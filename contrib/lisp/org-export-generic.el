@@ -87,7 +87,9 @@
 ;;     *** allow different open/closing prefixes
 ;;   * properties
 ;;   * drawers
-;;   * oh my
+;;   * Escape camel-case for wiki exporters.
+;;   * Adjust to depth limits on headers --- need to roll-over from headers
+;;     to lists, as per other exporters
 ;;   * optmization (many plist extracts should be in let vars)
 ;;   * define defcustom spec for the specifier list
 ;;   * fonts:  at least monospace is not handled at all here.
@@ -406,7 +408,7 @@ in this way, it will be wrapped."
      :body-section-prefix           "\n"
 
      :body-section-header-prefix    (" == " " === " " ==== "
-				     " ===== " " ====== " " ======= ")
+				     " ===== " )
      :body-section-header-suffix    (" ==\n\n" " ===\n\n" " ====\n\n" 
 				     " =====\n\n" " ======\n\n" " =======\n\n")
 
