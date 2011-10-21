@@ -1138,16 +1138,16 @@ instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
   (when (> (length arg-string) 0)
-    (delq nil
-	  (mapcar
-	   (lambda (arg)
-	     (if (string-match
-		  "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)"
-		  arg)
-		 (cons (intern (match-string 1 arg))
-		       (org-babel-read (org-babel-chomp (match-string 2 arg))))
-	       (cons (intern (org-babel-chomp arg)) nil)))
-	   (org-babel-parse-multiple-vars
+    (org-babel-parse-multiple-vars
+     (delq nil
+	   (mapcar
+	    (lambda (arg)
+	      (if (string-match
+		   "\\([^ \f\t\n\r\v]+\\)[ \f\t\n\r\v]+\\([^ \f\t\n\r\v]+.*\\)"
+		   arg)
+		  (cons (intern (match-string 1 arg))
+			(org-babel-read (org-babel-chomp (match-string 2 arg))))
+		(cons (intern (org-babel-chomp arg)) nil)))
 	    (org-babel-balanced-split arg-string '((32 9) . 58)))))))
 
 (defun org-babel-parse-multiple-vars (header-arguments)
