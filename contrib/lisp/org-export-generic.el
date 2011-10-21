@@ -405,8 +405,8 @@ in this way, it will be wrapped."
      :body-header-section-numbers   nil
      :body-section-prefix           "\n"
 
-     :body-section-header-prefix    ("== " "=== " "==== "
-				     "===== " "====== " "======= ")
+     :body-section-header-prefix    (" == " " === " " ==== "
+				     " ===== " " ====== " " ======= ")
      :body-section-header-suffix    (" ==\n\n" " ===\n\n" " ====\n\n" 
 				     " =====\n\n" " ======\n\n" " =======\n\n")
 
