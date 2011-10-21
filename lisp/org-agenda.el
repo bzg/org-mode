@@ -6784,13 +6784,13 @@ When called with a prefix argument, include all archive files as well."
 (defun org-agenda-do-context-action ()
   "Show outline path and, maybe, follow mode window."
   (let ((m (org-get-at-bol 'org-marker)))
-    (if (and org-agenda-follow-mode m)
-	(if org-agenda-follow-indirect
-	    (org-agenda-tree-to-indirect-buffer)
-	  (org-agenda-show)))
-    (if (and m org-agenda-show-outline-path)
-	(org-with-point-at m
-	  (org-display-outline-path t)))))
+    (when (and (markerp m) (marker-buffer m))
+      (and org-agenda-follow-mode
+	   (if org-agenda-follow-indirect
+	       (org-agenda-tree-to-indirect-buffer)
+	     (org-agenda-show)))
+      (and org-agenda-show-outline-path
+	   (org-with-point-at m (org-display-outline-path t))))))
 
 (defun org-agenda-show-priority ()
   "Show the priority of the current item.
