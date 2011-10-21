@@ -7534,16 +7534,24 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	(goto-char pos)
 	(if (not (org-at-timestamp-p))
 	    (error "Cannot find time stamp"))
-	(setq cdate (org-parse-time-string (match-string 0) 'nodefault)
-	      cdate (calendar-absolute-from-gregorian 
-		     (list (nth 4 cdate) (nth 3 cdate) (nth 5 cdate)))
-	      today (org-today))
-	(if (and (equal arg 1)
-		 (or (not what) (eq what 'day))
-		 (> today cdate))
-	    ;; immediately shift to today
-	    (org-timestamp-change (- today cdate) 'day)
-	  (org-timestamp-change arg (or what 'day))))
+	(when (and org-agenda-move-date-from-past-immediately-to-today
+		   (not (save-match-data (org-at-date-range-p))))
+	  (setq cdate (org-parse-time-string (match-string 0) 'nodefault)
+		cdate (calendar-absolute-from-gregorian 
+		       (list (nth 4 cdate) (nth 3 cdate) (nth 5 cdate)))
+		today (org-today))
+	  (if (and (equal arg 1)
+		   (or (not what) (eq what 'day))
+		   (> today cdate))
+	      ;; immediately shift to today
+	      (setq arg (- today cdate))))
+	(org-timestamp-change arg (or what 'day))
+	(when (and (org-at-date-range-p)
+		   (re-search-backward org-tr-regexp-both (point-at-bol)))
+	  (let ((end org-last-changed-timestamp))
+	    (org-timestamp-change arg (or what 'day))
+	    (setq org-last-changed-timestamp
+		  (concat org-last-changed-timestamp "--" end)))))
       (org-agenda-show-new-time marker org-last-changed-timestamp))
     (message "Time stamp changed to %s" org-last-changed-timestamp)))
 
