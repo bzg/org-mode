@@ -16980,6 +16980,10 @@ BEG and END default to the buffer boundaries."
 
 ;;;; Key bindings
 
+;; Remap outline keys
+(define-key org-mode-map [remap outline-promote] 'org-promote-subtree)
+(define-key org-mode-map [remap outline-demote] 'org-demote-subtree)
+
 ;; Make `C-c C-x' a prefix key
 (org-defkey org-mode-map "\C-c\C-x" (make-sparse-keymap))
 
