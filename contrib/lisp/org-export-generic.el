@@ -322,47 +322,6 @@ in this way, it will be wrapped."
 
      :body-bullet-list-prefix       ("* " "** " "*** " "**** " "***** ")
      )
-
-    ;;
-    ;; minimal html exporter
-    ;;
-    ("html"
-     ;; simple html output
-     :file-suffix        	    ".html"
-     :key-binding                   ?h
-
-     :header-prefix             "<body>"
-
-     :title-format              "<h1>%s</h1>\n\n"
-
-     :date-export        	    t
-     :date-format               "<br /><b>Date:</b> <i>%s</i><br />\n\n"
-
-     :toc-export                nil
-
-     :body-header-section-numbers 3
-
-     :body-section-header-prefix  ("<h1>" "<h2>" "<h3>"
-				   "<h4>" "<h5>" "<h6>")
-     :body-section-header-format  "%s"
-     :body-section-header-suffix  ("</h1>\n" "</h2>\n" "</h3>\n"
-				   "</h4>\n" "</h5>\n" "</h6>\n")
-
-     :body-section-prefix         "<secprefix>\n"
-     :body-section-suffix         "</secsuffix>\n"
-					;	 :body-section-prefix         ("<sec1>\n" "<sec2>\n" "<sec3>\n")
-					;	 :body-section-suffix         ("</sec1>\n" "</sec2>\n" "</sec3>\n")
-
-     :body-line-export-preformated t
-     :body-line-format             "%s\n"
-
-     :body-text-prefix "<p>\n"
-     :body-text-suffix "</p>\n"
-
-     :body-bullet-list-prefix      (?* ?+ ?-)
-					;	 :body-bullet-list-suffix      (?* ?+ ?-)
-     )
-
     ;;
     ;; internet-draft .xml for xml2rfc exporter
     ;;
