@@ -1121,10 +1121,10 @@ instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
 		  (and (matches ch (cdr alts))
 		       (matches last (car alts)))))
     (let ((balance 0) (partial nil) (lst nil) (last 0))
-      (mapc (lambda (ch)  ; split on [] balanced instances of [ \t]:
+      (mapc (lambda (ch)  ; split on [] or () balanced instances of [ \t]:
 	      (setq balance (+ balance
-			       (cond ((equal 91 ch) 1)
-				     ((equal 93 ch) -1)
+			       (cond ((or (equal 91 ch) (equal 40 ch)) 1)
+				     ((or (equal 93 ch) (equal 41 ch)) -1)
 				     (t 0))))
 	      (setq partial (cons ch partial))
 	      (when (and (= balance 0) (matched ch last))
@@ -1148,7 +1148,9 @@ instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
 		  (cons (intern (match-string 1 arg))
 			(org-babel-read (org-babel-chomp (match-string 2 arg))))
 		(cons (intern (org-babel-chomp arg)) nil)))
-	    (org-babel-balanced-split arg-string '((32 9) . 58)))))))
+	    ((lambda (raw)
+	       (cons (car raw) (mapcar (lambda (r) (concat ":" r)) (cdr raw))))
+	     (org-babel-balanced-split arg-string '((32 9) . 58))))))))
 
 (defun org-babel-parse-multiple-vars (header-arguments)
   "Expand multiple variable assignments behind a single :var keyword.
