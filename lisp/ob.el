@@ -1047,19 +1047,21 @@ Return an association list of any source block params which
 may be specified in the properties of the current outline entry."
   (save-match-data
     (let (val sym)
-      (delq nil
-	    (mapcar
-	     (lambda (header-arg)
-	       (and (setq val (org-entry-get (point) header-arg t))
-		    (cons (intern (concat ":" header-arg))
-			  (org-babel-read val))))
+      (org-babel-parse-multiple-vars
+       (delq nil
 	     (mapcar
-	      'symbol-name
-	      (append
-	       org-babel-header-arg-names
-	       (progn
-		 (setq sym (intern (concat "org-babel-header-arg-names:" lang)))
-		 (and (boundp sym) (eval sym))))))))))
+	      (lambda (header-arg)
+		(and (setq val (org-entry-get (point) header-arg t))
+		     (cons (intern (concat ":" header-arg))
+			   (org-babel-read val))))
+	      (mapcar
+	       'symbol-name
+	       (append
+		org-babel-header-arg-names
+		(progn
+		  (setq sym (intern (concat "org-babel-header-arg-names:"
+					    lang)))
+		  (and (boundp sym) (eval sym)))))))))))
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
@@ -1107,6 +1109,32 @@ may be specified in the properties of the current outline entry."
            (org-babel-parse-header-arguments
             (org-babel-clean-text-properties (or (match-string 4) "")))))))
 
+(defun org-babel-balanced-split (string alts)
+  "Split STRING on instances of ALTS.
+ALTS is a cons of two character options where each option may be
+either the numeric code of a single character or a list of
+character alternatives.  For example to split on balanced
+instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
+  (flet ((matches (ch spec) (or (and (numberp spec) (= spec ch))
+				(member ch spec)))
+	 (matched (ch last)
+		  (and (matches ch (cdr alts))
+		       (matches last (car alts)))))
+    (let ((balance 0) (partial nil) (lst nil) (last 0))
+      (mapc (lambda (ch)  ; split on [] balanced instances of [ \t]:
+	      (setq balance (+ balance
+			       (cond ((equal 91 ch) 1)
+				     ((equal 93 ch) -1)
+				     (t 0))))
+	      (setq partial (cons ch partial))
+	      (when (and (= balance 0) (matched ch last))
+		(setq lst (cons (apply #'string (nreverse (cddr partial)))
+				lst))
+		(setq partial nil))
+	      (setq last ch))
+	    (string-to-list string))
+      (nreverse (cons (apply #'string (nreverse partial)) lst)))))
+
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
   (when (> (length arg-string) 0)
@@ -1119,21 +1147,24 @@ may be specified in the properties of the current outline entry."
 		 (cons (intern (match-string 1 arg))
 		       (org-babel-read (org-babel-chomp (match-string 2 arg))))
 	       (cons (intern (org-babel-chomp arg)) nil)))
-	   (let ((balance 0) (partial nil) (lst nil) (last 0))
-	     (mapc (lambda (ch)  ; split on [] balanced instances of [ \t]:
-		     (setq balance (+ balance
-				      (cond ((equal 91 ch) 1)
-					    ((equal 93 ch) -1)
-					    (t 0))))
-		     (setq partial (cons ch partial))
-		     (when (and (= ch 58) (= balance 0)
-				(or (= last 32) (= last 9)))
-		       (setq lst (cons (apply #'string (nreverse (cddr partial)))
-				       lst))
-		       (setq partial (list ch)))
-		     (setq last ch))
-		   (string-to-list arg-string))
-	     (nreverse (cons (apply #'string (nreverse partial)) lst)))))))
+	   (org-babel-parse-multiple-vars
+	    (org-babel-balanced-split arg-string '((32 9) . 58)))))))
+
+(defun org-babel-parse-multiple-vars (header-arguments)
+  "Expand multiple variable assignments behind a single :var keyword.
+
+This allows expression of multiple variables with one :var as
+shown below.
+
+#+PROPERTY: var foo=1, bar=2"
+  (let (results)
+    (mapc (lambda (pair)
+	    (if (eq (car pair) :var)
+		(mapcar (lambda (spec) (push (cons :var spec) results))
+			(org-babel-balanced-split (cdr pair) '(44 . (32 9))))
+	      (push pair results)))
+	  header-arguments)
+    (nreverse results)))
 
 (defun org-babel-process-params (params)
   "Expand variables in PARAMS and add summary parameters."
