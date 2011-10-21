@@ -617,6 +617,7 @@ underlined headlines.  The default is 3."
 	  (buffer-substring
 	   (if (org-region-active-p) (region-beginning) (point-min))
 	   (if (org-region-active-p) (region-end) (point-max))))
+	 (org-export-current-backend 'org-export-generic)
 	 (lines (org-split-string
 		 (org-export-preprocess-string
 		  region
