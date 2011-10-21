@@ -251,8 +251,12 @@ Works on both Emacs and XEmacs."
   (defun org-activate-mark ()
     (when (mark t)
       (setq mark-active t)
-      (unless transient-mark-mode
-	(setq transient-mark-mode 'lambda)))))
+      (when (and (boundp 'transient-mark-mode)
+		 (not transient-mark-mode))
+	(setq transient-mark-mode 'lambda))
+      (when (boundp 'zmacs-regions)
+	(setq zmacs-regions t)))))
+
 
 ;; Invisibility compatibility
 

@@ -1029,7 +1029,7 @@ Pressing `1' will switch between these two options."
 		  (setq r1 (read-char-exclusive)))
 	      (error "No enclosing node with LaTeX_CLASS or EXPORT_TITLE or EXPORT_FILE_NAME")
 	      )))))
-    (redisplay)
+    (if (fboundp 'redisplay) (redisplay)) ;; XEmacs does not have/need (redisplay)
     (and bpos (goto-char bpos))
     (setq r2 (if (< r1 27) (+ r1 96) r1))
     (unless (setq ass (assq r2 cmds))

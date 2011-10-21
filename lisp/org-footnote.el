@@ -71,13 +71,13 @@
   ;; their definition.
   ;;
   ;; `org-re' is used for regexp compatibility with XEmacs.
-  (org-re (concat "\\[\\(?:"
-		  ;; Match inline footnotes.
-		  "fn:\\([-_[:word:]]+\\)?:\\|"
-		  ;; Match other footnotes.
-		  "\\(?:\\([0-9]+\\)\\]\\)\\|"
-		  "\\(fn:[-_[:word:]]+\\)"
-		  "\\)"))
+  (concat "\\[\\(?:"
+	  ;; Match inline footnotes.
+	  (org-re "fn:\\([-_[:word:]]+\\)?:\\|")
+	  ;; Match other footnotes.
+	  "\\(?:\\([0-9]+\\)\\]\\)\\|"
+	  (org-re "\\(fn:[-_[:word:]]+\\)")
+	  "\\)")
   "Regular expression for matching footnotes.")
 
 (defconst org-footnote-definition-re

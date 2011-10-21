@@ -29,7 +29,9 @@
 (require 'ob)
 (require 'calc)
 (require 'calc-store)
-(unless (featurep 'xemacs) (require 'calc-trail))
+(unless (featurep 'xemacs)
+  (require 'calc-trail)
+  (require 'calc-store))
 (eval-when-compile (require 'ob-comint))
 
 (defvar org-babel-default-header-args:calc nil
