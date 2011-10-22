@@ -3950,7 +3950,7 @@ in `org-agenda-text-search-extra-files'."
 			    category (org-get-category)
 			    org-category-pos (get-text-property (point) 'org-category-position)
 			    tags (org-get-tags-at (point))
-			    txt (org-format-agenda-item
+			    txt (org-agenda-format-item
 				 ""
 				 (buffer-substring-no-properties
 				  beg1 (point-at-eol))
@@ -4400,7 +4400,7 @@ of what a project is and how to check if it stuck, customize the variable
       (setq entries
 	    (mapcar
 	     (lambda (x)
-	       (setq x (org-format-agenda-item "" x "Diary" nil 'time))
+	       (setq x (org-agenda-format-item "" x "Diary" nil 'time))
 	       ;; Extend the text properties to the beginning of the line
 	       (org-add-props x (text-properties-at (1- (length x)) x)
 		 'type "diary" 'date date 'face 'org-agenda-diary))
@@ -4622,7 +4622,7 @@ the documentation of `org-diary'."
 	      org-category-pos (get-text-property (point) 'org-category-position)
 	      txt (match-string 1)
 	      tags (org-get-tags-at (point))
-	      txt (org-format-agenda-item "" txt category tags)
+	      txt (org-agenda-format-item "" txt category tags)
 	      priority (1+ (org-get-priority txt))
 	      todo-state (org-get-todo-state))
 	(org-add-props txt props
@@ -4794,7 +4794,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		  tags (org-get-tags-at))
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 	    (setq head (or (match-string 1) ""))
-	    (setq txt (org-format-agenda-item
+	    (setq txt (org-agenda-format-item
 		       (if inactivep org-agenda-inactive-leader nil)
 		       head category tags timestr
 		       remove-re)))
@@ -4848,7 +4848,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		(setq txt r)
 	      (setq txt "SEXP entry returned empty string"))
 
-	    (setq txt (org-format-agenda-item
+	    (setq txt (org-agenda-format-item
 		       "" txt category tags 'time))
 	    (org-add-props txt props 'org-marker marker)
 	    (org-add-props txt nil
@@ -5004,7 +5004,7 @@ please use `org-class' instead."
 		  (setq txt (concat (substring txt 0 (match-beginning 1))
 				    " - " extra " " (match-string 2 txt)))
 		(setq txt (concat txt " - " extra))))
-	    (setq txt (org-format-agenda-item
+	    (setq txt (org-agenda-format-item
 		       (cond
 			(closedp "Closed:    ")
 			    (statep (concat "State:     (" state ")"))
@@ -5214,7 +5214,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		      (setq timestr
 			    (concat (substring s (match-beginning 1)) " "))
 		    (setq timestr 'time))
-		  (setq txt (org-format-agenda-item
+		  (setq txt (org-agenda-format-item
 			     (if (= diff 0)
 				 (car org-agenda-deadline-leaders)
 			       (if (functionp
@@ -5329,7 +5329,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		    (setq timestr
 			  (concat (substring s (match-beginning 1)) " "))
 		  (setq timestr 'time))
-		(setq txt (org-format-agenda-item
+		(setq txt (org-agenda-format-item
 			   (if (= diff 0)
 			       (car org-agenda-scheduled-leaders)
 			     (format (nth 1 org-agenda-scheduled-leaders)
@@ -5412,7 +5412,7 @@ FRACTION is what fraction of the head-warning time has passed."
 			      "--"
 			      "<" (regexp-quote s2) ".*?>")
 			   nil)))
-		    (setq txt (org-format-agenda-item
+		    (setq txt (org-agenda-format-item
 			       (format
 				(nth (if (= d1 d2) 0 1)
 				     org-agenda-timerange-leaders)
@@ -5461,7 +5461,7 @@ The flag is set if the currently compiled format contains a `%e'.")
 	  (return (cadr entry))
       (return (apply 'create-image (cdr entry)))))))
 
-(defun org-format-agenda-item (extra txt &optional category tags dotime
+(defun org-agenda-format-item (extra txt &optional category tags dotime
 				     remove-re habitp)
   "Format TXT to be inserted into the agenda buffer.
 In particular, it adds the prefix and corresponding text properties.  EXTRA
@@ -5681,14 +5681,14 @@ The modified list may contain inherited tags, and tags matched by
       (while (setq time (pop gridtimes))
 	(unless (and remove (member time have))
 	  (setq time (replace-regexp-in-string " " "0" (format "%04s" time)))
-	  (push (org-format-agenda-item
+	  (push (org-agenda-format-item
 		 nil string "" nil
 		 (concat (substring time 0 -2) ":" (substring time -2)))
 		new)
 	  (put-text-property
 	   2 (length (car new)) 'face 'org-time-grid (car new))))
       (when (and todayp org-agenda-show-current-time-in-grid)
-	(push (org-format-agenda-item
+	(push (org-agenda-format-item
 	       nil
 	       org-agenda-current-time-string
 	       "" nil
@@ -7268,7 +7268,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 					    &optional fixface just-this)
   "Change all lines in the agenda buffer which match HDMARKER.
 The new content of the line will be NEWHEAD (as modified by
-`org-format-agenda-item').  HDMARKER is checked with
+`org-agenda-format-item').  HDMARKER is checked with
 `equal' against all `org-hd-marker' text properties in the file.
 If FIXFACE is non-nil, the face of each item is modified according to
 the new TODO state.
@@ -7301,7 +7301,7 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		    (save-excursion
 		      (save-restriction
 			(widen)
-			(org-format-agenda-item (org-get-at-bol 'extra)
+			(org-agenda-format-item (org-get-at-bol 'extra)
 						newhead cat tags dotime)))))
 		pl (text-property-any (point-at-bol) (point-at-eol) 'org-heading t)
 		undone-face (org-get-at-bol 'undone-face)
@@ -7902,10 +7902,10 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
 	    (org-agenda-time-leading-zero t)
 	    fmt time time2)
 	(if org-agenda-insert-diary-extract-time
-	    ;; Use org-format-agenda-item to parse text for a time-range and
+	    ;; Use org-agenda-format-item to parse text for a time-range and
 	    ;; remove it.  FIXME: This is a hack, we should refactor
 	    ;; that function to make time extraction available separately
-	    (setq fmt (org-format-agenda-item nil text nil nil t)
+	    (setq fmt (org-agenda-format-item nil text nil nil t)
 		  time (get-text-property 0 'time fmt)
 		  time2 (if (> (length time) 0)
 			    ;; split-string removes trailing ...... if
