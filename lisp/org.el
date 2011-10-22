@@ -3710,6 +3710,7 @@ Normal means, no org-mode-specific context."
 (defvar calc-embedded-close-formula)
 (defvar calc-embedded-open-formula)
 (declare-function cdlatex-tab "ext:cdlatex" ())
+(declare-function cdlatex-compute-tables "ext:cdlatex" ())
 (declare-function dired-get-filename "dired" (&optional localp no-error-if-not-filep))
 (defvar font-lock-unfontify-region-function)
 (declare-function iswitchb-read-buffer "iswitchb"
