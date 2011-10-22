@@ -4326,7 +4326,7 @@ of what a project is and how to check if it stuck, customize the variable
 	 (tags (nth 2 org-stuck-projects))
 	 (tags-re (if (member "*" tags)
 		      (concat org-outline-regexp-bol
-			      (org-ref ".*:[[:alnum:]_@#%]+:[ \t]*$"))
+			      (org-re ".*:[[:alnum:]_@#%]+:[ \t]*$"))
 		    (if tags
 			(concat org-outline-regexp-bol
 				".*:\\("
