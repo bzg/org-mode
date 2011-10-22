@@ -306,7 +306,7 @@ buffer."
 	     (error "Language mode `%s' fails with: %S" lang-f (nth 1 e)))))
 	(dolist (pair transmitted-variables)
 	  (org-set-local (car pair) (cadr pair)))
-	(when eq major-mode 'org-mode
+	(when (eq major-mode 'org-mode)
 	  (goto-char (point-min))
 	  (while (re-search-forward "^," nil t)
 	    (if (eq (org-current-line) line) (setq total-nindent (1+ total-nindent)))
