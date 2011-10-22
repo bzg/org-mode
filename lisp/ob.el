@@ -181,10 +181,10 @@ Returns non-nil if match-data set"
 	  (when (looking-at org-babel-inline-src-block-regexp)
 	    t ))))))
 
+(defvar org-babel-inline-lob-one-liner-regexp)
 (defun org-babel-get-lob-one-liner-matches()
   "Set match data if on line of an lob one liner.
 Returns non-nil if match-data set"
-
   (save-excursion
     (unless (= (point) (point-at-bol)) ;; move before inline block
       (re-search-backward "[ \f\t\n\r\v]" nil t))
@@ -1490,7 +1490,6 @@ region is not active then the point is demarcated."
 	(goto-char start) (move-end-of-line 1)))))
 
 (defvar org-babel-lob-one-liner-regexp)
-(defvar org-babel-inline-lob-one-liner-regexp)
 (defun org-babel-where-is-src-block-result (&optional insert info hash indent)
   "Find where the current source block results begin.
 Return the point at the beginning of the result of the current
