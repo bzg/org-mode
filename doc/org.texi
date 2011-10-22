@@ -8128,13 +8128,15 @@ command.
 @c
 @orgcmd{S-@key{right},org-agenda-do-date-later}
 Change the timestamp associated with the current line by one day into the
-future.  With a numeric prefix argument, change it by that many days.  For
-example, @kbd{3 6 5 S-@key{right}} will change it by a year.  With a
-@kbd{C-u} prefix, change the time by one hour.  If you immediately repeat the
-command, it will continue to change hours even without the prefix arg.  With
-a double @kbd{C-u C-u} prefix, do the same for changing minutes.  The stamp
-is changed in the original Org file, but the change is not directly reflected
-in the agenda buffer.  Use @kbd{r} or @kbd{g} to update the buffer.
+future.  If the date is in the past, the first call to this command will move
+it to today.@*
+With a numeric prefix argument, change it by that many days.  For example,
+@kbd{3 6 5 S-@key{right}} will change it by a year.  With a @kbd{C-u} prefix,
+change the time by one hour.  If you immediately repeat the command, it will
+continue to change hours even without the prefix arg.  With a double @kbd{C-u
+C-u} prefix, do the same for changing minutes.@*
+The stamp is changed in the original Org file, but the change is not directly
+reflected in the agenda buffer.  Use @kbd{r} or @kbd{g} to update the buffer.
 @c
 @orgcmd{S-@key{left},org-agenda-do-date-earlier}
 Change the timestamp associated with the current line by one day

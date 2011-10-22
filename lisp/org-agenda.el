@@ -1073,6 +1073,15 @@ and timeline buffers."
 	      (const :tag "Saturday" 6)
 	      (const :tag "Sunday" 0)))
 
+(defcustom org-agenda-move-date-from-past-immediately-to-today t
+  "Non-nil means jumpt to today when moving a past date forward in time.
+When using S-right in the agenda to move a a date forward, and the date
+stamp currently points to the past, the first key press will move it
+to today.  WHen nil, just move one day forward even if the date stays
+in the past."
+  :group 'org-agenda-daily/weekly
+  :type 'boolean)
+
 (defcustom org-agenda-include-diary nil
   "If non-nil, include in the agenda entries from the Emacs Calendar's diary.
 Custom commands can set this variable in the options section."
@@ -7535,14 +7544,14 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	(if (not (org-at-timestamp-p))
 	    (error "Cannot find time stamp"))
 	(when (and org-agenda-move-date-from-past-immediately-to-today
+		   (equal arg 1)
+		   (or (not what) (eq what 'day))
 		   (not (save-match-data (org-at-date-range-p))))
 	  (setq cdate (org-parse-time-string (match-string 0) 'nodefault)
 		cdate (calendar-absolute-from-gregorian 
 		       (list (nth 4 cdate) (nth 3 cdate) (nth 5 cdate)))
 		today (org-today))
-	  (if (and (equal arg 1)
-		   (or (not what) (eq what 'day))
-		   (> today cdate))
+	  (if (> today cdate)
 	      ;; immediately shift to today
 	      (setq arg (- today cdate))))
 	(org-timestamp-change arg (or what 'day))
