@@ -5377,8 +5377,8 @@ FRACTION is what fraction of the head-warning time has passed."
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp org-tr-regexp)
 	 (d0 (calendar-absolute-from-gregorian date))
-	 marker hdmarker ee txt d1 d2 s1 s2 category todo-state tags pos
-	 head donep)
+	 marker hdmarker ee txt d1 d2 s1 s2 category org-category-pos
+	 todo-state tags pos head donep)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -7551,7 +7551,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 		   (or (not what) (eq what 'day))
 		   (not (save-match-data (org-at-date-range-p))))
 	  (setq cdate (org-parse-time-string (match-string 0) 'nodefault)
-		cdate (calendar-absolute-from-gregorian 
+		cdate (calendar-absolute-from-gregorian
 		       (list (nth 4 cdate) (nth 3 cdate) (nth 5 cdate)))
 		today (org-today))
 	  (if (> today cdate)
