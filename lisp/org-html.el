@@ -1298,11 +1298,11 @@ PUB-DIR is set, use this as the publishing directory."
 		 "%s
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
                \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
-<html xmlns=\"http://www.w3.org/1999/xhtml\"
-lang=\"%s\" xml:lang=\"%s\">
+<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\">
 <head>
 <title>%s</title>
 <meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>
+<meta name=\"title\" content=\"%s\"/>
 <meta name=\"generator\" content=\"Org-mode\"/>
 <meta name=\"generated\" content=\"%s\"/>
 <meta name=\"author\" content=\"%s\"/>
@@ -1325,7 +1325,7 @@ lang=\"%s\" xml:lang=\"%s\">
 		 language language
 		 title
 		 (or charset "iso-8859-1")
-		 date author description keywords
+		 title date author description keywords
 		 style
 		 mathjax
 		 (if (or link-up link-home)
