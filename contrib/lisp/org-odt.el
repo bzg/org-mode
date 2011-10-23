@@ -30,6 +30,11 @@
 (eval-when-compile (require 'cl))
 (require 'org-lparse)
 
+(defgroup org-export-odt nil
+  "Options specific for ODT export of Org-mode files."
+  :tag "Org Export ODT"
+  :group 'org-export)
+
 (defun org-odt-end-export ()
   (org-odt-fixup-label-references)
 
@@ -282,7 +287,7 @@ in `org-odt-get'. If the above option is unspecified then
 The format specified here should be listed in OTHER-BACKENDS
 option of `org-odt-get' or `org-lparse-convert-capabilities' as
 appropriate."
-  :group 'org-odt
+  :group 'org-export-odt
   :type '(choice :convert-widget
 		 (lambda (w)
 		   (apply 'widget-convert (widget-type w)
