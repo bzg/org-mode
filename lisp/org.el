@@ -4654,24 +4654,24 @@ means to push this value onto the list in the variable.")
 		    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
 		    "\\)")
 	    org-heading-regexp
-	    "\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
+	    "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
 	    org-heading-keyword-regexp-format
-	    "\\(\\*+\\)\\(?: +%s\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
+	    "^\\(\\*+\\)\\(?: +%s\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
 	    org-heading-keyword-maybe-regexp-format
-	    "\\(\\*+\\)\\(?: +%s\\)?\\(?: +\\(.*?\\)\\)?[ \t]*$"
+	    "^\\(\\*+\\)\\(?: +%s\\)?\\(?: +\\(.*?\\)\\)?[ \t]*$"
 	    org-not-done-heading-regexp
 	    (format org-heading-keyword-regexp-format org-not-done-regexp)
 	    org-todo-line-regexp
 	    (format org-heading-keyword-maybe-regexp-format org-todo-regexp)
 	    org-complex-heading-regexp
-	    (concat "\\(\\*+\\)"
+	    (concat "^\\(\\*+\\)"
 		    "\\(?: +" org-todo-regexp "\\)?"
 		    "\\(?: +\\(\\[#.\\]\\)\\)?"
 		    "\\(?: +\\(.*?\\)\\)?"
 		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?")
 		    "[ \t]*$")
 	    org-complex-heading-regexp-format
-	    (concat "\\(\\*+\\)"
+	    (concat "^\\(\\*+\\)"
 		    "\\(?: +" org-todo-regexp "\\)?"
 		    "\\(?: +\\(\\[#.\\]\\)\\)?"
 		    "\\(?: +"
@@ -4683,7 +4683,7 @@ means to push this value onto the list in the variable.")
 		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%%:]+:\\)\\)?")
 		    "[ \t]*$")
 	    org-todo-line-tags-regexp
-	    (concat "\\(\\*+\\)"
+	    (concat "^\\(\\*+\\)"
 		    "\\(?: +" org-todo-regexp "\\)?"
 		    "\\(?: +\\(.*?\\)\\)?"
 		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]:_@#%]+:\\)\\)?")
