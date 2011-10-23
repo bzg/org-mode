@@ -3887,7 +3887,7 @@ in `org-agenda-text-search-extra-files'."
     (if (not regexps+)
 	(setq regexp org-outline-regexp-bol)
       (setq regexp (pop regexps+))
-      (if hdl-only (setq regexp (concat org-outline-regexp-bol " .*?"
+      (if hdl-only (setq regexp (concat org-outline-regexp-bol ".*?"
 					regexp))))
     (setq files (org-agenda-files nil 'ifmode))
     (when (eq (car org-agenda-text-search-extra-files) 'agenda-archives)
@@ -4623,7 +4623,7 @@ the documentation of `org-diary'."
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      category (org-get-category)
 	      org-category-pos (get-text-property (point) 'org-category-position)
-	      txt (match-string 2)
+	      txt (buffer-substring (match-beginning 2) (match-end 3))
 	      tags (org-get-tags-at (point))
 	      txt (org-agenda-format-item "" txt category tags)
 	      priority (1+ (org-get-priority txt))
