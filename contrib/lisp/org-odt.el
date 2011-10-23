@@ -1000,7 +1000,7 @@ styles congruent with the ODF-1.2 specification."
 				((string= s "\t") (org-odt-format-tabs))
 				(t (org-odt-format-spaces (length s))))) line))
 
-(defcustom org-export-odt-use-htmlfontify t
+(defcustom org-export-odt-fontify-srcblocks t
   "Specify whether or not source blocks need to be fontified.
 Turn this option on if you want to colorize the source code
 blocks in the exported file.  For colorization to work, you need
@@ -1024,7 +1024,7 @@ to make available an enhanced version of `htmlfontify' library."
 (defun org-odt-format-source-code-or-example-plain
   (lines lang caption textareap cols rows num cont rpllbl fmt)
   "Format source or example blocks much like fixedwidth blocks.
-Use this when `org-export-odt-use-htmlfontify' option is turned
+Use this when `org-export-odt-fontify-srcblocks' option is turned
 off."
   (let* ((lines (org-split-string lines "[\r\n]"))
 	 (line-count (length lines))
@@ -1100,7 +1100,7 @@ based on your current display settings.  It is necessary that the
 styles.xml already contains needed styles for colorizing to work.
 
 This variable is effective only if
-`org-export-odt-use-htmlfontify' is turned on."
+`org-export-odt-fontify-srcblocks' is turned on."
   :group 'org-export-odt
   :type 'boolean)
 
@@ -1119,8 +1119,8 @@ Update styles.xml with styles that were collected as part of
 (defun org-odt-format-source-code-or-example-colored
   (lines lang caption textareap cols rows num cont rpllbl fmt)
   "Format source or example blocks using `htmlfontify-string'.
-Use this routine when `org-export-odt-use-htmlfontify' option is
-turned on."
+Use this routine when `org-export-odt-fontify-srcblocks' option
+is turned on."
   (let* ((lang-m (and lang (or (cdr (assoc lang org-src-lang-modes)) lang)))
 	 (mode (and lang-m (intern (concat (if (symbolp lang-m)
 					       (symbol-name lang-m)
@@ -1165,11 +1165,11 @@ turned on."
   "Format source or example blocks for export.
 Use `org-odt-format-source-code-or-example-plain' or
 `org-odt-format-source-code-or-example-colored' depending on the
-value of `org-export-odt-use-htmlfontify."
+value of `org-export-odt-fontify-srcblocks."
   (setq lines (org-export-number-lines
 	       lines 0 0 num cont rpllbl fmt 'preprocess)
 	lines (funcall
-	       (or (and org-export-odt-use-htmlfontify
+	       (or (and org-export-odt-fontify-srcblocks
 			(or (featurep 'htmlfontify)
 			    (require 'htmlfontify))
 			(fboundp 'htmlfontify-string)
