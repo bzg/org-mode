@@ -7199,6 +7199,23 @@ With numerical prefix arg ARG, go up to this level and then take that tree.
 With a \\[universal-argument] prefix, make a separate frame for this tree (i.e. don't
 use the dedicated frame)."
   (interactive)
+  (if (and current-prefix-arg (listp current-prefix-arg))
+      (org-agenda-do-tree-to-indirect-buffer)
+    (let ((agenda-window (selected-window))
+          (indirect-window (get-buffer-window org-last-indirect-buffer)))
+      (save-window-excursion (org-agenda-do-tree-to-indirect-buffer))
+      (unwind-protect
+          (progn
+            (unless indirect-window
+              (setq indirect-window (split-window agenda-window)))
+            (select-window indirect-window)
+            (switch-to-buffer org-last-indirect-buffer :norecord)
+            (fit-window-to-buffer indirect-window))
+        (select-window agenda-window)))))
+
+(defun org-agenda-do-tree-to-indirect-buffer ()
+  "Implements org-agenda-tree-to-indirect-buffer, but
+doesn't attempt to manage stability of the window configuration."
   (org-agenda-check-no-diary)
   (let* ((marker (or (org-get-at-bol 'org-marker)
 		     (org-agenda-error)))
