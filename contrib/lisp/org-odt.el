@@ -209,10 +209,9 @@ a per-file basis.  For example,
 
 (defconst org-export-odt-tmpdir-prefix "odt-")
 (defconst org-export-odt-bookmark-prefix "OrgXref.")
-(defcustom org-export-odt-embed-images t
-  "Should the images be copied in to the odt file or just linked?"
-  :type 'boolean
-  :group 'org-export-odt)
+
+(defvar org-export-odt-embed-images t
+  "Should the images be copied in to the odt file or just linked?")
 
 (defcustom org-odt-export-inline-images 'maybe
   "Non-nil means inline images into exported HTML pages.
