@@ -213,22 +213,14 @@ a per-file basis.  For example,
 (defvar org-export-odt-embed-images t
   "Should the images be copied in to the odt file or just linked?")
 
-(defcustom org-odt-export-inline-images 'maybe
-  "Non-nil means inline images into exported HTML pages.
-This is done using an <img> tag.  When nil, an anchor with href is used to
-link to the image.  If this option is `maybe', then images in links with
-an empty description will be inlined, while images with a description will
-be linked only."
-  :group 'org-odt-export
-  :type '(choice (const :tag "Never" nil)
-		 (const :tag "Always" t)
-		 (const :tag "When there is no description" maybe)))
+(defvar org-export-odt-inline-images 'maybe) ; counterpart of
+					     ; `org-export-html-inline-images'
 
-(defcustom org-odt-export-inline-image-extensions
+(defcustom org-export-odt-inline-image-extensions
   '("png" "jpeg" "jpg" "gif")
   "Extensions of image files that can be inlined into HTML."
   :type '(repeat (string :tag "Extension"))
-  :group 'org-odt-export)
+  :group 'org-export-odt)
 
 (defcustom org-export-odt-pixels-per-inch display-pixels-per-inch
   ;; FIXME add docstring
@@ -1315,9 +1307,9 @@ MAY-INLINE-P allows inlining it as an image."
        ((and (member type '("file"))
 	     (not fragment)
 	     (org-file-image-p
-	      filename org-odt-export-inline-image-extensions)
-	     (or (eq t org-odt-export-inline-images)
-		 (and org-odt-export-inline-images (not descp))))
+	      filename org-export-odt-inline-image-extensions)
+	     (or (eq t org-export-odt-inline-images)
+		 (and org-export-odt-inline-images (not descp))))
 	(org-odt-format-inline-image thefile))
        ;; check for embedded formulas
        ((and (member type '("file"))
