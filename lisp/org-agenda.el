@@ -8428,7 +8428,7 @@ tag and (if present) the flagging note."
 (defvar appt-time-msg-list)
 
 ;;;###autoload
-(defun org-agenda-to-appt (&optional refresh filter)
+(defun org-agenda-to-appt (&optional refresh filter &rest args)
   "Activate appointments found in `org-agenda-files'.
 With a \\[universal-argument] prefix, refresh the list of
 appointments.
@@ -8439,6 +8439,10 @@ expression, and filter out entries that don't match it.
 If FILTER is a string, use this string as a regular expression
 for filtering entries out.
 
+If FILTER is a function, filter out entries against which
+calling the function returns nil.  This function takes one
+argument: an entry from `org-agenda-get-day-entries'.
+
 FILTER can also be an alist with the car of each cell being
 either 'headline or 'category.  For example:
 
@@ -8446,12 +8450,18 @@ either 'headline or 'category.  For example:
     (category \"Work\"))
 
 will only add headlines containing IMPORTANT or headlines
-belonging to the \"Work\" category."
+belonging to the \"Work\" category.
+
+ARGS are symbols indicating what kind of entries to consider.
+By default `org-agenda-to-appt' will use :deadline, :scheduled
+and :timestamp entries.  See the docstring of `org-diary' for
+details and examples."
   (interactive "P")
   (if refresh (setq appt-time-msg-list nil))
   (if (eq filter t)
       (setq filter (read-from-minibuffer "Regexp filter: ")))
   (let* ((cnt 0) ; count added events
+	 (scope (or args '(:deadline :scheduled :timestamp)))
 	 (org-agenda-new-buffers nil)
 	 (org-deadline-warning-days 0)
 	 ;; Do not use `org-today' here because appt only takes
@@ -8465,10 +8475,10 @@ belonging to the \"Work\" category."
     (org-prepare-agenda-buffers files)
     (while (setq file (pop files))
       (setq entries
-	    (append entries
-		    (org-agenda-get-day-entries
-		     file today :timestamp :scheduled :deadline))))
-    (setq entries (delq nil entries))
+	    (delq nil 
+		  (append entries
+			  (apply 'org-agenda-get-day-entries 
+				 file today scope)))))
     ;; Map thru entries and find if we should filter them out
     (mapc
      (lambda(x)
@@ -8477,6 +8487,7 @@ belonging to the \"Work\" category."
 	      (tod (get-text-property 1 'time-of-day x))
 	      (ok (or (null filter)
 		      (and (stringp filter) (string-match filter evt))
+		      (and (functionp filter) (funcall filter x))
 		      (and (listp filter)
 			   (or (string-match
 				(cadr (assoc 'category filter)) cat)
