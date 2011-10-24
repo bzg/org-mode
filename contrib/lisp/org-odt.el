@@ -277,16 +277,10 @@ a per-file basis.  For example,
   "Automatically post-process to this format after exporting to \"odt\".
 Interactive commands `org-export-as-odt' and
 `org-export-as-odt-and-open' export first to \"odt\" format and
-then use an external converter to convert the resulting document
-to this format.
-
-The converter used is that specified with CONVERT-METHOD option
-in `org-odt-get'. If the above option is unspecified then
-`org-lparse-convert-process' is used.
-
-The format specified here should be listed in OTHER-BACKENDS
-option of `org-odt-get' or `org-lparse-convert-capabilities' as
-appropriate."
+then use `org-export-odt-convert-process' to convert the
+resulting document to this format.  During customization of this
+variable, the list of valid values are populated based on
+`org-export-odt-convert-capabilities'."
   :group 'org-export-odt
   :type '(choice :convert-widget
 		 (lambda (w)
@@ -294,8 +288,8 @@ appropriate."
 			  (eval (car (widget-get w :args)))))
 		 `((const :tag "None" nil)
 		   ,@(mapcar (lambda (c)
-			       `(const :tag ,(car c) ,(car c)))
-			     (org-lparse-get-other-backends "odt")))))
+			       `(const :tag ,c ,c))
+			     (org-lparse-reachable-formats "odt")))))
 
 ;;;###autoload
 (defun org-export-as-odt-and-open (arg)
@@ -1954,6 +1948,126 @@ visually."
     (while (re-search-forward (format "%s[ \r\n\t]*%s" open close) nil t)
       (replace-match ""))))
 
+(defcustom org-export-odt-convert-processes
+  '(("BasicODConverter"
+     ("soffice" "-norestore" "-invisible" "-headless"
+      "\"macro:///BasicODConverter.Main.Convert(%I,%f,%O)\""))
+    ("unoconv"
+     ("unoconv" "-f" "%f" "-o" "%d" "%i")))
+  "Specify a list of document converters and their usage.
+The converters in this list are offered as choices while
+customizing `org-export-odt-convert-process'.
+
+This variable is an alist where each element is of the
+form (CONVERTER-NAME CONVERTER-PROCESS).  CONVERTER-NAME is name
+of the converter.  CONVERTER-PROCESS specifies the command-line
+syntax of the converter and is of the form (CONVERTER-PROGRAM
+ARG1 ARG2 ...).  CONVERTER-PROGRAM is the name of the executable.
+ARG1, ARG2 etc are command line options that are passed to
+CONVERTER-PROGRAM.  Format specifiers can be used in the ARGs and
+they are interpreted as below:
+
+%i input file name in full
+%I input file name as a URL
+%f format of the output file
+%o output file name in full
+%O output file name as a URL
+%d output dir in full
+%D output dir as a URL."
+  :group 'org-export-odt
+  :type
+  '(choice
+    (const :tag "None" nil)
+    (alist :tag "Converters"
+	   :key-type (string :tag "Converter Name")
+	   :value-type (group (cons (string :tag "Executable")
+				    (repeat (string :tag "Command line args")))))))
+
+(defcustom org-export-odt-convert-process nil
+  "Use this converter to convert from \"odt\" format to other formats.
+During customization, the list of converter names are populated
+from `org-export-odt-convert-processes'."
+  :group 'org-export-odt
+  :type '(choice :convert-widget
+		 (lambda (w)
+		   (apply 'widget-convert (widget-type w)
+			  (eval (car (widget-get w :args)))))
+		 `((const :tag "None" nil)
+		   ,@(mapcar (lambda (c)
+			       `(const :tag ,(car c) ,(car c)))
+			     org-export-odt-convert-processes))))
+
+(defcustom org-export-odt-convert-capabilities
+  '(("Text"
+     ("odt" "ott" "doc" "rtf")
+     (("pdf" "pdf") ("odt" "odt") ("xhtml" "html") ("rtf" "rtf")
+      ("ott" "ott") ("doc" "doc") ("ooxml" "xml") ("html" "html")))
+    ("Web"
+     ("html" "xhtml") (("pdf" "pdf") ("odt" "txt") ("html" "html")))
+    ("Spreadsheet"
+     ("ods" "ots" "xls" "csv")
+     (("pdf" "pdf") ("ots" "ots") ("html" "html") ("csv" "csv")
+      ("ods" "ods") ("xls" "xls") ("xhtml" "xhtml") ("ooxml" "xml")))
+    ("Presentation"
+     ("odp" "otp" "ppt")
+     (("pdf" "pdf") ("swf" "swf") ("odp" "odp") ("xhtml" "xml")
+      ("otp" "otp") ("ppt" "ppt") ("odg" "odg") ("html" "html"))))
+  "Specify input and output formats of `org-export-odt-convert-process'.
+More correctly, specify the set of input and output formats that
+the user is actually interested in.
+
+This variable is an alist where each element is of the
+form (DOCUMENT-CLASS INPUT-FMT-LIST OUTPUT-FMT-ALIST).
+INPUT-FMT-LIST is a list of INPUT-FMTs.  OUTPUT-FMT-ALIST is an
+alist where each element is of the form (OUTPUT-FMT
+OUTPUT-FILE-EXTENSION).
+
+The variable is interpreted as follows:
+`org-export-odt-convert-process' can take any document that is in
+INPUT-FMT-LIST and produce any document that is in the
+OUTPUT-FMT-LIST.  A document converted to OUTPUT-FMT will have
+OUTPUT-FILE-EXTENSION as the file name extension.  OUTPUT-FMT
+serves dual purposes:
+- It is used for populating completion candidates during
+  `org-export-odt-convert' commands.
+- It is used as the value of \"%f\" specifier in
+  `org-export-odt-convert-process'.
+
+DOCUMENT-CLASS is used to group a set of file formats in
+INPUT-FMT-LIST in to a single class.
+
+Note that this variable inherently captures how LibreOffice based
+converters work.  LibreOffice maps documents of various formats
+to classes like Text, Web, Spreadsheet, Presentation etc and
+allow document of a given class (irrespective of it's source
+format) to be converted to any of the export formats associated
+with that class.
+
+See default setting of this variable for an typical
+configuration."
+  :group 'org-export-odt
+  :type
+  '(choice
+    (const :tag "None" nil)
+    (alist :key-type (string :tag "Document Class")
+	   :value-type
+	   (group (repeat :tag "Input formats" (string :tag "Input format"))
+		  (alist :tag "Output formats"
+			 :key-type (string :tag "Output format")
+			 :value-type
+			 (group (string :tag "Output file extension")))))))
+
+(defun org-export-odt-convert (&optional in-file out-fmt prefix-arg)
+  "Convert IN-FILE to format OUT-FMT using a command line converter.
+IN-FILE is the file to be converted.  If unspecified, it defaults
+to variable `buffer-file-name'.  OUT-FMT is the desired output
+format.  Use `org-export-odt-convert-process' as the converter.
+If PREFIX-ARG is non-nil then the newly converted file is opened
+using `org-open-file'."
+  (interactive
+   (append (org-lparse-convert-read-params) current-prefix-arg))
+  (org-lparse-do-convert in-file out-fmt prefix-arg))
+
 (defun org-odt-get (what &optional opt-plist)
   (case what
     (BACKEND 'odt)
@@ -1965,8 +2079,15 @@ visually."
     (INIT-METHOD 'org-odt-init-outfile)
     (FINAL-METHOD 'org-odt-finalize-outfile)
     (SAVE-METHOD 'org-odt-save-as-outfile)
-    ;; (OTHER-BACKENDS)			; see note in `org-xhtml-get'
-    ;; (CONVERT-METHOD)			; see note in `org-xhtml-get'
+    (CONVERT-METHOD
+     (and org-export-odt-convert-process
+	  (cadr (assoc-string org-export-odt-convert-process
+			      org-export-odt-convert-processes t))))
+    (CONVERT-CAPABILITIES
+     (and org-export-odt-convert-process
+	  (cadr (assoc-string org-export-odt-convert-process
+			      org-export-odt-convert-processes t))
+	  org-export-odt-convert-capabilities))
     (TOPLEVEL-HLEVEL 1)
     (SPECIAL-STRING-REGEXPS org-export-odt-special-string-regexps)
     (INLINE-IMAGES 'maybe)
