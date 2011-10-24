@@ -209,9 +209,11 @@ positions, and the definition, when inlined."
 	     (or (eq (char-before (match-end 0)) 58)
 		 (/= (match-beginning 0) (point-at-bol))))
     (let* ((beg (match-beginning 0))
-	   (label (or (match-string 2) (match-string 3)
+	   (label (or (org-match-string-no-properties 2)
+		      (org-match-string-no-properties 3)
 		      ;; Anonymous footnotes don't have labels
-		      (and (match-string 1) (concat "fn:" (match-string 1)))))
+		      (and (match-string 1)
+			   (concat "fn:" (org-match-string-no-properties 1)))))
 	   ;; Inline footnotes don't end at (match-end 0) as
 	   ;; `org-footnote-re' stops just after the second colon.
 	   ;; Find the real ending with `scan-sexps', so Org doesn't
@@ -257,7 +259,7 @@ label, start, end and definition of the footnote otherwise."
 					  "\\|^[ \t]*$") nil t))))
 	(when (re-search-backward org-footnote-definition-re lim t)
 	  (end-of-line)
-	  (list (match-string 1)
+	  (list (org-match-string-no-properties 1)
 		(match-beginning 0)
 		(save-match-data
 		  ;; In a message, limit search to signature.
