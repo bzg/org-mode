@@ -8489,10 +8489,12 @@ details and examples."
 		      (and (stringp filter) (string-match filter evt))
 		      (and (functionp filter) (funcall filter x))
 		      (and (listp filter)
-			   (or (string-match
-				(cadr (assoc 'category filter)) cat)
-			       (string-match
-				(cadr (assoc 'headline filter)) evt))))))
+			   (let ((cat-filter (cadr (assoc 'category filter)))
+				 (evt-filter (cadr (assoc 'headline filter))))
+			     (or (and (stringp cat-filter)
+				      (string-match cat-filter cat))
+				 (and (stringp evt-filter)
+				      (string-match evt-filter evt))))))))
 	 ;; FIXME: Shall we remove text-properties for the appt text?
 	 ;; (setq evt (set-text-properties 0 (length evt) nil evt))
 	 (when (and ok tod)
