@@ -4925,6 +4925,7 @@ please use `org-class' instead."
      (nth 2 date1) (car date1) (nth 1 date1)
      (nth 2 date2) (car date2) (nth 1 date2)
      dayname skip-weeks)))
+(make-obsolete 'org-diary-class 'org-class "")
 
 (defalias 'org-get-closed 'org-agenda-get-progress)
 (defun org-agenda-get-progress ()
