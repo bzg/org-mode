@@ -4891,9 +4891,11 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 ;; Define the` org-class' function
 (defun org-class (y1 m1 d1 y2 m2 d2 dayname &rest skip-weeks)
   "Entry applies if date is between dates on DAYNAME, but skips SKIP-WEEKS.
-DAYNAME is a number between 0 (Sunday) and 6 (Saturday).  SKIP-WEEKS
-is any number of ISO weeks in the block period for which the item should
-be skipped."
+DAYNAME is a number between 0 (Sunday) and 6 (Saturday).
+SKIP-WEEKS is any number of ISO weeks in the block period for which the
+item should be skipped.  If any of the SKIP-WEEKS arguments is the symbol
+`holidays', then any date that is known by the Emacs calendar to be a
+holidy will also be skipped."
   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
 	 (d (calendar-absolute-from-gregorian date)))
@@ -4905,6 +4907,8 @@ be skipped."
 	 (progn
 	   (require 'cal-iso)
 	   (not (member (car (calendar-iso-from-absolute d)) skip-weeks))))
+     (not (and (memq `holidays' skip-weeks)
+	       (calendar-check-holidays date)))
      entry)))
 
 (defun org-diary-class (m1 d1 y1 m2 d2 y2 dayname &rest skip-weeks)
