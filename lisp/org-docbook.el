@@ -970,7 +970,7 @@ publishing directory."
 		    (push (cons num 1) footref-seen))))))
 
 	  (cond
-	   ((string-match "\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$" line)
+	   ((string-match "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$" line)
 	    ;; This is a headline
 	    (setq level (org-tr-level (- (match-end 1) (match-beginning 1)
 					 level-offset))

@@ -1648,7 +1648,7 @@ PUB-DIR is set, use this as the publishing directory."
 			 t t line))))))
 
 	  (cond
-	   ((string-match "\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$" line)
+	   ((string-match "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$" line)
 	    ;; This is a headline
 	    (setq level (org-tr-level (- (match-end 1) (match-beginning 1)
 					 level-offset))
