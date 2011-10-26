@@ -19434,9 +19434,13 @@ position before START-RE (resp. after END-RE)."
 	     (cons beg end))))))
 
 (defun org-in-block-p (names)
-  "Is point inside any block whose name belongs to NAMES?
+  "Non-nil when point belongs to a block whose name belongs to NAMES.
 
-NAMES is a list of strings containing names of blocks."
+NAMES is a list of strings containing names of blocks.
+
+Return first block name matched, or nil.  Beware that in case of
+nested blocks, the returned name may not belong to the closest
+block from point."
   (save-match-data
     (catch 'exit
       (let ((case-fold-search t)
@@ -19448,7 +19452,7 @@ NAMES is a list of strings containing names of blocks."
 			 (concat "^[ \t]*#\\+begin_" n)
 			 (concat "^[ \t]*#\\+end_" n)
 			 lim-up lim-down)
-		    (throw 'exit t))))
+		    (throw 'exit n))))
 	      names))
       nil)))
 
