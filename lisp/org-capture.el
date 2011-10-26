@@ -1213,8 +1213,10 @@ Use PREFIX as a prefix for the name of the indirect buffer."
       (setq bname (concat prefix "-" (number-to-string (incf n)) "-" base)))
     (condition-case nil
         (make-indirect-buffer buffer bname 'clone)
-      (error (make-indirect-buffer buffer bname)))))
-
+      (error
+       (let ((buf (make-indirect-buffer buffer bname)))
+	 (with-current-buffer buf (org-mode))
+	 buf)))))
 
 (defun org-capture-verify-tree (tree)
   "Throw error if TREE is not a valid tree"
