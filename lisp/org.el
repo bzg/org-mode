@@ -8995,7 +8995,7 @@ This command can be called in any mode to insert a link in Org-mode syntax."
   (org-load-modules-maybe)
   (org-run-like-in-org-mode 'org-insert-link))
 
-(defun org-insert-link (&optional complete-file link-location)
+(defun org-insert-link (&optional complete-file link-location default-description)
   "Insert a link.  At the prompt, enter the link.
 
 Completion can be used to insert any of the link protocol prefixes like
@@ -9031,7 +9031,10 @@ called with the link target, and the result will be the default
 link description.
 
 If the LINK-LOCATION parameter is non-nil, this value will be
-used as the link location instead of reading one interactively."
+used as the link location instead of reading one interactively.
+
+If the DEFAULT-DESCRIPTION parameter is non-nil, this value will
+be used as the default description."
   (interactive "P")
   (let* ((wcf (current-window-configuration))
 	 (region (if (org-region-active-p)
@@ -9161,6 +9164,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     (if org-make-link-description-function
 	(setq desc (funcall org-make-link-description-function link desc)))
 
+    (if default-description (setq desc default-description))
     (setq desc (read-string "Description: " desc))
     (unless (string-match "\\S-" desc) (setq desc nil))
     (if remove (apply 'delete-region remove))
