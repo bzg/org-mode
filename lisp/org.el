@@ -18286,7 +18286,8 @@ See the individual commands for more information."
 	    (org-indent-line-function)
 	  (org-indent-line-to ind)))))
    ((and org-return-follows-link
-	 (eq (get-text-property (point) 'face) 'org-link))
+	 (or (eq (get-text-property (point) 'face) 'org-link)
+	     (memq 'org-link (get-text-property (point) 'face))))
     (call-interactively 'org-open-at-point))
    ((and (org-at-heading-p)
 	 (looking-at
