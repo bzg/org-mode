@@ -737,13 +737,13 @@ modified) list.")
 		  '("TITLE" "AUTHOR" "DATE" "EMAIL" "TEXT" "OPTIONS" "LANGUAGE"
 		    "MATHJAX"
 		    "LINK_UP" "LINK_HOME" "SETUPFILE" "STYLE"
-		    "LATEX_HEADER" "LATEX_CLASS"
+		    "LATEX_HEADER" "LATEX_CLASS" "LATEX_CLASS_OPTIONS"
 		    "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS"
 		    "KEYWORDS" "DESCRIPTION" "MACRO" "BIND" "XSLT")
 		  (mapcar 'car org-export-inbuffer-options-extra))))
 	    (case-fold-search t)
 	    p key val text options mathjax a pr style
-	    latex-header latex-class macros letbind
+	    latex-header latex-class latex-class-options macros letbind
 	    ext-setup-or-nil setup-file setup-dir setup-contents (start 0))
 	(while (or (and ext-setup-or-nil
 			(string-match re ext-setup-or-nil start)
@@ -770,6 +770,8 @@ modified) list.")
 	    (setq latex-header (concat latex-header "\n" val)))
 	   ((string-equal key "LATEX_CLASS")
 	    (setq latex-class val))
+           ((string-equal key "LATEX_CLASS_OPTIONS")
+            (setq latex-class-options val))
 	   ((string-equal key "TEXT")
 	    (setq text (if text (concat text "\n" val) val)))
 	   ((string-equal key "OPTIONS")
@@ -813,6 +815,8 @@ modified) list.")
 	  (setq p (plist-put p :latex-header-extra (substring latex-header 1))))
 	(when latex-class
 	  (setq p (plist-put p :latex-class latex-class)))
+        (when latex-class-options
+          (setq p (plist-put p :latex-class-options latex-class-options)))
 	(when options
 	  (setq p (org-export-add-options-to-plist p options)))
 	(when mathjax
