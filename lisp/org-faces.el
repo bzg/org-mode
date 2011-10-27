@@ -672,6 +672,13 @@ month and 365.24 days for a year)."
   "Face for showing the agenda restriction lock."
   :group 'org-faces)
 
+(defface org-agenda-filter-tags
+  (org-compatible-face nil
+    '((((background light)) (:foreground "orange"))
+      (((background dark))  (:foreground "orange"))))
+  "Face for showing the tags (in the mode-line) which are used in the agenda filtering."
+  :group 'org-faces)
+
 (defface org-time-grid ;; originally copied from font-lock-variable-name-face
   (org-compatible-face nil
     '((((class color) (min-colors 16) (background light)) (:foreground "DarkGoldenrod"))

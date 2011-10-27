@@ -6764,13 +6764,20 @@ When called with a prefix argument, include all archive files as well."
 	       ((eq org-agenda-show-log 'clockcheck) " ClkCk")
 	       (org-agenda-show-log " Log")
 	       (t ""))
+	      ;; show tags used for filtering in a custom face
 	      (if (or org-agenda-filter (get 'org-agenda-filter
 					     :preset-filter))
-		  (concat " {" (mapconcat
-				'identity
-				(append (get 'org-agenda-filter
-					     :preset-filter)
-					org-agenda-filter) "") "}")
+		  '(:eval (propertize
+			   (concat " {"
+				   (mapconcat
+				    'identity
+				    (append
+				     (get 'org-agenda-filter :preset-filter)
+				     org-agenda-filter)
+				    "")
+				   "}")
+			   'face 'org-agenda-filter-tags
+			   'help-echo "Tags used in filtering"))
 		"")
 	      (if org-agenda-archives-mode
 		  (if (eq org-agenda-archives-mode t)
