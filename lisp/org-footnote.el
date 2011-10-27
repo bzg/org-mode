@@ -209,9 +209,11 @@ positions, and the definition, when inlined."
 	     (or (eq (char-before (match-end 0)) 58)
 		 (/= (match-beginning 0) (point-at-bol))))
     (let* ((beg (match-beginning 0))
-	   (label (or (match-string 2) (match-string 3)
+	   (label (or (org-match-string-no-properties 2)
+		      (org-match-string-no-properties 3)
 		      ;; Anonymous footnotes don't have labels
-		      (and (match-string 1) (concat "fn:" (match-string 1)))))
+		      (and (match-string 1)
+			   (concat "fn:" (org-match-string-no-properties 1)))))
 	   ;; Inline footnotes don't end at (match-end 0) as
 	   ;; `org-footnote-re' stops just after the second colon.
 	   ;; Find the real ending with `scan-sexps', so Org doesn't
@@ -257,7 +259,7 @@ label, start, end and definition of the footnote otherwise."
 					  "\\|^[ \t]*$") nil t))))
 	(when (re-search-backward org-footnote-definition-re lim t)
 	  (end-of-line)
-	  (list (match-string 1)
+	  (list (org-match-string-no-properties 1)
 		(match-beginning 0)
 		(save-match-data
 		  ;; In a message, limit search to signature.
@@ -353,7 +355,7 @@ Return a non-nil value when a definition has been found."
       (looking-at (format "\\[%s\\]\\|\\[%s:" label label))
       (goto-char (match-end 0))
       (org-show-context 'link-search)
-      (when (org-mode-p)
+      (when (eq major-mode 'org-mode)
 	(message "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))
       t)))
 
@@ -481,7 +483,7 @@ or new, let the user edit the definition of the footnote."
   (let ((label (org-footnote-normalize-label label)))
     (cond
      ;; In an Org file.
-     ((org-mode-p)
+     ((eq major-mode 'org-mode)
       ;; If `org-footnote-section' is defined, find it, or create it
       ;; at the end of the buffer.
       (when org-footnote-section
@@ -543,7 +545,7 @@ or new, let the user edit the definition of the footnote."
     (insert "\n[" label "] ")
     ;; Only notify user about next possible action when in an Org
     ;; buffer, as the bindings may have different meanings otherwise.
-    (when (org-mode-p)
+    (when (eq major-mode 'org-mode)
       (message
        "Edit definition and go back with `C-c &' or, if unique, with `C-c C-c'."))))
 
@@ -701,13 +703,13 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
       (goto-char (point-min))
       (cond
        ((and org-footnote-section
-	     (org-mode-p)
+	     (eq major-mode 'org-mode)
 	     (re-search-forward
 	      (concat "^\\*[ \t]+" (regexp-quote org-footnote-section)
 		      "[ \t]*$")
 	      nil t))
 	(delete-region (match-beginning 0) (org-end-of-subtree t)))
-       ((org-mode-p)
+       ((eq major-mode 'org-mode)
 	(goto-char (point-max))
 	(unless (bolp) (newline)))
        (t
@@ -761,7 +763,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
        ;; No footnote: exit.
        ((not ref-table))
        ;; Cases when footnotes should be inserted in one place.
-       ((or (not (org-mode-p))
+       ((or (not (eq major-mode 'org-mode))
 	    org-footnote-section
 	    (not sort-only))
 	;; Insert again the section title, if any.  Ensure that title,
@@ -770,7 +772,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	;; separate section with a blank line, unless explicitly
 	;; stated in `org-blank-before-new-entry'.
 	(cond
-	 ((not (org-mode-p))
+	 ((not (eq major-mode 'org-mode))
 	  (skip-chars-backward " \t\n\r")
 	  (delete-region (point) ins-point)
 	  (unless (bolp) (newline))

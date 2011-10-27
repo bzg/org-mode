@@ -157,7 +157,7 @@ If both match values are nil, return all contacts."
     (dolist (file (org-contacts-files))
       (org-check-agenda-file file)
       (with-current-buffer (org-get-agenda-file-buffer file)
-        (unless (org-mode-p)
+        (unless (eq major-mode 'org-mode)
           (error "File %s is no in `org-mode'" file))
         (org-scan-tags
          '(add-to-list 'markers (set-marker (make-marker) (point)))
@@ -262,7 +262,7 @@ If both match values are nil, return all contacts."
     (when marker
       (switch-to-buffer-other-window (marker-buffer marker))
       (goto-char marker)
-      (when (org-mode-p)
+      (when (eq major-mode 'org-mode)
         (org-show-context 'agenda)
         (save-excursion
           (and (outline-next-heading)

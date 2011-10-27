@@ -30,6 +30,11 @@
 (eval-when-compile (require 'cl))
 (require 'org-lparse)
 
+(defgroup org-export-odt nil
+  "Options specific for ODT export of Org-mode files."
+  :tag "Org Export ODT"
+  :group 'org-export)
+
 (defun org-odt-end-export ()
   (org-odt-fixup-label-references)
 
@@ -209,32 +214,18 @@ a per-file basis.  For example,
 
 (defconst org-export-odt-tmpdir-prefix "odt-")
 (defconst org-export-odt-bookmark-prefix "OrgXref.")
-(defcustom org-export-odt-use-bookmarks-for-internal-links t
-  "Export Internal links as bookmarks?."
-  :type 'boolean
-  :group 'org-export-odt)
 
-(defcustom org-export-odt-embed-images t
-  "Should the images be copied in to the odt file or just linked?"
-  :type 'boolean
-  :group 'org-export-odt)
+(defvar org-export-odt-embed-images t
+  "Should the images be copied in to the odt file or just linked?")
 
-(defcustom org-odt-export-inline-images 'maybe
-  "Non-nil means inline images into exported HTML pages.
-This is done using an <img> tag.  When nil, an anchor with href is used to
-link to the image.  If this option is `maybe', then images in links with
-an empty description will be inlined, while images with a description will
-be linked only."
-  :group 'org-odt-export
-  :type '(choice (const :tag "Never" nil)
-		 (const :tag "Always" t)
-		 (const :tag "When there is no description" maybe)))
+(defvar org-export-odt-inline-images 'maybe) ; counterpart of
+					     ; `org-export-html-inline-images'
 
-(defcustom org-odt-export-inline-image-extensions
+(defcustom org-export-odt-inline-image-extensions
   '("png" "jpeg" "jpg" "gif")
   "Extensions of image files that can be inlined into HTML."
   :type '(repeat (string :tag "Extension"))
-  :group 'org-odt-export)
+  :group 'org-export-odt)
 
 (defcustom org-export-odt-pixels-per-inch display-pixels-per-inch
   ;; FIXME add docstring
@@ -286,25 +277,19 @@ be linked only."
   "Automatically post-process to this format after exporting to \"odt\".
 Interactive commands `org-export-as-odt' and
 `org-export-as-odt-and-open' export first to \"odt\" format and
-then use an external converter to convert the resulting document
-to this format.
-
-The converter used is that specified with CONVERT-METHOD option
-in `org-odt-get'. If the above option is unspecified then
-`org-lparse-convert-process' is used.
-
-The format specified here should be listed in OTHER-BACKENDS
-option of `org-odt-get' or `org-lparse-convert-capabilities' as
-appropriate."
-  :group 'org-odt
+then use `org-export-odt-convert-process' to convert the
+resulting document to this format.  During customization of this
+variable, the list of valid values are populated based on
+`org-export-odt-convert-capabilities'."
+  :group 'org-export-odt
   :type '(choice :convert-widget
 		 (lambda (w)
 		   (apply 'widget-convert (widget-type w)
 			  (eval (car (widget-get w :args)))))
 		 `((const :tag "None" nil)
 		   ,@(mapcar (lambda (c)
-			       `(const :tag ,(car c) ,(car c)))
-			     (org-lparse-get-other-backends "odt")))))
+			       `(const :tag ,c ,c))
+			     (org-lparse-reachable-formats "odt")))))
 
 ;;;###autoload
 (defun org-export-as-odt-and-open (arg)
@@ -1005,7 +990,7 @@ styles congruent with the ODF-1.2 specification."
 				((string= s "\t") (org-odt-format-tabs))
 				(t (org-odt-format-spaces (length s))))) line))
 
-(defcustom org-export-odt-use-htmlfontify t
+(defcustom org-export-odt-fontify-srcblocks t
   "Specify whether or not source blocks need to be fontified.
 Turn this option on if you want to colorize the source code
 blocks in the exported file.  For colorization to work, you need
@@ -1029,7 +1014,7 @@ to make available an enhanced version of `htmlfontify' library."
 (defun org-odt-format-source-code-or-example-plain
   (lines lang caption textareap cols rows num cont rpllbl fmt)
   "Format source or example blocks much like fixedwidth blocks.
-Use this when `org-export-odt-use-htmlfontify' option is turned
+Use this when `org-export-odt-fontify-srcblocks' option is turned
 off."
   (let* ((lines (org-split-string lines "[\r\n]"))
 	 (line-count (length lines))
@@ -1105,7 +1090,7 @@ based on your current display settings.  It is necessary that the
 styles.xml already contains needed styles for colorizing to work.
 
 This variable is effective only if
-`org-export-odt-use-htmlfontify' is turned on."
+`org-export-odt-fontify-srcblocks' is turned on."
   :group 'org-export-odt
   :type 'boolean)
 
@@ -1124,8 +1109,8 @@ Update styles.xml with styles that were collected as part of
 (defun org-odt-format-source-code-or-example-colored
   (lines lang caption textareap cols rows num cont rpllbl fmt)
   "Format source or example blocks using `htmlfontify-string'.
-Use this routine when `org-export-odt-use-htmlfontify' option is
-turned on."
+Use this routine when `org-export-odt-fontify-srcblocks' option
+is turned on."
   (let* ((lang-m (and lang (or (cdr (assoc lang org-src-lang-modes)) lang)))
 	 (mode (and lang-m (intern (concat (if (symbolp lang-m)
 					       (symbol-name lang-m)
@@ -1170,11 +1155,11 @@ turned on."
   "Format source or example blocks for export.
 Use `org-odt-format-source-code-or-example-plain' or
 `org-odt-format-source-code-or-example-colored' depending on the
-value of `org-export-odt-use-htmlfontify."
+value of `org-export-odt-fontify-srcblocks."
   (setq lines (org-export-number-lines
 	       lines 0 0 num cont rpllbl fmt 'preprocess)
 	lines (funcall
-	       (or (and org-export-odt-use-htmlfontify
+	       (or (and org-export-odt-fontify-srcblocks
 			(or (featurep 'htmlfontify)
 			    (require 'htmlfontify))
 			(fboundp 'htmlfontify-string)
@@ -1321,9 +1306,9 @@ MAY-INLINE-P allows inlining it as an image."
        ((and (member type '("file"))
 	     (not fragment)
 	     (org-file-image-p
-	      filename org-odt-export-inline-image-extensions)
-	     (or (eq t org-odt-export-inline-images)
-		 (and org-odt-export-inline-images (not descp))))
+	      filename org-export-odt-inline-image-extensions)
+	     (or (eq t org-export-odt-inline-images)
+		 (and org-export-odt-inline-images (not descp))))
 	(org-odt-format-inline-image thefile))
        ;; check for embedded formulas
        ((and (member type '("file"))
@@ -1963,6 +1948,126 @@ visually."
     (while (re-search-forward (format "%s[ \r\n\t]*%s" open close) nil t)
       (replace-match ""))))
 
+(defcustom org-export-odt-convert-processes
+  '(("BasicODConverter"
+     ("soffice" "-norestore" "-invisible" "-headless"
+      "\"macro:///BasicODConverter.Main.Convert(%I,%f,%O)\""))
+    ("unoconv"
+     ("unoconv" "-f" "%f" "-o" "%d" "%i")))
+  "Specify a list of document converters and their usage.
+The converters in this list are offered as choices while
+customizing `org-export-odt-convert-process'.
+
+This variable is an alist where each element is of the
+form (CONVERTER-NAME CONVERTER-PROCESS).  CONVERTER-NAME is name
+of the converter.  CONVERTER-PROCESS specifies the command-line
+syntax of the converter and is of the form (CONVERTER-PROGRAM
+ARG1 ARG2 ...).  CONVERTER-PROGRAM is the name of the executable.
+ARG1, ARG2 etc are command line options that are passed to
+CONVERTER-PROGRAM.  Format specifiers can be used in the ARGs and
+they are interpreted as below:
+
+%i input file name in full
+%I input file name as a URL
+%f format of the output file
+%o output file name in full
+%O output file name as a URL
+%d output dir in full
+%D output dir as a URL."
+  :group 'org-export-odt
+  :type
+  '(choice
+    (const :tag "None" nil)
+    (alist :tag "Converters"
+	   :key-type (string :tag "Converter Name")
+	   :value-type (group (cons (string :tag "Executable")
+				    (repeat (string :tag "Command line args")))))))
+
+(defcustom org-export-odt-convert-process nil
+  "Use this converter to convert from \"odt\" format to other formats.
+During customization, the list of converter names are populated
+from `org-export-odt-convert-processes'."
+  :group 'org-export-odt
+  :type '(choice :convert-widget
+		 (lambda (w)
+		   (apply 'widget-convert (widget-type w)
+			  (eval (car (widget-get w :args)))))
+		 `((const :tag "None" nil)
+		   ,@(mapcar (lambda (c)
+			       `(const :tag ,(car c) ,(car c)))
+			     org-export-odt-convert-processes))))
+
+(defcustom org-export-odt-convert-capabilities
+  '(("Text"
+     ("odt" "ott" "doc" "rtf")
+     (("pdf" "pdf") ("odt" "odt") ("xhtml" "html") ("rtf" "rtf")
+      ("ott" "ott") ("doc" "doc") ("ooxml" "xml") ("html" "html")))
+    ("Web"
+     ("html" "xhtml") (("pdf" "pdf") ("odt" "txt") ("html" "html")))
+    ("Spreadsheet"
+     ("ods" "ots" "xls" "csv")
+     (("pdf" "pdf") ("ots" "ots") ("html" "html") ("csv" "csv")
+      ("ods" "ods") ("xls" "xls") ("xhtml" "xhtml") ("ooxml" "xml")))
+    ("Presentation"
+     ("odp" "otp" "ppt")
+     (("pdf" "pdf") ("swf" "swf") ("odp" "odp") ("xhtml" "xml")
+      ("otp" "otp") ("ppt" "ppt") ("odg" "odg") ("html" "html"))))
+  "Specify input and output formats of `org-export-odt-convert-process'.
+More correctly, specify the set of input and output formats that
+the user is actually interested in.
+
+This variable is an alist where each element is of the
+form (DOCUMENT-CLASS INPUT-FMT-LIST OUTPUT-FMT-ALIST).
+INPUT-FMT-LIST is a list of INPUT-FMTs.  OUTPUT-FMT-ALIST is an
+alist where each element is of the form (OUTPUT-FMT
+OUTPUT-FILE-EXTENSION).
+
+The variable is interpreted as follows:
+`org-export-odt-convert-process' can take any document that is in
+INPUT-FMT-LIST and produce any document that is in the
+OUTPUT-FMT-LIST.  A document converted to OUTPUT-FMT will have
+OUTPUT-FILE-EXTENSION as the file name extension.  OUTPUT-FMT
+serves dual purposes:
+- It is used for populating completion candidates during
+  `org-export-odt-convert' commands.
+- It is used as the value of \"%f\" specifier in
+  `org-export-odt-convert-process'.
+
+DOCUMENT-CLASS is used to group a set of file formats in
+INPUT-FMT-LIST in to a single class.
+
+Note that this variable inherently captures how LibreOffice based
+converters work.  LibreOffice maps documents of various formats
+to classes like Text, Web, Spreadsheet, Presentation etc and
+allow document of a given class (irrespective of it's source
+format) to be converted to any of the export formats associated
+with that class.
+
+See default setting of this variable for an typical
+configuration."
+  :group 'org-export-odt
+  :type
+  '(choice
+    (const :tag "None" nil)
+    (alist :key-type (string :tag "Document Class")
+	   :value-type
+	   (group (repeat :tag "Input formats" (string :tag "Input format"))
+		  (alist :tag "Output formats"
+			 :key-type (string :tag "Output format")
+			 :value-type
+			 (group (string :tag "Output file extension")))))))
+
+(defun org-export-odt-convert (&optional in-file out-fmt prefix-arg)
+  "Convert IN-FILE to format OUT-FMT using a command line converter.
+IN-FILE is the file to be converted.  If unspecified, it defaults
+to variable `buffer-file-name'.  OUT-FMT is the desired output
+format.  Use `org-export-odt-convert-process' as the converter.
+If PREFIX-ARG is non-nil then the newly converted file is opened
+using `org-open-file'."
+  (interactive
+   (append (org-lparse-convert-read-params) current-prefix-arg))
+  (org-lparse-do-convert in-file out-fmt prefix-arg))
+
 (defun org-odt-get (what &optional opt-plist)
   (case what
     (BACKEND 'odt)
@@ -1974,8 +2079,15 @@ visually."
     (INIT-METHOD 'org-odt-init-outfile)
     (FINAL-METHOD 'org-odt-finalize-outfile)
     (SAVE-METHOD 'org-odt-save-as-outfile)
-    ;; (OTHER-BACKENDS)			; see note in `org-xhtml-get'
-    ;; (CONVERT-METHOD)			; see note in `org-xhtml-get'
+    (CONVERT-METHOD
+     (and org-export-odt-convert-process
+	  (cadr (assoc-string org-export-odt-convert-process
+			      org-export-odt-convert-processes t))))
+    (CONVERT-CAPABILITIES
+     (and org-export-odt-convert-process
+	  (cadr (assoc-string org-export-odt-convert-process
+			      org-export-odt-convert-processes t))
+	  org-export-odt-convert-capabilities))
     (TOPLEVEL-HLEVEL 1)
     (SPECIAL-STRING-REGEXPS org-export-odt-special-string-regexps)
     (INLINE-IMAGES 'maybe)

@@ -185,7 +185,7 @@ restart `org-mode' if necessary."
 	      (lambda() (add-hook 'before-save-hook
 				  'org-expiry-process-entries t t)))
     ;; need this to refresh org-mode hooks
-    (when (org-mode-p)
+    (when (eq major-mode 'org-mode)
       (org-mode)
       (if (org-called-interactively-p)
 	  (message "Org-expiry insinuated, `org-mode' restarted.")))))
@@ -206,7 +206,7 @@ and restart `org-mode' if necessary."
 				   'org-expiry-process-entries t t)))
   (when arg
     ;; need this to refresh org-mode hooks
-    (when (org-mode-p)
+    (when (eq major-mode 'org-mode)
       (org-mode)
       (if (org-called-interactively-p)
 	  (message "Org-expiry de-insinuated, `org-mode' restarted.")))))

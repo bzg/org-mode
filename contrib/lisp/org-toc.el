@@ -218,7 +218,7 @@ specified, then make `org-toc-recenter' use this value."
 (defun org-toc-show (&optional depth position)
   "Show the table of contents of the current Org-mode buffer."
   (interactive "P")
-  (if (org-mode-p)
+  (if (eq major-mode 'org-mode)
       (progn (setq org-toc-base-buffer (current-buffer))
 	     (setq org-toc-odd-levels-only org-odd-levels-only))
     (if (eq major-mode 'org-toc-mode)

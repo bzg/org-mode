@@ -21,7 +21,7 @@
     (and delete-other-windows (delete-other-windows))
     (widen)
     (goto-char pos)
-    (when (org-mode-p)
+    (when (eq major-mode 'org-mode)
       (org-show-context 'agenda)
       (save-excursion
 	(and (outline-next-heading)
@@ -54,7 +54,7 @@
     (switch-to-buffer-other-window buffer)
     (widen)
     (goto-char pos)
-    (when (org-mode-p)
+    (when (eq major-mode 'org-mode)
       (org-show-context 'agenda)
       (save-excursion
 	(and (outline-next-heading)

@@ -684,7 +684,7 @@ See `org-publish-projects'."
 	 (pub-dir
 	  (file-name-as-directory
 	   (file-truename
-	    (or (plist-get project-plist :publishing-directory)
+	    (or (eval (plist-get project-plist :publishing-directory))
 		(error "Project %s does not have :publishing-directory defined"
 		       (car project))))))
 	 tmp-pub-dir)

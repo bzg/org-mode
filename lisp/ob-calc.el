@@ -28,7 +28,6 @@
 ;;; Code:
 (require 'ob)
 (require 'calc)
-(require 'calc-store)
 (unless (featurep 'xemacs)
   (require 'calc-trail)
   (require 'calc-store))

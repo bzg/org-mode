@@ -63,13 +63,14 @@
 This function is called by `org-babel-execute-src-block'"
   (require 'inf-shen)
   (let* ((result-type (cdr (assoc :result-type params)))
+	 (result-params (cdr (assoc :result-params params)))
          (full-body (org-babel-expand-body:shen body params)))
     ((lambda (results)
        (if (or (member 'scalar result-params)
 	       (member 'verbatim result-params))
 	   results
 	 (condition-case nil (org-babel-script-escape results)
-	   (error result))))
+	   (error results))))
      (with-temp-buffer
        (insert full-body)
        (call-interactively #'shen-eval-defun)))))

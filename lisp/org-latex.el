@@ -723,7 +723,7 @@ then use this command to convert it."
   (interactive "r")
   (let (reg latex buf)
     (save-window-excursion
-      (if (org-mode-p)
+      (if (eq major-mode 'org-mode)
 	  (setq latex (org-export-region-as-latex
 		       beg end t 'string))
 	(setq reg (buffer-substring beg end)
@@ -1344,7 +1344,7 @@ LEVEL indicates the default depth for export."
 	      (save-restriction
 		(widen)
 		(goto-char (point-min))
-		(and (re-search-forward "^#\\+LaTeX_CLASS:[ \t]*\\(-[a-zA-Z]+\\)" nil t)
+		(and (re-search-forward "^#\\+LaTeX_CLASS:[ \t]*\\([-a-zA-Z]+\\)" nil t)
 		     (match-string 1))))
 	    (plist-get org-export-latex-options-plist :latex-class)
 	    org-export-latex-default-class)
@@ -1399,7 +1399,11 @@ OPT-PLIST is the options plist for current buffer."
 	(email (replace-regexp-in-string
 		"_" "\\\\_"
 		(org-export-apply-macros-in-string
-		 (plist-get opt-plist :email)))))
+		 (plist-get opt-plist :email))))
+	(description (org-export-apply-macros-in-string
+		      (plist-get opt-plist :description)))
+	(keywords (org-export-apply-macros-in-string
+		   (plist-get opt-plist :keywords))))
     (concat
      (if (plist-get opt-plist :time-stamp-file)
 	 (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
@@ -1433,6 +1437,12 @@ OPT-PLIST is the options plist for current buffer."
 	     (format-time-string
 	      (or (plist-get opt-plist :date)
 		  org-export-latex-date-format)))
+     ;; add some hyperref options
+     ;; FIXME: let's have a defcustom for this?
+     (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
+         (org-export-latex-fontify-headline keywords)
+         (org-export-latex-fontify-headline description)
+	 (concat "Emacs Org-mode version " org-version))
      ;; beginning of the document
      "\n\\begin{document}\n\n"
      ;; insert the title command

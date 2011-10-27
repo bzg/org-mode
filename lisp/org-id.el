@@ -431,7 +431,7 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 		 (delq nil
 		       (mapcar (lambda (b)
 				 (with-current-buffer b
-				   (and (org-mode-p) (buffer-file-name))))
+				   (and (eq major-mode 'org-mode) (buffer-file-name))))
 			       (buffer-list)))
 		 ;; All files known to have IDs
 		 org-id-files)))
@@ -600,7 +600,7 @@ optional argument MARKERP, return the position as a new marker."
 (defun org-id-store-link ()
   "Store a link to the current entry, using its ID."
   (interactive)
-  (when (and (buffer-file-name (buffer-base-buffer)) (org-mode-p))
+  (when (and (buffer-file-name (buffer-base-buffer)) (eq major-mode 'org-mode))
     (let* ((link (org-make-link "id:" (org-id-get-create)))
 	   (case-fold-search nil)
 	   (desc (save-excursion

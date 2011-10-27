@@ -144,7 +144,7 @@ command to convert it."
   (interactive "r")
   (let (reg ascii buf pop-up-frames)
     (save-window-excursion
-      (if (org-mode-p)
+      (if (eq major-mode 'org-mode)
 	  (setq ascii (org-export-region-as-ascii
 		      beg end t 'string))
 	(setq reg (buffer-substring beg end)
@@ -283,7 +283,7 @@ publishing directory."
 		    "UNTITLED"))
 	 (email (plist-get opt-plist :email))
 	 (language (plist-get opt-plist :language))
-	 (quote-re0 (concat "^[ \t]*" org-quote-string "\\>"))
+	 (quote-re0 (concat "^\\(" org-quote-string "\\)\\( +\\|[ \t]*$\\)"))
 	 (todo nil)
 	 (lang-words nil)
 	 (region
@@ -406,7 +406,7 @@ publishing directory."
 				   txt))
 			     (setq txt (replace-match "" t t txt)))
 			 (if (string-match quote-re0 txt)
-			     (setq txt (replace-match "" t t txt)))
+			     (setq txt (replace-match "" t t txt 1)))
 
 			 (if org-export-with-section-numbers
 			     (setq txt (concat (org-section-number level)

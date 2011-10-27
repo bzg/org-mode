@@ -3172,7 +3172,13 @@ file:/myself@@some.where:papers/last.pdf   @r{file, path on remote machine}
 /myself@@some.where:papers/last.pdf        @r{same as above}
 file:sometextfile::NNN                    @r{file with line number to jump to}
 file:projects.org                         @r{another Org file}
-file:projects.org::some words             @r{text search in Org file}
+file:projects.org::some words             @r{text search in Org file}@footnote{
+The actual behavior of the search will depend on the value of
+the variable @code{org-link-search-must-match-exact-headline}.  If its value
+is nil, then a fuzzy text search will be done.  If it is t, then only the
+exact headline will be matched.  If the value is @code{'query-to-create},
+then an exact headline will be searched; if it is not found, then the user
+will be queried to create it.}
 file:projects.org::*task title            @r{heading search in Org file}
 docview:papers/last.pdf::NNN              @r{open file in doc-view mode at page NNN}
 id:B7423F4D-2E8A-471B-8810-C40F074717E9   @r{Link to heading by ID}
@@ -3191,7 +3197,7 @@ gnus:group                                @r{Gnus group link}
 gnus:group#id                             @r{Gnus article link}
 bbdb:R.*Stallman                          @r{BBDB link (with regexp)}
 irc:/irc.com/#emacs/bob                   @r{IRC link}
-info:org#External%20links                 @r{Info node link (with encoded space)}
+info:org#External links                   @r{Info node link}
 shell:ls *.org                            @r{A shell command}
 elisp:org-agenda                          @r{Interactive Elisp command}
 elisp:(find-file-other-frame "Elisp.org") @r{Elisp form to evaluate}
@@ -8988,7 +8994,8 @@ further details.}.  This is done with the @samp{src} block, where you also
 need to specify the name of the major mode that should be used to fontify the
 example@footnote{Code in @samp{src} blocks may also be evaluated either
 interactively or on export.  See @pxref{Working With Source Code} for more
-information on evaluating code blocks.}:
+information on evaluating code blocks.}, see @ref{Easy Templates} for
+shortcuts to easily insert code blocks.
 @cindex #+BEGIN_SRC
 
 @example
@@ -11633,7 +11640,8 @@ The following sections describe Org-mode's code block handling facilities.
 @cindex code block, structure
 @cindex source code, block structure
 
-The structure of code blocks is as follows:
+The structure of code blocks is as follows (empty code blocks may be inserted
+using Org-mode's @ref{Easy Templates} system):
 
 @example
 #+srcname: <name>

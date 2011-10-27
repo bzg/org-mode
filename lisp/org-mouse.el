@@ -615,12 +615,12 @@ This means, between the beginning of line and the point."
   (beginning-of-line))
 
 (defadvice dnd-insert-text (around org-mouse-dnd-insert-text activate)
-  (if (org-mode-p)
+  (if (eq major-mode 'org-mode)
       (org-mouse-insert-item text)
     ad-do-it))
 
 (defadvice dnd-open-file (around org-mouse-dnd-open-file activate)
-  (if (org-mode-p)
+  (if (eq major-mode 'org-mode)
       (org-mouse-insert-item uri)
     ad-do-it))
 
@@ -630,13 +630,6 @@ This means, between the beginning of line and the point."
       (save-match-data
 	(set-match-data ',match)
 	(apply ',function rest)))))
-
-(defun org-mouse-match-todo-keyword ()
-  (save-excursion
-    (org-back-to-heading)
-    (if (looking-at org-outline-regexp) (goto-char (match-end 0)))
-    (or (looking-at (concat " +" org-todo-regexp " *"))
-	(looking-at " \\( *\\)"))))
 
 (defun org-mouse-yank-link (click)
   (interactive "e")

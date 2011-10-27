@@ -61,19 +61,6 @@ If there is an active region, export only the region.  The prefix
 ARG specifies how many levels of the outline should become
 headlines.  The default is 3.  Lower levels will become bulleted
 lists."
-  ;; (interactive "Mbackend: \nP")
-  (interactive
-   (let* ((input (if (featurep 'ido) 'ido-completing-read 'completing-read))
-	  (all-backends (org-lparse-all-backends))
-	  (target-backend
-	   (funcall input "Export to: " all-backends nil t nil))
-	  (native-backend
-	   (or
-	    ;; (and (org-lparse-backend-is-native-p target-backend)
-	    ;; 	    target-backend)
-	    (funcall input "Use Native backend:  "
-		     (cdr (assoc target-backend all-backends)) nil t nil))))
-     (list target-backend native-backend current-prefix-arg)))
   (let (f (file-or-buf (org-lparse target-backend native-backend
 				   arg 'hidden)))
     (when file-or-buf
@@ -103,7 +90,6 @@ emacs   --batch
   "Call `org-lparse' with output to a temporary buffer.
 No file is created.  The prefix ARG is passed through to
 `org-lparse'."
-  (interactive "Mbackend: \nP")
   (let ((tempbuf (format "*Org %s Export*" (upcase backend))))
       (org-lparse backend backend arg nil nil tempbuf)
       (when org-export-show-temporary-export-buffer
@@ -115,10 +101,9 @@ No file is created.  The prefix ARG is passed through to
 This can be used in any buffer.  For example, you could write an
 itemized list in org-mode syntax in an HTML buffer and then use
 this command to convert it."
-  (interactive "Mbackend: \nr")
   (let (reg backend-string buf pop-up-frames)
     (save-window-excursion
-      (if (org-mode-p)
+      (if (eq major-mode 'org-mode)
 	  (setq backend-string (org-lparse-region backend beg end t 'string))
 	(setq reg (buffer-substring beg end)
 	      buf (get-buffer-create "*Org tmp*"))
@@ -147,9 +132,6 @@ a Lisp program could call this function in the following way:
 
 When called interactively, the output buffer is selected, and shown
 in a window.  A non-interactive call will only return the buffer."
-  (interactive "Mbackend: \nr\nP")
-  (when (org-called-interactively-p 'any)
-    (setq buffer (format "*Org %s Export*" (upcase backend))))
   (let ((transient-mark-mode t) (zmacs-regions t)
 	ext-plist rtn)
     (setq ext-plist (plist-put ext-plist :ignore-subtree-p t))
@@ -368,43 +350,41 @@ Add BACKEND to `org-lparse-native-backends'."
 		org-lparse-native-backends))
   (message "Unregistered backend %S" backend))
 
-(defun org-lparse-get-other-backends (in-fmt)
-  "Return OUTPUT-FMT-ALIST corresponding to IN-FMT.
-See `org-lparse-convert-capabilities' for definition of
-OUTPUT-FMT-ALIST."
-  (when (org-lparse-get-converter in-fmt)
-    (or (ignore-errors (org-lparse-backend-get in-fmt 'OTHER-BACKENDS) )
-	(catch 'out-fmts
-	  (dolist (c org-lparse-convert-capabilities)
+(defun org-lparse-do-reachable-formats (in-fmt)
+  "Return verbose info about formats to which IN-FMT can be converted.
+Return a list where each element is of the
+form (CONVERTER-PROCESS . OUTPUT-FMT-ALIST).  See
+`org-export-odt-convert-processes' for CONVERTER-PROCESS and see
+`org-export-odt-convert-capabilities' for OUTPUT-FMT-ALIST."
+  (let (reachable-formats)
+    (dolist (backend org-lparse-native-backends reachable-formats)
+      (let* ((converter (org-lparse-backend-get
+			 backend 'CONVERT-METHOD))
+	     (capabilities (org-lparse-backend-get
+			    backend 'CONVERT-CAPABILITIES)))
+	(when converter
+	  (dolist (c capabilities)
 	    (when (member in-fmt (nth 1 c))
-	      (throw 'out-fmts (nth 2 c))))))))
+	      (push (cons converter (nth 2 c)) reachable-formats))))))))
 
-(defun org-lparse-get-converter (in-fmt)
-  "Return converter associated with IN-FMT.
-See `org-lparse-convert-capabilities' for further information."
-  (or (ignore-errors (org-lparse-backend-get in-fmt 'CONVERT-METHOD))
-      org-lparse-convert-process))
+(defun org-lparse-reachable-formats (in-fmt)
+  "Return list of formats to which IN-FMT can be converted.
+The list of the form (OUTPUT-FMT-1 OUTPUT-FMT-2 ...)."
+  (let (l)
+    (mapc (lambda (e) (add-to-list 'l e))
+	  (apply 'append (mapcar
+			  (lambda (e) (mapcar 'car (cdr e)))
+			  (org-lparse-do-reachable-formats in-fmt))))
+    l))
 
-(defun org-lparse-all-backends ()
-  "Return all formats to which `org-lparse' could export to.
-The return value is an alist of the form (TARGET-BACKEND
-NATIVE-BACKEND-1 NATIVE-BACKEND-2 ...) with the condition that
-the org file can be exported to TARGET-BACKEND via any one of
-NATIVE-BACKEND-1, NATIVE-BACKEND-2 etc.
-
-For example, an entry of the form \"(\"pdf\" \"odt\" \"xhtml\")\"
-would mean that the org file could be exported to \"pdf\" format
-by exporting natively either to \"xhtml\" or \"odt\" backends."
-  (let (all-backends)
-    (flet ((add (other native)
-		(let ((val (assoc-string other all-backends t)))
-		  (if val (setcdr val (nconc (list native) (cdr val)))
-		    (push (cons other (list native)) all-backends)))))
-      (loop for backend in org-lparse-native-backends
-	    do (loop for other in
-		     (mapcar #'car (org-lparse-get-other-backends backend))
-		     do (add other backend))))
-    all-backends))
+(defun org-lparse-reachable-p (in-fmt out-fmt)
+  "Return non-nil if IN-FMT can be converted to OUT-FMT."
+  (catch 'done
+    (let ((reachable-formats (org-lparse-do-reachable-formats in-fmt)))
+      (dolist (e reachable-formats)
+	(let ((out-fmt-spec (assoc out-fmt (cdr e))))
+	  (when out-fmt-spec
+	    (throw 'done (cons (car e) out-fmt-spec))))))))
 
 (defun org-lparse-backend-is-native-p (backend)
   (member backend org-lparse-native-backends))
@@ -442,140 +422,18 @@ header and footer, simply return the content of <body>...</body>,
 without even the body tags themselves.
 
 PUB-DIR specifies the publishing directory."
-  (interactive
-   (let* ((input (if (featurep 'ido) 'ido-completing-read 'completing-read))
-	  (all-backends (org-lparse-all-backends))
-	  (target-backend
-	   (and all-backends
-		(funcall input "Export to: " all-backends nil t nil)))
-	  (native-backend
-	   (let ((choices (if target-backend
-			      (cdr (assoc target-backend all-backends))
-			    (or org-lparse-native-backends
-				(error "No registered backends")))))
-	     (funcall input "Use Native backend:  " choices nil t nil))))
-     (list target-backend native-backend current-prefix-arg)))
   (let* ((org-lparse-backend (intern native-backend))
 	 (org-lparse-other-backend (and target-backend
 					(intern target-backend))))
     (unless (org-lparse-backend-is-native-p native-backend)
       (error "Don't know how to export natively to backend %s" native-backend))
-    (unless (or (not target-backend)
-		(equal target-backend native-backend)
-		(assoc target-backend (org-lparse-get-other-backends
-				       native-backend)))
+
+    (unless (or (equal native-backend target-backend)
+		(org-lparse-reachable-p native-backend target-backend))
       (error "Don't know how to export to backend %s %s" target-backend
 	     (format "via %s" native-backend)))
     (run-hooks 'org-export-first-hook)
     (org-do-lparse arg hidden ext-plist to-buffer body-only pub-dir)))
-
-(defcustom org-lparse-convert-processes
-  '(("BasicODConverter"
-     ("soffice" "-norestore" "-invisible" "-headless"
-      "\"macro:///BasicODConverter.Main.Convert(%I,%f,%O)\""))
-    ("unoconv"
-     ("unoconv" "-f" "%f" "-o" "%d" "%i")))
-  "Specify a list of document converters and their usage.
-The converters in this list are offered as choices while
-customizing `org-lparse-convert-process'.
-
-This variable is an alist where each element is of the
-form (CONVERTER-NAME (CONVERTER-PROGRAM ARG1 ARG2 ...)).
-CONVERTER-NAME is name of the converter.  CONVERTER-PROGRAM is
-the name of the executable.  ARG1, ARG2 etc are command line
-options that are passed to CONVERTER-PROGRAM.  Format specifiers
-can be used in the ARGs and they are interpreted as below:
-
-%i input file name in full
-%I input file name as a URL
-%f format of the output file
-%o output file name in full
-%O output file name as a URL
-%d output dir in full
-%D output dir as a URL."
-  :group 'org-lparse
-  :type
-  '(choice
-    (const :tag "None" nil)
-    (alist :tag "Converters"
-	   :key-type (string :tag "Converter Name")
-	   :value-type (group (cons (string :tag "Executable")
-				    (repeat (string :tag "Command line args")))))))
-(defcustom org-lparse-convert-process nil
-  "Command to convert from an Org exported format to other formats.
-During customization, the list of choices are populated from
-`org-lparse-convert-processes'.  Refer afore-mentioned variable
-for further information."
-  :group 'org-lparse
-  :type '(choice :convert-widget
-		 (lambda (w)
-		   (apply 'widget-convert (widget-type w)
-			  (eval (car (widget-get w :args)))))
-		 `((const :tag "None" nil)
-		   ,@(mapcar (lambda (c)
-			       `(const :tag ,(car c) ,(cadr c)))
-			     org-lparse-convert-processes))))
-
-(defcustom org-lparse-convert-capabilities
-  '(("Text"
-     ("odt" "ott" "doc" "rtf")
-     (("pdf" "pdf") ("odt" "odt") ("xhtml" "html") ("rtf" "rtf")
-      ("ott" "ott") ("doc" "doc") ("ooxml" "xml") ("html" "html")))
-    ("Web"
-     ("html" "xhtml") (("pdf" "pdf") ("odt" "txt") ("html" "html")))
-    ("Spreadsheet"
-     ("ods" "ots" "xls" "csv")
-     (("pdf" "pdf") ("ots" "ots") ("html" "html") ("csv" "csv")
-      ("ods" "ods") ("xls" "xls") ("xhtml" "xhtml") ("ooxml" "xml")))
-    ("Presentation"
-     ("odp" "otp" "ppt")
-     (("pdf" "pdf") ("swf" "swf") ("odp" "odp") ("xhtml" "xml")
-      ("otp" "otp") ("ppt" "ppt") ("odg" "odg") ("html" "html"))))
-  "Specify input and output formats of `org-lparse-convert-process'.
-More correctly, specify the set of input and output formats that
-the user is actually interested in.
-
-This variable is an alist where each element is of the
-form (DOCUMENT-CLASS INPUT-FMT-LIST OUTPUT-FMT-ALIST).
-INPUT-FMT-LIST is a list of INPUT-FMTs.  OUTPUT-FMT-ALIST is an
-alist where each element is of the form (OUTPUT-FMT
-OUTPUT-FILE-EXTENSION).
-
-The variable is interpreted as follows:
-`org-lparse-convert-process' can take any document that is in
-INPUT-FMT-LIST and produce any document that is in the
-OUTPUT-FMT-LIST.  A document converted to OUTPUT-FMT will have
-OUTPUT-FILE-EXTENSION as the file name extension.  OUTPUT-FMT
-serves dual purposes:
-- It is used for populating completion candidates during
-  `org-lparse' and `org-lparse-convert' commands.
-
-- It is used as the value of \"%f\" specifier in
-  `org-lparse-convert-process'.
-
-DOCUMENT-CLASS is used to group a set of file formats in
-INPUT-FMT-LIST in to a single class.
-
-Note that this variable inherently captures how LibreOffice based
-converters work.  LibreOffice maps documents of various formats
-to classes like Text, Web, Spreadsheet, Presentation etc and
-allow document of a given class (irrespective of it's source
-format) to be converted to any of the export formats associated
-with that class.
-
-See default setting of this variable for an typical
-configuration."
-  :group 'org-lparse
-  :type
-  '(choice
-    (const :tag "None" nil)
-    (alist :key-type (string :tag "Document Class")
-	   :value-type
-	   (group (repeat :tag "Input formats" (string :tag "Input format"))
-		  (alist :tag "Output formats"
-			 :key-type (string :tag "Output format")
-			 :value-type
-			 (group (string :tag "Output file extension")))))))
 
 (defcustom org-lparse-use-flashy-warning nil
   "Control flashing of messages logged with `org-lparse-warn'.
@@ -584,44 +442,41 @@ exporter lingers for a while to catch user's attention."
   :type 'boolean
   :group 'org-lparse)
 
-(defun org-lparse-convert (&optional in-file out-fmt prefix-arg)
-  "Convert IN-FILE to format OUT-FMT using a command line converter.
-IN-FILE is the file to be converted.  If unspecified, it defaults
-to variable `buffer-file-name'.  OUT-FMT is the desired output
-format.  If the backend has registered a CONVERT-METHOD as part
-of it's get function then that converter is used.  Otherwise
-`org-lparse-convert-process' is used.  If PREFIX-ARG is non-nil
-then the newly converted file is opened using `org-open-file'."
-  (interactive
-   (let* ((input (if (featurep 'ido) 'ido-completing-read 'completing-read))
-	  (in-file (read-file-name "File to be converted: "
-				   nil buffer-file-name t))
-	  (in-fmt (file-name-extension in-file))
-	  (out-fmt-choices (org-lparse-get-other-backends in-fmt))
-	  (out-fmt
-	   (or (and out-fmt-choices
-		    (funcall input "Output format:  "
-			     out-fmt-choices nil nil nil))
-	       (error
-		"No known converter or no known output formats for %s files"
-		in-fmt))))
-     (list in-file out-fmt current-prefix-arg)))
+(defun org-lparse-convert-read-params ()
+  "Return IN-FILE and OUT-FMT params for `org-lparse-do-convert'.
+This is a helper routine for interactive use."
+  (let* ((input (if (featurep 'ido) 'ido-completing-read 'completing-read))
+	 (in-file (read-file-name "File to be converted: "
+				  nil buffer-file-name t))
+	 (in-fmt (file-name-extension in-file))
+	 (out-fmt-choices (org-lparse-reachable-formats in-fmt))
+	 (out-fmt
+	  (or (and out-fmt-choices
+		   (funcall input "Output format:  "
+			    out-fmt-choices nil nil nil))
+	      (error
+	       "No known converter or no known output formats for %s files"
+	       in-fmt))))
+    (list in-file out-fmt)))
+
+(defun org-lparse-do-convert (in-file out-fmt &optional prefix-arg)
+  "Workhorse routine for `org-export-odt-convert'."
   (require 'browse-url)
   (let* ((in-file (expand-file-name (or in-file buffer-file-name)))
 	 (dummy (or (file-readable-p in-file)
 		    (error "Cannot read %s" in-file)))
 	 (in-fmt (file-name-extension in-file))
 	 (out-fmt (or out-fmt (error "Output format unspecified")))
-	 (convert-process (org-lparse-get-converter in-fmt))
+	 (how (or (org-lparse-reachable-p in-fmt out-fmt)
+		  (error "Cannot convert from %s format to %s format?"
+			 in-fmt out-fmt)))
+	 (convert-process (car how))
 	 (program (car convert-process))
 	 (dummy (and (or program (error "Converter not configured"))
 		     (or (executable-find program)
 			 (error "Cannot find converter %s" program))))
-	 (out-fmt-alist
-	  (or (assoc out-fmt (org-lparse-get-other-backends in-fmt))
-	      (error "Cannot convert from %s to %s format" in-fmt out-fmt)))
 	 (out-file (concat (file-name-sans-extension in-file) "."
-			   (nth 1 out-fmt-alist)))
+			   (nth 1 (or (cdr how) out-fmt))))
 	 (out-dir (file-name-directory in-file))
 	 (arglist (mapcar (lambda (arg)
 			    (format-spec
@@ -1283,14 +1138,11 @@ version."
 	(let ((f (org-lparse-get 'SAVE-METHOD)))
 	  (or (and f (functionp f) (funcall f filename opt-plist))
 	      (save-buffer)))
-	(or (when (and (boundp 'org-lparse-other-backend)
-		       org-lparse-other-backend
-		       (not (equal org-lparse-backend org-lparse-other-backend)))
-	      (let ((org-lparse-convert-process
-		     (org-lparse-get-converter org-lparse-backend)))
-		(when org-lparse-convert-process
-		  (org-lparse-convert buffer-file-name
-				      (symbol-name org-lparse-other-backend)))))
+	(or (and (boundp 'org-lparse-other-backend)
+		 org-lparse-other-backend
+		 (not (equal org-lparse-backend org-lparse-other-backend))
+		 (org-lparse-do-convert
+		  buffer-file-name (symbol-name org-lparse-other-backend)))
 	    (current-buffer)))
        ((eq to-buffer 'string)
 	(prog1 (buffer-substring (point-min) (point-max))
