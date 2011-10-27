@@ -2986,20 +2986,24 @@ when a line/row is swaped out of that privileged position.  So for
 formulas that use a range of rows or columns, it may often be better
 to anchor the formula with \"I\" row markers, or to offset from the
 borders of the table using the @< @> $< $> makers."
-  (let (n nmax len char)
-    (while (string-match "\\([@$]\\)\\(<+\\|>+\\)" s)
-      (setq nmax (if (equal (match-string 1 s) "@")
-		     (1- (length org-table-dlines))
-		   org-table-current-ncol)
-	    len (- (match-end 2) (match-beginning 2))
-	    char (string-to-char (match-string 2 s))
-	    n (if (= char ?<)
-		  len
-		(- nmax len -1)))
-      (if (or (< n 1) (> n nmax))
-	  (error "Reference \"%s\" in expression \"%s\" points outside table"
-		 (match-string 0 s) s))
-      (setq s (replace-match (format "%s%d" (match-string 1 s) n) t t s))))
+  (let (n nmax len char (start 0))
+    (while (string-match "\\([@$]\\)\\(<+\\|>+\\)\\|\\(remote([^\)]+)\\)"
+			 s start)
+      (if (match-end 3)
+	  (setq start (match-end 3))
+	(setq nmax (if (equal (match-string 1 s) "@")
+		       (1- (length org-table-dlines))
+		     org-table-current-ncol)
+	      len (- (match-end 2) (match-beginning 2))
+	      char (string-to-char (match-string 2 s))
+	      n (if (= char ?<)
+		    len
+		  (- nmax len -1)))
+	(if (or (< n 1) (> n nmax))
+	    (error "Reference \"%s\" in expression \"%s\" points outside table"
+		   (match-string 0 s) s))
+	(setq start (match-beginning 0))
+	(setq s (replace-match (format "%s%d" (match-string 1 s) n) t t s)))))
   s)
 
 (defun org-table-formula-substitute-names (f)
@@ -4668,6 +4672,8 @@ The return value is either a single string for a single field, or a
 list of the fields in the rectangle ."
   (save-match-data
     (let ((id-loc nil)
+	  ;; Protect a bunch of variables from being overwritten
+	  ;; by the context of the remote table
 	  org-table-column-names org-table-column-name-regexp
 	  org-table-local-parameters org-table-named-field-locations
 	  org-table-current-line-types org-table-current-begin-line
@@ -4704,7 +4710,8 @@ list of the fields in the rectangle ."
 		  (error "Cannot find a table at NAME or ID %s" name-or-id))
 		(setq tbeg (point-at-bol))
 		(org-table-get-specials)
-		(setq form (org-table-formula-substitute-names form))
+		(setq form (org-table-formula-substitute-names
+			    (org-table-formula-handle-first/last-rc form)))
 		(if (and (string-match org-table-range-regexp form)
 			 (> (length (match-string 0 form)) 1))
 		    (save-match-data
