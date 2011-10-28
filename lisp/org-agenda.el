@@ -4907,7 +4907,7 @@ holidy will also be skipped."
 	 (progn
 	   (require 'cal-iso)
 	   (not (member (car (calendar-iso-from-absolute d)) skip-weeks))))
-     (not (and (memq `holidays' skip-weeks)
+     (not (and (memq 'holidays skip-weeks)
 	       (calendar-check-holidays date)))
      entry)))
 
