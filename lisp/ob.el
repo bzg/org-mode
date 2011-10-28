@@ -1162,7 +1162,7 @@ shown below.
   (let (results)
     (mapc (lambda (pair)
 	    (if (eq (car pair) :var)
-		(mapcar (lambda (spec) (push (cons :var spec) results))
+		(mapcar (lambda (v) (push (cons :var (org-babel-trim v)) results))
 			(org-babel-balanced-split (cdr pair) '(44 . (32 9))))
 	      (push pair results)))
 	  header-arguments)
