@@ -20,7 +20,7 @@ Use a code block ouput as an input
 #+end_src
 
 Use input file
-#+srcname: genfile
+#+name: genfile
 #+begin_src awk  :in-file ob-awk-test.in :results silent
     $0~/[\t]*#/{
         # skip comments 
@@ -33,7 +33,7 @@ Use input file
 
 * Input data generators
 A code block to generate input stream
-#+srcname: genseq
+#+name: genseq
 #+begin_src emacs-lisp :results silent
 (print "1")
 #+end_src

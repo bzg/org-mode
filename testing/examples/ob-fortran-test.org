@@ -5,12 +5,12 @@
   :PROPERTIES:
   :ID:       459384e8-1797-4f11-867e-dde0473ea7cc
   :END:
-#+source: hello
+#+name: hello
 #+begin_src fortran :results silent
 print *, 'Hello world'
 #+end_src
 
-#+source: fortran_parameter
+#+name: fortran_parameter
 #+begin_src fortran :results silent
 integer, parameter :: i = 10
 write (*, '(i2)') i

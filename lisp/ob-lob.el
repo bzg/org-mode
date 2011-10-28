@@ -61,24 +61,15 @@ To add files to this list use the `org-babel-lob-ingest' command."
 	     lob-ingest-count (if (> lob-ingest-count 1) "s" ""))
     lob-ingest-count))
 
-(defconst org-babel-lob-call-aliases '("lob" "call")
-  "Aliases to call a source block function.
-If you change the value of this variable then your files may
-  become unusable by other org-babel users, and vice versa.")
-
 (defconst org-babel-block-lob-one-liner-regexp
   (concat
-   "^\\([ \t]*\\)#\\+\\(?:"
-   (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
-   "\\):[ \t]+\\([^\(\)\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)"
+   "^\\([ \t]*\\)#\\+call:[ \t]+\\([^\(\)\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)"
    "\(\\([^\n]*\\)\)\\(\\[.+\\]\\|\\)[ \t]*\\(\\([^\n]*\\)\\)?")
   "Regexp to match non-inline calls to predefined source block functions.")
 
 (defconst org-babel-inline-lob-one-liner-regexp
   (concat
-   "\\([^\n]*\\)\\(?:"
-   (mapconcat #'regexp-quote org-babel-lob-call-aliases "\\|")
-   "\\)_\\([^\(\)\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)"
+   "\\([^\n]*\\)call_\\([^\(\)\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)"
    "\(\\([^\n]*\\)\)\\(\\[\\(.*?\\)\\]\\)?")
   "Regexp to match inline calls to predefined source block functions.")
 

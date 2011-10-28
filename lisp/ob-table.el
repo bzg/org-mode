@@ -30,7 +30,7 @@
 ;;   (defun fibbd (n) (if (< n 2) 1 (+ (fibbd (- n 1)) (fibbd (- n 2)))))
 ;; #+end_src
 
-;; #+srcname: fibbd
+;; #+name: fibbd
 ;; #+begin_src emacs-lisp :var n=2 :results silent
 ;; (fibbd n)
 ;; #+end_src

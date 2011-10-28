@@ -13,36 +13,6 @@
   (require 'org-test)
   (require 'org-test-ob-consts))
 
-(ert-deftest test-org-babel/src-name-regexp ()
-  (should(equal "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
-		org-babel-src-name-regexp))
-  (mapcar (lambda (name) 
-	    (should (org-test-string-exact-match
-		     org-babel-src-name-regexp
-		     (concat
-		      "   \t #+"
-		      name
-		      ":    \t src-name \t blah blah blah ")))
-	    (should (string-match
-		     org-babel-src-name-regexp
-		     (concat 
-		      "#+" (upcase name)
-		      ": src-name")))
-	    ;;TODO This should fail no?
-	    (should (org-test-string-exact-match
-		     org-babel-src-name-regexp
-		     (concat
-		      "#+" name ":")))
-	    ;;TODO Check - should this pass?
-	    (should (not (org-test-string-exact-match
-			  org-babel-src-name-regexp
-			  (concat
-			   "#+" name " : src-name")))))
-	  '("srcname" "source" "function"))
-  (should (not  (org-test-string-exact-match
-		 org-babel-src-name-regexp
-		 "#+invalid-name: src-name"))))
-
 (ert-deftest test-org-babel/multi-line-header-regexp ()
   (should(equal "^[ \t]*#\\+headers?:[ \t]*\\([^\n]*\\)$"
 		org-babel-multi-line-header-regexp))
@@ -62,18 +32,6 @@
    (not (org-test-string-exact-match
 	 org-babel-multi-line-header-regexp
 	 "   \t #+headers : blah1 blah2 blah3 \t\n\t\n blah4 blah5 blah6 \n"))))
-
-(ert-deftest test-org-babel/src-name-w-name-regexp ()
-  (should(equal
-	  (concat org-babel-src-name-regexp "\\("
-		  org-babel-multi-line-header-regexp "\\)*"
-		  "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)")
-	  org-babel-src-name-w-name-regexp))
-  (should (org-test-string-exact-match
-	   org-babel-src-name-w-name-regexp
-	   (concat
-	    "#+srcname: src-name "
-	    "#+headers: blah1 blah2 blah3 \t\n\t\n blah4 blah5 blah6 \n"))))
 
 (ert-deftest test-org-babel/src-block-regexp ()
   (let ((test-block

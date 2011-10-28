@@ -114,7 +114,7 @@ remove code block execution from the C-c C-c keybinding."
   :type 'boolean)
 
 (defvar org-babel-src-name-regexp
-  "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
+  "^[ \t]*#\\+name:[ \t]*"
   "Regular expression used to match a source name line.")
 
 (defvar org-babel-multi-line-header-regexp
@@ -217,8 +217,8 @@ Returns a list
 		   (nth 2 info)
 		   (org-babel-parse-header-arguments (match-string 1)))))
 	  (when (looking-at org-babel-src-name-w-name-regexp)
-	    (setq name (org-babel-clean-text-properties (match-string 4)))
-	    (when (match-string 6)
+	    (setq name (org-babel-clean-text-properties (match-string 3)))
+	    (when (match-string 5)
 	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
 		    (org-babel-merge-params
 		     (mapcar
@@ -230,7 +230,7 @@ Returns a list
 			   (error
 			    "variable \"%s\"%s must be assigned a default value"
 			    var (if name (format " in block \"%s\"" name) ""))))
-		       (org-babel-ref-split-args (match-string 6))))
+		       (org-babel-ref-split-args (match-string 5))))
 		     (nth 2 info))))))
       ;; inline source block
       (when (org-babel-get-inline-src-block-matches)
@@ -397,7 +397,7 @@ specific header arguments as well.")
   '((:session . "none") (:results . "replace") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
-(defvar org-babel-data-names '("TBLNAME" "RESNAME" "RESULTS" "DATA"))
+(defvar org-babel-data-names '("TBLNAME" "RESULTS" "NAME"))
 
 (defvar org-babel-result-regexp
   (concat "^[ \t]*#\\+"
@@ -1367,7 +1367,7 @@ org-babel-named-src-block-regexp."
 	  (regexp (org-babel-named-src-block-regexp-for-name name)) msg)
       (goto-char (point-min))
       (when (or (re-search-forward regexp nil t)
-                (re-search-backward regexp nil t))
+		(re-search-backward regexp nil t))
         (match-beginning 0)))))
 
 (defun org-babel-src-block-names (&optional file)
@@ -1376,7 +1376,7 @@ org-babel-named-src-block-regexp."
     (when file (find-file file)) (goto-char (point-min))
     (let (names)
       (while (re-search-forward org-babel-src-name-w-name-regexp nil t)
-	(setq names (cons (match-string 4) names)))
+	(setq names (cons (match-string 3) names)))
       names)))
 
 ;;;###autoload
@@ -1392,16 +1392,21 @@ org-babel-named-src-block-regexp."
         (progn (goto-char point) (org-show-context))
       (message "result '%s' not found in this buffer" name))))
 
-(defun org-babel-find-named-result (name)
+(defun org-babel-find-named-result (name &optional point)
   "Find a named result.
 Return the location of the result named NAME in the current
 buffer or nil if no such result exists."
   (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward
-           (concat org-babel-result-regexp
-                   "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
-      (beginning-of-line 0) (point))))
+    (goto-char (or point (point-min)))
+    (catch 'is-a-code-block
+      (when (re-search-forward
+	     (concat org-babel-result-regexp
+		     "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
+	(when (and (string= "name" (match-string 1))
+		   (or (looking-at org-babel-src-block-regexp)
+		       (looking-at org-babel-multi-line-header-regexp)))
+	  (throw 'is-a-code-block (org-babel-find-named-result name (point))))
+	(beginning-of-line 0) (point)))))
 
 (defun org-babel-result-names (&optional file)
   "Returns the names of results in FILE or the current buffer."

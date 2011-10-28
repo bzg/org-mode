@@ -147,7 +147,7 @@ options and are taken from `org-babel-default-inline-header-args'."
 		(forward-char 2)))))))))
 
 (defun org-exp-res/src-name-cleanup ()
-  "Clean up #+results and #+srcname lines for export.
+  "Clean up #+results and #+name lines for export.
 This function should only be called after all block processing
 has taken place."
   (interactive)

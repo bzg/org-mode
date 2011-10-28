@@ -9,7 +9,9 @@
 There is no default value assigned to =x= variable. This is not permitted
 anymore.
 
-#+source: carre(x)
+#+name: carre(x)
 #+begin_src python
   return x*x
 #+end_src
+
+#+name: carre
