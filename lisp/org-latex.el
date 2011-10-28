@@ -377,6 +377,33 @@ When nil, grouping causes only separation lines between groups."
   :group 'org-export-latex
   :type 'boolean)
 
+(defcustom org-export-latex-tables-tstart nil
+  "LaTeX command for top rule for tables."
+  :group 'org-export-latex
+  :version "24.1"
+  :type '(choice
+          (const :tag "Nothing" nil)
+          (string :tag "String")
+          (const  :tag "Booktabs default: \\toprule" "\\toprule")))
+
+(defcustom org-export-latex-tables-hline "\\hline"
+  "LaTeX command to use for a rule somewhere in the middle of a table."
+  :group 'org-export-latex
+  :version "24.1"
+  :type '(choice
+          (string :tag "String")
+          (const  :tag "Standard: \\hline" "\\hline")
+          (const  :tag "Booktabs default: \\midrule" "\\midrule")))
+
+(defcustom org-export-latex-tables-tend nil
+  "LaTeX command for bottom rule for tables."
+  :group 'org-export-latex
+  :version "24.1"
+  :type '(choice
+          (const :tag "Nothing" nil)
+          (string :tag "String")
+          (const  :tag "Booktabs default: \\bottomrule" "\\bottomrule")))
+
 (defcustom org-export-latex-low-levels 'itemize
   "How to convert sections below the current level of sectioning.
 This is specified by the `org-export-headline-levels' option or the
@@ -2053,14 +2080,20 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 				    align))
                         (orgtbl-to-latex
                          lines
-                         `(:tstart nil :tend nil
+                         `(:tstart ,org-export-latex-tables-tstart
+				   :tend ,org-export-latex-tables-tend
+				   :hline ,org-export-latex-tables-hline
+                                   :skipheadrule ,longtblp
                                    :hlend ,(if longtblp
                                                (format "\\\\
-\\hline
+%s
 \\endhead
-\\hline\\multicolumn{%d}{r}{Continued on next page}\\
+%s\\multicolumn{%d}{r}{Continued on next page}\\
 \\endfoot
-\\endlastfoot" (length org-table-last-alignment))
+\\endlastfoot"
+                                           org-export-latex-tables-hline
+                                           org-export-latex-tables-hline
+                                           (length org-table-last-alignment))
                                              nil)))
                         (if (not longtblp) (format "\n\\end{%s}" tabular-env))
                         (if longtblp "\n" (if org-export-latex-tables-centered

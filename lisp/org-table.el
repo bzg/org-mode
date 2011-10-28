@@ -4514,6 +4514,7 @@ directly by `orgtbl-send-table'.  See manual."
 
   (let* ((splicep (plist-get params :splice))
 	 (hline (plist-get params :hline))
+	 (skipheadrule (plist-get params :skipheadrule))
 	 (remove-nil-linesp (plist-get params :remove-nil-lines))
 	 (remove-newlines (plist-get params :remove-newlines))
 	 (*orgtbl-hline* hline)
@@ -4559,7 +4560,7 @@ directly by `orgtbl-send-table'.  See manual."
 		 (*orgtbl-sep* (or (plist-get params :hlsep) *orgtbl-sep*))
 		 (*orgtbl-fmt* (or (plist-get params :hfmt) *orgtbl-fmt*)))
 	    (orgtbl-format-section 'hline))
-	  (if hline (push hline *orgtbl-rtn*))
+	  (if (and hline (not skipheadrule)) (push hline *orgtbl-rtn*))
 	  (pop *orgtbl-table*)))
 
     ;; Now format the main section.
