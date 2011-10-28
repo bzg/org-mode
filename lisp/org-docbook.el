@@ -474,9 +474,11 @@ publishing directory."
 	 (current-dir (if buffer-file-name
 			  (file-name-directory buffer-file-name)
 			default-directory))
+	 (auto-insert nil); Avoid any auto-insert stuff for the new file
 	 (buffer (if to-buffer
 		     (cond
-		      ((eq to-buffer 'string) (get-buffer-create "*Org DocBook Export*"))
+		      ((eq to-buffer 'string)
+		       (get-buffer-create "*Org DocBook Export*"))
 		      (t (get-buffer-create to-buffer)))
 		   (find-file-noselect filename)))
 	 ;; org-levels-open is a global variable
