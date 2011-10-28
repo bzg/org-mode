@@ -4584,6 +4584,7 @@ the documentation of `org-diary'."
 		  (setq results (append results rtn))))))))
 	results))))
 
+(defvar org-heading-keyword-regexp-format) ; defined in org.el
 (defun org-agenda-get-todos ()
   "Return the TODO information for agenda display."
   (let* ((props (list 'face nil

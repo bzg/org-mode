@@ -1640,6 +1640,7 @@ from the buffer."
       (org-if-unprotected
        (replace-match "")))))
 
+(defvar org-heading-keyword-regexp-format) ; defined in org.el
 (defun org-export-protect-quoted-subtrees ()
   "Mark quoted subtrees with the protection property."
   (let ((org-re-quote (format org-heading-keyword-regexp-format

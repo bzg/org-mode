@@ -1054,6 +1054,9 @@ OPT-PLIST is the export options list."
     line))
 
 ;;; org-export-as-html
+
+(defvar org-heading-keyword-regexp-format) ; defined in org.el
+
 ;;;###autoload
 (defun org-export-as-html (arg &optional hidden ext-plist
 			       to-buffer body-only pub-dir)

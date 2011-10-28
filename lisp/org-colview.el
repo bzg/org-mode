@@ -1142,6 +1142,8 @@ calc         function to get values from base elements"
 
 ;;; Dynamic block for Column view
 
+(defvar org-heading-regexp) ; defined in org.el
+(defvar org-heading-keyword-regexp-format) ; defined in org.el
 (defun org-columns-capture-view (&optional maxlevel skip-empty-rows)
   "Get the column view of the current buffer or subtree.
 The first optional argument MAXLEVEL sets the level limit.  A
