@@ -305,6 +305,16 @@ OPT-PLIST is the export options list."
 	    start (+ start (length rpl))))
     line))
 
+(defvar org-lparse-par-open-stashed)	; bound during `org-do-lparse'
+(defun org-lparse-stash-save-paragraph-state ()
+  (assert (zerop org-lparse-par-open-stashed))
+  (setq org-lparse-par-open-stashed org-lparse-par-open)
+  (setq org-lparse-par-open nil))
+
+(defun org-lparse-stash-pop-paragraph-state ()
+  (setq org-lparse-par-open org-lparse-par-open-stashed)
+  (setq org-lparse-par-open-stashed 0))
+
 (defmacro with-org-lparse-preserve-paragraph-state (&rest body)
   `(let ((org-lparse-do-open-par org-lparse-par-open))
      (org-lparse-end-paragraph)
@@ -543,6 +553,15 @@ and then converted to \"doc\" then org-lparse-backend is set to
 (defvar org-lparse-to-buffer nil
   "Bind this to TO-BUFFER arg of `org-lparse'.")
 
+(defun org-lparse-get-block-params (params)
+  (save-match-data
+    (when params
+      (setq params (org-trim params))
+      (unless (string-match "\\`(.*)\\'" params)
+	(setq params (format "(%s)" params)))
+      (ignore-errors (read params)))))
+
+(defvar org-lparse-special-blocks '("list-table" "annotation"))
 (defun org-do-lparse (arg &optional hidden ext-plist
 			  to-buffer body-only pub-dir)
   "Export the outline to various formats.
@@ -572,6 +591,7 @@ version."
 					; collecting styles
 	 org-lparse-encode-pending
 	 org-lparse-par-open
+	 (org-lparse-par-open-stashed 0)
 
 	 ;; list related vars
 	 (org-lparse-list-level 0)	; list level starts at 1. A
@@ -902,13 +922,19 @@ version."
 	    (throw 'nextline nil))
 
 	  ;; Blockquotes, verse, and center
-	  (when (string-match  "^ORG-\\(.+\\)-\\(START\\|END\\)$" line)
+	  (when (string-match
+		 "^ORG-\\(.+\\)-\\(START\\|END\\)\\([ \t]+.*\\)?$" line)
 	    (let* ((style (intern (downcase (match-string 1 line))))
+		   (env-options-plist (org-lparse-get-block-params
+				       (match-string 3 line)))
 		   (f (cdr (assoc (match-string 2 line)
 				  '(("START" . org-lparse-begin-environment)
 				    ("END" . org-lparse-end-environment))))))
-	      (when (memq style '(blockquote verse center list-table))
-		(funcall f style)
+	      (when (memq style
+			  (append
+			   '(blockquote verse center)
+			   (mapcar 'intern org-lparse-special-blocks)))
+		(funcall f style env-options-plist)
 		(throw 'nextline nil))))
 
 	  (run-hooks 'org-export-html-after-blockquotes-hook)
@@ -1713,48 +1739,58 @@ information."
   (org-lparse-end-paragraph)
   (org-lparse-end-list-item (or type "u")))
 
-(defcustom org-lparse-list-table-enable nil
-  "Specify whether a list be exported as a table.
-When this option is enabled, lists that are enclosed in
-\"#+begin_list-table...#+end_list-table\" are exported as
-tables. Otherwise they are exported normally."
-  :type 'boolean
-  :group 'org-lparse)
-
 (defun org-lparse-preprocess-after-blockquote-hook ()
-  "Treat #+begin_list-table...#+end_list-table blocks specially.
-When `org-lparse-list-table-enable' is non-nil, enclose these
-blocks within ORG-LIST-TABLE-START...ORG-LIST-TABLE-END."
-  (when org-lparse-list-table-enable
-    (goto-char (point-min))
-    (while (re-search-forward "^[ \t]*#\\+\\(begin\\|end\\)_\\(.*\\)$" nil t)
-      (when (string= (downcase (match-string 2)) "list-table")
-	(replace-match (if (equal (downcase (match-string 1)) "begin")
-			   "ORG-LIST-TABLE-START"
-			 "ORG-LIST-TABLE-END") t t)))))
+  "Treat `org-lparse-special-blocks' specially."
+  (goto-char (point-min))
+  (while (re-search-forward
+	  "^[ \t]*#\\+\\(begin\\|end\\)_\\(\\S-+\\)[ \t]*\\(.*\\)$" nil t)
+    (when (member (downcase (match-string 2)) org-lparse-special-blocks)
+      (replace-match
+       (if (equal (downcase (match-string 1)) "begin")
+	   (format "ORG-%s-START %s" (upcase (match-string 2))
+		   (match-string 3))
+	 (format "ORG-%s-END %s" (upcase (match-string 2))
+		 (match-string 3))) t t))))
 
 (add-hook 'org-export-preprocess-after-blockquote-hook
 	  'org-lparse-preprocess-after-blockquote-hook)
 
+(defun org-lparse-strip-experimental-blocks-maybe-hook ()
+  "Strip \"list-table\" and \"annotation\" blocks.
+Stripping happens only when the exported backend is not one of
+\"odt\" or \"xhtml\"."
+  (when (not org-lparse-backend)
+    (message "Stripping following blocks - %S" org-lparse-special-blocks)
+    (goto-char (point-min))
+    (let ((case-fold-search t))
+      (while
+	  (re-search-forward
+	   "^[ \t]*#\\+begin_\\(\\S-+\\)\\([ \t]+.*\\)?\n\\([^\000]*?\\)\n[ \t]*#\\+end_\\1\\>.*"
+	   nil t)
+	(when (member (match-string 1) org-lparse-special-blocks)
+	  (replace-match "" t t))))))
+
+(add-hook 'org-export-preprocess-hook
+	  'org-lparse-strip-experimental-blocks-maybe-hook)
+
 (defvar org-lparse-list-table-p nil
-  "Non-nil if `org-do-lparse' is within a list-table.
-See `org-lparse-list-table-enable'.")
+  "Non-nil if `org-do-lparse' is within a list-table.")
 
 (defvar org-lparse-dyn-current-environment nil)
-(defun org-lparse-begin-environment (style)
+(defun org-lparse-begin-environment (style &optional env-options-plist)
   (case style
     (list-table
-     (setq org-lparse-list-table-p org-lparse-list-table-enable))
+     (setq org-lparse-list-table-p t))
     (t
      (setq org-lparse-dyn-current-environment style)
-     (org-lparse-begin 'ENVIRONMENT  style))))
+     (org-lparse-begin 'ENVIRONMENT  style env-options-plist))))
 
-(defun org-lparse-end-environment (style)
+(defun org-lparse-end-environment (style &optional env-options-plist)
   (case style
     (list-table
      (setq org-lparse-list-table-p nil))
     (t
-     (org-lparse-end 'ENVIRONMENT style)
+     (org-lparse-end 'ENVIRONMENT style env-options-plist)
      (setq org-lparse-dyn-current-environment nil))))
 
 (defun org-lparse-current-environment-p (style)
@@ -2061,7 +2097,7 @@ When TITLE is nil, just close all open levels."
 
 ;; Notes on LIST-TABLES
 ;; ====================
-;; When `org-lparse-list-table-enable' is non-nil, the following list
+;; Lists withing "list-table" blocks (as shown below)
 ;;
 ;; #+begin_list-table
 ;; - Row 1

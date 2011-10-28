@@ -504,8 +504,41 @@ PUB-DIR is set, use this as the publishing directory."
    '("<text:p%s>" . "</text:p>") text
    (org-odt-get-extra-attrs-for-paragraph-style style)))
 
-(defun org-odt-begin-environment (style)
+(defvar org-lparse-opt-plist)		    ; bound during org-do-lparse
+(defun org-odt-format-author (&optional author)
+  (when (setq author (or author (plist-get org-lparse-opt-plist :author)))
+    (org-odt-format-tags '("<dc:creator>" . "</dc:creator>") author)))
+
+(defun org-odt-iso-date-from-org-timestamp (&optional org-ts)
+  (save-match-data
+    (let* ((time
+	    (and (stringp org-ts)
+		 (string-match org-ts-regexp0 org-ts)
+		 (apply 'encode-time
+			(org-fix-decoded-time
+			 (org-parse-time-string (match-string 0 org-ts) t)))))
+	   (date (format-time-string "%Y-%m-%dT%H:%M:%S%z" time)))
+      (format "%s:%s" (substring date 0 -2) (substring date -2)))))
+
+(defun org-odt-begin-annotation (&optional author date)
+  (org-lparse-insert-tag "<office:annotation>")
+  (when (setq author (org-odt-format-author author))
+    (insert author))
+  (insert (org-odt-format-tags
+	   '("<dc:date>" . "</dc:date>")
+	   (org-odt-iso-date-from-org-timestamp
+	    (or date (plist-get org-lparse-opt-plist :date)))))
+  (org-lparse-begin-paragraph))
+
+(defun org-odt-end-annotation ()
+  (org-lparse-insert-tag  "</office:annotation>"))
+
+(defun org-odt-begin-environment (style env-options-plist)
   (case style
+    (annotation
+     (org-lparse-stash-save-paragraph-state)
+     (org-odt-begin-annotation (plist-get env-options-plist 'author)
+			       (plist-get env-options-plist 'date)))
     ((blockquote verse center quote)
      (org-lparse-begin-paragraph style)
      (list))
@@ -514,8 +547,12 @@ PUB-DIR is set, use this as the publishing directory."
      (list))
     (t (error "Unknown environment %s" style))))
 
-(defun org-odt-end-environment (style)
+(defun org-odt-end-environment (style env-options-plist)
   (case style
+    (annotation
+     (org-lparse-end-paragraph)
+     (org-odt-end-annotation)
+     (org-lparse-stash-pop-paragraph-state))
     ((blockquote verse center quote)
      (org-lparse-end-paragraph)
      (list))
@@ -1446,7 +1483,7 @@ MAY-INLINE-P allows inlining it as an image."
 			     (or (org-find-text-property-in-string
 				  'org-latex-src-embed-type src) 'character)
 			   'paragraph)))
-	   (attr-plist (when attr (read  attr)))
+	   (attr-plist (org-lparse-get-block-params attr))
 	   (size (org-odt-image-size-from-file
 		  src (plist-get attr-plist :width)
 		  (plist-get attr-plist :height)
@@ -1840,36 +1877,8 @@ visually."
 	    xml-files)
 
       (delete-directory zipdir)))
-
   (message "Created %s" target)
   (set-buffer (find-file-noselect target t)))
-
-(defun org-odt-format-date (date)
-  (let ((warning-msg
-	 "OpenDocument files require that dates be in ISO-8601 format. Please review your DATE options for compatibility."))
-    ;; If the user is not careful with the date specification, an
-    ;; invalid meta.xml will be emitted.
-
-    ;; For now honor user's diktat and let him off with a warning
-    ;; message. This is OK as LibreOffice (and possibly other
-    ;; apps) doesn't deem this deviation as critical and continue
-    ;; to load the file.
-
-    ;; FIXME: Surely there a better way to handle this. Revisit this
-    ;; later.
-    (cond
-     ((and date (string-match "%" date))
-      ;; Honor user's diktat. See comments above
-      (org-lparse-warn warning-msg)
-      (format-time-string date))
-     (date
-      ;; Honor user's diktat. See comments above
-      (org-lparse-warn warning-msg)
-      date)
-     (t
-      ;; ISO 8601 format
-      (let ((stamp (format-time-string "%Y-%m-%dT%H:%M:%S%z")))
-	(format "%s:%s" (substring stamp 0 -2) (substring stamp -2)))))))
 
 (defconst org-odt-manifest-file-entry-tag
   "
@@ -1900,13 +1909,13 @@ visually."
     (write-region "\n</manifest:manifest>" nil manifest-file t)))
 
 (defun org-odt-update-meta-file (opt-plist)
-  (let ((date (org-odt-format-date (plist-get opt-plist :date)))
+  (let ((date (org-odt-iso-date-from-org-timestamp
+	       (plist-get opt-plist :date)))
 	(author (or (plist-get opt-plist :author) ""))
 	(email (plist-get opt-plist :email))
 	(keywords (plist-get opt-plist :keywords))
 	(description (plist-get opt-plist :description))
 	(title (plist-get opt-plist :title)))
-
     (write-region
      (concat
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -1918,7 +1927,7 @@ visually."
          xmlns:ooo=\"http://openoffice.org/2004/office\"
          office:version=\"1.2\">
        <office:meta>" "\n"
-      (org-odt-format-tags '("<dc:creator>" . "</dc:creator>") author)
+      (org-odt-format-author)
       (org-odt-format-tags
        '("\n<meta:initial-creator>" . "</meta:initial-creator>") author)
       (org-odt-format-tags '("\n<dc:date>" . "</dc:date>") date)
@@ -2100,7 +2109,6 @@ using `org-open-file'."
     (t (error "Unknown property: %s"  what))))
 
 (defvar org-lparse-latex-fragment-fallback) ; set by org-do-lparse
-(defvar org-lparse-opt-plist)		    ; bound during org-do-lparse
 (defun org-export-odt-do-preprocess-latex-fragments ()
   "Convert LaTeX fragments to images."
   (let* ((latex-frag-opt (plist-get org-lparse-opt-plist :LaTeX-fragments))
