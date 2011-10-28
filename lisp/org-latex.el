@@ -869,6 +869,8 @@ when PUB-DIR is set, use this as the publishing directory."
 			  (file-truename (or buffer-file-name "dummy.org")))
 		   (concat filename ".tex")
 		 filename)))
+	 (auto-insert nil); Avoid any auto-insert stuff for the new file
+	 (TeX-master t) ; Avoid the Query for TeX master from AUCTeX
 	 (buffer (if to-buffer
 		     (cond
 		      ((eq to-buffer 'string) (get-buffer-create
