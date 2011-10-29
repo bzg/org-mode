@@ -673,7 +673,7 @@ month and 365.24 days for a year)."
   :group 'org-faces)
 
 (defface org-agenda-filter-tags
-  (org-compatible-face 'default
+  (org-compatible-face 'modeline
     nil)
   "Face for tag(s) in the mode-line when filtering the agenda."
   :group 'org-faces)
