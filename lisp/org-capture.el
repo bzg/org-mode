@@ -333,7 +333,8 @@ calendar                |  %:type %:date"
 
 (defcustom org-capture-before-finalize-hook nil
   "Hook that is run right before a capture process is finalized.
-The capture buffer is still current when this hook runs."
+The capture buffer is still current when this hook runs and it is
+widened to the entire buffer."
   :group 'org-capture
   :type 'hook)
 
