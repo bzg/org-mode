@@ -6767,7 +6767,7 @@ When called with a prefix argument, include all archive files as well."
 	      ;; show tags used for filtering in a custom face
 	      (if (or org-agenda-filter (get 'org-agenda-filter
 					     :preset-filter))
-		  '(:eval (propertize
+		  '(:eval (org-propertize
 			   (concat " {"
 				   (mapconcat
 				    'identity

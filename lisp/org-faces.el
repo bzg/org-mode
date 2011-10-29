@@ -673,10 +673,9 @@ month and 365.24 days for a year)."
   :group 'org-faces)
 
 (defface org-agenda-filter-tags
-  (org-compatible-face nil
-    '((((background light)) (:foreground "orange"))
-      (((background dark))  (:foreground "orange"))))
-  "Face for showing the tags (in the mode-line) which are used in the agenda filtering."
+  (org-compatible-face 'default
+    nil)
+  "Face for tag(s) in the mode-line when filtering the agenda."
   :group 'org-faces)
 
 (defface org-time-grid ;; originally copied from font-lock-variable-name-face
