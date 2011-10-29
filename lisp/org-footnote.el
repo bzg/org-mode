@@ -240,7 +240,8 @@ positions, and the definition, when inlined."
 	(list label beg end
 	      ;; Definition: ensure this is an inline footnote first.
 	      (and (or (not label) (match-string 1))
-		   (org-trim (buffer-substring (match-end 0) (1- end)))))))))
+		   (org-trim (buffer-substring-no-properties
+			      (match-end 0) (1- end)))))))))
 
 (defun org-footnote-at-definition-p ()
   "Is the cursor at a footnote definition?
@@ -275,7 +276,8 @@ label, start, end and definition of the footnote otherwise."
 			      bound 'move)
 			     (progn (skip-chars-forward " \t\n") (point-at-bol)))
 			(point))))
-		(org-trim (buffer-substring (match-end 0) (point)))))))))
+		(org-trim (buffer-substring-no-properties
+			   (match-end 0) (point)))))))))
 
 (defun org-footnote-get-next-reference (&optional label backward limit)
   "Return complete reference of the next footnote.
