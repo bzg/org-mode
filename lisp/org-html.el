@@ -1157,8 +1157,8 @@ PUB-DIR is set, use this as the publishing directory."
 		      (t (get-buffer-create to-buffer)))
 		   (find-file-noselect filename)))
 	 (org-levels-open (make-vector org-level-max nil))
-	 (date (plist-get opt-plist :date))
-	 (author      (plist-get opt-plist :author))
+	 (date        (org-html-expand (plist-get opt-plist :date)))
+	 (author      (org-html-expand (plist-get opt-plist :author)))
 	 (html-validation-link (or org-export-html-validation-link ""))
 	 (title       (org-html-expand
 		       (or (and subtree-p (org-export-get-title-from-subtree))
@@ -1187,8 +1187,8 @@ PUB-DIR is set, use this as the publishing directory."
 	 (inverse     nil)
 	 (email       (plist-get opt-plist :email))
 	 (language    (plist-get opt-plist :language))
-	 (keywords    (plist-get opt-plist :keywords))
-	 (description (plist-get opt-plist :description))
+	 (keywords    (org-html-expand (plist-get opt-plist :keywords)))
+	 (description (org-html-expand (plist-get opt-plist :description)))
 	 (num         (plist-get opt-plist :section-numbers))
 	 (lang-words  nil)
 	 (head-count  0) cnt
