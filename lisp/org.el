@@ -17393,6 +17393,23 @@ hook.  The default setting is `org-speed-command-default-hook'."
 If the cursor is in a table looking at whitespace, the whitespace is
 overwritten, and the table is not marked as requiring realignment."
   (interactive "p")
+  (let ((invisible-at-point
+	 (car (get-char-property-and-overlay (point) 'invisible)))
+	(invisible-before-point
+	 (car (get-char-property-and-overlay (1- (point)) 'invisible))))
+    (when (or (eq invisible-at-point 'outline)
+	    (eq invisible-at-point 'org-hide-block)
+	    (eq invisible-before-point 'outline)
+	    (eq invisible-before-point 'org-hide-block))
+      (if (or (eq invisible-before-point 'outline)
+	      (eq invisible-before-point 'org-hide-block))
+	  (goto-char (previous-overlay-change (point))))
+      (org-cycle)
+      (if (or (eq invisible-before-point 'outline)
+	      (eq invisible-before-point 'org-hide-block))
+	  (forward-char 1))
+      (message "Unfolding invisible region around point before editing")
+      (sit-for 1)))
   (cond
    ((and org-use-speed-commands
 	 (setq org-speed-command
