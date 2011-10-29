@@ -5278,6 +5278,7 @@ Its presence causes entries to be shown on specific dates in the agenda
 @table @var
 @item Plain timestamp; Event; Appointment
 @cindex timestamp
+@cindex appointment
 A simple timestamp just assigns a date/time to an item.  This is just
 like writing down an appointment or event in a paper agenda.  In the
 timeline and agenda displays, the headline of an entry associated with a
@@ -7277,6 +7278,8 @@ in an Org or Diary file.
 @subsubheading Appointment reminders
 @cindex @file{appt.el}
 @cindex appointment reminders
+@cindex appointment
+@cindex reminders
 
 Org can interact with Emacs appointments notification facility.  To add all
 the appointments of your agenda files, use the command
