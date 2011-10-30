@@ -4537,8 +4537,16 @@ means to push this value onto the list in the variable.")
 		(setq ext-setup-or-nil
 		      (concat (substring ext-setup-or-nil 0 start)
 			      "\n" setup-contents "\n"
-			      (substring ext-setup-or-nil start)))))
-	     ))))
+			      (substring ext-setup-or-nil start)))))))
+	  ;; search for property blocks
+	  (goto-char (point-min))
+	  (while (re-search-forward org-block-regexp nil t)
+	    (when (equal "PROPERTY" (upcase (match-string 1)))
+	      (setq value (replace-regexp-in-string
+			   "[\n\r]" " " (match-string 4)))
+	      (when (string-match "\\(\\S-+\\)\\s-+\\(.*\\)" value)
+		(push (cons (match-string 1 value) (match-string 2 value))
+		      props))))))
       (org-set-local 'org-use-sub-superscripts scripts)
       (when cat
 	(org-set-local 'org-category (intern cat))
