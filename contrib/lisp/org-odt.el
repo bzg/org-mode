@@ -736,7 +736,7 @@ style from the list."
   (when label
     (insert
      (org-odt-format-stylized-paragraph
-      'table (org-odt-format-entity-caption label caption "Table"))))
+      'table (org-odt-format-entity-caption label caption "__Table__"))))
   (org-lparse-insert-tag
    "<table:table table:name=\"%s\" table:style-name=\"%s\">"
    (or label "") (or (nth 1 org-odt-table-style-spec) "OrgTable"))
@@ -1280,7 +1280,7 @@ value of `org-export-odt-fontify-srcblocks."
 	      (if caption "CaptionedDisplayFormula" "DisplayFormula")
 	      href width height caption nil)
 	    ,(if (not label) ""
-	       (org-odt-format-entity-caption label nil "Equation"))))
+	       (org-odt-format-entity-caption label nil "__MathFormula__"))))
 	 nil nil nil "OrgEquation" nil '((1 "c" 8) (2 "c" 1)))
 	(throw 'nextline nil))))))
 
@@ -1477,9 +1477,11 @@ MAY-INLINE-P allows inlining it as an image."
 	   (caption (and caption (org-xml-format-desc caption)))
 	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src))
+	   (latex-fragment-p (org-find-text-property-in-string
+			      'org-latex-src src))
+	   (category (and latex-fragment-p "__DvipngImage__"))
 	   (embed-as (or embed-as
-			 (if (org-find-text-property-in-string
-			      'org-latex-src src)
+			 (if latex-fragment-p
 			     (or (org-find-text-property-in-string
 				  'org-latex-src-embed-type src) 'character)
 			   'paragraph)))
@@ -1497,7 +1499,7 @@ MAY-INLINE-P allows inlining it as an image."
 	  (t (error "Unknown value for embed-as %S" embed-as))))
        (t
 	(org-odt-format-entity
-	 "CaptionedDisplayImage" href width height caption label))))))
+	 "CaptionedDisplayImage" href width height caption label category))))))
 
 (defun org-odt-format-frame (text width height style &optional
 				  extra anchor-type)
@@ -1532,19 +1534,20 @@ MAY-INLINE-P allows inlining it as an image."
 		content) nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\"")))
 
 (defvar org-odt-entity-frame-styles
-  '(("InlineImage" "Figure" ("OrgInlineImage" nil "as-char"))
-    ("DisplayImage" "Figure" ("OrgDisplayImage" nil "paragraph"))
-    ("CaptionedDisplayImage" "Figure"
+  '(("InlineImage" "__Figure__" ("OrgInlineImage" nil "as-char"))
+    ("DisplayImage" "__Figure__" ("OrgDisplayImage" nil "paragraph"))
+    ("CaptionedDisplayImage" "__Figure__"
      ("OrgCaptionedImage"
       " style:rel-width=\"100%\" style:rel-height=\"scale\"" "paragraph")
      ("OrgImageCaptionFrame"))
-    ("InlineFormula" "Equation" ("OrgInlineFormula" nil "as-char"))
-    ("DisplayFormula" "Equation" ("OrgDisplayFormula" nil "as-char"))
-    ("CaptionedDisplayFormula" "Equation"
+    ("InlineFormula" "__MathFormula__" ("OrgInlineFormula" nil "as-char"))
+    ("DisplayFormula" "__MathFormula__" ("OrgDisplayFormula" nil "as-char"))
+    ("CaptionedDisplayFormula" "__MathFormula__"
      ("OrgCaptionedFormula" nil "paragraph")
      ("OrgFormulaCaptionFrame" nil "as-char"))))
 
-(defun org-odt-format-entity (entity href width height &optional caption label)
+(defun org-odt-format-entity (entity href width height
+				     &optional caption label category)
   (let* ((entity-style (assoc entity org-odt-entity-frame-styles))
 	 (entity-frame (apply 'org-odt-format-frame
 			      href width height (nth 2 entity-style))))
@@ -1552,11 +1555,10 @@ MAY-INLINE-P allows inlining it as an image."
       (apply 'org-odt-format-textbox
 	     (org-odt-format-stylized-paragraph
 	      'illustration
-	      (concat entity-frame (org-odt-format-entity-caption
-				    label caption (nth 1 entity-style))))
+	      (concat entity-frame
+		      (org-odt-format-entity-caption
+		       label caption (or category (nth 1 entity-style)))))
 	     width height (nth 3 entity-style)))))
-
-
 
 (defvar org-odt-embedded-images-count 0)
 (defun org-odt-copy-image-file (path)
@@ -1645,106 +1647,154 @@ MAY-INLINE-P allows inlining it as an image."
 (defvar org-odt-entity-labels-alist nil
   "Associate Labels with the Labelled entities.
 Each element of the alist is of the form (LABEL-NAME
-CATEGORY-NAME SEQNO).  LABEL-NAME is same as that specified by
-\"#+LABEL: ...\" line.  CATEGORY-NAME is the type of the entity
-that LABEL-NAME is attached to.  CATEGORY-NAME can be one of
-\"Table\", \"Figure\" or \"Equation\".  SEQNO is the unique
-number assigned to the referenced entity on a per-CATEGORY basis.
-It is generated sequentially and is 1-based.
+CATEGORY-NAME SEQNO LABEL-STYLE-NAME).  LABEL-NAME is same as
+that specified by \"#+LABEL: ...\" line.  CATEGORY-NAME is the
+type of the entity that LABEL-NAME is attached to.  CATEGORY-NAME
+can be one of \"Table\", \"Figure\" or \"Equation\".  SEQNO is
+the unique number assigned to the referenced entity on a
+per-CATEGORY basis.  It is generated sequentially and is 1-based.
+LABEL-STYLE-NAME is a key `org-odt-label-styles'.
 
-Update this alist with `org-odt-add-label-definition' and
-retrieve an entry with `org-odt-get-label-definition'.")
+See `org-odt-add-label-definition' and
+`org-odt-fixup-label-references'.")
 
 (defvar org-odt-entity-counts-plist nil
   "Plist of running counters of SEQNOs for each of the CATEGORY-NAMEs.
 See `org-odt-entity-labels-alist' for known CATEGORY-NAMEs.")
 
-(defvar org-odt-label-def-ref-spec
-  '(("Equation" "(%n)" "text" "(%n)")
-    ("" "%e %n%c" "category-and-value" "%e %n"))
+(defvar org-odt-label-styles
+  '(("text" "(%n)" "text" "(%n)")
+    ("category-and-value" "%e %n%c" "category-and-value" "%e %n"))
   "Specify how labels are applied and referenced.
-This is an alist where each element is of the form (CATEGORY-NAME
-LABEL-APPLY-FMT LABEL-REF-MODE LABEL-REF-FMT).  CATEGORY-NAME is
-as defined in `org-odt-entity-labels-alist'.  It can additionally
-be an empty string in which case it is used as a catch-all
-specifier.
+This is an alist where each element is of the
+form (LABEL-STYLE-NAME LABEL-ATTACH-FMT LABEL-REF-MODE
+LABEL-REF-FMT).
 
-LABEL-APPLY-FMT is used for applying labels and captions.  It may
-contain following specifiers - %e, %n and %c.  %e is replaced
-with the CATEGORY-NAME.  %n is replaced with \"<text:sequence
-...> SEQNO </text:sequence>\".  %c is replaced with CAPTION. See
-`org-odt-format-label-definition'.
+LABEL-ATTACH-FMT controls how labels and captions are attached to
+an entity.  It may contain following specifiers - %e, %n and %c.
+%e is replaced with the CATEGORY-NAME.  %n is replaced with
+\"<text:sequence ...> SEQNO </text:sequence>\".  %c is replaced
+with CAPTION. See `org-odt-format-label-definition'.
 
-LABEL-REF-MODE and LABEL-REF-FMT are used for generating the
-following label reference - \"<text:sequence-ref
+LABEL-REF-MODE and LABEL-REF-FMT controls how label references
+are generated.  The following XML is generated for a label
+reference - \"<text:sequence-ref
 text:reference-format=\"LABEL-REF-MODE\" ...> LABEL-REF-FMT
 </text:sequence-ref>\".  LABEL-REF-FMT may contain following
-specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.  %n is
-replaced with SEQNO. See `org-odt-format-label-reference'.")
+specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
+%n is replaced with SEQNO. See
+`org-odt-format-label-reference'.")
 
-(defun org-odt-add-label-definition (label category)
-  "Return (SEQNO . LABEL-APPLY-FMT).
-See `org-odt-label-def-ref-spec'."
+(defvar org-odt-category-map-alist
+  '(("__Table__" "Table" "category-and-value")
+    ("__Figure__" "Figure" "category-and-value")
+    ("__MathFormula__" "Equation" "text")
+    ("__DvipngImage__" "Equation" "category-and-value"))
+  "Map a CATEGORY-HANDLE to CATEGORY-NAME and LABEL-STYLE.
+This is an alist where each element is of the form
+\\(CATEGORY-HANDLE CATEGORY-NAME LABEL-STYLE\\).  CATEGORY_HANDLE
+could either be one of the internal handles (as seen above) or be
+derived from the \"#+LABEL:<label-name>\" specification.  See
+`org-export-odt-get-category-from-label'.  CATEGORY-NAME and
+LABEL-STYLE are used for generating ODT labels.  See
+`org-odt-label-styles'.")
+
+(defvar org-export-odt-user-categories
+  '("Illustration" "Table" "Text" "Drawing" "Equation" "Figure"))
+
+(defvar org-export-odt-get-category-from-label nil
+  "Should category of label be inferred from label itself.
+When this option is non-nil, a label is parsed in to two
+component parts delimited by a \":\" (colon) as shown here -
+#+LABEL:[CATEGORY-HANDLE:]EXTRA.  The CATEGORY-HANDLE is mapped
+to a CATEGORY-NAME and LABEL-STYLE using
+`org-odt-category-map-alist'.  (If no such map is provided and
+CATEGORY-NAME is set to CATEGORY-HANDLE and LABEL-STYLE is set to
+\"category-and-value\").  If CATEGORY-NAME so obtained is listed
+under `org-export-odt-user-categories' then the user specified
+styles are used.  Otherwise styles as determined by the internal
+CATEGORY-HANDLE is used.  See
+`org-odt-get-label-category-and-style' for details.")
+
+(defun org-odt-get-label-category-and-style (label default-category)
+  "See `org-export-odt-get-category-from-label'."
+  (let ((default-category-map
+	  (assoc default-category org-odt-category-map-alist))
+	user-category user-category-map category)
+    (cond
+     ((not org-export-odt-get-category-from-label)
+      default-category-map)
+     ((not (setq user-category
+		 (save-match-data
+		   (and (string-match "\\`\\(.*\\):.+" label)
+			(match-string 1 label)))))
+      default-category-map)
+     (t
+      (setq user-category-map
+	    (or (assoc user-category org-odt-category-map-alist)
+		(list nil user-category "category-and-value"))
+	    category (nth 1 user-category-map))
+      (if (member category org-export-odt-user-categories)
+	  user-category-map
+	default-category-map)))))
+
+(defun org-odt-add-label-definition (label default-category)
+  "Create an entry in `org-odt-entity-labels-alist' and return it."
   (setq label (substring-no-properties label))
-  (let (seqno label-props fmt (category-sym (intern category)))
-    (setq seqno (1+ (plist-get org-odt-entity-counts-plist category-sym))
-	  org-odt-entity-counts-plist (plist-put org-odt-entity-counts-plist
-						 category-sym seqno)
-	  fmt (cadr (or (assoc-string category org-odt-label-def-ref-spec t)
-			(assoc-string "" org-odt-label-def-ref-spec t)))
-	  label-props (list label category seqno))
+  (let* ((label-props (org-odt-get-label-category-and-style
+		       label default-category))
+	 (category (nth 1 label-props))
+	 (counter category)
+	 (label-style (nth 2 label-props))
+	 (sequence-var (intern (mapconcat
+				'downcase
+				(org-split-string counter) "-")))
+	 (seqno (1+ (or (plist-get org-odt-entity-counts-plist sequence-var)
+			0)))
+	 (label-props (list label category seqno label-style)))
+    (setq org-odt-entity-counts-plist
+	  (plist-put org-odt-entity-counts-plist sequence-var seqno))
     (push label-props org-odt-entity-labels-alist)
-    (cons seqno fmt)))
+    label-props))
 
-(defun org-odt-get-label-definition (label)
-  "Return (LABEL-NAME CATEGORY-NAME SEQNO LABEL-REF-MODE LABEL-REF-FMT).
-See `org-odt-entity-labels-alist' and
-`org-odt-label-def-ref-spec'."
-  (let* ((label-props (assoc label org-odt-entity-labels-alist))
-	 (category (nth 1 label-props)))
-    (unless label-props
-      (org-lparse-warn
-       (format "Unable to resolve reference to label \"%s\"" label)))
-    (when label-props
-      (append label-props
-	      (cddr (or (assoc-string category org-odt-label-def-ref-spec t)
-			(assoc-string "" org-odt-label-def-ref-spec t)))))))
-
-(defun org-odt-format-label-definition (label category caption)
+(defun org-odt-format-label-definition (caption label category seqno label-style)
   (assert label)
-  (let* ((label-props (org-odt-add-label-definition label category))
-	 (seqno (car label-props))
-	 (fmt (cdr label-props)))
-    (or (format-spec
-	 fmt
-	 `((?e . ,category)
-	   (?n . ,(org-odt-format-tags
-		   '("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
-		   (format "%d" seqno) label category category))
-	   (?c . ,(or (and caption (concat ": " caption)) ""))))
-	caption "")))
+  (format-spec
+   (cadr (assoc-string label-style org-odt-label-styles t))
+   `((?e . ,category)
+     (?n . ,(org-odt-format-tags
+	     '("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
+	     (format "%d" seqno) label category category))
+     (?c . ,(or (and caption (concat ": " caption)) "")))))
 
-(defun org-odt-format-label-reference (label category seqno fmt1 fmt2)
+(defun org-odt-format-label-reference (label category seqno label-style)
   (assert label)
   (save-match-data
-    (org-odt-format-tags
-     '("<text:sequence-ref text:reference-format=\"%s\" text:ref-name=\"%s\">"
-       . "</text:sequence-ref>")
-     (format-spec fmt2 `((?e . ,category)
-			 (?n . ,(format "%d" seqno)))) fmt1 label)))
+    (let* ((fmt (cddr (assoc-string label-style org-odt-label-styles t)))
+	   (fmt1 (car fmt))
+	   (fmt2 (cadr fmt)))
+      (org-odt-format-tags
+       '("<text:sequence-ref text:reference-format=\"%s\" text:ref-name=\"%s\">"
+	 . "</text:sequence-ref>")
+       (format-spec fmt2 `((?e . ,category)
+			   (?n . ,(format "%d" seqno)))) fmt1 label))))
 
 (defun org-odt-fixup-label-references ()
   (goto-char (point-min))
   (while (re-search-forward
 	  "<text:sequence-ref text:ref-name=\"\\([^\"]+\\)\"/>" nil t)
     (let* ((label (match-string 1))
-	   (label-def (org-odt-get-label-definition label))
+	   (label-def (assoc label org-odt-entity-labels-alist))
 	   (rpl (and label-def
 		     (apply 'org-odt-format-label-reference label-def))))
-      (when rpl (replace-match rpl t t)))))
+      (if rpl (replace-match rpl t t)
+	(org-lparse-warn
+	 (format "Unable to resolve reference to label \"%s\"" label))))))
 
 (defun org-odt-format-entity-caption (label caption category)
-  (or (and label (org-odt-format-label-definition label category caption))
+  (or (and label
+	   (apply 'org-odt-format-label-definition
+		  caption (org-odt-add-label-definition label category)))
       caption ""))
 
 (defun org-odt-format-tags (tag text &rest args)
@@ -1768,7 +1818,7 @@ See `org-odt-entity-labels-alist' and
 	  org-odt-embedded-images-count 0
 	  org-odt-embedded-formulas-count 0
 	  org-odt-entity-labels-alist nil
-	  org-odt-entity-counts-plist (list 'Table 0 'Equation 0 'Figure 0))
+	  org-odt-entity-counts-plist nil)
     content-file))
 
 (defcustom org-export-odt-prettify-xml nil
