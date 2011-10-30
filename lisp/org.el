@@ -17396,7 +17396,8 @@ overwritten, and the table is not marked as requiring realignment."
   (let ((invisible-at-point
 	 (car (get-char-property-and-overlay (point) 'invisible)))
 	(invisible-before-point
-	 (car (get-char-property-and-overlay (1- (point)) 'invisible))))
+	 (or (bobp) (car (get-char-property-and-overlay 
+			  (1- (point)) 'invisible)))))
     (when (or (eq invisible-at-point 'outline)
 	    (eq invisible-at-point 'org-hide-block)
 	    (eq invisible-before-point 'outline)
