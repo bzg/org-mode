@@ -75,7 +75,7 @@
 (defconst org-odt-lib-dir (file-name-directory load-file-name))
 (defconst org-odt-data-dir
   (let ((dir1 (expand-file-name "../odt" org-odt-lib-dir))	   ; git
-	(dir2 (expand-file-name "./contrib/odt" org-odt-lib-dir))) ; elpa
+	(dir2 (expand-file-name "./" org-odt-lib-dir)))		   ; elpa
     (cond
      ((file-directory-p dir1) dir1)
      ((file-directory-p dir2) dir2)
