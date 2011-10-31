@@ -1045,7 +1045,7 @@ to make available an enhanced version of `htmlfontify' library."
     (when ref
       (setq line (org-odt-format-target line (concat "coderef-" ref))))
     (setq line (org-odt-format-stylized-paragraph par-style line))
-    (when num
+    (if (not num) line
       (org-odt-format-tags '("<text:list-item>" . "</text:list-item>") line))))
 
 (defun org-odt-format-source-code-or-example-plain
