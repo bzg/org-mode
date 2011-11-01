@@ -2160,15 +2160,21 @@ can work correctly."
 (defun org-export-get-title-from-subtree ()
   "Return subtree title and exclude it from export."
   (let ((rbeg (region-beginning)) (rend (region-end))
-	(inhibit-read-only t) title)
+	(inhibit-read-only t)
+	(tags (plist-get (org-infile-export-plist) :tags))
+	title)
     (save-excursion
       (goto-char rbeg)
       (when (and (org-at-heading-p)
 		 (>= (org-end-of-subtree t t) rend))
+	(when (plist-member org-export-opt-plist :tags)
+	  (setq tags (or (plist-get org-export-opt-plist :tags) tags)))
 	;; This is a subtree, we take the title from the first heading
 	(goto-char rbeg)
-	(looking-at org-todo-line-regexp)
-	(setq title (match-string 3))
+	(looking-at org-todo-line-tags-regexp)
+	(setq title (if (eq tags t)
+			(format "%s\t%s" (match-string 3) (match-string 4))
+		      (match-string 3)))
 	(org-unmodified
 	 (add-text-properties (point) (1+ (point-at-eol))
 			      (list :org-license-to-kill t)))
