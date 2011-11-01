@@ -9170,9 +9170,9 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	    (setq desc path))))
 
     (if org-make-link-description-function
-	(setq desc (funcall org-make-link-description-function link desc)))
+	(setq desc (funcall org-make-link-description-function link desc))
+      (if default-description (setq desc default-description)))
 
-    (if default-description (setq desc default-description))
     (setq desc (read-string "Description: " desc))
     (unless (string-match "\\S-" desc) (setq desc nil))
     (if remove (apply 'delete-region remove))
