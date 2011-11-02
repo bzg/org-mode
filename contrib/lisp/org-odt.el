@@ -2209,7 +2209,8 @@ using `org-open-file'."
 	   ;; time we would have seen and collected all the label
 	   ;; definitions in `org-odt-entity-labels-alist'.
 	   (org-odt-format-tags
-	    "<text:sequence-ref text:ref-name=\"%s\"/>" "" label)) t t)))))
+	    "<text:sequence-ref text:ref-name=\"%s\"/>" ""
+	    (org-add-props label '(org-protected t)))) t t)))))
 
 ;; process latex fragments as part of
 ;; `org-export-preprocess-after-blockquote-hook'. Note that this hook
