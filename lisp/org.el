@@ -5814,7 +5814,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 			 (concat "\\("
 				 org-comment-string "\\|" org-quote-string
 				 "\\)"))
-		 '(1 'org-special-keyword t))
+		 '(2 'org-special-keyword t))
 	   '("^#.*" (0 'font-lock-comment-face t))
 	   ;; Blocks and meta lines
 	   '(org-fontify-meta-lines-and-blocks)
