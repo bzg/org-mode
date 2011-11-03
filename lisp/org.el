@@ -1065,6 +1065,28 @@ OK to kill that hidden subtree.  When nil, kill without remorse."
 	  (const :tag "Protect hidden subtrees with a security query" t)
 	  (const :tag "Never kill a hidden subtree with C-k" error)))
 
+(defcustom org-catch-invisible-edits nil
+  "Check if in invisible region before inserting or deleting a character.
+Valid values are:
+
+nil              Do not check, so just do invisible edits.
+error            Throw an error and do nothing.
+show             Make point visible, and do the requested edit.
+show-and-error   Make point visible, then throw an error and abort the edit.
+smart            Make point visible, and do insertion/deletion if it is
+                 adjacent to visible text and the change feels predictable.
+                 Never delete a previously invisible character or add in the
+                 middle or right after an invisible region.  Basically, this
+                 allows insertion and backward-delete right before ellipses.
+                 FIXME: maybe in this case we should not even show?"
+  :group 'org-edit-structure
+  :type '(choice
+	  (const :tag "Do not check" nil)
+	  (const :tag "Throw error when trying to edit" error)
+	  (const :tag "Unhide, but do not do the edit" show-and-error)
+	  (const :tag "Show invisible part and do the edit" show)
+	  (const :tag "Be smart and do the right thing" smart)))
+
 (defcustom org-yank-folded-subtrees t
   "Non-nil means when yanking subtrees, fold them.
 If the kill is a single subtree, or a sequence of subtrees, i.e. if
@@ -17401,24 +17423,7 @@ hook.  The default setting is `org-speed-command-default-hook'."
 If the cursor is in a table looking at whitespace, the whitespace is
 overwritten, and the table is not marked as requiring realignment."
   (interactive "p")
-  (let ((invisible-at-point
-	 (car (get-char-property-and-overlay (point) 'invisible)))
-	(invisible-before-point
-	 (or (bobp) (car (get-char-property-and-overlay 
-			  (1- (point)) 'invisible)))))
-    (when (or (eq invisible-at-point 'outline)
-	    (eq invisible-at-point 'org-hide-block)
-	    (eq invisible-before-point 'outline)
-	    (eq invisible-before-point 'org-hide-block))
-      (if (or (eq invisible-before-point 'outline)
-	      (eq invisible-before-point 'org-hide-block))
-	  (goto-char (previous-overlay-change (point))))
-      (org-cycle)
-      (if (or (eq invisible-before-point 'outline)
-	      (eq invisible-before-point 'org-hide-block))
-	  (forward-char 1))
-      (message "Unfolding invisible region around point before editing")
-      (sit-for 1)))
+  (org-check-before-invisible-edit 'insert)
   (cond
    ((and org-use-speed-commands
 	 (setq org-speed-command
@@ -17470,6 +17475,53 @@ overwritten, and the table is not marked as requiring realignment."
 	    (setq org-self-insert-command-undo-counter
 		  (1+ org-self-insert-command-undo-counter))))))))
 
+(defun org-check-before-invisible-edit (kind)
+  "Check is editing if kind KIND would be dangerous with invisible text around.
+The detailed reaction depends on the user option `org-catch-invisible-edits'."
+  ;; First, try to get out of here as quickly as possible, to reduce overhead
+  (if (and org-catch-invisible-edits
+	   (or (not (boundp 'visible-mode)) (not visible-mode))
+	   (or (get-char-property (point) 'invisible)
+	       (get-char-property (max (point-min) (1- (point))) 'invisible)))
+      ;; OK, we need to take a closer look
+      (let* ((invisible-at-point (get-char-property (point) 'invisible))
+	     (invisible-before-point (if (bobp) nil  (get-char-property
+						      (1- (point)) 'invisible)))
+	     (border-and-ok-direction
+	      (or
+	       ;; Check if we are acting predictably before invisible text
+	       (and invisible-at-point (not invisible-before-point)
+		    (memq kind '(insert delete-backward)))
+	       ;; Check if we are acting predictably after invisible text
+	       ;; This works not well, and I have turned it off.  It seems
+	       ;; better to always show and stop after invisible text.
+	       ;; (and (not invisible-at-point) invisible-before-point
+	       ;;  (memq kind '(insert delete)))
+	       )))
+
+	(when (or (memq invisible-at-point '(outline org-hide-block))
+		  (memq invisible-before-point '(outline org-hide-block)))
+	  (if (eq org-catch-invisible-edits 'error)
+	      (error "Editing in invisible areas is prohibited - make visible first"))
+	  ;; Make the area visible
+	  (save-excursion
+	    (if invisible-before-point
+		(goto-char (previous-single-char-property-change
+			    (point) 'invisible)))
+	    (org-cycle))
+	  (cond
+	   ((eq org-catch-invisible-edits 'show)
+	    ;; That's it, we do the edit after showing
+	    (message
+	     "Unfolding invisible region around point before editing")
+	    (sit-for 1))
+	   ((and (eq org-catch-invisible-edits 'smart)
+		 border-and-ok-direction)
+	    (message "Unfolding invisible region around point before editing"))
+	   (t
+	    ;; Don't do the edit, make the user repeat it in full visibility
+	    (error "Edit in invisible region aborted, repeat to confirm with text visible")))))))
+
 (defun org-fix-tags-on-the-fly ()
   (when (and (equal (char-after (point-at-bol)) ?*)
 	     (org-on-heading-p))
@@ -17482,6 +17534,7 @@ front of the next \"|\" separator, to keep the table aligned.  The table will
 still be marked for re-alignment if the field did fill the entire column,
 because, in this case the deletion might narrow the column."
   (interactive "p")
+  (org-check-before-invisible-edit 'delete-backward)
   (if (and (org-table-p)
 	   (eq N 1)
 	   (string-match "|" (buffer-substring (point-at-bol) (point)))
@@ -17508,6 +17561,7 @@ front of the next \"|\" separator, to keep the table aligned.  The table will
 still be marked for re-alignment if the field did fill the entire column,
 because, in this case the deletion might narrow the column."
   (interactive "p")
+  (org-check-before-invisible-edit 'delete)
   (if (and (org-table-p)
 	   (not (bolp))
 	   (not (= (char-after) ?|))
