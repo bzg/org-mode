@@ -4268,10 +4268,6 @@ collapsed state."
 
 ;;; Variables for pre-computed regular expressions, all buffer local
 
-(defvar org-heading-regexp nil
-  "Matches an headline.
-Stars are put in group 1 and the trimmed body in group 2.")
-(make-variable-buffer-local 'org-heading-regexp)
 (defvar org-drawer-regexp nil
   "Matches first line of a hidden block.")
 (make-variable-buffer-local 'org-drawer-regexp)
@@ -4295,18 +4291,6 @@ group 3: Priority cookie
 group 4: True headline
 group 5: Tags")
 (make-variable-buffer-local 'org-complex-heading-regexp)
-(defvar org-heading-keyword-regexp-format nil
-  "Printf format to make regexp to match an headline with some keyword.
-This regexp will match the headline of any node which has the
-exact keyword that is put into the format.  The keyword isn't in
-any group by default, but the stars and the body are.")
-(make-variable-buffer-local 'org-heading-keyword-regexp-format)
-(defvar org-heading-keyword-maybe-regexp-format nil
-  "Printf format to make regexp to match an headline with some keyword.
-This regexp can match any headline with the specified keyword, or
-a without a keyword.  The keyword isn't in any group by default,
-but the stars and the body are.")
-(make-variable-buffer-local 'org-heading-keyword-maybe-regexp-format)
 (defvar org-complex-heading-regexp-format nil
   "Printf format to make regexp to match an exact headline.
 This regexp will match the headline of any node which has the
@@ -4683,12 +4667,6 @@ means to push this value onto the list in the variable.")
 	    (concat "\\("
 		    (mapconcat 'regexp-quote org-not-done-keywords "\\|")
 		    "\\)")
-	    org-heading-regexp
-	    "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
-	    org-heading-keyword-regexp-format
-	    "^\\(\\*+\\)\\(?: +%s\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
-	    org-heading-keyword-maybe-regexp-format
-	    "^\\(\\*+\\)\\(?: +%s\\)?\\(?: +\\(.*?\\)\\)?[ \t]*$"
 	    org-not-done-heading-regexp
 	    (format org-heading-keyword-regexp-format org-not-done-regexp)
 	    org-todo-line-regexp
@@ -4875,6 +4853,22 @@ This variable is set by `org-before-change-function'.
   "Regexp to match Org headlines.
 This is similar to `org-outline-regexp' but additionally makes
 sure that we are at the beginning of the line.")
+
+(defconst org-heading-regexp "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
+  "Matches an headline, putting stars and text into groups.
+Stars are put in group 1 and the trimmed body in group 2.")
+(defconst org-heading-keyword-regexp-format
+  "^\\(\\*+\\)\\(?: +%s\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
+  "Printf format for a regexp matching an headline with some keyword.
+This regexp will match the headline of any node which has the
+exact keyword that is put into the format.  The keyword isn't in
+any group by default, but the stars and the body are.")
+(defconst org-heading-keyword-maybe-regexp-format
+  "^\\(\\*+\\)\\(?: +%s\\)?\\(?: +\\(.*?\\)\\)?[ \t]*$"
+  "Printf format for a regexp matching an headline, possibly with some keyword.
+This regexp can match any headline with the specified keyword, or
+without a keyword.  The keyword isn't in any group by default,
+but the stars and the body are.")
 
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
