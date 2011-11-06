@@ -2,14 +2,6 @@ ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
 
-GITVERSION	= $(shell git describe --abbrev=6 HEAD)
-ORGVERSION	= $(subst release_,,$(shell git describe --abbrev=0 HEAD))
-GITSTATUS	= $(shell git status -uno --porcelain)
-DATE            = $(shell date +%Y-%m-%d)
-ifneq ("$(GITSTATUS)", "")
-  GITVERSION := $(GITVERSION).dirty
-endif
-
 .PHONY:		all info html pdf card manual guide install clean cleanall clean-install
 
 all:		info html pdf card

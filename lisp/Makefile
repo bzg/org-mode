@@ -2,36 +2,32 @@ ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
 
-GITVERSION	= $(shell git describe --abbrev=6 HEAD)
-GITSTATUS	= $(shell git status -uno --porcelain)
-ifneq ("$(GITSTATUS)", "")
-  GITVERSION := $(GITVERSION).dirty
-endif
-
 LISPO = org-install.el
 LISPF = $(subst $(LISPO),,$(wildcard *.el))
 LISPC = $(LISPF:%el=%elc)
 
 .PHONY:		all autoloads compile install clean cleanall clean-install
 
-all compile:	$(LISPC)
+all \
+compile \
+compile-dirty:	$(LISPC)
 
 autoloads:	$(LISPO)
 
-org-install.el:	$(LISPC)
+org-install.el:	$(LISPF)
 	$(BATCH) \
 	 --eval "(require 'autoload)" \
 	 --eval '(find-file "$(LISPO)")' \
 	 --eval '(erase-buffer)' \
 	 --eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPF))))' \
 	 --eval '(insert "\n(provide (quote org-install))\n")' \
+	 --eval '(insert "\n(defconst org-release \"$(ORGVERSION)\"\n  \"The release version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
+	 --eval '(insert "\n(defconst org-git-version \"$(GITVERSION)\"\n  \"The Git version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
 	 --eval '(save-buffer)'
 
 install:	$(LISPF) compile autoloads
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(CP) $(LISPC) $(LISPF) $(LISPO) $(lispdir)
-	-$(SED) -e 's/^\((defconst org-git-version \).*/\1 "$(GITVERSION)"/;' org.el > $(lispdir)/org.el
-	$(MAKE) $(lispdir)/org.elc
 
 clean:
 	$(RM) *.elc

@@ -7,7 +7,6 @@
 ;; Maintainer: Bastien Guerry <bzg at gnu dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.8.09
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -209,37 +208,14 @@ identifier."
 
 ;;; Version
 
-(defconst org-version "7.8.09"
-  "The version number of the file org.el.")
-
-(defconst org-git-version "N/A"
-  "The Git version of org-mode.  Inserted by installing org-mode
-  or when a release is made.")
-
-;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
   (interactive "P")
   (let* ((origin default-directory)
-	 (version org-version)
-	 (git-version org-git-version)
+	 (version (if (boundp 'org-release) org-release "N/A"))
+	 (git-version (if (boundp 'org-git-version) org-git-version "N/A"))
 	 (dir (concat (file-name-directory (locate-library "org")) "../" )))
-    (when (and (file-exists-p (expand-file-name ".git" dir))
-	       (executable-find "git"))
-      (unwind-protect
-	  (progn
-	    (cd dir)
-	    (when (eql 0 (shell-command "git describe --abbrev=4 HEAD"))
-	      (with-current-buffer "*Shell Command Output*"
-		(goto-char (point-min))
-		(setq git-version (buffer-substring (point) (point-at-eol))))
-	      (subst-char-in-string ?- ?. git-version t)
-	      (when (string-match "\\S-"
-				  (shell-command-to-string "git status -uno --porcelain"))
-		(setq git-version (concat git-version ".dirty")))
-	      (setq version (concat version " (" git-version ")"))))
-	(cd origin)))
     (setq version (format "Org-mode version %s (%s)" version git-version))
     (if here (insert version))
     (message version)))

@@ -7,12 +7,23 @@ LISPDIRS	= lisp
 SUBDIRS		= doc $(LISPDIRS)
 INSTSUB         = $(SUBDIRS:%=install-%)
 
+GITVERSION	= $(shell git describe --abbrev=6 HEAD)
+ORGVERSION	= $(subst release_,,$(shell git describe --abbrev=0 HEAD))
+GITSTATUS	= $(shell git status -uno --porcelain)
+DATE            = $(shell date +%Y-%m-%d)
+ifneq ("$(GITSTATUS)", "")
+  GITVERSION := $(GITVERSION).dirty
+endif
+
 .PHONY:	default all up2 update compile lisp doc \
 	install info html pdf card docs $(INSTSUB) \
 	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel
 
-compile:	lisp
+compile::	lisp
 	$(MAKE) -C $< clean
+
+compile \
+compile-dirty::	lisp
 	$(MAKE) -C $< $@
 
 all \
