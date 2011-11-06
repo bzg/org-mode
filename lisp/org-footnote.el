@@ -205,9 +205,7 @@ positions, and the definition, when inlined."
 	     (or (looking-at org-footnote-re)
 		 (org-in-regexp org-footnote-re)
 		 (save-excursion (re-search-backward org-footnote-re nil t)))
-	     ;; Only inline footnotes can start at bol.
-	     (or (eq (char-before (match-end 0)) 58)
-		 (/= (match-beginning 0) (point-at-bol))))
+	     (/= (match-beginning 0) (point-at-bol)))
     (let* ((beg (match-beginning 0))
 	   (label (or (org-match-string-no-properties 2)
 		      (org-match-string-no-properties 3)
@@ -461,8 +459,7 @@ or new, let the user edit the definition of the footnote."
 	      (mapcar 'list lbls) nil nil
 	      (if (eq org-footnote-auto-label 'confirm) propose nil)))))))
     (cond
-     ((and label (bolp) (not org-footnote-define-inline))
-      (error "Cannot create a non-inlined footnote at left margin"))
+     ((bolp) (error "Cannot create a footnote reference at left margin"))
      ((not label)
       (insert "[fn:: ]")
       (backward-char 1))
