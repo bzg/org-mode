@@ -1005,12 +1005,16 @@ styles congruent with the ODF-1.2 specification."
 (defun org-odt-format-horizontal-line ()
   (org-odt-format-stylized-paragraph 'horizontal-line ""))
 
+(defun org-odt-encode-plain-text (line &optional no-whitespace-filling)
+  (setq line (org-xml-encode-plain-text line))
+  (if no-whitespace-filling line
+    (org-odt-fill-tabs-and-spaces line)))
+
 (defun org-odt-format-line (line)
   (case org-lparse-dyn-current-environment
     (fixedwidth (concat
 		 (org-odt-format-stylized-paragraph
-		  'fixedwidth (org-odt-fill-tabs-and-spaces
-			       (org-xml-encode-plain-text line))) "\n"))
+		  'fixedwidth (org-odt-encode-plain-text line)) "\n"))
     (t (concat line "\n"))))
 
 (defun org-odt-format-comment (fmt &rest args)
@@ -1060,10 +1064,9 @@ off."
      (lambda (line)
        (incf i)
        (org-odt-format-source-line-with-line-number-and-label
-	line rpllbl num (lambda (line)
-			  (org-odt-fill-tabs-and-spaces
-			   (org-xml-encode-plain-text line)))
-	(if (= i line-count) "OrgFixedWidthBlockLastLine" "OrgFixedWidthBlock")))
+	line rpllbl num 'org-odt-encode-plain-text
+	(if (= i line-count) "OrgFixedWidthBlockLastLine"
+	  "OrgFixedWidthBlock")))
      lines "\n")))
 
 (defvar org-src-block-paragraph-format
@@ -1263,13 +1266,16 @@ value of `org-export-odt-fontify-srcblocks."
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	   (caption (and caption (org-xml-format-desc caption)))
 	   (label (org-find-text-property-in-string 'org-label src))
+	   (latex-frag (org-find-text-property-in-string 'org-latex-src src))
 	   (embed-as (or embed-as
-			 (and (org-find-text-property-in-string
-			       'org-latex-src src)
+			 (and latex-frag
 			      (org-find-text-property-in-string
 			       'org-latex-src-embed-type src))
 			 'paragraph))
 	   width height)
+      (when latex-frag
+	(setq href (org-propertize href :title "LaTeX Fragment"
+				   :description latex-frag)))
       (cond
        ((eq embed-as 'character)
 	(org-odt-format-entity "InlineFormula" href width height))
@@ -1477,11 +1483,11 @@ MAY-INLINE-P allows inlining it as an image."
 	   (caption (and caption (org-xml-format-desc caption)))
 	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src))
-	   (latex-fragment-p (org-find-text-property-in-string
+	   (latex-frag (org-find-text-property-in-string
 			      'org-latex-src src))
-	   (category (and latex-fragment-p "__DvipngImage__"))
+	   (category (and latex-frag "__DvipngImage__"))
 	   (embed-as (or embed-as
-			 (if latex-fragment-p
+			 (if latex-frag
 			     (or (org-find-text-property-in-string
 				  'org-latex-src-embed-type src) 'character)
 			   'paragraph)))
@@ -1491,6 +1497,9 @@ MAY-INLINE-P allows inlining it as an image."
 		  (plist-get attr-plist :height)
 		  (plist-get attr-plist :scale) nil embed-as))
 	   (width (car size)) (height (cdr size)))
+      (when latex-frag
+	(setq href (org-propertize href :title "LaTeX Fragment"
+				   :description latex-frag)))
       (cond
        ((not (or caption label))
 	(case embed-as
@@ -1500,6 +1509,14 @@ MAY-INLINE-P allows inlining it as an image."
        (t
 	(org-odt-format-entity
 	 "CaptionedDisplayImage" href width height caption label category))))))
+
+(defun org-odt-format-object-description (title description)
+  (concat (and title (org-odt-format-tags
+		      '("<svg:title>" . "</svg:title>")
+		      (org-odt-encode-plain-text title t)))
+	  (and description (org-odt-format-tags
+			    '("<svg:desc>" . "</svg:desc>")
+			    (org-odt-encode-plain-text description t)))))
 
 (defun org-odt-format-frame (text width height style &optional
 				  extra anchor-type)
@@ -1511,7 +1528,10 @@ MAY-INLINE-P allows inlining it as an image."
 	  (format " text:anchor-type=\"%s\"" (or anchor-type "paragraph")))))
     (org-odt-format-tags
      '("<draw:frame draw:style-name=\"%s\"%s>" . "</draw:frame>")
-     text style frame-attrs)))
+     (concat text (org-odt-format-object-description
+		   (get-text-property 0 :title text)
+		   (get-text-property 0 :description text)))
+     style frame-attrs)))
 
 (defun org-odt-format-textbox (text width height style &optional
 				    extra anchor-type)
@@ -2188,6 +2208,16 @@ using `org-open-file'."
 			  (file-name-nondirectory org-current-export-file)))
        org-current-export-dir nil display-msg
        nil nil latex-frag-opt))))
+
+(defadvice org-format-latex-as-mathml
+  (after org-odt-protect-latex-fragment activate)
+  "Encode LaTeX fragment as XML.
+Do this when translation to MathML fails."
+  (when (or (not (> (length ad-return-value) 0))
+	    (get-text-property 0 'org-protected ad-return-value))
+    (setq ad-return-value
+	  (org-propertize (org-odt-encode-plain-text (ad-get-arg 0))
+			  'org-protected t))))
 
 (defun org-export-odt-preprocess-latex-fragments ()
   (when (equal org-export-current-backend 'odt)
