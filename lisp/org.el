@@ -111,6 +111,7 @@
 (declare-function org-at-clock-log-p "org-clock" ())
 (declare-function org-clock-timestamps-up "org-clock" ())
 (declare-function org-clock-timestamps-down "org-clock" ())
+(declare-function find-library-name "find-func")
 
 ;; babel
 (require 'ob)
@@ -208,6 +209,7 @@ identifier."
 
 ;;; Version
 
+;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
@@ -215,8 +217,11 @@ With prefix arg HERE, insert it at point."
   (let* ((origin default-directory)
 	 (version (if (boundp 'org-release) org-release "N/A"))
 	 (git-version (if (boundp 'org-git-version) org-git-version "N/A"))
-	 (dir (concat (file-name-directory (locate-library "org")) "../" )))
-    (setq version (format "Org-mode version %s (%s)" version git-version))
+	 (org-install (ignore-errors (find-library-name "org-install"))))
+    (setq version (format "Org-mode version %s (%s @ %s)"
+			  version
+			  git-version
+			  (if org-install org-install "org-install.el can not be found!")))
     (if here (insert version))
     (message version)))
 
