@@ -3286,7 +3286,7 @@ If yes remove the column and the special lines."
 
 (defun org-export-push-to-kill-ring (format)
   "Push buffer content to kill ring.
-The depends on the variable `org-export-copy-to-kill'."
+The depends on the variable `org-export-copy-to-kill-ring'."
   (when org-export-copy-to-kill-ring
     (org-kill-new (buffer-string))
     (when (fboundp 'x-set-selection)
