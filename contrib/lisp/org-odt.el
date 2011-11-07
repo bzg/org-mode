@@ -1271,7 +1271,7 @@ value of `org-export-odt-fontify-srcblocks."
 			 (and latex-frag
 			      (org-find-text-property-in-string
 			       'org-latex-src-embed-type src))
-			 'paragraph))
+			 (if (or caption label) 'paragraph 'character)))
 	   width height)
       (when latex-frag
 	(setq href (org-propertize href :title "LaTeX Fragment"
@@ -1306,7 +1306,14 @@ value of `org-export-odt-fontify-srcblocks."
 	(org-odt-create-manifest-file-entry
 	 "application/vnd.oasis.opendocument.formula" target-dir "1.2")
 
-	(copy-file src-file target-file 'overwrite)
+	(case (org-odt-is-formula-link-p src-file)
+	  (mathml
+	   (copy-file src-file target-file 'overwrite))
+	  (odf
+	   (org-odt-zip-extract-one src-file "content.xml" target-dir))
+	  (t
+	   (error "%s is not a formula file" src-file)))
+
 	(org-odt-create-manifest-file-entry "text/xml" target-file))
     target-file))
 
@@ -1323,7 +1330,11 @@ value of `org-export-odt-fontify-srcblocks."
 
 (defun org-odt-is-formula-link-p (file)
   (let ((case-fold-search nil))
-    (string-match "\\.mathml\\'" file)))
+    (cond
+     ((string-match "\\.\\(mathml\\|mml\\)\\'" file)
+      'mathml)
+     ((string-match "\\.odf\\'" file)
+      'odf))))
 
 (defun org-odt-format-org-link (opt-plist type-1 path fragment desc attr
 					  descp)
