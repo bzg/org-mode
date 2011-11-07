@@ -55,14 +55,16 @@
 (require 'org-list)
 
 ;;;###autoload
-(defun org-lparse-and-open (target-backend native-backend arg)
+(defun org-lparse-and-open (target-backend native-backend arg
+					   &optional file-or-buf)
   "Export outline to TARGET-BACKEND via NATIVE-BACKEND and open exported file.
 If there is an active region, export only the region.  The prefix
 ARG specifies how many levels of the outline should become
 headlines.  The default is 3.  Lower levels will become bulleted
 lists."
-  (let (f (file-or-buf (org-lparse target-backend native-backend
-				   arg 'hidden)))
+  (let (f (file-or-buf (or file-or-buf
+			   (org-lparse target-backend native-backend
+				       arg 'hidden))))
     (when file-or-buf
       (setq f (cond
 	       ((bufferp file-or-buf) buffer-file-name)

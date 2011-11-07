@@ -2151,6 +2151,7 @@ configuration."
 			 :value-type
 			 (group (string :tag "Output file extension")))))))
 
+;;;###autoload
 (defun org-export-odt-convert (&optional in-file out-fmt prefix-arg)
   "Convert IN-FILE to format OUT-FMT using a command line converter.
 IN-FILE is the file to be converted.  If unspecified, it defaults
@@ -2342,6 +2343,64 @@ To disable outline numbering pass a LEVEL of 0."
       (when (> (string-to-number (match-string 2)) level)
 	(replace-match replacement t nil))))
   (save-buffer 0))
+
+;;;###autoload
+(defun org-export-as-odf (latex-frag &optional odf-file)
+  "Export LATEX-FRAG as OpenDocument formula file ODF-FILE.
+Use `org-create-math-formula' to convert LATEX-FRAG first to
+MathML.  When invoked as an interactive command, use
+`org-latex-regexps' to infer LATEX-FRAG from currently active
+region.  If no LaTeX fragments are found, prompt for it.  Push
+MathML source to kill ring, if `org-export-copy-to-kill-ring' is
+non-nil."
+  (interactive
+   `(,(let (frag)
+	(setq frag (and (setq frag (and (region-active-p)
+					(buffer-substring (region-beginning)
+							  (region-end))))
+			(loop for e in org-latex-regexps
+			      thereis (when (string-match (nth 1 e) frag)
+					(match-string (nth 2 e) frag)))))
+	(read-string "LaTeX Fragment: " frag nil frag))
+     ,(let ((odf-filename (expand-file-name
+			   (concat
+			    (file-name-sans-extension
+			     (or (file-name-nondirectory buffer-file-name)))
+			    "." "odf")
+			   (file-name-directory buffer-file-name))))
+	(message "default val is %s"  odf-filename)
+	(read-file-name "ODF filename: " nil odf-filename nil
+			(file-name-nondirectory odf-filename)))))
+  (let* ((org-lparse-backend 'odf)
+	 org-lparse-opt-plist
+	 (filename (or odf-file
+		       (expand-file-name
+			(concat
+			 (file-name-sans-extension
+			  (or (file-name-nondirectory buffer-file-name)))
+			 "." "odf")
+			(file-name-directory buffer-file-name))))
+	 (buffer (find-file-noselect (org-odt-init-outfile filename)))
+	 (coding-system-for-write 'utf-8)
+	 (save-buffer-coding-system 'utf-8))
+    (set-buffer buffer)
+    (set-buffer-file-coding-system coding-system-for-write)
+    (let ((mathml (org-create-math-formula latex-frag)))
+      (unless mathml (error "No Math formula created"))
+      (insert mathml)
+      (or (org-export-push-to-kill-ring
+	   (upcase (symbol-name org-lparse-backend)))
+	  (message "Exporting... done")))
+    (org-odt-save-as-outfile filename nil)))
+
+;;;###autoload
+(defun org-export-as-odf-and-open ()
+ "Export LaTeX fragment as OpenDocument formula and immediately open it.
+Use `org-export-as-odf' to read LaTeX fragment and OpenDocument
+formula file."
+  (interactive)
+  (org-lparse-and-open
+   nil nil nil (call-interactively 'org-export-as-odf)))
 
 (provide 'org-odt)
 
