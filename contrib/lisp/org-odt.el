@@ -212,7 +212,7 @@ a per-file basis.  For example,
   '(add-to-list 'org-export-inbuffer-options-extra
 		'("ODT_STYLES_FILE" :odt-styles-file)))
 
-(defconst org-export-odt-tmpdir-prefix "odt-")
+(defconst org-export-odt-tmpdir-prefix "%s-")
 (defconst org-export-odt-bookmark-prefix "OrgXref.")
 
 (defvar org-export-odt-embed-images t
@@ -1827,7 +1827,8 @@ CATEGORY-HANDLE is used.  See
     ;; Not at all OSes ship with zip by default
     (error "Executable \"zip\" needed for creating OpenDocument files"))
 
-  (let* ((outdir (make-temp-file org-export-odt-tmpdir-prefix t))
+  (let* ((outdir (make-temp-file
+		  (format org-export-odt-tmpdir-prefix org-lparse-backend) t))
 	 (content-file (expand-file-name "content.xml" outdir)))
 
     ;; init conten.xml
@@ -1852,56 +1853,28 @@ visually."
 
 (defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
 (defun org-odt-save-as-outfile (target opt-plist)
-  ;; create mimetype file
-  (write-region "application/vnd.oasis.opendocument.text" nil
-		(expand-file-name "mimetype"))
-
   ;; write meta file
   (org-odt-update-meta-file opt-plist)
 
   ;; write styles file
-  (let ((styles-file (plist-get opt-plist :odt-styles-file)))
-    (org-odt-copy-styles-file (and styles-file
-				   (read (org-trim styles-file)))))
+  (when (equal org-lparse-backend 'odt)
+    (org-odt-update-styles-file opt-plist))
 
-  ;; Update styles.xml - take care of outline numbering
-  (with-current-buffer
-      (find-file-noselect (expand-file-name "styles.xml") t)
-    ;; Don't make automatic backup of styles.xml file. This setting
-    ;; prevents the backedup styles.xml file from being zipped in to
-    ;; odt file. This is more of a hackish fix. Better alternative
-    ;; would be to fix the zip command so that the output odt file
-    ;; includes only the needed files and excludes any auto-generated
-    ;; extra files like backups and auto-saves etc etc. Note that
-    ;; currently the zip command zips up the entire temp directory so
-    ;; that any auto-generated files created under the hood ends up in
-    ;; the resulting odt file.
-    (set (make-local-variable 'backup-inhibited) t)
-
-    ;; Import local setting of `org-export-with-section-numbers'
-    (org-lparse-bind-local-variables opt-plist)
-    (org-odt-configure-outline-numbering
-     (if org-export-with-section-numbers org-export-headline-levels 0)))
-
-  ;; Write custom stlyes for source blocks
-  (org-odt-insert-custom-styles-for-srcblocks
-   (mapconcat
-    (lambda (style)
-      (format " %s\n" (cddr style)))
-    hfy-user-sheet-assoc ""))
+  ;; create mimetype file
+  (let ((mimetype (org-odt-write-mimetype-file org-lparse-backend)))
+    (org-odt-create-manifest-file-entry mimetype "/" "1.2"))
 
   ;; create a manifest entry for content.xml
-  (org-odt-create-manifest-file-entry
-   "application/vnd.oasis.opendocument.text" "/" "1.2")
-
   (org-odt-create-manifest-file-entry "text/xml" "content.xml")
 
   ;; write out the manifest entries before zipping
   (org-odt-write-manifest-file)
 
   (let ((xml-files '("mimetype" "META-INF/manifest.xml" "content.xml"
-		     "meta.xml" "styles.xml"))
+		     "meta.xml"))
 	(zipdir default-directory))
+    (when (equal org-lparse-backend 'odt)
+      (push "styles.xml" xml-files))
     (message "Switching to directory %s" (expand-file-name zipdir))
 
     ;; save all xml files
@@ -2016,6 +1989,48 @@ visually."
 
   ;; create a manifest entry for meta.xml
   (org-odt-create-manifest-file-entry "text/xml" "meta.xml"))
+
+(defun org-odt-update-styles-file (opt-plist)
+  ;; write styles file
+  (let ((styles-file (plist-get opt-plist :odt-styles-file)))
+    (org-odt-copy-styles-file (and styles-file
+				   (read (org-trim styles-file)))))
+
+  ;; Update styles.xml - take care of outline numbering
+  (with-current-buffer
+      (find-file-noselect (expand-file-name "styles.xml") t)
+    ;; Don't make automatic backup of styles.xml file. This setting
+    ;; prevents the backedup styles.xml file from being zipped in to
+    ;; odt file. This is more of a hackish fix. Better alternative
+    ;; would be to fix the zip command so that the output odt file
+    ;; includes only the needed files and excludes any auto-generated
+    ;; extra files like backups and auto-saves etc etc. Note that
+    ;; currently the zip command zips up the entire temp directory so
+    ;; that any auto-generated files created under the hood ends up in
+    ;; the resulting odt file.
+    (set (make-local-variable 'backup-inhibited) t)
+
+    ;; Import local setting of `org-export-with-section-numbers'
+    (org-lparse-bind-local-variables opt-plist)
+    (org-odt-configure-outline-numbering
+     (if org-export-with-section-numbers org-export-headline-levels 0)))
+
+  ;; Write custom stlyes for source blocks
+  (org-odt-insert-custom-styles-for-srcblocks
+   (mapconcat
+    (lambda (style)
+      (format " %s\n" (cddr style)))
+    hfy-user-sheet-assoc "")))
+
+(defun org-odt-write-mimetype-file (format)
+  ;; create mimetype file
+  (let ((mimetype
+	 (case format
+	   (odt "application/vnd.oasis.opendocument.text")
+	   (odf "application/vnd.oasis.opendocument.formula")
+	   (t (error "Unknown OpenDocument backend %S" org-lparse-backend)))))
+    (write-region mimetype nil (expand-file-name "mimetype"))
+    mimetype))
 
 (defun org-odt-finalize-outfile ()
   (org-odt-delete-empty-paragraphs))
