@@ -117,7 +117,11 @@ specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-octave-var-to-octave var
 			     (if (listp (car var)) "; " ",")) "]")
-    (format "%s" (or var "nil"))))
+    (cond
+     ((stringp var)
+      (format "\'%s\'" var))
+     (t
+      (format "%s" var)))))
 
 (defun org-babel-prep-session:octave (session params &optional matlabp)
   "Prepare SESSION according to the header arguments specified in PARAMS."

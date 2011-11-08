@@ -80,6 +80,7 @@ First tangle this file out to your desktop.
          (concat org-dir "/testing/examples/ob-C-test.org")
          (concat org-dir "/testing/examples/normal.org")
          (concat org-dir "/testing/examples/ob-awk-test.org")
+         (concat org-dir "/testing/examples/ob-octave.org")
          (concat org-dir "/testing/examples/ob-fortran-test.org")
          (concat org-dir "/testing/examples/ob-maxima-test.org")
          (concat org-dir "/testing/examples/link-in-heading.org")
