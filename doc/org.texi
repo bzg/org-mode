@@ -1002,6 +1002,36 @@ version information of Emacs (@kbd{M-x emacs-version @key{RET}}) and Org
 that you only need to add your description.  If you re not sending the Email
 from within Emacs, please copy and paste the content into your Email program.
 
+Sometimes you might face a problem due to an error in your Emacs or Org-mode
+setup.  Before reporting a bug, it is very helpful to start Emacs with minimal
+customisations and reproduce the problem.  Doing so often helps you determine
+if the problem is with your customisation or with Org-mode itself.  You can
+start a typical minimal session with a command like the example below.
+
+@example
+$ emacs -Q -l /path/to/minimal-org.el
+@end example
+
+However if you are using Org-mode as distributed with Emacs, a minimal setup
+is not necessary.  In that case it is sufficient to start Emacs as @code{emacs
+-Q}.  The @code{minimal-org.el} setup file can have contents as shown below.
+
+@example
+;;; Minimal setup to load latest `org-mode'
+
+;; activate debugging
+(setq debug-on-error t
+      debug-on-signal nil
+      debug-on-quit nil)
+
+;; add latest org-mode to load path
+(add-to-list 'load-path (expand-file-name "/path/to/org-mode/lisp"))
+(add-to-list 'load-path (expand-file-name "/path/to/org-mode/contrib/lisp"))
+
+;; activate org
+(require 'org-install)
+@end example
+
 If an error occurs, a backtrace can be very useful (see below on how to
 create one).  Often a small example file helps, along with clear information
 about:
