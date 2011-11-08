@@ -1,0 +1,63 @@
+* Test org maxima file
+#+begin_src maxima :var s=4 :results silent
+print(s);
+#+end_src
+
+Pass a string
+#+begin_src maxima :var fun="sin(x)" :var q=2 :results silent
+print(diff(fun, x, q));
+#+end_src
+
+Graphic output
+#+begin_src maxima  :var a=0.5 :results graphics :file maxima-test-sin.png
+plot2d(sin(a*x), [x, 0, 2*%pi])$
+#+end_src
+
+#+begin_src maxima  :results graphics :file maxima-test-3d.png
+plot3d (2^(-u^2 + v^2), [u, -3, 3], [v, -2, 2])$
+#+end_src
+
+Output to a file
+#+begin_src maxima :file maxima-test-ouput.out
+for i:1 thru 10 do print(i)$
+#+end_src
+
+List as input
+#+begin_src maxima :var a=(list 1 2 3)
+print(a+1);
+#+end_src
+
+#+begin_src maxima :var a=(list 1 (list 1 2) 3)
+print(a+1);
+#+end_src
+
+#+tblname: test_tbl_col
+| 1.0 |
+| 2.0 |
+
+#+tblname: test_tbl_row
+| 1.0 | 2.0 |
+
+Extra bracket? TODO:
+#+begin_src maxima :var s=test_tbl_col
+print(s+1.0);
+#+end_src
+
+#+begin_src maxima :var s=test_tbl_row
+print(s+1.0);
+#+end_src
+
+Matrix
+#+tblname: test_tbl_mtr
+| 1.0 | 1.0 |
+| 0.0 | 4.0 |
+
+#+begin_src maxima :var s=test_tbl_mtr
+ms: apply(matrix, s);
+print(ms^^2);
+#+end_src
+
+#+begin_src maxima :var s=test_tbl_mtr
+ms: apply(matrix, s);
+print(ms^^2);
+#+end_src
