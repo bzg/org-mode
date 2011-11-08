@@ -47,9 +47,9 @@
 		(list
 		 ;; graphic output
 		 (let ((graphic-file (org-babel-maxima-graphical-output-file params)))
-		   (if graphic-file  
-		       (format 
-			"set_plot_option ([gnuplot_term, png]); set_plot_option ([gnuplot_out_file, %S]);" 
+		   (if graphic-file
+		       (format
+			"set_plot_option ([gnuplot_term, png]); set_plot_option ([gnuplot_out_file, %S]);"
 			graphic-file)
 		     ""))
 		 ;; variables
@@ -81,8 +81,8 @@ called by `org-babel-execute-src-block'."
 					   (= 0 (length line)))
 				 line))
 			     (split-string raw "[\r\n]"))) "\n"))
-	    (org-babel-eval cmd ""))))) 
-    (if (org-babel-maxima-graphical-output-file params) 
+	    (org-babel-eval cmd "")))))
+    (if (org-babel-maxima-graphical-output-file params)
 	nil
       (if (or (member "scalar" result-params)
 	      (member "verbatim" result-params)
@@ -105,7 +105,7 @@ of the same value."
       (setq val (symbol-name val))
       (when (= (length val) 1)
         (setq val (string-to-char val))))
-      (format "%S: %s$" var 
+      (format "%S: %s$" var
 	      (org-babel-maxima-elisp-to-maxima val))))
 
 (defun org-babel-maxima-graphical-output-file (params)

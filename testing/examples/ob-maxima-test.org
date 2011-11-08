@@ -61,7 +61,7 @@ print(s+1.0);
 #+end_src
 
 Matrix
-#+tblname: test_tbl_mtr 
+#+tblname: test_tbl_mtr
 | 1.0 | 1.0 |
 
 #+begin_src maxima :var s=test_tbl_mtr :results silent :results verbatim
@@ -88,4 +88,3 @@ tex(ratsimp(diff(%e^(a*x), x)));
 #+BEGIN_LaTeX
 $$a\,e^{a\,x}$$
 #+END_LaTeX
-
