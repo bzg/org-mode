@@ -17089,9 +17089,43 @@ BEG and END default to the buffer boundaries."
 
 ;;;; Key bindings
 
-;; Remap outline keys
+;; Outline functions from `outline-mode-prefix-map'
+;; that can be remapped in Org:
+(define-key org-mode-map [remap outline-mark-subtree] 'org-mark-subtree)
+(define-key org-mode-map [remap show-subtree] 'org-show-subtree)
+(define-key org-mode-map [remap outline-forward-same-level]
+  'org-forward-same-level)
+(define-key org-mode-map [remap outline-backward-same-level]
+  'org-backward-same-level)
+(define-key org-mode-map [remap show-branches]
+  'org-kill-note-or-show-branches)
 (define-key org-mode-map [remap outline-promote] 'org-promote-subtree)
 (define-key org-mode-map [remap outline-demote] 'org-demote-subtree)
+(define-key org-mode-map [remap outline-insert-heading] 'org-ctrl-c-ret)
+
+;; Outline functions from `outline-mode-prefix-map'
+;; that can not be remapped in Org:
+;; - the column "key binding" shows whether the Outline function is still
+;;   available in Org mode on the same key that it has been bound to in
+;;   Outline mode:
+;;   - "overridden": key used for a different functionality in Org mode
+;;   - else: key still bound to the same Outline function in Org mode
+;; | Outline function                   | key binding | Org replacement       |
+;; |------------------------------------+-------------+-----------------------|
+;; | `outline-next-visible-heading'     | `C-c C-n'   | still same function   |
+;; | `outline-previous-visible-heading' | `C-c C-p'   | still same function   |
+;; | `show-children'                    | `C-c C-i'   | visibility cycling    |
+;; | `hide-subtree'                     | overridden  | visibility cycling    |
+;; | `outline-up-heading'               | `C-c C-u'   | still same function   |
+;; | `hide-body'                        | overridden  | no replacement        |
+;; | `show-all'                         | overridden  | no replacement        |
+;; | `hide-entry'                       | overridden  | visibility cycling    |
+;; | `show-entry'                       | overridden  | no replacement        |
+;; | `hide-leaves'                      | overridden  | no replacement        |
+;; | `hide-sublevels'                   | overridden  | no replacement        |
+;; | `hide-other'                       | overridden  | no replacement        |
+;; | `outline-move-subtree-up'          | `C-c C-^'   | better: org-shiftup   |
+;; | `outline-move-subtree-down'        | overridden  | better: org-shiftdown |
 
 ;; Make `C-c C-x' a prefix key
 (org-defkey org-mode-map "\C-c\C-x" (make-sparse-keymap))
