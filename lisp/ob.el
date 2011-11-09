@@ -71,6 +71,7 @@
 (declare-function org-babel-ref-goto-headline-id "ob-ref" (id))
 (declare-function org-babel-ref-headline-body "ob-ref" ())
 (declare-function org-babel-lob-execute-maybe "ob-lob" ())
+(declare-function org-babel-map-call-lines "ob-lob" (file &rest body))
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 (declare-function org-at-item-p "org-list" ())
 (declare-function org-list-parse-list "org-list" (&optional delete))
@@ -858,7 +859,9 @@ the current buffer."
     (org-babel-map-src-blocks nil
       (org-babel-execute-src-block arg))
     (org-babel-map-inline-src-blocks nil
-      (org-babel-execute-src-block arg))))
+      (org-babel-execute-src-block arg))
+    (org-babel-map-call-lines nil
+      (org-babel-lob-execute-maybe))))
 
 ;;;###autoload
 (defun org-babel-execute-subtree (&optional arg)
