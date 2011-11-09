@@ -1170,14 +1170,19 @@ shown below.
 
 (defun org-babel-process-params (params)
   "Expand variables in PARAMS and add summary parameters."
-  (let* ((vars-and-names (org-babel-disassemble-tables
-			  (mapcar (lambda (el)
-				    (if (consp (cdr el))
-					(cdr el) (org-babel-ref-parse (cdr el))))
-				  (org-babel-get-header params :var))
-			  (cdr (assoc :hlines params))
-			  (cdr (assoc :colnames params))
-			  (cdr (assoc :rownames params))))
+  (let* ((vars-and-names (if (and (assoc :colname-names params)
+				  (assoc :rowname-names params))
+			     (list (mapcar #'cdr
+					   (org-babel-get-header params :var)))
+			   (org-babel-disassemble-tables
+			    (mapcar (lambda (el)
+				      (if (consp (cdr el))
+					  (cdr el)
+					(org-babel-ref-parse (cdr el))))
+				    (org-babel-get-header params :var))
+			    (cdr (assoc :hlines params))
+			    (cdr (assoc :colnames params))
+			    (cdr (assoc :rownames params)))))
 	 (raw-result (or (cdr (assoc :results params)) ""))
 	 (result-params (append
 			 (split-string (if (stringp raw-result)
