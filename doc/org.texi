@@ -4032,13 +4032,17 @@ also overrule the setting of this variable for a subtree by setting a
 
 Since it is normally too much to record a note for every state, Org-mode
 expects configuration on a per-keyword basis for this.  This is achieved by
-adding special markers @samp{!} (for a timestamp) and @samp{@@} (for a note)
-in parentheses after each keyword.  For example, with the setting
+adding special markers @samp{!} (for a timestamp) or @samp{@@} (for a note
+with timestamp) in parentheses after each keyword.  For example, with the
+setting
 
 @lisp
 (setq org-todo-keywords
   '((sequence "TODO(t)" "WAIT(w@@/!)" "|" "DONE(d!)" "CANCELED(c@@)")))
 @end lisp
+
+To record a timestamp without a note for TODO keywords configured with
+@samp{@@}, just type @kbd{C-c C-c} to enter a blank note when prompted.
 
 @noindent
 @vindex org-log-done
