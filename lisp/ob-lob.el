@@ -95,7 +95,9 @@ Detect if this is context for a Library Of Babel source block and
 if so then run the appropriate source block from the Library."
   (interactive)
   (let ((info (org-babel-lob-get-info)))
-    (if (nth 0 info) (progn (org-babel-lob-execute info) t) nil)))
+    (if (and (nth 0 info) (not (org-babel-in-example-or-verbatim)))
+	(progn (org-babel-lob-execute info) t)
+      nil)))
 
 ;;;###autoload
 (defun org-babel-lob-get-info ()

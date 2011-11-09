@@ -172,6 +172,7 @@ org-mode text."
 	  (goto-char (point-at-bol))
 	  (looking-at "[ \t]*:[ \t]")))
       (org-in-verbatim-emphasis)
+      (org-in-block-p org-list-forbidden-blocks)
       (org-between-regexps-p "^[ \t]*#\\+begin_src" "^[ \t]*#\\+end_src")))
 
 (defvar org-babel-default-lob-header-args)
