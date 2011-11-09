@@ -5267,13 +5267,15 @@ is used in a much wider sense.
 @cindex scheduling
 
 A timestamp is a specification of a date (possibly with a time or a range of
-times) in a special format, either @samp{<2003-09-16 Tue>} or
-@samp{<2003-09-16 Tue 09:39>} or @samp{<2003-09-16 Tue
-12:00-12:30>}@footnote{This is inspired by the standard ISO 8601 date/time
-format.  To use an alternative format, see @ref{Custom time format}.}.  A
-timestamp can appear anywhere in the headline or body of an Org tree entry.
-Its presence causes entries to be shown on specific dates in the agenda
-(@pxref{Weekly/daily agenda}).  We distinguish:
+times) in a special format, either @samp{<2003-09-16 Tue>}@footnote{In this
+simplest form, the day name is optional when you type the date yourself.
+However, any dates inserted or modified by Org will add that day name, for
+reading convenience.} or @samp{<2003-09-16 Tue 09:39>} or @samp{<2003-09-16
+Tue 12:00-12:30>}@footnote{This is inspired by the standard ISO 8601
+date/time format.  To use an alternative format, see @ref{Custom time
+format}.}.  A timestamp can appear anywhere in the headline or body of an Org
+tree entry.  Its presence causes entries to be shown on specific dates in the
+agenda (@pxref{Weekly/daily agenda}).  We distinguish:
 
 @table @var
 @item Plain timestamp; Event; Appointment
@@ -5373,6 +5375,9 @@ an agenda entry.
 Like @kbd{C-c .} and @kbd{C-c !}, but use the alternative format which
 contains date and time.  The default time can be rounded to multiples of 5
 minutes, see the option @code{org-time-stamp-rounding-minutes}.
+@c
+@orgkey{C-c C-c}
+Normalize timestamp, insert/fix day name if missing or wrong.
 @c
 @orgcmd{C-c <,org-date-from-calendar}
 Insert a timestamp corresponding to the cursor date in the Calendar.
@@ -13770,6 +13775,8 @@ ordered list.
 @item
 If the cursor is on the @code{#+BEGIN} line of a dynamic block, the
 block is updated.
+@item
+If the cursor is at a timestamp, fix the day name in the timestamp.
 @end itemize
 
 @node Clean view, TTY keys, The very busy C-c C-c key, Miscellaneous
