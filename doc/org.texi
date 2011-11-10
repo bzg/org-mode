@@ -5685,7 +5685,7 @@ an item:
 @orgcmd{C-c C-d,org-deadline}
 Insert @samp{DEADLINE} keyword along with a stamp.  The insertion will happen
 in the line directly following the headline.  Any CLOSED timestamp will be
-removed.  When called with a prefix arg, an existing deadline will be removed 
+removed.  When called with a prefix arg, an existing deadline will be removed
 from the entry.  Depending on the variable @code{org-log-redeadline}@footnote{with corresponding
 @code{#+STARTUP} keywords @code{logredeadline}, @code{lognoteredeadline},
 and @code{nologredeadline}}, a note will be taken when changing an existing
@@ -11861,7 +11861,7 @@ It is also possible to evaluate named code blocks from anywhere in an
 Org-mode buffer or an Org-mode table. Live code blocks located in the current
 Org-mode buffer or in the ``Library of Babel'' (see @ref{Library of Babel})
 can be executed.  Named code blocks can be executed with a separate
-@code{#+CALL:} line or inline within a block of text.  
+@code{#+CALL:} line or inline within a block of text.
 
 The syntax of the @code{#+CALL:} line is
 
@@ -11870,7 +11870,7 @@ The syntax of the @code{#+CALL:} line is
 #+CALL: <name>[<inside header arguments>](<arguments>) <end header arguments>
 @end example
 
-The syntax for inline evaluation of named code blocks is 
+The syntax for inline evaluation of named code blocks is
 
 @example
 ... call_<name>(<arguments>) ...
@@ -12280,7 +12280,7 @@ all be passed by reference
 @item list
 a named, simple list.  Nesting is not carried through to the source code
 block.
- 
+
 @example
 #+NAME: example-list
   - simple
@@ -12355,7 +12355,7 @@ on two lines
 @item results block
 
 named results blocks are passed intact.  Referring to the results of the last
-example 
+example
 
 @example
 #+BEGIN_SRC emacs-lisp :var x=read-literal-example
