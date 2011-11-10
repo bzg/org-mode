@@ -166,8 +166,7 @@ has taken place."
 Example and verbatim code include escaped portions of
 an org-mode buffer code that should be treated as normal
 org-mode text."
-  (or (org-in-indented-comment-line)
-      (save-match-data
+  (or (save-match-data
 	(save-excursion
 	  (goto-char (point-at-bol))
 	  (looking-at "[ \t]*:[ \t]")))

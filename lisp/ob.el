@@ -218,7 +218,7 @@ Returns a list
 		   (org-babel-parse-header-arguments (match-string 1)))))
 	  (when (looking-at org-babel-src-name-w-name-regexp)
 	    (setq name (org-babel-clean-text-properties (match-string 3)))
-	    (when (match-string 5)
+	    (when (and (match-string 5) (> (length (match-string 5)) 0))
 	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
 		    (org-babel-merge-params
 		     (mapcar
@@ -1180,16 +1180,16 @@ shown below.
 
 (defun org-babel-process-params (params)
   "Expand variables in PARAMS and add summary parameters."
-  (let* ((vars-and-names (if (and (assoc :colname-names params)
+  (let* ((processed-vars (mapcar (lambda (el)
+				   (if (consp (cdr el))
+				       (cdr el)
+				     (org-babel-ref-parse (cdr el))))
+				 (org-babel-get-header params :var)))
+	 (vars-and-names (if (and (assoc :colname-names params)
 				  (assoc :rowname-names params))
-			     (list (mapcar #'cdr
-					   (org-babel-get-header params :var)))
+			     (list processed-vars)
 			   (org-babel-disassemble-tables
-			    (mapcar (lambda (el)
-				      (if (consp (cdr el))
-					  (cdr el)
-					(org-babel-ref-parse (cdr el))))
-				    (org-babel-get-header params :var))
+			    processed-vars
 			    (cdr (assoc :hlines params))
 			    (cdr (assoc :colnames params))
 			    (cdr (assoc :rownames params)))))
