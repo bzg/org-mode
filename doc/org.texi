@@ -11652,7 +11652,7 @@ The following sections describe Org-mode's code block handling facilities.
 @cindex code block, structure
 @cindex source code, block structure
 @cindex #+NAME
-@ciindex #+BEGIN_SRC
+@cindex #+BEGIN_SRC
 
 Live code blocks can be specified with a @samp{src} block or
 inline@footnote{Note that @samp{src} blocks may be inserted using Org-mode's
@@ -12233,14 +12233,14 @@ syntax used to specify arguments is the same across all languages.  In every
 case, variables require a default value when they are declared.
 
 The values passed to arguments can either be literal values, references, or
-Emacs Lisp code (see @ref{Emacs Lisp evaluation of variables}). References
+Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}). References
 include anything in the Org-mode file that takes a @code{#+NAME:},
 @code{#+TBLNAME:}, or @code{#+RESULTS:} line.  This includes tables, lists,
 @code{#+BEGIN_EXAMPLE} blocks, other code blocks, and the results of other
 code blocks.
 
-Argument values can be indexed in a manner similar to arrays (see
-@ref{Indexable variable values}).
+Argument values can be indexed in a manner similar to arrays (see @ref{var,
+Indexable variable values}).
 
 The following syntax is used to pass arguments to code blocks using the
 @code{:var} header argument.
@@ -12259,6 +12259,7 @@ tables, lists, literal examples, other code blocks, and results blocks can
 all be passed by reference
 @table @asis
 @item table
+@end table
 
 @example
 #+TBLNAME: example-table
