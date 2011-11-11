@@ -403,6 +403,23 @@ duplicate results block."
     (should (search-forward "Hello")) ; the same string in the results block
     (should-error (search-forward "Hello"))))
 
+(ert-deftest test-org-babel/nested-code-block ()
+  "Test nested code blocks inside code blocks don't cause problems."
+  (org-test-with-temp-text "#+begin_src org :results silent
+  ,#+begin_src emacs-lisp
+  ,  'foo
+  ,#+end_src
+#+end_src"
+    (should (string= (org-babel-execute-src-block)
+		     "#+begin_src emacs-lisp\n  'foo\n#+end_src"))))
+
+(ert-deftest test-org-babel/partial-nested-code-block ()
+  "Test nested code blocks inside code blocks don't cause problems."
+  (org-test-with-temp-text "#+begin_src org :results silent
+  ,#+begin_src emacs-lisp
+#+end_src"
+    (should (string= "#+begin_src emacs-lisp" (org-babel-execute-src-block)))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
