@@ -178,7 +178,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 	    (let* ((match-start (copy-marker (match-beginning 0)))
 		   (body-start (copy-marker (match-end 0)))
 		   (indentation (length (match-string 1)))
-		   (inner-re (format "[\r\n]*[ \t]*#\\+\\(begin\\|end\\)_%s"
+		   (inner-re (format "[\r\n][ \t]*#\\+\\(begin\\|end\\)_%s"
 				     (regexp-quote (downcase (match-string 2)))))
 		   (type (intern (downcase (match-string 2))))
 		   (headers (save-match-data
