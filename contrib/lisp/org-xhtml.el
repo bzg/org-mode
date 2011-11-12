@@ -1403,10 +1403,10 @@ lang=\"%s\" xml:lang=\"%s\">
        (END (org-lparse-begin-paragraph))))
     (t (error "Unknown environment %s" style))))
 
-(defun org-xhtml-begin-environment (style)
+(defun org-xhtml-begin-environment (style env-options-plist)
   (org-xhtml-format-environment style 'BEGIN))
 
-(defun org-xhtml-end-environment (style)
+(defun org-xhtml-end-environment (style env-options-plist)
   (org-xhtml-format-environment style 'END))
 
 (defun org-xhtml-begin-list (ltype)
