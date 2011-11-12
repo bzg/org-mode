@@ -6144,6 +6144,8 @@ in special contexts.
 	     (or (bolp) (not (eq org-cycle-emulate-tab 'exc-hl-bol))))
 	(org-inlinetask-toggle-visibility))
 
+       ((org-try-cdlatex-tab))
+
        ;; At an item/headline: delegate to `org-cycle-internal-local'.
        ((and (or (and org-cycle-include-plain-lists (org-at-item-p))
 		 (save-excursion (beginning-of-line 1)
@@ -6158,8 +6160,6 @@ in special contexts.
 	 'org-tab-after-check-for-cycling-hook))
 
        ((org-try-structure-completion))
-
-       ((org-try-cdlatex-tab))
 
        ((run-hook-with-args-until-success
 	 'org-tab-before-tab-emulation-hook))
@@ -16563,14 +16563,16 @@ It makes sense to do so if `org-cdlatex-mode' is active and if the cursor is
     insert a LaTeX environment."
   (when org-cdlatex-mode
     (cond
+     ;; Before any word on the line: No expansion possible.
+     ((save-excursion (skip-chars-backward " \t") (bolp)) nil)
+     ;; Just after first word on the line: Expand it.  Make sure it
+     ;; cannot happen on headlines, though.
      ((save-excursion
 	(skip-chars-backward "a-zA-Z0-9*")
 	(skip-chars-backward " \t")
-	(bolp))
+	(and (bolp) (not (org-at-heading-p))))
       (cdlatex-tab) t)
-     ((org-inside-LaTeX-fragment-p)
-      (cdlatex-tab) t)
-     (t nil))))
+     ((org-inside-LaTeX-fragment-p) (cdlatex-tab) t))))
 
 (defun org-cdlatex-underscore-caret (&optional arg)
   "Execute `cdlatex-sub-superscript' in LaTeX fragments.
