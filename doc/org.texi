@@ -12332,7 +12332,7 @@ code block name using standard function call syntax
 @end example
 
 @item literal example
-a literal example block named with an @code{#+DATA:} line
+a literal example block named with a @code{#+DATA:} line
 
 @example
 #+DATA: literal-example
