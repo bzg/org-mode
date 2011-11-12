@@ -12249,18 +12249,17 @@ The following syntax is used to pass arguments to code blocks using the
 :var name=assign
 @end example
 
-where @code{assign} can take one of the following forms
+The argument, @code{assign}, can either be a literal value, such as a string
+@samp{"string"} or a number @samp{9}, or a reference to a table, a list, a
+literal example, another code block (with or without arguments), or the
+results of evaluating another code block.
 
-@table @asis
-@item literal value
-either a string @samp{"string"} or a number @samp{9}.
-@item reference
-tables, lists, literal examples, other code blocks, and results blocks can
-all be passed by reference
-@table @asis
+Here are examples of passing values by reference:
+
+@table @dfn
+
 @item table
-@end table
-
+an Org mode table named with either a @code{#+NAME:} or @code{#+TBLNAME:} line
 @example
 #+TBLNAME: example-table
 | 1 |
@@ -12278,27 +12277,26 @@ all be passed by reference
 @end example
 
 @item list
-a named, simple list.  Nesting is not carried through to the source code
-block.
+a named, simple list (note that nesting is not carried through to the source
+code block)
 
 @example
 #+NAME: example-list
   - simple
     - not
     - nested
-  - lists
+  - list
 
 #+BEGIN_SRC emacs-lisp :var x=example-list
   (print x)
 #+END_SRC
 
 #+RESULTS:
-| simple | lists |
+| simple | list |
 @end example
 
-@item code block
-a code block name, as assigned by @code{#+NAME:}, followed by
-parentheses:
+@item code block without arguments
+a code block name, as assigned by @code{#+NAME:}, followed by parentheses
 
 @example
 #+BEGIN_SRC emacs-lisp :var length=table-length()
@@ -12309,9 +12307,10 @@ parentheses:
 : 8
 @end example
 
-In addition, an argument can be passed to the code block referenced by
-@code{:var}.  The argument is passed within the parentheses following the
-code block name using standard function call syntax:
+@item code block with arguments
+a code block name, as assigned by @code{#+NAME:}, followed by parentheses and
+optional arguments passed within the parentheses following the
+code block name using standard function call syntax
 
 @example
 #+NAME: double
@@ -12332,7 +12331,7 @@ code block name using standard function call syntax:
 @end example
 
 @item literal example
-named literal examples are passed intact
+a named literal example block
 
 @example
 #+NAME: literal-example
@@ -12353,26 +12352,24 @@ on two lines
 @end example
 
 @item results block
-
-named results blocks are passed intact.  Referring to the results of the last
-example
+named results blocks, such as the results of the previous example, are passed
+intact
 
 @example
 #+BEGIN_SRC emacs-lisp :var x=read-literal-example
-  (concatenate 'string x "\nAgain.")
+  (concatenate 'string x " Again.")
 #+END_SRC
 
 #+results:
 : A literal example
-: on two lines for you.
-: Again.
+: on two lines for you. Again.
 @end example
 @end table
 
 @subsubheading Alternate argument syntax
 It is also possible to specify arguments in a potentially more natural way
 using the @code{#+NAME:} line of a code block.  As in the following
-example, arguments can be packed inside of parenthesis, separated by commas,
+example, arguments can be packed inside of parentheses, separated by commas,
 following the source name.
 
 @example
