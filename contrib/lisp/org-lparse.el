@@ -243,11 +243,11 @@ OPT-PLIST is the export options list."
 
        ((functionp (setq fnc (nth 2 (assoc type org-link-protocols))))
 	;; The link protocol has a function for format the link
-	(setq rpl
-	      (save-match-data
-		(funcall fnc (org-link-unescape path)
-			 desc1 org-lparse-backend))))
-
+	(setq rpl (save-match-data
+		    (funcall fnc (org-link-unescape path)
+			     desc1 (case org-lparse-backend
+				     (xhtml 'html)
+				     (t org-lparse-backend))))))
        ((string= type "file")
 	;; FILE link
 	(save-match-data
