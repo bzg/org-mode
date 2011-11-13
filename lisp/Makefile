@@ -1,3 +1,4 @@
+.SUFFIXES:	# we don't need default suffix rules
 ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
@@ -6,11 +7,12 @@ LISPO = org-install.el
 LISPF = $(subst $(LISPO),,$(wildcard *.el))
 LISPC = $(LISPF:%el=%elc)
 
-.PHONY:		all autoloads compile install clean cleanall clean-install
+.PHONY:		all compile compile-dirty autoloads install clean cleanall clean-install
 
 all \
 compile \
-compile-dirty:	$(LISPC)
+compile-dirty:
+	$(BATCH) --eval '(batch-byte-recompile-directory 0)'
 
 autoloads:	$(LISPO)
 
@@ -38,9 +40,3 @@ cleanall:
 clean-install:
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
 	$(RM) $(lispdir)/org*.el* $(lispdir)/ob*.el*
-
-.SUFFIXES:	# we don't need default suffix rules
-.SUFFIXES:	.el .elc
-
-.el.elc:
-	$(ELC) $<
