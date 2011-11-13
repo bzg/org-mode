@@ -102,6 +102,10 @@ org-test searches this directory up the directory tree.")
 
 
 ;;; Functions for writing tests
+(put 'missing-test-dependency
+     'error-conditions
+     '(error missing-test-dependency))
+
 (defun org-test-for-executable (exe)
   "Throw an error if EXE is not available.
 This can be used at the top of code-block-language specific test
@@ -111,7 +115,7 @@ executable."
 	   (lambda (acc dir)
 	     (or acc (file-exists-p (expand-file-name exe dir))))
 	   exec-path :initial-value nil)
-    (throw 'missing-test-dependency exe)))
+    (signal 'missing-test-dependency (list exe))))
 
 (defun org-test-buffer (&optional file)
   "TODO:  Setup and return a buffer to work with.
@@ -275,10 +279,17 @@ otherwise place the point at the beginning of the inserted text."
 	       (lambda (path)
 		 (if (file-directory-p path)
 		     (rld path)
-		   (catch 'missing-test-dependency
-		     (when (string-match "^[A-Za-z].*\\.el$"
+		   (condition-case err
+		       (when (string-match "^[A-Za-z].*\\.el$"
 					 (file-name-nondirectory path))
-		       (load-file path)))))
+			 (load-file path))
+		     (missing-test-dependency
+		      (let ((name (intern
+				   (concat "org-missing-dependency/"
+					   (file-name-nondirectory
+					    (file-name-sans-extension path))))))
+			(eval `(ert-deftest ,name ()
+				 :expected-result :failed (should nil))))))))
 	       (directory-files base 'full
 				"^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
     (rld (expand-file-name "lisp" org-test-dir))
