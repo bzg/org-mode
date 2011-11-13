@@ -382,11 +382,13 @@ precedence over this variable."
 		 (string :tag "Custom formatting string")
 		 (function :tag "Function (must return a string)")))
 
-(defcustom org-export-xhtml-preamble-format
-  '(("en" "<h1 class=\"title\">%t</h1>"))
+(defcustom org-export-xhtml-preamble-format '(("en" ""))
   "The format for the HTML preamble.
 
 %t stands for the title.
+%a stands for the author's name.
+%e stands for the author's email.
+%d stands for the date.
 
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
@@ -422,10 +424,10 @@ precedence over this variable."
 "))
   "The format for the HTML postamble.
 
-%a stands for the author.
-%e stands for the email(s).
+%a stands for the author's name.
+%e stands for the author's email.
 %d stands for the date.
-%c will be replaced by information about Org/Emacs.
+%c will be replaced by information about Org/Emacs versions.
 %v will be replaced by `org-export-xhtml-validation-link'.
 
 If you need to use a \"%\" character, you need to escape it
@@ -561,19 +563,15 @@ When nil, also column one will use data tags."
   :group 'org-export-xhtml
   :type 'string)
 
-(defcustom org-export-xhtml-with-timestamp nil
-  "If non-nil, write timestamp into the exported HTML text.
-If non-nil, write `org-export-xhtml-html-helper-timestamp' into the
-exported HTML text.  Otherwise, the buffer will just be saved to
-a file."
-  :group 'org-export-xhtml
-  :type 'boolean)
+;; FIXME Obsolete since Org 7.7
+;; Use the :timestamp option or `org-export-time-stamp-file' instead
+(defvar org-export-xhtml-with-timestamp nil
+  "If non-nil, write container for HTML-helper-mode timestamp.")
 
-(defcustom org-export-xhtml-html-helper-timestamp
-  "<br/><br/><hr/><p><!-- hhmts start --> <!-- hhmts end --></p>\n"
-  "The HTML tag used as timestamp delimiter for HTML-helper-mode."
-  :group 'org-export-xhtml
-  :type 'string)
+;; FIXME Obsolete since Org 7.7
+(defvar org-export-xhtml-html-helper-timestamp
+  "\n<p><br/><br/>\n<!-- hhmts start --> <!-- hhmts end --></p>\n"
+  "The HTML tag used as timestamp delimiter for HTML-helper-mode.")
 
 (defcustom org-export-xhtml-protect-char-alist
   '(("&" . "&amp;")
@@ -626,6 +624,26 @@ with a link to this URL."
   :type '(choice
 	  (const :tag "Keep internal css" nil)
 	  (string :tag "URL or local href")))
+
+;; FIXME: The following variable is obsolete since Org 7.7 but is
+;; still declared and checked within code for compatibility reasons.
+;; Use the custom variables `org-export-xhtml-divs' instead.
+(defvar org-export-xhtml-content-div "content"
+  "The name of the container DIV that holds all the page contents.
+
+This variable is obsolete since Org version 7.7.
+Please set `org-export-xhtml-divs' instead.")
+
+(defcustom org-export-xhtml-divs '("preamble" "content" "postamble")
+  "The name of the main divs for HTML export.
+This is a list of three strings, the first one for the preamble
+DIV, the second one for the content DIV and the third one for the
+postamble DIV."
+  :group 'org-export-xhtml
+  :type '(list
+	  (string :tag " Div for the preamble:")
+	  (string :tag "  Div for the content:")
+	  (string :tag "Div for the postamble:")))
 
 ;;; Hooks
 
@@ -1232,19 +1250,24 @@ make any modifications to the exporter file.  For example,
 			(string-match "\\S-" (plist-get opt-plist :link-home))
 			(plist-get opt-plist :link-home))))
     (insert "\n<body>")
-    (org-lparse-insert-tag "<div id=\"content\">")
     (insert  "\n"
 	     (or (and (or link-up link-home)
 		      (format org-export-xhtml-home/up-format
 			      (or link-up link-home)
 			      (or link-home link-up))) "")
 	     "\n"))
-  (org-xhtml-insert-preamble opt-plist))
+  (org-xhtml-insert-preamble opt-plist)
+
+  (org-lparse-insert-tag
+   "<div id=\"%s\">" (or org-export-xhtml-content-div
+			 (nth 1 org-export-xhtml-divs)))
+
+  (org-lparse-insert-tag "\n<h1 class=\"title\"> %s </h1>\n"
+			 (plist-get opt-plist :title)))
 
 (defun org-xhtml-end-document-body (opt-plist)
   (org-xhtml-insert-postamble opt-plist)
   (unless body-only
-    (org-lparse-insert-tag "</div>")
     (insert "\n</body>")))
 
 (defun org-xhtml-begin-document-content (opt-plist)
@@ -1746,21 +1769,31 @@ make any modifications to the exporter file.  For example,
 	  (date (plist-get opt-plist :effective-date))
 	  (author (plist-get opt-plist :author))
 	  (lang-words (plist-get opt-plist :lang-words))
-	  (email (plist-get opt-plist :email)))
+	  (email (plist-get opt-plist :email))
+	  html-pre-real-contents)
       (cond ((stringp html-pre)
-	     (insert
-	      (format-spec html-pre `((?t . ,title) (?a . ,author)
-				      (?d . ,date) (?e . ,email)))))
+	     (setq html-pre-real-contents
+		   (format-spec html-pre `((?t . ,title) (?a . ,author)
+					   (?d . ,date) (?e . ,email)))))
 	    ((functionp html-pre)
-	     (funcall html-pre))
+	     (insert "<div id=\"" (nth 0 org-export-xhtml-divs) "\">\n")
+	     (funcall html-pre)
+	     (insert "\n</div>\n"))
 	    (t
-	     (insert
-	      (format-spec
-	       (or (cadr (assoc (nth 0 lang-words)
-				org-export-xhtml-preamble-format))
-		   (cadr (assoc "en" org-export-xhtml-preamble-format)))
-	       `((?t . ,title) (?a . ,author)
-		 (?d . ,date) (?e . ,email)))))))))
+	     (setq html-pre-real-contents
+		   (format-spec
+		    (or (cadr (assoc (nth 0 lang-words)
+				     org-export-xhtml-preamble-format))
+			(cadr (assoc "en" org-export-xhtml-preamble-format)))
+		    `((?t . ,title) (?a . ,author)
+		      (?d . ,date) (?e . ,email))))))
+
+      ;; don't output an empty preamble DIV
+      (unless (and (functionp html-pre)
+		   (equal html-pre-real-contents ""))
+	(insert "<div id=\"" (nth 0 org-export-xhtml-divs) "\">\n")
+	(insert html-pre-real-contents)
+	(insert "\n</div>\n")))))
 
 (defun org-xhtml-insert-postamble (opt-plist)
   (when org-lparse-footnote-definitions
@@ -1772,6 +1805,9 @@ make any modifications to the exporter file.  For example,
   (let ((bib (org-export-xhtml-get-bibliography)))
     (when bib
       (insert "\n" bib "\n")))
+
+  (unless body-only
+    (org-lparse-insert-tag "</div>"))
 
   ;; export html postamble
   (unless body-only
@@ -1790,18 +1826,16 @@ make any modifications to the exporter file.  For example,
 	    (concat "Org version " org-version " with Emacs version "
 		    (number-to-string emacs-major-version))))
       (when (plist-get opt-plist :html-postamble)
+	(insert "\n<div id=\"" (nth 2 org-export-xhtml-divs) "\">\n")
 	(cond ((stringp html-post)
-	       (insert "<div id=\"postamble\">\n")
 	       (insert (format-spec html-post
 				    `((?a . ,author) (?e . ,email)
 				      (?d . ,date)   (?c . ,creator-info)
-				      (?v . ,html-validation-link))))
-	       (insert "</div>"))
+				      (?v . ,html-validation-link)))))
 	      ((functionp html-post)
 	       (funcall html-post))
 	      ((eq html-post 'auto)
 	       ;; fall back on default postamble
-	       (insert "<div id=\"postamble\">\n")
 	       (when (plist-get opt-plist :time-stamp-file)
 		 (insert "<p class=\"date\">" (nth 2 lang-words) ": " date "</p>\n"))
 	       (when (and (plist-get opt-plist :author-info) author)
@@ -1812,20 +1846,21 @@ make any modifications to the exporter file.  For example,
 		 (insert "<p class=\"creator\">"
 			 (concat "Org version " org-version " with Emacs version "
 				 (number-to-string emacs-major-version) "</p>\n")))
-	       (insert html-validation-link "\n</div>"))
+	       (insert html-validation-link "\n"))
 	      (t
-	       (insert "<div id=\"postamble\">\n")
 	       (insert (format-spec
 			(or (cadr (assoc (nth 0 lang-words)
 					 org-export-xhtml-postamble-format))
 			    (cadr (assoc "en" org-export-xhtml-postamble-format)))
 			`((?a . ,author) (?e . ,email)
 			  (?d . ,date)   (?c . ,creator-info)
-			  (?v . ,html-validation-link))))
-	       (insert "</div>"))))))
+			  (?v . ,html-validation-link))))))
+	(insert "</div>"))))
 
-  (if org-export-xhtml-with-timestamp
-      (insert org-export-xhtml-html-helper-timestamp)))
+  ;; FIXME `org-export-xhtml-with-timestamp' has been declared
+  ;; obsolete since Org 7.7 -- don't forget to remove this.
+  (when org-export-xhtml-with-timestamp
+    (insert org-export-xhtml-html-helper-timestamp)))
 
 ;; There are references to org-html-expand, org-html-protect and
 ;; org-html-do-expand outside of org-html.el. For now provide a
