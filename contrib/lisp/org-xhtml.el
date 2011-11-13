@@ -1274,11 +1274,11 @@ make any modifications to the exporter file.  For example,
 	     "%s
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
 	       \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">
-<html xmlns=\"http://www.w3.org/1999/xhtml\"
-lang=\"%s\" xml:lang=\"%s\">
+<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\">
 <head>
 <title>%s</title>
 <meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>
+<meta name=\"title\" content=\"%s\"/>
 <meta name=\"generator\" content=\"Org-mode\"/>
 <meta name=\"generated\" content=\"%s\"/>
 <meta name=\"author\" content=\"%s\"/>
@@ -1300,6 +1300,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	     language language
 	     (plist-get opt-plist :title)
 	     charset
+	     (plist-get opt-plist :title)
 	     (plist-get opt-plist :effective-date)
 	     (plist-get opt-plist :author)
 	     (plist-get opt-plist :description)

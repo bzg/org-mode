@@ -563,6 +563,7 @@ and then converted to \"doc\" then org-lparse-backend is set to
 	(setq params (format "(%s)" params)))
       (ignore-errors (read params)))))
 
+(defvar org-heading-keyword-regexp-format) ; defined in org.el
 (defvar org-lparse-special-blocks '("list-table" "annotation"))
 (defun org-do-lparse (arg &optional hidden ext-plist
 			  to-buffer body-only pub-dir)
@@ -674,6 +675,7 @@ version."
 	 (current-dir (if buffer-file-name
 			  (file-name-directory buffer-file-name)
 			default-directory))
+	 (auto-insert nil) ; Avoid any auto-insert stuff for the new file
 	 (buffer (if to-buffer
 		     (cond
 		      ((eq to-buffer 'string)
@@ -684,6 +686,12 @@ version."
 			  (and f (functionp f) (funcall f filename)))
 			filename))))
 	 (org-levels-open (make-vector org-level-max nil))
+	 (dummy (mapc
+		 (lambda(p)
+		   (let* ((val (plist-get opt-plist p))
+			  (val (org-xml-encode-org-text-skip-links val)))
+		     (setq opt-plist (plist-put opt-plist p val))))
+		 '(:date :author :keywords :description)))
 	 (date (plist-get opt-plist :date))
 	 (date (cond
 		((and date (string-match "%" date))
@@ -704,8 +712,9 @@ version."
 			   "UNTITLED")))
 	 (dummy (setq opt-plist (plist-put opt-plist :title title)))
 	 (html-table-tag (plist-get opt-plist :html-table-tag))
-	 (quote-re0   (concat "^[ \t]*" org-quote-string "\\>"))
-	 (quote-re    (concat "^\\(\\*+\\)\\([ \t]+" org-quote-string "\\>\\)"))
+	 (quote-re0 (concat "^ *" org-quote-string "\\( +\\|[ \t]*$\\)"))
+	 (quote-re (format org-heading-keyword-regexp-format
+			   org-quote-string))
 	 (org-lparse-dyn-current-environment nil)
 	 ;; Get the language-dependent settings
 	 (lang-words (or (assoc (plist-get opt-plist :language)
@@ -1038,7 +1047,7 @@ version."
 			 t t line))))))
 
 	  (cond
-	   ((string-match "^\\(\\*+\\)[ \t]+\\(.*\\)" line)
+	   ((string-match "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$" line)
 	    ;; This is a headline
 	    (setq level (org-tr-level (- (match-end 1) (match-beginning 1)
 					 level-offset))
@@ -1450,18 +1459,20 @@ Possible conversions are set in `org-export-html-protect-char-alist'."
 
 (defun org-xml-encode-org-text-skip-links (string)
   "Prepare STRING for HTML export.  Apply all active conversions.
-If there are links in the string, don't modify these."
-  (let* ((re (concat org-bracket-link-regexp "\\|"
-		     (org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")))
-	 m s l res)
-    (while (setq m (string-match re string))
-      (setq s (substring string 0 m)
-	    l (match-string 0 string)
-	    string (substring string (match-end 0)))
-      (push (org-xml-encode-org-text s) res)
-      (push l res))
-    (push (org-xml-encode-org-text string) res)
-    (apply 'concat (nreverse res))))
+If there are links in the string, don't modify these.  If STRING
+is nil, return nil."
+  (when string
+    (let* ((re (concat org-bracket-link-regexp "\\|"
+		       (org-re "[ \t]+\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")))
+	   m s l res)
+      (while (setq m (string-match re string))
+	(setq s (substring string 0 m)
+	      l (match-string 0 string)
+	      string (substring string (match-end 0)))
+	(push (org-xml-encode-org-text s) res)
+	(push l res))
+      (push (org-xml-encode-org-text string) res)
+      (apply 'concat (nreverse res)))))
 
 (defun org-xml-encode-org-text (s)
   "Apply all active conversions to translate special ASCII to HTML."
