@@ -1,3 +1,15 @@
+ORG-INSTALL = $(BATCH) \
+	 --eval "(require 'autoload)" \
+	 --eval '(find-file "$(LISPO)")' \
+	 --eval '(erase-buffer)' \
+	 --eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPF))))' \
+	 --eval '(insert "\n(provide (quote org-install))\n")' \
+	 --eval '(insert "\n(defconst org-release \"$(ORGVERSION)\"\n  \"The release version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
+	 --eval '(insert "\n(defconst org-git-version \"$(GITVERSION)\"\n  \"The Git version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
+	 --eval '(save-buffer)'
+-include local.mk	# optional local customization
+
+.NOTPARALLEL:	# always run this make serially
 .SUFFIXES:	# we don't need default suffix rules
 ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
@@ -11,21 +23,13 @@ LISPC = $(LISPF:%el=%elc)
 
 all \
 compile \
-compile-dirty:
-	$(BATCH) --eval '(batch-byte-recompile-directory 0)'
+compile-dirty:	cleanauto
+	$(ELCDIR)
 
 autoloads:	$(LISPO)
 
 org-install.el:	$(LISPF)
-	$(BATCH) \
-	 --eval "(require 'autoload)" \
-	 --eval '(find-file "$(LISPO)")' \
-	 --eval '(erase-buffer)' \
-	 --eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPF))))' \
-	 --eval '(insert "\n(provide (quote org-install))\n")' \
-	 --eval '(insert "\n(defconst org-release \"$(ORGVERSION)\"\n  \"The release version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
-	 --eval '(insert "\n(defconst org-git-version \"$(GITVERSION)\"\n  \"The Git version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
-	 --eval '(save-buffer)'
+	$(ORG-INSTALL)
 
 install:	$(LISPF) compile autoloads
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
@@ -33,6 +37,9 @@ install:	$(LISPF) compile autoloads
 
 clean:
 	$(RM) *.elc
+
+cleanauto:
+	$(RM) $(LISPO) $(LISPO:%el=%elc)
 
 cleanall:
 	$(RM) *.elc $(LISPO)

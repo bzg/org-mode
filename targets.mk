@@ -19,6 +19,7 @@ endif
 	install info html pdf card docs $(INSTSUB) \
 	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel
 
+all \
 compile::	lisp
 	$(MAKE) -C $< clean
 
@@ -27,7 +28,7 @@ compile-dirty::	lisp
 	$(MAKE) -C $< $@
 
 all \
-clean-install:	$(SUBDIRS)
+clean-install::	$(SUBDIRS)
 	$(foreach dir, $?, $(MAKE) -C $(dir) $@;)
 
 up2:	update

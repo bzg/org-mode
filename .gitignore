@@ -36,6 +36,7 @@ org-*.zip
 manual
 org_dual_license.texi
 ORGWEBPAGE/Changes.txt
+local*.mk
 
 # aspell word and replacement lists
 

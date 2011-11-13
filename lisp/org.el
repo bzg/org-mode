@@ -209,6 +209,7 @@ identifier."
 
 ;;; Version
 
+(defvaralias 'org-version 'org-release)
 ;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.

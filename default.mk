@@ -20,11 +20,14 @@ infodir = $(prefix)/info
 
 # Using emacs in batch mode.
 
-BATCH   = $(EMACS) -batch -q -no-site-file -eval          \
-          "(setq load-path (cons (expand-file-name \".\") \
-                                 (cons \"$(lispdir)\" load-path)))"
+BATCH   = $(EMACS) -batch -Q -L .
 
-# Specify the byte-compiler for compiling org-mode files
+# How to byte-compile the whole source directory
+ELCDIR  = $(BATCH) \
+	  --eval '(defconst org-release "$(ORGVERSION)")' \
+	  --eval '(batch-byte-recompile-directory 0)'
+
+# How to byte-compile a single source file
 ELC     = $(BATCH) -f batch-byte-compile
 
 # How to make a pdf file from a texinfo file
