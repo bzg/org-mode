@@ -816,8 +816,8 @@ ATTR is a string of other attributes of the \"a\" element."
 
 (defun org-xhtml-format-inline-image (desc)
   ;; FIXME: alt text missing here?
-  (org-xhtml-format-tags "<img src=\"%s\" alt=\"\"/>" "" desc))
-
+  (org-xhtml-format-tags
+   "<img src=\"%s\" alt=\"%s\"/>" "" desc (file-name-nondirectory desc)))
 
 ;; FIXME: the org-lparse defvar belongs to org-lparse.el
 (defvar org-lparse-link-description-is-image)
