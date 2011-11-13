@@ -5,11 +5,10 @@
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 0.8
-
+;;
 ;; This file is not (yet) part of GNU Emacs.
 ;; However, it is distributed under the same license.
-
+;;
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -36,6 +35,8 @@
 
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function htmlize-region "ext:htmlize" (beg end))
+(declare-function org-pop-to-buffer-same-window
+		  "org-compat" (&optional buffer-or-name norecord label))
 
 (defgroup org-export-xhtml nil
   "Options specific for HTML export of Org-mode files."
@@ -579,6 +580,7 @@ a file."
     ("<" . "&lt;")
     (">" . "&gt;"))
   "Alist of characters to be converted by `org-html-protect'."
+  :group 'org-export-xhtml
   :type '(repeat (cons (string :tag "Character")
 		       (string :tag "HTML equivalent"))))
 
@@ -713,17 +715,15 @@ See variable `org-export-xhtml-link-org-files-as-html'"
 		  "."
 		  (plist-get opt-plist :html-extension)))))))
 
-;;; org-xhtml-format-org-link
 (defun org-xhtml-format-org-link (opt-plist type-1 path fragment desc attr
 					    descp)
   "Make an HTML link.
 OPT-PLIST is an options list.
-TYPE is the device-type of the link (THIS://foo.html)
-PATH is the path of the link (http://THIS#locationx)
-FRAGMENT is the fragment part of the link, if any (foo.html#THIS)
+TYPE is the device-type of the link (THIS://foo.html).
+PATH is the path of the link (http://THIS#location).
+FRAGMENT is the fragment part of the link, if any (foo.html#THIS).
 DESC is the link description, if any.
-ATTR is a string of other attributes of the a element.
-MAY-INLINE-P allows inlining it as an image."
+ATTR is a string of other attributes of the \"a\" element."
   (declare (special org-lparse-par-open))
   (save-match-data
     (when (string= type-1 "coderef")
@@ -1751,7 +1751,7 @@ lang=\"%s\" xml:lang=\"%s\">
 	      (format-spec html-pre `((?t . ,title) (?a . ,author)
 				      (?d . ,date) (?e . ,email)))))
 	    ((functionp html-pre)
-	     (funcall html-pre opt-plist))
+	     (funcall html-pre))
 	    (t
 	     (insert
 	      (format-spec
@@ -1797,7 +1797,7 @@ lang=\"%s\" xml:lang=\"%s\">
 				      (?v . ,html-validation-link))))
 	       (insert "</div>"))
 	      ((functionp html-post)
-	       (funcall html-post opt-plist))
+	       (funcall html-post))
 	      ((eq html-post 'auto)
 	       ;; fall back on default postamble
 	       (insert "<div id=\"postamble\">\n")

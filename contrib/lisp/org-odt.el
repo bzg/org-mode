@@ -5,8 +5,7 @@
 ;; Author: Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 0.8
-
+;;
 ;; This file is not (yet) part of GNU Emacs.
 ;; However, it is distributed under the same license.
 
@@ -1338,14 +1337,13 @@ value of `org-export-odt-fontify-srcblocks."
 
 (defun org-odt-format-org-link (opt-plist type-1 path fragment desc attr
 					  descp)
-  "Make an HTML link.
+  "Make a OpenDocument link.
 OPT-PLIST is an options list.
-TYPE is the device-type of the link (THIS://foo.html)
-PATH is the path of the link (http://THIS#locationx)
-FRAGMENT is the fragment part of the link, if any (foo.html#THIS)
+TYPE-1 is the device-type of the link (THIS://foo.html).
+PATH is the path of the link (http://THIS#location).
+FRAGMENT is the fragment part of the link, if any (foo.html#THIS).
 DESC is the link description, if any.
-ATTR is a string of other attributes of the a element.
-MAY-INLINE-P allows inlining it as an image."
+ATTR is a string of other attributes of the a element."
   (declare (special org-lparse-par-open))
   (save-match-data
     (let* ((may-inline-p

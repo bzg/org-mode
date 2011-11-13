@@ -5,8 +5,7 @@
 ;; Author: Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 0.8
-
+;;
 ;; This file is not (yet) part of GNU Emacs.
 ;; However, it is distributed under the same license.
 
@@ -996,7 +995,8 @@ version."
 	  (setq line (org-lparse-format-org-link line opt-plist))
 
 	  ;; TODO items
-	  (if (and (string-match org-todo-line-regexp line)
+	  (if (and org-todo-line-regexp
+		   (string-match org-todo-line-regexp line)
 		   (match-beginning 2))
 	      (setq line (concat
 			  (substring line 0 (match-beginning 2))
@@ -1409,24 +1409,26 @@ for further information."
   "Format time stamps in string S, or remove them."
   (catch 'exit
     (let (r b)
-      (while (string-match org-maybe-keyword-time-regexp s)
-	(or b (setq b (substring s 0 (match-beginning 0))))
-	(setq r (concat
-		 r (substring s 0 (match-beginning 0)) " "
-		 (org-lparse-format
-		  'FONTIFY
-		  (concat
-		   (if (match-end 1)
-		       (org-lparse-format
-			'FONTIFY
-			(match-string 1 s) "timestamp-kwd"))
-		   " "
+      (when org-maybe-keyword-time-regexp
+	(while (string-match org-maybe-keyword-time-regexp s)
+	  (or b (setq b (substring s 0 (match-beginning 0))))
+	  (setq r (concat
+		   r (substring s 0 (match-beginning 0)) " "
 		   (org-lparse-format
 		    'FONTIFY
-		    (substring (org-translate-time (match-string 3 s)) 1 -1)
-		    "timestamp"))
-		  "timestamp-wrapper"))
-	      s (substring s (match-end 0))))
+		    (concat
+		     (if (match-end 1)
+			 (org-lparse-format
+			  'FONTIFY
+			  (match-string 1 s) "timestamp-kwd"))
+		     " "
+		     (org-lparse-format
+		      'FONTIFY
+		      (substring (org-translate-time (match-string 3 s)) 1 -1)
+		      "timestamp"))
+		    "timestamp-wrapper"))
+		s (substring s (match-end 0)))))
+
       ;; Line break if line started and ended with time stamp stuff
       (if (not r)
 	  s
