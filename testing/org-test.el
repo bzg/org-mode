@@ -276,8 +276,9 @@ otherwise place the point at the beginning of the inserted text."
 		 (if (file-directory-p path)
 		     (rld path)
 		   (catch 'missing-test-dependency
-		     (when (string-match "^[A-Za-z].*\\.el$" path)
-		       load-file path))))
+		     (when (string-match "^[A-Za-z].*\\.el$"
+					 (file-name-nondirectory path))
+		       (load-file path)))))
 	       (directory-files base 'full
 				"^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
     (rld (expand-file-name "lisp" org-test-dir))
