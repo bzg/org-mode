@@ -4626,7 +4626,8 @@ the documentation of `org-diary'."
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      category (org-get-category)
 	      org-category-pos (get-text-property (point) 'org-category-position)
-	      txt (buffer-substring (match-beginning 2) (match-end 3))
+	      txt (buffer-substring
+		   (org-trim (match-beginning 2) (match-end 0)))
 	      tags (org-get-tags-at (point))
 	      txt (org-agenda-format-item "" txt category tags)
 	      priority (1+ (org-get-priority txt))
