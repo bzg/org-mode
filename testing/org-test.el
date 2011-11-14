@@ -340,15 +340,9 @@ Load all test files first."
   "Run all defined tests matching \"\\(org\\|ob\\)\".
 Load all test files first."
   (interactive)
-  (let ((org-id-track-globally t)
-	(message-log-max t))
-    (with-current-buffer
-	(get-buffer-create "*Messages*")
-      (erase-buffer))
-    (org-test-touch-all-examples)
-    (org-test-update-id-locations)
-    (org-test-load)
-    (ert "\\(org\\|ob\\)")))
+  (org-test-touch-all-examples)
+  (org-test-load)
+  (ert "\\(org\\|ob\\)"))
 
 (provide 'org-test)
 
