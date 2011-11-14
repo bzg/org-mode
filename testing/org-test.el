@@ -39,8 +39,9 @@
   (unless (featurep 'org)
     (setq load-path (cons org-lisp-dir load-path))
     (require 'org)
-    (org-babel-do-load-languages
-     'org-babel-load-languages '((sh . t))))
+    (require 'org-id)
+     (org-babel-do-load-languages
+     'org-babel-load-languages '((sh . t) (org . t))))
 
   (let* ((load-path (cons
 		     org-test-dir
@@ -314,21 +315,40 @@ otherwise place the point at the beginning of the inserted text."
 		 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$"))
     (find-file file)))
 
+(defun org-test-update-id-locations ()
+  (org-id-update-id-locations
+   (directory-files
+    org-test-example-dir 'full
+    "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$")))
+
 (defun org-test-run-batch-tests ()
   "Run all defined tests matching \"\\(org\\|ob\\)\".
 Load all test files first."
   (interactive)
-  (org-test-touch-all-examples)
-  (org-test-load)
-  (ert-run-tests-batch-and-exit "\\(org\\|ob\\)"))
+  (let ((org-id-track-globally t)
+	(org-id-locations-file
+	 (convert-standard-filename
+	  (expand-file-name
+	   "testing/.test-org-id-locations"
+	   org-base-dir))))
+    (org-test-touch-all-examples)
+    (org-test-update-id-locations)
+    (org-test-load)
+    (ert-run-tests-batch-and-exit "\\(org\\|ob\\)")))
 
 (defun org-test-run-all-tests ()
   "Run all defined tests matching \"\\(org\\|ob\\)\".
 Load all test files first."
   (interactive)
-  (org-test-touch-all-examples)
-  (org-test-load)
-  (ert "\\(org\\|ob\\)"))
+  (let ((org-id-track-globally t)
+	(message-log-max t))
+    (with-current-buffer
+	(get-buffer-create "*Messages*")
+      (erase-buffer))
+    (org-test-touch-all-examples)
+    (org-test-update-id-locations)
+    (org-test-load)
+    (ert "\\(org\\|ob\\)")))
 
 (provide 'org-test)
 
