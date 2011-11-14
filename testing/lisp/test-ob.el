@@ -420,6 +420,17 @@ duplicate results block."
 #+end_src"
     (should (string= "#+begin_src emacs-lisp" (org-babel-execute-src-block)))))
 
+(ert-deftest test-ob/does-not-replace-a-block-with-the-results ()
+  (org-test-with-temp-text "#+NAME: foo
+#+BEGIN_SRC emacs-lisp
+ 'foo
+#+END_SRC\n"
+    (org-babel-next-src-block 1)
+    (should (eq 'foo (org-babel-execute-src-block)))
+    (goto-char (point-min))
+    (org-babel-next-src-block 1)
+    (should (looking-at org-babel-src-block-regexp))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
