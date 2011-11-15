@@ -12259,7 +12259,7 @@ Here are examples of passing values by reference:
 @table @dfn
 
 @item table
-an Org mode table named with either a @code{#+DATA:} or @code{#+TBLNAME:} line
+an Org mode table named with either a @code{#+NAME:} or @code{#+TBLNAME:} line
 @example
 #+TBLNAME: example-table
 | 1 |
@@ -12277,11 +12277,11 @@ an Org mode table named with either a @code{#+DATA:} or @code{#+TBLNAME:} line
 @end example
 
 @item list
-a simple list named with a @code{#+DATA:} line (note that nesting is not
+a simple list named with a @code{#+NAME:} line (note that nesting is not
 carried through to the source code block)
 
 @example
-#+DATA: example-list
+#+NAME: example-list
   - simple
     - not
     - nested
@@ -12332,10 +12332,10 @@ code block name using standard function call syntax
 @end example
 
 @item literal example
-a literal example block named with a @code{#+DATA:} line
+a literal example block named with a @code{#+NAME:} line
 
 @example
-#+DATA: literal-example
+#+NAME: literal-example
 #+BEGIN_EXAMPLE
 A literal example
 on two lines
