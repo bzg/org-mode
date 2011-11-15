@@ -1742,42 +1742,45 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "prepend" result-params)))) ; already there
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
-	;; insert results based on type
-	(cond
-	 ;; do nothing for an empty result
-	 ((= (length result) 0))
-	 ;; insert a list if preferred
-	 ((member "list" result-params)
-	  (insert
-	   (org-babel-trim
-	    (org-list-to-generic
-	     (cons 'unordered
-		   (mapcar
-		    (lambda (el) (list nil (if (stringp el) el (format "%S" el))))
-		    (if (listp result) result (list result))))
-	     '(:splicep nil :istart "- " :iend "\n")))
-	   "\n"))
-	 ;; assume the result is a table if it's not a string
-	 ((not (stringp result))
-	  (goto-char beg)
-	  (insert (concat (orgtbl-to-orgtbl
-			   (if (or (eq 'hline (car result))
-				   (and (listp (car result))
-					(listp (cdr (car result)))))
-			       result (list result))
-			   '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
-	  (goto-char beg) (when (org-at-table-p) (org-table-align)))
-	 ((member "file" result-params)
-	  (when inlinep (goto-char inlinep))
-	  (insert result))
-	 (t (goto-char beg) (insert result)))
-	(when (listp result) (goto-char (org-table-end)))
-	(setq end (point-marker))
-	;; possibly wrap result
 	(flet ((wrap (start finish)
 		     (goto-char beg) (insert (concat start "\n"))
 		     (goto-char end) (insert (concat finish "\n"))
-		     (setq end (point-marker))))
+		     (setq end (point-marker)))
+	       (proper-list-p (it) (and (listp it) (null (cdr (last it))))))
+	  ;; insert results based on type
+	  (cond
+	   ;; do nothing for an empty result
+	   ((null result))
+	   ;; insert a list if preferred
+	   ((member "list" result-params)
+	    (insert
+	     (org-babel-trim
+	      (org-list-to-generic
+	       (cons 'unordered
+		     (mapcar
+		      (lambda (el) (list nil (if (stringp el) el (format "%S" el))))
+		      (if (listp result) result (list result))))
+	       '(:splicep nil :istart "- " :iend "\n")))
+	     "\n"))
+	   ;; assume the result is a table if it's not a string
+	   ((proper-list-p result)
+	    (goto-char beg)
+	    (insert (concat (orgtbl-to-orgtbl
+			     (if (or (eq 'hline (car result))
+				     (and (listp (car result))
+					  (listp (cdr (car result)))))
+				 result (list result))
+			     '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
+	    (goto-char beg) (when (org-at-table-p) (org-table-align)))
+	   ((and (listp result) (not (proper-list-p result)))
+	    (insert (format "%s\n" result)))
+	   ((member "file" result-params)
+	    (when inlinep (goto-char inlinep))
+	    (insert result))
+	   (t (goto-char beg) (insert result)))
+	  (when (proper-list-p result) (goto-char (org-table-end)))
+	  (setq end (point-marker))
+	  ;; possibly wrap result
 	  (cond
 	   ((member "html" result-params)
 	    (wrap "#+BEGIN_HTML" "#+END_HTML"))
@@ -1794,7 +1797,8 @@ code ---- the results are extracted in the syntax of the source
 	    (when (and (stringp result) (not (member "file" result-params)))
 	      (org-babel-examplize-region beg end results-switches))
 	    (wrap "#+BEGIN_RESULT" "#+END_RESULT"))
-	   ((and (stringp result) (not (member "file" result-params)))
+	   ((and (not (proper-list-p result))
+		 (not (member "file" result-params)))
 	    (org-babel-examplize-region beg end results-switches)
 	    (setq end (point)))))
 	;; possibly indent the results to match the #+results line
@@ -1803,7 +1807,7 @@ code ---- the results are extracted in the syntax of the source
 		   (not (and (listp result)
 			     (member "append" result-params))))
 	  (indent-rigidly beg end indent))))
-    (if (= (length result) 0)
+    (if (null result)
 	(if (member "value" result-params)
 	    (message "Code block returned no value.")
 	  (message "Code block produced no output."))
