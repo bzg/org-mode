@@ -431,6 +431,22 @@ duplicate results block."
     (org-babel-next-src-block 1)
     (should (looking-at org-babel-src-block-regexp))))
 
+(ert-deftest test-ob/catches-all-references ()
+  (org-test-with-temp-text "
+#+NAME: literal-example
+#+BEGIN_EXAMPLE
+A literal example
+on two lines
+#+END_EXAMPLE
+
+#+NAME: read-literal-example
+#+BEGIN_SRC emacs-lisp :var x=literal-example
+  (concatenate 'string x \" for me.\")
+#+END_SRC"
+    (org-babel-next-src-block 1)
+    (should (string= (org-babel-execute-src-block)
+		     "A literal example\non two lines for me."))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

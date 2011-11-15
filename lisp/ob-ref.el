@@ -174,9 +174,10 @@ the variable."
 	 (lob-info (setq type 'lob))
 	 (id (setq type 'id))
 	 ((and (looking-at org-babel-src-name-regexp)
-	       (progn (forward-line 1)
-		      (or (looking-at org-babel-src-block-regexp)
-			  (looking-at org-babel-multi-line-header-regexp))))
+	       (save-excursion
+		 (forward-line 1)
+		 (or (looking-at org-babel-src-block-regexp)
+		     (looking-at org-babel-multi-line-header-regexp))))
 	  (setq type 'source-block))
 	 (t (while (not (setq type (org-babel-ref-at-ref-p)))
 	      (forward-line 1)
