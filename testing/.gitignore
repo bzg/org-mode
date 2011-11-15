@@ -2,3 +2,4 @@
 # old versions of Emacs
 ert
 .org-test-id-locations
+.test-org-id-locations
