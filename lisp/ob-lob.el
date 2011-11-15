@@ -28,6 +28,8 @@
 (require 'ob)
 (require 'ob-table)
 
+(declare-function org-babel-in-example-or-verbatim "ob-exp" nil)
+
 (defvar org-babel-library-of-babel nil
   "Library of source-code blocks.
 This is an association list.  Populate the library by adding
