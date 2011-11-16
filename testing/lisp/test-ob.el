@@ -463,6 +463,40 @@ on two lines
     (org-babel-next-src-block 2)
     (should (string= (org-babel-execute-src-block) "baz"))))
 
+(ert-deftest test-ob/do-not-resolve-to-partial-names-data ()
+  (org-test-with-temp-text "
+#+tblname: base_plus
+| 1 |
+| 2 |
+
+#+tblname: base
+| 3 |
+| 4 |
+
+#+begin_src emacs-lisp :var x=base
+  x
+#+end_src"
+    (org-babel-next-src-block 1)
+    (should (equal (org-babel-execute-src-block) '((3) (4))))))
+
+(ert-deftest test-ob/do-not-resolve-to-partial-names-code ()
+  (org-test-with-temp-text "
+#+name: base_plus
+#+begin_src emacs-lisp
+  'bar
+#+end_src
+
+#+name: base
+#+begin_src emacs-lisp
+  'foo
+#+end_src
+
+#+begin_src emacs-lisp :var x=base
+  x
+#+end_src"
+    (org-babel-next-src-block 3)
+    (should (equal (org-babel-execute-src-block) "foo"))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

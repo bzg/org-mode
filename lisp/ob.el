@@ -433,12 +433,13 @@ can not be resolved.")
 
 (defun org-babel-named-src-block-regexp-for-name (name)
   "This generates a regexp used to match a src block named NAME."
-  (concat org-babel-src-name-regexp (regexp-quote name) "[ \t\n]*"
+  (concat org-babel-src-name-regexp (regexp-quote name)
+	  "\\([ \t]\\|$\\|(\\)" ".*[\r\n]"
 	  (substring org-babel-src-block-regexp 1)))
 
 (defun org-babel-named-data-regexp-for-name (name)
   "This generates a regexp used to match data named NAME."
-  (concat org-babel-result-regexp (regexp-quote name) "[ \t]*.*$"))
+  (concat org-babel-result-regexp (regexp-quote name) "\\([ \t]\\|$\\)"))
 
 ;;; functions
 (defvar call-process-region)
