@@ -430,10 +430,15 @@ can not be resolved.")
 
 (defvar org-babel-after-execute-hook nil
   "Hook for functions to be called after `org-babel-execute-src-block'")
+
 (defun org-babel-named-src-block-regexp-for-name (name)
   "This generates a regexp used to match a src block named NAME."
   (concat org-babel-src-name-regexp (regexp-quote name) "[ \t\n]*"
 	  (substring org-babel-src-block-regexp 1)))
+
+(defun org-babel-named-data-regexp-for-name (name)
+  "This generates a regexp used to match data named NAME."
+  (concat org-babel-result-regexp (regexp-quote name) "[ \t]*.*$"))
 
 ;;; functions
 (defvar call-process-region)

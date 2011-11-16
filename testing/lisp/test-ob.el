@@ -447,6 +447,22 @@ on two lines
     (should (string= (org-babel-execute-src-block)
 		     "A literal example\non two lines for me."))))
 
+(ert-deftest test-ob/resolve-code-blocks-before-data-blocks ()
+  (org-test-with-temp-text "
+#+name: foo
+: bar
+
+#+name: foo
+#+begin_src emacs-lisp
+  \"baz\"
+#+end_src
+
+#+begin_src emacs-lisp :var foo=foo
+  foo
+#+end_src"
+    (org-babel-next-src-block 2)
+    (should (string= (org-babel-execute-src-block) "baz"))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
