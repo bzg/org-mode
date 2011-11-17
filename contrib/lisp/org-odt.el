@@ -1623,6 +1623,12 @@ ATTR is a string of other attributes of the a element."
   "Hardcoded image dimensions one for each of the anchor
   methods.")
 
+;; A4 page size is 21.0 by 29.7 cms
+;; The default page settings has 2cm margin on each of the sides. So
+;; the effective text area is 17.0 by 25.7 cm
+(defvar org-export-odt-max-image-size '(17.0 . 20.0)
+  "Limiting dimensions for an embedded image.")
+
 (defun org-odt-do-image-size (probe-method file &optional dpi anchor-type)
   (setq dpi (or dpi org-export-odt-pixels-per-inch))
   (setq anchor-type (or anchor-type "paragraph"))
@@ -1671,6 +1677,14 @@ ATTR is a string of other attributes of the a element."
      (user-width
       (setq height (* user-width (/ height width)) width user-width))
      (t (ignore)))
+    ;; ensure that an embedded image fits comfortably within a page
+    (let ((max-width (car org-export-odt-max-image-size))
+	  (max-height (cdr org-export-odt-max-image-size)))
+      (when (or (> width max-width) (> height max-height))
+	(let* ((scale1 (/ max-width width))
+	       (scale2 (/ max-height height))
+	       (scale (min scale1 scale2)))
+	  (setq width (* scale width) height (* scale height)))))
     (cons width height)))
 
 (defvar org-odt-entity-labels-alist nil
