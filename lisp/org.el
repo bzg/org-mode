@@ -11168,6 +11168,7 @@ With numeric prefix arg, switch to that state.
 With a double \\[universal-argument] prefix, switch to the next set of TODO \
 keywords (nextset).
 With a triple \\[universal-argument] prefix, circumvent any state blocking.
+With a numeric prefix arg of 0, inhibit note taking for the change.
 
 For calling through lisp, arg is also interpreted in the following way:
 'none             -> empty state
@@ -11199,6 +11200,9 @@ For calling through lisp, arg is also interpreted in the following way:
 	       (org-log-done org-log-done)
 	       (org-log-repeat org-log-repeat)
 	       (org-todo-log-states org-todo-log-states)
+	       (org-inhibit-logging
+		(if (equal arg 0)
+		    (progn (setq arg nil) 'note) org-inhibit-logging))
 	       (this (match-string 1))
 	       (hl-pos (match-beginning 0))
 	       (head (org-get-todo-sequence-head this))
