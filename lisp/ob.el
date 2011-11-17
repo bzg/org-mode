@@ -114,7 +114,7 @@ remove code block execution from the C-c C-c keybinding."
   :type 'boolean)
 
 (defvar org-babel-src-name-regexp
-  "^[ \t]*#\\+\\(srcname\\|source\\|function\\):[ \t]*"
+  "^[ \t]*#\\+name:[ \t]*"
   "Regular expression used to match a source name line.")
 
 (defvar org-babel-multi-line-header-regexp
@@ -217,8 +217,8 @@ Returns a list
 		   (nth 2 info)
 		   (org-babel-parse-header-arguments (match-string 1)))))
 	  (when (looking-at org-babel-src-name-w-name-regexp)
-	    (setq name (org-babel-clean-text-properties (match-string 4)))
-	    (when (match-string 6)
+	    (setq name (org-babel-clean-text-properties (match-string 3)))
+	    (when (and (match-string 5) (> (length (match-string 5)) 0))
 	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
 		    (org-babel-merge-params
 		     (mapcar
@@ -230,7 +230,7 @@ Returns a list
 			   (error
 			    "variable \"%s\"%s must be assigned a default value"
 			    var (if name (format " in block \"%s\"" name) ""))))
-		       (org-babel-ref-split-args (match-string 6))))
+		       (org-babel-ref-split-args (match-string 5))))
 		     (nth 2 info))))))
       ;; inline source block
       (when (org-babel-get-inline-src-block-matches)
@@ -397,7 +397,7 @@ specific header arguments as well.")
   '((:session . "none") (:results . "replace") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
-(defvar org-babel-data-names '("TBLNAME" "RESNAME" "RESULTS" "DATA"))
+(defvar org-babel-data-names '("TBLNAME" "RESULTS" "NAME"))
 
 (defvar org-babel-result-regexp
   (concat "^[ \t]*#\\+"
@@ -430,10 +430,16 @@ can not be resolved.")
 
 (defvar org-babel-after-execute-hook nil
   "Hook for functions to be called after `org-babel-execute-src-block'")
+
 (defun org-babel-named-src-block-regexp-for-name (name)
   "This generates a regexp used to match a src block named NAME."
-  (concat org-babel-src-name-regexp (regexp-quote name) "[ \t\n]*"
+  (concat org-babel-src-name-regexp (regexp-quote name)
+	  "\\([ \t]\\|$\\|(\\)" ".*[\r\n]"
 	  (substring org-babel-src-block-regexp 1)))
+
+(defun org-babel-named-data-regexp-for-name (name)
+  "This generates a regexp used to match data named NAME."
+  (concat org-babel-result-regexp (regexp-quote name) "\\([ \t]\\|$\\)"))
 
 ;;; functions
 (defvar call-process-region)
@@ -1121,17 +1127,24 @@ instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
   (flet ((matches (ch spec) (or (and (numberp spec) (= spec ch))
 				(member ch spec)))
 	 (matched (ch last)
-		  (and (matches ch (cdr alts))
-		       (matches last (car alts)))))
-    (let ((balance 0) (partial nil) (lst nil) (last 0))
-      (mapc (lambda (ch)  ; split on [] or () balanced instances of [ \t]:
+		  (if (consp alts)
+		      (and (matches ch (cdr alts))
+			   (matches last (car alts)))
+		    (matches ch alts))))
+    (let ((balance 0) (quote nil) (partial nil) (lst nil) (last 0))
+      (mapc (lambda (ch)  ; split on [], (), "" balanced instances of [ \t]:
 	      (setq balance (+ balance
 			       (cond ((or (equal 91 ch) (equal 40 ch)) 1)
 				     ((or (equal 93 ch) (equal 41 ch)) -1)
 				     (t 0))))
+	      (when (and (equal 34 ch) (not (equal 92 last)))
+		(setq quote (not quote)))
 	      (setq partial (cons ch partial))
-	      (when (and (= balance 0) (matched ch last))
-		(setq lst (cons (apply #'string (nreverse (cddr partial)))
+	      (when (and (= balance 0) (not quote) (matched ch last))
+		(setq lst (cons (apply #'string (nreverse
+						 (if (consp alts)
+						     (cddr partial)
+						   (cdr partial))))
 				lst))
 		(setq partial nil))
 	      (setq last ch))
@@ -1166,23 +1179,23 @@ shown below.
     (mapc (lambda (pair)
 	    (if (eq (car pair) :var)
 		(mapcar (lambda (v) (push (cons :var (org-babel-trim v)) results))
-			(org-babel-balanced-split (cdr pair) '(44 . (32 9))))
+			(org-babel-balanced-split (cdr pair) 32))
 	      (push pair results)))
 	  header-arguments)
     (nreverse results)))
 
 (defun org-babel-process-params (params)
   "Expand variables in PARAMS and add summary parameters."
-  (let* ((vars-and-names (if (and (assoc :colname-names params)
+  (let* ((processed-vars (mapcar (lambda (el)
+				   (if (consp (cdr el))
+				       (cdr el)
+				     (org-babel-ref-parse (cdr el))))
+				 (org-babel-get-header params :var)))
+	 (vars-and-names (if (and (assoc :colname-names params)
 				  (assoc :rowname-names params))
-			     (list (mapcar #'cdr
-					   (org-babel-get-header params :var)))
+			     (list processed-vars)
 			   (org-babel-disassemble-tables
-			    (mapcar (lambda (el)
-				      (if (consp (cdr el))
-					  (cdr el)
-					(org-babel-ref-parse (cdr el))))
-				    (org-babel-get-header params :var))
+			    processed-vars
 			    (cdr (assoc :hlines params))
 			    (cdr (assoc :colnames params))
 			    (cdr (assoc :rownames params)))))
@@ -1367,7 +1380,7 @@ org-babel-named-src-block-regexp."
 	  (regexp (org-babel-named-src-block-regexp-for-name name)) msg)
       (goto-char (point-min))
       (when (or (re-search-forward regexp nil t)
-                (re-search-backward regexp nil t))
+		(re-search-backward regexp nil t))
         (match-beginning 0)))))
 
 (defun org-babel-src-block-names (&optional file)
@@ -1376,7 +1389,7 @@ org-babel-named-src-block-regexp."
     (when file (find-file file)) (goto-char (point-min))
     (let (names)
       (while (re-search-forward org-babel-src-name-w-name-regexp nil t)
-	(setq names (cons (match-string 4) names)))
+	(setq names (cons (match-string 3) names)))
       names)))
 
 ;;;###autoload
@@ -1392,16 +1405,21 @@ org-babel-named-src-block-regexp."
         (progn (goto-char point) (org-show-context))
       (message "result '%s' not found in this buffer" name))))
 
-(defun org-babel-find-named-result (name)
+(defun org-babel-find-named-result (name &optional point)
   "Find a named result.
 Return the location of the result named NAME in the current
 buffer or nil if no such result exists."
   (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward
-           (concat org-babel-result-regexp
-                   "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
-      (beginning-of-line 0) (point))))
+    (goto-char (or point (point-min)))
+    (catch 'is-a-code-block
+      (when (re-search-forward
+	     (concat org-babel-result-regexp
+		     "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]") nil t)
+	(when (and (string= "name" (downcase (match-string 1)))
+		   (or (looking-at org-babel-src-block-regexp)
+		       (looking-at org-babel-multi-line-header-regexp)))
+	  (throw 'is-a-code-block (org-babel-find-named-result name (point))))
+	(beginning-of-line 0) (point)))))
 
 (defun org-babel-result-names (&optional file)
   "Returns the names of results in FILE or the current buffer."
@@ -1730,42 +1748,45 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "prepend" result-params)))) ; already there
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
-	;; insert results based on type
-	(cond
-	 ;; do nothing for an empty result
-	 ((= (length result) 0))
-	 ;; insert a list if preferred
-	 ((member "list" result-params)
-	  (insert
-	   (org-babel-trim
-	    (org-list-to-generic
-	     (cons 'unordered
-		   (mapcar
-		    (lambda (el) (list nil (if (stringp el) el (format "%S" el))))
-		    (if (listp result) result (list result))))
-	     '(:splicep nil :istart "- " :iend "\n")))
-	   "\n"))
-	 ;; assume the result is a table if it's not a string
-	 ((not (stringp result))
-	  (goto-char beg)
-	  (insert (concat (orgtbl-to-orgtbl
-			   (if (or (eq 'hline (car result))
-				   (and (listp (car result))
-					(listp (cdr (car result)))))
-			       result (list result))
-			   '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
-	  (goto-char beg) (when (org-at-table-p) (org-table-align)))
-	 ((member "file" result-params)
-	  (when inlinep (goto-char inlinep))
-	  (insert result))
-	 (t (goto-char beg) (insert result)))
-	(when (listp result) (goto-char (org-table-end)))
-	(setq end (point-marker))
-	;; possibly wrap result
 	(flet ((wrap (start finish)
 		     (goto-char beg) (insert (concat start "\n"))
 		     (goto-char end) (insert (concat finish "\n"))
-		     (setq end (point-marker))))
+		     (setq end (point-marker)))
+	       (proper-list-p (it) (and (listp it) (null (cdr (last it))))))
+	  ;; insert results based on type
+	  (cond
+	   ;; do nothing for an empty result
+	   ((null result))
+	   ;; insert a list if preferred
+	   ((member "list" result-params)
+	    (insert
+	     (org-babel-trim
+	      (org-list-to-generic
+	       (cons 'unordered
+		     (mapcar
+		      (lambda (el) (list nil (if (stringp el) el (format "%S" el))))
+		      (if (listp result) result (list result))))
+	       '(:splicep nil :istart "- " :iend "\n")))
+	     "\n"))
+	   ;; assume the result is a table if it's not a string
+	   ((proper-list-p result)
+	    (goto-char beg)
+	    (insert (concat (orgtbl-to-orgtbl
+			     (if (or (eq 'hline (car result))
+				     (and (listp (car result))
+					  (listp (cdr (car result)))))
+				 result (list result))
+			     '(:fmt (lambda (cell) (format "%s" cell)))) "\n"))
+	    (goto-char beg) (when (org-at-table-p) (org-table-align)))
+	   ((and (listp result) (not (proper-list-p result)))
+	    (insert (format "%s\n" result)))
+	   ((member "file" result-params)
+	    (when inlinep (goto-char inlinep))
+	    (insert result))
+	   (t (goto-char beg) (insert result)))
+	  (when (proper-list-p result) (goto-char (org-table-end)))
+	  (setq end (point-marker))
+	  ;; possibly wrap result
 	  (cond
 	   ((member "html" result-params)
 	    (wrap "#+BEGIN_HTML" "#+END_HTML"))
@@ -1782,7 +1803,8 @@ code ---- the results are extracted in the syntax of the source
 	    (when (and (stringp result) (not (member "file" result-params)))
 	      (org-babel-examplize-region beg end results-switches))
 	    (wrap "#+BEGIN_RESULT" "#+END_RESULT"))
-	   ((and (stringp result) (not (member "file" result-params)))
+	   ((and (not (proper-list-p result))
+		 (not (member "file" result-params)))
 	    (org-babel-examplize-region beg end results-switches)
 	    (setq end (point)))))
 	;; possibly indent the results to match the #+results line
@@ -1791,7 +1813,7 @@ code ---- the results are extracted in the syntax of the source
 		   (not (and (listp result)
 			     (member "append" result-params))))
 	  (indent-rigidly beg end indent))))
-    (if (= (length result) 0)
+    (if (null result)
 	(if (member "value" result-params)
 	    (message "Code block returned no value.")
 	  (message "Code block produced no output."))

@@ -22,7 +22,7 @@
 
 A collection of simple utility functions:
 
-#+srcname: echo
+#+name: echo
 #+begin_src emacs-lisp :var input="echo'd"
   input
 #+end_src
@@ -35,7 +35,7 @@ Read the contents of the file at =file=.  The =:results vector= and
 =:results scalar= header arguments can be used to read the contents of
 file as either a table or a string.
 
-#+srcname: read
+#+name: read
 #+begin_src emacs-lisp :var file="" :var format=""
   (if (string= format "csv")
       (with-temp-buffer
@@ -49,7 +49,7 @@ file as either a table or a string.
 Write =data= to a file at =file=.  If =data= is a list, then write it
 as a table in traditional Org-mode table syntax.
 
-#+srcname: write
+#+name: write
 #+begin_src emacs-lisp :var data="" :var file="" :var ext='()
   (flet ((echo (r) (if (stringp r) r (format "%S" r))))
     (with-temp-file file
@@ -67,7 +67,7 @@ as a table in traditional Org-mode table syntax.
 
 Read local or remote file in [[http://www.json.org/][json]] format into emacs-lisp objects.
 
-#+srcname: json
+#+name: json
 #+begin_src emacs-lisp :var file='() :var url='()
   (require 'json)
   (cond
@@ -96,7 +96,7 @@ The =google= command seems to be throwing "Moved Temporarily" errors
 when trying to download textual documents, but this is working fine
 for spreadsheets.
 
-#+source: gdoc-read
+#+name: gdoc-read
 #+begin_src emacs-lisp :var title="example" :var format="csv"
   (let* ((file (concat title "." format))
          (cmd (format "google docs get --format %S --title %S" format title)))
@@ -126,7 +126,7 @@ Write =data= to a google document named =title=.  If =data= is tabular
 it will be saved to a spreadsheet, otherwise it will be saved as a
 normal document.
 
-#+source: gdoc-write
+#+name: gdoc-write
 #+begin_src emacs-lisp :var title="babel-upload" :var data=fibs(n=10) :results silent
   (let* ((format (if (listp data) "csv" "txt"))
          (tmp-file (make-temp-file "org-babel-google-doc" nil (concat "." format)))
@@ -157,7 +157,7 @@ example usage
   Plot column 2 (y axis) against column 1 (x axis). Columns 3 and
   beyond, if present, are ignored.
 
-#+srcname: R-plot(data=R-plot-example-data)
+#+name: R-plot(data=R-plot-example-data)
 #+begin_src R
 plot(data)
 #+end_src
@@ -169,7 +169,7 @@ plot(data)
 | 4 | 16 |
 | 5 | 25 |
 
-#+lob: R-plot(data=R-plot-example-data)
+#+call: R-plot(data=R-plot-example-data)
 
 #+resname: R-plot(data=R-plot-example-data)
 : nil
@@ -180,7 +180,7 @@ plot(data)
 
 ** Headline references
 
-#+source: headline
+#+name: headline
 #+begin_src emacs-lisp :var headline=top :var file='()
   (save-excursion
     (when file (get-file-buffer file))
@@ -217,7 +217,7 @@ optional.
 | env   | optional environment, default to "tabular" |
 | width | optional width specification string        |
 
-#+srcname: booktabs
+#+name: booktabs
 #+begin_src emacs-lisp :var table='((:head) hline (:body)) :var align='() :var env="tabular" :var width='() :noweb yes :results latex
   (flet ((to-tab (tab)
                  (orgtbl-to-generic
@@ -266,7 +266,7 @@ are optional.
 | foot      | optional "foot" string                                      |
 | lastfoot  | optional "lastfoot" string                                  |
 
-#+srcname: longtable
+#+name: longtable
 #+begin_src emacs-lisp :var table='((:table)) :var align='() :var width='() :var hline="\\hline" :var firsthead='() :var head='() :var foot='() :var lastfoot='() :noweb yes :results latex
   (org-fill-template
    "
@@ -314,7 +314,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
 #+tblname: arguments-notes
 | \multicolumn{2}{l}{This is a footnote to the \emph{arguments} table.} |
 
-#+srcname: booktabs-notes
+#+name: booktabs-notes
 #+begin_src emacs-lisp :var table='((:head) hline (:body)) :var notes='() :var align='() :var env="tabular" :var width='() :var lspace='() :noweb yes :results latex
   (flet ((to-tab (tab)
                  (orgtbl-to-generic
@@ -356,7 +356,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
 | 1 | 2 | 3 |
 | 4 | 5 | 6 |
 
-#+srcname: transpose
+#+name: transpose
 #+begin_src emacs-lisp :var table=transpose-example
   (apply #'mapcar* #'list table)
 #+end_src
@@ -372,7 +372,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
 | 1 | 2 | 3 |
 | a | b | c |
 
-#+source: all-to-string
+#+name: all-to-string
 #+begin_src emacs-lisp :var tbl='()
   (defun all-to-string (tbl)
     (if (listp tbl)
@@ -387,7 +387,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
   (mapcar (lambda (row) (mapcar (lambda (cell) (stringp cell)) row)) tbl)
 #+end_src
 
-#+results:
+#+name:
 | nil | nil | nil |
 | t   | t   | t   |
 
@@ -395,7 +395,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
   (mapcar (lambda (row) (mapcar (lambda (cell) (stringp cell)) row)) tbl)
 #+end_src
 
-#+results:
+#+name:
 | t | t | t |
 | t | t | t |
 
@@ -412,7 +412,7 @@ export. The function uses the Emacs VC commands to interface to the
 local version control system, but has only been tested to work with
 Git. 'limit' is currently unsupported.
 
-#+source: vc-log
+#+name: vc-log
 #+headers: :var limit=-1
 #+headers: :var buf=(buffer-name (current-buffer))
 #+begin_src emacs-lisp
@@ -440,34 +440,34 @@ Git. 'limit' is currently unsupported.
 
 ** Trivial python code blocks
 
-#+srcname: python-identity(a=1)
+#+name: python-identity(a=1)
 #+begin_src python
 a
 #+end_src
 
-#+srcname: python-add(a=1, b=2)
+#+name: python-add(a=1, b=2)
 #+begin_src python
 a + b
 #+end_src
 
 ** Arithmetic
 
-#+source: lob-add
+#+name: lob-add
 #+begin_src emacs-lisp :var a=0 :var b=0
   (+ a b)
 #+end_src
 
-#+source: lob-minus
+#+name: lob-minus
 #+begin_src emacs-lisp :var a=0 :var b=0
   (- a b)
 #+end_src
 
-#+source: lob-times
+#+name: lob-times
 #+begin_src emacs-lisp :var a=0 :var b=0
   (* a b)
 #+end_src
 
-#+source: lob-div
+#+name: lob-div
 #+begin_src emacs-lisp :var a=0 :var b=0
   (/ a b)
 #+end_src
@@ -477,7 +477,7 @@ a + b
 The =elispgantt= source block was sent to the mailing list by Eric
 Fraga.  It was modified slightly by Tom Dye.
  
-#+source: elispgantt
+#+name: elispgantt
 #+begin_src emacs-lisp :var table=gantttest
   (let ((dates "")
         (entries (nthcdr 2 table))

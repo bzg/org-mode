@@ -39,8 +39,9 @@
   (unless (featurep 'org)
     (setq load-path (cons org-lisp-dir load-path))
     (require 'org)
-    (org-babel-do-load-languages
-     'org-babel-load-languages '((sh . t))))
+    (require 'org-id)
+     (org-babel-do-load-languages
+     'org-babel-load-languages '((sh . t) (org . t))))
 
   (let* ((load-path (cons
 		     org-test-dir
@@ -102,6 +103,10 @@ org-test searches this directory up the directory tree.")
 
 
 ;;; Functions for writing tests
+(put 'missing-test-dependency
+     'error-conditions
+     '(error missing-test-dependency))
+
 (defun org-test-for-executable (exe)
   "Throw an error if EXE is not available.
 This can be used at the top of code-block-language specific test
@@ -111,7 +116,7 @@ executable."
 	   (lambda (acc dir)
 	     (or acc (file-exists-p (expand-file-name exe dir))))
 	   exec-path :initial-value nil)
-    (throw 'missing-test-dependency exe)))
+    (signal 'missing-test-dependency (list exe))))
 
 (defun org-test-buffer (&optional file)
   "TODO:  Setup and return a buffer to work with.
@@ -274,9 +279,18 @@ otherwise place the point at the beginning of the inserted text."
 	      (mapc
 	       (lambda (path)
 		 (if (file-directory-p path)
-		   (rld path)
-		   (catch 'missing-test-dependency
-		     (load-file path))))
+		     (rld path)
+		   (condition-case err
+		       (when (string-match "^[A-Za-z].*\\.el$"
+					 (file-name-nondirectory path))
+			 (load-file path))
+		     (missing-test-dependency
+		      (let ((name (intern
+				   (concat "org-missing-dependency/"
+					   (file-name-nondirectory
+					    (file-name-sans-extension path))))))
+			(eval `(ert-deftest ,name ()
+				 :expected-result :failed (should nil))))))))
 	       (directory-files base 'full
 				"^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
     (rld (expand-file-name "lisp" org-test-dir))
@@ -301,13 +315,26 @@ otherwise place the point at the beginning of the inserted text."
 		 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$"))
     (find-file file)))
 
+(defun org-test-update-id-locations ()
+  (org-id-update-id-locations
+   (directory-files
+    org-test-example-dir 'full
+    "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$")))
+
 (defun org-test-run-batch-tests ()
   "Run all defined tests matching \"\\(org\\|ob\\)\".
 Load all test files first."
   (interactive)
-  (org-test-touch-all-examples)
-  (org-test-load)
-  (ert-run-tests-batch-and-exit "\\(org\\|ob\\)"))
+  (let ((org-id-track-globally t)
+	(org-id-locations-file
+	 (convert-standard-filename
+	  (expand-file-name
+	   "testing/.test-org-id-locations"
+	   org-base-dir))))
+    (org-test-touch-all-examples)
+    (org-test-update-id-locations)
+    (org-test-load)
+    (ert-run-tests-batch-and-exit "\\(org\\|ob\\)")))
 
 (defun org-test-run-all-tests ()
   "Run all defined tests matching \"\\(org\\|ob\\)\".

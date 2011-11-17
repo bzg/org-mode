@@ -4438,6 +4438,15 @@ in the #+STARTUP line, the corresponding variable, and the value to
 set this variable to if the option is found.  An optional forth element PUSH
 means to push this value onto the list in the variable.")
 
+(defun org-update-property-plist (key val props)
+  "Update PROPS with KEY and VAL."
+  (if (string= "+" (substring key (- (length key) 1)))
+      (let* ((key (substring key 0 (- (length key) 1)))
+	     (previous (cdr (assoc key props))))
+	(cons (cons key (concat previous " " val))
+	      (org-remove-if (lambda (p) (string= (car p) key)) props)))
+    (cons (cons key val) props)))
+
 (defun org-set-regexps-and-options ()
   "Precompute regular expressions for current buffer."
   (when (eq major-mode 'org-mode)
@@ -4499,8 +4508,9 @@ means to push this value onto the list in the variable.")
 	      (setq prio (org-split-string value " +")))
 	     ((equal key "PROPERTY")
 	      (when (string-match "\\(\\S-+\\)\\s-+\\(.*\\)" value)
-		(push (cons (match-string 1 value) (match-string 2 value))
-		      props)))
+		(setq props (org-update-property-plist (match-string 1 value)
+						       (match-string 2 value)
+						       props))))
 	     ((equal key "FILETAGS")
 	      (when (string-match "\\S-" value)
 		(setq ftags
@@ -4552,8 +4562,9 @@ means to push this value onto the list in the variable.")
 	      (setq value (replace-regexp-in-string
 			   "[\n\r]" " " (match-string 4)))
 	      (when (string-match "\\(\\S-+\\)\\s-+\\(.*\\)" value)
-		(push (cons (match-string 1 value) (match-string 2 value))
-		      props))))))
+		(setq props (org-update-property-plist (match-string 1 value)
+						       (match-string 2 value)
+						       props)))))))
       (org-set-local 'org-use-sub-superscripts scripts)
       (when cat
 	(org-set-local 'org-category (intern cat))
@@ -5425,9 +5436,8 @@ will be prompted for."
 	     '(font-lock-fontified t face org-meta-line))
 	    t)
 	   ((or (member dc1 '("begin:" "end:" "caption:" "label:"
-			      "orgtbl:" "tblfm:" "tblname:" "result:"
-			      "results:" "source:" "srcname:" "call:"
-			      "data:" "header:" "headers:"))
+			      "orgtbl:" "tblfm:" "tblname:" "results:"
+			      "call:" "header:" "headers:"))
 		(and (match-end 4) (equal dc3 "attr")))
 	    (add-text-properties
 	     beg (match-end 0)
@@ -6616,8 +6626,7 @@ DATA should have been made by `org-outline-overlay-data'."
 	(widen)
 	(show-all)
 	(mapc (lambda (c)
-		(setq o (make-overlay (car c) (cdr c)))
-		(overlay-put o 'invisible 'outline))
+		(outline-flag-region (car c) (cdr c) t))
 	      data)))))
 
 ;;; Folding of blocks
@@ -10998,10 +11007,8 @@ This function can be used in a hook."
     "BEGIN_CENTER" "END_CENTER"
     "BEGIN_SRC" "END_SRC"
     "BEGIN_RESULT" "END_RESULT"
-    "SOURCE:" "SRCNAME:" "FUNCTION:"
-    "RESULTS:" "DATA:"
+    "NAME:" "RESULTS:"
     "HEADER:" "HEADERS:"
-    "BABEL:"
     "CATEGORY:" "COLUMNS:" "PROPERTY:"
     "CAPTION:" "LABEL:"
     "SETUPFILE:"
@@ -14087,17 +14094,23 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 	  (cdr (assoc property (org-entry-properties nil 'special property)))
 	(let ((range (unless (org-before-first-heading-p)
 		       (org-get-property-block))))
-	  (if (and range
-		   (goto-char (car range))
-		   (re-search-forward
-		    (org-re-property property)
-		    (cdr range) t))
-	      ;; Found the property, return it.
-	      (if (match-end 1)
-		  (if literal-nil
-		      (org-match-string-no-properties 1)
-		    (org-not-nil (org-match-string-no-properties 1)))
-		"")))))))
+	  (when (and range (goto-char (car range)))
+	    ((lambda (val) (when val (if literal-nil val (org-not-nil val))))
+	     (cond
+	      ((re-search-forward
+		(org-re-property property) (cdr range) t)
+	       (if (match-end 1) (org-match-string-no-properties 1) ""))
+	      ((re-search-forward
+		(org-re-property (concat property "+")) (cdr range) t)
+	       (cdr (assoc
+		     property
+		     (org-update-property-plist
+		      (concat property "+")
+		      (if (match-end 1) (org-match-string-no-properties 1) "")
+		      (list (or (assoc property org-file-properties)
+				(assoc property org-global-properties)
+				(assoc property org-global-properties-fixed)
+				))))))))))))))
 
 (defun org-property-or-variable-value (var &optional inherit)
   "Check if there is a property fixing the value of VAR.
