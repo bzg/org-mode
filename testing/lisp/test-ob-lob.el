@@ -94,6 +94,14 @@
 	;; 10 should export
 	(should (re-search-forward "10" nil t))))))
 
+(ert-deftest test-ob-lob/do-not-eval-lob-lines-in-example-blocks-on-export ()
+  (org-test-with-temp-text-in-file "
+for export
+#+begin_example
+#+call: rubbish()
+#+end_example"
+    (org-export-as-html nil)))
+
 (provide 'test-ob-lob)
 
 ;;; test-ob-lob.el ends here

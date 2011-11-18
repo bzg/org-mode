@@ -184,7 +184,7 @@ options are taken from `org-babel-default-header-args'."
     (goto-char start)
     (while (and (< (point) end)
 		(re-search-forward org-babel-lob-one-liner-regexp nil t))
-      (unless (and (match-string 12) (org-babel-in-example-or-verbatim))
+      (unless (org-babel-in-example-or-verbatim)
 	(let* ((lob-info (org-babel-lob-get-info))
 	       (inlinep (match-string 11))
 	       (inline-start (match-end 11))
