@@ -3636,7 +3636,7 @@ given in `org-agenda-start-on-weekday'."
 	      (setq rtn (apply 'org-agenda-get-day-entries
 			       file date
 			       org-agenda-entry-types)))))
-	  (setq rtnall (append rtnall rtn))))
+	  (setq rtnall (append rtnall rtn)))) ;; all entries
       (if org-agenda-include-diary
 	  (let ((org-agenda-search-headline-for-time t))
 	    (require 'diary-lib)
@@ -3658,7 +3658,7 @@ given in `org-agenda-start-on-weekday'."
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt)
 	    (when todayp
 	      (put-text-property s (1- (point)) 'org-today t))
-	    (if rtnall (insert
+	    (if rtnall (insert ;; all entries
 			(org-finalize-agenda-entries
 			 (org-agenda-add-time-grid-maybe
 			  rtnall ndays todayp))
@@ -4721,7 +4721,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 
 (defun org-agenda-get-timestamps ()
   "Return the date stamp information for agenda display."
-  (let* ((props (list 'face nil
+  (let* ((props (list 'face 'org-agenda-calendar-event
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
@@ -4822,7 +4822,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 (defun org-agenda-get-sexps ()
   "Return the sexp information for agenda display."
   (require 'diary-lib)
-  (let* ((props (list 'mouse-face 'highlight
+  (let* ((props (list 'face 'org-agenda-calendar-sexp
+		      'mouse-face 'highlight
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
