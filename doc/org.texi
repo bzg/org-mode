@@ -12243,7 +12243,8 @@ Argument values can be indexed in a manner similar to arrays (see @ref{var,
 Indexable variable values}).
 
 The following syntax is used to pass arguments to code blocks using the
-@code{:var} header argument.
+@code{:var} header argument.  Note that spaces around the @code{=} sign are
+not permitted.
 
 @example
 :var name=assign
@@ -12297,7 +12298,7 @@ carried through to the source code block)
 
 @item code block without arguments
 a code block name (from the example above), as assigned by @code{#+NAME:},
-followed by parentheses
+optionally followed by parentheses
 
 @example
 #+BEGIN_SRC emacs-lisp :var length=table-length()
@@ -12352,19 +12353,6 @@ on two lines
 
 @end example
 
-@item results block
-named results blocks, such as the results of the previous example, are passed
-intact
-
-@example
-#+BEGIN_SRC emacs-lisp :var x=read-literal-example
-  (concatenate 'string x " Again.")
-#+END_SRC
-
-#+results:
-: A literal example
-: on two lines for you. Again.
-@end example
 @end table
 
 @subsubheading Alternate argument syntax
