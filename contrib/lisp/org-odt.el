@@ -908,14 +908,13 @@ styles congruent with the ODF-1.2 specification."
 (defun org-odt-end-footnote-definition (n)
   (org-lparse-end-paragraph))
 
-(defun org-odt-begin-toc (lang-specific-heading)
+(defun org-odt-begin-toc (lang-specific-heading max-level)
   (insert
    (format "
     <text:table-of-content text:style-name=\"Sect2\" text:protected=\"true\" text:name=\"Table of Contents1\">
-     <text:table-of-content-source text:outline-level=\"10\">
+     <text:table-of-content-source text:outline-level=\"%d\">
       <text:index-title-template text:style-name=\"Contents_20_Heading\">%s</text:index-title-template>
-" lang-specific-heading))
-
+" max-level lang-specific-heading))
   (loop for level from 1 upto 10
 	do (insert (format
 		    "

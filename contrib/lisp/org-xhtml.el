@@ -1067,7 +1067,7 @@ that uses these same face definitions."
   (org-lparse-begin-list-item 'unordered)
   (insert toc-entry))
 
-(defun org-xhtml-begin-toc (lang-specific-heading)
+(defun org-xhtml-begin-toc (lang-specific-heading max-level)
   (org-lparse-insert-tag "<div id=\"table-of-contents\">")
   (insert
    (org-lparse-format 'HEADING lang-specific-heading

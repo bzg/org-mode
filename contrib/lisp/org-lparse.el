@@ -1886,7 +1886,7 @@ See `org-xhtml-entity-format-callbacks-alist' for more information."
     (with-temp-buffer
       (org-lparse-bind-local-variables opt-plist)
       (erase-buffer)
-      (org-lparse-begin 'TOC (nth 3 (plist-get opt-plist :lang-words)))
+      (org-lparse-begin 'TOC (nth 3 (plist-get opt-plist :lang-words)) umax-toc)
       (setq
        lines
        (mapcar
