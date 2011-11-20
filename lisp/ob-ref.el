@@ -66,6 +66,9 @@
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
 
+(defcustom org-babel-update-intermediate nil
+  "Update the in-buffer results of code blocks executed to resolve references.")
+
 (defun org-babel-ref-parse (assignment)
   "Parse a variable ASSIGNMENT in a header argument.
 If the right hand side of the assignment has a literal value
@@ -189,7 +192,9 @@ the variable."
 		  (table        (org-babel-read-table))
 		  (list         (org-babel-read-list))
 		  (file         (org-babel-read-link))
-		  (source-block (org-babel-execute-src-block nil nil params))
+		  (source-block (org-babel-execute-src-block
+				 nil nil (if org-babel-update-intermediate
+					     nil params)))
 		  (lob          (org-babel-execute-src-block
 				 nil lob-info params))
 		  (id           (org-babel-ref-headline-body)))))

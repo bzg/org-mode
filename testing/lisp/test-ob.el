@@ -504,6 +504,33 @@ on two lines
 "
     (should (= 10 (org-babel-execute-src-block)))))
 
+(ert-deftest test-ob/org-babel-update-intermediate ()
+  (org-test-with-temp-text "#+name: foo
+#+begin_src emacs-lisp
+  2
+#+end_src
+
+#+results: foo
+: 4
+
+#+begin_src emacs-lisp :var it=foo
+  (+ it 1)
+#+end_src"
+    (let ((org-babel-update-intermediate nil))
+      (goto-char (point-min))
+      (org-babel-next-src-block 2)
+      (should (= 3 (org-babel-execute-src-block)))
+      (goto-char (point-min))
+      (forward-line 6)
+      (should (looking-at ": 4")))
+    (let ((org-babel-update-intermediate t))
+      (goto-char (point-min))
+      (org-babel-next-src-block 2)
+      (should (= 3 (org-babel-execute-src-block)))
+      (goto-char (point-min))
+      (forward-line 6)
+      (should (looking-at ": 2")))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
