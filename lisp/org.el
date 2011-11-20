@@ -5437,7 +5437,7 @@ will be prompted for."
 	    t)
 	   ((or (member dc1 '("begin:" "end:" "caption:" "label:"
 			      "orgtbl:" "tblfm:" "tblname:" "results:"
-			      "call:" "header:" "headers:"))
+			      "call:" "header:" "headers:" "name:"))
 		(and (match-end 4) (equal dc3 "attr")))
 	    (add-text-properties
 	     beg (match-end 0)
