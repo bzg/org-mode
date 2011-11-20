@@ -12243,8 +12243,7 @@ Argument values can be indexed in a manner similar to arrays (see @ref{var,
 Indexable variable values}).
 
 The following syntax is used to pass arguments to code blocks using the
-@code{:var} header argument.  Note that spaces around the @code{=} sign are
-not permitted.
+@code{:var} header argument.
 
 @example
 :var name=assign
