@@ -1696,7 +1696,8 @@ from the `before-change-functions' in the current buffer."
   "Clock out if the current entry contains the running clock.
 This is used to stop the clock after a TODO entry is marked DONE,
 and is only done if the variable `org-clock-out-when-done' is not nil."
-  (when (and org-clock-out-when-done
+  (when (and (org-clocking-p)
+	     org-clock-out-when-done
 	     (or (and (eq t org-clock-out-when-done)
 		      (member state org-done-keywords))
 		 (and (listp org-clock-out-when-done)
