@@ -19660,6 +19660,18 @@ Taken from `count' in cl-seq.el with all keyword arguments removed."
       (if (funcall predicate e) (push e res)))
     (nreverse res)))
 
+(defun org-reduce (cl-func cl-seq &rest cl-keys)
+  "Reduce two-argument FUNCTION across SEQ.
+Taken from `reduce' in cl-seq.el with all keyword arguments but
+\":initial-value\" removed."
+  (let ((cl-accum (cond ((memq :initial-value cl-keys)
+                         (cadr (memq :initial-value cl-keys)))
+                        (cl-seq (pop cl-seq))
+                        (t (funcall cl-func)))))
+    (while cl-seq
+      (setq cl-accum (funcall cl-func cl-accum (pop cl-seq))))
+    cl-accum))
+
 (defun org-back-over-empty-lines ()
   "Move backwards over whitespace, to the beginning of the first empty line.
 Returns the number of empty lines passed."
