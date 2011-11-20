@@ -497,6 +497,13 @@ on two lines
     (org-babel-next-src-block 3)
     (should (equal (org-babel-execute-src-block) "foo"))))
 
+(ert-deftest test-ob/allow-spaces-around-=-in-var-specs ()
+  (org-test-with-temp-text "#+begin_src emacs-lisp :var a = 1 b = 2 c= 3 d =4
+  (+ a b c d)
+#+end_src
+"
+    (should (= 10 (org-babel-execute-src-block)))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

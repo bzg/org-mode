@@ -1151,6 +1151,18 @@ instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
 	    (string-to-list string))
       (nreverse (cons (apply #'string (nreverse partial)) lst)))))
 
+(defun org-babel-join-splits-near-ch (ch list)
+  "Join splits where \"=\" is on either end of the split."
+  (flet ((last= (str) (= ch (aref str (1- (length str)))))
+         (first= (str) (= ch (aref str 0))))
+    (reverse
+     (org-reduce (lambda (acc el)
+               (let ((head (car acc)))
+                 (if (and head (or (last= head) (first= el)))
+                     (cons (concat head el) (cdr acc))
+                   (cons el acc))))
+             list :initial-value nil))))
+
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
   (when (> (length arg-string) 0)
@@ -1179,7 +1191,8 @@ shown below.
     (mapc (lambda (pair)
 	    (if (eq (car pair) :var)
 		(mapcar (lambda (v) (push (cons :var (org-babel-trim v)) results))
-			(org-babel-balanced-split (cdr pair) 32))
+			(org-babel-join-splits-near-ch
+			 61 (org-babel-balanced-split (cdr pair) 32)))
 	      (push pair results)))
 	  header-arguments)
     (nreverse results)))
