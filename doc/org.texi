@@ -4706,18 +4706,19 @@ and properties.  For a complete description with many examples, see
 @chapter Properties and columns
 @cindex properties
 
-Properties are a set of key-value pairs associated with an entry.  There
-are two main applications for properties in Org-mode.  First, properties
-are like tags, but with a value.  Second, you can use properties to
-implement (very basic) database capabilities in an Org buffer.  For
-an example of the first application, imagine maintaining a file where
+A property is a key-value pair associated with an entry.  Properties can be
+set so they are associated with a single entry, with every entry in a tree,
+or with every entry in an Org-mode file.
+
+There are two main applications for properties in Org-mode.  First,
+properties are like tags, but with a value.  Imagine maintaining a file where
 you document bugs and plan releases for a piece of software.  Instead of
-using tags like @code{:release_1:}, @code{:release_2:}, one can use a
+using tags like @code{:release_1:}, @code{:release_2:}, you can use a
 property, say @code{:Release:}, that in different subtrees has different
-values, such as @code{1.0} or @code{2.0}.  For an example of the second
-application of properties, imagine keeping track of your music CDs,
-where properties could be things such as the album, artist, date of
-release, number of tracks, and so on.
+values, such as @code{1.0} or @code{2.0}.  Second, you can use properties to
+implement (very basic) database capabilities in an Org buffer.  Imagine
+keeping track of your music CDs, where properties could be things such as the
+album, artist, date of release, number of tracks, and so on.
 
 Properties can be conveniently edited and viewed in column view
 (@pxref{Column view}).
@@ -4736,7 +4737,8 @@ Properties can be conveniently edited and viewed in column view
 @cindex property syntax
 @cindex drawer, for properties
 
-Properties are key-value pairs.  They need to be inserted into a special
+Properties are key-value pairs.  When they are associated with a single entry
+or with a tree they need to be inserted into a special
 drawer (@pxref{Drawers}) with the name @code{PROPERTIES}.  Each property
 is specified on a single line, with the key (surrounded by colons)
 first, and the value after it.  Here is an example:
@@ -4753,6 +4755,10 @@ first, and the value after it.  Here is an example:
     :NDisks:    1
     :END:
 @end example
+
+Depending on the value of @code{org-use-property-inheritance}, a property set
+this way will either be associated with a single entry, or the sub-tree
+defined by the entry, see @ref{Property Inheritance}.
 
 You may define the allowed values for a particular property @samp{:Xyz:}
 by setting a property @samp{:Xyz_ALL:}.  This special property is
@@ -4776,7 +4782,25 @@ file, use a line like
 @cindex #+PROPERTY
 @example
 #+PROPERTY: NDisks_ALL 1 2 3 4
+#+PROPERTY: var foo=1
 @end example
+
+If you want to accumulate properties that can be inherited by any entry in a
+file, append a @code{+} to the property name
+@cindex property, +
+@example
+#+PROPERTY: var+ bar=2
+@end example
+
+It is also possible to accumulate properties for a single entry
+@cindex property, +
+@example
+* Babel code
+  :PROPERTIES:
+  :var+: baz=3
+  :END:
+@end example
+Note that a property can only have one accumulation at the entry level.
 
 @vindex org-global-properties
 Property values set with the global variable
