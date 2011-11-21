@@ -12078,9 +12078,8 @@ be removed."
 		  default-input (and ts (org-get-compact-tod ts))))))
       (when what
 	(setq time
-	      (if (and (stringp time)
-		       (string-match "^[-+]+[0-9]" time))
-		  ;; This is a relative time, set the proper date
+	      (if (stringp time)
+		  ;; This is a string (relative or absolute), set proper date
 		  (apply 'encode-time
 			 (org-read-date-analyze
 			  time default-time (decode-time default-time)))
@@ -14807,7 +14806,7 @@ The prompt will suggest to enter an ISO date, but you can also enter anything
 which will at least partially be understood by `parse-time-string'.
 Unrecognized parts of the date will default to the current day, month, year,
 hour and minute.  If this command is called to replace a timestamp at point,
-of to enter the second timestamp of a range, the default time is taken
+or to enter the second timestamp of a range, the default time is taken
 from the existing stamp.  Furthermore, the command prefers the future,
 so if you are giving a date where the year is not given, and the day-month
 combination is already past in the current year, it will assume you
