@@ -4758,7 +4758,7 @@ first, and the value after it.  Here is an example:
 
 Depending on the value of @code{org-use-property-inheritance}, a property set
 this way will either be associated with a single entry, or the sub-tree
-defined by the entry, see @ref{Property Inheritance}.
+defined by the entry, see @ref{Property inheritance}.
 
 You may define the allowed values for a particular property @samp{:Xyz:}
 by setting a property @samp{:Xyz_ALL:}.  This special property is
@@ -4782,25 +4782,38 @@ file, use a line like
 @cindex #+PROPERTY
 @example
 #+PROPERTY: NDisks_ALL 1 2 3 4
-#+PROPERTY: var foo=1
 @end example
 
-If you want to accumulate properties that can be inherited by any entry in a
-file, append a @code{+} to the property name
+If you want to add to the value of an existing property, append a @code{+} to
+the property name.  The following results in the property @code{var} having
+the value ``foo=1 bar=2''.
 @cindex property, +
 @example
+#+PROPERTY: var  foo=1
 #+PROPERTY: var+ bar=2
 @end example
 
-It is also possible to accumulate properties for a single entry
+It is also possible to add to the values of inherited properties.  The
+following results in the @code{genres} property having the value ``Classic
+Baroque'' under the @code{Goldberg Variations} subtree.
 @cindex property, +
 @example
-* Babel code
-  :PROPERTIES:
-  :var+: baz=3
-  :END:
+* CD collection
+** Classic
+    :PROPERTIES:
+    :GENRES: Classic
+    :END:
+*** Goldberg Variations
+    :PROPERTIES:
+    :Title:     Goldberg Variations
+    :Composer:  J.S. Bach
+    :Artist:    Glen Gould
+    :Publisher: Deutsche Grammophon
+    :NDisks:    1
+    :GENRES+:   Baroque
+    :END:
 @end example
-Note that a property can only have one accumulation at the entry level.
+Note that a property can only have one entry per Drawer.
 
 @vindex org-global-properties
 Property values set with the global variable
