@@ -1018,8 +1018,11 @@ portions of results lines."
     (beginning-of-line)
     (if (re-search-forward org-babel-result-regexp nil t)
         (let ((start (progn (beginning-of-line 2) (- (point) 1)))
-              (end (progn (goto-char (- (org-babel-result-end) 1)) (point)))
-              ov)
+	      (end (progn
+		     (while (looking-at org-babel-multi-line-header-regexp)
+		       (forward-line 1))
+		     (goto-char (- (org-babel-result-end) 1)) (point)))
+	      ov)
           (if (memq t (mapcar (lambda (overlay)
                                 (eq (overlay-get overlay 'invisible)
 				    'org-babel-hide-result))
