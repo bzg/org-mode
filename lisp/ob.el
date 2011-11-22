@@ -252,12 +252,15 @@ of potentially harmful code."
   (let* ((eval (or (cdr (assoc :eval (nth 2 info)))
 		   (when (assoc :noeval (nth 2 info)) "no")))
          (query (cond ((equal eval "query") t)
+		      ((and org-current-export-file
+			    (equal eval "query-export")) t)
                       ((functionp org-confirm-babel-evaluate)
                        (funcall org-confirm-babel-evaluate
                                 (nth 0 info) (nth 1 info)))
                       (t org-confirm-babel-evaluate))))
     (if (or (equal eval "never") (equal eval "no")
-	    (and (equal eval "non-export") org-current-export-file)
+	    (and org-current-export-file (or (equal eval "no-export")
+					     (equal eval "never-export")))
 	    (and query
 		 (not (yes-or-no-p
 		       (format "Evaluate this%scode block%son your system? "
@@ -266,7 +269,8 @@ of potentially harmful code."
 				   (format " (%s) " (nth 4 info)) " "))))))
 	(prog1 nil (message "Evaluation %s"
 			    (if (or (equal eval "never") (equal eval "no")
-				    (equal eval "non-export"))
+				    (equal eval "no-export")
+				    (equal eval "never-export"))
 				"Disabled" "Aborted")))
       t)))
 

@@ -531,6 +531,27 @@ on two lines
       (forward-line 6)
       (should (looking-at ": 2")))))
 
+(ert-deftest test-ob/eval-header-argument ()
+  (flet ((check-eval (eval runp)
+	   (org-test-with-temp-text (format "#+begin_src emacs-lisp :eval %s
+  (setq foo :evald)
+#+end_src" eval)
+	     (let ((foo :not-run))
+	       (if runp
+		   (progn (should (org-babel-execute-src-block))
+			  (should (eq foo :evald)))
+		 (progn (should-not (org-babel-execute-src-block))
+			(should-not (eq foo :evald))))))))
+    (check-eval "never" nil)
+    (check-eval "no" nil)
+    (check-eval "never-export" t)
+    (check-eval "no-export" t)
+    (let ((org-current-export-file "something"))
+      (check-eval "never" nil)
+      (check-eval "no" nil)
+      (check-eval "never-export" nil)
+      (check-eval "no-export" nil))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
