@@ -257,6 +257,7 @@ of potentially harmful code."
                                 (nth 0 info) (nth 1 info)))
                       (t org-confirm-babel-evaluate))))
     (if (or (equal eval "never") (equal eval "no")
+	    (and (equal eval "non-export") org-current-export-file)
 	    (and query
 		 (not (yes-or-no-p
 		       (format "Evaluate this%scode block%son your system? "
@@ -264,7 +265,8 @@ of potentially harmful code."
 			       (if (nth 4 info)
 				   (format " (%s) " (nth 4 info)) " "))))))
 	(prog1 nil (message "Evaluation %s"
-			    (if (or (equal eval "never") (equal eval "no"))
+			    (if (or (equal eval "never") (equal eval "no")
+				    (equal eval "non-export"))
 				"Disabled" "Aborted")))
       t)))
 
