@@ -11692,8 +11692,8 @@ The following sections describe Org-mode's code block handling facilities.
 @cindex #+BEGIN_SRC
 
 Live code blocks can be specified with a @samp{src} block or
-inline@footnote{Note that @samp{src} blocks may be inserted using Org-mode's
-@ref{Easy Templates} system}.  The structure of a @samp{src} block is
+inline.@footnote{Note that @samp{src} blocks may be inserted using Org-mode's
+@ref{Easy Templates} system}  The structure of a @samp{src} block is
 
 @example
 #+NAME: <name>
@@ -12125,13 +12125,15 @@ syntax}), which can be set on a buffer-wide or per-heading basis.  An example
 of setting a header argument for all code blocks in a buffer is
 
 @example
-#+property: tangle yes
+#+PROPERTY: tangle yes
 @end example
 
+@vindex org-use-property-inheritance
 When properties are used to set default header arguments, they are looked up
-with inheritance, so the value of the @code{:cache} header argument will default
-to @code{yes} in all code blocks in the subtree rooted at the following
-heading:
+with inheritance, regardless of the value of
+@code{org-use-property-inheritance}.  In the following example the value of
+the @code{:cache} header argument will default to @code{yes} in all code
+blocks in the subtree rooted at the following heading:
 
 @example
 * outline header
