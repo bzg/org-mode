@@ -5437,7 +5437,7 @@ will be prompted for."
 	    t)
 	   ((or (member dc1 '("begin:" "end:" "caption:" "label:"
 			      "orgtbl:" "tblfm:" "tblname:" "results:"
-			      "call:" "header:" "headers:"))
+			      "call:" "header:" "headers:" "name:"))
 		(and (match-end 4) (equal dc3 "attr")))
 	    (add-text-properties
 	     beg (match-end 0)
@@ -19660,6 +19660,18 @@ Taken from `count' in cl-seq.el with all keyword arguments removed."
       (setq e (pop seq))
       (if (funcall predicate e) (push e res)))
     (nreverse res)))
+
+(defun org-reduce (cl-func cl-seq &rest cl-keys)
+  "Reduce two-argument FUNCTION across SEQ.
+Taken from `reduce' in cl-seq.el with all keyword arguments but
+\":initial-value\" removed."
+  (let ((cl-accum (cond ((memq :initial-value cl-keys)
+                         (cadr (memq :initial-value cl-keys)))
+                        (cl-seq (pop cl-seq))
+                        (t (funcall cl-func)))))
+    (while cl-seq
+      (setq cl-accum (funcall cl-func cl-accum (pop cl-seq))))
+    cl-accum))
 
 (defun org-back-over-empty-lines ()
   "Move backwards over whitespace, to the beginning of the first empty line.

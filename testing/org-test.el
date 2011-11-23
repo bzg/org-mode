@@ -180,6 +180,7 @@ files."
      (goto-char (point-min))
      (re-search-forward (regexp-quote ,marker))
      ,@body))
+(def-edebug-spec org-test-at-marker (form form body))
 
 (defmacro org-test-with-temp-text (text &rest body)
   "Run body in a temporary buffer with Org-mode as the active
@@ -197,6 +198,23 @@ otherwise place the point at the beginning of the inserted text."
 	    `(progn (insert ,inside-text)
 		    (goto-char (point-min)))))
        ,@body)))
+(def-edebug-spec org-test-with-temp-text (form body))
+
+(defmacro org-test-with-temp-text-in-file (text &rest body)
+  "Run body in a temporary file buffer with Org-mode as the active mode."
+  (declare (indent 1))
+  (let ((file (make-temp-file "org-test"))
+	(inside-text (if (stringp text) text (eval text)))
+	(results (gensym)))
+    `(let ((kill-buffer-query-functions nil) ,results)
+       (with-temp-file ,file (insert ,inside-text))
+       (find-file ,file)
+       (org-mode)
+       (setq ,results ,@body)
+       (save-buffer) (kill-buffer)
+       (delete-file ,file)
+       ,results)))
+(def-edebug-spec org-test-with-temp-text-in-file (form body))
 
 
 ;;; Navigation Functions

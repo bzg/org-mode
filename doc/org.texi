@@ -4706,18 +4706,19 @@ and properties.  For a complete description with many examples, see
 @chapter Properties and columns
 @cindex properties
 
-Properties are a set of key-value pairs associated with an entry.  There
-are two main applications for properties in Org-mode.  First, properties
-are like tags, but with a value.  Second, you can use properties to
-implement (very basic) database capabilities in an Org buffer.  For
-an example of the first application, imagine maintaining a file where
+A property is a key-value pair associated with an entry.  Properties can be
+set so they are associated with a single entry, with every entry in a tree,
+or with every entry in an Org-mode file.
+
+There are two main applications for properties in Org-mode.  First,
+properties are like tags, but with a value.  Imagine maintaining a file where
 you document bugs and plan releases for a piece of software.  Instead of
-using tags like @code{:release_1:}, @code{:release_2:}, one can use a
+using tags like @code{:release_1:}, @code{:release_2:}, you can use a
 property, say @code{:Release:}, that in different subtrees has different
-values, such as @code{1.0} or @code{2.0}.  For an example of the second
-application of properties, imagine keeping track of your music CDs,
-where properties could be things such as the album, artist, date of
-release, number of tracks, and so on.
+values, such as @code{1.0} or @code{2.0}.  Second, you can use properties to
+implement (very basic) database capabilities in an Org buffer.  Imagine
+keeping track of your music CDs, where properties could be things such as the
+album, artist, date of release, number of tracks, and so on.
 
 Properties can be conveniently edited and viewed in column view
 (@pxref{Column view}).
@@ -4736,7 +4737,8 @@ Properties can be conveniently edited and viewed in column view
 @cindex property syntax
 @cindex drawer, for properties
 
-Properties are key-value pairs.  They need to be inserted into a special
+Properties are key-value pairs.  When they are associated with a single entry
+or with a tree they need to be inserted into a special
 drawer (@pxref{Drawers}) with the name @code{PROPERTIES}.  Each property
 is specified on a single line, with the key (surrounded by colons)
 first, and the value after it.  Here is an example:
@@ -4753,6 +4755,10 @@ first, and the value after it.  Here is an example:
     :NDisks:    1
     :END:
 @end example
+
+Depending on the value of @code{org-use-property-inheritance}, a property set
+this way will either be associated with a single entry, or the sub-tree
+defined by the entry, see @ref{Property inheritance}.
 
 You may define the allowed values for a particular property @samp{:Xyz:}
 by setting a property @samp{:Xyz_ALL:}.  This special property is
@@ -4777,6 +4783,37 @@ file, use a line like
 @example
 #+PROPERTY: NDisks_ALL 1 2 3 4
 @end example
+
+If you want to add to the value of an existing property, append a @code{+} to
+the property name.  The following results in the property @code{var} having
+the value ``foo=1 bar=2''.
+@cindex property, +
+@example
+#+PROPERTY: var  foo=1
+#+PROPERTY: var+ bar=2
+@end example
+
+It is also possible to add to the values of inherited properties.  The
+following results in the @code{genres} property having the value ``Classic
+Baroque'' under the @code{Goldberg Variations} subtree.
+@cindex property, +
+@example
+* CD collection
+** Classic
+    :PROPERTIES:
+    :GENRES: Classic
+    :END:
+*** Goldberg Variations
+    :PROPERTIES:
+    :Title:     Goldberg Variations
+    :Composer:  J.S. Bach
+    :Artist:    Glen Gould
+    :Publisher: Deutsche Grammophon
+    :NDisks:    1
+    :GENRES+:   Baroque
+    :END:
+@end example
+Note that a property can only have one entry per Drawer.
 
 @vindex org-global-properties
 Property values set with the global variable
@@ -12297,7 +12334,7 @@ carried through to the source code block)
 
 @item code block without arguments
 a code block name (from the example above), as assigned by @code{#+NAME:},
-followed by parentheses
+optionally followed by parentheses
 
 @example
 #+BEGIN_SRC emacs-lisp :var length=table-length()
@@ -12352,19 +12389,6 @@ on two lines
 
 @end example
 
-@item results block
-named results blocks, such as the results of the previous example, are passed
-intact
-
-@example
-#+BEGIN_SRC emacs-lisp :var x=read-literal-example
-  (concatenate 'string x " Again.")
-#+END_SRC
-
-#+results:
-: A literal example
-: on two lines for you. Again.
-@end example
 @end table
 
 @subsubheading Alternate argument syntax
@@ -13088,12 +13112,23 @@ permissions of the tangled file are set to make it executable.
 @node eval,  , shebang, Specific header arguments
 @subsubsection @code{:eval}
 The @code{:eval} header argument can be used to limit the evaluation of
-specific code blocks.  @code{:eval} accepts two arguments ``never'' and
-``query''.  @code{:eval never} (or @code{:eval no}) will ensure that a code
-block is never evaluated, this can be useful for protecting against the
-evaluation of dangerous code blocks.  @code{:eval query} will require a query
-for every execution of a code block regardless of the value of the
-@code{org-confirm-babel-evaluate} variable.
+specific code blocks.  The @code{:eval} header argument can be useful for
+protecting against the evaluation of dangerous code blocks or to ensure that
+evaluation will require a query regardless of the value of the
+@code{org-confirm-babel-evaluate} variable.  The possible values of
+@code{:eval} and their effects are shown below.
+
+@table @code
+@item never or no
+The code block will not be evaluated under any circumstances.
+@item query
+Evaluation of the code block will require a query.
+@item never-export or no-export
+The code block will not be evaluated during export but may still be called
+interactively.
+@item query-export
+Evaluation of the code block during export will require a query.
+@end table
 
 If this header argument is not set then evaluation is determined by the value
 of the @code{org-confirm-babel-evaluate} variable see @ref{Code evaluation

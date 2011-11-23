@@ -50,7 +50,6 @@
 
 (ert-deftest ob-fortran/input-var ()
   "Test :var"
-  :expected-result :failed
   (org-test-at-id "d8d1dfd3-5f0c-48fe-b55d-777997e02242"
     (org-babel-next-src-block)
     (should (= 15 (org-babel-execute-src-block)))))

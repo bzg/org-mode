@@ -252,11 +252,15 @@ of potentially harmful code."
   (let* ((eval (or (cdr (assoc :eval (nth 2 info)))
 		   (when (assoc :noeval (nth 2 info)) "no")))
          (query (cond ((equal eval "query") t)
+		      ((and org-current-export-file
+			    (equal eval "query-export")) t)
                       ((functionp org-confirm-babel-evaluate)
                        (funcall org-confirm-babel-evaluate
                                 (nth 0 info) (nth 1 info)))
                       (t org-confirm-babel-evaluate))))
     (if (or (equal eval "never") (equal eval "no")
+	    (and org-current-export-file (or (equal eval "no-export")
+					     (equal eval "never-export")))
 	    (and query
 		 (not (yes-or-no-p
 		       (format "Evaluate this%scode block%son your system? "
@@ -264,7 +268,9 @@ of potentially harmful code."
 			       (if (nth 4 info)
 				   (format " (%s) " (nth 4 info)) " "))))))
 	(prog1 nil (message "Evaluation %s"
-			    (if (or (equal eval "never") (equal eval "no"))
+			    (if (or (equal eval "never") (equal eval "no")
+				    (equal eval "no-export")
+				    (equal eval "never-export"))
 				"Disabled" "Aborted")))
       t)))
 
@@ -1012,8 +1018,11 @@ portions of results lines."
     (beginning-of-line)
     (if (re-search-forward org-babel-result-regexp nil t)
         (let ((start (progn (beginning-of-line 2) (- (point) 1)))
-              (end (progn (goto-char (- (org-babel-result-end) 1)) (point)))
-              ov)
+	      (end (progn
+		     (while (looking-at org-babel-multi-line-header-regexp)
+		       (forward-line 1))
+		     (goto-char (- (org-babel-result-end) 1)) (point)))
+	      ov)
           (if (memq t (mapcar (lambda (overlay)
                                 (eq (overlay-get overlay 'invisible)
 				    'org-babel-hide-result))
@@ -1151,6 +1160,18 @@ instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
 	    (string-to-list string))
       (nreverse (cons (apply #'string (nreverse partial)) lst)))))
 
+(defun org-babel-join-splits-near-ch (ch list)
+  "Join splits where \"=\" is on either end of the split."
+  (flet ((last= (str) (= ch (aref str (1- (length str)))))
+         (first= (str) (= ch (aref str 0))))
+    (reverse
+     (org-reduce (lambda (acc el)
+               (let ((head (car acc)))
+                 (if (and head (or (last= head) (first= el)))
+                     (cons (concat head el) (cdr acc))
+                   (cons el acc))))
+             list :initial-value nil))))
+
 (defun org-babel-parse-header-arguments (arg-string)
   "Parse a string of header arguments returning an alist."
   (when (> (length arg-string) 0)
@@ -1179,7 +1200,8 @@ shown below.
     (mapc (lambda (pair)
 	    (if (eq (car pair) :var)
 		(mapcar (lambda (v) (push (cons :var (org-babel-trim v)) results))
-			(org-babel-balanced-split (cdr pair) 32))
+			(org-babel-join-splits-near-ch
+			 61 (org-babel-balanced-split (cdr pair) 32)))
 	      (push pair results)))
 	  header-arguments)
     (nreverse results)))

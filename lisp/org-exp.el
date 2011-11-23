@@ -2151,9 +2151,10 @@ can work correctly."
 		   (save-excursion (outline-next-heading) (point)))))
 	(when (re-search-forward "^[ \t]*[^|# \t\r\n].*\n" end t)
 	  ;; Mark the line so that it will not be exported as normal text.
-	  (org-unmodified
-	   (add-text-properties (match-beginning 0) (match-end 0)
-				(list :org-license-to-kill t)))
+	  (unless (org-in-block-p org-list-forbidden-blocks)
+	    (org-unmodified
+	     (add-text-properties (match-beginning 0) (match-end 0)
+				  (list :org-license-to-kill t))))
 	  ;; Return the title string
 	  (org-trim (match-string 0)))))))
 

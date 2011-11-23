@@ -497,6 +497,61 @@ on two lines
     (org-babel-next-src-block 3)
     (should (equal (org-babel-execute-src-block) "foo"))))
 
+(ert-deftest test-ob/allow-spaces-around-=-in-var-specs ()
+  (org-test-with-temp-text "#+begin_src emacs-lisp :var a = 1 b = 2 c= 3 d =4
+  (+ a b c d)
+#+end_src
+"
+    (should (= 10 (org-babel-execute-src-block)))))
+
+(ert-deftest test-ob/org-babel-update-intermediate ()
+  (org-test-with-temp-text "#+name: foo
+#+begin_src emacs-lisp
+  2
+#+end_src
+
+#+results: foo
+: 4
+
+#+begin_src emacs-lisp :var it=foo
+  (+ it 1)
+#+end_src"
+    (let ((org-babel-update-intermediate nil))
+      (goto-char (point-min))
+      (org-babel-next-src-block 2)
+      (should (= 3 (org-babel-execute-src-block)))
+      (goto-char (point-min))
+      (forward-line 6)
+      (should (looking-at ": 4")))
+    (let ((org-babel-update-intermediate t))
+      (goto-char (point-min))
+      (org-babel-next-src-block 2)
+      (should (= 3 (org-babel-execute-src-block)))
+      (goto-char (point-min))
+      (forward-line 6)
+      (should (looking-at ": 2")))))
+
+(ert-deftest test-ob/eval-header-argument ()
+  (flet ((check-eval (eval runp)
+	   (org-test-with-temp-text (format "#+begin_src emacs-lisp :eval %s
+  (setq foo :evald)
+#+end_src" eval)
+	     (let ((foo :not-run))
+	       (if runp
+		   (progn (should (org-babel-execute-src-block))
+			  (should (eq foo :evald)))
+		 (progn (should-not (org-babel-execute-src-block))
+			(should-not (eq foo :evald))))))))
+    (check-eval "never" nil)
+    (check-eval "no" nil)
+    (check-eval "never-export" t)
+    (check-eval "no-export" t)
+    (let ((org-current-export-file "something"))
+      (check-eval "never" nil)
+      (check-eval "no" nil)
+      (check-eval "never-export" nil)
+      (check-eval "no-export" nil))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

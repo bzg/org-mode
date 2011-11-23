@@ -36,7 +36,6 @@
 (declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
 (add-to-list 'org-export-interblocks '(src org-babel-exp-inline-src-blocks))
 (add-to-list 'org-export-interblocks '(lob org-babel-exp-lob-one-liners))
-(add-hook 'org-export-blocks-postblock-hook 'org-exp-res/src-name-cleanup)
 
 (org-export-blocks-add-block '(src org-babel-exp-src-block nil))
 
@@ -146,21 +145,6 @@ options and are taken from `org-babel-default-inline-header-args'."
 		(org-babel-examplize-region (match-beginning 1) (match-end 1))
 		(forward-char 2)))))))))
 
-(defun org-exp-res/src-name-cleanup ()
-  "Clean up #+results and #+name lines for export.
-This function should only be called after all block processing
-has taken place."
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (while (org-re-search-forward-unprotected
-	    (concat
-	     "\\("org-babel-src-name-regexp"\\|"org-babel-result-regexp"\\)")
-	    nil t)
-      (delete-region
-       (progn (beginning-of-line) (point))
-       (progn (end-of-line) (+ 1 (point)))))))
-
 (defun org-babel-in-example-or-verbatim ()
   "Return true if point is in example or verbatim code.
 Example and verbatim code include escaped portions of
@@ -184,7 +168,7 @@ options are taken from `org-babel-default-header-args'."
     (goto-char start)
     (while (and (< (point) end)
 		(re-search-forward org-babel-lob-one-liner-regexp nil t))
-      (unless (and (match-string 12) (org-babel-in-example-or-verbatim))
+      (unless (org-babel-in-example-or-verbatim)
 	(let* ((lob-info (org-babel-lob-get-info))
 	       (inlinep (match-string 11))
 	       (inline-start (match-end 11))
