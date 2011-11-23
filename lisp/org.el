@@ -7888,7 +7888,8 @@ I this way you can spell out a number of instances of a repeating task,
 and still retain the repeater to cover future instances of the task."
   (interactive "nNumber of clones to produce: \nsDate shift per clone (e.g. +1w, empty to copy unchanged): ")
   (let (beg end template task idprop
-	    shift-n shift-what doshift nmin nmax (n-no-remove -1))
+	    shift-n shift-what doshift nmin nmax (n-no-remove -1)
+	    (drawer-re org-drawer-regexp))
     (if (not (and (integerp n) (> n 0)))
 	(error "Invalid number of replications %s" n))
     (if (and (setq doshift (and (stringp shift) (string-match "\\S-" shift)))
@@ -7909,19 +7910,6 @@ and still retain the repeater to cover future instances of the task."
     (or (bolp) (insert "\n"))
     (setq end (point))
     (setq template (buffer-substring beg end))
-    ;; Remove clocks and empty drawers
-    (with-temp-buffer
-      (insert template)
-      (goto-char (point-min))
-      (while (re-search-forward
-	      "^[ \t]*CLOCK:.*$" (save-excursion (org-end-of-subtree t t)) t)
-	(replace-match "")
-	(kill-whole-line))
-      (goto-char (point-min))
-      (while (re-search-forward
-	      (concat "^[ \t]*:" (regexp-opt org-drawers) ":[ \t]*$") nil t)
-	(mapc (lambda(d) (org-remove-empty-drawer-at d (point))) org-drawers))
-      (setq template (buffer-substring (point-min) (point-max))))
     (when (and doshift
 	       (string-match "<[^<>\n]+ \\+[0-9]+[dwmy][^<>\n]*>" template))
       (delete-region beg end)
@@ -7934,11 +7922,17 @@ and still retain the repeater to cover future instances of the task."
 	    (insert template)
 	    (org-mode)
 	    (goto-char (point-min))
+	    (org-show-subtree)
 	    (and idprop (if org-clone-delete-id
 			    (org-entry-delete nil "ID")
 			  (org-id-get-create t)))
-	    (while (re-search-forward org-property-start-re nil t)
-	      (org-remove-empty-drawer-at "PROPERTIES" (point)))
+	    (unless (= n 0)
+	      (while (re-search-forward "^[ \t]*CLOCK:.*$" nil t)
+		(kill-whole-line))
+	      (goto-char (point-min))
+	      (while (re-search-forward drawer-re nil t)
+		(mapc (lambda (d)
+			(org-remove-empty-drawer-at d (point))) org-drawers)))
 	    (goto-char (point-min))
 	    (when doshift
 	      (while (re-search-forward org-ts-regexp-both nil t)
