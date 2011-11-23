@@ -15240,6 +15240,7 @@ WHAT       is \"d\", \"w\", \"m\", or \"y\" for day, week, month, year.
 N          is the number of WHATs to shift.
 DEF-FLAG   is t when a double ++ or -- indicates shift relative to
            the DEFAULT date rather than TODAY."
+  (require 'parse-time)
   (when (and
 	 (string-match
 	  (concat
