@@ -1959,21 +1959,22 @@ visually."
 (defun org-odt-write-manifest-file ()
   (make-directory "META-INF")
   (let ((manifest-file (expand-file-name "META-INF/manifest.xml")))
-    (write-region
-     "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
-     <manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.2\">\n"
-     nil manifest-file)
-    (mapc
-     (lambda (file-entry)
-       (let* ((version (nth 2 file-entry))
-	      (extra (if version
-			 (format  " manifest:version=\"%s\"" version)
-		       "")))
-	 (write-region
-	  (format org-odt-manifest-file-entry-tag
-		  (nth 0 file-entry) (nth 1 file-entry) extra)
-	  nil manifest-file t))) org-odt-manifest-file-entries)
-    (write-region "\n</manifest:manifest>" nil manifest-file t)))
+    (with-current-buffer
+	(find-file-noselect manifest-file t)
+      (insert
+       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+     <manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.2\">\n")
+      (mapc
+       (lambda (file-entry)
+	 (let* ((version (nth 2 file-entry))
+		(extra (if version
+			   (format  " manifest:version=\"%s\"" version)
+			 "")))
+	   (insert
+	    (format org-odt-manifest-file-entry-tag
+		    (nth 0 file-entry) (nth 1 file-entry) extra))))
+       org-odt-manifest-file-entries)
+      (insert "\n</manifest:manifest>"))))
 
 (defun org-odt-update-meta-file (opt-plist)
   (let ((date (org-odt-iso-date-from-org-timestamp
