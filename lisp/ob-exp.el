@@ -167,7 +167,7 @@ options are taken from `org-babel-default-header-args'."
   (save-excursion
     (goto-char start)
     (while (and (< (point) end)
-		(re-search-forward org-babel-lob-one-liner-regexp nil t))
+		(re-search-forward org-babel-lob-one-liner-regexp end t))
       (unless (org-babel-in-example-or-verbatim)
 	(let* ((lob-info (org-babel-lob-get-info))
 	       (inlinep (match-string 11))
