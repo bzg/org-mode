@@ -1214,9 +1214,9 @@ and `:post-blank' keywords."
            (contents-begin
             (re-search-backward
              (concat "^[ \t]*#\\+begin_src"
-                     "\\(?: +\\(\\S-+\\)\\)?"         ; language
-                     "\\(?:\\( +[-+][A-Za-z]\\)+\\)?" ; switches
-                     "\\(.*\\)[ \t]*$")               ; arguments
+                     "\\(?: +\\(\\S-+\\)\\)?"	     ; language
+                     "\\(\\(?: +[-+][A-Za-z]\\)*\\)" ; switches
+                     "\\(.*\\)[ \t]*$")		     ; arguments
              nil t))
            ;; Get language as a string.
            (language (org-match-string-no-properties 1))
