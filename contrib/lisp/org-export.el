@@ -153,13 +153,13 @@ the same property.  It is a symbol among:
   `split'   Split values at white spaces, and cons them to the
             previous list.
 
-KEYWORD and OPTION have precedence over VARIABLE.
+KEYWORD and OPTION have precedence over DEFAULT.
 
 All these properties should be back-end agnostic.  For back-end
 specific properties, define a similar variable named
-`org-element-BACKEND-option-alist', replacing BACKEND with the
-name of the appropriate back-end.  You can also redefine
-properties there, as they have precedence over these.")
+`org-BACKEND-option-alist', replacing BACKEND with the name of
+the appropriate back-end.  You can also redefine properties
+there, as they have precedence over these.")
 
 (defconst org-export-special-keywords
   '("SETUP_FILE" "OPTIONS" "MACRO")
