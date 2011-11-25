@@ -66,9 +66,8 @@
 ;; with a single newline character.
 
 ;; These functions must follow a strict naming convention:
-;; `org-element-BACKEND-TYPE' where, obviously, BACKEND is the name of
-;; the export back-end and TYPE the type of the element or object
-;; handled.
+;; `org-BACKEND-TYPE' where, obviously, BACKEND is the name of the
+;; export back-end and TYPE the type of the element or object handled.
 
 ;; Moreover, two additional functions can be defined.  On the one
 ;; hand, `org-BACKEND-template' returns the final transcoded string,
