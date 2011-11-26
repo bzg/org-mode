@@ -9678,7 +9678,7 @@ there is one, offer it as link number zero."
      ((equal (length links) 1)
       (setq link (list (car links))))
      ((and (integerp nth) (>= (length links) (if have-zero (1+ nth) nth)))
-      (setq link (nth (if have-zero nth (1- nth)) links)))
+      (setq link (list (nth (if have-zero nth (1- nth)) links))))
      (t ; we have to select a link
       (save-excursion
 	(save-window-excursion

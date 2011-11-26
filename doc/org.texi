@@ -3185,7 +3185,7 @@ file:papers/last.pdf                      @r{file, relative path}
 ./papers/last.pdf                         @r{same as above}
 file:/myself@@some.where:papers/last.pdf   @r{file, path on remote machine}
 /myself@@some.where:papers/last.pdf        @r{same as above}
-file:sometextfile::NNN                    @r{file with line number to jump to}
+file:sometextfile::NNN                    @r{file, jump to line number}
 file:projects.org                         @r{another Org file}
 file:projects.org::some words             @r{text search in Org file}@footnote{
 The actual behavior of the search will depend on the value of
@@ -3195,7 +3195,9 @@ exact headline will be matched.  If the value is @code{'query-to-create},
 then an exact headline will be searched; if it is not found, then the user
 will be queried to create it.}
 file:projects.org::*task title            @r{heading search in Org file}
-docview:papers/last.pdf::NNN              @r{open file in doc-view mode at page NNN}
+file+sys:/path/to/file                    @r{open via OS, like double-click}
+file+emacs:/path/to/file                  @r{force opening by Emacs}
+docview:papers/last.pdf::NNN              @r{open in doc-view mode at page}
 id:B7423F4D-2E8A-471B-8810-C40F074717E9   @r{Link to heading by ID}
 news:comp.emacs                           @r{Usenet link}
 mailto:adent@@galaxy.net                   @r{Mail link}
