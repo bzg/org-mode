@@ -457,9 +457,8 @@ Insert the results of execution into the buffer.  Source code
 execution and the collection and formatting of results can be
 controlled through a variety of header arguments.
 
-With prefix argument ARG, force re-execution even if a an
-existing result cached in the buffer would otherwise have been
-returned.
+With prefix argument ARG, force re-execution even if an existing
+result cached in the buffer would otherwise have been returned.
 
 Optionally supply a value for INFO in the form returned by
 `org-babel-get-src-block-info'.
