@@ -13030,6 +13030,10 @@ Leaves hlines in the table.  Setting @code{:hlines yes} has this effect.
 
 The @code{:colnames} header argument accepts the values @code{yes},
 @code{no}, or @code{nil} for unassigned.  The default value is @code{nil}.
+Note that the behavior of the @code{:colnames} header argument may differ
+across languages.  For example Emacs Lisp code blocks ignore the
+@code{:colnames} header argument entirely given the ease with which tables
+with column names may be handled directly in Emacs Lisp.
 
 @itemize @bullet
 @item @code{nil}
