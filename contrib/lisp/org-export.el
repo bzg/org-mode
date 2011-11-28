@@ -2005,18 +2005,19 @@ Point is at buffer's beginning when BODY is applied."
            (,overlays (mapcar
                        'copy-overlay (overlays-in (point-min) (point-max)))))
        (with-temp-buffer
-         (org-clone-local-variables
-          ,original-buffer "^\\(org-\\|orgtbl-\\|major-mode$\\)")
-         (insert ,buffer-string)
-         (mapc (lambda (ov)
-                 (move-overlay
-                  ov
-                  (- (overlay-start ov) ,offset)
-                  (- (overlay-end ov) ,offset)
-                  (current-buffer)))
-               ,overlays)
-         (goto-char (point-min))
-         (progn ,@body)))))
+         (let ((buffer-invisibility-spec nil))
+	   (org-clone-local-variables
+	    ,original-buffer "^\\(org-\\|orgtbl-\\|major-mode$\\)")
+	   (insert ,buffer-string)
+	   (mapc (lambda (ov)
+		   (move-overlay
+		    ov
+		    (- (overlay-start ov) ,offset)
+		    (- (overlay-end ov) ,offset)
+		    (current-buffer)))
+		 ,overlays)
+	   (goto-char (point-min))
+	   (progn ,@body))))))
 (def-edebug-spec org-export-with-current-buffer-copy (body))
 
 
