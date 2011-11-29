@@ -873,8 +873,7 @@ CONTENTS is nil. INFO is a plist holding contextual information."
      org-latex-footnote-separator)
    ;; Use \footnotemark if the footnote has already been defined.
    ;; Otherwise, define it with \footnote command.
-   (let* ((all-seen (plist-get org-export-persistent-properties
-                               :seen-footnote-labels))
+   (let* ((all-seen (plist-get info :seen-footnote-labels))
           (label (org-element-get-property :label footnote-reference))
           ;; Anonymous footnotes are always new footnotes.
           (seenp (and label (member label all-seen)))
