@@ -54,6 +54,11 @@
 ;;; Code:
 (require 'ob)
 (require 'ob-eval)
+(require 'ob-comint)
+(require 'comint)
+(eval-when-compile (require 'cl))
+
+(declare-function run-picolisp "ext:inferior-picolisp" (cmd))
 
 ;; optionally define a file extension for this language
 (add-to-list 'org-babel-tangle-lang-exts '("picolisp" . "l"))
@@ -99,6 +104,7 @@
 	 (session (org-babel-picolisp-initiate-session session-name))
 	 ;; either OUTPUT or VALUE which should behave as described above
 	 (result-type (cdr (assoc :result-type params)))
+	 (result-params (cdr (assoc :result-params params)))
 	 ;; expand the body with `org-babel-expand-body:picolisp'
 	 (full-body (org-babel-expand-body:picolisp body params))
          ;; wrap body appropriately for the type of evaluation and results
@@ -135,18 +141,18 @@
 		       (cond
 			;; remove leading "-> " from return values
 			((and (>= (length line) 3)
-			      (string= "-> " (subseq line 0 3)))
-			 (subseq line 3))
+			      (string= "-> " (substring line 0 3)))
+			 (substring line 3))
 			;; remove trailing "-> <<return-value>>" on the
 			;; last line of output
 			((and (member "output" result-params)
 			      (string-match-p "->" line))
-			 (subseq line 0 (string-match "->" line)))
+			 (substring line 0 (string-match "->" line)))
 			(t line)
 			)
                        ;; (if (and (>= (length line) 3) ;; remove leading "<- "
-                       ;;          (string= "-> " (subseq line 0 3)))
-                       ;;     (subseq line 3)
+                       ;;          (string= "-> " (substring line 0 3)))
+                       ;;     (substring line 3)
                        ;;   line)
 		       )))
                   ;; returns a list of the output of each evaluated expression
