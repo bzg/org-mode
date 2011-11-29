@@ -525,9 +525,20 @@ Headlines are exported using `org-bibtex-export-headline'."
 	  "Bibtex file: " nil nil nil
 	  (file-name-nondirectory
 	   (concat (file-name-sans-extension (buffer-file-name)) ".bib")))))
-  (let ((bibtex-entries (remove nil (org-map-entries #'org-bibtex-headline))))
-    (with-temp-file filename
-      (insert (mapconcat #'identity bibtex-entries "\n")))))
+  ((lambda (error-point)
+     (when error-point
+       (goto-char error-point)
+       (message "Bibtex error at %S" (nth 4 (org-heading-components)))))
+   (catch 'bib
+     (let ((bibtex-entries (remove nil (org-map-entries
+					(lambda ()
+					  (condition-case foo
+					      (org-bibtex-headline)
+					    (error (throw 'bib (point)))))))))
+       (with-temp-file filename
+	 (insert (mapconcat #'identity bibtex-entries "\n")))
+       (message "Successfully exported %d bibtex entries to %s"
+		(length bibtex-entries) filename) nil))))
 
 (defun org-bibtex-check (&optional optional)
   "Check the current headline for required fields.
