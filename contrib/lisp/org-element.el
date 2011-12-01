@@ -2805,6 +2805,18 @@ Nil values returned from FUN are ignored in the result."
            (t 'objects)))
          walk-tree                      ; For byte-compiler
          acc                            ; Accumulate results into ACC.
+         (accumulate-maybe
+          (function
+           ;; Check if TYPE is matching among TYPES.  If so, apply FUN
+           ;; to BLOB and accumulate return value into ACC.  INFO is
+           ;; the communication channel.
+           (lambda (type types fun blob info)
+             (when (memq type types)
+               (let ((result (funcall fun blob info)))
+                 (cond
+                  ((not result))
+                  (first-match (throw 'first-match result))
+                  (t (push result acc))))))))
          (walk-tree
           (function
            ;; Recursively walk DATA.  INFO, if non-nil, is a plist
@@ -2813,24 +2825,18 @@ Nil values returned from FUN are ignored in the result."
              (mapc
               (lambda (blob)
                 (let ((type (if (stringp blob) 'plain-text (car blob))))
-                  ;; 1. Check if TYPE is matching.  If so, apply FUN
-                  ;;    to BLOB and accumulate return value into ACC.
-                  (when (memq type types)
-                    (let ((result (funcall fun blob info)))
-                      (cond
-                       ((not result))
-                       (first-match (throw 'first-match result))
-                       (t (push result acc)))))
-                  ;; 2. Determine if a recursion into BLOB is possible
-                  ;;    and allowed.
+                  ;; Determine if a recursion into BLOB is possible
+                  ;; and allowed.
                   (cond
                    ;; Element or object not exportable.
-                   ((org-export-skip-p blob info))
+                   ((and info (org-export-skip-p blob info)))
                    ;; Archived headline: skip it.
                    ((and info
                          (eq type 'headline)
-                         (and (eq (plist-get info :with-archived-trees) 'headline)
-                              (org-element-get-property :archivedp blob))))
+                         (and (eq (plist-get info :with-archived-trees)
+                                  'headline)
+                              (org-element-get-property :archivedp blob)))
+		    (funcall accumulate-maybe type types fun blob info))
                    ;; At an include keyword: apply mapping to its
                    ;; contents.
                    ((and info
@@ -2838,6 +2844,7 @@ Nil values returned from FUN are ignored in the result."
                          (string=
                           (downcase (org-element-get-property :key blob))
                           "include"))
+		    (funcall accumulate-maybe type types fun blob info)
                     (let* ((data (org-export-parse-included-file blob info))
                            (value (org-element-get-property :value blob))
                            (file (and (string-match "^\"\\(\\S-+\\)\"" value)
@@ -2863,7 +2870,8 @@ Nil values returned from FUN are ignored in the result."
                    ;; Limiting recursion to greater elements, and BLOB
                    ;; isn't one.
                    ((and (eq type-category 'greater-elements)
-                         (not (memq type org-element-greater-elements))))
+                         (not (memq type org-element-greater-elements)))
+		    (funcall accumulate-maybe type types fun blob info))
                    ;; Limiting recursion to elements, and BLOB only
                    ;; contains objects.
                    ((and (eq type-category 'elements) (eq type 'paragraph)))
@@ -2872,13 +2880,15 @@ Nil values returned from FUN are ignored in the result."
                    ((and (eq type-category 'objects)
                          (not (or (eq type 'paragraph)
                                   (memq type org-element-greater-elements)
-                                  (memq type org-element-recursive-objects)))))
+                                  (memq type org-element-recursive-objects))))
+		    (funcall accumulate-maybe type types fun blob info))
                    ;; Recursion is possible and allowed: Update local
                    ;; informations and move into BLOB.
-                   (t (funcall walk-tree
-                               blob
-                               (and options
-                                    (org-export-update-info blob info t)))))))
+                   (t (funcall accumulate-maybe type types fun blob info)
+		      (funcall
+                       walk-tree
+                       blob
+                       (and options (org-export-update-info blob info t)))))))
               (org-element-get-contents data))))))
     (catch 'first-match
       (funcall walk-tree data options)
