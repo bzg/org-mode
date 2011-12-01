@@ -254,6 +254,7 @@ CONTENTS is the contents of the element."
           contents))
 
 ;;;; Footnote Definition
+
 (defun org-element-footnote-definition-parser ()
   "Parse a footnote definition.
 
@@ -283,6 +284,12 @@ a plist containing `:label', `:begin' `:end', `:contents-begin',
                      :post-blank ,(count-lines contents-end end)
                      ,@(cadr keywords))))))
 
+(defun org-element-footnote-definition-interpreter (footnote-definition contents)
+  "Interpret FOOTNOTE-DEFINITION element as Org syntax.
+CONTENTS is the contents of the footnote-definition."
+  (concat (format "[%s]" (org-element-get-property :label footnote-definition))
+          " "
+          contents))
 
 
 ;;;; Headline
@@ -1555,6 +1562,7 @@ its beginning position."
           (throw 'exit (cons 'export-snippet (match-beginning 0))))))))
 
 ;;;; Footnote Reference
+
 (defun org-element-footnote-reference-parser ()
   "Parse footnote reference at point.
 
@@ -1581,12 +1589,7 @@ with `:label', `:type', `:definition', `:begin', `:end' and
                      :post-blank ,post-blank
                      :raw-definition ,raw-def)))))
 
-(defun org-element-footnote-definition-interpreter (footnote-definition contents)
-  "Interpret FOOTNOTE-DEFINITION element as Org syntax.
-CONTENTS is the contents of the footnote-definition."
-  (concat (format "[%s]" (org-element-get-property :label footnote-definition))
-          " "
-          contents))(defun org-element-footnote-reference-interpreter (footnote-reference contents)
+(defun org-element-footnote-reference-interpreter (footnote-reference contents)
   "Interpret FOOTNOTE-REFERENCE object as Org syntax.
 CONTENTS is nil."
   (let ((label (or (org-element-get-property :label footnote-reference)
@@ -1607,6 +1610,7 @@ cdr is beginning position."
   (let (fn-ref)
      (when (setq fn-ref (org-footnote-get-next-reference nil nil limit))
        (cons 'footnote-reference (nth 1 fn-ref)))))
+
 
 ;;;; Inline Babel Call
 (defun org-element-inline-babel-call-parser ()
