@@ -610,6 +610,12 @@ while every other back-end will ignore it."
 ;;   - category :: persistent
 ;;   - type :: integer
 
+;; + `headline-numbering' :: Alist between headlines' beginning
+;;      position and their numbering, as a list of numbers
+;;      (cf. `org-export-get-headline-number').
+;;   - category :: persistent
+;;   - type :: alist (INTEGER . LIST)
+
 ;; + `included-files' :: List of files, with full path, included in
 ;;      the current buffer, through the "#+include:" keyword.  It is
 ;;      mainly used to verify that no infinite recursive inclusion
@@ -1096,14 +1102,14 @@ retrieved."
 ;; `org-export-use-select-tag-p' determines if an headline makes use
 ;; of an export tag enforcing inclusion. `org-export-get-min-level'
 ;; gets the minimal exportable level, used as a basis to compute
-;; relative level for headlines. Eventually,
-;; `org-export-get-point-max' returns the maximum exportable ending
-;; position in the parse tree.
+;; relative level for headlines. `org-export-get-point-max' returns
+;; the maximum exportable ending position in the parse tree.
+;; Eventually `org-export-collect-headline-numbering' builds an alist
+;; between headlines' beginning position and their numbering.
 
 (defconst org-export-persistent-properties-list
-  '(:babel-data-alist :babel-info-alist :babel-results-alist :code-refs
-                      :headline-offset :parse-tree :point-max
-                      :seen-footnote-labels :total-loc :use-select-tags)
+  '(:code-refs :headline-alist :headline-offset :headline-offset :parse-tree
+               :point-max :seen-footnote-labels :total-loc :use-select-tags)
   "List of persistent properties.")
 
 (defconst org-export-persistent-properties nil
@@ -1131,6 +1137,9 @@ Following initial persistent properties are set:
                    local level. An offset of -1 means an headline
                    of level 2 should be considered as a level
                    1 headline in the context.
+
+`:headline-numbering' Alist of all headlines' beginning position
+                   as key an the associated numbering as value.
 
 `:parse-tree'      Whole parse tree.
 
@@ -1178,7 +1187,11 @@ Following initial persistent properties are set:
                     (list (org-element-get-property :raw-value headline)
                           (org-element-get-property :begin headline)
                           (org-element-get-property :end headline))))))
-  ;; 6. `:back-end'
+  ;; 6. `:headline-numbering'
+  (setq options (org-export-set-property
+                 options :headline-numbering
+                 (org-export-collect-headline-numbering data options)))
+  ;; 7. `:back-end'
   (setq options (org-export-set-property options :back-end backend)))
 
 (defun org-export-use-select-tags-p (data options)
@@ -1224,6 +1237,30 @@ OPTIONS is a plist holding export options."
           (org-element-get-contents data))
     pos-max))
 
+(defun org-export-collect-headline-numbering (data options)
+  "Return numbering of all exportable headlines in a parse tree.
+
+DATA is the parse tree.  OPTIONS is the plist holding export
+options.
+
+Return an alist whose key is headline's beginning position and
+value is its associated numbering (in the shape of a list of
+numbers)."
+  (let ((numbering (make-vector org-export-max-depth 0)))
+    (org-element-map
+     data
+     'headline
+     (lambda (headline info)
+       (let ((relative-level (1- (org-export-get-relative-level blob info))))
+         (cons
+          (org-element-get-property :begin headline)
+          (loop for n across numbering
+                for idx from 0 to org-export-max-depth
+                when (< idx relative-level) collect n
+                when (= idx relative-level) collect (aset numbering idx (1+ n))
+                when (> idx relative-level) do (aset numbering idx 0)))))
+     options)))
+
 
 ;;;; Properties Management
 
@@ -1255,18 +1292,11 @@ The following properties are updated:
                          (plist).
 `previous-element'        Previous element's type (symbol).
 `previous-object'         Previous object's type (symbol).
-`previous-section-number' Numbering of the previous headline
-                          (vector).
 `seen-footnote-labels'    List of already parsed footnote
                           labels (string list)
 
 Return the property list."
-  (let* ((type (and (not (stringp blob)) (car blob)))
-         (relative-level (and (eq type 'headline)
-                              (org-export-get-relative-level blob info)))
-         (current-num (and (eq type 'headline)
-                           (or (plist-get info :previous-section-number)
-                               (make-vector org-export-max-depth 0)))))
+  (let* ((type (and (not (stringp blob)) (car blob))))
     (cond
      ;; Case 1: We're moving into a recursive blob.
      (recursep
@@ -1275,20 +1305,15 @@ Return the property list."
        `(:genealogy ,(cons type (plist-get info :genealogy))
                     :previous-element nil
                     :previous-object nil
-                    :parent-properties ,(if (memq type org-element-all-elements)
-                                            (nth 1 blob)
-                                          (plist-get info :parent-properties))
+                    :parent-properties
+                    ,(if (memq type org-element-all-elements)
+                         (nth 1 blob)
+                       (plist-get info :parent-properties))
                     :inherited-properties
                     ,(if (eq type 'headline)
                          (org-combine-plists
                           (plist-get info :inherited-properties) (nth 1 blob))
-                       (plist-get info :inherited-properties))
-                    :previous-section-number
-                    ,(let ((current-num (copy-sequence current-num)))
-                       (if (not (eq type 'headline))
-                           current-num
-                         (progn (incf (aref current-num (1- relative-level)))
-                                current-num))))
+                       (plist-get info :inherited-properties)))
        ;; Add persistent properties.
        org-export-persistent-properties))
      ;; Case 2: No recursion.
@@ -1304,12 +1329,6 @@ Return the property list."
           (unless (and label (member label seen-labels))
             (setq info (org-export-set-property
                         info :seen-footnote-labels (push label seen-labels))))))
-      ;; At an headline: update section number.
-      (when (eq type 'headline)
-        (setq info (org-export-set-property
-                    info :previous-section-number
-                    (progn (incf (aref current-num (1- relative-level)))
-                           current-num))))
       ;; Set `:previous-element' or `:previous-object' according to
       ;; BLOB.
       (setq info (cond ((not type)
@@ -2055,12 +2074,8 @@ INFO is a plist holding contextual information."
 (defun org-export-get-headline-number (headline info)
   "Return HEADLINE numbering as a list of numbers.
 INFO is a plist holding contextual information."
-  (let ((relative-level (org-export-get-relative-level headline info))
-        (previous-numbering (or (plist-get info :previous-section-number)
-                                (make-vector org-export-max-depth 0))))
-    (loop for n across previous-numbering
-          for i from 1 to relative-level
-          collect (if (= i relative-level) (1+ n) n))))
+  (cdr (assq (org-element-get-property :begin headline)
+             (plist-get info :headline-numbering))))
 
 (defun org-export-number-to-roman (n)
   "Convert integer N into a roman numeral."
