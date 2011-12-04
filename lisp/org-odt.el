@@ -72,22 +72,41 @@
   "Regular expressions for special string conversion.")
 
 (defconst org-odt-lib-dir (file-name-directory load-file-name))
-(defconst org-odt-data-dir
-  (let ((dir1 (expand-file-name "../odt" org-odt-lib-dir))	   ; git
-	(dir2 (expand-file-name "./" org-odt-lib-dir)))		   ; elpa
-    (cond
-     ((file-directory-p dir1) dir1)
-     ((file-directory-p dir2) dir2)
-     (t (error "Cannot find factory styles file. Check package dir layout"))))
-  "Directory that holds auxiliary files used by the ODT exporter.
+(defconst org-odt-styles-dir
+  (let ((styles-dir (expand-file-name "../etc/styles/" org-odt-lib-dir)))
+    (prog1 styles-dir
+      (unless (and (file-readable-p (expand-file-name
+				     "OrgOdtContentTemplate.xml" styles-dir))
+		   (file-readable-p (expand-file-name
+				     "OrgOdtStyles.xml" styles-dir)))
+	(error "Cannot find factory styles file. Check package dir layout"))))
+  "Directory that holds auxiliary XML files used by the ODT exporter.
 
-The 'styles' subdir contains the following xml files -
- 'OrgOdtStyles.xml' and 'OrgOdtContentTemplate.xml' - which are
- used as factory settings of `org-export-odt-styles-file' and
- `org-export-odt-content-template-file'.
+This directory contains the following XML files -
+ \"OrgOdtStyles.xml\" and \"OrgOdtContentTemplate.xml\".  These
+ XML files are used as the default values of
+ `org-export-odt-styles-file' and
+ `org-export-odt-content-template-file'.")
 
-The 'etc/schema' subdir contains rnc files for validating of
-OpenDocument xml files.")
+(defconst org-export-odt-schema-dir
+  (let ((schema-dir (expand-file-name
+		     "../contrib/odt/etc/schema/" org-odt-lib-dir)))
+    (if (and (file-readable-p
+	      (expand-file-name "od-manifest-schema-v1.2-cs01.rnc" schema-dir))
+	     (file-readable-p
+	      (expand-file-name "od-schema-v1.2-cs01.rnc" schema-dir))
+	     (file-readable-p
+	      (expand-file-name "schemas.xml" schema-dir)))
+	schema-dir
+      (prog1 nil
+	(message "Unable to locate OpenDocument schema files.")
+	(message "These files may be needed for enhanced debugging."))))
+  "Directory that contains OpenDocument schema files.
+
+This directory contains rnc files for OpenDocument schema.  It
+also contains a \"schemas.xml\" that can be added to
+`rng-schema-locating-files' for auto validation of OpenDocument
+XML files.  See also `rng-nxml-auto-validate-flag'.")
 
 (defvar org-odt-file-extensions
   '(("odt" . "OpenDocument Text")
@@ -119,11 +138,14 @@ OpenDocument xml files.")
 
 ;; RelaxNG validation of OpenDocument xml files
 (eval-after-load 'rng-nxml
-  '(setq rng-nxml-auto-validate-flag t))
+  '(when org-export-odt-schema-dir
+     (setq rng-nxml-auto-validate-flag t)))
 
 (eval-after-load 'rng-loc
-  '(add-to-list 'rng-schema-locating-files
-		(expand-file-name "etc/schema/schemas.xml" org-odt-data-dir)))
+  '(when org-export-odt-schema-dir
+     (add-to-list 'rng-schema-locating-files
+		  (expand-file-name "schemas.xml"
+				    org-export-odt-schema-dir))))
 
 (mapc
  (lambda (desc)
@@ -160,7 +182,7 @@ The exporter embeds the exported content just before
 \"</office:text>\" element.
 
 If unspecified, the file named \"OrgOdtContentTemplate.xml\"
-under `org-odt-data-dir' is used."
+under `org-odt-styles-dir' is used."
   :type 'file
   :group 'org-export-odt)
 
@@ -174,7 +196,7 @@ Valid values are one of:
 ...))
 
 In case of option 1, an in-built styles.xml is used. See
-`org-odt-data-dir' for more information.
+`org-odt-styles-dir' for more information.
 
 In case of option 3, the specified file is unzipped and the
 styles.xml embedded therein is used.
@@ -431,8 +453,8 @@ PUB-DIR is set, use this as the publishing directory."
   ;; automatic styles
   (insert-file-contents
    (or org-export-odt-content-template-file
-       (expand-file-name "styles/OrgOdtContentTemplate.xml"
-			 org-odt-data-dir)))
+       (expand-file-name "OrgOdtContentTemplate.xml"
+			 org-odt-styles-dir)))
   (goto-char (point-min))
   (re-search-forward "</office:text>" nil nil)
   (delete-region (match-beginning 0) (point-max)))
@@ -2323,8 +2345,8 @@ Do this when translation to MathML fails."
   ;; throw an error purely for aesthetic reasons.
   (setq styles-file (or styles-file
 			org-export-odt-styles-file
-			(expand-file-name "styles/OrgOdtStyles.xml"
-					  org-odt-data-dir)
+			(expand-file-name "OrgOdtStyles.xml"
+					  org-odt-styles-dir)
 			(error "org-odt: Missing styles file?")))
   (cond
    ((listp styles-file)
