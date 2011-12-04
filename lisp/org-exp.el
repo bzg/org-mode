@@ -1283,6 +1283,9 @@ on this string to produce the exported version."
       ;; Remove #+TBLFM and #+TBLNAME lines
       (org-export-handle-table-metalines)
 
+      ;; Remove #+results and #+name lines
+      (org-export-res/src-name-cleanup)
+
       ;; Run the final hook
       (run-hooks 'org-export-preprocess-final-hook)
 
@@ -1991,6 +1994,18 @@ When it is nil, all comments will be removed."
 	(goto-char (1+ pos))
 	(replace-match "")
 	(goto-char (max (point-min) (1- pos)))))))
+
+(defun org-export-res/src-name-cleanup ()
+  "Clean up #+results and #+name lines for export.
+This function should only be called after all block processing
+has taken place."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (let ((case-fold-search t))
+      (while (org-re-search-forward-unprotected
+	      "#\\+\\(name\\|results\\(\\[[a-z0-9]+\\]\\)?\\):" nil t)
+	(delete-region (match-beginning 0) (progn (forward-line) (point)))))))
 
 (defun org-export-mark-radio-links ()
   "Find all matches for radio targets and turn them into internal links."
