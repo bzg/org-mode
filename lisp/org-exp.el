@@ -52,9 +52,9 @@
 (autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
 
 (autoload 'org-export-as-odt "org-odt"
-  "Export the outline to a OpenDocumentText file." t)
+  "Export the outline to a OpenDocument Text file." t)
 (autoload 'org-export-as-odt-and-open "org-odt"
-  "Export the outline to a OpenDocumentText file and open it." t)
+  "Export the outline to a OpenDocument Text file and open it." t)
 
 (defgroup org-export nil
   "Options for exporting org-listings."
@@ -952,7 +952,7 @@ Pressing `1' will switch between these two options."
 
 \[D] export as DocBook   [V] export as DocBook, process to PDF, and open
 
-\[o] export as OpenDocumentText                    [O] ... and open
+\[o] export as OpenDocument Text                   [O] ... and open
 
 \[j] export as TaskJuggler                         [J] ... and open
 
