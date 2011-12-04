@@ -96,6 +96,7 @@ LISPF      = 	org.el			\
 		org-irc.el		\
 		org-latex.el		\
 		org-list.el		\
+		org-lparse.el		\
 		org-mac-message.el	\
 	     	org-macs.el		\
 		org-mew.el              \
@@ -103,6 +104,7 @@ LISPF      = 	org.el			\
 		org-mks.el		\
 		org-mobile.el		\
 		org-mouse.el		\
+		org-odt.el		\
 		org-publish.el		\
 		org-plot.el		\
 		org-protocol.el		\
@@ -493,6 +495,7 @@ lisp/org-inlinetask.elc:
 lisp/org-irc.elc:	lisp/org.el
 lisp/org-jsinfo.elc:	lisp/org.el lisp/org-exp.el
 lisp/org-list.elc:	lisp/org-macs.el lisp/org-compat.el
+lisp/org-lparse.elc:	lisp/org-exp.el
 lisp/org-mac-message.elc:	lisp/org.el
 lisp/org-macs.elc:
 lisp/org-mew.elc:	lisp/org.el
@@ -500,6 +503,7 @@ lisp/org-mhe.elc:	lisp/org.el
 lisp/org-mks.elc:
 lisp/org-mobile.elc:	lisp/org.el
 lisp/org-mouse.elc:	lisp/org.el
+lisp/org-odt.elc:	lisp/org-lparse.el
 lisp/org-plot.elc:	lisp/org.el lisp/org-exp.el lisp/org-table.el
 lisp/org-publish.elc:
 lisp/org-protocol.elc:	lisp/org.el
