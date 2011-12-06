@@ -623,6 +623,11 @@ OpenDocument Text export
 * Working with raw OpenDocument XML::
 * Advanced topics in @acronym{ODT} export::
 
+Math formatting in @acronym{ODT} export
+
+* Working with @LaTeX{} math snippets::
+* Working with MathML or OpenDocument formula files::
+
 Advanced topics in @acronym{ODT} export
 
 * Exporting and Converting to Other formats::
@@ -10820,11 +10825,11 @@ converted file instead.
 @anchor{x-export-to-other-formats}
 @vindex org-export-odt-preferred-output-format
 Very often, you will find yourself exporting to @acronym{ODT} format, only to
-immediately save the exported document to a different format like @samp{doc},
-@samp{pdf} etc.  In such cases, you will find it convenient to configure a
-converter (@pxref{Configuring  a converter}) and specify your preferred
-output format by customizing the variable
-@code{org-export-odt-preferred-output-format}.  This way the export commands
+immediately save the exported document to a different format like @samp{pdf}.
+In such cases, you will find it convenient to configure a converter
+(@pxref{Exporting and Converting to Other formats}) and specify your
+preferred output format by customizing the variable
+@code{org-export-odt-preferred-output-format}.  This way, the export commands
 (@pxref{x-export-to-odt,,Exporting to ODT}) can be extended to also export to
 the preferred format.
 
@@ -10906,8 +10911,9 @@ and alignment}) then these are honored on export@footnote{The column widths
 are interpreted as weighted ratios with the default weight being 1}.
 
 @cindex #+ATTR_ODT
-You can override the default formatting of the table by specifying a custom
-table style with the @code{#+ATTR_ODT} line.
+If you are not satisfied with the default formatting of tables, you can
+create custom table styles and associate them with a table using
+@code{#+ATTR_ODT} line. @xref{Customizing Tables in @acronym{ODT} export}.
 
 @node Images in @acronym{ODT} export, Math formatting in @acronym{ODT} export, Tables in @acronym{ODT} export, OpenDocument Text export
 @subsection Images in @acronym{ODT} export
@@ -10998,6 +11004,14 @@ original height:width ratio, do the following
 @node Math formatting in @acronym{ODT} export, Literal Examples in @acronym{ODT} export, Images in @acronym{ODT} export, OpenDocument Text export
 @subsection Math formatting in @acronym{ODT} export
 
+@menu
+* Working with @LaTeX{} math snippets::
+* Working with MathML or OpenDocument formula files::
+@end menu
+
+@node Working with @LaTeX{} math snippets, Working with MathML or OpenDocument formula files, Math formatting in @acronym{ODT} export, Math formatting in @acronym{ODT} export
+@subsubsection Working with @LaTeX{} math snippets
+
 @LaTeX{} math snippets (@pxref{LaTeX fragments}) can be embedded in the ODT
 document using one of the following ways:
 
@@ -11012,9 +11026,9 @@ This option is activated on a per-file basis with
 @end example
 
 With this option, @LaTeX{} fragments are first converted in to MathML
-fragments using an external LaTeX-to-MathML converter program.  The resulting
-MathML fragments are then embedded as a OpenDocument Formula in the exported
-document.
+fragments using an external @LaTeX{}-to-MathML converter program.  The
+resulting MathML fragments are then embedded as a OpenDocument Formula in the
+exported document.
 
 @vindex org-latex-to-mathml-convert-command
 @vindex org-latex-to-mathml-jar-file
@@ -11034,8 +11048,20 @@ converter, you can configure the above variables as shown below.
       "/path/to/mathtoweb.jar")
 @end lisp
 
-@cindex dvipng
+You can use the following commands to quickly verify the reliability of
+@LaTeX{}-to-MathML converter.
 
+@table @kbd
+
+@item M-x org-export-as-odf
+Convert a @LaTeX{} math snippet to OpenDocument formula(@file{.odf}) file.
+
+@item M-x org-export-as-odf-and-open
+Convert a @LaTeX{} math snippet to OpenDocument formula(@file{.odf}) file and
+open the formula file with the system-registered application.
+@end table
+
+@cindex dvipng
 @item png
 
 This option is activated on a per-file basis with
@@ -11047,8 +11073,25 @@ This option is activated on a per-file basis with
 With this option, @LaTeX{} fragments are processed into png images and the
 resulting images are embedded in the exported document.  This method requires
 that the @file{dvipng} program be available on your system.
-
 @end enumerate
+
+@node Working with MathML or OpenDocument formula files,  , Working with @LaTeX{} math snippets, Math formatting in @acronym{ODT} export
+@subsubsection Working with MathML or OpenDocument formula files
+
+For various reasons, you may find embedding @LaTeX{} math snippets in a
+@acronym{ODT} document less than reliable.  In that case, you can embed a
+Math equation by linking to it's MathML(@file{.mml}) source or it's
+OpenDocument formula(@file{.odf}) file as shown below:
+
+@example
+[[./equation.mml]]
+@end example
+
+or
+
+@example
+[[./equation.odf]]
+@end example
 
 @node Literal Examples in @acronym{ODT} export, Working with raw OpenDocument XML, Math formatting in @acronym{ODT} export, OpenDocument Text export
 @subsection Literal Examples in @acronym{ODT} export
