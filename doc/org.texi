@@ -612,7 +612,7 @@ DocBook export
 
 OpenDocument Text export
 
-* Installing ODT exporter::     How to install @acronym{ODT} exporter
+* Pre-requisites for @acronym{ODT} export::
 * @acronym{ODT} export commands::  How to invoke @acronym{ODT} export
 * Applying Custom Styles::      How to apply custom styles to the output
 * Links in @acronym{ODT} export::  How links will be interpreted and formatted
@@ -622,7 +622,6 @@ OpenDocument Text export
 * Literal Examples in @acronym{ODT} export::  How source and example blocks are formatted
 * Working with raw OpenDocument XML::
 * Advanced topics in @acronym{ODT} export::
-* Additional Documentation::    Where to find more information
 
 Advanced topics in @acronym{ODT} export
 
@@ -10755,7 +10754,7 @@ special characters included in XHTML entities:
 @cindex org-odt.el
 @cindex org-modules
 
-Orgmode@footnote{Versions 7.6 or later} supports export to OpenDocument
+Orgmode@footnote{Versions 7.8 or later} supports export to OpenDocument
 Text(@acronym{ODT}) format using @file{org-odt.el} module.  Documents created
 by this exporter use @cite{OpenDocument-v1.2
 specification}@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
@@ -10763,7 +10762,7 @@ Open Document Format for Office Applications (OpenDocument) Version 1.2}} and
 are compatible with LibreOffice 3.4.
 
 @menu
-* Installing ODT exporter::     How to install @acronym{ODT} exporter
+* Pre-requisites for @acronym{ODT} export::
 * @acronym{ODT} export commands::  How to invoke @acronym{ODT} export
 * Applying Custom Styles::      How to apply custom styles to the output
 * Links in @acronym{ODT} export::  How links will be interpreted and formatted
@@ -10773,35 +10772,15 @@ are compatible with LibreOffice 3.4.
 * Literal Examples in @acronym{ODT} export::  How source and example blocks are formatted
 * Working with raw OpenDocument XML::
 * Advanced topics in @acronym{ODT} export::
-* Additional Documentation::    Where to find more information
 @end menu
 
-@node Installing ODT exporter, @acronym{ODT} export commands, OpenDocument Text export, OpenDocument Text export
-@subsection Installing @acronym{ODT} exporter
-
-@subsubheading Obtaining and Installing @acronym{ODT} exporter
-The @acronym{ODT} exporter can be enabled in one of the following ways based
-on your mode of installation.
-
-@enumerate
-@item
-If you have downloaded Org, either as a distribution @file{.zip} or
-@file{.tar} file, or as a @file{git} archive, add the @file{contrib} subdir
-to @code{load-path} and customize variable @code{org-modules} to include the
-@samp{odt} option.
-
-@item
-If you are using Org that comes bundled with Emacs, then you can install the
-@samp{org-odt} package using the package manager (@inforef{Packages,,emacs}).
-@end enumerate
-
-@subsubheading Pre-requisites for @acronym{ODT} exporter
-
+@node Pre-requisites for @acronym{ODT} export, @acronym{ODT} export commands, OpenDocument Text export, OpenDocument Text export
+@subsection Pre-requisites for @acronym{ODT} export
 @cindex zip
 @acronym{ODT} exporter relies on @file{zip} program to create the final
 output.  Check the availability of this program before proceeding further.
 
-@node @acronym{ODT} export commands, Applying Custom Styles, Installing ODT exporter, OpenDocument Text export
+@node @acronym{ODT} export commands, Applying Custom Styles, Pre-requisites for @acronym{ODT} export, OpenDocument Text export
 @subsection @acronym{ODT} export commands
 
 @subsubheading Exporting to @acronym{ODT}
@@ -11163,7 +11142,7 @@ This paragraph is specially formatted and uses bold text.
 
 @end enumerate
 
-@node Advanced topics in @acronym{ODT} export, Additional Documentation, Working with raw OpenDocument XML, OpenDocument Text export
+@node Advanced topics in @acronym{ODT} export,  , Working with raw OpenDocument XML, OpenDocument Text export
 @subsection Advanced topics in @acronym{ODT} export
 
 @menu
@@ -11442,13 +11421,6 @@ elements that control how various entities - Tables, Images, Equations etc -
 are numbered.
 @end enumerate
 @end itemize
-
-@node Additional Documentation,  , Advanced topics in @acronym{ODT} export, OpenDocument Text export
-@subsection Additional documentation
-
-The @acronym{ODT} exporter is still in development.  For up to date
-information, please follow Org mailing list @email{emacs-orgmode@@gnu.org}
-closely.
 
 @c end opendocument
 
