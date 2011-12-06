@@ -620,7 +620,6 @@ OpenDocument Text export
 * Images in @acronym{ODT} export::  How to insert images
 * Math formatting in @acronym{ODT} export::  How @LaTeX{} fragments are formatted
 * Literal Examples in @acronym{ODT} export::  How source and example blocks are formatted
-* Working with raw OpenDocument XML::
 * Advanced topics in @acronym{ODT} export::
 
 Math formatting in @acronym{ODT} export
@@ -633,8 +632,9 @@ Advanced topics in @acronym{ODT} export
 * Exporting and Converting to Other formats::
 * Configuring a converter::
 * Using the converter::
+* Working with OpenDocument style files::
+* Working with raw OpenDocument XML::
 * Customizing Tables in @acronym{ODT} export::
-* A note on the internals of @acronym{ODT} exporter::
 
 Exporting and Converting to Other formats
 
@@ -10775,7 +10775,6 @@ are compatible with LibreOffice 3.4.
 * Images in @acronym{ODT} export::  How to insert images
 * Math formatting in @acronym{ODT} export::  How @LaTeX{} fragments are formatted
 * Literal Examples in @acronym{ODT} export::  How source and example blocks are formatted
-* Working with raw OpenDocument XML::
 * Advanced topics in @acronym{ODT} export::
 @end menu
 
@@ -10838,13 +10837,13 @@ the preferred format.
 @cindex styles, custom
 @cindex template, custom
 
-The @acronym{ODT} exporter ships with a set of OpenDocument styles (@pxref{A
-note on the internals of @acronym{ODT} exporter}) that ensure a
-well-formatted output.  These factory styles, however, may not cater to your
-specific tastes.  To customize the output, you can either modify the above
-styles files directly or generate the required styles using an application
-like LibreOffice.  The latter method is suitable for both expert and
-non-expert users alike and is described here.
+The @acronym{ODT} exporter ships with a set of OpenDocument styles
+(@pxref{Working with OpenDocument style files}) that ensure a well-formatted
+output.  These factory styles, however, may not cater to your specific
+tastes.  To customize the output, you can either modify the above styles
+files directly or generate the required styles using an application like
+LibreOffice.  The latter method is suitable for both expert and non-expert
+users alike and is described here.
 
 @subsubsection Applying custom styles - The Easy way
 
@@ -10867,13 +10866,20 @@ Text (@file{.odt}) or OpenDocument Template (@file{.ott}) file.
 @cindex #+ODT_STYLES_FILE
 @vindex org-export-odt-styles-file
 Customize the variable @code{org-export-odt-styles-file} and point it to the
-newly created file.
+newly created file.  For additional configuration options
+@xref{x-overriding-factory-styles,,Overriding factory styles}.
 
 If you would like to choose a style on per-file basis, you can use the
 @code{#+ODT_STYLES_FILE} option. A typical setting will look like
 
 @example
 #+ODT_STYLES_FILE: "/path/to/example.ott"
+@end example
+
+or
+
+@example
+#+ODT_STYLES_FILE: ("/path/to/file.ott" ("styles.xml" "image/hdr.png"))
 @end example
 
 @end enumerate
@@ -11093,7 +11099,7 @@ or
 [[./equation.odf]]
 @end example
 
-@node Literal Examples in @acronym{ODT} export, Working with raw OpenDocument XML, Math formatting in @acronym{ODT} export, OpenDocument Text export
+@node Literal Examples in @acronym{ODT} export, Advanced topics in @acronym{ODT} export, Math formatting in @acronym{ODT} export, OpenDocument Text export
 @subsection Literal Examples in @acronym{ODT} export
 
 Export of Literal examples (@pxref{Literal examples}) with full fontification
@@ -11120,80 +11126,17 @@ their auto-generation altogether, you can do so by customizing the variable
 You can turn off fontification support for Literal examples by customizing
 the variable @code{org-export-odt-fontify-srcblocks}.
 
-@node Working with raw OpenDocument XML, Advanced topics in @acronym{ODT} export, Literal Examples in @acronym{ODT} export, OpenDocument Text export
-@subsection Working with raw OpenDocument XML
 
-There are times when you would want one-off formatting in the exported
-document.  You can achieve this by embedding raw OpenDocument XML in the Org
-file.  The use of this feature is better illustrated with couple of examples.
-
-@enumerate
-@item Embedding ODT tags as part of regular text
-
-You can include simple OpenDocument tags by prepending them with them with
-@samp{@@}. For example, to highlight a region of text do the following:
-
-@example
-@@<text:span text:style-name="Highlight">This is a
-highlighted text@@</text:span>. But this is a
-regular text.
-@end example
-
-@strong{Hint:} To see the above example in action, edit your
-@file{styles.xml} and add a custom @samp{Highlight} style as shown below.
-
-@example
-<style:style style:name="Highlight" style:family="text">
-  <style:text-properties fo:background-color="#ff0000"/>
-</style:style>
-@end example
-
-@item Embedding a one-line OpenDocument XML
-
-You can add a simple OpenDocument one-liner using the @code{#+ODT:}
-directive.  For example to force a page break do the following
-
-@example
-#+ODT: <text:p text:style-name="PageBreak"/>
-@end example
-
-@strong{Hint:} To see the above example in action, edit your
-@file{styles.xml} and add a custom @samp{PageBreak} style as shown below.
-
-@example
-<style:style style:name="PageBreak" style:family="paragraph"
-	     style:parent-style-name="Text_20_body">
-  <style:paragraph-properties fo:break-before="page"/>
-</style:style>
-@end example
-
-@item Embedding a block of OpenDocument XML
-
-You can add a large block of OpenDocument XML using the
-@code{#+BEGIN_ODT}@dots{}@code{#+END_ODT} construct.
-
-For example to create a one-off paragraph that uses bold text do the
-following:
-
-@example
-#+BEGIN_ODT
-<text:p text:style-name="Text_20_body_20_bold">
-This paragraph is specially formatted and uses bold text.
-</text:p>
-#+END_ODT
-@end example
-
-@end enumerate
-
-@node Advanced topics in @acronym{ODT} export,  , Working with raw OpenDocument XML, OpenDocument Text export
+@node Advanced topics in @acronym{ODT} export,  , Literal Examples in @acronym{ODT} export, OpenDocument Text export
 @subsection Advanced topics in @acronym{ODT} export
 
 @menu
 * Exporting and Converting to Other formats::
 * Configuring a converter::
 * Using the converter::
+* Working with OpenDocument style files::
+* Working with raw OpenDocument XML::
 * Customizing Tables in @acronym{ODT} export::
-* A note on the internals of @acronym{ODT} exporter::
 @end menu
 
 @node Exporting and Converting to Other formats, Configuring a converter, Advanced topics in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
@@ -11268,7 +11211,7 @@ Select the newly added converter as the preferred one by customizing the
 variable @code{org-export-odt-convert-process}.
 @end enumerate
 
-@node Using the converter, Customizing Tables in @acronym{ODT} export, Configuring a converter, Advanced topics in @acronym{ODT} export
+@node Using the converter, Working with OpenDocument style files, Configuring a converter, Advanced topics in @acronym{ODT} export
 @subsubheading Using the converter
 Once a command-line converter is configured you can use it to extend the list
 of formats to which Org can export
@@ -11288,7 +11231,173 @@ Note that you can use this command to even convert documents that is produced
  outside of Org and in formats that is different from @acronym{ODT} format.
 @end table
 
-@node Customizing Tables in @acronym{ODT} export, A note on the internals of @acronym{ODT} exporter, Using the converter, Advanced topics in @acronym{ODT} export
+@node Working with OpenDocument style files, Working with raw OpenDocument XML, Using the converter, Advanced topics in @acronym{ODT} export
+@subsubsection Working with OpenDocument style files
+@cindex styles, custom
+@cindex template, custom
+
+@anchor{x-factory-styles}
+@subsubheading Factory styles
+
+@acronym{ODT} exporter relies on two files for generating it's output.  These
+files are bundled with the distribution under the directory pointed to by
+variable @code{org-odt-styles-dir}.  The two files are:
+
+@itemize
+@anchor{x-orgodtstyles-xml}
+@item
+@file{OrgOdtStyles.xml}
+
+This file contributes to @file{styles.xml} file of the final @samp{ODT}
+document.  This file gets modified for the following purposes:
+@enumerate
+
+@item
+To control outline numbering based on user settings.
+
+@item
+To add styles generated by the @file{htmlfontify.el} for fontification of
+code blocks.
+@end enumerate
+
+@anchor{x-orgodtcontenttemplate-xml}
+@item
+@file{OrgOdtContentTemplate.xml}
+
+This file contributes to the @file{content.xml} file of the final @samp{ODT}
+document.  The contents of the Org outline is inserted between the
+@samp{<office:text>}@dots{}@samp{</office:text>} elements of this file.
+
+Apart from serving as a template file for the final @file{content.xml}, the
+file serves the following purposes:
+@enumerate
+
+@item
+It contains Automatic Styles for formatting of tables which are referenced by
+the exporter.
+
+@item
+It contains @samp{<text:sequence-decl>}@dots{}@samp{</text:sequence-decl>}
+elements that control how various entities - Tables, Images, Equations etc -
+are numbered.
+@end enumerate
+@end itemize
+
+@anchor{x-overriding-factory-styles}
+@subsubheading Overriding factory styles
+The following two variables control the location from which the @acronym{ODT}
+exporter picks up the custom styles and content template files.  You can
+customize these variables to override the factory styles used by the
+exporter.
+
+@itemize
+@anchor{x-org-export-odt-styles-file}
+@item
+@code{org-export-odt-styles-file}
+
+Use this variable to specify the @file{styles.xml} that will be used in the
+final output.  You can specify one of the following values:
+
+@enumerate
+@item A @file{styles.xml} file
+
+Use this file instead of the default @file{styles.xml}
+
+@item A @file{.odt} or @file{.ott} file
+
+Use the @file{styles.xml} contained in the specified OpenDocument Text or
+Template file
+
+@item A @file{.odt} or @file{.ott} file and a subset of files contained within them
+
+Use the @file{styles.xml} contained in the specified OpenDocument Text or
+Template file.  Additionally extract the specified member files and embed
+those within the final @samp{ODT} document.
+
+Use this option if the @file{styles.xml} references additional files like
+header and footer images.
+
+@item @code{nil}
+
+Use the default @file{styles.xml}
+@end enumerate
+
+@anchor{x-org-export-odt-content-template-file}
+@item
+@code{org-export-odt-content-template-file}
+
+Use this variable to specify the blank @file{content.xml} that will be used
+in the final output.
+@end itemize
+
+@node Working with raw OpenDocument XML, Customizing Tables in @acronym{ODT} export, Working with OpenDocument style files, Advanced topics in @acronym{ODT} export
+@subsubsection Working with raw OpenDocument XML
+
+There are times when you would want one-off formatting in the exported
+document.  You can achieve this by embedding raw OpenDocument XML in the Org
+file.  The use of this feature is better illustrated with couple of examples.
+
+@enumerate
+@item Embedding ODT tags as part of regular text
+
+You can include simple OpenDocument tags by prepending them with them with
+@samp{@@}. For example, to highlight a region of text do the following:
+
+@example
+@@<text:span text:style-name="Highlight">This is a
+highlighted text@@</text:span>. But this is a
+regular text.
+@end example
+
+@strong{Hint:} To see the above example in action, edit your
+@file{styles.xml}(@pxref{x-orgodtstyles-xml,,Factory styles}) and add a
+custom @samp{Highlight} style as shown below.
+
+@example
+<style:style style:name="Highlight" style:family="text">
+  <style:text-properties fo:background-color="#ff0000"/>
+</style:style>
+@end example
+
+@item Embedding a one-line OpenDocument XML
+
+You can add a simple OpenDocument one-liner using the @code{#+ODT:}
+directive.  For example to force a page break do the following
+
+@example
+#+ODT: <text:p text:style-name="PageBreak"/>
+@end example
+
+@strong{Hint:} To see the above example in action, edit your
+@file{styles.xml}(@pxref{x-orgodtstyles-xml,,Factory styles}) and add a
+custom @samp{PageBreak} style as shown below.
+
+@example
+<style:style style:name="PageBreak" style:family="paragraph"
+	     style:parent-style-name="Text_20_body">
+  <style:paragraph-properties fo:break-before="page"/>
+</style:style>
+@end example
+
+@item Embedding a block of OpenDocument XML
+
+You can add a large block of OpenDocument XML using the
+@code{#+BEGIN_ODT}@dots{}@code{#+END_ODT} construct.
+
+For example to create a one-off paragraph that uses bold text do the
+following:
+
+@example
+#+BEGIN_ODT
+<text:p text:style-name="Text_20_body_20_bold">
+This paragraph is specially formatted and uses bold text.
+</text:p>
+#+END_ODT
+@end example
+
+@end enumerate
+
+@node Customizing Tables in @acronym{ODT} export,  , Working with raw OpenDocument XML, Advanced topics in @acronym{ODT} export
 @subsubsection Customizing Tables in @acronym{ODT} export
 @cindex tables, in ODT export
 
@@ -11368,8 +11477,8 @@ following table.
 
 To create a table template with name @samp{Custom}, define the above styles
 in the @code{<office:automatic-styles>}...@code{</office:automatic-styles>}
-element of the content template file (see docstring of variable
-@code{org-export-odt-content-template-file}).
+element of the content template file
+(@pxref{x-orgodtcontenttemplate-xml,,Factory styles}).
 
 @item
 Define a table style@footnote{See attributes - @code{table:template-name},
@@ -11415,55 +11524,6 @@ To do this, specify the table style created in step (2) as part of
 | Anna  |  4321 |  25 |
 @end example
 @end enumerate
-
-@node A note on the internals of @acronym{ODT} exporter,  , Customizing Tables in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
-@subsubsection A note on the internals of @acronym{ODT} exporter
-@cindex styles, custom
-@cindex template, custom
-
-@vindex org-export-odt-styles-file
-
-@acronym{ODT} exporter relies on two files for generating it's output.  These
-files are bundled with the distribution under the directory pointed to by
-variable @code{org-odt-styles-dir}.  The two files are:
-
-@itemize
-@item
-@file{OrgOdtStyles.xml}
-
-This file contributes to @file{styles.xml} file of the final @samp{ODT}
-document.  This file gets modified for the following purposes:
-@enumerate
-
-@item
-To control outline numbering based on user settings.
-
-@item
-To add styles generated by the @file{htmlfontify.el} for fontification of
-code blocks.
-@end enumerate
-
-@item
-@file{OrgOdtContentTemplate.xml}
-
-This file contributes to the @file{content.xml} file of the final @samp{ODT}
-document.  The contents of the Org outline is inserted between the
-@samp{<office:text>}@dots{}@samp{</office:text>} elements of this file.
-
-Apart from serving as a template file for the final @file{content.xml}, the
-file serves the following purposes:
-@enumerate
-
-@item
-It contains Automatic Styles for formatting of tables which are referenced by
-the exporter.
-
-@item
-It contains @samp{<text:sequence-decl>}@dots{}@samp{</text:sequence-decl>}
-elements that control how various entities - Tables, Images, Equations etc -
-are numbered.
-@end enumerate
-@end itemize
 
 @c end opendocument
 
