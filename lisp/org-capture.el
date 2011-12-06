@@ -778,7 +778,8 @@ already gone.  Any prefix argument will be passed to the refile command."
 	    (let ((prompt-time (org-read-date
 				nil t nil "Date for tree entry:"
 				(current-time))))
-	      (org-capture-put :prompt-time prompt-time)
+	      (org-capture-put :prompt-time prompt-time
+			       :default-time prompt-time)
 	      (time-to-days prompt-time)))
 	   (t
 	    ;; current date, possible corrected for late night workers
