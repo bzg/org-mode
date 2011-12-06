@@ -10854,78 +10854,54 @@ the preferred format.
 @cindex styles, custom
 @cindex template, custom
 
-@subsubheading Overriding the default styles
+The @acronym{ODT} exporter ships with a set of OpenDocument styles (@pxref{A
+note on the internals of @acronym{ODT} exporter}) that ensure a
+well-formatted output.  These factory styles, however, may not cater to your
+specific tastes.  To customize the output, you can either modify the above
+styles files directly or generate the required styles using an application
+like LibreOffice.  The latter method is suitable for both expert and
+non-expert users alike and is described here.
 
-The default styles that ship with the @acronym{ODT} exporter would suffice
-for generating well-formatted document.  However it may not cater to your
-specific tastes.  If this is the case, you can replace the factory defaults
-with your own by customizing the following variables:
-
-@itemize
-@item
-@code{org-export-odt-styles-file}
-
-Use this variable to specify the @file{styles.xml} that will be used in the
-final output.  You can specify one of the following values:
+@subsubsection Applying custom styles - The Easy way
 
 @enumerate
-@item A @file{styles.xml} file
+@item
+Create a sample @file{example.org} file with the below settings and export it
+to @acronym{ODT} format.
 
-Use this file instead of the default @file{styles.xml}
-
-@item A @file{.odt} or @file{.ott} file
-
-Use the @file{styles.xml} contained in the specified OpenDocument Text or
-Template file
-
-@item A @file{.odt} or @file{.ott} file and a subset of files contained within them
-
-Use the @file{styles.xml} contained in the specified OpenDocument Text or
-Template file.  Additionally extract the specified member files and embed
-those within the final @samp{ODT} document.
-
-Use this option if the @file{styles.xml} references additional files like
-header and footer images.
-
-@item @code{nil}
-
-Use the default @file{styles.xml}
-@end enumerate
+@example
+#+OPTIONS: H:10 num:t
+@end example
 
 @item
-@code{org-export-odt-content-template-file}
+Open the above @file{example.odt} using LibreOffice.  Use the @file{Stylist}
+to locate the target styles - these typically have @samp{Org} prefix - and
+modify those to your taste.  Save the modified file either as an OpenDocument
+Text (@file{.odt}) or OpenDocument Template (@file{.ott}) file.
 
-Use this variable to specify the blank @file{content.xml} that will be used
-in the final output.
-@end itemize
-
-@noindent
-@strong{Caution:} For best results with custom styles, you need to ensure
-that all style names emitted by the @acronym{ODT} exporter be apriori defined
-in @file{styles.xml} and the template @file{content.xml} files.  Unless
-sufficient care is exercised in choosing the custom style files, the result
-could be less than satisfactory.  So it is highly recommended that you build
-your custom @file{styles.xml} from the default @file{styles.xml} bundled with
-the exporter.
-
-@subsubheading Specifying Custom Styles on per-file basis
-
+@item
 @cindex #+ODT_STYLES_FILE
+@vindex org-export-odt-styles-file
+Customize the variable @code{org-export-odt-styles-file} and point it to the
+newly created file.
 
-You can use @code{#+ODT_STYLES_FILE} option to specify custom styles on
-per-file basis.  This option effectively overrides the value of
-@code{org-export-odt-styles-file} with the specified value just for this
-buffer.  A typical setting will look like
-
-@example
-#+ODT_STYLES_FILE: "/path/to/styles.xml"
-@end example
-
-or
+If you would like to choose a style on per-file basis, you can use the
+@code{#+ODT_STYLES_FILE} option. A typical setting will look like
 
 @example
-#+ODT_STYLES_FILE: ("/path/to/file.ott" ("styles.xml" "image/hdr.png"))
+#+ODT_STYLES_FILE: "/path/to/example.ott"
 @end example
+
+@end enumerate
+
+@subsubsection Using Third-party Styles and Templates
+
+You can use third-party styles and templates for customizing your output.
+This will produce the desired output only if the template provides all
+style-names that the @samp{ODT} exporter relies on.  Unless this condition is
+met, the output is going to be less than satisfactory.  So it is highly
+recommended that you only work with templates that are directly derived from
+the factory settings.
 
 @node Links in @acronym{ODT} export, Tables in @acronym{ODT} export, Applying Custom Styles, OpenDocument Text export
 @subsection Links in @acronym{ODT} export
