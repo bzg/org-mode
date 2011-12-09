@@ -2466,23 +2466,31 @@ Return new code as a string."
   "Extract info from TABLE.
 Return a plist whose properties and values are:
 `:alignment'        vector of strings among \"r\", \"l\" and \"c\",
-`:column-groups'    vector of symbols among `start', `end', `startend',
-`:special-column-p' boolean."
+`:column-groups'    vector of symbols among `start', `end', `start-end',
+`:row-groups'       list of integers representing row groups.
+`:special-column-p' non-nil if table has a special column.
+`:width'            vector of integers representing desired width of
+                    current column, or nil."
   (with-temp-buffer
     (insert table)
     (goto-char 1)
     (org-table-align)
     (let ((align (vconcat (mapcar (lambda (c) (if c "r" "l"))
                                   org-table-last-alignment)))
-          (colgroups (make-vector (length org-table-last-alignment) nil))
+          (width (make-vector (length org-table-last-alignment) nil))
+	  (colgroups (make-vector (length org-table-last-alignment) nil))
+	  (row-group 0)
+	  (rowgroups)
           (special-column-p 'empty))
       (mapc (lambda (row)
-              ;; Determine if a special column is present by looking
-              ;; for special markers in the first column.  More
-              ;; accurately, the first column is considered special if
-              ;; it only contains special markers and, maybe, empty
-              ;; cells.
-              (unless (string-match "^[ \t]*|[-+]+|[ \t]*$" row)
+              (if (string-match "^[ \t]*|[-+]+|[ \t]*$" row)
+		  (incf row-group)
+		(push row-group rowgroups)
+		;; Determine if a special column is present by looking
+		;; for special markers in the first column.  More
+		;; accurately, the first column is considered special
+		;; if it only contains special markers and, maybe,
+		;; empty cells.
                 (setq special-column-p
                       (cond
                        ((not special-column-p) nil)
@@ -2490,13 +2498,15 @@ Return a plist whose properties and values are:
                                       row) 'special)
                        ((string-match "^[ \t]*| +|" row) special-column-p))))
               (cond
+	       ;; Read forced alignment and width information, if any,
+	       ;; and determine final alignment for the table.
                ((org-table-cookie-line-p row)
-                ;; Read forced alignment information, if any, and
-                ;; determine final alignment for the table.
                 (let ((col 0))
                   (mapc (lambda (field)
-                          (when (string-match "<\\([lrc]\\)[0-9]*>" field)
-                            (aset align col (match-string 1 field)))
+                          (when (string-match "<\\([lrc]\\)\\([0-9]+\\)?>" field)
+                            (aset align col (match-string 1 field))
+			    (aset width col (let ((w (match-string 2 field)))
+					      (and w (string-to-number w)))))
                           (incf col))
                         (org-split-string row "[ \t]*|[ \t]*"))))
                ;; Read column groups information.
@@ -2513,7 +2523,9 @@ Return a plist whose properties and values are:
       ;; Return plist.
       (list :alignment align
             :column-groups colgroups
-            :special-column-p (eq special-column-p 'special)))))
+	    :row-groups (reverse rowgroups)
+            :special-column-p (eq special-column-p 'special)
+	    :width width))))
 
 (defun org-export-clean-table (table specialp)
   "Clean string TABLE from its formatting elements.

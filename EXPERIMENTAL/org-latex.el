@@ -1698,43 +1698,43 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
             (format "\\begin{center}\n%s\n\\end{center}" output)
           output)))
      ;; Case 3: Standard table.
-     (t (let* (
-               (info (org-export-table-format-info raw-table))
-               (clean-table (org-export-clean-table
-                             raw-table (plist-get info :special-column-p)))
-               (columns-number (length (plist-get info :alignment))))
-          ;; Convert ROWS to send them to `orgtbl-to-latex'.  In
-          ;; particular, send each cell to
-          ;; `org-element-parse-secondary-string' to expand any Org
-          ;; object within.  Eventually, flesh the format string out with
-          ;; the table.
-          (format (org-latex-table--format-string table info)
-                  (orgtbl-to-latex
-                   (mapcar
-                    (lambda (row)
-                      (if (string-match org-table-hline-regexp row)
-                          'hline
-                        (mapcar
-                         (lambda (cell)
-                           (org-export-secondary-string
-                            (org-element-parse-secondary-string
-                             cell
-                             (cdr (assq 'table org-element-string-restrictions)))
-                            'latex info))
-                         (org-split-string row "[ \t]*|[ \t]*"))))
-                    (org-split-string clean-table "\n"))
-                   `(:tstart nil :tend nil
-                             ;; Longtable environment requires specific
-                             ;; header line end.
-                             :hlend ,(and attr
-                                          (string-match "\\<longtable\\>" attr)
-                                          (format "\\\\
+     (t
+      (let* ((table-info (org-export-table-format-info raw-table))
+	     (clean-table (org-export-clean-table
+			   raw-table (plist-get table-info :special-column-p)))
+	     (columns-number (length (plist-get table-info :alignment))))
+	;; Convert ROWS to send them to `orgtbl-to-latex'.  In
+	;; particular, send each cell to
+	;; `org-element-parse-secondary-string' to expand any Org
+	;; object within.  Eventually, flesh the format string out with
+	;; the table.
+	(format (org-latex-table--format-string table table-info)
+		(orgtbl-to-latex
+		 (mapcar
+		  (lambda (row)
+		    (if (string-match org-table-hline-regexp row)
+			'hline
+		      (mapcar
+		       (lambda (cell)
+			 (org-export-secondary-string
+			  (org-element-parse-secondary-string
+			   cell
+			   (cdr (assq 'table org-element-string-restrictions)))
+			  'latex info))
+		       (org-split-string row "[ \t]*|[ \t]*"))))
+		  (org-split-string clean-table "\n"))
+		 `(:tstart nil :tend nil
+			   ;; Longtable environment requires specific
+			   ;; header line end.
+			   :hlend ,(and attr
+					(string-match "\\<longtable\\>" attr)
+					(format "\\\\
 \\hline
 \\endhead
 \\hline\\multicolumn{%d}{r}{Continued on next page}\\\\
 \\endfoot
 \\endlastfoot"
-                                                  columns-number))))))))))
+						columns-number))))))))))
 
 
 ;;;; Target
