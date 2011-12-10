@@ -100,7 +100,7 @@ This directory contains the following XML files -
  `org-export-odt-styles-file' and
  `org-export-odt-content-template-file'.")
 
-(defconst org-export-odt-schema-dir
+(defcustom org-export-odt-schema-dir
   (let ((schema-dir (expand-file-name
 		     "../contrib/odt/etc/schema/" org-odt-lib-dir)))
     (if (and (file-readable-p
@@ -116,7 +116,32 @@ This directory contains the following XML files -
 This directory contains rnc files for OpenDocument schema.  It
 also contains a \"schemas.xml\" that can be added to
 `rng-schema-locating-files' for auto validation of OpenDocument
-XML files.  See also `rng-nxml-auto-validate-flag'.")
+XML files.  See also `rng-nxml-auto-validate-flag'."
+  :type '(choice
+	  (const :tag "Not set" nil)
+	  (directory :tag "Schema directory"))
+  :group 'org-export-odt
+  :set
+  (lambda (var value)
+    "Set `org-export-odt-schema-dir'.
+Also add it to `rng-schema-locating-files'."
+    (let ((schema-dir value))
+      (set var
+	   (if (and
+		(file-readable-p
+		 (expand-file-name "od-manifest-schema-v1.2-cs01.rnc" schema-dir))
+		(file-readable-p
+		 (expand-file-name "od-schema-v1.2-cs01.rnc" schema-dir))
+		(file-readable-p
+		 (expand-file-name "schemas.xml" schema-dir)))
+	       schema-dir
+	     (prog1 nil
+	       (message "Warning (org-odt): Unable to locate OpenDocument schema files.")))))
+    (when org-export-odt-schema-dir
+      (eval-after-load 'rng-loc
+	'(add-to-list 'rng-schema-locating-files
+		      (expand-file-name "schemas.xml"
+					org-export-odt-schema-dir))))))
 
 (defvar org-odt-file-extensions
   '(("odt" . "OpenDocument Text")
@@ -130,32 +155,7 @@ XML files.  See also `rng-nxml-auto-validate-flag'.")
     ("otp" . "OpenDocument Presentation Template")
     ("odi" . "OpenDocument Image")
     ("odf" . "OpenDocument Formula")
-    ("odc" . "OpenDocument Chart")
-    ("doc" . "Microsoft Text")
-    ("docx" . "Microsoft Text")
-    ("xls" . "Microsoft Spreadsheet")
-    ("xlsx" . "Microsoft Spreadsheet")
-    ("ppt" . "Microsoft Presentation")
-    ("pptx" . "Microsoft Presentation")))
-
-(defvar org-odt-ms-file-extensions
-  '(("doc" . "Microsoft Text")
-    ("docx" . "Microsoft Text")
-    ("xls" . "Microsoft Spreadsheet")
-    ("xlsx" . "Microsoft Spreadsheet")
-    ("ppt" . "Microsoft Presentation")
-    ("pptx" . "Microsoft Presentation")))
-
-;; RelaxNG validation of OpenDocument xml files
-(eval-after-load 'rng-nxml
-  '(when org-export-odt-schema-dir
-     (setq rng-nxml-auto-validate-flag t)))
-
-(eval-after-load 'rng-loc
-  '(when org-export-odt-schema-dir
-     (add-to-list 'rng-schema-locating-files
-		  (expand-file-name "schemas.xml"
-				    org-export-odt-schema-dir))))
+    ("odc" . "OpenDocument Chart")))
 
 (mapc
  (lambda (desc)
@@ -166,13 +166,6 @@ XML files.  See also `rng-nxml-auto-validate-flag'.")
    (add-to-list 'auto-mode-alist
 		(cons (concat  "\\." (car desc) "\\'") 'archive-mode)))
  org-odt-file-extensions)
-
-(mapc
- (lambda (desc)
-   ;; Let Org open all Microsoft files using system-registered app
-   (add-to-list 'org-file-apps
-		(cons (concat  "\\." (car desc) "\\'") 'system)))
- org-odt-ms-file-extensions)
 
 ;; register the odt exporter with the pre-processor
 (add-to-list 'org-export-backends 'odt)
