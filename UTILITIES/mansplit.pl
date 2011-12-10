@@ -43,7 +43,7 @@ EOF
 
 
 $script = <<'EOF';
-</style><link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />
+<link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />
 <script type="text/javascript" src="http://orgmode.org/org-keys.js"></script>
 <script type="text/javascript">
   <!--/*--><![CDATA[/*><!--*/
