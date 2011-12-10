@@ -188,7 +188,8 @@ PKG_FILES = $(LISPFILES0)		\
             doc/orgguide.pdf		\
             doc/orgcard.tex		\
             doc/orgcard.pdf		\
-            doc/orgcard_letter.pdf
+            doc/orgcard_letter.pdf	\
+            etc/
 
 .SUFFIXES: .el .elc .texi
 SHELL = /bin/sh

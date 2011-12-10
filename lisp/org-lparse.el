@@ -1,6 +1,6 @@
 ;;; org-lparse.el --- Line-oriented parser-exporter for Org-mode
 
-;; Copyright (C) 2010-2011 Jambunathan <kjambunathan at gmail dot com>
+;; Copyright (C) 2010-2011 Free Software Foundation, Inc.
 
 ;; Author: Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -49,9 +49,11 @@
 ;; FAQs and more information on using this library.
 
 ;;; Code:
-
+(eval-when-compile
+  (require 'cl))
 (require 'org-exp)
 (require 'org-list)
+(require 'format-spec)
 
 ;;;###autoload
 (defun org-lparse-and-open (target-backend native-backend arg
@@ -244,9 +246,10 @@ OPT-PLIST is the export options list."
 	;; The link protocol has a function for format the link
 	(setq rpl (save-match-data
 		    (funcall fnc (org-link-unescape path)
-			     desc1 (case org-lparse-backend
-				     (xhtml 'html)
-				     (t org-lparse-backend))))))
+			     desc1 (and (boundp 'org-lparse-backend)
+					(case org-lparse-backend
+					  (xhtml 'html)
+					  (t org-lparse-backend)))))))
        ((string= type "file")
 	;; FILE link
 	(save-match-data
@@ -470,6 +473,9 @@ This is a helper routine for interactive use."
 	       "No known converter or no known output formats for %s files"
 	       in-fmt))))
     (list in-file out-fmt)))
+
+(eval-when-compile
+  (require 'browse-url))
 
 (defun org-lparse-do-convert (in-file out-fmt &optional prefix-arg)
   "Workhorse routine for `org-export-odt-convert'."
@@ -1797,17 +1803,15 @@ Stripping happens only when the exported backend is not one of
   (case style
     (list-table
      (setq org-lparse-list-table-p t))
-    (t
-     (setq org-lparse-dyn-current-environment style)
-     (org-lparse-begin 'ENVIRONMENT  style env-options-plist))))
+    (t (setq org-lparse-dyn-current-environment style)
+       (org-lparse-begin 'ENVIRONMENT  style env-options-plist))))
 
 (defun org-lparse-end-environment (style &optional env-options-plist)
   (case style
     (list-table
      (setq org-lparse-list-table-p nil))
-    (t
-     (org-lparse-end 'ENVIRONMENT style env-options-plist)
-     (setq org-lparse-dyn-current-environment nil))))
+    (t (org-lparse-end 'ENVIRONMENT style env-options-plist)
+       (setq org-lparse-dyn-current-environment nil))))
 
 (defun org-lparse-current-environment-p (style)
   (eq org-lparse-dyn-current-environment style))

@@ -1,6 +1,6 @@
 ;;; org-odt.el --- OpenDocumentText export for Org-mode
 
-;; Copyright (C) 2010-2011 Jambunathan <kjambunathan at gmail dot com>
+;; Copyright (C) 2010-2011 Free Software Foundation, Inc.
 
 ;; Author: Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -26,7 +26,9 @@
 ;;; Commentary:
 
 ;;; Code:
-(eval-when-compile (require 'cl))
+(eval-when-compile
+  (require 'cl)
+  (require 'htmlfontify))
 (require 'org-lparse)
 
 (defgroup org-export-odt nil
@@ -73,13 +75,23 @@
 
 (defconst org-odt-lib-dir (file-name-directory load-file-name))
 (defconst org-odt-styles-dir
-  (let ((styles-dir (expand-file-name "../etc/styles/" org-odt-lib-dir)))
-    (prog1 styles-dir
-      (unless (and (file-readable-p (expand-file-name
-				     "OrgOdtContentTemplate.xml" styles-dir))
-		   (file-readable-p (expand-file-name
-				     "OrgOdtStyles.xml" styles-dir)))
-	(error "Cannot find factory styles file. Check package dir layout"))))
+  (let* ((styles-dir1 (expand-file-name "../etc/styles/" org-odt-lib-dir))
+	 (styles-dir2 (expand-file-name "./etc/styles/" org-odt-lib-dir))
+	 (styles-dir
+	  (catch 'styles-dir
+	    (mapc (lambda (styles-dir)
+		    (when (and (file-readable-p
+				(expand-file-name
+				 "OrgOdtContentTemplate.xml" styles-dir))
+			       (file-readable-p
+				(expand-file-name
+				 "OrgOdtStyles.xml" styles-dir)))
+		      (throw 'styles-dir styles-dir)))
+		  (list styles-dir1 styles-dir2))
+	    nil)))
+    (unless styles-dir
+      (error "Cannot find factory styles file. Check package dir layout"))
+    styles-dir)
   "Directory that holds auxiliary XML files used by the ODT exporter.
 
 This directory contains the following XML files -
@@ -98,9 +110,7 @@ This directory contains the following XML files -
 	     (file-readable-p
 	      (expand-file-name "schemas.xml" schema-dir)))
 	schema-dir
-      (prog1 nil
-	(message "Unable to locate OpenDocument schema files.")
-	(message "These files may be needed for enhanced debugging."))))
+      (prog1 nil (message "Unable to locate OpenDocument schema files."))))
   "Directory that contains OpenDocument schema files.
 
 This directory contains rnc files for OpenDocument schema.  It
@@ -253,6 +263,24 @@ a per-file basis.  For example,
   ""
   :type 'float
   :group 'org-export-odt)
+
+(defcustom org-export-odt-create-custom-styles-for-srcblocks t
+  "Whether custom styles for colorized source blocks be automatically created.
+When this option is turned on, the exporter creates custom styles
+for source blocks based on the advice of `htmlfontify'.  Creation
+of custom styles happen as part of `org-odt-hfy-face-to-css'.
+
+When this option is turned off exporter does not create such
+styles.
+
+Use the latter option if you do not want the custom styles to be
+based on your current display settings.  It is necessary that the
+styles.xml already contains needed styles for colorizing to work.
+
+This variable is effective only if
+`org-export-odt-fontify-srcblocks' is turned on."
+  :group 'org-export-odt
+  :type 'boolean)
 
 (defvar org-export-odt-default-org-styles-alist
   '((paragraph . ((default . "Text_20_body")
@@ -1136,24 +1164,6 @@ and prefix with \"OrgSrc\".  For example,
  </style:style>" style-name color-val))))))
     (cons style-name style)))
 
-(defcustom org-export-odt-create-custom-styles-for-srcblocks t
-  "Whether custom styles for colorized source blocks be automatically created.
-When this option is turned on, the exporter creates custom styles
-for source blocks based on the advice of `htmlfontify'.  Creation
-of custom styles happen as part of `org-odt-hfy-face-to-css'.
-
-When this option is turned off exporter does not create such
-styles.
-
-Use the latter option if you do not want the custom styles to be
-based on your current display settings.  It is necessary that the
-styles.xml already contains needed styles for colorizing to work.
-
-This variable is effective only if
-`org-export-odt-fontify-srcblocks' is turned on."
-  :group 'org-export-odt
-  :type 'boolean)
-
 (defun org-odt-insert-custom-styles-for-srcblocks (styles)
   "Save STYLES used for colorizing of source blocks.
 Update styles.xml with styles that were collected as part of
@@ -1867,6 +1877,7 @@ CATEGORY-HANDLE is used.  See
 	(suffix (when org-lparse-encode-pending "@")))
     (apply 'org-lparse-format-tags tag text prefix suffix args)))
 
+(defvar org-odt-manifest-file-entries nil)
 (defun org-odt-init-outfile (filename)
   (unless (executable-find "zip")
     ;; Not at all OSes ship with zip by default
@@ -1971,8 +1982,6 @@ visually."
 (defconst org-odt-manifest-file-entry-tag
   "
 <manifest:file-entry manifest:media-type=\"%s\" manifest:full-path=\"%s\"%s/>")
-
-(defvar org-odt-manifest-file-entries nil)
 
 (defun org-odt-create-manifest-file-entry (&rest args)
   (push args org-odt-manifest-file-entries))
@@ -2196,6 +2205,9 @@ configuration."
 			 :key-type (string :tag "Output format")
 			 :value-type
 			 (group (string :tag "Output file extension")))))))
+
+(declare-function org-create-math-formula "org"
+		  (latex-frag &optional mathml-file))
 
 ;;;###autoload
 (defun org-export-odt-convert (&optional in-file out-fmt prefix-arg)
