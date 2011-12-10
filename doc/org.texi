@@ -635,6 +635,7 @@ Advanced topics in @acronym{ODT} export
 * Working with OpenDocument style files::
 * Working with raw OpenDocument XML::
 * Customizing Tables in @acronym{ODT} export::
+* Validating OpenDocument XML::
 
 Exporting and Converting to Other formats
 
@@ -11137,6 +11138,7 @@ the variable @code{org-export-odt-fontify-srcblocks}.
 * Working with OpenDocument style files::
 * Working with raw OpenDocument XML::
 * Customizing Tables in @acronym{ODT} export::
+* Validating OpenDocument XML::
 @end menu
 
 @node Exporting and Converting to Other formats, Configuring a converter, Advanced topics in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
@@ -11397,7 +11399,7 @@ This paragraph is specially formatted and uses bold text.
 
 @end enumerate
 
-@node Customizing Tables in @acronym{ODT} export,  , Working with raw OpenDocument XML, Advanced topics in @acronym{ODT} export
+@node Customizing Tables in @acronym{ODT} export, Validating OpenDocument XML, Working with raw OpenDocument XML, Advanced topics in @acronym{ODT} export
 @subsubsection Customizing Tables in @acronym{ODT} export
 @cindex tables, in ODT export
 
@@ -11524,6 +11526,27 @@ To do this, specify the table style created in step (2) as part of
 | Anna  |  4321 |  25 |
 @end example
 @end enumerate
+
+@node Validating OpenDocument XML,  , Customizing Tables in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
+@subsubsection Validating OpenDocument XML
+
+Occasionally, you will discover that the document created by the
+@acronym{ODT} exporter cannot be opened by your favorite application.  One of
+the common reasons for this is that the @file{.odt} file is corrupt.  In such
+cases, you may want to validate the document against the OpenDocument RELAX
+NG Compact Syntax (RNC) schema. 
+
+For de-compressing @file{.odt} file@footnote{@file{.odt} files are nothing
+but @samp{zip} archives} @inforef{File Archives,,emacs}.  For general help
+with validation (and schema-sensitive editing) of XML files
+@inforef{Introduction,,nxml-mode}.
+
+@vindex org-export-odt-schema-dir
+If you have ready access to OpenDocument @file{.rnc} files and the needed
+schema locating rules in a single folder, you can customize the variable
+@code{org-export-odt-schema-dir} to point to that directory.  The
+@acronym{ODT} exporter will take care of updating the
+@code{rng-schema-locating-files} for you.
 
 @c end opendocument
 
