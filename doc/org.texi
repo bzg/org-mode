@@ -9950,7 +9950,7 @@ tables, place something like the following before the table:
 @cindex #+ATTR_HTML
 @example
 #+CAPTION: This is a table with lines around and between cells
-#+ATTR_HTML: border="2" rules="all" frame="all"
+#+ATTR_HTML: border="2" rules="all" frame="border"
 @end example
 
 @node Images in HTML export, Math formatting in HTML export, Tables in HTML export, HTML export
