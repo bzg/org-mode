@@ -355,6 +355,14 @@ CSS classes, then this prefix can be very useful."
   :group 'org-export-html
   :type 'string)
 
+(defcustom org-export-html-headline-anchor-format "<a name=\"%s\" id=\"%s\"></a>"
+  "Format for anchors in HTML headlines.
+It requires to %s: both will be replaced by the anchor referring
+to the headline (e.g. \"sec-2\").  When set to `nil', don't insert
+HTML anchors in headlines."
+  :group 'org-export-html
+  :type 'string)
+
 (defcustom org-export-html-preamble t
   "Non-nil means insert a preamble in HTML export.
 
@@ -2438,8 +2446,9 @@ When TITLE is nil, just close all open levels."
 	  (mapconcat (lambda (x)
 		       (setq x (org-solidify-link-text
 				(if (org-uuidgen-p x) (concat "ID-" x) x)))
-		       (format "<a name=\"%s\" id=\"%s\"></a>"
-			       x x))
+		       (if (stringp org-export-html-headline-anchor-format)
+			   (format org-export-html-headline-anchor-format x x)
+			 ""))
 		     extra-targets
 		     ""))
     (while (>= l level)
