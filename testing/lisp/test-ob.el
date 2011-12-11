@@ -552,6 +552,30 @@ on two lines
       (check-eval "never-export" nil)
       (check-eval "no-export" nil))))
 
+(ert-deftest test-ob/noweb-expansion ()
+  (org-test-with-temp-text "#+begin_src sh :results output :tangle yes
+  <<foo>>
+#+end_src
+
+#+name: foo
+#+begin_src sh
+  bar
+#+end_src"
+    (should (string= (org-babel-expand-noweb-references) "bar")))
+  (org-test-with-temp-text "#+begin_src sh :results output :tangle yes
+  <<foo>>
+#+end_src
+
+#+name: foo
+#+begin_src sh
+  bar
+#+end_src
+
+#+begin_src sh :noweb-ref foo
+  baz
+#+end_src"
+    (should (string= (org-babel-expand-noweb-references) "barbaz"))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

@@ -1989,7 +1989,8 @@ block but are passed literally to the \"example-block\"."
          (lang (nth 0 info))
          (body (nth 1 info))
 	 (comment (string= "noweb" (cdr (assoc :comments (nth 2 info)))))
-	 (rx-prefix (regexp-opt (list org-babel-src-name-regexp ":noweb-ref")))
+	 (rx-prefix (concat "\\(" org-babel-src-name-regexp "\\|"
+			    ":noweb-ref[ \t]+" "\\)"))
          (new-body "") index source-name evaluate prefix blocks-in-buffer)
     (flet ((nb-add (text) (setq new-body (concat new-body text)))
 	   (c-wrap (text)
@@ -2030,7 +2031,7 @@ block but are passed literally to the \"example-block\"."
 		    (when (org-babel-ref-goto-headline-id source-name)
 		      (org-babel-ref-headline-body)))
 		  ;; find the expansion of reference in this buffer
-		  (let ((rx (concat rx-prefix "[ \t]+" source-name))
+		  (let ((rx (concat rx-prefix source-name))
 			expansion)
 		    (save-excursion
 		      (goto-char (point-min))
