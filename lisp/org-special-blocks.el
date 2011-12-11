@@ -1,4 +1,3 @@
-
 ;; Copyright (C) 2009-2011  Free Software Foundation, Inc.
 
 ;; Author: Chris Gray <chrismgray@gmail.com>
@@ -81,11 +80,15 @@ seen.  This is run after a few special cases are taken care of."
   "Converts the special cookies into div blocks."
   ;; Uses the dynamically-bound variable `line'.
   (when (string-match "^ORG-\\(.*\\)-\\(START\\|END\\)$" line)
-;    (org-close-par-maybe)
     (message "%s" (match-string 1))
-    (if (equal (match-string 2 line) "START")
-	(insert "<div class=\"" (match-string 1 line) "\">\n")
-      (insert "</div>\n"))
+    (when (equal (match-string 2 line) "START")
+      (org-close-par-maybe)
+      (insert "\n<div class=\"" (match-string 1 line) "\">")
+      (org-open-par))
+    (when (equal (match-string 2 line) "END")
+      (org-close-par-maybe)
+      (insert "\n</div>")
+      (org-open-par))
     (throw 'nextline nil)))
 
 (add-hook 'org-export-html-after-blockquotes-hook
