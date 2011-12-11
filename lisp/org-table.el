@@ -241,6 +241,14 @@ days."
 		 (symbol :tag "Hours  " 'hours)
 		 (symbol :tag "Days   " 'days)))
 
+(defcustom org-table-formula-field-format "%s"
+  "Format for fields which contain the result of a formula.
+For example, using \"~%s~\" will display the result within tilde
+characters.  Beware that modifying the display can prevent the
+field from being used in another formula."
+  :group 'org-table-settings
+  :type 'string)
+
 (defcustom org-table-formula-evaluate-inline t
   "Non-nil means TAB and RET evaluate a formula in current table field.
 If the current field starts with an equal sign, it is assumed to be a formula
@@ -2572,7 +2580,8 @@ $1->    %s\n" orig formula form0 form))
 	    (message "")))
 	(if (listp ev) (setq fmt nil ev "#ERROR"))
 	(org-table-justify-field-maybe
-	 (if fmt (format fmt (string-to-number ev)) ev))
+	 (format org-table-formula-field-format
+		 (if fmt (format fmt (string-to-number ev)) ev)))
 	(if (and down (> ndown 0) (looking-at ".*\n[ \t]*|[^-]"))
 	    (call-interactively 'org-return)
 	  (setq ndown 0)))
