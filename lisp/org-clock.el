@@ -1698,6 +1698,7 @@ This is used to stop the clock after a TODO entry is marked DONE,
 and is only done if the variable `org-clock-out-when-done' is not nil."
   (when (and (org-clocking-p)
 	     org-clock-out-when-done
+	     (marker-buffer org-clock-marker)
 	     (or (and (eq t org-clock-out-when-done)
 		      (member state org-done-keywords))
 		 (and (listp org-clock-out-when-done)
