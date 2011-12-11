@@ -11143,12 +11143,14 @@ nil or a string to be used for the todo mark." )
     ct1))
 
 (defun org-todo-yesterday (&optional arg)
-  "Like `org-todo' but the time of change will be 23:59 of yesterday"
+  "Like `org-todo' but the time of change will be 23:59 of yesterday."
   (interactive "P")
-  (let* ((hour (third (decode-time
-                       (org-current-time))))
-         (org-extend-today-until (1+ hour)))
-    (org-todo arg)))
+  (if (eq major-mode 'org-agenda-mode)
+      (apply 'org-agenda-todo-yesterday arg)
+    (let* ((hour (third (decode-time
+			 (org-current-time))))
+	   (org-extend-today-until (1+ hour)))
+      (org-todo arg))))
 
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
