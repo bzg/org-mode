@@ -1726,6 +1726,35 @@ blindly applies a recipe that works for simple tables."
 	    (replace-match "-+"))
 	  (goto-char beg)))))
 
+(defun org-table-transpose-table-at-point ()
+  "Transpose orgmode table at point and eliminate hlines.
+So a table like
+
+| 1 | 2 | 4 | 5 |
+|---+---+---+---|
+| a | b | c | d |
+| e | f | g | h |
+
+will be transposed as
+
+| 1 | a | e |
+| 2 | b | f |
+| 4 | c | g |
+| 5 | d | h |
+
+Note that horizontal lines disappeared."
+  (interactive)
+  (let ((contents
+         (apply #'mapcar* #'list
+                ;; remove 'hline from list
+                (remove-if-not 'listp
+                               ;; signals error if not table
+                               (org-table-to-lisp)))))
+    (delete-region (org-table-begin) (org-table-end))
+    (insert (mapconcat (lambda(x) (concat "| " (mapconcat 'identity x " | " ) "  |\n" ))
+                       contents ""))
+    (org-table-align)))
+
 (defun org-table-wrap-region (arg)
   "Wrap several fields in a column like a paragraph.
 This is useful if you'd like to spread the contents of a field over several
