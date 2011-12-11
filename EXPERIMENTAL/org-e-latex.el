@@ -22,6 +22,14 @@
 
 ;; This library implements a LaTeX back-end for Org generic exporter.
 
+;; To test it, run
+;;
+;;   M-: (org-export-to-buffer 'e-latex "*Test e-LaTeX") RET
+;;
+;; in an org-mode buffer then switch to the buffer to see the LaTeX
+;; export.  See contrib/lisp/org-export.el for more details on how
+;; this exporter works.
+
 ;; It introduces three new buffer keywords: "LATEX_CLASS",
 ;; "LATEX_CLASS_OPTIONS" and "LATEX_HEADER".
 
