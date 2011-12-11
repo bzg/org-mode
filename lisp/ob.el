@@ -2072,21 +2072,14 @@ block but are passed literally to the \"example-block\"."
          (lang (nth 0 info))
          (body (nth 1 info))
 	 (comment (string= "noweb" (cdr (assoc :comments (nth 2 info)))))
+	 (rx-prefix (regexp-opt (list org-babel-src-name-regexp ":noweb-ref")))
          (new-body "") index source-name evaluate prefix blocks-in-buffer)
     (flet ((nb-add (text) (setq new-body (concat new-body text)))
 	   (c-wrap (text)
 		   (with-temp-buffer
 		     (funcall (intern (concat lang "-mode")))
 		     (comment-region (point) (progn (insert text) (point)))
-		     (org-babel-trim (buffer-string))))
-	   (blocks () ;; return the info lists of all blocks in this buffer
-		   (let (infos)
-		     (save-restriction
-		       (widen)
-		       (org-babel-map-src-blocks nil
-			 (setq infos (cons (org-babel-get-src-block-info 'light)
-					   infos))))
-		     (reverse infos))))
+		     (org-babel-trim (buffer-string)))))
       (with-temp-buffer
         (insert body) (goto-char (point-min))
         (setq index (point))
@@ -2120,21 +2113,20 @@ block but are passed literally to the \"example-block\"."
 		    (when (org-babel-ref-goto-headline-id source-name)
 		      (org-babel-ref-headline-body)))
 		  ;; find the expansion of reference in this buffer
-		  (mapconcat
-		   (lambda (i)
-		     (when (string= source-name
-				    (or (cdr (assoc :noweb-ref (nth 2 i)))
-					(nth 4 i)))
-		       (let ((body (org-babel-expand-noweb-references i)))
-			 (if comment
-			     ((lambda (cs)
-				(concat (c-wrap (car cs)) "\n"
-					body "\n" (c-wrap (cadr cs))))
-			      (org-babel-tangle-comment-links i))
-			   body))))
-		   (or blocks-in-buffer
-		       (setq blocks-in-buffer (blocks)))
-		   "")
+		  (let ((rx (concat rx-prefix "[ \t]+" source-name))
+			expansion)
+		    (save-excursion
+		      (goto-char (point-min))
+		      (while (re-search-forward rx nil t)
+			(let* ((i (org-babel-get-src-block-info 'light))
+			       (body (org-babel-expand-noweb-references i)))
+			  (if comment
+			      ((lambda (cs)
+				 (concat (c-wrap (car cs)) "\n"
+					 body "\n" (c-wrap (cadr cs))))
+			       (org-babel-tangle-comment-links i))
+			    (setq expansion (concat expansion body))))))
+		    expansion)
 		  ;; possibly raise an error if named block doesn't exist
 		  (if (member lang org-babel-noweb-error-langs)
 		      (error "%s" (concat
