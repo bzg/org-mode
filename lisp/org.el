@@ -846,7 +846,7 @@ than its value."
 	  (const :tag "No limit" nil)
 	  (integer :tag "Maximum level")))
 
-(defcustom org-drawers '("PROPERTIES" "CLOCK" "LOGBOOK")
+(defcustom org-drawers '("PROPERTIES" "CLOCK" "LOGBOOK" "RESULTS")
   "Names of drawers.  Drawers are not opened by cycling on the headline above.
 Drawers only open with a TAB on the drawer line itself.  A drawer looks like
 this:

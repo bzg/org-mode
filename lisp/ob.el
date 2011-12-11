@@ -1703,6 +1703,10 @@ raw ----- results are added directly to the Org-mode file.  This
           is a good option if you code block will output org-mode
           formatted text.
 
+wrap ---- results are added directly to the Org-mode file as with
+          \"raw\", but are wrapped in a RESULTS drawer, allowing
+          them to later be replaced or removed automatically.
+
 org ----- similar in effect to raw, only the results are wrapped
           in an org code block.  Similar to the raw option, on
           export the results will be interpreted as org-formatted
@@ -1821,9 +1825,7 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "raw" result-params)
 	    (goto-char beg) (if (org-at-table-p) (org-cycle)))
 	   ((member "wrap" result-params)
-	    (when (and (stringp result) (not (member "file" result-params)))
-	      (org-babel-examplize-region beg end results-switches))
-	    (wrap "#+BEGIN_RESULT" "#+END_RESULT"))
+	    (wrap ":RESULTS:" ":END:"))
 	   ((and (not (proper-list-p result))
 		 (not (member "file" result-params)))
 	    (org-babel-examplize-region beg end results-switches)
@@ -1858,6 +1860,8 @@ code ---- the results are extracted in the syntax of the source
      ((org-at-item-p) (let* ((struct (org-list-struct))
 			     (prvs (org-list-prevs-alist struct)))
 			(org-list-get-list-end (point-at-bol) struct prvs)))
+     ((looking-at "^\\([ \t]*\\):RESULTS:")
+      (re-search-forward (concat "^" (match-string 1) ":END:")))
      (t
       (let ((case-fold-search t)
 	    (blocks-re (regexp-opt
