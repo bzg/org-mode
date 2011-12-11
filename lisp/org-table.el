@@ -1747,9 +1747,8 @@ Note that horizontal lines disappeared."
   (let ((contents
          (apply #'mapcar* #'list
                 ;; remove 'hline from list
-                (remove-if-not 'listp
-                               ;; signals error if not table
-                               (org-table-to-lisp)))))
+		(delq nil (mapcar (lambda (x) (when (listp x) x))
+				  (org-table-to-lisp))))))
     (delete-region (org-table-begin) (org-table-end))
     (insert (mapconcat (lambda(x) (concat "| " (mapconcat 'identity x " | " ) "  |\n" ))
                        contents ""))
