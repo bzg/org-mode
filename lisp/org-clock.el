@@ -658,7 +658,7 @@ Use alsa's aplay tool if available."
 
 (defun org-program-exists (program-name)
   "Checks whenever we can locate program and launch it."
-  (if (eq system-type 'gnu/linux)
+  (if (member system-type '(gnu/linux darwin))
       (= 0 (call-process "which" nil nil nil program-name))))
 
 (defvar org-clock-mode-line-entry nil
