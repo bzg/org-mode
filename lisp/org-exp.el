@@ -2083,10 +2083,11 @@ Also, store forced alignment information found in such lines."
 	(re-angle-link (concat "\\([^[]\\)" org-angle-link-re))
 	nodesc)
     (goto-char (point-min))
+    (while (re-search-forward org-bracket-link-regexp nil t)
+      (put-text-property (match-beginning 0) (match-end 0) 'org-normalized-link t))
+    (goto-char (point-min))
     (while (re-search-forward re-plain-link nil t)
-      (unless (org-string-match-p
-	       "\\[\\[\\S-+:\\S-*?\\<"
-	       (buffer-substring (point-at-bol) (match-beginning 0)))
+      (unless (get-text-property (match-beginning 0) 'org-normalized-link)
 	(goto-char (1- (match-end 0)))
 	(org-if-unprotected-at (1+ (match-beginning 0))
 	  (let* ((s (concat (match-string 1)
