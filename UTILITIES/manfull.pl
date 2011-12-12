@@ -9,7 +9,7 @@ open OUT,">$page" or die "Cannot write to $page\n";
 while (<IN>) {
   if (/<meta http-equiv="Content-Style-Type" content="text\/css">/) {
     print OUT;
-    print OUT '<link rel="stylesheet" href="http://orgmode.org/org.css" type="text/css" />';
+    print OUT '<link rel="stylesheet" href="http://orgmode.org/org-manual.css" type="text/css" />';
   } elsif (/<div class="contents">/) {
     print OUT;
     print OUT '<div id="table-of-contents">';
