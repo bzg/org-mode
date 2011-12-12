@@ -614,12 +614,12 @@ OpenDocument Text export
 
 * Pre-requisites for @acronym{ODT} export::  What packages @acronym{ODT} exporter relies on
 * @acronym{ODT} export commands::  How to invoke @acronym{ODT} export
-* Applying Custom Styles::      How to apply custom styles to the output
+* Applying custom styles::      How to apply custom styles to the output
 * Links in @acronym{ODT} export::  How links will be interpreted and formatted
 * Tables in @acronym{ODT} export::  How Tables are exported
 * Images in @acronym{ODT} export::  How to insert images
 * Math formatting in @acronym{ODT} export::  How @LaTeX{} fragments are formatted
-* Literal Examples in @acronym{ODT} export::  How source and example blocks are formatted
+* Literal examples in @acronym{ODT} export::  How source and example blocks are formatted
 * Advanced topics in @acronym{ODT} export::  Read this if you are a power user
 
 Math formatting in @acronym{ODT} export
@@ -629,10 +629,10 @@ Math formatting in @acronym{ODT} export
 
 Advanced topics in @acronym{ODT} export
 
-* Exporting and Converting to Other formats::  How to produce @samp{pdf} and other formats
+* Exporting and converting to other formats::  How to produce @samp{pdf} and other formats
 * Working with OpenDocument style files::  Explore the internals
-* Creating One-Off styles::     How to produce custom highlighting etc
-* Customizing Tables in @acronym{ODT} export::  How to define and use Table templates
+* Creating one-off styles::     How to produce custom highlighting etc
+* Customizing tables in @acronym{ODT} export::  How to define and use Table templates
 * Validating OpenDocument XML::  How to debug corrupt OpenDocument files
 
 Publishing
@@ -10755,9 +10755,9 @@ special characters included in XHTML entities:
 @cindex org-odt.el
 @cindex org-modules
 
-Orgmode@footnote{Versions 7.8 or later} supports export to OpenDocument
-Text(@acronym{ODT}) format using @file{org-odt.el} module.  Documents created
-by this exporter use @cite{OpenDocument-v1.2
+Orgmode@footnote{Versions 7.8 or later} supports export to OpenDocument Text
+(@acronym{ODT}) format using the @file{org-odt.el} module.  Documents created
+by this exporter use the @cite{OpenDocument-v1.2
 specification}@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
 Open Document Format for Office Applications (OpenDocument) Version 1.2}} and
 are compatible with LibreOffice 3.4.
@@ -10765,22 +10765,22 @@ are compatible with LibreOffice 3.4.
 @menu
 * Pre-requisites for @acronym{ODT} export::  What packages @acronym{ODT} exporter relies on
 * @acronym{ODT} export commands::  How to invoke @acronym{ODT} export
-* Applying Custom Styles::      How to apply custom styles to the output
+* Applying custom styles::      How to apply custom styles to the output
 * Links in @acronym{ODT} export::  How links will be interpreted and formatted
 * Tables in @acronym{ODT} export::  How Tables are exported
 * Images in @acronym{ODT} export::  How to insert images
 * Math formatting in @acronym{ODT} export::  How @LaTeX{} fragments are formatted
-* Literal Examples in @acronym{ODT} export::  How source and example blocks are formatted
+* Literal examples in @acronym{ODT} export::  How source and example blocks are formatted
 * Advanced topics in @acronym{ODT} export::  Read this if you are a power user
 @end menu
 
 @node Pre-requisites for @acronym{ODT} export, @acronym{ODT} export commands, OpenDocument Text export, OpenDocument Text export
 @subsection Pre-requisites for @acronym{ODT} export
 @cindex zip
-@acronym{ODT} exporter relies on @file{zip} program to create the final
+The @acronym{ODT} exporter relies on the @file{zip} program to create the final
 output.  Check the availability of this program before proceeding further.
 
-@node @acronym{ODT} export commands, Applying Custom Styles, Pre-requisites for @acronym{ODT} export, OpenDocument Text export
+@node @acronym{ODT} export commands, Applying custom styles, Pre-requisites for @acronym{ODT} export, OpenDocument Text export
 @subsection @acronym{ODT} export commands
 
 @subsubheading Exporting to @acronym{ODT}
@@ -10795,15 +10795,15 @@ output.  Check the availability of this program before proceeding further.
 
 Export as OpenDocument Text file.
 @vindex org-export-odt-preferred-output-format
-If @code{org-export-odt-preferred-output-format} is specfied, automatically
+If @code{org-export-odt-preferred-output-format} is specified, automatically
 convert the exported file to that format.
-@xref{x-export-to-other-formats,,Automatically Exporting to Other formats}.
+@xref{x-export-to-other-formats,,Automatically exporting to other formats}.
 
-For an Org file, @file{myfile.org}, the @acronym{ODT} file will be
+For an Org file @file{myfile.org}, the @acronym{ODT} file will be
 @file{myfile.odt}.  The file will be overwritten without warning.  If there
-is an active region@footnote{This requires @code{transient-mark-mode} to be
-turned on}, only the region will be exported.  If the selected region is a
-single tree@footnote{To select the current subtree, use @kbd{C-c @@}.}, the
+is an active region,@footnote{This requires @code{transient-mark-mode} to be
+turned on} only the region will be exported.  If the selected region is a
+single tree,@footnote{To select the current subtree, use @kbd{C-c @@}} the
 tree head will become the document title.  If the tree head entry has, or
 inherits, an @code{EXPORT_FILE_NAME} property, that name will be used for the
 export.
@@ -10813,23 +10813,23 @@ Export as OpenDocument Text file and open the resulting file.
 @vindex org-export-odt-preferred-output-format
 If @code{org-export-odt-preferred-output-format} is specified, open the
 converted file instead.
-@xref{x-export-to-other-formats,,Automatically Exporting to Other formats}.
+@xref{x-export-to-other-formats,,Automatically exporting to other formats}.
 @end table
 
-@subsubheading Automatically Exporting to Other formats
+@subsubheading Automatically exporting to other formats
 @anchor{x-export-to-other-formats}
 @vindex org-export-odt-preferred-output-format
 Very often, you will find yourself exporting to @acronym{ODT} format, only to
 immediately save the exported document to a different format like @samp{pdf}.
 In such cases, you will find it convenient to configure a converter
-(@pxref{Exporting and Converting to Other formats}) and specify your
+(@pxref{Exporting and converting to other formats}) and specify your
 preferred output format by customizing the variable
 @code{org-export-odt-preferred-output-format}.  This way, the export commands
 (@pxref{x-export-to-odt,,Exporting to ODT}) can be extended to also export to
 the preferred format.
 
-@node Applying Custom Styles, Links in @acronym{ODT} export, @acronym{ODT} export commands, OpenDocument Text export
-@subsection Applying Custom Styles
+@node Applying custom styles, Links in @acronym{ODT} export, @acronym{ODT} export commands, OpenDocument Text export
+@subsection Applying custom styles
 @cindex styles, custom
 @cindex template, custom
 
@@ -10837,11 +10837,11 @@ The @acronym{ODT} exporter ships with a set of OpenDocument styles
 (@pxref{Working with OpenDocument style files}) that ensure a well-formatted
 output.  These factory styles, however, may not cater to your specific
 tastes.  To customize the output, you can either modify the above styles
-files directly or generate the required styles using an application like
-LibreOffice.  The latter method is suitable for both expert and non-expert
-users alike and is described here.
+files directly, or generate the required styles using an application like
+LibreOffice.  The latter method is suitable for expert and non-expert
+users alike, and is described here.
 
-@subsubsection Applying custom styles - The Easy way
+@subsubsection Applying custom styles - the easy way
 
 @enumerate
 @item
@@ -10854,18 +10854,18 @@ to @acronym{ODT} format.
 
 @item
 Open the above @file{example.odt} using LibreOffice.  Use the @file{Stylist}
-to locate the target styles - these typically have @samp{Org} prefix - and
-modify those to your taste.  Save the modified file either as an OpenDocument
-Text (@file{.odt}) or OpenDocument Template (@file{.ott}) file.
+to locate the target styles - these typically have the @samp{Org} prefix -
+and modify those to your taste.  Save the modified file either as an
+OpenDocument Text (@file{.odt}) or OpenDocument Template (@file{.ott}) file.
 
 @item
 @cindex #+ODT_STYLES_FILE
 @vindex org-export-odt-styles-file
 Customize the variable @code{org-export-odt-styles-file} and point it to the
 newly created file.  For additional configuration options
-@xref{x-overriding-factory-styles,,Overriding factory styles}.
+@pxref{x-overriding-factory-styles,,Overriding factory styles}.
 
-If you would like to choose a style on per-file basis, you can use the
+If you would like to choose a style on a per-file basis, you can use the
 @code{#+ODT_STYLES_FILE} option. A typical setting will look like
 
 @example
@@ -10880,42 +10880,41 @@ or
 
 @end enumerate
 
-@subsubsection Using Third-party Styles and Templates
+@subsubsection Using third-party styles and templates
 
 You can use third-party styles and templates for customizing your output.
 This will produce the desired output only if the template provides all
-style-names that the @samp{ODT} exporter relies on.  Unless this condition is
+style names that the @samp{ODT} exporter relies on.  Unless this condition is
 met, the output is going to be less than satisfactory.  So it is highly
 recommended that you only work with templates that are directly derived from
 the factory settings.
 
-@node Links in @acronym{ODT} export, Tables in @acronym{ODT} export, Applying Custom Styles, OpenDocument Text export
+@node Links in @acronym{ODT} export, Tables in @acronym{ODT} export, Applying custom styles, OpenDocument Text export
 @subsection Links in @acronym{ODT} export
 @cindex tables, in DocBook export
 
-@acronym{ODT} exporter creates cross-references (aka bookmarks) for links
-that are destined locally.  It creates internet style links for all other
-links.
+The @acronym{ODT} exporter creates cross-references (aka bookmarks) for
+internal links.  It creates Internet-style links for all other links.
 
 @node Tables in @acronym{ODT} export, Images in @acronym{ODT} export, Links in @acronym{ODT} export, OpenDocument Text export
 @subsection Tables in @acronym{ODT} export
 @cindex tables, in DocBook export
 
 Export of native Org-mode tables (@pxref{Tables}) and simple @file{table.el}
-tables is supported.  However export of complex @file{table.el} tables -
-tables that have column or row spans - are not supported. Such tables are
+tables is supported.  However, export of complex @file{table.el} tables -
+tables that have column or row spans - is not supported. Such tables are
 stripped from the exported document.
 
-By default, a table is exported with with top and bottom frames and with
+By default, a table is exported with top and bottom frames and with
 rules separating row and column groups (@pxref{Column groups}).  If the table
-specifies alignment and relative width for it's columns (@pxref{Column width
-and alignment}) then these are honored on export@footnote{The column widths
-are interpreted as weighted ratios with the default weight being 1}.
+specifies alignment and relative width for its columns (@pxref{Column width
+and alignment}) then these are honored on export.@footnote{The column widths
+are interpreted as weighted ratios with the default weight being 1}
 
 @cindex #+ATTR_ODT
 If you are not satisfied with the default formatting of tables, you can
 create custom table styles and associate them with a table using
-@code{#+ATTR_ODT} line. @xref{Customizing Tables in @acronym{ODT} export}.
+the @code{#+ATTR_ODT} line. @xref{Customizing tables in @acronym{ODT} export}.
 
 @node Images in @acronym{ODT} export, Math formatting in @acronym{ODT} export, Tables in @acronym{ODT} export, OpenDocument Text export
 @subsection Images in @acronym{ODT} export
@@ -10945,24 +10944,19 @@ link to an image file.  For example, to embed a image
 [[http://orgmode.org][./org-mode-unicorn.png]]
 @end example
 
+@subsubheading Sizing and scaling of embedded images
+
 You can control the size and scale of the embedded images using the
 @code{#+ATTR_ODT} attribute.
 
-@subsubheading How image size is computed
-In order to scale the embedded images, the exporter needs to compute the size
-of the image.  This is done by retrieving the image size in pixels and
-converting the pixel units to centimetres using
+@vindex org-export-odt-pixels-per-inch
+Note that the exporter specifies the desired size of the image in the final
+document in units of centimetres.  In order to scale the embedded images, the
+exporter needs to compute the size of the image.  This is done by retrieving
+the image size in pixels and converting the pixel units to centimetres using
 @code{org-export-odt-pixels-per-inch}.  The default value of this variable is
 set to @code{display-pixels-per-inch}.  You can tweak this variable to
 achieve the best results.
-
-@subsubheading Sizing and scaling of embedded images
-@c @vindex org-export-odt-pixels-per-inch
-
-Note that the exporter specifies the desired size of the image in the final
-document in units of centimetres.  To compute the size of the original image
-in centimetres, the To convert the image size in pixels to equivalent units
-in cms @code{org-export-odt-pixels-per-inch} is used.
 
 The examples below illustrate the various possibilities.
 
@@ -10977,7 +10971,7 @@ To embed @file{img.png} as a 10 cm x 10 cm image, do the following:
 @end example
 
 @item Scale the image
-To embed @file{img.png} at half it's size, do the following:
+To embed @file{img.png} at half its size, do the following:
 
 @example
 #+ATTR_ODT: :scale 0.5
@@ -10985,8 +10979,8 @@ To embed @file{img.png} at half it's size, do the following:
 @end example
 
 @item Scale the image to a specific width
-To embed @file{img.png} to occupy a width of 10 cm while retaining the
-original height:width ratio, do the following:
+To embed @file{img.png} with a width of 10 cm while retaining the original
+height:width ratio, do the following:
 
 @example
 #+ATTR_ODT: :width 10
@@ -10994,8 +10988,8 @@ original height:width ratio, do the following:
 @end example
 
 @item Scale the image to a specific height
-To embed @file{img.png} to occupy a height of 10 cm while retaining the
-original height:width ratio, do the following
+To embed @file{img.png} with a height of 10 cm while retaining the original
+height:width ratio, do the following
 
 @example
 #+ATTR_ODT: :height 10
@@ -11003,10 +10997,10 @@ original height:width ratio, do the following
 @end example
 @end table
 
-@node Math formatting in @acronym{ODT} export, Literal Examples in @acronym{ODT} export, Images in @acronym{ODT} export, OpenDocument Text export
+@node Math formatting in @acronym{ODT} export, Literal examples in @acronym{ODT} export, Images in @acronym{ODT} export, OpenDocument Text export
 @subsection Math formatting in @acronym{ODT} export
 
-@acronym{ODT} exporter has special support for handling Math.
+The @acronym{ODT} exporter has special support for handling math.
 
 @menu
 * Working with @LaTeX{} math snippets::  How to embed @LaTeX{} math fragments
@@ -11017,7 +11011,7 @@ original height:width ratio, do the following
 @subsubsection Working with @LaTeX{} math snippets
 
 @LaTeX{} math snippets (@pxref{LaTeX fragments}) can be embedded in the ODT
-document using one of the following ways:
+document in one of the following ways:
 
 @cindex MathML
 @enumerate
@@ -11029,10 +11023,10 @@ This option is activated on a per-file basis with
 #+OPTIONS: LaTeX:t
 @end example
 
-With this option, @LaTeX{} fragments are first converted in to MathML
+With this option, @LaTeX{} fragments are first converted into MathML
 fragments using an external @LaTeX{}-to-MathML converter program.  The
-resulting MathML fragments are then embedded as a OpenDocument Formula in the
-exported document.
+resulting MathML fragments are then embedded as an OpenDocument Formula in
+the exported document.
 
 @vindex org-latex-to-mathml-convert-command
 @vindex org-latex-to-mathml-jar-file
@@ -11053,20 +11047,20 @@ converter, you can configure the above variables as shown below.
 @end lisp
 
 You can use the following commands to quickly verify the reliability of
-@LaTeX{}-to-MathML converter.
+the @LaTeX{}-to-MathML converter.
 
 @table @kbd
 
 @item M-x org-export-as-odf
-Convert a @LaTeX{} math snippet to OpenDocument formula(@file{.odf}) file.
+Convert a @LaTeX{} math snippet to OpenDocument formula (@file{.odf}) file.
 
 @item M-x org-export-as-odf-and-open
-Convert a @LaTeX{} math snippet to OpenDocument formula(@file{.odf}) file and
+Convert a @LaTeX{} math snippet to OpenDocument formula (@file{.odf}) file and
 open the formula file with the system-registered application.
 @end table
 
 @cindex dvipng
-@item png
+@item PNG images
 
 This option is activated on a per-file basis with
 
@@ -11074,7 +11068,7 @@ This option is activated on a per-file basis with
 #+OPTIONS: LaTeX:dvipng
 @end example
 
-With this option, @LaTeX{} fragments are processed into png images and the
+With this option, @LaTeX{} fragments are processed into PNG images and the
 resulting images are embedded in the exported document.  This method requires
 that the @file{dvipng} program be available on your system.
 @end enumerate
@@ -11082,10 +11076,10 @@ that the @file{dvipng} program be available on your system.
 @node Working with MathML or OpenDocument formula files,  , Working with @LaTeX{} math snippets, Math formatting in @acronym{ODT} export
 @subsubsection Working with MathML or OpenDocument formula files
 
-For various reasons, you may find embedding @LaTeX{} math snippets in a
+For various reasons, you may find embedding @LaTeX{} math snippets in an
 @acronym{ODT} document less than reliable.  In that case, you can embed a
-Math equation by linking to it's MathML(@file{.mml}) source or it's
-OpenDocument formula(@file{.odf}) file as shown below:
+math equation by linking to its MathML(@file{.mml}) source or its
+OpenDocument formula (@file{.odf}) file as shown below:
 
 @example
 [[./equation.mml]]
@@ -11097,23 +11091,24 @@ or
 [[./equation.odf]]
 @end example
 
-@node Literal Examples in @acronym{ODT} export, Advanced topics in @acronym{ODT} export, Math formatting in @acronym{ODT} export, OpenDocument Text export
-@subsection Literal Examples in @acronym{ODT} export
+@node Literal examples in @acronym{ODT} export, Advanced topics in @acronym{ODT} export, Math formatting in @acronym{ODT} export, OpenDocument Text export
+@subsection Literal examples in @acronym{ODT} export
 
-Export of Literal examples (@pxref{Literal examples}) with full fontification
+Export of literal examples (@pxref{Literal examples}) with full fontification
 is supported.  This feature is enabled by default and is activated
 automatically if an enhanced version of @file{htmlfontify.el} is available in
-the @code{load-path}@footnote{@file{htmlfontify.el} that ships with standard
-Emacs <= 24.1 has no support for @acronym{ODT} fontification.  A copy of the
-proposed version is available as an attachment to
-@url{http://debbugs.gnu.org/cgi/bugreport.cgi?msg=5;filename=htmlfontify.el;att=9;bug=9914, Emacs Bug #9914}.}
+the @code{load-path}.@footnote{The @file{htmlfontify.el} that ships with
+standard Emacs <= 24.1 has no support for @acronym{ODT} fontification.  A
+copy of the proposed version is available as an attachment to
+@url{http://debbugs.gnu.org/cgi/bugreport.cgi?msg=5;filename=htmlfontify.el;att=9;bug=9914,
+Emacs Bug #9914}.}
 
 @vindex org-export-odt-fontify-srcblocks
 
-The character styles used for fontification of the Literal blocks are
+The character styles used for fontification of the literal blocks are
 auto-generated by the exporter in conjunction with @file{htmlfontify.el}
 library and need not be included in the default @file{styles.xml} file.
-These auto-generated styles have @samp{OrgSrc} prefix and inherit their color
+These auto-generated styles have the @samp{OrgSrc} prefix and inherit their color
 based on the face used by Emacs @code{font-lock} library.
 
 @vindex org-export-odt-create-custom-styles-for-srcblocks
@@ -11121,11 +11116,11 @@ If you prefer to use your own custom styles for fontification and disable
 their auto-generation altogether, you can do so by customizing the variable
 @code{org-export-odt-create-custom-styles-for-srcblocks}.
 
-You can turn off fontification support for Literal examples by customizing
+You can turn off fontification support for literal examples by customizing
 the variable @code{org-export-odt-fontify-srcblocks}.
 
 
-@node Advanced topics in @acronym{ODT} export,  , Literal Examples in @acronym{ODT} export, OpenDocument Text export
+@node Advanced topics in @acronym{ODT} export,  , Literal examples in @acronym{ODT} export, OpenDocument Text export
 @subsection Advanced topics in @acronym{ODT} export
 
 If you rely heavily on @acronym{ODT} export, you may want to exploit the full
@@ -11133,24 +11128,24 @@ set of features that the exporter offers.  This section describes features
 that would be of interest to power users.
 
 @menu
-* Exporting and Converting to Other formats::  How to produce @samp{pdf} and other formats
+* Exporting and converting to other formats::  How to produce @samp{pdf} and other formats
 * Working with OpenDocument style files::  Explore the internals
-* Creating One-Off styles::     How to produce custom highlighting etc
-* Customizing Tables in @acronym{ODT} export::  How to define and use Table templates
+* Creating one-off styles::     How to produce custom highlighting etc
+* Customizing tables in @acronym{ODT} export::  How to define and use Table templates
 * Validating OpenDocument XML::  How to debug corrupt OpenDocument files
 @end menu
 
-@node Exporting and Converting to Other formats, Working with OpenDocument style files, Advanced topics in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
-@subsubsection Exporting and Converting to Other formats
+@node Exporting and converting to other formats, Working with OpenDocument style files, Advanced topics in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
+@subsubsection Exporting and converting to other formats
 @cindex convert
 @cindex doc, docx
 
-@acronym{ODT} exporter adds support for exporting Org outlines to formats
+The @acronym{ODT} exporter adds support for exporting Org outlines to formats
 that are not supported natively by Org. It also adds support to convert
 document from one format to another.  To use these features, you need to
 configure a command-line converter.  Once a command-line converter is
 configured you can use it to extend the list of formats to which Org can
-export to. @xref{x-export-to-other-formats,,Automatically Exporting to Other
+export. @xref{x-export-to-other-formats,,Automatically exporting to other
 formats}.  You can also use it to perform one-off document conversion as
 detailed below.
 
@@ -11158,17 +11153,13 @@ detailed below.
 @table @kbd
 
 @item M-x org-export-odt-convert
-Convert an existing document from one format to another format as determined
- by variable @code{org-export-odt-convert-capabilities}
- (@pxref{x-odt-converter-capabilities,,Configure converter
- capabilities}). @strong{Please note} that you can use this command to even
- convert documents that is produced outside of Org and in formats that is
- different from @acronym{ODT} format.
+Convert an existing document from one format to another as determined by the
+variable @code{org-export-odt-convert-capabilities}
+(@pxref{x-odt-converter-capabilities,,Configure converter
+capabilities}). @strong{Please note} that you can use this command to even
+convert documents that are produced outside of Org and in other formats than
+@acronym{ODT} format.
 @end table
-
-@anchor{x-configuring-a-converter}
-@subsubheading Configuring a converter
-This section explores how to configure a converter.
 
 @subsubheading Pre-configured converters
 
@@ -11188,7 +11179,7 @@ distribution.
 
 @vindex org-odt-data-dir
 This converter is distributed as a LibreOffice extension and can be found in
-the your Org distribution. See the subdirectory pointed to by the variable
+your Org distribution. See the subdirectory pointed to by the variable
 @code{org-odt-data-dir}.
 
 @end enumerate
@@ -11205,7 +11196,7 @@ Name your converter and add it to the list of known converters by customizing
 the variable @code{org-export-odt-convert-processes}.  Also specify how the
 converter can be invoked via command-line to effect the conversion.
 
-@item Configure it's capabilities
+@item Configure its capabilities
 @vindex org-export-odt-convert-capabilities
 
 @anchor{x-odt-converter-capabilities}
@@ -11213,7 +11204,7 @@ converter can be invoked via command-line to effect the conversion.
 Specify the set of formats the converter can handle by customizing the
 variable @code{org-export-odt-convert-capabilities}.  Use the default value
 for this variable as a guide for configuring your converter.  As suggested by
-the default setting, you can specify full set of formats supported by the
+the default setting, you can specify the full set of formats supported by the
 converter and not limit yourself to specifying formats that are related to
 just the OpenDocument Text format.
 
@@ -11224,29 +11215,29 @@ Select the newly added converter as the preferred one by customizing the
 variable @code{org-export-odt-convert-process}.
 @end enumerate
 
-@node Working with OpenDocument style files, Creating One-Off styles, Exporting and Converting to Other formats, Advanced topics in @acronym{ODT} export
+@node Working with OpenDocument style files, Creating one-off styles, Exporting and converting to other formats, Advanced topics in @acronym{ODT} export
 @subsubsection Working with OpenDocument style files
 @cindex styles, custom
 @cindex template, custom
 
-This section explores the internals of @acronym{ODT} exporter and the means
-by which it produces stylized documents.  Read this section if you are
+This section explores the internals of the @acronym{ODT} exporter and the
+means by which it produces styled documents.  Read this section if you are
 interested in exploring the automatic and custom OpenDocument styles used by
 the exporter.
 
 @anchor{x-factory-styles}
 @subsubheading Factory styles
 
-@acronym{ODT} exporter relies on two files for generating it's output.  These
-files are bundled with the distribution under the directory pointed to by
-variable @code{org-odt-styles-dir}.  The two files are:
+The @acronym{ODT} exporter relies on two files for generating its output.
+These files are bundled with the distribution under the directory pointed to
+by the variable @code{org-odt-styles-dir}.  The two files are:
 
 @itemize
 @anchor{x-orgodtstyles-xml}
 @item
 @file{OrgOdtStyles.xml}
 
-This file contributes to @file{styles.xml} file of the final @samp{ODT}
+This file contributes to the @file{styles.xml} file of the final @samp{ODT}
 document.  This file gets modified for the following purposes:
 @enumerate
 
@@ -11254,8 +11245,8 @@ document.  This file gets modified for the following purposes:
 To control outline numbering based on user settings.
 
 @item
-To add styles generated by the @file{htmlfontify.el} for fontification of
-code blocks.
+To add styles generated by @file{htmlfontify.el} for fontification of code
+blocks.
 @end enumerate
 
 @anchor{x-orgodtcontenttemplate-xml}
@@ -11263,7 +11254,7 @@ code blocks.
 @file{OrgOdtContentTemplate.xml}
 
 This file contributes to the @file{content.xml} file of the final @samp{ODT}
-document.  The contents of the Org outline is inserted between the
+document.  The contents of the Org outline are inserted between the
 @samp{<office:text>}@dots{}@samp{</office:text>} elements of this file.
 
 Apart from serving as a template file for the final @file{content.xml}, the
@@ -11271,12 +11262,12 @@ file serves the following purposes:
 @enumerate
 
 @item
-It contains Automatic Styles for formatting of tables which are referenced by
+It contains automatic styles for formatting of tables which are referenced by
 the exporter.
 
 @item
 It contains @samp{<text:sequence-decl>}@dots{}@samp{</text:sequence-decl>}
-elements that control how various entities - Tables, Images, Equations etc -
+elements that control how various entities - tables, images, equations etc -
 are numbered.
 @end enumerate
 @end itemize
@@ -11312,8 +11303,8 @@ Use the @file{styles.xml} contained in the specified OpenDocument Text or
 Template file.  Additionally extract the specified member files and embed
 those within the final @samp{ODT} document.
 
-Use this option if the @file{styles.xml} references additional files like
-header and footer images.
+Use this option if the @file{styles.xml} file references additional files
+like header and footer images.
 
 @item @code{nil}
 
@@ -11328,8 +11319,8 @@ Use this variable to specify the blank @file{content.xml} that will be used
 in the final output.
 @end itemize
 
-@node Creating One-Off styles, Customizing Tables in @acronym{ODT} export, Working with OpenDocument style files, Advanced topics in @acronym{ODT} export
-@subsubsection Creating One-Off styles
+@node Creating one-off styles, Customizing tables in @acronym{ODT} export, Working with OpenDocument style files, Advanced topics in @acronym{ODT} export
+@subsubsection Creating one-off styles
 
 There are times when you would want one-off formatting in the exported
 document.  You can achieve this by embedding raw OpenDocument XML in the Org
@@ -11338,7 +11329,7 @@ file.  The use of this feature is better illustrated with couple of examples.
 @enumerate
 @item Embedding ODT tags as part of regular text
 
-You can include simple OpenDocument tags by prepending them with them with
+You can include simple OpenDocument tags by prefixing them with
 @samp{@@}. For example, to highlight a region of text do the following:
 
 @example
@@ -11360,7 +11351,7 @@ custom @samp{Highlight} style as shown below.
 @item Embedding a one-line OpenDocument XML
 
 You can add a simple OpenDocument one-liner using the @code{#+ODT:}
-directive.  For example to force a page break do the following
+directive.  For example, to force a page break do the following:
 
 @example
 #+ODT: <text:p text:style-name="PageBreak"/>
@@ -11382,7 +11373,7 @@ custom @samp{PageBreak} style as shown below.
 You can add a large block of OpenDocument XML using the
 @code{#+BEGIN_ODT}@dots{}@code{#+END_ODT} construct.
 
-For example to create a one-off paragraph that uses bold text do the
+For example, to create a one-off paragraph that uses bold text, do the
 following:
 
 @example
@@ -11395,23 +11386,23 @@ This paragraph is specially formatted and uses bold text.
 
 @end enumerate
 
-@node Customizing Tables in @acronym{ODT} export, Validating OpenDocument XML, Creating One-Off styles, Advanced topics in @acronym{ODT} export
-@subsubsection Customizing Tables in @acronym{ODT} export
+@node Customizing tables in @acronym{ODT} export, Validating OpenDocument XML, Creating one-off styles, Advanced topics in @acronym{ODT} export
+@subsubsection Customizing tables in @acronym{ODT} export
 @cindex tables, in ODT export
 
 @cindex #+ATTR_ODT
 You can override the default formatting of the table by specifying a custom
 table style with the @code{#+ATTR_ODT} line. For a discussion on default
-formatting of tables @xref{Tables in @acronym{ODT} export}.
+formatting of tables @pxref{Tables in @acronym{ODT} export}.
 
 This feature closely mimics the way table templates are defined in the
 OpenDocument-v1.2
-specification@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
-OpenDocument-v1.2 Specification}}.
+specification.@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
+OpenDocument-v1.2 Specification}}
 
 
 
-@subsubheading Custom Table Styles - An Illustration
+@subsubheading Custom table styles - an illustration
 
 To have a quick preview of this feature, install the below setting and export
 the table that follows.
@@ -11435,24 +11426,24 @@ the table that follows.
 @end example
 
 In the above example, you used a template named @samp{Custom} and installed
-two table styles with names @samp{TableWithHeaderRowAndColumn} and
+two table styles with the names @samp{TableWithHeaderRowAndColumn} and
 @samp{TableWithFirstRowandLastRow}. (@strong{Important:} The OpenDocument
-styles needed for producing the above template has been pre-defined for you.
-These styles are available under section marked @samp{Custom Table Template}
-in @file{OrgOdtContentTemplate.xml}
+styles needed for producing the above template have been pre-defined for you.
+These styles are available under the section marked @samp{Custom Table
+Template} in @file{OrgOdtContentTemplate.xml}
 (@pxref{x-orgodtcontenttemplate-xml,,Factory styles}).  If you need
 additional templates you have to define these styles yourselves.
 
-@subsubheading Custom Table Styles - The Nitty Gritties
+@subsubheading Custom table styles - the nitty-gritty
 To use this feature proceed as follows:
 
 @enumerate
 @item
-Create a table template@footnote{See @code{<table:table-template>} element of
-OpenDocument-v1.2 specification}
+Create a table template@footnote{See the @code{<table:table-template>}
+element of the OpenDocument-v1.2 specification}
 
 A table template is nothing but a set of @samp{table-cell} and
-@samp{paragraph} style for each of the following table cell categories:
+@samp{paragraph} styles for each of the following table cell categories:
 
 @itemize @minus
 @item Body
@@ -11470,8 +11461,8 @@ The names for the above styles must be chosen based on the name of the table
 template using a well-defined convention.
 
 The naming convention is better illustrated with an example.  For a table
-template with name @samp{Custom}, the needed style names are listed in the
-following table.
+template with the name @samp{Custom}, the needed style names are listed in
+the following table.
 
 @multitable  {Table cell type} {CustomEvenColumnTableCell} {CustomEvenColumnTableParagraph}
 @headitem Table cell type
@@ -11509,25 +11500,27 @@ following table.
 @tab @samp{CustomOddColumnTableParagraph}
 @end multitable
 
-To create a table template with name @samp{Custom}, define the above styles
-in the @code{<office:automatic-styles>}...@code{</office:automatic-styles>}
-element of the content template file
-(@pxref{x-orgodtcontenttemplate-xml,,Factory styles}).
+To create a table template with the name @samp{Custom}, define the above
+styles in the
+@code{<office:automatic-styles>}...@code{</office:automatic-styles>} element
+of the content template file (@pxref{x-orgodtcontenttemplate-xml,,Factory
+styles}).
 
 @item
-Define a table style@footnote{See attributes - @code{table:template-name},
+Define a table style@footnote{See the attributes @code{table:template-name},
 @code{table:use-first-row-styles}, @code{table:use-last-row-styles},
 @code{table:use-first-column-styles}, @code{table:use-last-column-styles},
-@code{table:use-banding-rows-styles}, @code{table:use-banding-column-styles}
-- of @code{<table:table>} element in OpenDocument-v1.2 specification}
+@code{table:use-banding-rows-styles}, and
+@code{table:use-banding-column-styles} of the @code{<table:table>} element in
+the OpenDocument-v1.2 specification}
 
 @vindex org-export-odt-table-styles
 To define a table style, create an entry for the style in the variable
 @code{org-export-odt-table-styles} and specify the following:
 
 @itemize @minus
-@item name of the table template created in step (1)
-@item set of cell styles in that template that are to be activated
+@item the name of the table template created in step (1)
+@item the set of cell styles in that template that are to be activated
 @end itemize
 
 For example, the entry below defines two different table styles
@@ -11550,7 +11543,7 @@ by selectively activating the individual cell styles in that template.
 Associate a table with the table style
 
 To do this, specify the table style created in step (2) as part of
-@code{ATTR_ODT} line as show below.
+the @code{ATTR_ODT} line as shown below.
 
 @example
 #+ATTR_ODT: TableWithHeaderRowAndColumn
@@ -11560,7 +11553,7 @@ To do this, specify the table style created in step (2) as part of
 @end example
 @end enumerate
 
-@node Validating OpenDocument XML,  , Customizing Tables in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
+@node Validating OpenDocument XML,  , Customizing tables in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
 @subsubsection Validating OpenDocument XML
 
 Occasionally, you will discover that the document created by the
@@ -11569,14 +11562,14 @@ the common reasons for this is that the @file{.odt} file is corrupt.  In such
 cases, you may want to validate the document against the OpenDocument RELAX
 NG Compact Syntax (RNC) schema.
 
-For de-compressing @file{.odt} file@footnote{@file{.odt} files are nothing
-but @samp{zip} archives} @inforef{File Archives,,emacs}.  For general help
-with validation (and schema-sensitive editing) of XML files
+For de-compressing the @file{.odt} file@footnote{@file{.odt} files are
+nothing but @samp{zip} archives}: @inforef{File Archives,,emacs}.  For
+general help with validation (and schema-sensitive editing) of XML files:
 @inforef{Introduction,,nxml-mode}.
 
 @vindex org-export-odt-schema-dir
 If you have ready access to OpenDocument @file{.rnc} files and the needed
-schema locating rules in a single folder, you can customize the variable
+schema-locating rules in a single folder, you can customize the variable
 @code{org-export-odt-schema-dir} to point to that directory.  The
 @acronym{ODT} exporter will take care of updating the
 @code{rng-schema-locating-files} for you.
