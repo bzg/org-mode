@@ -696,14 +696,14 @@ month and 365.24 days for a year)."
   :group 'org-faces)
 
 (defface org-agenda-calendar-event
-  '((((background light)) (:foreground "#FFFFFF" :background "#1662AF"))
-    (((background dark)) (:foreground "blue")))
+  (org-compatible-face 'default
+    nil)
   "Face used to show events and appointments in the agenda."
   :group 'org-faces)
 
 (defface org-agenda-calendar-sexp
-  '((((background light)) (:background "light blue"))
-    (((background dark)) (:foreground "light blue")))
+  (org-compatible-face 'default
+    nil)
   "Face used to show events computed from a S-expression."
   :group 'org-faces)
 
