@@ -6023,7 +6023,7 @@ Insert a dynamic block (@pxref{Dynamic blocks}) containing a clock
 report as an Org-mode table into the current file.  When the cursor is
 at an existing clock table, just update it.  When called with a prefix
 argument, jump to the first clock report in the current document and
-update it.   The clock table always includes also trees with
+update it.  The clock table always includes also trees with
 @code{:ARCHIVE:} tag.
 @orgcmdkkc{C-c C-c,C-c C-x C-u,org-dblock-update}
 Update dynamic block at point.  The cursor needs to be in the
@@ -6642,7 +6642,7 @@ buffer again after capture is completed.
 
 In the template itself, special @kbd{%}-escapes@footnote{If you need one of
 these sequences literally, escape the @kbd{%} with a backslash.}  allow
-dynamic insertion of content. The templates are expanded in the order given here:
+dynamic insertion of content.  The templates are expanded in the order given here:
 
 @smallexample
 %[@var{file}]     @r{insert the contents of the file given by @var{file}.}
@@ -10896,7 +10896,7 @@ newly created file.  For additional configuration options
 @pxref{x-overriding-factory-styles,,Overriding factory styles}.
 
 If you would like to choose a style on a per-file basis, you can use the
-@code{#+ODT_STYLES_FILE} option. A typical setting will look like
+@code{#+ODT_STYLES_FILE} option.  A typical setting will look like
 
 @example
 #+ODT_STYLES_FILE: "/path/to/example.ott"
@@ -10932,7 +10932,7 @@ internal links.  It creates Internet-style links for all other links.
 
 Export of native Org-mode tables (@pxref{Tables}) and simple @file{table.el}
 tables is supported.  However, export of complex @file{table.el} tables -
-tables that have column or row spans - is not supported. Such tables are
+tables that have column or row spans - is not supported.  Such tables are
 stripped from the exported document.
 
 By default, a table is exported with top and bottom frames and with
@@ -10944,7 +10944,7 @@ are interpreted as weighted ratios with the default weight being 1}
 @cindex #+ATTR_ODT
 If you are not satisfied with the default formatting of tables, you can
 create custom table styles and associate them with a table using
-the @code{#+ATTR_ODT} line. @xref{Customizing tables in @acronym{ODT} export}.
+the @code{#+ATTR_ODT} line.  @xref{Customizing tables in @acronym{ODT} export}.
 
 @node Images in @acronym{ODT} export, Math formatting in @acronym{ODT} export, Tables in @acronym{ODT} export, OpenDocument Text export
 @subsection Images in @acronym{ODT} export
@@ -11171,11 +11171,11 @@ that would be of interest to power users.
 @cindex doc, docx
 
 The @acronym{ODT} exporter adds support for exporting Org outlines to formats
-that are not supported natively by Org. It also adds support to convert
+that are not supported natively by Org.  It also adds support to convert
 document from one format to another.  To use these features, you need to
 configure a command-line converter.  Once a command-line converter is
 configured you can use it to extend the list of formats to which Org can
-export. @xref{x-export-to-other-formats,,Automatically exporting to other
+export.  @xref{x-export-to-other-formats,,Automatically exporting to other
 formats}.  You can also use it to perform one-off document conversion as
 detailed below.
 
@@ -11186,7 +11186,7 @@ detailed below.
 Convert an existing document from one format to another as determined by the
 variable @code{org-export-odt-convert-capabilities}
 (@pxref{x-odt-converter-capabilities,,Configure converter
-capabilities}). @strong{Please note} that you can use this command to even
+capabilities}).  @strong{Please note} that you can use this command to even
 convert documents that are produced outside of Org and in other formats than
 @acronym{ODT} format.
 @end table
@@ -11209,7 +11209,7 @@ distribution.
 
 @vindex org-odt-data-dir
 This converter is distributed as a LibreOffice extension and can be found in
-your Org distribution. See the subdirectory pointed to by the variable
+your Org distribution.  See the subdirectory pointed to by the variable
 @code{org-odt-data-dir}.
 
 @end enumerate
@@ -11360,11 +11360,11 @@ file.  The use of this feature is better illustrated with couple of examples.
 @item Embedding ODT tags as part of regular text
 
 You can include simple OpenDocument tags by prefixing them with
-@samp{@@}. For example, to highlight a region of text do the following:
+@samp{@@}.  For example, to highlight a region of text do the following:
 
 @example
 @@<text:span text:style-name="Highlight">This is a
-highlighted text@@</text:span>. But this is a
+highlighted text@@</text:span>.  But this is a
 regular text.
 @end example
 
@@ -11422,7 +11422,7 @@ This paragraph is specially formatted and uses bold text.
 
 @cindex #+ATTR_ODT
 You can override the default formatting of the table by specifying a custom
-table style with the @code{#+ATTR_ODT} line. For a discussion on default
+table style with the @code{#+ATTR_ODT} line.  For a discussion on default
 formatting of tables @pxref{Tables in @acronym{ODT} export}.
 
 This feature closely mimics the way table templates are defined in the
@@ -11457,7 +11457,7 @@ the table that follows.
 
 In the above example, you used a template named @samp{Custom} and installed
 two table styles with the names @samp{TableWithHeaderRowAndColumn} and
-@samp{TableWithFirstRowandLastRow}. (@strong{Important:} The OpenDocument
+@samp{TableWithFirstRowandLastRow}.  (@strong{Important:} The OpenDocument
 styles needed for producing the above template have been pre-defined for you.
 These styles are available under the section marked @samp{Custom Table
 Template} in @file{OrgOdtContentTemplate.xml}
@@ -12435,7 +12435,7 @@ inline.@footnote{Note that @samp{src} blocks may be inserted using Org-mode's
 @end example
 
 The @code{#+NAME:} line is optional, and can be used to name the code
-block. Live code blocks require that a language be specified on the
+block.  Live code blocks require that a language be specified on the
 @code{#+BEGIN_SRC} line.  Switches and header arguments are optional.
 @cindex source code, inline
 
@@ -12612,7 +12612,7 @@ that code is only evaluated after explicit confirmation from the user.  For
 information on these safeguards (and on how to disable them) see @ref{Code
 evaluation security}.} and the results of evaluation optionally placed in the
 Org-mode buffer.  By default, the evaluation facility is only enabled for
-Lisp code blocks specified as @code{emacs-lisp}. However, souce code blocks
+Lisp code blocks specified as @code{emacs-lisp}.  However, souce code blocks
 in many languages can be evaluated within Org-mode (see @ref{Languages} for a
 list of supported languages and @ref{Structure of code blocks} for
 information on the syntax used to define a code block).
@@ -12627,7 +12627,7 @@ its results into the Org-mode buffer.
 @cindex #+CALL
 
 It is also possible to evaluate named code blocks from anywhere in an
-Org-mode buffer or an Org-mode table. Live code blocks located in the current
+Org-mode buffer or an Org-mode table.  Live code blocks located in the current
 Org-mode buffer or in the ``Library of Babel'' (see @ref{Library of Babel})
 can be executed.  Named code blocks can be executed with a separate
 @code{#+CALL:} line or inline within a block of text.
@@ -12659,7 +12659,7 @@ argument @code{:var n=2}, would be written as @code{#+CALL: double(n=4)}.
 Inside header arguments are passed through and applied to the named code
 block.  These arguments use header argument syntax rather than standard
 function call syntax.  Inside header arguments affect how the code block is
-evaluated. For example, @code{[:results output]} will collect the results of
+evaluated.  For example, @code{[:results output]} will collect the results of
 everything printed to @code{STDOUT} during execution of the code block.
 @item <end header arguments>
 End header arguments are applied to the calling instance and do not affect
@@ -13004,7 +13004,7 @@ syntax used to specify arguments is the same across all languages.  In every
 case, variables require a default value when they are declared.
 
 The values passed to arguments can either be literal values, references, or
-Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}). References
+Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}).  References
 include anything in the Org-mode file that takes a @code{#+NAME:},
 @code{#+TBLNAME:}, or @code{#+RESULTS:} line.  This includes tables, lists,
 @code{#+BEGIN_EXAMPLE} blocks, other code blocks, and the results of other
