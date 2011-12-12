@@ -36,7 +36,11 @@
 ;; user to add this class to his or her stylesheet if this div is to
 ;; mean anything.
 
+(require 'org-html)
 (require 'org-compat)
+
+(declare-function org-open-par "org-html" ())
+(declare-function org-close-par-maybe "org-html" ())
 
 (defvar org-special-blocks-ignore-regexp "^\\(LaTeX\\|HTML\\)$"
   "A regexp indicating the names of blocks that should be ignored

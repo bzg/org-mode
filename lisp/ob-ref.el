@@ -66,7 +66,7 @@
 (defvar org-babel-ref-split-regexp
   "[ \f\t\n\r\v]*\\(.+?\\)[ \f\t\n\r\v]*=[ \f\t\n\r\v]*\\(.+\\)[ \f\t\n\r\v]*")
 
-(defcustom org-babel-update-intermediate nil
+(defvar org-babel-update-intermediate nil
   "Update the in-buffer results of code blocks executed to resolve references.")
 
 (defun org-babel-ref-parse (assignment)
