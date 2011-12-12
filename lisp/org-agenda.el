@@ -7214,8 +7214,7 @@ use the dedicated frame)."
         (select-window agenda-window)))))
 
 (defun org-agenda-do-tree-to-indirect-buffer ()
-  "Implements org-agenda-tree-to-indirect-buffer, but
-doesn't attempt to manage stability of the window configuration."
+  "Same as `org-agenda-tree-to-indirect-buffer' without saving window."
   (org-agenda-check-no-diary)
   (let* ((marker (or (org-get-at-bol 'org-marker)
 		     (org-agenda-error)))
