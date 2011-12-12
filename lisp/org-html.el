@@ -370,8 +370,8 @@ When `t', insert a string as defined by one of the formatting
 strings in `org-export-html-preamble-format'.  When set to a
 string, this string overrides `org-export-html-preamble-format'.
 When set to a function, apply this function and insert the
-returned string.  The function takes the property list of export
-options as its only argument.
+returned string.  The function takes no argument, but you can
+use `opt-plist' to access the current export options.
 
 Setting :html-preamble in publishing projects will take
 precedence over this variable."
@@ -403,8 +403,8 @@ string overrides `org-export-html-postamble-format'.  When set to
 'auto, discard `org-export-html-postamble-format' and honor
 `org-export-author/email/creator-info' variables.  When set to a
 function, apply this function and insert the returned string.
-The function takes the property list of export options as its
-only argument.
+The function takes no argument, but you can use `opt-plist' to
+access the current export options.
 
 Setting :html-postamble in publishing projects will take
 precedence over this variable."
@@ -1358,7 +1358,7 @@ PUB-DIR is set, use this as the publishing directory."
 						 (?d . ,date) (?e . ,email)))))
 		  ((functionp html-pre)
 		   (insert "<div id=\"" (nth 0 org-export-html-divs) "\">\n")
-		   (funcall html-pre)
+		   (if (stringp (funcall html-pre)) (insert (funcall html-pre)))
 		   (insert "\n</div>\n"))
 		  (t
 		   (setq html-pre-real-contents
@@ -1816,7 +1816,7 @@ PUB-DIR is set, use this as the publishing directory."
 					  (?d . ,date)   (?c . ,creator-info)
 					  (?v . ,html-validation-link)))))
 		  ((functionp html-post)
-		   (funcall html-post))
+		   (if (stringp (funcall html-post)) (insert (funcall html-post))))
 		  ((eq html-post 'auto)
 		   ;; fall back on default postamble
 		   (when (plist-get opt-plist :time-stamp-file)
