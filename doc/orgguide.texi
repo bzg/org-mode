@@ -3,8 +3,8 @@
 @setfilename ../../info/orgguide
 @settitle The compact Org-mode Guide
 
-@set VERSION 7.7
-@set DATE July 2011
+@set VERSION 7.8
+@set DATE December 2011
 
 @c Use proper quote and backtick for code sections in PDF output
 @c Cf. Texinfo manual 14.2
