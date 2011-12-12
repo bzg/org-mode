@@ -1226,7 +1226,7 @@ value of `org-export-odt-fontify-srcblocks."
 	lines (funcall
 	       (or (and org-export-odt-fontify-srcblocks
 			(or (featurep 'htmlfontify)
-			    (require 'htmlfontify))
+			    (require 'htmlfontify nil t))
 			(fboundp 'htmlfontify-string)
 			'org-odt-format-source-code-or-example-colored)
 		   'org-odt-format-source-code-or-example-plain)
