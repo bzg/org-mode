@@ -28,7 +28,9 @@
 ;;; Code:
 (eval-when-compile
   (require 'cl)
-  (require 'htmlfontify))
+  ;; htmlfontify.el was introduce in Emacs 23.2
+  (when (>= (string-to-number emacs-version) 23.2)
+    (require 'htmlfontify)))
 (require 'org-lparse)
 
 (defgroup org-export-odt nil
