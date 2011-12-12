@@ -1352,28 +1352,21 @@ PUB-DIR is set, use this as the publishing directory."
 	(when (plist-get opt-plist :html-preamble)
 	  (let ((html-pre (plist-get opt-plist :html-preamble))
 		html-pre-real-contents)
-	    (cond ((stringp html-pre)
-		   (setq html-pre-real-contents
-			 (format-spec html-pre `((?t . ,title) (?a . ,author)
-						 (?d . ,date) (?e . ,email)))))
-		  ((functionp html-pre)
-		   (insert "<div id=\"" (nth 0 org-export-html-divs) "\">\n")
-		   (funcall html-pre)
-		   (insert "\n</div>\n"))
-		  (t
-		   (setq html-pre-real-contents
+	    (setq html-pre-real-contents
+		  (if (stringp html-pre)
+		      (format-spec html-pre `((?t . ,title) (?a . ,author)
+					      (?d . ,date) (?e . ,email)))
 		    (format-spec
 		     (or (cadr (assoc (nth 0 lang-words)
 				      org-export-html-preamble-format))
 			 (cadr (assoc "en" org-export-html-preamble-format)))
 		     `((?t . ,title) (?a . ,author)
-		       (?d . ,date) (?e . ,email))))))
-	    ;; don't output an empty preamble DIV
-	    (unless (and (functionp html-pre)
-			 (equal html-pre-real-contents ""))
-	      (insert "<div id=\"" (nth 0 org-export-html-divs) "\">\n")
-	      (insert html-pre-real-contents)
-	      (insert "\n</div>\n"))))
+		       (?d . ,date) (?e . ,email)))))
+	    ;; Always insert the preamble
+	    (insert "<div id=\"" (nth 0 org-export-html-divs) "\">\n")
+	    (insert (if (functionp html-pre) (funcall html-pre)
+		      (insert html-pre-real-contents)))
+	    (insert "\n</div>\n")))
 
 	;; begin wrap around body
 	(insert (format "\n<div id=\"%s\">"
@@ -1816,7 +1809,7 @@ PUB-DIR is set, use this as the publishing directory."
 					  (?d . ,date)   (?c . ,creator-info)
 					  (?v . ,html-validation-link)))))
 		  ((functionp html-post)
-		   (funcall html-post))
+		   (insert (funcall html-post)))
 		  ((eq html-post 'auto)
 		   ;; fall back on default postamble
 		   (when (plist-get opt-plist :time-stamp-file)
