@@ -576,6 +576,13 @@ on two lines
 #+end_src"
     (should (string= (org-babel-expand-noweb-references) "barbaz"))))
 
+(ert-deftest test-ob/splitting-variable-lists-in-references ()
+  (org-test-with-temp-text ""
+    (should (= 1 (length (org-babel-ref-split-args
+			  "a=\"this, no work\""))))
+    (should (= 2 (length (org-babel-ref-split-args
+			  "a=\"this, no work\", b=1"))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
