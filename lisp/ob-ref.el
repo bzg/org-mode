@@ -244,20 +244,7 @@ to \"0:-1\"."
 
 (defun org-babel-ref-split-args (arg-string)
   "Split ARG-STRING into top-level arguments of balanced parenthesis."
-  (let ((index 0) (depth 0) (buffer "") holder return)
-    ;; crawl along string, splitting at any ","s which are on the top level
-    (while (< index (length arg-string))
-      (setq holder (substring arg-string index (+ 1 index)))
-      (setq buffer (concat buffer holder))
-      (setq index (+ 1 index))
-      (cond
-       ((string= holder ",")
-        (when (= depth 0)
-          (setq return (cons (substring buffer 0 -1) return))
-          (setq buffer "")))
-       ((or (string= holder "(") (string= holder "[")) (setq depth (+ depth 1)))
-       ((or (string= holder ")") (string= holder "]")) (setq depth (- depth 1)))))
-    (mapcar #'org-babel-trim (reverse (cons buffer return)))))
+  (mapcar #'org-babel-trim (org-babel-balanced-split arg-string 44)))
 
 (defvar org-bracket-link-regexp)
 (defun org-babel-ref-at-ref-p ()
