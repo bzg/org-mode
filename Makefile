@@ -195,7 +195,7 @@ PKG_FILES = $(LISPFILES0)		\
 SHELL = /bin/sh
 
 # Additional distribution files
-DISTFILES_extra=  Makefile request-assign-future.txt contrib
+DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
 
 default: $(ELCFILES) $(ELCBFILES)
 
