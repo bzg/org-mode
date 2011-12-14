@@ -7969,6 +7969,7 @@ press @kbd{v a} again.
 @c
 @orgcmdkskc{v R,R,org-agenda-clockreport-mode}
 @vindex org-agenda-start-with-clockreport-mode
+@vindex org-clock-report-include-clocking-task
 Toggle Clockreport mode.  In Clockreport mode, the daily/weekly agenda will
 always show a table with the clocked times for the timespan and file scope
 covered by the current agenda view.  The initial setting for this mode in new
@@ -7976,7 +7977,8 @@ agenda buffers can be set with the variable
 @code{org-agenda-start-with-clockreport-mode}.  By using a prefix argument
 when toggling this mode (i.e.@: @kbd{C-u R}), the clock table will not show
 contributions from entries that are hidden by agenda filtering@footnote{Only
-tags filtering will be respected here, effort filtering is ignored.}.
+tags filtering will be respected here, effort filtering is ignored.}.  See
+also the variable @code{org-clock-report-include-clocking-task}.
 @c
 @orgkey{v c}
 @vindex org-agenda-clock-consistency-checks
