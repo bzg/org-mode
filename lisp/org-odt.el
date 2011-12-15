@@ -286,7 +286,8 @@ This variable is effective only if
 		  (center . "OrgCenter")
 		  (left . "OrgLeft")
 		  (right . "OrgRight")
-		  (title . "Heading_20_1.title")
+		  (title . "OrgTitle")
+		  (subtitle . "OrgSubtitle")
 		  (footnote . "Footnote")
 		  (src . "OrgSrcBlock")
 		  (illustration . "Illustration")
@@ -485,16 +486,64 @@ PUB-DIR is set, use this as the publishing directory."
 ;; Following variable is let bound when `org-do-lparse' is in
 ;; progress. See org-html.el.
 (defvar org-lparse-toc)
+(defun org-odt-format-toc ()
+  (if (not org-lparse-toc) "" (concat  "\n" org-lparse-toc "\n")))
+
+(defun org-odt-format-preamble (opt-plist)
+  (let* ((title (plist-get opt-plist :title))
+	 (author (plist-get opt-plist :author))
+	 (date (plist-get opt-plist :date))
+	 (iso-date (org-odt-format-date date))
+	 (date (org-odt-format-date date "%d %b %Y"))
+	 (email (plist-get opt-plist :email)))
+    (concat
+     ;; title
+     (when title
+       (concat
+	(org-odt-format-stylized-paragraph
+	 'title (org-odt-format-tags
+		 '("<text:title>" . "</text:title>") title))
+	;; separator
+	"<text:p text:style-name=\"OrgTitle\"/>"))
+
+     (cond
+      ((and author (not email))
+       ;; author only
+       (concat
+	(org-odt-format-stylized-paragraph
+	 'subtitle
+	 (org-odt-format-tags
+	  '("<text:initial-creator>" . "</text:initial-creator>")
+	  author))
+	;; separator
+	"<text:p text:style-name=\"OrgSubtitle\"/>"))
+      ((and author email)
+       ;; author and email
+       (concat
+	(org-odt-format-stylized-paragraph
+	 'subtitle
+	 (org-odt-format-link
+	  (org-odt-format-tags
+	   '("<text:initial-creator>" . "</text:initial-creator>")
+	   author) (concat "mailto:" email)))
+	;; separator
+	"<text:p text:style-name=\"OrgSubtitle\"/>")))
+     ;; date
+     (when date
+       (concat
+	(org-odt-format-stylized-paragraph
+	 'subtitle
+	 (org-odt-format-tags
+	  '("<text:date style:data-style-name=\"%s\" text:date-value=\"%s\">"
+	    . "</text:date>") date "N75" iso-date))
+	;; separator
+	"<text:p text:style-name=\"OrgSubtitle\"/>"))
+     ;; toc
+     (org-odt-format-toc))))
+
 (defun org-odt-begin-document-body (opt-plist)
   (org-odt-begin-office-body)
-  (let ((title (plist-get opt-plist :title)))
-    (when title
-      (insert
-       (org-odt-format-stylized-paragraph 'title title))))
-
-  ;; insert toc
-  (when org-lparse-toc
-    (insert "\n" org-lparse-toc "\n")))
+  (insert (org-odt-format-preamble opt-plist)))
 
 (defvar org-lparse-body-only)		; let bound during org-do-lparse
 (defvar org-lparse-to-buffer)		; let bound during org-do-lparse
@@ -553,7 +602,7 @@ PUB-DIR is set, use this as the publishing directory."
   (when (setq author (or author (plist-get org-lparse-opt-plist :author)))
     (org-odt-format-tags '("<dc:creator>" . "</dc:creator>") author)))
 
-(defun org-odt-iso-date-from-org-timestamp (&optional org-ts)
+(defun org-odt-format-date (&optional org-ts fmt)
   (save-match-data
     (let* ((time
 	    (and (stringp org-ts)
@@ -561,8 +610,11 @@ PUB-DIR is set, use this as the publishing directory."
 		 (apply 'encode-time
 			(org-fix-decoded-time
 			 (org-parse-time-string (match-string 0 org-ts) t)))))
-	   (date (format-time-string "%Y-%m-%dT%H:%M:%S%z" time)))
-      (format "%s:%s" (substring date 0 -2) (substring date -2)))))
+	   date)
+      (cond
+       (fmt (format-time-string fmt time))
+       (t (setq date (format-time-string "%Y-%m-%dT%H:%M:%S%z" time))
+	  (format "%s:%s" (substring date 0 -2) (substring date -2)))))))
 
 (defun org-odt-begin-annotation (&optional author date)
   (org-lparse-insert-tag "<office:annotation>")
@@ -570,7 +622,7 @@ PUB-DIR is set, use this as the publishing directory."
     (insert author))
   (insert (org-odt-format-tags
 	   '("<dc:date>" . "</dc:date>")
-	   (org-odt-iso-date-from-org-timestamp
+	   (org-odt-format-date
 	    (or date (plist-get org-lparse-opt-plist :date)))))
   (org-lparse-begin-paragraph))
 
@@ -2002,8 +2054,7 @@ visually."
       (insert "\n</manifest:manifest>"))))
 
 (defun org-odt-update-meta-file (opt-plist)
-  (let ((date (org-odt-iso-date-from-org-timestamp
-	       (plist-get opt-plist :date)))
+  (let ((date (org-odt-format-date (plist-get opt-plist :date)))
 	(author (or (plist-get opt-plist :author) ""))
 	(email (plist-get opt-plist :email))
 	(keywords (plist-get opt-plist :keywords))
