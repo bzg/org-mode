@@ -4,7 +4,7 @@ DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
 .EXPORT_ALL_VARIABLES:
 
 LISPDIRS	= lisp
-SUBDIRS		= doc $(LISPDIRS)
+SUBDIRS		= doc etc $(LISPDIRS)
 INSTSUB         = $(SUBDIRS:%=install-%)
 
 GITVERSION	= $(shell git describe --abbrev=6 HEAD)
@@ -15,7 +15,7 @@ ifneq ("$(GITSTATUS)", "")
   GITVERSION := $(GITVERSION).dirty
 endif
 
-.PHONY:	default all up2 update compile lisp doc \
+.PHONY:	default all up2 update compile lisp doc etc \
 	install info html pdf card docs $(INSTSUB) \
 	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel
 

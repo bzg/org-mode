@@ -37,6 +37,8 @@ manual
 org_dual_license.texi
 ORGWEBPAGE/Changes.txt
 local*.mk
+doc/git-describe.texi
+.gitattributes
 
 # aspell word and replacement lists
 
