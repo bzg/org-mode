@@ -984,7 +984,9 @@ the project."
 	 main last-main letter last-letter file sub link tgext)
     ;; `files' contains the list of relative file names
     (dolist (file files)
-      (setq origfile (substring file 1 -1))
+      (setq origfile
+	    (concat (file-name-directory file)
+		    (substring (file-name-nondirectory file) 1 -1)))
       (setq buf (find-file-noselect file))
       (with-current-buffer buf
 	(goto-char (point-min))
