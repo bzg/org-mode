@@ -83,29 +83,6 @@ To add files to this list use the `org-babel-lob-ingest' command."
 ;; functions for executing lob one-liners
 
 ;;;###autoload
-(defmacro org-babel-map-call-lines (file &rest body)
-  "Evaluate BODY forms on each call line in FILE.
-If FILE is nil evaluate BODY forms on source blocks in current
-buffer."
-  (declare (indent 1))
-  (let ((tempvar (make-symbol "file")))
-    `(let* ((,tempvar ,file)
-	    (visited-p (or (null ,tempvar)
-			   (get-file-buffer (expand-file-name ,tempvar))))
-	    (point (point)) to-be-removed)
-       (save-window-excursion
-	 (when ,tempvar (find-file ,tempvar))
-	 (setq to-be-removed (current-buffer))
-	 (goto-char (point-min))
-	 (while (re-search-forward org-babel-lob-one-liner-regexp nil t)
-	   (goto-char (match-beginning 1))
-	   (save-match-data ,@body)
-	   (goto-char (match-end 0))))
-       (unless visited-p (kill-buffer to-be-removed))
-       (goto-char point))))
-(def-edebug-spec org-babel-map-call-lines (form body))
-
-;;;###autoload
 (defun org-babel-lob-execute-maybe ()
   "Execute a Library of Babel source block, if appropriate.
 Detect if this is context for a Library Of Babel source block and
