@@ -9569,13 +9569,16 @@ application the system uses for this file type."
 	    (apply cmd (nreverse args1))))
 
 	 ((member type '("http" "https" "ftp" "news"))
-	  (browse-url (concat type ":" (org-link-escape
-					path org-link-escape-chars-browser))))
+	  (browse-url (concat type ":" (if (org-string-match-p "[[:nonascii:] ]" path)
+					   (org-link-escape
+					    path org-link-escape-chars-browser)
+					 path))))
 
 	 ((string= type "doi")
-	  (browse-url (concat "http://dx.doi.org/"
-                              (org-link-escape
-                               path org-link-escape-chars-browser))))
+	  (browse-url (concat "http://dx.doi.org/" (if (org-string-match-p "[[:nonascii:] ]" path)
+						       (org-link-escape
+							path org-link-escape-chars-browser)
+						     path))))
 
 	 ((member type '("message"))
 	  (browse-url (concat type ":" path)))
