@@ -10405,7 +10405,8 @@ on the system \"/user@host:\"."
 			   (or (funcall org-refile-target-verify-function)
 			       (throw 'next t))))
 		       (when (and (looking-at org-complex-heading-regexp)
-				  (not (member (match-string 4) excluded-entries)))
+				  (not (member (match-string 4) excluded-entries))
+				  (match-string 4))
 			 (setq level (org-reduced-level
 				      (- (match-end 1) (match-beginning 1)))
 			       txt (org-link-display-format (match-string 4))
