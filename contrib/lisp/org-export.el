@@ -2586,57 +2586,29 @@ it also."
 
 ;;;; For Tables Of Contents
 
-;; `org-export-get-headlines' builds a table of contents in the shape
-;; of a nested list of cons cells whose car is headline's name and cdr
-;; an unique identifier.  One can then easily parse it and transcode
-;; it in a back-end.  Identifiers can be used to construct internal
-;; links.
+;; `org-export-collect-headlines' builds a list of all exportable
+;; headline elements, maybe limited to a certain depth.  One can then
+;; easily parse it and transcode it.
 
 ;; Building lists of tables, figures or listings is quite similar.
 ;; Once the generic function `org-export-collect-elements' is defined,
 ;; `org-export-collect-tables', `org-export-collect-figures' and
 ;; `org-export-collect-listings' can be derived from it.
 
-(defun org-export-get-headlines (backend info &optional n)
-  "Build a table of contents.
-
-BACKEND is the back-end used to transcode headline's name.  INFO
-is a plist holding export options.
+(defun org-export-collect-headlines (info &optional n)
+  "Collect headlines in order to build a table of contents.
 
 When non-nil, optional argument N must be an integer.  It
 specifies the depth of the table of contents.
 
-Return an alist whose keys are headlines' name and value their
-relative level and an unique identifier that might be used for
-internal links.
-
-For example, on the following tree, where numbers in parens are
-buffer position at beginning of the line:
-
-* Title 1       (1)
-** Sub-title 1  (21)
-** Sub-title 2  (42)
-* Title 2       (62)
-
-the function will return:
-
-\(\(\"Title 1\" 1 1\)
- \(\"Sub-title 1\" 2 21\)
- \(\"Sub-title 2\" 2 42\)
- \(\"Title 2\" 1 62\)\)"
+Return a list of all exportable headlines as parsed elements."
   (org-element-map
    (plist-get info :parse-tree)
    'headline
-   (lambda (headline local-info)
-     ;; Get HEADLINE's relative level.
-     (let ((level (+ (or (plist-get local-info :headline-offset) 0)
-		     (org-element-get-property :level headline))))
-       (unless (and (wholenump n) (> level n))
-	 (list
-	  (org-export-secondary-string
-	   (org-element-get-property :title headline) backend info)
-	  level
-	  (org-element-get-property :begin headline)))))
+   (lambda (headline local)
+     ;; Strip contents from HEADLINE.
+     (let ((relative-level (org-export-get-relative-level headline local)))
+       (unless (and n (> relative-level n)) headline)))
    info))
 
 (defun org-export-collect-elements (type backend info)
