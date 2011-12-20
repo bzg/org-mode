@@ -16,10 +16,16 @@ EMACS=emacs
 # Where local software is found
 prefix=/usr/local
 
-# Where local lisp files go.
+# Where local lisp files go
 lispdir   = $(prefix)/share/emacs/site-lisp
 
-# Where info files go.
+# Where etc files go
+etcdir    = $(lispdir)/../etc
+
+# Where style files go
+stylesdir = $(etcdir)/styles
+
+# Where info files go
 infodir = $(prefix)/share/info
 
 ##----------------------------------------------------------------------
@@ -175,6 +181,7 @@ DOCFILES    = doc/org.texi doc/org.pdf doc/org doc/dir \
 CARDFILES   = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
 TEXIFILES   = doc/org.texi
 INFOFILES   = doc/org
+STYLESFILES = etc/styles/OrgOdtContentTemplate.xml etc/styles/OrgOdtStyles.xml
 
 # Package Manager (ELPA)
 PKG_TAG = $(shell date +%Y%m%d)
@@ -211,7 +218,7 @@ update:
 
 compile: $(ELCFILES0) $(ELCBFILES)
 
-install: install-lisp
+install: install-lisp install-etc
 
 doc: doc/org.html doc/org.pdf doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgguide.pdf doc/orgcard.txt
 
@@ -230,6 +237,10 @@ install-info: $(INFOFILES)
 	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
 	$(CP) $(INFOFILES) $(infodir)
 	$(INSTALL_INFO) --infodir=$(infodir) $(INFOFILES)
+
+install-etc: $(STYLESFILES)
+	if [ ! -d $(stylesdir) ]; then $(MKDIR) $(stylesdir); else true; fi ;
+	$(CP) $(STYLESFILES) $(stylesdir)
 
 autoloads: lisp/org-install.el
 
