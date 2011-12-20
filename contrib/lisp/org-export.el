@@ -2075,8 +2075,8 @@ Point is at buffer's beginning when BODY is applied."
 ;; should be added here.
 
 ;; As of now, functions operating on headlines, include keywords,
-;; links, macros, src-blocks, tables and tables of contents are
-;; implemented.
+;; links, macros, references, src-blocks, tables and tables of
+;; contents are implemented.
 
 
 ;;;; For Headlines
@@ -2361,6 +2361,56 @@ INFO is a plist holding export options."
       (setq value (eval (read value))))
     ;; Return expanded string.
     (format "%s" value)))
+
+
+;;;; For References
+
+;; `org-export-get-ordinal' associates a sequence number to any object
+;; or element.
+
+(defun org-export-get-ordinal (element info &optional within-section predicate)
+  "Return ordinal number of an element or object.
+
+ELEMENT is the element or object considered.  INFO is the plist
+used as a communication channel.
+
+When optional argument WITHIN-SECTION is non-nil, narrow counting
+to the section containing ELEMENT.
+
+Optional argument PREDICATE is a function returning a non-nil
+value if the current element or object should be counted in.  It
+accepts one argument: the element or object being considered.
+This argument allows to count only a certain type of objects,
+like inline images, which are a subset of links \(in that case,
+`org-export-inline-image-p' might be an useful predicate\)."
+  (let ((counter 0)
+        (type (car element))
+        ;; Determine if search should apply to current section, in
+        ;; which case it should be retrieved first, or to full parse
+        ;; tree.  As a special case, an element or object without
+        ;; a parent headline will also trigger a full search,
+        ;; notwithstanding WITHIN-SECTION value.
+        (data
+         (let ((parse-tree (plist-get info :parse-tree)))
+           (if within-section
+               (let ((parent (plist-get (plist-get info :inherited-properties)
+                                        :begin)))
+                 (if (not parent) parse-tree
+                   (org-element-map
+                    parse-tree 'headline
+                    (lambda (el local)
+                      (when (= (org-element-get-property :begin el) parent) el))
+                    info 'first-match)))
+             parse-tree))))
+    ;; Increment counter until ELEMENT is found again.
+    (org-element-map
+     data type
+     (lambda (el local)
+       (cond
+        ((and (functionp predicate) (funcall predicate el)))
+        ((equal element el) (1+ counter))
+        (t (incf counter) nil)))
+     info 'first-match)))
 
 
 ;;;; For Src-Blocks
