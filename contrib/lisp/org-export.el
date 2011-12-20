@@ -2277,15 +2277,13 @@ PATH is the link path.  DESC is its description."
 	  ((string= desc "") "%s")
 	  (t desc))))
 
-(defun org-export-inline-image-p (link contents &optional extensions)
+(defun org-export-inline-image-p (link &optional extensions)
   "Non-nil if LINK object points to an inline image.
-
-CONTENTS is the link description part, as a string, or nil.
 
 When non-nil, optional argument EXTENSIONS is a list of valid
 extensions for image files, as strings.  Otherwise, a default
 list is provided \(cf. `org-image-file-name-regexp'\)."
-  (and (or (not contents) (string= contents ""))
+  (and (not (org-element-get-contents link))
        (string= (org-element-get-property :type link) "file")
        (org-file-image-p
 	(expand-file-name (org-element-get-property :path link))

@@ -1251,7 +1251,7 @@ INFO is a plist holding contextual information. See
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
 	 (imagep (org-export-inline-image-p
-		  link desc org-e-latex-inline-image-extensions))
+		  link org-e-latex-inline-image-extensions))
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
