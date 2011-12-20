@@ -1908,8 +1908,8 @@ developer-specified filters, if any, are called first."
 ;;; Core functions
 
 ;; This is the room for the main function, `org-export-as', along with
-;; its derivative, `org-export-to-buffer'.  They differ only by the
-;; way they output the resulting code.
+;; its derivatives, `org-export-to-buffer' and `org-export-to-file'.
+;; They differ only by the way they output the resulting code.
 
 ;; Note that `org-export-as' doesn't really parse the current buffer,
 ;; but a copy of it (with the same buffer-local variables and
@@ -1986,7 +1986,8 @@ Return code as a string."
 	    (org-export-filter-apply-functions
 	     org-export-filter-final-output-functions body backend)))))))
 
-(defun org-export-to-buffer (backend buffer &optional subtreep visible-only body-only ext-plist)
+(defun org-export-to-buffer (backend buffer &optional subtreep visible-only
+				     body-only ext-plist)
   "Call `org-export-as' with output to a specified buffer.
 
 BACKEND is the back-end used for transcoding, as a symbol.
@@ -1994,12 +1995,8 @@ BACKEND is the back-end used for transcoding, as a symbol.
 BUFFER is the output buffer.  If it already exists, it will be
 erased first, otherwise, it will be created.
 
-Arguments SUBTREEP, VISIBLE-ONLY and BODY-ONLY are similar to
-those used in `org-export-as'.
-
-EXT-PLIST, when provided, is a property list with external
-parameters overriding Org default settings, but still inferior to
-file-local settings.
+Arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and EXT-PLIST are
+similar to those used in `org-export-as', which see.
 
 Return buffer."
   (let ((out (org-export-as backend subtreep visible-only body-only ext-plist))
@@ -2009,6 +2006,42 @@ Return buffer."
       (insert out)
       (goto-char (point-min)))
     buffer))
+
+(defun org-export-to-file (backend filename &optional post-process subtreep
+                                   visible-only body-only ext-plist)
+  "Call `org-export-as' with output to a specified file.
+
+BACKEND is the back-end used for transcoding, as a symbol.
+
+FILENAME is the output file name.  If it already exists, it will
+be erased first, unless it isn't writable, in which case an error
+will be returned.  Otherwise, the file will be created.
+
+Optional argument POST-PROCESS, when non-nil, is a function
+applied to the output file.  It expects one argument: the file
+name, as a string.  It can be used to call shell commands on that
+file, display a specific buffer, etc.
+
+Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
+EXT-PLIST are similar to those used in `org-export-as', which
+see.
+
+Return file name."
+  ;; Checks for file and directory permissions.
+  (cond
+   ((not (file-exists-p filename))
+    (let ((dir (or (file-name-directory filename) default-directory)))
+      (unless (file-writable-p dir) (error "Output directory not writable"))))
+   ((not (file-writable-p filename)) (error "Output file not writable")))
+  ;; All checks passed: insert contents to a temporary buffer and
+  ;; write it to the specified file.
+  (let ((out (org-export-as backend subtreep visible-only body-only ext-plist)))
+    (with-temp-buffer
+      (insert out)
+      (write-file filename)))
+  (when post-process (funcall post-process filename))
+  ;; Return value.
+  filename)
 
 (defmacro org-export-with-current-buffer-copy (&rest body)
   "Apply BODY in a copy of the current buffer.
