@@ -2647,7 +2647,7 @@ Return an alist where key is the caption of the table and value
 an unique identifier that might be used for internal links."
   (org-export-collect-elements 'table backend info))
 
-(defun org-export-get-figures (backend info)
+(defun org-export-collect-figures (backend info)
   "Build a list of figures.
 
 A figure is a paragraph type element with a caption or a name.
