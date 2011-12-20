@@ -620,7 +620,7 @@ while every other back-end will ignore it."
 ;;      the current buffer, through the "#+include:" keyword.  It is
 ;;      mainly used to verify that no infinite recursive inclusion
 ;;      happens.
-;;   - category :: persistent
+;;   - category :: local
 ;;   - type :: list of strings
 
 ;; + `inherited-properties' :: Properties of the headline ancestors
@@ -668,13 +668,6 @@ while every other back-end will ignore it."
 ;;   - type :: symbol
 ;;   - update :: `org-export-update-info'
 
-;; + `previous-section-number' :: Numbering of the previous
-;;      headline.  As it might not be practical for direct use, the
-;;      function `org-export-get-headline-level' is provided
-;;      to extract useful information out of it.
-;;   - category :: local
-;;   - type :: vector
-
 ;; + `section-numbers' :: Non-nil means transcoding should add
 ;;      section numbers to headlines.
 ;;   - category :: option
@@ -707,7 +700,7 @@ while every other back-end will ignore it."
 
 ;; + `total-loc' :: Contains total lines of code accumulated by source
 ;;                  blocks with the "+n" option so far.
-;;   - category :: option
+;;   - category :: persistent
 ;;   - type :: integer
 ;;   - update :: `org-export-handle-code'
 
@@ -1108,8 +1101,9 @@ retrieved."
 ;; between headlines' beginning position and their numbering.
 
 (defconst org-export-persistent-properties-list
-  '(:code-refs :headline-alist :headline-offset :headline-offset :parse-tree
-	       :point-max :seen-footnote-labels :total-loc :use-select-tags)
+  '(:back-end :code-refs :headline-alist :headline-numbering :headline-offset
+	      :parse-tree :point-max :seen-footnote-labels :target-list
+	      :total-loc :use-select-tags)
   "List of persistent properties.")
 
 (defconst org-export-persistent-properties nil
