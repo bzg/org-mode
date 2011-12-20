@@ -1642,6 +1642,7 @@ to disable them individually.
 
 @table @asis
 @orgcmd{@key{TAB},org-cycle}
+@cindex cycling, in plain lists
 @vindex org-cycle-include-plain-lists
 Items can be folded just like headline levels.  Normally this works only if
 the cursor is on a plain list item.  For more details, see the variable
@@ -7138,6 +7139,7 @@ the front.  With a prefix argument, file is added/moved to the end.
 @orgcmd{C-c ],org-remove-file}
 Remove current file from the list of agenda files.
 @kindex C-,
+@cindex cycling, of agenda files
 @orgcmd{C-',org-cycle-agenda-files}
 @itemx C-,
 Cycle through agenda file list, visiting one file after the other.
