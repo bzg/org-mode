@@ -1648,9 +1648,12 @@ Items can be folded just like headline levels.  Normally this works only if
 the cursor is on a plain list item.  For more details, see the variable
 @code{org-cycle-include-plain-lists}.  If this variable is set to
 @code{integrate}, plain list items will be treated like low-level
-headlines.  The level of an item is then given by the
-indentation of the bullet/number.  Items are always subordinate to real
-headlines, however; the hierarchies remain completely separated.
+headlines.  The level of an item is then given by the indentation of the
+bullet/number.  Items are always subordinate to real headlines, however; the
+hierarchies remain completely separated.  In a new item with no text yet, the
+first @key{TAB} demotes the item to become a child of the previous
+one.  Subsequent @key{TAB}s move the item to meaningful levels in the list
+and eventually get it back to its initial position.
 @orgcmd{M-@key{RET},org-insert-heading}
 @vindex org-M-RET-may-split-line
 @vindex org-list-automatic-rules
@@ -1664,11 +1667,6 @@ one.
 @kindex M-S-@key{RET}
 @item M-S-@key{RET}
 Insert a new item with a checkbox (@pxref{Checkboxes}).
-@orgcmd{@key{TAB},org-cycle}
-In a new item with no text yet, the first @key{TAB} demotes the item to
-become a child of the previous one.  Subsequent @key{TAB}s move the item to
-meaningful levels in the list and eventually get it back to its initial
-position.
 @kindex S-@key{down}
 @item S-@key{up}
 @itemx S-@key{down}
