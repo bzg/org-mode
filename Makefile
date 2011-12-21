@@ -91,6 +91,7 @@ LISPF      = 	org.el			\
 		org-footnote.el		\
 		org-freemind.el		\
 		org-gnus.el		\
+		org-eshell.el		\
 		org-habit.el		\
 		org-html.el		\
 		org-icalendar.el	\
