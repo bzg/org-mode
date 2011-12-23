@@ -579,11 +579,24 @@ while every other back-end will ignore it."
 ;;   - category :: option
 ;;   - type :: list of strings
 
-;; + `footnotes-labels-alist' :: Alist between footnote labels and
-;;      their definition, as parsed data.  Once retrieved, the
-;;      definition should be exported with `org-export-data'.
+;; + `footnote-definition-alist' :: Alist between footnote labels and
+;;     their definition, as parsed data.  Only non-inlined footnotes
+;;     are represented in this alist.  Also, every definition isn't
+;;     guaranteed to be referenced in the parse tree.  The purpose of
+;;     this property is to preserve definitions from oblivion
+;;     (i.e. when the parse tree comes from a part of the original
+;;     buffer), it isn't meant for direct use in a back-end.  To
+;;     retrieve a definition relative to a reference, use
+;;     `org-export-get-footnote-definition' instead.
 ;;   - category :: option
 ;;   - type :: alist (STRING . LIST)
+
+;; + `footnote-seen-labels' :: List of already transcoded footnote
+;;      labels.  It is used to know when a reference appears for the
+;;      first time. (cf. `org-export-footnote-first-reference-p').
+;;   - category :: persistent
+;;   - type :: list of strings
+;;   - update :: `org-export-update-info'
 
 ;; + `genealogy' :: List of current element's parents types.
 ;;   - category :: local
@@ -672,12 +685,6 @@ while every other back-end will ignore it."
 ;;      section numbers to headlines.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
-;; + `seen-footnote-labels' :: List of already transcoded footnote
-;;      labels.
-;;   - category :: persistent
-;;   - type :: list of strings
-;;   - update :: `org-export-update-info'
 
 ;; + `select-tags' :: List of tags enforcing inclusion of sub-trees in
 ;;                    transcoding.  When such a tag is present,
@@ -1030,6 +1037,10 @@ BACKEND is a symbol specifying which back-end should be used."
   "Return a plist with non-optional properties.
 OPTIONS is the export options plist computed so far."
   (list
+   ;; `:macro-date', `:macro-time' and `:macro-property' could as well
+   ;; be initialized as persistent properties, since they don't depend
+   ;; on initial environment.  Though, it may be more logical to keep
+   ;; them close to other ":macro-" properties.
    :macro-date "(eval (format-time-string \"$1\"))"
    :macro-time "(eval (format-time-string \"$1\"))"
    :macro-property "(eval (org-entry-get nil \"$1\" 'selective))"
@@ -1041,18 +1052,22 @@ OPTIONS is the export options plist computed so far."
 		"))"))
    :macro-input-file (and (buffer-file-name)
 			  (file-name-nondirectory (buffer-file-name)))
-   :footnotes-labels-alist
+   ;; Footnotes definitions must be collected in the original buffer,
+   ;; as there's no insurance that they will still be in the parse
+   ;; tree, due to some narrowing.
+   :footnote-definition-alist
    (let (alist)
      (org-with-wide-buffer
       (goto-char (point-min))
       (while (re-search-forward org-footnote-definition-re nil t)
 	(let ((def (org-footnote-at-definition-p)))
-	  (org-skip-whitespace)
-	  (push (cons (car def)
-		      (save-restriction
-			(narrow-to-region (point) (nth 2 def))
-			(org-element-parse-buffer)))
-		alist)))
+	  (when def
+	    (org-skip-whitespace)
+	    (push (cons (car def)
+			(save-restriction
+			  (narrow-to-region (point) (nth 2 def))
+			  (org-element-parse-buffer)))
+		  alist))))
       alist))))
 
 (defvar org-export-allow-BIND-local nil)
@@ -1102,7 +1117,7 @@ retrieved."
 
 (defconst org-export-persistent-properties-list
   '(:back-end :code-refs :headline-alist :headline-numbering :headline-offset
-	      :parse-tree :point-max :seen-footnote-labels :target-list
+	      :parse-tree :point-max :footnote-seen-labels :target-list
 	      :total-loc :use-select-tags)
   "List of persistent properties.")
 
@@ -1278,6 +1293,8 @@ When RECURSEP is non-nil, assume the following element or object
 will be inside the current one.
 
 The following properties are updated:
+`footnote-seen-labels'    List of already parsed footnote
+			  labels (string list)
 `genealogy'               List of current element's parents
 			  (symbol list).
 `inherited-properties'    List of inherited properties from
@@ -1286,8 +1303,6 @@ The following properties are updated:
 			 (plist).
 `previous-element'        Previous element's type (symbol).
 `previous-object'         Previous object's type (symbol).
-`seen-footnote-labels'    List of already parsed footnote
-			  labels (string list)
 
 Return the property list."
   (let* ((type (and (not (stringp blob)) (car blob))))
@@ -1317,12 +1332,12 @@ Return the property list."
       (when (eq type 'footnote-reference)
 	(let ((label (org-element-get-property :label blob))
 	      (seen-labels (plist-get org-export-persistent-properties
-				      :seen-footnote-labels)))
+				      :footnote-seen-labels)))
 	  ;; Store anonymous footnotes (nil label) without checking if
 	  ;; another anonymous footnote was seen before.
 	  (unless (and label (member label seen-labels))
 	    (setq info (org-export-set-property
-			info :seen-footnote-labels (push label seen-labels))))))
+			info :footnote-seen-labels (push label seen-labels))))))
       ;; Set `:previous-element' or `:previous-object' according to
       ;; BLOB.
       (setq info (cond ((not type)
@@ -2074,9 +2089,80 @@ Point is at buffer's beginning when BODY is applied."
 ;; function general enough to have its use across many back-ends
 ;; should be added here.
 
-;; As of now, functions operating on headlines, include keywords,
-;; links, macros, references, src-blocks, tables and tables of
-;; contents are implemented.
+;; As of now, functions operating on footnotes, headlines, include
+;; keywords, links, macros, references, src-blocks, tables and tables
+;; of contents are implemented.
+
+;;;; For Footnotes
+
+;; `org-export-collect-footnote-definitions' is a tool to list
+;; actually used footnotes definitions in the whole parse tree, or in
+;; an headline, in order to add footnote listings throughout the
+;; transcoded data.
+
+;; `org-export-footnote-first-reference-p' is a predicate used by some
+;; back-ends, when they need to attach the footnote definition only to
+;; the first occurrence of the corresponding label.
+
+;; `org-export-get-footnote-definition' and
+;; `org-export-get-footnote-number' provide easier access to
+;; additional information relative to a footnote reference.
+
+(defun org-export-collect-footnote-definitions (data info)
+  "Return an alist between footnote label and its definition.
+
+DATA is the parse tree from which definitions are collected.
+INFO is the plist used as a communication channel.
+
+As anonymous footnotes have no label, the key used is that case
+is their beginning position.
+
+Definitions are sorted by order of references.  They either
+appear as Org data \(transcoded with `org-export-data'\) or as
+a secondary string for inlined footnotes \(transcoded with
+`org-export-secondary-string'\).  Unreferenced definitions are
+ignored."
+  (org-element-map
+   data 'footnote-reference
+   (lambda (footnote local)
+     (cond
+      ;; Definition already collected.
+      ((not (org-export-footnote-first-reference-p footnote local)) nil)
+      ;; Reference has a label: Use it as a key, and get the
+      ;; corresponding definition.
+      ((org-element-get-property :label footnote)
+       (cons (org-element-get-property :label footnote)
+             (org-export-get-footnote-definition footnote local)))
+      ;; No label: This is an anonymous footnote. Use beginning
+      ;; position as the key and inline definition (a secondary
+      ;; string) as its value.
+      (t (cons (org-element-get-property :begin footnote)
+               (org-element-get-property :inline-definition footnote)))))
+   info))
+
+(defun org-export-footnote-first-reference-p (footnote-reference info)
+  "Non-nil when a footnote reference is the first one for its label.
+
+FOOTNOTE-REFERENCE is the footnote reference being considered.
+INFO is the plist used as a communication channel."
+  (let ((label (org-element-get-property :label footnote-reference)))
+    (not (and label (member label (plist-get info :footnote-seen-labels))))))
+
+(defun org-export-get-footnote-definition (footnote-reference info)
+  "Return definition of FOOTNOTE-REFERENCE as parsed data.
+INFO is the plist used as a communication channel."
+  (let ((label (org-element-get-property :label footnote-reference)))
+    (or (org-element-get-property :inline-definition footnote-reference)
+        (cdr (assoc label (plist-get info :footnote-definition-alist))))))
+
+(defun org-export-get-footnote-number (footnote-reference info)
+  "Return footnote number associated to FOOTNOTE-REFERENCE.
+INFO is the plist used as a communication channel."
+  (let* ((all-seen (plist-get info :footnote-seen-labels))
+         (label (org-element-get-property :label footnote-reference))
+         ;; Anonymous footnotes are always new footnotes.
+         (seenp (and label (member label all-seen))))
+    (if seenp (length seenp) (1+ (length all-seen)))))
 
 
 ;;;; For Headlines
