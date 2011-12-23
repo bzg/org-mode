@@ -24,7 +24,7 @@
 
 ;; To test it, run
 ;;
-;;   M-: (org-export-to-buffer 'e-latex "*Test e-LaTeX") RET
+;;   M-: (org-export-to-buffer 'e-latex "*Test e-LaTeX*") RET
 ;;
 ;; in an org-mode buffer then switch to the buffer to see the LaTeX
 ;; export.  See contrib/lisp/org-export.el for more details on how
