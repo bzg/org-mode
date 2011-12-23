@@ -881,27 +881,24 @@ CONTENTS is nil. INFO is a plist holding contextual information."
      org-e-latex-footnote-separator)
    ;; Use \footnotemark if the footnote has already been defined.
    ;; Otherwise, define it with \footnote command.
-   (let* ((all-seen (plist-get info :seen-footnote-labels))
-	  (label (org-element-get-property :label footnote-reference))
-	  ;; Anonymous footnotes are always new footnotes.
-	  (seenp (and label (member label all-seen)))
-	  (inline-def-p (org-element-get-property
-			 :inline-definition footnote-reference)))
-     (cond
-      (seenp (format "\\footnotemark[%s]" (length seenp)))
-      ;; Inline definitions are secondary strings.
-      (inline-def-p
-       (format "\\footnote{%s}"
-	       (org-trim
-		(org-export-secondary-string inline-def-p 'latex info))))
-      ;; Non-inline footnotes necessarily contain a label.  Retrieve
-      ;; match definition in `:footnotes-labels-alist'.
-      (t
-       (format "\\footnote{%s}"
-	       (org-trim
-		(org-export-data
-		 (cdr (assoc label (plist-get info :footnotes-labels-alist)))
-		 'latex info))))))))
+   (cond
+    ((not (org-export-footnote-first-reference-p footnote-reference info))
+     (format "\\footnotemark[%s]"
+	     (org-export-get-footnote-number footnote-reference info)))
+    ;; Inline definitions are secondary strings.
+    ((eq (org-element-get-property :type footnote-reference) 'inline)
+     (format "\\footnote{%s}"
+	     (org-trim
+	      (org-export-secondary-string
+	       (org-export-get-footnote-definition footnote-reference info)
+	       'e-latex info))))
+    ;; Non-inline footnotes definitions are full Org data.
+    (t
+     (format "\\footnote{%s}"
+	     (org-trim
+	      (org-export-data
+	       (org-export-get-footnote-definition footnote-reference info)
+	       'e-latex info)))))))
 
 
 ;;;; Headline
