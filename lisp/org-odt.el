@@ -495,7 +495,11 @@ PUB-DIR is set, use this as the publishing directory."
 	 (date (plist-get opt-plist :date))
 	 (iso-date (org-odt-format-date date))
 	 (date (org-odt-format-date date "%d %b %Y"))
-	 (email (plist-get opt-plist :email)))
+	 (email (plist-get opt-plist :email))
+	 ;; switch on or off above vars based on user settings
+	 (author (and (plist-get opt-plist :author-info) (or author email)))
+	 (email (and (plist-get opt-plist :email-info) email))
+	 (date (and (plist-get opt-plist :time-stamp-file) date)))
     (concat
      ;; title
      (when title
@@ -505,7 +509,6 @@ PUB-DIR is set, use this as the publishing directory."
 		 '("<text:title>" . "</text:title>") title))
 	;; separator
 	"<text:p text:style-name=\"OrgTitle\"/>"))
-
      (cond
       ((and author (not email))
        ;; author only
