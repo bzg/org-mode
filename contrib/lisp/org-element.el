@@ -2775,7 +2775,7 @@ the current buffer."
     (insert string)
     (org-element-parse-objects (point-min) (point-max) nil restriction)))
 
-(defun org-element-map (data types fun &optional options first-match)
+(defun org-element-map (data types fun &optional info first-match)
   "Map a function on selected elements or objects.
 
 DATA is the parsed tree, as returned by, i.e,
@@ -2785,7 +2785,7 @@ matching element or object.  It must accept two arguments: the
 element or object itself and a plist holding contextual
 information.
 
-When optional argument OPTIONS is non-nil, it should be a plist
+When optional argument INFO is non-nil, it should be a plist
 holding export options.  In that case, parts of the parse tree
 not exportable according to that property list will be skipped
 and files included through a keyword will be visited.
@@ -2796,9 +2796,8 @@ match for which FUN doesn't return nil, and return that value.
 Nil values returned from FUN are ignored in the result."
   ;; Ensure TYPES is a list, even of one element.
   (unless (listp types) (setq types (list types)))
-  ;; Recursion depth is determined by TYPE-CATEGORY, to avoid
-  ;; unnecessary steps.
-  (let* ((type-category
+  ;; Recursion depth is determined by --CATEGORY.
+  (let* ((--category
 	  (cond
 	   ((loop for type in types
 		  always (memq type org-element-greater-elements))
@@ -2807,97 +2806,98 @@ Nil values returned from FUN are ignored in the result."
 		  always (memq type org-element-all-elements))
 	    'elements)
 	   (t 'objects)))
-	 walk-tree                      ; For byte-compiler
-	 acc                            ; Accumulate results into ACC.
+	 walk-tree			; For byte-compiler
+	 --acc
 	 (accumulate-maybe
 	  (function
-	   ;; Check if TYPE is matching among TYPES.  If so, apply FUN
-	   ;; to BLOB and accumulate return value into ACC.  INFO is
-	   ;; the communication channel.
-	   (lambda (type types fun blob info)
-	     (when (memq type types)
-	       (let ((result (funcall fun blob info)))
-		 (cond
-		  ((not result))
-		  (first-match (throw 'first-match result))
-		  (t (push result acc))))))))
+	   (lambda (--type types fun --blob --local)
+	     ;; Check if TYPE is matching among TYPES.  If so, apply
+	     ;; FUN to --BLOB and accumulate return value
+	     ;; into --ACC.  --LOCAL is the communication channel.
+	     (when (memq --type types)
+	       (let ((result (funcall fun --blob --local)))
+		 (cond ((not result))
+		       (first-match (throw 'first-match result))
+		       (t (push result --acc))))))))
 	 (walk-tree
 	  (function
-	   ;; Recursively walk DATA.  INFO, if non-nil, is a plist
-	   ;; holding contextual information.
-	   (lambda (data info)
+	   (lambda (--data --local)
+	     ;; Recursively walk DATA.  --LOCAL, if non-nil, is
+	     ;; a plist holding contextual information.
 	     (mapc
-	      (lambda (blob)
-		(let ((type (if (stringp blob) 'plain-text (car blob))))
-		  ;; Determine if a recursion into BLOB is possible
-		  ;; and allowed.
+	      (lambda (--blob)
+		(let ((--type (if (stringp --blob) 'plain-text (car --blob))))
+		  ;; Determine if a recursion into --BLOB is
+		  ;; possible and allowed.
 		  (cond
 		   ;; Element or object not exportable.
-		   ((and info (org-export-skip-p blob info)))
-		   ;; Archived headline: skip it.
+		   ((and info (org-export-skip-p --blob info)))
+		   ;; Archived headline: Maybe apply fun on it, but
+		   ;; skip contents.
 		   ((and info
-			 (eq type 'headline)
-			 (and (eq (plist-get info :with-archived-trees)
-				  'headline)
-			      (org-element-get-property :archivedp blob)))
-		    (funcall accumulate-maybe type types fun blob info))
+			 (eq --type 'headline)
+			 (eq (plist-get info :with-archived-trees) 'headline)
+			 (org-element-get-property :archivedp --blob))
+		    (funcall accumulate-maybe --type types fun --blob --local))
 		   ;; At an include keyword: apply mapping to its
 		   ;; contents.
-		   ((and info
-			 (eq type 'keyword)
+		   ((and --local
+			 (eq --type 'keyword)
 			 (string=
-			  (downcase (org-element-get-property :key blob))
+			  (downcase (org-element-get-property :key --blob))
 			  "include"))
-		    (funcall accumulate-maybe type types fun blob info)
-		    (let* ((data (org-export-parse-included-file blob info))
-			   (value (org-element-get-property :value blob))
-			   (file (and (string-match "^\"\\(\\S-+\\)\"" value)
-				      (match-string 1 value))))
+		    (funcall accumulate-maybe --type types fun --blob --local)
+		    (let* ((--data
+			    (org-export-parse-included-file --blob --local))
+			   (--value (org-element-get-property :value --blob))
+			   (--file
+			    (and (string-match "^\"\\(\\S-+\\)\"" --value)
+				 (match-string 1 --value))))
 		      (funcall
-		       walk-tree
-		       data
+		       walk-tree --data
 		       (org-combine-plists
-			info
+			--local
 			;; Store full path of already included files
 			;; to avoid recursive file inclusion.
 			`(:included-files
-			  ,(cons (expand-file-name file)
-				 (plist-get info :included-files))
+			  ,(cons (expand-file-name --file)
+				 (plist-get --local :included-files))
 			  ;; Ensure that a top-level headline in the
 			  ;; included file becomes a direct child of
 			  ;; the current headline in the buffer.
 			  :headline-offset
 			  ,(- (+ (plist-get
-				  (plist-get info :inherited-properties) :level)
-				 (or (plist-get info :headline-offset) 0))
-			      (1- (org-export-get-min-level data info))))))))
-		   ;; Limiting recursion to greater elements, and BLOB
+				  (plist-get --local :inherited-properties)
+				  :level)
+				 (or (plist-get --local :headline-offset) 0))
+			      (1- (org-export-get-min-level
+				   --data --local))))))))
+		   ;; Limiting recursion to greater elements, and --BLOB
 		   ;; isn't one.
-		   ((and (eq type-category 'greater-elements)
-			 (not (memq type org-element-greater-elements)))
-		    (funcall accumulate-maybe type types fun blob info))
-		   ;; Limiting recursion to elements, and BLOB only
+		   ((and (eq --category 'greater-elements)
+			 (not (memq --type org-element-greater-elements)))
+		    (funcall accumulate-maybe --type types fun --blob --local))
+		   ;; Limiting recursion to elements, and --BLOB only
 		   ;; contains objects.
-		   ((and (eq type-category 'elements) (eq type 'paragraph)))
-		   ;; No limitation on recursion, but BLOB hasn't got
-		   ;; a recursive type.
-		   ((and (eq type-category 'objects)
-			 (not (or (eq type 'paragraph)
-				  (memq type org-element-greater-elements)
-				  (memq type org-element-recursive-objects))))
-		    (funcall accumulate-maybe type types fun blob info))
+		   ((and (eq --category 'elements) (eq --type 'paragraph)))
+		   ;; No limitation on recursion, but --BLOB hasn't
+		   ;; got a recursive type.
+		   ((and (eq --category 'objects)
+			 (not (or (eq --type 'paragraph)
+				  (memq --type org-element-greater-elements)
+				  (memq --type org-element-recursive-objects))))
+		    (funcall accumulate-maybe --type types fun --blob --local))
 		   ;; Recursion is possible and allowed: Update local
-		   ;; informations and move into BLOB.
-		   (t (funcall accumulate-maybe type types fun blob info)
+		   ;; information and move into --BLOB.
+		   (t (funcall accumulate-maybe --type types fun --blob --local)
 		      (funcall
-		       walk-tree
-		       blob
-		       (and options (org-export-update-info blob info t)))))))
-	      (org-element-get-contents data))))))
+		       walk-tree --blob
+		       (and info (org-export-update-info --blob --local t)))))))
+	      (org-element-get-contents --data))))))
     (catch 'first-match
-      (funcall walk-tree data options)
+      (funcall walk-tree data info)
       ;; Return value in a proper order.
-      (reverse acc))))
+      (reverse --acc))))
 
 ;; The following functions are internal parts of the parser.  The
 ;; first one, `org-element-parse-elements' acts at the element's
