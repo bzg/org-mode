@@ -1260,7 +1260,8 @@ numbers)."
      data
      'headline
      (lambda (headline info)
-       (let ((relative-level (1- (org-export-get-relative-level blob info))))
+       (let ((relative-level
+	      (1- (org-export-get-relative-level headline info))))
 	 (cons
 	  (org-element-get-property :begin headline)
 	  (loop for n across numbering
