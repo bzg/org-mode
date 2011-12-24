@@ -77,8 +77,9 @@
 
 (defconst org-odt-lib-dir (file-name-directory load-file-name))
 (defconst org-odt-styles-dir
-  (let* ((styles-dir1 (expand-file-name "../etc/styles/" org-odt-lib-dir))
-	 (styles-dir2 (expand-file-name "./etc/styles/" org-odt-lib-dir))
+  (let* ((styles-dir1 (expand-file-name "../etc/styles/" org-odt-lib-dir)) ; git
+	 (styles-dir2 (expand-file-name "./etc/styles/" org-odt-lib-dir)) ; elpa
+	 (styles-dir3 (expand-file-name "./etc/org/" data-directory)) ; system
 	 (styles-dir
 	  (catch 'styles-dir
 	    (mapc (lambda (styles-dir)
@@ -89,7 +90,7 @@
 				(expand-file-name
 				 "OrgOdtStyles.xml" styles-dir)))
 		      (throw 'styles-dir styles-dir)))
-		  (list styles-dir1 styles-dir2))
+		  (list styles-dir1 styles-dir2 styles-dir3))
 	    nil)))
     (unless styles-dir
       (error "Cannot find factory styles file. Check package dir layout"))
@@ -100,7 +101,12 @@ This directory contains the following XML files -
  \"OrgOdtStyles.xml\" and \"OrgOdtContentTemplate.xml\".  These
  XML files are used as the default values of
  `org-export-odt-styles-file' and
- `org-export-odt-content-template-file'.")
+ `org-export-odt-content-template-file'.
+
+The default value of this variable varies depending on the
+version of org in use.  Note that the user could be using org
+from one of: org's own private git repository, GNU ELPA tar or
+standard Emacs.")
 
 (defcustom org-export-odt-schema-dir
   (let ((schema-dir (expand-file-name
@@ -115,10 +121,20 @@ This directory contains the following XML files -
       (prog1 nil (message "Unable to locate OpenDocument schema files."))))
   "Directory that contains OpenDocument schema files.
 
-This directory contains rnc files for OpenDocument schema.  It
-also contains a \"schemas.xml\" that can be added to
-`rng-schema-locating-files' for auto validation of OpenDocument
-XML files.  See also `rng-nxml-auto-validate-flag'."
+This directory contains:
+1. rnc files for OpenDocument schema
+2. a \"schemas.xml\" file that specifies locating rules needed
+   for auto validation of OpenDocument XML files.
+
+Use the customize interface to set this variable.  This ensures
+that `rng-schema-locating-files' is updated and auto-validation
+of OpenDocument XML takes place based on the value
+`rng-nxml-auto-validate-flag'.
+
+The default value of this variable varies depending on the
+version of org in use.  The OASIS schema files are available only
+in the org's private git repository.  It is *not* bundled with
+GNU ELPA tar or standard Emacs distribution."
   :type '(choice
 	  (const :tag "Not set" nil)
 	  (directory :tag "Schema directory"))
