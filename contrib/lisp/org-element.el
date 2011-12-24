@@ -477,8 +477,8 @@ Assume point is at beginning of the inline task."
 			 :contents-begin ,contents-begin
 			 :contents-end ,contents-end
 			 :level ,(nth 1 components)
-			 :with-priority ,(nth 3 components)
-			 :with-tags ,(nth 5 components)
+			 :priority ,(nth 3 components)
+			 :tags ,(nth 5 components)
 			 :todo-keyword ,todo
 			 :todo-type ,todo-type
 			 :post-blank ,(count-lines pos-before-blank end)
