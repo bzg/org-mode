@@ -27,10 +27,7 @@
 
 ;;; Code:
 (eval-when-compile
-  (require 'cl)
-  ;; htmlfontify.el was introduce in Emacs 23.2
-  (when (>= (string-to-number emacs-version) 23.2)
-    (require 'htmlfontify)))
+  (require 'cl))
 (require 'org-lparse)
 
 (defgroup org-export-odt nil
@@ -1195,6 +1192,10 @@ This style is much the same as that of \"OrgFixedWidthBlock\"
 except that the foreground and background colors are set
 according to the default face identified by the `htmlfontify'.")
 
+(defvar hfy-optimisations)
+(declare-function hfy-face-to-style "htmlfontify" (fn))
+(declare-function hfy-face-or-def-to-name "htmlfontify" (fn))
+
 (defun org-odt-hfy-face-to-css (fn)
   "Create custom style for face FN.
 When FN is the default face, use it's foreground and background
@@ -1297,6 +1298,8 @@ value of `org-export-odt-fontify-srcblocks."
 	lines (funcall
 	       (or (and org-export-odt-fontify-srcblocks
 			(or (featurep 'htmlfontify)
+			    ;; htmlfontify.el was introduced in Emacs 23.2
+			    ;; So load it with some caution
 			    (require 'htmlfontify nil t))
 			(fboundp 'htmlfontify-string)
 			'org-odt-format-source-code-or-example-colored)
