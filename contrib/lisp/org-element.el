@@ -262,7 +262,7 @@ CONTENTS is the contents of the element."
 
 Return a list whose car is `footnote-definition' and cdr is
 a plist containing `:label', `:begin' `:end', `:contents-begin',
-`contents-end' and `:post-blank' keywords."
+`:contents-end' and `:post-blank' keywords."
   (save-excursion
     (let* ((f-def (org-footnote-at-definition-p))
 	   (label (car f-def))
@@ -547,8 +547,9 @@ CONTENTS is the contents of inlinetask."
 STRUCT is the structure of the plain list.
 
 Return a list whose car is `item' and cdr is a plist containing
-`:begin', `:end', `:contents-begin', `:contents-end',
-`:checkbox', `:counter', `:tag' and `:hiddenp'.
+`:bullet', `:begin', `:end', `:contents-begin', `:contents-end',
+`:checkbox', `:counter', `:tag', `:raw-tag', `:structure',
+`:hiddenp' and `:post-blank' keywords.
 
 Assume point is at the beginning of the item."
   (save-excursion
@@ -586,13 +587,14 @@ Assume point is at the beginning of the item."
 				(skip-chars-backward " \r\t\n")
 				(forward-line)
 				(point))))
-      ;; Note: CONTENTS-BEGIN and CONTENTS-END can be mixed up in the
-      ;; case of an empty item separated from the next by a blank
-      ;; line.
       (list 'item
 	    `(:bullet ,bullet
 		      :begin ,begin
 		      :end ,end
+		      ;; CONTENTS-BEGIN and CONTENTS-END may be mixed
+		      ;; up in the case of an empty item separated
+		      ;; from the next by a blank line.  Thus, ensure
+		      ;; the former is always the smallest of two.
 		      :contents-begin ,(min contents-begin contents-end)
 		      :contents-end ,(max contents-begin contents-end)
 		      :checkbox ,checkbox
