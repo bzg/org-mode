@@ -2156,14 +2156,28 @@ INFO is the plist used as a communication channel."
     (or (org-element-get-property :inline-definition footnote-reference)
         (cdr (assoc label (plist-get info :footnote-definition-alist))))))
 
-(defun org-export-get-footnote-number (footnote-reference info)
-  "Return footnote number associated to FOOTNOTE-REFERENCE.
+(defun org-export-get-footnote-number (footnote info)
+  "Return number associated to a footnote.
+
+FOOTNOTE is either a footnote reference or a footnote definition.
 INFO is the plist used as a communication channel."
-  (let* ((all-seen (plist-get info :footnote-seen-labels))
-         (label (org-element-get-property :label footnote-reference))
-         ;; Anonymous footnotes are always new footnotes.
-         (seenp (and label (member label all-seen))))
-    (if seenp (length seenp) (1+ (length all-seen)))))
+  (let ((label (org-element-get-property :label footnote)))
+    (if (eq (car footnote) 'footnote-definition)
+	;; If a footnote definition was provided, first search for
+	;; a relative footnote reference, as only footnote references
+	;; can determine the associated ordinal.
+	(org-element-map
+	 (plist-get info :parse-tree) 'footnote-reference
+	 (lambda (foot-ref local)
+	   (when (string= (org-element-get-property :label foot-ref) label)
+	     (let* ((all-seen (plist-get info :footnote-seen-labels))
+		    (seenp (and label (member label all-seen))))
+	       (if seenp (length seenp) (1+ (length all-seen))))))
+	 info 'first-match)
+      (let* ((all-seen (plist-get info :footnote-seen-labels))
+	     ;; Anonymous footnotes are always new footnotes.
+	     (seenp (and label (member label all-seen))))
+	(if seenp (length seenp) (1+ (length all-seen)))))))
 
 
 ;;;; For Headlines
