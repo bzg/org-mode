@@ -195,7 +195,7 @@ Markup for rich export
 * Images and tables::		Tables and Images will be included
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
-* Embedded LaTeX::		LaTeX can be freely used inside Org documents
+* Embedded @LaTeX{}::		@LaTeX{} can be freely used inside Org documents
 
 Structural markup elements
 
@@ -212,7 +212,7 @@ Exporting
 * The export dispatcher::	How to access exporter commands
 * ASCII/Latin-1/UTF-8 export::	Exporting to flat files with encoding
 * HTML export::			Exporting to HTML
-* LaTeX and PDF export::	Exporting to La@TeX{}, and processing to PDF
+* @LaTeX{} and PDF export::	Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::		Exporting to DocBook
 * iCalendar export::		
 
@@ -2047,7 +2047,7 @@ John Wiegley's setup}}
 
 When exporting Org-mode documents, the exporter tries to reflect the
 structure of the document as accurately as possible in the backend.  Since
-export targets like HTML, La@TeX{}, or DocBook allow much richer formatting,
+export targets like HTML, @LaTeX{}, or DocBook allow much richer formatting,
 Org mode has rules on how to prepare text for rich export.  This section
 summarizes the markup rules used in an Org-mode buffer.
 
@@ -2056,7 +2056,7 @@ summarizes the markup rules used in an Org-mode buffer.
 * Images and tables::		Tables and Images will be included
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
-* Embedded LaTeX::		LaTeX can be freely used inside Org documents
+* Embedded @LaTeX{}::		@LaTeX{} can be freely used inside Org documents
 @end menu
 
 @node Structural markup elements, Images and tables, Markup, Markup
@@ -2183,7 +2183,7 @@ the text you can refer to the object with @code{\ref@{tab:basic-data@}}:
    |-----|----|
 @end smallexample
 
-Some backends (HTML, La@TeX{}, and DocBook) allow you to directly include
+Some backends (HTML, @LaTeX{}, and DocBook) allow you to directly include
 images into the exported document.  Org does this, if a link to an image
 files does not have a description part, for example @code{[[./img/a.jpg]]}.
 If you wish to define a caption for the image and maybe a label for internal
@@ -2238,7 +2238,7 @@ look like the fontified Emacs buffer
 To edit the example in a special buffer supporting this language, use
 @kbd{C-c '} to both enter and leave the editing buffer.
 
-@node Include files, Embedded LaTeX, Literal examples, Markup
+@node Include files, Embedded @LaTeX{}, Literal examples, Markup
 @section Include files
 
 During export, you can include the content of another file.  For example, to
@@ -2254,13 +2254,13 @@ language for formatting the contents.  The markup is optional, if it is not
 given, the text will be assumed to be in Org mode format and will be
 processed normally. @kbd{C-c '} will visit the included file.
 
-@node Embedded LaTeX,  , Include files, Markup
-@section Embedded La@TeX{}
+@node Embedded @LaTeX{},  , Include files, Markup
+@section Embedded @LaTeX{}
 
 For scientific notes which need to be able to contain mathematical symbols
-and the occasional formula, Org-mode supports embedding La@TeX{} code into
+and the occasional formula, Org-mode supports embedding @LaTeX{} code into
 its files.  You can directly use TeX-like macros for special symbols, enter
-formulas and entire LaTeX environments.
+formulas and entire @LaTeX{} environments.
 
 @smallexample
 Angles are written as Greek letters \alpha, \beta and \gamma.  The mass if
@@ -2274,7 +2274,7 @@ x=\sqrt@{b@}
 @end smallexample
 @noindent  With
 @uref{http://orgmode.org/manual/LaTeX-fragments.html#LaTeX-fragments,special
-setup}, LaTeX snippets will be included as images when exporting to HTML.
+setup}, @LaTeX{} snippets will be included as images when exporting to HTML.
 
 @seealso{
 @uref{http://orgmode.org/manual/Markup.html#Markup, Chapter 11 of the manual}}
@@ -2283,7 +2283,7 @@ setup}, LaTeX snippets will be included as images when exporting to HTML.
 @chapter Exporting
 
 Org-mode documents can be exported into a variety of other formats: ASCII
-export for inclusion into emails, HTML to publish on the web, La@TeX{}/PDF
+export for inclusion into emails, HTML to publish on the web, @LaTeX{}/PDF
 for beautiful printed documents and DocBook to enter the world of many other
 formats using DocBook tools.  There is also export to iCalendar format so
 that planning information can be incorporated into desktop calendars.
@@ -2293,7 +2293,7 @@ that planning information can be incorporated into desktop calendars.
 * The export dispatcher::	How to access exporter commands
 * ASCII/Latin-1/UTF-8 export::	Exporting to flat files with encoding
 * HTML export::			Exporting to HTML
-* LaTeX and PDF export::	Exporting to La@TeX{}, and processing to PDF
+* @LaTeX{} and PDF export::	Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::		Exporting to DocBook
 * iCalendar export::		
 @end menu
@@ -2324,7 +2324,7 @@ Insert template with export options, see example below.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
 #+LINK_UP:     the ``up'' link of an exported page
 #+LINK_HOME:   the ``home'' link of an exported page
-#+LATEX_HEADER: extra line(s) for the LaTeX header, like \usepackage@{xyz@}
+#+LATEX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
 @end smallexample
 
 @node The export dispatcher, ASCII/Latin-1/UTF-8 export, Export options, Exporting
@@ -2357,7 +2357,7 @@ Like the above commands, but use Latin-1 encoding.
 Like the above commands, but use UTF-8 encoding.
 @end table
 
-@node HTML export, LaTeX and PDF export, ASCII/Latin-1/UTF-8 export, Exporting
+@node HTML export, @LaTeX{} and PDF export, ASCII/Latin-1/UTF-8 export, Exporting
 @section HTML export
 
 @table @kbd
@@ -2380,28 +2380,28 @@ All lines between these markers are exported literally
 #+END_HTML
 @end smallexample
 
-@node LaTeX and PDF export, DocBook export, HTML export, Exporting
-@section La@TeX{} and PDF export
+@node @LaTeX{} and PDF export, DocBook export, HTML export, Exporting
+@section @LaTeX{} and PDF export
 
 @table @kbd
 @item C-c C-e l
-Export as La@TeX{} file @file{myfile.tex}.
+Export as @LaTeX{} file @file{myfile.tex}.
 @item C-c C-e p
-Export as La@TeX{} and then process to PDF.
+Export as @LaTeX{} and then process to PDF.
 @item C-c C-e d
-Export as La@TeX{} and then process to PDF, then open the resulting PDF file.
+Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-By default, the La@TeX{} output uses the class @code{article}.  You can
+By default, the @LaTeX{} output uses the class @code{article}.  You can
 change this by adding an option like @code{#+LaTeX_CLASS: myclass} in your
 file.  The class must be listed in @code{org-export-latex-classes}.
 
-Embedded La@TeX{} as described in @ref{Embedded LaTeX}, will be correctly
-inserted into the La@TeX{} file.  Similarly to the HTML exporter, you can use
+Embedded @LaTeX{} as described in @ref{Embedded @LaTeX{}}, will be correctly
+inserted into the @LaTeX{} file.  Similarly to the HTML exporter, you can use
 @code{#+LaTeX:} and @code{#+BEGIN_LaTeX ... #+END_LaTeX} construct to add
-verbatim LaTeX code.
+verbatim @LaTeX{} code.
 
-@node DocBook export, iCalendar export, LaTeX and PDF export, Exporting
+@node DocBook export, iCalendar export, @LaTeX{} and PDF export, Exporting
 @section DocBook export
 
 @table @kbd
@@ -2410,7 +2410,7 @@ Export as DocBook file.
 @end table
 
 Similarly to the HTML exporter, you can use @code{#+DocBook:} and
-@code{#+BEGIN_DocBook ... #+END_DocBook} construct to add verbatim LaTeX
+@code{#+BEGIN_DocBook ... #+END_DocBook} construct to add verbatim @LaTeX{}
 code.
 
 @node iCalendar export,  , DocBook export, Exporting
