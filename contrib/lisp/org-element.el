@@ -301,8 +301,8 @@ containing `:raw-value', `:title', `:begin', `:end',
 `:pre-blank', `:hiddenp', `:contents-begin' and `:contents-end',
 `:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
 `:scheduled', `:deadline', `:timestamp', `:clock', `:category',
-`:custom-id', `:id', `:quotedp', `:archivedp', `:commentedp',
-`:last-sibling-p' and `:footnote-section-p' keywords.
+`:quotedp', `:archivedp', `:commentedp' and `:footnote-section-p'
+keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in lowercase, the underscores replaced with hyphens
@@ -444,8 +444,14 @@ CONTENTS is the contents of the element."
 
 Return a list whose car is `inlinetask' and cdr is a plist
 containing `:raw-value', `:title', `:begin', `:end', `:hiddenp',
-`:contents-begin' and `:contents-end', `:level', `:with-priority',
-`tags:', `todo-keyword', `todo-type', and `:post-blank' keywords.
+`:contents-begin' and `:contents-end', `:level', `:priority',
+`:raw-value', `:tags', `:todo-keyword', `:todo-type',
+`:scheduled', `:deadline', `:timestamp', `:clock' and
+`:post-blank' keywords.
+
+The plist also contains any property set in the property drawer,
+with its name in lowercase, the underscores replaced with hyphens
+and colons at the beginning (i.e. `:custom-id').
 
 Assume point is at beginning of the inline task."
   (save-excursion
@@ -456,6 +462,23 @@ Assume point is at beginning of the inline task."
 	   (todo-type (and todo
 			   (if (member todo org-done-keywords) 'done 'todo)))
 	   (raw-value (nth 4 components))
+	   (standard-props (let (plist)
+			     (mapc
+			      (lambda (p)
+				(let ((p-name (downcase (car p))))
+				  (while (string-match "_" p-name)
+				    (setq p-name
+					  (replace-match "-" nil nil p-name)))
+				  (setq p-name (intern (concat ":" p-name)))
+				  (setq plist
+					(plist-put plist p-name (cdr p)))))
+			      (org-entry-properties nil 'standard))
+			     plist))
+	   (time-props (org-entry-properties nil 'special "CLOCK"))
+	   (scheduled (cdr (assoc "SCHEDULED" time-props)))
+	   (deadline (cdr (assoc "DEADLINE" time-props)))
+	   (clock (cdr (assoc "CLOCK" time-props)))
+	   (timestamp (cdr (assoc "TIMESTAMP" time-props)))
 	   (title (org-element-parse-secondary-string
 		   raw-value
 		   (cdr (assq 'inlinetask org-element-string-restrictions))))
@@ -481,7 +504,12 @@ Assume point is at beginning of the inline task."
 			 :tags ,(nth 5 components)
 			 :todo-keyword ,todo
 			 :todo-type ,todo-type
+			 :scheduled ,scheduled
+			 :deadline ,deadline
+			 :timestamp ,timestamp
+			 :clock ,clock
 			 :post-blank ,(count-lines pos-before-blank end)
+			 ,@standard-props
 			 ,@(cadr keywords))))))
 
 (defun org-element-inlinetask-interpreter (inlinetask contents)
