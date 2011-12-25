@@ -9463,16 +9463,16 @@ export, @code{:html-scale}) property can be used to adjust the size of the
 preview images.
 
 @node CDLaTeX mode,  , Previewing @LaTeX{} fragments, Embedded @LaTeX{}
-@subsection Using CDLa@TeX{} to enter math
-@cindex CDLa@TeX{}
+@subsection Using CD@LaTeX{} to enter math
+@cindex CD@LaTeX{}
 
-CDLa@TeX{} mode is a minor mode that is normally used in combination with a
+CD@LaTeX{} mode is a minor mode that is normally used in combination with a
 major @LaTeX{} mode like AUC@TeX{} in order to speed-up insertion of
 environments and math templates.  Inside Org mode, you can make use of
-some of the features of CDLa@TeX{} mode.  You need to install
+some of the features of CD@LaTeX{} mode.  You need to install
 @file{cdlatex.el} and @file{texmathp.el} (the latter comes also with
 AUC@TeX{}) from @url{http://www.astro.uva.nl/~dominik/Tools/cdlatex}.
-Don't use CDLa@TeX{} mode itself under Org mode, but use the light
+Don't use CD@LaTeX{} mode itself under Org mode, but use the light
 version @code{org-cdlatex-mode} that comes as part of Org mode.  Turn it
 on for the current buffer with @code{M-x org-cdlatex-mode}, or for all
 Org files with
@@ -9482,7 +9482,7 @@ Org files with
 @end lisp
 
 When this mode is enabled, the following features are present (for more
-details see the documentation of CDLa@TeX{} mode):
+details see the documentation of CD@LaTeX{} mode):
 @itemize @bullet
 @kindex C-c @{
 @item
@@ -14833,7 +14833,7 @@ setup.  See the installation instructions in the file
 @item @file{cdlatex.el} by Carsten Dominik
 @cindex @file{cdlatex.el}
 @cindex Dominik, Carsten
-Org mode can make use of the CDLa@TeX{} package to efficiently enter
+Org mode can make use of the CD@LaTeX{} package to efficiently enter
 @LaTeX{} fragments into Org files.  See @ref{CDLaTeX mode}.
 @item @file{imenu.el} by Ake Stenhoff and Lars Lindberg
 @cindex @file{imenu.el}
