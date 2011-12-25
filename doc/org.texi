@@ -541,7 +541,7 @@ Markup for rich export
 * Include files::               Include additional files into a document
 * Index entries::               Making an index
 * Macro replacement::           Use macros to create complex output
-* Embedded LaTeX::              LaTeX can be freely used inside Org documents
+* Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 
 Structural markup elements
 
@@ -560,8 +560,8 @@ Embedded @LaTeX{}
 
 * Special symbols::             Greek letters and other symbols
 * Subscripts and superscripts::  Simple syntax for raising/lowering text
-* LaTeX fragments::             Complex formulas made easy
-* Previewing LaTeX fragments::  What will this snippet look like?
+* @LaTeX{} fragments::             Complex formulas made easy
+* Previewing @LaTeX{} fragments::  What will this snippet look like?
 * CDLaTeX mode::                Speed up entering of formulas
 
 Exporting
@@ -571,7 +571,7 @@ Exporting
 * The export dispatcher::       How to access exporter commands
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
-* LaTeX and PDF export::        Exporting to @LaTeX{}, and processing to PDF
+* @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * TaskJuggler export::          Exporting to TaskJuggler
@@ -594,11 +594,11 @@ HTML export
 
 @LaTeX{} and PDF export
 
-* LaTeX/PDF export commands::   Which key invokes which commands
+* @LaTeX{}/PDF export commands::
 * Header and sectioning::       Setting up the export file structure
-* Quoting LaTeX code::          Incorporating literal @LaTeX{} code
-* Tables in LaTeX export::      Options for exporting tables to @LaTeX{}
-* Images in LaTeX export::      How to insert figures into @LaTeX{} output
+* Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
+* Tables in @LaTeX{} export::   Options for exporting tables to @LaTeX{}
+* Images in @LaTeX{} export::   How to insert figures into @LaTeX{} output
 * Beamer class export::         Turning the file into a presentation
 
 DocBook export
@@ -751,7 +751,7 @@ Hacking
 Tables and lists in arbitrary syntax
 
 * Radio tables::                Sending and receiving radio tables
-* A LaTeX example::             Step by step, almost a tutorial
+* A @LaTeX{} example::          Step by step, almost a tutorial
 * Translator functions::        Copy and modify
 * Radio lists::                 Doing the same for lists
 
@@ -1829,7 +1829,7 @@ Org mode extends the number-based syntax to @emph{named} footnotes and
 optional inline definition.  Using plain numbers as markers (as
 @file{footnote.el} does) is supported for backward compatibility, but not
 encouraged because of possible conflicts with @LaTeX{} snippets (@pxref{Embedded
-LaTeX}).  Here are the valid references:
+@LaTeX{}}).  Here are the valid references:
 
 @table @code
 @item [1]
@@ -8793,7 +8793,7 @@ summarizes the markup rules used in an Org mode buffer.
 * Include files::               Include additional files into a document
 * Index entries::               Making an index
 * Macro replacement::           Use macros to create complex output
-* Embedded LaTeX::              LaTeX can be freely used inside Org documents
+* Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 @end menu
 
 @node Structural markup elements, Images and tables, Markup, Markup
@@ -9075,16 +9075,16 @@ If the example is source code from a programming language, or any other text
 that can be marked up by font-lock in Emacs, you can ask for the example to
 look like the fontified Emacs buffer@footnote{This works automatically for
 the HTML backend (it requires version 1.34 of the @file{htmlize.el} package,
-which is distributed with Org).  Fontified code chunks in LaTeX can be
+which is distributed with Org).  Fontified code chunks in @LaTeX{} can be
 achieved using either the listings or the
 @url{http://code.google.com/p/minted, minted,} package.  To use listings, turn
 on the variable @code{org-export-latex-listings} and ensure that the listings
-package is included by the LaTeX header (e.g.@: by configuring
+package is included by the @LaTeX{} header (e.g.@: by configuring
 @code{org-export-latex-packages-alist}).  See the listings documentation for
 configuration options, including obtaining colored output.  For minted it is
 necessary to install the program @url{http://pygments.org, pygments}, in
 addition to setting @code{org-export-latex-minted}, ensuring that the minted
-package is included by the LaTeX header, and ensuring that the
+package is included by the @LaTeX{} header, and ensuring that the
 @code{-shell-escape} option is passed to @file{pdflatex} (see
 @code{org-latex-to-pdf-process}).  See the documentation of the variables
 @code{org-export-latex-listings} and @code{org-export-latex-minted} for
@@ -9230,7 +9230,7 @@ an index} for more information.
 
 
 
-@node Macro replacement, Embedded LaTeX, Index entries, Markup
+@node Macro replacement, Embedded @LaTeX{}, Index entries, Markup
 @section Macro replacement
 @cindex macro replacement, during export
 @cindex #+MACRO
@@ -9255,7 +9255,7 @@ Macro expansion takes place during export, and some people use it to
 construct complex HTML code.
 
 
-@node Embedded LaTeX,  , Macro replacement, Markup
+@node Embedded @LaTeX{},  , Macro replacement, Markup
 @section Embedded @LaTeX{}
 @cindex @TeX{} interpretation
 @cindex @LaTeX{} interpretation
@@ -9273,12 +9273,12 @@ readily processed to produce pretty output for a number of export backends.
 @menu
 * Special symbols::             Greek letters and other symbols
 * Subscripts and superscripts::  Simple syntax for raising/lowering text
-* LaTeX fragments::             Complex formulas made easy
-* Previewing LaTeX fragments::  What will this snippet look like?
+* @LaTeX{} fragments::             Complex formulas made easy
+* Previewing @LaTeX{} fragments::  What will this snippet look like?
 * CDLaTeX mode::                Speed up entering of formulas
 @end menu
 
-@node Special symbols, Subscripts and superscripts, Embedded LaTeX, Embedded LaTeX
+@node Special symbols, Subscripts and superscripts, Embedded @LaTeX{}, Embedded @LaTeX{}
 @subsection Special symbols
 @cindex math symbols
 @cindex special symbols
@@ -9325,7 +9325,7 @@ buffer content which remains plain ASCII, but it overlays the UTF-8 character
 for display purposes only.
 @end table
 
-@node Subscripts and superscripts, LaTeX fragments, Special symbols, Embedded LaTeX
+@node Subscripts and superscripts, @LaTeX{} fragments, Special symbols, Embedded @LaTeX{}
 @subsection Subscripts and superscripts
 @cindex subscript
 @cindex superscript
@@ -9363,7 +9363,7 @@ In addition to showing entities as UTF-8 characters, this command will also
 format sub- and superscripts in a WYSIWYM way.
 @end table
 
-@node LaTeX fragments, Previewing LaTeX fragments, Subscripts and superscripts, Embedded LaTeX
+@node @LaTeX{} fragments, Previewing @LaTeX{} fragments, Subscripts and superscripts, Embedded @LaTeX{}
 @subsection @LaTeX{} fragments
 @cindex @LaTeX{} fragments
 
@@ -9422,10 +9422,10 @@ can configure the option @code{org-format-latex-options} to deselect the
 ones you do not wish to have interpreted by the @LaTeX{} converter.
 
 @vindex org-export-with-LaTeX-fragments
-LaTeX processing can be configured with the variable
+@LaTeX{} processing can be configured with the variable
 @code{org-export-with-LaTeX-fragments}.  The default setting is @code{t}
 which means @file{MathJax} for HTML, and no processing for DocBook, ASCII and
-LaTeX backends.  You can also set this variable on a per-file basis using one
+@LaTeX{} backends.  You can also set this variable on a per-file basis using one
 of these lines:
 
 @example
@@ -9435,9 +9435,9 @@ of these lines:
 #+OPTIONS: LaTeX:verbatim   @r{Verbatim export, for jsMath or so}
 @end example
 
-@node Previewing LaTeX fragments, CDLaTeX mode, LaTeX fragments, Embedded LaTeX
-@subsection Previewing LaTeX fragments
-@cindex LaTeX fragments, preview
+@node Previewing @LaTeX{} fragments, CDLaTeX mode, @LaTeX{} fragments, Embedded @LaTeX{}
+@subsection Previewing @LaTeX{} fragments
+@cindex @LaTeX{} fragments, preview
 
 If you have @file{dvipng} installed, @LaTeX{} fragments can be processed to
 produce preview images of the typeset expressions:
@@ -9462,7 +9462,7 @@ some aspects of the preview.  In particular, the @code{:scale} (and for HTML
 export, @code{:html-scale}) property can be used to adjust the size of the
 preview images.
 
-@node CDLaTeX mode,  , Previewing LaTeX fragments, Embedded LaTeX
+@node CDLaTeX mode,  , Previewing @LaTeX{} fragments, Embedded @LaTeX{}
 @subsection Using CDLa@TeX{} to enter math
 @cindex CDLa@TeX{}
 
@@ -9551,7 +9551,7 @@ enabled (default in Emacs 23).
 * The export dispatcher::       How to access exporter commands
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
-* LaTeX and PDF export::        Exporting to @LaTeX{}, and processing to PDF
+* @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::              Exporting to DocBook
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * TaskJuggler export::          Exporting to TaskJuggler
@@ -9642,11 +9642,11 @@ Insert template with export options, see example below.
 #+TEXT:        Some descriptive text to be inserted at the beginning.
 #+TEXT:        Several lines may be given.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
-#+BIND:        lisp-var lisp-val, e.g.@:: org-export-latex-low-levels itemize
+#+BIND:        lisp-var lisp-val, e.g.@:: @code{org-export-latex-low-levels itemize}
                @r{You need to confirm using these, or configure @code{org-export-allow-BIND}}
 #+LINK_UP:     the ``up'' link of an exported page
 #+LINK_HOME:   the ``home'' link of an exported page
-#+LATEX_HEADER: extra line(s) for the LaTeX header, like \usepackage@{xyz@}
+#+LATEX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
 #+EXPORT_SELECT_TAGS:   Tags that select a tree for export
 #+EXPORT_EXCLUDE_TAGS:  Tags that exclude a tree from export
 #+XSLT:        the XSLT stylesheet used by DocBook exporter to generate FO file
@@ -9811,7 +9811,7 @@ Links will be exported in a footnote-like style, with the descriptive part in
 the text and the link in a note before the next heading.  See the variable
 @code{org-export-ascii-links-to-notes} for details and other options.
 
-@node HTML export, LaTeX and PDF export, ASCII/Latin-1/UTF-8 export, Exporting
+@node HTML export, @LaTeX{} and PDF export, ASCII/Latin-1/UTF-8 export, Exporting
 @section HTML export
 @cindex HTML export
 
@@ -10029,7 +10029,7 @@ You could use @code{http} addresses just as well.
 @cindex MathJax
 @cindex dvipng
 
-@LaTeX{} math snippets (@pxref{LaTeX fragments}) can be displayed in two
+@LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be displayed in two
 different ways on HTML pages.  The default is to use the
 @uref{http://www.mathjax.org, MathJax system} which should work out of the
 box with Org mode installation because @code{http://orgmode.org} serves
@@ -10225,16 +10225,16 @@ You can choose default values for these options by customizing the variable
 @code{org-infojs-options}.  If you always want to apply the script to your
 pages, configure the variable @code{org-export-html-use-infojs}.
 
-@node LaTeX and PDF export, DocBook export, HTML export, Exporting
+@node @LaTeX{} and PDF export, DocBook export, HTML export, Exporting
 @section @LaTeX{} and PDF export
 @cindex @LaTeX{} export
 @cindex PDF export
 @cindex Guerry, Bastien
 
 Org mode contains a @LaTeX{} exporter written by Bastien Guerry.  With
-further processing@footnote{The default LaTeX output is designed for
-processing with pdftex or latex.  It includes packages that are not
-compatible with xetex and possibly luatex.  See the variables
+further processing@footnote{The default @LaTeX{} output is designed for
+processing with @code{pdftex} or @LaTeX{}.  It includes packages that are not
+compatible with @code{xetex} and possibly @code{luatex}.  See the variables
 @code{org-export-latex-default-packages-alist} and
 @code{org-export-latex-packages-alist}.}, this backend is also used to
 produce PDF output.  Since the @LaTeX{} output uses @file{hyperref} to
@@ -10244,15 +10244,15 @@ structured in order to be correctly exported: respect the hierarchy of
 sections.
 
 @menu
-* LaTeX/PDF export commands::   Which key invokes which commands
+* @LaTeX{}/PDF export commands::
 * Header and sectioning::       Setting up the export file structure
-* Quoting LaTeX code::          Incorporating literal @LaTeX{} code
-* Tables in LaTeX export::      Options for exporting tables to @LaTeX{}
-* Images in LaTeX export::      How to insert figures into @LaTeX{} output
+* Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
+* Tables in @LaTeX{} export::   Options for exporting tables to @LaTeX{}
+* Images in @LaTeX{} export::   How to insert figures into @LaTeX{} output
 * Beamer class export::         Turning the file into a presentation
 @end menu
 
-@node LaTeX/PDF export commands, Header and sectioning, LaTeX and PDF export, LaTeX and PDF export
+@node @LaTeX{}/PDF export commands, Header and sectioning, @LaTeX{} and PDF export, @LaTeX{} and PDF export
 @subsection @LaTeX{} export commands
 
 @cindex region, active
@@ -10304,13 +10304,13 @@ with a numeric prefix argument.  For example,
 @noindent
 creates two levels of headings and does the rest as items.
 
-@node Header and sectioning, Quoting LaTeX code, LaTeX/PDF export commands, LaTeX and PDF export
+@node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{}/PDF export commands, @LaTeX{} and PDF export
 @subsection Header and sectioning structure
 @cindex @LaTeX{} class
 @cindex @LaTeX{} sectioning structure
 @cindex @LaTeX{} header
-@cindex header, for LaTeX files
-@cindex sectioning structure, for LaTeX export
+@cindex header, for @LaTeX{} files
+@cindex sectioning structure, for @LaTeX{} export
 
 By default, the @LaTeX{} output uses the class @code{article}.
 
@@ -10338,10 +10338,10 @@ can also use @code{#+LATEX_HEADER: \usepackage@{xyz@}} to add lines to the
 header.  See the docstring of @code{org-export-latex-classes} for more
 information.
 
-@node Quoting LaTeX code, Tables in LaTeX export, Header and sectioning, LaTeX and PDF export
+@node Quoting @LaTeX{} code, Tables in @LaTeX{} export, Header and sectioning, @LaTeX{} and PDF export
 @subsection Quoting @LaTeX{} code
 
-Embedded @LaTeX{} as described in @ref{Embedded LaTeX}, will be correctly
+Embedded @LaTeX{} as described in @ref{Embedded @LaTeX{}}, will be correctly
 inserted into the @LaTeX{} file.  This includes simple macros like
 @samp{\ref@{LABEL@}} to create a cross reference to a figure.  Furthermore,
 you can add special code that should only be present in @LaTeX{} export with
@@ -10350,7 +10350,7 @@ the following constructs:
 @cindex #+LaTeX
 @cindex #+BEGIN_LaTeX
 @example
-#+LaTeX: Literal LaTeX code for export
+#+LaTeX: Literal @LaTeX{} code for export
 @end example
 
 @noindent or
@@ -10363,7 +10363,7 @@ All lines between these markers are exported literally
 @end example
 
 
-@node Tables in LaTeX export, Images in LaTeX export, Quoting LaTeX code, LaTeX and PDF export
+@node Tables in @LaTeX{} export, Images in @LaTeX{} export, Quoting @LaTeX{} code, @LaTeX{} and PDF export
 @subsection Tables in @LaTeX{} export
 @cindex tables, in @LaTeX{} export
 
@@ -10400,7 +10400,7 @@ or to specify a multicolumn table with @code{tabulary}
 | ..... | ..... |
 @end example
 
-@node Images in LaTeX export, Beamer class export, Tables in LaTeX export, LaTeX and PDF export
+@node Images in @LaTeX{} export, Beamer class export, Tables in @LaTeX{} export, @LaTeX{} and PDF export
 @subsection Images in @LaTeX{} export
 @cindex images, inline in @LaTeX{}
 @cindex inlining images in @LaTeX{}
@@ -10451,14 +10451,14 @@ will export the image wrapped in a @code{figure*} environment.
 If you need references to a label created in this way, write
 @samp{\ref@{fig:SED-HR4049@}} just like in @LaTeX{}.
 
-@node Beamer class export,  , Images in LaTeX export, LaTeX and PDF export
+@node Beamer class export,  , Images in @LaTeX{} export, @LaTeX{} and PDF export
 @subsection Beamer class export
 
-The LaTeX class @file{beamer} allows production of high quality presentations
-using LaTeX and pdf processing.  Org mode has special support for turning an
+The @LaTeX{} class @file{beamer} allows production of high quality presentations
+using @LaTeX{} and pdf processing.  Org mode has special support for turning an
 Org mode file or tree into a @file{beamer} presentation.
 
-When the LaTeX class for the current buffer (as set with @code{#+LaTeX_CLASS:
+When the @LaTeX{} class for the current buffer (as set with @code{#+LaTeX_CLASS:
 beamer}) or subtree (set with a @code{LaTeX_CLASS} property) is
 @code{beamer}, a special export mode will turn the file or tree into a beamer
 presentation.  Any tree with not-too-deep level nesting should in principle be
@@ -10578,7 +10578,7 @@ Here is a simple example Org document that is intended for beamer export.
 
 For more information, see the documentation on Worg.
 
-@node DocBook export, OpenDocument Text export, LaTeX and PDF export, Exporting
+@node DocBook export, OpenDocument Text export, @LaTeX{} and PDF export, Exporting
 @section DocBook export
 @cindex DocBook export
 @cindex PDF export
@@ -11042,7 +11042,7 @@ The @acronym{ODT} exporter has special support for handling math.
 @node Working with @LaTeX{} math snippets, Working with MathML or OpenDocument formula files, Math formatting in @acronym{ODT} export, Math formatting in @acronym{ODT} export
 @subsubsection Working with @LaTeX{} math snippets
 
-@LaTeX{} math snippets (@pxref{LaTeX fragments}) can be embedded in the ODT
+@LaTeX{} math snippets (@pxref{@LaTeX{} fragments}) can be embedded in the ODT
 document in one of the following ways:
 
 @cindex MathML
@@ -11063,7 +11063,7 @@ the exported document.
 @vindex org-latex-to-mathml-convert-command
 @vindex org-latex-to-mathml-jar-file
 
-You can specify the LaTeX-to-MathML converter by customizing the variables
+You can specify the @LaTeX{}-to-MathML converter by customizing the variables
 @code{org-latex-to-mathml-convert-command} and
 @code{org-latex-to-mathml-jar-file}.
 
@@ -11619,7 +11619,7 @@ resource assignments based on the project outline and the constraints that
 you have provided.
 
 The TaskJuggler exporter is a bit different from other exporters, such as the
-HTML and LaTeX exporters for example, in that it does not export all the
+@code{HTML} and @LaTeX{} exporters for example, in that it does not export all the
 nodes of a document or strictly follow the order of the nodes in the
 document.
 
@@ -12895,7 +12895,7 @@ properties.  In the following example, the @code{:results} header argument
 is set to @code{silent}, meaning the results of execution will not be
 inserted in the buffer, and the @code{:exports} header argument is set to
 @code{code}, meaning only the body of the code block will be
-preserved on export to HTML or LaTeX.
+preserved on export to HTML or @LaTeX{}.
 
 @example
 #+NAME: factorial
@@ -13326,7 +13326,7 @@ such by Org mode.  E.g., @code{:results value raw}.
 Results are assumed to be HTML and will be enclosed in a @code{begin_html}
 block.  E.g., @code{:results value html}.
 @item @code{latex}
-Results assumed to be LaTeX and are enclosed in a @code{begin_latex} block.
+Results assumed to be @LaTeX{} and are enclosed in a @code{begin_latex} block.
 E.g., @code{:results value latex}.
 @item @code{code}
 Result are assumed to be parsable code and are enclosed in a code block.
@@ -13451,7 +13451,7 @@ which the link does not point.
 @subsubsection @code{:exports}
 
 The @code{:exports} header argument specifies what should be included in HTML
-or LaTeX exports of the Org mode file.
+or @LaTeX{} exports of the Org mode file.
 
 @itemize @bullet
 @item @code{code}
@@ -15251,12 +15251,12 @@ can use Org's facilities to edit and structure lists by turning
 
 @menu
 * Radio tables::                Sending and receiving radio tables
-* A LaTeX example::             Step by step, almost a tutorial
+* A @LaTeX{} example::          Step by step, almost a tutorial
 * Translator functions::        Copy and modify
 * Radio lists::                 Doing the same for lists
 @end menu
 
-@node Radio tables, A LaTeX example, Tables in arbitrary syntax, Tables in arbitrary syntax
+@node Radio tables, A @LaTeX{} example, Tables in arbitrary syntax, Tables in arbitrary syntax
 @subsection Radio tables
 @cindex radio tables
 
@@ -15324,7 +15324,7 @@ makes this comment-toggling very easy, in particular if you bind it to a
 key.
 @end itemize
 
-@node A LaTeX example, Translator functions, Radio tables, Tables in arbitrary syntax
+@node A @LaTeX{} example, Translator functions, Radio tables, Tables in arbitrary syntax
 @subsection A @LaTeX{} example of radio tables
 @cindex @LaTeX{}, and Orgtbl mode
 
@@ -15434,7 +15434,7 @@ applied.  Similar to @code{fmt}, functions of two arguments can be
 supplied instead of strings.
 @end table
 
-@node Translator functions, Radio lists, A LaTeX example, Tables in arbitrary syntax
+@node Translator functions, Radio lists, A @LaTeX{} example, Tables in arbitrary syntax
 @subsection Translator functions
 @cindex HTML, and Orgtbl mode
 @cindex translator function
@@ -16182,7 +16182,7 @@ Before I get to this list, a few special mentions are in order:
 @table @i
 @item Bastien Guerry
 Bastien has written a large number of extensions to Org (most of them
-integrated into the core by now), including the LaTeX exporter and the plain
+integrated into the core by now), including the @LaTeX{} exporter and the plain
 list parser.  His support during the early days, when he basically acted as
 co-maintainer, was central to the success of this project.  Bastien also
 invented Worg, helped establishing the Web presence of Org, and sponsors
@@ -16399,7 +16399,7 @@ tweaks and features.
 extension system, added support for mairix, and proposed the mapping API.
 @item
 @i{Ulf Stegemann} created the table to translate special symbols to HTML,
-LaTeX, UTF-8, Latin-1 and ASCII.
+@LaTeX{}, UTF-8, Latin-1 and ASCII.
 @item
 @i{Andy Stewart} contributed code to @file{org-w3m.el}, to copy HTML content
 with links transformation to Org syntax.
@@ -16409,7 +16409,7 @@ chapter about publishing.
 @item
 @i{Jambunathan K} contributed the @acronym{ODT} exporter.
 @item
-@i{Sebastien Vauban} reported many issues with LaTeX and BEAMER export and
+@i{Sebastien Vauban} reported many issues with @LaTeX{} and BEAMER export and
 enabled source code highlighling in Gnus.
 @item
 @i{Stefan Vollmar} organized a video-recorded talk at the
