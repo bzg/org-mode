@@ -2359,9 +2359,9 @@ regexp matching one object can also match the other object.")
   "List of affiliated keywords as strings.")
 
 (defconst org-element-keyword-translation-alist
-  '(("tblname" . "name") ("srcname" . "name") ("resname" . "name")
-    ("source" . "name") ("result" . "results") ("headers" . "header")
-    ("label" . "name"))
+  '(("data" . "name")  ("label" . "name") ("resname" . "name")
+    ("source" . "name") ("srcname" . "name") ("tblname" . "name")
+    ("result" . "results") ("headers" . "header"))
   "Alist of usual translations for keywords.
 The key is the old name and the value the new one.  The property
 holding their value will be named after the translated name.")
