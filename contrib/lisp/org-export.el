@@ -2110,13 +2110,10 @@ Point is at buffer's beginning when BODY is applied."
 ;; additional information relative to a footnote reference.
 
 (defun org-export-collect-footnote-definitions (data info)
-  "Return an alist between footnote label and its definition.
+  "Return an alist between footnote numbers, labels and definitions.
 
 DATA is the parse tree from which definitions are collected.
 INFO is the plist used as a communication channel.
-
-As anonymous footnotes have no label, the key used is that case
-is their beginning position.
 
 Definitions are sorted by order of references.  They either
 appear as Org data \(transcoded with `org-export-data'\) or as
@@ -2126,19 +2123,10 @@ ignored."
   (org-element-map
    data 'footnote-reference
    (lambda (footnote local)
-     (cond
-      ;; Definition already collected.
-      ((not (org-export-footnote-first-reference-p footnote local)) nil)
-      ;; Reference has a label: Use it as a key, and get the
-      ;; corresponding definition.
-      ((org-element-get-property :label footnote)
-       (cons (org-element-get-property :label footnote)
-             (org-export-get-footnote-definition footnote local)))
-      ;; No label: This is an anonymous footnote. Use beginning
-      ;; position as the key and inline definition (a secondary
-      ;; string) as its value.
-      (t (cons (org-element-get-property :begin footnote)
-               (org-element-get-property :inline-definition footnote)))))
+     (when (org-export-footnote-first-reference-p footnote local)
+       (list (org-export-get-footnote-number footnote local)
+	     (org-element-get-property :label footnote)
+	     (org-export-get-footnote-definition footnote local))))
    info))
 
 (defun org-export-footnote-first-reference-p (footnote-reference info)
