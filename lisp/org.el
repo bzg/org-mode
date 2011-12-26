@@ -5723,7 +5723,7 @@ Use `org-reduced-level' to remove the effect of `org-odd-levels'."
 
 (defvar org-font-lock-keywords nil)
 
-(defconst org-property-re (org-re "^[ \t]*\\(:\\([-[:alnum:]_]+\\):\\)[ \t]*\\([^ \t\r\n].*\\)")
+(defconst org-property-re (org-re "^[ \t]*\\(:\\([-[:alnum:]_]+\\+?\\):\\)[ \t]*\\([^ \t\r\n].*\\)")
   "Regular expression matching a property line.")
 
 (defvar org-font-lock-hook nil
