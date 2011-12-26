@@ -1,28 +1,28 @@
-;;; -*- coding: utf-8-unix -*-
-;;; org-drill.el - Self-testing using spaced repetition
-;;;
-;;; Author: Paul Sexton <eeeickythump@gmail.com>
-;;; Version: 2.3.5
-;;; Repository at http://bitbucket.org/eeeickythump/org-drill/
-;;;
-;;;
-;;; Synopsis
-;;; ========
-;;;
-;;; Uses the SuperMemo spaced repetition algorithms to conduct interactive
-;;; "drill sessions", where the material to be remembered is presented to the
-;;; student in random order. The student rates his or her recall of each item,
-;;; and this information is used to schedule the item for later revision.
-;;;
-;;; Each drill session can be restricted to topics in the current buffer
-;;; (default), one or several files, all agenda files, or a subtree. A single
-;;; topic can also be drilled.
-;;;
-;;; Different "card types" can be defined, which present their information to
-;;; the student in different ways.
-;;;
-;;; See the file README.org for more detailed documentation.
-
+;; -*- coding: utf-8-unix -*-
+;; org-drill.el - Self-testing using spaced repetition
+;;
+;; Author: Paul Sexton <eeeickythump@gmail.com>
+;; Version: 2.3.5
+;; Repository at http://bitbucket.org/eeeickythump/org-drill/
+;;
+;; This file is not part of GNU Emacs.
+;;
+;; Synopsis
+;; ========
+;;
+;; Uses the SuperMemo spaced repetition algorithms to conduct interactive
+;; "drill sessions", where the material to be remembered is presented to the
+;; student in random order. The student rates his or her recall of each item,
+;; and this information is used to schedule the item for later revision.
+;;
+;; Each drill session can be restricted to topics in the current buffer
+;; (default), one or several files, all agenda files, or a subtree. A single
+;; topic can also be drilled.
+;;
+;; Different "card types" can be defined, which present their information to
+;; the student in different ways.
+;;
+;; See the file README.org in the repository for more detailed documentation.
 
 (eval-when-compile (require 'cl))
 (eval-when-compile (require 'hi-lock))
@@ -35,7 +35,6 @@
   "Options concerning interactive drill sessions in Org mode (org-drill)."
   :tag "Org-Drill"
   :group 'org-link)
-
 
 
 (defcustom org-drill-question-tag
@@ -52,7 +51,6 @@ by `org-drill'."
 Nil means unlimited."
   :group 'org-drill
   :type '(choice integer (const nil)))
-
 
 
 (defcustom org-drill-maximum-duration
@@ -107,7 +105,7 @@ Possible values:
   but a warning message is printed when each leech item is
   presented."
   :group 'org-drill
-  :type '(choice (const 'warn) (const 'skip) (const nil)))
+  :type '(choice (const warn) (const skip) (const nil)))
 
 
 (defface org-drill-visible-cloze-face
@@ -262,9 +260,9 @@ directory            All files with the extension '.org' in the same
   ;; 'file-no-restriction' means current file/buffer, ignoring restrictions
   ;; 'directory' means all *.org files in current directory
   :group 'org-drill
-  :type '(choice (const 'file) (const 'tree) (const 'file-no-restriction)
-                 (const 'file-with-archives) (const 'agenda)
-                 (const 'agenda-with-archives) (const 'directory)
+  :type '(choice (const file) (const tree) (const file-no-restriction)
+                 (const file-with-archives) (const agenda)
+                 (const agenda-with-archives) (const directory)
                  list))
 
 
@@ -290,7 +288,7 @@ Available choices are:
   adjusting intervals when items are reviewed early or late has been taken
   from SM11, a later version of the algorithm, and included in Simple8."
   :group 'org-drill
-  :type '(choice (const 'sm2) (const 'sm5) (const 'simple8)))
+  :type '(choice (const sm2) (const sm5) (const simple8)))
 
 
 (defcustom org-drill-optimal-factor-matrix
