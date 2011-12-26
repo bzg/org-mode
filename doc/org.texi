@@ -1664,12 +1664,15 @@ new item@footnote{If you do not want the item to be split, customize the
 variable @code{org-M-RET-may-split-line}.}.  If this command is executed
 @emph{before item's body}, the new item is created @emph{before} the current
 one.
+@end table
+
+@table @kbd
 @kindex M-S-@key{RET}
-@item M-S-@key{RET}
+@item M-S-RET
 Insert a new item with a checkbox (@pxref{Checkboxes}).
 @kindex S-@key{down}
-@item S-@key{up}
-@itemx S-@key{down}
+@item S-up
+@itemx S-down
 @cindex shift-selection-mode
 @vindex org-support-shift-select
 @vindex org-list-use-circular-motion
@@ -1681,21 +1684,21 @@ jumping commands like @kbd{C-@key{up}} and @kbd{C-@key{down}} to quite
 similar effect.
 @kindex M-@key{up}
 @kindex M-@key{down}
-@item M-@key{up}
-@itemx M-@key{down}
+@item M-up
+@itemx M-down
 Move the item including subitems up/down@footnote{See
 @code{org-liste-use-circular-motion} for a cyclic behavior.} (swap with
 previous/next item of same indentation).  If the list is ordered, renumbering
 is automatic.
 @kindex M-@key{left}
 @kindex M-@key{right}
-@item M-@key{left}
-@itemx M-@key{right}
+@item M-left
+@itemx M-right
 Decrease/increase the indentation of an item, leaving children alone.
 @kindex M-S-@key{left}
 @kindex M-S-@key{right}
-@item M-S-@key{left}
-@itemx M-S-@key{right}
+@item M-S-left
+@itemx M-S-right
 Decrease/increase the indentation of the item, including subitems.
 Initially, the item tree is selected based on current indentation.  When
 these commands are executed several times in direct succession, the initially
@@ -1738,7 +1741,7 @@ Turn the whole plain list into a subtree of the current heading.  Checkboxes
 (resp. checked).
 @kindex S-@key{left}
 @kindex S-@key{right}
-@item S-@key{left}/@key{right}
+@item S-left/right
 @vindex org-support-shift-select
 This command also cycles bullet styles when the cursor in on the bullet or
 anywhere in an item line, details depending on
