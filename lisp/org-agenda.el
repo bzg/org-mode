@@ -2766,6 +2766,7 @@ This ensures the export commands can easily use it."
 			 'org-agenda-title-append org-agenda-title-append))))
 
 (defvar org-mobile-creating-agendas)
+(defvar org-agenda-write-buffer-name "Agenda View")
 (defun org-write-agenda (file &optional open nosettings)
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
@@ -2788,7 +2789,7 @@ higher priority settings."
 	 (let ((bs (copy-sequence (buffer-string))) beg)
 	   (org-agenda-unmark-filtered-text)
 	   (with-temp-buffer
-	     (rename-buffer "Agenda View" t)
+	     (rename-buffer org-agenda-write-buffer-name t)
 	     (set-buffer-modified-p nil)
 	     (insert bs)
 	     (org-agenda-remove-marked-text 'org-filtered)
