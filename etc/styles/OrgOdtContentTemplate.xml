@@ -54,52 +54,52 @@
     </style:style>
 
     <style:style style:name="OrgTblCell" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
+      <style:table-cell-properties style:vertical-align="top" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
     </style:style>
-    <style:style style:name="OrgTblCellL" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
+    <style:style style:name="OrgTblCellL" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
     </style:style>
-    <style:style style:name="OrgTblCellR" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
+    <style:style style:name="OrgTblCellR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
     </style:style>
-    <style:style style:name="OrgTblCellLR" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
+    <style:style style:name="OrgTblCellLR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
     </style:style>
-    <style:style style:name="OrgTblCellT" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
+    <style:style style:name="OrgTblCellT" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="none" fo:border-right="none"/>
     </style:style>
-    <style:style style:name="OrgTblCellTL" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
+    <style:style style:name="OrgTblCellTL" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
     </style:style>
-    <style:style style:name="OrgTblCellTR" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
+    <style:style style:name="OrgTblCellTR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
     </style:style>
-    <style:style style:name="OrgTblCellTLR" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
+    <style:style style:name="OrgTblCellTLR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="none" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
     </style:style>
-    <style:style style:name="OrgTblCellB" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="none"/>
+    <style:style style:name="OrgTblCellB" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="none"/>
     </style:style>
-    <style:style style:name="OrgTblCellBL" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
+    <style:style style:name="OrgTblCellBL" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
     </style:style>
-    <style:style style:name="OrgTblCellBR" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
+    <style:style style:name="OrgTblCellBR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
     </style:style>
-    <style:style style:name="OrgTblCellBLR" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
+    <style:style style:name="OrgTblCellBLR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="none" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
     </style:style>
-    <style:style style:name="OrgTblCellTB" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="none"/>
+    <style:style style:name="OrgTblCellTB" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="none"/>
     </style:style>
-    <style:style style:name="OrgTblCellTBL" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
+    <style:style style:name="OrgTblCellTBL" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="none"/>
     </style:style>
-    <style:style style:name="OrgTblCellTBR" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
+    <style:style style:name="OrgTblCellTBR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="none" fo:border-right="0.002cm solid #000000"/>
     </style:style>
-    <style:style style:name="OrgTblCellTBLR" style:family="table-cell">
-      <style:table-cell-properties style:vertical-align="middle" fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
+    <style:style style:name="OrgTblCellTBLR" style:family="table-cell" style:parent-style-name="OrgTblCell">
+      <style:table-cell-properties fo:padding="0.159cm" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000"/>
     </style:style>
 
     <!-- BEGIN: Table styles for numbered equations -->
@@ -160,31 +160,31 @@
 
     <!-- Table Cell Styles -->
     <style:style style:name="CustomTableCell" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#ffffff" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#ffffff" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
 	<style:background-image/>
       </style:table-cell-properties>
     </style:style>
 
     <style:style style:name="CustomFirstRowTableCell" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#000080" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#000080" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
 	<style:background-image/>
       </style:table-cell-properties>
     </style:style>
 
     <style:style style:name="CustomLastRowTableCell" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#cccccc" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#cccccc" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
 	<style:background-image/>
       </style:table-cell-properties>
     </style:style>
 
     <style:style style:name="CustomFirstColumnTableCell" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#4d4d4d" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#4d4d4d" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
 	<style:background-image/>
       </style:table-cell-properties>
     </style:style>
 
     <style:style style:name="CustomLastColumnTableCell" style:family="table-cell">
-      <style:table-cell-properties fo:background-color="#cccccc" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
+      <style:table-cell-properties style:vertical-align="top" fo:background-color="#cccccc" fo:padding="0.097cm" fo:border-left="0.002cm solid #000000" fo:border-right="0.002cm solid #000000" fo:border-top="0.002cm solid #000000" fo:border-bottom="0.002cm solid #000000">
 	<style:background-image/>
       </style:table-cell-properties>
     </style:style>
