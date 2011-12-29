@@ -12703,7 +12703,7 @@ ACTION can be `set', `up', `down', or a character."
 (defvar org-agenda-archives-mode)
 (defvar org-map-continue-from nil
   "Position from where mapping should continue.
-Can be set by the action argument to `org-scan-tag's and `org-map-entries'.")
+Can be set by the action argument to `org-scan-tags' and `org-map-entries'.")
 
 (defvar org-scanner-tags nil
   "The current tag list while the tags scanner is running.")
