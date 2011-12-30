@@ -113,7 +113,7 @@ and `org-odt-data-dir'.")
 					       schema-dir))
 			    (file-readable-p
 			     (expand-file-name "schemas.xml" schema-dir)))
-		   (message "Debug (org-odt): Success. Using schema files under %s"
+		   (message "Debug (org-odt): Using schema files under %s"
 			    schema-dir)
 		   (throw 'schema-dir schema-dir))))
 	     org-odt-schema-dir-list)
