@@ -82,57 +82,6 @@ Use this to infer values of `org-odt-styles-dir' and
 Use this to infer values of `org-odt-styles-dir' and
 `org-export-odt-schema-dir'.")
 
-(defconst org-odt-styles-dir-list
-  (list
-   (and org-odt-data-dir
-	(expand-file-name "./styles/" org-odt-data-dir)) ; bail out
-   (eval-when-compile
-     (and (boundp 'org-odt-data-dir) org-odt-data-dir ; see make install
-	  (expand-file-name "./styles/" org-odt-data-dir)))
-   (expand-file-name "../etc/styles/" org-odt-lib-dir) ; git
-   (expand-file-name "./etc/styles/" org-odt-lib-dir)  ; elpa
-   (expand-file-name "./org/" data-directory)	       ; system
-   )
-  "List of directories to search for OpenDocument styles files.
-See `org-odt-styles-dir'.  The entries in this list are populated
-heuristically based on the values of `org-odt-lib-dir' and
-`org-odt-data-dir'.")
-
-(defconst org-odt-styles-dir
-  (let* ((styles-dir
-	  (catch 'styles-dir
-	    (message "Debug (org-odt): Searching for OpenDocument styles files...")
-	    (mapc (lambda (styles-dir)
-		    (when styles-dir
-		      (message "Debug (org-odt): Trying %s..." styles-dir)
-		      (when (and (file-readable-p
-				  (expand-file-name
-				   "OrgOdtContentTemplate.xml" styles-dir))
-				 (file-readable-p
-				  (expand-file-name
-				   "OrgOdtStyles.xml" styles-dir)))
-			(message "Debug (org-odt): Using styles under %s"
-				 styles-dir)
-			(throw 'styles-dir styles-dir))))
-		  org-odt-styles-dir-list)
-	    nil)))
-    (unless styles-dir
-      (error "Error (org-odt): Cannot find factory styles files. Aborting."))
-    styles-dir)
-  "Directory that holds auxiliary XML files used by the ODT exporter.
-
-This directory contains the following XML files -
- \"OrgOdtStyles.xml\" and \"OrgOdtContentTemplate.xml\".  These
- XML files are used as the default values of
- `org-export-odt-styles-file' and
- `org-export-odt-content-template-file'.
-
-The default value of this variable varies depending on the
-version of org in use and is initialized from
-`org-odt-styles-dir-list'.  Note that the user could be using org
-from one of: org's own private git repository, GNU ELPA tar or
-standard Emacs.")
-
 (defconst org-odt-schema-dir-list
   (list
    (and org-odt-data-dir
@@ -215,6 +164,57 @@ Also add it to `rng-schema-locating-files'."
 	'(add-to-list 'rng-schema-locating-files
 		      (expand-file-name "schemas.xml"
 					org-export-odt-schema-dir))))))
+
+(defconst org-odt-styles-dir-list
+  (list
+   (and org-odt-data-dir
+	(expand-file-name "./styles/" org-odt-data-dir)) ; bail out
+   (eval-when-compile
+     (and (boundp 'org-odt-data-dir) org-odt-data-dir ; see make install
+	  (expand-file-name "./styles/" org-odt-data-dir)))
+   (expand-file-name "../etc/styles/" org-odt-lib-dir) ; git
+   (expand-file-name "./etc/styles/" org-odt-lib-dir)  ; elpa
+   (expand-file-name "./org/" data-directory)	       ; system
+   )
+  "List of directories to search for OpenDocument styles files.
+See `org-odt-styles-dir'.  The entries in this list are populated
+heuristically based on the values of `org-odt-lib-dir' and
+`org-odt-data-dir'.")
+
+(defconst org-odt-styles-dir
+  (let* ((styles-dir
+	  (catch 'styles-dir
+	    (message "Debug (org-odt): Searching for OpenDocument styles files...")
+	    (mapc (lambda (styles-dir)
+		    (when styles-dir
+		      (message "Debug (org-odt): Trying %s..." styles-dir)
+		      (when (and (file-readable-p
+				  (expand-file-name
+				   "OrgOdtContentTemplate.xml" styles-dir))
+				 (file-readable-p
+				  (expand-file-name
+				   "OrgOdtStyles.xml" styles-dir)))
+			(message "Debug (org-odt): Using styles under %s"
+				 styles-dir)
+			(throw 'styles-dir styles-dir))))
+		  org-odt-styles-dir-list)
+	    nil)))
+    (unless styles-dir
+      (error "Error (org-odt): Cannot find factory styles files. Aborting."))
+    styles-dir)
+  "Directory that holds auxiliary XML files used by the ODT exporter.
+
+This directory contains the following XML files -
+ \"OrgOdtStyles.xml\" and \"OrgOdtContentTemplate.xml\".  These
+ XML files are used as the default values of
+ `org-export-odt-styles-file' and
+ `org-export-odt-content-template-file'.
+
+The default value of this variable varies depending on the
+version of org in use and is initialized from
+`org-odt-styles-dir-list'.  Note that the user could be using org
+from one of: org's own private git repository, GNU ELPA tar or
+standard Emacs.")
 
 (defvar org-odt-file-extensions
   '(("odt" . "OpenDocument Text")
