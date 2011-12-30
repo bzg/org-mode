@@ -7797,14 +7797,15 @@ The cursor may be at a date in the calendar, or in the Org agenda."
 	   newhead)
       (org-with-remote-undo (marker-buffer marker)
         (with-current-buffer (marker-buffer marker)
-	  (widen)
-	  (goto-char pos)
-	  (org-show-context 'agenda)
-	  (org-show-entry)
-	  (org-cycle-hide-drawers 'children)
-	  (org-clock-in arg)
-	  (setq newhead (org-get-heading)))
-	(org-agenda-change-all-lines newhead hdmarker)))))
+	  (save-restriction
+	    (widen)
+	    (goto-char pos)
+	    (org-show-context 'agenda)
+	    (org-show-entry)
+	    (org-cycle-hide-drawers 'children)
+	    (org-clock-in arg)
+	    (setq newhead (org-get-heading)))
+	  (org-agenda-change-all-lines newhead hdmarker))))))
 
 (defun org-agenda-clock-out ()
   "Stop the currently running clock."
