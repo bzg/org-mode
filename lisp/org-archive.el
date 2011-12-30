@@ -191,13 +191,14 @@ If the cursor is not at a headline when this command is called, try all level
 this heading."
   (interactive "P")
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
-      (let (org-loop-over-headlines-in-active-region)
+      (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
+		    'region-current-level 'region))
+	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
 	 `(progn (setq org-map-continue-from (progn (org-back-to-heading) (point)))
 		 (org-archive-subtree ,find-done))
 	 org-loop-over-headlines-in-active-region
-	 'region
-	 (if (outline-invisible-p) (org-end-of-subtree nil t))))
+	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (if find-done
 	(org-archive-all-done)
       ;; Save all relevant TODO keyword-relatex variables
@@ -357,7 +358,9 @@ The archive sibling is a sibling of the heading with the heading name
 sibling does not exist, it will be created at the end of the subtree."
   (interactive)
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
-      (let (org-loop-over-headlines-in-active-region)
+      (let ((cl (when (eq org-loop-over-headlines-in-active-region 'start-level)
+		  'region-current-level 'region))
+	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
 	 '(progn (setq org-map-continue-from
 		       (progn (org-back-to-heading)
@@ -367,8 +370,7 @@ sibling does not exist, it will be created at the end of the subtree."
 		 (when (org-at-heading-p)
 		   (org-archive-to-archive-sibling)))
 	 org-loop-over-headlines-in-active-region
-	 'region
-	 (if (outline-invisible-p) (org-end-of-subtree nil t))))
+	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (save-restriction
       (widen)
       (let (b e pos leader level)
@@ -469,12 +471,13 @@ With prefix ARG, check all children of current headline and offer tagging
 the children that do not contain any open TODO items."
   (interactive "P")
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
-      (let (org-loop-over-headlines-in-active-region)
+      (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
+		    'region-current-level 'region))
+	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
 	 `(org-toggle-archive-tag ,find-done)
 	 org-loop-over-headlines-in-active-region
-	 'region
-	 (if (outline-invisible-p) (org-end-of-subtree nil t))))
+	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (if find-done
 	(org-archive-all-done 'tag)
       (let (set)
@@ -489,12 +492,13 @@ the children that do not contain any open TODO items."
   "Set the ARCHIVE tag."
   (interactive)
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
-      (let (org-loop-over-headlines-in-active-region)
+      (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
+		    'region-current-level 'region))
+	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
 	 'org-archive-set-tag
 	 org-loop-over-headlines-in-active-region
-	 'region
-	 (if (outline-invisible-p) (org-end-of-subtree nil t))))
+	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (org-toggle-tag org-archive-tag 'on)))
 
 ;;;###autoload
