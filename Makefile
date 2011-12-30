@@ -19,11 +19,10 @@ prefix=/usr/local
 # Where local lisp files go
 lispdir   = $(prefix)/share/emacs/site-lisp
 
-# Where etc files go
-etcdir    = $(lispdir)/../etc
-
-# Where style files go
-stylesdir = $(etcdir)/styles
+# Where data files go
+# $(datadir) contains auxiliary files for use with ODT exporter.
+# See comments under DATAFILES.
+datadir = $(prefix)/share/emacs/etc
 
 # Where info files go
 infodir = $(prefix)/share/info
@@ -35,7 +34,7 @@ infodir = $(prefix)/share/info
 # Using emacs in batch mode.
 
 BATCH=$(EMACS) -batch -q -no-site-file -eval                             			\
-  "(setq load-path (cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path)))"
+  "(setq load-path (cons (expand-file-name \"./lisp/\") (cons \"$(lispdir)\" load-path)))" $(BATCH_EXTRA)
 
 # Specify the byte-compiler for compiling org-mode files
 ELC= $(BATCH) -f batch-byte-compile
@@ -54,7 +53,7 @@ TEXI2HTML = makeinfo --html --number-sections
 TEXI2HTMLNOPSLIT = makeinfo --html --no-split --number-sections
 
 # How to copy the lisp files and elc files to their distination.
-CP = cp -p
+CP = cp -pr
 
 # Name of the program to install info files
 INSTALL_INFO=install-info
@@ -182,7 +181,26 @@ DOCFILES    = doc/org.texi doc/org.pdf doc/org doc/dir \
 CARDFILES   = doc/orgcard.tex doc/orgcard.pdf doc/orgcard_letter.pdf
 TEXIFILES   = doc/org.texi
 INFOFILES   = doc/org
-STYLESFILES = etc/styles/OrgOdtContentTemplate.xml etc/styles/OrgOdtStyles.xml
+
+# etc/styles contains OpenDocument style files.  These files *must* be
+# installed for the ODT exporter to function.  These files are
+# distirbuted with GNU ELPA as well as with stock Emacs >= 24.1.
+
+# contrib/odt/etc/schema contains OpenDocument schema files.  It is
+# *desirable* but *not* mandatory that these files be installed.
+# These files are not distributed with stock Emacs.  This is because
+# the terms under which OASIS distributes these files are not
+# agreeable to FSF.
+
+# BasicODConverter-x.y.z.oxt is a LibreOffice extension for converting
+# OpenDocument files to numerous other formats.  It is similar to
+# unoconv and is implemented in StarBasic.  It is *desirable* but
+# *not* *mandatory* that the converter be installed.  It is
+# distributed under the same license as GNU Emacs.  This file is *not*
+# part of GNU Emacs.
+DATAFILES   = etc/styles \
+	      # contrib/odt/BasicODConverter/BasicODConverter*.oxt \
+	      # contrib/odt/etc/schema \
 
 # Package Manager (ELPA)
 PKG_TAG = $(shell date +%Y%m%d)
@@ -219,7 +237,7 @@ update:
 
 compile: $(ELCFILES0) $(ELCBFILES)
 
-install: install-lisp install-etc
+install: install-lisp install-data
 
 doc: doc/org.html doc/org.pdf doc/orgcard.pdf doc/orgcard_letter.pdf doc/orgguide.pdf doc/orgcard.txt
 
@@ -228,6 +246,15 @@ p:
 
 g:
 	${MAKE} pdf && open doc/orgguide.pdf
+
+# Always force re-compilation of org-odt
+lisp/org-odt.elc: org-odt-data-dir
+org-odt-data-dir:
+
+# Sleight of hand to "hard code" the value of $(datadir) in
+# org-odt.el.  See variables `org-odt-styles-dir-list' and
+# `org-odt-schema-dir-list'.
+install-lisp: BATCH_EXTRA = -eval "(setq org-odt-data-dir (expand-file-name \"$(datadir)\"))"
 
 install-lisp: $(LISPFILES) $(ELCFILES)
 	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
@@ -239,9 +266,9 @@ install-info: $(INFOFILES)
 	$(CP) $(INFOFILES) $(infodir)
 	$(INSTALL_INFO) --infodir=$(infodir) $(INFOFILES)
 
-install-etc: $(STYLESFILES)
-	if [ ! -d $(stylesdir) ]; then $(MKDIR) $(stylesdir); else true; fi ;
-	$(CP) $(STYLESFILES) $(stylesdir)
+install-data: $(DATAFILES)
+	if [ ! -d $(datadir) ]; then $(MKDIR) $(datadir); else true; fi ;
+	$(CP) $(DATAFILES) $(datadir)
 
 autoloads: lisp/org-install.el
 
