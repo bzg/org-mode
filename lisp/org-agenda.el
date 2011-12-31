@@ -2608,16 +2608,8 @@ before running the agenda command."
 	(org-tags-view nil cmd-key)
       (org-agenda nil cmd-key)))
   (set-buffer org-agenda-buffer-name)
-  (princ (org-encode-for-stdout (buffer-string))))
+  (princ (buffer-string)))
 (def-edebug-spec org-batch-agenda (form &rest sexp))
-
-;(defun org-encode-for-stdout (string)
-;  (if (fboundp 'encode-coding-string)
-;      (encode-coding-string string buffer-file-coding-system)
-;    string))
-
-(defun org-encode-for-stdout (string)
-  string)
 
 (defvar org-agenda-info nil)
 
@@ -2670,11 +2662,10 @@ agenda-day   The day in the agenda where this is listed"
 	(setq org-agenda-info
 	      (org-fix-agenda-info (text-properties-at 0 line)))
 	(princ
-	 (org-encode-for-stdout
-	  (mapconcat 'org-agenda-export-csv-mapper
-		     '(org-category txt type todo tags date time extra
-				    priority-letter priority agenda-day)
-		     ",")))
+	 (mapconcat 'org-agenda-export-csv-mapper
+		    '(org-category txt type todo tags date time extra
+				   priority-letter priority agenda-day)
+		    ","))
 	(princ "\n")))))
 (def-edebug-spec org-batch-agenda-csv (form &rest sexp))
 
