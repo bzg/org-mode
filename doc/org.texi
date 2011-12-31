@@ -1241,8 +1241,8 @@ Reveal context around point, showing the current entry, the following heading
 and the hierarchy above.  Useful for working near a location that has been
 exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda command
 (@pxref{Agenda commands}).  With a prefix argument show, on each
-level, all sibling headings.  With double prefix arg, also show the entire
-subtree of the parent.
+level, all sibling headings.  With a double prefix argument, also show the 
+entire subtree of the parent.
 @orgcmd{C-c C-k,show-branches}
 Expose all the headings of the subtree, CONTENT view for just one subtree.
 @orgcmd{C-c C-x b,org-tree-to-indirect-buffer}
@@ -4427,9 +4427,11 @@ off a box while there are unchecked boxes above it.
 
 @table @kbd
 @orgcmd{C-c C-c,org-toggle-checkbox}
-Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
-double prefix argument, set it to @samp{[-]}, which is considered to be an
-intermediate state.
+Toggle checkbox status or (with prefix arg) checkbox presence at point.  
+With a single prefix argument, add an empty checkbox or remove the current
+one@footnote{`C-u C-c C-c' on the @emph{first} item of a list with no checkbox
+will add checkboxes to the rest of the list.}.  With a double prefix argument, set it to @samp{[-]}, which is
+considered to be an intermediate state.
 @orgcmd{C-c C-x C-b,org-toggle-checkbox}
 Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
 double prefix argument, set it to @samp{[-]}, which is considered to be an
