@@ -12424,7 +12424,7 @@ b      Show deadlines and scheduled items before a date.
 a      Show deadlines and scheduled items after a date."
   (interactive "P")
   (let (ans kwd value)
-    (message "Sparse tree: [r]egexp [/]regexp [t]odo [T]odo-kwd [m]atch [p]roperty\n             [d]eadlines [b]efore-date [a]fter-date")
+    (message "Sparse tree: [r]egexp [/]regexp [t]odo [T]odo-kwd [m]atch [p]roperty\n             [d]eadlines [b]efore-date [a]fter-date [D]ates range")
     (setq ans (read-char-exclusive))
     (cond
      ((equal ans ?d)
@@ -12433,6 +12433,8 @@ a      Show deadlines and scheduled items after a date."
       (call-interactively 'org-check-before-date))
      ((equal ans ?a)
       (call-interactively 'org-check-after-date))
+     ((equal ans ?D)
+      (call-interactively 'org-check-dates-range))
      ((equal ans ?t)
       (org-show-todo-tree nil))
      ((equal ans ?T)
@@ -15545,6 +15547,27 @@ days.  If the prefix is a raw \\[universal-argument] prefix, all deadlines are s
 		      (org-time-string-to-time date))))))
     (message "%d entries after %s"
 	     (org-occur regexp nil callback) date)))
+
+(defun org-check-dates-range (start-date end-date)
+  "Check for deadlines/scheduled entries between START-DATE and END-DATE."
+  (interactive (list (org-read-date nil nil nil "Range starts")
+		     (org-read-date nil nil nil "Range end")))
+  (let ((case-fold-search nil)
+	(regexp (concat "\\<\\(" org-deadline-string
+			"\\|" org-scheduled-string
+			"\\) *<\\([^>]+\\)>"))
+	(callback
+	 (lambda ()
+	   (let ((match (match-string 2)))
+	     (and
+	      (not (time-less-p
+		    (org-time-string-to-time match)
+		    (org-time-string-to-time start-date)))
+	      (time-less-p
+	       (org-time-string-to-time match)
+	       (org-time-string-to-time end-date)))))))
+    (message "%d entries between %s and %s"
+	     (org-occur regexp nil callback) start-date end-date)))
 
 (defun org-evaluate-time-range (&optional to-buffer)
   "Evaluate a time range by computing the difference between start and end.
