@@ -18330,7 +18330,7 @@ This command does many different things, depending on context:
 			((equal arg '(4)) nil)
 			((equal "[X]" cbox) "[ ]")
 			(t "[X]"))))
-	  (if firstp
+	  (if (and firstp arg)
 	      ;; If at first item of sub-list, remove check-box from
 	      ;; every item at the same level.
 	      (mapc
@@ -18367,7 +18367,9 @@ This command does many different things, depending on context:
 	      ;; If at first item of sub-list, add check-box to every
 	      ;; item at the same level.
 	      (mapc
-	       (lambda (pos) (org-list-set-checkbox pos new-struct "[ ]"))
+	       (lambda (pos)
+		 (unless (org-list-get-checkbox pos new-struct)
+		   (org-list-set-checkbox pos new-struct "[ ]")))
 	       (org-list-get-all-items
 		(point-at-bol) new-struct (org-list-prevs-alist new-struct)))
 	    (org-list-set-checkbox (point-at-bol) new-struct "[ ]")))
