@@ -18390,19 +18390,12 @@ This command does many different things, depending on context:
 	     block-item)
 	;; Use a light version of `org-toggle-checkbox' to avoid
 	;; computing list structure twice.
-	(let ((new-box (cond
-			((equal arg '(16)) "[-]")
-			((equal arg '(4)) nil)
-			((equal "[X]" cbox) "[ ]")
-			(t "[X]"))))
-	  (if firstp
-	      ;; If at first item of sub-list, remove check-box from
-	      ;; every item at the same level.
-	      (mapc
-	       (lambda (pos) (org-list-set-checkbox pos struct new-box))
-	       (org-list-get-all-items
-		(point-at-bol) struct (org-list-prevs-alist struct)))
-	    (org-list-set-checkbox (point-at-bol) struct new-box)))
+	(org-list-set-checkbox (point-at-bol) struct
+			       (cond
+				((equal arg '(16)) "[-]")
+				((equal arg '(4)) nil)
+				((equal "[X]" cbox) "[ ]")
+				(t "[X]")))
 	;; Replicate `org-list-write-struct', while grabbing a return
 	;; value from `org-list-struct-fix-box'.
 	(org-list-struct-fix-ind struct parents 2)
