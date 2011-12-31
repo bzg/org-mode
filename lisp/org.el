@@ -12760,6 +12760,7 @@ only lines with a TODO keyword are included in the output."
 	(org-overview)
 	(org-remove-occur-highlights))
       (while (re-search-forward re nil t)
+	(setq org-map-continue-from nil)
 	(catch :skip
 	  (setq todo (if (match-end 1) (org-match-string-no-properties 2))
 		tags (if (match-end 4) (org-match-string-no-properties 4)))
