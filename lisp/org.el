@@ -12525,8 +12525,8 @@ starting point when no match is found."
 (defun org-show-context (&optional key)
   "Make sure point and context are visible.
 How much context is shown depends upon the variables
-`org-show-hierarchy-above', `org-show-following-heading'. and
-`org-show-siblings'."
+`org-show-hierarchy-above', `org-show-following-heading',
+`org-show-entry-below' and `org-show-siblings'."
   (let ((heading-p   (org-on-heading-p t))
 	(hierarchy-p (org-get-alist-option org-show-hierarchy-above key))
 	(following-p (org-get-alist-option org-show-following-heading key))
