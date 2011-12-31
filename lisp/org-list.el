@@ -1914,16 +1914,21 @@ Initial position of cursor is restored after the changes."
     (goto-char origin)
     (move-marker origin nil)))
 
-(defun org-list-write-struct (struct parents)
+(defun org-list-write-struct (struct parents &optional old-struct)
   "Correct bullets, checkboxes and indentation in list at point.
+
 STRUCT is the list structure.  PARENTS is the alist of parents,
-as returned by `org-list-parents-alist'."
+as returned by `org-list-parents-alist'.
+
+When non-nil, optional argument OLD-STRUCT is the reference
+structure of the list.  It should be provided whenever STRUCT
+doesn't correspond anymore to the real list in buffer."
   ;; Order of functions matters here: checkboxes and endings need
   ;; correct indentation to be set, and indentation needs correct
   ;; bullets.
   ;;
   ;; 0. Save a copy of structure before modifications
-  (let ((old-struct (copy-tree struct)))
+  (let ((old-struct (or old-struct (copy-tree struct))))
     ;; 1. Set a temporary, but coherent with PARENTS, indentation in
     ;;    order to get items endings and bullets properly
     (org-list-struct-fix-ind struct parents 2)
