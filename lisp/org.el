@@ -11191,194 +11191,201 @@ For calling through lisp, arg is also interpreted in the following way:
 \"WAITING\"         -> switch to the specified keyword, but only if it
                      really is a member of `org-todo-keywords'."
   (interactive "P")
-  (if (equal arg '(16)) (setq arg 'nextset))
-  (let ((org-blocker-hook org-blocker-hook)
-	(case-fold-search nil))
-    (when (equal arg '(64))
-      (setq arg nil org-blocker-hook nil))
-    (when (and org-blocker-hook
-	       (or org-inhibit-blocking
-		   (org-entry-get nil "NOBLOCKING")))
-      (setq org-blocker-hook nil))
-    (save-excursion
-      (catch 'exit
-	(org-back-to-heading t)
-	(if (looking-at org-outline-regexp) (goto-char (1- (match-end 0))))
-	(or (looking-at (concat " +" org-todo-regexp "\\( +\\|[ \t]*$\\)"))
-	    (looking-at "\\(?: *\\|[ \t]*$\\)"))
-	(let* ((match-data (match-data))
-	       (startpos (point-at-bol))
-	       (logging (save-match-data (org-entry-get nil "LOGGING" t t)))
-	       (org-log-done org-log-done)
-	       (org-log-repeat org-log-repeat)
-	       (org-todo-log-states org-todo-log-states)
-	       (org-inhibit-logging
-		(if (equal arg 0)
-		    (progn (setq arg nil) 'note) org-inhibit-logging))
-	       (this (match-string 1))
-	       (hl-pos (match-beginning 0))
-	       (head (org-get-todo-sequence-head this))
-	       (ass (assoc head org-todo-kwd-alist))
-	       (interpret (nth 1 ass))
-	       (done-word (nth 3 ass))
-	       (final-done-word (nth 4 ass))
-	       (last-state (or this ""))
-	       (completion-ignore-case t)
-	       (member (member this org-todo-keywords-1))
-	       (tail (cdr member))
-	       (state (cond
-		       ((and org-todo-key-trigger
-			     (or (and (equal arg '(4))
-				      (eq org-use-fast-todo-selection 'prefix))
-				 (and (not arg) org-use-fast-todo-selection
-				      (not (eq org-use-fast-todo-selection
-					       'prefix)))))
-			;; Use fast selection
-			(org-fast-todo-selection))
-		       ((and (equal arg '(4))
-			     (or (not org-use-fast-todo-selection)
-				 (not org-todo-key-trigger)))
-			;; Read a state with completion
-			(org-icompleting-read
-			 "State: " (mapcar (lambda(x) (list x))
-					   org-todo-keywords-1)
-			 nil t))
-		       ((eq arg 'right)
-			(if this
-			    (if tail (car tail) nil)
-			  (car org-todo-keywords-1)))
-		       ((eq arg 'left)
-			(if (equal member org-todo-keywords-1)
-			    nil
+  (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
+      (let (org-loop-over-headlines-in-active-region)
+	(org-map-entries
+	 `(org-todo ,arg)
+	 org-loop-over-headlines-in-active-region
+	 'region
+	 (if (outline-invisible-p) (org-end-of-subtree nil t))))
+    (if (equal arg '(16)) (setq arg 'nextset))
+    (let ((org-blocker-hook org-blocker-hook)
+	  (case-fold-search nil))
+      (when (equal arg '(64))
+	(setq arg nil org-blocker-hook nil))
+      (when (and org-blocker-hook
+		 (or org-inhibit-blocking
+		     (org-entry-get nil "NOBLOCKING")))
+	(setq org-blocker-hook nil))
+      (save-excursion
+	(catch 'exit
+	  (org-back-to-heading t)
+	  (if (looking-at org-outline-regexp) (goto-char (1- (match-end 0))))
+	  (or (looking-at (concat " +" org-todo-regexp "\\( +\\|[ \t]*$\\)"))
+	      (looking-at "\\(?: *\\|[ \t]*$\\)"))
+	  (let* ((match-data (match-data))
+		 (startpos (point-at-bol))
+		 (logging (save-match-data (org-entry-get nil "LOGGING" t t)))
+		 (org-log-done org-log-done)
+		 (org-log-repeat org-log-repeat)
+		 (org-todo-log-states org-todo-log-states)
+		 (org-inhibit-logging
+		  (if (equal arg 0)
+		      (progn (setq arg nil) 'note) org-inhibit-logging))
+		 (this (match-string 1))
+		 (hl-pos (match-beginning 0))
+		 (head (org-get-todo-sequence-head this))
+		 (ass (assoc head org-todo-kwd-alist))
+		 (interpret (nth 1 ass))
+		 (done-word (nth 3 ass))
+		 (final-done-word (nth 4 ass))
+		 (last-state (or this ""))
+		 (completion-ignore-case t)
+		 (member (member this org-todo-keywords-1))
+		 (tail (cdr member))
+		 (state (cond
+			 ((and org-todo-key-trigger
+			       (or (and (equal arg '(4))
+					(eq org-use-fast-todo-selection 'prefix))
+				   (and (not arg) org-use-fast-todo-selection
+					(not (eq org-use-fast-todo-selection
+						 'prefix)))))
+			  ;; Use fast selection
+			  (org-fast-todo-selection))
+			 ((and (equal arg '(4))
+			       (or (not org-use-fast-todo-selection)
+				   (not org-todo-key-trigger)))
+			  ;; Read a state with completion
+			  (org-icompleting-read
+			   "State: " (mapcar (lambda(x) (list x))
+					     org-todo-keywords-1)
+			   nil t))
+			 ((eq arg 'right)
 			  (if this
-			      (nth (- (length org-todo-keywords-1)
-				      (length tail) 2)
-				   org-todo-keywords-1)
-			    (org-last org-todo-keywords-1))))
-		       ((and (eq org-use-fast-todo-selection t) (equal arg '(4))
-			     (setq arg nil))) ; hack to fall back to cycling
-		       (arg
-			;; user or caller requests a specific state
-			(cond
-			 ((equal arg "") nil)
-			 ((eq arg 'none) nil)
-			 ((eq arg 'done) (or done-word (car org-done-keywords)))
-			 ((eq arg 'nextset)
-			  (or (car (cdr (member head org-todo-heads)))
-			      (car org-todo-heads)))
-			 ((eq arg 'previousset)
-			  (let ((org-todo-heads (reverse org-todo-heads)))
+			      (if tail (car tail) nil)
+			    (car org-todo-keywords-1)))
+			 ((eq arg 'left)
+			  (if (equal member org-todo-keywords-1)
+			      nil
+			    (if this
+				(nth (- (length org-todo-keywords-1)
+					(length tail) 2)
+				     org-todo-keywords-1)
+			      (org-last org-todo-keywords-1))))
+			 ((and (eq org-use-fast-todo-selection t) (equal arg '(4))
+			       (setq arg nil))) ; hack to fall back to cycling
+			 (arg
+			  ;; user or caller requests a specific state
+			  (cond
+			   ((equal arg "") nil)
+			   ((eq arg 'none) nil)
+			   ((eq arg 'done) (or done-word (car org-done-keywords)))
+			   ((eq arg 'nextset)
 			    (or (car (cdr (member head org-todo-heads)))
-				(car org-todo-heads))))
-			 ((car (member arg org-todo-keywords-1)))
-			 ((stringp arg)
-			  (error "State `%s' not valid in this file" arg))
-			 ((nth (1- (prefix-numeric-value arg))
-			       org-todo-keywords-1))))
-		       ((null member) (or head (car org-todo-keywords-1)))
-		       ((equal this final-done-word) nil) ;; -> make empty
-		       ((null tail) nil) ;; -> first entry
-		       ((memq interpret '(type priority))
-			(if (eq this-command last-command)
-			    (car tail)
-			  (if (> (length tail) 0)
-			      (or done-word (car org-done-keywords))
-			    nil)))
-		       (t
-			(car tail))))
-	       (state (or
- 		       (run-hook-with-args-until-success
-			'org-todo-get-default-hook state last-state)
- 		       state))
-	       (next (if state (concat " " state " ") " "))
-	       (change-plist (list :type 'todo-state-change :from this :to state
-				   :position startpos))
-	       dolog now-done-p)
-	  (when org-blocker-hook
+				(car org-todo-heads)))
+			   ((eq arg 'previousset)
+			    (let ((org-todo-heads (reverse org-todo-heads)))
+			      (or (car (cdr (member head org-todo-heads)))
+				  (car org-todo-heads))))
+			   ((car (member arg org-todo-keywords-1)))
+			   ((stringp arg)
+			    (error "State `%s' not valid in this file" arg))
+			   ((nth (1- (prefix-numeric-value arg))
+				 org-todo-keywords-1))))
+			 ((null member) (or head (car org-todo-keywords-1)))
+			 ((equal this final-done-word) nil) ;; -> make empty
+			 ((null tail) nil) ;; -> first entry
+			 ((memq interpret '(type priority))
+			  (if (eq this-command last-command)
+			      (car tail)
+			    (if (> (length tail) 0)
+				(or done-word (car org-done-keywords))
+			      nil)))
+			 (t
+			  (car tail))))
+		 (state (or
+			 (run-hook-with-args-until-success
+			  'org-todo-get-default-hook state last-state)
+			 state))
+		 (next (if state (concat " " state " ") " "))
+		 (change-plist (list :type 'todo-state-change :from this :to state
+				     :position startpos))
+		 dolog now-done-p)
+	    (when org-blocker-hook
+	      (setq org-last-todo-state-is-todo
+		    (not (member this org-done-keywords)))
+	      (unless (save-excursion
+			(save-match-data
+			  (org-with-wide-buffer
+			   (run-hook-with-args-until-failure
+			    'org-blocker-hook change-plist))))
+		(if (org-called-interactively-p 'interactive)
+		    (error "TODO state change from %s to %s blocked" this state)
+		  ;; fail silently
+		  (message "TODO state change from %s to %s blocked" this state)
+		  (throw 'exit nil))))
+	    (store-match-data match-data)
+	    (replace-match next t t)
+	    (unless (pos-visible-in-window-p hl-pos)
+	      (message "TODO state changed to %s" (org-trim next)))
+	    (unless head
+	      (setq head (org-get-todo-sequence-head state)
+		    ass (assoc head org-todo-kwd-alist)
+		    interpret (nth 1 ass)
+		    done-word (nth 3 ass)
+		    final-done-word (nth 4 ass)))
+	    (when (memq arg '(nextset previousset))
+	      (message "Keyword-Set %d/%d: %s"
+		       (- (length org-todo-sets) -1
+			  (length (memq (assoc state org-todo-sets) org-todo-sets)))
+		       (length org-todo-sets)
+		       (mapconcat 'identity (assoc state org-todo-sets) " ")))
 	    (setq org-last-todo-state-is-todo
-		  (not (member this org-done-keywords)))
-	    (unless (save-excursion
-		      (save-match-data
-			(org-with-wide-buffer
-			 (run-hook-with-args-until-failure
-			  'org-blocker-hook change-plist))))
-	      (if (org-called-interactively-p 'interactive)
-		  (error "TODO state change from %s to %s blocked" this state)
-		;; fail silently
-		(message "TODO state change from %s to %s blocked" this state)
-		(throw 'exit nil))))
-	  (store-match-data match-data)
-	  (replace-match next t t)
-	  (unless (pos-visible-in-window-p hl-pos)
-	    (message "TODO state changed to %s" (org-trim next)))
-	  (unless head
-	    (setq head (org-get-todo-sequence-head state)
-		  ass (assoc head org-todo-kwd-alist)
-		  interpret (nth 1 ass)
-		  done-word (nth 3 ass)
-		  final-done-word (nth 4 ass)))
-	  (when (memq arg '(nextset previousset))
-	    (message "Keyword-Set %d/%d: %s"
-		     (- (length org-todo-sets) -1
-			(length (memq (assoc state org-todo-sets) org-todo-sets)))
-		     (length org-todo-sets)
-		     (mapconcat 'identity (assoc state org-todo-sets) " ")))
-	  (setq org-last-todo-state-is-todo
-		(not (member state org-done-keywords)))
-	  (setq now-done-p (and (member state org-done-keywords)
-				(not (member this org-done-keywords))))
-	  (and logging (org-local-logging logging))
-	  (when (and (or org-todo-log-states org-log-done)
-		     (not (eq org-inhibit-logging t))
-		     (not (memq arg '(nextset previousset))))
-	    ;; we need to look at recording a time and note
-	    (setq dolog (or (nth 1 (assoc state org-todo-log-states))
-			    (nth 2 (assoc this org-todo-log-states))))
-	    (if (and (eq dolog 'note) (eq org-inhibit-logging 'note))
-		(setq dolog 'time))
-	    (when (and state
-		       (member state org-not-done-keywords)
-		       (not (member this org-not-done-keywords)))
-	      ;; This is now a todo state and was not one before
-	      ;; If there was a CLOSED time stamp, get rid of it.
-	      (org-add-planning-info nil nil 'closed))
-	    (when (and now-done-p org-log-done)
-	      ;; It is now done, and it was not done before
-	      (org-add-planning-info 'closed (org-current-effective-time))
-	      (if (and (not dolog) (eq 'note org-log-done))
-		  (org-add-log-setup 'done state this 'findpos 'note)))
-	    (when (and state dolog)
-	      ;; This is a non-nil state, and we need to log it
-	      (org-add-log-setup 'state state this 'findpos dolog)))
-	  ;; Fixup tag positioning
-	  (org-todo-trigger-tag-changes state)
-	  (and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
-	  (when org-provide-todo-statistics
-	    (org-update-parent-todo-statistics))
-	  (run-hooks 'org-after-todo-state-change-hook)
-	  (if (and arg (not (member state org-done-keywords)))
-	      (setq head (org-get-todo-sequence-head state)))
-	  (put-text-property (point-at-bol) (point-at-eol) 'org-todo-head head)
-	  ;; Do we need to trigger a repeat?
-	  (when now-done-p
-	    (when (boundp 'org-agenda-headline-snapshot-before-repeat)
-	      ;; This is for the agenda, take a snapshot of the headline.
-	      (save-match-data
-		(setq org-agenda-headline-snapshot-before-repeat
-		      (org-get-heading))))
-	    (org-auto-repeat-maybe state))
-	  ;; Fixup cursor location if close to the keyword
-	  (if (and (outline-on-heading-p)
-		   (not (bolp))
-		   (save-excursion (beginning-of-line 1)
-				   (looking-at org-todo-line-regexp))
-		   (< (point) (+ 2 (or (match-end 2) (match-end 1)))))
-	      (progn
-		(goto-char (or (match-end 2) (match-end 1)))
-		(and (looking-at " ") (just-one-space))))
-	  (when org-trigger-hook
-	    (save-excursion
-	      (run-hook-with-args 'org-trigger-hook change-plist))))))))
+		  (not (member state org-done-keywords)))
+	    (setq now-done-p (and (member state org-done-keywords)
+				  (not (member this org-done-keywords))))
+	    (and logging (org-local-logging logging))
+	    (when (and (or org-todo-log-states org-log-done)
+		       (not (eq org-inhibit-logging t))
+		       (not (memq arg '(nextset previousset))))
+	      ;; we need to look at recording a time and note
+	      (setq dolog (or (nth 1 (assoc state org-todo-log-states))
+			      (nth 2 (assoc this org-todo-log-states))))
+	      (if (and (eq dolog 'note) (eq org-inhibit-logging 'note))
+		  (setq dolog 'time))
+	      (when (and state
+			 (member state org-not-done-keywords)
+			 (not (member this org-not-done-keywords)))
+		;; This is now a todo state and was not one before
+		;; If there was a CLOSED time stamp, get rid of it.
+		(org-add-planning-info nil nil 'closed))
+	      (when (and now-done-p org-log-done)
+		;; It is now done, and it was not done before
+		(org-add-planning-info 'closed (org-current-effective-time))
+		(if (and (not dolog) (eq 'note org-log-done))
+		    (org-add-log-setup 'done state this 'findpos 'note)))
+	      (when (and state dolog)
+		;; This is a non-nil state, and we need to log it
+		(org-add-log-setup 'state state this 'findpos dolog)))
+	    ;; Fixup tag positioning
+	    (org-todo-trigger-tag-changes state)
+	    (and org-auto-align-tags (not org-setting-tags) (org-set-tags nil t))
+	    (when org-provide-todo-statistics
+	      (org-update-parent-todo-statistics))
+	    (run-hooks 'org-after-todo-state-change-hook)
+	    (if (and arg (not (member state org-done-keywords)))
+		(setq head (org-get-todo-sequence-head state)))
+	    (put-text-property (point-at-bol) (point-at-eol) 'org-todo-head head)
+	    ;; Do we need to trigger a repeat?
+	    (when now-done-p
+	      (when (boundp 'org-agenda-headline-snapshot-before-repeat)
+		;; This is for the agenda, take a snapshot of the headline.
+		(save-match-data
+		  (setq org-agenda-headline-snapshot-before-repeat
+			(org-get-heading))))
+	      (org-auto-repeat-maybe state))
+	    ;; Fixup cursor location if close to the keyword
+	    (if (and (outline-on-heading-p)
+		     (not (bolp))
+		     (save-excursion (beginning-of-line 1)
+				     (looking-at org-todo-line-regexp))
+		     (< (point) (+ 2 (or (match-end 2) (match-end 1)))))
+		(progn
+		  (goto-char (or (match-end 2) (match-end 1)))
+		  (and (looking-at " ") (just-one-space))))
+	    (when org-trigger-hook
+	      (save-excursion
+		(run-hook-with-args 'org-trigger-hook change-plist)))))))))
 
 (defun org-block-todo-from-children-or-siblings-or-parent (change-plist)
   "Block turning an entry into a TODO, using the hierarchy.
