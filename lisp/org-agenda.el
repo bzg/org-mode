@@ -1901,7 +1901,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c\C-xp" 'org-agenda-set-property)
 (org-defkey org-agenda-mode-map "q" 'org-agenda-quit)
 (org-defkey org-agenda-mode-map "x" 'org-agenda-exit)
-(org-defkey org-agenda-mode-map "\C-x\C-w" 'org-write-agenda)
+(org-defkey org-agenda-mode-map "\C-x\C-w" 'org-agenda-write)
 (org-defkey org-agenda-mode-map "\C-x\C-s" 'org-save-all-org-buffers)
 (org-defkey org-agenda-mode-map "s" 'org-save-all-org-buffers)
 (org-defkey org-agenda-mode-map "P" 'org-agenda-show-priority)
@@ -2015,7 +2015,7 @@ The following commands are available:
       :keys "v A"]
      "--"
      ["Remove Restriction" org-agenda-remove-restriction-lock org-agenda-restrict])
-    ["Write view to file" org-write-agenda t]
+    ["Write view to file" org-agenda-write t]
     ["Rebuild buffer" org-agenda-redo t]
     ["Save all Org-mode Buffers" org-save-all-org-buffers t]
     "--"
@@ -2750,7 +2750,7 @@ This ensures the export commands can easily use it."
 	  (while files
 	    (org-eval-in-environment (append org-agenda-exporter-settings
 					     opts pars)
-	      (org-write-agenda (expand-file-name (pop files) dir) nil t)))
+	      (org-agenda-write (expand-file-name (pop files) dir) nil t)))
 	  (and (get-buffer org-agenda-buffer-name)
 	       (kill-buffer org-agenda-buffer-name)))))))
 (def-edebug-spec org-batch-store-agenda-views (&rest sexp))
@@ -2767,7 +2767,7 @@ This ensures the export commands can easily use it."
 
 (defvar org-mobile-creating-agendas)
 (defvar org-agenda-write-buffer-name "Agenda View")
-(defun org-write-agenda (file &optional open nosettings)
+(defun org-agenda-write (file &optional open nosettings)
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
 HTML (.html or .htm) or Postscript (.ps) is produced.
