@@ -192,7 +192,7 @@ this heading."
   (interactive "P")
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
-		    'region-current-level 'region))
+		    'region-start-level 'region))
 	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
 	 `(progn (setq org-map-continue-from (progn (org-back-to-heading) (point)))
@@ -359,7 +359,7 @@ sibling does not exist, it will be created at the end of the subtree."
   (interactive)
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (when (eq org-loop-over-headlines-in-active-region 'start-level)
-		  'region-current-level 'region))
+		  'region-start-level 'region))
 	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
 	 '(progn (setq org-map-continue-from
@@ -472,7 +472,7 @@ the children that do not contain any open TODO items."
   (interactive "P")
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
-		    'region-current-level 'region))
+		    'region-start-level 'region))
 	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
 	 `(org-toggle-archive-tag ,find-done)
@@ -493,7 +493,7 @@ the children that do not contain any open TODO items."
   (interactive)
   (if (and (org-region-active-p) org-loop-over-headlines-in-active-region)
       (let ((cl (if (eq org-loop-over-headlines-in-active-region 'start-level)
-		    'region-current-level 'region))
+		    'region-start-level 'region))
 	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
 	 'org-archive-set-tag
