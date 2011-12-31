@@ -9634,10 +9634,11 @@ Insert template with export options, see example below.
 @vindex user-full-name
 @vindex user-mail-address
 @vindex org-export-default-language
+@vindex org-export-date-timestamp-format
 @example
 #+TITLE:       the title to be shown (default is the buffer name)
 #+AUTHOR:      the author (default taken from @code{user-full-name})
-#+DATE:        a date, fixed, or a format string for @code{format-time-string}
+#+DATE:        a date, an Org timestamp@footnote{@code{org-export-date-timestamp-format} defines how this timestamp will be exported.}, or a format string for @code{format-time-string}
 #+EMAIL:       his/her email address (default from @code{user-mail-address})
 #+DESCRIPTION: the page description, e.g.@: for the XHTML meta tag
 #+KEYWORDS:    the page keywords, e.g.@: for the XHTML meta tag
@@ -9656,8 +9657,8 @@ Insert template with export options, see example below.
 @end example
 
 @noindent
-The OPTIONS line is a compact@footnote{If you want to configure many options
-this way, you can use several OPTIONS lines.} form to specify export
+The @code{#+OPTIONS} line is a compact@footnote{If you want to configure many options
+this way, you can use several @code{#+OPTIONS} lines.} form to specify export
 settings.  Here you can:
 @cindex headline levels
 @cindex section-numbers

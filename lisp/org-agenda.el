@@ -1901,7 +1901,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c\C-xp" 'org-agenda-set-property)
 (org-defkey org-agenda-mode-map "q" 'org-agenda-quit)
 (org-defkey org-agenda-mode-map "x" 'org-agenda-exit)
-(org-defkey org-agenda-mode-map "\C-x\C-w" 'org-write-agenda)
+(org-defkey org-agenda-mode-map "\C-x\C-w" 'org-agenda-write)
 (org-defkey org-agenda-mode-map "\C-x\C-s" 'org-save-all-org-buffers)
 (org-defkey org-agenda-mode-map "s" 'org-save-all-org-buffers)
 (org-defkey org-agenda-mode-map "P" 'org-agenda-show-priority)
@@ -2015,7 +2015,7 @@ The following commands are available:
       :keys "v A"]
      "--"
      ["Remove Restriction" org-agenda-remove-restriction-lock org-agenda-restrict])
-    ["Write view to file" org-write-agenda t]
+    ["Write view to file" org-agenda-write t]
     ["Rebuild buffer" org-agenda-redo t]
     ["Save all Org-mode Buffers" org-save-all-org-buffers t]
     "--"
@@ -2608,16 +2608,8 @@ before running the agenda command."
 	(org-tags-view nil cmd-key)
       (org-agenda nil cmd-key)))
   (set-buffer org-agenda-buffer-name)
-  (princ (org-encode-for-stdout (buffer-string))))
+  (princ (buffer-string)))
 (def-edebug-spec org-batch-agenda (form &rest sexp))
-
-;(defun org-encode-for-stdout (string)
-;  (if (fboundp 'encode-coding-string)
-;      (encode-coding-string string buffer-file-coding-system)
-;    string))
-
-(defun org-encode-for-stdout (string)
-  string)
 
 (defvar org-agenda-info nil)
 
@@ -2670,11 +2662,10 @@ agenda-day   The day in the agenda where this is listed"
 	(setq org-agenda-info
 	      (org-fix-agenda-info (text-properties-at 0 line)))
 	(princ
-	 (org-encode-for-stdout
-	  (mapconcat 'org-agenda-export-csv-mapper
-		     '(org-category txt type todo tags date time extra
-				    priority-letter priority agenda-day)
-		     ",")))
+	 (mapconcat 'org-agenda-export-csv-mapper
+		    '(org-category txt type todo tags date time extra
+				   priority-letter priority agenda-day)
+		    ","))
 	(princ "\n")))))
 (def-edebug-spec org-batch-agenda-csv (form &rest sexp))
 
@@ -2750,7 +2741,7 @@ This ensures the export commands can easily use it."
 	  (while files
 	    (org-eval-in-environment (append org-agenda-exporter-settings
 					     opts pars)
-	      (org-write-agenda (expand-file-name (pop files) dir) nil t)))
+	      (org-agenda-write (expand-file-name (pop files) dir) nil t)))
 	  (and (get-buffer org-agenda-buffer-name)
 	       (kill-buffer org-agenda-buffer-name)))))))
 (def-edebug-spec org-batch-store-agenda-views (&rest sexp))
@@ -2766,7 +2757,8 @@ This ensures the export commands can easily use it."
 			 'org-agenda-title-append org-agenda-title-append))))
 
 (defvar org-mobile-creating-agendas)
-(defun org-write-agenda (file &optional open nosettings)
+(defvar org-agenda-write-buffer-name "Agenda View")
+(defun org-agenda-write (file &optional open nosettings)
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
 HTML (.html or .htm) or Postscript (.ps) is produced.
@@ -2788,7 +2780,7 @@ higher priority settings."
 	 (let ((bs (copy-sequence (buffer-string))) beg)
 	   (org-agenda-unmark-filtered-text)
 	   (with-temp-buffer
-	     (rename-buffer "Agenda View" t)
+	     (rename-buffer org-agenda-write-buffer-name t)
 	     (set-buffer-modified-p nil)
 	     (insert bs)
 	     (org-agenda-remove-marked-text 'org-filtered)
@@ -6187,14 +6179,14 @@ to switch to narrowing."
        "%s by tag [%s ], [TAB], %s[/]:off, [+-]:narrow, [>=<?]:effort: "
        (if narrow "Narrow" "Filter") tag-chars
        (if org-agenda-auto-exclude-function "[RET], " ""))
-      (setq char (read-char)))
+      (setq char (read-char-exclusive)))
     (when (member char '(?+ ?-))
       ;; Narrowing down
       (cond ((equal char ?-) (setq strip t narrow t))
 	    ((equal char ?+) (setq strip nil narrow t)))
       (message
        "Narrow by tag [%s ], [TAB], [/]:off, [>=<]:effort: " tag-chars)
-      (setq char (read-char)))
+      (setq char (read-char-exclusive)))
     (when (member char '(?< ?> ?= ??))
       ;; An effort operator
       (setq effort-op (char-to-string char))
@@ -6207,7 +6199,7 @@ to switch to narrowing."
 		     (if (= i 9) "0" (int-to-string (1+ i)))
 		     "]" (nth i efforts))))
 	(message "Effort%s: %s " effort-op effort-prompt)
-	(setq char (read-char))
+	(setq char (read-char-exclusive))
 	(when (or (< char ?0) (> char ?9))
 	  (error "Need 1-9,0 to select effort" ))))
     (when (equal char ?\t)
