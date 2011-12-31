@@ -6187,14 +6187,14 @@ to switch to narrowing."
        "%s by tag [%s ], [TAB], %s[/]:off, [+-]:narrow, [>=<?]:effort: "
        (if narrow "Narrow" "Filter") tag-chars
        (if org-agenda-auto-exclude-function "[RET], " ""))
-      (setq char (read-char)))
+      (setq char (read-char-exclusive)))
     (when (member char '(?+ ?-))
       ;; Narrowing down
       (cond ((equal char ?-) (setq strip t narrow t))
 	    ((equal char ?+) (setq strip nil narrow t)))
       (message
        "Narrow by tag [%s ], [TAB], [/]:off, [>=<]:effort: " tag-chars)
-      (setq char (read-char)))
+      (setq char (read-char-exclusive)))
     (when (member char '(?< ?> ?= ??))
       ;; An effort operator
       (setq effort-op (char-to-string char))
@@ -6207,7 +6207,7 @@ to switch to narrowing."
 		     (if (= i 9) "0" (int-to-string (1+ i)))
 		     "]" (nth i efforts))))
 	(message "Effort%s: %s " effort-op effort-prompt)
-	(setq char (read-char))
+	(setq char (read-char-exclusive))
 	(when (or (< char ?0) (> char ?9))
 	  (error "Need 1-9,0 to select effort" ))))
     (when (equal char ?\t)
