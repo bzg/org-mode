@@ -8034,18 +8034,27 @@ Remove the restriction lock on the agenda, if it is currently restricted to a
 file or subtree (@pxref{Agenda files}).
 
 @tsubheading{Secondary filtering and query editing}
-@cindex filtering, by tag and effort, in agenda
+@cindex filtering, by tag category and effort, in agenda
 @cindex tag filtering, in agenda
+@cindex category filtering, in agenda
 @cindex effort filtering, in agenda
 @cindex query editing, in agenda
 
+@orgcmd{<,org-agenda-filter-by-category}
+@vindex org-agenda-category-filter-preset
+
+Filter the current agenda view with respect to the category of the item at
+point.  Pressing @code{<} another time will remove this filter.  You can add
+a filter preset through the option @code{org-agenda-category-filter-preset}
+(see below.)
+
 @orgcmd{/,org-agenda-filter-by-tag}
-@vindex org-agenda-filter-preset
+@vindex org-agenda-tag-filter-preset
 Filter the current agenda view with respect to a tag and/or effort estimates.
 The difference between this and a custom agenda command is that filtering is
 very fast, so that you can switch quickly between different filters without
 having to recreate the agenda.@footnote{Custom commands can preset a filter by
-binding the variable @code{org-agenda-filter-preset} as an option.  This
+binding the variable @code{org-agenda-tag-filter-preset} as an option.  This
 filter will then be applied to the view and persist as a basic filter through
 refreshes and more secondary filtering.  The filter is a global property of
 the entire agenda view---in a block agenda, you should only set this in the

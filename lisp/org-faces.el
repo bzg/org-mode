@@ -678,6 +678,12 @@ month and 365.24 days for a year)."
   "Face for tag(s) in the mode-line when filtering the agenda."
   :group 'org-faces)
 
+(defface org-agenda-filter-category
+  (org-compatible-face 'modeline
+    nil)
+  "Face for tag(s) in the mode-line when filtering the agenda."
+  :group 'org-faces)
+
 (defface org-time-grid ;; originally copied from font-lock-variable-name-face
   (org-compatible-face nil
     '((((class color) (min-colors 16) (background light)) (:foreground "DarkGoldenrod"))
