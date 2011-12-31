@@ -410,6 +410,10 @@ XEmacs user should have this variable set to nil, because
 When set to `t', some commands will be performed in all headlines
 within the active region.
 
+When set to `start-level', some commands will be performed in all
+headlines within the active region, provided that these headlines
+are of the same level than the first one.
+
 When set to a string, those commands will be performed on the
 matching headlines within the active region.  Such string must be
 a tags/property/todo match as it is used in the agenda tags view.
@@ -419,6 +423,7 @@ The list of commands is:
 - `org-deadline'"
   :type '(choice (const :tag "Don't loop" nil)
 		 (const :tag "All headlines in active region" t)
+		 (const :tag "In active region, headlines at the same level than the first one" 'start-level)
 		 (string :tag "Tags/Property/Todo matcher"))
   :group 'org-todo
   :group 'org-archive)
@@ -12718,7 +12723,7 @@ obtain a list of properties.  Building the tags list for each entry in such
 a file becomes an N^2 operation - but with this variable set, it scales
 as N.")
 
-(defun org-scan-tags (action matcher &optional todo-only)
+(defun org-scan-tags (action matcher &optional todo-only start-level)
   "Scan headline tags with inheritance and produce output ACTION.
 
 ACTION can be `sparse-tree' to produce a sparse tree in the current buffer,
@@ -12728,9 +12733,17 @@ this case the return value is a list of all return values from these calls.
 
 MATCHER is a Lisp form to be evaluated, testing if a given set of tags
 qualifies a headline for inclusion.  When TODO-ONLY is non-nil,
-only lines with a TODO keyword are included in the output."
+only lines with a TODO keyword are included in the output.
+
+START-LEVEL can be a string with asterisks, reducing the scope to
+headlines matching this string."
   (require 'org-agenda)
-  (let* ((re (concat "^" org-outline-regexp " *\\(\\<\\("
+  (let* ((re (concat "^"
+		     (if start-level
+			 ;; Get the correct level to match
+			 (concat "\\*\\{" (number-to-string start-level) "\\} ")
+		       org-outline-regexp)
+		     " *\\(\\<\\("
 		     (mapconcat 'regexp-quote org-todo-keywords-1 "\\|")
 		     (org-re
 		      "\\>\\)\\)? *\\(.*?\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*$")))
@@ -13724,6 +13737,9 @@ SCOPE determines the scope of this command.  It can be any of:
 nil     The current buffer, respecting the restriction if any
 tree    The subtree started with the entry at point
 region  The entries within the active region, if any
+region-start-level
+        The entries within the active region, but only those at
+        the same level than the first one.
 file    The current buffer, without restriction
 file-with-archives
         The current buffer, and any archives associated with it
@@ -13752,13 +13768,15 @@ with `org-get-tags-at'.  If your function gets properties with
 to t around the call to `org-entry-properties' to get the same speedup.
 Note that if your function moves around to retrieve tags and properties at
 a *different* entry, you cannot use these techniques."
-  (unless (and (eq scope 'region) (not (org-region-active-p)))
+  (unless (and (or (eq scope 'region) (eq scope 'region-start-level))
+	       (not (org-region-active-p)))
     (let* ((org-agenda-archives-mode nil) ; just to make sure
 	   (org-agenda-skip-archived-trees (memq 'archive skip))
 	   (org-agenda-skip-comment-trees (memq 'comment skip))
 	   (org-agenda-skip-function
 	    (car (org-delete-all '(comment archive) skip)))
 	   (org-tags-match-list-sublevels t)
+	   (start-level (eq scope 'region-start-level))
 	   matcher file res
 	   org-todo-keywords-for-agenda
 	   org-done-keywords-for-agenda
@@ -13777,7 +13795,14 @@ a *different* entry, you cannot use these techniques."
 		 (org-back-to-heading t)
 		 (org-narrow-to-subtree)
 		 (setq scope nil))
-		((and (eq scope 'region) (org-region-active-p))
+		((and (or (eq scope 'region) (eq scope 'region-start-level))
+		      (org-region-active-p))
+		 ;; If needed, set start-level to a string like "2"
+		 (when start-level
+		   (save-excursion
+		     (goto-char (region-beginning))
+		     (unless (org-at-heading-p) (outline-next-heading))
+		     (setq start-level (org-current-level))))
 		 (narrow-to-region (region-beginning)
 				   (save-excursion
 				     (goto-char (region-end))
@@ -13790,7 +13815,7 @@ a *different* entry, you cannot use these techniques."
 	      (progn
 		(org-prepare-agenda-buffers
 		 (list (buffer-file-name (current-buffer))))
-		(setq res (org-scan-tags func matcher)))
+		(setq res (org-scan-tags func matcher nil start-level)))
 	    ;; Get the right scope
 	    (cond
 	     ((and scope (listp scope) (symbolp (car scope)))
