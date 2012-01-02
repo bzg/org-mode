@@ -72,50 +72,54 @@
     ("\\.\\.\\." . "&#x2026;"))		; hellip
   "Regular expressions for special string conversion.")
 
-(defconst org-odt-lib-dir (file-name-directory load-file-name))
-(defconst org-odt-styles-dir
-  (let* ((styles-dir1 (expand-file-name "../etc/styles/" org-odt-lib-dir)) ; git
-	 (styles-dir2 (expand-file-name "./etc/styles/" org-odt-lib-dir)) ; elpa
-	 (styles-dir3 (expand-file-name "./etc/org/" data-directory)) ; system
-	 (styles-dir
-	  (catch 'styles-dir
-	    (mapc (lambda (styles-dir)
-		    (when (and (file-readable-p
-				(expand-file-name
-				 "OrgOdtContentTemplate.xml" styles-dir))
-			       (file-readable-p
-				(expand-file-name
-				 "OrgOdtStyles.xml" styles-dir)))
-		      (throw 'styles-dir styles-dir)))
-		  (list styles-dir1 styles-dir2 styles-dir3))
-	    nil)))
-    (unless styles-dir
-      (error "Cannot find factory styles file. Check package dir layout"))
-    styles-dir)
-  "Directory that holds auxiliary XML files used by the ODT exporter.
+(defconst org-odt-lib-dir (file-name-directory load-file-name)
+  "Location of ODT exporter.
+Use this to infer values of `org-odt-styles-dir' and
+`org-export-odt-schema-dir'.")
 
-This directory contains the following XML files -
- \"OrgOdtStyles.xml\" and \"OrgOdtContentTemplate.xml\".  These
- XML files are used as the default values of
- `org-export-odt-styles-file' and
- `org-export-odt-content-template-file'.
+(defvar org-odt-data-dir nil
+  "Data directory for ODT exporter.
+Use this to infer values of `org-odt-styles-dir' and
+`org-export-odt-schema-dir'.")
 
-The default value of this variable varies depending on the
-version of org in use.  Note that the user could be using org
-from one of: org's own private git repository, GNU ELPA tar or
-standard Emacs.")
+(defconst org-odt-schema-dir-list
+  (list
+   (and org-odt-data-dir
+	(expand-file-name "./schema/" org-odt-data-dir)) ; bail out
+   (eval-when-compile
+     (and (boundp 'org-odt-data-dir) org-odt-data-dir ; see make install
+	  (expand-file-name "./schema/" org-odt-data-dir)))
+   (expand-file-name "../contrib/odt/etc/schema/" org-odt-lib-dir) ; git
+   )
+  "List of directories to search for OpenDocument schema files.
+Use this list to set the default value of
+`org-export-odt-schema-dir'.  The entries in this list are
+populated heuristically based on the values of `org-odt-lib-dir'
+and `org-odt-data-dir'.")
 
 (defcustom org-export-odt-schema-dir
-  (let ((schema-dir (expand-file-name
-		     "../contrib/odt/etc/schema/" org-odt-lib-dir)))
-    (if (and (file-readable-p
-	      (expand-file-name "od-manifest-schema-v1.2-cs01.rnc" schema-dir))
-	     (file-readable-p
-	      (expand-file-name "od-schema-v1.2-cs01.rnc" schema-dir))
-	     (file-readable-p
-	      (expand-file-name "schemas.xml" schema-dir)))
-	schema-dir
-      (prog1 nil (message "Unable to locate OpenDocument schema files."))))
+  (let* ((schema-dir
+	  (catch 'schema-dir
+	    (message "Debug (org-odt): Searching for OpenDocument schema files...")
+	    (mapc
+	     (lambda (schema-dir)
+	       (when schema-dir
+		 (message "Debug (org-odt): Trying %s..." schema-dir)
+		 (when (and (file-readable-p
+			     (expand-file-name "od-manifest-schema-v1.2-cs01.rnc"
+					       schema-dir))
+			    (file-readable-p
+			     (expand-file-name "od-schema-v1.2-cs01.rnc"
+					       schema-dir))
+			    (file-readable-p
+			     (expand-file-name "schemas.xml" schema-dir)))
+		   (message "Debug (org-odt): Using schema files under %s"
+			    schema-dir)
+		   (throw 'schema-dir schema-dir))))
+	     org-odt-schema-dir-list)
+	    (message "Debug (org-odt): No OpenDocument schema files installed")
+	    nil)))
+    schema-dir)
   "Directory that contains OpenDocument schema files.
 
 This directory contains:
@@ -129,9 +133,10 @@ of OpenDocument XML takes place based on the value
 `rng-nxml-auto-validate-flag'.
 
 The default value of this variable varies depending on the
-version of org in use.  The OASIS schema files are available only
-in the org's private git repository.  It is *not* bundled with
-GNU ELPA tar or standard Emacs distribution."
+version of org in use and is initialized from
+`org-odt-schema-dir-list'.  The OASIS schema files are available
+only in the org's private git repository.  It is *not* bundled
+with GNU ELPA tar or standard Emacs distribution."
   :type '(choice
 	  (const :tag "Not set" nil)
 	  (directory :tag "Schema directory"))
@@ -150,13 +155,66 @@ Also add it to `rng-schema-locating-files'."
 		(file-readable-p
 		 (expand-file-name "schemas.xml" schema-dir)))
 	       schema-dir
-	     (prog1 nil
-	       (message "Warning (org-odt): Unable to locate OpenDocument schema files.")))))
+	     (when value
+	       (message "Error (org-odt): %s has no OpenDocument schema files"
+			value))
+	     nil)))
     (when org-export-odt-schema-dir
       (eval-after-load 'rng-loc
 	'(add-to-list 'rng-schema-locating-files
 		      (expand-file-name "schemas.xml"
 					org-export-odt-schema-dir))))))
+
+(defconst org-odt-styles-dir-list
+  (list
+   (and org-odt-data-dir
+	(expand-file-name "./styles/" org-odt-data-dir)) ; bail out
+   (eval-when-compile
+     (and (boundp 'org-odt-data-dir) org-odt-data-dir ; see make install
+	  (expand-file-name "./styles/" org-odt-data-dir)))
+   (expand-file-name "../etc/styles/" org-odt-lib-dir) ; git
+   (expand-file-name "./etc/styles/" org-odt-lib-dir)  ; elpa
+   (expand-file-name "./org/" data-directory)	       ; system
+   )
+  "List of directories to search for OpenDocument styles files.
+See `org-odt-styles-dir'.  The entries in this list are populated
+heuristically based on the values of `org-odt-lib-dir' and
+`org-odt-data-dir'.")
+
+(defconst org-odt-styles-dir
+  (let* ((styles-dir
+	  (catch 'styles-dir
+	    (message "Debug (org-odt): Searching for OpenDocument styles files...")
+	    (mapc (lambda (styles-dir)
+		    (when styles-dir
+		      (message "Debug (org-odt): Trying %s..." styles-dir)
+		      (when (and (file-readable-p
+				  (expand-file-name
+				   "OrgOdtContentTemplate.xml" styles-dir))
+				 (file-readable-p
+				  (expand-file-name
+				   "OrgOdtStyles.xml" styles-dir)))
+			(message "Debug (org-odt): Using styles under %s"
+				 styles-dir)
+			(throw 'styles-dir styles-dir))))
+		  org-odt-styles-dir-list)
+	    nil)))
+    (unless styles-dir
+      (error "Error (org-odt): Cannot find factory styles files. Aborting."))
+    styles-dir)
+  "Directory that holds auxiliary XML files used by the ODT exporter.
+
+This directory contains the following XML files -
+ \"OrgOdtStyles.xml\" and \"OrgOdtContentTemplate.xml\".  These
+ XML files are used as the default values of
+ `org-export-odt-styles-file' and
+ `org-export-odt-content-template-file'.
+
+The default value of this variable varies depending on the
+version of org in use and is initialized from
+`org-odt-styles-dir-list'.  Note that the user could be using org
+from one of: org's own private git repository, GNU ELPA tar or
+standard Emacs.")
 
 (defvar org-odt-file-extensions
   '(("odt" . "OpenDocument Text")

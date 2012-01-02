@@ -1241,8 +1241,8 @@ Reveal context around point, showing the current entry, the following heading
 and the hierarchy above.  Useful for working near a location that has been
 exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda command
 (@pxref{Agenda commands}).  With a prefix argument show, on each
-level, all sibling headings.  With double prefix arg, also show the entire
-subtree of the parent.
+level, all sibling headings.  With a double prefix argument, also show the 
+entire subtree of the parent.
 @orgcmd{C-c C-k,show-branches}
 Expose all the headings of the subtree, CONTENT view for just one subtree.
 @orgcmd{C-c C-x b,org-tree-to-indirect-buffer}
@@ -4427,9 +4427,11 @@ off a box while there are unchecked boxes above it.
 
 @table @kbd
 @orgcmd{C-c C-c,org-toggle-checkbox}
-Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
-double prefix argument, set it to @samp{[-]}, which is considered to be an
-intermediate state.
+Toggle checkbox status or (with prefix arg) checkbox presence at point.  
+With a single prefix argument, add an empty checkbox or remove the current
+one@footnote{`C-u C-c C-c' on the @emph{first} item of a list with no checkbox
+will add checkboxes to the rest of the list.}.  With a double prefix argument, set it to @samp{[-]}, which is
+considered to be an intermediate state.
 @orgcmd{C-c C-x C-b,org-toggle-checkbox}
 Toggle checkbox status or (with prefix arg) checkbox presence at point.  With
 double prefix argument, set it to @samp{[-]}, which is considered to be an
@@ -8034,18 +8036,27 @@ Remove the restriction lock on the agenda, if it is currently restricted to a
 file or subtree (@pxref{Agenda files}).
 
 @tsubheading{Secondary filtering and query editing}
-@cindex filtering, by tag and effort, in agenda
+@cindex filtering, by tag category and effort, in agenda
 @cindex tag filtering, in agenda
+@cindex category filtering, in agenda
 @cindex effort filtering, in agenda
 @cindex query editing, in agenda
 
+@orgcmd{<,org-agenda-filter-by-category}
+@vindex org-agenda-category-filter-preset
+
+Filter the current agenda view with respect to the category of the item at
+point.  Pressing @code{<} another time will remove this filter.  You can add
+a filter preset through the option @code{org-agenda-category-filter-preset}
+(see below.)
+
 @orgcmd{/,org-agenda-filter-by-tag}
-@vindex org-agenda-filter-preset
+@vindex org-agenda-tag-filter-preset
 Filter the current agenda view with respect to a tag and/or effort estimates.
 The difference between this and a custom agenda command is that filtering is
 very fast, so that you can switch quickly between different filters without
 having to recreate the agenda.@footnote{Custom commands can preset a filter by
-binding the variable @code{org-agenda-filter-preset} as an option.  This
+binding the variable @code{org-agenda-tag-filter-preset} as an option.  This
 filter will then be applied to the view and persist as a basic filter through
 refreshes and more secondary filtering.  The filter is a global property of
 the entire agenda view---in a block agenda, you should only set this in the
@@ -9634,10 +9645,11 @@ Insert template with export options, see example below.
 @vindex user-full-name
 @vindex user-mail-address
 @vindex org-export-default-language
+@vindex org-export-date-timestamp-format
 @example
 #+TITLE:       the title to be shown (default is the buffer name)
 #+AUTHOR:      the author (default taken from @code{user-full-name})
-#+DATE:        a date, fixed, or a format string for @code{format-time-string}
+#+DATE:        a date, an Org timestamp@footnote{@code{org-export-date-timestamp-format} defines how this timestamp will be exported.}, or a format string for @code{format-time-string}
 #+EMAIL:       his/her email address (default from @code{user-mail-address})
 #+DESCRIPTION: the page description, e.g.@: for the XHTML meta tag
 #+KEYWORDS:    the page keywords, e.g.@: for the XHTML meta tag
@@ -9656,8 +9668,8 @@ Insert template with export options, see example below.
 @end example
 
 @noindent
-The OPTIONS line is a compact@footnote{If you want to configure many options
-this way, you can use several OPTIONS lines.} form to specify export
+The @code{#+OPTIONS} line is a compact@footnote{If you want to configure many options
+this way, you can use several @code{#+OPTIONS} lines.} form to specify export
 settings.  Here you can:
 @cindex headline levels
 @cindex section-numbers
@@ -13615,7 +13627,9 @@ concatenated together to form the replacement text.
 By setting this header argument at the sub-tree or file level, simple code
 block concatenation may be achieved.  For example, when tangling the
 following Org mode file, the bodies of code blocks will be concatenated into
-the resulting pure code file.
+the resulting pure code file@footnote{(The example needs property inheritance
+to be turned on for the @code{noweb-ref} property, see @ref{Property
+inheritance}).}.
 
 @example
  #+BEGIN_SRC sh :tangle yes :noweb yes :shebang #!/bin/sh

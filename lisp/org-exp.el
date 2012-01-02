@@ -217,6 +217,11 @@ and in `org-clock-clocktable-language-setup'."
   :group 'org-export-general
   :type 'string)
 
+(defcustom org-export-date-timestamp-format "%Y-%m-%d"
+  "Time string format for Org timestamps in the #+DATE option."
+  :group 'org-export-general
+  :type 'string)
+
 (defvar org-export-page-description ""
   "The page description, for the XHTML meta tag.
 This is best set with the #+DESCRIPTION line in a file, it does not make
@@ -726,6 +731,7 @@ must accept the property list as an argument, and must return the (possibly
 modified) list.")
 
 ;; FIXME: should we fold case here?
+
 (defun org-infile-export-plist ()
   "Return the property list with file-local settings for export."
   (save-excursion
@@ -759,7 +765,15 @@ modified) list.")
 	   ((string-equal key "TITLE") (setq p (plist-put p :title val)))
 	   ((string-equal key "AUTHOR")(setq p (plist-put p :author val)))
 	   ((string-equal key "EMAIL") (setq p (plist-put p :email val)))
-	   ((string-equal key "DATE") (setq p (plist-put p :date val)))
+	   ((string-equal key "DATE")
+	    ;; If date is an Org timestamp, convert it to a time
+	    ;; string using `org-export-date-timestamp-format'
+	    (when (string-match org-ts-regexp3 val)
+	      (setq val (format-time-string
+			 org-export-date-timestamp-format
+			 (apply 'encode-time (org-parse-time-string
+					      (match-string 0 val))))))
+	    (setq p (plist-put p :date val)))
 	   ((string-equal key "KEYWORDS") (setq p (plist-put p :keywords val)))
 	   ((string-equal key "DESCRIPTION")
 	    (setq p (plist-put p :description val)))
@@ -2333,7 +2347,7 @@ TYPE must be a string, any of:
 			    (plist-get org-export-opt-plist
 				       (intern (concat ":" key)))))
 	  (save-match-data
-	    ;; If arguments are provided, first retreive them properly
+	    ;; If arguments are provided, first retrieve them properly
 	    ;; (in ARGS, as a list), then replace them in VAL.
 	    (when args
 	      (setq args (org-split-string args ",") args2 nil)
