@@ -33,7 +33,9 @@ org-install.el:	$(LISPF)
 	$(ORG-INSTALL)
 
 install:	$(LISPF) compile autoloads
-	if [ ! -d $(DESTDIR)$(lispdir) ]; then $(MKDIR) $(DESTDIR)$(lispdir); else true; fi ;
+	if [ ! -d $(DESTDIR)$(lispdir) ] ; then \
+	  $(MKDIR) $(DESTDIR)$(lispdir) ; \
+	fi ;
 	$(CP) $(LISPC) $(LISPF) $(LISPO) $(DESTDIR)$(lispdir)
 
 clean:
@@ -46,5 +48,6 @@ cleanall:
 	$(RM) *.elc $(LISPO)
 
 clean-install:
-	if [ ! -d $(DESTDIR)$(lispdir) ]; then $(MKDIR) $(DESTDIR)$(lispdir); else true; fi ;
-	$(RM) $(DESTDIR)$(lispdir)/org*.el* $(DESTDIR)$(lispdir)/ob*.el*
+	if [ -d $(DESTDIR)$(lispdir) ] ; then \
+	  $(RM) $(DESTDIR)$(lispdir)/org*.el* $(DESTDIR)$(lispdir)/ob*.el* ; \
+	fi ;

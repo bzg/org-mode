@@ -12,12 +12,20 @@ endif
 all:
 
 install:	$(ETCDIRS)
-	$(foreach dir, $?, if [ ! -d $(DESTDIR)$(datadir)/$(dir) ]; then $(MKDIR) $(DESTDIR)$(datadir)/$(dir); else true; fi ; $(CP) $(dir)/* $(DESTDIR)$(datadir)/$(dir); )
+	for dir in $? ; do \
+	  if [ ! -d $(DESTDIR)$(datadir)/$${dir} ] ; then \
+	    $(MKDIR) $(DESTDIR)$(datadir)/$${dir} ; \
+	  fi ; \
+	  $(CP) $${dir}/* $(DESTDIR)$(datadir)/$${dir} ; \
+	done ;
 
 clean:
 
 cleanall:
 
-clean-install:
-	if [ ! -d $(DESTDIR)$(datadir) ]; then $(MKDIR) $(DESTDIR)$(datadir); else true; fi ;
-	$(RMR) $(DESTDIR)$(datadir)
+clean-install:	$(ETCDIRS)
+	for dir in $? ; do \
+	  if [ -d $(DESTDIR)$(datadir)/$${dir} ] ; then \
+	    $(RMR) $(DESTDIR)$(datadir)/$${dir} ; \
+	  fi ; \
+	done ;
