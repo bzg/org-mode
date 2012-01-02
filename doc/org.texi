@@ -14001,13 +14001,20 @@ When a code block is tangled or evaluated, whether or not ``noweb''
 references are expanded depends upon the value of the @code{:noweb} header
 argument.  If @code{:noweb yes}, then a Noweb reference is expanded before
 evaluation.  If @code{:noweb no}, the default, then the reference is not
-expanded before evaluation.
+expanded before evaluation.  See the @ref{noweb-ref} header argument for
+a more flexible way to resolve noweb references.
 
 Note: the default value, @code{:noweb no}, was chosen to ensure that
 correct code is not broken in a language, such as Ruby, where
 @code{<<arg>>} is a syntactically valid construct.  If @code{<<arg>>} is not
 syntactically valid in languages that you use, then please consider setting
 the default value.
+
+Note: if noweb tangling is slow in large Org-mode files consider setting the
+@code{*org-babel-use-quick-and-dirty-noweb-expansion*} variable to true.
+This will result in faster noweb reference resolution at the expense of not
+correctly resolving inherited values of the @code{:noweb-ref} header
+argument.
 
 @node Key bindings and useful functions, Batch execution, Noweb reference syntax, Working With Source Code
 @section Key bindings and useful functions
