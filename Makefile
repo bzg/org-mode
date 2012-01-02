@@ -3,7 +3,7 @@
 # This file is not part of GNU Emacs
 
 # default target is "all"
-.DEFAULT:	all
+all::
 
 # Describe valid make targets for org-mode.
 .PHONY:	targets help
