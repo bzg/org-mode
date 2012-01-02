@@ -1,8 +1,9 @@
 # Makefile - for the org-mode distribution
 #
-# Maintainer: Carsten Dominik <dominik@science.uva.nl>
-# Version: VERSIONTAG
-#
+# This file is not part of GNU Emacs
+
+# default target is "all"
+.DEFAULT:	all
 
 # Describe valid make targets for org-mode.
 .PHONY:	targets help
@@ -32,8 +33,6 @@ targets help:
 	$(info make clean-install - remove installed Org ELisp and documentation files)
 	@echo ""
 
- include default.mk
--include local.mk	# optional local customization
- include maint.mk
- include targets.mk
- include maint-targets.mk
+ include default.mk	# defaults, customizable via "local.mk"
+-include local.mk	# optional local customization, use default.mk as template
+ include targets.mk	# toplevel make machinery

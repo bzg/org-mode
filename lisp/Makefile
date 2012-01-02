@@ -6,6 +6,7 @@ ORG-INSTALL = $(BATCH) \
 	 --eval '(insert "\n(provide (quote org-install))\n")' \
 	 --eval '(insert "\n(defconst org-release \"$(ORGVERSION)\"\n  \"The release version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
 	 --eval '(insert "\n(defconst org-git-version \"$(GITVERSION)\"\n  \"The Git version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
+	 --eval '(insert "\n(defconst org-odt-data-dir \"$(datadir)\"\n  \"The location of ODT styles.\")\n")' \
 	 --eval '(save-buffer)'
 -include local.mk	# optional local customization
 
@@ -32,8 +33,8 @@ org-install.el:	$(LISPF)
 	$(ORG-INSTALL)
 
 install:	$(LISPF) compile autoloads
-	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
-	$(CP) $(LISPC) $(LISPF) $(LISPO) $(lispdir)
+	if [ ! -d $(DESTDIR)$(lispdir) ]; then $(MKDIR) $(DESTDIR)$(lispdir); else true; fi ;
+	$(CP) $(LISPC) $(LISPF) $(LISPO) $(DESTDIR)$(lispdir)
 
 clean:
 	$(RM) *.elc
@@ -45,5 +46,5 @@ cleanall:
 	$(RM) *.elc $(LISPO)
 
 clean-install:
-	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
-	$(RM) $(lispdir)/org*.el* $(lispdir)/ob*.el*
+	if [ ! -d $(DESTDIR)$(lispdir) ]; then $(MKDIR) $(DESTDIR)$(lispdir); else true; fi ;
+	$(RM) $(DESTDIR)$(lispdir)/org*.el* $(DESTDIR)$(lispdir)/ob*.el*

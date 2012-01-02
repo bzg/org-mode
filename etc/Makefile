@@ -1,4 +1,3 @@
-etcdir = $(lispdir)/etc
 ETCDIRS = styles
 -include local.mk	# optional local customization
 
@@ -13,12 +12,12 @@ endif
 all:
 
 install:	$(ETCDIRS)
-	$(foreach dir, $?, if [ ! -d $(etcdir)/$(dir) ]; then $(MKDIR) $(etcdir)/$(dir); else true; fi ; $(CP) $(dir)/* $(etcdir)/$(dir); )
+	$(foreach dir, $?, if [ ! -d $(DESTDIR)$(datadir)/$(dir) ]; then $(MKDIR) $(DESTDIR)$(datadir)/$(dir); else true; fi ; $(CP) $(dir)/* $(DESTDIR)$(datadir)/$(dir); )
 
 clean:
 
 cleanall:
 
 clean-install:
-	if [ ! -d $(etcdir) ]; then $(MKDIR) $(etcdir); else true; fi ;
-	$(RMR) $(etcdir)
+	if [ ! -d $(DESTDIR)$(datadir) ]; then $(MKDIR) $(DESTDIR)$(datadir); else true; fi ;
+	$(RMR) $(DESTDIR)$(datadir)

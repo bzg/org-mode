@@ -1,7 +1,7 @@
+.SUFFIXES:	# we don't need default suffix rules
 ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
-
 .PHONY:		all info html pdf card manual guide install clean cleanall clean-install
 
 all:		info html pdf card
@@ -30,9 +30,9 @@ git-describe.texi: org.texi
 
 
 install:	org
-	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
-	$(CP) org $(infodir)
-	$(INSTALL_INFO) --infodir=$(infodir) org
+	if [ ! -d $(DESTDIR)$(infodir) ]; then $(MKDIR) $(DESTDIR)$(infodir); else true; fi ;
+	$(CP) org $(DESTDIR)$(infodir)
+	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) org
 
 clean:
 	$(RM) org *.pdf *.html *_letter.tex \
@@ -42,10 +42,9 @@ cleanall:	clean
 	$(RMR) guide manual
 
 clean-install:
-	$(RM) $(infodir)/org*
-	$(INSTALL_INFO) --infodir=$(infodir) --remove org
+	$(RM) $(DESTDIR)$(infodir)/org*
+	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) --remove org
 
-.SUFFIXES:	# we don't need default suffix rules
 .SUFFIXES:	.texi .tex .txt
 
 %:		%.texi

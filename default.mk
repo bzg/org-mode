@@ -11,6 +11,9 @@ prefix  = /usr/share
 # Where local lisp files go.
 lispdir = $(prefix)/emacs/site-lisp/org
 
+# Where local data files go.
+datadir = $(lispdir)/etc
+
 # Where info files go.
 infodir = $(prefix)/info
 
@@ -63,4 +66,3 @@ CP      = install -p
 
 # Name of the program to install info files
 INSTALL_INFO = install-info
-
