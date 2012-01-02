@@ -13617,7 +13617,9 @@ concatenated together to form the replacement text.
 By setting this header argument at the sub-tree or file level, simple code
 block concatenation may be achieved.  For example, when tangling the
 following Org mode file, the bodies of code blocks will be concatenated into
-the resulting pure code file.
+the resulting pure code file@footnote{(The example needs property inheritance
+to be turned on for the @code{noweb-ref} property, see @ref{Property
+inheritance}).}.
 
 @example
  #+BEGIN_SRC sh :tangle yes :noweb yes :shebang #!/bin/sh
