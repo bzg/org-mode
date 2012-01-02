@@ -20426,7 +20426,7 @@ beyond the end of the headline."
 		   org-special-ctrl-a/e)))
     (cond
      ((or (not special) arg
-	  (not (or (org-on-heading-p) (org-at-item-p))))
+	  (not (or (org-on-heading-p) (org-at-item-p) (org-at-drawer-p))))
       (call-interactively
        (cond ((org-bound-and-true-p line-move-visual) 'end-of-visual-line)
 	     ((fboundp 'move-end-of-line) 'move-end-of-line)
@@ -20446,6 +20446,9 @@ beyond the end of the headline."
 	  (call-interactively (if (fboundp 'move-end-of-line)
 				  'move-end-of-line
 				'end-of-line)))))
+     ((org-at-drawer-p)
+      (move-end-of-line 1)
+      (when (overlays-at (1- (point))) (backward-char 1)))
      ;; At an item: Move before any hidden text.
      (t (call-interactively 'end-of-line)))
     (org-no-warnings
@@ -20640,6 +20643,12 @@ This version does not only check the character property, but also
   (outline-on-heading-p t))
 (defun org-at-heading-p (&optional ignored)
   (outline-on-heading-p t))
+
+(defun org-at-drawer-p nil
+  "Whether point is at a drawer."
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at org-drawer-regexp)))
 
 (defun org-point-at-end-of-empty-headline ()
   "If point is at the end of an empty headline, return t, else nil.
