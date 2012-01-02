@@ -3,15 +3,20 @@
 DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
 .EXPORT_ALL_VARIABLES:
 
-LISPDIRS	= lisp
-SUBDIRS		= doc etc $(LISPDIRS)
-INSTSUB         = $(SUBDIRS:%=install-%)
+LISPDIRS      = lisp
+SUBDIRS       = doc etc $(LISPDIRS)
+INSTSUB       = $(SUBDIRS:%=install-%)
 
-GITVERSION	= $(shell git describe --abbrev=6 HEAD)
-ORGVERSION	= $(subst release_,,$(shell git describe --abbrev=0 HEAD))
-GITSTATUS	= $(shell git status -uno --porcelain)
-DATE            = $(shell date +%Y-%m-%d)
-ifneq ("$(GITSTATUS)", "")
+ifneq ($(wildcard .git),)
+  GITVERSION ?= $(shell git describe --abbrev=6 HEAD)
+  ORGVERSION ?= $(subst release_,,$(shell git describe --abbrev=0 HEAD))
+  GITSTATUS  ?= $(shell git status -uno --porcelain)
+else
+  GITVERSION ?= N/A
+  ORGVERSION ?= N/A
+endif
+DATE          = $(shell date +%Y-%m-%d)
+ifneq ($(GITSTATUS),)
   GITVERSION := $(GITVERSION).dirty
 endif
 
