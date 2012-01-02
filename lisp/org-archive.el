@@ -433,7 +433,7 @@ When TAG is non-nil, don't move trees, but mark them with the ARCHIVE tag."
 	(question (if tag "Set ARCHIVE tag (no open TODO items)? "
 		    "Move subtree to archive (no open TODO items)? "))
 	beg end (cntarch 0))
-    (if (org-on-heading-p)
+    (if (org-at-heading-p)
 	(progn
 	  (setq re1 (concat "^" (regexp-quote
 				 (make-string

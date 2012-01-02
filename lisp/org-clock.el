@@ -1066,7 +1066,7 @@ the clocking selection, associated with the letter `d'."
 
       ;; Clock in at which position?
       (setq target-pos
-	    (if (and (eobp) (not (org-on-heading-p)))
+	    (if (and (eobp) (not (org-at-heading-p)))
 		(point-at-bol 0)
 	      (point)))
       (run-hooks 'org-clock-in-prepare-hook)

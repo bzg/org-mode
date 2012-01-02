@@ -3940,7 +3940,7 @@ in `org-agenda-text-search-extra-files'."
 					org-agenda-restrict-end)
 		    (widen))
 		  (goto-char (point-min))
-		  (unless (or (org-on-heading-p)
+		  (unless (or (org-at-heading-p)
 			      (outline-next-heading))
 		    (throw 'nextfile t))
 		  (goto-char (max (point-min) (1- (point))))
@@ -8000,7 +8000,7 @@ the resulting entry will not be shown.  When TEXT is empty, switch to
      ((eq type 'anniversary)
       (or (re-search-forward "^*[ \t]+Anniversaries" nil t)
 	(progn
-	  (or (org-on-heading-p t)
+	  (or (org-at-heading-p t)
 	      (progn
 		(outline-next-heading)
 		(insert "* Anniversaries\n\n")

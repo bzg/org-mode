@@ -102,7 +102,7 @@ to `directory'."
 
 This function goes into `org-open-at-point-functions'."
   (and org-wikinodes-active
-       (not (org-on-heading-p))
+       (not (org-at-heading-p))
        (let (case-fold-search) (org-in-regexp org-wikinodes-camel-regexp))
        (progn (org-wikinodes-follow-link (match-string 0)) t)))
 
@@ -180,7 +180,7 @@ setting of `org-wikinodes-create-targets'."
 
 (defun org-wikinodes-clear-cache-when-on-target ()
   "When on a headline that is a Wiki target, clear the cache."
-  (when (and (org-on-heading-p)
+  (when (and (org-at-heading-p)
 	     (org-in-regexp (format org-complex-heading-regexp-format
 				    org-wikinodes-camel-regexp))
 	     (org-in-regexp org-wikinodes-camel-regexp))
@@ -280,7 +280,7 @@ with working links."
     (while (re-search-forward re nil t)
       (org-if-unprotected-at (match-beginning 0)
 	(unless (save-match-data
-		  (or (org-on-heading-p)
+		  (or (org-at-heading-p)
 		      (org-in-regexp org-bracket-link-regexp)
 		      (org-in-regexp org-plain-link-re)
 		      (org-in-regexp "<<[^<>]+>>")))

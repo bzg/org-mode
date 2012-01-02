@@ -1430,7 +1430,7 @@ the current file."
 		   (setq found (condition-case nil (org-link-search link)
 				 (error nil)))
 		   (when (and found
-			      (or (org-on-heading-p)
+			      (or (org-at-heading-p)
 				  (not (eq found 'dedicated))))
 		     (or (get-text-property (point) 'target)
 			 (get-text-property
@@ -1541,7 +1541,7 @@ removed as well."
       (setq beg (point))
       (put-text-property beg (point-max) :org-delete t)
       (while (re-search-forward re-sel nil t)
-	(when (org-on-heading-p)
+	(when (org-at-heading-p)
 	  (org-back-to-heading)
 	  (remove-text-properties
 	   (max (1- (point)) (point-min))
@@ -1611,7 +1611,7 @@ from the buffer."
     (when (not (eq export-archived-trees t))
       (goto-char (point-min))
       (while (re-search-forward re-archive nil t)
-	(if (not (org-on-heading-p t))
+	(if (not (org-at-heading-p t))
 	    (goto-char (point-at-eol))
 	  (beginning-of-line 1)
 	  (setq a (if export-archived-trees

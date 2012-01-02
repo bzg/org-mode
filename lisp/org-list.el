@@ -113,7 +113,7 @@
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-level-increment "org" ())
 (declare-function org-narrow-to-subtree "org" ())
-(declare-function org-on-heading-p "org" (&optional invisible-ok))
+(declare-function org-at-heading-p "org" (&optional invisible-ok))
 (declare-function org-previous-line-empty-p "org" ())
 (declare-function org-remove-if "org" (predicate seq))
 (declare-function org-reduced-level "org" (L))
@@ -2288,7 +2288,7 @@ in subtree, ignoring drawers."
 		    (setq lim-up (point-at-bol))
 		  (error "No item in region"))
 		(setq lim-down (copy-marker limit))))
-	     ((org-on-heading-p)
+	     ((org-at-heading-p)
 	      ;; On an heading, start at first item after drawers and
 	      ;; time-stamps (scheduled, etc.).
 	      (let ((limit (save-excursion (outline-next-heading) (point))))
@@ -2447,7 +2447,7 @@ With optional prefix argument ALL, do this for the whole buffer."
 	      (cond			; boxes count
 	       ;; Cookie is at an heading, but specifically for todo,
 	       ;; not for checkboxes: skip it.
-	       ((and (org-on-heading-p)
+	       ((and (org-at-heading-p)
 		     (string-match "\\<todo\\>"
 				   (downcase
 				    (or (org-entry-get nil "COOKIE_DATA") ""))))
@@ -2456,14 +2456,14 @@ With optional prefix argument ALL, do this for the whole buffer."
 	       ;; heading already have been read.  Use data collected
 	       ;; in STRUCTS-BAK.  This should only happen when
 	       ;; heading has more than one cookie on it.
-	       ((and (org-on-heading-p)
+	       ((and (org-at-heading-p)
 		     (<= (save-excursion (outline-next-heading) (point))
 			 backup-end))
 		(funcall count-boxes nil structs-bak recursivep))
 	       ;; Cookie is at a fresh heading.  Grab structure of
 	       ;; every list containing a checkbox between point and
 	       ;; next headline, and save them in STRUCTS-BAK.
-	       ((org-on-heading-p)
+	       ((org-at-heading-p)
 		(setq backup-end (save-excursion
 				   (outline-next-heading) (point))
 		      structs-bak nil)
