@@ -24,7 +24,7 @@
 
 ;; To test it, run
 ;;
-;;   M-: (org-export-to-buffer 'e-latex "*Test e-LaTeX") RET
+;;   M-: (org-export-to-buffer 'e-latex "*Test e-LaTeX*") RET
 ;;
 ;; in an org-mode buffer then switch to the buffer to see the LaTeX
 ;; export.  See contrib/lisp/org-export.el for more details on how
@@ -588,7 +588,7 @@ If there's no caption nor label, return the empty string.
 For non-floats, see `org-e-latex--wrap-label'."
   (let ((caption-str (and caption
 			  (org-export-secondary-string
-			   caption 'latex info)))
+			   caption 'e-latex info)))
 	(label-str (if label (format "\\label{%s}" label) "")))
     (cond
      ((and (not caption-str) (not label)) "")
@@ -670,7 +670,7 @@ This function shouldn't be used for floats. See
 CONTENTS is the transcoded contents string. INFO is a plist
 holding export options."
   (let ((title (org-export-secondary-string
-		(plist-get info :title) 'latex info)))
+		(plist-get info :title) 'e-latex info)))
     (concat
      ;; 1. Time-stamp.
      (and (plist-get info :time-stamp-file)
@@ -699,10 +699,10 @@ holding export options."
      (let ((author (and (plist-get info :with-author)
 			(let ((auth (plist-get info :author)))
 			  (and auth (org-export-secondary-string
-				     auth 'latex info)))))
+				     auth 'e-latex info)))))
 	   (email (and (plist-get info :with-email)
 		       (org-export-secondary-string
-			(plist-get info :email) 'latex info))))
+			(plist-get info :email) 'e-latex info))))
        (cond ((and author email (not (string= "" email)))
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     (author (format "\\author{%s}\n" author))
@@ -881,27 +881,24 @@ CONTENTS is nil. INFO is a plist holding contextual information."
      org-e-latex-footnote-separator)
    ;; Use \footnotemark if the footnote has already been defined.
    ;; Otherwise, define it with \footnote command.
-   (let* ((all-seen (plist-get info :seen-footnote-labels))
-	  (label (org-element-get-property :label footnote-reference))
-	  ;; Anonymous footnotes are always new footnotes.
-	  (seenp (and label (member label all-seen)))
-	  (inline-def-p (org-element-get-property
-			 :inline-definition footnote-reference)))
-     (cond
-      (seenp (format "\\footnotemark[%s]" (length seenp)))
-      ;; Inline definitions are secondary strings.
-      (inline-def-p
-       (format "\\footnote{%s}"
-	       (org-trim
-		(org-export-secondary-string inline-def-p 'latex info))))
-      ;; Non-inline footnotes necessarily contain a label.  Retrieve
-      ;; match definition in `:footnotes-labels-alist'.
-      (t
-       (format "\\footnote{%s}"
-	       (org-trim
-		(org-export-data
-		 (cdr (assoc label (plist-get info :footnotes-labels-alist)))
-		 'latex info))))))))
+   (cond
+    ((not (org-export-footnote-first-reference-p footnote-reference info))
+     (format "\\footnotemark[%s]"
+	     (org-export-get-footnote-number footnote-reference info)))
+    ;; Inline definitions are secondary strings.
+    ((eq (org-element-get-property :type footnote-reference) 'inline)
+     (format "\\footnote{%s}"
+	     (org-trim
+	      (org-export-secondary-string
+	       (org-export-get-footnote-definition footnote-reference info)
+	       'e-latex info))))
+    ;; Non-inline footnotes definitions are full Org data.
+    (t
+     (format "\\footnote{%s}"
+	     (org-trim
+	      (org-export-data
+	       (org-export-get-footnote-definition footnote-reference info)
+	       'e-latex info)))))))
 
 
 ;;;; Headline
@@ -940,12 +937,12 @@ holding contextual information."
 		  (concat (car sec) "\n%s" (nth 1 sec))
 		(concat (nth 2 sec) "\n%s" (nth 3 sec)))))))
 	 (text (org-export-secondary-string
-		(org-element-get-property :title headline) 'latex info))
+		(org-element-get-property :title headline) 'e-latex info))
 	 (todo (and (plist-get info :with-todo-keywords)
 		    (let ((todo (org-element-get-property
 				 :todo-keyword headline)))
 		      (and todo
-			   (org-export-secondary-string todo 'latex info)))))
+			   (org-export-secondary-string todo 'e-latex info)))))
 	 (todo-type (and todo (org-element-get-property :todo-type headline)))
 	 (tags (and (plist-get info :with-tags)
 		    (org-element-get-property :tags headline)))
@@ -1065,12 +1062,12 @@ contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((title (org-export-secondary-string
-	       (org-element-get-property :title inlinetask) 'latex info))
+	       (org-element-get-property :title inlinetask) 'e-latex info))
 	(todo (and (plist-get info :with-todo-keywords)
 		   (let ((todo (org-element-get-property
 				:todo-keyword inlinetask)))
 		     (and todo
-			  (org-export-secondary-string todo 'latex info)))))
+			  (org-export-secondary-string todo 'e-latex info)))))
 	(todo-type (org-element-get-property :todo-type inlinetask))
 	(tags (and (plist-get info :with-tags)
 		   (org-element-get-property :tags inlinetask)))
@@ -1122,7 +1119,7 @@ contextual information."
 	 (tag (let ((tag (org-element-get-property :tag item)))
 		(and tag
 		     (format "[%s]" (org-export-secondary-string
-				     tag 'latex info))))))
+				     tag 'e-latex info))))))
     (concat counter "\\item" tag " " checkbox contents)))
 
 
@@ -1153,7 +1150,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 ((string= "figures" value) "\\listoffigures")
 	 ((string= "listings" value) "\\listoflistings"))))
      ((string= key "include")
-      (org-export-included-file keyword 'latex info)))))
+      (org-export-included-file keyword 'e-latex info)))))
 
 
 ;;;; Latex Environment
@@ -1251,7 +1248,7 @@ INFO is a plist holding contextual information. See
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
 	 (imagep (org-export-inline-image-p
-		  link desc org-e-latex-inline-image-extensions))
+		  link org-e-latex-inline-image-extensions))
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
@@ -1277,7 +1274,7 @@ INFO is a plist holding contextual information. See
      ((member type '("custom-id" "target" "radio"))
       (format "\\hyperref[%s]{%s}"
 	      (org-export-solidify-link-text path)
-	      (or desc (org-export-secondary-string path 'latex info))))
+	      (or desc (org-export-secondary-string path 'e-latex info))))
      ;; Fuzzy: With the help of `org-export-resolve-fuzzy-link', find
      ;; the destination of the link.
      ((string= type "fuzzy")
@@ -1289,20 +1286,20 @@ INFO is a plist holding contextual information. See
 		  (org-export-solidify-link-text destination)
 		  (or desc
 		      (org-export-secondary-string
-		       (org-element-get-property :raw-link link) 'latex info))))
+		       (org-element-get-property :raw-link link) 'e-latex info))))
 	 ;; Headline match.
 	 ((integerp destination)
 	  (format "\\hyperref[headline-%d]{%s}"
 		  destination
 		  (or desc
 		      (org-export-secondary-string
-		       (org-element-get-property :raw-link link) 'latex info))))
+		       (org-element-get-property :raw-link link) 'e-latex info))))
 	 ;; No match.
 	 (t (format "\\texttt{%s}"
 		    (or desc
 			(org-export-secondary-string
 			 (org-element-get-property :raw-link link)
-			 'latex info)))))))
+			 'e-latex info)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -1522,7 +1519,7 @@ contextual information."
 	    (caption-str (and caption
 			      (org-export-secondary-string
 			       (org-element-get-property :caption src-block)
-			       'latex info))))
+			       'e-latex info))))
 	(concat (format "\\lstset{%s}\n"
 			(org-e-latex--make-option-string
 			 (append org-e-latex-listings-options
@@ -1728,7 +1725,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			  (org-element-parse-secondary-string
 			   cell
 			   (cdr (assq 'table org-element-string-restrictions)))
-			  'latex info))
+			  'e-latex info))
 		       (org-split-string row "[ \t]*|[ \t]*"))))
 		  (org-split-string clean-table "\n"))
 		 `(:tstart nil :tend nil
@@ -1834,7 +1831,7 @@ CONTENTS is nil. INFO is a plist holding contextual information."
 		      (org-remove-indentation
 		       (org-export-secondary-string
 			(org-element-get-property :value verse-block)
-			'latex info)))))
+			'e-latex info)))))
      (while (string-match "^[ \t]+" contents)
        (let ((new-str (format "\\hspace*{%dem}"
 			      (length (match-string 0 contents)))))

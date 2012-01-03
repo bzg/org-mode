@@ -72,50 +72,54 @@
     ("\\.\\.\\." . "&#x2026;"))		; hellip
   "Regular expressions for special string conversion.")
 
-(defconst org-odt-lib-dir (file-name-directory load-file-name))
-(defconst org-odt-styles-dir
-  (let* ((styles-dir1 (expand-file-name "../etc/styles/" org-odt-lib-dir)) ; git
-	 (styles-dir2 (expand-file-name "./etc/styles/" org-odt-lib-dir)) ; elpa
-	 (styles-dir3 (expand-file-name "./etc/org/" data-directory)) ; system
-	 (styles-dir
-	  (catch 'styles-dir
-	    (mapc (lambda (styles-dir)
-		    (when (and (file-readable-p
-				(expand-file-name
-				 "OrgOdtContentTemplate.xml" styles-dir))
-			       (file-readable-p
-				(expand-file-name
-				 "OrgOdtStyles.xml" styles-dir)))
-		      (throw 'styles-dir styles-dir)))
-		  (list styles-dir1 styles-dir2 styles-dir3))
-	    nil)))
-    (unless styles-dir
-      (error "Cannot find factory styles file. Check package dir layout"))
-    styles-dir)
-  "Directory that holds auxiliary XML files used by the ODT exporter.
+(defconst org-odt-lib-dir (file-name-directory load-file-name)
+  "Location of ODT exporter.
+Use this to infer values of `org-odt-styles-dir' and
+`org-export-odt-schema-dir'.")
 
-This directory contains the following XML files -
- \"OrgOdtStyles.xml\" and \"OrgOdtContentTemplate.xml\".  These
- XML files are used as the default values of
- `org-export-odt-styles-file' and
- `org-export-odt-content-template-file'.
+(defvar org-odt-data-dir nil
+  "Data directory for ODT exporter.
+Use this to infer values of `org-odt-styles-dir' and
+`org-export-odt-schema-dir'.")
 
-The default value of this variable varies depending on the
-version of org in use.  Note that the user could be using org
-from one of: org's own private git repository, GNU ELPA tar or
-standard Emacs.")
+(defconst org-odt-schema-dir-list
+  (list
+   (and org-odt-data-dir
+	(expand-file-name "./schema/" org-odt-data-dir)) ; bail out
+   (eval-when-compile
+     (and (boundp 'org-odt-data-dir) org-odt-data-dir ; see make install
+	  (expand-file-name "./schema/" org-odt-data-dir)))
+   (expand-file-name "../contrib/odt/etc/schema/" org-odt-lib-dir) ; git
+   )
+  "List of directories to search for OpenDocument schema files.
+Use this list to set the default value of
+`org-export-odt-schema-dir'.  The entries in this list are
+populated heuristically based on the values of `org-odt-lib-dir'
+and `org-odt-data-dir'.")
 
 (defcustom org-export-odt-schema-dir
-  (let ((schema-dir (expand-file-name
-		     "../contrib/odt/etc/schema/" org-odt-lib-dir)))
-    (if (and (file-readable-p
-	      (expand-file-name "od-manifest-schema-v1.2-cs01.rnc" schema-dir))
-	     (file-readable-p
-	      (expand-file-name "od-schema-v1.2-cs01.rnc" schema-dir))
-	     (file-readable-p
-	      (expand-file-name "schemas.xml" schema-dir)))
-	schema-dir
-      (prog1 nil (message "Unable to locate OpenDocument schema files."))))
+  (let* ((schema-dir
+	  (catch 'schema-dir
+	    (message "Debug (org-odt): Searching for OpenDocument schema files...")
+	    (mapc
+	     (lambda (schema-dir)
+	       (when schema-dir
+		 (message "Debug (org-odt): Trying %s..." schema-dir)
+		 (when (and (file-readable-p
+			     (expand-file-name "od-manifest-schema-v1.2-cs01.rnc"
+					       schema-dir))
+			    (file-readable-p
+			     (expand-file-name "od-schema-v1.2-cs01.rnc"
+					       schema-dir))
+			    (file-readable-p
+			     (expand-file-name "schemas.xml" schema-dir)))
+		   (message "Debug (org-odt): Using schema files under %s"
+			    schema-dir)
+		   (throw 'schema-dir schema-dir))))
+	     org-odt-schema-dir-list)
+	    (message "Debug (org-odt): No OpenDocument schema files installed")
+	    nil)))
+    schema-dir)
   "Directory that contains OpenDocument schema files.
 
 This directory contains:
@@ -129,9 +133,10 @@ of OpenDocument XML takes place based on the value
 `rng-nxml-auto-validate-flag'.
 
 The default value of this variable varies depending on the
-version of org in use.  The OASIS schema files are available only
-in the org's private git repository.  It is *not* bundled with
-GNU ELPA tar or standard Emacs distribution."
+version of org in use and is initialized from
+`org-odt-schema-dir-list'.  The OASIS schema files are available
+only in the org's private git repository.  It is *not* bundled
+with GNU ELPA tar or standard Emacs distribution."
   :type '(choice
 	  (const :tag "Not set" nil)
 	  (directory :tag "Schema directory"))
@@ -150,13 +155,66 @@ Also add it to `rng-schema-locating-files'."
 		(file-readable-p
 		 (expand-file-name "schemas.xml" schema-dir)))
 	       schema-dir
-	     (prog1 nil
-	       (message "Warning (org-odt): Unable to locate OpenDocument schema files.")))))
+	     (when value
+	       (message "Error (org-odt): %s has no OpenDocument schema files"
+			value))
+	     nil)))
     (when org-export-odt-schema-dir
       (eval-after-load 'rng-loc
 	'(add-to-list 'rng-schema-locating-files
 		      (expand-file-name "schemas.xml"
 					org-export-odt-schema-dir))))))
+
+(defconst org-odt-styles-dir-list
+  (list
+   (and org-odt-data-dir
+	(expand-file-name "./styles/" org-odt-data-dir)) ; bail out
+   (eval-when-compile
+     (and (boundp 'org-odt-data-dir) org-odt-data-dir ; see make install
+	  (expand-file-name "./styles/" org-odt-data-dir)))
+   (expand-file-name "../etc/styles/" org-odt-lib-dir) ; git
+   (expand-file-name "./etc/styles/" org-odt-lib-dir)  ; elpa
+   (expand-file-name "./org/" data-directory)	       ; system
+   )
+  "List of directories to search for OpenDocument styles files.
+See `org-odt-styles-dir'.  The entries in this list are populated
+heuristically based on the values of `org-odt-lib-dir' and
+`org-odt-data-dir'.")
+
+(defconst org-odt-styles-dir
+  (let* ((styles-dir
+	  (catch 'styles-dir
+	    (message "Debug (org-odt): Searching for OpenDocument styles files...")
+	    (mapc (lambda (styles-dir)
+		    (when styles-dir
+		      (message "Debug (org-odt): Trying %s..." styles-dir)
+		      (when (and (file-readable-p
+				  (expand-file-name
+				   "OrgOdtContentTemplate.xml" styles-dir))
+				 (file-readable-p
+				  (expand-file-name
+				   "OrgOdtStyles.xml" styles-dir)))
+			(message "Debug (org-odt): Using styles under %s"
+				 styles-dir)
+			(throw 'styles-dir styles-dir))))
+		  org-odt-styles-dir-list)
+	    nil)))
+    (unless styles-dir
+      (error "Error (org-odt): Cannot find factory styles files. Aborting."))
+    styles-dir)
+  "Directory that holds auxiliary XML files used by the ODT exporter.
+
+This directory contains the following XML files -
+ \"OrgOdtStyles.xml\" and \"OrgOdtContentTemplate.xml\".  These
+ XML files are used as the default values of
+ `org-export-odt-styles-file' and
+ `org-export-odt-content-template-file'.
+
+The default value of this variable varies depending on the
+version of org in use and is initialized from
+`org-odt-styles-dir-list'.  Note that the user could be using org
+from one of: org's own private git repository, GNU ELPA tar or
+standard Emacs.")
 
 (defvar org-odt-file-extensions
   '(("odt" . "OpenDocument Text")
@@ -1383,7 +1441,7 @@ value of `org-export-odt-fontify-srcblocks."
 	(org-lparse-insert-list-table
 	 `((,(org-odt-format-entity
 	      (if caption "CaptionedDisplayFormula" "DisplayFormula")
-	      href width height caption nil)
+	      href width height :caption caption :label nil)
 	    ,(if (not label) ""
 	       (org-odt-format-entity-caption label nil "__MathFormula__"))))
 	 nil nil nil "OrgEquation" nil '((1 "c" 8) (2 "c" 1)))
@@ -1585,7 +1643,7 @@ ATTR is a string of other attributes of the a element."
    (expand-file-name
     (concat (sha1 file-name) "." (file-name-extension file-name)) "Pictures")))
 
-(defun org-export-odt-format-image (src href &optional embed-as)
+(defun org-export-odt-format-image (src href)
   "Create image tag with source and attributes."
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
@@ -1593,14 +1651,27 @@ ATTR is a string of other attributes of the a element."
 	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src))
 	   (latex-frag (org-find-text-property-in-string
-			      'org-latex-src src))
+			'org-latex-src src))
 	   (category (and latex-frag "__DvipngImage__"))
-	   (embed-as (or embed-as
-			 (if latex-frag
-			     (or (org-find-text-property-in-string
-				  'org-latex-src-embed-type src) 'character)
-			   'paragraph)))
 	   (attr-plist (org-lparse-get-block-params attr))
+	   (user-frame-anchor
+	    (car (assoc-string (plist-get attr-plist :anchor)
+			       (if (or caption label)
+				   '(("paragraph") ("page"))
+				 '(("character") ("paragraph") ("page"))) t)))
+	   (user-frame-style
+	    (and user-frame-anchor (plist-get attr-plist :style)))
+	   (user-frame-attrs
+	    (and user-frame-anchor (plist-get attr-plist :attributes)))
+	   (user-frame-params
+	    (list user-frame-style user-frame-attrs user-frame-anchor))
+	   (embed-as (cond
+		      (latex-frag
+		       (symbol-name
+			(or (org-find-text-property-in-string
+			     'org-latex-src-embed-type src) 'character)))
+		      (user-frame-anchor)
+		      (t "paragraph")))
 	   (size (org-odt-image-size-from-file
 		  src (plist-get attr-plist :width)
 		  (plist-get attr-plist :height)
@@ -1609,15 +1680,12 @@ ATTR is a string of other attributes of the a element."
       (when latex-frag
 	(setq href (org-propertize href :title "LaTeX Fragment"
 				   :description latex-frag)))
-      (cond
-       ((not (or caption label))
-	(case embed-as
-	  (paragraph (org-odt-format-entity "DisplayImage" href width height))
-	  (character (org-odt-format-entity "InlineImage" href width height))
-	  (t (error "Unknown value for embed-as %S" embed-as))))
-       (t
+      (let ((frame-style-handle (concat (and (or caption label) "Captioned")
+					embed-as "Image")))
 	(org-odt-format-entity
-	 "CaptionedDisplayImage" href width height caption label category))))))
+	 frame-style-handle href width height
+	 :caption caption :label label :category category
+	 :user-frame-params user-frame-params)))))
 
 (defun org-odt-format-object-description (title description)
   (concat (and title (org-odt-format-tags
@@ -1663,31 +1731,55 @@ ATTR is a string of other attributes of the a element."
 		content) nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\"")))
 
 (defvar org-odt-entity-frame-styles
-  '(("InlineImage" "__Figure__" ("OrgInlineImage" nil "as-char"))
-    ("DisplayImage" "__Figure__" ("OrgDisplayImage" nil "paragraph"))
-    ("CaptionedDisplayImage" "__Figure__"
+  '(("CharacterImage" "__Figure__" ("OrgInlineImage" nil "as-char"))
+    ("ParagraphImage" "__Figure__" ("OrgDisplayImage" nil "paragraph"))
+    ("PageImage" "__Figure__" ("OrgPageImage" nil "page"))
+    ("CaptionedParagraphImage" "__Figure__"
      ("OrgCaptionedImage"
       " style:rel-width=\"100%\" style:rel-height=\"scale\"" "paragraph")
-     ("OrgImageCaptionFrame"))
+     ("OrgImageCaptionFrame" nil "paragraph"))
+    ("CaptionedPageImage" "__Figure__"
+     ("OrgCaptionedImage"
+      " style:rel-width=\"100%\" style:rel-height=\"scale\"" "paragraph")
+     ("OrgPageImageCaptionFrame" nil "page"))
     ("InlineFormula" "__MathFormula__" ("OrgInlineFormula" nil "as-char"))
     ("DisplayFormula" "__MathFormula__" ("OrgDisplayFormula" nil "as-char"))
     ("CaptionedDisplayFormula" "__MathFormula__"
      ("OrgCaptionedFormula" nil "paragraph")
      ("OrgFormulaCaptionFrame" nil "as-char"))))
 
-(defun org-odt-format-entity (entity href width height
-				     &optional caption label category)
-  (let* ((entity-style (assoc entity org-odt-entity-frame-styles))
-	 (entity-frame (apply 'org-odt-format-frame
-			      href width height (nth 2 entity-style))))
-    (if (not (or caption label)) entity-frame
+(defun org-odt-merge-frame-params(default-frame-params user-frame-params)
+  (if (not user-frame-params) default-frame-params
+    (assert (= (length default-frame-params) 3))
+    (assert (= (length user-frame-params) 3))
+    (loop for user-frame-param in user-frame-params
+	  for default-frame-param in default-frame-params
+	  collect (or user-frame-param default-frame-param))))
+
+(defun* org-odt-format-entity (entity href width height
+				      &key caption label category
+				      user-frame-params)
+  (let* ((entity-style (assoc-string entity org-odt-entity-frame-styles t))
+	 default-frame-params frame-params)
+    (cond
+     ((not (or caption label))
+      (setq default-frame-params (nth 2 entity-style))
+      (setq frame-params (org-odt-merge-frame-params
+			  default-frame-params user-frame-params))
+      (apply 'org-odt-format-frame href width height frame-params))
+     (t
+      (setq default-frame-params (nth 3 entity-style))
+      (setq frame-params (org-odt-merge-frame-params
+			  default-frame-params user-frame-params))
       (apply 'org-odt-format-textbox
 	     (org-odt-format-stylized-paragraph
 	      'illustration
-	      (concat entity-frame
-		      (org-odt-format-entity-caption
-		       label caption (or category (nth 1 entity-style)))))
-	     width height (nth 3 entity-style)))))
+	      (concat
+	       (apply 'org-odt-format-frame href width height
+		      (nth 2 entity-style))
+	       (org-odt-format-entity-caption
+		label caption (or category (nth 1 entity-style)))))
+	     width height frame-params)))))
 
 (defvar org-odt-embedded-images-count 0)
 (defun org-odt-copy-image-file (path)

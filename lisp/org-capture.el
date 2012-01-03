@@ -1417,7 +1417,7 @@ The template may still contain \"%?\" for cursor positioning."
 		(or (equal (char-before) ?:) (insert ":"))
 		(insert ins)
 		(or (equal (char-after) ?:) (insert ":"))
-		(and (org-on-heading-p) (org-set-tags nil 'align)))))
+		(and (org-at-heading-p) (org-set-tags nil 'align)))))
 	   ((equal char "C")
 	    (cond ((= (length clipboards) 1) (insert (car clipboards)))
 		  ((> (length clipboards) 1)

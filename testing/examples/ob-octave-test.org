@@ -43,3 +43,13 @@ Input elisp nil
 #+begin_src octave :exports results :results silent :var s='nil
 ans = s
 #+end_src
+
+
+* Graphical tests
+#+begin_src octave :results graphics :file chart.png
+sombrero;
+#+end_src
+
+#+begin_src octave :session
+sombrero;
+#+end_src

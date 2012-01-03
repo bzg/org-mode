@@ -1,22 +1,23 @@
 #+title:    The Library of Babel
 #+author:     Org-mode People
-#+STARTUP:  oddeven hideblocks
+#+STARTUP:  hideblocks
 
 * Introduction
 
-  The Library of Babel is an extensible collection of ready-made and
-  easily-shortcut-callable source-code blocks for handling common tasks.
-  Org-babel comes pre-populated with the source-code blocks located in this
-  file. It is possible to add source-code blocks from any org-mode file to
-  the library by calling =(org-babel-lob-ingest "path/to/file.org")=.
-  
-  This file is included in worg mainly less for viewing through the web
-  interface, and more for contribution through the worg git repository.  If
-  you have code snippets that you think others may find useful please add
-  them to this file and [[file:~/src/worg/worg-git.org::contribute-to-worg][contribute them]] to worg.
-  
-  The raw Org-mode text of this file can be downloaded at
-  [[repofile:contrib/babel/library-of-babel.org][library-of-babel.org]]
+The Library of Babel is an extensible collection of ready-made and
+easily-shortcut-callable source-code blocks for handling common tasks.
+Org-babel comes pre-populated with the source-code blocks located in
+this file.  It is possible to add source-code blocks from any org-mode
+file to the library by calling =(org-babel-lob-ingest
+"path/to/file.org")=.
+
+This file is included in worg mainly less for viewing through the web
+interface, and more for contribution through the worg git repository.
+If you have code snippets that you think others may find useful please
+add them to this file and [[file:~/src/worg/worg-git.org::contribute-to-worg][contribute them]] to worg.
+
+The raw Org-mode text of this file can be downloaded at
+[[repofile:contrib/babel/library-of-babel.org][library-of-babel.org]]
 
 * Simple
 
@@ -63,7 +64,7 @@ as a table in traditional Org-mode table syntax.
 
 ** Remote files
 
-**** json
+*** json
 
 Read local or remote file in [[http://www.json.org/][json]] format into emacs-lisp objects.
 
@@ -83,14 +84,14 @@ Read local or remote file in [[http://www.json.org/][json]] format into emacs-li
       (json-read))))
 #+end_src
 
-**** Google docs
+*** Google docs
 
 The following code blocks make use of the [[http://code.google.com/p/googlecl/][googlecl]] Google command line
 tool.  This tool provides functionality for accessing Google services
 from the command line, and the following code blocks use /googlecl/
 for reading from and writing to Google docs with Org-mode code blocks.
 
-****** Read a document from Google docs
+**** Read a document from Google docs
 
 The =google= command seems to be throwing "Moved Temporarily" errors
 when trying to download textual documents, but this is working fine
@@ -120,7 +121,7 @@ document as a string.
 
 : #+call: gdoc-read(title="loremi", :format "txt")
 
-****** Write a document to a Google docs
+**** Write a document to a Google docs
 
 Write =data= to a google document named =title=.  If =data= is tabular
 it will be saved to a spreadsheet, otherwise it will be saved as a
@@ -147,18 +148,18 @@ example usage
 :   (flet ((fib (m) (if (< m 2) 1 (+ (fib (- m 1)) (fib (- m 2))))))
 :     (mapcar (lambda (el) (list el (fib el))) (number-sequence 0 (- n 1))))
 : #+end_src
-: 
+:
 : #+call: gdoc-write(title="fibs", data=fibs(n=10))
 
 * Plotting code
 
 ** R
 
-  Plot column 2 (y axis) against column 1 (x axis). Columns 3 and
-  beyond, if present, are ignored.
+Plot column 2 (y axis) against column 1 (x axis). Columns 3 and
+beyond, if present, are ignored.
 
-#+name: R-plot(data=R-plot-example-data)
-#+begin_src R
+#+name: R-plot
+#+begin_src R :var data=R-plot-example-data
 plot(data)
 #+end_src
 
@@ -275,7 +276,7 @@ are optional.
   %head
   %foot
   %lastfoot
-  
+
   %table
   \\end{longtable}\n"
    (list
@@ -295,7 +296,6 @@ are optional.
                                lis)) table)
                    (list :lend " \\\\" :sep " & " :hline hline)))))
 #+end_src
-
 
 *** booktabs-notes
 
@@ -350,7 +350,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
       )))
 #+end_src
 
-** Elegant lisp for transposing a matrix.
+** Elegant lisp for transposing a matrix
 
 #+tblname: transpose-example
 | 1 | 2 | 3 |
@@ -405,7 +405,7 @@ span. Note the use of LaTeX, rather than Org-mode, markup.
    :PROPERTIES:
    :AUTHOR: Luke Crook
    :END:
-   
+
 This function will attempt to retrieve the entire commit log for the
 file associated with the current buffer and insert this log into the
 export. The function uses the Emacs VC commands to interface to the
@@ -428,7 +428,7 @@ Git. 'limit' is currently unsupported.
         (setq vc-fileset (vc-deduce-fileset t)) ; FIXME: Why t? --Stef
         (setq backend (car vc-fileset))
         (setq files (cadr vc-fileset)))
-      (with-temp-buffer 
+      (with-temp-buffer
         (let ((status (vc-call-backend
                        backend 'print-log files (current-buffer))))
           (when (and (processp status)   ; Make sure status is a process
@@ -440,13 +440,13 @@ Git. 'limit' is currently unsupported.
 
 ** Trivial python code blocks
 
-#+name: python-identity(a=1)
-#+begin_src python
+#+name: python-identity
+#+begin_src python :var a=1
 a
 #+end_src
 
-#+name: python-add(a=1, b=2)
-#+begin_src python
+#+name: python-add
+#+begin_src python :var a=1 :var b=2
 a + b
 #+end_src
 
@@ -476,7 +476,7 @@ a + b
 
 The =elispgantt= source block was sent to the mailing list by Eric
 Fraga.  It was modified slightly by Tom Dye.
- 
+
 #+name: elispgantt
 #+begin_src emacs-lisp :var table=gantttest
   (let ((dates "")
@@ -580,5 +580,5 @@ Fraga.  It was modified slightly by Tom Dye.
 
 ** From Org's contrib/babel/langs
 
-- ob-oz.el, by Torsten Anders and Eric Schulte 
+- ob-oz.el, by Torsten Anders and Eric Schulte
 - ob-fomus.el, by Torsten Anders

@@ -2361,7 +2361,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 					  (let ((next (org-footnote-get-next-reference)))
 					    (and next (= (nth 1 next) (nth 2 ref)))))
 			  org-export-latex-footnote-separator ""))))
-	    (when (org-on-heading-p)
+	    (when (org-at-heading-p)
 	      (setq fnote (concat (org-export-latex-protect-string "\\protect")
 				  fnote)))
 	    ;; Ensure a footnote at column 0 cannot end a list

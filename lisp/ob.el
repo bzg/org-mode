@@ -1979,6 +1979,12 @@ parameters when merging lists."
      '(results exports tangle noweb padline cache shebang comments))
     params))
 
+(defvar *org-babel-use-quick-and-dirty-noweb-expansion* nil
+  "Set to true to use regular expressions to expand noweb references.
+This results in much faster noweb reference expansion but does
+not properly allow code blocks to inherit the \":noweb-ref\"
+header argument from buffer or subtree wide properties.")
+
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.
 
@@ -2057,18 +2063,28 @@ block but are passed literally to the \"example-block\"."
 		  (let (expansion)
 		    (save-excursion
 		      (goto-char (point-min))
-		      (org-babel-map-src-blocks nil
-			(let ((i (org-babel-get-src-block-info 'light)))
-			  (when (equal (or (cdr (assoc :noweb-ref (nth 2 i)))
-					   (nth 4 i))
-				       source-name)
-			    (let ((body (org-babel-expand-noweb-references i)))
+		      (if *org-babel-use-quick-and-dirty-noweb-expansion*
+			  (while (re-search-forward rx nil t)
+			    (let* ((i (org-babel-get-src-block-info 'light))
+				   (body (org-babel-expand-noweb-references i)))
 			      (if comment
 				  ((lambda (cs)
 				     (concat (c-wrap (car cs)) "\n"
 					     body "\n" (c-wrap (cadr cs))))
 				   (org-babel-tangle-comment-links i))
-				(setq expansion (concat expansion body))))))))
+				(setq expansion (concat expansion body)))))
+			(org-babel-map-src-blocks nil
+			  (let ((i (org-babel-get-src-block-info 'light)))
+			    (when (equal (or (cdr (assoc :noweb-ref (nth 2 i)))
+					     (nth 4 i))
+					 source-name)
+			      (let ((body (org-babel-expand-noweb-references i)))
+				(if comment
+				    ((lambda (cs)
+				       (concat (c-wrap (car cs)) "\n"
+					       body "\n" (c-wrap (cadr cs))))
+				     (org-babel-tangle-comment-links i))
+				  (setq expansion (concat expansion body)))))))))
 		    expansion)
 		  ;; possibly raise an error if named block doesn't exist
 		  (if (member lang org-babel-noweb-error-langs)

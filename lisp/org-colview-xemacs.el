@@ -707,7 +707,7 @@ Where possible, use the standard interface for changing this line."
       (beginning-of-line 1)
       ;; `next-line' is needed here, because it skips invisible line.
       (condition-case nil (org-no-warnings (next-line 1)) (error nil))
-      (setq hidep (org-on-heading-p 1)))
+      (setq hidep (org-at-heading-p 1)))
     (eval form)
     (and hidep (hide-entry))))
 
@@ -1036,7 +1036,7 @@ display, or in the #+COLUMNS line of the current buffer."
 	      (replace-match (concat "#+COLUMNS: " fmt) t t))
 	    (unless (> cnt 0)
 	      (goto-char (point-min))
-	      (or (org-on-heading-p t) (outline-next-heading))
+	      (or (org-at-heading-p t) (outline-next-heading))
 	      (let ((inhibit-read-only t))
 		(insert-before-markers "#+COLUMNS: " fmt "\n")))
 	    (org-set-local 'org-columns-default-format fmt))))))

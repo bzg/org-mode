@@ -15,6 +15,8 @@
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
+;; This file is not part of GNU Emacs.
+
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -260,7 +262,7 @@ CONTENTS is the contents of the element."
 
 Return a list whose car is `footnote-definition' and cdr is
 a plist containing `:label', `:begin' `:end', `:contents-begin',
-`contents-end' and `:post-blank' keywords."
+`:contents-end' and `:post-blank' keywords."
   (save-excursion
     (let* ((f-def (org-footnote-at-definition-p))
 	   (label (car f-def))
@@ -301,8 +303,8 @@ containing `:raw-value', `:title', `:begin', `:end',
 `:pre-blank', `:hiddenp', `:contents-begin' and `:contents-end',
 `:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
 `:scheduled', `:deadline', `:timestamp', `:clock', `:category',
-`:custom-id', `:id', `:quotedp', `:archivedp', `:commentedp',
-`:last-sibling-p' and `:footnote-section-p' keywords.
+`:quotedp', `:archivedp', `:commentedp' and `:footnote-section-p'
+keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in lowercase, the underscores replaced with hyphens
@@ -444,8 +446,14 @@ CONTENTS is the contents of the element."
 
 Return a list whose car is `inlinetask' and cdr is a plist
 containing `:raw-value', `:title', `:begin', `:end', `:hiddenp',
-`:contents-begin' and `:contents-end', `:level', `:with-priority',
-`tags:', `todo-keyword', `todo-type', and `:post-blank' keywords.
+`:contents-begin' and `:contents-end', `:level', `:priority',
+`:raw-value', `:tags', `:todo-keyword', `:todo-type',
+`:scheduled', `:deadline', `:timestamp', `:clock' and
+`:post-blank' keywords.
+
+The plist also contains any property set in the property drawer,
+with its name in lowercase, the underscores replaced with hyphens
+and colons at the beginning (i.e. `:custom-id').
 
 Assume point is at beginning of the inline task."
   (save-excursion
@@ -456,6 +464,23 @@ Assume point is at beginning of the inline task."
 	   (todo-type (and todo
 			   (if (member todo org-done-keywords) 'done 'todo)))
 	   (raw-value (nth 4 components))
+	   (standard-props (let (plist)
+			     (mapc
+			      (lambda (p)
+				(let ((p-name (downcase (car p))))
+				  (while (string-match "_" p-name)
+				    (setq p-name
+					  (replace-match "-" nil nil p-name)))
+				  (setq p-name (intern (concat ":" p-name)))
+				  (setq plist
+					(plist-put plist p-name (cdr p)))))
+			      (org-entry-properties nil 'standard))
+			     plist))
+	   (time-props (org-entry-properties nil 'special "CLOCK"))
+	   (scheduled (cdr (assoc "SCHEDULED" time-props)))
+	   (deadline (cdr (assoc "DEADLINE" time-props)))
+	   (clock (cdr (assoc "CLOCK" time-props)))
+	   (timestamp (cdr (assoc "TIMESTAMP" time-props)))
 	   (title (org-element-parse-secondary-string
 		   raw-value
 		   (cdr (assq 'inlinetask org-element-string-restrictions))))
@@ -477,11 +502,16 @@ Assume point is at beginning of the inline task."
 			 :contents-begin ,contents-begin
 			 :contents-end ,contents-end
 			 :level ,(nth 1 components)
-			 :with-priority ,(nth 3 components)
-			 :with-tags ,(nth 5 components)
+			 :priority ,(nth 3 components)
+			 :tags ,(nth 5 components)
 			 :todo-keyword ,todo
 			 :todo-type ,todo-type
+			 :scheduled ,scheduled
+			 :deadline ,deadline
+			 :timestamp ,timestamp
+			 :clock ,clock
 			 :post-blank ,(count-lines pos-before-blank end)
+			 ,@standard-props
 			 ,@(cadr keywords))))))
 
 (defun org-element-inlinetask-interpreter (inlinetask contents)
@@ -517,8 +547,9 @@ CONTENTS is the contents of inlinetask."
 STRUCT is the structure of the plain list.
 
 Return a list whose car is `item' and cdr is a plist containing
-`:begin', `:end', `:contents-begin', `:contents-end',
-`:checkbox', `:counter', `:tag' and `:hiddenp'.
+`:bullet', `:begin', `:end', `:contents-begin', `:contents-end',
+`:checkbox', `:counter', `:tag', `:raw-tag', `:structure',
+`:hiddenp' and `:post-blank' keywords.
 
 Assume point is at the beginning of the item."
   (save-excursion
@@ -556,13 +587,14 @@ Assume point is at the beginning of the item."
 				(skip-chars-backward " \r\t\n")
 				(forward-line)
 				(point))))
-      ;; Note: CONTENTS-BEGIN and CONTENTS-END can be mixed up in the
-      ;; case of an empty item separated from the next by a blank
-      ;; line.
       (list 'item
 	    `(:bullet ,bullet
 		      :begin ,begin
 		      :end ,end
+		      ;; CONTENTS-BEGIN and CONTENTS-END may be mixed
+		      ;; up in the case of an empty item separated
+		      ;; from the next by a blank line.  Thus, ensure
+		      ;; the former is always the smallest of two.
 		      :contents-begin ,(min contents-begin contents-end)
 		      :contents-end ,(max contents-begin contents-end)
 		      :checkbox ,checkbox
@@ -2331,9 +2363,9 @@ regexp matching one object can also match the other object.")
   "List of affiliated keywords as strings.")
 
 (defconst org-element-keyword-translation-alist
-  '(("tblname" . "name") ("srcname" . "name") ("resname" . "name")
-    ("source" . "name") ("result" . "results") ("headers" . "header")
-    ("label" . "name"))
+  '(("data" . "name")  ("label" . "name") ("resname" . "name")
+    ("source" . "name") ("srcname" . "name") ("tblname" . "name")
+    ("result" . "results") ("headers" . "header"))
   "Alist of usual translations for keywords.
 The key is the old name and the value the new one.  The property
 holding their value will be named after the translated name.")
@@ -2775,7 +2807,7 @@ the current buffer."
     (insert string)
     (org-element-parse-objects (point-min) (point-max) nil restriction)))
 
-(defun org-element-map (data types fun &optional options first-match)
+(defun org-element-map (data types fun &optional info first-match)
   "Map a function on selected elements or objects.
 
 DATA is the parsed tree, as returned by, i.e,
@@ -2785,7 +2817,7 @@ matching element or object.  It must accept two arguments: the
 element or object itself and a plist holding contextual
 information.
 
-When optional argument OPTIONS is non-nil, it should be a plist
+When optional argument INFO is non-nil, it should be a plist
 holding export options.  In that case, parts of the parse tree
 not exportable according to that property list will be skipped
 and files included through a keyword will be visited.
@@ -2796,9 +2828,8 @@ match for which FUN doesn't return nil, and return that value.
 Nil values returned from FUN are ignored in the result."
   ;; Ensure TYPES is a list, even of one element.
   (unless (listp types) (setq types (list types)))
-  ;; Recursion depth is determined by TYPE-CATEGORY, to avoid
-  ;; unnecessary steps.
-  (let* ((type-category
+  ;; Recursion depth is determined by --CATEGORY.
+  (let* ((--category
 	  (cond
 	   ((loop for type in types
 		  always (memq type org-element-greater-elements))
@@ -2807,97 +2838,98 @@ Nil values returned from FUN are ignored in the result."
 		  always (memq type org-element-all-elements))
 	    'elements)
 	   (t 'objects)))
-	 walk-tree                      ; For byte-compiler
-	 acc                            ; Accumulate results into ACC.
+	 walk-tree			; For byte-compiler
+	 --acc
 	 (accumulate-maybe
 	  (function
-	   ;; Check if TYPE is matching among TYPES.  If so, apply FUN
-	   ;; to BLOB and accumulate return value into ACC.  INFO is
-	   ;; the communication channel.
-	   (lambda (type types fun blob info)
-	     (when (memq type types)
-	       (let ((result (funcall fun blob info)))
-		 (cond
-		  ((not result))
-		  (first-match (throw 'first-match result))
-		  (t (push result acc))))))))
+	   (lambda (--type types fun --blob --local)
+	     ;; Check if TYPE is matching among TYPES.  If so, apply
+	     ;; FUN to --BLOB and accumulate return value
+	     ;; into --ACC.  --LOCAL is the communication channel.
+	     (when (memq --type types)
+	       (let ((result (funcall fun --blob --local)))
+		 (cond ((not result))
+		       (first-match (throw 'first-match result))
+		       (t (push result --acc))))))))
 	 (walk-tree
 	  (function
-	   ;; Recursively walk DATA.  INFO, if non-nil, is a plist
-	   ;; holding contextual information.
-	   (lambda (data info)
+	   (lambda (--data --local)
+	     ;; Recursively walk DATA.  --LOCAL, if non-nil, is
+	     ;; a plist holding contextual information.
 	     (mapc
-	      (lambda (blob)
-		(let ((type (if (stringp blob) 'plain-text (car blob))))
-		  ;; Determine if a recursion into BLOB is possible
-		  ;; and allowed.
+	      (lambda (--blob)
+		(let ((--type (if (stringp --blob) 'plain-text (car --blob))))
+		  ;; Determine if a recursion into --BLOB is
+		  ;; possible and allowed.
 		  (cond
 		   ;; Element or object not exportable.
-		   ((and info (org-export-skip-p blob info)))
-		   ;; Archived headline: skip it.
+		   ((and info (org-export-skip-p --blob info)))
+		   ;; Archived headline: Maybe apply fun on it, but
+		   ;; skip contents.
 		   ((and info
-			 (eq type 'headline)
-			 (and (eq (plist-get info :with-archived-trees)
-				  'headline)
-			      (org-element-get-property :archivedp blob)))
-		    (funcall accumulate-maybe type types fun blob info))
+			 (eq --type 'headline)
+			 (eq (plist-get info :with-archived-trees) 'headline)
+			 (org-element-get-property :archivedp --blob))
+		    (funcall accumulate-maybe --type types fun --blob --local))
 		   ;; At an include keyword: apply mapping to its
 		   ;; contents.
-		   ((and info
-			 (eq type 'keyword)
+		   ((and --local
+			 (eq --type 'keyword)
 			 (string=
-			  (downcase (org-element-get-property :key blob))
+			  (downcase (org-element-get-property :key --blob))
 			  "include"))
-		    (funcall accumulate-maybe type types fun blob info)
-		    (let* ((data (org-export-parse-included-file blob info))
-			   (value (org-element-get-property :value blob))
-			   (file (and (string-match "^\"\\(\\S-+\\)\"" value)
-				      (match-string 1 value))))
+		    (funcall accumulate-maybe --type types fun --blob --local)
+		    (let* ((--data
+			    (org-export-parse-included-file --blob --local))
+			   (--value (org-element-get-property :value --blob))
+			   (--file
+			    (and (string-match "^\"\\(\\S-+\\)\"" --value)
+				 (match-string 1 --value))))
 		      (funcall
-		       walk-tree
-		       data
+		       walk-tree --data
 		       (org-combine-plists
-			info
+			--local
 			;; Store full path of already included files
 			;; to avoid recursive file inclusion.
 			`(:included-files
-			  ,(cons (expand-file-name file)
-				 (plist-get info :included-files))
+			  ,(cons (expand-file-name --file)
+				 (plist-get --local :included-files))
 			  ;; Ensure that a top-level headline in the
 			  ;; included file becomes a direct child of
 			  ;; the current headline in the buffer.
 			  :headline-offset
 			  ,(- (+ (plist-get
-				  (plist-get info :inherited-properties) :level)
-				 (or (plist-get info :headline-offset) 0))
-			      (1- (org-export-get-min-level data info))))))))
-		   ;; Limiting recursion to greater elements, and BLOB
+				  (plist-get --local :inherited-properties)
+				  :level)
+				 (or (plist-get --local :headline-offset) 0))
+			      (1- (org-export-get-min-level
+				   --data --local))))))))
+		   ;; Limiting recursion to greater elements, and --BLOB
 		   ;; isn't one.
-		   ((and (eq type-category 'greater-elements)
-			 (not (memq type org-element-greater-elements)))
-		    (funcall accumulate-maybe type types fun blob info))
-		   ;; Limiting recursion to elements, and BLOB only
+		   ((and (eq --category 'greater-elements)
+			 (not (memq --type org-element-greater-elements)))
+		    (funcall accumulate-maybe --type types fun --blob --local))
+		   ;; Limiting recursion to elements, and --BLOB only
 		   ;; contains objects.
-		   ((and (eq type-category 'elements) (eq type 'paragraph)))
-		   ;; No limitation on recursion, but BLOB hasn't got
-		   ;; a recursive type.
-		   ((and (eq type-category 'objects)
-			 (not (or (eq type 'paragraph)
-				  (memq type org-element-greater-elements)
-				  (memq type org-element-recursive-objects))))
-		    (funcall accumulate-maybe type types fun blob info))
+		   ((and (eq --category 'elements) (eq --type 'paragraph)))
+		   ;; No limitation on recursion, but --BLOB hasn't
+		   ;; got a recursive type.
+		   ((and (eq --category 'objects)
+			 (not (or (eq --type 'paragraph)
+				  (memq --type org-element-greater-elements)
+				  (memq --type org-element-recursive-objects))))
+		    (funcall accumulate-maybe --type types fun --blob --local))
 		   ;; Recursion is possible and allowed: Update local
-		   ;; informations and move into BLOB.
-		   (t (funcall accumulate-maybe type types fun blob info)
+		   ;; information and move into --BLOB.
+		   (t (funcall accumulate-maybe --type types fun --blob --local)
 		      (funcall
-		       walk-tree
-		       blob
-		       (and options (org-export-update-info blob info t)))))))
-	      (org-element-get-contents data))))))
+		       walk-tree --blob
+		       (and info (org-export-update-info --blob --local t)))))))
+	      (org-element-get-contents --data))))))
     (catch 'first-match
-      (funcall walk-tree data options)
+      (funcall walk-tree data info)
       ;; Return value in a proper order.
-      (reverse acc))))
+      (reverse --acc))))
 
 ;; The following functions are internal parts of the parser.  The
 ;; first one, `org-element-parse-elements' acts at the element's

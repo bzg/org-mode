@@ -4,7 +4,7 @@
 ;; Author: Konrad Hinsen <konrad.hinsen AT fastmail.net>
 ;; Version: 0.1
 ;;
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 ;;
 ;; Emacs is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -58,7 +58,6 @@
       (org-store-link-props
        :link (org-make-link "eshell:" link)
        :description command))))
-  
 
 (provide 'org-eshell)
 

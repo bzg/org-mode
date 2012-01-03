@@ -1014,7 +1014,7 @@ See also the variable `org-reverse-note-order'."
 					; not handle this note
 	    (and visitp (run-with-idle-timer 0.01 nil 'org-remember-visit-immediately))
 	    (goto-char spos)
-	    (cond ((org-on-heading-p t)
+	    (cond ((org-at-heading-p t)
 		   (org-back-to-heading t)
 		   (setq level (funcall outline-level))
 		   (cond

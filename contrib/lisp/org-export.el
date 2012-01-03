@@ -579,11 +579,24 @@ while every other back-end will ignore it."
 ;;   - category :: option
 ;;   - type :: list of strings
 
-;; + `footnotes-labels-alist' :: Alist between footnote labels and
-;;      their definition, as parsed data.  Once retrieved, the
-;;      definition should be exported with `org-export-data'.
+;; + `footnote-definition-alist' :: Alist between footnote labels and
+;;     their definition, as parsed data.  Only non-inlined footnotes
+;;     are represented in this alist.  Also, every definition isn't
+;;     guaranteed to be referenced in the parse tree.  The purpose of
+;;     this property is to preserve definitions from oblivion
+;;     (i.e. when the parse tree comes from a part of the original
+;;     buffer), it isn't meant for direct use in a back-end.  To
+;;     retrieve a definition relative to a reference, use
+;;     `org-export-get-footnote-definition' instead.
 ;;   - category :: option
 ;;   - type :: alist (STRING . LIST)
+
+;; + `footnote-seen-labels' :: List of already transcoded footnote
+;;      labels.  It is used to know when a reference appears for the
+;;      first time. (cf. `org-export-footnote-first-reference-p').
+;;   - category :: persistent
+;;   - type :: list of strings
+;;   - update :: `org-export-update-info'
 
 ;; + `genealogy' :: List of current element's parents types.
 ;;   - category :: local
@@ -620,7 +633,7 @@ while every other back-end will ignore it."
 ;;      the current buffer, through the "#+include:" keyword.  It is
 ;;      mainly used to verify that no infinite recursive inclusion
 ;;      happens.
-;;   - category :: persistent
+;;   - category :: local
 ;;   - type :: list of strings
 
 ;; + `inherited-properties' :: Properties of the headline ancestors
@@ -668,23 +681,10 @@ while every other back-end will ignore it."
 ;;   - type :: symbol
 ;;   - update :: `org-export-update-info'
 
-;; + `previous-section-number' :: Numbering of the previous
-;;      headline.  As it might not be practical for direct use, the
-;;      function `org-export-get-headline-level' is provided
-;;      to extract useful information out of it.
-;;   - category :: local
-;;   - type :: vector
-
 ;; + `section-numbers' :: Non-nil means transcoding should add
 ;;      section numbers to headlines.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
-;; + `seen-footnote-labels' :: List of already transcoded footnote
-;;      labels.
-;;   - category :: persistent
-;;   - type :: list of strings
-;;   - update :: `org-export-update-info'
 
 ;; + `select-tags' :: List of tags enforcing inclusion of sub-trees in
 ;;                    transcoding.  When such a tag is present,
@@ -707,7 +707,7 @@ while every other back-end will ignore it."
 
 ;; + `total-loc' :: Contains total lines of code accumulated by source
 ;;                  blocks with the "+n" option so far.
-;;   - category :: option
+;;   - category :: persistent
 ;;   - type :: integer
 ;;   - update :: `org-export-handle-code'
 
@@ -1037,6 +1037,10 @@ BACKEND is a symbol specifying which back-end should be used."
   "Return a plist with non-optional properties.
 OPTIONS is the export options plist computed so far."
   (list
+   ;; `:macro-date', `:macro-time' and `:macro-property' could as well
+   ;; be initialized as persistent properties, since they don't depend
+   ;; on initial environment.  Though, it may be more logical to keep
+   ;; them close to other ":macro-" properties.
    :macro-date "(eval (format-time-string \"$1\"))"
    :macro-time "(eval (format-time-string \"$1\"))"
    :macro-property "(eval (org-entry-get nil \"$1\" 'selective))"
@@ -1048,18 +1052,22 @@ OPTIONS is the export options plist computed so far."
 		"))"))
    :macro-input-file (and (buffer-file-name)
 			  (file-name-nondirectory (buffer-file-name)))
-   :footnotes-labels-alist
+   ;; Footnotes definitions must be collected in the original buffer,
+   ;; as there's no insurance that they will still be in the parse
+   ;; tree, due to some narrowing.
+   :footnote-definition-alist
    (let (alist)
      (org-with-wide-buffer
       (goto-char (point-min))
       (while (re-search-forward org-footnote-definition-re nil t)
 	(let ((def (org-footnote-at-definition-p)))
-	  (org-skip-whitespace)
-	  (push (cons (car def)
-		      (save-restriction
-			(narrow-to-region (point) (nth 2 def))
-			(org-element-parse-buffer)))
-		alist)))
+	  (when def
+	    (org-skip-whitespace)
+	    (push (cons (car def)
+			(save-restriction
+			  (narrow-to-region (point) (nth 2 def))
+			  (org-element-parse-buffer)))
+		  alist))))
       alist))))
 
 (defvar org-export-allow-BIND-local nil)
@@ -1108,8 +1116,9 @@ retrieved."
 ;; between headlines' beginning position and their numbering.
 
 (defconst org-export-persistent-properties-list
-  '(:code-refs :headline-alist :headline-offset :headline-offset :parse-tree
-	       :point-max :seen-footnote-labels :total-loc :use-select-tags)
+  '(:back-end :code-refs :headline-alist :headline-numbering :headline-offset
+	      :parse-tree :point-max :footnote-seen-labels :target-list
+	      :total-loc :use-select-tags)
   "List of persistent properties.")
 
 (defconst org-export-persistent-properties nil
@@ -1251,7 +1260,8 @@ numbers)."
      data
      'headline
      (lambda (headline info)
-       (let ((relative-level (1- (org-export-get-relative-level blob info))))
+       (let ((relative-level
+	      (1- (org-export-get-relative-level headline info))))
 	 (cons
 	  (org-element-get-property :begin headline)
 	  (loop for n across numbering
@@ -1284,6 +1294,8 @@ When RECURSEP is non-nil, assume the following element or object
 will be inside the current one.
 
 The following properties are updated:
+`footnote-seen-labels'    List of already parsed footnote
+			  labels (string list)
 `genealogy'               List of current element's parents
 			  (symbol list).
 `inherited-properties'    List of inherited properties from
@@ -1292,8 +1304,6 @@ The following properties are updated:
 			 (plist).
 `previous-element'        Previous element's type (symbol).
 `previous-object'         Previous object's type (symbol).
-`seen-footnote-labels'    List of already parsed footnote
-			  labels (string list)
 
 Return the property list."
   (let* ((type (and (not (stringp blob)) (car blob))))
@@ -1323,12 +1333,12 @@ Return the property list."
       (when (eq type 'footnote-reference)
 	(let ((label (org-element-get-property :label blob))
 	      (seen-labels (plist-get org-export-persistent-properties
-				      :seen-footnote-labels)))
+				      :footnote-seen-labels)))
 	  ;; Store anonymous footnotes (nil label) without checking if
 	  ;; another anonymous footnote was seen before.
 	  (unless (and label (member label seen-labels))
 	    (setq info (org-export-set-property
-			info :seen-footnote-labels (push label seen-labels))))))
+			info :footnote-seen-labels (push label seen-labels))))))
       ;; Set `:previous-element' or `:previous-object' according to
       ;; BLOB.
       (setq info (cond ((not type)
@@ -1908,8 +1918,8 @@ developer-specified filters, if any, are called first."
 ;;; Core functions
 
 ;; This is the room for the main function, `org-export-as', along with
-;; its derivative, `org-export-to-buffer'.  They differ only by the
-;; way they output the resulting code.
+;; its derivatives, `org-export-to-buffer' and `org-export-to-file'.
+;; They differ only by the way they output the resulting code.
 
 ;; Note that `org-export-as' doesn't really parse the current buffer,
 ;; but a copy of it (with the same buffer-local variables and
@@ -1986,7 +1996,8 @@ Return code as a string."
 	    (org-export-filter-apply-functions
 	     org-export-filter-final-output-functions body backend)))))))
 
-(defun org-export-to-buffer (backend buffer &optional subtreep visible-only body-only ext-plist)
+(defun org-export-to-buffer (backend buffer &optional subtreep visible-only
+				     body-only ext-plist)
   "Call `org-export-as' with output to a specified buffer.
 
 BACKEND is the back-end used for transcoding, as a symbol.
@@ -1994,12 +2005,8 @@ BACKEND is the back-end used for transcoding, as a symbol.
 BUFFER is the output buffer.  If it already exists, it will be
 erased first, otherwise, it will be created.
 
-Arguments SUBTREEP, VISIBLE-ONLY and BODY-ONLY are similar to
-those used in `org-export-as'.
-
-EXT-PLIST, when provided, is a property list with external
-parameters overriding Org default settings, but still inferior to
-file-local settings.
+Arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and EXT-PLIST are
+similar to those used in `org-export-as', which see.
 
 Return buffer."
   (let ((out (org-export-as backend subtreep visible-only body-only ext-plist))
@@ -2009,6 +2016,42 @@ Return buffer."
       (insert out)
       (goto-char (point-min)))
     buffer))
+
+(defun org-export-to-file (backend filename &optional post-process subtreep
+                                   visible-only body-only ext-plist)
+  "Call `org-export-as' with output to a specified file.
+
+BACKEND is the back-end used for transcoding, as a symbol.
+
+FILENAME is the output file name.  If it already exists, it will
+be erased first, unless it isn't writable, in which case an error
+will be returned.  Otherwise, the file will be created.
+
+Optional argument POST-PROCESS, when non-nil, is a function
+applied to the output file.  It expects one argument: the file
+name, as a string.  It can be used to call shell commands on that
+file, display a specific buffer, etc.
+
+Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
+EXT-PLIST are similar to those used in `org-export-as', which
+see.
+
+Return file name."
+  ;; Checks for file and directory permissions.
+  (cond
+   ((not (file-exists-p filename))
+    (let ((dir (or (file-name-directory filename) default-directory)))
+      (unless (file-writable-p dir) (error "Output directory not writable"))))
+   ((not (file-writable-p filename)) (error "Output file not writable")))
+  ;; All checks passed: insert contents to a temporary buffer and
+  ;; write it to the specified file.
+  (let ((out (org-export-as backend subtreep visible-only body-only ext-plist)))
+    (with-temp-buffer
+      (insert out)
+      (write-file filename)))
+  (when post-process (funcall post-process filename))
+  ;; Return value.
+  filename)
 
 (defmacro org-export-with-current-buffer-copy (&rest body)
   "Apply BODY in a copy of the current buffer.
@@ -2047,9 +2090,82 @@ Point is at buffer's beginning when BODY is applied."
 ;; function general enough to have its use across many back-ends
 ;; should be added here.
 
-;; As of now, functions operating on headlines, include keywords,
-;; links, macros, src-blocks, tables and tables of contents are
-;; implemented.
+;; As of now, functions operating on footnotes, headlines, include
+;; keywords, links, macros, references, src-blocks, tables and tables
+;; of contents are implemented.
+
+;;;; For Footnotes
+
+;; `org-export-collect-footnote-definitions' is a tool to list
+;; actually used footnotes definitions in the whole parse tree, or in
+;; an headline, in order to add footnote listings throughout the
+;; transcoded data.
+
+;; `org-export-footnote-first-reference-p' is a predicate used by some
+;; back-ends, when they need to attach the footnote definition only to
+;; the first occurrence of the corresponding label.
+
+;; `org-export-get-footnote-definition' and
+;; `org-export-get-footnote-number' provide easier access to
+;; additional information relative to a footnote reference.
+
+(defun org-export-collect-footnote-definitions (data info)
+  "Return an alist between footnote numbers, labels and definitions.
+
+DATA is the parse tree from which definitions are collected.
+INFO is the plist used as a communication channel.
+
+Definitions are sorted by order of references.  They either
+appear as Org data \(transcoded with `org-export-data'\) or as
+a secondary string for inlined footnotes \(transcoded with
+`org-export-secondary-string'\).  Unreferenced definitions are
+ignored."
+  (org-element-map
+   data 'footnote-reference
+   (lambda (footnote local)
+     (when (org-export-footnote-first-reference-p footnote local)
+       (list (org-export-get-footnote-number footnote local)
+	     (org-element-get-property :label footnote)
+	     (org-export-get-footnote-definition footnote local))))
+   info))
+
+(defun org-export-footnote-first-reference-p (footnote-reference info)
+  "Non-nil when a footnote reference is the first one for its label.
+
+FOOTNOTE-REFERENCE is the footnote reference being considered.
+INFO is the plist used as a communication channel."
+  (let ((label (org-element-get-property :label footnote-reference)))
+    (not (and label (member label (plist-get info :footnote-seen-labels))))))
+
+(defun org-export-get-footnote-definition (footnote-reference info)
+  "Return definition of FOOTNOTE-REFERENCE as parsed data.
+INFO is the plist used as a communication channel."
+  (let ((label (org-element-get-property :label footnote-reference)))
+    (or (org-element-get-property :inline-definition footnote-reference)
+        (cdr (assoc label (plist-get info :footnote-definition-alist))))))
+
+(defun org-export-get-footnote-number (footnote info)
+  "Return number associated to a footnote.
+
+FOOTNOTE is either a footnote reference or a footnote definition.
+INFO is the plist used as a communication channel."
+  (let ((label (org-element-get-property :label footnote)))
+    (if (eq (car footnote) 'footnote-definition)
+	;; If a footnote definition was provided, first search for
+	;; a relative footnote reference, as only footnote references
+	;; can determine the associated ordinal.
+	(org-element-map
+	 (plist-get info :parse-tree) 'footnote-reference
+	 (lambda (foot-ref local)
+	   (when (string= (org-element-get-property :label foot-ref) label)
+	     (let* ((all-seen (plist-get info :footnote-seen-labels))
+		    (seenp (and label (member label all-seen))))
+	       (if seenp (length seenp) (1+ (length all-seen))))))
+	 info 'first-match)
+      (let* ((all-seen (plist-get info :footnote-seen-labels))
+	     ;; Anonymous footnotes are always new footnotes.
+	     (seenp (and label (member label all-seen))))
+	(if seenp (length seenp) (1+ (length all-seen)))))))
 
 
 ;;;; For Headlines
@@ -2244,15 +2360,13 @@ PATH is the link path.  DESC is its description."
 	  ((string= desc "") "%s")
 	  (t desc))))
 
-(defun org-export-inline-image-p (link contents &optional extensions)
+(defun org-export-inline-image-p (link &optional extensions)
   "Non-nil if LINK object points to an inline image.
-
-CONTENTS is the link description part, as a string, or nil.
 
 When non-nil, optional argument EXTENSIONS is a list of valid
 extensions for image files, as strings.  Otherwise, a default
 list is provided \(cf. `org-image-file-name-regexp'\)."
-  (and (or (not contents) (string= contents ""))
+  (and (not (org-element-get-contents link))
        (string= (org-element-get-property :type link) "file")
        (org-file-image-p
 	(expand-file-name (org-element-get-property :path link))
@@ -2336,6 +2450,56 @@ INFO is a plist holding export options."
       (setq value (eval (read value))))
     ;; Return expanded string.
     (format "%s" value)))
+
+
+;;;; For References
+
+;; `org-export-get-ordinal' associates a sequence number to any object
+;; or element.
+
+(defun org-export-get-ordinal (element info &optional within-section predicate)
+  "Return ordinal number of an element or object.
+
+ELEMENT is the element or object considered.  INFO is the plist
+used as a communication channel.
+
+When optional argument WITHIN-SECTION is non-nil, narrow counting
+to the section containing ELEMENT.
+
+Optional argument PREDICATE is a function returning a non-nil
+value if the current element or object should be counted in.  It
+accepts one argument: the element or object being considered.
+This argument allows to count only a certain type of objects,
+like inline images, which are a subset of links \(in that case,
+`org-export-inline-image-p' might be an useful predicate\)."
+  (let ((counter 0)
+        (type (car element))
+        ;; Determine if search should apply to current section, in
+        ;; which case it should be retrieved first, or to full parse
+        ;; tree.  As a special case, an element or object without
+        ;; a parent headline will also trigger a full search,
+        ;; notwithstanding WITHIN-SECTION value.
+        (data
+         (let ((parse-tree (plist-get info :parse-tree)))
+           (if within-section
+               (let ((parent (plist-get (plist-get info :inherited-properties)
+                                        :begin)))
+                 (if (not parent) parse-tree
+                   (org-element-map
+                    parse-tree 'headline
+                    (lambda (el local)
+                      (when (= (org-element-get-property :begin el) parent) el))
+                    info 'first-match)))
+             parse-tree))))
+    ;; Increment counter until ELEMENT is found again.
+    (org-element-map
+     data type
+     (lambda (el local)
+       (cond
+        ((and (functionp predicate) (funcall predicate el)))
+        ((equal element el) (1+ counter))
+        (t (incf counter) nil)))
+     info 'first-match)))
 
 
 ;;;; For Src-Blocks
@@ -2555,57 +2719,29 @@ it also."
 
 ;;;; For Tables Of Contents
 
-;; `org-export-get-headlines' builds a table of contents in the shape
-;; of a nested list of cons cells whose car is headline's name and cdr
-;; an unique identifier.  One can then easily parse it and transcode
-;; it in a back-end.  Identifiers can be used to construct internal
-;; links.
+;; `org-export-collect-headlines' builds a list of all exportable
+;; headline elements, maybe limited to a certain depth.  One can then
+;; easily parse it and transcode it.
 
 ;; Building lists of tables, figures or listings is quite similar.
 ;; Once the generic function `org-export-collect-elements' is defined,
 ;; `org-export-collect-tables', `org-export-collect-figures' and
 ;; `org-export-collect-listings' can be derived from it.
 
-(defun org-export-get-headlines (backend info &optional n)
-  "Build a table of contents.
-
-BACKEND is the back-end used to transcode headline's name.  INFO
-is a plist holding export options.
+(defun org-export-collect-headlines (info &optional n)
+  "Collect headlines in order to build a table of contents.
 
 When non-nil, optional argument N must be an integer.  It
 specifies the depth of the table of contents.
 
-Return an alist whose keys are headlines' name and value their
-relative level and an unique identifier that might be used for
-internal links.
-
-For example, on the following tree, where numbers in parens are
-buffer position at beginning of the line:
-
-* Title 1       (1)
-** Sub-title 1  (21)
-** Sub-title 2  (42)
-* Title 2       (62)
-
-the function will return:
-
-\(\(\"Title 1\" 1 1\)
- \(\"Sub-title 1\" 2 21\)
- \(\"Sub-title 2\" 2 42\)
- \(\"Title 2\" 1 62\)\)"
+Return a list of all exportable headlines as parsed elements."
   (org-element-map
    (plist-get info :parse-tree)
    'headline
-   (lambda (headline local-info)
-     ;; Get HEADLINE's relative level.
-     (let ((level (+ (or (plist-get local-info :headline-offset) 0)
-		     (org-element-get-property :level headline))))
-       (unless (and (wholenump n) (> level n))
-	 (list
-	  (org-export-secondary-string
-	   (org-element-get-property :title headline) backend info)
-	  level
-	  (org-element-get-property :begin headline)))))
+   (lambda (headline local)
+     ;; Strip contents from HEADLINE.
+     (let ((relative-level (org-export-get-relative-level headline local)))
+       (unless (and n (> relative-level n)) headline)))
    info))
 
 (defun org-export-collect-elements (type backend info)
@@ -2644,7 +2780,7 @@ Return an alist where key is the caption of the table and value
 an unique identifier that might be used for internal links."
   (org-export-collect-elements 'table backend info))
 
-(defun org-export-get-figures (backend info)
+(defun org-export-collect-figures (backend info)
   "Build a list of figures.
 
 A figure is a paragraph type element with a caption or a name.
