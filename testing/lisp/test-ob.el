@@ -583,6 +583,12 @@ on two lines
     (should (= 2 (length (org-babel-ref-split-args
 			  "a=\"this, no work\", b=1"))))))
 
+(ert-deftest test-ob/org-babel-balanced-split ()
+  (should (equal
+	   '(":a 1" "b [2 3]" "c (4 :d (5 6))")
+	   (org-babel-balanced-split ":a 1 :b [2 3] :c (4 :d (5 6))"
+				     '((32 9) . 58)))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
