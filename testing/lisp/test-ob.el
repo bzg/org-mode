@@ -618,16 +618,6 @@ on two lines
 		       (buffer-substring-no-properties
 			(point-min) (point-max)))))))
 
-(ert-deftest test-org-babel/inline-src-block-enclosed-within-parenthesis ()
-  (let ((test-line "{src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
-    (org-test-with-temp-text
-	(concat test-line "}")
-      (forward-char 1)
-      (org-ctrl-c-ctrl-c)
-      (should (string= (concat test-line " =\"x\"=}")
-		       (buffer-substring-no-properties
-			(point-min) (point-max)))))))
-
 (ert-deftest test-org-babel/inline-src_blk-preceded-by-letter ()
   "Test inline source block invalid where preceded by letter"
 
