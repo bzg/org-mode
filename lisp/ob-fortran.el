@@ -5,7 +5,7 @@
 ;; Authors: Sergey Litvinov (based on ob-C.el by Eric Schulte), Eric Schulte
 ;; Keywords: literate programming, reproducible research, fortran
 ;; Homepage: http://orgmode.org
-;; Version: 7.8.02
+;; Version: 7.8.03
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
