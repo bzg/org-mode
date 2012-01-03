@@ -1,4 +1,4 @@
-ETCDIRS = styles
+ETCDIRS = styles schema
 -include local.mk	# optional local customization
 
 .NOTPARALLEL:	# always run this make serially
