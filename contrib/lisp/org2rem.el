@@ -1,6 +1,6 @@
 ;;; org2rem.el --- Convert org appointments into reminders
 
-;; Copyright (C) 2006-2011 Free Software Foundation, Inc.
+;; Copyright (C) 2006-2012 Free Software Foundation, Inc.
 
 ;; Author: Bastien Guerry and Shatad Pratap
 ;; Keywords: outlines, hypermedia, calendar, wp

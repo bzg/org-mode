@@ -1,6 +1,6 @@
 ;;; test-ob-table.el
 
-;; Copyright (c) ߚ Eric Schulte
+;; Copyright (c) 2011-2012 Eric Schulte
 ;; Authors: Eric Schulte
 
 ;; Released under the GNU General Public License version 3

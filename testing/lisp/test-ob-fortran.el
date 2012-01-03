@@ -1,6 +1,6 @@
 ;;; test-ob-fortran.el --- tests for ob-fortran.el
 
-;; Copyright (c) 2010 Sergey Litvinov
+;; Copyright (c) 2010-2012 Sergey Litvinov
 ;; Authors: Sergey Litvinov
 
 ;; Released under the GNU General Public License version 3

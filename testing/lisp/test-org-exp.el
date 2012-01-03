@@ -1,6 +1,6 @@
 ;;; test-org-exp.el --- tests for org-exp.el
 
-;; Copyright (c) 2010 Eric Schulte
+;; Copyright (c) 2010-2012 Eric Schulte
 ;; Authors: Eric Schulte
 
 ;; Released under the GNU General Public License version 3

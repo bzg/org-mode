@@ -1,6 +1,6 @@
 ;;; test-ob.el --- tests for ob.el
 
-;; Copyright (c) 2010, 2011 Eric Schulte
+;; Copyright (c) 2010-2012 Eric Schulte
 ;; Authors: Eric Schulte, Martyn Jago
 
 ;; Released under the GNU General Public License version 3

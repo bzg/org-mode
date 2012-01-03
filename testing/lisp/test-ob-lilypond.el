@@ -1,6 +1,6 @@
 ;;; test-ob-lilypond.el --- tests for ob-lilypond.el
 
-;; Copyright (c) 2010 Martyn Jago
+;; Copyright (c) 2010-2012 Martyn Jago
 ;; Authors: Martyn Jago
 
 ;; Released under the GNU General Public License version 3

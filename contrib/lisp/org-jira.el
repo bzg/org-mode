@@ -1,6 +1,6 @@
 ;;; org-jira.el --- add a jira:ticket protocol to Org
 (defconst org-jira-version "0.1")
-;; Copyright (C) 2008-2011 Jonathan Arkell.
+;; Copyright (C) 2008-2012 Jonathan Arkell.
 ;; Author: Jonathan Arkell <jonnay@jonnay.net>
 
 ;; This file is not part of GNU Emacs.
