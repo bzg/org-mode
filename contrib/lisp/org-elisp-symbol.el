@@ -1,6 +1,6 @@
 ;;; org-elisp-symbol.el --- Org links to emacs-lisp symbols
 ;;
-;; Copyright 2007-2011 Free Software Foundation, Inc.
+;; Copyright 2007-2012 Free Software Foundation, Inc.
 ;;
 ;; Author: bzg AT gnu DOT org
 ;; Version: 0.2
