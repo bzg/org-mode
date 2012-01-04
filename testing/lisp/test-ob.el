@@ -177,7 +177,7 @@
     (let ((test-point (point)))
       (should (fboundp 'org-babel-get-inline-src-block-matches))
       (should (re-search-forward "src_" nil t)) ;; 1
-      (should (= (+ test-point 140) (match-end 0)))
+      (should (= (+ test-point 138) (match-end 0)))
       (should (org-babel-get-inline-src-block-matches))
       (should (re-search-forward "}" nil (point-at-bol))) ;; 1
       (should-not (org-babel-get-inline-src-block-matches))
