@@ -1,6 +1,6 @@
 ;;; org-registry.el --- a registry for Org links
 ;;
-;; Copyright 2007-2011 Bastien Guerry
+;; Copyright 2007-2012 Bastien Guerry
 ;;
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-registry.el

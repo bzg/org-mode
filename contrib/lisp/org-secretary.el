@@ -1,5 +1,5 @@
 ;;; org-secretary.el --- Team management with org-mode
-;; Copyright (C) 2010-2011 Juan Reyero
+;; Copyright (C) 2010-2012 Juan Reyero
 ;;
 ;; Author: Juan Reyero <juan _at_ juanreyero _dot_ com>
 ;; Keywords: outlines, tasks, team, management
