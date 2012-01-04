@@ -114,51 +114,121 @@
 
 (ert-deftest test-org-babel/elisp-in-header-arguments ()
   "Test execution of elisp forms in header arguments."
-  ;; at the babel.org:elisp-forms-in-header-arguments header
-  (org-test-at-id "22d67284-bf14-4cdc-8319-f4bd876829d7"
-    (org-babel-next-src-block)
-    (let ((info (org-babel-get-src-block-info)))
-      (should (= 4 (org-babel-execute-src-block))))))
+  (org-test-with-temp-text-in-file "
+
+* elisp forms in header arguments
+  :PROPERTIES:
+  :var:      prop = (* 7 6)
+  :END:
+#+begin_src emacs-lisp
+  prop
+#+end_src"
+    
+    (progn
+      (goto-char (point-min))
+      (org-babel-next-src-block)
+      (let ((info (org-babel-get-src-block-info)))
+	(should (= 42 (org-babel-execute-src-block)))))))
 
 (ert-deftest test-org-babel/simple-named-code-block ()
   "Test that simple named code blocks can be evaluated."
-  (org-test-at-id "0d82b52d-1bb9-4916-816b-2c67c8108dbb"
-    (org-babel-next-src-block 1)
-    (should (= 42 (org-babel-execute-src-block)))))
+  (org-test-with-temp-text-in-file "
+
+#+name: i-have-a-name
+#+begin_src emacs-lisp
+  42
+#+end_src
+
+#+name:
+: 42
+
+#+name: i-have-a-name
+: 42"
+
+    (progn
+      (org-babel-next-src-block 1)
+      (should (= 42 (org-babel-execute-src-block))))))
 
 (ert-deftest test-org-babel/simple-variable-resolution ()
   "Test that simple variable resolution is working."
-  (org-test-at-id "f68821bc-7f49-4389-85b5-914791ee3718"
-    (org-babel-next-src-block 2)
-    (should (= 4 (org-babel-execute-src-block)))))
+  (org-test-with-temp-text-in-file "
+
+#+name: four
+#+begin_src emacs-lisp
+  (list 1 2 3 4)
+#+end_src
+
+#+begin_src emacs-lisp :var four=four
+  (length four)
+#+end_src"
+    
+    (progn
+      (org-babel-next-src-block 2)
+      (should (= 4 (org-babel-execute-src-block)))
+      (forward-line 5)
+      (should (string= ": 4" (buffer-substring
+			      (point-at-bol)
+			      (point-at-eol)))))))
 
 (ert-deftest test-org-babel/multi-line-header-arguments ()
   "Test that multi-line header arguments and can be read."
-  (org-test-at-id "b77c8857-6c76-4ea9-8a61-ddc2648d96c4"
-    (org-babel-next-src-block)
-    (let ((results (org-babel-execute-src-block)))
-      (should(equal 'a (cadr (assoc 1 results))))
-      (should(equal 'd (cadr (assoc 4 results)))))))
+  (org-test-with-temp-text-in-file "
+
+#+headers: :var letters='(a b c d e f g)
+#+begin_src emacs-lisp :var numbers='(1 2 3 4 5 6 7)
+  (map 'list #'list numbers letters)
+#+end_src"
+
+    (progn
+      (org-babel-next-src-block)
+      (let ((results (org-babel-execute-src-block)))
+	(should(equal 'a (cadr (assoc 1 results))))
+	(should(equal 'd (cadr (assoc 4 results))))))))
 
 (ert-deftest test-org-babel/parse-header-args ()
-  (org-test-at-id "7eb0dc6e-1c53-4275-88b3-b22f3113b9c3"
-    (org-babel-next-src-block)
-    (let* ((info (org-babel-get-src-block-info))
-	   (params (nth 2 info)))
-      (message "%S" params)
-      (should(equal "example-lang" (nth 0 info)))
-      (should(string= "the body" (org-babel-trim (nth 1 info))))
-      (should-not (member '(:session\ \ \ \ ) params))
-      (should(equal '(:session) (assoc :session params)))
-      (should(equal '(:result-type . output) (assoc :result-type params)))
-      (should(equal '(num . 9) (cdr (assoc :var params)))))))
+  (org-test-with-temp-text-in-file "
+
+#+begin_src example-lang :session     :results output :var num=9
+  the body
+#+end_src"
+
+    (progn
+      (org-babel-next-src-block)
+      (let* ((info (org-babel-get-src-block-info))
+	     (params (nth 2 info)))
+	(message "%S" params)
+	(should(equal "example-lang" (nth 0 info)))
+	(should(string= "the body" (org-babel-trim (nth 1 info))))
+	(should-not (member '(:session\ \ \ \ ) params))
+	(should(equal '(:session) (assoc :session params)))
+	(should(equal '(:result-type . output) (assoc :result-type params)))
+	(should(equal '(num . 9) (cdr (assoc :var params))))))))
 
 (ert-deftest test-org-babel/parse-header-args2 ()
-  (org-test-at-id "2409e8ba-7b5f-4678-8888-e48aa02d8cb4"
-    (should (string-match (regexp-quote "this is simple")
-			  (org-babel-ref-resolve "simple-subtree")))
-    (org-babel-next-src-block)
-    (should (= 14 (org-babel-execute-src-block)))))
+  (org-test-with-temp-text-in-file "
+
+* resolving sub-trees as references
+ 
+#+begin_src emacs-lisp :var text=d4faa7b3-072b-4dcf-813c-dd7141c633f3
+  (length text)
+#+end_src
+
+#+begin_src org :noweb yes
+  <<simple-subtree>>
+  <<d4faa7b3-072b-4dcf-813c-dd7141c633f3>>
+#+end_src
+
+** simple subtree with custom ID
+   :PROPERTIES:
+   :CUSTOM_ID: simple-subtree
+   :END:
+this is simple"
+    
+    (progn
+      (should (string-match (regexp-quote "this is simple")
+			    (org-babel-ref-resolve "simple-subtree")))
+      (org-babel-next-src-block)
+      (should (= 14 (org-babel-execute-src-block))))))
 
 (ert-deftest test-org-babel/inline-src-blocks ()
   (org-test-at-id "54cb8dc3-298c-4883-a933-029b3c9d4b18"
@@ -193,8 +263,7 @@
       (should (re-search-forward ":results" nil t)) ;; 4
       (should (org-babel-get-inline-src-block-matches))
       (end-of-line)
-      (should-not (org-babel-get-inline-src-block-matches))
-    )))
+      (should-not (org-babel-get-inline-src-block-matches)))))
 
 (ert-deftest test-org-babel/inline-src_blk-default-results-replace-line-1 ()
   (let ((test-line "src_sh{echo 1}"))
@@ -369,12 +438,25 @@
 			(point-min) (point-max)))))))
 
 (ert-deftest test-org-babel/combining-scalar-and-raw-result-types ()
-  (flet ((next-result ()
-		      (org-babel-next-src-block)
-		      (org-babel-execute-src-block)
-		      (goto-char (org-babel-where-is-src-block-result))
-		      (forward-line 1)))
-    (org-test-at-id "a73a2ab6-b8b2-4c0e-ae7f-23ad14eab7bc"
+  (org-test-with-temp-text-in-file "
+
+#+begin_src sh :results scalar
+echo \"[[file:./cv.cls]]\"
+#+end_src
+
+#+name:
+: [[file:./cv.cls]]
+
+#+begin_src sh :results raw scalar
+   echo \"[[file:./cv.cls]]\"
+#+end_src
+"
+    (flet ((next-result ()
+			(org-babel-next-src-block)
+			(org-babel-execute-src-block)
+			(goto-char (org-babel-where-is-src-block-result))
+			(forward-line 1)))
+      (goto-char (point-min))
       (next-result)
       (should (org-babel-in-example-or-verbatim))
       (next-result)

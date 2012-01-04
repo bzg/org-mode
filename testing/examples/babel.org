@@ -29,19 +29,6 @@
   ;; noweb-tangle-end
 #+end_src
 
-* elisp forms in header arguments
-  :PROPERTIES:
-  :ID:       22d67284-bf14-4cdc-8319-f4bd876829d7
-  :var:      prop=(+ 2 2)
-  :END:
-
-#+begin_src emacs-lisp
-  prop
-#+end_src
-
-#+name:
-: 4
-
 * excessive id links on tangling
   :PROPERTIES:
   :ID:       ef06fd7f-012b-4fde-87a2-2ae91504ea7e
@@ -59,42 +46,6 @@
 #+begin_src emacs-lisp :tangle no
   (message "for tangling")
 #+end_src
-* simple variable resolution
-  :PROPERTIES:
-  :ID:       f68821bc-7f49-4389-85b5-914791ee3718
-  :END:
-
-#+name: four
-#+begin_src emacs-lisp
-  (list 1 2 3 4)
-#+end_src
-
-#+begin_src emacs-lisp :var four=four
-  (length four)
-#+end_src
-
-#+name:
-: 4
-
-* multi-line header arguments
-  :PROPERTIES:
-  :ID:       b77c8857-6c76-4ea9-8a61-ddc2648d96c4
-  :END:
-
-#+headers: :var letters='(a b c d e f g)
-#+begin_src emacs-lisp :var numbers='(1 2 3 4 5 6 7)
-  (map 'list #'list numbers letters)
-#+end_src
-
-#+name:
-| 1 | a |
-| 2 | b |
-| 3 | c |
-| 4 | d |
-| 5 | e |
-| 6 | f |
-| 7 | g |
-
 * simple named code block
   :PROPERTIES:
   :ID:       0d82b52d-1bb9-4916-816b-2c67c8108dbb
@@ -202,14 +153,6 @@ Here is one in the middle src_sh{echo 1} of a line.
 Here is one at the end of a line. src_sh{echo 2}
 src_sh{echo 3} Here is one at the beginning of a line.
 
-* parsing header arguments
-  :PROPERTIES:
-  :ID:       7eb0dc6e-1c53-4275-88b3-b22f3113b9c3
-  :END:
-
-#+begin_src example-lang :session     :results output :var num=9
-  the body
-#+end_src
 * conflicting blocks on export
   :PROPERTIES:
   :ID:       5daa4d03-e3ea-46b7-b093-62c1b7632df3
@@ -289,22 +232,3 @@ src_sh{echo "One"} block at start of line
  One spaced block in  src_sh{ echo "middle" } of line 
 src_sh{echo 2} blocks on the src_emacs-lisp{"same"} line
  Inline block with src_sh[:results silent]{ echo "parameters" }.
-* returning file names -- interpreted as lists
-  :PROPERTIES:
-  :ID:       a73a2ab6-b8b2-4c0e-ae7f-23ad14eab7bc
-  :END:
-
-#+begin_src sh :results scalar
-  echo "[[file:./cv.cls]]"
-#+end_src
-
-#+name:
-: [[file:./cv.cls]]
-
-#+begin_src sh :results raw scalar
-   echo "[[file:./cv.cls]]"
-#+end_src
-
-#+name:
-[[file:./cv.cls]]
-
