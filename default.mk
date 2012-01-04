@@ -22,19 +22,21 @@ infodir = $(prefix)/info
 ##----------------------------------------------------------------------
 
 # Using emacs in batch mode.
-BATCH   = $(EMACS) -batch -Q -L .
+BATCH   = $(EMACS) -batch -Q \
+	  -L . \
+	  --eval '(defconst org-release "$(ORGVERSION)-Make")' \
 
 # run tests
 BTEST   = $(EMACS) -batch \
 	  $(BTEST_EXTRA) \
 	  -L lisp/ \
+	  --eval '(defconst org-release "$(ORGVERSION)-Test")' \
 	  -l testing/org-test.el \
 	  -eval "(setq org-confirm-babel-evaluate nil)" \
 	  -f org-test-run-batch-tests
 
 # How to byte-compile the whole source directory
 ELCDIR  = $(BATCH) \
-	  --eval '(defconst org-release "$(ORGVERSION)")' \
 	  --eval '(batch-byte-recompile-directory 0)'
 
 # How to byte-compile a single source file
