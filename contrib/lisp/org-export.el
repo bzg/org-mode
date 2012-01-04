@@ -2017,15 +2017,11 @@ Return buffer."
       (goto-char (point-min)))
     buffer))
 
-(defun org-export-to-file (backend filename &optional post-process subtreep
-                                   visible-only body-only ext-plist)
+(defun org-export-to-file (backend &optional post-process subtreep visible-only
+				   body-only ext-plist pub-dir)
   "Call `org-export-as' with output to a specified file.
 
 BACKEND is the back-end used for transcoding, as a symbol.
-
-FILENAME is the output file name.  If it already exists, it will
-be erased first, unless it isn't writable, in which case an error
-will be returned.  Otherwise, the file will be created.
 
 Optional argument POST-PROCESS, when non-nil, is a function
 applied to the output file.  It expects one argument: the file
@@ -2036,22 +2032,45 @@ Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
 EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
-Return file name."
-  ;; Checks for file and directory permissions.
-  (cond
-   ((not (file-exists-p filename))
-    (let ((dir (or (file-name-directory filename) default-directory)))
-      (unless (file-writable-p dir) (error "Output directory not writable"))))
-   ((not (file-writable-p filename)) (error "Output file not writable")))
-  ;; All checks passed: insert contents to a temporary buffer and
-  ;; write it to the specified file.
-  (let ((out (org-export-as backend subtreep visible-only body-only ext-plist)))
-    (with-temp-buffer
-      (insert out)
-      (write-file filename)))
-  (when post-process (funcall post-process filename))
-  ;; Return value.
-  filename)
+When optional argument PUB-DIR is set, use it as the publishing
+directory.
+
+Return output file's name."
+  ;; First get output directory and output file name.
+  (let ((out-file
+	 (concat (file-name-as-directory (or pub-dir "."))
+		 ;; Output file name either comes from
+		 ;; EXPORT_FILE_NAME sub-tree property, assuming input
+		 ;; is narrowed to said sub-tree, or to the name of
+		 ;; buffer's associated file.
+		 (file-name-sans-extension
+		  (or (and subtreep
+			   (org-entry-get
+			    (save-excursion
+			      (ignore-errors
+				(org-back-to-heading (not visible-only))
+				(point)))
+			    "EXPORT_FILE_NAME" t))
+		      (file-name-nondirectory
+		       (or (buffer-file-name (buffer-base-buffer))
+			   (error "Output file's name undefined")))))
+		 ".tex")))
+    ;; Checks for file and directory permissions.
+    (cond
+     ((not (file-exists-p out-file))
+      (unless (file-writable-p (or pub-dir "."))
+	(error "Output directory not writable")))
+     ((not (file-writable-p out-file)) (error "Output file not writable")))
+    ;; All checks passed: insert contents to a temporary buffer and
+    ;; write it to the specified file.
+    (let ((out (org-export-as
+		backend subtreep visible-only body-only ext-plist)))
+      (with-temp-buffer
+	(insert out)
+	(write-file out-file)))
+    (when post-process (funcall post-process out-file))
+    ;; Return full path.
+    out-file))
 
 (defmacro org-export-with-current-buffer-copy (&rest body)
   "Apply BODY in a copy of the current buffer.
