@@ -212,7 +212,7 @@ otherwise place the point at the beginning of the inserted text."
        (find-file ,file)
        (org-mode)
        (setq ,results ,@body)
-       (save-buffer) (kill-buffer)
+       (save-buffer) (kill-buffer (current-buffer))
        (delete-file ,file)
        ,results)))
 (def-edebug-spec org-test-with-temp-text-in-file (form body))
