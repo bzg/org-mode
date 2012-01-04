@@ -1,6 +1,7 @@
 ;;; org-eshell.el - Support for links to working directories in eshell
-;; Copyright (C) 2011 Free Software Foundation, Inc.
-;;
+
+;; Copyright (C) 2011-2012 Free Software Foundation, Inc.
+
 ;; Author: Konrad Hinsen <konrad.hinsen AT fastmail.net>
 ;; Version: 7.8.03
 ;;
