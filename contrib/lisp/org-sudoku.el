@@ -127,7 +127,7 @@ This works by solving the whole game, then inserting only the single field."
     (setq game (org-sudoku-solve-game game))
     (if game
 	(progn
-	  (org-table-put i j (number-to-string 
+	  (org-table-put i j (number-to-string
 			      (nth 1 (assoc (cons i j) game)))
 			 'align)
 	  (org-table-goto-line i)
@@ -140,7 +140,7 @@ This works by solving the whole game, then inserting only the single field."
   "Interpret table at point as sudoku game and read it.
 A game structure is returned."
   (let (b e g i j game)
-    
+
     (org-table-goto-line 1)
     (org-table-goto-column 1)
     (setq b (point))

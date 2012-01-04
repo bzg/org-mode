@@ -639,5 +639,3 @@ button changes the binding of the arrow keys."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;;; org-panel.el ends here
-
-
