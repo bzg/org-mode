@@ -21,8 +21,8 @@ ifneq ($(GITSTATUS),)
 endif
 
 .PHONY:	default all up2 update compile lisp doc etc \
-	install info html pdf card docs $(INSTSUB) \
-	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel
+	test install info html pdf card docs $(INSTSUB) \
+	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel clean-install
 
 all \
 compile::	lisp
@@ -35,6 +35,12 @@ compile-dirty::	lisp
 all \
 clean-install::	$(SUBDIRS)
 	$(foreach dir, $?, $(MAKE) -C $(dir) $@;)
+
+test::	all
+
+test \
+test-dirty::
+	$(BTEST)
 
 up2:	update
 	sudo ${MAKE} install

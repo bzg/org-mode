@@ -12,7 +12,7 @@ prefix  = /usr/share
 lispdir = $(prefix)/emacs/site-lisp/org
 
 # Where local data files go.
-datadir = $(lispdir)/etc
+datadir = $(prefix)/emacs/etc/org
 
 # Where info files go.
 infodir = $(prefix)/info
@@ -22,8 +22,15 @@ infodir = $(prefix)/info
 ##----------------------------------------------------------------------
 
 # Using emacs in batch mode.
-
 BATCH   = $(EMACS) -batch -Q -L .
+
+# run tests
+BTEST   = $(EMACS) -batch \
+	  $(BTEST_EXTRA) \
+	  -L lisp/ \
+	  -l testing/org-test.el \
+	  -eval "(setq org-confirm-babel-evaluate nil)" \
+	  -f org-test-run-batch-tests
 
 # How to byte-compile the whole source directory
 ELCDIR  = $(BATCH) \
