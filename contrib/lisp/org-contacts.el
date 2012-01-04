@@ -1,6 +1,6 @@
 ;;; org-contacts.el --- Contacts management
 
-;; Copyright (C) 2010-2011 Julien Danjou <julien@danjou.info>
+;; Copyright (C) 2010-2012 Julien Danjou <julien@danjou.info>
 
 ;; Author: Julien Danjou <julien@danjou.info>
 ;; Keywords: outlines, hypermedia, calendar
