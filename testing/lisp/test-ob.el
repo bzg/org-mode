@@ -26,7 +26,7 @@
     (match-string
      1
      "   \t #+headers: blah1 blah2 blah3 \t\n\t\n blah4 blah5 blah6 \n")))
-  
+
   ;;TODO Check - should this fail?
   (should
    (not (org-test-string-exact-match
@@ -123,7 +123,7 @@
 #+begin_src emacs-lisp
   prop
 #+end_src"
-    
+
     (progn
       (goto-char (point-min))
       (org-babel-next-src-block)
@@ -161,7 +161,7 @@
 #+begin_src emacs-lisp :var four=four
   (length four)
 #+end_src"
-    
+
     (progn
       (org-babel-next-src-block 2)
       (should (= 4 (org-babel-execute-src-block)))
@@ -208,7 +208,7 @@
   (org-test-with-temp-text-in-file "
 
 * resolving sub-trees as references
- 
+
 #+begin_src emacs-lisp :var text=d4faa7b3-072b-4dcf-813c-dd7141c633f3
   (length text)
 #+end_src
@@ -223,7 +223,7 @@
    :CUSTOM_ID: simple-subtree
    :END:
 this is simple"
-    
+
     (progn
       (should (string-match (regexp-quote "this is simple")
 			    (org-babel-ref-resolve "simple-subtree")))
@@ -290,7 +290,7 @@ this is simple"
     (org-test-with-temp-text
 	test-line
       (should-error (org-ctrl-c-ctrl-c))
-      (forward-char) (org-ctrl-c-ctrl-c) 
+      (forward-char) (org-ctrl-c-ctrl-c)
       (should (string=
 	       (concat test-line " =1=")
 	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))
@@ -347,7 +347,7 @@ this is simple"
       	       (concat test-line " =x=")
       	       (buffer-substring-no-properties
 		(point-at-bol) (point-at-eol))))))
-    
+
   (let ((test-line (concat " Some text prior to block "
 			   "src_emacs-lisp[:results replace]{ \"y\" }")))
     (org-test-with-temp-text test-line
