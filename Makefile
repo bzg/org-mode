@@ -169,7 +169,8 @@ LISPF      = 	org.el			\
 		ob-java.el		\
 		ob-shen.el		\
 		ob-fortran.el		\
-		ob-picolisp.el
+		ob-picolisp.el		\
+		ob-maxima.el
 
 LISPFILES0  = $(LISPF:%=lisp/%)
 LISPFILES   = $(LISPFILES0) lisp/org-install.el
