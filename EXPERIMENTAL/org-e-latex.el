@@ -66,7 +66,7 @@ structure of the value.")
 
 (defcustom org-e-latex-default-class "article"
   "The default LaTeX class."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(string :tag "LaTeX class"))
 
 (defcustom org-e-latex-classes
@@ -170,7 +170,7 @@ function name.  That function will be called with two parameters,
 the (reduced) level of the headline, and a predicate non-nil when
 the headline should be numbered.  It must return a format string in
 which the section title will be added."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(repeat
 	  (list (string :tag "LaTeX class")
 		(string :tag "LaTeX header")
@@ -194,7 +194,7 @@ For example, adding an entry
 
 will cause \\usepackage[utf8x]{inputenc} to be used for buffers that
 are written as utf8 files."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(repeat
 	  (cons
 	   (string :tag "Derived from buffer")
@@ -203,7 +203,7 @@ are written as utf8 files."
 (defcustom org-e-latex-date-format
   "\\today"
   "Format string for \\date{...}."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'boolean)
 
 (defcustom org-e-latex-title-command "\\maketitle"
@@ -211,7 +211,7 @@ are written as utf8 files."
 If this string contains the formatting specification \"%s\" then
 it will be used as a formatting string, passing the title as an
 argument."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'string)
 
 
@@ -238,7 +238,7 @@ order to reproduce the default set-up:
 	  \(when priority \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
 	  text
 	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)"
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'function)
 
 
@@ -261,7 +261,7 @@ Value can also be set to the following symbols: `verb' and
 create a format string and select a delimiter character that
 isn't in the string.  For the latter, Org will use \"\\texttt\"
 to typeset and try to protect special characters."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'alist)
 
 
@@ -269,7 +269,7 @@ to typeset and try to protect special characters."
 
 (defcustom org-e-latex-footnote-separator "\\textsuperscript{,}\\,"
   "Text used to separate footnotes."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'string)
 
 
@@ -277,17 +277,17 @@ to typeset and try to protect special characters."
 
 (defcustom org-e-latex-active-timestamp-format "\\textit{%s}"
   "A printf format string to be applied to active time-stamps."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'string)
 
 (defcustom org-e-latex-inactive-timestamp-format "\\textit{%s}"
   "A printf format string to be applied to inactive time-stamps."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'string)
 
 (defcustom org-e-latex-diary-timestamp-format "\\textit{%s}"
   "A printf format string to be applied to diary time-stamps."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'string)
 
 
@@ -295,12 +295,12 @@ to typeset and try to protect special characters."
 
 (defcustom org-e-latex-image-default-option "width=.9\\linewidth"
   "Default option for images."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'string)
 
 (defcustom org-e-latex-default-figure-position "htb"
   "Default position for latex figures."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'string)
 
 (defcustom org-e-latex-inline-image-extensions
@@ -312,7 +312,7 @@ way the LaTeX file is processed.  When used with pdflatex, pdf,
 jpg and png images are OK.  When processing through dvi to
 Postscript, only ps and eps are allowed.  The default we use here
 encompasses both."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(repeat (string :tag "Extension")))
 
 
@@ -320,23 +320,23 @@ encompasses both."
 
 (defcustom org-e-latex-default-table-environment "tabular"
   "Default environment used to build tables."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'string)
 
 (defcustom org-e-latex-tables-centered t
   "When non-nil, tables are exported in a center environment."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'boolean)
 
 (defcustom org-e-latex-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'boolean)
 
 (defcustom org-e-latex-table-caption-above t
   "When non-nil, place caption string at the beginning of the table.
 Otherwise, place it near the end."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'boolean)
 
 
@@ -357,7 +357,7 @@ in order to mimic default behaviour:
 \(defun org-e-latex-format-drawer-default \(name contents\)
   \"Format a drawer element for LaTeX export.\"
   contents\)"
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'function)
 
 
@@ -396,7 +396,7 @@ in order to mimic default behaviour:
 		    \"\\\\end{minipage}}\"
 		    \"\\\\end{center}\"\)
 	    full-title contents\)\)"
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type 'function)
 
 
@@ -430,7 +430,7 @@ In addition, it is necessary to install
 pygments (http://pygments.org), and to configure the variable
 `org-e-latex-to-pdf-process' so that the -shell-escape option is
 passed to pdflatex."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(choice
 	  (const :tag "Use listings" t)
 	  (const :tag "Use minted" 'minted)
@@ -453,7 +453,7 @@ The value is the string that should be inserted as the language parameter
 for the listings package.  If the mode name and the listings name are
 the same, the language does not need an entry in this list - but it does not
 hurt if it is present."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode       ")
@@ -476,7 +476,7 @@ black keywords.
 
 Note that the same options will be applied to blocks of all
 languages."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(repeat
 	  (list
 	   (string :tag "Listings option name ")
@@ -499,7 +499,7 @@ Note that minted uses all lower case for language identifiers,
 and that the full list of language identifiers can be obtained
 with:
 pygmentize -L lexers"
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode     ")
@@ -522,7 +522,7 @@ will result in src blocks being exported with
 
 as the start of the minted environment. Note that the same
 options will be applied to blocks of all languages."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(repeat
 	  (list
 	   (string :tag "Minted option name ")
@@ -560,7 +560,7 @@ The CDR of each item in this alist is a list of three CONS:
 For each item in a CONS, the first string is a regexp
 for allowed characters before/after the quote, the second
 string defines the replacement string for this quote."
-  :group 'org-export-latex
+  :group 'org-export-e-latex
   :type '(list
 	  (cons :tag "Opening quote"
 		(string :tag "Regexp for char before")
