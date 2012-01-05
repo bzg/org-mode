@@ -1,4 +1,5 @@
 ;;; org.el --- Outline-based notes management and organizer
+
 ;; Carstens outline-mode for keeping track of everything.
 ;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
 ;;
