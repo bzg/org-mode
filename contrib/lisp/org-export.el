@@ -503,6 +503,11 @@ while every other back-end will ignore it."
 	   (string :tag "Shortcut")
 	   (string :tag "Back-end"))))
 
+(defcustom org-export-coding-system nil
+  "Coding system for the exported file."
+  :group 'org-export-general
+  :type 'coding-system)
+
 
 
 ;;; The Communication Channel
@@ -2069,7 +2074,8 @@ Return output file's name."
 		backend subtreep visible-only body-only ext-plist)))
       (with-temp-buffer
 	(insert out)
-	(write-file out-file)))
+	(let ((coding-system-for-write org-export-coding-system))
+	  (write-file out-file))))
     (when post-process (funcall post-process out-file))
     ;; Return full path.
     out-file))
