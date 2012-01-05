@@ -2019,6 +2019,8 @@ block but are passed literally to the \"example-block\"."
          (lang (nth 0 info))
          (body (nth 1 info))
 	 (comment (string= "noweb" (cdr (assoc :comments (nth 2 info)))))
+	 (rx-prefix (concat "\\(" org-babel-src-name-regexp "\\|"
+			    ":noweb-ref[ \t]+" "\\)"))
          (new-body "") index source-name evaluate prefix blocks-in-buffer)
     (flet ((nb-add (text) (setq new-body (concat new-body text)))
 	   (c-wrap (text)
@@ -2059,31 +2061,36 @@ block but are passed literally to the \"example-block\"."
 		    (when (org-babel-ref-goto-headline-id source-name)
 		      (org-babel-ref-headline-body)))
 		  ;; find the expansion of reference in this buffer
-		  (let (expansion)
+		  (let ((rx (concat rx-prefix source-name))
+			expansion)
 		    (save-excursion
 		      (goto-char (point-min))
 		      (if *org-babel-use-quick-and-dirty-noweb-expansion*
 			  (while (re-search-forward rx nil t)
 			    (let* ((i (org-babel-get-src-block-info 'light))
-				   (body (org-babel-expand-noweb-references i)))
-			      (if comment
-				  ((lambda (cs)
-				     (concat (c-wrap (car cs)) "\n"
-					     body "\n" (c-wrap (cadr cs))))
-				   (org-babel-tangle-comment-links i))
-				(setq expansion (concat expansion body)))))
+				   (body (org-babel-expand-noweb-references i))
+				   (full (if comment
+					     ((lambda (cs)
+						(concat (c-wrap (car cs)) "\n"
+							body "\n"
+							(c-wrap (cadr cs))))
+					      (org-babel-tangle-comment-links i))
+					   body)))
+			      (setq expansion (concat expansion full))))
 			(org-babel-map-src-blocks nil
 			  (let ((i (org-babel-get-src-block-info 'light)))
 			    (when (equal (or (cdr (assoc :noweb-ref (nth 2 i)))
 					     (nth 4 i))
 					 source-name)
-			      (let ((body (org-babel-expand-noweb-references i)))
-				(if comment
-				    ((lambda (cs)
-				       (concat (c-wrap (car cs)) "\n"
-					       body "\n" (c-wrap (cadr cs))))
-				     (org-babel-tangle-comment-links i))
-				  (setq expansion (concat expansion body)))))))))
+			      (let* ((body (org-babel-expand-noweb-references i))
+				     (full (if comment
+					       ((lambda (cs)
+						  (concat (c-wrap (car cs)) "\n"
+							  body "\n"
+							  (c-wrap (cadr cs))))
+						(org-babel-tangle-comment-links i))
+					     body)))
+				(setq expansion (concat expansion full))))))))
 		    expansion)
 		  ;; possibly raise an error if named block doesn't exist
 		  (if (member lang org-babel-noweb-error-langs)
