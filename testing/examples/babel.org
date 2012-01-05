@@ -7,26 +7,69 @@
   :END:
 
 #+name: noweb-example
-#+begin_src emacs-lisp
-  (message "expanded")
+#+begin_src emacs-lisp :results silent :exports code
+  (message "expanded1")
 #+end_src
 
-#+begin_src emacs-lisp :noweb yes
-  ;; noweb-yes-start
+#+name: noweb-example2
+#+begin_src emacs-lisp :results silent
+  (message "expanded2")
+#+end_src
+
+#+begin_src emacs-lisp :noweb yes :results silent
+;; noweb-1-yes-start
   <<noweb-example>>
-  ;; noweb-yes-end
 #+end_src
 
-#+begin_src emacs-lisp :noweb no
-  ;; noweb-no-start
-  <<noweb-example>>
-  ;; noweb-no-end
+#+begin_src emacs-lisp :noweb no  :results silent
+;; noweb-no-start
+  <<noweb-example1>>
 #+end_src
 
-#+begin_src emacs-lisp :noweb tangle
+#+begin_src emacs-lisp :noweb yes :results silent
+;; noweb-2-yes-start
+  <<noweb-example2>>
+#+end_src
+
+#+begin_src emacs-lisp :noweb tangle :results silent
   ;; noweb-tangle-start
+  <<noweb-example1>>
+  <<noweb-example2>>
+#+end_src
+
+* =:noweb= header argument expansion using :exports results
+  :PROPERTIES:
+  :ID:       8701beb4-13d9-468c-997a-8e63e8b66f8d
+  :END:
+
+#+name: noweb-example
+#+begin_src emacs-lisp :exports results
+  (message "expanded1")
+#+end_src
+
+#+name: noweb-example2
+#+begin_src emacs-lisp :exports results
+  (message "expanded2")
+#+end_src
+
+#+begin_src emacs-lisp :noweb yes :exports results
+;; noweb-1-yes-start
   <<noweb-example>>
-  ;; noweb-tangle-end
+#+end_src
+
+#+begin_src emacs-lisp :noweb no :exports code
+;; noweb-no-start
+  <<noweb-example1>>
+#+end_src
+
+#+begin_src emacs-lisp :noweb yes :exports results
+;; noweb-2-yes-start
+  <<noweb-example2>>
+#+end_src
+
+#+begin_src emacs-lisp :noweb tangle :exports code
+  <<noweb-example1>> 
+  <<noweb-example2>> 
 #+end_src
 
 * excessive id links on tangling
@@ -62,7 +105,7 @@
 #+name: i-have-a-name
 : 42
 
-* Pascal's Triangle -- export test
+* Pascal's Triangle -- exports both test
   :PROPERTIES:
   :ID:       92518f2a-a46a-4205-a3ab-bcce1008a4bb
   :END:
@@ -153,21 +196,24 @@ Here is one in the middle src_sh{echo 1} of a line.
 Here is one at the end of a line. src_sh{echo 2}
 src_sh{echo 3} Here is one at the beginning of a line.
 
-* conflicting blocks on export
+* mixed blocks with exports both
   :PROPERTIES:
   :ID:       5daa4d03-e3ea-46b7-b093-62c1b7632df3
   :END:
+
 #+name: a-list
 - a
 - b
 - c
 
-#+begin_src emacs-lisp :results wrap :exports both
+#+begin_src emacs-lisp :exports both
     "code block results"
 #+end_src
-#+begin_src emacs-lisp :var lst=a-list :results list
+
+#+begin_src emacs-lisp :var lst=a-list :results list :exports both
   (reverse lst)
 #+end_src
+
 * using the =:noweb-ref= header argument
   :PROPERTIES:
   :ID:       54d68d4b-1544-4745-85ab-4f03b3cbd8a0
