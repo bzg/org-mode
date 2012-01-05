@@ -508,6 +508,11 @@ while every other back-end will ignore it."
   :group 'org-export-general
   :type 'coding-system)
 
+(defcustom org-export-copy-to-kill-ring t
+  "Non-nil means exported stuff will also be pushed onto the kill ring."
+  :group 'org-export-general
+  :type 'boolean)
+
 
 
 ;;; The Communication Channel
@@ -1970,7 +1975,7 @@ Return code as a string."
       ;; Buffer isn't parsed directly.  Instead, a temporary copy is
       ;; created, where all code blocks are evaluated.  RAW-DATA is
       ;; the parsed tree of the buffer resulting from that process.
-      ;; Eventually call `org-export-filter-parse-tree-functions'..
+      ;; Eventually call `org-export-filter-parse-tree-functions'.
       (let ((info (org-export-collect-options backend subtreep ext-plist))
 	    (raw-data (progn
 			(when subtreep	; Only parse subtree contents.
@@ -1991,17 +1996,17 @@ Return code as a string."
 		raw-data info backend)))
 	;; Now transcode RAW-DATA.  Also call
 	;; `org-export-filter-final-output-functions'.
-	(let ((body (org-element-normalize-string
-		     (org-export-data raw-data backend info)))
-	      (template (intern (format "org-%s-template" backend))))
-	  (if (and (not body-only) (fboundp template))
-	      (org-trim
-	       (org-export-filter-apply-functions
-		org-export-filter-final-output-functions
-		(funcall template body info)
-		backend))
-	    (org-export-filter-apply-functions
-	     org-export-filter-final-output-functions body backend)))))))
+	(let* ((body (org-element-normalize-string
+		      (org-export-data raw-data backend info)))
+	       (template (intern (format "org-%s-template" backend)))
+	       (output (org-export-filter-apply-functions
+			org-export-filter-final-output-functions
+			(if (or (not (fboundp template)) body-only) body
+			  (funcall template body info))
+			backend)))
+	  ;; Maybe add final OUTPUT to kill ring before returning it.
+	  (when org-export-copy-to-kill-ring (org-kill-new output))
+	  output)))))
 
 (defun org-export-to-buffer (backend buffer &optional subtreep visible-only
 				     body-only ext-plist)
