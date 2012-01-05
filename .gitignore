@@ -40,6 +40,10 @@ local*.mk
 doc/git-describe.texi
 .gitattributes
 
+# texi2pdf --tidy
+
+doc/*.t2d
+
 # aspell word and replacement lists
 
 .aspell.org.pws

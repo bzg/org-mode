@@ -1,15 +1,17 @@
 ##----------------------------------------------------------------------
-##  YOU MUST EDIT THE FOLLOWING LINES
+##  NEVER EDIT THIS FILE, PUT ANY ADAPTATIONS INTO local.mk
+##----------------------------------------------------------------------
+##  CHECK AND ADAPT THE FOLLOWING DEFINITIONS
 ##----------------------------------------------------------------------
 
 # Name of your emacs binary
-EMACS   = emacs
+EMACS	= emacs
 
 # Where local software is found
-prefix  = /usr/share
+prefix	= /usr/share
 
 # Where local lisp files go.
-lispdir = $(prefix)/emacs/site-lisp/org
+lispdir= $(prefix)/emacs/site-lisp/org
 
 # Where local data files go.
 datadir = $(prefix)/emacs/etc/org
@@ -18,16 +20,17 @@ datadir = $(prefix)/emacs/etc/org
 infodir = $(prefix)/info
 
 ##----------------------------------------------------------------------
-## YOU MAY NEED TO EDIT THESE
+## YOU MAY NEED TO ADAPT THESE DEFINITIONS
 ##----------------------------------------------------------------------
 
 # Using emacs in batch mode.
-BATCH   = $(EMACS) -batch -Q \
+BATCH	= $(EMACS) -batch -Q \
 	  -L . \
 	  --eval '(defconst org-release "$(ORGVERSION)-Make")' \
 
-# run tests
-BTEST   = $(EMACS) -batch \
+# How to run tests
+BTEST_EXTRA = # placeholder
+BTEST	= $(EMACS) -batch \
 	  $(BTEST_EXTRA) \
 	  -L lisp/ \
 	  --eval '(defconst org-release "$(ORGVERSION)-Test")' \
@@ -36,20 +39,20 @@ BTEST   = $(EMACS) -batch \
 	  -f org-test-run-batch-tests
 
 # How to byte-compile the whole source directory
-ELCDIR  = $(BATCH) \
+ELCDIR	= $(BATCH) \
 	  --eval '(batch-byte-recompile-directory 0)'
 
 # How to byte-compile a single source file
-ELC     = $(BATCH) -f batch-byte-compile
+ELC	= $(BATCH) -f batch-byte-compile
 
 # How to make a pdf file from a texinfo file
-TEXI2PDF = texi2pdf
+TEXI2PDF = texi2pdf --batch --clean
 
 # How to make a pdf file from a tex file
 PDFTEX = pdftex
 
 # How to create directories
-MKDIR   = mkdir -p
+MKDIR	= mkdir -p
 
 # How to create the info files from the texinfo file
 MAKEINFO = makeinfo
@@ -58,20 +61,21 @@ MAKEINFO = makeinfo
 TEXI2HTML = makeinfo --html --number-sections
 
 # How to find files
-FIND    = find
+FIND	= find
 
 # How to remove files
-RM      = rm -f
+RM	= rm -f
 
 # How to remove files recursively
-RMR     = rm -fr
+RMR	= rm -fr
 
 # How to stream edit a file
-SED     = sed
+SED	= sed
 
 # How to copy the lisp files and elc files to their destination.
-# CP    = cp -p         # try this if there is no install
-CP      = install -p
+# CP	= cp -p	# try this if there is no install
+CP	= install -p
 
 # Name of the program to install info files
+# INSTALL_INFO = ginstall-info # Debian: avoid harmless warning message
 INSTALL_INFO = install-info

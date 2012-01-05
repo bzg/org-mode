@@ -22,7 +22,8 @@ endif
 
 .PHONY:	default all up2 update compile lisp doc etc \
 	test install info html pdf card docs $(INSTSUB) \
-	autoloads cleanall clean cleancontrib cleanelc cleandoc cleanrel clean-install
+	autoloads cleanall clean cleancontrib cleanrel clean-install \
+	cleanelc cleanlisp cleandoc cleandocs
 
 all \
 compile::	lisp
@@ -46,8 +47,8 @@ up2:	update
 	sudo ${MAKE} install
 
 update:
+	git remote update
 	git pull
-	${MAKE} clean
 	${MAKE} all
 
 install:	$(INSTSUB)
@@ -62,7 +63,7 @@ info html pdf card:
 $(INSTSUB):
 	$(MAKE) -C $(@:install-%=%) install
 
-autoloads: lisp maint.mk
+autoloads: lisp
 	$(MAKE) -C $< $@
 
 cleanall: $(SUBDIRS)
@@ -81,3 +82,9 @@ cleanrel:
 	$(RMR) RELEASEDIR
 	$(RMR) org-7.*
 	$(RMR) org-7*zip org-7*tar.gz
+
+cleanelc cleanlisp:
+	$(MAKE) -C lisp clean
+
+cleandoc cleandocs:
+	$(MAKE) -C doc clean
