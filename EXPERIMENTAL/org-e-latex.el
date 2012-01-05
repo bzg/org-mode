@@ -573,6 +573,70 @@ string defines the replacement string for this quote."
 		(string :tag "Replacement quote     "))))
 
 
+;;;; Compilation
+
+(defcustom org-e-latex-pdf-process
+  '("pdflatex -interaction nonstopmode -output-directory %o %f"
+    "pdflatex -interaction nonstopmode -output-directory %o %f"
+    "pdflatex -interaction nonstopmode -output-directory %o %f")
+  "Commands to process a LaTeX file to a PDF file.
+This is a list of strings, each of them will be given to the shell
+as a command.  %f in the command will be replaced by the full file name, %b
+by the file base name (i.e. without extension) and %o by the base directory
+of the file.
+
+The reason why this is a list is that it usually takes several runs of
+`pdflatex', maybe mixed with a call to `bibtex'.  Org does not have a clever
+mechanism to detect which of these commands have to be run to get to a stable
+result, and it also does not do any error checking.
+
+By default, Org uses 3 runs of `pdflatex' to do the processing.  If you
+have texi2dvi on your system and if that does not cause the infamous
+egrep/locale bug:
+
+     http://lists.gnu.org/archive/html/bug-texinfo/2010-03/msg00031.html
+
+then `texi2dvi' is the superior choice.  Org does offer it as one
+of the customize options.
+
+Alternatively, this may be a Lisp function that does the processing, so you
+could use this to apply the machinery of AUCTeX or the Emacs LaTeX mode.
+This function should accept the file name as its single argument."
+  :group 'org-export-pdf
+  :type '(choice
+	  (repeat :tag "Shell command sequence"
+		  (string :tag "Shell command"))
+	  (const :tag "2 runs of pdflatex"
+		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "3 runs of pdflatex"
+		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "pdflatex,bibtex,pdflatex,pdflatex"
+		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "bibtex %b"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"
+		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "texi2dvi"
+		 ("texi2dvi -p -b -c -V %f"))
+	  (const :tag "rubber"
+		 ("rubber -d --into %o %f"))
+	  (function)))
+
+(defcustom org-e-latex-logfiles-extensions
+  '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb")
+  "The list of file extensions to consider as LaTeX logfiles."
+  :group 'org-export-e-latex
+  :type '(repeat (string :tag "Extension")))
+
+(defcustom org-e-latex-remove-logfiles t
+  "Non-nil means remove the logfiles produced by PDF production.
+These are the .aux, .log, .out, and .toc files."
+  :group 'org-export-e-latex
+  :type 'boolean)
+
+
 
 ;;; Internal Functions
 
@@ -1837,6 +1901,98 @@ CONTENTS is nil. INFO is a plist holding contextual information."
 			      (length (match-string 0 contents)))))
 	 (setq contents (replace-match new-str nil t contents))))
      (format "\\begin{verse}\n%s\\end{verse}" contents))))
+
+
+
+;;; Compilation
+
+(defun org-e-latex-compile (texfile)
+  "Compile a TeX file.
+
+TEXFILE is the name of the file being compiled.  Processing is
+done through the command specified in `org-e-latex-pdf-process'.
+
+Return PDF file name or an error if it couldn't be produced."
+  (let* ((wconfig (current-window-configuration))
+	 (texfile (file-truename texfile))
+	 (base (file-name-sans-extension texfile))
+	 errors)
+    (message (format "Processing LaTeX file " texfile "..." texfile))
+    (unwind-protect
+	(progn
+	  (cond
+	   ;; A function is provided: Apply it.
+	   ((functionp org-latex-to-pdf-process)
+	    (funcall org-latex-to-pdf-process (shell-quote-argument texfile)))
+	   ;; A list is provided: Replace %b, %f and %o with appropriate
+	   ;; values in each command before applying it.  Output is
+	   ;; redirected to "*Org PDF LaTeX Output*" buffer.
+	   ((consp org-e-latex-pdf-process)
+	    (let* ((out-dir (or (file-name-directory texfile) "./"))
+		   (outbuf (get-buffer-create "*Org PDF LaTeX Output*")))
+	      (mapc
+	       (lambda (command)
+		 (shell-command
+		  (replace-regexp-in-string
+		   "%b" (shell-quote-argument base)
+		   (replace-regexp-in-string
+		    "%f" (shell-quote-argument texfile)
+		    (replace-regexp-in-string
+		     "%o" (shell-quote-argument out-dir) command)))
+		  outbuf))
+	       org-e-latex-pdf-process)
+	      ;; Collect standard errors from output buffer.
+	      (setq errors (org-e-latex-collect-errors outbuf))))
+	   (t (error "No valid command to process to PDF")))
+	  (let ((pdffile (concat base ".pdf")))
+	    ;; Check for process failure.  Provide collected errors if
+	    ;; possible.
+	    (if (not (file-exists-p pdffile))
+		(error (concat (format "PDF file %s wasn't produced" pdffile)
+			       (when errors (concat ": " errors))))
+	      ;; Else remove log files, when specified, and signal end of
+	      ;; process to user, along with any error encountered.
+	      (when org-e-latex-remove-logfiles
+		(dolist (ext org-e-latex-logfiles-extensions)
+		  (let ((file (concat base "." ext)))
+		    (when (file-exists-p file) (delete-file file)))))
+	      (message (concat "Process completed"
+			       (if (not errors) "."
+				 (concat " with errors: " errors)))))
+	    ;; Return output file name.
+	    pdffile))
+      (set-window-configuration wconfig))))
+
+(defun org-e-latex-collect-errors (buffer)
+  "Collect some kind of errors from \"pdflatex\" command output.
+
+BUFFER is the buffer containing output.
+
+Return collected error types as a string, or nil if there was
+none."
+  (with-current-buffer buffer
+    (save-excursion
+      (goto-char (point-max))
+      ;; Find final "pdflatex" run.
+      (when (re-search-backward "^[ \t]*This is pdf.*?TeX.*?Version" nil t)
+	(let ((case-fold-search t)
+	      (errors ""))
+	  (when (save-excursion
+		  (re-search-forward "Reference.*?undefined" nil t))
+	    (setq errors (concat errors " [undefined reference]")))
+	  (when (save-excursion
+		  (re-search-forward "Citation.*?undefined" nil t))
+	    (setq errors (concat errors " [undefined citation]")))
+	  (when (save-excursion
+		  (re-search-forward "Undefined control sequence" nil t))
+	    (setq errors (concat errors " [undefined control sequence]")))
+	  (when (save-excursion
+		  (re-search-forward "^! LaTeX.*?Error"))
+	    (setq errors (concat errors " [LaTeX error]")))
+	  (when (save-excursion
+		  (re-search-forward "^! Package.*?Error"))
+	    (setq errors (concat errors " [package error]")))
+	  (and (org-string-nw-p errors) (org-trim errors)))))))
 
 
 (provide 'org-e-latex)
