@@ -68,8 +68,8 @@
 #+end_src
 
 #+begin_src emacs-lisp :noweb tangle :exports code
-  <<noweb-example1>> 
-  <<noweb-example2>> 
+  <<noweb-example1>>
+  <<noweb-example2>>
 #+end_src
 
 * excessive id links on tangling

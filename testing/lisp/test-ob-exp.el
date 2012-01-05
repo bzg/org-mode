@@ -207,8 +207,7 @@ elements in the final html."
 		  "code block results"
 		  "</pre>"
 		  "</body>"))))))
-      
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here
-
