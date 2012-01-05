@@ -895,7 +895,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let* ((options (or (org-element-get-property :options example-block) ""))
 	 (value (org-export-handle-code
 		 (org-element-get-property :value example-block) options info)))
-    (org-e-latex--wrap-label example-block value)))
+    (org-e-latex--wrap-label
+     example-block (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
 
 
 ;;;; Export Snippet
@@ -925,8 +926,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		  "^[ \t]*: ?" ""
 		  (org-element-get-property :value fixed-width)))))
     (org-e-latex--wrap-label
-     fixed-width
-     (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
+     fixed-width (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
 
 
 ;;;; Footnote Definition
