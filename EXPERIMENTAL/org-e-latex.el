@@ -1987,10 +1987,10 @@ none."
 		  (re-search-forward "Undefined control sequence" nil t))
 	    (setq errors (concat errors " [undefined control sequence]")))
 	  (when (save-excursion
-		  (re-search-forward "^! LaTeX.*?Error"))
+		  (re-search-forward "^! LaTeX.*?Error" nil t))
 	    (setq errors (concat errors " [LaTeX error]")))
 	  (when (save-excursion
-		  (re-search-forward "^! Package.*?Error"))
+		  (re-search-forward "^! Package.*?Error" nil t))
 	    (setq errors (concat errors " [package error]")))
 	  (and (org-string-nw-p errors) (org-trim errors)))))))
 
