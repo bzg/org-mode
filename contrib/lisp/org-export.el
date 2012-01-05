@@ -913,23 +913,25 @@ BACKEND is a symbol specifying the back-end to use."
 
 (defun org-export-get-subtree-options ()
   "Get export options in subtree at point.
-Return the options as a plist."
-  (org-with-wide-buffer
-   (when (ignore-errors (org-back-to-heading t))
-     (let (prop plist)
-       (when (setq prop (progn (looking-at org-todo-line-regexp)
-			       (or (org-entry-get (point) "EXPORT_TITLE")
-				   (org-match-string-no-properties 3))))
-	 (setq plist (plist-put plist :title prop)))
-       (when (setq prop (org-entry-get (point) "EXPORT_TEXT"))
-	 (setq plist (plist-put plist :text prop)))
-       (when (setq prop (org-entry-get (point) "EXPORT_AUTHOR"))
-	 (setq plist (plist-put plist :author prop)))
-       (when (setq prop (org-entry-get (point) "EXPORT_DATE"))
-	 (setq plist (plist-put plist :date prop)))
-       (when (setq prop (org-entry-get (point) "EXPORT_OPTIONS"))
-	 (setq plist (org-export-add-options-to-plist plist prop)))
-       plist))))
+
+Assume point is at subtree's beginning.
+
+Return options as a plist."
+  (let (prop plist)
+    (when (setq prop (progn (looking-at org-todo-line-regexp)
+			    (or (save-match-data
+				  (org-entry-get (point) "EXPORT_TITLE"))
+				(org-match-string-no-properties 3))))
+      (setq plist (plist-put plist :title prop)))
+    (when (setq prop (org-entry-get (point) "EXPORT_TEXT"))
+      (setq plist (plist-put plist :text prop)))
+    (when (setq prop (org-entry-get (point) "EXPORT_AUTHOR"))
+      (setq plist (plist-put plist :author prop)))
+    (when (setq prop (org-entry-get (point) "EXPORT_DATE"))
+      (setq plist (plist-put plist :date prop)))
+    (when (setq prop (org-entry-get (point) "EXPORT_OPTIONS"))
+      (setq plist (org-export-add-options-to-plist plist prop)))
+    plist))
 
 (defun org-export-get-inbuffer-options (buffer-string backend files)
   "Return in-buffer options as a plist.
@@ -1954,28 +1956,28 @@ Return code as a string."
     (save-restriction
       ;; Narrow buffer to an appropriate region for parsing.
       (when (org-region-active-p)
-	(narrow-to-region (region-beginning) (region-end)))
-      (goto-char (point-min))
-      (when subtreep
-	(unless (org-at-heading-p)
-	  (org-with-limited-levels (outline-next-heading)))
-	(let ((end (save-excursion (org-end-of-subtree t)))
-	      (begin (progn (forward-line)
-			    (org-skip-whitespace)
-			    (point-at-bol))))
-	  (narrow-to-region begin end)))
+	(narrow-to-region (region-beginning) (region-end))
+	(goto-char (point-min)))
+      (when (and subtreep (not (org-at-heading-p)))
+	;; Ensure point is at sub-tree's beginning.
+	(org-with-limited-levels (org-back-to-heading (not visible-only))))
       ;; Retrieve export options (INFO) and parsed tree (RAW-DATA).
       ;; Buffer isn't parsed directly.  Instead, a temporary copy is
       ;; created, where all code blocks are evaluated.  RAW-DATA is
       ;; the parsed tree of the buffer resulting from that process.
       ;; Eventually call `org-export-filter-parse-tree-functions'..
       (let ((info (org-export-collect-options backend subtreep ext-plist))
-	    (raw-data (org-export-filter-apply-functions
-		       org-export-filter-parse-tree-functions
-		       (org-export-with-current-buffer-copy
-			(org-export-blocks-preprocess)
-			(org-element-parse-buffer nil visible-only))
-		       backend)))
+	    (raw-data (progn
+			(when subtreep	; Only parse subtree contents.
+			  (let ((end (save-excursion (org-end-of-subtree t))))
+			    (narrow-to-region
+			     (progn (forward-line) (point)) end)))
+			(org-export-filter-apply-functions
+			 org-export-filter-parse-tree-functions
+			 (org-export-with-current-buffer-copy
+			  (org-export-blocks-preprocess)
+			  (org-element-parse-buffer nil visible-only))
+			 backend))))
 	;; Initialize the communication system and combine it to INFO.
 	(setq info
 	      (org-combine-plists
