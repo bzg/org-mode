@@ -85,8 +85,9 @@
 ;; back-end.  See `org-export-option-alist' for supported defaults and
 ;; syntax.
 
-;; Tools for common tasks across back-ends are implemented in the last
-;; part of this file.
+;; Tools for common tasks across back-ends are implemented in the
+;; penultimate part of this file.  A dispatcher for standard back-ends
+;; is provided in the last one.
 
 ;;; Code:
 (eval-when-compile (require 'cl))
@@ -510,6 +511,34 @@ while every other back-end will ignore it."
 
 (defcustom org-export-copy-to-kill-ring t
   "Non-nil means exported stuff will also be pushed onto the kill ring."
+  :group 'org-export-general
+  :type 'boolean)
+
+(defcustom org-export-initial-scope 'buffer
+  "The initial scope when exporting with `org-export-dispatch'.
+This variable can be either set to `buffer' or `subtree'."
+  :group 'org-export-general
+  :type '(choice
+	  (const :tag "Export current buffer" 'buffer)
+	  (const :tag "Export current subtree" 'subtree)))
+
+(defcustom org-export-show-temporary-export-buffer t
+  "Non-nil means show buffer after exporting to temp buffer.
+When Org exports to a file, the buffer visiting that file is ever
+shown, but remains buried.  However, when exporting to a temporary
+buffer, that buffer is popped up in a second window.  When this variable
+is nil, the buffer remains buried also in these cases."
+  :group 'org-export-general
+  :type 'boolean)
+
+(defcustom org-export-dispatch-use-expert-ui nil
+  "Non-nil means using a non-intrusive `org-export-dispatch'.
+In that case, no help buffer is displayed.  Though, an indicator
+for current export scope is added to the prompt \(i.e. \"b\" when
+output is restricted to body only, \"s\" when it is restricted to
+the current subtree and \"v\" when only visible elements are
+considered for export\).  Also, \[?] allows to switch back to
+standard mode."
   :group 'org-export-general
   :type 'boolean)
 
@@ -2834,6 +2863,126 @@ Return an alist where key is the caption of the src block and
 value an unique indentifier that might be used for internal
 links."
   (org-export-collect-elements 'src-block backend info))
+
+
+
+;;; The Dispatcher
+
+;; `org-export-dispatch' is the standard interactive way to start an
+;; export process.  It uses `org-export-dispatch-ui' as a subroutine
+;; for its interface.  Most commons back-ends should have an entry in
+;; it.
+
+(defun org-export-dispatch ()
+  "Export dispatcher for Org mode.
+
+It provides an access to common export related tasks in a buffer.
+Its interface comes in two flavours: standard and expert.  While
+both share the same set of bindings, only the former displays the
+valid keys associations.  Set `org-export-dispatch-use-expert-ui'
+to switch to one or the other.
+
+Return an error if key pressed has no associated command."
+  (interactive)
+  (let* ((input (org-export-dispatch-ui
+		 (if (listp org-export-initial-scope) org-export-initial-scope
+		   (list org-export-initial-scope))
+		 org-export-dispatch-use-expert-ui))
+	 (raw-key (car input))
+	 (scope (cdr input)))
+    ;; Translate "C-a", "C-b"... into "a", "b"... Then take action
+    ;; depending on user's key pressed.
+    (case (if (< raw-key 27) (+ raw-key 96) raw-key)
+      ;; Export with `e-latex' back-end.
+      (?L (let ((outbuf (org-export-to-buffer
+			 'e-latex "*Org E-latex Export*"
+			 (memq 'subtree scope)
+			 (memq 'visible scope)
+			 (memq 'body scope))))
+	    (with-current-buffer outbuf (latex-mode))
+	    (when org-export-show-temporary-export-buffer
+	      (switch-to-buffer-other-window outbuf))))
+      ((?l ?p ?d)
+       (org-export-to-file
+	'e-latex
+	(cond ((eq raw-key ?p) #'org-e-latex-compile)
+	      ((eq raw-key ?d)
+	       (lambda (file) (org-open-file (org-e-latex-compile file)))))
+	(memq 'subtree scope)
+	(memq 'visible scope)
+	(memq 'body scope)))
+      ;; Undefined command.
+      (t (error "No command associated with key %s"
+		(char-to-string raw-key))))))
+
+(defun org-export-dispatch-ui (scope expertp)
+  "Handle interface for `org-export-dispatch'.
+
+SCOPE is a list containing current interactive options set for
+export.  It can contain any of the following symbols:
+`body'    toggles a body-only export
+`subtree' restricts export to current subtree
+`visible' restricts export to visible part of buffer.
+
+EXPERTP, when non-nil, triggers expert UI.  In that case, no help
+buffer is provided, but indications about currently active
+options are given in the prompt.  Moreover, \[?] allows to switch
+back to standard interface.
+
+Return value is a list with key pressed as car and a list of
+final interactive export options as cdr."
+  (let ((help (format "-------------------  General Options  -------------------
+\[1] Body only:     %s
+\[2] Export scope:  %s
+\[3] Visible only:  %s
+
+--------------------  LaTeX Export  ---------------------
+\[l] to LaTeX file               [L] to temporary buffer
+\[p] to PDF file                 [d] ... and open it"
+		      (if (memq 'body scope) "On" "Off")
+		      (if (memq 'subtree scope) "Subtree" "Buffer")
+		      (if (memq 'visible scope) "On" "Off")))
+	(standard-prompt "Export command: ")
+	(expert-prompt (format "Export command (%s%s%s): "
+			       (if (memq 'body scope) "b" "-")
+			       (if (memq 'subtree scope) "s" "-")
+			       (if (memq 'visible scope) "v" "-")))
+	(handle-keypress
+	 (function
+	  ;; Read a character from command input, toggling interactive
+	  ;; options when applicable.  PROMPT is the displayed prompt,
+	  ;; as a string.
+	  (lambda (prompt)
+	    (let ((key (read-char-exclusive prompt)))
+	      (cond
+	       ;; Ignore non-standard characters (i.e. "M-a").
+	       ((not (characterp key)) (org-export-dispatch-ui scope expertp))
+	       ;; Switch back to standard interface.
+	       ((and (eq key ??) expertp) (org-export-dispatch-ui scope nil))
+	       ((eq key ?1)
+		(org-export-dispatch-ui
+		 (if (memq 'body scope) (remq 'body scope) (cons 'body scope))
+		 expertp))
+	       ((eq key ?2)
+		(org-export-dispatch-ui
+		 (if (memq 'subtree scope) (remq 'subtree scope)
+		   (cons 'subtree scope))
+		 expertp))
+	       ((eq key ?3)
+		(org-export-dispatch-ui
+		 (if (memq 'visible scope) (remq 'visible scope)
+		   (cons 'visible scope))
+		 expertp))
+	       (t (cons key scope))))))))
+    ;; With expert UI, just read key with a fancy prompt.  In standard
+    ;; UI, display an intrusive help buffer.
+    (if expertp (funcall handle-keypress expert-prompt)
+      (save-window-excursion
+	(delete-other-windows)
+	(with-output-to-temp-buffer "*Org Export/Publishing Help*" (princ help))
+	(org-fit-window-to-buffer
+	 (get-buffer-window "*Org Export/Publishing Help*"))
+	(funcall handle-keypress standard-prompt)))))
 
 
 (provide 'org-export)
