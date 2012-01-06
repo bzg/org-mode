@@ -122,9 +122,16 @@
 
 (ert-deftest test-org-babel/simple-named-code-block ()
   "Test that simple named code blocks can be evaluated."
-  (org-test-at-id "0d82b52d-1bb9-4916-816b-2c67c8108dbb"
-    (org-babel-next-src-block 1)
-    (should (= 42 (org-babel-execute-src-block)))))
+  (org-test-with-temp-text-in-file "
+
+#+name: i-have-a-name
+#+begin_src emacs-lisp
+  42
+#+end_src"
+
+    (progn
+      (org-babel-next-src-block 1)
+      (should (= 42 (org-babel-execute-src-block))))))
 
 (ert-deftest test-org-babel/simple-variable-resolution ()
   "Test that simple variable resolution is working."
@@ -587,34 +594,80 @@ on two lines
 	   '(":a 1" "b [2 3]" "c (4 :d (5 6))")
 	   (org-babel-balanced-split ":a 1 :b [2 3] :c (4 :d (5 6))"
 				     '((32 9) . 58)))))
-
-(ert-deftest test-org-babel/inline-src_blk-preceded-punct-preceded-by-point ()
-  (let ((test-line ".src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
-    (org-test-with-temp-text
-	test-line
-      (forward-char 1)
+(ert-deftest test-ob/commented-last-block-line-no-var ()
+  (org-test-with-temp-text-in-file "
+#+begin_src emacs-lisp
+;;
+#+end_src"
+    (progn
+      (org-babel-next-src-block)
       (org-ctrl-c-ctrl-c)
-      (should (string= (concat test-line " =\"x\"=")
+      (should (re-search-forward "\\#\\+results:" nil t))
+      (forward-line)
+      (should
+       (string=
+	"" 
+	(buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+  (org-test-with-temp-text-in-file "
+#+begin_src emacs-lisp
+\"some text\";;
+#+end_src"
+
+    (progn
+      (org-babel-next-src-block)
+      (org-ctrl-c-ctrl-c)
+      (should (re-search-forward "\\#\\+results:" nil t))
+      (forward-line)
+      (should
+       (string=
+	": some text" 
+	(buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
+
+(ert-deftest test-ob/commented-last-block-line-with-var ()
+  (org-test-with-temp-text-in-file "
+#+begin_src emacs-lisp :var a=1
+;;
+#+end_src"
+    (progn
+      (org-babel-next-src-block)
+      (org-ctrl-c-ctrl-c)
+      (re-search-forward "\\#\\+results:" nil t)
+      (forward-line)
+      (should (string=
+	       "" 
+	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+  (org-test-with-temp-text-in-file "
+#+begin_src emacs-lisp :var a=2
+2;;
+#+end_src"
+    (progn
+      (org-babel-next-src-block)
+      (org-ctrl-c-ctrl-c)
+      (re-search-forward "\\#\\+results:" nil t)
+      (forward-line)
+      (should (string=
+	       ": 2" 
+	       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
+
+(defun test-ob-verify-result-and-removed-result (result buffer-text)
+  "Test helper function to test `org-babel-remove-result'.
+A temp buffer is populated with BUFFER-TEXT, the first block is executed,
+and the result of execution is verified against RESULT.
+
+The block is actually executed /twice/ to ensure result
+replacement happens correctly."
+  (org-test-with-temp-text
+      buffer-text
+    (progn
+      (org-babel-next-src-block) (org-ctrl-c-ctrl-c) (org-ctrl-c-ctrl-c)
+      (should (re-search-forward "\\#\\+results:" nil t))
+      (forward-line)
+      (should (string= result 
 		       (buffer-substring-no-properties
-			(point-min) (point-max)))))))
-
-(ert-deftest test-org-babel/inline-src-block-preceded-by-equality ()
-  (let ((test-line "=src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
-    (org-test-with-temp-text
-	test-line
-      (forward-char 1)
-      (org-ctrl-c-ctrl-c)
-      (should (string= (concat test-line " =\"x\"=")
-		       (buffer-substring-no-properties
-			(point-min) (point-max)))))))
-
-(ert-deftest test-org-babel/inline-src-block-enclosed-within-parenthesis ()
-  (let ((test-line "(src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
-    (org-test-with-temp-text
-	(concat test-line ")")
-      (forward-char 1)
-      (org-ctrl-c-ctrl-c)
-      (should (string= (concat test-line " =\"x\"=)" )
+			(point-at-bol)
+			(- (point-max) 16))))
+      (org-babel-previous-src-block) (org-babel-remove-result)
+      (should (string= buffer-text
 		       (buffer-substring-no-properties
 			(point-min) (point-max)))))))
 
@@ -726,31 +779,17 @@ Line 3\"
 
 * next heading"))
 
-(ert-deftest test-org-babel/inline-src_blk-preceded-by-letter ()
-  "Test inline source block invalid where preceded by letter"
+(ert-deftest test-ob/org-babel-remove-result--results-pp ()
+  "Test `org-babel-remove-result' with :results pp."
+  (test-ob-verify-result-and-removed-result
+   ": \"I /am/ working!\""
 
-  ;; inline-src-blk preceded by letter
-  (org-test-with-temp-text
-      "asrc_emacs-lisp[ :results verbatim ]{ \"x\"  }"
-    (forward-char 1)
-    (let ((error-result
-	   (should-error
-	    (org-ctrl-c-ctrl-c))))
-      (should (equal `(error "C-c C-c can do nothing useful at this location")
-		     error-result)))))
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results pp
+\"I /am/ working!\")
+#+end_src
 
-(ert-deftest test-org-babel/inline-src_blk-preceded-by-number ()
-  "Test inline source block invalid where preceded by number"
-
-  ;; inline-src-blk preceded by number
-  (org-test-with-temp-text
-      "0src_emacs-lisp[ :results verbatim ]{ \"x\"  }"
-    (forward-char 1)
-    (let ((error-result
-	   (should-error
-	    (org-ctrl-c-ctrl-c))))
-      (should (equal `(error "C-c C-c can do nothing useful at this location")
-		     error-result)))))
+* next heading"))
 
 (provide 'test-ob)
 
