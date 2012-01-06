@@ -73,7 +73,7 @@
   (org-test-at-id "eb1f6498-5bd9-45e0-9c56-50717053e7b7"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string))
+	   (org-export-as-html nil nil nil 'string 'body-only))
 	  (test-point 0))
 
       (org-test-with-temp-text-in-file
@@ -86,9 +86,7 @@
 			      x
 			      nil t)))
 		  (setq test-point (point)))
-		'("<head>" "</head>" "<body>"
-		  "<code>:noweb</code> header argument expansion"
-		  "<code>:noweb</code> header argument expansion"
+		'("<code>:noweb</code> header argument expansion"
 		  "message" "expanded1"
 		  "message" "expanded2"
 		  "noweb-1-yes-start"
@@ -99,8 +97,7 @@
 		  "message" "expanded2"
 		  "noweb-tangle-start"
 		  "&lt;&lt;noweb-example1&gt;&gt;"
-		  "&lt;&lt;noweb-example2&gt;&gt;"
-		  "</body>"))))))
+		  "&lt;&lt;noweb-example2&gt;&gt;"))))))
 
 (ert-deftest ob-exp/noweb-on-export-with-exports-results ()
   "Noweb header arguments export correctly using :exports results.
@@ -110,7 +107,7 @@
   (org-test-at-id "8701beb4-13d9-468c-997a-8e63e8b66f8d"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string))
+	   (org-export-as-html nil nil nil 'string 'body-only))
 	  (test-point 0))
 
       (org-test-with-temp-text-in-file
@@ -123,9 +120,7 @@
 			      x
 			      nil t)))
 		  (setq test-point (point)))
-		'("<head>" "</head>" "<body>"
-		  "<code>:noweb</code> header argument expansion using :exports results"
-		  "<code>:noweb</code> header argument expansion using :exports results"
+		'("<code>:noweb</code> header argument expansion using :exports results"
 		  "expanded1"
 		  "expanded2"
 		  "expanded1"
@@ -133,8 +128,7 @@
 		  "&lt;&lt;noweb-example1&gt;&gt;"
 		  "expanded2"
 		  "&lt;&lt;noweb-example1&gt;&gt;"
-		  "&lt;&lt;noweb-example2&gt;&gt;"
-		  "</body>"))))))
+		  "&lt;&lt;noweb-example2&gt;&gt;"))))))
 
 (ert-deftest ob-exp/exports-both ()
   "Test the :exports both header argument.
@@ -143,9 +137,8 @@ elements in the final html."
   (org-test-at-id "92518f2a-a46a-4205-a3ab-bcce1008a4bb"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string))
+	   (org-export-as-html nil nil nil 'string 'body-only))
 	  (test-point 0))
-
       (org-test-with-temp-text-in-file
 	  exported-html
 
@@ -156,9 +149,7 @@ elements in the final html."
 			      x
 			      nil t)))
 		  (setq test-point (point)))
-		'("<head>" "</head>" "<body>"
-		   "Pascal's Triangle &ndash; exports both test"
-		   "Pascal's Triangle &ndash; exports both test"
+		'( "Pascal's Triangle &ndash; exports both test"
 		   "<pre"
 		   "defun" "pascals-triangle"
 		   "if""list""list""let*""prev-triangle"
@@ -173,14 +164,13 @@ elements in the final html."
 		   "<tr>"">1<"">3<"">3<"">1<""</tr>"
 		   "<tr>"">1<"">4<"">6<"">4<"">1<""</tr>"
 		   "<tr>"">1<"">5<"">10<"">10<"">5<"">1<""</tr>"
-		   "</tbody>""</table>"
-		  "</body>"))))))
+		   "</tbody>""</table>"))))))
 
 (ert-deftest ob-exp/mixed-blocks-with-exports-both ()
     (org-test-at-id "5daa4d03-e3ea-46b7-b093-62c1b7632df3"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string))
+	   (org-export-as-html nil nil nil 'string  'body-only))
 	  (test-point 0))
       (org-test-with-temp-text-in-file
 	  exported-html
@@ -192,9 +182,7 @@ elements in the final html."
 			      x
 			      nil t)))
 		  (setq test-point (point)))
-		'("<head>" "</head>" "<body>"
-		  "mixed blocks with exports both"
-		  "mixed blocks with exports both"
+		'("mixed blocks with exports both"
 		  "<ul>"
 		  "<li>""a""</li>"
 		  "<li>""b""</li>"
@@ -205,9 +193,9 @@ elements in the final html."
 		  "</pre>"
 		  "<pre class=\"example\">"
 		  "code block results"
-		  "</pre>"
-		  "</body>"))))))
-
+		  "</pre>"))))))
+      
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here
+
