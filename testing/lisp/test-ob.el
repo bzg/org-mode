@@ -137,13 +137,7 @@
 #+name: i-have-a-name
 #+begin_src emacs-lisp
   42
-#+end_src
-
-#+name:
-: 42
-
-#+name: i-have-a-name
-: 42"
+#+end_src"
 
     (progn
       (org-babel-next-src-block 1)
@@ -670,6 +664,203 @@ on two lines
 	   '(":a 1" "b [2 3]" "c (4 :d (5 6))")
 	   (org-babel-balanced-split ":a 1 :b [2 3] :c (4 :d (5 6))"
 				     '((32 9) . 58)))))
+
+(ert-deftest test-ob/commented-last-block-line-no-var ()
+  (org-test-with-temp-text-in-file "
+#+begin_src emacs-lisp
+;;
+#+end_src"
+    (progn
+      (org-babel-next-src-block)
+      (org-ctrl-c-ctrl-c)
+      (should (re-search-forward "\\#\\+results:" nil t))
+      (forward-line)
+      (should
+       (string=
+	"" 
+	(buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+  (org-test-with-temp-text-in-file "
+#+begin_src emacs-lisp
+\"some text\";;
+#+end_src"
+
+    (progn
+      (org-babel-next-src-block)
+      (org-ctrl-c-ctrl-c)
+      (should (re-search-forward "\\#\\+results:" nil t))
+      (forward-line)
+      (should
+       (string=
+	": some text" 
+	(buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
+
+(ert-deftest test-ob/commented-last-block-line-with-var ()
+  (org-test-with-temp-text-in-file "
+#+begin_src emacs-lisp :var a=1
+;;
+#+end_src"
+    (progn
+      (org-babel-next-src-block)
+      (org-ctrl-c-ctrl-c)
+      (re-search-forward "\\#\\+results:" nil t)
+      (forward-line)
+      (should (string=
+	       "" 
+	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
+  (org-test-with-temp-text-in-file "
+#+begin_src emacs-lisp :var a=2
+2;;
+#+end_src"
+    (progn
+      (org-babel-next-src-block)
+      (org-ctrl-c-ctrl-c)
+      (re-search-forward "\\#\\+results:" nil t)
+      (forward-line)
+      (should (string=
+	       ": 2" 
+	       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
+
+(defun test-ob-verify-result-and-removed-result (result buffer-text)
+  "Test helper function to test `org-babel-remove-result'.
+A temp buffer is populated with BUFFER-TEXT, the first block is executed,
+and the result of execution is verified against RESULT.
+
+The block is actually executed /twice/ to ensure result
+replacement happens correctly."
+  (org-test-with-temp-text
+      buffer-text
+    (progn
+      (org-babel-next-src-block) (org-ctrl-c-ctrl-c) (org-ctrl-c-ctrl-c)
+      (should (re-search-forward "\\#\\+results:" nil t))
+      (forward-line)
+      (should (string= result 
+		       (buffer-substring-no-properties
+			(point-at-bol)
+			(- (point-max) 16))))
+      (org-babel-previous-src-block) (org-babel-remove-result)
+      (should (string= buffer-text
+		       (buffer-substring-no-properties
+			(point-min) (point-max)))))))
+
+(ert-deftest test-ob/org-babel-remove-result--results-default ()
+  "Test `org-babel-remove-result' with default :results."
+  (mapcar (lambda (language)
+	    (test-ob-verify-result-and-removed-result
+	     "\n"
+	     (concat
+"* org-babel-remove-result
+#+begin_src " language "
+#+end_src
+
+* next heading")))
+	  '("sh" "emacs-lisp")))
+
+(ert-deftest test-ob/org-babel-remove-result--results-list ()
+  "Test `org-babel-remove-result' with :results list."
+  (test-ob-verify-result-and-removed-result
+   "- 1
+- 2
+- 3
+- (quote (4 5))"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results list
+'(1 2 3 '(4 5))
+#+end_src
+
+* next heading"))
+
+;; TODO FIXME Activate when Eric's trailing newline fix has been committed
+;; (ert-deftest test-ob/org-babel-remove-result--results-wrap ()
+;;   (test-ob-verify-result-and-removed-result
+;;    ":RESULTS:
+;; hello there
+;; :END:"
+;; 
+;; "* org-babel-remove-result
+;; 
+;; +begin_src emacs-lisp :results wrap
+;; \"hello there\"
+;; #+end_src
+;; 
+;; * next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-org ()
+  "Test `org-babel-remove-result' with :results org."
+  (test-ob-verify-result-and-removed-result
+   "#+BEGIN_ORG
+* heading
+** subheading
+content
+#+END_ORG"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results org
+\"* heading
+** subheading
+content\"
+#+end_src
+
+* next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-html ()
+  "Test `org-babel-remove-result' with :results html."
+  (test-ob-verify-result-and-removed-result
+   "#+BEGIN_HTML
+<head><body></body></head>
+#+END_HTML"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results html
+\"<head><body></body></head>\"
+#+end_src
+
+* next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-latex ()
+  "Test `org-babel-remove-result' with :results latex."
+  (test-ob-verify-result-and-removed-result
+   "#+BEGIN_LaTeX
+Line 1
+Line 2
+Line 3
+#+END_LaTeX"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results latex
+\"Line 1
+Line 2
+Line 3\"
+#+end_src
+
+* next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-code ()
+  "Test `org-babel-remove-result' with :results code."
+
+  (test-ob-verify-result-and-removed-result
+   "#+BEGIN_SRC emacs-lisp
+\"I am working!\"
+#+END_SRC"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results code
+(message \"I am working!\")
+#+end_src
+
+* next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-pp ()
+  "Test `org-babel-remove-result' with :results pp."
+  (test-ob-verify-result-and-removed-result
+   ": \"I /am/ working!\""
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results pp
+\"I /am/ working!\")
+#+end_src
+
+* next heading"))
 
 (provide 'test-ob)
 
