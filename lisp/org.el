@@ -4447,12 +4447,12 @@ means to push this value onto the list in the variable.")
 
 (defun org-update-property-plist (key val props)
   "Update PROPS with KEY and VAL."
-  (if (string= "+" (substring key (- (length key) 1)))
-      (let* ((key (substring key 0 (- (length key) 1)))
-	     (previous (cdr (assoc key props))))
-	(cons (cons key (concat previous " " val))
-	      (org-remove-if (lambda (p) (string= (car p) key)) props)))
-    (cons (cons key val) props)))
+  (let ((remainder (org-remove-if (lambda (p) (string= (car p) key)) props)))
+    (if (string= "+" (substring key (- (length key) 1)))
+	(let* ((key (substring key 0 (- (length key) 1)))
+	       (previous (cdr (assoc key props))))
+	  (cons (cons key (concat previous " " val)) remainder))
+      (cons (cons key val) remainder))))
 
 (defconst org-block-regexp
   "^[ \t]*#\\+begin_?\\([^ \n]+\\)\\(\\([^\n]+\\)\\)?\n\\([^\000]+?\\)#\\+end_?\\1[ \t]*$"
