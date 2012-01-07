@@ -637,9 +637,10 @@ standard mode."
 ;;   - type :: list of strings
 ;;   - update :: `org-export-update-info'
 
-;; + `genealogy' :: List of current element's parents types.
+;; + `genealogy' :: Flat list of current object or element's parents
+;;      from closest to farthest.
 ;;   - category :: local
-;;   - type :: list of symbols
+;;   - type :: list of elements and objects
 ;;   - update :: `org-export-update-info'
 
 ;; + `headline-alist' :: Alist between headlines raw name and their
@@ -675,12 +676,6 @@ standard mode."
 ;;   - category :: local
 ;;   - type :: list of strings
 
-;; + `inherited-properties' :: Properties of the headline ancestors
-;;      of the current element or object.  Those from the closest
-;;      headline have precedence over the others.
-;;   - category :: local
-;;   - type :: plist
-
 ;; + `keywords' :: List of keywords attached to data.
 ;;   - category :: option
 ;;   - type :: string
@@ -688,11 +683,6 @@ standard mode."
 ;; + `language' :: Default language used for translations.
 ;;   - category :: option
 ;;   - type :: string
-
-;; + `parent-properties' :: Properties of the parent element.
-;;   - category :: local
-;;   - type :: plist
-;;   - update :: `org-export-update-info'
 
 ;; + `parse-tree' :: Whole parse tree, available at any time during
 ;;                   transcoding.
@@ -1338,11 +1328,7 @@ The following properties are updated:
 `footnote-seen-labels'    List of already parsed footnote
 			  labels (string list)
 `genealogy'               List of current element's parents
-			  (symbol list).
-`inherited-properties'    List of inherited properties from
-			  parent headlines (plist).
-`parent-properties'       List of last element's properties
-			 (plist).
+			  (list of elements and objects).
 `previous-element'        Previous element's type (symbol).
 `previous-object'         Previous object's type (symbol).
 
@@ -1353,19 +1339,7 @@ Return the property list."
      (recursep
       (org-combine-plists
        info
-       `(:genealogy ,(cons type (plist-get info :genealogy))
-		    :previous-element nil
-		    :previous-object nil
-		    :parent-properties
-		    ,(if (memq type org-element-all-elements)
-			 (nth 1 blob)
-		       (plist-get info :parent-properties))
-		    :inherited-properties
-		    ,(if (eq type 'headline)
-			 (org-combine-plists
-			  (plist-get info :inherited-properties) (nth 1 blob))
-		       (plist-get info :inherited-properties)))
-       ;; Add persistent properties.
+       `(:genealogy ,(cons blob (plist-get info :genealogy)))
        org-export-persistent-properties))
      ;; Case 2: No recursion.
      (t
@@ -1500,7 +1474,7 @@ Return transcoded string."
 			 ;; indentation: there is none and it might be
 			 ;; misleading.
 			 (and (not (plist-get info :previous-element))
-			      (let ((parent (car (plist-get info :genealogy))))
+			      (let ((parent (caar (plist-get info :genealogy))))
 				(memq parent '(footnote-definition item)))))))
 		   (org-export-data
 		    paragraph
@@ -2279,7 +2253,8 @@ INFO is the plist used as a communication channel."
   "Non-nil when HEADLINE is the last sibling in its sub-tree.
 INFO is the plist used as a communication channel."
   (= (org-element-get-property :end headline)
-     (or (plist-get (plist-get info :parent-properties) :end)
+     (or (org-element-get-property
+	  :end (org-export-get-parent-headline headline info))
 	 (plist-get info :point-max))))
 
 
@@ -2322,7 +2297,8 @@ Return the transcoded string."
 	 ;; file becomes a direct child of the current headline
 	 ;; in the buffer.
 	 :headline-offset
-	 ,(- (+ (plist-get (plist-get info :inherited-properties) :level)
+	 ,(- (+ (org-element-get-property
+		 :level (org-export-get-parent-headline keyword info))
 		(plist-get info :headline-offset))
 	     (1- (org-export-get-min-level data info)))))))))
 
@@ -2541,17 +2517,9 @@ like inline images, which are a subset of links \(in that case,
         ;; a parent headline will also trigger a full search,
         ;; notwithstanding WITHIN-SECTION value.
         (data
-         (let ((parse-tree (plist-get info :parse-tree)))
-           (if within-section
-               (let ((parent (plist-get (plist-get info :inherited-properties)
-                                        :begin)))
-                 (if (not parent) parse-tree
-                   (org-element-map
-                    parse-tree 'headline
-                    (lambda (el local)
-                      (when (= (org-element-get-property :begin el) parent) el))
-                    info 'first-match)))
-             parse-tree))))
+         (if (not within-section) (plist-get info :parse-tree)
+	   (or (org-export-get-parent-headline element info)
+	       (plist-get info :parse-tree)))))
     ;; Increment counter until ELEMENT is found again.
     (org-element-map
      data type
@@ -2863,6 +2831,17 @@ Return an alist where key is the caption of the src block and
 value an unique indentifier that might be used for internal
 links."
   (org-export-collect-elements 'src-block backend info))
+
+
+;;;; Misc. Tools
+
+(defun org-export-get-parent-headline (blob info)
+  "Return BLOB's closest parent headline or nil."
+  (catch 'exit
+    (mapc
+     (lambda (el) (when (eq (car el) headline) (throw 'exit el)))
+     (plist-get info :genealogy))
+    nil))
 
 
 
