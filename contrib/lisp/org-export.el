@@ -92,6 +92,9 @@
 ;;; Code:
 (eval-when-compile (require 'cl))
 (require 'org-element)
+;; Require major back-ends
+(require 'org-e-ascii "../../EXPERIMENTAL/org-e-ascii.el")
+(require 'org-e-latex "../../EXPERIMENTAL/org-e-latex.el")
 
 
 ;;; Internal Variables
@@ -2857,6 +2860,21 @@ Return an error if key pressed has no associated command."
     ;; Translate "C-a", "C-b"... into "a", "b"... Then take action
     ;; depending on user's key pressed.
     (case (if (< raw-key 27) (+ raw-key 96) raw-key)
+      ;; Export with `e-ascii' back-end.
+      ((?A ?N ?U)
+       (let ((outbuf
+	      (org-export-to-buffer
+	       'e-ascii "*Org E-ASCII Export*"
+	       (memq 'subtree scope) (memq 'visible scope) (memq 'body scope)
+	       `(:ascii-charset
+		 ,(case raw-key (?A 'ascii) (?N 'latin1) (t 'utf-8))))))
+	 (with-current-buffer outbuf (text-mode))
+	 (when org-export-show-temporary-export-buffer
+	   (switch-to-buffer-other-window outbuf))))
+      ((?a ?n ?u)
+       (org-e-ascii-export-to-ascii
+	(memq 'subtree scope) (memq 'visible scope) (memq 'body scope)
+	`(:ascii-charset ,(case raw-key (?a 'ascii) (?n 'latin1) (t 'utf-8)))))
       ;; Export with `e-latex' back-end.
       (?L
        (let ((outbuf
@@ -2893,14 +2911,17 @@ back to standard interface.
 
 Return value is a list with key pressed as car and a list of
 final interactive export options as cdr."
-  (let ((help (format "-------------------  General Options  -------------------
+  (let ((help (format "-------------------  General Options  --------------------
 \[1] Body only:     %s
 \[2] Export scope:  %s
 \[3] Visible only:  %s
 
---------------------  LaTeX Export  ---------------------
-\[l] to LaTeX file               [L] to temporary buffer
-\[p] to PDF file                 [d] ... and open it"
+--------------  ASCII/Latin-1/UTF-8 Export  --------------
+\[a/n/u] to TXT file            [A/N/U] to temporary buffer
+
+---------------------  LaTeX Export  ---------------------
+\[l] to TEX file                [L] to temporary buffer
+\[p] to PDF file                [d] ... and open it"
 		      (if (memq 'body scope) "On" "Off")
 		      (if (memq 'subtree scope) "Subtree" "Buffer")
 		      (if (memq 'visible scope) "On" "Off")))
