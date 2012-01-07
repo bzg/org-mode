@@ -2843,7 +2843,7 @@ links."
   "Return BLOB's closest parent headline or nil."
   (catch 'exit
     (mapc
-     (lambda (el) (when (eq (car el) headline) (throw 'exit el)))
+     (lambda (el) (when (eq (car el) 'headline) (throw 'exit el)))
      (plist-get info :genealogy))
     nil))
 
