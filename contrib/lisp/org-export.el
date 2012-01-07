@@ -2678,7 +2678,6 @@ Return a plist whose properties and values are:
       (mapc (lambda (row)
 	      (if (string-match "^[ \t]*|[-+]+|[ \t]*$" row)
 		  (incf row-group)
-		(push row-group rowgroups)
 		;; Determine if a special column is present by looking
 		;; for special markers in the first column.  More
 		;; accurately, the first column is considered special
@@ -2696,10 +2695,13 @@ Return a plist whose properties and values are:
 	       ((org-table-cookie-line-p row)
 		(let ((col 0))
 		  (mapc (lambda (field)
-			  (when (string-match "<\\([lrc]\\)\\([0-9]+\\)?>" field)
-			    (aset align col (match-string 1 field))
-			    (aset width col (let ((w (match-string 2 field)))
-					      (and w (string-to-number w)))))
+			  (when (string-match
+				 "<\\([lrc]\\)?\\([0-9]+\\)?>" field)
+			    (let ((align-data (match-string 1 field)))
+			      (when align-data (aset align col align-data)))
+			    (let ((w-data (match-string 2 field)))
+			      (when w-data
+				(aset width col (string-to-number w-data)))))
 			  (incf col))
 			(org-split-string row "[ \t]*|[ \t]*"))))
 	       ;; Read column groups information.
@@ -2711,7 +2713,9 @@ Return a plist whose properties and values are:
 				      ((string= ">" field) 'end)
 				      ((string= "<>" field) 'start-end)))
 			  (incf col))
-			(org-split-string row "[ \t]*|[ \t]*"))))))
+			(org-split-string row "[ \t]*|[ \t]*"))))
+	       ;; Contents line.
+	       (t (push row-group rowgroups))))
 	    (org-split-string table "\n"))
       ;; Return plist.
       (list :alignment align
