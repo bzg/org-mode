@@ -1169,7 +1169,10 @@ holding contextual information."
   "Transcode an ITEM element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((level (plist-get (plist-get info :parent-properties) :level))
+  ;; Grab `:level' from plain-list properties, which is always the
+  ;; first element above current item.
+  (let* ((level (org-element-get-property
+		 :level (car (plist-get info :genealogy))))
 	 (counter (let ((count (org-element-get-property :counter item)))
 		    (and count
 			 (< level 4)
@@ -1248,7 +1251,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-latex-link--inline-image (path info)
   "Return LaTeX code for an image at PATH.
 INFO is a plist containing export options."
-  (let* ((parent-props (plist-get info :parent-properties))
+  (let* ((parent-props (nth 1 (car (plist-get info :genealogy))))
 	 (caption (org-e-latex--caption/label-string
 		   (plist-get parent-props :caption)
 		   (plist-get parent-props :name)
