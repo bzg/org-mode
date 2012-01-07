@@ -2686,8 +2686,8 @@ Return a plist whose properties and values are:
 		(setq special-column-p
 		      (cond
 		       ((not special-column-p) nil)
-		       ((string-match "^[ \t]*| *\\\\?\\([\#!$*_^]\\) *|"
-				      row) 'special)
+		       ((string-match "^[ \t]*| *\\\\?\\([/#!$*_^]\\) *|" row)
+			'special)
 		       ((string-match "^[ \t]*| +|" row) special-column-p))))
 	      (cond
 	       ;; Read forced alignment and width information, if any,
