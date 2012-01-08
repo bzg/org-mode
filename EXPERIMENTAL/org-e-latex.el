@@ -941,8 +941,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is nil. INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
-   (when (eq (plist-get info :previous-object) 'footnote-reference)
-     org-e-latex-footnote-separator)
+   (let ((prev (org-export-get-previous-element footnote-reference info)))
+     (when (and (listp prev) (eq (car prev) 'footnote-reference))
+       org-e-latex-footnote-separator))
    ;; Use \footnotemark if the footnote has already been defined.
    ;; Otherwise, define it with \footnote command.
    (cond
@@ -974,8 +975,7 @@ holding contextual information."
   (let* ((class (plist-get info :latex-class))
 	 (numberedp (plist-get info :section-numbers))
 	 ;; Get level relative to current parsed data.
-	 (level (+ (org-element-get-property :level headline)
-		   (plist-get info :headline-offset)))
+	 (level (org-export-get-relative-level headline info))
 	 (class-sectionning (assoc class org-e-latex-classes))
 	 ;; Section formatting will set two placeholders: one for the
 	 ;; title and the other for the contents.
