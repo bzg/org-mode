@@ -1513,6 +1513,15 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (when value (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
 
 
+;;;; Section
+
+(defun org-e-latex-section (section contents info)
+  "Transcode a SECTION element from Org to LaTeX.
+CONTENTS holds the contents of the section.  INFO is a plist
+holding contextual information."
+  contents)
+
+
 ;;;; Radio Target
 
 (defun org-e-latex-radio-target (radio-target text info)
