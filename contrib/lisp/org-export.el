@@ -1767,6 +1767,12 @@ Each filter is called with two arguments: the transcoded
 quote-section, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
+(defvar org-export-filter-section-functions nil
+  "Filter, or list of filters, applied to a transcoded section.
+Each filter is called with two arguments: the transcoded section,
+as a string, and the back-end, as a symbol.  It must return
+a string or nil.")
+
 (defvar org-export-filter-special-block-functions nil
   "Filter, or list of filters, applied to a transcoded special block.
 Each filter is called with two arguments: the transcoded special
