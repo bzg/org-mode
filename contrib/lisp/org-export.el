@@ -691,18 +691,6 @@ standard mode."
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `previous-element' :: Previous element's type at the same
-;;      level.
-;;   - category :: local
-;;   - type :: symbol
-;;   - update :: `org-export-update-info'
-
-;; + `previous-object' :: Previous object type (or `plain-text') at
-;;      the same level.
-;;   - category :: local
-;;   - type :: symbol
-;;   - update :: `org-export-update-info'
-
 ;; + `section-numbers' :: Non-nil means transcoding should add
 ;;      section numbers to headlines.
 ;;   - category :: option
@@ -1330,19 +1318,7 @@ Return the property list."
       (org-combine-plists
        info
        `(:genealogy ,(cons blob (plist-get info :genealogy)))
-       org-export-persistent-properties))
-     ;; Case 2: No recursion.
-     (t
-      ;; Set `:previous-element' or `:previous-object' according to
-      ;; BLOB.
-      (setq info (cond ((not type)
-			(org-export-set-property
-			 info :previous-object 'plain-text))
-		       ((memq type org-element-all-elements)
-			(org-export-set-property info :previous-element type))
-		       (t (org-export-set-property info :previous-object type))))
-      ;; Return updated value.
-      info))))
+       org-export-persistent-properties)))))
 
 (defun org-export-set-property (info prop value)
   "Set property PROP to VALUE in plist INFO.
