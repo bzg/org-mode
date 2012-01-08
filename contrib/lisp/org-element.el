@@ -43,15 +43,15 @@
 ;; Elements containing paragraphs are called greater elements.
 ;; Concerned types are: `center-block', `drawer', `dynamic-block',
 ;; `footnote-definition', `headline', `inlinetask', `item',
-;; `plain-list', `quote-block' and `special-block'.
+;; `plain-list', `quote-block', `section' and `special-block'.
 
-;; Greater elements (excepted `headline' and `item' types) and
-;; elements (excepted `keyword', `babel-call', and `property-drawer'
-;; types) can have a fixed set of keywords as attributes.  Those are
-;; called "affiliated keywords", to distinguish them from others
-;; keywords, which are full-fledged elements.  In particular, the
-;; "name" affiliated keyword allows to label almost any element in an
-;; Org buffer.
+;; Greater elements (excepted `headline', `item' and `section' types)
+;; and elements (excepted `keyword', `babel-call', and
+;; `property-drawer' types) can have a fixed set of keywords as
+;; attributes.  Those are called "affiliated keywords", to distinguish
+;; them from others keywords, which are full-fledged elements.  In
+;; particular, the "name" affiliated keyword allows to label almost
+;; any element in an Org buffer.
 
 ;; Notwithstanding affiliated keywords, each greater element, element
 ;; and object has a fixed set of properties attached to it.  Among
@@ -717,11 +717,45 @@ Assume point is at beginning or end of the block."
 		     :post-blank ,(count-lines pos-before-blank end)
 		     ,@(cadr keywords))))))
 
-
 (defun org-element-quote-block-interpreter (quote-block contents)
   "Interpret QUOTE-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
   (format "#+begin_quote\n%s#+end_quote" contents))
+
+
+;;;; Section
+
+(defun org-element-section-parser ()
+  "Parse a section.
+
+Return a list whose car is `section' and cdr is a plist
+containing `:begin', `:end', `:contents-begin', `contents-end'
+and `:post-blank' keywords."
+  (save-excursion
+    ;; Beginning of section is the beginning of the first non-blank
+    ;; line after previous headline.
+    (let ((begin (save-excursion
+		   (org-with-limited-levels (outline-previous-heading))
+		   (forward-line)
+		   (org-skip-whitespace)
+		   (point-at-bol)))
+	  (end (progn (org-with-limited-levels (outline-next-heading))
+		      (point)))
+	  (pos-before-blank (progn (skip-chars-backward " \r\t\n")
+				   (forward-line)
+				   (point))))
+      (list 'section
+	    `(:begin ,begin
+		     :end ,end
+		     :contents-begin ,begin
+		     :contents-end ,pos-before-blank
+		     :post-blank ,(count-lines pos-before-blank end))))))
+
+(defun org-element-section-interpreter (section contents)
+  "Interpret SECTION element as Org syntax.
+CONTENTS is the contents of the element."
+  contents)
+
 
 ;;;; Special Block
 (defun org-element-special-block-parser ()
@@ -2316,12 +2350,13 @@ CONTENTS is nil."
 		 export-block fixed-width footnote-definition headline
 		 horizontal-rule inlinetask item keyword latex-environment
 		 babel-call paragraph plain-list property-drawer quote-block
-		 quote-section special-block src-block table verse-block)
+		 quote-section section special-block src-block table
+		 verse-block)
   "Complete list of elements.")
 
 (defconst org-element-greater-elements
   '(center-block drawer dynamic-block footnote-definition headline inlinetask
-		 item plain-list quote-block special-block)
+		 item plain-list quote-block section special-block)
   "List of recursive element types aka Greater Elements.")
 
 (defconst org-element-all-successors
@@ -2488,7 +2523,7 @@ match group 2.
 
 Don't modify it, set `org-element--affiliated-keywords' instead.")
 
-(defun org-element-at-point (&optional toggle-item structure)
+(defun org-element-at-point (&optional special structure)
   "Determine closest element around point.
 
 Return value is a list \(TYPE PROPS\) where TYPE is the type of
@@ -2497,11 +2532,12 @@ element.
 
 Possible types are defined in `org-element-all-elements'.
 
-If optional argument TOGGLE-ITEM is non-nil, parse item wise
-instead of plain-list wise, using STRUCTURE as the current list
-structure.
+Optional argument SPECIAL, when non-nil, can be either `item' or
+`section'.  The former allows to parse item wise instead of
+plain-list wise, using STRUCTURE as the current list structure.
+The latter will try to parse a section before anything else.
 
-If STRUCTURE isn't provided but TOGGLE-ITEM is non-nil, it will
+If STRUCTURE isn't provided but SPECIAL is set to `item', it will
 be computed."
   (save-excursion
     (beginning-of-line)
@@ -2517,7 +2553,7 @@ be computed."
 	(let ((opoint (point)))
 	  (while (looking-at org-element--affiliated-re) (forward-line))
 	  (when (looking-at "[ \t]*$") (goto-char opoint))))
-      (let ((type (org-element-guess-type)))
+      (let ((type (org-element-guess-type (eq special 'section))))
 	(cond
 	 ;; Guessing element type on the current line is impossible:
 	 ;; try to find the beginning of the current element to get
@@ -2556,14 +2592,14 @@ be computed."
 	     ((org-footnote-at-definition-p)
 	      (org-element-footnote-definition-parser))
 	     ((and opoint-in-item-p (org-at-item-p) (= opoint-in-item-p (point)))
-	      (if toggle-item
+	      (if (eq special 'item)
 		  (org-element-item-parser (or structure (org-list-struct)))
 		(org-element-plain-list-parser (or structure (org-list-struct)))))
 	     ;; In any other case, the paragraph started the line
 	     ;; below.
 	     (t (forward-line) (org-element-paragraph-parser)))))
 	 ((eq type 'plain-list)
-	  (if toggle-item
+	  (if (eq special 'item)
 	      (org-element-item-parser (or structure (org-list-struct)))
 	    (org-element-plain-list-parser (or structure (org-list-struct)))))
 	 ;; Straightforward case: call the appropriate parser.
@@ -2580,10 +2616,14 @@ be computed."
 Used internally by `org-element-guess-type'.  Do not modify it
 directly, set `org-element-non-recursive-block-alist' instead.")
 
-(defun org-element-guess-type ()
+(defun org-element-guess-type (&optional section-mode)
   "Return the type of element at point, or nil if undetermined.
+
 This function may move point to an appropriate position for
-parsing.  Used internally by `org-element-at-point'."
+parsing.  Used internally by `org-element-at-point'.
+
+When optional argument SECTION-MODE is non-nil, try to find if
+point is in a section in priority."
   ;; Beware: Order matters for some cases in that function.
   (beginning-of-line)
   (let ((case-fold-search t))
@@ -2595,6 +2635,10 @@ parsing.  Used internally by `org-element-at-point'."
 	       (string-match (format "^%s\\(?: \\|$\\)" org-quote-string)
 			     headline))))
       'quote-section)
+     ;; Any buffer position not at an headline or in a quote section
+     ;; is inside a section, provided function is actively looking for
+     ;; them.
+     (section-mode 'section)
      ;; Non-recursive block.
      ((let ((type (org-in-block-p org-element--element-block-types)))
 	(and type (cdr (assoc type org-element-non-recursive-block-alist)))))
@@ -2790,7 +2834,9 @@ Assume buffer is in Org mode."
     (nconc (list 'org-data nil)
 	   (org-element-parse-elements
 	    (point-at-bol) (point-max)
-	    nil nil granularity visible-only nil))))
+	    ;; Start is section mode so text before the first headline
+	    ;; belongs to a section.
+	    'section nil granularity visible-only nil))))
 
 (defun org-element-parse-secondary-string (string restriction &optional buffer)
   "Recursively parse objects in STRING and return structure.
@@ -2944,11 +2990,14 @@ Nil values returned from FUN are ignored in the result."
 ;; calls.  Thus, searching for a given type fails only once, and every
 ;; object is searched only once at top level (but sometimes more for
 ;; nested types).
-(defun org-element-parse-elements (beg end item structure granularity visible-only acc)
+(defun org-element-parse-elements
+  (beg end special structure granularity visible-only acc)
   "Parse ELEMENT with point at its beginning.
 
-If ITEM is non-nil, parse item wise instead of plain-list wise,
-using STRUCTURE as the current list structure.
+SPECIAL prioritize some elements over the others.  It can set to
+either `section' or `item', which will focus search,
+respectively, on sections and items.  Moreover, when value is
+`item', STRUCTURE will be used as the current list structure.
 
 GRANULARITY determines the depth of the recursion.  It can be set
 to the following symbols:
@@ -2960,7 +3009,7 @@ to the following symbols:
 `object' or nil     Parse the complete buffer.
 
 When VISIBLE-ONLY is non-nil, don't parse contents of hidden
-greater elements.
+elements.
 
 Elements are accumulated into ACC."
   (save-excursion
@@ -2971,9 +3020,9 @@ Elements are accumulated into ACC."
     ;; Main loop start.
     (while (and (< (point) end) (not (eobp)))
       (push
-       ;; 1. If ITEM is toggled, point is at an item.  Knowing that,
-       ;; there's no need to go through `org-element-at-point'.
-       (if item
+       ;; 1. Item mode is active: point is at an item.  Knowing that,
+       ;;    there's no need to go through `org-element-at-point'.
+       (if (eq special 'item)
 	   (let* ((element (org-element-item-parser structure))
 		  (cbeg (org-element-get-property :contents-begin element))
 		  (cend (org-element-get-property :contents-end element)))
@@ -2987,10 +3036,10 @@ Elements are accumulated into ACC."
 		(reverse element))))
 	 ;; 2. When ITEM is nil, find current element's type and parse
 	 ;;    it accordingly to its category.
-	 (let ((element (org-element-at-point nil structure)))
+	 (let ((element (org-element-at-point special structure)))
 	   (goto-char (org-element-get-property :end element))
 	   (cond
-	    ;; Case 1: ELEMENT is a footnote-definition.  If
+	    ;; Case 1.  ELEMENT is a footnote-definition.  If
 	    ;; GRANURALITY allows parsing, use narrowing so that
 	    ;; footnote label don't interfere with paragraph
 	    ;; recognition.
@@ -3003,8 +3052,8 @@ Elements are accumulated into ACC."
 		 (org-element-parse-elements
 		  cbeg cend nil structure granularity visible-only
 		  (reverse element)))))
-	    ;; Case 1: ELEMENT is a paragraph.  Parse objects inside,
-	    ;;         if GRANULARITY allows it.
+	    ;; Case 2.  ELEMENT is a paragraph.  Parse objects inside,
+	    ;; if GRANULARITY allows it.
 	    ((and (eq (car element) 'paragraph)
 		  (or (not granularity) (eq granularity 'object)))
 	     (org-element-parse-objects
@@ -3012,14 +3061,12 @@ Elements are accumulated into ACC."
 	      (org-element-get-property :contents-end element)
 	      (reverse element)
 	      nil))
-	    ;; Case 2: ELEMENT is recursive: parse it between
-	    ;;         `contents-begin' and `contents-end'.  If it's
-	    ;;         a plain list, also switch to item mode.  Make
-	    ;;         sure GRANULARITY allows the recursion, or
-	    ;;         ELEMENT is an headline, in which case going
-	    ;;         inside is mandatory, in order to get sub-level
-	    ;;         headings.  If VISIBLE-ONLY is true and element
-	    ;;         is hidden, do not recurse into it.
+	    ;; Case 3.  ELEMENT is recursive: parse it between
+	    ;; `contents-begin' and `contents-end'.  Make sure
+	    ;; GRANULARITY allows the recursion, or ELEMENT is an
+	    ;; headline, in which case going inside is mandatory, in
+	    ;; order to get sub-level headings.  If VISIBLE-ONLY is
+	    ;; true and element is hidden, do not recurse into it.
 	    ((and (memq (car element) org-element-greater-elements)
 		  (or (not granularity)
 		      (memq granularity '(element object))
@@ -3029,13 +3076,16 @@ Elements are accumulated into ACC."
 	     (org-element-parse-elements
 	      (org-element-get-property :contents-begin element)
 	      (org-element-get-property :contents-end element)
-	      (eq (car element) 'plain-list)
+	      ;; At a plain list, switch to item mode.  At an
+	      ;; headline, switch to section mode.  Any other element
+	      ;; turns off special modes.
+	      (case (car element) (plain-list 'item) (headline 'section))
 	      (org-element-get-property :structure element)
 	      granularity
 	      visible-only
 	      (reverse element)))
-	    ;; Case 3: Else, just accumulate ELEMENT, unless
-	    ;;         GRANULARITY is set to `headline'.
+	    ;; Case 4.  Else, just accumulate ELEMENT, unless
+	    ;; GRANULARITY is set to `headline'.
 	    ((not (eq granularity 'headline)) element))))
        acc)
       (org-skip-whitespace))
