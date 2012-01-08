@@ -10460,9 +10460,7 @@ add something like @samp{placement=[h!]} to the attributes.  It is to be noted
 this option can be used with tables as well@footnote{One can also take
 advantage of this option to pass other, unrelated options into the figure or
 table environment.  For an example see the section ``Exporting org files'' in
-@url{http://orgmode.org/worg/org-hacks.html}}.  For example the
-@code{#+ATTR_LaTeX:} line below is exported as the @code{figure} environment
-below it.
+@url{http://orgmode.org/worg/org-hacks.html}}.
 
 If you would like to let text flow around the image, add the word @samp{wrap}
 to the @code{#+ATTR_LaTeX:} line, which will make the figure occupy the left
