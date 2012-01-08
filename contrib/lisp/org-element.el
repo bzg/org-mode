@@ -3084,9 +3084,8 @@ Elements are accumulated into ACC."
 	      granularity
 	      visible-only
 	      (reverse element)))
-	    ;; Case 4.  Else, just accumulate ELEMENT, unless
-	    ;; GRANULARITY is set to `headline'.
-	    ((not (eq granularity 'headline)) element))))
+	    ;; Case 4.  Else, just accumulate ELEMENT.
+	    (t element))))
        acc)
       (org-skip-whitespace))
     ;; Return result.
