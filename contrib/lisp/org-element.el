@@ -3116,7 +3116,7 @@ allowed in the current object."
 	(setq next-object (funcall get-next-object candidates))
 	;; 1. Text before any object.
 	(let ((obj-beg (org-element-get-property :begin next-object)))
-	  (unless (= beg obj-beg)
+	  (unless (= (point) obj-beg)
 	    (push (buffer-substring-no-properties (point) obj-beg) acc)))
 	;; 2. Object...
 	(let ((obj-end (org-element-get-property :end next-object))
