@@ -386,7 +386,8 @@ then run `org-babel-pop-to-session'."
     (session	. :any)
     (shebang	. :any)
     (tangle	. ((tangle yes no :any)))
-    (var	. :any)))
+    (var	. :any)
+    (wrap       . :any)))
 
 (defconst org-babel-header-arg-names
   (mapcar #'car org-babel-common-header-args-w-values)
@@ -1754,6 +1755,9 @@ code ---- the results are extracted in the syntax of the source
 	  (setq end (point-marker))
 	  ;; possibly wrap result
 	  (cond
+	   ((assoc :wrap (nth 2 info))
+	    (let ((name (or (cdr (assoc :wrap (nth 2 info))) "results")))
+	      (wrap (concat "#+BEGIN_" name) (concat "#+END_" name))))
 	   ((member "html" result-params)
 	    (wrap "#+BEGIN_HTML" "#+END_HTML"))
 	   ((member "latex" result-params)
@@ -1804,11 +1808,10 @@ code ---- the results are extracted in the syntax of the source
      ((looking-at "^\\([ \t]*\\):RESULTS:")
       (re-search-forward (concat "^" (match-string 1) ":END:")))
      (t
-      (let ((case-fold-search t)
-	    (blocks-re (regexp-opt
-			(list "latex" "html" "example" "src" "result" "org"))))
-	(if (looking-at (concat "[ \t]*#\\+begin_" blocks-re))
-	    (progn (re-search-forward (concat "[ \t]*#\\+end_" blocks-re) nil t)
+      (let ((case-fold-search t))
+	(if (looking-at (concat "[ \t]*#\\+begin_\\([^ \t\n\r]+\\)"))
+	    (progn (re-search-forward (concat "[ \t]*#\\+end_" (match-string 1))
+				      nil t)
 		   (forward-char 1))
 	  (while (looking-at "[ \t]*\\(: \\|\\[\\[\\)")
 	    (forward-line 1))))
