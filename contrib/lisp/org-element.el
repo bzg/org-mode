@@ -736,7 +736,7 @@ and `:post-blank' keywords."
     ;; line after previous headline.
     (let ((begin (save-excursion
 		   (org-with-limited-levels (outline-previous-heading))
-		   (if (bobp) (point)
+		   (if (not (org-at-heading-p)) (point)
 		     (forward-line) (org-skip-whitespace) (point-at-bol))))
 	  (end (progn (org-with-limited-levels (outline-next-heading))
 		      (point)))
