@@ -2033,7 +2033,7 @@ Assume point is at the radio target."
 (defun org-element-radio-target-interpreter (target contents)
   "Interpret TARGET object as Org syntax.
 CONTENTS is the contents of the object."
-  (concat ">"))
+  (concat "<<<" contents ">>>"))
 
 (defun org-element-radio-target-successor (limit)
   "Search for the next radio-target and return position.
