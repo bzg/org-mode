@@ -630,13 +630,6 @@ standard mode."
 ;;   - category :: option
 ;;   - type :: alist (STRING . LIST)
 
-;; + `footnote-seen-labels' :: List of already transcoded footnote
-;;      labels.  It is used to know when a reference appears for the
-;;      first time. (cf. `org-export-footnote-first-reference-p').
-;;   - category :: persistent
-;;   - type :: list of strings
-;;   - update :: `org-export-update-info'
-
 ;; + `genealogy' :: Flat list of current object or element's parents
 ;;      from closest to farthest.
 ;;   - category :: local
@@ -1148,8 +1141,7 @@ retrieved."
 
 (defconst org-export-persistent-properties-list
   '(:back-end :code-refs :headline-alist :headline-numbering :headline-offset
-	      :parse-tree :point-max :footnote-seen-labels :target-list
-	      :total-loc :use-select-tags)
+	      :parse-tree :point-max :target-list :total-loc :use-select-tags)
   "List of persistent properties.")
 
 (defconst org-export-persistent-properties nil
@@ -1325,8 +1317,6 @@ When RECURSEP is non-nil, assume the following element or object
 will be inside the current one.
 
 The following properties are updated:
-`footnote-seen-labels'    List of already parsed footnote
-			  labels (string list)
 `genealogy'               List of current element's parents
 			  (list of elements and objects).
 `previous-element'        Previous element's type (symbol).
@@ -1343,17 +1333,6 @@ Return the property list."
        org-export-persistent-properties))
      ;; Case 2: No recursion.
      (t
-      ;; At a footnote reference: mark its label as seen, if not
-      ;; already the case.
-      (when (eq type 'footnote-reference)
-	(let ((label (org-element-get-property :label blob))
-	      (seen-labels (plist-get org-export-persistent-properties
-				      :footnote-seen-labels)))
-	  ;; Store anonymous footnotes (nil label) without checking if
-	  ;; another anonymous footnote was seen before.
-	  (unless (and label (member label seen-labels))
-	    (setq info (org-export-set-property
-			info :footnote-seen-labels (push label seen-labels))))))
       ;; Set `:previous-element' or `:previous-object' according to
       ;; BLOB.
       (setq info (cond ((not type)
@@ -2155,14 +2134,16 @@ appear as Org data \(transcoded with `org-export-data'\) or as
 a secondary string for inlined footnotes \(transcoded with
 `org-export-secondary-string'\).  Unreferenced definitions are
 ignored."
-  (org-element-map
-   data 'footnote-reference
-   (lambda (footnote local)
-     (when (org-export-footnote-first-reference-p footnote local)
-       (list (org-export-get-footnote-number footnote local)
-	     (org-element-get-property :label footnote)
-	     (org-export-get-footnote-definition footnote local))))
-   info))
+  (let (refs)
+    ;; Collect seen references in REFS.
+    (org-element-map
+     data 'footnote-reference
+     (lambda (footnote local)
+       (when (org-export-footnote-first-reference-p footnote local)
+	 (list (org-export-get-footnote-number footnote local)
+	       (org-element-get-property :label footnote)
+	       (org-export-get-footnote-definition footnote local))))
+     info)))
 
 (defun org-export-footnote-first-reference-p (footnote-reference info)
   "Non-nil when a footnote reference is the first one for its label.
@@ -2170,7 +2151,15 @@ ignored."
 FOOTNOTE-REFERENCE is the footnote reference being considered.
 INFO is the plist used as a communication channel."
   (let ((label (org-element-get-property :label footnote-reference)))
-    (not (and label (member label (plist-get info :footnote-seen-labels))))))
+    (or (not label)
+	(equal
+	 footnote-reference
+	 (org-element-map
+	  (plist-get info :parse-tree) 'footnote-reference
+	  (lambda (footnote local)
+	    (when (string= (org-element-get-property :label footnote) label)
+	      footnote))
+	  info 'first-match)))))
 
 (defun org-export-get-footnote-definition (footnote-reference info)
   "Return definition of FOOTNOTE-REFERENCE as parsed data.
@@ -2184,23 +2173,22 @@ INFO is the plist used as a communication channel."
 
 FOOTNOTE is either a footnote reference or a footnote definition.
 INFO is the plist used as a communication channel."
-  (let ((label (org-element-get-property :label footnote)))
-    (if (eq (car footnote) 'footnote-definition)
-	;; If a footnote definition was provided, first search for
-	;; a relative footnote reference, as only footnote references
-	;; can determine the associated ordinal.
-	(org-element-map
-	 (plist-get info :parse-tree) 'footnote-reference
-	 (lambda (foot-ref local)
-	   (when (string= (org-element-get-property :label foot-ref) label)
-	     (let* ((all-seen (plist-get info :footnote-seen-labels))
-		    (seenp (and label (member label all-seen))))
-	       (if seenp (length seenp) (1+ (length all-seen))))))
-	 info 'first-match)
-      (let* ((all-seen (plist-get info :footnote-seen-labels))
-	     ;; Anonymous footnotes are always new footnotes.
-	     (seenp (and label (member label all-seen))))
-	(if seenp (length seenp) (1+ (length all-seen)))))))
+  (let ((label (org-element-get-property :label footnote)) seen-refs)
+    (org-element-map
+     (plist-get info :parse-tree) 'footnote-reference
+     (lambda (fn local)
+       (let ((fn-lbl (org-element-get-property :label fn)))
+	 (cond
+	  ((and (not fn-lbl) (equal fn footnote)) (1+ (length seen-refs)))
+	  ((and label (string= label fn-lbl)) (1+ (length seen-refs)))
+	  ;; Anonymous footnote: it's always a new one.  Also, be sure
+	  ;; to return nil from the `cond' so `first-match' doesn't
+	  ;; get us out of the loop.
+	  ((not fn-lbl) (push 'inline seen-refs) nil)
+	  ;; Label not seen so far: add it so SEEN-REFS.  Again,
+	  ;; return nil to stay in the loop.
+	  ((not (member fn-lbl seen-refs)) (push fn-lbl seen-refs) nil))))
+     info 'first-match)))
 
 
 ;;;; For Headlines
