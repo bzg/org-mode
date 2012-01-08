@@ -1307,8 +1307,6 @@ will be inside the current one.
 The following properties are updated:
 `genealogy'               List of current element's parents
 			  (list of elements and objects).
-`previous-element'        Previous element's type (symbol).
-`previous-object'         Previous object's type (symbol).
 
 Return the property list."
   (let* ((type (and (not (stringp blob)) (car blob))))
@@ -1428,7 +1426,7 @@ Return transcoded string."
 			 ;; a footnote definition, ignore first line's
 			 ;; indentation: there is none and it might be
 			 ;; misleading.
-			 (and (not (plist-get info :previous-element))
+			 (and (not (org-export-get-previous-element blob info))
 			      (let ((parent (caar (plist-get info :genealogy))))
 				(memq parent '(footnote-definition item)))))))
 		   (org-export-data
@@ -2217,7 +2215,7 @@ INFO is a plist holding contextual information."
 (defun org-export-first-sibling-p (headline info)
   "Non-nil when HEADLINE is the first sibling in its sub-tree.
 INFO is the plist used as a communication channel."
-  (not (eq (plist-get info :previous-element) 'headline)))
+  (not (eq (car (org-export-get-previous-element headline info)) 'headline)))
 
 (defun org-export-last-sibling-p (headline info)
   "Non-nil when HEADLINE is the last sibling in its sub-tree.
@@ -2807,7 +2805,7 @@ links."
   (org-export-collect-elements 'src-block backend info))
 
 
-;;;; Misc. Tools
+;;;; Topology
 
 (defun org-export-get-parent-headline (blob info)
   "Return BLOB's closest parent headline or nil."
@@ -2816,6 +2814,17 @@ links."
      (lambda (el) (when (eq (car el) 'headline) (throw 'exit el)))
      (plist-get info :genealogy))
     nil))
+
+(defun org-export-get-previous-element (blob info)
+  "Return previous element or object.
+
+BLOB is an element or object.  INFO is a plist used as
+a communication channel.
+
+Return previous element or object, a string, or nil."
+  (let ((parent (car (plist-get info :genealogy))))
+    (if (stringp parent) blob
+      (cadr (member blob (reverse (org-element-get-contents parent)))))))
 
 
 
