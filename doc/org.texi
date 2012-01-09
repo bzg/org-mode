@@ -1426,7 +1426,7 @@ more details, see the docstring of the command
 @code{org-clone-subtree-with-time-shift}.
 @orgcmd{C-c C-w,org-refile}
 Refile entry or region to a different location.  @xref{Refiling notes}.
-@orgcmd{C-c ^,org-sort-entries-or-items}
+@orgcmd{C-c ^,org-sort}
 Sort same-level entries.  When there is an active region, all entries in the
 region will be sorted.  Otherwise the children of the current headline are
 sorted.  The command prompts for the sorting method, which can be
