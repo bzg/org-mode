@@ -14324,7 +14324,7 @@ either by the @i{calc} interpreter, or by the @i{Emacs Lisp} interpreter.
 @cindex options, for customization
 @cindex variables, for customization
 
-There are more than 180 variables that can be used to customize
+There are more than 500 variables that can be used to customize
 Org.  For the sake of compactness of the manual, I am not
 describing the variables here.  A structured overview of customization
 variables is available with @kbd{M-x org-customize}.  Or select
