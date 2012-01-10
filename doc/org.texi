@@ -13583,9 +13583,8 @@ argument can have one of three values: @code{yes}, @code{no}, or @code{tangle}.
 All ``noweb'' syntax references in the body of the code block will be
 expanded before the block is evaluated, tangled or exported.
 @item @code{no}
-The default.  No ``noweb'' syntax specific action is taken on evaluating
-code blocks, However, noweb references will still be expanded during
-tangling.
+The default.  No ``noweb'' syntax specific action is taken when the code
+block is evaluated, tangled or exported.
 @item @code{tangle}
 All ``noweb'' syntax references in the body of the code block will be
 expanded before the block is tangled, however ``noweb'' references will not
