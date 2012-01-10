@@ -4378,6 +4378,8 @@ of what a project is and how to check if it stuck, customize the variable
 
 (defvar org-disable-agenda-to-diary nil)          ;Dynamically-scoped param.
 (defvar diary-list-entries-hook)
+(if (fboundp 'defvaralias)
+    (defvaralias 'diary-list-entries-hook 'list-diary-entries-hook))
 (defvar diary-time-regexp)
 (defun org-get-entries-from-diary (date)
   "Get the (Emacs Calendar) diary entries for DATE."

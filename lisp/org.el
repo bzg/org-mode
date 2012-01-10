@@ -170,7 +170,7 @@ requirements) is loaded."
 		 (const :tag "Haskell" haskell)
 		 (const :tag "Java" java)
 		 (const :tag "Javascript" js)
-		 (const :tag "Latex" latex)
+		 (const :tag "LaTeX" latex)
 		 (const :tag "Ledger" ledger)
 		 (const :tag "Lilypond" lilypond)
 		 (const :tag "Maxima" maxima)
