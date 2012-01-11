@@ -13581,21 +13581,27 @@ interpreted language.
 @node noweb, noweb-ref, session, Specific header arguments
 @subsubsection @code{:noweb}
 
-The @code{:noweb} header argument controls expansion of ``noweb'' style (see
-@ref{Noweb reference syntax}) references in a code block.  This header
-argument can have one of three values: @code{yes}, @code{no}, or @code{tangle}.
+The @code{:noweb} header argument controls expansion of ``noweb'' syntax
+references (see @ref{Noweb reference syntax}) when the code block is
+evaluated, tangled, or exported.  The @code{:noweb} header argument can have
+one of four values: @code{no}, @code{yes}, @code{tangle}, or
+@code{no-export}.
 
 @itemize @bullet
-@item @code{yes}
-All ``noweb'' syntax references in the body of the code block will be
-expanded before the block is evaluated, tangled or exported.
 @item @code{no}
-The default.  No ``noweb'' syntax specific action is taken when the code
-block is evaluated, tangled or exported.
+The default.  ``Noweb'' syntax references in the body of the code block will
+not be expanded before the code block is evaluated, tangled or exported.
+@item @code{yes}
+``Noweb'' syntax references in the body of the code block will be
+expanded before the code block is evaluated, tangled or exported.
 @item @code{tangle}
-All ``noweb'' syntax references in the body of the code block will be
-expanded before the block is tangled, however ``noweb'' references will not
-be expanded when the block is evaluated or exported.
+``Noweb'' syntax references in the body of the code block will be expanded
+before the code block is tangled. However, ``noweb'' syntax references will
+not be expanded when the code block is evaluated or exported.
+@item @code{no-export}
+``Noweb'' syntax references in the body of the code block will be expanded
+before the block is evaluated or tangled. However, ``noweb'' syntax
+references will not be expanded when the code block is exported.
 @end itemize
 
 @subsubheading Noweb prefix lines
