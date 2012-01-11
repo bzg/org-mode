@@ -12622,17 +12622,24 @@ of tangled code files.
 @section Evaluating code blocks
 @cindex code block, evaluating
 @cindex source code, evaluating
+@cindex #+RESULTS
 
 Code blocks can be evaluated@footnote{Whenever code is evaluated there is a
 potential for that code to do harm.  Org mode provides safeguards to ensure
 that code is only evaluated after explicit confirmation from the user.  For
 information on these safeguards (and on how to disable them) see @ref{Code
 evaluation security}.} and the results of evaluation optionally placed in the
-Org mode buffer.  By default, the evaluation facility is only enabled for
-Lisp code blocks specified as @code{emacs-lisp}. However, souce code blocks
-in many languages can be evaluated within Org mode (see @ref{Languages} for a
-list of supported languages and @ref{Structure of code blocks} for
-information on the syntax used to define a code block).
+Org mode buffer.  The results of evaluation are placed following a line that
+begins by default with @code{#+RESULTS} and optionally a cache identifier
+and/or the name of the evaluated code block.  The default value of
+@code{#+RESULTS} can be changed with the customizable variable
+@code{org-babel-results-keyword}. 
+
+By default, the evaluation facility is only enabled for Lisp code blocks
+specified as @code{emacs-lisp}. However, source code blocks in many languages
+can be evaluated within Org mode (see @ref{Languages} for a list of supported
+languages and @ref{Structure of code blocks} for information on the syntax
+used to define a code block).
 
 @kindex C-c C-c
 There are a number of ways to evaluate code blocks.  The simplest is to press
