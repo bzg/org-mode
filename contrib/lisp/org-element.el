@@ -3201,10 +3201,13 @@ allowed in the current object."
       (while (setq candidates (org-element-get-next-object-candidates
 			       end restriction candidates))
 	(setq next-object (funcall get-next-object candidates))
-	;; 1. Text before any object.
+	;; 1. Text before any object.  Untabify it.
 	(let ((obj-beg (org-element-get-property :begin next-object)))
 	  (unless (= (point) obj-beg)
-	    (push (buffer-substring-no-properties (point) obj-beg) acc)))
+	    (push (replace-regexp-in-string
+		   "\t" (make-string tab-width ? )
+		   (buffer-substring-no-properties (point) obj-beg))
+		  acc)))
 	;; 2. Object...
 	(let ((obj-end (org-element-get-property :end next-object))
 	      (cont-beg (org-element-get-property :contents-begin next-object)))
@@ -3233,9 +3236,12 @@ allowed in the current object."
 		  next-object)
 		acc)
 	  (goto-char obj-end)))
-      ;; 3. Text after last object.
+      ;; 3. Text after last object.  Untabify it.
       (unless (= (point) end)
-	(push (buffer-substring-no-properties (point) end) acc))
+	(push (replace-regexp-in-string
+	       "\t" (make-string tab-width ? )
+	       (buffer-substring-no-properties (point) end))
+	      acc))
       ;; Result.
       (nreverse acc))))
 
@@ -3445,16 +3451,15 @@ Return the normalized element."
    (let ((contents (org-element-get-contents element)))
      (if (not (or ignore-first (stringp (car contents)))) contents
        (catch 'exit
-	 ;; 1. Remove tabs from each string in CONTENTS.  Get maximal
-	 ;;    common indentation (MCI) along the way.
+	 ;; 1. Get maximal common indentation (MCI) among each string
+	 ;;    in CONTENTS.
 	 (let* ((ind-list (unless ignore-first
 			    (list (org-get-string-indentation (car contents)))))
 		(contents
 		 (mapcar
 		  (lambda (object)
 		    (if (not (stringp object)) object
-		      (let ((start 0)
-			    (object (org-remove-tabs object)))
+		      (let ((start 0))
 			(while (string-match "\n\\( *\\)" object start)
 			  (setq start (match-end 0))
 			  (push (length (match-string 1 object)) ind-list))
