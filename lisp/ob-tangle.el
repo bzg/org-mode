@@ -342,11 +342,7 @@ code blocks by language."
 			     body params
 			     (and (fboundp assignments-cmd)
 				  (funcall assignments-cmd params))))))
-		      (if (and (cdr (assoc :noweb params)) ;; expand noweb refs
-			       (let ((nowebs (split-string
-					      (cdr (assoc :noweb params)))))
-				 (or (member "yes" nowebs)
-				     (member "tangle" nowebs))))
+		      (if (org-babel-noweb-p params :tangle)
 			  (org-babel-expand-noweb-references info)
 			(nth 1 info)))))
 		   (comment

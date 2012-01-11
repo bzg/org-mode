@@ -482,12 +482,9 @@ block."
 	     (new-hash (when cache? (org-babel-sha1-hash info)))
 	     (old-hash (when cache? (org-babel-current-result-hash)))
 	     (body (setf (nth 1 info)
-			 (let ((noweb (cdr (assoc :noweb params))))
-			   (if (and noweb
-				    (or (string= "yes" noweb)
-					(string= "tangle" noweb)))
-			       (org-babel-expand-noweb-references info)
-			     (nth 1 info)))))
+			 (if (org-babel-noweb-p params :eval)
+			     (org-babel-expand-noweb-references info)
+			   (nth 1 info))))
 	     (dir (cdr (assoc :dir params)))
 	     (default-directory
 	       (or (and dir (file-name-as-directory dir)) default-directory))
@@ -561,8 +558,7 @@ arguments and pop open the results in a preview buffer."
                              (lambda (el1 el2) (string< (symbol-name (car el1))
 						   (symbol-name (car el2)))))))
          (body (setf (nth 1 info)
-		     (if (and (cdr (assoc :noweb params))
-                              (string= "yes" (cdr (assoc :noweb params))))
+		     (if (org-babel-noweb-p params :eval)
 			 (org-babel-expand-noweb-references info) (nth 1 info))))
          (expand-cmd (intern (concat "org-babel-expand-body:" lang)))
 	 (assignments-cmd (intern (concat "org-babel-variable-assignments:"
@@ -657,8 +653,7 @@ session."
          (lang (nth 0 info))
          (params (nth 2 info))
          (body (setf (nth 1 info)
-		     (if (and (cdr (assoc :noweb params))
-                              (string= "yes" (cdr (assoc :noweb params))))
+		     (if (org-babel-noweb-p params :eval)
                          (org-babel-expand-noweb-references info)
 		       (nth 1 info))))
          (session (cdr (assoc :session params)))
@@ -1954,7 +1949,7 @@ parameters when merging lists."
 	      (:tangle ;; take the latest -- always overwrite
 	       (setq tangle (or (list (cdr pair)) tangle)))
 	      (:noweb
-	       (setq noweb (e-merge '(("yes" "no" "tangle")) noweb
+	       (setq noweb (e-merge '(("yes" "no" "tangle" "no-export")) noweb
 				    (split-string (or (cdr pair) "")))))
 	      (:cache
 	       (setq cache (e-merge '(("yes" "no")) cache
@@ -1986,6 +1981,20 @@ parameters when merging lists."
 This results in much faster noweb reference expansion but does
 not properly allow code blocks to inherit the \":noweb-ref\"
 header argument from buffer or subtree wide properties.")
+
+(defun org-babel-noweb-p (params context)
+  "Check if PARAMS require expansion in CONTEXT.
+CONTEXT may be one of :tangle, :export or :eval."
+  (flet ((intersection (as bs)
+		       (when as
+			 (if (member (car as) bs)
+			     (car as)
+			   (intersection (cdr as) bs)))))
+    (intersection (case context
+                    (:tangle '("yes" "tangle" "no-export"))
+                    (:eval   '("yes" "no-export"))
+                    (:export '("yes")))
+                  (split-string (or (cdr (assoc :noweb params)) "")))))
 
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.

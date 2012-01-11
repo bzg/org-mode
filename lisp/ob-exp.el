@@ -110,8 +110,7 @@ none ----- do not display either code or results upon export"
 	  (setf hash (org-babel-sha1-hash info)))
 	;; expand noweb references in the original file
 	(setf (nth 1 info)
-	      (if (and (cdr (assoc :noweb (nth 2 info)))
-		       (string= "yes" (cdr (assoc :noweb (nth 2 info)))))
+	      (if (org-babel-noweb-p (nth 2 info) :export)
 		  (org-babel-expand-noweb-references
 		   info (get-file-buffer org-current-export-file))
 		(nth 1 info)))
@@ -133,8 +132,7 @@ options and are taken from `org-babel-default-inline-header-args'."
 	  (unless (org-babel-in-example-or-verbatim)
 	    ;; expand noweb references in the original file
 	    (setf (nth 1 info)
-		  (if (and (cdr (assoc :noweb params))
-			   (string= "yes" (cdr (assoc :noweb params))))
+		  (if (org-babel-noweb-p params :export)
 		      (org-babel-expand-noweb-references
 		       info (get-file-buffer org-current-export-file))
 		    (nth 1 info)))
