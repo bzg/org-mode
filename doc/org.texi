@@ -9035,7 +9035,7 @@ the object with @code{\ref@{tab:basic-data@}}:
 
 @example
 #+CAPTION: This is the caption for the next table (or link)
-#+LABEL:   tbl:basic-data
+#+LABEL:   tab:basic-data
    | ... | ...|
    |-----|----|
 @end example
