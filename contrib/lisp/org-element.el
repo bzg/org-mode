@@ -2969,7 +2969,9 @@ Nil values returned from FUN are ignored in the result."
 		   (t (funcall accumulate-maybe --type types fun --blob --local)
 		      (funcall
 		       walk-tree --blob
-		       (and info (org-export-update-info --blob --local t)))))))
+		       (org-combine-plists
+			info `(:genealogy
+			       ,(cons --blob (plist-get info :genealogy)))))))))
 	      (org-element-get-contents --data))))))
     (catch 'first-match
       (funcall walk-tree data info)

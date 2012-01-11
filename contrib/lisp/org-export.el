@@ -556,30 +556,16 @@ standard mode."
 ;;    All export options are defined through the
 ;;    `org-export-option-alist' variable.
 ;;
-;; 2. Persistent properties are stored in
-;;    `org-export-persistent-properties' and available at every level
-;;    of recursion. Their value is extracted directly from the parsed
-;;    tree, and depends on export options (whole trees may be filtered
-;;    out of the export process).
+;; 2. Tree properties are extracted directly from the parsed tree, by
+;;    `org-export-collect-tree-properties' and depend on export
+;;    options (whole trees may be filtered out of the export process).
 ;;
-;;    Properties belonging to that type are defined in the
-;;    `org-export-persistent-properties-list' variable.
-;;
-;; 3. Every other property is considered local, and available at
-;;    a precise level of recursion and below.
-
-;; Managing properties during transcode process is mainly done with
-;; `org-export-update-info'.  Even though they come from different
-;; sources, the function transparently concatenates them in a single
-;; property list passed as an argument to each transcode function.
-;; Thus, during export, all necessary information is available through
-;; that single property list, and the element or object itself.
-;; Though, modifying a property will still require some special care,
-;; and should be done with `org-export-set-property' instead of plain
-;; `plist-put'.
+;; 3. Local options are updated during parsing, and their value
+;;    depends on the level of recursion.  For now, only `:genealogy'
+;;    belongs to that category.
 
 ;; Here is the full list of properties available during transcode
-;; process, with their category (option, persistent or local), their
+;; process, with their category (option, tree or local), their
 ;; value type and the function updating them, when appropriate.
 
 ;; + `author' :: Author's name.
@@ -587,15 +573,8 @@ standard mode."
 ;;   - type :: string
 
 ;; + `back-end' :: Current back-end used for transcoding.
-;;   - category :: persistent
+;;   - category :: tree
 ;;   - type :: symbol
-
-;; + `code-refs' :: Association list between reference name and real
-;;                  labels in source code.  It is used to properly
-;;                  resolve links inside source blocks.
-;;   - category :: persistent
-;;   - type :: alist (INT-OR-STRING . STRING)
-;;   - update :: `org-export-handle-code'
 
 ;; + `creator' :: String to write as creation information.
 ;;   - category :: option
@@ -634,12 +613,11 @@ standard mode."
 ;;      from closest to farthest.
 ;;   - category :: local
 ;;   - type :: list of elements and objects
-;;   - update :: `org-export-update-info'
 
 ;; + `headline-alist' :: Alist between headlines raw name and their
 ;;      boundaries.  It is used to resolve "fuzzy" links
 ;;      (cf. `org-export-resolve-fuzzy-link').
-;;   - category :: persistent
+;;   - category :: tree
 ;;   - type :: alist (STRING INTEGER INTEGER)
 
 ;; + `headline-levels' :: Maximum level being exported as an
@@ -653,13 +631,13 @@ standard mode."
 ;;      of headlines in the parse tree.  For example, a value of -1
 ;;      means a level 2 headline should be considered as level
 ;;      1 (cf. `org-export-get-relative-level').
-;;   - category :: persistent
+;;   - category :: tree
 ;;   - type :: integer
 
 ;; + `headline-numbering' :: Alist between headlines' beginning
 ;;      position and their numbering, as a list of numbers
 ;;      (cf. `org-export-get-headline-number').
-;;   - category :: persistent
+;;   - category :: tree
 ;;   - type :: alist (INTEGER . LIST)
 
 ;; + `included-files' :: List of files, with full path, included in
@@ -707,7 +685,7 @@ standard mode."
 ;;                    parse tree.  This is used to partly resolve
 ;;                    "fuzzy" links
 ;;                    (cf. `org-export-resolve-fuzzy-link').
-;;   - category :: persistent
+;;   - category :: tree
 ;;   - type :: list of strings
 
 ;; + `time-stamp-file' :: Non-nil means transcoding should insert
@@ -715,16 +693,10 @@ standard mode."
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `total-loc' :: Contains total lines of code accumulated by source
-;;                  blocks with the "+n" option so far.
-;;   - category :: persistent
-;;   - type :: integer
-;;   - update :: `org-export-handle-code'
-
 ;; + `use-select-tags' :: When non-nil, a select tags has been found
 ;;      in the parse tree.  Thus, any headline without one will be
 ;;      filtered out.  See `select-tags'.
-;;   - category :: persistent
+;;   - category :: tree
 ;;   - type :: interger or nil
 
 ;; + `with-archived-trees' :: Non-nil when archived subtrees should
@@ -1050,8 +1022,8 @@ BACKEND is a symbol specifying which back-end should be used."
 OPTIONS is the export options plist computed so far."
   (list
    ;; `:macro-date', `:macro-time' and `:macro-property' could as well
-   ;; be initialized as persistent properties, since they don't depend
-   ;; on initial environment.  Though, it may be more logical to keep
+   ;; be initialized as tree properties, since they don't depend on
+   ;; initial environment.  Though, it may be more logical to keep
    ;; them close to other ":macro-" properties.
    :macro-date "(eval (format-time-string \"$1\"))"
    :macro-time "(eval (format-time-string \"$1\"))"
@@ -1109,16 +1081,13 @@ retrieved."
       (org-set-local (car pair) (nth 1 pair)))))
 
 
-;;;; Persistent Properties
+;;;; Tree Properties
 
-;; Persistent properties are declared in
-;; `org-export-persistent-properties-list' variable.  Most of them are
-;; initialized at the beginning of the transcoding process by
-;; `org-export-initialize-persistent-properties'.  The others are
-;; updated during that process.
+;; They are initialized at the beginning of the transcoding process by
+;; `org-export-collect-tree-properties'.
 
-;; Dedicated functions focus on computing the value of specific
-;; persistent properties during initialization.  Thus,
+;; Dedicated functions focus on computing the value of specific tree
+;; properties during initialization.  Thus,
 ;; `org-export-use-select-tag-p' determines if an headline makes use
 ;; of an export tag enforcing inclusion. `org-export-get-min-level'
 ;; gets the minimal exportable level, used as a basis to compute
@@ -1127,26 +1096,14 @@ retrieved."
 ;; Eventually `org-export-collect-headline-numbering' builds an alist
 ;; between headlines' beginning position and their numbering.
 
-(defconst org-export-persistent-properties-list
-  '(:back-end :code-refs :headline-alist :headline-numbering :headline-offset
-	      :parse-tree :point-max :target-list :total-loc :use-select-tags)
-  "List of persistent properties.")
-
-(defconst org-export-persistent-properties nil
-  "Used internally to store properties and values during transcoding.
-
-Only properties that should survive recursion are saved here.
-
-This variable is reset before each transcoding.")
-
-(defun org-export-initialize-persistent-properties (data options backend)
-  "Initialize `org-export-persistent-properties'.
+(defun org-export-collect-tree-properties (data options backend)
+  "Extract tree properties from parse tree.
 
 DATA is the parse tree from which information is retrieved.
 OPTIONS is a list holding export options.  BACKEND is the
 back-end called for transcoding, as a symbol.
 
-Following initial persistent properties are set:
+Following tree properties are set:
 `:back-end'        Back-end used for transcoding.
 
 `:headline-alist'  Alist of all headlines' name as key and a list
@@ -1169,50 +1126,32 @@ Following initial persistent properties are set:
 
 `:use-select-tags' Non-nil when parsed tree use a special tag to
 		   enforce transcoding of the headline."
-  ;; First delete any residual persistent property.
-  (setq org-export-persistent-properties nil)
-  ;; Immediately after, set `:use-select-tags' property, as it will be
-  ;; required for further computations.
-  (setq options
-	(org-export-set-property
-	 options
-	 :use-select-tags
-	 (org-export-use-select-tags-p data options)))
-  ;; Get the rest of the initial persistent properties, now
-  ;; `:use-select-tags' is set...
-  ;; 1. `:parse-tree' ...
-  (setq options (org-export-set-property options :parse-tree data))
-  ;; 2. `:headline-offset' ...
-  (setq options
-	(org-export-set-property
-	 options :headline-offset
-	 (- 1 (org-export-get-min-level data options))))
-  ;; 3. `:point-max' ...
-  (setq options (org-export-set-property
-		 options :point-max
-		 (org-export-get-point-max data options)))
-  ;; 4. `:target-list'...
-  (setq options (org-export-set-property
-		 options :target-list
-		 (org-element-map
-		  data 'target
-		  (lambda (target info)
-		    (org-element-get-property :raw-value target)))))
-  ;; 5. `:headline-alist'
-  (setq options (org-export-set-property
-		 options :headline-alist
-		 (org-element-map
-		  data 'headline
-		  (lambda (headline info)
-		    (list (org-element-get-property :raw-value headline)
-			  (org-element-get-property :begin headline)
-			  (org-element-get-property :end headline))))))
-  ;; 6. `:headline-numbering'
-  (setq options (org-export-set-property
-		 options :headline-numbering
-		 (org-export-collect-headline-numbering data options)))
-  ;; 7. `:back-end'
-  (setq options (org-export-set-property options :back-end backend)))
+  ;; First, set `:use-select-tags' property, as it will be required
+  ;; for further computations.
+  (setq info
+	(org-combine-plists
+	 info `(:use-select-tags ,(org-export-use-select-tags-p data info))))
+  ;; Get the rest of the tree properties, now `:use-select-tags' is
+  ;; set...
+  (nconc
+   `(:parse-tree
+     ,data
+     :headline-offset ,(- 1 (org-export-get-min-level data info))
+     :point-max ,(org-export-get-point-max data info)
+     :target-list
+     ,(org-element-map
+       data 'target
+       (lambda (target info) (org-element-get-property :raw-value target)))
+     :headline-alist
+     ,(org-element-map
+       data 'headline
+       (lambda (headline info)
+	 (list (org-element-get-property :raw-value headline)
+	       (org-element-get-property :begin headline)
+	       (org-element-get-property :end headline))))
+     :headline-numbering ,(org-export-collect-headline-numbering data info)
+     :back-end ,backend)
+   info))
 
 (defun org-export-use-select-tags-p (data options)
   "Non-nil when data use a tag enforcing transcoding.
@@ -1283,50 +1222,6 @@ numbers)."
      options)))
 
 
-;;;; Properties Management
-
-;; This is mostly done with the help of two functions.  On the one
-;; hand `org-export-update-info' is used to keep up-to-date local
-;; information while walking the nested list representing the parsed
-;; document.  On the other end, `org-export-set-property' handles
-;; properties modifications according to their type (persistent or
-;; local).
-
-;; As exceptions, `:code-refs' and `:total-loc' properties are updated
-;; with `org-export-handle-code' function.
-
-(defun org-export-update-info (blob info recursep)
-  "Update export options depending on context.
-
-BLOB is the element or object being parsed.  INFO is the plist
-holding the export options.
-
-When RECURSEP is non-nil, assume the following element or object
-will be inside the current one.
-
-The following properties are updated:
-`genealogy'               List of current element's parents
-			  (list of elements and objects).
-
-Return the property list."
-  (let* ((type (and (not (stringp blob)) (car blob))))
-    (cond
-     ;; Case 1: We're moving into a recursive blob.
-     (recursep
-      (org-combine-plists
-       info
-       `(:genealogy ,(cons blob (plist-get info :genealogy)))
-       org-export-persistent-properties)))))
-
-(defun org-export-set-property (info prop value)
-  "Set property PROP to VALUE in plist INFO.
-Return the new plist."
-  (when (memq prop org-export-persistent-properties-list)
-    (setq org-export-persistent-properties
-	  (plist-put org-export-persistent-properties prop value)))
-  (plist-put info prop value))
-
-
 
 ;;; The Transcoder
 
@@ -1364,13 +1259,12 @@ Return transcoded string."
    ;; BLOB can be an element, an object, a string, or nil.
    (lambda (blob)
      (cond
-      ((not blob) nil) ((equal blob "") nil)
+      ((not blob) nil)
       ;; BLOB is a string.  Check if the optional transcoder for plain
       ;; text exists, and call it in that case.  Otherwise, simply
       ;; return string.  Also update INFO and call
       ;; `org-export-filter-plain-text-functions'.
       ((stringp blob)
-       (setq info (org-export-update-info blob info nil))
        (let ((transcoder (intern (format "org-%s-plain-text" backend))))
 	 (org-export-filter-apply-functions
 	  org-export-filter-plain-text-functions
@@ -1400,12 +1294,14 @@ Return transcoded string."
 		;; Case 0. No transcoder defined: ignore BLOB.
 		((not transcoder) nil)
 		;; Case 1. Transparently export an Org document.
-		((eq type 'org-data)
-		 (org-export-data blob backend info))
+		((eq type 'org-data) (org-export-data blob backend info))
 		;; Case 2. For a recursive object.
 		((memq type org-element-recursive-objects)
 		 (org-export-data
-		  blob backend (org-export-update-info blob info t)))
+		  blob backend
+		  (org-combine-plists
+		   info
+		   `(:genealogy ,(cons blob (plist-get info :genealogy))))))
 		;; Case 3. For a recursive element.
 		((memq type org-element-greater-elements)
 		 ;; Ignore contents of an archived tree
@@ -1416,7 +1312,10 @@ Return transcoded string."
 			  (org-element-get-property :archivedp blob))
 		   (org-element-normalize-string
 		    (org-export-data
-		     blob backend (org-export-update-info blob info t)))))
+		     blob backend
+		     (org-combine-plists
+		      info `(:genealogy
+			     ,(cons blob (plist-get info :genealogy))))))))
 		;; Case 4. For a paragraph.
 		((eq type 'paragraph)
 		 (let ((paragraph
@@ -1430,9 +1329,10 @@ Return transcoded string."
 			      (let ((parent (caar (plist-get info :genealogy))))
 				(memq parent '(footnote-definition item)))))))
 		   (org-export-data
-		    paragraph
-		    backend
-		    (org-export-update-info blob info t))))))
+		    paragraph backend
+		    (org-combine-plists
+		     info `(:genealogy
+			    ,(cons paragraph (plist-get info :genealogy)))))))))
 	      ;; 3. Transcode BLOB into RESULTS string.
 	      (results (cond
 			((not transcoder) nil)
@@ -1445,7 +1345,6 @@ Return transcoded string."
 	 ;;    the same white space between elements or objects as in
 	 ;;    the original buffer, and call appropriate filters.
 	 (when results
-	   (setq info (org-export-update-info blob info nil))
 	   ;; No filter for a full document.
 	   (if (eq type 'org-data)
 	       results
@@ -1468,12 +1367,8 @@ Return transcoded string."
 SECONDARY is a nested list as returned by
 `org-element-parse-secondary-string'.
 
-BACKEND is a symbol among supported exporters.
-
-INFO is a plist holding export options and also used as
-a communication channel between elements when walking the nested
-list.  See `org-export-update-info' function for more
-details.
+BACKEND is a symbol among supported exporters.  INFO is a plist
+used as a communication channel.
 
 Return transcoded string."
   ;; Make SECONDARY acceptable for `org-export-data'.
@@ -1953,9 +1848,7 @@ Return code as a string."
 	;; Initialize the communication system and combine it to INFO.
 	(setq info
 	      (org-combine-plists
-	       info
-	       (org-export-initialize-persistent-properties
-		raw-data info backend)))
+	       info (org-export-collect-tree-properties raw-data info backend)))
 	;; Now transcode RAW-DATA.  Also call
 	;; `org-export-filter-final-output-functions'.
 	(let* ((body (org-element-normalize-string
@@ -2351,6 +2244,10 @@ Return the parsed tree."
 ;; (i.e. links with "fuzzy" as type) within the parsed tree, and
 ;; returns an appropriate unique identifier when found, or nil.
 
+;; `org-export-resolve-coderef' associates a reference to a line
+;; number in the element it belongs, or returns the reference itself
+;; when the element isn't numbered.
+
 (defun org-export-solidify-link-text (s)
   "Take link text and make a safe target out of it."
   (save-match-data
@@ -2432,6 +2329,40 @@ Assume LINK type is \"fuzzy\"."
 	 ;; will do.  Return its beginning position.
 	 (t (caar cands)))))))
 
+(defun org-export-resolve-coderef (ref info)
+  "Resolve a code reference REF.
+
+INFO is a plist used as a communication channel.
+
+Return associated line number in source code, or REF itself,
+depending on src-block or example element's switches."
+  (org-element-map
+   (plist-get info :parse-tree) '(src-block example)
+   (lambda (el local)
+     (let ((switches (or (org-element-get-property :switches el) "")))
+       (with-temp-buffer
+         (insert (org-trim (org-element-get-property :value el)))
+         ;; Build reference regexp.
+         (let* ((label
+                 (or (and (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
+                          (match-string 1 switches))
+                     org-coderef-label-format))
+                (ref-re
+                 (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
+                         (replace-regexp-in-string "%s" ref label nil t))))
+           ;; Element containing REF is found.  Only associate REF to
+           ;; a line number if element has "+n" or "-n" and "-k" or
+           ;; "-r" as switches.  When it has "+n", count accumulated
+           ;; locs before, too.
+           (when (re-search-backward ref-re nil t)
+             (cond
+              ((not (string-match "-[kr]\\>" switches)) ref)
+              ((string-match "-n\\>" switches) (line-number-at-pos))
+	      ((string-match "\\+n\\>" switches)
+	       (+ (org-export-get-loc el local) (line-number-at-pos)))
+              (t ref)))))))
+   info 'first-match))
+
 
 ;;;; For Macros
 
@@ -2501,21 +2432,44 @@ like inline images, which are a subset of links \(in that case,
 
 ;;;; For Src-Blocks
 
+;; `org-export-get-loc' counts number of code lines accumulated in
+;; src-block or example elements with a "+n" switch until a given
+;; element excluded.
+
 ;; `org-export-handle-code' takes care of line numbering and reference
-;; cleaning in source code, when appropriate.  It also updates global
-;; LOC count (`:total-loc' property) and code references alist
-;; (`:code-refs' property).
+;; cleaning in source code, when appropriate.
 
-(defun org-export-handle-code (code switches info
-					    &optional language num-fmt ref-fmt)
-  "Handle line numbers and code references in CODE.
+(defun org-export-get-loc (element info)
+  "Return accumulated lines of code up to ELEMENT.
 
-CODE is the string to process.  SWITCHES is the option string
-determining which changes will be applied to CODE.  INFO is the
-plist used as a communication channel during export.
+INFO is the plist used as a communication channel.
 
-Optional argument LANGUAGE, when non-nil, is a string specifying
-code's language.
+Only example or src-block elements with a \"+n\" switch can
+increase that number.  ELEMENT is excluded from count."
+  (let ((loc 0))
+    (org-element-map
+     (plist-get info :parse-tree) `(src-block example ,(car element))
+     (lambda (el local)
+       (cond
+        ;; ELEMENT is reached: Quit the loop.
+        ((equal el element) t)
+        ;; Only count lines from src-block and example elements with
+        ;; a "+n" switch.
+        ((not (memq (car el) '(src-block example))) nil)
+        ((let ((switches (org-element-get-property :switches el)))
+           (and switches (string-match "+n\\>" switches)))
+         ;; Accumulate locs and return nil to stay in the loop.
+         (setq loc (+ loc (org-count-lines
+                           (org-trim (org-element-get-property :value el)))))
+         nil)))
+     info 'first-match)
+    ;; Return value.
+    loc))
+
+(defun org-export-handle-code (element info &optional num-fmt ref-fmt)
+  "Handle line numbers and code references in ELEMENT.
+
+INFO is a plist used as a communication channel.
 
 If optional argument NUM-FMT is a string, it will be used as
 a format string for numbers at beginning of each line.
@@ -2523,22 +2477,22 @@ a format string for numbers at beginning of each line.
 If optional argument REF-FMT is a string, it will be used as
 a format string for each line of code containing a reference.
 
-Update the following INFO properties by side-effect: `:total-loc'
-and `:code-refs'.
-
 Return new code as a string."
-  (let* ((switches (or switches ""))
+  (let* ((switches (or (org-element-get-property :switches element) ""))
+	 (code (org-element-get-property :value element))
 	 (numberp (string-match "[-+]n\\>" switches))
-	 (continuep (string-match "\\+n\\>" switches))
-	 (total-LOC (if (and numberp (not continuep))
-			0
-		      (or (plist-get info :total-loc) 0)))
+	 (accumulatep (string-match "\\+n\\>" switches))
+	 ;; Initialize loc counter when any kind of numbering is
+	 ;; active.
+	 (total-LOC (cond
+		     (accumulatep (org-export-get-loc element info))
+		     (numberp 0)))
+	 ;; Get code and clean it.  Remove blank lines at its
+	 ;; beginning and end.  Also remove protective commas.
 	 (preserve-indent-p (or org-src-preserve-indentation
 				(string-match "-i\\>" switches)))
 	 (replace-labels (when (string-match "-r\\>" switches)
 			   (if (string-match "-k\\>" switches) 'keep t)))
-	 ;; Get code and clean it.  Remove blank lines at its
-	 ;; beginning and end.  Also remove protective commas.
 	 (code (let ((c (replace-regexp-in-string
 			 "\\`\\([ \t]*\n\\)+" ""
 			 (replace-regexp-in-string
@@ -2547,19 +2501,22 @@ Return new code as a string."
 		 (unless preserve-indent-p (setq c (org-remove-indentation c)))
 		 ;; Free up the protected lines.  Note: Org blocks
 		 ;; have commas at the beginning or every line.
-		 (if (string= language "org")
+		 (if (string=
+		      (or (org-element-get-property :language element) "")
+		      "org")
 		     (replace-regexp-in-string "^," "" c)
 		   (replace-regexp-in-string
 		    "^\\(,\\)\\(:?\\*\\|[ \t]*#\\+\\)" "" c nil nil 1))))
 	 ;; Split code to process it line by line.
 	 (code-lines (org-split-string code "\n"))
-	 ;; Ensure line numbers will be correctly padded before
-	 ;; applying the format string.
-	 (num-fmt (format (if (stringp num-fmt) num-fmt "%s:  ")
-			  (format "%%%ds"
-				  (length (number-to-string
-					   (+ (length code-lines)
-					      total-LOC))))))
+	 ;; If numbering is active, ensure line numbers will be
+	 ;; correctly padded before applying the format string.
+	 (num-fmt
+	  (when numberp
+	    (format (if (stringp num-fmt) num-fmt "%s:  ")
+		    (format "%%%ds"
+			    (length (number-to-string
+				     (+ (length code-lines) total-LOC)))))))
 	 ;; Get format used for references.
 	 (label-fmt (or (and (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
 			     (match-string 1 switches))
@@ -2567,51 +2524,25 @@ Return new code as a string."
 	 ;; Build a regexp matching a loc with a reference.
 	 (with-ref-re (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
 			      (replace-regexp-in-string
-			       "%s" "\\([-a-zA-Z0-9_ ]+\\)" label-fmt nil t)))
-	 coderefs)
+			       "%s" "\\([-a-zA-Z0-9_ ]+\\)" label-fmt nil t))))
     (org-element-normalize-string
-     (mapconcat (lambda (loc)
-		  ;; Maybe add line number to current line of code
-		  ;; (LOC).
-		  (when numberp
-		    (setq loc (concat (format num-fmt (incf total-LOC)) loc)))
-		  ;; Take action if at a ref line.
-		  (when (string-match with-ref-re loc)
-		    (let ((ref (match-string 3 loc)))
-		      (setq loc
-			    (cond
-			     ;; Option "-k": don't remove labels.  Use
-			     ;; numbers for references when lines are
-			     ;; numbered, use labels otherwise.
-			     ((eq replace-labels 'keep)
-			      (let ((full-ref (format "(%s)" ref)))
-				(push (cons ref (if numberp total-LOC full-ref))
-				      coderefs)
-				(replace-match full-ref nil nil loc 2))
-			      (replace-match (format "(%s)" ref) nil nil loc 2))
-			     ;; Option "-r" without "-k": remove labels.
-			     ;; Use numbers for references when lines are
-			     ;; numbered, use labels otherwise.
-			     (replace-labels
-			      (push (cons ref (if numberp total-LOC ref))
-				    coderefs)
-			      (replace-match "" nil nil loc 1))
-			     ;; Else: don't remove labels and don't use
-			     ;; numbers for references.
-			     (t
-			      (let ((full-ref (format "(%s)" ref)))
-				(push (cons ref full-ref) coderefs)
-				(replace-match full-ref nil nil loc 2)))))))
-		  ;; If REF-FMT is defined, apply it to current LOC.
-		  (when (stringp ref-fmt) (setq loc (format ref-fmt loc)))
-		  ;; Update by side-effect communication channel.
-		  ;; Return updated LOC.
-		  (setq info (org-export-set-property
-			      (org-export-set-property
-			       info :code-refs coderefs)
-			      :total-loc total-LOC))
-		  loc)
-		code-lines "\n"))))
+     (mapconcat
+      (lambda (loc)
+	;; Maybe add line number to current line of code (LOC).
+	(when numberp (setq loc (concat (format num-fmt (incf total-LOC)) loc)))
+	;; Take action if at a ref line.
+	(when (string-match with-ref-re loc)
+	  (let ((ref (match-string 3 loc)))
+	    (setq loc
+		  ;; Option "-r" without "-k" removes labels.
+		  (if (and replace-labels (not (eq replace-labels 'keep)))
+		      (replace-match "" nil nil loc 1)
+		    (replace-match (format "(%s)" ref) nil nil loc 2)))))
+	;; If REF-FMT is defined, apply it to current LOC.
+	(when (stringp ref-fmt) (setq loc (format ref-fmt loc)))
+	;; Return updated LOC for concatenation.
+	loc)
+      code-lines "\n"))))
 
 
 ;;;; For Tables
