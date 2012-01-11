@@ -2429,8 +2429,8 @@ like inline images, which are a subset of links \(in that case,
 ;;;; For Src-Blocks
 
 ;; `org-export-get-loc' counts number of code lines accumulated in
-;; src-block or example elements with a "+n" switch until a given
-;; element excluded.
+;; src-block or example-block elements with a "+n" switch until
+;; a given element, excluded.  Note: "-n" switches reset that count.
 
 ;; `org-export-handle-code' takes care of line numbering and reference
 ;; cleaning in source code, when appropriate.
@@ -2440,23 +2440,25 @@ like inline images, which are a subset of links \(in that case,
 
 INFO is the plist used as a communication channel.
 
-Only example or src-block elements with a \"+n\" switch can
-increase that number.  ELEMENT is excluded from count."
+ELEMENT is excluded from count."
   (let ((loc 0))
     (org-element-map
-     (plist-get info :parse-tree) `(src-block example ,(car element))
+     (plist-get info :parse-tree) `(src-block example-block ,(car element))
      (lambda (el local)
        (cond
         ;; ELEMENT is reached: Quit the loop.
         ((equal el element) t)
-        ;; Only count lines from src-block and example elements with
-        ;; a "+n" switch.
-        ((not (memq (car el) '(src-block example))) nil)
+        ;; Only count lines from src-block and example-block elements
+        ;; with a "+n" or "-n" switch.  A "-n" switch resets counter.
+        ((not (memq (car el) '(src-block example-block))) nil)
         ((let ((switches (org-element-get-property :switches el)))
-           (and switches (string-match "+n\\>" switches)))
-         ;; Accumulate locs and return nil to stay in the loop.
-         (setq loc (+ loc (org-count-lines
-                           (org-trim (org-element-get-property :value el)))))
+           (when (and switches (string-match "\\([-+]\\)n\\>" switches))
+	     ;; Accumulate locs or reset them.
+	     (let ((accumulatep (string= (match-string 1 switches) "-"))
+		   (lines (org-count-lines
+			   (org-trim (org-element-get-property :value el)))))
+	       (setq loc (if accumulatep lines (+ loc lines))))))
+	 ;; Return nil to stay in the loop.
          nil)))
      info 'first-match)
     ;; Return value.
