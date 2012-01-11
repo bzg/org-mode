@@ -19,6 +19,7 @@
 					     org-test-example-dir))
      (org-mode)
      ,@body))
+(def-edebug-spec test-org-in-property-buffer (body))
 
 (ert-deftest test-org-property-accumulation-top-use ()
   (test-org-in-property-buffer
