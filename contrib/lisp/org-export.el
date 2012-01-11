@@ -1346,18 +1346,14 @@ Return transcoded string."
 	 ;;    the original buffer, and call appropriate filters.
 	 (when results
 	   ;; No filter for a full document.
-	   (if (eq type 'org-data)
-	       results
+	   (if (eq type 'org-data) results
 	     (org-export-filter-apply-functions
 	      (eval (intern (format "org-export-filter-%s-functions" type)))
-	      (if (memq type org-element-all-elements)
-		  (concat
-		   (org-element-normalize-string results)
-		   (make-string (org-element-get-property :post-blank blob) 10))
-		(concat
-		 results
-		 (make-string
-		  (org-element-get-property :post-blank blob) 32)))
+	      (let ((post-blank (org-element-get-property :post-blank blob)))
+		(if (memq type org-element-all-elements)
+		    (concat (org-element-normalize-string results)
+			    (make-string post-blank ?\n))
+		  (concat results (make-string post-blank ? ))))
 	      backend)))))))
    (org-element-get-contents data) ""))
 

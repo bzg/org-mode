@@ -134,6 +134,7 @@
 
 
 ;;;; Center Block
+
 (defun org-element-center-block-parser ()
   "Parse a center block.
 
@@ -158,21 +159,23 @@ Assume point is at beginning or end of the block."
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'center-block
-	    `(:begin ,begin
-		     :end ,end
-		     :hiddenp ,hidden
-		     :contents-begin ,contents-begin
-		     :contents-end ,contents-end
-		     :post-blank ,(count-lines pos-before-blank end)
-		     ,@(cadr keywords))))))
+      `(center-block
+	(:begin ,begin
+		:end ,end
+		:hiddenp ,hidden
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,(count-lines pos-before-blank end)
+		,@(cadr keywords))))))
 
 (defun org-element-center-block-interpreter (center-block contents)
   "Interpret CENTER-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
   (format "#+begin_center\n%s#+end_center" contents))
 
+
 ;;;; Drawer
+
 (defun org-element-drawer-parser ()
   "Parse a drawer.
 
@@ -194,15 +197,15 @@ Assume point is at beginning of drawer."
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'drawer
-	    `(:begin ,begin
-		     :end ,end
-		     :drawer-name ,name
-		     :hiddenp ,hidden
-		     :contents-begin ,contents-begin
-		     :contents-end ,contents-end
-		     :post-blank ,(count-lines pos-before-blank end)
-		     ,@(cadr keywords))))))
+      `(drawer
+	(:begin ,begin
+		:end ,end
+		:drawer-name ,name
+		:hiddenp ,hidden
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,(count-lines pos-before-blank end)
+		,@(cadr keywords))))))
 
 (defun org-element-drawer-interpreter (drawer contents)
   "Interpret DRAWER element as Org syntax.
@@ -211,7 +214,9 @@ CONTENTS is the contents of the element."
 	  (org-element-get-property :drawer-name drawer)
 	  contents))
 
+
 ;;;; Dynamic Block
+
 (defun org-element-dynamic-block-parser ()
   "Parse a dynamic block.
 
@@ -255,6 +260,7 @@ CONTENTS is the contents of the element."
 	    (and arg (concat " " args)))
 	  contents))
 
+
 ;;;; Footnote Definition
 
 (defun org-element-footnote-definition-parser ()
@@ -277,14 +283,14 @@ a plist containing `:label', `:begin' `:end', `:contents-begin',
 	   (contents-end (progn (skip-chars-backward " \r\t\n")
 				(forward-line)
 				(point))))
-      (list 'footnote-definition
-	    `(:label ,label
-		     :begin ,begin
-		     :end ,end
-		     :contents-begin ,contents-begin
-		     :contents-end ,contents-end
-		     :post-blank ,(count-lines contents-end end)
-		     ,@(cadr keywords))))))
+      `(footnote-definition
+	(:label ,label
+		:begin ,begin
+		:end ,end
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,(count-lines contents-end end)
+		,@(cadr keywords))))))
 
 (defun org-element-footnote-definition-interpreter (footnote-definition contents)
   "Interpret FOOTNOTE-DEFINITION element as Org syntax.
@@ -295,6 +301,7 @@ CONTENTS is the contents of the footnote-definition."
 
 
 ;;;; Headline
+
 (defun org-element-headline-parser ()
   "Parse an headline.
 
@@ -372,30 +379,30 @@ Assume point is at beginning of the headline."
       (setq title (org-element-parse-secondary-string
 		   raw-value
 		   (cdr (assq 'headline org-element-string-restrictions))))
-      (list 'headline
-	    `(:raw-value ,raw-value
-			 :title ,title
-			 :begin ,begin
-			 :end ,end
-			 :pre-blank ,(count-lines pos-after-head contents-begin)
-			 :hiddenp ,hidden
-			 :contents-begin ,contents-begin
-			 :contents-end ,contents-end
-			 :level ,level
-			 :priority ,(nth 3 components)
-			 :tags ,tags
-			 :todo-keyword ,todo
-			 :todo-type ,todo-type
-			 :scheduled ,scheduled
-			 :deadline ,deadline
-			 :timestamp ,timestamp
-			 :clock ,clock
-			 :post-blank ,(count-lines contents-end end)
-			 :footnote-section-p ,footnote-section-p
-			 :archivedp ,archivedp
-			 :commentedp ,commentedp
-			 :quotedp ,quotedp
-			 ,@standard-props)))))
+      `(headline
+	(:raw-value ,raw-value
+		    :title ,title
+		    :begin ,begin
+		    :end ,end
+		    :pre-blank ,(count-lines pos-after-head contents-begin)
+		    :hiddenp ,hidden
+		    :contents-begin ,contents-begin
+		    :contents-end ,contents-end
+		    :level ,level
+		    :priority ,(nth 3 components)
+		    :tags ,tags
+		    :todo-keyword ,todo
+		    :todo-type ,todo-type
+		    :scheduled ,scheduled
+		    :deadline ,deadline
+		    :timestamp ,timestamp
+		    :clock ,clock
+		    :post-blank ,(count-lines contents-end end)
+		    :footnote-section-p ,footnote-section-p
+		    :archivedp ,archivedp
+		    :commentedp ,commentedp
+		    :quotedp ,quotedp
+		    ,@standard-props)))))
 
 (defun org-element-headline-interpreter (headline contents)
   "Interpret HEADLINE element as Org syntax.
@@ -440,7 +447,9 @@ CONTENTS is the contents of the element."
 	    (make-string (1+ pre-blank) 10)
 	    contents)))
 
+
 ;;;; Inlinetask
+
 (defun org-element-inlinetask-parser ()
   "Parse an inline task.
 
@@ -493,26 +502,26 @@ Assume point is at beginning of the inline task."
 			      (save-excursion (forward-line -1) (point))))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'inlinetask
-	    `(:raw-value ,raw-value
-			 :title ,title
-			 :begin ,begin
-			 :end ,end
-			 :hiddenp ,(and (> contents-end contents-begin) hidden)
-			 :contents-begin ,contents-begin
-			 :contents-end ,contents-end
-			 :level ,(nth 1 components)
-			 :priority ,(nth 3 components)
-			 :tags ,(nth 5 components)
-			 :todo-keyword ,todo
-			 :todo-type ,todo-type
-			 :scheduled ,scheduled
-			 :deadline ,deadline
-			 :timestamp ,timestamp
-			 :clock ,clock
-			 :post-blank ,(count-lines pos-before-blank end)
-			 ,@standard-props
-			 ,@(cadr keywords))))))
+      `(inlinetask
+	(:raw-value ,raw-value
+		    :title ,title
+		    :begin ,begin
+		    :end ,end
+		    :hiddenp ,(and (> contents-end contents-begin) hidden)
+		    :contents-begin ,contents-begin
+		    :contents-end ,contents-end
+		    :level ,(nth 1 components)
+		    :priority ,(nth 3 components)
+		    :tags ,(nth 5 components)
+		    :todo-keyword ,todo
+		    :todo-type ,todo-type
+		    :scheduled ,scheduled
+		    :deadline ,deadline
+		    :timestamp ,timestamp
+		    :clock ,clock
+		    :post-blank ,(count-lines pos-before-blank end)
+		    ,@standard-props
+		    ,@(cadr keywords))))))
 
 (defun org-element-inlinetask-interpreter (inlinetask contents)
   "Interpret INLINETASK element as Org syntax.
@@ -540,7 +549,9 @@ CONTENTS is the contents of inlinetask."
 				      1)))))))
     (concat inlinetask (and tags (format tags-fmt tags) "\n" contents))))
 
+
 ;;;; Item
+
 (defun org-element-item-parser (struct)
   "Parse an item.
 
@@ -587,23 +598,23 @@ Assume point is at the beginning of the item."
 				(skip-chars-backward " \r\t\n")
 				(forward-line)
 				(point))))
-      (list 'item
-	    `(:bullet ,bullet
-		      :begin ,begin
-		      :end ,end
-		      ;; CONTENTS-BEGIN and CONTENTS-END may be mixed
-		      ;; up in the case of an empty item separated
-		      ;; from the next by a blank line.  Thus, ensure
-		      ;; the former is always the smallest of two.
-		      :contents-begin ,(min contents-begin contents-end)
-		      :contents-end ,(max contents-begin contents-end)
-		      :checkbox ,checkbox
-		      :counter ,counter
-		      :raw-tag ,raw-tag
-		      :tag ,tag
-		      :hiddenp ,hidden
-		      :structure ,struct
-		      :post-blank ,(count-lines contents-end end))))))
+      `(item
+	(:bullet ,bullet
+		 :begin ,begin
+		 :end ,end
+		 ;; CONTENTS-BEGIN and CONTENTS-END may be mixed
+		 ;; up in the case of an empty item separated
+		 ;; from the next by a blank line.  Thus, ensure
+		 ;; the former is always the smallest of two.
+		 :contents-begin ,(min contents-begin contents-end)
+		 :contents-end ,(max contents-begin contents-end)
+		 :checkbox ,checkbox
+		 :counter ,counter
+		 :raw-tag ,raw-tag
+		 :tag ,tag
+		 :hiddenp ,hidden
+		 :structure ,struct
+		 :post-blank ,(count-lines contents-end end))))))
 
 (defun org-element-item-interpreter (item contents)
   "Interpret ITEM element as Org syntax.
@@ -630,7 +641,9 @@ CONTENTS is the contents of the element."
       (replace-regexp-in-string
        "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))))
 
+
 ;;;; Plain List
+
 (defun org-element-plain-list-parser (&optional structure)
   "Parse a plain list.
 
@@ -667,23 +680,25 @@ Assume point is at one of the list items."
 		       (progn (org-skip-whitespace)
 			      (if (eobp) (point) (point-at-bol))))))
       ;; Return value.
-      (list 'plain-list
-	    `(:type ,type
-		    :begin ,begin
-		    :end ,end
-		    :contents-begin ,contents-begin
-		    :contents-end ,contents-end
-		    :level ,level
-		    :structure ,struct
-		    :post-blank ,(count-lines contents-end end)
-		    ,@(cadr keywords))))))
+      `(plain-list
+	(:type ,type
+	       :begin ,begin
+	       :end ,end
+	       :contents-begin ,contents-begin
+	       :contents-end ,contents-end
+	       :level ,level
+	       :structure ,struct
+	       :post-blank ,(count-lines contents-end end)
+	       ,@(cadr keywords))))))
 
 (defun org-element-plain-list-interpreter (plain-list contents)
   "Interpret PLAIN-LIST element as Org syntax.
 CONTENTS is the contents of the element."
   contents)
 
+
 ;;;; Quote Block
+
 (defun org-element-quote-block-parser ()
   "Parse a quote block.
 
@@ -708,14 +723,14 @@ Assume point is at beginning or end of the block."
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'quote-block
-	    `(:begin ,begin
-		     :end ,end
-		     :hiddenp ,hidden
-		     :contents-begin ,contents-begin
-		     :contents-end ,contents-end
-		     :post-blank ,(count-lines pos-before-blank end)
-		     ,@(cadr keywords))))))
+      `(quote-block
+	(:begin ,begin
+		:end ,end
+		:hiddenp ,hidden
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,(count-lines pos-before-blank end)
+		,@(cadr keywords))))))
 
 (defun org-element-quote-block-interpreter (quote-block contents)
   "Interpret QUOTE-BLOCK element as Org syntax.
@@ -743,12 +758,12 @@ and `:post-blank' keywords."
 	  (pos-before-blank (progn (skip-chars-backward " \r\t\n")
 				   (forward-line)
 				   (point))))
-      (list 'section
-	    `(:begin ,begin
-		     :end ,end
-		     :contents-begin ,begin
-		     :contents-end ,pos-before-blank
-		     :post-blank ,(count-lines pos-before-blank end))))))
+      `(section
+	(:begin ,begin
+		:end ,end
+		:contents-begin ,begin
+		:contents-end ,pos-before-blank
+		:post-blank ,(count-lines pos-before-blank end))))))
 
 (defun org-element-section-interpreter (section contents)
   "Interpret SECTION element as Org syntax.
@@ -757,6 +772,7 @@ CONTENTS is the contents of the element."
 
 
 ;;;; Special Block
+
 (defun org-element-special-block-parser ()
   "Parse a special block.
 
@@ -784,15 +800,15 @@ Assume point is at beginning or end of the block."
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'special-block
-	    `(:type ,type
-		    :begin ,begin
-		    :end ,end
-		    :hiddenp ,hidden
-		    :contents-begin ,contents-begin
-		    :contents-end ,contents-end
-		    :post-blank ,(count-lines pos-before-blank end)
-		    ,@(cadr keywords))))))
+      `(special-block
+	(:type ,type
+	       :begin ,begin
+	       :end ,end
+	       :hiddenp ,hidden
+	       :contents-begin ,contents-begin
+	       :contents-end ,contents-end
+	       :post-blank ,(count-lines pos-before-blank end)
+	       ,@(cadr keywords))))))
 
 (defun org-element-special-block-interpreter (special-block contents)
   "Interpret SPECIAL-BLOCK element as Org syntax.
@@ -818,6 +834,7 @@ CONTENTS is the contents of the element."
 
 
 ;;;; Babel Call
+
 (defun org-element-babel-call-parser ()
   "Parse a babel call.
 
@@ -831,11 +848,11 @@ keywords."
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (org-skip-whitespace)
 		      (if (eobp) (point) (point-at-bol)))))
-      (list 'babel-call
-	    `(:beg ,beg
-		   :end ,end
-		   :info ,info
-		   :post-blank ,(count-lines pos-before-blank end))))))
+      `(babel-call
+	(:beg ,beg
+	      :end ,end
+	      :info ,info
+	      :post-blank ,(count-lines pos-before-blank end))))))
 
 (defun org-element-babel-call-interpreter (inline-babel-call contents)
   "Interpret INLINE-BABEL-CALL object as Org syntax.
@@ -851,7 +868,9 @@ CONTENTS is nil."
 	      main-source)
 	    (and post-options (format "[%s]" post-options)))))
 
+
 ;;;; Comment
+
 (defun org-element-comment-parser ()
   "Parse a comment.
 
@@ -886,19 +905,21 @@ keywords."
       (setq end (if (eobp) (point) (point-at-bol)))
       ;; Extract value.
       (setq value (buffer-substring-no-properties beg-coms pos-before-blank)))
-    (list 'comment
-	  `(:begin ,begin
-		   :end ,end
-		   :value ,value
-		   :post-blank ,(count-lines pos-before-blank end)
-		   ,@(cadr keywords)))))
+    `(comment
+      (:begin ,begin
+	      :end ,end
+	      :value ,value
+	      :post-blank ,(count-lines pos-before-blank end)
+	      ,@(cadr keywords)))))
 
 (defun org-element-comment-interpreter (comment contents)
   "Interpret COMMENT element as Org syntax.
 CONTENTS is nil."
   (org-element-get-property :value comment))
 
+
 ;;;; Comment Block
+
 (defun org-element-comment-block-parser ()
   "Parse an export block.
 
@@ -921,13 +942,13 @@ containing `:begin', `:end', `:hiddenp', `:value' and
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol))))
 	   (value (buffer-substring-no-properties contents-begin contents-end)))
-      (list 'comment-block
-	    `(:begin ,begin
-		     :end ,end
-		     :value ,value
-		     :hiddenp ,hidden
-		     :post-blank ,(count-lines pos-before-blank end)
-		     ,@(cadr keywords))))))
+      `(comment-block
+	(:begin ,begin
+		:end ,end
+		:value ,value
+		:hiddenp ,hidden
+		:post-blank ,(count-lines pos-before-blank end)
+		,@(cadr keywords))))))
 
 (defun org-element-comment-block-interpreter (comment-block contents)
   "Interpret COMMENT-BLOCK element as Org syntax.
@@ -937,7 +958,9 @@ CONTENTS is nil."
 	   (org-element-get-property :value comment-block))
 	  "#+begin_comment"))
 
+
 ;;;; Example Block
+
 (defun org-element-example-block-parser ()
   "Parse an example block.
 
@@ -962,14 +985,14 @@ containing `:begin', `:end', `:options', `:hiddenp', `:value' and
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'example-block
-	    `(:begin ,begin
-		     :end ,end
-		     :value ,value
-		     :options ,options
-		     :hiddenp ,hidden
-		     :post-blank ,(count-lines pos-before-blank end)
-		     ,@(cadr keywords))))))
+      `(example-block
+	(:begin ,begin
+		:end ,end
+		:value ,value
+		:options ,options
+		:hiddenp ,hidden
+		:post-blank ,(count-lines pos-before-blank end)
+		,@(cadr keywords))))))
 
 (defun org-element-example-block-interpreter (example-block contents)
   "Interpret EXAMPLE-BLOCK element as Org syntax.
@@ -980,7 +1003,9 @@ CONTENTS is nil."
 	     (org-element-get-property :value example-block))
 	    "#+end_example")))
 
+
 ;;;; Export Block
+
 (defun org-element-export-block-parser ()
   "Parse an export block.
 
@@ -1006,14 +1031,14 @@ containing `:begin', `:end', `:type', `:hiddenp', `:value' and
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol))))
 	   (value (buffer-substring-no-properties contents-begin contents-end)))
-      (list 'export-block
-	    `(:begin ,begin
-		     :end ,end
-		     :type ,type
-		     :value ,value
-		     :hiddenp ,hidden
-		     :post-blank ,(count-lines pos-before-blank end)
-		     ,@(cadr keywords))))))
+      `(export-block
+	(:begin ,begin
+		:end ,end
+		:type ,type
+		:value ,value
+		:hiddenp ,hidden
+		:post-blank ,(count-lines pos-before-blank end)
+		,@(cadr keywords))))))
 
 (defun org-element-export-block-interpreter (export-block contents)
   "Interpret EXPORT-BLOCK element as Org syntax.
@@ -1023,7 +1048,9 @@ CONTENTS is nil."
 	    (org-element-get-property :value export-block)
 	    (format "#+end_%s" type))))
 
+
 ;;;; Fixed-width
+
 (defun org-element-fixed-width-parser ()
   "Parse a fixed-width section.
 
@@ -1058,19 +1085,21 @@ keywords."
       (setq end (if (eobp) (point) (point-at-bol)))
       ;; Extract value.
       (setq value (buffer-substring-no-properties beg-area pos-before-blank)))
-    (list 'fixed-width
-	  `(:begin ,begin
-		   :end ,end
-		   :value ,value
-		   :post-blank ,(count-lines pos-before-blank end)
-		   ,@(cadr keywords)))))
+    `(fixed-width
+      (:begin ,begin
+	      :end ,end
+	      :value ,value
+	      :post-blank ,(count-lines pos-before-blank end)
+	      ,@(cadr keywords)))))
 
 (defun org-element-fixed-width-interpreter (fixed-width contents)
   "Interpret FIXED-WIDTH element as Org syntax.
 CONTENTS is nil."
   (org-remove-indentation (org-element-get-property :value fixed-width)))
 
+
 ;;;; Horizontal Rule
+
 (defun org-element-horizontal-rule-parser ()
   "Parse an horizontal rule.
 
@@ -1083,18 +1112,20 @@ CONTENTS is nil."
 	   (post-hr (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'horizontal-rule
-	    `(:begin ,begin
-		     :end ,end
-		     :post-blank ,(count-lines post-hr end)
-		     ,@(cadr keywords))))))
+      `(horizontal-rule
+	(:begin ,begin
+		:end ,end
+		:post-blank ,(count-lines post-hr end)
+		,@(cadr keywords))))))
 
 (defun org-element-horizontal-rule-interpreter (horizontal-rule contents)
   "Interpret HORIZONTAL-RULE element as Org syntax.
 CONTENTS is nil."
   "-----")
 
+
 ;;;; Keyword
+
 (defun org-element-keyword-parser ()
   "Parse a keyword at point.
 
@@ -1111,12 +1142,12 @@ keywords."
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'keyword
-	    `(:key ,key
-		   :value ,value
-		   :begin ,begin
-		   :end ,end
-		   :post-blank ,(count-lines pos-before-blank end))))))
+      `(keyword
+	(:key ,key
+	      :value ,value
+	      :begin ,begin
+	      :end ,end
+	      :post-blank ,(count-lines pos-before-blank end))))))
 
 (defun org-element-keyword-interpreter (keyword contents)
   "Interpret KEYWORD element as Org syntax.
@@ -1125,7 +1156,9 @@ CONTENTS is nil."
 	  (org-element-get-property :key keyword)
 	  (org-element-get-property :value keyword)))
 
+
 ;;;; Latex Environment
+
 (defun org-element-latex-environment-parser ()
   "Parse a LaTeX environment.
 
@@ -1143,19 +1176,21 @@ containing `:begin', `:end', `:value' and `:post-blank' keywords."
 	   (value (buffer-substring-no-properties contents-begin contents-end))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'latex-environment
-	    `(:begin ,begin
-		     :end ,end
-		     :value ,value
-		     :post-blank ,(count-lines contents-end end)
-		     ,@(cadr keywords))))))
+      `(latex-environment
+	(:begin ,begin
+		:end ,end
+		:value ,value
+		:post-blank ,(count-lines contents-end end)
+		,@(cadr keywords))))))
 
 (defun org-element-latex-environment-interpreter (latex-environment contents)
   "Interpret LATEX-ENVIRONMENT element as Org syntax.
 CONTENTS is nil."
   (org-element-get-property :value latex-environment))
 
+
 ;;;; Paragraph
+
 (defun org-element-paragraph-parser ()
   "Parse a paragraph.
 
@@ -1177,20 +1212,22 @@ Assume point is at the beginning of the paragraph."
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
-      (list 'paragraph
-	    `(:begin ,begin
-		     :end ,end
-		     :contents-begin ,contents-begin
-		     :contents-end ,contents-end
-		     :post-blank ,(count-lines pos-before-blank end)
-		     ,@(cadr keywords))))))
+      `(paragraph
+	(:begin ,begin
+		:end ,end
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,(count-lines pos-before-blank end)
+		,@(cadr keywords))))))
 
 (defun org-element-paragraph-interpreter (paragraph contents)
   "Interpret PARAGRAPH element as Org syntax.
 CONTENTS is the contents of the element."
   contents)
 
+
 ;;;; Property Drawer
+
 (defun org-element-property-drawer-parser ()
   "Parse a property drawer.
 
@@ -1221,12 +1258,12 @@ containing `:begin', `:end', `:hiddenp', `:contents-begin',
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (org-skip-whitespace)
 		      (if (eobp) (point) (point-at-bol)))))
-      (list 'property-drawer
-	    `(:begin ,begin
-		     :end ,end
-		     :hiddenp ,hidden
-		     :properties ,properties
-		     :post-blank ,(count-lines pos-before-blank end))))))
+      `(property-drawer
+	(:begin ,begin
+		:end ,end
+		:hiddenp ,hidden
+		:properties ,properties
+		:post-blank ,(count-lines pos-before-blank end))))))
 
 (defun org-element-property-drawer-interpreter (property-drawer contents)
   "Interpret PROPERTY-DRAWER element as Org syntax.
@@ -1239,7 +1276,9 @@ CONTENTS is nil."
 		(nreverse props) "\n")
      "\n:END:")))
 
+
 ;;;; Quote Section
+
 (defun org-element-quote-section-parser ()
   "Parse a quote section.
 
@@ -1258,20 +1297,22 @@ keywords."
 				    (point)))
 	   (value (unless (= begin end)
 		    (buffer-substring-no-properties begin pos-before-blank))))
-      (list 'quote-section
-	    `(:begin ,begin
-		     :end ,end
-		     :value ,value
-		     :post-blank ,(if value
-				      (count-lines pos-before-blank end)
-				    0))))))
+      `(quote-section
+	(:begin ,begin
+		:end ,end
+		:value ,value
+		:post-blank ,(if value
+				 (count-lines pos-before-blank end)
+			       0))))))
 
 (defun org-element-quote-section-interpreter (quote-section contents)
   "Interpret QUOTE-SECTION element as Org syntax.
 CONTENTS is nil."
   (org-element-get-property :value quote-section))
 
+
 ;;;; Src Block
+
 (defun org-element-src-block-parser ()
   "Parse a src block.
 
@@ -1315,18 +1356,18 @@ and `:post-blank' keywords."
 		       (if (eobp) (point) (point-at-bol))))
 	   ;; Get visibility status.
 	   (hidden (progn (goto-char contents-begin)
-			     (forward-line)
-			     (org-truely-invisible-p))))
-      (list 'src-block
-	    `(:language ,language
-			:switches ,switches
-			:parameters ,parameters
-			:begin ,begin
-			:end ,end
-			:hiddenp ,hidden
-			:value ,value
-			:post-blank ,(count-lines contents-end end)
-			,@(cadr keywords))))))
+			  (forward-line)
+			  (org-truely-invisible-p))))
+      `(src-block
+	(:language ,language
+		   :switches ,switches
+		   :parameters ,parameters
+		   :begin ,begin
+		   :end ,end
+		   :hiddenp ,hidden
+		   :value ,value
+		   :post-blank ,(count-lines contents-end end)
+		   ,@(cadr keywords))))))
 
 (defun org-element-src-block-interpreter (src-block contents)
   "Interpret SRC-BLOCK element as Org syntax.
@@ -1352,7 +1393,9 @@ CONTENTS is nil."
 	    value
 	    "#+end_src")))
 
+
 ;;;; Table
+
 (defun org-element-table-parser ()
   "Parse a table at point.
 
@@ -1373,21 +1416,23 @@ Return a list whose car is `table' and cdr is a plist containing
 		       (if (eobp) (point) (point-at-bol))))
 	   (raw-table (org-remove-indentation
 		       (buffer-substring-no-properties table-begin table-end))))
-      (list 'table
-	    `(:begin ,begin
-		     :end ,end
-		     :type ,type
-		     :raw-table ,raw-table
-		     :tblfm ,tblfm
-		     :post-blank ,(count-lines pos-before-blank end)
-		     ,@(cadr keywords))))))
+      `(table
+	(:begin ,begin
+		:end ,end
+		:type ,type
+		:raw-table ,raw-table
+		:tblfm ,tblfm
+		:post-blank ,(count-lines pos-before-blank end)
+		,@(cadr keywords))))))
 
 (defun org-element-table-interpreter (table contents)
   "Interpret TABLE element as Org syntax.
 CONTENTS is nil."
   (org-element-get-property :raw-table table))
 
+
 ;;;; Verse Block
+
 (defun org-element-verse-block-parser ()
   "Parse a verse block.
 
@@ -1416,15 +1461,14 @@ Assume point is at beginning or end of the block."
 	   (value (org-element-parse-secondary-string
 		   (org-remove-indentation raw-val)
 		   (cdr (assq 'verse org-element-string-restrictions)))))
-      (list 'verse-block
-	    `(:begin ,begin
-		     :end ,end
-		     :hiddenp ,hidden
-		     :raw-value ,raw-val
-		     :value ,value
-		     :post-blank ,(count-lines pos-before-blank end)
-		     ,@(cadr keywords))))))
-
+      `(verse-block
+	(:begin ,begin
+		:end ,end
+		:hiddenp ,hidden
+		:raw-value ,raw-val
+		:value ,value
+		:post-blank ,(count-lines pos-before-blank end)
+		,@(cadr keywords))))))
 
 (defun org-element-verse-block-interpreter (verse-block contents)
   "Interpret VERSE-BLOCK element as Org syntax.
@@ -1460,6 +1504,7 @@ CONTENTS is nil."
 ;; maybe tweak restrictions about it, and that's it.
 
 ;;;; Emphasis
+
 (defun org-element-emphasis-parser ()
   "Parse text markup object at point.
 
@@ -1478,13 +1523,13 @@ Assume point is at the first emphasis marker."
 	  (post-blank (progn (goto-char (match-end 2))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
-      (list 'emphasis
-	    `(:marker ,marker
-		      :begin ,begin
-		      :end ,end
-		      :contents-begin ,contents-begin
-		      :contents-end ,contents-end
-		      :post-blank ,post-blank)))))
+      `(emphasis
+	(:marker ,marker
+		 :begin ,begin
+		 :end ,end
+		 :contents-begin ,contents-begin
+		 :contents-end ,contents-end
+		 :post-blank ,post-blank)))))
 
 (defun org-element-emphasis-interpreter (emphasis contents)
   "Interpret EMPHASIS object as Org syntax.
@@ -1508,6 +1553,7 @@ Return value is a cons cell whose car is `emphasis' or
 	    (match-beginning 2)))))
 
 ;;;; Entity
+
 (defun org-element-entity-parser ()
   "Parse entity at point.
 
@@ -1526,18 +1572,18 @@ Assume point is at the beginning of the entity."
 			      (when bracketsp (forward-char 2))
 			      (skip-chars-forward " \t")))
 	   (end (point)))
-      (list 'entity
-	    `(:name ,(car value)
-		    :latex ,(nth 1 value)
-		    :latex-math-p ,(nth 2 value)
-		    :html ,(nth 3 value)
-		    :ascii ,(nth 4 value)
-		    :latin1 ,(nth 5 value)
-		    :utf-8 ,(nth 6 value)
-		    :begin ,begin
-		    :end ,end
-		    :use-brackets-p ,bracketsp
-		    :post-blank ,post-blank)))))
+      `(entity
+	(:name ,(car value)
+	       :latex ,(nth 1 value)
+	       :latex-math-p ,(nth 2 value)
+	       :html ,(nth 3 value)
+	       :ascii ,(nth 4 value)
+	       :latin1 ,(nth 5 value)
+	       :utf-8 ,(nth 6 value)
+	       :begin ,begin
+	       :end ,end
+	       :use-brackets-p ,bracketsp
+	       :post-blank ,post-blank)))))
 
 (defun org-element-entity-interpreter (entity contents)
   "Interpret ENTITY object as Org syntax.
@@ -1580,7 +1626,9 @@ Return value is a cons cell whose car is `entity' or
 			matchers)
 		  (point))))))))
 
+
 ;;;; Export Snippet
+
 (defun org-element-export-snippet-parser ()
   "Parse export snippet at point.
 
@@ -1598,12 +1646,12 @@ Assume point is at the beginning of the snippet."
 		   (match-end 0) (1- before-blank)))
 	   (post-blank (skip-chars-forward " \t"))
 	   (end (point)))
-      (list 'export-snippet
-	    `(:back-end ,back-end
-			:value ,value
-			:begin ,begin
-			:end ,end
-			:post-blank ,post-blank)))))
+      `(export-snippet
+	(:back-end ,back-end
+		   :value ,value
+		   :begin ,begin
+		   :end ,end
+		   :post-blank ,post-blank)))))
 
 (defun org-element-export-snippet-interpreter (export-snippet contents)
   "Interpret EXPORT-SNIPPET object as Org syntax.
@@ -1626,6 +1674,7 @@ its beginning position."
 		(and end (eq (char-before end) ?})))
 	  (throw 'exit (cons 'export-snippet (match-beginning 0))))))))
 
+
 ;;;; Footnote Reference
 
 (defun org-element-footnote-reference-parser ()
@@ -1645,14 +1694,14 @@ with `:label', `:type', `:definition', `:begin', `:end' and
 	   (post-blank (progn (goto-char (nth 2 ref))
 			      (skip-chars-forward " \t")))
 	   (end (point)))
-      (list 'footnote-reference
-	    `(:label ,label
-		     :type ,type
-		     :inline-definition ,inline-def
-		     :begin ,begin
-		     :end ,end
-		     :post-blank ,post-blank
-		     :raw-definition ,raw-def)))))
+      `(footnote-reference
+	(:label ,label
+		:type ,type
+		:inline-definition ,inline-def
+		:begin ,begin
+		:end ,end
+		:post-blank ,post-blank
+		:raw-definition ,raw-def)))))
 
 (defun org-element-footnote-reference-interpreter (footnote-reference contents)
   "Interpret FOOTNOTE-REFERENCE object as Org syntax.
@@ -1678,6 +1727,7 @@ cdr is beginning position."
 
 
 ;;;; Inline Babel Call
+
 (defun org-element-inline-babel-call-parser ()
   "Parse inline babel call at point.
 
@@ -1693,11 +1743,11 @@ Assume point is at the beginning of the babel call."
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
-      (list 'inline-babel-call
-	    `(:begin ,begin
-		     :end ,end
-		     :info ,info
-		     :post-blank ,post-blank)))))
+      `(inline-babel-call
+	(:begin ,begin
+		:end ,end
+		:info ,info
+		:post-blank ,post-blank)))))
 
 (defun org-element-inline-babel-call-interpreter (inline-babel-call contents)
   "Interpret INLINE-BABEL-CALL object as Org syntax.
@@ -1729,7 +1779,9 @@ cdr is beginning position."
 	   limit t)
       (cons 'inline-babel-call (match-beginning 0)))))
 
+
 ;;;; Inline Src Block
+
 (defun org-element-inline-src-block-parser ()
   "Parse inline source block at point.
 
@@ -1748,15 +1800,13 @@ Assume point is at the beginning of the inline src block."
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
-      (list 'inline-src-block
-	    `(:language ,language
-			:value ,value
-			:parameters ,parameters
-			:begin ,begin
-			:end ,end
-			:post-blank ,post-blank)))))
-
-
+      `(inline-src-block
+	(:language ,language
+		   :value ,value
+		   :parameters ,parameters
+		   :begin ,begin
+		   :end ,end
+		   :post-blank ,post-blank)))))
 
 (defun org-element-inline-src-block-successor (limit)
   "Search for the next inline-babel-call and return beginning position.
@@ -1769,7 +1819,9 @@ cdr is beginning position."
     (when (re-search-forward org-babel-inline-src-block-regexp limit t)
       (cons 'inline-src-block (match-beginning 1)))))
 
+
 ;;;; Latex Fragment
+
 (defun org-element-latex-fragment-parser ()
   "Parse latex fragment at point.
 
@@ -1797,11 +1849,11 @@ Assume point is at the beginning of the latex fragment."
 	   (post-blank (progn (goto-char (match-end substring-match))
 			      (skip-chars-forward " \t")))
 	   (end (point)))
-      (list 'latex-fragment
-	    `(:value ,value
-		     :begin ,begin
-		     :end ,end
-		     :post-blank ,post-blank)))))
+      `(latex-fragment
+	(:value ,value
+		:begin ,begin
+		:end ,end
+		:post-blank ,post-blank)))))
 
 (defun org-element-latex-fragment-interpreter (latex-fragment contents)
   "Interpret LATEX-FRAGMENT object as Org syntax.
@@ -1809,6 +1861,7 @@ CONTENTS is nil."
   (org-element-get-property :value latex-fragment))
 
 ;;;; Line Break
+
 (defun org-element-line-break-parser ()
   "Parse line break at point.
 
@@ -1821,10 +1874,10 @@ Assume point is at the beginning of the line break."
 	   (end (progn (end-of-line) (point)))
 	   (post-blank (- (skip-chars-backward " \t")))
 	   (end (point)))
-      (list 'line-break
-	    `(:begin ,begin
-		     :end ,end
-		     :post-blank ,post-blank)))))
+      `(line-break
+	(:begin ,begin
+		:end ,end
+		:post-blank ,post-blank)))))
 
 (defun org-element-line-break-interpreter (line-break contents)
   "Interpret LINE-BREAK object as Org syntax.
@@ -1845,7 +1898,9 @@ beginning position."
       (when (and beg (re-search-backward "\\S-" (point-at-bol) t))
 	(cons 'line-break beg)))))
 
+
 ;;;; Link
+
 (defun org-element-link-parser ()
   "Parse link at point.
 
@@ -1914,15 +1969,15 @@ Assume point is at the beginning of the link."
       ;; LINK-END variable.
       (setq post-blank (progn (goto-char link-end) (skip-chars-forward " \t"))
 	    end (point))
-      (list 'link
-	    `(:type ,type
-		    :path ,path
-		    :raw-link ,(or raw-link path)
-		    :begin ,begin
-		    :end ,end
-		    :contents-begin ,contents-begin
-		    :contents-end ,contents-end
-		    :post-blank ,post-blank)))))
+      `(link
+	(:type ,type
+	       :path ,path
+	       :raw-link ,(or raw-link path)
+	       :begin ,begin
+	       :end ,end
+	       :contents-begin ,contents-begin
+	       :contents-end ,contents-end
+	       :post-blank ,post-blank)))))
 
 (defun org-element-link-interpreter (link contents)
   "Interpret LINK object as Org syntax.
@@ -1950,7 +2005,9 @@ beginning position."
       (when (re-search-forward link-regexp limit t)
 	(cons 'link (match-beginning 0))))))
 
+
 ;;;; Macro
+
 (defun org-element-macro-parser ()
   "Parse macro at point.
 
@@ -1978,13 +2035,13 @@ Assume point is at the macro."
 			(pop args))
 		      (push (pop args) args2))
 		    (mapcar 'org-trim (nreverse args2))))))
-      (list 'macro
-	    `(:key ,key
-		   :value ,value
-		   :args ,args
-		   :begin ,begin
-		   :end ,end
-		   :post-blank ,post-blank)))))
+      `(macro
+	(:key ,key
+	      :value ,value
+	      :args ,args
+	      :begin ,begin
+	      :end ,end
+	      :post-blank ,post-blank)))))
 
 (defun org-element-macro-interpreter (macro contents)
   "Interpret MACRO object as Org syntax.
@@ -2004,7 +2061,9 @@ beginning position."
 	   limit t)
       (cons 'macro (match-beginning 0)))))
 
+
 ;;;; Radio-target
+
 (defun org-element-radio-target-parser ()
   "Parse radio target at point.
 
@@ -2022,13 +2081,13 @@ Assume point is at the radio target."
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
-      (list 'radio-target
-	    `(:begin ,begin
-		     :end ,end
-		     :contents-begin ,contents-begin
-		     :contents-end ,contents-end
-		     :raw-value ,raw-value
-		     :post-blank ,post-blank)))))
+      `(radio-target
+	(:begin ,begin
+		:end ,end
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:raw-value ,raw-value
+		:post-blank ,post-blank)))))
 
 (defun org-element-radio-target-interpreter (target contents)
   "Interpret TARGET object as Org syntax.
@@ -2046,7 +2105,9 @@ is beginning position."
      (when (re-search-forward org-radio-target-regexp limit t)
        (cons 'radio-target (match-beginning 0)))))
 
+
 ;;;; Statistics Cookie
+
 (defun org-element-statistics-cookie-parser ()
   "Parse statistics cookie at point.
 
@@ -2062,11 +2123,11 @@ Assume point is at the beginning of the statistics-cookie."
 	   (post-blank (progn (goto-char (match-end 0))
 			      (skip-chars-forward " \t")))
 	   (end (point)))
-      (list 'statistics-cookie
-	    `(:begin ,begin
-		     :end ,end
-		     :value ,value
-		     :post-blank ,post-blank)))))
+      `(statistics-cookie
+	(:begin ,begin
+		:end ,end
+		:value ,value
+		:post-blank ,post-blank)))))
 
 (defun org-element-statistics-cookie-interpreter (statistics-cookie contents)
   "Interpret STATISTICS-COOKIE object as Org syntax.
@@ -2084,7 +2145,9 @@ cdr is beginning position."
     (when (re-search-forward "\\[[0-9]*\\(%\\|/[0-9]*\\)\\]" limit t)
       (cons 'statistics-cookie (match-beginning 0)))))
 
+
 ;;;; Subscript
+
 (defun org-element-subscript-parser ()
   "Parse subscript at point.
 
@@ -2105,13 +2168,13 @@ Assume point is at the underscore."
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
-      (list 'subscript
-	    `(:begin ,begin
-		     :end ,end
-		     :use-brackets-p ,bracketsp
-		     :contents-begin ,contents-begin
-		     :contents-end ,contents-end
-		     :post-blank ,post-blank)))))
+      `(subscript
+	(:begin ,begin
+		:end ,end
+		:use-brackets-p ,bracketsp
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,post-blank)))))
 
 (defun org-element-subscript-interpreter (subscript contents)
   "Interpret SUBSCRIPT object as Org syntax.
@@ -2133,7 +2196,9 @@ Return value is a cons cell whose car is either `subscript' or
       (cons (if (string= (match-string 2) "_") 'subscript 'superscript)
 	    (match-beginning 2)))))
 
+
 ;;;; Superscript
+
 (defun org-element-superscript-parser ()
   "Parse superscript at point.
 
@@ -2154,13 +2219,13 @@ Assume point is at the caret."
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
-      (list 'superscript
-	    `(:begin ,begin
-		     :end ,end
-		     :use-brackets-p ,bracketsp
-		     :contents-begin ,contents-begin
-		     :contents-end ,contents-end
-		     :post-blank ,post-blank)))))
+      `(superscript
+	(:begin ,begin
+		:end ,end
+		:use-brackets-p ,bracketsp
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,post-blank)))))
 
 (defun org-element-superscript-interpreter (superscript contents)
   "Interpret SUPERSCRIPT object as Org syntax.
@@ -2169,7 +2234,9 @@ CONTENTS is the contents of the object."
    (if (org-element-get-property :use-brackets-p superscript) "^{%s}" "^%s")
    contents))
 
+
 ;;;; Target
+
 (defun org-element-target-parser ()
   "Parse target at point.
 
@@ -2187,13 +2254,13 @@ Assume point is at the target."
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
-      (list 'target
-	    `(:begin ,begin
-		     :end ,end
-		     :contents-begin ,contents-begin
-		     :contents-end ,contents-end
-		     :raw-value ,raw-value
-		     :post-blank ,post-blank)))))
+      `(target
+	(:begin ,begin
+		:end ,end
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:raw-value ,raw-value
+		:post-blank ,post-blank)))))
 
 (defun org-element-target-interpreter (target contents)
   "Interpret TARGET object as Org syntax.
@@ -2211,7 +2278,9 @@ beginning position."
      (when (re-search-forward org-target-regexp limit t)
        (cons 'target (match-beginning 0)))))
 
+
 ;;;; Time-stamp
+
 (defun org-element-time-stamp-parser ()
   "Parse time stamp at point.
 
@@ -2248,13 +2317,13 @@ Assume point is at the beginning of the time-stamp."
 	   (post-blank (progn (goto-char (match-end 0))
 			      (skip-chars-forward " \t")))
 	   (end (point)))
-      (list 'time-stamp
-	    `(:appt-type ,appt-type
-			 :type ,type
-			 :value ,value
-			 :begin ,begin
-			 :end ,end
-			 :post-blank ,post-blank)))))
+      `(time-stamp
+	(:appt-type ,appt-type
+		    :type ,type
+		    :value ,value
+		    :begin ,begin
+		    :end ,end
+		    :post-blank ,post-blank)))))
 
 (defun org-element-time-stamp-interpreter (time-stamp contents)
   "Interpret TIME-STAMP object as Org syntax.
@@ -2285,7 +2354,9 @@ beginning position."
 	   limit t)
       (cons 'time-stamp (match-beginning 0)))))
 
+
 ;;;; Verbatim
+
 (defun org-element-verbatim-parser ()
   "Parse verbatim object at point.
 
@@ -2302,12 +2373,12 @@ Assume point is at the first verbatim marker."
 	  (post-blank (progn (goto-char (match-end 2))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
-      (list 'verbatim
-	    `(:marker ,marker
-		      :begin ,begin
-		      :end ,end
-		      :value ,value
-		      :post-blank ,post-blank)))))
+      `(verbatim
+	(:marker ,marker
+		 :begin ,begin
+		 :end ,end
+		 :value ,value
+		 :post-blank ,post-blank)))))
 
 (defun org-element-verbatim-interpreter (verbatim contents)
   "Interpret VERBATIM object as Org syntax.
@@ -2483,6 +2554,7 @@ matching `org-element-parsed-keywords'.")
 ;;
 ;; Provide two accessors: `org-element-get-property' and
 ;; `org-element-get-contents'.
+
 (defun org-element-get-property (property element)
   "Extract the value from the PROPERTY of an ELEMENT."
   (plist-get (nth 1 element) property))
@@ -2505,6 +2577,7 @@ matching `org-element-parsed-keywords'.")
 ;; corresponding `item' element.  By default, `org-element-at-point'
 ;; works at the `plain-list' level.  But, by providing an optional
 ;; argument, one can make it switch to the `item' level.
+
 (defconst org-element--affiliated-re
   (format "[ \t]*#\\+\\(%s\\):"
 	  (mapconcat
@@ -2609,6 +2682,7 @@ be computed."
 ;; looking for a specific regexp in the current line, or by using
 ;; already implemented functions.  This is the goal of
 ;; `org-element-guess-type'.
+
 (defconst org-element--element-block-types
   (mapcar 'car org-element-non-recursive-block-alist)
   "List of non-recursive block types, as strings.
@@ -2667,8 +2741,7 @@ point is in a section in priority."
      ((or (looking-at org-drawer-regexp) (looking-at "[ \t]*:END:[ \t]*$"))
       (let ((completep (org-between-regexps-p
 			org-drawer-regexp "^[ \t]*:END:[ \t]*$")))
-	(if (not completep)
-	    'paragraph
+	(if (not completep) 'paragraph
 	  (goto-char (car completep)) 'drawer)))
      ((looking-at "[ \t]*:\\( \\|$\\)") 'fixed-width)
      ;; Babel calls must be tested before general keywords as they are
@@ -2685,8 +2758,7 @@ point is in a section in priority."
       (let ((completep (org-between-regexps-p
 			"^[ \t]*#\\+begin:\\(?:\\s-\\|$\\)"
 			"^[ \t]*#\\+end:\\(?:\\s-\\|$\\)")))
-	(if (not completep)
-	    'paragraph
+	(if (not completep) 'paragraph
 	  (goto-char (car completep)) 'dynamic-block)))
      ((looking-at "\\(#\\|[ \t]*#\\+\\( \\|$\\)\\)") 'comment)
      ((looking-at "[ \t]*-\\{5,\\}[ \t]*$") 'horizontal-rule)
@@ -2694,8 +2766,7 @@ point is in a section in priority."
      ((looking-at "[ \t]*#\\+tblfm:")
       (forward-line -1)
       ;; A TBLFM line separated from any table is just plain text.
-      (if (org-at-table-p)
-	  'table
+      (if (org-at-table-p) 'table
 	(forward-line) 'paragraph))
      ((looking-at (org-item-re)) 'plain-list))))
 
@@ -2726,6 +2797,7 @@ point is in a section in priority."
 ;;   optional square brackets as the secondary one.
 
 ;; A keyword may belong to more than one category.
+
 (defun org-element-collect-affiliated-keywords (&optional key-re trans-list
 							  consed parsed duals)
   "Collect affiliated keywords before point.
@@ -2809,6 +2881,7 @@ cdr a plist of keywords and values."
 ;; parts of the parse tree, transparently walks into included files,
 ;; and maintain a list of local properties (i.e. those inherited from
 ;; parent headlines) for function's consumption.
+
 (defun org-element-parse-buffer (&optional granularity visible-only)
   "Recursively parse the buffer and return structure.
 If narrowing is in effect, only parse the visible part of the
@@ -2991,6 +3064,7 @@ Nil values returned from FUN are ignored in the result."
 ;; calls.  Thus, searching for a given type fails only once, and every
 ;; object is searched only once at top level (but sometimes more for
 ;; nested types).
+
 (defun org-element-parse-elements
   (beg end special structure granularity visible-only acc)
   "Parse ELEMENT with point at its beginning.
@@ -3140,12 +3214,10 @@ allowed in the current object."
 		       (let ((new-restr
 			      (cdr (assq (car next-object)
 					 org-element-object-restrictions))))
-			 (if (not restriction)
-			     new-restr
-			   (delq nil
-				 (mapcar (lambda (e)
-					   (and (memq e restriction) e))
-					 new-restr))))))
+			 (if (not restriction) new-restr
+			   (delq nil (mapcar
+				      (lambda (e) (and (memq e restriction) e))
+				      new-restr))))))
 		  ;; ... not recursive.
 		  next-object)
 		acc)
@@ -3173,13 +3245,11 @@ OBJECTS is the previous candidates alist."
     ;; If no previous result, search every object type in RESTRICTION.
     ;; Otherwise, keep potential candidates (old objects located after
     ;; point) and ask to search again those which had matched before.
-    (if objects
-	(mapc (lambda (obj)
-		(if (< (cdr obj) (point))
-		    (push (car obj) types-to-search)
-		  (push obj next-candidates)))
-	      objects)
-      (setq types-to-search restriction))
+    (if (not objects) (setq types-to-search restriction)
+      (mapc (lambda (obj)
+	      (if (< (cdr obj) (point)) (push (car obj) types-to-search)
+		(push obj next-candidates)))
+	    objects))
     ;; Call the appropriate "get-next" function for each type to
     ;; search and accumulate matches.
     (mapc
@@ -3210,6 +3280,7 @@ OBJECTS is the previous candidates alist."
 ;;
 ;; Both functions rely internally on
 ;; `org-element-interpret--affiliated-keywords'.
+
 (defun org-element-interpret-data (data &optional genealogy previous)
   "Interpret a parse tree representing Org data.
 
@@ -3232,8 +3303,7 @@ Return Org syntax as a string."
       (t
        (let* ((type (car blob))
 	      (interpreter
-	       (if (eq type 'org-data)
-		   'identity
+	       (if (eq type 'org-data) 'identity
 		 (intern (format "org-element-%s-interpreter" type))))
 	      (contents
 	       (cond
@@ -3333,6 +3403,7 @@ If there is no affiliated keyword, return the empty string."
 ;;
 ;; The second function, `org-element-normalize-contents', removes
 ;; global indentation from the contents of the current element.
+
 (defun org-element-normalize-string (s)
   "Ensure string S ends with a single newline character.
 
@@ -3361,28 +3432,24 @@ Return the normalized element."
   (nconc
    (list (car element) (nth 1 element))
    (let ((contents (org-element-get-contents element)))
-     (cond
-      ((and (not ignore-first) (not (stringp (car contents)))) contents)
-      (t
+     (if (not (or ignore-first (stringp (car contents)))) contents
        (catch 'exit
 	 ;; 1. Remove tabs from each string in CONTENTS.  Get maximal
 	 ;;    common indentation (MCI) along the way.
 	 (let* ((ind-list (unless ignore-first
 			    (list (org-get-string-indentation (car contents)))))
 		(contents
-		 (mapcar (lambda (object)
-			   (if (not (stringp object))
-			       object
-			     (let ((start 0)
-				   (object (org-remove-tabs object)))
-			       (while (string-match "\n\\( *\\)" object start)
-				 (setq start (match-end 0))
-				 (push (length (match-string 1 object))
-				       ind-list))
-			       object)))
-			 contents))
-		(mci (if ind-list
-			 (apply 'min ind-list)
+		 (mapcar
+		  (lambda (object)
+		    (if (not (stringp object)) object
+		      (let ((start 0)
+			    (object (org-remove-tabs object)))
+			(while (string-match "\n\\( *\\)" object start)
+			  (setq start (match-end 0))
+			  (push (length (match-string 1 object)) ind-list))
+			object)))
+		  contents))
+		(mci (if ind-list (apply 'min ind-list)
 		       (throw 'exit contents))))
 	   ;; 2. Remove that indentation from CONTENTS.  First string
 	   ;;    must be treated differently because it's the only one
@@ -3395,11 +3462,10 @@ Return the normalized element."
 			    (format "\\` \\{%d\\}" mci) "" first-obj)
 			   (cdr contents)))))
 	   (mapcar (lambda (object)
-		     (if (not (stringp object))
-			 object
+		     (if (not (stringp object)) object
 		       (replace-regexp-in-string
 			(format "\n \\{%d\\}" mci) "\n" object)))
-		   contents))))))))
+		   contents)))))))
 
 
 
@@ -3422,6 +3488,7 @@ Return the normalized element."
 
 ;; `org-element-nested-p' and `org-element-swap-A-B' are used
 ;; internally by some of the previously cited tools.
+
 (defsubst org-element-nested-p (elem-A elem-B)
   "Non-nil when elements ELEM-A and ELEM-B are nested."
   (let ((beg-A (org-element-get-property :begin elem-A))
