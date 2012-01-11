@@ -2754,8 +2754,7 @@ a communication channel.
 
 Return previous element or object, a string, or nil."
   (let ((parent (car (plist-get info :genealogy))))
-    (if (stringp parent) blob
-      (cadr (member blob (reverse (org-element-get-contents parent)))))))
+    (cadr (member blob (reverse (org-element-get-contents parent))))))
 
 
 
