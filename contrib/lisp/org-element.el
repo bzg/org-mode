@@ -1808,6 +1808,17 @@ Assume point is at the beginning of the inline src block."
 		   :end ,end
 		   :post-blank ,post-blank)))))
 
+(defun org-element-inline-src-block-interpreter (inline-src-block contents)
+  "Interpret INLINE-SRC-BLOCK object as Org syntax.
+CONTENTS is nil."
+  (let ((language (org-element-get-property :language inline-src-block))
+	(arguments (org-element-get-property :parameters inline-src-block))
+	(body (org-element-get-property :value inline-src-block)))
+    (format "src_%s%s{%s}"
+	    language
+	    (if arguments (format "[%s]" arguments) "")
+	    body)))
+
 (defun org-element-inline-src-block-successor (limit)
   "Search for the next inline-babel-call and return beginning position.
 
