@@ -970,10 +970,10 @@ containing `:begin', `:end', `:options', `:hiddenp', `:value' and
   (save-excursion
     (end-of-line)
     (let* ((case-fold-search t)
-	   (options (progn
-		      (re-search-backward
-		       "^[ \t]*#\\+begin_example\\(?: +\\(.*\\)\\)?" nil t)
-		      (org-match-string-no-properties 1)))
+	   (switches (progn
+		       (re-search-backward
+			"^[ \t]*#\\+begin_example\\(?: +\\(.*\\)\\)?" nil t)
+		       (org-match-string-no-properties 1)))
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
@@ -989,7 +989,7 @@ containing `:begin', `:end', `:options', `:hiddenp', `:value' and
 	(:begin ,begin
 		:end ,end
 		:value ,value
-		:options ,options
+		:switches ,switches
 		:hiddenp ,hidden
 		:post-blank ,(count-lines pos-before-blank end)
 		,@(cadr keywords))))))
