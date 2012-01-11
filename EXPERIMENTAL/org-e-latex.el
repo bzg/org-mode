@@ -893,8 +893,7 @@ contextual information."
   "Transcode a EXAMPLE-BLOCK element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let* ((options (or (org-element-get-property :options example-block) ""))
-	 (value (org-export-handle-code
-		 (org-element-get-property :value example-block) options info)))
+	 (value (org-export-handle-code example-block info)))
     (org-e-latex--wrap-label
      example-block (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
 
@@ -1371,7 +1370,7 @@ INFO is a plist holding contextual information. See
      ;; equivalent line number.
      ((string= type "coderef")
       (format (org-export-get-coderef-format path (or desc ""))
-	      (cdr (assoc path (plist-get info :code-refs)))))
+	      (org-export-resolve-coderef path info)))
      ;; Link type is handled by a special function.
      ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
       (funcall protocol (org-link-unescape path) desc 'latex))
@@ -1553,10 +1552,7 @@ holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-get-property :language src-block))
-	 (code (org-export-handle-code
-		(org-element-get-property :value src-block)
-		(org-element-get-property :switches src-block)
-		info lang))
+	 (code (org-export-handle-code src-block info))
 	 (caption (org-element-get-property :caption src-block))
 	 (label (org-element-get-property :name src-block))
 	 (custom-env (and lang
