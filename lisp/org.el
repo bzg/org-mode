@@ -20491,7 +20491,8 @@ depending on context."
 	(if (or (eq org-ctrl-k-protect-subtree 'error)
 		(not (y-or-n-p "Kill hidden subtree along with headline? ")))
 	    (error "C-k aborted - would kill hidden subtree")))
-    (call-interactively 'kill-line))
+    (call-interactively
+     (if visual-line-mode 'kill-visual-line 'kill-line)))
    ((looking-at (org-re ".*?\\S-\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$"))
     (kill-region (point) (match-beginning 1))
     (org-set-tags nil t))
