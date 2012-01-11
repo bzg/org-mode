@@ -2409,8 +2409,8 @@ verbatim @LaTeX{} code.
 Export as DocBook file.
 @end table
 
-Similarly to the HTML exporter, you can use @code{#+DocBook:} and
-@code{#+BEGIN_DocBook ... #+END_DocBook} construct to add verbatim @LaTeX{}
+Similarly to the HTML exporter, you can use @code{#+DOCBOOK:} and
+@code{#+BEGIN_DOCBOOK ... #+END_DOCBOOK} construct to add verbatim @LaTeX{}
 code.
 
 @node iCalendar export,  , DocBook export, Exporting
@@ -2492,10 +2492,10 @@ results in several formats.
 The structure of code blocks is as follows:
 
 @example
-#+srcname: <name>
-#+begin_src <language> <switches> <header arguments>
+#+NAME: <name>
+#+BEGIN_SRC <language> <switches> <header arguments>
   <body>
-#+end_src
+#+END_SRC
 @end example
 
 Where @code{<name>} is a string used to name the code block,
@@ -2520,11 +2520,11 @@ in many languages.  For a complete list of supported languages see the
 manual.  The following shows a code block and its results.
 
 @example
-#+begin_src emacs-lisp
+#+BEGIN_SRC emacs-lisp
   (+ 1 2 3 4)
-#+end_src
+#+END_SRC
 
-#+results:
+#+RESULTS:
 : 10
 @end example
 
