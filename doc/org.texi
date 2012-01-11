@@ -1097,11 +1097,11 @@ special meaning are written with all capitals.
 @end table
 
 Moreover, Org uses @i{option keywords} (like @code{#+TITLE} to set the title)
-and @i{environment keywords} (like @code{#+BEGIN_LaTeX} to start a @LaTeX{}
-environment).  Both are written in uppercase@footnote{@code{#+results} is the
-only exception, as it is dynamically inserted with lowercase characters.} for
-a better readability of the manual, but you can safely use lowercase
-(e.g. @code{#+title} and @code{#+begin_latex}) in your Org files.
+and @i{environment keywords} (like @code{#+BEGIN_HTML} to start a @code{HTML}
+environment).  They are written in uppercase in the manual to enhance its
+readability, but you can use lowercase in your Org files@footnote{Easy
+templates insert lowercase keywords and Babel dynamically inserts
+@code{#+results}.}
 
 The manual lists both the keys and the corresponding commands for accessing a
 functionality.  Org mode often uses the same key for different functions,
@@ -12945,7 +12945,7 @@ Multi-line header arguments on an un-named code block:
    (message "data1:%S, data2:%S" data1 data2)
  #+END_SRC
 
- #+results:
+ #+RESULTS:
  : data1:1, data2:2
 @end example
 
@@ -12957,7 +12957,7 @@ Multi-line header arguments on a named code block:
      (message "data:%S" data)
    #+END_SRC
 
-   #+results: named-block
+   #+RESULTS: named-block
    : data:2
 @end example
 
@@ -13030,7 +13030,7 @@ case, variables require a default value when they are declared.
 The values passed to arguments can either be literal values, references, or
 Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}). References
 include anything in the Org mode file that takes a @code{#+NAME:},
-@code{#+TBLNAME:}, or @code{#+results:} line.  This includes tables, lists,
+@code{#+TBLNAME:}, or @code{#+RESULTS:} line.  This includes tables, lists,
 @code{#+BEGIN_EXAMPLE} blocks, other code blocks, and the results of other
 code blocks.
 
@@ -13067,7 +13067,7 @@ an Org mode table named with either a @code{#+NAME:} or @code{#+TBLNAME:} line
 (length table)
 #+END_SRC
 
-#+results: table-length
+#+RESULTS: table-length
 : 4
 @end example
 
@@ -13086,7 +13086,7 @@ carried through to the source code block)
   (print x)
 #+END_SRC
 
-#+results:
+#+RESULTS:
 | simple | list |
 @end example
 
@@ -13099,7 +13099,7 @@ optionally followed by parentheses
 (* 2 length)
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : 8
 @end example
 
@@ -13114,7 +13114,7 @@ code block name using standard function call syntax
 (* 2 input)
 #+END_SRC
 
-#+results: double
+#+RESULTS: double
 : 16
 
 #+NAME: squared
@@ -13122,7 +13122,7 @@ code block name using standard function call syntax
 (* input input)
 #+END_SRC
 
-#+results: squared
+#+RESULTS: squared
 : 4
 @end example
 
@@ -13141,7 +13141,7 @@ on two lines
   (concatenate 'string x " for you.")
 #+END_SRC
 
-#+results: read-literal-example
+#+RESULTS: read-literal-example
 : A literal example
 : on two lines for you.
 
@@ -13183,7 +13183,7 @@ following example assigns the last cell of the first row the table
   data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : a
 @end example
 
@@ -13204,7 +13204,7 @@ to @code{data}.
   data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 | 2 | b |
 | 3 | c |
 | 4 | d |
@@ -13226,7 +13226,7 @@ column is referenced.
   data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 | 1 | 2 | 3 | 4 |
 @end example
 
@@ -13246,7 +13246,7 @@ another by commas, as shown in the following example.
   data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 | 11 | 14 | 17 |
 @end example
 
@@ -13279,7 +13279,7 @@ Emacs Lisp, as shown in the following example.
   $data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : (a b c)
 @end example
 
@@ -13682,7 +13682,7 @@ every time it is called.
 @item @code{yes}
 Every time the code block is run a SHA1 hash of the code and arguments
 passed to the block will be generated.  This hash is packed into the
-@code{#+results:} line and will be checked on subsequent
+@code{#+RESULTS:} line and will be checked on subsequent
 executions of the code block.  If the code block has not
 changed since the last time it was evaluated, it will not be re-evaluated.
 @end itemize
@@ -13699,7 +13699,7 @@ changed since it was last run.
  runif(1)
  #+END_SRC
 
- #+results[a2a72cd647ad44515fab62e144796432793d68e1]: random
+ #+RESULTS[a2a72cd647ad44515fab62e144796432793d68e1]: random
  0.4659510825295
 
  #+NAME: caller
@@ -13707,7 +13707,7 @@ changed since it was last run.
  x
  #+END_SRC
 
- #+results[bec9c8724e397d5df3b696502df3ed7892fc4f5f]: caller
+ #+RESULTS[bec9c8724e397d5df3b696502df3ed7892fc4f5f]: caller
  0.254227238707244
 @end example
 
@@ -13751,7 +13751,7 @@ default value yields the following results.
   return tab
 #+END_SRC
 
-#+results: echo-table
+#+RESULTS: echo-table
 | a | b | c |
 | d | e | f |
 | g | h | i |
@@ -13773,7 +13773,7 @@ Leaves hlines in the table.  Setting @code{:hlines yes} has this effect.
   return tab
 #+END_SRC
 
-#+results: echo-table
+#+RESULTS: echo-table
 | a | b | c |
 |---+---+---|
 | d | e | f |
@@ -13811,7 +13811,7 @@ processing, then reapplied to the results.
   return [[val + '*' for val in row] for row in tab]
 #+END_SRC
 
-#+results: echo-table-again
+#+RESULTS: echo-table-again
 | a  |
 |----|
 | b* |
@@ -13854,7 +13854,7 @@ and is then reapplied to the results.
   return [[val + 10 for val in row] for row in tab]
 #+END_SRC
 
-#+results: echo-table-once-again
+#+RESULTS: echo-table-once-again
 | one | 11 | 12 | 13 | 14 | 15 |
 | two | 16 | 17 | 18 | 19 | 20 |
 @end example
@@ -13966,7 +13966,7 @@ process.  For example, compare the following two blocks:
  print "bye"
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : hello
 : bye
 @end example
@@ -13979,7 +13979,7 @@ In non-session mode, the `2' is not printed and does not appear.
  print "bye"
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : hello
 : 2
 : bye
