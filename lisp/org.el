@@ -4446,11 +4446,12 @@ means to push this value onto the list in the variable.")
 
 (defun org-update-property-plist (key val props)
   "Update PROPS with KEY and VAL."
-  (let ((remainder (org-remove-if (lambda (p) (string= (car p) key)) props)))
-    (if (string= "+" (substring key (- (length key) 1)))
-	(let* ((key (substring key 0 (- (length key) 1)))
-	       (previous (cdr (assoc key props))))
-	  (cons (cons key (concat previous " " val)) remainder))
+  (let* ((appending (string= "+" (substring key (- (length key) 1))))
+	 (key (if appending (substring key 0 (- (length key) 1)) key))
+	 (remainder (org-remove-if (lambda (p) (string= (car p) key)) props))
+	 (previous (cdr (assoc key props))))
+    (if appending
+	(cons (cons key (if previous (concat previous " " val) val)) remainder)
       (cons (cons key val) remainder))))
 
 (defconst org-block-regexp
