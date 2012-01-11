@@ -1050,7 +1050,13 @@ OPTIONS is the export options plist computed so far."
 	    (push (cons (car def)
 			(save-restriction
 			  (narrow-to-region (point) (nth 2 def))
-			  (org-element-parse-buffer)))
+			  ;; Like `org-element-parse-buffer', but
+			  ;; makes sure the definition doesn't start
+			  ;; with a section element.
+			  (nconc
+			   (list 'org-data nil)
+			   (org-element-parse-elements
+			    (point-min) (point-max) nil nil nil nil nil))))
 		  alist))))
       alist))))
 
