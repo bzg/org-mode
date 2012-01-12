@@ -18425,22 +18425,22 @@ This command does many different things, depending on context:
       ;; only if function was called with an argument.  Send list only
       ;; if at top item.
       (let* ((struct (org-list-struct))
-	     (new-struct struct)
-	     (firstp (= (org-list-get-top-point struct) (point-at-bol))))
+	     (firstp (= (org-list-get-top-point struct) (point-at-bol)))
+	     old-struct)
 	(when arg
-	  (setq new-struct (copy-tree struct))
+	  (setq old-struct (copy-tree struct))
 	  (if firstp
 	      ;; If at first item of sub-list, add check-box to every
 	      ;; item at the same level.
 	      (mapc
 	       (lambda (pos)
-		 (unless (org-list-get-checkbox pos new-struct)
-		   (org-list-set-checkbox pos new-struct "[ ]")))
+		 (unless (org-list-get-checkbox pos struct)
+		   (org-list-set-checkbox pos struct "[ ]")))
 	       (org-list-get-all-items
-		(point-at-bol) new-struct (org-list-prevs-alist new-struct)))
-	    (org-list-set-checkbox (point-at-bol) new-struct "[ ]")))
+		(point-at-bol) struct (org-list-prevs-alist struct)))
+	    (org-list-set-checkbox (point-at-bol) struct "[ ]")))
 	(org-list-write-struct
-	 new-struct (org-list-parents-alist new-struct) struct)
+	 struct (org-list-parents-alist struct) old-struct)
 	(when arg (org-update-checkbox-count-maybe))
 	(when firstp (org-list-send-list 'maybe))))
      ((save-excursion (beginning-of-line 1) (looking-at org-dblock-start-re))
