@@ -843,6 +843,13 @@ settings."
   (let ((options (org-combine-plists
 		  ;; ... from global variables...
 		  (org-export-get-global-options backend)
+		  ;; ... from buffer's name (default title)...
+		  `(:title
+		    ,(or (let ((file (buffer-file-name (buffer-base-buffer))))
+			   (and file
+				(file-name-sans-extension
+				 (file-name-nondirectory file))))
+			 (buffer-name (buffer-base-buffer))))
 		  ;; ... from an external property list...
 		  ext-plist
 		  ;; ... from in-buffer settings...
@@ -854,16 +861,7 @@ settings."
 		  (and subtreep
 		       (org-export-get-subtree-options)))))
     ;; Add initial options.
-    (setq options (append (org-export-initial-options options)
-			  options))
-    ;; Set a default title if none has been specified so far.
-    (unless (plist-get options :title)
-      (setq options (plist-put options :title
-			       (or (and buffer-file-name
-					(file-name-sans-extension
-					 (file-name-nondirectory
-					  buffer-file-name)))
-				   (buffer-name)))))
+    (setq options (append (org-export-initial-options options) options))
     ;; Return plist.
     options))
 
