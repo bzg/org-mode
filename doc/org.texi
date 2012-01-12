@@ -1443,8 +1443,7 @@ creation time, scheduled time, deadline time), by priority, by TODO keyword
 (in the sequence the keywords have been defined in the setup) or by the value
 of a property.  Reverse sorting is possible as well.  You can also supply
 your own function to extract the sorting key.  With a @kbd{C-u} prefix,
-sorting will be case-sensitive.  With two @kbd{C-u C-u} prefixes, duplicate
-entries will also be removed.
+sorting will be case-sensitive.
 @orgcmd{C-x n s,org-narrow-to-subtree}
 Narrow buffer to current subtree.
 @orgcmd{C-x n b,org-narrow-to-block}
