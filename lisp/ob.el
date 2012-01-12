@@ -1758,7 +1758,7 @@ code ---- the results are extracted in the syntax of the source
 	  ;; possibly wrap result
 	  (cond
 	   ((assoc :wrap (nth 2 info))
-	    (let ((name (or (cdr (assoc :wrap (nth 2 info))) "results")))
+	    (let ((name (or (cdr (assoc :wrap (nth 2 info))) "RESULTS")))
 	      (wrap (concat "#+BEGIN_" name) (concat "#+END_" name))))
 	   ((member "html" result-params)
 	    (wrap "#+BEGIN_HTML" "#+END_HTML"))
