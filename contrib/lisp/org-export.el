@@ -2468,16 +2468,24 @@ ELEMENT is excluded from count."
     ;; Return value.
     loc))
 
-(defun org-export-handle-code (element info &optional num-fmt ref-fmt)
+(defun org-export-handle-code (element info &optional num-fmt ref-fmt delayed)
   "Handle line numbers and code references in ELEMENT.
 
-INFO is a plist used as a communication channel.
+ELEMENT has either a `src-block' an `example-block' type.  INFO
+is a plist used as a communication channel.
 
 If optional argument NUM-FMT is a string, it will be used as
 a format string for numbers at beginning of each line.
 
 If optional argument REF-FMT is a string, it will be used as
 a format string for each line of code containing a reference.
+
+When optional argument DELAYED is non-nil, `org-loc' and
+`org-coderef' properties, set to an adequate value, are applied
+to, respectively, numbered lines and lines with a reference.  No
+line numbering is done and all references are stripped from the
+resulting string.  Both NUM-FMT and REF-FMT arguments are ignored
+in that situation.
 
 Return new code as a string."
   (let* ((switches (or (org-element-get-property :switches element) ""))
@@ -2514,7 +2522,7 @@ Return new code as a string."
 	 ;; If numbering is active, ensure line numbers will be
 	 ;; correctly padded before applying the format string.
 	 (num-fmt
-	  (when numberp
+	  (when (and (not delayed) numberp)
 	    (format (if (stringp num-fmt) num-fmt "%s:  ")
 		    (format "%%%ds"
 			    (length (number-to-string
@@ -2531,17 +2539,24 @@ Return new code as a string."
      (mapconcat
       (lambda (loc)
 	;; Maybe add line number to current line of code (LOC).
-	(when numberp (setq loc (concat (format num-fmt (incf total-LOC)) loc)))
+	(when numberp
+	  (incf total-LOC)
+	  (setq loc (if delayed (org-add-props loc nil 'org-loc total-LOC)
+		      (concat (format num-fmt total-LOC) loc))))
 	;; Take action if at a ref line.
 	(when (string-match with-ref-re loc)
 	  (let ((ref (match-string 3 loc)))
 	    (setq loc
 		  ;; Option "-r" without "-k" removes labels.
-		  (if (and replace-labels (not (eq replace-labels 'keep)))
+		  ;; A non-nil DELAYED removes labels unconditionally.
+		  (if (or delayed
+			  (and replace-labels (not (eq replace-labels 'keep))))
 		      (replace-match "" nil nil loc 1)
-		    (replace-match (format "(%s)" ref) nil nil loc 2)))))
-	;; If REF-FMT is defined, apply it to current LOC.
-	(when (stringp ref-fmt) (setq loc (format ref-fmt loc)))
+		    (replace-match (format "(%s)" ref) nil nil loc 2)))
+	    ;; Store REF in `org-coderef' property if DELAYED asks to.
+	    (cond (delayed (setq loc (org-add-props loc nil 'org-coderef ref)))
+		  ;; If REF-FMT is defined, apply it to current LOC.
+		  ((stringp ref-fmt) (setq loc (format ref-fmt loc))))))
 	;; Return updated LOC for concatenation.
 	loc)
       code-lines "\n"))))
