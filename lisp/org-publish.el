@@ -1031,7 +1031,7 @@ the project."
        (setq ibuffer (find-file-noselect index-file))
        (with-current-buffer ibuffer
          (erase-buffer)
-         (insert "\n\n#+include: \"theindex.inc\"\n\n")
+         (insert "\n\n#+INCLUDE: \"theindex.inc\"\n\n")
          (save-buffer))
        (kill-buffer ibuffer)))))
 

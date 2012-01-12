@@ -11024,29 +11024,29 @@ This function can be used in a hook."
 
 (defcustom org-structure-template-alist
   '(
-    ("s" "#+begin_src ?\n\n#+end_src"
+    ("s" "#+BEGIN_SRC ?\n\n#+END_SRC"
          "<src lang=\"?\">\n\n</src>")
-    ("e" "#+begin_example\n?\n#+end_example"
+    ("e" "#+BEGIN_EXAMPLE\n?\n#+END_EXAMPLE"
          "<example>\n?\n</example>")
-    ("q" "#+begin_quote\n?\n#+end_quote"
+    ("q" "#+BEGIN_QUOTE\n?\n#+END_QUOTE"
          "<quote>\n?\n</quote>")
-    ("v" "#+begin_verse\n?\n#+end_verse"
+    ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE"
          "<verse>\n?\n/verse>")
-    ("c" "#+begin_center\n?\n#+end_center"
+    ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER"
          "<center>\n?\n/center>")
-    ("l" "#+begin_latex\n?\n#+end_latex"
+    ("l" "#+BEGIN_LaTeX\n?\n#+END_LaTeX"
          "<literal style=\"latex\">\n?\n</literal>")
-    ("L" "#+latex: "
+    ("L" "#+LaTeX: "
          "<literal style=\"latex\">?</literal>")
-    ("h" "#+begin_html\n?\n#+end_html"
+    ("h" "#+BEGIN_HTML\n?\n#+END_HTML"
          "<literal style=\"html\">\n?\n</literal>")
-    ("H" "#+html: "
+    ("H" "#+HTML: "
          "<literal style=\"html\">?</literal>")
-    ("a" "#+begin_ascii\n?\n#+end_ascii")
-    ("A" "#+ascii: ")
-    ("i" "#+index: ?"
-     "#+index: ?")
-    ("I" "#+include %file ?"
+    ("a" "#+BEGIN_ASCII\n?\n#+END_ASCII")
+    ("A" "#+ASCII: ")
+    ("i" "#+INDEX: ?"
+     "#+INDEX: ?")
+    ("I" "#+INCLUDE %file ?"
          "<include file=%file markup=\"?\">")
     )
   "Structure completion elements.
