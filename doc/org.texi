@@ -13915,10 +13915,10 @@ security}.
 @node wrap, , eval, Specific header arguments
 @subsubsection @code{:wrap}
 The @code{:wrap} header argument is used to mark the results of source block
-evaluation.  The header argument can be passed a string that typically will
-be appended to @code{#+BEGIN_} and @code{#+END_}, which will then be used to
-wrap the results.  An exception to this rule is the string @code{drawer},
-which instead wraps the results in an Org mode drawer.
+evaluation.  The header argument can be passed a string that will be appended
+to @code{#+BEGIN_} and @code{#+END_}, which will then be used to wrap the
+results.  If not string is specified then the results will be wrapped in a
+@code{#+BEGIN/END_RESULTS} block.
 
 @node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
 @section Results of evaluation
