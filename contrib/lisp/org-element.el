@@ -1887,7 +1887,7 @@ Assume point is at the beginning of the line break."
 (defun org-element-line-break-interpreter (line-break contents)
   "Interpret LINE-BREAK object as Org syntax.
 CONTENTS is nil."
-  "\n")
+  "\\\\\n")
 
 (defun org-element-line-break-successor (limit)
   "Search for the next statistics cookie and return position.
