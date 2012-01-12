@@ -7959,8 +7959,7 @@ and still retain the repeater to cover future instances of the task."
 
 (defun org-sort (with-case)
   "Call `org-sort-entries', `org-table-sort-lines' or `org-sort-list'.
-Optional argument WITH-CASE means sort case-sensitively.
-With a double prefix argument, also remove duplicate entries."
+Optional argument WITH-CASE means sort case-sensitively."
   (interactive "P")
   (cond
    ((org-at-table-p) (org-call-with-arg 'org-table-sort-lines with-case))
