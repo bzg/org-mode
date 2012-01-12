@@ -1880,20 +1880,14 @@ Return a list whose car is `line-break', and cdr a plist with
 `:begin', `:end' and `:post-blank' keywords.
 
 Assume point is at the beginning of the line break."
-  (save-excursion
-    (let* ((begin (point))
-	   (end (progn (end-of-line) (point)))
-	   (post-blank (- (skip-chars-backward " \t")))
-	   (end (point)))
-      `(line-break
-	(:begin ,begin
-		:end ,end
-		:post-blank ,post-blank)))))
+  (let ((begin (point))
+	(end (save-excursion (forward-line) (point))))
+    `(line-break (:begin ,begin :end ,end :post-blank 0))))
 
 (defun org-element-line-break-interpreter (line-break contents)
   "Interpret LINE-BREAK object as Org syntax.
 CONTENTS is nil."
-  (org-element-get-property :value line-break))
+  "\n")
 
 (defun org-element-line-break-successor (limit)
   "Search for the next statistics cookie and return position.
