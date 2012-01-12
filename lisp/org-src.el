@@ -214,7 +214,7 @@ buffer."
   (let ((mark (and (org-region-active-p) (mark)))
 	(case-fold-search t)
 	(info (org-edit-src-find-region-and-lang))
-	(full-info (org-babel-get-src-block-info))
+	(full-info (org-babel-get-src-block-info 'light))
 	(org-mode-p (derived-mode-p 'org-mode)) ;; derived-mode-p is reflexive
 	(beg (make-marker))
 	(end (make-marker))
