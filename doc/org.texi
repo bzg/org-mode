@@ -715,6 +715,7 @@ Specific header arguments
 * rownames::                    Handle row names in tables
 * shebang::                     Make tangled files executable
 * eval::                        Limit evaluation of specific code blocks
+* wrap::                        Mark source block evaluation results
 
 Miscellaneous
 
@@ -13021,6 +13022,7 @@ argument in lowercase letters.  The following header arguments are defined:
 * rownames::                    Handle row names in tables
 * shebang::                     Make tangled files executable
 * eval::                        Limit evaluation of specific code blocks
+* wrap::                        Mark source block evaluation results
 @end menu
 
 Additional header arguments are defined on a language-specific basis, see
@@ -13885,7 +13887,7 @@ Setting the @code{:shebang} header argument to a string value
 first line of any tangled file holding the code block, and the file
 permissions of the tangled file are set to make it executable.
 
-@node eval,  , shebang, Specific header arguments
+@node eval, wrap, shebang, Specific header arguments
 @subsubsection @code{:eval}
 The @code{:eval} header argument can be used to limit the evaluation of
 specific code blocks.  The @code{:eval} header argument can be useful for
@@ -13909,6 +13911,14 @@ Evaluation of the code block during export will require a query.
 If this header argument is not set then evaluation is determined by the value
 of the @code{org-confirm-babel-evaluate} variable see @ref{Code evaluation
 security}.
+
+@node wrap, , eval, Specific header arguments
+@subsubsection @code{:wrap}
+The @code{:wrap} header argument is used to mark the results of source block
+evaluation.  The header argument can be passed a string that typically will
+be appended to @code{#+BEGIN_} and @code{#+END_}, which will then be used to
+wrap the results.  An exception to this rule is the string @code{drawer},
+which instead wraps the results in an Org mode drawer.
 
 @node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
 @section Results of evaluation
