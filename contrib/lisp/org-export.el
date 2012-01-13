@@ -614,12 +614,6 @@ standard mode."
 ;;   - category :: local
 ;;   - type :: list of elements and objects
 
-;; + `headline-alist' :: Alist between headlines raw name and their
-;;      boundaries.  It is used to resolve "fuzzy" links
-;;      (cf. `org-export-resolve-fuzzy-link').
-;;   - category :: tree
-;;   - type :: alist (STRING INTEGER INTEGER)
-
 ;; + `headline-levels' :: Maximum level being exported as an
 ;;      headline.  Comparison is done with the relative level of
 ;;      headlines in the parse tree, not necessarily with their
@@ -681,9 +675,8 @@ standard mode."
 ;;   - category :: option
 ;;   - type :: list of strings
 
-;; + `target-list' :: List of targets raw names encoutered in the
-;;                    parse tree.  This is used to partly resolve
-;;                    "fuzzy" links
+;; + `target-list' :: List of targets encountered in the parse tree.
+;;                    This is used to partly resolve "fuzzy" links
 ;;                    (cf. `org-export-resolve-fuzzy-link').
 ;;   - category :: tree
 ;;   - type :: list of strings
@@ -1100,19 +1093,15 @@ retrieved."
 ;; Eventually `org-export-collect-headline-numbering' builds an alist
 ;; between headlines' beginning position and their numbering.
 
-(defun org-export-collect-tree-properties (data options backend)
+(defun org-export-collect-tree-properties (data info backend)
   "Extract tree properties from parse tree.
 
-DATA is the parse tree from which information is retrieved.
-OPTIONS is a list holding export options.  BACKEND is the
-back-end called for transcoding, as a symbol.
+DATA is the parse tree from which information is retrieved.  INFO
+is a list holding export options.  BACKEND is the back-end called
+for transcoding, as a symbol.
 
 Following tree properties are set:
 `:back-end'        Back-end used for transcoding.
-
-`:headline-alist'  Alist of all headlines' name as key and a list
-		   holding beginning and ending positions as
-		   value.
 
 `:headline-offset' Offset between true level of headlines and
 		   local level. An offset of -1 means an headline
@@ -1126,7 +1115,7 @@ Following tree properties are set:
 
 `:point-max'       Last position in the parse tree
 
-`:target-list'     List of all targets' raw name in the parse tree.
+`:target-list'     List of all targets in the parse tree.
 
 `:use-select-tags' Non-nil when parsed tree use a special tag to
 		   enforce transcoding of the headline."
@@ -1143,16 +1132,7 @@ Following tree properties are set:
      :headline-offset ,(- 1 (org-export-get-min-level data info))
      :point-max ,(org-export-get-point-max data info)
      :target-list
-     ,(org-element-map
-       data 'target
-       (lambda (target info) (org-element-get-property :raw-value target)))
-     :headline-alist
-     ,(org-element-map
-       data 'headline
-       (lambda (headline info)
-	 (list (org-element-get-property :raw-value headline)
-	       (org-element-get-property :begin headline)
-	       (org-element-get-property :end headline))))
+     ,(org-element-map data 'target (lambda (target local) target) info)
      :headline-numbering ,(org-export-collect-headline-numbering data info)
      :back-end ,backend)
    info))
@@ -2279,55 +2259,53 @@ list is provided \(cf. `org-image-file-name-regexp'\)."
 
 INFO is a plist holding contextual information.
 
-Return value can be a string, an buffer position, or nil:
+Return value can be an object, an element, or nil:
 
-- If LINK path exactly matches any target, return its name as the
-  identifier.
+- If LINK path exactly matches any target, return the target
+  object.
 
-- If LINK path exactly matches any headline name, return
-  headline's beginning position as the identifier.  If more than
-  one headline share that name, priority will be given to the one
-  with the closest common ancestor, if any, or the first one in
-  the parse tree otherwise.
+- If LINK path exactly matches any headline name, return that
+  element.  If more than one headline share that name, priority
+  will be given to the one with the closest common ancestor, if
+  any, or the first one in the parse tree otherwise.
 
 - Otherwise, return nil.
 
 Assume LINK type is \"fuzzy\"."
   (let ((path (org-element-get-property :path link)))
-    (if (member path (plist-get info :target-list))
-	;; Link points to a target: return its name as a string.
-	path
-      ;; Link either points to an headline or nothing.  Try to find
-      ;; the source, with priority given to headlines with the closest
-      ;; common ancestor.  If such candidate is found, return its
-      ;; beginning position as an unique identifier, otherwise return
-      ;; nil.
-      (let* ((head-alist (plist-get info :headline-alist))
-	     (link-begin (org-element-get-property :begin link))
-	     (link-end (org-element-get-property :end link))
-	     ;; Store candidates as a list of cons cells holding their
-	     ;; beginning and ending position.
-	     (cands (loop for head in head-alist
-			  when (string= (car head) path)
-			  collect (cons (nth 1 head) (nth 2 head)))))
-	(cond
-	 ;; No candidate: return nil.
-	 ((not cands) nil)
-	 ;; If one or more candidates share common ancestors with
-	 ;; LINK, return beginning position of the first one matching
-	 ;; the closer ancestor shared.
-	 ((let ((ancestors (loop for head in head-alist
-				 when (and (> link-begin (nth 1 head))
-					   (<= link-end (nth 2 head)))
-				 collect (cons (nth 1 head) (nth 2 head)))))
-	    (loop named main for ancestor in (nreverse ancestors) do
-		  (loop for candidate in cands
-			when (and (>= (car candidate) (car ancestor))
-				  (<= (cdr candidate) (cdr ancestor)))
-			do (return-from main (car candidate))))))
-	 ;; No candidate have a common ancestor with link: First match
-	 ;; will do.  Return its beginning position.
-	 (t (caar cands)))))))
+    ;; Link points to a target: return it.
+    (or (loop for target in (plist-get info :target-list)
+	      when (string= (org-element-get-property :raw-value target) path)
+	      return target)
+	;; Link either points to an headline or nothing.  Try to find
+	;; the source, with priority given to headlines with the closest
+	;; common ancestor.  If such candidate is found, return its
+	;; beginning position as an unique identifier, otherwise return
+	;; nil.
+	(let ((find-headline
+	       (function
+		;; Return first headline whose `:raw-value' property
+		;; is NAME in parse tree DATA, or nil.
+		(lambda (name data)
+		  (org-element-map
+		   data 'headline
+		   (lambda (headline local)
+		     (when (string=
+			    (org-element-get-property :raw-value headline)
+			    name)
+		       headline))
+		   info 'first-match)))))
+	  ;; Search among headlines sharing an ancestor with link,
+	  ;; from closest to farthest.
+	  (or (catch 'exit
+		(mapc
+		 (lambda (parent)
+		   (when (eq (car parent) 'headline)
+		     (let ((foundp (funcall find-headline path parent)))
+		       (when foundp (throw 'exit foundp)))))
+		 (plist-get info :genealogy)) nil)
+	      ;; No match with a common ancestor: try the full parse-tree.
+	      (funcall find-headline path (plist-get info :parse-tree)))))))
 
 (defun org-export-resolve-coderef (ref info)
   "Resolve a code reference REF.
