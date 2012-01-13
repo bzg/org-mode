@@ -877,39 +877,43 @@ CONTENTS is nil."
 Return a list whose car is `comment' and cdr is a plist
 containing `:begin', `:end', `:value' and `:post-blank'
 keywords."
-  (let ((comment-re "\\(#\\|[ \t]*#\\+\\( \\|$\\)\\)")
-	beg-coms begin end value pos-before-blank keywords)
+  (let (beg-coms begin end end-coms keywords)
     (save-excursion
-      ;; Move to the beginning of comments.
-      (unless (bobp)
-	(while (and (not (bobp)) (looking-at comment-re))
-	  (forward-line -1))
-	(unless (looking-at comment-re) (forward-line 1)))
-      (setq beg-coms (point))
-      ;; Get affiliated keywords, if any.
-      (setq keywords (org-element-collect-affiliated-keywords))
-      ;; Store true beginning of element.
-      (setq begin (car keywords))
-      ;; Get ending of comments.  If point is in a list, ensure to not
-      ;; get outside of it.
-      (let* ((itemp (org-in-item-p))
-	     (max-pos (if itemp
-			  (org-list-get-bottom-point
-			   (save-excursion (goto-char itemp) (org-list-struct)))
-			(point-max))))
-	(while (and (looking-at comment-re) (< (point) max-pos))
-	  (forward-line)))
-      (setq pos-before-blank (point))
+      (if (looking-at "#")
+	  ;; First type of comment: comments at column 0.
+	  (let ((comment-re "^\\([^#]\\|#\\+[a-z]\\)"))
+	    (save-excursion
+	      (re-search-backward comment-re nil 'move)
+	      (if (bobp) (setq keywords nil beg-coms (point))
+		(forward-line)
+		(setq keywords (org-element-collect-affiliated-keywords)
+		      beg-coms (point))))
+	    (re-search-forward comment-re nil 'move)
+	    (setq end-coms (if (eobp) (point) (match-beginning 0))))
+	;; Second type of comment: indented comments.
+	(let ((comment-re "[ \t]*#\\+\\(?: \\|$\\)"))
+	  (unless (bobp)
+	    (while (and (not (bobp)) (looking-at comment-re))
+	      (forward-line -1))
+	    (unless (looking-at comment-re) (forward-line)))
+	  (setq beg-coms (point))
+	  (setq keywords (org-element-collect-affiliated-keywords))
+	  ;; Get comments ending.  This may not be accurate if
+	  ;; commented lines within an item are followed by commented
+	  ;; lines outside of the list.  Though, parser will always
+	  ;; get it right as it already knows surrounding element and
+	  ;; has narrowed buffer to its contents.
+	  (while (looking-at comment-re) (forward-line))
+	  (setq end-coms (point))))
       ;; Find position after blank.
+      (goto-char end-coms)
       (org-skip-whitespace)
-      (setq end (if (eobp) (point) (point-at-bol)))
-      ;; Extract value.
-      (setq value (buffer-substring-no-properties beg-coms pos-before-blank)))
+      (setq end (if (eobp) (point) (point-at-bol))))
     `(comment
-      (:begin ,begin
+      (:begin ,(or (car keywords) beg-coms)
 	      :end ,end
-	      :value ,value
-	      :post-blank ,(count-lines pos-before-blank end)
+	      :value ,(buffer-substring-no-properties beg-coms end-coms)
+	      :post-blank ,(count-lines end-coms end)
 	      ,@(cadr keywords)))))
 
 (defun org-element-comment-interpreter (comment contents)
@@ -2765,7 +2769,7 @@ point is in a section in priority."
 			"^[ \t]*#\\+end:\\(?:\\s-\\|$\\)")))
 	(if (not completep) 'paragraph
 	  (goto-char (car completep)) 'dynamic-block)))
-     ((looking-at "\\(#\\|[ \t]*#\\+\\( \\|$\\)\\)") 'comment)
+     ((looking-at "\\(#\\|[ \t]*#\\+\\)\\(?: \\|$\\)") 'comment)
      ((looking-at "[ \t]*-\\{5,\\}[ \t]*$") 'horizontal-rule)
      ((org-at-table-p t) 'table)
      ((looking-at "[ \t]*#\\+tblfm:")
@@ -3056,13 +3060,21 @@ Nil values returned from FUN are ignored in the result."
       ;; Return value in a proper order.
       (reverse --acc))))
 
-;; The following functions are internal parts of the parser.  The
-;; first one, `org-element-parse-elements' acts at the element's
-;; level.  The second one, `org-element-parse-objects' applies on all
-;; objects of a paragraph or a secondary string.  It uses
+;; The following functions are internal parts of the parser.
+
+;; The first one, `org-element-parse-elements' acts at the element's
+;; level.  As point is always at the beginning of an element during
+;; parsing, it doesn't have to rely on `org-element-at-point'.
+;; Instead, it calls a more restrictive, though way quicker,
+;; alternative: `org-element-current-element'.  That function
+;; internally uses `org-element--element-block-re' for quick access to
+;; a common regexp.
+
+;; The second one, `org-element-parse-objects' applies on all objects
+;; of a paragraph or a secondary string.  It uses
 ;; `org-element-get-candidates' to optimize the search of the next
 ;; object in the buffer.
-;;
+
 ;; More precisely, that function looks for every allowed object type
 ;; first.  Then, it discards failed searches, keeps further matches,
 ;; and searches again types matched behind point, for subsequent
@@ -3094,54 +3106,40 @@ elements.
 Elements are accumulated into ACC."
   (save-excursion
     (goto-char beg)
-    ;; Shortcut when parsing only headlines.
+    ;; When parsing only headlines, skip any text before first one.
     (when (and (eq granularity 'headline) (not (org-at-heading-p)))
       (org-with-limited-levels (outline-next-heading)))
     ;; Main loop start.
-    (while (and (< (point) end) (not (eobp)))
+    (while (not (eobp))
       (push
-       ;; 1. Item mode is active: point is at an item.  Knowing that,
-       ;;    there's no need to go through `org-element-at-point'.
+       ;; 1. Item mode is active: point must be at an item.  Parse it
+       ;;    directly, skipping `org-element-current-element'.
        (if (eq special 'item)
-	   (let* ((element (org-element-item-parser structure))
-		  (cbeg (org-element-get-property :contents-begin element))
-		  (cend (org-element-get-property :contents-end element)))
+	   (let ((element (org-element-item-parser structure)))
 	     (goto-char (org-element-get-property :end element))
-	     ;; Narrow region to contents, so that item bullet don't
-	     ;; interfere with paragraph parsing.
 	     (save-restriction
-	       (narrow-to-region cbeg cend)
+	       (narrow-to-region
+		(org-element-get-property :contents-begin element)
+		(org-element-get-property :contents-end element))
 	       (org-element-parse-elements
-		cbeg cend nil structure granularity visible-only
+		(point-min) (point-max) nil structure granularity visible-only
 		(reverse element))))
 	 ;; 2. When ITEM is nil, find current element's type and parse
 	 ;;    it accordingly to its category.
-	 (let ((element (org-element-at-point special structure)))
+	 (let ((element (org-element-current-element special structure)))
 	   (goto-char (org-element-get-property :end element))
 	   (cond
-	    ;; Case 1.  ELEMENT is a footnote-definition.  If
-	    ;; GRANURALITY allows parsing, use narrowing so that
-	    ;; footnote label don't interfere with paragraph
-	    ;; recognition.
-	    ((and (eq (car element) 'footnote-definition)
-		  (not (memq granularity '(headline greater-element))))
-	     (let ((cbeg (org-element-get-property :contents-begin element))
-		   (cend (org-element-get-property :contents-end element)))
-	       (save-restriction
-		 (narrow-to-region cbeg cend)
-		 (org-element-parse-elements
-		  cbeg cend nil structure granularity visible-only
-		  (reverse element)))))
-	    ;; Case 2.  ELEMENT is a paragraph.  Parse objects inside,
+	    ;; Case 1.  ELEMENT is a paragraph.  Parse objects inside,
 	    ;; if GRANULARITY allows it.
 	    ((and (eq (car element) 'paragraph)
 		  (or (not granularity) (eq granularity 'object)))
-	     (org-element-parse-objects
-	      (org-element-get-property :contents-begin element)
-	      (org-element-get-property :contents-end element)
-	      (reverse element)
-	      nil))
-	    ;; Case 3.  ELEMENT is recursive: parse it between
+	     (save-restriction
+	       (narrow-to-region
+		(org-element-get-property :contents-begin element)
+		(org-element-get-property :contents-end element))
+	       (org-element-parse-objects
+		(point-min) (point-max) (reverse element) nil)))
+	    ;; Case 2.  ELEMENT is recursive: parse it between
 	    ;; `contents-begin' and `contents-end'.  Make sure
 	    ;; GRANULARITY allows the recursion, or ELEMENT is an
 	    ;; headline, in which case going inside is mandatory, in
@@ -3153,23 +3151,155 @@ Elements are accumulated into ACC."
 		      (eq (car element) 'headline))
 		  (not (and visible-only
 			    (org-element-get-property :hiddenp element))))
-	     (org-element-parse-elements
-	      (org-element-get-property :contents-begin element)
-	      (org-element-get-property :contents-end element)
-	      ;; At a plain list, switch to item mode.  At an
-	      ;; headline, switch to section mode.  Any other element
-	      ;; turns off special modes.
-	      (case (car element) (plain-list 'item) (headline 'section))
-	      (org-element-get-property :structure element)
-	      granularity
-	      visible-only
-	      (reverse element)))
-	    ;; Case 4.  Else, just accumulate ELEMENT.
+	     (save-restriction
+	       (narrow-to-region
+		(org-element-get-property :contents-begin element)
+		(org-element-get-property :contents-end element))
+	       (org-element-parse-elements
+		(point-min) (point-max)
+		;; At a plain list, switch to item mode.  At an
+		;; headline, switch to section mode.  Any other
+		;; element turns off special modes.
+		(case (car element) (plain-list 'item) (headline 'section))
+		(org-element-get-property :structure element)
+		granularity visible-only (reverse element))))
+	    ;; Case 3.  Else, just accumulate ELEMENT.
 	    (t element))))
        acc)
       (org-skip-whitespace))
     ;; Return result.
     (nreverse acc)))
+
+(defconst org-element--element-block-re
+  (format "[ \t]*#\\+begin_\\(%s\\)\\(?: \\|$\\)"
+          (mapconcat
+           'regexp-quote
+           (mapcar 'car org-element-non-recursive-block-alist) "\\|"))
+  "Regexp matching the beginning of a non-recursive block type.
+Used internally by `org-element-current-element'.  Do not modify
+it directly, set `org-element-recursive-block-alist' instead.")
+
+(defun org-element-current-element (&optional special structure)
+  "Parse the element at point.
+
+Return value is a list \(TYPE PROPS\) where TYPE is the type of
+the element and PROPS a plist of properties associated to the
+element.
+
+Possible types are defined in `org-element-all-elements'.
+
+Optional argument SPECIAL, when non-nil, can be either `item' or
+`section'.  The former allows to parse item wise instead of
+plain-list wise, using STRUCTURE as the current list structure.
+The latter will try to parse a section before anything else.
+
+If STRUCTURE isn't provided but SPECIAL is set to `item', it will
+be computed.
+
+Unlike to `org-element-at-point', this function assumes point is
+always at the beginning of the element it has to parse.  As such,
+it is quicker than its counterpart and always accurate, albeit
+more restrictive."
+  (save-excursion
+    (beginning-of-line)
+    ;; If point is at an affiliated keyword, try moving to the
+    ;; beginning of the associated element.  If none is found, the
+    ;; keyword is orphaned and will be treated as plain text.
+    (when (looking-at org-element--affiliated-re)
+      (let ((opoint (point)))
+        (while (looking-at org-element--affiliated-re) (forward-line))
+        (when (looking-at "[ \t]*$") (goto-char opoint))))
+    (let ((case-fold-search t))
+      (cond
+       ;; Headline.
+       ((org-with-limited-levels (org-at-heading-p))
+        (org-element-headline-parser))
+       ;; Quote section.
+       ((let ((headline (ignore-errors (nth 4 (org-heading-components)))))
+          (and headline
+               (let (case-fold-search)
+                 (string-match (format "^%s\\(?: \\|$\\)" org-quote-string)
+                               headline))))
+        (org-element-quote-section-parser))
+       ;; Section.
+       ((eq special 'section) (org-element-section-parser))
+       ;; Non-recursive block.
+       ((when (looking-at org-element--element-block-re)
+          (let ((type (downcase (match-string 1))))
+            (if (save-excursion
+                  (re-search-forward
+                   (format "[ \t]*#\\+end_%s\\(?: \\|$\\)" type) nil t))
+                ;; Build appropriate parser.
+                (funcall
+                 (intern
+                  (format "org-element-%s-parser"
+                          (cdr (assoc type
+                                      org-element-non-recursive-block-alist)))))
+              (org-element-paragraph-parser)))))
+       ;; Inlinetask.
+       ((org-at-heading-p) (org-element-inlinetask-parser))
+       ;; LaTeX Environment or paragraph if incomplete.
+       ((looking-at "^[ \t]*\\\\begin{")
+        (if (save-excursion
+              (re-search-forward "^[ \t]*\\\\end{[^}]*}[ \t]*" nil t))
+            (org-element-latex-environment-parser)
+          (org-element-paragraph-parser)))
+       ;; Property drawer.
+       ((looking-at org-property-start-re)
+        (if (save-excursion (re-search-forward org-property-end-re nil t))
+            (org-element-property-drawer-parser)
+          (org-element-paragraph-parser)))
+       ;; Recursive block, or paragraph if incomplete.
+       ((looking-at "[ \t]*#\\+begin_\\([-A-Za-z0-9]+\\)\\(?: \\|$\\)")
+        (let ((type (downcase (match-string 1))))
+          (cond
+           ((not (save-excursion
+                   (re-search-forward
+                    (format "[ \t]*#\\+end_%s\\(?: \\|$\\)" type) nil t)))
+            (org-element-paragraph-parser))
+           ((string= type "center") (org-element-center-block-parser))
+           ((string= type "quote") (org-element-quote-block-parser))
+           (t (org-element-special-block-parser)))))
+       ;; Drawer.
+       ((looking-at org-drawer-regexp)
+        (if (save-excursion (re-search-forward "^[ \t]*:END:[ \t]*$" nil t))
+            (org-element-drawer-parser)
+          (org-element-paragraph-parser)))
+       ((looking-at "[ \t]*:\\( \\|$\\)") (org-element-fixed-width-parser))
+       ;; Babel call.
+       ((looking-at org-babel-block-lob-one-liner-regexp)
+        (org-element-babel-call-parser))
+       ;; Keyword, or paragraph if at an affiliated keyword.
+       ((looking-at "[ \t]*#\\+\\([a-z]+\\(:?_[a-z]+\\)*\\):")
+        (let ((key (downcase (match-string 1))))
+          (if (or (string= key "tblfm")
+                  (member key org-element-affiliated-keywords))
+              (org-element-paragraph-parser)
+            (org-element-keyword-parser))))
+       ;; Footnote definition.
+       ((looking-at org-footnote-definition-re)
+        (org-element-footnote-definition-parser))
+       ;; Dynamic block or paragraph if incomplete.
+       ((looking-at "[ \t]*#\\+begin:\\(?: \\|$\\)")
+        (if (save-excursion
+              (re-search-forward "^[ \t]*#\\+end:\\(?: \\|$\\)" nil t))
+            (org-element-dynamic-block-parser)
+          (org-element-paragraph-parser)))
+       ;; Comment.
+       ((looking-at "\\(#\\|[ \t]*#\\+\\)\\(?: \\|$\\)")
+	(org-element-comment-parser))
+       ;; Horizontal rule.
+       ((looking-at "[ \t]*-\\{5,\\}[ \t]*$")
+        (org-element-horizontal-rule-parser))
+       ;; Table.
+       ((org-at-table-p t) (org-element-table-parser))
+       ;; List or item.
+       ((looking-at (org-item-re))
+        (if (eq special 'item)
+            (org-element-item-parser (or structure (org-list-struct)))
+          (org-element-plain-list-parser (or structure (org-list-struct)))))
+       ;; Default element: Paragraph.
+       (t (org-element-paragraph-parser))))))
 
 (defun org-element-parse-objects (beg end acc restriction)
   "Parse objects between BEG and END and return recursive structure.
