@@ -50,24 +50,21 @@ process."
   (declare (indent 1))
   `(let* ((lang-headers (intern (concat "org-babel-default-header-args:" ,lang)))
 	  (heading (nth 4 (ignore-errors (org-heading-components))))
-	  (link (when org-current-export-file
-		  (org-make-link-string
-		   (if heading
-		       (concat org-current-export-file "::" heading)
-		     org-current-export-file))))
 	  (export-buffer (current-buffer)) results)
-     (when link
+     (when org-current-export-file
        ;; resolve parameters in the original file so that
        ;; headline and file-wide parameters are included, attempt
        ;; to go to the same heading in the original file
-       (set-buffer (get-file-buffer org-current-export-file))
+       (set-buffer (if (bufferp org-current-export-file) org-current-export-file
+		     (get-file-buffer org-current-export-file)))
        (save-restriction
-	 (condition-case nil
-	     (let ((org-link-search-inhibit-query t))
-	       (org-open-link-from-string link))
-	   (error (when heading
-		    (goto-char (point-min))
-		    (re-search-forward (regexp-quote heading) nil t))))
+	 (when heading
+	   (condition-case nil
+	       (let ((org-link-search-inhibit-query t))
+		 (org-link-search heading))
+	     (error (when heading
+		      (goto-char (point-min))
+		      (re-search-forward (regexp-quote heading) nil t)))))
 	 (setq results ,@body))
        (set-buffer export-buffer)
        results)))
@@ -114,7 +111,9 @@ none ----- do not display either code or results upon export"
 		   (org-babel-noweb-wrap) "" (nth 1 info))
 		(if (org-babel-noweb-p (nth 2 info) :export)
 		    (org-babel-expand-noweb-references
-		     info (get-file-buffer org-current-export-file))  
+                     info (if (bufferp org-current-export-file)
+                              org-current-export-file
+                            (get-file-buffer org-current-export-file)))  
 		  (nth 1 info))))
 	(org-babel-exp-do-export info 'block hash)))))
 
@@ -165,7 +164,9 @@ this template."
 			  (if (and (cdr (assoc :noweb params))
 				   (string= "yes" (cdr (assoc :noweb params))))
 			      (org-babel-expand-noweb-references
-			       info (get-file-buffer org-current-export-file))
+			       info (if (bufferp org-current-export-file)
+                                        org-current-export-file
+                                      (get-file-buffer org-current-export-file)))
 			    (nth 1 info)))
 		    (let ((code-replacement (save-match-data
 					      (org-babel-exp-do-export
