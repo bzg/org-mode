@@ -812,7 +812,7 @@ body ------------- string holding the body of the code block
 beg-body --------- point at the beginning of the body
 end-body --------- point at the end of the body"
   (declare (indent 1))
-  (let ((tempvar (make-symbol "file")))
+  (let ((tempvar (gensym "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
@@ -850,7 +850,7 @@ end-body --------- point at the end of the body"
 If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
   (declare (indent 1))
-  (let ((tempvar (make-symbol "file")))
+  (let ((tempvar (gensym "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
@@ -874,7 +874,7 @@ buffer."
 If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
   (declare (indent 1))
-  (let ((tempvar (make-symbol "file")))
+  (let ((tempvar (gensym "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
@@ -892,6 +892,30 @@ buffer."
 (def-edebug-spec org-babel-map-call-lines (form body))
 
 ;;;###autoload
+(defmacro org-babel-map-executables (file &rest body)
+  (declare (indent 1))
+  (let ((tempvar (gensym "file"))
+	(rx (gensym "rx")))
+    `(let* ((,tempvar ,file)
+	    (,rx (concat "\\(" org-babel-src-block-regexp
+			 "\\|" org-babel-inline-src-block-regexp
+			 "\\|" org-babel-lob-one-liner-regexp "\\)"))
+	    (visited-p (or (null ,tempvar)
+			   (get-file-buffer (expand-file-name ,tempvar))))
+	    (point (point)) to-be-removed)
+       (save-window-excursion
+	 (when ,tempvar (find-file ,tempvar))
+	 (setq to-be-removed (current-buffer))
+	 (goto-char (point-min))
+	 (while (re-search-forward ,rx nil t)
+	   (goto-char (match-beginning 1))
+	   (save-match-data ,@body)
+	   (goto-char (match-end 0))))
+       (unless visited-p (kill-buffer to-be-removed))
+       (goto-char point))))
+(def-edebug-spec org-babel-map-executables (form body))
+
+;;;###autoload
 (defun org-babel-execute-buffer (&optional arg)
   "Execute source code blocks in a buffer.
 Call `org-babel-execute-src-block' on every source block in
@@ -899,12 +923,10 @@ the current buffer."
   (interactive "P")
   (org-babel-eval-wipe-error-buffer)
   (org-save-outline-visibility t
-    (org-babel-map-src-blocks nil
-      (org-babel-execute-src-block arg))
-    (org-babel-map-inline-src-blocks nil
-      (org-babel-execute-src-block arg))
-    (org-babel-map-call-lines nil
-      (org-babel-lob-execute-maybe))))
+    (org-babel-map-executables nil
+      (if (looking-at org-babel-lob-one-liner-regexp)
+          (org-babel-lob-execute-maybe)
+        (org-babel-execute-src-block arg)))))
 
 ;;;###autoload
 (defun org-babel-execute-subtree (&optional arg)
