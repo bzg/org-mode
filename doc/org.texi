@@ -5406,10 +5406,11 @@ the settings.  This has been the source of much confusion.  Org mode users
 can resort to special versions of these functions like @code{org-date} or
 @code{org-anniversary}.  These work just like the corresponding @code{diary-}
 functions, but with stable ISO order of arguments (year, month, day) wherever
-applicable, independent of the value of @code{calendar-date-style}.}.  For example
+applicable, independent of the value of @code{calendar-date-style}.}.  For
+example with optional time
 
 @example
-* The nerd meeting on every 2nd Thursday of the month
+* 22:00-23:00 The nerd meeting on every 2nd Thursday of the month
   <%%(org-float t 4 2)>
 @end example
 
