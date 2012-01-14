@@ -210,13 +210,37 @@ The function respects the value of the :exports header argument."
       ('both (org-babel-exp-results info type nil hash)
 	     (org-babel-exp-code info)))))
 
+(defcustom org-babel-exp-code-template
+  "#+BEGIN_SRC %lang%flags\n%body\n#+END_SRC"
+  "Template used to export the body of code blocks.
+This template may be customized to include additional information
+such as the code block name, or the values of particular header
+arguments.  The template is filled out using `org-fill-template',
+and the following %keys may be used.
+
+ lang ------ the language of the code block
+ name ------ the name of the code block
+ body ------ the body of the code block
+ flags ----- the flags passed to the code block
+
+In addition to the keys mentioned above, every header argument
+defined for the code block may be used as a key and will be
+replaced with its value."
+  :group 'org-babel
+  :type 'string)
+
 (defun org-babel-exp-code (info)
   "Return the original code block formatted for export."
   (org-fill-template
-   "#+BEGIN_SRC %lang%flags\n%body\n#+END_SRC"
+   org-babel-exp-code-template
    `(("lang"  . ,(nth 0 info))
+     ("body"  . ,(nth 1 info))
+     ,@(mapcar (lambda (pair)
+		 (cons (substring (symbol-name (car pair)) 1)
+		       (format "%S" (cdr pair))))
+	       (nth 2 info))
      ("flags" . ,((lambda (f) (when f (concat " " f))) (nth 3 info)))
-     ("body"  . ,(nth 1 info)))))
+     ("name"  . ,(nth 4 info)))))
 
 (defun org-babel-exp-results (info type &optional silent hash)
   "Evaluate and return the results of the current code block for export.
