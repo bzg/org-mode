@@ -1345,27 +1345,28 @@ INFO is a plist holding contextual information. See
      ;; the destination of the link.
      ((string= type "fuzzy")
       (let ((destination (org-export-resolve-fuzzy-link link info)))
-	(cond
-	 ;; Target match.
-	 ((stringp destination)
-	  (format "\\hyperref[%s]{%s}"
-		  (org-export-solidify-link-text destination)
-		  (or desc
-		      (org-export-secondary-string
-		       (org-element-get-property :raw-link link) 'e-latex info))))
-	 ;; Headline match.
-	 ((integerp destination)
-	  (format "\\hyperref[headline-%d]{%s}"
-		  destination
-		  (or desc
-		      (org-export-secondary-string
-		       (org-element-get-property :raw-link link) 'e-latex info))))
-	 ;; No match.
-	 (t (format "\\texttt{%s}"
-		    (or desc
-			(org-export-secondary-string
-			 (org-element-get-property :raw-link link)
-			 'e-latex info)))))))
+	(case (car destination)
+	  (target
+	   (format "\\hyperref[%s]{%s}"
+		   (org-export-solidify-link-text
+		    (org-element-get-property :raw-value destination))
+		   (or desc
+		       (org-export-secondary-string
+			(org-element-get-property :raw-link link)
+			'e-latex info))))
+	  (headline
+	   (format "\\hyperref[headline-%d]{%s}"
+		   (org-element-get-property :begin destination)
+		   (or desc
+		       (org-export-secondary-string
+			(org-element-get-property :raw-link link)
+			'e-latex info))))
+	  (otherwise
+	   (format "\\texttt{%s}"
+		   (or desc
+		       (org-export-secondary-string
+			(org-element-get-property :raw-link link)
+			'e-latex info)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
