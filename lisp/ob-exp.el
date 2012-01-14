@@ -240,7 +240,7 @@ replaced with its value."
 		       (format "%S" (cdr pair))))
 	       (nth 2 info))
      ("flags" . ,((lambda (f) (when f (concat " " f))) (nth 3 info)))
-     ("name"  . ,(nth 4 info)))))
+     ("name"  . ,(or (nth 4 info) "")))))
 
 (defun org-babel-exp-results (info type &optional silent hash)
   "Evaluate and return the results of the current code block for export.
