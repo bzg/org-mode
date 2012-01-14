@@ -628,7 +628,7 @@ on two lines
       (check-eval "never-export" nil)
       (check-eval "no-export" nil))))
 
-(ert-deftest test-ob/noweb-expansion ()
+(ert-deftest test-ob/noweb-expansion-1 ()
   (org-test-with-temp-text "#+begin_src sh :results output :tangle yes
   <<foo>>
 #+end_src
@@ -637,7 +637,9 @@ on two lines
 #+begin_src sh
   bar
 #+end_src"
-    (should (string= (org-babel-expand-noweb-references) "bar")))
+    (should (string= (org-babel-expand-noweb-references) "bar"))))
+
+(ert-deftest test-ob/noweb-expansion-2 ()
   (org-test-with-temp-text "#+begin_src sh :results output :tangle yes
   <<foo>>
 #+end_src

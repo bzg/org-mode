@@ -194,7 +194,29 @@ elements in the final html."
 		  "<pre class=\"example\">"
 		  "code block results"
 		  "</pre>"))))))
-      
+
+(ert-deftest ob-exp/export-with-name ()
+  (let ((org-babel-exp-code-template
+	 "=%name=\n#+BEGIN_SRC %lang%flags\nbody\n#+END_SRC"))
+    (org-test-at-id "b02ddd8a-eeb8-42ab-8664-8a759e6f43d9"
+      (org-narrow-to-subtree)
+      (let ((ascii (org-export-as-ascii nil nil nil 'string 'body-only)))
+	(should (string-match "qux" ascii))))))
+
+(ert-deftest ob-exp/export-with-header-argument ()
+  (let ((org-babel-exp-code-template
+	 "
+| header  | value    |
+|---------+----------|
+| foo     | %foo     |
+| results | %results |
+#+BEGIN_SRC %lang%flags\nbody\n#+END_SRC"))
+    (org-test-at-id "b02ddd8a-eeb8-42ab-8664-8a759e6f43d9"
+      (org-narrow-to-subtree)
+      (let ((ascii (org-export-as-ascii nil nil nil 'string 'body-only)))
+	(should (string-match "baz" ascii))
+	(should (string-match "replace" ascii))))))
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here

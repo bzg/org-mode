@@ -278,3 +278,13 @@ src_sh{echo "One"} block at start of line
  One spaced block in  src_sh{ echo "middle" } of line
 src_sh{echo 2} blocks on the src_emacs-lisp{"same"} line
  Inline block with src_sh[:results silent]{ echo "parameters" }.
+* exporting a code block with a name
+  :PROPERTIES:
+  :ID:       b02ddd8a-eeb8-42ab-8664-8a759e6f43d9
+  :END:
+
+exporting a code block with a name
+#+name: qux
+#+begin_src sh :foo "baz"
+  echo bar
+#+end_src
