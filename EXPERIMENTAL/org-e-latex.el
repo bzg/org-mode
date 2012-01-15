@@ -1040,9 +1040,7 @@ holding contextual information."
      ;; Case 2. This is a deep sub-tree: export it as a list item.
      ;;         Also export as items headlines for which no section
      ;;         format has been found.
-     ((or (not section-fmt)
-	  (and (wholenump (plist-get info :headline-levels))
-	       (> level (plist-get info :headline-levels))))
+     ((or (not section-fmt) (org-export-low-level-p headline info))
       ;; Build the real contents of the sub-tree.
       (let ((low-level-body
 	     (concat

@@ -2053,15 +2053,28 @@ INFO is the plist used as a communication channel."
 ;; headline, while `org-export-number-to-roman' allows to convert it
 ;; to roman numbers.
 
-;; `org-export-first-sibling-p' and `org-export-last-sibling-p' are
-;; two useful predicates when it comes to fulfill the
-;; `:headline-levels' property.
+;; `org-export-low-level-p', `org-export-first-sibling-p' and
+;; `org-export-last-sibling-p' are three useful predicates when it
+;; comes to fulfill the `:headline-levels' property.
 
 (defun org-export-get-relative-level (headline info)
   "Return HEADLINE relative level within current parsed tree.
 INFO is a plist holding contextual information."
   (+ (org-element-get-property :level headline)
      (or (plist-get info :headline-offset) 0)))
+
+(defun org-export-low-level-p (headline info)
+  "Non-nil when HEADLINE is considered as low level.
+
+A low level headlines has a relative level greater than
+`:headline-levels' property value.
+
+Return value is the difference between HEADLINE relative level
+and the last level being considered as high enough, or nil."
+  (let ((limit (plist-get info :headline-levels)))
+    (when (wholenump limit)
+      (let ((level (org-export-get-relative-level headline info)))
+        (and (> level limit) (- level limit))))))
 
 (defun org-export-get-headline-number (headline info)
   "Return HEADLINE numbering as a list of numbers.
