@@ -1351,7 +1351,7 @@ PUB-DIR is set, use this as the publishing directory."
 	;; insert html preamble
 	(when (plist-get opt-plist :html-preamble)
 	  (let ((html-pre (plist-get opt-plist :html-preamble))
-		html-pre-real-contents)
+		(html-pre-real-contents ""))
 	    (cond ((stringp html-pre)
 		   (setq html-pre-real-contents
 			 (format-spec html-pre `((?t . ,title) (?a . ,author)
