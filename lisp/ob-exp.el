@@ -46,17 +46,25 @@ process."
   :type 'boolean)
 (put 'org-export-babel-evaluate 'safe-local-variable (lambda (x) (eq x nil)))
 
+(defun org-babel-exp-get-export-buffer ()
+  "Return the current export buffer if possible."
+  (cond
+   ((bufferp org-current-export-file) org-current-export-file)
+   (org-current-export-file (get-file-buffer org-current-export-file))
+   ('otherwise
+    (error "Requested export buffer when `org-current-export-file' is nil"))))
+
 (defmacro org-babel-exp-in-export-file (lang &rest body)
   (declare (indent 1))
   `(let* ((lang-headers (intern (concat "org-babel-default-header-args:" ,lang)))
 	  (heading (nth 4 (ignore-errors (org-heading-components))))
-	  (export-buffer (current-buffer)) results)
-     (when org-current-export-file
+	  (export-buffer (current-buffer))
+	  (original-buffer (org-babel-exp-get-export-buffer)) results)
+     (when original-buffer
        ;; resolve parameters in the original file so that
        ;; headline and file-wide parameters are included, attempt
        ;; to go to the same heading in the original file
-       (set-buffer (if (bufferp org-current-export-file) org-current-export-file
-		     (get-file-buffer org-current-export-file)))
+       (set-buffer original-buffer)
        (save-restriction
 	 (when heading
 	   (condition-case nil
@@ -111,9 +119,7 @@ none ----- do not display either code or results upon export"
 		   (org-babel-noweb-wrap) "" (nth 1 info))
 		(if (org-babel-noweb-p (nth 2 info) :export)
 		    (org-babel-expand-noweb-references
-                     info (if (bufferp org-current-export-file)
-                              org-current-export-file
-                            (get-file-buffer org-current-export-file)))  
+                     info (org-babel-exp-get-export-buffer))  
 		  (nth 1 info))))
 	(org-babel-exp-do-export info 'block hash)))))
 
@@ -164,9 +170,7 @@ this template."
 			  (if (and (cdr (assoc :noweb params))
 				   (string= "yes" (cdr (assoc :noweb params))))
 			      (org-babel-expand-noweb-references
-			       info (if (bufferp org-current-export-file)
-                                        org-current-export-file
-                                      (get-file-buffer org-current-export-file)))
+			       info (org-babel-exp-get-export-buffer))
 			    (nth 1 info)))
 		    (let ((code-replacement (save-match-data
 					      (org-babel-exp-do-export
