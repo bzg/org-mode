@@ -249,6 +249,30 @@ elements in the final html."
       (should-not (string-match (regexp-quote "<<strip-export-1>>") ascii))
       (should-not (string-match (regexp-quote "i=\"10\"") ascii)))))
 
+(ert-deftest ob-exp/export-from-a-temp-buffer ()
+  (org-test-with-temp-text
+      "
+#+Title: exporting from a temporary buffer
+
+#+name: foo
+#+BEGIN_SRC emacs-lisp
+  :foo
+#+END_SRC
+
+#+name: bar
+#+BEGIN_SRC emacs-lisp
+  :bar
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :var foo=foo :noweb yes :exports results
+  (list foo <<bar>>)
+#+END_SRC
+"
+    (let* ((org-current-export-file (current-buffer))
+	   (ascii (org-export-as-ascii nil nil nil 'string)))
+      (should (string-match (regexp-quote (format nil "%S" '(:foo :bar)))
+			    ascii)))))
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here
