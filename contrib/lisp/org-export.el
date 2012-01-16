@@ -1867,61 +1867,62 @@ Return buffer."
       (goto-char (point-min)))
     buffer))
 
-(defun org-export-to-file (backend &optional post-process subtreep visible-only
-				   body-only ext-plist pub-dir)
+(defun org-export-to-file (backend file &optional subtreep visible-only
+				   body-only ext-plist)
   "Call `org-export-as' with output to a specified file.
 
-BACKEND is the back-end used for transcoding, as a symbol.
-
-Optional argument POST-PROCESS, when non-nil, is a function
-applied to the output file.  It expects one argument: the file
-name, as a string.  It can be used to call shell commands on that
-file, display a specific buffer, etc.
+BACKEND is the back-end used for transcoding, as a symbol.  FILE
+is the name of the output file, as a string.
 
 Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
 EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
+Return output file's name."
+  ;; Checks for FILE permissions.  `write-file' would do the same, but
+  ;; we'd rather avoid needless transcoding of parse tree.
+  (unless (file-writable-p file) (error "Output file not writable"))
+  ;; Insert contents to a temporary buffer and write it to FILE.
+  (let ((out (org-export-as
+	      backend subtreep visible-only body-only ext-plist)))
+    (with-temp-buffer
+      (insert out)
+      (let ((coding-system-for-write org-export-coding-system))
+	(write-file file))))
+  ;; Return full path.
+  file)
+
+(defun org-export-output-file-name (extension &optional subtreep pub-dir)
+  "Return output file's name according to buffer specifications.
+
+EXTENSION is a string representing the output file extension.
+
+With a non-nil optional argument SUBTREEP, try to determine
+output file's name by looking for \"EXPORT_FILE_NAME\" property
+of subtree at point.
+
 When optional argument PUB-DIR is set, use it as the publishing
 directory.
 
-Return output file's name."
-  ;; First get output directory and output file name.
-  (let ((out-file
-	 (concat (file-name-as-directory (or pub-dir "."))
-		 ;; Output file name either comes from
-		 ;; EXPORT_FILE_NAME sub-tree property, assuming input
-		 ;; is narrowed to said sub-tree, or to the name of
-		 ;; buffer's associated file.
-		 (file-name-sans-extension
-		  (or (and subtreep
-			   (org-entry-get
-			    (save-excursion
-			      (ignore-errors
-				(org-back-to-heading (not visible-only))
-				(point)))
-			    "EXPORT_FILE_NAME" t))
-		      (file-name-nondirectory
-		       (or (buffer-file-name (buffer-base-buffer))
-			   (error "Output file's name undefined")))))
-		 ".tex")))
-    ;; Checks for file and directory permissions.
-    (cond
-     ((not (file-exists-p out-file))
-      (unless (file-writable-p (or pub-dir "."))
-	(error "Output directory not writable")))
-     ((not (file-writable-p out-file)) (error "Output file not writable")))
-    ;; All checks passed: insert contents to a temporary buffer and
-    ;; write it to the specified file.
-    (let ((out (org-export-as
-		backend subtreep visible-only body-only ext-plist)))
-      (with-temp-buffer
-	(insert out)
-	(let ((coding-system-for-write org-export-coding-system))
-	  (write-file out-file))))
-    (when post-process (funcall post-process out-file))
-    ;; Return full path.
-    out-file))
+Return file name as a string, or nil if it couldn't be
+determined."
+  (let ((base-name
+	 (concat
+	  (file-name-as-directory (or pub-dir "."))
+	  ;; Output file name either comes from EXPORT_FILE_NAME
+	  ;; sub-tree property, assuming point is at beginning of said
+	  ;; sub-tree, or to the name of buffer's associated file.
+	  (file-name-sans-extension
+	   (or (and subtreep
+		    (org-entry-get
+		     (save-excursion
+		       (ignore-errors
+			 (org-back-to-heading (not visible-only)) (point)))
+		     "EXPORT_FILE_NAME" t))
+	       (file-name-nondirectory
+		(or (buffer-file-name (buffer-base-buffer)))))))))
+    ;; BASE-NAME will be nil when original buffer was temporary one.
+    (when base-name (concat base-name extension))))
 
 (defmacro org-export-with-current-buffer-copy (&rest body)
   "Apply BODY in a copy of the current buffer.
