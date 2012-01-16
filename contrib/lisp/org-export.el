@@ -1124,12 +1124,16 @@ Following tree properties are set:
   (setq info
 	(org-combine-plists
 	 info `(:use-select-tags ,(org-export-use-select-tags-p data info))))
-  ;; Get the rest of the tree properties, now `:use-select-tags' is
-  ;; set...
+  ;; Then get `:headline-offset' in order to be able to use
+  ;; `org-export-get-relative-level'.
+  (setq info
+	(org-combine-plists
+	 info `(:headline-offset ,(- 1 (org-export-get-min-level data info)))))
+  ;; Now, get the rest of the tree properties, now `:use-select-tags'
+  ;; is set...
   (nconc
    `(:parse-tree
      ,data
-     :headline-offset ,(- 1 (org-export-get-min-level data info))
      :point-max ,(org-export-get-point-max data info)
      :target-list
      ,(org-element-map data 'target (lambda (target local) target) info)
@@ -1186,9 +1190,8 @@ OPTIONS is a plist holding export options."
 DATA is the parse tree.  OPTIONS is the plist holding export
 options.
 
-Return an alist whose key is headline's beginning position and
-value is its associated numbering (in the shape of a list of
-numbers)."
+Return an alist whose key is an headline and value is its
+associated numbering \(in the shape of a list of numbers\)."
   (let ((numbering (make-vector org-export-max-depth 0)))
     (org-element-map
      data
@@ -1197,7 +1200,7 @@ numbers)."
        (let ((relative-level
 	      (1- (org-export-get-relative-level headline info))))
 	 (cons
-	  (org-element-get-property :begin headline)
+	  headline
 	  (loop for n across numbering
 		for idx from 0 to org-export-max-depth
 		when (< idx relative-level) collect n
@@ -2053,9 +2056,9 @@ INFO is the plist used as a communication channel."
 ;; headline, while `org-export-number-to-roman' allows to convert it
 ;; to roman numbers.
 
-;; `org-export-first-sibling-p' and `org-export-last-sibling-p' are
-;; two useful predicates when it comes to fulfill the
-;; `:headline-levels' property.
+;; `org-export-low-level-p', `org-export-first-sibling-p' and
+;; `org-export-last-sibling-p' are three useful predicates when it
+;; comes to fulfill the `:headline-levels' property.
 
 (defun org-export-get-relative-level (headline info)
   "Return HEADLINE relative level within current parsed tree.
@@ -2063,11 +2066,23 @@ INFO is a plist holding contextual information."
   (+ (org-element-get-property :level headline)
      (or (plist-get info :headline-offset) 0)))
 
+(defun org-export-low-level-p (headline info)
+  "Non-nil when HEADLINE is considered as low level.
+
+A low level headlines has a relative level greater than
+`:headline-levels' property value.
+
+Return value is the difference between HEADLINE relative level
+and the last level being considered as high enough, or nil."
+  (let ((limit (plist-get info :headline-levels)))
+    (when (wholenump limit)
+      (let ((level (org-export-get-relative-level headline info)))
+        (and (> level limit) (- level limit))))))
+
 (defun org-export-get-headline-number (headline info)
   "Return HEADLINE numbering as a list of numbers.
 INFO is a plist holding contextual information."
-  (cdr (assq (org-element-get-property :begin headline)
-	     (plist-get info :headline-numbering))))
+  (cdr (assoc headline (plist-get info :headline-numbering))))
 
 (defun org-export-number-to-roman (n)
   "Convert integer N into a roman numeral."
