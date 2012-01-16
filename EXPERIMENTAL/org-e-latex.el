@@ -56,7 +56,7 @@ structure of the value.")
 
 ;;; User Configurable Variables
 
-(defgroup org-export-latex nil
+(defgroup org-export-e-latex nil
   "Options for exporting Org mode files to LaTeX."
   :tag "Org Export LaTeX"
   :group 'org-export)
@@ -411,8 +411,8 @@ package.  Just add these to `org-e-latex-packages-alist',
 for example using customize, or with something like
 
   (require 'org-e-latex)
-  (add-to-list 'org-export-latex-packages-alist '(\"\" \"listings\"))
-  (add-to-list 'org-export-latex-packages-alist '(\"\" \"color\"))
+  (add-to-list 'org-e-latex-packages-alist '(\"\" \"listings\"))
+  (add-to-list 'org-e-latex-packages-alist '(\"\" \"color\"))
 
 Alternatively,
 
@@ -467,7 +467,7 @@ These options are supplied as a comma-separated list to the
 a list containing two strings: the name of the option, and the
 value. For example,
 
-  (setq org-export-latex-listings-options
+  (setq org-e-latex-listings-options
     '((\"basicstyle\" \"\\small\")
       (\"keywordstyle\" \"\\color{black}\\bfseries\\underbar\")))
 
@@ -513,7 +513,7 @@ These options are supplied within square brackets in
 a list containing two strings: the name of the option, and the
 value. For example,
 
-  (setq org-export-latex-minted-options
+  (setq org-e-latex-minted-options
     '((\"bgcolor\" \"bg\") (\"frame\" \"lines\")))
 
 will result in src blocks being exported with
@@ -533,7 +533,7 @@ options will be applied to blocks of all languages."
 environments used during export of src blocks by the listings and
 minted latex packages. For example,
 
-  (setq org-export-latex-custom-lang-environments
+  (setq org-e-latex-custom-lang-environments
      '((python \"pythoncode\")))
 
 would have the effect that if org encounters begin_src python
