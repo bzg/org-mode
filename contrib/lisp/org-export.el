@@ -2797,23 +2797,21 @@ Return an error if key pressed has no associated command."
     ;; depending on user's key pressed.
     (case (if (< raw-key 27) (+ raw-key 96) raw-key)
       ;; Export with `e-latex' back-end.
-      (?L (let ((outbuf (org-export-to-buffer
-			 'e-latex "*Org E-latex Export*"
-			 (memq 'subtree scope)
-			 (memq 'visible scope)
-			 (memq 'body scope))))
-	    (with-current-buffer outbuf (latex-mode))
-	    (when org-export-show-temporary-export-buffer
-	      (switch-to-buffer-other-window outbuf))))
-      ((?l ?p ?d)
-       (org-export-to-file
-	'e-latex
-	(cond ((eq raw-key ?p) #'org-e-latex-compile)
-	      ((eq raw-key ?d)
-	       (lambda (file) (org-open-file (org-e-latex-compile file)))))
-	(memq 'subtree scope)
-	(memq 'visible scope)
-	(memq 'body scope)))
+      (?L
+       (let ((outbuf
+	      (org-export-to-buffer
+	       'e-latex "*Org E-LaTeX Export*"
+	       (memq 'subtree scope) (memq 'visible scope) (memq 'body scope))))
+	 (with-current-buffer outbuf (latex-mode))
+	 (when org-export-show-temporary-export-buffer
+	   (switch-to-buffer-other-window outbuf))))
+      (?l (org-e-latex-export-to-latex
+	   (memq 'subtree scope) (memq 'visible scope) (memq 'body scope)))
+      (?p (org-e-latex-export-to-pdf
+	   (memq 'subtree scope) (memq 'visible scope) (memq 'body scope)))
+      (?d (org-open-file
+	   (org-e-latex-export-to-pdf
+	    (memq 'subtree scope) (memq 'visible scope) (memq 'body scope))))
       ;; Undefined command.
       (t (error "No command associated with key %s"
 		(char-to-string raw-key))))))

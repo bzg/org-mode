@@ -1911,7 +1911,71 @@ CONTENTS is nil. INFO is a plist holding contextual information."
 
 
 
-;;; Compilation
+;;; Interactive functions
+
+(defun org-e-latex-export-to-latex
+  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  "Export current buffer to a LaTeX file.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+When optional argument BODY-ONLY is non-nil, only write code
+between \"\\begin{document}\" and \"\\end{document}\".
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+When optional argument PUB-DIR is set, use it as the publishing
+directory.
+
+Return output file's name."
+  (interactive)
+  (let ((outfile (org-export-output-file-name ".tex" subtreep pub-dir)))
+    (org-export-to-file
+     'e-latex outfile subtreep visible-only body-only ext-plist)))
+
+(defun org-e-latex-export-to-pdf
+  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  "Export current buffer to LaTeX then process through to PDF.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+When optional argument BODY-ONLY is non-nil, only write code
+between \"\\begin{document}\" and \"\\end{document}\".
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+When optional argument PUB-DIR is set, use it as the publishing
+directory.
+
+Return PDF file's name."
+  (interactive)
+  (org-e-latex-compile
+   (org-e-latex-export-to-latex
+    subtreep visible-only body-only ext-plist pub-dir)))
 
 (defun org-e-latex-compile (texfile)
   "Compile a TeX file.
