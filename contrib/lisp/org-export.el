@@ -909,7 +909,9 @@ Return options as a plist."
 (defun org-export-get-inbuffer-options (buffer-string backend files)
   "Return in-buffer options as a plist.
 BUFFER-STRING is the string of the buffer.  BACKEND is a symbol
-specifying which back-end should be used."
+specifying which back-end should be used.  FILES is a list of
+setup files names read so far, used to avoid circular
+dependencies."
   (let ((case-fold-search t) plist)
     ;; 1. Special keywords, as in `org-export-special-keywords'.
     (let ((start 0)
@@ -1104,7 +1106,7 @@ Following tree properties are set:
 `:back-end'        Back-end used for transcoding.
 
 `:headline-offset' Offset between true level of headlines and
-		   local level. An offset of -1 means an headline
+		   local level.  An offset of -1 means an headline
 		   of level 2 should be considered as a level
 		   1 headline in the context.
 
@@ -2070,6 +2072,8 @@ INFO is a plist holding contextual information."
 (defun org-export-low-level-p (headline info)
   "Non-nil when HEADLINE is considered as low level.
 
+INFO is a plist used as a communication channel.
+
 A low level headlines has a relative level greater than
 `:headline-levels' property value.
 
@@ -2183,9 +2187,9 @@ lines, include only those lines."
 (defun org-export-parse-included-file (keyword info)
   "Parse file specified by include KEYWORD.
 
-KEYWORD is the include keyword element transcoded. BACKEND is the
-language back-end used for transcoding. INFO is the plist used as
-a communication channel.
+KEYWORD is the include keyword element transcoded.  BACKEND is
+the language back-end used for transcoding.  INFO is the plist
+used as a communication channel.
 
 Return the parsed tree."
   (let* ((value (org-element-get-property :value keyword))
@@ -2245,7 +2249,7 @@ Return the parsed tree."
 ;; when the element isn't numbered.
 
 (defun org-export-solidify-link-text (s)
-  "Take link text and make a safe target out of it."
+  "Take link text S and make a safe target out of it."
   (save-match-data
     (mapconcat 'identity (org-split-string s "[^a-zA-Z0-9_\\.-]+") "-")))
 
@@ -2263,7 +2267,7 @@ PATH is the link path.  DESC is its description."
 
 When non-nil, optional argument EXTENSIONS is a list of valid
 extensions for image files, as strings.  Otherwise, a default
-list is provided \(cf. `org-image-file-name-regexp'\)."
+list is provided \(cf `org-image-file-name-regexp'\)."
   (and (not (org-element-get-contents link))
        (string= (org-element-get-property :type link) "file")
        (org-file-image-p
@@ -2674,6 +2678,8 @@ it also."
 (defun org-export-collect-headlines (info &optional n)
   "Collect headlines in order to build a table of contents.
 
+INFO is a plist used as a communication channel.
+
 When non-nil, optional argument N must be an integer.  It
 specifies the depth of the table of contents.
 
@@ -2750,7 +2756,8 @@ links."
 ;;;; Topology
 
 (defun org-export-get-parent-headline (blob info)
-  "Return BLOB's closest parent headline or nil."
+  "Return BLOB's closest parent headline or nil.
+INFO is a plist used as a communication channel."
   (catch 'exit
     (mapc
      (lambda (el) (when (eq (car el) 'headline) (throw 'exit el)))

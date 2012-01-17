@@ -232,10 +232,12 @@ The function result will be used in the section format string.
 As an example, one could set the variable to the following, in
 order to reproduce the default set-up:
 
-\(defun org-e-latex-format-headline-default \(todo todo-type priority text tags\)
+\(defun org-e-latex-format-headline \(todo todo-type priority text tags\)
   \"Default format function for an headline.\"
-  \(concat \(when todo \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo\)\)
-	  \(when priority \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
+  \(concat \(when todo
+            \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo\)\)
+	  \(when priority
+            \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
 	  text
 	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)"
   :group 'org-export-e-latex
@@ -379,11 +381,12 @@ The function should return the string to be exported.
 For example, the variable could be set to the following function
 in order to mimic default behaviour:
 
-\(defun org-e-latex-format-inlinetask-default \(todo type priority name tags contents\)
+\(defun org-e-latex-format-inlinetask \(todo type priority name tags contents\)
 \"Format an inline task element for LaTeX export.\"
   \(let \(\(full-title
 	 \(concat
-	  \(when todo \(format \"\\\\textbf{\\\\textsf{\\\\textsc{%s}}} \" todo\)\)
+	  \(when todo
+            \(format \"\\\\textbf{\\\\textsf{\\\\textsc{%s}}} \" todo\)\)
 	  \(when priority \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
 	  title
 	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)\)
@@ -463,9 +466,9 @@ hurt if it is present."
   "Association list of options for the latex listings package.
 
 These options are supplied as a comma-separated list to the
-\\lstset command. Each element of the association list should be
+\\lstset command.  Each element of the association list should be
 a list containing two strings: the name of the option, and the
-value. For example,
+value.  For example,
 
   (setq org-e-latex-listings-options
     '((\"basicstyle\" \"\\small\")
@@ -509,9 +512,9 @@ pygmentize -L lexers"
   "Association list of options for the latex minted package.
 
 These options are supplied within square brackets in
-\\begin{minted} environments. Each element of the alist should be
-a list containing two strings: the name of the option, and the
-value. For example,
+\\begin{minted} environments.  Each element of the alist should
+be a list containing two strings: the name of the option, and the
+value.  For example,
 
   (setq org-e-latex-minted-options
     '((\"bgcolor\" \"bg\") (\"frame\" \"lines\")))
@@ -529,12 +532,13 @@ options will be applied to blocks of all languages."
 	   (string :tag "Minted option value"))))
 
 (defvar org-e-latex-custom-lang-environments nil
-  "Association list mapping languages to language-specific latex
-environments used during export of src blocks by the listings and
-minted latex packages. For example,
+  "Alist mapping languages to language-specific LaTeX environments.
 
-  (setq org-e-latex-custom-lang-environments
-     '((python \"pythoncode\")))
+It is used during export of src blocks by the listings and minted
+latex packages.  For example,
+
+  \(setq org-e-latex-custom-lang-environments
+     '\(\(python \"pythoncode\"\)\)\)
 
 would have the effect that if org encounters begin_src python
 during latex export it will output
@@ -644,7 +648,7 @@ These are the .aux, .log, .out, and .toc files."
   "Return caption and label LaTeX string for floats.
 
 CAPTION is a secondary string \(a list of strings and Org
-objects\) and LABEL a string representing the label. INFO is
+objects\) and LABEL a string representing the label.  INFO is
 a plist holding contextual information.
 
 If there's no caption nor label, return the empty string.
@@ -705,7 +709,9 @@ nil."
 	     ","))
 
 (defun org-e-latex--quotation-marks (text info)
-  "Export quotation marks depending on language conventions."
+  "Export quotation marks depending on language conventions.
+TEXT is a string containing quotation marks to be replaced.  INFO
+is a plist used as a communication channel."
   (mapc (lambda(l)
 	  (let ((start 0))
 	    (while (setq start (string-match (car l) text start))
@@ -718,7 +724,7 @@ nil."
 
 (defun org-e-latex--wrap-label (element output)
   "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
-This function shouldn't be used for floats. See
+This function shouldn't be used for floats.  See
 `org-e-latex--caption/label-string'."
   (let ((label (org-element-get-property :name element)))
     (if (or (not output) (not label) (string= output "") (string= label ""))
@@ -731,7 +737,7 @@ This function shouldn't be used for floats. See
 
 (defun org-e-latex-template (contents info)
   "Return complete document string after LaTeX conversion.
-CONTENTS is the transcoded contents string. INFO is a plist
+CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((title (org-export-secondary-string
 		(plist-get info :title) 'e-latex info)))
@@ -937,7 +943,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-e-latex-footnote-reference (footnote-reference contents info)
   "Transcode a FOOTNOTE-REFERENCE element from Org to LaTeX.
-CONTENTS is nil. INFO is a plist holding contextual information."
+CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
    (let ((prev (org-export-get-previous-element footnote-reference info)))
@@ -1305,7 +1311,7 @@ INFO is a plist containing export options."
   "Transcode a LINK object from Org to LaTeX.
 
 DESC is the description part of the link, or the empty string.
-INFO is a plist holding contextual information. See
+INFO is a plist holding contextual information.  See
 `org-export-data'."
   (let* ((type (org-element-get-property :type link))
 	 (raw-path (org-element-get-property :path link))
@@ -1701,7 +1707,7 @@ The format string one placeholder for the body of the table."
 
 (defun org-e-latex-table--align-string (attr info)
   "Return an appropriate LaTeX alignment string.
-
+ATTR is a string containing table's LaTeX specific attributes.
 INFO is the plist containing format info about the table, as
 returned by `org-export-table-format-info'."
   (or (and attr
@@ -1829,7 +1835,8 @@ contextual information."
 
 (defun org-e-latex-time-stamp (time-stamp contents info)
   "Transcode a TIME-STAMP object from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
   (let ((value (org-element-get-property :value time-stamp))
 	(type (org-element-get-property :type time-stamp))
 	(appt-type (org-element-get-property :appt-type time-stamp)))
@@ -1849,11 +1856,13 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Verbatim
 
-(defun org-e-latex-verbatim (element contents info)
-  "Return verbatim text in LaTeX."
-  (let ((fmt (cdr (assoc (org-element-get-property :marker element)
+(defun org-e-latex-verbatim (verbatim contents info)
+  "Transcode a VERBATIM object from Org to LaTeX.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (let ((fmt (cdr (assoc (org-element-get-property :marker verbatim)
 			 org-e-latex-emphasis-alist)))
-	(value (org-element-get-property :value element)))
+	(value (org-element-get-property :value verbatim)))
     (cond
      ;; Handle the `verb' special case.
      ((eq 'verb fmt)
@@ -1887,7 +1896,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-e-latex-verse-block (verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to LaTeX.
-CONTENTS is nil. INFO is a plist holding contextual information."
+CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-e-latex--wrap-label
    verse-block
    ;; In a verse environment, add a line break to each newline

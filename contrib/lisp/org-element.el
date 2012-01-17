@@ -647,6 +647,9 @@ CONTENTS is the contents of the element."
 (defun org-element-plain-list-parser (&optional structure)
   "Parse a plain list.
 
+Optional argument STRUCTURE, when non-nil, is the structure of
+the plain list being parsed.
+
 Return a list whose car is `plain-list' and cdr is a plist
 containing `:type', `:begin', `:end', `:contents-begin' and
 `:contents-end', `:level', `:structure' and `:post-blank'
@@ -1498,7 +1501,7 @@ CONTENTS is nil."
 ;; org-element-NAME-successor, where NAME is the name of the
 ;; successor, as defined in `org-element-all-successors'.
 
-;; Some object types (i.e `emphasis') are recursive.  Restrictions on
+;; Some object types (i.e. `emphasis') are recursive.  Restrictions on
 ;; object types they can contain will be specified in
 ;; `org-element-object-restrictions'.
 
@@ -1542,7 +1545,7 @@ CONTENTS is the contents of the object."
     (concat marker contents marker)))
 
 (defun org-element-text-markup-successor (limit)
-  "Search for the next emphasis or verbatim and return position.
+  "Search for the next emphasis or verbatim object.
 
 LIMIT bounds the search.
 
@@ -1718,8 +1721,7 @@ CONTENTS is nil."
     (format "[%s]" (concat label def))))
 
 (defun org-element-footnote-reference-successor (limit)
-  "Search for the next footnote-reference and return beginning
-  position.
+  "Search for the next footnote-reference object.
 
 LIMIT bounds the search.
 
@@ -1768,8 +1770,7 @@ CONTENTS is nil."
 	    (and post-options (format "[%s]" post-options)))))
 
 (defun org-element-inline-babel-call-successor (limit)
-  "Search for the next inline-babel-call and return beginning
-  position.
+  "Search for the next inline-babel-call object.
 
 LIMIT bounds the search.
 
@@ -1824,7 +1825,7 @@ CONTENTS is nil."
 	    body)))
 
 (defun org-element-inline-src-block-successor (limit)
-  "Search for the next inline-babel-call and return beginning position.
+  "Search for the next inline-babel-call element.
 
 LIMIT bounds the search.
 
@@ -1894,7 +1895,7 @@ CONTENTS is nil."
   "\\\\\n")
 
 (defun org-element-line-break-successor (limit)
-  "Search for the next statistics cookie and return position.
+  "Search for the next line-break object.
 
 LIMIT bounds the search.
 
@@ -2000,7 +2001,7 @@ CONTENTS is the contents of the object."
 		(if (string= contents "") "" (format "[%s]" contents)))))))
 
 (defun org-element-link-successor (limit)
-  "Search for the next link and return position.
+  "Search for the next link object.
 
 LIMIT bounds the search.
 
@@ -2058,7 +2059,7 @@ CONTENTS is nil."
   (org-element-get-property :value macro))
 
 (defun org-element-macro-successor (limit)
-  "Search for the next macro and return position.
+  "Search for the next macro object.
 
 LIMIT bounds the search.
 
@@ -2104,7 +2105,7 @@ CONTENTS is the contents of the object."
   (concat "<<<" contents ">>>"))
 
 (defun org-element-radio-target-successor (limit)
-  "Search for the next radio-target and return position.
+  "Search for the next radio-target object.
 
 LIMIT bounds the search.
 
@@ -2144,7 +2145,7 @@ CONTENTS is nil."
   (org-element-get-property :value statistics-cookie))
 
 (defun org-element-statistics-cookie-successor (limit)
-  "Search for the next statistics cookie and return position.
+  "Search for the next statistics cookie object.
 
 LIMIT bounds the search.
 
@@ -2193,8 +2194,7 @@ CONTENTS is the contents of the object."
    contents))
 
 (defun org-element-sub/superscript-successor  (limit)
-  "Search for the next sub/superscript and return beginning
-position.
+  "Search for the next sub/superscript object.
 
 LIMIT bounds the search.
 
@@ -2277,7 +2277,7 @@ CONTENTS is the contents of target."
   (concat ""))
 
 (defun org-element-target-successor (limit)
-  "Search for the next target and return position.
+  "Search for the next target object.
 
 LIMIT bounds the search.
 
@@ -2345,7 +2345,7 @@ CONTENTS is nil."
    (org-element-get-property :value time-stamp)))
 
 (defun org-element-time-stamp-successor (limit)
-  "Search for the next time-stamp and return position.
+  "Search for the next time-stamp object.
 
 LIMIT bounds the search.
 
@@ -3084,7 +3084,7 @@ Nil values returned from FUN are ignored in the result."
 
 (defun org-element-parse-elements
   (beg end special structure granularity visible-only acc)
-  "Parse ELEMENT with point at its beginning.
+  "Parse elements between BEG and END positions.
 
 SPECIAL prioritize some elements over the others.  It can set to
 either `section' or `item', which will focus search,
