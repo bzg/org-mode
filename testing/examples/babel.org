@@ -288,3 +288,22 @@ exporting a code block with a name
 #+begin_src sh :foo "baz"
   echo bar
 #+end_src
+* noweb no-export and exports both
+  :PROPERTIES:
+  :ID:       8a820f6c-7980-43db-8a24-0710d33729c9
+  :END:
+Weird interaction.
+
+here is one block
+
+#+name: noweb-no-export-and-exports-both-1
+#+BEGIN_SRC sh :exports none
+  echo 1
+#+END_SRC
+
+and another
+
+#+BEGIN_SRC sh :noweb no-export :exports both
+  # I am inside the code block
+  <<noweb-no-export-and-exports-both-1>>
+#+END_SRC

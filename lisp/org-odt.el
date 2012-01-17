@@ -646,6 +646,15 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-odt-end-outline-text ()
   (ignore))
 
+(defvar org-odt-section-count 0)
+(defun org-odt-begin-section (style &optional name)
+  (setq name (or name (format "Section-%d" (incf org-odt-section-count))))
+  (org-lparse-insert-tag
+   "<text:section text:style-name=\"%s\" text:name=\"%s\">" style name))
+
+(defun org-odt-end-section ()
+  (org-lparse-insert-tag "</text:section>"))
+
 (defun org-odt-begin-paragraph (&optional style)
   (org-lparse-insert-tag
    "<text:p%s>" (org-odt-get-extra-attrs-for-paragraph-style style)))
@@ -729,13 +738,17 @@ PUB-DIR is set, use this as the publishing directory."
      (list))
     (t (error "Unknown environment %s" style))))
 
-(defvar org-lparse-list-level) ; dynamically bound in org-do-lparse
+(defvar org-lparse-list-stack) ; dynamically bound in org-do-lparse
+(defvar org-odt-list-stack-stashed)
 (defun org-odt-begin-list (ltype)
   (setq ltype (or (org-lparse-html-list-type-to-canonical-list-type ltype)
 		  ltype))
   (let* ((style-name (org-odt-get-style-name-for-entity 'list ltype))
-	 (extra (concat (when (= org-lparse-list-level 1)
-			  " text:continue-numbering=\"false\"")
+	 (extra (concat (if (or org-lparse-list-table-p
+				(and (= 1 (length org-lparse-list-stack))
+				     (null org-odt-list-stack-stashed)))
+			    " text:continue-numbering=\"false\""
+			  " text:continue-numbering=\"true\"")
 			(when style-name
 			  (format " text:style-name=\"%s\""  style-name)))))
     (case ltype
@@ -758,11 +771,15 @@ PUB-DIR is set, use this as the publishing directory."
     (ordered
      (assert (not headline) t)
      (let* ((counter arg) (extra ""))
-       (org-lparse-insert-tag "<text:list-item>")
+       (org-lparse-insert-tag (if (= (length org-lparse-list-stack)
+				     (length org-odt-list-stack-stashed))
+				  "<text:list-header>" "<text:list-item>"))
        (org-lparse-begin-paragraph)))
     (unordered
      (let* ((id arg) (extra ""))
-       (org-lparse-insert-tag "<text:list-item>")
+       (org-lparse-insert-tag (if (= (length org-lparse-list-stack)
+				     (length org-odt-list-stack-stashed))
+				  "<text:list-header>" "<text:list-item>"))
        (org-lparse-begin-paragraph)
        (insert (if headline (org-odt-format-target headline id)
 		 (org-odt-format-bookmark "" id)))))
@@ -783,12 +800,29 @@ PUB-DIR is set, use this as the publishing directory."
 		  ltype))
   (case ltype
     ((ordered unordered)
-     (org-lparse-insert-tag "</text:list-item>"))
+     (org-lparse-insert-tag (if (= (length org-lparse-list-stack)
+				   (length org-odt-list-stack-stashed))
+				(prog1 "</text:list-header>"
+				  (setq org-odt-list-stack-stashed nil))
+			      "</text:list-item>")))
     (description
      (org-lparse-end-list-item-1)
      (org-lparse-end-list 'description)
      (org-lparse-end-list-item-1))
     (t (error "Unknown list type"))))
+
+(defun org-odt-discontinue-list ()
+  (let ((stashed-stack org-lparse-list-stack))
+    (loop for list-type in stashed-stack
+	  do (org-lparse-end-list-item-1 list-type)
+	  (org-lparse-end-list list-type))
+    (setq org-odt-list-stack-stashed stashed-stack)))
+
+(defun org-odt-continue-list ()
+  (setq org-odt-list-stack-stashed (nreverse org-odt-list-stack-stashed))
+  (loop for list-type in org-odt-list-stack-stashed
+	do (org-lparse-begin-list list-type)
+	(org-lparse-begin-list-item list-type)))
 
 ;; Following variables are let bound when table emission is in
 ;; progress. See org-lparse.el.
@@ -897,7 +931,19 @@ style from the list."
 			       :key-type symbol
 			       :value-type (const :tag "True" t))))))
 
+(defvar org-odt-table-indentedp nil)
 (defun org-odt-begin-table (caption label attributes)
+  (setq org-odt-table-indentedp (not (null org-lparse-list-stack)))
+  (when org-odt-table-indentedp
+    ;; Within the Org file, the table is appearing within a list item.
+    ;; OpenDocument doesn't allow table to appear within list items.
+    ;; Temporarily terminate the list, emit the table and then
+    ;; re-continue the list.
+    (org-odt-discontinue-list)
+    ;; Put the Table in an indented section.
+    (let ((level (length org-odt-list-stack-stashed)))
+      (org-odt-begin-section (format "OrgIndentedSection-Level-%d" level))))
+
   (setq org-odt-table-style attributes)
   (setq org-odt-table-style-spec
 	(assoc org-odt-table-style org-export-odt-table-styles))
@@ -940,7 +986,10 @@ style from the list."
 	 ((equal spec "table-cell:style-name")
 	  (replace-match table-cell-style t t))))))
   (goto-char (point-max))
-  (org-lparse-insert-tag "</table:table>"))
+  (org-lparse-insert-tag "</table:table>")
+  (when org-odt-table-indentedp
+    (org-odt-end-section)
+    (org-odt-continue-list)))
 
 (defun org-odt-begin-table-rowgroup (&optional is-header-row)
   (when org-lparse-table-rowgrp-open
@@ -2053,7 +2102,9 @@ CATEGORY-HANDLE is used.  See
     (setq org-odt-manifest-file-entries nil
 	  org-odt-embedded-images-count 0
 	  org-odt-embedded-formulas-count 0
+	  org-odt-section-count 0
 	  org-odt-entity-labels-alist nil
+	  org-odt-list-stack-stashed nil
 	  org-odt-entity-counts-plist nil)
     content-file))
 
