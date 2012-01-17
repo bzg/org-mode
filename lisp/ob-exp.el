@@ -251,7 +251,8 @@ inhibit insertion of results into the buffer."
   (when (and org-export-babel-evaluate
 	     (not (and hash (equal hash (org-babel-current-result-hash)))))
     (let ((lang (nth 0 info))
-	  (body (nth 1 info)))
+	  (body (nth 1 info))
+	  (info (copy-sequence info)))
       ;; skip code blocks which we can't evaluate
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)

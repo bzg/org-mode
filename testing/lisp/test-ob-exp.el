@@ -217,6 +217,13 @@ elements in the final html."
 	(should (string-match "baz" ascii))
 	(should (string-match "replace" ascii))))))
 
+(ert-deftest ob-exp/noweb-no-export-and-exports-both ()
+  (org-test-at-id "8a820f6c-7980-43db-8a24-0710d33729c9"
+    (org-narrow-to-subtree)
+    (let ((html (org-export-as-html nil nil nil 'string 'body-only)))
+      (should (string-match (regexp-quote "noweb-no-export-and-exports-both-1")
+			    html)))))
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here
