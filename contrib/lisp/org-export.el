@@ -654,10 +654,6 @@ standard mode."
 ;;   - category :: global
 ;;   - type :: list (as returned by `org-element-parse-buffer')
 
-;; + `point-max' :: Last ending position in the parse tree.
-;;   - category :: global
-;;   - type :: integer
-
 ;; + `preserve-breaks' :: Non-nil means transcoding should preserve
 ;;      all line breaks.
 ;;   - category :: option
@@ -1115,8 +1111,6 @@ Following tree properties are set:
 
 `:parse-tree'      Whole parse tree.
 
-`:point-max'       Last position in the parse tree
-
 `:target-list'     List of all targets in the parse tree.
 
 `:use-select-tags' Non-nil when parsed tree use a special tag to
@@ -1136,7 +1130,6 @@ Following tree properties are set:
   (nconc
    `(:parse-tree
      ,data
-     :point-max ,(org-export-get-point-max data info)
      :target-list
      ,(org-element-map data 'target (lambda (target local) target) info)
      :headline-numbering ,(org-export-collect-headline-numbering data info)
@@ -1173,18 +1166,6 @@ OPTIONS is a plist holding export options."
       ;; If no headline was found, for the sake of consistency, set
       ;; minimum level to 1 nonetheless.
       (if (= min-level 10000) 1 min-level))))
-
-(defun org-export-get-point-max (data options)
-  "Return last exportable ending position in DATA.
-DATA is parsed tree as returned by `org-element-parse-buffer'.
-OPTIONS is a plist holding export options."
-  (let ((pos-max 1))
-    (mapc (lambda (blob)
-	    (unless (and (eq (car blob) 'headline)
-			 (org-export-skip-p blob options))
-	      (setq pos-max (org-element-get-property :end blob))))
-	  (org-element-get-contents data))
-    pos-max))
 
 (defun org-export-collect-headline-numbering (data options)
   "Return numbering of all exportable headlines in a parse tree.
@@ -2113,10 +2094,9 @@ INFO is the plist used as a communication channel."
 (defun org-export-last-sibling-p (headline info)
   "Non-nil when HEADLINE is the last sibling in its sub-tree.
 INFO is the plist used as a communication channel."
-  (= (org-element-get-property :end headline)
-     (or (org-element-get-property
-	  :end (org-export-get-parent-headline headline info))
-	 (plist-get info :point-max))))
+  (equal
+   (car (last (org-element-get-contents (car (plist-get info :genealogy)))))
+   headline))
 
 
 ;;;; For Include Keywords
