@@ -3105,7 +3105,9 @@ elements.
 
 Elements are accumulated into ACC."
   (save-excursion
-    (goto-char beg)
+    (save-restriction
+      (narrow-to-region beg end)
+      (goto-char beg)
     ;; When parsing only headlines, skip any text before first one.
     (when (and (eq granularity 'headline) (not (org-at-heading-p)))
       (org-with-limited-levels (outline-next-heading)))
@@ -3117,13 +3119,10 @@ Elements are accumulated into ACC."
        (if (eq special 'item)
 	   (let ((element (org-element-item-parser structure)))
 	     (goto-char (org-element-get-property :end element))
-	     (save-restriction
-	       (narrow-to-region
-		(org-element-get-property :contents-begin element)
-		(org-element-get-property :contents-end element))
-	       (org-element-parse-elements
-		(point-min) (point-max) nil structure granularity visible-only
-		(reverse element))))
+	     (org-element-parse-elements
+	      (org-element-get-property :contents-begin element)
+	      (org-element-get-property :contents-end element)
+	      nil structure granularity visible-only (reverse element)))
 	 ;; 2. When ITEM is nil, find current element's type and parse
 	 ;;    it accordingly to its category.
 	 (let ((element (org-element-current-element special structure)))
@@ -3133,12 +3132,10 @@ Elements are accumulated into ACC."
 	    ;; if GRANULARITY allows it.
 	    ((and (eq (car element) 'paragraph)
 		  (or (not granularity) (eq granularity 'object)))
-	     (save-restriction
-	       (narrow-to-region
-		(org-element-get-property :contents-begin element)
-		(org-element-get-property :contents-end element))
-	       (org-element-parse-objects
-		(point-min) (point-max) (reverse element) nil)))
+	     (org-element-parse-objects
+	      (org-element-get-property :contents-begin element)
+	      (org-element-get-property :contents-end element)
+	      (reverse element) nil))
 	    ;; Case 2.  ELEMENT is recursive: parse it between
 	    ;; `contents-begin' and `contents-end'.  Make sure
 	    ;; GRANULARITY allows the recursion, or ELEMENT is an
@@ -3151,22 +3148,18 @@ Elements are accumulated into ACC."
 		      (eq (car element) 'headline))
 		  (not (and visible-only
 			    (org-element-get-property :hiddenp element))))
-	     (save-restriction
-	       (narrow-to-region
-		(org-element-get-property :contents-begin element)
-		(org-element-get-property :contents-end element))
-	       (org-element-parse-elements
-		(point-min) (point-max)
-		;; At a plain list, switch to item mode.  At an
-		;; headline, switch to section mode.  Any other
-		;; element turns off special modes.
-		(case (car element) (plain-list 'item) (headline 'section))
-		(org-element-get-property :structure element)
-		granularity visible-only (reverse element))))
+	     (org-element-parse-elements
+	      (org-element-get-property :contents-begin element)
+	      (org-element-get-property :contents-end element)
+	      ;; At a plain list, switch to item mode.  At an
+	      ;; headline, switch to section mode.  Any other
+	      ;; element turns off special modes.
+	      (case (car element) (plain-list 'item) (headline 'section))
+	      (org-element-get-property :structure element)
+	      granularity visible-only (reverse element)))
 	    ;; Case 3.  Else, just accumulate ELEMENT.
 	    (t element))))
-       acc)
-      (org-skip-whitespace))
+       acc)))
     ;; Return result.
     (nreverse acc)))
 
