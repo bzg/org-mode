@@ -1935,7 +1935,8 @@ Return output file's name."
 (defun org-export-output-file-name (extension &optional subtreep pub-dir)
   "Return output file's name according to buffer specifications.
 
-EXTENSION is a string representing the output file extension.
+EXTENSION is a string representing the output file extension,
+with the leading dot.
 
 With a non-nil optional argument SUBTREEP, try to determine
 output file's name by looking for \"EXPORT_FILE_NAME\" property
@@ -1947,22 +1948,36 @@ directory.
 Return file name as a string, or nil if it couldn't be
 determined."
   (let ((base-name
-	 (concat
-	  (file-name-as-directory (or pub-dir "."))
-	  ;; Output file name either comes from EXPORT_FILE_NAME
-	  ;; sub-tree property, assuming point is at beginning of said
-	  ;; sub-tree, or to the name of buffer's associated file.
-	  (file-name-sans-extension
-	   (or (and subtreep
-		    (org-entry-get
-		     (save-excursion
-		       (ignore-errors
-			 (org-back-to-heading (not visible-only)) (point)))
-		     "EXPORT_FILE_NAME" t))
-	       (file-name-nondirectory
-		(or (buffer-file-name (buffer-base-buffer)))))))))
-    ;; BASE-NAME will be nil when original buffer was temporary one.
-    (when base-name (concat base-name extension))))
+	 ;; File name may come from EXPORT_FILE_NAME subtree property,
+	 ;; assuming point is at beginning of said sub-tree.
+	 (file-name-sans-extension
+	  (or (and subtreep
+		   (org-entry-get
+		    (save-excursion
+		      (ignore-errors
+			(org-back-to-heading (not visible-only)) (point)))
+		    "EXPORT_FILE_NAME" t))
+	      ;; File name may be extracted from buffer's associated
+	      ;; file, if any.
+	      (buffer-file-name (buffer-base-buffer))
+	      ;; Can't determine file name on our own: Ask user.
+	      (let ((read-file-name-function
+		     (and org-completion-use-ido 'ido-read-file-name)))
+		(read-file-name
+		 "Output file: " pub-dir nil nil nil
+		 (lambda (name)
+		   (string= (file-name-extension name t) extension))))))))
+    ;; Build file name. Enforce EXTENSION over whatever user may have
+    ;; come up with. PUB-DIR, if defined, always has precedence over
+    ;; any provided path.
+    (cond
+     (pub-dir
+      (concat (file-name-as-directory pub-dir)
+	      (file-name-nondirectory base-name)
+	      extension))
+     ((string= (file-name-nondirectory base-name) base-name)
+      (concat (file-name-as-directory ".") base-name extension))
+     (t (concat base-name extension)))))
 
 (defmacro org-export-with-current-buffer-copy (&rest body)
   "Apply BODY in a copy of the current buffer.
