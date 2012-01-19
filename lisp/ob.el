@@ -812,7 +812,7 @@ body ------------- string holding the body of the code block
 beg-body --------- point at the beginning of the body
 end-body --------- point at the end of the body"
   (declare (indent 1))
-  (let ((tempvar (gensym "file")))
+  (let ((tempvar (make-symbol "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
@@ -850,7 +850,7 @@ end-body --------- point at the end of the body"
 If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
   (declare (indent 1))
-  (let ((tempvar (gensym "file")))
+  (let ((tempvar (make-symbol "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
@@ -874,7 +874,7 @@ buffer."
 If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
   (declare (indent 1))
-  (let ((tempvar (gensym "file")))
+  (let ((tempvar (make-symbol "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
@@ -894,8 +894,8 @@ buffer."
 ;;;###autoload
 (defmacro org-babel-map-executables (file &rest body)
   (declare (indent 1))
-  (let ((tempvar (gensym "file"))
-	(rx (gensym "rx")))
+  (let ((tempvar (make-symbol "file"))
+	(rx (make-symbol "rx")))
     `(let* ((,tempvar ,file)
 	    (,rx (concat "\\(" org-babel-src-block-regexp
 			 "\\|" org-babel-inline-src-block-regexp
