@@ -2224,6 +2224,10 @@ Return the parsed tree."
 ;; (i.e. links with "fuzzy" as type) within the parsed tree, and
 ;; returns an appropriate unique identifier when found, or nil.
 
+;; `org-export-resolve-id-link' returns the first headline with
+;; specified id or custom-id in parse tree, or nil when none was
+;; found.
+
 ;; `org-export-resolve-coderef' associates a reference to a line
 ;; number in the element it belongs, or returns the reference itself
 ;; when the element isn't numbered.
@@ -2306,6 +2310,22 @@ Assume LINK type is \"fuzzy\"."
 		 (plist-get info :genealogy)) nil)
 	      ;; No match with a common ancestor: try the full parse-tree.
 	      (funcall find-headline path (plist-get info :parse-tree)))))))
+
+(defun org-export-resolve-id-link (link info)
+  "Return headline referenced as LINK destination.
+
+INFO is a plist used as a communication channel.
+
+Return value can be an headline element or nil.  Assume LINK type
+is either \"id\" or \"custom-id\"."
+  (let ((id (org-element-get-property :path link)))
+    (org-element-map
+     (plist-get info :parse-tree) 'headline
+     (lambda (headline local)
+       (when (or (string= (org-element-get-property :id headline) id)
+                 (string= (org-element-get-property :custom-id headline) id))
+         headline))
+     info 'first-match)))
 
 (defun org-export-resolve-coderef (ref info)
   "Resolve a code reference REF.
