@@ -808,7 +808,7 @@ body ------------- string holding the body of the code block
 beg-body --------- point at the beginning of the body
 end-body --------- point at the end of the body"
   (declare (indent 1))
-  (let ((tempvar (gensym "file")))
+  (let ((tempvar (make-symbol "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
@@ -846,7 +846,7 @@ end-body --------- point at the end of the body"
 If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
   (declare (indent 1))
-  (let ((tempvar (gensym "file")))
+  (let ((tempvar (make-symbol "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
@@ -870,7 +870,7 @@ buffer."
 If FILE is nil evaluate BODY forms on source blocks in current
 buffer."
   (declare (indent 1))
-  (let ((tempvar (gensym "file")))
+  (let ((tempvar (make-symbol "file")))
     `(let* ((,tempvar ,file)
 	    (visited-p (or (null ,tempvar)
 			   (get-file-buffer (expand-file-name ,tempvar))))
@@ -890,8 +890,8 @@ buffer."
 ;;;###autoload
 (defmacro org-babel-map-executables (file &rest body)
   (declare (indent 1))
-  (let ((tempvar (gensym "file"))
-	(rx (gensym "rx")))
+  (let ((tempvar (make-symbol "file"))
+	(rx (make-symbol "rx")))
     `(let* ((,tempvar ,file)
 	    (,rx (concat "\\(" org-babel-src-block-regexp
 			 "\\|" org-babel-inline-src-block-regexp
@@ -1023,6 +1023,89 @@ This can be called with C-c C-c."
                               (overlays-at (or point (point))))))))
     (when hash (kill-new hash) (message hash))))
 (add-hook 'org-ctrl-c-ctrl-c-hook 'org-babel-hash-at-point)
+
+(defun org-babel-result-hide-spec ()
+  "Hide portions of results lines.
+Add `org-babel-hide-result' as an invisibility spec for hiding
+portions of results lines."
+  (add-to-invisibility-spec '(org-babel-hide-result . t)))
+(add-hook 'org-mode-hook 'org-babel-result-hide-spec)
+
+(defvar org-babel-hide-result-overlays nil
+  "Overlays hiding results.")
+
+(defun org-babel-result-hide-all ()
+  "Fold all results in the current buffer."
+  (interactive)
+  (org-babel-show-result-all)
+  (save-excursion
+    (while (re-search-forward org-babel-result-regexp nil t)
+      (save-excursion (goto-char (match-beginning 0))
+                      (org-babel-hide-result-toggle-maybe)))))
+
+(defun org-babel-show-result-all ()
+  "Unfold all results in the current buffer."
+  (mapc 'delete-overlay org-babel-hide-result-overlays)
+  (setq org-babel-hide-result-overlays nil))
+
+;;;###autoload
+(defun org-babel-hide-result-toggle-maybe ()
+  "Toggle visibility of result at point."
+  (interactive)
+  (let ((case-fold-search t))
+    (if (save-excursion
+          (beginning-of-line 1)
+          (looking-at org-babel-result-regexp))
+        (progn (org-babel-hide-result-toggle)
+               t) ;; to signal that we took action
+      nil))) ;; to signal that we did not
+
+(defun org-babel-hide-result-toggle (&optional force)
+  "Toggle the visibility of the current result."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (if (re-search-forward org-babel-result-regexp nil t)
+        (let ((start (progn (beginning-of-line 2) (- (point) 1)))
+	      (end (progn
+		     (while (looking-at org-babel-multi-line-header-regexp)
+		       (forward-line 1))
+		     (goto-char (- (org-babel-result-end) 1)) (point)))
+	      ov)
+          (if (memq t (mapcar (lambda (overlay)
+                                (eq (overlay-get overlay 'invisible)
+				    'org-babel-hide-result))
+                              (overlays-at start)))
+              (if (or (not force) (eq force 'off))
+                  (mapc (lambda (ov)
+                          (when (member ov org-babel-hide-result-overlays)
+                            (setq org-babel-hide-result-overlays
+                                  (delq ov org-babel-hide-result-overlays)))
+                          (when (eq (overlay-get ov 'invisible)
+                                    'org-babel-hide-result)
+                            (delete-overlay ov)))
+                        (overlays-at start)))
+            (setq ov (make-overlay start end))
+            (overlay-put ov 'invisible 'org-babel-hide-result)
+            ;; make the block accessible to isearch
+            (overlay-put
+             ov 'isearch-open-invisible
+             (lambda (ov)
+               (when (member ov org-babel-hide-result-overlays)
+                 (setq org-babel-hide-result-overlays
+                       (delq ov org-babel-hide-result-overlays)))
+               (when (eq (overlay-get ov 'invisible)
+                         'org-babel-hide-result)
+                 (delete-overlay ov))))
+            (push ov org-babel-hide-result-overlays)))
+      (error "Not looking at a result line"))))
+
+;; org-tab-after-check-for-cycling-hook
+(add-hook 'org-tab-first-hook 'org-babel-hide-result-toggle-maybe)
+;; Remove overlays when changing major mode
+(add-hook 'org-mode-hook
+	  (lambda () (org-add-hook 'change-major-mode-hook
+				   'org-babel-show-result-all 'append 'local)))
 
 (defvar org-file-properties)
 (defun org-babel-params-from-properties (&optional lang)
