@@ -3088,9 +3088,10 @@ Nil values returned from FUN are ignored in the result."
   "Parse elements between BEG and END positions.
 
 SPECIAL prioritize some elements over the others.  It can set to
-either `section' or `item', which will focus search,
-respectively, on sections and items.  Moreover, when value is
-`item', STRUCTURE will be used as the current list structure.
+`quote-section', `section' or `item', which will focus search,
+respectively, on quote sections, sections and items.  Moreover,
+when value is `item', STRUCTURE will be used as the current list
+structure.
 
 GRANULARITY determines the depth of the recursion.  It can be set
 to the following symbols:
@@ -3186,10 +3187,11 @@ element.
 
 Possible types are defined in `org-element-all-elements'.
 
-Optional argument SPECIAL, when non-nil, can be either `item' or
-`section'.  The former allows to parse item wise instead of
-plain-list wise, using STRUCTURE as the current list structure.
-The latter will try to parse a section before anything else.
+Optional argument SPECIAL, when non-nil, can be either `item',
+`section' or `quote-section'.  `item' allows to parse item wise
+instead of plain-list wise, using STRUCTURE as the current list
+structure.  `section' (resp. `quote-section') will try to parse
+a section (resp. a quote section) before anything else.
 
 If STRUCTURE isn't provided but SPECIAL is set to `item', it will
 be computed.
