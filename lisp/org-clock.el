@@ -2091,7 +2091,6 @@ the currently selected interval size."
 	      (with-current-buffer (find-buffer-visiting file)
 		(save-excursion
 		  (save-restriction
-		    (widen)
 		    (push (org-clock-get-table-data file params) tbls))))))
 	;; Just from the current file
 	(save-restriction
