@@ -2770,7 +2770,7 @@ point is in a section in priority."
 			"^[ \t]*#\\+end:\\(?:\\s-\\|$\\)")))
 	(if (not completep) 'paragraph
 	  (goto-char (car completep)) 'dynamic-block)))
-     ((looking-at "\\(#\\|[ \t]*#\\+\\)\\(?: \\|$\\)") 'comment)
+     ((looking-at "\\(#\\|[ \t]*#\\+\\(?: \\|$\\)\\)") 'comment)
      ((looking-at "[ \t]*-\\{5,\\}[ \t]*$") 'horizontal-rule)
      ((org-at-table-p t) 'table)
      ((looking-at "[ \t]*#\\+tblfm:")
@@ -3279,7 +3279,7 @@ more restrictive."
             (org-element-dynamic-block-parser)
           (org-element-paragraph-parser)))
        ;; Comment.
-       ((looking-at "\\(#\\|[ \t]*#\\+\\)\\(?: \\|$\\)")
+       ((looking-at "\\(#\\|[ \t]*#\\+\\(?: \\|$\\)\\)")
 	(org-element-comment-parser))
        ;; Horizontal rule.
        ((looking-at "[ \t]*-\\{5,\\}[ \t]*$")
