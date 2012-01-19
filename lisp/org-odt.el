@@ -1765,7 +1765,8 @@ ATTR is a string of other attributes of the a element."
    (org-odt-format-tags
     '("<draw:text-box %s>" . "</draw:text-box>")
     text (concat (format " fo:min-height=\"%0.2fcm\"" (or height .2))
-		 (format " fo:min-width=\"%0.2fcm\"" (or width .2))))
+		 (unless width
+		   (format " fo:min-width=\"%0.2fcm\"" (or width .2)))))
    width nil style extra anchor-type))
 
 (defun org-odt-format-inlinetask (heading content
