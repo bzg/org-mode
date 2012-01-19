@@ -1291,26 +1291,22 @@ CONTENTS is nil."
 
 Return a list whose car is `quote-section' and cdr is a plist
 containing `:begin', `:end', `:value' and `:post-blank'
-keywords."
+keywords.
+
+Assume point is at beginning of the section."
   (save-excursion
-    (let* ((begin (progn (org-back-to-heading t)
-			 (forward-line)
-			 (org-skip-whitespace)
-			 (point-at-bol)))
+    (let* ((begin (point))
 	   (end (progn (org-with-limited-levels (outline-next-heading))
 		       (point)))
 	   (pos-before-blank (progn (skip-chars-backward " \r\t\n")
 				    (forward-line)
 				    (point)))
-	   (value (unless (= begin end)
-		    (buffer-substring-no-properties begin pos-before-blank))))
+	   (value (buffer-substring-no-properties begin pos-before-blank)))
       `(quote-section
 	(:begin ,begin
 		:end ,end
 		:value ,value
-		:post-blank ,(if value
-				 (count-lines pos-before-blank end)
-			       0))))))
+		:post-blank ,(count-lines pos-before-blank end))))))
 
 (defun org-element-quote-section-interpreter (quote-section contents)
   "Interpret QUOTE-SECTION element as Org syntax.
@@ -2716,6 +2712,11 @@ point is in a section in priority."
 	     (let (case-fold-search)
 	       (string-match (format "^%s\\(?: \\|$\\)" org-quote-string)
 			     headline))))
+      ;; Move to section beginning.
+      (org-back-to-heading t)
+      (forward-line)
+      (org-skip-whitespace)
+      (beginning-of-line)
       'quote-section)
      ;; Any buffer position not at an headline or in a quote section
      ;; is inside a section, provided function is actively looking for
@@ -3154,7 +3155,11 @@ Elements are accumulated into ACC."
 	      ;; At a plain list, switch to item mode.  At an
 	      ;; headline, switch to section mode.  Any other
 	      ;; element turns off special modes.
-	      (case (car element) (plain-list 'item) (headline 'section))
+	      (case (car element)
+		(plain-list 'item)
+		(headline (if (org-element-get-property :quotedp element)
+			      'quote-section
+			    'section)))
 	      (org-element-get-property :structure element)
 	      granularity visible-only (reverse element)))
 	    ;; Case 3.  Else, just accumulate ELEMENT.
@@ -3208,12 +3213,7 @@ more restrictive."
        ((org-with-limited-levels (org-at-heading-p))
         (org-element-headline-parser))
        ;; Quote section.
-       ((let ((headline (ignore-errors (nth 4 (org-heading-components)))))
-          (and headline
-               (let (case-fold-search)
-                 (string-match (format "^%s\\(?: \\|$\\)" org-quote-string)
-                               headline))))
-        (org-element-quote-section-parser))
+       ((eq special 'quote-section) (org-element-quote-section-parser))
        ;; Section.
        ((eq special 'section) (org-element-section-parser))
        ;; Non-recursive block.
