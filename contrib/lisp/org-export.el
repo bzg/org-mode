@@ -1756,6 +1756,10 @@ developer-specified filters, if any, are called first."
 ;; its derivatives, `org-export-to-buffer' and `org-export-to-file'.
 ;; They differ only by the way they output the resulting code.
 
+;; `org-export-output-file-name' is an auxiliary function meant to be
+;; used with `org-export-to-file'.  With a given extension, it tries
+;; to provide a canonical file name to write export output to.
+
 ;; Note that `org-export-as' doesn't really parse the current buffer,
 ;; but a copy of it (with the same buffer-local variables and
 ;; visibility), where Babel blocks are executed, if appropriate.
@@ -2259,7 +2263,7 @@ list is provided \(cf `org-image-file-name-regexp'\)."
 	extensions)))
 
 (defun org-export-resolve-fuzzy-link (link info)
-  "Return an unique identifier for LINK destination.
+  "Return LINK destination.
 
 INFO is a plist holding contextual information.
 
