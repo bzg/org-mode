@@ -2097,12 +2097,12 @@ header argument from buffer or subtree wide properties.")
 (defun org-babel-noweb-p (params context)
   "Check if PARAMS require expansion in CONTEXT.
 CONTEXT may be one of :tangle, :export or :eval."
-  (flet ((intersection (as bs)
+  (flet ((intersect (as bs)
 		       (when as
 			 (if (member (car as) bs)
 			     (car as)
-			   (intersection (cdr as) bs)))))
-    (intersection (case context
+			   (intersect (cdr as) bs)))))
+    (intersect (case context
                     (:tangle '("yes" "tangle" "no-export"))
                     (:eval   '("yes" "no-export"))
                     (:export '("yes")))
