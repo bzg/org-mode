@@ -16498,13 +16498,13 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	(rea (concat ":" org-archive-tag ":"))
 	     bmp file re)
     (save-excursion
-      (while (setq file (pop files))
-	(catch 'nextfile
-	  (if (bufferp file)
-	      (set-buffer file)
-	    (org-check-agenda-file file)
-	    (set-buffer (org-get-agenda-file-buffer file)))
-	  (save-restriction
+      (save-restriction
+	(while (setq file (pop files))
+	  (catch 'nextfile
+	    (if (bufferp file)
+		(set-buffer file)
+	      (org-check-agenda-file file)
+	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
 	    (setq bmp (buffer-modified-p))
 	    (org-refresh-category-properties)
