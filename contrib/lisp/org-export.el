@@ -2701,64 +2701,60 @@ Return a list of all exportable headlines as parsed elements."
        (unless (and n (> relative-level n)) headline)))
    info))
 
-(defun org-export-collect-elements (type backend info)
-  "Collect named elements of type TYPE.
+(defun org-export-collect-elements (type info &optional predicate)
+  "Collect referenceable elements of a determined type.
 
-Only elements with a caption or a name are collected.
+TYPE can be a symbol or a list of symbols specifying element
+types to search.  Only elements with a caption or a name are
+collected.
 
-BACKEND is the back-end used to transcode their caption or name.
-INFO is a plist holding export options.
+INFO is a plist used as a communication channel.
 
-Return an alist where key is entry's name and value an unique
-identifier that might be used for internal links."
+When non-nil, optional argument PREDICATE is a function accepting
+one argument, an element of type TYPE.  It returns a non-nil
+value when that element should be collected.
+
+Return a list of all elements found, in order of appearance."
   (org-element-map
-   (plist-get info :parse-tree)
-   type
-   (lambda (element info)
-     (let ((entry
-	    (cond
-	     ((org-element-get-property :caption element)
-	      (org-export-secondary-string
-	       (org-element-get-property :caption element) backend info))
-	     ((org-element-get-property :name element)
-	      (org-export-secondary-string
-	       (org-element-get-property :name element) backend info)))))
-       ;; Skip elements with neither a caption nor a name.
-       (when entry (cons entry (org-element-get-property :begin element)))))
-   info))
+   (plist-get info :parse-tree) type
+   (lambda (element local)
+     (and (or (org-element-get-property :caption element)
+	      (org-element-get-property :name element))
+	  (or (not predicate) (funcall predicate element)))
+     element) info))
 
-(defun org-export-collect-tables (backend info)
+(defun org-export-collect-tables (info)
   "Build a list of tables.
 
-BACKEND is the back-end used to transcode table's name.  INFO is
-a plist holding export options.
+INFO is a plist used as a communication channel.
 
-Return an alist where key is the caption of the table and value
-an unique identifier that might be used for internal links."
-  (org-export-collect-elements 'table backend info))
+Return a list of table elements with a caption or a name
+affiliated keyword."
+  (org-export-collect-elements 'table info))
 
-(defun org-export-collect-figures (backend info)
+(defun org-export-collect-figures (info predicate)
   "Build a list of figures.
 
-A figure is a paragraph type element with a caption or a name.
+INFO is a plist used as a communication channel.  PREDICATE is
+a function which accepts one argument: a paragraph element and
+whose return value is non-nil when that element should be
+collected.
 
-BACKEND is the back-end used to transcode headline's name.  INFO
-is a plist holding export options.
+A figure is a paragraph type element, with a caption or a name,
+verifying PREDICATE.  The latter has to be provided since
+a \"figure\" is a vague concept that may depend on back-end.
 
-Return an alist where key is the caption of the figure and value
-an unique indentifier that might be used for internal links."
-  (org-export-collect-elements 'paragraph backend info))
+Return a list of elements recognized as figures."
+  (org-export-collect-elements 'paragraph info predicate))
 
 (defun org-export-collect-listings (backend info)
   "Build a list of src blocks.
 
-BACKEND is the back-end used to transcode src block's name.  INFO
-is a plist holding export options.
+INFO is a plist used as a communication channel.
 
-Return an alist where key is the caption of the src block and
-value an unique indentifier that might be used for internal
-links."
-  (org-export-collect-elements 'src-block backend info))
+Return a list of src-block elements with a caption or a name
+affiliated keyword."
+  (org-export-collect-elements 'src-block info))
 
 
 ;;;; Topology
