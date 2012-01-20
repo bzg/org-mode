@@ -477,7 +477,10 @@ the header arguments specified at the front of the source code
 block."
   (interactive)
   (let ((info (or info (org-babel-get-src-block-info))))
-    (when (org-babel-confirm-evaluate info)
+    (when (org-babel-confirm-evaluate
+	   (let ((i info))
+	     (setf (nth 2 i) (org-babel-merge-params (nth 2 info) params))
+	     i))
       (let* ((lang (nth 0 info))
 	     (params (if params
 			 (org-babel-process-params
@@ -905,6 +908,7 @@ buffer."
 	 (goto-char (point-min))
 	 (while (re-search-forward ,rx nil t)
 	   (goto-char (match-beginning 1))
+	   (when (looking-at org-babel-inline-src-block-regexp)(forward-char 1))
 	   (save-match-data ,@body)
 	   (goto-char (match-end 0))))
        (unless visited-p (kill-buffer to-be-removed))

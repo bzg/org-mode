@@ -164,7 +164,11 @@ options are taken from `org-babel-default-header-args'."
   (interactive)
   (save-excursion
     (goto-char start)
-    (while (and (< (point) end)
+    (unless (markerp end)
+      (let ((m (make-marker)))
+	(set-marker m end (current-buffer))
+	(setq end m)))
+    (while (and (< (point) (marker-position end))
 		(re-search-forward org-babel-lob-one-liner-regexp end t))
       (unless (org-babel-in-example-or-verbatim)
 	(let* ((lob-info (org-babel-lob-get-info))
@@ -186,9 +190,6 @@ options are taken from `org-babel-default-header-args'."
 						     (butlast lob-info) " ")))))
 			       "" nil (car (last lob-info)))
 			 'lob)))))
-	  (setq end (+ end (- (length rep)
-			      (- (length (match-string 0))
-				 (length (or (match-string 11) ""))))))
 	  (if inlinep
 	      (save-excursion
 		(goto-char inline-start)
