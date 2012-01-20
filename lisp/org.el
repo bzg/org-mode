@@ -5792,7 +5792,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   (if org-fontify-done-headline
 	       (list (format org-heading-keyword-regexp-format
 			     (concat
-			      "\\("
+			      "\\(?:"
 			      (mapconcat 'regexp-quote org-done-keywords "\\|")
 			      "\\)"))
 		     '(2 'org-headline-done t))
