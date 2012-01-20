@@ -2720,8 +2720,8 @@ Return a list of all elements found, in order of appearance."
    (lambda (element local)
      (and (or (org-element-get-property :caption element)
 	      (org-element-get-property :name element))
-	  (or (not predicate) (funcall predicate element)))
-     element) info))
+	  (or (not predicate) (funcall predicate element))
+	  element)) info))
 
 (defun org-export-collect-tables (info)
   "Build a list of tables.
@@ -2747,7 +2747,7 @@ a \"figure\" is a vague concept that may depend on back-end.
 Return a list of elements recognized as figures."
   (org-export-collect-elements 'paragraph info predicate))
 
-(defun org-export-collect-listings (backend info)
+(defun org-export-collect-listings (info)
   "Build a list of src blocks.
 
 INFO is a plist used as a communication channel.
