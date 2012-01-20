@@ -18494,7 +18494,8 @@ Calls `org-table-next-row' or `newline', depending on context.
 See the individual commands for more information."
   (interactive)
   (cond
-   ((bobp) (if indent (newline-and-indent) (newline)))
+   ((or (bobp) (org-in-src-block-p))
+    (if indent (newline-and-indent) (newline)))
    ((org-at-table-p)
     (org-table-justify-field-maybe)
     (call-interactively 'org-table-next-row))
