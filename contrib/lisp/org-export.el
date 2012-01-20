@@ -2395,11 +2395,16 @@ INFO is a plist holding export options."
 ;; `org-export-get-ordinal' associates a sequence number to any object
 ;; or element.
 
-(defun org-export-get-ordinal (element info &optional within-section predicate)
+(defun org-export-get-ordinal
+  (element info &optional types within-section predicate)
   "Return ordinal number of an element or object.
 
 ELEMENT is the element or object considered.  INFO is the plist
 used as a communication channel.
+
+Optional argument TYPES, when non-nil, is a list of element or
+object types, as symbols, that should also be counted in.
+Otherwise, only provided element's type is considered.
 
 When optional argument WITHIN-SECTION is non-nil, narrow counting
 to the section containing ELEMENT.
@@ -2411,7 +2416,6 @@ This argument allows to count only a certain type of objects,
 like inline images, which are a subset of links \(in that case,
 `org-export-inline-image-p' might be an useful predicate\)."
   (let ((counter 0)
-        (type (car element))
         ;; Determine if search should apply to current section, in
         ;; which case it should be retrieved first, or to full parse
         ;; tree.  As a special case, an element or object without
@@ -2423,12 +2427,12 @@ like inline images, which are a subset of links \(in that case,
 	       (plist-get info :parse-tree)))))
     ;; Increment counter until ELEMENT is found again.
     (org-element-map
-     data type
+     data (or types (car element))
      (lambda (el local)
        (cond
-        ((and (functionp predicate) (funcall predicate el)))
         ((equal element el) (1+ counter))
-        (t (incf counter) nil)))
+	((not predicate) (incf counter) nil)
+	((funcall predicate el) (incf counter) nil)))
      info 'first-match)))
 
 
