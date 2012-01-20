@@ -3243,6 +3243,8 @@ mailto:adent@@galaxy.net                   @r{Mail link}
 vm:folder                                 @r{VM folder link}
 vm:folder#id                              @r{VM message link}
 vm://myself@@some.where.org/folder#id      @r{VM on remote machine}
+vm-imap:account:folder                    @r{VM IMAP folder link}
+vm-imap:account:folder#id                 @r{VM IMAP message link}
 wl:folder                                 @r{WANDERLUST folder link}
 wl:folder#id                              @r{WANDERLUST message link}
 mhe:folder                                @r{MH-E folder link}
@@ -6698,21 +6700,21 @@ similar way.}:
 
 @vindex org-from-is-user-regexp
 @smallexample
-Link type               |  Available keywords
-------------------------+----------------------------------------------
-bbdb                    |  %:name %:company
-irc                     |  %:server %:port %:nick
-vm, wl, mh, mew, rmail  |  %:type %:subject %:message-id
-                        |  %:from %:fromname %:fromaddress
-                        |  %:to   %:toname   %:toaddress
-                        |  %:date @r{(message date header field)}
-                        |  %:date-timestamp @r{(date as active timestamp)}
-                        |  %:date-timestamp-inactive @r{(date as inactive timestamp)}
-                        |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
-gnus                    |  %:group, @r{for messages also all email fields}
-w3, w3m                 |  %:url
-info                    |  %:file %:node
-calendar                |  %:date
+Link type                        |  Available keywords
+---------------------------------+----------------------------------------------
+bbdb                             |  %:name %:company
+irc                              |  %:server %:port %:nick
+vm, vm-imap, wl, mh, mew, rmail  |  %:type %:subject %:message-id
+                                 |  %:from %:fromname %:fromaddress
+                                 |  %:to   %:toname   %:toaddress
+                                 |  %:date @r{(message date header field)}
+                                 |  %:date-timestamp @r{(date as active timestamp)}
+                                 |  %:date-timestamp-inactive @r{(date as inactive timestamp)}
+                                 |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
+gnus                             |  %:group, @r{for messages also all email fields}
+w3, w3m                          |  %:url
+info                             |  %:file %:node
+calendar                         |  %:date
 @end smallexample
 
 @noindent
