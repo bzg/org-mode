@@ -13273,7 +13273,7 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
 (defun org-set-tags-command (&optional arg just-align)
   "Call the set-tags command for the current entry."
   (interactive "P")
-  (if (org-at-heading-p)
+  (if (or (org-at-heading-p) (and arg (org-before-first-heading-p)))
       (org-set-tags arg just-align)
     (save-excursion
       (org-back-to-heading t)
@@ -13327,7 +13327,7 @@ If DATA is nil or the empty string, any tags will be removed."
 With prefix ARG, realign all tags in headings in the current buffer."
   (interactive "P")
   (let* ((re org-outline-regexp-bol)
-	 (current (org-get-tags-string))
+	 (current (unless arg (org-get-tags-string)))
 	 (col (current-column))
 	 (org-setting-tags t)
 	 table current-tags inherited-tags ; computed below when needed
