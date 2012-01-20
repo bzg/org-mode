@@ -19504,6 +19504,14 @@ and end of string."
   "Is S an ID created by UUIDGEN?"
   (string-match "\\`[0-9a-f]\\{8\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{12\\}\\'" (downcase s)))
 
+(defun org-in-src-block-p nil
+  "Whether point is in a code source block."
+  (let (ov)
+    (when (setq ov (overlays-at (point)))
+      (memq 'org-block-background
+	    (overlay-properties
+	     (car ov))))))
+
 (defun org-context ()
   "Return a list of contexts of the current cursor position.
 If several contexts apply, all are returned.
@@ -19522,8 +19530,10 @@ contexts are:
 :table            in an org-mode table
 :table-special    on a special filed in a table
 :table-table      in a table.el table
+:clocktable       in a clocktable
+:src-block        in a source block
 :link             on a hyperlink
-:keyword          on a keyword: SCHEDULED, DEADLINE, CLOSE,COMMENT, QUOTE.
+:keyword          on a keyword: SCHEDULED, DEADLINE, CLOSE, COMMENT, QUOTE.
 :target           on a <<target>>
 :radio-target     on a <<<radio-target>>>
 :latex-fragment   on a LaTeX fragment
@@ -19534,6 +19544,7 @@ faces as a help to recognize the following contexts: :table-special, :link,
 and :keyword."
   (let* ((f (get-text-property (point) 'face))
 	 (faces (if (listp f) f (list f)))
+	 (case-fold-search t)
 	 (p (point)) clist o)
     ;; First the large context
     (cond
@@ -19566,6 +19577,23 @@ and :keyword."
 		      (next-single-property-change p 'face)) clist)))
      ((org-at-table-p 'any)
       (push (list :table-table) clist)))
+    (goto-char p)
+
+    ;; New the "medium" contexts: clocktables, source blocks
+    (cond ((org-in-clocktable-p)
+	   (push (list :clocktable
+		       (and (or (looking-at "#\\+BEGIN: clocktable")
+				(search-backward "#+BEGIN: clocktable" nil t))
+			    (match-beginning 0))
+		       (and (re-search-forward "#\\+END:?" nil t)
+			    (match-end 0))) clist))
+	  ((org-in-src-block-p)
+	   (push (list :src-block
+		       (and (or (looking-at "#\\+BEGIN_SRC")
+				(search-backward "#+BEGIN_SRC" nil t))
+			    (match-beginning 0))
+		       (and (search-forward "#+END_SRC" nil t)
+			    (match-beginning 0))) clist)))
     (goto-char p)
 
     ;; Now the small context
