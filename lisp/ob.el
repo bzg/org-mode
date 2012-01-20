@@ -476,7 +476,10 @@ the header arguments specified at the front of the source code
 block."
   (interactive)
   (let ((info (or info (org-babel-get-src-block-info))))
-    (when (org-babel-confirm-evaluate info)
+    (when (org-babel-confirm-evaluate
+	   (let ((i info))
+	     (setf (nth 2 i) (org-babel-merge-params (nth 2 info) params))
+	     i))
       (let* ((lang (nth 0 info))
 	     (params (if params
 			 (org-babel-process-params
