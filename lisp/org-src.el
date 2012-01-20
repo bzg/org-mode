@@ -659,21 +659,30 @@ the language, a switch telling if the content should be in a single line."
       (set-window-configuration org-edit-src-saved-temp-window-config)
       (setq org-edit-src-saved-temp-window-config nil))))
 
+(defmacro org-src-in-org-buffer (&rest body)
+  `(let ((p (point)) (m (mark)) msg)
+     (save-window-excursion
+       (org-edit-src-exit 'save)
+       ,@body
+       (setq msg (current-message))
+       (if (eq org-src-window-setup 'other-frame)
+	   (let ((org-src-window-setup 'current-window))
+	     (org-edit-src-code 'save))
+	 (org-edit-src-code 'save)))
+     (push-mark m 'nomessage)
+     (goto-char (min p (point-max)))
+     (message (or msg ""))))
+(def-edebug-spec org-src-in-org-buffer (body))
+
 (defun org-edit-src-save ()
   "Save parent buffer with current state source-code buffer."
   (interactive)
-  (let ((p (point)) (m (mark)) msg)
-    (save-window-excursion
-      (org-edit-src-exit 'save)
-      (save-buffer)
-      (setq msg (current-message))
-      (if (eq org-src-window-setup 'other-frame)
-	  (let ((org-src-window-setup 'current-window))
-	    (org-edit-src-code 'save))
-	(org-edit-src-code 'save)))
-    (push-mark m 'nomessage)
-    (goto-char (min p (point-max)))
-    (message (or msg ""))))
+  (org-src-in-org-buffer (save-buffer)))
+
+(defun org-src-tangle (arg)
+  "Tangle the parent buffer."
+  (interactive)
+  (org-src-in-org-buffer (org-babel-tangle arg)))
 
 (defun org-src-mode-configure-edit-buffer ()
   (when (org-bound-and-true-p org-edit-src-from-org-mode)
