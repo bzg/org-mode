@@ -912,6 +912,7 @@ buffer."
 	 (goto-char (point-min))
 	 (while (re-search-forward ,rx nil t)
 	   (goto-char (match-beginning 1))
+	   (when (looking-at org-babel-inline-src-block-regexp)(forward-char 1))
 	   (save-match-data ,@body)
 	   (goto-char (match-end 0))))
        (unless visited-p (kill-buffer to-be-removed))
