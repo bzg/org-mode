@@ -167,7 +167,7 @@
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
     (:with-creator nil "creator" org-export-with-creator)
-    (:with-drawers nil "drawer" org-export-with-drawers)
+    (:with-drawers nil "d" org-export-with-drawers)
     (:with-email nil "email" org-export-with-email)
     (:with-emphasize nil "*" org-export-with-emphasize)
     (:with-entities nil "e" org-export-with-entities)
