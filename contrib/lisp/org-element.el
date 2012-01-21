@@ -752,21 +752,22 @@ and `:post-blank' keywords."
   (save-excursion
     ;; Beginning of section is the beginning of the first non-blank
     ;; line after previous headline.
-    (let ((begin (save-excursion
-		   (org-with-limited-levels (outline-previous-heading))
-		   (if (not (org-at-heading-p)) (point)
-		     (forward-line) (org-skip-whitespace) (point-at-bol))))
-	  (end (progn (org-with-limited-levels (outline-next-heading))
-		      (point)))
-	  (pos-before-blank (progn (skip-chars-backward " \r\t\n")
-				   (forward-line)
-				   (point))))
-      `(section
-	(:begin ,begin
-		:end ,end
-		:contents-begin ,begin
-		:contents-end ,pos-before-blank
-		:post-blank ,(count-lines pos-before-blank end))))))
+    (org-with-limited-levels
+     (let ((begin
+	    (save-excursion
+	      (outline-previous-heading)
+	      (if (not (org-at-heading-p)) (point)
+		(forward-line) (org-skip-whitespace) (point-at-bol))))
+	   (end (progn (outline-next-heading) (point)))
+	   (pos-before-blank (progn (skip-chars-backward " \r\t\n")
+				    (forward-line)
+				    (point))))
+       `(section
+	 (:begin ,begin
+		 :end ,end
+		 :contents-begin ,begin
+		 :contents-end ,pos-before-blank
+		 :post-blank ,(count-lines pos-before-blank end)))))))
 
 (defun org-element-section-interpreter (section contents)
   "Interpret SECTION element as Org syntax.
