@@ -36,8 +36,46 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
-(require 'org-element)
-(require 'org-export)
+
+(defvar org-export-latex-default-packages-alist)
+(defvar org-export-latex-packages-alist)
+
+(declare-function org-element-get-property "org-element" (property element))
+(declare-function org-element-normalize-string "org-element" (s))
+(declare-function org-element-parse-secondary-string
+		  "org-element" (string restriction &optional buffer))
+(defvar org-element-string-restrictions)
+
+(declare-function org-export-clean-table "org-export" (table specialp))
+(declare-function org-export-data "org-export" (data backend info))
+(declare-function org-export-directory "org-export" (type plist))
+(declare-function org-export-expand-macro "org-export" (macro info))
+(declare-function org-export-first-sibling-p "org-export" (headline info))
+(declare-function org-export-footnote-first-reference-p "org-export" (footnote-reference info))
+(declare-function org-export-get-coderef-format "org-export" (path desc))
+(declare-function org-export-get-footnote-definition "org-export" (footnote-reference info))
+(declare-function org-export-get-footnote-number "org-export" (footnote info))
+(declare-function org-export-get-previous-element "org-export" (blob info))
+(declare-function org-export-get-relative-level "org-export" (headline info))
+(declare-function org-export-handle-code
+		  "org-export" (element info &optional num-fmt ref-fmt delayed))
+(declare-function org-export-included-file "org-export" (keyword backend info))
+(declare-function org-export-inline-image-p "org-export" (link &optional extensions))
+(declare-function org-export-last-sibling-p "org-export" (headline info))
+(declare-function org-export-low-level-p "org-export" (headline info))
+(declare-function org-export-output-file-name
+		  "org-export" (extension &optional subtreep pub-dir))
+(declare-function org-export-resolve-coderef "org-export" (ref info))
+(declare-function org-export-resolve-fuzzy-link "org-export" (link info))
+(declare-function org-export-secondary-string "org-export" (secondary backend info))
+(declare-function org-export-solidify-link-text "org-export" (s))
+(declare-function org-export-table-format-info "org-export" (table))
+(declare-function
+ org-export-to-buffer "org-export"
+ (backend buffer &optional subtreep visible-only body-only ext-plist))
+(declare-function
+ org-export-to-file "org-export"
+ (backend file &optional subtreep visible-only body-only ext-plist))
 
 
 
@@ -1997,7 +2035,7 @@ Return PDF file name or an error if it couldn't be produced."
 	 (texfile (file-truename texfile))
 	 (base (file-name-sans-extension texfile))
 	 errors)
-    (message (format "Processing LaTeX file " texfile "..." texfile))
+    (message (format "Processing LaTeX file %s ..." texfile))
     (unwind-protect
 	(progn
 	  (cond
