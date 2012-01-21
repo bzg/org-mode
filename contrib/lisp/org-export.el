@@ -276,10 +276,15 @@ If the value is `comment' insert it as a comment."
   :group 'org-export-general
   :type '(string :tag "Creator string"))
 
-(defcustom org-export-with-drawers nil
-  "Non-nil means export with drawers like the property drawer.
+(defcustom org-export-with-drawers t
+  "Non-nil means export contents of standard drawers.
+
 When t, all drawers are exported.  This may also be a list of
-drawer names to export."
+drawer names to export.  This variable doesn't apply to
+properties drawers.
+
+This option can also be set with the #+OPTIONS line,
+e.g. \"d:nil\"."
   :group 'org-export-general
   :type '(choice
 	  (const :tag "All drawers" t)
