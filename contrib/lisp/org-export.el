@@ -110,6 +110,52 @@
     (:description "DESCRIPTION" nil nil newline)
     (:email "EMAIL" nil user-mail-address t)
     (:exclude-tags "EXPORT_EXCLUDE_TAGS" nil org-export-exclude-tags split)
+    (:filter-babel-call nil nil org-export-filter-babel-call-functions)
+    (:filter-center-block nil nil org-export-filter-center-block-functions)
+    (:filter-comment nil nil org-export-filter-comment-functions)
+    (:filter-comment-block nil nil org-export-filter-comment-block-functions)
+    (:filter-drawer nil nil org-export-filter-drawer-functions)
+    (:filter-dynamic-block nil nil org-export-filter-dynamic-block-functions)
+    (:filter-emphasis nil nil org-export-filter-emphasis-functions)
+    (:filter-entity nil nil org-export-filter-entity-functions)
+    (:filter-example-block nil nil org-export-filter-example-block-functions)
+    (:filter-export-block nil nil org-export-filter-export-block-functions)
+    (:filter-export-snippet nil nil org-export-filter-export-snippet-functions)
+    (:filter-final-output nil nil org-export-filter-final-output-functions)
+    (:filter-fixed-width nil nil org-export-filter-fixed-width-functions)
+    (:filter-footnote-definition nil nil org-export-filter-footnote-definition-functions)
+    (:filter-footnote-reference nil nil org-export-filter-footnote-reference-functions)
+    (:filter-headline nil nil org-export-filter-headline-functions)
+    (:filter-horizontal-rule nil nil org-export-filter-horizontal-rule-functions)
+    (:filter-inline-babel-call nil nil org-export-filter-inline-babel-call-functions)
+    (:filter-inline-src-block nil nil org-export-filter-inline-src-block-functions)
+    (:filter-inlinetask nil nil org-export-filter-inlinetask-functions)
+    (:filter-item nil nil org-export-filter-item-functions)
+    (:filter-keyword nil nil org-export-filter-keyword-functions)
+    (:filter-latex-environment nil nil org-export-filter-latex-environment-functions)
+    (:filter-latex-fragment nil nil org-export-filter-latex-fragment-functions)
+    (:filter-line-break nil nil org-export-filter-line-break-functions)
+    (:filter-link nil nil org-export-filter-link-functions)
+    (:filter-macro nil nil org-export-filter-macro-functions)
+    (:filter-paragraph nil nil org-export-filter-paragraph-functions)
+    (:filter-parse-tree nil nil org-export-filter-parse-tree-functions)
+    (:filter-plain-list nil nil org-export-filter-plain-list-functions)
+    (:filter-plain-text nil nil org-export-filter-plain-text-functions)
+    (:filter-property-drawer nil nil org-export-filter-property-drawer-functions)
+    (:filter-quote-block nil nil org-export-filter-quote-block-functions)
+    (:filter-quote-section nil nil org-export-filter-quote-section-functions)
+    (:filter-radio-target nil nil org-export-filter-radio-target-functions)
+    (:filter-section nil nil org-export-filter-section-functions)
+    (:filter-special-block nil nil org-export-filter-special-block-functions)
+    (:filter-src-block nil nil org-export-filter-src-block-functions)
+    (:filter-statistics-cookie nil nil org-export-filter-statistics-cookie-functions)
+    (:filter-subscript nil nil org-export-filter-subscript-functions)
+    (:filter-superscript nil nil org-export-filter-superscript-functions)
+    (:filter-table nil nil org-export-filter-table-functions)
+    (:filter-target nil nil org-export-filter-target-functions)
+    (:filter-time-stamp nil nil org-export-filter-time-stamp-functions)
+    (:filter-verbatim nil nil org-export-filter-verbatim-functions)
+    (:filter-verse-block nil nil org-export-filter-verse-block-functions)
     (:headline-levels nil "H" org-export-headline-levels)
     (:keywords "KEYWORDS" nil nil space)
     (:language "LANGUAGE" nil org-export-default-language t)
@@ -1237,7 +1283,7 @@ Return transcoded string."
       ((stringp blob)
        (let ((transcoder (intern (format "org-%s-plain-text" backend))))
 	 (org-export-filter-apply-functions
-	  org-export-filter-plain-text-functions
+	  (plist-get info :filter-plain-text)
 	  (if (fboundp transcoder) (funcall transcoder blob info) blob)
 	  backend)))
       ;; BLOB is an element or an object.
@@ -1318,7 +1364,7 @@ Return transcoded string."
 	   ;; No filter for a full document.
 	   (if (eq type 'org-data) results
 	     (org-export-filter-apply-functions
-	      (eval (intern (format "org-export-filter-%s-functions" type)))
+	      (plist-get info (intern (format ":filter-%s" type)))
 	      (let ((post-blank (org-element-get-property :post-blank blob)))
 		(if (memq type org-element-all-elements)
 		    (concat (org-element-normalize-string results)
@@ -1739,13 +1785,12 @@ return a string or nil.")
 
 (defun org-export-filter-apply-functions (filters value backend)
   "Call every function in FILTERS with arguments VALUE and BACKEND.
-Functions are called in reverse order, to be reasonably sure that
-developer-specified filters, if any, are called first."
+Functions are called in a LIFO fashion, to be sure that developer
+specified filters, if any, are called first."
   ;; Ensure FILTERS is a list.
-  (let ((filters (if (listp filters) (reverse filters) (list filters))))
-    (loop for filter in filters
-	  if (not value) return nil else
-	  do (setq value (funcall filter value backend))))
+  (loop for filter in filters
+	if (not value) return nil else
+	do (setq value (funcall filter value backend)))
   value)
 
 
@@ -1803,18 +1848,18 @@ Return code as a string."
       ;; created, where all code blocks are evaluated.  RAW-DATA is
       ;; the parsed tree of the buffer resulting from that process.
       ;; Eventually call `org-export-filter-parse-tree-functions'.
-      (let ((info (org-export-collect-options backend subtreep ext-plist))
-	    (raw-data (progn
-			(when subtreep	; Only parse subtree contents.
-			  (let ((end (save-excursion (org-end-of-subtree t))))
-			    (narrow-to-region
-			     (progn (forward-line) (point)) end)))
-			(org-export-filter-apply-functions
-			 org-export-filter-parse-tree-functions
-			 (org-export-with-current-buffer-copy
-			  (org-export-blocks-preprocess)
-			  (org-element-parse-buffer nil visible-only))
-			 backend))))
+      (let* ((info (org-export-collect-options backend subtreep ext-plist))
+	     (raw-data (progn
+			 (when subtreep	; Only parse subtree contents.
+			   (let ((end (save-excursion (org-end-of-subtree t))))
+			     (narrow-to-region
+			      (progn (forward-line) (point)) end)))
+			 (org-export-filter-apply-functions
+			  (plist-get info :filter-parse-tree)
+			  (org-export-with-current-buffer-copy
+			   (org-export-blocks-preprocess)
+			   (org-element-parse-buffer nil visible-only))
+			  backend))))
 	;; Initialize the communication system and combine it to INFO.
 	(setq info
 	      (org-combine-plists
@@ -1825,7 +1870,7 @@ Return code as a string."
 		      (org-export-data raw-data backend info)))
 	       (template (intern (format "org-%s-template" backend)))
 	       (output (org-export-filter-apply-functions
-			org-export-filter-final-output-functions
+			(plist-get info :filter-final-output)
 			(if (or (not (fboundp template)) body-only) body
 			  (funcall template body info))
 			backend)))
