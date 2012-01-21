@@ -1523,157 +1523,157 @@ a string or nil.")
 ;;;; Elements Filters
 
 (defvar org-export-filter-center-block-functions nil
-  "Filter, or list of filters, applied to a transcoded center block.
+  "List of functions applied to a transcoded center block.
 Each filter is called with two arguments: the transcoded center
 block, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-drawer-functions nil
-  "Filter, or list of filters, applied to a transcoded drawer.
+  "List of functions applied to a transcoded drawer.
 Each filter is called with two arguments: the transcoded drawer,
 as a string, and the back-end, as a symbol.  It must return
 a string or nil.")
 
 (defvar org-export-filter-dynamic-block-functions nil
-  "Filter, or list of filters, applied to a transcoded dynamic-block.
+  "List of functions applied to a transcoded dynamic-block.
 Each filter is called with two arguments: the transcoded
 dynamic-block, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-headline-functions nil
-  "Filter, or list of filters, applied to a transcoded headline.
+  "List of functions applied to a transcoded headline.
 Each filter is called with two arguments: the transcoded
 headline, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-inlinetask-functions nil
-  "Filter, or list of filters, applied to a transcoded inlinetask.
+  "List of functions applied to a transcoded inlinetask.
 Each filter is called with two arguments: the transcoded
 inlinetask, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-plain-list-functions nil
-  "Filter, or list of filters, applied to a transcoded plain-list.
+  "List of functions applied to a transcoded plain-list.
 Each filter is called with two arguments: the transcoded
 plain-list, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-item-functions nil
-  "Filter, or list of filters, applied to a transcoded item.
+  "List of functions applied to a transcoded item.
 Each filter is called with two arguments: the transcoded item, as
 a string, and the back-end, as a symbol.  It must return a string
 or nil.")
 
 (defvar org-export-filter-comment-functions nil
-  "Filter, or list of filters, applied to a transcoded comment.
+  "List of functions applied to a transcoded comment.
 Each filter is called with two arguments: the transcoded comment,
 as a string, and the back-end, as a symbol.  It must return
 a string or nil.")
 
 (defvar org-export-filter-comment-block-functions nil
-  "Filter, or list of filters, applied to a transcoded comment-comment.
+  "List of functions applied to a transcoded comment-comment.
 Each filter is called with two arguments: the transcoded
 comment-block, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-example-block-functions nil
-  "Filter, or list of filters, applied to a transcoded example-block.
+  "List of functions applied to a transcoded example-block.
 Each filter is called with two arguments: the transcoded
 example-block, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-export-block-functions nil
-  "Filter, or list of filters, applied to a transcoded export-block.
+  "List of functions applied to a transcoded export-block.
 Each filter is called with two arguments: the transcoded
 export-block, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-fixed-width-functions nil
-  "Filter, or list of filters, applied to a transcoded fixed-width.
+  "List of functions applied to a transcoded fixed-width.
 Each filter is called with two arguments: the transcoded
 fixed-width, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-footnote-definition-functions nil
-  "Filter, or list of filters, applied to a transcoded footnote-definition.
+  "List of functions applied to a transcoded footnote-definition.
 Each filter is called with two arguments: the transcoded
 footnote-definition, as a string, and the back-end, as a symbol.
 It must return a string or nil.")
 
 (defvar org-export-filter-horizontal-rule-functions nil
-  "Filter, or list of filters, applied to a transcoded horizontal-rule.
+  "List of functions applied to a transcoded horizontal-rule.
 Each filter is called with two arguments: the transcoded
 horizontal-rule, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-keyword-functions nil
-  "Filter, or list of filters, applied to a transcoded keyword.
+  "List of functions applied to a transcoded keyword.
 Each filter is called with two arguments: the transcoded keyword,
 as a string, and the back-end, as a symbol.  It must return
 a string or nil.")
 
 (defvar org-export-filter-latex-environment-functions nil
-  "Filter, or list of filters, applied to a transcoded latex-environment.
+  "List of functions applied to a transcoded latex-environment.
 Each filter is called with two arguments: the transcoded
 latex-environment, as a string, and the back-end, as a symbol.
 It must return a string or nil.")
 
 (defvar org-export-filter-babel-call-functions nil
-  "Filter, or list of filters, applied to a transcoded babel-call.
+  "List of functions applied to a transcoded babel-call.
 Each filter is called with two arguments: the transcoded
 babel-call, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-paragraph-functions nil
-  "Filter, or list of filters, applied to a transcoded paragraph.
+  "List of functions applied to a transcoded paragraph.
 Each filter is called with two arguments: the transcoded
 paragraph, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-property-drawer-functions nil
-  "Filter, or list of filters, applied to a transcoded property-drawer.
+  "List of functions applied to a transcoded property-drawer.
 Each filter is called with two arguments: the transcoded
 property-drawer, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-quote-block-functions nil
-  "Filter, or list of filters, applied to a transcoded quote block.
+  "List of functions applied to a transcoded quote block.
 Each filter is called with two arguments: the transcoded quote
 block, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-quote-section-functions nil
-  "Filter, or list of filters, applied to a transcoded quote-section.
+  "List of functions applied to a transcoded quote-section.
 Each filter is called with two arguments: the transcoded
 quote-section, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-section-functions nil
-  "Filter, or list of filters, applied to a transcoded section.
+  "List of functions applied to a transcoded section.
 Each filter is called with two arguments: the transcoded section,
 as a string, and the back-end, as a symbol.  It must return
 a string or nil.")
 
 (defvar org-export-filter-special-block-functions nil
-  "Filter, or list of filters, applied to a transcoded special block.
+  "List of functions applied to a transcoded special block.
 Each filter is called with two arguments: the transcoded special
 block, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-src-block-functions nil
-  "Filter, or list of filters, applied to a transcoded src-block.
+  "List of functions applied to a transcoded src-block.
 Each filter is called with two arguments: the transcoded
 src-block, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-table-functions nil
-  "Filter, or list of filters, applied to a transcoded table.
+  "List of functions applied to a transcoded table.
 Each filter is called with two arguments: the transcoded table,
 as a string, and the back-end, as a symbol.  It must return
 a string or nil.")
 
 (defvar org-export-filter-verse-block-functions nil
-  "Filter, or list of filters, applied to a transcoded verse block.
+  "List of functions applied to a transcoded verse block.
 Each filter is called with two arguments: the transcoded verse
 block, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
@@ -1682,103 +1682,103 @@ return a string or nil.")
 ;;;; Objects Filters
 
 (defvar org-export-filter-emphasis-functions nil
-  "Filter, or list of filters, applied to a transcoded emphasis.
+  "List of functions applied to a transcoded emphasis.
 Each filter is called with two arguments: the transcoded
 emphasis, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-entity-functions nil
-  "Filter, or list of filters, applied to a transcoded entity.
+  "List of functions applied to a transcoded entity.
 Each filter is called with two arguments: the transcoded entity,
 as a string, and the back-end, as a symbol.  It must return
 a string or nil.")
 
 (defvar org-export-filter-export-snippet-functions nil
-  "Filter, or list of filters, applied to a transcoded export-snippet.
+  "List of functions applied to a transcoded export-snippet.
 Each filter is called with two arguments: the transcoded
 export-snippet, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-footnote-reference-functions nil
-  "Filter, or list of filters, applied to a transcoded footnote-reference.
+  "List of functions applied to a transcoded footnote-reference.
 Each filter is called with two arguments: the transcoded
 footnote-reference, as a string, and the back-end, as a symbol.
 It must return a string or nil.")
 
 (defvar org-export-filter-inline-babel-call-functions nil
-  "Filter, or list of filters, applied to a transcoded inline-babel-call.
+  "List of functions applied to a transcoded inline-babel-call.
 Each filter is called with two arguments: the transcoded
 inline-babel-call, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-inline-src-block-functions nil
-  "Filter, or list of filters, applied to a transcoded inline-src-block.
+  "List of functions applied to a transcoded inline-src-block.
 Each filter is called with two arguments: the transcoded
 inline-src-block, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-latex-fragment-functions nil
-  "Filter, or list of filters, applied to a transcoded latex-fragment.
+  "List of functions applied to a transcoded latex-fragment.
 Each filter is called with two arguments: the transcoded
 latex-fragment, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-line-break-functions nil
-  "Filter, or list of filters, applied to a transcoded line-break.
+  "List of functions applied to a transcoded line-break.
 Each filter is called with two arguments: the transcoded
 line-break, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-link-functions nil
-  "Filter, or list of filters, applied to a transcoded link.
+  "List of functions applied to a transcoded link.
 Each filter is called with two arguments: the transcoded link, as
 a string, and the back-end, as a symbol.  It must return a string
 or nil.")
 
 (defvar org-export-filter-macro-functions nil
-  "Filter, or list of filters, applied to a transcoded macro.
+  "List of functions applied to a transcoded macro.
 Each filter is called with two arguments: the transcoded macro,
 as a string, and the back-end, as a symbol.  It must return
 a string or nil.")
 
 (defvar org-export-filter-radio-target-functions nil
-  "Filter, or list of filters, applied to a transcoded radio-target.
+  "List of functions applied to a transcoded radio-target.
 Each filter is called with two arguments: the transcoded
 radio-target, as a string, and the back-end, as a symbol.  It
 must return a string or nil.")
 
 (defvar org-export-filter-statistics-cookie-functions nil
-  "Filter, or list of filters, applied to a transcoded statistics-cookie.
+  "List of functions applied to a transcoded statistics-cookie.
 Each filter is called with two arguments: the transcoded
 statistics-cookie, as a string, and the back-end, as a symbol.
 It must return a string or nil.")
 
 (defvar org-export-filter-subscript-functions nil
-  "Filter, or list of filters, applied to a transcoded subscript.
+  "List of functions applied to a transcoded subscript.
 Each filter is called with two arguments: the transcoded
 subscript, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-superscript-functions nil
-  "Filter, or list of filters, applied to a transcoded superscript.
+  "List of functions applied to a transcoded superscript.
 Each filter is called with two arguments: the transcoded
 superscript, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-target-functions nil
-  "Filter, or list of filters, applied to a transcoded target.
+  "List of functions applied to a transcoded target.
 Each filter is called with two arguments: the transcoded target,
 as a string, and the back-end, as a symbol.  It must return
 a string or nil.")
 
 (defvar org-export-filter-time-stamp-functions nil
-  "Filter, or list of filters, applied to a transcoded time-stamp.
+  "List of functions applied to a transcoded time-stamp.
 Each filter is called with two arguments: the transcoded
 time-stamp, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
 
 (defvar org-export-filter-verbatim-functions nil
-  "Filter, or list of filters, applied to a transcoded verbatim.
+  "List of functions applied to a transcoded verbatim.
 Each filter is called with two arguments: the transcoded
 verbatim, as a string, and the back-end, as a symbol.  It must
 return a string or nil.")
