@@ -685,28 +685,28 @@ These are the .aux, .log, .out, and .toc files."
 (defun org-e-latex--caption/label-string (caption label info)
   "Return caption and label LaTeX string for floats.
 
-CAPTION is a secondary string \(a list of strings and Org
-objects\) and LABEL a string representing the label.  INFO is
-a plist holding contextual information.
+CAPTION is a cons cell of secondary strings, the car being the
+standard caption and the cdr its short form.  LABEL is a string
+representing the label.  INFO is a plist holding contextual
+information.
 
 If there's no caption nor label, return the empty string.
 
 For non-floats, see `org-e-latex--wrap-label'."
-  (let ((caption-str (and caption
-			  (org-export-secondary-string
-			   caption 'e-latex info)))
-	(label-str (if label (format "\\label{%s}" label) "")))
+  (let ((label-str (if label (format "\\label{%s}" label) "")))
     (cond
-     ((and (not caption-str) (not label)) "")
-     ((not caption-str) (format "\\label{%s}\n" label))
+     ((and (not caption) (not label)) "")
+     ((not caption) (format "\\label{%s}\n" label))
      ;; Option caption format with short name.
-     ((string-match "\\[\\([^][]*\\)\\]{\\([^{}]*\\)}" caption-str)
+     ((cdr caption)
       (format "\\caption[%s]{%s%s}\n"
-	      (org-match-string-no-properties 1 caption-str)
+	      (org-export-secondary-string (cdr caption) 'e-latex info)
 	      label-str
-	      (org-match-string-no-properties 2 caption-str)))
+	      (org-export-secondary-string (car caption) 'e-latex info)))
      ;; Standard caption format.
-     (t (format "\\caption{%s%s}\n" label-str caption-str)))))
+     (t (format "\\caption{%s%s}\n"
+		label-str
+		(org-export-secondary-string (car caption) 'e-latex info))))))
 
 (defun org-e-latex--guess-inputenc (header)
   "Set the coding system in inputenc to what the buffer is.
@@ -1629,12 +1629,17 @@ contextual information."
 	(if float-env (format float-env body) body)))
      ;; Use listings package.
      (t
-      (let ((lst-lang (or (cadr (assq (intern lang) org-e-latex-listings-langs))
-			  lang))
-	    (caption-str (and caption
-			      (org-export-secondary-string
-			       (org-element-get-property :caption src-block)
-			       'e-latex info))))
+      (let ((lst-lang
+	     (or (cadr (assq (intern lang) org-e-latex-listings-langs)) lang))
+	    (caption-str
+	     (when caption
+	       (let ((main (org-export-secondary-string
+			    (car caption) 'e-latex info)))
+		 (if (not (cdr caption)) (format "{%s}" main)
+		   (format
+		    "{[%s]%s}"
+		    (org-export-secondary-string (cdr caption) 'e-latex info)
+		    main))))))
 	(concat (format "\\lstset{%s}\n"
 			(org-e-latex--make-option-string
 			 (append org-e-latex-listings-options

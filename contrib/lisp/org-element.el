@@ -2500,7 +2500,7 @@ strings and objects.
 This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
-(defconst org-element-dual-keywords '("results")
+(defconst org-element-dual-keywords '("caption" "results")
   "List of keywords which can have a secondary value.
 
 In Org syntax, they can be written with optional square brackets
@@ -2589,7 +2589,7 @@ matching `org-element-parsed-keywords'.")
 	  (mapconcat
 	   (lambda (keyword)
 	     (if (member keyword org-element-dual-keywords)
-		 (format "\\(%s\\)\\(?:\\[\\(.*?\\)\\]\\)?"
+		 (format "\\(%s\\)\\(?:\\[\\(.*\\)\\]\\)?"
 			 (regexp-quote keyword))
 	       (regexp-quote keyword)))
 	   org-element-affiliated-keywords "\\|"))
@@ -2834,8 +2834,8 @@ it's value will be a list of parsed strings.  It defaults to
 DUALS is a list of strings.  Any keyword member of this list can
 have two parts: one mandatory and one optional.  Its value is
 a cons cell whose car is the former, and the cdr the latter.  If
-a keyword is a member of both PARSED and DUALS, only the primary
-part will be parsed.  It defaults to `org-element-dual-keywords'.
+a keyword is a member of both PARSED and DUALS, both values will
+be parsed.  It defaults to `org-element-dual-keywords'.
 
 Return a list whose car is the position at the first of them and
 cdr a plist of keywords and values."
@@ -2846,6 +2846,9 @@ cdr a plist of keywords and values."
 	  (consed (or consed org-element-multiple-keywords))
 	  (parsed (or parsed org-element-parsed-keywords))
 	  (duals (or duals org-element-dual-keywords))
+	  ;; RESTRICT is the list of objects allowed in parsed
+	  ;; keywords value.
+	  (restrict (cdr (assq 'keyword org-element-string-restrictions)))
 	  output)
       (unless (bobp)
 	(while (and (not (bobp))
@@ -2854,21 +2857,27 @@ cdr a plist of keywords and values."
 		 ;; Apply translation to RAW-KWD.  From there, KWD is
 		 ;; the official keyword.
 		 (kwd (or (cdr (assoc raw-kwd trans-list)) raw-kwd))
-		 ;; If KWD is a dual keyword, find it secondary value.
-		 (dual-value (and (member kwd duals)
-				  (org-match-string-no-properties 3)))
 		 ;; Find main value for any keyword.
-		 (value (org-trim (buffer-substring-no-properties
-				   (match-end 0) (point-at-eol))))
+		 (value
+		  (save-match-data
+		    (org-trim
+		     (buffer-substring-no-properties
+		      (match-end 0) (point-at-eol)))))
+		 ;; If KWD is a dual keyword, find its secondary
+		 ;; value.  Maybe parse it.
+		 (dual-value
+		  (and (member kwd duals)
+		       (let ((sec (org-match-string-no-properties 3)))
+			 (if (or (not sec) (not (member kwd parsed))) sec
+			   (org-element-parse-secondary-string sec restrict)))))
 		 ;; Attribute a property name to KWD.
 		 (kwd-sym (and kwd (intern (concat ":" kwd)))))
 	    ;; Now set final shape for VALUE.
 	    (when (member kwd parsed)
-	      (setq value
-		    (org-element-parse-secondary-string
-		     value
-		     (cdr (assq 'keyword org-element-string-restrictions)))))
-	    (when (member kwd duals) (setq value (cons value dual-value)))
+	      (setq value (org-element-parse-secondary-string value restrict)))
+	    (when (member kwd duals)
+	      ;; VALUE is mandatory.  Set it to nil if there is none.
+	      (setq value (and value (cons value dual-value))))
 	    (when (member kwd consed)
 	      (setq value (cons value (plist-get output kwd-sym))))
 	    ;; Eventually store the new value in OUTPUT.

@@ -629,9 +629,9 @@ keyword."
 			  (src-block "Listing %d: %s")) info)))
 	(org-e-ascii--fill-string
 	 (format
-	  title-fmt
-	  reference
-	  (if caption (org-export-secondary-string caption 'e-ascii info) name))
+	  title-fmt reference
+	  (if (not caption) name
+	    (org-export-secondary-string (car caption) 'e-ascii info)))
 	 (org-e-ascii--current-text-width element info) info)))))
 
 (defun org-e-ascii--build-toc (info &optional n keyword)
@@ -696,7 +696,9 @@ generation.  INFO is a plist used as a communication channel."
 	       (org-e-ascii--fill-string
 		(let ((caption (org-element-get-property :caption src-block)))
 		  (if (not caption) (org-element-get-property :name src-block)
-		    (org-export-secondary-string caption 'e-ascii info)))
+		    (org-export-secondary-string
+		     ;; Use short name in priority, if available.
+		     (or (cdr caption) (car caption)) 'e-ascii info)))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-listings info) "\n")))))
@@ -733,7 +735,9 @@ generation.  INFO is a plist used as a communication channel."
 	       (org-e-ascii--fill-string
 		(let ((caption (org-element-get-property :caption table)))
 		  (if (not caption) (org-element-get-property :name table)
-		    (org-export-secondary-string caption 'e-ascii info)))
+		    ;; Use short name in priority, if available.
+		    (org-export-secondary-string
+		     (or (cdr caption) (car caption)) 'e-ascii info)))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-tables info) "\n")))))
