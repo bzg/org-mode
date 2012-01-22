@@ -90,6 +90,9 @@
 
 (defcustom org-inlinetask-min-level 15
   "Minimum level a headline must have before it is treated as an inline task.
+Don't set it to something higher than `29' or clocking will break since this 
+is the hardcoded maximum number of stars `org-clock-sum' will work with.
+
 It is strongly recommended that you set `org-cycle-max-level' not at all,
 or to a number smaller than this one.  In fact, when `org-cycle-max-level' is
 not set, it will be assumed to be one less than the value of smaller than
