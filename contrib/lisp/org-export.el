@@ -945,7 +945,12 @@ Return options as a plist."
 			    (or (save-match-data
 				  (org-entry-get (point) "EXPORT_TITLE"))
 				(org-match-string-no-properties 3))))
-      (setq plist (plist-put plist :title prop)))
+      (setq plist
+	    (plist-put
+	     plist :title
+	     (org-element-parse-secondary-string
+	      prop
+	      (cdr (assq 'keyword org-element-string-restrictions))))))
     (when (setq prop (org-entry-get (point) "EXPORT_TEXT"))
       (setq plist (plist-put plist :text prop)))
     (when (setq prop (org-entry-get (point) "EXPORT_AUTHOR"))
