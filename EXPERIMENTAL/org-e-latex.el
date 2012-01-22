@@ -1678,11 +1678,12 @@ contextual information."
 
 ;;;; Table
 
-(defun org-e-latex-table--format-string (table info)
+(defun org-e-latex-table--format-string (table table-info info)
   "Return an appropriate format string for TABLE.
 
-INFO is the plist containing format info about the table, as
-returned by `org-export-table-format-info'.
+TABLE-INFO is the plist containing format info about the table,
+as returned by `org-export-table-format-info'.  INFO is a plist
+used as a communication channel.
 
 The format string one placeholder for the body of the table."
   (let* ((label (org-element-get-property :name table))
@@ -1692,7 +1693,7 @@ The format string one placeholder for the body of the table."
 			  (org-element-get-property :attr_latex table)
 			  " "))
 	 ;; Determine alignment string.
-	 (alignment (org-e-latex-table--align-string attr info))
+	 (alignment (org-e-latex-table--align-string attr table-info))
 	 ;; Determine environment for the table: longtable, tabular...
 	 (table-env (cond
 		     ((not attr) org-e-latex-default-table-environment)
@@ -1748,20 +1749,20 @@ The format string one placeholder for the body of the table."
 		  (concat (if org-e-latex-table-caption-above "" caption)
 			  (format "\n\\end{%s}" float-env))))))))
 
-(defun org-e-latex-table--align-string (attr info)
+(defun org-e-latex-table--align-string (attr table-info)
   "Return an appropriate LaTeX alignment string.
 ATTR is a string containing table's LaTeX specific attributes.
-INFO is the plist containing format info about the table, as
-returned by `org-export-table-format-info'."
+TABLE-INFO is the plist containing format info about the table,
+as returned by `org-export-table-format-info'."
   (or (and attr
 	   (string-match "\\<align=\\(\\S-+\\)" attr)
 	   (match-string 1 attr))
-      (let* ((align (copy-sequence (plist-get info :alignment)))
-	     (colgroups (copy-sequence (plist-get info :column-groups)))
+      (let* ((align (copy-sequence (plist-get table-info :alignment)))
+	     (colgroups (copy-sequence (plist-get table-info :column-groups)))
 	     (cols (length align))
 	     (separators (make-vector (1+ cols) "")))
 	;; Ignore the first column if it's special.
-	(when (plist-get info :special-column-p)
+	(when (plist-get table-info :special-column-p)
 	  (aset align 0 "") (aset colgroups 0 nil))
 	(let ((col 0))
 	  (mapc (lambda (el)
@@ -1833,7 +1834,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	;; `org-element-parse-secondary-string' to expand any Org
 	;; object within.  Eventually, flesh the format string out with
 	;; the table.
-	(format (org-e-latex-table--format-string table table-info)
+	(format (org-e-latex-table--format-string table table-info info)
 		(orgtbl-to-latex
 		 (mapcar
 		  (lambda (row)
