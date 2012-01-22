@@ -2538,7 +2538,7 @@ superscript.")
     (inlinetask entity inline-babel-call latex-fragment link macro radio-target
 		sub/superscript text-markup time-stamp)
     (item entity inline-babel-call latex-fragment macro radio-target
-	  sub/superscript target verbatim)
+	  sub/superscript target text-markup)
     (keyword entity latex-fragment macro sub/superscript text-markup)
     (table entity latex-fragment macro text-markup)
     (verse entity footnote-reference inline-babel-call inline-src-block
