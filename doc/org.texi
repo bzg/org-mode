@@ -1165,7 +1165,8 @@ Headlines define the structure of an outline tree.  The headlines in Org
 start with one or more stars, on the left margin@footnote{See the variables
 @code{org-special-ctrl-a/e}, @code{org-special-ctrl-k}, and
 @code{org-ctrl-k-protect-subtree} to configure special behavior of @kbd{C-a},
-@kbd{C-e}, and @kbd{C-k} in headlines.}.  For example:
+@kbd{C-e}, and @kbd{C-k} in headlines.} @footnote{Clocking only works with
+headings indented less then 30 stars.}.  For example:
 
 @example
 * Top level headline
