@@ -986,12 +986,24 @@ dependencies."
 		  ((string= key "OPTIONS")
 		   (org-export-parse-option-keyword val backend))
 		  ((string= key "MACRO")
-		   (string-match "^\\([-a-zA-Z0-9_]+\\)[ \t]+\\(.*?[ \t]*$\\)"
-				 val)
-		   (plist-put nil
-			      (intern (concat ":macro-"
-					      (downcase (match-string 1 val))))
-			      (match-string 2 val))))
+		   (when (string-match
+			  "^\\([-a-zA-Z0-9_]+\\)\\(?:[ \t]+\\(.*?\\)[ \t]*$\\)?"
+			  val)
+		     (let ((key (intern
+				 (concat ":macro-"
+					 (downcase (match-string 1 val)))))
+			   (value (match-string 2 val)))
+		       (cond
+			((not value) "")
+			((string-match "\\`(eval\\>" value) (list key value))
+			(t
+			 (list
+			  key
+			  ;; If user explicitly asks for a newline, be
+			  ;; sure to preserve it from further filling
+			  ;; with `hard-newline'.
+			  (replace-regexp-in-string
+			   "\\\\n" hard-newline value))))))))
 		 plist)))))
     ;; 2. Standard options, as in `org-export-option-alist'.
     (let* ((all (append org-export-option-alist
