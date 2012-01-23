@@ -1559,7 +1559,7 @@ value of `org-export-odt-fontify-srcblocks."
 	      href width height :caption caption :label nil)
 	    ,(if (not label) ""
 	       (org-odt-format-entity-caption label nil "__MathFormula__"))))
-	 nil nil nil "OrgEquation" nil '((1 "c" 8) (2 "c" 1)))
+	 nil nil nil ":style \"OrgEquation\"" nil '((1 "c" 8) (2 "c" 1)))
 	(throw 'nextline nil))))))
 
 (defvar org-odt-embedded-formulas-count 0)
