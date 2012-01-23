@@ -1906,7 +1906,7 @@ outline, not only the heading.
 @c
 @itemx @key{TAB}
 Go to the original location of the item in another window.  Under Emacs
-22, @kbd{mouse-1} will also works for this.
+22, @kbd{mouse-1} will also work for this.
 @c
 @itemx @key{RET}
 Go to the original location of the item and delete other windows.
