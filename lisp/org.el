@@ -1015,23 +1015,25 @@ indentation in a virtual way, i.e. at display time in Emacs."
   "Non-nil means `C-a' and `C-e' behave specially in headlines and items.
 
 When t, `C-a' will bring back the cursor to the beginning of the
-headline text, i.e. after the stars and after a possible TODO keyword.
-In an item, this will be the position after the bullet.
-When the cursor is already at that position, another `C-a' will bring
-it to the beginning of the line.
+headline text, i.e. after the stars and after a possible TODO
+keyword.  In an item, this will be the position after bullet and
+check-box, if any.  When the cursor is already at that position,
+another `C-a' will bring it to the beginning of the line.
 
-`C-e' will jump to the end of the headline, ignoring the presence of tags
-in the headline.  A second `C-e' will then jump to the true end of the
-line, after any tags.  This also means that, when this variable is
-non-nil, `C-e' also will never jump beyond the end of the heading of a
-folded section, i.e. not after the ellipses.
+`C-e' will jump to the end of the headline, ignoring the presence
+of tags in the headline.  A second `C-e' will then jump to the
+true end of the line, after any tags.  This also means that, when
+this variable is non-nil, `C-e' also will never jump beyond the
+end of the heading of a folded section, i.e. not after the
+ellipses.
 
-When set to the symbol `reversed', the first `C-a' or `C-e' works normally,
-going to the true line boundary first.  Only a directly following, identical
-keypress will bring the cursor to the special positions.
+When set to the symbol `reversed', the first `C-a' or `C-e' works
+normally, going to the true line boundary first.  Only a directly
+following, identical keypress will bring the cursor to the
+special positions.
 
-This may also be a cons cell where the behavior for `C-a' and `C-e' is
-set separately."
+This may also be a cons cell where the behavior for `C-a' and
+`C-e' is set separately."
   :group 'org-edit-structure
   :type '(choice
 	  (const :tag "off" nil)
@@ -20435,14 +20437,22 @@ beyond the end of the headline."
 		 ((not (eq last-command this-command)) (point))
 		 (t refpos)))))
        ((org-at-item-p)
-	(goto-char
-	 (if (eq special t)
-	     (cond ((> pos (match-end 0)) (match-end 0))
-		   ((= pos (point)) (match-end 0))
-		   (t (point)))
-	   (cond ((> pos (point)) (point))
-		 ((not (eq last-command this-command)) (point))
-		 (t (match-end 0))))))))
+	;; Set special position at first white space character after
+	;; bullet, and check-box, if any.
+	(let ((after-bullet
+	       (progn (looking-at org-list-full-item-re)
+		      (let ((bul (or (match-end 3) (match-end 1))))
+			(if (= (char-after bul) ? ) (1+ bul) bul)))))
+	  ;; Special case: Move point to special position when
+	  ;; currently after it or at beginning of line.
+	  (if (eq special t)
+	      (when (or (> pos after-bullet) (= (point) pos))
+		(goto-char after-bullet))
+	    ;; Reversed case: Move point to special position when
+	    ;; point was already at beginning of line and command is
+	    ;; repeated.
+	    (when (and (= (point) pos) (eq last-command this-command))
+	      (goto-char after-bullet)))))))
     (org-no-warnings
      (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
