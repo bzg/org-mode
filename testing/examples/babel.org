@@ -307,3 +307,30 @@ and another
   # I am inside the code block
   <<noweb-no-export-and-exports-both-1>>
 #+END_SRC
+
+* in order evaluation on export
+  :PROPERTIES:
+  :exports: results
+  :ID:       96cc7073-97ec-4556-87cf-1f9bffafd317
+  :END:
+
+First.
+#+name: foo-for-order-of-evaluation
+#+begin_src emacs-lisp :var it=1
+  (push it *evaluation-collector*)
+#+end_src
+
+Second
+#+begin_src emacs-lisp
+  (push 2 *evaluation-collector*)
+#+end_src
+
+Third src_emacs-lisp{(push 3 *evaluation-collector*)}
+
+Fourth
+#+call: foo-for-order-of-evaluation(4)
+
+Fifth
+#+begin_src emacs-lisp
+  (push 5 *evaluation-collector*)
+#+end_src
