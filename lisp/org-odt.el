@@ -1534,15 +1534,13 @@ value of `org-export-odt-fontify-srcblocks."
 	       (org-odt-copy-image-file thefile) thelink))))
     (org-export-odt-format-image thefile href)))
 
-(defun org-export-odt-format-formula (src href &optional embed-as)
-  "Create image tag with source and attributes."
+(defun org-export-odt-format-formula (src href)
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	   (caption (and caption (org-xml-format-desc caption)))
 	   (label (org-find-text-property-in-string 'org-label src))
 	   (latex-frag (org-find-text-property-in-string 'org-latex-src src))
-	   (embed-as (or embed-as
-			 (and latex-frag
+	   (embed-as (or (and latex-frag
 			      (org-find-text-property-in-string
 			       'org-latex-src-embed-type src))
 			 (if (or caption label) 'paragraph 'character)))
@@ -1773,9 +1771,7 @@ ATTR is a string of other attributes of the a element."
 	   (attr-plist (org-lparse-get-block-params attr))
 	   (user-frame-anchor
 	    (car (assoc-string (plist-get attr-plist :anchor)
-			       (if (or caption label)
-				   '(("paragraph") ("page"))
-				 '(("character") ("paragraph") ("page"))) t)))
+			       '(("as-char") ("paragraph") ("page")) t)))
 	   (user-frame-style
 	    (and user-frame-anchor (plist-get attr-plist :style)))
 	   (user-frame-attrs
@@ -1785,8 +1781,10 @@ ATTR is a string of other attributes of the a element."
 	   (embed-as (cond
 		      (latex-frag
 		       (symbol-name
-			(or (org-find-text-property-in-string
-			     'org-latex-src-embed-type src) 'character)))
+			(case (org-find-text-property-in-string
+			       'org-latex-src-embed-type src)
+			  (paragraph 'paragraph)
+			  (t 'as-char))))
 		      (user-frame-anchor)
 		      (t "paragraph")))
 	   (size (org-odt-image-size-from-file
@@ -1849,9 +1847,13 @@ ATTR is a string of other attributes of the a element."
 		content) nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\"")))
 
 (defvar org-odt-entity-frame-styles
-  '(("CharacterImage" "__Figure__" ("OrgInlineImage" nil "as-char"))
+  '(("As-CharImage" "__Figure__" ("OrgInlineImage" nil "as-char"))
     ("ParagraphImage" "__Figure__" ("OrgDisplayImage" nil "paragraph"))
     ("PageImage" "__Figure__" ("OrgPageImage" nil "page"))
+    ("CaptionedAs-CharImage" "__Figure__"
+     ("OrgCaptionedImage"
+      " style:rel-width=\"100%\" style:rel-height=\"scale\"" "paragraph")
+     ("OrgInlineImage" nil "as-char"))
     ("CaptionedParagraphImage" "__Figure__"
      ("OrgCaptionedImage"
       " style:rel-width=\"100%\" style:rel-height=\"scale\"" "paragraph")
@@ -1928,7 +1930,7 @@ ATTR is a string of other attributes of the a element."
   image.")
 
 (defvar org-export-odt-default-image-sizes-alist
-  '(("character" . (5 . 0.4))
+  '(("as-char" . (5 . 0.4))
     ("paragraph" . (5 . 5)))
   "Hardcoded image dimensions one for each of the anchor
   methods.")
