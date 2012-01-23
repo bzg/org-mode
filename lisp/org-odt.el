@@ -2017,7 +2017,8 @@ See `org-odt-entity-labels-alist' for known CATEGORY-NAMEs.")
 
 (defvar org-odt-label-styles
   '(("text" "(%n)" "text" "(%n)")
-    ("category-and-value" "%e %n%c" "category-and-value" "%e %n"))
+    ("category-and-value" "%e %n%c" "category-and-value" "%e %n")
+    ("value" "%e %n%c" "value" "%n"))
   "Specify how labels are applied and referenced.
 This is an alist where each element is of the
 form (LABEL-STYLE-NAME LABEL-ATTACH-FMT LABEL-REF-MODE
@@ -2039,10 +2040,14 @@ specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
 `org-odt-format-label-reference'.")
 
 (defvar org-odt-category-map-alist
-  '(("__Table__" "Table" "category-and-value")
-    ("__Figure__" "Figure" "category-and-value")
+  '(("__Table__" "Table" "value")
+    ("__Figure__" "Figure" "value")
     ("__MathFormula__" "Equation" "text")
-    ("__DvipngImage__" "Equation" "category-and-value"))
+    ("__DvipngImage__" "Equation" "value")
+    ;; ("__Table__" "Table" "category-and-value")
+    ;; ("__Figure__" "Figure" "category-and-value")
+    ;; ("__DvipngImage__" "Equation" "category-and-value")
+    )
   "Map a CATEGORY-HANDLE to CATEGORY-NAME and LABEL-STYLE.
 This is an alist where each element is of the form
 \\(CATEGORY-HANDLE CATEGORY-NAME LABEL-STYLE\\).  CATEGORY_HANDLE
