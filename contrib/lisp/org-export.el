@@ -2012,7 +2012,8 @@ Point is at buffer's beginning when BODY is applied."
        (with-temp-buffer
 	 (let ((buffer-invisibility-spec nil))
 	   (org-clone-local-variables
-	    ,original-buffer "^\\(org-\\|orgtbl-\\|major-mode$\\)")
+	    ,original-buffer
+	    "^\\(org-\\|orgtbl-\\|major-mode$\\|outline-regexp$\\)")
 	   (insert ,buffer-string)
 	   (mapc (lambda (ov)
 		   (move-overlay
