@@ -646,11 +646,11 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-odt-end-outline-text ()
   (ignore))
 
-(defvar org-odt-section-count 0)
 (defun org-odt-begin-section (style &optional name)
-  (setq name (or name (format "Section-%d" (incf org-odt-section-count))))
-  (org-lparse-insert-tag
-   "<text:section text:style-name=\"%s\" text:name=\"%s\">" style name))
+  (let ((default-name (car (org-odt-add-automatic-style "Section"))))
+    (org-lparse-insert-tag
+     "<text:section text:style-name=\"%s\" text:name=\"%s\">"
+     style (or name default-name))))
 
 (defun org-odt-end-section ()
   (org-lparse-insert-tag "</text:section>"))
@@ -931,6 +931,75 @@ style from the list."
 			       :key-type symbol
 			       :value-type (const :tag "True" t))))))
 
+(defvar org-odt-table-style-format
+  "
+<style:style style:name=\"%s\" style:family=\"table\">
+  <style:table-properties style:rel-width=\"%d%%\" fo:margin-top=\"0cm\" fo:margin-bottom=\"0.20cm\" table:align=\"center\"/>
+</style:style>
+"
+  "Template for auto-generated Table styles.")
+
+(defvar org-odt-automatic-styles '()
+  "Registry of automatic styles for various OBJECT-TYPEs.
+The variable has the following form:
+\(\(OBJECT-TYPE-A
+  \(\(OBJECT-NAME-A.1 OBJECT-PROPS-A.1\)
+   \(OBJECT-NAME-A.2 OBJECT-PROPS-A.2\) ...\)\)
+ \(OBJECT-TYPE-B
+  \(\(OBJECT-NAME-B.1 OBJECT-PROPS-B.1\)
+   \(OBJECT-NAME-B.2 OBJECT-PROPS-B.2\) ...\)\)
+ ...\).
+
+OBJECT-TYPEs could be \"Section\", \"Table\", \"Figure\" etc.
+OBJECT-PROPS is (typically) a plist created by passing
+\"#+ATTR_ODT: \" option to `org-lparse-get-block-params'.
+
+Use `org-odt-add-automatic-style' to add update this variable.'")
+
+(defvar org-odt-object-counters nil
+  "Running counters for various OBJECT-TYPEs.
+Use this to generate automatic names and style-names. See
+`org-odt-add-automatic-style'.")
+
+(defun org-odt-write-automatic-styles ()
+  "Write automatic styles to \"content.xml\"."
+  (with-current-buffer
+      (find-file-noselect (expand-file-name "content.xml") t)
+    ;; position the cursor
+    (goto-char (point-min))
+    (re-search-forward "  </office:automatic-styles>" nil t)
+    (goto-char (match-beginning 0))
+    ;; write automatic table styles
+    (loop for (style-name props) in
+	  (plist-get org-odt-automatic-styles 'Table) do
+	  (when (setq props (or (plist-get props :rel-width) 96))
+	    (insert (format org-odt-table-style-format style-name props))))))
+
+(defun org-odt-add-automatic-style (object-type &optional object-props)
+  "Create an automatic style of type OBJECT-TYPE with param OBJECT-PROPS.
+OBJECT-PROPS is (typically) a plist created by passing
+\"#+ATTR_ODT: \" option of the object in question to
+`org-lparse-get-block-params'.
+
+Use `org-odt-object-counters' to generate an automatic
+OBJECT-NAME and STYLE-NAME.  If OBJECT-PROPS is non-nil, add a
+new entry in `org-odt-automatic-styles'.  Return (OBJECT-NAME
+. STYLE-NAME)."
+  (assert (stringp object-type))
+  (let* ((object (intern object-type))
+	 (seqvar object)
+	 (seqno (1+ (or (plist-get org-odt-object-counters seqvar) 0)))
+	 (object-name (format "%s%d" object-type seqno)) style-name)
+    (setq org-odt-object-counters
+	  (plist-put org-odt-object-counters seqvar seqno))
+    (when object-props
+      (setq style-name (format "Org%s" object-name))
+      (setq org-odt-automatic-styles
+	    (plist-put org-odt-automatic-styles object
+		       (append (list (list style-name object-props))
+			       (plist-get org-odt-automatic-styles object)))))
+    (cons object-name style-name)))
+
 (defvar org-odt-table-indentedp nil)
 (defun org-odt-begin-table (caption label attributes)
   (setq org-odt-table-indentedp (not (null org-lparse-list-stack)))
@@ -943,17 +1012,18 @@ style from the list."
     ;; Put the Table in an indented section.
     (let ((level (length org-odt-list-stack-stashed)))
       (org-odt-begin-section (format "OrgIndentedSection-Level-%d" level))))
-
-  (setq org-odt-table-style attributes)
+  (setq attributes (org-lparse-get-block-params attributes))
+  (setq org-odt-table-style (plist-get attributes :style))
   (setq org-odt-table-style-spec
 	(assoc org-odt-table-style org-export-odt-table-styles))
-  (when label
-    (insert
-     (org-odt-format-stylized-paragraph
-      'table (org-odt-format-entity-caption label caption "__Table__"))))
-  (org-lparse-insert-tag
-   "<table:table table:name=\"%s\" table:style-name=\"%s\">"
-   (or label "") (or (nth 1 org-odt-table-style-spec) "OrgTable"))
+  (insert
+   (org-odt-format-stylized-paragraph
+    'table (org-odt-format-entity-caption label caption "__Table__")))
+  (let ((name-and-style (org-odt-add-automatic-style "Table" attributes)))
+    (org-lparse-insert-tag
+     "<table:table table:name=\"%s\" table:style-name=\"%s\">"
+     (car name-and-style) (or (nth 1 org-odt-table-style-spec)
+			      (cdr name-and-style) "OrgTable")))
   (setq org-lparse-table-begin-marker (point)))
 
 (defvar org-lparse-table-colalign-info)
@@ -2103,9 +2173,10 @@ CATEGORY-HANDLE is used.  See
     (setq org-odt-manifest-file-entries nil
 	  org-odt-embedded-images-count 0
 	  org-odt-embedded-formulas-count 0
-	  org-odt-section-count 0
 	  org-odt-entity-labels-alist nil
 	  org-odt-list-stack-stashed nil
+	  org-odt-automatic-styles nil
+	  org-odt-object-counters nil
 	  org-odt-entity-counts-plist nil)
     content-file))
 
@@ -2120,6 +2191,9 @@ visually."
 
 (defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
 (defun org-odt-save-as-outfile (target opt-plist)
+  ;; write automatic styles
+  (org-odt-write-automatic-styles)
+
   ;; write meta file
   (org-odt-update-meta-file opt-plist)
 
@@ -2637,7 +2711,6 @@ non-nil."
 			     (or (file-name-nondirectory buffer-file-name)))
 			    "." "odf")
 			   (file-name-directory buffer-file-name))))
-	(message "default val is %s"  odf-filename)
 	(read-file-name "ODF filename: " nil odf-filename nil
 			(file-name-nondirectory odf-filename)))))
   (let* ((org-lparse-backend 'odf)
