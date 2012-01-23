@@ -2863,6 +2863,16 @@ Return previous element or object, a string, or nil."
   (let ((parent (car (plist-get info :genealogy))))
     (cadr (member blob (reverse (org-element-get-contents parent))))))
 
+(defun org-export-get-next-element (blob info)
+  "Return next element or object.
+
+BLOB is an element or object.  INFO is a plist used as
+a communication channel.
+
+Return next element or object, a string, or nil."
+  (let ((parent (car (plist-get info :genealogy))))
+    (cadr (member blob (org-element-get-contents parent)))))
+
 
 
 ;;; The Dispatcher
