@@ -146,6 +146,7 @@ currently executed.")
 	 (save-restriction ,@body)))
      (unless visited-p
        (kill-buffer to-be-removed))))
+(def-edebug-spec org-test-at-id (form body))
 
 (defmacro org-test-in-example-file (file &rest body)
   "Execute body in the Org-mode example file."

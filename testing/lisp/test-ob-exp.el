@@ -103,6 +103,13 @@
 ;;     (org-mark-subtree)
 ;;     (org-export-as-latex nil)))
 
+(ert-deftest ob-exp/evaluate-all-executables-in-order ()
+  (org-test-at-id "96cc7073-97ec-4556-87cf-1f9bffafd317"
+    (org-narrow-to-subtree)
+    (let (*evaluation-collector*)
+      (org-export-as-ascii nil nil nil 'string)
+      (should (equal '(5 4 3 2 1) *evaluation-collector*)))))
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here
