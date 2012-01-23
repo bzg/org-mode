@@ -115,6 +115,23 @@ none ----- do not display either code or results upon export"
 		(nth 1 info)))
 	(org-babel-exp-do-export info 'block hash)))))
 
+(defcustom org-babel-exp-call-line-template
+  ""
+  "Template used to export call lines.
+This template may be customized to include the call line name
+with any export markup.  The template is filled out using
+`org-fill-template', and the following %keys may be used.
+
+ line --- call line
+
+An example value would be \"\\n: call: %line\" to export the call line
+wrapped in a verbatim environment.
+
+Note: the results are inserted separately after the contents of
+this template."
+  :group 'org-babel
+  :type 'string)
+
 (defvar org-babel-default-lob-header-args)
 (defun org-babel-exp-non-block-elements (start end)
   "Process inline source and call lines between START and END for export."
@@ -160,22 +177,24 @@ none ----- do not display either code or results upon export"
 		   (inlinep (match-string 11))
 		   (inline-start (match-end 11))
 		   (inline-end (match-end 0))
-		   (rep (let ((lob-info (org-babel-lob-get-info)))
-			  (save-match-data
-			    (org-babel-exp-do-export
-			     (list "emacs-lisp" "results"
-				   (org-babel-merge-params
-				    org-babel-default-header-args
-				    org-babel-default-lob-header-args
-				    (org-babel-params-from-properties)
-				    (org-babel-parse-header-arguments
-				     (org-babel-clean-text-properties
-				      (concat ":var results="
-					      (mapconcat #'identity
-							 (butlast lob-info)
-							 " ")))))
-				   "" nil (car (last lob-info)))
-			     'lob)))))
+		   (results (save-match-data
+			      (org-babel-exp-do-export
+			       (list "emacs-lisp" "results"
+				     (org-babel-merge-params
+				      org-babel-default-header-args
+				      org-babel-default-lob-header-args
+				      (org-babel-params-from-properties)
+				      (org-babel-parse-header-arguments
+				       (org-babel-clean-text-properties
+					(concat ":var results="
+						(mapconcat #'identity
+							   (butlast lob-info)
+							   " ")))))
+				     "" nil (car (last lob-info)))
+			       'lob)))
+		   (rep (org-fill-template
+			 org-babel-exp-call-line-template
+			 `(("line"  . ,(nth 0 lob-info))))))
 	      (if inlinep
 		  (save-excursion
 		    (goto-char inline-start)

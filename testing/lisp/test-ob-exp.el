@@ -231,6 +231,15 @@ elements in the final html."
       (org-export-as-ascii nil nil nil 'string)
       (should (equal '(5 4 3 2 1) *evaluation-collector*)))))
 
+(ert-deftest ob-exp/export-call-line-information ()
+  (org-test-at-id "bec63a04-491e-4caa-97f5-108f3020365c"
+    (org-narrow-to-subtree)
+    (let* ((org-babel-exp-call-line-template "\n: call: %line special-token")
+	   (html (org-export-as-html nil nil nil 'string t)))
+      (should (string-match "double" html))
+      (should (string-match "16" html))
+      (should (string-match "special-token" html)))))
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here

@@ -334,3 +334,9 @@ Fifth
 #+begin_src emacs-lisp
   (push 5 *evaluation-collector*)
 #+end_src
+* exporting more than just results from a call line
+  :PROPERTIES:
+  :ID:       bec63a04-491e-4caa-97f5-108f3020365c
+  :END:
+Here is a call line with more than just the results exported.
+#+call: double(8)
