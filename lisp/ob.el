@@ -604,15 +604,17 @@ arguments and pop open the results in a preview buffer."
   ;; TODO: report malformed code block
   ;; TODO: report incompatible combinations of header arguments
   ;; TODO: report uninitialized variables
-  (let ((too-close 2)) ;; <- control closeness to report potential match
+  (let ((too-close 2) ;; <- control closeness to report potential match
+	(names (mapcar #'symbol-name org-babel-header-arg-names)))
     (dolist (header (mapcar (lambda (arg) (substring (symbol-name (car arg)) 1))
 			    (and (org-babel-where-is-src-block-head)
 				 (org-babel-parse-header-arguments
 				  (org-babel-clean-text-properties
 				   (match-string 4))))))
-      (dolist (name (mapcar #'symbol-name org-babel-header-arg-names))
+      (dolist (name names)
 	(when (and (not (string= header name))
-		   (<= (org-babel-edit-distance header name) too-close))
+		   (<= (org-babel-edit-distance header name) too-close)
+		   (not (member header names)))
 	  (error "supplied header \"%S\" is suspiciously close to \"%S\""
 		 header name))))
     (message "No suspicious header arguments found.")))
