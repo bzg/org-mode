@@ -1360,7 +1360,9 @@ INFO is a plist holding contextual information.  See
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
-		((and (not imagep) (string= type "file"))
+		(imagep (if (not (file-name-absolute-p raw-path)) raw-path
+			  (expand-file-name raw-path)))
+		((string= type "file")
 		 (when (string-match "\\(.+\\)::.+" raw-path)
 		   (setq raw-path (match-string 1 raw-path)))
 		 (if (file-name-absolute-p raw-path)
