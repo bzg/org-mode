@@ -661,7 +661,7 @@ the language, a switch telling if the content should be in a single line."
       (setq org-edit-src-saved-temp-window-config nil))))
 
 (defmacro org-src-in-org-buffer (&rest body)
-  `(let ((p (point)) (m (mark)) msg)
+  `(let ((p (point)) (m (mark)) (ul buffer-undo-list) msg)
      (save-window-excursion
        (org-edit-src-exit 'save)
        ,@body
@@ -670,6 +670,7 @@ the language, a switch telling if the content should be in a single line."
 	   (let ((org-src-window-setup 'current-window))
 	     (org-edit-src-code 'save))
 	 (org-edit-src-code 'save)))
+     (setq buffer-undo-list ul)
      (push-mark m 'nomessage)
      (goto-char (min p (point-max)))
      (message (or msg ""))))
