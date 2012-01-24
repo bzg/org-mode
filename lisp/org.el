@@ -14786,11 +14786,11 @@ at the cursor, it will be modified."
       (insert "--")
       (setq time (let ((this-command this-command))
 		  (org-read-date arg 'totime nil nil
-				 default-time default-input)))
+				 default-time default-input inactive)))
       (org-insert-time-stamp time (or org-time-was-given arg) inactive))
      ((org-at-timestamp-p t)
       (setq time (let ((this-command this-command))
-		   (org-read-date arg 'totime nil nil default-time default-input)))
+		   (org-read-date arg 'totime nil nil default-time default-input inactive)))
       (when (org-at-timestamp-p t) ; just to get the match data
 ;	(setq inactive (eq (char-after (match-beginning 0)) ?\[))
 	(replace-match "")
@@ -14805,7 +14805,7 @@ at the cursor, it will be modified."
       (message "Timestamp updated"))
      (t
       (setq time (let ((this-command this-command))
-		   (org-read-date arg 'totime nil nil default-time default-input)))
+		   (org-read-date arg 'totime nil nil default-time default-input inactive)))
       (org-insert-time-stamp time (or org-time-was-given arg) inactive
 			     nil nil (list org-end-time-was-given))))))
 
@@ -14853,7 +14853,7 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-analyze-forced-year nil)
 
 (defun org-read-date (&optional with-time to-time from-string prompt
-				default-time default-input)
+				default-time default-input inactive)
   "Read a date, possibly a time, and make things smooth for the user.
 The prompt will suggest to enter an ISO date, but you can also enter anything
 which will at least partially be understood by `parse-time-string'.
@@ -15002,6 +15002,7 @@ user."
 		  (unwind-protect
 		      (progn
 			(use-local-map map)
+			(setq org-read-date-inactive inactive)
 			(add-hook 'post-command-hook 'org-read-date-display)
 			(setq org-ans0 (read-string prompt default-input
 						    'org-read-date-history nil))
@@ -15049,6 +15050,7 @@ user."
 (defvar def)
 (defvar defdecode)
 (defvar with-time)
+(defvar org-read-date-inactive)
 (defun org-read-date-display ()
   "Display the current date prompt interpretation in the minibuffer."
   (when org-read-date-display-live
@@ -15072,7 +15074,9 @@ user."
 			(and (boundp 'org-time-was-given) org-time-was-given))
 		    (cdr fmts)
 		  (car fmts)))
-	   (txt (concat "=> " (format-time-string fmt (apply 'encode-time f)))))
+	   (txt (format-time-string fmt (apply 'encode-time f)))
+	   (txt (if org-read-date-inactive (concat "[" (substring txt 1 -1) "]") txt))
+	   (txt (concat "=> " txt)))
       (when (and org-end-time-was-given
 		 (string-match org-plain-time-of-day-regexp txt))
 	(setq txt (concat (substring txt 0 (match-end 0)) "-"
