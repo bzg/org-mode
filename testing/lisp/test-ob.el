@@ -618,6 +618,114 @@ on two lines
 		       (buffer-substring-no-properties
 			(point-min) (point-max)))))))
 
+(ert-deftest test-ob/org-babel-remove-result--results-default ()
+  "Test `org-babel-remove-result' with default :results."
+  (mapcar (lambda (language)
+	    (test-ob-verify-result-and-removed-result
+	     "\n"
+	     (concat
+"* org-babel-remove-result
+#+begin_src " language "
+#+end_src
+
+* next heading")))
+	  '("sh" "emacs-lisp")))
+
+(ert-deftest test-ob/org-babel-remove-result--results-list ()
+  "Test `org-babel-remove-result' with :results list."
+  (test-ob-verify-result-and-removed-result
+   "- 1
+- 2
+- 3
+- (quote (4 5))"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results list
+'(1 2 3 '(4 5))
+#+end_src
+
+* next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-wrap ()
+  "Test `org-babel-remove-result' with :results wrap."
+  (test-ob-verify-result-and-removed-result
+   ":RESULTS:
+hello there
+:END:"
+
+ "* org-babel-remove-result
+
+#+begin_src emacs-lisp :results wrap
+\"hello there\"
+#+end_src
+
+* next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-org ()
+  "Test `org-babel-remove-result' with :results org."
+  (test-ob-verify-result-and-removed-result
+   "#+BEGIN_ORG
+* heading
+** subheading
+content
+#+END_ORG"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results org
+\"* heading
+** subheading
+content\"
+#+end_src
+
+* next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-html ()
+  "Test `org-babel-remove-result' with :results html."
+  (test-ob-verify-result-and-removed-result
+   "#+BEGIN_HTML
+<head><body></body></head>
+#+END_HTML"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results html
+\"<head><body></body></head>\"
+#+end_src
+
+* next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-latex ()
+  "Test `org-babel-remove-result' with :results latex."
+  (test-ob-verify-result-and-removed-result
+   "#+BEGIN_LaTeX
+Line 1
+Line 2
+Line 3
+#+END_LaTeX"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results latex
+\"Line 1
+Line 2
+Line 3\"
+#+end_src
+
+* next heading"))
+
+(ert-deftest test-ob/org-babel-remove-result--results-code ()
+  "Test `org-babel-remove-result' with :results code."
+
+  (test-ob-verify-result-and-removed-result
+   "#+BEGIN_SRC emacs-lisp
+\"I am working!\"
+#+END_SRC"
+
+"* org-babel-remove-result
+#+begin_src emacs-lisp :results code
+(message \"I am working!\")
+#+end_src
+
+* next heading"))
+
 (ert-deftest test-org-babel/inline-src_blk-preceded-by-letter ()
   "Test inline source block invalid where preceded by letter"
 

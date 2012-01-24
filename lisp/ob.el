@@ -1921,7 +1921,8 @@ code ---- the results are extracted in the syntax of the source
 			     (prvs (org-list-prevs-alist struct)))
 			(org-list-get-list-end (point-at-bol) struct prvs)))
      ((looking-at "^\\([ \t]*\\):RESULTS:")
-      (re-search-forward (concat "^" (match-string 1) ":END:")))
+      (progn (re-search-forward (concat "^" (match-string 1) ":END:"))
+	     (forward-char 1) (point)))
      (t
       (let ((case-fold-search t)
 	    (blocks-re (regexp-opt
