@@ -13684,6 +13684,10 @@ inheritance}).}.
  #+END_SRC
 @end example
 
+The @code{org-babel-noweb-separator} variable holds the string used to
+separate accumulate noweb references like those above.  By default this
+variable holds a newline.
+
 @node cache, sep, noweb-ref, Specific header arguments
 @subsubsection @code{:cache}
 

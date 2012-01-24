@@ -120,6 +120,11 @@ be used."
   :group 'org-babel
   :type 'string)
 
+(defcustom org-babel-noweb-separator "\n"
+  "String used to separate accumulated noweb references."
+  :group 'org-babel
+  :type 'string)
+
 (defvar org-babel-src-name-regexp
   "^[ \t]*#\\+name:[ \t]*"
   "Regular expression used to match a source name line.")
@@ -2206,7 +2211,7 @@ block but are passed literally to the \"example-block\"."
 							(c-wrap (cadr cs))))
 					      (org-babel-tangle-comment-links i))
 					   body)))
-			      (setq expansion (concat expansion full))))
+			      (setq expansion (cons full expansion))))
 			(org-babel-map-src-blocks nil
 			  (let ((i (org-babel-get-src-block-info 'light)))
 			    (when (equal (or (cdr (assoc :noweb-ref (nth 2 i)))
@@ -2220,8 +2225,9 @@ block but are passed literally to the \"example-block\"."
 							  (c-wrap (cadr cs))))
 						(org-babel-tangle-comment-links i))
 					     body)))
-				(setq expansion (concat expansion full))))))))
-		    expansion)
+				(setq expansion (cons full expansion))))))))
+		    (mapconcat #'identity (nreverse expansion)
+			       org-babel-noweb-separator))
 		  ;; possibly raise an error if named block doesn't exist
 		  (if (member lang org-babel-noweb-error-langs)
 		      (error "%s" (concat
