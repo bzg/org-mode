@@ -11046,11 +11046,11 @@ This function can be used in a hook."
          "<example>\n?\n</example>")
     ("q" "#+begin_quote\n?\n#+end_quote"
          "<quote>\n?\n</quote>")
-    ("v" "#+begin_verse\n?\n#+end_verse"
-         "<verse>\n?\n/verse>")
-    ("c" "#+begin_center\n?\n#+end_center"
-         "<center>\n?\n/center>")
-    ("l" "#+begin_latex\n?\n#+end_latex"
+    ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE"
+         "<verse>\n?\n</verse>")
+    ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER"
+         "<center>\n?\n</center>")
+    ("l" "#+BEGIN_LaTeX\n?\n#+END_LaTeX"
          "<literal style=\"latex\">\n?\n</literal>")
     ("L" "#+latex: "
          "<literal style=\"latex\">?</literal>")
