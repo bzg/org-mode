@@ -11033,9 +11033,9 @@ This function can be used in a hook."
     ("q" "#+BEGIN_QUOTE\n?\n#+END_QUOTE"
          "<quote>\n?\n</quote>")
     ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE"
-         "<verse>\n?\n/verse>")
+         "<verse>\n?\n</verse>")
     ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER"
-         "<center>\n?\n/center>")
+         "<center>\n?\n</center>")
     ("l" "#+BEGIN_LaTeX\n?\n#+END_LaTeX"
          "<literal style=\"latex\">\n?\n</literal>")
     ("L" "#+LaTeX: "
