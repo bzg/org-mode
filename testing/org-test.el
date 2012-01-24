@@ -339,9 +339,10 @@ otherwise place the point at the beginning of the inserted text."
     (unless (get-file-buffer file)
       (add-to-list 'org-test-buffers (find-file file)))))
 
-(defun org-test-bury-all-examples ()
-  (mapcar (lambda (b) (when (buffer-live-p b) (bury-buffer b)))
-	  org-test-buffers))
+(defun org-test-kill-all-examples ()
+  (while org-test-buffers
+    (let ((b (pop org-test-buffers)))
+      (when (buffer-live-p b) (kill-buffer b)))))
 
 (defun org-test-update-id-locations ()
   (org-id-update-id-locations
@@ -371,7 +372,7 @@ Load all test files first."
   (org-test-touch-all-examples)
   (org-test-load)
   (ert "\\(org\\|ob\\)")
-  (org-test-bury-all-examples))
+  (org-test-kill-all-examples))
 
 (provide 'org-test)
 
