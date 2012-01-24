@@ -217,6 +217,7 @@ src_sh{echo 3} Here is one at the beginning of a line.
 * using the =:noweb-ref= header argument
   :PROPERTIES:
   :ID:       54d68d4b-1544-4745-85ab-4f03b3cbd8a0
+  :noweb-sep: ""
   :END:
 
 #+begin_src sh :tangle yes :noweb yes :shebang #!/bin/sh

@@ -708,6 +708,7 @@ Specific header arguments
 * session::                     Preserve the state of code evaluation
 * noweb::                       Toggle expansion of noweb references
 * noweb-ref::                   Specify block's noweb reference resolution target
+* noweb-sep::                   String used to separate noweb references
 * cache::                       Avoid re-evaluating unchanged code blocks
 * sep::                         Delimiter for writing tabular results outside Org
 * hlines::                      Handle horizontal lines in tables
@@ -13017,6 +13018,7 @@ argument in lowercase letters.  The following header arguments are defined:
 * session::                     Preserve the state of code evaluation
 * noweb::                       Toggle expansion of noweb references
 * noweb-ref::                   Specify block's noweb reference resolution target
+* noweb-sep::                   String used to separate noweb references
 * cache::                       Avoid re-evaluating unchanged code blocks
 * sep::                         Delimiter for writing tabular results outside Org
 * hlines::                      Handle horizontal lines in tables
@@ -13640,7 +13642,7 @@ Note that noweb replacement text that does not contain any newlines will not
 be affected by this change, so it is still possible to use inline noweb
 references.
 
-@node noweb-ref, cache, noweb, Specific header arguments
+@node noweb-ref, noweb-sep, noweb, Specific header arguments
 @subsubsection @code{:noweb-ref}
 When expanding ``noweb'' style references the bodies of all code block with
 @emph{either} a block name matching the reference name @emph{or} a
@@ -13684,11 +13686,18 @@ inheritance}).}.
  #+END_SRC
 @end example
 
-The @code{org-babel-noweb-separator} variable holds the string used to
-separate accumulate noweb references like those above.  By default this
-variable holds a newline.
+The @code{:noweb-sep} (see @ref{noweb-sep}) header argument holds the string
+used to separate accumulate noweb references like those above.  By default a
+newline is used.
 
-@node cache, sep, noweb-ref, Specific header arguments
+@node noweb-sep, cache, noweb-ref, Specific header arguments
+@subsubsection @code{:noweb-sep}
+
+The @code{:noweb-sep} header argument holds the string used to separate
+accumulate noweb references (see @ref{noweb-ref}).  By default a newline is
+used.
+
+@node cache, sep, noweb-sep, Specific header arguments
 @subsubsection @code{:cache}
 
 The @code{:cache} header argument controls the use of in-buffer caching of

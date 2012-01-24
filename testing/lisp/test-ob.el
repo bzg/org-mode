@@ -644,11 +644,11 @@ on two lines
 #+end_src
 
 #+name: foo
-#+begin_src sh
+#+begin_src sh :noweb-sep \"\"
   bar
 #+end_src
 
-#+begin_src sh :noweb-ref foo
+#+begin_src sh :noweb-ref foo :noweb-sep \"\"
   baz
 #+end_src"
     (should (string= (org-babel-expand-noweb-references) "barbaz"))))

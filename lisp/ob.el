@@ -120,11 +120,6 @@ be used."
   :group 'org-babel
   :type 'string)
 
-(defcustom org-babel-noweb-separator "\n"
-  "String used to separate accumulated noweb references."
-  :group 'org-babel
-  :type 'string)
-
 (defvar org-babel-src-name-regexp
   "^[ \t]*#\\+name:[ \t]*"
   "Regular expression used to match a source name line.")
@@ -388,6 +383,7 @@ then run `org-babel-pop-to-session'."
     (noeval)
     (noweb	. ((yes no tangle)))
     (noweb-ref	. :any)
+    (noweb-sep  . :any)
     (padline	. ((yes no)))
     (results	. ((file list vector table scalar verbatim)
 		    (raw org html latex code pp wrap)
@@ -2204,6 +2200,8 @@ block but are passed literally to the \"example-block\"."
 			  (while (re-search-forward rx nil t)
 			    (let* ((i (org-babel-get-src-block-info 'light))
 				   (body (org-babel-expand-noweb-references i))
+				   (sep (or (cdr (assoc :noweb-sep (nth 2 i)))
+					    "\n"))
 				   (full (if comment
 					     ((lambda (cs)
 						(concat (c-wrap (car cs)) "\n"
@@ -2211,13 +2209,15 @@ block but are passed literally to the \"example-block\"."
 							(c-wrap (cadr cs))))
 					      (org-babel-tangle-comment-links i))
 					   body)))
-			      (setq expansion (cons full expansion))))
+			      (setq expansion (cons sep (cons full expansion)))))
 			(org-babel-map-src-blocks nil
 			  (let ((i (org-babel-get-src-block-info 'light)))
 			    (when (equal (or (cdr (assoc :noweb-ref (nth 2 i)))
 					     (nth 4 i))
 					 source-name)
 			      (let* ((body (org-babel-expand-noweb-references i))
+				     (sep (or (cdr (assoc :noweb-sep (nth 2 i)))
+					      "\n"))
 				     (full (if comment
 					       ((lambda (cs)
 						  (concat (c-wrap (car cs)) "\n"
@@ -2225,9 +2225,9 @@ block but are passed literally to the \"example-block\"."
 							  (c-wrap (cadr cs))))
 						(org-babel-tangle-comment-links i))
 					     body)))
-				(setq expansion (cons full expansion))))))))
-		    (mapconcat #'identity (nreverse expansion)
-			       org-babel-noweb-separator))
+				(setq expansion
+				      (cons sep (cons full expansion)))))))))
+		    (mapconcat #'identity (nreverse (cdr expansion)) ""))
 		  ;; possibly raise an error if named block doesn't exist
 		  (if (member lang org-babel-noweb-error-langs)
 		      (error "%s" (concat
