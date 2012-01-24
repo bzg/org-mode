@@ -7142,10 +7142,13 @@ if it was hidden in the outline."
     (select-window win)))
 
 (defvar org-agenda-show-window nil)
-(defun org-agenda-show-and-scroll-up ()
+(defun org-agenda-show-and-scroll-up (&optional arg)
   "Display the Org-mode file which contains the item at point.
-When called repeatedly, scroll the window that is displaying the buffer."
-  (interactive)
+When called repeatedly, scroll the window that is displaying the buffer.
+With a \\[universal-argument] prefix, use `org-show-entry' instead of
+`show-subtree' to display the item, so that drawers and logbooks stay
+folded."
+  (interactive "P")
   (let ((win (selected-window)))
     (if (and (window-live-p org-agenda-show-window)
 	     (eq this-command last-command))
@@ -7153,7 +7156,7 @@ When called repeatedly, scroll the window that is displaying the buffer."
 	  (select-window org-agenda-show-window)
 	  (ignore-errors (scroll-up)))
       (org-agenda-goto t)
-      (show-subtree)
+      (if arg (org-show-entry) (show-subtree))
       (setq org-agenda-show-window (selected-window)))
     (select-window win)))
 
