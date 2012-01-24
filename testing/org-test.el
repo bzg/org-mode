@@ -199,7 +199,7 @@ otherwise place the point at the beginning of the inserted text."
 		      (goto-char ,(match-beginning 0)))
 	    `(progn (insert ,inside-text)
 		    (goto-char (point-min)))))
-       ,@body)))
+       (prog1 ,@body (kill-buffer)))))
 (def-edebug-spec org-test-with-temp-text (form body))
 
 (defmacro org-test-with-temp-text-in-file (text &rest body)
@@ -329,11 +329,19 @@ otherwise place the point at the beginning of the inserted text."
 		(file-name-nondirectory (buffer-file-name)))
 	       "/")))
 
+(defvar org-test-buffers nil
+  "Hold buffers open for running Org-mode tests.")
+
 (defun org-test-touch-all-examples ()
   (dolist (file (directory-files
 		 org-test-example-dir 'full
 		 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$"))
-    (find-file file)))
+    (unless (get-file-buffer file)
+      (add-to-list 'org-test-buffers (find-file file)))))
+
+(defun org-test-bury-all-examples ()
+  (mapcar (lambda (b) (when (buffer-live-p b) (bury-buffer b)))
+	  org-test-buffers))
 
 (defun org-test-update-id-locations ()
   (org-id-update-id-locations
@@ -362,7 +370,8 @@ Load all test files first."
   (interactive)
   (org-test-touch-all-examples)
   (org-test-load)
-  (ert "\\(org\\|ob\\)"))
+  (ert "\\(org\\|ob\\)")
+  (org-test-bury-all-examples))
 
 (provide 'org-test)
 
