@@ -771,20 +771,20 @@ replacement happens correctly."
 
 * next heading"))
 
-;; TODO FIXME Activate when Eric's trailing newline fix has been committed
-;; (ert-deftest test-ob/org-babel-remove-result--results-wrap ()
-;;   (test-ob-verify-result-and-removed-result
-;;    ":RESULTS:
-;; hello there
-;; :END:"
-;; 
-;; "* org-babel-remove-result
-;; 
-;; +begin_src emacs-lisp :results wrap
-;; \"hello there\"
-;; #+end_src
-;; 
-;; * next heading"))
+(ert-deftest test-ob/org-babel-remove-result--results-wrap ()
+  "Test `org-babel-remove-result' with :results wrap."
+  (test-ob-verify-result-and-removed-result
+   ":RESULTS:
+hello there
+:END:"
+
+ "* org-babel-remove-result
+
+#+begin_src emacs-lisp :results wrap
+\"hello there\"
+#+end_src
+
+* next heading"))
 
 (ert-deftest test-ob/org-babel-remove-result--results-org ()
   "Test `org-babel-remove-result' with :results org."
