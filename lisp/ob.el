@@ -2162,7 +2162,8 @@ block but are passed literally to the \"example-block\"."
       (with-temp-buffer
         (insert body) (goto-char (point-min))
         (setq index (point))
-        (while (and (re-search-forward "<<\\(.+?\\)>>" nil t))
+        (while (and (re-search-forward "<<\\([^ \t].+?[^ \t]\\|[^ \t]\\)>>"
+				       nil t))
           (save-match-data (setf source-name (match-string 1)))
           (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
           (save-match-data
@@ -2227,7 +2228,8 @@ block but are passed literally to the \"example-block\"."
 					     body)))
 				(setq expansion
 				      (cons sep (cons full expansion)))))))))
-		    (mapconcat #'identity (nreverse (cdr expansion)) ""))
+		    (and expansion
+			 (mapconcat #'identity (nreverse (cdr expansion)) "")))
 		  ;; possibly raise an error if named block doesn't exist
 		  (if (member lang org-babel-noweb-error-langs)
 		      (error "%s" (concat
