@@ -17366,6 +17366,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
 (org-defkey org-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
 (org-defkey org-mode-map "\C-c@" 'org-mark-subtree)
+(org-defkey org-mode-map "\C-c\C-@" 'org-mark-list)
 (org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
 ;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
 
