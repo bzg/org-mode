@@ -14400,6 +14400,11 @@ formats in the current buffer."
 (defun org-insert-property-drawer ()
   "Insert a property drawer into the current entry."
   (interactive)
+  (org-insert-drawer "PROPERTIES"))
+
+(defun org-insert-drawer (drawer)
+  "Insert a drawer into the current entry."
+  (interactive "sDrawer: ")
   (org-back-to-heading t)
   (looking-at org-outline-regexp)
   (let ((indent (if org-adapt-indentation
@@ -14425,7 +14430,7 @@ formats in the current buffer."
     (org-skip-over-state-notes)
     (skip-chars-backward " \t\n\r")
     (if (eq (char-before) ?*) (forward-char 1))
-    (let ((inhibit-read-only t)) (insert "\n:PROPERTIES:\n:END:"))
+    (let ((inhibit-read-only t)) (insert "\n:" drawer ":\n:END:"))
     (beginning-of-line 0)
     (org-indent-to-column indent)
     (beginning-of-line 2)
