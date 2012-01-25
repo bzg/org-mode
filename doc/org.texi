@@ -15264,7 +15264,7 @@ not accept any arguments, and return the full link with prefix.
 @vindex org-ctrl-c-ctrl-c-hook
 
 Org has several commands that act differently depending on context.  The most
-important example it the @kbd{C-c C-c} (@pxref{The very busy C-c C-c key}).
+important example is the @kbd{C-c C-c} (@pxref{The very busy C-c C-c key}).
 Also the @kbd{M-cursor} and @kbd{M-S-cursor} keys have this property.
 
 Add-ons can tap into this functionality by providing a function that detects
