@@ -18038,14 +18038,16 @@ See the individual commands for more information."
    (t (call-interactively 'backward-word))))
 
 (defun org-metaright (&optional arg)
-  "Demote subtree or move table column to right.
-Calls `org-do-demote' or `org-table-move-column', depending on context.
+  "Demote a subtree, a list item or move table column to right.
+In front of a drawer or a block keyword, indent it correctly.
 With no specific context, calls the Emacs default `forward-word'.
 See the individual commands for more information."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-metaright-hook))
    ((org-at-table-p) (call-interactively 'org-table-move-column))
+   ((org-at-drawer-p) (call-interactively 'org-indent-drawer))
+   ((org-at-block-p) (call-interactively 'org-indent-block))
    ((org-with-limited-levels
      (or (org-at-heading-p)
 	 (and (org-region-active-p)
@@ -20209,6 +20211,47 @@ If point is in an inline task, mark that task instead."
 		       t t))
     (org-move-to-column column)))
 
+(defun org-indent-drawer ()
+  "Indent the drawer at point."
+  (interactive)
+  (let ((p (point))
+	(e (and (save-excursion (re-search-forward ":END:" nil t))
+		(match-end 0)))
+	(folded
+	 (save-excursion
+	   (end-of-line)
+	   (when (overlays-at (point))
+	     (member 'invisible (overlay-properties
+				 (car (overlays-at (point)))))))))
+    (when folded (org-cycle))
+    (indent-for-tab-command)
+    (while (and (move-beginning-of-line 2) (< (point) e))
+	(indent-for-tab-command))
+    (goto-char p)
+    (when folded (org-cycle)))
+  (message "Drawer at point indented"))
+
+(defun org-indent-block ()
+  "Indent the block at point."
+  (interactive)
+  (let ((p (point))
+	(case-fold-search t)
+	(e (and (save-excursion (re-search-forward "#\\+end_?\\(?:[a-z]+\\)?" nil t))
+		(match-end 0)))
+	(folded
+	 (save-excursion
+	   (end-of-line)
+	   (when (overlays-at (point))
+	     (member 'invisible (overlay-properties
+				 (car (overlays-at (point)))))))))
+    (when folded (org-cycle))
+    (indent-for-tab-command)
+    (while (and (move-beginning-of-line 2) (< (point) e))
+	(indent-for-tab-command))
+    (goto-char p)
+    (when folded (org-cycle)))
+  (message "Block at point indented"))
+
 (defvar org-adaptive-fill-regexp-backup adaptive-fill-regexp
   "Variable to store copy of `adaptive-fill-regexp'.
 Since `adaptive-fill-regexp' is set to never match, we need to
@@ -20762,10 +20805,16 @@ This version does not only check the character property, but also
 (defalias 'org-on-heading-p 'org-at-heading-p)
 
 (defun org-at-drawer-p nil
-  "Whether point is at a drawer."
+  "Is cursor at a drawer keyword?"
   (save-excursion
     (move-beginning-of-line 1)
     (looking-at org-drawer-regexp)))
+
+(defun org-at-block-p nil
+  "Is cursor at a block keyword?"
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at org-block-regexp)))
 
 (defun org-point-at-end-of-empty-headline ()
   "If point is at the end of an empty headline, return t, else nil.
