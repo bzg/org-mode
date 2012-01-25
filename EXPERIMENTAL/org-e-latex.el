@@ -1068,16 +1068,13 @@ holding contextual information."
 		       text
 		       (when tags (format "\\hfill{}\\textsc{%s}" tags)))))
 	 ;; Associate some \label to the headline for internal links.
-	 (headline-labels (mapconcat
-			   (lambda (p)
-			     (let ((val (org-element-get-property p headline)))
-			       (when val (format "\\label{%s}\n"
-						 (if (eq p :begin)
-						     (format "headline-%s" val)
-						   val)))))
-			   '(:custom-id :id :begin) ""))
-	 (pre-blanks (make-string (org-element-get-property :pre-blank headline)
-				  10)))
+	 (headline-label
+	  (format "\\label{sec-%s}\n"
+		  (mapconcat 'number-to-string
+			     (org-export-get-headline-number headline info)
+			     "-")))
+	 (pre-blanks (make-string
+		      (org-element-get-property :pre-blank headline) 10)))
     (cond
      ;; Case 1: This is a footnote section: ignore it.
      ((org-element-get-property :footnote-section-p headline) nil)
@@ -1092,7 +1089,7 @@ holding contextual information."
 	      (when (org-export-first-sibling-p headline info)
 		(format "\\begin{%s}\n" (if numberedp 'enumerate 'itemize)))
 	      ;; Itemize headline
-	      "\\item " full-text "\n" headline-labels pre-blanks contents)))
+	      "\\item " full-text "\n" headline-label pre-blanks contents)))
 	;; If headline in the last sibling, close the list, before any
 	;; blank line.  Otherwise, simply return LOW-LEVEL-BODY.
 	(if (org-export-last-sibling-p headline info)
@@ -1103,7 +1100,7 @@ holding contextual information."
 	  low-level-body)))
      ;; Case 3. Standard headline.  Export it as a section.
      (t (format section-fmt full-text
-		(concat headline-labels pre-blanks contents))))))
+		(concat headline-label pre-blanks contents))))))
 
 
 ;;;; Horizontal Rule
@@ -1374,20 +1371,19 @@ INFO is a plist holding contextual information.  See
     (cond
      ;; Image file.
      (imagep (org-e-latex-link--inline-image path info))
-     ;; Id: for now, assume it's an internal link. TODO: do something
-     ;; to check if it isn't in the current file.
-     ((string= type "id")
-      (format "\\hyperref[%s]{%s}" path (or desc path)))
-     ;; Custom-id, target or radioed target: replace link with the
-     ;; normalized custom-id/target name.
-     ((member type '("custom-id" "target" "radio"))
+     ;; Target or radioed target: replace link with the normalized
+     ;; custom-id/target name.
+     ((member type '("target" "radio"))
       (format "\\hyperref[%s]{%s}"
 	      (org-export-solidify-link-text path)
 	      (or desc (org-export-secondary-string path 'e-latex info))))
-     ;; Fuzzy: With the help of `org-export-resolve-fuzzy-link', find
-     ;; the destination of the link.
-     ((string= type "fuzzy")
-      (let ((destination (org-export-resolve-fuzzy-link link info)))
+     ;; Links pointing to an headline: Find destination and build
+     ;; appropriate referencing commanding.
+     ((member type '("custom-id" "fuzzy" "id"))
+      (let ((destination (if (string= type "fuzzy")
+			     (org-export-resolve-fuzzy-link link info)
+			   (org-export-resolve-id-link link info))))
+	;; Fuzzy link points to a target.  Do as above.
 	(case (car destination)
 	  (target
 	   (format "\\hyperref[%s]{%s}"
@@ -1397,13 +1393,25 @@ INFO is a plist holding contextual information.  See
 		       (org-export-secondary-string
 			(org-element-get-property :raw-link link)
 			'e-latex info))))
+	  ;; Fuzzy link points to an headline.  If headlines are
+	  ;; numbered and the link has no description, display
+	  ;; headline's number.  Otherwise, display description or
+	  ;; headline's title.
 	  (headline
-	   (format "\\hyperref[headline-%d]{%s}"
-		   (org-element-get-property :begin destination)
-		   (or desc
-		       (org-export-secondary-string
-			(org-element-get-property :raw-link link)
-			'e-latex info))))
+	   (let ((label
+		  (format "sec-%s"
+			  (mapconcat
+			   'number-to-string
+			   (org-export-get-headline-number destination info)
+			   "-"))))
+	     (if (and (plist-get info :section-numbers) (not desc))
+		 (format "\\ref{%s}" label)
+	       (format "\\hyperref[%s]{%s}" label
+		       (or desc
+			   (org-export-secondary-string
+			    (org-element-get-property :title destination)
+			    'e-latex info))))))
+	  ;; Fuzzy link points nowhere.
 	  (otherwise
 	   (format "\\texttt{%s}"
 		   (or desc
