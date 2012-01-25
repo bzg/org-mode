@@ -12783,7 +12783,7 @@ headlines matching this string."
 				   (buffer-name (buffer-base-buffer)))))))
 	 (case-fold-search nil)
 	 (org-map-continue-from nil)
-         lspos tags tags-list
+         lspos tags
 	 (tags-alist (list (cons 0 org-file-tags)))
 	 (llast 0) rtn rtn1 level category i txt
 	 todo marker entry priority)
@@ -12874,8 +12874,7 @@ headlines matching this string."
 			      (make-string (1- level) ?.) "")
 			  (org-get-heading))
 			 category
-			 tags-list
-			 )
+			 tags-list)
 		    priority (org-get-priority txt))
 	      (goto-char lspos)
 	      (setq marker (org-agenda-new-marker))
