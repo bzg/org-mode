@@ -1319,12 +1319,11 @@ INFO is a plist containing export options."
 	   (t ""))))
     ;; Now clear ATTR from any special keyword and set a default
     ;; value if nothing is left.
-    (if (not attr)
-	(setq attr "")
-      (while (string-match "\\(wrap\\|multicolumn\\|float\\|placement=\\S-+\\)"
-			   attr)
-	(replace-match "" nil nil attr))
-      (setq attr (org-trim attr)))
+    (setq attr
+	  (if (not attr) ""
+	    (org-trim
+	     (replace-regexp-in-string
+	      "\\(wrap\\|multicolumn\\|float\\|placement=\\S-+\\)" "" attr))))
     (setq attr (cond ((not (string= attr "")) attr)
 		     ((eq disposition 'float) "width=0.7\\textwidth")
 		     ((eq disposition 'wrap) "width=0.48\\textwidth")
