@@ -1080,7 +1080,7 @@ attach it to your bug report.
 @node Conventions,  , Feedback, Introduction
 @section Typesetting conventions used in this manual
 
-Org uses three types of keywords: TODO keywords, tags and property 
+Org uses three types of keywords: TODO keywords, tags and property
 names.  In this manual we use the following conventions:
 
 @table @code
@@ -4085,9 +4085,11 @@ time-stamped note for a change.  These records will be inserted after the
 headline as an itemized list, newest first@footnote{See the variable
 @code{org-log-states-order-reversed}}.  When taking a lot of notes, you might
 want to get the notes out of the way into a drawer (@pxref{Drawers}).
-Customize the variable @code{org-log-into-drawer} to get this
-behavior---the recommended drawer for this is called @code{LOGBOOK}.  You can
-also overrule the setting of this variable for a subtree by setting a
+Customize the variable @code{org-log-into-drawer} to get this behavior---the
+recommended drawer for this is called @code{LOGBOOK}@footnote{Note that the
+@code{LOGBOOK} drawer is unfolded when pressing @key{SPC} in the agenda to
+show an entry---use @key{C-u SPC} to keep it folded here}.  You can also
+overrule the setting of this variable for a subtree by setting a
 @code{LOG_INTO_DRAWER} property.
 
 Since it is normally too much to record a note for every state, Org mode
@@ -12647,7 +12649,7 @@ Org mode buffer.  The results of evaluation are placed following a line that
 begins by default with @code{#+RESULTS} and optionally a cache identifier
 and/or the name of the evaluated code block.  The default value of
 @code{#+RESULTS} can be changed with the customizable variable
-@code{org-babel-results-keyword}. 
+@code{org-babel-results-keyword}.
 
 By default, the evaluation facility is only enabled for Lisp code blocks
 specified as @code{emacs-lisp}. However, source code blocks in many languages
