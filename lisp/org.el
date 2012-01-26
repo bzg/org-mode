@@ -16764,6 +16764,8 @@ the cursor is before the first headline,
 display all fragments in the buffer.
 The images can be removed again with \\[org-ctrl-c-ctrl-c]."
   (interactive "P")
+  (unless buffer-file-name
+    (error "Can't preview LaTeX fragment in a non-file buffer"))
   (org-remove-latex-fragment-image-overlays)
   (save-excursion
     (save-restriction
