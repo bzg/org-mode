@@ -1768,6 +1768,8 @@ numerically, alphabetically, by time, or by custom function.
 @cindex visibility cycling, drawers
 
 @vindex org-drawers
+@cindex org-insert-drawer
+@kindex C-c C-x d
 Sometimes you want to keep information associated with an entry, but you
 normally don't want to see it.  For this, Org mode has @emph{drawers}.
 Drawers need to be configured with the variable
@@ -1783,6 +1785,13 @@ look like this:
    :END:
    After the drawer.
 @end example
+
+You can interactively insert drawers at point by calling
+@code{org-insert-drawer}, which is bound to @key{C-c C-x d}.  With an active
+region, this command will put the region inside the drawer.  With a prefix
+argument, this command calls @code{org-insert-property-drawer} and add a
+property drawer right below the current headline.  Completion over drawer
+keywords is also possible using @key{M-TAB}.
 
 Visibility cycling (@pxref{Visibility cycling}) on the headline will hide and
 show the entry, but keep the drawer collapsed to a single line.  In order to
@@ -4894,8 +4903,8 @@ in the current file will be offered as possible completions.
 @orgcmd{C-c C-x p,org-set-property}
 Set a property.  This prompts for a property name and a value.  If
 necessary, the property drawer is created as well.
-@item M-x org-insert-property-drawer
-@findex org-insert-property-drawer
+@item C-u M-x org-insert-drawer
+@cindex org-insert-drawer
 Insert a property drawer into the current entry.  The drawer will be
 inserted early in the entry, but after the lines with planning
 information like deadlines.
@@ -15912,6 +15921,7 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 `special' or `standard', only get that subclass.
 @end defun
 @vindex org-use-property-inheritance
+@findex org-insert-property-drawer
 @defun org-entry-get pom property &optional inherit
 Get value of PROPERTY for entry at point-or-marker POM.  By default,
 this only looks at properties defined locally in the entry.  If INHERIT
@@ -15934,7 +15944,7 @@ Get all property keys in the current buffer.
 @end defun
 
 @defun org-insert-property-drawer
-Insert a property drawer at point.
+Insert a property drawer for the current entry.  Also
 @end defun
 
 @defun org-entry-put-multivalued-property pom property &rest values

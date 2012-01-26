@@ -14398,62 +14398,106 @@ formats in the current buffer."
 
 (defun org-insert-property-drawer ()
   "Insert a property drawer into the current entry."
-  (interactive)
-  (org-insert-drawer "PROPERTIES"))
+  (org-back-to-heading t)
+  (looking-at org-outline-regexp)
+  (let ((indent (if org-adapt-indentation
+		    (- (match-end 0) (match-beginning 0))
+		  0))
+	(beg (point))
+	(re (concat "^[ \t]*" org-keyword-time-regexp))
+	end hiddenp)
+    (outline-next-heading)
+    (setq end (point))
+    (goto-char beg)
+    (while (re-search-forward re end t))
+    (setq hiddenp (outline-invisible-p))
+    (end-of-line 1)
+    (and (equal (char-after) ?\n) (forward-char 1))
+    (while (looking-at "^[ \t]*\\(:CLOCK:\\|:LOGBOOK:\\|CLOCK:\\|:END:\\)")
+      (if (member (match-string 1) '("CLOCK:" ":END:"))
+	  ;; just skip this line
+	  (beginning-of-line 2)
+	;; Drawer start, find the end
+	(re-search-forward "^\\*+ \\|^[ \t]*:END:" nil t)
+	(beginning-of-line 1)))
+    (org-skip-over-state-notes)
+    (skip-chars-backward " \t\n\r")
+    (if (eq (char-before) ?*) (forward-char 1))
+    (let ((inhibit-read-only t)) (insert "\n:PROPERTIES:\n:END:"))
+    (beginning-of-line 0)
+    (org-indent-to-column indent)
+    (beginning-of-line 2)
+    (org-indent-to-column indent)
+    (beginning-of-line 0)
+    (if hiddenp
+	(save-excursion
+	  (org-back-to-heading t)
+	  (hide-entry))
+      (org-flag-drawer t))))
 
-(defun org-insert-drawer (&optional drawer)
-  "Insert a drawer into the current entry."
-  (interactive)
-  (if (org-region-active-p)
-    (let ((rbeg (region-beginning))
-	  (rend (region-end))
-	  (drawer (or drawer (completing-read "Drawer: " org-drawers))))
-      (goto-char rbeg)
-      (insert ":" drawer ":\n")
-      (move-beginning-of-line 1)
-      (indent-for-tab-command)
-      (goto-char rend)
-      (move-end-of-line 1)
-      (insert "\n:END:")
-      (move-beginning-of-line 1)
-      (indent-for-tab-command))
-    (org-back-to-heading t)
-    (looking-at org-outline-regexp)
-    (let ((indent (if org-adapt-indentation
-		      (- (match-end 0) (match-beginning 0))
-		    0))
-	  (beg (point))
-	  (re (concat "^[ \t]*" org-keyword-time-regexp))
-	  (drawer (or drawer (completing-read "Drawer: " org-drawers)))
-	  end hiddenp)
-      (outline-next-heading)
-      (setq end (point))
-      (goto-char beg)
-      (while (re-search-forward re end t))
-      (setq hiddenp (outline-invisible-p))
-      (end-of-line 1)
-      (and (equal (char-after) ?\n) (forward-char 1))
-      (while (looking-at "^[ \t]*\\(:CLOCK:\\|:LOGBOOK:\\|CLOCK:\\|:END:\\)")
-	(if (member (match-string 1) '("CLOCK:" ":END:"))
-	    ;; just skip this line
-	    (beginning-of-line 2)
-	  ;; Drawer start, find the end
-	  (re-search-forward "^\\*+ \\|^[ \t]*:END:" nil t)
-	  (beginning-of-line 1)))
-      (org-skip-over-state-notes)
-      (skip-chars-backward " \t\n\r")
-      (if (eq (char-before) ?*) (forward-char 1))
-      (let ((inhibit-read-only t)) (insert "\n:" drawer ":\n:END:"))
-      (beginning-of-line 0)
-      (org-indent-to-column indent)
-      (beginning-of-line 2)
-      (org-indent-to-column indent)
-      (beginning-of-line 0)
-      (if hiddenp
-	  (save-excursion
-	    (org-back-to-heading t)
-	    (hide-entry))
-	(org-flag-drawer t)))))
+(defun org-insert-drawer (&optional arg drawer)
+  "Insert a drawer at point.
+
+Optional argument DRAWER, when non-nil, is a string representing
+drawer's name.  Otherwise, the user is prompted for a name.
+
+If a region is active, insert the drawer around that region
+instead.
+
+Point is left between drawer's boundaries."
+  (interactive "P")
+  (let* ((logbook (if (stringp org-log-into-drawer) org-log-into-drawer
+		    "LOGBOOK"))
+	 ;; SYSTEM-DRAWERS is a list of drawer names that are used
+	 ;; internally by Org.  They are meant to be inserted
+	 ;; automatically.
+	 (system-drawers `("CLOCK" ,logbook "PROPERTIES"))
+	 ;; Remove system drawers from list.  Note: For some reason,
+	 ;; `org-completing-read' ignores the predicate while
+	 ;; `completing-read' handles it fine.
+	 (drawer (if arg "PROPERTIES"
+		   (or drawer
+		       (completing-read
+			"Drawer: " org-drawers
+			(lambda (d) (not (member d system-drawers))))))))
+    (cond
+     ;; With C-u, fall back on `org-insert-property-drawer'
+     (arg (org-insert-property-drawer))
+     ;; With an active region, insert a drawer at point.
+     ((not (org-region-active-p))
+      (progn
+	(unless (bolp) (insert "\n"))
+	(insert (format ":%s:\n\n:END:\n" drawer))
+	(forward-line -2)))
+     ;; Otherwise, insert the drawer at point
+     (t
+      (let ((rbeg (region-beginning))
+	    (rend (copy-marker (region-end))))
+	(unwind-protect
+	    (progn
+	      (goto-char rbeg)
+	      (beginning-of-line)
+	      (when (save-excursion
+		      (re-search-forward org-outline-regexp-bol rend t))
+		(error "Drawers cannot contain headlines"))
+	      ;; Position point at the beginning of the first
+	      ;; non-blank line in region. Insert drawer's opening
+	      ;; there, then indent it.
+	      (org-skip-whitespace)
+	      (beginning-of-line)
+	      (insert ":" drawer ":\n")
+	      (forward-line -1)
+	      (indent-for-tab-command)
+	      ;; Move point to the beginning of the first blank line
+	      ;; after the last non-blank line in region.  Insert
+	      ;; drawer's closing, then indent it.
+	      (goto-char rend)
+	      (skip-chars-backward " \r\t\n")
+	      (insert "\n:END:")
+	      (indent-for-tab-command)
+	      (unless (eolp) (insert "\n")))
+	  ;; Clear marker, whatever the outcome of insertion is.
+	  (set-marker rend nil)))))))
 
 (defvar org-property-set-functions-alist nil
   "Property set function alist.
@@ -17320,6 +17364,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-a" 'org-archive-subtree-default)
+(org-defkey org-mode-map "\C-c\C-xd" 'org-insert-drawer)
 (org-defkey org-mode-map "\C-c\C-xa" 'org-toggle-archive-tag)
 (org-defkey org-mode-map "\C-c\C-xA" 'org-archive-to-archive-sibling)
 (org-defkey org-mode-map "\C-c\C-xb" 'org-tree-to-indirect-buffer)
