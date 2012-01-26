@@ -102,6 +102,12 @@ the value of this variable."
 	  (const :tag "Off" nil)
 	  (integer)))
 
+(defcustom org-inlinetask-show-first-star nil
+  "Non-nil means display the first star of an inline task as additional marker.
+When nil, the first star is not shown."
+  :tag "Org Inline Tasks"
+  :group 'org-structure)
+
 (defcustom org-inlinetask-export t
   "Non-nil means export inline tasks.
 When nil, they will not be exported."
@@ -434,9 +440,12 @@ Either remove headline and meta data, or do special formatting."
 			 'org-hide
 		       'org-warning)))
     (while (re-search-forward re limit t)
-      (add-text-properties (match-beginning 1) (match-end 1)
-			   `(face ,start-face font-lock-fontified t))
-      (add-text-properties (match-beginning 2) (match-end 2)
+      (if org-inlinetask-show-first-star
+	  (add-text-properties (match-beginning 1) (match-end 1)
+			       `(face ,start-face font-lock-fontified t)))
+      (add-text-properties (match-beginning
+			    (if org-inlinetask-show-first-star 2 1))
+			   (match-end 2)
 			   '(face org-hide font-lock-fontified t))
       (add-text-properties (match-beginning 3) (match-end 3)
 			   '(face org-inlinetask font-lock-fontified t)))))
