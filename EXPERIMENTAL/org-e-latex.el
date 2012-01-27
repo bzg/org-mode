@@ -803,7 +803,11 @@ holding export options."
 	    (plist-get info :latex-header-extra))))))
      ;; 3. Define alert if not yet defined.
      "\\providecommand{\\alert}[1]{\\textbf{#1}}\n"
-     ;; 4. Author.
+     ;; 4. Possibly limit depth for headline numbering.
+     (let ((sec-num (plist-get info :section-numbers)))
+       (when (integerp sec-num)
+	 (format "\\setcounter{secnumdepth}{%d}\n" sec-num)))
+     ;; 5. Author.
      (let ((author (and (plist-get info :with-author)
 			(let ((auth (plist-get info :author)))
 			  (and auth (org-export-secondary-string
@@ -815,12 +819,12 @@ holding export options."
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     (author (format "\\author{%s}\n" author))
 	     (t "\\author{}\n")))
-     ;; 5. Date.
+     ;; 6. Date.
      (let ((date (plist-get info :date)))
        (and date (format "\\date{%s}\n" date)))
-     ;; 6. Title
+     ;; 7. Title
      (format "\\title{%s}\n" title)
-     ;; 7. Hyperref options.
+     ;; 8. Hyperref options.
      (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
 	     (or (plist-get info :keywords) "")
 	     (or (plist-get info :description) "")
@@ -829,9 +833,9 @@ holding export options."
 		((not creator-info) "")
 		((eq creator-info 'comment) "")
 		(t (plist-get info :creator)))))
-     ;; 7. Document start.
+     ;; 9. Document start.
      "\\begin{document}\n\n"
-     ;; 8. Title command.
+     ;; 10. Title command.
      (org-element-normalize-string
       (cond ((string= "" title) nil)
 	    ((not (stringp org-e-latex-title-command)) nil)
@@ -839,22 +843,22 @@ holding export options."
 			   org-e-latex-title-command)
 	     (format org-e-latex-title-command title))
 	    (t org-e-latex-title-command)))
-     ;; 9. Table of contents.
+     ;; 11. Table of contents.
      (let ((depth (plist-get info :with-toc)))
        (when depth
 	 (concat (when (wholenump depth)
 		   (format "\\setcounter{tocdepth}{%d}\n" depth))
 		 "\\tableofcontents\n\\vspace*{1cm}\n\n")))
-     ;; 10. Document's body.
+     ;; 12. Document's body.
      contents
-     ;; 11. Creator.
+     ;; 13. Creator.
      (let ((creator-info (plist-get info :with-creator)))
        (cond
 	((not creator-info))
 	((eq creator-info 'comment)
 	 (format "%% %s\n" (plist-get info :creator)))
 	(t (concat (plist-get info :creator) "\n"))))
-     ;; 12. Document end.
+     ;; 14. Document end.
      "\\end{document}")))
 
 

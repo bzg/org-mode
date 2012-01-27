@@ -394,6 +394,9 @@ When nil, remove priority cookies for export."
 (defcustom org-export-with-section-numbers t
   "Non-nil means add section numbers to headlines when exporting.
 
+When set to an integer n, numbering will only happen for
+headlines whose relative level is higher or equal to n.
+
 This option can also be set with the #+OPTIONS line,
 e.g. \"num:t\"."
   :group 'org-export-general

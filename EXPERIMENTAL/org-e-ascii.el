@@ -563,13 +563,20 @@ specifications.
 if optional argument NOTAGS is nil, no tags will be added to the
 title."
   (let* ((headlinep (eq (car element) 'headline))
-	 ;; Numbering is specific to headlines.
-	 (numbers (and headlinep (plist-get info :section-numbers)
-		       (concat
-			(mapconcat
-			 #'number-to-string
-			 (org-export-get-headline-number element info) ".")
-			" ")))
+	 (numbers
+	  ;; Numbering is specific to headlines.
+	  (and headlinep
+	       ;; Section numbering must be active, and headline's
+	       ;; level should be above specified limit, if any.
+	       (let ((sec-num (plist-get info :section-numbers)))
+		 (if (not (wholenump sec-num)) sec-num
+		   (<= (org-export-get-relative-level headline info) sec-num)))
+	       ;; All tests passed: build numbering string.
+	       (concat
+		(mapconcat
+		 #'number-to-string
+		 (org-export-get-headline-number element info) ".")
+		" ")))
 	 (text (org-export-secondary-string
 		(org-element-get-property :title element) 'e-ascii info))
 	 (todo
@@ -593,8 +600,8 @@ title."
 	(format " %%%ds"
 		(max (- text-width  (1+ (length first-part))) (length tags)))
 	tags))
-     ;; Maybe underline text, if ELEMENT type is `headline' and
-     ;; a underline character has been defined.
+     ;; Maybe underline text, if ELEMENT type is `headline' and an
+     ;; underline character has been defined.
      (when (and underline headlinep)
        (let ((under-char
 	      (nth (1- (org-export-get-relative-level element info))
