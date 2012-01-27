@@ -35,7 +35,20 @@
   :tag "Org Export ODT"
   :group 'org-export)
 
+(defun org-odt-insert-toc ()
+  (goto-char (point-min))
+  (cond
+   ((re-search-forward
+     "\\(<text:p [^>]*>\\)?\\s-*\\[TABLE-OF-CONTENTS\\]\\s-*\\(</text:p>\\)?"
+     nil t)
+    (goto-char (match-beginning 0))
+    (replace-match ""))
+   (t
+    (goto-char org-lparse-dyn-first-heading-pos))
+   (insert (org-odt-format-toc))))
+
 (defun org-odt-end-export ()
+  (org-odt-insert-toc)
   (org-odt-fixup-label-references)
 
   ;; remove empty paragraphs
@@ -611,13 +624,12 @@ PUB-DIR is set, use this as the publishing directory."
 	  '("<text:date style:data-style-name=\"%s\" text:date-value=\"%s\">"
 	    . "</text:date>") date "N75" iso-date))
 	;; separator
-	"<text:p text:style-name=\"OrgSubtitle\"/>"))
-     ;; toc
-     (org-odt-format-toc))))
+	"<text:p text:style-name=\"OrgSubtitle\"/>")))))
 
 (defun org-odt-begin-document-body (opt-plist)
   (org-odt-begin-office-body)
-  (insert (org-odt-format-preamble opt-plist)))
+  (insert (org-odt-format-preamble opt-plist))
+  (setq org-lparse-dyn-first-heading-pos (point)))
 
 (defvar org-lparse-body-only)		; let bound during org-do-lparse
 (defvar org-lparse-to-buffer)		; let bound during org-do-lparse
