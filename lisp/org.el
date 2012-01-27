@@ -20511,9 +20511,11 @@ beyond the end of the headline."
 	;; Set special position at first white space character after
 	;; bullet, and check-box, if any.
 	(let ((after-bullet
-	       (progn (looking-at org-list-full-item-re)
-		      (let ((bul (or (match-end 3) (match-end 1))))
-			(if (= (char-after bul) ? ) (1+ bul) bul)))))
+	       (and (looking-at org-list-full-item-re)
+		    (let ((box (match-end 3)))
+		      (if (not box) (match-end 1)
+			(let ((after (char-after box)))
+			  (if (and after (= after ? )) (1+ box) box)))))))
 	  ;; Special case: Move point to special position when
 	  ;; currently after it or at beginning of line.
 	  (if (eq special t)
