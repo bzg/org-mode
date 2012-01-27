@@ -152,7 +152,8 @@ none ----- do not display either code or results upon export"
 					      (org-babel-exp-do-export
 					       info 'inline))))
 		      (if code-replacement
-			  (replace-match code-replacement nil nil nil 1)
+			  (progn (replace-match code-replacement nil nil nil 1)
+				 (delete-char 1))
 			(org-babel-examplize-region (match-beginning 1)
 						    (match-end 1))
 			(forward-char 2)))))))
