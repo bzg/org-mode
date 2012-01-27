@@ -176,8 +176,8 @@ Returns non-nil if match-data set"
 	(first-line-p (= 1 (line-number-at-pos)))
 	(orig (point)))
     (let ((search-for (cond ((and src-at-0-p first-line-p  "src_"))
-			    (first-line-p "[( \t]src_")
-			    (t "[( \f\t\n\r\v]src_")))
+			    (first-line-p "[[:punct:] \t]src_")
+			    (t "[[:punct:] \f\t\n\r\v]src_")))
 	  (lower-limit (if first-line-p
 			   nil
 			 (- (point-at-bol) 1))))
