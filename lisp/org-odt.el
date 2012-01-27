@@ -33,17 +33,17 @@
   :tag "Org Export ODT"
   :group 'org-export)
 
+(defvar org-lparse-dyn-first-heading-pos) ; let bound during org-do-lparse
 (defun org-odt-insert-toc ()
   (goto-char (point-min))
   (cond
    ((re-search-forward
      "\\(<text:p [^>]*>\\)?\\s-*\\[TABLE-OF-CONTENTS\\]\\s-*\\(</text:p>\\)?"
      nil t)
-    (goto-char (match-beginning 0))
     (replace-match ""))
    (t
-    (goto-char org-lparse-dyn-first-heading-pos))
-   (insert (org-odt-format-toc))))
+    (goto-char org-lparse-dyn-first-heading-pos)))
+  (insert (org-odt-format-toc)))
 
 (defun org-odt-end-export ()
   (org-odt-insert-toc)
