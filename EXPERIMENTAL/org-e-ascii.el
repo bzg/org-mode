@@ -36,6 +36,7 @@
 
 (declare-function org-element-get-contents "org-element" (element))
 (declare-function org-element-get-property "org-element" (property element))
+(declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-map "org-element"
 		  (data types fun &optional info first-match))
 (declare-function org-element-time-stamp-interpreter
@@ -938,67 +939,68 @@ INFO is a plist used as a communication channel."
   "Return complete document string after ASCII conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (org-e-ascii--indent-string
-   (let ((text-width (- org-e-ascii-text-width org-e-ascii-global-margin)))
-     ;; 1. Build title block.
-     (concat
-      (org-e-ascii-template--document-title info)
-      ;; 2. Table of contents.
-      (let ((depth (plist-get info :with-toc)))
-	(when depth
-	  (concat
-	   (org-e-ascii--build-toc info (and (wholenump depth) depth))
-	   "\n\n\n")))
-      ;; 3. Document's body.
-      contents
-      ;; 4. Footnote definitions.
-      (let ((definitions (org-export-collect-footnote-definitions
-			  (plist-get info :parse-tree) info))
-	    ;; Insert full links right inside the footnote definition
-	    ;; as they have no chance to be inserted later.
-	    (org-e-ascii-links-to-notes nil))
-	(when definitions
-	  (concat
-	   "\n\n\n"
-	   (let ((title (org-e-ascii--translate "Footnotes\n" info)))
-	     (concat
-	      title
-	      (make-string
-	       (1- (length title))
-	       (if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))))
-	   "\n\n"
-	   (mapconcat
-	    (lambda (ref)
-	      (let ((id (format "[%s] " (car ref))))
-		;; Distinguish between inline definitions and
-		;; full-fledged definitions.
-		(org-trim
-		 (let ((def (nth 2 ref)))
-		   (if (eq (car def) 'org-data)
-		       ;; Full-fledged definition: footnote ID is
-		       ;; inserted inside the first parsed paragraph
-		       ;; (FIRST), if any, to be sure filling will
-		       ;; take it into consideration.
-		       (let ((first (car (org-element-get-contents def))))
-			 (if (not (eq (car first) 'paragraph))
-			     (concat id "\n" (org-export-data def 'e-ascii info))
-			   (push id (nthcdr 2 first))
-			   (org-export-data def 'e-ascii info)))
-		     ;; Fill paragraph once footnote ID is inserted in
-		     ;; order to have a correct length for first line.
-		     (org-e-ascii--fill-string
-		      (concat id (org-export-secondary-string def 'e-ascii info))
-		      text-width info))))))
-	    definitions "\n\n"))))
-      ;; 5. Creator.  Ignore `comment' value as there are no comments in
-      ;;    ASCII.  Justify it to the bottom right.
-      (let ((creator-info (plist-get info :with-creator)))
-	(unless (or (not creator-info) (eq creator-info 'comment))
-	  (concat
-	   "\n\n\n"
-	   (org-e-ascii--fill-string
-	    (plist-get info :creator) text-width info 'right))))))
-   org-e-ascii-global-margin))
+  (org-element-normalize-string
+   (org-e-ascii--indent-string
+    (let ((text-width (- org-e-ascii-text-width org-e-ascii-global-margin)))
+      ;; 1. Build title block.
+      (concat
+       (org-e-ascii-template--document-title info)
+       ;; 2. Table of contents.
+       (let ((depth (plist-get info :with-toc)))
+	 (when depth
+	   (concat
+	    (org-e-ascii--build-toc info (and (wholenump depth) depth))
+	    "\n\n\n")))
+       ;; 3. Document's body.
+       contents
+       ;; 4. Footnote definitions.
+       (let ((definitions (org-export-collect-footnote-definitions
+			   (plist-get info :parse-tree) info))
+	     ;; Insert full links right inside the footnote definition
+	     ;; as they have no chance to be inserted later.
+	     (org-e-ascii-links-to-notes nil))
+	 (when definitions
+	   (concat
+	    "\n\n\n"
+	    (let ((title (org-e-ascii--translate "Footnotes\n" info)))
+	      (concat
+	       title
+	       (make-string
+		(1- (length title))
+		(if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))))
+	    "\n\n"
+	    (mapconcat
+	     (lambda (ref)
+	       (let ((id (format "[%s] " (car ref))))
+		 ;; Distinguish between inline definitions and
+		 ;; full-fledged definitions.
+		 (org-trim
+		  (let ((def (nth 2 ref)))
+		    (if (eq (car def) 'org-data)
+			;; Full-fledged definition: footnote ID is
+			;; inserted inside the first parsed paragraph
+			;; (FIRST), if any, to be sure filling will
+			;; take it into consideration.
+			(let ((first (car (org-element-get-contents def))))
+			  (if (not (eq (car first) 'paragraph))
+			      (concat id "\n" (org-export-data def 'e-ascii info))
+			    (push id (nthcdr 2 first))
+			    (org-export-data def 'e-ascii info)))
+		      ;; Fill paragraph once footnote ID is inserted in
+		      ;; order to have a correct length for first line.
+		      (org-e-ascii--fill-string
+		       (concat id (org-export-secondary-string def 'e-ascii info))
+		       text-width info))))))
+	     definitions "\n\n"))))
+       ;; 5. Creator.  Ignore `comment' value as there are no comments in
+       ;;    ASCII.  Justify it to the bottom right.
+       (let ((creator-info (plist-get info :with-creator)))
+	 (unless (or (not creator-info) (eq creator-info 'comment))
+	   (concat
+	    "\n\n\n"
+	    (org-e-ascii--fill-string
+	     (plist-get info :creator) text-width info 'right))))))
+    org-e-ascii-global-margin)))
 
 (defun org-e-ascii--translate (s info)
   "Translate string S.
