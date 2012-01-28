@@ -16268,7 +16268,7 @@ Bastien has written a large number of extensions to Org (most of them
 integrated into the core by now), including the @LaTeX{} exporter and the plain
 list parser.  His support during the early days, when he basically acted as
 co-maintainer, was central to the success of this project.  Bastien also
-invented Worg, helped establishing the Web presence of Org, and sponsors
+invented Worg, helped establishing the Web presence of Org, and sponsored
 hosting costs for the orgmode.org website.
 @item Eric Schulte and Dan Davison
 Eric and Dan are jointly responsible for the Org-babel system, which turns
