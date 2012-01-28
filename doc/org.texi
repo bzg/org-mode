@@ -1773,7 +1773,7 @@ numerically, alphabetically, by time, or by custom function.
 Sometimes you want to keep information associated with an entry, but you
 normally don't want to see it.  For this, Org mode has @emph{drawers}.
 Drawers need to be configured with the variable
-@code{org-drawers}@footnote{You can define additional drawers on a 
+@code{org-drawers}@footnote{You can define additional drawers on a
 per-file basis with a line like @code{#+DRAWERS: HIDDEN STATE}}.  Drawers
 look like this:
 
@@ -14433,7 +14433,7 @@ Set tags that can be inherited by any entry in the file, including the
 top-level entries.
 @item #+DRAWERS: NAME1 .....
 @vindex org-drawers
-Set the file-local set of additional drawers.  The corresponding global 
+Set the file-local set of additional drawers.  The corresponding global
 variable is @code{org-drawers}.
 @item #+LINK:  linkword replace
 @vindex org-link-abbrev-alist
