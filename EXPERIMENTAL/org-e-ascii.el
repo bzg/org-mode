@@ -95,24 +95,15 @@ See `org-export-option-alist' for more information on the
 structure or the values.")
 
 (defconst org-e-ascii-dictionary
-  '(("Table Of Contents\n"
+  '(("Footnotes\n"
      ("en"
-      :ascii "Table Of Contents\n"
-      :latin1 "Table Of Contents\n"
-      :utf-8 "Table Of Contents\n")
+      :ascii "Footnotes\n"
+      :latin1 "Footnotes\n"
+      :utf-8 "Footnotes\n")
      ("fr"
-      :ascii "Sommaire\n"
-      :latin1 "Table des matières\n"
-      :utf-8 "Table des matières\n"))
-    ("Table %d: %s"
-     ("en"
-      :ascii "Table %d: %s"
-      :latin1 "Table %d: %s"
-      :utf-8 "Table %d: %s")
-     ("fr"
-      :ascii "Tableau %d : %s"
-      :latin1 "Tableau %d : %s"
-      :utf-8 "Tableau nº %d : %s"))
+      :ascii "Notes de bas de page\n"
+      :latin1 "Notes de bas de page\n"
+      :utf-8 "Notes de bas de page\n"))
     ("Listing %d: %s"
      ("en"
       :ascii "Listing %d: %s"
@@ -149,6 +140,33 @@ structure or the values.")
       :ascii "Programme %d : "
       :latin1 "Programme %d : "
       :utf-8 "Programme nº %d : "))
+    ("Table Of Contents\n"
+     ("en"
+      :ascii "Table Of Contents\n"
+      :latin1 "Table Of Contents\n"
+      :utf-8 "Table Of Contents\n")
+     ("fr"
+      :ascii "Sommaire\n"
+      :latin1 "Table des matières\n"
+      :utf-8 "Table des matières\n"))
+    ("Table %d: %s"
+     ("en"
+      :ascii "Table %d: %s"
+      :latin1 "Table %d: %s"
+      :utf-8 "Table %d: %s")
+     ("fr"
+      :ascii "Tableau %d : %s"
+      :latin1 "Tableau %d : %s"
+      :utf-8 "Tableau nº %d : %s"))
+    ("See section %s"
+     ("en"
+      :ascii "See section %s"
+      :latin1 "See section %s"
+      :utf-8 "See section %s")
+     ("fr"
+      :ascii "cf. section %s"
+      :latin1 "cf. section %s"
+      :utf-8 "cf. section %s"))
     ("Table %d: "
      ("en"
       :ascii "Table %d: "
@@ -166,16 +184,7 @@ structure or the values.")
      ("fr"
       :ascii "Destination inconnue"
       :latin1 "Référence inconnue"
-      :utf-8 "Référence inconnue"))
-    ("See section %s"
-     ("en"
-      :ascii "See section %s"
-      :latin1 "See section %s"
-      :utf-8 "See section %s")
-     ("fr"
-      :ascii "cf. section %s"
-      :latin1 "cf. section %s"
-      :utf-8 "cf. section %s")))
+      :utf-8 "Référence inconnue")))
   "Dictionary for ASCII back-end.
 
 Alist whose car is the string to translate and cdr is an alist
@@ -946,6 +955,13 @@ holding export options."
 	(when definitions
 	  (concat
 	   "\n\n\n"
+	   (let ((title (org-e-ascii--translate "Footnotes\n" info)))
+	     (concat
+	      title
+	      (make-string
+	       (1- (length title))
+	       (if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))))
+	   "\n\n"
 	   (mapconcat
 	    (lambda (ref)
 	      (let ((id (format "[%s] " (car ref))))
