@@ -9443,7 +9443,7 @@ Org-mode syntax."
   (interactive "sLink: \nP")
   (let ((reference-buffer (or reference-buffer (current-buffer))))
     (with-temp-buffer
-      (let ((org-inhibit-startup t))
+      (let ((org-inhibit-startup (not reference-buffer)))
 	(org-mode)
 	(insert s)
 	(goto-char (point-min))
