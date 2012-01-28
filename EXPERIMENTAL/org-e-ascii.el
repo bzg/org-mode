@@ -220,6 +220,12 @@ Inner margin is applied between each headline."
   :group 'org-export-e-ascii
   :type 'integer)
 
+(defcustom org-e-ascii-quote-margin 6
+  "Width of margin used for quoting text, in characters.
+This margin is applied on both sides of the text."
+  :group 'org-export-e-ascii
+  :type 'integer)
+
 (defcustom org-e-ascii-inlinetask-width 30
   "Width of inline tasks, in number of characters.
 This number ignores any margin."
@@ -526,12 +532,11 @@ INFO is a plist used as a communication channel."
       (- total-width
 	 ;; Each `quote-block', `quote-section' and `verse-block' above
 	 ;; narrows text width by twice the standard margin size.
-	 (+ (let ((margin (max (floor (/ total-width 12)) 2)))
-	      (* (loop for parent in genealogy
-		       when (memq (car parent)
-				  '(quote-block quote-section verse-block))
-		       count parent)
-		 2 margin))
+	 (+ (* (loop for parent in genealogy
+		     when (memq (car parent)
+				'(quote-block quote-section verse-block))
+		     count parent)
+	       2 org-e-ascii-quote-margin)
 	    ;; Text width within a plain-list is restricted by
 	    ;; indentation of current item.  If that's the case,
 	    ;; compute it with the help of `:structure' property from
@@ -1456,11 +1461,11 @@ channel."
   "Transcode a QUOTE-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let* ((width (org-e-ascii--current-text-width quote-block info))
-	 (margin-width (max (floor (/ width 12)) 2)))
+  (let ((width (org-e-ascii--current-text-width quote-block info)))
     (org-e-ascii--indent-string
      (org-remove-indentation
-      (org-e-ascii--fill-string contents width info)) margin-width)))
+      (org-e-ascii--fill-string contents width info))
+     org-e-ascii-quote-margin)))
 
 
 ;;;; Quote Section
@@ -1468,15 +1473,14 @@ holding contextual information."
 (defun org-e-ascii-quote-section (quote-section contents info)
   "Transcode a QUOTE-SECTION element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((width (org-e-ascii--current-text-width quote-section info))
-	 (margin-width (max (floor (/ width 12)) 2))
-	 (value
-	  (org-export-secondary-string
-	   (org-remove-indentation
-	    (org-element-get-property :value quote-section)) 'e-ascii info)))
+  (let ((width (org-e-ascii--current-text-width quote-section info))
+	(value
+	 (org-export-secondary-string
+	  (org-remove-indentation
+	   (org-element-get-property :value quote-section)) 'e-ascii info)))
     (org-e-ascii--indent-string
      value
-     (+ margin-width
+     (+ org-e-ascii-quote-margin
 	;; Don't apply inner margin if parent headline is low level.
 	(let ((headline (org-export-get-parent-headline quote-section info)))
 	  (if (org-export-low-level-p headline info) 0
@@ -1834,7 +1838,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       (org-export-secondary-string
        (org-element-get-property :value verse-block) 'e-ascii info)
       verse-width 'left)
-     (max (floor (/ verse-width 12)) 2))))
+     org-e-ascii-quote-margin)))
 
 
 ;;; Filter
