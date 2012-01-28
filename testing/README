@@ -1,0 +1,45 @@
+# -*- mode:org -*-
+#+Title: Org-mode Testing
+#+Property: results silent
+
+* dependencies
+The only dependency is [[http://www.emacswiki.org/emacs/ErtTestLibrary][ERT]] the Emacs testing library which ships with
+Emacs24.  If you are running an older version of Emacs and don't
+already have ERT installed it can be installed from its old [[https://github.com/ohler/ert][git
+repository]].
+
+* non-interactive batch testing from the command line
+The simplest way to run the Org-mode test suite is from the command
+line with the following invocation.  Note that the paths below are
+relative to the base of the Org-mode directory.
+#+BEGIN_SRC sh
+  emacs -Q --batch -l lisp/org.el -l testing/org-test.el \
+      --eval "(progn (org-reload) (setq org-confirm-babel-evaluate nil))" \
+      -f org-test-run-batch-tests
+#+END_SRC
+
+The options in the above command are explained below.
+| -Q      | ignores any personal configuration ensuring a vanilla Emacs instance is used |
+| --batch | runs Emacs in "batch" mode with no gui and termination after execution       |
+| -l      | loads Org-mode and the org mode test suite defined in testing/org-test.el    |
+| --eval  | reloads Org-mode and allows evaluation of code blocks by the tests           |
+| -f      | actually runs the tests using the `org-test-run-batch-tests' function        |
+
+* interactive testing from within Emacs
+To run the Org-mode test suite from a current Emacs instance simply
+load and run the test suite with the following commands.
+
+1) First load the test suite.
+   #+BEGIN_SRC emacs-lisp :var here=(buffer-file-name)
+     (add-to-list 'load-path (file-name-directory here))
+     (require 'org-test)
+   #+END_SRC
+
+2) Then run the test suite.
+   #+BEGIN_SRC emacs-lisp
+     (org-test-run-all-tests)
+   #+END_SRC
+* troubleshooting
+- If the value of the =org-babel-no-eval-on-ctrl-c-ctrl-c= is non-nil
+  then it will result in some test failure, as there are tests which
+  rely on this behavior.
