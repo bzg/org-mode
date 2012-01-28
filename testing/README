@@ -39,3 +39,7 @@ load and run the test suite with the following commands.
    #+BEGIN_SRC emacs-lisp
      (org-test-run-all-tests)
    #+END_SRC
+* troubleshooting
+- If the value of the =org-babel-no-eval-on-ctrl-c-ctrl-c= is non-nil
+  then it will result in some test failure, as there are tests which
+  rely on this behavior.
