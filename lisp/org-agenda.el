@@ -4463,15 +4463,18 @@ that can be put into `org-agenda-skip-function' for the duration of a command."
 	   (not (re-search-forward (nth 1 m) end t)))
       (and (or
 	    (setq m (memq 'nottodo conditions))
+	    (setq m (memq 'todo-unblocked conditions))
+	    (setq m (memq 'nottodo-unblocked conditions))
 	    (setq m (memq 'todo conditions)))
 	   (org-agenda-skip-if-todo m end)))
      end)))
 
 (defun org-agenda-skip-if-todo (args end)
   "Helper function for `org-agenda-skip-if', do not use it directly.
-ARGS is a list with first element either `todo' or `nottodo'.
-The remainder is either a list of TODO keywords, or a state symbol
-`todo' or `done' or `any'."
+ARGS is a list with first element either `todo', `nottodo',
+`todo-unblocked' or `nottodo-unblocked'. The remainder is either
+a list of TODO keywords, or a state symbol `todo' or `done' or
+`any'."
   (let ((kw (car args))
 	(arg (cadr args))
 	todo-wds todo-re)
@@ -4495,9 +4498,20 @@ The remainder is either a list of TODO keywords, or a state symbol
 	  (concat "^\\*+[ \t]+\\<\\("
 		  (mapconcat 'identity todo-wds  "\\|")
 		  "\\)\\>"))
-    (if (eq kw 'todo)
-	(re-search-forward todo-re end t)
-      (not (re-search-forward todo-re end t)))))
+    (cond
+     ((eq kw 'todo) (re-search-forward todo-re end t))
+     ((eq kw 'nottodo) (not (re-search-forward todo-re end t)))
+     ((eq kw 'todo-unblocked)
+      (catch 'unblocked
+	(while (re-search-forward todo-re end t)
+	  (or (org-entry-blocked-p) (throw 'unblocked t)))
+	nil))
+     ((eq kw 'nottodo-unblocked)
+      (catch 'unblocked
+	(while (re-search-forward todo-re end t)
+	  (or (org-entry-blocked-p) (throw 'unblocked nil)))
+	t))
+     )))
 
 ;;;###autoload
 (defun org-agenda-list-stuck-projects (&rest ignore)
