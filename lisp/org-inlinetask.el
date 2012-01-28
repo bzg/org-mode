@@ -454,7 +454,7 @@ Either remove headline and meta data, or do special formatting."
      ((= end start))
      ;; Inlinetask was folded: expand it.
      ((get-char-property (1+ start) 'invisible)
-      (outline-flag-region start end nil))
+      (org-show-entry))
      (t (outline-flag-region start end t)))))
 
 (defun org-inlinetask-remove-END-maybe ()
