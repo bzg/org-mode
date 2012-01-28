@@ -102,6 +102,7 @@ These are just a completion help.")
     ("theorem"        "t" "\\begin{theorem}%a%U%x"             "\\end{theorem}")
     ("definition"     "d" "\\begin{definition}%a%U%x"          "\\end{definition}")
     ("example"        "e" "\\begin{example}%a%U%x"             "\\end{example}")
+    ("exampleblock"   "E" "\\begin{exampleblock}%a{%h}%x"      "\\end{exampleblock}")
     ("proof"          "p" "\\begin{proof}%a%U%x"               "\\end{proof}")
     ("beamercolorbox" "o" "\\begin{beamercolorbox}%o{%h}%x"    "\\end{beamercolorbox}")
     ("normal"         "h" "%h" "") ; Emit the heading as normal text
