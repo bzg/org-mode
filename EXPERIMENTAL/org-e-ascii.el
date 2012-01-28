@@ -36,6 +36,7 @@
 
 (declare-function org-element-get-contents "org-element" (element))
 (declare-function org-element-get-property "org-element" (property element))
+(declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-map "org-element"
 		  (data types fun &optional info first-match))
 (declare-function org-element-time-stamp-interpreter
@@ -95,24 +96,15 @@ See `org-export-option-alist' for more information on the
 structure or the values.")
 
 (defconst org-e-ascii-dictionary
-  '(("Table Of Contents\n"
+  '(("Footnotes\n"
      ("en"
-      :ascii "Table Of Contents\n"
-      :latin1 "Table Of Contents\n"
-      :utf-8 "Table Of Contents\n")
+      :ascii "Footnotes\n"
+      :latin1 "Footnotes\n"
+      :utf-8 "Footnotes\n")
      ("fr"
-      :ascii "Sommaire\n"
-      :latin1 "Table des matières\n"
-      :utf-8 "Table des matières\n"))
-    ("Table %d: %s"
-     ("en"
-      :ascii "Table %d: %s"
-      :latin1 "Table %d: %s"
-      :utf-8 "Table %d: %s")
-     ("fr"
-      :ascii "Tableau %d : %s"
-      :latin1 "Tableau %d : %s"
-      :utf-8 "Tableau nº %d : %s"))
+      :ascii "Notes de bas de page\n"
+      :latin1 "Notes de bas de page\n"
+      :utf-8 "Notes de bas de page\n"))
     ("Listing %d: %s"
      ("en"
       :ascii "Listing %d: %s"
@@ -149,6 +141,33 @@ structure or the values.")
       :ascii "Programme %d : "
       :latin1 "Programme %d : "
       :utf-8 "Programme nº %d : "))
+    ("Table Of Contents\n"
+     ("en"
+      :ascii "Table Of Contents\n"
+      :latin1 "Table Of Contents\n"
+      :utf-8 "Table Of Contents\n")
+     ("fr"
+      :ascii "Sommaire\n"
+      :latin1 "Table des matières\n"
+      :utf-8 "Table des matières\n"))
+    ("Table %d: %s"
+     ("en"
+      :ascii "Table %d: %s"
+      :latin1 "Table %d: %s"
+      :utf-8 "Table %d: %s")
+     ("fr"
+      :ascii "Tableau %d : %s"
+      :latin1 "Tableau %d : %s"
+      :utf-8 "Tableau nº %d : %s"))
+    ("See section %s"
+     ("en"
+      :ascii "See section %s"
+      :latin1 "See section %s"
+      :utf-8 "See section %s")
+     ("fr"
+      :ascii "cf. section %s"
+      :latin1 "cf. section %s"
+      :utf-8 "cf. section %s"))
     ("Table %d: "
      ("en"
       :ascii "Table %d: "
@@ -166,16 +185,7 @@ structure or the values.")
      ("fr"
       :ascii "Destination inconnue"
       :latin1 "Référence inconnue"
-      :utf-8 "Référence inconnue"))
-    ("See section %s"
-     ("en"
-      :ascii "See section %s"
-      :latin1 "See section %s"
-      :utf-8 "See section %s")
-     ("fr"
-      :ascii "cf. section %s"
-      :latin1 "cf. section %s"
-      :utf-8 "cf. section %s")))
+      :utf-8 "Référence inconnue")))
   "Dictionary for ASCII back-end.
 
 Alist whose car is the string to translate and cdr is an alist
@@ -208,6 +218,12 @@ This number includes margin size, as set in
 (defcustom org-e-ascii-inner-margin 2
   "Width of the inner margin, in number of characters.
 Inner margin is applied between each headline."
+  :group 'org-export-e-ascii
+  :type 'integer)
+
+(defcustom org-e-ascii-quote-margin 6
+  "Width of margin used for quoting text, in characters.
+This margin is applied on both sides of the text."
   :group 'org-export-e-ascii
   :type 'integer)
 
@@ -517,12 +533,11 @@ INFO is a plist used as a communication channel."
       (- total-width
 	 ;; Each `quote-block', `quote-section' and `verse-block' above
 	 ;; narrows text width by twice the standard margin size.
-	 (+ (let ((margin (max (floor (/ total-width 12)) 2)))
-	      (* (loop for parent in genealogy
-		       when (memq (car parent)
-				  '(quote-block quote-section verse-block))
-		       count parent)
-		 2 margin))
+	 (+ (* (loop for parent in genealogy
+		     when (memq (car parent)
+				'(quote-block quote-section verse-block))
+		     count parent)
+	       2 org-e-ascii-quote-margin)
 	    ;; Text width within a plain-list is restricted by
 	    ;; indentation of current item.  If that's the case,
 	    ;; compute it with the help of `:structure' property from
@@ -924,60 +939,68 @@ INFO is a plist used as a communication channel."
   "Return complete document string after ASCII conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (org-e-ascii--indent-string
-   (let ((text-width (- org-e-ascii-text-width org-e-ascii-global-margin)))
-     ;; 1. Build title block.
-     (concat
-      (org-e-ascii-template--document-title info)
-      ;; 2. Table of contents.
-      (let ((depth (plist-get info :with-toc)))
-	(when depth
-	  (concat
-	   (org-e-ascii--build-toc info (and (wholenump depth) depth))
-	   "\n\n\n")))
-      ;; 3. Document's body.
-      contents
-      ;; 4. Footnote definitions.
-      (let ((definitions (org-export-collect-footnote-definitions
-			  (plist-get info :parse-tree) info))
-	    ;; Insert full links right inside the footnote definition
-	    ;; as they have no chance to be inserted later.
-	    (org-e-ascii-links-to-notes nil))
-	(when definitions
-	  (concat
-	   "\n\n\n"
-	   (mapconcat
-	    (lambda (ref)
-	      (let ((id (format "[%s] " (car ref))))
-		;; Distinguish between inline definitions and
-		;; full-fledged definitions.
-		(org-trim
-		 (let ((def (nth 2 ref)))
-		   (if (eq (car def) 'org-data)
-		       ;; Full-fledged definition: footnote ID is
-		       ;; inserted inside the first parsed paragraph
-		       ;; (FIRST), if any, to be sure filling will
-		       ;; take it into consideration.
-		       (let ((first (car (org-element-get-contents def))))
-			 (if (not (eq (car first) 'paragraph))
-			     (concat id "\n" (org-export-data def 'e-ascii info))
-			   (push id (nthcdr 2 first))
-			   (org-export-data def 'e-ascii info)))
-		     ;; Fill paragraph once footnote ID is inserted in
-		     ;; order to have a correct length for first line.
-		     (org-e-ascii--fill-string
-		      (concat id (org-export-secondary-string def 'e-ascii info))
-		      text-width info))))))
-	    definitions "\n\n"))))
-      ;; 5. Creator.  Ignore `comment' value as there are no comments in
-      ;;    ASCII.  Justify it to the bottom right.
-      (let ((creator-info (plist-get info :with-creator)))
-	(unless (or (not creator-info) (eq creator-info 'comment))
-	  (concat
-	   "\n\n\n"
-	   (org-e-ascii--fill-string
-	    (plist-get info :creator) text-width info 'right))))))
-   org-e-ascii-global-margin))
+  (org-element-normalize-string
+   (org-e-ascii--indent-string
+    (let ((text-width (- org-e-ascii-text-width org-e-ascii-global-margin)))
+      ;; 1. Build title block.
+      (concat
+       (org-e-ascii-template--document-title info)
+       ;; 2. Table of contents.
+       (let ((depth (plist-get info :with-toc)))
+	 (when depth
+	   (concat
+	    (org-e-ascii--build-toc info (and (wholenump depth) depth))
+	    "\n\n\n")))
+       ;; 3. Document's body.
+       contents
+       ;; 4. Footnote definitions.
+       (let ((definitions (org-export-collect-footnote-definitions
+			   (plist-get info :parse-tree) info))
+	     ;; Insert full links right inside the footnote definition
+	     ;; as they have no chance to be inserted later.
+	     (org-e-ascii-links-to-notes nil))
+	 (when definitions
+	   (concat
+	    "\n\n\n"
+	    (let ((title (org-e-ascii--translate "Footnotes\n" info)))
+	      (concat
+	       title
+	       (make-string
+		(1- (length title))
+		(if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))))
+	    "\n\n"
+	    (mapconcat
+	     (lambda (ref)
+	       (let ((id (format "[%s] " (car ref))))
+		 ;; Distinguish between inline definitions and
+		 ;; full-fledged definitions.
+		 (org-trim
+		  (let ((def (nth 2 ref)))
+		    (if (eq (car def) 'org-data)
+			;; Full-fledged definition: footnote ID is
+			;; inserted inside the first parsed paragraph
+			;; (FIRST), if any, to be sure filling will
+			;; take it into consideration.
+			(let ((first (car (org-element-get-contents def))))
+			  (if (not (eq (car first) 'paragraph))
+			      (concat id "\n" (org-export-data def 'e-ascii info))
+			    (push id (nthcdr 2 first))
+			    (org-export-data def 'e-ascii info)))
+		      ;; Fill paragraph once footnote ID is inserted in
+		      ;; order to have a correct length for first line.
+		      (org-e-ascii--fill-string
+		       (concat id (org-export-secondary-string def 'e-ascii info))
+		       text-width info))))))
+	     definitions "\n\n"))))
+       ;; 5. Creator.  Ignore `comment' value as there are no comments in
+       ;;    ASCII.  Justify it to the bottom right.
+       (let ((creator-info (plist-get info :with-creator)))
+	 (unless (or (not creator-info) (eq creator-info 'comment))
+	   (concat
+	    "\n\n\n"
+	    (org-e-ascii--fill-string
+	     (plist-get info :creator) text-width info 'right))))))
+    org-e-ascii-global-margin)))
 
 (defun org-e-ascii--translate (s info)
   "Translate string S.
@@ -1440,11 +1463,11 @@ channel."
   "Transcode a QUOTE-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let* ((width (org-e-ascii--current-text-width quote-block info))
-	 (margin-width (max (floor (/ width 12)) 2)))
+  (let ((width (org-e-ascii--current-text-width quote-block info)))
     (org-e-ascii--indent-string
      (org-remove-indentation
-      (org-e-ascii--fill-string contents width info)) margin-width)))
+      (org-e-ascii--fill-string contents width info))
+     org-e-ascii-quote-margin)))
 
 
 ;;;; Quote Section
@@ -1452,15 +1475,14 @@ holding contextual information."
 (defun org-e-ascii-quote-section (quote-section contents info)
   "Transcode a QUOTE-SECTION element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((width (org-e-ascii--current-text-width quote-section info))
-	 (margin-width (max (floor (/ width 12)) 2))
-	 (value
-	  (org-export-secondary-string
-	   (org-remove-indentation
-	    (org-element-get-property :value quote-section)) 'e-ascii info)))
+  (let ((width (org-e-ascii--current-text-width quote-section info))
+	(value
+	 (org-export-secondary-string
+	  (org-remove-indentation
+	   (org-element-get-property :value quote-section)) 'e-ascii info)))
     (org-e-ascii--indent-string
      value
-     (+ margin-width
+     (+ org-e-ascii-quote-margin
 	;; Don't apply inner margin if parent headline is low level.
 	(let ((headline (org-export-get-parent-headline quote-section info)))
 	  (if (org-export-low-level-p headline info) 0
@@ -1818,7 +1840,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       (org-export-secondary-string
        (org-element-get-property :value verse-block) 'e-ascii info)
       verse-width 'left)
-     (max (floor (/ verse-width 12)) 2))))
+     org-e-ascii-quote-margin)))
 
 
 ;;; Filter
