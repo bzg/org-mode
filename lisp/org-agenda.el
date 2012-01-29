@@ -1516,6 +1516,16 @@ to occupy a fixed space in the agenda display."
   :group 'org-agenda-line-format
   :type 'string)
 
+(defcustom org-agenda-diary-sexp-prefix nil
+  "A regexp that matches part of a diary sexp entry
+which should be treated as scheduling/deadline information in
+`org-agenda'.
+
+For example, you can use this to extract the `diary-remind-message' from
+`diary-remind' entries."
+  :group 'org-agenda-line-format
+  :type '(choice (const :tag "None" nil) (regexp :tag "Regexp")))
+
 (defcustom org-agenda-timerange-leaders '("" "(%d/%d): ")
   "Text preceding timerange entries in the agenda view.
 This is a list with two strings.  The first applies when the range
@@ -5046,7 +5056,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp "^&?%%(")
-	 marker category org-category-pos ee txt tags entry
+	 marker category extra org-category-pos ee txt tags entry
 	 result beg b sexp sexp-entry todo-state)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -5070,12 +5080,16 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	  (dolist (r (if (stringp result)
 			 (list result)
 		       result)) ;; we expect a list here
+	    (when (and org-agenda-diary-sexp-prefix
+		       (string-match org-agenda-diary-sexp-prefix r))
+	      (setq extra (match-string 0 r)
+		    r (replace-match "" nil nil r)))
 	    (if (string-match "\\S-" r)
 		(setq txt r)
 	      (setq txt "SEXP entry returned empty string"))
 
 	    (setq txt (org-agenda-format-item
-		       "" txt category tags 'time))
+		       extra txt category tags 'time))
 	    (org-add-props txt props 'org-marker marker)
 	    (org-add-props txt nil
 	      'org-category category 'date date 'todo-state todo-state
