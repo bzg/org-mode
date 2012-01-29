@@ -183,6 +183,14 @@ properties are:
                      before and after the new item.  Default 0, only common
                      other value is 1.
 
+ :empty-lines-before Set this to the number of lines the should be inserted
+                     before the new item. Overrides :empty-lines for the
+                     number lines inserted before.
+
+ :empty-lines-after  Set this to the number of lines the should be inserted
+                     after the new item. Overrides :empty-lines for the
+                     number of lines inserted after.
+
  :clock-in           Start the clock in this item.
 
  :clock-keep         Keep the clock running when filing the captured entry.
@@ -586,7 +594,8 @@ captured item after finalizing."
 	  (goto-char end)
 	  (or (bolp) (newline))
 	  (org-capture-empty-lines-after
-	   (or (org-capture-get :empty-lines 'local) 0))))
+	   (or (org-capture-get :empty-lines-after 'local)
+	       (org-capture-get :empty-lines 'local) 0))))
       ;; Postprocessing:  Update Statistics cookies, do the sorting
       (when (derived-mode-p 'org-mode)
 	(save-excursion
@@ -902,7 +911,7 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
 	  (progn
 	    (outline-next-heading)
 	    (or (bolp) (insert "\n")))
-	(org-end-of-subtree t t)
+	(org-end-of-subtree t nil)
 	(or (bolp) (insert "\n")))))
     (org-capture-empty-lines-before)
     (setq beg (point))
@@ -1137,7 +1146,8 @@ Of course, if exact position has been required, just put it there."
 (defun org-capture-empty-lines-before (&optional n)
   "Arrange for the correct number of empty lines before the insertion point.
 Point will be after the empty lines, so insertion can directly be done."
-  (setq n (or n (org-capture-get :empty-lines) 0))
+  (setq n (or n (org-capture-get :empty-lines-before)
+	      (org-capture-get :empty-lines) 0))
   (let ((pos (point)))
     (org-back-over-empty-lines)
     (delete-region (point) pos)
@@ -1146,7 +1156,8 @@ Point will be after the empty lines, so insertion can directly be done."
 (defun org-capture-empty-lines-after (&optional n)
   "Arrange for the correct number of empty lines after the inserted string.
 Point will remain at the first line after the inserted text."
-  (setq n (or n (org-capture-get :empty-lines) 0))
+  (setq n (or n (org-capture-get :empty-lines-after)
+	      (org-capture-get :empty-lines) 0))
   (org-back-over-empty-lines)
   (while (looking-at "[ \t]*\n") (replace-match ""))
   (let ((pos (point)))
