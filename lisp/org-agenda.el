@@ -776,6 +776,21 @@ but not scheduled today."
 	  (const :tag "Always" t)
 	  (const :tag "Not when scheduled today" not-today)))
 
+(defcustom org-agenda-skip-timestamp-if-deadline-is-shown nil
+  "Non-nil means skip timestamp line if same entry shows because of deadline.
+In the agenda of today, an entry can show up multiple times
+because it has both a plain timestamp and has a nearby deadline.
+When this variable is t, then only the deadline is shown and the
+fact that the entry has a timestamp for or including today is not
+shown.  When this variable is nil, the entry will be shown
+several times."
+  :group 'org-agenda-skip
+  :group 'org-agenda-daily/weekly
+  :version "24.1"
+  :type '(choice
+	  (const :tag "Never" nil)
+	  (const :tag "Always" t)))
+
 (defcustom org-agenda-skip-deadline-if-done nil
   "Non-nil means don't show deadlines when the corresponding item is done.
 When nil, the deadline is still shown and should give you a happy feeling.
@@ -4795,7 +4810,7 @@ the documentation of `org-diary'."
 		 ((eq arg :timestamp)
 		  (setq rtn (org-agenda-get-blocks))
 		  (setq results (append results rtn))
-		  (setq rtn (org-agenda-get-timestamps))
+		  (setq rtn (org-agenda-get-timestamps deadline-results))
 		  (setq results (append results rtn)))
 		 ((eq arg :sexp)
 		  (setq rtn (org-agenda-get-sexps))
@@ -4947,7 +4962,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 (defconst org-agenda-no-heading-message
   "No heading for this item in buffer or region.")
 
-(defun org-agenda-get-timestamps ()
+(defun org-agenda-get-timestamps (&optional deadline-results)
   "Return the date stamp information for agenda display."
   (let* ((props (list 'face 'org-agenda-calendar-event
 		      'org-not-done-regexp org-not-done-regexp
@@ -4958,6 +4973,12 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
 	 (d1 (calendar-absolute-from-gregorian date))
+	 mm
+	 (deadline-position-alist
+	  (mapcar (lambda (a) (and (setq mm (get-text-property
+					     0 'org-hd-marker a))
+				   (cons (marker-position mm) a)))
+		  deadline-results))
 	 (remove-re
 	  (concat
 	   (regexp-quote
@@ -5025,6 +5046,9 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	  (if (not (re-search-backward org-outline-regexp-bol nil t))
 	      (setq txt org-agenda-no-heading-message)
 	    (goto-char (match-beginning 0))
+	    (if (and (eq t org-agenda-skip-timestamp-if-deadline-is-shown)
+		     (assoc (point) deadline-position-alist))
+		(throw :skip nil))
 	    (setq hdmarker (org-agenda-new-marker)
 		  tags (org-get-tags-at))
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
