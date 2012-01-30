@@ -588,9 +588,11 @@ Assume point is at the beginning of the item."
 	   (contents-begin (progn (looking-at org-list-full-item-re)
 				  (goto-char (match-end 0))
 				  (org-skip-whitespace)
-				  (if (>= (point) end)
-				      (point-at-bol)
-				    (point))))
+				  ;; If first line isn't empty,
+				  ;; contents really start at the text
+				  ;; after item's meta-data.
+				  (if (= (point-at-bol) begin) (point)
+				    (point-at-bol))))
 	   (hidden (progn (forward-line)
 			  (and (not (= (point) end))
 			       (org-truely-invisible-p))))
