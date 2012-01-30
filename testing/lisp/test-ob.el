@@ -588,10 +588,7 @@ on two lines
 	   (org-babel-balanced-split ":a 1 :b [2 3] :c (4 :d (5 6))"
 				     '((32 9) . 58)))))
 
-(ert-deftest test-org-babel/inline-src_blk-preceded-punct ()
-  "Test inline source block where preceded by punctuation"
-
-  ;; inline-src-blk preceded by point
+(ert-deftest test-org-babel/inline-src_blk-preceded-punct-preceded-by-point ()
   (let ((test-line ".src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
     (org-test-with-temp-text
 	test-line
@@ -599,9 +596,9 @@ on two lines
       (org-ctrl-c-ctrl-c)
       (should (string= (concat test-line " =\"x\"=")
 		       (buffer-substring-no-properties
-			(point-min) (point-max))))))
+			(point-min) (point-max)))))))
 
-  ;; inline-src-blk preceded by equality
+(ert-deftest test-org-babel/inline-src-block-preceded-by-equality ()
   (let ((test-line "=src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
     (org-test-with-temp-text
 	test-line
@@ -609,9 +606,9 @@ on two lines
       (org-ctrl-c-ctrl-c)
       (should (string= (concat test-line " =\"x\"=")
 		       (buffer-substring-no-properties
-			(point-min) (point-max))))))
+			(point-min) (point-max)))))))
 
-  ;; inline-src-blk enclosed within parenthesis
+(ert-deftest test-org-babel/inline-src-block-enclosed-within-parenthesis ()
   (let ((test-line "(src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
     (org-test-with-temp-text
 	(concat test-line ")")
@@ -619,9 +616,9 @@ on two lines
       (org-ctrl-c-ctrl-c)
       (should (string= (concat test-line " =\"x\"=)" )
 		       (buffer-substring-no-properties
-			(point-min) (point-max))))))
+			(point-min) (point-max)))))))
 
-  ;; inline-src-blk enclosed within parenthesis
+(ert-deftest test-org-babel/inline-src-block-enclosed-within-parenthesis ()
   (let ((test-line "{src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
     (org-test-with-temp-text
 	(concat test-line "}")
