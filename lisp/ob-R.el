@@ -279,8 +279,9 @@ last statement in BODY, as elisp."
      (with-temp-buffer
        (insert (org-babel-chomp body))
        (let ((ess-local-process-name
-	      (process-name (get-buffer-process session))))
-	 (ess-eval-buffer nil)))
+	      (process-name (get-buffer-process session)))
+	     (ess-eval-visibly-p nil))
+	 (ess-eval-buffer)))
      (let ((tmp-file (org-babel-temp-file "R-")))
        (org-babel-comint-eval-invisibly-and-wait-for-file
 	session tmp-file
