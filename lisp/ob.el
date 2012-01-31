@@ -2179,7 +2179,7 @@ block but are passed literally to the \"example-block\"."
         (insert body) (goto-char (point-min))
         (setq index (point))
         (while (and (re-search-forward (org-babel-noweb-wrap
-					"\\([^ \t].+?[^ \t]\\|[^ \t]\\)")
+					"\\([^ \t\n].+?[^ \t]\\|[^ \t\n]\\)")
 				       nil t))
           (save-match-data (setf source-name (match-string 1)))
           (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
