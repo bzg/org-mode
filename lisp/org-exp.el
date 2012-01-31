@@ -1730,10 +1730,11 @@ from the buffer."
 					":[ \t]*\\(.*\\)") nil t)
 	(if (not (eq backend org-export-current-backend))
 	    (delete-region (point-at-bol) (min (1+ (point-at-eol)) (point-max)))
-	  (replace-match "\\1\\2" t)
-	  (add-text-properties
-	   (point-at-bol) (min (1+ (point-at-eol)) (point-max))
-	   `(org-protected t original-indentation ,ind org-native-text t))))
+	  (let ((ind (get-text-property (point-at-bol) 'original-indentation)))
+	    (replace-match "\\1\\2" t)
+	    (add-text-properties
+	     (point-at-bol) (min (1+ (point-at-eol)) (point-max))
+	     `(org-protected t original-indentation ,ind org-native-text t)))))
       ;; Delete #+ATTR_BACKEND: stuff of another backend. Those
       ;; matching the current backend will be taken care of by
       ;; `org-export-attach-captions-and-attributes'
@@ -1748,7 +1749,8 @@ from the buffer."
       (while (re-search-forward (concat "^[ \t]*#\\+BEGIN_" backend-name "\\>.*\n?")
 				nil t)
 	(setq beg (match-beginning 0) beg-content (match-end 0))
-	(setq ind (save-excursion (goto-char beg) (org-get-indentation)))
+	(setq ind (or (get-text-property beg 'original-indentation)
+		      (save-excursion (goto-char beg) (org-get-indentation))))
 	(when (re-search-forward (concat "^[ \t]*#\\+END_" backend-name "\\>.*\n?")
 				 nil t)
 	  (setq end (match-end 0) end-content (match-beginning 0))
