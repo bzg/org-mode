@@ -2150,7 +2150,7 @@ block but are passed literally to the \"example-block\"."
       (with-temp-buffer
         (insert body) (goto-char (point-min))
         (setq index (point))
-        (while (and (re-search-forward "<<\\([^ \t].+?[^ \t]\\|[^ \t]\\)>>"
+        (while (and (re-search-forward "<<\\([^ \t\n].+?[^ \t\n]\\|[^ \t\n]\\)>>"
 				       nil t))
           (save-match-data (setf source-name (match-string 1)))
           (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
