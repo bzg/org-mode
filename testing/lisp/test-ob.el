@@ -588,6 +588,72 @@ on two lines
 	   (org-babel-balanced-split ":a 1 :b [2 3] :c (4 :d (5 6))"
 				     '((32 9) . 58)))))
 
+(ert-deftest test-org-babel/inline-src_blk-preceded-punct-preceded-by-point ()
+  (let ((test-line ".src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
+    (org-test-with-temp-text
+	test-line
+      (forward-char 1)
+      (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " =\"x\"=")
+		       (buffer-substring-no-properties
+			(point-min) (point-max)))))))
+
+(ert-deftest test-org-babel/inline-src-block-preceded-by-equality ()
+  (let ((test-line "=src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
+    (org-test-with-temp-text
+	test-line
+      (forward-char 1)
+      (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " =\"x\"=")
+		       (buffer-substring-no-properties
+			(point-min) (point-max)))))))
+
+(ert-deftest test-org-babel/inline-src-block-enclosed-within-parenthesis ()
+  (let ((test-line "(src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
+    (org-test-with-temp-text
+	(concat test-line ")")
+      (forward-char 1)
+      (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " =\"x\"=)" )
+		       (buffer-substring-no-properties
+			(point-min) (point-max)))))))
+
+(ert-deftest test-org-babel/inline-src-block-enclosed-within-parenthesis ()
+  (let ((test-line "{src_emacs-lisp[ :results verbatim ]{ \"x\"  }"))
+    (org-test-with-temp-text
+	(concat test-line "}")
+      (forward-char 1)
+      (org-ctrl-c-ctrl-c)
+      (should (string= (concat test-line " =\"x\"=}")
+		       (buffer-substring-no-properties
+			(point-min) (point-max)))))))
+
+(ert-deftest test-org-babel/inline-src_blk-preceded-by-letter ()
+  "Test inline source block invalid where preceded by letter"
+
+  ;; inline-src-blk preceded by letter
+  (org-test-with-temp-text
+      "asrc_emacs-lisp[ :results verbatim ]{ \"x\"  }"
+    (forward-char 1)
+    (let ((error-result
+	   (should-error
+	    (org-ctrl-c-ctrl-c))))
+      (should (equal `(error "C-c C-c can do nothing useful at this location")
+		     error-result)))))
+
+(ert-deftest test-org-babel/inline-src_blk-preceded-by-number ()
+  "Test inline source block invalid where preceded by number"
+
+  ;; inline-src-blk preceded by number
+  (org-test-with-temp-text
+      "0src_emacs-lisp[ :results verbatim ]{ \"x\"  }"
+    (forward-char 1)
+    (let ((error-result
+	   (should-error
+	    (org-ctrl-c-ctrl-c))))
+      (should (equal `(error "C-c C-c can do nothing useful at this location")
+		     error-result)))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
