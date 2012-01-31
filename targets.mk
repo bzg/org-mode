@@ -44,12 +44,12 @@ test-dirty::
 	$(BTEST)
 
 up2:	update
-	sudo ${MAKE} install
+	$(SUDO) $(MAKE) install
 
 update:
 	git remote update
 	git pull
-	${MAKE} all
+	$(MAKE) all
 
 install:	$(INSTSUB)
 

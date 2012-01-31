@@ -76,6 +76,10 @@ SED	= sed
 # CP	= cp -p	# try this if there is no install
 CP	= install -p
 
+# How to obtain administrative privileges
+# SUDO	= 	# leave blank if you don't need this
+SUDO	= sudo
+
 # Name of the program to install info files
 # INSTALL_INFO = ginstall-info # Debian: avoid harmless warning message
 INSTALL_INFO = install-info
