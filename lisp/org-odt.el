@@ -1966,7 +1966,8 @@ ATTR is a string of other attributes of the a element."
 				   (pixels-to-cms (cdr size-in-pixels)))))))
     (case probe-method
       (emacs
-       (size-in-cms (ignore-errors (image-size (create-image file) 'pixels))))
+       (size-in-cms (ignore-errors (clear-image-cache)
+				   (image-size (create-image file) 'pixels))))
       (imagemagick
        (size-in-cms
 	(let ((dim (shell-command-to-string
