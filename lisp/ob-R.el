@@ -281,7 +281,7 @@ last statement in BODY, as elisp."
        (let ((ess-local-process-name
 	      (process-name (get-buffer-process session)))
 	     (ess-eval-visibly-p nil))
-	 (ess-eval-buffer)))
+	 (ess-eval-buffer nil)))
      (let ((tmp-file (org-babel-temp-file "R-")))
        (org-babel-comint-eval-invisibly-and-wait-for-file
 	session tmp-file
