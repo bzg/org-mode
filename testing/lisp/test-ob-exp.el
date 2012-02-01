@@ -240,6 +240,15 @@ elements in the final html."
       (should (string-match "16" html))
       (should (string-match "special-token" html)))))
 
+(ert-deftest ob-exp/noweb-strip-export-ensure-strips ()
+  (org-test-at-id "8e7bd234-99b2-4b14-8cd6-53945e409775"
+    (org-narrow-to-subtree)
+    (org-babel-next-src-block 2)
+    (should (= 110 (org-babel-execute-src-block)))
+    (let ((ascii (org-export-as-ascii nil nil nil 'string t)))
+      (should-not (string-match (regexp-quote "<<strip-export-1>>") ascii))
+      (should-not (string-match (regexp-quote "i=\"10\"") ascii)))))
+
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here

@@ -109,10 +109,13 @@ none ----- do not display either code or results upon export"
 	  (setf hash (org-babel-sha1-hash info)))
 	;; expand noweb references in the original file
 	(setf (nth 1 info)
-	      (if (org-babel-noweb-p (nth 2 info) :export)
-		  (org-babel-expand-noweb-references
-		   info (get-file-buffer org-current-export-file))
-		(nth 1 info)))
+	      (if (string= "strip-export" (cdr (assoc :noweb (nth 2 info))))
+		  (replace-regexp-in-string
+		   (org-babel-noweb-wrap) "" (nth 1 info))
+		(if (org-babel-noweb-p (nth 2 info) :export)
+		    (org-babel-expand-noweb-references
+		     info (get-file-buffer org-current-export-file))  
+		  (nth 1 info))))
 	(org-babel-exp-do-export info 'block hash)))))
 
 (defcustom org-babel-exp-call-line-template

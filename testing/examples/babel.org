@@ -341,3 +341,17 @@ Fifth
   :END:
 Here is a call line with more than just the results exported.
 #+call: double(8)
+* strip noweb references on export
+  :PROPERTIES:
+  :ID:       8e7bd234-99b2-4b14-8cd6-53945e409775
+  :END:
+
+#+name: strip-export-1
+#+BEGIN_SRC sh :exports none
+  i="10"
+#+END_SRC
+
+#+BEGIN_SRC sh :noweb strip-export :exports code :results silent
+  <<strip-export-1>>
+  echo "1$i"
+#+END_SRC

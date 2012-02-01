@@ -398,7 +398,7 @@ then run `org-babel-pop-to-session'."
     (mkdirp	. ((yes no)))
     (no-expand)
     (noeval)
-    (noweb	. ((yes no tangle)))
+    (noweb	. ((yes no tangle no-export strip-export)))
     (noweb-ref	. :any)
     (noweb-sep  . :any)
     (padline	. ((yes no)))
@@ -2086,8 +2086,10 @@ parameters when merging lists."
 	      (:tangle ;; take the latest -- always overwrite
 	       (setq tangle (or (list (cdr pair)) tangle)))
 	      (:noweb
-	       (setq noweb (e-merge '(("yes" "no" "tangle" "no-export")) noweb
-				    (split-string (or (cdr pair) "")))))
+	       (setq noweb (e-merge
+			    '(("yes" "no" "tangle" "no-export" "strip-export"))
+			    noweb
+			    (split-string (or (cdr pair) "")))))
 	      (:cache
 	       (setq cache (e-merge '(("yes" "no")) cache
 				    (split-string (or (cdr pair) "")))))
@@ -2128,8 +2130,8 @@ CONTEXT may be one of :tangle, :export or :eval."
 			     (car as)
 			   (intersect (cdr as) bs)))))
     (intersect (case context
-                    (:tangle '("yes" "tangle" "no-export"))
-                    (:eval   '("yes" "no-export"))
+                    (:tangle '("yes" "tangle" "no-export" "strip-export"))
+                    (:eval   '("yes" "no-export" "strip-export"))
                     (:export '("yes")))
                   (split-string (or (cdr (assoc :noweb params)) "")))))
 
