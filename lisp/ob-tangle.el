@@ -281,7 +281,7 @@ references."
   (interactive)
   (goto-char (point-min))
   (while (or (re-search-forward "\\[\\[file:.*\\]\\[.*\\]\\]" nil t)
-             (re-search-forward (org-babel-noweb-wrap "[^[:space:]]*") nil t))
+             (re-search-forward (org-babel-noweb-wrap) nil t))
     (delete-region (save-excursion (beginning-of-line 1) (point))
                    (save-excursion (end-of-line 1) (forward-char 1) (point)))))
 

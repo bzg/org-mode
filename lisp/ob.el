@@ -132,8 +132,10 @@ See also `org-babel-noweb-wrap-start'."
   :group 'org-babel
   :type 'string)
 
-(defun org-babel-noweb-wrap (regexp)
-  (concat org-babel-noweb-wrap-start regexp org-babel-noweb-wrap-end))
+(defun org-babel-noweb-wrap (&optional regexp)
+  (concat org-babel-noweb-wrap-start
+	  (or regexp "\\([^ \t\n].+?[^ \t]\\|[^ \t\n]\\)")
+	  org-babel-noweb-wrap-end))
 
 (defvar org-babel-src-name-regexp
   "^[ \t]*#\\+name:[ \t]*"
@@ -2178,9 +2180,7 @@ block but are passed literally to the \"example-block\"."
       (with-temp-buffer
         (insert body) (goto-char (point-min))
         (setq index (point))
-        (while (and (re-search-forward (org-babel-noweb-wrap
-					"\\([^ \t\n].+?[^ \t]\\|[^ \t\n]\\)")
-				       nil t))
+        (while (and (re-search-forward (org-babel-noweb-wrap) nil t))
           (save-match-data (setf source-name (match-string 1)))
           (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
           (save-match-data
