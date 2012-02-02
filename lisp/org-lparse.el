@@ -493,28 +493,29 @@ This is a helper routine for interactive use."
 	 (out-dir (file-name-directory in-file))
 	 (arglist (mapcar (lambda (arg)
 			    (format-spec
-			     arg `((?i . ,in-file)
+			     arg `((?i . ,(shell-quote-argument in-file))
 				   (?I . ,(browse-url-file-url in-file))
 				   (?f . ,out-fmt)
 				   (?o . ,out-file)
 				   (?O . ,(browse-url-file-url out-file))
-				   (?d . ,out-dir)
+				   (?d . , (shell-quote-argument out-dir))
 				   (?D . ,(browse-url-file-url out-dir)))))
-			  (cdr convert-process))))
+			  convert-process))
+	 (cmd (mapconcat 'identity arglist " ")))
     (when (file-exists-p out-file)
       (delete-file out-file))
 
-    (message "Executing %s %s" program (mapconcat 'identity arglist " "))
-    (apply 'call-process program nil nil nil arglist)
+    (message "Executing %s" cmd)
+    (let ((cmd-output (shell-command-to-string cmd)))
+      (message "%s" cmd-output))
+
     (cond
      ((file-exists-p out-file)
       (message "Exported to %s using %s" out-file program)
       (when prefix-arg
 	(message "Opening %s..."  out-file)
 	(org-open-file out-file))
-      out-file
-      ;; (set-buffer (find-file-noselect out-file))
-      )
+      out-file)
      (t
       (message "Export to %s failed" out-file)
       nil))))

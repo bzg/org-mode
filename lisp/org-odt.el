@@ -2402,8 +2402,10 @@ visually."
       (replace-match ""))))
 
 (defcustom org-export-odt-convert-processes
-  '(("BasicODConverter"
-     ("soffice" "-norestore" "-invisible" "-headless"
+  '(("LibreOffice"
+     ("soffice" "--headless" "--convert-to %f" "--outdir %d" "%i"))
+    ("BasicODConverter"
+     ("soffice" "--headless"
       "\"macro:///BasicODConverter.Main.Convert(%I,%f,%O)\""))
     ("unoconv"
      ("unoconv" "-f" "%f" "-o" "%d" "%i")))
@@ -2436,7 +2438,7 @@ they are interpreted as below:
 	   :value-type (group (cons (string :tag "Executable")
 				    (repeat (string :tag "Command line args")))))))
 
-(defcustom org-export-odt-convert-process nil
+(defcustom org-export-odt-convert-process "LibreOffice"
   "Use this converter to convert from \"odt\" format to other formats.
 During customization, the list of converter names are populated
 from `org-export-odt-convert-processes'."
