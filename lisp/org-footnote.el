@@ -547,7 +547,9 @@ or new, let the user edit the definition of the footnote."
 	(unless (bolp) (newline))
 	(set-marker max nil))))
     ;; Insert footnote label.
-    (insert "\n[" label "] ")
+    (when (zerop (org-back-over-empty-lines)) (newline))
+    (insert "[" label "] \n")
+    (backward-char)
     ;; Only notify user about next possible action when in an Org
     ;; buffer, as the bindings may have different meanings otherwise.
     (when (eq major-mode 'org-mode)
@@ -713,10 +715,12 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	(if (re-search-forward
 	      (concat "^\\*[ \t]+" (regexp-quote org-footnote-section)
 		      "[ \t]*$") nil t)
-	    (delete-region (match-beginning 0) (org-end-of-subtree t)))
+	    (delete-region (match-beginning 0) (org-end-of-subtree t t)))
 	;; A new footnote section is inserted by default at the end of
 	;; the buffer.
 	(goto-char (point-max))
+	(skip-chars-backward " \r\t\n")
+	(forward-line)
 	(unless (bolp) (newline)))
        ;; No footnote section set: Footnotes will be added before next
        ;; headline.
