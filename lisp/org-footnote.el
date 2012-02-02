@@ -775,7 +775,8 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
        ((not ref-table))
        ;; Cases when footnotes should be inserted in one place.
        ((or (not (eq major-mode 'org-mode))
-	    org-footnote-section)
+	    org-footnote-section
+	    export-props)
 	;; Insert again the section title, if any.  Ensure that title,
 	;; or the subsequent footnotes, will be separated by a blank
 	;; lines from the rest of the document.  In an Org buffer,
