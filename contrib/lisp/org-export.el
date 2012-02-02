@@ -2016,7 +2016,7 @@ Point is at buffer's beginning when BODY is applied."
 	 (let ((buffer-invisibility-spec nil))
 	   (org-clone-local-variables
 	    ,original-buffer
-	    "^\\(org-\\|orgtbl-\\|major-mode$\\|outline-regexp$\\)")
+	    "^\\(org-\\|orgtbl-\\|major-mode$\\|outline-\\(regexp\\|level\\)$\\)")
 	   (insert ,buffer-string)
 	   (mapc (lambda (ov)
 		   (move-overlay
