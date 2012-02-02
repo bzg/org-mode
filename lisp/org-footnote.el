@@ -242,40 +242,46 @@ positions, and the definition, when inlined."
 			      (match-end 0) (1- end)))))))))
 
 (defun org-footnote-at-definition-p ()
-  "Is the cursor at a footnote definition?
+  "Is point within a footnote definition?
 
-This matches only pure definitions like [1] or [fn:name] at the beginning
-of a line.  It does not match references like [fn:name:definition], where the
-footnote text is included and defined locally.
+This matches only pure definitions like [1] or [fn:name] at the
+beginning of a line.  It does not match references like
+\[fn:name:definition], where the footnote text is included and
+defined locally.
 
-The return value will be nil if not at a footnote definition, and a list with
-label, start, end and definition of the footnote otherwise."
+The return value will be nil if not at a footnote definition, and
+a list with label, start, end and definition of the footnote
+otherwise."
   (when (save-excursion (beginning-of-line) (org-footnote-in-valid-context-p))
     (save-excursion
       (end-of-line)
+      ;; Footnotes definitions are separated by new headlines or blank
+      ;; lines.
       (let ((lim (save-excursion (re-search-backward
 				  (concat org-outline-regexp-bol
 					  "\\|^[ \t]*$") nil t))))
 	(when (re-search-backward org-footnote-definition-re lim t)
-	  (end-of-line)
-	  (list (org-match-string-no-properties 1)
-		(match-beginning 0)
-		(save-match-data
-		  ;; In a message, limit search to signature.
-		  (let ((bound (and (derived-mode-p 'message-mode)
-				    (save-excursion
-				      (goto-char (point-max))
-				      (re-search-backward
-				       message-signature-separator nil t)))))
-		    (or (and (re-search-forward
+	  (let ((label (org-match-string-no-properties 1))
+		(beg (match-beginning 0))
+		(beg-def (match-end 0))
+		;; In message-mode, do not search after signature.
+		(end (let ((bound (and (derived-mode-p 'message-mode)
+				       (save-excursion
+					 (goto-char (point-max))
+					 (re-search-backward
+					  message-signature-separator nil t)))))
+		       (if (progn
+			     (end-of-line)
+			     (re-search-forward
 			      (concat org-outline-regexp-bol "\\|"
 				      org-footnote-definition-re "\\|"
-				      "^[ \t]*$")
-			      bound 'move)
-			     (progn (skip-chars-forward " \t\n") (point-at-bol)))
-			(point))))
-		(org-trim (buffer-substring-no-properties
-			   (match-end 0) (point)))))))))
+				      "^[ \t]*$") bound 'move))
+			   (progn (goto-char (match-beginning 0))
+				  (org-skip-whitespace)
+				  (point-at-bol))
+			 (point)))))
+	    (list label beg end
+		  (org-trim (buffer-substring-no-properties beg-def end)))))))))
 
 (defun org-footnote-get-next-reference (&optional label backward limit)
   "Return complete reference of the next footnote.
