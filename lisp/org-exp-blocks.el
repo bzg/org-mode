@@ -57,9 +57,9 @@
 ;;        using the dot utility.  For information on dot see
 ;;        http://www.graphviz.org/
 ;;
-;; comment :: Wrap comments with titles and author information, in
-;;            their own divs with author-specific ids allowing for css
-;;            coloring of comments based on the author.
+;; export-comment :: Wrap comments with titles and author information,
+;;            in their own divs with author-specific ids allowing for
+;;            css coloring of comments based on the author.
 ;;
 ;;; Adding new blocks
 ;;
@@ -87,7 +87,7 @@
 	value))
 
 (defcustom org-export-blocks
-  '((comment org-export-blocks-format-comment t)
+  '((export-comment org-export-blocks-format-comment t)
     (ditaa org-export-blocks-format-ditaa nil)
     (dot org-export-blocks-format-dot nil))
   "Use this alist to associate block types with block exporting functions.
