@@ -92,9 +92,10 @@
 ;;; Code:
 (eval-when-compile (require 'cl))
 (require 'org-element)
-;; Require major back-ends
+;; Require major back-ends and publishing tools
 (require 'org-e-ascii "../../EXPERIMENTAL/org-e-ascii.el")
 (require 'org-e-latex "../../EXPERIMENTAL/org-e-latex.el")
+(require 'org-e-publish "../../EXPERIMENTAL/org-e-publish.el")
 
 
 ;;; Internal Variables
@@ -3027,7 +3028,7 @@ Return an error if key pressed has no associated command."
 		   (list org-export-initial-scope))
 		 org-export-dispatch-use-expert-ui))
 	 (raw-key (car input))
-	 (scope (cdr input)))
+	 (optns (cdr input)))
     ;; Translate "C-a", "C-b"... into "a", "b"... Then take action
     ;; depending on user's key pressed.
     (case (if (< raw-key 27) (+ raw-key 96) raw-key)
@@ -3036,7 +3037,7 @@ Return an error if key pressed has no associated command."
        (let ((outbuf
 	      (org-export-to-buffer
 	       'e-ascii "*Org E-ASCII Export*"
-	       (memq 'subtree scope) (memq 'visible scope) (memq 'body scope)
+	       (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)
 	       `(:ascii-charset
 		 ,(case raw-key (?A 'ascii) (?N 'latin1) (t 'utf-8))))))
 	 (with-current-buffer outbuf (text-mode))
@@ -3044,63 +3045,80 @@ Return an error if key pressed has no associated command."
 	   (switch-to-buffer-other-window outbuf))))
       ((?a ?n ?u)
        (org-e-ascii-export-to-ascii
-	(memq 'subtree scope) (memq 'visible scope) (memq 'body scope)
+	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)
 	`(:ascii-charset ,(case raw-key (?a 'ascii) (?n 'latin1) (t 'utf-8)))))
       ;; Export with `e-latex' back-end.
       (?L
        (let ((outbuf
 	      (org-export-to-buffer
 	       'e-latex "*Org E-LaTeX Export*"
-	       (memq 'subtree scope) (memq 'visible scope) (memq 'body scope))))
+	       (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
 	 (with-current-buffer outbuf (latex-mode))
 	 (when org-export-show-temporary-export-buffer
 	   (switch-to-buffer-other-window outbuf))))
       (?l (org-e-latex-export-to-latex
-	   (memq 'subtree scope) (memq 'visible scope) (memq 'body scope)))
+	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?p (org-e-latex-export-to-pdf
-	   (memq 'subtree scope) (memq 'visible scope) (memq 'body scope)))
+	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?d (org-open-file
 	   (org-e-latex-export-to-pdf
-	    (memq 'subtree scope) (memq 'visible scope) (memq 'body scope))))
+	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
+      ;; Publishing facilities
+      (?F (org-e-publish-current-file (memq 'force optns)))
+      (?P (org-e-publish-current-project (memq 'force optns)))
+      (?X (let ((project
+		 (assoc (org-icompleting-read
+			 "Publish project: " org-e-publish-project-alist nil t)
+			org-e-publish-project-alist)))
+	    (org-e-publish project (memq 'force optns))))
+      (?E (org-e-publish-all (memq 'force optns)))
       ;; Undefined command.
       (t (error "No command associated with key %s"
 		(char-to-string raw-key))))))
 
-(defun org-export-dispatch-ui (scope expertp)
+(defun org-export-dispatch-ui (options expertp)
   "Handle interface for `org-export-dispatch'.
 
-SCOPE is a list containing current interactive options set for
+OPTIONS is a list containing current interactive options set for
 export.  It can contain any of the following symbols:
 `body'    toggles a body-only export
 `subtree' restricts export to current subtree
 `visible' restricts export to visible part of buffer.
+`force'   force publishing files.
 
 EXPERTP, when non-nil, triggers expert UI.  In that case, no help
 buffer is provided, but indications about currently active
 options are given in the prompt.  Moreover, \[?] allows to switch
 back to standard interface.
 
-Return value is a list with key pressed as car and a list of
-final interactive export options as cdr."
-  (let ((help (format "-------------------  General Options  --------------------
-\[1] Body only:     %s
-\[2] Export scope:  %s
-\[3] Visible only:  %s
+Return value is a list with key pressed as CAR and a list of
+final interactive export options as CDR."
+  (let ((help
+	 (format "--------------------  General Options  --------------------
+\[1] Body only:     %s        [2] Export scope:     %s
+\[3] Visible only:  %s        [4] Force publishing: %s
 
---------------  ASCII/Latin-1/UTF-8 Export  --------------
-\[a/n/u] to TXT file            [A/N/U] to temporary buffer
 
----------------------  LaTeX Export  ---------------------
-\[l] to TEX file                [L] to temporary buffer
-\[p] to PDF file                [d] ... and open it"
-		      (if (memq 'body scope) "On" "Off")
-		      (if (memq 'subtree scope) "Subtree" "Buffer")
-		      (if (memq 'visible scope) "On" "Off")))
+--------------  ASCII/Latin-1/UTF-8 Export  ---------------
+\[a/n/u] to TXT file           [A/N/U] to temporary buffer
+
+---------------------  LaTeX Export  ----------------------
+\[l] to TEX file               [L] to temporary buffer
+\[p] to PDF file               [d] ... and open it
+
+------------------------- Publish -------------------------
+\[F] current file              [P] current project
+\[X] a project                 [E] every project"
+		 (if (memq 'body options) "On" "Off")
+		 (if (memq 'subtree options) "Subtree" "Buffer")
+		 (if (memq 'visible options) "On" "Off")
+		 (if (memq 'force options) "On" "Off")))
 	(standard-prompt "Export command: ")
-	(expert-prompt (format "Export command (%s%s%s): "
-			       (if (memq 'body scope) "b" "-")
-			       (if (memq 'subtree scope) "s" "-")
-			       (if (memq 'visible scope) "v" "-")))
+	(expert-prompt (format "Export command (%s%s%s%s): "
+			       (if (memq 'body options) "b" "-")
+			       (if (memq 'subtree options) "s" "-")
+			       (if (memq 'visible options) "v" "-")
+			       (if (memq 'force options) "f" "-")))
 	(handle-keypress
 	 (function
 	  ;; Read a character from command input, toggling interactive
@@ -3110,24 +3128,21 @@ final interactive export options as cdr."
 	    (let ((key (read-char-exclusive prompt)))
 	      (cond
 	       ;; Ignore non-standard characters (i.e. "M-a").
-	       ((not (characterp key)) (org-export-dispatch-ui scope expertp))
-	       ;; Switch back to standard interface.
-	       ((and (eq key ??) expertp) (org-export-dispatch-ui scope nil))
-	       ((eq key ?1)
+	       ((not (characterp key)) (org-export-dispatch-ui options expertp))
+	       ;; Help key: Switch back to standard interface if
+	       ;; expert UI was active.
+	       ((eq key ??) (org-export-dispatch-ui options nil))
+	       ;; Toggle export options.
+	       ((memq key '(?1 ?2 ?3 ?4))
 		(org-export-dispatch-ui
-		 (if (memq 'body scope) (remq 'body scope) (cons 'body scope))
+		 (let ((option (case key (?1 'body) (?2 'subtree) (?3 'visible)
+				     (?4 'force))))
+		   (if (memq option options) (remq option options)
+		     (cons option options)))
 		 expertp))
-	       ((eq key ?2)
-		(org-export-dispatch-ui
-		 (if (memq 'subtree scope) (remq 'subtree scope)
-		   (cons 'subtree scope))
-		 expertp))
-	       ((eq key ?3)
-		(org-export-dispatch-ui
-		 (if (memq 'visible scope) (remq 'visible scope)
-		   (cons 'visible scope))
-		 expertp))
-	       (t (cons key scope))))))))
+	       ;; Action selected: Send key and options back to
+	       ;; `org-export-dispatch'.
+	       (t (cons key options))))))))
     ;; With expert UI, just read key with a fancy prompt.  In standard
     ;; UI, display an intrusive help buffer.
     (if expertp (funcall handle-keypress expert-prompt)
