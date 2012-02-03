@@ -1885,7 +1885,8 @@ Return code as a string."
 			 (org-export-filter-apply-functions
 			  (plist-get info :filter-parse-tree)
 			  (org-export-with-current-buffer-copy
-			   (org-export-blocks-preprocess)
+			   (let ((org-current-export-file (current-buffer)))
+			     (org-export-blocks-preprocess))
 			   (org-element-parse-buffer nil visible-only))
 			  backend))))
 	;; Initialize the communication system and combine it to INFO.
