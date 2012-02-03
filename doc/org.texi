@@ -14059,34 +14059,72 @@ are active:
 In an Org mode buffer, the following key bindings are active:
 
 @multitable @columnfractions 0.45 0.55
-@kindex C-c C-v a
-@kindex C-c C-v C-a
-@item @kbd{C-c C-v a} @ @ @r{or} @ @ @kbd{C-c C-v C-a} @tab @code{org-babel-sha1-hash}
+@kindex C-c C-v p
+@kindex C-c C-v C-p
+@item @kbd{C-c C-v p} @ @ @r{or} @ @ @kbd{C-c C-v C-p} @tab @code{org-babel-previous-src-block}
+@kindex C-c C-v n
+@kindex C-c C-v C-n
+@item @kbd{C-c C-v n} @ @ @r{or} @ @ @kbd{C-c C-v C-n} @tab @code{org-babel-next-src-block}
+@kindex C-c C-v e
+@kindex C-c C-v C-e
+@item @kbd{C-c C-v e} @ @ @r{or} @ @ @kbd{C-c C-v C-e} @tab @code{org-babel-execute-maybe}
+@kindex C-c C-v o
+@kindex C-c C-v C-o
+@item @kbd{C-c C-v o} @ @ @r{or} @ @ @kbd{C-c C-v C-o} @tab @code{org-babel-open-src-block-result}
+@kindex C-c C-v v
+@kindex C-c C-v C-v
+@item @kbd{C-c C-v v} @ @ @r{or} @ @ @kbd{C-c C-v C-v} @tab @code{org-babel-expand-src-block}
+@kindex C-c C-v u
+@kindex C-c C-v C-u
+@item @kbd{C-c C-v u} @ @ @r{or} @ @ @kbd{C-c C-v C-u} @tab @code{org-babel-goto-src-block-head}
+@kindex C-c C-v g
+@kindex C-c C-v C-g
+@item @kbd{C-c C-v g} @ @ @r{or} @ @ @kbd{C-c C-v C-g} @tab @code{org-babel-goto-named-src-block}
+@kindex C-c C-v r
+@kindex C-c C-v C-r
+@item @kbd{C-c C-v r} @ @ @r{or} @ @ @kbd{C-c C-v C-r} @tab @code{org-babel-goto-named-result}
 @kindex C-c C-v b
 @kindex C-c C-v C-b
 @item @kbd{C-c C-v b} @ @ @r{or} @ @ @kbd{C-c C-v C-b} @tab @code{org-babel-execute-buffer}
-@kindex C-c C-v f
-@kindex C-c C-v C-f
-@item @kbd{C-c C-v f} @ @ @r{or} @ @ @kbd{C-c C-v C-f} @tab @code{org-babel-tangle-file}
-@kindex C-c C-v g
-@item @kbd{C-c C-v g} @tab @code{org-babel-goto-named-source-block}
-@kindex C-c C-v h
-@item @kbd{C-c C-v h} @tab @code{org-babel-describe-bindings}
-@kindex C-c C-v l
-@kindex C-c C-v C-l
-@item @kbd{C-c C-v l} @ @ @r{or} @ @ @kbd{C-c C-v C-l} @tab @code{org-babel-lob-ingest}
-@kindex C-c C-v p
-@kindex C-c C-v C-p
-@item @kbd{C-c C-v p} @ @ @r{or} @ @ @kbd{C-c C-v C-p} @tab @code{org-babel-expand-src-block}
 @kindex C-c C-v s
 @kindex C-c C-v C-s
 @item @kbd{C-c C-v s} @ @ @r{or} @ @ @kbd{C-c C-v C-s} @tab @code{org-babel-execute-subtree}
+@kindex C-c C-v d
+@kindex C-c C-v C-d
+@item @kbd{C-c C-v d} @ @ @r{or} @ @ @kbd{C-c C-v C-d} @tab @code{org-babel-demarcate-block}
 @kindex C-c C-v t
 @kindex C-c C-v C-t
 @item @kbd{C-c C-v t} @ @ @r{or} @ @ @kbd{C-c C-v C-t} @tab @code{org-babel-tangle}
+@kindex C-c C-v f
+@kindex C-c C-v C-f
+@item @kbd{C-c C-v f} @ @ @r{or} @ @ @kbd{C-c C-v C-f} @tab @code{org-babel-tangle-file}
+@kindex C-c C-v c
+@kindex C-c C-v C-c
+@item @kbd{C-c C-v c} @ @ @r{or} @ @ @kbd{C-c C-v C-c} @tab @code{org-babel-check-src-block}
+@kindex C-c C-v j
+@kindex C-c C-v C-j
+@item @kbd{C-c C-v j} @ @ @r{or} @ @ @kbd{C-c C-v C-j} @tab @code{org-babel-insert-header-arg}
+@kindex C-c C-v l
+@kindex C-c C-v C-l
+@item @kbd{C-c C-v l} @ @ @r{or} @ @ @kbd{C-c C-v C-l} @tab @code{org-babel-load-in-session}
+@kindex C-c C-v i
+@kindex C-c C-v C-i
+@item @kbd{C-c C-v i} @ @ @r{or} @ @ @kbd{C-c C-v C-i} @tab @code{org-babel-lob-ingest}
+@kindex C-c C-v I
+@kindex C-c C-v C-I
+@item @kbd{C-c C-v I} @ @ @r{or} @ @ @kbd{C-c C-v C-I} @tab @code{org-babel-view-src-block-info}
 @kindex C-c C-v z
 @kindex C-c C-v C-z
-@item @kbd{C-c C-v z} @ @ @r{or} @ @ @kbd{C-c C-v C-z} @tab @code{org-babel-switch-to-session}
+@item @kbd{C-c C-v z} @ @ @r{or} @ @ @kbd{C-c C-v C-z} @tab @code{org-babel-switch-to-session-with-code}
+@kindex C-c C-v a
+@kindex C-c C-v C-a
+@item @kbd{C-c C-v a} @ @ @r{or} @ @ @kbd{C-c C-v C-a} @tab @code{org-babel-sha1-hash}
+@kindex C-c C-v h
+@kindex C-c C-v C-h
+@item @kbd{C-c C-v h} @ @ @r{or} @ @ @kbd{C-c C-v C-h} @tab @code{org-babel-describe-bindings}
+@kindex C-c C-v x
+@kindex C-c C-v C-x
+@item @kbd{C-c C-v x} @ @ @r{or} @ @ @kbd{C-c C-v C-x} @tab @code{org-babel-do-key-sequence-in-edit-buffer}
 @end multitable
 
 @c When possible these keybindings were extended to work when the control key is
