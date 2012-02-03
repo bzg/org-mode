@@ -250,6 +250,7 @@ elements in the final html."
       (should-not (string-match (regexp-quote "i=\"10\"") ascii)))))
 
 (ert-deftest ob-exp/export-from-a-temp-buffer ()
+  :expected-result :failed
   (org-test-with-temp-text
       "
 #+Title: exporting from a temporary buffer
