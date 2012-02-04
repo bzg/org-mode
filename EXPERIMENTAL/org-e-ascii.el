@@ -1845,11 +1845,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;; Filter
 
-(defun org-e-ascii-filter-headline-blank-lines (headline back-end)
+(defun org-e-ascii-filter-headline-blank-lines (headline back-end info)
   "Filter controlling number of blank lines after an headline.
 
 HEADLINE is a string representing a transcoded headline.
-BACK-END is symbol specifying back-end used for export.
+BACK-END is symbol specifying back-end used for export.  INFO is
+plist containing the communication channel.
 
 This function only applies to `e-ascii' back-end.  See
 `org-e-ascii-headline-spacing' for information.

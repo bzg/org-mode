@@ -1313,7 +1313,7 @@ Return transcoded string."
 	 (org-export-filter-apply-functions
 	  (plist-get info :filter-plain-text)
 	  (if (fboundp transcoder) (funcall transcoder blob info) blob)
-	  backend)))
+	  backend info)))
       ;; BLOB is an element or an object.
       (t
        (let* ((type (if (stringp blob) 'plain-text (car blob)))
@@ -1398,7 +1398,7 @@ Return transcoded string."
 		    (concat (org-element-normalize-string results)
 			    (make-string post-blank ?\n))
 		  (concat results (make-string post-blank ? ))))
-	      backend)))))))
+	      backend info)))))))
    (org-element-get-contents data) ""))
 
 (defun org-export-secondary-string (secondary backend info)
@@ -1508,7 +1508,8 @@ contents, as a string or nil."
 ;; Every set is back-end agnostic.  Although, a filter is always
 ;; called, in addition to the string it applies to, with the back-end
 ;; used as argument, so it's easy enough for the end-user to add
-;; back-end specific filters in the set.
+;; back-end specific filters in the set.  The communication channel,
+;; as a plist, is required as the third argument.
 
 ;; Filters sets are defined below. There are of four types:
 
@@ -1524,301 +1525,341 @@ contents, as a string or nil."
 
 ;; All filters sets are applied through
 ;; `org-export-filter-apply-functions' function.  Filters in a set are
-;; applied in reverse order, that is in the order of consing.  It
-;; allows developers to be reasonably sure that their filters will be
-;; applied first.
+;; applied in a LIFO fashion.  It allows developers to be sure that
+;; their filters will be applied first.
 
 ;;;; Special Filters
 (defvar org-export-filter-parse-tree-functions nil
   "Filter, or list of filters, applied to the parsed tree.
-Each filter is called with two arguments: the parse tree, as
-returned by `org-element-parse-buffer', and the back-end as
-a symbol.  It must return the modified parse tree to transcode.")
+Each filter is called with three arguments: the parse tree, as
+returned by `org-element-parse-buffer', the back-end, as
+a symbol, and the communication channel, as a plist.  It must
+return the modified parse tree to transcode.")
 
 (defvar org-export-filter-final-output-functions nil
   "Filter, or list of filters, applied to the transcoded string.
-Each filter is called with two arguments: the full transcoded
-string, and the back-end as a symbol.  It must return a string
-that will be used as the final export output.")
+Each filter is called with three arguments: the full transcoded
+string, the back-end, as a symbol, and the communication channel,
+as a plist.  It must return a string that will be used as the
+final export output.")
 
 (defvar org-export-filter-plain-text-functions nil
   "Filter, or list of filters, applied to plain text.
-Each filter is called with two arguments: a string which contains
-no Org syntax, and the back-end as a symbol.  It must return
-a string or nil.")
+Each filter is called with three arguments: a string which
+contains no Org syntax, the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 
 ;;;; Elements Filters
 
 (defvar org-export-filter-center-block-functions nil
   "List of functions applied to a transcoded center block.
-Each filter is called with two arguments: the transcoded center
-block, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded center
+block, as a string, the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-drawer-functions nil
   "List of functions applied to a transcoded drawer.
-Each filter is called with two arguments: the transcoded drawer,
-as a string, and the back-end, as a symbol.  It must return
-a string or nil.")
+Each filter is called with three arguments: the transcoded
+drawer, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-dynamic-block-functions nil
   "List of functions applied to a transcoded dynamic-block.
-Each filter is called with two arguments: the transcoded
-dynamic-block, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+dynamic-block, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-headline-functions nil
   "List of functions applied to a transcoded headline.
-Each filter is called with two arguments: the transcoded
-headline, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+headline, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-inlinetask-functions nil
   "List of functions applied to a transcoded inlinetask.
-Each filter is called with two arguments: the transcoded
-inlinetask, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+inlinetask, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-plain-list-functions nil
   "List of functions applied to a transcoded plain-list.
-Each filter is called with two arguments: the transcoded
-plain-list, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+plain-list, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-item-functions nil
   "List of functions applied to a transcoded item.
-Each filter is called with two arguments: the transcoded item, as
-a string, and the back-end, as a symbol.  It must return a string
-or nil.")
+Each filter is called with three arguments: the transcoded item,
+as a string, and the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-comment-functions nil
   "List of functions applied to a transcoded comment.
-Each filter is called with two arguments: the transcoded comment,
-as a string, and the back-end, as a symbol.  It must return
-a string or nil.")
+Each filter is called with three arguments: the transcoded
+comment, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-comment-block-functions nil
   "List of functions applied to a transcoded comment-comment.
-Each filter is called with two arguments: the transcoded
-comment-block, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+comment-block, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-example-block-functions nil
   "List of functions applied to a transcoded example-block.
-Each filter is called with two arguments: the transcoded
-example-block, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+example-block, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-export-block-functions nil
   "List of functions applied to a transcoded export-block.
-Each filter is called with two arguments: the transcoded
-export-block, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+export-block, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-fixed-width-functions nil
   "List of functions applied to a transcoded fixed-width.
-Each filter is called with two arguments: the transcoded
-fixed-width, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+fixed-width, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-footnote-definition-functions nil
   "List of functions applied to a transcoded footnote-definition.
-Each filter is called with two arguments: the transcoded
-footnote-definition, as a string, and the back-end, as a symbol.
-It must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+footnote-definition, as a string, and the back-end, as a symbol,
+and the communication channel, as a plist.  It must return
+a string or nil.")
 
 (defvar org-export-filter-horizontal-rule-functions nil
   "List of functions applied to a transcoded horizontal-rule.
-Each filter is called with two arguments: the transcoded
-horizontal-rule, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+horizontal-rule, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-keyword-functions nil
   "List of functions applied to a transcoded keyword.
-Each filter is called with two arguments: the transcoded keyword,
-as a string, and the back-end, as a symbol.  It must return
-a string or nil.")
+Each filter is called with three arguments: the transcoded
+keyword, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-latex-environment-functions nil
   "List of functions applied to a transcoded latex-environment.
-Each filter is called with two arguments: the transcoded
-latex-environment, as a string, and the back-end, as a symbol.
-It must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+latex-environment, as a string, and the back-end, as a symbol,
+and the communication channel, as a plist.  It must return
+a string or nil.")
 
 (defvar org-export-filter-babel-call-functions nil
   "List of functions applied to a transcoded babel-call.
-Each filter is called with two arguments: the transcoded
-babel-call, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+babel-call, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-paragraph-functions nil
   "List of functions applied to a transcoded paragraph.
-Each filter is called with two arguments: the transcoded
-paragraph, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+paragraph, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-property-drawer-functions nil
   "List of functions applied to a transcoded property-drawer.
-Each filter is called with two arguments: the transcoded
-property-drawer, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+property-drawer, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-quote-block-functions nil
   "List of functions applied to a transcoded quote block.
-Each filter is called with two arguments: the transcoded quote
-block, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded quote
+block, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-quote-section-functions nil
   "List of functions applied to a transcoded quote-section.
-Each filter is called with two arguments: the transcoded
-quote-section, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+quote-section, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-section-functions nil
   "List of functions applied to a transcoded section.
-Each filter is called with two arguments: the transcoded section,
-as a string, and the back-end, as a symbol.  It must return
-a string or nil.")
+Each filter is called with three arguments: the transcoded
+section, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-special-block-functions nil
   "List of functions applied to a transcoded special block.
-Each filter is called with two arguments: the transcoded special
-block, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+special block, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-src-block-functions nil
   "List of functions applied to a transcoded src-block.
-Each filter is called with two arguments: the transcoded
-src-block, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+src-block, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-table-functions nil
   "List of functions applied to a transcoded table.
-Each filter is called with two arguments: the transcoded table,
-as a string, and the back-end, as a symbol.  It must return
-a string or nil.")
+Each filter is called with three arguments: the transcoded table,
+as a string, and the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-verse-block-functions nil
   "List of functions applied to a transcoded verse block.
-Each filter is called with two arguments: the transcoded verse
-block, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded verse
+block, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 
 ;;;; Objects Filters
 
 (defvar org-export-filter-emphasis-functions nil
   "List of functions applied to a transcoded emphasis.
-Each filter is called with two arguments: the transcoded
-emphasis, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+emphasis, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-entity-functions nil
   "List of functions applied to a transcoded entity.
-Each filter is called with two arguments: the transcoded entity,
-as a string, and the back-end, as a symbol.  It must return
-a string or nil.")
+Each filter is called with three arguments: the transcoded
+entity, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-export-snippet-functions nil
   "List of functions applied to a transcoded export-snippet.
-Each filter is called with two arguments: the transcoded
-export-snippet, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+export-snippet, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-footnote-reference-functions nil
   "List of functions applied to a transcoded footnote-reference.
-Each filter is called with two arguments: the transcoded
-footnote-reference, as a string, and the back-end, as a symbol.
-It must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+footnote-reference, as a string, and the back-end, as a symbol,
+and the communication channel, as a plist.  It must return
+a string or nil.")
 
 (defvar org-export-filter-inline-babel-call-functions nil
   "List of functions applied to a transcoded inline-babel-call.
-Each filter is called with two arguments: the transcoded
-inline-babel-call, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+inline-babel-call, as a string, and the back-end, as a symbol,
+and the communication channel, as a plist.  It must return
+a string or nil.")
 
 (defvar org-export-filter-inline-src-block-functions nil
   "List of functions applied to a transcoded inline-src-block.
-Each filter is called with two arguments: the transcoded
-inline-src-block, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+inline-src-block, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-latex-fragment-functions nil
   "List of functions applied to a transcoded latex-fragment.
-Each filter is called with two arguments: the transcoded
-latex-fragment, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+latex-fragment, as a string, and the back-end, as a symbol, and
+the communication channel, as a plist.  It must return a string
+or nil.")
 
 (defvar org-export-filter-line-break-functions nil
   "List of functions applied to a transcoded line-break.
-Each filter is called with two arguments: the transcoded
-line-break, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+line-break, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-link-functions nil
   "List of functions applied to a transcoded link.
-Each filter is called with two arguments: the transcoded link, as
-a string, and the back-end, as a symbol.  It must return a string
-or nil.")
+Each filter is called with three arguments: the transcoded link,
+as a string, and the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-macro-functions nil
   "List of functions applied to a transcoded macro.
-Each filter is called with two arguments: the transcoded macro,
-as a string, and the back-end, as a symbol.  It must return
-a string or nil.")
+Each filter is called with three arguments: the transcoded macro,
+as a string, and the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-radio-target-functions nil
   "List of functions applied to a transcoded radio-target.
-Each filter is called with two arguments: the transcoded
-radio-target, as a string, and the back-end, as a symbol.  It
-must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+radio-target, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-statistics-cookie-functions nil
   "List of functions applied to a transcoded statistics-cookie.
-Each filter is called with two arguments: the transcoded
-statistics-cookie, as a string, and the back-end, as a symbol.
-It must return a string or nil.")
+Each filter is called with three arguments: the transcoded
+statistics-cookie, as a string, and the back-end, as a symbol,
+and the communication channel, as a plist.  It must return
+a string or nil.")
 
 (defvar org-export-filter-subscript-functions nil
   "List of functions applied to a transcoded subscript.
-Each filter is called with two arguments: the transcoded
-subscript, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+subscript, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-superscript-functions nil
   "List of functions applied to a transcoded superscript.
-Each filter is called with two arguments: the transcoded
-superscript, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+superscript, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-target-functions nil
   "List of functions applied to a transcoded target.
-Each filter is called with two arguments: the transcoded target,
-as a string, and the back-end, as a symbol.  It must return
-a string or nil.")
+Each filter is called with three arguments: the transcoded
+target, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-time-stamp-functions nil
   "List of functions applied to a transcoded time-stamp.
-Each filter is called with two arguments: the transcoded
-time-stamp, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+time-stamp, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-verbatim-functions nil
   "List of functions applied to a transcoded verbatim.
-Each filter is called with two arguments: the transcoded
-verbatim, as a string, and the back-end, as a symbol.  It must
-return a string or nil.")
+Each filter is called with three arguments: the transcoded
+verbatim, as a string, and the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
-(defun org-export-filter-apply-functions (filters value backend)
-  "Call every function in FILTERS with arguments VALUE and BACKEND.
+(defun org-export-filter-apply-functions (filters value backend info)
+  "Call every function in FILTERS with arguments VALUE, BACKEND and INFO.
 Functions are called in a LIFO fashion, to be sure that developer
 specified filters, if any, are called first."
-  ;; Ensure FILTERS is a list.
   (loop for filter in filters
 	if (not value) return nil else
-	do (setq value (funcall filter value backend)))
+	do (setq value (funcall filter value backend info)))
   value)
 
 
@@ -1871,14 +1912,15 @@ Return code as a string."
       (when (and subtreep (not (org-at-heading-p)))
 	;; Ensure point is at sub-tree's beginning.
 	(org-with-limited-levels (org-back-to-heading (not visible-only))))
-      ;; Retrieve export options (INFO) and parsed tree (RAW-DATA).
+      ;; Retrieve export options (INFO) and parsed tree (RAW-DATA),
+      ;; Then options can be completed with tree properties.  Note:
       ;; Buffer isn't parsed directly.  Instead, a temporary copy is
       ;; created, where all code blocks are evaluated.  RAW-DATA is
       ;; the parsed tree of the buffer resulting from that process.
       ;; Eventually call `org-export-filter-parse-tree-functions'.
       (let* ((info (org-export-collect-options backend subtreep ext-plist))
 	     (raw-data (progn
-			 (when subtreep	; Only parse subtree contents.
+			 (when subtreep		; Only parse subtree contents.
 			   (let ((end (save-excursion (org-end-of-subtree t))))
 			     (narrow-to-region
 			      (progn (forward-line) (point)) end)))
@@ -1888,11 +1930,12 @@ Return code as a string."
 			   (let ((org-current-export-file (current-buffer)))
 			     (org-export-blocks-preprocess))
 			   (org-element-parse-buffer nil visible-only))
-			  backend))))
-	;; Initialize the communication system and combine it to INFO.
+			  backend info))))
+	;; Now get full initial options with tree properties.
 	(setq info
 	      (org-combine-plists
-	       info (org-export-collect-tree-properties raw-data info backend)))
+	       info
+	       (org-export-collect-tree-properties raw-data info backend)))
 	;; Now transcode RAW-DATA.  Also call
 	;; `org-export-filter-final-output-functions'.
 	(let* ((body (org-element-normalize-string
@@ -1902,7 +1945,7 @@ Return code as a string."
 			(plist-get info :filter-final-output)
 			(if (or (not (fboundp template)) body-only) body
 			  (funcall template body info))
-			backend)))
+			backend info)))
 	  ;; Maybe add final OUTPUT to kill ring before returning it.
 	  (when org-export-copy-to-kill-ring (org-kill-new output))
 	  output)))))
