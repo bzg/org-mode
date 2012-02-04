@@ -3038,10 +3038,12 @@ Nil values returned from FUN are ignored in the result."
 			  ;; included file becomes a direct child of
 			  ;; the current headline in the buffer.
 			  :headline-offset
-			  ,(- (+ (plist-get
-				  (plist-get --local :inherited-properties)
-				  :level)
-				 (or (plist-get --local :headline-offset) 0))
+			  ,(- (let ((parent
+				     (org-export-get-parent-headline
+				      --blob --local)))
+				(if (not parent) 0
+				  (org-export-get-relative-level
+				   parent --local)))
 			      (1- (org-export-get-min-level
 				   --data --local))))))))
 		   ;; Limiting recursion to greater elements, and --BLOB

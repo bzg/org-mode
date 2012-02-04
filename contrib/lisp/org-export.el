@@ -2267,17 +2267,17 @@ Return the transcoded string."
       data backend
       (org-combine-plists
        info
-       ;; Store full path of already included files to avoid
-       ;; recursive file inclusion.
+       ;; Store full path of already included files to avoid recursive
+       ;; file inclusion.
        `(:included-files
 	 ,(cons (expand-file-name file) (plist-get info :included-files))
-	 ;; Ensure that a top-level headline in the included
-	 ;; file becomes a direct child of the current headline
-	 ;; in the buffer.
+	 ;; Ensure that a top-level headline in the included file
+	 ;; becomes a direct child of the current headline in the
+	 ;; buffer.
 	 :headline-offset
-	 ,(- (+ (org-element-get-property
-		 :level (org-export-get-parent-headline keyword info))
-		(plist-get info :headline-offset))
+	 ,(- (let ((parent (org-export-get-parent-headline keyword info)))
+	       (if (not parent) 0
+		 (org-export-get-relative-level parent info)))
 	     (1- (org-export-get-min-level data info)))))))))
 
 (defun org-export-get-file-contents (file &optional lines)
