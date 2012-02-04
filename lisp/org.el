@@ -20404,14 +20404,28 @@ beyond the end of the headline."
 		 ((not (eq last-command this-command)) (point))
 		 (t refpos)))))
        ((org-at-item-p)
-	(goto-char
-	 (if (eq special t)
-	     (cond ((> pos (match-end 0)) (match-end 0))
-		   ((= pos (point)) (match-end 0))
-		   (t (point)))
-	   (cond ((> pos (point)) (point))
-		 ((not (eq last-command this-command)) (point))
-		 (t (match-end 0))))))))
+	;; Being at an item and not looking at an the item means point
+	;; was previously moved to beginning of a visual line, whiche
+	;; doesn't contain the item.  Therefore, do nothing special,
+	;; just stay here.
+	(when (looking-at org-list-full-item-re)
+	  ;; Set special position at first white space character after
+	  ;; bullet, and check-box, if any.
+	  (let ((after-bullet
+		 (let ((box (match-end 3)))
+		   (if (not box) (match-end 1)
+		     (let ((after (char-after box)))
+		       (if (and after (= after ? )) (1+ box) box))))))
+	    ;; Special case: Move point to special position when
+	    ;; currently after it or at beginning of line.
+	    (if (eq special t)
+		(when (or (> pos after-bullet) (= (point) pos))
+		  (goto-char after-bullet))
+	      ;; Reversed case: Move point to special position when
+	      ;; point was already at beginning of line and command is
+	      ;; repeated.
+	      (when (and (= (point) pos) (eq last-command this-command))
+		(goto-char after-bullet))))))))
     (org-no-warnings
      (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
@@ -20450,7 +20464,10 @@ beyond the end of the headline."
       (move-end-of-line 1)
       (when (overlays-at (1- (point))) (backward-char 1)))
      ;; At an item: Move before any hidden text.
-     (t (call-interactively 'end-of-line)))
+     (t (call-interactively
+	 (cond ((org-bound-and-true-p line-move-visual) 'end-of-visual-line)
+	       ((fboundp 'move-end-of-line) 'move-end-of-line)
+	       (t 'end-of-line)))))
     (org-no-warnings
      (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
