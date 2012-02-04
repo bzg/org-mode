@@ -1328,9 +1328,7 @@ information."
 	 ((string= "tables" value)
 	  (org-e-ascii--list-tables keyword info))
 	 ((string= "listings" value)
-	  (org-e-ascii--list-listings keyword info)))))
-     ((string= key "include")
-      (org-export-included-file keyword 'e-ascii info)))))
+	  (org-e-ascii--list-listings keyword info))))))))
 
 
 ;;;; Latex Environment

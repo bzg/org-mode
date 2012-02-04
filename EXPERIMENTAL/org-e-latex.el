@@ -1257,9 +1257,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	     "\\tableofcontents")))
 	 ((string= "tables" value) "\\listoftables")
 	 ((string= "figures" value) "\\listoffigures")
-	 ((string= "listings" value) "\\listoflistings"))))
-     ((string= key "include")
-      (org-export-included-file keyword 'e-latex info)))))
+	 ((string= "listings" value) "\\listoflistings")))))))
 
 
 ;;;; Latex Environment

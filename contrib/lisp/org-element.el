@@ -3011,41 +3011,6 @@ Nil values returned from FUN are ignored in the result."
 			 (eq (plist-get info :with-archived-trees) 'headline)
 			 (org-element-get-property :archivedp --blob))
 		    (funcall accumulate-maybe --type types fun --blob --local))
-		   ;; At an include keyword: apply mapping to its
-		   ;; contents.
-		   ((and --local
-			 (eq --type 'keyword)
-			 (string=
-			  (downcase (org-element-get-property :key --blob))
-			  "include"))
-		    (funcall accumulate-maybe --type types fun --blob --local)
-		    (let* ((--data
-			    (org-export-parse-included-file --blob --local))
-			   (--value (org-element-get-property :value --blob))
-			   (--file
-			    (and (string-match "^\"\\(\\S-+\\)\"" --value)
-				 (match-string 1 --value))))
-		      (funcall
-		       walk-tree --data
-		       (org-combine-plists
-			--local
-			;; Store full path of already included files
-			;; to avoid recursive file inclusion.
-			`(:included-files
-			  ,(cons (expand-file-name --file)
-				 (plist-get --local :included-files))
-			  ;; Ensure that a top-level headline in the
-			  ;; included file becomes a direct child of
-			  ;; the current headline in the buffer.
-			  :headline-offset
-			  ,(- (let ((parent
-				     (org-export-get-parent-headline
-				      --blob --local)))
-				(if (not parent) 0
-				  (org-export-get-relative-level
-				   parent --local)))
-			      (1- (org-export-get-min-level
-				   --data --local))))))))
 		   ;; Limiting recursion to greater elements, and --BLOB
 		   ;; isn't one.
 		   ((and (eq --category 'greater-elements)

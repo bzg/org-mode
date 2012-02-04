@@ -1876,8 +1876,18 @@ specified filters, if any, are called first."
 
 ;; Note that `org-export-as' doesn't really parse the current buffer,
 ;; but a copy of it (with the same buffer-local variables and
-;; visibility), where Babel blocks are executed, if appropriate.
+;; visibility), where include keywords are expanded and Babel blocks
+;; are executed, if appropriate.
 ;; `org-export-with-current-buffer-copy' macro prepares that copy.
+
+;; File inclusion is taken care of by
+;; `org-export-expand-include-keyword' and
+;; `org-export-prepare-file-contents'.  Structure wise, including
+;; a whole Org file in a buffer often makes little sense.  For
+;; example, if the file contains an headline and the include keyword
+;; was within an item, the item should contain the headline.  That's
+;; why file inclusion should be done before any structure can be
+;; associated to the file, that is before parsing.
 
 (defun org-export-as (backend
 		      &optional subtreep visible-only body-only ext-plist)
@@ -1915,9 +1925,10 @@ Return code as a string."
       ;; Retrieve export options (INFO) and parsed tree (RAW-DATA),
       ;; Then options can be completed with tree properties.  Note:
       ;; Buffer isn't parsed directly.  Instead, a temporary copy is
-      ;; created, where all code blocks are evaluated.  RAW-DATA is
-      ;; the parsed tree of the buffer resulting from that process.
-      ;; Eventually call `org-export-filter-parse-tree-functions'.
+      ;; created, where include keywords are expanded and code blocks
+      ;; are evaluated.  RAW-DATA is the parsed tree of the buffer
+      ;; resulting from that process.  Eventually call
+      ;; `org-export-filter-parse-tree-functions'.
       (let* ((info (org-export-collect-options backend subtreep ext-plist))
 	     (raw-data (progn
 			 (when subtreep		; Only parse subtree contents.
@@ -1927,6 +1938,7 @@ Return code as a string."
 			 (org-export-filter-apply-functions
 			  (plist-get info :filter-parse-tree)
 			  (org-export-with-current-buffer-copy
+			   (org-export-expand-include-keyword nil)
 			   (let ((org-current-export-file (current-buffer)))
 			     (org-export-blocks-preprocess))
 			   (org-element-parse-buffer nil visible-only))
@@ -2073,6 +2085,155 @@ Point is at buffer's beginning when BODY is applied."
 	   (progn ,@body))))))
 (def-edebug-spec org-export-with-current-buffer-copy (body))
 
+(defun org-export-expand-include-keyword (included)
+  "Expand every include keyword in buffer.
+INCLUDED is a list of included file names along with their line
+restriction, when appropriate.  It is used to avoid infinite
+recursion."
+  (let ((case-fold-search nil))
+    (goto-char (point-min))
+    (while (re-search-forward "^[ \t]*#\\+include: \\(.*\\)" nil t)
+      (when (eq (car (save-match-data (org-element-at-point))) 'keyword)
+	(beginning-of-line)
+	;; Extract arguments from keyword's value.
+	(let* ((value (match-string 1))
+	       (ind (org-get-indentation))
+	       (file (and (string-match "^\"\\(\\S-+\\)\"" value)
+			  (prog1 (expand-file-name (match-string 1 value))
+			    (setq value (replace-match "" nil nil value)))))
+	       (lines
+		(and (string-match
+		      ":lines +\"\\(\\(?:[0-9]+\\)?-\\(?:[0-9]+\\)?\\)\"" value)
+		     (prog1 (match-string 1 value)
+		       (setq value (replace-match "" nil nil value)))))
+	       (env (cond ((string-match "\\<example\\>" value) 'example)
+			  ((string-match "\\<src\\(?: +\\(.*\\)\\)?" value)
+			   (match-string 1 value))))
+	       ;; Minimal level of included file defaults to the child
+	       ;; level of the current headline, if any, or one.  It
+	       ;; only applies is the file is meant to be included as
+	       ;; an Org one.
+	       (minlevel
+		(and (not env)
+		     (if (string-match ":minlevel +\\([0-9]+\\)" value)
+			 (prog1 (string-to-number (match-string 1 value))
+			   (setq value (replace-match "" nil nil value)))
+		       (let ((cur (org-current-level)))
+			 (if cur (1+ (org-reduced-level cur)) 1))))))
+	  ;; Remove keyword.
+	  (delete-region (point) (progn (forward-line) (point)))
+	  (cond
+	   ((not (file-readable-p file)) (error "Cannot include file %s" file))
+	   ;; Check if files has already been parsed.  Look after
+	   ;; inclusion lines too, as different parts of the same file
+	   ;; can be included too.
+	   ((member (list file lines) included)
+	    (error "Recursive file inclusion: %s" file))
+	   (t
+	    (cond
+	     ((eq env 'example)
+	      (insert
+	       (let ((ind-str (make-string ind ? ))
+		     (contents
+		      ;; Protect sensitive contents with commas.
+		      (replace-regexp-in-string
+		       "\\(^\\)\\([*]\\|[ \t]*#\\+\\)" ","
+		       (org-export-prepare-file-contents file lines)
+		       nil nil 1)))
+		 (format "%s#+begin_example\n%s%s#+end_example\n"
+			 ind-str contents ind-str))))
+	     ((stringp env)
+	      (insert
+	       (let ((ind-str (make-string ind ? ))
+		     (contents
+		      ;; Protect sensitive contents with commas.
+		      (replace-regexp-in-string
+		       (if (string= env "org") "\\(^\\)\\(.\\)"
+			 "\\(^\\)\\([*]\\|[ \t]*#\\+\\)") ","
+			 (org-export-prepare-file-contents file lines)
+			 nil nil 1)))
+		 (format "%s#+begin_src %s\n%s%s#+end_src\n"
+			 ind-str env contents ind-str))))
+	     (t
+	      (insert
+	       (with-temp-buffer
+		 (org-mode)
+		 (insert
+		  (org-export-prepare-file-contents file lines ind minlevel))
+		 (org-export-expand-include-keyword
+		  (cons (list file lines) included))
+		 (buffer-string))))))))))))
+
+(defun org-export-prepare-file-contents (file &optional lines ind minlevel)
+  "Prepare the contents of FILE for inclusion and return them as a string.
+
+When optional argument LINES is a string specifying a range of
+lines, include only those lines.
+
+Optional argument IND, when non-nil, is an integer specifying the
+global indentation of returned contents.  Since its purpose is to
+allow an included file to stay in the same environment it was
+created \(i.e. a list item), it doesn't apply past the first
+headline encountered.
+
+Optional argument MINLEVEL, when non-nil, is an integer
+specifying the level that any top-level headline in the included
+file should have."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (when lines
+      (let* ((lines (split-string lines "-"))
+	     (lbeg (string-to-number (car lines)))
+	     (lend (string-to-number (cadr lines)))
+	     (beg (if (zerop lbeg) (point-min)
+		    (goto-char (point-min))
+		    (forward-line (1- lbeg))
+		    (point)))
+	     (end (if (zerop lend) (point-max)
+		    (goto-char (point-min))
+		    (forward-line (1- lend))
+		    (point))))
+	(narrow-to-region beg end)))
+    ;; Remove blank lines at beginning and end of contents.  The logic
+    ;; behind that removal is that blank lines around include keyword
+    ;; override blank lines in included file.
+    (goto-char (point-min))
+    (org-skip-whitespace)
+    (beginning-of-line)
+    (delete-region (point-min) (point))
+    (goto-char (point-max))
+    (skip-chars-backward " \r\t\n")
+    (forward-line)
+    (delete-region (point) (point-max))
+    ;; If IND is set, preserve indentation of include keyword until
+    ;; the first headline encountered.
+    (when ind
+      (unless (eq major-mode 'org-mode) (org-mode))
+      (goto-char (point-min))
+      (let ((ind-str (make-string ind ? )))
+	(while (not (or (eobp) (looking-at org-outline-regexp-bol)))
+	  ;; Do not move footnote definitions out of column 0.
+	  (unless (and (looking-at org-footnote-definition-re)
+		       (eq (car (org-element-at-point)) 'footnote-definition))
+	    (insert ind-str))
+	  (forward-line))))
+    ;; When MINLEVEL is specified, compute minimal level for headlines
+    ;; in the file (CUR-MIN), and remove stars to each headline so
+    ;; that headlines with minimal level have a level of MINLEVEL.
+    (when minlevel
+      (unless (eq major-mode 'org-mode) (org-mode))
+      (let ((levels (org-map-entries
+		     (lambda () (org-reduced-level (org-current-level))))))
+	(when levels
+	  (let ((offset (- minlevel (apply 'min levels))))
+	    (unless (zerop offset)
+	      (when org-odd-levels-only (setq offset (* offset 2)))
+	      ;; Only change stars, don't bother moving whole
+	      ;; sections.
+	      (org-map-entries
+	       (lambda () (if (< offset 0) (delete-char (abs offset))
+		       (insert (make-string offset ?*))))))))))
+    (buffer-string)))
 
 
 ;;; Tools For Back-Ends
@@ -2081,9 +2242,9 @@ Point is at buffer's beginning when BODY is applied."
 ;; function general enough to have its use across many back-ends
 ;; should be added here.
 
-;; As of now, functions operating on footnotes, headlines, include
-;; keywords, links, macros, references, src-blocks, tables and tables
-;; of contents are implemented.
+;; As of now, functions operating on footnotes, headlines, links,
+;; macros, references, src-blocks, tables and tables of contents are
+;; implemented.
 
 ;;;; For Footnotes
 
@@ -2234,116 +2395,6 @@ INFO is the plist used as a communication channel."
   (equal
    (car (last (org-element-get-contents (car (plist-get info :genealogy)))))
    headline))
-
-
-;;;; For Include Keywords
-
-;; This section provides a tool to properly handle insertion of files
-;; during export: `org-export-included-files'.  It recursively
-;; transcodes a file specfied by an include keyword.
-
-;; It uses two helper functions: `org-export-get-file-contents'
-;; returns contents of a file according to parameters specified in the
-;; keyword while `org-export-parse-included-file' parses the file
-;; specified by it.
-
-(defun org-export-included-file (keyword backend info)
-  "Transcode file specified with include KEYWORD.
-
-KEYWORD is the include keyword element transcoded.  BACKEND is
-the language back-end used for transcoding.  INFO is the plist
-used as a communication channel.
-
-This function updates `:included-files' and `:headline-offset'
-properties.
-
-Return the transcoded string."
-  (let ((data (org-export-parse-included-file keyword info))
-	(file (let ((value (org-element-get-property :value keyword)))
-		(and (string-match "^\"\\(\\S-+\\)\"" value)
-		     (match-string 1 value)))))
-    (org-element-normalize-string
-     (org-export-data
-      data backend
-      (org-combine-plists
-       info
-       ;; Store full path of already included files to avoid recursive
-       ;; file inclusion.
-       `(:included-files
-	 ,(cons (expand-file-name file) (plist-get info :included-files))
-	 ;; Ensure that a top-level headline in the included file
-	 ;; becomes a direct child of the current headline in the
-	 ;; buffer.
-	 :headline-offset
-	 ,(- (let ((parent (org-export-get-parent-headline keyword info)))
-	       (if (not parent) 0
-		 (org-export-get-relative-level parent info)))
-	     (1- (org-export-get-min-level data info)))))))))
-
-(defun org-export-get-file-contents (file &optional lines)
-  "Get the contents of FILE and return them as a string.
-When optional argument LINES is a string specifying a range of
-lines, include only those lines."
-  (with-temp-buffer
-    (insert-file-contents file)
-    (when lines
-      (let* ((lines (split-string lines "-"))
-	     (lbeg (string-to-number (car lines)))
-	     (lend (string-to-number (cadr lines)))
-	     (beg (if (zerop lbeg) (point-min)
-		    (goto-char (point-min))
-		    (forward-line (1- lbeg))
-		    (point)))
-	     (end (if (zerop lend) (point-max)
-		    (goto-char (point-min))
-		    (forward-line (1- lend))
-		    (point))))
-	(narrow-to-region beg end)))
-    (buffer-string)))
-
-(defun org-export-parse-included-file (keyword info)
-  "Parse file specified by include KEYWORD.
-
-KEYWORD is the include keyword element transcoded.  BACKEND is
-the language back-end used for transcoding.  INFO is the plist
-used as a communication channel.
-
-Return the parsed tree."
-  (let* ((value (org-element-get-property :value keyword))
-	 (file (and (string-match "^\"\\(\\S-+\\)\"" value)
-		    (prog1 (match-string 1 value)
-		      (setq value (replace-match "" nil nil value)))))
-	 (lines (and (string-match
-		      ":lines +\"\\(\\(?:[0-9]+\\)?-\\(?:[0-9]+\\)?\\)\"" value)
-		     (prog1 (match-string 1 value)
-		       (setq value (replace-match "" nil nil value)))))
-	 (env (cond ((string-match "\\<example\\>" value) "example")
-		    ((string-match "\\<src\\(?: +\\(.*\\)\\)?" value)
-		     (match-string 1 value)))))
-    (cond
-     ((or (not file)
-	  (not (file-exists-p file))
-	  (not (file-readable-p file)))
-      (format "Cannot include file %s" file))
-     ((and (not env)
-	   (member (expand-file-name file) (plist-get info :included-files)))
-      (error "Recursive file inclusion: %S" file))
-     (t (let ((raw (org-element-normalize-string
-		    (org-export-get-file-contents
-		     (expand-file-name file) lines))))
-	  ;; If environment isn't specified, Insert file in
-	  ;; a temporary buffer and parse it as Org syntax.
-	  ;; Otherwise, build the element representing the file.
-	  (cond
-	   ((not env)
-	    (with-temp-buffer
-	      (insert raw) (org-mode) (org-element-parse-buffer)))
-	   ((string= "example" env)
-	    `(org-data nil (example-block (:value ,raw :post-blank 0))))
-	   (t
-	    `(org-data
-	      nil
-	      (src-block (:value ,raw :language ,env :post-blank 0))))))))))
 
 
 ;;;; For Links
