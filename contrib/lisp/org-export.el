@@ -691,13 +691,6 @@ standard mode."
 ;;   - category :: tree
 ;;   - type :: alist (INTEGER . LIST)
 
-;; + `included-files' :: List of files, with full path, included in
-;;      the current buffer, through the "#+include:" keyword.  It is
-;;      mainly used to verify that no infinite recursive inclusion
-;;      happens.
-;;   - category :: local
-;;   - type :: list of strings
-
 ;; + `keywords' :: List of keywords attached to data.
 ;;   - category :: option
 ;;   - type :: string
@@ -705,6 +698,10 @@ standard mode."
 ;; + `language' :: Default language used for translations.
 ;;   - category :: option
 ;;   - type :: string
+
+;; + `macro-input-file' :: File name of input file, or nil.
+;;   - category :: option
+;;   - type :: string or nil
 
 ;; + `parse-tree' :: Whole parse tree, available at any time during
 ;;                   transcoding.
@@ -1092,13 +1089,17 @@ OPTIONS is the export options plist computed so far."
    :macro-time "(eval (format-time-string \"$1\"))"
    :macro-property "(eval (org-entry-get nil \"$1\" 'selective))"
    :macro-modification-time
-   (and (buffer-file-name)
-	(file-exists-p (buffer-file-name))
+   (and (buffer-file-name (buffer-base-buffer))
+	(file-exists-p (buffer-file-name (buffer-base-buffer)))
 	(concat "(eval (format-time-string \"$1\" '"
-		(prin1-to-string (nth 5 (file-attributes (buffer-file-name))))
+		(prin1-to-string
+		 (nth 5 (file-attributes
+			 (buffer-file-name (buffer-base-buffer)))))
 		"))"))
-   :macro-input-file (and (buffer-file-name)
-			  (file-name-nondirectory (buffer-file-name)))
+   ;; Store input file name.
+   :macro-input-file (and (buffer-file-name (buffer-base-buffer))
+			  (file-name-nondirectory
+			   (buffer-file-name (buffer-base-buffer))))
    ;; Footnotes definitions must be collected in the original buffer,
    ;; as there's no insurance that they will still be in the parse
    ;; tree, due to some narrowing.
@@ -2559,19 +2560,23 @@ depending on src-block or example element's switches."
 INFO is a plist holding export options."
   (let* ((key (org-element-get-property :key macro))
 	 (args (org-element-get-property :args macro))
+	 ;; User's macros are stored in the communication channel with
+	 ;; a ":macro-" prefix.
 	 (value (plist-get info (intern (format ":macro-%s" key)))))
-    ;; Replace arguments in VALUE.
-    (let ((s 0) n)
-      (while (string-match "\\$\\([0-9]+\\)" value s)
-	(setq s (1+ (match-beginning 0))
-	      n (string-to-number (match-string 1 value)))
-	(and (>= (length args) n)
-	     (setq value (replace-match (nth (1- n) args) t t value)))))
-    ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
-    (when (string-match "\\`(eval\\>" value)
-      (setq value (eval (read value))))
-    ;; Return expanded string.
-    (format "%s" value)))
+    ;; Replace arguments in VALUE. A nil VALUE removes the macro call
+    ;; from export.
+    (when (stringp value)
+      (let ((s 0) n)
+	(while (string-match "\\$\\([0-9]+\\)" value s)
+	  (setq s (1+ (match-beginning 0))
+		n (string-to-number (match-string 1 value)))
+	  (and (>= (length args) n)
+	       (setq value (replace-match (nth (1- n) args) t t value)))))
+      ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
+      (when (string-match "\\`(eval\\>" value)
+	(setq value (eval (read value))))
+      ;; Return string.
+      (format "%s" (or value "")))))
 
 
 ;;;; For References
