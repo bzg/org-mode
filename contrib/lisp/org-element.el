@@ -3032,8 +3032,9 @@ Nil values returned from FUN are ignored in the result."
 		      (funcall
 		       walk-tree --blob
 		       (org-combine-plists
-			info `(:genealogy
-			       ,(cons --blob (plist-get info :genealogy)))))))))
+			--local
+			`(:genealogy
+			  ,(cons --blob (plist-get --local :genealogy)))))))))
 	      (org-element-get-contents --data))))))
     (catch 'first-match
       (funcall walk-tree data info)
