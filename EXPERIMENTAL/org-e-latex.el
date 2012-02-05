@@ -51,23 +51,27 @@
 (declare-function org-export-directory "org-export" (type plist))
 (declare-function org-export-expand-macro "org-export" (macro info))
 (declare-function org-export-first-sibling-p "org-export" (headline info))
-(declare-function org-export-footnote-first-reference-p "org-export" (footnote-reference info))
+(declare-function org-export-footnote-first-reference-p "org-export"
+		  (footnote-reference info))
 (declare-function org-export-get-coderef-format "org-export" (path desc))
-(declare-function org-export-get-footnote-definition "org-export" (footnote-reference info))
+(declare-function org-export-get-footnote-definition "org-export"
+		  (footnote-reference info))
 (declare-function org-export-get-footnote-number "org-export" (footnote info))
 (declare-function org-export-get-previous-element "org-export" (blob info))
 (declare-function org-export-get-relative-level "org-export" (headline info))
 (declare-function org-export-handle-code
 		  "org-export" (element info &optional num-fmt ref-fmt delayed))
 (declare-function org-export-included-file "org-export" (keyword backend info))
-(declare-function org-export-inline-image-p "org-export" (link &optional extensions))
+(declare-function org-export-inline-image-p "org-export"
+		  (link &optional extensions))
 (declare-function org-export-last-sibling-p "org-export" (headline info))
 (declare-function org-export-low-level-p "org-export" (headline info))
 (declare-function org-export-output-file-name
 		  "org-export" (extension &optional subtreep pub-dir))
 (declare-function org-export-resolve-coderef "org-export" (ref info))
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
-(declare-function org-export-secondary-string "org-export" (secondary backend info))
+(declare-function org-export-secondary-string "org-export"
+		  (secondary backend info))
 (declare-function org-export-solidify-link-text "org-export" (s))
 (declare-function org-export-table-format-info "org-export" (table))
 (declare-function
@@ -141,20 +145,22 @@ associated information.  Here is the structure of each cell:
 The header string
 -----------------
 
-The HEADER-STRING is the header that will be inserted into the LaTeX file.
-It should contain the \\documentclass macro, and anything else that is needed
-for this setup.  To this header, the following commands will be added:
+The HEADER-STRING is the header that will be inserted into the
+LaTeX file.  It should contain the \\documentclass macro, and
+anything else that is needed for this setup.  To this header, the
+following commands will be added:
 
-- Calls to \\usepackage for all packages mentioned in the variables
-  `org-e-latex-default-packages-alist' and
-  `org-e-latex-packages-alist'.  Thus, your header definitions should
-  avoid to also request these packages.
+- Calls to \\usepackage for all packages mentioned in the
+  variables `org-export-latex-default-packages-alist' and
+  `org-export-latex-packages-alist'.  Thus, your header
+  definitions should avoid to also request these packages.
 
 - Lines specified via \"#+LaTeX_HEADER:\"
 
-If you need more control about the sequence in which the header is built
-up, or if you want to exclude one of these building blocks for a particular
-class, you can use the following macro-like placeholders.
+If you need more control about the sequence in which the header
+is built up, or if you want to exclude one of these building
+blocks for a particular class, you can use the following
+macro-like placeholders.
 
  [DEFAULT-PACKAGES]      \\usepackage statements for default packages
  [NO-DEFAULT-PACKAGES]   do not include any of the default packages
@@ -172,23 +178,25 @@ So a header like
   \\providecommand{\\alert}[1]{\\textbf{#1}}
   [PACKAGES]
 
-will omit the default packages, and will include the #+LaTeX_HEADER lines,
-then have a call to \\providecommand, and then place \\usepackage commands
-based on the content of `org-e-latex-packages-alist'.
+will omit the default packages, and will include the
+#+LaTeX_HEADER lines, then have a call to \\providecommand, and
+then place \\usepackage commands based on the content of
+`org-export-latex-packages-alist'.
 
-If your header or `org-e-latex-default-packages-alist' inserts
-\"\\usepackage[AUTO]{inputenc}\", AUTO will automatically be replaced with
-a coding system derived from `buffer-file-coding-system'.  See also the
-variable `org-e-latex-inputenc-alist' for a way to influence this
+If your header or `org-export-latex-default-packages-alist'
+inserts \"\\usepackage[AUTO]{inputenc}\", AUTO will automatically
+be replaced with a coding system derived from
+`buffer-file-coding-system'.  See also the variable
+`org-e-latex-inputenc-alist' for a way to influence this
 mechanism.
 
 The sectioning structure
 ------------------------
 
-The sectioning structure of the class is given by the elements following
-the header string.  For each sectioning level, a number of strings is
-specified.  A %s formatter is mandatory in each section string and will
-be replaced by the title of the section.
+The sectioning structure of the class is given by the elements
+following the header string.  For each sectioning level, a number
+of strings is specified.  A %s formatter is mandatory in each
+section string and will be replaced by the title of the section.
 
 Instead of a cons cell \(numbered . unnumbered\), you can also
 provide a list of 2 or 4 elements,
@@ -199,15 +207,15 @@ or
 
   \(numbered-open numbered-close unnumbered-open unnumbered-close\)
 
-providing opening and closing strings for a LaTeX environment that should
-represent the document section.  The opening clause should have a %s
-to represent the section title.
+providing opening and closing strings for a LaTeX environment
+that should represent the document section.  The opening clause
+should have a %s to represent the section title.
 
-Instead of a list of sectioning commands, you can also specify a
-function name.  That function will be called with two parameters,
-the (reduced) level of the headline, and a predicate non-nil when
-the headline should be numbered.  It must return a format string in
-which the section title will be added."
+Instead of a list of sectioning commands, you can also specify
+a function name.  That function will be called with two
+parameters, the \(reduced) level of the headline, and a predicate
+non-nil when the headline should be numbered.  It must return
+a format string in which the section title will be added."
   :group 'org-export-e-latex
   :type '(repeat
 	  (list (string :tag "LaTeX class")
@@ -448,28 +456,28 @@ in order to mimic default behaviour:
 This package will fontify source code, possibly even with color.
 If you want to use this, you also need to make LaTeX use the
 listings package, and if you want to have color, the color
-package.  Just add these to `org-e-latex-packages-alist',
-for example using customize, or with something like
+package.  Just add these to `org-export-latex-packages-alist',
+for example using customize, or with something like:
 
-  (require 'org-e-latex)
-  (add-to-list 'org-e-latex-packages-alist '(\"\" \"listings\"))
-  (add-to-list 'org-e-latex-packages-alist '(\"\" \"color\"))
+  \(require 'org-e-latex)
+  \(add-to-list 'org-export-latex-packages-alist '\(\"\" \"listings\"))
+  \(add-to-list 'org-export-latex-packages-alist '\(\"\" \"color\"))
 
 Alternatively,
 
-  (setq org-e-latex-listings 'minted)
+  \(setq org-e-latex-listings 'minted)
 
 causes source code to be exported using the minted package as
 opposed to listings.  If you want to use minted, you need to add
-the minted package to `org-e-latex-packages-alist', for
+the minted package to `org-export-latex-packages-alist', for
 example using customize, or with
 
-  (require 'org-e-latex)
-  (add-to-list 'org-e-latex-packages-alist '(\"\" \"minted\"))
+  \(require 'org-e-latex)
+  \(add-to-list 'org-export-latex-packages-alist '\(\"\" \"minted\"))
 
-In addition, it is necessary to install
-pygments (http://pygments.org), and to configure the variable
-`org-e-latex-to-pdf-process' so that the -shell-escape option is
+In addition, it is necessary to install pygments
+\(http://pygments.org), and to configure the variable
+`org-e-latex-pdf-process' so that the -shell-escape option is
 passed to pdflatex."
   :group 'org-export-e-latex
   :type '(choice
@@ -490,10 +498,10 @@ passed to pdflatex."
     (sql "SQL") (sqlite "sql"))
   "Alist mapping languages to their listing language counterpart.
 The key is a symbol, the major mode symbol without the \"-mode\".
-The value is the string that should be inserted as the language parameter
-for the listings package.  If the mode name and the listings name are
-the same, the language does not need an entry in this list - but it does not
-hurt if it is present."
+The value is the string that should be inserted as the language
+parameter for the listings package.  If the mode name and the
+listings name are the same, the language does not need an entry
+in this list - but it does not hurt if it is present."
   :group 'org-export-e-latex
   :type '(repeat
 	  (list
@@ -531,15 +539,16 @@ languages."
     (caml "ocaml"))
   "Alist mapping languages to their minted language counterpart.
 The key is a symbol, the major mode symbol without the \"-mode\".
-The value is the string that should be inserted as the language parameter
-for the minted package.  If the mode name and the listings name are
-the same, the language does not need an entry in this list - but it does not
-hurt if it is present.
+The value is the string that should be inserted as the language
+parameter for the minted package.  If the mode name and the
+listings name are the same, the language does not need an entry
+in this list - but it does not hurt if it is present.
 
 Note that minted uses all lower case for language identifiers,
 and that the full list of language identifiers can be obtained
 with:
-pygmentize -L lexers"
+
+  pygmentize -L lexers"
   :group 'org-export-e-latex
   :type '(repeat
 	  (list
@@ -554,8 +563,8 @@ These options are supplied within square brackets in
 be a list containing two strings: the name of the option, and the
 value.  For example,
 
-  (setq org-e-latex-minted-options
-    '((\"bgcolor\" \"bg\") (\"frame\" \"lines\")))
+  \(setq org-e-latex-minted-options
+    '\((\"bgcolor\" \"bg\") \(\"frame\" \"lines\")))
 
 will result in src blocks being exported with
 
@@ -622,28 +631,30 @@ string defines the replacement string for this quote."
     "pdflatex -interaction nonstopmode -output-directory %o %f"
     "pdflatex -interaction nonstopmode -output-directory %o %f")
   "Commands to process a LaTeX file to a PDF file.
-This is a list of strings, each of them will be given to the shell
-as a command.  %f in the command will be replaced by the full file name, %b
-by the file base name (i.e. without extension) and %o by the base directory
-of the file.
+This is a list of strings, each of them will be given to the
+shell as a command.  %f in the command will be replaced by the
+full file name, %b by the file base name \(i.e. without
+extension) and %o by the base directory of the file.
 
-The reason why this is a list is that it usually takes several runs of
-`pdflatex', maybe mixed with a call to `bibtex'.  Org does not have a clever
-mechanism to detect which of these commands have to be run to get to a stable
-result, and it also does not do any error checking.
+The reason why this is a list is that it usually takes several
+runs of `pdflatex', maybe mixed with a call to `bibtex'.  Org
+does not have a clever mechanism to detect which of these
+commands have to be run to get to a stable result, and it also
+does not do any error checking.
 
-By default, Org uses 3 runs of `pdflatex' to do the processing.  If you
-have texi2dvi on your system and if that does not cause the infamous
-egrep/locale bug:
+By default, Org uses 3 runs of `pdflatex' to do the processing.
+If you have texi2dvi on your system and if that does not cause
+the infamous egrep/locale bug:
 
      http://lists.gnu.org/archive/html/bug-texinfo/2010-03/msg00031.html
 
 then `texi2dvi' is the superior choice.  Org does offer it as one
 of the customize options.
 
-Alternatively, this may be a Lisp function that does the processing, so you
-could use this to apply the machinery of AUCTeX or the Emacs LaTeX mode.
-This function should accept the file name as its single argument."
+Alternatively, this may be a Lisp function that does the
+processing, so you could use this to apply the machinery of
+AUCTeX or the Emacs LaTeX mode.  This function should accept the
+file name as its single argument."
   :group 'org-export-pdf
   :type '(choice
 	  (repeat :tag "Shell command sequence"
