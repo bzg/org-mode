@@ -691,6 +691,10 @@ standard mode."
 ;;   - category :: tree
 ;;   - type :: alist (INTEGER . LIST)
 
+;; + `input-file' :: Full path to input file, if any.
+;;   - category :: option
+;;   - type :: string or nil
+
 ;; + `keywords' :: List of keywords attached to data.
 ;;   - category :: option
 ;;   - type :: string
@@ -699,7 +703,8 @@ standard mode."
 ;;   - category :: option
 ;;   - type :: string
 
-;; + `macro-input-file' :: File name of input file, or nil.
+;; + `macro-input-file' :: Macro returning file name of input file, or
+;;   nil.
 ;;   - category :: option
 ;;   - type :: string or nil
 
@@ -904,7 +909,7 @@ settings."
 		  (and subtreep
 		       (org-export-get-subtree-options)))))
     ;; Add initial options.
-    (setq options (append (org-export-initial-options options) options))
+    (setq options (append (org-export-initial-options) options))
     ;; Return plist.
     options))
 
@@ -1077,52 +1082,50 @@ BACKEND is a symbol specifying which back-end should be used."
     ;; Return value.
     plist))
 
-(defun org-export-initial-options (options)
-  "Return a plist with non-optional properties.
-OPTIONS is the export options plist computed so far."
-  (list
-   ;; `:macro-date', `:macro-time' and `:macro-property' could as well
-   ;; be initialized as tree properties, since they don't depend on
-   ;; initial environment.  Though, it may be more logical to keep
-   ;; them close to other ":macro-" properties.
-   :macro-date "(eval (format-time-string \"$1\"))"
-   :macro-time "(eval (format-time-string \"$1\"))"
-   :macro-property "(eval (org-entry-get nil \"$1\" 'selective))"
-   :macro-modification-time
-   (and (buffer-file-name (buffer-base-buffer))
-	(file-exists-p (buffer-file-name (buffer-base-buffer)))
-	(concat "(eval (format-time-string \"$1\" '"
-		(prin1-to-string
-		 (nth 5 (file-attributes
-			 (buffer-file-name (buffer-base-buffer)))))
-		"))"))
-   ;; Store input file name.
-   :macro-input-file (and (buffer-file-name (buffer-base-buffer))
-			  (file-name-nondirectory
-			   (buffer-file-name (buffer-base-buffer))))
-   ;; Footnotes definitions must be collected in the original buffer,
-   ;; as there's no insurance that they will still be in the parse
-   ;; tree, due to some narrowing.
-   :footnote-definition-alist
-   (let (alist)
-     (org-with-wide-buffer
-      (goto-char (point-min))
-      (while (re-search-forward org-footnote-definition-re nil t)
-	(let ((def (org-footnote-at-definition-p)))
-	  (when def
-	    (org-skip-whitespace)
-	    (push (cons (car def)
-			(save-restriction
-			  (narrow-to-region (point) (nth 2 def))
-			  ;; Like `org-element-parse-buffer', but
-			  ;; makes sure the definition doesn't start
-			  ;; with a section element.
-			  (nconc
-			   (list 'org-data nil)
-			   (org-element-parse-elements
-			    (point-min) (point-max) nil nil nil nil nil))))
-		  alist))))
-      alist))))
+(defun org-export-initial-options ()
+  "Return a plist with properties related to input buffer."
+  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+    (list
+     ;; Store full path of input file name, or nil.  For internal use.
+     :input-file visited-file
+     ;; `:macro-date', `:macro-time' and `:macro-property' could as well
+     ;; be initialized as tree properties, since they don't depend on
+     ;; initial environment.  Though, it may be more logical to keep
+     ;; them close to other ":macro-" properties.
+     :macro-date "(eval (format-time-string \"$1\"))"
+     :macro-time "(eval (format-time-string \"$1\"))"
+     :macro-property "(eval (org-entry-get nil \"$1\" 'selective))"
+     :macro-modification-time
+     (and visited-file
+	  (file-exists-p visited-file)
+	  (concat "(eval (format-time-string \"$1\" '"
+		  (prin1-to-string (nth 5 (file-attributes visited-file)))
+		  "))"))
+     ;; Store input file name as a macro.
+     :macro-input-file (and visited-file (file-name-nondirectory visited-file))
+     ;; Footnotes definitions must be collected in the original buffer,
+     ;; as there's no insurance that they will still be in the parse
+     ;; tree, due to some narrowing.
+     :footnote-definition-alist
+     (let (alist)
+       (org-with-wide-buffer
+	(goto-char (point-min))
+	(while (re-search-forward org-footnote-definition-re nil t)
+	  (let ((def (org-footnote-at-definition-p)))
+	    (when def
+	      (org-skip-whitespace)
+	      (push (cons (car def)
+			  (save-restriction
+			    (narrow-to-region (point) (nth 2 def))
+			    ;; Like `org-element-parse-buffer', but
+			    ;; makes sure the definition doesn't start
+			    ;; with a section element.
+			    (nconc
+			     (list 'org-data nil)
+			     (org-element-parse-elements
+			      (point-min) (point-max) nil nil nil nil nil))))
+		    alist))))
+	alist)))))
 
 (defvar org-export-allow-BIND-local nil)
 (defun org-export-confirm-letbind ()
