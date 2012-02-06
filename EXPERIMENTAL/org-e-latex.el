@@ -183,9 +183,10 @@ will omit the default packages, and will include the
 then place \\usepackage commands based on the content of
 `org-export-latex-packages-alist'.
 
-If your header or `org-export-latex-default-packages-alist'
-inserts \"\\usepackage[AUTO]{inputenc}\", AUTO will automatically
-be replaced with a coding system derived from
+If your header, `org-export-latex-default-packages-alist' or
+`org-export-latex-packages-alist' inserts
+\"\\usepackage[AUTO]{inputenc}\", AUTO will automatically be
+replaced with a coding system derived from
 `buffer-file-coding-system'.  See also the variable
 `org-e-latex-inputenc-alist' for a way to influence this
 mechanism.
