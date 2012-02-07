@@ -503,7 +503,7 @@ This function will run in the final LaTeX document."
       (while (re-search-forward org-beamer-fragile-re nil t)
 	(save-excursion
 	  ;; Are we inside a frame here?
-	  (when (and (re-search-backward "^[ \t]*\\\\\\(begin\\|end\\){frame}"
+	  (when (and (re-search-backward "^[ \t]*\\\\\\(begin\\|end\\){frame}\\(<[^>]*>\\)?"
 					 nil t)
 		     (equal (match-string 1) "begin"))
 	    ;; yes, inside a frame, make sure "fragile" is one of the options
