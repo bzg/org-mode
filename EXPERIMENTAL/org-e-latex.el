@@ -840,11 +840,8 @@ holding export options."
      (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
 	     (or (plist-get info :keywords) "")
 	     (or (plist-get info :description) "")
-	     (let ((creator-info (plist-get info :with-creator)))
-	       (cond
-		((not creator-info) "")
-		((eq creator-info 'comment) "")
-		(t (plist-get info :creator)))))
+	     (if (not (plist-get info :with-creator)) ""
+	       (plist-get info :creator)))
      ;; 9. Document start.
      "\\begin{document}\n\n"
      ;; 10. Title command.
@@ -866,7 +863,7 @@ holding export options."
      ;; 13. Creator.
      (let ((creator-info (plist-get info :with-creator)))
        (cond
-	((not creator-info))
+	((not creator-info) "")
 	((eq creator-info 'comment)
 	 (format "%% %s\n" (plist-get info :creator)))
 	(t (concat (plist-get info :creator) "\n"))))
