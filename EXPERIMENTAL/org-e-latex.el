@@ -382,6 +382,15 @@ encompasses both."
   :group 'org-export-e-latex
   :type 'boolean)
 
+(defcustom org-e-latex-tables-booktabs nil
+  "When non-nil, display tables in a formal \"booktabs\" style.
+This option assumes that the \"booktabs\" package is properly
+loaded in the header of the document.  This value can be ignored
+locally with \"booktabs=yes\" and \"booktabs=no\" LaTeX
+attributes."
+  :group 'org-export-e-latex
+  :type 'boolean)
+
 (defcustom org-e-latex-table-caption-above t
   "When non-nil, place caption string at the beginning of the table.
 Otherwise, place it near the end."
@@ -1846,41 +1855,64 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ;; Case 3: Standard table.
      (t
       (let* ((table-info (org-export-table-format-info raw-table))
-	     (clean-table (org-export-clean-table
-			   raw-table (plist-get table-info :special-column-p)))
-	     (columns-number (length (plist-get table-info :alignment))))
+	     (columns-number (length (plist-get table-info :alignment)))
+	     (longtablep (and attr (string-match "\\<longtable\\>" attr)))
+	     (booktabsp
+	      (or (and attr (string-match "\\<booktabs=\\(yes\\|t\\)\\>" attr))
+		  org-e-latex-tables-booktabs))
+	     ;; CLEAN-TABLE is a table turned into a list, much like
+	     ;; `org-table-to-lisp', with special column and
+	     ;; formatting cookies removed, and cells already
+	     ;; transcoded.
+	     (clean-table
+	      (mapcar
+	       (lambda (row)
+		 (if (string-match org-table-hline-regexp row) 'hline
+		   (mapcar
+		    (lambda (cell)
+		      (org-export-secondary-string
+		       (org-element-parse-secondary-string
+			cell
+			(cdr (assq 'table org-element-string-restrictions)))
+		       'e-latex info))
+		    (org-split-string row "[ \t]*|[ \t]*"))))
+	       (org-split-string
+		(org-export-clean-table
+		 raw-table (plist-get table-info :special-column-p))
+		"\n"))))
+	;; If BOOKTABSP is non-nil, remove any rule at the beginning
+	;; and the end of the table, since booktabs' special rules
+	;; will be inserted instead.
+	(when booktabsp
+	  (when (eq (car clean-table) 'hline)
+	    (setq clean-table (cdr clean-table)))
+	  (when (eq (car (last clean-table)) 'hline)
+	    (setq clean-table (butlast clean-table))))
 	;; Convert ROWS to send them to `orgtbl-to-latex'.  In
 	;; particular, send each cell to
 	;; `org-element-parse-secondary-string' to expand any Org
-	;; object within.  Eventually, flesh the format string out with
-	;; the table.
-	(format (org-e-latex-table--format-string table table-info info)
-		(orgtbl-to-latex
-		 (mapcar
-		  (lambda (row)
-		    (if (string-match org-table-hline-regexp row)
-			'hline
-		      (mapcar
-		       (lambda (cell)
-			 (org-export-secondary-string
-			  (org-element-parse-secondary-string
-			   cell
-			   (cdr (assq 'table org-element-string-restrictions)))
-			  'e-latex info))
-		       (org-split-string row "[ \t]*|[ \t]*"))))
-		  (org-split-string clean-table "\n"))
-		 `(:tstart nil :tend nil
-			   ;; Longtable environment requires specific
-			   ;; header line end.
-			   :hlend ,(and attr
-					(string-match "\\<longtable\\>" attr)
-					(format "\\\\
-\\hline
+	;; object within.  Eventually, flesh the format string out
+	;; with the table.
+	(format
+	 (org-e-latex-table--format-string table table-info info)
+	 (orgtbl-to-latex
+	  clean-table
+	  ;; Parameters passed to `orgtbl-to-latex'.
+	  `(:tstart ,(and booktabsp "\\toprule")
+		    :tend ,(and booktabsp "\\bottomrule")
+		    :hline ,(if booktabsp "\\midrule" "\\hline")
+		    ;; Longtable environment requires specific header
+		    ;; lines end string.
+		    :hlend ,(and longtablep
+				 (format "\\\\
+%s
 \\endhead
-\\hline\\multicolumn{%d}{r}{Continued on next page}\\\\
+%s\\multicolumn{%d}{r}{Continued on next page}\\\\
 \\endfoot
 \\endlastfoot"
-						columns-number))))))))))
+					 (if booktabsp "\\midrule" "\\hline")
+					 (if booktabsp "\\midrule" "\\hline")
+					 columns-number))))))))))
 
 
 ;;;; Target
