@@ -2663,10 +2663,17 @@ indentation for each level.  To get this support in a file, use
 @node MobileOrg,  , Clean view, Miscellaneous
 @section MobileOrg
 
-@i{MobileOrg} is an application originally developed for the @i{iPhone/iPod
-Touch} series of devices, developed by Richard Moreland.  There is also an
-independent implementation for Android devices, by Matt Jones.
-For details, see the Org-mode manual.
+@i{MobileOrg} is the name of the mobile companion app for Org mode, currently
+available for iOS and for Android.  @i{MobileOrg} offers offline viewing and
+capture support for an Org mode system rooted on a ``real'' computer.  It
+does also allow you to record changes to existing entries.
+
+The @uref{http://mobileorg.ncogni.to/, iOS implementation} for the
+@i{iPhone/iPod Touch/iPad} series of devices, was developed by Richard
+Moreland. Android users should check out
+@uref{http://wiki.github.com/matburt/mobileorg-android/, MobileOrg Android}
+by Matt Jones.  The two implementations are not identical but offer similar
+features.
 
 @seealso{
 @uref{http://orgmode.org/manual/Miscellaneous.html#Miscellaneous, Chapter 15

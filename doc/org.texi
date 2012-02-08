@@ -16137,13 +16137,16 @@ The following example counts the number of entries with TODO keyword
 @cindex iPhone
 @cindex MobileOrg
 
-@uref{http://mobileorg.ncogni.to/, MobileOrg} is an application for the
-@i{iPhone/iPod Touch} series of devices, developed by Richard Moreland.
-@i{MobileOrg} offers offline viewing and capture support for an Org mode
-system rooted on a ``real'' computer.  It does also allow you to record
-changes to existing entries.  Android users should check out
+@i{MobileOrg} is the name of the mobile companion app for Org mode, currently
+available for iOS and for Android.  @i{MobileOrg} offers offline viewing and
+capture support for an Org mode system rooted on a ``real'' computer.  It
+does also allow you to record changes to existing entries.
+The @uref{http://mobileorg.ncogni.to/, iOS implementation} for the
+@i{iPhone/iPod Touch/iPad} series of devices, was developed by Richard
+Moreland. Android users should check out
 @uref{http://wiki.github.com/matburt/mobileorg-android/, MobileOrg Android}
-by Matt Jones.
+by Matt Jones.  The two implementations are not identical but offer similar
+features.
 
 This appendix describes the support Org has for creating agenda views in a
 format that can be displayed by @i{MobileOrg}, and for integrating notes
