@@ -1763,17 +1763,6 @@ buffer and update it."
        (org-combine-plists org-clock-clocktable-default-properties props))))
   (org-update-dblock))
 
-(defun org-in-clocktable-p ()
-  "Check if the cursor is in a clocktable."
-  (let ((pos (point)) start)
-    (save-excursion
-      (end-of-line 1)
-      (and (re-search-backward "^[ \t]*#\\+BEGIN:[ \t]+clocktable" nil t)
-	   (setq start (match-beginning 0))
-	   (re-search-forward "^[ \t]*#\\+END:.*" nil t)
-	   (>= (match-end 0) pos)
-	   start))))
-
 (defun org-day-of-week (day month year)
   "Returns the day of the week as an integer."
   (nth 6
