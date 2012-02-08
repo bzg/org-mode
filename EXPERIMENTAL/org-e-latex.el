@@ -1714,11 +1714,12 @@ TABLE-INFO is the plist containing format info about the table,
 as returned by `org-export-table-format-info'.  INFO is a plist
 used as a communication channel.
 
-The format string one placeholder for the body of the table."
+The format string leaves one placeholder for the body of the
+table."
   (let* ((label (org-element-get-property :name table))
 	 (caption (org-e-latex--caption/label-string
 		   (org-element-get-property :caption table) label info))
-	 (attr (mapconcat #'identity
+	 (attr (mapconcat 'identity
 			  (org-element-get-property :attr_latex table)
 			  " "))
 	 ;; Determine alignment string.
@@ -1727,8 +1728,8 @@ The format string one placeholder for the body of the table."
 	 (table-env (cond
 		     ((not attr) org-e-latex-default-table-environment)
 		     ((string-match "\\<longtable\\>" attr) "longtable")
-		     ((string-match "\\(tabular.\\)" attr)
-		      (org-match-string-no-properties 1 attr))
+		     ((string-match "\\<tabular.?\\>" attr)
+		      (org-match-string-no-properties 0 attr))
 		     (t org-e-latex-default-table-environment)))
 	 ;; If table is a float, determine environment: table or table*.
 	 (float-env (cond
@@ -1739,29 +1740,23 @@ The format string one placeholder for the body of the table."
 		      "table*")
 		     ((or (not (string= caption "")) label) "table")))
 	 ;; Extract others display options.
-	 (width (and attr
-		     (string-match "\\<width=\\(\\S-+\\)" attr)
+	 (width (and attr (string-match "\\<width=\\(\\S-+\\)" attr)
 		     (org-match-string-no-properties 1 attr)))
-	 (placement (if (and attr
-			     (string-match "\\<placement=\\(\\S-+\\)" attr))
-			(org-match-string-no-properties 1 attr)
-		      (concat "["
-			      org-e-latex-default-figure-position
-			      "]"))))
+	 (placement
+	  (if (and attr (string-match "\\<placement=\\(\\S-+\\)" attr))
+	      (org-match-string-no-properties 1 attr)
+	    (format "[%s]" org-e-latex-default-figure-position))))
     ;; Prepare the final format string for the table.
     (cond
      ;; Longtable.
      ((string= "longtable" table-env)
-      (format "\\begin{longtable}{%s}\n%s\n%%s\n%s\\end{longtable}"
-	      alignment
-	      (if (or (not org-e-latex-table-caption-above)
-		      (string= "" caption))
-		  ""
-		(concat (org-trim caption) "\\\\"))
-	      (if (or org-e-latex-table-caption-above
-		      (string= "" caption))
-		  ""
-		(concat (org-trim caption) "\\\\\n"))))
+      (format
+       "\\begin{longtable}{%s}\n%s\n%%s\n%s\\end{longtable}"
+       alignment
+       (if (or (not org-e-latex-table-caption-above) (string= "" caption)) ""
+	 (concat (org-trim caption) "\\\\"))
+       (if (or org-e-latex-table-caption-above (string= "" caption)) ""
+	 (concat (org-trim caption) "\\\\\n"))))
      ;; Others.
      (t (concat (when float-env
 		  (concat
@@ -1770,9 +1765,7 @@ The format string one placeholder for the body of the table."
 		(when org-e-latex-tables-centered "\\begin{center}\n")
 		(format "\\begin{%s}%s{%s}\n%%s\n\\end{%s}"
 			table-env
-			(if width (format "{%s}" width) "")
-			alignment
-			table-env)
+			(if width (format "{%s}" width) "") alignment table-env)
 		(when org-e-latex-tables-centered "\n\\end{center}")
 		(when float-env
 		  (concat (if org-e-latex-table-caption-above "" caption)
@@ -1828,8 +1821,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((eq (org-element-get-property :type table) 'table.el)
       (require 'table)
       ;; Ensure "*org-export-table*" buffer is empty.
-      (and (get-buffer "*org-export-table*")
-	   (kill-buffer (get-buffer "*org-export-table*")))
+      (with-current-buffer (get-buffer-create "*org-export-table*")
+	(erase-buffer))
       (let ((output (with-temp-buffer
 		      (insert raw-table)
 		      (goto-char 1)
@@ -1848,10 +1841,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    (while (and (< (length output) pos)
 			(setq pos (string-match "^\\\\hline\n?" output pos)))
 	      (incf n)
-	      (unless (= n 2) (setq output (replace-match "" nil nil output))))))
-	(if org-e-latex-tables-centered
-	    (format "\\begin{center}\n%s\n\\end{center}" output)
-	  output)))
+	      (unless (= n 2)
+		(setq output (replace-match "" nil nil output))))))
+	(if (not org-e-latex-tables-centered) output
+	  (format "\\begin{center}\n%s\n\\end{center}" output))))
      ;; Case 3: Standard table.
      (t
       (let* ((table-info (org-export-table-format-info raw-table))
