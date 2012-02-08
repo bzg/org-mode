@@ -6843,7 +6843,7 @@ hierarchy above."
 	 (selected-point
 	  (if (eq interface 'outline)
 	      (car (org-get-location (current-buffer) org-goto-help))
-	    (let ((pa (org-refile-get-location "Goto")))
+	    (let ((pa (org-refile-get-location "Goto" nil nil t)))
 	      (org-refile-check-position pa)
 	      (nth 3 pa)))))
     (if selected-point
