@@ -1387,7 +1387,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	  (message (concat "Clock stopped at %s after HH:MM = " org-time-clocksum-format "%s") te h m
 		   (if remove " => LINE REMOVED" ""))
           (run-hooks 'org-clock-out-hook)
-	  (org-clock-delete-current))))))
+	  (unless (org-clocking-p)
+	    (org-clock-delete-current)))))))
 
 (add-hook 'org-clock-out-hook 'org-clock-remove-empty-clock-drawer)
 
