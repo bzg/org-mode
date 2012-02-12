@@ -484,24 +484,17 @@ This is a helper routine for interactive use."
 		  (error "Cannot convert from %s format to %s format?"
 			 in-fmt out-fmt)))
 	 (convert-process (car how))
-	 (program (car convert-process))
-	 (dummy (and (or program (error "Converter not configured"))
-		     (or (executable-find program)
-			 (error "Cannot find converter %s" program))))
 	 (out-file (concat (file-name-sans-extension in-file) "."
 			   (nth 1 (or (cdr how) out-fmt))))
 	 (out-dir (file-name-directory in-file))
-	 (arglist (mapcar (lambda (arg)
-			    (format-spec
-			     arg `((?i . ,(shell-quote-argument in-file))
-				   (?I . ,(browse-url-file-url in-file))
-				   (?f . ,out-fmt)
-				   (?o . ,out-file)
-				   (?O . ,(browse-url-file-url out-file))
-				   (?d . , (shell-quote-argument out-dir))
-				   (?D . ,(browse-url-file-url out-dir)))))
-			  convert-process))
-	 (cmd (mapconcat 'identity arglist " ")))
+	 (cmd (format-spec convert-process
+			   `((?i . ,(shell-quote-argument in-file))
+			     (?I . ,(browse-url-file-url in-file))
+			     (?f . ,out-fmt)
+			     (?o . ,out-file)
+			     (?O . ,(browse-url-file-url out-file))
+			     (?d . , (shell-quote-argument out-dir))
+			     (?D . ,(browse-url-file-url out-dir))))))
     (when (file-exists-p out-file)
       (delete-file out-file))
 
@@ -511,7 +504,7 @@ This is a helper routine for interactive use."
 
     (cond
      ((file-exists-p out-file)
-      (message "Exported to %s using %s" out-file program)
+      (message "Exported to %s" out-file)
       (when prefix-arg
 	(message "Opening %s..."  out-file)
 	(org-open-file out-file))

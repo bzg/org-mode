@@ -2413,24 +2413,20 @@ visually."
 
 (defcustom org-export-odt-convert-processes
   '(("LibreOffice"
-     ("soffice" "--headless" "--convert-to %f" "--outdir %d" "%i"))
+     "soffice --headless --convert-to %f --outdir %d %i")
     ("BasicODConverter"
-     ("soffice" "--headless"
-      "\"macro:///BasicODConverter.Main.Convert(%I,%f,%O)\""))
+     "soffice --headless \"macro:///BasicODConverter.Main.Convert(%I,%f,%O)\"")
     ("unoconv"
-     ("unoconv" "-f" "%f" "-o" "%d" "%i")))
+     "unoconv -f %f -o %d %i"))
   "Specify a list of document converters and their usage.
 The converters in this list are offered as choices while
 customizing `org-export-odt-convert-process'.
 
-This variable is an alist where each element is of the
-form (CONVERTER-NAME CONVERTER-PROCESS).  CONVERTER-NAME is name
-of the converter.  CONVERTER-PROCESS specifies the command-line
-syntax of the converter and is of the form (CONVERTER-PROGRAM
-ARG1 ARG2 ...).  CONVERTER-PROGRAM is the name of the executable.
-ARG1, ARG2 etc are command line options that are passed to
-CONVERTER-PROGRAM.  Format specifiers can be used in the ARGs and
-they are interpreted as below:
+This variable is a list where each element is of the
+form (CONVERTER-NAME CONVERTER-CMD).  CONVERTER-NAME is the name
+of the converter.  CONVERTER-CMD is the shell command for the
+converter and can contain format specifiers.  These format
+specifiers are interpreted as below:
 
 %i input file name in full
 %I input file name as a URL
@@ -2446,8 +2442,7 @@ they are interpreted as below:
     (const :tag "None" nil)
     (alist :tag "Converters"
 	   :key-type (string :tag "Converter Name")
-	   :value-type (group (cons (string :tag "Executable")
-				    (repeat (string :tag "Command line args")))))))
+	   :value-type (group (string :tag "Command line")))))
 
 (defcustom org-export-odt-convert-process "LibreOffice"
   "Use this converter to convert from \"odt\" format to other formats.
@@ -2470,6 +2465,7 @@ from `org-export-odt-convert-processes'."
      (("pdf" "pdf") ("odt" "odt") ("rtf" "rtf") ("ott" "ott") ("doc" "doc")
       ("docx" "docx") ("html" "html")))
     ("Web"
+     ("html")
      (("pdf" "pdf") ("odt" "odt") ("html" "html")))
     ("Spreadsheet"
      ("ods" "ots" "xls" "csv" "xlsx")
@@ -2517,7 +2513,8 @@ configuration."
   :type
   '(choice
     (const :tag "None" nil)
-    (alist :key-type (string :tag "Document Class")
+    (alist :tag "Capabilities"
+	   :key-type (string :tag "Document Class")
 	   :value-type
 	   (group (repeat :tag "Input formats" (string :tag "Input format"))
 		  (alist :tag "Output formats"
