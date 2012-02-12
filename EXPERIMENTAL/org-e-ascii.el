@@ -925,12 +925,13 @@ INFO is a plist used as a communication channel."
 	 (concat line "\n"
 		 (unless utf8p "\n")
 		 (upcase formatted-title)
-		 (if utf8p "\n\n\n" "\n\n")
 		 (cond
 		  ((and (org-string-nw-p author) (org-string-nw-p email))
-		   (concat author "\n" email))
-		  ((org-string-nw-p author) author)
-		  ((org-string-nw-p email) email))
+		   (concat (if utf8p "\n\n\n" "\n\n") author "\n" email))
+		  ((org-string-nw-p author)
+		   (concat (if utf8p "\n\n\n" "\n\n") author))
+		  ((org-string-nw-p email)
+		   (concat (if utf8p "\n\n\n" "\n\n") email)))
 		 "\n" line
 		 (when (org-string-nw-p date) (concat "\n\n\n" date))
 		 "\n\n\n") text-width 'center)))))
