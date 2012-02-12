@@ -2414,8 +2414,6 @@ visually."
 (defcustom org-export-odt-convert-processes
   '(("LibreOffice"
      "soffice --headless --convert-to %f --outdir %d %i")
-    ("BasicODConverter"
-     "soffice --headless \"macro:///BasicODConverter.Main.Convert(%I,%f,%O)\"")
     ("unoconv"
      "unoconv -f %f -o %d %i"))
   "Specify a list of document converters and their usage.
