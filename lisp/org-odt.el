@@ -31,7 +31,8 @@
 (defgroup org-export-odt nil
   "Options specific for ODT export of Org-mode files."
   :tag "Org Export ODT"
-  :group 'org-export)
+  :group 'org-export
+  :version "24.1")
 
 (defvar org-lparse-dyn-first-heading-pos) ; let bound during org-do-lparse
 (defun org-odt-insert-toc ()
@@ -152,6 +153,7 @@ with GNU ELPA tar or standard Emacs distribution."
 	  (const :tag "Not set" nil)
 	  (directory :tag "Schema directory"))
   :group 'org-export-odt
+  :version "24.1"
   :set
   (lambda (var value)
     "Set `org-export-odt-schema-dir'.
@@ -271,7 +273,8 @@ The exporter embeds the exported content just before
 If unspecified, the file named \"OrgOdtContentTemplate.xml\"
 under `org-odt-styles-dir' is used."
   :type 'file
-  :group 'org-export-odt)
+  :group 'org-export-odt
+  :version "24.1")
 
 (defcustom org-export-odt-styles-file nil
   "Default styles file for use with ODT export.
@@ -305,6 +308,7 @@ a per-file basis.  For example,
 #+ODT_STYLES_FILE: \"/path/to/styles.xml\" or
 #+ODT_STYLES_FILE: (\"/path/to/file.ott\" (\"styles.xml\" \"image/hdr.png\"))."
   :group 'org-export-odt
+  :version "24.1"
   :type
   '(choice
     (const :tag "Factory settings" nil)
@@ -331,13 +335,16 @@ a per-file basis.  For example,
   '("png" "jpeg" "jpg" "gif")
   "Extensions of image files that can be inlined into HTML."
   :type '(repeat (string :tag "Extension"))
-  :group 'org-export-odt)
+  :group 'org-export-odt
+  :version "24.1")
 
 (defcustom org-export-odt-pixels-per-inch display-pixels-per-inch
-  ;; FIXME add docstring
-  ""
+  "Scaling factor for converting images pixels to inches.
+Use this for sizing of embedded images.  See Info node `(org)
+Images in ODT export' for more information."
   :type 'float
-  :group 'org-export-odt)
+  :group 'org-export-odt
+  :version "24.1")
 
 (defcustom org-export-odt-create-custom-styles-for-srcblocks t
   "Whether custom styles for colorized source blocks be automatically created.
@@ -355,6 +362,7 @@ styles.xml already contains needed styles for colorizing to work.
 This variable is effective only if
 `org-export-odt-fontify-srcblocks' is turned on."
   :group 'org-export-odt
+  :version "24.1"
   :type 'boolean)
 
 (defvar org-export-odt-default-org-styles-alist
@@ -407,6 +415,7 @@ resulting document to this format.  During customization of this
 variable, the list of valid values are populated based on
 `org-export-odt-convert-capabilities'."
   :group 'org-export-odt
+  :version "24.1"
   :type '(choice :convert-widget
 		 (lambda (w)
 		   (apply 'widget-convert (widget-type w)
@@ -926,6 +935,7 @@ The TABLE-STYLE-NAME \"OrgEquation\" is used internally for
 formatting of numbered display equations.  Do not delete this
 style from the list."
   :group 'org-export-odt
+  :version "24.1"
   :type '(choice
           (const :tag "None" nil)
           (repeat :tag "Table Styles"
@@ -1333,7 +1343,8 @@ Turn this option on if you want to colorize the source code
 blocks in the exported file.  For colorization to work, you need
 to make available an enhanced version of `htmlfontify' library."
   :type 'boolean
-  :group 'org-export-odt)
+  :group 'org-export-odt
+  :version "24.1")
 
 (defun org-odt-format-source-line-with-line-number-and-label
   (line rpllbl num fontifier par-style)
@@ -2205,6 +2216,7 @@ component xml buffers before they are saved.  Turn this off for
 regular use.  Turn this on if you need to examine the xml
 visually."
   :group 'org-export-odt
+  :version "24.1"
   :type 'boolean)
 
 (defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
@@ -2428,6 +2440,7 @@ they are interpreted as below:
 %d output dir in full
 %D output dir as a URL."
   :group 'org-export-odt
+  :version "24.1"
   :type
   '(choice
     (const :tag "None" nil)
@@ -2441,6 +2454,7 @@ they are interpreted as below:
 During customization, the list of converter names are populated
 from `org-export-odt-convert-processes'."
   :group 'org-export-odt
+  :version "24.1"
   :type '(choice :convert-widget
 		 (lambda (w)
 		   (apply 'widget-convert (widget-type w)
@@ -2499,6 +2513,7 @@ with that class.
 See default setting of this variable for an typical
 configuration."
   :group 'org-export-odt
+  :version "24.1"
   :type
   '(choice
     (const :tag "None" nil)
