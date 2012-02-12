@@ -1,4 +1,4 @@
-;;; org-odt.el --- OpenDocumentText export for Org-mode
+;;; org-odt.el --- OpenDocument Text exporter for Org-mode
 
 ;; Copyright (C) 2010-2012 Free Software Foundation, Inc.
 
@@ -326,9 +326,7 @@ a per-file basis.  For example,
 (defvar org-export-odt-embed-images t
   "Should the images be copied in to the odt file or just linked?")
 
-(defvar org-export-odt-inline-images 'maybe) ; counterpart of
-					     ; `org-export-html-inline-images'
-
+(defvar org-export-odt-inline-images 'maybe)
 (defcustom org-export-odt-inline-image-extensions
   '("png" "jpeg" "jpg" "gif")
   "Extensions of image files that can be inlined into HTML."
@@ -1077,8 +1075,8 @@ new entry in `org-odt-automatic-styles'.  Return (OBJECT-NAME
   (when org-lparse-table-rowgrp-open
     (org-lparse-end 'TABLE-ROWGROUP))
   (org-lparse-insert-tag (if is-header-row
-			   "<table:table-header-rows>"
-			 "<table:table-rows>"))
+			     "<table:table-header-rows>"
+			   "<table:table-rows>"))
   (setq org-lparse-table-rowgrp-open t)
   (setq org-lparse-table-cur-rowgrp-is-hdr is-header-row))
 
@@ -1248,9 +1246,9 @@ styles congruent with the ODF-1.2 specification."
 		       (concat snumber ". "))
 		  headline
 		  (and tags
-		    (concat
-		     (org-lparse-format 'SPACES 3)
-		     (org-lparse-format 'FONTIFY tags "tag")))))
+		       (concat
+			(org-lparse-format 'SPACES 3)
+			(org-lparse-format 'FONTIFY tags "tag")))))
   (when todo
     (setq headline (org-lparse-format 'FONTIFY headline "todo")))
 
@@ -1586,19 +1584,19 @@ value of `org-export-odt-fontify-srcblocks."
       (message "Embedding %s as %s ..."
 	       (substring-no-properties path) target-file)
 
-	(make-directory target-dir)
-	(org-odt-create-manifest-file-entry
-	 "application/vnd.oasis.opendocument.formula" target-dir "1.2")
+      (make-directory target-dir)
+      (org-odt-create-manifest-file-entry
+       "application/vnd.oasis.opendocument.formula" target-dir "1.2")
 
-	(case (org-odt-is-formula-link-p src-file)
-	  (mathml
-	   (copy-file src-file target-file 'overwrite))
-	  (odf
-	   (org-odt-zip-extract-one src-file "content.xml" target-dir))
-	  (t
-	   (error "%s is not a formula file" src-file)))
+      (case (org-odt-is-formula-link-p src-file)
+	(mathml
+	 (copy-file src-file target-file 'overwrite))
+	(odf
+	 (org-odt-zip-extract-one src-file "content.xml" target-dir))
+	(t
+	 (error "%s is not a formula file" src-file)))
 
-	(org-odt-create-manifest-file-entry "text/xml" target-file))
+      (org-odt-create-manifest-file-entry "text/xml" target-file))
     target-file))
 
 (defun org-odt-format-inline-formula (thefile)
@@ -1703,7 +1701,7 @@ ATTR is a string of other attributes of the a element."
        "</text:h>") text level level)))
 
 (defun org-odt-format-headline (title extra-targets tags
-					    &optional snumber level)
+				      &optional snumber level)
   (concat
    (org-lparse-format 'EXTRA-TARGETS extra-targets)
 
@@ -2329,21 +2327,21 @@ visually."
          xmlns:ooo=\"http://openoffice.org/2004/office\"
          office:version=\"1.2\">
        <office:meta>" "\n"
-      (org-odt-format-author)
-      (org-odt-format-tags
-       '("\n<meta:initial-creator>" . "</meta:initial-creator>") author)
-      (org-odt-format-tags '("\n<dc:date>" . "</dc:date>") date)
-      (org-odt-format-tags
-       '("\n<meta:creation-date>" . "</meta:creation-date>") date)
-      (org-odt-format-tags '("\n<meta:generator>" . "</meta:generator>")
-			   (when org-export-creator-info
-			     (format "Org-%s/Emacs-%s"
-				     org-version emacs-version)))
-      (org-odt-format-tags '("\n<meta:keyword>" . "</meta:keyword>") keywords)
-      (org-odt-format-tags '("\n<dc:subject>" . "</dc:subject>") description)
-      (org-odt-format-tags '("\n<dc:title>" . "</dc:title>") title)
-      "\n"
-      "  </office:meta>" "</office:document-meta>")
+       (org-odt-format-author)
+       (org-odt-format-tags
+	'("\n<meta:initial-creator>" . "</meta:initial-creator>") author)
+       (org-odt-format-tags '("\n<dc:date>" . "</dc:date>") date)
+       (org-odt-format-tags
+	'("\n<meta:creation-date>" . "</meta:creation-date>") date)
+       (org-odt-format-tags '("\n<meta:generator>" . "</meta:generator>")
+			    (when org-export-creator-info
+			      (format "Org-%s/Emacs-%s"
+				      org-version emacs-version)))
+       (org-odt-format-tags '("\n<meta:keyword>" . "</meta:keyword>") keywords)
+       (org-odt-format-tags '("\n<dc:subject>" . "</dc:subject>") description)
+       (org-odt-format-tags '("\n<dc:title>" . "</dc:title>") title)
+       "\n"
+       "  </office:meta>" "</office:document-meta>")
      nil (expand-file-name "meta.xml")))
 
   ;; create a manifest entry for meta.xml
@@ -2692,10 +2690,6 @@ Do this when translation to MathML fails."
   ;; create a manifest entry for styles.xml
   (org-odt-create-manifest-file-entry "text/xml" "styles.xml"))
 
-(defvar org-export-odt-factory-settings
-  "d4328fb9d1b6cb211d4320ff546829f26700dc5e"
-  "SHA1 hash of OrgOdtStyles.xml.")
-
 (defun org-odt-configure-outline-numbering (level)
   "Outline numbering is retained only upto LEVEL.
 To disable outline numbering pass a LEVEL of 0."
@@ -2759,7 +2753,7 @@ non-nil."
 
 ;;;###autoload
 (defun org-export-as-odf-and-open ()
- "Export LaTeX fragment as OpenDocument formula and immediately open it.
+  "Export LaTeX fragment as OpenDocument formula and immediately open it.
 Use `org-export-as-odf' to read LaTeX fragment and OpenDocument
 formula file."
   (interactive)
