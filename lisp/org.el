@@ -12868,7 +12868,7 @@ headlines matching this string."
 	      (and org-highlight-sparse-tree-matches
 		   (org-get-heading) (match-end 0)
 		   (org-highlight-new-match
-		    (match-beginning 0) (match-beginning 1)))
+		    (match-beginning 1) (match-end 1)))
 	      (org-show-context 'tags-tree))
 	     ((eq action 'agenda)
 	      (setq txt (org-agenda-format-item
