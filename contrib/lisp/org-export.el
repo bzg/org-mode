@@ -847,9 +847,12 @@ standard mode."
 
 ;;;; Export Options
 
-;; Export options come from five sources, in increasing precedence
-;; order:
+;;;; Environment Options
 
+;; Environment options encompass all parameters defined outside the
+;; scope of the parsed data.  They come from five sources, in
+;; increasing precedence order:
+;;
 ;; - Global variables,
 ;; - External options provided at export time,
 ;; - Options keyword symbols,
@@ -867,24 +870,25 @@ standard mode."
 ;;  `org-export-get-inbuffer-options' and
 ;;  `org-export-get-global-options'.
 ;;
-;;  Some properties do not rely on the previous sources but still
-;;  depend on the original buffer are taken care of in
+;;  Some properties, which do not rely on the previous sources but
+;;  still depend on the original buffer, are taken care of with
 ;;  `org-export-initial-options'.
 
 ;; Also, `org-export-confirm-letbind' and `org-export-install-letbind'
 ;; take care of the part relative to "#+BIND:" keywords.
 
-(defun org-export-collect-options (backend subtreep ext-plist)
+(defun org-export-get-environment (&optional backend subtreep ext-plist)
   "Collect export options from the current buffer.
 
-BACKEND is a symbol specifying the back-end to use.
+Optional argument BACKEND is a symbol specifying which back-end
+specific options to read, if any.
 
-When SUBTREEP is non-nil, assume the export is done against the
-current sub-tree.
+When optional argument SUBTREEP is non-nil, assume the export is
+done against the current sub-tree.
 
-EXT-PLIST is a property list with external parameters overriding
-org-mode's default settings, but still inferior to file-local
-settings."
+Third optional argument EXT-PLIST is a property list with
+external parameters overriding Org default settings, but still
+inferior to file-local settings."
   ;; First install #+BIND variables.
   (org-export-install-letbind-maybe)
   ;; Get and prioritize export options...
@@ -902,24 +906,26 @@ settings."
 		  ext-plist
 		  ;; ... from in-buffer settings...
 		  (org-export-get-inbuffer-options
-		   (org-with-wide-buffer (buffer-string)) backend
+		   backend
 		   (and buffer-file-name
 			(org-remove-double-quotes buffer-file-name)))
 		  ;; ... and from subtree, when appropriate.
-		  (and subtreep
-		       (org-export-get-subtree-options)))))
+		  (and subtreep (org-export-get-subtree-options)))))
     ;; Add initial options.
     (setq options (append (org-export-initial-options) options))
     ;; Return plist.
     options))
 
-(defun org-export-parse-option-keyword (options backend)
+(defun org-export-parse-option-keyword (options &optional backend)
   "Parse an OPTIONS line and return values as a plist.
-BACKEND is a symbol specifying the back-end to use."
-  (let* ((all (append org-export-option-alist
-			 (let ((var (intern
-				     (format "org-%s-option-alist" backend))))
-			   (and (boundp var) (eval var)))))
+Optional argument BACKEND is a symbol specifying which back-end
+specific items to read, if any."
+  (let* ((all
+	  (append org-export-option-alist
+		  (and backend
+		       (let ((var (intern
+				   (format "org-%s-option-alist" backend))))
+			 (and (boundp var) (eval var))))))
 	 ;; Build an alist between #+OPTION: item and property-name.
 	 (alist (delq nil
 		      (mapcar (lambda (e)
@@ -966,118 +972,137 @@ Return options as a plist."
       (setq plist (org-export-add-options-to-plist plist prop)))
     plist))
 
-(defun org-export-get-inbuffer-options (buffer-string backend files)
-  "Return in-buffer options as a plist.
-BUFFER-STRING is the string of the buffer.  BACKEND is a symbol
-specifying which back-end should be used.  FILES is a list of
-setup files names read so far, used to avoid circular
-dependencies."
-  (let ((case-fold-search t) plist)
-    ;; 1. Special keywords, as in `org-export-special-keywords'.
-    (let ((start 0)
-	  (special-re (org-make-options-regexp org-export-special-keywords)))
-      (while (string-match special-re buffer-string start)
-	(setq start (match-end 0))
-	(let ((key (upcase (org-match-string-no-properties 1 buffer-string)))
-	      ;; Special keywords do not have their value expanded.
-	      (val (org-match-string-no-properties 2 buffer-string)))
-	  (setq plist
-		(org-combine-plists
-		 (cond
-		  ((string= key "SETUP_FILE")
-		   (let ((file (expand-file-name
-				(org-remove-double-quotes (org-trim val)))))
-		     ;; Avoid circular dependencies.
-		     (unless (member file files)
-		       (org-export-get-inbuffer-options
-			(org-file-contents file 'noerror)
-			backend
-			(cons file files)))))
-		  ((string= key "OPTIONS")
-		   (org-export-parse-option-keyword val backend))
-		  ((string= key "MACRO")
-		   (when (string-match
-			  "^\\([-a-zA-Z0-9_]+\\)\\(?:[ \t]+\\(.*?\\)[ \t]*$\\)?"
-			  val)
-		     (let ((key (intern
-				 (concat ":macro-"
-					 (downcase (match-string 1 val)))))
-			   (value (match-string 2 val)))
-		       (cond
-			((not value) "")
-			((string-match "\\`(eval\\>" value) (list key value))
-			(t
-			 (list
-			  key
-			  ;; If user explicitly asks for a newline, be
-			  ;; sure to preserve it from further filling
-			  ;; with `hard-newline'.
-			  (replace-regexp-in-string
-			   "\\\\n" hard-newline value))))))))
-		 plist)))))
-    ;; 2. Standard options, as in `org-export-option-alist'.
-    (let* ((all (append org-export-option-alist
-			(let ((var (intern
-				    (format "org-%s-option-alist" backend))))
-			  (and (boundp var) (eval var)))))
-	   ;; Build alist between keyword name and property name.
-	   (alist (delq nil (mapcar (lambda (e)
-				      (when (nth 1 e) (cons (nth 1 e) (car e))))
-				    all)))
-	   ;; Build regexp matching all keywords associated to export
-	   ;; options.  Note: the search is case insensitive.
-	   (opt-re (org-make-options-regexp
-		    (delq nil (mapcar (lambda (e) (nth 1 e)) all))))
-	   (start 0))
-      (while (string-match opt-re buffer-string start)
-	(setq start (match-end 0))
-	(let* ((key (upcase (org-match-string-no-properties 1 buffer-string)))
-	       ;; Expand value, applying restrictions for keywords.
-	       (val (org-match-string-no-properties 2 buffer-string))
-	       (prop (cdr (assoc key alist)))
-	       (behaviour (nth 4 (assq prop all))))
-	  (setq plist
-		(plist-put
-		 plist prop
-		 ;; Handle value depending on specified BEHAVIOUR.
-		 (case behaviour
-		   (space (if (plist-get plist prop)
-			      (concat (plist-get plist prop) " " (org-trim val))
-			    (org-trim val)))
-		   (newline (org-trim
-			     (concat
-			      (plist-get plist prop) "\n" (org-trim val))))
-		   (split `(,@(plist-get plist prop) ,@(org-split-string val)))
-		   ('t val)
-		   (otherwise (plist-get plist prop)))))))
-      ;; Parse keywords specified in `org-element-parsed-keywords'.
-      (mapc
-       (lambda (key)
-	 (let* ((prop (cdr (assoc (upcase key) alist)))
-		(value (and prop (plist-get plist prop))))
-	   (when (stringp value)
-	     (setq plist
-		   (plist-put
-		    plist prop
-		    (org-element-parse-secondary-string
-		     value
-		     (cdr (assq 'keyword org-element-string-restrictions))))))))
-       org-element-parsed-keywords))
-    ;; Return final value.
-    plist))
+(defun org-export-get-inbuffer-options (&optional backend files)
+  "Return current buffer export options, as a plist.
 
-(defun org-export-get-global-options (backend)
+Optional argument BACKEND, when non-nil, is a symbol specifying
+which back-end specific options should also be read in the
+process.
+
+Optional argument FILES is a list of setup files names read so
+far, used to avoid circular dependencies.
+
+Assume buffer is in Org mode.  Narrowing, if any, is ignored."
+  (org-with-wide-buffer
+    (goto-char (point-min))
+    (let ((case-fold-search t) plist)
+      ;; 1. Special keywords, as in `org-export-special-keywords'.
+      (let ((special-re (org-make-options-regexp org-export-special-keywords)))
+	(while (re-search-forward special-re nil t)
+	  (let ((element (org-element-at-point)))
+	    (when (eq (car element) 'keyword)
+	      (let ((key (upcase (org-element-get-property :key element)))
+		    (val (org-element-get-property :value element)))
+		(setq plist
+		      (org-combine-plists
+		       plist
+		       (cond
+			((string= key "SETUP_FILE")
+			 (let ((file
+				(expand-file-name
+				 (org-remove-double-quotes (org-trim val)))))
+			   ;; Avoid circular dependencies.
+			   (unless (member file files)
+			     (with-temp-buffer
+			       (insert (org-file-contents file 'noerror))
+			       (org-mode)
+			       (org-export-get-inbuffer-options
+				backend (cons file files))))))
+			((string= key "OPTIONS")
+			 (org-export-parse-option-keyword val backend))
+			((string= key "MACRO")
+			 (when (string-match
+				"^\\([-a-zA-Z0-9_]+\\)\\(?:[ \t]+\\(.*?\\)[ \t]*$\\)?"
+				val)
+			   (let ((key
+				  (intern
+				   (concat ":macro-"
+					   (downcase (match-string 1 val)))))
+				 (value (match-string 2 val)))
+			     (cond
+			      ((not value) "")
+			      ((string-match "\\`(eval\\>" value)
+			       (list key value))
+			      (t
+			       (list
+				key
+				;; If user explicitly asks for a newline, be
+				;; sure to preserve it from further filling
+				;; with `hard-newline'.
+				(replace-regexp-in-string
+				 "\\\\n" hard-newline value)))))))))))))))
+      ;; 2. Standard options, as in `org-export-option-alist'.
+      (let* ((all (append org-export-option-alist
+			  ;; Also look for back-end specific options
+			  ;; if BACKEND is defined.
+			  (and backend
+			       (let ((var
+				      (intern
+				       (format "org-%s-option-alist" backend))))
+				 (and (boundp var) (eval var))))))
+	     ;; Build alist between keyword name and property name.
+	     (alist
+	      (delq nil (mapcar
+			 (lambda (e) (when (nth 1 e) (cons (nth 1 e) (car e))))
+			 all)))
+	     ;; Build regexp matching all keywords associated to export
+	     ;; options.  Note: the search is case insensitive.
+	     (opt-re (org-make-options-regexp
+		      (delq nil (mapcar (lambda (e) (nth 1 e)) all)))))
+	(goto-char (point-min))
+	(while (re-search-forward opt-re nil t)
+	  (let ((element (org-element-at-point)))
+	    (when (eq (car element) 'keyword)
+	      (let* ((key (upcase (org-element-get-property :key element)))
+		     (val (org-element-get-property :value element))
+		     (prop (cdr (assoc key alist)))
+		     (behaviour (nth 4 (assq prop all))))
+		(setq plist
+		      (plist-put
+		       plist prop
+		       ;; Handle value depending on specified BEHAVIOUR.
+		       (case behaviour
+			 (space
+			  (if (not (plist-get plist prop)) (org-trim val)
+			    (concat (plist-get plist prop) " " (org-trim val))))
+			 (newline
+			  (org-trim
+			   (concat (plist-get plist prop) "\n" (org-trim val))))
+			 (split
+			  `(,@(plist-get plist prop) ,@(org-split-string val)))
+			 ('t val)
+			 (otherwise (plist-get plist prop)))))))))
+	;; Parse keywords specified in `org-element-parsed-keywords'.
+	(mapc
+	 (lambda (key)
+	   (let* ((prop (cdr (assoc key alist)))
+		  (value (and prop (plist-get plist prop))))
+	     (when (stringp value)
+	       (setq plist
+		     (plist-put
+		      plist prop
+		      (org-element-parse-secondary-string
+		       value
+		       (cdr (assq 'keyword org-element-string-restrictions))))))))
+	 org-element-parsed-keywords))
+      ;; 3. Return final value.
+      plist)))
+
+(defun org-export-get-global-options (&optional backend)
   "Return global export options as a plist.
-BACKEND is a symbol specifying which back-end should be used."
+
+Optional argument BACKEND, if non-nil, is a symbol specifying
+which back-end specific export options should also be read in the
+process."
   (let ((all (append org-export-option-alist
-		     (let ((var (intern
-				 (format "org-%s-option-alist" backend))))
-		       (and (boundp var) (eval var)))))
+		     (and backend
+			  (let ((var (intern
+				      (format "org-%s-option-alist" backend))))
+			    (and (boundp var) (eval var))))))
 	;; Output value.
 	plist)
     (mapc (lambda (cell)
-	    (setq plist
-		  (plist-put plist (car cell) (eval (nth 3 cell)))))
+	    (setq plist (plist-put plist (car cell) (eval (nth 3 cell)))))
 	  all)
     ;; Return value.
     plist))
@@ -1921,11 +1946,10 @@ Return code as a string."
     (save-restriction
       ;; Narrow buffer to an appropriate region for parsing.
       (when (org-region-active-p)
-	(narrow-to-region (region-beginning) (region-end))
-	(goto-char (point-min)))
+	(narrow-to-region (region-beginning) (region-end)))
       (when (and subtreep (not (org-at-heading-p)))
 	;; Ensure point is at sub-tree's beginning.
-	(org-with-limited-levels (org-back-to-heading (not visible-only))))
+	(org-narrow-to-subtree))
       ;; Retrieve export options (INFO) and parsed tree (RAW-DATA),
       ;; Then options can be completed with tree properties.  Note:
       ;; Buffer isn't parsed directly.  Instead, a temporary copy is
@@ -1933,26 +1957,25 @@ Return code as a string."
       ;; are evaluated.  RAW-DATA is the parsed tree of the buffer
       ;; resulting from that process.  Eventually call
       ;; `org-export-filter-parse-tree-functions'.
-      (let* ((info (org-export-collect-options backend subtreep ext-plist))
-	     (raw-data (progn
-			 (when subtreep		; Only parse subtree contents.
-			   (let ((end (save-excursion (org-end-of-subtree t))))
-			     (narrow-to-region
-			      (progn (forward-line) (point)) end)))
-			 (org-export-filter-apply-functions
-			  (plist-get info :filter-parse-tree)
-			  (org-export-with-current-buffer-copy
-			   (org-export-expand-include-keyword nil)
-			   (let ((org-current-export-file (current-buffer)))
-			     (org-export-blocks-preprocess))
-			   (org-element-parse-buffer nil visible-only))
-			  backend info))))
-	;; Now get full initial options with tree properties.
+      (goto-char (point-min))
+      (let ((info (org-export-get-environment backend subtreep ext-plist)))
+	;; Remove subtree's headline from contents if subtree mode is
+	;; activated.
+	(when subtreep (forward-line) (narrow-to-region (point) (point-max)))
+	(let ((raw-data (org-export-filter-apply-functions
+			 (plist-get info :filter-parse-tree)
+			 (org-export-with-current-buffer-copy
+			  (org-export-expand-include-keyword nil)
+			  (let ((org-current-export-file (current-buffer)))
+			    (org-export-blocks-preprocess))
+			  (org-element-parse-buffer nil visible-only))
+			 backend info)))
+	;; Complete communication channel with tree properties.
 	(setq info
 	      (org-combine-plists
 	       info
 	       (org-export-collect-tree-properties raw-data info backend)))
-	;; Now transcode RAW-DATA.  Also call
+	;; Transcode RAW-DATA.  Also call
 	;; `org-export-filter-final-output-functions'.
 	(let* ((body (org-element-normalize-string
 		      (org-export-data raw-data backend info)))
@@ -1964,7 +1987,7 @@ Return code as a string."
 			backend info)))
 	  ;; Maybe add final OUTPUT to kill ring before returning it.
 	  (when org-export-copy-to-kill-ring (org-kill-new output))
-	  output)))))
+	  output))))))
 
 (defun org-export-to-buffer (backend buffer &optional subtreep visible-only
 				     body-only ext-plist)
