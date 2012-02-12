@@ -28,9 +28,9 @@
 
 ;; - The communication channel consists in a property list, which is
 ;;   created and updated during the process.  Its use is to offer
-;;   every piece of information, would it be export options or
-;;   contextual data, all in a single place.  The exhaustive list of
-;;   properties is given in "The Communication Channel" section of
+;;   every piece of information, would it be about initial environment
+;;   or contextual data, all in a single place.  The exhaustive list
+;;   of properties is given in "The Communication Channel" section of
 ;;   this file.
 
 ;; - The transcoder walks the parse tree, ignores or treat as plain
@@ -606,55 +606,56 @@ standard mode."
 ;; During export process, every function has access to a number of
 ;; properties.  They are of three types:
 
-;; 1. Export options are collected once at the very beginning of the
-;;    process, out of the original buffer and environment.  The task
-;;    is handled by `org-export-collect-options' function.
+;; 1. Environment options are collected once at the very beginning of
+;;    the process, out of the original buffer and configuration.
+;;    Associated to the parse tree, they make an Org closure.
+;;    Collecting them is handled by `org-export-get-environment'
+;;    function.
 ;;
-;;    All export options are defined through the
+;;    Most environment options are defined through the
 ;;    `org-export-option-alist' variable.
 ;;
-;; 2. Tree properties are extracted directly from the parsed tree, by
-;;    `org-export-collect-tree-properties' and depend on export
-;;    options (whole trees may be filtered out of the export process).
+;; 2. Tree properties are extracted directly from the parsed tree,
+;;    just before export, by `org-export-collect-tree-properties'.
 ;;
 ;; 3. Local options are updated during parsing, and their value
 ;;    depends on the level of recursion.  For now, only `:genealogy'
 ;;    belongs to that category.
 
 ;; Here is the full list of properties available during transcode
-;; process, with their category (option, tree or local), their
-;; value type and the function updating them, when appropriate.
+;; process, with their category (option, tree or local) and their
+;; value type.
 
-;; + `author' :: Author's name.
+;; + `:author' :: Author's name.
 ;;   - category :: option
 ;;   - type :: string
 
-;; + `back-end' :: Current back-end used for transcoding.
+;; + `:back-end' :: Current back-end used for transcoding.
 ;;   - category :: tree
 ;;   - type :: symbol
 
-;; + `creator' :: String to write as creation information.
+;; + `:creator' :: String to write as creation information.
 ;;   - category :: option
 ;;   - type :: string
 
-;; + `date' :: String to use as date.
+;; + `:date' :: String to use as date.
 ;;   - category :: option
 ;;   - type :: string
 
-;; + `description' :: Description text for the current data.
+;; + `:description' :: Description text for the current data.
 ;;   - category :: option
 ;;   - type :: string
 
-;; + `email' :: Author's email.
+;; + `:email' :: Author's email.
 ;;   - category :: option
 ;;   - type :: string
 
-;; + `exclude-tags' :: Tags for exclusion of subtrees from export
+;; + `:exclude-tags' :: Tags for exclusion of subtrees from export
 ;;      process.
 ;;   - category :: option
 ;;   - type :: list of strings
 
-;; + `footnote-definition-alist' :: Alist between footnote labels and
+;; + `:footnote-definition-alist' :: Alist between footnote labels and
 ;;     their definition, as parsed data.  Only non-inlined footnotes
 ;;     are represented in this alist.  Also, every definition isn't
 ;;     guaranteed to be referenced in the parse tree.  The purpose of
@@ -666,159 +667,158 @@ standard mode."
 ;;   - category :: option
 ;;   - type :: alist (STRING . LIST)
 
-;; + `genealogy' :: Flat list of current object or element's parents
+;; + `:genealogy' :: Flat list of current object or element's parents
 ;;      from closest to farthest.
 ;;   - category :: local
 ;;   - type :: list of elements and objects
 
-;; + `headline-levels' :: Maximum level being exported as an
+;; + `:headline-levels' :: Maximum level being exported as an
 ;;      headline.  Comparison is done with the relative level of
 ;;      headlines in the parse tree, not necessarily with their
 ;;      actual level.
 ;;   - category :: option
 ;;   - type :: integer
 
-;; + `headline-offset' :: Difference between relative and real level
+;; + `:headline-offset' :: Difference between relative and real level
 ;;      of headlines in the parse tree.  For example, a value of -1
 ;;      means a level 2 headline should be considered as level
 ;;      1 (cf. `org-export-get-relative-level').
 ;;   - category :: tree
 ;;   - type :: integer
 
-;; + `headline-numbering' :: Alist between headlines' beginning
+;; + `:headline-numbering' :: Alist between headlines' beginning
 ;;      position and their numbering, as a list of numbers
 ;;      (cf. `org-export-get-headline-number').
 ;;   - category :: tree
 ;;   - type :: alist (INTEGER . LIST)
 
-;; + `input-file' :: Full path to input file, if any.
+;; + `:input-file' :: Full path to input file, if any.
 ;;   - category :: option
 ;;   - type :: string or nil
 
-;; + `keywords' :: List of keywords attached to data.
+;; + `:keywords' :: List of keywords attached to data.
 ;;   - category :: option
 ;;   - type :: string
 
-;; + `language' :: Default language used for translations.
+;; + `:language' :: Default language used for translations.
 ;;   - category :: option
 ;;   - type :: string
 
-;; + `macro-input-file' :: Macro returning file name of input file, or
-;;   nil.
+;; + `:macro-input-file' :: Macro returning file name of input file,
+;;   or nil.
 ;;   - category :: option
 ;;   - type :: string or nil
 
-;; + `parse-tree' :: Whole parse tree, available at any time during
+;; + `:parse-tree' :: Whole parse tree, available at any time during
 ;;                   transcoding.
 ;;   - category :: global
 ;;   - type :: list (as returned by `org-element-parse-buffer')
 
-;; + `preserve-breaks' :: Non-nil means transcoding should preserve
+;; + `:preserve-breaks' :: Non-nil means transcoding should preserve
 ;;      all line breaks.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `section-numbers' :: Non-nil means transcoding should add
+;; + `:section-numbers' :: Non-nil means transcoding should add
 ;;      section numbers to headlines.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `select-tags' :: List of tags enforcing inclusion of sub-trees in
-;;                    transcoding.  When such a tag is present,
+;; + `:select-tags' :: List of tags enforcing inclusion of sub-trees
+;;                    in transcoding.  When such a tag is present,
 ;;                    subtrees without it are de facto excluded from
 ;;                    the process.  See `use-select-tags'.
 ;;   - category :: option
 ;;   - type :: list of strings
 
-;; + `target-list' :: List of targets encountered in the parse tree.
+;; + `:target-list' :: List of targets encountered in the parse tree.
 ;;                    This is used to partly resolve "fuzzy" links
 ;;                    (cf. `org-export-resolve-fuzzy-link').
 ;;   - category :: tree
 ;;   - type :: list of strings
 
-;; + `time-stamp-file' :: Non-nil means transcoding should insert
+;; + `:time-stamp-file' :: Non-nil means transcoding should insert
 ;;      a time stamp in the output.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `use-select-tags' :: When non-nil, a select tags has been found
+;; + `:use-select-tags' :: When non-nil, a select tags has been found
 ;;      in the parse tree.  Thus, any headline without one will be
 ;;      filtered out.  See `select-tags'.
 ;;   - category :: tree
 ;;   - type :: interger or nil
 
-;; + `with-archived-trees' :: Non-nil when archived subtrees should
+;; + `:with-archived-trees' :: Non-nil when archived subtrees should
 ;;      also be transcoded.  If it is set to the `headline' symbol,
 ;;      only the archived headline's name is retained.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t, `headline')
 
-;; + `with-author' :: Non-nil means author's name should be included
+;; + `:with-author' :: Non-nil means author's name should be included
 ;;                    in the output.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `with-creator' :: Non-nild means a creation sentence should be
+;; + `:with-creator' :: Non-nild means a creation sentence should be
 ;;      inserted at the end of the transcoded string.  If the value
 ;;      is `comment', it should be commented.
 ;;   - category :: option
 ;;   - type :: symbol (`comment', nil, t)
 
-;; + `with-drawers' :: Non-nil means drawers should be exported.  If
+;; + `:with-drawers' :: Non-nil means drawers should be exported.  If
 ;;      its value is a list of names, only drawers with such names
 ;;      will be transcoded.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t) or list of strings
 
-;; + `with-email' :: Non-nil means output should contain author's
+;; + `:with-email' :: Non-nil means output should contain author's
 ;;                   email.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `with-emphasize' :: Non-nil means emphasized text should be
+;; + `:with-emphasize' :: Non-nil means emphasized text should be
 ;;      interpreted.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `with-fixed-width' :: Non-nil if transcoder should interpret
-;;      strings starting with a colon as a fixed-with (verbatim)
-;;      area.
+;; + `:with-fixed-width' :: Non-nil if transcoder should interpret
+;;      strings starting with a colon as a fixed-with (verbatim) area.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `with-footnotes' :: Non-nil if transcoder should interpret
+;; + `:with-footnotes' :: Non-nil if transcoder should interpret
 ;;      footnotes.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `with-priority' :: Non-nil means transcoding should include
+;; + `:with-priority' :: Non-nil means transcoding should include
 ;;      priority cookies.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `with-special-strings' :: Non-nil means transcoding should
+;; + `:with-special-strings' :: Non-nil means transcoding should
 ;;      interpret special strings in plain text.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `with-sub-superscript' :: Non-nil means transcoding should
+;; + `:with-sub-superscript' :: Non-nil means transcoding should
 ;;      interpret subscript and superscript.  With a value of "{}",
 ;;      only interpret those using curly brackets.
 ;;   - category :: option
 ;;   - type :: symbol (nil, {}, t)
 
-;; + `with-tables' :: Non-nil means transcoding should interpret
+;; + `:with-tables' :: Non-nil means transcoding should interpret
 ;;                    tables.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;; + `with-tags' :: Non-nil means transcoding should keep tags in
+;; + `:with-tags' :: Non-nil means transcoding should keep tags in
 ;;                  headlines.  A `not-in-toc' value will remove them
 ;;                  from the table of contents, if any, nonetheless.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t, `not-in-toc')
 
-;; + `with-tasks' :: Non-nil means transcoding should include
+;; + `:with-tasks' :: Non-nil means transcoding should include
 ;;                   headlines with a TODO keyword.  A `todo' value
 ;;                   will only include headlines with a todo type
 ;;                   keyword while a `done' value will do the
@@ -828,24 +828,23 @@ standard mode."
 ;;   - category :: option
 ;;   - type :: symbol (t, todo, done, nil) or list of strings
 
-;; + `with-timestamps' :: Non-nil means transcoding should include
+;; + `:with-timestamps' :: Non-nil means transcoding should include
 ;;      time stamps and associated keywords.  Otherwise, completely
 ;;      remove them.
 ;;   - category :: option
 ;;   - type :: symbol: (t, nil)
 
-;; + `with-toc' :: Non-nil means that a table of contents has to be
+;; + `:with-toc' :: Non-nil means that a table of contents has to be
 ;;                 added to the output.  An integer value limits its
 ;;                 depth.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t or integer)
 
-;; + `with-todo-keywords' :: Non-nil means transcoding should
+;; + `:with-todo-keywords' :: Non-nil means transcoding should
 ;;      include TODO keywords.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 
-;;;; Export Options
 
 ;;;; Environment Options
 
@@ -854,13 +853,12 @@ standard mode."
 ;; increasing precedence order:
 ;;
 ;; - Global variables,
-;; - External options provided at export time,
 ;; - Options keyword symbols,
 ;; - Buffer keywords,
 ;; - Subtree properties.
 
-;; The central internal function with regards to export options is
-;; `org-export-collect-options'.  It updates global variables with
+;; The central internal function with regards to environment options
+;; is `org-export-get-environment'.  It updates global variables with
 ;; "#+BIND:" keywords, then retrieve and prioritize properties from
 ;; the different sources.
 
@@ -1181,7 +1179,8 @@ retrieved."
 
 ;;;; Tree Properties
 
-;; They are initialized at the beginning of the transcoding process by
+;; Tree properties are infromation extracted from parse tree.  They
+;; are initialized at the beginning of the transcoding process by
 ;; `org-export-collect-tree-properties'.
 
 ;; Dedicated functions focus on computing the value of specific tree
@@ -2010,8 +2009,8 @@ Return buffer."
       (goto-char (point-min)))
     buffer))
 
-(defun org-export-to-file (backend file &optional subtreep visible-only
-				   body-only ext-plist)
+(defun org-export-to-file
+  (backend file &optional subtreep visible-only body-only ext-plist)
   "Call `org-export-as' with output to a specified file.
 
 BACKEND is the back-end used for transcoding, as a symbol.  FILE
