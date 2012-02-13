@@ -83,17 +83,21 @@
 ;; override `org-e-ascii-charset' variable on the fly by the ext-plist
 ;; mechanism.
 
-;; We also install a developer filter for headlines, in order to
-;; control blank lines in output string.
+;; We also install a filter for headlines and sections, in order to
+;; control blank lines separating them in output string.
 
 (defconst org-e-ascii-option-alist
   '((:ascii-charset nil nil org-e-ascii-charset)
-    (:filter-headline nil nil (cons
-			       'org-e-ascii-filter-headline-blank-lines
-			       org-export-filter-headline-functions)))
+    )
   "Alist between ASCII export properties and ways to set them.
 See `org-export-option-alist' for more information on the
 structure or the values.")
+
+(defconst org-e-ascii-filters-alist
+  '((:filter-headline . org-e-ascii-filter-headline-blank-lines)
+    (:filter-section . org-e-ascii-filter-headline-blank-lines))
+  "Alist between filters keywords and back-end specific filters.
+See `org-export-filters-alist' for more information.")
 
 (defconst org-e-ascii-dictionary
   '(("Footnotes\n"

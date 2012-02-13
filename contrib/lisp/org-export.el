@@ -114,52 +114,6 @@
     (:description "DESCRIPTION" nil nil newline)
     (:email "EMAIL" nil user-mail-address t)
     (:exclude-tags "EXPORT_EXCLUDE_TAGS" nil org-export-exclude-tags split)
-    (:filter-babel-call nil nil org-export-filter-babel-call-functions)
-    (:filter-center-block nil nil org-export-filter-center-block-functions)
-    (:filter-comment nil nil org-export-filter-comment-functions)
-    (:filter-comment-block nil nil org-export-filter-comment-block-functions)
-    (:filter-drawer nil nil org-export-filter-drawer-functions)
-    (:filter-dynamic-block nil nil org-export-filter-dynamic-block-functions)
-    (:filter-emphasis nil nil org-export-filter-emphasis-functions)
-    (:filter-entity nil nil org-export-filter-entity-functions)
-    (:filter-example-block nil nil org-export-filter-example-block-functions)
-    (:filter-export-block nil nil org-export-filter-export-block-functions)
-    (:filter-export-snippet nil nil org-export-filter-export-snippet-functions)
-    (:filter-final-output nil nil org-export-filter-final-output-functions)
-    (:filter-fixed-width nil nil org-export-filter-fixed-width-functions)
-    (:filter-footnote-definition nil nil org-export-filter-footnote-definition-functions)
-    (:filter-footnote-reference nil nil org-export-filter-footnote-reference-functions)
-    (:filter-headline nil nil org-export-filter-headline-functions)
-    (:filter-horizontal-rule nil nil org-export-filter-horizontal-rule-functions)
-    (:filter-inline-babel-call nil nil org-export-filter-inline-babel-call-functions)
-    (:filter-inline-src-block nil nil org-export-filter-inline-src-block-functions)
-    (:filter-inlinetask nil nil org-export-filter-inlinetask-functions)
-    (:filter-item nil nil org-export-filter-item-functions)
-    (:filter-keyword nil nil org-export-filter-keyword-functions)
-    (:filter-latex-environment nil nil org-export-filter-latex-environment-functions)
-    (:filter-latex-fragment nil nil org-export-filter-latex-fragment-functions)
-    (:filter-line-break nil nil org-export-filter-line-break-functions)
-    (:filter-link nil nil org-export-filter-link-functions)
-    (:filter-macro nil nil org-export-filter-macro-functions)
-    (:filter-paragraph nil nil org-export-filter-paragraph-functions)
-    (:filter-parse-tree nil nil org-export-filter-parse-tree-functions)
-    (:filter-plain-list nil nil org-export-filter-plain-list-functions)
-    (:filter-plain-text nil nil org-export-filter-plain-text-functions)
-    (:filter-property-drawer nil nil org-export-filter-property-drawer-functions)
-    (:filter-quote-block nil nil org-export-filter-quote-block-functions)
-    (:filter-quote-section nil nil org-export-filter-quote-section-functions)
-    (:filter-radio-target nil nil org-export-filter-radio-target-functions)
-    (:filter-section nil nil org-export-filter-section-functions)
-    (:filter-special-block nil nil org-export-filter-special-block-functions)
-    (:filter-src-block nil nil org-export-filter-src-block-functions)
-    (:filter-statistics-cookie nil nil org-export-filter-statistics-cookie-functions)
-    (:filter-subscript nil nil org-export-filter-subscript-functions)
-    (:filter-superscript nil nil org-export-filter-superscript-functions)
-    (:filter-table nil nil org-export-filter-table-functions)
-    (:filter-target nil nil org-export-filter-target-functions)
-    (:filter-time-stamp nil nil org-export-filter-time-stamp-functions)
-    (:filter-verbatim nil nil org-export-filter-verbatim-functions)
-    (:filter-verse-block nil nil org-export-filter-verse-block-functions)
     (:headline-levels nil "H" org-export-headline-levels)
     (:keywords "KEYWORDS" nil nil space)
     (:language "LANGUAGE" nil org-export-default-language t)
@@ -219,6 +173,65 @@ These keywords are not directly associated to a property.  The
 way they are handled must be hard-coded into
 `org-export-get-inbuffer-options' function.")
 
+(defconst org-export-filters-alist
+  '((:filter-babel-call . org-export-filter-babel-call-functions)
+    (:filter-center-block . org-export-filter-center-block-functions)
+    (:filter-comment . org-export-filter-comment-functions)
+    (:filter-comment-block . org-export-filter-comment-block-functions)
+    (:filter-drawer . org-export-filter-drawer-functions)
+    (:filter-dynamic-block . org-export-filter-dynamic-block-functions)
+    (:filter-emphasis . org-export-filter-emphasis-functions)
+    (:filter-entity . org-export-filter-entity-functions)
+    (:filter-example-block . org-export-filter-example-block-functions)
+    (:filter-export-block . org-export-filter-export-block-functions)
+    (:filter-export-snippet . org-export-filter-export-snippet-functions)
+    (:filter-final-output . org-export-filter-final-output-functions)
+    (:filter-fixed-width . org-export-filter-fixed-width-functions)
+    (:filter-footnote-definition . org-export-filter-footnote-definition-functions)
+    (:filter-footnote-reference . org-export-filter-footnote-reference-functions)
+    (:filter-headline . org-export-filter-headline-functions)
+    (:filter-horizontal-rule . org-export-filter-horizontal-rule-functions)
+    (:filter-inline-babel-call . org-export-filter-inline-babel-call-functions)
+    (:filter-inline-src-block . org-export-filter-inline-src-block-functions)
+    (:filter-inlinetask . org-export-filter-inlinetask-functions)
+    (:filter-item . org-export-filter-item-functions)
+    (:filter-keyword . org-export-filter-keyword-functions)
+    (:filter-latex-environment . org-export-filter-latex-environment-functions)
+    (:filter-latex-fragment . org-export-filter-latex-fragment-functions)
+    (:filter-line-break . org-export-filter-line-break-functions)
+    (:filter-link . org-export-filter-link-functions)
+    (:filter-macro . org-export-filter-macro-functions)
+    (:filter-paragraph . org-export-filter-paragraph-functions)
+    (:filter-parse-tree . org-export-filter-parse-tree-functions)
+    (:filter-plain-list . org-export-filter-plain-list-functions)
+    (:filter-plain-text . org-export-filter-plain-text-functions)
+    (:filter-property-drawer . org-export-filter-property-drawer-functions)
+    (:filter-quote-block . org-export-filter-quote-block-functions)
+    (:filter-quote-section . org-export-filter-quote-section-functions)
+    (:filter-radio-target . org-export-filter-radio-target-functions)
+    (:filter-section . org-export-filter-section-functions)
+    (:filter-special-block . org-export-filter-special-block-functions)
+    (:filter-src-block . org-export-filter-src-block-functions)
+    (:filter-statistics-cookie . org-export-filter-statistics-cookie-functions)
+    (:filter-subscript . org-export-filter-subscript-functions)
+    (:filter-superscript . org-export-filter-superscript-functions)
+    (:filter-table . org-export-filter-table-functions)
+    (:filter-target . org-export-filter-target-functions)
+    (:filter-time-stamp . org-export-filter-time-stamp-functions)
+    (:filter-verbatim . org-export-filter-verbatim-functions)
+    (:filter-verse-block . org-export-filter-verse-block-functions))
+  "Alist between filters properties and initial values.
+
+The key of each association is a property name accessible through
+the communication channel its value is a configurable global
+variable defining initial filters.
+
+This list is meant to install user specified filters.  Back-end
+developers may install their own filters using
+`org-BACKEND-filters-alist', where BACKEND is the name of the
+considered back-end.  Filters defined there will always be
+prepended to the current list, so they always get applied
+first.")
 
 
 ;;; User-configurable Variables
@@ -1557,6 +1570,9 @@ contents, as a string or nil."
 ;; applied in a LIFO fashion.  It allows developers to be sure that
 ;; their filters will be applied first.
 
+;; Filters properties are installed in communication channel just
+;; before parsing, with `org-export-install-filters' function.
+
 ;;;; Special Filters
 (defvar org-export-filter-parse-tree-functions nil
   "Filter, or list of filters, applied to the parsed tree.
@@ -1891,6 +1907,35 @@ specified filters, if any, are called first."
 	do (setq value (funcall filter value backend info)))
   value)
 
+(defun org-export-install-filters (backend info)
+  "Install filters properties in communication channel.
+
+BACKEND is a symbol specifying which back-end specific filters to
+install, if any.  INFO is a plist containing the current
+communication channel.
+
+Return the updated communication channel."
+  (let (plist)
+    ;; Install user defined filters with `org-export-filters-alist'.
+    (mapc (lambda (p)
+	    (setq plist (plist-put plist (car p) (eval (cdr p)))))
+	  org-export-filters-alist)
+    ;; Prepend back-end specific filters to that list.
+    (let ((back-end-filters (intern (format "org-%s-filters-alist" backend))))
+      (when (boundp back-end-filters)
+	(mapc (lambda (p)
+		;; Single values get consed, lists are prepended.
+		(let ((key (car p)) (value (cdr p)))
+		  (when value
+		    (setq plist
+			  (plist-put
+			   plist key
+			   (if (atom value) (cons value (plist-get plist key))
+			     (append value (plist-get plist key))))))))
+	      (eval back-end-filters))))
+    ;; Return new communication channel.
+    (org-combine-plists info plist)))
+
 
 
 ;;; Core functions
@@ -1962,6 +2007,8 @@ Return code as a string."
 	;; Remove subtree's headline from contents if subtree mode is
 	;; activated.
 	(when subtreep (forward-line) (narrow-to-region (point) (point-max)))
+	;; Install filters in communication channel.
+	(setq info (org-export-install-filters backend info))
 	(let ((raw-data (org-export-filter-apply-functions
 			 (plist-get info :filter-parse-tree)
 			 (org-export-with-current-buffer-copy
