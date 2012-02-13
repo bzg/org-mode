@@ -111,6 +111,7 @@ nil      : Leave auto-save-mode enabled.
            NOTE: This only works for entries which have a tag
            that matches `org-crypt-tag-matcher'."
   :group 'org-crypt
+  :version "24.1"
   :type '(choice (const :tag "Always"  t)
                  (const :tag "Never"   nil)
                  (const :tag "Ask"     ask)

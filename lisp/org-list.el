@@ -215,6 +215,7 @@ Both uppercase and lowercase are handled.  Lists with more than
 26 items will fallback to standard numbering.  Alphabetical
 counters like \"[@c]\" will be recognized."
   :group 'org-plain-lists
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-list-two-spaces-after-bullet-regexp nil
@@ -244,6 +245,7 @@ the first item of the list.
 When set to `both', each of the preceding methods is applied to
 determine lists endings.  This is the default method."
   :group 'org-plain-lists
+  :version "24.1"
   :type '(choice
 	  (const :tag "With a regexp defining ending" regexp)
 	  (const :tag "With indentation of regular (no bullet) text" indent)
@@ -263,6 +265,7 @@ It must start with \"^\" and end with \"\\n\".  It defaults to 2
 blank lines. `org-empty-line-terminates-plain-lists' has
 precedence over it."
   :group 'org-plain-lists
+  :version "24.1"
   :type 'string)
 
 (defcustom org-list-automatic-rules '((bullet . t)
@@ -288,6 +291,7 @@ indent    when non-nil, indenting or outdenting list top-item
           outdenting a list whose bullet is * to column 0 will
           change that bullet to \"-\"."
    :group 'org-plain-lists
+   :version "24.1"
    :type '(alist :tag "Sets of rules"
 		 :key-type
 		 (choice
@@ -307,6 +311,7 @@ This affects the behavior of \\[org-move-item-up],
  \\[org-move-item-down], \\[org-next-item] and
  \\[org-previous-item]."
   :group 'org-plain-lists
+  :version "24.1"
   :type 'boolean)
 
 (defvar org-checkbox-statistics-hook nil
@@ -336,6 +341,7 @@ When the indentation would be larger than this, it will become
 By setting this to a small number, usually 1 or 2, one can more
 clearly distinguish sub-items in a list."
   :group 'org-plain-lists
+  :version "24.1"
   :type 'integer)
 
 (defcustom org-list-radio-list-templates

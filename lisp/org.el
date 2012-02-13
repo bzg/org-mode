@@ -152,6 +152,7 @@ keybinding.  By default only Emacs Lisp (which has no
 requirements) is loaded."
   :group 'org-babel
   :set 'org-babel-do-load-languages
+  :version "24.1"
   :type '(alist :tag "Babel Languages"
 		:key-type
 		(choice
@@ -200,6 +201,7 @@ When non-nil, clones of a subtree don't inherit the ID property.
 Otherwise they inherit the ID property with a new unique
 identifier."
   :type 'boolean
+  :version "24.1"
   :group 'org-id)
 
 ;;; Version
@@ -258,6 +260,7 @@ With prefix arg HERE, insert it at point."
 (defcustom org-log-buffer-setup-hook nil
   "Hook that is run after an Org log buffer is created."
   :group 'org
+  :version "24.1"
   :type 'hook)
 
 (defvar org-modules)  ; defined below
@@ -427,6 +430,7 @@ already archived entries."
 		 (const :tag "All headlines in active region" t)
 		 (const :tag "In active region, headlines at the same level than the first one" 'start-level)
 		 (string :tag "Tags/Property/Todo matcher"))
+  :version "24.1"
   :group 'org-todo
   :group 'org-archive)
 
@@ -495,6 +499,7 @@ Not all export backends support this, but HTML does.
 This option can also be set with the +OPTIONS line, e.g. \"^:nil\"."
   :group 'org-startup
   :group 'org-export-translation
+  :version "24.1"
   :type '(choice
 	  (const :tag "Always interpret" t)
 	  (const :tag "Only with braces" {})
@@ -511,6 +516,7 @@ the following lines anywhere in the buffer:
 
    #+STARTUP: beamer"
   :group 'org-startup
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-startup-align-all-tables nil
@@ -531,6 +537,7 @@ the following lines anywhere in the buffer:
    #+STARTUP: inlineimages
    #+STARTUP: noinlineimages"
   :group 'org-startup
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-insert-mode-line-in-empty-file nil
@@ -1070,6 +1077,7 @@ used to kill (part-of) a headline that has hidden text behind it.
 Any other non-nil value will result in a query to the user, if it is
 OK to kill that hidden subtree.  When nil, kill without remorse."
   :group 'org-edit-structure
+  :version "24.1"
   :type '(choice
 	  (const :tag "Do not protect hidden subtrees" nil)
 	  (const :tag "Protect hidden subtrees with a security query" t)
@@ -1090,6 +1098,7 @@ smart            Make point visible, and do insertion/deletion if it is
                  allows insertion and backward-delete right before ellipses.
                  FIXME: maybe in this case we should not even show?"
   :group 'org-edit-structure
+  :version "24.1"
   :type '(choice
 	  (const :tag "Do not check" nil)
 	  (const :tag "Throw error when trying to edit" error)
@@ -1543,6 +1552,7 @@ Changing this requires a restart of Emacs to work correctly."
 When nil, the link search tries to match a phrase with all words
 in the search text."
   :group 'org-link-follow
+  :version "24.1"
   :type '(choice
 	  (const :tag "Use fuzzy text search" nil)
 	  (const :tag "Match only exact headline" t)
@@ -1663,6 +1673,7 @@ single keystroke rather than having to type \"yes\"."
 (defcustom org-confirm-shell-link-not-regexp ""
   "A regexp to skip confirmation for shell links."
   :group 'org-link-follow
+  :version "24.1"
   :type 'regexp)
 
 (defcustom org-confirm-elisp-link-function 'yes-or-no-p
@@ -1688,6 +1699,7 @@ single keystroke rather than having to type \"yes\"."
 (defcustom org-confirm-elisp-link-not-regexp ""
   "A regexp to skip confirmation for Elisp links."
   :group 'org-link-follow
+  :version "24.1"
   :type 'regexp)
 
 (defconst org-file-apps-defaults-gnu
@@ -1910,6 +1922,7 @@ When bulk-refiling from the agenda, the value `note' is forbidden and
 will temporarily be changed to `time'."
   :group 'org-refile
   :group 'org-progress
+  :version "24.1"
   :type '(choice
 	  (const :tag "No logging" nil)
 	  (const :tag "Record timestamp" time)
@@ -1985,6 +1998,7 @@ If you have added new entries to a buffer that might themselves be targets,
 you need to clear the cache manually by pressing `C-0 C-c C-w' or, if you
 find that easier, `C-u C-u C-u C-c C-w'."
   :group 'org-refile
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-refile-use-outline-path nil
@@ -2040,6 +2054,7 @@ don't contain a set of subtrees, but it might be convenient to
 do so sometimes: in that case, the first line of the region is
 converted to a headline before refiling."
   :group 'org-refile
+  :version "24.1"
   :type 'boolean)
 
 (defgroup org-todo nil
@@ -2516,6 +2531,7 @@ By default this is the first task in a TODO sequence, or the previous state
 in a TODO_TYP set.  But you can specify another task here.
 alternatively, set the :REPEAT_TO_STATE: property of the entry."
   :group 'org-todo
+  :version "24.1"
   :type '(choice (const :tag "Head of sequence" nil)
 		 (string :tag "Specific state")))
 
@@ -2600,6 +2616,7 @@ an integer, increasing by 1000 for each priority level.
 The user can set a different function here, which should take a string
 as an argument and return the numeric priority."
   :group 'org-priorities
+  :version "24.1"
   :type 'function)
 
 (defgroup org-time nil
@@ -2741,6 +2758,7 @@ But you can also set a deviating value here.
 This may t or nil, or the symbol `org-read-date-prefer-future'."
   :group 'org-agenda
   :group 'org-time
+  :version "24.1"
   :type '(choice
 	  (const :tag "Use org-read-date-prefer-future"
 		 org-read-date-prefer-future)
@@ -2775,6 +2793,7 @@ has limited date range is not negligible.
 A workaround for this problem is to use diary sexp dates for time
 stamps outside of this range."
   :group 'org-time
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-read-date-display-live t
@@ -2822,6 +2841,7 @@ For example, if `org-extend-today-until' is 8, and it's 4am, then the
 \"effective time\" of any timestamps between midnight and 8am will be
 23:59 of the previous day."
   :group 'boolean
+  :version "24.1"
   :type 'integer)
 
 (defcustom org-edit-timestamp-down-means-later nil
@@ -2895,6 +2915,7 @@ tags in that file can be created dynamically (there are none).
                     'org-complete-tags-always-offer-all-agenda-tags)
                    t)))"
   :group 'org-tags
+  :version "24.1"
   :type 'boolean)
 
 (defvar org-file-tags nil
@@ -3063,6 +3084,7 @@ and the clock summary:
                                    (org-entry-get (point) \"Effort\"))))
                      (org-minutes-to-hh:mm-string (- effort clocksum))))))"
   :group 'org-properties
+  :version "24.1"
   :type 'alist)
 
 (defcustom org-use-property-inheritance nil
@@ -3334,7 +3356,9 @@ This is a property list with the following properties:
   "Non-nil means signal an error when image creation of LaTeX snippets fails.
 When nil, just push out a message."
   :group 'org-latex
+  :version "24.1"
   :type 'boolean)
+
 (defcustom org-latex-to-mathml-jar-file nil
   "Value of\"%j\" in `org-latex-to-mathml-convert-command'.
 Use this to specify additional executable file say a jar file.
@@ -3342,6 +3366,7 @@ Use this to specify additional executable file say a jar file.
 When using MathToWeb as the converter, specify the full-path to
 your mathtoweb.jar file."
   :group 'org-latex
+  :version "24.1"
   :type '(choice
 	  (const :tag "None" nil)
 	  (file :tag "JAR file" :must-match t)))
@@ -3359,6 +3384,7 @@ This command is used by `org-create-math-formula'.
 When using MathToWeb as the converter, set this to
 \"java -jar %j -unicode -force -df %o %I\"."
   :group 'org-latex
+  :version "24.1"
   :type '(choice
 	  (const :tag "None" nil)
 	  (string :tag "\nShell command")))
@@ -3468,6 +3494,7 @@ compiling LaTeX snippets into images for inclusion into HTML."
   :group 'org-export-latex
   :set 'org-set-packages-alist
   :get 'org-get-packages-alist
+  :version "24.1"
   :type '(repeat
 	  (choice
 	   (list :tag "options/package pair"
@@ -3533,6 +3560,7 @@ lines to the buffer:
 For example, a value '(title) for this list will make the document's title
 appear in the buffer without the initial #+TITLE: keyword."
   :group 'org-appearance
+  :version "24.1"
   :type '(set (const :tag "#+AUTHOR" author)
 	      (const :tag "#+DATE" date)
 	      (const :tag "#+EMAIL" email)
@@ -3573,11 +3601,13 @@ org-level-* faces."
   "Non-nil means show entities as UTF8 characters.
 When nil, the \\name form remains in the buffer."
   :group 'org-appearance
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-pretty-entities-include-sub-superscripts t
   "Non-nil means, pretty entity display includes formatting sub/superscripts."
   :group 'org-appearance
+  :version "24.1"
   :type 'boolean)
 
 (defvar org-emph-re nil
@@ -5358,6 +5388,7 @@ will be prompted for."
 (defcustom org-src-fontify-natively nil
   "When non-nil, fontify code in code blocks."
   :type 'boolean
+  :version "24.1"
   :group 'org-appearance
   :group 'org-babel)
 
@@ -16229,6 +16260,7 @@ minutes.
 For example, if the value of this variable is ((\"hours\" . 60)), then an
 effort string \"2hours\" is equivalent to 120 minutes."
   :group 'org-agenda
+  :version "24.1"
   :type '(alist :key-type (string :tag "Modifier")
 		:value-type (number :tag "Minutes")))
 
@@ -17607,6 +17639,7 @@ be one of an interactive command, a function, or a form.
 Set `org-use-speed-commands' to non-nil value to enable this
 hook.  The default setting is `org-speed-command-default-hook'."
   :group 'org-structure
+  :version "24.1"
   :type 'hook)
 
 (defun org-self-insert-command (N)

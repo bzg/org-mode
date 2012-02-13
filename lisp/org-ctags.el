@@ -162,6 +162,7 @@ See the ctags documentation for more information.")
     (t "ctags-exuberant"))
   "Full path to the ctags executable file."
   :group 'org-ctags
+  :version "24.1"
   :type 'file)
 
 (defcustom org-ctags-open-link-functions
@@ -170,6 +171,7 @@ See the ctags documentation for more information.")
     org-ctags-ask-append-topic)
   "List of functions to be prepended to ORG-OPEN-LINK-FUNCTIONS when ORG-CTAGS is active."
   :group 'org-ctags
+  :version "24.1"
   :type 'hook
   :options '(org-ctags-find-tag
              org-ctags-ask-rebuild-tags-file-then-find-tag
@@ -191,6 +193,7 @@ Created as a local variable in each buffer.")
 The following patterns are replaced in the string:
     `%t' - replaced with the capitalized title of the hyperlink"
   :group 'org-ctags
+  :version "24.1"
   :type 'string)
 
 
