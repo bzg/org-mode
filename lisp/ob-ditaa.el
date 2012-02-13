@@ -53,6 +53,7 @@
   "Option for the ditaa jar file.
 Do not leave leading or trailing spaces in this string."
   :group 'org-babel
+  :version "24.1"
   :type 'string)
 
 (defun org-babel-execute:ditaa (body params)

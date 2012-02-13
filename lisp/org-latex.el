@@ -218,6 +218,7 @@ For example, adding an entry
 will cause \\usepackage[utf8x]{inputenc} to be used for buffers that
 are written as utf8 files."
   :group 'org-export-latex
+  :version "24.1"
   :type '(repeat
 	  (cons
 	   (string :tag "Derived from buffer")
@@ -283,6 +284,7 @@ markup defined, the first one in the association list will be used."
 (defcustom org-export-latex-tag-markup "\\textbf{%s}"
   "Markup for tags, as a printf format."
   :group 'org-export-latex
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-latex-timestamp-markup "\\textit{%s}"
@@ -293,6 +295,7 @@ markup defined, the first one in the association list will be used."
 (defcustom org-export-latex-timestamp-inactive-markup "\\textit{%s}"
   "A printf format string to be applied to inactive time stamps."
   :group 'org-export-latex
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-latex-timestamp-keyword-markup "\\texttt{%s}"
@@ -307,6 +310,7 @@ If it contains two %s instances, the first will be filled with
 the link, the second with the link description.  If it contains
 only one, the %s will be filled with the link."
   :group 'org-export-latex
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-latex-hyperref-format "\\hyperref[%s]{%s}"
@@ -314,11 +318,13 @@ only one, the %s will be filled with the link."
 The format must contain one or two %s instances.  The first one
 will be filled with the link, the second with its description."
   :group 'org-export-latex
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-latex-footnote-separator "\\textsuperscript{,}\\,"
   "Text used to separate footnotes."
   :group 'org-export-latex
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-latex-quotes
@@ -336,6 +342,7 @@ For each item in a CONS, the first string is a regexp
 for allowed characters before/after the quote, the second
 string defines the replacement string for this quote."
   :group 'org-export-latex
+  :version "24.1"
   :type '(list
 	  (cons :tag "Opening quote"
 		(string :tag "Regexp for char before")
@@ -361,6 +368,7 @@ string defines the replacement string for this quote."
   "When non-nil, the caption is set above the table.  When nil,
 the caption is set below the table."
   :group 'org-export-latex
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-export-latex-tables-column-borders nil
@@ -478,6 +486,7 @@ Code blocks exported with the listings package (controlled by the
 `org-export-latex-listings' variable) can be named in the style
 of noweb."
   :group 'org-export-latex
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-export-latex-minted-langs
@@ -499,6 +508,7 @@ with:
 pygmentize -L lexers
 "
   :group 'org-export-latex
+  :version "24.1"
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode       ")
@@ -522,6 +532,7 @@ black keywords.
 Note that the same options will be applied to blocks of all
 languages."
   :group 'org-export-latex
+  :version "24.1"
   :type '(repeat
 	  (list
 	   (string :tag "Listings option name ")
@@ -545,6 +556,7 @@ will result in src blocks being exported with
 as the start of the minted environment. Note that the same
 options will be applied to blocks of all languages."
   :group 'org-export-latex
+  :version "24.1"
   :type '(repeat
 	  (list
 	   (string :tag "Minted option name ")
@@ -586,11 +598,13 @@ and `org-export-with-tags' instead."
 (defcustom org-latex-default-figure-position "htb"
   "Default position for latex figures."
   :group 'org-export-latex
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-latex-tabular-environment "tabular"
   "Default environment used to build tables."
   :group 'org-export-latex
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-latex-inline-image-extensions
@@ -667,6 +681,7 @@ This function should accept the file name as its single argument."
   '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb")
   "The list of file extensions to consider as LaTeX logfiles."
   :group 'org-export-pdf
+  :version "24.1"
   :type '(repeat (string :tag "Extension")))
 
 (defcustom org-export-pdf-remove-logfiles t
