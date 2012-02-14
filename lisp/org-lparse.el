@@ -486,6 +486,7 @@ This is a helper routine for interactive use."
 	 (convert-process (car how))
 	 (out-file (concat (file-name-sans-extension in-file) "."
 			   (nth 1 (or (cdr how) out-fmt))))
+	 (extra-options (or (nth 2 (cdr how)) ""))
 	 (out-dir (file-name-directory in-file))
 	 (cmd (format-spec convert-process
 			   `((?i . ,(shell-quote-argument in-file))
@@ -494,7 +495,8 @@ This is a helper routine for interactive use."
 			     (?o . ,out-file)
 			     (?O . ,(browse-url-file-url out-file))
 			     (?d . , (shell-quote-argument out-dir))
-			     (?D . ,(browse-url-file-url out-dir))))))
+			     (?D . ,(browse-url-file-url out-dir))
+			     (?x . ,extra-options)))))
     (when (file-exists-p out-file)
       (delete-file out-file))
 

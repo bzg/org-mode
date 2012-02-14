@@ -2379,7 +2379,7 @@ visually."
 
 (defcustom org-export-odt-convert-processes
   '(("LibreOffice"
-     "soffice --headless --convert-to %f --outdir %d %i")
+     "soffice --headless --convert-to %f%x --outdir %d %i")
     ("unoconv"
      "unoconv -f %f -o %d %i"))
   "Specify a list of document converters and their usage.
@@ -2398,7 +2398,8 @@ specifiers are interpreted as below:
 %o output file name in full
 %O output file name as a URL
 %d output dir in full
-%D output dir as a URL."
+%D output dir as a URL.
+%x extra options as set in `org-export-odt-convert-capabilities'."
   :group 'org-export-odt
   :version "24.1"
   :type
@@ -2426,8 +2427,8 @@ from `org-export-odt-convert-processes'."
 (defcustom org-export-odt-convert-capabilities
   '(("Text"
      ("odt" "ott" "doc" "rtf" "docx")
-     (("pdf" "pdf") ("odt" "odt") ("rtf" "rtf") ("ott" "ott") ("doc" "doc")
-      ("docx" "docx") ("html" "html")))
+     (("pdf" "pdf") ("odt" "odt") ("rtf" "rtf") ("ott" "ott")
+      ("doc" "doc" ":\"MS Word 97\"") ("docx" "docx") ("html" "html")))
     ("Web"
      ("html")
      (("pdf" "pdf") ("odt" "odt") ("html" "html")))
@@ -2447,7 +2448,7 @@ This variable is an alist where each element is of the
 form (DOCUMENT-CLASS INPUT-FMT-LIST OUTPUT-FMT-ALIST).
 INPUT-FMT-LIST is a list of INPUT-FMTs.  OUTPUT-FMT-ALIST is an
 alist where each element is of the form (OUTPUT-FMT
-OUTPUT-FILE-EXTENSION).
+OUTPUT-FILE-EXTENSION EXTRA-OPTIONS).
 
 The variable is interpreted as follows:
 `org-export-odt-convert-process' can take any document that is in
@@ -2459,6 +2460,9 @@ serves dual purposes:
   `org-export-odt-convert' commands.
 - It is used as the value of \"%f\" specifier in
   `org-export-odt-convert-process'.
+
+EXTRA-OPTIONS is used as the value of \"%x\" specifier in
+`org-export-odt-convert-process'.
 
 DOCUMENT-CLASS is used to group a set of file formats in
 INPUT-FMT-LIST in to a single class.
@@ -2484,7 +2488,10 @@ configuration."
 		  (alist :tag "Output formats"
 			 :key-type (string :tag "Output format")
 			 :value-type
-			 (group (string :tag "Output file extension")))))))
+			 (group (string :tag "Output file extension")
+				(choice
+				 (const :tag "None" nil)
+				 (string :tag "Extra options"))))))))
 
 (declare-function org-create-math-formula "org"
 		  (latex-frag &optional mathml-file))
