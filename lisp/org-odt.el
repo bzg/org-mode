@@ -445,40 +445,6 @@ emacs   --batch
         --visit=MyFile --funcall org-export-as-odt-batch"
   (org-lparse-batch "odt"))
 
-;;;###autoload
-(defun org-export-as-odt-to-buffer (arg)
-  "Call `org-lparse-odt` with output to a temporary buffer.
-No file is created.  The prefix ARG is passed through to `org-lparse-to-buffer'."
-  (interactive "P")
-  (org-lparse-to-buffer "odt" arg))
-
-;;;###autoload
-(defun org-replace-region-by-odt (beg end)
-  "Assume the current region has org-mode syntax, and convert it to ODT.
-This can be used in any buffer.  For example, you could write an
-itemized list in org-mode syntax in an ODT buffer and then use this
-command to convert it."
-  (interactive "r")
-  (org-replace-region-by "odt" beg end))
-
-;;;###autoload
-(defun org-export-region-as-odt (beg end &optional body-only buffer)
-  "Convert region from BEG to END in org-mode buffer to ODT.
-If prefix arg BODY-ONLY is set, omit file header, footer, and table of
-contents, and only produce the region of converted text, useful for
-cut-and-paste operations.
-If BUFFER is a buffer or a string, use/create that buffer as a target
-of the converted ODT.  If BUFFER is the symbol `string', return the
-produced ODT as a string and leave not buffer behind.  For example,
-a Lisp program could call this function in the following way:
-
-  (setq odt (org-export-region-as-odt beg end t 'string))
-
-When called interactively, the output buffer is selected, and shown
-in a window.  A non-interactive call will only return the buffer."
-  (interactive "r\nP")
-  (org-lparse-region "odt" beg end body-only buffer))
-
 ;;; org-export-as-odt
 ;;;###autoload
 (defun org-export-as-odt (arg &optional hidden ext-plist
