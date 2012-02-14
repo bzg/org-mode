@@ -26,7 +26,7 @@ targets help:
 	$(info make pdf           - make pdf documentation)
 	$(info make card          - make refcards documentation)
 	$(info )
-	$(info make test          - build org and run all test suite)
+	$(info make check         - build org and run complete test suite)
 	$(info make clean         - clean Org ELisp and documentation files)
 	$(info make compile       - cleanly compile Org ELisp files)
 	$(info make compile-dirty - compile Org ELisp without cleaning)

@@ -21,7 +21,7 @@ ifneq ($(GITSTATUS),)
 endif
 
 .PHONY:	default all up2 update compile lisp doc etc \
-	test install info html pdf card docs $(INSTSUB) \
+	check test install info html pdf card docs $(INSTSUB) \
 	autoloads cleanall clean cleancontrib cleanrel clean-install \
 	cleanelc cleanlisp cleandoc cleandocs
 
@@ -37,9 +37,9 @@ all \
 clean-install::	$(SUBDIRS)
 	$(foreach dir, $?, $(MAKE) -C $(dir) $@;)
 
-test::	all
+check test::	all
 
-test \
+check test \
 test-dirty::
 	$(BTEST)
 
