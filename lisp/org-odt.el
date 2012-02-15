@@ -1912,9 +1912,9 @@ ATTR is a string of other attributes of the a element."
     target-file))
 
 (defvar org-export-odt-image-size-probe-method
-  '(emacs imagemagick force)
-  "Ordered list of methods by for determining size of an embedded
-  image.")
+  (append (and (executable-find "identify") '(imagemagick)) ; See Bug#10675
+	  '(emacs fixed))
+  "Ordered list of methods for determining image sizes.")
 
 (defvar org-export-odt-default-image-sizes-alist
   '(("as-char" . (5 . 0.4))
@@ -1941,8 +1941,9 @@ ATTR is a string of other attributes of the a element."
 				   (pixels-to-cms (cdr size-in-pixels)))))))
     (case probe-method
       (emacs
-       (size-in-cms (ignore-errors (clear-image-cache)
-				   (image-size (create-image file) 'pixels))))
+       (size-in-cms (ignore-errors	; Emacs could be in batch mode
+		      (clear-image-cache)
+		      (image-size (create-image file) 'pixels))))
       (imagemagick
        (size-in-cms
 	(let ((dim (shell-command-to-string
