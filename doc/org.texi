@@ -12659,7 +12659,7 @@ and/or the name of the evaluated code block.  The default value of
 @code{org-babel-results-keyword}.
 
 By default, the evaluation facility is only enabled for Lisp code blocks
-specified as @code{emacs-lisp}. However, source code blocks in many languages
+specified as @code{emacs-lisp}.  However, source code blocks in many languages
 can be evaluated within Org mode (see @ref{Languages} for a list of supported
 languages and @ref{Structure of code blocks} for information on the syntax
 used to define a code block).
@@ -12673,8 +12673,8 @@ evaluation from the @kbd{C-c C-c} key binding.}.  This will call the
 its results into the Org mode buffer.
 @cindex #+CALL
 
-It is also possible to evaluate named code blocks from anywhere in an
-Org mode buffer or an Org mode table. Live code blocks located in the current
+It is also possible to evaluate named code blocks from anywhere in an Org
+mode buffer or an Org mode table.  Live code blocks located in the current
 Org mode buffer or in the ``Library of Babel'' (see @ref{Library of Babel})
 can be executed.  Named code blocks can be executed with a separate
 @code{#+CALL:} line or inline within a block of text.
@@ -13053,7 +13053,7 @@ syntax used to specify arguments is the same across all languages.  In every
 case, variables require a default value when they are declared.
 
 The values passed to arguments can either be literal values, references, or
-Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}). References
+Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}).  References
 include anything in the Org mode file that takes a @code{#+NAME:},
 @code{#+TBLNAME:}, or @code{#+RESULTS:} line.  This includes tables, lists,
 @code{#+BEGIN_EXAMPLE} blocks, other code blocks, and the results of other
@@ -13621,15 +13621,15 @@ not be expanded before the code block is evaluated, tangled or exported.
 expanded before the code block is evaluated, tangled or exported.
 @item @code{tangle}
 ``Noweb'' syntax references in the body of the code block will be expanded
-before the code block is tangled. However, ``noweb'' syntax references will
+before the code block is tangled.  However, ``noweb'' syntax references will
 not be expanded when the code block is evaluated or exported.
 @item @code{no-export}
 ``Noweb'' syntax references in the body of the code block will be expanded
-before the block is evaluated or tangled. However, ``noweb'' syntax
+before the block is evaluated or tangled.  However, ``noweb'' syntax
 references will not be expanded when the code block is exported.
 @item @code{strip-export}
 ``Noweb'' syntax references in the body of the code block will be expanded
-before the block is evaluated or tangled. However, ``noweb'' syntax
+before the block is evaluated or tangled.  However, ``noweb'' syntax
 references will not be removed when the code block is exported.
 @end itemize
 
@@ -16143,7 +16143,7 @@ capture support for an Org mode system rooted on a ``real'' computer.  It
 does also allow you to record changes to existing entries.
 The @uref{http://mobileorg.ncogni.to/, iOS implementation} for the
 @i{iPhone/iPod Touch/iPad} series of devices, was developed by Richard
-Moreland. Android users should check out
+Moreland.  Android users should check out
 @uref{http://wiki.github.com/matburt/mobileorg-android/, MobileOrg Android}
 by Matt Jones.  The two implementations are not identical but offer similar
 features.
