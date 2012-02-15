@@ -92,6 +92,12 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
     "http://some.host.com/form?&id=blah%2Bblah25"
     (org-link-unescape (org-link-escape "http://some.host.com/form?&id=blah%2Bblah25")))))
 
+(ert-deftest test-org/accumulated-properties-in-drawers ()
+  "Ensure properties accumulate in subtree drawers."
+  (org-test-at-id "75282ba2-f77a-4309-a970-e87c149fe125"
+    (org-babel-next-src-block)
+    (should (equal '(2 1) (org-babel-execute-src-block)))))
+
 (provide 'test-org)
 
 ;;; test-org.el ends here
