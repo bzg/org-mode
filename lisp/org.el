@@ -14137,24 +14137,26 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 	  ;; retrieve it, but specify the wanted property
 	  (cdr (assoc property (org-entry-properties nil 'special property)))
 	(let ((range (unless (org-before-first-heading-p)
-		       (org-get-property-block))))
-	  (when (and range (goto-char (car range)))
-	    ((lambda (val) (when val (if literal-nil val (org-not-nil val))))
-	     (cond
-	      ((re-search-forward
-		(org-re-property property) (cdr range) t)
-	       (if (match-end 1) (org-match-string-no-properties 1) ""))
-	      ((re-search-forward
-		(org-re-property (concat property "+")) (cdr range) t)
-	       (cdr (assoc
-		     property
-		     (org-update-property-plist
-		      (concat property "+")
-		      (if (match-end 1) (org-match-string-no-properties 1) "")
-		      (list (or (assoc property org-file-properties)
-				(assoc property org-global-properties)
-				(assoc property org-global-properties-fixed)
-				))))))))))))))
+		       (org-get-property-block)))
+	      (props (list (or (assoc property org-file-properties)
+			       (assoc property org-global-properties)
+			       (assoc property org-global-properties-fixed))))
+	      val)
+	  (flet ((ap (key)
+		     (when (re-search-forward
+			    (org-re-property key) (cdr range) t)
+		       (setq props
+			     (org-update-property-plist
+			      key
+			      (if (match-end 1)
+				  (org-match-string-no-properties 1) "")
+			      props)))))
+	    (when (and range (goto-char (car range)))
+	      (ap property)
+	      (goto-char (car range))
+	      (ap (concat property "+"))
+	      (setq val (cdr (assoc property props)))
+	      (when val (if literal-nil val (org-not-nil val))))))))))
 
 (defun org-property-or-variable-value (var &optional inherit)
   "Check if there is a property fixing the value of VAR.
