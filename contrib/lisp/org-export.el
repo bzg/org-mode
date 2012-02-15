@@ -233,6 +233,21 @@ considered back-end.  Filters defined there will always be
 prepended to the current list, so they always get applied
 first.")
 
+(defconst org-export-default-inline-image-rule
+  `(("file" .
+     ,(format "\\.%s\\'"
+	      (regexp-opt
+	       '("png" "jpeg" "jpg" "gif" "tiff" "tif" "xbm"
+		 "xpm" "pbm" "pgm" "ppm") t))))
+  "Default rule for link matching an inline image.
+This rule applies to links with no description.  By default, it
+will be considered as an inline image if it targets a local file
+whose extension is either \"png\", \"jpeg\", \"jpg\", \"gif\",
+\"tiff\", \"tif\", \"xbm\", \"xpm\", \"pbm\", \"pgm\" or \"ppm\".
+See `org-export-inline-image-p' for more information about
+rules.")
+
+
 
 ;;; User-configurable Variables
 
@@ -2508,17 +2523,29 @@ PATH is the link path.  DESC is its description."
 	  ((string= desc "") "%s")
 	  (t desc))))
 
-(defun org-export-inline-image-p (link &optional extensions)
+(defun org-export-inline-image-p (link &optional rules)
   "Non-nil if LINK object points to an inline image.
 
-When non-nil, optional argument EXTENSIONS is a list of valid
-extensions for image files, as strings.  Otherwise, a default
-list is provided \(cf `org-image-file-name-regexp'\)."
+Optional argument is a set of RULES defining inline images.  It
+is an alist where associations have the following shape:
+
+  \(TYPE . REGEXP)
+
+Applying a rule means apply REGEXP against LINK's path when its
+type is TYPE.  The function will return a non-nil value if any of
+the provided rules is non-nil.  The default rule is
+`org-export-default-inline-image-rule'.
+
+This only applies to links without a description."
   (and (not (org-element-get-contents link))
-       (string= (org-element-get-property :type link) "file")
-       (org-file-image-p
-	(expand-file-name (org-element-get-property :path link))
-	extensions)))
+       (let ((case-fold-search t)
+	     (rules (or rules org-export-default-inline-image-rule)))
+	 (some
+	  (lambda (rule)
+	    (and (string= (org-element-get-property :type link) (car rule))
+		 (string-match (cdr rule)
+			       (org-element-get-property :path link))))
+	  rules))))
 
 (defun org-export-resolve-fuzzy-link (link info)
   "Return LINK destination.

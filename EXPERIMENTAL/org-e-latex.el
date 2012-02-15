@@ -352,17 +352,22 @@ to typeset and try to protect special characters."
   :group 'org-export-e-latex
   :type 'string)
 
-(defcustom org-e-latex-inline-image-extensions
-  '("pdf" "jpeg" "jpg" "png" "ps" "eps")
-  "Extensions of image files that can be inlined into LaTeX.
+(defcustom org-e-latex-inline-image-rules
+  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\)\\'"))
+  "Rules characterizing image files that can be inlined into LaTeX.
 
-Note that the image extension *actually* allowed depend on the
-way the LaTeX file is processed.  When used with pdflatex, pdf,
-jpg and png images are OK.  When processing through dvi to
-Postscript, only ps and eps are allowed.  The default we use here
-encompasses both."
+A rule consists in an association whose key is the type of link
+to consider, and value is a regexp that will be matched against
+link's path.
+
+Note that, by default, the image extension *actually* allowed
+depend on the way the LaTeX file is processed.  When used with
+pdflatex, pdf, jpg and png images are OK.  When processing
+through dvi to Postscript, only ps and eps are allowed.  The
+default we use here encompasses both."
   :group 'org-export-e-latex
-  :type '(repeat (string :tag "Extension")))
+  :type '(alist :key-type (string :tag "Type")
+		:value-type (regexp :tag "Path")))
 
 
 ;;;; Tables
@@ -1372,7 +1377,7 @@ INFO is a plist holding contextual information.  See
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
 	 (imagep (org-export-inline-image-p
-		  link org-e-latex-inline-image-extensions))
+		  link org-e-latex-inline-image-rules))
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))

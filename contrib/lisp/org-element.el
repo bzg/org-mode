@@ -2518,7 +2518,7 @@ This list is checked after translations have been applied.  See
   '((emphasis entity export-snippet inline-babel-call inline-src-block
 	      radio-target sub/superscript target text-markup time-stamp)
     (link entity export-snippet inline-babel-call inline-src-block
-	  latex-fragment sub/superscript text-markup)
+	  latex-fragment link sub/superscript text-markup)
     (radio-target entity export-snippet latex-fragment sub/superscript)
     (subscript entity export-snippet inline-babel-call inline-src-block
 	       latex-fragment sub/superscript text-markup)
