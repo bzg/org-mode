@@ -3048,13 +3048,57 @@ affiliated keyword."
 
 ;;;; Topology
 
+;; Here are various functions to retrieve information about the
+;; neighbourhood of a given element or object.  Neighbours of interest
+;; are parent headline (`org-export-get-parent-headline'), parent
+;; paragraph (`org-export-get-parent-paragraph'), previous element or
+;; object (`org-export-get-previous-element') and next element or
+;; object (`org-export-get-next-element').
+
+;; All of these functions are just a specific use of the more generic
+;; `org-export-get-genealogy', which returns the genealogy relative to
+;; the element or object.
+
+(defun org-export-get-genealogy (blob info)
+  "Return genealogy relative to a given element or object.
+BLOB is the element or object being considered.  INFO is a plist
+used as a communication channel."
+  ;; LOCALP tells if current `:genealogy' is sufficient to find parent
+  ;; headline, or if it should be computed.
+  (let ((localp (member blob (org-element-get-contents
+			      (car (plist-get info :genealogy))))))
+    (if localp (plist-get info :genealogy)
+      (catch 'exit
+	(org-element-map
+	 (plist-get info :parse-tree) (car blob)
+	 (lambda (el local) (when (equal el blob) (throw 'exit local)))
+	 info)))))
+
 (defun org-export-get-parent-headline (blob info)
-  "Return BLOB's closest parent headline or nil.
-INFO is a plist used as a communication channel."
+  "Return closest parent headline or nil.
+
+BLOB is the element or object being considered.  INFO is a plist
+used as a communication channel."
   (catch 'exit
     (mapc
      (lambda (el) (when (eq (car el) 'headline) (throw 'exit el)))
-     (plist-get info :genealogy))
+     (org-export-get-genealogy blob info))
+    nil))
+
+(defun org-export-get-parent-paragraph (object info)
+  "Return parent paragraph or nil.
+
+INFO is a plist used as a communication channel.
+
+Optional argument OBJECT, when provided, is the object to consider.
+Otherwise, return the paragraph containing current object.
+
+This is useful for objects, which share attributes with the
+paragraph containing them."
+  (catch 'exit
+    (mapc
+     (lambda (el) (when (eq (car el) 'paragraph) (throw 'exit el)))
+     (org-export-get-genealogy object info))
     nil))
 
 (defun org-export-get-previous-element (blob info)
@@ -3064,7 +3108,7 @@ BLOB is an element or object.  INFO is a plist used as
 a communication channel.
 
 Return previous element or object, a string, or nil."
-  (let ((parent (car (plist-get info :genealogy))))
+  (let ((parent (car (org-export-get-genealogy blob info))))
     (cadr (member blob (reverse (org-element-get-contents parent))))))
 
 (defun org-export-get-next-element (blob info)
@@ -3074,7 +3118,7 @@ BLOB is an element or object.  INFO is a plist used as
 a communication channel.
 
 Return next element or object, a string, or nil."
-  (let ((parent (car (plist-get info :genealogy))))
+  (let ((parent (car (org-export-get-genealogy blob info))))
     (cadr (member blob (org-element-get-contents parent)))))
 
 

@@ -1311,18 +1311,23 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Link
 
-(defun org-e-latex-link--inline-image (path info)
-  "Return LaTeX code for an image at PATH.
-INFO is a plist containing export options."
-  (let* ((parent-props (nth 1 (car (plist-get info :genealogy))))
+(defun org-e-latex-link--inline-image (link info)
+  "Return LaTeX code for an inline image.
+LINK is the link pointing to the inline image.  INFO is a plist
+used as a communication channel."
+  (let* ((parent (org-export-get-parent-paragraph link info))
+	 (path (let ((raw-path (org-element-get-property :path link)))
+		 (if (not (file-name-absolute-p raw-path)) raw-path
+		   (expand-file-name raw-path))))
 	 (caption (org-e-latex--caption/label-string
-		   (plist-get parent-props :caption)
-		   (plist-get parent-props :name)
+		   (org-element-get-property :caption parent)
+		   (org-element-get-property :name parent)
 		   info))
 	 ;; Retrieve latex attributes from the element around.
 	 (attr (let ((raw-attr
 		      (mapconcat #'identity
-				 (plist-get parent-props :attr_latex) " ")))
+				 (org-element-get-property :attr_latex parent)
+				 " ")))
 		 (unless (string= raw-attr "") raw-attr)))
 	 (disposition
 	  (cond
@@ -1352,15 +1357,15 @@ INFO is a plist containing export options."
 		     (t (or org-e-latex-image-default-option ""))))
     ;; Return proper string, depending on DISPOSITION.
     (case disposition
-      ('wrap (format "\\begin{wrapfigure}%s
+      (wrap (format "\\begin{wrapfigure}%s
 \\centering
 \\includegraphics[%s]{%s}
 %s\\end{wrapfigure}" placement attr path caption))
-      ('mulicolumn (format "\\begin{figure*}%s
+      (mulicolumn (format "\\begin{figure*}%s
 \\centering
 \\includegraphics[%s]{%s}
 %s\\end{figure*}" placement attr path caption))
-      ('float (format "\\begin{figure}%s
+      (float (format "\\begin{figure}%s
 \\centering
 \\includegraphics[%s]{%s}
 %s\\end{figure}" placement attr path caption))
@@ -1381,8 +1386,6 @@ INFO is a plist holding contextual information.  See
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
-		(imagep (if (not (file-name-absolute-p raw-path)) raw-path
-			  (expand-file-name raw-path)))
 		((string= type "file")
 		 (when (string-match "\\(.+\\)::.+" raw-path)
 		   (setq raw-path (match-string 1 raw-path)))
@@ -1395,7 +1398,7 @@ INFO is a plist holding contextual information.  See
 	 protocol)
     (cond
      ;; Image file.
-     (imagep (org-e-latex-link--inline-image path info))
+     (imagep (org-e-latex-link--inline-image link info))
      ;; Target or radioed target: replace link with the normalized
      ;; custom-id/target name.
      ((member type '("target" "radio"))
