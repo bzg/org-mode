@@ -1280,7 +1280,13 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	     "\\tableofcontents")))
 	 ((string= "tables" value) "\\listoftables")
 	 ((string= "figures" value) "\\listoffigures")
-	 ((string= "listings" value) "\\listoflistings")))))))
+	 ((string= "listings" value)
+	  (cond
+	   ((eq org-e-latex-listings 'minted) "\\listoflistings")
+	   (org-e-latex-listings "\\lstlistoflistings")
+	   ;; At the moment, src blocks with a caption are wrapped
+	   ;; into a figure environment.
+	   (t "\\listoffigures")))))))))
 
 
 ;;;; Latex Environment
