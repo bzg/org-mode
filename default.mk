@@ -19,6 +19,10 @@ datadir = $(prefix)/emacs/etc/org
 # Where info files go.
 infodir = $(prefix)/info
 
+# where to create temporary files for the testsuite
+TMPDIR ?= /tmp
+testdir = $(TMPDIR)/tmp-orgtest
+
 ##----------------------------------------------------------------------
 ## YOU MAY NEED TO ADAPT THESE DEFINITIONS
 ##----------------------------------------------------------------------

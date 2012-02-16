@@ -23,7 +23,7 @@ endif
 .PHONY:	default all up2 update compile lisp doc etc \
 	check test install info html pdf card docs $(INSTSUB) \
 	autoloads cleanall clean cleancontrib cleanrel clean-install \
-	cleanelc cleanlisp cleandoc cleandocs
+	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest
 
 all \
 compile::	lisp
@@ -41,7 +41,11 @@ check test::	all
 
 check test \
 test-dirty::
-	$(BTEST)
+	-$(MKDIR) $(testdir)
+	TMPDIR=$(testdir) $(BTEST)
+ifeq ($(TEST_NO_AUTOCLEAN),) # define this variable to leave $(testdir) around for inspection
+	$(MAKE) cleantest
+endif
 
 up2:	update
 	$(SUDO) $(MAKE) install
@@ -66,13 +70,14 @@ $(INSTSUB):
 autoloads: lisp
 	$(MAKE) -C $< $@
 
-cleanall: $(SUBDIRS)
-	$(foreach dir, $?, $(MAKE) -C $(dir) $@;)
-	-$(FIND) . -name \*~ -exec $(RM) {} \;
+cleandirs: $(SUBDIRS)
+	$(foreach dir, $?, $(MAKE) -C $(dir) cleanall;)
 
 clean:	cleanrel
 	$(MAKE) -C lisp clean
 	$(MAKE) -C doc clean
+
+cleanall: cleandirs cleantest
 	-$(FIND) . -name \*~ -exec $(RM) {} \;
 
 cleancontrib:
@@ -85,6 +90,11 @@ cleanrel:
 
 cleanelc cleanlisp:
 	$(MAKE) -C lisp clean
+	-$(FIND) lisp -name \*~ -exec $(RM) {} \;
 
 cleandoc cleandocs:
 	$(MAKE) -C doc clean
+	-$(FIND) doc -name \*~ -exec $(RM) {} \;
+
+cleantest:
+	$(RMR) $(testdir)
