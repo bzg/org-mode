@@ -1597,16 +1597,11 @@ line.  In particular, if an ordered list reaches number @samp{10.}, then the
 list.  An item ends before the next line that is less or equally indented
 than its bullet/number.
 
-@vindex org-list-ending-method
-@vindex org-list-end-regexp
 @vindex org-empty-line-terminates-plain-lists
-Two methods@footnote{To disable either of them, configure
-@code{org-list-ending-method}.} are provided to terminate lists.  A list ends
-whenever every item has ended, which means before any line less or equally
-indented than items at top level.  It also ends before two blank
+A list ends whenever every item has ended, which means before any line less
+or equally indented than items at top level.  It also ends before two blank
 lines@footnote{See also @code{org-empty-line-terminates-plain-lists}.}.  In
-that case, all items are closed.  For finer control, you can end lists with
-any pattern set in @code{org-list-end-regexp}.  Here is an example:
+that case, all items are closed.  Here is an example:
 
 @example
 @group
