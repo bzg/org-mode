@@ -2452,7 +2452,7 @@ Sharing the same successor comes handy when, for example, the
 regexp matching one object can also match the other object.")
 
 (defconst org-element-recursive-objects
-  '(emphasis link subscript superscript target radio-target)
+  '(emphasis link macro subscript superscript target radio-target)
   "List of recursive object types.")
 
 (defconst org-element-non-recursive-block-alist
@@ -2517,6 +2517,7 @@ This list is checked after translations have been applied.  See
 	      radio-target sub/superscript target text-markup time-stamp)
     (link entity export-snippet inline-babel-call inline-src-block
 	  latex-fragment link sub/superscript text-markup)
+    (macro macro)
     (radio-target entity export-snippet latex-fragment sub/superscript)
     (subscript entity export-snippet inline-babel-call inline-src-block
 	       latex-fragment sub/superscript text-markup)

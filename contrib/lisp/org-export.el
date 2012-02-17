@@ -1011,109 +1011,124 @@ far, used to avoid circular dependencies.
 
 Assume buffer is in Org mode.  Narrowing, if any, is ignored."
   (org-with-wide-buffer
-    (goto-char (point-min))
-    (let ((case-fold-search t) plist)
-      ;; 1. Special keywords, as in `org-export-special-keywords'.
-      (let ((special-re (org-make-options-regexp org-export-special-keywords)))
-	(while (re-search-forward special-re nil t)
-	  (let ((element (org-element-at-point)))
-	    (when (eq (car element) 'keyword)
-	      (let ((key (upcase (org-element-get-property :key element)))
-		    (val (org-element-get-property :value element)))
-		(setq plist
-		      (org-combine-plists
-		       plist
-		       (cond
-			((string= key "SETUP_FILE")
-			 (let ((file
-				(expand-file-name
-				 (org-remove-double-quotes (org-trim val)))))
-			   ;; Avoid circular dependencies.
-			   (unless (member file files)
-			     (with-temp-buffer
-			       (insert (org-file-contents file 'noerror))
-			       (org-mode)
-			       (org-export-get-inbuffer-options
-				backend (cons file files))))))
-			((string= key "OPTIONS")
-			 (org-export-parse-option-keyword val backend))
-			((string= key "MACRO")
-			 (when (string-match
-				"^\\([-a-zA-Z0-9_]+\\)\\(?:[ \t]+\\(.*?\\)[ \t]*$\\)?"
-				val)
-			   (let ((key
-				  (intern
-				   (concat ":macro-"
-					   (downcase (match-string 1 val)))))
-				 (value (match-string 2 val)))
-			     (cond
-			      ((not value) "")
-			      ((string-match "\\`(eval\\>" value)
-			       (list key value))
-			      (t
-			       (list
-				key
-				;; If user explicitly asks for a newline, be
-				;; sure to preserve it from further filling
-				;; with `hard-newline'.
-				(replace-regexp-in-string
-				 "\\\\n" hard-newline value)))))))))))))))
-      ;; 2. Standard options, as in `org-export-option-alist'.
-      (let* ((all (append org-export-option-alist
-			  ;; Also look for back-end specific options
-			  ;; if BACKEND is defined.
-			  (and backend
-			       (let ((var
-				      (intern
-				       (format "org-%s-option-alist" backend))))
-				 (and (boundp var) (eval var))))))
-	     ;; Build alist between keyword name and property name.
-	     (alist
-	      (delq nil (mapcar
-			 (lambda (e) (when (nth 1 e) (cons (nth 1 e) (car e))))
-			 all)))
-	     ;; Build regexp matching all keywords associated to export
-	     ;; options.  Note: the search is case insensitive.
-	     (opt-re (org-make-options-regexp
-		      (delq nil (mapcar (lambda (e) (nth 1 e)) all)))))
-	(goto-char (point-min))
-	(while (re-search-forward opt-re nil t)
-	  (let ((element (org-element-at-point)))
-	    (when (eq (car element) 'keyword)
-	      (let* ((key (upcase (org-element-get-property :key element)))
-		     (val (org-element-get-property :value element))
-		     (prop (cdr (assoc key alist)))
-		     (behaviour (nth 4 (assq prop all))))
-		(setq plist
-		      (plist-put
-		       plist prop
-		       ;; Handle value depending on specified BEHAVIOUR.
-		       (case behaviour
-			 (space
-			  (if (not (plist-get plist prop)) (org-trim val)
-			    (concat (plist-get plist prop) " " (org-trim val))))
-			 (newline
-			  (org-trim
-			   (concat (plist-get plist prop) "\n" (org-trim val))))
-			 (split
-			  `(,@(plist-get plist prop) ,@(org-split-string val)))
-			 ('t val)
-			 (otherwise (plist-get plist prop)))))))))
-	;; Parse keywords specified in `org-element-parsed-keywords'.
-	(mapc
-	 (lambda (key)
-	   (let* ((prop (cdr (assoc key alist)))
-		  (value (and prop (plist-get plist prop))))
-	     (when (stringp value)
+   (goto-char (point-min))
+   (let ((case-fold-search t) plist)
+     ;; 1. Special keywords, as in `org-export-special-keywords'.
+     (let ((special-re (org-make-options-regexp org-export-special-keywords)))
+       (while (re-search-forward special-re nil t)
+	 (let ((element (org-element-at-point)))
+	   (when (eq (car element) 'keyword)
+	     (let* ((key (upcase (org-element-get-property :key element)))
+		    (val (org-element-get-property :value element))
+		    (prop
+		     (cond
+		      ((string= key "SETUP_FILE")
+		       (let ((file
+			      (expand-file-name
+			       (org-remove-double-quotes (org-trim val)))))
+			 ;; Avoid circular dependencies.
+			 (unless (member file files)
+			   (with-temp-buffer
+			     (insert (org-file-contents file 'noerror))
+			     (org-mode)
+			     (org-export-get-inbuffer-options
+			      backend (cons file files))))))
+		      ((string= key "OPTIONS")
+		       (org-export-parse-option-keyword val backend))
+		      ((string= key "MACRO")
+		       (when (string-match
+			      "^\\([-a-zA-Z0-9_]+\\)\\(?:[ \t]+\\(.*?\\)[ \t]*$\\)?"
+			      val)
+			 (let ((key
+				(intern
+				 (concat ":macro-"
+					 (downcase (match-string 1 val)))))
+			       (value (org-match-string-no-properties 2 val)))
+			   (cond
+			    ((not value) "")
+			    ;; Value will be evaled.  Leave it as-is.
+			    ((string-match "\\`(eval\\>" value)
+			     (list key value))
+			    ;; Value has to be parsed for nested
+			    ;; macros.
+			    (t
+			     (list
+			      key
+			      (let ((restr
+				     (cdr
+				      (assq 'macro
+					    org-element-object-restrictions))))
+				(org-element-parse-secondary-string
+				 ;; If user explicitly asks for
+				 ;; a newline, be sure to preserve it
+				 ;; from further filling with
+				 ;; `hard-newline'.  Also replace
+				 ;; "\\n" with "\n", "\\\n" with "\\n"
+				 ;; and so on...
+				 (replace-regexp-in-string
+				  "\\(\\\\\\\\\\)n" "\\\\"
+				  (replace-regexp-in-string
+				   "\\(?:^\\|[^\\\\]\\)\\(\\\\n\\)"
+				   hard-newline value nil nil 1)
+				  nil nil 1)
+				 restr)))))))))))
+	       (setq plist (org-combine-plists plist prop)))))))
+     ;; 2. Standard options, as in `org-export-option-alist'.
+     (let* ((all (append org-export-option-alist
+			 ;; Also look for back-end specific options
+			 ;; if BACKEND is defined.
+			 (and backend
+			      (let ((var
+				     (intern
+				      (format "org-%s-option-alist" backend))))
+				(and (boundp var) (eval var))))))
+	    ;; Build alist between keyword name and property name.
+	    (alist
+	     (delq nil (mapcar
+			(lambda (e) (when (nth 1 e) (cons (nth 1 e) (car e))))
+			all)))
+	    ;; Build regexp matching all keywords associated to export
+	    ;; options.  Note: the search is case insensitive.
+	    (opt-re (org-make-options-regexp
+		     (delq nil (mapcar (lambda (e) (nth 1 e)) all)))))
+       (goto-char (point-min))
+       (while (re-search-forward opt-re nil t)
+	 (let ((element (org-element-at-point)))
+	   (when (eq (car element) 'keyword)
+	     (let* ((key (upcase (org-element-get-property :key element)))
+		    (val (org-element-get-property :value element))
+		    (prop (cdr (assoc key alist)))
+		    (behaviour (nth 4 (assq prop all))))
 	       (setq plist
 		     (plist-put
 		      plist prop
-		      (org-element-parse-secondary-string
-		       value
-		       (cdr (assq 'keyword org-element-string-restrictions))))))))
-	 org-element-parsed-keywords))
-      ;; 3. Return final value.
-      plist)))
+		      ;; Handle value depending on specified BEHAVIOUR.
+		      (case behaviour
+			(space
+			 (if (not (plist-get plist prop)) (org-trim val)
+			   (concat (plist-get plist prop) " " (org-trim val))))
+			(newline
+			 (org-trim
+			  (concat (plist-get plist prop) "\n" (org-trim val))))
+			(split
+			 `(,@(plist-get plist prop) ,@(org-split-string val)))
+			('t val)
+			(otherwise (plist-get plist prop)))))))))
+       ;; Parse keywords specified in `org-element-parsed-keywords'.
+       (mapc
+	(lambda (key)
+	  (let* ((prop (cdr (assoc key alist)))
+		 (value (and prop (plist-get plist prop))))
+	    (when (stringp value)
+	      (setq plist
+		    (plist-put
+		     plist prop
+		     (org-element-parse-secondary-string
+		      value
+		      (cdr (assq 'keyword org-element-string-restrictions))))))))
+	org-element-parsed-keywords))
+     ;; 3. Return final value.
+     plist)))
 
 (defun org-export-get-global-options (&optional backend)
   "Return global export options as a plist.
@@ -2661,22 +2676,26 @@ INFO is a plist holding export options."
   (let* ((key (org-element-get-property :key macro))
 	 (args (org-element-get-property :args macro))
 	 ;; User's macros are stored in the communication channel with
-	 ;; a ":macro-" prefix.
-	 (value (plist-get info (intern (format ":macro-%s" key)))))
-    ;; Replace arguments in VALUE. A nil VALUE removes the macro call
-    ;; from export.
-    (when (stringp value)
-      (let ((s 0) n)
-	(while (string-match "\\$\\([0-9]+\\)" value s)
-	  (setq s (1+ (match-beginning 0))
-		n (string-to-number (match-string 1 value)))
-	  (and (>= (length args) n)
-	       (setq value (replace-match (nth (1- n) args) t t value)))))
-      ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
-      (when (string-match "\\`(eval\\>" value)
-	(setq value (eval (read value))))
-      ;; Return string.
-      (format "%s" (or value "")))))
+	 ;; a ":macro-" prefix.  If it's a string leave it as-is.
+	 ;; Otherwise, it's a secondary string that needs to be
+	 ;; expanded recursively.
+	 (value
+	  (let ((val (plist-get info (intern (format ":macro-%s" key)))))
+	    (if (stringp val) val
+	      (org-export-secondary-string
+	       val (plist-get info :back-end) info)))))
+    ;; Replace arguments in VALUE.
+    (let ((s 0) n)
+      (while (string-match "\\$\\([0-9]+\\)" value s)
+	(setq s (1+ (match-beginning 0))
+	      n (string-to-number (match-string 1 value)))
+	(and (>= (length args) n)
+	     (setq value (replace-match (nth (1- n) args) t t value)))))
+    ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
+    (when (string-match "\\`(eval\\>" value)
+      (setq value (eval (read value))))
+    ;; Return string.
+    (format "%s" (or value ""))))
 
 
 ;;;; For References
