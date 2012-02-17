@@ -1993,8 +1993,8 @@ Return the updated communication channel."
 ;; why file inclusion should be done before any structure can be
 ;; associated to the file, that is before parsing.
 
-(defun org-export-as (backend
-		      &optional subtreep visible-only body-only ext-plist)
+(defun org-export-as
+  (backend &optional subtreep visible-only body-only ext-plist noexpand)
   "Transcode current Org buffer into BACKEND code.
 
 If narrowing is active in the current buffer, only transcode its
@@ -2012,9 +2012,12 @@ contents of hidden elements.
 When optional argument BODY-ONLY is non-nil, only return body
 code, without preamble nor postamble.
 
-EXT-PLIST, when provided, is a property list with external
-parameters overriding Org default settings, but still inferior to
-file-local settings.
+Optional argument EXT-PLIST, when provided, is a property list
+with external parameters overriding Org default settings, but
+still inferior to file-local settings.
+
+Optional argument NOEXPAND, when non-nil, prevents included files
+to be expanded and Babel code to be executed.
 
 Return code as a string."
   (save-excursion
@@ -2039,14 +2042,18 @@ Return code as a string."
 	(when subtreep (forward-line) (narrow-to-region (point) (point-max)))
 	;; Install filters in communication channel.
 	(setq info (org-export-install-filters backend info))
-	(let ((raw-data (org-export-filter-apply-functions
-			 (plist-get info :filter-parse-tree)
-			 (org-export-with-current-buffer-copy
-			  (org-export-expand-include-keyword nil)
-			  (let ((org-current-export-file (current-buffer)))
-			    (org-export-blocks-preprocess))
-			  (org-element-parse-buffer nil visible-only))
-			 backend info)))
+	(let ((raw-data
+	       (org-export-filter-apply-functions
+		(plist-get info :filter-parse-tree)
+		;; If NOEXPAND is non-nil, simply parse current
+		;; visible part of buffer.
+		(if noexpand (org-element-parse-buffer nil visible-only)
+		  (org-export-with-current-buffer-copy
+		   (org-export-expand-include-keyword nil)
+		   (let ((org-current-export-file (current-buffer)))
+		     (org-export-blocks-preprocess))
+		   (org-element-parse-buffer nil visible-only)))
+		backend info)))
 	;; Complete communication channel with tree properties.
 	(setq info
 	      (org-combine-plists
@@ -2066,8 +2073,8 @@ Return code as a string."
 	  (when org-export-copy-to-kill-ring (org-kill-new output))
 	  output))))))
 
-(defun org-export-to-buffer (backend buffer &optional subtreep visible-only
-				     body-only ext-plist)
+(defun org-export-to-buffer
+  (backend buffer &optional subtreep visible-only body-only ext-plist noexpand)
   "Call `org-export-as' with output to a specified buffer.
 
 BACKEND is the back-end used for transcoding, as a symbol.
@@ -2075,11 +2082,13 @@ BACKEND is the back-end used for transcoding, as a symbol.
 BUFFER is the output buffer.  If it already exists, it will be
 erased first, otherwise, it will be created.
 
-Arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and EXT-PLIST are
-similar to those used in `org-export-as', which see.
+Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY, EXT-PLIST
+and NOEXPAND are similar to those used in `org-export-as', which
+see.
 
 Return buffer."
-  (let ((out (org-export-as backend subtreep visible-only body-only ext-plist))
+  (let ((out (org-export-as
+	      backend subtreep visible-only body-only ext-plist noexpand))
 	(buffer (get-buffer-create buffer)))
     (with-current-buffer buffer
       (erase-buffer)
@@ -2088,14 +2097,14 @@ Return buffer."
     buffer))
 
 (defun org-export-to-file
-  (backend file &optional subtreep visible-only body-only ext-plist)
+  (backend file &optional subtreep visible-only body-only ext-plist noexpand)
   "Call `org-export-as' with output to a specified file.
 
 BACKEND is the back-end used for transcoding, as a symbol.  FILE
 is the name of the output file, as a string.
 
-Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
-EXT-PLIST are similar to those used in `org-export-as', which
+Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY, EXT-PLIST
+and NOEXPAND are similar to those used in `org-export-as', which
 see.
 
 Return output file's name."
@@ -2104,7 +2113,7 @@ Return output file's name."
   (unless (file-writable-p file) (error "Output file not writable"))
   ;; Insert contents to a temporary buffer and write it to FILE.
   (let ((out (org-export-as
-	      backend subtreep visible-only body-only ext-plist)))
+	      backend subtreep visible-only body-only ext-plist noexpand)))
     (with-temp-buffer
       (insert out)
       (let ((coding-system-for-write org-export-coding-system))
