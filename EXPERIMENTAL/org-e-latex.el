@@ -45,6 +45,7 @@
 (declare-function org-element-parse-secondary-string
 		  "org-element" (string restriction &optional buffer))
 (defvar org-element-string-restrictions)
+(defvar org-element-object-restrictions)
 
 (declare-function org-export-clean-table "org-export" (table specialp))
 (declare-function org-export-data "org-export" (data backend info))
@@ -1405,14 +1406,18 @@ INFO is a plist holding contextual information.  See
     (cond
      ;; Image file.
      (imagep (org-e-latex-link--inline-image link info))
-     ;; Target or radioed target: replace link with the normalized
-     ;; custom-id/target name.
-     ((member type '("target" "radio"))
+     ;; Radioed target: Target's name is obtained from original raw
+     ;; link.  Path is parsed and transcoded in order to have a proper
+     ;; display of the contents.
+     ((string= type "radio")
       (format "\\hyperref[%s]{%s}"
 	      (org-export-solidify-link-text path)
-	      (or desc (org-export-secondary-string path 'e-latex info))))
+	      (org-export-secondary-string
+	       (org-element-parse-secondary-string
+		path (cdr (assq 'radio-target org-element-object-restrictions)))
+	       'e-latex info)))
      ;; Links pointing to an headline: Find destination and build
-     ;; appropriate referencing commanding.
+     ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
       (let ((destination (if (string= type "fuzzy")
 			     (org-export-resolve-fuzzy-link link info)

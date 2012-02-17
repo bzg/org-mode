@@ -2512,7 +2512,7 @@ INFO is the plist used as a communication channel."
 (defun org-export-solidify-link-text (s)
   "Take link text S and make a safe target out of it."
   (save-match-data
-    (mapconcat 'identity (org-split-string s "[^a-zA-Z0-9_\\.-]+") "-")))
+    (mapconcat 'identity (org-split-string s "[^a-zA-Z0-9_.-]+") "-")))
 
 (defun org-export-get-coderef-format (path desc)
   "Return format string for code reference link.

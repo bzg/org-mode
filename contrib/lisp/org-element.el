@@ -1923,13 +1923,11 @@ Assume point is at the beginning of the link."
 	  end contents-begin contents-end link-end post-blank path type
 	  raw-link link)
       (cond
-       ;; Type 1: text targeted from a radio target.
+       ;; Type 1: Text targeted from a radio target.
        ((and org-target-link-regexp (looking-at org-target-link-regexp))
 	(setq type "radio"
-	      path (org-match-string-no-properties 0)
-	      contents-begin (match-beginning 0)
-	      contents-end (match-end 0)
-	      link-end (match-end 0)))
+	      link-end (match-end 0)
+	      path (org-match-string-no-properties 0)))
        ;; Type 2: Standard link, i.e. [[http://orgmode.org][homepage]]
        ((looking-at org-bracket-link-regexp)
 	(setq contents-begin (match-beginning 3)
