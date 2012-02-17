@@ -1677,10 +1677,17 @@ TABLE-INFO holds information about the table.  See
 `org-export-table-format-info'.
 
 Unlike to `:width' property from `org-export-table-format-info',
-the return value contains width of every column, not only those
-with a width cookie."
-  (let* ((cookies (plist-get table-info :width))
-	 (width (make-vector (length cookies) 0)))
+the return value is a vector containing width of every column,
+not only those with an explicit width cookie.  Special column, if
+any, is ignored."
+  ;; All rows have the same length, but be sure to ignore hlines.
+  (let ((width (make-vector
+		(loop for row in table
+		      unless (eq row 'hline)
+		      return (length row))
+		0)))
+    ;; Set column width to the maximum width of the cells in that
+    ;; column.
     (mapc
      (lambda (line)
        (let ((idx 0))
@@ -1695,9 +1702,12 @@ with a width cookie."
       ;; When colums are not widened, width cookies have precedence
       ;; over string lengths.  Thus, overwrite the latter with the
       ;; former.
-      (loop for w across cookies
-	    for idx from 0 to (length cookies)
-	    when w do (aset width idx w)))
+      (let ((cookies (plist-get table-info :width))
+	    (specialp (plist-get table-info :special-column-p)))
+	;; Remove special column from COOKIES vector, if any.
+	(loop for w across (if specialp (substring cookies 1) cookies)
+	      for idx from 0 to width
+	      when w do (aset width idx w))))
     ;; Return value.
     width))
 
@@ -1787,14 +1797,16 @@ INFO is a plist used as a communication channel."
 			((eq position 'bottom) "┷")
 			(t "┼")))
 		 (t "+"))
-	   ;; Hline has to cover all the cell and
-	   ;; both white spaces between columns.
+	   ;; Hline has to cover all the cell and both white spaces
+	   ;; between columns.
 	   (make-string (+ width 2)
 			(cond ((not utf8p) ?-)
 			      ((not position) ?─)
 			      (t ?━))))
 	  into hline
 	  finally return
+	  ;; There is one separator more than columns, so handle it
+	  ;; here.
 	  (concat
 	   hline
 	   (cond
