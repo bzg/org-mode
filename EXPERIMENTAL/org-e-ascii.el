@@ -1613,14 +1613,22 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (special-col-p (plist-get table-info :special-column-p))
 	      (alignment (plist-get table-info :alignment))
 	      (clean-table (org-export-clean-table raw-table special-col-p))
-	      ;; Change table into lisp, much like `org-table-to-lisp',
-	      ;; being more careful about keeping the exact length of
-	      ;; cells, for alignment purpose.
+	      ;; Change table into lisp, much like
+	      ;; `org-table-to-lisp', being more careful about keeping
+	      ;; the exact length of cells, for alignment purpose.
+	      ;; Cells are parsed and transcoded along the way.
 	      (lisp-table
 	       (mapcar
 		(lambda (line)
 		  (if (string-match org-table-hline-regexp line) 'hline
-		    (org-split-string (org-trim line) "\\s-?|\\s-?")))
+		    (mapcar
+		     (lambda (cell)
+		       (org-export-secondary-string
+			(org-element-parse-secondary-string
+			 cell
+			 (cdr (assq 'item org-element-string-restrictions)))
+			'e-ascii info))
+		     (org-split-string (org-trim line) "\\s-?|\\s-?"))))
 		(org-split-string clean-table "[ \t]*\n[ \t]*")))
 	      ;; Compute real column widths.
 	      (column-widths
