@@ -3071,7 +3071,9 @@ used as a communication channel."
       (catch 'exit
 	(org-element-map
 	 (plist-get info :parse-tree) (car blob)
-	 (lambda (el local) (when (equal el blob) (throw 'exit local)))
+	 (lambda (el local)
+	   (when (equal el blob)
+	     (throw 'exit (plist-get local :genealogy))))
 	 info)))))
 
 (defun org-export-get-parent-headline (blob info)
