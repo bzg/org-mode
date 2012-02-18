@@ -3211,6 +3211,14 @@ Return an error if key pressed has no associated command."
       (?d (org-open-file
 	   (org-e-latex-export-to-pdf
 	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
+
+      ;; Export with `e-html' back-end.
+      (?h (org-e-html-export-to-html
+	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
+      (?b (org-open-file
+      	   (org-e-html-export-to-html
+      	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
+
       ;; Publishing facilities
       (?F (org-e-publish-current-file (memq 'force optns)))
       (?P (org-e-publish-current-project (memq 'force optns)))
@@ -3253,6 +3261,9 @@ final interactive export options as CDR."
 ---------------------  LaTeX Export  ----------------------
 \[l] to TEX file               [L] to temporary buffer
 \[p] to PDF file               [d] ... and open it
+
+---------------------  HTML Export  -----------------------
+\[h] to HTML file              [b] ... and open it
 
 ------------------------- Publish -------------------------
 \[F] current file              [P] current project
