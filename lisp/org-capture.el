@@ -347,6 +347,13 @@ widened to the entire buffer."
   :version "24.1"
   :type 'hook)
 
+(defcustom org-capture-prepare-finalize-hook nil
+  "Hook that is run before the finalization starts.
+The capture buffer is current and still narrowed."
+  :group 'org-capture
+  :version "24.1"
+  :type 'hook)
+
 ;;; The property list for keeping information about the capture process
 
 (defvar org-capture-plist nil
@@ -529,6 +536,8 @@ captured item after finalizing."
   (unless (and org-capture-mode
 	       (buffer-base-buffer (current-buffer)))
     (error "This does not seem to be a capture buffer for Org-mode"))
+
+  (run-hooks 'org-capture-prepare-finalize-hook)
 
   ;; Did we start the clock in this capture buffer?
   (when (and org-capture-clock-was-started
