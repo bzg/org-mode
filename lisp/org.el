@@ -14154,7 +14154,7 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 	    (when (and range (goto-char (car range)))
 	      (ap property)
 	      (goto-char (car range))
-	      (ap (concat property "+"))
+	      (while (ap (concat property "+")))
 	      (setq val (cdr (assoc property props)))
 	      (when val (if literal-nil val (org-not-nil val))))))))))
 
