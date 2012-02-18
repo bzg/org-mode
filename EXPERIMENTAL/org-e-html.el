@@ -1198,30 +1198,13 @@ of `org-lparse' to \"html\"."
 ;; progress. See org-lparse.el.
 
 ;; FIXME: the org-lparse defvar belongs to org-lparse.el
-(defvar org-lparse-table-begin-marker)
-(defvar org-lparse-table-ncols)
 (defvar org-lparse-table-rowgrp-open)
 (defvar org-lparse-table-rownum)
 (defvar org-lparse-table-cur-rowgrp-is-hdr)
 (defvar org-lparse-table-is-styled)
-(defvar org-lparse-table-rowgrp-info)
-(defvar org-lparse-table-colalign-vector)
-(defvar org-lparse-table-num-numeric-items-per-column)
 
-(defun org-e-html-format-footnote-definition (contents n)
-  (concat
-   (format
-    (format org-e-html-footnote-format
-	    "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>")
-    n n n)
-
-   contents))
-
-;; (defun org-e-html-format-spaces (n)
-;;   (let ((space (or (and org-lparse-encode-pending "\\nbsp") "&nbsp;")) out)
-;;     (while (> n 0)
-;;       (setq out (concat out space))
-;;       (setq n (1- n))) out))
+(defun org-e-html-format-spaces (n)
+  (let (out) (dotimes (i n out) (setq out (concat out "&nbsp;")))))
 
 (defun org-e-html-format-tabs (&optional n)
   (ignore))
@@ -1303,9 +1286,6 @@ Replaces invalid characters with \"_\"."
 			    (if (org-uuidgen-p x) (concat "ID-" x) x)))
 		   (org-e-html-format-anchor "" x))) extra-targets "")))
 
-(defun org-e-html-format-spaces (n)
-  (let (out) (dotimes (i n out) (setq out (concat out "&nbsp;")))))
-
 (defun org-e-html-format-org-tags (tags)
   (if (not tags) ""
     (org-e-html-format-fontify
@@ -1343,6 +1323,36 @@ Replaces invalid characters with \"_\"."
 (defun org-e-html-format-footnotes-section (section-name definitions)
   (if (not definitions) ""
     (format org-e-html-footnotes-section section-name definitions)))
+
+(defun org-e-html-format-footnote-definition (fn)
+  (let ((n (car fn)) (def (cdr fn)))
+    (format
+     "<tr>\n<td>%s</td>\n<td>%s</td>\n</tr>\n"
+     (format
+      (format org-e-html-footnote-format
+	      "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>")
+      n n n) def)))
+
+(defun org-e-html-footnote-section (info)
+  (let* ((fn-alist (org-export-collect-footnote-definitions
+		    (plist-get info :parse-tree) info))
+
+	 (fn-alist
+	  (loop for (n type raw) in fn-alist collect
+		(cons n (if (equal (car raw) 'org-data)
+			    (org-trim (org-export-data raw 'e-html info))
+			  (format "<p>%s</p>"
+				  (org-trim (org-export-secondary-string
+					     raw 'e-html info))))))))
+    (when fn-alist
+      (org-e-html-format-footnotes-section
+       (nth 4 (or (assoc (plist-get info :language)
+			 org-export-language-setup)
+		  (assoc "en" org-export-language-setup)))
+
+       (format
+	"<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">\n%s\n</table>\n"
+	(mapconcat 'org-e-html-format-footnote-definition fn-alist "\n"))))))
 
 (defun org-e-html-format-org-entity (wd)
   (org-entity-get-representation wd 'html))
@@ -1403,36 +1413,6 @@ Replaces invalid characters with \"_\"."
       (format-time-string date))
      (date date)
      (t (format-time-string "%Y-%m-%d %T %Z")))))
-
-(defun org-e-html-footnote-section (info)
-  (when org-e-html-footnotes-alist
-    (setq org-e-html-footnotes-alist (nreverse org-e-html-footnotes-alist))
-    (org-e-html-format-footnotes-section
-     (nth 4 (or (assoc (plist-get info :language)
-		       org-export-language-setup)
-		(assoc "en" org-export-language-setup)))
-
-     (format "
-<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">
-%s
-</table>
-
-"
-	     (mapconcat
-	      (lambda (x)
-		(let ((n (car x))
-		      (def (cdr x)))
-		  (format "
-<tr>
-<td>%s</td>
-<td>%s</td>
-</tr>
-"
-			  (format
-			   (format org-e-html-footnote-format
-				   "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>")
-			   n n n) def)))
-	      org-e-html-footnotes-alist "\n")))))
 
 (eval-when-compile (require 'cl))
 ;;; org-e-html.el
@@ -1690,15 +1670,6 @@ default we use here encompasses both."
 
 (defcustom org-e-html-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
-  :group 'org-export-e-html
-  :type 'boolean)
-
-(defcustom org-e-html-tables-booktabs nil
-  "When non-nil, display tables in a formal \"booktabs\" style.
-This option assumes that the \"booktabs\" package is properly
-loaded in the header of the document.  This value can be ignored
-locally with \"booktabs=yes\" and \"booktabs=no\" HTML
-attributes."
   :group 'org-export-e-html
   :type 'boolean)
 
@@ -2547,28 +2518,16 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     ((not (org-export-footnote-first-reference-p footnote-reference info))
      (org-e-html-format-footnote-reference
       (org-export-get-footnote-number footnote-reference info)
-      "FIXME" 100))
+      "IGNORED" 100))
     ;; Inline definitions are secondary strings.
     ((eq (org-element-get-property :type footnote-reference) 'inline)
-     (let ((n (org-export-get-footnote-number footnote-reference info))
-	   (def (format
-		 "<p>%s</p>"
-		 (org-trim
-		  (org-export-secondary-string
-		   (org-export-get-footnote-definition footnote-reference info)
-		   'e-html info)))))
-       (push (cons n def) org-e-html-footnotes-alist)
-       (org-e-html-format-footnote-reference n def 1)))
+     (org-e-html-format-footnote-reference
+      (org-export-get-footnote-number footnote-reference info)
+      "IGNORED" 1))
     ;; Non-inline footnotes definitions are full Org data.
-    (t
-     (let ((n (org-export-get-footnote-number footnote-reference info))
-	   (def (org-trim
-		 (org-export-data
-		  (org-export-get-footnote-definition footnote-reference info)
-		  'e-html info))))
-
-       (push (cons n def) org-e-html-footnotes-alist)
-       (org-e-html-format-footnote-reference n def 1))))))
+    (t (org-e-html-format-footnote-reference
+	(org-export-get-footnote-number footnote-reference info)
+	"IGNORED" 1)))))
 
 
 ;;;; Headline
@@ -3319,103 +3278,6 @@ contextual information."
 
 ;;;; Table
 
-(defun org-e-html-table--format-string (table table-info info)
-  "Return an appropriate format string for TABLE.
-
-TABLE-INFO is the plist containing format info about the table,
-as returned by `org-export-table-format-info'.  INFO is a plist
-used as a communication channel.
-
-The format string leaves one placeholder for the body of the
-table."
-  (let* ((label (org-element-get-property :name table))
-	 (caption (org-e-html--caption/label-string
-		   (org-element-get-property :caption table) label info))
-	 (attr (mapconcat 'identity
-			  (org-element-get-property :attr_html table)
-			  " "))
-	 ;; Determine alignment string.
-	 (alignment (org-e-html-table--align-string attr table-info))
-	 ;; Determine environment for the table: longtable, tabular...
-	 (table-env (cond
-		     ((not attr) org-e-html-default-table-environment)
-		     ((string-match "\\<longtable\\>" attr) "longtable")
-		     ((string-match "\\<tabular.?\\>" attr)
-		      (org-match-string-no-properties 0 attr))
-		     (t org-e-html-default-table-environment)))
-	 ;; If table is a float, determine environment: table or table*.
-	 (float-env (cond
-		     ((string= "longtable" table-env) nil)
-		     ((and attr
-			   (or (string-match (regexp-quote "table*") attr)
-			       (string-match "\\<multicolumn\\>" attr)))
-		      "table*")
-		     ((or (not (string= caption "")) label) "table")))
-	 ;; Extract others display options.
-	 (width (and attr (string-match "\\<width=\\(\\S-+\\)" attr)
-		     (org-match-string-no-properties 1 attr)))
-	 (placement
-	  (if (and attr (string-match "\\<placement=\\(\\S-+\\)" attr))
-	      (org-match-string-no-properties 1 attr)
-	    (format "[%s]" org-e-html-default-figure-position))))
-    ;; Prepare the final format string for the table.
-    (cond
-     ;; Longtable.
-     ((string= "longtable" table-env)
-      (format
-       "\\begin{longtable}{%s}\n%s\n%%s\n%s\\end{longtable}"
-       alignment
-       (if (or (not org-e-html-table-caption-above) (string= "" caption)) ""
-	 (concat (org-trim caption) "\\\\"))
-       (if (or org-e-html-table-caption-above (string= "" caption)) ""
-	 (concat (org-trim caption) "\\\\\n"))))
-     ;; Others.
-     (t (concat (when float-env
-		  (concat
-		   (format "\\begin{%s}%s\n" float-env placement)
-		   (if org-e-html-table-caption-above caption "")))
-		(when org-e-html-tables-centered "\\begin{center}\n")
-		(format "\\begin{%s}%s{%s}\n%%s\n\\end{%s}"
-			table-env
-			(if width (format "{%s}" width) "") alignment table-env)
-		(when org-e-html-tables-centered "\n\\end{center}")
-		(when float-env
-		  (concat (if org-e-html-table-caption-above "" caption)
-			  (format "\n\\end{%s}" float-env))))))))
-
-(defun org-e-html-table--align-string (attr table-info)
-  "Return an appropriate HTML alignment string.
-ATTR is a string containing table's HTML specific attributes.
-TABLE-INFO is the plist containing format info about the table,
-as returned by `org-export-table-format-info'."
-  (or (and attr
-	   (string-match "\\<align=\\(\\S-+\\)" attr)
-	   (match-string 1 attr))
-      (let* ((align (copy-sequence (plist-get table-info :alignment)))
-	     (colgroups (copy-sequence (plist-get table-info :column-groups)))
-	     (cols (length align))
-	     (separators (make-vector (1+ cols) "")))
-	;; Ignore the first column if it's special.
-	(when (plist-get table-info :special-column-p)
-	  (aset align 0 "") (aset colgroups 0 nil))
-	(let ((col 0))
-	  (mapc (lambda (el)
-		  (let ((gr (aref colgroups col)))
-		    (when (memq gr '(start start-end))
-		      (aset separators col "|"))
-		    (when (memq gr '(end start-end))
-		      (aset separators (1+ col) "|")))
-		  (incf col))
-		align))
-	;; Build the HTML specific alignment string.
-	(loop for al across align
-	      for sep across separators
-	      concat (concat sep al) into output
-	      finally return (concat output (aref separators cols))))))
-
-
-;; tables
-
 (defun org-e-html-begin-table (caption label attributes)
   (let* ((html-table-tag (or (plist-get info :html-table-tag) ; FIXME
 			     org-e-html-table-tag))
@@ -3429,29 +3291,9 @@ as returned by `org-export-table-format-info'."
     (concat "\n" html-table-tag
 	    (format "\n<caption>%s</caption>" (or caption "")))))
 
+;; org-table-number-fraction FIXME
+
 (defun org-e-html-end-table ()
-  (when org-lparse-table-is-styled
-    ;; column groups
-    ;; (unless (car org-table-colgroup-info)
-    ;;   (setq org-table-colgroup-info
-    ;; 	    (cons :start (cdr org-table-colgroup-info))))
-
-    ;; column alignment
-    (let ((c -1))
-      ;; (mapc
-      ;;  (lambda (x)
-      ;; 	 (incf c)
-      ;; 	 (setf (aref org-lparse-table-colalign-vector c)
-      ;; 	       (or (aref org-lparse-table-colalign-vector c)
-      ;; 		   (if (> (/ (float x) (1+ org-lparse-table-rownum))
-      ;; 			  org-table-number-fraction)
-      ;; 		       "right" "left"))))
-      ;;  org-lparse-table-num-numeric-items-per-column)
-      ))
-
-  ;; html specific stuff starts here
-  ;; (org-e-html-end-table)
-
   "</table>\n")
 
 (defun org-e-html-format-table-cell (text r c horiz-span)
@@ -3480,18 +3322,6 @@ as returned by `org-export-table-format-info'."
 	  (eval (cdr org-export-table-row-tags))))
 
 (defun org-e-html-table-row (fields &optional text-for-empty-fields)
-  (if org-lparse-table-ncols
-      ;; second and subsequent rows of the table
-      ;; (when (and org-lparse-list-table-p
-      ;; 		 (> (length fields) org-lparse-table-ncols))
-      ;; 	(error "Table row has %d columns but header row claims %d columns"
-      ;; 	       (length fields) org-lparse-table-ncols))
-    ;; first row of the table
-    (setq org-lparse-table-ncols (length fields))
-    ;; (when org-lparse-table-is-styled
-    ;;   (setq org-lparse-table-num-numeric-items-per-column
-    ;; 	    (make-vector org-lparse-table-ncols 0)))
-    )
   (incf org-lparse-table-rownum)
   (let ((i -1))
     (org-e-html-format-table-row
@@ -3500,13 +3330,7 @@ as returned by `org-export-table-format-info'."
 	(when (and (string= x "") text-for-empty-fields)
 	  (setq x text-for-empty-fields))
 	(incf i)
-	(let (col-cookie horiz-span)
-	  (when org-lparse-table-is-styled
-	    ;; (when (and (< i org-lparse-table-ncols)
-	    ;; 	       (string-match org-table-number-regexp x))
-	    ;;   (incf (aref org-lparse-table-num-numeric-items-per-column i)))
-	    (setq col-cookie (cdr (assoc (1+ i) org-lparse-table-colalign-info))
-		  horiz-span (nth 1 col-cookie)))
+	(let (horiz-span)
 	  (org-e-html-format-table-cell
 	   x org-lparse-table-rownum i (or horiz-span 0))))
       fields "\n"))))
@@ -3554,19 +3378,15 @@ as returned by `org-export-table-format-info'."
     (concat preamble (if colgropen "</colgroup>"))))
 
 (defun org-e-html-list-table (lines &optional splice
-				  caption label attributes head
-				  org-lparse-table-colalign-info)
+				    caption label attributes head)
   (or (featurep 'org-table)		; required for
       (require 'org-table))		; `org-table-number-regexp'
   (let* ((org-lparse-table-rownum -1)
-	 (org-lparse-table-ncols (length (plist-get info :alignment)))
 	 i (cnt 0)
 	 tbopen fields line
 	 org-lparse-table-cur-rowgrp-is-hdr
 	 org-lparse-table-rowgrp-open
-	 ;; org-lparse-table-num-numeric-items-per-column
-	 org-lparse-table-colalign-vector n
-	 org-lparse-table-rowgrp-info
+	 n
 	 (org-lparse-table-style 'org-table)
 	 org-lparse-table-is-styled)
     (cond
@@ -3579,19 +3399,13 @@ as returned by `org-export-table-format-info'."
       (concat
        (org-e-html-begin-table caption label attributes)
        (org-e-html-table-preamble)
-       (progn (push (cons (1+ org-lparse-table-rownum) :start)
-		    org-lparse-table-rowgrp-info)
-	      (org-e-html-begin-table-rowgroup head))
+       (org-e-html-begin-table-rowgroup head)
 
        (mapconcat
 	(lambda (line)
 	  (cond
-	   ((equal line :hrule)
-	    (push (cons (1+ org-lparse-table-rownum) :start)
-		  org-lparse-table-rowgrp-info)
-	    (org-e-html-begin-table-rowgroup))
-	   (t
-	    (org-e-html-table-row line))))
+	   ((equal line :hrule) (org-e-html-begin-table-rowgroup))
+	   (t (org-e-html-table-row line))))
 	lines "\n")
 
        (org-e-html-end-table-rowgroup)
@@ -3625,13 +3439,13 @@ form (FIELD1 FIELD2 FIELD3 ...) as appropriate."
 (defun org-e-html-table (table contents info)
   "Transcode a TABLE element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* (
-	 ;; FIXME
-	 ;; see `org-e-html-table--format-string'
-	 (label (org-element-get-property :name table))
+  (let* ((label (org-element-get-property :name table))
 	 (caption (org-e-html--caption/label-string
 		   (org-element-get-property :caption table) label info))
+
 	 ;; FIXME
+	 ;; org-e-html-table-caption-above
+	 ;; (string= "" caption) (org-trim caption)
 
 	 (attr (mapconcat #'identity
 			  (org-element-get-property :attr_html table)
@@ -3660,29 +3474,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		      (with-current-buffer "*org-export-table*"
 			(org-trim (buffer-string))))))
 	(kill-buffer (get-buffer "*org-export-table*"))
-	;; Remove left out comments.
-	(while (string-match "^%.*\n" output)
-	  (setq output (replace-match "" t t output)))
-	;; When the "rmlines" attribute is provided, remove all hlines
-	;; but the the one separating heading from the table body.
-	(when (and attr (string-match "\\<rmlines\\>" attr))
-	  (let ((n 0) (pos 0))
-	    (while (and (< (length output) pos)
-			(setq pos (string-match "^\\\\hline\n?" output pos)))
-	      (incf n)
-	      (unless (= n 2)
-		(setq output (replace-match "" nil nil output))))))
-	;; (if (not org-e-html-tables-centered) output
-	;;   (format "\\begin{center}\n%s\n\\end{center}" output))
 	output))
      ;; Case 3: Standard table.
      (t
       (let* ((table-info (org-export-table-format-info raw-table))
+	     ;; (alignment (org-e-html-table--align-string attr table-info))
 	     (columns-number (length (plist-get table-info :alignment)))
-	     (longtablep (and attr (string-match "\\<longtable\\>" attr)))
-	     (booktabsp
-	      (or (and attr (string-match "\\<booktabs=\\(yes\\|t\\)\\>" attr))
-		  org-e-html-tables-booktabs))
 	     ;; CLEAN-TABLE is a table turned into a list, much like
 	     ;; `org-table-to-lisp', with special column and
 	     ;; formatting cookies removed, and cells already
@@ -3690,63 +3487,34 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	     (lines (org-split-string
 		     (org-export-clean-table
 		      raw-table (plist-get table-info :special-column-p)) "\n"))
+	     clean-table)
 
-	     ;; (clean-table
-	     ;;  (mapcar
-	     ;;   (lambda (row)
-	     ;; 	 (if (string-match org-table-hline-regexp row) 'hline
-	     ;; 	   (mapcar
-	     ;; 	    (lambda (cell)
-	     ;; 	      (org-export-secondary-string
-	     ;; 	       (org-element-parse-secondary-string
-	     ;; 		cell
-	     ;; 		(cdr (assq 'table org-element-string-restrictions)))
-	     ;; 	       'e-html info))
-	     ;; 	    (org-split-string row "[ \t]*|[ \t]*"))))
+	;; (setq clean-table
+	;;       (mapcar
+	;;        (lambda (row)
+	;;      	 (if (string-match org-table-hline-regexp row) 'hline
+	;;      	   (mapcar
+	;;      	    (lambda (cell)
+	;;      	      (org-export-secondary-string
+	;;      	       (org-element-parse-secondary-string
+	;;      		cell
+	;;      		(cdr (assq 'table org-element-string-restrictions)))
+	;;      	       'e-html info))
+	;;      	    (org-split-string row "[ \t]*|[ \t]*"))))
+	;;        lines))
 
-	     ;;   lines))
-
-
-
-	     )
-
-	(let ((splice nil) head)
-	  (setq lines (org-e-html-org-table-to-list-table lines splice))
-	  (org-e-html-list-table lines splice caption label attr head nil))
-	;; If BOOKTABSP is non-nil, remove any rule at the beginning
-	;; and the end of the table, since booktabs' special rules
-	;; will be inserted instead.
-	;; (when booktabsp
-	;;   (when (eq (car clean-table) 'hline)
-	;;     (setq clean-table (cdr clean-table)))
-	;;   (when (eq (car (last clean-table)) 'hline)
-	;;     (setq clean-table (butlast clean-table))))
 	;; Convert ROWS to send them to `orgtbl-to-latex'.  In
 	;; particular, send each cell to
 	;; `org-element-parse-secondary-string' to expand any Org
 	;; object within.  Eventually, flesh the format string out
 	;; with the table.
-	;; 	(format
-	;; 	 (org-e-html-table--format-string table table-info info)
-	;; 	 (orgtbl-to-latex
-	;; 	  clean-table
-	;; 	  ;; Parameters passed to `orgtbl-to-latex'.
-	;; 	  `(:tstart ,(and booktabsp "\\toprule")
-	;; 		    :tend ,(and booktabsp "\\bottomrule")
-	;; 		    :hline ,(if booktabsp "\\midrule" "\\hline")
-	;; 		    ;; Longtable environment requires specific header
-	;; 		    ;; lines end string.
-	;; 		    :hlend ,(and longtablep
-	;; 				 (format "\\\\
-	;; %s
-	;; \\endhead
-	;; %s\\multicolumn{%d}{r}{Continued on next page}\\\\
-	;; \\endfoot
-	;; \\endlastfoot"
-	;; 					 (if booktabsp "\\midrule" "\\hline")
-	;; 					 (if booktabsp "\\midrule" "\\hline")
-	;; 					 columns-number)))))
-	)))))
+	;; (format
+	;;  (org-e-html-table--format-string table table-info info)
+	;;  (orgtbl-to-latex clean-table params))
+
+	(let ((splice nil) head)
+	  (setq lines (org-e-html-org-table-to-list-table lines splice))
+	  (org-e-html-list-table lines splice caption label attr head)))))))
 
 
 ;;;; Target
@@ -3824,8 +3592,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   ;; Replace each white space at beginning of a line with a
   ;; non-breaking space.
   (while (string-match "^[ \t]+" contents)
-    (let ((new-str (format "&nbsp;"
-			   (length (match-string 0 contents)))))
+    (let ((new-str (org-e-html-format-spaces
+		    (length (match-string 0 contents)))))
       (setq contents (replace-match new-str nil t contents))))
 
   (org-e-html--wrap-label
@@ -3863,8 +3631,6 @@ directory.
 
 Return output file's name."
   (interactive)
-
-  (setq org-e-html-footnotes-alist nil)
 
   ;; FIXME
   (with-current-buffer (get-buffer-create "*debug*")
