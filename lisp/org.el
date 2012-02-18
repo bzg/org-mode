@@ -5460,6 +5460,22 @@ will be prompted for."
 	     '(font-lock-fontified t face font-lock-comment-face)))
 	   (t nil))))))
 
+(defun org-strip-protective-commas (beg end)
+  "Strip protective commas between BEG and END in the current buffer."
+  (interactive "r")
+  (save-excursion
+    (save-match-data
+      (goto-char beg)
+      (let ((front-line (save-excursion
+			  (re-search-forward
+			   "[^[:space:]]" end t)
+			  (goto-char (match-beginning 0))
+			  (current-column))))
+	(while (re-search-forward "^[ \t]*\\(,\\)\\([*]\\|#\\+\\)" end t)
+	  (goto-char (match-beginning 1))
+	  (when (= (current-column) front-line)
+	    (replace-match "" nil nil nil 1)))))))
+
 (defun org-activate-angle-links (limit)
   "Run through the buffer and add overlays to links."
   (if (re-search-forward org-angle-link-re limit t)
