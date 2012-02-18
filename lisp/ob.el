@@ -2269,8 +2269,10 @@ block but are passed literally to the \"example-block\"."
 
 (defun org-babel-strip-protective-commas (body)
   "Strip protective commas from bodies of source blocks."
-  (when body
-    (replace-regexp-in-string "^,#" "#" body)))
+  (with-temp-buffer
+    (insert body)
+    (org-strip-protective-commas (point-min) (point-max))
+    (buffer-string)))
 
 (defun org-babel-script-escape (str &optional force)
   "Safely convert tables into elisp lists."
