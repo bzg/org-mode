@@ -3218,7 +3218,9 @@ Return an error if key pressed has no associated command."
 	      (org-export-to-buffer
 	       'e-html "*Org E-HTML Export*"
 	       (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
-	 (with-current-buffer outbuf (nxhtml-mode))
+	 ;; set major mode
+	 (with-current-buffer outbuf
+	   (if (featurep 'nxhtml-mode) (nxhtml-mode) (nxml-mode)))
 	 (when org-export-show-temporary-export-buffer
 	   (switch-to-buffer-other-window outbuf))))
       (?h (org-e-html-export-to-html
