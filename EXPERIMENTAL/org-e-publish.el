@@ -602,16 +602,15 @@ Return output file name."
   (org-e-latex-compile
    (org-e-publish-org-to 'e-latex filename ".tex" plist pub-dir)))
 
-;; TODO: Not implemented yet.
-;; (defun org-e-publish-org-to-html (plist filename pub-dir)
-;;   "Publish an org file to HTML.
-;;
-;; FILENAME is the filename of the Org file to be published.  PLIST
-;; is the property list for the given project.  PUB-DIR is the
-;; publishing directory.
-;;
-;; Return output file name."
-;;   (org-e-publish-org-to 'e-html filename "html" plist pub-dir))
+(defun org-e-publish-org-to-html (plist filename pub-dir)
+  "Publish an org file to HTML.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to 'e-html filename "html" plist pub-dir))
 
 ;; TODO: Not implemented yet.
 ;; (defun org-e-publish-org-to-org (plist filename pub-dir)
