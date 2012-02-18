@@ -1949,13 +1949,7 @@ item.
 
 Org comes with a fast and intuitive table editor.  Spreadsheet-like
 calculations are supported using the Emacs @file{calc} package
-@ifinfo
-(@pxref{Top,Calc,,Calc,Gnu Emacs Calculator Manual}).
-@end ifinfo
-@ifnotinfo
-(see the Emacs Calculator manual for more information about the Emacs
-calculator).
-@end ifnotinfo
+(@pxref{Top, Calc, , calc, Gnu Emacs Calculator Manual}).
 
 @menu
 * Built-in table editor::       Simple tables
@@ -2515,9 +2509,8 @@ A formula can be any algebraic expression understood by the Emacs
 non-standard convention that @samp{/} has lower precedence than
 @samp{*}, so that @samp{a/b*c} is interpreted as @samp{a/(b*c)}.}  Before
 evaluation by @code{calc-eval} (@pxref{Calling Calc from
-Your Programs,calc-eval,Calling Calc from Your Lisp Programs,Calc,GNU
+Your Programs, calc-eval, Calling Calc from Your Lisp Programs, calc, GNU
 Emacs Calc Manual}),
-@c FIXME:  The link to the Calc manual in HTML does not work.
 variable substitution takes place according to the rules described above.
 @cindex vectors, in table calculations
 The range vectors can be directly fed into the Calc vector functions
@@ -14896,7 +14889,7 @@ checks for the availability of Calc by looking for the function
 been installed properly.  As of Emacs 22, Calc is part of the Emacs
 distribution.  Another possibility for interaction between the two
 packages is using Calc for embedded calculations.  @xref{Embedded Mode,
-, Embedded Mode, Calc, GNU Emacs Calc Manual}.
+, Embedded Mode, calc, GNU Emacs Calc Manual}.
 @item @file{constants.el} by Carsten Dominik
 @cindex @file{constants.el}
 @cindex Dominik, Carsten
