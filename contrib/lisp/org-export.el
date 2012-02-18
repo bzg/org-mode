@@ -94,6 +94,7 @@
 (require 'org-element)
 ;; Require major back-ends and publishing tools
 (require 'org-e-ascii "../../EXPERIMENTAL/org-e-ascii.el")
+(require 'org-e-html "../../EXPERIMENTAL/org-e-html.el")
 (require 'org-e-latex "../../EXPERIMENTAL/org-e-latex.el")
 (require 'org-e-publish "../../EXPERIMENTAL/org-e-publish.el")
 
@@ -3211,14 +3212,20 @@ Return an error if key pressed has no associated command."
       (?d (org-open-file
 	   (org-e-latex-export-to-pdf
 	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
-
       ;; Export with `e-html' back-end.
+      (?H
+       (let ((outbuf
+	      (org-export-to-buffer
+	       'e-html "*Org E-HTML Export*"
+	       (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
+	 (with-current-buffer outbuf (nxhtml-mode))
+	 (when org-export-show-temporary-export-buffer
+	   (switch-to-buffer-other-window outbuf))))
       (?h (org-e-html-export-to-html
 	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?b (org-open-file
-      	   (org-e-html-export-to-html
-      	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
-
+	   (org-e-html-export-to-html
+	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
       ;; Publishing facilities
       (?F (org-e-publish-current-file (memq 'force optns)))
       (?P (org-e-publish-current-project (memq 'force optns)))
@@ -3264,6 +3271,7 @@ final interactive export options as CDR."
 
 ---------------------  HTML Export  -----------------------
 \[h] to HTML file              [b] ... and open it
+\[H] to temporary buffer
 
 ------------------------- Publish -------------------------
 \[F] current file              [P] current project
