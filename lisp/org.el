@@ -16092,14 +16092,12 @@ in the timestamp determines what will be changed."
 
 (defun org-recenter-calendar (date)
   "If the calendar is visible, recenter it to DATE."
-  (let* ((win (selected-window))
-	 (cwin (get-buffer-window "*Calendar*" t))
-	 (calendar-move-hook nil))
+  (let ((cwin (get-buffer-window "*Calendar*" t)))
     (when cwin
-      (select-window cwin)
-      (calendar-goto-date (if (listp date) date
-			    (calendar-gregorian-from-absolute date)))
-      (select-window win))))
+      (let ((calendar-move-hook nil))
+	(with-selected-window cwin
+	  (calendar-goto-date (if (listp date) date
+				(calendar-gregorian-from-absolute date))))))))
 
 (defun org-goto-calendar (&optional arg)
   "Go to the Emacs calendar at the current date.
