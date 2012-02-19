@@ -869,26 +869,8 @@ Line 3\"
 	test-line
       (forward-char 1)
       (org-ctrl-c-ctrl-c)
-      (should (re-search-forward "\\#\\+results:" nil t))
-      (forward-line)
-      (should
-       (string=
-	"" 
-	(buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
-  (org-test-with-temp-text-in-file "
-#+begin_src emacs-lisp
-\"some text\";;
-#+end_src"
-
-    (progn
-      (org-babel-next-src-block)
-      (org-ctrl-c-ctrl-c)
-      (should (re-search-forward "\\#\\+results:" nil t))
-      (forward-line)
-      (should
-       (string=
-	": some text" 
-	(buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
+      (should (re-search-forward "=\"x\"=" nil t))
+      (forward-line))))
 
 (ert-deftest test-ob/commented-last-block-line-with-var ()
   (org-test-with-temp-text-in-file "
