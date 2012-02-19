@@ -46,6 +46,18 @@
     (goto-char org-lparse-dyn-first-heading-pos)))
   (insert (org-odt-format-toc)))
 
+(defun org-odt-insert-toc ()
+  (goto-char (point-min))
+  (cond
+   ((re-search-forward
+     "\\(<text:p [^>]*>\\)?\\s-*\\[TABLE-OF-CONTENTS\\]\\s-*\\(</text:p>\\)?"
+     nil t)
+    (goto-char (match-beginning 0))
+    (replace-match ""))
+   (t
+    (goto-char org-lparse-dyn-first-heading-pos))
+   (insert (org-odt-format-toc))))
+
 (defun org-odt-end-export ()
   (org-odt-insert-toc)
   (org-odt-fixup-label-references)
@@ -2169,6 +2181,7 @@ CATEGORY-HANDLE is used.  See
     (setq org-odt-manifest-file-entries nil
 	  org-odt-embedded-images-count 0
 	  org-odt-embedded-formulas-count 0
+	  org-odt-section-count 0
 	  org-odt-entity-labels-alist nil
 	  org-odt-list-stack-stashed nil
 	  org-odt-automatic-styles nil
