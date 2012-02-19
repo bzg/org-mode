@@ -987,10 +987,6 @@ that uses these same face definitions."
 (defvar org-lparse-dyn-first-heading-pos)
 
 (defun org-e-html-end-export ()
-  ;; insert the table of contents
-  (when (and org-export-with-toc (not body-only) org-lparse-toc)
-    (org-e-html-insert-toc org-lparse-toc))
-
   ;; Convert whitespace place holders
   (goto-char (point-min))
   (let (beg end n)
@@ -1014,117 +1010,75 @@ that uses these same face definitions."
 
 (defun org-e-html-format-toc-entry (snumber todo headline tags href)
   (setq headline (concat
-		  (and org-export-with-section-numbers
-		       (concat snumber " "))
+		  ;; section number
+		  (and org-export-with-section-numbers (concat snumber " "))
+		  ;; headline
 		  headline
-		  (and tags
-		    (concat
-		     (org-lparse-format 'SPACES 3)
-		     (org-lparse-format 'FONTIFY tags "tag")))))
-  (when todo
-    (setq headline (org-lparse-format 'FONTIFY headline "todo")))
-  (org-lparse-format 'LINK headline (concat  "#" href)))
+		  ;; tags
+		  (and tags (concat
+			     (org-e-html-format-spaces 3)
+			     (org-e-html-format-fontify tags "tag")))))
+  ;; fontify headline based on TODO keyword
+  (when todo (setq headline (org-e-html-format-fontify headline "todo")))
+  (org-e-html-format-link headline (concat  "#" href)))
 
-(defun org-e-html-format-toc-item (toc-entry level org-last-level)
-  (when (> level org-last-level)
-    (let ((cnt (- level org-last-level)))
-      (while (>= (setq cnt (1- cnt)) 0)
-	(org-lparse-begin-list 'unordered)
-	(org-lparse-begin-list-item 'unordered))))
-  (when (< level org-last-level)
-    (let ((cnt (- org-last-level level)))
-      (while (>= (setq cnt (1- cnt)) 0)
-	(org-lparse-end-list-item-1)
-	(org-lparse-end-list 'unordered))))
+(defun org-e-html-toc-entry-formatter
+  (level snumber todo todo-type priority
+	 headline tags target extra-targets extra-class)
+  (org-e-html-format-toc-entry snumber todo headline tags target))
 
-  (org-lparse-end-list-item-1)
-  (org-lparse-begin-list-item 'unordered)
-  (insert toc-entry))
+(defun org-e-html-make-string (n string)
+  (let (out) (dotimes (i n out) (setq out (concat string out)))))
 
-(defun org-e-html-begin-toc (lang-specific-heading max-level)
-  (org-lparse-insert-tag "<div id=\"table-of-contents\">")
-  (insert
-   (org-lparse-format 'HEADING lang-specific-heading
-		     (or (org-lparse-get 'TOPLEVEL-HLEVEL) 1)))
-  (org-lparse-insert-tag "<div id=\"text-table-of-contents\">")
-  (org-lparse-begin-list 'unordered)
-  (org-lparse-begin-list-item 'unordered))
+(defun org-e-html-toc-text (toc-entries)
+  (let* ((prev-level (1- (nth 1 (car toc-entries))))
+	 (start-level prev-level))
+    (concat
+     (mapconcat
+      (lambda (entry)
+	(let ((headline (nth 0 entry))
+	      (level (nth 1 entry)))
+	  (concat
+	   (let* ((cnt (- level prev-level))
+		  (times (if (> cnt 0) (1- cnt) (- cnt)))
+		  rtn)
+	     (setq prev-level level)
+	     (concat
+	      (org-e-html-make-string
+	       times (cond ((> cnt 0) "<ul>\n<li>\n")
+			   ((< cnt 0) "</li>\n</ul>\n")))
+	      (if (> cnt 0) "<ul>\n<li>\n" "</li>\n<li>\n")))
+	   headline)))
+      toc-entries "")
+     (org-e-html-make-string
+      (- prev-level start-level) "</li>\n</ul>\n"))))
 
-(defun org-e-html-end-toc ()
-  (while (> org-last-level (1- org-min-level))
-    (setq org-last-level (1- org-last-level))
-    (org-lparse-end-list-item-1)
-    (org-lparse-end-list 'unordered))
-  (org-lparse-insert-tag "</div>")
-  (org-lparse-insert-tag "</div>")
+(defun org-e-html-toc (depth info)
+  (assert (wholenump depth))
+  (let* ((headlines (org-export-collect-headlines info depth))
+	 (toc-entries
+	  (loop for headline in headlines collect
+		(list (org-e-html-headline-text
+		       headline info 'org-e-html-toc-entry-formatter)
+		      (org-export-get-relative-level headline info)))))
+    (when toc-entries
+      (let* ((lang-specific-heading "Table of Contents")) ; FIXME
+	(concat
+	 "<div id=\"table-of-contents\">\n"
+	 (org-e-html-format-heading lang-specific-heading
+				    (or org-e-html-toplevel-hlevel 1))
+	 "<div id=\"text-table-of-contents\">"
+	 (org-e-html-toc-text toc-entries)
+	 "</div>\n"
+	 "</div>\n")))))
 
-  ;; cleanup empty list items in toc
-  (while (re-search-backward "<li>[ \r\n\t]*</li>\n?" (point-min) t)
-    (replace-match "")))
-
-;;;###autoload
-(defun org-export-as-html-and-open (arg)
-  "Export the outline as HTML and immediately open it with a browser.
-If there is an active region, export only the region.
-The prefix ARG specifies how many levels of the outline should become
-headlines.  The default is 3.  Lower levels will become bulleted lists."
-  (interactive "P")
-  (error "FIXME"))
-
-;;;###autoload
-(defun org-export-as-html-batch ()
-  "Call the function `org-lparse-batch'.
-This function can be used in batch processing as:
-emacs   --batch
-        --load=$HOME/lib/emacs/org.el
-        --eval \"(setq org-export-headline-levels 2)\"
-        --visit=MyFile --funcall org-export-as-html-batch"
-  (error "FIXME"))
-
-;;;###autoload
-(defun org-export-as-html-to-buffer (arg)
-  "Call `org-lparse-to-buffer` with output to a temporary buffer.
-No file is created.  The prefix ARG is passed through to `org-lparse-to-buffer'."
-  (interactive "P")
-  (error "FIXME"))
-
-;;;###autoload
-(defun org-replace-region-by-html (beg end)
-  "Assume the current region has org-mode syntax, and convert it to HTML.
-This can be used in any buffer.  For example, you could write an
-itemized list in org-mode syntax in an HTML buffer and then use this
-command to convert it."
-  (interactive "r")
-  (error "FIXME"))
-
-;;;###autoload
-(defun org-export-region-as-html (beg end &optional body-only buffer)
-  "Convert region from BEG to END in `org-mode' buffer to HTML.
-If prefix arg BODY-ONLY is set, omit file header, footer, and table of
-contents, and only produce the region of converted text, useful for
-cut-and-paste operations.
-If BUFFER is a buffer or a string, use/create that buffer as a target
-of the converted HTML.  If BUFFER is the symbol `string', return the
-produced HTML as a string and leave not buffer behind.  For example,
-a Lisp program could call this function in the following way:
-
-  (setq html (org-export-region-as-html beg end t 'string))
-
-When called interactively, the output buffer is selected, and shown
-in a window.  A non-interactive call will only return the buffer."
-  (interactive "r\nP")
-  (error "FIXME"))
-
-;;; org-export-as-html
-;;;###autoload
-(defun org-export-as-html (arg &optional hidden ext-plist
-			       to-buffer body-only pub-dir)
-  "Export the outline as a pretty HTML file.
-Use `org-lparse' internally to perform the actual export. This
-routine merely binds the TARGET-BACKEND and NATIVE-BACKEND args
-of `org-lparse' to \"html\"."
-  (interactive "P")
-  (error "FIXME"))
+;; FIXME: Legacy interactive functions
+;; org-export-as-html-and-open
+;; org-export-as-html-batch
+;; org-export-as-html-to-buffer
+;; org-replace-region-by-html
+;; org-export-region-as-html
+;; org-export-as-html
 
 (defun org-e-html-begin-outline (level1 snumber title tags
 				      target extra-targets extra-class)
@@ -2194,18 +2148,23 @@ original parsed data.  INFO is a plist holding export options."
 	       (or link-home link-up))))
    ;; preamble
    (org-e-html-preamble info)
-
-   ;; content
+   ;; begin content
    (format "
 <div id=\"%s\">" (or org-e-html-content-div
 		     (nth 1 org-e-html-divs)))
+   ;; document title
    (format "
 <h1 class=\"title\"> %s </h1>\n" (plist-get info :title))
-
+   ;; table of contents
+   (let ((depth (plist-get info :with-toc)))
+     (when (wholenump depth) (org-e-html-toc depth info)))
+   ;; document contents
    contents
+   ;; footnotes section
    (org-e-html-footnote-section info)
+   ;; bibliography
    (org-e-html-bibliography)
-
+   ;; end content
    (unless body-only
      "
 </div>")
@@ -2542,6 +2501,44 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (list (if (member todo org-done-keywords) "done" "todo")
 	   todo))))
 
+(defvar org-e-html-headline-formatter
+  (lambda (level snumber todo todo-type priority
+		 title tags target extra-targets extra-class)
+    (concat snumber " " title)))
+
+(defun org-e-html-headline-text (headline info &optional formatter)
+  "Transcode an HEADLINE element from Org to HTML.
+CONTENTS holds the contents of the headline.  INFO is a plist
+holding contextual information."
+  (let* ((numberedp (plist-get info :section-numbers))
+	 (level (org-export-get-relative-level headline info))
+	 (todo (and (plist-get info :with-todo-keywords)
+		    (let ((todo (org-element-get-property
+				 :todo-keyword headline)))
+		      (and todo
+			   (org-export-secondary-string todo 'e-html info)))))
+	 (todo-type (and todo (org-element-get-property :todo-type headline)))
+	 (priority (and (plist-get info :with-priority)
+			(org-element-get-property :priority headline)))
+	 (text (org-export-secondary-string
+		(org-element-get-property :title headline) 'e-html info))
+	 (tags (and (plist-get info :with-tags)
+		    (org-element-get-property :tags headline)))
+
+	 (headline-no (org-export-get-headline-number headline info))
+	 (headline-label
+	  (format "sec-%s" (mapconcat 'number-to-string headline-no "-")))
+	 (headline-labels (list headline-label))
+	 (headline-no (org-export-get-headline-number headline info))
+	 (section-no (mapconcat 'number-to-string headline-no "."))
+	 (primary-target (car (last headline-labels)))
+	 (secondary-targets (butlast headline-labels))
+	 (extra-class nil)
+	 (formatter (or (and (functionp formatter) formatter)
+			org-e-html-headline-formatter)))
+    (funcall formatter level section-no todo todo-type priority
+	     text tags primary-target secondary-targets extra-class)))
+
 (defun org-e-html-headline (headline contents info)
   "Transcode an HEADLINE element from Org to HTML.
 CONTENTS holds the contents of the headline.  INFO is a plist
@@ -2801,10 +2798,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (let ((depth (or (and (string-match "[0-9]+" value)
 				(string-to-number (match-string 0 value)))
 			   (plist-get info :with-toc))))
-	    (concat
-	     (when (wholenump depth)
-	       (format "\\setcounter{tocdepth}{%s}\n" depth))
-	     "\\tableofcontents")))
+	    (when (wholenump depth) (org-e-html-toc depth info))))
 	 ((string= "tables" value) "\\listoftables")
 	 ((string= "figures" value) "\\listoffigures")
 	 ((string= "listings" value)
