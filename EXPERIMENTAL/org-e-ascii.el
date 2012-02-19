@@ -66,6 +66,7 @@
 (declare-function org-export-resolve-coderef "org-export" (ref info))
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
 (declare-function org-export-resolve-id-link "org-export" (link info))
+(declare-function org-export-resolve-ref-link "org-export" (link info))
 (declare-function org-export-secondary-string
 		  "org-export" (secondary backend info))
 (declare-function org-export-table-format-info "org-export" (table))
@@ -833,8 +834,8 @@ channel."
 			 (org-element-get-property :raw-link link)
 		       (org-export-secondary-string desc 'e-ascii info)))))
        (cond
-	;; Coderefs and radio links are ignored.
-	((member type '("coderef" "radio")) nil)
+	;; Coderefs, radio links and ref links are ignored.
+	((member type '("coderef" "radio" "ref")) nil)
 	;; Id, custom-id and fuzzy links (with the exception of
 	;; targets): Headlines refer to their numbering.
 	((member type '("custom-id" "fuzzy" "id"))
@@ -1384,6 +1385,17 @@ INFO is a plist holding contextual information."
 	(org-element-get-property :path link)
 	(cdr (assq 'radio-target org-element-object-restrictions)))
        'e-ascii info))
+     ;; Ref link: If there's no description (DESC, return link's
+     ;; destination sequence number among elements of same
+     ;; type. Otherwise, use DESC.
+     ((string= type "ref")
+      (if (org-string-nw-p desc) desc
+	(format "%d"
+		(org-export-get-ordinal
+		 (org-export-resolve-ref-link link info)
+		 info nil nil
+		 (lambda (el) (or (org-element-get-property :caption el)
+			     (org-element-get-property :name el)))))))
      ;; Do not apply a special syntax on fuzzy links pointing to
      ;; targets.
      ((and (string= type "fuzzy")

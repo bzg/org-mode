@@ -1946,6 +1946,9 @@ Assume point is at the beginning of the link."
 	 ;; Explicit type (http, irc, bbdb...).  See `org-link-types'.
 	 ((string-match org-link-re-with-space3 link)
 	  (setq type (match-string 1 link) path (match-string 2 link)))
+	 ;; Ref type: PATH is the name of the target element.
+	 ((string-match "^ref:\\(.*\\)" link)
+	  (setq type "ref" path (org-trim (match-string 1 link))))
 	 ;; Id type: PATH is the id.
 	 ((string-match "^id:\\([-a-f0-9]+\\)" link)
 	  (setq type "id" path (match-string 1 link)))

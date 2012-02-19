@@ -2641,6 +2641,20 @@ is either \"id\" or \"custom-id\"."
          headline))
      info 'first-match)))
 
+(defun org-export-resolve-ref-link (link info)
+  "Return element referenced as LINK destination.
+
+INFO is a plist used as a communication channel.
+
+Assume LINK type is \"ref\" and.  Return value is the first
+element whose `:name' property matches LINK's `:path', or nil."
+  (let ((name (org-element-get-property :path link)))
+    (org-element-map
+     (plist-get info :parse-tree) org-element-all-elements
+     (lambda (el local)
+       (when (string= (org-element-get-property :name el) name) el))
+     info 'first-match)))
+
 (defun org-export-resolve-coderef (ref info)
   "Resolve a code reference REF.
 

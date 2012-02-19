@@ -1416,6 +1416,12 @@ INFO is a plist holding contextual information.  See
 	       (org-element-parse-secondary-string
 		path (cdr (assq 'radio-target org-element-object-restrictions)))
 	       'e-latex info)))
+     ;; Ref link: If no description is provided, reference label PATH
+     ;; and display table number.  Otherwise move to label but display
+     ;; description instead.
+     ((string= type "ref")
+      (if (not desc) (format "\\ref{%s}" path)
+	(format "\\hyperref[%s]{%s}" path desc)))
      ;; Links pointing to an headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
