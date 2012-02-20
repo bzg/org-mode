@@ -1466,7 +1466,7 @@ Assume point is at beginning or end of the block."
 		       (if (eobp) (point) (point-at-bol))))
 	   (value (org-element-parse-secondary-string
 		   (org-remove-indentation raw-val)
-		   (cdr (assq 'verse org-element-string-restrictions)))))
+		   (cdr (assq 'verse-block org-element-string-restrictions)))))
       `(verse-block
 	(:begin ,begin
 		:end ,end
@@ -2544,10 +2544,10 @@ superscript.")
     (item entity inline-babel-call latex-fragment macro radio-target
 	  sub/superscript target text-markup)
     (keyword entity latex-fragment macro sub/superscript text-markup)
-    (table entity latex-fragment macro text-markup)
-    (verse entity footnote-reference inline-babel-call inline-src-block
-	   latex-fragment line-break link macro radio-target sub/superscript
-	   target text-markup time-stamp))
+    (table entity latex-fragment macro target text-markup)
+    (verse-block entity footnote-reference inline-babel-call inline-src-block
+		 latex-fragment line-break link macro radio-target
+		 sub/superscript target text-markup time-stamp))
   "Alist of secondary strings restrictions.
 
 When parsed, some elements have a secondary string which could
