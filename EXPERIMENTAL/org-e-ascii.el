@@ -1287,22 +1287,37 @@ contextual information."
   (let ((bullet
 	 ;; First parent of ITEM is always the plain-list.  Get
 	 ;; `:type' property from it.
-	 (let ((type (org-element-get-property
-		      :type (car (plist-get info :genealogy)))))
-	   (if (eq type 'descriptive)
-	       (concat
-		(org-export-secondary-string
-		 (org-element-get-property :tag item) 'e-ascii info) ": ")
-	     (org-element-get-property :bullet item)))))
+	 (org-list-bullet-string
+	  (let ((type (org-element-get-property
+		       :type (car (plist-get info :genealogy)))))
+	    (cond
+	     ((eq type 'descriptive)
+	      (concat
+	       (org-export-secondary-string
+		(org-element-get-property :tag item) 'e-ascii info) ": "))
+	     ((eq type 'ordered)
+	      ;; Return correct number for ITEM, paying attention to
+	      ;; counters.
+	      (let* ((struct (org-element-get-property :structure item))
+		     (bul (org-element-get-property :bullet item))
+		     (num
+		      (number-to-string
+		       (car (last (org-list-get-item-number
+				   (org-element-get-property :begin item)
+				   struct
+				   (org-list-prevs-alist struct)
+				   (org-list-parents-alist struct)))))))
+		(replace-regexp-in-string "[0-9]+" num bul)))
+	     (t (let ((bul (org-element-get-property :bullet item)))
+		  ;; Change bullets into more visible form if UTF-8 is active.
+		  (if (not (eq (plist-get info :ascii-charset) 'utf-8)) bul
+		    (replace-regexp-in-string
+		     "-" "•"
+		     (replace-regexp-in-string
+		      "+" "⁃"
+		      (replace-regexp-in-string "*" "‣" bul)))))))))))
     (concat
-     ;; Change bullets into more visible form if UTF-8 is active.
-     (if (not (eq (plist-get info :ascii-charset) 'utf-8)) bullet
-       (replace-regexp-in-string
-	"-" "•"
-	(replace-regexp-in-string
-	 "+" "⁃"
-	 (replace-regexp-in-string
-	  "*" "‣" bullet))))
+     bullet
      ;; Contents: Pay attention to indentation.  Note: check-boxes are
      ;; already taken care of at the paragraph level so they don't
      ;; interfere with indentation.

@@ -621,7 +621,22 @@ Assume point is at the beginning of the item."
 (defun org-element-item-interpreter (item contents)
   "Interpret ITEM element as Org syntax.
 CONTENTS is the contents of the element."
-  (let* ((bullet (org-element-get-property :bullet item))
+  (let* ((bullet
+	  (let* ((beg (org-element-get-property :begin item))
+		 (struct (org-element-get-property :structure item))
+		 (pre (org-list-prevs-alist struct))
+		 (bul (org-element-get-property :bullet item)))
+	    (org-list-bullet-string
+	     (if (not (eq (org-list-get-list-type beg struct pre) 'ordered)) "-"
+	       (let ((num
+		      (car
+		       (last
+			(org-list-get-item-number
+			 beg struct pre (org-list-parents-alist struct))))))
+		 (format "%d%s"
+			 num
+			 (if (eq org-plain-list-ordered-item-terminator ?\)) ")"
+			   ".")))))))
 	 (checkbox (org-element-get-property :checkbox item))
 	 (counter (org-element-get-property :counter item))
 	 (tag (org-element-get-property :raw-tag item))
@@ -630,9 +645,6 @@ CONTENTS is the contents of the element."
     ;; Indent contents.
     (concat
      bullet
-     (when (and org-list-two-spaces-after-bullet-regexp
-		(string-match org-list-two-spaces-after-bullet-regexp bullet))
-       " ")
      (and counter (format "[@%d] " counter))
      (cond
       ((eq checkbox 'on) "[X] ")
@@ -640,8 +652,7 @@ CONTENTS is the contents of the element."
       ((eq checkbox 'trans) "[-] "))
      (and tag (format "%s :: " tag))
      (org-trim
-      (replace-regexp-in-string
-       "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))))
+      (replace-regexp-in-string "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))))
 
 
 ;;;; Plain List
