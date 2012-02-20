@@ -3292,10 +3292,10 @@ final interactive export options as CDR."
 ------------------------- Publish -------------------------
 \[F] current file              [P] current project
 \[X] a project                 [E] every project"
-		 (if (memq 'body options) "On" "Off")
-		 (if (memq 'subtree options) "Subtree" "Buffer")
-		 (if (memq 'visible options) "On" "Off")
-		 (if (memq 'force options) "On" "Off")))
+		 (if (memq 'body options) "On " "Off")
+		 (if (memq 'subtree options) "Subtree" "Buffer ")
+		 (if (memq 'visible options) "On " "Off")
+		 (if (memq 'force options) "On " "Off")))
 	(standard-prompt "Export command: ")
 	(expert-prompt (format "Export command (%s%s%s%s): "
 			       (if (memq 'body options) "b" "-")
