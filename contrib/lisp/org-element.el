@@ -2540,7 +2540,7 @@ This list is checked after translations have been applied.  See
     (target entity export-snippet latex-fragment sub/superscript text-markup))
   "Alist of recursive objects restrictions.
 
-Car is a recursive object type and cdr is a list of successors
+CAR is a recursive object type and CDR is a list of successors
 that will be called within an object of such type.
 
 For example, in a `radio-target' object, one can only find
@@ -2563,11 +2563,23 @@ superscript.")
 
 When parsed, some elements have a secondary string which could
 contain various objects (i.e. headline's name, or table's cells).
-For association, the car is the element type, and the cdr a list
-of successors that will be called in that secondary string.
+For association, CAR is the element type, and CDR a list of
+successors that will be called in that secondary string.
 
 Note: `keyword' secondary string type only applies to keywords
 matching `org-element-parsed-keywords'.")
+
+(defconst org-element-secondary-value-alist
+  '((headline . :title)
+    (inlinetask . :title)
+    (item . :tag)
+    (footnote-reference . :inline-definition)
+    (verse-block . :value))
+  "Alist between element types and location of secondary value.
+Only elements with a secondary value available at parse time are
+considered here.  This is used internally by `org-element-map',
+which will look into the secondary strings of an element only if
+its type is listed here.")
 
 
 
@@ -2991,20 +3003,45 @@ Nil values returned from FUN are ignored in the result."
 		  always (memq type org-element-all-elements))
 	    'elements)
 	   (t 'objects)))
-	 walk-tree			; For byte-compiler
+	 ;; --RESTRICTS is a list of element types whose secondary
+	 ;; string could possibly contain an object with a type among
+	 ;; TYPES.
+	 (--restricts
+	  (and (eq --category 'objects)
+	       (loop for el in org-element-secondary-value-alist
+		     when
+		     (loop for o in types
+			   thereis
+			   (memq o (cdr
+				    (assq (car el)
+					  org-element-string-restrictions))))
+		     collect (car el))))
+	 --walk-tree			; For byte-compiler
 	 --acc
-	 (accumulate-maybe
+	 (--check-blob
 	  (function
 	   (lambda (--type types fun --blob --local)
 	     ;; Check if TYPE is matching among TYPES.  If so, apply
 	     ;; FUN to --BLOB and accumulate return value
 	     ;; into --ACC.  --LOCAL is the communication channel.
+	     ;; If --BLOB has a secondary string that can contain
+	     ;; objects with their type amond TYPES, look into that
+	     ;; string first.
+	     (when (memq --type --restricts)
+	       (funcall
+		--walk-tree
+		`(org-data
+		  nil
+		  ,@(org-element-get-property
+		     (cdr (assq --type org-element-secondary-value-alist))
+		     --blob))
+		--local))
 	     (when (memq --type types)
 	       (let ((result (funcall fun --blob --local)))
 		 (cond ((not result))
 		       (first-match (throw 'first-match result))
 		       (t (push result --acc))))))))
-	 (walk-tree
+	 (--walk-tree
 	  (function
 	   (lambda (--data --local)
 	     ;; Recursively walk DATA.  --LOCAL, if non-nil, is
@@ -3017,18 +3054,18 @@ Nil values returned from FUN are ignored in the result."
 		  (cond
 		   ;; Element or object not exportable.
 		   ((and info (org-export-skip-p --blob info)))
-		   ;; Archived headline: Maybe apply fun on it, but
+		   ;; Archived headline: Maybe apply FUN on it, but
 		   ;; skip contents.
 		   ((and info
 			 (eq --type 'headline)
 			 (eq (plist-get info :with-archived-trees) 'headline)
 			 (org-element-get-property :archivedp --blob))
-		    (funcall accumulate-maybe --type types fun --blob --local))
+		    (funcall --check-blob --type types fun --blob --local))
 		   ;; Limiting recursion to greater elements, and --BLOB
 		   ;; isn't one.
 		   ((and (eq --category 'greater-elements)
 			 (not (memq --type org-element-greater-elements)))
-		    (funcall accumulate-maybe --type types fun --blob --local))
+		    (funcall --check-blob --type types fun --blob --local))
 		   ;; Limiting recursion to elements, and --BLOB only
 		   ;; contains objects.
 		   ((and (eq --category 'elements) (eq --type 'paragraph)))
@@ -3038,19 +3075,19 @@ Nil values returned from FUN are ignored in the result."
 			 (not (or (eq --type 'paragraph)
 				  (memq --type org-element-greater-elements)
 				  (memq --type org-element-recursive-objects))))
-		    (funcall accumulate-maybe --type types fun --blob --local))
+		    (funcall --check-blob --type types fun --blob --local))
 		   ;; Recursion is possible and allowed: Update local
 		   ;; information and move into --BLOB.
-		   (t (funcall accumulate-maybe --type types fun --blob --local)
+		   (t (funcall --check-blob --type types fun --blob --local)
 		      (funcall
-		       walk-tree --blob
+		       --walk-tree --blob
 		       (org-combine-plists
 			--local
 			`(:genealogy
 			  ,(cons --blob (plist-get --local :genealogy)))))))))
 	      (org-element-get-contents --data))))))
     (catch 'first-match
-      (funcall walk-tree data info)
+      (funcall --walk-tree data info)
       ;; Return value in a proper order.
       (reverse --acc))))
 

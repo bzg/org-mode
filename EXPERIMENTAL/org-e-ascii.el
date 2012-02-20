@@ -798,7 +798,7 @@ the following section and in any inlinetask's title there."
 		 (when (and (listp obj) (eq (car obj) 'link))
 		   (let ((link (funcall unique-link-p obj)))
 		     (and link (push link acc)))))))))
-	 ;; Retrieve headline's section, if it exists.
+	 ;; Retrieve HEADLINE's section, if it exists.
 	 (section (if (eq (car element) 'section) element
 		    (let ((sec (car (org-element-get-contents element))))
 		      (and (eq (car sec) 'section) sec))))
@@ -809,15 +809,7 @@ the following section and in any inlinetask's title there."
      (funcall harvest-links-in-title headline)
      ;; Get all links in SECTION.
      (org-element-map
-      section 'link (lambda (link local) (funcall unique-link-p link)) info)
-     ;; Links that may be in inlinetasks titles within SECTION.
-     (let (acc)
-       (org-element-map
-	section 'inlinetask
-	(lambda (inlinetask local)
-	  (push (funcall harvest-links-in-title inlinetask) acc))
-	info)
-       (delq nil acc)))))
+      section 'link (lambda (link local) (funcall unique-link-p link)) info))))
 
 (defun org-e-ascii--describe-links (links width info)
   "Return a string describing a list of links.
