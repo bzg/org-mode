@@ -614,6 +614,7 @@ OpenDocument Text export
 
 * Pre-requisites for @acronym{ODT} export::  What packages @acronym{ODT} exporter relies on
 * @acronym{ODT} export commands::  How to invoke @acronym{ODT} export
+* Extending @acronym{ODT} export:: How to produce @samp{doc}, @samp{pdf} files
 * Applying custom styles::      How to apply custom styles to the output
 * Links in @acronym{ODT} export::  How links will be interpreted and formatted
 * Tables in @acronym{ODT} export::  How Tables are exported
@@ -629,7 +630,7 @@ Math formatting in @acronym{ODT} export
 
 Advanced topics in @acronym{ODT} export
 
-* Exporting and converting to other formats::  How to produce @samp{pdf} and other formats
+* Configuring a document converter::  How to register a document converter
 * Working with OpenDocument style files::  Explore the internals
 * Creating one-off styles::     How to produce custom highlighting etc
 * Customizing tables in @acronym{ODT} export::  How to define and use Table templates
@@ -10801,6 +10802,7 @@ are compatible with LibreOffice 3.4.
 @menu
 * Pre-requisites for @acronym{ODT} export::  What packages @acronym{ODT} exporter relies on
 * @acronym{ODT} export commands::  How to invoke @acronym{ODT} export
+* Extending @acronym{ODT} export:: How to produce @samp{doc}, @samp{pdf} files
 * Applying custom styles::      How to apply custom styles to the output
 * Links in @acronym{ODT} export::  How links will be interpreted and formatted
 * Tables in @acronym{ODT} export::  How Tables are exported
@@ -10816,7 +10818,7 @@ are compatible with LibreOffice 3.4.
 The @acronym{ODT} exporter relies on the @file{zip} program to create the final
 output.  Check the availability of this program before proceeding further.
 
-@node @acronym{ODT} export commands, Applying custom styles, Pre-requisites for @acronym{ODT} export, OpenDocument Text export
+@node @acronym{ODT} export commands, Extending @acronym{ODT} export, Pre-requisites for @acronym{ODT} export, OpenDocument Text export
 @subsection @acronym{ODT} export commands
 
 @subsubheading Exporting to @acronym{ODT}
@@ -10830,10 +10832,11 @@ output.  Check the availability of this program before proceeding further.
 @cindex property EXPORT_FILE_NAME
 
 Export as OpenDocument Text file.
+
 @vindex org-export-odt-preferred-output-format
 If @code{org-export-odt-preferred-output-format} is specified, automatically
-convert the exported file to that format.
-@xref{x-export-to-other-formats,,Automatically exporting to other formats}.
+convert the exported file to that format.  @xref{x-export-to-other-formats, ,
+Automatically exporting to other formats}.
 
 For an Org file @file{myfile.org}, the @acronym{ODT} file will be
 @file{myfile.odt}.  The file will be overwritten without warning.  If there
@@ -10846,25 +10849,61 @@ export.
 
 @orgcmd{C-c C-e O,org-export-as-odt-and-open}
 Export as OpenDocument Text file and open the resulting file.
+
 @vindex org-export-odt-preferred-output-format
 If @code{org-export-odt-preferred-output-format} is specified, open the
-converted file instead.
-@xref{x-export-to-other-formats,,Automatically exporting to other formats}.
+converted file instead.  @xref{x-export-to-other-formats, , Automatically
+exporting to other formats}.
 @end table
 
-@subsubheading Automatically exporting to other formats
+@node Extending @acronym{ODT} export, Applying custom styles, @acronym{ODT} export commands, OpenDocument Text export
+@subsection Extending @acronym{ODT} export
+
+The @acronym{ODT} exporter can interface with a variety of document
+converters and supports popular converters out of the box.  As a result, you
+can use it to export to formats like @samp{doc} or convert a document from
+one format (say @samp{csv}) to another format (say @samp{ods} or @samp{xls}).
+
+@cindex @file{unoconv}
+@cindex LibreOffice
+If you have a working installation of LibreOffice, a document converter is
+pre-configured for you and you can use it right away.  If you would like to
+use @file{unoconv} as your preferred converter, customize the variable
+@code{org-export-odt-convert-process} to point to @code{unoconv}.  If you
+would like to use a converter of your own choosing or tweak the default
+settings of the default @file{LibreOffice} and @samp{unoconv} converters
+@xref{Configuring a document converter}.
+
+@subsubsection Automatically exporting to other formats
 @anchor{x-export-to-other-formats}
+
 @vindex org-export-odt-preferred-output-format
 Very often, you will find yourself exporting to @acronym{ODT} format, only to
-immediately save the exported document to a different format like @samp{pdf}.
-In such cases, you will find it convenient to configure a converter
-(@pxref{Exporting and converting to other formats}) and specify your
+immediately save the exported document to other formats like @samp{doc},
+@samp{docx}, @samp{rtf}, @samp{pdf} etc.  In such cases, you can specify your
 preferred output format by customizing the variable
 @code{org-export-odt-preferred-output-format}.  This way, the export commands
-(@pxref{x-export-to-odt,,Exporting to ODT}) can be extended to also export to
-the preferred format.
+(@pxref{x-export-to-odt,,Exporting to ODT}) can be extended to export to a
+format that is of immediate interest to you.
 
-@node Applying custom styles, Links in @acronym{ODT} export, @acronym{ODT} export commands, OpenDocument Text export
+@subsubsection Converting between document formats
+@anchor{x-convert-to-other-formats}
+
+There are many document converters in the wild which support conversion to
+and from various file formats, including, but not limited to the
+@acronym{ODT} format.  LibreOffice converter, mentioned above, is one such
+converter.  Once a converter is configured, you can interact with it using
+the following command.
+
+@vindex org-export-odt-convert
+@table @kbd
+
+@item M-x org-export-odt-convert
+Convert an existing document from one format to another.  With a prefix
+argument, also open the newly produced file.
+@end table
+
+@node Applying custom styles, Links in @acronym{ODT} export, Extending @acronym{ODT} export, OpenDocument Text export
 @subsection Applying custom styles
 @cindex styles, custom
 @cindex template, custom
@@ -10941,16 +10980,42 @@ tables is supported.  However, export of complex @file{table.el} tables -
 tables that have column or row spans - is not supported.  Such tables are
 stripped from the exported document.
 
-By default, a table is exported with top and bottom frames and with
-rules separating row and column groups (@pxref{Column groups}).  If the table
-specifies alignment and relative width for its columns (@pxref{Column width
-and alignment}) then these are honored on export.@footnote{The column widths
-are interpreted as weighted ratios with the default weight being 1}
+By default, a table is exported with top and bottom frames and with rules
+separating row and column groups (@pxref{Column groups}).  Furthermore, all
+tables are typeset to occupy the same width.  If the table specifies
+alignment and relative width for its columns (@pxref{Column width and
+alignment}) then these are honored on export.@footnote{The column widths are
+interpreted as weighted ratios with the default weight being 1}
 
 @cindex #+ATTR_ODT
-If you are not satisfied with the default formatting of tables, you can
-create custom table styles and associate them with a table using
-the @code{#+ATTR_ODT} line.  @xref{Customizing tables in @acronym{ODT} export}.
+You can control the width of the table by specifying @code{:rel-width}
+property using an @code{#+ATTR_ODT} line.
+
+For example, consider the following table which makes use of all the rules
+mentoned above.
+
+@example
+#+ATTR_ODT: :rel-width 50
+| Area/Month    |   Jan |   Feb |   Mar |   Sum |
+|---------------+-------+-------+-------+-------|
+| /             |     < |       |       |     < |
+| <l13>         |  <r5> |  <r5> |  <r5> |  <r6> |
+| North America |     1 |    21 |   926 |   948 |
+| Middle East   |     6 |    75 |   844 |   925 |
+| Asia Pacific  |     9 |    27 |   790 |   826 |
+|---------------+-------+-------+-------+-------|
+| Sum           |    16 |   123 |  2560 |  2699 |
+@end example
+
+On export, the table will occupy 50% of text area.  The columns will be sized
+(roughly) in the ratio of 13:5:5:5:6.  The first column will be left-aligned
+and rest of the columns will be right-aligned.  There will be vertical rules
+after separating the header and last columns from other columns.  There will
+be horizontal rules separating the header and last rows from other rows.
+
+If you are not satisfied with the above formatting options, you can create
+custom table styles and associate them with a table using the
+@code{#+ATTR_ODT} line.  @xref{Customizing tables in @acronym{ODT} export}.
 
 @node Images in @acronym{ODT} export, Math formatting in @acronym{ODT} export, Tables in @acronym{ODT} export, OpenDocument Text export
 @subsection Images in @acronym{ODT} export
@@ -10982,14 +11047,21 @@ link to an image file.  For example, to embed a image
 
 @subsubheading Sizing and scaling of embedded images
 
+@cindex #+ATTR_ODT
 You can control the size and scale of the embedded images using the
 @code{#+ATTR_ODT} attribute.
 
+@cindex identify, ImageMagick
 @vindex org-export-odt-pixels-per-inch
-Note that the exporter specifies the desired size of the image in the final
-document in units of centimeters.  In order to scale the embedded images, the
-exporter needs to compute the size of the image.  This is done by retrieving
-the image size in pixels and converting the pixel units to centimeters using
+The exporter specifies the desired size of the image in the final document in
+units of centimeters.  In order to scale the embedded images, the exporter
+queries for pixel dimensions of the images using one of a) ImageMagick's
+@file{identify} program or b) Emacs `create-image' and `image-size'
+APIs.@footnote{Use of @file{ImageMagick} is only desirable.  However, if you
+routinely produce documents that have large images or you export your Org
+files that has images using a Emacs batch script, then the use of
+@file{ImageMagick} is mandatory.} The pixel dimensions are subsequently
+converted in to units of centimeters using
 @code{org-export-odt-pixels-per-inch}.  The default value of this variable is
 set to @code{display-pixels-per-inch}.  You can tweak this variable to
 achieve the best results.
@@ -10997,7 +11069,6 @@ achieve the best results.
 The examples below illustrate the various possibilities.
 
 @table @asis
-
 @item Explicitly size the image
 To embed @file{img.png} as a 10 cm x 10 cm image, do the following:
 
@@ -11032,6 +11103,20 @@ height:width ratio, do the following
 [[./img.png]]
 @end example
 @end table
+
+@subsubheading Anchoring of images
+
+@cindex #+ATTR_ODT
+You can control the manner in which an image is anchored by setting the
+@code{:anchor} property of it's @code{#+ATTR_ODT} line.  You can specify one
+of the the following three values for the @code{:anchor} property -
+@samp{"as-char"}, @samp{"paragraph"} and @samp{"page"}.
+
+To create an image that is anchored to a page, do the following:
+@example
+#+ATTR_ODT: :anchor "page"
+[[./img.png]]
+@end example
 
 @node Math formatting in @acronym{ODT} export, Literal examples in @acronym{ODT} export, Images in @acronym{ODT} export, OpenDocument Text export
 @subsection Math formatting in @acronym{ODT} export
@@ -11164,65 +11249,23 @@ set of features that the exporter offers.  This section describes features
 that would be of interest to power users.
 
 @menu
-* Exporting and converting to other formats::  How to produce @samp{pdf} and other formats
+* Configuring a document converter::  How to register a document converter
 * Working with OpenDocument style files::  Explore the internals
 * Creating one-off styles::     How to produce custom highlighting etc
 * Customizing tables in @acronym{ODT} export::  How to define and use Table templates
 * Validating OpenDocument XML::  How to debug corrupt OpenDocument files
 @end menu
 
-@node Exporting and converting to other formats, Working with OpenDocument style files, Advanced topics in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
-@subsubsection Exporting and converting to other formats
+@node Configuring a document converter, Working with OpenDocument style files, Advanced topics in @acronym{ODT} export, Advanced topics in @acronym{ODT} export
+@subsubsection Configuring a document converter
 @cindex convert
-@cindex doc, docx
-
-The @acronym{ODT} exporter adds support for exporting Org outlines to formats
-that are not supported natively by Org.  It also adds support to convert
-document from one format to another.  To use these features, you need to
-configure a command-line converter.  Once a command-line converter is
-configured you can use it to extend the list of formats to which Org can
-export.  @xref{x-export-to-other-formats,,Automatically exporting to other
-formats}.  You can also use it to perform one-off document conversion as
-detailed below.
-
-@vindex org-export-odt-convert
-@table @kbd
-
-@item M-x org-export-odt-convert
-Convert an existing document from one format to another as determined by the
-variable @code{org-export-odt-convert-capabilities}
-(@pxref{x-odt-converter-capabilities,,Configure converter
-capabilities}).  @strong{Please note} that you can use this command to even
-convert documents that are produced outside of Org and in other formats than
-@acronym{ODT} format.
-@end table
-
-@subsubheading Pre-configured converters
-
+@cindex doc, docx, rtf
 @cindex converter
-The @acronym{ODT} exporter supports two converters out of the box:
 
-@enumerate
-
-@cindex @file{unoconv}
-@item @file{unoconv}
-
-This converter is available as an installable package in your favorite
-distribution.
-
-@cindex @file{BasicODConverter}
-@item @file{BasicODConverter}
-
-@vindex org-odt-data-dir
-This converter is distributed as a LibreOffice extension and can be found in
-your Org distribution.  See the subdirectory pointed to by the variable
-@code{org-odt-data-dir}.
-
-@end enumerate
-
-@subsubheading Installing a new converter
-If you prefer to use a converter other than the two mentioned above, then you
-may have to do additional configuration.  You can proceed as follows:
+The @acronym{ODT} exporter can work with popular converters with little or no
+extra configuration from your side. @xref{Extending @acronym{ODT} export}.
+If you are using a converter that is not supported by default or if you would
+like to tweak the default converter settings, proceed as below.
 
 @enumerate
 @item Register the converter
@@ -11251,7 +11294,7 @@ Select the newly added converter as the preferred one by customizing the
 variable @code{org-export-odt-convert-process}.
 @end enumerate
 
-@node Working with OpenDocument style files, Creating one-off styles, Exporting and converting to other formats, Advanced topics in @acronym{ODT} export
+@node Working with OpenDocument style files, Creating one-off styles, Configuring a document converter, Advanced topics in @acronym{ODT} export
 @subsubsection Working with OpenDocument style files
 @cindex styles, custom
 @cindex template, custom

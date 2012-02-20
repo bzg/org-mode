@@ -484,37 +484,33 @@ This is a helper routine for interactive use."
 		  (error "Cannot convert from %s format to %s format?"
 			 in-fmt out-fmt)))
 	 (convert-process (car how))
-	 (program (car convert-process))
-	 (dummy (and (or program (error "Converter not configured"))
-		     (or (executable-find program)
-			 (error "Cannot find converter %s" program))))
 	 (out-file (concat (file-name-sans-extension in-file) "."
 			   (nth 1 (or (cdr how) out-fmt))))
+	 (extra-options (or (nth 2 (cdr how)) ""))
 	 (out-dir (file-name-directory in-file))
-	 (arglist (mapcar (lambda (arg)
-			    (format-spec
-			     arg `((?i . ,in-file)
-				   (?I . ,(browse-url-file-url in-file))
-				   (?f . ,out-fmt)
-				   (?o . ,out-file)
-				   (?O . ,(browse-url-file-url out-file))
-				   (?d . ,out-dir)
-				   (?D . ,(browse-url-file-url out-dir)))))
-			  (cdr convert-process))))
+	 (cmd (format-spec convert-process
+			   `((?i . ,(shell-quote-argument in-file))
+			     (?I . ,(browse-url-file-url in-file))
+			     (?f . ,out-fmt)
+			     (?o . ,out-file)
+			     (?O . ,(browse-url-file-url out-file))
+			     (?d . , (shell-quote-argument out-dir))
+			     (?D . ,(browse-url-file-url out-dir))
+			     (?x . ,extra-options)))))
     (when (file-exists-p out-file)
       (delete-file out-file))
 
-    (message "Executing %s %s" program (mapconcat 'identity arglist " "))
-    (apply 'call-process program nil nil nil arglist)
+    (message "Executing %s" cmd)
+    (let ((cmd-output (shell-command-to-string cmd)))
+      (message "%s" cmd-output))
+
     (cond
      ((file-exists-p out-file)
-      (message "Exported to %s using %s" out-file program)
+      (message "Exported to %s" out-file)
       (when prefix-arg
 	(message "Opening %s..."  out-file)
 	(org-open-file out-file))
-      out-file
-      ;; (set-buffer (find-file-noselect out-file))
-      )
+      out-file)
      (t
       (message "Export to %s failed" out-file)
       nil))))
