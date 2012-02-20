@@ -1704,8 +1704,12 @@ with `:label', `:type', `:definition', `:begin', `:end' and
     (let* ((ref (org-footnote-at-reference-p))
 	   (label (car ref))
 	   (raw-def (nth 3 ref))
-	   (inline-def (and raw-def
-			    (org-element-parse-secondary-string raw-def nil)))
+	   (inline-def
+	    (and raw-def
+		 (org-element-parse-secondary-string
+		  raw-def
+		  (cdr (assq 'footnote-reference
+			     org-element-string-restrictions)))))
 	   (type (if (nth 3 ref) 'inline 'standard))
 	   (begin (nth 1 ref))
 	   (post-blank (progn (goto-char (nth 2 ref))
@@ -2527,7 +2531,7 @@ This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
 (defconst org-element-object-restrictions
-  '((emphasis entity export-snippet inline-babel-call inline-src-block
+  '((emphasis entity export-snippet inline-babel-call inline-src-block link
 	      radio-target sub/superscript target text-markup time-stamp)
     (link entity export-snippet inline-babel-call inline-src-block
 	  latex-fragment link sub/superscript text-markup)
@@ -2548,10 +2552,14 @@ entities, export snippets, latex-fragments, subscript and
 superscript.")
 
 (defconst org-element-string-restrictions
-  '((headline entity inline-babel-call latex-fragment link macro radio-target
-	      statistics-cookie sub/superscript text-markup time-stamp)
-    (inlinetask entity inline-babel-call latex-fragment link macro radio-target
-		sub/superscript text-markup time-stamp)
+  '((footnote-reference entity export-snippet inline-babel-call inline-src-block
+			latex-fragment line-break link macro radio-target
+			sub/superscript target text-markup time-stamp)
+    (headline entity inline-babel-call inline-src-block latex-fragment link
+	      macro radio-target statistics-cookie sub/superscript text-markup
+	      time-stamp)
+    (inlinetask entity inline-babel-call inline-src-block latex-fragment link
+		macro radio-target sub/superscript text-markup time-stamp)
     (item entity inline-babel-call latex-fragment macro radio-target
 	  sub/superscript target text-markup)
     (keyword entity latex-fragment macro sub/superscript text-markup)
