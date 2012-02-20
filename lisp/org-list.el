@@ -1020,6 +1020,41 @@ type is determined by the first item of the list."
      ((string-match "[[:alnum:]]" (org-list-get-bullet first struct)) 'ordered)
      (t 'unordered))))
 
+(defun org-list-get-item-number (item struct prevs parents)
+  "Return ITEM's sequence number.
+
+STRUCT is the list structure.  PREVS is the alist of previous
+items, as returned by `org-list-prevs-alist'.  PARENTS is the
+alist of ancestors, as returned by `org-list-parents-alist'.
+
+Return value is a list of integers.  Counters have an impact on
+that value."
+  (let ((get-relative-number
+	 (function
+	  (lambda (item struct prevs)
+	    ;; Return relative sequence number of ITEM in the sub-list
+	    ;; it belongs.  STRUCT is the list structure.  PREVS is
+	    ;; the alist of previous items.
+	    (let ((seq 0) (pos item) counter)
+	      (while (and (not (setq counter (org-list-get-counter pos struct)))
+			  (setq pos (org-list-get-prev-item pos struct prevs)))
+		(incf seq))
+	      (if (not counter) (1+ seq)
+		(cond
+		 ((string-match "[A-Za-z]" counter)
+		  (+ (- (string-to-char (upcase (match-string 0 counter))) 64)
+		     seq))
+		 ((string-match "[0-9]+" counter)
+		  (+ (string-to-number (match-string 0 counter)) seq))
+		 (t (1+ seq)))))))))
+    ;; Cons each parent relative number into return value (OUT).
+    (let ((out (list (funcall get-relative-number item struct prevs)))
+	  (parent item))
+      (while (setq parent (org-list-get-parent parent struct parents))
+	(push (funcall get-relative-number parent struct prevs) out))
+      ;; Return value.
+      out)))
+
 
 
 ;;; Searching
