@@ -88,6 +88,47 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
     (org-babel-next-src-block)
     (should (equal '(2 1) (org-babel-execute-src-block)))))
 
+
+
+;;; Links
+
+;;;; Fuzzy links
+
+;; Fuzzy links [[text]] encompass links to a target (<<text>>), to
+;; a target keyword (aka an invisible target: #+TARGET: text), to
+;; a named element (#+name: text) and to headlines (* Text).
+
+(ert-deftest test-org-export/fuzzy-links ()
+  "Test fuzzy links specifications."
+  ;; 1. Fuzzy link goes in priority to a matching target.
+  (org-test-with-temp-text
+      "#+TARGET: Test\n#+NAME: Test\n|a|b|\n<<Test>>\n* Test\n[[Test]]"
+    (goto-line 4)
+    (org-open-at-point)
+    (should (looking-at "<<Test>>")))
+  ;; 2. Fuzzy link should then go to a matching target keyword.
+  (org-test-with-temp-text
+      "#+NAME: Test\n|a|b|\n#+TARGET: Test\n* Test\n[[Test]]"
+    (goto-line 4)
+    (org-open-at-point)
+    (should (looking-at "#\\+TARGET: Test")))
+  ;; 3. Then fuzzy link points to an element with a given name.
+  (org-test-with-temp-text "Test\n#+NAME: Test\n|a|b|\n* Test\n[[Test]]"
+    (goto-line 5)
+    (org-open-at-point)
+    (should (looking-at "#\\+NAME: Test")))
+  ;; 4. A target still lead to a matching headline otherwise.
+  (org-test-with-temp-text "* Head1\n* Head2\n*Head3\n[[Head2]]"
+    (goto-line 4)
+    (org-open-at-point)
+    (should (looking-at "\\* Head2")))
+  ;; 5. With a leading star in link, enforce heading match.
+  (org-test-with-temp-text "#+TARGET: Test\n* Test\n<<Test>>\n[[*Test]]"
+    (goto-line 4)
+    (org-open-at-point)
+    (should (looking-at "\\* Test"))))
+
+
 (provide 'test-org)
 
 ;;; test-org.el ends here

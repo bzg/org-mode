@@ -1289,8 +1289,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (cond
      ((string= key "latex") value)
      ((string= key "index") (format "\\index{%s}" value))
-     ((string= key "target")
-      (format "\\label{%s}" (org-export-solidify-link-text value)))
+     ;; Invisible targets.
+     ((string= key "target") nil)
      ((string= key "toc")
       (let ((value (downcase value)))
 	(cond
@@ -1449,32 +1449,26 @@ INFO is a plist holding contextual information.  See
 	       (org-element-parse-secondary-string
 		path (cdr (assq 'radio-target org-element-object-restrictions)))
 	       'e-latex info)))
-     ;; Ref link: If no description is provided, reference label PATH
-     ;; and display table number.  Otherwise move to label but display
-     ;; description instead.
-     ((string= type "ref")
-      (if (not desc) (format "\\ref{%s}" path)
-	(format "\\hyperref[%s]{%s}" path desc)))
      ;; Links pointing to an headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
       (let ((destination (if (string= type "fuzzy")
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
-	;; Fuzzy link points to a target.  Do as above.
 	(case (org-element-type destination)
-	  (target
-	   (format "\\hyperref[%s]{%s}"
-		   (org-export-solidify-link-text
-		    (org-element-property :raw-value destination))
+	  ;; Fuzzy link points nowhere.
+	  ('nil
+	   (format "\\texttt{%s}"
 		   (or desc
 		       (org-export-secondary-string
 			(org-element-property :raw-link link)
 			'e-latex info))))
-	  ;; Fuzzy link points to an headline.  If headlines are
-	  ;; numbered and the link has no description, display
-	  ;; headline's number.  Otherwise, display description or
-	  ;; headline's title.
+	  ;; Fuzzy link points to an invisible target.
+	  (keyword nil)
+	  ;; LINK points to an headline.  If headlines are numbered
+	  ;; and the link has no description, display headline's
+	  ;; number.  Otherwise, display description or headline's
+	  ;; title.
 	  (headline
 	   (let ((label
 		  (format "sec-%s"
@@ -1489,13 +1483,11 @@ INFO is a plist holding contextual information.  See
 			   (org-export-secondary-string
 			    (org-element-property :title destination)
 			    'e-latex info))))))
-	  ;; Fuzzy link points nowhere.
+          ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
-	   (format "\\texttt{%s}"
-		   (or desc
-		       (org-export-secondary-string
-			(org-element-property :raw-link link)
-			'e-latex info)))))))
+	   (let ((path (org-export-solidify-link-text path)))
+	     (if (not desc) (format "\\ref{%s}" path)
+	       (format "\\hyperref[%s]{%s}" path desc)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -1968,14 +1960,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Target
 
-(defun org-e-latex-target (target text info)
+(defun org-e-latex-target (target contents info)
   "Transcode a TARGET object from Org to LaTeX.
-TEXT is the text of the target.  INFO is a plist holding
-contextual information."
-  (format "\\label{%s}%s"
-	  (org-export-solidify-link-text
-	   (org-element-property :raw-value target))
-	  text))
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format "\\label{%s}"
+	  (org-export-solidify-link-text (org-element-property :value target))))
 
 
 ;;;; Time-stamp

@@ -364,3 +364,94 @@ body\n")))
 	;; Both footnotes should be seen.
 	(should
 	 (= (length (org-export-collect-footnote-definitions tree info)) 2))))))
+
+(ert-deftest test-org-export/fuzzy-links ()
+  "Test fuzz link export specifications."
+  ;; 1. Links to invisible (keyword) targets should be ignored.
+  (org-test-with-temp-text
+      "Paragraph.\n#+TARGET: Test\n[[Test]]"
+    (let* ((tree (org-element-parse-buffer))
+	   (info (org-combine-plists (org-export-initial-options))))
+      (setq info (org-combine-plists
+		  info (org-export-collect-tree-properties tree info 'test)))
+      (should-not
+       (org-element-map
+	tree 'link
+	(lambda (link)
+	  (org-export-get-ordinal
+	   (org-export-resolve-fuzzy-link link info) info)) info))))
+  ;; 2. Link to an headline should return headline's number.
+  (org-test-with-temp-text
+      "Paragraph.\n* Head1\n* Head2\n* Head3\n[[Head2]]"
+    (let* ((tree (org-element-parse-buffer))
+	   (info (org-combine-plists (org-export-initial-options))))
+      (setq info (org-combine-plists
+		  info (org-export-collect-tree-properties tree info 'test)))
+      (should
+       ;; Note: Headline's number is in fact a list of numbers.
+       (equal '(2)
+	      (org-element-map
+	       tree 'link
+	       (lambda (link)
+		 (org-export-get-ordinal
+		  (org-export-resolve-fuzzy-link link info) info)) info t)))))
+  ;; 3. Link to a target in an item should return item's number.
+  (org-test-with-temp-text
+      "- Item1\n  - Item11\n  - <<test>>Item12\n- Item2\n\n\n[[test]]"
+    (let* ((tree (org-element-parse-buffer))
+	   (info (org-combine-plists (org-export-initial-options))))
+      (setq info (org-combine-plists
+		  info (org-export-collect-tree-properties tree info 'test)))
+      (should
+       ;; Note: Item's number is in fact a list of numbers.
+       (equal '(1 2)
+	      (org-element-map
+	       tree 'link
+	       (lambda (link)
+		 (org-export-get-ordinal
+		  (org-export-resolve-fuzzy-link link info) info)) info t)))))
+  ;; 4. Link to a target in a footnote should return footnote's
+  ;;    number.
+  (org-test-with-temp-text
+      "Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
+    (let* ((tree (org-element-parse-buffer))
+	   (info (org-combine-plists (org-export-initial-options))))
+      (setq info (org-combine-plists
+		  info (org-export-collect-tree-properties tree info 'test)))
+      (should
+       (equal '(2 3)
+	      (org-element-map
+	       tree 'link
+	       (lambda (link)
+		 (org-export-get-ordinal
+		  (org-export-resolve-fuzzy-link link info) info)) info)))))
+  ;; 5. Link to a named element should return sequence number of that
+  ;;    element.
+  (org-test-with-temp-text
+      "#+NAME: tbl1\n|1|2|\n#+NAME: tbl2\n|3|4|\n#+NAME: tbl3\n|5|6|\n[[tbl2]]"
+    (let* ((tree (org-element-parse-buffer))
+	   (info (org-combine-plists (org-export-initial-options))))
+      (setq info (org-combine-plists
+		  info (org-export-collect-tree-properties tree info 'test)))
+      (should
+       (= 2
+	  (org-element-map
+	   tree 'link
+	   (lambda (link)
+	     (org-export-get-ordinal
+	      (org-export-resolve-fuzzy-link link info) info)) info t)))))
+  ;; 6. Link to a target not within an item, a table, a footnote
+  ;;    reference or definition should return section number.
+  (org-test-with-temp-text
+      "* Head1\n* Head2\nParagraph<<target>>\n* Head3\n[[target]]"
+    (let* ((tree (org-element-parse-buffer))
+	   (info (org-combine-plists (org-export-initial-options))))
+      (setq info (org-combine-plists
+		  info (org-export-collect-tree-properties tree info 'test)))
+      (should
+       (equal '(2)
+	      (org-element-map
+	       tree 'link
+	       (lambda (link)
+		 (org-export-get-ordinal
+		  (org-export-resolve-fuzzy-link link info) info)) info t))))))

@@ -1289,7 +1289,13 @@ Following tree properties are set:
    `(:parse-tree
      ,data
      :target-list
-     ,(org-element-map data 'target 'identity info)
+     ,(org-element-map
+       data '(keyword target)
+       (lambda (blob)
+	 (when (or (eq (org-element-type blob) 'target)
+		   (string= (upcase (org-element-property :key blob))
+                            "TARGET"))
+	   blob)) info)
      :headline-numbering ,(org-export-collect-headline-numbering data info)
      :back-end ,backend)
    info))
@@ -2704,8 +2710,11 @@ INFO is a plist holding contextual information.
 
 Return value can be an object, an element, or nil:
 
-- If LINK path exactly matches any target, return the target
-  object.
+- If LINK path matches a target object (i.e. <<path>>) or
+  element (i.e. \"#+target: path\"), return it.
+
+- If LINK path exactly matches the name affiliated keyword
+  \(i.e. #+name: path) of an element, return that element.
 
 - If LINK path exactly matches any headline name, return that
   element.  If more than one headline share that name, priority
@@ -2716,16 +2725,29 @@ Return value can be an object, an element, or nil:
 
 Assume LINK type is \"fuzzy\"."
   (let ((path (org-element-property :path link)))
-    ;; Link points to a target: return it.
-    (or (loop for target in (plist-get info :target-list)
-	      when (string= (org-element-property :raw-value target) path)
-	      return target)
-	;; Link either points to an headline or nothing.  Try to find
-	;; the source, with priority given to headlines with the closest
-	;; common ancestor.  If such candidate is found, return its
-	;; beginning position as an unique identifier, otherwise return
-	;; nil.
-	(let ((find-headline
+    (cond
+     ;; First try to find a matching "<<path>>" unless user specified
+     ;; he was looking for an headline (path starts with a *
+     ;; character).
+     ((and (not (eq (substring path 0 1) ?*))
+	   (loop for target in (plist-get info :target-list)
+		 when (string= (org-element-property :value target) path)
+		 return target)))
+     ;; Then try to find an element with a matching "#+name: path"
+     ;; affiliated keyword.
+     ((and (not (eq (substring path 0 1) ?*))
+	   (org-element-map
+	    (plist-get info :parse-tree) org-element-all-elements
+	    (lambda (el)
+              (when (string= (org-element-property :name el) path) el))
+	    info 'first-match)))
+     ;; Last case: link either points to an headline or to
+     ;; nothingness.  Try to find the source, with priority given to
+     ;; headlines with the closest common ancestor.  If such candidate
+     ;; is found, return its beginning position as an unique
+     ;; identifier, otherwise return nil.
+     (t
+      (let ((find-headline
 	       (function
 		;; Return first headline whose `:raw-value' property
 		;; is NAME in parse tree DATA, or nil.
@@ -2748,7 +2770,7 @@ Assume LINK type is \"fuzzy\"."
 		       (when foundp (throw 'exit foundp)))))
 		 (org-export-get-genealogy link info)) nil)
 	      ;; No match with a common ancestor: try the full parse-tree.
-	      (funcall find-headline path (plist-get info :parse-tree)))))))
+	      (funcall find-headline path (plist-get info :parse-tree))))))))
 
 (defun org-export-resolve-id-link (link info)
   "Return headline referenced as LINK destination.
@@ -2764,20 +2786,6 @@ is either \"id\" or \"custom-id\"."
        (when (or (string= (org-element-property :id headline) id)
                  (string= (org-element-property :custom-id headline) id))
          headline))
-     info 'first-match)))
-
-(defun org-export-resolve-ref-link (link info)
-  "Return element referenced as LINK destination.
-
-INFO is a plist used as a communication channel.
-
-Assume LINK type is \"ref\" and.  Return value is the first
-element whose `:name' property matches LINK's `:path', or nil."
-  (let ((name (org-element-property :path link)))
-    (org-element-map
-     (plist-get info :parse-tree) org-element-all-elements
-     (lambda (el)
-       (when (string= (org-element-property :name el) name) el))
      info 'first-match)))
 
 (defun org-export-resolve-coderef (ref info)
@@ -2870,27 +2878,62 @@ Optional argument PREDICATE is a function returning a non-nil
 value if the current element or object should be counted in.  It
 accepts one argument: the element or object being considered.
 This argument allows to count only a certain type of objects,
-like inline images, which are a subset of links \(in that case,
-`org-export-inline-image-p' might be an useful predicate\)."
-  (let ((counter 0)
-        ;; Determine if search should apply to current section, in
-        ;; which case it should be retrieved first, or to full parse
-        ;; tree.  As a special case, an element or object without
-        ;; a parent headline will also trigger a full search,
-        ;; notwithstanding WITHIN-SECTION value.
-        (data
-         (if (not within-section) (plist-get info :parse-tree)
-	   (or (org-export-get-parent-headline element info)
-	       (plist-get info :parse-tree)))))
-    ;; Increment counter until ELEMENT is found again.
-    (org-element-map
-     data (or types (org-element-type element))
-     (lambda (el)
-       (cond
-        ((equal element el) (1+ counter))
-	((not predicate) (incf counter) nil)
-	((funcall predicate el) (incf counter) nil)))
-     info 'first-match)))
+like inline images, which are a subset of links (in that case,
+`org-export-inline-image-p' might be an useful predicate).
+
+Return value is a list of numbers if ELEMENT is an headline or an
+item.  It is nil for keywords.  It represents the footnote number
+for footnote definitions and footnote references.  If ELEMENT is
+a target, return the same value as if ELEMENT was the closest
+table, item or headline containing the target.  In any other
+case, return the sequence number of ELEMENT among elements or
+objects of the same type."
+  ;; A target keyword, representing an invisible target, never has
+  ;; a sequence number.
+  (unless (eq (org-element-type element) 'keyword)
+    ;; Ordinal of a target object refer to the ordinal of the closest
+    ;; table, item, or headline containing the object.
+    (when (eq (org-element-type element) 'target)
+      (setq element
+	    (loop for parent in (org-export-get-genealogy element info)
+		  when
+		  (memq
+		   (org-element-type parent)
+		   '(footnote-definition footnote-reference headline item
+                                         table))
+		  return parent)))
+    (case (org-element-type element)
+      ;; Special case 1: An headline returns its number as a list.
+      (headline (org-export-get-headline-number element info))
+      ;; Special case 2: An item returns its number as a list.
+      (item (let ((struct (org-element-property :structure element)))
+	      (org-list-get-item-number
+	       (org-element-property :begin element)
+	       struct
+	       (org-list-prevs-alist struct)
+	       (org-list-parents-alist struct))))
+      ((footnote definition footnote-reference)
+       (org-export-get-footnote-number element info))
+      (otherwise
+       (let ((counter 0)
+	     ;; Determine if search should apply to current section,
+	     ;; in which case it should be retrieved first, or to full
+	     ;; parse tree.  As a special case, an element or object
+	     ;; without a parent headline will also trigger a full
+	     ;; search, notwithstanding WITHIN-SECTION value.
+	     (data
+	      (if (not within-section) (plist-get info :parse-tree)
+		(or (org-export-get-parent-headline element info)
+		    (plist-get info :parse-tree)))))
+	 ;; Increment counter until ELEMENT is found again.
+	 (org-element-map
+	  data (or types (org-element-type element))
+	  (lambda (el)
+	    (cond
+	     ((equal element el) (1+ counter))
+	     ((not predicate) (incf counter) nil)
+	     ((funcall predicate el) (incf counter) nil)))
+	  info 'first-match))))))
 
 
 ;;;; For Src-Blocks

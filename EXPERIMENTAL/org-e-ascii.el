@@ -820,28 +820,22 @@ channel."
 		     (if (not desc) (org-element-property :raw-link link)
 		       (org-export-secondary-string desc 'e-ascii info)))))
        (cond
-	;; Coderefs, radio links and ref links are ignored.
-	((member type '("coderef" "radio" "ref")) nil)
-	;; Id, custom-id and fuzzy links (with the exception of
-	;; targets): Headlines refer to their numbering.
-	((member type '("custom-id" "fuzzy" "id"))
-	 (let ((destination (if (string= type "fuzzy")
-				(org-export-resolve-fuzzy-link link info)
-			      (org-export-resolve-id-link link info))))
-	   (unless (eq (org-element-type destination) 'target)
-	     (concat
-	      (org-e-ascii--fill-string
-	       (format
-		"[%s] %s"
-		anchor
-		(if (not destination)
-		    (org-e-ascii--translate "Unknown reference" info)
-		  (format
-		   (org-e-ascii--translate "See section %s" info)
-		   (mapconcat 'number-to-string
-			      (org-export-get-headline-number destination info)
-			      "."))))
-	       width info) "\n\n"))))
+	;; Coderefs, radio links and fuzzy links are ignored.
+	((member type '("coderef" "radio" "fuzzy")) nil)
+	;; Id and custom-id links: Headlines refer to their numbering.
+	((member type '("custom-id" "id"))
+	 (let ((dest (org-export-resolve-id-link link info)))
+	   (concat
+	    (org-e-ascii--fill-string
+	     (format
+	      "[%s] %s"
+	      anchor
+	      (if (not dest) (org-e-ascii--translate "Unknown reference" info)
+		(format
+		 (org-e-ascii--translate "See section %s" info)
+		 (mapconcat 'number-to-string
+			    (org-export-get-headline-number dest info) "."))))
+	     width info) "\n\n")))
 	;; Do not add a link that cannot be resolved and doesn't have
 	;; any description: destination is already visible in the
 	;; paragraph.
@@ -1385,29 +1379,23 @@ INFO is a plist holding contextual information."
 	(org-element-property :path link)
 	(cdr (assq 'radio-target org-element-object-restrictions)))
        'e-ascii info))
-     ;; Ref link: If there's no description (DESC, return link's
-     ;; destination sequence number among elements of same
-     ;; type. Otherwise, use DESC.
-     ((string= type "ref")
-      (if (org-string-nw-p desc) desc
-	(format "%d"
-		(org-export-get-ordinal
-		 (org-export-resolve-ref-link link info)
-		 info nil nil
-		 (lambda (el) (or (org-element-property :caption el)
-			     (org-element-property :name el)))))))
      ;; Do not apply a special syntax on fuzzy links pointing to
      ;; targets.
-     ((and (string= type "fuzzy")
-	   (let ((path (org-element-property :path link)))
-	     (loop for target in (plist-get info :target-list)
-		   thereis (string=
-			    (org-element-property :raw-value target)
-			    path))))
-      (if (org-string-nw-p desc) desc raw-link))
+     ((string= type "fuzzy")
+      (let ((destination (org-export-resolve-fuzzy-link link info)))
+	;; Ignore invisible "#+target: path".
+	(unless (eq (org-element-type destination) 'keyword)
+	  (if (org-string-nw-p desc) desc
+	    (when destination
+	      (let ((number (org-export-get-ordinal destination info)))
+		(when number
+		  (if (atom number) (number-to-string number)
+		    (mapconcat 'number-to-string number ".")))))))))
      (t
-      (concat (format "[%s]" (if (org-string-nw-p desc) desc raw-link))
-	      (unless org-e-ascii-links-to-notes (format " (%s)" raw-link)))))))
+      (if (not (org-string-nw-p desc)) (format "[%s]" raw-link)
+	(concat
+	 (format "[%s]" desc)
+	 (unless org-e-ascii-links-to-notes (format " (%s)" raw-link))))))))
 
 
 ;;;; Macro
@@ -1845,11 +1833,7 @@ INFO is a plist used as a communication channel."
 
 ;;;; Target
 
-(defun org-e-ascii-target (target contents info)
-  "Transcode a TARGET object from Org to ASCII.
-CONTENTS is the contents of the target.  INFO is a plist holding
-contextual information."
-  contents)
+;; Targets are invisible.
 
 
 ;;;; Time-stamp

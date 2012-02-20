@@ -1967,9 +1967,6 @@ Assume point is at the beginning of the link."
 	 ;; Explicit type (http, irc, bbdb...).  See `org-link-types'.
 	 ((string-match org-link-re-with-space3 link)
 	  (setq type (match-string 1 link) path (match-string 2 link)))
-	 ;; Ref type: PATH is the name of the target element.
-	 ((string-match "^ref:\\(.*\\)" link)
-	  (setq type "ref" path (org-trim (match-string 1 link))))
 	 ;; Id type: PATH is the id.
 	 ((string-match "^id:\\([-a-f0-9]+\\)" link)
 	  (setq type "id" path (match-string 1 link)))
@@ -2269,25 +2266,21 @@ CONTENTS is the contents of the object."
   "Parse target at point.
 
 Return a list whose car is `target' and cdr a plist with
-`:begin', `:end', `:contents-begin', `:contents-end', `raw-value'
-and `:post-blank' as keywords.
+`:begin', `:end', `:contents-begin', `:contents-end', `value' and
+`:post-blank' as keywords.
 
 Assume point is at the target."
   (save-excursion
     (looking-at org-target-regexp)
     (let ((begin (point))
-	  (contents-begin (match-beginning 1))
-	  (contents-end (match-end 1))
-	  (raw-value (org-match-string-no-properties 1))
+	  (value (org-match-string-no-properties 1))
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
       `(target
 	(:begin ,begin
 		:end ,end
-		:contents-begin ,contents-begin
-		:contents-end ,contents-end
-		:raw-value ,raw-value
+		:value ,value
 		:post-blank ,post-blank)))))
 
 (defun org-element-target-interpreter (target contents)
@@ -2481,7 +2474,7 @@ regexp matching one object can also match the other object.")
   "Complete list of object types.")
 
 (defconst org-element-recursive-objects
-  '(emphasis link macro subscript superscript target radio-target)
+  '(emphasis link macro subscript superscript radio-target)
   "List of recursive object types.")
 
 (defconst org-element-non-recursive-block-alist
@@ -2551,8 +2544,7 @@ This list is checked after translations have been applied.  See
     (subscript entity export-snippet inline-babel-call inline-src-block
 	       latex-fragment sub/superscript text-markup)
     (superscript entity export-snippet inline-babel-call inline-src-block
-		 latex-fragment sub/superscript text-markup)
-    (target entity export-snippet latex-fragment sub/superscript text-markup))
+		 latex-fragment sub/superscript text-markup))
   "Alist of recursive objects restrictions.
 
 CAR is a recursive object type and CDR is a list of successors
