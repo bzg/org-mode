@@ -1295,9 +1295,19 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-latex-latex-environment (latex-environment contents info)
   "Transcode a LATEX-ENVIRONMENT element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-e-latex--wrap-label
-   latex-environment
-   (org-remove-indentation (org-element-get-property :value latex-environment))))
+  (let ((label (org-element-get-property :name latex-environment))
+	(value (org-remove-indentation
+		(org-element-get-property :value latex-environment))))
+    (if (not (org-string-nw-p label)) value
+      ;; Environment is labelled: label must be within the environment
+      ;; (otherwise, a reference pointing to that element will count
+      ;; the section instead).
+      (with-temp-buffer
+	(insert value)
+	(goto-char (point-min))
+	(forward-line)
+	(insert (format "\\label{%s}\n" label))
+	(buffer-string)))))
 
 
 ;;;; Latex Fragment
