@@ -715,15 +715,15 @@ Assume point is at an item."
       ;;    equally indented than BEG-CELL's cdr.  Also, store ending
       ;;    position of items in END-LST-2.
       (catch 'exit
-      	(while t
-      	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
+        (while t
+          (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
 			(org-get-indentation))))
-      	    (cond
-      	     ((>= (point) lim-down)
+            (cond
+             ((>= (point) lim-down)
 	      ;; At downward limit: this is de facto the end of the
 	      ;; list.  Save point as an ending position, and jump to
 	      ;; part 3.
-      	      (throw 'exit
+              (throw 'exit
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
 	     ;; At a verbatim block, move to its end.  Point is at bol
 	     ;; and 'org-example property is set by whole lines:
@@ -1279,9 +1279,8 @@ This function modifies STRUCT."
       (insert body item-sep)
       ;; 5. Add new item to STRUCT.
       (mapc (lambda (e)
-      	      (let ((p (car e))
-      		    (end (nth 6 e)))
-      		(cond
+              (let ((p (car e)) (end (nth 6 e)))
+                (cond
 		 ;; Before inserted item, positions don't change but
 		 ;; an item ending after insertion has its end shifted
 		 ;; by SIZE-OFFSET.
