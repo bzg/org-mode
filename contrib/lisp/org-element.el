@@ -3595,50 +3595,72 @@ newline character at its end."
 
 ELEMENT must only contain plain text and objects.
 
-The following changes are applied to plain text:
-  - Remove global indentation, preserving relative one.
-  - Untabify it.
-
 If optional argument IGNORE-FIRST is non-nil, ignore first line's
 indentation to compute maximal common indentation.
 
-Return the normalized element."
-  (nconc
-   (list (car element) (nth 1 element))
-   (let ((contents (org-element-get-contents element)))
-     (if (not (or ignore-first (stringp (car contents)))) contents
-       (catch 'exit
-	 ;; 1. Get maximal common indentation (MCI) among each string
-	 ;;    in CONTENTS.
-	 (let* ((ind-list (unless ignore-first
-			    (list (org-get-string-indentation (car contents)))))
-		(contents
+Return the normalized element that is element with global
+indentation removed from its contents.  The function assumes that
+indentation is not done with TAB characters."
+  (let (ind-list
+        (collect-inds
+         (function
+          ;; Return list of indentations within BLOB.  This is done by
+          ;; walking recursively BLOB and updating IND-LIST along the
+          ;; way.  FIRST-FLAG is non-nil when the first string hasn't
+          ;; been seen yet.  It is required as this string is the only
+          ;; one whose indentation doesn't happen after a newline
+          ;; character.
+          (lambda (blob first-flag)
+            (mapc
+             (lambda (object)
+	       (when (and first-flag (stringp object))
+                 (setq first-flag nil)
+                 (string-match "\\`\\( *\\)" object)
+		 (let ((len (length (match-string 1 object))))
+		   ;; An indentation of zero means no string will be
+		   ;; modified.  Quit the process.
+		   (if (zerop len) (throw 'zero (setq ind-list nil))
+		     (push len ind-list))))
+               (cond
+                ((stringp object)
+                 (let ((start 0))
+                   (while (string-match "\n\\( *\\)" object start)
+                     (setq start (match-end 0))
+                     (push (length (match-string 1 object)) ind-list))))
+                ((memq (car object) org-element-recursive-objects)
+                 (funcall collect-inds object first-flag))))
+             (org-element-get-contents blob))))))
+    ;; Collect indentation list in ELEMENT.  Possibly remove first
+    ;; value if IGNORE-FIRST is non-nil.
+    (catch 'zero (funcall collect-inds element (not ignore-first)))
+    (if (not ind-list) element
+      ;; Build ELEMENT back, replacing each string with the same
+      ;; string minus common indentation.
+      (let ((build
+	     (function
+	      (lambda (blob mci first-flag)
+		;; Return BLOB with all its strings indentation
+		;; shortened from MCI white spaces.  FIRST-FLAG is
+		;; non-nil when the first string hasn't been seen
+		;; yet.
+		(nconc
+		 (list (car blob) (nth 1 blob))
 		 (mapcar
 		  (lambda (object)
-		    (if (not (stringp object)) object
-		      (let ((start 0))
-			(while (string-match "\n\\( *\\)" object start)
-			  (setq start (match-end 0))
-			  (push (length (match-string 1 object)) ind-list))
-			object)))
-		  contents))
-		(mci (if ind-list (apply 'min ind-list)
-		       (throw 'exit contents))))
-	   ;; 2. Remove that indentation from CONTENTS.  First string
-	   ;;    must be treated differently because it's the only one
-	   ;;    whose indentation doesn't happen after a newline
-	   ;;    character.
-	   (let ((first-obj (car contents)))
-	     (unless (or (not (stringp first-obj)) ignore-first)
-	       (setq contents
-		     (cons (replace-regexp-in-string
-			    (format "\\` \\{%d\\}" mci) "" first-obj)
-			   (cdr contents)))))
-	   (mapcar (lambda (object)
-		     (if (not (stringp object)) object
-		       (replace-regexp-in-string
-			(format "\n \\{%d\\}" mci) "\n" object)))
-		   contents)))))))
+		    (when (and first-flag (stringp object))
+		      (setq first-flag nil)
+		      (setq object
+			    (replace-regexp-in-string
+			     (format "\\` \\{%d\\}" mci) "" object)))
+		    (cond
+		     ((stringp object)
+		      (replace-regexp-in-string
+		       (format "\n \\{%d\\}" mci) "\n" object))
+		     ((memq (car object) org-element-recursive-objects)
+		      (funcall build object mci first-flag))
+		     (t object)))
+		  (org-element-get-contents blob)))))))
+	(funcall build element (apply 'min ind-list) (not ignore-first))))))
 
 
 
