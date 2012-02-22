@@ -3267,7 +3267,7 @@ If yes remove the column and the special lines."
 	      ((org-table-cookie-line-p x)
 	       ;; This line contains formatting cookies, discard it
 	       nil)
-	      ((string-match "^[ \t]*| *[!_^/] *|" x)
+	      ((string-match "^[ \t]*| *\\([!_^/$]\\|\\\\\\$\\) *|" x)
 	       ;; ignore this line
 	       nil)
 	      ((or (string-match "^\\([ \t]*\\)|-+\\+" x)
