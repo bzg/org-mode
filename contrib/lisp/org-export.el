@@ -1046,7 +1046,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 					 (downcase (match-string 1 val)))))
 			       (value (org-match-string-no-properties 2 val)))
 			   (cond
-			    ((not value) "")
+			    ((not value) nil)
 			    ;; Value will be evaled.  Leave it as-is.
 			    ((string-match "\\`(eval\\>" value)
 			     (list key value))
@@ -1114,7 +1114,8 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			(split
 			 `(,@(plist-get plist prop) ,@(org-split-string val)))
 			('t val)
-			(otherwise (plist-get plist prop)))))))))
+			(otherwise (if (not (plist-member plist prop)) val
+				     (plist-get plist prop))))))))))
        ;; Parse keywords specified in `org-element-parsed-keywords'.
        (mapc
 	(lambda (key)
@@ -1297,11 +1298,11 @@ OPTIONS is a plist holding export options."
    data
    'headline
    (lambda (headline info)
-     (let ((tags (org-element-property :with-tags headline)))
-       (and tags (string-match
-		  (format ":%s:" (plist-get info :select-tags)) tags))))
-   options
-   'stop-at-first-match))
+     (let ((tags (org-element-property :tags headline)))
+       (and tags
+	    (loop for tag in (plist-get info :select-tags)
+		  thereis (string-match (format ":%s:" tag) tags)))))
+   options 'first-match))
 
 (defun org-export-get-min-level (data options)
   "Return minimum exportable headline's level in DATA.
@@ -1349,8 +1350,6 @@ associated numbering \(in the shape of a list of numbers\)."
   "Non-nil when element or object BLOB should be skipped during export.
 OPTIONS is the plist holding export options."
   (case (org-element-type blob)
-    ;; Plain text is never skipped.
-    (plain-text nil)
     ;; Check headline.
     (headline
      (let ((with-tasks (plist-get options :with-tasks))
