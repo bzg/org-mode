@@ -2065,11 +2065,9 @@ Return code as a string."
   (save-excursion
     (save-restriction
       ;; Narrow buffer to an appropriate region for parsing.
-      (when (org-region-active-p)
-	(narrow-to-region (region-beginning) (region-end)))
-      (when (and subtreep (not (org-at-heading-p)))
-	;; Ensure point is at sub-tree's beginning.
-	(org-narrow-to-subtree))
+      (cond ((org-region-active-p)
+	     (narrow-to-region (region-beginning) (region-end)))
+	    (subtreep (org-narrow-to-subtree)))
       ;; Retrieve export options (INFO) and parsed tree (RAW-DATA),
       ;; Then options can be completed with tree properties.  Note:
       ;; Buffer isn't parsed directly.  Instead, a temporary copy is
