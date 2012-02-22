@@ -3037,13 +3037,12 @@ Nil values returned from FUN are ignored in the result."
 	 --acc
 	 (--check-blob
 	  (function
-	   (lambda (--type types fun --blob --local)
+	   (lambda (--type types fun --blob info)
 	     ;; Check if TYPE is matching among TYPES.  If so, apply
-	     ;; FUN to --BLOB and accumulate return value
-	     ;; into --ACC.  --LOCAL is the communication channel.
-	     ;; If --BLOB has a secondary string that can contain
-	     ;; objects with their type amond TYPES, look into that
-	     ;; string first.
+	     ;; FUN to --BLOB and accumulate return value into --ACC.
+	     ;; INFO is the communication channel.  If --BLOB has
+	     ;; a secondary string that can contain objects with their
+	     ;; type amond TYPES, look into that string first.
 	     (when (memq --type --restricts)
 	       (funcall
 		--walk-tree
@@ -3052,16 +3051,16 @@ Nil values returned from FUN are ignored in the result."
 		  ,@(org-element-property
 		     (cdr (assq --type org-element-secondary-value-alist))
 		     --blob))
-		--local))
+		info))
 	     (when (memq --type types)
-	       (let ((result (funcall fun --blob --local)))
+	       (let ((result (funcall fun --blob info)))
 		 (cond ((not result))
 		       (first-match (throw 'first-match result))
 		       (t (push result --acc))))))))
 	 (--walk-tree
 	  (function
-	   (lambda (--data --local)
-	     ;; Recursively walk DATA.  --LOCAL, if non-nil, is
+	   (lambda (--data info)
+	     ;; Recursively walk DATA.  INFO, if non-nil, is
 	     ;; a plist holding contextual information.
 	     (mapc
 	      (lambda (--blob)
@@ -3070,19 +3069,23 @@ Nil values returned from FUN are ignored in the result."
 		  ;; possible and allowed.
 		  (cond
 		   ;; Element or object not exportable.
-		   ((and info (org-export-skip-p --blob info)))
+		   ((member --blob (plist-get info :ignore-list)))
 		   ;; Archived headline: Maybe apply FUN on it, but
-		   ;; skip contents.
+		   ;; ignore contents.
 		   ((and info
 			 (eq --type 'headline)
 			 (eq (plist-get info :with-archived-trees) 'headline)
 			 (org-element-property :archivedp --blob))
-		    (funcall --check-blob --type types fun --blob --local))
+		    (funcall --check-blob
+			     --type types fun
+			     ;; Ensure --BLOB has no contents.
+			     (list --type (nth 1 --blob))
+			     info))
 		   ;; Limiting recursion to greater elements, and --BLOB
 		   ;; isn't one.
 		   ((and (eq --category 'greater-elements)
 			 (not (memq --type org-element-greater-elements)))
-		    (funcall --check-blob --type types fun --blob --local))
+		    (funcall --check-blob --type types fun --blob info))
 		   ;; Limiting recursion to elements, and --BLOB only
 		   ;; contains objects.
 		   ((and (eq --category 'elements) (eq --type 'paragraph)))
@@ -3092,16 +3095,11 @@ Nil values returned from FUN are ignored in the result."
 			 (not (or (eq --type 'paragraph)
 				  (memq --type org-element-greater-elements)
 				  (memq --type org-element-recursive-objects))))
-		    (funcall --check-blob --type types fun --blob --local))
-		   ;; Recursion is possible and allowed: Update local
-		   ;; information and move into --BLOB.
-		   (t (funcall --check-blob --type types fun --blob --local)
-		      (funcall
-		       --walk-tree --blob
-		       (org-combine-plists
-			--local
-			`(:genealogy
-			  ,(cons --blob (plist-get --local :genealogy)))))))))
+		    (funcall --check-blob --type types fun --blob info))
+		   ;; Recursion is possible and allowed: Maybe apply
+		   ;; FUN to --BLOB, then move into it.
+		   (t (funcall --check-blob --type types fun --blob info)
+		      (funcall --walk-tree --blob info)))))
 	      (org-element-contents --data))))))
     (catch 'first-match
       (funcall --walk-tree data info)

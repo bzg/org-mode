@@ -1234,7 +1234,7 @@ contextual information."
   ;; Grab `:level' from plain-list properties, which is always the
   ;; first element above current item.
   (let* ((level (org-element-property
-		 :level (car (plist-get info :genealogy))))
+		 :level (car (org-export-get-genealogy item info))))
 	 (counter (let ((count (org-element-property :counter item)))
 		    (and count
 			 (< level 4)

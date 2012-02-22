@@ -514,7 +514,7 @@ INFO is a plist used as a communication channel."
     ;; Elements with a relative width: store maximum text width in
     ;; TOTAL-WIDTH.
     (otherwise
-     (let* ((genealogy (cons element (plist-get info :genealogy)))
+     (let* ((genealogy (cons element (org-export-get-genealogy element info)))
 	    ;; Total width is determined by the presence, or not, of an
 	    ;; inline task among ELEMENT parents.
 	    (total-width
@@ -1280,7 +1280,7 @@ contextual information."
 	 ;; `:type' property from it.
 	 (org-list-bullet-string
 	  (let ((type (org-element-property
-		       :type (car (plist-get info :genealogy)))))
+		       :type (car (org-export-get-genealogy item info)))))
 	    (cond
 	     ((eq type 'descriptive)
 	      (concat
@@ -1432,7 +1432,7 @@ information."
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (org-e-ascii--fill-string
-   (let ((parent (car (plist-get info :genealogy))))
+   (let ((parent (car (org-export-get-genealogy paragraph info))))
      ;; If PARAGRAPH is the first one in a list element, be sure to
      ;; add the check-box in front of it, before any filling.  Later,
      ;; it would interfere with line width.

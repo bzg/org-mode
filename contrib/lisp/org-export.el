@@ -649,7 +649,7 @@ standard mode."
 ;;    just before export, by `org-export-collect-tree-properties'.
 ;;
 ;; 3. Local options are updated during parsing, and their value
-;;    depends on the level of recursion.  For now, only `:genealogy'
+;;    depends on the level of recursion.  For now, only `:ignore-list'
 ;;    belongs to that category.
 
 ;; Here is the full list of properties available during transcode
@@ -697,11 +697,6 @@ standard mode."
 ;;   - category :: option
 ;;   - type :: alist (STRING . LIST)
 
-;; + `:genealogy' :: Flat list of current object or element's parents
-;;      from closest to farthest.
-;;   - category :: local
-;;   - type :: list of elements and objects
-
 ;; + `:headline-levels' :: Maximum level being exported as an
 ;;      headline.  Comparison is done with the relative level of
 ;;      headlines in the parse tree, not necessarily with their
@@ -716,11 +711,16 @@ standard mode."
 ;;   - category :: tree
 ;;   - type :: integer
 
-;; + `:headline-numbering' :: Alist between headlines' beginning
-;;      position and their numbering, as a list of numbers
+;; + `:headline-numbering' :: Alist between headlines and their
+;;      numbering, as a list of numbers
 ;;      (cf. `org-export-get-headline-number').
 ;;   - category :: tree
 ;;   - type :: alist (INTEGER . LIST)
+
+;; + `:ignore-list' :: List of elements and objects that should be
+;;      ignored during export.
+;;   - category :: local
+;;   - type :: list of elements and objects
 
 ;; + `:input-file' :: Full path to input file, if any.
 ;;   - category :: option
@@ -1231,12 +1231,12 @@ retrieved."
 ;; Dedicated functions focus on computing the value of specific tree
 ;; properties during initialization.  Thus,
 ;; `org-export-use-select-tag-p' determines if an headline makes use
-;; of an export tag enforcing inclusion. `org-export-get-min-level'
-;; gets the minimal exportable level, used as a basis to compute
-;; relative level for headlines. `org-export-get-point-max' returns
-;; the maximum exportable ending position in the parse tree.
+;; of an export tag enforcing inclusion. `org-export-get-ignore-list'
+;; marks collect elements and objects that should be skipped during
+;; export, `org-export-get-min-level' gets the minimal exportable
+;; level, used as a basis to compute relative level for headlines.
 ;; Eventually `org-export-collect-headline-numbering' builds an alist
-;; between headlines' beginning position and their numbering.
+;; between headlines and their numbering.
 
 (defun org-export-collect-tree-properties (data info backend)
   "Extract tree properties from parse tree.
@@ -1256,6 +1256,8 @@ Following tree properties are set:
 `:headline-numbering' Alist of all headlines' beginning position
 		   as key an the associated numbering as value.
 
+`:ignore-list'     List of elements that should be ignored during export.
+
 `:parse-tree'      Whole parse tree.
 
 `:target-list'     List of all targets in the parse tree.
@@ -1265,15 +1267,19 @@ Following tree properties are set:
   ;; First, set `:use-select-tags' property, as it will be required
   ;; for further computations.
   (setq info
-	(org-combine-plists
-	 info `(:use-select-tags ,(org-export-use-select-tags-p data info))))
-  ;; Then get `:headline-offset' in order to be able to use
+	(plist-put info
+		   :use-select-tags (org-export-use-select-tags-p data info)))
+  ;; Then get the list of elements and objects to ignore, and put it
+  ;; into `:ignore-list'.
+  (setq info
+	(plist-put info :ignore-list (org-export-get-ignore-list data info)))
+  ;; Finally get `:headline-offset' in order to be able to use
   ;; `org-export-get-relative-level'.
   (setq info
-	(org-combine-plists
-	 info `(:headline-offset ,(- 1 (org-export-get-min-level data info)))))
-  ;; Now, get the rest of the tree properties, now `:use-select-tags'
-  ;; is set...
+	(plist-put info
+		   :headline-offset (- 1 (org-export-get-min-level data info))))
+  ;; Now, properties order doesn't matter: get the rest of the tree
+  ;; properties.
   (nconc
    `(:parse-tree
      ,data
@@ -1303,13 +1309,14 @@ DATA is parsed tree as returned by `org-element-parse-buffer'.
 OPTIONS is a plist holding export options."
   (catch 'exit
     (let ((min-level 10000))
-      (mapc (lambda (blob)
-	      (when (and (eq (org-element-type blob) 'headline)
-			 (not (org-export-skip-p blob options)))
-		(setq min-level
-		      (min (org-element-property :level blob) min-level)))
-	      (when (= min-level 1) (throw 'exit 1)))
-	    (org-element-contents data))
+      (mapc
+       (lambda (blob)
+	 (when (and (eq (org-element-type blob) 'headline)
+		    (not (org-export-ignored-p blob options)))
+	   (setq min-level
+		 (min (org-element-property :level blob) min-level)))
+	 (when (= min-level 1) (throw 'exit 1)))
+       (org-element-contents data))
       ;; If no headline was found, for the sake of consistency, set
       ;; minimum level to 1 nonetheless.
       (if (= min-level 10000) 1 min-level))))
@@ -1338,6 +1345,84 @@ associated numbering \(in the shape of a list of numbers\)."
 		when (> idx relative-level) do (aset numbering idx 0)))))
      options)))
 
+(defun org-export--skip-p (blob options)
+  "Non-nil when element or object BLOB should be skipped during export.
+OPTIONS is the plist holding export options."
+  (case (org-element-type blob)
+    ;; Plain text is never skipped.
+    (plain-text nil)
+    ;; Check headline.
+    (headline
+     (let ((with-tasks (plist-get options :with-tasks))
+	   (todo (org-element-property :todo-keyword blob))
+	   (todo-type (org-element-property :todo-type blob))
+	   (archived (plist-get options :with-archived-trees))
+	   (tag-list (let ((tags (org-element-property :tags blob)))
+		       (and tags (org-split-string tags ":")))))
+       (or
+	;; Ignore subtrees with an exclude tag.
+	(loop for k in (plist-get options :exclude-tags)
+	      thereis (member k tag-list))
+	;; Ignore subtrees without a select tag, when such tag is found
+	;; in the buffer.
+	(and (plist-get options :use-select-tags)
+	     (loop for k in (plist-get options :select-tags)
+		   never (member k tag-list)))
+	;; Ignore commented sub-trees.
+	(org-element-property :commentedp blob)
+	;; Ignore archived subtrees if `:with-archived-trees' is nil.
+	(and (not archived) (org-element-property :archivedp blob))
+	;; Ignore tasks, if specified by `:with-tasks' property.
+	(and todo (not with-tasks))
+	(and todo
+	     (memq with-tasks '(todo done))
+	     (not (eq todo-type with-tasks)))
+	(and todo
+	     (consp with-tasks)
+	     (not (member todo with-tasks))))))
+    ;; Check time-stamp.
+    (time-stamp (not (plist-get options :with-timestamps)))
+    ;; Check drawer.
+    (drawer
+     (or (not (plist-get options :with-drawers))
+	 (and (consp (plist-get options :with-drawers))
+	      (not (member (org-element-property :drawer-name blob)
+			   (plist-get options :with-drawers))))))
+    ;; Check export snippet.
+    (export-snippet
+     (let* ((raw-back-end (org-element-property :back-end blob))
+	    (true-back-end
+	     (or (cdr (assoc raw-back-end org-export-snippet-translation-alist))
+		 raw-back-end)))
+       (not (string= (symbol-name (plist-get options :back-end))
+		     true-back-end))))))
+
+(defun org-export-get-ignore-list (data options)
+  "Return list of elements and objects to ignore during export.
+
+DATA is the parse tree to traverse.  OPTIONS is the plist holding
+export options.
+
+Return elements or objects to ignore as a list."
+  (let (ignore-list
+	(walk-data
+	 (function
+	  (lambda (data options)
+	    ;; Collect ignored elements or objects into IGNORE-LIST.
+	    (mapc
+	     (lambda (el)
+	       (if (org-export--skip-p el options) (push el ignore-list)
+		 (let ((type (org-element-type el)))
+		   (when (or (eq type 'org-data)
+			     (memq type org-element-greater-elements)
+			     (memq type org-element-recursive-objects)
+			     (eq type 'paragraph))
+		     (funcall walk-data el options)))))
+	     (org-element-contents data))))))
+    (funcall walk-data data options)
+    ;; Return value.
+    ignore-list))
+
 
 
 ;;; The Transcoder
@@ -1353,11 +1438,12 @@ associated numbering \(in the shape of a list of numbers\)."
 ;; `org-export-secondary-string' is provided for that specific task.
 
 ;; Internally, three functions handle the filtering of objects and
-;; elements during the export.  More precisely, `org-export-skip-p'
-;; determines if the considered object or element should be ignored
-;; altogether, `org-export-interpret-p' tells which elements or
-;; objects should be seen as real Org syntax and `org-export-expand'
-;; transforms the others back into their original shape.
+;; elements during the export.  In particular,
+;; `org-export-ignore-element' mark an element or object so future
+;; parse tree traversals skip it, `org-export-interpret-p' tells which
+;; elements or objects should be seen as real Org syntax and
+;; `org-export-expand' transforms the others back into their original
+;; shape.
 
 (defun org-export-data (data backend info)
   "Convert DATA to a string into BACKEND format.
@@ -1396,14 +1482,12 @@ Return transcoded string."
 		;; 1.0 A full Org document is inserted.
 		((eq type 'org-data) 'identity)
 		;; 1.1. BLOB should be ignored.
-		((org-export-skip-p blob info) nil)
+		((member blob (plist-get info :ignore-list)) nil)
 		;; 1.2. BLOB shouldn't be transcoded.  Interpret it
 		;;      back into Org syntax.
-		((not (org-export-interpret-p blob info))
-		 'org-export-expand)
+		((not (org-export-interpret-p blob info)) 'org-export-expand)
 		;; 1.3. Else apply naming convention.
-		(t (let ((trans (intern
-				 (format "org-%s-%s" backend type))))
+		(t (let ((trans (intern (format "org-%s-%s" backend type))))
 		     (and (fboundp trans) trans)))))
 	      ;; 2. Compute CONTENTS of BLOB.
 	      (contents
@@ -1414,11 +1498,7 @@ Return transcoded string."
 		((eq type 'org-data) (org-export-data blob backend info))
 		;; Case 2. For a recursive object.
 		((memq type org-element-recursive-objects)
-		 (org-export-data
-		  blob backend
-		  (org-combine-plists
-		   info
-		   `(:genealogy ,(cons blob (plist-get info :genealogy))))))
+		 (org-export-data blob backend info))
 		;; Case 3. For a recursive element.
 		((memq type org-element-greater-elements)
 		 ;; Ignore contents of an archived tree
@@ -1428,11 +1508,7 @@ Return transcoded string."
 			  (eq (plist-get info :with-archived-trees) 'headline)
 			  (org-element-property :archivedp blob))
 		   (org-element-normalize-string
-		    (org-export-data
-		     blob backend
-		     (org-combine-plists
-		      info `(:genealogy
-			     ,(cons blob (plist-get info :genealogy))))))))
+		    (org-export-data blob backend info))))
 		;; Case 4. For a paragraph.
 		((eq type 'paragraph)
 		 (let ((paragraph
@@ -1443,13 +1519,12 @@ Return transcoded string."
 			 ;; indentation: there is none and it might be
 			 ;; misleading.
 			 (and (not (org-export-get-previous-element blob info))
-			      (let ((parent (caar (plist-get info :genealogy))))
-				(memq parent '(footnote-definition item)))))))
-		   (org-export-data
-		    paragraph backend
-		    (org-combine-plists
-		     info `(:genealogy
-			    ,(cons paragraph (plist-get info :genealogy)))))))))
+			      (let ((parent
+				     (car
+				      (org-export-get-genealogy blob info))))
+				(memq (org-element-type parent)
+				      '(footnote-definition item)))))))
+		   (org-export-data paragraph backend info)))))
 	      ;; 3. Transcode BLOB into RESULTS string.
 	      (results (cond
 			((not transcoder) nil)
@@ -1458,20 +1533,32 @@ Return transcoded string."
 			  `(org-data nil ,(funcall transcoder blob contents))
 			  backend info))
 			(t (funcall transcoder blob contents info)))))
-	 ;; 4. Discard nil results.  Otherwise, update INFO, append
-	 ;;    the same white space between elements or objects as in
-	 ;;    the original buffer, and call appropriate filters.
-	 (when results
-	   ;; No filter for a full document.
-	   (if (eq type 'org-data) results
-	     (org-export-filter-apply-functions
-	      (plist-get info (intern (format ":filter-%s" type)))
-	      (let ((post-blank (org-element-property :post-blank blob)))
-		(if (memq type org-element-all-elements)
-		    (concat (org-element-normalize-string results)
-			    (make-string post-blank ?\n))
-		  (concat results (make-string post-blank ? ))))
-	      backend info)))))))
+	 ;; 4. Return results.
+	 (cond
+	  ;; Discard nil results.  Also ignore BLOB from further
+	  ;; traversals in parse tree.
+	  ((not results) (org-export-ignore-element blob info) nil)
+	  ;; No filter for a full document.
+	  ((eq type 'org-data) results)
+	  ;; Otherwise, update INFO, append the same white space
+	  ;; between elements or objects as in the original buffer,
+	  ;; and call appropriate filters.
+	  (t
+	   (let ((results
+		  (org-export-filter-apply-functions
+		   (plist-get info (intern (format ":filter-%s" type)))
+		   (let ((post-blank (org-element-property :post-blank blob)))
+		     (if (memq type org-element-all-elements)
+			 (concat (org-element-normalize-string results)
+				 (make-string post-blank ?\n))
+		       (concat results (make-string post-blank ? ))))
+		   backend info)))
+	     ;; If BLOB was transcoded into an empty string, ignore it
+	     ;; from subsequent traversals.
+	     (unless (org-string-nw-p results)
+	       (org-export-ignore-element blob info))
+	     ;; Eventually return string.
+	     results)))))))
    (org-element-contents data) ""))
 
 (defun org-export-secondary-string (secondary backend info)
@@ -1487,58 +1574,6 @@ Return transcoded string."
   ;; Make SECONDARY acceptable for `org-export-data'.
   (let ((s (if (listp secondary) secondary (list secondary))))
     (org-export-data `(org-data nil ,@s) backend (copy-sequence info))))
-
-(defun org-export-skip-p (blob info)
-  "Non-nil when element or object BLOB should be skipped during export.
-INFO is the plist holding export options."
-  (case (org-element-type blob)
-    ;; Plain text is never skipped.
-    (plain-text nil)
-    ;; Check headline.
-    (headline
-     (let ((with-tasks (plist-get info :with-tasks))
-	   (todo (org-element-property :todo-keyword blob))
-	   (todo-type (org-element-property :todo-type blob))
-	   (archived (plist-get info :with-archived-trees))
-	   (tag-list (let ((tags (org-element-property :tags blob)))
-		       (and tags (org-split-string tags ":")))))
-       (or
-	;; Ignore subtrees with an exclude tag.
-	(loop for k in (plist-get info :exclude-tags)
-	      thereis (member k tag-list))
-	;; Ignore subtrees without a select tag, when such tag is found
-	;; in the buffer.
-	(and (plist-get info :use-select-tags)
-	     (loop for k in (plist-get info :select-tags)
-		   never (member k tag-list)))
-	;; Ignore commented sub-trees.
-	(org-element-property :commentedp blob)
-	;; Ignore archived subtrees if `:with-archived-trees' is nil.
-	(and (not archived) (org-element-property :archivedp blob))
-	;; Ignore tasks, if specified by `:with-tasks' property.
-	(and todo (not with-tasks))
-	(and todo
-	     (memq with-tasks '(todo done))
-	     (not (eq todo-type with-tasks)))
-	(and todo
-	     (consp with-tasks)
-	     (not (member todo with-tasks))))))
-    ;; Check time-stamp.
-    (time-stamp (not (plist-get info :with-timestamps)))
-    ;; Check drawer.
-    (drawer
-     (or (not (plist-get info :with-drawers))
-	 (and (consp (plist-get info :with-drawers))
-	      (not (member (org-element-property :drawer-name blob)
-			   (plist-get info :with-drawers))))))
-    ;; Check export snippet.
-    (export-snippet
-     (let* ((raw-back-end (org-element-property :back-end blob))
-	    (true-back-end
-	     (or (cdr (assoc raw-back-end org-export-snippet-translation-alist))
-		 raw-back-end)))
-       (not (string= (symbol-name (plist-get info :back-end))
-		     true-back-end))))))
 
 (defun org-export-interpret-p (blob info)
   "Non-nil if element or object BLOB should be interpreted as Org syntax.
@@ -1570,6 +1605,13 @@ BLOB is either an element or an object.  CONTENTS is its
 contents, as a string or nil."
   (funcall (intern (format "org-element-%s-interpreter" (org-element-type blob)))
 	   blob contents))
+
+(defun org-export-ignore-element (element info)
+  "Add ELEMENT to `:ignore-list' in INFO.
+
+Any element in `:ignore-list' will be skipped when using
+`org-element-map'.  INFO is modified by side effects."
+  (plist-put info :ignore-list (cons element (plist-get info :ignore-list))))
 
 
 
@@ -2510,9 +2552,7 @@ INFO is the plist used as a communication channel."
 (defun org-export-last-sibling-p (headline info)
   "Non-nil when HEADLINE is the last sibling in its sub-tree.
 INFO is the plist used as a communication channel."
-  (equal
-   (car (last (org-element-contents (car (plist-get info :genealogy)))))
-   headline))
+  (not (org-export-get-next-element headline info)))
 
 
 ;;;; For Links
@@ -2625,7 +2665,7 @@ Assume LINK type is \"fuzzy\"."
 		   (when (eq (org-element-type parent) 'headline)
 		     (let ((foundp (funcall find-headline path parent)))
 		       (when foundp (throw 'exit foundp)))))
-		 (plist-get info :genealogy)) nil)
+		 (org-export-get-genealogy link info)) nil)
 	      ;; No match with a common ancestor: try the full parse-tree.
 	      (funcall find-headline path (plist-get info :parse-tree)))))))
 
@@ -3111,18 +3151,18 @@ affiliated keyword."
   "Return genealogy relative to a given element or object.
 BLOB is the element or object being considered.  INFO is a plist
 used as a communication channel."
-  ;; LOCALP tells if current `:genealogy' is sufficient to find parent
-  ;; headline, or if it should be computed.
-  (let ((localp (member blob (org-element-contents
-			      (car (plist-get info :genealogy))))))
-    (if localp (plist-get info :genealogy)
-      (catch 'exit
-	(org-element-map
-	 (plist-get info :parse-tree) (org-element-type blob)
-	 (lambda (el local)
-	   (when (equal el blob)
-	     (throw 'exit (plist-get local :genealogy))))
-	 info)))))
+  (let* ((end (org-element-property :end blob))
+         (walk-data
+          (lambda (data genealogy)
+            (mapc
+             (lambda (el)
+               (cond
+		((stringp el))
+                ((equal el blob) (throw 'exit genealogy))
+                ((>= (org-element-property :end el) end)
+                 (funcall walk-data el (cons el genealogy)))))
+	     (org-element-contents data)))))
+    (catch 'exit (funcall walk-data (plist-get info :parse-tree) nil) nil)))
 
 (defun org-export-get-parent-headline (blob info)
   "Return closest parent headline or nil.
