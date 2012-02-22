@@ -2993,7 +2993,7 @@ it also."
 			 ((org-table-colgroup-line-p row) nil)
 			 ((org-table-cookie-line-p row) nil)
 			 ;; Ignore rows starting with a special marker.
-			 ((string-match "^[ \t]*| *[!_^/] *|" row) nil)
+			 ((string-match "^[ \t]*| *[!_^/$] *|" row) nil)
 			 ;; Remove special column.
 			 ((and specialp
 			       (or (string-match "^\\([ \t]*\\)|-+\\+" row)
