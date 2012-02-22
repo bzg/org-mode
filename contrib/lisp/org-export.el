@@ -1018,7 +1018,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
      (let ((special-re (org-make-options-regexp org-export-special-keywords)))
        (while (re-search-forward special-re nil t)
 	 (let ((element (org-element-at-point)))
-	   (when (eq (car element) 'keyword)
+	   (when (eq (org-element-type element) 'keyword)
 	     (let* ((key (upcase (org-element-get-property :key element)))
 		    (val (org-element-get-property :value element))
 		    (prop
@@ -1095,7 +1095,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
        (goto-char (point-min))
        (while (re-search-forward opt-re nil t)
 	 (let ((element (org-element-at-point)))
-	   (when (eq (car element) 'keyword)
+	   (when (eq (org-element-type element) 'keyword)
 	     (let* ((key (upcase (org-element-get-property :key element)))
 		    (val (org-element-get-property :value element))
 		    (prop (cdr (assoc key alist)))
@@ -1304,7 +1304,7 @@ OPTIONS is a plist holding export options."
   (catch 'exit
     (let ((min-level 10000))
       (mapc (lambda (blob)
-	      (when (and (eq (car blob) 'headline)
+	      (when (and (eq (org-element-type blob) 'headline)
 			 (not (org-export-skip-p blob options)))
 		(setq min-level
 		      (min (org-element-get-property :level blob) min-level)))
@@ -1389,7 +1389,7 @@ Return transcoded string."
 	  backend info)))
       ;; BLOB is an element or an object.
       (t
-       (let* ((type (if (stringp blob) 'plain-text (car blob)))
+       (let* ((type (org-element-type blob))
 	      ;; 1. Determine the appropriate TRANSCODER.
 	      (transcoder
 	       (cond
@@ -1491,59 +1491,60 @@ Return transcoded string."
 (defun org-export-skip-p (blob info)
   "Non-nil when element or object BLOB should be skipped during export.
 INFO is the plist holding export options."
-  ;; Check headline.
-  (unless (stringp blob)
-    (case (car blob)
-      ('headline
-       (let ((with-tasks (plist-get info :with-tasks))
-	     (todo (org-element-get-property :todo-keyword blob))
-	     (todo-type (org-element-get-property :todo-type blob))
-	     (archived (plist-get info :with-archived-trees))
-	     (tag-list (let ((tags (org-element-get-property :tags blob)))
-			 (and tags (org-split-string tags ":")))))
-	 (or
-	  ;; Ignore subtrees with an exclude tag.
-	  (loop for k in (plist-get info :exclude-tags)
-		thereis (member k tag-list))
-	  ;; Ignore subtrees without a select tag, when such tag is found
-	  ;; in the buffer.
-	  (and (plist-get info :use-select-tags)
-	       (loop for k in (plist-get info :select-tags)
-		     never (member k tag-list)))
-	  ;; Ignore commented sub-trees.
-	  (org-element-get-property :commentedp blob)
-	  ;; Ignore archived subtrees if `:with-archived-trees' is nil.
-	  (and (not archived) (org-element-get-property :archivedp blob))
-	  ;; Ignore tasks, if specified by `:with-tasks' property.
-	  (and todo (not with-tasks))
-	  (and todo
-	       (memq with-tasks '(todo done))
-	       (not (eq todo-type with-tasks)))
-	  (and todo
-	       (consp with-tasks)
-	       (not (member todo with-tasks))))))
-      ;; Check time-stamp.
-      ('time-stamp (not (plist-get info :with-timestamps)))
-      ;; Check drawer.
-      ('drawer
-       (or (not (plist-get info :with-drawers))
-	   (and (consp (plist-get info :with-drawers))
-		(not (member (org-element-get-property :drawer-name blob)
-			     (plist-get info :with-drawers))))))
-      ;; Check export snippet.
-      ('export-snippet
-       (let* ((raw-back-end (org-element-get-property :back-end blob))
-	      (true-back-end
-	       (or (cdr (assoc raw-back-end org-export-snippet-translation-alist))
-		   raw-back-end)))
-	 (not (string= (symbol-name (plist-get info :back-end))
-		       true-back-end)))))))
+  (case (org-element-type blob)
+    ;; Plain text is never skipped.
+    (plain-text nil)
+    ;; Check headline.
+    (headline
+     (let ((with-tasks (plist-get info :with-tasks))
+	   (todo (org-element-get-property :todo-keyword blob))
+	   (todo-type (org-element-get-property :todo-type blob))
+	   (archived (plist-get info :with-archived-trees))
+	   (tag-list (let ((tags (org-element-get-property :tags blob)))
+		       (and tags (org-split-string tags ":")))))
+       (or
+	;; Ignore subtrees with an exclude tag.
+	(loop for k in (plist-get info :exclude-tags)
+	      thereis (member k tag-list))
+	;; Ignore subtrees without a select tag, when such tag is found
+	;; in the buffer.
+	(and (plist-get info :use-select-tags)
+	     (loop for k in (plist-get info :select-tags)
+		   never (member k tag-list)))
+	;; Ignore commented sub-trees.
+	(org-element-get-property :commentedp blob)
+	;; Ignore archived subtrees if `:with-archived-trees' is nil.
+	(and (not archived) (org-element-get-property :archivedp blob))
+	;; Ignore tasks, if specified by `:with-tasks' property.
+	(and todo (not with-tasks))
+	(and todo
+	     (memq with-tasks '(todo done))
+	     (not (eq todo-type with-tasks)))
+	(and todo
+	     (consp with-tasks)
+	     (not (member todo with-tasks))))))
+    ;; Check time-stamp.
+    (time-stamp (not (plist-get info :with-timestamps)))
+    ;; Check drawer.
+    (drawer
+     (or (not (plist-get info :with-drawers))
+	 (and (consp (plist-get info :with-drawers))
+	      (not (member (org-element-get-property :drawer-name blob)
+			   (plist-get info :with-drawers))))))
+    ;; Check export snippet.
+    (export-snippet
+     (let* ((raw-back-end (org-element-get-property :back-end blob))
+	    (true-back-end
+	     (or (cdr (assoc raw-back-end org-export-snippet-translation-alist))
+		 raw-back-end)))
+       (not (string= (symbol-name (plist-get info :back-end))
+		     true-back-end))))))
 
 (defun org-export-interpret-p (blob info)
   "Non-nil if element or object BLOB should be interpreted as Org syntax.
 Check is done according to export options INFO, stored as
 a plist."
-  (case (car blob)
+  (case (org-element-type blob)
     ;; ... entities...
     (entity (plist-get info :with-entities))
     ;; ... emphasis...
@@ -1567,8 +1568,8 @@ a plist."
   "Expand a parsed element or object to its original state.
 BLOB is either an element or an object.  CONTENTS is its
 contents, as a string or nil."
-  (funcall
-   (intern (format "org-element-%s-interpreter" (car blob))) blob contents))
+  (funcall (intern (format "org-element-%s-interpreter" (org-element-type blob)))
+	   blob contents))
 
 
 
@@ -2207,7 +2208,8 @@ recursion."
   (let ((case-fold-search nil))
     (goto-char (point-min))
     (while (re-search-forward "^[ \t]*#\\+include: \\(.*\\)" nil t)
-      (when (eq (car (save-match-data (org-element-at-point))) 'keyword)
+      (when (eq (org-element-type (save-match-data (org-element-at-point)))
+		'keyword)
 	(beginning-of-line)
 	;; Extract arguments from keyword's value.
 	(let* ((value (match-string 1))
@@ -2328,7 +2330,8 @@ file should have."
 	(while (not (or (eobp) (looking-at org-outline-regexp-bol)))
 	  ;; Do not move footnote definitions out of column 0.
 	  (unless (and (looking-at org-footnote-definition-re)
-		       (eq (car (org-element-at-point)) 'footnote-definition))
+		       (eq (org-element-type (org-element-at-point))
+			   'footnote-definition))
 	    (insert ind-str))
 	  (forward-line))))
     ;; When MINLEVEL is specified, compute minimal level for headlines
@@ -2501,7 +2504,8 @@ INFO is a plist holding contextual information."
 (defun org-export-first-sibling-p (headline info)
   "Non-nil when HEADLINE is the first sibling in its sub-tree.
 INFO is the plist used as a communication channel."
-  (not (eq (car (org-export-get-previous-element headline info)) 'headline)))
+  (not (eq (org-element-type (org-export-get-previous-element headline info))
+	   'headline)))
 
 (defun org-export-last-sibling-p (headline info)
   "Non-nil when HEADLINE is the last sibling in its sub-tree.
@@ -2618,7 +2622,7 @@ Assume LINK type is \"fuzzy\"."
 	  (or (catch 'exit
 		(mapc
 		 (lambda (parent)
-		   (when (eq (car parent) 'headline)
+		   (when (eq (org-element-type parent) 'headline)
 		     (let ((foundp (funcall find-headline path parent)))
 		       (when foundp (throw 'exit foundp)))))
 		 (plist-get info :genealogy)) nil)
@@ -2759,7 +2763,7 @@ like inline images, which are a subset of links \(in that case,
 	       (plist-get info :parse-tree)))))
     ;; Increment counter until ELEMENT is found again.
     (org-element-map
-     data (or types (car element))
+     data (or types (org-element-type element))
      (lambda (el local)
        (cond
         ((equal element el) (1+ counter))
@@ -2785,14 +2789,15 @@ INFO is the plist used as a communication channel.
 ELEMENT is excluded from count."
   (let ((loc 0))
     (org-element-map
-     (plist-get info :parse-tree) `(src-block example-block ,(car element))
+     (plist-get info :parse-tree)
+     `(src-block example-block ,(org-element-type element))
      (lambda (el local)
        (cond
         ;; ELEMENT is reached: Quit the loop.
         ((equal el element) t)
         ;; Only count lines from src-block and example-block elements
         ;; with a "+n" or "-n" switch.  A "-n" switch resets counter.
-        ((not (memq (car el) '(src-block example-block))) nil)
+        ((not (memq (org-element-type el) '(src-block example-block))) nil)
         ((let ((switches (org-element-get-property :switches el)))
            (when (and switches (string-match "\\([-+]\\)n\\>" switches))
 	     ;; Accumulate locs or reset them.
@@ -3113,7 +3118,7 @@ used as a communication channel."
     (if localp (plist-get info :genealogy)
       (catch 'exit
 	(org-element-map
-	 (plist-get info :parse-tree) (car blob)
+	 (plist-get info :parse-tree) (org-element-type blob)
 	 (lambda (el local)
 	   (when (equal el blob)
 	     (throw 'exit (plist-get local :genealogy))))
@@ -3126,7 +3131,7 @@ BLOB is the element or object being considered.  INFO is a plist
 used as a communication channel."
   (catch 'exit
     (mapc
-     (lambda (el) (when (eq (car el) 'headline) (throw 'exit el)))
+     (lambda (el) (when (eq (org-element-type el) 'headline) (throw 'exit el)))
      (org-export-get-genealogy blob info))
     nil))
 
@@ -3142,7 +3147,7 @@ This is useful for objects, which share attributes with the
 paragraph containing them."
   (catch 'exit
     (mapc
-     (lambda (el) (when (eq (car el) 'paragraph) (throw 'exit el)))
+     (lambda (el) (when (eq (org-element-type el) 'paragraph) (throw 'exit el)))
      (org-export-get-genealogy object info))
     nil))
 

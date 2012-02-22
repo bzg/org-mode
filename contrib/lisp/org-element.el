@@ -79,10 +79,10 @@
 ;; The first part of this file implements a parser and an interpreter
 ;; for each type of Org syntax.
 
-;; The next two parts introduce two accessors and a function
+;; The next two parts introduce three accessors and a function
 ;; retrieving the smallest element containing point (respectively
-;; `org-element-get-property', `org-element-get-contents' and
-;; `org-element-at-point').
+;; `org-element-type', `org-element-get-property',
+;; `org-element-get-contents' and `org-element-at-point').
 
 ;; The following part creates a fully recursive buffer parser.  It
 ;; also provides a tool to map a function to elements or objects
@@ -2593,8 +2593,20 @@ its type is listed here.")
 
 ;;; Accessors
 ;;
-;; Provide two accessors: `org-element-get-property' and
-;; `org-element-get-contents'.
+;; Provide three accessors: `org-element-type',
+;; `org-element-get-property' and `org-element-get-contents'.
+
+(defun org-element-type (element)
+  "Return type of element ELEMENT.
+
+The function returns the type of the element or object provided.
+It can also return the following special value:
+  `plain-text'       for a string
+  `org-data'         for a complete document
+  nil                in any other case."
+  (cond
+   ((not (consp element)) (and (stringp element) 'plain-text))
+   ((symbolp (car element)) (car element))))
 
 (defun org-element-get-property (property element)
   "Extract the value from the PROPERTY of an ELEMENT."
@@ -3056,7 +3068,7 @@ Nil values returned from FUN are ignored in the result."
 	     ;; a plist holding contextual information.
 	     (mapc
 	      (lambda (--blob)
-		(let ((--type (if (stringp --blob) 'plain-text (car --blob))))
+		(let ((--type (org-element-type --blob)))
 		  ;; Determine if a recursion into --BLOB is
 		  ;; possible and allowed.
 		  (cond
@@ -3170,7 +3182,7 @@ Elements are accumulated into ACC."
 	   (cond
 	    ;; Case 1.  ELEMENT is a paragraph.  Parse objects inside,
 	    ;; if GRANULARITY allows it.
-	    ((and (eq (car element) 'paragraph)
+	    ((and (eq (org-element-type element) 'paragraph)
 		  (or (not granularity) (eq granularity 'object)))
 	     (org-element-parse-objects
 	      (org-element-get-property :contents-begin element)
@@ -3182,10 +3194,10 @@ Elements are accumulated into ACC."
 	    ;; headline, in which case going inside is mandatory, in
 	    ;; order to get sub-level headings.  If VISIBLE-ONLY is
 	    ;; true and element is hidden, do not recurse into it.
-	    ((and (memq (car element) org-element-greater-elements)
+	    ((and (memq (org-element-type element) org-element-greater-elements)
 		  (or (not granularity)
 		      (memq granularity '(element object))
-		      (eq (car element) 'headline))
+		      (eq (org-element-type element) 'headline))
 		  (not (and visible-only
 			    (org-element-get-property :hiddenp element))))
 	     (org-element-parse-elements
@@ -3194,7 +3206,7 @@ Elements are accumulated into ACC."
 	      ;; At a plain list, switch to item mode.  At an
 	      ;; headline, switch to section mode.  Any other
 	      ;; element turns off special modes.
-	      (case (car element)
+	      (case (org-element-type element)
 		(plain-list 'item)
 		(headline (if (org-element-get-property :quotedp element)
 			      'quote-section
@@ -3475,7 +3487,7 @@ Return Org syntax as a string."
       ((equal blob "") nil)
       ((stringp blob) blob)
       (t
-       (let* ((type (car blob))
+       (let* ((type (org-element-type blob))
 	      (interpreter
 	       (if (eq type 'org-data) 'identity
 		 (intern (format "org-element-%s-interpreter" type))))
@@ -3627,7 +3639,7 @@ indentation is not done with TAB characters."
                    (while (string-match "\n\\( *\\)" object start)
                      (setq start (match-end 0))
                      (push (length (match-string 1 object)) ind-list))))
-                ((memq (car object) org-element-recursive-objects)
+                ((memq (org-element-type object) org-element-recursive-objects)
                  (funcall collect-inds object first-flag))))
              (org-element-get-contents blob))))))
     ;; Collect indentation list in ELEMENT.  Possibly remove first
@@ -3644,7 +3656,7 @@ indentation is not done with TAB characters."
 		;; non-nil when the first string hasn't been seen
 		;; yet.
 		(nconc
-		 (list (car blob) (nth 1 blob))
+		 (list (org-element-type blob) (nth 1 blob))
 		 (mapcar
 		  (lambda (object)
 		    (when (and first-flag (stringp object))
@@ -3656,7 +3668,7 @@ indentation is not done with TAB characters."
 		     ((stringp object)
 		      (replace-regexp-in-string
 		       (format "\n \\{%d\\}" mci) "\n" object))
-		     ((memq (car object) org-element-recursive-objects)
+		     ((memq (org-element-type object) org-element-recursive-objects)
 		      (funcall build object mci first-flag))
 		     (t object)))
 		  (org-element-get-contents blob)))))))
@@ -3833,7 +3845,7 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
 	   (cond
 	    ;; At an item: Either move to the next element inside, or
 	    ;; to its end if it's hidden.
-	    ((eq (car element) 'item)
+	    ((eq (org-element-type element) 'item)
 	     (if (org-element-get-property :hiddenp element)
 		 (goto-char (org-element-get-property :end element))
 	       (end-of-line)
@@ -3842,7 +3854,7 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
 	       (beginning-of-line)))
 	    ;; At a recursive element: Either move inside, or if it's
 	    ;; hidden, move to its end.
-	    ((memq (car element) org-element-greater-elements)
+	    ((memq (org-element-type element) org-element-greater-elements)
 	     (let ((cbeg (org-element-get-property :contents-begin element)))
 	       (goto-char
 		(if (or (org-element-get-property :hiddenp element)
@@ -3922,7 +3934,7 @@ modified."
 	  (function
 	   (lambda (contents)
 	     (mapc (lambda (element)
-		     (if (eq (car element) 'headline)
+		     (if (eq (org-element-type element) 'headline)
 			 (funcall unindent-tree
 				  (org-element-get-contents element))
 		       (save-excursion

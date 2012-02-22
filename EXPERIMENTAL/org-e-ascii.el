@@ -504,69 +504,69 @@ INFO is a plist used as a communicaton channel."
 (defun org-e-ascii--current-text-width (element info)
   "Return maximum text width for ELEMENT's contents.
 INFO is a plist used as a communication channel."
-  (cond
-   ;; Elements with an absolute width: `headline' and `inlinetask'.
-   ((eq (car element) 'inlinetask) org-e-ascii-inlinetask-width)
-   ((eq (car element) 'headline)
-    (- org-e-ascii-text-width
-       (let ((low-level-rank (org-export-low-level-p element info)))
-	 (if low-level-rank (* low-level-rank 2) org-e-ascii-global-margin))))
-   ;; Elements with a relative width: store maximum text width in
-   ;; TOTAL-WIDTH.
-   (t
-    (let* ((genealogy (cons element (plist-get info :genealogy)))
-	   ;; Total width is determined by the presence, or not, of an
-	   ;; inline task among ELEMENT parents.
-	   (total-width
-	    (if (loop for parent in genealogy
-		      thereis (eq (car parent) 'inlinetask))
-		org-e-ascii-inlinetask-width
-	      ;; No inlinetask: Remove global margin from text width.
-	      (- org-e-ascii-text-width
-		 org-e-ascii-global-margin
-		 (let ((parent (org-export-get-parent-headline element info)))
-		   ;; Inner margin doesn't apply to text before first
-		   ;; headline.
-		   (if (not parent) 0
-		     (let ((low-level-rank
-			    (org-export-low-level-p parent info)))
-		       ;; Inner margin doesn't apply to contents of
-		       ;; low level headlines, since they've got their
-		       ;; own indentation mechanism.
-		       (if low-level-rank (* low-level-rank 2)
-			 org-e-ascii-inner-margin))))))))
-      (- total-width
-	 ;; Each `quote-block', `quote-section' and `verse-block' above
-	 ;; narrows text width by twice the standard margin size.
-	 (+ (* (loop for parent in genealogy
-		     when (memq (car parent)
-				'(quote-block quote-section verse-block))
-		     count parent)
-	       2 org-e-ascii-quote-margin)
-	    ;; Text width within a plain-list is restricted by
-	    ;; indentation of current item.  If that's the case,
-	    ;; compute it with the help of `:structure' property from
-	    ;; parent item, if any.
-	    (let ((parent-item
-		   (if (eq (car element) 'item) element
-		     (loop for parent in genealogy
-			   when (eq (car parent) 'item)
-			   return parent))))
-	      (if (not parent-item) 0
-		;; Compute indentation offset of the current item,
-		;; that is the sum of the difference between its
-		;; indentation and the indentation of the top item in
-		;; the list and current item bullet's length.  Also
-		;; remove tag length (for description lists) or bullet
-		;; length.
-		(let ((struct (org-element-get-property :structure parent-item))
-		      (beg-item (org-element-get-property :begin parent-item)))
-		  (+ (- (org-list-get-ind beg-item struct)
-			(org-list-get-ind
-			 (org-list-get-top-point struct) struct))
-		     (length
-		      (or (org-list-get-tag beg-item struct)
-			  (org-list-get-bullet beg-item struct)))))))))))))
+  (case (org-element-type element)
+    ;; Elements with an absolute width: `headline' and `inlinetask'.
+    (inlinetask org-e-ascii-inlinetask-width)
+    ('headline
+     (- org-e-ascii-text-width
+	(let ((low-level-rank (org-export-low-level-p element info)))
+	  (if low-level-rank (* low-level-rank 2) org-e-ascii-global-margin))))
+    ;; Elements with a relative width: store maximum text width in
+    ;; TOTAL-WIDTH.
+    (otherwise
+     (let* ((genealogy (cons element (plist-get info :genealogy)))
+	    ;; Total width is determined by the presence, or not, of an
+	    ;; inline task among ELEMENT parents.
+	    (total-width
+	     (if (loop for parent in genealogy
+		       thereis (eq (org-element-type parent) 'inlinetask))
+		 org-e-ascii-inlinetask-width
+	       ;; No inlinetask: Remove global margin from text width.
+	       (- org-e-ascii-text-width
+		  org-e-ascii-global-margin
+		  (let ((parent (org-export-get-parent-headline element info)))
+		    ;; Inner margin doesn't apply to text before first
+		    ;; headline.
+		    (if (not parent) 0
+		      (let ((low-level-rank
+			     (org-export-low-level-p parent info)))
+			;; Inner margin doesn't apply to contents of
+			;; low level headlines, since they've got their
+			;; own indentation mechanism.
+			(if low-level-rank (* low-level-rank 2)
+			  org-e-ascii-inner-margin))))))))
+       (- total-width
+	  ;; Each `quote-block', `quote-section' and `verse-block' above
+	  ;; narrows text width by twice the standard margin size.
+	  (+ (* (loop for parent in genealogy
+		      when (memq (org-element-type parent)
+				 '(quote-block quote-section verse-block))
+		      count parent)
+		2 org-e-ascii-quote-margin)
+	     ;; Text width within a plain-list is restricted by
+	     ;; indentation of current item.  If that's the case,
+	     ;; compute it with the help of `:structure' property from
+	     ;; parent item, if any.
+	     (let ((parent-item
+		    (if (eq (org-element-type element) 'item) element
+		      (loop for parent in genealogy
+			    when (eq (org-element-type parent) 'item)
+			    return parent))))
+	       (if (not parent-item) 0
+		 ;; Compute indentation offset of the current item,
+		 ;; that is the sum of the difference between its
+		 ;; indentation and the indentation of the top item in
+		 ;; the list and current item bullet's length.  Also
+		 ;; remove tag length (for description lists) or bullet
+		 ;; length.
+		 (let ((struct (org-element-get-property :structure parent-item))
+		       (beg-item (org-element-get-property :begin parent-item)))
+		   (+ (- (org-list-get-ind beg-item struct)
+			 (org-list-get-ind
+			  (org-list-get-top-point struct) struct))
+		      (length
+		       (or (org-list-get-tag beg-item struct)
+			   (org-list-get-bullet beg-item struct)))))))))))))
 
 (defun org-e-ascii--build-title
   (element info text-width &optional underline notags)
@@ -582,7 +582,7 @@ specifications.
 
 if optional argument NOTAGS is nil, no tags will be added to the
 title."
-  (let* ((headlinep (eq (car element) 'headline))
+  (let* ((headlinep (eq (org-element-type element) 'headline))
 	 (numbers
 	  ;; Numbering is specific to headlines.
 	  (and headlinep
@@ -651,7 +651,7 @@ keyword."
 	      (lambda (el) (or (org-element-get-property :caption el)
 			  (org-element-get-property :name el)))))
 	    (title-fmt (org-e-ascii--translate
-			(case (car element)
+			(case (org-element-type element)
 			  (table "Table %d: %s")
 			  (src-block "Listing %d: %s")) info)))
 	(org-e-ascii--fill-string
@@ -795,14 +795,14 @@ the following section and in any inlinetask's title there."
 	   (lambda (element)
 	     (let (acc)
 	       (dolist (obj (org-element-get-property :title element) acc)
-		 (when (and (listp obj) (eq (car obj) 'link))
+		 (when (eq (org-element-type obj) 'link)
 		   (let ((link (funcall unique-link-p obj)))
 		     (and link (push link acc)))))))))
 	 ;; Retrieve HEADLINE's section, if it exists.
-	 (section (if (eq (car element) 'section) element
+	 (section (if (eq (org-element-type element) 'section) element
 		    (let ((sec (car (org-element-get-contents element))))
-		      (and (eq (car sec) 'section) sec))))
-	 (headline (if (eq (car element) 'headline) element
+		      (and (eq (org-element-type sec) 'section) sec))))
+	 (headline (if (eq (org-element-type element) 'headline) element
 		     (org-export-get-parent-headline element info))))
     (append
      ;; Links that may be in HEADLINE's title.
@@ -834,7 +834,7 @@ channel."
 	 (let ((destination (if (string= type "fuzzy")
 				(org-export-resolve-fuzzy-link link info)
 			      (org-export-resolve-id-link link info))))
-	   (unless (eq (car destination) 'target)
+	   (unless (eq (org-element-type destination) 'target)
 	     (concat
 	      (org-e-ascii--fill-string
 	       (format
@@ -974,13 +974,13 @@ holding export options."
 		 ;; full-fledged definitions.
 		 (org-trim
 		  (let ((def (nth 2 ref)))
-		    (if (eq (car def) 'org-data)
+		    (if (eq (org-element-type def) 'org-data)
 			;; Full-fledged definition: footnote ID is
 			;; inserted inside the first parsed paragraph
 			;; (FIRST), if any, to be sure filling will
 			;; take it into consideration.
 			(let ((first (car (org-element-get-contents def))))
-			  (if (not (eq (car first) 'paragraph))
+			  (if (not (eq (org-element-type first) 'paragraph))
 			      (concat id "\n" (org-export-data def 'e-ascii info))
 			    (push id (nthcdr 2 first))
 			    (org-export-data def 'e-ascii info)))
@@ -1437,7 +1437,7 @@ the plist used as a communication channel."
      ;; If PARAGRAPH is the first one in a list element, be sure to
      ;; add the check-box in front of it, before any filling.  Later,
      ;; it would interfere with line width.
-     (if (and (eq (car parent) 'item)
+     (if (and (eq (org-element-type parent) 'item)
 	      (equal (car (org-element-get-contents parent)) paragraph))
 	 (let ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
 	   (concat (case (org-element-get-property :checkbox parent)

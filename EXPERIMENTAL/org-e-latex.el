@@ -745,8 +745,7 @@ Return the new header."
 		   (latexenc-coding-system-to-inputenc
 		    buffer-file-coding-system))
 		 "utf8")))
-    (if (not cs)
-	header
+    (if (not cs) header
       ;; First translate if that is requested.
       (setq cs (or (cdr (assoc cs org-e-latex-inputenc-alist)) cs))
       ;; Then find the \usepackage statement and replace the option.
@@ -1013,7 +1012,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
    (let ((prev (org-export-get-previous-element footnote-reference info)))
-     (when (and (listp prev) (eq (car prev) 'footnote-reference))
+     (when (eq (org-element-type prev) 'footnote-reference)
        org-e-latex-footnote-separator))
    ;; Use \footnotemark if the footnote has already been defined.
    ;; Otherwise, define it with \footnote command.
@@ -1439,7 +1438,7 @@ INFO is a plist holding contextual information.  See
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
 	;; Fuzzy link points to a target.  Do as above.
-	(case (car destination)
+	(case (org-element-type destination)
 	  (target
 	   (format "\\hyperref[%s]{%s}"
 		   (org-export-solidify-link-text
