@@ -3247,6 +3247,12 @@ Return an error if key pressed has no associated command."
       (?b (org-open-file
 	   (org-e-html-export-to-html
 	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
+      ;; Export with `e-odt' back-end.
+      (?o (org-e-odt-export-to-odt
+	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
+      (?O (org-open-file
+	   (org-e-odt-export-to-odt
+	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
       ;; Publishing facilities
       (?F (org-e-publish-current-file (memq 'force optns)))
       (?P (org-e-publish-current-project (memq 'force optns)))
@@ -3293,6 +3299,9 @@ final interactive export options as CDR."
 ---------------------  HTML Export  -----------------------
 \[h] to HTML file              [b] ... and open it
 \[H] to temporary buffer
+
+---------------------  ODF Export  -----------------------
+\[o] to ODT file               [O] ... and open it
 
 ------------------------- Publish -------------------------
 \[F] current file              [P] current project
