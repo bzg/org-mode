@@ -1517,8 +1517,9 @@ CONTENTS is nil."
 
 ;; Adding a new type of object is simple.  Implement a successor,
 ;; a parser, and an interpreter for it, all following the naming
-;; convention.  Register successor in `org-element-all-successors',
-;; maybe tweak restrictions about it, and that's it.
+;; convention.  Register type in `org-element-all-objects' and
+;; successor in `org-element-all-successors'.  Maybe tweak
+;; restrictions about it, and that's it.
 
 ;;;; Emphasis
 
@@ -2443,7 +2444,7 @@ CONTENTS is nil."
 		 babel-call paragraph plain-list property-drawer quote-block
 		 quote-section section special-block src-block table
 		 verse-block)
-  "Complete list of elements.")
+  "Complete list of element types.")
 
 (defconst org-element-greater-elements
   '(center-block drawer dynamic-block footnote-definition headline inlinetask
@@ -2465,6 +2466,13 @@ CONTENTS is nil."
 
 Sharing the same successor comes handy when, for example, the
 regexp matching one object can also match the other object.")
+
+(defconst org-element-all-objects
+  '(emphasis entity export-snippet footnote-reference inline-babel-call
+	     inline-src-block line-break latex-fragment link macro radio-target
+	     statistics-cookie subscript superscript target time-stamp
+	     verbatim)
+  "Complete list of object types.")
 
 (defconst org-element-recursive-objects
   '(emphasis link macro subscript superscript target radio-target)
