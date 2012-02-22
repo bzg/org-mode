@@ -3245,6 +3245,8 @@ Return an error if key pressed has no associated command."
     ;; Translate "C-a", "C-b"... into "a", "b"... Then take action
     ;; depending on user's key pressed.
     (case (if (< raw-key 27) (+ raw-key 96) raw-key)
+      ;; Allow to quit with "q" key.
+      (?q nil)
       ;; Export with `e-ascii' back-end.
       ((?A ?N ?U)
        (let ((outbuf
@@ -3329,28 +3331,34 @@ back to standard interface.
 Return value is a list with key pressed as CAR and a list of
 final interactive export options as CDR."
   (let ((help
-	 (format "--------------------  General Options  --------------------
-\[1] Body only:     %s        [2] Export scope:     %s
-\[3] Visible only:  %s        [4] Force publishing: %s
+	 (format "---- (Options) -------------------------------------------
+
+\[1] Body only:     %s       [2] Export scope:     %s
+\[3] Visible only:  %s       [4] Force publishing: %s
 
 
---------------  ASCII/Latin-1/UTF-8 Export  ---------------
-\[a/n/u] to TXT file           [A/N/U] to temporary buffer
+----(ASCII/Latin-1/UTF-8 Export)--------------------------
 
----------------------  LaTeX Export  ----------------------
-\[l] to TEX file               [L] to temporary buffer
-\[p] to PDF file               [d] ... and open it
+\[a/n/u] to TXT file          [A/N/U] to temporary buffer
 
----------------------  HTML Export  -----------------------
-\[h] to HTML file              [b] ... and open it
+----(HTML Export)-----------------------------------------
+
+\[h] to HTML file             [b] ... and open it
 \[H] to temporary buffer
 
----------------------  ODF Export  -----------------------
-\[o] to ODT file               [O] ... and open it
+----(LaTeX Export)----------------------------------------
 
-------------------------- Publish -------------------------
-\[F] current file              [P] current project
-\[X] a project                 [E] every project"
+\[l] to TEX file              [L] to temporary buffer
+\[p] to PDF file              [d] ... and open it
+
+----(ODF Export)------------------------------------------
+
+\[o] to ODT file              [O] ... and open it
+
+----(Publish)---------------------------------------------
+
+\[F] current file             [P] current project
+\[X] a project                [E] every project"
 		 (if (memq 'body options) "On " "Off")
 		 (if (memq 'subtree options) "Subtree" "Buffer ")
 		 (if (memq 'visible options) "On " "Off")
