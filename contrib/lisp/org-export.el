@@ -1519,9 +1519,7 @@ Return transcoded string."
 			 ;; indentation: there is none and it might be
 			 ;; misleading.
 			 (and (not (org-export-get-previous-element blob info))
-			      (let ((parent
-				     (car
-				      (org-export-get-genealogy blob info))))
+			      (let ((parent (org-export-get-parent blob info)))
 				(memq (org-element-type parent)
 				      '(footnote-definition item)))))))
 		   (org-export-data paragraph backend info)))))
@@ -3138,10 +3136,11 @@ affiliated keyword."
 
 ;; Here are various functions to retrieve information about the
 ;; neighbourhood of a given element or object.  Neighbours of interest
-;; are parent headline (`org-export-get-parent-headline'), parent
-;; paragraph (`org-export-get-parent-paragraph'), previous element or
-;; object (`org-export-get-previous-element') and next element or
-;; object (`org-export-get-next-element').
+;; are direct parent (`org-export-get-parent'), parent headline
+;; (`org-export-get-parent-headline'), parent paragraph
+;; (`org-export-get-parent-paragraph'), previous element or object
+;; (`org-export-get-previous-element') and next element or object
+;; (`org-export-get-next-element').
 
 ;; All of these functions are just a specific use of the more generic
 ;; `org-export-get-genealogy', which returns the genealogy relative to
@@ -3163,6 +3162,12 @@ used as a communication channel."
                  (funcall walk-data el (cons el genealogy)))))
 	     (org-element-contents data)))))
     (catch 'exit (funcall walk-data (plist-get info :parse-tree) nil) nil)))
+
+(defun org-export-get-parent (blob info)
+  "Return BLOB parent or nil.
+BLOB is the element or object considered.  INFO is a plist used
+as a communication channel."
+  (car (org-export-get-genealogy blob info)))
 
 (defun org-export-get-parent-headline (blob info)
   "Return closest parent headline or nil.
@@ -3198,7 +3203,7 @@ BLOB is an element or object.  INFO is a plist used as
 a communication channel.
 
 Return previous element or object, a string, or nil."
-  (let ((parent (car (org-export-get-genealogy blob info))))
+  (let ((parent (org-export-get-parent blob info)))
     (cadr (member blob (reverse (org-element-contents parent))))))
 
 (defun org-export-get-next-element (blob info)
@@ -3208,7 +3213,7 @@ BLOB is an element or object.  INFO is a plist used as
 a communication channel.
 
 Return next element or object, a string, or nil."
-  (let ((parent (car (org-export-get-genealogy blob info))))
+  (let ((parent (org-export-get-parent blob info)))
     (cadr (member blob (org-element-contents parent)))))
 
 

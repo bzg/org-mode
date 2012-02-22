@@ -1279,34 +1279,32 @@ contextual information."
 	 ;; First parent of ITEM is always the plain-list.  Get
 	 ;; `:type' property from it.
 	 (org-list-bullet-string
-	  (let ((type (org-element-property
-		       :type (car (org-export-get-genealogy item info)))))
-	    (cond
-	     ((eq type 'descriptive)
-	      (concat
-	       (org-export-secondary-string
-		(org-element-property :tag item) 'e-ascii info) ": "))
-	     ((eq type 'ordered)
-	      ;; Return correct number for ITEM, paying attention to
-	      ;; counters.
-	      (let* ((struct (org-element-property :structure item))
-		     (bul (org-element-property :bullet item))
-		     (num
-		      (number-to-string
-		       (car (last (org-list-get-item-number
-				   (org-element-property :begin item)
-				   struct
-				   (org-list-prevs-alist struct)
-				   (org-list-parents-alist struct)))))))
-		(replace-regexp-in-string "[0-9]+" num bul)))
-	     (t (let ((bul (org-element-property :bullet item)))
-		  ;; Change bullets into more visible form if UTF-8 is active.
-		  (if (not (eq (plist-get info :ascii-charset) 'utf-8)) bul
+	  (case (org-element-property :type (org-export-get-parent item info))
+	    (descriptive
+	     (concat
+	      (org-export-secondary-string
+	       (org-element-property :tag item) 'e-ascii info) ": "))
+	    (ordered
+	     ;; Return correct number for ITEM, paying attention to
+	     ;; counters.
+	     (let* ((struct (org-element-property :structure item))
+		    (bul (org-element-property :bullet item))
+		    (num
+		     (number-to-string
+		      (car (last (org-list-get-item-number
+				  (org-element-property :begin item)
+				  struct
+				  (org-list-prevs-alist struct)
+				  (org-list-parents-alist struct)))))))
+	       (replace-regexp-in-string "[0-9]+" num bul)))
+	    (t (let ((bul (org-element-property :bullet item)))
+		 ;; Change bullets into more visible form if UTF-8 is active.
+		 (if (not (eq (plist-get info :ascii-charset) 'utf-8)) bul
+		   (replace-regexp-in-string
+		    "-" "•"
 		    (replace-regexp-in-string
-		     "-" "•"
-		     (replace-regexp-in-string
-		      "+" "⁃"
-		      (replace-regexp-in-string "*" "‣" bul)))))))))))
+		     "+" "⁃"
+		     (replace-regexp-in-string "*" "‣" bul))))))))))
     (concat
      bullet
      ;; Contents: Pay attention to indentation.  Note: check-boxes are
@@ -1432,7 +1430,7 @@ information."
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (org-e-ascii--fill-string
-   (let ((parent (car (org-export-get-genealogy paragraph info))))
+   (let ((parent (org-export-get-parent paragraph info)))
      ;; If PARAGRAPH is the first one in a list element, be sure to
      ;; add the check-box in front of it, before any filling.  Later,
      ;; it would interfere with line width.

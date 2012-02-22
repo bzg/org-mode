@@ -4225,10 +4225,9 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   ;; Grab `:level' from plain-list properties, which is always the
   ;; first element above current item.
-  (let* ((plain-list (car (org-export-get-genealogy item info)))
+  (let* ((plain-list (org-export-get-parent item info))
 	 (type (org-element-property :type plain-list))
-	 (level (org-element-property
-		 :level (car (plist-get info :genealogy))))
+	 (level (org-element-property :level plain-list))
 	 (counter (org-element-property :counter item))
 	 (checkbox (org-element-property :checkbox item))
 	 (tag (let ((tag (org-element-property :tag item)))
