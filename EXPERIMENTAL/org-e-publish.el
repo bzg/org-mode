@@ -41,7 +41,7 @@
 (eval-when-compile (require 'cl))
 (require 'format-spec)
 
-(declare-function org-element-get-property "org-element" (property element))
+(declare-function org-element-property "org-element" (property element))
 (declare-function org-element-map "org-element"
 		  (data types fun &optional info first-match))
 
@@ -976,9 +976,9 @@ keyword."
     (org-element-map
      tree 'keyword
      (lambda (k local)
-       (when (string= (downcase (org-element-get-property :key k))
+       (when (string= (downcase (org-element-property :key k))
 		      "index")
-	 (let ((index (org-element-get-property :value k))
+	 (let ((index (org-element-property :value k))
 	       (parent (org-export-get-parent-headline k local)))
 	   (list index (plist-get info :input-file) parent))))
      info)))
@@ -1040,14 +1040,12 @@ publishing directory."
 		       ;; Destination.
 		       (cond
 			((not target) (format "file:%s" file))
-			((let ((id (org-element-get-property :id target)))
+			((let ((id (org-element-property :id target)))
 			   (and id (format "id:%s" id))))
-			((let ((id (org-element-get-property
-				    :custom-id target)))
+			((let ((id (org-element-property :custom-id target)))
 			   (and id (format "file:%s::#%s" file id))))
-			(t (format
-			    "file:%s::*%s" file
-			    (org-element-get-property :raw-value target))))
+			(t (format "file:%s::*%s" file
+				   (org-element-property :raw-value target))))
 		       ;; Description.
 		       (car (last entry)))))
 		  "\n"))))

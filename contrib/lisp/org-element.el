@@ -81,8 +81,8 @@
 
 ;; The next two parts introduce three accessors and a function
 ;; retrieving the smallest element containing point (respectively
-;; `org-element-type', `org-element-get-property',
-;; `org-element-get-contents' and `org-element-at-point').
+;; `org-element-type', `org-element-property', `org-element-contents'
+;; and `org-element-at-point').
 
 ;; The following part creates a fully recursive buffer parser.  It
 ;; also provides a tool to map a function to elements or objects
@@ -211,7 +211,7 @@ Assume point is at beginning of drawer."
   "Interpret DRAWER element as Org syntax.
 CONTENTS is the contents of the element."
   (format ":%s:\n%s:END:"
-	  (org-element-get-property :drawer-name drawer)
+	  (org-element-property :drawer-name drawer)
 	  contents))
 
 
@@ -255,8 +255,8 @@ Assume point is at beginning of dynamic block."
   "Interpret DYNAMIC-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
   (format "#+BEGIN: %s%s\n%s#+END:"
-	  (org-element-get-property :block-name dynamic-block)
-	  (let ((args (org-element-get-property :arguments dynamic-block)))
+	  (org-element-property :block-name dynamic-block)
+	  (let ((args (org-element-property :arguments dynamic-block)))
 	    (and arg (concat " " args)))
 	  contents))
 
@@ -295,7 +295,7 @@ a plist containing `:label', `:begin' `:end', `:contents-begin',
 (defun org-element-footnote-definition-interpreter (footnote-definition contents)
   "Interpret FOOTNOTE-DEFINITION element as Org syntax.
 CONTENTS is the contents of the footnote-definition."
-  (concat (format "[%s]" (org-element-get-property :label footnote-definition))
+  (concat (format "[%s]" (org-element-property :label footnote-definition))
 	  " "
 	  contents))
 
@@ -407,27 +407,27 @@ Assume point is at beginning of the headline."
 (defun org-element-headline-interpreter (headline contents)
   "Interpret HEADLINE element as Org syntax.
 CONTENTS is the contents of the element."
-  (let* ((level (org-element-get-property :level headline))
-	 (todo (org-element-get-property :todo-keyword headline))
-	 (priority (org-element-get-property :priority headline))
-	 (title (org-element-get-property :raw-value headline))
-	 (tags (let ((tag-string (org-element-get-property :tags headline))
-		     (archivedp (org-element-get-property :archivedp headline)))
+  (let* ((level (org-element-property :level headline))
+	 (todo (org-element-property :todo-keyword headline))
+	 (priority (org-element-property :priority headline))
+	 (title (org-element-property :raw-value headline))
+	 (tags (let ((tag-string (org-element-property :tags headline))
+		     (archivedp (org-element-property :archivedp headline)))
 		 (cond
 		  ((and (not tag-string) archivedp)
 		   (format ":%s:" org-archive-tag))
 		  (archivedp (concat ":" org-archive-tag tag-string))
 		  (t tag-string))))
-	 (commentedp (org-element-get-property :commentedp headline))
-	 (quotedp (org-element-get-property :quotedp headline))
-	 (pre-blank (org-element-get-property :pre-blank headline))
+	 (commentedp (org-element-property :commentedp headline))
+	 (quotedp (org-element-property :quotedp headline))
+	 (pre-blank (org-element-property :pre-blank headline))
 	 (heading (concat (make-string level ?*)
 			  (and todo (concat " " todo))
 			  (and quotedp (concat " " org-quote-string))
 			  (and commentedp (concat " " org-comment-string))
 			  (and priority (concat " " priority))
 			  (cond ((and org-footnote-section
-				      (org-element-get-property
+				      (org-element-property
 				       :footnote-section-p headline))
 				 (concat " " org-footnote-section))
 				(title (concat " " title)))))
@@ -526,11 +526,11 @@ Assume point is at beginning of the inline task."
 (defun org-element-inlinetask-interpreter (inlinetask contents)
   "Interpret INLINETASK element as Org syntax.
 CONTENTS is the contents of inlinetask."
-  (let* ((level (org-element-get-property :level inlinetask))
-	 (todo (org-element-get-property :todo-keyword inlinetask))
-	 (priority (org-element-get-property :priority inlinetask))
-	 (title (org-element-get-property :raw-value inlinetask))
-	 (tags (org-element-get-property :tags inlinetask))
+  (let* ((level (org-element-property :level inlinetask))
+	 (todo (org-element-property :todo-keyword inlinetask))
+	 (priority (org-element-property :priority inlinetask))
+	 (title (org-element-property :raw-value inlinetask))
+	 (tags (org-element-property :tags inlinetask))
 	 (task (concat (make-string level ?*)
 		       (and todo (concat " " todo))
 		       (and priority (concat " " priority))
@@ -622,10 +622,10 @@ Assume point is at the beginning of the item."
   "Interpret ITEM element as Org syntax.
 CONTENTS is the contents of the element."
   (let* ((bullet
-	  (let* ((beg (org-element-get-property :begin item))
-		 (struct (org-element-get-property :structure item))
+	  (let* ((beg (org-element-property :begin item))
+		 (struct (org-element-property :structure item))
 		 (pre (org-list-prevs-alist struct))
-		 (bul (org-element-get-property :bullet item)))
+		 (bul (org-element-property :bullet item)))
 	    (org-list-bullet-string
 	     (if (not (eq (org-list-get-list-type beg struct pre) 'ordered)) "-"
 	       (let ((num
@@ -637,9 +637,9 @@ CONTENTS is the contents of the element."
 			 num
 			 (if (eq org-plain-list-ordered-item-terminator ?\)) ")"
 			   ".")))))))
-	 (checkbox (org-element-get-property :checkbox item))
-	 (counter (org-element-get-property :counter item))
-	 (tag (org-element-get-property :raw-tag item))
+	 (checkbox (org-element-property :checkbox item))
+	 (counter (org-element-property :counter item))
+	 (tag (org-element-property :raw-tag item))
 	 ;; Compute indentation.
 	 (ind (make-string (length bullet) 32)))
     ;; Indent contents.
@@ -830,7 +830,7 @@ Assume point is at beginning or end of the block."
 (defun org-element-special-block-interpreter (special-block contents)
   "Interpret SPECIAL-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
-  (let ((block-type (org-element-get-property :type special-block)))
+  (let ((block-type (org-element-property :type special-block)))
     (format "#+begin_%s\n%s#+end_%s" block-type contents block-type)))
 
 
@@ -874,7 +874,7 @@ keywords."
 (defun org-element-babel-call-interpreter (inline-babel-call contents)
   "Interpret INLINE-BABEL-CALL object as Org syntax.
 CONTENTS is nil."
-  (let* ((babel-info (org-element-get-property :info inline-babel-call))
+  (let* ((babel-info (org-element-property :info inline-babel-call))
 	 (main-source (car babel-info))
 	 (post-options (nth 1 babel-info)))
     (concat "#+call: "
@@ -936,7 +936,7 @@ keywords."
 (defun org-element-comment-interpreter (comment contents)
   "Interpret COMMENT element as Org syntax.
 CONTENTS is nil."
-  (org-element-get-property :value comment))
+  (org-element-property :value comment))
 
 
 ;;;; Comment Block
@@ -976,7 +976,7 @@ containing `:begin', `:end', `:hiddenp', `:value' and
 CONTENTS is nil."
   (concat "#+begin_comment\n"
 	  (org-remove-indentation
-	   (org-element-get-property :value comment-block))
+	   (org-element-property :value comment-block))
 	  "#+begin_comment"))
 
 
@@ -1018,10 +1018,10 @@ containing `:begin', `:end', `:options', `:hiddenp', `:value' and
 (defun org-element-example-block-interpreter (example-block contents)
   "Interpret EXAMPLE-BLOCK element as Org syntax.
 CONTENTS is nil."
-  (let ((options (org-element-get-property :options example-block)))
+  (let ((options (org-element-property :options example-block)))
     (concat "#+begin_example" (and options (concat " " options)) "\n"
 	    (org-remove-indentation
-	     (org-element-get-property :value example-block))
+	     (org-element-property :value example-block))
 	    "#+end_example")))
 
 
@@ -1064,9 +1064,9 @@ containing `:begin', `:end', `:type', `:hiddenp', `:value' and
 (defun org-element-export-block-interpreter (export-block contents)
   "Interpret EXPORT-BLOCK element as Org syntax.
 CONTENTS is nil."
-  (let ((type (org-element-get-property :type export-block)))
+  (let ((type (org-element-property :type export-block)))
     (concat (format "#+begin_%s\n" type)
-	    (org-element-get-property :value export-block)
+	    (org-element-property :value export-block)
 	    (format "#+end_%s" type))))
 
 
@@ -1116,7 +1116,7 @@ keywords."
 (defun org-element-fixed-width-interpreter (fixed-width contents)
   "Interpret FIXED-WIDTH element as Org syntax.
 CONTENTS is nil."
-  (org-remove-indentation (org-element-get-property :value fixed-width)))
+  (org-remove-indentation (org-element-property :value fixed-width)))
 
 
 ;;;; Horizontal Rule
@@ -1174,8 +1174,8 @@ keywords."
   "Interpret KEYWORD element as Org syntax.
 CONTENTS is nil."
   (format "#+%s: %s"
-	  (org-element-get-property :key keyword)
-	  (org-element-get-property :value keyword)))
+	  (org-element-property :key keyword)
+	  (org-element-property :value keyword)))
 
 
 ;;;; Latex Environment
@@ -1207,7 +1207,7 @@ containing `:begin', `:end', `:value' and `:post-blank' keywords."
 (defun org-element-latex-environment-interpreter (latex-environment contents)
   "Interpret LATEX-ENVIRONMENT element as Org syntax.
 CONTENTS is nil."
-  (org-element-get-property :value latex-environment))
+  (org-element-property :value latex-environment))
 
 
 ;;;; Paragraph
@@ -1289,7 +1289,7 @@ containing `:begin', `:end', `:hiddenp', `:contents-begin',
 (defun org-element-property-drawer-interpreter (property-drawer contents)
   "Interpret PROPERTY-DRAWER element as Org syntax.
 CONTENTS is nil."
-  (let ((props (org-element-get-property :properties property-drawer)))
+  (let ((props (org-element-property :properties property-drawer)))
     (concat
      ":PROPERTIES:\n"
      (mapconcat (lambda (p)
@@ -1325,7 +1325,7 @@ Assume point is at beginning of the section."
 (defun org-element-quote-section-interpreter (quote-section contents)
   "Interpret QUOTE-SECTION element as Org syntax.
 CONTENTS is nil."
-  (org-element-get-property :value quote-section))
+  (org-element-property :value quote-section))
 
 
 ;;;; Src Block
@@ -1389,10 +1389,10 @@ and `:post-blank' keywords."
 (defun org-element-src-block-interpreter (src-block contents)
   "Interpret SRC-BLOCK element as Org syntax.
 CONTENTS is nil."
-  (let ((lang (org-element-get-property :language src-block))
-	(switches (org-element-get-property :switches src-block))
-	(params (org-element-get-property :parameters src-block))
-	(value (let ((val (org-element-get-property :value src-block)))
+  (let ((lang (org-element-property :language src-block))
+	(switches (org-element-property :switches src-block))
+	(params (org-element-property :parameters src-block))
+	(value (let ((val (org-element-property :value src-block)))
 		 (cond
 		  (org-src-preserve-indentation val)
 		  ((zerop org-edit-src-content-indentation)
@@ -1445,7 +1445,7 @@ Return a list whose car is `table' and cdr is a plist containing
 (defun org-element-table-interpreter (table contents)
   "Interpret TABLE element as Org syntax.
 CONTENTS is nil."
-  (org-element-get-property :raw-table table))
+  (org-element-property :raw-table table))
 
 
 ;;;; Verse Block
@@ -1492,7 +1492,7 @@ Assume point is at beginning or end of the block."
 CONTENTS is nil."
   (format "#+begin_verse\n%s#+end_verse"
   (org-remove-indentation
-  (org-element-get-property :raw-value verse-block))))
+  (org-element-property :raw-value verse-block))))
 
 
 
@@ -1551,7 +1551,7 @@ Assume point is at the first emphasis marker."
 (defun org-element-emphasis-interpreter (emphasis contents)
   "Interpret EMPHASIS object as Org syntax.
 CONTENTS is the contents of the object."
-  (let ((marker (org-element-get-property :marker emphasis)))
+  (let ((marker (org-element-property :marker emphasis)))
     (concat marker contents marker)))
 
 (defun org-element-text-markup-successor (limit)
@@ -1606,8 +1606,8 @@ Assume point is at the beginning of the entity."
   "Interpret ENTITY object as Org syntax.
 CONTENTS is nil."
   (concat "\\"
-	  (org-element-get-property :name entity)
-	  (when (org-element-get-property :use-brackets-p entity) "{}")))
+	  (org-element-property :name entity)
+	  (when (org-element-property :use-brackets-p entity) "{}")))
 
 (defun org-element-latex-or-entity-successor (limit)
   "Search for the next latex-fragment or entity object.
@@ -1674,8 +1674,8 @@ Assume point is at the beginning of the snippet."
   "Interpret EXPORT-SNIPPET object as Org syntax.
 CONTENTS is nil."
   (format "@%s{%s}"
-	  (org-element-get-property :back-end export-snippet)
-	  (org-element-get-property :value export-snippet)))
+	  (org-element-property :back-end export-snippet)
+	  (org-element-property :value export-snippet)))
 
 (defun org-element-export-snippet-successor (limit)
   "Search for the next export-snippet object.
@@ -1727,11 +1727,10 @@ with `:label', `:type', `:definition', `:begin', `:end' and
 (defun org-element-footnote-reference-interpreter (footnote-reference contents)
   "Interpret FOOTNOTE-REFERENCE object as Org syntax.
 CONTENTS is nil."
-  (let ((label (or (org-element-get-property :label footnote-reference)
-		   "fn:"))
-	(def (let ((raw (org-element-get-property
-			 :raw-definition footnote-reference)))
-	       (if raw (concat ":" raw) ""))))
+  (let ((label (or (org-element-property :label footnote-reference) "fn:"))
+	(def
+	 (let ((raw (org-element-property :raw-definition footnote-reference)))
+	   (if raw (concat ":" raw) ""))))
     (format "[%s]" (concat label def))))
 
 (defun org-element-footnote-reference-successor (limit)
@@ -1772,7 +1771,7 @@ Assume point is at the beginning of the babel call."
 (defun org-element-inline-babel-call-interpreter (inline-babel-call contents)
   "Interpret INLINE-BABEL-CALL object as Org syntax.
 CONTENTS is nil."
-  (let* ((babel-info (org-element-get-property :info inline-babel-call))
+  (let* ((babel-info (org-element-property :info inline-babel-call))
 	 (main-source (car babel-info))
 	 (post-options (nth 1 babel-info)))
     (concat "call_"
@@ -1830,9 +1829,9 @@ Assume point is at the beginning of the inline src block."
 (defun org-element-inline-src-block-interpreter (inline-src-block contents)
   "Interpret INLINE-SRC-BLOCK object as Org syntax.
 CONTENTS is nil."
-  (let ((language (org-element-get-property :language inline-src-block))
-	(arguments (org-element-get-property :parameters inline-src-block))
-	(body (org-element-get-property :value inline-src-block)))
+  (let ((language (org-element-property :language inline-src-block))
+	(arguments (org-element-property :parameters inline-src-block))
+	(body (org-element-property :value inline-src-block)))
     (format "src_%s%s{%s}"
 	    language
 	    (if arguments (format "[%s]" arguments) "")
@@ -1888,7 +1887,7 @@ Assume point is at the beginning of the latex fragment."
 (defun org-element-latex-fragment-interpreter (latex-fragment contents)
   "Interpret LATEX-FRAGMENT object as Org syntax.
 CONTENTS is nil."
-  (org-element-get-property :value latex-fragment))
+  (org-element-property :value latex-fragment))
 
 ;;;; Line Break
 
@@ -2007,13 +2006,12 @@ Assume point is at the beginning of the link."
 (defun org-element-link-interpreter (link contents)
   "Interpret LINK object as Org syntax.
 CONTENTS is the contents of the object."
-  (let ((type (org-element-get-property :type link))
-	(raw-link (org-element-get-property :raw-link link)))
-    (cond
-     ((string= type "radio") raw-link)
-     (t (format "[[%s]%s]"
-		raw-link
-		(if (string= contents "") "" (format "[%s]" contents)))))))
+  (let ((type (org-element-property :type link))
+	(raw-link (org-element-property :raw-link link)))
+    (if (string= type "radio") raw-link
+      (format "[[%s]%s]"
+	      raw-link
+	      (if (string= contents "") "" (format "[%s]" contents))))))
 
 (defun org-element-link-successor (limit)
   "Search for the next link object.
@@ -2024,9 +2022,8 @@ Return value is a cons cell whose car is `link' and cdr is
 beginning position."
   (save-excursion
     (let ((link-regexp
-	   (if org-target-link-regexp
-	       (concat org-any-link-re "\\|" org-target-link-regexp)
-	     org-any-link-re)))
+	   (if (not org-target-link-regexp) org-any-link-re
+	     (concat org-any-link-re "\\|" org-target-link-regexp))))
       (when (re-search-forward link-regexp limit t)
 	(cons 'link (match-beginning 0))))))
 
@@ -2071,7 +2068,7 @@ Assume point is at the macro."
 (defun org-element-macro-interpreter (macro contents)
   "Interpret MACRO object as Org syntax.
 CONTENTS is nil."
-  (org-element-get-property :value macro))
+  (org-element-property :value macro))
 
 (defun org-element-macro-successor (limit)
   "Search for the next macro object.
@@ -2157,7 +2154,7 @@ Assume point is at the beginning of the statistics-cookie."
 (defun org-element-statistics-cookie-interpreter (statistics-cookie contents)
   "Interpret STATISTICS-COOKIE object as Org syntax.
 CONTENTS is nil."
-  (org-element-get-property :value statistics-cookie))
+  (org-element-property :value statistics-cookie))
 
 (defun org-element-statistics-cookie-successor (limit)
   "Search for the next statistics cookie object.
@@ -2205,7 +2202,7 @@ Assume point is at the underscore."
   "Interpret SUBSCRIPT object as Org syntax.
 CONTENTS is the contents of the object."
   (format
-   (if (org-element-get-property :use-brackets-p subscript) "_{%s}" "_%s")
+   (if (org-element-property :use-brackets-p subscript) "_{%s}" "_%s")
    contents))
 
 (defun org-element-sub/superscript-successor  (limit)
@@ -2255,7 +2252,7 @@ Assume point is at the caret."
   "Interpret SUPERSCRIPT object as Org syntax.
 CONTENTS is the contents of the object."
   (format
-   (if (org-element-get-property :use-brackets-p superscript) "^{%s}" "^%s")
+   (if (org-element-property :use-brackets-p superscript) "^{%s}" "^%s")
    contents))
 
 
@@ -2353,11 +2350,11 @@ Assume point is at the beginning of the time-stamp."
   "Interpret TIME-STAMP object as Org syntax.
 CONTENTS is nil."
   (concat
-   (case (org-element-get-property :appt-type time-stamp)
+   (case (org-element-property :appt-type time-stamp)
      (closed (concat org-closed-string " "))
      (deadline (concat org-deadline-string " "))
      (scheduled (concat org-scheduled-string " ")))
-   (org-element-get-property :value time-stamp)))
+   (org-element-property :value time-stamp)))
 
 (defun org-element-time-stamp-successor (limit)
   "Search for the next time-stamp object.
@@ -2407,8 +2404,8 @@ Assume point is at the first verbatim marker."
 (defun org-element-verbatim-interpreter (verbatim contents)
   "Interpret VERBATIM object as Org syntax.
 CONTENTS is nil."
-  (let ((marker (org-element-get-property :marker verbatim))
-	(value (org-element-get-property :value verbatim)))
+  (let ((marker (org-element-property :marker verbatim))
+	(value (org-element-property :value verbatim)))
     (concat marker value marker)))
 
 
@@ -2593,8 +2590,8 @@ its type is listed here.")
 
 ;;; Accessors
 ;;
-;; Provide three accessors: `org-element-type',
-;; `org-element-get-property' and `org-element-get-contents'.
+;; Provide three accessors: `org-element-type', `org-element-property'
+;; and `org-element-contents'.
 
 (defun org-element-type (element)
   "Return type of element ELEMENT.
@@ -2608,11 +2605,11 @@ It can also return the following special value:
    ((not (consp element)) (and (stringp element) 'plain-text))
    ((symbolp (car element)) (car element))))
 
-(defun org-element-get-property (property element)
+(defun org-element-property (property element)
   "Extract the value from the PROPERTY of an ELEMENT."
   (plist-get (nth 1 element) property))
 
-(defun org-element-get-contents (element)
+(defun org-element-contents (element)
   "Extract contents from an ELEMENT."
   (nthcdr 2 element))
 
@@ -3052,7 +3049,7 @@ Nil values returned from FUN are ignored in the result."
 		--walk-tree
 		`(org-data
 		  nil
-		  ,@(org-element-get-property
+		  ,@(org-element-property
 		     (cdr (assq --type org-element-secondary-value-alist))
 		     --blob))
 		--local))
@@ -3079,7 +3076,7 @@ Nil values returned from FUN are ignored in the result."
 		   ((and info
 			 (eq --type 'headline)
 			 (eq (plist-get info :with-archived-trees) 'headline)
-			 (org-element-get-property :archivedp --blob))
+			 (org-element-property :archivedp --blob))
 		    (funcall --check-blob --type types fun --blob --local))
 		   ;; Limiting recursion to greater elements, and --BLOB
 		   ;; isn't one.
@@ -3105,7 +3102,7 @@ Nil values returned from FUN are ignored in the result."
 			--local
 			`(:genealogy
 			  ,(cons --blob (plist-get --local :genealogy)))))))))
-	      (org-element-get-contents --data))))))
+	      (org-element-contents --data))))))
     (catch 'first-match
       (funcall --walk-tree data info)
       ;; Return value in a proper order.
@@ -3170,23 +3167,23 @@ Elements are accumulated into ACC."
        ;;    directly, skipping `org-element-current-element'.
        (if (eq special 'item)
 	   (let ((element (org-element-item-parser structure)))
-	     (goto-char (org-element-get-property :end element))
+	     (goto-char (org-element-property :end element))
 	     (org-element-parse-elements
-	      (org-element-get-property :contents-begin element)
-	      (org-element-get-property :contents-end element)
+	      (org-element-property :contents-begin element)
+	      (org-element-property :contents-end element)
 	      nil structure granularity visible-only (reverse element)))
 	 ;; 2. When ITEM is nil, find current element's type and parse
 	 ;;    it accordingly to its category.
 	 (let ((element (org-element-current-element special structure)))
-	   (goto-char (org-element-get-property :end element))
+	   (goto-char (org-element-property :end element))
 	   (cond
 	    ;; Case 1.  ELEMENT is a paragraph.  Parse objects inside,
 	    ;; if GRANULARITY allows it.
 	    ((and (eq (org-element-type element) 'paragraph)
 		  (or (not granularity) (eq granularity 'object)))
 	     (org-element-parse-objects
-	      (org-element-get-property :contents-begin element)
-	      (org-element-get-property :contents-end element)
+	      (org-element-property :contents-begin element)
+	      (org-element-property :contents-end element)
 	      (reverse element) nil))
 	    ;; Case 2.  ELEMENT is recursive: parse it between
 	    ;; `contents-begin' and `contents-end'.  Make sure
@@ -3199,19 +3196,19 @@ Elements are accumulated into ACC."
 		      (memq granularity '(element object))
 		      (eq (org-element-type element) 'headline))
 		  (not (and visible-only
-			    (org-element-get-property :hiddenp element))))
+			    (org-element-property :hiddenp element))))
 	     (org-element-parse-elements
-	      (org-element-get-property :contents-begin element)
-	      (org-element-get-property :contents-end element)
+	      (org-element-property :contents-begin element)
+	      (org-element-property :contents-end element)
 	      ;; At a plain list, switch to item mode.  At an
 	      ;; headline, switch to section mode.  Any other
 	      ;; element turns off special modes.
 	      (case (org-element-type element)
 		(plain-list 'item)
-		(headline (if (org-element-get-property :quotedp element)
+		(headline (if (org-element-property :quotedp element)
 			      'quote-section
 			    'section)))
-	      (org-element-get-property :structure element)
+	      (org-element-property :structure element)
 	      granularity visible-only (reverse element)))
 	    ;; Case 3.  Else, just accumulate ELEMENT.
 	    (t element))))
@@ -3371,15 +3368,15 @@ allowed in the current object."
 			       end restriction candidates))
 	(setq next-object (funcall get-next-object candidates))
 	;; 1. Text before any object.  Untabify it.
-	(let ((obj-beg (org-element-get-property :begin next-object)))
+	(let ((obj-beg (org-element-property :begin next-object)))
 	  (unless (= (point) obj-beg)
 	    (push (replace-regexp-in-string
 		   "\t" (make-string tab-width ? )
 		   (buffer-substring-no-properties (point) obj-beg))
 		  acc)))
 	;; 2. Object...
-	(let ((obj-end (org-element-get-property :end next-object))
-	      (cont-beg (org-element-get-property :contents-begin next-object)))
+	(let ((obj-end (org-element-property :end next-object))
+	      (cont-beg (org-element-property :contents-begin next-object)))
 	  (push (if (and (memq (car next-object) org-element-recursive-objects)
 			 cont-beg)
 		    ;; ... recursive.  The CONT-BEG check is for
@@ -3388,7 +3385,7 @@ allowed in the current object."
 		    (save-restriction
 		      (narrow-to-region
 		       cont-beg
-		       (org-element-get-property :contents-end next-object))
+		       (org-element-property :contents-end next-object))
 		      (org-element-parse-objects
 		       (point-min) (point-max) (reverse next-object)
 		       ;; Restrict allowed objects.  This is the
@@ -3527,12 +3524,11 @@ Return Org syntax as a string."
 	   (concat
 	    (org-element-interpret--affiliated-keywords blob)
 	    (org-element-normalize-string results)
-	    (make-string (org-element-get-property :post-blank blob) 10)))
+	    (make-string (org-element-property :post-blank blob) 10)))
 	  (t (concat
 	      results
-	      (make-string
-	       (org-element-get-property :post-blank blob) 32))))))))
-   (org-element-get-contents data) ""))
+	      (make-string (org-element-property :post-blank blob) 32))))))))
+   (org-element-contents data) ""))
 
 (defun org-element-interpret-secondary (secondary)
   "Interpret SECONDARY string as Org syntax.
@@ -3563,7 +3559,7 @@ If there is no affiliated keyword, return the empty string."
 		      "\n"))))))
     (mapconcat
      (lambda (key)
-       (let ((value (org-element-get-property (intern (concat ":" key)) element)))
+       (let ((value (org-element-property (intern (concat ":" key)) element)))
 	 (when value
 	   (if (member key org-element-multiple-keywords)
 	       (mapconcat (lambda (line)
@@ -3641,7 +3637,7 @@ indentation is not done with TAB characters."
                      (push (length (match-string 1 object)) ind-list))))
                 ((memq (org-element-type object) org-element-recursive-objects)
                  (funcall collect-inds object first-flag))))
-             (org-element-get-contents blob))))))
+             (org-element-contents blob))))))
     ;; Collect indentation list in ELEMENT.  Possibly remove first
     ;; value if IGNORE-FIRST is non-nil.
     (catch 'zero (funcall collect-inds element (not ignore-first)))
@@ -3671,7 +3667,7 @@ indentation is not done with TAB characters."
 		     ((memq (org-element-type object) org-element-recursive-objects)
 		      (funcall build object mci first-flag))
 		     (t object)))
-		  (org-element-get-contents blob)))))))
+		  (org-element-contents blob)))))))
 	(funcall build element (apply 'min ind-list) (not ignore-first))))))
 
 
@@ -3698,10 +3694,10 @@ indentation is not done with TAB characters."
 
 (defsubst org-element-nested-p (elem-A elem-B)
   "Non-nil when elements ELEM-A and ELEM-B are nested."
-  (let ((beg-A (org-element-get-property :begin elem-A))
-	(beg-B (org-element-get-property :begin elem-B))
-	(end-A (org-element-get-property :end elem-A))
-	(end-B (org-element-get-property :end elem-B)))
+  (let ((beg-A (org-element-property :begin elem-A))
+	(beg-B (org-element-property :begin elem-B))
+	(end-A (org-element-property :end elem-A))
+	(end-B (org-element-property :end elem-B)))
     (or (and (>= beg-A beg-B) (<= end-A end-B))
 	(and (>= beg-B beg-A) (<= end-B end-A)))))
 
@@ -3711,16 +3707,16 @@ indentation is not done with TAB characters."
 Leave point at the end of ELEM-A.
 
 Assume ELEM-A is before ELEM-B and that they are not nested."
-  (goto-char (org-element-get-property :begin elem-A))
-  (let* ((beg-B (org-element-get-property :begin elem-B))
+  (goto-char (org-element-property :begin elem-A))
+  (let* ((beg-B (org-element-property :begin elem-B))
 	 (end-B-no-blank (save-excursion
-			     (goto-char (org-element-get-property :end elem-B))
+			     (goto-char (org-element-property :end elem-B))
 			     (skip-chars-backward " \r\t\n")
 			     (forward-line)
 			     (point)))
-	 (beg-A (org-element-get-property :begin elem-A))
+	 (beg-A (org-element-property :begin elem-A))
 	 (end-A-no-blank (save-excursion
-			   (goto-char (org-element-get-property :end elem-A))
+			   (goto-char (org-element-property :end elem-A))
 			   (skip-chars-backward " \r\t\n")
 			   (forward-line)
 			   (point)))
@@ -3729,14 +3725,14 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
 	 (between-A-B (buffer-substring end-A-no-blank beg-B)))
     (delete-region beg-A end-B-no-blank)
     (insert body-B between-A-B body-A)
-    (goto-char (org-element-get-property :end elem-B))))
+    (goto-char (org-element-property :end elem-B))))
 
 (defun org-element-backward ()
   "Move backward by one element."
   (interactive)
   (let* ((opoint (point))
 	 (element (org-element-at-point))
-	 (start-el-beg (org-element-get-property :begin element)))
+	 (start-el-beg (org-element-property :begin element)))
     ;; At an headline. The previous element is the previous sibling,
     ;; or the parent if any.
     (cond
@@ -3755,9 +3751,9 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
 	(if (and itemp (<= (org-list-get-bottom-point struct) opoint))
 	    (progn
 	      (goto-char (org-list-get-top-point struct))
-	      (goto-char (org-element-get-property
+	      (goto-char (org-element-property
 			  :begin (org-element-at-point))))
-	  (goto-char (org-element-get-property :begin prev-element))))
+	  (goto-char (org-element-property :begin prev-element))))
       (while (org-truely-invisible-p) (org-element-up)))
      ;; Else, move at the element beginning. One exception: if point
      ;; was in the blank lines after the end of a list, move directly
@@ -3769,9 +3765,9 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
 		      (save-excursion (goto-char itemp)
 				      (setq struct (org-list-struct))))
 		     opoint))
-	    (progn (goto-char (org-list-get-top-point struct))
-		   (goto-char (org-element-get-property
-			       :begin (org-element-at-point))))
+	    (progn
+	      (goto-char (org-list-get-top-point struct))
+	      (goto-char (org-element-property :begin (org-element-at-point))))
 	  (goto-char start-el-beg)))))))
 
 (defun org-element-drag-backward ()
@@ -3782,9 +3778,9 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
     (when (= (progn (goto-char (point-min))
 		    (org-skip-whitespace)
 		    (point-at-bol))
-	     (org-element-get-property :end elem))
+	     (org-element-property :end elem))
       (error "Cannot drag element backward"))
-    (goto-char (org-element-get-property :begin elem))
+    (goto-char (org-element-property :begin elem))
     (org-element-backward)
     (let ((prev-elem (org-element-at-point)))
       (when (or (org-element-nested-p elem prev-elem)
@@ -3794,8 +3790,8 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
 	(error "Cannot drag element backward"))
       ;; Compute new position of point: it's shifted by PREV-ELEM
       ;; body's length.
-      (let ((size-prev (- (org-element-get-property :end prev-elem)
-			  (org-element-get-property :begin prev-elem))))
+      (let ((size-prev (- (org-element-property :end prev-elem)
+			  (org-element-property :begin prev-elem))))
 	(org-element-swap-A-B prev-elem elem)
 	(goto-char (- pos size-prev))))))
 
@@ -3804,9 +3800,9 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
   (interactive)
   (let* ((pos (point))
 	 (elem (org-element-at-point)))
-    (when (= (point-max) (org-element-get-property :end elem))
+    (when (= (point-max) (org-element-property :end elem))
       (error "Cannot drag element forward"))
-    (goto-char (org-element-get-property :end elem))
+    (goto-char (org-element-property :end elem))
     (let ((next-elem (org-element-at-point)))
       (when (or (org-element-nested-p elem next-elem)
 		(and (eq (car next-elem) 'headline)
@@ -3817,14 +3813,14 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
       ;; body's length (without final blanks) and by the length of
       ;; blanks between ELEM and NEXT-ELEM.
       (let ((size-next (- (save-excursion
-			    (goto-char (org-element-get-property :end next-elem))
+			    (goto-char (org-element-property :end next-elem))
 			    (skip-chars-backward " \r\t\n")
 			    (forward-line)
 			    (point))
-			  (org-element-get-property :begin next-elem)))
-	    (size-blank (- (org-element-get-property :end elem)
+			  (org-element-property :begin next-elem)))
+	    (size-blank (- (org-element-property :end elem)
 			   (save-excursion
-			     (goto-char (org-element-get-property :end elem))
+			     (goto-char (org-element-property :end elem))
 			     (skip-chars-backward " \r\t\n")
 			     (forward-line)
 			     (point)))))
@@ -3846,8 +3842,8 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
 	    ;; At an item: Either move to the next element inside, or
 	    ;; to its end if it's hidden.
 	    ((eq (org-element-type element) 'item)
-	     (if (org-element-get-property :hiddenp element)
-		 (goto-char (org-element-get-property :end element))
+	     (if (org-element-property :hiddenp element)
+		 (goto-char (org-element-property :end element))
 	       (end-of-line)
 	       (re-search-forward org-element-paragraph-separate nil t)
 	       (org-skip-whitespace)
@@ -3855,14 +3851,14 @@ Assume ELEM-A is before ELEM-B and that they are not nested."
 	    ;; At a recursive element: Either move inside, or if it's
 	    ;; hidden, move to its end.
 	    ((memq (org-element-type element) org-element-greater-elements)
-	     (let ((cbeg (org-element-get-property :contents-begin element)))
+	     (let ((cbeg (org-element-property :contents-begin element)))
 	       (goto-char
-		(if (or (org-element-get-property :hiddenp element)
+		(if (or (org-element-property :hiddenp element)
 			(> origin cbeg))
-		    (org-element-get-property :end element)
+		    (org-element-property :end element)
 		  cbeg))))
 	    ;; Else: move to the current element's end.
-	    (t (goto-char (org-element-get-property :end element))))))))
+	    (t (goto-char (org-element-property :end element))))))))
 
 (defun org-element-mark-element ()
   "Put point at beginning of this element, mark at end.
@@ -3877,11 +3873,11 @@ ones already marked."
 	(set-mark
 	 (save-excursion
 	   (goto-char (mark))
-	   (goto-char (org-element-get-property :end (org-element-at-point)))))
+	   (goto-char (org-element-property :end (org-element-at-point)))))
       (let ((element (org-element-at-point)))
 	(end-of-line)
-	(push-mark (org-element-get-property :end element) t t)
-	(goto-char (org-element-get-property :begin element))))))
+	(push-mark (org-element-property :end element) t t)
+	(goto-char (org-element-property :begin element))))))
 
 (defun org-narrow-to-element ()
   "Narrow buffer to current element."
@@ -3890,16 +3886,16 @@ ones already marked."
     (cond
      ((eq (car elem) 'headline)
       (narrow-to-region
-       (org-element-get-property :begin elem)
-       (org-element-get-property :end elem)))
+       (org-element-property :begin elem)
+       (org-element-property :end elem)))
      ((memq (car elem) org-element-greater-elements)
       (narrow-to-region
-       (org-element-get-property :contents-begin elem)
-       (org-element-get-property :contents-end elem)))
+       (org-element-property :contents-begin elem)
+       (org-element-property :contents-end elem)))
      (t
       (narrow-to-region
-       (org-element-get-property :begin elem)
-       (org-element-get-property :end elem))))))
+       (org-element-property :begin elem)
+       (org-element-property :end elem))))))
 
 (defun org-transpose-elements ()
   "Transpose current and previous elements, keeping blank lines between.
@@ -3911,9 +3907,9 @@ Point is moved after both elements."
     (when (= (save-excursion (goto-char (point-min))
 			     (org-skip-whitespace)
 			     (point-at-bol))
-	     (org-element-get-property :begin cur))
+	     (org-element-property :begin cur))
       (error "No previous element"))
-    (goto-char (org-element-get-property :begin cur))
+    (goto-char (org-element-property :begin cur))
     (forward-line -1)
     (let ((prev (org-element-at-point)))
       (when (org-element-nested-p cur prev)
@@ -3936,15 +3932,15 @@ modified."
 	     (mapc (lambda (element)
 		     (if (eq (org-element-type element) 'headline)
 			 (funcall unindent-tree
-				  (org-element-get-contents element))
+				  (org-element-contents element))
 		       (save-excursion
 			 (save-restriction
 			   (narrow-to-region
-			    (org-element-get-property :begin element)
-			    (org-element-get-property :end element))
+			    (org-element-property :begin element)
+			    (org-element-property :end element))
 			   (org-do-remove-indentation)))))
 		   (reverse contents))))))
-    (funcall unindent-tree (org-element-get-contents parse-tree))))
+    (funcall unindent-tree (org-element-contents parse-tree))))
 
 (defun org-element-up ()
   "Move to upper element.
@@ -3957,34 +3953,34 @@ Return position at the beginning of the upper element."
       (or (org-up-heading-safe) (error "No surronding element")))
      ((and (org-at-item-p)
 	   (setq elem (org-element-at-point))
-	   (let* ((top-list-p (zerop (org-element-get-property :level elem))))
+	   (let* ((top-list-p (zerop (org-element-property :level elem))))
 	     (unless top-list-p
 	       ;; If parent is bound to be in the same list as the
 	       ;; original point, move to that parent.
-	       (let ((struct (org-element-get-property :structure elem)))
+	       (let ((struct (org-element-property :structure elem)))
 		 (goto-char
 		  (org-list-get-parent
 		   (point-at-bol) struct (org-list-parents-alist struct))))))))
      (t
       (let* ((elem (or elem (org-element-at-point)))
 	     (end (save-excursion
-		    (goto-char (org-element-get-property :end elem))
+		    (goto-char (org-element-property :end elem))
 		    (skip-chars-backward " \r\t\n")
 		    (forward-line)
 		    (point)))
 	     prev-elem)
-	(goto-char (org-element-get-property :begin elem))
+	(goto-char (org-element-property :begin elem))
 	(forward-line -1)
-	(while (and (< (org-element-get-property
+	(while (and (< (org-element-property
 			:end (setq prev-elem (org-element-at-point)))
 		       end)
 		    (not (bobp)))
-	  (goto-char (org-element-get-property :begin prev-elem))
+	  (goto-char (org-element-property :begin prev-elem))
 	  (forward-line -1))
-	(if (and (bobp) (< (org-element-get-property :end prev-elem) end))
+	(if (and (bobp) (< (org-element-property :end prev-elem) end))
 	    (progn (goto-char opoint)
 		   (error "No surrounding element"))
-	  (goto-char (org-element-get-property :begin prev-elem))))))))
+	  (goto-char (org-element-property :begin prev-elem))))))))
 
 
 (provide 'org-element)

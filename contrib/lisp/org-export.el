@@ -1019,8 +1019,8 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
        (while (re-search-forward special-re nil t)
 	 (let ((element (org-element-at-point)))
 	   (when (eq (org-element-type element) 'keyword)
-	     (let* ((key (upcase (org-element-get-property :key element)))
-		    (val (org-element-get-property :value element))
+	     (let* ((key (upcase (org-element-property :key element)))
+		    (val (org-element-property :value element))
 		    (prop
 		     (cond
 		      ((string= key "SETUP_FILE")
@@ -1096,8 +1096,8 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
        (while (re-search-forward opt-re nil t)
 	 (let ((element (org-element-at-point)))
 	   (when (eq (org-element-type element) 'keyword)
-	     (let* ((key (upcase (org-element-get-property :key element)))
-		    (val (org-element-get-property :value element))
+	     (let* ((key (upcase (org-element-property :key element)))
+		    (val (org-element-property :value element))
 		    (prop (cdr (assoc key alist)))
 		    (behaviour (nth 4 (assq prop all))))
 	       (setq plist
@@ -1291,7 +1291,7 @@ OPTIONS is a plist holding export options."
    data
    'headline
    (lambda (headline info)
-     (let ((tags (org-element-get-property :with-tags headline)))
+     (let ((tags (org-element-property :with-tags headline)))
        (and tags (string-match
 		  (format ":%s:" (plist-get info :select-tags)) tags))))
    options
@@ -1307,9 +1307,9 @@ OPTIONS is a plist holding export options."
 	      (when (and (eq (org-element-type blob) 'headline)
 			 (not (org-export-skip-p blob options)))
 		(setq min-level
-		      (min (org-element-get-property :level blob) min-level)))
+		      (min (org-element-property :level blob) min-level)))
 	      (when (= min-level 1) (throw 'exit 1)))
-	    (org-element-get-contents data))
+	    (org-element-contents data))
       ;; If no headline was found, for the sake of consistency, set
       ;; minimum level to 1 nonetheless.
       (if (= min-level 10000) 1 min-level))))
@@ -1426,7 +1426,7 @@ Return transcoded string."
 		 (unless (and
 			  (eq type 'headline)
 			  (eq (plist-get info :with-archived-trees) 'headline)
-			  (org-element-get-property :archivedp blob))
+			  (org-element-property :archivedp blob))
 		   (org-element-normalize-string
 		    (org-export-data
 		     blob backend
@@ -1466,13 +1466,13 @@ Return transcoded string."
 	   (if (eq type 'org-data) results
 	     (org-export-filter-apply-functions
 	      (plist-get info (intern (format ":filter-%s" type)))
-	      (let ((post-blank (org-element-get-property :post-blank blob)))
+	      (let ((post-blank (org-element-property :post-blank blob)))
 		(if (memq type org-element-all-elements)
 		    (concat (org-element-normalize-string results)
 			    (make-string post-blank ?\n))
 		  (concat results (make-string post-blank ? ))))
 	      backend info)))))))
-   (org-element-get-contents data) ""))
+   (org-element-contents data) ""))
 
 (defun org-export-secondary-string (secondary backend info)
   "Convert SECONDARY string into BACKEND format.
@@ -1497,10 +1497,10 @@ INFO is the plist holding export options."
     ;; Check headline.
     (headline
      (let ((with-tasks (plist-get info :with-tasks))
-	   (todo (org-element-get-property :todo-keyword blob))
-	   (todo-type (org-element-get-property :todo-type blob))
+	   (todo (org-element-property :todo-keyword blob))
+	   (todo-type (org-element-property :todo-type blob))
 	   (archived (plist-get info :with-archived-trees))
-	   (tag-list (let ((tags (org-element-get-property :tags blob)))
+	   (tag-list (let ((tags (org-element-property :tags blob)))
 		       (and tags (org-split-string tags ":")))))
        (or
 	;; Ignore subtrees with an exclude tag.
@@ -1512,9 +1512,9 @@ INFO is the plist holding export options."
 	     (loop for k in (plist-get info :select-tags)
 		   never (member k tag-list)))
 	;; Ignore commented sub-trees.
-	(org-element-get-property :commentedp blob)
+	(org-element-property :commentedp blob)
 	;; Ignore archived subtrees if `:with-archived-trees' is nil.
-	(and (not archived) (org-element-get-property :archivedp blob))
+	(and (not archived) (org-element-property :archivedp blob))
 	;; Ignore tasks, if specified by `:with-tasks' property.
 	(and todo (not with-tasks))
 	(and todo
@@ -1529,11 +1529,11 @@ INFO is the plist holding export options."
     (drawer
      (or (not (plist-get info :with-drawers))
 	 (and (consp (plist-get info :with-drawers))
-	      (not (member (org-element-get-property :drawer-name blob)
+	      (not (member (org-element-property :drawer-name blob)
 			   (plist-get info :with-drawers))))))
     ;; Check export snippet.
     (export-snippet
-     (let* ((raw-back-end (org-element-get-property :back-end blob))
+     (let* ((raw-back-end (org-element-property :back-end blob))
 	    (true-back-end
 	     (or (cdr (assoc raw-back-end org-export-snippet-translation-alist))
 		 raw-back-end)))
@@ -1558,7 +1558,7 @@ a plist."
     ((subscript superscript)
      (let ((sub/super-p (plist-get info :with-sub-superscript)))
        (if (eq sub/super-p '{})
-	   (org-element-get-property :use-brackets-p blob)
+	   (org-element-property :use-brackets-p blob)
 	 sub/super-p)))
     ;; ... tables...
     (table (plist-get info :with-tables))
@@ -2396,7 +2396,7 @@ ignored."
      (lambda (footnote local)
        (when (org-export-footnote-first-reference-p footnote local)
 	 (list (org-export-get-footnote-number footnote local)
-	       (org-element-get-property :label footnote)
+	       (org-element-property :label footnote)
 	       (org-export-get-footnote-definition footnote local))))
      info)))
 
@@ -2405,22 +2405,22 @@ ignored."
 
 FOOTNOTE-REFERENCE is the footnote reference being considered.
 INFO is the plist used as a communication channel."
-  (let ((label (org-element-get-property :label footnote-reference)))
+  (let ((label (org-element-property :label footnote-reference)))
     (or (not label)
 	(equal
 	 footnote-reference
 	 (org-element-map
 	  (plist-get info :parse-tree) 'footnote-reference
 	  (lambda (footnote local)
-	    (when (string= (org-element-get-property :label footnote) label)
+	    (when (string= (org-element-property :label footnote) label)
 	      footnote))
 	  info 'first-match)))))
 
 (defun org-export-get-footnote-definition (footnote-reference info)
   "Return definition of FOOTNOTE-REFERENCE as parsed data.
 INFO is the plist used as a communication channel."
-  (let ((label (org-element-get-property :label footnote-reference)))
-    (or (org-element-get-property :inline-definition footnote-reference)
+  (let ((label (org-element-property :label footnote-reference)))
+    (or (org-element-property :inline-definition footnote-reference)
         (cdr (assoc label (plist-get info :footnote-definition-alist))))))
 
 (defun org-export-get-footnote-number (footnote info)
@@ -2428,11 +2428,11 @@ INFO is the plist used as a communication channel."
 
 FOOTNOTE is either a footnote reference or a footnote definition.
 INFO is the plist used as a communication channel."
-  (let ((label (org-element-get-property :label footnote)) seen-refs)
+  (let ((label (org-element-property :label footnote)) seen-refs)
     (org-element-map
      (plist-get info :parse-tree) 'footnote-reference
      (lambda (fn local)
-       (let ((fn-lbl (org-element-get-property :label fn)))
+       (let ((fn-lbl (org-element-property :label fn)))
 	 (cond
 	  ((and (not fn-lbl) (equal fn footnote)) (1+ (length seen-refs)))
 	  ((and label (string= label fn-lbl)) (1+ (length seen-refs)))
@@ -2462,7 +2462,7 @@ INFO is the plist used as a communication channel."
 (defun org-export-get-relative-level (headline info)
   "Return HEADLINE relative level within current parsed tree.
 INFO is a plist holding contextual information."
-  (+ (org-element-get-property :level headline)
+  (+ (org-element-property :level headline)
      (or (plist-get info :headline-offset) 0)))
 
 (defun org-export-low-level-p (headline info)
@@ -2511,7 +2511,7 @@ INFO is the plist used as a communication channel."
   "Non-nil when HEADLINE is the last sibling in its sub-tree.
 INFO is the plist used as a communication channel."
   (equal
-   (car (last (org-element-get-contents (car (plist-get info :genealogy)))))
+   (car (last (org-element-contents (car (plist-get info :genealogy)))))
    headline))
 
 
@@ -2566,14 +2566,14 @@ the provided rules is non-nil.  The default rule is
 `org-export-default-inline-image-rule'.
 
 This only applies to links without a description."
-  (and (not (org-element-get-contents link))
+  (and (not (org-element-contents link))
        (let ((case-fold-search t)
 	     (rules (or rules org-export-default-inline-image-rule)))
 	 (some
 	  (lambda (rule)
-	    (and (string= (org-element-get-property :type link) (car rule))
+	    (and (string= (org-element-property :type link) (car rule))
 		 (string-match (cdr rule)
-			       (org-element-get-property :path link))))
+			       (org-element-property :path link))))
 	  rules))))
 
 (defun org-export-resolve-fuzzy-link (link info)
@@ -2594,10 +2594,10 @@ Return value can be an object, an element, or nil:
 - Otherwise, return nil.
 
 Assume LINK type is \"fuzzy\"."
-  (let ((path (org-element-get-property :path link)))
+  (let ((path (org-element-property :path link)))
     ;; Link points to a target: return it.
     (or (loop for target in (plist-get info :target-list)
-	      when (string= (org-element-get-property :raw-value target) path)
+	      when (string= (org-element-property :raw-value target) path)
 	      return target)
 	;; Link either points to an headline or nothing.  Try to find
 	;; the source, with priority given to headlines with the closest
@@ -2613,7 +2613,7 @@ Assume LINK type is \"fuzzy\"."
 		   data 'headline
 		   (lambda (headline local)
 		     (when (string=
-			    (org-element-get-property :raw-value headline)
+			    (org-element-property :raw-value headline)
 			    name)
 		       headline))
 		   info 'first-match)))))
@@ -2636,12 +2636,12 @@ INFO is a plist used as a communication channel.
 
 Return value can be an headline element or nil.  Assume LINK type
 is either \"id\" or \"custom-id\"."
-  (let ((id (org-element-get-property :path link)))
+  (let ((id (org-element-property :path link)))
     (org-element-map
      (plist-get info :parse-tree) 'headline
      (lambda (headline local)
-       (when (or (string= (org-element-get-property :id headline) id)
-                 (string= (org-element-get-property :custom-id headline) id))
+       (when (or (string= (org-element-property :id headline) id)
+                 (string= (org-element-property :custom-id headline) id))
          headline))
      info 'first-match)))
 
@@ -2652,11 +2652,11 @@ INFO is a plist used as a communication channel.
 
 Assume LINK type is \"ref\" and.  Return value is the first
 element whose `:name' property matches LINK's `:path', or nil."
-  (let ((name (org-element-get-property :path link)))
+  (let ((name (org-element-property :path link)))
     (org-element-map
      (plist-get info :parse-tree) org-element-all-elements
      (lambda (el local)
-       (when (string= (org-element-get-property :name el) name) el))
+       (when (string= (org-element-property :name el) name) el))
      info 'first-match)))
 
 (defun org-export-resolve-coderef (ref info)
@@ -2669,9 +2669,9 @@ depending on src-block or example element's switches."
   (org-element-map
    (plist-get info :parse-tree) '(src-block example)
    (lambda (el local)
-     (let ((switches (or (org-element-get-property :switches el) "")))
+     (let ((switches (or (org-element-property :switches el) "")))
        (with-temp-buffer
-         (insert (org-trim (org-element-get-property :value el)))
+         (insert (org-trim (org-element-property :value el)))
          ;; Build reference regexp.
          (let* ((label
                  (or (and (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
@@ -2701,8 +2701,8 @@ depending on src-block or example element's switches."
 (defun org-export-expand-macro (macro info)
   "Expand MACRO and return it as a string.
 INFO is a plist holding export options."
-  (let* ((key (org-element-get-property :key macro))
-	 (args (org-element-get-property :args macro))
+  (let* ((key (org-element-property :key macro))
+	 (args (org-element-property :args macro))
 	 ;; User's macros are stored in the communication channel with
 	 ;; a ":macro-" prefix.  If it's a string leave it as-is.
 	 ;; Otherwise, it's a secondary string that needs to be
@@ -2798,12 +2798,12 @@ ELEMENT is excluded from count."
         ;; Only count lines from src-block and example-block elements
         ;; with a "+n" or "-n" switch.  A "-n" switch resets counter.
         ((not (memq (org-element-type el) '(src-block example-block))) nil)
-        ((let ((switches (org-element-get-property :switches el)))
+        ((let ((switches (org-element-property :switches el)))
            (when (and switches (string-match "\\([-+]\\)n\\>" switches))
 	     ;; Accumulate locs or reset them.
 	     (let ((accumulatep (string= (match-string 1 switches) "-"))
 		   (lines (org-count-lines
-			   (org-trim (org-element-get-property :value el)))))
+			   (org-trim (org-element-property :value el)))))
 	       (setq loc (if accumulatep lines (+ loc lines))))))
 	 ;; Return nil to stay in the loop.
          nil)))
@@ -2831,8 +2831,8 @@ resulting string.  Both NUM-FMT and REF-FMT arguments are ignored
 in that situation.
 
 Return new code as a string."
-  (let* ((switches (or (org-element-get-property :switches element) ""))
-	 (code (org-element-get-property :value element))
+  (let* ((switches (or (org-element-property :switches element) ""))
+	 (code (org-element-property :value element))
 	 (numberp (string-match "[-+]n\\>" switches))
 	 (accumulatep (string-match "\\+n\\>" switches))
 	 ;; Initialize loc counter when any kind of numbering is
@@ -2855,7 +2855,7 @@ Return new code as a string."
 		 ;; Free up the protected lines.  Note: Org blocks
 		 ;; have commas at the beginning or every line.
 		 (if (string=
-		      (or (org-element-get-property :language element) "")
+		      (or (org-element-property :language element) "")
 		      "org")
 		     (replace-regexp-in-string "^," "" c)
 		   (replace-regexp-in-string
@@ -3055,8 +3055,8 @@ Return a list of all elements found, in order of appearance."
   (org-element-map
    (plist-get info :parse-tree) type
    (lambda (element local)
-     (and (or (org-element-get-property :caption element)
-	      (org-element-get-property :name element))
+     (and (or (org-element-property :caption element)
+	      (org-element-property :name element))
 	  (or (not predicate) (funcall predicate element))
 	  element)) info))
 
@@ -3113,7 +3113,7 @@ BLOB is the element or object being considered.  INFO is a plist
 used as a communication channel."
   ;; LOCALP tells if current `:genealogy' is sufficient to find parent
   ;; headline, or if it should be computed.
-  (let ((localp (member blob (org-element-get-contents
+  (let ((localp (member blob (org-element-contents
 			      (car (plist-get info :genealogy))))))
     (if localp (plist-get info :genealogy)
       (catch 'exit
@@ -3159,7 +3159,7 @@ a communication channel.
 
 Return previous element or object, a string, or nil."
   (let ((parent (car (org-export-get-genealogy blob info))))
-    (cadr (member blob (reverse (org-element-get-contents parent))))))
+    (cadr (member blob (reverse (org-element-contents parent))))))
 
 (defun org-export-get-next-element (blob info)
   "Return next element or object.
@@ -3169,7 +3169,7 @@ a communication channel.
 
 Return next element or object, a string, or nil."
   (let ((parent (car (org-export-get-genealogy blob info))))
-    (cadr (member blob (org-element-get-contents parent)))))
+    (cadr (member blob (org-element-contents parent)))))
 
 
 
