@@ -159,6 +159,14 @@ as Org syntax."
 	(should
 	 (equal (org-export-as 'test nil nil nil '(:with-archived-trees nil))
 		"")))))
+  (org-test-with-temp-text "* Head1 :archive:\nbody\n** Sub-head 2"
+    (let ((org-archive-tag "archive"))
+      (org-test-with-backend "test"
+	(should
+	 (string-match
+	  "\\* Head1[ \t]+:archive:"
+	  (org-export-as 'test nil nil nil
+			 '(:with-archived-trees headline)))))))
   (org-test-with-temp-text "* Head1 :archive:"
     (let ((org-archive-tag "archive"))
       (org-test-with-backend "test"

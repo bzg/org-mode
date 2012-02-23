@@ -1414,12 +1414,21 @@ Return elements or objects to ignore as a list."
 	     (lambda (el)
 	       (if (org-export--skip-p el options) (push el ignore-list)
 		 (let ((type (org-element-type el)))
-		   (when (or (eq type 'org-data)
-			     (memq type org-element-greater-elements)
-			     (memq type org-element-recursive-objects)
-			     (eq type 'paragraph))
-		     (funcall walk-data el options)))))
+		   (if (and (eq (plist-get info :with-archived-trees) 'headline)
+			    (eq (org-element-type el) 'headline)
+			    (org-element-property :archivedp el))
+		       ;; If headline is archived but tree below has
+		       ;; to be skipped, add it to ignore list.
+		       (mapc (lambda (e) (push e ignore-list))
+			     (org-element-contents el))
+		     ;; Move into recursive objects/elements.
+		     (when (or (eq type 'org-data)
+			       (memq type org-element-greater-elements)
+			       (memq type org-element-recursive-objects)
+			       (eq type 'paragraph))
+		       (funcall walk-data el options))))))
 	     (org-element-contents data))))))
+    ;; Main call.
     (funcall walk-data data options)
     ;; Return value.
     ignore-list))

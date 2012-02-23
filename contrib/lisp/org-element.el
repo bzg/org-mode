@@ -3009,8 +3009,7 @@ information.
 
 When optional argument INFO is non-nil, it should be a plist
 holding export options.  In that case, parts of the parse tree
-not exportable according to that property list will be skipped
-and files included through a keyword will be visited.
+not exportable according to that property list will be skipped.
 
 When optional argument FIRST-MATCH is non-nil, stop at the first
 match for which FUN doesn't return nil, and return that value.
@@ -3077,18 +3076,7 @@ Nil values returned from FUN are ignored in the result."
 		  ;; possible and allowed.
 		  (cond
 		   ;; Element or object not exportable.
-		   ((member --blob (plist-get info :ignore-list)))
-		   ;; Archived headline: Maybe apply FUN on it, but
-		   ;; ignore contents.
-		   ((and info
-			 (eq --type 'headline)
-			 (eq (plist-get info :with-archived-trees) 'headline)
-			 (org-element-property :archivedp --blob))
-		    (funcall --check-blob
-			     --type types fun
-			     ;; Ensure --BLOB has no contents.
-			     (list --type (nth 1 --blob))
-			     info))
+		   ((and info (member --blob (plist-get info :ignore-list))))
 		   ;; Limiting recursion to greater elements, and --BLOB
 		   ;; isn't one.
 		   ((and (eq --category 'greater-elements)
