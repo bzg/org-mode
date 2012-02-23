@@ -2122,8 +2122,8 @@ Return PDF file name or an error if it couldn't be produced."
 	(progn
 	  (cond
 	   ;; A function is provided: Apply it.
-	   ((functionp org-latex-to-pdf-process)
-	    (funcall org-latex-to-pdf-process (shell-quote-argument texfile)))
+	   ((functionp org-e-latex-pdf-process)
+	    (funcall org-e-latex-pdf-process (shell-quote-argument texfile)))
 	   ;; A list is provided: Replace %b, %f and %o with appropriate
 	   ;; values in each command before applying it.  Output is
 	   ;; redirected to "*Org PDF LaTeX Output*" buffer.
@@ -2138,7 +2138,7 @@ Return PDF file name or an error if it couldn't be produced."
 		   (replace-regexp-in-string
 		    "%f" (shell-quote-argument texfile)
 		    (replace-regexp-in-string
-		     "%o" (shell-quote-argument out-dir) command)))
+		     "%o" (shell-quote-argument out-dir) command t t) t t) t t)
 		  outbuf))
 	       org-e-latex-pdf-process)
 	      ;; Collect standard errors from output buffer.
