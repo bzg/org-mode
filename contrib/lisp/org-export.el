@@ -347,9 +347,13 @@ This option can also be set with the #+OPTIONS line, e.g. \"*:nil\"."
 
 (defcustom org-export-exclude-tags '("noexport")
   "Tags that exclude a tree from export.
+
 All trees carrying any of these tags will be excluded from
 export.  This is without condition, so even subtrees inside that
-carry one of the `org-export-select-tags' will be removed."
+carry one of the `org-export-select-tags' will be removed.
+
+This option can also be set with the #+EXPORT_EXCLUDE_TAGS:
+keyword."
   :group 'org-export-general
   :type '(repeat (string :tag "Tag")))
 
@@ -419,7 +423,11 @@ e.g. \"e:nil\"."
 
 (defcustom org-export-with-priority nil
   "Non-nil means include priority cookies in export.
-When nil, remove priority cookies for export."
+
+When nil, remove priority cookies for export.
+
+This option can also be set with the #+OPTIONS line,
+e.g. \"pri:t\"."
   :group 'org-export-general
   :type 'boolean)
 
@@ -436,10 +444,14 @@ e.g. \"num:t\"."
 
 (defcustom org-export-select-tags '("export")
   "Tags that select a tree for export.
+
 If any such tag is found in a buffer, all trees that do not carry
-one of these tags will be deleted before export.  Inside trees
+one of these tags will be ignored during export.  Inside trees
 that are selected like this, you can still deselect a subtree by
-tagging it with one of the `org-export-exclude-tags'."
+tagging it with one of the `org-export-exclude-tags'.
+
+This option can also be set with the #+EXPORT_SELECT_TAGS:
+keyword."
   :group 'org-export-general
   :type '(repeat (string :tag "Tag")))
 
@@ -773,12 +785,6 @@ standard mode."
 ;;      a time stamp in the output.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
-;; + `:use-select-tags' :: When non-nil, a select tags has been found
-;;      in the parse tree.  Thus, any headline without one will be
-;;      filtered out.  See `select-tags'.
-;;   - category :: tree
-;;   - type :: interger or nil
 
 ;; + `:with-archived-trees' :: Non-nil when archived subtrees should
 ;;      also be transcoded.  If it is set to the `headline' symbol,
@@ -1233,13 +1239,12 @@ retrieved."
 
 ;; Dedicated functions focus on computing the value of specific tree
 ;; properties during initialization.  Thus,
-;; `org-export-use-select-tag-p' determines if an headline makes use
-;; of an export tag enforcing inclusion. `org-export-get-ignore-list'
-;; marks collect elements and objects that should be skipped during
-;; export, `org-export-get-min-level' gets the minimal exportable
-;; level, used as a basis to compute relative level for headlines.
-;; Eventually `org-export-collect-headline-numbering' builds an alist
-;; between headlines and their numbering.
+;; `org-export-populate-ignore-list' lists elements and objects that
+;; should be skipped during export, `org-export-get-min-level' gets
+;; the minimal exportable level, used as a basis to compute relative
+;; level for headlines.  Eventually
+;; `org-export-collect-headline-numbering' builds an alist between
+;; headlines and their numbering.
 
 (defun org-export-collect-tree-properties (data info backend)
   "Extract tree properties from parse tree.
@@ -1256,27 +1261,21 @@ Following tree properties are set:
 		   of level 2 should be considered as a level
 		   1 headline in the context.
 
-`:headline-numbering' Alist of all headlines' beginning position
-		   as key an the associated numbering as value.
+`:headline-numbering' Alist of all headlines as key an the
+		      associated numbering as value.
 
-`:ignore-list'     List of elements that should be ignored during export.
+`:ignore-list'     List of elements that should be ignored during
+                   export.
 
 `:parse-tree'      Whole parse tree.
 
-`:target-list'     List of all targets in the parse tree.
-
-`:use-select-tags' Non-nil when parsed tree use a special tag to
-		   enforce transcoding of the headline."
-  ;; First, set `:use-select-tags' property, as it will be required
-  ;; for further computations.
-  (setq info
-	(plist-put info
-		   :use-select-tags (org-export-use-select-tags-p data info)))
-  ;; Then get the list of elements and objects to ignore, and put it
+`:target-list'     List of all targets in the parse tree."
+  ;; First, get the list of elements and objects to ignore, and put it
   ;; into `:ignore-list'.
   (setq info
-	(plist-put info :ignore-list (org-export-get-ignore-list data info)))
-  ;; Finally get `:headline-offset' in order to be able to use
+	(plist-put info
+		   :ignore-list (org-export-populate-ignore-list data info)))
+  ;; Then compute `:headline-offset' in order to be able to use
   ;; `org-export-get-relative-level'.
   (setq info
 	(plist-put info
@@ -1291,20 +1290,6 @@ Following tree properties are set:
      :headline-numbering ,(org-export-collect-headline-numbering data info)
      :back-end ,backend)
    info))
-
-(defun org-export-use-select-tags-p (data options)
-  "Non-nil when data use a tag enforcing transcoding.
-DATA is parsed data as returned by `org-element-parse-buffer'.
-OPTIONS is a plist holding export options."
-  (org-element-map
-   data
-   'headline
-   (lambda (headline info)
-     (let ((tags (org-element-property :tags headline)))
-       (and tags
-	    (loop for tag in (plist-get info :select-tags)
-		  thereis (string-match (format ":%s:" tag) tags)))))
-   options 'first-match))
 
 (defun org-export-get-min-level (data options)
   "Return minimum exportable headline's level in DATA.
@@ -1348,7 +1333,71 @@ associated numbering \(in the shape of a list of numbers\)."
 		when (> idx relative-level) do (aset numbering idx 0)))))
      options)))
 
-(defun org-export--skip-p (blob options)
+(defun org-export-populate-ignore-list (data options)
+  "Return list of elements and objects to ignore during export.
+
+DATA is the parse tree to traverse.  OPTIONS is the plist holding
+export options.
+
+Return elements or objects to ignore as a list."
+  (let (ignore
+	(walk-data
+	 (function
+	  (lambda (data options selected)
+	    ;; Collect ignored elements or objects into IGNORE-LIST.
+	    (mapc
+	     (lambda (el)
+	       (if (org-export--skip-p el options selected) (push el ignore)
+		 (let ((type (org-element-type el)))
+		   (if (and (eq (plist-get info :with-archived-trees) 'headline)
+			    (eq (org-element-type el) 'headline)
+			    (org-element-property :archivedp el))
+		       ;; If headline is archived but tree below has
+		       ;; to be skipped, add it to ignore list.
+		       (mapc (lambda (e) (push e ignore))
+			     (org-element-contents el))
+		     ;; Move into recursive objects/elements.
+		     (when (or (eq type 'org-data)
+			       (memq type org-element-greater-elements)
+			       (memq type org-element-recursive-objects)
+			       (eq type 'paragraph))
+		       (funcall walk-data el options selected))))))
+	     (org-element-contents data))))))
+    ;; Main call.  First find trees containing a select tag, if any.
+    (funcall walk-data data options (org-export--selected-trees data options))
+    ;; Return value.
+    ignore))
+
+(defun org-export--selected-trees (data info)
+  "Return list of headlines containing a select tag in their tree.
+DATA is parsed data as returned by `org-element-parse-buffer'.
+INFO is a plist holding export options."
+  (let (selected-trees
+	(walk-data
+	 (function
+	  (lambda (data genealogy)
+	    (case (org-element-type data)
+	      (org-data
+	       (funcall walk-data (org-element-contents data) genealogy))
+	      (headline
+	       (let ((tags (org-element-property :tags headline)))
+		 (if (and tags
+			  (loop for tag in (plist-get info :select-tags)
+				thereis (string-match
+					 (format ":%s:" tag) tags)))
+		     ;; When a select tag is found, mark as acceptable
+		     ;; full genealogy and every headline within the
+		     ;; tree.
+		     (setq selected-trees
+			   (append
+			    (cons data genealogy)
+			    (org-element-map data 'headline (lambda (h p) h))
+			    selected-trees))
+		   ;; Else, continue searching in tree, recursively.
+		   (funcall walk-data data (cons data genealogy))))))))))
+    (funcall walk-data data nil) selected-trees))
+
+(defun org-export--skip-p (blob options select-tags)
   "Non-nil when element or object BLOB should be skipped during export.
 OPTIONS is the plist holding export options."
   (case (org-element-type blob)
@@ -1364,23 +1413,19 @@ OPTIONS is the plist holding export options."
 	;; Ignore subtrees with an exclude tag.
 	(loop for k in (plist-get options :exclude-tags)
 	      thereis (member k tag-list))
-	;; Ignore subtrees without a select tag, when such tag is found
-	;; in the buffer.
-	(and (plist-get options :use-select-tags)
-	     (loop for k in (plist-get options :select-tags)
-		   never (member k tag-list)))
+	;; Ignore subtrees without a select tag, when such tag is
+	;; found in the buffer.
+	(member blob select-tags)
 	;; Ignore commented sub-trees.
 	(org-element-property :commentedp blob)
 	;; Ignore archived subtrees if `:with-archived-trees' is nil.
 	(and (not archived) (org-element-property :archivedp blob))
 	;; Ignore tasks, if specified by `:with-tasks' property.
-	(and todo (not with-tasks))
 	(and todo
-	     (memq with-tasks '(todo done))
-	     (not (eq todo-type with-tasks)))
-	(and todo
-	     (consp with-tasks)
-	     (not (member todo with-tasks))))))
+	     (or (not with-tasks)
+		 (and (memq with-tasks '(todo done))
+		      (not (eq todo-type with-tasks)))
+		 (and (consp with-tasks) (not (member todo with-tasks))))))))
     ;; Check time-stamp.
     (time-stamp (not (plist-get options :with-timestamps)))
     ;; Check drawer.
@@ -1397,41 +1442,6 @@ OPTIONS is the plist holding export options."
 		 raw-back-end)))
        (not (string= (symbol-name (plist-get options :back-end))
 		     true-back-end))))))
-
-(defun org-export-get-ignore-list (data options)
-  "Return list of elements and objects to ignore during export.
-
-DATA is the parse tree to traverse.  OPTIONS is the plist holding
-export options.
-
-Return elements or objects to ignore as a list."
-  (let (ignore-list
-	(walk-data
-	 (function
-	  (lambda (data options)
-	    ;; Collect ignored elements or objects into IGNORE-LIST.
-	    (mapc
-	     (lambda (el)
-	       (if (org-export--skip-p el options) (push el ignore-list)
-		 (let ((type (org-element-type el)))
-		   (if (and (eq (plist-get info :with-archived-trees) 'headline)
-			    (eq (org-element-type el) 'headline)
-			    (org-element-property :archivedp el))
-		       ;; If headline is archived but tree below has
-		       ;; to be skipped, add it to ignore list.
-		       (mapc (lambda (e) (push e ignore-list))
-			     (org-element-contents el))
-		     ;; Move into recursive objects/elements.
-		     (when (or (eq type 'org-data)
-			       (memq type org-element-greater-elements)
-			       (memq type org-element-recursive-objects)
-			       (eq type 'paragraph))
-		       (funcall walk-data el options))))))
-	     (org-element-contents data))))))
-    ;; Main call.
-    (funcall walk-data data options)
-    ;; Return value.
-    ignore-list))
 
 
 

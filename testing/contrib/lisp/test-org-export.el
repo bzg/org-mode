@@ -134,13 +134,30 @@ as Org syntax."
        (equal (org-export-as 'test nil nil nil '(:exclude-tags ("noexport")))
 	      ""))))
   ;; Test include tags.
-  (org-test-with-temp-text "* Head1\n* Head2 :export:"
+  (org-test-with-temp-text "
+* Head1
+** Sub-Head1.1 :export:
+*** Sub-Head1.1.1
+* Head2"
     (org-test-with-backend "test"
       (should
        (string-match
-	"\\* Head2[ \t]+:export:\n"
-	(org-export-as 'test nil nil nil
-		       '(:select-tags ("export") :with-tags nil))))))
+	"\\* Head1\n\\*\\* Sub-Head1.1[ \t]+:export:\n\\*\\*\\* Sub-Head1.1.1\n"
+	(org-export-as 'test nil nil nil '(:select-tags ("export")))))))
+  ;; Test mixing include tags and exclude tags.
+  (org-test-with-temp-text "
+* Head1 :export:
+** Sub-Head1 :noexport:
+** Sub-Head2
+* Head2 :noexport:
+** Sub-Head1 :export:"
+    (org-test-with-backend "test"
+      (should
+       (string-match
+	"\\* Head1[ \t]+:export:\n\\*\\* Sub-Head2\n"
+	(org-export-as
+	 'test nil nil nil
+	 '(:select-tags ("export") :exclude-tags ("noexport")))))))
   ;; Ignore tasks.
   (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
     (org-test-with-temp-text "* TODO Head1"
