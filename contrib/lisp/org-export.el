@@ -1313,7 +1313,7 @@ OPTIONS is a plist holding export options."
       (mapc
        (lambda (blob)
 	 (when (and (eq (org-element-type blob) 'headline)
-		    (not (org-export-ignored-p blob options)))
+		    (not (member blob (plist-get options :ignore-list))))
 	   (setq min-level
 		 (min (org-element-property :level blob) min-level)))
 	 (when (= min-level 1) (throw 'exit 1)))
