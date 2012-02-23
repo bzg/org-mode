@@ -3173,12 +3173,13 @@ Elements are accumulated into ACC."
 	      nil structure granularity visible-only (reverse element)))
 	 ;; 2. When ITEM is nil, find current element's type and parse
 	 ;;    it accordingly to its category.
-	 (let ((element (org-element-current-element special structure)))
+	 (let* ((element (org-element-current-element special structure))
+		(type (org-element-type element)))
 	   (goto-char (org-element-property :end element))
 	   (cond
 	    ;; Case 1.  ELEMENT is a paragraph.  Parse objects inside,
 	    ;; if GRANULARITY allows it.
-	    ((and (eq (org-element-type element) 'paragraph)
+	    ((and (eq type 'paragraph)
 		  (or (not granularity) (eq granularity 'object)))
 	     (org-element-parse-objects
 	      (org-element-property :contents-begin element)
@@ -3190,10 +3191,10 @@ Elements are accumulated into ACC."
 	    ;; headline, in which case going inside is mandatory, in
 	    ;; order to get sub-level headings.  If VISIBLE-ONLY is
 	    ;; true and element is hidden, do not recurse into it.
-	    ((and (memq (org-element-type element) org-element-greater-elements)
+	    ((and (memq type org-element-greater-elements)
 		  (or (not granularity)
 		      (memq granularity '(element object))
-		      (eq (org-element-type element) 'headline))
+		      (eq type 'headline))
 		  (not (and visible-only
 			    (org-element-property :hiddenp element))))
 	     (org-element-parse-elements
@@ -3202,7 +3203,7 @@ Elements are accumulated into ACC."
 	      ;; At a plain list, switch to item mode.  At an
 	      ;; headline, switch to section mode.  Any other
 	      ;; element turns off special modes.
-	      (case (org-element-type element)
+	      (case type
 		(plain-list 'item)
 		(headline (if (org-element-property :quotedp element)
 			      'quote-section
