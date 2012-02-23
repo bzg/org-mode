@@ -2187,7 +2187,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-html-export-snippet (export-snippet contents info)
   "Transcode a EXPORT-SNIPPET object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-element-property :value export-snippet))
+  (when (eq (org-export-snippet-backend export-snippet) 'e-html)
+    (org-element-property :value export-snippet)))
 
 
 ;;;; Export Block

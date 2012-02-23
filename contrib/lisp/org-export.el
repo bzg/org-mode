@@ -1433,15 +1433,7 @@ OPTIONS is the plist holding export options."
      (or (not (plist-get options :with-drawers))
 	 (and (consp (plist-get options :with-drawers))
 	      (not (member (org-element-property :drawer-name blob)
-			   (plist-get options :with-drawers))))))
-    ;; Check export snippet.
-    (export-snippet
-     (let* ((raw-back-end (org-element-property :back-end blob))
-	    (true-back-end
-	     (or (cdr (assoc raw-back-end org-export-snippet-translation-alist))
-		 raw-back-end)))
-       (not (string= (symbol-name (plist-get options :back-end))
-		     true-back-end))))))
+			   (plist-get options :with-drawers))))))))
 
 
 
@@ -2420,6 +2412,24 @@ file should have."
 ;; As of now, functions operating on footnotes, headlines, links,
 ;; macros, references, src-blocks, tables and tables of contents are
 ;; implemented.
+
+;;;; For Export Snippets
+
+;; Every export snippet is transmitted to the back-end.  Though, the
+;; latter will only retain one type of export-snippet, ignoring
+;; others, based on the former's target back-end.  The function
+;; `org-export-snippet-backend' returns that back-end for a given
+;; export-snippet.
+
+(defun org-export-snippet-backend (export-snippet)
+  "Return EXPORT-SNIPPET targeted back-end as a symbol.
+Translation, with `org-export-snippet-translation-alist', is
+applied."
+  (let ((back-end (org-element-property :back-end export-snippet)))
+    (intern
+     (or (cdr (assoc back-end org-export-snippet-translation-alist))
+	 back-end))))
+
 
 ;;;; For Footnotes
 

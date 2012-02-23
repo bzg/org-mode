@@ -24,9 +24,6 @@
 
 ;;; Tests
 
-(require 'org-test)
-(require 'org-export)
-
 (defmacro org-test-with-backend (backend &rest body)
   "Execute body with an export back-end defined.
 
@@ -237,3 +234,16 @@ text
       (forward-line 3)
       (mark-paragraph)
       (should (equal (org-export-as 'test) "text\n")))))
+
+(ert-deftest test-org-export/export-snippet ()
+  "Test export snippets transcoding."
+  (org-test-with-temp-text "@test{A}@t{B}"
+    (org-test-with-backend "test"
+      (flet ((org-test-export-snippet
+	      (snippet contents info)
+	      (when (eq (org-export-snippet-backend snippet) 'test)
+		(org-element-property :value snippet))))
+	(let ((org-export-snippet-translation-alist nil))
+	  (should (equal (org-export-as 'test) "A\n")))
+	(let ((org-export-snippet-translation-alist '(("t" . "test"))))
+	  (should (equal (org-export-as 'test) "AB\n")))))))

@@ -972,7 +972,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-latex-export-snippet (export-snippet contents info)
   "Transcode a EXPORT-SNIPPET object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-element-property :value export-snippet))
+  (when (eq (org-export-snippet-backend export-snippet) 'e-latex)
+    (org-element-property :value export-snippet)))
 
 
 ;;;; Export Block
