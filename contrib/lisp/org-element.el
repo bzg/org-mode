@@ -322,15 +322,20 @@ Assume point is at beginning of the headline."
     (let* ((components (org-heading-components))
 	   (level (nth 1 components))
 	   (todo (nth 2 components))
-	   (todo-type (and todo
-			   (if (member todo org-done-keywords) 'done 'todo)))
+	   (todo-type
+	    (and todo (if (member todo org-done-keywords) 'done 'todo)))
 	   (tags (nth 5 components))
 	   (raw-value (nth 4 components))
-	   (quotedp (string-match (format "^%s +" org-quote-string) raw-value))
-	   (commentedp (string-match
-			(format "^%s +" org-comment-string) raw-value))
-	   (archivedp (and tags
-			   (string-match (format ":%s:" org-archive-tag) tags)))
+	   (quotedp
+	    (let ((case-fold-search nil))
+	      (string-match (format "^%s +" org-quote-string) raw-value)))
+	   (commentedp
+	    (let ((case-fold-search nil))
+	      (string-match (format "^%s +" org-comment-string) raw-value)))
+	   (archivedp
+	    (and tags
+		 (let ((case-fold-search nil))
+		   (string-match (format ":%s:" org-archive-tag) tags))))
 	   (footnote-section-p (and org-footnote-section
 				    (string= org-footnote-section raw-value)))
 	   (standard-props (let (plist)
