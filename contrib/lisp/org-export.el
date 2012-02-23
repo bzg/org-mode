@@ -3368,25 +3368,25 @@ final interactive export options as CDR."
 \[3] Visible only:  %s       [4] Force publishing: %s
 
 
-----(ASCII/Latin-1/UTF-8 Export)--------------------------
+--- (ASCII/Latin-1/UTF-8 Export) -------------------------
 
 \[a/n/u] to TXT file          [A/N/U] to temporary buffer
 
-----(HTML Export)-----------------------------------------
+--- (HTML Export) ----------------------------------------
 
 \[h] to HTML file             [b] ... and open it
 \[H] to temporary buffer
 
-----(LaTeX Export)----------------------------------------
+--- (LaTeX Export) ---------------------------------------
 
 \[l] to TEX file              [L] to temporary buffer
 \[p] to PDF file              [d] ... and open it
 
-----(ODF Export)------------------------------------------
+--- (ODF Export) -----------------------------------------
 
 \[o] to ODT file              [O] ... and open it
 
-----(Publish)---------------------------------------------
+--- (Publish) --------------------------------------------
 
 \[F] current file             [P] current project
 \[X] a project                [E] every project"
