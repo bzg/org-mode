@@ -2101,7 +2101,7 @@ Return code as a string."
 		;; visible part of buffer.
 		(if noexpand (org-element-parse-buffer nil visible-only)
 		  (org-export-with-current-buffer-copy
-		   (org-export-expand-include-keyword nil)
+		   (org-export-expand-include-keyword)
 		   (let ((org-current-export-file (current-buffer)))
 		     (org-export-blocks-preprocess))
 		   (org-element-parse-buffer nil visible-only)))
@@ -2250,14 +2250,16 @@ Point is at buffer's beginning when BODY is applied."
 	   (progn ,@body))))))
 (def-edebug-spec org-export-with-current-buffer-copy (body))
 
-(defun org-export-expand-include-keyword (included)
+(defun org-export-expand-include-keyword (&optional included dir)
   "Expand every include keyword in buffer.
-INCLUDED is a list of included file names along with their line
-restriction, when appropriate.  It is used to avoid infinite
-recursion."
-  (let ((case-fold-search nil))
+Optional argument INCLUDED is a list of included file names along
+with their line restriction, when appropriate.  It is used to
+avoid infinite recursion.  Optional argument DIR is the current
+working directory.  It is used to properly resolve relative
+paths."
+  (let ((case-fold-search t))
     (goto-char (point-min))
-    (while (re-search-forward "^[ \t]*#\\+include: \\(.*\\)" nil t)
+    (while (re-search-forward "^[ \t]*#\\+INCLUDE: \\(.*\\)" nil t)
       (when (eq (org-element-type (save-match-data (org-element-at-point)))
 		'keyword)
 	(beginning-of-line)
@@ -2265,7 +2267,7 @@ recursion."
 	(let* ((value (match-string 1))
 	       (ind (org-get-indentation))
 	       (file (and (string-match "^\"\\(\\S-+\\)\"" value)
-			  (prog1 (expand-file-name (match-string 1 value))
+			  (prog1 (expand-file-name (match-string 1 value) dir)
 			    (setq value (replace-match "" nil nil value)))))
 	       (lines
 		(and (string-match
@@ -2306,7 +2308,7 @@ recursion."
 		       "\\(^\\)\\([*]\\|[ \t]*#\\+\\)" ","
 		       (org-export-prepare-file-contents file lines)
 		       nil nil 1)))
-		 (format "%s#+begin_example\n%s%s#+end_example\n"
+		 (format "%s#+BEGIN_EXAMPLE\n%s%s#+END_EXAMPLE\n"
 			 ind-str contents ind-str))))
 	     ((stringp env)
 	      (insert
@@ -2318,7 +2320,7 @@ recursion."
 			 "\\(^\\)\\([*]\\|[ \t]*#\\+\\)") ","
 			 (org-export-prepare-file-contents file lines)
 			 nil nil 1)))
-		 (format "%s#+begin_src %s\n%s%s#+end_src\n"
+		 (format "%s#+BEGIN_SRC %s\n%s%s#+END_SRC\n"
 			 ind-str env contents ind-str))))
 	     (t
 	      (insert
@@ -2327,7 +2329,8 @@ recursion."
 		 (insert
 		  (org-export-prepare-file-contents file lines ind minlevel))
 		 (org-export-expand-include-keyword
-		  (cons (list file lines) included))
+		  (cons (list file lines) included)
+		  (file-name-directory file))
 		 (buffer-string))))))))))))
 
 (defun org-export-prepare-file-contents (file &optional lines ind minlevel)

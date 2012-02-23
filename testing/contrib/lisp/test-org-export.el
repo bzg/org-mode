@@ -247,3 +247,52 @@ text
 	  (should (equal (org-export-as 'test) "A\n")))
 	(let ((org-export-snippet-translation-alist '(("t" . "test"))))
 	  (should (equal (org-export-as 'test) "AB\n")))))))
+
+(ert-deftest test-org-export/expand-include ()
+  "Test file inclusion in an Org buffer."
+  ;; Full insertion with recursive inclusion.
+  (org-test-with-temp-text
+      (format "#+INCLUDE: \"%s/examples/include.org\"" org-test-dir)
+    (org-export-expand-include-keyword)
+    (should (equal (buffer-string)
+		   "Small Org file with an include keyword.
+
+#+BEGIN_SRC emacs-lisp :exports results
+(+ 2 1)
+#+END_SRC
+
+Success!
+
+* Heading
+body\n")))
+  ;; Localized insertion.
+  (org-test-with-temp-text
+      (format "#+INCLUDE: \"%s/examples/include.org\" :lines \"1-2\""
+	      org-test-dir)
+    (org-export-expand-include-keyword)
+    (should (equal (buffer-string)
+		   "Small Org file with an include keyword.\n")))
+  ;; Insertion with constraints on headlines level.
+  (org-test-with-temp-text
+      (format
+       "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-\""
+       org-test-dir)
+    (org-export-expand-include-keyword)
+    (should (equal (buffer-string) "* Top heading\n** Heading\nbody\n")))
+  ;; Inclusion within an example block.
+  (org-test-with-temp-text
+      (format "#+INCLUDE: \"%s/examples/include.org\" :lines \"1-2\" example"
+	      org-test-dir)
+    (org-export-expand-include-keyword)
+    (should
+     (equal
+      (buffer-string)
+      "#+BEGIN_EXAMPLE\nSmall Org file with an include keyword.\n#+END_EXAMPLE\n")))
+  ;; Inclusion within a src-block.
+  (org-test-with-temp-text
+      (format
+       "#+INCLUDE: \"%s/examples/include.org\" :lines \"4-5\" src emacs-lisp"
+       org-test-dir)
+    (org-export-expand-include-keyword)
+    (should (equal (buffer-string)
+		   "#+BEGIN_SRC emacs-lisp\n(+ 2 1)\n#+END_SRC\n"))))
