@@ -3538,7 +3538,7 @@ in-between, if any, are siblings of the element at point."
 	    ((let ((end (org-element-property :end element)))
 	       (when (<= end origin)
 		 (if (> (point-max) end) (goto-char end)
-		   (throw 'exit (if keep-trail trail element))))))
+		   (throw 'exit (or trail element))))))
 	    ;; 2. An element containing point is always the element at
 	    ;;    point.
 	    ((not (memq type org-element-greater-elements))
@@ -3547,44 +3547,27 @@ in-between, if any, are siblings of the element at point."
 	    ((eq type 'plain-list)
 	     (setq struct (org-element-property :structure element)
 		   prevs (or prevs (org-list-prevs-alist struct)))
-	     (cond
-	      ;; 3.1. ORIGIN isn't at a list item: try to find the
-	      ;;      smallest item containing it.
-	      ((not (assq origin struct))
-	       (catch 'local
-		 (let (parent)
-		   (mapc
-		    (lambda (item)
-		      (let ((pos (car item)))
-			(cond
-			 ;; Item ends before point: skip it.
-			 ((<= (org-list-get-item-end pos struct) origin))
-			 ;; Item contains point: store is in PARENT.
-			 ((< pos origin) (setq parent pos))
-			 ;; We went too far: return PARENT.
-			 (t
-			  (setq item-flag 'item)
-			  (throw 'local (goto-char parent))))))
-		    struct))
-		 ;; No item contained point, though the plain list
-		 ;; does.  Point is in the blank lines after the list:
-		 ;; return plain list.
-		 (throw 'exit (if keep-trail trail element))))
-	      ;; 3.2. ORIGIN is at a the beginning of the first item
-	      ;;      in a list.  This is a special case.  Return
-	      ;;      plain list.
-	      ((= (org-list-get-list-begin origin struct prevs) origin)
-	       (goto-char origin)
-	       (let ((lst (org-element-plain-list-parser struct)))
-		 (cond ((not keep-trail) (throw 'exit lst))
-		       ((/= (org-list-get-top-point struct) origin)
-			(throw 'exit (push lst trail)))
-		       (t (throw 'exit trail)))))
-	      ;; 3.3. ORIGIN is at a list item.  Parse it and return
-	      ;;      it.
-	      (t (goto-char origin)
-		 (let ((item (org-element-item-parser struct)))
-		   (throw 'exit (if keep-trail (push item trail) item))))))
+	     (let ((beg (org-element-property :contents-begin element)))
+	       (if (= beg origin) (throw 'exit (or trail element))
+		 ;; Find the item at this level containing ORIGIN.
+		 (let ((items (org-list-get-all-items beg struct prevs)))
+		   (let (parent)
+		     (catch 'local
+		       (mapc
+			(lambda (pos)
+			  (cond
+			   ;; Item ends before point: skip it.
+			   ((<= (org-list-get-item-end pos struct) origin))
+			   ;; Item contains point: store is in PARENT.
+			   ((<= pos origin) (setq parent pos))
+			   ;; We went too far: return PARENT.
+			   (t (throw 'local nil)))) items))
+		     ;; No parent: no item contained point, though
+		     ;; the plain list does.  Point is in the blank
+		     ;; lines after the list: return plain list.
+		     (if (not parent) (throw 'exit (or trail element))
+		       (setq item-flag 'item)
+		       (goto-char parent)))))))
 	    ;; 4. At any other greater element type, if point is
 	    ;;    within contents, move into it.  Otherwise, return
 	    ;;    that element.
@@ -3593,7 +3576,7 @@ in-between, if any, are siblings of the element at point."
 	     (let ((beg (org-element-property :contents-begin element))
 		   (end (org-element-property :contents-end element)))
 	       (if (or (> beg origin) (< end origin))
-		   (throw 'exit (if keep-trail trail element))
+		   (throw 'exit (or trail element))
 		 ;; Reset trail, since we found a parent.
 		 (when keep-trail (setq trail (list element)))
 		 (narrow-to-region beg end)
@@ -3672,23 +3655,18 @@ Move to the previous element at the same level, when possible."
 	    (let ((dest (save-excursion (org-backward-same-level 1) (point))))
 	      (if (= (point-min) dest) (error "Cannot move further up")
 		(goto-char dest))))
-	   ;; At an item: unless point is at top position, move to the
-	   ;; previous item, or parent item.
+	   ;; At an item: try to move to the previous item, if any.
 	   ((and (eq type 'item)
-		 (let ((struct (org-element-property :structure element)))
-		   (when (/= (org-list-get-top-point struct) beg)
-		     (let ((prevs (org-list-prevs-alist struct)))
-		       (goto-char
-			(or (org-list-get-prev-item beg struct prevs)
-			    (org-list-get-parent
-			     beg struct (org-list-parents-alist struct)))))))))
+		 (let* ((struct (org-element-property :structure element))
+			(prev (org-list-get-prev-item
+			       beg struct (org-list-prevs-alist struct))))
+		   (when prev (goto-char prev)))))
 	   ;; In any other case, find the previous element in the
 	   ;; trail and move to its beginning.  If no previous element
 	   ;; can be found, move to headline.
-	   (t
-	    (let ((prev (nth 1 trail)))
-	      (if prev (goto-char (org-element-property :begin prev))
-		(org-back-to-heading))))))))))
+	   (t (let ((prev (nth 1 trail)))
+		(if prev (goto-char (org-element-property :begin prev))
+		  (org-back-to-heading))))))))))
 
 (defun org-element-drag-backward ()
   "Drag backward element at point."
@@ -3754,39 +3732,35 @@ Move to the next element at the same level, when possible."
   (if (eobp) (error "Cannot move further down")
     (let* ((trail (org-element-at-point 'keep-trail))
 	   (element (car trail))
+	   (type (org-element-type element))
 	   (end (org-element-property :end element)))
-      (case (org-element-type element)
-	;; At an headline, move to next headline at the same level.
-	(headline (goto-char end))
-	;; At an item, if the first of the sub-list and point is at
-	;; beginning of list, move to the end of that sub-list.
-	;; Otherwise, move to the next item.
-	(item
-	 (let* ((struct (org-element-property :structure element))
-		(prevs (org-list-prevs-alist struct))
-		(beg (org-element-property :begin element))
-		(next-item (org-list-get-next-item beg struct prevs)))
-	   (if next-item (goto-char next-item)
-	     (goto-char (org-list-get-list-end beg struct prevs))
-	     (org-skip-whitespace)
-	     (beginning-of-line))))
-	;; In any other case, move to element's end, unless this
-	;; position is also the end of its parent's contents, in which
-	;; case, directly jump to parent's end.
-	(otherwise
-	 (let ((parent
-		;; Determine if TRAIL contains the real parent of ELEMENT.
-		(and (> (length trail) 1)
-		     (let* ((parent-candidate (car (last trail))))
-		       (and (memq (org-element-type parent-candidate)
-				  org-element-greater-elements)
-			    (>= (org-element-property
-				 :contents-end parent-candidate) end)
-			    parent-candidate)))))
-	   (cond ((not parent) (goto-char end))
-		 ((= (org-element-property :contents-end parent) end)
-		  (goto-char (org-element-property :end parent)))
-		 (t (goto-char end)))))))))
+      (cond
+       ;; At an headline, move to next headline at the same level.
+       ((eq type 'headline) (goto-char end))
+       ;; At an item.  Move to the next item, if possible.
+       ((and (eq type 'item)
+	     (let* ((struct (org-element-property :structure element))
+		    (prevs (org-list-prevs-alist struct))
+		    (beg (org-element-property :begin element))
+		    (next-item (org-list-get-next-item beg struct prevs)))
+	       (when next-item (goto-char next-item)))))
+       ;; In any other case, move to element's end, unless this
+       ;; position is also the end of its parent's contents, in which
+       ;; case, directly jump to parent's end.
+       (t
+	(let ((parent
+	       ;; Determine if TRAIL contains the real parent of ELEMENT.
+	       (and (> (length trail) 1)
+		    (let* ((parent-candidate (car (last trail))))
+		      (and (memq (org-element-type parent-candidate)
+				 org-element-greater-elements)
+			   (>= (org-element-property
+				:contents-end parent-candidate) end)
+			   parent-candidate)))))
+	  (cond ((not parent) (goto-char end))
+		((= (org-element-property :contents-end parent) end)
+		 (goto-char (org-element-property :end parent)))
+		(t (goto-char end)))))))))
 
 (defun org-element-mark-element ()
   "Put point at beginning of this element, mark at end.

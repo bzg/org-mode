@@ -240,11 +240,15 @@ Outside."
 
 
 Outside."
-    ;; 5.1. At beginning of sub-list: expected to move at parent item.
+    ;; 5.1. At beginning of sub-list: expected to move to the
+    ;;      paragraph before it.
     (goto-line 4)
     (org-element-backward)
-    (should (looking-at "- item1"))
+    (should (looking-at "item1"))
     ;; 5.2. At an item in a list: expected to move at previous item.
+    (goto-line 8)
+    (org-element-backward)
+    (should (looking-at "  - sub2"))
     (goto-line 12)
     (org-element-backward)
     (should (looking-at "- item1"))
