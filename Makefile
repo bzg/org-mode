@@ -258,18 +258,21 @@ org-odt-data-dir:
 install-lisp: BATCH_EXTRA = -eval "(setq org-odt-data-dir (expand-file-name \"$(datadir)\"))"
 
 install-lisp: $(LISPFILES) $(ELCFILES)
-	if [ ! -d $(lispdir) ]; then $(MKDIR) $(lispdir); else true; fi ;
-	$(CP) $(LISPFILES)  $(lispdir)
-	$(CP) $(ELCFILES)   $(lispdir)
+	if [ ! -d $(DESTDIR)$(lispdir) ]; then \
+		$(MKDIR) $(DESTDIR)$(lispdir); else true; fi ;
+	$(CP) $(LISPFILES)  $(DESTDIR)$(lispdir)
+	$(CP) $(ELCFILES)   $(DESTDIR)$(lispdir)
 
 install-info: $(INFOFILES)
-	if [ ! -d $(infodir) ]; then $(MKDIR) $(infodir); else true; fi ;
-	$(CP) $(INFOFILES) $(infodir)
-	$(INSTALL_INFO) --infodir=$(infodir) $(INFOFILES)
+	if [ ! -d $(DESTDIR)$(infodir) ]; then \
+		$(MKDIR) $(DESTDIR)$(infodir); else true; fi ;
+	$(CP) $(INFOFILES) $(DESTDIR)$(infodir)
+	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) $(INFOFILES)
 
 install-data: $(DATAFILES)
-	if [ ! -d $(datadir) ]; then $(MKDIR) $(datadir); else true; fi ;
-	$(CP) $(DATAFILES) $(datadir)
+	if [ ! -d $(DESTDIR)$(datadir) ]; then \
+		$(MKDIR) $(DESTDIR)$(datadir); else true; fi ;
+	$(CP) $(DATAFILES) $(DESTDIR)$(datadir)
 
 autoloads: lisp/org-install.el
 
