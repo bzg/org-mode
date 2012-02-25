@@ -7304,11 +7304,11 @@ use the dedicated frame)."
   (if (and current-prefix-arg (listp current-prefix-arg))
       (org-agenda-do-tree-to-indirect-buffer)
     (let ((agenda-window (selected-window))
-          (indirect-window (get-buffer-window org-last-indirect-buffer)))
+          (indirect-window (and org-last-indirect-buffer (get-buffer-window org-last-indirect-buffer))))
       (save-window-excursion (org-agenda-do-tree-to-indirect-buffer))
       (unwind-protect
           (progn
-            (unless indirect-window
+            (unless (and indirect-window (window-live-p indirect-window))
               (setq indirect-window (split-window agenda-window)))
             (select-window indirect-window)
             (switch-to-buffer org-last-indirect-buffer :norecord)
