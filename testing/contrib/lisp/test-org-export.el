@@ -315,3 +315,30 @@ body\n")))
       (let ((org-export-filter-parse-tree-functions '(skip-note-head)))
 	(org-test-with-temp-text "* Head1\n* Head2 (note)\n"
 	  (should (equal (org-export-as 'test) "* Head1\n")))))))
+
+(ert-deftest test-org-export/footnotes ()
+  "Test footnotes specifications."
+  ;; 1. Test nested footnotes.
+  (let ((org-footnote-section nil))
+    (org-test-with-temp-text "
+Some text[fn:1] and some other text[fn:new:and an inline
+footnote with another one[fn:label:reference to[fn:1] and a new
+one[fn:label2:label2]].
+
+[fn:1] with a footnote inside[fn:inside] and a new footnote [fn:label3:label3].
+
+[fn:inside] like that."
+(let* ((tree (org-element-parse-buffer))
+       (info (org-combine-plists
+	      (org-export-initial-options) '(:with-footnotes t))))
+  (setq info (org-combine-plists
+	      info (org-export-collect-tree-properties tree info 'test)))
+  (let* ((fn-numbers
+	  (org-element-map
+	   tree 'footnote-reference
+	   (lambda (ref)
+	     (or (org-export-get-footnote-number ref info) 'unknown)) info)))
+    ;; 1.1. Every nested footnote has a number.
+    (should (every 'numberp fn-numbers))
+    ;; 1.2. Can tell which are new and which aren't.
+    (should (= (apply 'max fn-numbers) 5)))))))

@@ -2563,9 +2563,10 @@ entities, export snippets, latex-fragments, subscript and
 superscript.")
 
 (defconst org-element-string-restrictions
-  '((footnote-reference entity export-snippet inline-babel-call inline-src-block
-			latex-fragment line-break link macro radio-target
-			sub/superscript target text-markup time-stamp)
+  '((footnote-reference entity export-snippet footnote-reference
+			inline-babel-call inline-src-block latex-fragment
+			line-break link macro radio-target sub/superscript
+			target text-markup time-stamp)
     (headline entity inline-babel-call inline-src-block latex-fragment link
 	      macro radio-target statistics-cookie sub/superscript text-markup
 	      time-stamp)

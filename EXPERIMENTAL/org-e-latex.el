@@ -1013,26 +1013,46 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
    (let ((prev (org-export-get-previous-element footnote-reference info)))
      (when (eq (org-element-type prev) 'footnote-reference)
        org-e-latex-footnote-separator))
-   ;; Use \footnotemark if the footnote has already been defined.
-   ;; Otherwise, define it with \footnote command.
    (cond
+    ;; Use \footnotemark if the footnote has already been defined.
     ((not (org-export-footnote-first-reference-p footnote-reference info))
-     (format "\\footnotemark[%s]"
+     (format "\\footnotemark[%s]{}"
 	     (org-export-get-footnote-number footnote-reference info)))
-    ;; Inline definitions are secondary strings.
-    ((eq (org-element-property :type footnote-reference) 'inline)
-     (format "\\footnote{%s}"
-	     (org-trim
-	      (org-export-secondary-string
-	       (org-export-get-footnote-definition footnote-reference info)
-	       'e-latex info))))
-    ;; Non-inline footnotes definitions are full Org data.
+    ;; Use also \footnotemark if reference is within another footnote
+    ;; reference or footnote definition.
+    ((loop for parent in (org-export-get-genealogy footnote-reference info)
+	   thereis (memq (org-element-type parent)
+			 '(footnote-reference footnote-definition)))
+     (format "\\footnotemark[%s]{}"
+	     (org-export-get-footnote-number footnote-reference info)))
+    ;; Otherwise, define it with \footnote command.
     (t
-     (format "\\footnote{%s}"
-	     (org-trim
-	      (org-export-data
-	       (org-export-get-footnote-definition footnote-reference info)
-	       'e-latex info)))))))
+     (let ((def (org-export-get-footnote-definition footnote-reference info)))
+       (unless (eq (org-element-type def) 'org-data)
+	 (setq def (cons 'org-data (cons nil def))))
+       (concat
+	(format "\\footnote{%s}" (org-trim (org-export-data def 'e-latex info)))
+	;; Retrieve all footnote references within the footnote to add
+	;; their definition after it, since LaTeX doesn't support them
+	;; inside.
+	(let ((all-refs
+	       (org-element-map
+		def 'footnote-reference
+		(lambda (ref)
+		  (when (org-export-footnote-first-reference-p ref info) ref))
+		info)))
+	  (mapconcat
+	   (lambda (ref)
+	     (format
+	      "\\footnotetext[%s]{%s}"
+	      (org-export-get-footnote-number ref info)
+	      (org-trim
+	       (funcall
+		(if (org-element-property :inline-definition ref)
+		    'org-export-secondary-string
+		  'org-export-data)
+		(org-export-get-footnote-definition ref info) 'e-latex info))))
+	   all-refs ""))))))))
 
 
 ;;;; Headline
