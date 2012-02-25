@@ -2897,9 +2897,7 @@ cdr a plist of keywords and values."
 ;; The (almost) almighty `org-element-map' allows to apply a function
 ;; on elements or objects matching some type, and accumulate the
 ;; resulting values.  In an export situation, it also skips unneeded
-;; parts of the parse tree, transparently walks into included files,
-;; and maintain a list of local properties (i.e. those inherited from
-;; parent headlines) for function's consumption.
+;; parts of the parse tree.
 
 (defun org-element-parse-buffer (&optional granularity visible-only)
   "Recursively parse the buffer and return structure.
@@ -2950,9 +2948,8 @@ the current buffer."
 DATA is the parsed tree, as returned by, i.e,
 `org-element-parse-buffer'.  TYPES is a symbol or list of symbols
 of elements or objects types.  FUN is the function called on the
-matching element or object.  It must accept two arguments: the
-element or object itself and a plist holding contextual
-information.
+matching element or object.  It must accept one arguments: the
+element or object itself.
 
 When optional argument INFO is non-nil, it should be a plist
 holding export options.  In that case, parts of the parse tree
@@ -3004,16 +3001,15 @@ Nil values returned from FUN are ignored in the result."
 		  nil
 		  ,@(org-element-property
 		     (cdr (assq --type org-element-secondary-value-alist))
-		     --blob))
-		info))
+		     --blob))))
 	     (when (memq --type types)
-	       (let ((result (funcall fun --blob info)))
+	       (let ((result (funcall fun --blob)))
 		 (cond ((not result))
 		       (first-match (throw 'first-match result))
 		       (t (push result --acc))))))))
 	 (--walk-tree
 	  (function
-	   (lambda (--data info)
+	   (lambda (--data)
 	     ;; Recursively walk DATA.  INFO, if non-nil, is
 	     ;; a plist holding contextual information.
 	     (mapc
@@ -3042,10 +3038,10 @@ Nil values returned from FUN are ignored in the result."
 		   ;; Recursion is possible and allowed: Maybe apply
 		   ;; FUN to --BLOB, then move into it.
 		   (t (funcall --check-blob --type types fun --blob info)
-		      (funcall --walk-tree --blob info)))))
+		      (funcall --walk-tree --blob)))))
 	      (org-element-contents --data))))))
     (catch 'first-match
-      (funcall --walk-tree data info)
+      (funcall --walk-tree data)
       ;; Return value in a proper order.
       (reverse --acc))))
 

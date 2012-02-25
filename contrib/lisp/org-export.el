@@ -1286,7 +1286,7 @@ Following tree properties are set:
    `(:parse-tree
      ,data
      :target-list
-     ,(org-element-map data 'target (lambda (target local) target) info)
+     ,(org-element-map data 'target 'identity info)
      :headline-numbering ,(org-export-collect-headline-numbering data info)
      :back-end ,backend)
    info))
@@ -1321,9 +1321,9 @@ associated numbering \(in the shape of a list of numbers\)."
     (org-element-map
      data
      'headline
-     (lambda (headline info)
+     (lambda (headline)
        (let ((relative-level
-	      (1- (org-export-get-relative-level headline info))))
+	      (1- (org-export-get-relative-level headline options))))
 	 (cons
 	  headline
 	  (loop for n across numbering
@@ -1391,7 +1391,7 @@ INFO is a plist holding export options."
 		     (setq selected-trees
 			   (append
 			    (cons data genealogy)
-			    (org-element-map data 'headline (lambda (h p) h))
+			    (org-element-map data 'headline 'identity)
 			    selected-trees))
 		   ;; Else, continue searching in tree, recursively.
 		   (funcall walk-data data (cons data genealogy))))))))))
@@ -2458,11 +2458,11 @@ ignored."
     ;; Collect seen references in REFS.
     (org-element-map
      data 'footnote-reference
-     (lambda (footnote local)
-       (when (org-export-footnote-first-reference-p footnote local)
-	 (list (org-export-get-footnote-number footnote local)
+     (lambda (footnote)
+       (when (org-export-footnote-first-reference-p footnote info)
+	 (list (org-export-get-footnote-number footnote info)
 	       (org-element-property :label footnote)
-	       (org-export-get-footnote-definition footnote local))))
+	       (org-export-get-footnote-definition footnote info))))
      info)))
 
 (defun org-export-footnote-first-reference-p (footnote-reference info)
@@ -2476,7 +2476,7 @@ INFO is the plist used as a communication channel."
 	 footnote-reference
 	 (org-element-map
 	  (plist-get info :parse-tree) 'footnote-reference
-	  (lambda (footnote local)
+	  (lambda (footnote)
 	    (when (string= (org-element-property :label footnote) label)
 	      footnote))
 	  info 'first-match)))))
@@ -2496,7 +2496,7 @@ INFO is the plist used as a communication channel."
   (let ((label (org-element-property :label footnote)) seen-refs)
     (org-element-map
      (plist-get info :parse-tree) 'footnote-reference
-     (lambda (fn local)
+     (lambda (fn)
        (let ((fn-lbl (org-element-property :label fn)))
 	 (cond
 	  ((and (not fn-lbl) (equal fn footnote)) (1+ (length seen-refs)))
@@ -2674,7 +2674,7 @@ Assume LINK type is \"fuzzy\"."
 		(lambda (name data)
 		  (org-element-map
 		   data 'headline
-		   (lambda (headline local)
+		   (lambda (headline)
 		     (when (string=
 			    (org-element-property :raw-value headline)
 			    name)
@@ -2702,7 +2702,7 @@ is either \"id\" or \"custom-id\"."
   (let ((id (org-element-property :path link)))
     (org-element-map
      (plist-get info :parse-tree) 'headline
-     (lambda (headline local)
+     (lambda (headline)
        (when (or (string= (org-element-property :id headline) id)
                  (string= (org-element-property :custom-id headline) id))
          headline))
@@ -2718,7 +2718,7 @@ element whose `:name' property matches LINK's `:path', or nil."
   (let ((name (org-element-property :path link)))
     (org-element-map
      (plist-get info :parse-tree) org-element-all-elements
-     (lambda (el local)
+     (lambda (el)
        (when (string= (org-element-property :name el) name) el))
      info 'first-match)))
 
@@ -2731,7 +2731,7 @@ Return associated line number in source code, or REF itself,
 depending on src-block or example element's switches."
   (org-element-map
    (plist-get info :parse-tree) '(src-block example)
-   (lambda (el local)
+   (lambda (el)
      (let ((switches (or (org-element-property :switches el) "")))
        (with-temp-buffer
          (insert (org-trim (org-element-property :value el)))
@@ -2752,7 +2752,7 @@ depending on src-block or example element's switches."
               ((not (string-match "-[kr]\\>" switches)) ref)
               ((string-match "-n\\>" switches) (line-number-at-pos))
 	      ((string-match "\\+n\\>" switches)
-	       (+ (org-export-get-loc el local) (line-number-at-pos)))
+	       (+ (org-export-get-loc el info) (line-number-at-pos)))
               (t ref)))))))
    info 'first-match))
 
@@ -2827,7 +2827,7 @@ like inline images, which are a subset of links \(in that case,
     ;; Increment counter until ELEMENT is found again.
     (org-element-map
      data (or types (org-element-type element))
-     (lambda (el local)
+     (lambda (el)
        (cond
         ((equal element el) (1+ counter))
 	((not predicate) (incf counter) nil)
@@ -2854,7 +2854,7 @@ ELEMENT is excluded from count."
     (org-element-map
      (plist-get info :parse-tree)
      `(src-block example-block ,(org-element-type element))
-     (lambda (el local)
+     (lambda (el)
        (cond
         ;; ELEMENT is reached: Quit the loop.
         ((equal el element) t)
@@ -3095,9 +3095,9 @@ Return a list of all exportable headlines as parsed elements."
   (org-element-map
    (plist-get info :parse-tree)
    'headline
-   (lambda (headline local)
+   (lambda (headline)
      ;; Strip contents from HEADLINE.
-     (let ((relative-level (org-export-get-relative-level headline local)))
+     (let ((relative-level (org-export-get-relative-level headline info)))
        (unless (and n (> relative-level n)) headline)))
    info))
 
@@ -3117,7 +3117,7 @@ value when that element should be collected.
 Return a list of all elements found, in order of appearance."
   (org-element-map
    (plist-get info :parse-tree) type
-   (lambda (element local)
+   (lambda (element)
      (and (or (org-element-property :caption element)
 	      (org-element-property :name element))
 	  (or (not predicate) (funcall predicate element))

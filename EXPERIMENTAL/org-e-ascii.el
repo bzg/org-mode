@@ -809,7 +809,7 @@ the following section and in any inlinetask's title there."
      (funcall harvest-links-in-title headline)
      ;; Get all links in SECTION.
      (org-element-map
-      section 'link (lambda (link local) (funcall unique-link-p link)) info))))
+      section 'link (lambda (link) (funcall unique-link-p link)) info))))
 
 (defun org-e-ascii--describe-links (links width info)
   "Return a string describing a list of links.

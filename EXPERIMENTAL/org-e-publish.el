@@ -975,11 +975,11 @@ keyword."
    (delete-dups
     (org-element-map
      tree 'keyword
-     (lambda (k local)
+     (lambda (k)
        (when (string= (downcase (org-element-property :key k))
 		      "index")
 	 (let ((index (org-element-property :value k))
-	       (parent (org-export-get-parent-headline k local)))
+	       (parent (org-export-get-parent-headline k info)))
 	   (list index (plist-get info :input-file) parent))))
      info)))
   ;; Return parse-tree to avoid altering output.
