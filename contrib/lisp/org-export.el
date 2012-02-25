@@ -1271,10 +1271,13 @@ Following tree properties are set:
 
 `:target-list'     List of all targets in the parse tree."
   ;; First, get the list of elements and objects to ignore, and put it
-  ;; into `:ignore-list'.
+  ;; into `:ignore-list'.  Do not overwrite any user ignore that might
+  ;; have been done during parse tree filtering.
   (setq info
 	(plist-put info
-		   :ignore-list (org-export-populate-ignore-list data info)))
+		   :ignore-list
+		   (append (org-export-populate-ignore-list data info)
+			   (plist-get info :ignore-list))))
   ;; Then compute `:headline-offset' in order to be able to use
   ;; `org-export-get-relative-level'.
   (setq info

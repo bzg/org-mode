@@ -296,3 +296,22 @@ body\n")))
     (org-export-expand-include-keyword)
     (should (equal (buffer-string)
 		   "#+BEGIN_SRC emacs-lisp\n(+ 2 1)\n#+END_SRC\n"))))
+
+(ert-deftest test-org-export/user-ignore-list ()
+  "Test if `:ignore-list' accepts user input."
+  (org-test-with-backend "test"
+    (flet ((skip-note-head
+	    (data backend info)
+	    ;; Ignore headlines with the word "note" in their title.
+	    (org-element-map
+	     data 'headline
+	     (lambda (headline)
+	       (when (string-match "\\<note\\>"
+				   (org-element-property :raw-value headline))
+		 (org-export-ignore-element headline info)))
+	     info)
+	    data))
+      ;; Install function in parse tree filters.
+      (let ((org-export-filter-parse-tree-functions '(skip-note-head)))
+	(org-test-with-temp-text "* Head1\n* Head2 (note)\n"
+	  (should (equal (org-export-as 'test) "* Head1\n")))))))
