@@ -1545,9 +1545,7 @@ Return transcoded string."
 			(t (funcall transcoder blob contents info)))))
 	 ;; 4. Return results.
 	 (cond
-	  ;; Discard nil results.  Also ignore BLOB from further
-	  ;; traversals in parse tree.
-	  ((not results) (org-export-ignore-element blob info) nil)
+	  ((not results) nil)
 	  ;; No filter for a full document.
 	  ((eq type 'org-data) results)
 	  ;; Otherwise, update INFO, append the same white space
@@ -1563,10 +1561,6 @@ Return transcoded string."
 				 (make-string post-blank ?\n))
 		       (concat results (make-string post-blank ? ))))
 		   backend info)))
-	     ;; If BLOB was transcoded into an empty string, ignore it
-	     ;; from subsequent traversals.
-	     (unless (org-string-nw-p results)
-	       (org-export-ignore-element blob info))
 	     ;; Eventually return string.
 	     results)))))))
    (org-element-contents data) ""))
