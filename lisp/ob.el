@@ -1457,13 +1457,35 @@ If the point is not on a source block then return nil."
 (defun org-babel-goto-named-src-block (name)
   "Go to a named source-code block."
   (interactive
-   (let ((completion-ignore-case t))
-     (list (org-icompleting-read "source-block name: "
-				 (org-babel-src-block-names) nil t))))
+   (let ((completion-ignore-case t)
+	 (under-point (thing-at-point 'line)))
+     (list (org-icompleting-read
+	    "source-block name: " (org-babel-src-block-names) nil t
+	    (cond
+	     ;; noweb
+	     ((string-match (org-babel-noweb-wrap) under-point)
+	      (let ((block-name (match-string 1 under-point)))
+		(string-match "[^(]*" block-name)
+		(match-string 0 block-name)))
+	     ;; #+call:
+	     ((string-match org-babel-lob-one-liner-regexp under-point)
+	      (let ((source-info (car (org-babel-lob-get-info))))
+		(if (string-match "^\\([^\\[]+?\\)\\(\\[.*\\]\\)?(" source-info)
+		    (let ((source-name (match-string 1 source-info)))
+		      source-name))))
+	     ;; #+results:
+	     ((string-match (concat "#\\+" org-babel-results-keyword
+				    "\\:\s+\\([^\\(]*\\)") under-point)
+	      (match-string 1 under-point))
+	     ;; symbol-at-point
+	     ((and (thing-at-point 'symbol))
+	      (org-babel-find-named-block (thing-at-point 'symbol))
+	      (thing-at-point 'symbol))
+	     (""))))))
   (let ((point (org-babel-find-named-block name)))
     (if point
         ;; taken from `org-open-at-point'
-        (progn (goto-char point) (org-show-context))
+        (progn (org-mark-ring-push) (goto-char point) (org-show-context))
       (message "source-code block '%s' not found in this buffer" name))))
 
 (defun org-babel-find-named-block (name)
