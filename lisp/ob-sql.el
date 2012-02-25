@@ -70,6 +70,10 @@ This function is called by `org-babel-execute-src-block'."
                        (org-babel-temp-file "sql-out-")))
 	 (header-delim "")
          (command (case (intern engine)
+                    ('monetdb (format "mclient -f tab %s < %s > %s"
+                                      (or cmdline "")
+                                      (org-babel-process-file-name in-file)
+                                      (org-babel-process-file-name out-file)))
                     ('msosql (format "osql %s -s \"\t\" -i %s -o %s"
                                      (or cmdline "")
                                      (org-babel-process-file-name in-file)
