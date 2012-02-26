@@ -3028,7 +3028,8 @@ Nil values returned from FUN are ignored in the result."
 		    (funcall --check-blob --type types fun --blob))
 		   ;; Limiting recursion to elements, and --BLOB only
 		   ;; contains objects.
-		   ((and (eq --category 'elements) (eq --type 'paragraph)))
+		   ((and (eq --category 'elements) (eq --type 'paragraph))
+		    (funcall --check-blob --type types fun --blob))
 		   ;; No limitation on recursion, but --BLOB hasn't
 		   ;; got a recursive type.
 		   ((and (eq --category 'objects)
