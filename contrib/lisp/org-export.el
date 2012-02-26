@@ -2457,16 +2457,28 @@ appear as Org data \(transcoded with `org-export-data'\) or as
 a secondary string for inlined footnotes \(transcoded with
 `org-export-secondary-string'\).  Unreferenced definitions are
 ignored."
-  (let (refs)
-    ;; Collect seen references in REFS.
-    (org-element-map
-     data 'footnote-reference
-     (lambda (footnote)
-       (when (org-export-footnote-first-reference-p footnote info)
-	 (list (org-export-get-footnote-number footnote info)
-	       (org-element-property :label footnote)
-	       (org-export-get-footnote-definition footnote info))))
-     info)))
+  (let (num-alist
+	(collect-fn
+	 (function
+	  (lambda (data)
+	    ;; Collect footnote number, label and definition in DATA.
+	    (org-element-map
+	     data 'footnote-reference
+	     (lambda (fn)
+	       (when (org-export-footnote-first-reference-p fn info)
+		 (let ((def (org-export-get-footnote-definition fn info)))
+		   (push
+		    (list (org-export-get-footnote-number fn info)
+			  (org-element-property :label fn)
+			  def)
+		    num-alist)
+		   ;; Also search in definition for nested footnotes.
+		  (when (eq (org-element-property :type fn) 'standard)
+		    (funcall collect-fn def)))))
+	     info)
+	    ;; Return final value.
+	    (reverse num-alist)))))
+    (funcall collect-fn (plist-get info :parse-tree))))
 
 (defun org-export-footnote-first-reference-p (footnote-reference info)
   "Non-nil when a footnote reference is the first one for its label.
@@ -2543,9 +2555,8 @@ INFO is the plist used as a communication channel."
 		  ;; Once again, return nil to stay in the loop.
 		  ((not (member fn-lbl seen-refs))
 		   (push fn-lbl seen-refs)
-		   (when (eq (org-element-type fn) 'standard)
-		     (funcall search-ref
-			      (org-export-get-footnote-definition fn info)))
+		   (funcall search-ref
+			    (org-export-get-footnote-definition fn info))
 		   nil))))
 	     info 'first-match)))))
     (catch 'exit (funcall search-ref (plist-get info :parse-tree)))))

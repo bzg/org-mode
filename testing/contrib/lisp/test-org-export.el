@@ -32,15 +32,15 @@ body to execute.  The defined back-end simply returns parsed data
 as Org syntax."
   (declare (debug (form body)) (indent 1))
   `(flet ,(let (transcoders)
-           (dolist (type (append org-element-all-elements
-                                 org-element-all-objects)
-                         transcoders)
-             (push `(,(intern (format "org-%s-%s" backend type))
-                     (obj contents info)
-                     (,(intern (format "org-element-%s-interpreter" type))
-                      obj contents))
-                   transcoders)))
-        ,@body))
+	    (dolist (type (append org-element-all-elements
+				  org-element-all-objects)
+			  transcoders)
+	      (push `(,(intern (format "org-%s-%s" backend type))
+		      (obj contents info)
+		      (,(intern (format "org-element-%s-interpreter" type))
+		       obj contents))
+		    transcoders)))
+     ,@body))
 
 (ert-deftest test-org-export/parse-option-keyword ()
   "Test reading all standard #+OPTIONS: items."
@@ -320,49 +320,52 @@ body\n")))
   "Test footnotes specifications."
   (let ((org-footnote-section nil))
     ;; 1. Read every type of footnote.
-    (org-test-with-temp-text "
-Text[fn:1] [1] [fn:label:C] [fn::D]
-
-[fn:1] A
-
-[1] B"
-(let* ((tree (org-element-parse-buffer))
-       (info (org-combine-plists
-	      (org-export-initial-options) '(:with-footnotes t))))
-  (setq info (org-combine-plists
-	      info (org-export-collect-tree-properties tree info 'test)))
-  (should
-   (equal
-    '((1 . "A") (2 . "B") (3 . "C") (4 . "D"))
-    (org-element-map
-     tree 'footnote-reference
-     (lambda (ref)
-       (cons (org-export-get-footnote-number ref info)
-	     (if (eq (org-element-property :type ref) 'inline)
-		 (car (org-export-get-footnote-definition ref info))
-	       (car (org-element-contents
-		     (car (org-element-contents
-			   (org-export-get-footnote-definition ref info))))))))
-     info)))))
-    ;; 2. Test nested footnotes.
-    (org-test-with-temp-text "
-Text[fn:1:A[fn:2]] [fn:3].
-
-[fn:2] B [fn:3] [fn::D].
-
-[fn:3] C."
-(let* ((tree (org-element-parse-buffer))
-       (info (org-combine-plists
-	      (org-export-initial-options) '(:with-footnotes t))))
-  (setq info (org-combine-plists
-	      info (org-export-collect-tree-properties tree info 'test)))
-  (should
-   (equal
-    '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
-    (org-element-map
-     tree 'footnote-reference
-     (lambda (ref)
-       (when (org-export-footnote-first-reference-p ref info)
-	 (cons (org-export-get-footnote-number ref info)
-	       (org-element-property :label ref))))
-     info)))))))
+    (org-test-with-temp-text
+	"Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
+      (let* ((tree (org-element-parse-buffer))
+	     (info (org-combine-plists
+		    (org-export-initial-options) '(:with-footnotes t))))
+	(setq info (org-combine-plists
+		    info (org-export-collect-tree-properties tree info 'test)))
+	(should
+	 (equal
+	  '((1 . "A") (2 . "B") (3 . "C") (4 . "D"))
+	  (org-element-map
+	   tree 'footnote-reference
+	   (lambda (ref)
+	     (let ((def (org-export-get-footnote-definition ref info)))
+	       (cons (org-export-get-footnote-number ref info)
+		     (if (eq (org-element-property :type ref) 'inline) (car def)
+		       (car (org-element-contents
+			     (car (org-element-contents def))))))))
+	   info)))))
+    ;; 2. Test nested footnotes order.
+    (org-test-with-temp-text
+	"Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
+      (let* ((tree (org-element-parse-buffer))
+	     (info (org-combine-plists
+		    (org-export-initial-options) '(:with-footnotes t))))
+	(setq info (org-combine-plists
+		    info (org-export-collect-tree-properties tree info 'test)))
+	(should
+	 (equal
+	  '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
+	  (org-element-map
+	   tree 'footnote-reference
+	   (lambda (ref)
+	     (when (org-export-footnote-first-reference-p ref info)
+	       (cons (org-export-get-footnote-number ref info)
+		     (org-element-property :label ref))))
+	   info)))))
+    ;; 3. Test nested footnote in invisible definitions.
+    (org-test-with-temp-text "Text[1]\n\n[1] B [2]\n\n[2] C."
+      ;; Hide definitions.
+      (narrow-to-region (point) (point-at-eol))
+      (let* ((tree (org-element-parse-buffer))
+	     (info (org-combine-plists
+		    (org-export-initial-options) '(:with-footnotes t))))
+	(setq info (org-combine-plists
+		    info (org-export-collect-tree-properties tree info 'test)))
+	;; Both footnotes should be seen.
+	(should
+	 (= (length (org-export-collect-footnote-definitions tree info)) 2))))))
