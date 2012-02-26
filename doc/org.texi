@@ -9830,13 +9830,13 @@ at a different level, specify it with a prefix argument.  For example,
 @end example
 
 @noindent
-creates only top level headlines and does the rest as items.  When
+creates only top level headlines and exports the rest as items.  When
 headlines are converted to items, the indentation of the text following
 the headline is changed to fit nicely under the item.  This is done with
 the assumption that the first body line indicates the base indentation of
 the body text.  Any indentation larger than this is adjusted to preserve
 the layout relative to the first line.  Should there be lines with less
-indentation than the first, these are left alone.
+indentation than the first one, these are left alone.
 
 @vindex org-export-ascii-links-to-notes
 Links will be exported in a footnote-like style, with the descriptive part in
@@ -10227,7 +10227,7 @@ viewing options:
 path:    @r{The path to the script.  The default is to grab the script from}
          @r{@url{http://orgmode.org/org-info.js}, but you might want to have}
          @r{a local copy and use a path like @samp{../scripts/org-info.js}.}
-view:    @r{Initial view when website is first shown.  Possible values are:}
+view:    @r{Initial view when the website is first shown.  Possible values are:}
          info      @r{Info-like interface with one section per page.}
          overview  @r{Folding interface, initially showing only top-level.}
          content   @r{Folding interface, starting with all headlines visible.}
