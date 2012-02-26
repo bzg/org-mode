@@ -2985,29 +2985,7 @@ Nil values returned from FUN are ignored in the result."
 				    (assq (car el)
 					  org-element-string-restrictions))))
 		     collect (car el))))
-	 --walk-tree			; For byte-compiler
 	 --acc
-	 (--check-blob
-	  (function
-	   (lambda (--type types fun --blob)
-	     ;; Check if TYPE is matching among TYPES.  If so, apply
-	     ;; FUN to --BLOB and accumulate return value into --ACC.
-	     ;; INFO is the communication channel.  If --BLOB has
-	     ;; a secondary string that can contain objects with their
-	     ;; type amond TYPES, look into that string first.
-	     (when (memq --type types)
-	       (let ((result (funcall fun --blob)))
-		 (cond ((not result))
-		       (first-match (throw 'first-match result))
-		       (t (push result --acc)))))
-	     (when (memq --type --restricts)
-	       (funcall
-		--walk-tree
-		`(org-data
-		  nil
-		  ,@(org-element-property
-		     (cdr (assq --type org-element-secondary-value-alist))
-		     --blob)))))))
 	 (--walk-tree
 	  (function
 	   (lambda (--data)
@@ -3015,31 +2993,34 @@ Nil values returned from FUN are ignored in the result."
 	     ;; a plist holding contextual information.
 	     (mapc
 	      (lambda (--blob)
-		(let ((--type (org-element-type --blob)))
-		  ;; Determine if a recursion into --BLOB is
-		  ;; possible and allowed.
-		  (cond
-		   ;; Element or object not exportable.
-		   ((and info (member --blob (plist-get info :ignore-list))))
-		   ;; Limiting recursion to greater elements, and --BLOB
-		   ;; isn't one.
-		   ((and (eq --category 'greater-elements)
-			 (not (memq --type org-element-greater-elements)))
-		    (funcall --check-blob --type types fun --blob))
-		   ;; Limiting recursion to elements, and --BLOB only
-		   ;; contains objects.
-		   ((and (eq --category 'elements) (eq --type 'paragraph))
-		    (funcall --check-blob --type types fun --blob))
-		   ;; No limitation on recursion, but --BLOB hasn't
-		   ;; got a recursive type.
-		   ((and (eq --category 'objects)
-			 (not (or (eq --type 'paragraph)
-				  (memq --type org-element-greater-elements)
-				  (memq --type org-element-recursive-objects))))
-		    (funcall --check-blob --type types fun --blob))
-		   ;; Recursion is possible and allowed: Maybe apply
-		   ;; FUN to --BLOB, then move into it.
-		   (t (funcall --check-blob --type types fun --blob)
+		(unless (and info (member --blob (plist-get info :ignore-list)))
+		  (let ((--type (org-element-type --blob)))
+		    ;; Check if TYPE is matching among TYPES.  If so,
+		    ;; apply FUN to --BLOB and accumulate return value
+		    ;; into --ACC (or exit if FIRST-MATCH is non-nil).
+		    (when (memq --type types)
+		      (let ((result (funcall fun --blob)))
+			(cond ((not result))
+			      (first-match (throw 'first-match result))
+			      (t (push result --acc)))))
+		    ;; If --BLOB has a secondary string that can
+		    ;; contain objects with their type among TYPES,
+		    ;; look into that string.
+		    (when (memq --type --restricts)
+		      (funcall
+		       --walk-tree
+		       `(org-data
+			 nil
+			 ,@(org-element-property
+			    (cdr (assq --type org-element-secondary-value-alist))
+			    --blob))))
+		    ;; Now determine if a recursion into --BLOB is
+		    ;; possible.  If so, do it.
+		    (when (or (memq --type org-element-recursive-objects)
+			      (and (memq --type org-element-all-elements)
+				   (not (eq --category 'elements)))
+			      (and (memq --type org-element-greater-elements)
+				   (not (eq --category 'greater-elements))))
 		      (funcall --walk-tree --blob)))))
 	      (org-element-contents --data))))))
     (catch 'first-match
