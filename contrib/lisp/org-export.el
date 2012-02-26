@@ -2474,15 +2474,29 @@ ignored."
 FOOTNOTE-REFERENCE is the footnote reference being considered.
 INFO is the plist used as a communication channel."
   (let ((label (org-element-property :label footnote-reference)))
-    (or (not label)
-	(equal
-	 footnote-reference
-	 (org-element-map
-	  (plist-get info :parse-tree) 'footnote-reference
-	  (lambda (footnote)
-	    (when (string= (org-element-property :label footnote) label)
-	      footnote))
-	  info 'first-match)))))
+    ;; Anonymous footnotes are always a first reference.
+    (if (not label) t
+      ;; Otherwise, return the first footnote with the same LABEL and
+      ;; test if it is equal to FOOTNOTE-REFERENCE.
+      (let ((search-refs
+	     (function
+	      (lambda (data)
+		(org-element-map
+		 data 'footnote-reference
+		 (lambda (fn)
+		   (cond
+		    ((string= (org-element-property :label fn) label)
+		     (throw 'exit fn))
+		    ;; If FN isn't inlined, be sure to traverse its
+		    ;; definition before resuming search.  See
+		    ;; comments in `org-export-get-footnote-number'
+		    ;; for more information.
+		    ((eq (org-element-property :type fn) 'standard)
+		     (funcall search-refs
+			      (org-export-get-footnote-definition fn info)))))
+		 info 'first-match)))))
+	(equal (catch 'exit (funcall search-refs (plist-get info :parse-tree)))
+	       footnote-reference)))))
 
 (defun org-export-get-footnote-definition (footnote-reference info)
   "Return definition of FOOTNOTE-REFERENCE as parsed data.
@@ -2496,22 +2510,45 @@ INFO is the plist used as a communication channel."
 
 FOOTNOTE is either a footnote reference or a footnote definition.
 INFO is the plist used as a communication channel."
-  (let ((label (org-element-property :label footnote)) seen-refs)
-    (org-element-map
-     (plist-get info :parse-tree) 'footnote-reference
-     (lambda (fn)
-       (let ((fn-lbl (org-element-property :label fn)))
-	 (cond
-	  ((and (not fn-lbl) (equal fn footnote)) (1+ (length seen-refs)))
-	  ((and label (string= label fn-lbl)) (1+ (length seen-refs)))
-	  ;; Anonymous footnote: it's always a new one.  Also, be sure
-	  ;; to return nil from the `cond' so `first-match' doesn't
-	  ;; get us out of the loop.
-	  ((not fn-lbl) (push 'inline seen-refs) nil)
-	  ;; Label not seen so far: add it so SEEN-REFS.  Again,
-	  ;; return nil to stay in the loop.
-	  ((not (member fn-lbl seen-refs)) (push fn-lbl seen-refs) nil))))
-     info 'first-match)))
+  (let ((label (org-element-property :label footnote))
+	seen-refs
+	(search-ref
+	 (function
+	  (lambda (data)
+	    ;; Search footnote references through DATA, filling
+	    ;; SEEN-REFS along the way.
+	    (org-element-map
+	     data 'footnote-reference
+	     (lambda (fn)
+	       (let ((fn-lbl (org-element-property :label fn)))
+		 (cond
+		  ;; Anonymous footnote match: return number.
+		  ((and (not fn-lbl) (equal fn footnote))
+		   (throw 'exit (1+ (length seen-refs))))
+		  ;; Labels match: return number.
+		  ((and label (string= label fn-lbl))
+		   (throw 'exit (1+ (length seen-refs))))
+		  ;; Anonymous footnote: it's always a new one.  Also,
+		  ;; be sure to return nil from the `cond' so
+		  ;; `first-match' doesn't get us out of the loop.
+		  ((not fn-lbl) (push 'inline seen-refs) nil)
+		  ;; Label not seen so far: add it so SEEN-REFS.
+		  ;;
+		  ;; Also search for subsequent references in footnote
+		  ;; definition so numbering following reading logic.
+		  ;; Note that we don't have to care about inline
+		  ;; definitions, since `org-element-map' already
+		  ;; traverse them at the right time.
+		  ;;
+		  ;; Once again, return nil to stay in the loop.
+		  ((not (member fn-lbl seen-refs))
+		   (push fn-lbl seen-refs)
+		   (when (eq (org-element-type fn) 'standard)
+		     (funcall search-ref
+			      (org-export-get-footnote-definition fn info)))
+		   nil))))
+	     info 'first-match)))))
+    (catch 'exit (funcall search-ref (plist-get info :parse-tree)))))
 
 
 ;;;; For Headlines
@@ -3178,15 +3215,30 @@ affiliated keyword."
   "Return genealogy relative to a given element or object.
 BLOB is the element or object being considered.  INFO is a plist
 used as a communication channel."
-  (let* ((end (org-element-property :end blob))
+  (let* ((type (org-element-type blob))
+	 (end (org-element-property :end blob))
          (walk-data
           (lambda (data genealogy)
+	    ;; Walk DATA, looking for BLOB.  GENEALOGY is the list of
+	    ;; parents of all elements in DATA.
             (mapc
              (lambda (el)
                (cond
-		((stringp el))
+		((stringp el) nil)
                 ((equal el blob) (throw 'exit genealogy))
                 ((>= (org-element-property :end el) end)
+		 ;; If BLOB is an object and EL contains a secondary
+		 ;; string, be sure to check it.
+		 (when (memq type org-element-all-objects)
+		   (let ((sec-prop
+			  (cdr (assq (org-element-type el)
+				     org-element-secondary-value-alist))))
+		     (when sec-prop
+		       (funcall
+			walk-data
+			(cons 'org-data
+			      (cons nil (org-element-property sec-prop el)))
+			(cons el genealogy)))))
                  (funcall walk-data el (cons el genealogy)))))
 	     (org-element-contents data)))))
     (catch 'exit (funcall walk-data (plist-get info :parse-tree) nil) nil)))

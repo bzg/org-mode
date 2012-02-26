@@ -2989,12 +2989,17 @@ Nil values returned from FUN are ignored in the result."
 	 --acc
 	 (--check-blob
 	  (function
-	   (lambda (--type types fun --blob info)
+	   (lambda (--type types fun --blob)
 	     ;; Check if TYPE is matching among TYPES.  If so, apply
 	     ;; FUN to --BLOB and accumulate return value into --ACC.
 	     ;; INFO is the communication channel.  If --BLOB has
 	     ;; a secondary string that can contain objects with their
 	     ;; type amond TYPES, look into that string first.
+	     (when (memq --type types)
+	       (let ((result (funcall fun --blob)))
+		 (cond ((not result))
+		       (first-match (throw 'first-match result))
+		       (t (push result --acc)))))
 	     (when (memq --type --restricts)
 	       (funcall
 		--walk-tree
@@ -3002,12 +3007,7 @@ Nil values returned from FUN are ignored in the result."
 		  nil
 		  ,@(org-element-property
 		     (cdr (assq --type org-element-secondary-value-alist))
-		     --blob))))
-	     (when (memq --type types)
-	       (let ((result (funcall fun --blob)))
-		 (cond ((not result))
-		       (first-match (throw 'first-match result))
-		       (t (push result --acc))))))))
+		     --blob)))))))
 	 (--walk-tree
 	  (function
 	   (lambda (--data)
@@ -3025,7 +3025,7 @@ Nil values returned from FUN are ignored in the result."
 		   ;; isn't one.
 		   ((and (eq --category 'greater-elements)
 			 (not (memq --type org-element-greater-elements)))
-		    (funcall --check-blob --type types fun --blob info))
+		    (funcall --check-blob --type types fun --blob))
 		   ;; Limiting recursion to elements, and --BLOB only
 		   ;; contains objects.
 		   ((and (eq --category 'elements) (eq --type 'paragraph)))
@@ -3035,10 +3035,10 @@ Nil values returned from FUN are ignored in the result."
 			 (not (or (eq --type 'paragraph)
 				  (memq --type org-element-greater-elements)
 				  (memq --type org-element-recursive-objects))))
-		    (funcall --check-blob --type types fun --blob info))
+		    (funcall --check-blob --type types fun --blob))
 		   ;; Recursion is possible and allowed: Maybe apply
 		   ;; FUN to --BLOB, then move into it.
-		   (t (funcall --check-blob --type types fun --blob info)
+		   (t (funcall --check-blob --type types fun --blob)
 		      (funcall --walk-tree --blob)))))
 	      (org-element-contents --data))))))
     (catch 'first-match

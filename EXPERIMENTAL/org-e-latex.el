@@ -1023,8 +1023,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     ((loop for parent in (org-export-get-genealogy footnote-reference info)
 	   thereis (memq (org-element-type parent)
 			 '(footnote-reference footnote-definition)))
-     (format "\\footnotemark[%s]{}"
-	     (org-export-get-footnote-number footnote-reference info)))
+     (let ((num (org-export-get-footnote-number footnote-reference info)))
+       (format "\\footnotemark[%s]{}\\setcounter{footnote}{%s}" num num)))
     ;; Otherwise, define it with \footnote command.
     (t
      (let ((def (org-export-get-footnote-definition footnote-reference info)))
@@ -1032,15 +1032,24 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 (setq def (cons 'org-data (cons nil def))))
        (concat
 	(format "\\footnote{%s}" (org-trim (org-export-data def 'e-latex info)))
-	;; Retrieve all footnote references within the footnote to add
-	;; their definition after it, since LaTeX doesn't support them
-	;; inside.
-	(let ((all-refs
-	       (org-element-map
-		def 'footnote-reference
-		(lambda (ref)
-		  (when (org-export-footnote-first-reference-p ref info) ref))
-		info)))
+	;; Retrieve all footnote references within the footnote and
+	;; add their definition after it, since LaTeX doesn't support
+	;; them inside.
+	(let (all-refs
+	      (search-refs
+	       (function
+		(lambda (data)
+		  ;; Return a list of all footnote references in DATA.
+		  (org-element-map
+		   data 'footnote-reference
+		   (lambda (ref)
+		     (when (org-export-footnote-first-reference-p ref info)
+		       (push ref all-refs)
+		       (when (eq (org-element-property :type ref) 'standard)
+			 (funcall
+			  search-refs
+			  (org-export-get-footnote-definition ref info)))))
+		   info) (reverse all-refs)))))
 	  (mapconcat
 	   (lambda (ref)
 	     (format
@@ -1048,11 +1057,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (org-export-get-footnote-number ref info)
 	      (org-trim
 	       (funcall
-		(if (org-element-property :inline-definition ref)
+		(if (eq (org-element-property :type ref) 'inline)
 		    'org-export-secondary-string
 		  'org-export-data)
 		(org-export-get-footnote-definition ref info) 'e-latex info))))
-	   all-refs ""))))))))
+	   (funcall search-refs def) ""))))))))
 
 
 ;;;; Headline

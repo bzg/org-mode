@@ -318,27 +318,51 @@ body\n")))
 
 (ert-deftest test-org-export/footnotes ()
   "Test footnotes specifications."
-  ;; 1. Test nested footnotes.
   (let ((org-footnote-section nil))
+    ;; 1. Read every type of footnote.
     (org-test-with-temp-text "
-Some text[fn:1] and some other text[fn:new:and an inline
-footnote with another one[fn:label:reference to[fn:1] and a new
-one[fn:label2:label2]].
+Text[fn:1] [1] [fn:label:C] [fn::D]
 
-[fn:1] with a footnote inside[fn:inside] and a new footnote [fn:label3:label3].
+[fn:1] A
 
-[fn:inside] like that."
+[1] B"
 (let* ((tree (org-element-parse-buffer))
        (info (org-combine-plists
 	      (org-export-initial-options) '(:with-footnotes t))))
   (setq info (org-combine-plists
 	      info (org-export-collect-tree-properties tree info 'test)))
-  (let* ((fn-numbers
-	  (org-element-map
-	   tree 'footnote-reference
-	   (lambda (ref)
-	     (or (org-export-get-footnote-number ref info) 'unknown)) info)))
-    ;; 1.1. Every nested footnote has a number.
-    (should (every 'numberp fn-numbers))
-    ;; 1.2. Can tell which are new and which aren't.
-    (should (= (apply 'max fn-numbers) 5)))))))
+  (should
+   (equal
+    '((1 . "A") (2 . "B") (3 . "C") (4 . "D"))
+    (org-element-map
+     tree 'footnote-reference
+     (lambda (ref)
+       (cons (org-export-get-footnote-number ref info)
+	     (if (eq (org-element-property :type ref) 'inline)
+		 (car (org-export-get-footnote-definition ref info))
+	       (car (org-element-contents
+		     (car (org-element-contents
+			   (org-export-get-footnote-definition ref info))))))))
+     info)))))
+    ;; 2. Test nested footnotes.
+    (org-test-with-temp-text "
+Text[fn:1:A[fn:2]] [fn:3].
+
+[fn:2] B [fn:3] [fn::D].
+
+[fn:3] C."
+(let* ((tree (org-element-parse-buffer))
+       (info (org-combine-plists
+	      (org-export-initial-options) '(:with-footnotes t))))
+  (setq info (org-combine-plists
+	      info (org-export-collect-tree-properties tree info 'test)))
+  (should
+   (equal
+    '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
+    (org-element-map
+     tree 'footnote-reference
+     (lambda (ref)
+       (when (org-export-footnote-first-reference-p ref info)
+	 (cons (org-export-get-footnote-number ref info)
+	       (org-element-property :label ref))))
+     info)))))))
