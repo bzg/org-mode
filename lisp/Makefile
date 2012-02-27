@@ -1,12 +1,21 @@
 ORG-INSTALL = $(BATCH) \
-	 --eval "(require 'autoload)" \
+	 --eval '(require '"'"'autoload)' \
 	 --eval '(find-file "$(LISPO)")' \
 	 --eval '(erase-buffer)' \
+	 --eval '(insert ";;; org-install.el --- automatically extracted autoloads\n;;\n;;; Code:\n")' \
 	 --eval '(mapc (lambda (x) (generate-file-autoloads (symbol-name x))) (quote ($(LISPF))))' \
-	 --eval '(insert "\n(provide (quote org-install))\n")' \
-	 --eval '(insert "\n(defconst org-release \"$(ORGVERSION)\"\n  \"The release version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
-	 --eval '(insert "\n(defconst org-git-version \"$(GITVERSION)\"\n  \"The Git version of org-mode.  Inserted by installing org-mode\n  or when a release is made.\")\n")' \
-	 --eval '(insert "\n(defconst org-odt-data-dir \"$(datadir)\"\n  \"The location of ODT styles.\")\n")' \
+	 --eval '(insert "\f\n(provide '"'"'org-install)\n")' \
+	 --eval '(insert "(defconst org-release \"$(ORGVERSION)\"\n")' \
+	 --eval '(insert "  \"The release version of org-mode.\n")' \
+	 --eval '(insert "  Inserted by installing org-mode or when a release is made.\")\n")' \
+	 --eval '(insert "(defconst org-git-version \"$(GITVERSION)\"\n")' \
+	 --eval '(insert "  \"The Git version of org-mode.\n")' \
+	 --eval '(insert "  Inserted by installing org-mode or when a release is made.\")\n")' \
+	 --eval '(insert "(defconst org-odt-data-dir \"$(datadir)\"\n")' \
+	 --eval '(insert "  \"The location of ODT styles.\")\n")' \
+	 --eval '(insert ";; Local Variables:\n;; version-control: never\n")' \
+	 --eval '(insert ";; no-byte-compile: t\n;; no-update-autoloads: t\n")' \
+	 --eval '(insert ";; coding: utf-8\n;; End:\n;;; org-install.el ends here\n")' \
 	 --eval '(save-buffer)'
 -include local.mk	# optional local customization
 
@@ -20,7 +29,9 @@ LISPO = org-install.el
 LISPF = $(subst $(LISPO),,$(wildcard *.el))
 LISPC = $(LISPF:%el=%elc)
 
-.PHONY:		all compile compile-dirty autoloads install clean cleanall clean-install
+.PHONY:	all compile compile-dirty \
+	autoloads \
+	install clean cleanauto cleanall clean-install
 
 all \
 compile \
@@ -41,7 +52,7 @@ install:	$(LISPF) compile autoloads
 clean:
 	$(RM) *.elc
 
-cleanauto:
+cleanauto:	# internal target
 	$(RM) $(LISPO) $(LISPO:%el=%elc)
 
 cleanall:
