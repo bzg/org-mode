@@ -119,7 +119,8 @@
 (defvar date)   ;; dynamically scoped from Org
 
 ;; Support for version 2.35
-(defvar org-bbdb-old (fboundp 'bbdb-record-get-field-internal))
+(eval-after-load 'bbdb
+  '(defvar org-bbdb-old (fboundp 'bbdb-record-get-field-internal)))
 
 ;; Customization
 
