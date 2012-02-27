@@ -1071,9 +1071,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((class (plist-get info :latex-class))
-	 (numberedp (plist-get info :section-numbers))
-	 ;; Get level relative to current parsed data.
 	 (level (org-export-get-relative-level headline info))
+	 (numberedp (let ((sec-num (plist-get info :section-numbers)))
+		      (if (wholenump sec-num) (<= level sec-num) sec-num)))
 	 (class-sectionning (assoc class org-e-latex-classes))
 	 ;; Section formatting will set two placeholders: one for the
 	 ;; title and the other for the contents.
