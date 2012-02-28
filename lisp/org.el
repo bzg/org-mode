@@ -206,6 +206,7 @@ identifier."
 (defconst org-version "7.8.03"
   "The version number of the file org.el.")
 
+;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
