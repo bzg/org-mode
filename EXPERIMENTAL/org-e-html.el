@@ -890,12 +890,12 @@ order to reproduce the default set-up:
 ;;;; Emphasis
 
 (defcustom org-e-html-emphasis-alist
-  '(("*" . "\\textbf{%s}")
-    ("/" . "\\emph{%s}")
-    ("_" . "\\underline{%s}")
-    ("+" . "\\st{%s}")
-    ("=" . protectedtexttt)
-    ("~" . verb))
+  '(("*" . "<b>%s</b>")
+    ("/" . "<i>%s</i>")
+    ("_" . "<span style=\"text-decoration:underline;\">%s</span>")
+    ("+" . "<del>%s</del>")
+    ("=" . "<code>%s</code>")
+    ("~" . "<code>%s</code>"))
   "Alist of HTML expressions to convert emphasis fontifiers.
 
 The key is the character used as a marker for fontification.  The
@@ -1317,7 +1317,7 @@ that uses these same face definitions."
 		  headline
 		  ;; tags
 		  (and tags (concat
-			     (org-e-html-format-spaces 3)
+			     "&nbsp;&nbsp;&nbsp;"
 			     (org-e-html-format-fontify tags "tag")))))
   ;; fontify headline based on TODO keyword
   (when todo (setq headline (org-e-html-format-fontify headline "todo")))
@@ -1430,18 +1430,6 @@ that uses these same face definitions."
 (defun org-e-html-end-outline-text ()
   (org-lparse-insert-tag "</div>"))
 
-(defun org-e-html-format-spaces (n)
-  (let (out) (dotimes (i n out) (setq out (concat out "&nbsp;")))))
-
-(defun org-e-html-format-tabs (&optional n)
-  (ignore))
-
-(defun org-e-html-format-line-break ()
-  "<br/>\n")
-
-(defun org-e-html-format-horizontal-line ()
-  "<hr/>\n")
-
 ;; (defun org-e-html-format-line (line)
 ;;   (case org-lparse-dyn-current-environment
 ;;     ((quote fixedwidth) (concat (org-e-html-encode-plain-text line) "\n"))
@@ -1522,7 +1510,7 @@ Replaces invalid characters with \"_\"."
 	 x (concat org-e-html-tag-class-prefix
 		   (org-e-html-fix-class-name x))))
       (org-split-string tags ":")
-      (org-e-html-format-spaces 1)) "tag")))
+      "&nbsp;") "tag")))
 
 (defun org-e-html-format-section-number (&optional snumber level)
   ;; FIXME
@@ -1537,7 +1525,7 @@ Replaces invalid characters with \"_\"."
    (org-e-html-format-extra-targets extra-targets)
    (concat (org-e-html-format-section-number snumber level) " ")
    title
-   (and tags (concat (org-e-html-format-spaces 3)
+   (and tags (concat "&nbsp;&nbsp;&nbsp;"
 		     (org-e-html-format-org-tags tags)))))
 
 (defun org-e-html-format-footnote-reference (n def refcnt)
@@ -1989,18 +1977,8 @@ holding contextual information.  See
   "Transcode EMPHASIS from Org to HTML.
 CONTENTS is the contents of the emphasized text.  INFO is a plist
 holding contextual information.."
-  ;; (format (cdr (assoc (org-element-property :marker emphasis)
-  ;; 		      org-e-html-emphasis-alist))
-  ;; 	  contents)
-  (org-e-html-format-fontify
-   contents (cadr (assoc
-		   (org-element-property :marker emphasis)
-		   '(("*" bold)
-		     ("/" emphasis)
-		     ("_" underline)
-		     ("=" code)
-		     ("~" verbatim)
-		     ("+" strike))))))
+  (let* ((marker (org-element-property :marker emphasis)))
+    (format (cdr (assoc marker org-e-html-emphasis-alist)) contents)))
 
 
 ;;;; Entity
@@ -2399,8 +2377,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((attr (mapconcat #'identity
 			 (org-element-property :attr_html horizontal-rule)
 			 " ")))
-    (org-e-html--wrap-label horizontal-rule
-			    (org-e-html-format-horizontal-line))))
+    (org-e-html--wrap-label horizontal-rule "<hr/>\n")))
 
 
 ;;;; Inline Babel Call
@@ -2971,8 +2948,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a SUBSCRIPT object from Org to HTML.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  ;; (format (if (= (length contents) 1) "$_%s$" "$_{\\mathrm{%s}}$") contents)
-  (org-e-html-format-fontify contents 'subscript))
+  (format "<sub>%s</sub>" contents))
 
 
 ;;;; Superscript
@@ -2981,8 +2957,7 @@ contextual information."
   "Transcode a SUPERSCRIPT object from Org to HTML.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  ;; (format (if (= (length contents) 1) "$^%s$" "$^{\\mathrm{%s}}$") contents)
-  (org-e-html-format-fontify contents 'superscript))
+  (format "<sup>%s</sup>" contents))
 
 
 ;;;; Table
@@ -3260,14 +3235,13 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		    (org-export-secondary-string
 		     (org-element-property :value verse-block)
 		     'e-html info)))))
-
   ;; Replace each white space at beginning of a line with a
   ;; non-breaking space.
   (while (string-match "^[ \t]+" contents)
-    (let ((new-str (org-e-html-format-spaces
-		    (length (match-string 0 contents)))))
-      (setq contents (replace-match new-str nil t contents))))
-
+    (let* ((num-ws (length (match-string 0 contents)))
+	   (ws (let (out) (dotimes (i num-ws out)
+			    (setq out (concat out "&nbsp;"))))))
+      (setq contents (replace-match ws nil t contents))))
   (org-e-html--wrap-label
    verse-block (format "<p class=\"verse\">\n%s</p>" contents)))
 
