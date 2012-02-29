@@ -12,13 +12,9 @@
 
 
 ;;; Code:
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts)
-  (require 'org-export))
+
+(unless (featurep 'org-export)
+  (signal 'missing-test-dependency "org-export"))
 
 
 

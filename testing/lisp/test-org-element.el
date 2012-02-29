@@ -21,13 +21,8 @@
 
 ;;; Code:
 
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts)
-  (require 'org-element))
+(unless (featurep 'org-element)
+  (signal 'missing-test-dependency "org-element"))
 
 
 
