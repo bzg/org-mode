@@ -810,7 +810,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  (lambda (x)
 	    (format "\n[%s] %s" (nth (if sort-only 0 1) x) (nth 2 x)))
 	  ref-table "\n"))
-	(unless (eobp) (insert "\n"))
+	(unless (eobp) (insert "\n\n"))
 	;; When exporting, add newly inserted markers along with their
 	;; associated definition to `org-export-footnotes-seen'.
 	(when export-props (setq org-export-footnotes-seen ref-table)))
