@@ -18,15 +18,13 @@
   "Test of hello world program."
   (org-test-at-id "459384e8-1797-4f11-867e-dde0473ea7cc"
     (org-babel-next-src-block)
-    (should (equal "Hello world" (org-babel-execute-src-block))))
-)
+    (should (equal "Hello world" (org-babel-execute-src-block)))))
 
 (ert-deftest ob-fortran/fortran-var-program ()
   "Test a fortran variable"
   (org-test-at-id "459384e8-1797-4f11-867e-dde0473ea7cc"
     (org-babel-next-src-block 2)
-    (should (= 10 (org-babel-execute-src-block))))
-)
+    (should (= 10 (org-babel-execute-src-block)))))
 
 (ert-deftest ob-fortran/input-var ()
   "Test :var"
