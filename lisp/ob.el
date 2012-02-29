@@ -33,6 +33,8 @@
 (defvar org-babel-library-of-babel)
 (declare-function show-all "outline" ())
 (declare-function org-reduce "org" (CL-FUNC CL-SEQ &rest CL-KEYS))
+(declare-function org-mark-ring-push "org" (&optional pos buffer))
+(declare-function org-strip-protective-commas "org" (beg end))
 (declare-function tramp-compat-make-temp-file "tramp-compat"
                   (filename &optional dir-flag))
 (declare-function tramp-dissect-file-name "tramp" (name &optional nodefault))
