@@ -129,7 +129,7 @@
 ;; cannot contain other greater elements of their own type.
 
 ;; Beside implementing a parser and an interpreter, adding a new
-;; greater element requires to tweak `org-element-guess-type'.
+;; greater element requires to tweak `org-element-current-element'.
 ;; Moreover, the newly defined type must be added to both
 ;; `org-element-all-elements' and `org-element-greater-elements'.
 
@@ -848,8 +848,8 @@ CONTENTS is the contents of the element."
 
 ;; Also, as for greater elements, adding a new element type is done
 ;; through the following steps: implement a parser and an interpreter,
-;; tweak `org-element-guess-type' so that it recognizes the new type
-;; and add that new type to `org-element-all-elements'.
+;; tweak `org-element-current-element' so that it recognizes the new
+;; type and add that new type to `org-element-all-elements'.
 
 ;; As a special case, when the newly defined type is a block type,
 ;; `org-element-non-recursive-block-alist' has to be modified
