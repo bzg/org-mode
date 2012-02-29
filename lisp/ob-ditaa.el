@@ -37,17 +37,13 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-exp-blocks)
 
 (defvar org-babel-default-header-args:ditaa
   '((:results . "file")
     (:exports . "results")
     (:java . "-Dfile.encoding=UTF-8"))
   "Default arguments for evaluating a ditaa source block.")
-
-(defcustom org-ditaa-jar-path nil
-  "Path for the ditaa jar file."
-  :group 'org-babel
-  :type 'string)
 
 (defcustom org-ditaa-jar-option "-jar"
   "Option for the ditaa jar file.
