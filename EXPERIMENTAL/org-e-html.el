@@ -746,17 +746,17 @@ borders and spacing."
   :group 'org-export-e-html
   :type 'string)
 
-(defcustom org-export-table-header-tags '("<th scope=\"%s\"%s>" . "</th>")
+(defcustom org-e-html-table-header-tags '("<th scope=\"%s\"%s>" . "</th>")
   "The opening tag for table header fields.
 This is customizable so that alignment options can be specified.
 The first %s will be filled with the scope of the field, either row or col.
 The second %s will be replaced by a style entry to align the field.
 See also the variable `org-e-html-table-use-header-tags-for-first-column'.
 See also the variable `org-e-html-table-align-individual-fields'."
-  :group 'org-export-tables
+  :group 'org-export-tables		; FIXME: change group?
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
-(defcustom org-export-table-data-tags '("<td%s>" . "</td>")
+(defcustom org-e-html-table-data-tags '("<td%s>" . "</td>")
   "The opening tag for table data fields.
 This is customizable so that alignment options can be specified.
 The first %s will be filled with the scope of the field, either row or col.
@@ -765,7 +765,7 @@ See also the variable `org-e-html-table-align-individual-fields'."
   :group 'org-export-tables
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
-(defcustom org-export-table-row-tags '("<tr>" . "</tr>")
+(defcustom org-e-html-table-row-tags '("<tr>" . "</tr>")
   "The opening tag for table data fields.
 This is customizable so that alignment options can be specified.
 Instead of strings, these can be Lisp forms that will be evaluated
@@ -774,7 +774,7 @@ the variable `head' will be true when this is a header line, nil when this
 is a body line.  And the variable `nline' will contain the line number,
 starting from 1 in the first header line.  For example
 
-  (setq org-export-table-row-tags
+  (setq org-e-html-table-row-tags
         (cons '(if head
                    \"<tr>\"
                  (if (= (mod nline 2) 1)
@@ -1318,10 +1318,11 @@ that uses these same face definitions."
 		  ;; tags
 		  (and tags (concat
 			     "&nbsp;&nbsp;&nbsp;"
-			     (org-e-html-format-fontify tags "tag")))))
+			     (format "<span class=\"tag\">%s</span>" tags)))))
   ;; fontify headline based on TODO keyword
-  (when todo (setq headline (org-e-html-format-fontify headline "todo")))
-  (org-e-html-format-link headline (concat  "#" href)))
+  (when todo
+    (setq headline (format "<span class=\"todo\">%s</span>" headline)))
+  (format "<a href=\"#%s\">%s</a>" href headline))
 
 (defun org-e-html-toc-entry-formatter
   (level snumber todo todo-type priority
@@ -1346,9 +1347,9 @@ that uses these same face definitions."
 	     (setq prev-level level)
 	     (concat
 	      (org-e-html-make-string
-	       times (cond ((> cnt 0) "<ul>\n<li>\n")
+	       times (cond ((> cnt 0) "\n<ul>\n<li>")
 			   ((< cnt 0) "</li>\n</ul>\n")))
-	      (if (> cnt 0) "<ul>\n<li>\n" "</li>\n<li>\n")))
+	      (if (> cnt 0) "\n<ul>\n<li>" "</li>\n<li>")))
 	   headline)))
       toc-entries "")
      (org-e-html-make-string
@@ -1363,81 +1364,25 @@ that uses these same face definitions."
 		       headline info 'org-e-html-toc-entry-formatter)
 		      (org-export-get-relative-level headline info)))))
     (when toc-entries
-      (let* ((lang-specific-heading "Table of Contents")) ; FIXME
+      (let* ((lang-specific-heading
+	      (nth 3 (or (assoc (plist-get info :language)
+				org-export-language-setup)
+			 (assoc "en" org-export-language-setup)))))
 	(concat
 	 "<div id=\"table-of-contents\">\n"
-	 (org-e-html-format-heading lang-specific-heading
-				    (or org-e-html-toplevel-hlevel 1))
+	 (format "<h%d>%s</h%d>\n"
+		 org-e-html-toplevel-hlevel
+		 lang-specific-heading
+		 org-e-html-toplevel-hlevel)
 	 "<div id=\"text-table-of-contents\">"
 	 (org-e-html-toc-text toc-entries)
 	 "</div>\n"
 	 "</div>\n")))))
 
-(defun org-e-html-begin-outline (level1 snumber title tags
-				      target extra-targets extra-class)
-  (let* ((class (format "outline-%d" level1))
-	 (class (if extra-class (concat  class " " extra-class) class))
-	 (id (format "outline-container-%s"
-		     (org-lparse-suffix-from-snumber snumber)))
-	 (extra (concat (when id (format " id=\"%s\"" id))
-			(when class (format " class=\"%s\"" class)))))
-    (org-lparse-insert-tag "<div%s>" extra)
-    (insert
-     (org-lparse-format 'HEADING
-		       (org-lparse-format
-			'HEADLINE title extra-targets tags snumber level1)
-		       level1 target))))
-
-(defun org-e-html-end-outline ()
-  (org-lparse-insert-tag  "</div>"))
-
-
-;; (defun org-e-html-format-heading (text level &optional id)
-;;   (let* ((extra (concat (when id (format " id=\"%s\"" id)))))
-;;     (concat (format "<h%d%s>" level extra) text (format "</h%d>" level))))
-
-(defun org-e-html-suffix-from-snumber (snumber)
-  (let* ((snu (replace-regexp-in-string "\\." "-" snumber))
-	 (href (cdr (assoc (concat "sec-" snu)
-			   org-export-preferred-target-alist))))
-    (org-solidify-link-text (or href snu))))
-
-(defun org-e-html-format-outline (contents level1 snumber title
-					 tags target extra-targets extra-class)
-  (let* ((class (format "outline-%d" level1))
-	 (class (if extra-class (concat  class " " extra-class) class))
-	 (id (and snumber ;; FIXME
-		  (format "outline-container-%s"
-			  (org-e-html-suffix-from-snumber snumber))))
-	 (extra (concat (when id (format " id=\"%s\"" id))
-			(when class (format " class=\"%s\"" class)))))
-    (concat
-     (format "<div%s>\n" extra)
-     (org-e-html-format-heading
-      (org-e-html-format-headline title extra-targets tags snumber level1)
-      level1 target)
-     contents
-     "</div>")))
-
-(defun org-e-html-begin-outline-text (level1 snumber extra-class)
-  (let* ((class (format "outline-text-%d" level1))
-	 (class (if extra-class (concat  class " " extra-class) class))
-	 (id (format "text-%s" (org-lparse-suffix-from-snumber snumber)))
-	 (extra (concat (when id (format " id=\"%s\"" id))
-			(when class (format " class=\"%s\"" class)))))
-    (org-lparse-insert-tag "<div%s>" extra)))
-
-(defun org-e-html-end-outline-text ()
-  (org-lparse-insert-tag "</div>"))
-
 ;; (defun org-e-html-format-line (line)
 ;;   (case org-lparse-dyn-current-environment
 ;;     ((quote fixedwidth) (concat (org-e-html-encode-plain-text line) "\n"))
 ;;     (t (concat line "\n"))))
-
-(defun org-e-html-format-comment (fmt &rest args)
-  (let ((comment (apply 'format fmt args)))
-    (format "\n<!-- %s  -->\n" comment)))
 
 (defun org-e-html-fix-class-name (kwd) 	; audit callers of this function
   "Turn todo keyword into a valid class name.
@@ -1446,87 +1391,6 @@ Replaces invalid characters with \"_\"."
     (while (string-match "[^a-zA-Z0-9_]" kwd)
       (setq kwd (replace-match "_" t t kwd))))
   kwd)
-
-(defun org-e-html-format-fontify (text style &optional id)
-  (let (class extra how)
-    (cond
-     ((eq style 'underline)
-      (setq extra " style=\"text-decoration:underline;\"" ))
-     ((setq how (cdr (assoc style
-			    '((bold . ("<b>" . "</b>"))
-			      (emphasis . ("<i>" . "</i>"))
-			      (code . ("<code>" . "</code>"))
-			      (verbatim . ("<code>" . "</code>"))
-			      (strike . ("<del>" . "</del>"))
-			      (subscript . ("<sub>" . "</sub>"))
-			      (superscript . ("<sup>" . "</sup>")))))))
-     ((listp style)
-      (setq class (mapconcat 'identity style " ")))
-     ((stringp style)
-      (setq class style))
-     (t (error "Unknown style %S" style)))
-
-    (setq extra (concat (when class (format " class=\"%s\"" class))
-			(when id (format " id=\"%s\""  id))
-			extra))
-
-    (let ((tags (or how '("<span%s>" . "</span>"))))
-      (concat (format (car tags) extra) text  (cdr tags)))))
-
-(defun org-e-html-format-link (text href &optional extra)
-  (let ((extra (concat (format " href=\"%s\"" href)
-		       (and extra (concat  " " extra)))))
-    (format "<a%s>%s</a>" extra text)))
-
-(defun org-e-html-format-internal-link (text href &optional extra)
-  (org-e-html-format-link text (concat "#" href) extra))
-
-(defun org-e-html-format-heading (text level &optional id)
-  (let* ((extra (concat (when id (format " id=\"%s\"" id)))))
-    (concat (format "<h%d%s>" level extra) text (format "</h%d>\n" level))))
-
-(defun org-e-html-format-anchor (text name &optional class)
-  (let* ((id name)
-	 (extra (concat
-		 (when name (format " name=\"%s\""  name))
-		 (when id (format " id=\"%s\""  id))
-		 (when class (format " class=\"%s\""  class)))))
-    (format "<a%s>%s</a>" extra text)))
-
-(defun org-e-html-format-extra-targets (extra-targets)
-  (if (not extra-targets) ""
-    (mapconcat (lambda (x)
-		 (when x
-		   (setq x (org-solidify-link-text
-			    (if (org-uuidgen-p x) (concat "ID-" x) x)))
-		   (org-e-html-format-anchor "" x))) extra-targets "")))
-
-(defun org-e-html-format-org-tags (tags)
-  (if (not tags) ""
-    (org-e-html-format-fontify
-     (mapconcat
-      (lambda (x)
-	(org-e-html-format-fontify
-	 x (concat org-e-html-tag-class-prefix
-		   (org-e-html-fix-class-name x))))
-      (org-split-string tags ":")
-      "&nbsp;") "tag")))
-
-(defun org-e-html-format-section-number (&optional snumber level)
-  ;; FIXME
-  (and org-export-with-section-numbers
-       ;; (not org-lparse-body-only)
-       snumber level
-       (org-e-html-format-fontify snumber (format "section-number-%d" level))))
-
-(defun org-e-html-format-headline (title extra-targets tags
-				       &optional snumber level)
-  (concat
-   (org-e-html-format-extra-targets extra-targets)
-   (concat (org-e-html-format-section-number snumber level) " ")
-   title
-   (and tags (concat "&nbsp;&nbsp;&nbsp;"
-		     (org-e-html-format-org-tags tags)))))
 
 (defun org-e-html-format-footnote-reference (n def refcnt)
   (let ((extra (if (= refcnt 1) "" (format ".%d"  refcnt))))
@@ -1564,13 +1428,9 @@ Replaces invalid characters with \"_\"."
        (nth 4 (or (assoc (plist-get info :language)
 			 org-export-language-setup)
 		  (assoc "en" org-export-language-setup)))
-
        (format
-	"<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">\n%s\n</table>\n"
+	"<table>\n%s\n</table>\n"
 	(mapconcat 'org-e-html-format-footnote-definition fn-alist "\n"))))))
-
-(defun org-e-html-format-org-entity (wd)
-  (org-entity-get-representation wd 'html))
 
 (defun org-e-html-get-coding-system-for-write ()
   (or org-e-html-coding-system
@@ -2226,12 +2086,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-e-html-todo (todo)
   (when todo
-    (org-e-html-format-fontify
-     (concat
-      org-e-html-todo-kwd-class-prefix
-      (org-e-html-fix-class-name todo))
-     (list (if (member todo org-done-keywords) "done" "todo")
-	   todo))))
+    (format "<span class=\"%s %s%s\">%s</span>"
+	    (if (member todo org-done-keywords) "done" "todo")
+	    org-e-html-todo-kwd-class-prefix (org-e-html-fix-class-name todo)
+	    todo)))
 
 (defun org-e-html-headline-text (headline info &optional formatter)
   "Transcode an HEADLINE element from Org to HTML.
@@ -2363,10 +2221,45 @@ holding contextual information."
      (t
       ;; (format section-fmt full-text
       ;; 	(concat headline-label pre-blanks contents))
-
-      (org-e-html-format-outline contents level section-no full-text tags
-				 (car (last headline-labels))
-				 (butlast headline-labels) nil)))))
+      (let* ((extra-class nil)		; FIXME
+	     (extra-ids nil)		; FIXME
+	     (level1 (+ level (1- org-e-html-toplevel-hlevel)))
+	     (title
+	      (concat
+	       ;; extra-ids
+	       (mapconcat
+		(lambda (x)
+		  (when x
+		    (let ((id (org-solidify-link-text
+			       (if (org-uuidgen-p x) (concat "ID-" x) x))))
+		      (format "<a id=\"%s\" name=\"%s\"/>" id id))))
+		extra-ids "")
+	       ;; section number
+	       (and (plist-get info :section-numbers)
+		    (format "<span class=\"section-number-%d\">%s</span> "
+			    level1 (mapconcat 'number-to-string headline-no
+					      ".")))
+	       ;; full-text
+	       full-text
+	       ;; tags
+	       (and (plist-get info :with-tags) tags
+		    (concat
+		     "&nbsp;&nbsp;&nbsp;"
+		     (format "<span class=\"tag\">%s</span>"
+			     (mapconcat
+			      (lambda (tag)
+				(format "<span class=\"%s\">%s</span>"
+					(concat org-e-html-tag-class-prefix
+						(org-e-html-fix-class-name tag))
+					tag))
+			      (org-split-string tags ":") "&nbsp;"))))))
+	     (id (mapconcat 'number-to-string headline-no "-")))
+	(format "<div id=\"%s\" class=\"%s\">%s%s</div>\n"
+		(format "outline-container-%s" id)
+		(concat (format "outline-%d" level1) (and extra-class " ")
+			extra-class)
+		(format "\n<h%d id=\"sec-%s\">%s</h%d>\n" level1 id title level1)
+		contents))))))
 
 
 ;;;; Horizontal Rule
@@ -2447,15 +2340,15 @@ holding contextual information."
 
 ;;;; Item
 
+(defun org-e-html-checkbox (checkbox)
+  (case checkbox (on "<code>[X]</code>")
+	(off "<code>[&nbsp;]</code>")
+	(trans "<code>[-]</code>")
+	(t "")))
+
 (defun org-e-html-format-list-item (contents type checkbox
 					     &optional term-counter-id
 					     headline)
-  (when checkbox
-    (setq checkbox
-	  (org-e-html-format-fontify (case checkbox
-				       (on "[X]")
-				       (off "[&nbsp;]")
-				       (trans "[-]")) 'code)))
   (concat
    (case type
      (ordered
@@ -2472,7 +2365,8 @@ holding contextual information."
       (let* ((term term-counter-id))
 	(setq term (or term "(no term)"))
 	(concat (format "<dt> %s </dt>" term) "<dd>"))))
-   checkbox (and checkbox " ") contents
+   (org-e-html-checkbox checkbox) (and checkbox " ")
+   contents
    (case type
      (ordered "</li>")
      (unordered "</li>")
@@ -2575,7 +2469,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	     (text (if (string-match "\\`[a-z]\\{1,10\\}:\\(.+\\)" label)
 		       (substring label (match-beginning 1))
 		     label)))
-	(org-e-html-format-internal-link text href)))
+	(format "<a href=\"#%s\">%s</a>" href text)))
      (t (let ((processing-type (plist-get info :LaTeX-fragments)))
 	  (cond
 	   ((member processing-type '(t mathjax))
@@ -2657,9 +2551,9 @@ INFO is a plist holding contextual information.  See
      ;; Target or radioed target: replace link with the normalized
      ;; custom-id/target name.
      ((member type '("target" "radio"))
-      (org-e-html-format-internal-link
-       (or desc (org-export-secondary-string path 'e-html info))
-       (org-export-solidify-link-text path)))
+      (format "<a href=\"#%s\">%s</a>"
+	      (org-export-solidify-link-text path)
+	      (or desc (org-export-secondary-string path 'e-html info))))
      ;; Links pointing to an headline: Find destination and build
      ;; appropriate referencing commanding.
      ((member type '("custom-id" "fuzzy" "id"))
@@ -2669,13 +2563,12 @@ INFO is a plist holding contextual information.  See
 	;; Fuzzy link points to a target.  Do as above.
 	(case (org-element-type destination)
 	  (target
-	   (org-e-html-format-internal-link
-	    (or desc
-		(org-export-secondary-string
-		 (org-element-property :raw-link link)
-		 'e-html info))
-	    (org-export-solidify-link-text
-	     (org-element-property :raw-value destination))))
+	   (format "<a href=\"#%s\">%s</a>"
+		   (org-export-solidify-link-text (org-element-property
+						   :raw-value destination))
+		   (or desc (org-export-secondary-string
+			     (org-element-property :raw-link link)
+			     'e-html info))))
 	  ;; Fuzzy link points to an headline.  If headlines are
 	  ;; numbered and the link has no description, display
 	  ;; headline's number.  Otherwise, display description or
@@ -2689,18 +2582,16 @@ INFO is a plist holding contextual information.  See
 			   "-"))))
 	     (if (and (plist-get info :section-numbers) (not desc))
 		 (format "\\ref{%s}" label)
-	       (org-e-html-format-internal-link
-		(or desc
-		    (org-export-secondary-string
-		     (org-element-property :title destination)
-		     'e-html info)) label))))
+	       (format "<a href=\"#%s\">%s</a>"
+		       label (or desc
+				 (org-export-secondary-string
+				  (org-element-property :title destination)
+				  'e-html info))))))
 	  ;; Fuzzy link points nowhere.
 	  (otherwise
-	   (org-e-html-format-fontify
-	    (or desc
-		(org-export-secondary-string
-		 (org-element-property :raw-link link)
-		 'e-html info)) 'emphasis)))))
+	   (format "<i>%s</i>" (or desc (org-export-secondary-string
+					 (org-element-property :raw-link link)
+					 'e-html info)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -2710,11 +2601,11 @@ INFO is a plist holding contextual information.  See
      ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
       (funcall protocol (org-link-unescape path) desc 'html))
      ;; External link with a description part.
-     ((and path desc) (org-e-html-format-link desc path))
+     ((and path desc) (format "<a href=\"%s\">%s</a>" path desc))
      ;; External link without a description part.
-     (path (org-e-html-format-link path path))
+     (path (format "<a href=\"%s\">%s</a>" path path))
      ;; No path, only description.  Try to do something useful.
-     (t (org-e-html-format-fontify desc 'emphasis)))))
+     (t (format "<i>%s</i>" desc)))))
 
 
 ;;;; Babel Call
@@ -2748,7 +2639,7 @@ the plist used as a communication channel."
 	      (org-element-property :contents-begin parent)))
       ;; leading paragraph in a list item have no tags
       contents)
-     (t (concat (format "<p%s> " extra) contents "</p>")))))
+     (t (format "\n<p%s>\n%s\n</p>" extra contents)))))
 
 
 ;;;; Plain List
@@ -2882,7 +2773,8 @@ holding contextual information."
     ;; Before first headline: no container, just return CONTENTS.
     (if (not parent) contents
       ;; Get div's class and id references.
-      (let ((class-num (org-export-get-relative-level parent info))
+      (let ((class-num (+ (org-export-get-relative-level parent info)
+			  (1- org-e-html-toplevel-hlevel)))
             (id-num
              (mapconcat
               'number-to-string
@@ -2897,9 +2789,9 @@ holding contextual information."
   "Transcode a RADIO-TARGET object from Org to HTML.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (org-e-html-format-anchor
-   text (org-export-solidify-link-text
-	 (org-element-property :raw-value radio-target))))
+  (let ((id (org-export-solidify-link-text
+	     (org-element-property :raw-value radio-target))))
+    (format "<a id=\"%s\" name=\"%s\">%s</a>" id id text)))
 
 
 ;;;; Special Block
@@ -2939,7 +2831,7 @@ contextual information."
   "Transcode a STATISTICS-COOKIE object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((cookie-value (org-element-property :value statistics-cookie)))
-    (org-e-html-format-fontify cookie-value 'code)))
+    (format "<code>%s</code>" cookie-value)))
 
 
 ;;;; Subscript
@@ -2988,20 +2880,20 @@ contextual information."
     (cond
      (org-e-html-table-cur-rowgrp-is-hdr
       (concat
-       (format (car org-export-table-header-tags) "col" cell-style-cookie)
-       text (cdr org-export-table-header-tags)))
+       (format (car org-e-html-table-header-tags) "col" cell-style-cookie)
+       text (cdr org-e-html-table-header-tags)))
      ((and (= c 0) org-e-html-table-use-header-tags-for-first-column)
       (concat
-       (format (car org-export-table-header-tags) "row" cell-style-cookie)
-       text (cdr org-export-table-header-tags)))
+       (format (car org-e-html-table-header-tags) "row" cell-style-cookie)
+       text (cdr org-e-html-table-header-tags)))
      (t
       (concat
-       (format (car org-export-table-data-tags) cell-style-cookie)
-       text (cdr org-export-table-data-tags))))))
+       (format (car org-e-html-table-data-tags) cell-style-cookie)
+       text (cdr org-e-html-table-data-tags))))))
 
 (defun org-e-html-format-table-row (row)
-  (concat (eval (car org-export-table-row-tags)) row
-	  (eval (cdr org-export-table-row-tags))))
+  (concat (eval (car org-e-html-table-row-tags)) row
+	  (eval (cdr org-e-html-table-row-tags))))
 
 (defun org-e-html-table-row (fields &optional text-for-empty-fields)
   (incf org-e-html-table-rownum)
@@ -3169,9 +3061,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a TARGET object from Org to HTML.
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
-  (org-e-html-format-anchor
-   text (org-export-solidify-link-text
-	 (org-element-property :raw-value target))))
+  (let ((id (org-export-solidify-link-text
+	     (org-element-property :raw-value target))))
+    (format "<a id=\"%s\" name=\"%s\">%s</a>" id id text)))
 
 
 ;;;; Time-stamp
@@ -3180,34 +3072,19 @@ contextual information."
   "Transcode a TIME-STAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  ;; (let ((value (org-element-property :value time-stamp))
-  ;; 	(type (org-element-property :type time-stamp))
-  ;; 	(appt-type (org-element-property :appt-type time-stamp)))
-  ;;   (concat (cond ((eq appt-type 'scheduled)
-  ;; 		   (format "\\textbf{\\textsc{%s}} " org-scheduled-string))
-  ;; 		  ((eq appt-type 'deadline)
-  ;; 		   (format "\\textbf{\\textsc{%s}} " org-deadline-string))
-  ;; 		  ((eq appt-type 'closed)
-  ;; 		   (format "\\textbf{\\textsc{%s}} " org-closed-string)))
-  ;; 	    (cond ((memq type '(active active-range))
-  ;; 		   (format org-e-html-active-timestamp-format value))
-  ;; 		  ((memq type '(inactive inactive-range))
-  ;; 		   (format org-e-html-inactive-timestamp-format value))
-  ;; 		  (t
-  ;; 		   (format org-e-html-diary-timestamp-format value)))))
   (let ((value (org-element-property :value time-stamp))
         (type (org-element-property :type time-stamp))
         (appt-type (org-element-property :appt-type time-stamp)))
-    (setq value (org-export-secondary-string value 'e-html info))
-    (org-e-html-format-fontify
-     (concat
-      (org-e-html-format-fontify
-       (cond ((eq appt-type 'scheduled) org-scheduled-string)
-	     ((eq appt-type 'deadline) org-deadline-string)
-	     ((eq appt-type 'closed) org-closed-string)) "timestamp-kwd")
-      ;; FIXME: (org-translate-time value)
-      (org-e-html-format-fontify value "timestamp"))
-     "timestamp-wrapper")))
+    (setq value (org-translate-time
+		 (org-export-secondary-string value 'e-html info)))
+    (setq appt-type (case appt-type
+		      (scheduled org-scheduled-string)
+		      (deadline org-deadline-string)
+		      (closed org-closed-string)))
+    (format "<span class=\"timestamp-wrapper\">%s%s</span>"
+	    (if (not appt-type) ""
+		(format "<span class=\"timestamp-kwd\">%s</span> " appt-type))
+	    (format "<span class=\"timestamp\">%s</span>" value))))
 
 
 ;;;; Verbatim
@@ -3347,6 +3224,11 @@ Return output file's name."
 ;;;; org-e-html-todo-kwd-class-prefix
 ;;;; org-e-html-tag-class-prefix
 ;;;; org-e-html-footnote-separator
+
+;;;; org-export-preferred-target-alist
+;;;; org-solidify-link-text
+;;;; class for anchors
+;;;; org-export-with-section-numbers, body-only
 
 (provide 'org-e-html)
 ;;; org-e-html.el ends here
