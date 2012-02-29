@@ -8,17 +8,10 @@
 
 ;; Template test file for Org-mode tests
 
-
 ;;; Code:
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
+(unless (featurep 'ob-sh)
+  (signal 'missing-test-dependency "Support for Sh code blocks"))
 
-
-;;; Tests
 (ert-deftest test-ob-sh/dont-insert-spaces-on-expanded-bodies ()
   "Expanded shell bodies should not start with a blank line
 unless the body of the tangled block does."

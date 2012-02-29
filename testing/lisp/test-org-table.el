@@ -10,17 +10,7 @@
 
 ;; Template test file for Org-mode tests
 
-
 ;;; Code:
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
-
-
-;;; Tests
 (ert-deftest test-org-table/org-table-convert-refs-to-an/1 ()
   "Simple reference @1$1."
   (should

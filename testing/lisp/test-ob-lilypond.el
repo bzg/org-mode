@@ -6,14 +6,9 @@
 ;; Released under the GNU General Public License version 3
 ;; see: http://www.gnu.org/licenses/gpl-3.0.html
 
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
-
-(require 'ob-lilypond)
+;;; Code:
+(unless (featurep 'ob-lilypond)
+  (signal 'missing-test-dependency "Support for Lilypond code blocks"))
 
 (save-excursion
   (set-buffer (get-buffer-create "test-ob-lilypond.el"))

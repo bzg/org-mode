@@ -10,18 +10,9 @@
 
 ;; Template test file for Org-mode tests
 
-
 ;;; Code:
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
-
-
-;;; Tests
-(require 'org-html)
+(unless (featurep 'org-html)
+  (signal 'missing-test-dependency "Support for Org-html"))
 
 (defmacro org-test-html/export-link (name link expected &optional desc opt-plist)
   `(ert-deftest ,(intern (concat "test-org-html/export-link/" name)) ()

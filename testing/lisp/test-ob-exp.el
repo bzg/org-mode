@@ -10,17 +10,7 @@
 
 ;; Template test file for Org-mode tests
 
-
 ;;; Code:
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
-
-
-;;; Tests
 (ert-deftest test-ob-exp/org-babel-exp-src-blocks/w-no-headers ()
   "Testing export without any headlines in the org-mode file."
   (let ((html-file (concat (file-name-sans-extension org-test-no-heading-file)

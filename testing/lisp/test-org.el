@@ -10,17 +10,7 @@
 
 ;; Template test file for Org-mode tests
 
-
 ;;; Code:
-(let* ((testing-lisp-dir (file-name-directory
-			  (or load-file-name buffer-file-name)))
-       (load-path (cons testing-lisp-dir load-path)))
-  (dolist (file (directory-files testing-lisp-dir 'full
-				 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$"))
-    (require (intern (substring file 0 (- (length file) 3))))))
-
-
-;;; Tests
 (ert-deftest test-org/org-link-escape-ascii-character ()
   "Escape an ascii character."
   (should

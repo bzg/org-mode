@@ -12,15 +12,6 @@
 
 
 ;;; Code:
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
-
-
-;;; Tests
 
 ;; TODO
 ;; (ert-deftest ob-tangle/noweb-on-tangle ()
