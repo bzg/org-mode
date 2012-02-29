@@ -330,6 +330,22 @@ play with them."
   :version "24.1"
   :type 'boolean)
 
+(defcustom org-clock-clocked-in-display 'mode-line
+  "When clocked in for a task, org-mode can display the current
+task and accumulated time in the mode line and/or frame title.
+Allowed values are:
+
+both         displays in both mode line and frame title
+mode-line    displays only in mode line (default)
+frame-title  displays only in frame title
+nil          current clock is not displayed"
+  :group 'org-clock
+  :type '(choice
+	  (const :tag "Mode line" mode-line)
+	  (const :tag "Frame title" frame-title)
+	  (const :tag "Both" both)
+	  (const :tag "None" nil)))
+
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that
@@ -351,6 +367,8 @@ to add an effort property.")
 
 (defvar org-mode-line-string "")
 (put 'org-mode-line-string 'risky-local-variable t)
+
+(defvar org-frame-title-string '(" " org-mode-line-string))
 
 (defvar org-clock-mode-line-timer nil)
 (defvar org-clock-idle-timer nil)
@@ -1176,18 +1194,28 @@ the clocking selection, associated with the letter `d'."
 			 (save-excursion (org-back-to-heading t) (point))
 			 (buffer-base-buffer))
 	    (setq org-clock-has-been-used t)
-	    (or global-mode-string (setq global-mode-string '("")))
-	    (or (memq 'org-mode-line-string global-mode-string)
-		(setq global-mode-string
-		      (append global-mode-string '(org-mode-line-string))))
+	    ;; add to mode line
+	    (when (or (eq org-clock-clocked-in-display 'mode-line)
+		      (eq org-clock-clocked-in-display 'both))
+	      (or global-mode-string (setq global-mode-string '("")))
+	      (or (memq 'org-mode-line-string global-mode-string)
+		  (setq global-mode-string
+			(append global-mode-string '(org-mode-line-string)))))
+	    ;; add to frame title
+	    (when (or (eq org-clock-clocked-in-display 'frame-title)
+		      (eq org-clock-clocked-in-display 'both))
+	      (or (memq 'org-frame-title-string frame-title-format)
+		  (setq frame-title-format
+			(append frame-title-format '(org-frame-title-string)))))
 	    (org-clock-update-mode-line)
 	    (when org-clock-mode-line-timer
 	      (cancel-timer org-clock-mode-line-timer)
 	      (setq org-clock-mode-line-timer nil))
-	    (setq org-clock-mode-line-timer
-		  (run-with-timer org-clock-update-period
-				  org-clock-update-period
-				  'org-clock-update-mode-line))
+	    (when org-clock-clocked-in-display
+	      (setq org-clock-mode-line-timer
+		    (run-with-timer org-clock-update-period
+				    org-clock-update-period
+				    'org-clock-update-mode-line)))
 	    (when org-clock-idle-timer
 	      (cancel-timer org-clock-idle-timer)
 	      (setq org-clock-idle-timer nil))
@@ -1335,6 +1363,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
     (when (not (org-clocking-p))
       (setq global-mode-string
 	    (delq 'org-mode-line-string global-mode-string))
+      (setq frame-title-format
+	    (delq 'org-frame-title-string frame-title-format))
       (force-mode-line-update)
       (if fail-quietly (throw 'exit t) (error "No active clock")))
     (let (ts te s h m remove)
@@ -1379,6 +1409,8 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	    (setq org-clock-idle-timer nil))
 	  (setq global-mode-string
 		(delq 'org-mode-line-string global-mode-string))
+	  (setq frame-title-format
+		(delq 'org-frame-title-string frame-title-format))
 	  (when org-clock-out-switch-to-state
 	    (save-excursion
 	      (org-back-to-heading t)
@@ -1478,6 +1510,8 @@ UPDOWN tells whether to change 'up or 'down."
   (when (not (org-clocking-p))
     (setq global-mode-string
          (delq 'org-mode-line-string global-mode-string))
+    (setq frame-title-format
+	  (delq 'org-frame-title-string frame-title-format))
     (force-mode-line-update)
     (error "No active clock"))
   (save-excursion ; Do not replace this with `with-current-buffer'.
@@ -1490,6 +1524,8 @@ UPDOWN tells whether to change 'up or 'down."
   (move-marker org-clock-hd-marker nil)
   (setq global-mode-string
 	(delq 'org-mode-line-string global-mode-string))
+  (setq frame-title-format
+	(delq 'org-frame-title-string frame-title-format))
   (force-mode-line-update)
   (message "Clock canceled")
   (run-hooks 'org-clock-cancel-hook))

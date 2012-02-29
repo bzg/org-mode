@@ -56,6 +56,22 @@ When 0, the user is prompted for a value."
   :version "24.1"
   :type 'number)
 
+(defcustom org-timer-display 'mode-line
+  "When a timer is running, org-mode can display it in the mode
+line and/or frame title.
+Allowed values are:
+
+both         displays in both mode line and frame title
+mode-line    displays only in mode line (default)
+frame-title  displays only in frame title
+nil          current timer is not displayed"
+  :group 'org-time
+  :type '(choice
+	  (const :tag "Mode line" mode-line)
+	  (const :tag "Frame title" frame-title)
+	  (const :tag "Both" both)
+	  (const :tag "None" nil)))
+
 (defvar org-timer-start-hook nil
   "Hook run after relative timer is started.")
 
@@ -270,10 +286,17 @@ If the integer is negative, the string will start with \"-\"."
 (defun org-timer-set-mode-line (value)
   "Set the mode-line display of the relative timer.
 VALUE can be `on', `off', or `pause'."
-  (or global-mode-string (setq global-mode-string '("")))
-  (or (memq 'org-timer-mode-line-string global-mode-string)
-      (setq global-mode-string
-	    (append global-mode-string '(org-timer-mode-line-string))))
+  (when (or (eq org-timer-display 'mode-line)
+	    (eq org-timer-display 'both))
+    (or global-mode-string (setq global-mode-string '("")))
+    (or (memq 'org-timer-mode-line-string global-mode-string)
+	(setq global-mode-string
+	      (append global-mode-string '(org-timer-mode-line-string)))))
+  (when (or (eq org-timer-display 'frame-title)
+	     (eq org-timer-display 'both))
+    (or (memq 'org-timer-mode-line-string frame-title-format)
+	(setq frame-title-format
+	      (append frame-title-format '(org-timer-mode-line-string)))))
   (cond
    ((equal value 'off)
     (when org-timer-mode-line-timer
@@ -281,21 +304,32 @@ VALUE can be `on', `off', or `pause'."
       (setq org-timer-mode-line-timer nil))
     (setq global-mode-string
 	  (delq 'org-timer-mode-line-string global-mode-string))
+    (setq frame-title-format
+	  (delq 'org-timer-mode-line-string frame-title-format))
     (force-mode-line-update))
    ((equal value 'pause)
     (when org-timer-mode-line-timer
       (cancel-timer org-timer-mode-line-timer)
       (setq org-timer-mode-line-timer nil)))
    ((equal value 'on)
+  (when (or (eq org-timer-display 'mode-line)
+	    (eq org-timer-display 'both))
     (or global-mode-string (setq global-mode-string '("")))
     (or (memq 'org-timer-mode-line-string global-mode-string)
 	(setq global-mode-string
-	      (append global-mode-string '(org-timer-mode-line-string))))
+	      (append global-mode-string '(org-timer-mode-line-string)))))
+  (when (or (eq org-timer-display 'frame-title)
+	    (eq org-timer-display 'both))
+    (or (memq 'org-timer-mode-line-string frame-title-format)
+	(setq frame-title-format
+	      (append frame-title-format '(org-timer-mode-line-string)))))
     (org-timer-update-mode-line)
     (when org-timer-mode-line-timer
-      (cancel-timer org-timer-mode-line-timer))
-    (setq org-timer-mode-line-timer
-	  (run-with-timer 1 1 'org-timer-update-mode-line)))))
+      (cancel-timer org-timer-mode-line-timer)
+      (setq org-timer-mode-line-timer nil))
+    (when org-timer-display
+      (setq org-timer-mode-line-timer
+	    (run-with-timer 1 1 'org-timer-update-mode-line))))))
 
 (defun org-timer-update-mode-line ()
   "Update the timer time in the mode line."
