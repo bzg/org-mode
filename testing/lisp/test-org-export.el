@@ -57,11 +57,12 @@ as Org syntax."
    (equal
     (org-export-parse-option-keyword
      "arch:headline creator:comment d:(\"TEST\")
- ^:{} toc:1 tags:not-in-toc tasks:todo")
-    '(:with-archived-trees
-      headline :with-creator comment :with-drawers ("TEST")
-      :with-sub-superscript {} :with-toc 1 :with-tags not-in-toc
-      :with-tasks todo))))
+ ^:{} toc:1 tags:not-in-toc tasks:todo num:2")
+    '( :section-numbers
+       2
+       :with-archived-trees headline :with-creator comment
+       :with-drawers ("TEST") :with-sub-superscript {} :with-toc 1
+       :with-tags not-in-toc :with-tasks todo))))
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
@@ -253,9 +254,7 @@ text
     (should (equal (buffer-string)
 		   "Small Org file with an include keyword.
 
-#+BEGIN_SRC emacs-lisp :exports results
-(+ 2 1)
-#+END_SRC
+#+BEGIN_SRC emacs-lisp :exports results\n(+ 2 1)\n#+END_SRC
 
 Success!
 

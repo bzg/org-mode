@@ -1072,8 +1072,7 @@ CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((class (plist-get info :latex-class))
 	 (level (org-export-get-relative-level headline info))
-	 (numberedp (let ((sec-num (plist-get info :section-numbers)))
-		      (if (wholenump sec-num) (<= level sec-num) sec-num)))
+	 (numberedp (org-export-numbered-headline-p headline info))
 	 (class-sectionning (assoc class org-e-latex-classes))
 	 ;; Section formatting will set two placeholders: one for the
 	 ;; title and the other for the contents.
@@ -1095,8 +1094,7 @@ holding contextual information."
 	      (when numberedp (concat (car sec) "\n%s" (nth 1 sec))))
 	     ;; (num-in num-out no-num-in no-num-out)
 	     ((= (length sec) 4)
-	      (if numberedp
-		  (concat (car sec) "\n%s" (nth 1 sec))
+	      (if numberedp (concat (car sec) "\n%s" (nth 1 sec))
 		(concat (nth 2 sec) "\n%s" (nth 3 sec)))))))
 	 (text (org-export-secondary-string
 		(org-element-property :title headline) 'e-latex info))
@@ -1144,14 +1142,14 @@ holding contextual information."
 		(format "\\begin{%s}\n" (if numberedp 'enumerate 'itemize)))
 	      ;; Itemize headline
 	      "\\item " full-text "\n" headline-label pre-blanks contents)))
-	;; If headline in the last sibling, close the list, before any
-	;; blank line.  Otherwise, simply return LOW-LEVEL-BODY.
-	(if (org-export-last-sibling-p headline info)
-	    (replace-regexp-in-string
-	     "[ \t\n]*\\'"
-	     (format "\n\\\\end{%s}" (if numberedp 'enumerate 'itemize))
-	     low-level-body)
-	  low-level-body)))
+	;; If headline is not the last sibling simply return
+	;; LOW-LEVEL-BODY.  Otherwise, also close the list, before any
+	;; blank line.
+	(if (not (org-export-last-sibling-p headline info)) low-level-body
+	  (replace-regexp-in-string
+	   "[ \t\n]*\\'"
+	   (format "\n\\\\end{%s}" (if numberedp 'enumerate 'itemize))
+	   low-level-body))))
      ;; Case 3. Standard headline.  Export it as a section.
      (t (format section-fmt full-text
 		(concat headline-label pre-blanks contents))))))

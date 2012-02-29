@@ -2601,6 +2601,13 @@ and the last level being considered as high enough, or nil."
 INFO is a plist holding contextual information."
   (cdr (assoc headline (plist-get info :headline-numbering))))
 
+(defun org-export-numbered-headline-p (headline info)
+  "Return a non-nil value if HEADLINE element should be numbered.
+INFO is a plist used as a communication channel."
+  (let ((sec-num (plist-get info :section-numbers))
+	(level (org-export-get-relative-level headline info)))
+    (if (wholenump sec-num) (<= level sec-num) sec-num)))
+
 (defun org-export-number-to-roman (n)
   "Convert integer N into a roman numeral."
   (let ((roman '((1000 . "M") (900 . "CM") (500 . "D") (400 . "CD")

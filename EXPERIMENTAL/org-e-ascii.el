@@ -585,12 +585,7 @@ title."
   (let* ((headlinep (eq (org-element-type element) 'headline))
 	 (numbers
 	  ;; Numbering is specific to headlines.
-	  (and headlinep
-	       ;; Section numbering must be active, and headline's
-	       ;; level should be above specified limit, if any.
-	       (let ((sec-num (plist-get info :section-numbers)))
-		 (if (not (wholenump sec-num)) sec-num
-		   (<= (org-export-get-relative-level headline info) sec-num)))
+	  (and headlinep (org-export-numbered-headline-p element info)
 	       ;; All tests passed: build numbering string.
 	       (concat
 		(mapconcat
