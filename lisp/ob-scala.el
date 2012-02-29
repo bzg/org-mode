@@ -1,28 +1,25 @@
 ;;; ob-scala.el --- org-babel functions for Scala evaluation
 
-;; Copyright (C) Andrzej Lichnerowicz
+;; Copyright (C) 2012  Free Software Foundation, Inc.
 
 ;; Author: Andrzej Lichnerowicz
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
-;; Version: 0.01
 
-;;; License:
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;; Currently only supports the external execution. No session support yet.
@@ -32,12 +29,12 @@
 ;; - Scala major mode :: Can be installed from Scala sources
 ;;  https://github.com/scala/scala-dist/blob/master/tool-support/src/emacs/scala-mode.el
 
-
 ;;; Code:
 (require 'ob)
 (require 'ob-ref)
 (require 'ob-comint)
 (require 'ob-eval)
+(eval-when-compile (require 'cl))
 
 (add-to-list 'org-babel-tangle-lang-exts '("scala" . "scala"))
 (defvar org-babel-default-header-args:scala '())
@@ -50,9 +47,9 @@
 called by `org-babel-execute-src-block'"
   (message "executing Scala source code block")
   (let* ((processed-params (org-babel-process-params params))
-         (session (org-babel-scala-initiate-session (first processed-params)))
-         (vars (second processed-params))
-         (result-params (third processed-params))
+         (session (org-babel-scala-initiate-session (nth 0 processed-params)))
+         (vars (nth 1 processed-params))
+         (result-params (nth 2 processed-params))
          (result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:generic
                      body params))
@@ -81,7 +78,8 @@ Emacs-lisp table, otherwise return the results as a string."
 ")
 
 
-(defun org-babel-scala-evaluate (session body &optional result-type result-params)
+(defun org-babel-scala-evaluate
+  (session body &optional result-type result-params)
   "Evaluate BODY in external Scala process.
 If RESULT-TYPE equals 'output then return standard output as a string.
 If RESULT-TYPE equals 'value then return the value of the last statement
@@ -90,7 +88,7 @@ in BODY as elisp."
   (case result-type
     (output
      (let ((src-file (org-babel-temp-file "scala-")))
-       (progn (with-temp-file src-file (insert full-body))
+       (progn (with-temp-file src-file (insert body))
               (org-babel-eval
                (concat org-babel-scala-command " " src-file) ""))))
     (value 
@@ -116,4 +114,7 @@ supported in Scala."
   nil)
 
 (provide 'ob-scala)
+
+
+
 ;;; ob-scala.el ends here
