@@ -677,8 +677,7 @@ Assume point is at an item."
 	       ((looking-at item-re)
 		(push (funcall assoc-at-point ind) itm-lst)
 		(push (cons ind (point)) end-lst)
-		(when (or (<= ind (cdr beg-cell)) (< ind text-min-ind))
-		  (setq beg-cell (cons (point) ind)))
+		(when (< ind text-min-ind) (setq beg-cell (cons (point) ind)))
 		(forward-line -1))
 	       ;; Skip blocks, drawers, inline tasks, blank lines.
 	       ((and (looking-at "^[ \t]*#\\+end_")
