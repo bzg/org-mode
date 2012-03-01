@@ -1996,7 +1996,8 @@ file's directory then expand relative links."
 (defun org-babel-examplize-region (beg end &optional results-switches)
   "Comment out region using the inline '==' or ': ' org example quote."
   (interactive "*r")
-  (flet ((chars-between (b e) (string-match "[\\S]" (buffer-substring b e))))
+  (flet ((chars-between (b e)
+			(not (string-match "^[\\s]*$" (buffer-substring b e)))))
     (if (or (chars-between (save-excursion (goto-char beg) (point-at-bol)) beg)
 	    (chars-between end (save-excursion (goto-char end) (point-at-eol))))
 	(save-excursion
