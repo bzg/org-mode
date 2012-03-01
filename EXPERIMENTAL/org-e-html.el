@@ -120,7 +120,8 @@
     (:html-preamble nil nil org-e-html-preamble)
     (:html-table-tag nil nil org-e-html-table-tag)
     (:xml-declaration nil nil org-e-html-xml-declaration)
-    (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments))
+    (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments)
+    (:mathjax "MATHJAX" nil "" space))
   "Alist between export properties and ways to set them.
 
 The car of the alist is the property name, and the cdr is a list
@@ -1567,39 +1568,31 @@ This function shouldn't be used for floats.  See
 
 (defun org-e-html-mathjax-config (template options in-buffer)
   "Insert the user setup into the matchjax template."
-  (let (name val (yes "   ") (no "// ") x)
-    (mapc
-     (lambda (e)
-       (setq name (car e) val (nth 1 e))
-       (if (string-match (concat "\\<" (symbol-name name) ":") in-buffer)
-	   (setq val (car (read-from-string
-			   (substring in-buffer (match-end 0))))))
-       (if (not (stringp val)) (setq val (format "%s" val)))
-       (if (string-match (concat "%" (upcase (symbol-name name))) template)
-	   (setq template (replace-match val t t template))))
-     options)
-    (setq val (nth 1 (assq 'mathml options)))
-    (if (string-match (concat "\\<mathml:") in-buffer)
-	(setq val (car (read-from-string
-			(substring in-buffer (match-end 0))))))
-    ;; Exchange prefixes depending on mathml setting
-    (if (not val) (setq x yes yes no no x))
-    ;; Replace cookies to turn on or off the config/jax lines
-    (if (string-match ":MMLYES:" template)
-	(setq template (replace-match yes t t template)))
-    (if (string-match ":MMLNO:" template)
-	(setq template (replace-match no t t template)))
-    ;; Return the modified template
-    template))
-
-(defun org-e-html-mathjax (info)
-  (when (or (eq (plist-get info :HTML-fragments) 'mathjax)
-	    (and org-export-have-math
-		 (eq (plist-get info :HTML-fragments) t)))
-    (org-e-html-mathjax-config
-     org-e-html-mathjax-template
-     org-e-html-mathjax-options
-     (or (plist-get info :mathjax) ""))))
+  (when (member (plist-get info :LaTeX-fragments) '(mathjax t))
+    (let (name val (yes "   ") (no "// ") x)
+      (mapc
+       (lambda (e)
+	 (setq name (car e) val (nth 1 e))
+	 (if (string-match (concat "\\<" (symbol-name name) ":") in-buffer)
+	     (setq val (car (read-from-string
+			     (substring in-buffer (match-end 0))))))
+	 (if (not (stringp val)) (setq val (format "%s" val)))
+	 (if (string-match (concat "%" (upcase (symbol-name name))) template)
+	     (setq template (replace-match val t t template))))
+       options)
+      (setq val (nth 1 (assq 'mathml options)))
+      (if (string-match (concat "\\<mathml:") in-buffer)
+	  (setq val (car (read-from-string
+			  (substring in-buffer (match-end 0))))))
+      ;; Exchange prefixes depending on mathml setting
+      (if (not val) (setq x yes yes no no x))
+      ;; Replace cookies to turn on or off the config/jax lines
+      (if (string-match ":MMLYES:" template)
+	  (setq template (replace-match yes t t template)))
+      (if (string-match ":MMLNO:" template)
+	  (setq template (replace-match no t t template)))
+      ;; Return the modified template
+      template)))
 
 (defun org-e-html-preamble (info)
   (when (plist-get info :html-preamble)
@@ -1732,7 +1725,9 @@ original parsed data.  INFO is a plist holding export options."
 <head>"
    (org-e-html-meta-info info)		; meta
    (org-e-html-style info)		; style
-   (org-e-html-mathjax info)		; mathjax
+   (org-e-html-mathjax-config		; mathjax
+    org-e-html-mathjax-template org-e-html-mathjax-options
+    (or (plist-get info :mathjax) ""))
    "
 </head>"
 
