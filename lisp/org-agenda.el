@@ -5868,8 +5868,18 @@ could bind the variable in the options section of a custom command.")
       (let ((pl (text-property-any 0 (length x) 'org-heading t x)))
 	(setq re (get-text-property 0 'org-todo-regexp x))
 	(when (and re
+		   ;; Test `pl' because if there's no heading content,
+		   ;; there's no point matching to highlight.  Note
+		   ;; that if we didn't test `pl' first, and there
+		   ;; happened to be no keyword from `org-todo-regexp'
+		   ;; on this heading line, then the `equal' comparison
+		   ;; afterwards would spuriously succeed in the case
+		   ;; where `pl' is nil -- causing an args-out-of-range
+		   ;; error when we try to add text properties to text
+		   ;; that isn't there.
+		   pl
 		   (equal (string-match (concat "\\(\\.*\\)" re "\\( +\\)")
-					x (or pl 0)) pl))
+					x pl) pl))
 	  (add-text-properties
 	   (or (match-end 1) (match-end 0)) (match-end 0)
 	   (list 'face (org-get-todo-face (match-string 2 x)))
