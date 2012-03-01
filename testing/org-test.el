@@ -30,6 +30,8 @@
 
 
 ;;;; Code:
+(require 'org-test-ob-consts)
+
 (let* ((org-test-dir (expand-file-name
 		      (file-name-directory
 		       (or load-file-name buffer-file-name))))
