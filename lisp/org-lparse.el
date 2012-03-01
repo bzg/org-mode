@@ -1813,6 +1813,12 @@ Stripping happens only when the exported backend is not one of
   (org-lparse-end 'FOOTNOTE-DEFINITION n)
   (setq org-lparse-insert-tag-with-newlines 'both)
   (let ((footnote-def (org-lparse-end-collect)))
+    ;; Cleanup newlines in footnote definition.  This ensures that a
+    ;; transcoded line is never (wrongly) broken in to multiple lines.
+    (let ((pos 0))
+      (while (string-match "[\r\n]+" footnote-def pos)
+	(setq pos (1+ (match-beginning 0)))
+	(setq footnote-def (replace-match " " t t footnote-def))))
     (push (cons n footnote-def) org-lparse-footnote-definitions)))
 
 (defvar org-lparse-collect-buffer nil
