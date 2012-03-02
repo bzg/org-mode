@@ -676,8 +676,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  ;; If EXPORT-PROPS isn't nil, also add `org-footnote'
 	  ;; property to it, so it can be easily recognized by
 	  ;; exporters.
-	  (if sort-only
-	      (goto-char (nth 2 ref))
+	  (if sort-only (goto-char (nth 2 ref))
 	    (delete-region (nth 1 ref) (nth 2 ref))
 	    (goto-char (nth 1 ref))
 	    (let ((new-ref (format "[%d]" marker)))
@@ -706,7 +705,10 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 				      '(:todo-keywords t :tags t :priority t))))
 				(org-export-preprocess-string def parameters))
 			    def)
-			  inlinep pos) ref-table)))))
+			  ;; Reference beginning position is a marker
+			  ;; to preserve it during further buffer
+			  ;; modifications.
+			  inlinep (copy-marker pos)) ref-table)))))
       ;; 2. Find and remove the footnote section, if any.  Also
       ;;    determine where footnotes shall be inserted (INS-POINT).
       (cond
@@ -722,10 +724,9 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	(skip-chars-backward " \r\t\n")
 	(forward-line)
 	(unless (bolp) (newline)))
-       ;; No footnote section set: Footnotes will be added before next
-       ;; headline.
-       ((eq major-mode 'org-mode)
-	(org-with-limited-levels (outline-next-heading)))
+       ;; No footnote section set: Footnotes will be added at the end
+       ;; of the section containing their first reference.
+       ((eq major-mode 'org-mode))
        (t
 	;; Remove any left-over tag in the buffer, if one is set up.
 	(when org-footnote-tag-for-non-org-mode-files
@@ -758,18 +759,21 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 		   (lambda (x)
 		     (cond
 		      ;; When only sorting, ignore inline footnotes.
-		      ((and sort-only (nth 3 x)) nil)
+		      ;; Also clear position marker.
+		      ((and sort-only (nth 3 x))
+		       (set-marker (nth 4 x) nil) nil)
 		      ;; No definition available: provide one.
 		      ((not (nth 2 x))
-		       (append (butlast x 2)
-			       (list (format "DEFINITION NOT FOUND: %s" (car x))
-				     (nth 3 x))))
+		       (append
+			(list (car x) (nth 1 x)
+			      (format "DEFINITION NOT FOUND: %s" (car x)))
+			(nthcdr 3 x)))
 		      (t x)))
 		   ref-table)))
       (setq ref-table (nreverse ref-table))
       ;; 4. Remove left-over definitions in the buffer.
-      (mapc (lambda (x) (unless (nth 3 x)
-		     (org-footnote-delete-definitions (car x))))
+      (mapc (lambda (x)
+	      (unless (nth 3 x) (org-footnote-delete-definitions (car x))))
 	    ref-table)
       ;; 5. Insert the footnotes again in the buffer, at the
       ;;    appropriate spot.
@@ -791,11 +795,6 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	  (skip-chars-backward " \t\n\r")
 	  (delete-region (point) ins-point)
 	  (unless (bolp) (newline))
-	  ;; Keep one blank line between footnotes and signature.
-	  (when (and (derived-mode-p 'message-mode)
-		     (save-excursion
-		       (re-search-forward message-signature-separator nil t)))
-	    (open-line 1))
 	  (when org-footnote-tag-for-non-org-mode-files
 	    (insert "\n" org-footnote-tag-for-non-org-mode-files "\n")))
 	 ((and org-footnote-section (not export-props))
@@ -808,6 +807,8 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	(insert
 	 (mapconcat
 	  (lambda (x)
+	    ;; Clean markers.
+	    (set-marker (nth 4 x) nil)
 	    (format "\n[%s] %s" (nth (if sort-only 0 1) x) (nth 2 x)))
 	  ref-table "\n"))
 	(unless (eobp) (insert "\n\n"))
@@ -819,7 +820,10 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
        ((not sort-only)
 	(mapc
 	 (lambda (x)
-	   (goto-char (nth 4 x))
+	   (let ((pos (nth 4 x)))
+	     (goto-char pos)
+	     ;; Clean marker.
+	     (set-marker pos nil))
 	   (org-footnote-goto-local-insertion-point)
 	   (insert (format "\n[%s] %s\n" (nth 1 x) (nth 2 x))))
 	 ref-table))
