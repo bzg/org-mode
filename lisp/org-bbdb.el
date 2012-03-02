@@ -118,10 +118,6 @@
 
 (defvar date)   ;; dynamically scoped from Org
 
-;; Support for version 2.35
-(eval-after-load 'bbdb
-  '(defvar org-bbdb-old (fboundp 'bbdb-record-get-field-internal)))
-
 ;; Customization
 
 (defgroup org-bbdb-anniversaries nil
@@ -201,7 +197,7 @@ date year)."
     ;; This is BBDB, we make this link!
     (let* ((rec (bbdb-current-record))
            (name (bbdb-record-name rec))
-	   (company (if org-bbdb-old
+	   (company (if (fboundp 'bbdb-record-getprop)
                         (bbdb-record-getprop rec 'company)
                       (car (bbdb-record-get-field rec 'organization))))
 	   (link (org-make-link "bbdb:" name)))
@@ -222,10 +218,10 @@ italicized, in all other cases it is left unchanged."
 
 (defun org-bbdb-open (name)
   "Follow a BBDB link to NAME."
-  (require 'bbdb)
+  (require 'bbdb-com)
   (let ((inhibit-redisplay (not debug-on-error))
 	(bbdb-electric-p nil))
-    (if org-bbdb-old
+    (if (fboundp 'bbdb-name)
         (org-bbdb-open-old)
       (org-bbdb-open-new))))
 
