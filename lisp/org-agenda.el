@@ -1501,8 +1501,8 @@ Custom commands can set this variable in the options section."
   :group 'org-agenda-line-format)
 
 (defvar org-prefix-format-compiled nil
-  "The compiled prefix format and associated variables, as a list
-where first element is a list of variable bindings, and second
+  "The compiled prefix format and associated variables.
+This is a list where first element is a list of variable bindings, and second
 element is the compiled format expression.  See the variable
 `org-agenda-prefix-format'.")
 
@@ -1816,17 +1816,17 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 ;;; Multiple agenda buffers support
 
 (defcustom org-agenda-sticky nil
-   "Non-nil means agenda q key will bury agenda buffers, instead
-of killing it, and agenda commands show existing buffer instead
-of generating new one"
+   "Non-nil means agenda q key will bury agenda buffers.
+Agenda commands will then show existing buffer instead of generating new ones.
+When nil, `q' will kill the single agenda buffer."
   :group 'org-agenda
   :type 'boolean)
 
 (defvar org-agenda-buffer nil
-  "Agenda buffer currently being generated")
+  "Agenda buffer currently being generated.")
 
 (defun org-toggle-sticky-agenda (&optional arg)
-  "Toggle `org-agenda-sticky'"
+  "Toggle `org-agenda-sticky'."
   (interactive)
   (setq org-agenda-sticky (or arg (not org-agenda-sticky)))
   (message "Sticky agenda was %s" (if org-agenda-sticky "enabled" "disabled")))
@@ -1839,49 +1839,45 @@ of generating new one"
 ;; below list is generating by grepping org-agenda.el for defvar
 (defconst org-agenda-local-vars
   '(;; calendar-mode-map
+;    org-clock-current-task
+;    org-mobile-force-id-on-agenda-items
+;    org-habit-show-habits
+;    org-habit-show-habits-only-for-today
     org-agenda-this-buffer-name
-    org-clock-current-task
-    org-mobile-force-id-on-agenda-items
-    org-habit-show-habits
-    org-habit-show-habits-only-for-today
-    org-agenda-this-buffer-name
-    org-agenda-overriding-header
-    org-agenda-title-append
+;    org-agenda-overriding-header
+;    org-agenda-title-append
     org-agenda-undo-list
     org-agenda-pending-undo-list
     org-agenda-archives-mode
-    org-agenda-entry-text-cleanup-hook
-    org-agenda-include-inactive-timestamps
-    org-prefix-format-compiled
-    org-agenda-mode-map
-    org-agenda-menu
-    org-agenda-restrict
+;    org-agenda-entry-text-cleanup-hook
+;    org-agenda-include-inactive-timestamps ?????????????
+;    org-prefix-format-compiled ???????????
+;    org-agenda-mode-map
+;    org-agenda-menu
     org-agenda-follow-mode
     org-agenda-entry-text-mode
     org-agenda-clockreport-mode
     org-agenda-show-log
     org-agenda-redo-command
     org-agenda-query-string
-    org-agenda-mode-hook
+;    org-agenda-mode-hook
     org-agenda-type
     org-agenda-force-single-file
     org-agenda-bulk-marked-entries
-    org-agenda-allow-remote-undo
-    org-agenda-undo-list
+;    org-agenda-allow-remote-undo
     org-agenda-undo-has-started-in
-    org-agenda-pending-undo-list
     org-agenda-restrict
     org-agenda-restrict-begin
     org-agenda-restrict-end
-    org-agenda-last-dispatch-buffer
+;    org-agenda-last-dispatch-buffer
     ;; org-agenda-overriding-restriction
     ;; org-agenda-overriding-arguments
     org-agenda-last-arguments
     org-agenda-info
-    org-mobile-creating-agendas
+;    org-mobile-creating-agendas
     org-agenda-tag-filter-overlays
     org-agenda-cat-filter-overlays
-    org-agenda-marker-table
+;    org-agenda-marker-table
     org-pre-agenda-window-conf
     org-agenda-columns-active
     org-agenda-name
@@ -1890,47 +1886,48 @@ of generating new one"
     org-agenda-tag-filter-while-redo
     org-agenda-tag-filter-preset
     org-agenda-category-filter-preset
-    org-agenda-skip-function
+;    org-agenda-skip-function
     org-agenda-markers
-    org-agenda-last-marker-time
-    org-agenda-only-exact-dates
-    org-agenda-start-day
-    org-starting-day
-    org-agenda-current-span
-    org-arg-loc
-    org-agenda-entry-types
-    org-agenda-search-history
-    org-todo-only
-    org-search-syntax-table
+;    org-agenda-last-marker-time
+;    org-agenda-only-exact-dates
+;    org-agenda-start-day
+    org-starting-day        ; not necessary to include, but no harm
+    org-agenda-current-span ; not necessary to include, but no harm
+    org-arg-loc             ; not necessary to include, but no harm
+;    org-agenda-entry-types
+;    org-agenda-search-history
+;    org-todo-only
+;    org-search-syntax-table
     org-agenda-last-search-view-search-was-boolean
-    org-last-arg
-    org-agenda-skip-regexp
-    org-agenda-overriding-header
-    org-disable-agenda-to-diary
-    diary-list-entries-hook
-    diary-time-regexp
-    org-agenda-cleanup-fancy-diary-hook
-    org-diary-last-run-time
-    org-heading-keyword-regexp-format
-    org-agenda-sorting-strategy
-    org-agenda-sorting-strategy-selected
-    org-agenda-before-sorting-filter-function
-    org-agenda-restriction-lock-overlay
-    org-global-tags-completion-table
+    org-last-arg           ; not necessary to include, but no harm
+;    org-agenda-skip-regexp
+;    org-agenda-overriding-header
+;    org-disable-agenda-to-diary
+;    diary-list-entries-hook
+;    diary-time-regexp
+;    org-agenda-cleanup-fancy-diary-hook
+;    org-diary-last-run-time
+;    org-heading-keyword-regexp-format
+;    org-agenda-sorting-strategy
+;    org-agenda-sorting-strategy-selected
+;    org-agenda-before-sorting-filter-function
+;    org-agenda-restriction-lock-overlay
+;    org-global-tags-completion-table
     org-agenda-filtered-by-category
     org-agenda-filter-form
-    org-hl
-    org-agenda-after-show-hook
-    org-archive-default-command
-    org-agenda-show-window
-    org-agenda-cycle-counter
-    org-last-heading-marker
+;    org-hl
+;    org-agenda-after-show-hook
+;    org-archive-default-command
+    org-agenda-show-window     ; not sure if needed, but probably OK
+    org-agenda-cycle-counter   ; not sure if needed, but probably OK
+;    org-last-heading-marker
     ;; calendar-longitude
     ;; calendar-latitude
     ;; calendar-location-name
     org-agenda-bulk-marked-entries
-    appt-time-msg-list
-    org-agenda-last-prefix-arg))
+;    appt-time-msg-list
+    org-agenda-last-prefix-arg
+    ))
 
 
 (defun org-agenda-mode ()
