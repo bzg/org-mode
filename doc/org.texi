@@ -13716,8 +13716,11 @@ used.
 
 The @code{:cache} header argument controls the use of in-buffer caching of
 the results of evaluating code blocks.  It can be used to avoid re-evaluating
-unchanged code blocks.  This header argument can have one of two
-values: @code{yes} or @code{no}.
+unchanged code blocks.  Note that the @code{:cache} header argument will not
+attempt to cache results when the @code{:session} header argument is used,
+because the results of the code block execution may be stored in the session
+outside of the Org-mode buffer.  The @code{:cache} header argument can have
+one of two values: @code{yes} or @code{no}.
 
 @itemize @bullet
 @item @code{no}
