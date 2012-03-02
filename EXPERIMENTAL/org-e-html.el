@@ -1859,7 +1859,7 @@ contextual information."
   (let ((ref (org-find-text-property-in-string 'org-coderef line))
 	(num (org-find-text-property-in-string 'org-loc line)))
     (when num
-      (setq line (format "<span class=\"linenr1\">%d:  </span>%s (%s)"
+      (setq line (format "<span class=\"linenr\">%d:  </span>%s (%s)"
 			 num line ref)))
     (when ref
       (setq line
