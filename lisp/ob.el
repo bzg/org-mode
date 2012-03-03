@@ -1497,7 +1497,8 @@ buffer or nil if no such result exists."
 	     (concat org-babel-result-regexp
 		     "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]+") nil t)
 	(when (and (string= "name" (downcase (match-string 1)))
-		   (or (looking-at org-babel-src-block-regexp)
+		   (or (beginning-of-line 1)
+		       (looking-at org-babel-src-block-regexp)
 		       (looking-at org-babel-multi-line-header-regexp)))
 	  (throw 'is-a-code-block (org-babel-find-named-result name (point))))
 	(beginning-of-line 0) (point)))))
