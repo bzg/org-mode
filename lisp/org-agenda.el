@@ -1937,12 +1937,30 @@ The following commands are available:
 
 \\{org-agenda-mode-map}"
   (interactive)
-  (kill-all-local-variables)
-  (let ((sticky-p (or org-agenda-sticky
-		      org-agenda-doing-sticky-redo)))
-    (when sticky-p
-      (mapc 'make-local-variable org-agenda-local-vars))
-    (set (make-local-variable 'org-agenda-this-buffer-is-sticky) sticky-p))
+  (cond (org-agenda-doing-sticky-redo
+	 ;; Refreshing sticky agenda-buffer
+	 ;; 
+	 ;; Preserve the value of `org-agenda-local-vars' variables,
+	 ;; while letting `kill-all-local-variables' kill the rest
+	 (let ((save (buffer-local-variables)))
+	   (kill-all-local-variables)
+	   (mapc 'make-local-variable org-agenda-local-vars)
+	   (dolist (elem save)
+	     (let ((var (car elem))
+		   (val (cdr elem)))
+	       (when (and val
+			  (member var org-agenda-local-vars))
+		 (set var val)))))
+	 (set (make-local-variable 'org-agenda-this-buffer-is-sticky) t))
+	(org-agenda-sticky
+	 ;; Creating a sticky Agenda buffer for the first time
+	 (kill-all-local-variables)
+	 (mapc 'make-local-variable org-agenda-local-vars)
+	 (set (make-local-variable 'org-agenda-this-buffer-is-sticky) t))
+	(t
+	 ;; Creating a non-sticky agenda buffer
+	 (kill-all-local-variables)
+	 (set (make-local-variable 'org-agenda-this-buffer-is-sticky) nil)))
   (setq org-agenda-undo-list nil
 	org-agenda-pending-undo-list nil
 	org-agenda-bulk-marked-entries nil)
