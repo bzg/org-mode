@@ -825,7 +825,9 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	     ;; Clean marker.
 	     (set-marker pos nil))
 	   (org-footnote-goto-local-insertion-point)
-	   (insert (format "\n[%s] %s\n" (nth 1 x) (nth 2 x))))
+	   (insert (format "\n[%s] %s\n"
+			   (if sort-only (car x) (nth 1 x))
+			   (nth 2 x))))
 	 ref-table))))))
 
 (defun org-footnote-goto-local-insertion-point ()
