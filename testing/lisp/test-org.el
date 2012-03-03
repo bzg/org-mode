@@ -103,13 +103,13 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   ;; 1. Fuzzy link goes in priority to a matching target.
   (org-test-with-temp-text
       "#+TARGET: Test\n#+NAME: Test\n|a|b|\n<<Test>>\n* Test\n[[Test]]"
-    (goto-line 4)
+    (goto-line 6)
     (org-open-at-point)
     (should (looking-at "<<Test>>")))
   ;; 2. Fuzzy link should then go to a matching target keyword.
   (org-test-with-temp-text
       "#+NAME: Test\n|a|b|\n#+TARGET: Test\n* Test\n[[Test]]"
-    (goto-line 4)
+    (goto-line 5)
     (org-open-at-point)
     (should (looking-at "#\\+TARGET: Test")))
   ;; 3. Then fuzzy link points to an element with a given name.

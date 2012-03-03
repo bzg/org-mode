@@ -1855,35 +1855,33 @@ contextual information."
 ;; (defun org-odt-format-source-code-or-example-colored
 ;;   (lines lang caption textareap cols rows num cont rpllbl fmt))
 
+(defun org-e-html-format-source-line-with-line-number-and-label (line)
+  (let ((ref (org-find-text-property-in-string 'org-coderef line))
+	(num (org-find-text-property-in-string 'org-loc line)))
+    (when num
+      (setq line (format "<span class=\"linenr\">%d:  </span>%s (%s)"
+			 num line ref)))
+    (when ref
+      (setq line
+	    (format
+	     "<span id=\"coderef-%s\" class=\"coderef-off\">%s (%s)</span>"
+	     ref line ref)))
+    line))
+
 (defun org-e-html-format-source-code-or-example-plain
   (lines lang caption textareap cols rows num cont rpllbl fmt)
-  (setq lines
-	(concat
-	 "<pre class=\"example\">\n"
-	 (cond
-	  (textareap
-	   (concat
-	    (format "<p>\n<textarea cols=\"%d\" rows=\"%d\">"
-		    cols rows)
-	    lines "</textarea>\n</p>\n"))
-	  (t
-	   (with-temp-buffer
-	     (insert lines)
-	     (goto-char (point-min))
-	     (while (re-search-forward "[<>&]" nil t)
-	       (replace-match (cdr (assq (char-before)
-					 '((?&."&amp;")(?<."&lt;")(?>."&gt;"))))
-			      t t))
-	     (buffer-string))))
-	 "</pre>\n"))
-
-  (unless textareap
-    (setq lines (org-export-number-lines lines 1 1 num cont rpllbl fmt)))
-
-  ;; (when (string-match "\\(\\`<[^>]*>\\)\n" lines)
-  ;;   (setq lines (replace-match "\\1" t nil lines)))
-
-  lines)
+  (format
+   "\n<pre class=\"example\">\n%s\n</pre>"
+   (cond
+    (textareap
+     (format "<p>\n<textarea cols=\"%d\" rows=\"%d\">%s\n</textarea>\n</p>\n"
+	     cols rows lines))
+    (t (mapconcat
+	(lambda (line)
+	  (org-e-html-format-source-line-with-line-number-and-label
+	   (org-e-html-encode-plain-text line)))
+	(org-split-string lines "\n")
+	"\n")))))
 
 (defun org-e-html-format-source-code-or-example-colored
   (lines lang caption textareap cols rows num cont rpllbl fmt)
@@ -1925,7 +1923,11 @@ contextual information."
 	     lines "</div>")))
 
     (unless textareap
-      (setq lines (org-export-number-lines lines 1 1 num cont rpllbl fmt)))
+      (setq lines
+	    (mapconcat
+	     (lambda (line)
+	       (org-e-html-format-source-line-with-line-number-and-label line))
+	     (org-split-string lines "\n") "\n")))
 
     ;; (when (string-match "\\(\\`<[^>]*>\\)\n" lines)
     ;;   (setq lines (replace-match "\\1" t nil lines)))
@@ -2008,7 +2010,7 @@ INDENT was the original indentation of the block."
   "Transcode a EXAMPLE-BLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let* ((options (or (org-element-property :options example-block) ""))
-	 (value (org-export-handle-code example-block info)))
+	 (value (org-export-handle-code example-block info nil nil t)))
     ;; (org-e-html--wrap-label
     ;;  example-block (format "\\begin{verbatim}\n%s\\end{verbatim}" value))
     (org-e-html--wrap-label
@@ -2590,8 +2592,14 @@ INFO is a plist holding contextual information.  See
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
-      (format (org-export-get-coderef-format path (or desc ""))
-	      (org-export-resolve-coderef path info)))
+      (let ((fragment (concat "coderef-" path)))
+	(format "<a href=#%s %s>%s</a>" fragment
+		(format (concat "class=\"coderef\""
+				" onmouseover=\"CodeHighlightOn(this, '%s');\""
+				" onmouseout=\"CodeHighlightOff(this, '%s');\"")
+			fragment fragment)
+		(format (org-export-get-coderef-format path (or desc "%s"))
+			(org-export-resolve-coderef path info)))))
      ;; Link type is handled by a special function.
      ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
       (funcall protocol (org-link-unescape path) desc 'html))
@@ -2808,7 +2816,7 @@ holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-property :language src-block))
-	 (code (org-export-handle-code src-block info))
+	 (code (org-export-handle-code src-block info nil nil t))
 	 (caption (org-element-property :caption src-block))
 	 (label (org-element-property :name src-block)))
     ;; FIXME: Handle caption

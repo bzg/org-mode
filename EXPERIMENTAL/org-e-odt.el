@@ -566,7 +566,7 @@ styles congruent with the ODF-1.2 specification."
     (let ((xref-format "text"))
       (when (numberp desc)
 	(setq desc (format "%d" desc) xref-format "number"))
-      (org-e-odt-format-tags
+      (org-e-odt-format-tags-simple
        '("<text:bookmark-ref text:reference-format=\"%s\" text:ref-name=\"%s\">" .
 	 "</text:bookmark-ref>")
        desc xref-format href)))
@@ -575,7 +575,7 @@ styles congruent with the ODF-1.2 specification."
      '("<draw:a xlink:type=\"simple\" xlink:href=\"%s\" %s>" . "</draw:a>")
      desc href (or attr "")))
    (t
-    (org-e-odt-format-tags
+    (org-e-odt-format-tags-simple
      '("<text:a xlink:type=\"simple\" xlink:href=\"%s\" %s>" . "</text:a>")
      desc href (or attr "")))))
 
@@ -625,17 +625,18 @@ styles congruent with the ODF-1.2 specification."
 
 
 (defun org-e-odt-format-source-line-with-line-number-and-label
-  (line rpllbl num fontifier par-style)
-
-  (let ((keep-label (not (numberp rpllbl)))
-	(ref (org-find-text-property-in-string 'org-coderef line)))
-    (setq line (concat line (and keep-label ref (format "(%s)" ref))))
+  (line fontifier par-style)
+  (let (;; (keep-label (not (numberp rpllbl)))
+	(ref (org-find-text-property-in-string 'org-coderef line))
+	(num (org-find-text-property-in-string 'org-loc line)))
+    (setq line (concat line (and ref (format "(%s)" ref))))
     (setq line (funcall fontifier line))
     (when ref
       (setq line (org-e-odt-format-target line (concat "coderef-" ref))))
     (setq line (org-e-odt-format-stylized-paragraph par-style line))
     (if (not num) line
-      (org-e-odt-format-tags '("<text:list-item>" . "</text:list-item>") line))))
+      (org-e-odt-format-tags
+       '("<text:list-item>" . "</text:list-item>") line))))
 
 (defun org-e-odt-format-source-code-or-example-plain
   (lines lang caption textareap cols rows num cont rpllbl fmt)
@@ -649,7 +650,7 @@ off."
      (lambda (line)
        (incf i)
        (org-e-odt-format-source-line-with-line-number-and-label
-	line rpllbl num 'org-e-odt-encode-plain-text
+	line 'org-e-odt-encode-plain-text
 	(if (= i line-count) "OrgFixedWidthBlockLastLine"
 	  "OrgFixedWidthBlock")))
      lines "\n")))
@@ -701,8 +702,7 @@ Update styles.xml with styles that were collected as part of
 	(goto-char (match-beginning 0))
 	(insert "\n<!-- Org Htmlfontify Styles -->\n" styles "\n")))))
 
-(defun org-e-odt-format-source-code-or-example-colored
-  (lines lang caption textareap cols rows num cont rpllbl fmt)
+(defun org-e-odt-format-source-code-or-example-colored (lines lang caption)
   "Format source or example blocks using `htmlfontify-string'.
 Use this routine when `org-export-e-odt-fontify-srcblocks' option
 is turned on."
@@ -740,37 +740,37 @@ is turned on."
 	 (lambda (line)
 	   (incf i)
 	   (org-e-odt-format-source-line-with-line-number-and-label
-	    line rpllbl num 'htmlfontify-string
+	    line 'htmlfontify-string
 	    (if (= i line-count) "OrgSrcBlockLastLine" "OrgSrcBlock")))
 	 lines "\n")))))
 
 (defun org-e-odt-format-source-code-or-example (lines lang
-						      &optional
-						      caption textareap
-						      cols rows num cont
-						      rpllbl fmt)
+						&optional caption ; FIXME
+						)
   "Format source or example blocks for export.
 Use `org-e-odt-format-source-code-or-example-plain' or
 `org-e-odt-format-source-code-or-example-colored' depending on the
 value of `org-export-e-odt-fontify-srcblocks."
   (setq ;; lines (org-export-number-lines
-	;;        lines 0 0 num cont rpllbl fmt 'preprocess) FIXME
-	lines (funcall
-	       (or (and org-export-e-odt-fontify-srcblocks
-			(or (featurep 'htmlfontify)
-			    ;; htmlfontify.el was introduced in Emacs 23.2
-			    ;; So load it with some caution
-			    (require 'htmlfontify nil t))
-			(fboundp 'htmlfontify-string)
-			'org-e-odt-format-source-code-or-example-colored)
-		   'org-e-odt-format-source-code-or-example-plain)
-	       lines lang caption textareap cols rows num cont rpllbl fmt))
-  (if (not num) lines
-    (let ((extra (format " text:continue-numbering=\"%s\""
-			 (if cont "true" "false"))))
-      (org-e-odt-format-tags
-       '("<text:list text:style-name=\"OrgSrcBlockNumberedLine\"%s>"
-	 . "</text:list>") lines extra))))
+   ;;        lines 0 0 num cont rpllbl fmt 'preprocess) FIXME
+   lines (funcall
+	  (or (and org-export-e-odt-fontify-srcblocks
+		   (or (featurep 'htmlfontify)
+		       ;; htmlfontify.el was introduced in Emacs 23.2
+		       ;; So load it with some caution
+		       (require 'htmlfontify nil t))
+		   (fboundp 'htmlfontify-string)
+		   'org-e-odt-format-source-code-or-example-colored)
+	      'org-e-odt-format-source-code-or-example-plain)
+	  lines lang caption))
+  (let ((num (org-find-text-property-in-string 'org-loc lines)))
+    (if (not num) lines
+      (let* ((cont (not (equal num 1)))
+	     (extra (format " text:continue-numbering=\"%s\""
+			    (if cont "true" "false"))))
+	(org-e-odt-format-tags
+	 '("<text:list text:style-name=\"OrgSrcBlockNumberedLine\"%s>"
+	   . "</text:list>") lines extra)))))
 
 (defun org-e-odt-remap-stylenames (style-name)
   (or
@@ -1340,6 +1340,9 @@ ATTR is a string of other attributes of the a element."
 
 (defun org-e-odt-format-tags (tag text &rest args)
   (apply 'org-e-odt-format-tags-1 tag text "\n" "\n" args))
+
+(defun org-e-odt-format-tags-simple (tag text &rest args)
+  (apply 'org-e-odt-format-tags-1 tag text nil nil args))
 
 (defun org-e-odt-init-outfile ()
   (unless (executable-find "zip")
@@ -3440,7 +3443,7 @@ contextual information."
   "Transcode a EXAMPLE-BLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let* ((options (or (org-element-property :options example-block) ""))
-	 (value (org-export-handle-code example-block info)))
+	 (value (org-export-handle-code example-block info nil nil t)))
     (org-e-odt--wrap-label
      example-block (org-e-odt-format-source-code-or-example value nil))))
 
@@ -3989,8 +3992,11 @@ INFO is a plist holding contextual information.  See
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
-      (format (org-export-get-coderef-format path (or desc ""))
-	      (org-export-resolve-coderef path info)))
+      (let* ((fmt (org-export-get-coderef-format path (or desc "%s")))
+	     (res (org-export-resolve-coderef path info))
+	     (org-e-odt-suppress-xref nil)
+	     (href (org-xml-format-href (concat "#coderef-" path))))
+	(format fmt (org-e-odt-format-link res href))))
      ;; Link type is handled by a special function.
      ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
       (funcall protocol (org-link-unescape path) desc 'html))
@@ -4178,7 +4184,7 @@ holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-property :language src-block))
-	 (code (org-export-handle-code src-block info))
+	 (code (org-export-handle-code src-block info nil nil t))
 	 (caption (org-element-property :caption src-block))
 	 (label (org-element-property :name src-block)))
     ;; FIXME: Handle caption

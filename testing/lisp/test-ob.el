@@ -1032,6 +1032,36 @@ Line 3\"
 
 * next heading"))
 
+(ert-deftest test-ob/results-do-not-replace-code-blocks ()
+  (org-test-with-temp-text "Block two has a space after the name.
+
+  #+name: foo
+  #+begin_src emacs-lisp 
+    1
+  #+end_src emacs-lisp
+
+#+name: foo 
+#+begin_src emacs-lisp
+  2
+#+end_src
+
+#+name: foo
+#+begin_src emacs-lisp
+  3
+#+end_src
+
+#+RESULTS: foo
+: foo
+"
+    (dolist (num '(1 2 3))
+      ;; execute the block
+      (goto-char (point-min))
+      (org-babel-next-src-block num) (org-babel-execute-src-block)
+      ;; check the results
+      (goto-char (point-max))
+      (move-beginning-of-line 0)
+      (should (looking-at (format ": %d" num))))))
+
 (provide 'test-ob)
 
 ;;; test-ob ends here
