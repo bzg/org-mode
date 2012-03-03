@@ -817,7 +817,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	(when export-props (setq org-export-footnotes-seen ref-table)))
        ;; Each footnote definition has to be inserted at the end of
        ;; the section where its first reference belongs.
-       ((not sort-only)
+       (t
 	(mapc
 	 (lambda (x)
 	   (let ((pos (nth 4 x)))
@@ -826,24 +826,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 	     (set-marker pos nil))
 	   (org-footnote-goto-local-insertion-point)
 	   (insert (format "\n[%s] %s\n" (nth 1 x) (nth 2 x))))
-	 ref-table))
-       ;; Else, insert each definition at the end of the section
-       ;; containing their first reference.  Happens only in Org files
-       ;; with no special footnote section, and only when doing
-       ;; sorting.
-       (t (mapc 'org-insert-footnote-reference-near-definition
-		ref-table))))))
-
-(defun org-insert-footnote-reference-near-definition (entry)
-  "Find first reference of footnote ENTRY and insert the definition there.
-ENTRY is (fn-label num-mark definition)."
-  (when (car entry)
-    (goto-char (point-min))
-    (let ((ref (org-footnote-get-next-reference (car entry))))
-      (when ref
-	(goto-char (nth 2 ref))
-	(org-footnote-goto-local-insertion-point)
-	(insert (format "\n[%s] %s\n" (car entry) (nth 2 entry)))))))
+	 ref-table))))))
 
 (defun org-footnote-goto-local-insertion-point ()
   "Find insertion point for footnote, just before next outline heading."
