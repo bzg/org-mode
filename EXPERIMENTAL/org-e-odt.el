@@ -1838,6 +1838,7 @@ formula file."
 (declare-function org-element-parse-secondary-string
 		  "org-element" (string restriction &optional buffer))
 (defvar org-element-string-restrictions)
+(defvar org-element-object-restrictions)
 
 (declare-function org-export-clean-table "org-export" (table specialp))
 (declare-function org-export-data "org-export" (data backend info))
@@ -3488,7 +3489,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-e-odt-footnote-def (raw info) ; FIXME
   (if (equal (org-element-type raw) 'org-data)
-      (org-trim (org-export-data raw 'e-odt info))
+      (org-trim (org-export-data raw 'e-odt info)) ; fix paragraph
+						   ; style
     (org-odt-format-stylized-paragraph
      'footnote (org-trim (org-export-secondary-string raw 'e-odt info)))))
 
@@ -3501,7 +3503,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
    (let ((prev (org-export-get-previous-element footnote-reference info)))
-     (when (and (listp prev) (eq (car prev) 'footnote-reference))
+     (when (eq (org-element-type prev) 'footnote-reference)
        org-e-odt-footnote-separator))
    (cond
     ((not (org-export-footnote-first-reference-p footnote-reference info))
@@ -3536,7 +3538,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode an HEADLINE element from Org to HTML.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
-  (let* ((numberedp (plist-get info :section-numbers))
+  (let* ((numberedp (org-export-numbered-headline-p headline info))
 	 (level (org-export-get-relative-level headline info))
 	 (todo (and (plist-get info :with-todo-keywords)
 		    (let ((todo (org-element-property
@@ -3570,7 +3572,7 @@ holding contextual information."
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((class (plist-get info :latex-class))
-	 (numberedp (plist-get info :section-numbers))
+	 (numberedp (org-export-numbered-headline-p headline info))
 	 ;; Get level relative to current parsed data.
 	 (level (org-export-get-relative-level headline info))
 	 ;; (class-sectionning (assoc class org-e-odt-classes))
@@ -3789,8 +3791,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (cond
      ((string= key "latex") value)
      ((string= key "index") (format "\\index{%s}" value))
-     ((string= key "target")
-      (format "\\label{%s}" (org-export-solidify-link-text value)))
+     ((string= key "target") nil	; FIXME
+      ;; (format "\\label{%s}" (org-export-solidify-link-text value))
+      )
      ((string= key "toc")
       (let ((value (downcase value)))
 	(cond
@@ -3942,53 +3945,58 @@ INFO is a plist holding contextual information.  See
     (cond
      ;; Image file.
      (imagep (org-e-odt-link--inline-image link info))
-     ;; Target or radioed target: replace link with the normalized
-     ;; custom-id/target name.
-     ((member type '("target" "radio"))
+     ;; Radioed target: Target's name is obtained from original raw
+     ;; link.  Path is parsed and transcoded in order to have a proper
+     ;; display of the contents.
+     ((string= type "radio")
       (org-e-odt-format-internal-link
-       (or desc (org-export-secondary-string path 'e-odt info))
+       (org-export-secondary-string
+	(org-element-parse-secondary-string
+	 path (cdr (assq 'radio-target org-element-object-restrictions)))
+	'e-odt info)
        (org-export-solidify-link-text path)))
      ;; Links pointing to an headline: Find destination and build
-     ;; appropriate referencing commanding.
+     ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
       (let ((destination (if (string= type "fuzzy")
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
-	;; Fuzzy link points to a target.  Do as above.
 	(case (org-element-type destination)
-	  (target
-	   (org-e-odt-format-internal-link
-	    (or desc
-		(org-export-secondary-string
-		 (org-element-property :raw-link link)
-		 'e-odt info))
-	    (org-export-solidify-link-text
-	     (org-element-property :raw-value destination))))
-	  ;; Fuzzy link points to an headline.  If headlines are
-	  ;; numbered and the link has no description, display
-	  ;; headline's number.  Otherwise, display description or
-	  ;; headline's title.
-	  (headline
-	   (let ((label
-		  (format "sec-%s"
-			  (mapconcat
-			   'number-to-string
-			   (org-export-get-headline-number destination info)
-			   "-"))))
-	     (if (and (plist-get info :section-numbers) (not desc))
-		 (format "\\ref{%s}" label)
-	       (org-e-odt-format-internal-link
-		(or desc
-		    (org-export-secondary-string
-		     (org-element-property :title destination)
-		     'e-odt info)) label))))
 	  ;; Fuzzy link points nowhere.
-	  (otherwise
+	  ('nil
 	   (org-e-odt-format-fontify
-	    (or desc
-		(org-export-secondary-string
-		 (org-element-property :raw-link link)
-		 'e-odt info)) 'emphasis)))))
+	    (or desc (org-export-secondary-string
+		      (org-element-property :raw-link link)
+		      'e-odt info)) 'emphasis))
+	  ;; Fuzzy link points to an invisible target.
+	  (keyword nil)
+	  ;; LINK points to an headline.  If headlines are numbered
+	  ;; and the link has no description, display headline's
+	  ;; number.  Otherwise, display description or headline's
+	  ;; title.
+	  (headline
+	   (let* ((headline-no (org-export-get-headline-number destination info))
+		  (label (format "sec-%s" (mapconcat 'number-to-string
+						     headline-no "-")))
+		  (section-no (mapconcat 'number-to-string headline-no ".")))
+	     (setq desc
+		   (cond
+		    (desc desc)
+		    ((plist-get info :section-numbers) section-no)
+		    (t (org-export-secondary-string
+			(org-element-property :title destination)
+			'e-odt info))))
+	     (org-e-odt-format-internal-link desc label)))
+	  ;; Fuzzy link points to a target.  Do as above.
+	  (otherwise
+	   (let ((path (org-export-solidify-link-text path)))
+	     (unless desc
+	       (setq desc (let ((number (org-export-get-ordinal
+					 destination info)))
+			    (when number
+			      (if (atom number) (number-to-string number)
+				(mapconcat 'number-to-string number "."))))))
+	     (org-e-odt-format-internal-link (or desc "FIXME") path))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -4032,7 +4040,7 @@ the plist used as a communication channel."
 	 (class (cdr (assoc style '((footnote . "footnote")
 				    (verse . nil)))))
 	 (extra (if class (format " class=\"%s\"" class) ""))
-	 (parent (car (org-export-get-genealogy paragraph info)))
+	 (parent (org-export-get-parent paragraph info))
 	 (parent-type (org-element-type parent))
 	 (style (case parent-type
 		  (quote-block 'quote)
@@ -4384,13 +4392,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Target
 
-(defun org-e-odt-target (target text info)
+(defun org-e-odt-target (target contents info)
   "Transcode a TARGET object from Org to HTML.
-TEXT is the text of the target.  INFO is a plist holding
-contextual information."
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
   (org-e-odt-format-anchor
-   text (org-export-solidify-link-text
-	 (org-element-property :raw-value target))))
+   "" (org-export-solidify-link-text (org-element-property :value target))))
 
 
 ;;;; Time-stamp
