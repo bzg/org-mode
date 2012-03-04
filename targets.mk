@@ -53,7 +53,7 @@ up2:	update
 update:
 	git remote update
 	git pull
-	$(MAKE) all
+	$(MAKE) check
 
 install:	$(INSTSUB)
 
