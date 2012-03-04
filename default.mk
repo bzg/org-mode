@@ -33,13 +33,20 @@ BATCH	= $(EMACS) -batch -Q \
 	  --eval '(defconst org-release "$(ORGVERSION)-Make")' \
 
 # How to run tests
-BTEST_EXTRA = # placeholder
-BTEST	= $(EMACS) -batch \
-	  $(BTEST_EXTRA) \
-	  -L lisp/ \
+BTEST_PRE   = # add options before standard load-path
+BTEST_POST  = # add options after standard load path
+BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave python sh # R
+# R is not activated by default because it requires ess to be installed and configured
+req-ob-lang = --eval '(require '"'"'ob-$(ob-lang))'
+BTEST_EXTRA = # extra packages to require
+req-extra   = --eval '(require '"'"'$(req))'
+BTEST	= $(EMACS) -batch -Q \
+	  $(BTEST_PRE) -L lisp/ -L testing/ $(BTEST_POST) \
 	  --eval '(defconst org-release "$(ORGVERSION)-Test")' \
 	  -l testing/org-test.el \
-	  -eval "(setq org-confirm-babel-evaluate nil)" \
+	  $(foreach ob-lang,$(BTEST_OB_LANGUAGES),$(req-ob-lang)) \
+	  $(foreach req,$(BTEST_EXTRA),$(req-extra)) \
+	  --eval '(setq org-confirm-babel-evaluate nil)' \
 	  -f org-test-run-batch-tests
 
 # How to byte-compile the whole source directory
