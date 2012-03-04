@@ -2459,9 +2459,9 @@ DATA is the parse tree from which definitions are collected.
 INFO is the plist used as a communication channel.
 
 Definitions are sorted by order of references.  They either
-appear as Org data \(transcoded with `org-export-data'\) or as
-a secondary string for inlined footnotes \(transcoded with
-`org-export-secondary-string'\).  Unreferenced definitions are
+appear as Org data (transcoded with `org-export-data') or as
+a secondary string for inlined footnotes (transcoded with
+`org-export-secondary-string').  Unreferenced definitions are
 ignored."
   (let (num-alist
 	(collect-fn
@@ -2481,10 +2481,11 @@ ignored."
 		   ;; Also search in definition for nested footnotes.
 		  (when (eq (org-element-property :type fn) 'standard)
 		    (funcall collect-fn def)))))
-	     info)
-	    ;; Return final value.
-	    (reverse num-alist)))))
-    (funcall collect-fn (plist-get info :parse-tree))))
+	     ;; Don't enter footnote definitions since it will happen
+	     ;; when their first reference is found.
+	     info nil 'footnote-definition)))))
+    (funcall collect-fn (plist-get info :parse-tree))
+    (reverse num-alist)))
 
 (defun org-export-footnote-first-reference-p (footnote-reference info)
   "Non-nil when a footnote reference is the first one for its label.
@@ -2512,7 +2513,9 @@ INFO is the plist used as a communication channel."
 		    ((eq (org-element-property :type fn) 'standard)
 		     (funcall search-refs
 			      (org-export-get-footnote-definition fn info)))))
-		 info 'first-match)))))
+		 ;; Don't enter footnote definitions since it will
+		 ;; happen when their first reference is found.
+		 info 'first-match 'footnote-definition)))))
 	(equal (catch 'exit (funcall search-refs (plist-get info :parse-tree)))
 	       footnote-reference)))))
 
@@ -2564,7 +2567,9 @@ INFO is the plist used as a communication channel."
 		   (funcall search-ref
 			    (org-export-get-footnote-definition fn info))
 		   nil))))
-	     info 'first-match)))))
+	     ;; Don't enter footnote definitions since it will happen
+	     ;; when their first reference is found.
+	     info 'first-match 'footnote-definition)))))
     (catch 'exit (funcall search-ref (plist-get info :parse-tree)))))
 
 
