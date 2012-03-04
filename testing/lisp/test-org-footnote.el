@@ -212,7 +212,8 @@ Footnotes:
   ;; 3. As an exception, in `message-mode' buffer, if a signature is
   ;;    present, insert footnotes before it.
   (let ((org-footnote-tag-for-non-org-mode-files nil)
-        (message-signature-separator "^-- $"))
+        (message-cite-prefix-regexp "\\([ 	]*[_.[:word:]]+>+\\|[ 	]*[]>|]\\)+")
+	(message-signature-separator "^-- $"))
     (with-temp-buffer
       (insert "Body[fn::def]
 -- 
