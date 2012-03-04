@@ -112,6 +112,9 @@
           (&optional dont-check-disk already-in-db-buffer))
 (declare-function bbdb-split "ext:bbdb" (string separators))
 (declare-function bbdb-string-trim "ext:bbdb" (string))
+(declare-function bbdb-record-get-field "ext:bbdb" (record field))
+(declare-function bbdb-search-name "ext:bbdb-com" (regexp &optional layout))
+(declare-function bbdb-search-organization "ext:bbdb-com" (regexp &optional layout))
 
 (declare-function calendar-leap-year-p "calendar" (year))
 (declare-function diary-ordinal-suffix "diary-lib" (n))
