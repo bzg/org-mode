@@ -2935,7 +2935,7 @@ the current buffer."
     (insert string)
     (org-element-parse-objects (point-min) (point-max) nil restriction)))
 
-(defun org-element-map (data types fun &optional info first-match)
+(defun org-element-map (data types fun &optional info first-match no-recursion)
   "Map a function on selected elements or objects.
 
 DATA is the parsed tree, as returned by, i.e,
@@ -2951,9 +2951,15 @@ not exportable according to that property list will be skipped.
 When optional argument FIRST-MATCH is non-nil, stop at the first
 match for which FUN doesn't return nil, and return that value.
 
-Nil values returned from FUN are ignored in the result."
-  ;; Ensure TYPES is a list, even of one element.
+Optional argument NO-RECURSION is a symbol or a list of symbols
+representing elements or objects types.  `org-element-map' won't
+enter any recursive element or object whose type belongs to that
+list.  Though, FUN can still be applied on them.
+
+Nil values returned from FUN do not appear in the results."
+  ;; Ensure TYPES and NO-RECURSION are a list, even of one element.
   (unless (listp types) (setq types (list types)))
+  (unless (listp no-recursion) (setq no-recursion (list no-recursion)))
   ;; Recursion depth is determined by --CATEGORY.
   (let* ((--category
 	  (cond
@@ -3008,12 +3014,13 @@ Nil values returned from FUN are ignored in the result."
 			    --blob))))
 		    ;; Now determine if a recursion into --BLOB is
 		    ;; possible.  If so, do it.
-		    (when (or (memq --type org-element-recursive-objects)
-			      (and (memq --type org-element-all-elements)
-				   (not (eq --category 'elements)))
-			      (and (memq --type org-element-greater-elements)
-				   (not (eq --category 'greater-elements))))
-		      (funcall --walk-tree --blob)))))
+		    (unless (memq --type no-recursion)
+		      (when (or (and (memq --type org-element-greater-elements)
+				     (not (eq --category 'greater-elements)))
+				(and (memq --type org-element-all-elements)
+				     (not (eq --category 'elements)))
+				(memq --type org-element-recursive-objects))
+			(funcall --walk-tree --blob))))))
 	      (org-element-contents --data))))))
     (catch 'first-match
       (funcall --walk-tree data)

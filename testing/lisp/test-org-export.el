@@ -363,7 +363,20 @@ body\n")))
 		    info (org-export-collect-tree-properties tree info 'test)))
 	;; Both footnotes should be seen.
 	(should
-	 (= (length (org-export-collect-footnote-definitions tree info)) 2))))))
+	 (= (length (org-export-collect-footnote-definitions tree info)) 2))))
+    ;; 4. Test footnotes definitions collection.
+    (org-test-with-temp-text "Text[fn:1:A[fn:2]] [fn:3].
+
+\[fn:2] B [fn:3] [fn::D].
+
+\[fn:3] C."
+      (let ((tree (org-element-parse-buffer))
+	    (info (org-combine-plists
+		   (org-export-initial-options) '(:with-footnotes t))))
+	(setq info (org-combine-plists
+		    info (org-export-collect-tree-properties tree info 'test)))
+	(should (= (length (org-export-collect-footnote-definitions tree info))
+		   4))))))
 
 (ert-deftest test-org-export/fuzzy-links ()
   "Test fuzz link export specifications."
