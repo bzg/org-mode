@@ -210,17 +210,20 @@ Footnotes:
 
 \[1] Definition"))))
   ;; 3. As an exception, in `message-mode' buffer, if a signature is
-  ;;    present, insert footnotes before it.
-  (let ((org-footnote-tag-for-non-org-mode-files nil)
-        (message-cite-prefix-regexp "\\([ 	]*[_.[:word:]]+>+\\|[ 	]*[]>|]\\)+")
-	(message-signature-separator "^-- $"))
+  ;;    present, insert footnotes before it.n
+  (let ((org-footnote-tag-for-non-org-mode-files nil))
     (with-temp-buffer
       (insert "Body[fn::def]
 -- 
 Fake signature
 -- 
 Signature")
-      (let ((major-mode 'message-mode)) (org-footnote-normalize))
+      ;; Mimic `message-mode'.
+      (let ((major-mode 'message-mode)
+	    (message-cite-prefix-regexp "\\([ 	]*[_.[:word:]]+>+\\|[ 	]*[]>|]\\)+")
+	    (message-signature-separator "^-- $"))
+	(flet ((message-point-in-header-p nil nil))
+	  (org-footnote-normalize)))
       (should
        (equal (buffer-string)
               "Body[1]
