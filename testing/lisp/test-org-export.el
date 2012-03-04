@@ -229,7 +229,9 @@ text
       ;; Region.
       (goto-char (point-min))
       (forward-line 3)
-      (mark-paragraph)
+      (transient-mark-mode 1)
+      (push-mark (point) t t)
+      (goto-char (point-at-eol))
       (should (equal (org-export-as 'test) "text\n")))))
 
 (ert-deftest test-org-export/export-snippet ()
