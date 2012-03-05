@@ -97,7 +97,7 @@ as shown in the example below.
 		     (delq nil (mapcar
 				(lambda (el)
 				  (if (eq '$ el)
-				      (setq quote t)
+				      (prog1 nil (setq quote t))
 				    (prog1 (if quote
 					       (format "\"%s\"" el)
 					     (org-babel-clean-text-properties el))
