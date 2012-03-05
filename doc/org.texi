@@ -14057,6 +14057,14 @@ evaluation.  If @code{:noweb no}, the default, then the reference is not
 expanded before evaluation.  See the @ref{noweb-ref} header argument for
 a more flexible way to resolve noweb references.
 
+It is possible to include the @emph{results} of a code block rather than the
+body.  This is done by appending parenthesis to the code block name which may
+optionally contain arguments to the code block as shown below.
+
+@example
+<<code-block-name(optional arguments)>>
+@end example
+
 Note: the default value, @code{:noweb no}, was chosen to ensure that
 correct code is not broken in a language, such as Ruby, where
 @code{<<arg>>} is a syntactically valid construct.  If @code{<<arg>>} is not
