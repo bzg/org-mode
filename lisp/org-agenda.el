@@ -1886,7 +1886,7 @@ When nil, `q' will kill the single agenda buffer."
     org-agenda-tag-filter-while-redo
     org-agenda-tag-filter-preset
     org-agenda-category-filter-preset
-;    org-agenda-skip-function
+;      org-agenda-skip-function
     org-agenda-markers
 ;    org-agenda-last-marker-time
 ;    org-agenda-only-exact-dates
