@@ -1860,7 +1860,6 @@ When nil, `q' will kill the single agenda buffer."
     org-agenda-show-log
     org-agenda-redo-command
     org-agenda-query-string
-;    org-agenda-mode-hook
     org-agenda-type
     org-agenda-force-single-file
     org-agenda-bulk-marked-entries
