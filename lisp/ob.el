@@ -2169,6 +2169,8 @@ block but are passed literally to the \"example-block\"."
           (setq index (point))
           (nb-add
 	   (with-current-buffer parent-buffer
+	     (save-restriction
+	       (widen)
 	     (mapconcat ;; interpose PREFIX between every line
 	      #'identity
 	      (split-string
@@ -2228,7 +2230,7 @@ block but are passed literally to the \"example-block\"."
 				   "could not be resolved (see "
 				   "`org-babel-noweb-error-langs')"))
 		    "")))
-	       "[\n\r]") (concat "\n" prefix)))))
+	       "[\n\r]") (concat "\n" prefix))))))
         (nb-add (buffer-substring index (point-max)))))
     new-body))
 

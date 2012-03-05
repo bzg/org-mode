@@ -185,9 +185,11 @@ exported source code blocks by language."
   (when only-this-block
     (unless (org-babel-where-is-src-block-head)
       (error "Point is not currently inside of a code block"))
-    (unless target-file
-      (setq target-file
-	    (read-from-minibuffer "Tangle to: " (buffer-file-name))))
+    (save-match-data
+      (unless (or (cdr (assoc :tangle (nth 2 (org-babel-get-src-block-info))))
+		  target-file)
+	(setq target-file
+	      (read-from-minibuffer "Tangle to: " (buffer-file-name)))))
     (narrow-to-region (match-beginning 0) (match-end 0)))
   (save-excursion
     (let ((block-counter 0)
