@@ -112,11 +112,9 @@
           (&optional dont-check-disk already-in-db-buffer))
 (declare-function bbdb-split "ext:bbdb" (string separators))
 (declare-function bbdb-string-trim "ext:bbdb" (string))
-(declare-function bbdb-record-get-field "ext:bbdb"
-		  (fn file &optional arglist fileonly))
-;; These two functions below are part of BBDB3:
-(declare-function bbdb-search-name "ext:bbdb" (regexp &optional layout))
-(declare-function bbdb-search-organization "ext:bbdb" (regexp &optional layout))
+(declare-function bbdb-record-get-field "ext:bbdb" (record field))
+(declare-function bbdb-search-name "ext:bbdb-com" (regexp &optional layout))
+(declare-function bbdb-search-organization "ext:bbdb-com" (regexp &optional layout))
 
 (declare-function calendar-leap-year-p "calendar" (year))
 (declare-function diary-ordinal-suffix "diary-lib" (n))
@@ -228,10 +226,10 @@ italicized, in all other cases it is left unchanged."
   (let ((inhibit-redisplay (not debug-on-error))
 	(bbdb-electric-p nil))
     (if (fboundp 'bbdb-name)
-        (org-bbdb-open-old)
-      (org-bbdb-open-new))))
+        (org-bbdb-open-old name)
+      (org-bbdb-open-new name))))
 
-(defun org-bbdb-open-old ()
+(defun org-bbdb-open-old (name)
   (catch 'exit
     ;; Exact match on name
     (bbdb-name (concat "\\`" name "\\'") nil)
@@ -251,7 +249,7 @@ italicized, in all other cases it is left unchanged."
       (delete-window (get-buffer-window "*BBDB*"))
       (error "No matching BBDB record"))))
 
-(defun org-bbdb-open-new ()
+(defun org-bbdb-open-new (name)
   (catch 'exit
     ;; Exact match on name
     (bbdb-search-name (concat "\\`" name "\\'") nil)

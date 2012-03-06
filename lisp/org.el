@@ -7948,7 +7948,7 @@ the following will happen:
   repeater intact.
 - the start days in the repeater in the original entry will be shifted
   to past the last clone.
-I this way you can spell out a number of instances of a repeating task,
+In this way you can spell out a number of instances of a repeating task,
 and still retain the repeater to cover future instances of the task."
   (interactive "nNumber of clones to produce: \nsDate shift per clone (e.g. +1w, empty to copy unchanged): ")
   (let (beg end template task idprop
@@ -7975,7 +7975,7 @@ and still retain the repeater to cover future instances of the task."
     (setq end (point))
     (setq template (buffer-substring beg end))
     (when (and doshift
-	       (string-match "<[^<>\n]+ \\+[0-9]+[dwmy][^<>\n]*>" template))
+	       (string-match "<[^<>\n]+ [.+]?\\+[0-9]+[dwmy][^<>\n]*>" template))
       (delete-region beg end)
       (setq end beg)
       (setq nmin 0 nmax (1+ nmax) n-no-remove nmax))
@@ -8006,7 +8006,7 @@ and still retain the repeater to cover future instances of the task."
 		(while (re-search-forward org-ts-regexp nil t)
 		  (save-excursion
 		    (goto-char (match-beginning 0))
-		    (if (looking-at "<[^<>\n]+\\( +\\+[0-9]+[dwmy]\\)")
+		    (if (looking-at "<[^<>\n]+\\( +[.+]?\\+[0-9]+[dwmy]\\)")
 			(delete-region (match-beginning 1) (match-end 1)))))))
 	    (setq task (buffer-string)))
 	  (insert task))
