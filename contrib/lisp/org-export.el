@@ -2865,8 +2865,7 @@ INFO is a plist holding export options."
 ;; `org-export-get-ordinal' associates a sequence number to any object
 ;; or element.
 
-(defun org-export-get-ordinal
-  (element info &optional types within-section predicate)
+(defun org-export-get-ordinal (element info &optional types predicate)
   "Return ordinal number of an element or object.
 
 ELEMENT is the element or object considered.  INFO is the plist
