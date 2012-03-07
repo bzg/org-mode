@@ -2876,15 +2876,11 @@ Optional argument TYPES, when non-nil, is a list of element or
 object types, as symbols, that should also be counted in.
 Otherwise, only provided element's type is considered.
 
-When optional argument WITHIN-SECTION is non-nil, narrow counting
-to the section containing ELEMENT.
-
 Optional argument PREDICATE is a function returning a non-nil
 value if the current element or object should be counted in.  It
-accepts one argument: the element or object being considered.
-This argument allows to count only a certain type of objects,
-like inline images, which are a subset of links (in that case,
-`org-export-inline-image-p' might be an useful predicate).
+accepts two arguments: the element or object being considered and
+the plist used as a communication channel.  This allows to count
+only a certain type of objects (i.e. inline images).
 
 Return value is a list of numbers if ELEMENT is an headline or an
 item.  It is nil for keywords.  It represents the footnote number
@@ -2920,24 +2916,15 @@ objects of the same type."
       ((footnote definition footnote-reference)
        (org-export-get-footnote-number element info))
       (otherwise
-       (let ((counter 0)
-	     ;; Determine if search should apply to current section,
-	     ;; in which case it should be retrieved first, or to full
-	     ;; parse tree.  As a special case, an element or object
-	     ;; without a parent headline will also trigger a full
-	     ;; search, notwithstanding WITHIN-SECTION value.
-	     (data
-	      (if (not within-section) (plist-get info :parse-tree)
-		(or (org-export-get-parent-headline element info)
-		    (plist-get info :parse-tree)))))
+       (let ((counter 0))
 	 ;; Increment counter until ELEMENT is found again.
 	 (org-element-map
-	  data (or types (org-element-type element))
+	  (plist-get info :parse-tree) (or types (org-element-type element))
 	  (lambda (el)
 	    (cond
 	     ((equal element el) (1+ counter))
 	     ((not predicate) (incf counter) nil)
-	     ((funcall predicate el) (incf counter) nil)))
+	     ((funcall predicate el info) (incf counter) nil)))
 	  info 'first-match))))))
 
 
