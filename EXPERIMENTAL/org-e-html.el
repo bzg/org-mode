@@ -163,12 +163,6 @@ Intended to be locally bound around a call to `org-export-as-html'." )
 (defvar org-e-html-table-cur-rowgrp-is-hdr)
 (defvar org-lparse-table-is-styled)
 
-
-(defvar org-e-html-headline-formatter
-  (lambda (level snumber todo todo-type priority
-		 title tags target extra-targets extra-class)
-    (concat snumber " " title)))
-
 
 
 ;;; User Configuration Variables
@@ -879,7 +873,6 @@ order to reproduce the default set-up:
   :group 'org-export-e-html
   :type 'function)
 
-
 ;;;; Emphasis
 
 (defcustom org-e-html-emphasis-alist
@@ -930,16 +923,6 @@ to typeset and try to protect special characters."
 
 
 ;;;; Links
-
-(defcustom org-e-html-image-default-option "width=.9\\linewidth"
-  "Default option for images."
-  :group 'org-export-e-html
-  :type 'string)
-
-(defcustom org-e-html-default-figure-position "htb"
-  "Default position for latex figures."
-  :group 'org-export-e-html
-  :type 'string)
 
 (defcustom org-e-html-inline-image-rules
   '(("file" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\|svg\\)\\'")
@@ -1174,29 +1157,25 @@ ATTR is a string of other attributes of the \"a\" element."
 
 (defun org-e-html-format-inline-image (src &optional
 					   caption label attr standalone-p)
-  "Create image tag with source and attributes."
-  (let* ((caption (or caption (org-find-text-property-in-string
-			       'org-caption src)))
-	 (label (or label (org-find-text-property-in-string
-			   'org-label src)))
-	 (attr (or attr (org-find-text-property-in-string
-			 'org-attributes src)))
-	 (img-extras (if (string-match "^ltxpng/" src)
+  (let* ((id (if (not label) ""
+	       (format " id=\"%s\"" (org-export-solidify-link-text label))))
+	 (attr (concat attr
+		       (cond
+			((string-match "\\<alt=" (or attr "")) "")
+			((string-match "^ltxpng/" src)
 			 (format " alt=\"%s\""
-				 (org-find-text-property-in-string
-				  'org-latex-src src))
-		       (if (string-match "\\<alt=" (or attr ""))
-			   (concat " " attr )
-			 (concat " " attr " alt=\"" src "\"")))))
-    (let ((img (format "<img src=\"%s\"%s />" src img-extras)))
-      (cond
-       (standalone-p
-	(format "\n<div%s class=\"figure\">%s\n</div>"
-		(if (not label) ""
-		  (format " id=\"%s\"" (org-export-solidify-link-text label)))
-		(concat (format "\n<p>%s</p>" img)
-			(when caption (format "\n<p>%s</p>" caption)))))
-       (t img)))))
+				 (org-e-html-encode-plain-text
+				  (org-find-text-property-in-string
+				   'org-latex-src src))))
+			(t (format " alt=\"%s\""
+				   (file-name-nondirectory src)))))))
+    (cond
+     (standalone-p
+      (let ((img (format "<img src=\"%s\" %s/>" src attr)))
+	(format "\n<div%s class=\"figure\">%s%s\n</div>"
+		id (format "\n<p>%s</p>" img)
+		(when caption (format "\n<p>%s</p>" caption)))))
+     (t (format "<img src=\"%s\" %s/>" src (concat attr id))))))
 
 ;;;; Bibliography
 
@@ -1298,26 +1277,6 @@ that uses these same face definitions."
   (if (looking-at " +") (replace-match ""))
   (goto-char (point-min)))
 
-(defun org-e-html-format-toc-entry (snumber todo headline tags href)
-  (setq headline (concat
-		  ;; section number
-		  (and org-export-with-section-numbers (concat snumber " "))
-		  ;; headline
-		  headline
-		  ;; tags
-		  (and tags (concat
-			     "&nbsp;&nbsp;&nbsp;"
-			     (format "<span class=\"tag\">%s</span>" tags)))))
-  ;; fontify headline based on TODO keyword
-  (when todo
-    (setq headline (format "<span class=\"todo\">%s</span>" headline)))
-  (format "<a href=\"#%s\">%s</a>" href headline))
-
-(defun org-e-html-toc-entry-formatter
-  (level snumber todo todo-type priority
-	 headline tags target extra-targets extra-class)
-  (org-e-html-format-toc-entry snumber todo headline tags target))
-
 (defun org-e-html-make-string (n string)
   (let (out) (dotimes (i n out) (setq out (concat string out)))))
 
@@ -1344,13 +1303,25 @@ that uses these same face definitions."
      (org-e-html-make-string
       (- prev-level start-level) "</li>\n</ul>\n"))))
 
+(defun* org-e-html-format-toc-headline
+    (todo todo-type priority text tags
+	  &key level section-number headline-label &allow-other-keys)
+  (let ((headline (concat
+		   section-number (and section-number ". ")
+		   text
+		   (and tags "&nbsp;&nbsp;&nbsp;") (org-e-html--tags tags))))
+    (format "<a href=\"#%s\">%s</a>"
+	    headline-label
+	    (if (not nil) headline
+	      (format "<span class=\"%s\">%s</span>" todo-type headline)))))
+
 (defun org-e-html-toc (depth info)
   (assert (wholenump depth))
   (let* ((headlines (org-export-collect-headlines info depth))
 	 (toc-entries
 	  (loop for headline in headlines collect
-		(list (org-e-html-headline-text
-		       headline info 'org-e-html-toc-entry-formatter)
+		(list (org-e-html-format-headline--wrap
+		       headline info 'org-e-html-format-toc-headline)
 		      (org-export-get-relative-level headline info)))))
     (when toc-entries
       (let* ((lang-specific-heading
@@ -1478,18 +1449,6 @@ This is used to choose a separator for constructs like \\verb."
     (loop for c across ll
 	  when (not (string-match (regexp-quote (char-to-string c)) s))
 	  return (char-to-string c))))
-
-(defun org-e-html--make-option-string (options)
-  "Return a comma separated string of keywords and values.
-OPTIONS is an alist where the key is the options keyword as
-a string, and the value a list containing the keyword value, or
-nil."
-  (mapconcat (lambda (pair)
-	       (concat (first pair)
-		       (when (> (length (second pair)) 0)
-			 (concat "=" (second pair)))))
-	     options
-	     ","))
 
 (defun org-e-html--quotation-marks (text info)
   "Export quotation marks depending on language conventions.
@@ -1763,6 +1722,40 @@ original parsed data.  INFO is a plist holding export options."
 </body>")
    "
 </html>"))
+
+
+
+;;; Transcode Helpers
+
+(defun org-e-html--todo (todo)
+  (when todo
+    (format "<span class=\"%s %s%s\">%s</span>"
+	    (if (member todo org-done-keywords) "done" "todo")
+	    org-e-html-todo-kwd-class-prefix (org-e-html-fix-class-name todo)
+	    todo)))
+
+(defun org-e-html--tags (tags)
+  (when tags
+    (format "<span class=\"tag\">%s</span>"
+	    (mapconcat
+	     (lambda (tag)
+	       (format "<span class=\"%s\">%s</span>"
+		       (concat org-e-html-tag-class-prefix
+			       (org-e-html-fix-class-name tag))
+		       tag))
+	     (org-split-string tags ":") "&nbsp;"))))
+
+(defun* org-e-html-format-headline
+  (todo todo-type priority text tags
+	&key level section-number headline-label &allow-other-keys)
+  (let ((section-number
+	 (when section-number
+	   (format "<span class=\"section-number-%d\">%s</span> "
+		   level section-number)))
+	(todo (org-e-html--todo todo))
+	(tags (org-e-html--tags tags)))
+    (concat section-number todo (and todo " ") text
+	    (and tags "&nbsp;&nbsp;&nbsp;") tags)))
 
 
 
@@ -2066,19 +2059,18 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Headline
 
-(defun org-e-html-todo (todo)
-  (when todo
-    (format "<span class=\"%s %s%s\">%s</span>"
-	    (if (member todo org-done-keywords) "done" "todo")
-	    org-e-html-todo-kwd-class-prefix (org-e-html-fix-class-name todo)
-	    todo)))
-
-(defun org-e-html-headline-text (headline info &optional formatter)
+(defun org-e-html-format-headline--wrap (headline info
+						  &optional format-function
+						  &rest extra-keys)
   "Transcode an HEADLINE element from Org to HTML.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
-  (let* ((numberedp (org-export-numbered-headline-p headline info))
-	 (level (org-export-get-relative-level headline info))
+  (let* ((level (+ (org-export-get-relative-level headline info)
+		   (1- org-e-html-toplevel-hlevel)))
+	 (headline-number (org-export-get-headline-number headline info))
+	 (section-number (and (org-export-numbered-headline-p headline info)
+			      (mapconcat 'number-to-string
+					 headline-number ".")))
 	 (todo (and (plist-get info :with-todo-keywords)
 		    (let ((todo (org-element-property
 				 :todo-keyword headline)))
@@ -2091,20 +2083,21 @@ holding contextual information."
 		(org-element-property :title headline) 'e-html info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-element-property :tags headline)))
-
-	 (headline-no (org-export-get-headline-number headline info))
-	 (headline-label
-	  (format "sec-%s" (mapconcat 'number-to-string headline-no "-")))
-	 (headline-labels (list headline-label))
-	 (headline-no (org-export-get-headline-number headline info))
-	 (section-no (mapconcat 'number-to-string headline-no "."))
-	 (primary-target (car (last headline-labels)))
-	 (secondary-targets (butlast headline-labels))
-	 (extra-class nil)
-	 (formatter (or (and (functionp formatter) formatter)
-			org-e-html-headline-formatter)))
-    (funcall formatter level section-no todo todo-type priority
-	     text tags primary-target secondary-targets extra-class)))
+	 (headline-label (concat "sec-" (mapconcat 'number-to-string
+						   headline-number "-")))
+	 (format-function (cond
+			   ((functionp format-function) format-function)
+			   ((functionp org-e-html-format-headline-function)
+			    (function*
+			     (lambda (todo todo-type priority text tags
+					   &allow-other-keys)
+			       (funcall org-e-html-format-headline-function
+					todo todo-type priority text tags))))
+			   (t 'org-e-html-format-headline))))
+    (apply format-function 
+    	   todo todo-type  priority text tags
+    	   :headline-label headline-label :level level
+    	   :section-number section-number extra-keys)))
 
 (defun org-e-html-headline (headline contents info)
   "Transcode an HEADLINE element from Org to HTML.
@@ -2124,20 +2117,12 @@ holding contextual information."
 		    (org-element-property :tags headline)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
+	 (section-number (and (org-export-numbered-headline-p headline info)
+			      (mapconcat 'number-to-string
+					 (org-export-get-headline-number
+					  headline info) ".")))
 	 ;; Create the headline text.
-	 (full-text (if (functionp org-e-html-format-headline-function)
-			;; User-defined formatting function.
-			(funcall org-e-html-format-headline-function
-				 todo todo-type priority text tags)
-		      ;; Default formatting.
-		      (concat
-		       ;; (when todo
-		       ;; 	 (format "\\textbf{\\textsf{\\textsc{%s}}} " todo))
-		       (org-e-html-todo todo) " "
-		       (when priority (format "\\framebox{\\#%c} " priority))
-		       text
-		       ;; (when tags (format "\\hfill{}\\textsc{%s}" tags))
-		       ))))
+	 (full-text (org-e-html-format-headline--wrap headline info)))
     (cond
      ;; Case 1: This is a footnote section: ignore it.
      ((org-element-property :footnote-section-p headline) nil)
@@ -2160,45 +2145,23 @@ holding contextual information."
       (let* ((extra-class (org-element-property :html-container-class headline))
 	     (extra-ids (list (org-element-property :custom-id headline)
 			      (org-element-property :id headline)))
+	     (extra-ids
+	      (mapconcat
+	       (lambda (x)
+		 (when x
+		   (let ((id (org-solidify-link-text
+			      (if (org-uuidgen-p x) (concat "ID-" x) x))))
+		     (format "<a id=\"%s\" name=\"%s\"/>" id id))))
+	       extra-ids ""))
 	     (level1 (+ level (1- org-e-html-toplevel-hlevel)))
-	     (title
-	      (concat
-	       ;; extra-ids
-	       (mapconcat
-		(lambda (x)
-		  (when x
-		    (let ((id (org-solidify-link-text
-			       (if (org-uuidgen-p x) (concat "ID-" x) x))))
-		      (format "<a id=\"%s\" name=\"%s\"/>" id id))))
-		extra-ids "")
-	       ;; section number
-	       (and (org-export-numbered-headline-p headline info)
-		    (format "<span class=\"section-number-%d\">%s</span> "
-			    level1
-			    (mapconcat
-			     'number-to-string
-			     (org-export-get-headline-number headline info) ".")))
-	       ;; full-text
-	       full-text
-	       ;; tags
-	       (and (plist-get info :with-tags) tags
-		    (concat
-		     "&nbsp;&nbsp;&nbsp;"
-		     (format "<span class=\"tag\">%s</span>"
-			     (mapconcat
-			      (lambda (tag)
-				(format "<span class=\"%s\">%s</span>"
-					(concat org-e-html-tag-class-prefix
-						(org-e-html-fix-class-name tag))
-					tag))
-			      (org-split-string tags ":") "&nbsp;"))))))
 	     (id (mapconcat 'number-to-string
 			    (org-export-get-headline-number headline info) "-")))
 	(format "<div id=\"%s\" class=\"%s\">%s%s</div>\n"
 		(format "outline-container-%s" id)
 		(concat (format "outline-%d" level1) (and extra-class " ")
 			extra-class)
-		(format "\n<h%d id=\"sec-%s\">%s</h%d>\n" level1 id title level1)
+		(format "\n<h%d id=\"sec-%s\">%s%s</h%d>\n"
+			level1 id extra-ids full-text level1)
 		contents))))))
 
 
@@ -2240,42 +2203,25 @@ contextual information."
   "Transcode an INLINETASK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((title (org-export-secondary-string
-	       (org-element-property :title inlinetask) 'e-html info))
-	(todo (and (plist-get info :with-todo-keywords)
-		   (let ((todo (org-element-property
-				:todo-keyword inlinetask)))
-		     (and todo
-			  (org-export-secondary-string todo 'e-html info)))))
-	(todo-type (org-element-property :todo-type inlinetask))
-	(tags (and (plist-get info :with-tags)
-		   (org-element-property :tags inlinetask)))
-	(priority (and (plist-get info :with-priority)
-		       (org-element-property :priority inlinetask))))
-    ;; If `org-e-html-format-inlinetask-function' is provided, call it
-    ;; with appropriate arguments.
-    (if (functionp org-e-html-format-inlinetask-function)
-	(funcall org-e-html-format-inlinetask-function
-		 todo todo-type priority title tags contents)
-      ;; Otherwise, use a default template.
-      (org-e-html--wrap-label
-       inlinetask
-       (let ((full-title
-	      (concat
-	       (when todo (format "\\textbf{\\textsf{\\textsc{%s}}} " todo))
-	       (when priority (format "\\framebox{\\#%c} " priority))
-	       title
-	       (when tags (format "\\hfill{}\\textsc{%s}" tags)))))
-	 (format (concat "\\begin{center}\n"
-			 "\\fbox{\n"
-			 "\\begin{minipage}[c]{.6\\textwidth}\n"
-			 "%s\n\n"
-			 "\\rule[.8em]{\\textwidth}{2pt}\n\n"
-			 "%s"
-			 "\\end{minipage}\n"
-			 "}\n"
-			 "\\end{center}")
-		 full-title contents))))))
+  (cond
+   ;; If `org-e-html-format-inlinetask-function' is provided, call it
+   ;; with appropriate arguments.
+   ((functionp org-e-html-format-inlinetask-function)
+    (let ((format-function
+	   (function*
+	    (lambda (todo todo-type priority text tags
+			  &key contents &allow-other-keys)
+	      (funcall org-e-html-format-inlinetask-function
+		       todo todo-type priority text tags contents)))))
+      (org-e-html-format-headline--wrap
+       inlinetask info format-function :contents contents)))
+   ;; Otherwise, use a default template.
+   (t (org-e-html--wrap-label
+       inlinetask 
+       (format
+	"\n<div class=\"inlinetask\">\n<b>%s</b><br/>\n%s\n</div>"
+	(org-e-html-format-headline--wrap inlinetask info)
+	contents)))))
 
 
 ;;;; Item
@@ -2385,8 +2331,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		   (org-element-property :caption latex-environment)
 		   (org-element-property :name latex-environment)
 		   info))
-	 (label (org-element-property :name latex-environment))
-	 (attr nil))
+	 (attr nil)			; FIXME
+	 (label (org-element-property :name latex-environment)))
      (cond
       ((member processing-type '(t mathjax))
        (org-e-html-format-latex latex-frag 'mathjax))
@@ -2397,8 +2343,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		    (string-match "file:\\([^]]*\\)" formula-link))
 	   (org-e-html-format-inline-image
 	    (match-string 1 formula-link) caption label attr t))))
-      (t
-       latex-frag)))))
+      (t latex-frag)))))
 
 
 ;;;; Latex Fragment
@@ -2430,14 +2375,18 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Link
 
-(defun org-e-html-link--inline-image (link info)
+(defun org-e-html-link--inline-image (link desc info)
   "Return HTML code for an inline image.
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
-  (let* ((parent (org-export-get-parent-paragraph link info))
-	 (path (let ((raw-path (org-element-property :path link)))
-		 (if (not (file-name-absolute-p raw-path)) raw-path
-		   (expand-file-name raw-path))))
+  (let* ((type (org-element-property :type link))
+	 (raw-path (org-element-property :path link))
+	 (path (cond ((member type '("http" "https"))
+		      (concat type ":" raw-path))
+		     ((file-name-absolute-p raw-path)
+		      (expand-file-name raw-path))
+		     (t raw-path)))
+	 (parent (org-export-get-parent-paragraph link info))
 	 (caption (org-e-html--caption/label-string
 		   (org-element-property :caption parent)
 		   (org-element-property :name parent)
@@ -2453,9 +2402,8 @@ used as a communication channel."
     ;; value if nothing is left.
     (setq attr (if (not attr) "" (org-trim attr)))
     ;; Return proper string, depending on DISPOSITION.
-    (let ((href (and label (org-export-solidify-link-text label))))
-      (org-e-html-format-inline-image
-       path caption href attr (org-e-html-standalone-image-p link info)))))
+    (org-e-html-format-inline-image
+     path caption label attr (org-e-html-standalone-image-p link info))))
 
 (defvar org-e-html-standalone-image-predicate)
 (defun org-e-html-standalone-image-p (element info &optional predicate)
@@ -2513,8 +2461,6 @@ INFO is a plist holding contextual information.  See
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
-	 (imagep (org-export-inline-image-p
-		  link org-e-html-inline-image-rules))
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
@@ -2530,7 +2476,10 @@ INFO is a plist holding contextual information.  See
 	 protocol)
     (cond
      ;; Image file.
-     (imagep (org-e-html-link--inline-image link info))
+     ((and (or (eq t org-e-html-inline-images)
+	       (and org-e-html-inline-images (not desc)))
+	   (org-export-inline-image-p link org-e-html-inline-image-rules))
+      (org-e-html-link--inline-image link desc info))
      ;; Radioed target: Target's name is obtained from original raw
      ;; link.  Path is parsed and transcoded in order to have a proper
      ;; display of the contents.
@@ -2581,7 +2530,7 @@ INFO is a plist holding contextual information.  See
 			     ((org-e-html-standalone-image-p destination info)
 			      (org-export-get-ordinal
 			       (assoc 'link (org-element-contents destination))
-			       info 'link nil 'org-e-html-standalone-image-p))
+			       info 'link 'org-e-html-standalone-image-p))
 			     (t (org-export-get-ordinal destination info))))
 	       (setq desc (when number
 			    (if (atom number) (number-to-string number)
@@ -3232,6 +3181,7 @@ Return output file's name."
 ;;;; org-solidify-link-text
 ;;;; class for anchors
 ;;;; org-export-with-section-numbers, body-only
+;;;; org-export-mark-todo-in-toc
 
 (provide 'org-e-html)
 ;;; org-e-html.el ends here
