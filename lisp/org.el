@@ -8534,11 +8534,12 @@ call CMD."
 
 (defun org-get-category (&optional pos force-refresh)
   "Get the category applying to position POS."
-  (if force-refresh (org-refresh-category-properties))
-  (let ((pos (or pos (point))))
-    (or (get-text-property pos 'org-category)
-	(progn (org-refresh-category-properties)
-	       (get-text-property pos 'org-category)))))
+  (save-match-data
+    (if force-refresh (org-refresh-category-properties))
+    (let ((pos (or pos (point))))
+      (or (get-text-property pos 'org-category)
+	  (progn (org-refresh-category-properties)
+		 (get-text-property pos 'org-category))))))
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
