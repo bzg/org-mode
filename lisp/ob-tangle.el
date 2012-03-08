@@ -395,7 +395,7 @@ form
   (start-line file link source-name params body comment)"
   (let* ((start-line (nth 0 spec))
 	 (file (nth 1 spec))
-	 (link (org-link-escape (nth 2 spec)))
+	 (link (nth 2 spec))
 	 (source-name (nth 3 spec))
 	 (body (nth 5 spec))
 	 (comment (nth 6 spec))
