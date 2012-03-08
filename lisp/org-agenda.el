@@ -406,7 +406,7 @@ where
 
 desc   A description string to be displayed in the dispatcher menu.
 cmd    An agenda command, similar to the above.  However, tree commands
-       are no allowed, but instead you can get agenda and global todo list.
+       are not allowed, but instead you can get agenda and global todo list.
        So valid commands for a set are:
        (agenda \"\" settings)
        (alltodo \"\" settings)

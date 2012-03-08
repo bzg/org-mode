@@ -207,7 +207,7 @@ Valid values are ?. and ?\).  To get both terminators, use t."
   :group 'org-plain-lists
   :type '(choice (const :tag "dot like in \"2.\"" ?.)
 		 (const :tag "paren like in \"2)\"" ?\))
-		 (const :tab "both" t)))
+		 (const :tag "both" t)))
 
 (defcustom org-alphabetical-lists nil
   "Non-nil means single character alphabetical bullets are allowed.
