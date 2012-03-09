@@ -1829,6 +1829,7 @@ When nil, `q' will kill the single agenda buffer."
   "Toggle `org-agenda-sticky'."
   (interactive)
   (setq org-agenda-sticky (or arg (not org-agenda-sticky)))
+  (org-agenda-kill-all-agenda-buffers)
   (message "Sticky agenda was %s" (if org-agenda-sticky "enabled" "disabled")))
 
 (defvar org-agenda-last-prefix-arg nil)
@@ -2695,6 +2696,11 @@ s   Search for keywords                 C   Configure custom agenda commands
 					  nil
 					(cons (substring (car x) 1) (cdr x))))
 				    custom))))
+	   ((eq c ?\C-k)
+	    (org-agenda-remove-restriction-lock 'noupdate)
+	    (org-agenda-kill-all-agenda-buffers)
+	    (message "All agenda buffers have been killed")
+	    (ding) (sit-for 2))
 	   ((and (not restrict-ok) (memq c '(?1 ?0 ?<)))
 	    (message "Restriction is only possible in Org-mode buffers")
 	    (ding) (sit-for 1))
@@ -2730,6 +2736,9 @@ s   Search for keywords                 C   Configure custom agenda commands
   "The arguments of the previous call to `org-agenda'.")
 (defun org-agenda-run-series (name series)
   (org-let (nth 1 series) '(org-prepare-agenda name))
+  ;; We need to reset agenda markers heree, because when constructing a
+  ;; block agenda, the individual blocks do not do that.
+  (org-agenda-reset-markers)
   (let* ((org-agenda-multi t)
 	 (redo (list 'org-agenda-run-series name (list 'quote series)))
 	 (org-agenda-overriding-arguments
@@ -3288,8 +3297,7 @@ generating a new one"
       (progn
 	;; Popup existing buffer
 	(org-prepare-agenda-window (get-buffer org-agenda-buffer-name))
-	(message
-	 "Sticky Agenda buffer, use `r' to refresh")
+	(message "Sticky Agenda buffer, use `r' to refresh")
 	(throw 'exit nil))
     (setq org-todo-keywords-for-agenda nil)
     (setq org-done-keywords-for-agenda nil)
@@ -3298,7 +3306,8 @@ generating a new one"
       (setq org-agenda-tag-filter nil
 	    org-agenda-category-filter nil))
     (put 'org-agenda-tag-filter :preset-filter org-agenda-tag-filter-preset)
-    (put 'org-agenda-category-filter :preset-filter org-agenda-category-filter-preset)
+    (put 'org-agenda-category-filter :preset-filter
+	 org-agenda-category-filter-preset)
     (if org-agenda-multi
 	(progn
 	  (setq buffer-read-only nil)
@@ -3316,10 +3325,10 @@ generating a new one"
       ;; since they are now buffer local
       (org-prepare-agenda-window (get-buffer-create org-agenda-buffer-name))
       (setq buffer-read-only nil)
+      (org-agenda-reset-markers)
       (let ((inhibit-read-only t)) (erase-buffer))
       (org-agenda-mode)
       (setq org-agenda-buffer (current-buffer))
-      (org-agenda-reset-markers)
       (setq org-agenda-contributing-files nil)
       (setq org-agenda-columns-active nil)
       (org-prepare-agenda-buffers (org-agenda-files nil 'ifmode))
@@ -3369,6 +3378,7 @@ generating a new one"
 	(org-agenda-filter-apply org-agenda-tag-filter 'tag))
       (when (or org-agenda-category-filter (get 'org-agenda-category-filter :preset-filter))
 	(org-agenda-filter-apply org-agenda-category-filter 'category))
+      (org-add-hook 'kill-buffer-hook 'org-agenda-reset-markers 'append 'local)
       )))
 
 (defun org-agenda-mark-clocking-task ()
@@ -3524,9 +3534,13 @@ no longer in use."
     (move-marker (pop org-agenda-markers) nil)))
 
 (defun org-agenda-save-markers-for-cut-and-paste (beg end)
-  "Save relative positions of markers in region."
-  (mapc (lambda (m) (org-check-and-save-marker m beg end))
-	org-agenda-markers))
+  "Save relative positions of markers in region.
+This check for agenda markers in all agenda buffers currently active."
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (eq major-mode 'org-agenda-mode)
+	(mapc (lambda (m) (org-check-and-save-marker m beg end))
+	      org-agenda-markers)))))
 
 ;;; Entry text mode
 
@@ -4732,6 +4746,8 @@ function from a program - use `org-agenda-get-day-entries' instead."
   (when (> (- (org-float-time)
 	      org-agenda-last-marker-time)
 	   5)
+    ;; I am not sure if this works with sticky agendas, because the marker
+    ;; list is then no longer a global variable.
     (org-agenda-reset-markers))
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
@@ -6346,7 +6362,6 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 	(error "Not allowed in %s-type agenda buffers" org-agenda-type)
       nil)))
 
-
 (defun org-agenda-Quit (&optional arg)
   "Exit agenda by removing the window or the buffer"
   (interactive)
@@ -6355,16 +6370,16 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
     (let ((buf (current-buffer)))
       (if (eq org-agenda-window-setup 'other-frame)
 	  (progn
-	    (kill-buffer buf)
 	    (org-agenda-reset-markers)
+	    (kill-buffer buf)
 	    (org-columns-remove-overlays)
 	    (setq org-agenda-archives-mode nil)
 	    (delete-frame))
 	(and (not (eq org-agenda-window-setup 'current-window))
 	     (not (one-window-p))
 	     (delete-window))
-	(kill-buffer buf)
 	(org-agenda-reset-markers)
+	(kill-buffer buf)
 	(org-columns-remove-overlays)
 	(setq org-agenda-archives-mode nil)))
     ;; Maybe restore the pre-agenda window configuration.
@@ -6399,6 +6414,17 @@ Org-mode buffers visited directly by the user will not be touched."
   (org-release-buffers org-agenda-new-buffers)
   (setq org-agenda-new-buffers nil)
   (org-agenda-Quit))
+
+(defun org-agenda-kill-all-agenda-buffers ()
+  "Kill all buffers in `org-agena-mode'.
+This is used when toggling sticky agendas.  You can also explicitly invoke it
+with `C-c a C-k'."
+  (interactive)
+  (let (blist)
+    (dolist (buf (buffer-list))
+      (when (with-current-buffer buf (eq major-mode 'org-agenda-mode))
+	(push buf blist)))
+    (mapc 'kill-buffer blist)))
 
 (defun org-agenda-execute (arg)
   "Execute another agenda command, keeping same window.
