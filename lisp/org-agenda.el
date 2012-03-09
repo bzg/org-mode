@@ -932,7 +932,8 @@ have been removed when this is called, as will any matches for regular
 expressions listed in `org-agenda-entry-text-exclude-regexps'.")
 
 (defvar org-agenda-include-inactive-timestamps nil
-  "Non-nil means include inactive time stamps in agenda and timeline.")
+  "Non-nil means include inactive time stamps in agenda and timeline.
+Dynamically scoped.")
 
 (defgroup org-agenda-windows nil
   "Options concerning the windows used by the Agenda in Org Mode."
@@ -1809,7 +1810,6 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 (defvar org-agenda-mode-hook nil
   "Hook for `org-agenda-mode', run after the mode is turned on.")
 (defvar org-agenda-type nil)
-(defvar org-agenda-force-single-file nil)
 (defvar org-agenda-bulk-marked-entries) ;; Defined further down in this file
 
 
@@ -1840,92 +1840,86 @@ When nil, `q' will kill the single agenda buffer."
 ;; below list is generating by grepping org-agenda.el for defvar
 (defconst org-agenda-local-vars
   '(;; calendar-mode-map
-;    org-clock-current-task
-;    org-mobile-force-id-on-agenda-items
-;    org-habit-show-habits
-;    org-habit-show-habits-only-for-today
-    org-agenda-this-buffer-name
-;    org-agenda-overriding-header
-;    org-agenda-title-append
-    org-agenda-undo-list
-    org-agenda-pending-undo-list
-    org-agenda-archives-mode
-;    org-agenda-entry-text-cleanup-hook
-;    org-agenda-include-inactive-timestamps ?????????????
-;    org-prefix-format-compiled ???????????
-;    org-agenda-mode-map
-;    org-agenda-menu
-    org-agenda-follow-mode
-    org-agenda-entry-text-mode
-    org-agenda-clockreport-mode
-    org-agenda-show-log
-    org-agenda-redo-command
-    org-agenda-query-string
-    org-agenda-type
-    org-agenda-force-single-file
-    org-agenda-bulk-marked-entries
-;    org-agenda-allow-remote-undo
-    org-agenda-undo-has-started-in
-    org-agenda-restrict
-    org-agenda-restrict-begin
-    org-agenda-restrict-end
-;    org-agenda-last-dispatch-buffer
-    ;; org-agenda-overriding-restriction
-    ;; org-agenda-overriding-arguments
-    org-agenda-last-arguments
-    org-agenda-info
-;    org-mobile-creating-agendas
-    org-agenda-tag-filter-overlays
-    org-agenda-cat-filter-overlays
-;    org-agenda-marker-table
-    org-pre-agenda-window-conf
-    org-agenda-columns-active
-    org-agenda-name
-    org-agenda-tag-filter
-    org-agenda-category-filter
-    org-agenda-tag-filter-while-redo
-    org-agenda-tag-filter-preset
-    org-agenda-category-filter-preset
-    org-agenda-markers
-;    org-agenda-last-marker-time
-;    org-agenda-only-exact-dates
-;    org-agenda-start-day
-    org-starting-day        ; not necessary to include, but no harm
-    org-agenda-current-span ; not necessary to include, but no harm
-    org-arg-loc             ; not necessary to include, but no harm
-;    org-agenda-entry-types
-;    org-agenda-search-history
-;    org-todo-only
-;    org-search-syntax-table
-    org-agenda-last-search-view-search-was-boolean
-    org-last-arg           ; not necessary to include, but no harm
-;    org-agenda-skip-regexp
-;    org-agenda-overriding-header
-;    org-disable-agenda-to-diary
-;    diary-list-entries-hook
-;    diary-time-regexp
-;    org-agenda-cleanup-fancy-diary-hook
-;    org-diary-last-run-time
-;    org-heading-keyword-regexp-format
-;    org-agenda-sorting-strategy
-;    org-agenda-sorting-strategy-selected
-;    org-agenda-before-sorting-filter-function
-;    org-agenda-restriction-lock-overlay
-;    org-global-tags-completion-table
-    org-agenda-filtered-by-category
-    org-agenda-filter-form
-;    org-hl
-;    org-agenda-after-show-hook
-;    org-archive-default-command
-    org-agenda-show-window     ; not sure if needed, but probably OK
-    org-agenda-cycle-counter   ; not sure if needed, but probably OK
-;    org-last-heading-marker
-    ;; calendar-longitude
-    ;; calendar-latitude
-    ;; calendar-location-name
-    org-agenda-bulk-marked-entries
-;    appt-time-msg-list
-    org-agenda-last-prefix-arg
+;    org-clock-current-task               ; Must be global
+;    org-mobile-force-id-on-agenda-items  ; Must be global
+;    org-habit-show-habits                ; Must be global
+;    org-habit-show-habits-only-for-today  ; Must be global
+    org-agenda-this-buffer-name           ; OK with sticky buffers
+;    org-agenda-overriding-header         ; Must be global (will be scoped)
+;    org-agenda-title-append              ; Must be global (will be scoped)
+    org-agenda-undo-list                  ; OK with sticky buffers
+    org-agenda-pending-undo-list          ; OK with sticky buffers
+;    org-agenda-archives-mode             ;; Taken out because it is hard to make work with sticky buffers because it is used in .org buffers and maybe even elsewhere.  Just leave it global for now.
+;    org-agenda-entry-text-cleanup-hook   ; Must be global
+;    org-agenda-include-inactive-timestamps ; Scoped variable, should be global
+    org-prefix-format-compiled ; Not sure how this works, but Max did specifically this, to it is likely OK to be local
+;    org-agenda-mode-map           ; Must be global
+;    org-agenda-menu               ; Must be global
+    org-agenda-follow-mode         ; OK with sticky buffers
+    org-agenda-entry-text-mode     ; OK with sticky buffers
+    org-agenda-clockreport-mode    ; OK with sticky buffers
+    org-agenda-show-log            ; Should now be OK with sticky buffers
+    org-agenda-redo-command        ; OK with sticky buffers
+    org-agenda-query-string        ; OK with sticky buffers
+    org-agenda-type                ; OK with sticky buffers
+    org-agenda-bulk-marked-entries ; OK with sticky buffers
+;    org-agenda-allow-remote-undo  ; Must be global
+    org-agenda-undo-has-started-in ; OK with sticky buffers
+    org-agenda-restrict            ; ?????????????? Does not work with sticky, maybe we need to keep this global?
+    org-agenda-restrict-begin      ; ?????????????? Does not work with sticky, maybe we need to keep this global?
+    org-agenda-restrict-end        ; ?????????????? Does not work with sticky, maybe we need to keep this global?
+;    org-agenda-last-dispatch-buffer ; must be global
+    ;; org-agenda-overriding-restriction ; must be global
+    ;; org-agenda-overriding-arguments ; must be global
+    org-agenda-last-arguments      ; OK with sticky buffers
+    org-agenda-info                ; OK with sticky buffers
+;    org-mobile-creating-agendas   ; Must be global
+    org-agenda-tag-filter-overlays ; OK with sticky buffers
+    org-agenda-cat-filter-overlays ; OK with sticky buffers
+;    org-agenda-marker-table       ; Should be global
+    org-pre-agenda-window-conf     ; OK with sticky buffers
+    org-agenda-columns-active      ; OK with sticky buffers
+;     org-agenda-name              ; Not needed will be set locally
+    org-agenda-tag-filter          ; OK with sticky buffers
+    org-agenda-category-filter     ; OK with sticky buffers
+;    org-agenda-tag-filter-while-redo ; not necessary
+;    org-agenda-tag-filter-preset ;  not necessary since scoped from options
+;    org-agenda-category-filter-preset ; not necessary since sciped from options
+    org-agenda-markers             ; OK with sticky buffers
+;    org-agenda-last-marker-time   ; Must be global
+;    org-agenda-only-exact-dates   ; Must be global
+;    org-agenda-start-day      ; must be global
+;    org-starting-day          ; not necessary to include
+;    org-agenda-current-span   ; not necessary to include
+;    org-arg-loc               ; not necessary to include
+;    org-agenda-entry-types    ; Must be global
+;    org-agenda-search-history ; Must be global
+;    org-todo-only             ; Must be global
+;    org-search-syntax-table   ; Must be global
+    org-agenda-last-search-view-search-was-boolean ; OK with sticky buffers
+;    org-last-arg                   ; not necessary to include
+;    org-agenda-skip-regexp                     ; Must be global (will be scoped)
+;    org-agenda-overriding-header               ; Must be global (will be scoped)
+;    org-disable-agenda-to-diary                ; Must be global
+;    diary-list-entries-hook                    ; Must be global
+;    diary-time-regexp                          ; Must be global
+;    org-agenda-cleanup-fancy-diary-hook        ; Must be global
+;    org-diary-last-run-time                    ; Must be global
+;    org-heading-keyword-regexp-format          ; Must be global
+;    org-agenda-sorting-strategy                ; Must be global
+;    org-agenda-sorting-strategy-selected       ; Must be global
+;    org-agenda-before-sorting-filter-function  ; Must be global
+;    org-agenda-restriction-lock-overlay        ; Must be global
+;    org-global-tags-completion-table           ; Must be global
+    org-agenda-filtered-by-category             ; OK with sticky buffers
+    org-agenda-filter-form                      ; OK with sticky buffers
+;    org-hl                                     ; Must be global
+;    org-agenda-after-show-hook                 ; Must be global
+;    org-archive-default-command                ; Must be global
+    org-agenda-show-window                      ; not sure if needed, but probably OK
+    org-agenda-cycle-counter                    ; not sure if needed, but probably OK
+;    org-last-heading-marker                    ; Must be global
+    org-agenda-last-prefix-arg                  ; OK with sticky buffers
     ))
 
 
@@ -3228,7 +3222,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defvar org-agenda-name nil)
 (defvar org-agenda-tag-filter nil)
 (defvar org-agenda-category-filter nil)
-(defvar org-agenda-tag-filter-while-redo nil)
+(defvar org-agenda-tag-filter-while-redo nil) ; dynamically scoped
 (defvar org-agenda-tag-filter-preset nil
   "A preset of the tags filter used for secondary agenda filtering.
 This must be a list of strings, each string must be a single tag preceded
@@ -3273,11 +3267,12 @@ generating a new one"
 
 (defun org-prepare-agenda-window (abuf)
   "Setup agenda buffer in the window"
-  (let* ((awin (get-buffer-window abuf)))
+  (let* ((awin (get-buffer-window abuf))
+	 wconf)
     (cond
      ((equal (current-buffer) abuf) nil)
      (awin (select-window awin))
-     ((not (setq org-pre-agenda-window-conf (current-window-configuration))))
+     ((not (setq wconf (current-window-configuration))))
      ((equal org-agenda-window-setup 'current-window)
       (org-pop-to-buffer-same-window abuf))
      ((equal org-agenda-window-setup 'other-window)
@@ -3290,7 +3285,8 @@ generating a new one"
     ;; additional test in case agenda is invoked from within agenda
     ;; buffer via elisp link
     (unless (equal (current-buffer) abuf)
-      (org-pop-to-buffer-same-window abuf))))
+      (org-pop-to-buffer-same-window abuf))
+    (setq org-pre-agenda-window-conf wconf)))
 
 (defun org-prepare-agenda (&optional name)
   (if (org-agenda-use-sticky-p)
@@ -3602,15 +3598,16 @@ If the buffer contains an active region, only check the region for
 dates."
   (interactive "P")
   (let* ((dopast t)
-	 (doclosed org-agenda-show-log)
+	 (org-agenda-show-log-scoped org-agenda-show-log)
 	 (entry (buffer-file-name (or (buffer-base-buffer (current-buffer))
 				      (current-buffer))))
 	 (date (calendar-current-date))
 	 (beg (if (org-region-active-p) (region-beginning) (point-min)))
 	 (end (if (org-region-active-p) (region-end) (point-max)))
-	 (day-numbers (org-get-all-dates beg end 'no-ranges
-					 t doclosed ; always include today
-					 org-timeline-show-empty-dates))
+	 (day-numbers (org-get-all-dates
+		       beg end 'no-ranges
+		       t org-agenda-show-log-scoped ; always include today
+		       org-timeline-show-empty-dates))
 	 (org-deadline-warning-days 0)
 	 (org-agenda-only-exact-dates t)
 	 (today (org-today))
@@ -3629,7 +3626,7 @@ dates."
     (org-prepare-agenda (concat "Timeline " (file-name-nondirectory entry)))
     (org-compile-prefix-format 'timeline)
     (org-set-sorting-strategy 'timeline)
-    (if doclosed (push :closed args))
+    (if org-agenda-show-log-scoped (push :closed args))
     (push :timestamp args)
     (push :deadline args)
     (push :scheduled args)
@@ -3817,6 +3814,7 @@ given in `org-agenda-start-on-weekday'."
 	 (day-numbers (list start))
 	 (day-cnt 0)
 	 (inhibit-redisplay (not debug-on-error))
+	 (org-agenda-show-log-scoped org-agenda-show-log)
 	 s e rtn rtnall file date d start-pos end-pos todayp
 	 clocktable-start clocktable-end filter)
     (setq org-agenda-redo-command
@@ -3867,10 +3865,10 @@ given in `org-agenda-start-on-weekday'."
 	      (setq org-agenda-entry-types
 		    (delq :deadline org-agenda-entry-types)))
 	    (cond
-	     ((memq org-agenda-show-log '(only clockcheck))
+	     ((memq org-agenda-show-log-scoped '(only clockcheck))
 	      (setq rtn (org-agenda-get-day-entries
 			 file date :closed)))
-	     (org-agenda-show-log
+	     (org-agenda-show-log-scoped
 	      (setq rtn (apply 'org-agenda-get-day-entries
 			       file date
 			       (append '(:closed) org-agenda-entry-types))))
@@ -3938,7 +3936,7 @@ given in `org-agenda-start-on-weekday'."
 	    (recenter 1))))
     (goto-char (or start-pos 1))
     (add-text-properties (point-min) (point-max) '(org-agenda-type agenda))
-    (if (eq org-agenda-show-log 'clockcheck)
+    (if (eq org-agenda-show-log-scoped 'clockcheck)
 	(org-agenda-show-clocking-issues))
     (org-finalize-agenda)
     (setq buffer-read-only t)
@@ -5190,9 +5188,9 @@ please use `org-class' instead."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
-	 (items (if (consp org-agenda-show-log)
-		    org-agenda-show-log
-		  (if (eq org-agenda-show-log 'clockcheck)
+	 (items (if (consp org-agenda-show-log-scoped)
+		    org-agenda-show-log-scoped
+		  (if (eq org-agenda-show-log-scoped 'clockcheck)
 		      '(clock)
 		    org-agenda-log-mode-items)))
 	 (parts
