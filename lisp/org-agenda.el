@@ -1852,7 +1852,7 @@ When nil, `q' will kill the single agenda buffer."
 ;    org-agenda-archives-mode             ;; Taken out because it is hard to make work with sticky buffers because it is used in .org buffers and maybe even elsewhere.  Just leave it global for now.
 ;    org-agenda-entry-text-cleanup-hook   ; Must be global
 ;    org-agenda-include-inactive-timestamps ; Scoped variable, should be global
-    org-prefix-format-compiled ; Not sure how this works, but Max did specifically this, to it is likely OK to be local
+    ; org-prefix-format-compiled   ; Fine as global, the culprit was org-prefix-has-xxx vars -- Max
 ;    org-agenda-mode-map           ; Must be global
 ;    org-agenda-menu               ; Must be global
     org-agenda-follow-mode         ; OK with sticky buffers
@@ -5736,10 +5736,7 @@ Any match of REMOVE-RE will be removed from TXT."
   ;; Agenda buffers, because this function expects to be called with
   ;; the buffer where item comes from being current, and not agenda
   ;; buffer
-  (let* ((org-prefix-format-compiled
-	  (with-current-buffer org-agenda-buffer
-	    org-prefix-format-compiled))
-	 (bindings (car org-prefix-format-compiled))
+  (let* ((bindings (car org-prefix-format-compiled))
 	 (formatter (cadr org-prefix-format-compiled)))
     (loop for (var value) in bindings
 	  do (set var value))
