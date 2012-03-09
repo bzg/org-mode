@@ -211,6 +211,7 @@ identifier."
 (defconst org-version "7.8.03"
   "The version number of the file org.el.")
 
+;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
@@ -6844,7 +6845,7 @@ This command works around this by showing a copy of the current buffer
 in an indirect buffer, in overview mode.  You can dive into the tree in
 that copy, use org-occur and incremental search to find a location.
 When pressing RET or `Q', the command returns to the original buffer in
-which the visibility is still unchanged.  After RET is will also jump to
+which the visibility is still unchanged.  After RET it will also jump to
 the location selected in the indirect buffer and expose the headline
 hierarchy above."
   (interactive "P")
@@ -8534,11 +8535,12 @@ call CMD."
 
 (defun org-get-category (&optional pos force-refresh)
   "Get the category applying to position POS."
-  (if force-refresh (org-refresh-category-properties))
-  (let ((pos (or pos (point))))
-    (or (get-text-property pos 'org-category)
-	(progn (org-refresh-category-properties)
-	       (get-text-property pos 'org-category)))))
+  (save-match-data
+    (if force-refresh (org-refresh-category-properties))
+    (let ((pos (or pos (point))))
+      (or (get-text-property pos 'org-category)
+	  (progn (org-refresh-category-properties)
+		 (get-text-property pos 'org-category))))))
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."

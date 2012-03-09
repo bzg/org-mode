@@ -54,7 +54,7 @@
 (declare-function org-export-get-footnote-number "org-export" (footnote info))
 (declare-function org-export-get-headline-number "org-export" (headline info))
 (declare-function org-export-get-ordinal "org-export"
-		  (element info &optional types within-section predicate))
+		  (element info &optional types predicate))
 (declare-function org-export-get-parent-headline "org-export" (blob info))
 (declare-function org-export-get-relative-level "org-export" (headline info))
 (declare-function org-export-handle-code
@@ -642,7 +642,7 @@ keyword."
       ;; src-block with either a caption or a name.
       (let ((reference
 	     (org-export-get-ordinal
-	      element info nil nil
+	      element info nil
 	      (lambda (el) (or (org-element-property :caption el)
 			  (org-element-property :name el)))))
 	    (title-fmt (org-e-ascii--translate

@@ -10361,11 +10361,22 @@ defines a header template for each class@footnote{Into which the values of
 @code{org-export-latex-default-packages-alist} and
 @code{org-export-latex-packages-alist} are spliced.}, and allows you to
 define the sectioning structure for each class.  You can also define your own
-classes there.  @code{#+LaTeX_CLASS_OPTIONS} or a @code{LaTeX_CLASS_OPTIONS}
-property can specify the options for the @code{\documentclass} macro.  You
-can also use @code{#+LaTeX_HEADER: \usepackage@{xyz@}} to add lines to the
-header.  See the docstring of @code{org-export-latex-classes} for more
-information.
+classes there.  @code{#+LaTeX_CLASS_OPTIONS} or a @code{:LaTeX_CLASS_OPTIONS:}
+property can specify the options for the @code{\documentclass} macro.  The
+options to documentclass have to be provided, as expected by @LaTeX{}, within
+square brackets.  You can also use @code{#+LaTeX_HEADER: \usepackage@{xyz@}}
+to add lines to the header.  See the docstring of
+@code{org-export-latex-classes} for more information.  An example is shown
+below.
+
+@example
+#+LaTeX_CLASS: article
+#+LaTeX_CLASS_OPTIONS: [a4paper]
+#+LaTeX_HEADER: \usepackage@{xyz@}
+
+* Headline 1
+  some text
+@end example
 
 @node Quoting @LaTeX{} code, Tables in @LaTeX{} export, Header and sectioning, @LaTeX{} and PDF export
 @subsection Quoting @LaTeX{} code
