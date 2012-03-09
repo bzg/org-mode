@@ -3859,6 +3859,17 @@ modified."
 	   ((org-before-first-heading-p) (error "No surrounding element"))
 	   (t (org-back-to-heading))))))))))
 
+(defun org-element-down ()
+  "Move to inner element."
+  (interactive)
+  (let ((element (org-element-at-point)))
+    (cond
+     ((eq (org-element-type element) 'plain-list)
+      (forward-char))
+     ((memq (org-element-type element) org-element-greater-elements)
+      (goto-char (org-element-property :contents-begin element)))
+     (t (error "No inner element")))))
+
 
 (provide 'org-element)
 ;;; org-element.el ends here
