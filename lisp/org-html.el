@@ -1422,7 +1422,7 @@ PUB-DIR is set, use this as the publishing directory."
 			     (if (string-match
 				  (org-re "[ \t]+:\\([[:alnum:]_@:]+\\):[ \t]*$") txt)
 				 (setq txt (replace-match
-					    "&nbsp;&nbsp;&nbsp;<span class=\"tag\"> \\1</span>" t nil txt)))
+					    "&nbsp;&nbsp;&nbsp;<span class=\"tag\">\\1</span>" t nil txt)))
 			     (if (string-match quote-re0 txt)
 				 (setq txt (replace-match "" t t txt)))
 			     (setq snumber (org-section-number level))
