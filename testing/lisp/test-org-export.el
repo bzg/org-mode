@@ -313,6 +313,10 @@ body\n")))
 	(org-test-with-temp-text "* Head1\n* Head2 (note)\n"
 	  (should (equal (org-export-as 'test) "* Head1\n")))))))
 
+
+
+;; Footnotes
+
 (ert-deftest test-org-export/footnotes ()
   "Test footnotes specifications."
   (let ((org-footnote-section nil))
@@ -379,6 +383,10 @@ body\n")))
 		    info (org-export-collect-tree-properties tree info 'test)))
 	(should (= (length (org-export-collect-footnote-definitions tree info))
 		   4))))))
+
+
+
+;;; Links
 
 (ert-deftest test-org-export/fuzzy-links ()
   "Test fuzz link export specifications."
@@ -563,6 +571,53 @@ Another text. (ref:text)
       (let ((tree (org-element-parse-buffer)))
 	(should (equal (org-export-resolve-coderef "text" `(:parse-tree ,tree))
 		       "text"))))))
+
+
+
+;;; Src-block and example-block
+
+(ert-deftest test-org-export/unravel-code ()
+  "Test `org-export-unravel-code' function."
+  (let ((org-coderef-label-format "(ref:%s)"))
+    ;; 1. Code without reference.
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE\n(+ 1 1)\n#+END_EXAMPLE"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("(+ 1 1)\n"))))
+    ;; 2. Code with reference.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE\n(+ 1 1) (ref:test)\n#+END_EXAMPLE"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("(+ 1 1)\n" (1 . "test")))))
+    ;; 3. Code with user-defined reference.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\n(+ 1 1) [ref:test]\n#+END_EXAMPLE"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("(+ 1 1)\n" (1 . "test")))))
+    ;; 4. Code references keys are relative to the current block.
+    (org-test-with-temp-text "
+#+BEGIN_EXAMPLE -n
+\(+ 1 1)
+#+END_EXAMPLE
+#+BEGIN_EXAMPLE +n
+\(+ 2 2)
+\(+ 3 3) (ref:one)
+#+END_EXAMPLE"
+      (goto-line 5)
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("(+ 2 2)\n(+ 3 3)\n" (2 . "one")))))
+    ;; 5. Free up comma-protected lines.
+    ;;
+    ;; 5.1. In an Org source block, every line is protected.
+    (org-test-with-temp-text
+	"#+BEGIN_SRC org\n,* Test\n,# comment\n,Text\n#+END_SRC"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("* Test\n# comment\nText\n"))))
+    ;; 5.2. In other blocks, only headlines, comments and keywords are
+    ;;      protected.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE\n,* Headline\n, * Not headline\n,Keep\n#+END_EXAMPLE"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("* Headline\n, * Not headline\n,Keep\n"))))))
 
 
 

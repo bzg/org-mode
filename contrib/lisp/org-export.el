@@ -2805,12 +2805,12 @@ depending on src-block or example element's switches."
    (lambda (el)
      (with-temp-buffer
        (insert (org-trim (org-element-property :value el)))
-       (let* ((label-fmt (or (org-element-property :label-fmt el)
-			     org-coderef-label-format))
+       (let* ((label-fmt (regexp-quote
+			  (or (org-element-property :label-fmt el)
+			      org-coderef-label-format)))
 	      (ref-re
 	       (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
-		       (regexp-quote
-			(replace-regexp-in-string "%s" ref label-fmt nil t)))))
+		       (replace-regexp-in-string "%s" ref label-fmt nil t))))
 	 ;; Element containing REF is found.  Resolve it to either
 	 ;; a label or a line number, as needed.
 	 (when (re-search-backward ref-re nil t)
@@ -2972,19 +2972,18 @@ ELEMENT is excluded from count."
     ;; Return value.
     loc))
 
-(defun org-export-unravel-code (element info)
+(defun org-export-unravel-code (element)
   "Clean source code and extract references out of it.
 
-ELEMENT has either a `src-block' an `example-block' type.  INFO
-is a plist used as a communication channel.
+ELEMENT has either a `src-block' an `example-block' type.
 
 Return a cons cell whose CAR is the source code, cleaned from any
 reference and protective comma and CDR is an alist between
 relative line number (integer) and name of code reference on that
 line (string)."
   (let* ((line 0) refs
-	 ;; Get code and clean it. Remove blank lines at its beginning
-	 ;; and end. Also remove protective commas.
+	 ;; Get code and clean it.  Remove blank lines at its
+	 ;; beginning and end.  Also remove protective commas.
 	 (code (let ((c (replace-regexp-in-string
 			 "\\`\\([ \t]*\n\\)+" ""
 			 (replace-regexp-in-string
@@ -3001,14 +3000,14 @@ line (string)."
 		   (replace-regexp-in-string
 		    "^\\(,\\)\\(:?\\*\\|[ \t]*#\\+\\)" "" c nil nil 1))))
 	 ;; Get format used for references.
-	 (label-fmt (or (org-element-property :label-fmt element)
-			  org-coderef-label-format))
+	 (label-fmt (regexp-quote
+		     (or (org-element-property :label-fmt element)
+			 org-coderef-label-format)))
 	 ;; Build a regexp matching a loc with a reference.
 	 (with-ref-re
 	  (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)[ \t]*\\)$"
-		  (regexp-quote
-		   (replace-regexp-in-string
-		    "%s" "\\([-a-zA-Z0-9_ ]+\\)" label-fmt nil t)))))
+		  (replace-regexp-in-string
+		   "%s" "\\([-a-zA-Z0-9_ ]+\\)" label-fmt nil t))))
     ;; Return value.
     (cons
      ;; Code with references removed.
@@ -3066,7 +3065,7 @@ spaces.  Code references, on the other hand, appear flushed to
 the right, separated by six white spaces from the widest line of
 code."
   ;; Extract code and references.
-  (let* ((code-info (org-export-unravel-code element info))
+  (let* ((code-info (org-export-unravel-code element))
          (code (car code-info))
          (code-lines (org-split-string code "\n"))
 	 (refs (and (org-element-property :retain-labels element)

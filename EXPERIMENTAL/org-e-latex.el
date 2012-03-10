@@ -1720,7 +1720,7 @@ contextual information."
 	      ;; Language.
 	      (or (cadr (assq (intern lang) org-e-latex-minted-langs)) lang)
 	      ;; Source code.
-	      (let* ((code-info (org-export-unravel-code src-block contents))
+	      (let* ((code-info (org-export-unravel-code src-block))
 		     (max-width
 		      (apply 'max
 			     (mapcar 'length
@@ -1768,7 +1768,7 @@ contextual information."
 	 ;; Source code.
 	 (format
 	  "\\begin{lstlisting}\n%s\\end{lstlisting}"
-	  (let* ((code-info (org-export-unravel-code src-block info))
+	  (let* ((code-info (org-export-unravel-code src-block))
 		 (max-width
 		  (apply 'max
 			 (mapcar 'length
