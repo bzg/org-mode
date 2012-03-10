@@ -195,12 +195,12 @@
 	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText [ref:text]\n#+END_EXAMPLE"
       (let ((element (org-element-current-element)))
 	(should
-	 (equal (org-element-property :coderef-fmt element) "[ref:%s]"))))
+	 (equal (org-element-property :label-fmt element) "[ref:%s]"))))
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp -l \"[ref:%s]\"\n(+ 1 1) [ref:text]\n#+END_SRC"
       (let ((element (org-element-current-element)))
 	(should
-	 (equal (org-element-property :coderef-fmt element) "[ref:%s]"))))))
+	 (equal (org-element-property :label-fmt element) "[ref:%s]"))))))
 
 
 
