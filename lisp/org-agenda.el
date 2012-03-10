@@ -1816,22 +1816,30 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 
 ;;; Multiple agenda buffers support
 
+(defun org-toggle-sticky-agenda (&optional arg)
+  "Toggle `org-agenda-sticky'."
+  (interactive "P")
+  (let ((new-value (if arg (> (prefix-numeric-value arg) 0)
+		     (not org-agenda-sticky))))
+    (if (equal new-value org-agenda-sticky)
+	(message "Sticky agenda was already %s"
+		 (if org-agenda-sticky "enabled" "disabled"))
+      (setq org-agenda-sticky new-value)
+      (org-agenda-kill-all-agenda-buffers)
+      (message "Sticky agenda was %s" (if org-agenda-sticky "enabled" "disabled")))))
+
+(defvar org-agenda-sticky nil)
 (defcustom org-agenda-sticky nil
-   "Non-nil means agenda q key will bury agenda buffers.
+  "Non-nil means agenda q key will bury agenda buffers.
 Agenda commands will then show existing buffer instead of generating new ones.
 When nil, `q' will kill the single agenda buffer."
   :group 'org-agenda
-  :type 'boolean)
+  :type 'boolean
+  :set (lambda (var val)
+	 (org-toggle-sticky-agenda (if val 1 0))))
 
 (defvar org-agenda-buffer nil
   "Agenda buffer currently being generated.")
-
-(defun org-toggle-sticky-agenda (&optional arg)
-  "Toggle `org-agenda-sticky'."
-  (interactive)
-  (setq org-agenda-sticky (or arg (not org-agenda-sticky)))
-  (org-agenda-kill-all-agenda-buffers)
-  (message "Sticky agenda was %s" (if org-agenda-sticky "enabled" "disabled")))
 
 (defvar org-agenda-last-prefix-arg nil)
 (defvar org-agenda-this-buffer-name nil)
