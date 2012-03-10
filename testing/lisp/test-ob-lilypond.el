@@ -42,10 +42,10 @@
   (should (boundp 'ly-version)))
 
 (ert-deftest ob-lilypond/ly-version-command ()
-  (should (equal "ob-lilypond version 0.3" (ly-version)))
+  (should (equal "ob-lilypond version 7.6" (ly-version)))
   (with-temp-buffer
     (ly-version t)
-    (should (equal "ob-lilypond version 0.3"
+    (should (equal "ob-lilypond version 7.6"
                    (buffer-substring (point-min) (point-max))))))
 
 (ert-deftest ob-lilypond/ly-compile-lilyfile ()
@@ -56,6 +56,7 @@
              t                          ;display
              ,(if ly-gen-png  "--png"  "") ;&rest...
              ,(if ly-gen-html "--html" "")   
+             ,(if ly-gen-pdf "--pdf" "")   
              ,(if ly-use-eps  "-dbackend=eps" "")
              ,(if ly-gen-svg  "-dbackend=svg" "")
              "--output=test-file"
@@ -115,6 +116,9 @@
 
 (ert-deftest ob-lilypond/ly-gen-html ()
   (should (boundp 'ly-gen-html)))
+
+(ert-deftest ob-lilypond/ly-gen-html ()
+  (should (boundp 'ly-gen-pdf)))
 
 (ert-deftest ob-lilypond/use-eps ()
   (should (boundp 'ly-use-eps)))
@@ -296,6 +300,18 @@
     (ly-toggle-pdf-display)
     (should (not ly-display-pdf-post-tangle))))
 
+(ert-deftest ob-lilypond/ly-toggle-pdf-generation-toggles-flag ()
+  (if ly-gen-pdf
+      (progn
+        (ly-toggle-pdf-generation)
+         (should (not ly-gen-pdf))
+        (ly-toggle-pdf-generation)
+        (should ly-gen-pdf))
+    (ly-toggle-pdf-generation)
+    (should ly-gen-pdf)
+    (ly-toggle-pdf-generation)
+    (should (not ly-gen-pdf))))
+
 (ert-deftest ob-lilypond/ly-toggle-arrange-mode ()
   (if ly-arrange-mode
       (progn
@@ -348,6 +364,7 @@
   (should (equal '((:tangle . "yes")
                    (:noweb . "yes")
                    (:results . "silent")
+                   (:cache . "yes")
                    (:comments . "yes"))
                  (ly-set-header-args t)))
   (should (equal '((:results . "file")
@@ -359,6 +376,7 @@
   (should (equal '((:tangle . "yes")
                    (:noweb . "yes")
                    (:results . "silent")
+                   (:cache . "yes")
                    (:comments . "yes"))
                  org-babel-default-header-args:lilypond))
   (ly-set-header-args nil)
