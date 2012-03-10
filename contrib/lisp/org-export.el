@@ -2801,30 +2801,24 @@ INFO is a plist used as a communication channel.
 Return associated line number in source code, or REF itself,
 depending on src-block or example element's switches."
   (org-element-map
-   (plist-get info :parse-tree) '(src-block example)
+   (plist-get info :parse-tree) '(example-block src-block)
    (lambda (el)
-     (let ((switches (or (org-element-property :switches el) "")))
-       (with-temp-buffer
-         (insert (org-trim (org-element-property :value el)))
-         ;; Build reference regexp.
-         (let* ((label
-                 (or (and (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-                          (match-string 1 switches))
-                     org-coderef-label-format))
-                (ref-re
-                 (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
-                         (replace-regexp-in-string "%s" ref label nil t))))
-           ;; Element containing REF is found.  Only associate REF to
-           ;; a line number if element has "+n" or "-n" and "-k" or
-           ;; "-r" as switches.  When it has "+n", count accumulated
-           ;; locs before, too.
-           (when (re-search-backward ref-re nil t)
-             (cond
-              ((not (string-match "-[kr]\\>" switches)) ref)
-              ((string-match "-n\\>" switches) (line-number-at-pos))
-	      ((string-match "\\+n\\>" switches)
-	       (+ (org-export-get-loc el info) (line-number-at-pos)))
-              (t ref)))))))
+     (with-temp-buffer
+       (insert (org-trim (org-element-property :value el)))
+       (let* ((label-fmt (or (org-element-property :label-fmt el)
+			     org-coderef-label-format))
+	      (ref-re
+	       (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
+		       (regexp-quote
+			(replace-regexp-in-string "%s" ref label-fmt nil t)))))
+	 ;; Element containing REF is found.  Resolve it to either
+	 ;; a label or a line number, as needed.
+	 (when (re-search-backward ref-re nil t)
+	   (cond
+	    ((org-element-property :use-labels el) ref)
+	    ((eq (org-element-property :number-lines el) 'continued)
+	     (+ (org-export-get-loc el info) (line-number-at-pos)))
+	    (t (line-number-at-pos)))))))
    info 'first-match))
 
 
@@ -2933,8 +2927,21 @@ objects of the same type."
 ;; src-block or example-block elements with a "+n" switch until
 ;; a given element, excluded.  Note: "-n" switches reset that count.
 
-;; `org-export-handle-code' takes care of line numbering and reference
-;; cleaning in source code, when appropriate.
+;; `org-export-unravel-code' extracts source code (along with a code
+;; references alist) from an `element-block' or `src-block' type
+;; element.
+
+;; `org-export-format-code' applies a formatting function to each line
+;; of code, providing relative line number and code reference when
+;; appropriate.  Since it doesn't access the original element from
+;; which the source code is coming, it expects from the code calling
+;; it to know if lines should be numbered and if code references
+;; should appear.
+
+;; Eventually, `org-export-format-code-default' is a higher-level
+;; function (it makes use of the two previous functions) which handles
+;; line numbering and code references inclusion, and returns source
+;; code in a format suitable for plain text or verbatim output.
 
 (defun org-export-get-loc (element info)
   "Return accumulated lines of code up to ELEMENT.
@@ -2953,111 +2960,145 @@ ELEMENT is excluded from count."
         ;; Only count lines from src-block and example-block elements
         ;; with a "+n" or "-n" switch.  A "-n" switch resets counter.
         ((not (memq (org-element-type el) '(src-block example-block))) nil)
-        ((let ((switches (org-element-property :switches el)))
-           (when (and switches (string-match "\\([-+]\\)n\\>" switches))
+        ((let ((linums (org-element-property :number-lines el)))
+	   (when linums
 	     ;; Accumulate locs or reset them.
-	     (let ((accumulatep (string= (match-string 1 switches) "-"))
-		   (lines (org-count-lines
+	     (let ((lines (org-count-lines
 			   (org-trim (org-element-property :value el)))))
-	       (setq loc (if accumulatep lines (+ loc lines))))))
+	       (setq loc (if (eq linums 'new) lines (+ loc lines))))))
 	 ;; Return nil to stay in the loop.
          nil)))
      info 'first-match)
     ;; Return value.
     loc))
 
-(defun org-export-handle-code (element info &optional num-fmt ref-fmt delayed)
-  "Handle line numbers and code references in ELEMENT.
+(defun org-export-unravel-code (element info)
+  "Clean source code and extract references out of it.
 
 ELEMENT has either a `src-block' an `example-block' type.  INFO
 is a plist used as a communication channel.
 
-If optional argument NUM-FMT is a string, it will be used as
-a format string for numbers at beginning of each line.
-
-If optional argument REF-FMT is a string, it will be used as
-a format string for each line of code containing a reference.
-
-When optional argument DELAYED is non-nil, `org-loc' and
-`org-coderef' properties, set to an adequate value, are applied
-to, respectively, numbered lines and lines with a reference.  No
-line numbering is done and all references are stripped from the
-resulting string.  Both NUM-FMT and REF-FMT arguments are ignored
-in that situation.
-
-Return new code as a string."
-  (let* ((switches (or (org-element-property :switches element) ""))
-	 (code (org-element-property :value element))
-	 (numberp (string-match "[-+]n\\>" switches))
-	 (accumulatep (string-match "\\+n\\>" switches))
-	 ;; Initialize loc counter when any kind of numbering is
-	 ;; active.
-	 (total-LOC (cond
-		     (accumulatep (org-export-get-loc element info))
-		     (numberp 0)))
-	 ;; Get code and clean it.  Remove blank lines at its
-	 ;; beginning and end.  Also remove protective commas.
-	 (preserve-indent-p (or org-src-preserve-indentation
-				(string-match "-i\\>" switches)))
-	 (replace-labels (when (string-match "-r\\>" switches)
-			   (if (string-match "-k\\>" switches) 'keep t)))
+Return a cons cell whose CAR is the source code, cleaned from any
+reference and protective comma and CDR is an alist between
+relative line number (integer) and name of code reference on that
+line (string)."
+  (let* ((line 0) refs
+	 ;; Get code and clean it. Remove blank lines at its beginning
+	 ;; and end. Also remove protective commas.
 	 (code (let ((c (replace-regexp-in-string
 			 "\\`\\([ \t]*\n\\)+" ""
 			 (replace-regexp-in-string
-			  "\\(:?[ \t]*\n\\)*[ \t]*\\'" "\n" code))))
+			  "\\(:?[ \t]*\n\\)*[ \t]*\\'" "\n"
+			  (org-element-property :value element)))))
 		 ;; If appropriate, remove global indentation.
-		 (unless preserve-indent-p (setq c (org-remove-indentation c)))
+		 (unless (or org-src-preserve-indentation
+			     (org-element-property :preserve-indent element))
+		   (setq c (org-remove-indentation c)))
 		 ;; Free up the protected lines.  Note: Org blocks
 		 ;; have commas at the beginning or every line.
-		 (if (string=
-		      (or (org-element-property :language element) "")
-		      "org")
+		 (if (string= (org-element-property :language element) "org")
 		     (replace-regexp-in-string "^," "" c)
 		   (replace-regexp-in-string
 		    "^\\(,\\)\\(:?\\*\\|[ \t]*#\\+\\)" "" c nil nil 1))))
-	 ;; Split code to process it line by line.
-	 (code-lines (org-split-string code "\n"))
-	 ;; If numbering is active, ensure line numbers will be
-	 ;; correctly padded before applying the format string.
-	 (num-fmt
-	  (when (and (not delayed) numberp)
-	    (format (if (stringp num-fmt) num-fmt "%s:  ")
-		    (format "%%%ds"
-			    (length (number-to-string
-				     (+ (length code-lines) total-LOC)))))))
 	 ;; Get format used for references.
-	 (label-fmt (or (and (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-			     (match-string 1 switches))
-			org-coderef-label-format))
+	 (label-fmt (or (org-element-property :label-fmt element)
+			  org-coderef-label-format))
 	 ;; Build a regexp matching a loc with a reference.
-	 (with-ref-re (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
-			      (replace-regexp-in-string
-			       "%s" "\\([-a-zA-Z0-9_ ]+\\)" label-fmt nil t))))
+	 (with-ref-re
+	  (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)[ \t]*\\)$"
+		  (regexp-quote
+		   (replace-regexp-in-string
+		    "%s" "\\([-a-zA-Z0-9_ ]+\\)" label-fmt nil t)))))
+    ;; Return value.
+    (cons
+     ;; Code with references removed.
+     (org-element-normalize-string
+      (mapconcat
+       (lambda (loc)
+	 (incf line)
+	 (if (not (string-match with-ref-re loc)) loc
+	   ;; Ref line: remove ref, and signal its position in REFS.
+	   (push (cons line (match-string 3 loc)) refs)
+	   (replace-match "" nil nil loc 1)))
+       (org-split-string code "\n") "\n"))
+     ;; Reference alist.
+     refs)))
+
+(defun org-export-format-code (code fun &optional num-lines ref-alist)
+  "Format CODE by applying FUN line-wise and return it.
+
+CODE is a string representing the code to format.  FUN is
+a function.  It must accept three arguments: a line of
+code (string), the current line number (integer) or nil and the
+reference associated to the current line (string) or nil.
+
+Optional argument NUM-LINES can be an integer representing the
+number of code lines accumulated until the current code.  Line
+numbers passed to FUN will take it into account.  If it is nil,
+FUN's second argument will always be nil.  This number can be
+obtained with `org-export-get-loc' function.
+
+Optional argument REF-ALIST can be an alist between relative line
+number (i.e. ignoring NUM-LINES) and the name of the code
+reference on it.  If it is nil, FUN's third argument will always
+be nil.  It can be obtained through the use of
+`org-export-unravel-code' function."
+  (let ((--locs (org-split-string code "\n"))
+	(--line 0))
     (org-element-normalize-string
      (mapconcat
-      (lambda (loc)
-	;; Maybe add line number to current line of code (LOC).
-	(when numberp
-	  (incf total-LOC)
-	  (setq loc (if delayed (org-add-props loc nil 'org-loc total-LOC)
-		      (concat (format num-fmt total-LOC) loc))))
-	;; Take action if at a ref line.
-	(when (string-match with-ref-re loc)
-	  (let ((ref (match-string 3 loc)))
-	    (setq loc
-		  ;; Option "-r" without "-k" removes labels.
-		  ;; A non-nil DELAYED removes labels unconditionally.
-		  (if (or delayed
-			  (and replace-labels (not (eq replace-labels 'keep))))
-		      (replace-match "" nil nil loc 1)
-		    (replace-match (format "(%s)" ref) nil nil loc 2)))
-	    ;; Store REF in `org-coderef' property if DELAYED asks to.
-	    (cond (delayed (setq loc (org-add-props loc nil 'org-coderef ref)))
-		  ;; If REF-FMT is defined, apply it to current LOC.
-		  ((stringp ref-fmt) (setq loc (format ref-fmt loc))))))
-	;; Return updated LOC for concatenation.
-	loc)
-      code-lines "\n"))))
+      (lambda (--loc)
+	(incf --line)
+	(let ((--ref (cdr (assq --line ref-alist))))
+	  (funcall fun --loc (and num-lines (+ num-lines --line)) --ref)))
+      --locs "\n"))))
+
+(defun org-export-format-code-default (element info)
+  "Return source code from ELEMENT, formatted in a standard way.
+
+ELEMENT is either a `src-block' or `example-block' element.  INFO
+is a plist used as a communication channel.
+
+This function takes care of line numbering and code references
+inclusion.  Line numbers, when applicable, appear at the
+beginning of the line, separated from the code by two white
+spaces.  Code references, on the other hand, appear flushed to
+the right, separated by six white spaces from the widest line of
+code."
+  ;; Extract code and references.
+  (let* ((code-info (org-export-unravel-code element info))
+         (code (car code-info))
+         (code-lines (org-split-string code "\n"))
+	 (refs (and (org-element-property :retain-labels element)
+		    (cdr code-info)))
+         ;; Handle line numbering.
+         (num-start (case (org-element-property :number-lines element)
+                      (continued (org-export-get-loc element info))
+                      (new 0)))
+         (num-fmt
+          (and num-start
+               (format "%%%ds  "
+                       (length (number-to-string
+                                (+ (length code-lines) num-start))))))
+         ;; Prepare references display, if required.  Any reference
+         ;; should start six columns after the widest line of code,
+         ;; wrapped with parenthesis.
+	 (max-width
+	  (+ (apply 'max (mapcar 'length code-lines))
+	     (if (not num-start) 0 (length (format num-fmt num-start))))))
+    (org-export-format-code
+     code
+     (lambda (loc line-num ref)
+       (let ((number-str (and num-fmt (format num-fmt line-num))))
+         (concat
+          number-str
+          loc
+          (and ref
+               (concat (make-string
+                        (- (+ 6 max-width)
+                           (+ (length loc) (length number-str))) ? )
+                       (format "(%s)" ref))))))
+     num-start refs)))
 
 
 ;;;; For Tables

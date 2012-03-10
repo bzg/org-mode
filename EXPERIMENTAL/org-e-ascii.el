@@ -50,6 +50,7 @@
 (declare-function org-export-collect-tables "org-export" (info))
 (declare-function org-export-data "org-export" (data backend info))
 (declare-function org-export-expand-macro "org-export" (macro info))
+(declare-function org-export-format-code-default "org-export" (element info))
 (declare-function org-export-get-coderef-format "org-export" (path desc))
 (declare-function org-export-get-footnote-number "org-export" (footnote info))
 (declare-function org-export-get-headline-number "org-export" (headline info))
@@ -57,8 +58,6 @@
 		  (element info &optional types predicate))
 (declare-function org-export-get-parent-headline "org-export" (blob info))
 (declare-function org-export-get-relative-level "org-export" (headline info))
-(declare-function org-export-handle-code
-		  "org-export" (element info &optional num-fmt ref-fmt delayed))
 (declare-function org-export-included-file "org-export" (keyword backend info))
 (declare-function org-export-low-level-p "org-export" (headline info))
 (declare-function org-export-output-file-name "org-export"
@@ -1082,7 +1081,8 @@ contextual information."
 (defun org-e-ascii-example-block (example-block contents info)
   "Transcode a EXAMPLE-BLOCK element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-e-ascii--box-string (org-export-handle-code example-block info) info))
+  (org-e-ascii--box-string
+   (org-export-format-code-default example-block info) info))
 
 
 ;;;; Export Snippet
@@ -1546,7 +1546,8 @@ contextual information."
   (let ((caption (org-e-ascii--build-caption src-block info)))
     (concat
      (when (and caption org-e-ascii-caption-above) (concat caption "\n"))
-     (org-e-ascii--box-string (org-export-handle-code src-block info) info)
+     (org-e-ascii--box-string
+      (org-export-format-code-default src-block info) info)
      (when (and caption (not org-e-ascii-caption-above))
        (concat "\n" caption)))))
 

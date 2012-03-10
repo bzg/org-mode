@@ -470,3 +470,101 @@ body\n")))
 	       (lambda (link)
 		 (org-export-get-ordinal
 		  (org-export-resolve-fuzzy-link link info) info)) info t))))))
+
+(defun test-org-export/resolve-coderef ()
+  "Test `org-export-resolve-coderef' specifications."
+  (let ((org-coderef-label-format "(ref:%s)"))
+    ;; 1. A link to a "-n -k -r" block returns line number.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -n -k -r\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -n -k -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    ;; 2. A link to a "-n -r" block returns line number.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -n -r\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    ;; 3. A link to a "-n" block returns coderef.
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -n\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
+		"coderef"))))
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -n\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
+		"coderef"))))
+    ;; 4. A link to a "-r" block returns line number.
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -r\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    ;; 5. A link to a block without a switch returns coderef.
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
+		"coderef"))))
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
+		"coderef"))))
+    ;; 6. Correctly handle continued line numbers.  A "+n" switch
+    ;;    should resume numbering from previous block with numbered
+    ;;    lines, ignoring blocks not numbering lines in the process.
+    ;;    A "-n" switch resets count.
+    (org-test-with-temp-text "
+#+BEGIN_EXAMPLE -n
+Text.
+#+END_EXAMPLE
+
+#+BEGIN_SRC emacs-lisp
+\(- 1 1)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp +n -r
+\(+ 1 1) (ref:addition)
+#+END_SRC
+
+#+BEGIN_EXAMPLE -n -r
+Another text. (ref:text)
+#+END_EXAMPLE"
+      (let* ((tree (org-element-parse-buffer))
+	     (info `(:parse-tree ,tree)))
+	(should (= (org-export-resolve-coderef "addition" info) 2))
+	(should (= (org-export-resolve-coderef "text" info) 1))))
+    ;; 7. Recognize coderef with user-specified syntax.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText. [ref:text]\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should (equal (org-export-resolve-coderef "text" `(:parse-tree ,tree))
+		       "text"))))))
+
+
+
+(provide 'test-org-export)
+;;; test-org-export.el end here

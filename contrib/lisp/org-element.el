@@ -991,22 +991,43 @@ CONTENTS is nil."
 (defun org-element-example-block-parser ()
   "Parse an example block.
 
-Return a list whose car is `example' and cdr is a plist
-containing `:begin', `:end', `:options', `:hiddenp', `:value' and
-`:post-blank' keywords."
+Return a list whose car is `example-block' and cdr is a plist
+containing `:begin', `:end', `:number-lines', `:preserve-indent',
+`:retain-labels', `:use-labels', `:label-fmt', `:hiddenp',
+`:switches', `:value' and `:post-blank' keywords."
   (save-excursion
     (end-of-line)
     (let* ((case-fold-search t)
 	   (switches (progn
 		       (re-search-backward
-			"^[ \t]*#\\+begin_example\\(?: +\\(.*\\)\\)?" nil t)
+			"^[ \t]*#\\+BEGIN_EXAMPLE\\(?: +\\(.*\\)\\)?" nil t)
 		       (org-match-string-no-properties 1)))
+	   ;; Switches analysis
+	   (number-lines (cond ((not switches) nil)
+			       ((string-match "-n\\>" switches) 'new)
+			       ((string-match "+n\\>" switches) 'continued)))
+	   (preserve-indent (and switches (string-match "-i\\>" switches)))
+	   ;; Should labels be retained in (or stripped from) example
+	   ;; blocks?
+	   (retain-labels
+	    (or (not switches)
+		(not (string-match "-r\\>" switches))
+		(and number-lines (string-match "-k\\>" switches))))
+	   ;; What should code-references use - labels or
+	   ;; line-numbers?
+	   (use-labels
+	    (or (not switches)
+		(and retain-labels (not (string-match "-k\\>" switches)))))
+	   (label-fmt (and switches
+			     (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
+			     (match-string 1 switches)))
+	   ;; Standard block parsing.
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
 	   (contents-end (progn
-			   (re-search-forward "^[ \t]*#\\+end_example" nil t)
+			   (re-search-forward "^[ \t]*#\\+END_EXAMPLE" nil t)
 			   (point-at-bol)))
 	   (value (buffer-substring-no-properties contents-begin contents-end))
 	   (pos-before-blank (progn (forward-line) (point)))
@@ -1017,6 +1038,11 @@ containing `:begin', `:end', `:options', `:hiddenp', `:value' and
 		:end ,end
 		:value ,value
 		:switches ,switches
+		:number-lines ,number-lines
+		:preserve-indent ,preserve-indent
+		:retain-labels ,retain-labels
+		:use-labels ,use-labels
+		:label-fmt ,label-fmt
 		:hiddenp ,hidden
 		:post-blank ,(count-lines pos-before-blank end)
 		,@(cadr keywords))))))
@@ -1341,31 +1367,52 @@ CONTENTS is nil."
 
 Return a list whose car is `src-block' and cdr is a plist
 containing `:language', `:switches', `:parameters', `:begin',
-`:end', `:hiddenp', `:contents-begin', `:contents-end', `:value'
-and `:post-blank' keywords."
+`:end', `:hiddenp', `:contents-begin', `:contents-end',
+`:number-lines', `:retain-labels', `:use-labels', `:label-fmt',
+`:preserve-indent', `:value' and `:post-blank' keywords."
   (save-excursion
     (end-of-line)
     (let* ((case-fold-search t)
 	   ;; Get position at beginning of block.
 	   (contents-begin
 	    (re-search-backward
-	     (concat "^[ \t]*#\\+begin_src"
-		     "\\(?: +\\(\\S-+\\)\\)?"	     ; language
-		     "\\(\\(?: +[-+][A-Za-z]\\)*\\)" ; switches
-		     "\\(.*\\)[ \t]*$")		     ; arguments
+	     (concat
+	      "^[ \t]*#\\+BEGIN_SRC"
+	      "\\(?: +\\(\\S-+\\)\\)?"	; language
+	      "\\(\\(?: +\\(?:-l \".*?\"\\|[-+][A-Za-z]\\)\\)*\\)" ; switches
+	      "\\(.*\\)[ \t]*$")	; parameters
 	     nil t))
 	   ;; Get language as a string.
 	   (language (org-match-string-no-properties 1))
-	   ;; Get switches.
-	   (switches (org-match-string-no-properties 2))
 	   ;; Get parameters.
 	   (parameters (org-trim (org-match-string-no-properties 3)))
+	   ;; Get switches.
+	   (switches (org-match-string-no-properties 2))
+	   ;; Switches analysis
+	   (number-lines (cond ((not switches) nil)
+			       ((string-match "-n\\>" switches) 'new)
+			       ((string-match "+n\\>" switches) 'continued)))
+	   (preserve-indent (and switches (string-match "-i\\>" switches)))
+	   (label-fmt (and switches
+			     (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
+			     (match-string 1 switches)))
+	   ;; Should labels be retained in (or stripped from) src
+	   ;; blocks?
+	   (retain-labels
+	    (or (not switches)
+		(not (string-match "-r\\>" switches))
+		(and number-lines (string-match "-k\\>" switches))))
+	   ;; What should code-references use - labels or
+	   ;; line-numbers?
+	   (use-labels
+	    (or (not switches)
+		(and retain-labels (not (string-match "-k\\>" switches)))))
 	   ;; Get affiliated keywords.
 	   (keywords (org-element-collect-affiliated-keywords))
 	   ;; Get beginning position.
 	   (begin (car keywords))
 	   ;; Get position at end of block.
-	   (contents-end (progn (re-search-forward "^[ \t]*#\\+end_src" nil t)
+	   (contents-end (progn (re-search-forward "^[ \t]*#\\+END_SRC" nil t)
 				(forward-line)
 				(point)))
 	   ;; Retrieve code.
@@ -1387,6 +1434,11 @@ and `:post-blank' keywords."
 		   :parameters ,parameters
 		   :begin ,begin
 		   :end ,end
+		   :number-lines ,number-lines
+		   :preserve-indent ,preserve-indent
+		   :retain-labels ,retain-labels
+		   :use-labels ,use-labels
+		   :label-fmt ,label-fmt
 		   :hiddenp ,hidden
 		   :value ,value
 		   :post-blank ,(count-lines contents-end end)
