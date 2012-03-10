@@ -1837,93 +1837,35 @@ When nil, `q' will kill the single agenda buffer."
 (defvar org-agenda-doing-sticky-redo nil)
 (defvar org-agenda-this-buffer-is-sticky nil)
 
-;; below list is generating by grepping org-agenda.el for defvar
 (defconst org-agenda-local-vars
-  '(
-;   org-clock-current-task                ; Must be global
-;   org-mobile-force-id-on-agenda-items   ; Must be global
-;   org-habit-show-habits                 ; Must be global
-;   org-habit-show-habits-only-for-today  ; Must be global
-    org-agenda-this-buffer-name           ; OK with sticky buffers
-;   org-agenda-overriding-header          ; Must be global (will be scoped)
-;   org-agenda-title-append               ; Must be global (will be scoped)
-    org-agenda-undo-list                  ; OK with sticky buffers
-    org-agenda-pending-undo-list          ; OK with sticky buffers
-;   org-agenda-archives-mode              ; Leave it global
-    ;; the above was taken out because it is hard to make work with sticky
-    ;; buffers because it is used in .org buffers and maybe even elsewhere.
-;   org-agenda-entry-text-cleanup-hook   ; Must be global
-;   org-agenda-include-inactive-timestamps ; Scoped variable, should be global
-;   org-prefix-format-compiled           ; Fine as global, the culprit was org-prefix-has-xxx vars -- Max
-;   org-agenda-mode-map                  ; Must be global
-;   org-agenda-menu                      ; Must be global
-    org-agenda-follow-mode               ; OK with sticky buffers
-    org-agenda-entry-text-mode           ; OK with sticky buffers
-    org-agenda-clockreport-mode          ; OK with sticky buffers
-    org-agenda-show-log                  ; Should now be OK with sticky buffers
-    org-agenda-redo-command              ; OK with sticky buffers
-    org-agenda-query-string              ; OK with sticky buffers
-    org-agenda-type                      ; OK with sticky buffers
-    org-agenda-bulk-marked-entries       ; OK with sticky buffers
-;   org-agenda-allow-remote-undo         ; Must be global
-    org-agenda-undo-has-started-in       ; OK with sticky buffers
-;   org-agenda-restrict                  ; Does not work with sticky, leave global?
-;   org-agenda-restrict-begin            ; Does not work with sticky, leave global?
-;   org-agenda-restrict-end              ; Does not work with sticky, leave global?
-;   org-agenda-last-dispatch-buffer      ; must be global
-;   org-agenda-overriding-restriction    ; must be global
-;   org-agenda-overriding-arguments      ; must be global
-    org-agenda-last-arguments            ;   OK with sticky buffers
-    org-agenda-info                      ; OK with sticky buffers
-;   org-mobile-creating-agendas          ; Must be global
-    org-agenda-tag-filter-overlays       ; OK with sticky buffers
-    org-agenda-cat-filter-overlays       ; OK with sticky buffers
-;   org-agenda-marker-table              ; Should be global
-    org-pre-agenda-window-conf           ; OK with sticky buffers
-    org-agenda-columns-active            ; OK with sticky buffers
-;    org-agenda-name                     ; Not needed will be set locally
-    org-agenda-tag-filter                ; OK with sticky buffers
-    org-agenda-category-filter           ; OK with sticky buffers
-;   org-agenda-tag-filter-while-redo     ; not necessary
-;   org-agenda-tag-filter-preset         ; not necessary since scoped from options
-;   org-agenda-category-filter-preset    ; not necessary since sciped from options
-    org-agenda-markers                   ; OK with sticky buffers
-;   org-agenda-last-marker-time          ; Must be global
-;   org-agenda-only-exact-dates          ; Must be global
-;   org-agenda-start-day                 ; must be global
-;   org-starting-day                     ; not necessary to include
-;   org-agenda-current-span              ; not necessary to include
-;   org-arg-loc                          ; not necessary to include
-;   org-agenda-entry-types               ; Must be global
-;   org-agenda-search-history            ; Must be global
-;   org-todo-only                        ; Must be global
-;   org-search-syntax-table              ; Must be global
-    org-agenda-last-search-view-search-was-boolean ; OK with sticky buffers
-;   org-last-arg                         ; not necessary to include
-;   org-agenda-skip-regexp               ; Must be global (will be scoped)
-;   org-agenda-overriding-header         ; Must be global (will be scoped)
-;   org-disable-agenda-to-diary          ; Must be global
-;   diary-list-entries-hook              ; Must be global
-;   diary-time-regexp                    ; Must be global
-;   org-agenda-cleanup-fancy-diary-hook  ; Must be global
-;   org-diary-last-run-time              ; Must be global
-;   org-heading-keyword-regexp-format    ; Must be global
-;   org-agenda-sorting-strategy          ; Must be global
-;   org-agenda-sorting-strategy-selected ; Must be global
-;   org-agenda-before-sorting-filter-function  ; Must be global
-;   org-agenda-restriction-lock-overlay  ; Must be global
-;   org-global-tags-completion-table     ; Must be global
-    org-agenda-filtered-by-category      ; OK with sticky buffers
-    org-agenda-filter-form               ; OK with sticky buffers
-;   org-hl                               ; Must be global
-;   org-agenda-after-show-hook           ; Must be global
-;   org-archive-default-command          ; Must be global
-    org-agenda-show-window               ; not sure if needed, but probably OK
-    org-agenda-cycle-counter             ; not sure if needed, but probably OK
-;   org-last-heading-marker              ; Must be global
-    org-agenda-last-prefix-arg           ; OK with sticky buffers
-    ))
-
+  '(org-agenda-this-buffer-name
+    org-agenda-undo-list
+    org-agenda-pending-undo-list
+    org-agenda-follow-mode
+    org-agenda-entry-text-mode
+    org-agenda-clockreport-mode
+    org-agenda-show-log
+    org-agenda-redo-command
+    org-agenda-query-string
+    org-agenda-type
+    org-agenda-bulk-marked-entries
+    org-agenda-undo-has-started-in
+    org-agenda-last-arguments
+    org-agenda-info
+    org-agenda-tag-filter-overlays
+    org-agenda-cat-filter-overlays
+    org-pre-agenda-window-conf
+    org-agenda-columns-active
+    org-agenda-tag-filter
+    org-agenda-category-filter
+    org-agenda-markers
+    org-agenda-last-search-view-search-was-boolean
+    org-agenda-filtered-by-category
+    org-agenda-filter-form
+    org-agenda-show-window
+    org-agenda-cycle-counter
+    org-agenda-last-prefix-arg)
+  "Variables that must be local in agenda buffers to allow multiple buffers.")
 
 (defun org-agenda-mode ()
   "Mode for time-sorted view on action items in Org-mode files.
@@ -2551,15 +2493,15 @@ Agenda views are separated by `org-agenda-block-separator'."
 	(erase-buffer)
 	(insert (eval-when-compile
 		  (let ((header
-"
-Press key for an agenda command:        <   Buffer, subtree/region restriction
+"Press key for an agenda command:        <   Buffer, subtree/region restriction
 --------------------------------        >   Remove restriction
 a   Agenda for current week or day      e   Export agenda views
 t   List of all TODO entries            T   Entries with special TODO kwd
 m   Match a TAGS/PROP/TODO query        M   Like m, but only TODO entries
 L   Timeline for current buffer         #   List stuck projects (!=configure)
-s   Search for keywords                 C   Configure custom agenda commands
+s   Search for keywords                 *   Toggle sticky agenda views
 /   Multi-occur                         ?   Find :FLAGGED: entries
+                                        C   Configure custom agenda commands
 ")
 			(start 0))
 		    (while (string-match
@@ -2692,11 +2634,9 @@ s   Search for keywords                 C   Configure custom agenda commands
 					  nil
 					(cons (substring (car x) 1) (cdr x))))
 				    custom))))
-	   ((eq c ?\C-k)
-	    (org-agenda-remove-restriction-lock 'noupdate)
-	    (org-agenda-kill-all-agenda-buffers)
-	    (message "All agenda buffers have been killed")
-	    (ding) (sit-for 2))
+	   ((eq c ?*)
+	    (org-toggle-sticky-agenda)
+	    (sit-for 2))
 	   ((and (not restrict-ok) (memq c '(?1 ?0 ?<)))
 	    (message "Restriction is only possible in Org-mode buffers")
 	    (ding) (sit-for 1))

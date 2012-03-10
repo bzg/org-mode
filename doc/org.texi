@@ -7245,6 +7245,16 @@ the region.  Otherwise, restrict it to the current subtree@footnote{For
 backward compatibility, you can also press @kbd{0} to restrict to the
 current region/subtree.}.  After pressing @kbd{< <}, you still need to press the
 character selecting the command.
+
+@item *
+@vindex org-agenda-sticky
+Toggle sticky agenda views.  By default, Org maintains only a single agenda
+buffer and rebuilds it each time you change the view, to make sure everything
+is always up to date.  If you switch between views often and the build time
+bothers you, you can turn on sticky agenda buffers (make this the default by
+customizing the variable @code{org-agenda-sticky}).  With sticky agendas, the
+dispatcher only switches to the selected view, you need to update it by hand
+with @kbd{r} or @kbd{g}.
 @end table
 
 You can also define custom commands that will be accessible through the
