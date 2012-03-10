@@ -312,6 +312,21 @@ Outside."
     (org-element-up)
     (should (looking-at "\\* Top"))))
 
+(ert-deftest test-org-elemnet/down-element ()
+  "Test `org-element-down' specifications."
+  ;; 1. Error when the element hasn't got a recursive type.
+  (org-test-with-temp-text "Paragraph."
+    (should-error (org-element-down)))
+  ;; 2. When at a plain-list, move to first item.
+  (org-test-with-temp-text "- Item 1\n  - Item 1.1\n  - Item 2.2"
+    (goto-line 2)
+    (org-element-down)
+    (should (looking-at " - Item 1.1")))
+  ;; 3. Otherwise, move inside the greater element.
+  (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph.\n#+END_CENTER"
+    (org-element-down)
+    (should (looking-at "Paragraph"))))
+
 
 (provide 'test-org-element)
 ;;; test-org-element.el ends here
