@@ -1805,6 +1805,7 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 (defvar org-agenda-entry-text-mode nil)
 (defvar org-agenda-clockreport-mode nil)
 (defvar org-agenda-show-log nil)
+(defvar org-agenda-show-scoped nil) ; Used for dynamically scoping
 (defvar org-agenda-redo-command nil)
 (defvar org-agenda-query-string nil)
 (defvar org-agenda-mode-hook nil
