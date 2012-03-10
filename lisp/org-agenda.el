@@ -1819,16 +1819,17 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 (defun org-toggle-sticky-agenda (&optional arg)
   "Toggle `org-agenda-sticky'."
   (interactive "P")
-  (let ((new-value (if arg (> (prefix-numeric-value arg) 0)
+  (let ((new-value (if arg
+		       (> (prefix-numeric-value arg) 0)
 		     (not org-agenda-sticky))))
     (if (equal new-value org-agenda-sticky)
 	(message "Sticky agenda was already %s"
 		 (if org-agenda-sticky "enabled" "disabled"))
       (setq org-agenda-sticky new-value)
       (org-agenda-kill-all-agenda-buffers)
-      (message "Sticky agenda was %s" (if org-agenda-sticky "enabled" "disabled")))))
+      (message "Sticky agenda was %s"
+	       (if org-agenda-sticky "enabled" "disabled")))))
 
-(defvar org-agenda-sticky nil)
 (defcustom org-agenda-sticky nil
   "Non-nil means agenda q key will bury agenda buffers.
 Agenda commands will then show existing buffer instead of generating new ones.
@@ -1836,7 +1837,9 @@ When nil, `q' will kill the single agenda buffer."
   :group 'org-agenda
   :type 'boolean
   :set (lambda (var val)
-	 (org-toggle-sticky-agenda (if val 1 0))))
+	 (if (boundp var)
+	     (org-toggle-sticky-agenda (if val 1 0))
+	   (set var val))))
 
 (defvar org-agenda-buffer nil
   "Agenda buffer currently being generated.")
