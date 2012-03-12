@@ -1874,9 +1874,9 @@ code ---- the results are extracted in the syntax of the source
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
 	(flet ((wrap (start finish)
-		     (goto-char beg) (insert (concat start "\n"))
 		     (goto-char end) (insert (concat finish "\n"))
-		     (setq end (point-marker)))
+		     (goto-char beg) (insert (concat start "\n"))
+		     (goto-char end) (setq end (point-marker)))
 	       (proper-list-p (it) (and (listp it) (null (cdr (last it))))))
 	  ;; insert results based on type
 	  (cond
