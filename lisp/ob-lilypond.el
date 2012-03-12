@@ -319,7 +319,7 @@ If TEST is non-nil, the shell command is returned and is not run"
                  (concat (ly-determine-pdf-path) " " pdf-file)))
             (if test
                 cmd-string
-	      (start-process 
+	      (start-process
 	       "\"Audition pdf\""
 	       "*lilypond*"
 	       (ly-determine-pdf-path)
@@ -338,7 +338,7 @@ If TEST is non-nil, the shell command is returned and is not run"
                  (concat (ly-determine-midi-path) " " midi-file)))
             (if test
                 cmd-string
-              (start-process 
+              (start-process
                "\"Audition midi\""
                "*lilypond*"
                (ly-determine-midi-path)

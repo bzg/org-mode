@@ -56,7 +56,7 @@
              t                          ;display
              ,(if ly-gen-png  "--png"  "") ;&rest...
              ,(if ly-gen-html "--html" "")   
-             ,(if ly-gen-pdf "--pdf" "")   
+             ,(if ly-gen-pdf "--pdf" "")
              ,(if ly-use-eps  "-dbackend=eps" "")
              ,(if ly-gen-svg  "-dbackend=svg" "")
              "--output=test-file"
