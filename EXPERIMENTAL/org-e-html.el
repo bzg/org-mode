@@ -1807,9 +1807,6 @@ original parsed data.  INFO is a plist holding export options."
 
 (defun org-e-html-do-format-code
   (code &optional lang refs retain-labels num-start textarea-p)
-  "Transcode a SRC-BLOCK element from Org to HTML.
-CONTENTS holds the contents of the item.  INFO is a plist holding
-contextual information."
   (when textarea-p
     (setq num-start nil refs nil lang nil))
   (let* ((code-lines (org-split-string code "\n"))
@@ -1841,7 +1838,8 @@ contextual information."
 
 (defun org-e-html-format-code (element info)
   (let* ((lang (org-element-property :language element))
-	 (switches (org-element-property :switches element))
+	 ;; (switches (org-element-property :switches element))
+	 (switches nil)			; FIXME
 	 (textarea-p (and switches (string-match "-t\\>" switches)))
 	 ;; Extract code and references.
 	 (code-info (org-export-unravel-code element))
@@ -1939,7 +1937,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 (attr (mapconcat #'identity
 			  (org-element-property :attr_html example-block)
 			  " "))
-	 (switches (org-element-property :switches example-block))
+	 ;; (switches (org-element-property :switches example-block))
+	 (switches nil)			; FIXME
 	 (textarea-p (and switches (string-match "-t\\>" switches)))
 	 (code (org-e-html-format-code example-block info)))
     (cond
@@ -2733,7 +2732,8 @@ contextual information."
 	 (attr (mapconcat #'identity
 			  (org-element-property :attr_html src-block)
 			  " "))
-	 (switches (org-element-property :switches src-block))
+	 ;; (switches (org-element-property :switches src-block))
+	 (switches nil)			; FIXME
 	 (textarea-p (and switches (string-match "-t\\>" switches)))
 	 (code (org-e-html-format-code src-block info)))
     (cond
