@@ -295,6 +295,8 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 	(push (cons file link-name) rtn)))
     (nreverse rtn)))
 
+(defvar org-agenda-filter)
+
 ;;;###autoload
 (defun org-mobile-push ()
   "Push the current state of Org affairs to the WebDAV directory.

@@ -41,6 +41,7 @@
 (declare-function org-at-table.el-p "org" ())
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
+(declare-function org-strip-protective-commas "org" (beg end))
 (declare-function org-pop-to-buffer-same-window 
 		  "org-compat" (&optional buffer-or-name norecord label))
 
