@@ -13673,6 +13673,9 @@ references will not be expanded when the code block is exported.
 ``Noweb'' syntax references in the body of the code block will be expanded
 before the block is evaluated or tangled.  However, ``noweb'' syntax
 references will not be removed when the code block is exported.
+@item @code{eval}
+``Noweb'' syntax references in the body of the code block will only be
+expanded before the block is evaluated.
 @end itemize
 
 @subsubheading Noweb prefix lines
