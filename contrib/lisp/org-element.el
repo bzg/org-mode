@@ -3919,6 +3919,8 @@ modified."
      ((eq (org-element-type element) 'plain-list)
       (forward-char))
      ((memq (org-element-type element) org-element-greater-elements)
+      ;; If contents are hidden, first disclose them.
+      (when (org-element-property :hiddenp element) (org-cycle))
       (goto-char (org-element-property :contents-begin element)))
      (t (error "No inner element")))))
 
