@@ -212,16 +212,16 @@ buffer."
   (interactive)
   (unless (eq context 'save)
     (setq org-edit-src-saved-temp-window-config (current-window-configuration)))
-  (let ((mark (and (org-region-active-p) (mark)))
-	(case-fold-search t)
-	(info (org-edit-src-find-region-and-lang))
-	(full-info (org-babel-get-src-block-info 'light))
-	(org-mode-p (derived-mode-p 'org-mode)) ;; derived-mode-p is reflexive
-	(beg (make-marker))
-	(end (make-marker))
-	(allow-write-back-p (null code))
-	block-nindent total-nindent ovl lang lang-f single lfmt buffer msg
-	begline markline markcol line col transmitted-variables)
+  (let* ((mark (and (org-region-active-p) (mark)))
+	 (case-fold-search t)
+	 (info (org-edit-src-find-region-and-lang))
+	 (full-info (org-babel-get-src-block-info 'light))
+	 (org-mode-p (derived-mode-p 'org-mode)) ;; derived-mode-p is reflexive
+	 (beg (make-marker))
+	 (end (make-marker))
+	 (allow-write-back-p (null code))
+	 block-nindent total-nindent ovl lang lang-f single lfmt buffer msg
+	 begline markline markcol line col transmitted-variables)
     (if (not info)
 	nil
       (setq beg (move-marker beg (nth 0 info))
