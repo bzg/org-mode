@@ -2116,7 +2116,8 @@ parameters when merging lists."
 	       (setq tangle (or (list (cdr pair)) tangle)))
 	      (:noweb
 	       (setq noweb (e-merge
-			    '(("yes" "no" "tangle" "no-export" "strip-export"))
+			    '(("yes" "no" "tangle" "no-export"
+			       "strip-export" "eval"))
 			    noweb
 			    (split-string (or (cdr pair) "")))))
 	      (:cache
@@ -2160,7 +2161,7 @@ CONTEXT may be one of :tangle, :export or :eval."
 			   (intersect (cdr as) bs)))))
     (intersect (case context
                     (:tangle '("yes" "tangle" "no-export" "strip-export"))
-                    (:eval   '("yes" "no-export" "strip-export"))
+                    (:eval   '("yes" "no-export" "strip-export" "eval"))
                     (:export '("yes")))
                   (split-string (or (cdr (assoc :noweb params)) "")))))
 
