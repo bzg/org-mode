@@ -1505,8 +1505,7 @@ This function shouldn't be used for floats.  See
 
 (defun org-e-html-style (info)
   (concat
-   (when (plist-get info :style-include-default)
-     org-e-html-style-default)
+   "\n" (when (plist-get info :style-include-default) org-e-html-style-default)
    (plist-get info :style)
    (plist-get info :style-extra)
    "\n"
@@ -1727,12 +1726,16 @@ original parsed data.  INFO is a plist holding export options."
 
 ;;; Transcode Helpers
 
+;;;; Todo
+
 (defun org-e-html--todo (todo)
   (when todo
     (format "<span class=\"%s %s%s\">%s</span>"
 	    (if (member todo org-done-keywords) "done" "todo")
 	    org-e-html-todo-kwd-class-prefix (org-e-html-fix-class-name todo)
 	    todo)))
+
+;;;; Tags
 
 (defun org-e-html--tags (tags)
   (when tags
@@ -1745,6 +1748,8 @@ original parsed data.  INFO is a plist holding export options."
 		       tag))
 	     (org-split-string tags ":") "&nbsp;"))))
 
+;;;; Headline
+
 (defun* org-e-html-format-headline
   (todo todo-type priority text tags
 	&key level section-number headline-label &allow-other-keys)
@@ -1756,6 +1761,98 @@ original parsed data.  INFO is a plist holding export options."
 	(tags (org-e-html--tags tags)))
     (concat section-number todo (and todo " ") text
 	    (and tags "&nbsp;&nbsp;&nbsp;") tags)))
+
+;;;; Src Code
+
+(defun org-e-html-fontify-code (code lang)
+  (when code
+    (cond
+     ;; Case 1: No lang.  Possibly an example block.
+     ((not lang)
+      ;; Simple transcoding.
+      (org-e-html-encode-plain-text code))
+     ;; Case 2: No htmlize or an inferior version of htmlize
+     ((not (and (require 'htmlize nil t) (fboundp 'htmlize-region-for-paste)))
+      ;; Emit a warning.
+      (message "Cannot fontify src block (htmlize.el >= 1.34 required)")
+      ;; Simple transcoding.
+      (org-e-html-encode-plain-text code))
+     (t
+      ;; Map language
+      (setq lang (or (assoc-default lang org-src-lang-modes) lang))
+      (let* ((lang-mode (and lang (intern (format "%s-mode" lang)))))
+	(cond
+	 ;; Case 1: Language is not associated with any Emacs mode
+	 ((not (functionp lang-mode))
+	  ;; Simple transcoding.
+	  (org-e-html-encode-plain-text code))
+	 ;; Case 2: Default.  Fotify code.
+	 (t
+	  ;; htmlize
+	  (setq code (with-temp-buffer
+		       (insert code)
+		       (funcall lang-mode)
+		       (font-lock-fontify-buffer)
+		       ;; markup each line separately
+		       (org-remove-formatting-on-newlines-in-region
+			(point-min) (point-max))
+		       (org-src-mode)
+		       (set-buffer-modified-p nil)
+		       (org-export-e-htmlize-region-for-paste
+			(point-min) (point-max))))
+	  ;; Strip any encolosing <pre></pre> tags
+	  (if (string-match "<pre[^>]*>\n*\\([^\000]*\\)</pre>" code)
+	      (match-string 1 code)
+	    code))))))))
+
+(defun org-e-html-do-format-code
+  (code &optional lang refs retain-labels num-start textarea-p)
+  (when textarea-p
+    (setq num-start nil refs nil lang nil))
+  (let* ((code-lines (org-split-string code "\n"))
+	 (code-length (length code-lines))
+	 (num-fmt
+	  (and num-start
+	       (format "%%%ds: "
+		       (length (number-to-string (+ code-length num-start))))))
+	 (code (org-e-html-fontify-code code lang)))
+    (assert (= code-length (length (org-split-string code "\n"))))
+    (org-export-format-code
+     code
+     (lambda (loc line-num ref)
+       (setq loc
+	     (concat
+	      ;; Add line number, if needed.
+	      (when num-start
+		(format "<span class=\"linenr\">%s</span>"
+			(format num-fmt line-num)))
+	      ;; Transcoded src line.
+	      loc
+	      ;; Add label, if needed.
+	      (when (and ref retain-labels) (format " (%s)" ref))))
+       ;; Mark transcoded line as an anchor, if needed.
+       (if (not ref) loc
+	 (format "<span id=\"coderef-%s\" class=\"coderef-off\">%s</span>"
+		 ref loc)))
+     num-start refs)))
+
+(defun org-e-html-format-code (element info)
+  (let* ((lang (org-element-property :language element))
+	 ;; (switches (org-element-property :switches element))
+	 (switches nil)			; FIXME
+	 (textarea-p (and switches (string-match "-t\\>" switches)))
+	 ;; Extract code and references.
+	 (code-info (org-export-unravel-code element))
+	 (code (car code-info))
+	 (refs (cdr code-info))
+	 ;; Does the src block contain labels?
+	 (retain-labels (org-element-property :retain-labels element))
+	 ;; Does it have line numbers?
+	 (num-start (case (org-element-property :number-lines element)
+		      (continued (org-export-get-loc element info))
+		      (new 0))))
+    (org-e-html-do-format-code
+     code lang refs retain-labels num-start textarea-p)))
 
 
 
@@ -1824,175 +1921,37 @@ holding contextual information.."
   "Transcode an ENTITY object from Org to HTML.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
-  ;; (let ((ent (org-element-property :latex entity)))
-  ;;   (if (org-element-property :latex-math-p entity)
-  ;; 	(format "$%s$" ent)
-  ;;     ent))
   (org-element-property :html entity))
 
 
 ;;;; Example Block
 
-(defun org-e-html-format-source-line-with-line-number-and-label (line)
-  (let ((ref (org-find-text-property-in-string 'org-coderef line))
-	(num (org-find-text-property-in-string 'org-loc line)))
-    (when num
-      (setq line (format "<span class=\"linenr\">%d:  </span>%s (%s)"
-			 num line ref)))
-    (when ref
-      (setq line
-	    (format
-	     "<span id=\"coderef-%s\" class=\"coderef-off\">%s (%s)</span>"
-	     ref line ref)))
-    line))
-
-(defun org-e-html-format-source-code-or-example-plain
-  (lines lang caption textareap cols rows num cont rpllbl fmt)
-  (format
-   "\n<pre class=\"example\">\n%s\n</pre>"
-   (cond
-    (textareap
-     (format "<p>\n<textarea cols=\"%d\" rows=\"%d\">%s\n</textarea>\n</p>\n"
-	     cols rows lines))
-    (t (mapconcat
-	(lambda (line)
-	  (org-e-html-format-source-line-with-line-number-and-label
-	   (org-e-html-encode-plain-text line)))
-	(org-split-string lines "\n")
-	"\n")))))
-
-(defun org-e-html-format-source-code-or-example-colored
-  (lines lang caption textareap cols rows num cont rpllbl fmt)
-  (let* ((lang-m (when lang
-		   (or (cdr (assoc lang org-src-lang-modes))
-		       lang)))
-	 (mode (and lang-m (intern
-			    (concat
-			     (if (symbolp lang-m)
-				 (symbol-name lang-m)
-			       lang-m)
-			     "-mode"))))
-	 (org-inhibit-startup t)
-	 (org-startup-folded nil))
-    (setq lines
-	  (with-temp-buffer
-	    (insert lines)
-	    (if (functionp mode)
-		(funcall mode)
-	      (fundamental-mode))
-	    (font-lock-fontify-buffer)
-	    ;; markup each line separately
-	    (org-remove-formatting-on-newlines-in-region
-	     (point-min) (point-max))
-	    (org-src-mode)
-	    (set-buffer-modified-p nil)
-	    (org-export-e-htmlize-region-for-paste
-	     (point-min) (point-max))))
-
-    (when (string-match "<pre\\([^>]*\\)>\n*" lines)
-      (setq lines (replace-match
-		   (format "<pre class=\"src src-%s\">\n" lang) t t lines)))
-
-    (when caption
-      (setq lines
-	    (concat
-	     "<div class=\"org-src-container\">"
-	     (format "<label class=\"org-src-name\">%s</label>" caption)
-	     lines "</div>")))
-
-    (unless textareap
-      (setq lines
-	    (mapconcat
-	     (lambda (line)
-	       (org-e-html-format-source-line-with-line-number-and-label line))
-	     (org-split-string lines "\n") "\n")))
-
-    ;; (when (string-match "\\(\\`<[^>]*>\\)\n" lines)
-    ;;   (setq lines (replace-match "\\1" t nil lines)))
-    lines))
-
-(defun org-e-html-format-source-code-or-example
-  (lang code &optional opts indent caption)
-  "Format CODE from language LANG and return it formatted for export.
-The CODE is marked up in `org-export-current-backend' format.
-
-Check if a function by name
-\"org-<backend>-format-source-code-or-example\" is bound. If yes,
-use it as the custom formatter. Otherwise, use the default
-formatter. Default formatters are provided for docbook, html,
-latex and ascii backends. For example, use
-`org-e-html-format-source-code-or-example' to provide a custom
-formatter for export to \"html\".
-
-If LANG is nil, do not add any fontification.
-OPTS contains formatting options, like `-n' for triggering numbering lines,
-and `+n' for continuing previous numbering.
-Code formatting according to language currently only works for HTML.
-Numbering lines works for all three major backends (html, latex, and ascii).
-INDENT was the original indentation of the block."
-  (save-match-data
-    (let* ((backend-formatter 'org-e-html-format-source-code-or-example-plain)
-	   num cont rtn rpllbl keepp textareap preserve-indentp cols rows fmt)
-      (setq opts (or opts "")
-	    num (string-match "[-+]n\\>" opts)
-	    cont (string-match "\\+n\\>" opts)
-	    rpllbl (string-match "-r\\>" opts)
-	    keepp (string-match "-k\\>" opts)
-	    textareap (string-match "-t\\>" opts)
-	    preserve-indentp (or org-src-preserve-indentation
-				 (string-match "-i\\>" opts))
-	    cols (if (string-match "-w[ \t]+\\([0-9]+\\)" opts)
-		     (string-to-number (match-string 1 opts))
-		   80)
-	    rows (if (string-match "-h[ \t]+\\([0-9]+\\)" opts)
-		     (string-to-number (match-string 1 opts))
-		   (org-count-lines code))
-	    fmt (if (string-match "-l[ \t]+\"\\([^\"\n]+\\)\"" opts)
-		    (match-string 1 opts)))
-      (when (and textareap
-		 ;; (eq org-export-current-backend 'html)
-		 )
-	;; we cannot use numbering or highlighting.
-	(setq num nil cont nil lang nil))
-      (if keepp (setq rpllbl 'keep))
-      (setq rtn (if preserve-indentp code (org-remove-indentation code)))
-      (when (string-match "^," rtn)
-	(setq rtn (with-temp-buffer
-		    (insert rtn)
-		    ;; Free up the protected lines
-		    (goto-char (point-min))
-		    (while (re-search-forward "^," nil t)
-		      (if (or (equal lang "org")
-			      (save-match-data
-				(looking-at "\\([*#]\\|[ \t]*#\\+\\)")))
-			  (replace-match ""))
-		      (end-of-line 1))
-		    (buffer-string))))
-      (when lang
-	(if (featurep 'xemacs)
-	    (require 'htmlize)
-	  (require 'htmlize nil t)))
-
-      (setq backend-formatter
-	    (cond
-	     ((fboundp 'htmlize-region-for-paste)
-	      'org-e-html-format-source-code-or-example-colored)
-	     (t
-	      (message
-	       "htmlize.el 1.34 or later is needed for source code formatting")
-	      'org-e-html-format-source-code-or-example-plain)))
-      (funcall backend-formatter rtn lang caption textareap cols rows
-	       num cont rpllbl fmt))))
-
 (defun org-e-html-example-block (example-block contents info)
   "Transcode a EXAMPLE-BLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let* ((options (or (org-element-property :options example-block) ""))
-	 (value (org-export-handle-code example-block info nil nil t)))
-    ;; (org-e-html--wrap-label
-    ;;  example-block (format "\\begin{verbatim}\n%s\\end{verbatim}" value))
-    (org-e-html--wrap-label
-     example-block (org-e-html-format-source-code-or-example nil value))))
+	 (lang (org-element-property :language example-block))
+	 (caption (org-element-property :caption example-block))
+	 (label (org-element-property :name example-block))
+	 (caption-str (org-e-html--caption/label-string caption label info))
+	 (attr (mapconcat #'identity
+			  (org-element-property :attr_html example-block)
+			  " "))
+	 ;; (switches (org-element-property :switches example-block))
+	 (switches nil)			; FIXME
+	 (textarea-p (and switches (string-match "-t\\>" switches)))
+	 (code (org-e-html-format-code example-block info)))
+    (cond
+     (textarea-p
+      (let ((cols (if (not (string-match "-w[ \t]+\\([0-9]+\\)" switches))
+		      80 (string-to-number (match-string 1 switches))))
+	    (rows (if (string-match "-h[ \t]+\\([0-9]+\\)" switches)
+		      (string-to-number (match-string 1 switches))
+		    (org-count-lines code))))
+	(format
+	 "\n<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s\n</textarea>\n</p>"
+	 cols rows code)))
+     (t (format "\n<pre class=\"example\">\n%s\n</pre>" code)))))
 
 
 ;;;; Export Snippet
@@ -2023,7 +1982,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		  "^[ \t]*: ?" ""
 		  (org-element-property :value fixed-width)))))
     (org-e-html--wrap-label
-     fixed-width (org-e-html-format-source-code-or-example nil value))))
+     fixed-width (format "\n<pre class=\"example\">\n%s\n</pre>"
+			 (org-e-html-do-format-code value)))))
 
 
 ;;;; Footnote Definition
@@ -2094,7 +2054,7 @@ holding contextual information."
 			       (funcall org-e-html-format-headline-function
 					todo todo-type priority text tags))))
 			   (t 'org-e-html-format-headline))))
-    (apply format-function 
+    (apply format-function
     	   todo todo-type  priority text tags
     	   :headline-label headline-label :level level
     	   :section-number section-number extra-keys)))
@@ -2217,7 +2177,7 @@ holding contextual information."
        inlinetask info format-function :contents contents)))
    ;; Otherwise, use a default template.
    (t (org-e-html--wrap-label
-       inlinetask 
+       inlinetask
        (format
 	"\n<div class=\"inlinetask\">\n<b>%s</b><br/>\n%s\n</div>"
 	(org-e-html-format-headline--wrap inlinetask info)
@@ -2540,7 +2500,7 @@ INFO is a plist holding contextual information.  See
      ;; equivalent line number.
      ((string= type "coderef")
       (let ((fragment (concat "coderef-" path)))
-	(format "<a href=#%s %s>%s</a>" fragment
+	(format "<a href=\"#%s\" %s>%s</a>" fragment
 		(format (concat "class=\"coderef\""
 				" onmouseover=\"CodeHighlightOn(this, '%s');\""
 				" onmouseout=\"CodeHighlightOff(this, '%s');\"")
@@ -2766,17 +2726,32 @@ holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-property :language src-block))
-	 (code (org-export-handle-code src-block info nil nil t))
 	 (caption (org-element-property :caption src-block))
-	 (label (org-element-property :name src-block)))
-    ;; FIXME: Handle caption
-
-    ;; caption-str (when caption)
-    ;; (main (org-export-secondary-string (car caption) 'e-html info))
-    ;; (secondary (org-export-secondary-string (cdr caption) 'e-html info))
-    ;; (caption-str (org-e-html--caption/label-string caption label info))
-    (org-e-html-format-source-code-or-example lang code)))
-
+	 (label (org-element-property :name src-block))
+	 (caption-str (org-e-html--caption/label-string caption label info))
+	 (attr (mapconcat #'identity
+			  (org-element-property :attr_html src-block)
+			  " "))
+	 ;; (switches (org-element-property :switches src-block))
+	 (switches nil)			; FIXME
+	 (textarea-p (and switches (string-match "-t\\>" switches)))
+	 (code (org-e-html-format-code src-block info)))
+    (cond
+     (lang (format
+	    "\n<div class=\"org-src-container\">\n%s%s\n</div>"
+	    (if (not caption) ""
+	      (format "<label class=\"org-src-name\">%s</label>" caption-str))
+	    (format "\n<pre class=\"src src-%s\">%s\n</pre>" lang code)))
+     (textarea-p
+      (let ((cols (if (not (string-match "-w[ \t]+\\([0-9]+\\)" switches))
+		      80 (string-to-number (match-string 1 switches))))
+	    (rows (if (string-match "-h[ \t]+\\([0-9]+\\)" switches)
+		      (string-to-number (match-string 1 switches))
+		    (org-count-lines code))))
+	(format
+	 "\n<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s\n</textarea>\n</p>"
+	 cols rows code)))
+     (t (format "\n<pre class=\"example\">\n%s\n</pre>" code)))))
 
 ;;;; Statistics Cookie
 

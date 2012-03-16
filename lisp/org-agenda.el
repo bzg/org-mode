@@ -6213,7 +6213,7 @@ When this is the global TODO list, a prefix argument will be interpreted."
 (defvar org-global-tags-completion-table nil)
 (defvar org-agenda-filtered-by-category nil)
 (defvar org-agenda-filter-form nil)
-
+(defvar org-agenda-filtered-by-category nil)
 (defun org-agenda-filter-by-category (strip)
   "Keep only those lines in the agenda buffer that have a specific category.
 The category is that of the current line."

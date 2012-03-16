@@ -623,38 +623,6 @@ styles congruent with the ODF-1.2 specification."
 				((string= s "\t") (org-e-odt-format-tabs))
 				(t (org-e-odt-format-spaces (length s))))) line))
 
-
-(defun org-e-odt-format-source-line-with-line-number-and-label
-  (line fontifier par-style)
-  (let (;; (keep-label (not (numberp rpllbl)))
-	(ref (org-find-text-property-in-string 'org-coderef line))
-	(num (org-find-text-property-in-string 'org-loc line)))
-    (setq line (concat line (and ref (format "(%s)" ref))))
-    (setq line (funcall fontifier line))
-    (when ref
-      (setq line (org-e-odt-format-target line (concat "coderef-" ref))))
-    (setq line (org-e-odt-format-stylized-paragraph par-style line))
-    (if (not num) line
-      (org-e-odt-format-tags
-       '("<text:list-item>" . "</text:list-item>") line))))
-
-(defun org-e-odt-format-source-code-or-example-plain
-  (lines lang caption textareap cols rows num cont rpllbl fmt)
-  "Format source or example blocks much like fixedwidth blocks.
-Use this when `org-export-e-odt-fontify-srcblocks' option is turned
-off."
-  (let* ((lines (org-split-string lines "[\r\n]"))
-	 (line-count (length lines))
-	 (i 0))
-    (mapconcat
-     (lambda (line)
-       (incf i)
-       (org-e-odt-format-source-line-with-line-number-and-label
-	line 'org-e-odt-encode-plain-text
-	(if (= i line-count) "OrgFixedWidthBlockLastLine"
-	  "OrgFixedWidthBlock")))
-     lines "\n")))
-
 (defun org-e-odt-hfy-face-to-css (fn)
   "Create custom style for face FN.
 When FN is the default face, use it's foreground and background
@@ -701,76 +669,6 @@ Update styles.xml with styles that were collected as part of
       (when (re-search-forward "</office:styles>" nil t)
 	(goto-char (match-beginning 0))
 	(insert "\n<!-- Org Htmlfontify Styles -->\n" styles "\n")))))
-
-(defun org-e-odt-format-source-code-or-example-colored (lines lang caption)
-  "Format source or example blocks using `htmlfontify-string'.
-Use this routine when `org-export-e-odt-fontify-srcblocks' option
-is turned on."
-  (let* ((lang-m (and lang (or (cdr (assoc lang org-src-lang-modes)) lang)))
-	 (mode (and lang-m (intern (concat (if (symbolp lang-m)
-					       (symbol-name lang-m)
-					     lang-m) "-mode"))))
-	 (org-inhibit-startup t)
-	 (org-startup-folded nil)
-	 (lines (with-temp-buffer
-		  (insert lines)
-		  (if (functionp mode) (funcall mode) (fundamental-mode))
-		  (font-lock-fontify-buffer)
-		  (buffer-string)))
-	 (hfy-html-quote-regex "\\([<\"&> 	]\\)")
-	 (hfy-html-quote-map '(("\"" "&quot;")
-			       ("<" "&lt;")
-			       ("&" "&amp;")
-			       (">" "&gt;")
-			       (" " "<text:s/>")
-			       ("	" "<text:tab/>")))
-	 (hfy-face-to-css 'org-e-odt-hfy-face-to-css)
-	 (hfy-optimisations-1 (copy-seq hfy-optimisations))
-	 (hfy-optimisations (add-to-list 'hfy-optimisations-1
-					 'body-text-only))
-	 (hfy-begin-span-handler
-	  (lambda (style text-block text-id text-begins-block-p)
-	    (insert (format "<text:span text:style-name=\"%s\">" style))))
-	 (hfy-end-span-handler (lambda nil (insert "</text:span>"))))
-    (when (fboundp 'htmlfontify-string)
-      (let* ((lines (org-split-string lines "[\r\n]"))
-	     (line-count (length lines))
-	     (i 0))
-	(mapconcat
-	 (lambda (line)
-	   (incf i)
-	   (org-e-odt-format-source-line-with-line-number-and-label
-	    line 'htmlfontify-string
-	    (if (= i line-count) "OrgSrcBlockLastLine" "OrgSrcBlock")))
-	 lines "\n")))))
-
-(defun org-e-odt-format-source-code-or-example (lines lang
-						&optional caption ; FIXME
-						)
-  "Format source or example blocks for export.
-Use `org-e-odt-format-source-code-or-example-plain' or
-`org-e-odt-format-source-code-or-example-colored' depending on the
-value of `org-export-e-odt-fontify-srcblocks."
-  (setq ;; lines (org-export-number-lines
-   ;;        lines 0 0 num cont rpllbl fmt 'preprocess) FIXME
-   lines (funcall
-	  (or (and org-export-e-odt-fontify-srcblocks
-		   (or (featurep 'htmlfontify)
-		       ;; htmlfontify.el was introduced in Emacs 23.2
-		       ;; So load it with some caution
-		       (require 'htmlfontify nil t))
-		   (fboundp 'htmlfontify-string)
-		   'org-e-odt-format-source-code-or-example-colored)
-	      'org-e-odt-format-source-code-or-example-plain)
-	  lines lang caption))
-  (let ((num (org-find-text-property-in-string 'org-loc lines)))
-    (if (not num) lines
-      (let* ((cont (not (equal num 1)))
-	     (extra (format " text:continue-numbering=\"%s\""
-			    (if cont "true" "false"))))
-	(org-e-odt-format-tags
-	 '("<text:list text:style-name=\"OrgSrcBlockNumberedLine\"%s>"
-	   . "</text:list>") lines extra)))))
 
 (defun org-e-odt-remap-stylenames (style-name)
   (or
@@ -3325,6 +3223,92 @@ This function shouldn't be used for floats.  See
 
 
 
+;;; Transcode Helpers
+
+;;;; Src Code
+
+(defun org-e-odt-htmlfontify-string (line)
+  (let* ((hfy-html-quote-regex "\\([<\"&> 	]\\)")
+	 (hfy-html-quote-map '(("\"" "&quot;")
+			       ("<" "&lt;")
+			       ("&" "&amp;")
+			       (">" "&gt;")
+			       (" " "<text:s/>")
+			       ("	" "<text:tab/>")))
+	 (hfy-face-to-css 'org-e-odt-hfy-face-to-css)
+	 (hfy-optimisations-1 (copy-seq hfy-optimisations))
+	 (hfy-optimisations (add-to-list 'hfy-optimisations-1
+					 'body-text-only))
+	 (hfy-begin-span-handler
+	  (lambda (style text-block text-id text-begins-block-p)
+	    (insert (format "<text:span text:style-name=\"%s\">" style))))
+	 (hfy-end-span-handler (lambda nil (insert "</text:span>"))))
+    (htmlfontify-string line)))
+
+(defun org-e-odt-do-format-code
+  (code &optional lang refs retain-labels num-start)
+  (let* ((lang (or (assoc-default lang org-src-lang-modes) lang))
+	 (lang-mode (and lang (intern (format "%s-mode" lang))))
+	 (code-lines (org-split-string code "\n"))
+	 (code-length (length code-lines))
+	 (use-htmlfontify-p (and (functionp lang-mode)
+				 org-export-e-odt-fontify-srcblocks
+				 (require 'htmlfontify nil t)
+				 (fboundp 'htmlfontify-string)))
+	 (code (if (not use-htmlfontify-p) code
+		 (with-temp-buffer
+		   (insert code)
+		   (funcall lang-mode)
+		   (font-lock-fontify-buffer)
+		   (buffer-string))))
+	 (fontifier (if use-htmlfontify-p 'org-e-odt-htmlfontify-string
+		      'org-e-odt-encode-plain-text))
+	 (par-style (if use-htmlfontify-p "OrgSrcBlock"
+		      "OrgFixedWidthBlock"))
+	 (i 0))
+    (assert (= code-length (length (org-split-string code "\n"))))
+    (setq code
+	  (org-export-format-code
+	   code
+	   (lambda (loc line-num ref)
+	     (setq par-style
+		   (concat par-style (and (= (incf i) code-length) "LastLine")))
+
+	     (setq loc (concat loc (and ref retain-labels (format " (%s)" ref))))
+	     (setq loc (funcall fontifier loc))
+	     (when ref
+	       (setq loc (org-e-odt-format-target loc (concat "coderef-" ref))))
+	     (setq loc (org-e-odt-format-stylized-paragraph par-style loc))
+	     (if (not line-num) loc
+	       (org-e-odt-format-tags
+		'("<text:list-item>" . "</text:list-item>") loc)))
+	   num-start refs))
+    (cond
+     ((not num-start) code)
+     ((equal num-start 0)
+      (org-e-odt-format-tags
+       '("<text:list text:style-name=\"OrgSrcBlockNumberedLine\"%s>"
+	 . "</text:list>") code " text:continue-numbering=\"false\""))
+     (t (org-e-odt-format-tags
+	 '("<text:list text:style-name=\"OrgSrcBlockNumberedLine\"%s>"
+	   . "</text:list>") code " text:continue-numbering=\"true\"")))))
+
+(defun org-e-odt-format-code (element info)
+  (let* ((lang (org-element-property :language element))
+	 ;; Extract code and references.
+	 (code-info (org-export-unravel-code element))
+	 (code (car code-info))
+	 (refs (cdr code-info))
+	 ;; Does the src block contain labels?
+	 (retain-labels (org-element-property :retain-labels element))
+	 ;; Does it have line numbers?
+	 (num-start (case (org-element-property :number-lines element)
+		      (continued (org-export-get-loc element info))
+		      (new 0))))
+    (org-e-odt-do-format-code code lang refs retain-labels num-start)))
+
+
+
 ;;; Template
 
 (defun org-e-odt-template (contents info)
@@ -4192,7 +4176,6 @@ holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-property :language src-block))
-	 (code (org-export-handle-code src-block info nil nil t))
 	 (caption (org-element-property :caption src-block))
 	 (label (org-element-property :name src-block)))
     ;; FIXME: Handle caption
@@ -4201,7 +4184,7 @@ contextual information."
     ;; (main (org-export-secondary-string (car caption) 'e-odt info))
     ;; (secondary (org-export-secondary-string (cdr caption) 'e-odt info))
     ;; (caption-str (org-e-odt--caption/label-string caption label info))
-    (org-e-odt-format-source-code-or-example code lang)))
+    (org-e-odt-format-code src-block info)))
 
 
 ;;;; Statistics Cookie

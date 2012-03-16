@@ -76,6 +76,7 @@
   (require 'gnus-sum))
 
 (require 'calendar)
+(require 'format-spec)
 
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
 (when (fboundp 'defvaralias)
@@ -4929,6 +4930,8 @@ sure that we are at the beginning of the line.")
 (defconst org-heading-regexp "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
   "Matches an headline, putting stars and text into groups.
 Stars are put in group 1 and the trimmed body in group 2.")
+
+(defvar bidi-paragraph-direction)
 
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
@@ -12854,7 +12857,7 @@ headlines matching this string."
 				   (buffer-name (buffer-base-buffer)))))))
 	 (case-fold-search nil)
 	 (org-map-continue-from nil)
-         lspos tags
+         lspos tags tags-list
 	 (tags-alist (list (cons 0 org-file-tags)))
 	 (llast 0) rtn rtn1 level category i txt
 	 todo marker entry priority)
@@ -14986,6 +14989,7 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-final-answer nil)
 (defvar org-read-date-analyze-futurep nil)
 (defvar org-read-date-analyze-forced-year nil)
+(defvar org-read-date-inactive)
 
 (defun org-read-date (&optional with-time to-time from-string prompt
 				default-time default-input inactive)
@@ -15185,7 +15189,6 @@ user."
 (defvar def)
 (defvar defdecode)
 (defvar with-time)
-(defvar org-read-date-inactive)
 (defun org-read-date-display ()
   "Display the current date prompt interpretation in the minibuffer."
   (when org-read-date-display-live
@@ -17007,6 +17010,8 @@ Some of the options can be changed using the variable
 	     (t
 	      (error "Unknown conversion type %s for latex fragments"
 		     processing-type)))))))))
+
+(declare-function format-spec "format-spec" (format specification))
 
 (defun org-create-math-formula (latex-frag &optional mathml-file)
   "Convert LATEX-FRAG to MathML and store it in MATHML-FILE.

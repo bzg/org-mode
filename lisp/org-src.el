@@ -41,7 +41,8 @@
 (declare-function org-at-table.el-p "org" ())
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
-(declare-function org-pop-to-buffer-same-window
+(declare-function org-strip-protective-commas "org" (beg end))
+(declare-function org-pop-to-buffer-same-window 
 		  "org-compat" (&optional buffer-or-name norecord label))
 
 (defcustom org-edit-src-region-extra nil
@@ -684,6 +685,8 @@ the language, a switch telling if the content should be in a single line."
   "Save parent buffer with current state source-code buffer."
   (interactive)
   (org-src-in-org-buffer (save-buffer)))
+
+(declare-function org-babel-tangle "ob-tangle" (&optional only-this-block target-file lang))
 
 (defun org-src-tangle (arg)
   "Tangle the parent buffer."

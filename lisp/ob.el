@@ -59,6 +59,7 @@
 (declare-function org-cycle "org" (&optional arg))
 (declare-function org-uniquify "org" (list))
 (declare-function org-current-level "org" ())
+(declare-function org-strip-protective-commas "org" (beg end))
 (declare-function org-table-import "org-table" (file arg))
 (declare-function org-add-hook "org-compat"
 		  (hook function &optional append local))
@@ -1874,9 +1875,9 @@ code ---- the results are extracted in the syntax of the source
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
 	(flet ((wrap (start finish)
-		     (goto-char beg) (insert (concat start "\n"))
 		     (goto-char end) (insert (concat finish "\n"))
-		     (setq end (point-marker)))
+		     (goto-char beg) (insert (concat start "\n"))
+		     (goto-char end) (setq end (point-marker)))
 	       (proper-list-p (it) (and (listp it) (null (cdr (last it))))))
 	  ;; insert results based on type
 	  (cond
@@ -2115,7 +2116,8 @@ parameters when merging lists."
 	       (setq tangle (or (list (cdr pair)) tangle)))
 	      (:noweb
 	       (setq noweb (e-merge
-			    '(("yes" "no" "tangle" "no-export" "strip-export"))
+			    '(("yes" "no" "tangle" "no-export"
+			       "strip-export" "eval"))
 			    noweb
 			    (split-string (or (cdr pair) "")))))
 	      (:cache
@@ -2159,7 +2161,7 @@ CONTEXT may be one of :tangle, :export or :eval."
 			   (intersect (cdr as) bs)))))
     (intersect (case context
                     (:tangle '("yes" "tangle" "no-export" "strip-export"))
-                    (:eval   '("yes" "no-export" "strip-export"))
+                    (:eval   '("yes" "no-export" "strip-export" "eval"))
                     (:export '("yes")))
                   (split-string (or (cdr (assoc :noweb params)) "")))))
 
