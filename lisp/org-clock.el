@@ -2463,7 +2463,9 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
       (org-clock-sum ts te
 		     (unless (null matcher)
 		       (lambda ()
-			 (let ((tags-list (org-get-tags-at)))
+			 (let* ((tags-list (org-get-tags-at))
+				(org-scanner-tags tags-list)
+				(org-trust-scanner-tags t))
 			   (eval matcher)))))
       (goto-char (point-min))
       (setq st t)
