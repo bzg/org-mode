@@ -4240,7 +4240,7 @@ See `org-agenda-skip-if' for details."
 (defun org-agenda-skip-if (subtree conditions)
   "Checks current entity for CONDITIONS.
 If SUBTREE is non-nil, the entire subtree is checked.  Otherwise, only
-the entry, i.e. the text before the next heading is checked.
+the entry (i.e. the text before the next heading) is checked.
 
 CONDITIONS is a list of symbols, boolean OR is used to combine the results
 from different tests.  Valid conditions are:
@@ -4266,12 +4266,12 @@ keywords, which may include \"*\" to match any todo keyword.
 
 would skip all entries with \"TODO\" or \"WAITING\" keywords.
 
-Instead of a list a keyword class may be given
+Instead of a list, a keyword class may be given.  For example:
 
     (org-agenda-skip-entry-if 'nottodo 'done)
 
 would skip entries that haven't been marked with any of \"DONE\"
-keywords. Possible classes are: `todo', `done', `any'.
+keywords.  Possible classes are: `todo', `done', `any'.
 
 If any of these conditions is met, this function returns the end point of
 the entity, causing the search to continue from there.  This is a function
@@ -4304,8 +4304,8 @@ that can be put into `org-agenda-skip-function' for the duration of a command."
 	   (stringp (nth 1 m))
 	   (not (re-search-forward (nth 1 m) end t)))
       (and (or
-	    (setq m (memq 'todo conditions))
-	    (setq m (memq 'nottodo conditions)))
+	    (setq m (memq 'nottodo conditions))
+	    (setq m (memq 'todo conditions)))
 	   (org-agenda-skip-if-todo m end)))
      end)))
 
@@ -7314,7 +7314,9 @@ use the dedicated frame)."
   (if (and current-prefix-arg (listp current-prefix-arg))
       (org-agenda-do-tree-to-indirect-buffer)
     (let ((agenda-window (selected-window))
-          (indirect-window (and org-last-indirect-buffer (get-buffer-window org-last-indirect-buffer))))
+          (indirect-window
+	   (and org-last-indirect-buffer
+		(get-buffer-window org-last-indirect-buffer))))
       (save-window-excursion (org-agenda-do-tree-to-indirect-buffer))
       (unwind-protect
           (progn
@@ -7323,7 +7325,7 @@ use the dedicated frame)."
             (select-window indirect-window)
             (switch-to-buffer org-last-indirect-buffer :norecord)
             (fit-window-to-buffer indirect-window))
-        (select-window agenda-window)))))
+        (select-window (get-buffer-window org-agenda-buffer-name))))))
 
 (defun org-agenda-do-tree-to-indirect-buffer ()
   "Same as `org-agenda-tree-to-indirect-buffer' without saving window."
