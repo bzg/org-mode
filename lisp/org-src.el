@@ -686,6 +686,8 @@ the language, a switch telling if the content should be in a single line."
   (interactive)
   (org-src-in-org-buffer (save-buffer)))
 
+(declare-function org-babel-tangle "ob-tangle" (&optional only-this-block target-file lang))
+
 (defun org-src-tangle (arg)
   "Tangle the parent buffer."
   (interactive)

@@ -50,6 +50,9 @@
   :tag "Org"
   :group 'org)
 
+(defvar org-drawer-regexp)
+(defvar org-property-re)
+
 (defun org-thing-at-point ()
   "Examine the thing at point and let the caller know what it is.
 The return value is a string naming the thing at point."
@@ -246,6 +249,8 @@ This needs more work, to handle headings with lots of spaces in them."
 	       (setq lst (delete (car prop) lst)))
 	     lst))
    (substring pcomplete-stub 1)))
+
+(defvar org-drawers)
 
 (defun pcomplete/org-mode/drawer ()
   "Complete a drawer name."
