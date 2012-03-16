@@ -4953,7 +4953,7 @@ TIMESTAMP_IA @r{The first inactive timestamp in the entry.}
 CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}}
              @r{must be run first to compute the values in the current buffer.}
 BLOCKED      @r{"t" if task is currently blocked by children or siblings}
-ITEM         @r{The content of the entry.}
+ITEM         @r{The headline of the entry.}
 FILE         @r{The filename the entry is located in.}
 @end example
 
@@ -7536,6 +7536,9 @@ So a search @samp{+LEVEL=3+boss-TODO="DONE"} lists all level three headlines
 that have the tag @samp{boss} and are @emph{not} marked with the TODO keyword
 DONE.  In buffers with @code{org-odd-levels-only} set, @samp{LEVEL} does not
 count the number of stars, but @samp{LEVEL=2} will correspond to 3 stars etc.
+The ITEM special property cannot currently be used in tags/property
+searches@footnote{But @pxref{x-agenda-skip-entry-regexp,
+,skipping entries based on regexp}.}.
 
 Here are more examples:
 @table @samp
@@ -15876,9 +15879,10 @@ Skip current entry if the TODO keyword is TODO or WAITING.
 Skip current entry if the TODO keyword marks a DONE state.
 @item (org-agenda-skip-entry-if 'timestamp)
 Skip current entry if it has any timestamp, may also be deadline or scheduled.
-@item (org-agenda-skip-entry 'regexp "regular expression")
+@anchor{x-agenda-skip-entry-regexp}
+@item (org-agenda-skip-entry-if 'regexp "regular expression")
 Skip current entry if the regular expression matches in the entry.
-@item (org-agenda-skip-entry 'notregexp "regular expression")
+@item (org-agenda-skip-entry-if 'notregexp "regular expression")
 Skip current entry unless the regular expression matches.
 @item (org-agenda-skip-subtree-if 'regexp "regular expression")
 Same as above, but check and skip the entire subtree.
