@@ -8645,7 +8645,7 @@ For file links, arg negates `org-context-in-file-links'."
        (setq link (plist-get org-store-link-plist :link)
 	     desc (or (plist-get org-store-link-plist :description) link)))
 
-      ((equal (buffer-name) "*Org Edit Src Example*")
+      ((org-src-edit-buffer-p)
        (let (label gc)
 	 (while (or (not label)
 		    (save-excursion
