@@ -12906,7 +12906,8 @@ headlines matching this string."
 
 		 ;; eval matcher only when the todo condition is OK
 		 (and (or (not todo-only) (member todo org-not-done-keywords))
-		      (let ((case-fold-search t)) (eval matcher)))
+		      (let ((case-fold-search t) (org-trust-scanner-tags t))
+			   (eval matcher)))
 
 		 ;; Call the skipper, but return t if it does not skip,
 		 ;; so that the `and' form continues evaluating
