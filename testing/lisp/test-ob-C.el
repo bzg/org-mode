@@ -1,5 +1,15 @@
-(require 'ob-C)
- 
+;;; test-ob-awk.el --- tests for ob-awk.el
+
+;; Copyright (c) 2010-2012 Sergey Litvinov
+;; Authors: Sergey Litvinov
+
+;; Released under the GNU General Public License version 3
+;; see: http://www.gnu.org/licenses/gpl-3.0.html
+
+;;; Code:
+(unless (featurep 'ob-C)
+  (signal 'missing-test-dependency "Support for C code blocks"))
+
 (ert-deftest ob-C/assert ()
   (should t))
 

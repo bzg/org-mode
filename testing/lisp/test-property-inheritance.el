@@ -1,24 +1,19 @@
 ;;; test-ob-R.el --- tests for ob-R.el
 
-;; Copyright (c) 2011 Eric Schulte
+;; Copyright (c) 2011-2012 Eric Schulte
 ;; Authors: Eric Schulte
 
 ;; Released under the GNU General Public License version 3
 ;; see: http://www.gnu.org/licenses/gpl-3.0.html
 
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
-
+;;; Code:
 (defmacro test-org-in-property-buffer (&rest body)
   `(with-temp-buffer
      (insert-file-contents (expand-file-name "property-inheritance.org"
 					     org-test-example-dir))
      (org-mode)
      ,@body))
+(def-edebug-spec test-org-in-property-buffer (body))
 
 (ert-deftest test-org-property-accumulation-top-use ()
   (test-org-in-property-buffer

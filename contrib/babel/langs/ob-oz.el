@@ -1,10 +1,11 @@
 ;;; ob-oz.el --- org-babel functions for Oz evaluation
 
-;; Copyright (C) 2009, 2012 Torsten Anders and Eric Schulte
+;; Copyright (C) 2009-2012 Torsten Anders and Eric Schulte 
 
-;; Author: Torsten Anders and Eric Schulte
+;; Author: Torsten Anders and Eric Schulte 
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
+;; Version: 0.02
 
 ;;; License:
 
@@ -25,7 +26,7 @@
 
 ;;; Commentary:
 
-;; Org-Babel support for evaluating Oz source code.
+;; Org-Babel support for evaluating Oz source code. 
 ;;
 ;; Oz code is always send to the Oz Programming Environment (OPI), the
 ;; Emacs mode and compiler interface for Oz programs. Therefore, only
@@ -70,7 +71,7 @@
 ;;   arrive then in any order) I could use IDs
 ;;   (e.g. integers). However, how do I do concurrency in Emacs Lisp,
 ;;   and how can I define org-babel-execute:oz concurrently.
-;;
+;; 
 ;; - Expressions are rarely used in Oz at the top-level, and using
 ;;   them in documentation and Literate Programs will cause
 ;;   confusion. Idea: hide expression from reader and instead show
@@ -93,10 +94,10 @@
 
 ;;
 ;; Interface to communicate with Oz.
-;; (1) For statements without any results: oz-send-string
+;; (1) For statements without any results: oz-send-string 
 ;; (2) For expressions with a single result: oz-send-string-expression
 ;;     (defined in org-babel-oz-ResultsValue.el)
-;;
+;; 
 
 ;; oz-send-string-expression implements an additional very direct
 ;; communication between Org-babel and the Oz compiler. Communication
@@ -127,7 +128,7 @@
   "Path to the contrib/scripts directory in which
 StartOzServer.oz is located.")
 
-(defvar org-babel-oz-port 6001
+(defvar org-babel-oz-port 6001		
   "Port for communicating with Oz compiler.")
 (defvar org-babel-oz-OPI-socket nil
   "Socket for communicating with OPI.")
@@ -143,18 +144,18 @@ StartOzServer.oz is located.")
 
 (defun org-babel-oz-create-socket ()
   (message "Create OPI socket for evaluating expressions")
-  ;; Start Oz directly
+  ;; Start Oz directly 
   (run-oz)
   ;; Create socket on Oz side (after Oz was started).
   (oz-send-string (concat "\\insert '" org-babel-oz-server-dir "StartOzServer.oz'"))
   ;; Wait until socket is created before connecting to it.
   ;; Quick hack: wait 3 sec
-  ;;
+  ;; 
   ;; extending time to 30 secs does not help when starting Emacs for
   ;; the first time (and computer does nothing else)
   (sit-for 3)
   ;; connect to OPI socket
-  (setq org-babel-oz-OPI-socket
+  (setq org-babel-oz-OPI-socket  
 	;; Creates a socket. I/O interface of Emacs sockets as for processes.
 	(open-network-stream "*Org-babel-OPI-socket*" nil "localhost" org-babel-oz-port))
   ;; install filter
@@ -165,7 +166,7 @@ StartOzServer.oz is located.")
 ;; oz-send-string-expression turns is into synchronous...
 (defun oz-send-string-expression (string &optional wait-time)
   "Similar to oz-send-string, oz-send-string-expression sends a string to the OPI compiler. However, string must be expression and this function returns the result of the expression (as string). oz-send-string-expression is synchronous, wait-time allows to specify a maximum wait time. After wait-time is over with no result, the function returns nil."
-  (if (not org-babel-oz-OPI-socket)
+  (if (not org-babel-oz-OPI-socket) 
       (org-babel-oz-create-socket))
   (let ((polling-delay 0.1)
 	result)
@@ -175,11 +176,11 @@ StartOzServer.oz is located.")
 	(let ((waited 0))
 	  (unwind-protect
 	      (progn
-		(while
+		(while 
 		    ;; stop loop if org-babel-oz-collected-result \= nil or waiting time is over
 		    (not (or (not (equal org-babel-oz-collected-result nil))
 			     (> waited wait-time)))
-		  (progn
+		  (progn 
 		    (sit-for polling-delay)
 ;; 		    (message "org-babel-oz: next polling iteration")
 		    (setq waited (+ waited polling-delay))))
@@ -252,7 +253,7 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 ;;       (when vars
 ;;         (with-temp-buffer
 ;;           (insert var-lines) (write-file vars-file)
-;;           (oz-mode)
+;;           (oz-mode) 
 ;; ;; 	  (inferior-oz-load-file) ; ??
 ;; 	  ))
 ;;       (current-buffer))))
@@ -261,7 +262,7 @@ called by `org-babel-execute-src-block' via multiple-value-bind."
 
 ;; TODO: testing... (simplified version of def in org-babel-prep-session:ocaml)
 ;;
-;; BUG: does not work yet. Error: ad-Orig-error: buffer none doesn't exist or has no process
+;; BUG: does not work yet. Error: ad-Orig-error: buffer none doesn't exist or has no process 
 ;; UNUSED DEF
 (defun org-babel-oz-initiate-session (&optional session params)
   "If there is not a current inferior-process-buffer in SESSION
@@ -277,12 +278,12 @@ then create.  Return the initialized session."
 specifying a var of the same value."
   (if (listp var)
 ;;       (concat "[" (mapconcat #'org-babel-oz-var-to-oz var ", ") "]")
-      (eval var)
-    (format "%s" var) ; don't preserve string quotes.
+      (eval var) 
+    (format "%s" var) ; don't preserve string quotes. 
 ;;     (format "%s" var)
     ))
 
-;; TODO:
+;; TODO: 
 (defun org-babel-oz-table-or-string (results)
   "If the results look like a table, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."

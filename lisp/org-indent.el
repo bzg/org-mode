@@ -45,6 +45,7 @@
 (declare-function org-inlinetask-get-task-level "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 (declare-function org-list-item-body-column "org-list" (item))
+(defvar org-inlinetask-show-first-star)
 
 (defgroup org-indent nil
   "Options concerning dynamic virtual outline indentation."
@@ -293,8 +294,10 @@ Assume point is at beginning of line."
 		(let ((stars (aref org-indent-stars
 				   (min l org-indent-max-levels))))
 		  (and stars
-		       (concat org-indent-inlinetask-first-star
-			       (substring stars 1)))))
+		       (if (org-bound-and-true-p org-inlinetask-show-first-star)
+			   (concat org-indent-inlinetask-first-star
+				   (substring stars 1))
+			 stars))))
 	       (h (aref org-indent-stars
 			(min l org-indent-max-levels)))
 	       (t (aref org-indent-strings

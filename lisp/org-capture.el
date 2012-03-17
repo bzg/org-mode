@@ -56,7 +56,7 @@
 		  (date &optional keep-restriction))
 (declare-function org-table-get-specials "org-table" ())
 (declare-function org-table-goto-line "org-table" (N))
-(declare-function org-pop-to-buffer-same-window "org-compat" 
+(declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
 
 (defvar org-remember-default-headline)
@@ -262,6 +262,7 @@ w3, w3m                 |  %:type %:url
 info                    |  %:type %:file %:node
 calendar                |  %:type %:date"
   :group 'org-capture
+  :version "24.1"
   :type
   '(repeat
     (choice :value ("" "" entry (file "~/org/notes.org") "")
@@ -336,12 +337,21 @@ calendar                |  %:type %:date"
 The capture buffer is still current when this hook runs and it is
 widened to the entire buffer."
   :group 'org-capture
+  :version "24.1"
   :type 'hook)
 
 (defcustom org-capture-after-finalize-hook nil
   "Hook that is run right after a capture process is finalized.
   Suitable for window cleanup"
   :group 'org-capture
+  :version "24.1"
+  :type 'hook)
+
+(defcustom org-capture-prepare-finalize-hook nil
+  "Hook that is run before the finalization starts.
+The capture buffer is current and still narrowed."
+  :group 'org-capture
+  :version "24.1"
   :type 'hook)
 
 ;;; The property list for keeping information about the capture process
@@ -526,6 +536,8 @@ captured item after finalizing."
   (unless (and org-capture-mode
 	       (buffer-base-buffer (current-buffer)))
     (error "This does not seem to be a capture buffer for Org-mode"))
+
+  (run-hooks 'org-capture-prepare-finalize-hook)
 
   ;; Did we start the clock in this capture buffer?
   (when (and org-capture-clock-was-started

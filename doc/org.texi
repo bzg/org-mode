@@ -4,8 +4,8 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@set VERSION 7.8.03
-@set DATE January 2012
+@set VERSION 7.8.04
+@set DATE March 2012
 
 @c Use proper quote and backtick for code sections in PDF output
 @c Cf. Texinfo manual 14.2
@@ -265,7 +265,7 @@
 @copying
 This manual is for Org version @value{VERSION}.
 
-Copyright @copyright{} 2004-2011  Free Software Foundation, Inc.
+Copyright @copyright{} 2004-2012  Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -717,6 +717,7 @@ Specific header arguments
 * rownames::                    Handle row names in tables
 * shebang::                     Make tangled files executable
 * eval::                        Limit evaluation of specific code blocks
+* wrap::                        Mark source block evaluation results
 
 Miscellaneous
 
@@ -1080,7 +1081,7 @@ attach it to your bug report.
 @node Conventions,  , Feedback, Introduction
 @section Typesetting conventions used in this manual
 
-Org uses three types of keywords: TODO keywords, tags, and property
+Org uses three types of keywords: TODO keywords, tags and property
 names.  In this manual we use the following conventions:
 
 @table @code
@@ -1098,7 +1099,14 @@ User-defined properties are capitalized; built-in properties with
 special meaning are written with all capitals.
 @end table
 
-The manual lists both the keys and the corresponding commands for accessing
+Moreover, Org uses @i{option keywords} (like @code{#+TITLE} to set the title)
+and @i{environment keywords} (like @code{#+BEGIN_HTML} to start a @code{HTML}
+environment).  They are written in uppercase in the manual to enhance its
+readability, but you can use lowercase in your Org files@footnote{Easy
+templates insert lowercase keywords and Babel dynamically inserts
+@code{#+results}.}
+
+The manual lists both the keys and the corresponding commands for accessing a
 functionality.  Org mode often uses the same key for different functions,
 depending on context.  The command that is bound to such keys has a generic
 name, like @code{org-metaright}.  In the manual we will, wherever possible,
@@ -1158,7 +1166,8 @@ Headlines define the structure of an outline tree.  The headlines in Org
 start with one or more stars, on the left margin@footnote{See the variables
 @code{org-special-ctrl-a/e}, @code{org-special-ctrl-k}, and
 @code{org-ctrl-k-protect-subtree} to configure special behavior of @kbd{C-a},
-@kbd{C-e}, and @kbd{C-k} in headlines.}.  For example:
+@kbd{C-e}, and @kbd{C-k} in headlines.} @footnote{Clocking only works with
+headings indented less then 30 stars.}.  For example:
 
 @example
 * Top level headline
@@ -1428,7 +1437,7 @@ more details, see the docstring of the command
 @code{org-clone-subtree-with-time-shift}.
 @orgcmd{C-c C-w,org-refile}
 Refile entry or region to a different location.  @xref{Refiling notes}.
-@orgcmd{C-c ^,org-sort-entries-or-items}
+@orgcmd{C-c ^,org-sort}
 Sort same-level entries.  When there is an active region, all entries in the
 region will be sorted.  Otherwise the children of the current headline are
 sorted.  The command prompts for the sorting method, which can be
@@ -1755,11 +1764,13 @@ numerically, alphabetically, by time, or by custom function.
 @cindex visibility cycling, drawers
 
 @vindex org-drawers
+@cindex org-insert-drawer
+@kindex C-c C-x d
 Sometimes you want to keep information associated with an entry, but you
 normally don't want to see it.  For this, Org mode has @emph{drawers}.
 Drawers need to be configured with the variable
-@code{org-drawers}@footnote{You can define drawers on a per-file basis
-with a line like @code{#+DRAWERS: HIDDEN PROPERTIES STATE}}.  Drawers
+@code{org-drawers}@footnote{You can define additional drawers on a
+per-file basis with a line like @code{#+DRAWERS: HIDDEN STATE}}.  Drawers
 look like this:
 
 @example
@@ -1770,6 +1781,13 @@ look like this:
    :END:
    After the drawer.
 @end example
+
+You can interactively insert drawers at point by calling
+@code{org-insert-drawer}, which is bound to @key{C-c C-x d}.  With an active
+region, this command will put the region inside the drawer.  With a prefix
+argument, this command calls @code{org-insert-property-drawer} and add a
+property drawer right below the current headline.  Completion over drawer
+keywords is also possible using @key{M-TAB}.
 
 Visibility cycling (@pxref{Visibility cycling}) on the headline will hide and
 show the entry, but keep the drawer collapsed to a single line.  In order to
@@ -3225,6 +3243,8 @@ mailto:adent@@galaxy.net                   @r{Mail link}
 vm:folder                                 @r{VM folder link}
 vm:folder#id                              @r{VM message link}
 vm://myself@@some.where.org/folder#id      @r{VM on remote machine}
+vm-imap:account:folder                    @r{VM IMAP folder link}
+vm-imap:account:folder#id                 @r{VM IMAP message link}
 wl:folder                                 @r{WANDERLUST folder link}
 wl:folder#id                              @r{WANDERLUST message link}
 mhe:folder                                @r{MH-E folder link}
@@ -4063,9 +4083,11 @@ time-stamped note for a change.  These records will be inserted after the
 headline as an itemized list, newest first@footnote{See the variable
 @code{org-log-states-order-reversed}}.  When taking a lot of notes, you might
 want to get the notes out of the way into a drawer (@pxref{Drawers}).
-Customize the variable @code{org-log-into-drawer} to get this
-behavior---the recommended drawer for this is called @code{LOGBOOK}.  You can
-also overrule the setting of this variable for a subtree by setting a
+Customize the variable @code{org-log-into-drawer} to get this behavior---the
+recommended drawer for this is called @code{LOGBOOK}@footnote{Note that the
+@code{LOGBOOK} drawer is unfolded when pressing @key{SPC} in the agenda to
+show an entry---use @key{C-u SPC} to keep it folded here}.  You can also
+overrule the setting of this variable for a subtree by setting a
 @code{LOG_INTO_DRAWER} property.
 
 Since it is normally too much to record a note for every state, Org mode
@@ -4870,8 +4892,8 @@ in the current file will be offered as possible completions.
 @orgcmd{C-c C-x p,org-set-property}
 Set a property.  This prompts for a property name and a value.  If
 necessary, the property drawer is created as well.
-@item M-x org-insert-property-drawer
-@findex org-insert-property-drawer
+@item C-u M-x org-insert-drawer
+@cindex org-insert-drawer
 Insert a property drawer into the current entry.  The drawer will be
 inserted early in the entry, but after the lines with planning
 information like deadlines.
@@ -5896,12 +5918,14 @@ created for this purpose, it is described in @ref{Structure editing}.
 @cindex time clocking
 
 Org mode allows you to clock the time you spend on specific tasks in a
-project.  When you start working on an item, you can start the clock.
-When you stop working on that task, or when you mark the task done, the
-clock is stopped and the corresponding time interval is recorded.  It
-also computes the total time spent on each subtree of a project.  And it
-remembers a history or tasks recently clocked, to that you can jump quickly
-between a number of tasks absorbing your time.
+project.  When you start working on an item, you can start the clock.  When
+you stop working on that task, or when you mark the task done, the clock is
+stopped and the corresponding time interval is recorded.  It also computes
+the total time spent on each subtree@footnote{Clocking only works if all
+headings are indented with less than 30 stars.  This is a hardcoded
+limitation of `lmax' in `org-clock-sum'.} of a project.  And it remembers a
+history or tasks recently clocked, to that you can jump quickly between a
+number of tasks absorbing your time.
 
 To save the clock history across Emacs sessions, use
 @lisp
@@ -6680,21 +6704,21 @@ similar way.}:
 
 @vindex org-from-is-user-regexp
 @smallexample
-Link type               |  Available keywords
-------------------------+----------------------------------------------
-bbdb                    |  %:name %:company
-irc                     |  %:server %:port %:nick
-vm, wl, mh, mew, rmail  |  %:type %:subject %:message-id
-                        |  %:from %:fromname %:fromaddress
-                        |  %:to   %:toname   %:toaddress
-                        |  %:date @r{(message date header field)}
-                        |  %:date-timestamp @r{(date as active timestamp)}
-                        |  %:date-timestamp-inactive @r{(date as inactive timestamp)}
-                        |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
-gnus                    |  %:group, @r{for messages also all email fields}
-w3, w3m                 |  %:url
-info                    |  %:file %:node
-calendar                |  %:date
+Link type                        |  Available keywords
+---------------------------------+----------------------------------------------
+bbdb                             |  %:name %:company
+irc                              |  %:server %:port %:nick
+vm, vm-imap, wl, mh, mew, rmail  |  %:type %:subject %:message-id
+                                 |  %:from %:fromname %:fromaddress
+                                 |  %:to   %:toname   %:toaddress
+                                 |  %:date @r{(message date header field)}
+                                 |  %:date-timestamp @r{(date as active timestamp)}
+                                 |  %:date-timestamp-inactive @r{(date as inactive timestamp)}
+                                 |  %:fromto @r{(either "to NAME" or "from NAME")@footnote{This will always be the other, not the user.  See the variable @code{org-from-is-user-regexp}.}}
+gnus                             |  %:group, @r{for messages also all email fields}
+w3, w3m                          |  %:url
+info                             |  %:file %:node
+calendar                         |  %:date
 @end smallexample
 
 @noindent
@@ -9017,7 +9041,7 @@ the object with @code{\ref@{tab:basic-data@}}:
 
 @example
 #+CAPTION: This is the caption for the next table (or link)
-#+LABEL:   tbl:basic-data
+#+LABEL:   tab:basic-data
    | ... | ...|
    |-----|----|
 @end example
@@ -9631,7 +9655,7 @@ Insert template with export options, see example below.
 @cindex #+EXPORT_SELECT_TAGS
 @cindex #+EXPORT_EXCLUDE_TAGS
 @cindex #+XSLT
-@cindex #+LATEX_HEADER
+@cindex #+LaTeX_HEADER
 @vindex user-full-name
 @vindex user-mail-address
 @vindex org-export-default-language
@@ -9651,7 +9675,7 @@ Insert template with export options, see example below.
                @r{You need to confirm using these, or configure @code{org-export-allow-BIND}}
 #+LINK_UP:     the ``up'' link of an exported page
 #+LINK_HOME:   the ``home'' link of an exported page
-#+LATEX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
+#+LaTeX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
 #+EXPORT_SELECT_TAGS:   Tags that select a tree for export
 #+EXPORT_EXCLUDE_TAGS:  Tags that exclude a tree from export
 #+XSLT:        the XSLT stylesheet used by DocBook exporter to generate FO file
@@ -10323,11 +10347,11 @@ By default, the @LaTeX{} output uses the class @code{article}.
 @vindex org-export-latex-classes
 @vindex org-export-latex-default-packages-alist
 @vindex org-export-latex-packages-alist
-@cindex #+LATEX_HEADER
-@cindex #+LATEX_CLASS
-@cindex #+LATEX_CLASS_OPTIONS
-@cindex property, LATEX_CLASS
-@cindex property, LATEX_CLASS_OPTIONS
+@cindex #+LaTeX_HEADER
+@cindex #+LaTeX_CLASS
+@cindex #+LaTeX_CLASS_OPTIONS
+@cindex property, LaTeX_CLASS
+@cindex property, LaTeX_CLASS_OPTIONS
 You can change this globally by setting a different value for
 @code{org-export-latex-default-class} or locally by adding an option like
 @code{#+LaTeX_CLASS: myclass} in your file, or with a @code{:LaTeX_CLASS:}
@@ -10337,11 +10361,22 @@ defines a header template for each class@footnote{Into which the values of
 @code{org-export-latex-default-packages-alist} and
 @code{org-export-latex-packages-alist} are spliced.}, and allows you to
 define the sectioning structure for each class.  You can also define your own
-classes there.  @code{#+LaTeX_CLASS_OPTIONS} or a @code{LaTeX_CLASS_OPTIONS}
-property can specify the options for the @code{\documentclass} macro.  You
-can also use @code{#+LATEX_HEADER: \usepackage@{xyz@}} to add lines to the
-header.  See the docstring of @code{org-export-latex-classes} for more
-information.
+classes there.  @code{#+LaTeX_CLASS_OPTIONS} or a @code{:LaTeX_CLASS_OPTIONS:}
+property can specify the options for the @code{\documentclass} macro.  The
+options to documentclass have to be provided, as expected by @LaTeX{}, within
+square brackets.  You can also use @code{#+LaTeX_HEADER: \usepackage@{xyz@}}
+to add lines to the header.  See the docstring of
+@code{org-export-latex-classes} for more information.  An example is shown
+below.
+
+@example
+#+LaTeX_CLASS: article
+#+LaTeX_CLASS_OPTIONS: [a4paper]
+#+LaTeX_HEADER: \usepackage@{xyz@}
+
+* Headline 1
+  some text
+@end example
 
 @node Quoting @LaTeX{} code, Tables in @LaTeX{} export, Header and sectioning, @LaTeX{} and PDF export
 @subsection Quoting @LaTeX{} code
@@ -10425,9 +10460,7 @@ add something like @samp{placement=[h!]} to the attributes.  It is to be noted
 this option can be used with tables as well@footnote{One can also take
 advantage of this option to pass other, unrelated options into the figure or
 table environment.  For an example see the section ``Exporting org files'' in
-@url{http://orgmode.org/worg/org-hacks.html}}.  For example the
-@code{#+ATTR_LaTeX:} line below is exported as the @code{figure} environment
-below it.
+@url{http://orgmode.org/worg/org-hacks.html}}.
 
 If you would like to let text flow around the image, add the word @samp{wrap}
 to the @code{#+ATTR_LaTeX:} line, which will make the figure occupy the left
@@ -10514,7 +10547,7 @@ transitions.
 Frames will automatically receive a @code{fragile} option if they contain
 source code that uses the verbatim environment.  Special @file{beamer}
 specific code can be inserted using @code{#+BEAMER:} and
-@code{#+BEGIN_beamer...#+end_beamer} constructs, similar to other export
+@code{#+BEGIN_BEAMER...#+END_BEAMER} constructs, similar to other export
 backends, but with the difference that @code{#+LaTeX:} stuff will be included
 in the presentation as well.
 
@@ -12277,7 +12310,7 @@ publish it as @file{theindex.html}.
 @end multitable
 
 The file will be created when first publishing a project with the
-@code{:makeindex} set.  The file only contains a statement @code{#+include:
+@code{:makeindex} set.  The file only contains a statement @code{#+INCLUDE:
 "theindex.inc"}.  You can then build around this include statement by adding
 a title, style information, etc.
 
@@ -12665,10 +12698,10 @@ Org mode buffer.  The results of evaluation are placed following a line that
 begins by default with @code{#+RESULTS} and optionally a cache identifier
 and/or the name of the evaluated code block.  The default value of
 @code{#+RESULTS} can be changed with the customizable variable
-@code{org-babel-results-keyword}. 
+@code{org-babel-results-keyword}.
 
 By default, the evaluation facility is only enabled for Lisp code blocks
-specified as @code{emacs-lisp}. However, source code blocks in many languages
+specified as @code{emacs-lisp}.  However, source code blocks in many languages
 can be evaluated within Org mode (see @ref{Languages} for a list of supported
 languages and @ref{Structure of code blocks} for information on the syntax
 used to define a code block).
@@ -12682,8 +12715,8 @@ evaluation from the @kbd{C-c C-c} key binding.}.  This will call the
 its results into the Org mode buffer.
 @cindex #+CALL
 
-It is also possible to evaluate named code blocks from anywhere in an
-Org mode buffer or an Org mode table. Live code blocks located in the current
+It is also possible to evaluate named code blocks from anywhere in an Org
+mode buffer or an Org mode table.  Live code blocks located in the current
 Org mode buffer or in the ``Library of Babel'' (see @ref{Library of Babel})
 can be executed.  Named code blocks can be executed with a separate
 @code{#+CALL:} line or inline within a block of text.
@@ -12977,7 +13010,7 @@ Multi-line header arguments on an un-named code block:
    (message "data1:%S, data2:%S" data1 data2)
  #+END_SRC
 
- #+results:
+ #+RESULTS:
  : data1:1, data2:2
 @end example
 
@@ -12989,7 +13022,7 @@ Multi-line header arguments on a named code block:
      (message "data:%S" data)
    #+END_SRC
 
-   #+results: named-block
+   #+RESULTS: named-block
    : data:2
 @end example
 
@@ -13047,6 +13080,7 @@ argument in lowercase letters.  The following header arguments are defined:
 * rownames::                    Handle row names in tables
 * shebang::                     Make tangled files executable
 * eval::                        Limit evaluation of specific code blocks
+* wrap::                        Mark source block evaluation results
 @end menu
 
 Additional header arguments are defined on a language-specific basis, see
@@ -13061,7 +13095,7 @@ syntax used to specify arguments is the same across all languages.  In every
 case, variables require a default value when they are declared.
 
 The values passed to arguments can either be literal values, references, or
-Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}). References
+Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}).  References
 include anything in the Org mode file that takes a @code{#+NAME:},
 @code{#+TBLNAME:}, or @code{#+RESULTS:} line.  This includes tables, lists,
 @code{#+BEGIN_EXAMPLE} blocks, other code blocks, and the results of other
@@ -13100,7 +13134,7 @@ an Org mode table named with either a @code{#+NAME:} or @code{#+TBLNAME:} line
 (length table)
 #+END_SRC
 
-#+results: table-length
+#+RESULTS: table-length
 : 4
 @end example
 
@@ -13119,7 +13153,7 @@ carried through to the source code block)
   (print x)
 #+END_SRC
 
-#+results:
+#+RESULTS:
 | simple | list |
 @end example
 
@@ -13132,7 +13166,7 @@ optionally followed by parentheses
 (* 2 length)
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : 8
 @end example
 
@@ -13147,7 +13181,7 @@ code block name using standard function call syntax
 (* 2 input)
 #+END_SRC
 
-#+results: double
+#+RESULTS: double
 : 16
 
 #+NAME: squared
@@ -13155,7 +13189,7 @@ code block name using standard function call syntax
 (* input input)
 #+END_SRC
 
-#+results: squared
+#+RESULTS: squared
 : 4
 @end example
 
@@ -13174,7 +13208,7 @@ on two lines
   (concatenate 'string x " for you.")
 #+END_SRC
 
-#+results: read-literal-example
+#+RESULTS: read-literal-example
 : A literal example
 : on two lines for you.
 
@@ -13216,7 +13250,7 @@ following example assigns the last cell of the first row the table
   data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : a
 @end example
 
@@ -13237,7 +13271,7 @@ to @code{data}.
   data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 | 2 | b |
 | 3 | c |
 | 4 | d |
@@ -13259,7 +13293,7 @@ column is referenced.
   data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 | 1 | 2 | 3 | 4 |
 @end example
 
@@ -13279,7 +13313,7 @@ another by commas, as shown in the following example.
   data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 | 11 | 14 | 17 |
 @end example
 
@@ -13312,7 +13346,7 @@ Emacs Lisp, as shown in the following example.
   $data
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : (a b c)
 @end example
 
@@ -13378,10 +13412,10 @@ The results are interpreted as raw Org mode code and are inserted directly
 into the buffer.  If the results look like a table they will be aligned as
 such by Org mode.  E.g., @code{:results value raw}.
 @item @code{html}
-Results are assumed to be HTML and will be enclosed in a @code{begin_html}
+Results are assumed to be HTML and will be enclosed in a @code{BEGIN_HTML}
 block.  E.g., @code{:results value html}.
 @item @code{latex}
-Results assumed to be @LaTeX{} and are enclosed in a @code{begin_latex} block.
+Results assumed to be @LaTeX{} and are enclosed in a @code{BEGIN_LaTeX} block.
 E.g., @code{:results value latex}.
 @item @code{code}
 Result are assumed to be parsable code and are enclosed in a code block.
@@ -13614,21 +13648,34 @@ interpreted language.
 @node noweb, noweb-ref, session, Specific header arguments
 @subsubsection @code{:noweb}
 
-The @code{:noweb} header argument controls expansion of ``noweb'' style (see
-@ref{Noweb reference syntax}) references in a code block.  This header
-argument can have one of three values: @code{yes}, @code{no}, or @code{tangle}.
+The @code{:noweb} header argument controls expansion of ``noweb'' syntax
+references (see @ref{Noweb reference syntax}) when the code block is
+evaluated, tangled, or exported.  The @code{:noweb} header argument can have
+one of the five values: @code{no}, @code{yes}, @code{tangle}, or
+@code{no-export} @code{strip-export}.
 
 @itemize @bullet
-@item @code{yes}
-All ``noweb'' syntax references in the body of the code block will be
-expanded before the block is evaluated, tangled or exported.
 @item @code{no}
-The default.  No ``noweb'' syntax specific action is taken when the code
-block is evaluated, tangled or exported.
+The default.  ``Noweb'' syntax references in the body of the code block will
+not be expanded before the code block is evaluated, tangled or exported.
+@item @code{yes}
+``Noweb'' syntax references in the body of the code block will be
+expanded before the code block is evaluated, tangled or exported.
 @item @code{tangle}
-All ``noweb'' syntax references in the body of the code block will be
-expanded before the block is tangled, however ``noweb'' references will not
-be expanded when the block is evaluated or exported.
+``Noweb'' syntax references in the body of the code block will be expanded
+before the code block is tangled.  However, ``noweb'' syntax references will
+not be expanded when the code block is evaluated or exported.
+@item @code{no-export}
+``Noweb'' syntax references in the body of the code block will be expanded
+before the block is evaluated or tangled.  However, ``noweb'' syntax
+references will not be expanded when the code block is exported.
+@item @code{strip-export}
+``Noweb'' syntax references in the body of the code block will be expanded
+before the block is evaluated or tangled.  However, ``noweb'' syntax
+references will not be removed when the code block is exported.
+@item @code{eval}
+``Noweb'' syntax references in the body of the code block will only be
+expanded before the block is evaluated.
 @end itemize
 
 @subsubheading Noweb prefix lines
@@ -13729,7 +13776,7 @@ every time it is called.
 @item @code{yes}
 Every time the code block is run a SHA1 hash of the code and arguments
 passed to the block will be generated.  This hash is packed into the
-@code{#+results:} line and will be checked on subsequent
+@code{#+RESULTS:} line and will be checked on subsequent
 executions of the code block.  If the code block has not
 changed since the last time it was evaluated, it will not be re-evaluated.
 @end itemize
@@ -13746,7 +13793,7 @@ changed since it was last run.
  runif(1)
  #+END_SRC
 
- #+results[a2a72cd647ad44515fab62e144796432793d68e1]: random
+ #+RESULTS[a2a72cd647ad44515fab62e144796432793d68e1]: random
  0.4659510825295
 
  #+NAME: caller
@@ -13754,7 +13801,7 @@ changed since it was last run.
  x
  #+END_SRC
 
- #+results[bec9c8724e397d5df3b696502df3ed7892fc4f5f]: caller
+ #+RESULTS[bec9c8724e397d5df3b696502df3ed7892fc4f5f]: caller
  0.254227238707244
 @end example
 
@@ -13798,7 +13845,7 @@ default value yields the following results.
   return tab
 #+END_SRC
 
-#+results: echo-table
+#+RESULTS: echo-table
 | a | b | c |
 | d | e | f |
 | g | h | i |
@@ -13820,7 +13867,7 @@ Leaves hlines in the table.  Setting @code{:hlines yes} has this effect.
   return tab
 #+END_SRC
 
-#+results: echo-table
+#+RESULTS: echo-table
 | a | b | c |
 |---+---+---|
 | d | e | f |
@@ -13858,7 +13905,7 @@ processing, then reapplied to the results.
   return [[val + '*' for val in row] for row in tab]
 #+END_SRC
 
-#+results: echo-table-again
+#+RESULTS: echo-table-again
 | a  |
 |----|
 | b* |
@@ -13901,7 +13948,7 @@ and is then reapplied to the results.
   return [[val + 10 for val in row] for row in tab]
 #+END_SRC
 
-#+results: echo-table-once-again
+#+RESULTS: echo-table-once-again
 | one | 11 | 12 | 13 | 14 | 15 |
 | two | 16 | 17 | 18 | 19 | 20 |
 @end example
@@ -13919,7 +13966,7 @@ Setting the @code{:shebang} header argument to a string value
 first line of any tangled file holding the code block, and the file
 permissions of the tangled file are set to make it executable.
 
-@node eval,  , shebang, Specific header arguments
+@node eval, wrap, shebang, Specific header arguments
 @subsubsection @code{:eval}
 The @code{:eval} header argument can be used to limit the evaluation of
 specific code blocks.  The @code{:eval} header argument can be useful for
@@ -13943,6 +13990,14 @@ Evaluation of the code block during export will require a query.
 If this header argument is not set then evaluation is determined by the value
 of the @code{org-confirm-babel-evaluate} variable see @ref{Code evaluation
 security}.
+
+@node wrap,  , eval, Specific header arguments
+@subsubsection @code{:wrap}
+The @code{:wrap} header argument is used to mark the results of source block
+evaluation.  The header argument can be passed a string that will be appended
+to @code{#+BEGIN_} and @code{#+END_}, which will then be used to wrap the
+results.  If not string is specified then the results will be wrapped in a
+@code{#+BEGIN/END_RESULTS} block.
 
 @node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
 @section Results of evaluation
@@ -14013,7 +14068,7 @@ process.  For example, compare the following two blocks:
  print "bye"
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : hello
 : bye
 @end example
@@ -14026,7 +14081,7 @@ In non-session mode, the `2' is not printed and does not appear.
  print "bye"
 #+END_SRC
 
-#+results:
+#+RESULTS:
 : hello
 : 2
 : bye
@@ -14317,19 +14372,19 @@ keystrokes are typed on a line by itself.
 The following template selectors are currently supported.
 
 @multitable @columnfractions 0.1 0.9
-@item @kbd{s} @tab @code{#+begin_src     ... #+end_src}
-@item @kbd{e} @tab @code{#+begin_example ... #+end_example}
-@item @kbd{q} @tab @code{#+begin_quote   ... #+end_quote}
-@item @kbd{v} @tab @code{#+begin_verse   ... #+end_verse}
-@item @kbd{c} @tab @code{#+begin_center  ... #+end_center}
-@item @kbd{l} @tab @code{#+begin_latex   ... #+end_latex}
-@item @kbd{L} @tab @code{#+latex:}
-@item @kbd{h} @tab @code{#+begin_html    ... #+end_html}
-@item @kbd{H} @tab @code{#+html:}
-@item @kbd{a} @tab @code{#+begin_ascii   ... #+end_ascii}
-@item @kbd{A} @tab @code{#+ascii:}
-@item @kbd{i} @tab @code{#+index:} line
-@item @kbd{I} @tab @code{#+include:} line
+@item @kbd{s} @tab @code{#+BEGIN_SRC     ... #+END_SRC}
+@item @kbd{e} @tab @code{#+BEGIN_EXAMPLE ... #+END_EXAMPLE}
+@item @kbd{q} @tab @code{#+BEGIN_QUOTE   ... #+END_QUOTE}
+@item @kbd{v} @tab @code{#+BEGIN_VERSE   ... #+END_VERSE}
+@item @kbd{c} @tab @code{#+BEGIN_CENTER  ... #+END_CENTER}
+@item @kbd{l} @tab @code{#+BEGIN_LaTeX   ... #+END_LaTeX}
+@item @kbd{L} @tab @code{#+LaTeX:}
+@item @kbd{h} @tab @code{#+BEGIN_HTML    ... #+END_HTML}
+@item @kbd{H} @tab @code{#+HTML:}
+@item @kbd{a} @tab @code{#+BEGIN_ASCII   ... #+END_ASCII}
+@item @kbd{A} @tab @code{#+ASCII:}
+@item @kbd{i} @tab @code{#+INDEX:} line
+@item @kbd{I} @tab @code{#+INCLUDE:} line
 @end multitable
 
 For example, on an empty line, typing "<e" and then pressing TAB, will expand
@@ -14423,7 +14478,7 @@ either by the @i{calc} interpreter, or by the @i{Emacs Lisp} interpreter.
 @cindex options, for customization
 @cindex variables, for customization
 
-There are more than 180 variables that can be used to customize
+There are more than 500 variables that can be used to customize
 Org.  For the sake of compactness of the manual, I am not
 describing the variables here.  A structured overview of customization
 variables is available with @kbd{M-x org-customize}.  Or select
@@ -14474,8 +14529,8 @@ Set tags that can be inherited by any entry in the file, including the
 top-level entries.
 @item #+DRAWERS: NAME1 .....
 @vindex org-drawers
-Set the file-local set of drawers.  The corresponding global variable is
-@code{org-drawers}.
+Set the file-local set of additional drawers.  The corresponding global
+variable is @code{org-drawers}.
 @item #+LINK:  linkword replace
 @vindex org-link-abbrev-alist
 These lines (several are allowed) specify link abbreviations.
@@ -14686,7 +14741,7 @@ This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+DATE:,
 @itemx #+OPTIONS:, #+BIND:, #+XSLT:,
 @itemx #+DESCRIPTION:, #+KEYWORDS:,
-@itemx #+LATEX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:,
+@itemx #+LaTeX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:,
 @itemx #+EXPORT_SELECT_TAGS:, #+EXPORT_EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
 @ref{Export options}.
@@ -15962,6 +16017,7 @@ If WHICH is nil or `all', get all properties.  If WHICH is
 `special' or `standard', only get that subclass.
 @end defun
 @vindex org-use-property-inheritance
+@findex org-insert-property-drawer
 @defun org-entry-get pom property &optional inherit
 Get value of PROPERTY for entry at point-or-marker POM.  By default,
 this only looks at properties defined locally in the entry.  If INHERIT
@@ -15984,7 +16040,7 @@ Get all property keys in the current buffer.
 @end defun
 
 @defun org-insert-property-drawer
-Insert a property drawer at point.
+Insert a property drawer for the current entry.  Also
 @end defun
 
 @defun org-entry-put-multivalued-property pom property &rest values
@@ -16137,13 +16193,16 @@ The following example counts the number of entries with TODO keyword
 @cindex iPhone
 @cindex MobileOrg
 
-@uref{http://mobileorg.ncogni.to/, MobileOrg} is an application for the
-@i{iPhone/iPod Touch} series of devices, developed by Richard Moreland.
-@i{MobileOrg} offers offline viewing and capture support for an Org mode
-system rooted on a ``real'' computer.  It does also allow you to record
-changes to existing entries.  Android users should check out
+@i{MobileOrg} is the name of the mobile companion app for Org mode, currently
+available for iOS and for Android.  @i{MobileOrg} offers offline viewing and
+capture support for an Org mode system rooted on a ``real'' computer.  It
+does also allow you to record changes to existing entries.
+The @uref{http://mobileorg.ncogni.to/, iOS implementation} for the
+@i{iPhone/iPod Touch/iPad} series of devices, was developed by Richard
+Moreland.  Android users should check out
 @uref{http://wiki.github.com/matburt/mobileorg-android/, MobileOrg Android}
-by Matt Jones.
+by Matt Jones.  The two implementations are not identical but offer similar
+features.
 
 This appendix describes the support Org has for creating agenda views in a
 format that can be displayed by @i{MobileOrg}, and for integrating notes
@@ -16308,7 +16367,7 @@ Bastien has written a large number of extensions to Org (most of them
 integrated into the core by now), including the @LaTeX{} exporter and the plain
 list parser.  His support during the early days, when he basically acted as
 co-maintainer, was central to the success of this project.  Bastien also
-invented Worg, helped establishing the Web presence of Org, and sponsors
+invented Worg, helped establishing the Web presence of Org, and sponsored
 hosting costs for the orgmode.org website.
 @item Eric Schulte and Dan Davison
 Eric and Dan are jointly responsible for the Org-babel system, which turns

@@ -3,6 +3,7 @@
 ;; Copyright (C) 2011-2012 Free Software Foundation, Inc.
 
 ;; Author: Konrad Hinsen <konrad.hinsen AT fastmail.net>
+;; Version: 7.8.04
 
 ;; This file is part of GNU Emacs.
 
@@ -45,7 +46,7 @@
      (if (get-buffer eshell-buffer-name)
        (org-pop-to-buffer-same-window eshell-buffer-name)
        (eshell))
-     (end-of-buffer)
+     (goto-char (point-max))
      (eshell-kill-input)
      (insert command)
      (eshell-send-input)))

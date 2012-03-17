@@ -120,6 +120,7 @@
 (declare-function diary-ordinal-suffix "diary-lib" (n))
 
 (defvar date)   ;; dynamically scoped from Org
+(defvar name)   ;; dynamically scoped from Org
 
 ;; Customization
 

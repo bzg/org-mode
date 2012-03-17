@@ -10,17 +10,7 @@
 
 ;; Template test file for Org-mode tests
 
-
 ;;; Code:
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
-
-
-;;; Tests
 (ert-deftest test-org-table/org-table-convert-refs-to-an/1 ()
   "Simple reference @1$1."
   (should
@@ -54,12 +44,28 @@
 ;;    (string= "$3 = remote(FOO, @@#$2)" (org-table-convert-refs-to-rc "C& = remote(FOO, @@#B&)"))))
 
 (ert-deftest test-org-table/simple-formula ()
-  (org-test-at-id "563523f7-3f3e-49c9-9622-9216cc9a5d95"
-    (re-search-forward (regexp-quote "#+tblname: simple-formula") nil t)
-    (forward-line 1)
-    (should (org-at-table-p))
-    (should (org-table-recalculate 'all))
-    (should (string= "10" (first (nth 5 (org-table-to-lisp)))))))
+  (org-test-with-temp-text-in-file "
+
+* simple formula
+  :PROPERTIES:
+  :ID:       563523f7-3f3e-49c9-9622-9216cc9a5d95
+  :END:
+
+#+tblname: simple-formula
+|  1 |
+|  2 |
+|  3 |
+|  4 |
+|----|
+|    |
+  #+TBLFM: $1=vsum(@1..@-1)
+"
+    (progn    
+      (re-search-forward (regexp-quote "#+tblname: simple-formula") nil t)
+      (forward-line 1)
+      (should (org-at-table-p))
+      (should (org-table-recalculate 'all))
+      (should (string= "10" (first (nth 5 (org-table-to-lisp))))))))
 
 (provide 'test-org-table)
 
