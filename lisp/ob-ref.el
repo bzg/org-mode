@@ -1,6 +1,6 @@
 ;;; ob-ref.el --- org-babel functions for referencing external data
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2011  Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;;	Dan Davison
@@ -60,7 +60,7 @@
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-id-find-id-in-file "org-id" (id file &optional markerp))
 (declare-function org-show-context "org" (&optional key))
-(declare-function org-pop-to-buffer-same-window
+(declare-function org-pop-to-buffer-same-window 
 		  "org-compat" (&optional buffer-or-name norecord label))
 
 (defvar org-babel-ref-split-regexp

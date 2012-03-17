@@ -1,6 +1,6 @@
 ;;; org-freemind.el --- Export Org files to freemind
 
-;; Copyright (C) 2009-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2011 Free Software Foundation, Inc.
 
 ;; Author: Lennart Borgman (lennart O borgman A gmail O com)
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -414,7 +414,6 @@ MATCHED is the link just matched."
   ;; with this setting now, but not before??? Was this perhaps a java
   ;; bug or is it a windows xp bug (some resource gets exhausted if you
   ;; use sticky keys which I do).
-  :version "24.1"
   :group 'org-freemind)
 
 (defun org-freemind-org-text-to-freemind-subnode/note (node-name start end drawers-regexp)

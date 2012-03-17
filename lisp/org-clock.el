@@ -1,6 +1,6 @@
 ;;; org-clock.el --- The time clocking code for Org-mode
 
-;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2011 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -226,7 +226,6 @@ should get a different face (`org-mode-line-clock-overrun').
 When this is a string, it is prepended to the clock string as an indication,
 also using the face `org-mode-line-clock-overrun'."
   :group 'org-clock
-  :version "24.1"
   :type '(choice
 	  (const :tag "Just mark the time string" nil)
 	  (string :tag "Text to prepend")))
@@ -268,14 +267,12 @@ string as argument."
     :formatter nil)
   "Default properties for clock tables."
   :group 'org-clock
-  :version "24.1"
   :type 'plist)
 
 (defcustom org-clock-clocktable-formatter 'org-clocktable-write-default
   "Function to turn clocking data into a table.
 For more information, see `org-clocktable-write-default'."
   :group 'org-clocktable
-  :version "24.1"
   :type 'function)
 
 ;; FIXME: translate es and nl last string "Clock summary at"
@@ -286,7 +283,6 @@ For more information, see `org-clocktable-write-default'."
     ("nl" "Bestand"  "N"  "Tijdstip"   "Hoofding" "Duur"  "ALLES" "Totale duur"  "Bestandstijd" "Clock summary at"))
   "Terms used in clocktable, translated to different languages."
   :group 'org-clocktable
-  :version "24.1"
   :type 'alist)
 
 (defcustom org-clock-clocktable-default-properties '(:maxlevel 2 :scope file)
@@ -314,13 +310,11 @@ play with them."
 (defcustom org-clock-report-include-clocking-task nil
   "When non-nil, include the current clocking task time in clock reports."
   :group 'org-clock
-  :version "24.1"
   :type 'boolean)
 
 (defcustom org-clock-resolve-expert nil
   "Non-nil means do not show the splash buffer with the clock resolver."
   :group 'org-clock
-  :version "24.1"
   :type 'boolean)
 
 (defvar org-clock-in-prepare-hook nil
@@ -1393,8 +1387,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	  (message (concat "Clock stopped at %s after HH:MM = " org-time-clocksum-format "%s") te h m
 		   (if remove " => LINE REMOVED" ""))
           (run-hooks 'org-clock-out-hook)
-	  (unless (org-clocking-p)
-	    (org-clock-delete-current)))))))
+	  (org-clock-delete-current))))))
 
 (add-hook 'org-clock-out-hook 'org-clock-remove-empty-clock-drawer)
 
@@ -1996,7 +1989,7 @@ the currently selected interval size."
                         (encode-time 0 0 0 (+ d n) m y))))
           ((and wp (string-match "w\\|W" wp) mw (> (length wp) 0))
            (require 'cal-iso)
-           (setq date (calendar-gregorian-from-absolute
+           (setq date (calendar-gregorian-from-absolute 
 		       (calendar-absolute-from-iso (list (+ mw n) 1 y))))
            (setq ins (format-time-string
                       "%G-W%V"
@@ -2013,7 +2006,7 @@ the currently selected interval size."
                (setq mw 5
                      y (- y 1))
              ())
-           (setq date (calendar-gregorian-from-absolute
+           (setq date (calendar-gregorian-from-absolute 
 		       (calendar-absolute-from-iso (org-quarter-to-date (+ mw n) y))))
            (setq ins (format-time-string
                       (concatenate 'string (number-to-string y) "-Q" (number-to-string (+ mw n)))
@@ -2463,9 +2456,7 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
       (org-clock-sum ts te
 		     (unless (null matcher)
 		       (lambda ()
-			 (let* ((tags-list (org-get-tags-at))
-				(org-scanner-tags tags-list)
-				(org-trust-scanner-tags t))
+			 (let ((tags-list (org-get-tags-at)))
 			   (eval matcher)))))
       (goto-char (point-min))
       (setq st t)
@@ -2640,3 +2631,4 @@ The details of what will be saved are regulated by the variable
 (provide 'org-clock)
 
 ;;; org-clock.el ends here
+

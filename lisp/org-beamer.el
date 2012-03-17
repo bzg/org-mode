@@ -1,6 +1,6 @@
 ;;; org-beamer.el --- Beamer-specific LaTeX export for org-mode
 ;;
-;; Copyright (C) 2007-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2007-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;; Maintainer: Carsten Dominik <carsten.dominik AT gmail DOT com>
@@ -43,7 +43,6 @@
 (defcustom org-beamer-use-parts nil
   ""
   :group 'org-beamer
-  :version "24.1"
   :type 'boolean)
 
 (defcustom org-beamer-frame-level 1
@@ -53,7 +52,6 @@ Setting this to 2 will allow sections, 3 will allow subsections as well.
 You can set this to 4 as well, if you at the same time set
 `org-beamer-use-parts' to make the top levels `\part'."
   :group 'org-beamer
-  :version "24.1"
   :type '(choice
 	  (const :tag "Frames need a BEAMER_env property" nil)
 	  (integer :tag "Specific level makes a frame")))
@@ -62,14 +60,12 @@ You can set this to 4 as well, if you at the same time set
   "Default options string to use for frames, should contains the [brackets].
 And example for this is \"[allowframebreaks]\"."
   :group 'org-beamer
-  :version "24.1"
   :type '(string :tag "[options]"))
 
 (defcustom org-beamer-column-view-format
   "%45ITEM %10BEAMER_env(Env) %10BEAMER_envargs(Env Args) %4BEAMER_col(Col) %8BEAMER_extra(Extra)"
   "Default column view format that should be used to fill the template."
   :group 'org-beamer
-  :version "24.1"
   :type '(choice
 	  (const  :tag "Do not insert Beamer column view format" nil)
 	  (string :tag "Beamer column view format")))
@@ -80,7 +76,6 @@ And example for this is \"[allowframebreaks]\"."
 When a beamer template is filled, this will be the default for
 BEAMER_HEADER_EXTRA, which will be inserted just before \\begin{document}."
   :group 'org-beamer
-  :version "24.1"
   :type '(choice
 	  (const  :tag "Do not insert Beamer themes" nil)
 	  (string :tag "Beamer themes")))
@@ -107,7 +102,6 @@ These are just a completion help.")
     ("theorem"        "t" "\\begin{theorem}%a%U%x"             "\\end{theorem}")
     ("definition"     "d" "\\begin{definition}%a%U%x"          "\\end{definition}")
     ("example"        "e" "\\begin{example}%a%U%x"             "\\end{example}")
-    ("exampleblock"   "E" "\\begin{exampleblock}%a{%h}%x"      "\\end{exampleblock}")
     ("proof"          "p" "\\begin{proof}%a%U%x"               "\\end{proof}")
     ("beamercolorbox" "o" "\\begin{beamercolorbox}%o{%h}%x"    "\\end{beamercolorbox}")
     ("normal"         "h" "%h" "") ; Emit the heading as normal text
@@ -148,7 +142,6 @@ open    The opening template for the environment, with the following escapes
 close   The closing string of the environment."
 
   :group 'org-beamer
-  :version "24.1"
   :type '(repeat
 	  (list
 	   (string :tag "Environment")
@@ -409,7 +402,6 @@ the value will be inserted right after the documentclass statement."
 (defcustom org-beamer-fragile-re "\\\\\\(verb\\|lstinline\\)\\|^[ \t]*\\\\begin{\\(verbatim\\|lstlisting\\|minted\\)}"
   "If this regexp matches in a frame, the frame is marked as fragile."
   :group 'org-beamer
-  :version "24.1"
   :type 'regexp)
 
 (defface org-beamer-tag '((t (:box (:line-width 1 :color grey40))))
@@ -519,7 +511,6 @@ This function will run in the final LaTeX document."
 (defcustom org-beamer-outline-frame-title "Outline"
   "Default title of a frame containing an outline."
   :group 'org-beamer
-  :version "24.1"
   :type '(string :tag "Outline frame title")
 )
 
@@ -528,7 +519,6 @@ This function will run in the final LaTeX document."
 You might want to put e.g. [allowframebreaks=0.9] here.  Remember to
 include square brackets."
   :group 'org-beamer
-  :version "24.1"
   :type '(string :tag "Outline frame options")
 )
 

@@ -1,6 +1,6 @@
 ;;; org-html.el --- HTML export for Org-mode
 
-;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2011 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -64,7 +64,6 @@ by the footnotes themselves."
 (defcustom org-export-html-footnote-separator "<sup>, </sup>"
   "Text used to separate footnotes."
   :group 'org-export-html
-  :version "24.1"
   :type 'string)
 
 (defcustom org-export-html-coding-system nil
@@ -253,7 +252,6 @@ You can also customize this for each buffer, using something like
 
 #+MATHJAX: scale:\"133\" align:\"right\" mathml:t path:\"/MathJax/\""
   :group 'org-export-html
-  :version "24.1"
   :type '(list :greedy t
 	      (list :tag "path   (the path from where to load MathJax.js)"
 		    (const :format "       " path) (string))
@@ -337,7 +335,6 @@ You can also customize this for each buffer, using something like
 </script>"
   "The MathJax setup for XHTML files."
   :group 'org-export-html
-  :version "24.1"
   :type 'string)
 
 (defcustom org-export-html-tag-class-prefix ""
@@ -364,7 +361,6 @@ It requires to %s: both will be replaced by the anchor referring
 to the headline (e.g. \"sec-2\").  When set to `nil', don't insert
 HTML anchors in headlines."
   :group 'org-export-html
-  :version "24.1"
   :type 'string)
 
 (defcustom org-export-html-preamble t
@@ -396,7 +392,6 @@ precedence over this variable."
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
   :group 'org-export-html
-  :version "24.1"
   :type 'string)
 
 (defcustom org-export-html-postamble 'auto
@@ -437,7 +432,6 @@ precedence over this variable."
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
   :group 'org-export-html
-  :version "24.1"
   :type 'string)
 
 (defcustom org-export-html-home/up-format
@@ -554,7 +548,6 @@ When nil, alignment will only be specified in the column tags, but this
 is ignored by some browsers (like Firefox, Safari).  Opera does it right
 though."
   :group 'org-export-tables
-  :version "24.1"
   :type 'boolean)
 
 (defcustom org-export-html-table-use-header-tags-for-first-column nil
@@ -585,7 +578,6 @@ When nil, also column one will use data tags."
     (">" . "&gt;"))
   "Alist of characters to be converted by `org-html-protect'."
   :group 'org-export-html
-  :version "24.1"
   :type '(repeat (cons (string :tag "Character")
 		       (string :tag "HTML equivalent"))))
 
@@ -647,7 +639,6 @@ This is a list of three strings, the first one for the preamble
 DIV, the second one for the content DIV and the third one for the
 postamble DIV."
   :group 'org-export-html
-  :version "24.1"
   :type '(list
 	  (string :tag " Div for the preamble:")
 	  (string :tag "  Div for the content:")

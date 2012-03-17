@@ -1,6 +1,6 @@
 ;;; org-collector --- collect properties into tables
 
-;; Copyright (C) 2008-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2011 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte <schulte dot eric at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp, experimentation,
@@ -87,7 +87,7 @@
 ;; | run (50)  |                          0.116446 |
 ;; | run (100) |                          0.118863 |
 ;; #+END:
-;;
+;; 
 
 ;;; Code:
 (require 'org)
@@ -134,7 +134,7 @@ preceeding the dblock, then update the contents of the dblock."
 	  (org-narrow-to-subtree)
 	  (setq stringformat (if noquote "%s" "%S"))
 	  (setq table (org-propview-to-table
-		       (org-propview-collect cols stringformat conds match scope inherit
+		       (org-propview-collect cols stringformat conds match scope inherit 
 					     (if colnames colnames cols)) stringformat))
 	  (widen))
 	(setq pos (point))

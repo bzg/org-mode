@@ -1,6 +1,6 @@
 ;;; org-feed.el --- Add RSS feed items to Org files
 ;;
-;; Copyright (C) 2009-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -80,7 +80,7 @@
 ;;  that received the input of the feed.  You should add FEEDSTATUS
 ;;  to your list of drawers in the files that receive feed input:
 ;;
-;;       #+DRAWERS: PROPERTIES CLOCK LOGBOOK RESULTS FEEDSTATUS
+;;       #+DRAWERS: PROPERTIES LOGBOOK FEEDSTATUS
 ;;
 ;;  Acknowledgments
 ;;  ---------------

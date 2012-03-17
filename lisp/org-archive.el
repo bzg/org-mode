@@ -1,6 +1,6 @@
 ;;; org-archive.el --- Archiving for Org-mode
 
-;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2011 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -43,7 +43,6 @@
 (defcustom org-archive-reversed-order nil
   "Non-nil means make the tree first child under the archive heading, not last."
   :group 'org-archive
-  :version "24.1"
   :type 'boolean)
 
 (defcustom org-archive-sibling-heading "Archive"
@@ -73,7 +72,6 @@ This variable is obsolete and has no effect anymore, instead add or remove
 (defcustom org-archive-subtree-add-inherited-tags 'infile
   "Non-nil means append inherited tags when archiving a subtree."
   :group 'org-archive
-  :version "24.1"
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "When archiving a subtree to the same file" infile)

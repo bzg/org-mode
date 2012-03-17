@@ -1,6 +1,6 @@
 ;;; org-irc.el --- Store links to IRC sessions
 ;;
-;; Copyright (C) 2008-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: Philip Jackson <emacs@shellarchive.co.uk>
 ;; Keywords: erc, irc, link, org
@@ -59,7 +59,7 @@
 (declare-function erc-server-buffer "erc" ())
 (declare-function erc-get-server-nickname-list "erc" ())
 (declare-function erc-cmd-JOIN "erc" (channel &optional key))
-(declare-function org-pop-to-buffer-same-window
+(declare-function org-pop-to-buffer-same-window 
 		  "org-compat" (&optional buffer-or-name norecord label))
 
 (defvar org-irc-client 'erc
