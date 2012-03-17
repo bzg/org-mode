@@ -90,9 +90,6 @@
 
 (defcustom org-inlinetask-min-level 15
   "Minimum level a headline must have before it is treated as an inline task.
-Don't set it to something higher than `29' or clocking will break since this 
-is the hardcoded maximum number of stars `org-clock-sum' will work with.
-
 It is strongly recommended that you set `org-cycle-max-level' not at all,
 or to a number smaller than this one.  In fact, when `org-cycle-max-level' is
 not set, it will be assumed to be one less than the value of smaller than
@@ -101,12 +98,6 @@ the value of this variable."
   :type '(choice
 	  (const :tag "Off" nil)
 	  (integer)))
-
-(defcustom org-inlinetask-show-first-star nil
-  "Non-nil means display the first star of an inline task as additional marker.
-When nil, the first star is not shown."
-  :tag "Org Inline Tasks"
-  :group 'org-structure)
 
 (defcustom org-inlinetask-export t
   "Non-nil means export inline tasks.
@@ -182,7 +173,6 @@ or, with the additional package \"todonotes\" for LaTeX,
 This should be the state `org-inlinetask-insert-task' should use by
 default, or nil of no state should be assigned."
   :group 'org-inlinetask
-  :version "24.1"
   :type '(choice
 	  (const :tag "No state" nil)
 	  (string :tag "Specific state")))
@@ -441,12 +431,9 @@ Either remove headline and meta data, or do special formatting."
 			 'org-hide
 		       'org-warning)))
     (while (re-search-forward re limit t)
-      (if org-inlinetask-show-first-star
-	  (add-text-properties (match-beginning 1) (match-end 1)
-			       `(face ,start-face font-lock-fontified t)))
-      (add-text-properties (match-beginning
-			    (if org-inlinetask-show-first-star 2 1))
-			   (match-end 2)
+      (add-text-properties (match-beginning 1) (match-end 1)
+			   `(face ,start-face font-lock-fontified t))
+      (add-text-properties (match-beginning 2) (match-end 2)
 			   '(face org-hide font-lock-fontified t))
       (add-text-properties (match-beginning 3) (match-end 3)
 			   '(face org-inlinetask font-lock-fontified t)))))
@@ -464,7 +451,7 @@ Either remove headline and meta data, or do special formatting."
      ((= end start))
      ;; Inlinetask was folded: expand it.
      ((get-char-property (1+ start) 'invisible)
-      (org-show-entry))
+      (outline-flag-region start end nil))
      (t (outline-flag-region start end t)))))
 
 (defun org-inlinetask-remove-END-maybe ()

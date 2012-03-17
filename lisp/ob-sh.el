@@ -56,13 +56,14 @@ This will be passed to  `shell-command-on-region'")
 This function is called by `org-babel-execute-src-block'."
   (let* ((session (org-babel-sh-initiate-session
 		   (cdr (assoc :session params))))
+         (result-params (cdr (assoc :result-params params)))
 	 (stdin ((lambda (stdin) (when stdin (org-babel-sh-var-to-string
 					 (org-babel-ref-resolve stdin))))
 		 (cdr (assoc :stdin params))))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:sh params))))
     (org-babel-reassemble-table
-     (org-babel-sh-evaluate session full-body params stdin)
+     (org-babel-sh-evaluate session full-body result-params stdin)
      (org-babel-pick-name
       (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
@@ -133,38 +134,29 @@ Emacs-lisp table, otherwise return the results as a string."
 (defvar org-babel-sh-eoe-output "org_babel_sh_eoe"
   "String to indicate that evaluation has completed.")
 
-(defun org-babel-sh-evaluate (session body &optional params stdin)
+(defun org-babel-sh-evaluate (session body &optional result-params stdin)
   "Pass BODY to the Shell process in BUFFER.
 If RESULT-TYPE equals 'output then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals 'value then
 return the value of the last statement in BODY."
   ((lambda (results)
      (when results
-       (let ((result-params (cdr (assoc :result-params params))))
-	 (if (or (member "scalar" result-params)
-		 (member "verbatim" result-params)
-		 (member "output" result-params))
-	     results
-	   (let ((tmp-file (org-babel-temp-file "sh-")))
-	     (with-temp-file tmp-file (insert results))
-	     (org-babel-import-elisp-from-file tmp-file))))))
+       (if (or (member "scalar" result-params)
+	       (member "verbatim" result-params)
+	       (member "output" result-params))
+	   results
+	 (let ((tmp-file (org-babel-temp-file "sh-")))
+	   (with-temp-file tmp-file (insert results))
+	   (org-babel-import-elisp-from-file tmp-file)))))
    (cond
     (stdin				; external shell script w/STDIN
      (let ((script-file (org-babel-temp-file "sh-script-"))
-	   (stdin-file (org-babel-temp-file "sh-stdin-"))
-	   (shebang (cdr (assoc :shebang params)))
-	   (padline (not (string= "no" (cdr (assoc :padline params))))))
-       (with-temp-file script-file
-	 (when shebang (insert (concat shebang "\n")))
-	 (when padline (insert "\n"))
-	 (insert body))
-       (set-file-modes script-file #o755)
+	   (stdin-file (org-babel-temp-file "sh-stdin-")))
+       (with-temp-file script-file (insert body))
        (with-temp-file stdin-file (insert stdin))
        (with-temp-buffer
 	 (call-process-shell-command
-	  (if shebang
-	      script-file
-	    (format "%s %s" org-babel-sh-command script-file))
+	  (format "%s %s" org-babel-sh-command script-file)
 	  stdin-file
 	  (current-buffer))
 	 (buffer-string))))
@@ -190,17 +182,7 @@ return the value of the last statement in BODY."
 	    (list org-babel-sh-eoe-indicator))))
 	2)) "\n"))
     ('otherwise				; external shell script
-     (if (cdr (assoc :shebang params))
-	 (let ((script-file (org-babel-temp-file "sh-script-"))
-	       (shebang (cdr (assoc :shebang params)))
-	       (padline (not (string= "no" (cdr (assoc :padline params))))))
-	   (with-temp-file script-file
-	     (when shebang (insert (concat shebang "\n")))
-	     (when padline (insert "\n"))
-	     (insert body))
-	   (set-file-modes script-file #o755)
-	   (org-babel-eval script-file ""))
-       (org-babel-eval org-babel-sh-command (org-babel-trim body)))))))
+     (org-babel-eval org-babel-sh-command (org-babel-trim body))))))
 
 (defun org-babel-sh-strip-weird-long-prompt (string)
   "Remove prompt cruft from a string of shell output."

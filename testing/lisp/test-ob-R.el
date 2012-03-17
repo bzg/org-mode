@@ -1,17 +1,23 @@
 ;;; test-ob-R.el --- tests for ob-R.el
 
-;; Copyright (c) 2011-2012 Eric Schulte
+;; Copyright (c) 2011 Eric Schulte
 ;; Authors: Eric Schulte
 
 ;; Released under the GNU General Public License version 3
 ;; see: http://www.gnu.org/licenses/gpl-3.0.html
 
-;;; Code:
 (org-test-for-executable "R")
 (unless (featurep 'ess)
   (signal 'missing-test-dependency "ESS"))
-(unless (featurep 'ob-R)
-  (signal 'missing-test-dependency "Support for R code blocks"))
+
+(let ((load-path (cons (expand-file-name
+			".." (file-name-directory
+			      (or load-file-name buffer-file-name)))
+		       load-path)))
+  (require 'org-test)
+  (require 'org-test-ob-consts))
+
+(require 'ob-R)
 
 (ert-deftest test-ob-R/simple-session ()
   (org-test-with-temp-text

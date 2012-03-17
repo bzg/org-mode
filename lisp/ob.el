@@ -33,8 +33,6 @@
 (defvar org-babel-library-of-babel)
 (declare-function show-all "outline" ())
 (declare-function org-reduce "org" (CL-FUNC CL-SEQ &rest CL-KEYS))
-(declare-function org-mark-ring-push "org" (&optional pos buffer))
-(declare-function org-strip-protective-commas "org" (beg end))
 (declare-function tramp-compat-make-temp-file "tramp-compat"
                   (filename &optional dir-flag))
 (declare-function tramp-dissect-file-name "tramp" (name &optional nodefault))
@@ -59,7 +57,6 @@
 (declare-function org-cycle "org" (&optional arg))
 (declare-function org-uniquify "org" (list))
 (declare-function org-current-level "org" ())
-(declare-function org-strip-protective-commas "org" (beg end))
 (declare-function org-table-import "org-table" (file arg))
 (declare-function org-add-hook "org-compat"
 		  (hook function &optional append local))
@@ -107,7 +104,6 @@ against accidental code block evaluation.  The
 `org-babel-no-eval-on-ctrl-c-ctrl-c' variable can be used to
 remove code block execution from the C-c C-c keybinding."
     :group 'org-babel
-    :version "24.1"
     :type '(choice boolean function))
 ;; don't allow this variable to be changed through file settings
 (put 'org-confirm-babel-evaluate 'safe-local-variable (lambda (x) (eq x t)))
@@ -115,7 +111,6 @@ remove code block execution from the C-c C-c keybinding."
 (defcustom org-babel-no-eval-on-ctrl-c-ctrl-c nil
   "Remove code block evaluation from the C-c C-c key binding."
   :group 'org-babel
-  :version "24.1"
   :type 'boolean)
 
 (defcustom org-babel-results-keyword "RESULTS"
@@ -124,23 +119,6 @@ Should be either RESULTS or NAME however any capitalization may
 be used."
   :group 'org-babel
   :type 'string)
-
-(defcustom org-babel-noweb-wrap-start "<<"
-  "String used to begin a noweb reference in a code block.
-See also `org-babel-noweb-wrap-end'."
-  :group 'org-babel
-  :type 'string)
-
-(defcustom org-babel-noweb-wrap-end ">>"
-  "String used to end a noweb reference in a code block.
-See also `org-babel-noweb-wrap-start'."
-  :group 'org-babel
-  :type 'string)
-
-(defun org-babel-noweb-wrap (&optional regexp)
-  (concat org-babel-noweb-wrap-start
-	  (or regexp "\\([^ \t\n].+?[^ \t]\\|[^ \t\n]\\)")
-	  org-babel-noweb-wrap-end))
 
 (defvar org-babel-src-name-regexp
   "^[ \t]*#\\+name:[ \t]*"
@@ -403,7 +381,7 @@ then run `org-babel-pop-to-session'."
     (mkdirp	. ((yes no)))
     (no-expand)
     (noeval)
-    (noweb	. ((yes no tangle no-export strip-export)))
+    (noweb	. ((yes no tangle)))
     (noweb-ref	. :any)
     (noweb-sep  . :any)
     (padline	. ((yes no)))
@@ -416,8 +394,7 @@ then run `org-babel-pop-to-session'."
     (session	. :any)
     (shebang	. :any)
     (tangle	. ((tangle yes no :any)))
-    (var	. :any)
-    (wrap       . :any)))
+    (var	. :any)))
 
 (defconst org-babel-header-arg-names
   (mapcar #'car org-babel-common-header-args-w-values)
@@ -515,9 +492,12 @@ block."
 	     (new-hash (when cache? (org-babel-sha1-hash info)))
 	     (old-hash (when cache? (org-babel-current-result-hash)))
 	     (body (setf (nth 1 info)
-			 (if (org-babel-noweb-p params :eval)
-			     (org-babel-expand-noweb-references info)
-			   (nth 1 info))))
+			 (let ((noweb (cdr (assoc :noweb params))))
+			   (if (and noweb
+				    (or (string= "yes" noweb)
+					(string= "tangle" noweb)))
+			       (org-babel-expand-noweb-references info)
+			     (nth 1 info)))))
 	     (dir (cdr (assoc :dir params)))
 	     (default-directory
 	       (or (and dir (file-name-as-directory dir)) default-directory))
@@ -591,7 +571,8 @@ arguments and pop open the results in a preview buffer."
                              (lambda (el1 el2) (string< (symbol-name (car el1))
 						   (symbol-name (car el2)))))))
          (body (setf (nth 1 info)
-		     (if (org-babel-noweb-p params :eval)
+		     (if (and (cdr (assoc :noweb params))
+                              (string= "yes" (cdr (assoc :noweb params))))
 			 (org-babel-expand-noweb-references info) (nth 1 info))))
          (expand-cmd (intern (concat "org-babel-expand-body:" lang)))
 	 (assignments-cmd (intern (concat "org-babel-variable-assignments:"
@@ -688,7 +669,8 @@ session."
          (lang (nth 0 info))
          (params (nth 2 info))
          (body (setf (nth 1 info)
-		     (if (org-babel-noweb-p params :eval)
+		     (if (and (cdr (assoc :noweb params))
+                              (string= "yes" (cdr (assoc :noweb params))))
                          (org-babel-expand-noweb-references info)
 		       (nth 1 info))))
          (session (cdr (assoc :session params)))
@@ -1460,35 +1442,13 @@ If the point is not on a source block then return nil."
 (defun org-babel-goto-named-src-block (name)
   "Go to a named source-code block."
   (interactive
-   (let ((completion-ignore-case t)
-	 (under-point (thing-at-point 'line)))
-     (list (org-icompleting-read
-	    "source-block name: " (org-babel-src-block-names) nil t
-	    (cond
-	     ;; noweb
-	     ((string-match (org-babel-noweb-wrap) under-point)
-	      (let ((block-name (match-string 1 under-point)))
-		(string-match "[^(]*" block-name)
-		(match-string 0 block-name)))
-	     ;; #+call:
-	     ((string-match org-babel-lob-one-liner-regexp under-point)
-	      (let ((source-info (car (org-babel-lob-get-info))))
-		(if (string-match "^\\([^\\[]+?\\)\\(\\[.*\\]\\)?(" source-info)
-		    (let ((source-name (match-string 1 source-info)))
-		      source-name))))
-	     ;; #+results:
-	     ((string-match (concat "#\\+" org-babel-results-keyword
-				    "\\:\s+\\([^\\(]*\\)") under-point)
-	      (match-string 1 under-point))
-	     ;; symbol-at-point
-	     ((and (thing-at-point 'symbol))
-	      (org-babel-find-named-block (thing-at-point 'symbol))
-	      (thing-at-point 'symbol))
-	     (""))))))
+   (let ((completion-ignore-case t))
+     (list (org-icompleting-read "source-block name: "
+				 (org-babel-src-block-names) nil t))))
   (let ((point (org-babel-find-named-block name)))
     (if point
         ;; taken from `org-open-at-point'
-        (progn (org-mark-ring-push) (goto-char point) (org-show-context))
+        (progn (goto-char point) (org-show-context))
       (message "source-code block '%s' not found in this buffer" name))))
 
 (defun org-babel-find-named-block (name)
@@ -1914,9 +1874,6 @@ code ---- the results are extracted in the syntax of the source
 	  (setq end (point-marker))
 	  ;; possibly wrap result
 	  (cond
-	   ((assoc :wrap (nth 2 info))
-	    (let ((name (or (cdr (assoc :wrap (nth 2 info))) "RESULTS")))
-	      (wrap (concat "#+BEGIN_" name) (concat "#+END_" name))))
 	   ((member "html" result-params)
 	    (wrap "#+BEGIN_HTML" "#+END_HTML"))
 	   ((member "latex" result-params)
@@ -1968,10 +1925,11 @@ code ---- the results are extracted in the syntax of the source
       (progn (re-search-forward (concat "^" (match-string 1) ":END:"))
 	     (forward-char 1) (point)))
      (t
-      (let ((case-fold-search t))
-	(if (looking-at (concat "[ \t]*#\\+begin_\\([^ \t\n\r]+\\)"))
-	    (progn (re-search-forward (concat "[ \t]*#\\+end_" (match-string 1))
-				      nil t)
+      (let ((case-fold-search t)
+	    (blocks-re (regexp-opt
+			(list "latex" "html" "example" "src" "result" "org"))))
+	(if (looking-at (concat "[ \t]*#\\+begin_" blocks-re))
+	    (progn (re-search-forward (concat "[ \t]*#\\+end_" blocks-re) nil t)
 		   (forward-char 1))
 	  (while (looking-at "[ \t]*\\(: \\|\\[\\[\\)")
 	    (forward-line 1))))
@@ -2115,11 +2073,8 @@ parameters when merging lists."
 	      (:tangle ;; take the latest -- always overwrite
 	       (setq tangle (or (list (cdr pair)) tangle)))
 	      (:noweb
-	       (setq noweb (e-merge
-			    '(("yes" "no" "tangle" "no-export"
-			       "strip-export" "eval"))
-			    noweb
-			    (split-string (or (cdr pair) "")))))
+	       (setq noweb (e-merge '(("yes" "no" "tangle")) noweb
+				    (split-string (or (cdr pair) "")))))
 	      (:cache
 	       (setq cache (e-merge '(("yes" "no")) cache
 				    (split-string (or (cdr pair) "")))))
@@ -2150,20 +2105,6 @@ parameters when merging lists."
 This results in much faster noweb reference expansion but does
 not properly allow code blocks to inherit the \":noweb-ref\"
 header argument from buffer or subtree wide properties.")
-
-(defun org-babel-noweb-p (params context)
-  "Check if PARAMS require expansion in CONTEXT.
-CONTEXT may be one of :tangle, :export or :eval."
-  (flet ((intersect (as bs)
-		       (when as
-			 (if (member (car as) bs)
-			     (car as)
-			   (intersect (cdr as) bs)))))
-    (intersect (case context
-                    (:tangle '("yes" "tangle" "no-export" "strip-export"))
-                    (:eval   '("yes" "no-export" "strip-export" "eval"))
-                    (:export '("yes")))
-                  (split-string (or (cdr (assoc :noweb params)) "")))))
 
 (defun org-babel-expand-noweb-references (&optional info parent-buffer)
   "Expand Noweb references in the body of the current source code block.
@@ -2212,7 +2153,8 @@ block but are passed literally to the \"example-block\"."
       (with-temp-buffer
         (insert body) (goto-char (point-min))
         (setq index (point))
-        (while (and (re-search-forward (org-babel-noweb-wrap) nil t))
+        (while (and (re-search-forward "<<\\([^ \t\n].+?[^ \t\n]\\|[^ \t\n]\\)>>"
+				       nil t))
           (save-match-data (setf source-name (match-string 1)))
           (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
           (save-match-data
@@ -2284,7 +2226,7 @@ block but are passed literally to the \"example-block\"."
 		  ;; possibly raise an error if named block doesn't exist
 		  (if (member lang org-babel-noweb-error-langs)
 		      (error "%s" (concat
-				   (org-babel-noweb-wrap source-name)
+				   "<<" source-name ">> "
 				   "could not be resolved (see "
 				   "`org-babel-noweb-error-langs')"))
 		    "")))

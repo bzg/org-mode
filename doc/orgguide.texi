@@ -40,7 +40,7 @@
 @end macro
 @copying
 
-Copyright @copyright{} 2010-2012 Free Software Foundation
+Copyright @copyright{} 2010 Free Software Foundation
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -1906,7 +1906,7 @@ outline, not only the heading.
 @c
 @itemx @key{TAB}
 Go to the original location of the item in another window.  Under Emacs
-22, @kbd{mouse-1} will also work for this.
+22, @kbd{mouse-1} will also works for this.
 @c
 @itemx @key{RET}
 Go to the original location of the item and delete other windows.
@@ -2409,8 +2409,8 @@ verbatim @LaTeX{} code.
 Export as DocBook file.
 @end table
 
-Similarly to the HTML exporter, you can use @code{#+DOCBOOK:} and
-@code{#+BEGIN_DOCBOOK ... #+END_DOCBOOK} construct to add verbatim @LaTeX{}
+Similarly to the HTML exporter, you can use @code{#+DocBook:} and
+@code{#+BEGIN_DocBook ... #+END_DocBook} construct to add verbatim @LaTeX{}
 code.
 
 @node iCalendar export,  , DocBook export, Exporting
@@ -2492,10 +2492,10 @@ results in several formats.
 The structure of code blocks is as follows:
 
 @example
-#+NAME: <name>
-#+BEGIN_SRC <language> <switches> <header arguments>
+#+srcname: <name>
+#+begin_src <language> <switches> <header arguments>
   <body>
-#+END_SRC
+#+end_src
 @end example
 
 Where @code{<name>} is a string used to name the code block,
@@ -2520,11 +2520,11 @@ in many languages.  For a complete list of supported languages see the
 manual.  The following shows a code block and its results.
 
 @example
-#+BEGIN_SRC emacs-lisp
+#+begin_src emacs-lisp
   (+ 1 2 3 4)
-#+END_SRC
+#+end_src
 
-#+RESULTS:
+#+results:
 : 10
 @end example
 
@@ -2663,17 +2663,10 @@ indentation for each level.  To get this support in a file, use
 @node MobileOrg,  , Clean view, Miscellaneous
 @section MobileOrg
 
-@i{MobileOrg} is the name of the mobile companion app for Org mode, currently
-available for iOS and for Android.  @i{MobileOrg} offers offline viewing and
-capture support for an Org mode system rooted on a ``real'' computer.  It
-does also allow you to record changes to existing entries.
-
-The @uref{http://mobileorg.ncogni.to/, iOS implementation} for the
-@i{iPhone/iPod Touch/iPad} series of devices, was developed by Richard
-Moreland. Android users should check out
-@uref{http://wiki.github.com/matburt/mobileorg-android/, MobileOrg Android}
-by Matt Jones.  The two implementations are not identical but offer similar
-features.
+@i{MobileOrg} is an application originally developed for the @i{iPhone/iPod
+Touch} series of devices, developed by Richard Moreland.  There is also an
+independent implementation for Android devices, by Matt Jones.
+For details, see the Org-mode manual.
 
 @seealso{
 @uref{http://orgmode.org/manual/Miscellaneous.html#Miscellaneous, Chapter 15

@@ -215,7 +215,6 @@ Both uppercase and lowercase are handled.  Lists with more than
 26 items will fallback to standard numbering.  Alphabetical
 counters like \"[@c]\" will be recognized."
   :group 'org-plain-lists
-  :version "24.1"
   :type 'boolean)
 
 (defcustom org-list-two-spaces-after-bullet-regexp nil
@@ -259,7 +258,6 @@ indent    when non-nil, indenting or outdenting list top-item
           outdenting a list whose bullet is * to column 0 will
           change that bullet to \"-\"."
    :group 'org-plain-lists
-   :version "24.1"
    :type '(alist :tag "Sets of rules"
 		 :key-type
 		 (choice
@@ -279,7 +277,6 @@ This affects the behavior of \\[org-move-item-up],
  \\[org-move-item-down], \\[org-next-item] and
  \\[org-previous-item]."
   :group 'org-plain-lists
-  :version "24.1"
   :type 'boolean)
 
 (defvar org-checkbox-statistics-hook nil
@@ -309,7 +306,6 @@ When the indentation would be larger than this, it will become
 By setting this to a small number, usually 1 or 2, one can more
 clearly distinguish sub-items in a list."
   :group 'org-plain-lists
-  :version "24.1"
   :type 'integer)
 
 (defcustom org-list-radio-list-templates
@@ -714,15 +710,15 @@ Assume point is at an item."
       ;;    equally indented than BEG-CELL's cdr.  Also, store ending
       ;;    position of items in END-LST-2.
       (catch 'exit
-        (while t
-          (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
+      	(while t
+      	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
 			(org-get-indentation))))
-            (cond
-             ((>= (point) lim-down)
+      	    (cond
+      	     ((>= (point) lim-down)
 	      ;; At downward limit: this is de facto the end of the
 	      ;; list.  Save point as an ending position, and jump to
 	      ;; part 3.
-              (throw 'exit
+      	      (throw 'exit
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
 	     ;; At a verbatim block, move to its end.  Point is at bol
 	     ;; and 'org-example property is set by whole lines:
@@ -1019,41 +1015,6 @@ type is determined by the first item of the list."
      ((string-match "[[:alnum:]]" (org-list-get-bullet first struct)) 'ordered)
      (t 'unordered))))
 
-(defun org-list-get-item-number (item struct prevs parents)
-  "Return ITEM's sequence number.
-
-STRUCT is the list structure.  PREVS is the alist of previous
-items, as returned by `org-list-prevs-alist'.  PARENTS is the
-alist of ancestors, as returned by `org-list-parents-alist'.
-
-Return value is a list of integers.  Counters have an impact on
-that value."
-  (let ((get-relative-number
-	 (function
-	  (lambda (item struct prevs)
-	    ;; Return relative sequence number of ITEM in the sub-list
-	    ;; it belongs.  STRUCT is the list structure.  PREVS is
-	    ;; the alist of previous items.
-	    (let ((seq 0) (pos item) counter)
-	      (while (and (not (setq counter (org-list-get-counter pos struct)))
-			  (setq pos (org-list-get-prev-item pos struct prevs)))
-		(incf seq))
-	      (if (not counter) (1+ seq)
-		(cond
-		 ((string-match "[A-Za-z]" counter)
-		  (+ (- (string-to-char (upcase (match-string 0 counter))) 64)
-		     seq))
-		 ((string-match "[0-9]+" counter)
-		  (+ (string-to-number (match-string 0 counter)) seq))
-		 (t (1+ seq)))))))))
-    ;; Cons each parent relative number into return value (OUT).
-    (let ((out (list (funcall get-relative-number item struct prevs)))
-	  (parent item))
-      (while (setq parent (org-list-get-parent parent struct parents))
-	(push (funcall get-relative-number parent struct prevs) out))
-      ;; Return value.
-      out)))
-
 
 
 ;;; Searching
@@ -1278,8 +1239,9 @@ This function modifies STRUCT."
       (insert body item-sep)
       ;; 5. Add new item to STRUCT.
       (mapc (lambda (e)
-              (let ((p (car e)) (end (nth 6 e)))
-                (cond
+      	      (let ((p (car e))
+      		    (end (nth 6 e)))
+      		(cond
 		 ;; Before inserted item, positions don't change but
 		 ;; an item ending after insertion has its end shifted
 		 ;; by SIZE-OFFSET.
@@ -2166,18 +2128,6 @@ item is invisible."
 	  (looking-at org-list-full-item-re)
 	  (goto-char (match-end 0))
 	  t)))))
-
-(defun org-mark-list ()
-  "Mark the current list.
-If this is a sublist, only mark the sublist."
-  (interactive)
-  (let* ((item (org-list-get-item-begin))
-	 (struct (org-list-struct))
-	 (prevs (org-list-prevs-alist struct))
-	 (lbeg (org-list-get-list-begin item struct prevs))
-	 (lend (org-list-get-list-end item struct prevs)))
-    (push-mark lend nil t)
-    (goto-char lbeg)))
 
 (defun org-list-repair ()
   "Fix indentation, bullets and checkboxes is the list at point."

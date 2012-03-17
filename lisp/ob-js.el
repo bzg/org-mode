@@ -55,7 +55,6 @@
 (defcustom org-babel-js-cmd "node"
   "Name of command used to evaluate js blocks."
   :group 'org-babel
-  :version "24.1"
   :type 'string)
 
 (defvar org-babel-js-function-wrapper

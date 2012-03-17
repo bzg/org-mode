@@ -169,13 +169,11 @@ window configuration, it is not recommended to set this variable to nil,
 except maybe locally in a special file that has mostly tables with long
 fields."
   :group 'org-table
-  :version "24.1"
   :type 'boolean)
 
 (defcustom org-table-fix-formulas-confirm nil
   "Whether the user should confirm when Org fixes formulas."
   :group 'org-table-editing
-  :version "24.1"
   :type '(choice
 	  (const :tag "with yes-or-no" yes-or-no-p)
 	  (const :tag "with y-or-n" y-or-n-p)
@@ -238,7 +236,6 @@ number of hours.  Other allowed values are 'seconds, 'minutes and
 'days, and the output will be a fraction of seconds, minutes or
 days."
   :group 'org-table-calculation
-  :version "24.1"
   :type '(choice (symbol :tag "Seconds" 'seconds)
 		 (symbol :tag "Minutes" 'minutes)
 		 (symbol :tag "Hours  " 'hours)
@@ -250,7 +247,6 @@ For example, using \"~%s~\" will display the result within tilde
 characters.  Beware that modifying the display can prevent the
 field from being used in another formula."
   :group 'org-table-settings
-  :version "24.1"
   :type 'string)
 
 (defcustom org-table-formula-evaluate-inline t
@@ -2440,7 +2436,7 @@ not overwrite the stored one."
 	   (modes (copy-sequence org-calc-default-modes))
 	   (numbers nil) ; was a variable, now fixed default
 	   (keep-empty nil)
-	   n form form0 formrpl formrg bw fmt x ev orig c lispp literal
+	   n form form0 formrpl formrg bw fmt x ev orig c lispp literal 
 	   duration duration-output-format)
       ;; Parse the format string.  Since we have a lot of modes, this is
       ;; a lot of work.  However, I think calc still uses most of the time.
@@ -2465,7 +2461,7 @@ not overwrite the stored one."
 		      duration-output-format nil
 		      fmt (replace-match "" t t fmt)))
 	    (if (string-match "t" fmt)
-		(setq duration t
+		(setq duration t 
 		      duration-output-format org-table-duration-custom-format
 		      numbers t
 		      fmt (replace-match "" t t fmt)))
@@ -2533,7 +2529,7 @@ not overwrite the stored one."
 	;; Insert complex ranges
 	(while (and (string-match org-table-range-regexp form)
 		    (> (length (match-string 0 form)) 1))
-	  (setq formrg (save-match-data
+	  (setq formrg (save-match-data 
 			 (org-table-get-range (match-string 0 form) nil n0)))
 	  (setq formrpl
 		(save-match-data
@@ -4763,3 +4759,4 @@ list of the fields in the rectangle ."
 (provide 'org-table)
 
 ;;; org-table.el ends here
+
