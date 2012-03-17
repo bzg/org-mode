@@ -1,6 +1,6 @@
 ;;; org-element.el --- Parser And Applications for Org syntax
 
-;; Copyright (C) 2011  Free Software Foundation, Inc.
+;; Copyright (C) 2011, 2012  Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp

@@ -1,6 +1,6 @@
 ;;; ob-oz.el --- org-babel functions for Oz evaluation
 
-;; Copyright (C) 2009 Torsten Anders and Eric Schulte 
+;; Copyright (C) 2009, 2012 Torsten Anders and Eric Schulte 
 
 ;; Author: Torsten Anders and Eric Schulte 
 ;; Keywords: literate programming, reproducible research

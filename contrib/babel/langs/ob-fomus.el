@@ -1,6 +1,6 @@
 ;;; ob-fomus.el --- org-babel functions for fomus evaluation
 
-;; Copyright (C) 2011 Torsten Anders
+;; Copyright (C) 2011, 2012 Torsten Anders
 
 ;; Author: Torsten Anders
 ;; Keywords: literate programming, reproducible research
