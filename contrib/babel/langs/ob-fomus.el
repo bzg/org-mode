@@ -5,7 +5,6 @@
 ;; Author: Torsten Anders
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
-;; Version: 
 
 ;;; License:
 
