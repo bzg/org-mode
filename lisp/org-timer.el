@@ -1,6 +1,6 @@
 ;;; org-timer.el --- The relative timer code for Org-mode
 
-;; Copyright (C) 2008-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2011 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -53,7 +53,6 @@ the value of the relative timer."
   "The default timer when a timer is set.
 When 0, the user is prompted for a value."
   :group 'org-time
-  :version "24.1"
   :type 'number)
 
 (defvar org-timer-start-hook nil

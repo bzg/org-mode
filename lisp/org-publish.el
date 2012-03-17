@@ -1,5 +1,5 @@
 ;;; org-publish.el --- publish related org-mode files as a website
-;; Copyright (C) 2006-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2006-2011 Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Carsten Dominik <carsten DOT dominik AT gmail DOT com>
@@ -248,7 +248,6 @@ nil won't sort files.
 You can overwrite this default per project in your
 `org-publish-project-alist', using `:sitemap-sort-files'."
   :group 'org-publish
-  :version "24.1"
   :type 'symbol)
 
 (defcustom org-publish-sitemap-sort-folders 'first
@@ -261,7 +260,6 @@ Any other value will not mix files and folders.
 You can overwrite this default per project in your
 `org-publish-project-alist', using `:sitemap-sort-folders'."
   :group 'org-publish
-  :version "24.1"
   :type 'symbol)
 
 (defcustom org-publish-sitemap-sort-ignore-case nil
@@ -270,14 +268,12 @@ You can overwrite this default per project in your
 You can overwrite this default per project in your
 `org-publish-project-alist', using `:sitemap-ignore-case'."
   :group 'org-publish
-  :version "24.1"
   :type 'boolean)
 
 (defcustom org-publish-sitemap-date-format "%Y-%m-%d"
   "Format for `format-time-string' which is used to print a date
 in the sitemap."
   :group 'org-publish
-  :version "24.1"
   :type 'string)
 
 (defcustom org-publish-sitemap-file-entry-format "%t"
@@ -288,7 +284,6 @@ You could use brackets to delimit on what part the link will be.
 %a is the author.
 %d is the date formatted using `org-publish-sitemap-date-format'."
   :group 'org-publish
-  :version "24.1"
   :type 'string)
 
 
@@ -373,7 +368,7 @@ This is a compatibility function for Emacsen without `delete-dups'."
 
 (declare-function org-publish-delete-dups "org-publish" (list))
 (declare-function find-lisp-find-files "find-lisp" (directory regexp))
-(declare-function org-pop-to-buffer-same-window
+(declare-function org-pop-to-buffer-same-window 
 		  "org-compat" (&optional buffer-or-name norecord label))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1036,7 +1031,7 @@ the project."
        (setq ibuffer (find-file-noselect index-file))
        (with-current-buffer ibuffer
          (erase-buffer)
-         (insert "\n\n#+INCLUDE: \"theindex.inc\"\n\n")
+         (insert "\n\n#+include: \"theindex.inc\"\n\n")
          (save-buffer))
        (kill-buffer ibuffer)))))
 
@@ -1132,7 +1127,7 @@ so that the file including them will be republished as well."
       (let ((ctime (org-publish-cache-ctime-of-src filename)))
 	(or (< pstamp ctime)
 	    (when included-files-ctime
-	      (not (null (delq nil (mapcar (lambda(ct) (< ctime ct))
+	      (not (null (delq nil (mapcar (lambda(ct) (< ctime ct)) 
 					   included-files-ctime))))))))))
 
 (defun org-publish-cache-set-file-property (filename property value &optional project-name)

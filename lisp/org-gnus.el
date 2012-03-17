@@ -1,6 +1,6 @@
 ;;; org-gnus.el --- Support for links to Gnus groups and messages from within Org-mode
 
-;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2011 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;;         Tassilo Horn <tassilo at member dot fsf dot org>
@@ -62,7 +62,6 @@ configured) IMAP servers don't support this operation quickly.
 So if following a link to a Gnus article takes ages, try setting
 this variable to `t'."
   :group 'org-link-store
-  :version "24.1"
   :type 'boolean)
 
 
@@ -176,7 +175,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 	(setq to (or to (gnus-fetch-original-field "To"))
 	      newsgroups (gnus-fetch-original-field "Newsgroups")
 	      x-no-archive (gnus-fetch-original-field "x-no-archive")))
-      (org-store-link-props :type "gnus" :from from :subject subject
+      (org-store-link-props :type "gnus" :from from :subject subject 
 			    :message-id message-id :group group :to to)
       (when date
 	(org-add-link-props :date date :date-timestamp date-ts

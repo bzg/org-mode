@@ -1,6 +1,6 @@
 ;;; org-habit.el --- The habit tracking code for Org-mode
 
-;; Copyright (C) 2009-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2011 Free Software Foundation, Inc.
 
 ;; Author: John Wiegley <johnw at gnu dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -70,13 +70,11 @@ relative to the current effective date."
 (defcustom org-habit-today-glyph ?!
   "Glyph character used to identify today."
   :group 'org-habit
-  :version "24.1"
   :type 'character)
 
 (defcustom org-habit-completed-glyph ?*
   "Glyph character used to show completed days on which a task was done."
   :group 'org-habit
-  :version "24.1"
   :type 'character)
 
 (defface org-habit-clear-face

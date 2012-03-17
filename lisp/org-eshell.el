@@ -46,7 +46,7 @@
      (if (get-buffer eshell-buffer-name)
        (org-pop-to-buffer-same-window eshell-buffer-name)
        (eshell))
-     (goto-char (point-max))
+     (end-of-buffer)
      (eshell-kill-input)
      (insert command)
      (eshell-send-input)))

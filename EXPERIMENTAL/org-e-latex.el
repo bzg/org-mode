@@ -1,6 +1,6 @@
 ;;; org-e-latex.el --- LaTeX Back-End For Org Export Engine
 
-;; Copyright (C) 2011-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2011  Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -36,54 +36,8 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
-
-(defvar org-export-latex-default-packages-alist)
-(defvar org-export-latex-packages-alist)
-
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-normalize-string "org-element" (s))
-(declare-function org-element-parse-secondary-string
-		  "org-element" (string restriction &optional buffer))
-(defvar org-element-string-restrictions)
-(defvar org-element-object-restrictions)
-
-(declare-function org-export-clean-table "org-export" (table specialp))
-(declare-function org-export-data "org-export" (data backend info))
-(declare-function org-export-directory "org-export" (type plist))
-(declare-function org-export-expand-macro "org-export" (macro info))
-(declare-function org-export-first-sibling-p "org-export" (headline info))
-(declare-function org-export-footnote-first-reference-p "org-export"
-		  (footnote-reference info))
-(declare-function org-export-format-code "org-export"
-		  (code fun &optional num-lines ref-alist))
-(declare-function org-export-format-code-default "org-export" (element info))
-(declare-function org-export-get-coderef-format "org-export" (path desc))
-(declare-function org-export-get-footnote-definition "org-export"
-		  (footnote-reference info))
-(declare-function org-export-get-footnote-number "org-export" (footnote info))
-(declare-function org-export-get-previous-element "org-export" (blob info))
-(declare-function org-export-get-relative-level "org-export" (headline info))
-(declare-function org-export-unravel-code
-		  "org-export" (element info &optional num-fmt ref-fmt delayed))
-(declare-function org-export-included-file "org-export" (keyword backend info))
-(declare-function org-export-inline-image-p "org-export"
-		  (link &optional extensions))
-(declare-function org-export-last-sibling-p "org-export" (headline info))
-(declare-function org-export-low-level-p "org-export" (headline info))
-(declare-function org-export-output-file-name
-		  "org-export" (extension &optional subtreep pub-dir))
-(declare-function org-export-resolve-coderef "org-export" (ref info))
-(declare-function org-export-resolve-fuzzy-link "org-export" (link info))
-(declare-function org-export-secondary-string "org-export"
-		  (secondary backend info))
-(declare-function org-export-solidify-link-text "org-export" (s))
-(declare-function org-export-table-format-info "org-export" (table))
-(declare-function
- org-export-to-buffer "org-export"
- (backend buffer &optional subtreep visible-only body-only ext-plist))
-(declare-function
- org-export-to-file "org-export"
- (backend file &optional subtreep visible-only body-only ext-plist))
+(require 'org-element)
+(require 'org-export)
 
 
 
@@ -102,7 +56,7 @@ structure of the value.")
 
 ;;; User Configurable Variables
 
-(defgroup org-export-e-latex nil
+(defgroup org-export-latex nil
   "Options for exporting Org mode files to LaTeX."
   :tag "Org Export LaTeX"
   :group 'org-export)
@@ -112,7 +66,7 @@ structure of the value.")
 
 (defcustom org-e-latex-default-class "article"
   "The default LaTeX class."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type '(string :tag "LaTeX class"))
 
 (defcustom org-e-latex-classes
@@ -149,22 +103,20 @@ associated information.  Here is the structure of each cell:
 The header string
 -----------------
 
-The HEADER-STRING is the header that will be inserted into the
-LaTeX file.  It should contain the \\documentclass macro, and
-anything else that is needed for this setup.  To this header, the
-following commands will be added:
+The HEADER-STRING is the header that will be inserted into the LaTeX file.
+It should contain the \\documentclass macro, and anything else that is needed
+for this setup.  To this header, the following commands will be added:
 
-- Calls to \\usepackage for all packages mentioned in the
-  variables `org-export-latex-default-packages-alist' and
-  `org-export-latex-packages-alist'.  Thus, your header
-  definitions should avoid to also request these packages.
+- Calls to \\usepackage for all packages mentioned in the variables
+  `org-e-latex-default-packages-alist' and
+  `org-e-latex-packages-alist'.  Thus, your header definitions should
+  avoid to also request these packages.
 
 - Lines specified via \"#+LaTeX_HEADER:\"
 
-If you need more control about the sequence in which the header
-is built up, or if you want to exclude one of these building
-blocks for a particular class, you can use the following
-macro-like placeholders.
+If you need more control about the sequence in which the header is built
+up, or if you want to exclude one of these building blocks for a particular
+class, you can use the following macro-like placeholders.
 
  [DEFAULT-PACKAGES]      \\usepackage statements for default packages
  [NO-DEFAULT-PACKAGES]   do not include any of the default packages
@@ -182,26 +134,23 @@ So a header like
   \\providecommand{\\alert}[1]{\\textbf{#1}}
   [PACKAGES]
 
-will omit the default packages, and will include the
-#+LaTeX_HEADER lines, then have a call to \\providecommand, and
-then place \\usepackage commands based on the content of
-`org-export-latex-packages-alist'.
+will omit the default packages, and will include the #+LaTeX_HEADER lines,
+then have a call to \\providecommand, and then place \\usepackage commands
+based on the content of `org-e-latex-packages-alist'.
 
-If your header, `org-export-latex-default-packages-alist' or
-`org-export-latex-packages-alist' inserts
-\"\\usepackage[AUTO]{inputenc}\", AUTO will automatically be
-replaced with a coding system derived from
-`buffer-file-coding-system'.  See also the variable
-`org-e-latex-inputenc-alist' for a way to influence this
+If your header or `org-e-latex-default-packages-alist' inserts
+\"\\usepackage[AUTO]{inputenc}\", AUTO will automatically be replaced with
+a coding system derived from `buffer-file-coding-system'.  See also the
+variable `org-e-latex-inputenc-alist' for a way to influence this
 mechanism.
 
 The sectioning structure
 ------------------------
 
-The sectioning structure of the class is given by the elements
-following the header string.  For each sectioning level, a number
-of strings is specified.  A %s formatter is mandatory in each
-section string and will be replaced by the title of the section.
+The sectioning structure of the class is given by the elements following
+the header string.  For each sectioning level, a number of strings is
+specified.  A %s formatter is mandatory in each section string and will
+be replaced by the title of the section.
 
 Instead of a cons cell \(numbered . unnumbered\), you can also
 provide a list of 2 or 4 elements,
@@ -212,16 +161,16 @@ or
 
   \(numbered-open numbered-close unnumbered-open unnumbered-close\)
 
-providing opening and closing strings for a LaTeX environment
-that should represent the document section.  The opening clause
-should have a %s to represent the section title.
+providing opening and closing strings for a LaTeX environment that should
+represent the document section.  The opening clause should have a %s
+to represent the section title.
 
-Instead of a list of sectioning commands, you can also specify
-a function name.  That function will be called with two
-parameters, the \(reduced) level of the headline, and a predicate
-non-nil when the headline should be numbered.  It must return
-a format string in which the section title will be added."
-  :group 'org-export-e-latex
+Instead of a list of sectioning commands, you can also specify a
+function name.  That function will be called with two parameters,
+the (reduced) level of the headline, and a predicate non-nil when
+the headline should be numbered.  It must return a format string in
+which the section title will be added."
+  :group 'org-export-latex
   :type '(repeat
 	  (list (string :tag "LaTeX class")
 		(string :tag "LaTeX header")
@@ -245,7 +194,7 @@ For example, adding an entry
 
 will cause \\usepackage[utf8x]{inputenc} to be used for buffers that
 are written as utf8 files."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type '(repeat
 	  (cons
 	   (string :tag "Derived from buffer")
@@ -254,7 +203,7 @@ are written as utf8 files."
 (defcustom org-e-latex-date-format
   "\\today"
   "Format string for \\date{...}."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'boolean)
 
 (defcustom org-e-latex-title-command "\\maketitle"
@@ -262,7 +211,7 @@ are written as utf8 files."
 If this string contains the formatting specification \"%s\" then
 it will be used as a formatting string, passing the title as an
 argument."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'string)
 
 
@@ -283,15 +232,13 @@ The function result will be used in the section format string.
 As an example, one could set the variable to the following, in
 order to reproduce the default set-up:
 
-\(defun org-e-latex-format-headline \(todo todo-type priority text tags\)
+\(defun org-e-latex-format-headline-default \(todo todo-type priority text tags\)
   \"Default format function for an headline.\"
-  \(concat \(when todo
-            \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo\)\)
-	  \(when priority
-            \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
+  \(concat \(when todo \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo\)\)
+	  \(when priority \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
 	  text
 	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)"
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'function)
 
 
@@ -314,7 +261,7 @@ Value can also be set to the following symbols: `verb' and
 create a format string and select a delimiter character that
 isn't in the string.  For the latter, Org will use \"\\texttt\"
 to typeset and try to protect special characters."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'alist)
 
 
@@ -322,7 +269,7 @@ to typeset and try to protect special characters."
 
 (defcustom org-e-latex-footnote-separator "\\textsuperscript{,}\\,"
   "Text used to separate footnotes."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'string)
 
 
@@ -330,17 +277,17 @@ to typeset and try to protect special characters."
 
 (defcustom org-e-latex-active-timestamp-format "\\textit{%s}"
   "A printf format string to be applied to active time-stamps."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'string)
 
 (defcustom org-e-latex-inactive-timestamp-format "\\textit{%s}"
   "A printf format string to be applied to inactive time-stamps."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'string)
 
 (defcustom org-e-latex-diary-timestamp-format "\\textit{%s}"
   "A printf format string to be applied to diary time-stamps."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'string)
 
 
@@ -348,62 +295,48 @@ to typeset and try to protect special characters."
 
 (defcustom org-e-latex-image-default-option "width=.9\\linewidth"
   "Default option for images."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'string)
 
 (defcustom org-e-latex-default-figure-position "htb"
   "Default position for latex figures."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'string)
 
-(defcustom org-e-latex-inline-image-rules
-  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\)\\'"))
-  "Rules characterizing image files that can be inlined into LaTeX.
+(defcustom org-e-latex-inline-image-extensions
+  '("pdf" "jpeg" "jpg" "png" "ps" "eps")
+  "Extensions of image files that can be inlined into LaTeX.
 
-A rule consists in an association whose key is the type of link
-to consider, and value is a regexp that will be matched against
-link's path.
-
-Note that, by default, the image extension *actually* allowed
-depend on the way the LaTeX file is processed.  When used with
-pdflatex, pdf, jpg and png images are OK.  When processing
-through dvi to Postscript, only ps and eps are allowed.  The
-default we use here encompasses both."
-  :group 'org-export-e-latex
-  :type '(alist :key-type (string :tag "Type")
-		:value-type (regexp :tag "Path")))
+Note that the image extension *actually* allowed depend on the
+way the LaTeX file is processed.  When used with pdflatex, pdf,
+jpg and png images are OK.  When processing through dvi to
+Postscript, only ps and eps are allowed.  The default we use here
+encompasses both."
+  :group 'org-export-latex
+  :type '(repeat (string :tag "Extension")))
 
 
 ;;;; Tables
 
 (defcustom org-e-latex-default-table-environment "tabular"
   "Default environment used to build tables."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'string)
 
 (defcustom org-e-latex-tables-centered t
   "When non-nil, tables are exported in a center environment."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'boolean)
 
 (defcustom org-e-latex-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
-  :group 'org-export-e-latex
-  :type 'boolean)
-
-(defcustom org-e-latex-tables-booktabs nil
-  "When non-nil, display tables in a formal \"booktabs\" style.
-This option assumes that the \"booktabs\" package is properly
-loaded in the header of the document.  This value can be ignored
-locally with \"booktabs=yes\" and \"booktabs=no\" LaTeX
-attributes."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'boolean)
 
 (defcustom org-e-latex-table-caption-above t
   "When non-nil, place caption string at the beginning of the table.
 Otherwise, place it near the end."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'boolean)
 
 
@@ -424,7 +357,7 @@ in order to mimic default behaviour:
 \(defun org-e-latex-format-drawer-default \(name contents\)
   \"Format a drawer element for LaTeX export.\"
   contents\)"
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'function)
 
 
@@ -446,12 +379,11 @@ The function should return the string to be exported.
 For example, the variable could be set to the following function
 in order to mimic default behaviour:
 
-\(defun org-e-latex-format-inlinetask \(todo type priority name tags contents\)
+\(defun org-e-latex-format-inlinetask-default \(todo type priority name tags contents\)
 \"Format an inline task element for LaTeX export.\"
   \(let \(\(full-title
 	 \(concat
-	  \(when todo
-            \(format \"\\\\textbf{\\\\textsf{\\\\textsc{%s}}} \" todo\)\)
+	  \(when todo \(format \"\\\\textbf{\\\\textsf{\\\\textsc{%s}}} \" todo\)\)
 	  \(when priority \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
 	  title
 	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)\)
@@ -464,7 +396,7 @@ in order to mimic default behaviour:
 		    \"\\\\end{minipage}}\"
 		    \"\\\\end{center}\"\)
 	    full-title contents\)\)"
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type 'function)
 
 
@@ -475,30 +407,30 @@ in order to mimic default behaviour:
 This package will fontify source code, possibly even with color.
 If you want to use this, you also need to make LaTeX use the
 listings package, and if you want to have color, the color
-package.  Just add these to `org-export-latex-packages-alist',
-for example using customize, or with something like:
+package.  Just add these to `org-e-latex-packages-alist',
+for example using customize, or with something like
 
-  \(require 'org-e-latex)
-  \(add-to-list 'org-export-latex-packages-alist '\(\"\" \"listings\"))
-  \(add-to-list 'org-export-latex-packages-alist '\(\"\" \"color\"))
+  (require 'org-e-latex)
+  (add-to-list 'org-export-latex-packages-alist '(\"\" \"listings\"))
+  (add-to-list 'org-export-latex-packages-alist '(\"\" \"color\"))
 
 Alternatively,
 
-  \(setq org-e-latex-listings 'minted)
+  (setq org-e-latex-listings 'minted)
 
 causes source code to be exported using the minted package as
 opposed to listings.  If you want to use minted, you need to add
-the minted package to `org-export-latex-packages-alist', for
+the minted package to `org-e-latex-packages-alist', for
 example using customize, or with
 
-  \(require 'org-e-latex)
-  \(add-to-list 'org-export-latex-packages-alist '\(\"\" \"minted\"))
+  (require 'org-e-latex)
+  (add-to-list 'org-e-latex-packages-alist '(\"\" \"minted\"))
 
-In addition, it is necessary to install pygments
-\(http://pygments.org), and to configure the variable
-`org-e-latex-pdf-process' so that the -shell-escape option is
+In addition, it is necessary to install
+pygments (http://pygments.org), and to configure the variable
+`org-e-latex-to-pdf-process' so that the -shell-escape option is
 passed to pdflatex."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type '(choice
 	  (const :tag "Use listings" t)
 	  (const :tag "Use minted" 'minted)
@@ -517,11 +449,11 @@ passed to pdflatex."
     (sql "SQL") (sqlite "sql"))
   "Alist mapping languages to their listing language counterpart.
 The key is a symbol, the major mode symbol without the \"-mode\".
-The value is the string that should be inserted as the language
-parameter for the listings package.  If the mode name and the
-listings name are the same, the language does not need an entry
-in this list - but it does not hurt if it is present."
-  :group 'org-export-e-latex
+The value is the string that should be inserted as the language parameter
+for the listings package.  If the mode name and the listings name are
+the same, the language does not need an entry in this list - but it does not
+hurt if it is present."
+  :group 'org-export-latex
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode       ")
@@ -531,11 +463,11 @@ in this list - but it does not hurt if it is present."
   "Association list of options for the latex listings package.
 
 These options are supplied as a comma-separated list to the
-\\lstset command.  Each element of the association list should be
+\\lstset command. Each element of the association list should be
 a list containing two strings: the name of the option, and the
-value.  For example,
+value. For example,
 
-  (setq org-e-latex-listings-options
+  (setq org-export-latex-listings-options
     '((\"basicstyle\" \"\\small\")
       (\"keywordstyle\" \"\\color{black}\\bfseries\\underbar\")))
 
@@ -544,7 +476,7 @@ black keywords.
 
 Note that the same options will be applied to blocks of all
 languages."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type '(repeat
 	  (list
 	   (string :tag "Listings option name ")
@@ -558,17 +490,16 @@ languages."
     (caml "ocaml"))
   "Alist mapping languages to their minted language counterpart.
 The key is a symbol, the major mode symbol without the \"-mode\".
-The value is the string that should be inserted as the language
-parameter for the minted package.  If the mode name and the
-listings name are the same, the language does not need an entry
-in this list - but it does not hurt if it is present.
+The value is the string that should be inserted as the language parameter
+for the minted package.  If the mode name and the listings name are
+the same, the language does not need an entry in this list - but it does not
+hurt if it is present.
 
 Note that minted uses all lower case for language identifiers,
 and that the full list of language identifiers can be obtained
 with:
-
-  pygmentize -L lexers"
-  :group 'org-export-e-latex
+pygmentize -L lexers"
+  :group 'org-export-latex
   :type '(repeat
 	  (list
 	   (symbol :tag "Major mode     ")
@@ -578,12 +509,12 @@ with:
   "Association list of options for the latex minted package.
 
 These options are supplied within square brackets in
-\\begin{minted} environments.  Each element of the alist should
-be a list containing two strings: the name of the option, and the
-value.  For example,
+\\begin{minted} environments. Each element of the alist should be
+a list containing two strings: the name of the option, and the
+value. For example,
 
-  \(setq org-e-latex-minted-options
-    '\((\"bgcolor\" \"bg\") \(\"frame\" \"lines\")))
+  (setq org-export-latex-minted-options
+    '((\"bgcolor\" \"bg\") (\"frame\" \"lines\")))
 
 will result in src blocks being exported with
 
@@ -591,20 +522,19 @@ will result in src blocks being exported with
 
 as the start of the minted environment. Note that the same
 options will be applied to blocks of all languages."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type '(repeat
 	  (list
 	   (string :tag "Minted option name ")
 	   (string :tag "Minted option value"))))
 
 (defvar org-e-latex-custom-lang-environments nil
-  "Alist mapping languages to language-specific LaTeX environments.
+  "Association list mapping languages to language-specific latex
+environments used during export of src blocks by the listings and
+minted latex packages. For example,
 
-It is used during export of src blocks by the listings and minted
-latex packages.  For example,
-
-  \(setq org-e-latex-custom-lang-environments
-     '\(\(python \"pythoncode\"\)\)\)
+  (setq org-export-latex-custom-lang-environments
+     '((python \"pythoncode\")))
 
 would have the effect that if org encounters begin_src python
 during latex export it will output
@@ -630,7 +560,7 @@ The CDR of each item in this alist is a list of three CONS:
 For each item in a CONS, the first string is a regexp
 for allowed characters before/after the quote, the second
 string defines the replacement string for this quote."
-  :group 'org-export-e-latex
+  :group 'org-export-latex
   :type '(list
 	  (cons :tag "Opening quote"
 		(string :tag "Regexp for char before")
@@ -643,100 +573,34 @@ string defines the replacement string for this quote."
 		(string :tag "Replacement quote     "))))
 
 
-;;;; Compilation
-
-(defcustom org-e-latex-pdf-process
-  '("pdflatex -interaction nonstopmode -output-directory %o %f"
-    "pdflatex -interaction nonstopmode -output-directory %o %f"
-    "pdflatex -interaction nonstopmode -output-directory %o %f")
-  "Commands to process a LaTeX file to a PDF file.
-This is a list of strings, each of them will be given to the
-shell as a command.  %f in the command will be replaced by the
-full file name, %b by the file base name \(i.e. without
-extension) and %o by the base directory of the file.
-
-The reason why this is a list is that it usually takes several
-runs of `pdflatex', maybe mixed with a call to `bibtex'.  Org
-does not have a clever mechanism to detect which of these
-commands have to be run to get to a stable result, and it also
-does not do any error checking.
-
-By default, Org uses 3 runs of `pdflatex' to do the processing.
-If you have texi2dvi on your system and if that does not cause
-the infamous egrep/locale bug:
-
-     http://lists.gnu.org/archive/html/bug-texinfo/2010-03/msg00031.html
-
-then `texi2dvi' is the superior choice.  Org does offer it as one
-of the customize options.
-
-Alternatively, this may be a Lisp function that does the
-processing, so you could use this to apply the machinery of
-AUCTeX or the Emacs LaTeX mode.  This function should accept the
-file name as its single argument."
-  :group 'org-export-pdf
-  :type '(choice
-	  (repeat :tag "Shell command sequence"
-		  (string :tag "Shell command"))
-	  (const :tag "2 runs of pdflatex"
-		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
-	  (const :tag "3 runs of pdflatex"
-		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
-	  (const :tag "pdflatex,bibtex,pdflatex,pdflatex"
-		 ("pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "bibtex %b"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"
-		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
-	  (const :tag "texi2dvi"
-		 ("texi2dvi -p -b -c -V %f"))
-	  (const :tag "rubber"
-		 ("rubber -d --into %o %f"))
-	  (function)))
-
-(defcustom org-e-latex-logfiles-extensions
-  '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb")
-  "The list of file extensions to consider as LaTeX logfiles."
-  :group 'org-export-e-latex
-  :type '(repeat (string :tag "Extension")))
-
-(defcustom org-e-latex-remove-logfiles t
-  "Non-nil means remove the logfiles produced by PDF production.
-These are the .aux, .log, .out, and .toc files."
-  :group 'org-export-e-latex
-  :type 'boolean)
-
-
 
 ;;; Internal Functions
 
 (defun org-e-latex--caption/label-string (caption label info)
   "Return caption and label LaTeX string for floats.
 
-CAPTION is a cons cell of secondary strings, the car being the
-standard caption and the cdr its short form.  LABEL is a string
-representing the label.  INFO is a plist holding contextual
-information.
+CAPTION is a secondary string \(a list of strings and Org
+objects\) and LABEL a string representing the label. INFO is
+a plist holding contextual information.
 
 If there's no caption nor label, return the empty string.
 
 For non-floats, see `org-e-latex--wrap-label'."
-  (let ((label-str (if label (format "\\label{%s}" label) "")))
+  (let ((caption-str (and caption
+			  (org-export-secondary-string
+			   caption 'e-latex info)))
+	(label-str (if label (format "\\label{%s}" label) "")))
     (cond
-     ((and (not caption) (not label)) "")
-     ((not caption) (format "\\label{%s}\n" label))
+     ((and (not caption-str) (not label)) "")
+     ((not caption-str) (format "\\label{%s}\n" label))
      ;; Option caption format with short name.
-     ((cdr caption)
+     ((string-match "\\[\\([^][]*\\)\\]{\\([^{}]*\\)}" caption-str)
       (format "\\caption[%s]{%s%s}\n"
-	      (org-export-secondary-string (cdr caption) 'e-latex info)
+	      (org-match-string-no-properties 1 caption-str)
 	      label-str
-	      (org-export-secondary-string (car caption) 'e-latex info)))
+	      (org-match-string-no-properties 2 caption-str)))
      ;; Standard caption format.
-     (t (format "\\caption{%s%s}\n"
-		label-str
-		(org-export-secondary-string (car caption) 'e-latex info))))))
+     (t (format "\\caption{%s%s}\n" label-str caption-str)))))
 
 (defun org-e-latex--guess-inputenc (header)
   "Set the coding system in inputenc to what the buffer is.
@@ -748,7 +612,8 @@ Return the new header."
 		   (latexenc-coding-system-to-inputenc
 		    buffer-file-coding-system))
 		 "utf8")))
-    (if (not cs) header
+    (if (not cs)
+	header
       ;; First translate if that is requested.
       (setq cs (or (cdr (assoc cs org-e-latex-inputenc-alist)) cs))
       ;; Then find the \usepackage statement and replace the option.
@@ -776,9 +641,7 @@ nil."
 	     ","))
 
 (defun org-e-latex--quotation-marks (text info)
-  "Export quotation marks depending on language conventions.
-TEXT is a string containing quotation marks to be replaced.  INFO
-is a plist used as a communication channel."
+  "Export quotation marks depending on language conventions."
   (mapc (lambda(l)
 	  (let ((start 0))
 	    (while (setq start (string-match (car l) text start))
@@ -791,9 +654,9 @@ is a plist used as a communication channel."
 
 (defun org-e-latex--wrap-label (element output)
   "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
-This function shouldn't be used for floats.  See
+This function shouldn't be used for floats. See
 `org-e-latex--caption/label-string'."
-  (let ((label (org-element-property :name element)))
+  (let ((label (org-element-get-property :name element)))
     (if (or (not output) (not label) (string= output "") (string= label ""))
 	output
       (concat (format "\\label{%s}\n" label) output))))
@@ -804,7 +667,7 @@ This function shouldn't be used for floats.  See
 
 (defun org-e-latex-template (contents info)
   "Return complete document string after LaTeX conversion.
-CONTENTS is the transcoded contents string.  INFO is a plist
+CONTENTS is the transcoded contents string. INFO is a plist
 holding export options."
   (let ((title (org-export-secondary-string
 		(plist-get info :title) 'e-latex info)))
@@ -832,11 +695,7 @@ holding export options."
 	    (plist-get info :latex-header-extra))))))
      ;; 3. Define alert if not yet defined.
      "\\providecommand{\\alert}[1]{\\textbf{#1}}\n"
-     ;; 4. Possibly limit depth for headline numbering.
-     (let ((sec-num (plist-get info :section-numbers)))
-       (when (integerp sec-num)
-	 (format "\\setcounter{secnumdepth}{%d}\n" sec-num)))
-     ;; 5. Author.
+     ;; 4. Author.
      (let ((author (and (plist-get info :with-author)
 			(let ((auth (plist-get info :author)))
 			  (and auth (org-export-secondary-string
@@ -848,20 +707,23 @@ holding export options."
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     (author (format "\\author{%s}\n" author))
 	     (t "\\author{}\n")))
-     ;; 6. Date.
+     ;; 5. Date.
      (let ((date (plist-get info :date)))
        (and date (format "\\date{%s}\n" date)))
-     ;; 7. Title
+     ;; 6. Title
      (format "\\title{%s}\n" title)
-     ;; 8. Hyperref options.
+     ;; 7. Hyperref options.
      (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
 	     (or (plist-get info :keywords) "")
 	     (or (plist-get info :description) "")
-	     (if (not (plist-get info :with-creator)) ""
-	       (plist-get info :creator)))
-     ;; 9. Document start.
+	     (let ((creator-info (plist-get info :with-creator)))
+	       (cond
+		((not creator-info) "")
+		((eq creator-info 'comment) "")
+		(t (plist-get info :creator)))))
+     ;; 7. Document start.
      "\\begin{document}\n\n"
-     ;; 10. Title command.
+     ;; 8. Title command.
      (org-element-normalize-string
       (cond ((string= "" title) nil)
 	    ((not (stringp org-e-latex-title-command)) nil)
@@ -869,22 +731,22 @@ holding export options."
 			   org-e-latex-title-command)
 	     (format org-e-latex-title-command title))
 	    (t org-e-latex-title-command)))
-     ;; 11. Table of contents.
+     ;; 9. Table of contents.
      (let ((depth (plist-get info :with-toc)))
        (when depth
 	 (concat (when (wholenump depth)
 		   (format "\\setcounter{tocdepth}{%d}\n" depth))
 		 "\\tableofcontents\n\\vspace*{1cm}\n\n")))
-     ;; 12. Document's body.
+     ;; 10. Document's body.
      contents
-     ;; 13. Creator.
+     ;; 11. Creator.
      (let ((creator-info (plist-get info :with-creator)))
        (cond
-	((not creator-info) "")
+	((not creator-info))
 	((eq creator-info 'comment)
 	 (format "%% %s\n" (plist-get info :creator)))
 	(t (concat (plist-get info :creator) "\n"))))
-     ;; 14. Document end.
+     ;; 12. Document end.
      "\\end{document}")))
 
 
@@ -918,7 +780,7 @@ holding contextual information."
   "Transcode a DRAWER element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let* ((name (org-element-property :drawer-name drawer))
+  (let* ((name (org-element-get-property :drawer-name drawer))
 	 (output (if (functionp org-e-latex-format-drawer-function)
 		     (funcall org-e-latex-format-drawer-function
 			      name contents)
@@ -944,7 +806,7 @@ holding contextual information.  See
   "Transcode EMPHASIS from Org to LaTeX.
 CONTENTS is the contents of the emphasized text.  INFO is a plist
 holding contextual information.."
-  (format (cdr (assoc (org-element-property :marker emphasis)
+  (format (cdr (assoc (org-element-get-property :marker emphasis)
 		      org-e-latex-emphasis-alist))
 	  contents))
 
@@ -955,20 +817,21 @@ holding contextual information.."
   "Transcode an ENTITY object from Org to LaTeX.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
-  (let ((ent (org-element-property :latex entity)))
-    (if (org-element-property :latex-math-p entity) (format "$%s$" ent) ent)))
+  (let ((ent (org-element-get-property :latex entity)))
+    (if (org-element-get-property :latex-math-p entity)
+	(format "$%s$" ent)
+      ent)))
 
 
 ;;;; Example Block
 
 (defun org-e-latex-example-block (example-block contents info)
-  "Transcode an EXAMPLE-BLOCK element from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  (org-e-latex--wrap-label
-   example-block
-   (format "\\begin{verbatim}\n%s\\end{verbatim}"
-	   (org-export-format-code-default example-block info))))
+  "Transcode a EXAMPLE-BLOCK element from Org to LaTeX.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (let* ((options (or (org-element-get-property :options example-block) ""))
+	 (value (org-export-handle-code
+		 (org-element-get-property :value example-block) options info)))
+    (org-e-latex--wrap-label example-block value)))
 
 
 ;;;; Export Snippet
@@ -976,8 +839,7 @@ information."
 (defun org-e-latex-export-snippet (export-snippet contents info)
   "Transcode a EXPORT-SNIPPET object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (eq (org-export-snippet-backend export-snippet) 'e-latex)
-    (org-element-property :value export-snippet)))
+  (org-element-get-property :value export-snippet))
 
 
 ;;;; Export Block
@@ -985,8 +847,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-latex-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (string= (org-element-property :type export-block) "latex")
-    (org-remove-indentation (org-element-property :value export-block))))
+  (when (string= (org-element-get-property :type export-block) "latex")
+    (org-remove-indentation (org-element-get-property :value export-block))))
 
 
 ;;;; Fixed Width
@@ -997,9 +859,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let* ((value (org-element-normalize-string
 		 (replace-regexp-in-string
 		  "^[ \t]*: ?" ""
-		  (org-element-property :value fixed-width)))))
+		  (org-element-get-property :value fixed-width)))))
     (org-e-latex--wrap-label
-     fixed-width (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
+     fixed-width
+     (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
 
 
 ;;;; Footnote Definition
@@ -1011,61 +874,31 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-e-latex-footnote-reference (footnote-reference contents info)
   "Transcode a FOOTNOTE-REFERENCE element from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil. INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
-   (let ((prev (org-export-get-previous-element footnote-reference info)))
-     (when (eq (org-element-type prev) 'footnote-reference)
-       org-e-latex-footnote-separator))
+   (when (eq (plist-get info :previous-object) 'footnote-reference)
+     org-e-latex-footnote-separator)
+   ;; Use \footnotemark if the footnote has already been defined.
+   ;; Otherwise, define it with \footnote command.
    (cond
-    ;; Use \footnotemark if the footnote has already been defined.
     ((not (org-export-footnote-first-reference-p footnote-reference info))
-     (format "\\footnotemark[%s]{}"
+     (format "\\footnotemark[%s]"
 	     (org-export-get-footnote-number footnote-reference info)))
-    ;; Use also \footnotemark if reference is within another footnote
-    ;; reference or footnote definition.
-    ((loop for parent in (org-export-get-genealogy footnote-reference info)
-	   thereis (memq (org-element-type parent)
-			 '(footnote-reference footnote-definition)))
-     (let ((num (org-export-get-footnote-number footnote-reference info)))
-       (format "\\footnotemark[%s]{}\\setcounter{footnote}{%s}" num num)))
-    ;; Otherwise, define it with \footnote command.
+    ;; Inline definitions are secondary strings.
+    ((eq (org-element-get-property :type footnote-reference) 'inline)
+     (format "\\footnote{%s}"
+	     (org-trim
+	      (org-export-secondary-string
+	       (org-export-get-footnote-definition footnote-reference info)
+	       'e-latex info))))
+    ;; Non-inline footnotes definitions are full Org data.
     (t
-     (let ((def (org-export-get-footnote-definition footnote-reference info)))
-       (unless (eq (org-element-type def) 'org-data)
-	 (setq def (cons 'org-data (cons nil def))))
-       (concat
-	(format "\\footnote{%s}" (org-trim (org-export-data def 'e-latex info)))
-	;; Retrieve all footnote references within the footnote and
-	;; add their definition after it, since LaTeX doesn't support
-	;; them inside.
-	(let (all-refs
-	      (search-refs
-	       (function
-		(lambda (data)
-		  ;; Return a list of all footnote references in DATA.
-		  (org-element-map
-		   data 'footnote-reference
-		   (lambda (ref)
-		     (when (org-export-footnote-first-reference-p ref info)
-		       (push ref all-refs)
-		       (when (eq (org-element-property :type ref) 'standard)
-			 (funcall
-			  search-refs
-			  (org-export-get-footnote-definition ref info)))))
-		   info) (reverse all-refs)))))
-	  (mapconcat
-	   (lambda (ref)
-	     (format
-	      "\\footnotetext[%s]{%s}"
-	      (org-export-get-footnote-number ref info)
-	      (org-trim
-	       (funcall
-		(if (eq (org-element-property :type ref) 'inline)
-		    'org-export-secondary-string
-		  'org-export-data)
-		(org-export-get-footnote-definition ref info) 'e-latex info))))
-	   (funcall search-refs def) ""))))))))
+     (format "\\footnote{%s}"
+	     (org-trim
+	      (org-export-data
+	       (org-export-get-footnote-definition footnote-reference info)
+	       'e-latex info)))))))
 
 
 ;;;; Headline
@@ -1075,8 +908,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((class (plist-get info :latex-class))
-	 (level (org-export-get-relative-level headline info))
-	 (numberedp (org-export-numbered-headline-p headline info))
+	 (numberedp (plist-get info :section-numbers))
+	 ;; Get level relative to current parsed data.
+	 (level (+ (org-element-get-property :level headline)
+		   (plist-get info :headline-offset)))
 	 (class-sectionning (assoc class org-e-latex-classes))
 	 ;; Section formatting will set two placeholders: one for the
 	 ;; title and the other for the contents.
@@ -1098,19 +933,21 @@ holding contextual information."
 	      (when numberedp (concat (car sec) "\n%s" (nth 1 sec))))
 	     ;; (num-in num-out no-num-in no-num-out)
 	     ((= (length sec) 4)
-	      (if numberedp (concat (car sec) "\n%s" (nth 1 sec))
+	      (if numberedp
+		  (concat (car sec) "\n%s" (nth 1 sec))
 		(concat (nth 2 sec) "\n%s" (nth 3 sec)))))))
 	 (text (org-export-secondary-string
-		(org-element-property :title headline) 'e-latex info))
-	 (todo
-	  (and (plist-get info :with-todo-keywords)
-	       (let ((todo (org-element-property :todo-keyword headline)))
-		 (and todo (org-export-secondary-string todo 'e-latex info)))))
-	 (todo-type (and todo (org-element-property :todo-type headline)))
+		(org-element-get-property :title headline) 'e-latex info))
+	 (todo (and (plist-get info :with-todo-keywords)
+		    (let ((todo (org-element-get-property
+				 :todo-keyword headline)))
+		      (and todo
+			   (org-export-secondary-string todo 'e-latex info)))))
+	 (todo-type (and todo (org-element-get-property :todo-type headline)))
 	 (tags (and (plist-get info :with-tags)
-		    (org-element-property :tags headline)))
+		    (org-element-get-property :tags headline)))
 	 (priority (and (plist-get info :with-priority)
-			(org-element-property :priority headline)))
+			(org-element-get-property :priority headline)))
 	 ;; Create the headline text.
 	 (full-text (if (functionp org-e-latex-format-headline-function)
 			;; User-defined formatting function.
@@ -1124,20 +961,25 @@ holding contextual information."
 		       text
 		       (when tags (format "\\hfill{}\\textsc{%s}" tags)))))
 	 ;; Associate some \label to the headline for internal links.
-	 (headline-label
-	  (format "\\label{sec-%s}\n"
-		  (mapconcat 'number-to-string
-			     (org-export-get-headline-number headline info)
-			     "-")))
-	 (pre-blanks
-	  (make-string (org-element-property :pre-blank headline) 10)))
+	 (headline-labels (mapconcat
+			   (lambda (p)
+			     (let ((val (org-element-get-property p headline)))
+			       (when val (format "\\label{%s}\n"
+						 (if (eq p :begin)
+						     (format "headline-%s" val)
+						   val)))))
+			   '(:custom-id :id :begin) ""))
+	 (pre-blanks (make-string (org-element-get-property :pre-blank headline)
+				  10)))
     (cond
      ;; Case 1: This is a footnote section: ignore it.
-     ((org-element-property :footnote-section-p headline) nil)
+     ((org-element-get-property :footnote-section-p headline) nil)
      ;; Case 2. This is a deep sub-tree: export it as a list item.
      ;;         Also export as items headlines for which no section
      ;;         format has been found.
-     ((or (not section-fmt) (org-export-low-level-p headline info))
+     ((or (not section-fmt)
+	  (and (wholenump (plist-get info :headline-levels))
+	       (> level (plist-get info :headline-levels))))
       ;; Build the real contents of the sub-tree.
       (let ((low-level-body
 	     (concat
@@ -1145,18 +987,18 @@ holding contextual information."
 	      (when (org-export-first-sibling-p headline info)
 		(format "\\begin{%s}\n" (if numberedp 'enumerate 'itemize)))
 	      ;; Itemize headline
-	      "\\item " full-text "\n" headline-label pre-blanks contents)))
-	;; If headline is not the last sibling simply return
-	;; LOW-LEVEL-BODY.  Otherwise, also close the list, before any
-	;; blank line.
-	(if (not (org-export-last-sibling-p headline info)) low-level-body
-	  (replace-regexp-in-string
-	   "[ \t\n]*\\'"
-	   (format "\n\\\\end{%s}" (if numberedp 'enumerate 'itemize))
-	   low-level-body))))
+	      "\\item " full-text "\n" headline-labels pre-blanks contents)))
+	;; If headline in the last sibling, close the list, before any
+	;; blank line.  Otherwise, simply return LOW-LEVEL-BODY.
+	(if (org-export-last-sibling-p headline info)
+	    (replace-regexp-in-string
+	     "[ \t\n]*\\'"
+	     (format "\n\\\\end{%s}" (if numberedp 'enumerate 'itemize))
+	     low-level-body)
+	  low-level-body)))
      ;; Case 3. Standard headline.  Export it as a section.
      (t (format section-fmt full-text
-		(concat headline-label pre-blanks contents))))))
+		(concat headline-labels pre-blanks contents))))))
 
 
 ;;;; Horizontal Rule
@@ -1165,7 +1007,7 @@ holding contextual information."
   "Transcode an HORIZONTAL-RULE  object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((attr (mapconcat #'identity
-			 (org-element-property :attr_latex horizontal-rule)
+			 (org-element-get-property :attr_latex horizontal-rule)
 			 " ")))
     (org-e-latex--wrap-label horizontal-rule (concat "\\hrule " attr))))
 
@@ -1181,7 +1023,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode an INLINE-SRC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((code (org-element-property :value inline-src-block))
+  (let* ((code (org-element-get-property :value inline-src-block))
 	 (separator (org-e-latex--find-verb-separator code)))
     (cond
      ;; Do not use a special package: transcode it verbatim.
@@ -1189,7 +1031,7 @@ contextual information."
       (concat "\\verb" separator code separator))
      ;; Use minted package.
      ((eq org-e-latex-listings 'minted)
-      (let* ((org-lang (org-element-property :language inline-src-block))
+      (let* ((org-lang (org-element-get-property :language inline-src-block))
 	     (mint-lang (or (cadr (assq (intern org-lang)
 					org-e-latex-minted-langs))
 			    org-lang))
@@ -1202,7 +1044,7 @@ contextual information."
      ;; Use listings package.
      (t
       ;; Maybe translate language's name.
-      (let* ((org-lang (org-element-property :language inline-src-block))
+      (let* ((org-lang (org-element-get-property :language inline-src-block))
 	     (lst-lang (or (cadr (assq (intern org-lang)
 				       org-e-latex-listings-langs))
 			   org-lang))
@@ -1220,17 +1062,17 @@ contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((title (org-export-secondary-string
-	       (org-element-property :title inlinetask) 'e-latex info))
+	       (org-element-get-property :title inlinetask) 'e-latex info))
 	(todo (and (plist-get info :with-todo-keywords)
-		   (let ((todo (org-element-property
+		   (let ((todo (org-element-get-property
 				:todo-keyword inlinetask)))
 		     (and todo
 			  (org-export-secondary-string todo 'e-latex info)))))
-	(todo-type (org-element-property :todo-type inlinetask))
+	(todo-type (org-element-get-property :todo-type inlinetask))
 	(tags (and (plist-get info :with-tags)
-		   (org-element-property :tags inlinetask)))
+		   (org-element-get-property :tags inlinetask)))
 	(priority (and (plist-get info :with-priority)
-		       (org-element-property :priority inlinetask))))
+		       (org-element-get-property :priority inlinetask))))
     ;; If `org-e-latex-format-inlinetask-function' is provided, call it
     ;; with appropriate arguments.
     (if (functionp org-e-latex-format-inlinetask-function)
@@ -1263,20 +1105,18 @@ holding contextual information."
   "Transcode an ITEM element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  ;; Grab `:level' from plain-list properties, which is always the
-  ;; first element above current item.
-  (let* ((level (org-element-property :level (org-export-get-parent item info)))
-	 (counter (let ((count (org-element-property :counter item)))
+  (let* ((level (plist-get (plist-get info :parent-properties) :level))
+	 (counter (let ((count (org-element-get-property :counter item)))
 		    (and count
 			 (< level 4)
 			 (format "\\setcounter{enum%s}{%s}\n"
 				 (nth level '("i" "ii" "iii" "iv"))
 				 (1- count)))))
-	 (checkbox (let ((checkbox (org-element-property :checkbox item)))
+	 (checkbox (let ((checkbox (org-element-get-property :checkbox item)))
 		     (cond ((eq checkbox 'on) "$\\boxtimes$ ")
 			   ((eq checkbox 'off) "$\\Box$ ")
 			   ((eq checkbox 'trans) "$\\boxminus$ "))))
-	 (tag (let ((tag (org-element-property :tag item)))
+	 (tag (let ((tag (org-element-get-property :tag item)))
 		(and tag
 		     (format "[%s]" (org-export-secondary-string
 				     tag 'e-latex info))))))
@@ -1288,13 +1128,13 @@ contextual information."
 (defun org-e-latex-keyword (keyword contents info)
   "Transcode a KEYWORD element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((key (downcase (org-element-property :key keyword)))
-	(value (org-element-property :value keyword)))
+  (let ((key (downcase (org-element-get-property :key keyword)))
+	(value (org-element-get-property :value keyword)))
     (cond
      ((string= key "latex") value)
      ((string= key "index") (format "\\index{%s}" value))
-     ;; Invisible targets.
-     ((string= key "target") nil)
+     ((string= key "target")
+      (format "\\label{%s}" (org-export-solidify-link-text value)))
      ((string= key "toc")
       (let ((value (downcase value)))
 	(cond
@@ -1308,13 +1148,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	     "\\tableofcontents")))
 	 ((string= "tables" value) "\\listoftables")
 	 ((string= "figures" value) "\\listoffigures")
-	 ((string= "listings" value)
-	  (cond
-	   ((eq org-e-latex-listings 'minted) "\\listoflistings")
-	   (org-e-latex-listings "\\lstlistoflistings")
-	   ;; At the moment, src blocks with a caption are wrapped
-	   ;; into a figure environment.
-	   (t "\\listoffigures")))))))))
+	 ((string= "listings" value) "\\listoflistings"))))
+     ((string= key "include")
+      (org-export-included-file keyword 'e-latex info)))))
 
 
 ;;;; Latex Environment
@@ -1322,19 +1158,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-latex-latex-environment (latex-environment contents info)
   "Transcode a LATEX-ENVIRONMENT element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((label (org-element-property :name latex-environment))
-	(value (org-remove-indentation
-		(org-element-property :value latex-environment))))
-    (if (not (org-string-nw-p label)) value
-      ;; Environment is labelled: label must be within the environment
-      ;; (otherwise, a reference pointing to that element will count
-      ;; the section instead).
-      (with-temp-buffer
-	(insert value)
-	(goto-char (point-min))
-	(forward-line)
-	(insert (format "\\label{%s}\n" label))
-	(buffer-string)))))
+  (org-e-latex--wrap-label
+   latex-environment
+   (org-remove-indentation (org-element-get-property :value latex-environment))))
 
 
 ;;;; Latex Fragment
@@ -1342,7 +1168,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-latex-latex-fragment (latex-fragment contents info)
   "Transcode a LATEX-FRAGMENT object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-element-property :value latex-fragment))
+  (org-element-get-property :value latex-fragment))
 
 
 ;;;; Line Break
@@ -1355,23 +1181,18 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Link
 
-(defun org-e-latex-link--inline-image (link info)
-  "Return LaTeX code for an inline image.
-LINK is the link pointing to the inline image.  INFO is a plist
-used as a communication channel."
-  (let* ((parent (org-export-get-parent-paragraph link info))
-	 (path (let ((raw-path (org-element-property :path link)))
-		 (if (not (file-name-absolute-p raw-path)) raw-path
-		   (expand-file-name raw-path))))
+(defun org-e-latex-link--inline-image (path info)
+  "Return LaTeX code for an image at PATH.
+INFO is a plist containing export options."
+  (let* ((parent-props (plist-get info :parent-properties))
 	 (caption (org-e-latex--caption/label-string
-		   (org-element-property :caption parent)
-		   (org-element-property :name parent)
+		   (plist-get parent-props :caption)
+		   (plist-get parent-props :name)
 		   info))
 	 ;; Retrieve latex attributes from the element around.
 	 (attr (let ((raw-attr
 		      (mapconcat #'identity
-				 (org-element-property :attr_latex parent)
-				 " ")))
+				 (plist-get parent-props :attr_latex) " ")))
 		 (unless (string= raw-attr "") raw-attr)))
 	 (disposition
 	  (cond
@@ -1390,26 +1211,27 @@ used as a communication channel."
 	   (t ""))))
     ;; Now clear ATTR from any special keyword and set a default
     ;; value if nothing is left.
-    (setq attr
-	  (if (not attr) ""
-	    (org-trim
-	     (replace-regexp-in-string
-	      "\\(wrap\\|multicolumn\\|float\\|placement=\\S-+\\)" "" attr))))
+    (if (not attr)
+	(setq attr "")
+      (while (string-match "\\(wrap\\|multicolumn\\|float\\|placement=\\S-+\\)"
+			   attr)
+	(replace-match "" nil nil attr))
+      (setq attr (org-trim attr)))
     (setq attr (cond ((not (string= attr "")) attr)
 		     ((eq disposition 'float) "width=0.7\\textwidth")
 		     ((eq disposition 'wrap) "width=0.48\\textwidth")
 		     (t (or org-e-latex-image-default-option ""))))
     ;; Return proper string, depending on DISPOSITION.
     (case disposition
-      (wrap (format "\\begin{wrapfigure}%s
+      ('wrap (format "\\begin{wrapfigure}%s
 \\centering
 \\includegraphics[%s]{%s}
 %s\\end{wrapfigure}" placement attr path caption))
-      (mulicolumn (format "\\begin{figure*}%s
+      ('mulicolumn (format "\\begin{figure*}%s
 \\centering
 \\includegraphics[%s]{%s}
 %s\\end{figure*}" placement attr path caption))
-      (float (format "\\begin{figure}%s
+      ('float (format "\\begin{figure}%s
 \\centering
 \\includegraphics[%s]{%s}
 %s\\end{figure}" placement attr path caption))
@@ -1419,18 +1241,18 @@ used as a communication channel."
   "Transcode a LINK object from Org to LaTeX.
 
 DESC is the description part of the link, or the empty string.
-INFO is a plist holding contextual information.  See
+INFO is a plist holding contextual information. See
 `org-export-data'."
-  (let* ((type (org-element-property :type link))
-	 (raw-path (org-element-property :path link))
+  (let* ((type (org-element-get-property :type link))
+	 (raw-path (org-element-get-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
 	 (imagep (org-export-inline-image-p
-		  link org-e-latex-inline-image-rules))
+		  link org-e-latex-inline-image-extensions))
 	 (path (cond
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
-		((string= type "file")
+		((and (not imagep) (string= type "file"))
 		 (when (string-match "\\(.+\\)::.+" raw-path)
 		   (setq raw-path (match-string 1 raw-path)))
 		 (if (file-name-absolute-p raw-path)
@@ -1442,61 +1264,47 @@ INFO is a plist holding contextual information.  See
 	 protocol)
     (cond
      ;; Image file.
-     (imagep (org-e-latex-link--inline-image link info))
-     ;; Radioed target: Target's name is obtained from original raw
-     ;; link.  Path is parsed and transcoded in order to have a proper
-     ;; display of the contents.
-     ((string= type "radio")
+     (imagep (org-e-latex-link--inline-image path info))
+     ;; Id: for now, assume it's an internal link. TODO: do something
+     ;; to check if it isn't in the current file.
+     ((string= type "id")
+      (format "\\hyperref[%s]{%s}" path (or desc path)))
+     ;; Custom-id, target or radioed target: replace link with the
+     ;; normalized custom-id/target name.
+     ((member type '("custom-id" "target" "radio"))
       (format "\\hyperref[%s]{%s}"
 	      (org-export-solidify-link-text path)
-	      (org-export-secondary-string
-	       (org-element-parse-secondary-string
-		path (cdr (assq 'radio-target org-element-object-restrictions)))
-	       'e-latex info)))
-     ;; Links pointing to an headline: Find destination and build
-     ;; appropriate referencing command.
-     ((member type '("custom-id" "fuzzy" "id"))
-      (let ((destination (if (string= type "fuzzy")
-			     (org-export-resolve-fuzzy-link link info)
-			   (org-export-resolve-id-link link info))))
-	(case (org-element-type destination)
-	  ;; Fuzzy link points nowhere.
-	  ('nil
-	   (format "\\texttt{%s}"
-		   (or desc
-		       (org-export-secondary-string
-			(org-element-property :raw-link link)
-			'e-latex info))))
-	  ;; Fuzzy link points to an invisible target.
-	  (keyword nil)
-	  ;; LINK points to an headline.  If headlines are numbered
-	  ;; and the link has no description, display headline's
-	  ;; number.  Otherwise, display description or headline's
-	  ;; title.
-	  (headline
-	   (let ((label
-		  (format "sec-%s"
-			  (mapconcat
-			   'number-to-string
-			   (org-export-get-headline-number destination info)
-			   "-"))))
-	     (if (and (plist-get info :section-numbers) (not desc))
-		 (format "\\ref{%s}" label)
-	       (format "\\hyperref[%s]{%s}" label
-		       (or desc
-			   (org-export-secondary-string
-			    (org-element-property :title destination)
-			    'e-latex info))))))
-          ;; Fuzzy link points to a target.  Do as above.
-	  (otherwise
-	   (let ((path (org-export-solidify-link-text path)))
-	     (if (not desc) (format "\\ref{%s}" path)
-	       (format "\\hyperref[%s]{%s}" path desc)))))))
+	      (or desc (org-export-secondary-string path 'e-latex info))))
+     ;; Fuzzy: With the help of `org-export-resolve-fuzzy-link', find
+     ;; the destination of the link.
+     ((string= type "fuzzy")
+      (let ((destination (org-export-resolve-fuzzy-link link info)))
+	(cond
+	 ;; Target match.
+	 ((stringp destination)
+	  (format "\\hyperref[%s]{%s}"
+		  (org-export-solidify-link-text destination)
+		  (or desc
+		      (org-export-secondary-string
+		       (org-element-get-property :raw-link link) 'e-latex info))))
+	 ;; Headline match.
+	 ((integerp destination)
+	  (format "\\hyperref[headline-%d]{%s}"
+		  destination
+		  (or desc
+		      (org-export-secondary-string
+		       (org-element-get-property :raw-link link) 'e-latex info))))
+	 ;; No match.
+	 (t (format "\\texttt{%s}"
+		    (or desc
+			(org-export-secondary-string
+			 (org-element-get-property :raw-link link)
+			 'e-latex info)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
       (format (org-export-get-coderef-format path (or desc ""))
-	      (org-export-resolve-coderef path info)))
+	      (cdr (assoc path (plist-get info :code-refs)))))
      ;; Link type is handled by a special function.
      ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
       (funcall protocol (org-link-unescape path) desc 'latex))
@@ -1537,7 +1345,7 @@ the plist used as a communication channel."
   "Transcode a PLAIN-LIST element from Org to LaTeX.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
-  (let* ((type (org-element-property :type plain-list))
+  (let* ((type (org-element-get-property :type plain-list))
 	 (paralist-types '("inparaenum" "asparaenum" "inparaitem" "asparaitem"
 			   "inparadesc" "asparadesc"))
 	 (paralist-regexp (concat
@@ -1545,7 +1353,7 @@ contextual information."
 			   (mapconcat 'identity paralist-types "\\|")
 			   "\\)"))
 	 (attr (mapconcat #'identity
-			  (org-element-property :attr_latex plain-list)
+			  (org-element-get-property :attr_latex plain-list)
 			  " "))
 	 (latex-type (cond
 		      ((and attr
@@ -1634,17 +1442,8 @@ holding contextual information."
   "Transcode a QUOTE-SECTION element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((value (org-remove-indentation
-		(org-element-property :value quote-section))))
+		(org-element-get-property :value quote-section))))
     (when value (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
-
-
-;;;; Section
-
-(defun org-e-latex-section (section contents info)
-  "Transcode a SECTION element from Org to LaTeX.
-CONTENTS holds the contents of the section.  INFO is a plist
-holding contextual information."
-  contents)
 
 
 ;;;; Radio Target
@@ -1655,7 +1454,7 @@ TEXT is the text of the target.  INFO is a plist holding
 contextual information."
   (format "\\label{%s}%s"
 	  (org-export-solidify-link-text
-	   (org-element-property :raw-value radio-target))
+	   (org-element-get-property :raw-value radio-target))
 	  text))
 
 
@@ -1665,7 +1464,7 @@ contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((type (downcase (org-element-property :type special-block))))
+  (let ((type (downcase (org-element-get-property :type special-block))))
     (org-e-latex--wrap-label
      special-block
      (format "\\begin{%s}\n%s\\end{%s}" type contents type))))
@@ -1677,114 +1476,58 @@ holding contextual information."
   "Transcode a SRC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((lang (org-element-property :language src-block))
-	 (caption (org-element-property :caption src-block))
-	 (label (org-element-property :name src-block))
+  (let* ((lang (org-element-get-property :language src-block))
+	 (code (org-export-handle-code
+		(org-element-get-property :value src-block)
+		(org-element-get-property :switches src-block)
+		info lang))
+	 (caption (org-element-get-property :caption src-block))
+	 (label (org-element-get-property :name src-block))
 	 (custom-env (and lang
 			  (cadr (assq (intern lang)
-				      org-e-latex-custom-lang-environments))))
-	 (num-start (case (org-element-property :number-lines src-block)
-		      (continued (org-export-get-loc src-block info))
-		      (new 0)))
-	 (retain-labels (org-element-property :retain-labels src-block)))
+				      org-e-latex-custom-lang-environments)))))
     (cond
-     ;; Case 1.  No source fontification.
+     ;; No source fontification.
      ((not org-e-latex-listings)
-      (let ((caption-str (org-e-latex--caption/label-string caption label info))
+      (let ((caption-str (org-e-latex--caption/label-string
+			  caption label info))
 	    (float-env (when caption "\\begin{figure}[H]\n%s\n\\end{figure}")))
-	(format
-	 (or float-env "%s")
-	 (concat caption-str
-		 (format "\\begin{verbatim}\n%s\\end{verbatim}"
-			 (org-export-format-code-default src-block info))))))
-     ;; Case 2.  Custom environment.
-     (custom-env (format "\\begin{%s}\n%s\\end{%s}\n"
-			 custom-env
-			 (org-export-format-code-default src-block info)
-			 custom-env))
-     ;; Case 3.  Use minted package.
+	(format (or float-env "%s")
+		(concat
+		 caption-str
+		 (format "\\begin{verbatim}\n%s\\end{verbatim}" code)))))
+     ;; Custom environment.
+     (custom-env
+      (format "\\begin{%s}\n%s\\end{%s}\n" custom-env code custom-env))
+     ;; Use minted package.
      ((eq org-e-latex-listings 'minted)
-      (let ((float-env (when (or label caption)
-			 (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
-				 (org-e-latex--caption/label-string
-				  caption label info))))
-	    (body
-	     (format
-	      "\\begin{minted}[%s]{%s}\n%s\\end{minted}"
-	      ;; Options.
-	      (org-e-latex--make-option-string
-	       (if (not num-start) org-e-latex-minted-options
-		 (append `(("linenos")
-			   ("firstnumber" ,(number-to-string (1+ num-start))))
-			 org-e-latex-minted-options)))
-	      ;; Language.
-	      (or (cadr (assq (intern lang) org-e-latex-minted-langs)) lang)
-	      ;; Source code.
-	      (let* ((code-info (org-export-unravel-code src-block))
-		     (max-width
-		      (apply 'max
-			     (mapcar 'length
-				     (org-split-string (car code-info) "\n")))))
-		(org-export-format-code
-		 (car code-info)
-		 (lambda (loc num ref)
-		   (concat
-		    loc
-		    (when ref
-		      ;; Ensure references are flushed to the right,
-		      ;; separated with 6 spaces from the widest line
-		      ;; of code.
-		      (concat (make-string (+ (- max-width (length loc)) 6) ? )
-			      (format "(%s)" ref)))))
-		 nil (and retain-labels (cdr code-info)))))))
-	;; Return value.
+      (let* ((mint-lang (or (cadr (assq (intern lang) org-e-latex-minted-langs))
+			    lang))
+	     (float-env (when (or label caption)
+			  (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
+				  (org-e-latex--caption/label-string
+				   caption label info))))
+	     (body (format "\\begin{minted}[%s]{%s}\n%s\\end{minted}"
+			   (org-e-latex--make-option-string
+			    org-e-latex-minted-options)
+			   mint-lang code)))
 	(if float-env (format float-env body) body)))
-     ;; Case 4.  Use listings package.
+     ;; Use listings package.
      (t
-      (let ((lst-lang
-	     (or (cadr (assq (intern lang) org-e-latex-listings-langs)) lang))
-	    (caption-str
-	     (when caption
-	       (let ((main (org-export-secondary-string
-			    (car caption) 'e-latex info)))
-		 (if (not (cdr caption)) (format "{%s}" main)
-		   (format
-		    "{[%s]%s}"
-		    (org-export-secondary-string (cdr caption) 'e-latex info)
-		    main))))))
-	(concat
-	 ;; Options.
-	 (format "\\lstset{%s}\n"
-		 (org-e-latex--make-option-string
-		  (append org-e-latex-listings-options
-			  `(("language" ,lst-lang))
-			  (when label `(("label" ,label)))
-			  (when caption-str `(("caption" ,caption-str)))
-			  (cond ((not num-start) '(("numbers" "none")))
-				((zerop num-start) '(("numbers" "left")))
-				(t `(("numbers" "left")
-				     ("firstnumber"
-				      ,(number-to-string (1+ num-start)))))))))
-	 ;; Source code.
-	 (format
-	  "\\begin{lstlisting}\n%s\\end{lstlisting}"
-	  (let* ((code-info (org-export-unravel-code src-block))
-		 (max-width
-		  (apply 'max
-			 (mapcar 'length
-				 (org-split-string (car code-info) "\n")))))
-	    (org-export-format-code
-	     (car code-info)
-	     (lambda (loc num ref)
-	       (concat
-		loc
-		(when ref
-		  ;; Ensure references are flushed to the right,
-		  ;; separated with 6 spaces from the widest line of
-		  ;; code
-		  (concat (make-string (+ (- max-width (length loc)) 6) ? )
-			  (format "(%s)" ref)))))
-	     nil (and retain-labels (cdr code-info)))))))))))
+      (let ((lst-lang (or (cadr (assq (intern lang) org-e-latex-listings-langs))
+			  lang))
+	    (caption-str (and caption
+			      (org-export-secondary-string
+			       (org-element-get-property :caption src-block)
+			       'e-latex info))))
+	(concat (format "\\lstset{%s}\n"
+			(org-e-latex--make-option-string
+			 (append org-e-latex-listings-options
+				 `(("language" ,lst-lang))
+				 (when label `(("label" ,label)))
+				 (when caption-str
+				   `(("caption" ,caption-str))))))
+		(format "\\begin{lstlisting}\n%s\\end{lstlisting}" code)))))))
 
 
 ;;;; Statistics Cookie
@@ -1792,7 +1535,7 @@ contextual information."
 (defun org-e-latex-statistics-cookie (statistics-cookie contents info)
   "Transcode a STATISTICS-COOKIE object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-element-property :value statistics-cookie))
+  (org-element-get-property :value statistics-cookie))
 
 
 ;;;; Subscript
@@ -1815,29 +1558,27 @@ contextual information."
 
 ;;;; Table
 
-(defun org-e-latex-table--format-string (table table-info info)
+(defun org-e-latex-table--format-string (table info)
   "Return an appropriate format string for TABLE.
 
-TABLE-INFO is the plist containing format info about the table,
-as returned by `org-export-table-format-info'.  INFO is a plist
-used as a communication channel.
+INFO is the plist containing format info about the table, as
+returned by `org-export-table-format-info'.
 
-The format string leaves one placeholder for the body of the
-table."
-  (let* ((label (org-element-property :name table))
+The format string one placeholder for the body of the table."
+  (let* ((label (org-element-get-property :name table))
 	 (caption (org-e-latex--caption/label-string
-		   (org-element-property :caption table) label info))
-	 (attr (mapconcat 'identity
-			  (org-element-property :attr_latex table)
+		   (org-element-get-property :caption table) label info))
+	 (attr (mapconcat #'identity
+			  (org-element-get-property :attr_latex table)
 			  " "))
 	 ;; Determine alignment string.
-	 (alignment (org-e-latex-table--align-string attr table-info))
+	 (alignment (org-e-latex-table--align-string attr info))
 	 ;; Determine environment for the table: longtable, tabular...
 	 (table-env (cond
 		     ((not attr) org-e-latex-default-table-environment)
 		     ((string-match "\\<longtable\\>" attr) "longtable")
-		     ((string-match "\\<tabular.?\\>" attr)
-		      (org-match-string-no-properties 0 attr))
+		     ((string-match "\\(tabular.\\)" attr)
+		      (org-match-string-no-properties 1 attr))
 		     (t org-e-latex-default-table-environment)))
 	 ;; If table is a float, determine environment: table or table*.
 	 (float-env (cond
@@ -1848,23 +1589,29 @@ table."
 		      "table*")
 		     ((or (not (string= caption "")) label) "table")))
 	 ;; Extract others display options.
-	 (width (and attr (string-match "\\<width=\\(\\S-+\\)" attr)
+	 (width (and attr
+		     (string-match "\\<width=\\(\\S-+\\)" attr)
 		     (org-match-string-no-properties 1 attr)))
-	 (placement
-	  (if (and attr (string-match "\\<placement=\\(\\S-+\\)" attr))
-	      (org-match-string-no-properties 1 attr)
-	    (format "[%s]" org-e-latex-default-figure-position))))
+	 (placement (if (and attr
+			     (string-match "\\<placement=\\(\\S-+\\)" attr))
+			(org-match-string-no-properties 1 attr)
+		      (concat "["
+			      org-e-latex-default-figure-position
+			      "]"))))
     ;; Prepare the final format string for the table.
     (cond
      ;; Longtable.
      ((string= "longtable" table-env)
-      (format
-       "\\begin{longtable}{%s}\n%s\n%%s\n%s\\end{longtable}"
-       alignment
-       (if (or (not org-e-latex-table-caption-above) (string= "" caption)) ""
-	 (concat (org-trim caption) "\\\\"))
-       (if (or org-e-latex-table-caption-above (string= "" caption)) ""
-	 (concat (org-trim caption) "\\\\\n"))))
+      (format "\\begin{longtable}{%s}\n%s\n%%s\n%s\\end{longtable}"
+	      alignment
+	      (if (or (not org-e-latex-table-caption-above)
+		      (string= "" caption))
+		  ""
+		(concat (org-trim caption) "\\\\"))
+	      (if (or org-e-latex-table-caption-above
+		      (string= "" caption))
+		  ""
+		(concat (org-trim caption) "\\\\\n"))))
      ;; Others.
      (t (concat (when float-env
 		  (concat
@@ -1873,26 +1620,28 @@ table."
 		(when org-e-latex-tables-centered "\\begin{center}\n")
 		(format "\\begin{%s}%s{%s}\n%%s\n\\end{%s}"
 			table-env
-			(if width (format "{%s}" width) "") alignment table-env)
+			(if width (format "{%s}" width) "")
+			alignment
+			table-env)
 		(when org-e-latex-tables-centered "\n\\end{center}")
 		(when float-env
 		  (concat (if org-e-latex-table-caption-above "" caption)
 			  (format "\n\\end{%s}" float-env))))))))
 
-(defun org-e-latex-table--align-string (attr table-info)
+(defun org-e-latex-table--align-string (attr info)
   "Return an appropriate LaTeX alignment string.
-ATTR is a string containing table's LaTeX specific attributes.
-TABLE-INFO is the plist containing format info about the table,
-as returned by `org-export-table-format-info'."
+
+INFO is the plist containing format info about the table, as
+returned by `org-export-table-format-info'."
   (or (and attr
 	   (string-match "\\<align=\\(\\S-+\\)" attr)
 	   (match-string 1 attr))
-      (let* ((align (copy-sequence (plist-get table-info :alignment)))
-	     (colgroups (copy-sequence (plist-get table-info :column-groups)))
+      (let* ((align (copy-sequence (plist-get info :alignment)))
+	     (colgroups (copy-sequence (plist-get info :column-groups)))
 	     (cols (length align))
 	     (separators (make-vector (1+ cols) "")))
 	;; Ignore the first column if it's special.
-	(when (plist-get table-info :special-column-p)
+	(when (plist-get info :special-column-p)
 	  (aset align 0 "") (aset colgroups 0 nil))
 	(let ((col 0))
 	  (mapc (lambda (el)
@@ -1913,9 +1662,9 @@ as returned by `org-export-table-format-info'."
   "Transcode a TABLE element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((attr (mapconcat #'identity
-			 (org-element-property :attr_latex table)
+			 (org-element-get-property :attr_latex table)
 			 " "))
-	(raw-table (org-element-property :raw-table table)))
+	(raw-table (org-element-get-property :raw-table table)))
     (cond
      ;; Case 1: verbatim table.
      ((or org-e-latex-tables-verbatim
@@ -1926,11 +1675,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	       (plist-get (org-export-table-format-info raw-table)
 			  :special-column-p))))
      ;; Case 2: table.el table.  Convert it using appropriate tools.
-     ((eq (org-element-property :type table) 'table.el)
+     ((eq (org-element-get-property :type table) 'table.el)
       (require 'table)
       ;; Ensure "*org-export-table*" buffer is empty.
-      (with-current-buffer (get-buffer-create "*org-export-table*")
-	(erase-buffer))
+      (and (get-buffer "*org-export-table*")
+	   (kill-buffer (get-buffer "*org-export-table*")))
       (let ((output (with-temp-buffer
 		      (insert raw-table)
 		      (goto-char 1)
@@ -1949,92 +1698,70 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    (while (and (< (length output) pos)
 			(setq pos (string-match "^\\\\hline\n?" output pos)))
 	      (incf n)
-	      (unless (= n 2)
-		(setq output (replace-match "" nil nil output))))))
-	(if (not org-e-latex-tables-centered) output
-	  (format "\\begin{center}\n%s\n\\end{center}" output))))
+	      (unless (= n 2) (setq output (replace-match "" nil nil output))))))
+	(if org-e-latex-tables-centered
+	    (format "\\begin{center}\n%s\n\\end{center}" output)
+	  output)))
      ;; Case 3: Standard table.
      (t
       (let* ((table-info (org-export-table-format-info raw-table))
-	     (columns-number (length (plist-get table-info :alignment)))
-	     (longtablep (and attr (string-match "\\<longtable\\>" attr)))
-	     (booktabsp
-	      (or (and attr (string-match "\\<booktabs=\\(yes\\|t\\)\\>" attr))
-		  org-e-latex-tables-booktabs))
-	     ;; CLEAN-TABLE is a table turned into a list, much like
-	     ;; `org-table-to-lisp', with special column and
-	     ;; formatting cookies removed, and cells already
-	     ;; transcoded.
-	     (clean-table
-	      (mapcar
-	       (lambda (row)
-		 (if (string-match org-table-hline-regexp row) 'hline
-		   (mapcar
-		    (lambda (cell)
-		      (org-export-secondary-string
-		       (org-element-parse-secondary-string
-			cell
-			(cdr (assq 'table org-element-string-restrictions)))
-		       'e-latex info))
-		    (org-split-string row "[ \t]*|[ \t]*"))))
-	       (org-split-string
-		(org-export-clean-table
-		 raw-table (plist-get table-info :special-column-p))
-		"\n"))))
-	;; If BOOKTABSP is non-nil, remove any rule at the beginning
-	;; and the end of the table, since booktabs' special rules
-	;; will be inserted instead.
-	(when booktabsp
-	  (when (eq (car clean-table) 'hline)
-	    (setq clean-table (cdr clean-table)))
-	  (when (eq (car (last clean-table)) 'hline)
-	    (setq clean-table (butlast clean-table))))
+	     (clean-table (org-export-clean-table
+			   raw-table (plist-get table-info :special-column-p)))
+	     (columns-number (length (plist-get table-info :alignment))))
 	;; Convert ROWS to send them to `orgtbl-to-latex'.  In
 	;; particular, send each cell to
 	;; `org-element-parse-secondary-string' to expand any Org
-	;; object within.  Eventually, flesh the format string out
-	;; with the table.
-	(format
-	 (org-e-latex-table--format-string table table-info info)
-	 (orgtbl-to-latex
-	  clean-table
-	  ;; Parameters passed to `orgtbl-to-latex'.
-	  `(:tstart ,(and booktabsp "\\toprule")
-		    :tend ,(and booktabsp "\\bottomrule")
-		    :hline ,(if booktabsp "\\midrule" "\\hline")
-		    ;; Longtable environment requires specific header
-		    ;; lines end string.
-		    :hlend ,(and longtablep
-				 (format "\\\\
-%s
+	;; object within.  Eventually, flesh the format string out with
+	;; the table.
+	(format (org-e-latex-table--format-string table table-info)
+		(orgtbl-to-latex
+		 (mapcar
+		  (lambda (row)
+		    (if (string-match org-table-hline-regexp row)
+			'hline
+		      (mapcar
+		       (lambda (cell)
+			 (org-export-secondary-string
+			  (org-element-parse-secondary-string
+			   cell
+			   (cdr (assq 'table org-element-string-restrictions)))
+			  'e-latex info))
+		       (org-split-string row "[ \t]*|[ \t]*"))))
+		  (org-split-string clean-table "\n"))
+		 `(:tstart nil :tend nil
+			   ;; Longtable environment requires specific
+			   ;; header line end.
+			   :hlend ,(and attr
+					(string-match "\\<longtable\\>" attr)
+					(format "\\\\
+\\hline
 \\endhead
-%s\\multicolumn{%d}{r}{Continued on next page}\\\\
+\\hline\\multicolumn{%d}{r}{Continued on next page}\\\\
 \\endfoot
 \\endlastfoot"
-					 (if booktabsp "\\midrule" "\\hline")
-					 (if booktabsp "\\midrule" "\\hline")
-					 columns-number))))))))))
+						columns-number))))))))))
 
 
 ;;;; Target
 
-(defun org-e-latex-target (target contents info)
+(defun org-e-latex-target (target text info)
   "Transcode a TARGET object from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  (format "\\label{%s}"
-	  (org-export-solidify-link-text (org-element-property :value target))))
+TEXT is the text of the target.  INFO is a plist holding
+contextual information."
+  (format "\\label{%s}%s"
+	  (org-export-solidify-link-text
+	   (org-element-get-property :raw-value target))
+	  text))
 
 
 ;;;; Time-stamp
 
 (defun org-e-latex-time-stamp (time-stamp contents info)
   "Transcode a TIME-STAMP object from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  (let ((value (org-element-property :value time-stamp))
-	(type (org-element-property :type time-stamp))
-	(appt-type (org-element-property :appt-type time-stamp)))
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (let ((value (org-element-get-property :value time-stamp))
+	(type (org-element-get-property :type time-stamp))
+	(appt-type (org-element-get-property :appt-type time-stamp)))
     (concat (cond ((eq appt-type 'scheduled)
 		   (format "\\textbf{\\textsc{%s}} " org-scheduled-string))
 		  ((eq appt-type 'deadline)
@@ -2051,13 +1778,11 @@ information."
 
 ;;;; Verbatim
 
-(defun org-e-latex-verbatim (verbatim contents info)
-  "Transcode a VERBATIM object from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist used as a communication
-channel."
-  (let ((fmt (cdr (assoc (org-element-property :marker verbatim)
+(defun org-e-latex-verbatim (element contents info)
+  "Return verbatim text in LaTeX."
+  (let ((fmt (cdr (assoc (org-element-get-property :marker element)
 			 org-e-latex-emphasis-alist)))
-	(value (org-element-property :value verbatim)))
+	(value (org-element-get-property :value element)))
     (cond
      ;; Handle the `verb' special case.
      ((eq 'verb fmt)
@@ -2091,7 +1816,7 @@ channel."
 
 (defun org-e-latex-verse-block (verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil. INFO is a plist holding contextual information."
   (org-e-latex--wrap-label
    verse-block
    ;; In a verse environment, add a line break to each newline
@@ -2105,169 +1830,13 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		      "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n"
 		      (org-remove-indentation
 		       (org-export-secondary-string
-			(org-element-property :value verse-block)
+			(org-element-get-property :value verse-block)
 			'e-latex info)))))
      (while (string-match "^[ \t]+" contents)
        (let ((new-str (format "\\hspace*{%dem}"
 			      (length (match-string 0 contents)))))
 	 (setq contents (replace-match new-str nil t contents))))
      (format "\\begin{verse}\n%s\\end{verse}" contents))))
-
-
-
-;;; Interactive functions
-
-(defun org-e-latex-export-to-latex
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
-  "Export current buffer to a LaTeX file.
-
-If narrowing is active in the current buffer, only export its
-narrowed part.
-
-If a region is active, export that region.
-
-When optional argument SUBTREEP is non-nil, export the sub-tree
-at point, extracting information from the headline properties
-first.
-
-When optional argument VISIBLE-ONLY is non-nil, don't export
-contents of hidden elements.
-
-When optional argument BODY-ONLY is non-nil, only write code
-between \"\\begin{document}\" and \"\\end{document}\".
-
-EXT-PLIST, when provided, is a property list with external
-parameters overriding Org default settings, but still inferior to
-file-local settings.
-
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
-Return output file's name."
-  (interactive)
-  (let ((outfile (org-export-output-file-name ".tex" subtreep pub-dir)))
-    (org-export-to-file
-     'e-latex outfile subtreep visible-only body-only ext-plist)))
-
-(defun org-e-latex-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
-  "Export current buffer to LaTeX then process through to PDF.
-
-If narrowing is active in the current buffer, only export its
-narrowed part.
-
-If a region is active, export that region.
-
-When optional argument SUBTREEP is non-nil, export the sub-tree
-at point, extracting information from the headline properties
-first.
-
-When optional argument VISIBLE-ONLY is non-nil, don't export
-contents of hidden elements.
-
-When optional argument BODY-ONLY is non-nil, only write code
-between \"\\begin{document}\" and \"\\end{document}\".
-
-EXT-PLIST, when provided, is a property list with external
-parameters overriding Org default settings, but still inferior to
-file-local settings.
-
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
-Return PDF file's name."
-  (interactive)
-  (org-e-latex-compile
-   (org-e-latex-export-to-latex
-    subtreep visible-only body-only ext-plist pub-dir)))
-
-(defun org-e-latex-compile (texfile)
-  "Compile a TeX file.
-
-TEXFILE is the name of the file being compiled.  Processing is
-done through the command specified in `org-e-latex-pdf-process'.
-
-Return PDF file name or an error if it couldn't be produced."
-  (let* ((wconfig (current-window-configuration))
-	 (texfile (file-truename texfile))
-	 (base (file-name-sans-extension texfile))
-	 errors)
-    (message (format "Processing LaTeX file %s ..." texfile))
-    (unwind-protect
-	(progn
-	  (cond
-	   ;; A function is provided: Apply it.
-	   ((functionp org-e-latex-pdf-process)
-	    (funcall org-e-latex-pdf-process (shell-quote-argument texfile)))
-	   ;; A list is provided: Replace %b, %f and %o with appropriate
-	   ;; values in each command before applying it.  Output is
-	   ;; redirected to "*Org PDF LaTeX Output*" buffer.
-	   ((consp org-e-latex-pdf-process)
-	    (let* ((out-dir (or (file-name-directory texfile) "./"))
-		   (outbuf (get-buffer-create "*Org PDF LaTeX Output*")))
-	      (mapc
-	       (lambda (command)
-		 (shell-command
-		  (replace-regexp-in-string
-		   "%b" (shell-quote-argument base)
-		   (replace-regexp-in-string
-		    "%f" (shell-quote-argument texfile)
-		    (replace-regexp-in-string
-		     "%o" (shell-quote-argument out-dir) command t t) t t) t t)
-		  outbuf))
-	       org-e-latex-pdf-process)
-	      ;; Collect standard errors from output buffer.
-	      (setq errors (org-e-latex-collect-errors outbuf))))
-	   (t (error "No valid command to process to PDF")))
-	  (let ((pdffile (concat base ".pdf")))
-	    ;; Check for process failure.  Provide collected errors if
-	    ;; possible.
-	    (if (not (file-exists-p pdffile))
-		(error (concat (format "PDF file %s wasn't produced" pdffile)
-			       (when errors (concat ": " errors))))
-	      ;; Else remove log files, when specified, and signal end of
-	      ;; process to user, along with any error encountered.
-	      (when org-e-latex-remove-logfiles
-		(dolist (ext org-e-latex-logfiles-extensions)
-		  (let ((file (concat base "." ext)))
-		    (when (file-exists-p file) (delete-file file)))))
-	      (message (concat "Process completed"
-			       (if (not errors) "."
-				 (concat " with errors: " errors)))))
-	    ;; Return output file name.
-	    pdffile))
-      (set-window-configuration wconfig))))
-
-(defun org-e-latex-collect-errors (buffer)
-  "Collect some kind of errors from \"pdflatex\" command output.
-
-BUFFER is the buffer containing output.
-
-Return collected error types as a string, or nil if there was
-none."
-  (with-current-buffer buffer
-    (save-excursion
-      (goto-char (point-max))
-      ;; Find final "pdflatex" run.
-      (when (re-search-backward "^[ \t]*This is pdf.*?TeX.*?Version" nil t)
-	(let ((case-fold-search t)
-	      (errors ""))
-	  (when (save-excursion
-		  (re-search-forward "Reference.*?undefined" nil t))
-	    (setq errors (concat errors " [undefined reference]")))
-	  (when (save-excursion
-		  (re-search-forward "Citation.*?undefined" nil t))
-	    (setq errors (concat errors " [undefined citation]")))
-	  (when (save-excursion
-		  (re-search-forward "Undefined control sequence" nil t))
-	    (setq errors (concat errors " [undefined control sequence]")))
-	  (when (save-excursion
-		  (re-search-forward "^! LaTeX.*?Error" nil t))
-	    (setq errors (concat errors " [LaTeX error]")))
-	  (when (save-excursion
-		  (re-search-forward "^! Package.*?Error" nil t))
-	    (setq errors (concat errors " [package error]")))
-	  (and (org-string-nw-p errors) (org-trim errors)))))))
 
 
 (provide 'org-e-latex)

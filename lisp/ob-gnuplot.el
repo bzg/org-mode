@@ -1,6 +1,6 @@
 ;;; ob-gnuplot.el --- org-babel functions for gnuplot evaluation
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2011  Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
@@ -34,7 +34,7 @@
 ;;; Requirements:
 
 ;; - gnuplot :: http://www.gnuplot.info/
-;;
+;; 
 ;; - gnuplot-mode :: http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html
 
 ;;; Code:

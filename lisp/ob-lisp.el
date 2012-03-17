@@ -1,6 +1,6 @@
 ;;; ob-lisp.el --- org-babel functions for common lisp evaluation
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2011  Free Software Foundation, Inc.
 
 ;; Author: Joel Boehland
 ;;	Eric Schulte
@@ -49,7 +49,6 @@
 For example a value of \"(progn ;; %s\\n   %%s)\" would ignore the
 current directory string."
   :group 'org-babel
-  :version "24.1"
   :type 'string)
 
 (defun org-babel-expand-body:lisp (body params)

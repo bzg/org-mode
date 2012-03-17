@@ -1,5 +1,5 @@
 ;;; org-bookmark.el - Support for links to bookmark
-;; Copyright (C) 2008-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: Tokuya Kameshima <kames AT fa2.so-net.ne.jp>
 ;; Version: 1.0
@@ -67,7 +67,7 @@ Otherwise prompt the user for the right bookmark to use."
     (if (not file)
 	(when (eq major-mode 'bookmark-bmenu-mode)
 	  (setq bookmark (bookmark-bmenu-bookmark)))
-      (when (and (setq bmks
+      (when (and (setq bmks 
 		       (mapcar (lambda (name)
 				 (if (equal file
 					    (abbreviate-file-name
@@ -75,7 +75,7 @@ Otherwise prompt the user for the right bookmark to use."
 				     name))
 			       (bookmark-all-names)))
 		 (setq bmks (delete nil bmks)))
-	(setq bookmark
+	(setq bookmark 
 	      (if (or (eq 1 (length bmks)) org-bookmark-use-first-bookmark)
 		  (car bmks)
 		(completing-read "Bookmark: " bmks nil t nil nil (car bmks))))))

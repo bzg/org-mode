@@ -1,6 +1,6 @@
 ;;; org-src.el --- Source code examples in Org
 ;;
-;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;;	   Bastien Guerry <bzg AT gnu DOT org>
@@ -41,7 +41,6 @@
 (declare-function org-at-table.el-p "org" ())
 (declare-function org-get-indentation "org" (&optional line))
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
-(declare-function org-strip-protective-commas "org" (beg end))
 (declare-function org-pop-to-buffer-same-window
 		  "org-compat" (&optional buffer-or-name norecord label))
 
@@ -173,7 +172,6 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 
 (defvar org-src-mode-map (make-sparse-keymap))
 (define-key org-src-mode-map "\C-c'" 'org-edit-src-exit)
-(define-key org-src-mode-map "\C-x\C-s" 'org-edit-src-save)
 
 (defvar org-edit-src-force-single-line nil)
 (defvar org-edit-src-from-org-mode nil)
@@ -328,7 +326,6 @@ buffer."
 	 (if org-src-preserve-indentation col (max 0 (- col total-nindent))))
 	(org-src-mode)
 	(set-buffer-modified-p nil)
-	(setq buffer-file-name nil)
 	(and org-edit-src-persistent-message
 	     (org-set-local 'header-line-format msg))
 	(let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
@@ -674,33 +671,21 @@ the language, a switch telling if the content should be in a single line."
       (set-window-configuration org-edit-src-saved-temp-window-config)
       (setq org-edit-src-saved-temp-window-config nil))))
 
-(defmacro org-src-in-org-buffer (&rest body)
-  `(let ((p (point)) (m (mark)) (ul buffer-undo-list) msg)
-     (save-window-excursion
-       (org-edit-src-exit 'save)
-       ,@body
-       (setq msg (current-message))
-       (if (eq org-src-window-setup 'other-frame)
-	   (let ((org-src-window-setup 'current-window))
-	     (org-edit-src-code 'save))
-	 (org-edit-src-code 'save)))
-     (setq buffer-undo-list ul)
-     (push-mark m 'nomessage)
-     (goto-char (min p (point-max)))
-     (message (or msg ""))))
-(def-edebug-spec org-src-in-org-buffer (body))
-
 (defun org-edit-src-save ()
   "Save parent buffer with current state source-code buffer."
   (interactive)
-  (org-src-in-org-buffer (save-buffer)))
-
-(declare-function org-babel-tangle "ob-tangle" (&optional only-this-block target-file lang))
-
-(defun org-src-tangle (arg)
-  "Tangle the parent buffer."
-  (interactive)
-  (org-src-in-org-buffer (org-babel-tangle arg)))
+  (let ((p (point)) (m (mark)) msg)
+    (save-window-excursion
+      (org-edit-src-exit 'save)
+      (save-buffer)
+      (setq msg (current-message))
+      (if (eq org-src-window-setup 'other-frame)
+	  (let ((org-src-window-setup 'current-window))
+	    (org-edit-src-code 'save))
+	(org-edit-src-code 'save)))
+    (push-mark m 'nomessage)
+    (goto-char (min p (point-max)))
+    (message (or msg ""))))
 
 (defun org-src-mode-configure-edit-buffer ()
   (when (org-bound-and-true-p org-edit-src-from-org-mode)
@@ -774,7 +759,6 @@ Org-babel commands."
   "If non-nil, the effect of TAB in a code block is as if it were
 issued in the language major mode buffer."
   :type 'boolean
-  :version "24.1"
   :group 'org-babel)
 
 (defun org-src-native-tab-command-maybe ()

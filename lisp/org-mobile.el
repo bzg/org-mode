@@ -1,5 +1,5 @@
 ;;; org-mobile.el --- Code for asymmetric sync with a mobile device
-;; Copyright (C) 2009-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -37,7 +37,7 @@
 
 (eval-when-compile (require 'cl))
 
-(declare-function org-pop-to-buffer-same-window
+(declare-function org-pop-to-buffer-same-window 
 		  "org-compat" (&optional buffer-or-name norecord label))
 
 (defgroup org-mobile nil
@@ -68,7 +68,6 @@ org-agenda-text-search-extra-files
 (defcustom org-mobile-files-exclude-regexp ""
   "A regexp to exclude files from `org-mobile-files'."
   :group 'org-mobile
-  :version "24.1"
   :type 'regexp)
 
 (defcustom org-mobile-directory ""
@@ -85,7 +84,6 @@ Turning on encryption requires to set the same password in the MobileOrg
 application.  Before turning this on, check of MobileOrg does already
 support it - at the time of this writing it did not yet."
   :group 'org-mobile
-  :version "24.1"
   :type 'boolean)
 
 (defcustom org-mobile-encryption-tempfile "~/orgtmpcrypt"
@@ -93,7 +91,6 @@ support it - at the time of this writing it did not yet."
 This must be local file on your local machine (not on the WebDAV server).
 You might want to put this file into a directory where only you have access."
   :group 'org-mobile
-  :version "24.1"
   :type 'directory)
 
 (defcustom org-mobile-encryption-password ""
@@ -114,7 +111,6 @@ it, this also limits the security of this approach.  You can also leave
 this variable empty - Org will then ask for the password once per Emacs
 session."
   :group 'org-mobile
-  :version "24.1"
   :type '(string :tag "Password"))
 
 (defvar org-mobile-encryption-password-session nil)
@@ -154,7 +150,6 @@ custom   all custom agendas defined by the user
 all      the custom agendas and the default ones
 list     a list of selection key(s) as string."
   :group 'org-mobile
-  :version "24.1"
   :type '(choice
 	  (const :tag "Default Agendas" default)
 	  (const :tag "Custom Agendas" custom)
@@ -277,7 +272,7 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 		     (t nil)))
 		  org-mobile-files)))
 	 (files (delete
-		 nil
+		 nil 
 		 (mapcar (lambda (f)
 			   (unless (and (not (string= org-mobile-files-exclude-regexp ""))
 					(string-match org-mobile-files-exclude-regexp f))
@@ -300,8 +295,6 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 	(push (cons file link-name) rtn)))
     (nreverse rtn)))
 
-(defvar org-agenda-filter)
-
 ;;;###autoload
 (defun org-mobile-push ()
   "Push the current state of Org affairs to the WebDAV directory.
@@ -310,7 +303,7 @@ create all custom agenda views, for upload to the mobile phone."
   (interactive)
   (let ((a-buffer (get-buffer org-agenda-buffer-name)))
     (let ((org-agenda-buffer-name "*SUMO*")
-	  (org-agenda-tag-filter org-agenda-tag-filter)
+	  (org-agenda-filter org-agenda-filter)
 	  (org-agenda-redo-command org-agenda-redo-command))
       (save-excursion
 	(save-window-excursion
@@ -506,7 +499,7 @@ agenda view showing the flagged items."
 				 org-mobile-directory))
     (save-excursion
       (setq buf (find-file file))
-      (when (and (= (point-min) (point-max)))
+      (when (and (= (point-min) (point-max))) 
 	(insert "\n")
 	(save-buffer)
 	(when org-mobile-use-encryption
@@ -1106,3 +1099,4 @@ A and B must be strings or nil."
 (provide 'org-mobile)
 
 ;;; org-mobile.el ends here
+

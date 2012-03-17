@@ -1,5 +1,5 @@
 ;;; org-indent.el --- Dynamic indentation for  Org-mode
-;; Copyright (C) 2009-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -45,7 +45,6 @@
 (declare-function org-inlinetask-get-task-level "org-inlinetask" ())
 (declare-function org-inlinetask-in-task-p "org-inlinetask" ())
 (declare-function org-list-item-body-column "org-list" (item))
-(defvar org-inlinetask-show-first-star)
 
 (defgroup org-indent nil
   "Options concerning dynamic virtual outline indentation."
@@ -294,10 +293,8 @@ Assume point is at beginning of line."
 		(let ((stars (aref org-indent-stars
 				   (min l org-indent-max-levels))))
 		  (and stars
-		       (if (org-bound-and-true-p org-inlinetask-show-first-star)
-			   (concat org-indent-inlinetask-first-star
-				   (substring stars 1))
-			 stars))))
+		       (concat org-indent-inlinetask-first-star
+			       (substring stars 1)))))
 	       (h (aref org-indent-stars
 			(min l org-indent-max-levels)))
 	       (t (aref org-indent-strings

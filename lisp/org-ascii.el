@@ -1,6 +1,6 @@
 ;;; org-ascii.el --- ASCII export for Org-mode
 
-;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2011 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -108,7 +108,7 @@ utf8      Use all UTF-8 characters")
 (defun org-export-as-utf8 (&rest args)
   "Like `org-export-as-ascii', use encoding for special symbols."
   (interactive)
-  (org-export-as-encoding 'org-export-as-ascii
+  (org-export-as-encoding 'org-export-as-ascii 
 			  (org-called-interactively-p 'any)
 			  'utf8 args))
 
