@@ -80,7 +80,7 @@
 ;;  that received the input of the feed.  You should add FEEDSTATUS
 ;;  to your list of drawers in the files that receive feed input:
 ;;
-;;       #+DRAWERS: PROPERTIES LOGBOOK FEEDSTATUS
+;;       #+DRAWERS: PROPERTIES CLOCK LOGBOOK RESULTS FEEDSTATUS
 ;;
 ;;  Acknowledgments
 ;;  ---------------

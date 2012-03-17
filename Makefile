@@ -170,7 +170,9 @@ LISPF      = 	org.el			\
 		ob-shen.el		\
 		ob-fortran.el		\
 		ob-picolisp.el		\
-		ob-maxima.el
+		ob-maxima.el		\
+		ob-io.el		\
+		ob-scala.el
 
 LISPFILES0  = $(LISPF:%=lisp/%)
 LISPFILES   = $(LISPFILES0) lisp/org-install.el

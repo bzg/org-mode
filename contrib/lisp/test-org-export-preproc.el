@@ -36,4 +36,3 @@
       (org-pop-to-buffer-same-window "*preproc-temp*")
       (point-max)
       (insert string))))
-

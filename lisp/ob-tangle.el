@@ -47,6 +47,7 @@ be inserted as the extension commonly used to identify files
 written in this language.  If no entry is found in this list,
 then the name of the language is used."
   :group 'org-babel-tangle
+  :version "24.1"
   :type '(repeat
 	  (cons
 	   (string "Language name")
@@ -55,16 +56,19 @@ then the name of the language is used."
 (defcustom org-babel-post-tangle-hook nil
   "Hook run in code files tangled by `org-babel-tangle'."
   :group 'org-babel
+  :version "24.1"
   :type 'hook)
 
 (defcustom org-babel-pre-tangle-hook '(save-buffer)
   "Hook run at the beginning of `org-babel-tangle'."
   :group 'org-babel
+  :version "24.1"
   :type 'hook)
 
 (defcustom org-babel-tangle-body-hook nil
   "Hook run over the contents of each code block body."
   :group 'org-babel
+  :version "24.1"
   :type 'hook)
 
 (defcustom org-babel-tangle-comment-format-beg "[[%link][%source-name]]"
@@ -79,6 +83,7 @@ information into the output using `org-fill-template'.
 Whether or not comments are inserted during tangling is
 controlled by the :comments header argument."
   :group 'org-babel
+  :version "24.1"
   :type 'string)
 
 (defcustom org-babel-tangle-comment-format-end "%source-name ends here"
@@ -93,6 +98,7 @@ information into the output using `org-fill-template'.
 Whether or not comments are inserted during tangling is
 controlled by the :comments header argument."
   :group 'org-babel
+  :version "24.1"
   :type 'string)
 
 (defcustom org-babel-process-comment-text #'org-babel-trim
@@ -101,6 +107,7 @@ inserted as comments in tangled source-code files.  The function
 should take a single string argument and return a string
 result.  The default value is `org-babel-trim'."
   :group 'org-babel
+  :version "24.1"
   :type 'function)
 
 (defun org-babel-find-file-noselect-refresh (file)
@@ -283,7 +290,7 @@ references."
   (interactive)
   (goto-char (point-min))
   (while (or (re-search-forward "\\[\\[file:.*\\]\\[.*\\]\\]" nil t)
-             (re-search-forward "<<[^[:space:]]*>>" nil t))
+             (re-search-forward (org-babel-noweb-wrap) nil t))
     (delete-region (save-excursion (beginning-of-line 1) (point))
                    (save-excursion (end-of-line 1) (forward-char 1) (point)))))
 
@@ -344,11 +351,7 @@ code blocks by language."
 			     body params
 			     (and (fboundp assignments-cmd)
 				  (funcall assignments-cmd params))))))
-		      (if (and (cdr (assoc :noweb params)) ;; expand noweb refs
-			       (let ((nowebs (split-string
-					      (cdr (assoc :noweb params)))))
-				 (or (member "yes" nowebs)
-				     (member "tangle" nowebs))))
+		      (if (org-babel-noweb-p params :tangle)
 			  (org-babel-expand-noweb-references info)
 			(nth 1 info)))))
 		   (comment

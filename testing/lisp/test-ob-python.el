@@ -1,21 +1,15 @@
 ;;; test-ob-python.el --- tests for ob-python.el
 
-;; Copyright (c) 2011 Eric Schulte
+;; Copyright (c) 2011-2012 Eric Schulte
 ;; Authors: Eric Schulte
 
 ;; Released under the GNU General Public License version 3
 ;; see: http://www.gnu.org/licenses/gpl-3.0.html
 
+;;; Code:
 (org-test-for-executable "python")
-
-(let ((load-path (cons (expand-file-name
-			".." (file-name-directory
-			      (or load-file-name buffer-file-name)))
-		       load-path)))
-  (require 'org-test)
-  (require 'org-test-ob-consts))
-
-(require 'ob-python)
+(unless (featurep 'ob-python)
+  (signal 'missing-test-dependency "Support for Python code blocks"))
 
 (ert-deftest test-ob-python/colnames-yes-header-argument ()
   (org-test-with-temp-text "#+name: eg

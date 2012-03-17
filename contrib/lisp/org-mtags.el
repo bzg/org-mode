@@ -1,4 +1,5 @@
 ;;; org-mtags.el --- Muse-like tags in Org-mode
+
 ;; Copyright (C) 2008-2012 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
@@ -254,4 +255,3 @@ with string values.  In addition, it reutnrs the following properties:
 (provide 'org-mtags)
 
 ;;; org-mtags.el ends here
-

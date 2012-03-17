@@ -166,28 +166,33 @@
 (defcustom org-export-taskjuggler-extension ".tjp"
   "Extension of TaskJuggler files."
   :group 'org-export-taskjuggler
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-taskjuggler-project-tag "taskjuggler_project"
   "Tag, property or todo used to find the tree containing all
 the tasks for the project."
   :group 'org-export-taskjuggler
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-taskjuggler-resource-tag "taskjuggler_resource"
   "Tag, property or todo used to find the tree containing all the
 resources for the project."
   :group 'org-export-taskjuggler
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-taskjuggler-target-version 2.4
   "Which version of TaskJuggler the exporter is targeting."
   :group 'org-export-taskjuggler
+  :version "24.1"
   :type 'number)
 
 (defcustom org-export-taskjuggler-default-project-version "1.0"
   "Default version string for the project."
   :group 'org-export-taskjuggler
+  :version "24.1"
   :type 'string)
 
 (defcustom org-export-taskjuggler-default-project-duration 280
@@ -195,6 +200,7 @@ resources for the project."
 in the root node of the task tree, i.e. the tree that has been marked
 with `org-export-taskjuggler-project-tag'"
   :group 'org-export-taskjuggler
+  :version "24.1"
   :type 'integer)
 
 (defcustom org-export-taskjuggler-default-reports
@@ -214,6 +220,7 @@ with `org-export-taskjuggler-project-tag'"
 }")
   "Default reports for the project."
   :group 'org-export-taskjuggler
+  :version "24.1"
   :type '(repeat (string :tag "Report")))
 
 (defcustom org-export-taskjuggler-default-global-properties
@@ -230,6 +237,7 @@ include another TaskJuggler file.
 The global properties are inserted after the project declaration
 but before any resource and task declarations."
   :group 'org-export-taskjuggler
+  :version "24.1"
   :type '(string :tag "Preamble"))
 
 ;;; Hooks
@@ -355,8 +363,8 @@ information, all the properties, etc."
   (let* ((props (org-entry-properties))
 	 (components (org-heading-components))
 	 (level (nth 1 components))
-	 (headline 
-	  (replace-regexp-in-string 
+	 (headline
+	  (replace-regexp-in-string
 	   "\"" "\\\"" (nth 4 components) t t)) ; quote double quotes in headlines
 	 (parent-ordered (org-taskjuggler-parent-is-ordered-p)))
     (push (cons "level" level) props)
@@ -406,10 +414,10 @@ deeper), then it's not a leaf."
 	    (successor (car (cdr tasks))))
 	(cond
 	 ;; if a task has no successors it is a leaf
-	 ((null successor) 
+	 ((null successor)
 	  (push (cons (cons "leaf-node" t) task) new-list))
 	 ;; if the successor has a lower level than task it is a leaf
-	 ((<= (cdr (assoc "level" successor)) (cdr (assoc "level" task))) 
+	 ((<= (cdr (assoc "level" successor)) (cdr (assoc "level" task)))
 	  (push (cons (cons "leaf-node" t) task) new-list))
 	 ;; otherwise examine the rest of the tasks
 	 (t (push task new-list))))

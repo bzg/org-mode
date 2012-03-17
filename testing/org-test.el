@@ -1,6 +1,6 @@
 ;;;; org-test.el --- Tests for Org-mode
 
-;; Copyright (c) 2010 Sebastian Rose, Eric Schulte
+;; Copyright (c) 2010-2012 Sebastian Rose, Eric Schulte
 ;; Authors:
 ;;     Sebastian Rose, Hannover, Germany, sebastian_rose gmx de
 ;;     Eric Schulte, Santa Fe, New Mexico, USA, schulte.eric gmail com
@@ -30,6 +30,8 @@
 
 
 ;;;; Code:
+(require 'org-test-ob-consts)
+
 (let* ((org-test-dir (expand-file-name
 		      (file-name-directory
 		       (or load-file-name buffer-file-name))))
@@ -170,6 +172,7 @@ currently executed.")
 	 (save-restriction ,@body)))
      (unless visited-p
        (kill-buffer to-be-removed))))
+(def-edebug-spec org-test-in-example-file (form body))
 
 (defmacro org-test-at-marker (file marker &rest body)
   "Run body after placing the point at MARKER in FILE.
@@ -198,7 +201,7 @@ otherwise place the point at the beginning of the inserted text."
 		      (goto-char ,(match-beginning 0)))
 	    `(progn (insert ,inside-text)
 		    (goto-char (point-min)))))
-       ,@body)))
+       (prog1 ,@body (kill-buffer)))))
 (def-edebug-spec org-test-with-temp-text (form body))
 
 (defmacro org-test-with-temp-text-in-file (text &rest body)
@@ -223,12 +226,8 @@ otherwise place the point at the beginning of the inserted text."
   (defjump org-test-jump
     (("lisp/\\1.el" . "testing/lisp/test-\\1.el")
      ("lisp/\\1.el" . "testing/lisp/\\1.el/test.*.el")
-     ("contrib/lisp/\\1.el" . "testing/contrib/lisp/test-\\1.el")
-     ("contrib/lisp/\\1.el" . "testing/contrib/lisp/\\1.el/test.*.el")
      ("testing/lisp/test-\\1.el" . "lisp/\\1.el")
-     ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el")
-     ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el")
-     ("testing/contrib/lisp/test-\\1.el" . "contrib/lisp/\\1.el/test.*.el"))
+     ("testing/lisp/\\1.el" . "lisp/\\1.el/test.*.el"))
     (concat org-base-dir "/")
     "Jump between org-mode files and their tests."
     (lambda (path)
@@ -312,8 +311,7 @@ otherwise place the point at the beginning of the inserted text."
 				 :expected-result :failed (should nil))))))))
 	       (directory-files base 'full
 				"^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.el$"))))
-    (rld (expand-file-name "lisp" org-test-dir))
-    (rld (expand-file-name "lisp" (expand-file-name "contrib" org-test-dir)))))
+    (rld (expand-file-name "lisp" org-test-dir))))
 
 (defun org-test-current-defun ()
   "Test the current function."
@@ -328,11 +326,20 @@ otherwise place the point at the beginning of the inserted text."
 		(file-name-nondirectory (buffer-file-name)))
 	       "/")))
 
+(defvar org-test-buffers nil
+  "Hold buffers open for running Org-mode tests.")
+
 (defun org-test-touch-all-examples ()
   (dolist (file (directory-files
 		 org-test-example-dir 'full
 		 "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*\\.org$"))
-    (find-file file)))
+    (unless (get-file-buffer file)
+      (add-to-list 'org-test-buffers (find-file file)))))
+
+(defun org-test-kill-all-examples ()
+  (while org-test-buffers
+    (let ((b (pop org-test-buffers)))
+      (when (buffer-live-p b) (kill-buffer b)))))
 
 (defun org-test-update-id-locations ()
   (org-id-update-id-locations
@@ -361,7 +368,8 @@ Load all test files first."
   (interactive)
   (org-test-touch-all-examples)
   (org-test-load)
-  (ert "\\(org\\|ob\\)"))
+  (ert "\\(org\\|ob\\)")
+  (org-test-kill-all-examples))
 
 (provide 'org-test)
 
