@@ -1,6 +1,6 @@
 ;;; org-git-link.el --- Provide org links to specific file version
 
-;; Copyright (C) 2009-2011  Reimar Finken
+;; Copyright (C) 2009-2012  Reimar Finken
 
 ;; Author: Reimar Finken <reimar.finken@gmx.de>
 ;; Keywords: files, calendar, hypermedia

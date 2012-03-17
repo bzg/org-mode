@@ -1,6 +1,6 @@
 ;;; org-track.el --- Track the most recent Org-mode version available.
 ;;
-;; Copyright (C) 2009-2011
+;; Copyright (C) 2009-2012
 ;;   Free Software Foundation, Inc.
 ;;
 ;; Author: Bastien Guerry <bzg at altern dot org>

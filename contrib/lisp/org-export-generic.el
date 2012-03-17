@@ -1,6 +1,6 @@
 ;; org-export-generic.el --- Export frameworg with custom backends
 
-;; Copyright (C) 2009-2011  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
 
 ;; Author:   Wes Hardaker <hardaker at users dot sourceforge dot net>
 ;; Keywords: outlines, hypermedia, calendar, wp, export
