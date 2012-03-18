@@ -198,7 +198,8 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("nn" "Forfattar"  "Dato"  "Innhald" "Fotnotar")  ;; nn = Norsk (nynorsk)
     ("pl" "Autor"      "Data" "Spis tre&#x015b;ci"  "Przypis")
     ("ru" "Автор"      "Дата"  "Содержание" "Сноски")
-    ("sv" "F&ouml;rfattare" "Datum" "Inneh&aring;ll" "Fotnoter"))
+    ("sv" "F&ouml;rfattare" "Datum" "Inneh&aring;ll" "Fotnoter")
+    ("zh_CN" "作者" "日期" "目录" "脚注"))
   "Terms used in export text, translated to different languages.
 Use the variable `org-export-default-language' to set the language,
 or use the +OPTION lines for a per-file setting."
