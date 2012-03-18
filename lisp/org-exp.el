@@ -192,6 +192,9 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("hu" "Szerz&otilde;" "D&aacute;tum" "Tartalomjegyz&eacute;k" "L&aacute;bjegyzet")
     ("is" "H&ouml;fundur" "Dagsetning" "Efnisyfirlit" "Aftanm&aacute;lsgreinar")
     ("it" "Autore"     "Data"  "Indice" "Note a pi&egrave; di pagina")
+    ;; Use numeric character entities for proper rendering of non-UTF8 documents
+    ;; ("ja" "著者"       "日付"  "目次"          "脚注")
+    ("ja" "&#33879;&#32773;" "&#26085;&#20184;" "&#30446;&#27425;" "&#33050;&#27880;")
     ("nl" "Auteur"     "Datum" "Inhoudsopgave" "Voetnoten")
     ("no" "Forfatter"  "Dato"  "Innhold" "Fotnoter")
     ("nb" "Forfatter"  "Dato"  "Innhold" "Fotnoter")  ;; nb = Norsk (bokm.l)
