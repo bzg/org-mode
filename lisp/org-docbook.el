@@ -150,7 +150,6 @@ avoid same set of footnote IDs being used multiple times."
 (defcustom org-export-docbook-footnote-separator "<superscript>, </superscript>"
   "Text used to separate footnotes."
   :group 'org-export-docbook
-  :version "24.1"
   :type 'string)
 
 (defcustom org-export-docbook-emphasis-alist
@@ -196,7 +195,6 @@ This XSLT stylesheet is used by
 Object (FO) files.  You can use either `fo/docbook.xsl' that
 comes with DocBook, or any customization layer you may have."
   :group 'org-export-docbook
-  :version "24.1"
   :type 'string)
 
 (defcustom org-export-docbook-xslt-proc-command nil

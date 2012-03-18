@@ -1,14 +1,19 @@
 ;;; test-ob-lilypond.el --- tests for ob-lilypond.el
 
-;; Copyright (c) 2010-2012 Martyn Jago
+;; Copyright (c) 2010 Martyn Jago
 ;; Authors: Martyn Jago
 
 ;; Released under the GNU General Public License version 3
 ;; see: http://www.gnu.org/licenses/gpl-3.0.html
 
-;;; Code:
-(unless (featurep 'ob-lilypond)
-  (signal 'missing-test-dependency "Support for Lilypond code blocks"))
+(let ((load-path (cons (expand-file-name
+			".." (file-name-directory
+			      (or load-file-name buffer-file-name)))
+		       load-path)))
+  (require 'org-test)
+  (require 'org-test-ob-consts))
+
+(require 'ob-lilypond)
 
 (save-excursion
   (set-buffer (get-buffer-create "test-ob-lilypond.el"))
@@ -42,10 +47,10 @@
   (should (boundp 'ly-version)))
 
 (ert-deftest ob-lilypond/ly-version-command ()
-  (should (equal "ob-lilypond version 7.6" (ly-version)))
+  (should (equal "ob-lilypond version 0.3" (ly-version)))
   (with-temp-buffer
     (ly-version t)
-    (should (equal "ob-lilypond version 7.6"
+    (should (equal "ob-lilypond version 0.3"
                    (buffer-substring (point-min) (point-max))))))
 
 (ert-deftest ob-lilypond/ly-compile-lilyfile ()
@@ -56,7 +61,6 @@
              t                          ;display
              ,(if ly-gen-png  "--png"  "") ;&rest...
              ,(if ly-gen-html "--html" "")   
-             ,(if ly-gen-pdf "--pdf" "")
              ,(if ly-use-eps  "-dbackend=eps" "")
              ,(if ly-gen-svg  "-dbackend=svg" "")
              "--output=test-file"
@@ -116,9 +120,6 @@
 
 (ert-deftest ob-lilypond/ly-gen-html ()
   (should (boundp 'ly-gen-html)))
-
-(ert-deftest ob-lilypond/ly-gen-html ()
-  (should (boundp 'ly-gen-pdf)))
 
 (ert-deftest ob-lilypond/use-eps ()
   (should (boundp 'ly-use-eps)))
@@ -300,18 +301,6 @@
     (ly-toggle-pdf-display)
     (should (not ly-display-pdf-post-tangle))))
 
-(ert-deftest ob-lilypond/ly-toggle-pdf-generation-toggles-flag ()
-  (if ly-gen-pdf
-      (progn
-        (ly-toggle-pdf-generation)
-         (should (not ly-gen-pdf))
-        (ly-toggle-pdf-generation)
-        (should ly-gen-pdf))
-    (ly-toggle-pdf-generation)
-    (should ly-gen-pdf)
-    (ly-toggle-pdf-generation)
-    (should (not ly-gen-pdf))))
-
 (ert-deftest ob-lilypond/ly-toggle-arrange-mode ()
   (if ly-arrange-mode
       (progn
@@ -364,7 +353,6 @@
   (should (equal '((:tangle . "yes")
                    (:noweb . "yes")
                    (:results . "silent")
-                   (:cache . "yes")
                    (:comments . "yes"))
                  (ly-set-header-args t)))
   (should (equal '((:results . "file")
@@ -376,7 +364,6 @@
   (should (equal '((:tangle . "yes")
                    (:noweb . "yes")
                    (:results . "silent")
-                   (:cache . "yes")
                    (:comments . "yes"))
                  org-babel-default-header-args:lilypond))
   (ly-set-header-args nil)

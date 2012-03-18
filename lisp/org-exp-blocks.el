@@ -135,7 +135,6 @@ export function should accept three arguments."
 (defcustom org-export-blocks-postblock-hook nil
   "Run after blocks have been processed with `org-export-blocks-preprocess'."
   :group 'org-export-general
-  :version "24.1"
   :type 'hook)
 
 (defun org-export-blocks-html-quote (body &optional open close)
@@ -225,7 +224,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 
 ;;--------------------------------------------------------------------------------
 ;; ditaa: create images from ASCII art using the ditaa utility
-(defcustom org-ditaa-jar-path (expand-file-name
+(defvar org-ditaa-jar-path (expand-file-name
 			    "ditaa.jar"
 			    (file-name-as-directory
 			     (expand-file-name
@@ -234,9 +233,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 			       (expand-file-name
 				"../contrib"
 				(file-name-directory (or load-file-name buffer-file-name)))))))
-  "Path to the ditaa jar executable."
-  :group 'org-babel
-  :type 'string)
+  "Path to the ditaa jar executable.")
 
 (defvar org-export-current-backend) ; dynamically bound in org-exp.el
 (defun org-export-blocks-format-ditaa (body &rest headers)

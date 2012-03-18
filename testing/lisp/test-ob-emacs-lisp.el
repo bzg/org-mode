@@ -10,7 +10,19 @@
 
 ;; Org-mode tests for ob-emacs-lisp.el live here
 
+
 ;;; Code:
+
+(let ((load-path (cons (expand-file-name
+			".." (file-name-directory
+			      (or load-file-name buffer-file-name)))
+		       load-path)))
+  (require 'org-test)
+  (require 'org-test-ob-consts))
+
+
+;;; Tests
+
 (ert-deftest ob-emacs-lisp/commented-last-block-line-no-var ()
   (org-test-with-temp-text-in-file "
 #+begin_src emacs-lisp
