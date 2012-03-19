@@ -353,18 +353,15 @@ release:
 	git checkout maint
 	git merge -s recursive -X theirs master
 	UTILITIES/set-version.pl $(TAG)
-	git commit -a -m "Release $(TAG)"
+	git commit -a -m "Major release $(TAG) from master"
 	make relup TAG=$(TAG)
 	make cleanrel
-	rm -rf org-$(TAG)
-	rm -f org-$(TAG)*.zip
-	rm -f org-$(TAG)*.tar.gz
 	make pushreleasetag TAG=$(TAG)
 	git push -f origin maint
 	git checkout master
 	git merge -s ours maint
 	UTILITIES/set-version.pl -a $(TAG)
-	git commit -a -m "Update website to show $(TAG) as current release"
+	git commit -a -m "Bump to version $(TAG) as current release from master"
 	git push
 
 # The following target makes a release, but from the stuff that is on
@@ -379,20 +376,16 @@ release:
 
 fixrelease:
 	git checkout maint
-	git merge -s recursive -X theirs master
 	UTILITIES/set-version.pl $(TAG)
-	git commit -a -m "Release $(TAG)"
+	git commit -a -m "Bugfix release $(TAG) from maint"
 	make relup TAG=$(TAG)
 	make cleanrel
-	rm -rf org-$(TAG)
-	rm org-$(TAG)*.zip
-	rm org-$(TAG)*.tar.gz
 	make pushreleasetag TAG=$(TAG)
 	git push -f origin maint
 	git checkout master
 	git merge -s ours maint
 	UTILITIES/set-version.pl -o $(TAG)
-	git commit -a -m "Update website to show $(TAG) as current release"
+	git commit -a -m "Bump to version $(TAG) as current release from maint"
 	git push
 
 # ~$ make relup only makes sense from orgmode.org server
