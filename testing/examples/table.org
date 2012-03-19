@@ -1,0 +1,19 @@
+#+TITLE: example file with tables
+#+OPTIONS: num:nil ^:nil
+
+This is an example file for use by the Org-mode tests defined in
+file:../lisp/test-org-table.el.
+
+* simple formula
+  :PROPERTIES:
+  :ID:       563523f7-3f3e-49c9-9622-9216cc9a5d95
+  :END:
+
+#+tblname: simple-formula
+|  1 |
+|  2 |
+|  3 |
+|  4 |
+|----|
+| 10 |
+  #+TBLFM: $1=vsum(@1..@-1)
