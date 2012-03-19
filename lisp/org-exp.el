@@ -98,6 +98,7 @@ is nil, the buffer remains buried also in these cases."
 This applied to the commands `org-export-as-html-and-open' and
 `org-export-as-pdf-and-open'."
   :group 'org-export-general
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-export-run-in-background nil
@@ -120,6 +121,7 @@ force an export command into the current process."
   "The initial scope when exporting with `org-export'.
 This variable can be either set to 'buffer or 'subtree."
   :group 'org-export-general
+  :version "24.1"
   :type '(choice
 	  (const :tag "Export current buffer" 'buffer)
 	  (const :tag "Export current subtree" 'subtree)))
@@ -206,7 +208,7 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("sv" "F&ouml;rfattare" "Datum" "Inneh&aring;ll" "Fotnoter")
     ;; Use numeric character entities for proper rendering of non-UTF8 documents
     ;; ("zh_CN" "作者" "日期" "目录" "脚注")
-    ("zh_CN" "&#20316;&#32773;" "&#26085;&#26399;" "&#30446;&#24405;" "&#33050;&#27880;"))
+    ("zh-CN" "&#20316;&#32773;" "&#26085;&#26399;" "&#30446;&#24405;" "&#33050;&#27880;"))
   "Terms used in export text, translated to different languages.
 Use the variable `org-export-default-language' to set the language,
 or use the +OPTION lines for a per-file setting."
@@ -229,6 +231,7 @@ and in `org-clock-clocktable-language-setup'."
 (defcustom org-export-date-timestamp-format "%Y-%m-%d"
   "Time string format for Org timestamps in the #+DATE option."
   :group 'org-export-general
+  :version "24.1"
   :type 'string)
 
 (defvar org-export-page-description ""
@@ -326,6 +329,7 @@ done                 include only tasks that are already done.
 nil                  remove all tasks before export
 list of TODO kwds    keep only tasks with these keywords"
   :group 'org-export-general
+  :version "24.1"
   :type '(choice
 	  (const :tag "All tasks" t)
 	  (const :tag "No tasks" nil)
@@ -376,6 +380,7 @@ e.g. \"author:nil\"."
 This option can also be set with the +OPTIONS line,
 e.g. \"email:t\"."
   :group 'org-export-general
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-export-creator-info t
@@ -603,6 +608,7 @@ the values of constants may be useful to have."
 This is the global equivalent of the :remove-nil-lines option
 when locally sending a table with #+ORGTBL."
   :group 'org-export-tables
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-export-prefer-native-exporter-for-tables nil
