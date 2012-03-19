@@ -6,7 +6,7 @@
 ;; Maintainer: Bastien Guerry <bzg at gnu dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
-;; Version: 7.8.05
+;; Version: 7.8.06
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -203,7 +203,7 @@ identifier."
 
 ;;; Version
 
-(defconst org-version "7.8.05"
+(defconst org-version "7.8.06"
   "The version number of the file org.el.")
 
 ;;;###autoload
