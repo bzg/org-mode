@@ -671,6 +671,18 @@ This function should accept the file name as its single argument."
 		   "bibtex %b"
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "2 runs of xelatex"
+		 ("xelatex -interaction nonstopmode -output-directory %o %f"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "3 runs of xelatex"
+		 ("xelatex -interaction nonstopmode -output-directory %o %f"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "xelatex,bibtex,xelatex,xelatex"
+		 ("xelatex -interaction nonstopmode -output-directory %o %f"
+		   "bibtex %b"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "texi2dvi"
 		 ("texi2dvi -p -b -c -V %f"))
 	  (const :tag "rubber"
