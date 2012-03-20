@@ -43,6 +43,8 @@
 (declare-function org-switch-to-buffer-other-window "org" (&rest args))
 (declare-function org-pop-to-buffer-same-window
 		  "org-compat" (&optional buffer-or-name norecord label))
+(declare-function org-strip-protective-commas "org" (beg end))
+(declare-function org-base-buffer "org" (buffer))
 
 (defcustom org-edit-src-region-extra nil
   "Additional regexps to identify regions for editing with `org-edit-src-code'.

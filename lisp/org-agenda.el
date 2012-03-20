@@ -6191,6 +6191,7 @@ When this is the global TODO list, a prefix argument will be interpreted."
 
 (defvar org-global-tags-completion-table nil)
 (defvar org-agenda-filter-form nil)
+(defvar org-agenda-filtered-by-category nil)
 
 (defun org-agenda-filter-by-category (strip)
   "Keep only those lines in the agenda buffer that have a specific category.
@@ -6369,7 +6370,6 @@ If the line does not have an effort defined, return nil."
       (funcall op (or eff (if org-sort-agenda-noeffort-is-high 32767 0))
 	       value))))
 
-(defvar org-agenda-filtered-by-category nil)
 (defun org-agenda-filter-apply (filter type)
   "Set FILTER as the new agenda filter and apply it."
   (let (tags)
