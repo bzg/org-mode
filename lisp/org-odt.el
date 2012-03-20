@@ -2073,58 +2073,16 @@ specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
     ;; ("__DvipngImage__" "Equation" "category-and-value")
     )
   "Map a CATEGORY-HANDLE to CATEGORY-NAME and LABEL-STYLE.
-This is an alist where each element is of the form
+This is an list where each element is of the form
 \\(CATEGORY-HANDLE CATEGORY-NAME LABEL-STYLE\\).  CATEGORY_HANDLE
-could either be one of the internal handles (as seen above) or be
-derived from the \"#+LABEL:<label-name>\" specification.  See
-`org-export-odt-get-category-from-label'.  CATEGORY-NAME and
+is one of the internal handles, as seen above.  CATEGORY-NAME and
 LABEL-STYLE are used for generating ODT labels.  See
 `org-odt-label-styles'.")
-
-(defvar org-export-odt-user-categories
-  '("Illustration" "Table" "Text" "Drawing" "Equation" "Figure"))
-
-(defvar org-export-odt-get-category-from-label nil
-  "Should category of label be inferred from label itself.
-When this option is non-nil, a label is parsed in to two
-component parts delimited by a \":\" (colon) as shown here -
-#+LABEL:[CATEGORY-HANDLE:]EXTRA.  The CATEGORY-HANDLE is mapped
-to a CATEGORY-NAME and LABEL-STYLE using
-`org-odt-category-map-alist'.  (If no such map is provided and
-CATEGORY-NAME is set to CATEGORY-HANDLE and LABEL-STYLE is set to
-\"category-and-value\").  If CATEGORY-NAME so obtained is listed
-under `org-export-odt-user-categories' then the user specified
-styles are used.  Otherwise styles as determined by the internal
-CATEGORY-HANDLE is used.  See
-`org-odt-get-label-category-and-style' for details.")
-
-(defun org-odt-get-label-category-and-style (label default-category)
-  "See `org-export-odt-get-category-from-label'."
-  (let ((default-category-map
-	  (assoc default-category org-odt-category-map-alist))
-	user-category user-category-map category)
-    (cond
-     ((not org-export-odt-get-category-from-label)
-      default-category-map)
-     ((not (setq user-category
-		 (save-match-data
-		   (and (string-match "\\`\\(.*\\):.+" label)
-			(match-string 1 label)))))
-      default-category-map)
-     (t
-      (setq user-category-map
-	    (or (assoc user-category org-odt-category-map-alist)
-		(list nil user-category "category-and-value"))
-	    category (nth 1 user-category-map))
-      (if (member category org-export-odt-user-categories)
-	  user-category-map
-	default-category-map)))))
 
 (defun org-odt-add-label-definition (label default-category)
   "Create an entry in `org-odt-entity-labels-alist' and return it."
   (setq label (substring-no-properties label))
-  (let* ((label-props (org-odt-get-label-category-and-style
-		       label default-category))
+  (let* ((label-props (assoc default-category org-odt-category-map-alist))
 	 (category (nth 1 label-props))
 	 (counter category)
 	 (label-style (nth 2 label-props))
