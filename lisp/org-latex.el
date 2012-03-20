@@ -870,7 +870,6 @@ when PUB-DIR is set, use this as the publishing directory."
 		   (concat filename ".tex")
 		 filename)))
 	 (auto-insert nil); Avoid any auto-insert stuff for the new file
-	 (TeX-master t) ; Avoid the Query for TeX master from AUCTeX
 	 (buffer (if to-buffer
 		     (cond
 		      ((eq to-buffer 'string) (get-buffer-create
@@ -942,6 +941,9 @@ when PUB-DIR is set, use this as the publishing directory."
 	   :select-tags (plist-get opt-plist :select-tags)
 	   :exclude-tags (plist-get opt-plist :exclude-tags)
 	   :LaTeX-fragments nil)))
+
+    ;; Avoid the Query for TeX master from AUCTeX
+    (if (boundp 'TeX-master) (setq TeX-master t))
 
     (set-buffer buffer)
     (erase-buffer)
