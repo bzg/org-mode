@@ -59,6 +59,7 @@
 (declare-function org-trim "org" (s))
 (declare-function org-skip-whitespace "org" ())
 (declare-function outline-next-heading "outline")
+(declare-function org-skip-whitespace "org" ())
 
 (defvar org-outline-regexp-bol)		; defined in org.el
 (defvar org-odd-levels-only)		; defined in org.el
