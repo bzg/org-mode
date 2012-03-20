@@ -10642,7 +10642,8 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 				       (t (concat "Refile subtree \""
 						  heading-text "\" to")))
 				 default-buffer
-				 org-refile-allow-creating-parent-nodes
+				 (and (not (equal '(4) goto))
+				      org-refile-allow-creating-parent-nodes)
 				 goto))))))
 	  (setq file (nth 1 it)
 		re (nth 2 it)
