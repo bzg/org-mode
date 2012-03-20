@@ -2261,7 +2261,8 @@ of columns, much like horizontal lines can do for groups of rows.  In
 order to specify column groups, you can use a special row where the
 first field contains only @samp{/}.  The further fields can either
 contain @samp{<} to indicate that this column should start a group,
-@samp{>} to indicate the end of a column, or @samp{<>} to make a column
+@samp{>} to indicate the end of a column, or @samp{<>} (no space between @samp{<}
+and @samp{>}) to make a column
 a group of its own.  Boundaries between column groups will upon export be
 marked with vertical lines.  Here is an example:
 
