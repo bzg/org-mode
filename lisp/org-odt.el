@@ -1184,6 +1184,16 @@ styles congruent with the ODF-1.2 specification."
   (org-lparse-end-paragraph))
 
 (defun org-odt-begin-toc (lang-specific-heading max-level)
+  ;; Strings in `org-export-language-setup' can contain named html
+  ;; entities.  Replace those with utf-8 equivalents.
+  (let ((i 0) entity rpl)
+    (while (string-match "&\\([^#].*?\\);" lang-specific-heading i)
+      (setq entity (match-string 1 lang-specific-heading))
+      (if (not (setq rpl (org-entity-get-representation entity 'utf8)))
+	  (setq i (match-end 0))
+	(setq i (+ (match-beginning 0) (length rpl)))
+	(setq lang-specific-heading
+	      (replace-match rpl t t lang-specific-heading)))))
   (insert
    (format "
     <text:table-of-content text:style-name=\"Sect2\" text:protected=\"true\" text:name=\"Table of Contents1\">
