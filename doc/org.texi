@@ -11540,7 +11540,7 @@ the table that follows.
 @end lisp
 
 @example
-#+ATTR_ODT: TableWithHeaderRowAndColumn
+#+ATTR_ODT: :style "TableWithHeaderRowAndColumn"
 | Name  | Phone | Age |
 | Peter |  1234 |  17 |
 | Anna  |  4321 |  25 |
@@ -11645,9 +11645,9 @@ To define a table style, create an entry for the style in the variable
 @end itemize
 
 For example, the entry below defines two different table styles
-@samp{TableWithHeaderRowsAndColumns} and @samp{TableWithHeaderColumns} based
-on the same template @samp{Custom}.  The styles achieve their intended effect
-by selectively activating the individual cell styles in that template.
+@samp{TableWithHeaderRowAndColumn} and @samp{TableWithFirstRowandLastRow}
+based on the same template @samp{Custom}.  The styles achieve their intended
+effect by selectively activating the individual cell styles in that template.
 
 @lisp
 (setq org-export-odt-table-styles
@@ -11667,7 +11667,7 @@ To do this, specify the table style created in step (2) as part of
 the @code{ATTR_ODT} line as shown below.
 
 @example
-#+ATTR_ODT: TableWithHeaderRowAndColumn
+#+ATTR_ODT: :style "TableWithHeaderRowAndColumn"
 | Name  | Phone | Age |
 | Peter |  1234 |  17 |
 | Anna  |  4321 |  25 |
