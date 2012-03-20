@@ -1184,6 +1184,16 @@ styles congruent with the ODF-1.2 specification."
   (org-lparse-end-paragraph))
 
 (defun org-odt-begin-toc (lang-specific-heading max-level)
+  ;; Strings in `org-export-language-setup' can contain named html
+  ;; entities.  Replace those with utf-8 equivalents.
+  (let ((i 0) entity rpl)
+    (while (string-match "&\\([^#].*?\\);" lang-specific-heading i)
+      (setq entity (match-string 1 lang-specific-heading))
+      (if (not (setq rpl (org-entity-get-representation entity 'utf8)))
+	  (setq i (match-end 0))
+	(setq i (+ (match-beginning 0) (length rpl)))
+	(setq lang-specific-heading
+	      (replace-match rpl t t lang-specific-heading)))))
   (insert
    (format "
     <text:table-of-content text:style-name=\"Sect2\" text:protected=\"true\" text:name=\"Table of Contents1\">
@@ -1243,10 +1253,13 @@ styles congruent with the ODF-1.2 specification."
 (defun org-odt-format-link (desc href &optional attr)
   (cond
    ((and (= (string-to-char href) ?#) (not org-odt-suppress-xref))
-    (setq href (concat org-export-odt-bookmark-prefix (substring href 1)))
+    (setq href (substring href 1))
     (let ((xref-format "text"))
       (when (numberp desc)
 	(setq desc (format "%d" desc) xref-format "number"))
+      (when (listp desc)
+	(setq desc (mapconcat 'identity desc ".") xref-format "chapter"))
+      (setq href (concat org-export-odt-bookmark-prefix href))
       (org-odt-format-tags
        '("<text:bookmark-ref text:reference-format=\"%s\" text:ref-name=\"%s\">" .
 	 "</text:bookmark-ref>")
@@ -1613,7 +1626,8 @@ ATTR is a string of other attributes of the a element."
 		 (not fragment)))
 	   (type (if (equal type-1 "id") "file" type-1))
 	   (filename path)
-	   (thefile path))
+	   (thefile path)
+	   sec-frag sec-nos)
       (cond
        ;; check for inlined images
        ((and (member type '("file"))
@@ -1629,6 +1643,7 @@ ATTR is a string of other attributes of the a element."
 	     (org-odt-is-formula-link-p filename)
 	     (or (not descp)))
 	(org-odt-format-inline-formula thefile))
+       ;; code references
        ((string= type "coderef")
 	(let* ((ref fragment)
 	       (lineno-or-ref (cdr (assoc ref org-export-code-refs)))
@@ -1651,6 +1666,22 @@ ATTR is a string of other attributes of the a element."
 			  (or desc "%s"))
 			lineno-or-ref))
 	    (org-odt-format-link (org-xml-format-desc desc) href)))))
+       ;; links to headlines
+       ((and (string= type "")
+	     (or (not thefile) (string= thefile ""))
+	     (setq sec-frag fragment)
+	     (org-find-text-property-in-string 'org-no-description fragment)
+	     (or (string-match  "\\`sec\\(\\(-[0-9]+\\)+\\)" sec-frag)
+		 (and (setq sec-frag
+			    (loop for alias in org-export-target-aliases do
+				  (when (member fragment (cdr alias))
+				    (return (car alias)))))
+		      (string-match  "\\`sec\\(\\(-[0-9]+\\)+\\)" sec-frag)))
+	     (setq sec-nos (org-split-string (match-string 1 sec-frag) "-"))
+	     (<= (length sec-nos) (plist-get org-lparse-opt-plist
+					     :headline-levels)))
+	(let ((org-odt-suppress-xref nil))
+	  (org-odt-format-link sec-nos (concat "#" sec-frag) attr)))
        (t
 	(when (string= type "file")
 	  (setq thefile
