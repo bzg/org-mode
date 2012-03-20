@@ -325,6 +325,51 @@ in this way, it will be wrapped."
      :body-bullet-list-prefix       ("* " "** " "*** " "**** " "***** ")
      )
     ;;
+    ;; mediawiki
+    ;;
+    ("mediawiki"
+     :file-suffix        	    ".txt"
+     :key-binding                   ?m
+
+     :header-prefix            	    ""
+     :header-suffix            	    ""
+
+     :title-format             	    "= %s =\n"
+
+     :date-export        	    nil
+
+     :toc-export                    nil
+
+     :body-header-section-numbers   nil
+     :body-section-prefix           "\n"
+
+     :body-section-header-prefix    ("= " "== " "=== "
+				     "==== " "===== " "====== ")
+     :body-section-header-suffix    (" =\n\n" " ==\n\n" " ===\n\n"
+				     " ====\n\n" " =====\n\n" " ======\n\n")
+
+     :body-line-export-preformated  t          ;; yes/no/maybe???
+     :body-line-format              "%s\n"
+     :body-line-wrap                75
+
+     :body-line-fixed-format       " %s\n"
+
+     :body-list-format              "* %s\n"
+     :body-number-list-format       "# %s\n"
+
+     :body-bullet-list-prefix       ("* " "** " "*** " "**** " "***** ")
+     :body-list-checkbox-todo       "&#9744; "
+     :body-list-checkbox-done       "&#9746; "
+     :body-table-start              "{|"
+     :body-table-end                "|}"
+     :body-table-cell-start         "|"
+     :body-table-cell-end           "\n"
+     :body-table-last-cell-end      "|-"
+     :body-table-hline-start          ""
+
+
+     )
+    ;;
     ;; internet-draft .xml for xml2rfc exporter
     ;;
     ("ietfid"
@@ -715,7 +760,34 @@ underlined headlines.  The default is 3."
 	  (or (plist-get export-plist :body-list-checkbox-done-end) ""))
 	 (listcheckhalfend
 	  (or (plist-get export-plist :body-list-checkbox-half-end) ""))
-         (bodynewline-paragraph   (plist-get export-plist :body-newline-paragraph))
+	 (bodytablestart
+	  (or (plist-get export-plist :body-table-start) ""))
+	 (bodytableend
+	  (or (plist-get export-plist :body-table-end) ""))
+	 (bodytablerowstart
+	  (or (plist-get export-plist :body-table-row-start) ""))
+	 (bodytablerowend
+	  (or (plist-get export-plist :body-table-row-end) ""))
+	 (bodytablecellstart
+	  (or (plist-get export-plist :body-table-cell-start) ""))
+	 (bodytablecellend
+	  (or (plist-get export-plist :body-table-cell-end) ""))
+	 (bodytablefirstcellstart
+	  (or (plist-get export-plist :body-table-first-cell-start) ""))
+	 (bodytableinteriorcellstart
+	  (or (plist-get export-plist :body-table-interior-cell-start) ""))
+	 (bodytableinteriorcellend
+	  (or (plist-get export-plist :body-table-interior-cell-end) ""))
+	 (bodytablelastcellend
+	  (or (plist-get export-plist :body-table-last-cell-end) ""))
+	 (bodytablehlinestart
+	  (or (plist-get export-plist :body-table-hline-start) " \\1"))
+	 (bodytablehlineend
+	  (or (plist-get export-plist :body-table-hline-end) ""))
+
+
+
+	 (bodynewline-paragraph   (plist-get export-plist :body-newline-paragraph))
 	 (bodytextpre   (plist-get export-plist :body-text-prefix))
 	 (bodytextsuf   (plist-get export-plist :body-text-suffix))
 	 (bodylinewrap  (plist-get export-plist :body-line-wrap))
@@ -1328,16 +1400,21 @@ REVERSE means to reverse the list if the plist match is a list
       (setq lines (org-table-clean-before-export lines)))
     ;; Get rid of the vertical lines except for grouping
     (let ((vl (org-colgroup-info-to-vline-list org-table-colgroup-info))
-	  rtn line vl1 start)
+	  (rtn (list bodytablestart)) line vl1 start)
       (while (setq line (pop lines))
+	(setq line (concat bodytablerowstart line))
 	(if (string-match org-table-hline-regexp line)
 	    (and (string-match "|\\(.*\\)|" line)
-		 (setq line (replace-match " \\1" t nil line)))
+		 (setq line (replace-match (concat bodytablehlinestart bodytablehlineend) t nil line)))
 	  (setq start 0 vl1 vl)
+	  (if (string-match "|\\(.*\\)|" line)
+	      (setq line (replace-match (concat bodytablefirstcellstart bodytablecellstart " \\1 " bodytablecellend bodytablelastcellend) t nil line)))
 	  (while (string-match "|" line start)
-	    (setq start (match-end 0))
-	    (or (pop vl1) (setq line (replace-match " " t t line)))))
+	    (setq start (+ (match-end 0) (length (concat bodytablecellend bodytableinteriorcellend bodytableinteriorcellstart bodytablecellstart))))
+	    (or (pop vl1) (setq line (replace-match (concat bodytablecellend bodytableinteriorcellend bodytableinteriorcellstart bodytablecellstart) t t line)))))
+	(setq line (concat line bodytablerowend))
 	(push line rtn))
+      (setq rtn (cons bodytableend rtn))
       (nreverse rtn))))
 
 (defun org-colgroup-info-to-vline-list (info)
