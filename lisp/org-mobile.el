@@ -581,7 +581,7 @@ The table of checksums is written to the file mobile-checksums."
 			  (concat "<after>KEYS=" key " TITLE: "
 				  (if (and (stringp desc) (> (length desc) 0))
 				      desc (symbol-name type))
-				  " " match "</after>"))
+				  "</after>"))
 		    settings))
 	(push (list type match settings) new))
        ((or (functionp (nth 2 e)) (symbolp (nth 2 e)))
