@@ -653,10 +653,13 @@ postamble DIV."
 	  (string :tag "  Div for the content:")
 	  (string :tag "Div for the postamble:")))
 
-(defvar org-export-html-date-format-string "%Y-%m-%dT%R%z"
-  "The string used to format date and time.
+(defcustom org-export-html-date-format-string "%Y-%m-%dT%R%z"
+  "Format string to format the date and time.
 
-Default is an extended format of the ISO 8601 specification.")
+The default is an extended format of the ISO 8601 specification."
+  :group 'org-export-html
+  :version "24.1"
+  :type 'string)
 
 ;;; Hooks
 
