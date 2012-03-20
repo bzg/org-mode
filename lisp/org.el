@@ -75,6 +75,7 @@
   (require 'gnus-sum))
 
 (require 'calendar)
+(require 'format-spec)
 
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
 (when (fboundp 'defvaralias)
