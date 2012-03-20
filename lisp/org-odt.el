@@ -2063,51 +2063,105 @@ specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
 %n is replaced with SEQNO. See
 `org-odt-format-label-reference'.")
 
+(defcustom org-export-odt-category-strings
+  '(("en" "Table" "Figure" "Equation" "Equation"))
+  "Specify category strings for various captionable entities.
+Captionable entity can be one of a Table, an Embedded Image, a
+LaTeX fragment (generated with dvipng) or a Math Formula.
+
+For example, when `org-export-default-language' is \"en\", an
+embedded image will be captioned as \"Figure 1: Orgmode Logo\".
+If you want the images to be captioned instead as \"Illustration
+1: Orgmode Logo\", then modify the entry for \"en\" as shown
+below.
+
+  \(setq org-export-odt-category-strings
+	'\(\(\"en\" \"Table\" \"Illustration\"
+	   \"Equation\" \"Equation\"\)\)\)"
+  :group 'org-export-odt
+  :version "24.1"
+  :type '(repeat (list (string :tag "Language tag")
+		       (choice :tag "Table"
+			       (const :tag "Use Default" nil)
+			       (string :tag "Category string"))
+		       (choice :tag "Figure"
+			       (const :tag "Use Default" nil)
+			       (string :tag "Category string"))
+		       (choice :tag "Math Formula"
+			       (const :tag "Use Default" nil)
+			       (string :tag "Category string"))
+		       (choice :tag "Dvipng Image"
+			       (const :tag "Use Default" nil)
+			       (string :tag "Category string")))))
+
 (defvar org-odt-category-map-alist
   '(("__Table__" "Table" "value")
-    ("__Figure__" "Figure" "value")
-    ("__MathFormula__" "Equation" "text")
+    ("__Figure__" "Illustration" "value")
+    ("__MathFormula__" "Text" "text")
     ("__DvipngImage__" "Equation" "value")
     ;; ("__Table__" "Table" "category-and-value")
     ;; ("__Figure__" "Figure" "category-and-value")
     ;; ("__DvipngImage__" "Equation" "category-and-value")
     )
-  "Map a CATEGORY-HANDLE to CATEGORY-NAME and LABEL-STYLE.
-This is an list where each element is of the form
-\\(CATEGORY-HANDLE CATEGORY-NAME LABEL-STYLE\\).  CATEGORY_HANDLE
-is one of the internal handles, as seen above.  CATEGORY-NAME and
-LABEL-STYLE are used for generating ODT labels.  See
-`org-odt-label-styles'.")
+  "Map a CATEGORY-HANDLE to OD-VARIABLE and LABEL-STYLE.
+This is a list where each entry is of the form \\(CATEGORY-HANDLE
+OD-VARIABLE LABEL-STYLE\\).  CATEGORY_HANDLE identifies the
+captionable entity in question.  OD-VARIABLE is the OpenDocument
+sequence counter associated with the entity.  These counters are
+declared within
+\"<text:sequence-decls>...</text:sequence-decls>\" block of
+`org-export-odt-content-template-file'.  LABEL-STYLE is a key
+into `org-odt-label-styles' and specifies how a given entity
+should be captioned and referenced.
+
+The position of a CATEGORY-HANDLE in this list is used as an
+index in to per-language entry for
+`org-export-odt-category-strings' to retrieve a CATEGORY-NAME.
+This CATEGORY-NAME is then used for qualifying the user-specified
+captions on export.")
 
 (defun org-odt-add-label-definition (label default-category)
   "Create an entry in `org-odt-entity-labels-alist' and return it."
-  (setq label (substring-no-properties label))
   (let* ((label-props (assoc default-category org-odt-category-map-alist))
-	 (category (nth 1 label-props))
-	 (counter category)
-	 (label-style (nth 2 label-props))
-	 (sequence-var (intern (mapconcat
-				'downcase
-				(org-split-string counter) "-")))
+	 ;; identify the sequence number
+	 (counter (nth 1 label-props))
+	 (sequence-var (intern counter))
 	 (seqno (1+ (or (plist-get org-odt-entity-counts-plist sequence-var)
 			0)))
-	 (label-props (list label category seqno label-style)))
+	 ;; assign an internal label, if user has not provided one
+	 (label (if label (substring-no-properties label)
+		  (format  "%s-%s" default-category seqno)))
+	 ;; identify label style
+	 (label-style (nth 2 label-props))
+	 ;; grok language setting
+	 (en-strings (assoc-default "en" org-export-odt-category-strings))
+	 (lang (plist-get org-lparse-opt-plist :language))
+	 (lang-strings (assoc-default lang org-export-odt-category-strings))
+	 ;; retrieve localized category sting
+	 (pos (- (length org-odt-category-map-alist)
+		 (length (memq label-props org-odt-category-map-alist))))
+	 (category (or (nth pos lang-strings) (nth pos en-strings)))
+	 (label-props (list label category counter seqno label-style)))
+    ;; synchronize internal counters
     (setq org-odt-entity-counts-plist
 	  (plist-put org-odt-entity-counts-plist sequence-var seqno))
+    ;; stash label properties for later retrieval
     (push label-props org-odt-entity-labels-alist)
     label-props))
 
-(defun org-odt-format-label-definition (caption label category seqno label-style)
+(defun org-odt-format-label-definition (caption label category counter
+						seqno label-style)
   (assert label)
   (format-spec
    (cadr (assoc-string label-style org-odt-label-styles t))
    `((?e . ,category)
      (?n . ,(org-odt-format-tags
 	     '("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
-	     (format "%d" seqno) label category category))
+	     (format "%d" seqno) label counter counter))
      (?c . ,(or (and caption (concat ": " caption)) "")))))
 
-(defun org-odt-format-label-reference (label category seqno label-style)
+(defun org-odt-format-label-reference (label category counter
+					     seqno label-style)
   (assert label)
   (save-match-data
     (let* ((fmt (cddr (assoc-string label-style org-odt-label-styles t)))
