@@ -73,6 +73,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'org)
+(require 'find-func)
 
 (defun org-export-blocks-set (var value)
   "Set the value of `org-export-blocks' and install fontification."
@@ -224,7 +225,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 
 ;;--------------------------------------------------------------------------------
 ;; ditaa: create images from ASCII art using the ditaa utility
-(defvar org-ditaa-jar-path (expand-file-name
+(defcustom org-ditaa-jar-path (expand-file-name
 			    "ditaa.jar"
 			    (file-name-as-directory
 			     (expand-file-name
