@@ -21268,8 +21268,8 @@ Show the heading too, if it is currently invisible."
 	(goto-char (point-max))
 	(while (re-search-backward re nil t)
 	  (setq level (org-reduced-level (funcall outline-level)))
-	  (when (<= level n)
-	    (looking-at org-complex-heading-regexp)
+	  (when (and (<= level n)
+		     (looking-at org-complex-heading-regexp))
 	    (setq head (org-link-display-format
 			(org-match-string-no-properties 4))
 		  m (org-imenu-new-marker))
