@@ -17012,8 +17012,6 @@ Some of the options can be changed using the variable
 	      (error "Unknown conversion type %s for latex fragments"
 		     processing-type)))))))))
 
-(declare-function format-spec "format-spec" (format specification))
-
 (defun org-create-math-formula (latex-frag &optional mathml-file)
   "Convert LATEX-FRAG to MathML and store it in MATHML-FILE.
 Use `org-latex-to-mathml-convert-command'.  If the conversion is
