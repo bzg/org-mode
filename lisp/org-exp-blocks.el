@@ -232,7 +232,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 			      (file-name-as-directory
 			       (expand-file-name
 				"../contrib"
-				(file-name-directory (or load-file-name buffer-file-name)))))))
+				(file-name-directory (find-library-name "org")))))))
   "Path to the ditaa jar executable.")
 
 (defvar org-export-current-backend) ; dynamically bound in org-exp.el
