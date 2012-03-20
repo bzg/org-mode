@@ -2244,7 +2244,7 @@ block but are passed literally to the \"example-block\"."
 		    (when (org-babel-ref-goto-headline-id source-name)
 		      (org-babel-ref-headline-body)))
 		  ;; find the expansion of reference in this buffer
-		  (let ((rx (concat rx-prefix source-name))
+		  (let ((rx (concat rx-prefix source-name "[ \t\n]"))
 			expansion)
 		    (save-excursion
 		      (goto-char (point-min))

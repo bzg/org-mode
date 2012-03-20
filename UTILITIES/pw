@@ -314,7 +314,7 @@ def action_update_patch(rpc, patch_id, state = None, commit = None,
 
         if state.lower() in notify_on_state_change:
             if not delegate_id:
-                sys.stderr.write("Error: Delete (-d) required for this update\n")
+                sys.stderr.write("Error: Delegate (-d) required for this update\n")
                 sys.exit(1)
                 
             person = rpc.person_get(delegate_id)
