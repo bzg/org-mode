@@ -30,9 +30,8 @@
 (require 'ob)
 (require 'ob-eval)
 (require 'ob-tangle)
+(require 'outline)
 (defalias 'lilypond-mode 'LilyPond-mode)
-
-(declare-function show-all "outline" ())
 
 (add-to-list 'org-babel-tangle-lang-exts '("LilyPond" . "ly"))
 
