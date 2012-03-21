@@ -194,7 +194,9 @@ This is the compiled version of the format.")
 				   (point-at-bol) (point-at-eol)))))
 			    ;; In agenda, just get the `txt' property
 			    (org-no-properties
-			     (org-get-at-bol 'txt))))
+			     (or (org-get-at-bol 'txt)
+				 (buffer-substring
+				  (point) (progn (end-of-line) (point)))))))
 		  (assoc property props))
 	    width (or (cdr (assoc property org-columns-current-maxwidths))
 		      (nth 2 column)
