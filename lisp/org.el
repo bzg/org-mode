@@ -75,6 +75,7 @@
   (require 'gnus-sum))
 
 (require 'calendar)
+(require 'find-func)
 (require 'format-spec)
 
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
@@ -111,7 +112,6 @@
 (declare-function org-at-clock-log-p "org-clock" ())
 (declare-function org-clock-timestamps-up "org-clock" ())
 (declare-function org-clock-timestamps-down "org-clock" ())
-(declare-function find-library-name "find-func")
 
 ;; babel
 (require 'ob)
