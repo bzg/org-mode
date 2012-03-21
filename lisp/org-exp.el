@@ -207,8 +207,11 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("ru" "&#1040;&#1074;&#1090;&#1086;&#1088;"      "&#1044;&#1072;&#1090;&#1072;"  "&#1057;&#1086;&#1076;&#1077;&#1088;&#1078;&#1072;&#1085;&#1080;&#1077;" "&#1057;&#1085;&#1086;&#1089;&#1082;&#1080;")
     ("sv" "F&ouml;rfattare" "Datum" "Inneh&aring;ll" "Fotnoter")
     ;; Use numeric character entities for proper rendering of non-UTF8 documents
-    ;; ("zh_CN" "作者" "日期" "目录" "脚注")
-    ("zh-CN" "&#20316;&#32773;" "&#26085;&#26399;" "&#30446;&#24405;" "&#33050;&#27880;"))
+    ;; ("zh-CN" "作者" "日期" "目录" "脚注")
+    ("zh-CN" "&#20316;&#32773;" "&#26085;&#26399;" "&#30446;&#24405;" "&#33050;&#27880;")
+    ;; Use numeric character entities for proper rendering of non-UTF8 documents
+    ;; ("zh-TW" "作者" "日期" "目錄" "腳註")
+    ("zh-TW" "&#20316;&#32773;" "&#26085;&#26399;" "&#30446;&#37636;" "&#33139;&#35387;"))
   "Terms used in export text, translated to different languages.
 Use the variable `org-export-default-language' to set the language,
 or use the +OPTION lines for a per-file setting."
