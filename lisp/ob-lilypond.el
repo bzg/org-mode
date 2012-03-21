@@ -3,8 +3,8 @@
 ;; Copyright (C) 2010-2012  Free Software Foundation, Inc.
 
 ;; Author: Martyn Jago
-;; Keywords: babel language, literate programming, music score
-;; Homepage: https://github.com/mjago/ob-lilypond
+;; Keywords: babel language, literate programming
+;; Homepage: http://orgmode.org/worg/org-contrib/babel/languages/ob-doc-lilypond.html
 
 ;; This file is part of GNU Emacs.
 
@@ -34,9 +34,8 @@
 (require 'ob)
 (require 'ob-eval)
 (require 'ob-tangle)
+(require 'outline)
 (defalias 'lilypond-mode 'LilyPond-mode)
-
-(declare-function show-all "outline" ())
 
 (add-to-list 'org-babel-tangle-lang-exts '("LilyPond" . "ly"))
 
@@ -44,9 +43,6 @@
   "Default header arguments for lilypond code blocks.
 NOTE: The arguments are determined at lilypond compile time.
 See (ly-set-header-args)")
-
-(defconst ly-version "7.6"
-  "The version number of the file ob-lilypond.el.")
 
 (defvar ly-compile-post-tangle t
   "Following the org-babel-tangle (C-c C-v t) command,
@@ -437,13 +433,7 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
   (message (concat "Arrange mode has been "
                    (if ly-arrange-mode "ENABLED." "DISABLED."))))
 
-(defun ly-version (&optional insert-at-point)
-  (interactive)
-  (let ((version (format "ob-lilypond version %s" ly-version)))
-    (when insert-at-point (insert version))
-    (message version)))
-
-  (defun ly-switch-extension (file-name ext)
+(defun ly-switch-extension (file-name ext)
   "Utility command to swap current FILE-NAME extension with EXT"
 
   (concat (file-name-sans-extension

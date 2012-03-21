@@ -38,16 +38,6 @@
   (should-error (org-babel-prep-session:lilypond nil nil))
   :type 'error)
 
-(ert-deftest ob-lilypond/ly-version-const () 
-  (should (boundp 'ly-version)))
-
-(ert-deftest ob-lilypond/ly-version-command ()
-  (should (equal "ob-lilypond version 7.6" (ly-version)))
-  (with-temp-buffer
-    (ly-version t)
-    (should (equal "ob-lilypond version 7.6"
-                   (buffer-substring (point-min) (point-max))))))
-
 (ert-deftest ob-lilypond/ly-compile-lilyfile ()
   (should (equal
            `(,(ly-determine-ly-path)    ;program
