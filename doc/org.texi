@@ -613,13 +613,14 @@ DocBook export
 OpenDocument Text export
 
 * Pre-requisites for ODT export::  What packages ODT exporter relies on
-* ODT export commands::  How to invoke ODT export
-* Extending ODT export:: How to produce @samp{doc}, @samp{pdf} files
+* ODT export commands::         How to invoke ODT export
+* Extending ODT export::        How to produce @samp{doc}, @samp{pdf} files
 * Applying custom styles::      How to apply custom styles to the output
-* Links in ODT export::  How links will be interpreted and formatted
-* Tables in ODT export::  How Tables are exported
-* Images in ODT export::  How to insert images
+* Links in ODT export::         How links will be interpreted and formatted
+* Tables in ODT export::        How Tables are exported
+* Images in ODT export::        How to insert images
 * Math formatting in ODT export::  How @LaTeX{} fragments are formatted
+* Labels and captions in ODT export::  How captions are rendered
 * Literal examples in ODT export::  How source and example blocks are formatted
 * Advanced topics in ODT export::  Read this if you are a power user
 
@@ -10799,13 +10800,14 @@ are compatible with LibreOffice 3.4.
 
 @menu
 * Pre-requisites for ODT export::  What packages ODT exporter relies on
-* ODT export commands::  How to invoke ODT export
-* Extending ODT export:: How to produce @samp{doc}, @samp{pdf} files
+* ODT export commands::         How to invoke ODT export
+* Extending ODT export::        How to produce @samp{doc}, @samp{pdf} files
 * Applying custom styles::      How to apply custom styles to the output
-* Links in ODT export::  How links will be interpreted and formatted
-* Tables in ODT export::  How Tables are exported
-* Images in ODT export::  How to insert images
+* Links in ODT export::         How links will be interpreted and formatted
+* Tables in ODT export::        How Tables are exported
+* Images in ODT export::        How to insert images
 * Math formatting in ODT export::  How @LaTeX{} fragments are formatted
+* Labels and captions in ODT export::  How captions are rendered
 * Literal examples in ODT export::  How source and example blocks are formatted
 * Advanced topics in ODT export::  Read this if you are a power user
 @end menu
@@ -10966,8 +10968,15 @@ the factory settings.
 @subsection Links in ODT export
 @cindex tables, in DocBook export
 
-The ODT exporter creates cross-references (aka bookmarks) for
-internal links.  It creates Internet-style links for all other links.
+ODT exporter creates native cross-references for internal links.  It creates
+Internet-style links for all other links.
+
+A link with no description and destined to a regular (un-itemized) outline
+heading is replaced with a cross-reference and section number of the heading.
+
+A @samp{\ref@{label@}}-style reference to an image, table etc. is replaced
+with a cross-reference and sequence number of the labelled entity.
+@xref{Labels and captions in ODT export}.
 
 @node Tables in ODT export, Images in ODT export, Links in ODT export, OpenDocument Text export
 @subsection Tables in ODT export
@@ -11116,7 +11125,7 @@ To create an image that is anchored to a page, do the following:
 [[./img.png]]
 @end example
 
-@node Math formatting in ODT export, Literal examples in ODT export, Images in ODT export, OpenDocument Text export
+@node Math formatting in ODT export, Labels and captions in ODT export, Images in ODT export, OpenDocument Text export
 @subsection Math formatting in ODT export
 
 The ODT exporter has special support for handling math.
@@ -11210,34 +11219,69 @@ or
 [[./equation.odf]]
 @end example
 
-@node Literal examples in ODT export, Advanced topics in ODT export, Math formatting in ODT export, OpenDocument Text export
+@node Labels and captions in ODT export, Literal examples in ODT export, Math formatting in ODT export, OpenDocument Text export
+@subsection Labels and captions in ODT export
+
+You can label and caption various category of objects - an inline image, a
+table, a @LaTeX{} fragment or a Math formula - using @code{#+LABEL} and
+@code{#+CAPTION} lines.  @xref{Images and tables}.  ODT exporter enumerates
+each labelled or captioned object of a given category separately.  As a
+result, each such object is assigned a sequence number based on order of it's
+appearance in the Org file.
+
+In the exported document, a user-provided caption is augmented with the
+category and sequence number.  Consider the following inline image in an Org
+file.
+
+@example
+#+CAPTION: Bell curve
+#+LABEL:   fig:SED-HR4049
+[[./img/a.png]]
+@end example
+
+It could be rendered as shown below in the exported document.
+
+@example
+Figure 2: Bell curve
+@end example
+
+@vindex org-export-odt-category-strings
+You can modify the category component of the caption by customizing the
+variable @code{org-export-odt-category-strings}.  For example, to tag all
+embedded images with the string @samp{Illustration} (instead of the default
+@samp{Figure}) use the following setting.
+
+@lisp
+(setq org-export-odt-category-strings
+      '(("en" "Table" "Illustration" "Equation" "Equation")))
+@end lisp
+
+With this, previous image will be captioned as below in the exported
+document.
+
+@example
+Illustration 2: Bell curve
+@end example
+
+@node Literal examples in ODT export, Advanced topics in ODT export, Labels and captions in ODT export, OpenDocument Text export
 @subsection Literal examples in ODT export
 
 Export of literal examples (@pxref{Literal examples}) with full fontification
-is supported.  This feature is enabled by default and is activated
-automatically if an enhanced version of @file{htmlfontify.el} is available in
-the @code{load-path}.@footnote{The @file{htmlfontify.el} that ships with
-standard Emacs <= 24.1 has no support for ODT fontification.  A
-copy of the proposed version is available as an attachment to
-@url{http://debbugs.gnu.org/cgi/bugreport.cgi?msg=5;filename=htmlfontify.el;att=9;bug=9914,
-Emacs Bug #9914}.}
+is supported.  Internally, the exporter relies on @file{htmlfontify.el} to
+generate all style definitions needed for a fancy listing.@footnote{Your
+@file{htmlfontify.el} library must atleast be at Emacs 24.1 levels for
+fontification to be turned on.}  The auto-generated styles have @samp{OrgSrc}
+as prefix and inherit their color from the faces used by Emacs
+@code{font-lock} library for the source language.
 
 @vindex org-export-odt-fontify-srcblocks
-
-The character styles used for fontification of the literal blocks are
-auto-generated by the exporter in conjunction with @file{htmlfontify.el}
-library and need not be included in the default @file{styles.xml} file.
-These auto-generated styles have the @samp{OrgSrc} prefix and inherit their color
-based on the face used by Emacs @code{font-lock} library.
-
-@vindex org-export-odt-create-custom-styles-for-srcblocks
-If you prefer to use your own custom styles for fontification and disable
-their auto-generation altogether, you can do so by customizing the variable
+If you prefer to use your own custom styles for fontification, you can do so
+by customizing the variable
 @code{org-export-odt-create-custom-styles-for-srcblocks}.
 
-You can turn off fontification support for literal examples by customizing
-the variable @code{org-export-odt-fontify-srcblocks}.
-
+@vindex org-export-odt-create-custom-styles-for-srcblocks
+You can turn off fontification of literal examples by customizing the
+variable @code{org-export-odt-fontify-srcblocks}.
 
 @node Advanced topics in ODT export,  , Literal examples in ODT export, OpenDocument Text export
 @subsection Advanced topics in ODT export
@@ -11496,7 +11540,7 @@ the table that follows.
 @end lisp
 
 @example
-#+ATTR_ODT: TableWithHeaderRowAndColumn
+#+ATTR_ODT: :style "TableWithHeaderRowAndColumn"
 | Name  | Phone | Age |
 | Peter |  1234 |  17 |
 | Anna  |  4321 |  25 |
@@ -11601,9 +11645,9 @@ To define a table style, create an entry for the style in the variable
 @end itemize
 
 For example, the entry below defines two different table styles
-@samp{TableWithHeaderRowsAndColumns} and @samp{TableWithHeaderColumns} based
-on the same template @samp{Custom}.  The styles achieve their intended effect
-by selectively activating the individual cell styles in that template.
+@samp{TableWithHeaderRowAndColumn} and @samp{TableWithFirstRowandLastRow}
+based on the same template @samp{Custom}.  The styles achieve their intended
+effect by selectively activating the individual cell styles in that template.
 
 @lisp
 (setq org-export-odt-table-styles
@@ -11623,7 +11667,7 @@ To do this, specify the table style created in step (2) as part of
 the @code{ATTR_ODT} line as shown below.
 
 @example
-#+ATTR_ODT: TableWithHeaderRowAndColumn
+#+ATTR_ODT: :style "TableWithHeaderRowAndColumn"
 | Name  | Phone | Age |
 | Peter |  1234 |  17 |
 | Anna  |  4321 |  25 |
@@ -12663,7 +12707,7 @@ Org mode buffer.  The results of evaluation are placed following a line that
 begins by default with @code{#+RESULTS} and optionally a cache identifier
 and/or the name of the evaluated code block.  The default value of
 @code{#+RESULTS} can be changed with the customizable variable
-@code{org-babel-results-keyword}. 
+@code{org-babel-results-keyword}.
 
 By default, the evaluation facility is only enabled for Lisp code blocks
 specified as @code{emacs-lisp}. However, source code blocks in many languages
