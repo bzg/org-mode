@@ -1556,10 +1556,14 @@ value of `org-export-odt-fontify-srcblocks."
 	(org-lparse-end-paragraph)
 	(org-lparse-insert-list-table
 	 `((,(org-odt-format-entity
-	      (if caption "CaptionedDisplayFormula" "DisplayFormula")
-	      href width height :caption caption :label nil)
-	    ,(if (not label) ""
-	       (org-odt-format-entity-caption label nil "__MathFormula__"))))
+	      (if (not (or caption label)) "DisplayFormula"
+		"CaptionedDisplayFormula")
+	      href width height :caption caption :label label)
+	    ,(if (not (or caption label)) ""
+	       (let* ((label-props (car org-odt-entity-labels-alist)))
+		 (setcar (last label-props) "math-label")
+		 (apply 'org-odt-format-label-definition
+			caption label-props)))))
 	 nil nil nil ":style \"OrgEquation\"" nil '((1 "c" 8) (2 "c" 1)))
 	(throw 'nextline nil))))))
 
@@ -2040,9 +2044,10 @@ See `org-odt-add-label-definition' and
 See `org-odt-entity-labels-alist' for known CATEGORY-NAMEs.")
 
 (defvar org-odt-label-styles
-  '(("text" "(%n)" "text" "(%n)")
-    ("category-and-value" "%e %n%c" "category-and-value" "%e %n")
-    ("value" "%e %n%c" "value" "%n"))
+  '(("math-formula" "%c" "text" "(%n)")
+    ("math-label" "(%n)" "text" "(%n)")
+    ("category-and-value" "%e %n: %c" "category-and-value" "%e %n")
+    ("value" "%e %n: %c" "value" "%n"))
   "Specify how labels are applied and referenced.
 This is an alist where each element is of the
 form (LABEL-STYLE-NAME LABEL-ATTACH-FMT LABEL-REF-MODE
@@ -2097,7 +2102,7 @@ below.
 (defvar org-odt-category-map-alist
   '(("__Table__" "Table" "value")
     ("__Figure__" "Illustration" "value")
-    ("__MathFormula__" "Text" "text")
+    ("__MathFormula__" "Text" "math-formula")
     ("__DvipngImage__" "Equation" "value")
     ;; ("__Table__" "Table" "category-and-value")
     ;; ("__Figure__" "Figure" "category-and-value")
@@ -2158,7 +2163,7 @@ captions on export.")
      (?n . ,(org-odt-format-tags
 	     '("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
 	     (format "%d" seqno) label counter counter))
-     (?c . ,(or (and caption (concat ": " caption)) "")))))
+     (?c . ,(or caption "")))))
 
 (defun org-odt-format-label-reference (label category counter
 					     seqno label-style)
@@ -2187,10 +2192,9 @@ captions on export.")
 	 (format "Unable to resolve reference to label \"%s\"" label))))))
 
 (defun org-odt-format-entity-caption (label caption category)
-  (or (and label
-	   (apply 'org-odt-format-label-definition
-		  caption (org-odt-add-label-definition label category)))
-      caption ""))
+  (if (not (or label caption)) ""
+    (apply 'org-odt-format-label-definition caption
+	   (org-odt-add-label-definition label category))))
 
 (defun org-odt-format-tags (tag text &rest args)
   (let ((prefix (when org-lparse-encode-pending "@"))
