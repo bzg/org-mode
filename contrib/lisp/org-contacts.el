@@ -143,7 +143,8 @@ This overrides `org-email-link-description-format' if set."
 (defun org-contacts-filter (&optional name-match tags-match)
   "Search for a contact maching NAME-MATCH and TAGS-MATCH.
 If both match values are nil, return all contacts."
-  (let ((tags-matcher
+  (let* (todo-only
+	(tags-matcher
          (if tags-match
              (cdr (org-make-tags-matcher tags-match))
            t))
@@ -161,7 +162,8 @@ If both match values are nil, return all contacts."
           (error "File %s is no in `org-mode'" file))
         (org-scan-tags
          '(add-to-list 'markers (set-marker (make-marker) (point)))
-         `(and ,contacts-matcher ,tags-matcher ,name-matcher))))
+         `(and ,contacts-matcher ,tags-matcher ,name-matcher)
+	 todo-only)))
     (dolist (marker markers result)
       (org-with-point-at marker
         (add-to-list 'result
