@@ -2972,17 +2972,11 @@ Assume buffer is in Org mode."
 	    ;; belongs to a section.
 	    'section nil granularity visible-only nil))))
 
-(defun org-element-parse-secondary-string (string restriction &optional buffer)
+(defun org-element-parse-secondary-string (string restriction)
   "Recursively parse objects in STRING and return structure.
 
 RESTRICTION, when non-nil, is a symbol limiting the object types
-that will be looked after.
-
-Optional argument BUFFER indicates the buffer from where the
-secondary string was extracted.  It is used to determine where to
-get extraneous information for an object \(i.e. when resolving
-a link or looking for a footnote definition\).  It defaults to
-the current buffer."
+that will be looked after."
   (with-temp-buffer
     (insert string)
     (org-element-parse-objects (point-min) (point-max) nil restriction)))
