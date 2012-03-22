@@ -7652,13 +7652,13 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		new
 		(let ((org-prefix-format-compiled
 		       (or (get-text-property (point) 'format)
-			   org-prefix-format-compiled)))
+			   org-prefix-format-compiled))
+		      (extra (org-get-at-bol 'extra)))
 		  (with-current-buffer (marker-buffer hdmarker)
 		    (save-excursion
 		      (save-restriction
 			(widen)
-			(org-agenda-format-item (org-get-at-bol 'extra)
-						newhead cat tags dotime)))))
+			(org-agenda-format-item extra newhead cat tags dotime)))))
 		pl (text-property-any (point-at-bol) (point-at-eol) 'org-heading t)
 		undone-face (org-get-at-bol 'undone-face)
 		done-face (org-get-at-bol 'done-face))
