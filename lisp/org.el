@@ -6312,8 +6312,11 @@ in special contexts.
 	  (org-list-set-item-visibility (point-at-bol) struct 'children)
 	(org-show-entry)
 	(org-with-limited-levels (show-children))
-	(when (memq 'org-cycle-hide-drawers org-cycle-hook)
-	  (org-cycle-hide-drawers 'subtree))
+	;; FIXME: This slows down the func way too much.
+	;; How keep drawers hidden in subtree anyway?
+	;; (when (memq 'org-cycle-hide-drawers org-cycle-hook)
+	;;   (org-cycle-hide-drawers 'subtree))
+
 	;; Fold every list in subtree to top-level items.
 	(when (eq org-cycle-include-plain-lists 'integrate)
 	  (save-excursion
