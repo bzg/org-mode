@@ -304,11 +304,13 @@ you can \"misuse\" it to also add other text to the header.  However,
 		    (string :tag "+tag or -tag"))))
 	    (list :tag "Set daily/weekly entry types"
 		  (const org-agenda-entry-types)
-		  (set :greedy t :value (:deadline :scheduled :timestamp :sexp)
-		       (const :deadline)
-		       (const :scheduled)
-		       (const :timestamp)
-		       (const :sexp)))
+		  (list
+		   (const :format "" quote)
+		   (set :greedy t :value (:deadline :scheduled :timestamp :sexp)
+			(const :deadline)
+			(const :scheduled)
+			(const :timestamp)
+			(const :sexp))))
 	    (list :tag "Standard skipping condition"
 		  :value (org-agenda-skip-function '(org-agenda-skip-entry-if))
 		  (const org-agenda-skip-function)
