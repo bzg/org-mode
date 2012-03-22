@@ -431,6 +431,50 @@ Outside."
     (org-element-down)
     (should (looking-at "Paragraph"))))
 
+(ert-deftest test-org-element/drag-backward ()
+  "Test `org-element-drag-backward' specifications."
+  ;; 1. Error when trying to move first element of buffer.
+  (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
+    (should-error (org-element-drag-backward)))
+  ;; 2. Error when trying to swap nested elements.
+  (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
+    (forward-line)
+    (should-error (org-element-drag-backward)))
+  ;; 3. Error when trying to swap an headline element and
+  ;;    a non-headline element.
+  (org-test-with-temp-text "Test.\n* Head 1"
+    (forward-line)
+    (should-error (org-element-drag-backward)))
+  ;; 4. Otherwise, swap elements, preserving column and blank lines
+  ;;    between elements.
+  (org-test-with-temp-text "Para1\n\n\nParagraph 2\n\nPara3"
+    (search-forward "graph")
+    (org-element-drag-backward)
+    (should (equal (buffer-string) "Paragraph 2\n\n\nPara1\n\nPara3"))
+    (should (looking-at " 2"))))
+
+(ert-deftest test-org-element/drag-forward ()
+  "Test `org-element-drag-forward' specifications."
+  ;; 1. Error when trying to move first element of buffer.
+  (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
+    (goto-line 3)
+    (should-error (org-element-drag-forward)))
+  ;; 2. Error when trying to swap nested elements.
+  (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
+    (forward-line)
+    (should-error (org-element-drag-forward)))
+  ;; 3. Error when trying to swap a non-headline element and an
+  ;;    headline.
+  (org-test-with-temp-text "Test.\n* Head 1"
+    (should-error (org-element-drag-forward)))
+  ;; 4. Otherwise, swap elements, preserving column and blank lines
+  ;;    between elements.
+  (org-test-with-temp-text "Paragraph 1\n\n\nPara2\n\nPara3"
+    (search-forward "graph")
+    (org-element-drag-forward)
+    (should (equal (buffer-string) "Para2\n\n\nParagraph 1\n\nPara3"))
+    (should (looking-at " 1"))))
+
 
 (provide 'test-org-element)
 ;;; test-org-element.el ends here
