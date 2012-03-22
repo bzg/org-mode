@@ -1839,9 +1839,12 @@ table."
 		     ((string-match "\\<tabular.?\\>" attr)
 		      (org-match-string-no-properties 0 attr))
 		     (t org-e-latex-default-table-environment)))
-	 ;; If table is a float, determine environment: table or table*.
+	 ;; If table is a float, determine environment: table, table*
+	 ;; or sidewaystable.
 	 (float-env (cond
 		     ((string= "longtable" table-env) nil)
+		     ((and attr (string-match "\\<sidewaystable\\>" attr))
+		      "sidewaystables")
 		     ((and attr
 			   (or (string-match (regexp-quote "table*") attr)
 			       (string-match "\\<multicolumn\\>" attr)))
