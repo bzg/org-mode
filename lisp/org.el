@@ -17283,9 +17283,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-i"       'org-cycle)
 (org-defkey org-mode-map [(tab)]      'org-cycle)
 (org-defkey org-mode-map [(control tab)] 'org-force-cycle-archived)
-(org-defkey org-mode-map [(meta tab)] 'pcomplete)
 (org-defkey org-mode-map "\M-\t" 'pcomplete)
-(org-defkey org-mode-map "\M-\C-i"      'pcomplete)
 ;; The following line is necessary under Suse GNU/Linux
 (unless (featurep 'xemacs)
   (org-defkey org-mode-map [S-iso-lefttab]  'org-shifttab))
