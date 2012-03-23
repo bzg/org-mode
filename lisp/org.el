@@ -12821,7 +12821,7 @@ obtain a list of properties.  Building the tags list for each entry in such
 a file becomes an N^2 operation - but with this variable set, it scales
 as N.")
 
-(defun org-scan-tags (action matcher &optional todo-only start-level)
+(defun org-scan-tags (action matcher todo-only &optional start-level)
   "Scan headline tags with inheritance and produce output ACTION.
 
 ACTION can be `sparse-tree' to produce a sparse tree in the current buffer,
@@ -12831,7 +12831,9 @@ this case the return value is a list of all return values from these calls.
 
 MATCHER is a Lisp form to be evaluated, testing if a given set of tags
 qualifies a headline for inclusion.  When TODO-ONLY is non-nil,
-only lines with a TODO keyword are included in the output.
+only lines with a not-done TODO keyword are included in the output.
+This should be the same variable that was scoped into 
+and set by `org-make-tags-matcher' when it constructed MATCHER.
 
 START-LEVEL can be a string with asterisks, reducing the scope to
 headlines matching this string."
@@ -13001,8 +13003,6 @@ headlines matching this string."
 		 (if (member x org-use-tag-inheritance) x nil))
 	       tags)))))
 
-(defvar todo-only) ;; dynamically scoped
-
 (defun org-match-sparse-tree (&optional todo-only match)
   "Create a sparse tree according to tags string MATCH.
 MATCH can contain positive and negative selection of tags, like
@@ -13049,9 +13049,29 @@ instead of the agenda files."
 		     (org-agenda-files))))))))
 
 (defun org-make-tags-matcher (match)
-  "Create the TAGS/TODO matcher form for the selection string MATCH."
-  ;; todo-only is scoped dynamically into this function, and the function
-  ;; may change it if the matcher asks for it.
+  "Create the TAGS/TODO matcher form for the selection string MATCH.
+
+The variable `todo-only' is scoped dynamically into this function; it will be
+set to t if the matcher restricts matching to TODO entries,
+otherwise will not be touched.
+
+Returns a cons of the selection string MATCH and the constructed
+lisp form implementing the matcher.  The matcher is to be
+evaluated at an Org entry, with point on the headline,
+and returns t if the entry matches the
+selection string MATCH.  The returned lisp form references
+two variables with information about the entry, which must be
+bound around the form's evaluation: todo, the TODO keyword at the
+entry (or nil of none); and tags-list, the list of all tags at the
+entry including inherited ones.  Additionally, the category
+of the entry (if any) must be specified as the text property
+'org-category on the headline.
+
+See also `org-scan-tags'.
+"
+  (declare (special todo-only))
+  (unless (boundp 'todo-only)
+    (error "org-make-tags-matcher expects todo-only to be scoped in"))
   (unless match
     ;; Get a new match request, with completion
     (let ((org-last-tags-completion-table
@@ -13168,6 +13188,9 @@ instead of the agenda files."
     (setq matcher (if todomatcher
 		      (list 'and tagsmatcher todomatcher)
 		    tagsmatcher))
+    (when todo-only
+      (setq matcher (list 'and '(member todo org-not-done-keywords)
+			  matcher)))
     (cons match0 matcher)))
 
 (defun org-op-to-function (op &optional stringp)
@@ -13881,7 +13904,8 @@ a *different* entry, you cannot use these techniques."
 	   org-done-keywords-for-agenda
 	   org-todo-keyword-alist-for-agenda
 	   org-drawers-for-agenda
-	   org-tag-alist-for-agenda)
+	   org-tag-alist-for-agenda
+	   todo-only)
 
       (cond
        ((eq match t)   (setq matcher t))
@@ -13914,7 +13938,7 @@ a *different* entry, you cannot use these techniques."
 	      (progn
 		(org-prepare-agenda-buffers
 		 (list (buffer-file-name (current-buffer))))
-		(setq res (org-scan-tags func matcher nil start-level)))
+		(setq res (org-scan-tags func matcher todo-only start-level)))
 	    ;; Get the right scope
 	    (cond
 	     ((and scope (listp scope) (symbolp (car scope)))
@@ -13935,7 +13959,7 @@ a *different* entry, you cannot use these techniques."
 		  (save-restriction
 		    (widen)
 		    (goto-char (point-min))
-		    (setq res (append res (org-scan-tags func matcher))))))))))
+		    (setq res (append res (org-scan-tags func matcher todo-only))))))))))
       res)))
 
 ;;;; Properties

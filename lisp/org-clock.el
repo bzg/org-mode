@@ -2441,6 +2441,7 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 	 (tags (plist-get params :tags))
 	 (properties (plist-get params :properties))
 	 (inherit-property-p (plist-get params :inherit-props))
+	 todo-only
 	 (matcher (if tags (cdr (org-make-tags-matcher tags))))
 	 cc range-text st p time level hdl props tsp tbl)
 
