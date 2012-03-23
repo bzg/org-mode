@@ -14929,9 +14929,7 @@ plus or minus, it is relative to the date in DEFAULT-TIME.  E.g.
   +2w           --> two weeks from today
   ++5           --> five days from default date
 
-The function understands only English month and weekday abbreviations,
-but this can be configured with the variables `parse-time-months' and
-`parse-time-weekdays'.
+The function understands only English month and weekday abbreviations.
 
 While prompting, a calendar is popped up - you can also select the
 date with the mouse (button 1).  The calendar shows a period of three
@@ -15323,6 +15321,28 @@ user."
     (list second minute hour day month year)))
 
 (defvar parse-time-weekdays)
+
+;; (defcustom org-parse-time-weekdays parse-time-weekdays
+;;   "Alist of day names and their position in the week."
+;;   :group 'org-time
+;;   :type '(alist :key-type (string :tag "Day name")
+;; 		:value-type (integer :tag "Position")))
+
+(setq parse-time-weekdays '(("sun" . 0)
+			    ("mon" . 1)
+			    ("tue" . 2)
+			    ("wed" . 3)
+			    ("thu" . 4)
+			    ("fri" . 5)
+			    ("sat" . 6)
+			    ("sunday" . 0)
+			    ("monday" . 1)
+			    ("tuesday" . 2)
+			    ("wednesday" . 3)
+			    ("thursday" . 4)
+			    ("lundi" . 1)
+			    )
+      )
 
 (defun org-read-date-get-relative (s today default)
   "Check string S for special relative date string.
