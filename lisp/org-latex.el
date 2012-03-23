@@ -882,7 +882,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	       (concat
 		(file-name-as-directory
 		 (or pub-dir
-		     (org-export-directory :LaTeX ext-plist)))
+		     (org-export-directory :LaTeX org-export-latex-options-plist)))
 		(file-name-sans-extension
 		 (or (and subtree-p
 			  (org-entry-get rbeg "EXPORT_FILE_NAME" t))
