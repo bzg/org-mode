@@ -6374,7 +6374,7 @@ If the line does not have an effort defined, return nil."
 
 (defun org-agenda-filter-apply (filter type)
   "Set FILTER as the new agenda filter and apply it."
-  (let (tags)
+  (let (tags cat)
     (if (eq type 'tag)
 	(setq org-agenda-tag-filter filter)
       (setq org-agenda-category-filter filter
