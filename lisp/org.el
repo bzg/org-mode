@@ -21203,6 +21203,7 @@ Stop at the first and last subheadings of a superior heading."
 
 (defun org-show-subtree ()
   "Show everything after this heading at deeper levels."
+  (interactive)
   (outline-flag-region
    (point)
    (save-excursion
