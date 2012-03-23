@@ -930,6 +930,8 @@ Don't set this, this is meant for dynamic scoping.")
 		  (overlay-put ov 'display (format fmt val)))))
 	    org-columns-overlays))))
 
+(defvar org-inlinetask-min-level
+  (if (featurep 'org-inlinetask) org-inlinetask-min-level 15))
 (defun org-columns-compute (property)
   "Sum the values of property PROPERTY hierarchically, for the entire buffer."
   (interactive)
@@ -944,7 +946,9 @@ Don't set this, this is meant for dynamic scoping.")
 	 (fun (nth 6 ass))
 	 (calc (or (nth 7 ass) 'identity))
 	 (beg org-columns-top-level-marker)
-	 last-level val valflag flag end sumpos sum-alist sum str str1 useval)
+	 (inminlevel org-inlinetask-min-level)
+	 (last-level org-inlinetask-min-level)
+	 val valflag flag end sumpos sum-alist sum str str1 useval)
     (save-excursion
       ;; Find the region to compute
       (goto-char beg)
@@ -953,16 +957,21 @@ Don't set this, this is meant for dynamic scoping.")
       ;; Walk the tree from the back and do the computations
       (while (re-search-backward re beg t)
 	(setq sumpos (match-beginning 0)
-	      last-level level
+	      last-level (if (not (or (zerop level) (eq level inminlevel)))
+			     level last-level)
 	      level (org-outline-level)
 	      val (org-entry-get nil property)
 	      valflag (and val (string-match "\\S-" val)))
 	(cond
 	 ((< level last-level)
 	  ;; put the sum of lower levels here as a property
-	  (setq sum (when (aref lvals last-level)
-		      (apply fun (aref lvals last-level)))
-		flag (aref lflag last-level) ; any valid entries from children?
+	  (setq sum (+ (if (and (/= last-level inminlevel)
+				(aref lvals last-level))
+			   (apply fun (aref lvals last-level)) 0)
+		       (if (aref lvals inminlevel)
+			   (apply fun (aref lvals inminlevel)) 0))
+		flag (or (aref lflag last-level) ; any valid entries from children?
+			 (aref lflag inminlevel)) ; or inline tasks?
 		str (org-columns-number-to-string sum format printf)
 		str1 (org-add-props (copy-sequence str) nil 'org-computed t 'face 'bold)
 		useval (if flag str1 (if valflag val ""))
