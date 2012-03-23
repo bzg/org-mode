@@ -1535,6 +1535,20 @@ value of `org-export-odt-fontify-srcblocks."
 	       (org-odt-copy-image-file thefile) thelink))))
     (org-export-odt-format-image thefile href)))
 
+(defvar org-odt-entity-labels-alist nil
+  "Associate Labels with the Labeled entities.
+Each element of the alist is of the form (LABEL-NAME
+CATEGORY-NAME SEQNO LABEL-STYLE-NAME).  LABEL-NAME is same as
+that specified by \"#+LABEL: ...\" line.  CATEGORY-NAME is the
+type of the entity that LABEL-NAME is attached to.  CATEGORY-NAME
+can be one of \"Table\", \"Figure\" or \"Equation\".  SEQNO is
+the unique number assigned to the referenced entity on a
+per-CATEGORY basis.  It is generated sequentially and is 1-based.
+LABEL-STYLE-NAME is a key `org-odt-label-styles'.
+
+See `org-odt-add-label-definition' and
+`org-odt-fixup-label-references'.")
+
 (defun org-export-odt-format-formula (src href)
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
@@ -2024,20 +2038,6 @@ ATTR is a string of other attributes of the a element."
 	       (scale (min scale1 scale2)))
 	  (setq width (* scale width) height (* scale height)))))
     (cons width height)))
-
-(defvar org-odt-entity-labels-alist nil
-  "Associate Labels with the Labeled entities.
-Each element of the alist is of the form (LABEL-NAME
-CATEGORY-NAME SEQNO LABEL-STYLE-NAME).  LABEL-NAME is same as
-that specified by \"#+LABEL: ...\" line.  CATEGORY-NAME is the
-type of the entity that LABEL-NAME is attached to.  CATEGORY-NAME
-can be one of \"Table\", \"Figure\" or \"Equation\".  SEQNO is
-the unique number assigned to the referenced entity on a
-per-CATEGORY basis.  It is generated sequentially and is 1-based.
-LABEL-STYLE-NAME is a key `org-odt-label-styles'.
-
-See `org-odt-add-label-definition' and
-`org-odt-fixup-label-references'.")
 
 (defvar org-odt-entity-counts-plist nil
   "Plist of running counters of SEQNOs for each of the CATEGORY-NAMEs.
