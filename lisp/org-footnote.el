@@ -865,8 +865,9 @@ Return the number of footnotes removed."
 	  (ndef 0))
       (while (re-search-forward def-re nil t)
 	(let ((full-def (org-footnote-at-definition-p)))
-	  (delete-region (nth 1 full-def) (nth 2 full-def)))
-	(incf ndef))
+	  (when full-def
+	    (delete-region (nth 1 full-def) (nth 2 full-def))
+	    (incf ndef))))
       ndef)))
 
 (defun org-footnote-delete (&optional label)
