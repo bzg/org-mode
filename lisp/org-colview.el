@@ -357,7 +357,7 @@ CPHR is the complex heading regexp to use for parsing ITEM."
 		   'org-whitespace (* 2 (1- (org-reduced-level (- (match-end 1) (match-beginning 1))))))
 		 (and (match-end 2) (not (assoc "TODO" fmt)) (concat " " (match-string 2 item)))
 		 (and (match-end 3) (not (assoc "PRIORITY" fmt)) (concat " " (match-string 3 item)))
-		 " " (save-match-data (org-columns-compact-links (match-string 4 item)))
+		 " " (save-match-data (org-columns-compact-links (or (match-string 4 item) "")))
 		 (and (match-end 5) (not (assoc "TAGS" fmt)) (concat " " (match-string 5 item)))))
 	(add-text-properties
 	 0 (1+ (match-end 1))
