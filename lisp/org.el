@@ -15321,29 +15321,6 @@ user."
     (list second minute hour day month year)))
 
 (defvar parse-time-weekdays)
-
-;; (defcustom org-parse-time-weekdays parse-time-weekdays
-;;   "Alist of day names and their position in the week."
-;;   :group 'org-time
-;;   :type '(alist :key-type (string :tag "Day name")
-;; 		:value-type (integer :tag "Position")))
-
-(setq parse-time-weekdays '(("sun" . 0)
-			    ("mon" . 1)
-			    ("tue" . 2)
-			    ("wed" . 3)
-			    ("thu" . 4)
-			    ("fri" . 5)
-			    ("sat" . 6)
-			    ("sunday" . 0)
-			    ("monday" . 1)
-			    ("tuesday" . 2)
-			    ("wednesday" . 3)
-			    ("thursday" . 4)
-			    ("lundi" . 1)
-			    )
-      )
-
 (defun org-read-date-get-relative (s today default)
   "Check string S for special relative date string.
 TODAY and DEFAULT are internal times, for today and for a default.
