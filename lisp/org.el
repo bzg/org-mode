@@ -17177,7 +17177,7 @@ BEG and END default to the buffer boundaries."
     (save-restriction
       (widen)
       (setq beg (or beg (point-min)) end (or end (point-max)))
-      (goto-char (point-min))
+      (goto-char beg)
       (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
 			(substring (org-image-file-name-regexp) 0 -2)
 			"\\)\\]" (if include-linked "" "\\]")))
