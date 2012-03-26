@@ -108,8 +108,8 @@ if so then run the appropriate source block from the Library."
 		   (list
 		    (format "%s%s(%s)%s"
 			    (nonempty 3 12)
-			    (if (not (= 0 (length (nonempty 5 13))))
-				(concat "[" (nonempty 5 13) "]") "")
+			    (if (not (= 0 (length (nonempty 5 14))))
+				(concat "[" (nonempty 5 14) "]") "")
 			    (or (nonempty 7 16) "")
 			    (or (nonempty 8 19) ""))
 		    (nonempty 9 18)))
