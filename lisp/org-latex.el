@@ -1218,7 +1218,9 @@ numbered sections and lower levels as unnumbered sections."
 		   org-export-latex-add-level))
 	 (occur (number-to-string (cdr (assoc 'occur subcontent))))
 	 (content (cdr (assoc 'content subcontent)))
+	 (content-e (org-export-latex-content content))
 	 (subcontent (cadr (assoc 'subcontent subcontent)))
+	 (subcontent-e (org-export-latex-sub subcontent))
 	 (label (org-get-text-property-any 0 'target heading))
 	 (label-list (cons label (cdr (assoc label
 					     org-export-target-aliases))))
@@ -1262,11 +1264,11 @@ numbered sections and lower levels as unnumbered sections."
 	(when label
 	  (insert (mapconcat (lambda (l) (format "\\label{%s}" l))
 			     label-list "\n") "\n"))
-	(insert (org-export-latex-content content))
+	(insert content-e)
 	(cond ((stringp subcontent) (insert subcontent))
 	      ((listp subcontent)
 	       (while (org-looking-back "\n\n") (backward-delete-char 1))
-	       (org-export-latex-sub subcontent)))
+	       subcontent-e))
 	(when (and end (string-match "[^ \t]" end))
 	  (let ((hook (org-get-text-property-any 0 'org-insert-hook end)))
 	    (and (functionp hook) (funcall hook)))
@@ -1281,9 +1283,9 @@ numbered sections and lower levels as unnumbered sections."
 	     (insert (format "\n\\item[%s]%s~\n"
 			     heading
 			     (if label (format "\\label{%s}" label) "")))
-	     (insert (org-export-latex-content content))
+	     (insert content-e)
 	     (cond ((stringp subcontent) (insert subcontent))
-		   ((listp subcontent) (org-export-latex-sub subcontent)))
+		   ((listp subcontent) subcontent-e))
 	     (insert "\\end{description} % ends low level\n"))
 	    ((memq org-export-latex-low-levels '(itemize enumerate))
 	     (if (string-match "% ends low level$"
@@ -1291,12 +1293,14 @@ numbered sections and lower levels as unnumbered sections."
 		 (delete-region (point-at-bol 0) (point))
 	       (insert (format "\\begin{%s}\n"
 			       (symbol-name org-export-latex-low-levels))))
-	     (insert (format "\n\\item %s\\\\\n%s%%"
+	     (insert (format (if (not (equal (replace-regexp-in-string "\n" "" content-e) ""))
+				 "\n\\item %s\\\\\n%s%%"
+			       "\n\\item %s\n%s%%")
 			     heading
 			     (if label (format "\\label{%s}" label) "")))
-	     (insert (org-export-latex-content content))
+	     (insert content-e)
 	     (cond ((stringp subcontent) (insert subcontent))
-		   ((listp subcontent) (org-export-latex-sub subcontent)))
+		   ((listp subcontent) subcontent-e))
 	     (insert (format "\\end{%s} %% ends low level\n"
 			     (symbol-name org-export-latex-low-levels))))
 
@@ -1308,18 +1312,18 @@ numbered sections and lower levels as unnumbered sections."
 	     (insert (format (nth 2 org-export-latex-low-levels)
 			     heading
 			     (if label (format "\\label{%s}" label) "")))
-	     (insert (org-export-latex-content content))
+	     (insert content-e)
 	     (cond ((stringp subcontent) (insert subcontent))
-		   ((listp subcontent) (org-export-latex-sub subcontent)))
+		   ((listp subcontent) subcontent-e))
 	     (insert (nth 1 org-export-latex-low-levels)
 		     " %% ends low level\n"))
 
 	    ((stringp org-export-latex-low-levels)
 	     (insert (format org-export-latex-low-levels heading) "\n")
 	     (when label (insert (format "\\label{%s}\n" label)))
-	     (insert (org-export-latex-content content))
+	     (insert content-e)
 	     (cond ((stringp subcontent) (insert subcontent))
-		   ((listp subcontent) (org-export-latex-sub subcontent)))))))))
+		   ((listp subcontent) subcontent-e))))))))
 
 ;;; Exporting internals:
 (defun org-export-latex-set-initial-vars (ext-plist level)
