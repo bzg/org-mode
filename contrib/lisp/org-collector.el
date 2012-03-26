@@ -131,7 +131,7 @@ preceeding the dblock, then update the contents of the dblock."
 		  ((setq idpos (org-find-entry-with-id id))
 		   (goto-char idpos))
 		  (t (error "Cannot find entry with :ID: %s" id))))
-	  (org-narrow-to-subtree)
+	  (unless (eq id 'global) (org-narrow-to-subtree))
 	  (setq stringformat (if noquote "%s" "%S"))
 	  (setq table (org-propview-to-table
 		       (org-propview-collect cols stringformat conds match scope inherit
