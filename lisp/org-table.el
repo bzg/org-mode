@@ -4158,7 +4158,7 @@ overwritten, and the table is not marked as requiring realignment."
 	   (looking-at "[^|\n]*  +|"))
       (let (org-table-may-need-update)
 	(goto-char (1- (match-end 0)))
-	(delete-char -1)
+	(backward-delete-char 1)
 	(goto-char (match-beginning 0))
 	(self-insert-command N))
     (setq org-table-may-need-update t)
