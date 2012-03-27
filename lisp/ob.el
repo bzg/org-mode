@@ -400,6 +400,7 @@ then run `org-babel-pop-to-session'."
     (eval	. ((never query)))
     (exports	. ((code results both none)))
     (file	. :any)
+    (filelinkdescr . :any)
     (hlines	. ((no yes)))
     (mkdirp	. ((yes no)))
     (no-expand)
@@ -1833,7 +1834,14 @@ code ---- the results are extracted in the syntax of the source
       (progn
         (setq result (org-babel-clean-text-properties result))
         (when (member "file" result-params)
-          (setq result (org-babel-result-to-file result))))
+	  (progn (when (assoc :filelinkdescr (nth 2 info))
+		   (let ((filelinkdescr (or (cdr (assoc :filelinkdescr (nth 2 info)))
+					    (cdr (assoc :file (nth 2 info)))
+					    result)))
+		     (when filelinkdescr
+		       (setq result
+			     (list result filelinkdescr)))))
+		 (setq result (org-babel-result-to-file result)))))
     (unless (listp result) (setq result (format "%S" result))))
   (if (and result-params (member "silent" result-params))
       (progn
