@@ -13447,7 +13447,8 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	;; Get a new set of tags from the user
 	(save-excursion
 	  (setq table (append org-tag-persistent-alist
-			      (or org-tag-alist (org-get-buffer-tags))
+			      org-tag-alist
+			      (org-get-buffer-tags)
 			      (and
 			       org-complete-tags-always-offer-all-agenda-tags
 			       (org-global-tags-completion-table
