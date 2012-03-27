@@ -1330,7 +1330,8 @@ numbered sections and lower levels as unnumbered sections."
 	     (insert (format "\\end{%s} %% ends low level\n"
 			     (symbol-name org-export-latex-low-levels))))
 
-	    ((listp org-export-latex-low-levels)
+	    ((and (listp org-export-latex-low-levels)
+		  org-export-latex-low-levels)
 	     (if (string-match "% ends low level$"
 			       (buffer-substring (point-at-bol 0) (point)))
 		 (delete-region (point-at-bol 0) (point))
