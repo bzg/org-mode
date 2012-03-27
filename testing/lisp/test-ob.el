@@ -763,6 +763,19 @@ replacement happens correctly."
 
 * next heading"))
 
+(ert-deftest test-ob/org-babel-results-indented-wrap ()
+  "Ensure that wrapped results are inserted correction when indented.
+If not inserted correctly then the second evaluation will fail
+trying to find the :END: marker."
+  (org-test-with-temp-text
+   "- indented
+  #+begin_src sh :results file wrap
+    echo test.txt
+  #+end_src"
+    (org-babel-next-src-block 1)
+    (org-babel-execute-src-block)
+    (org-babel-execute-src-block)))
+
 (ert-deftest test-ob/org-babel-remove-result--results-wrap ()
   "Test `org-babel-remove-result' with :results wrap."
   (test-ob-verify-result-and-removed-result

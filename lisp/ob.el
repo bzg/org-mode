@@ -1878,7 +1878,8 @@ code ---- the results are extracted in the syntax of the source
 	(flet ((wrap (start finish)
 		     (goto-char end) (insert (concat finish "\n"))
 		     (goto-char beg) (insert (concat start "\n"))
-		     (goto-char end) (setq end (point-marker)))
+		     (goto-char end) (goto-char (point-at-eol))
+		     (setq end (point-marker)))
 	       (proper-list-p (it) (and (listp it) (null (cdr (last it))))))
 	  ;; insert results based on type
 	  (cond
