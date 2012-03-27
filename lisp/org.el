@@ -19083,7 +19083,7 @@ See the individual commands for more information."
      ["Insert citation" org-reftex-citation t]
      "--"
      ["Template for BEAMER" (progn (require 'org-beamer)
-				   (org-insert-beamer-options-template) t])
+				   (org-insert-beamer-options-template)) t])
     "--"
     ("MobileOrg"
      ["Push Files and Views" org-mobile-push t]
