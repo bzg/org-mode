@@ -589,7 +589,7 @@ include square brackets."
 (add-hook 'org-export-preprocess-before-selecting-backend-code-hook
 	  'org-beamer-select-beamer-code)
 
-(defun org-insert-beamer-options-template (kind)
+(defun org-insert-beamer-options-template (&optional kind)
   "Insert a settings template, to make sure users do this right."
   (interactive (progn
 		 (message "Current [s]ubtree or [g]lobal?")
