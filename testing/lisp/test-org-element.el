@@ -204,6 +204,62 @@
 
 
 
+;;; Secondary strings
+
+(ert-deftest test-org-element/secondary-string-parsing ()
+  "Test granularity correctly toggles secondary strings parsing."
+  ;; 1. With a granularity bigger than `object', no secondary string
+  ;;    should be parsed.
+  ;;
+  ;; 1.1. Test with `headline' type.
+  (org-test-with-temp-text "* Headline"
+    (let ((headline
+	   (org-element-map (org-element-parse-buffer 'headline) 'headline
+			    'identity
+			    nil
+			    'first-match)))
+      (should (stringp (org-element-property :title headline)))))
+  ;; 1.2. Test with `item' type.
+  (org-test-with-temp-text "* Headline\n- tag :: item"
+    (let ((item (org-element-map (org-element-parse-buffer 'element)
+				 'item
+				 'identity
+				 nil
+				 'first-match)))
+      (should (stringp (org-element-property :tag item)))))
+  ;; 1.3. Test with `verse-block' type.
+  (org-test-with-temp-text "#+BEGIN_VERSE\nTest\n#+END_VERSE"
+    (let ((verse-block (org-element-map (org-element-parse-buffer 'element)
+					'verse-block
+					'identity
+					nil
+					'first-match)))
+      (should (stringp (org-element-property :value verse-block)))))
+  ;; 1.4. Test with `inlinetask' type, if avalaible.
+  (when (featurep 'org-inlinetask)
+    (let ((org-inlinetask-min-level 15))
+      (org-test-with-temp-text "*************** Inlinetask"
+	(let ((inlinetask (org-element-map (org-element-parse-buffer 'element)
+					   'inlinetask
+					   'identity
+					   nil
+					   'first-match)))
+	  (should (stringp (org-element-property :title inlinetask)))))))
+  ;; 2. With a default granularity, secondary strings should be
+  ;;    parsed.
+  (org-test-with-temp-text "* Headline"
+    (let ((headline
+	   (org-element-map (org-element-parse-buffer) 'headline
+			    'identity
+			    nil
+			    'first-match)))
+      (should (listp (org-element-property :title headline)))))
+  ;; 3. `org-element-at-point' should never parse a secondary string.
+  (org-test-with-temp-text "* Headline"
+    (should (stringp (org-element-property :title (org-element-at-point))))))
+
+
+
 ;;; Navigation tools.
 
 (ert-deftest test-org-element/forward-element ()

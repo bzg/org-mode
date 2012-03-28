@@ -111,12 +111,18 @@
 ;; For each greater element type, we define a parser and an
 ;; interpreter.
 
-;; A parser (`item''s excepted) accepts no argument and represents the
-;; element or object as the list described above.  An interpreter
-;; accepts two arguments: the list representation of the element or
-;; object, and its contents.  The latter may be nil, depending on the
-;; element or object considered.  It returns the appropriate Org
-;; syntax, as a string.
+;; A parser returns the element or object as the list described above.
+;; Most of them accepts no argument.  Though, exceptions exist.  Hence
+;; every element containing a secondary string (see
+;; `org-element-secondary-value-alist') will accept an optional
+;; argument to toggle parsing of that secondary string.  Moreover,
+;; `item' parser requires current list's structure as its first
+;; element.
+
+;; An interpreter accepts two arguments: the list representation of
+;; the element or object, and its contents.  The latter may be nil,
+;; depending on the element or object considered.  It returns the
+;; appropriate Org syntax, as a string.
 
 ;; Parsing functions must follow the naming convention:
 ;; org-element-TYPE-parser, where TYPE is greater element's type, as
@@ -303,7 +309,7 @@ CONTENTS is the contents of the footnote-definition."
 
 ;;;; Headline
 
-(defun org-element-headline-parser ()
+(defun org-element-headline-parser (&optional raw-secondary-p)
   "Parse an headline.
 
 Return a list whose car is `headline' and cdr is a plist
@@ -317,6 +323,9 @@ keywords.
 The plist also contains any property set in the property drawer,
 with its name in lowercase, the underscores replaced with hyphens
 and colons at the beginning (i.e. `:custom-id').
+
+When RAW-SECONDARY-P is non-nil, headline's title will not be
+parsed as a secondary string, but as a plain string instead.
 
 Assume point is at beginning of the headline."
   (save-excursion
@@ -382,9 +391,11 @@ Assume point is at beginning of the headline."
 		    (concat org-archive-tag ":") "" tags)))
 	(when (string= tags ":") (setq tags nil)))
       ;; Then get TITLE.
-      (setq title (org-element-parse-secondary-string
-		   raw-value
-		   (cdr (assq 'headline org-element-string-restrictions))))
+      (setq title
+	    (if raw-secondary-p raw-value
+	      (org-element-parse-secondary-string
+	       raw-value
+	       (cdr (assq 'headline org-element-string-restrictions)))))
       `(headline
 	(:raw-value ,raw-value
 		    :title ,title
@@ -457,7 +468,7 @@ CONTENTS is the contents of the element."
 
 ;;;; Inlinetask
 
-(defun org-element-inlinetask-parser ()
+(defun org-element-inlinetask-parser (&optional raw-secondary-p)
   "Parse an inline task.
 
 Return a list whose car is `inlinetask' and cdr is a plist
@@ -470,6 +481,10 @@ The plist also contains any property set in the property drawer,
 with its name in lowercase, the underscores replaced with hyphens
 and colons at the beginning (i.e. `:custom-id').
 
+When optional argument RAW-SECONDARY-P is non-nil, inline-task's
+title will not be parsed as a secondary string, but as a plain
+string instead.
+
 Assume point is at beginning of the inline task."
   (save-excursion
     (let* ((keywords (org-element-collect-affiliated-keywords))
@@ -478,9 +493,10 @@ Assume point is at beginning of the inline task."
 	   (todo (nth 2 components))
 	   (todo-type (and todo
 			   (if (member todo org-done-keywords) 'done 'todo)))
-	   (title (org-element-parse-secondary-string
-		   (nth 4 components)
-		   (cdr (assq 'inlinetask org-element-string-restrictions))))
+	   (title (if raw-secondary-p (nth 4 components)
+		    (org-element-parse-secondary-string
+		     (nth 4 components)
+		     (cdr (assq 'inlinetask org-element-string-restrictions)))))
 	   (standard-props (let (plist)
 			     (mapc
 			      (lambda (p)
@@ -557,7 +573,7 @@ CONTENTS is the contents of inlinetask."
 
 ;;;; Item
 
-(defun org-element-item-parser (struct)
+(defun org-element-item-parser (struct &optional raw-secondary-p)
   "Parse an item.
 
 STRUCT is the structure of the plain list.
@@ -566,6 +582,10 @@ Return a list whose car is `item' and cdr is a plist containing
 `:bullet', `:begin', `:end', `:contents-begin', `:contents-end',
 `:checkbox', `:counter', `:tag', `:structure', `:hiddenp' and
 `:post-blank' keywords.
+
+When optional argument RAW-SECONDARY-P is non-nil, item's tag, if
+any, will not be parsed as a secondary string, but as a plain
+string instead.
 
 Assume point is at the beginning of the item."
   (save-excursion
@@ -584,11 +604,13 @@ Assume point is at the beginning of the item."
 			   64))
 		       ((string-match "[0-9]+" c)
 			(string-to-number (match-string 0 c))))))
-	   (tag (let ((raw-tag (org-list-get-tag begin struct)))
-		  (and raw-tag
-		       (org-element-parse-secondary-string
-			raw-tag
-			(cdr (assq 'item org-element-string-restrictions))))))
+	   (tag
+	    (let ((raw-tag (org-list-get-tag begin struct)))
+	      (and raw-tag
+		   (if raw-secondary-p raw-tag
+		     (org-element-parse-secondary-string
+		      raw-tag
+		      (cdr (assq 'item org-element-string-restrictions)))))))
 	   (end (org-list-get-item-end begin struct))
 	   (contents-begin (progn (looking-at org-list-full-item-re)
 				  (goto-char (match-end 0))
@@ -1507,12 +1529,16 @@ CONTENTS is nil."
 
 ;;;; Verse Block
 
-(defun org-element-verse-block-parser ()
+(defun org-element-verse-block-parser (&optional raw-secondary-p)
   "Parse a verse block.
 
 Return a list whose car is `verse-block' and cdr is a plist
 containing `:begin', `:end', `:hiddenp', `:value' and
 `:post-blank' keywords.
+
+When optional argument RAW-SECONDARY-P is non-nil, verse-block's
+value will not be parsed as a secondary string, but as a plain
+string instead.
 
 Assume point is at beginning or end of the block."
   (save-excursion
@@ -1524,16 +1550,20 @@ Assume point is at beginning or end of the block."
 		       (org-element-collect-affiliated-keywords)))
 	   (begin (car keywords))
 	   (hidden (progn (forward-line) (org-truely-invisible-p)))
+	   (value-begin (point))
+	   (value-end
+	    (progn
+	      (re-search-forward (concat "^[ \t]*#\\+END_VERSE") nil t)
+	      (point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
-	   (value (org-element-parse-secondary-string
-		   (buffer-substring-no-properties
-		    (point)
-		    (progn
-		      (re-search-forward (concat "^[ \t]*#\\+END_VERSE") nil t)
-		      (point-at-bol)))
-		   (cdr (assq 'verse-block org-element-string-restrictions))))
 	   (end (progn (org-skip-whitespace)
-		       (if (eobp) (point) (point-at-bol)))))
+		       (if (eobp) (point) (point-at-bol))))
+	   (value
+	    (if raw-secondary-p
+		(buffer-substring-no-properties value-begin value-end)
+	      (org-element-parse-secondary-string
+	       (buffer-substring-no-properties value-begin value-end)
+	       (cdr (assq 'verse-block org-element-string-restrictions))))))
       `(verse-block
 	(:begin ,begin
 		:end ,end
@@ -2638,11 +2668,7 @@ matching `org-element-parsed-keywords'.")
     (item . :tag)
     (footnote-reference . :inline-definition)
     (verse-block . :value))
-  "Alist between element types and location of secondary value.
-Only elements with a secondary value available at parse time are
-considered here.  This is used internally by `org-element-map',
-which will look into the secondary strings of an element only if
-its type is listed here.")
+  "Alist between element types and location of secondary value.")
 
 
 
@@ -2689,7 +2715,7 @@ It can also return the following special value:
 Used internally by `org-element-current-element'.  Do not modify
 it directly, set `org-element-recursive-block-alist' instead.")
 
-(defun org-element-current-element (&optional special structure)
+(defun org-element-current-element (&optional granularity special structure)
   "Parse the element starting at point.
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
@@ -2697,6 +2723,12 @@ of the element and PROPS a plist of properties associated to the
 element.
 
 Possible types are defined in `org-element-all-elements'.
+
+Optional argument GRANULARITY determines the depth of the
+recursion.  Allowed values are `headline', `greater-element',
+`element', `object' or nil.  When it is bigger than `object' (or
+nil), secondary values will not be parsed, since they only
+contain objects.
 
 Optional argument SPECIAL, when non-nil, can be either `item',
 `section' or `quote-section'.  `item' allows to parse item wise
@@ -2719,11 +2751,15 @@ it is quicker than its counterpart, albeit more restrictive."
       (let ((opoint (point)))
         (while (looking-at org-element--affiliated-re) (forward-line))
         (when (looking-at "[ \t]*$") (goto-char opoint))))
-    (let ((case-fold-search t))
+    (let ((case-fold-search t)
+	  ;; Determine if parsing depth allows for secondary strings
+	  ;; parsing.  It only applies to elements referenced in
+	  ;; `org-element-secondary-value-alist'.
+	  (raw-secondary-p (and granularity (not (eq granularity 'object)))))
       (cond
        ;; Headline.
        ((org-with-limited-levels (org-at-heading-p))
-        (org-element-headline-parser))
+        (org-element-headline-parser raw-secondary-p))
        ;; Quote section.
        ((eq special 'quote-section) (org-element-quote-section-parser))
        ;; Section.
@@ -2734,15 +2770,20 @@ it is quicker than its counterpart, albeit more restrictive."
             (if (save-excursion
                   (re-search-forward
                    (format "[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t))
-                ;; Build appropriate parser.
-                (funcall
-                 (intern
-                  (format "org-element-%s-parser"
-                          (cdr (assoc type
-                                      org-element-non-recursive-block-alist)))))
+                ;; Build appropriate parser.  `verse-block' type
+		;; elements require an additional argument, so they
+		;; must be treated separately.
+                (if (string= "VERSE" type)
+		    (org-element-verse-block-parser raw-secondary-p)
+		  (funcall
+		   (intern
+		    (format
+		     "org-element-%s-parser"
+		     (cdr (assoc type
+				 org-element-non-recursive-block-alist))))))
               (org-element-paragraph-parser)))))
        ;; Inlinetask.
-       ((org-at-heading-p) (org-element-inlinetask-parser))
+       ((org-at-heading-p) (org-element-inlinetask-parser raw-secondary-p))
        ;; LaTeX Environment or paragraph if incomplete.
        ((looking-at "^[ \t]*\\\\begin{")
         (if (save-excursion
@@ -2801,7 +2842,9 @@ it is quicker than its counterpart, albeit more restrictive."
        ;; List or item.
        ((looking-at (org-item-re))
         (if (eq special 'item)
-            (org-element-item-parser (or structure (org-list-struct)))
+            (org-element-item-parser
+	     (or structure (org-list-struct))
+	     raw-secondary-p)
           (org-element-plain-list-parser (or structure (org-list-struct)))))
        ;; Default element: Paragraph.
        (t (org-element-paragraph-parser))))))
@@ -3099,14 +3142,8 @@ respectively, on quote sections, sections and items.  Moreover,
 when value is `item', STRUCTURE will be used as the current list
 structure.
 
-GRANULARITY determines the depth of the recursion.  It can be set
-to the following symbols:
-
-`headline'          Only parse headlines.
-`greater-element'   Don't recurse into greater elements.  Thus,
-		    elements parsed are the top-level ones.
-`element'           Parse everything but objects and plain text.
-`object' or nil     Parse the complete buffer.
+GRANULARITY determines the depth of the recursion.  See
+`org-element-parse-buffer' for more information.
 
 When VISIBLE-ONLY is non-nil, don't parse contents of hidden
 elements.
@@ -3125,7 +3162,10 @@ Elements are accumulated into ACC."
        ;; 1. Item mode is active: point must be at an item.  Parse it
        ;;    directly, skipping `org-element-current-element'.
        (if (eq special 'item)
-	   (let ((element (org-element-item-parser structure)))
+	   (let ((element
+		  (org-element-item-parser
+		   structure
+		   (and granularity (not (eq granularity 'object))))))
 	     (goto-char (org-element-property :end element))
 	     (org-element-parse-elements
 	      (org-element-property :contents-begin element)
@@ -3133,7 +3173,8 @@ Elements are accumulated into ACC."
 	      nil structure granularity visible-only (reverse element)))
 	 ;; 2. When ITEM is nil, find current element's type and parse
 	 ;;    it accordingly to its category.
-	 (let* ((element (org-element-current-element special structure))
+	 (let* ((element (org-element-current-element
+			  granularity special structure))
 		(type (org-element-type element)))
 	   (goto-char (org-element-property :end element))
 	   (cond
@@ -3512,6 +3553,9 @@ indentation is not done with TAB characters."
 ;; basically jumps back to the beginning of section containing point
 ;; and moves, element after element, with
 ;; `org-element-current-element' until the container is found.
+;;
+;; Note: When using `org-element-at-point', secondary values are never
+;; parsed since the function focuses on elements, not on objects.
 
 (defun org-element-at-point (&optional keep-trail)
   "Determine closest element around point.
@@ -3535,10 +3579,11 @@ contains that headline as its single element).  Elements
 in-between, if any, are siblings of the element at point."
   (org-with-wide-buffer
    ;; If at an headline, parse it.  It is the sole element that
-   ;; doesn't require to know about context.
+   ;; doesn't require to know about context.  Be sure to disallow
+   ;; secondary string parsing, though.
    (if (org-with-limited-levels (org-at-heading-p))
-       (if (not keep-trail) (org-element-headline-parser)
-	 (list (org-element-headline-parser)))
+       (if (not keep-trail) (org-element-headline-parser t)
+	 (list (org-element-headline-parser t)))
      ;; Otherwise move at the beginning of the section containing
      ;; point.
      (let ((origin (point)) element type item-flag trail struct prevs)
@@ -3553,7 +3598,7 @@ in-between, if any, are siblings of the element at point."
        ;; original position.
        (catch 'exit
          (while t
-           (setq element (org-element-current-element item-flag struct)
+           (setq element (org-element-current-element 'element item-flag struct)
                  type (car element))
 	   (when keep-trail (push element trail))
            (cond
