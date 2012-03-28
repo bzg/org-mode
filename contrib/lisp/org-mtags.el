@@ -254,4 +254,3 @@ with string values.  In addition, it reutnrs the following properties:
 (provide 'org-mtags)
 
 ;;; org-mtags.el ends here
-

@@ -6,7 +6,7 @@
 ;; Version: 1.0
 ;; Keywords: org, wp
 ;;
-;; This file is not part of GNU Emacs. 
+;; This file is not part of GNU Emacs.
 ;;
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 ;; /   add a keyword as a positive selection criterion
 ;; \   add a keyword as a newgative selection criterion
 ;; =   clear a keyword from the selection string
-;; ;   
+;; ;
 
 (require 'org)
 
@@ -39,7 +39,7 @@
 (org-defkey org-agenda-mode-map "/" 'org-agenda-query-and-cmd)
 (org-defkey org-agenda-mode-map ";" 'org-agenda-query-or-cmd)
 (org-defkey org-agenda-mode-map "\\" 'org-agenda-query-not-cmd)
- 
+
 ;;; Agenda interactive query manipulation
 
 (defcustom org-agenda-query-selection-single-key t
@@ -283,7 +283,7 @@ keyword string."
 (defun org-agenda-query-generic-cmd (op)
   "Activate query manipulation with OP as initial operator."
   (let ((q (org-agenda-query-selection org-agenda-query-string op
-                                       org-tag-alist 
+                                       org-tag-alist
                                        (org-agenda-query-global-todo-keys))))
     (when q
       (setq org-agenda-query-string q)
