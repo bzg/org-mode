@@ -149,13 +149,13 @@ Assume point is at beginning or end of the block."
 	   (keywords (progn
 		       (end-of-line)
 		       (re-search-backward
-			(concat "^[ \t]*#\\+begin_center") nil t)
+			(concat "^[ \t]*#\\+BEGIN_CENTER") nil t)
 		       (org-element-collect-affiliated-keywords)))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
 	   (contents-end (progn (re-search-forward
-				 (concat "^[ \t]*#\\+end_center") nil t)
+				 (concat "^[ \t]*#\\+END_CENTER") nil t)
 				(point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
@@ -416,7 +416,8 @@ CONTENTS is the contents of the element."
   (let* ((level (org-element-property :level headline))
 	 (todo (org-element-property :todo-keyword headline))
 	 (priority (org-element-property :priority headline))
-	 (title (org-element-property :raw-value headline))
+	 (title (org-element-interpret-secondary
+		 (org-element-property :title headline)))
 	 (tags (let ((tag-string (org-element-property :tags headline))
 		     (archivedp (org-element-property :archivedp headline)))
 		 (cond
@@ -460,11 +461,10 @@ CONTENTS is the contents of the element."
   "Parse an inline task.
 
 Return a list whose car is `inlinetask' and cdr is a plist
-containing `:raw-value', `:title', `:begin', `:end', `:hiddenp',
+containing `:title', `:begin', `:end', `:hiddenp',
 `:contents-begin' and `:contents-end', `:level', `:priority',
-`:raw-value', `:tags', `:todo-keyword', `:todo-type',
-`:scheduled', `:deadline', `:timestamp', `:clock' and
-`:post-blank' keywords.
+`:tags', `:todo-keyword', `:todo-type', `:scheduled',
+`:deadline', `:timestamp', `:clock' and `:post-blank' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in lowercase, the underscores replaced with hyphens
@@ -478,7 +478,9 @@ Assume point is at beginning of the inline task."
 	   (todo (nth 2 components))
 	   (todo-type (and todo
 			   (if (member todo org-done-keywords) 'done 'todo)))
-	   (raw-value (nth 4 components))
+	   (title (org-element-parse-secondary-string
+		   (nth 4 components)
+		   (cdr (assq 'inlinetask org-element-string-restrictions))))
 	   (standard-props (let (plist)
 			     (mapc
 			      (lambda (p)
@@ -496,9 +498,6 @@ Assume point is at beginning of the inline task."
 	   (deadline (cdr (assoc "DEADLINE" time-props)))
 	   (clock (cdr (assoc "CLOCK" time-props)))
 	   (timestamp (cdr (assoc "TIMESTAMP" time-props)))
-	   (title (org-element-parse-secondary-string
-		   raw-value
-		   (cdr (assq 'inlinetask org-element-string-restrictions))))
 	   (contents-begin (save-excursion (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
 	   (pos-before-blank (org-inlinetask-goto-end))
@@ -509,25 +508,24 @@ Assume point is at beginning of the inline task."
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
       `(inlinetask
-	(:raw-value ,raw-value
-		    :title ,title
-		    :begin ,begin
-		    :end ,end
-		    :hiddenp ,(and (> contents-end contents-begin) hidden)
-		    :contents-begin ,contents-begin
-		    :contents-end ,contents-end
-		    :level ,(nth 1 components)
-		    :priority ,(nth 3 components)
-		    :tags ,(nth 5 components)
-		    :todo-keyword ,todo
-		    :todo-type ,todo-type
-		    :scheduled ,scheduled
-		    :deadline ,deadline
-		    :timestamp ,timestamp
-		    :clock ,clock
-		    :post-blank ,(count-lines pos-before-blank end)
-		    ,@standard-props
-		    ,@(cadr keywords))))))
+	(:title ,title
+		:begin ,begin
+		:end ,end
+		:hiddenp ,(and (> contents-end contents-begin) hidden)
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:level ,(nth 1 components)
+		:priority ,(nth 3 components)
+		:tags ,(nth 5 components)
+		:todo-keyword ,todo
+		:todo-type ,todo-type
+		:scheduled ,scheduled
+		:deadline ,deadline
+		:timestamp ,timestamp
+		:clock ,clock
+		:post-blank ,(count-lines pos-before-blank end)
+		,@standard-props
+		,@(cadr keywords))))))
 
 (defun org-element-inlinetask-interpreter (inlinetask contents)
   "Interpret INLINETASK element as Org syntax.
@@ -535,7 +533,8 @@ CONTENTS is the contents of inlinetask."
   (let* ((level (org-element-property :level inlinetask))
 	 (todo (org-element-property :todo-keyword inlinetask))
 	 (priority (org-element-property :priority inlinetask))
-	 (title (org-element-property :raw-value inlinetask))
+	 (title (org-element-interpret-secondary
+		 (org-element-property :title inlinetask)))
 	 (tags (org-element-property :tags inlinetask))
 	 (task (concat (make-string level ?*)
 		       (and todo (concat " " todo))
@@ -565,8 +564,8 @@ STRUCT is the structure of the plain list.
 
 Return a list whose car is `item' and cdr is a plist containing
 `:bullet', `:begin', `:end', `:contents-begin', `:contents-end',
-`:checkbox', `:counter', `:tag', `:raw-tag', `:structure',
-`:hiddenp' and `:post-blank' keywords.
+`:checkbox', `:counter', `:tag', `:structure', `:hiddenp' and
+`:post-blank' keywords.
 
 Assume point is at the beginning of the item."
   (save-excursion
@@ -585,11 +584,11 @@ Assume point is at the beginning of the item."
 			   64))
 		       ((string-match "[0-9]+" c)
 			(string-to-number (match-string 0 c))))))
-	   (raw-tag (org-list-get-tag begin struct))
-	   (tag (and raw-tag
-		     (org-element-parse-secondary-string
-		      raw-tag
-		      (cdr (assq 'item org-element-string-restrictions)))))
+	   (tag (let ((raw-tag (org-list-get-tag begin struct)))
+		  (and raw-tag
+		       (org-element-parse-secondary-string
+			raw-tag
+			(cdr (assq 'item org-element-string-restrictions))))))
 	   (end (org-list-get-item-end begin struct))
 	   (contents-begin (progn (looking-at org-list-full-item-re)
 				  (goto-char (match-end 0))
@@ -618,7 +617,6 @@ Assume point is at the beginning of the item."
 		 :contents-end ,(max contents-begin contents-end)
 		 :checkbox ,checkbox
 		 :counter ,counter
-		 :raw-tag ,raw-tag
 		 :tag ,tag
 		 :hiddenp ,hidden
 		 :structure ,struct
@@ -645,7 +643,8 @@ CONTENTS is the contents of the element."
 			   ".")))))))
 	 (checkbox (org-element-property :checkbox item))
 	 (counter (org-element-property :counter item))
-	 (tag (org-element-property :raw-tag item))
+	 (tag (let ((tag (org-element-property :tag item)))
+		(and tag (org-element-interpret-secondary tag))))
 	 ;; Compute indentation.
 	 (ind (make-string (length bullet) 32)))
     ;; Indent contents.
@@ -734,13 +733,13 @@ Assume point is at beginning or end of the block."
 	   (keywords (progn
 		       (end-of-line)
 		       (re-search-backward
-			(concat "^[ \t]*#\\+begin_quote") nil t)
+			(concat "^[ \t]*#\\+BEGIN_QUOTE") nil t)
 		       (org-element-collect-affiliated-keywords)))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
 	   (contents-end (progn (re-search-forward
-				 (concat "^[ \t]*#\\+end_quote") nil t)
+				 (concat "^[ \t]*#\\+END_QUOTE") nil t)
 				(point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
@@ -757,7 +756,7 @@ Assume point is at beginning or end of the block."
 (defun org-element-quote-block-interpreter (quote-block contents)
   "Interpret QUOTE-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
-  (format "#+begin_quote\n%s#+end_quote" contents))
+  (format "#+BEGIN_QUOTE\n%s#+END_QUOTE" contents))
 
 
 ;;;; Section
@@ -807,18 +806,18 @@ Assume point is at beginning or end of the block."
   (save-excursion
     (let* ((case-fold-search t)
 	   (type (progn (looking-at
-			 "[ \t]*#\\+\\(?:begin\\|end\\)_\\([-A-Za-z0-9]+\\)")
+			 "[ \t]*#\\+\\(?:BEGIN\\|END\\)_\\([-A-Za-z0-9]+\\)")
 			(org-match-string-no-properties 1)))
 	   (keywords (progn
 		       (end-of-line)
 		       (re-search-backward
-			(concat "^[ \t]*#\\+begin_" type) nil t)
+			(concat "^[ \t]*#\\+BEGIN_" type) nil t)
 		       (org-element-collect-affiliated-keywords)))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
 	   (contents-end (progn (re-search-forward
-				 (concat "^[ \t]*#\\+end_" type) nil t)
+				 (concat "^[ \t]*#\\+END_" type) nil t)
 				(point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
@@ -837,7 +836,7 @@ Assume point is at beginning or end of the block."
   "Interpret SPECIAL-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
   (let ((block-type (org-element-property :type special-block)))
-    (format "#+begin_%s\n%s#+end_%s" block-type contents block-type)))
+    (format "#+BEGIN_%s\n%s#+END_%s" block-type contents block-type)))
 
 
 
@@ -883,7 +882,7 @@ CONTENTS is nil."
   (let* ((babel-info (org-element-property :info inline-babel-call))
 	 (main-source (car babel-info))
 	 (post-options (nth 1 babel-info)))
-    (concat "#+call: "
+    (concat "#+CALL: "
 	    (if (string-match "\\[\\(\\[.*?\\]\\)\\]" main-source)
 		;; Remove redundant square brackets.
 		(replace-match
@@ -957,13 +956,13 @@ containing `:begin', `:end', `:hiddenp', `:value' and
     (end-of-line)
     (let* ((case-fold-search t)
 	   (keywords (progn
-		       (re-search-backward "^[ \t]*#\\+begin_comment" nil t)
+		       (re-search-backward "^[ \t]*#\\+BEGIN_COMMENT" nil t)
 		       (org-element-collect-affiliated-keywords)))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
 	   (contents-end (progn (re-search-forward
-				 "^[ \t]*#\\+end_comment" nil t)
+				 "^[ \t]*#\\+END_COMMENT" nil t)
 				(point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
@@ -1051,10 +1050,10 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
   "Interpret EXAMPLE-BLOCK element as Org syntax.
 CONTENTS is nil."
   (let ((options (org-element-property :options example-block)))
-    (concat "#+begin_example" (and options (concat " " options)) "\n"
+    (concat "#+BEGIN_EXAMPLE" (and options (concat " " options)) "\n"
 	    (org-remove-indentation
 	     (org-element-property :value example-block))
-	    "#+end_example")))
+	    "#+END_EXAMPLE")))
 
 
 ;;;; Export Block
@@ -1097,9 +1096,9 @@ containing `:begin', `:end', `:type', `:hiddenp', `:value' and
   "Interpret EXPORT-BLOCK element as Org syntax.
 CONTENTS is nil."
   (let ((type (org-element-property :type export-block)))
-    (concat (format "#+begin_%s\n" type)
+    (concat (format "#+BEGIN_%s\n" type)
 	    (org-element-property :value export-block)
-	    (format "#+end_%s" type))))
+	    (format "#+END_%s" type))))
 
 
 ;;;; Fixed-width
@@ -1461,12 +1460,12 @@ CONTENTS is nil."
 		     (replace-regexp-in-string
 		      "\\(^\\)[ \t]*\\S-" ind
 		      (org-remove-indentation val) nil nil 1)))))))
-    (concat (format "#+begin_src%s\n"
+    (concat (format "#+BEGIN_SRC%s\n"
 		    (concat (and lang (concat " " lang))
 			    (and switches (concat " " switches))
 			    (and params (concat " " params))))
 	    value
-	    "#+end_src")))
+	    "#+END_SRC")))
 
 
 ;;;; Table
@@ -1512,8 +1511,8 @@ CONTENTS is nil."
   "Parse a verse block.
 
 Return a list whose car is `verse-block' and cdr is a plist
-containing `:begin', `:end', `:hiddenp', `:raw-value', `:value'
-and `:post-blank' keywords.
+containing `:begin', `:end', `:hiddenp', `:value' and
+`:post-blank' keywords.
 
 Assume point is at beginning or end of the block."
   (save-excursion
@@ -1521,26 +1520,24 @@ Assume point is at beginning or end of the block."
 	   (keywords (progn
 		       (end-of-line)
 		       (re-search-backward
-			(concat "^[ \t]*#\\+begin_verse") nil t)
+			(concat "^[ \t]*#\\+BEGIN_VERSE") nil t)
 		       (org-element-collect-affiliated-keywords)))
 	   (begin (car keywords))
 	   (hidden (progn (forward-line) (org-truely-invisible-p)))
-	   (raw-val (buffer-substring-no-properties
-		     (point)
-		     (progn
-		       (re-search-forward (concat "^[ \t]*#\\+end_verse") nil t)
-		       (point-at-bol))))
 	   (pos-before-blank (progn (forward-line) (point)))
-	   (end (progn (org-skip-whitespace)
-		       (if (eobp) (point) (point-at-bol))))
 	   (value (org-element-parse-secondary-string
-		   (org-remove-indentation raw-val)
-		   (cdr (assq 'verse-block org-element-string-restrictions)))))
+		   (buffer-substring-no-properties
+		    (point)
+		    (progn
+		      (re-search-forward (concat "^[ \t]*#\\+END_VERSE") nil t)
+		      (point-at-bol)))
+		   (cdr (assq 'verse-block org-element-string-restrictions))))
+	   (end (progn (org-skip-whitespace)
+		       (if (eobp) (point) (point-at-bol)))))
       `(verse-block
 	(:begin ,begin
 		:end ,end
 		:hiddenp ,hidden
-		:raw-value ,raw-val
 		:value ,value
 		:post-blank ,(count-lines pos-before-blank end)
 		,@(cadr keywords))))))
@@ -1548,9 +1545,10 @@ Assume point is at beginning or end of the block."
 (defun org-element-verse-block-interpreter (verse-block contents)
   "Interpret VERSE-BLOCK element as Org syntax.
 CONTENTS is nil."
-  (format "#+begin_verse\n%s#+end_verse"
-  (org-remove-indentation
-  (org-element-property :raw-value verse-block))))
+  (format "#+BEGIN_VERSE\n%s#+END_VERSE"
+	  (org-remove-indentation
+	   (org-element-interpret-secondary
+	    (org-element-property :value verse-block)))))
 
 
 
@@ -1757,18 +1755,18 @@ its beginning position."
   "Parse footnote reference at point.
 
 Return a list whose car is `footnote-reference' and cdr a plist
-with `:label', `:type', `:definition', `:begin', `:end' and
-`:post-blank' as keywords."
+with `:label', `:type', `:inline-definition', `:begin', `:end'
+and `:post-blank' as keywords."
   (save-excursion
     (let* ((ref (org-footnote-at-reference-p))
 	   (label (car ref))
-	   (raw-def (nth 3 ref))
 	   (inline-def
-	    (and raw-def
-		 (org-element-parse-secondary-string
-		  raw-def
-		  (cdr (assq 'footnote-reference
-			     org-element-string-restrictions)))))
+	    (let ((raw-def (nth 3 ref)))
+	      (and raw-def
+		   (org-element-parse-secondary-string
+		    raw-def
+		    (cdr (assq 'footnote-reference
+			       org-element-string-restrictions))))))
 	   (type (if (nth 3 ref) 'inline 'standard))
 	   (begin (nth 1 ref))
 	   (post-blank (progn (goto-char (nth 2 ref))
@@ -1780,16 +1778,17 @@ with `:label', `:type', `:definition', `:begin', `:end' and
 		:inline-definition ,inline-def
 		:begin ,begin
 		:end ,end
-		:post-blank ,post-blank
-		:raw-definition ,raw-def)))))
+		:post-blank ,post-blank)))))
 
 (defun org-element-footnote-reference-interpreter (footnote-reference contents)
   "Interpret FOOTNOTE-REFERENCE object as Org syntax.
 CONTENTS is nil."
   (let ((label (or (org-element-property :label footnote-reference) "fn:"))
 	(def
-	 (let ((raw (org-element-property :raw-definition footnote-reference)))
-	   (if raw (concat ":" raw) ""))))
+	 (let ((inline-def
+		(org-element-property :inline-definition footnote-reference)))
+	   (if (not inline-def) ""
+	     (concat ":" (org-element-interpret-secondary inline-def))))))
     (format "[%s]" (concat label def))))
 
 (defun org-element-footnote-reference-successor (limit)
@@ -2146,7 +2145,7 @@ beginning position."
   "Parse radio target at point.
 
 Return a list whose car is `radio-target' and cdr a plist with
-`:begin', `:end', `:contents-begin', `:contents-end', `raw-value'
+`:begin', `:end', `:contents-begin', `:contents-end', `:value'
 and `:post-blank' as keywords.
 
 Assume point is at the radio target."
@@ -2155,7 +2154,7 @@ Assume point is at the radio target."
     (let ((begin (point))
 	  (contents-begin (match-beginning 1))
 	  (contents-end (match-end 1))
-	  (raw-value (org-match-string-no-properties 1))
+	  (value (org-match-string-no-properties 1))
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
@@ -2164,8 +2163,8 @@ Assume point is at the radio target."
 		:end ,end
 		:contents-begin ,contents-begin
 		:contents-end ,contents-end
-		:raw-value ,raw-value
-		:post-blank ,post-blank)))))
+		:post-blank ,post-blank
+		:value ,value)))))
 
 (defun org-element-radio-target-interpreter (target contents)
   "Interpret TARGET object as Org syntax.
