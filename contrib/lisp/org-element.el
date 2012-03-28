@@ -1069,15 +1069,15 @@ containing `:begin', `:end', `:type', `:hiddenp', `:value' and
     (let* ((case-fold-search t)
 	   (contents)
 	   (type (progn (re-search-backward
-			 (concat "[ \t]*#\\+begin_"
+			 (concat "[ \t]*#\\+BEGIN_"
 				 (org-re "\\([[:alnum:]]+\\)")))
-			(downcase (org-match-string-no-properties 1))))
+			(upcase (org-match-string-no-properties 1))))
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
 	   (contents-end (progn (re-search-forward
-				 (concat "^[ \t]*#\\+end_" type) nil t)
+				 (concat "^[ \t]*#\\+END_" type) nil t)
 				(point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
@@ -1188,7 +1188,7 @@ keywords."
     (let* ((begin (point))
 	   (key (progn (looking-at
 			"[ \t]*#\\+\\(\\(?:[a-z]+\\)\\(?:_[a-z]+\\)*\\):")
-		       (org-match-string-no-properties 1)))
+		       (upcase (org-match-string-no-properties 1))))
 	   (value (org-trim (buffer-substring-no-properties
 			     (match-end 0) (point-at-eol))))
 	   (pos-before-blank (progn (forward-line) (point)))
@@ -2529,33 +2529,33 @@ regexp matching one object can also match the other object.")
   "List of recursive object types.")
 
 (defconst org-element-non-recursive-block-alist
-  '(("ascii" . export-block)
-    ("comment" . comment-block)
-    ("docbook" . export-block)
-    ("example" . example-block)
-    ("html" . export-block)
-    ("latex" . export-block)
-    ("odt" . export-block)
-    ("src" . src-block)
-    ("verse" . verse-block))
+  '(("ASCII" . export-block)
+    ("COMMENT" . comment-block)
+    ("DOCBOOK" . export-block)
+    ("EXAMPLE" . example-block)
+    ("HTML" . export-block)
+    ("LATEX" . export-block)
+    ("ODT" . export-block)
+    ("SRC" . src-block)
+    ("VERSE" . verse-block))
   "Alist between non-recursive block name and their element type.")
 
 (defconst org-element-affiliated-keywords
-  '("attr_ascii" "attr_docbook" "attr_html" "attr_latex" "attr_odt" "caption"
-    "data" "header" "headers" "label" "name" "plot" "resname" "result" "results"
-    "source" "srcname" "tblname")
+  '("ATTR_ASCII" "ATTR_DOCBOOK" "ATTR_HTML" "ATTR_LATEX" "ATTR_ODT" "CAPTION"
+    "DATA" "HEADER" "HEADERS" "LABEL" "NAME" "PLOT" "RESNAME" "RESULT" "RESULTS"
+    "SOURCE" "SRCNAME" "TBLNAME")
   "List of affiliated keywords as strings.")
 
 (defconst org-element-keyword-translation-alist
-  '(("data" . "name")  ("label" . "name") ("resname" . "name")
-    ("source" . "name") ("srcname" . "name") ("tblname" . "name")
-    ("result" . "results") ("headers" . "header"))
+  '(("DATA" . "NAME")  ("LABEL" . "NAME") ("RESNAME" . "NAME")
+    ("SOURCE" . "NAME") ("SRCNAME" . "NAME") ("TBLNAME" . "NAME")
+    ("RESULT" . "RESULTS") ("HEADERS" . "HEADER"))
   "Alist of usual translations for keywords.
 The key is the old name and the value the new one.  The property
 holding their value will be named after the translated name.")
 
 (defconst org-element-multiple-keywords
-  '("attr_ascii" "attr_docbook" "attr_html" "attr_latex" "attr_odt" "header")
+  '("ATTR_ASCII" "ATTR_DOCBOOK" "ATTR_HTML" "ATTR_LATEX" "ATTR_ODT" "HEADER")
   "List of affiliated keywords that can occur more that once in an element.
 
 Their value will be consed into a list of strings, which will be
@@ -2564,7 +2564,7 @@ returned as the value of the property.
 This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
-(defconst org-element-parsed-keywords '("author" "caption" "title")
+(defconst org-element-parsed-keywords '("AUTHOR" "CAPTION" "TITLE")
   "List of keywords whose value can be parsed.
 
 Their value will be stored as a secondary string: a list of
@@ -2573,14 +2573,14 @@ strings and objects.
 This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
-(defconst org-element-dual-keywords '("caption" "results")
+(defconst org-element-dual-keywords '("CAPTION" "RESULTS")
   "List of keywords which can have a secondary value.
 
 In Org syntax, they can be written with optional square brackets
 before the colons.  For example, results keyword can be
 associated to a hash value with the following:
 
-  #+results[hash-string]: some-source
+  #+RESULTS[hash-string]: some-source
 
 This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
@@ -2681,7 +2681,7 @@ It can also return the following special value:
 ;; a common regexp.
 
 (defconst org-element--element-block-re
-  (format "[ \t]*#\\+begin_\\(%s\\)\\(?: \\|$\\)"
+  (format "[ \t]*#\\+BEGIN_\\(%s\\)\\(?: \\|$\\)"
           (mapconcat
            'regexp-quote
            (mapcar 'car org-element-non-recursive-block-alist) "\\|"))
@@ -2730,10 +2730,10 @@ it is quicker than its counterpart, albeit more restrictive."
        ((eq special 'section) (org-element-section-parser))
        ;; Non-recursive block.
        ((when (looking-at org-element--element-block-re)
-          (let ((type (downcase (match-string 1))))
+          (let ((type (upcase (match-string 1))))
             (if (save-excursion
                   (re-search-forward
-                   (format "[ \t]*#\\+end_%s\\(?: \\|$\\)" type) nil t))
+                   (format "[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t))
                 ;; Build appropriate parser.
                 (funcall
                  (intern
@@ -2755,15 +2755,15 @@ it is quicker than its counterpart, albeit more restrictive."
             (org-element-property-drawer-parser)
           (org-element-paragraph-parser)))
        ;; Recursive block, or paragraph if incomplete.
-       ((looking-at "[ \t]*#\\+begin_\\([-A-Za-z0-9]+\\)\\(?: \\|$\\)")
-        (let ((type (downcase (match-string 1))))
+       ((looking-at "[ \t]*#\\+BEGIN_\\([-A-Za-z0-9]+\\)\\(?: \\|$\\)")
+        (let ((type (upcase (match-string 1))))
           (cond
            ((not (save-excursion
                    (re-search-forward
-                    (format "[ \t]*#\\+end_%s\\(?: \\|$\\)" type) nil t)))
+                    (format "[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t)))
             (org-element-paragraph-parser))
-           ((string= type "center") (org-element-center-block-parser))
-           ((string= type "quote") (org-element-quote-block-parser))
+           ((string= type "CENTER") (org-element-center-block-parser))
+           ((string= type "QUOTE") (org-element-quote-block-parser))
            (t (org-element-special-block-parser)))))
        ;; Drawer.
        ((looking-at org-drawer-regexp)
@@ -2776,8 +2776,8 @@ it is quicker than its counterpart, albeit more restrictive."
         (org-element-babel-call-parser))
        ;; Keyword, or paragraph if at an affiliated keyword.
        ((looking-at "[ \t]*#\\+\\([a-z]+\\(:?_[a-z]+\\)*\\):")
-        (let ((key (downcase (match-string 1))))
-          (if (or (string= key "tblfm")
+        (let ((key (upcase (match-string 1))))
+          (if (or (string= key "TBLFM")
                   (member key org-element-affiliated-keywords))
               (org-element-paragraph-parser)
             (org-element-keyword-parser))))
@@ -2785,9 +2785,9 @@ it is quicker than its counterpart, albeit more restrictive."
        ((looking-at org-footnote-definition-re)
         (org-element-footnote-definition-parser))
        ;; Dynamic block or paragraph if incomplete.
-       ((looking-at "[ \t]*#\\+begin:\\(?: \\|$\\)")
+       ((looking-at "[ \t]*#\\+BEGIN:\\(?: \\|$\\)")
         (if (save-excursion
-              (re-search-forward "^[ \t]*#\\+end:\\(?: \\|$\\)" nil t))
+              (re-search-forward "^[ \t]*#\\+END:\\(?: \\|$\\)" nil t))
             (org-element-dynamic-block-parser)
           (org-element-paragraph-parser)))
        ;; Comment.
@@ -2896,7 +2896,7 @@ cdr a plist of keywords and values."
       (unless (bobp)
 	(while (and (not (bobp))
 		    (progn (forward-line -1) (looking-at key-re)))
-	  (let* ((raw-kwd (downcase (or (match-string 2) (match-string 1))))
+	  (let* ((raw-kwd (upcase (or (match-string 2) (match-string 1))))
 		 ;; Apply translation to RAW-KWD.  From there, KWD is
 		 ;; the official keyword.
 		 (kwd (or (cdr (assoc raw-kwd trans-list)) raw-kwd))
@@ -2914,7 +2914,7 @@ cdr a plist of keywords and values."
 			 (if (or (not sec) (not (member kwd parsed))) sec
 			   (org-element-parse-secondary-string sec restrict)))))
 		 ;; Attribute a property name to KWD.
-		 (kwd-sym (and kwd (intern (concat ":" kwd)))))
+		 (kwd-sym (and kwd (intern (concat ":" (downcase kwd))))))
 	    ;; Now set final shape for VALUE.
 	    (when (member kwd parsed)
 	      (setq value (org-element-parse-secondary-string value restrict)))

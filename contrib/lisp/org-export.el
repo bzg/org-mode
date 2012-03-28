@@ -1027,7 +1027,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
        (while (re-search-forward special-re nil t)
 	 (let ((element (org-element-at-point)))
 	   (when (eq (org-element-type element) 'keyword)
-	     (let* ((key (upcase (org-element-property :key element)))
+	     (let* ((key (org-element-property :key element))
 		    (val (org-element-property :value element))
 		    (prop
 		     (cond
@@ -1104,7 +1104,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
        (while (re-search-forward opt-re nil t)
 	 (let ((element (org-element-at-point)))
 	   (when (eq (org-element-type element) 'keyword)
-	     (let* ((key (upcase (org-element-property :key element)))
+	     (let* ((key (org-element-property :key element))
 		    (val (org-element-property :value element))
 		    (prop (cdr (assoc key alist)))
 		    (behaviour (nth 4 (assq prop all))))
@@ -1293,8 +1293,7 @@ Following tree properties are set:
        data '(keyword target)
        (lambda (blob)
 	 (when (or (eq (org-element-type blob) 'target)
-		   (string= (upcase (org-element-property :key blob))
-                            "TARGET"))
+		   (string= (org-element-property :key blob) "TARGET"))
 	   blob)) info)
      :headline-numbering ,(org-export-collect-headline-numbering data info)
      :back-end ,backend)
@@ -2720,10 +2719,10 @@ INFO is a plist holding contextual information.
 Return value can be an object, an element, or nil:
 
 - If LINK path matches a target object (i.e. <<path>>) or
-  element (i.e. \"#+target: path\"), return it.
+  element (i.e. \"#+TARGET: path\"), return it.
 
 - If LINK path exactly matches the name affiliated keyword
-  \(i.e. #+name: path) of an element, return that element.
+  \(i.e. #+NAME: path) of an element, return that element.
 
 - If LINK path exactly matches any headline name, return that
   element.  If more than one headline share that name, priority
@@ -2742,7 +2741,7 @@ Assume LINK type is \"fuzzy\"."
 	   (loop for target in (plist-get info :target-list)
 		 when (string= (org-element-property :value target) path)
 		 return target)))
-     ;; Then try to find an element with a matching "#+name: path"
+     ;; Then try to find an element with a matching "#+NAME: path"
      ;; affiliated keyword.
      ((and (not (eq (substring path 0 1) ?*))
 	   (org-element-map

@@ -82,10 +82,10 @@ as Org syntax."
 #+TITLE: with spaces"
       (org-export-get-inbuffer-options))
     '(:author
-      "Me, Myself and I" :creator "Idem" :date "Today"
+      ("Me, Myself and I") :creator "Idem" :date "Today"
       :description "Testing\nwith two lines" :email "some@email.org"
       :exclude-tags ("noexport" "invisible") :keywords "test" :language "en"
-      :select-tags ("export") :title "Some title with spaces"))))
+      :select-tags ("export") :title ("Some title with spaces")))))
 
 (ert-deftest test-org-export/define-macro ()
   "Try defining various Org macro using in-buffer #+MACRO: keyword."
