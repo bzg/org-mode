@@ -12775,7 +12775,7 @@ this case the return value is a list of all return values from these calls.
 MATCHER is a Lisp form to be evaluated, testing if a given set of tags
 qualifies a headline for inclusion.  When TODO-ONLY is non-nil,
 only lines with a not-done TODO keyword are included in the output.
-This should be the same variable that was scoped into 
+This should be the same variable that was scoped into
 and set by `org-make-tags-matcher' when it constructed MATCHER.
 
 START-LEVEL can be a string with asterisks, reducing the scope to

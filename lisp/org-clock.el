@@ -1989,7 +1989,7 @@ the currently selected interval size."
                         (encode-time 0 0 0 (+ d n) m y))))
           ((and wp (string-match "w\\|W" wp) mw (> (length wp) 0))
            (require 'cal-iso)
-           (setq date (calendar-gregorian-from-absolute 
+           (setq date (calendar-gregorian-from-absolute
 		       (calendar-absolute-from-iso (list (+ mw n) 1 y))))
            (setq ins (format-time-string
                       "%G-W%V"
@@ -2006,7 +2006,7 @@ the currently selected interval size."
                (setq mw 5
                      y (- y 1))
              ())
-           (setq date (calendar-gregorian-from-absolute 
+           (setq date (calendar-gregorian-from-absolute
 		       (calendar-absolute-from-iso (org-quarter-to-date (+ mw n) y))))
            (setq ins (format-time-string
                       (concatenate 'string (number-to-string y) "-Q" (number-to-string (+ mw n)))
@@ -2632,4 +2632,3 @@ The details of what will be saved are regulated by the variable
 (provide 'org-clock)
 
 ;;; org-clock.el ends here
-

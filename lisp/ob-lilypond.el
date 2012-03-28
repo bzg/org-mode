@@ -110,7 +110,7 @@ blocks")
 		body))))
      vars)
     body))
- 
+
 (defun org-babel-execute:lilypond (body params)
   "This function is called by `org-babel-execute-src-block'.
 Depending on whether we are in arrange mode either:
@@ -134,7 +134,7 @@ specific arguments to =org-babel-tangle="
 
 (defun ly-process-basic (body params)
   "Execute a lilypond block in basic mode"
-  
+
   (let* ((result-params (cdr (assoc :result-params params)))
 	 (out-file (cdr (assoc :file params)))
 	 (cmdline (or (cdr (assoc :cmdline params))
@@ -143,7 +143,7 @@ specific arguments to =org-babel-tangle="
 
     (with-temp-file in-file
       (insert (org-babel-expand-body:generic body params)))
-    
+
     (org-babel-eval
      (concat
       (ly-determine-ly-path)
@@ -173,7 +173,7 @@ If error in compilation, attempt to mark the error in lilypond org file"
           (ly-temp-file (ly-switch-extension
                          (buffer-file-name) ".ly")))
       (if (file-exists-p ly-tangled-file)
-          (progn 
+          (progn
             (when (file-exists-p ly-temp-file)
               (delete-file ly-temp-file))
             (rename-file ly-tangled-file
@@ -239,7 +239,7 @@ FILE-NAME is full path to lilypond file"
   "Mark the erroneous lines in the lilypond org buffer.
 FILE-NAME is full path to lilypond file.
 LINE is the erroneous line"
- 
+
   (switch-to-buffer-other-window
    (concat (file-name-nondirectory
             (ly-switch-extension file-name ".org"))))
@@ -252,7 +252,7 @@ LINE is the erroneous line"
           (set-mark (point))
           (goto-char (- (point) (length line))))
       (goto-char temp))))
-  
+
 (defun ly-parse-line-num (&optional buffer)
   "Extract error line number."
 
@@ -280,7 +280,7 @@ LINE is the erroneous line"
   "Extract the erroneous line from the tangled .ly file
 FILE-NAME is full path to lilypond file.
 LINENO is the number of the erroneous line"
- 
+
   (with-temp-buffer
     (insert-file-contents (ly-switch-extension file-name ".ly")
 			  nil nil nil t)
@@ -290,12 +290,12 @@ LINENO is the number of the erroneous line"
 	  (forward-line (- lineNo 1))
 	  (buffer-substring (point) (point-at-eol)))
       nil)))
-    
+
 (defun ly-attempt-to-open-pdf (file-name &optional test)
   "Attempt to display the generated pdf file
 FILE-NAME is full path to lilypond file
 If TEST is non-nil, the shell command is returned and is not run"
-  
+
   (when ly-display-pdf-post-tangle
     (let ((pdf-file (ly-switch-extension file-name ".pdf")))
       (if (file-exists-p pdf-file)
@@ -336,7 +336,7 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
 (defun ly-determine-pdf-path (&optional test)
   "Return correct path to pdf viewer depending on OS
 If TEST is non-nil, it contains a simulation of the OS for test purposes"
-  
+
   (let ((sys-type
          (or test system-type)))
     (cond ((string= sys-type  "darwin")
@@ -348,7 +348,7 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
 (defun ly-determine-midi-path (&optional test)
   "Return correct path to midi player depending on OS
 If TEST is non-nil, it contains a simulation of the OS for test purposes"
-   
+
   (let ((sys-type
          (or test test system-type)))
     (cond ((string= sys-type  "darwin")
@@ -356,10 +356,10 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
           ((string= sys-type "win32")
            ly-win32-midi-path)
           (t ly-nix-midi-path))))
- 
+
 (defun ly-toggle-midi-play ()
   "Toggle whether midi will be played following a successful compilation"
-  
+
   (interactive)
   (setq ly-play-midi-post-tangle
         (not ly-play-midi-post-tangle))
@@ -369,7 +369,7 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
 
 (defun ly-toggle-pdf-display ()
   "Toggle whether pdf will be displayed following a successful compilation"
-   
+
   (interactive)
   (setq ly-display-pdf-post-tangle
         (not ly-display-pdf-post-tangle))
