@@ -2703,7 +2703,7 @@ holding contextual information."
 TEXT is the text of the target.  INFO is a plist holding
 contextual information."
   (let ((id (org-export-solidify-link-text
-	     (org-element-property :raw-value radio-target))))
+	     (org-element-property :value radio-target))))
     (format "<a id=\"%s\" name=\"%s\">%s</a>" id id text)))
 
 

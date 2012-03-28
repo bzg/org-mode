@@ -1655,7 +1655,7 @@ TEXT is the text of the target.  INFO is a plist holding
 contextual information."
   (format "\\label{%s}%s"
 	  (org-export-solidify-link-text
-	   (org-element-property :raw-value radio-target))
+	   (org-element-property :value radio-target))
 	  text))
 
 
