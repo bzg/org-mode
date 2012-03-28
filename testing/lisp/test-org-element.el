@@ -204,10 +204,39 @@
 
 
 
-;;; Secondary strings
+;;; Granularity
+
+(ert-deftest test-org-element/granularity ()
+  "Test granularity impact on buffer parsing."
+  (org-test-with-temp-text "
+* Head 1
+** Head 2
+#+BEGIN_CENTER
+Centered paragraph.
+#+END_CENTER
+Paragraph \\alpha."
+    ;; 1.1. Granularity set to `headline' should parse every headline
+    ;;      in buffer, and only them.
+    (let ((tree (org-element-parse-buffer 'headline)))
+      (should (= 2 (length (org-element-map tree 'headline 'identity))))
+      (should-not (org-element-map tree 'paragraph 'identity)))
+    ;; 1.2. Granularity set to `greater-element' should not enter
+    ;;      greater elements excepted headlines and sections.
+    (let ((tree (org-element-parse-buffer 'greater-element)))
+      (should (= 1 (length (org-element-map tree 'center-block 'identity))))
+      (should (= 1 (length (org-element-map tree 'paragraph 'identity))))
+      (should-not (org-element-map tree 'entity 'identity)))
+    ;; 1.3. Granularity set to `element' should enter every
+    ;;      greater-element.
+    (let ((tree (org-element-parse-buffer 'element)))
+      (should (= 2 (length (org-element-map tree 'paragraph 'identity))))
+      (should-not (org-element-map tree 'entity 'identity)))
+    ;; 1.4. Granularity set to `object' can see everything.
+    (let ((tree (org-element-parse-buffer 'object)))
+      (should (= 1 (length (org-element-map tree 'entity 'identity)))))))
 
 (ert-deftest test-org-element/secondary-string-parsing ()
-  "Test granularity correctly toggles secondary strings parsing."
+  "Test if granularity correctly toggles secondary strings parsing."
   ;; 1. With a granularity bigger than `object', no secondary string
   ;;    should be parsed.
   ;;

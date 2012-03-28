@@ -2995,8 +2995,9 @@ Optional argument GRANULARITY determines the depth of the
 recursion.  It can be set to the following symbols:
 
 `headline'          Only parse headlines.
-`greater-element'   Don't recurse into greater elements.  Thus,
-		    elements parsed are the top-level ones.
+`greater-element'   Don't recurse into greater elements excepted
+		    headlines and sections.  Thus, elements
+		    parsed are the top-level ones.
 `element'           Parse everything but objects and plain text.
 `object'            Parse the complete buffer (default).
 
@@ -3195,6 +3196,7 @@ Elements are accumulated into ACC."
 	    ((and (memq type org-element-greater-elements)
 		  (or (not granularity)
 		      (memq granularity '(element object))
+		      (and (eq granularity 'greater-element) (eq type 'section))
 		      (eq type 'headline))
 		  (not (and visible-only
 			    (org-element-property :hiddenp element))))
