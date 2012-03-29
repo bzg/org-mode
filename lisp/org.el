@@ -5063,8 +5063,9 @@ The following commands are available:
   (set (make-local-variable 'pcomplete-parse-arguments-function)
        'org-parse-arguments)
   (set (make-local-variable 'pcomplete-termination-string) "")
-  (set (make-local-variable 'face-remapping-alist)
-       '((default org-default)))
+  (when (>= emacs-major-version 23)
+    (set (make-local-variable 'buffer-face-mode-face) 'org-default)
+    (buffer-face-mode))
 
   ;; If empty file that did not turn on org-mode automatically, make it to.
   (if (and org-insert-mode-line-in-empty-file
