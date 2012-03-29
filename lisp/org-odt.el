@@ -987,7 +987,7 @@ new entry in `org-odt-automatic-styles'.  Return (OBJECT-NAME
     (cons object-name style-name)))
 
 (defvar org-odt-table-indentedp nil)
-(defun org-odt-begin-table (caption label attributes)
+(defun org-odt-begin-table (caption label attributes short-caption)
   (setq org-odt-table-indentedp (not (null org-lparse-list-stack)))
   (when org-odt-table-indentedp
     ;; Within the Org file, the table is appearing within a list item.
@@ -1006,11 +1006,12 @@ new entry in `org-odt-automatic-styles'.  Return (OBJECT-NAME
     (insert
      (org-odt-format-stylized-paragraph
       'table (org-odt-format-entity-caption label caption "__Table__"))))
-  (let ((name-and-style (org-odt-add-automatic-style "Table" attributes)))
+  (let ((automatic-name (org-odt-add-automatic-style "Table" attributes)))
     (org-lparse-insert-tag
      "<table:table table:name=\"%s\" table:style-name=\"%s\">"
-     (car name-and-style) (or (nth 1 org-odt-table-style-spec)
-			      (cdr name-and-style) "OrgTable")))
+     (or short-caption (car automatic-name))
+     (or (nth 1 org-odt-table-style-spec)
+	 (cdr automatic-name) "OrgTable")))
   (setq org-lparse-table-begin-marker (point)))
 
 (defvar org-lparse-table-colalign-info)
@@ -1552,7 +1553,12 @@ See `org-odt-add-label-definition' and
 (defun org-export-odt-format-formula (src href)
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
+	   (short-caption
+	    (or (org-find-text-property-in-string 'org-caption-shortn src)
+		caption))
 	   (caption (and caption (org-xml-format-desc caption)))
+	   (short-caption (and short-caption
+			       (org-xml-format-desc short-caption)))
 	   (label (org-find-text-property-in-string 'org-label src))
 	   (latex-frag (org-find-text-property-in-string 'org-latex-src src))
 	   (embed-as (or (and latex-frag
@@ -1572,7 +1578,8 @@ See `org-odt-add-label-definition' and
 	 `((,(org-odt-format-entity
 	      (if (not (or caption label)) "DisplayFormula"
 		"CaptionedDisplayFormula")
-	      href width height :caption caption :label label)
+	      href width height :caption caption :label label
+	      :short-caption short-caption)
 	    ,(if (not (or caption label)) ""
 	       (let* ((label-props (car org-odt-entity-labels-alist)))
 		 (setcar (last label-props) "math-label")
@@ -1800,7 +1807,12 @@ ATTR is a string of other attributes of the a element."
   "Create image tag with source and attributes."
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
+	   (short-caption
+	    (or (org-find-text-property-in-string 'org-caption-shortn src)
+		caption))
 	   (caption (and caption (org-xml-format-desc caption)))
+	   (short-caption (and short-caption
+			       (org-xml-format-desc short-caption)))
 	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src))
 	   (latex-frag (org-find-text-property-in-string
@@ -1838,6 +1850,7 @@ ATTR is a string of other attributes of the a element."
 	(org-odt-format-entity
 	 frame-style-handle href width height
 	 :caption caption :label label :category category
+	 :short-caption short-caption
 	 :user-frame-params user-frame-params)))))
 
 (defun org-odt-format-object-description (title description)
@@ -1916,7 +1929,7 @@ ATTR is a string of other attributes of the a element."
 
 (defun* org-odt-format-entity (entity href width height
 				      &key caption label category
-				      user-frame-params)
+				      user-frame-params short-caption)
   (let* ((entity-style (assoc-string entity org-odt-entity-frame-styles t))
 	 default-frame-params frame-params)
     (cond
@@ -1934,7 +1947,16 @@ ATTR is a string of other attributes of the a element."
 	      'illustration
 	      (concat
 	       (apply 'org-odt-format-frame href width height
-		      (nth 2 entity-style))
+		      (let ((entity-style-1 (copy-sequence
+					     (nth 2 entity-style))))
+			(setcar (cdr entity-style-1)
+				(concat
+				 (cadr entity-style-1)
+				 (and short-caption
+				      (format " draw:name=\"%s\" "
+					      short-caption))))
+
+			entity-style-1))
 	       (org-odt-format-entity-caption
 		label caption (or category (nth 1 entity-style)))))
 	     width height frame-params)))))
