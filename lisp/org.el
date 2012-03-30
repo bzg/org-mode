@@ -14594,7 +14594,7 @@ in the current file."
 		(org-re-property property)
 		nil t)
 	  (setq cnt (1+ cnt))
-	  (replace-match ""))
+	  (delete-region (match-beginning 0) (1+ (point-at-eol))))
 	(message "Property \"%s\" removed from %d entries" property cnt)))))
 
 (defvar org-columns-current-fmt-compiled) ; defined in org-colview.el
