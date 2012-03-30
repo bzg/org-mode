@@ -1221,12 +1221,11 @@ for formatting.  This is required for the DocBook exporter."
     ;; column and the special lines
     (setq lines (org-table-clean-before-export lines)))
   (let* ((caption (org-find-text-property-in-string 'org-caption (car lines)))
+	 (short-caption (or (org-find-text-property-in-string
+			     'org-caption-shortn (car lines)) caption))
 	 (caption (and caption (org-xml-encode-org-text caption)))
-	 (short-caption (org-find-text-property-in-string
-			 'org-caption-shortn (car lines)))
-	 (short-caption (or short-caption caption))
 	 (short-caption (and short-caption
-			     (org-xml-encode-org-text short-caption)))
+			     (org-xml-encode-plain-text short-caption)))
 	 (label (org-find-text-property-in-string 'org-label (car lines)))
 	 (org-lparse-table-colalign-info (org-lparse-table-get-colalign-info lines))
 	 (attributes (org-find-text-property-in-string 'org-attributes

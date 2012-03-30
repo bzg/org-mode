@@ -1558,7 +1558,7 @@ See `org-odt-add-label-definition' and
 		caption))
 	   (caption (and caption (org-xml-format-desc caption)))
 	   (short-caption (and short-caption
-			       (org-xml-format-desc short-caption)))
+			       (org-xml-encode-plain-text short-caption)))
 	   (label (org-find-text-property-in-string 'org-label src))
 	   (latex-frag (org-find-text-property-in-string 'org-latex-src src))
 	   (embed-as (or (and latex-frag
@@ -1812,7 +1812,7 @@ ATTR is a string of other attributes of the a element."
 		caption))
 	   (caption (and caption (org-xml-format-desc caption)))
 	   (short-caption (and short-caption
-			       (org-xml-format-desc short-caption)))
+			       (org-xml-encode-plain-text short-caption)))
 	   (attr (org-find-text-property-in-string 'org-attributes src))
 	   (label (org-find-text-property-in-string 'org-label src))
 	   (latex-frag (org-find-text-property-in-string
