@@ -12,10 +12,13 @@ repository]].
 The simplest way to run the Org-mode test suite is from the command
 line with the following invocation.  Note that the paths below are
 relative to the base of the Org-mode directory.
-#+BEGIN_SRC sh
-  emacs -Q --batch -l lisp/org.el -l testing/org-test.el \
-      --eval "(progn (org-reload) (setq org-confirm-babel-evaluate nil))" \
-      -f org-test-run-batch-tests
+#+BEGIN_SRC sh :dir (expand-file-name "..")
+  # For Emacs earlier than 24, add -L /path/to/ert
+  emacs -Q --batch \
+        -L lisp/ -L testing/ -L testing/lisp -l lisp/org.el \
+        -l lisp/org-id.el -l testing/org-test.el \
+        --eval "(progn (org-reload) (setq org-confirm-babel-evaluate nil))" \
+        -f org-test-run-batch-tests
 #+END_SRC
 
 The options in the above command are explained below.
