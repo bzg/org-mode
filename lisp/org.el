@@ -15024,7 +15024,7 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-inactive)
 
 (defun org-read-date (&optional org-with-time to-time from-string prompt
-				default-time default-input)
+				default-time default-input inactive)
   "Read a date, possibly a time, and make things smooth for the user.
 The prompt will suggest to enter an ISO date, but you can also enter anything
 which will at least partially be understood by `parse-time-string'.
