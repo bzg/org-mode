@@ -4877,8 +4877,8 @@ This is for getting out of special buffers like remember.")
 
 ;; FIXME: Occasionally check by commenting these, to make sure
 ;;        no other functions uses these, forgetting to let-bind them.
-(defvar entry)
-(defvar last-state)
+(defvar org-entry)
+(defvar org-last-state)
 (defvar date)
 
 ;; Defined somewhere in this file, but used before definition.
@@ -4929,6 +4929,7 @@ sure that we are at the beginning of the line.")
 Stars are put in group 1 and the trimmed body in group 2.")
 
 (defvar bidi-paragraph-direction)
+(defvar buffer-face-mode-face)
 
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
@@ -10438,8 +10439,8 @@ on the system \"/user@host:\"."
 	targets tgs txt re files f desc descre fast-path-p level pos0)
     (message "Getting targets...")
     (with-current-buffer (or default-buffer (current-buffer))
-      (while (setq entry (pop entries))
-	(setq files (car entry) desc (cdr entry))
+      (while (setq org-entry (pop entries))
+	(setq files (car org-entry) desc (cdr org-entry))
 	(setq fast-path-p nil)
 	(cond
 	 ((null files) (setq files (list (current-buffer))))
@@ -11928,7 +11929,7 @@ of repeating deadline/scheduled time stamps to new date.
 This function is run automatically after each state change to a DONE state."
   ;; last-state is dynamically scoped into this function
   (let* ((repeat (org-get-repeat))
-	 (aa (assoc last-state org-todo-kwd-alist))
+	 (aa (assoc org-last-state org-todo-kwd-alist))
 	 (interpret (nth 1 aa))
 	 (head (nth 2 aa))
 	 (whata '(("d" . day) ("m" . month) ("y" . year)))
@@ -11941,7 +11942,7 @@ This function is run automatically after each state change to a DONE state."
       (setq to-state (or (org-entry-get nil "REPEAT_TO_STATE")
 			 org-todo-repeat-to-state))
       (unless (and to-state (member to-state org-todo-keywords-1))
-	(setq to-state (if (eq interpret 'type) last-state head)))
+	(setq to-state (if (eq interpret 'type) org-last-state head)))
       (org-todo to-state)
       (when (or org-log-repeat (org-entry-get nil "CLOCK"))
 	(org-entry-put nil "LAST_REPEAT" (format-time-string
@@ -11955,7 +11956,7 @@ This function is run automatically after each state change to a DONE state."
 		(setq org-log-note-how 'note))
 	  ;; Set up for taking a record
 	  (org-add-log-setup 'state (or done-word (car org-done-keywords))
-			     last-state
+			     org-last-state
 			     'findpos org-log-repeat)))
       (org-back-to-heading t)
       (org-add-planning-info nil nil 'closed)
@@ -13751,10 +13752,11 @@ Returns the new tags string, or nil to not change the current settings."
 		  (condition-case nil
 		      (setq tg (org-icompleting-read
 				"Tag: "
-				(append (or buffer-tags
-					    (with-current-buffer buf
-					      (org-get-buffer-tags)))
-					(mapcar 'car table))))
+				(delete-dups
+				 (append (or buffer-tags
+					     (with-current-buffer buf
+					       (mapcar 'car (org-get-buffer-tags))))
+					 (mapcar 'car table)))))
 		    (quit (setq tg "")))
 		  (when (string-match "\\S-" tg)
 		    (add-to-list 'buffer-tags (list tg))
@@ -14715,7 +14717,7 @@ in the current file."
 		(org-re-property property)
 		nil t)
 	  (setq cnt (1+ cnt))
-	  (replace-match ""))
+	  (delete-region (match-beginning 0) (1+ (point-at-eol))))
 	(message "Property \"%s\" removed from %d entries" property cnt)))))
 
 (defvar org-columns-current-fmt-compiled) ; defined in org-colview.el
@@ -15021,8 +15023,8 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-analyze-forced-year nil)
 (defvar org-read-date-inactive)
 
-(defun org-read-date (&optional with-time to-time from-string prompt
-				default-time default-input inactive)
+(defun org-read-date (&optional org-with-time to-time from-string prompt
+				default-time default-input)
   "Read a date, possibly a time, and make things smooth for the user.
 The prompt will suggest to enter an ISO date, but you can also enter anything
 which will at least partially be understood by `parse-time-string'.
@@ -15075,24 +15077,24 @@ the time/date that is used for everything that is not specified by the
 user."
   (require 'parse-time)
   (let* ((org-time-stamp-rounding-minutes
-	  (if (equal with-time '(16)) '(0 0) org-time-stamp-rounding-minutes))
+	  (if (equal org-with-time '(16)) '(0 0) org-time-stamp-rounding-minutes))
 	 (org-dcst org-display-custom-times)
 	 (ct (org-current-time))
-	 (def (or org-overriding-default-time default-time ct))
-	 (defdecode (decode-time def))
+	 (org-def (or org-overriding-default-time default-time ct))
+	 (org-defdecode (decode-time org-def))
 	 (dummy (progn
-		  (when (< (nth 2 defdecode) org-extend-today-until)
-		    (setcar (nthcdr 2 defdecode) -1)
-		    (setcar (nthcdr 1 defdecode) 59)
-		    (setq def (apply 'encode-time defdecode)
-			  defdecode (decode-time def)))))
+		  (when (< (nth 2 org-defdecode) org-extend-today-until)
+		    (setcar (nthcdr 2 org-defdecode) -1)
+		    (setcar (nthcdr 1 org-defdecode) 59)
+		    (setq org-def (apply 'encode-time org-defdecode)
+			  org-defdecode (decode-time org-def)))))
 	 (calendar-frame-setup nil)
 	 (calendar-setup nil)
 	 (calendar-move-hook nil)
 	 (calendar-view-diary-initially-flag nil)
 	 (calendar-view-holidays-initially-flag nil)
 	 (timestr (format-time-string
-		   (if with-time "%Y-%m-%d %H:%M" "%Y-%m-%d") def))
+		   (if org-with-time "%Y-%m-%d %H:%M" "%Y-%m-%d") org-def))
 	 (prompt (concat (if prompt (concat prompt " ") "")
 			 (format "Date+time [%s]: " timestr)))
 	 ans (org-ans0 "") org-ans1 org-ans2 final)
@@ -15105,7 +15107,7 @@ user."
 	  (calendar)
           (unwind-protect
               (progn
-		(calendar-forward-day (- (time-to-days def)
+		(calendar-forward-day (- (time-to-days org-def)
 					 (calendar-absolute-from-gregorian
 					  (calendar-current-date))))
 		(org-eval-in-calendar nil t)
@@ -15192,7 +15194,7 @@ user."
 	  (delete-overlay org-read-date-overlay)
 	  (setq org-read-date-overlay nil)))))
 
-    (setq final (org-read-date-analyze ans def defdecode))
+    (setq final (org-read-date-analyze ans org-def org-defdecode))
 
     (when org-read-date-analyze-forced-year
       (message "Year was forced into %s"
@@ -15214,9 +15216,9 @@ user."
 		  (nth 2 final) (nth 1 final))
 	(format "%04d-%02d-%02d" (nth 5 final) (nth 4 final) (nth 3 final))))))
 
-(defvar def)
-(defvar defdecode)
-(defvar with-time)
+(defvar org-def)
+(defvar org-defdecode)
+(defvar org-with-time)
 (defun org-read-date-display ()
   "Display the current date prompt interpretation in the minibuffer."
   (when org-read-date-display-live
@@ -15232,11 +15234,11 @@ user."
     (let* ((ans (concat (buffer-substring (point-at-bol) (point-max))
 			" " (or org-ans1 org-ans2)))
 	   (org-end-time-was-given nil)
-	   (f (org-read-date-analyze ans def defdecode))
+	   (f (org-read-date-analyze ans org-def org-defdecode))
 	   (fmts (if org-dcst
 		     org-time-stamp-custom-formats
 		   org-time-stamp-formats))
-	   (fmt (if (or with-time
+	   (fmt (if (or org-with-time
 			(and (boundp 'org-time-was-given) org-time-was-given))
 		    (cdr fmts)
 		  (car fmts)))
@@ -15254,7 +15256,7 @@ user."
 	    (make-overlay (1- (point-at-eol)) (point-at-eol)))
       (org-overlay-display org-read-date-overlay txt 'secondary-selection))))
 
-(defun org-read-date-analyze (ans def defdecode)
+(defun org-read-date-analyze (ans org-def org-defdecode)
   "Analyze the combined answer of the date prompt."
   ;; FIXME: cleanup and comment
   (let ((nowdecode (decode-time (current-time)))
@@ -15266,7 +15268,7 @@ user."
     (when (string-match "\\`[ \t]*\\.[ \t]*\\'" ans)
       (setq ans "+0"))
 
-    (when (setq delta (org-read-date-get-relative ans (current-time) def))
+    (when (setq delta (org-read-date-get-relative ans (current-time) org-def))
       (setq ans (replace-match "" t t ans)
 	    deltan (car delta)
 	    deltaw (nth 1 delta)
@@ -15360,19 +15362,19 @@ user."
 			  (substring ans (match-end 7))))))
 
     (setq tl (parse-time-string ans)
-	  day (or (nth 3 tl) (nth 3 defdecode))
+	  day (or (nth 3 tl) (nth 3 org-defdecode))
 	  month (or (nth 4 tl)
 		    (if (and org-read-date-prefer-future
 			     (nth 3 tl) (< (nth 3 tl) (nth 3 nowdecode)))
 			(prog1 (1+ (nth 4 nowdecode)) (setq futurep t))
-		      (nth 4 defdecode)))
+		      (nth 4 org-defdecode)))
 	  year (or (and (not kill-year) (nth 5 tl))
 		   (if (and org-read-date-prefer-future
 			    (nth 4 tl) (< (nth 4 tl) (nth 4 nowdecode)))
 		       (prog1 (1+ (nth 5 nowdecode)) (setq futurep t))
-		     (nth 5 defdecode)))
-	  hour (or (nth 2 tl) (nth 2 defdecode))
-	  minute (or (nth 1 tl) (nth 1 defdecode))
+		     (nth 5 org-defdecode)))
+	  hour (or (nth 2 tl) (nth 2 org-defdecode))
+	  minute (or (nth 1 tl) (nth 1 org-defdecode))
 	  second (or (nth 0 tl) 0)
 	  wday (nth 6 tl))
 
@@ -15443,7 +15445,7 @@ user."
       (condition-case nil
 	  (ignore (encode-time second minute hour day month year))
 	(error
-	 (setq year (nth 5 defdecode))
+	 (setq year (nth 5 org-defdecode))
 	 (setq org-read-date-analyze-forced-year t))))
     (setq org-read-date-analyze-futurep futurep)
     (list second minute hour day month year)))
