@@ -776,6 +776,22 @@ trying to find the :END: marker."
     (org-babel-execute-src-block)
     (org-babel-execute-src-block)))
 
+(ert-deftest test-ob/file-desc-header-argument ()
+  "Test that the :file-desc header argument is used."
+  (org-test-with-temp-text "#+begin_src emacs-lisp :results file :file-desc bar
+  \"foo\"
+#+end_src
+
+#+begin_src emacs-lisp :results file :file-desc
+  \"foo\"
+#+end_src"
+    (org-babel-execute-src-block)
+    (org-babel-next-src-block 1)
+    (org-babel-execute-src-block)
+    (goto-char (point-min))
+    (should (search-forward "[[file:foo][bar]]" nil t))
+    (should (search-forward "[[file:foo][foo]]" nil t))))
+
 (ert-deftest test-ob/org-babel-remove-result--results-wrap ()
   "Test `org-babel-remove-result' with :results wrap."
   (test-ob-verify-result-and-removed-result
