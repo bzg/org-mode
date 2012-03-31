@@ -262,7 +262,9 @@ replaced with its value."
   (org-fill-template
    org-babel-exp-code-template
    `(("lang"  . ,(nth 0 info))
-     ("body"  . ,(nth 1 info))
+     ("body"  . ,(if (string= (nth 0 info) "org")
+		     (replace-regexp-in-string "^" "," (nth 1 info))
+		   (nth 1 info)))
      ,@(mapcar (lambda (pair)
 		 (cons (substring (symbol-name (car pair)) 1)
 		       (format "%S" (cdr pair))))

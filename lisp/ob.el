@@ -1180,7 +1180,7 @@ may be specified in the properties of the current outline entry."
           ;; get block body less properties, protective commas, and indentation
           (with-temp-buffer
             (save-match-data
-              (insert (org-babel-strip-protective-commas body))
+              (insert (org-babel-strip-protective-commas body lang))
 	      (unless preserve-indentation (org-do-remove-indentation))
               (buffer-string)))
 	  (org-babel-merge-params
@@ -1198,7 +1198,7 @@ may be specified in the properties of the current outline entry."
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
           (org-babel-strip-protective-commas
-           (org-babel-clean-text-properties (match-string 5)))
+           (org-babel-clean-text-properties (match-string 5)) lang)
           (org-babel-merge-params
            org-babel-default-inline-header-args
            (org-babel-params-from-properties lang)
@@ -2299,11 +2299,15 @@ block but are passed literally to the \"example-block\"."
   (when text
     (set-text-properties 0 (length text) nil text) text))
 
-(defun org-babel-strip-protective-commas (body)
+(defun org-babel-strip-protective-commas (body &optional lang)
   "Strip protective commas from bodies of source blocks."
   (with-temp-buffer
     (insert body)
-    (org-strip-protective-commas (point-min) (point-max))
+    (if (and lang (string= lang "org"))
+	(progn (goto-char (point-min))
+	       (while (re-search-forward "^[ \t]*\\(,\\)" nil t)
+		 (replace-match "" nil nil nil 1)))
+      (org-strip-protective-commas (point-min) (point-max)))
     (buffer-string)))
 
 (defun org-babel-script-escape (str &optional force)
