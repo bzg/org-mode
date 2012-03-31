@@ -695,6 +695,7 @@ Specific header arguments
 * results::                     Specify the type of results and how they will
                                 be collected and handled
 * file::                        Specify a path for file output
+* file-desc::                   Specify a description for file results
 * dir::                         Specify the default (possibly remote)
                                 directory for code block execution
 * exports::                     Export code and/or results
@@ -13102,6 +13103,7 @@ argument in lowercase letters.  The following header arguments are defined:
 * results::                     Specify the type of results and how they will
                                 be collected and handled
 * file::                        Specify a path for file output
+* file-desc::                   Specify a description for file results
 * dir::                         Specify the default (possibly remote)
                                 directory for code block execution
 * exports::                     Export code and/or results
@@ -13497,7 +13499,7 @@ be prepended to the existing results.  Otherwise the new results will be
 inserted as with @code{replace}.
 @end itemize
 
-@node file, dir, results, Specific header arguments
+@node file, file-desc, results, Specific header arguments
 @subsubsection @code{:file}
 
 The header argument @code{:file} is used to specify an external file in which
@@ -13513,7 +13515,16 @@ The argument to @code{:file} should be either a string specifying the path to
 a file, or a list of two strings in which case the first element of the list
 should be the path to a file and the second a description for the link.
 
-@node dir, exports, file, Specific header arguments
+@node file-desc, dir, file, Specific header arguments
+@subsubsection @code{:file-desc}
+
+The value of the @code{:file-desc} header argument is used to provide a
+description for file code block results which are inserted as Org-mode links
+(see @ref{Link format}).  If the @code{:file-desc} header argument is given
+with no value the link path will be placed in both the ``link'' and the
+``description'' portion of the Org-mode link.
+
+@node dir, exports, file-desc, Specific header arguments
 @subsubsection @code{:dir} and remote execution
 
 While the @code{:file} header argument can be used to specify the path to the
