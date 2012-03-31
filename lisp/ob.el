@@ -1834,14 +1834,10 @@ code ---- the results are extracted in the syntax of the source
       (progn
         (setq result (org-babel-clean-text-properties result))
         (when (member "file" result-params)
-	  (progn (when (assoc :file-descr (nth 2 info))
-		   (let ((file-descr (or (cdr (assoc :file-descr (nth 2 info)))
-					    (cdr (assoc :file (nth 2 info)))
-					    result)))
-		     (when file-descr
-		       (setq result
-			     (list result file-descr)))))
-		 (setq result (org-babel-result-to-file result)))))
+	  (setq result (org-babel-result-to-file
+			result (when (assoc :file-desc (nth 2 info))
+				 (or (cdr (assoc :file-desc (nth 2 info)))
+				     result))))))
     (unless (listp result) (setq result (format "%S" result))))
   (if (and result-params (member "silent" result-params))
       (progn
@@ -1987,23 +1983,20 @@ code ---- the results are extracted in the syntax of the source
 	    (forward-line 1))))
       (point)))))
 
-(defun org-babel-result-to-file (result)
-  "Convert RESULT into an `org-mode' link.
+(defun org-babel-result-to-file (result &optional description)
+  "Convert RESULT into an `org-mode' link with optional DESCRIPTION.
 If the `default-directory' is different from the containing
 file's directory then expand relative links."
-  (flet ((cond-exp (file)
-	  (if (and default-directory
-		   buffer-file-name
-		   (not (string= (expand-file-name default-directory)
-				 (expand-file-name
-				  (file-name-directory buffer-file-name)))))
-	      (expand-file-name file default-directory)
-	    file)))
-    (if (stringp result)
-	(format "[[file:%s]]" (cond-exp result))
-      (when (and (listp result) (= 2 (length result))
-		 (stringp (car result)) (stringp (cadr result)))
-	(format "[[file:%s][%s]]" (car result) (cadr result))))))
+  (when (stringp result)
+    (format "[[file:%s]%s]"
+	    (if (and default-directory
+		     buffer-file-name
+		     (not (string= (expand-file-name default-directory)
+				   (expand-file-name
+				    (file-name-directory buffer-file-name)))))
+		(expand-file-name result default-directory)
+	      result)
+	    (if description (concat "[" description "]") ""))))
 
 (defun org-babel-examplize-region (beg end &optional results-switches)
   "Comment out region using the inline '==' or ': ' org example quote."
