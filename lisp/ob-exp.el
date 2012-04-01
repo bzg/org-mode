@@ -290,6 +290,7 @@ inhibit insertion of results into the buffer."
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)
 	(prog1 nil
+	  (setf (nth 1 info) body)
 	  (setf (nth 2 info)
 		(org-babel-exp-in-export-file lang
 		  (org-babel-process-params
