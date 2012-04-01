@@ -19,26 +19,25 @@ datadir = $(prefix)/emacs/etc/org
 # Where info files go.
 infodir = $(prefix)/info
 
-# where to create temporary files for the testsuite
+# Where to create temporary files for the testsuite
 TMPDIR ?= /tmp
 testdir = $(TMPDIR)/tmp-orgtest
+
+# Configuration for testing
+BTEST_PRE   = # add options before standard load-path
+BTEST_POST  = # add options after standard load path
+              # -L <path-to>/ert      # needed for Emacs23, Emacs24 has ert built in
+              # -L <path-to>/htmlize  # need at least version 1.34 for source code formatting
+BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave python sh # R
+              # R is not activated by default because it requires ess to be installed and configured
+BTEST_EXTRA = # extra packages to require for testing
 
 ##----------------------------------------------------------------------
 ## YOU MAY NEED TO ADAPT THESE DEFINITIONS
 ##----------------------------------------------------------------------
 
-# Using emacs in batch mode.
-BATCH	= $(EMACS) -batch -Q \
-	  -L . \
-	  --eval '(defconst org-release "$(ORGVERSION)-Make")' \
-
 # How to run tests
-BTEST_PRE   = # add options before standard load-path
-BTEST_POST  = # add options after standard load path
-BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave python sh # R
-# R is not activated by default because it requires ess to be installed and configured
 req-ob-lang = --eval '(require '"'"'ob-$(ob-lang))'
-BTEST_EXTRA = # extra packages to require
 req-extra   = --eval '(require '"'"'$(req))'
 BTEST	= $(EMACS) -batch -Q \
 	  $(BTEST_PRE) -L lisp/ -L testing/ $(BTEST_POST) \
@@ -48,6 +47,11 @@ BTEST	= $(EMACS) -batch -Q \
 	  $(foreach req,$(BTEST_EXTRA),$(req-extra)) \
 	  --eval '(setq org-confirm-babel-evaluate nil)' \
 	  -f org-test-run-batch-tests
+
+# Using emacs in batch mode.
+BATCH	= $(EMACS) -batch -Q \
+	  -L . \
+	  --eval '(defconst org-release "$(ORGVERSION)-Make")' \
 
 # How to byte-compile the whole source directory
 ELCDIR	= $(BATCH) \
