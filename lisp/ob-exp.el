@@ -257,7 +257,7 @@ replaced with its value."
 	     (org-babel-noweb-wrap) "" (nth 1 info))
 	  (if (org-babel-noweb-p (nth 2 info) :export)
 	      (org-babel-expand-noweb-references
-	       info (org-babel-exp-get-export-buffer))  
+	       info (org-babel-exp-get-export-buffer))
 	    (nth 1 info))))
   (org-fill-template
    org-babel-exp-code-template
@@ -271,6 +271,9 @@ replaced with its value."
 	       (nth 2 info))
      ("flags" . ,((lambda (f) (when f (concat " " f))) (nth 3 info)))
      ("name"  . ,(or (nth 4 info) "")))))
+     ("body"  . ,(if (string= (nth 0 info) "org")
+		     (replace-regexp-in-string "^" "," (nth 1 info))
+		   (nth 1 info))))))
 
 (defun org-babel-exp-results (info type &optional silent hash)
   "Evaluate and return the results of the current code block for export.
@@ -283,7 +286,7 @@ inhibit insertion of results into the buffer."
     (let ((lang (nth 0 info))
 	  (body (if (org-babel-noweb-p (nth 2 info) :eval)
 		    (org-babel-expand-noweb-references
-		     info (org-babel-exp-get-export-buffer))  
+		     info (org-babel-exp-get-export-buffer))
 		  (nth 1 info)))
 	  (info (copy-sequence info)))
       ;; skip code blocks which we can't evaluate
