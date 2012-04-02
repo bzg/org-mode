@@ -9929,11 +9929,11 @@ creates two levels of headings and does the rest as items.
 The HTML exporter lets you define a preamble and a postamble.
 
 The default value for @code{org-export-html-preamble} is @code{t}, which
-means that the preamble is inserted depending on the relevant formatting
-string in @code{org-export-html-preamble-format}.
+means that the preamble is inserted depending on the relevant format string
+in @code{org-export-html-preamble-format}.
 
 Setting @code{org-export-html-preamble} to a string will override the default
-formatting string.  Setting it to a function, will insert the output of the
+format string.  Setting it to a function, will insert the output of the
 function, which must be a string; such a function takes no argument but you
 can check against the value of @code{opt-plist}, which contains the list of
 publishing properties for the current file.  Setting to @code{nil} will not
@@ -9945,7 +9945,7 @@ means that the HTML exporter will look for the value of
 @code{org-export-creator-info} and @code{org-export-time-stamp-file},
 @code{org-export-html-validation-link} and build the postamble from these
 values.  Setting @code{org-export-html-postamble} to @code{t} will insert the
-postamble from the relevant formatting string found in
+postamble from the relevant format string found in
 @code{org-export-html-postamble-format}.  Setting it to @code{nil} will not
 insert any postamble.
 
