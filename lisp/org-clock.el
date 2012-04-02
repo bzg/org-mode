@@ -637,8 +637,7 @@ use libnotify if available, or fall back on a message."
 	((stringp org-show-notification-handler)
 	 (start-process "emacs-timer-notification" nil
 			org-show-notification-handler notification))
-	((featurep 'notifications)
-	 (require 'notifications)
+	((fboundp 'notifications-notify)
 	 (notifications-notify
 	  :title "Org-mode message"
 	  :body notification
