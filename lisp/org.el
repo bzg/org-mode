@@ -4877,7 +4877,7 @@ This is for getting out of special buffers like remember.")
 
 ;; FIXME: Occasionally check by commenting these, to make sure
 ;;        no other functions uses these, forgetting to let-bind them.
-(defvar org-entry)
+(defvar entry)
 (defvar org-last-state)
 (defvar date)
 
@@ -10439,8 +10439,8 @@ on the system \"/user@host:\"."
 	targets tgs txt re files f desc descre fast-path-p level pos0)
     (message "Getting targets...")
     (with-current-buffer (or default-buffer (current-buffer))
-      (while (setq org-entry (pop entries))
-	(setq files (car org-entry) desc (cdr org-entry))
+      (while (setq entry (pop entries))
+	(setq files (car entry) desc (cdr entry))
 	(setq fast-path-p nil)
 	(cond
 	 ((null files) (setq files (list (current-buffer))))
