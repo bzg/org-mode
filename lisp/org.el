@@ -11380,7 +11380,7 @@ For calling through lisp, arg is also interpreted in the following way:
 		;; It is now done, and it was not done before
 		(org-add-planning-info 'closed (org-current-effective-time))
 		(if (and (not dolog) (eq 'note org-log-done))
-		    (org-add-log-setup 'done state this 'findpos 'note)))
+		    (org-add-log-setup 'done org-state this 'findpos 'note)))
 	      (when (and org-state dolog)
 		;; This is a non-nil state, and we need to log it
 		(org-add-log-setup 'state org-state this 'findpos dolog)))
