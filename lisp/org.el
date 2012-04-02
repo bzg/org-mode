@@ -11322,7 +11322,7 @@ For calling through lisp, arg is also interpreted in the following way:
 			  (car tail))))
 		 (org-state (or
 			     (run-hook-with-args-until-success
-			      'org-todo-get-default-hook state org-last-state)
+			      'org-todo-get-default-hook org-state org-last-state)
 			     org-state))
 		 (next (if org-state (concat " " org-state " ") " "))
 		 (change-plist (list :type 'todo-state-change :from this :to org-state
