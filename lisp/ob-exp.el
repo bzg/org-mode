@@ -271,9 +271,6 @@ replaced with its value."
 	       (nth 2 info))
      ("flags" . ,((lambda (f) (when f (concat " " f))) (nth 3 info)))
      ("name"  . ,(or (nth 4 info) "")))))
-     ("body"  . ,(if (string= (nth 0 info) "org")
-		     (replace-regexp-in-string "^" "," (nth 1 info))
-		   (nth 1 info))))))
 
 (defun org-babel-exp-results (info type &optional silent hash)
   "Evaluate and return the results of the current code block for export.
