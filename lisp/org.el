@@ -2816,8 +2816,8 @@ be the favorite working time of John Wiegley :-)"
 For example, if `org-extend-today-until' is 8, and it's 4am, then the
 \"effective time\" of any timestamps between midnight and 8am will be
 23:59 of the previous day."
-  :group 'boolean
-  :type 'integer)
+  :group 'org-time
+  :type 'boolean)
 
 (defcustom org-edit-timestamp-down-means-later nil
   "Non-nil means S-down will increase the time in a time stamp.
