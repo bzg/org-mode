@@ -2842,6 +2842,7 @@ For example, if `org-extend-today-until' is 8, and it's 4am, then the
 \"effective time\" of any timestamps between midnight and 8am will be
 23:59 of the previous day."
   :group 'org-time
+  :version "24.1"
   :type 'boolean)
 
 (defcustom org-edit-timestamp-down-means-later nil
