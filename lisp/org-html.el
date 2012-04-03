@@ -1414,7 +1414,7 @@ PUB-DIR is set, use this as the publishing directory."
 		"\n<h1 class=\"title\">" title "</h1>\n"))
 
       ;; insert body
-      (if (and org-export-with-toc (not body-only))
+      (if org-export-with-toc
 	  (progn
 	    (push (format "<h%d>%s</h%d>\n"
 			  org-export-html-toplevel-hlevel
