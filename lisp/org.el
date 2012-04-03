@@ -13756,7 +13756,10 @@ Returns the new tags string, or nil to not change the current settings."
 				 (append (or buffer-tags
 					     (with-current-buffer buf
 					       (mapcar 'car (org-get-buffer-tags))))
-					 (mapcar 'car table)))))
+					 (delq nil
+					       (mapcar (lambda (x)
+							 (if (stringp
+							      (car x)) x)) table))))))
 		    (quit (setq tg "")))
 		  (when (string-match "\\S-" tg)
 		    (add-to-list 'buffer-tags (list tg))
