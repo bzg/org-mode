@@ -20521,6 +20521,14 @@ the functionality can be provided as a fall-back.")
 				 (save-excursion (forward-paragraph 1)
 						 (point)))
 	       (fill-paragraph justify) t)))
+	  ;; Don't fill schedule/deadline line before a paragraph
+	  ((save-excursion (forward-paragraph -1)
+			   (or (looking-at (concat "^[^\n]*" org-scheduled-regexp ".*$"))
+			       (looking-at (concat "^[^\n]*" org-deadline-regexp ".*$"))))
+	   (save-restriction
+	     (narrow-to-region (1+ (match-end 0))
+			       (save-excursion (forward-paragraph 1) (point)))
+	     (fill-paragraph justify) t))
 	  ;; Else simply call `fill-paragraph'.
 	  (t nil))))
 
