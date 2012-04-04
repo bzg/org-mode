@@ -35,7 +35,7 @@
 
 ;; FIXMES
 ;; org-export-preprocess-after-blockquote-hook
-;; org-export-e-odt-preprocess-latex-fragments
+;; org-e-odt-preprocess-latex-fragments
 ;; org-export-as-e-odt-and-open
 ;; org-export-as-e-odt-batch
 ;; org-export-as-e-odt
@@ -44,9 +44,9 @@
   (let ((entity (or entity 'default)))
     (or
      (cdr (assoc entity (cdr (assoc category
-				    org-export-e-odt-org-styles-alist))))
+				    org-e-odt-org-styles-alist))))
      (cdr (assoc entity (cdr (assoc category
-				    org-export-e-odt-default-org-styles-alist))))
+				    org-e-odt-default-org-styles-alist))))
      (error "Cannot determine style name for entity %s of type %s"
 	    entity category))))
 
@@ -55,17 +55,20 @@
 ;; progress. See org-html.el.
 
 (defun org-e-odt-format-preamble (info)
-  (let* ((title (plist-get info :title))
-	 (author (plist-get info :author))
+  (let* ((title (org-export-secondary-string
+		 (plist-get info :title) 'e-odt info))
+	 (author (and (plist-get info :with-author)
+		      (let ((auth (plist-get info :author)))
+			(and auth (org-export-secondary-string
+				   auth 'e-odt info)))))
 	 (date (plist-get info :date))
 	 (iso-date (org-e-odt-format-date date))
 	 (date (org-e-odt-format-date date "%d %b %Y"))
 	 (email (plist-get info :email))
 	 ;; switch on or off above vars based on user settings
 	 (author (and (plist-get info :with-author) (or author email)))
-	 (email (and (plist-get info :with-email) email))
 	 ;; (date (and (plist-get info :time-stamp-file) date))
-	 )
+	 (email (and (plist-get info :with-email) email)))
     (concat
      ;; title
      (when title
@@ -275,7 +278,7 @@
   "Create an automatic style of type OBJECT-TYPE with param OBJECT-PROPS.
 OBJECT-PROPS is (typically) a plist created by passing
 \"#+ATTR_ODT: \" option of the object in question to
-`org-lparse-get-block-params'.
+`org-e-odt-parse-block-attributes'.
 
 Use `org-e-odt-object-counters' to generate an automatic
 OBJECT-NAME and STYLE-NAME.  If OBJECT-PROPS is non-nil, add a
@@ -325,10 +328,10 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
     ;; Put the Table in an indented section.
     (let ((level (length org-e-odt-list-stack-stashed)))
       (org-e-odt-begin-section (format "OrgIndentedSection-Level-%d" level))))
-  (setq attributes (org-lparse-get-block-params attributes))
+  (setq attributes (org-e-odt-parse-block-attributes attributes))
   (setq org-e-odt-table-style (plist-get attributes :style))
   (setq org-e-odt-table-style-spec
-	(assoc org-e-odt-table-style org-export-e-odt-table-styles))
+	(assoc org-e-odt-table-style org-e-odt-table-styles))
   (concat
    (org-e-odt-format-stylized-paragraph
     'table (org-e-odt-format-entity-caption label caption "__Table__"))
@@ -381,7 +384,7 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
 (defun org-e-odt-get-table-cell-styles (r c &optional style-spec)
   "Retrieve styles applicable to a table cell.
 R and C are (zero-based) row and column numbers of the table
-cell.  STYLE-SPEC is an entry in `org-export-e-odt-table-styles'
+cell.  STYLE-SPEC is an entry in `org-e-odt-table-styles'
 applicable to the current table.  It is `nil' if the table is not
 associated with any style attributes.
 
@@ -562,10 +565,13 @@ styles congruent with the ODF-1.2 specification."
 (defun org-e-odt-format-link (desc href &optional attr)
   (cond
    ((and (= (string-to-char href) ?#) (not org-e-odt-suppress-xref))
-    (setq href (concat org-export-e-odt-bookmark-prefix (substring href 1)))
+    (setq href (substring href 1))
     (let ((xref-format "text"))
       (when (numberp desc)
 	(setq desc (format "%d" desc) xref-format "number"))
+      (when (listp desc)
+	(setq desc (mapconcat 'identity desc ".") xref-format "chapter"))
+      (setq href (concat org-e-odt-bookmark-prefix href))
       (org-e-odt-format-tags-simple
        '("<text:bookmark-ref text:reference-format=\"%s\" text:ref-name=\"%s\">" .
 	 "</text:bookmark-ref>")
@@ -645,7 +651,7 @@ and prefix with \"OrgSrc\".  For example,
 				 ""))) fn))
 	 (color-val (cdr (assoc "color" css-list)))
 	 (background-color-val (cdr (assoc "background" css-list)))
-	 (style (and org-export-e-odt-create-custom-styles-for-srcblocks
+	 (style (and org-e-odt-create-custom-styles-for-srcblocks
 		     (cond
 		      ((eq fn 'default)
 		       (format org-src-block-paragraph-format
@@ -705,21 +711,7 @@ Update styles.xml with styles that were collected as part of
     (file-relative-name (expand-file-name path dir)
 			(expand-file-name "eyecandy" dir))))
 
-(defun org-e-odt-format-inline-image (thefile
-				      &optional caption label attrs ; FIXME - CLA
-				      )
-  (let* ((thelink (if (file-name-absolute-p thefile) thefile
-		    (org-xml-format-href
-		     (org-e-odt-relocate-relative-path
-		      thefile org-current-export-file))))
-	 (href
-	  (org-e-odt-format-tags
-	   "<draw:image xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
-	   (if org-export-e-odt-embed-images
-	       (org-e-odt-copy-image-file thefile) thelink))))
-    (org-export-e-odt-format-image thefile href)))
-
-(defun org-export-e-odt-format-formula (src href)
+(defun org-e-odt-format-formula (src href)
   (save-match-data
     (let* ((caption (org-find-text-property-in-string 'org-caption src))
 	   (caption (and caption (org-xml-format-desc caption)))
@@ -781,7 +773,7 @@ Update styles.xml with styles that were collected as part of
 	  (org-e-odt-format-tags
 	   "<draw:object xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
 	   (file-name-directory (org-e-odt-copy-formula-file thefile)))))
-    (org-export-e-odt-format-formula thefile href)))
+    (org-e-odt-format-formula thefile href)))
 
 (defun org-e-odt-is-formula-link-p (file)
   (let ((case-fold-search nil))
@@ -814,9 +806,8 @@ ATTR is a string of other attributes of the a element."
        ((and (member type '("file"))
 	     (not fragment)
 	     (org-file-image-p
-	      filename org-export-e-odt-inline-image-extensions)
-	     (or (eq t org-export-e-odt-inline-images)
-		 (and org-export-e-odt-inline-images (not descp))))
+	      filename org-e-odt-inline-image-extensions)
+	     (not descp))
 	(org-e-odt-format-inline-image thefile))
        ;; check for embedded formulas
        ((and (member type '("file"))
@@ -867,25 +858,6 @@ ATTR is a string of other attributes of the a element."
 	  (org-e-odt-format-link
 	   (org-xml-format-desc desc) thefile attr)))))))
 
-(defun org-e-odt-format-heading (text level &optional id)
-  (let* ((text (if id (org-e-odt-format-target text id) text)))
-    (org-e-odt-format-tags
-     '("<text:h text:style-name=\"Heading_20_%s\" text:outline-level=\"%s\">" .
-       "</text:h>") text level level)))
-
-(defun org-e-odt-format-headline (title extra-targets tags
-					&optional snumber level)
-  (concat
-   (org-e-odt-format-extra-targets extra-targets)
-
-   ;; No need to generate section numbers. They are auto-generated by
-   ;; the application
-
-   ;; (concat (org-lparse-format 'SECTION-NUMBER snumber level) " ")
-   title
-   (and tags (concat (org-e-odt-format-spaces 3)
-		     (org-e-odt-format-org-tags tags)))))
-
 (defun org-e-odt-format-anchor (text name &optional class)
   (org-e-odt-format-target text name))
 
@@ -895,7 +867,7 @@ ATTR is a string of other attributes of the a element."
     text))
 
 (defun org-e-odt-format-target (text id)
-  (let ((name (concat org-export-e-odt-bookmark-prefix id)))
+  (let ((name (concat org-e-odt-bookmark-prefix id)))
     (concat
      (and id (org-e-odt-format-tags
 	      "<text:bookmark-start text:name=\"%s\"/>" "" name))
@@ -909,15 +881,12 @@ ATTR is a string of other attributes of the a element."
 	(note-class "footnote")
 	(par-style "Footnote"))
     (org-e-odt-format-tags
-     '("<text:note text:id=\"%s\" text:note-class=\"%s\">" .
-       "</text:note>")
+     '("<text:note text:id=\"%s\" text:note-class=\"%s\">" . "</text:note>")
      (concat
+      (org-e-odt-format-tags-simple
+       '("<text:note-citation>" . "</text:note-citation>") n)
       (org-e-odt-format-tags
-       '("<text:note-citation>" . "</text:note-citation>")
-       n)
-      (org-e-odt-format-tags
-       '("<text:note-body>" . "</text:note-body>")
-       def))
+       '("<text:note-body>" . "</text:note-body>") def))
      id note-class)))
 
 (defun org-e-odt-format-footnote-reference (n def refcnt)
@@ -932,60 +901,69 @@ ATTR is a string of other attributes of the a element."
 	(ref-name (concat "fn" n)))
     (org-e-odt-format-tags
      '("<text:span text:style-name=\"%s\">" . "</text:span>")
-     (org-e-odt-format-tags
+     (org-e-odt-format-tags-simple
       '("<text:note-ref text:note-class=\"%s\" text:reference-format=\"%s\" text:ref-name=\"%s\">" . "</text:note-ref>")
       n note-class ref-format ref-name)
      "OrgSuperscript")))
 
-(defun org-e-odt-get-image-name (file-name)
-  (require 'sha1)
-  (file-relative-name
-   (expand-file-name
-    (concat (sha1 file-name) "." (file-name-extension file-name)) "Pictures")))
-
-(defun org-export-e-odt-format-image (src href)
-  "Create image tag with source and attributes."
+(defun org-e-odt-parse-block-attributes (params)
   (save-match-data
-    (let* ((caption (org-find-text-property-in-string 'org-caption src))
-	   (caption (and caption (org-xml-format-desc caption)))
-	   (attr (org-find-text-property-in-string 'org-attributes src))
-	   (label (org-find-text-property-in-string 'org-label src))
-	   (latex-frag (org-find-text-property-in-string
-			'org-latex-src src))
-	   (category (and latex-frag "__DvipngImage__"))
-	   (attr-plist (org-lparse-get-block-params attr))
-	   (user-frame-anchor
-	    (car (assoc-string (plist-get attr-plist :anchor)
-			       '(("as-char") ("paragraph") ("page")) t)))
-	   (user-frame-style
-	    (and user-frame-anchor (plist-get attr-plist :style)))
-	   (user-frame-attrs
-	    (and user-frame-anchor (plist-get attr-plist :attributes)))
-	   (user-frame-params
-	    (list user-frame-style user-frame-attrs user-frame-anchor))
-	   (embed-as (cond
-		      (latex-frag
-		       (symbol-name
-			(case (org-find-text-property-in-string
-			       'org-latex-src-embed-type src)
-			  (paragraph 'paragraph)
-			  (t 'as-char))))
-		      (user-frame-anchor)
-		      (t "paragraph")))
-	   (size (org-e-odt-image-size-from-file
-		  src (plist-get attr-plist :width)
-		  (plist-get attr-plist :height)
-		  (plist-get attr-plist :scale) nil embed-as))
-	   (width (car size)) (height (cdr size)))
-      (when latex-frag
-	(setq href (org-propertize href :title "LaTeX Fragment"
-				   :description latex-frag)))
-      (let ((frame-style-handle (concat (and (or caption label) "Captioned")
-					embed-as "Image")))
-	(org-e-odt-format-entity
-	 frame-style-handle href width height
-	 :caption caption :label label :category category
-	 :user-frame-params user-frame-params)))))
+    (when params
+      (setq params (org-trim params))
+      (unless (string-match "\\`(.*)\\'" params)
+	(setq params (format "(%s)" params)))
+      (ignore-errors (read params)))))
+
+(defun org-e-odt-format-image (src  &optional
+				    caption label attr
+				    embed-as ; FIXME
+				    category ; FIXME
+				    )
+  "Create image tag with source and attributes."
+  (let* ((href (org-e-odt-format-tags
+		"<draw:image xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
+		(org-e-odt-copy-image-file src)))
+	 ;; (caption (org-find-text-property-in-string 'org-caption src))
+	 ;; (caption (and caption (org-xml-format-desc caption)))
+	 ;; (attr (org-find-text-property-in-string 'org-attributes src))
+	 ;; (label (org-find-text-property-in-string 'org-label src))
+	 ;; (latex-frag (org-find-text-property-in-string
+	 ;; 		'org-latex-src src))
+	 ;; (category (and latex-frag "__DvipngImage__")) ; FIXME
+	 (attr-plist (org-e-odt-parse-block-attributes attr))
+	 (user-frame-anchor
+	  (car (assoc-string (plist-get attr-plist :anchor)
+			     '(("as-char") ("paragraph") ("page")) t)))
+	 (user-frame-style
+	  (and user-frame-anchor (plist-get attr-plist :style)))
+	 (user-frame-attrs
+	  (and user-frame-anchor (plist-get attr-plist :attributes)))
+	 (user-frame-params
+	  (list user-frame-style user-frame-attrs user-frame-anchor))
+	 (embed-as (or embed-as user-frame-anchor "paragraph"))
+	 ;; (embed-as (cond
+	 ;; 	      (latex-frag
+	 ;; 	       (symbol-name
+	 ;; 	      	(case (org-find-text-property-in-string ; FIXME
+	 ;; 	      	       'org-latex-src-embed-type src)
+	 ;; 	      	  (paragraph 'paragraph)
+	 ;; 	      	  (t 'as-char))))
+	 ;; 	      (user-frame-anchor)
+	 ;; 	      (t "paragraph")))
+	 (size (org-e-odt-image-size-from-file
+		src (plist-get attr-plist :width)
+		(plist-get attr-plist :height)
+		(plist-get attr-plist :scale) nil embed-as))
+	 (width (car size)) (height (cdr size)))
+    ;; (when latex-frag			; FIXME
+    ;; 	(setq href (org-propertize href :title "LaTeX Fragment"
+    ;; 				   :description latex-frag)))
+    (let ((frame-style-handle (concat (and (or caption label) "Captioned")
+				      embed-as "Image")))
+      (org-e-odt-format-entity
+       frame-style-handle href width height
+       :caption caption :label label :category category
+       :user-frame-params user-frame-params))))
 
 (defun org-e-odt-format-object-description (title description)
   (concat (and title (org-e-odt-format-tags
@@ -1019,18 +997,6 @@ ATTR is a string of other attributes of the a element."
 		 (unless width
 		   (format " fo:min-width=\"%0.2fcm\"" (or width .2)))))
    width nil style extra anchor-type))
-
-(defun org-e-odt-format-inlinetask (heading content
-					    &optional todo priority tags)
-  (org-e-odt-format-stylized-paragraph
-   nil (org-e-odt-format-textbox
-	(concat (org-e-odt-format-stylized-paragraph
-		 "OrgInlineTaskHeading"
-		 (org-lparse-format
-		  'HEADLINE (concat (org-lparse-format-todo todo) " " heading)
-		  nil tags))
-		content) nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\"")))
-
 
 (defun org-e-odt-merge-frame-params(default-frame-params user-frame-params)
   (if (not user-frame-params) default-frame-params
@@ -1087,7 +1053,7 @@ ATTR is a string of other attributes of the a element."
     target-file))
 
 (defun org-e-odt-do-image-size (probe-method file &optional dpi anchor-type)
-  (setq dpi (or dpi org-export-e-odt-pixels-per-inch))
+  (setq dpi (or dpi org-e-odt-pixels-per-inch))
   (setq anchor-type (or anchor-type "paragraph"))
   (flet ((size-in-cms (size-in-pixels)
 		      (flet ((pixels-to-cms (pixels)
@@ -1111,7 +1077,7 @@ ATTR is a string of other attributes of the a element."
 		  (string-to-number (match-string 2 dim)))))))
       (t
        (cdr (assoc-string anchor-type
-			  org-export-e-odt-default-image-sizes-alist))))))
+			  org-e-odt-default-image-sizes-alist))))))
 
 (defun org-e-odt-image-size-from-file (file &optional user-width
 					    user-height scale dpi embed-as)
@@ -1120,7 +1086,7 @@ ATTR is a string of other attributes of the a element."
 		file (file-name-directory org-current-export-file))))
   (let* (size width height)
     (unless (and user-height user-width)
-      (loop for probe-method in org-export-e-odt-image-size-probe-method
+      (loop for probe-method in org-e-odt-image-size-probe-method
 	    until size
 	    do (setq size (org-e-odt-do-image-size
 			   probe-method file dpi embed-as)))
@@ -1137,8 +1103,8 @@ ATTR is a string of other attributes of the a element."
       (setq height (* user-width (/ height width)) width user-width))
      (t (ignore)))
     ;; ensure that an embedded image fits comfortably within a page
-    (let ((max-width (car org-export-e-odt-max-image-size))
-	  (max-height (cdr org-export-e-odt-max-image-size)))
+    (let ((max-width (car org-e-odt-max-image-size))
+	  (max-height (cdr org-e-odt-max-image-size)))
       (when (or (> width max-width) (> height max-height))
 	(let* ((scale1 (/ max-width width))
 	       (scale2 (/ max-height height))
@@ -1146,33 +1112,10 @@ ATTR is a string of other attributes of the a element."
 	  (setq width (* scale width) height (* scale height)))))
     (cons width height)))
 
-(defun org-e-odt-get-label-category-and-style (label default-category)
-  "See `org-export-e-odt-get-category-from-label'."
-  (let ((default-category-map
-	  (assoc default-category org-e-odt-category-map-alist))
-	user-category user-category-map category)
-    (cond
-     ((not org-export-e-odt-get-category-from-label)
-      default-category-map)
-     ((not (setq user-category
-		 (save-match-data
-		   (and (string-match "\\`\\(.*\\):.+" label)
-			(match-string 1 label)))))
-      default-category-map)
-     (t
-      (setq user-category-map
-	    (or (assoc user-category org-e-odt-category-map-alist)
-		(list nil user-category "category-and-value"))
-	    category (nth 1 user-category-map))
-      (if (member category org-export-e-odt-user-categories)
-	  user-category-map
-	default-category-map)))))
-
 (defun org-e-odt-add-label-definition (label default-category)
   "Create an entry in `org-e-odt-entity-labels-alist' and return it."
   (setq label (substring-no-properties label))
-  (let* ((label-props (org-e-odt-get-label-category-and-style
-		       label default-category))
+  (let* ((label-props (assoc default-category org-e-odt-category-map-alist))
 	 (category (nth 1 label-props))
 	 (counter category)
 	 (label-style (nth 2 label-props))
@@ -1187,40 +1130,38 @@ ATTR is a string of other attributes of the a element."
     (push label-props org-e-odt-entity-labels-alist)
     label-props))
 
+(defun org-e-odt-format-label-reference (label default-category
+					       seqno) ; FIXME
+  (let* ((label-props (assoc default-category org-e-odt-category-map-alist))
+	 (category (nth 1 label-props))
+	 (counter category)		; FIXME
+	 (label-style (nth 2 label-props)))
+    (unless label-props
+      (error "Unknown category: %S" default-category))
+    (org-e-odt-do-format-label-reference label category seqno label-style)))
+
 (defun org-e-odt-format-label-definition (caption label category seqno label-style)
   (assert label)
+  (setq label (org-solidify-link-text label))
   (format-spec
    (cadr (assoc-string label-style org-e-odt-label-styles t))
    `((?e . ,category)
-     (?n . ,(org-e-odt-format-tags
+     (?n . ,(org-e-odt-format-tags-simple
 	     '("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
 	     (format "%d" seqno) label category category))
      (?c . ,(or (and caption (concat ": " caption)) "")))))
 
-(defun org-e-odt-format-label-reference (label category seqno label-style)
+(defun org-e-odt-do-format-label-reference (label category seqno label-style)
   (assert label)
   (save-match-data
     (let* ((fmt (cddr (assoc-string label-style org-e-odt-label-styles t)))
 	   (fmt1 (car fmt))
 	   (fmt2 (cadr fmt)))
-      (org-e-odt-format-tags
+      (org-e-odt-format-tags-simple
        '("<text:sequence-ref text:reference-format=\"%s\" text:ref-name=\"%s\">"
 	 . "</text:sequence-ref>")
        (format-spec fmt2 `((?e . ,category)
 			   (?n . ,(format "%d" seqno)))) fmt1 label))))
-
-(defun org-e-odt-fixup-label-references ()
-  (goto-char (point-min))
-  (while (re-search-forward
-	  "<text:sequence-ref text:ref-name=\"\\([^\"]+\\)\">[ \t\n]*</text:sequence-ref>"
-	  nil t)
-    (let* ((label (match-string 1))
-	   (label-def (assoc label org-e-odt-entity-labels-alist))
-	   (rpl (and label-def
-		     (apply 'org-e-odt-format-label-reference label-def))))
-      (if rpl (replace-match rpl t t)
-	(org-lparse-warn
-	 (format "Unable to resolve reference to label \"%s\"" label))))))
 
 (defun org-e-odt-format-entity-caption (label caption category)
   (or (and label
@@ -1248,7 +1189,7 @@ ATTR is a string of other attributes of the a element."
     (error "Executable \"zip\" needed for creating OpenDocument files"))
 
   (let* ((outdir (make-temp-file
-		  (format org-export-e-odt-tmpdir-prefix org-lparse-backend) t))
+		  (format org-e-odt-tmpdir-prefix 'odt) t)) ; FIXME
 	 (content-file (expand-file-name "content.xml" outdir)))
 
     ;; reset variables
@@ -1307,7 +1248,7 @@ ATTR is a string of other attributes of the a element."
 	    (with-current-buffer
 		(find-file-noselect (expand-file-name file) t)
 	      ;; prettify output if needed
-	      (when org-export-e-odt-prettify-xml
+	      (when org-e-odt-prettify-xml
 		(indent-region (point-min) (point-max)))
 	      (save-buffer 0)))
 	  xml-files)
@@ -1373,12 +1314,15 @@ ATTR is a string of other attributes of the a element."
       (insert "\n</manifest:manifest>"))))
 
 (defun org-e-odt-update-meta-file (info) ; FIXME opt-plist
-  (let ((date (org-e-odt-format-date (plist-get info :date)))
-	(author (or (plist-get info :author) ""))
+  (let ((title (org-export-secondary-string
+		(plist-get info :title) 'e-odt info))
+	(author (or (let ((auth (plist-get info :author)))
+		      (and auth (org-export-secondary-string
+				 auth 'e-odt info))) ""))
+	(date (org-e-odt-format-date (plist-get info :date)))
 	(email (plist-get info :email))
 	(keywords (plist-get info :keywords))
-	(description (plist-get info :description))
-	(title (plist-get info :title)))
+	(description (plist-get info :description)))
     (write-region
      (concat
       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -1403,7 +1347,7 @@ ATTR is a string of other attributes of the a element."
       (format "<dc:title>%s</dc:title>\n" title)
       "\n"
       "  </office:meta>\n" "</office:document-meta>")
-  nil (expand-file-name "meta.xml")))
+     nil (expand-file-name "meta.xml")))
 
   ;; create a manifest entry for meta.xml
   (org-e-odt-create-manifest-file-entry "text/xml" "meta.xml"))
@@ -1412,25 +1356,12 @@ ATTR is a string of other attributes of the a element."
   ;; write styles file
   (let ((styles-file (plist-get opt-plist :odt-styles-file)))
     (org-e-odt-copy-styles-file (and styles-file
-				     (read (org-trim styles-file)))))
+				     (read (org-trim styles-file))))
 
-  ;; Update styles.xml - take care of outline numbering
-  (with-current-buffer
-      (find-file-noselect (expand-file-name "styles.xml") t)
-    ;; Don't make automatic backup of styles.xml file. This setting
-    ;; prevents the backed-up styles.xml file from being zipped in to
-    ;; odt file. This is more of a hackish fix. Better alternative
-    ;; would be to fix the zip command so that the output odt file
-    ;; includes only the needed files and excludes any auto-generated
-    ;; extra files like backups and auto-saves etc etc. Note that
-    ;; currently the zip command zips up the entire temp directory so
-    ;; that any auto-generated files created under the hood ends up in
-    ;; the resulting odt file.
-    (set (make-local-variable 'backup-inhibited) t)
-
-    ;; Import local setting of `org-export-with-section-numbers'
-    (org-e-odt-configure-outline-numbering
-     (if org-export-with-section-numbers org-export-headline-levels 0)))
+    ;; FIXME: Who is opening an empty styles.xml before this point?
+    (with-current-buffer
+	(find-file-noselect (expand-file-name "styles.xml") t)
+      (revert-buffer t t)))
 
   ;; Write custom styles for source blocks
   (org-e-odt-insert-custom-styles-for-srcblocks
@@ -1463,11 +1394,11 @@ ATTR is a string of other attributes of the a element."
 		  (latex-frag &optional mathml-file))
 
 ;;;###autoload
-(defun org-export-e-odt-convert (&optional in-file out-fmt prefix-arg)
+(defun org-e-odt-convert (&optional in-file out-fmt prefix-arg)
   "Convert IN-FILE to format OUT-FMT using a command line converter.
 IN-FILE is the file to be converted.  If unspecified, it defaults
 to variable `buffer-file-name'.  OUT-FMT is the desired output
-format.  Use `org-export-e-odt-convert-process' as the converter.
+format.  Use `org-e-odt-convert-process' as the converter.
 If PREFIX-ARG is non-nil then the newly converted file is opened
 using `org-open-file'."
   (interactive
@@ -1486,16 +1417,16 @@ using `org-open-file'."
     (FINAL-METHOD 'org-e-odt-finalize-outfile)
     (SAVE-METHOD 'org-e-odt-save-as-outfile)
     (CONVERT-METHOD
-     (and org-export-e-odt-convert-process
-	  (cadr (assoc-string org-export-e-odt-convert-process
-			      org-export-e-odt-convert-processes t))))
+     (and org-e-odt-convert-process
+	  (cadr (assoc-string org-e-odt-convert-process
+			      org-e-odt-convert-processes t))))
     (CONVERT-CAPABILITIES
-     (and org-export-e-odt-convert-process
-	  (cadr (assoc-string org-export-e-odt-convert-process
-			      org-export-e-odt-convert-processes t))
-	  org-export-e-odt-convert-capabilities))
+     (and org-e-odt-convert-process
+	  (cadr (assoc-string org-e-odt-convert-process
+			      org-e-odt-convert-processes t))
+	  org-e-odt-convert-capabilities))
     (TOPLEVEL-HLEVEL 1)
-    (SPECIAL-STRING-REGEXPS org-export-e-odt-special-string-regexps)
+    (SPECIAL-STRING-REGEXPS org-e-odt-special-string-regexps)
     (INLINE-IMAGES 'maybe)
     (INLINE-IMAGE-EXTENSIONS '("png" "jpeg" "jpg" "gif" "svg"))
     (PLAIN-TEXT-MAP '(("&" . "&amp;") ("<" . "&lt;") (">" . "&gt;")))
@@ -1505,7 +1436,7 @@ using `org-open-file'."
     (CODING-SYSTEM-FOR-SAVE 'utf-8)
     (t (error "Unknown property: %s"  what))))
 
-(defun org-export-e-odt-do-preprocess-latex-fragments ()
+(defun org-e-odt-do-preprocess-latex-fragments ()
   "Convert LaTeX fragments to images."
   (let* ((latex-frag-opt (plist-get org-lparse-opt-plist :LaTeX-fragments))
 	 (latex-frag-opt		;  massage the options
@@ -1545,29 +1476,9 @@ Do this when translation to MathML fails."
 	  (org-propertize (org-e-odt-encode-plain-text (ad-get-arg 0))
 			  'org-protected t))))
 
-(defun org-export-e-odt-preprocess-latex-fragments ()
+(defun org-e-odt-preprocess-latex-fragments ()
   (when (equal org-export-current-backend 'odt)
-    (org-export-e-odt-do-preprocess-latex-fragments)))
-
-(defun org-export-e-odt-preprocess-label-references ()
-  (goto-char (point-min))
-  (let (label label-components category value pretty-label)
-    (while (re-search-forward "\\\\ref{\\([^{}\n]+\\)}" nil t)
-      (org-if-unprotected-at (match-beginning 1)
-	(replace-match
-	 (let ((org-lparse-encode-pending t)
-	       (label (match-string 1)))
-	   ;; markup generated below is mostly an eye-candy.  At
-	   ;; pre-processing stage, there is no information on which
-	   ;; entity a label reference points to.  The actual markup
-	   ;; is generated as part of `org-e-odt-fixup-label-references'
-	   ;; which gets called at the fag end of export.  By this
-	   ;; time we would have seen and collected all the label
-	   ;; definitions in `org-e-odt-entity-labels-alist'.
-	   (org-e-odt-format-tags
-	    '("<text:sequence-ref text:ref-name=\"%s\">" .
-	      "</text:sequence-ref>")
-	    "" (org-add-props label '(org-protected t)))) t t)))))
+    (org-e-odt-do-preprocess-latex-fragments)))
 
 ;; process latex fragments as part of
 ;; `org-export-preprocess-after-blockquote-hook'. Note that this hook
@@ -1577,11 +1488,7 @@ Do this when translation to MathML fails."
 ;; captions, labels and attributes to be attached to png images
 ;; generated out of latex equations.
 (add-hook 'org-export-preprocess-after-blockquote-hook
-	  'org-export-e-odt-preprocess-latex-fragments)
-
-(defun org-export-e-odt-preprocess (parameters)
-  (org-export-e-odt-preprocess-label-references))
-
+	  'org-e-odt-preprocess-latex-fragments)
 
 (defun org-e-odt-zip-extract-one (archive member &optional target)
   (require 'arc-mode)
@@ -1608,7 +1515,7 @@ Do this when translation to MathML fails."
   ;; Non-availability of styles.xml is not a critical error. For now
   ;; throw an error purely for aesthetic reasons.
   (setq styles-file (or styles-file
-			org-export-e-odt-styles-file
+			org-e-odt-styles-file
 			(expand-file-name "OrgOdtStyles.xml"
 					  org-e-odt-styles-dir)
 			(error "org-e-odt: Missing styles file?")))
@@ -1628,17 +1535,17 @@ Do this when translation to MathML fails."
     (let ((styles-file-type (file-name-extension styles-file)))
       (cond
        ((string= styles-file-type "xml")
-	(copy-file styles-file "styles.xml" t))
+	(copy-file styles-file (expand-file-name "styles.xml") t))
        ((member styles-file-type '("odt" "ott"))
 	(org-e-odt-zip-extract styles-file "styles.xml")))))
    (t
     (error (format "Invalid specification of styles.xml file: %S"
-		   org-export-e-odt-styles-file))))
+		   org-e-odt-styles-file))))
 
   ;; create a manifest entry for styles.xml
   (org-e-odt-create-manifest-file-entry "text/xml" "styles.xml"))
 
-(defun org-e-odt-configure-outline-numbering (level)
+(defun org-e-odt-configure-outline-numbering ()
   "Outline numbering is retained only upto LEVEL.
 To disable outline numbering pass a LEVEL of 0."
   (goto-char (point-min))
@@ -1647,7 +1554,9 @@ To disable outline numbering pass a LEVEL of 0."
 	(replacement
 	 "<text:outline-level-style\\1text:level=\"\\2\" style:num-format=\"\">"))
     (while (re-search-forward regex nil t)
-      (when (> (string-to-number (match-string 2)) level)
+      (unless (let ((sec-num (plist-get info :section-numbers))
+		    (level (string-to-number (match-string 2))))
+		(if (wholenump sec-num) (<= level sec-num) sec-num))
 	(replace-match replacement t nil))))
   (save-buffer 0))
 
@@ -1794,18 +1703,18 @@ formula file."
   (file-name-directory load-file-name)
   "Location of ODT exporter.
 Use this to infer values of `org-e-odt-styles-dir' and
-`org-export-e-odt-schema-dir'.")
+`org-e-odt-schema-dir'.")
 
 (defvar org-e-odt-data-dir
   (expand-file-name "../etc/" org-e-odt-lib-dir)
   "Data directory for ODT exporter.
 Use this to infer values of `org-e-odt-styles-dir' and
-`org-export-e-odt-schema-dir'.")
+`org-e-odt-schema-dir'.")
 
 
 
 
-(defconst org-export-e-odt-special-string-regexps
+(defconst org-e-odt-special-string-regexps
   '(("\\\\-" . "&#x00ad;\\1")		; shy
     ("---\\([^-]\\)" . "&#x2014;\\1")	; mdash
     ("--\\([^-]\\)" . "&#x2013;\\1")	; ndash
@@ -1823,7 +1732,7 @@ Use this to infer values of `org-e-odt-styles-dir' and
    )
   "List of directories to search for OpenDocument schema files.
 Use this list to set the default value of
-`org-export-e-odt-schema-dir'.  The entries in this list are
+`org-e-odt-schema-dir'.  The entries in this list are
 populated heuristically based on the values of `org-e-odt-lib-dir'
 and `org-e-odt-data-dir'.")
 
@@ -1870,8 +1779,8 @@ heuristically based on the values of `org-e-odt-lib-dir' and
 This directory contains the following XML files -
  \"OrgOdtStyles.xml\" and \"OrgOdtContentTemplate.xml\".  These
  XML files are used as the default values of
- `org-export-e-odt-styles-file' and
- `org-export-e-odt-content-template-file'.
+ `org-e-odt-styles-file' and
+ `org-e-odt-content-template-file'.
 
 The default value of this variable varies depending on the
 version of org in use and is initialized from
@@ -1879,8 +1788,8 @@ version of org in use and is initialized from
 from one of: org's own private git repository, GNU ELPA tar or
 standard Emacs.")
 
-(defconst org-export-e-odt-tmpdir-prefix "%s-")
-(defconst org-export-e-odt-bookmark-prefix "OrgXref.")
+(defconst org-e-odt-tmpdir-prefix "%s-")
+(defconst org-e-odt-bookmark-prefix "OrgXref.")
 
 (defconst org-e-odt-manifest-file-entry-tag
   "
@@ -1905,11 +1814,7 @@ standard Emacs.")
     ("odf" . "OpenDocument Formula")
     ("odc" . "OpenDocument Chart")))
 
-(defvar org-export-e-odt-embed-images t
-  "Should the images be copied in to the odt file or just linked?")
-
-(defvar org-export-e-odt-inline-images 'maybe)
-(defvar org-export-e-odt-default-org-styles-alist
+(defvar org-e-odt-default-org-styles-alist
   '((paragraph . ((default . "Text_20_body")
 		  (fixedwidth . "OrgFixedWidthBlock")
 		  (verse . "OrgVerse")
@@ -1939,7 +1844,7 @@ standard Emacs.")
 	     (descriptive . "OrgDescriptionList"))))
   "Default styles for various entities.")
 
-(defvar org-export-e-odt-org-styles-alist org-export-e-odt-default-org-styles-alist)
+(defvar org-e-odt-org-styles-alist org-e-odt-default-org-styles-alist)
 
 ;;;_. callbacks
 ;;;_. control callbacks
@@ -1962,7 +1867,7 @@ standard Emacs.")
 This is set during `org-e-odt-begin-table'.")
 
 (defvar org-e-odt-table-style-spec nil
-  "Entry for `org-e-odt-table-style' in `org-export-e-odt-table-styles'.")
+  "Entry for `org-e-odt-table-style' in `org-e-odt-table-styles'.")
 
 
 (defvar org-e-odt-table-style-format
@@ -1986,7 +1891,7 @@ The variable has the following form:
 
 OBJECT-TYPEs could be \"Section\", \"Table\", \"Figure\" etc.
 OBJECT-PROPS is (typically) a plist created by passing
-\"#+ATTR_ODT: \" option to `org-lparse-get-block-params'.
+\"#+ATTR_ODT: \" option to `org-e-odt-parse-block-attributes'.
 
 Use `org-e-odt-add-automatic-style' to add update this variable.'")
 
@@ -2038,12 +1943,12 @@ according to the default face identified by the `htmlfontify'.")
 
 (defvar org-e-odt-embedded-images-count 0)
 
-(defvar org-export-e-odt-image-size-probe-method
+(defvar org-e-odt-image-size-probe-method
   (append (and (executable-find "identify") '(imagemagick)) ; See Bug#10675
 	  '(emacs fixed))
   "Ordered list of methods for determining image sizes.")
 
-(defvar org-export-e-odt-default-image-sizes-alist
+(defvar org-e-odt-default-image-sizes-alist
   '(("as-char" . (5 . 0.4))
     ("paragraph" . (5 . 5)))
   "Hardcoded image dimensions one for each of the anchor
@@ -2052,7 +1957,7 @@ according to the default face identified by the `htmlfontify'.")
 ;; A4 page size is 21.0 by 29.7 cms
 ;; The default page settings has 2cm margin on each of the sides. So
 ;; the effective text area is 17.0 by 25.7 cm
-(defvar org-export-e-odt-max-image-size '(17.0 . 20.0)
+(defvar org-e-odt-max-image-size '(17.0 . 20.0)
   "Limiting dimensions for an embedded image.")
 
 (defvar org-e-odt-entity-labels-alist nil
@@ -2111,26 +2016,9 @@ This is an alist where each element is of the form
 \\(CATEGORY-HANDLE CATEGORY-NAME LABEL-STYLE\\).  CATEGORY_HANDLE
 could either be one of the internal handles (as seen above) or be
 derived from the \"#+LABEL:<label-name>\" specification.  See
-`org-export-e-odt-get-category-from-label'.  CATEGORY-NAME and
+`org-e-odt-get-category-from-label'.  CATEGORY-NAME and
 LABEL-STYLE are used for generating ODT labels.  See
 `org-e-odt-label-styles'.")
-
-(defvar org-export-e-odt-user-categories
-  '("Illustration" "Table" "Text" "Drawing" "Equation" "Figure"))
-
-(defvar org-export-e-odt-get-category-from-label nil
-  "Should category of label be inferred from label itself.
-When this option is non-nil, a label is parsed in to two
-component parts delimited by a \":\" (colon) as shown here -
-#+LABEL:[CATEGORY-HANDLE:]EXTRA.  The CATEGORY-HANDLE is mapped
-to a CATEGORY-NAME and LABEL-STYLE using
-`org-e-odt-category-map-alist'.  (If no such map is provided and
-CATEGORY-NAME is set to CATEGORY-HANDLE and LABEL-STYLE is set to
-\"category-and-value\").  If CATEGORY-NAME so obtained is listed
-under `org-export-e-odt-user-categories' then the user specified
-styles are used.  Otherwise styles as determined by the internal
-CATEGORY-HANDLE is used.  See
-`org-e-odt-get-label-category-and-style' for details.")
 
 (defvar org-e-odt-manifest-file-entries nil)
 (defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
@@ -2231,7 +2119,7 @@ Intended to be locally bound around a call to `org-export-as-html'." )
   :group 'org-export-e-html
   :type '(repeat (cons (string :tag "Character")
 		       (string :tag "ODT equivalent"))))
-(defcustom org-export-e-odt-schema-dir
+(defcustom org-e-odt-schema-dir
   (let* ((schema-dir
 	  (catch 'schema-dir
 	    (message "Debug (org-e-odt): Searching for OpenDocument schema files...")
@@ -2278,7 +2166,7 @@ with GNU ELPA tar or standard Emacs distribution."
   :version "24.1"
   :set
   (lambda (var value)
-    "Set `org-export-e-odt-schema-dir'.
+    "Set `org-e-odt-schema-dir'.
 Also add it to `rng-schema-locating-files'."
     (let ((schema-dir value))
       (set var
@@ -2294,13 +2182,13 @@ Also add it to `rng-schema-locating-files'."
 	       (message "Error (org-e-odt): %s has no OpenDocument schema files"
 			value))
 	     nil)))
-    (when org-export-e-odt-schema-dir
+    (when org-e-odt-schema-dir
       (eval-after-load 'rng-loc
 	'(add-to-list 'rng-schema-locating-files
 		      (expand-file-name "schemas.xml"
-					org-export-e-odt-schema-dir))))))
+					org-e-odt-schema-dir))))))
 
-(defcustom org-export-e-odt-content-template-file nil
+(defcustom org-e-odt-content-template-file nil
   "Template file for \"content.xml\".
 The exporter embeds the exported content just before
 \"</office:text>\" element.
@@ -2311,7 +2199,7 @@ under `org-e-odt-styles-dir' is used."
   :group 'org-export-e-odt
   :version "24.1")
 
-(defcustom org-export-e-odt-styles-file nil
+(defcustom org-e-odt-styles-file nil
   "Default styles file for use with ODT export.
 Valid values are one of:
 1. nil
@@ -2356,14 +2244,14 @@ a per-file basis.  For example,
 		(repeat (file :tag "Member"))))))
 
 
-(defcustom org-export-e-odt-inline-image-extensions
+(defcustom org-e-odt-inline-image-extensions
   '("png" "jpeg" "jpg" "gif")
   "Extensions of image files that can be inlined into HTML."
   :type '(repeat (string :tag "Extension"))
   :group 'org-export-e-odt
   :version "24.1")
 
-(defcustom org-export-e-odt-pixels-per-inch display-pixels-per-inch
+(defcustom org-e-odt-pixels-per-inch display-pixels-per-inch
   "Scaling factor for converting images pixels to inches.
 Use this for sizing of embedded images.  See Info node `(org)
 Images in ODT export' for more information."
@@ -2371,7 +2259,7 @@ Images in ODT export' for more information."
   :group 'org-export-e-odt
   :version "24.1")
 
-(defcustom org-export-e-odt-create-custom-styles-for-srcblocks t
+(defcustom org-e-odt-create-custom-styles-for-srcblocks t
   "Whether custom styles for colorized source blocks be automatically created.
 When this option is turned on, the exporter creates custom styles
 for source blocks based on the advice of `htmlfontify'.  Creation
@@ -2385,19 +2273,19 @@ based on your current display settings.  It is necessary that the
 styles.xml already contains needed styles for colorizing to work.
 
 This variable is effective only if
-`org-export-e-odt-fontify-srcblocks' is turned on."
+`org-e-odt-fontify-srcblocks' is turned on."
   :group 'org-export-e-odt
   :version "24.1"
   :type 'boolean)
 
-(defcustom org-export-e-odt-preferred-output-format nil
+(defcustom org-e-odt-preferred-output-format nil
   "Automatically post-process to this format after exporting to \"odt\".
 Interactive commands `org-export-as-e-odt' and
 `org-export-as-e-odt-and-open' export first to \"odt\" format and
-then use `org-export-e-odt-convert-process' to convert the
+then use `org-e-odt-convert-process' to convert the
 resulting document to this format.  During customization of this
 variable, the list of valid values are populated based on
-`org-export-e-odt-convert-capabilities'."
+`org-e-odt-convert-capabilities'."
   :group 'org-export-e-odt
   :version "24.1"
   :type '(choice :convert-widget
@@ -2409,7 +2297,7 @@ variable, the list of valid values are populated based on
 			       `(const :tag ,c ,c))
 			     (org-lparse-reachable-formats "odt")))))
 
-(defcustom org-export-e-odt-table-styles
+(defcustom org-e-odt-table-styles
   '(("OrgEquation" "OrgEquation"
      ((use-first-column-styles . t)
       (use-last-column-styles . t))))
@@ -2423,7 +2311,7 @@ TABLE-STYLE-NAME is the style associated with the table through
 TABLE-TEMPLATE-NAME is a set of - upto 9 - automatic
 TABLE-CELL-STYLE-NAMEs and PARAGRAPH-STYLE-NAMEs (as defined
 below) that is included in
-`org-export-e-odt-content-template-file'.
+`org-e-odt-content-template-file'.
 
 TABLE-CELL-STYLE-NAME := TABLE-TEMPLATE-NAME + TABLE-CELL-TYPE +
                          \"TableCell\"
@@ -2448,7 +2336,7 @@ ON-OR-OFF                 := `t' | `nil'
 
 For example, with the following configuration
 
-\(setq org-export-e-odt-table-styles
+\(setq org-e-odt-table-styles
       '\(\(\"TableWithHeaderRowsAndColumns\" \"Custom\"
          \(\(use-first-row-styles . t\)
           \(use-first-column-styles . t\)\)\)
@@ -2498,7 +2386,7 @@ style from the list."
 					 use-banding-columns-styles)
 			       :key-type symbol
 			       :value-type (const :tag "True" t))))))
-(defcustom org-export-e-odt-fontify-srcblocks t
+(defcustom org-e-odt-fontify-srcblocks t
   "Specify whether or not source blocks need to be fontified.
 Turn this option on if you want to colorize the source code
 blocks in the exported file.  For colorization to work, you need
@@ -2507,7 +2395,7 @@ to make available an enhanced version of `htmlfontify' library."
   :group 'org-export-e-odt
   :version "24.1")
 
-(defcustom org-export-e-odt-prettify-xml t ; FIXME
+(defcustom org-e-odt-prettify-xml t ; FIXME
   "Specify whether or not the xml output should be prettified.
 When this option is turned on, `indent-region' is run on all
 component xml buffers before they are saved.  Turn this off for
@@ -2517,14 +2405,14 @@ visually."
   :version "24.1"
   :type 'boolean)
 
-(defcustom org-export-e-odt-convert-processes
+(defcustom org-e-odt-convert-processes
   '(("LibreOffice"
      "soffice --headless --convert-to %f%x --outdir %d %i")
     ("unoconv"
      "unoconv -f %f -o %d %i"))
   "Specify a list of document converters and their usage.
 The converters in this list are offered as choices while
-customizing `org-export-e-odt-convert-process'.
+customizing `org-e-odt-convert-process'.
 
 This variable is a list where each element is of the
 form (CONVERTER-NAME CONVERTER-CMD).  CONVERTER-NAME is the name
@@ -2539,7 +2427,7 @@ specifiers are interpreted as below:
 %O output file name as a URL
 %d output dir in full
 %D output dir as a URL.
-%x extra options as set in `org-export-e-odt-convert-capabilities'."
+%x extra options as set in `org-e-odt-convert-capabilities'."
   :group 'org-export-e-odt
   :version "24.1"
   :type
@@ -2549,10 +2437,10 @@ specifiers are interpreted as below:
 	   :key-type (string :tag "Converter Name")
 	   :value-type (group (string :tag "Command line")))))
 
-(defcustom org-export-e-odt-convert-process "LibreOffice"
+(defcustom org-e-odt-convert-process "LibreOffice"
   "Use this converter to convert from \"odt\" format to other formats.
 During customization, the list of converter names are populated
-from `org-export-e-odt-convert-processes'."
+from `org-e-odt-convert-processes'."
   :group 'org-export-e-odt
   :version "24.1"
   :type '(choice :convert-widget
@@ -2562,9 +2450,9 @@ from `org-export-e-odt-convert-processes'."
 		 `((const :tag "None" nil)
 		   ,@(mapcar (lambda (c)
 			       `(const :tag ,(car c) ,(car c)))
-			     org-export-e-odt-convert-processes))))
+			     org-e-odt-convert-processes))))
 
-(defcustom org-export-e-odt-convert-capabilities
+(defcustom org-e-odt-convert-capabilities
   '(("Text"
      ("odt" "ott" "doc" "rtf" "docx")
      (("pdf" "pdf") ("odt" "odt") ("rtf" "rtf") ("ott" "ott")
@@ -2580,7 +2468,7 @@ from `org-export-e-odt-convert-processes'."
      ("odp" "otp" "ppt" "pptx")
      (("pdf" "pdf") ("swf" "swf") ("odp" "odp") ("otp" "otp") ("ppt" "ppt")
       ("pptx" "pptx") ("odg" "odg"))))
-  "Specify input and output formats of `org-export-e-odt-convert-process'.
+  "Specify input and output formats of `org-e-odt-convert-process'.
 More correctly, specify the set of input and output formats that
 the user is actually interested in.
 
@@ -2591,18 +2479,18 @@ alist where each element is of the form (OUTPUT-FMT
 OUTPUT-FILE-EXTENSION EXTRA-OPTIONS).
 
 The variable is interpreted as follows:
-`org-export-e-odt-convert-process' can take any document that is in
+`org-e-odt-convert-process' can take any document that is in
 INPUT-FMT-LIST and produce any document that is in the
 OUTPUT-FMT-LIST.  A document converted to OUTPUT-FMT will have
 OUTPUT-FILE-EXTENSION as the file name extension.  OUTPUT-FMT
 serves dual purposes:
 - It is used for populating completion candidates during
-  `org-export-e-odt-convert' commands.
+  `org-e-odt-convert' commands.
 - It is used as the value of \"%f\" specifier in
-  `org-export-e-odt-convert-process'.
+  `org-e-odt-convert-process'.
 
 EXTRA-OPTIONS is used as the value of \"%x\" specifier in
-`org-export-e-odt-convert-process'.
+`org-e-odt-convert-process'.
 
 DOCUMENT-CLASS is used to group a set of file formats in
 INPUT-FMT-LIST in to a single class.
@@ -2772,18 +2660,8 @@ order to reproduce the default set-up:
 
 ;;;; Links
 
-(defcustom org-e-odt-image-default-option "width=.9\\linewidth"
-  "Default option for images."
-  :group 'org-export-e-odt
-  :type 'string)
-
-(defcustom org-e-odt-default-figure-position "htb"
-  "Default position for latex figures."
-  :group 'org-export-e-odt
-  :type 'string)
-
 (defcustom org-e-odt-inline-image-rules
-  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\)\\'"))
+  '(("file" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\)\\'"))
   "Rules characterizing image files that can be inlined into HTML.
 
 A rule consists in an association whose key is the type of link
@@ -2912,38 +2790,6 @@ string defines the replacement string for this quote."
 ;;     (if (not label) inline-image
 ;;       (org-e-odt-format-section inline-image "figure" label))))
 
-(defun org-e-odt-format-image (src)
-  "Create image tag with source and attributes."
-  (save-match-data
-    (let* ((caption (org-find-text-property-in-string 'org-caption src))
-	   (attr (org-find-text-property-in-string 'org-attributes src))
-	   (label (org-find-text-property-in-string 'org-label src))
-	   (caption (and caption (org-xml-encode-org-text caption)))
-	   (img-extras (if (string-match "^ltxpng/" src)
-			   (format " alt=\"%s\""
-				   (org-find-text-property-in-string
-				    'org-latex-src src))
-			 (if (string-match "\\<alt=" (or attr ""))
-			     (concat " " attr )
-			   (concat " " attr " alt=\"" src "\""))))
-	   (img (format "<img src=\"%s\"%s />" src img-extras))
-	   (extra (concat
-		   (and label
-			(format "id=\"%s\" " (org-solidify-link-text label)))
-		   "class=\"figure\"")))
-      (if caption
-	  (with-temp-buffer
-	    (with-org-lparse-preserve-paragraph-state
-	     (insert
-	      (org-lparse-format
-	       '("<div %s>" . "\n</div>")
-	       (concat
-		(org-lparse-format '("\n<p>" . "</p>") img)
-		(org-lparse-format '("\n<p>" . "</p>") caption))
-	       extra)))
-	    (buffer-string))
-	img))))
-
 ;;;; Bibliography
 
 (defun org-e-odt-bibliography ()
@@ -2996,20 +2842,6 @@ string defines the replacement string for this quote."
 	      (substring style (match-beginning 0)))
     style))
 
-;; (defun org-e-odt-format-toc-entry (snumber todo headline tags href)
-;;   (setq headline (concat
-;; 		  ;; section number
-;; 		  (and org-export-with-section-numbers (concat snumber " "))
-;; 		  ;; headline
-;; 		  headline
-;; 		  ;; tags
-;; 		  (and tags (concat
-;; 			     (org-e-odt-format-spaces 3)
-;; 			     (org-e-odt-format-fontify tags "tag")))))
-;;   ;; fontify headline based on TODO keyword
-;;   (when todo (setq headline (org-e-odt-format-fontify headline "todo")))
-;;   (org-e-odt-format-link headline (concat  "#" href)))
-
 (defun org-e-odt-toc-entry-formatter
   (level snumber todo todo-type priority
 	 headline tags target extra-targets extra-class)
@@ -3029,13 +2861,31 @@ string defines the replacement string for this quote."
 	   (setq prev-level level))))
      toc-entries "")))
 
+(defun* org-e-odt-format-toc-headline
+    (todo todo-type priority text tags
+	  &key level section-number headline-label &allow-other-keys)
+  ;; FIXME
+  (setq text (concat
+	      (and org-export-with-section-numbers
+		   (concat section-number ". "))
+	      text
+	      (and tags
+		   (concat
+		    (org-e-odt-format-spaces 3)
+		    (org-e-odt-format-fontify tags "tag")))))
+  (when todo
+    (setq text (org-e-odt-format-fontify text "todo")))
+
+  (let ((org-e-odt-suppress-xref t))
+    (org-e-odt-format-link text (concat "#" headline-label))))
+
 (defun org-e-odt-toc (depth info)
   (assert (wholenump depth))
   (let* ((headlines (org-export-collect-headlines info depth))
 	 (toc-entries
 	  (loop for headline in headlines collect
-		(list (org-e-odt-headline-text
-		       headline info 'org-e-odt-toc-entry-formatter)
+		(list (org-e-odt-format-headline--wrap
+		       headline info 'org-e-odt-format-toc-headline)
 		      (org-export-get-relative-level headline info)))))
     (when toc-entries
       (let* ((lang-specific-heading "Table of Contents")) ; FIXME
@@ -3070,11 +2920,7 @@ string defines the replacement string for this quote."
 
 (defun org-e-odt-format-outline (contents level1 snumber title
 					  tags target extra-targets extra-class)
-  (concat
-   (org-e-odt-format-heading
-   (org-e-odt-format-headline title extra-targets tags snumber level1)
-   level1 target)
-   contents))
+)
 
 ;; (defun org-e-odt-format-line (line)
 ;;   (case org-lparse-dyn-current-environment
@@ -3185,18 +3031,6 @@ This is used to choose a separator for constructs like \\verb."
 	  when (not (string-match (regexp-quote (char-to-string c)) s))
 	  return (char-to-string c))))
 
-(defun org-e-odt--make-option-string (options)
-  "Return a comma separated string of keywords and values.
-OPTIONS is an alist where the key is the options keyword as
-a string, and the value a list containing the keyword value, or
-nil."
-  (mapconcat (lambda (pair)
-	       (concat (first pair)
-		       (when (> (length (second pair)) 0)
-			 (concat "=" (second pair)))))
-	     options
-	     ","))
-
 (defun org-e-odt--quotation-marks (text info)
   "Export quotation marks depending on language conventions.
 TEXT is a string containing quotation marks to be replaced.  INFO
@@ -3225,6 +3059,13 @@ This function shouldn't be used for floats.  See
 
 ;;; Transcode Helpers
 
+(defun* org-e-odt-format-headline
+    (todo todo-type priority text tags
+	  &key level section-number headline-label &allow-other-keys)
+  (concat  (org-e-odt-todo todo) (and todo " ") text
+	   (and tags (org-e-odt-format-spaces 3))
+	   (and tags (org-e-odt-format-org-tags tags))))
+
 ;;;; Src Code
 
 (defun org-e-odt-htmlfontify-string (line)
@@ -3252,7 +3093,7 @@ This function shouldn't be used for floats.  See
 	 (code-lines (org-split-string code "\n"))
 	 (code-length (length code-lines))
 	 (use-htmlfontify-p (and (functionp lang-mode)
-				 org-export-e-odt-fontify-srcblocks
+				 org-e-odt-fontify-srcblocks
 				 (require 'htmlfontify nil t)
 				 (fboundp 'htmlfontify-string)))
 	 (code (if (not use-htmlfontify-p) code
@@ -3315,15 +3156,11 @@ This function shouldn't be used for floats.  See
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  RAW-DATA is the
 original parsed data.  INFO is a plist holding export options."
-
-
   ;; write meta file
   (org-e-odt-update-meta-file info)
-
-
   (with-temp-buffer
     (insert-file-contents
-     (or org-export-e-odt-content-template-file
+     (or org-e-odt-content-template-file
 	 (expand-file-name "OrgOdtContentTemplate.xml"
 			   org-e-odt-styles-dir)))
     (goto-char (point-min))
@@ -3334,7 +3171,21 @@ original parsed data.  INFO is a plist holding export options."
     (insert (org-e-odt-format-preamble info))
     ;; Table of Contents
     (let ((depth (plist-get info :with-toc)))
-      (when (wholenump depth) (org-e-odt-toc depth info)))
+      (when (wholenump depth) (insert (org-e-odt-toc depth info))))
+    ;; Update styles.xml - take care of outline numbering
+    (with-current-buffer
+	(find-file-noselect (expand-file-name "styles.xml") t)
+      ;; Don't make automatic backup of styles.xml file. This setting
+      ;; prevents the backed-up styles.xml file from being zipped in to
+      ;; odt file. This is more of a hackish fix. Better alternative
+      ;; would be to fix the zip command so that the output odt file
+      ;; includes only the needed files and excludes any auto-generated
+      ;; extra files like backups and auto-saves etc etc. Note that
+      ;; currently the zip command zips up the entire temp directory so
+      ;; that any auto-generated files created under the hood ends up in
+      ;; the resulting odt file.
+      (set (make-local-variable 'backup-inhibited) t)
+      (org-e-odt-configure-outline-numbering))
 
     ;; Contents
     (insert contents)
@@ -3518,12 +3369,17 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (list (if (member todo org-done-keywords) "done" "todo")
 	   todo))))
 
-(defun org-e-odt-headline-text (headline info &optional formatter)
-  "Transcode an HEADLINE element from Org to HTML.
+(defun org-e-odt-format-headline--wrap (headline info
+						  &optional format-function
+						  &rest extra-keys)
+  "Transcode an HEADLINE element from Org to ODT.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
-  (let* ((numberedp (org-export-numbered-headline-p headline info))
-	 (level (org-export-get-relative-level headline info))
+  (let* ((level (+ (org-export-get-relative-level headline info)))
+	 (headline-number (org-export-get-headline-number headline info))
+	 (section-number (and (org-export-numbered-headline-p headline info)
+			      (mapconcat 'number-to-string
+					 headline-number ".")))
 	 (todo (and (plist-get info :with-todo-keywords)
 		    (let ((todo (org-element-property
 				 :todo-keyword headline)))
@@ -3536,97 +3392,33 @@ holding contextual information."
 		(org-element-property :title headline) 'e-odt info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-element-property :tags headline)))
-
-	 (headline-no (org-export-get-headline-number headline info))
-	 (headline-label
-	  (format "sec-%s" (mapconcat 'number-to-string headline-no "-")))
-	 (headline-labels (list headline-label))
-	 (headline-no (org-export-get-headline-number headline info))
-	 (section-no (mapconcat 'number-to-string headline-no "."))
-	 (primary-target (car (last headline-labels)))
-	 (secondary-targets (butlast headline-labels))
-	 (extra-class nil)
-	 (formatter (or (and (functionp formatter) formatter)
-			org-e-odt-headline-formatter)))
-    (funcall formatter level section-no todo todo-type priority
-	     text tags primary-target secondary-targets extra-class)))
+	 (headline-label (concat "sec-" (mapconcat 'number-to-string
+						   headline-number "-")))
+	 (format-function (cond
+			   ((functionp format-function) format-function)
+			   ((functionp org-e-odt-format-headline-function)
+			    (function*
+			     (lambda (todo todo-type priority text tags
+					   &allow-other-keys)
+			       (funcall org-e-odt-format-headline-function
+					todo todo-type priority text tags))))
+			   (t 'org-e-odt-format-headline))))
+    (apply format-function
+    	   todo todo-type  priority text tags
+    	   :headline-label headline-label :level level
+    	   :section-number section-number extra-keys)))
 
 (defun org-e-odt-headline (headline contents info)
   "Transcode an HEADLINE element from Org to HTML.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
-  (let* ((class (plist-get info :latex-class))
-	 (numberedp (org-export-numbered-headline-p headline info))
+  (let* ((numberedp (org-export-numbered-headline-p headline info))
 	 ;; Get level relative to current parsed data.
 	 (level (org-export-get-relative-level headline info))
-	 ;; (class-sectionning (assoc class org-e-odt-classes))
-	 ;; Section formatting will set two placeholders: one for the
-	 ;; title and the other for the contents.
-	 ;; (section-fmt
-	 ;;  (let ((sec (if (and (symbolp (nth 2 class-sectionning))
-	 ;; 		      (fboundp (nth 2 class-sectionning)))
-	 ;; 		 (funcall (nth 2 class-sectionning) level numberedp)
-	 ;; 	       (nth (1+ level) class-sectionning))))
-	 ;;    (cond
-	 ;;     ;; No section available for that LEVEL.
-	 ;;     ((not sec) nil)
-	 ;;     ;; Section format directly returned by a function.
-	 ;;     ((stringp sec) sec)
-	 ;;     ;; (numbered-section . unnumbered-section)
-	 ;;     ((not (consp (cdr sec)))
-	 ;;      (concat (funcall (if numberedp #'car #'cdr) sec) "\n%s"))
-	 ;;     ;; (numbered-open numbered-close)
-	 ;;     ((= (length sec) 2)
-	 ;;      (when numberedp (concat (car sec) "\n%s" (nth 1 sec))))
-	 ;;     ;; (num-in num-out no-num-in no-num-out)
-	 ;;     ((= (length sec) 4)
-	 ;;      (if numberedp
-	 ;; 	  (concat (car sec) "\n%s" (nth 1 sec))
-	 ;; 	(concat (nth 2 sec) "\n%s" (nth 3 sec)))))))
 	 (text (org-export-secondary-string
 		(org-element-property :title headline) 'e-odt info))
-	 (todo (and (plist-get info :with-todo-keywords)
-		    (let ((todo (org-element-property
-				 :todo-keyword headline)))
-		      (and todo
-			   (org-export-secondary-string todo 'e-odt info)))))
-	 (todo-type (and todo (org-element-property :todo-type headline)))
-	 (tags (and (plist-get info :with-tags)
-		    (org-element-property :tags headline)))
-	 (priority (and (plist-get info :with-priority)
-			(org-element-property :priority headline)))
 	 ;; Create the headline text.
-	 (full-text (if (functionp org-e-odt-format-headline-function)
-			;; User-defined formatting function.
-			(funcall org-e-odt-format-headline-function
-				 todo todo-type priority text tags)
-		      ;; Default formatting.
-		      (concat
-		       ;; (when todo
-		       ;; 	 (format "\\textbf{\\textsf{\\textsc{%s}}} " todo))
-		       (org-e-odt-todo todo) " "
-		       (when priority (format "\\framebox{\\#%c} " priority))
-		       text
-		       ;; (when tags (format "\\hfill{}\\textsc{%s}" tags))
-		       )))
-	 ;; Associate some \label to the headline for internal links.
-	 ;; (headline-label
-	 ;;  (format "\\label{sec-%s}\n"
-	 ;; 	  (mapconcat 'number-to-string
-	 ;; 		     (org-export-get-headline-number headline info)
-	 ;; 		     "-")))
-
-	 ;; FIXME - begin
-	 (headline-no (org-export-get-headline-number headline info))
-	 (headline-label
-	  (format "sec-%s" (mapconcat 'number-to-string headline-no "-")))
-	 (headline-labels (list headline-label))
-	 (headline-no (org-export-get-headline-number headline info))
-	 (section-no (mapconcat 'number-to-string headline-no "."))
-	 ;; FIXME - end
-
-	 (pre-blanks (make-string
-		      (org-element-property :pre-blank headline) 10)))
+	 (full-text (org-e-odt-format-headline--wrap headline info)))
     (cond
      ;; Case 1: This is a footnote section: ignore it.
      ((org-element-property :footnote-section-p headline) nil)
@@ -3646,12 +3438,20 @@ holding contextual information."
 	      (org-e-odt-end-plain-list type)))))
      ;; Case 3. Standard headline.  Export it as a section.
      (t
-      ;; (format section-fmt full-text
-      ;; 	(concat headline-label pre-blanks contents))
-
-      (org-e-odt-format-outline contents level section-no full-text tags
-				 (car (last headline-labels))
-				 (butlast headline-labels) nil)))))
+      (let* ((extra-ids (list (org-element-property :custom-id headline)
+			      (org-element-property :id headline)))
+	     (extra-ids nil)		; FIXME
+	     (id (concat "sec-" (mapconcat 'number-to-string
+					   (org-export-get-headline-number
+					    headline info) "-"))))
+	(concat
+	 (org-e-odt-format-tags
+	  '("<text:h text:style-name=\"Heading_20_%s\" text:outline-level=\"%s\">" .
+	    "</text:h>")
+	  (concat (org-e-odt-format-extra-targets extra-ids)
+		  (if (not id) full-text (org-e-odt-format-target full-text id) ))
+	  level level)
+	 contents))))))
 
 
 ;;;; Horizontal Rule
@@ -3690,46 +3490,31 @@ contextual information."
     (concat (format "<div class=\"%s\"%s>\n" class extra) text "</div>\n")))
 
 (defun org-e-odt-inlinetask (inlinetask contents info)
-  "Transcode an INLINETASK element from Org to HTML.
+  "Transcode an INLINETASK element from Org to ODT.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((title (org-export-secondary-string
-	       (org-element-property :title inlinetask) 'e-odt info))
-	(todo (and (plist-get info :with-todo-keywords)
-		   (let ((todo (org-element-property
-				:todo-keyword inlinetask)))
-		     (and todo
-			  (org-export-secondary-string todo 'e-odt info)))))
-	(todo-type (org-element-property :todo-type inlinetask))
-	(tags (and (plist-get info :with-tags)
-		   (org-element-property :tags inlinetask)))
-	(priority (and (plist-get info :with-priority)
-		       (org-element-property :priority inlinetask))))
-    ;; If `org-e-odt-format-inlinetask-function' is provided, call it
-    ;; with appropriate arguments.
-    (if (functionp org-e-odt-format-inlinetask-function)
-	(funcall org-e-odt-format-inlinetask-function
-		 todo todo-type priority title tags contents)
-      ;; Otherwise, use a default template.
-      (org-e-odt--wrap-label
+  (cond
+   ;; If `org-e-odt-format-inlinetask-function' is provided, call it
+   ;; with appropriate arguments.
+   ((functionp org-e-odt-format-inlinetask-function)
+    (let ((format-function
+	   (function*
+	    (lambda (todo todo-type priority text tags
+			  &key contents &allow-other-keys)
+	      (funcall org-e-odt-format-inlinetask-function
+		       todo todo-type priority text tags contents)))))
+      (org-e-odt-format-headline--wrap
+       inlinetask info format-function :contents contents)))
+   ;; Otherwise, use a default template.
+   (t (org-e-odt--wrap-label
        inlinetask
-       (let ((full-title
-	      (concat
-	       (when todo (format "\\textbf{\\textsf{\\textsc{%s}}} " todo))
-	       (when priority (format "\\framebox{\\#%c} " priority))
-	       title
-	       (when tags (format "\\hfill{}\\textsc{%s}" tags)))))
-	 (format (concat "\\begin{center}\n"
-			 "\\fbox{\n"
-			 "\\begin{minipage}[c]{.6\\textwidth}\n"
-			 "%s\n\n"
-			 "\\rule[.8em]{\\textwidth}{2pt}\n\n"
-			 "%s"
-			 "\\end{minipage}\n"
-			 "}\n"
-			 "\\end{center}")
-		 full-title contents))))))
-
+       (org-e-odt-format-stylized-paragraph
+	nil (org-e-odt-format-textbox
+	     (concat (org-e-odt-format-stylized-paragraph
+		      "OrgInlineTaskHeading" (org-e-odt-format-headline--wrap
+					      inlinetask info))
+		     contents)
+	     nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\""))))))
 
 ;;;; Item
 
@@ -3819,10 +3604,19 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-e-odt--wrap-label
    latex-environment
-   (let ((latex-frag
-	  (org-remove-indentation
-	   (org-element-property :value latex-environment)))
-	 (processing-type (plist-get info :LaTeX-fragments)))
+   (let* ((latex-frag
+	   (org-remove-indentation
+	    (org-element-property :value latex-environment)))
+	  (processing-type (plist-get info :LaTeX-fragments))
+	  (caption (org-element-property :caption latex-environment))
+	  (short-caption (and (cdr caption) (org-export-secondary-string
+					     (cdr caption) 'e-odt info)))
+	  (caption (and (car caption) (org-export-secondary-string
+				       (car caption) 'e-odt info)))
+	  (label (org-element-property :name latex-environment))
+	 
+	  (attr nil)			; FIXME
+	  (label (org-element-property :name latex-environment)))
      (cond
       ((member processing-type '(t mathjax))
        (org-e-odt-format-latex latex-frag 'mathml))
@@ -3831,9 +3625,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			     latex-frag processing-type)))
 	 (when (and formula-link
 		    (string-match "file:\\([^]]*\\)" formula-link))
-	   (org-e-odt-format-inline-image (match-string 1 formula-link)))))
-      (t
-       latex-frag)))))
+	   (org-e-odt-format-image
+	    (match-string 1 formula-link) caption label attr "paragraph"
+	    "__DvipngImage__"))))
+      (t latex-frag)))))
 
 
 ;;;; Latex Fragment
@@ -3841,28 +3636,19 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-odt-latex-fragment (latex-fragment contents info)
   "Transcode a LATEX-FRAGMENT object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  ;; (org-element-property :value latex-fragment)
-  (let* ((latex-frag (org-element-property :value latex-fragment)))
+  (let* ((latex-frag (org-element-property :value latex-fragment))
+	 (processing-type (plist-get info :LaTeX-fragments)))
     (cond
-     ((string-match "\\\\ref{\\([^{}\n]+\\)}" latex-frag)
-      (let* ((label (match-string 1 latex-frag))
-	     (href (and label (org-export-solidify-link-text label)))
-	     (text (if (string-match "\\`[a-z]\\{1,10\\}:\\(.+\\)" label)
-		       (substring label (match-beginning 1))
-		     label)))
-	(org-e-odt-format-internal-link text href)))
-     (t (let ((processing-type (plist-get info :LaTeX-fragments)))
-	  (cond
-	   ((member processing-type '(t mathjax))
-	    (org-e-odt-format-latex latex-frag 'mathjax))
-	   ((equal processing-type 'dvipng)
-	    (let* ((formula-link (org-e-odt-format-latex
-				  latex-frag processing-type)))
-	      (when (and formula-link
-			 (string-match "file:\\([^]]*\\)" formula-link))
-		(org-e-odt-format-inline-image
-		 (match-string 1 formula-link)))))
-	   (t latex-frag)))))))
+     ((member processing-type '(t mathjax))
+      (org-e-odt-format-latex latex-frag 'mathml))
+     ((equal processing-type 'dvipng)
+      (let* ((formula-link (org-e-odt-format-latex latex-frag processing-type))
+	     (src (and formula-link
+		       (string-match "file:\\([^]]*\\)" formula-link)
+		       (match-string 1 formula-link))))
+	(assert src)
+	(org-e-odt-format-image src)))
+     (t latex-frag))))
 
 
 ;;;; Line Break
@@ -3875,18 +3661,23 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Link
 
-(defun org-e-odt-link--inline-image (link info)
+(defun org-e-odt-link--inline-image (link desc info)
   "Return HTML code for an inline image.
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
-  (let* ((parent (org-export-get-parent-paragraph link info))
-	 (path (let ((raw-path (org-element-property :path link)))
-		 (if (not (file-name-absolute-p raw-path)) raw-path
-		   (expand-file-name raw-path))))
-	 (caption (org-e-odt--caption/label-string
-		   (org-element-property :caption parent)
-		   (org-element-property :name parent)
-		   info))
+  (let* ((type (org-element-property :type link))
+	 (raw-path (org-element-property :path link))
+	 (path (cond ((member type '("http" "https"))
+		      (concat type ":" raw-path))
+		     ((file-name-absolute-p raw-path)
+		      (expand-file-name raw-path))
+		     (t raw-path)))
+	 (parent (org-export-get-parent-paragraph link info))
+	 (caption (org-element-property :caption parent))
+	 (short-caption (and (cdr caption) (org-export-secondary-string
+					    (cdr caption) 'e-odt info)))
+	 (caption (and (car caption) (org-export-secondary-string
+				      (car caption) 'e-odt info)))
 	 (label (org-element-property :name parent))
 	 ;; Retrieve latex attributes from the element around.
 	 (attr (let ((raw-attr
@@ -3898,8 +3689,59 @@ used as a communication channel."
     ;; value if nothing is left.
     (setq attr (if (not attr) "" (org-trim attr)))
     ;; Return proper string, depending on DISPOSITION.
-    (let ((href (and label (org-export-solidify-link-text label))))
-      (org-e-odt-format-inline-image path caption href attr))))
+    (org-e-odt-format-image
+     path caption label attr (if (org-e-html-standalone-image-p link info)
+				 "paragraph" "as-char"))))
+
+(defvar org-e-odt-standalone-image-predicate
+  (function (lambda (paragraph)
+	      (or (org-element-property :caption paragraph)
+		  (org-element-property :name paragraph)))))
+
+(defun org-e-odt-standalone-image-p (element info &optional predicate)
+  "Test if ELEMENT is a standalone image for the purpose ODT export.
+INFO is a plist holding contextual information.
+
+Return non-nil, if ELEMENT is of type paragraph and it's sole
+content, save for whitespaces, is a link that qualifies as an
+inline image.
+
+Return non-nil, if ELEMENT is of type link and it's containing
+paragraph has no other content save for leading and trailing
+whitespaces.
+
+Return nil, otherwise.
+
+Bind `org-e-odt-standalone-image-predicate' to constrain
+paragraph further.  For example, to check for only captioned
+standalone images, do the following.
+
+  \(setq org-e-odt-standalone-image-predicate
+	\(lambda \(paragraph\)
+	  \(org-element-property :caption paragraph\)\)\)
+"
+  (let ((paragraph (case (org-element-type element)
+		     (paragraph element)
+		     (link (and (org-export-inline-image-p
+				 element org-e-odt-inline-image-rules)
+				(org-export-get-parent element info)))
+		     (t nil))))
+    (when paragraph
+      (assert (eq (org-element-type paragraph) 'paragraph))
+      (when (or (not (and (boundp 'org-e-odt-standalone-image-predicate)
+			  (functionp org-e-odt-standalone-image-predicate)))
+		(funcall org-e-odt-standalone-image-predicate paragraph))
+	(let ((contents (org-element-contents paragraph)))
+	  (loop for x in contents
+		with inline-image-count = 0
+		always (cond
+			((eq (org-element-type x) 'plain-text)
+			 (not (org-string-nw-p x)))
+			((eq (org-element-type x) 'link)
+			 (when (org-export-inline-image-p
+				x org-e-odt-inline-image-rules)
+			   (= (incf inline-image-count) 1)))
+			(t nil))))))))
 
 (defun org-e-odt-link (link desc info)
   "Transcode a LINK object from Org to HTML.
@@ -3928,7 +3770,9 @@ INFO is a plist holding contextual information.  See
 	 protocol)
     (cond
      ;; Image file.
-     (imagep (org-e-odt-link--inline-image link info))
+     ((and (not desc) (org-export-inline-image-p
+		       link org-e-odt-inline-image-rules))
+      (org-e-odt-link--inline-image link desc info))
      ;; Radioed target: Target's name is obtained from original raw
      ;; link.  Path is parsed and transcoded in order to have a proper
      ;; display of the contents.
@@ -3973,14 +3817,30 @@ INFO is a plist holding contextual information.  See
 	     (org-e-odt-format-internal-link desc label)))
 	  ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
+	   ;; "__Table__"
+	   ;; "__Figure__"
+	   ;; "__MathFormula__"
+	   ;; "__DvipngImage__"
 	   (let ((path (org-export-solidify-link-text path)))
 	     (unless desc
-	       (setq desc (let ((number (org-export-get-ordinal
-					 destination info)))
-			    (when number
-			      (if (atom number) (number-to-string number)
-				(mapconcat 'number-to-string number "."))))))
-	     (org-e-odt-format-internal-link (or desc "FIXME") path))))))
+	       (setq number (cond
+			     ((org-e-odt-standalone-image-p destination info)
+			      (org-export-get-ordinal
+			       (assoc 'link (org-element-contents destination))
+			       info 'link 'org-e-odt-standalone-image-p))
+			     (t (org-export-get-ordinal destination info))))
+	       (setq desc (when number
+			    (if (atom number) (number-to-string number)
+			      (mapconcat 'number-to-string number ".")))))
+	     (let ((label path)
+		   (default-category
+		     (cond
+		      ((eq (org-element-type destination) 'table)
+		       "__Table__")
+		      ((org-e-odt-standalone-image-p destination info)
+		       "__Figure__")
+		      (t (error "Handle enumeration of %S" destination)))))
+	       (org-e-odt-format-label-reference label default-category number)))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -4029,6 +3889,7 @@ the plist used as a communication channel."
 	 (style (case parent-type
 		  (quote-block 'quote)
 		  (center-block 'center)
+		  (footnote-definition 'footnote)
 		  (t nil))))
     (org-e-odt-format-stylized-paragraph style contents)))
 
@@ -4053,7 +3914,7 @@ contextual information."
 
 (defun org-e-odt-convert-special-strings (string)
   "Convert special characters in STRING to ODT."
-  (let ((all org-export-e-odt-special-string-regexps)
+  (let ((all org-e-odt-special-string-regexps)
 	e a re rpl start)
     (while (setq a (pop all))
       (setq re (car a) rpl (cdr a) start 0)
@@ -4179,7 +4040,6 @@ contextual information."
 	 (caption (org-element-property :caption src-block))
 	 (label (org-element-property :name src-block)))
     ;; FIXME: Handle caption
-
     ;; caption-str (when caption)
     ;; (main (org-export-secondary-string (car caption) 'e-odt info))
     ;; (secondary (org-export-secondary-string (cdr caption) 'e-odt info))
@@ -4493,10 +4353,7 @@ directory.
 
 Return output file's name."
   (interactive)
-
-  ;; FIXME
-  (with-current-buffer (get-buffer-create "*debug*")
-    (erase-buffer))
+  (setq debug-on-error t)
 
   ;; (let* ((outfile (org-export-output-file-name ".html" subtreep pub-dir))
   ;; 	 (outfile "content.xml"))
@@ -4558,7 +4415,6 @@ Return output file's name."
 ;;;; org-e-odt-special-string-regexps
 ;;;; org-e-odt-coding-system
 ;;;; org-e-odt-coding-system
-;;;; org-e-odt-inline-images
 ;;;; org-e-odt-inline-image-extensions
 ;;;; org-e-odt-protect-char-alist
 ;;;; org-e-odt-table-use-header-tags-for-first-column
