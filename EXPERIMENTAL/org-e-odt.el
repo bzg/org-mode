@@ -711,33 +711,52 @@ Update styles.xml with styles that were collected as part of
     (file-relative-name (expand-file-name path dir)
 			(expand-file-name "eyecandy" dir))))
 
-(defun org-e-odt-format-formula (src href)
-  (save-match-data
-    (let* ((caption (org-find-text-property-in-string 'org-caption src))
-	   (caption (and caption (org-xml-format-desc caption)))
-	   (label (org-find-text-property-in-string 'org-label src))
-	   (latex-frag (org-find-text-property-in-string 'org-latex-src src))
-	   (embed-as (or (and latex-frag
-			      (org-find-text-property-in-string
-			       'org-latex-src-embed-type src))
-			 (if (or caption label) 'paragraph 'character)))
-	   width height)
-      (when latex-frag
-	(setq href (org-propertize href :title "LaTeX Fragment"
-				   :description latex-frag)))
-      (cond
-       ((eq embed-as 'character)
-	(org-e-odt-format-entity "InlineFormula" href width height))
-       (t
-	(org-lparse-end-paragraph)
-	(org-lparse-insert-list-table
+(defun org-e-odt-format-formula (src &optional caption label attr)
+  (let* ((href
+	  (org-e-odt-format-tags
+	   "<draw:object xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
+	   (file-name-directory (org-e-odt-copy-formula-file src))))
+	 ;; FIXME
+	 ;; (caption (org-find-text-property-in-string 'org-caption src))
+	 ;; (caption (and caption (org-xml-format-desc caption)))
+	 ;; (label (org-find-text-property-in-string 'org-label src))
+	 ;; (latex-frag (org-find-text-property-in-string 'org-latex-src src))
+	 (embed-as (or
+		    ;; FIXME
+		    ;; (and latex-frag
+		    ;;      (org-find-text-property-in-string
+		    ;;       'org-latex-src-embed-type src))
+		    (if (or caption label) 'paragraph 'character)))
+	 width height)
+    ;; FIXME
+    ;; (when latex-frag
+    ;; 	(setq href (org-propertize href :title "LaTeX Fragment"
+    ;; 				   :description latex-frag)))
+    (cond
+     ((eq embed-as 'character)
+      (org-e-odt-format-entity "InlineFormula" href width height))
+     (t
+      ;; (org-lparse-end-paragraph)
+
+      (let ((table-info nil)
+	    (table-info
+	     '(:alignment ["c" "c"]
+			  :column-groups [nil nil]
+			  :row-groups (0)
+			  :special-column-p nil :width [8 1]))
+	    (org-lparse-table-ncols 2)
+	    )				; FIXME
+	(org-e-odt-list-table
 	 `((,(org-e-odt-format-entity
 	      (if caption "CaptionedDisplayFormula" "DisplayFormula")
 	      href width height :caption caption :label nil)
 	    ,(if (not label) ""
 	       (org-e-odt-format-entity-caption label nil "__MathFormula__"))))
-	 nil nil nil ":style \"OrgEquation\"" nil '((1 "c" 8) (2 "c" 1)))
-	(throw 'nextline nil))))))
+	 nil nil ":style \"OrgEquation\"" ;; nil '((1 "c" 8) (2 "c" 1)) FIXME
+	 ))
+
+      ;; (throw 'nextline nil)
+      ))))
 
 (defun org-e-odt-copy-formula-file (path)
   "Returns the internal name of the file"
@@ -763,17 +782,6 @@ Update styles.xml with styles that were collected as part of
 
     (org-e-odt-create-manifest-file-entry "text/xml" target-file)
     target-file))
-
-(defun org-e-odt-format-inline-formula (thefile)
-  (let* ((thelink (if (file-name-absolute-p thefile) thefile
-		    (org-xml-format-href
-		     (org-e-odt-relocate-relative-path
-		      thefile org-current-export-file))))
-	 (href
-	  (org-e-odt-format-tags
-	   "<draw:object xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
-	   (file-name-directory (org-e-odt-copy-formula-file thefile)))))
-    (org-e-odt-format-formula thefile href)))
 
 (defun org-e-odt-is-formula-link-p (file)
   (let ((case-fold-search nil))
@@ -814,7 +822,7 @@ ATTR is a string of other attributes of the a element."
 	     (not fragment)
 	     (org-e-odt-is-formula-link-p filename)
 	     (or (not descp)))
-	(org-e-odt-format-inline-formula thefile))
+	(org-e-odt-format-formula thefile))
        ((string= type "coderef")
 	(let* ((ref fragment)
 	       (lineno-or-ref (cdr (assoc ref org-export-code-refs)))
@@ -1223,7 +1231,7 @@ ATTR is a string of other attributes of the a element."
   ;; (when (equal org-lparse-backend 'odt) FIXME
   ;;   )
 
-  (org-e-odt-update-styles-file opt-plist)
+  ;; (org-e-odt-update-styles-file opt-plist)
 
   ;; create mimetype file
   (let ((mimetype (org-e-odt-write-mimetype-file ;; org-lparse-backend FIXME
@@ -1352,9 +1360,9 @@ ATTR is a string of other attributes of the a element."
   ;; create a manifest entry for meta.xml
   (org-e-odt-create-manifest-file-entry "text/xml" "meta.xml"))
 
-(defun org-e-odt-update-styles-file (opt-plist)
+(defun org-e-odt-update-styles-file (info)
   ;; write styles file
-  (let ((styles-file (plist-get opt-plist :odt-styles-file)))
+  (let ((styles-file (plist-get info :odt-styles-file)))
     (org-e-odt-copy-styles-file (and styles-file
 				     (read (org-trim styles-file))))
 
@@ -1466,15 +1474,20 @@ using `org-open-file'."
        org-current-export-dir nil display-msg
        nil nil latex-frag-opt))))
 
-(defadvice org-format-latex-as-mathml
-  (after org-e-odt-protect-latex-fragment activate)
-  "Encode LaTeX fragment as XML.
-Do this when translation to MathML fails."
-  (when (or (not (> (length ad-return-value) 0))
-	    (get-text-property 0 'org-protected ad-return-value))
-    (setq ad-return-value
-	  (org-propertize (org-e-odt-encode-plain-text (ad-get-arg 0))
-			  'org-protected t))))
+(eval-after-load 'org-odt
+  '(ad-deactivate 'org-format-latex-as-mathml))
+
+ ; FIXME
+
+;; (defadvice org-format-latex-as-mathml	; FIXME
+;;   (after org-e-odt-protect-latex-fragment activate)
+;;   "Encode LaTeX fragment as XML.
+;; Do this when translation to MathML fails."
+;;   (when (or (not (> (length ad-return-value) 0))
+;; 	    (get-text-property 0 'org-protected ad-return-value))
+;;     (setq ad-return-value
+;; 	  (org-propertize (org-e-odt-encode-plain-text (ad-get-arg 0))
+;; 			  'org-protected t))))
 
 (defun org-e-odt-preprocess-latex-fragments ()
   (when (equal org-export-current-backend 'odt)
@@ -1630,12 +1643,6 @@ formula file."
 
 
 ;;; Hooks
-
-(defvar org-e-odt-after-blockquotes-hook nil
-  "Hook run during HTML export, after blockquote, verse, center are done.")
-
-(defvar org-e-odt-final-hook nil
-  "Hook run at the end of HTML export, in the new buffer.")
 
 ;; FIXME: it already exists in org-e-odt.el
 ;;; Function Declarations
@@ -2046,6 +2053,7 @@ LABEL-STYLE are used for generating ODT labels.  See
     ;; (:html-preamble nil nil org-e-odt-preamble)
     ;; (:html-table-tag nil nil org-e-odt-table-tag)
     ;; (:xml-declaration nil nil org-e-odt-xml-declaration)
+    (:odt-styles-file "ODT_STYLES_FILE" nil nil t)
     (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments))
   "Alist between export properties and ways to set them.
 
@@ -3172,6 +3180,10 @@ original parsed data.  INFO is a plist holding export options."
     ;; Table of Contents
     (let ((depth (plist-get info :with-toc)))
       (when (wholenump depth) (insert (org-e-odt-toc depth info))))
+
+    ;; Copy styles.xml.  Also dump htmlfontify styles, if there is any.
+    (org-e-odt-update-styles-file info)
+
     ;; Update styles.xml - take care of outline numbering
     (with-current-buffer
 	(find-file-noselect (expand-file-name "styles.xml") t)
@@ -3614,12 +3626,15 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (caption (and (car caption) (org-export-secondary-string
 				       (car caption) 'e-odt info)))
 	  (label (org-element-property :name latex-environment))
-	 
 	  (attr nil)			; FIXME
 	  (label (org-element-property :name latex-environment)))
      (cond
       ((member processing-type '(t mathjax))
-       (org-e-odt-format-latex latex-frag 'mathml))
+       (let* ((formula-link (org-e-odt-format-latex latex-frag 'mathml)))
+	 (when (and formula-link
+		    (string-match "file:\\([^]]*\\)" formula-link))
+	   (org-e-odt-format-formula
+	    (match-string 1 formula-link) caption label attr))))
       ((equal processing-type 'dvipng)
        (let* ((formula-link (org-e-odt-format-latex
 			     latex-frag processing-type)))
@@ -3640,7 +3655,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 (processing-type (plist-get info :LaTeX-fragments)))
     (cond
      ((member processing-type '(t mathjax))
-      (org-e-odt-format-latex latex-frag 'mathml))
+      (let* ((formula-link (org-e-odt-format-latex latex-frag 'mathml))
+	     (src (and formula-link
+		       (string-match "file:\\([^]]*\\)" formula-link)
+		       (match-string 1 formula-link))))
+	(assert src)
+	(org-e-odt-format-formula src)))
      ((equal processing-type 'dvipng)
       (let* ((formula-link (org-e-odt-format-latex latex-frag processing-type))
 	     (src (and formula-link
@@ -3839,6 +3859,10 @@ INFO is a plist holding contextual information.  See
 		       "__Table__")
 		      ((org-e-odt-standalone-image-p destination info)
 		       "__Figure__")
+		      ((eq (org-element-type destination) 'latex-environment)
+					; FIXME: Check if it is
+					; acutally latex eqn.
+		       "__MathFormula__")
 		      (t (error "Handle enumeration of %S" destination)))))
 	       (org-e-odt-format-label-reference label default-category number)))))))
      ;; Coderef: replace link with the reference name or the
@@ -4125,7 +4149,6 @@ contextual information."
     (concat preamble (if colgropen "</colgroup>"))))
 
 (defun org-e-odt-list-table (lines caption label attributes)
-  (setq lines (org-e-odt-org-table-to-list-table lines))
   (let* ((splice nil) head
 	 (org-e-odt-table-rownum -1)
 	 i (cnt 0)
@@ -4208,9 +4231,12 @@ form (FIELD1 FIELD2 FIELD3 ...) as appropriate."
 (defun org-e-odt-table (table contents info)
   "Transcode a TABLE element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((label (org-element-property :name table))
-	 (caption (org-e-odt--caption/label-string
-		   (org-element-property :caption table) label info))
+  (let* ((caption (org-element-property :caption table))
+	 (short-caption (and (cdr caption) (org-export-secondary-string
+					    (cdr caption) 'e-odt info)))
+	 (caption (and (car caption) (org-export-secondary-string
+				      (car caption) 'e-odt info)))
+	 (label (org-element-property :name table))
 	 (attr (mapconcat #'identity
 			  (org-element-property :attr_odt table)
 			  " "))
@@ -4230,7 +4256,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (genealogy (org-export-get-genealogy table info))
 	      (parent (car genealogy))
 	      (parent-type (org-element-type parent)))
-	 (org-e-odt-list-table lines caption label attr))))))
+	 (org-e-odt-list-table
+	  (org-e-odt-org-table-to-list-table lines) caption label attr))))))
 
 
 ;;;; Target
@@ -4397,7 +4424,6 @@ Return output file's name."
 ;;;; org-whitespace
 ;;;; "<span style=\"visibility:hidden;\">%s</span>"
 ;;;; Remove display properties
-;;;; org-e-odt-final-hook
 
 ;;;; org-e-odt-with-timestamp
 ;;;; org-e-odt-html-helper-timestamp
