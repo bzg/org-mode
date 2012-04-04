@@ -7852,9 +7852,9 @@ the other commands, the cursor needs to be in the desired line.
 @tsubheading{Motion}
 @cindex motion commands in agenda
 @orgcmd{n,org-agenda-next-line}
-Next line (same as @key{up} and @kbd{C-p}).
+Next line (same as @key{down} and @kbd{C-n}).
 @orgcmd{p,org-agenda-previous-line}
-Previous line (same as @key{down} and @kbd{C-n}).
+Previous line (same as @key{up} and @kbd{C-p}).
 @tsubheading{View/Go to Org file}
 @orgcmdkkc{@key{SPC},mouse-3,org-agenda-show-and-scroll-up}
 Display the original location of the item in another window.
