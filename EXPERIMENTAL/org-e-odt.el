@@ -34,7 +34,6 @@
   :version "24.1")
 
 ;; FIXMES
-;; org-export-preprocess-after-blockquote-hook
 ;; org-e-odt-preprocess-latex-fragments
 ;; org-export-as-e-odt-and-open
 ;; org-export-as-e-odt-batch
@@ -49,7 +48,6 @@
 				    org-e-odt-default-org-styles-alist))))
      (error "Cannot determine style name for entity %s of type %s"
 	    entity category))))
-
 
 ;; Following variable is let bound when `org-do-lparse' is in
 ;; progress. See org-html.el.
@@ -101,7 +99,7 @@
        (concat
 	(org-e-odt-format-stylized-paragraph
 	 'subtitle
-	 (org-odt-format-tags
+	 (org-e-odt-format-tags
 	  '("<text:date style:data-style-name=\"%s\" text:date-value=\"%s\">"
 	    . "</text:date>")
 	  date "N75" iso-date))
@@ -553,10 +551,7 @@ styles congruent with the ODF-1.2 specification."
     (org-e-odt-format-link headline (concat  "#" href))))
 
 (defun org-e-odt-format-toc-item (toc-entry level org-last-level)
-  (let ((style (format "Contents_20_%d"
-		       (+ level (or ;; (org-lparse-get 'TOPLEVEL-HLEVEL)
-				 1
-				    1) -1))))
+  (let ((style (format "Contents_20_%d" level)))
     (concat "\n" (org-e-odt-format-stylized-paragraph style toc-entry) "\n")))
 
 ;; Following variable is let bound during 'ORG-LINK callback. See
@@ -1388,58 +1383,13 @@ ATTR is a string of other attributes of the a element."
     (write-region mimetype nil (expand-file-name "mimetype"))
     mimetype))
 
-(defun org-e-odt-finalize-outfile ()
-  (org-e-odt-delete-empty-paragraphs))
-
-(defun org-e-odt-delete-empty-paragraphs ()
-  (goto-char (point-min))
-  (let ((open "<text:p[^>]*>")
-	(close "</text:p>"))
-    (while (re-search-forward (format "%s[ \r\n\t]*%s" open close) nil t)
-      (replace-match ""))))
-
 (declare-function org-create-math-formula "org"
 		  (latex-frag &optional mathml-file))
 
-;;;###autoload
-(defun org-e-odt-convert (&optional in-file out-fmt prefix-arg)
-  "Convert IN-FILE to format OUT-FMT using a command line converter.
-IN-FILE is the file to be converted.  If unspecified, it defaults
-to variable `buffer-file-name'.  OUT-FMT is the desired output
-format.  Use `org-e-odt-convert-process' as the converter.
-If PREFIX-ARG is non-nil then the newly converted file is opened
-using `org-open-file'."
-  (interactive
-   (append (org-lparse-convert-read-params) current-prefix-arg))
-  (org-lparse-do-convert in-file out-fmt prefix-arg))
-
 (defun org-e-odt-get (what &optional opt-plist)
   (case what
-    (BACKEND 'odt)
     (EXPORT-DIR (org-export-directory :html opt-plist))
-    (FILE-NAME-EXTENSION "odt")
-    (EXPORT-BUFFER-NAME "*Org ODT Export*")
-    (ENTITY-CONTROL org-e-odt-entity-control-callbacks-alist)
-    (ENTITY-FORMAT org-e-odt-entity-format-callbacks-alist)
-    (INIT-METHOD 'org-e-odt-init-outfile)
-    (FINAL-METHOD 'org-e-odt-finalize-outfile)
-    (SAVE-METHOD 'org-e-odt-save-as-outfile)
-    (CONVERT-METHOD
-     (and org-e-odt-convert-process
-	  (cadr (assoc-string org-e-odt-convert-process
-			      org-e-odt-convert-processes t))))
-    (CONVERT-CAPABILITIES
-     (and org-e-odt-convert-process
-	  (cadr (assoc-string org-e-odt-convert-process
-			      org-e-odt-convert-processes t))
-	  org-e-odt-convert-capabilities))
-    (TOPLEVEL-HLEVEL 1)
-    (SPECIAL-STRING-REGEXPS org-e-odt-special-string-regexps)
-    (INLINE-IMAGES 'maybe)
-    (INLINE-IMAGE-EXTENSIONS '("png" "jpeg" "jpg" "gif" "svg"))
-    (PLAIN-TEXT-MAP '(("&" . "&amp;") ("<" . "&lt;") (">" . "&gt;")))
     (TABLE-FIRST-COLUMN-AS-LABELS nil)
-    (FOOTNOTE-SEPARATOR )
     (CODING-SYSTEM-FOR-WRITE 'utf-8)
     (CODING-SYSTEM-FOR-SAVE 'utf-8)
     (t (error "Unknown property: %s"  what))))
@@ -1488,20 +1438,6 @@ using `org-open-file'."
 ;;     (setq ad-return-value
 ;; 	  (org-propertize (org-e-odt-encode-plain-text (ad-get-arg 0))
 ;; 			  'org-protected t))))
-
-(defun org-e-odt-preprocess-latex-fragments ()
-  (when (equal org-export-current-backend 'odt)
-    (org-e-odt-do-preprocess-latex-fragments)))
-
-;; process latex fragments as part of
-;; `org-export-preprocess-after-blockquote-hook'. Note that this hook
-;; is the one that is closest and well before the call to
-;; `org-export-attach-captions-and-attributes' in
-;; `org-export-preprocess-string'.  The above arrangement permits
-;; captions, labels and attributes to be attached to png images
-;; generated out of latex equations.
-(add-hook 'org-export-preprocess-after-blockquote-hook
-	  'org-e-odt-preprocess-latex-fragments)
 
 (defun org-e-odt-zip-extract-one (archive member &optional target)
   (require 'arc-mode)
@@ -1717,9 +1653,6 @@ Use this to infer values of `org-e-odt-styles-dir' and
   "Data directory for ODT exporter.
 Use this to infer values of `org-e-odt-styles-dir' and
 `org-e-odt-schema-dir'.")
-
-
-
 
 (defconst org-e-odt-special-string-regexps
   '(("\\\\-" . "&#x00ad;\\1")		; shy
@@ -3337,8 +3270,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-odt-footnote-def (raw info) ; FIXME
   (if (equal (org-element-type raw) 'org-data)
       (org-trim (org-export-data raw 'e-odt info)) ; fix paragraph
-						   ; style
-    (org-odt-format-stylized-paragraph
+					; style
+    (org-e-odt-format-stylized-paragraph
      'footnote (org-trim (org-export-secondary-string raw 'e-odt info)))))
 
 (defvar org-e-odt-footnote-separator
@@ -4388,9 +4321,9 @@ Return output file's name."
   ;;    'e-odt outfile subtreep visible-only body-only ext-plist))
 
   (let* ((outbuf (org-e-odt-init-outfile))
-	(target (org-export-output-file-name ".odt" subtreep pub-dir))
-	(outdir (file-name-directory (buffer-file-name outbuf)))
-	(default-directory outdir))
+	 (target (org-export-output-file-name ".odt" subtreep pub-dir))
+	 (outdir (file-name-directory (buffer-file-name outbuf)))
+	 (default-directory outdir))
 
     ;; FIXME: for copying embedded images
     (setq org-current-export-file
@@ -4402,16 +4335,132 @@ Return output file's name."
      (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))
 
     (setq org-lparse-opt-plist nil) 	; FIXME
-    (org-e-odt-save-as-outfile target ;; info
+    (org-e-odt-save-as-outfile target	;; info
 			       nil
 			       )
 
     ;; return outfile
-    target))
+    (if (not org-e-odt-preferred-output-format) target
+      (or (org-e-odt-convert target org-e-odt-preferred-output-format)
+	  target))))
 
 
 
 
+
+(defun org-e-odt-reachable-p (in-fmt out-fmt)
+  "Return non-nil if IN-FMT can be converted to OUT-FMT."
+  (catch 'done
+    (let ((reachable-formats (org-e-odt-do-reachable-formats in-fmt)))
+      (dolist (e reachable-formats)
+	(let ((out-fmt-spec (assoc out-fmt (cdr e))))
+	  (when out-fmt-spec
+	    (throw 'done (cons (car e) out-fmt-spec))))))))
+
+(defun org-e-odt-do-convert (in-file out-fmt &optional prefix-arg)
+  "Workhorse routine for `org-e-odt-convert'."
+  (require 'browse-url)
+  (let* ((in-file (expand-file-name (or in-file buffer-file-name)))
+	 (dummy (or (file-readable-p in-file)
+		    (error "Cannot read %s" in-file)))
+	 (in-fmt (file-name-extension in-file))
+	 (out-fmt (or out-fmt (error "Output format unspecified")))
+	 (how (or (org-e-odt-reachable-p in-fmt out-fmt)
+		  (error "Cannot convert from %s format to %s format?"
+			 in-fmt out-fmt)))
+	 (convert-process (car how))
+	 (out-file (concat (file-name-sans-extension in-file) "."
+			   (nth 1 (or (cdr how) out-fmt))))
+	 (extra-options (or (nth 2 (cdr how)) ""))
+	 (out-dir (file-name-directory in-file))
+	 (cmd (format-spec convert-process
+			   `((?i . ,(shell-quote-argument in-file))
+			     (?I . ,(browse-url-file-url in-file))
+			     (?f . ,out-fmt)
+			     (?o . ,out-file)
+			     (?O . ,(browse-url-file-url out-file))
+			     (?d . , (shell-quote-argument out-dir))
+			     (?D . ,(browse-url-file-url out-dir))
+			     (?x . ,extra-options)))))
+    (when (file-exists-p out-file)
+      (delete-file out-file))
+
+    (message "Executing %s" cmd)
+    (let ((cmd-output (shell-command-to-string cmd)))
+      (message "%s" cmd-output))
+
+    (cond
+     ((file-exists-p out-file)
+      (message "Exported to %s" out-file)
+      (when prefix-arg
+	(message "Opening %s..."  out-file)
+	(org-open-file out-file))
+      out-file)
+     (t
+      (message "Export to %s failed" out-file)
+      nil))))
+
+(defun org-e-odt-do-reachable-formats (in-fmt)
+  "Return verbose info about formats to which IN-FMT can be converted.
+Return a list where each element is of the
+form (CONVERTER-PROCESS . OUTPUT-FMT-ALIST).  See
+`org-e-odt-convert-processes' for CONVERTER-PROCESS and see
+`org-e-odt-convert-capabilities' for OUTPUT-FMT-ALIST."
+  (let* ((converter
+	  (and org-e-odt-convert-process
+	       (cadr (assoc-string org-e-odt-convert-process
+				   org-e-odt-convert-processes t))))
+	 (capabilities
+	  (and org-e-odt-convert-process
+	       (cadr (assoc-string org-e-odt-convert-process
+				   org-e-odt-convert-processes t))
+	       org-e-odt-convert-capabilities))
+	 reachable-formats)
+    (when converter
+      (dolist (c capabilities)
+	(when (member in-fmt (nth 1 c))
+	  (push (cons converter (nth 2 c)) reachable-formats))))
+    reachable-formats))
+
+(defun org-e-odt-reachable-formats (in-fmt)
+  "Return list of formats to which IN-FMT can be converted.
+The list of the form (OUTPUT-FMT-1 OUTPUT-FMT-2 ...)."
+  (let (l)
+    (mapc (lambda (e) (add-to-list 'l e))
+	  (apply 'append (mapcar
+			  (lambda (e) (mapcar 'car (cdr e)))
+			  (org-e-odt-do-reachable-formats in-fmt))))
+    l))
+
+(defun org-e-odt-convert-read-params ()
+  "Return IN-FILE and OUT-FMT params for `org-e-odt-do-convert'.
+This is a helper routine for interactive use."
+  (let* ((input (if (featurep 'ido) 'ido-completing-read 'completing-read))
+	 (in-file (read-file-name "File to be converted: "
+				  nil buffer-file-name t))
+	 (in-fmt (file-name-extension in-file))
+	 (out-fmt-choices (org-e-odt-reachable-formats in-fmt))
+	 (out-fmt
+	  (or (and out-fmt-choices
+		   (funcall input "Output format:  "
+			    out-fmt-choices nil nil nil))
+	      (error
+	       "No known converter or no known output formats for %s files"
+	       in-fmt))))
+    (list in-file out-fmt)))
+
+;;;###autoload
+(defun org-e-odt-convert (&optional in-file out-fmt prefix-arg)
+  "Convert IN-FILE to format OUT-FMT using a command line converter.
+IN-FILE is the file to be converted.  If unspecified, it defaults
+to variable `buffer-file-name'.  OUT-FMT is the desired output
+format.  Use `org-e-odt-convert-process' as the converter.
+If PREFIX-ARG is non-nil then the newly converted file is opened
+using `org-open-file'."
+  (interactive
+   (append (org-e-odt-convert-read-params) current-prefix-arg))
+  (org-e-odt-do-convert in-file out-fmt prefix-arg))
+
 ;;; FIXMES, TODOS, FOR REVIEW etc
 
 ;;;; org-format-table-html
@@ -4438,7 +4487,6 @@ Return output file's name."
 ;;;; (org-export-directory :html opt-plist)
 ;;;; (plist-get opt-plist :html-extension)
 ;;;; org-e-odt-toplevel-hlevel
-;;;; org-e-odt-special-string-regexps
 ;;;; org-e-odt-coding-system
 ;;;; org-e-odt-coding-system
 ;;;; org-e-odt-inline-image-extensions
@@ -4460,11 +4508,6 @@ Return output file's name."
    (add-to-list 'auto-mode-alist
 		(cons (concat  "\\." (car desc) "\\'") 'archive-mode)))
  org-e-odt-file-extensions)
-
-;; FIXME
-;; (eval-after-load 'org-exp
-;;   '(add-to-list 'org-export-inbuffer-options-extra
-;; 		'("ODT_STYLES_FILE" :odt-styles-file)))
 
 (provide 'org-e-odt)
 
