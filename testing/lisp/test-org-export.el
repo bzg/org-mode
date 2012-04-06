@@ -403,7 +403,7 @@ body\n")))
 ;;; Links
 
 (ert-deftest test-org-export/fuzzy-links ()
-  "Test fuzz link export specifications."
+  "Test fuzzy link export specifications."
   ;; 1. Links to invisible (keyword) targets should be ignored.
   (org-test-with-temp-text
       "Paragraph.\n#+TARGET: Test\n[[Test]]"

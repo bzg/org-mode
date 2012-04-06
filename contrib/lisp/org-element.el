@@ -286,10 +286,9 @@ a plist containing `:label', `:begin' `:end', `:contents-begin',
 				  (goto-char (match-end 0))
 				  (org-skip-whitespace)
 				  (point)))
-	   (end (goto-char (nth 2 f-def)))
-	   (contents-end (progn (skip-chars-backward " \r\t\n")
-				(forward-line)
-				(point))))
+	   (contents-end (goto-char (nth 2 f-def)))
+	   (end (progn (org-skip-whitespace)
+		       (if (eobp) (point) (point-at-bol)))))
       `(footnote-definition
 	(:label ,label
 		:begin ,begin

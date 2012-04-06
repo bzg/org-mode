@@ -278,9 +278,7 @@ otherwise."
 			      (concat org-outline-regexp-bol "\\|"
 				      org-footnote-definition-re "\\|"
 				      "^[ \t]*$") bound 'move))
-			   (progn (goto-char (match-beginning 0))
-				  (org-skip-whitespace)
-				  (point-at-bol))
+			   (match-beginning 0)
 			 (point)))))
 	    (list label beg end
 		  (org-trim (buffer-substring-no-properties beg-def end)))))))))
@@ -866,7 +864,11 @@ Return the number of footnotes removed."
       (while (re-search-forward def-re nil t)
 	(let ((full-def (org-footnote-at-definition-p)))
 	  (when full-def
-	    (delete-region (nth 1 full-def) (nth 2 full-def))
+	    ;; Remove the footnote, and all blank lines after it.
+	    (goto-char (nth 2 full-def))
+	    (org-skip-whitespace)
+	    (unless (eobp) (beginning-of-line))
+	    (delete-region (nth 1 full-def) (point))
 	    (incf ndef))))
       ndef)))
 
