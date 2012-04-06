@@ -27,12 +27,6 @@
 (eval-when-compile
   (require 'cl))
 
-(defgroup org-export-e-odt nil
-  "Options specific for ODT export of Org-mode files."
-  :tag "Org Export ODT"
-  :group 'org-export
-  :version "24.1")
-
 ;; FIXMES
 ;; org-e-odt-preprocess-latex-fragments
 ;; org-export-as-e-odt-and-open
@@ -314,7 +308,7 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
      col-nos "\n")))
 
 
-(defun org-e-odt-begin-table (caption label attributes)
+(defun org-e-odt-begin-table (caption label attributes short-caption)
   ;; (setq org-e-odt-table-indentedp (not (null org-lparse-list-stack)))
   (setq org-e-odt-table-indentedp nil)	; FIXME
   (when org-e-odt-table-indentedp
@@ -333,11 +327,11 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
   (concat
    (org-e-odt-format-stylized-paragraph
     'table (org-e-odt-format-entity-caption label caption "__Table__"))
-   (let ((name-and-style (org-e-odt-add-automatic-style "Table" attributes)))
+   (let ((automatic-name (org-e-odt-add-automatic-style "Table" attributes)))
      (format
       "\n<table:table table:name=\"%s\" table:style-name=\"%s\">\n"
-      (car name-and-style) (or (nth 1 org-e-odt-table-style-spec)
-			       (cdr name-and-style) "OrgTable")))
+      (or short-caption (car automatic-name))
+      (or (nth 1 org-e-odt-table-style-spec) (cdr automatic-name) "OrgTable")))
    (org-e-odt-format-table-columns) "\n")
 
   ;; (org-e-html-pp  table-info)
@@ -697,7 +691,7 @@ Update styles.xml with styles that were collected as part of
 			   (org-e-odt-remap-stylenames s)) style "")
 	      (org-e-odt-remap-stylenames parent-style)))
 	   (t (error "Don't how to handle style %s"  style)))))
-    (org-e-odt-format-tags
+    (org-e-odt-format-tags-simple
      '("<text:span text:style-name=\"%s\">" . "</text:span>")
      text style-name)))
 
@@ -713,7 +707,12 @@ Update styles.xml with styles that were collected as part of
 	   (file-name-directory (org-e-odt-copy-formula-file src))))
 	 ;; FIXME
 	 ;; (caption (org-find-text-property-in-string 'org-caption src))
+	 ;; (short-caption
+	 ;;  (or (org-find-text-property-in-string 'org-caption-shortn src)
+	 ;; 	caption))
 	 ;; (caption (and caption (org-xml-format-desc caption)))
+	 ;; (short-caption (and short-caption
+	 ;; 		     (org-xml-encode-plain-text short-caption)))
 	 ;; (label (org-find-text-property-in-string 'org-label src))
 	 ;; (latex-frag (org-find-text-property-in-string 'org-latex-src src))
 	 (embed-as (or
@@ -743,10 +742,15 @@ Update styles.xml with styles that were collected as part of
 	    )				; FIXME
 	(org-e-odt-list-table
 	 `((,(org-e-odt-format-entity
-	      (if caption "CaptionedDisplayFormula" "DisplayFormula")
-	      href width height :caption caption :label nil)
-	    ,(if (not label) ""
-	       (org-e-odt-format-entity-caption label nil "__MathFormula__"))))
+	      (if (not (or caption label)) "DisplayFormula"
+		"CaptionedDisplayFormula")
+	      href width height :caption caption :label label
+	      :short-caption short-caption)
+	    ,(if (not (or caption label)) ""
+	       (let* ((label-props (car org-e-odt-entity-labels-alist)))
+		 (setcar (last label-props) "math-label")
+		 (apply 'org-e-odt-format-label-definition
+			caption label-props)))))
 	 nil nil ":style \"OrgEquation\"" ;; nil '((1 "c" 8) (2 "c" 1)) FIXME
 	 ))
 
@@ -883,12 +887,12 @@ ATTR is a string of other attributes of the a element."
   (let ((id (concat  "fn" n))
 	(note-class "footnote")
 	(par-style "Footnote"))
-    (org-e-odt-format-tags
+    (org-e-odt-format-tags-simple
      '("<text:note text:id=\"%s\" text:note-class=\"%s\">" . "</text:note>")
      (concat
       (org-e-odt-format-tags-simple
        '("<text:note-citation>" . "</text:note-citation>") n)
-      (org-e-odt-format-tags
+      (org-e-odt-format-tags-simple
        '("<text:note-body>" . "</text:note-body>") def))
      id note-class)))
 
@@ -902,7 +906,7 @@ ATTR is a string of other attributes of the a element."
   (let ((note-class "footnote")
 	(ref-format "text")
 	(ref-name (concat "fn" n)))
-    (org-e-odt-format-tags
+    (org-e-odt-format-tags-simple
      '("<text:span text:style-name=\"%s\">" . "</text:span>")
      (org-e-odt-format-tags-simple
       '("<text:note-ref text:note-class=\"%s\" text:reference-format=\"%s\" text:ref-name=\"%s\">" . "</text:note-ref>")
@@ -927,7 +931,12 @@ ATTR is a string of other attributes of the a element."
 		"<draw:image xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
 		(org-e-odt-copy-image-file src)))
 	 ;; (caption (org-find-text-property-in-string 'org-caption src))
+	 ;; (short-caption
+	 ;;  (or (org-find-text-property-in-string 'org-caption-shortn src)
+	 ;;      caption))
 	 ;; (caption (and caption (org-xml-format-desc caption)))
+	 ;; (short-caption (and short-caption
+	 ;; 		     (org-xml-encode-plain-text short-caption)))
 	 ;; (attr (org-find-text-property-in-string 'org-attributes src))
 	 ;; (label (org-find-text-property-in-string 'org-label src))
 	 ;; (latex-frag (org-find-text-property-in-string
@@ -966,6 +975,7 @@ ATTR is a string of other attributes of the a element."
       (org-e-odt-format-entity
        frame-style-handle href width height
        :caption caption :label label :category category
+       :short-caption short-caption
        :user-frame-params user-frame-params))))
 
 (defun org-e-odt-format-object-description (title description)
@@ -1011,7 +1021,7 @@ ATTR is a string of other attributes of the a element."
 
 (defun* org-e-odt-format-entity (entity href width height
 					&key caption label category
-					user-frame-params)
+					user-frame-params short-caption)
   (let* ((entity-style (assoc-string entity org-e-odt-entity-frame-styles t))
 	 default-frame-params frame-params)
     (cond
@@ -1029,7 +1039,15 @@ ATTR is a string of other attributes of the a element."
 	      'illustration
 	      (concat
 	       (apply 'org-e-odt-format-frame href width height
-		      (nth 2 entity-style))
+		      (let ((entity-style-1 (copy-sequence
+					     (nth 2 entity-style))))
+			(setcar (cdr entity-style-1)
+				(concat
+				 (cadr entity-style-1)
+				 (and short-caption
+				      (format " draw:name=\"%s\" "
+					      short-caption))))
+			entity-style-1))
 	       (org-e-odt-format-entity-caption
 		label caption (or category (nth 1 entity-style)))))
 	     width height frame-params)))))
@@ -1117,19 +1135,29 @@ ATTR is a string of other attributes of the a element."
 
 (defun org-e-odt-add-label-definition (label default-category)
   "Create an entry in `org-e-odt-entity-labels-alist' and return it."
-  (setq label (substring-no-properties label))
   (let* ((label-props (assoc default-category org-e-odt-category-map-alist))
-	 (category (nth 1 label-props))
-	 (counter category)
-	 (label-style (nth 2 label-props))
-	 (sequence-var (intern (mapconcat
-				'downcase
-				(org-split-string counter) "-")))
+	 ;; identify the sequence number
+	 (counter (nth 1 label-props))
+	 (sequence-var (intern counter))
 	 (seqno (1+ (or (plist-get org-e-odt-entity-counts-plist sequence-var)
 			0)))
-	 (label-props (list label category seqno label-style)))
+	 ;; assign an internal label, if user has not provided one
+	 (label (if label (substring-no-properties label)
+		  (format  "%s-%s" default-category seqno)))
+	 ;; identify label style
+	 (label-style (nth 2 label-props))
+	 ;; grok language setting
+	 (en-strings (assoc-default "en" org-e-odt-category-strings))
+	 (lang (plist-get info :language)) ; FIXME
+	 (lang-strings (assoc-default lang org-export-odt-category-strings))
+	 ;; retrieve localized category sting
+	 (pos (- (length org-e-odt-category-map-alist)
+		 (length (memq label-props org-e-odt-category-map-alist))))
+	 (category (or (nth pos lang-strings) (nth pos en-strings)))
+	 (label-props (list label category counter seqno label-style)))
     (setq org-e-odt-entity-counts-plist
 	  (plist-put org-e-odt-entity-counts-plist sequence-var seqno))
+    ;; stash label properties for later retrieval
     (push label-props org-e-odt-entity-labels-alist)
     label-props))
 
@@ -1141,9 +1169,11 @@ ATTR is a string of other attributes of the a element."
 	 (label-style (nth 2 label-props)))
     (unless label-props
       (error "Unknown category: %S" default-category))
-    (org-e-odt-do-format-label-reference label category seqno label-style)))
+    (org-e-odt-do-format-label-reference
+     label category counter seqno label-style)))
 
-(defun org-e-odt-format-label-definition (caption label category seqno label-style)
+(defun org-e-odt-format-label-definition (caption label category counter
+						  seqno label-style)
   (assert label)
   (setq label (org-solidify-link-text label))
   (format-spec
@@ -1151,10 +1181,11 @@ ATTR is a string of other attributes of the a element."
    `((?e . ,category)
      (?n . ,(org-e-odt-format-tags-simple
 	     '("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
-	     (format "%d" seqno) label category category))
-     (?c . ,(or (and caption (concat ": " caption)) "")))))
+	     (format "%d" seqno) label counter counter))
+     (?c . ,(or caption "")))))
 
-(defun org-e-odt-do-format-label-reference (label category seqno label-style)
+(defun org-e-odt-do-format-label-reference (label category counter
+						  seqno label-style)
   (assert label)
   (save-match-data
     (let* ((fmt (cddr (assoc-string label-style org-e-odt-label-styles t)))
@@ -1167,10 +1198,9 @@ ATTR is a string of other attributes of the a element."
 			   (?n . ,(format "%d" seqno)))) fmt1 label))))
 
 (defun org-e-odt-format-entity-caption (label caption category)
-  (or (and label
-	   (apply 'org-e-odt-format-label-definition
-		  caption (org-e-odt-add-label-definition label category)))
-      caption ""))
+  (if (not (or label caption)) ""
+    (apply 'org-e-odt-format-label-definition caption
+	   (org-e-odt-add-label-definition label category))))
 
 (defun org-e-odt-format-tags-1 (tag text prefix suffix &rest args)
   (cond
@@ -1919,9 +1949,10 @@ See `org-e-odt-add-label-definition' and
 See `org-e-odt-entity-labels-alist' for known CATEGORY-NAMEs.")
 
 (defvar org-e-odt-label-styles
-  '(("text" "(%n)" "text" "(%n)")
-    ("category-and-value" "%e %n%c" "category-and-value" "%e %n")
-    ("value" "%e %n%c" "value" "%n"))
+  '(("math-formula" "%c" "text" "(%n)")
+    ("math-label" "(%n)" "text" "(%n)")
+    ("category-and-value" "%e %n: %c" "category-and-value" "%e %n")
+    ("value" "%e %n: %c" "value" "%n"))
   "Specify how labels are applied and referenced.
 This is an alist where each element is of the
 form (LABEL-STYLE-NAME LABEL-ATTACH-FMT LABEL-REF-MODE
@@ -1942,23 +1973,62 @@ specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
 %n is replaced with SEQNO. See
 `org-e-odt-format-label-reference'.")
 
+(defcustom org-e-odt-category-strings
+  '(("en" "Table" "Figure" "Equation" "Equation"))
+  "Specify category strings for various captionable entities.
+Captionable entity can be one of a Table, an Embedded Image, a
+LaTeX fragment (generated with dvipng) or a Math Formula.
+
+For example, when `org-export-default-language' is \"en\", an
+embedded image will be captioned as \"Figure 1: Orgmode Logo\".
+If you want the images to be captioned instead as \"Illustration
+1: Orgmode Logo\", then modify the entry for \"en\" as shown
+below.
+
+  \(setq org-e-odt-category-strings
+	'\(\(\"en\" \"Table\" \"Illustration\"
+	   \"Equation\" \"Equation\"\)\)\)"
+  :group 'org-export-e-odt
+  :version "24.1"
+  :type '(repeat (list (string :tag "Language tag")
+		       (choice :tag "Table"
+			       (const :tag "Use Default" nil)
+			       (string :tag "Category string"))
+		       (choice :tag "Figure"
+			       (const :tag "Use Default" nil)
+			       (string :tag "Category string"))
+		       (choice :tag "Math Formula"
+			       (const :tag "Use Default" nil)
+			       (string :tag "Category string"))
+		       (choice :tag "Dvipng Image"
+			       (const :tag "Use Default" nil)
+			       (string :tag "Category string")))))
+
 (defvar org-e-odt-category-map-alist
   '(("__Table__" "Table" "value")
-    ("__Figure__" "Figure" "value")
-    ("__MathFormula__" "Equation" "text")
+    ("__Figure__" "Illustration" "value")
+    ("__MathFormula__" "Text" "math-formula")
     ("__DvipngImage__" "Equation" "value")
     ;; ("__Table__" "Table" "category-and-value")
     ;; ("__Figure__" "Figure" "category-and-value")
     ;; ("__DvipngImage__" "Equation" "category-and-value")
     )
-  "Map a CATEGORY-HANDLE to CATEGORY-NAME and LABEL-STYLE.
-This is an alist where each element is of the form
-\\(CATEGORY-HANDLE CATEGORY-NAME LABEL-STYLE\\).  CATEGORY_HANDLE
-could either be one of the internal handles (as seen above) or be
-derived from the \"#+LABEL:<label-name>\" specification.  See
-`org-e-odt-get-category-from-label'.  CATEGORY-NAME and
-LABEL-STYLE are used for generating ODT labels.  See
-`org-e-odt-label-styles'.")
+  "Map a CATEGORY-HANDLE to OD-VARIABLE and LABEL-STYLE.
+This is a list where each entry is of the form \\(CATEGORY-HANDLE
+OD-VARIABLE LABEL-STYLE\\).  CATEGORY_HANDLE identifies the
+captionable entity in question.  OD-VARIABLE is the OpenDocument
+sequence counter associated with the entity.  These counters are
+declared within
+\"<text:sequence-decls>...</text:sequence-decls>\" block of
+`org-e-odt-content-template-file'.  LABEL-STYLE is a key
+into `org-e-odt-label-styles' and specifies how a given entity
+should be captioned and referenced.
+
+The position of a CATEGORY-HANDLE in this list is used as an
+index in to per-language entry for
+`org-e-odt-category-strings' to retrieve a CATEGORY-NAME.
+This CATEGORY-NAME is then used for qualifying the user-specified
+captions on export.")
 
 (defvar org-e-odt-manifest-file-entries nil)
 (defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
@@ -2048,8 +2118,8 @@ Intended to be locally bound around a call to `org-export-as-html'." )
 ;;; User Configuration Variables
 
 (defgroup org-export-e-odt nil
-  "Options for exporting Org mode files to HTML."
-  :tag "Org Export HTML"
+  "Options for exporting Org mode files to ODT."
+  :tag "Org Export ODT"
   :group 'org-export)
 
 (defcustom org-e-odt-protect-char-alist
@@ -2236,7 +2306,7 @@ variable, the list of valid values are populated based on
 		 `((const :tag "None" nil)
 		   ,@(mapcar (lambda (c)
 			       `(const :tag ,c ,c))
-			     (org-lparse-reachable-formats "odt")))))
+			     (org-e-odt-reachable-formats "odt")))))
 
 (defcustom org-e-odt-table-styles
   '(("OrgEquation" "OrgEquation"
@@ -4081,7 +4151,8 @@ contextual information."
 	       "</colgroup>"))))
     (concat preamble (if colgropen "</colgroup>"))))
 
-(defun org-e-odt-list-table (lines caption label attributes)
+(defun org-e-odt-list-table (lines caption label attributes
+				   &optional short-caption)
   (let* ((splice nil) head
 	 (org-e-odt-table-rownum -1)
 	 i (cnt 0)
@@ -4099,7 +4170,7 @@ contextual information."
       (setq org-lparse-table-is-styled t)
 
       (concat
-       (org-e-odt-begin-table caption label attributes)
+       (org-e-odt-begin-table caption label attributes short-caption)
        ;; FIXME (org-e-odt-table-preamble)
        (org-e-odt-begin-table-rowgroup head)
 
@@ -4190,7 +4261,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (parent (car genealogy))
 	      (parent-type (org-element-type parent)))
 	 (org-e-odt-list-table
-	  (org-e-odt-org-table-to-list-table lines) caption label attr))))))
+	  (org-e-odt-org-table-to-list-table lines)
+	  caption label attr short-caption))))))
 
 
 ;;;; Target
