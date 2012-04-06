@@ -273,20 +273,27 @@ CONTENTS is the contents of the element."
 (defun org-element-footnote-definition-parser ()
   "Parse a footnote definition.
 
-Return a list whose car is `footnote-definition' and cdr is
+Return a list whose CAR is `footnote-definition' and CDR is
 a plist containing `:label', `:begin' `:end', `:contents-begin',
-`:contents-end' and `:post-blank' keywords."
+`:contents-end' and `:post-blank' keywords.
+
+Assume point is at the beginning of the footnote definition."
   (save-excursion
-    (let* ((f-def (org-footnote-at-definition-p))
-	   (label (car f-def))
-	   (keywords (progn (goto-char (nth 1 f-def))
-			    (org-element-collect-affiliated-keywords)))
+    (looking-at org-footnote-definition-re)
+    (let* ((label (org-match-string-no-properties 1))
+	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
-	   (contents-begin (progn (looking-at (concat "\\[" label "\\]"))
-				  (goto-char (match-end 0))
+	   (contents-begin (progn (search-forward "]")
 				  (org-skip-whitespace)
 				  (point)))
-	   (contents-end (goto-char (nth 2 f-def)))
+	   (contents-end (if (progn
+			       (end-of-line)
+			       (re-search-forward
+				(concat org-outline-regexp-bol "\\|"
+					org-footnote-definition-re "\\|"
+					"^[ \t]*$") nil t))
+			     (match-beginning 0)
+			   (point-max)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
       `(footnote-definition
@@ -1783,28 +1790,37 @@ its beginning position."
 (defun org-element-footnote-reference-parser ()
   "Parse footnote reference at point.
 
-Return a list whose car is `footnote-reference' and cdr a plist
+Return a list whose CAR is `footnote-reference' and CDR a plist
 with `:label', `:type', `:inline-definition', `:begin', `:end'
 and `:post-blank' as keywords."
   (save-excursion
-    (let* ((ref (org-footnote-at-reference-p))
-	   (label (car ref))
-	   (inline-def
-	    (let ((raw-def (nth 3 ref)))
-	      (and raw-def
-		   (org-element-parse-secondary-string
-		    raw-def
-		    (cdr (assq 'footnote-reference
-			       org-element-string-restrictions))))))
-	   (type (if (nth 3 ref) 'inline 'standard))
-	   (begin (nth 1 ref))
-	   (post-blank (progn (goto-char (nth 2 ref))
+    (looking-at org-footnote-re)
+    (let* ((begin (point))
+	   (label (or (org-match-string-no-properties 2)
+		      (org-match-string-no-properties 3)
+		      (and (match-string 1)
+			   (concat "fn:" (org-match-string-no-properties 1)))))
+	   (type (if (or (not label) (match-string 1)) 'inline 'standard))
+	   (inner-begin (match-end 0))
+	   (inner-end
+	    (let ((count 1))
+	      (forward-char)
+	      (while (and (> count 0) (re-search-forward "[][]" nil t))
+		(if (equal (match-string 0) "[") (incf count) (decf count)))
+	      (1- (point))))
+	   (post-blank (progn (goto-char (1+ inner-end))
 			      (skip-chars-forward " \t")))
-	   (end (point)))
+	   (end (point))
+	   (inline-definition
+	    (and (eq type 'inline)
+		 (org-element-parse-secondary-string
+		  (buffer-substring inner-begin inner-end)
+		  (cdr (assq 'footnote-reference
+			     org-element-string-restrictions))))))
       `(footnote-reference
 	(:label ,label
 		:type ,type
-		:inline-definition ,inline-def
+		:inline-definition ,inline-definition
 		:begin ,begin
 		:end ,end
 		:post-blank ,post-blank)))))
@@ -1825,11 +1841,19 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `footnote-reference' and
-cdr is beginning position."
-  (let (fn-ref)
-     (when (setq fn-ref (org-footnote-get-next-reference nil nil limit))
-       (cons 'footnote-reference (nth 1 fn-ref)))))
+Return value is a cons cell whose CAR is `footnote-reference' and
+CDR is beginning position."
+  (save-excursion
+    (catch 'exit
+      (while (re-search-forward org-footnote-re limit t)
+	(save-excursion
+	  (let ((beg (match-beginning 0))
+		(count 1))
+	    (backward-char)
+	    (while (re-search-forward "[][]" limit t)
+	      (if (equal (match-string 0) "[") (incf count) (decf count))
+	      (when (zerop count)
+		(throw 'exit (cons 'footnote-reference beg))))))))))
 
 
 ;;;; Inline Babel Call
