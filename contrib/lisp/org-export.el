@@ -2078,58 +2078,67 @@ to be expanded and Babel code to be executed.
 Return code as a string."
   (save-excursion
     (save-restriction
-      ;; Narrow buffer to an appropriate region for parsing.
-      (cond ((org-region-active-p)
-	     (narrow-to-region (region-beginning) (region-end)))
-	    (subtreep (org-narrow-to-subtree)))
-      ;; Retrieve export options (INFO) and parsed tree (RAW-DATA),
-      ;; Then options can be completed with tree properties.  Note:
-      ;; Buffer isn't parsed directly.  Instead, a temporary copy is
-      ;; created, where include keywords are expanded and code blocks
-      ;; are evaluated.  RAW-DATA is the parsed tree of the buffer
-      ;; resulting from that process.  Eventually call
-      ;; `org-export-filter-parse-tree-functions'.
-      (goto-char (point-min))
-      (let ((info (org-export-get-environment backend subtreep ext-plist))
-	    ;; Save original file name or buffer in order to properly
-	    ;; resolve babel block expansion when body is outside
-	    ;; scope.
-	    (buf (or (buffer-file-name (buffer-base-buffer)) (current-buffer))))
-	;; Remove subtree's headline from contents if subtree mode is
-	;; activated.
-	(when subtreep (forward-line) (narrow-to-region (point) (point-max)))
-	;; Install filters in communication channel.
+      (let (info tree)
+	;; Narrow buffer to an appropriate region or subtree for
+	;; parsing.  If parsing subtree, be sure to remove main
+	;; headline too.
+	(cond ((org-region-active-p)
+	       (narrow-to-region (region-beginning) (region-end)))
+	      (subtreep
+	       (org-narrow-to-subtree)
+	       (goto-char (point-min))
+	       (forward-line)
+	       (narrow-to-region (point) (point-max))))
+	;; 1. Get export environment and tree.  Environment is
+	;;    relative to the buffer being parsed, which isn't always
+	;;    the original one, depending on the NOEXPAND value.
+	(if noexpand
+	    ;; If NOEXPAND is non-nil, simply parse current visible
+	    ;; part of buffer and retrieve environment from original
+	    ;; buffer.
+	    (setq info (org-export-get-environment backend subtreep ext-plist)
+		  tree (org-element-parse-buffer nil visible-only))
+	  ;; Otherwise, buffer isn't parsed directly.  Instead,
+	  ;; a temporary copy is created, where include keywords are
+	  ;; expanded and code blocks are evaluated.  Environment is
+	  ;; retrieved from that buffer.  Moreover, save original file
+	  ;; name or buffer in order to properly resolve babel block
+	  ;; expansion when body is outside scope.
+	  (let ((buf (or (buffer-file-name (buffer-base-buffer))
+			 (current-buffer))))
+	    (org-export-with-current-buffer-copy
+	     (org-export-expand-include-keyword)
+	     (let ((org-current-export-file buf))
+	       (org-export-blocks-preprocess))
+	     (setq info (org-export-get-environment backend subtreep ext-plist)
+		   tree (org-element-parse-buffer nil visible-only)))))
+	;; 2. Install user's and developer's filters in communication
+	;;    channel.  Then call parse-tree filters to get the final
+	;;    tree.
 	(setq info (org-export-install-filters backend info))
-	(let ((raw-data
-	       (org-export-filter-apply-functions
-		(plist-get info :filter-parse-tree)
-		;; If NOEXPAND is non-nil, simply parse current
-		;; visible part of buffer.
-		(if noexpand (org-element-parse-buffer nil visible-only)
-		  (org-export-with-current-buffer-copy
-		   (org-export-expand-include-keyword)
-		   (let ((org-current-export-file buf))
-		     (org-export-blocks-preprocess))
-		   (org-element-parse-buffer nil visible-only)))
-		backend info)))
-	  ;; Complete communication channel with tree properties.
-	  (setq info
-		(org-combine-plists
-		 info
-		 (org-export-collect-tree-properties raw-data info backend)))
-	  ;; Transcode RAW-DATA.  Also call
-	  ;; `org-export-filter-final-output-functions'.
-	  (let* ((body (org-element-normalize-string
-			(org-export-data raw-data backend info)))
-		 (template (intern (format "org-%s-template" backend)))
-		 (output (org-export-filter-apply-functions
-			  (plist-get info :filter-final-output)
-			  (if (or (not (fboundp template)) body-only) body
-			    (funcall template body info))
-			  backend info)))
-	    ;; Maybe add final OUTPUT to kill ring, then return it.
-	    (when org-export-copy-to-kill-ring (org-kill-new output))
-	    output))))))
+	(setq tree
+	      (org-export-filter-apply-functions
+	       (plist-get info :filter-parse-tree) tree backend info))
+	;; 3. Now tree is complete, compute its properties and add
+	;;    them to communication channel.
+	(setq info
+	      (org-combine-plists
+	       info
+	       (org-export-collect-tree-properties tree info backend)))
+	;; 4. Eventually transcode TREE.  Wrap the resulting string
+	;;    into a template, if required.  Eventually call
+	;;    final-output filter.
+	(let* ((body (org-element-normalize-string
+		      (org-export-data tree backend info)))
+	       (template (intern (format "org-%s-template" backend)))
+	       (output (org-export-filter-apply-functions
+			(plist-get info :filter-final-output)
+			(if (or (not (fboundp template)) body-only) body
+			  (funcall template body info))
+			backend info)))
+	  ;; Maybe add final OUTPUT to kill ring, then return it.
+	  (when org-export-copy-to-kill-ring (org-kill-new output))
+	  output)))))
 
 (defun org-export-to-buffer
   (backend buffer &optional subtreep visible-only body-only ext-plist noexpand)
