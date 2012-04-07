@@ -273,7 +273,7 @@ italicized, in all other cases it is left unchanged."
   "Convert YYYY-MM-DD to (month date year).
 Argument TIME-STR is the value retrieved from BBDB.  If YYYY- is omitted
 it will be considered unknown."
-  (multiple-value-bind (a b c) (values-list (bbdb-split time-str "-"))
+  (multiple-value-bind (a b c) (values-list (org-split-string time-str "-"))
     (if (eq c nil)
         (list (string-to-number a)
               (string-to-number b)
@@ -300,13 +300,19 @@ The hash table is created on first use.")
 (defun org-bbdb-make-anniv-hash ()
   "Create a hash with anniversaries extracted from BBDB, for fast access.
 The anniversaries are assumed to be stored `org-bbdb-anniversary-field'."
-
-  (let (split tmp annivs)
+  (let ((old-bbdb (fboundp 'bbdb-record-getprop))
+	split tmp annivs)
     (clrhash org-bbdb-anniv-hash)
     (dolist (rec (bbdb-records))
-      (when (setq annivs (bbdb-record-getprop
-                          rec org-bbdb-anniversary-field))
-        (setq annivs (bbdb-split annivs "\n"))
+      (when (setq annivs (if old-bbdb
+			     (bbdb-record-getprop
+			      rec org-bbdb-anniversary-field)
+			   (bbdb-record-note
+			    rec org-bbdb-anniversary-field)))
+        (setq annivs (if old-bbdb
+			 (bbdb-split annivs "\n")
+		       ;; parameter order is reversed in new bbdb
+		       (bbdb-split "\n" annivs)))
         (while annivs
           (setq split (org-bbdb-anniv-split (pop annivs)))
           (multiple-value-bind (m d y)
