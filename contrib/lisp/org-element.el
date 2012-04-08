@@ -2369,9 +2369,8 @@ CONTENTS is the contents of the object."
 (defun org-element-target-parser ()
   "Parse target at point.
 
-Return a list whose car is `target' and cdr a plist with
-`:begin', `:end', `:contents-begin', `:contents-end', `value' and
-`:post-blank' as keywords.
+Return a list whose CAR is `target' and CDR a plist with
+`:begin', `:end', `value' and `:post-blank' as keywords.
 
 Assume point is at the target."
   (save-excursion
@@ -2389,8 +2388,8 @@ Assume point is at the target."
 
 (defun org-element-target-interpreter (target contents)
   "Interpret TARGET object as Org syntax.
-CONTENTS is the contents of target."
-  (concat ""))
+CONTENTS is nil."
+  (format "<<%s>>" (org-element-property :value target)))
 
 (defun org-element-target-successor (limit)
   "Search for the next target object.
