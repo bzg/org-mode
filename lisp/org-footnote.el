@@ -864,11 +864,11 @@ Return the number of footnotes removed."
       (while (re-search-forward def-re nil t)
 	(let ((full-def (org-footnote-at-definition-p)))
 	  (when full-def
-	    ;; Remove the footnote, and all blank lines after it.
-	    (goto-char (nth 2 full-def))
-	    (org-skip-whitespace)
-	    (unless (eobp) (beginning-of-line))
-	    (delete-region (nth 1 full-def) (point))
+	    ;; Remove the footnote, and all blank lines before it.
+	    (goto-char (nth 1 full-def))
+	    (skip-chars-backward " \r\t\n")
+	    (unless (bolp) (forward-line))
+	    (delete-region (point) (nth 2 full-def))
 	    (incf ndef))))
       ndef)))
 
