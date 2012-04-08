@@ -1248,6 +1248,9 @@ PUB-DIR is set, use this as the publishing directory."
 	 (org-export-have-math nil)
 	 (org-export-footnotes-seen nil)
 	 (org-export-footnotes-data (org-footnote-all-labels 'with-defs))
+	 (custom-id (or (org-entry-get nil "CUSTOM_ID" t) ""))
+	 (footnote-def-prefix (format "fn-%s" custom-id))
+	 (footnote-ref-prefix (format "fnr-%s" custom-id))
 	 (lines
 	  (org-split-string
 	   (org-export-preprocess-string
@@ -1685,7 +1688,7 @@ PUB-DIR is set, use this as the publishing directory."
 			  (format
 			   (concat "%s"
 				   (format org-export-html-footnote-format
-					   (concat "<a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a>")))
+					   (concat "<a class=\"footref\" name=\"" footnote-ref-prefix ".%s%s\" href=\"#" footnote-def-prefix ".%s\">%s</a>")))
 			   (or (match-string 1 org-line) "") n extra n n)
 			  ;; If another footnote is following the
 			  ;; current one, add a separator.
@@ -1773,7 +1776,8 @@ PUB-DIR is set, use this as the publishing directory."
 			      (format
 			       (concat "<p class=\"footnote\">"
 				       (format org-export-html-footnote-format
-					       "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>"))
+					       (concat
+						"<a class=\"footnum\" name=\"" footnote-def-prefix ".%s\" href=\"#" footnote-ref-prefix ".%s\">%s</a>")))
 			       n n n) t t org-line)))))
 	    ;; Check if the line break needs to be conserved
 	    (cond
