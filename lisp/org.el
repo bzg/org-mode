@@ -3945,7 +3945,9 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	(unless quietly
 	  (message "Mapping tables: %d%%" (/ (* 100.0 (point)) (buffer-size))))
 	(beginning-of-line 1)
-	(when (looking-at org-table-line-regexp)
+	(when (and (looking-at org-table-line-regexp)
+		   ;; Exclude tables in src/example/verbatim/clocktable blocks
+		   (not (org-in-block-p '("src" "example"))))
 	  (save-excursion (funcall function))
 	  (or (looking-at org-table-line-regexp)
 	      (forward-char 1)))
