@@ -20780,11 +20780,12 @@ This version does not only check the character property, but also
 If the heading only contains a TODO keyword, it is still still considered
 empty."
   (and (looking-at "[ \t]*$")
-       (save-excursion
-         (beginning-of-line 1)
-	 (let ((case-fold-search nil))
-	   (looking-at org-todo-line-regexp)))
-       (string= (match-string 3) "")))
+       (when org-todo-line-regexp
+	 (save-excursion
+	   (beginning-of-line 1)
+	   (let ((case-fold-search nil))
+	     (looking-at org-todo-line-regexp)
+	     (string= (match-string 3) ""))))))
 
 (defun org-at-heading-or-item-p ()
   (or (org-at-heading-p) (org-at-item-p)))
