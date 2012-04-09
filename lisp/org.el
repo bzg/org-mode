@@ -5438,7 +5438,8 @@ will be prompted for."
 	    (when (re-search-forward
 		   (concat "^[ \t]*#\\+end" (match-string 4) "\\>.*")
 		   nil t)  ;; on purpose, we look further than LIMIT
-	      (setq end (match-end 0) end1 (1- (match-beginning 0)))
+	      (setq end (min (point-max) (match-end 0))
+		    end1 (min (point-max) (1- (match-beginning 0))))
 	      (setq block-end (match-beginning 0))
 	      (when quoting
 		(remove-text-properties beg end
@@ -5466,11 +5467,12 @@ will be prompted for."
 				     '(face org-block))) ; end of source block
 	       ((not org-fontify-quote-and-verse-blocks))
 	       ((string= block-type "quote")
-		(add-text-properties beg1 (1+ end1) '(face org-quote)))
+		(add-text-properties beg1 (min (point-max) (1+ end1)) '(face org-quote)))
 	       ((string= block-type "verse")
-		(add-text-properties beg1 (1+ end1) '(face org-verse))))
+		(add-text-properties beg1 (min (point-max) (1+ end1)) '(face org-verse))))
       	      (add-text-properties beg beg1 '(face org-block-begin-line))
-      	      (add-text-properties (1+ end) (1+ end1) '(face org-block-end-line))
+      	      (add-text-properties (min (point-max) (1+ end)) (min (point-max) (1+ end1))
+				   '(face org-block-end-line))
 	      t))
 	   ((member dc1 '("title:" "author:" "email:" "date:"))
 	    (add-text-properties
