@@ -2955,6 +2955,7 @@ with the prefix ARG."
 	  (throw 'exit t)))
       (error "No convergence after %d iterations" i))))
 
+;;;###autoload
 (defun org-table-recalculate-buffer-tables ()
   "Recalculate all tables in the current buffer."
   (interactive)
@@ -2963,6 +2964,7 @@ with the prefix ARG."
       (widen)
       (org-table-map-tables (lambda () (org-table-recalculate t)) t))))
 
+;;;###autoload
 (defun org-table-iterate-buffer-tables ()
   "Iterate all tables in the buffer, to converge inter-table dependencies."
  (interactive)
