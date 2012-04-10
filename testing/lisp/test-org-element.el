@@ -261,7 +261,7 @@
 
 
 
-;;; Granularity
+;;;; Granularity
 
 (ert-deftest test-org-element/granularity ()
   "Test granularity impact on buffer parsing."
@@ -346,7 +346,38 @@ Paragraph \\alpha."
 
 
 
-;;; Navigation tools.
+;;;; Interpretation.
+
+(ert-deftest test-org-element/interpret-affiliated-keywords ()
+  "Test if affiliated keywords are correctly interpreted."
+  ;; Interpret simple keywords.
+  (should
+   (equal
+    (org-element-interpret-data
+     '(org-data nil (paragraph (:name "para") "Paragraph")))
+    "#+NAME: para\nParagraph\n"))
+  ;; Interpret multiple keywords.
+  (should
+   (equal
+    (org-element-interpret-data
+     '(org-data nil (paragraph (:attr_ascii ("line1" "line2")) "Paragraph")))
+    "#+ATTR_ASCII: line1\n#+ATTR_ASCII: line2\nParagraph\n"))
+  ;; Interpret parsed keywords.
+  (should
+   (equal
+    (org-element-interpret-data
+     '(org-data nil (paragraph (:caption ("caption")) "Paragraph")))
+    "#+CAPTION: caption\nParagraph\n"))
+  ;; Interpret dual keywords.
+  (should
+   (equal
+    (org-element-interpret-data
+     '(org-data nil (paragraph (:caption (("long") "short")) "Paragraph")))
+    "#+CAPTION[short]: long\nParagraph\n")))
+
+
+
+;;;; Navigation tools.
 
 (ert-deftest test-org-element/forward-element ()
   "Test `org-element-forward' specifications."
