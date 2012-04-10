@@ -1149,7 +1149,7 @@ ATTR is a string of other attributes of the a element."
 	 ;; grok language setting
 	 (en-strings (assoc-default "en" org-e-odt-category-strings))
 	 (lang (plist-get info :language)) ; FIXME
-	 (lang-strings (assoc-default lang org-export-odt-category-strings))
+	 (lang-strings (assoc-default lang org-e-odt-category-strings))
 	 ;; retrieve localized category sting
 	 (pos (- (length org-e-odt-category-map-alist)
 		 (length (memq label-props org-e-odt-category-map-alist))))
@@ -1799,6 +1799,7 @@ standard Emacs.")
 		  (src . "OrgSrcBlock")
 		  (illustration . "Illustration")
 		  (table . "Table")
+		  (listing . "Listing")
 		  (definition-term . "Text_20_body_20_bold")
 		  (horizontal-line . "Horizontal_20_Line")))
     (character . ((bold . "Bold")
@@ -1974,7 +1975,7 @@ specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
 `org-e-odt-format-label-reference'.")
 
 (defcustom org-e-odt-category-strings
-  '(("en" "Table" "Figure" "Equation" "Equation"))
+  '(("en" "Table" "Figure" "Equation" "Equation" "Listing"))
   "Specify category strings for various captionable entities.
 Captionable entity can be one of a Table, an Embedded Image, a
 LaTeX fragment (generated with dvipng) or a Math Formula.
@@ -2002,6 +2003,9 @@ below.
 			       (string :tag "Category string"))
 		       (choice :tag "Dvipng Image"
 			       (const :tag "Use Default" nil)
+			       (string :tag "Category string"))
+		       (choice :tag "Listing"
+			       (const :tag "Use Default" nil)
 			       (string :tag "Category string")))))
 
 (defvar org-e-odt-category-map-alist
@@ -2009,6 +2013,7 @@ below.
     ("__Figure__" "Illustration" "value")
     ("__MathFormula__" "Text" "math-formula")
     ("__DvipngImage__" "Equation" "value")
+    ("__Listing__" "Listing" "value")
     ;; ("__Table__" "Table" "category-and-value")
     ;; ("__Figure__" "Figure" "category-and-value")
     ;; ("__DvipngImage__" "Equation" "category-and-value")
@@ -3866,6 +3871,8 @@ INFO is a plist holding contextual information.  See
 					; FIXME: Check if it is
 					; acutally latex eqn.
 		       "__MathFormula__")
+		      ((eq (org-element-type destination) 'src-block)
+		       "__Listing__")
 		      (t (error "Handle enumeration of %S" destination)))))
 	       (org-e-odt-format-label-reference label default-category number)))))))
      ;; Coderef: replace link with the reference name or the
@@ -4065,13 +4072,20 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-property :language src-block))
 	 (caption (org-element-property :caption src-block))
+	 (short-caption (and (cdr caption) (org-export-secondary-string
+					    (cdr caption) 'e-odt info)))
+	 (caption (and (car caption) (org-export-secondary-string
+				      (car caption) 'e-odt info)))
 	 (label (org-element-property :name src-block)))
     ;; FIXME: Handle caption
     ;; caption-str (when caption)
     ;; (main (org-export-secondary-string (car caption) 'e-odt info))
     ;; (secondary (org-export-secondary-string (cdr caption) 'e-odt info))
     ;; (caption-str (org-e-odt--caption/label-string caption label info))
-    (org-e-odt-format-code src-block info)))
+    (concat
+     (org-e-odt-format-stylized-paragraph
+      'listing (org-e-odt-format-entity-caption label caption "__Listing__"))
+     (org-e-odt-format-code src-block info))))
 
 
 ;;;; Statistics Cookie
