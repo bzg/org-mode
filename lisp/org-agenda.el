@@ -6217,7 +6217,7 @@ When this is the global TODO list, a prefix argument will be interpreted."
 (defun org-agenda-filter-by-category (strip)
   "Keep only those lines in the agenda buffer that have a specific category.
 The category is that of the current line."
-  (interactive "P")
+  (interactive)
   (if org-agenda-filtered-by-category
       (org-agenda-filter-show-all-cat)
     (let ((cat (org-no-properties (get-text-property (point) 'org-category))))
