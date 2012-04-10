@@ -13453,8 +13453,7 @@ With prefix ARG, realign all tags in headings in the current buffer."
 	;; Get a new set of tags from the user
 	(save-excursion
 	  (setq table (append org-tag-persistent-alist
-			      org-tag-alist
-			      (org-get-buffer-tags)
+			      (or org-tag-alist (org-get-buffer-tags))
 			      (and
 			       org-complete-tags-always-offer-all-agenda-tags
 			       (org-global-tags-completion-table
@@ -13756,14 +13755,9 @@ Returns the new tags string, or nil to not change the current settings."
 		  (condition-case nil
 		      (setq tg (org-icompleting-read
 				"Tag: "
-				(delete-dups
-				 (append (or buffer-tags
-					     (with-current-buffer buf
-					       (mapcar 'car (org-get-buffer-tags))))
-					 (delq nil
-					       (mapcar (lambda (x)
-							 (if (stringp
-							      (car x)) x)) table))))))
+				(or buffer-tags
+				    (with-current-buffer buf
+				      (org-get-buffer-tags)))))
 		    (quit (setq tg "")))
 		  (when (string-match "\\S-" tg)
 		    (add-to-list 'buffer-tags (list tg))
