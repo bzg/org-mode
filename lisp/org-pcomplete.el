@@ -144,7 +144,7 @@ When completing for #+STARTUP, for example, this function returns
 			      (if (string-match "^#\\+\\([A-Z_]+:?\\)" x)
 				  (match-string 1 x)))
 			    (org-split-string (org-get-current-options) "\n"))
-		    org-additional-option-like-keywords)))))
+		    (copy-sequence org-additional-option-like-keywords))))))
    (substring pcomplete-stub 2)))
 
 (defvar org-startup-options)
