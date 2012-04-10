@@ -5721,8 +5721,8 @@ until the entry is marked DONE.  An example:
 
 @example
 *** TODO write article about the Earth for the Guide
-    The editor in charge is [[bbdb:Ford Prefect]]
     DEADLINE: <2004-02-29 Sun>
+    The editor in charge is [[bbdb:Ford Prefect]]
 @end example
 
 You can specify a different lead time for warnings for a specific
