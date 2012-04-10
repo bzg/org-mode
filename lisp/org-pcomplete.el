@@ -69,7 +69,7 @@ The return value is a string naming the thing at point."
 	(re-search-backward "^[ \t]*#\\+\\([A-Z_]+\\):.*"
 			    (line-beginning-position) t))
       (cons "file-option" (match-string-no-properties 1)))
-     ((string-match "\\`[ \t]*#\\+[a-zA-Z]*\\'" line-to-here)
+     ((string-match "\\`[ \t]*#\\+[a-zA-Z_]*\\'" line-to-here)
       (cons "file-option" nil))
      ((equal (char-before beg) ?\[)
       (cons "link" nil))
