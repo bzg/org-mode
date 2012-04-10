@@ -87,6 +87,24 @@
 	  '((:session . "none") (:results . "replace") (:exports . "results"))
 	  org-babel-default-inline-header-args)))
 
+(ert-deftest ob-test/org-babel-combine-header-arg-lists ()
+  (let ((results (org-babel-combine-header-arg-lists
+                  '((foo  . :any)
+                    (bar)
+                    (baz  . ((foo bar) (baz)))
+                    (qux  . ((foo bar baz qux)))
+                    (quux . ((foo bar))))
+                  '((bar)
+                    (baz  . ((baz)))
+                    (quux . :any)))))
+    (dolist (pair '((foo  . :any)
+		    (bar)
+		    (baz  . ((baz)))
+		    (quux . :any)
+		    (qux  . ((foo bar baz qux)))))
+      (should (equal (cdr pair)
+                     (cdr (assoc (car pair) results)))))))
+
 ;;; ob-get-src-block-info
 (ert-deftest test-org-babel/get-src-block-info-language ()
   (org-test-at-marker nil org-test-file-ob-anchor

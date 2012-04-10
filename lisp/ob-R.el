@@ -40,10 +40,31 @@
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
 
-(defconst org-babel-header-arg-names:R
-  '(width height bg units pointsize antialias quality compression
-	  res type family title fonts version paper encoding
-	  pagecentre colormodel useDingbats horizontal)
+(defconst org-babel-header-args:R
+  '((width		 . :any)
+    (height		 . :any)
+    (bg			 . :any)
+    (units		 . :any)
+    (pointsize		 . :any)
+    (antialias		 . :any)
+    (quality		 . :any)
+    (compression	 . :any)
+    (res		 . :any)
+    (type		 . :any)
+    (family		 . :any)
+    (title		 . :any)
+    (fonts		 . :any)
+    (version		 . :any)
+    (paper		 . :any)
+    (encoding		 . :any)
+    (pagecentre		 . :any)
+    (colormodel		 . :any)
+    (useDingbats	 . :any)
+    (horizontal		 . :any)
+    (results             . ((file list vector table scalar verbatim)
+			    (raw org html latex code pp wrap)
+			    (replace silent append prepend)
+			    (output value graphics))))
   "R-specific header arguments.")
 
 (defvar org-babel-default-header-args:R '())

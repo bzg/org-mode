@@ -37,8 +37,18 @@
 
 (defvar org-babel-default-header-args:sqlite '())
 
-(defvar org-babel-header-arg-names:sqlite
-  '(db header echo bail csv column html line list separator nullvalue)
+(defvar org-babel-header-args:sqlite
+  '((db        . :any)
+    (header    . :any)
+    (echo      . :any)
+    (bail      . :any)
+    (csv       . :any)
+    (column    . :any)
+    (html      . :any)
+    (line      . :any)
+    (list      . :any)
+    (separator . :any)
+    (nullvalue . :any))
   "Sqlite specific header args.")
 
 (defun org-babel-expand-body:sqlite (body params)

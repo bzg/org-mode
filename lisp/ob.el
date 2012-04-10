@@ -622,6 +622,19 @@ arguments and pop open the results in a preview buffer."
 		   (mmin (in (1- i) j) (in i (1- j)) (in (1- i) (1- j)))))))
       (in l1 l2))))
 
+(defun org-babel-combine-header-arg-lists (original &rest others)
+  "Combine a number of lists of header argument names and arguments."
+  (let ((results (copy-sequence original)))
+    (dolist (new-list others)
+      (dolist (arg-pair new-list)
+	(let ((header (car arg-pair))
+	      (args (cdr arg-pair)))
+	  (setq results
+		(cons arg-pair (org-remove-if
+				(lambda (pair) (equal header (car pair)))
+				results))))))
+    results))
+
 ;;;###autoload
 (defun org-babel-check-src-block ()
   "Check for misspelled header arguments in the current code block."
@@ -649,12 +662,10 @@ arguments and pop open the results in a preview buffer."
   "Insert a header argument selecting from lists of common args and values."
   (interactive)
   (let* ((lang (car (org-babel-get-src-block-info 'light)))
-	 (lang-headers (intern (concat "org-babel-header-arg-names:" lang)))
-	 (headers (append (if (boundp lang-headers)
-			      (mapcar (lambda (h) (cons h :any))
-				      (eval lang-headers))
-			    nil)
-			  org-babel-common-header-args-w-values))
+	 (lang-headers (intern (concat "org-babel-header-args:" lang)))
+	 (headers (org-babel-combine-header-arg-lists
+		   org-babel-common-header-args-w-values
+		   (if (boundp lang-headers) (eval lang-headers) nil)))
 	 (arg (org-icompleting-read
 	      "Header Arg: "
 	      (mapcar
@@ -678,6 +689,30 @@ arguments and pop open the results in a preview buffer."
 		    (concat arg " ")
 		  "")))
 	    vals ""))))))))
+
+;; Add support for completing-read insertion of header arguments after ":"
+(defun org-babel-header-arg-expand ()
+  "Call `org-babel-enter-header-arg-w-completion' in appropriate contexts."
+  (when (and (= (char-before) ?\:) (org-babel-where-is-src-block-head))
+    (org-babel-enter-header-arg-w-completion (match-string 2))))
+
+(defun org-babel-enter-header-arg-w-completion (&optional lang)
+  "Insert header argument appropriate for LANG with completion."
+  (let* ((lang-headers-var (intern (concat "org-babel-header-args:" lang)))
+         (lang-headers (when (boundp lang-headers-var) (eval lang-headers-var)))
+	 (headers-w-values (org-babel-combine-header-arg-lists
+			    org-babel-common-header-args-w-values lang-headers))
+         (headers (mapcar #'symbol-name (mapcar #'car headers-w-values)))
+         (header (org-completing-read "Header Arg: " headers))
+         (args (cdr (assoc (intern header) headers-w-values)))
+         (arg (when (and args (listp args))
+                (org-completing-read
+                 (format "%s: " header)
+                 (mapcar #'symbol-name (apply #'append args))))))
+    (insert (concat header " " (or arg "")))
+    (cons header arg)))
+
+(add-hook 'org-tab-first-hook 'org-babel-header-arg-expand)
 
 ;;;###autoload
 (defun org-babel-load-in-session (&optional arg info)
@@ -1153,13 +1188,14 @@ may be specified in the properties of the current outline entry."
 		     (cons (intern (concat ":" header-arg))
 			   (org-babel-read val))))
 	      (mapcar
-	       'symbol-name
-	       (append
-		org-babel-header-arg-names
-		(progn
-		  (setq sym (intern (concat "org-babel-header-arg-names:"
-					    lang)))
-		  (and (boundp sym) (eval sym)))))))))))
+	       #'symbol-name
+	       (mapcar
+		#'car
+		(org-babel-combine-header-arg-lists
+		 org-babel-common-header-args-w-values
+		 (progn
+		   (setq sym (intern (concat "org-babel-header-args:" lang)))
+		   (and (boundp sym) (eval sym))))))))))))
 
 (defvar org-src-preserve-indentation)
 (defun org-babel-parse-src-block-match ()
