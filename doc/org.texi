@@ -10869,10 +10869,10 @@ one format (say @samp{csv}) to another format (say @samp{ods} or @samp{xls}).
 If you have a working installation of LibreOffice, a document converter is
 pre-configured for you and you can use it right away.  If you would like to
 use @file{unoconv} as your preferred converter, customize the variable
-@code{org-export-odt-convert-process} to point to @code{unoconv}.  You can also
-use a converter of your own choice or tweak the default settings of the default
-@file{LibreOffice} and @samp{unoconv} converters
-(@xref{Configuring a document converter}).
+@code{org-export-odt-convert-process} to point to @code{unoconv}.  You can
+also use your own favorite converter or tweak the default settings of the
+@file{LibreOffice} and @samp{unoconv} converters.  @xref{Configuring a
+document converter}.
 
 @subsubsection Automatically exporting to other formats
 @anchor{x-export-to-other-formats}
