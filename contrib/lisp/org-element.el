@@ -3415,17 +3415,17 @@ Return Org syntax as a string."
 	      (results (funcall interpreter blob contents)))
 	 ;; Update PREVIOUS.
 	 (setq previous type)
-	 ;; Build white spaces.
-	 (cond
-	  ((eq type 'org-data) results)
-	  ((memq type org-element-all-elements)
-	   (concat
-	    (org-element-interpret--affiliated-keywords blob)
-	    (org-element-normalize-string results)
-	    (make-string (org-element-property :post-blank blob) 10)))
-	  (t (concat
-	      results
-	      (make-string (org-element-property :post-blank blob) 32))))))))
+	 ;; Build white spaces.  If no `:post-blank' property is
+	 ;; specified, assume its value is 0.
+	 (let ((post-blank (or (org-element-property :post-blank blob) 0)))
+	   (cond
+	    ((eq type 'org-data) results)
+	    ((memq type org-element-all-elements)
+	     (concat
+	      (org-element-interpret--affiliated-keywords blob)
+	      (org-element-normalize-string results)
+	      (make-string post-blank 10)))
+	    (t (concat results (make-string post-blank 32)))))))))
    (org-element-contents data) ""))
 
 (defun org-element-interpret-secondary (secondary)
@@ -3450,14 +3450,19 @@ If there is no affiliated keyword, return the empty string."
 	    (let (dual)
 	      (when (member key org-element-dual-keywords)
 		(setq dual (cdr value) value (car value)))
-	      (concat "#+" key (and dual (format "[%s]" dual)) ": "
+	      (concat "#+" key
+		      (and dual
+			   (format "[%s]"
+				   (org-element-interpret-secondary dual)))
+		      ": "
 		      (if (member key org-element-parsed-keywords)
 			  (org-element-interpret-secondary value)
 			value)
 		      "\n"))))))
     (mapconcat
      (lambda (key)
-       (let ((value (org-element-property (intern (concat ":" key)) element)))
+       (let ((value (org-element-property (intern (concat ":" (downcase key)))
+					  element)))
 	 (when value
 	   (if (member key org-element-multiple-keywords)
 	       (mapconcat (lambda (line)
