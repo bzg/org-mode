@@ -2526,8 +2526,13 @@ not overwrite the stored one."
 		(replace-match
 		 (save-match-data
 		   (org-table-make-reference
-		    (org-table-get-remote-range
-		     (match-string 1 form) (match-string 2 form))
+		    (let ((rmtrng (org-table-get-remote-range
+				   (match-string 1 form) (match-string 2 form))))
+		      (if duration
+			  (if (listp rmtrng)
+			      (mapcar (lambda(x) (org-table-time-string-to-seconds x)) rmtrng)
+			    (org-table-time-string-to-seconds rmtrng))
+			rmtrng))
 		    keep-empty numbers lispp))
 		 t t form)))
 	;; Insert complex ranges
