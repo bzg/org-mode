@@ -132,13 +132,13 @@ exported html."
 (defun org-mime-file (ext path id)
   "Markup a file for attachment."
   (case org-mime-library
-    ('mml (format
-           "<#part type=\"%s\" filename=\"%s\" id=\"<%s>\">\n<#/part>\n"
-           ext path id))
+    ('mml (format (concat "<#part type=\"%s\" filename=\"%s\" "
+			  "disposition=inline id=\"<%s>\">\n<#/part>\n")
+		  ext path id))
     ('semi (concat
-            (format
-             "--[[%s\nContent-Disposition: inline;\nContent-ID: <%s>][base64]]\n"
-             ext id)
+	    (format (concat "--[[%s\nContent-Disposition: "
+			    "inline;\nContent-ID: <%s>][base64]]\n")
+		    ext id)
             (base64-encode-string
              (with-temp-buffer
                (set-buffer-multibyte nil)
