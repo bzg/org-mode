@@ -9735,7 +9735,7 @@ author:    @r{turn on/off inclusion of author name/email into exported file}
 email:     @r{turn on/off inclusion of author email into exported file}
 creator:   @r{turn on/off inclusion of creator info into exported file}
 timestamp: @r{turn on/off inclusion creation time into exported file}
-d:         @r{turn on/off inclusion of drawers}
+d:         @r{turn on/off inclusion of drawers, or list drawers to include}
 @end example
 @noindent
 These options take effect in both the HTML and @LaTeX{} export, except for
