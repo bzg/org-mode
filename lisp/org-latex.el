@@ -1034,6 +1034,11 @@ when PUB-DIR is set, use this as the publishing directory."
       (if (looking-at "[\n \t]+")
 	  (replace-match "\n")))
 
+    ;; Ensure we have a final newline
+    (goto-char (point-max))
+    (or (eq (char-before) ?\n)
+	(insert ?\n))
+
     (run-hooks 'org-export-latex-final-hook)
     (if to-buffer
 	(unless (eq major-mode 'latex-mode) (latex-mode))
