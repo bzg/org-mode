@@ -36,7 +36,7 @@
   :tag "Org Export ASCII"
   :group 'org-export)
 
-(defcustom org-export-ascii-underline '(?\- ?\= ?\~ ?^ ?\# ?\$)
+(defcustom org-export-ascii-underline '(?\= ?\- ?\~ ?\^ ?\. ?\# ?\$)
   "Characters for underlining headings in ASCII export.
 In the given sequence, these characters will be used for level 1, 2, ..."
   :group 'org-export-ascii
