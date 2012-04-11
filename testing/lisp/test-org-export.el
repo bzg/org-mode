@@ -38,6 +38,23 @@ as Org syntax."
 		    transcoders)))
      ,@body))
 
+(defmacro org-test-with-parsed-data (data &rest body)
+  "Execute body with parsed data available.
+
+DATA is a string containing the data to be parsed.  BODY is the
+body to execute.  Parse tree is available under the `tree'
+variable, and communication channel under `info'.
+
+This function calls `org-export-collect-tree-properties'.  As
+such, `:ignore-list' (for `org-element-map') and
+`:parse-tree' (for `org-export-get-genealogy') properties are
+already filled in `info'."
+  (declare (debug (form body)) (indent 1))
+  `(org-test-with-temp-text ,data
+     (let* ((tree (org-element-parse-buffer))
+	    (info (org-export-collect-tree-properties tree nil nil)))
+       ,@body)))
+
 (ert-deftest test-org-export/parse-option-keyword ()
   "Test reading all standard #+OPTIONS: items."
   (should
@@ -625,6 +642,553 @@ Another text. (ref:text)
       (should (equal (org-export-unravel-code (org-element-current-element))
 		     '("* Headline\n, * Not headline\n,Keep\n"))))))
 
+
+
+;;; Tables
+
+(ert-deftest test-org-export/special-column ()
+  "Test if the table's special column is properly recognized."
+  ;; 1. First column is special if it contains only a special marking
+  ;;    characters or empty cells.
+  (org-test-with-temp-text "
+| ! | 1 |
+|   | 2 |"
+    (should
+     (org-export-table-has-special-column-p
+      (org-element-map
+       (org-element-parse-buffer) 'table 'identity nil 'first-match))))
+  ;; 2. If the column contains anything else, it isn't special.
+  (org-test-with-temp-text "
+| ! | 1 |
+| b | 2 |"
+    (should-not
+     (org-export-table-has-special-column-p
+      (org-element-map
+       (org-element-parse-buffer) 'table 'identity nil 'first-match))))
+  ;; 3. Special marking characters are "#", "^", "*", "_", "/", "$"
+  ;;    and "!".
+  (org-test-with-temp-text "
+| # | 1 |
+| ^ | 2 |
+| * | 3 |
+| _ | 4 |
+| / | 5 |
+| $ | 6 |
+| ! | 7 |"
+    (should
+     (org-export-table-has-special-column-p
+      (org-element-map
+       (org-element-parse-buffer) 'table 'identity nil 'first-match))))
+  ;; 4. A first column with only empty cells isn't considered as
+  ;;    special.
+  (org-test-with-temp-text "
+|   | 1 |
+|   | 2 |"
+    (should-not
+     (org-export-table-has-special-column-p
+      (org-element-map
+       (org-element-parse-buffer) 'table 'identity nil 'first-match)))))
+
+(ert-deftest test-org-export/special-row ()
+  "Test if special rows in a table are properly recognized."
+  ;; 1. A row is special if it has a special marking character in the
+  ;;    special column.
+  (org-test-with-parsed-data "| ! | 1 |"
+    (should
+     (org-export-table-row-is-special-p
+      (org-element-map tree 'table-row 'identity nil 'first-match) info)))
+  ;; 2. A row is special when its first field is "/"
+  (org-test-with-parsed-data "
+| / | 1 |
+| a | b |"
+    (should
+     (org-export-table-row-is-special-p
+      (org-element-map tree 'table-row 'identity nil 'first-match) info)))
+  ;; 3. A row only containing alignment cookies is also considered as
+  ;;    special.
+  (org-test-with-parsed-data "| <5> |   | <l> | <l22> |"
+    (should
+     (org-export-table-row-is-special-p
+      (org-element-map tree 'table-row 'identity nil 'first-match) info)))
+  ;; 4. Everything else isn't considered as special.
+  (org-test-with-parsed-data "| a |   | c |"
+    (should-not
+     (org-export-table-row-is-special-p
+      (org-element-map tree 'table-row 'identity nil 'first-match) info)))
+  ;; 5. Table's rules are never considered as special rows.
+  (org-test-with-parsed-data "|---+---|"
+    (should-not
+     (org-export-table-row-is-special-p
+      (org-element-map tree 'table-row 'identity nil 'first-match) info))))
+
+(ert-deftest test-org-export/has-header-p ()
+  "Test `org-export-table-has-header-p' specifications."
+  ;; 1. With an header.
+  (org-test-with-parsed-data "
+| a | b |
+|---+---|
+| c | d |"
+    (should
+     (org-export-table-has-header-p
+      (org-element-map tree 'table 'identity info 'first-match)
+      info)))
+  ;; 2. Without an header.
+  (org-test-with-parsed-data "
+| a | b |
+| c | d |"
+    (should-not
+     (org-export-table-has-header-p
+      (org-element-map tree 'table 'identity info 'first-match)
+      info)))
+  ;; 3. Don't get fooled with starting and ending rules.
+  (org-test-with-parsed-data "
+|---+---|
+| a | b |
+| c | d |
+|---+---|"
+    (should-not
+     (org-export-table-has-header-p
+      (org-element-map tree 'table 'identity info 'first-match)
+      info))))
+
+(ert-deftest test-org-export/table-row-group ()
+  "Test `org-export-table-row-group' specifications."
+  ;; 1. A rule creates a new group.
+  (org-test-with-parsed-data "
+| a | b |
+|---+---|
+| 1 | 2 |"
+    (should
+     (equal
+      '(1 nil 2)
+      (mapcar (lambda (row) (org-export-table-row-group row info))
+	      (org-element-map tree 'table-row 'identity)))))
+  ;; 2. Special rows are ignored in count.
+  (org-test-with-parsed-data "
+| / | < | > |
+|---|---+---|
+|   | 1 | 2 |"
+    (should
+     (equal
+      '(nil nil 1)
+      (mapcar (lambda (row) (org-export-table-row-group row info))
+	      (org-element-map tree 'table-row 'identity)))))
+  ;; 3. Double rules also are ignored in count.
+  (org-test-with-parsed-data "
+| a | b |
+|---+---|
+|---+---|
+| 1 | 2 |"
+    (should
+     (equal
+      '(1 nil nil 2)
+      (mapcar (lambda (row) (org-export-table-row-group row info))
+	      (org-element-map tree 'table-row 'identity))))))
+
+(ert-deftest test-org-export/table-cell-width ()
+  "Test `org-export-table-cell-width' specifications."
+  ;; 1. Width is primarily determined by width cookies.  If no cookie
+  ;;    is found, cell's width is nil.
+  (org-test-with-parsed-data "
+| / | <l> | <6> | <l7> |
+|   |  a  |  b  |  c   |"
+    (should
+     (equal
+      '(nil 6 7)
+      (mapcar (lambda (cell) (org-export-table-cell-width cell info))
+	      (org-element-map tree 'table-cell 'identity info)))))
+  ;; 2. The last width cookie has precedence.
+  (org-test-with-parsed-data "
+| <6> |
+| <7> |
+|  a  |"
+    (should
+     (equal
+      '(7)
+      (mapcar (lambda (cell) (org-export-table-cell-width cell info))
+	      (org-element-map tree 'table-cell 'identity info)))))
+  ;; 3. Valid width cookies must have a specific row.
+  (org-test-with-parsed-data "| <6> | cell |"
+    (should
+     (equal
+      '(nil nil)
+      (mapcar (lambda (cell) (org-export-table-cell-width cell info))
+	      (org-element-map tree 'table-cell 'identity))))))
+
+(ert-deftest test-org-export/table-cell-alignment ()
+  "Test `org-export-table-cell-alignment' specifications."
+  (let ((org-table-number-fraction 0.5)
+	(org-table-number-regexp "^[0-9]+$"))
+    ;; 1. Alignment is primarily determined by alignment cookies.
+    (org-test-with-temp-text "| <l> | <c> | <r> |"
+      (let* ((tree (org-element-parse-buffer))
+	     (info `(:parse-tree ,tree)))
+	(should
+	 (equal
+	  '(left center right)
+	  (mapcar (lambda (cell) (org-export-table-cell-alignment cell info))
+		  (org-element-map tree 'table-cell 'identity))))))
+    ;; 2. The last alignment cookie has precedence.
+    (org-test-with-temp-text "
+| <l8> |
+| cell |
+| <r9> |"
+      (let* ((tree (org-element-parse-buffer))
+	     (info `(:parse-tree ,tree)))
+	(should
+	 (equal
+	  '(right right right)
+	  (mapcar (lambda (cell) (org-export-table-cell-alignment cell info))
+		  (org-element-map tree 'table-cell 'identity))))))
+    ;; 3. If there's no cookie, cell's contents determine alignment.
+    ;;    A column mostly made of cells containing numbers will align
+    ;;    its cells to the right.
+    (org-test-with-temp-text "
+| 123       |
+| some text |
+| 12345     |"
+      (let* ((tree (org-element-parse-buffer))
+	     (info `(:parse-tree ,tree)))
+	(should
+	 (equal
+	  '(right right right)
+	  (mapcar (lambda (cell)
+		    (org-export-table-cell-alignment cell info))
+		  (org-element-map tree 'table-cell 'identity))))))
+    ;; 5. Otherwise, they will be aligned to the left.
+    (org-test-with-temp-text "
+| text      |
+| some text |
+| 12345     |"
+      (let* ((tree (org-element-parse-buffer))
+	     (info `(:parse-tree ,tree)))
+	(should
+	 (equal
+	  '(left left left)
+	  (mapcar (lambda (cell)
+		    (org-export-table-cell-alignment cell info))
+		  (org-element-map tree 'table-cell 'identity))))))))
+
+(ert-deftest test-org-export/table-cell-borders ()
+  "Test `org-export-table-cell-borders' specifications."
+  ;; 1. Recognize various column groups indicators.
+  (org-test-with-parsed-data "| / | < | > | <> |"
+    (should
+     (equal
+      '((right bottom top) (left bottom top) (right bottom top)
+	(right left bottom top))
+      (mapcar (lambda (cell)
+		(org-export-table-cell-borders cell info))
+	      (org-element-map tree 'table-cell 'identity)))))
+  ;; 2. Accept shortcuts to define column groups.
+  (org-test-with-parsed-data "| / | < | < |"
+    (should
+     (equal
+      '((right bottom top) (right left bottom top) (left bottom top))
+      (mapcar (lambda (cell)
+		(org-export-table-cell-borders cell info))
+	      (org-element-map tree 'table-cell 'identity)))))
+  ;; 3. A valid column groups row must start with a "/".
+  (org-test-with-parsed-data "
+|   | < |
+| a | b |"
+    (should
+     (equal '((top) (top) (bottom) (bottom))
+	    (mapcar (lambda (cell)
+		      (org-export-table-cell-borders cell info))
+		    (org-element-map tree 'table-cell 'identity)))))
+  ;; 4. Take table rules into consideration.
+  (org-test-with-parsed-data "
+| 1 |
+|---|
+| 2 |"
+    (should
+     (equal '((below top) (bottom above))
+	    (mapcar (lambda (cell)
+		      (org-export-table-cell-borders cell info))
+		    (org-element-map tree 'table-cell 'identity)))))
+  ;; 5. Top and (resp. bottom) rules induce both `top' and `above'
+  ;;    (resp. `bottom' and `below') borders.  Any special row is
+  ;;    ignored.
+  (org-test-with-parsed-data "
+|---+----|
+| / |    |
+|   |  1 |
+|---+----|"
+    (should
+     (equal '((bottom below top above))
+	    (last
+	     (mapcar (lambda (cell)
+		       (org-export-table-cell-borders cell info))
+		     (org-element-map tree 'table-cell 'identity)))))))
+
+(ert-deftest test-org-export/table-dimensions ()
+  "Test `org-export-table-dimensions' specifications."
+  ;; 1. Standard test.
+  (org-test-with-parsed-data "
+| 1 | 2 | 3 |
+| 4 | 5 | 6 |"
+    (should
+     (equal '(2 . 3)
+	    (org-export-table-dimensions
+	     (org-element-map tree 'table 'identity info 'first-match) info))))
+  ;; 2. Ignore horizontal rules and special columns.
+  (org-test-with-parsed-data "
+| / | < | > |
+| 1 | 2 | 3 |
+|---+---+---|
+| 4 | 5 | 6 |"
+    (should
+     (equal '(2 . 3)
+	    (org-export-table-dimensions
+	     (org-element-map tree 'table 'identity info 'first-match) info)))))
+
+(ert-deftest test-org-export/table-cell-address ()
+  "Test `org-export-table-cell-address' specifications."
+  ;; 1. Standard test: index is 0-based.
+  (org-test-with-parsed-data "| a | b |"
+    (should
+     (equal '((0 . 0) (0 . 1))
+	    (org-element-map
+	     tree 'table-cell
+	     (lambda (cell) (org-export-table-cell-address cell info))
+	     info))))
+  ;; 2. Special column isn't counted, nor are special rows.
+  (org-test-with-parsed-data "
+| / | <> |
+|   | c  |"
+    (should
+     (equal '(0 . 0)
+	    (org-export-table-cell-address
+	     (car (last (org-element-map tree 'table-cell 'identity info)))
+	     info))))
+  ;; 3. Tables rules do not count either.
+  (org-test-with-parsed-data "
+| a |
+|---|
+| b |
+|---|
+| c |"
+    (should
+     (equal '(2 . 0)
+	    (org-export-table-cell-address
+	     (car (last (org-element-map tree 'table-cell 'identity info)))
+	     info))))
+  ;; 4. Return nil for special cells.
+  (org-test-with-parsed-data "| / | a |"
+    (should-not
+     (org-export-table-cell-address
+      (org-element-map tree 'table-cell 'identity nil 'first-match)
+      info))))
+
+(ert-deftest test-org-export/get-table-cell-at ()
+  "Test `org-export-get-table-cell-at' specifications."
+  ;; 1. Address ignores special columns, special rows and rules.
+  (org-test-with-parsed-data "
+| / | <> |
+|   | a  |
+|---+----|
+|   | b  |"
+    (should
+     (equal '("b")
+	    (org-element-contents
+	     (org-export-get-table-cell-at
+	      '(1 . 0)
+	      (org-element-map tree 'table 'identity info 'first-match)
+	      info)))))
+  ;; 2. Return value for a non-existent address is nil.
+  (org-test-with-parsed-data "| a |"
+    (should-not
+     (org-export-get-table-cell-at
+      '(2 . 2)
+      (org-element-map tree 'table 'identity info 'first-match)
+      info)))
+  (org-test-with-parsed-data "| / |"
+    (should-not
+     (org-export-get-table-cell-at
+      '(0 . 0)
+      (org-element-map tree 'table 'identity info 'first-match)
+      info))))
+
+(ert-deftest test-org-export/table-cell-starts-colgroup-p ()
+  "Test `org-export-table-cell-starts-colgroup-p' specifications."
+  ;; 1. A cell at a beginning of a row always starts a column group.
+  (org-test-with-parsed-data "| a |"
+    (should
+     (org-export-table-cell-starts-colgroup-p
+      (org-element-map tree 'table-cell 'identity info 'first-match)
+      info)))
+  ;; 2. Special column should be ignored when determining the
+  ;;    beginning of the row.
+  (org-test-with-parsed-data "
+| / |   |
+|   | a |"
+    (should
+     (org-export-table-cell-starts-colgroup-p
+      (org-element-map tree 'table-cell 'identity info 'first-match)
+      info)))
+  ;; 2. Explicit column groups.
+  (org-test-with-parsed-data "
+| / |   | < |
+| a | b | c |"
+    (should
+     (equal
+      '(yes no yes)
+      (org-element-map
+       tree 'table-cell
+       (lambda (cell)
+	 (if (org-export-table-cell-starts-colgroup-p cell info) 'yes 'no))
+       info)))))
+
+(ert-deftest test-org-export/table-cell-ends-colgroup-p ()
+  "Test `org-export-table-cell-ends-colgroup-p' specifications."
+  ;; 1. A cell at the end of a row always ends a column group.
+  (org-test-with-parsed-data "| a |"
+    (should
+     (org-export-table-cell-ends-colgroup-p
+      (org-element-map tree 'table-cell 'identity info 'first-match)
+      info)))
+  ;; 2. Special column should be ignored when determining the
+  ;;    beginning of the row.
+  (org-test-with-parsed-data "
+| / |   |
+|   | a |"
+    (should
+     (org-export-table-cell-ends-colgroup-p
+      (org-element-map tree 'table-cell 'identity info 'first-match)
+      info)))
+  ;; 3. Explicit column groups.
+  (org-test-with-parsed-data "
+| / | < |   |
+| a | b | c |"
+    (should
+     (equal
+      '(yes no yes)
+      (org-element-map
+       tree 'table-cell
+       (lambda (cell)
+	 (if (org-export-table-cell-ends-colgroup-p cell info) 'yes 'no))
+       info)))))
+
+(ert-deftest test-org-export/table-row-starts-rowgroup-p ()
+  "Test `org-export-table-row-starts-rowgroup-p' specifications."
+  ;; 1. A row at the beginning of a table always starts a row group.
+  ;;    So does a row following a table rule.
+  (org-test-with-parsed-data "
+| a |
+|---|
+| b |"
+    (should
+     (equal
+      '(yes no yes)
+      (org-element-map
+       tree 'table-row
+       (lambda (row)
+	 (if (org-export-table-row-starts-rowgroup-p row info) 'yes 'no))
+       info))))
+  ;; 2. Special rows should be ignored when determining the beginning
+  ;;    of the row.
+  (org-test-with-parsed-data "
+| / | < |
+|   | a |
+|---+---|
+| / | < |
+|   | b |"
+    (should
+     (equal
+      '(yes no yes)
+      (org-element-map
+       tree 'table-row
+       (lambda (row)
+	 (if (org-export-table-row-starts-rowgroup-p row info) 'yes 'no))
+       info)))))
+
+(ert-deftest test-org-export/table-row-ends-rowgroup-p ()
+  "Test `org-export-table-row-ends-rowgroup-p' specifications."
+  ;; 1. A row at the end of a table always ends a row group.  So does
+  ;;    a row preceding a table rule.
+  (org-test-with-parsed-data "
+| a |
+|---|
+| b |"
+    (should
+     (equal
+      '(yes no yes)
+      (org-element-map
+       tree 'table-row
+       (lambda (row)
+	 (if (org-export-table-row-ends-rowgroup-p row info) 'yes 'no))
+       info))))
+  ;; 2. Special rows should be ignored when determining the beginning
+  ;;    of the row.
+  (org-test-with-parsed-data "
+|   | a |
+| / | < |
+|---+---|
+|   | b |
+| / | < |"
+    (should
+     (equal
+      '(yes no yes)
+      (org-element-map
+       tree 'table-row
+       (lambda (row)
+	 (if (org-export-table-row-ends-rowgroup-p row info) 'yes 'no))
+       info)))))
+
+(ert-deftest test-org-export/table-row-starts-header-p ()
+  "Test `org-export-table-row-starts-header-p' specifications."
+  ;; 1. Only the row starting the first row group starts the table
+  ;;    header.
+  (org-test-with-parsed-data "
+| a |
+| b |
+|---|
+| c |"
+    (should
+     (equal
+      '(yes no no no)
+      (org-element-map
+       tree 'table-row
+       (lambda (row)
+	 (if (org-export-table-row-starts-header-p row info) 'yes 'no))
+       info))))
+  ;; 2. A row cannot start an header if there's no header in the
+  ;;    table.
+  (org-test-with-parsed-data "
+| a |
+|---|"
+    (should-not
+     (org-export-table-row-starts-header-p
+      (org-element-map tree 'table-row 'identity info 'first-match)
+      info))))
+
+(ert-deftest test-org-export/table-row-ends-header-p ()
+  "Test `org-export-table-row-ends-header-p' specifications."
+  ;; 1. Only the row starting the first row group starts the table
+  ;;    header.
+  (org-test-with-parsed-data "
+| a |
+| b |
+|---|
+| c |"
+    (should
+     (equal
+      '(no yes no no)
+      (org-element-map
+       tree 'table-row
+       (lambda (row)
+	 (if (org-export-table-row-ends-header-p row info) 'yes 'no))
+       info))))
+  ;; 2. A row cannot start an header if there's no header in the
+  ;;    table.
+  (org-test-with-parsed-data "
+| a |
+|---|"
+    (should-not
+     (org-export-table-row-ends-header-p
+      (org-element-map tree 'table-row 'identity info 'first-match)
+      info))))
 
 
 (provide 'test-org-export)

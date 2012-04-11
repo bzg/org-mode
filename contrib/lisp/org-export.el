@@ -219,6 +219,8 @@ way they are handled must be hard-coded into
     (:filter-subscript . org-export-filter-subscript-functions)
     (:filter-superscript . org-export-filter-superscript-functions)
     (:filter-table . org-export-filter-table-functions)
+    (:filter-table-cell . org-export-filter-table-cell-functions)
+    (:filter-table-row . org-export-filter-table-row-functions)
     (:filter-target . org-export-filter-target-functions)
     (:filter-time-stamp . org-export-filter-time-stamp-functions)
     (:filter-verbatim . org-export-filter-verbatim-functions)
@@ -1285,6 +1287,9 @@ Following tree properties are set or updated:
 `:parse-tree'      Whole parse tree.
 
 `:target-list'     List of all targets in the parse tree."
+  ;; Install the parse tree in the communication channel, in order to
+  ;; use `org-export-get-genealogy' and al.
+  (setq info (plist-put info :parse-tree data))
   ;; Get the list of elements and objects to ignore, and put it into
   ;; `:ignore-list'.  Do not overwrite any user ignore that might have
   ;; been done during parse tree filtering.
@@ -1314,9 +1319,7 @@ Following tree properties are set or updated:
   ;; Properties order doesn't matter: get the rest of the tree
   ;; properties.
   (nconc
-   `(:parse-tree
-     ,data
-     :target-list
+   `(:target-list
      ,(org-element-map
        data '(keyword target)
        (lambda (blob)
@@ -1393,10 +1396,7 @@ Return elements or objects to ignore as a list."
 		       (mapc (lambda (e) (push e ignore))
 			     (org-element-contents el))
 		     ;; Move into recursive objects/elements.
-		     (when (or (eq type 'org-data)
-			       (memq type org-element-greater-elements)
-			       (memq type org-element-recursive-objects)
-			       (eq type 'paragraph))
+		     (when (org-element-contents el)
 		       (funcall walk-data el options selected))))))
 	     (org-element-contents data))))))
     ;; Main call.  First find trees containing a select tag, if any.
@@ -1469,7 +1469,14 @@ OPTIONS is the plist holding export options."
      (or (not (plist-get options :with-drawers))
 	 (and (consp (plist-get options :with-drawers))
 	      (not (member (org-element-property :drawer-name blob)
-			   (plist-get options :with-drawers))))))))
+			   (plist-get options :with-drawers))))))
+    ;; Check table-row.
+    (table-row (org-export-table-row-is-special-p blob options))
+    ;; Check table-cell.
+    (table-cell
+     (and (org-export-table-has-special-column-p
+	   (nth 1 (org-export-get-genealogy blob options)))
+	  (not (org-export-get-previous-element blob options))))))
 
 
 
@@ -1487,7 +1494,7 @@ OPTIONS is the plist holding export options."
 
 ;; Internally, three functions handle the filtering of objects and
 ;; elements during the export.  In particular,
-;; `org-export-ignore-element' mark an element or object so future
+;; `org-export-ignore-element' marks an element or object so future
 ;; parse tree traversals skip it, `org-export-interpret-p' tells which
 ;; elements or objects should be seen as real Org syntax and
 ;; `org-export-expand' transforms the others back into their original
@@ -1540,14 +1547,11 @@ Return transcoded string."
 	      ;; 2. Compute CONTENTS of BLOB.
 	      (contents
 	       (cond
-		;; Case 0. No transcoder defined: ignore BLOB.
-		((not transcoder) nil)
+		;; Case 0. No transcoder or no contents: ignore BLOB.
+		((or (not transcoder) (not (org-element-contents blob))) nil)
 		;; Case 1. Transparently export an Org document.
 		((eq type 'org-data) (org-export-data blob backend info))
-		;; Case 2. For a recursive object.
-		((memq type org-element-recursive-objects)
-		 (org-export-data blob backend info))
-		;; Case 3. For a recursive element.
+		;; Case 2. For a greater element.
 		((memq type org-element-greater-elements)
 		 ;; Ignore contents of an archived tree
 		 ;; when `:with-archived-trees' is `headline'.
@@ -1557,20 +1561,21 @@ Return transcoded string."
 			  (org-element-property :archivedp blob))
 		   (org-element-normalize-string
 		    (org-export-data blob backend info))))
-		;; Case 4. For a paragraph.
-		((eq type 'paragraph)
-		 (let ((paragraph
-			(org-element-normalize-contents
-			 blob
-			 ;; When normalizing contents of an item or
-			 ;; a footnote definition, ignore first line's
-			 ;; indentation: there is none and it might be
-			 ;; misleading.
-			 (and (not (org-export-get-previous-element blob info))
-			      (let ((parent (org-export-get-parent blob info)))
-				(memq (org-element-type parent)
-				      '(footnote-definition item)))))))
-		   (org-export-data paragraph backend info)))))
+		;; Case 3. For an element containing objects.
+		(t
+		 (org-export-data
+		  (org-element-normalize-contents
+		   blob
+		   ;; When normalizing contents of the first paragraph
+		   ;; in an item or a footnote definition, ignore
+		   ;; first line's indentation: there is none and it
+		   ;; might be misleading.
+		   (and (eq type 'paragraph)
+			(not (org-export-get-previous-element blob info))
+			(let ((parent (org-export-get-parent blob info)))
+			  (memq (org-element-type parent)
+				'(footnote-definition item)))))
+		  backend info))))
 	      ;; 3. Transcode BLOB into RESULTS string.
 	      (results (cond
 			((not transcoder) nil)
@@ -1884,6 +1889,20 @@ nil.")
 Each filter is called with three arguments: the transcoded table,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-table-cell-functions nil
+  "List of functions applied to a transcoded table-cell.
+Each filter is called with three arguments: the transcoded
+table-cell, as a string, the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
+
+(defvar org-export-filter-table-row-functions nil
+  "List of functions applied to a transcoded table-row.
+Each filter is called with three arguments: the transcoded
+table-row, as a string, the back-end, as a symbol, and the
+communication channel, as a plist.  It must return a string or
+nil.")
 
 (defvar org-export-filter-verse-block-functions nil
   "List of functions applied to a transcoded verse block.
@@ -3140,106 +3159,429 @@ code."
 
 ;;;; For Tables
 
-;; `org-export-table-format-info' extracts formatting information
-;; (alignment, column groups and presence of a special column) from
-;; a raw table and returns it as a property list.
-;;
-;; `org-export-clean-table' cleans the raw table from any Org
-;; table-specific syntax.
+;; `org-export-table-has-special-column-p' and
+;; `org-export-table-row-is-special-p' are predicates used to look for
+;; meta-information about the table structure.
 
-(defun org-export-table-format-info (table)
-  "Extract info from TABLE.
-Return a plist whose properties and values are:
-`:alignment'        vector of strings among \"r\", \"l\" and \"c\",
-`:column-groups'    vector of symbols among `start', `end', `start-end',
-`:row-groups'       list of integers representing row groups.
-`:special-column-p' non-nil if table has a special column.
-`:width'            vector of integers representing desired width of
-		    current column, or nil."
-  (with-temp-buffer
-    (insert table)
-    (goto-char 1)
-    (org-table-align)
-    (let ((align (vconcat (mapcar (lambda (c) (if c "r" "l"))
-				  org-table-last-alignment)))
-	  (width (make-vector (length org-table-last-alignment) nil))
-	  (colgroups (make-vector (length org-table-last-alignment) nil))
-	  (row-group 0)
-	  (rowgroups)
-	  (special-column-p 'empty))
-      (mapc (lambda (row)
-	      (if (string-match "^[ \t]*|[-+]+|[ \t]*$" row)
-		  (incf row-group)
-		;; Determine if a special column is present by looking
-		;; for special markers in the first column.  More
-		;; accurately, the first column is considered special
-		;; if it only contains special markers and, maybe,
-		;; empty cells.
-		(setq special-column-p
-		      (cond
-		       ((not special-column-p) nil)
-		       ((string-match "^[ \t]*| *\\\\?\\([/#!$*_^]\\) *|" row)
-			'special)
-		       ((string-match "^[ \t]*| +|" row) special-column-p))))
-	      (cond
-	       ;; Read forced alignment and width information, if any,
-	       ;; and determine final alignment for the table.
-	       ((org-table-cookie-line-p row)
-		(let ((col 0))
-		  (mapc (lambda (field)
-			  (when (string-match
-				 "<\\([lrc]\\)?\\([0-9]+\\)?>" field)
-			    (let ((align-data (match-string 1 field)))
-			      (when align-data (aset align col align-data)))
-			    (let ((w-data (match-string 2 field)))
-			      (when w-data
-				(aset width col (string-to-number w-data)))))
-			  (incf col))
-			(org-split-string row "[ \t]*|[ \t]*"))))
-	       ;; Read column groups information.
-	       ((org-table-colgroup-line-p row)
-		(let ((col 0))
-		  (mapc (lambda (field)
-			  (aset colgroups col
-				(cond ((string= "<" field) 'start)
-				      ((string= ">" field) 'end)
-				      ((string= "<>" field) 'start-end)))
-			  (incf col))
-			(org-split-string row "[ \t]*|[ \t]*"))))
-	       ;; Contents line.
-	       (t (push row-group rowgroups))))
-	    (org-split-string table "\n"))
-      ;; Return plist.
-      (list :alignment align
-	    :column-groups colgroups
-	    :row-groups (reverse rowgroups)
-	    :special-column-p (eq special-column-p 'special)
-	    :width width))))
+;; `org-export-table-cell-width', `org-export-table-cell-alignment'
+;; and `org-export-table-cell-borders' extract information from
+;; a table-cell element.
 
-(defun org-export-clean-table (table specialp)
-  "Clean string TABLE from its formatting elements.
-Remove any row containing column groups or formatting cookies and
-rows starting with a special marker.  If SPECIALP is non-nil,
-assume the table contains a special formatting column and remove
-it also."
-  (let ((rows (org-split-string table "\n")))
-    (mapconcat 'identity
-	       (delq nil
-		     (mapcar
-		      (lambda (row)
-			(cond
-			 ((org-table-colgroup-line-p row) nil)
-			 ((org-table-cookie-line-p row) nil)
-			 ;; Ignore rows starting with a special marker.
-			 ((string-match "^[ \t]*| *[!_^/$] *|" row) nil)
-			 ;; Remove special column.
-			 ((and specialp
-			       (or (string-match "^\\([ \t]*\\)|-+\\+" row)
-				   (string-match "^\\([ \t]*\\)|[^|]*|" row)))
-			  (replace-match "\\1|" t nil row))
-			 (t row)))
-		      rows))
-	       "\n")))
+;; `org-export-table-dimensions' gives the number on rows and columns
+;; in the table, ignoring horizontal rules and special columns.
+;; `org-export-table-cell-address', given a table-cell object, returns
+;; the absolute address of a cell. On the other hand,
+;; `org-export-get-table-cell-at' does the contrary.
+
+(defun org-export-table-has-special-column-p (table)
+  "Non-nil when TABLE has a special column.
+All special columns will be ignored during export."
+  ;; The table has a special column when every first cell of every row
+  ;; has an empty value or contains a symbol among "/", "#", "!", "$",
+  ;; "*" "_" and "^".  Though, do not consider a first row containing
+  ;; only empty cells as special.
+  (let ((special-column-p 'empty))
+    (catch 'exit
+      (mapc
+       (lambda (row)
+	 (when (eq (org-element-property :type row) 'standard)
+	   (let ((value (org-element-contents
+			 (car (org-element-contents row)))))
+	     (cond ((member value '(("/") ("#") ("!") ("$") ("*") ("_") ("^")))
+		    (setq special-column-p 'special))
+		   ((not value))
+		   (t (throw 'exit nil))))))
+       (org-element-contents table))
+      (eq special-column-p 'special))))
+
+(defun org-export-table-has-header-p (table info)
+  "Non-nil when TABLE has an header.
+
+INFO is a plist used as a communication channel.
+
+A table has an header when it contains at least two row groups."
+  (let ((rowgroup 1) row-flag)
+    (org-element-map
+     table 'table-row
+     (lambda (row)
+       (cond
+	((> rowgroup 1) t)
+	((and row-flag (eq (org-element-property :type row) 'rule))
+	 (incf rowgroup) (setq row-flag nil))
+	((and (not row-flag) (eq (org-element-property :type row) 'standard))
+	 (setq row-flag t) nil)))
+     info)))
+
+(defun org-export-table-row-is-special-p (table-row info)
+  "Non-nil if TABLE-ROW is considered special.
+
+INFO is a plist used as the communication channel.
+
+All special rows will be ignored during export."
+  (when (eq (org-element-property :type table-row) 'standard)
+    (let ((first-cell (org-element-contents
+		       (car (org-element-contents table-row)))))
+      ;; A row is special either when...
+      (or
+       ;; ... it starts with a field only containing "/",
+       (equal first-cell '("/"))
+       ;; ... the table contains a special column and the row start
+       ;; with a marking character among, "^", "_", "$" or "!",
+       (and (org-export-table-has-special-column-p
+	     (org-export-get-parent table-row info))
+	    (member first-cell '(("^") ("_") ("$") ("!"))))
+       ;; ... it contains only alignment cookies and empty cells.
+       (let ((special-row-p 'empty))
+	 (catch 'exit
+	   (mapc
+	    (lambda (cell)
+	      (let ((value (org-element-contents cell)))
+		(cond ((not value))
+		      ((and (not (cdr value))
+			    (string-match "\\`<[lrc]?\\([0-9]+\\)?>\\'"
+					  (car value)))
+		       (setq special-row-p 'cookie))
+		      (t (throw 'exit nil)))))
+	    (org-element-contents table-row))
+	   (eq special-row-p 'cookie)))))))
+
+(defun org-export-table-row-group (table-row info)
+  "Return TABLE-ROW's group.
+
+INFO is a plist used as the communication channel.
+
+Return value is the group number, as an integer, or nil special
+rows and table rules.  Group 1 is also table's header."
+  (unless (or (eq (org-element-property :type table-row) 'rule)
+	      (org-export-table-row-is-special-p table-row info))
+    (let ((group 0) row-flag)
+      (catch 'found
+	(mapc
+	 (lambda (row)
+	   (cond
+	    ((and (eq (org-element-property :type row) 'standard)
+		  (not (org-export-table-row-is-special-p row info)))
+	     (unless row-flag (incf group) (setq row-flag t)))
+	    ((eq (org-element-property :type row) 'rule)
+	     (setq row-flag nil)))
+	   (when (equal table-row row) (throw 'found group)))
+	 (org-element-contents (org-export-get-parent table-row info)))))))
+
+(defun org-export-table-cell-width (table-cell info)
+  "Return TABLE-CELL contents width.
+
+INFO is a plist used as the communication channel.
+
+Return value is the width given by the last width cookie in the
+same column as TABLE-CELL, or nil."
+  (let* ((genealogy (org-export-get-genealogy table-cell info))
+	 (row (car genealogy))
+	 (column (let ((cells (org-element-contents row)))
+		   (- (length cells) (length (member table-cell cells)))))
+	 (table (nth 1 genealogy))
+	 cookie-width)
+    (mapc
+     (lambda (row)
+       (cond
+	;; In a special row, try to find a width cookie at COLUMN.
+	((org-export-table-row-is-special-p row info)
+	 (let ((value (org-element-contents
+		       (elt (org-element-contents row) column))))
+	   (cond
+	    ((not value))
+	    ((and (not (cdr value))
+		  (string-match "\\`<[lrc]?\\([0-9]+\\)?>\\'" (car value))
+		  (match-string 1 (car value)))
+	     (setq cookie-width
+		   (string-to-number (match-string 1 (car value))))))))
+	;; Ignore table rules.
+	((eq (org-element-property :type row) 'rule))))
+     (org-element-contents table))
+    ;; Return value.
+    cookie-width))
+
+(defun org-export-table-cell-alignment (table-cell info)
+  "Return TABLE-CELL contents alignment.
+
+INFO is a plist used as the communication channel.
+
+Return alignment as specified by the last alignment cookie in the
+same column as TABLE-CELL.  If no such cookie is found, a default
+alignment value will be deduced from fraction of numbers in the
+column (see `org-table-number-fraction' for more information).
+Possible values are `left', `right' and `center'."
+  (let* ((genealogy (org-export-get-genealogy table-cell info))
+	 (row (car genealogy))
+	 (column (let ((cells (org-element-contents row)))
+		   (- (length cells) (length (member table-cell cells)))))
+	 (table (nth 1 genealogy))
+	 (number-cells 0)
+	 (total-cells 0)
+	 cookie-align)
+    (mapc
+     (lambda (row)
+       (cond
+	;; In a special row, try to find an alignment cookie at
+	;; COLUMN.
+	((org-export-table-row-is-special-p row info)
+	 (let ((value (org-element-contents
+		       (elt (org-element-contents row) column))))
+	   (cond
+	    ((not value))
+	    ((and (not (cdr value))
+		  (string-match "\\`<\\([lrc]\\)?\\([0-9]+\\)?>\\'"
+				(car value))
+		  (match-string 1 (car value)))
+	     (setq cookie-align (match-string 1 (car value)))))))
+	;; Ignore table rules.
+	((eq (org-element-property :type row) 'rule))
+	;; In a standard row, check if cell's contents are expressing
+	;; some kind of number.  Increase NUMBER-CELLS accordingly.
+	;; Though, don't bother if an alignment cookie has already
+	;; defined cell's alignment.
+	((not cookie-align)
+	 (let ((value (org-element-interpret-secondary
+		       (org-element-contents
+			(elt (org-element-contents row) column)))))
+	   (incf total-cells)
+	   (when (string-match org-table-number-regexp value)
+	     (incf number-cells))))))
+     (org-element-contents table))
+    ;; Return value.  Alignment specified by cookies has precedence
+    ;; over alignment deduced from cells contents.
+    (cond ((equal cookie-align "l") 'left)
+	  ((equal cookie-align "r") 'right)
+	  ((equal cookie-align "c") 'center)
+	  ((>= (/ (float number-cells) total-cells) org-table-number-fraction)
+	   'right)
+	  (t 'left))))
+
+(defun org-export-table-cell-borders (table-cell info)
+  "Return TABLE-CELL borders.
+
+INFO is a plist used as a communication channel.
+
+Return value is a list of symbols, or nil.  Possible values are:
+`top', `bottom', `above', `below', `left' and `right'.  Note:
+`top' (resp. `bottom') only happen for a cell in the first
+row (resp. last row) of the table, ignoring table rules, if any.
+
+Returned borders ignore special rows."
+  (let* ((genealogy (org-export-get-genealogy table-cell info))
+	 (row (car genealogy))
+	 (table (nth 1 genealogy))
+	 borders)
+    ;; Top/above border?  TABLE-CELL has a border above when a rule
+    ;; used to demarcate row groups can be found above.  Hence,
+    ;; finding a rule isn't sufficient to push `above' in BORDERS:
+    ;; another regular row has to be found above that rule.
+    (let (rule-flag)
+      (catch 'exit
+	(mapc (lambda (row)
+		(cond ((eq (org-element-property :type row) 'rule)
+		       (setq rule-flag t))
+		      ((not (org-export-table-row-is-special-p row info))
+		       (if rule-flag (throw 'exit (push 'above borders))
+			 (throw 'exit nil)))))
+	      ;; Look at every row before the current one.
+	      (cdr (member row (reverse (org-element-contents table)))))
+	;; No rule above, or rule found starts the table (ignoring any
+	;; special row): TABLE-CELL is at the top of the table.
+	(when rule-flag (push 'above borders))
+	(push 'top borders)))
+    ;; Bottom/below border? TABLE-CELL has a border below when next
+    ;; non-regular row below is a rule.
+    (let (rule-flag)
+      (catch 'exit
+	(mapc (lambda (row)
+		(cond ((eq (org-element-property :type row) 'rule)
+		       (setq rule-flag t))
+		      ((not (org-export-table-row-is-special-p row info))
+		       (if rule-flag (throw 'exit (push 'below borders))
+			 (throw 'exit nil)))))
+	      ;; Look at every row after the current one.
+	      (cdr (member row (org-element-contents table))))
+	;; No rule below, or rule found ends the table (modulo some
+	;; special row): TABLE-CELL is at the bottom of the table.
+	(when rule-flag (push 'below borders))
+	(push 'bottom borders)))
+    ;; Right/left borders?  They can only be specified by column
+    ;; groups.  Column groups are defined in a row starting with "/".
+    ;; Also a column groups row only contains "<", "<>", ">" or blank
+    ;; cells.
+    (catch 'exit
+      (let ((column (let ((cells (org-element-contents row)))
+		      (- (length cells) (length (member table-cell cells))))))
+	(mapc
+	 (lambda (row)
+	   (unless (eq (org-element-property :type row) 'rule)
+	     (when (equal (org-element-contents
+			   (car (org-element-contents row)))
+			  '("/"))
+	       (let ((column-groups
+		      (mapcar
+		       (lambda (cell)
+			 (let ((value (org-element-contents cell)))
+			   (when (member value '(("<") ("<>") (">") nil))
+			     (car value))))
+		       (org-element-contents row))))
+		 ;; There's a left border when previous cell, if
+		 ;; any, ends a group, or current one starts one.
+		 (when (or (and (not (zerop column))
+				(member (elt column-groups (1- column))
+					'(">" "<>")))
+			   (member (elt column-groups column) '("<" "<>")))
+		   (push 'left borders))
+		 ;; There's a right border when next cell, if any,
+		 ;; starts a group, or current one ends one.
+		 (when (or (and (/= (1+ column) (length column-groups))
+				(member (elt column-groups (1+ column))
+					'("<" "<>")))
+			   (member (elt column-groups column) '(">" "<>")))
+		   (push 'right borders))
+		 (throw 'exit nil)))))
+	 ;; Table rows are read in reverse order so last column groups
+	 ;; row has precedence over any previous one.
+	 (reverse (org-element-contents table)))))
+    ;; Return value.
+    borders))
+
+(defun org-export-table-cell-starts-colgroup-p (table-cell info)
+  "Non-nil when TABLE-CELL is at the beginning of a row group.
+INFO is a plist used as a communication channel."
+  ;; A cell starts a column group either when it is at the beginning
+  ;; of a row (or after the special column, if any) or when it has
+  ;; a left border.
+  (or (equal (org-element-map
+	      (org-export-get-parent table-cell info)
+	      'table-cell 'identity info 'first-match)
+	     table-cell)
+      (memq 'left (org-export-table-cell-borders table-cell info))))
+
+(defun org-export-table-cell-ends-colgroup-p (table-cell info)
+  "Non-nil when TABLE-CELL is at the end of a row group.
+INFO is a plist used as a communication channel."
+  ;; A cell ends a column group either when it is at the end of a row
+  ;; or when it has a right border.
+  (or (equal (car (last (org-element-contents
+			 (org-export-get-parent table-cell info))))
+	     table-cell)
+      (memq 'right (org-export-table-cell-borders table-cell info))))
+
+(defun org-export-table-row-starts-rowgroup-p (table-row info)
+  "Non-nil when TABLE-ROW is at the beginning of a column group.
+INFO is a plist used as a communication channel."
+  (unless (or (eq (org-element-property :type table-row) 'rule)
+	      (org-export-table-row-is-special-p table-row info))
+    (let ((borders (org-export-table-cell-borders
+		    (car (org-element-contents table-row)) info)))
+      (or (memq 'top borders) (memq 'above borders)))))
+
+(defun org-export-table-row-ends-rowgroup-p (table-row info)
+  "Non-nil when TABLE-ROW is at the end of a column group.
+INFO is a plist used as a communication channel."
+  (unless (or (eq (org-element-property :type table-row) 'rule)
+	      (org-export-table-row-is-special-p table-row info))
+    (let ((borders (org-export-table-cell-borders
+		    (car (org-element-contents table-row)) info)))
+      (or (memq 'bottom borders) (memq 'below borders)))))
+
+(defun org-export-table-row-starts-header-p (table-row info)
+  "Non-nil when TABLE-ROW is the first table header's row.
+INFO is a plist used as a communication channel."
+  (and (org-export-table-has-header-p
+	(org-export-get-parent-table table-row info) info)
+       (org-export-table-row-starts-rowgroup-p table-row info)
+       (= (org-export-table-row-group table-row info) 1)))
+
+(defun org-export-table-row-ends-header-p (table-row info)
+  "Non-nil when TABLE-ROW is the last table header's row.
+INFO is a plist used as a communication channel."
+  (and (org-export-table-has-header-p
+	(org-export-get-parent-table table-row info) info)
+       (org-export-table-row-ends-rowgroup-p table-row info)
+       (= (org-export-table-row-group table-row info) 1)))
+
+(defun org-export-table-dimensions (table info)
+  "Return TABLE dimensions.
+
+INFO is a plist used as a communication channel.
+
+Return value is a CONS like (ROWS . COLUMNS) where
+ROWS (resp. COLUMNS) is the number of exportable
+rows (resp. columns)."
+  (let (first-row (columns 0) (rows 0))
+    ;; Set number of rows, and extract first one.
+    (org-element-map
+     table 'table-row
+     (lambda (row)
+       (when (eq (org-element-property :type row) 'standard)
+	 (incf rows)
+	 (unless first-row (setq first-row row)))) info)
+    ;; Set number of columns.
+    (org-element-map first-row 'table-cell (lambda (cell) (incf columns)) info)
+    ;; Return value.
+    (cons rows columns)))
+
+(defun org-export-table-cell-address (table-cell info)
+  "Return address of a regular TABLE-CELL object.
+
+TABLE-CELL is the cell considered.  INFO is a plist used as
+a communication channel.
+
+Address is a CONS cell (ROW . COLUMN), where ROW and COLUMN are
+zero-based index.  Only exportable cells are considered.  The
+function returns nil for other cells."
+  (let* ((table-row (org-export-get-parent table-cell info))
+	 (table (org-export-get-parent-table table-cell info)))
+    ;; Ignore cells in special rows or in special column.
+    (unless (or (org-export-table-row-is-special-p table-row info)
+		(and (org-export-table-has-special-column-p table)
+		     (equal (car (org-element-contents table-row)) table-cell)))
+      (cons
+       ;; Row number.
+       (let ((row-count 0))
+	 (org-element-map
+	  table 'table-row
+	  (lambda (row)
+	    (cond ((eq (org-element-property :type row) 'rule) nil)
+		  ((equal row table-row) row-count)
+		  (t (incf row-count) nil)))
+	  info 'first-match))
+       ;; Column number.
+       (let ((col-count 0))
+	 (org-element-map
+	  table-row 'table-cell
+	  (lambda (cell)
+	    (if (equal cell table-cell) col-count
+	      (incf col-count) nil))
+	  info 'first-match))))))
+
+(defun org-export-get-table-cell-at (address table info)
+  "Return regular table-cell object at ADDRESS in TABLE.
+
+Address is a CONS cell (ROW . COLUMN), where ROW and COLUMN are
+zero-based index.  TABLE is a table type element.  INFO is
+a plist used as a communication channel.
+
+If no table-cell, among exportable cells, is found at ADDRESS,
+return nil."
+  (let ((column-pos (cdr address)) (column-count 0))
+    (org-element-map
+     ;; Row at (car address) or nil.
+     (let ((row-pos (car address)) (row-count 0))
+       (org-element-map
+	table 'table-row
+	(lambda (row)
+	  (cond ((eq (org-element-property :type row) 'rule) nil)
+		((= row-count row-pos) row)
+		(t (incf row-count) nil)))
+	info 'first-match))
+     'table-cell
+     (lambda (cell)
+       (if (= column-count column-pos) cell
+	 (incf column-count) nil))
+     info 'first-match)))
 
 
 ;;;; For Tables Of Contents
@@ -3380,8 +3722,7 @@ as a communication channel."
   (car (org-export-get-genealogy blob info)))
 
 (defun org-export-get-parent-headline (blob info)
-  "Return closest parent headline or nil.
-
+  "Return BLOB parent headline or nil.
 BLOB is the element or object being considered.  INFO is a plist
 used as a communication channel."
   (catch 'exit
@@ -3391,18 +3732,22 @@ used as a communication channel."
     nil))
 
 (defun org-export-get-parent-paragraph (object info)
-  "Return parent paragraph or nil.
-
-INFO is a plist used as a communication channel.
-
-Optional argument OBJECT, when provided, is the object to consider.
-Otherwise, return the paragraph containing current object.
-
-This is useful for objects, which share attributes with the
-paragraph containing them."
+  "Return OBJECT parent paragraph or nil.
+OBJECT is the object to consider.  INFO is a plist used as
+a communication channel."
   (catch 'exit
     (mapc
      (lambda (el) (when (eq (org-element-type el) 'paragraph) (throw 'exit el)))
+     (org-export-get-genealogy object info))
+    nil))
+
+(defun org-export-get-parent-table (object info)
+  "Return OBJECT parent table or nil.
+OBJECT is either a `table-cell' or `table-element' type object.
+INFO is a plist used as a communication channel."
+  (catch 'exit
+    (mapc
+     (lambda (el) (when (eq (org-element-type el) 'table) (throw 'exit el)))
      (org-export-get-genealogy object info))
     nil))
 
