@@ -599,7 +599,14 @@ Outside."
     (goto-line 2)
     (org-element-down)
     (should (looking-at " - Item 1.1")))
-  ;; 3. Otherwise, move inside the greater element.
+  (org-test-with-temp-text "#+NAME: list\n- Item 1"
+    (org-element-down)
+    (should (looking-at " Item 1")))
+  ;; 3. When at a table, move to first row
+  (org-test-with-temp-text "#+NAME: table\n| a | b |"
+    (org-element-down)
+    (should (looking-at " a | b |")))
+  ;; 4. Otherwise, move inside the greater element.
   (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph.\n#+END_CENTER"
     (org-element-down)
     (should (looking-at "Paragraph"))))
