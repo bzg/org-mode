@@ -405,6 +405,17 @@ Otherwise, place it near the end."
   :group 'org-export-e-latex
   :type 'boolean)
 
+(defcustom org-e-latex-table-scientific-notation "%s\\,(%s)"
+  "Format string to display numbers in scientific notation.
+The format should have \"%s\" twice, for mantissa and exponent
+\(i.e. \"%s\\\\times10^{%s}\").
+
+When nil, no transformation is made."
+  :group 'org-export-e-latex
+  :type '(choice
+	  (string :tag "Format string")
+	  (const :tag "No formatting")))
+
 
 ;;;; Drawers
 
@@ -1821,7 +1832,7 @@ contextual information."
 
 ;;;; Table
 
-(defun org-e-latex-table--format-string (table table-info info)
+(defun org-e-latex-table--format-string (table info)
   "Return an appropriate format string for TABLE.
 
 TABLE-INFO is the plist containing format info about the table,
@@ -1837,7 +1848,7 @@ table."
 			  (org-element-property :attr_latex table)
 			  " "))
 	 ;; Determine alignment string.
-	 (alignment (org-e-latex-table--align-string attr table-info))
+	 (alignment (org-e-latex-table--align-string table info))
 	 ;; Determine environment for the table: longtable, tabular...
 	 (table-env (cond
 		     ((not attr) org-e-latex-default-table-environment)
@@ -1868,10 +1879,10 @@ table."
      ;; Longtable.
      ((string= "longtable" table-env)
       (format
-       "\\begin{longtable}{%s}\n%s\n%%s\n%s\\end{longtable}"
+       "\\begin{longtable}{%s}\n%s%%s%s\\end{longtable}"
        alignment
        (if (or (not org-e-latex-table-caption-above) (string= "" caption)) ""
-	 (concat (org-trim caption) "\\\\"))
+	 (concat (org-trim caption) "\\\\\n"))
        (if (or org-e-latex-table-caption-above (string= "" caption)) ""
 	 (concat (org-trim caption) "\\\\\n"))))
      ;; Others.
@@ -1880,7 +1891,7 @@ table."
 		   (format "\\begin{%s}%s\n" float-env placement)
 		   (if org-e-latex-table-caption-above caption "")))
 		(when org-e-latex-tables-centered "\\begin{center}\n")
-		(format "\\begin{%s}%s{%s}\n%%s\n\\end{%s}"
+		(format "\\begin{%s}%s{%s}\n%%s\\end{%s}"
 			table-env
 			(if width (format "{%s}" width) "") alignment table-env)
 		(when org-e-latex-tables-centered "\n\\end{center}")
@@ -1888,141 +1899,148 @@ table."
 		  (concat (if org-e-latex-table-caption-above "" caption)
 			  (format "\n\\end{%s}" float-env))))))))
 
-(defun org-e-latex-table--align-string (attr table-info)
+(defun org-e-latex-table--align-string (table info)
   "Return an appropriate LaTeX alignment string.
-ATTR is a string containing table's LaTeX specific attributes.
-TABLE-INFO is the plist containing format info about the table,
-as returned by `org-export-table-format-info'."
-  (or (and attr
-	   (string-match "\\<align=\\(\\S-+\\)" attr)
-	   (match-string 1 attr))
-      (let* ((align (copy-sequence (plist-get table-info :alignment)))
-	     (colgroups (copy-sequence (plist-get table-info :column-groups)))
-	     (cols (length align))
-	     (separators (make-vector (1+ cols) "")))
-	;; Ignore the first column if it's special.
-	(when (plist-get table-info :special-column-p)
-	  (aset align 0 "") (aset colgroups 0 nil))
-	(let ((col 0))
-	  (mapc (lambda (el)
-		  (let ((gr (aref colgroups col)))
-		    (when (memq gr '(start start-end))
-		      (aset separators col "|"))
-		    (when (memq gr '(end start-end))
-		      (aset separators (1+ col) "|")))
-		  (incf col))
-		align))
-	;; Build the LaTeX specific alignment string.
-	(loop for al across align
-	      for sep across separators
-	      concat (concat sep al) into output
-	      finally return (concat output (aref separators cols))))))
+TABLE is the considered table.  INFO is a plist used as
+a communication channel."
+  (let ((attr (mapconcat 'identity
+			 (org-element-property :attr_latex table)
+			 " ")))
+    (if (and attr (string-match "\\<align=\\(\\S-+\\)" attr))
+	(match-string 1 attr)
+      (let (alignment)
+	;; Extract column groups and alignment from first (non-rule)
+	;; row.
+	(org-element-map
+	 (org-element-map table 'table-row 'identity info 'first-match)
+	 'table-cell
+	 (lambda (cell)
+	   (let ((borders (org-export-table-cell-borders cell info)))
+	     ;; Check left border for the first cell only.
+	     (when (and (memq 'left borders) (not alignment))
+	       (push "|" alignment))
+	     (push (case (org-export-table-cell-alignment cell info)
+		     (left "l")
+		     (right "r")
+		     (center "c"))
+		   alignment)
+	     (when (memq 'right borders) (push "|" alignment))))
+	 info)
+	(apply 'concat (reverse alignment))))))
 
 (defun org-e-latex-table (table contents info)
   "Transcode a TABLE element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((attr (mapconcat #'identity
-			 (org-element-property :attr_latex table)
-			 " "))
-	(raw-table (org-element-property :raw-table table)))
-    (cond
-     ;; Case 1: verbatim table.
-     ((or org-e-latex-tables-verbatim
-	  (and attr (string-match "\\<verbatim\\>" attr)))
-      (format "\\begin{verbatim}\n%s\n\\end{verbatim}"
-	      (org-export-clean-table
-	       raw-table
-	       (plist-get (org-export-table-format-info raw-table)
-			  :special-column-p))))
-     ;; Case 2: table.el table.  Convert it using appropriate tools.
-     ((eq (org-element-property :type table) 'table.el)
-      (require 'table)
-      ;; Ensure "*org-export-table*" buffer is empty.
-      (with-current-buffer (get-buffer-create "*org-export-table*")
-	(erase-buffer))
-      (let ((output (with-temp-buffer
-		      (insert raw-table)
-		      (goto-char 1)
-		      (re-search-forward "^[ \t]*|[^|]" nil t)
-		      (table-generate-source 'latex "*org-export-table*")
-		      (with-current-buffer "*org-export-table*"
-			(org-trim (buffer-string))))))
-	(kill-buffer (get-buffer "*org-export-table*"))
-	;; Remove left out comments.
-	(while (string-match "^%.*\n" output)
-	  (setq output (replace-match "" t t output)))
-	;; When the "rmlines" attribute is provided, remove all hlines
-	;; but the the one separating heading from the table body.
+  (cond
+   ;; Case 1: verbatim table.
+   ((or org-e-latex-tables-verbatim
+	(let ((attr (mapconcat 'identity
+			       (org-element-property :attr_latex table)
+			       " ")))
+	  (and attr (string-match "\\<verbatim\\>" attr))))
+    (format "\\begin{verbatim}\n%s\n\\end{verbatim}"
+	    ;; Re-create table, without affiliated keywords.
+	    (org-trim
+	     (org-element-interpret-data
+	      `(org-data nil (table nil ,@(org-element-contents table)))))))
+   ;; Case 2: table.el table.  Convert it using appropriate tools.
+   ((eq (org-element-property :type table) 'table.el)
+    (require 'table)
+    ;; Ensure "*org-export-table*" buffer is empty.
+    (with-current-buffer (get-buffer-create "*org-export-table*")
+      (erase-buffer))
+    (let ((output (with-temp-buffer
+		    (insert (org-element-property :value table))
+		    (goto-char 1)
+		    (re-search-forward "^[ \t]*|[^|]" nil t)
+		    (table-generate-source 'latex "*org-export-table*")
+		    (with-current-buffer "*org-export-table*"
+		      (org-trim (buffer-string))))))
+      (kill-buffer (get-buffer "*org-export-table*"))
+      ;; Remove left out comments.
+      (while (string-match "^%.*\n" output)
+	(setq output (replace-match "" t t output)))
+      ;; When the "rmlines" attribute is provided, remove all hlines
+      ;; but the the one separating heading from the table body.
+      (let ((attr (mapconcat 'identity
+			     (org-element-property :attr_latex table)
+			     " ")))
 	(when (and attr (string-match "\\<rmlines\\>" attr))
 	  (let ((n 0) (pos 0))
 	    (while (and (< (length output) pos)
 			(setq pos (string-match "^\\\\hline\n?" output pos)))
 	      (incf n)
 	      (unless (= n 2)
-		(setq output (replace-match "" nil nil output))))))
-	(if (not org-e-latex-tables-centered) output
-	  (format "\\begin{center}\n%s\n\\end{center}" output))))
-     ;; Case 3: Standard table.
-     (t
-      (let* ((table-info (org-export-table-format-info raw-table))
-	     (columns-number (length (plist-get table-info :alignment)))
-	     (longtablep (and attr (string-match "\\<longtable\\>" attr)))
-	     (booktabsp
-	      (or (and attr (string-match "\\<booktabs=\\(yes\\|t\\)\\>" attr))
-		  org-e-latex-tables-booktabs))
-	     ;; CLEAN-TABLE is a table turned into a list, much like
-	     ;; `org-table-to-lisp', with special column and
-	     ;; formatting cookies removed, and cells already
-	     ;; transcoded.
-	     (clean-table
-	      (mapcar
-	       (lambda (row)
-		 (if (string-match org-table-hline-regexp row) 'hline
-		   (mapcar
-		    (lambda (cell)
-		      (org-export-secondary-string
-		       (org-element-parse-secondary-string
-			cell
-			(cdr (assq 'table org-element-string-restrictions)))
-		       'e-latex info))
-		    (org-split-string row "[ \t]*|[ \t]*"))))
-	       (org-split-string
-		(org-export-clean-table
-		 raw-table (plist-get table-info :special-column-p))
-		"\n"))))
-	;; If BOOKTABSP is non-nil, remove any rule at the beginning
-	;; and the end of the table, since booktabs' special rules
-	;; will be inserted instead.
-	(when booktabsp
-	  (when (eq (car clean-table) 'hline)
-	    (setq clean-table (cdr clean-table)))
-	  (when (eq (car (last clean-table)) 'hline)
-	    (setq clean-table (butlast clean-table))))
-	;; Convert ROWS to send them to `orgtbl-to-latex'.  In
-	;; particular, send each cell to
-	;; `org-element-parse-secondary-string' to expand any Org
-	;; object within.  Eventually, flesh the format string out
-	;; with the table.
-	(format
-	 (org-e-latex-table--format-string table table-info info)
-	 (orgtbl-to-latex
-	  clean-table
-	  ;; Parameters passed to `orgtbl-to-latex'.
-	  `(:tstart ,(and booktabsp "\\toprule")
-		    :tend ,(and booktabsp "\\bottomrule")
-		    :hline ,(if booktabsp "\\midrule" "\\hline")
-		    ;; Longtable environment requires specific header
-		    ;; lines end string.
-		    :hlend ,(and longtablep
-				 (format "\\\\
-%s
+		(setq output (replace-match "" nil nil output)))))))
+      (if (not org-e-latex-tables-centered) output
+	(format "\\begin{center}\n%s\n\\end{center}" output))))
+   ;; Case 3: Standard table.
+   (t (format (org-e-latex-table--format-string table info) contents))))
+
+
+;;;; Table Cell
+
+(defun org-e-latex-table-cell (table-cell contents info)
+  "Transcode a TABLE-CELL element from Org to LaTeX.
+CONTENTS is the cell contents.  INFO is a plist used as
+a communication channel."
+  (concat (if (and contents
+		   org-e-latex-table-scientific-notation
+		   (string-match orgtbl-exp-regexp contents))
+	      ;; Use appropriate format string for scientific
+	      ;; notation.
+	      (format org-e-latex-table-scientific-notation
+		      (match-string 1 contents)
+		      (match-string 2 contents))
+	    contents)
+	  (when (org-export-get-next-element table-cell info) " & ")))
+
+
+;;;; Table Row
+
+(defun org-e-latex-table-row (table-row contents info)
+  "Transcode a TABLE-ROW element from Org to LaTeX.
+CONTENTS is the contents of the row.  INFO is a plist used as
+a communication channel."
+  ;; Rules are ignored since table separators are deduced from
+  ;; borders of the current row.
+  (when (eq (org-element-property :type table-row) 'standard)
+    (let* ((attr (mapconcat 'identity
+			    (org-element-property
+			     :attr_latex (org-export-get-parent table-row info))
+			    " "))
+	   (longtablep (and attr (string-match "\\<longtable\\>" attr)))
+	   (booktabsp
+	    (or (and attr (string-match "\\<booktabs=\\(yes\\|t\\)\\>" attr))
+		org-e-latex-tables-booktabs))
+	   ;; TABLE-ROW's borders are extracted from its first cell.
+	   (borders
+	    (org-export-table-cell-borders
+	     (car (org-element-contents table-row)) info)))
+      (concat
+       ;; When BOOKTABS are activated enforce top-rule even when no
+       ;; hline was specifically marked.
+       (cond ((and booktabsp (memq 'top borders)) "\\toprule\n")
+	     ((and (memq 'top borders) (memq 'above borders)) "\\hline\n"))
+       contents "\\\\\n"
+       (cond
+	;; Special case for long tables. Define header and footers.
+	((and longtablep (org-export-table-row-ends-header-p table-row info))
+	 (format "%s
 \\endhead
-%s\\multicolumn{%d}{r}{Continued on next page}\\\\
+%s\\multicolumn{%d}{r}{Continued on next page} \\\\
 \\endfoot
 \\endlastfoot"
-					 (if booktabsp "\\midrule" "\\hline")
-					 (if booktabsp "\\midrule" "\\hline")
-					 columns-number))))))))))
+		 (if booktabsp "\\midrule" "\\hline")
+		 (if booktabsp "\\midrule" "\\hline")
+		 ;; Number of columns.
+		 (cdr (org-export-table-dimensions
+		       (org-export-get-parent-table table-row info) info))))
+	;; When BOOKTABS are activated enforce bottom rule even when
+	;; no hline was specifically marked.
+	((and booktabsp (memq 'bottom borders)) "\\bottomrule")
+	((and (memq 'bottom borders) (memq 'below borders)) "\\hline")
+	((memq 'below borders) (if booktabsp "\\midrule" "\\hline")))))))
 
 
 ;;;; Target
