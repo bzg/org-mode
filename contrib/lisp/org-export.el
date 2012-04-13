@@ -652,7 +652,6 @@ standard mode."
 
 ;; 1. Environment options are collected once at the very beginning of
 ;;    the process, out of the original buffer and configuration.
-;;    Associated to the parse tree, they make an Org closure.
 ;;    Collecting them is handled by `org-export-get-environment'
 ;;    function.
 ;;
@@ -891,6 +890,7 @@ standard mode."
 ;; increasing precedence order:
 ;;
 ;; - Global variables,
+;; - Buffer's attributes,
 ;; - Options keyword symbols,
 ;; - Buffer keywords,
 ;; - Subtree properties.
@@ -901,14 +901,11 @@ standard mode."
 ;; the different sources.
 
 ;;  The internal functions doing the retrieval are:
-;;  `org-export-parse-option-keyword' ,
-;;  `org-export-get-subtree-options' ,
-;;  `org-export-get-inbuffer-options' and
-;;  `org-export-get-global-options'.
-;;
-;;  Some properties, which do not rely on the previous sources but
-;;  still depend on the original buffer, are taken care of with
-;;  `org-export-initial-options'.
+;;  `org-export-get-global-options',
+;;  `org-export-get-buffer-attributes',
+;;  `org-export-parse-option-keyword',
+;;  `org-export-get-subtree-options' and
+;;  `org-export-get-inbuffer-options'
 
 ;; Also, `org-export-confirm-letbind' and `org-export-install-letbind'
 ;; take care of the part relative to "#+BIND:" keywords.
@@ -931,13 +928,8 @@ inferior to file-local settings."
   (let ((options (org-combine-plists
 		  ;; ... from global variables...
 		  (org-export-get-global-options backend)
-		  ;; ... from buffer's name (default title)...
-		  `(:title
-		    ,(or (let ((file (buffer-file-name (buffer-base-buffer))))
-			   (and file
-				(file-name-sans-extension
-				 (file-name-nondirectory file))))
-			 (buffer-name (buffer-base-buffer))))
+		  ;; ... from buffer's attributes...
+		  (org-export-get-buffer-attributes)
 		  ;; ... from an external property list...
 		  ext-plist
 		  ;; ... from in-buffer settings...
@@ -947,8 +939,6 @@ inferior to file-local settings."
 			(org-remove-double-quotes buffer-file-name)))
 		  ;; ... and from subtree, when appropriate.
 		  (and subtreep (org-export-get-subtree-options)))))
-    ;; Add initial options.
-    (setq options (append (org-export-initial-options) options))
     ;; Return plist.
     options))
 
@@ -1140,6 +1130,32 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
      ;; 3. Return final value.
      plist)))
 
+(defun org-export-get-buffer-attributes ()
+  "Return properties related to buffer attributes, as a plist."
+  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+    (list
+     ;; Store full path of input file name, or nil.  For internal use.
+     :input-file visited-file
+     :title (or (and visited-file
+		     (file-name-sans-extension
+		      (file-name-nondirectory visited-file)))
+		(buffer-name (buffer-base-buffer)))
+     :macro-modification-time
+     (and visited-file
+	  (file-exists-p visited-file)
+	  (concat "(eval (format-time-string \"$1\" '"
+		  (prin1-to-string (nth 5 (file-attributes visited-file)))
+		  "))"))
+     ;; Store input file name as a macro.
+     :macro-input-file (and visited-file (file-name-nondirectory visited-file))
+     ;; `:macro-date', `:macro-time' and `:macro-property' could as
+     ;; well be initialized as tree properties, since they don't
+     ;; depend on buffer properties.  Though, it may be more logical
+     ;; to keep them close to other ":macro-" properties.
+     :macro-date "(eval (format-time-string \"$1\"))"
+     :macro-time "(eval (format-time-string \"$1\"))"
+     :macro-property "(eval (org-entry-get nil \"$1\" 'selective))")))
+
 (defun org-export-get-global-options (&optional backend)
   "Return global export options as a plist.
 
@@ -1159,50 +1175,46 @@ process."
     ;; Return value.
     plist))
 
-(defun org-export-initial-options ()
-  "Return a plist with properties related to input buffer."
-  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-    (list
-     ;; Store full path of input file name, or nil.  For internal use.
-     :input-file visited-file
-     ;; `:macro-date', `:macro-time' and `:macro-property' could as well
-     ;; be initialized as tree properties, since they don't depend on
-     ;; initial environment.  Though, it may be more logical to keep
-     ;; them close to other ":macro-" properties.
-     :macro-date "(eval (format-time-string \"$1\"))"
-     :macro-time "(eval (format-time-string \"$1\"))"
-     :macro-property "(eval (org-entry-get nil \"$1\" 'selective))"
-     :macro-modification-time
-     (and visited-file
-	  (file-exists-p visited-file)
-	  (concat "(eval (format-time-string \"$1\" '"
-		  (prin1-to-string (nth 5 (file-attributes visited-file)))
-		  "))"))
-     ;; Store input file name as a macro.
-     :macro-input-file (and visited-file (file-name-nondirectory visited-file))
-     ;; Footnotes definitions must be collected in the original buffer,
-     ;; as there's no insurance that they will still be in the parse
-     ;; tree, due to some narrowing.
-     :footnote-definition-alist
-     (let (alist)
-       (org-with-wide-buffer
-	(goto-char (point-min))
-	(while (re-search-forward org-footnote-definition-re nil t)
-	  (let ((def (org-footnote-at-definition-p)))
-	    (when def
-	      (org-skip-whitespace)
-	      (push (cons (car def)
-			  (save-restriction
-			    (narrow-to-region (point) (nth 2 def))
-			    ;; Like `org-element-parse-buffer', but
-			    ;; makes sure the definition doesn't start
-			    ;; with a section element.
-			    (nconc
-			     (list 'org-data nil)
-			     (org-element-parse-elements
-			      (point-min) (point-max) nil nil nil nil nil))))
-		    alist))))
-	alist)))))
+(defun org-export-store-footnote-definitions (info)
+  "Collect and store footnote definitions from current buffer in INFO.
+
+INFO is a plist containing export options.
+
+Footnotes definitions are stored as a alist whose CAR is
+footnote's label, as a string, and CDR the contents, as a parse
+tree.  This alist will be consed to the value of
+`:footnote-definition-alist' in INFO, if any.
+
+The new plist is returned; use
+
+  \(setq info (org-export-store-footnote-definitions info))
+
+to be sure to use the new value.  INFO is modified by side
+effects."
+  ;; Footnotes definitions must be collected in the original buffer,
+  ;; as there's no insurance that they will still be in the parse
+  ;; tree, due to some narrowing.
+  (plist-put
+   info :footnote-definition-alist
+   (let ((alist (plist-get info :footnote-definition-alist)))
+     (org-with-wide-buffer
+      (goto-char (point-min))
+      (while (re-search-forward org-footnote-definition-re nil t)
+	(let ((def (org-footnote-at-definition-p)))
+	  (when def
+	    (org-skip-whitespace)
+	    (push (cons (car def)
+			(save-restriction
+			  (narrow-to-region (point) (nth 2 def))
+			  ;; Like `org-element-parse-buffer', but makes
+			  ;; sure the definition doesn't start with
+			  ;; a section element.
+			  (nconc
+			   (list 'org-data nil)
+			   (org-element-parse-elements
+			    (point-min) (point-max) nil nil nil nil nil))))
+		  alist))))
+      alist))))
 
 (defvar org-export-allow-BIND-local nil)
 (defun org-export-confirm-letbind ()
@@ -2078,54 +2090,60 @@ to be expanded and Babel code to be executed.
 Return code as a string."
   (save-excursion
     (save-restriction
-      (let (info tree)
-	;; Narrow buffer to an appropriate region or subtree for
-	;; parsing.  If parsing subtree, be sure to remove main
-	;; headline too.
-	(cond ((org-region-active-p)
-	       (narrow-to-region (region-beginning) (region-end)))
-	      (subtreep
-	       (org-narrow-to-subtree)
-	       (goto-char (point-min))
-	       (forward-line)
-	       (narrow-to-region (point) (point-max))))
-	;; 1. Get export environment and tree.  Environment is
-	;;    relative to the buffer being parsed, which isn't always
-	;;    the original one, depending on the NOEXPAND value.
+      ;; Narrow buffer to an appropriate region or subtree for
+      ;; parsing.  If parsing subtree, be sure to remove main headline
+      ;; too.
+      (cond ((org-region-active-p)
+	     (narrow-to-region (region-beginning) (region-end)))
+	    (subtreep
+	     (org-narrow-to-subtree)
+	     (goto-char (point-min))
+	     (forward-line)
+	     (narrow-to-region (point) (point-max))))
+      ;; 1. Get export environment from original buffer.  Store
+      ;;    original footnotes definitions in communication channel as
+      ;;    they might not be accessible anymore in a narrowed parse
+      ;;    tree.  Also install user's and developer's filters.
+      (let ((info (org-export-install-filters
+		   backend
+		   (org-export-store-footnote-definitions
+		    (org-export-get-environment backend subtreep ext-plist))))
+	    tree)
+	;; 2. Get parse tree.
 	(if noexpand
 	    ;; If NOEXPAND is non-nil, simply parse current visible
-	    ;; part of buffer and retrieve environment from original
-	    ;; buffer.
-	    (setq info (org-export-get-environment backend subtreep ext-plist)
-		  tree (org-element-parse-buffer nil visible-only))
+	    ;; part of buffer.
+	    (setq tree (org-element-parse-buffer nil visible-only))
 	  ;; Otherwise, buffer isn't parsed directly.  Instead,
 	  ;; a temporary copy is created, where include keywords are
-	  ;; expanded and code blocks are evaluated.  Environment is
-	  ;; retrieved from that buffer.  Moreover, save original file
-	  ;; name or buffer in order to properly resolve babel block
-	  ;; expansion when body is outside scope.
+	  ;; expanded and code blocks are evaluated.
 	  (let ((buf (or (buffer-file-name (buffer-base-buffer))
 			 (current-buffer))))
 	    (org-export-with-current-buffer-copy
 	     (org-export-expand-include-keyword)
+	     ;; Setting `org-current-export-file' is required by Org
+	     ;; Babel to properly resolve noweb references.
 	     (let ((org-current-export-file buf))
 	       (org-export-blocks-preprocess))
-	     (setq info (org-export-get-environment backend subtreep ext-plist)
-		   tree (org-element-parse-buffer nil visible-only)))))
-	;; 2. Install user's and developer's filters in communication
-	;;    channel.  Then call parse-tree filters to get the final
-	;;    tree.
-	(setq info (org-export-install-filters backend info))
+	     (setq tree (org-element-parse-buffer nil visible-only)
+		   ;; Footnote definitions must be stored again, since
+		   ;; buffer's expansion might have modified
+		   ;; boundaries of footnote definitions contained in
+		   ;; the parse tree.  This way, definitions in
+		   ;; `footnote-definition-alist' are bound to
+		   ;; coincide with those in the parse tree.
+		   info (org-export-store-footnote-definitions info)))))
+	;; 3. Call parse-tree filters to get the final tree.
 	(setq tree
 	      (org-export-filter-apply-functions
 	       (plist-get info :filter-parse-tree) tree backend info))
-	;; 3. Now tree is complete, compute its properties and add
+	;; 4. Now tree is complete, compute its properties and add
 	;;    them to communication channel.
 	(setq info
 	      (org-combine-plists
 	       info
 	       (org-export-collect-tree-properties tree info backend)))
-	;; 4. Eventually transcode TREE.  Wrap the resulting string
+	;; 5. Eventually transcode TREE.  Wrap the resulting string
 	;;    into a template, if required.  Eventually call
 	;;    final-output filter.
 	(let* ((body (org-element-normalize-string

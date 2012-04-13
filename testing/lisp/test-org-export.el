@@ -338,10 +338,8 @@ body\n")))
     (org-test-with-temp-text
 	"Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
       (let* ((tree (org-element-parse-buffer))
-	     (info (org-combine-plists
-		    (org-export-initial-options) '(:with-footnotes t))))
-	(setq info (org-combine-plists
-		    info (org-export-collect-tree-properties tree info 'test)))
+	     (info (org-export-store-footnote-definitions
+		    `(:parse-tree ,tree :with-footnotes t))))
 	(should
 	 (equal
 	  '((1 . "A") (2 . "B") (3 . "C") (4 . "D"))
@@ -358,10 +356,8 @@ body\n")))
     (org-test-with-temp-text
 	"Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
       (let* ((tree (org-element-parse-buffer))
-	     (info (org-combine-plists
-		    (org-export-initial-options) '(:with-footnotes t))))
-	(setq info (org-combine-plists
-		    info (org-export-collect-tree-properties tree info 'test)))
+	     (info (org-export-store-footnote-definitions
+		    `(:parse-tree ,tree :with-footnotes t))))
 	(should
 	 (equal
 	  '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
@@ -377,10 +373,8 @@ body\n")))
       ;; Hide definitions.
       (narrow-to-region (point) (point-at-eol))
       (let* ((tree (org-element-parse-buffer))
-	     (info (org-combine-plists
-		    (org-export-initial-options) '(:with-footnotes t))))
-	(setq info (org-combine-plists
-		    info (org-export-collect-tree-properties tree info 'test)))
+	     (info (org-export-store-footnote-definitions
+		    `(:parse-tree ,tree :with-footnotes t))))
 	;; Both footnotes should be seen.
 	(should
 	 (= (length (org-export-collect-footnote-definitions tree info)) 2))))
@@ -390,13 +384,23 @@ body\n")))
 \[fn:2] B [fn:3] [fn::D].
 
 \[fn:3] C."
-      (let ((tree (org-element-parse-buffer))
-	    (info (org-combine-plists
-		   (org-export-initial-options) '(:with-footnotes t))))
-	(setq info (org-combine-plists
-		    info (org-export-collect-tree-properties tree info 'test)))
+      (let* ((tree (org-element-parse-buffer))
+	     (info (org-export-store-footnote-definitions
+		    `(:parse-tree ,tree :with-footnotes t))))
 	(should (= (length (org-export-collect-footnote-definitions tree info))
-		   4))))))
+		   4))))
+    ;; 5. Test export of footnotes defined outside parsing scope.
+    (org-test-with-temp-text "[fn:1] Out of scope
+* Title
+Paragraph[fn:1]"
+      (org-test-with-backend "test"
+	(flet ((org-test-footnote-reference
+		(fn-ref contents info)
+		(org-element-interpret-data
+		 (org-export-get-footnote-definition fn-ref info))))
+	  (forward-line)
+	  (should (equal "ParagraphOut of scope\n"
+			 (org-export-as 'test 'subtree))))))))
 
 
 
@@ -408,9 +412,7 @@ body\n")))
   (org-test-with-temp-text
       "Paragraph.\n#+TARGET: Test\n[[Test]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should-not
        (org-element-map
 	tree 'link
@@ -421,9 +423,7 @@ body\n")))
   (org-test-with-temp-text
       "Paragraph.\n* Head1\n* Head2\n* Head3\n[[Head2]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        ;; Note: Headline's number is in fact a list of numbers.
        (equal '(2)
@@ -436,9 +436,7 @@ body\n")))
   (org-test-with-temp-text
       "- Item1\n  - Item11\n  - <<test>>Item12\n- Item2\n\n\n[[test]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        ;; Note: Item's number is in fact a list of numbers.
        (equal '(1 2)
@@ -452,9 +450,7 @@ body\n")))
   (org-test-with-temp-text
       "Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        (equal '(2 3)
 	      (org-element-map
@@ -467,9 +463,7 @@ body\n")))
   (org-test-with-temp-text
       "#+NAME: tbl1\n|1|2|\n#+NAME: tbl2\n|3|4|\n#+NAME: tbl3\n|5|6|\n[[tbl2]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        (= 2
 	  (org-element-map
@@ -482,9 +476,7 @@ body\n")))
   (org-test-with-temp-text
       "* Head1\n* Head2\nParagraph<<target>>\n* Head3\n[[target]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        (equal '(2)
 	      (org-element-map
