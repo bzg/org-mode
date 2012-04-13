@@ -57,7 +57,9 @@
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-trim "org" (s))
+(declare-function org-skip-whitespace "org" ())
 (declare-function outline-next-heading "outline")
+(declare-function org-skip-whitespace "org" ())
 
 (defvar org-outline-regexp-bol)		; defined in org.el
 (defvar org-odd-levels-only)		; defined in org.el
@@ -276,9 +278,7 @@ otherwise."
 			      (concat org-outline-regexp-bol "\\|"
 				      org-footnote-definition-re "\\|"
 				      "^[ \t]*$") bound 'move))
-			   (progn (goto-char (match-beginning 0))
-				  (org-skip-whitespace)
-				  (point-at-bol))
+			   (match-beginning 0)
 			 (point)))))
 	    (list label beg end
 		  (org-trim (buffer-substring-no-properties beg-def end)))))))))
@@ -703,7 +703,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
 				     (org-combine-plists
 				      export-props
 				      '(:todo-keywords t :tags t :priority t))))
-				(org-export-preprocess-string def parameters))
+				(apply #'org-export-preprocess-string def parameters))
 			    def)
 			  ;; Reference beginning position is a marker
 			  ;; to preserve it during further buffer
@@ -863,8 +863,13 @@ Return the number of footnotes removed."
 	  (ndef 0))
       (while (re-search-forward def-re nil t)
 	(let ((full-def (org-footnote-at-definition-p)))
-	  (delete-region (nth 1 full-def) (nth 2 full-def)))
-	(incf ndef))
+	  (when full-def
+	    ;; Remove the footnote, and all blank lines before it.
+	    (goto-char (nth 1 full-def))
+	    (skip-chars-backward " \r\t\n")
+	    (unless (bolp) (forward-line))
+	    (delete-region (point) (nth 2 full-def))
+	    (incf ndef))))
       ndef)))
 
 (defun org-footnote-delete (&optional label)

@@ -809,6 +809,8 @@ version."
       (setq umax-toc (if (integerp org-export-with-toc)
 			 (min org-export-with-toc umax)
 		       umax))
+      (setq org-lparse-opt-plist
+	    (plist-put org-lparse-opt-plist :headline-levels  umax))
 
       (when (and org-export-with-toc (not body-only))
 	(setq lines (org-lparse-prepare-toc
@@ -844,48 +846,6 @@ version."
 					 (car lines))))
 	      (org-lparse-end-environment 'fixedwidth))
 	    (throw 'nextline nil))
-
-	  ;; Notes: The baseline version of org-html.el (git commit
-	  ;; 3d802e), while encountering a *line-long* protected text,
-	  ;; does one of the following two things based on the state
-	  ;; of the export buffer.
-
-	  ;; 1. If a paragraph element has just been opened and
-	  ;;    contains only whitespace as content, insert the
-	  ;;    protected text as part of the previous paragraph.
-
-	  ;; 2. If the paragraph element has already been opened and
-	  ;;    contains some valid content insert the protected text
-	  ;;    as part of the current paragraph.
-
-	  ;; I think --->
-
-	  ;; Scenario 1 mentioned above kicks in when a block of
-	  ;; protected text has to be inserted en bloc. For example,
-	  ;; this happens, when inserting an source or example block
-	  ;; or preformatted content enclosed in #+backend,
-	  ;; #+begin_backend ... #+end_backend)
-
-	  ;; Scenario 2 mentioned above kicks in when the protected
-	  ;; text is part of a running sentence. For example this
-	  ;; happens in the case of an *multiline* LaTeX equation that
-	  ;; needs to be inserted verbatim.
-
-	  ;; org-html.el in the master branch seems to do some
-	  ;; jugglery by moving paragraphs around. Inorder to make
-	  ;; these changes backend-agnostic introduce a new text
-	  ;; property org-native-text and impose the added semantics
-	  ;; that these protected blocks appear outside of a
-	  ;; conventional paragraph element.
-	  ;;
-	  ;; Extra Note: Check whether org-example and org-native-text
-	  ;; are entirely equivalent.
-
-	  ;; Fixes bug reported by Christian Moe concerning verbatim
-	  ;; LaTeX fragments.
-	  ;; on git commit 533ba3f90250a1f25f494c390d639ea6274f235c
-	  ;; http://repo.or.cz/w/org-mode/org-jambu.git/shortlog/refs/heads/staging
-	  ;; See http://lists.gnu.org/archive/html/emacs-orgmode/2011-03/msg01379.html
 
 	  ;; Native Text
 	  (when (and (get-text-property 0 'org-native-text line)
@@ -1261,7 +1221,11 @@ for formatting.  This is required for the DocBook exporter."
     ;; column and the special lines
     (setq lines (org-table-clean-before-export lines)))
   (let* ((caption (org-find-text-property-in-string 'org-caption (car lines)))
+	 (short-caption (or (org-find-text-property-in-string
+			     'org-caption-shortn (car lines)) caption))
 	 (caption (and caption (org-xml-encode-org-text caption)))
+	 (short-caption (and short-caption
+			     (org-xml-encode-plain-text short-caption)))
 	 (label (org-find-text-property-in-string 'org-label (car lines)))
 	 (org-lparse-table-colalign-info (org-lparse-table-get-colalign-info lines))
 	 (attributes (org-find-text-property-in-string 'org-attributes
@@ -1272,11 +1236,13 @@ for formatting.  This is required for the DocBook exporter."
 			       (cdr lines))))))
     (setq lines (org-lparse-org-table-to-list-table lines splice))
     (org-lparse-insert-list-table
-     lines splice caption label attributes head org-lparse-table-colalign-info)))
+     lines splice caption label attributes head org-lparse-table-colalign-info
+     short-caption)))
 
 (defun org-lparse-insert-list-table (lines &optional splice
 					      caption label attributes head
-					      org-lparse-table-colalign-info)
+					      org-lparse-table-colalign-info
+					      short-caption)
   (or (featurep 'org-table)		; required for
       (require 'org-table))		; `org-table-number-regexp'
   (let* ((org-lparse-table-rownum -1) org-lparse-table-ncols i (cnt 0)
@@ -1296,7 +1262,7 @@ for formatting.  This is required for the DocBook exporter."
 	(insert (org-lparse-format-table-row line) "\n")))
      (t
       (setq org-lparse-table-is-styled t)
-      (org-lparse-begin 'TABLE caption label attributes)
+      (org-lparse-begin 'TABLE caption label attributes short-caption)
       (setq org-lparse-table-begin-marker (point))
       (org-lparse-begin-table-rowgroup head)
       (while (setq line (pop lines))
@@ -1327,13 +1293,14 @@ But it has the disadvantage, that no cell- or row-spanning is allowed."
 	     (org-lparse-table-cur-rowgrp-is-hdr
 	      org-export-highlight-first-table-line)
 	     (caption nil)
+	     (short-caption nil)
 	     (attributes nil)
 	     (label nil)
 	     (org-lparse-table-style 'table-table)
 	     (org-lparse-table-is-styled nil)
 	     fields org-lparse-table-ncols i (org-lparse-table-rownum -1)
 	     (empty (org-lparse-format 'SPACES 1)))
-    (org-lparse-begin 'TABLE caption label attributes)
+    (org-lparse-begin 'TABLE caption label attributes short-caption)
     (while (setq line (pop lines))
       (cond
        ((string-match "^[ \t]*\\+-" line)

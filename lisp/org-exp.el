@@ -194,12 +194,27 @@ This option can also be set with the +OPTIONS line, e.g. \"-:nil\"."
     ("hu" "Szerz&otilde;" "D&aacute;tum" "Tartalomjegyz&eacute;k" "L&aacute;bjegyzet")
     ("is" "H&ouml;fundur" "Dagsetning" "Efnisyfirlit" "Aftanm&aacute;lsgreinar")
     ("it" "Autore"     "Data"  "Indice" "Note a pi&egrave; di pagina")
+    ;; Use numeric character entities for proper rendering of non-UTF8 documents
+    ;; ("ja" "著者"       "日付"  "目次"          "脚注")
+    ("ja" "&#33879;&#32773;" "&#26085;&#20184;" "&#30446;&#27425;" "&#33050;&#27880;")
     ("nl" "Auteur"     "Datum" "Inhoudsopgave" "Voetnoten")
     ("no" "Forfatter"  "Dato"  "Innhold" "Fotnoter")
     ("nb" "Forfatter"  "Dato"  "Innhold" "Fotnoter")  ;; nb = Norsk (bokm.l)
     ("nn" "Forfattar"  "Dato"  "Innhald" "Fotnotar")  ;; nn = Norsk (nynorsk)
     ("pl" "Autor"      "Data" "Spis tre&#x015b;ci"  "Przypis")
-    ("sv" "F&ouml;rfattare" "Datum" "Inneh&aring;ll" "Fotnoter"))
+    ;; Use numeric character entities for proper rendering of non-UTF8 documents
+    ;; ("ru" "Автор"      "Дата"  "Содержание" "Сноски")
+    ("ru" "&#1040;&#1074;&#1090;&#1086;&#1088;"      "&#1044;&#1072;&#1090;&#1072;"  "&#1057;&#1086;&#1076;&#1077;&#1088;&#1078;&#1072;&#1085;&#1080;&#1077;" "&#1057;&#1085;&#1086;&#1089;&#1082;&#1080;")
+    ("sv" "F&ouml;rfattare" "Datum" "Inneh&aring;ll" "Fotnoter")
+    ;; Use numeric character entities for proper rendering of non-UTF8 documents
+    ;; ("uk" "Автор" "Дата" "Зміст" "Примітки")
+    ("uk" "&#1040;&#1074;&#1090;&#1086;&#1088;" "&#1044;&#1072;&#1090;&#1072;" "&#1047;&#1084;&#1110;&#1089;&#1090;" "&#1055;&#1088;&#1080;&#1084;&#1110;&#1090;&#1082;&#1080;")
+    ;; Use numeric character entities for proper rendering of non-UTF8 documents
+    ;; ("zh-CN" "作者" "日期" "目录" "脚注")
+    ("zh-CN" "&#20316;&#32773;" "&#26085;&#26399;" "&#30446;&#24405;" "&#33050;&#27880;")
+    ;; Use numeric character entities for proper rendering of non-UTF8 documents
+    ;; ("zh-TW" "作者" "日期" "目錄" "腳註")
+    ("zh-TW" "&#20316;&#32773;" "&#26085;&#26399;" "&#30446;&#37636;" "&#33139;&#35387;"))
   "Terms used in export text, translated to different languages.
 Use the variable `org-export-default-language' to set the language,
 or use the +OPTION lines for a per-file setting."

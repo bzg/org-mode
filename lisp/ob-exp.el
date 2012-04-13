@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
 
-;; Author: Eric Schulte
+;; Authors: Eric Schulte
 ;;	Dan Davison
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
@@ -113,15 +113,6 @@ none ----- do not display either code or results upon export"
 		    (if (boundp lang-headers) (eval lang-headers) nil)
 		    raw-params))))
 	  (setf hash (org-babel-sha1-hash info)))
-	;; expand noweb references in the original file
-	(setf (nth 1 info)
-	      (if (string= "strip-export" (cdr (assoc :noweb (nth 2 info))))
-		  (replace-regexp-in-string
-		   (org-babel-noweb-wrap) "" (nth 1 info))
-		(if (org-babel-noweb-p (nth 2 info) :export)
-		    (org-babel-expand-noweb-references
-                     info (org-babel-exp-get-export-buffer))  
-		  (nth 1 info))))
 	(org-babel-exp-do-export info 'block hash)))))
 
 (defcustom org-babel-exp-call-line-template
@@ -260,10 +251,20 @@ replaced with its value."
 
 (defun org-babel-exp-code (info)
   "Return the original code block formatted for export."
+  (setf (nth 1 info)
+	(if (string= "strip-export" (cdr (assoc :noweb (nth 2 info))))
+	    (replace-regexp-in-string
+	     (org-babel-noweb-wrap) "" (nth 1 info))
+	  (if (org-babel-noweb-p (nth 2 info) :export)
+	      (org-babel-expand-noweb-references
+	       info (org-babel-exp-get-export-buffer))
+	    (nth 1 info))))
   (org-fill-template
    org-babel-exp-code-template
    `(("lang"  . ,(nth 0 info))
-     ("body"  . ,(nth 1 info))
+     ("body"  . ,(if (string= (nth 0 info) "org")
+		     (replace-regexp-in-string "^" "," (nth 1 info))
+		   (nth 1 info)))
      ,@(mapcar (lambda (pair)
 		 (cons (substring (symbol-name (car pair)) 1)
 		       (format "%S" (cdr pair))))
@@ -280,12 +281,16 @@ inhibit insertion of results into the buffer."
   (when (and org-export-babel-evaluate
 	     (not (and hash (equal hash (org-babel-current-result-hash)))))
     (let ((lang (nth 0 info))
-	  (body (nth 1 info))
+	  (body (if (org-babel-noweb-p (nth 2 info) :eval)
+		    (org-babel-expand-noweb-references
+		     info (org-babel-exp-get-export-buffer))
+		  (nth 1 info)))
 	  (info (copy-sequence info)))
       ;; skip code blocks which we can't evaluate
       (when (fboundp (intern (concat "org-babel-execute:" lang)))
 	(org-babel-eval-wipe-error-buffer)
 	(prog1 nil
+	  (setf (nth 1 info) body)
 	  (setf (nth 2 info)
 		(org-babel-exp-in-export-file lang
 		  (org-babel-process-params

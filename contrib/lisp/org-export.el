@@ -652,7 +652,6 @@ standard mode."
 
 ;; 1. Environment options are collected once at the very beginning of
 ;;    the process, out of the original buffer and configuration.
-;;    Associated to the parse tree, they make an Org closure.
 ;;    Collecting them is handled by `org-export-get-environment'
 ;;    function.
 ;;
@@ -891,6 +890,7 @@ standard mode."
 ;; increasing precedence order:
 ;;
 ;; - Global variables,
+;; - Buffer's attributes,
 ;; - Options keyword symbols,
 ;; - Buffer keywords,
 ;; - Subtree properties.
@@ -901,14 +901,11 @@ standard mode."
 ;; the different sources.
 
 ;;  The internal functions doing the retrieval are:
-;;  `org-export-parse-option-keyword' ,
-;;  `org-export-get-subtree-options' ,
-;;  `org-export-get-inbuffer-options' and
-;;  `org-export-get-global-options'.
-;;
-;;  Some properties, which do not rely on the previous sources but
-;;  still depend on the original buffer, are taken care of with
-;;  `org-export-initial-options'.
+;;  `org-export-get-global-options',
+;;  `org-export-get-buffer-attributes',
+;;  `org-export-parse-option-keyword',
+;;  `org-export-get-subtree-options' and
+;;  `org-export-get-inbuffer-options'
 
 ;; Also, `org-export-confirm-letbind' and `org-export-install-letbind'
 ;; take care of the part relative to "#+BIND:" keywords.
@@ -931,13 +928,8 @@ inferior to file-local settings."
   (let ((options (org-combine-plists
 		  ;; ... from global variables...
 		  (org-export-get-global-options backend)
-		  ;; ... from buffer's name (default title)...
-		  `(:title
-		    ,(or (let ((file (buffer-file-name (buffer-base-buffer))))
-			   (and file
-				(file-name-sans-extension
-				 (file-name-nondirectory file))))
-			 (buffer-name (buffer-base-buffer))))
+		  ;; ... from buffer's attributes...
+		  (org-export-get-buffer-attributes)
 		  ;; ... from an external property list...
 		  ext-plist
 		  ;; ... from in-buffer settings...
@@ -947,8 +939,6 @@ inferior to file-local settings."
 			(org-remove-double-quotes buffer-file-name)))
 		  ;; ... and from subtree, when appropriate.
 		  (and subtreep (org-export-get-subtree-options)))))
-    ;; Add initial options.
-    (setq options (append (org-export-initial-options) options))
     ;; Return plist.
     options))
 
@@ -1027,7 +1017,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
        (while (re-search-forward special-re nil t)
 	 (let ((element (org-element-at-point)))
 	   (when (eq (org-element-type element) 'keyword)
-	     (let* ((key (upcase (org-element-property :key element)))
+	     (let* ((key (org-element-property :key element))
 		    (val (org-element-property :value element))
 		    (prop
 		     (cond
@@ -1104,7 +1094,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
        (while (re-search-forward opt-re nil t)
 	 (let ((element (org-element-at-point)))
 	   (when (eq (org-element-type element) 'keyword)
-	     (let* ((key (upcase (org-element-property :key element)))
+	     (let* ((key (org-element-property :key element))
 		    (val (org-element-property :value element))
 		    (prop (cdr (assoc key alist)))
 		    (behaviour (nth 4 (assq prop all))))
@@ -1140,6 +1130,32 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
      ;; 3. Return final value.
      plist)))
 
+(defun org-export-get-buffer-attributes ()
+  "Return properties related to buffer attributes, as a plist."
+  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+    (list
+     ;; Store full path of input file name, or nil.  For internal use.
+     :input-file visited-file
+     :title (or (and visited-file
+		     (file-name-sans-extension
+		      (file-name-nondirectory visited-file)))
+		(buffer-name (buffer-base-buffer)))
+     :macro-modification-time
+     (and visited-file
+	  (file-exists-p visited-file)
+	  (concat "(eval (format-time-string \"$1\" '"
+		  (prin1-to-string (nth 5 (file-attributes visited-file)))
+		  "))"))
+     ;; Store input file name as a macro.
+     :macro-input-file (and visited-file (file-name-nondirectory visited-file))
+     ;; `:macro-date', `:macro-time' and `:macro-property' could as
+     ;; well be initialized as tree properties, since they don't
+     ;; depend on buffer properties.  Though, it may be more logical
+     ;; to keep them close to other ":macro-" properties.
+     :macro-date "(eval (format-time-string \"$1\"))"
+     :macro-time "(eval (format-time-string \"$1\"))"
+     :macro-property "(eval (org-entry-get nil \"$1\" 'selective))")))
+
 (defun org-export-get-global-options (&optional backend)
   "Return global export options as a plist.
 
@@ -1159,50 +1175,46 @@ process."
     ;; Return value.
     plist))
 
-(defun org-export-initial-options ()
-  "Return a plist with properties related to input buffer."
-  (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-    (list
-     ;; Store full path of input file name, or nil.  For internal use.
-     :input-file visited-file
-     ;; `:macro-date', `:macro-time' and `:macro-property' could as well
-     ;; be initialized as tree properties, since they don't depend on
-     ;; initial environment.  Though, it may be more logical to keep
-     ;; them close to other ":macro-" properties.
-     :macro-date "(eval (format-time-string \"$1\"))"
-     :macro-time "(eval (format-time-string \"$1\"))"
-     :macro-property "(eval (org-entry-get nil \"$1\" 'selective))"
-     :macro-modification-time
-     (and visited-file
-	  (file-exists-p visited-file)
-	  (concat "(eval (format-time-string \"$1\" '"
-		  (prin1-to-string (nth 5 (file-attributes visited-file)))
-		  "))"))
-     ;; Store input file name as a macro.
-     :macro-input-file (and visited-file (file-name-nondirectory visited-file))
-     ;; Footnotes definitions must be collected in the original buffer,
-     ;; as there's no insurance that they will still be in the parse
-     ;; tree, due to some narrowing.
-     :footnote-definition-alist
-     (let (alist)
-       (org-with-wide-buffer
-	(goto-char (point-min))
-	(while (re-search-forward org-footnote-definition-re nil t)
-	  (let ((def (org-footnote-at-definition-p)))
-	    (when def
-	      (org-skip-whitespace)
-	      (push (cons (car def)
-			  (save-restriction
-			    (narrow-to-region (point) (nth 2 def))
-			    ;; Like `org-element-parse-buffer', but
-			    ;; makes sure the definition doesn't start
-			    ;; with a section element.
-			    (nconc
-			     (list 'org-data nil)
-			     (org-element-parse-elements
-			      (point-min) (point-max) nil nil nil nil nil))))
-		    alist))))
-	alist)))))
+(defun org-export-store-footnote-definitions (info)
+  "Collect and store footnote definitions from current buffer in INFO.
+
+INFO is a plist containing export options.
+
+Footnotes definitions are stored as a alist whose CAR is
+footnote's label, as a string, and CDR the contents, as a parse
+tree.  This alist will be consed to the value of
+`:footnote-definition-alist' in INFO, if any.
+
+The new plist is returned; use
+
+  \(setq info (org-export-store-footnote-definitions info))
+
+to be sure to use the new value.  INFO is modified by side
+effects."
+  ;; Footnotes definitions must be collected in the original buffer,
+  ;; as there's no insurance that they will still be in the parse
+  ;; tree, due to some narrowing.
+  (plist-put
+   info :footnote-definition-alist
+   (let ((alist (plist-get info :footnote-definition-alist)))
+     (org-with-wide-buffer
+      (goto-char (point-min))
+      (while (re-search-forward org-footnote-definition-re nil t)
+	(let ((def (org-footnote-at-definition-p)))
+	  (when def
+	    (org-skip-whitespace)
+	    (push (cons (car def)
+			(save-restriction
+			  (narrow-to-region (point) (nth 2 def))
+			  ;; Like `org-element-parse-buffer', but makes
+			  ;; sure the definition doesn't start with
+			  ;; a section element.
+			  (nconc
+			   (list 'org-data nil)
+			   (org-element-parse-elements
+			    (point-min) (point-max) nil nil nil nil nil))))
+		  alist))))
+      alist))))
 
 (defvar org-export-allow-BIND-local nil)
 (defun org-export-confirm-letbind ()
@@ -1293,8 +1305,7 @@ Following tree properties are set:
        data '(keyword target)
        (lambda (blob)
 	 (when (or (eq (org-element-type blob) 'target)
-		   (string= (upcase (org-element-property :key blob))
-                            "TARGET"))
+		   (string= (org-element-property :key blob) "TARGET"))
 	   blob)) info)
      :headline-numbering ,(org-export-collect-headline-numbering data info)
      :back-end ,backend)
@@ -2079,54 +2090,73 @@ to be expanded and Babel code to be executed.
 Return code as a string."
   (save-excursion
     (save-restriction
-      ;; Narrow buffer to an appropriate region for parsing.
+      ;; Narrow buffer to an appropriate region or subtree for
+      ;; parsing.  If parsing subtree, be sure to remove main headline
+      ;; too.
       (cond ((org-region-active-p)
 	     (narrow-to-region (region-beginning) (region-end)))
-	    (subtreep (org-narrow-to-subtree)))
-      ;; Retrieve export options (INFO) and parsed tree (RAW-DATA),
-      ;; Then options can be completed with tree properties.  Note:
-      ;; Buffer isn't parsed directly.  Instead, a temporary copy is
-      ;; created, where include keywords are expanded and code blocks
-      ;; are evaluated.  RAW-DATA is the parsed tree of the buffer
-      ;; resulting from that process.  Eventually call
-      ;; `org-export-filter-parse-tree-functions'.
-      (goto-char (point-min))
-      (let ((info (org-export-get-environment backend subtreep ext-plist)))
-	;; Remove subtree's headline from contents if subtree mode is
-	;; activated.
-	(when subtreep (forward-line) (narrow-to-region (point) (point-max)))
-	;; Install filters in communication channel.
-	(setq info (org-export-install-filters backend info))
-	(let ((raw-data
-	       (org-export-filter-apply-functions
-		(plist-get info :filter-parse-tree)
-		;; If NOEXPAND is non-nil, simply parse current
-		;; visible part of buffer.
-		(if noexpand (org-element-parse-buffer nil visible-only)
-		  (org-export-with-current-buffer-copy
-		   (org-export-expand-include-keyword)
-		   (let ((org-current-export-file (current-buffer)))
-		     (org-export-blocks-preprocess))
-		   (org-element-parse-buffer nil visible-only)))
-		backend info)))
-	;; Complete communication channel with tree properties.
+	    (subtreep
+	     (org-narrow-to-subtree)
+	     (goto-char (point-min))
+	     (forward-line)
+	     (narrow-to-region (point) (point-max))))
+      ;; 1. Get export environment from original buffer.  Store
+      ;;    original footnotes definitions in communication channel as
+      ;;    they might not be accessible anymore in a narrowed parse
+      ;;    tree.  Also install user's and developer's filters.
+      (let ((info (org-export-install-filters
+		   backend
+		   (org-export-store-footnote-definitions
+		    (org-export-get-environment backend subtreep ext-plist))))
+	    tree)
+	;; 2. Get parse tree.
+	(if noexpand
+	    ;; If NOEXPAND is non-nil, simply parse current visible
+	    ;; part of buffer.
+	    (setq tree (org-element-parse-buffer nil visible-only))
+	  ;; Otherwise, buffer isn't parsed directly.  Instead,
+	  ;; a temporary copy is created, where include keywords are
+	  ;; expanded and code blocks are evaluated.
+	  (let ((buf (or (buffer-file-name (buffer-base-buffer))
+			 (current-buffer))))
+	    (org-export-with-current-buffer-copy
+	     (org-export-expand-include-keyword)
+	     ;; Setting `org-current-export-file' is required by Org
+	     ;; Babel to properly resolve noweb references.
+	     (let ((org-current-export-file buf))
+	       (org-export-blocks-preprocess))
+	     (setq tree (org-element-parse-buffer nil visible-only)
+		   ;; Footnote definitions must be stored again, since
+		   ;; buffer's expansion might have modified
+		   ;; boundaries of footnote definitions contained in
+		   ;; the parse tree.  This way, definitions in
+		   ;; `footnote-definition-alist' are bound to
+		   ;; coincide with those in the parse tree.
+		   info (org-export-store-footnote-definitions info)))))
+	;; 3. Call parse-tree filters to get the final tree.
+	(setq tree
+	      (org-export-filter-apply-functions
+	       (plist-get info :filter-parse-tree) tree backend info))
+	;; 4. Now tree is complete, compute its properties and add
+	;;    them to communication channel.
 	(setq info
 	      (org-combine-plists
 	       info
-	       (org-export-collect-tree-properties raw-data info backend)))
-	;; Transcode RAW-DATA.  Also call
-	;; `org-export-filter-final-output-functions'.
+	       (org-export-collect-tree-properties tree info backend)))
+	;; 5. Eventually transcode TREE.  Wrap the resulting string
+	;;    into a template, if required.  Eventually call
+	;;    final-output filter.
 	(let* ((body (org-element-normalize-string
-		      (org-export-data raw-data backend info)))
+		      (org-export-data tree backend info)))
 	       (template (intern (format "org-%s-template" backend)))
 	       (output (org-export-filter-apply-functions
 			(plist-get info :filter-final-output)
 			(if (or (not (fboundp template)) body-only) body
 			  (funcall template body info))
 			backend info)))
-	  ;; Maybe add final OUTPUT to kill ring before returning it.
+	  ;; Maybe add final OUTPUT to kill ring, then return it.
 	  (when org-export-copy-to-kill-ring (org-kill-new output))
-	  output))))))
+	  output)))))
 
 (defun org-export-to-buffer
   (backend buffer &optional subtreep visible-only body-only ext-plist noexpand)
@@ -2716,10 +2746,10 @@ INFO is a plist holding contextual information.
 Return value can be an object, an element, or nil:
 
 - If LINK path matches a target object (i.e. <<path>>) or
-  element (i.e. \"#+target: path\"), return it.
+  element (i.e. \"#+TARGET: path\"), return it.
 
 - If LINK path exactly matches the name affiliated keyword
-  \(i.e. #+name: path) of an element, return that element.
+  \(i.e. #+NAME: path) of an element, return that element.
 
 - If LINK path exactly matches any headline name, return that
   element.  If more than one headline share that name, priority
@@ -2738,7 +2768,7 @@ Assume LINK type is \"fuzzy\"."
 	   (loop for target in (plist-get info :target-list)
 		 when (string= (org-element-property :value target) path)
 		 return target)))
-     ;; Then try to find an element with a matching "#+name: path"
+     ;; Then try to find an element with a matching "#+NAME: path"
      ;; affiliated keyword.
      ((and (not (eq (substring path 0 1) ?*))
 	   (org-element-map
@@ -2801,30 +2831,24 @@ INFO is a plist used as a communication channel.
 Return associated line number in source code, or REF itself,
 depending on src-block or example element's switches."
   (org-element-map
-   (plist-get info :parse-tree) '(src-block example)
+   (plist-get info :parse-tree) '(example-block src-block)
    (lambda (el)
-     (let ((switches (or (org-element-property :switches el) "")))
-       (with-temp-buffer
-         (insert (org-trim (org-element-property :value el)))
-         ;; Build reference regexp.
-         (let* ((label
-                 (or (and (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-                          (match-string 1 switches))
-                     org-coderef-label-format))
-                (ref-re
-                 (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
-                         (replace-regexp-in-string "%s" ref label nil t))))
-           ;; Element containing REF is found.  Only associate REF to
-           ;; a line number if element has "+n" or "-n" and "-k" or
-           ;; "-r" as switches.  When it has "+n", count accumulated
-           ;; locs before, too.
-           (when (re-search-backward ref-re nil t)
-             (cond
-              ((not (string-match "-[kr]\\>" switches)) ref)
-              ((string-match "-n\\>" switches) (line-number-at-pos))
-	      ((string-match "\\+n\\>" switches)
-	       (+ (org-export-get-loc el info) (line-number-at-pos)))
-              (t ref)))))))
+     (with-temp-buffer
+       (insert (org-trim (org-element-property :value el)))
+       (let* ((label-fmt (regexp-quote
+			  (or (org-element-property :label-fmt el)
+			      org-coderef-label-format)))
+	      (ref-re
+	       (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
+		       (replace-regexp-in-string "%s" ref label-fmt nil t))))
+	 ;; Element containing REF is found.  Resolve it to either
+	 ;; a label or a line number, as needed.
+	 (when (re-search-backward ref-re nil t)
+	   (cond
+	    ((org-element-property :use-labels el) ref)
+	    ((eq (org-element-property :number-lines el) 'continued)
+	     (+ (org-export-get-loc el info) (line-number-at-pos)))
+	    (t (line-number-at-pos)))))))
    info 'first-match))
 
 
@@ -2933,8 +2957,21 @@ objects of the same type."
 ;; src-block or example-block elements with a "+n" switch until
 ;; a given element, excluded.  Note: "-n" switches reset that count.
 
-;; `org-export-handle-code' takes care of line numbering and reference
-;; cleaning in source code, when appropriate.
+;; `org-export-unravel-code' extracts source code (along with a code
+;; references alist) from an `element-block' or `src-block' type
+;; element.
+
+;; `org-export-format-code' applies a formatting function to each line
+;; of code, providing relative line number and code reference when
+;; appropriate.  Since it doesn't access the original element from
+;; which the source code is coming, it expects from the code calling
+;; it to know if lines should be numbered and if code references
+;; should appear.
+
+;; Eventually, `org-export-format-code-default' is a higher-level
+;; function (it makes use of the two previous functions) which handles
+;; line numbering and code references inclusion, and returns source
+;; code in a format suitable for plain text or verbatim output.
 
 (defun org-export-get-loc (element info)
   "Return accumulated lines of code up to ELEMENT.
@@ -2953,111 +2990,144 @@ ELEMENT is excluded from count."
         ;; Only count lines from src-block and example-block elements
         ;; with a "+n" or "-n" switch.  A "-n" switch resets counter.
         ((not (memq (org-element-type el) '(src-block example-block))) nil)
-        ((let ((switches (org-element-property :switches el)))
-           (when (and switches (string-match "\\([-+]\\)n\\>" switches))
+        ((let ((linums (org-element-property :number-lines el)))
+	   (when linums
 	     ;; Accumulate locs or reset them.
-	     (let ((accumulatep (string= (match-string 1 switches) "-"))
-		   (lines (org-count-lines
+	     (let ((lines (org-count-lines
 			   (org-trim (org-element-property :value el)))))
-	       (setq loc (if accumulatep lines (+ loc lines))))))
+	       (setq loc (if (eq linums 'new) lines (+ loc lines))))))
 	 ;; Return nil to stay in the loop.
          nil)))
      info 'first-match)
     ;; Return value.
     loc))
 
-(defun org-export-handle-code (element info &optional num-fmt ref-fmt delayed)
-  "Handle line numbers and code references in ELEMENT.
+(defun org-export-unravel-code (element)
+  "Clean source code and extract references out of it.
 
-ELEMENT has either a `src-block' an `example-block' type.  INFO
-is a plist used as a communication channel.
+ELEMENT has either a `src-block' an `example-block' type.
 
-If optional argument NUM-FMT is a string, it will be used as
-a format string for numbers at beginning of each line.
-
-If optional argument REF-FMT is a string, it will be used as
-a format string for each line of code containing a reference.
-
-When optional argument DELAYED is non-nil, `org-loc' and
-`org-coderef' properties, set to an adequate value, are applied
-to, respectively, numbered lines and lines with a reference.  No
-line numbering is done and all references are stripped from the
-resulting string.  Both NUM-FMT and REF-FMT arguments are ignored
-in that situation.
-
-Return new code as a string."
-  (let* ((switches (or (org-element-property :switches element) ""))
-	 (code (org-element-property :value element))
-	 (numberp (string-match "[-+]n\\>" switches))
-	 (accumulatep (string-match "\\+n\\>" switches))
-	 ;; Initialize loc counter when any kind of numbering is
-	 ;; active.
-	 (total-LOC (cond
-		     (accumulatep (org-export-get-loc element info))
-		     (numberp 0)))
+Return a cons cell whose CAR is the source code, cleaned from any
+reference and protective comma and CDR is an alist between
+relative line number (integer) and name of code reference on that
+line (string)."
+  (let* ((line 0) refs
 	 ;; Get code and clean it.  Remove blank lines at its
 	 ;; beginning and end.  Also remove protective commas.
-	 (preserve-indent-p (or org-src-preserve-indentation
-				(string-match "-i\\>" switches)))
-	 (replace-labels (when (string-match "-r\\>" switches)
-			   (if (string-match "-k\\>" switches) 'keep t)))
 	 (code (let ((c (replace-regexp-in-string
 			 "\\`\\([ \t]*\n\\)+" ""
 			 (replace-regexp-in-string
-			  "\\(:?[ \t]*\n\\)*[ \t]*\\'" "\n" code))))
+			  "\\(:?[ \t]*\n\\)*[ \t]*\\'" "\n"
+			  (org-element-property :value element)))))
 		 ;; If appropriate, remove global indentation.
-		 (unless preserve-indent-p (setq c (org-remove-indentation c)))
+		 (unless (or org-src-preserve-indentation
+			     (org-element-property :preserve-indent element))
+		   (setq c (org-remove-indentation c)))
 		 ;; Free up the protected lines.  Note: Org blocks
 		 ;; have commas at the beginning or every line.
-		 (if (string=
-		      (or (org-element-property :language element) "")
-		      "org")
+		 (if (string= (org-element-property :language element) "org")
 		     (replace-regexp-in-string "^," "" c)
 		   (replace-regexp-in-string
 		    "^\\(,\\)\\(:?\\*\\|[ \t]*#\\+\\)" "" c nil nil 1))))
-	 ;; Split code to process it line by line.
-	 (code-lines (org-split-string code "\n"))
-	 ;; If numbering is active, ensure line numbers will be
-	 ;; correctly padded before applying the format string.
-	 (num-fmt
-	  (when (and (not delayed) numberp)
-	    (format (if (stringp num-fmt) num-fmt "%s:  ")
-		    (format "%%%ds"
-			    (length (number-to-string
-				     (+ (length code-lines) total-LOC)))))))
 	 ;; Get format used for references.
-	 (label-fmt (or (and (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-			     (match-string 1 switches))
-			org-coderef-label-format))
+	 (label-fmt (regexp-quote
+		     (or (org-element-property :label-fmt element)
+			 org-coderef-label-format)))
 	 ;; Build a regexp matching a loc with a reference.
-	 (with-ref-re (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
-			      (replace-regexp-in-string
-			       "%s" "\\([-a-zA-Z0-9_ ]+\\)" label-fmt nil t))))
+	 (with-ref-re
+	  (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)[ \t]*\\)$"
+		  (replace-regexp-in-string
+		   "%s" "\\([-a-zA-Z0-9_ ]+\\)" label-fmt nil t))))
+    ;; Return value.
+    (cons
+     ;; Code with references removed.
+     (org-element-normalize-string
+      (mapconcat
+       (lambda (loc)
+	 (incf line)
+	 (if (not (string-match with-ref-re loc)) loc
+	   ;; Ref line: remove ref, and signal its position in REFS.
+	   (push (cons line (match-string 3 loc)) refs)
+	   (replace-match "" nil nil loc 1)))
+       (org-split-string code "\n") "\n"))
+     ;; Reference alist.
+     refs)))
+
+(defun org-export-format-code (code fun &optional num-lines ref-alist)
+  "Format CODE by applying FUN line-wise and return it.
+
+CODE is a string representing the code to format.  FUN is
+a function.  It must accept three arguments: a line of
+code (string), the current line number (integer) or nil and the
+reference associated to the current line (string) or nil.
+
+Optional argument NUM-LINES can be an integer representing the
+number of code lines accumulated until the current code.  Line
+numbers passed to FUN will take it into account.  If it is nil,
+FUN's second argument will always be nil.  This number can be
+obtained with `org-export-get-loc' function.
+
+Optional argument REF-ALIST can be an alist between relative line
+number (i.e. ignoring NUM-LINES) and the name of the code
+reference on it.  If it is nil, FUN's third argument will always
+be nil.  It can be obtained through the use of
+`org-export-unravel-code' function."
+  (let ((--locs (org-split-string code "\n"))
+	(--line 0))
     (org-element-normalize-string
      (mapconcat
-      (lambda (loc)
-	;; Maybe add line number to current line of code (LOC).
-	(when numberp
-	  (incf total-LOC)
-	  (setq loc (if delayed (org-add-props loc nil 'org-loc total-LOC)
-		      (concat (format num-fmt total-LOC) loc))))
-	;; Take action if at a ref line.
-	(when (string-match with-ref-re loc)
-	  (let ((ref (match-string 3 loc)))
-	    (setq loc
-		  ;; Option "-r" without "-k" removes labels.
-		  ;; A non-nil DELAYED removes labels unconditionally.
-		  (if (or delayed
-			  (and replace-labels (not (eq replace-labels 'keep))))
-		      (replace-match "" nil nil loc 1)
-		    (replace-match (format "(%s)" ref) nil nil loc 2)))
-	    ;; Store REF in `org-coderef' property if DELAYED asks to.
-	    (cond (delayed (setq loc (org-add-props loc nil 'org-coderef ref)))
-		  ;; If REF-FMT is defined, apply it to current LOC.
-		  ((stringp ref-fmt) (setq loc (format ref-fmt loc))))))
-	;; Return updated LOC for concatenation.
-	loc)
-      code-lines "\n"))))
+      (lambda (--loc)
+	(incf --line)
+	(let ((--ref (cdr (assq --line ref-alist))))
+	  (funcall fun --loc (and num-lines (+ num-lines --line)) --ref)))
+      --locs "\n"))))
+
+(defun org-export-format-code-default (element info)
+  "Return source code from ELEMENT, formatted in a standard way.
+
+ELEMENT is either a `src-block' or `example-block' element.  INFO
+is a plist used as a communication channel.
+
+This function takes care of line numbering and code references
+inclusion.  Line numbers, when applicable, appear at the
+beginning of the line, separated from the code by two white
+spaces.  Code references, on the other hand, appear flushed to
+the right, separated by six white spaces from the widest line of
+code."
+  ;; Extract code and references.
+  (let* ((code-info (org-export-unravel-code element))
+         (code (car code-info))
+         (code-lines (org-split-string code "\n"))
+	 (refs (and (org-element-property :retain-labels element)
+		    (cdr code-info)))
+         ;; Handle line numbering.
+         (num-start (case (org-element-property :number-lines element)
+                      (continued (org-export-get-loc element info))
+                      (new 0)))
+         (num-fmt
+          (and num-start
+               (format "%%%ds  "
+                       (length (number-to-string
+                                (+ (length code-lines) num-start))))))
+         ;; Prepare references display, if required.  Any reference
+         ;; should start six columns after the widest line of code,
+         ;; wrapped with parenthesis.
+	 (max-width
+	  (+ (apply 'max (mapcar 'length code-lines))
+	     (if (not num-start) 0 (length (format num-fmt num-start))))))
+    (org-export-format-code
+     code
+     (lambda (loc line-num ref)
+       (let ((number-str (and num-fmt (format num-fmt line-num))))
+         (concat
+          number-str
+          loc
+          (and ref
+               (concat (make-string
+                        (- (+ 6 max-width)
+                           (+ (length loc) (length number-str))) ? )
+                       (format "(%s)" ref))))))
+     num-start refs)))
 
 
 ;;;; For Tables

@@ -306,11 +306,13 @@ you can \"misuse\" it to also add other text to the header.  However,
 		    (string :tag "+tag or -tag"))))
 	    (list :tag "Set daily/weekly entry types"
 		  (const org-agenda-entry-types)
-		  (set :greedy t :value (:deadline :scheduled :timestamp :sexp)
-		       (const :deadline)
-		       (const :scheduled)
-		       (const :timestamp)
-		       (const :sexp)))
+		  (list
+		   (const :format "" quote)
+		   (set :greedy t :value (:deadline :scheduled :timestamp :sexp)
+			(const :deadline)
+			(const :scheduled)
+			(const :timestamp)
+			(const :sexp))))
 	    (list :tag "Standard skipping condition"
 		  :value (org-agenda-skip-function '(org-agenda-skip-entry-if))
 		  (const org-agenda-skip-function)
@@ -1805,12 +1807,12 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 (defvar org-agenda-entry-text-mode nil)
 (defvar org-agenda-clockreport-mode nil)
 (defvar org-agenda-show-log nil)
-(defvar org-agenda-show-scoped nil) ; Used for dynamically scoping
 (defvar org-agenda-redo-command nil)
 (defvar org-agenda-query-string nil)
 (defvar org-agenda-mode-hook nil
   "Hook for `org-agenda-mode', run after the mode is turned on.")
 (defvar org-agenda-type nil)
+(defvar org-agenda-force-single-file nil)
 (defvar org-agenda-bulk-marked-entries) ;; Defined further down in this file
 
 
@@ -2684,7 +2686,7 @@ s   Search for keywords                 *   Toggle sticky agenda views
   "The arguments of the previous call to `org-agenda'.")
 (defun org-agenda-run-series (name series)
   (org-let (nth 1 series) '(org-prepare-agenda name))
-  ;; We need to reset agenda markers heree, because when constructing a
+  ;; We need to reset agenda markers here, because when constructing a
   ;; block agenda, the individual blocks do not do that.
   (org-agenda-reset-markers)
   (let* ((org-agenda-multi t)
@@ -2808,7 +2810,7 @@ agenda-day   The day in the agenda where this is listed"
 
 (defun org-fix-agenda-info (props)
   "Make sure all properties on an agenda item have a canonical form.
-  This ensures the export commands can easily use it."
+This ensures the export commands can easily use it."
   (let (tmp re)
     (when (setq tmp (plist-get props 'tags))
       (setq props (plist-put props 'tags (mapconcat 'identity tmp ":"))))
@@ -2845,8 +2847,8 @@ agenda-day   The day in the agenda where this is listed"
 	   ((stringp res) res)
 	   (t (prin1-to-string res))))
     (while (string-match "," res)
-      (setq res (replace-match ";" t t res))) ;
-  (org-trim res)))
+      (setq res (replace-match ";" t t res)))
+    (org-trim res)))
 
 
 ;;;###autoload
@@ -3176,7 +3178,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defvar org-agenda-name nil)
 (defvar org-agenda-tag-filter nil)
 (defvar org-agenda-category-filter nil)
-(defvar org-agenda-tag-filter-while-redo nil) ; dynamically scoped
+(defvar org-agenda-tag-filter-while-redo nil)
 (defvar org-agenda-tag-filter-preset nil
   "A preset of the tags filter used for secondary agenda filtering.
 This must be a list of strings, each string must be a single tag preceded
@@ -3250,7 +3252,6 @@ generating a new one"
 	(message "Sticky Agenda buffer, use `r' to refresh")
 	(throw 'exit nil))
     (setq org-todo-keywords-for-agenda nil)
-    (setq org-done-keywords-for-agenda nil)
     (setq org-drawers-for-agenda nil)
     (unless org-agenda-persistent-filter
       (setq org-agenda-tag-filter nil
@@ -3270,9 +3271,10 @@ generating a new one"
 		      (make-string (window-width) org-agenda-block-separator))
 		    "\n"))
 	  (narrow-to-region (point) (point-max)))
+      (setq org-done-keywords-for-agenda nil)
 
-      ;; any org variables need to be set after being in agenda buffer
-      ;; since they are now buffer local
+      ;; Setting any org variables that are in org-agenda-local-vars
+      ;; list need to be done after the prepare call
       (org-prepare-agenda-window (get-buffer-create org-agenda-buffer-name))
       (setq buffer-read-only nil)
       (org-agenda-reset-markers)
@@ -4393,7 +4395,7 @@ See `org-agenda-skip-if' for details."
 (defun org-agenda-skip-if (subtree conditions)
   "Checks current entity for CONDITIONS.
 If SUBTREE is non-nil, the entire subtree is checked.  Otherwise, only
-the entry, i.e. the text before the next heading is checked.
+the entry (i.e. the text before the next heading) is checked.
 
 CONDITIONS is a list of symbols, boolean OR is used to combine the results
 from different tests.  Valid conditions are:
@@ -4419,12 +4421,12 @@ keywords, which may include \"*\" to match any todo keyword.
 
 would skip all entries with \"TODO\" or \"WAITING\" keywords.
 
-Instead of a list a keyword class may be given
+Instead of a list, a keyword class may be given.  For example:
 
     (org-agenda-skip-entry-if 'nottodo 'done)
 
 would skip entries that haven't been marked with any of \"DONE\"
-keywords. Possible classes are: `todo', `done', `any'.
+keywords.  Possible classes are: `todo', `done', `any'.
 
 If any of these conditions is met, this function returns the end point of
 the entity, causing the search to continue from there.  This is a function
@@ -4457,8 +4459,8 @@ that can be put into `org-agenda-skip-function' for the duration of a command."
 	   (stringp (nth 1 m))
 	   (not (re-search-forward (nth 1 m) end t)))
       (and (or
-	    (setq m (memq 'todo conditions))
-	    (setq m (memq 'nottodo conditions)))
+	    (setq m (memq 'nottodo conditions))
+	    (setq m (memq 'todo conditions)))
 	   (org-agenda-skip-if-todo m end)))
      end)))
 
@@ -6418,8 +6420,8 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (recenter window-line)))
 
 (defvar org-global-tags-completion-table nil)
-(defvar org-agenda-filtered-by-category nil)
 (defvar org-agenda-filter-form nil)
+(defvar org-agenda-filtered-by-category nil)
 
 (defun org-agenda-filter-by-category (strip)
   "Keep only those lines in the agenda buffer that have a specific category.
@@ -6572,7 +6574,9 @@ to switch to narrowing."
     (dolist (x (delete-dups
 		(append (get 'org-agenda-category-filter
 			     :preset-filter) org-agenda-category-filter)))
-      (setq f1 (list 'equal (substring x 1) 'cat))
+      (if (equal "-" (substring x 0 1))
+	  (setq f1 (list 'not (list 'equal (substring x 1) 'cat)))
+	(setq f1 (list 'equal (substring x 1) 'cat)))
       (push f1 f))
     (cons 'and (nreverse f))))
 
@@ -6603,9 +6607,13 @@ If the line does not have an effort defined, return nil."
   (let (tags cat)
     (if (eq type 'tag)
 	(setq org-agenda-tag-filter filter)
-      (setq org-agenda-category-filter filter
-	    org-agenda-filtered-by-category t))
+      (setq org-agenda-category-filter filter))
     (setq org-agenda-filter-form (org-agenda-filter-make-matcher))
+    (if (and (eq type 'category)
+	     (not (equal (substring (car filter) 0 1) "-")))
+	;; Only set `org-agenda-filtered-by-category' to t
+	;; when a unique category is used as the filter
+	(setq org-agenda-filtered-by-category t))
     (org-agenda-set-mode-name)
     (save-excursion
       (goto-char (point-min))
@@ -6619,7 +6627,7 @@ If the line does not have an effort defined, return nil."
 	      (beginning-of-line 2))
 	  (beginning-of-line 2))))
     (if (get-char-property (point) 'invisible)
-	(org-agenda-previous-line))))
+	(ignore-errors (org-agenda-previous-line)))))
 
 (defun org-agenda-filter-hide-line (type)
   (let (ov)
@@ -7521,7 +7529,9 @@ use the dedicated frame)."
   (if (and current-prefix-arg (listp current-prefix-arg))
       (org-agenda-do-tree-to-indirect-buffer)
     (let ((agenda-window (selected-window))
-          (indirect-window (and org-last-indirect-buffer (get-buffer-window org-last-indirect-buffer))))
+          (indirect-window
+	   (and org-last-indirect-buffer
+		(get-buffer-window org-last-indirect-buffer))))
       (save-window-excursion (org-agenda-do-tree-to-indirect-buffer))
       (unwind-protect
           (progn
@@ -7530,7 +7540,7 @@ use the dedicated frame)."
             (select-window indirect-window)
             (switch-to-buffer org-last-indirect-buffer :norecord)
             (fit-window-to-buffer indirect-window))
-        (select-window agenda-window)))))
+        (select-window (get-buffer-window org-agenda-buffer-name))))))
 
 (defun org-agenda-do-tree-to-indirect-buffer ()
   "Same as `org-agenda-tree-to-indirect-buffer' without saving window."

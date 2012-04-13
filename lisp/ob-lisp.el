@@ -2,9 +2,9 @@
 
 ;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
 
-;; Author: Joel Boehland
-;;	Eric Schulte
-;;	David T. O'Toole <dto@gnu.org>
+;; Authors: Joel Boehland
+;;	 Eric Schulte
+;;	 David T. O'Toole <dto@gnu.org>
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 
@@ -41,7 +41,7 @@
 (add-to-list 'org-babel-tangle-lang-exts '("lisp" . "lisp"))
 
 (defvar org-babel-default-header-args:lisp '())
-(defvar org-babel-header-arg-names:lisp '(package))
+(defvar org-babel-header-args:lisp '((package . :any)))
 
 (defcustom org-babel-lisp-dir-fmt
   "(let ((*default-pathname-defaults* #P%S)) %%s)"

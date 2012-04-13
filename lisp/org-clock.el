@@ -1,6 +1,6 @@
 ;;; org-clock.el --- The time clocking code for Org-mode
 
-;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2012  Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -219,7 +219,8 @@ auto     Automatically, either `all', or `repeat' for repeating tasks"
 	  (const :tag "All task time" all)
 	  (const :tag "Automatically, `all' or since `repeat'" auto)))
 
-(defcustom org-task-overrun-text nil
+(defvaralias 'org-task-overrun-text 'org-clock-task-overrun-text)
+(defcustom org-clock-task-overrun-text nil
   "The extra modeline text that should indicate that the clock is overrun.
 The can be nil to indicate that instead of adding text, the clock time
 should get a different face (`org-mode-line-clock-overrun').
@@ -319,6 +320,12 @@ play with them."
 
 (defcustom org-clock-resolve-expert nil
   "Non-nil means do not show the splash buffer with the clock resolver."
+  :group 'org-clock
+  :version "24.1"
+  :type 'boolean)
+
+(defcustom org-clock-total-time-cell-format "*%s*"
+  "Format string for the total time cells."
   :group 'org-clock
   :version "24.1"
   :type 'boolean)
@@ -495,7 +502,7 @@ pointing to it."
 	(insert (format "[%c] %-15s %s\n" i cat task))
 	(cons i marker)))))
 
-(defvar org-task-overrun nil
+(defvar org-clock-task-overrun nil
   "Internal flag indicating if the clock has overrun the planned time.")
 (defvar org-clock-update-period 60
   "Number of seconds between mode line clock string updates.")
@@ -516,7 +523,7 @@ If not, show simply the clocked time like 01:50."
 	       (work-done-str
 		(org-propertize
 		 (format org-time-clocksum-format h m)
-		 'face (if (and org-task-overrun (not org-task-overrun-text))
+		 'face (if (and org-clock-task-overrun (not org-clock-task-overrun-text))
 			   'org-mode-line-clock-overrun 'org-mode-line-clock)))
 	       (effort-str (format org-time-clocksum-format effort-h effort-m))
 	       (clockstr (org-propertize
@@ -532,7 +539,7 @@ If not, show simply the clocked time like 01:50."
 (defun org-clock-update-mode-line ()
   (if org-clock-effort
       (org-clock-notify-once-if-expired)
-    (setq org-task-overrun nil))
+    (setq org-clock-task-overrun nil))
   (setq org-mode-line-string
 	(org-propertize
 	 (let ((clock-string (org-clock-get-clock-string))
@@ -546,10 +553,10 @@ If not, show simply the clocked time like 01:50."
 	 'local-map org-clock-mode-line-map
 	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)
 	 ))
-  (if (and org-task-overrun org-task-overrun-text)
+  (if (and org-clock-task-overrun org-clock-task-overrun-text)
       (setq org-mode-line-string
 	    (concat (org-propertize
-		     org-task-overrun-text
+		     org-clock-task-overrun-text
 		     'face 'org-mode-line-clock-overrun) org-mode-line-string)))
   (force-mode-line-update))
 
@@ -606,7 +613,7 @@ Notification is shown only once."
   (when (org-clocking-p)
     (let ((effort-in-minutes (org-duration-string-to-minutes org-clock-effort))
 	  (clocked-time (org-clock-get-clocked-time)))
-      (if (setq org-task-overrun
+      (if (setq org-clock-task-overrun
 		(if (or (null effort-in-minutes) (zerop effort-in-minutes))
 		    nil
 		  (>= clocked-time effort-in-minutes)))
@@ -631,8 +638,7 @@ use libnotify if available, or fall back on a message."
 	((stringp org-show-notification-handler)
 	 (start-process "emacs-timer-notification" nil
 			org-show-notification-handler notification))
-	((featurep 'notifications)
-	 (require 'notifications)
+	((fboundp 'notifications-notify)
 	 (notifications-notify
 	  :title "Org-mode message"
 	  :body notification
@@ -1698,7 +1704,7 @@ from the `before-change-functions' in the current buffer."
       (remove-hook 'before-change-functions
 		   'org-clock-remove-overlays 'local))))
 
-(defvar state) ;; dynamically scoped into this function
+(defvar org-state) ;; dynamically scoped into this function
 (defun org-clock-out-if-current ()
   "Clock out if the current entry contains the running clock.
 This is used to stop the clock after a TODO entry is marked DONE,
@@ -1707,9 +1713,9 @@ and is only done if the variable `org-clock-out-when-done' is not nil."
 	     org-clock-out-when-done
 	     (marker-buffer org-clock-marker)
 	     (or (and (eq t org-clock-out-when-done)
-		      (member state org-done-keywords))
+		      (member org-state org-done-keywords))
 		 (and (listp org-clock-out-when-done)
-		      (member state org-clock-out-when-done)))
+		      (member org-state org-clock-out-when-done)))
 	     (equal (or (buffer-base-buffer (org-clocking-buffer))
 			(org-clocking-buffer))
 		    (or (buffer-base-buffer (current-buffer))
@@ -2231,11 +2237,11 @@ from the dynamic block definition."
 				         ; file column, maybe
        (if level-p   "|"      "")        ; level column, maybe
        (if timestamp "|"      "")        ; timestamp column, maybe
-       (if properties (make-string (length properties) ?|) "")  ;properties columns, maybe
-       (concat "*" (nth 7 lwords) "*| ") ; instead of a headline
-       "*"
-       (org-minutes-to-hh:mm-string (or total-time 0)) ; the time
-       "*|\n")                          ; close line
+       (if properties (make-string (length properties) ?|) "")  ; properties columns, maybe
+       (concat (format org-clock-total-time-cell-format (nth 7 lwords))  "| ") ; instead of a headline
+       (format org-clock-total-time-cell-format
+	       (org-minutes-to-hh:mm-string (or total-time 0))) ; the time
+       "|\n")                          ; close line
 
       ;; Now iterate over the tables and insert the data
       ;; but only if any time has been collected
@@ -2441,6 +2447,7 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 	 (tags (plist-get params :tags))
 	 (properties (plist-get params :properties))
 	 (inherit-property-p (plist-get params :inherit-props))
+	 todo-only
 	 (matcher (if tags (cdr (org-make-tags-matcher tags))))
 	 cc range-text st p time level hdl props tsp tbl)
 
@@ -2463,7 +2470,9 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
       (org-clock-sum ts te
 		     (unless (null matcher)
 		       (lambda ()
-			 (let ((tags-list (org-get-tags-at)))
+			 (let* ((tags-list (org-get-tags-at))
+				(org-scanner-tags tags-list)
+				(org-trust-scanner-tags t))
 			   (eval matcher)))))
       (goto-char (point-min))
       (setq st t)

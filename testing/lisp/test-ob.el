@@ -87,6 +87,24 @@
 	  '((:session . "none") (:results . "replace") (:exports . "results"))
 	  org-babel-default-inline-header-args)))
 
+(ert-deftest ob-test/org-babel-combine-header-arg-lists ()
+  (let ((results (org-babel-combine-header-arg-lists
+                  '((foo  . :any)
+                    (bar)
+                    (baz  . ((foo bar) (baz)))
+                    (qux  . ((foo bar baz qux)))
+                    (quux . ((foo bar))))
+                  '((bar)
+                    (baz  . ((baz)))
+                    (quux . :any)))))
+    (dolist (pair '((foo  . :any)
+		    (bar)
+		    (baz  . ((baz)))
+		    (quux . :any)
+		    (qux  . ((foo bar baz qux)))))
+      (should (equal (cdr pair)
+                     (cdr (assoc (car pair) results)))))))
+
 ;;; ob-get-src-block-info
 (ert-deftest test-org-babel/get-src-block-info-language ()
   (org-test-at-marker nil org-test-file-ob-anchor
@@ -762,6 +780,35 @@ replacement happens correctly."
 #+end_src
 
 * next heading"))
+
+(ert-deftest test-ob/org-babel-results-indented-wrap ()
+  "Ensure that wrapped results are inserted correction when indented.
+If not inserted correctly then the second evaluation will fail
+trying to find the :END: marker."
+  (org-test-with-temp-text
+   "- indented
+  #+begin_src sh :results file wrap
+    echo test.txt
+  #+end_src"
+    (org-babel-next-src-block 1)
+    (org-babel-execute-src-block)
+    (org-babel-execute-src-block)))
+
+(ert-deftest test-ob/file-desc-header-argument ()
+  "Test that the :file-desc header argument is used."
+  (org-test-with-temp-text "#+begin_src emacs-lisp :results file :file-desc bar
+  \"foo\"
+#+end_src
+
+#+begin_src emacs-lisp :results file :file-desc
+  \"foo\"
+#+end_src"
+    (org-babel-execute-src-block)
+    (org-babel-next-src-block 1)
+    (org-babel-execute-src-block)
+    (goto-char (point-min))
+    (should (search-forward "[[file:foo][bar]]" nil t))
+    (should (search-forward "[[file:foo][foo]]" nil t))))
 
 (ert-deftest test-ob/org-babel-remove-result--results-wrap ()
   "Test `org-babel-remove-result' with :results wrap."

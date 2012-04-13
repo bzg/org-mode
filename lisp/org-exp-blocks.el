@@ -73,6 +73,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'org)
+(require 'find-func)
 
 (defun org-export-blocks-set (var value)
   "Set the value of `org-export-blocks' and install fontification."
@@ -233,7 +234,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 			      (file-name-as-directory
 			       (expand-file-name
 				"../contrib"
-				(file-name-directory (or load-file-name buffer-file-name)))))))
+				(file-name-directory (find-library-name "org")))))))
   "Path to the ditaa jar executable."
   :group 'org-babel
   :type 'string)

@@ -109,7 +109,6 @@ Body[1]
 \[4] Inline
 
 \[5] Anonymous
-
 ")))
     ;; 2.2. Put each footnote definition at the end of the section
     ;;      containing its first reference.
@@ -256,7 +255,6 @@ Signature")))))
 \[fn:2] B
 
 \[fn:label] C
-
 ")))))
 
 

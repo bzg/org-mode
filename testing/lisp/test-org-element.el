@@ -29,6 +29,7 @@
 ;;; Tests:
 
 
+
 ;;;; Headlines
 
 (ert-deftest test-org-element/headline-quote-keyword ()
@@ -100,7 +101,283 @@
 
 
 
-;;; Navigation tools.
+;;;; Example-blocks and Src-blocks
+
+(ert-deftest test-org-element/block-switches ()
+  "Test `example-block' and `src-block' switches parsing."
+  (let ((org-coderef-label-format "(ref:%s)"))
+    ;; 1. Test "-i" switch.
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-current-element)))
+	(should-not (org-element-property :preserve-indent element))))
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -i\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-current-element)))
+	(should (org-element-property :preserve-indent element))))
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-current-element)))
+	(should-not (org-element-property :preserve-indent element))))
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE -i\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-current-element)))
+	(should (org-element-property :preserve-indent element))))
+    ;; 2. "-n -r -k" combination should number lines, retain labels but
+    ;;    not use them in coderefs.
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r -k\nText.\N#+END_EXAMPLE"
+      (let ((element (org-element-current-element)))
+	(should (and (org-element-property :number-lines element)
+		     (org-element-property :retain-labels element)
+		     (not (org-element-property :use-labels element))))))
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -n -r -k\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-current-element)))
+	(should (and (org-element-property :number-lines element)
+		     (org-element-property :retain-labels element)
+		     (not (org-element-property :use-labels element))))))
+    ;; 3. "-n -r" combination should number-lines remove labels and not
+    ;;    use them in coderefs.
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-current-element)))
+	(should (and (org-element-property :number-lines element)
+		     (not (org-element-property :retain-labels element))
+		     (not (org-element-property :use-labels element))))))
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-current-element)))
+	(should (and (org-element-property :number-lines element)
+		     (not (org-element-property :retain-labels element))
+		     (not (org-element-property :use-labels element))))))
+    ;; 4. "-n" or "+n" should number lines, retain labels and use them
+    ;;    in coderefs.
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE -n\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-current-element)))
+	(should (and (org-element-property :number-lines element)
+		     (org-element-property :retain-labels element)
+		     (org-element-property :use-labels element)))))
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -n\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-current-element)))
+	(should (and (org-element-property :number-lines element)
+		     (org-element-property :retain-labels element)
+		     (org-element-property :use-labels element)))))
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE +n\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-current-element)))
+	(should (and (org-element-property :number-lines element)
+		     (org-element-property :retain-labels element)
+		     (org-element-property :use-labels element)))))
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp +n\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-current-element)))
+	(should (and (org-element-property :number-lines element)
+		     (org-element-property :retain-labels element)
+		     (org-element-property :use-labels element)))))
+    ;; 5. No switch should not number lines, but retain labels and use
+    ;;    them in coderefs.
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-current-element)))
+	(should (and (not (org-element-property :number-lines element))
+		     (org-element-property :retain-labels element)
+		     (org-element-property :use-labels element)))))
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-current-element)))
+	(should (and (not (org-element-property :number-lines element))
+		     (org-element-property :retain-labels element)
+		     (org-element-property :use-labels element)))))
+    ;; 6. "-r" switch only: do not number lines, remove labels, and
+    ;;    don't use labels in coderefs.
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE -r\nText.\n#+END_EXAMPLE"
+      (let ((element (org-element-current-element)))
+	(should (and (not (org-element-property :number-lines element))
+		     (not (org-element-property :retain-labels element))
+		     (not (org-element-property :use-labels element))))))
+    (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -r\n(+ 1 1)\n#+END_SRC"
+      (let ((element (org-element-current-element)))
+	(should (and (not (org-element-property :number-lines element))
+		     (not (org-element-property :retain-labels element))
+		     (not (org-element-property :use-labels element))))))
+    ;; 7. Recognize coderefs with user-defined syntax.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText [ref:text]\n#+END_EXAMPLE"
+      (let ((element (org-element-current-element)))
+	(should
+	 (equal (org-element-property :label-fmt element) "[ref:%s]"))))
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -l \"[ref:%s]\"\n(+ 1 1) [ref:text]\n#+END_SRC"
+      (let ((element (org-element-current-element)))
+	(should
+	 (equal (org-element-property :label-fmt element) "[ref:%s]"))))))
+
+
+
+;;;; Footnotes references and definitions
+
+(ert-deftest test-org-element/footnote-reference ()
+  "Test footnote-reference parsing."
+  ;; 1. Parse a standard reference.
+  (org-test-with-temp-text "[fn:label]"
+    (should (equal (org-element-footnote-reference-parser)
+		   '(footnote-reference
+		     (:label "fn:label" :type standard :inline-definition nil
+			     :begin 1 :end 11 :post-blank 0)))))
+  ;; 2. Parse a normalized reference.
+  (org-test-with-temp-text "[1]"
+    (should (equal (org-element-footnote-reference-parser)
+		   '(footnote-reference
+		     (:label "1" :type standard :inline-definition nil
+			     :begin 1 :end 4 :post-blank 0)))))
+  ;; 3. Parse an inline reference.
+  (org-test-with-temp-text "[fn:test:def]"
+    (should (equal (org-element-footnote-reference-parser)
+		   '(footnote-reference
+		     (:label "fn:test" :type inline :inline-definition ("def")
+			     :begin 1 :end 14 :post-blank 0)))))
+  ;; 4. Parse an anonymous reference.
+  (org-test-with-temp-text "[fn::def]"
+    (should (equal (org-element-footnote-reference-parser)
+		   '(footnote-reference
+		     (:label nil :type inline :inline-definition ("def")
+			     :begin 1 :end 10 :post-blank 0)))))
+  ;; 5. Parse nested footnotes.
+  (org-test-with-temp-text "[fn::def [fn:label]]"
+    (should
+     (equal
+      (org-element-footnote-reference-parser)
+      '(footnote-reference
+	(:label nil :type inline
+		:inline-definition
+		("def "
+		 (footnote-reference
+		  (:label "fn:label" :type standard :inline-definition nil
+			  :begin 5 :end 15 :post-blank 0)))
+		:begin 1 :end 21 :post-blank 0)))))
+  ;; 6. Parse adjacent footnotes.
+  (org-test-with-temp-text "[fn:label1][fn:label2]"
+    (should
+     (equal
+      (org-element-footnote-reference-parser)
+      '(footnote-reference
+	(:label "fn:label1" :type standard :inline-definition nil :begin 1
+		:end 12 :post-blank 0)))))
+  ;; 7. Only properly closed footnotes are recognized as such.
+  (org-test-with-temp-text "Text [fn:label"
+    (should-not
+     (org-element-map
+      (org-element-parse-buffer) 'footnote-reference 'identity))))
+
+
+
+;;;; Granularity
+
+(ert-deftest test-org-element/granularity ()
+  "Test granularity impact on buffer parsing."
+  (org-test-with-temp-text "
+* Head 1
+** Head 2
+#+BEGIN_CENTER
+Centered paragraph.
+#+END_CENTER
+Paragraph \\alpha."
+    ;; 1.1. Granularity set to `headline' should parse every headline
+    ;;      in buffer, and only them.
+    (let ((tree (org-element-parse-buffer 'headline)))
+      (should (= 2 (length (org-element-map tree 'headline 'identity))))
+      (should-not (org-element-map tree 'paragraph 'identity)))
+    ;; 1.2. Granularity set to `greater-element' should not enter
+    ;;      greater elements excepted headlines and sections.
+    (let ((tree (org-element-parse-buffer 'greater-element)))
+      (should (= 1 (length (org-element-map tree 'center-block 'identity))))
+      (should (= 1 (length (org-element-map tree 'paragraph 'identity))))
+      (should-not (org-element-map tree 'entity 'identity)))
+    ;; 1.3. Granularity set to `element' should enter every
+    ;;      greater-element.
+    (let ((tree (org-element-parse-buffer 'element)))
+      (should (= 2 (length (org-element-map tree 'paragraph 'identity))))
+      (should-not (org-element-map tree 'entity 'identity)))
+    ;; 1.4. Granularity set to `object' can see everything.
+    (let ((tree (org-element-parse-buffer 'object)))
+      (should (= 1 (length (org-element-map tree 'entity 'identity)))))))
+
+(ert-deftest test-org-element/secondary-string-parsing ()
+  "Test if granularity correctly toggles secondary strings parsing."
+  ;; 1. With a granularity bigger than `object', no secondary string
+  ;;    should be parsed.
+  ;;
+  ;; 1.1. Test with `headline' type.
+  (org-test-with-temp-text "* Headline"
+    (let ((headline
+	   (org-element-map (org-element-parse-buffer 'headline) 'headline
+			    'identity
+			    nil
+			    'first-match)))
+      (should (stringp (org-element-property :title headline)))))
+  ;; 1.2. Test with `item' type.
+  (org-test-with-temp-text "* Headline\n- tag :: item"
+    (let ((item (org-element-map (org-element-parse-buffer 'element)
+				 'item
+				 'identity
+				 nil
+				 'first-match)))
+      (should (stringp (org-element-property :tag item)))))
+  ;; 1.3. Test with `verse-block' type.
+  (org-test-with-temp-text "#+BEGIN_VERSE\nTest\n#+END_VERSE"
+    (let ((verse-block (org-element-map (org-element-parse-buffer 'element)
+					'verse-block
+					'identity
+					nil
+					'first-match)))
+      (should (stringp (org-element-property :value verse-block)))))
+  ;; 1.4. Test with `inlinetask' type, if avalaible.
+  (when (featurep 'org-inlinetask)
+    (let ((org-inlinetask-min-level 15))
+      (org-test-with-temp-text "*************** Inlinetask"
+	(let ((inlinetask (org-element-map (org-element-parse-buffer 'element)
+					   'inlinetask
+					   'identity
+					   nil
+					   'first-match)))
+	  (should (stringp (org-element-property :title inlinetask)))))))
+  ;; 2. With a default granularity, secondary strings should be
+  ;;    parsed.
+  (org-test-with-temp-text "* Headline"
+    (let ((headline
+	   (org-element-map (org-element-parse-buffer) 'headline
+			    'identity
+			    nil
+			    'first-match)))
+      (should (listp (org-element-property :title headline)))))
+  ;; 3. `org-element-at-point' should never parse a secondary string.
+  (org-test-with-temp-text "* Headline"
+    (should (stringp (org-element-property :title (org-element-at-point))))))
+
+
+
+;;;; Interpretation.
+
+(ert-deftest test-org-element/interpret-affiliated-keywords ()
+  "Test if affiliated keywords are correctly interpreted."
+  ;; Interpret simple keywords.
+  (should
+   (equal
+    (org-element-interpret-data
+     '(org-data nil (paragraph (:name "para") "Paragraph")))
+    "#+NAME: para\nParagraph\n"))
+  ;; Interpret multiple keywords.
+  (should
+   (equal
+    (org-element-interpret-data
+     '(org-data nil (paragraph (:attr_ascii ("line1" "line2")) "Paragraph")))
+    "#+ATTR_ASCII: line1\n#+ATTR_ASCII: line2\nParagraph\n"))
+  ;; Interpret parsed keywords.
+  (should
+   (equal
+    (org-element-interpret-data
+     '(org-data nil (paragraph (:caption ("caption")) "Paragraph")))
+    "#+CAPTION: caption\nParagraph\n"))
+  ;; Interpret dual keywords.
+  (should
+   (equal
+    (org-element-interpret-data
+     '(org-data nil (paragraph (:caption (("long") "short")) "Paragraph")))
+    "#+CAPTION[short]: long\nParagraph\n")))
+
+
+
+;;;; Navigation tools.
 
 (ert-deftest test-org-element/forward-element ()
   "Test `org-element-forward' specifications."
@@ -312,7 +589,7 @@ Outside."
     (org-element-up)
     (should (looking-at "\\* Top"))))
 
-(ert-deftest test-org-elemnet/down-element ()
+(ert-deftest test-org-element/down-element ()
   "Test `org-element-down' specifications."
   ;; 1. Error when the element hasn't got a recursive type.
   (org-test-with-temp-text "Paragraph."
@@ -326,6 +603,50 @@ Outside."
   (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph.\n#+END_CENTER"
     (org-element-down)
     (should (looking-at "Paragraph"))))
+
+(ert-deftest test-org-element/drag-backward ()
+  "Test `org-element-drag-backward' specifications."
+  ;; 1. Error when trying to move first element of buffer.
+  (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
+    (should-error (org-element-drag-backward)))
+  ;; 2. Error when trying to swap nested elements.
+  (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
+    (forward-line)
+    (should-error (org-element-drag-backward)))
+  ;; 3. Error when trying to swap an headline element and
+  ;;    a non-headline element.
+  (org-test-with-temp-text "Test.\n* Head 1"
+    (forward-line)
+    (should-error (org-element-drag-backward)))
+  ;; 4. Otherwise, swap elements, preserving column and blank lines
+  ;;    between elements.
+  (org-test-with-temp-text "Para1\n\n\nParagraph 2\n\nPara3"
+    (search-forward "graph")
+    (org-element-drag-backward)
+    (should (equal (buffer-string) "Paragraph 2\n\n\nPara1\n\nPara3"))
+    (should (looking-at " 2"))))
+
+(ert-deftest test-org-element/drag-forward ()
+  "Test `org-element-drag-forward' specifications."
+  ;; 1. Error when trying to move first element of buffer.
+  (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
+    (goto-line 3)
+    (should-error (org-element-drag-forward)))
+  ;; 2. Error when trying to swap nested elements.
+  (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
+    (forward-line)
+    (should-error (org-element-drag-forward)))
+  ;; 3. Error when trying to swap a non-headline element and an
+  ;;    headline.
+  (org-test-with-temp-text "Test.\n* Head 1"
+    (should-error (org-element-drag-forward)))
+  ;; 4. Otherwise, swap elements, preserving column and blank lines
+  ;;    between elements.
+  (org-test-with-temp-text "Paragraph 1\n\n\nPara2\n\nPara3"
+    (search-forward "graph")
+    (org-element-drag-forward)
+    (should (equal (buffer-string) "Para2\n\n\nParagraph 1\n\nPara3"))
+    (should (looking-at " 1"))))
 
 
 (provide 'test-org-element)

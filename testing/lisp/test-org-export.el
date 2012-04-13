@@ -82,10 +82,10 @@ as Org syntax."
 #+TITLE: with spaces"
       (org-export-get-inbuffer-options))
     '(:author
-      "Me, Myself and I" :creator "Idem" :date "Today"
+      ("Me, Myself and I") :creator "Idem" :date "Today"
       :description "Testing\nwith two lines" :email "some@email.org"
       :exclude-tags ("noexport" "invisible") :keywords "test" :language "en"
-      :select-tags ("export") :title "Some title with spaces"))))
+      :select-tags ("export") :title ("Some title with spaces")))))
 
 (ert-deftest test-org-export/define-macro ()
   "Try defining various Org macro using in-buffer #+MACRO: keyword."
@@ -232,7 +232,21 @@ text
       (transient-mark-mode 1)
       (push-mark (point) t t)
       (goto-char (point-at-eol))
-      (should (equal (org-export-as 'test) "text\n")))))
+      (should (equal (org-export-as 'test) "text\n"))))
+  ;; Subtree with a code block calling another block outside.
+  (org-test-with-temp-text "
+* Head1
+#+BEGIN_SRC emacs-lisp :noweb yes :exports results
+<<test>>
+#+END_SRC
+* Head2
+#+NAME: test
+#+BEGIN_SRC emacs-lisp
+\(+ 1 2)
+#+END_SRC"
+    (org-test-with-backend "test"
+      (forward-line 1)
+      (should (equal (org-export-as 'test 'subtree) ": 3\n")))))
 
 (ert-deftest test-org-export/export-snippet ()
   "Test export snippets transcoding."
@@ -313,6 +327,10 @@ body\n")))
 	(org-test-with-temp-text "* Head1\n* Head2 (note)\n"
 	  (should (equal (org-export-as 'test) "* Head1\n")))))))
 
+
+
+;; Footnotes
+
 (ert-deftest test-org-export/footnotes ()
   "Test footnotes specifications."
   (let ((org-footnote-section nil))
@@ -320,10 +338,8 @@ body\n")))
     (org-test-with-temp-text
 	"Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
       (let* ((tree (org-element-parse-buffer))
-	     (info (org-combine-plists
-		    (org-export-initial-options) '(:with-footnotes t))))
-	(setq info (org-combine-plists
-		    info (org-export-collect-tree-properties tree info 'test)))
+	     (info (org-export-store-footnote-definitions
+		    `(:parse-tree ,tree :with-footnotes t))))
 	(should
 	 (equal
 	  '((1 . "A") (2 . "B") (3 . "C") (4 . "D"))
@@ -340,10 +356,8 @@ body\n")))
     (org-test-with-temp-text
 	"Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
       (let* ((tree (org-element-parse-buffer))
-	     (info (org-combine-plists
-		    (org-export-initial-options) '(:with-footnotes t))))
-	(setq info (org-combine-plists
-		    info (org-export-collect-tree-properties tree info 'test)))
+	     (info (org-export-store-footnote-definitions
+		    `(:parse-tree ,tree :with-footnotes t))))
 	(should
 	 (equal
 	  '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
@@ -359,10 +373,8 @@ body\n")))
       ;; Hide definitions.
       (narrow-to-region (point) (point-at-eol))
       (let* ((tree (org-element-parse-buffer))
-	     (info (org-combine-plists
-		    (org-export-initial-options) '(:with-footnotes t))))
-	(setq info (org-combine-plists
-		    info (org-export-collect-tree-properties tree info 'test)))
+	     (info (org-export-store-footnote-definitions
+		    `(:parse-tree ,tree :with-footnotes t))))
 	;; Both footnotes should be seen.
 	(should
 	 (= (length (org-export-collect-footnote-definitions tree info)) 2))))
@@ -372,23 +384,35 @@ body\n")))
 \[fn:2] B [fn:3] [fn::D].
 
 \[fn:3] C."
-      (let ((tree (org-element-parse-buffer))
-	    (info (org-combine-plists
-		   (org-export-initial-options) '(:with-footnotes t))))
-	(setq info (org-combine-plists
-		    info (org-export-collect-tree-properties tree info 'test)))
+      (let* ((tree (org-element-parse-buffer))
+	     (info (org-export-store-footnote-definitions
+		    `(:parse-tree ,tree :with-footnotes t))))
 	(should (= (length (org-export-collect-footnote-definitions tree info))
-		   4))))))
+		   4))))
+    ;; 5. Test export of footnotes defined outside parsing scope.
+    (org-test-with-temp-text "[fn:1] Out of scope
+* Title
+Paragraph[fn:1]"
+      (org-test-with-backend "test"
+	(flet ((org-test-footnote-reference
+		(fn-ref contents info)
+		(org-element-interpret-data
+		 (org-export-get-footnote-definition fn-ref info))))
+	  (forward-line)
+	  (should (equal "ParagraphOut of scope\n"
+			 (org-export-as 'test 'subtree))))))))
+
+
+
+;;; Links
 
 (ert-deftest test-org-export/fuzzy-links ()
-  "Test fuzz link export specifications."
+  "Test fuzzy link export specifications."
   ;; 1. Links to invisible (keyword) targets should be ignored.
   (org-test-with-temp-text
       "Paragraph.\n#+TARGET: Test\n[[Test]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should-not
        (org-element-map
 	tree 'link
@@ -399,9 +423,7 @@ body\n")))
   (org-test-with-temp-text
       "Paragraph.\n* Head1\n* Head2\n* Head3\n[[Head2]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        ;; Note: Headline's number is in fact a list of numbers.
        (equal '(2)
@@ -414,9 +436,7 @@ body\n")))
   (org-test-with-temp-text
       "- Item1\n  - Item11\n  - <<test>>Item12\n- Item2\n\n\n[[test]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        ;; Note: Item's number is in fact a list of numbers.
        (equal '(1 2)
@@ -430,9 +450,7 @@ body\n")))
   (org-test-with-temp-text
       "Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        (equal '(2 3)
 	      (org-element-map
@@ -445,9 +463,7 @@ body\n")))
   (org-test-with-temp-text
       "#+NAME: tbl1\n|1|2|\n#+NAME: tbl2\n|3|4|\n#+NAME: tbl3\n|5|6|\n[[tbl2]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        (= 2
 	  (org-element-map
@@ -460,9 +476,7 @@ body\n")))
   (org-test-with-temp-text
       "* Head1\n* Head2\nParagraph<<target>>\n* Head3\n[[target]]"
     (let* ((tree (org-element-parse-buffer))
-	   (info (org-combine-plists (org-export-initial-options))))
-      (setq info (org-combine-plists
-		  info (org-export-collect-tree-properties tree info 'test)))
+	   (info (org-export-collect-tree-properties tree nil 'test)))
       (should
        (equal '(2)
 	      (org-element-map
@@ -470,3 +484,148 @@ body\n")))
 	       (lambda (link)
 		 (org-export-get-ordinal
 		  (org-export-resolve-fuzzy-link link info) info)) info t))))))
+
+(defun test-org-export/resolve-coderef ()
+  "Test `org-export-resolve-coderef' specifications."
+  (let ((org-coderef-label-format "(ref:%s)"))
+    ;; 1. A link to a "-n -k -r" block returns line number.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -n -k -r\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -n -k -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    ;; 2. A link to a "-n -r" block returns line number.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -n -r\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    ;; 3. A link to a "-n" block returns coderef.
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -n\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
+		"coderef"))))
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -n\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
+		"coderef"))))
+    ;; 4. A link to a "-r" block returns line number.
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -r\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
+    ;; 5. A link to a block without a switch returns coderef.
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
+		"coderef"))))
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE\nText (ref:coderef)\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should
+	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
+		"coderef"))))
+    ;; 6. Correctly handle continued line numbers.  A "+n" switch
+    ;;    should resume numbering from previous block with numbered
+    ;;    lines, ignoring blocks not numbering lines in the process.
+    ;;    A "-n" switch resets count.
+    (org-test-with-temp-text "
+#+BEGIN_EXAMPLE -n
+Text.
+#+END_EXAMPLE
+
+#+BEGIN_SRC emacs-lisp
+\(- 1 1)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp +n -r
+\(+ 1 1) (ref:addition)
+#+END_SRC
+
+#+BEGIN_EXAMPLE -n -r
+Another text. (ref:text)
+#+END_EXAMPLE"
+      (let* ((tree (org-element-parse-buffer))
+	     (info `(:parse-tree ,tree)))
+	(should (= (org-export-resolve-coderef "addition" info) 2))
+	(should (= (org-export-resolve-coderef "text" info) 1))))
+    ;; 7. Recognize coderef with user-specified syntax.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText. [ref:text]\n#+END_EXAMPLE"
+      (let ((tree (org-element-parse-buffer)))
+	(should (equal (org-export-resolve-coderef "text" `(:parse-tree ,tree))
+		       "text"))))))
+
+
+
+;;; Src-block and example-block
+
+(ert-deftest test-org-export/unravel-code ()
+  "Test `org-export-unravel-code' function."
+  (let ((org-coderef-label-format "(ref:%s)"))
+    ;; 1. Code without reference.
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE\n(+ 1 1)\n#+END_EXAMPLE"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("(+ 1 1)\n"))))
+    ;; 2. Code with reference.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE\n(+ 1 1) (ref:test)\n#+END_EXAMPLE"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("(+ 1 1)\n" (1 . "test")))))
+    ;; 3. Code with user-defined reference.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\n(+ 1 1) [ref:test]\n#+END_EXAMPLE"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("(+ 1 1)\n" (1 . "test")))))
+    ;; 4. Code references keys are relative to the current block.
+    (org-test-with-temp-text "
+#+BEGIN_EXAMPLE -n
+\(+ 1 1)
+#+END_EXAMPLE
+#+BEGIN_EXAMPLE +n
+\(+ 2 2)
+\(+ 3 3) (ref:one)
+#+END_EXAMPLE"
+      (goto-line 5)
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("(+ 2 2)\n(+ 3 3)\n" (2 . "one")))))
+    ;; 5. Free up comma-protected lines.
+    ;;
+    ;; 5.1. In an Org source block, every line is protected.
+    (org-test-with-temp-text
+	"#+BEGIN_SRC org\n,* Test\n,# comment\n,Text\n#+END_SRC"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("* Test\n# comment\nText\n"))))
+    ;; 5.2. In other blocks, only headlines, comments and keywords are
+    ;;      protected.
+    (org-test-with-temp-text
+	"#+BEGIN_EXAMPLE\n,* Headline\n, * Not headline\n,Keep\n#+END_EXAMPLE"
+      (should (equal (org-export-unravel-code (org-element-current-element))
+		     '("* Headline\n, * Not headline\n,Keep\n"))))))
+
+
+
+(provide 'test-org-export)
+;;; test-org-export.el end here

@@ -671,6 +671,18 @@ This function should accept the file name as its single argument."
 		   "bibtex %b"
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"
 		   "pdflatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "2 runs of xelatex"
+		 ("xelatex -interaction nonstopmode -output-directory %o %f"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "3 runs of xelatex"
+		 ("xelatex -interaction nonstopmode -output-directory %o %f"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"))
+	  (const :tag "xelatex,bibtex,xelatex,xelatex"
+		 ("xelatex -interaction nonstopmode -output-directory %o %f"
+		   "bibtex %b"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"
+		   "xelatex -interaction nonstopmode -output-directory %o %f"))
 	  (const :tag "texi2dvi"
 		 ("texi2dvi -p -b -c -V %f"))
 	  (const :tag "rubber"
@@ -870,7 +882,7 @@ when PUB-DIR is set, use this as the publishing directory."
 	       (concat
 		(file-name-as-directory
 		 (or pub-dir
-		     (org-export-directory :LaTeX ext-plist)))
+		     (org-export-directory :LaTeX org-export-latex-options-plist)))
 		(file-name-sans-extension
 		 (or (and subtree-p
 			  (org-entry-get rbeg "EXPORT_FILE_NAME" t))
@@ -885,7 +897,7 @@ when PUB-DIR is set, use this as the publishing directory."
 		   (concat filename ".tex")
 		 filename)))
 	 (auto-insert nil); Avoid any auto-insert stuff for the new file
-	 (TeX-master t) ; Avoid the Query for TeX master from AUCTeX
+	 (TeX-master (boundp 'TeX-master))
 	 (buffer (if to-buffer
 		     (cond
 		      ((eq to-buffer 'string) (get-buffer-create
@@ -1239,7 +1251,7 @@ numbered sections and lower levels as unnumbered sections."
 					     org-export-target-aliases))))
 	 (sectioning org-export-latex-sectioning)
 	 (depth org-export-latex-sectioning-depth)
-	 main-heading sub-heading)
+	 main-heading sub-heading ctnt)
     (when (symbolp (car sectioning))
       (setq sectioning (funcall (car sectioning) level heading))
       (when sectioning
@@ -1306,16 +1318,20 @@ numbered sections and lower levels as unnumbered sections."
 		 (delete-region (point-at-bol 0) (point))
 	       (insert (format "\\begin{%s}\n"
 			       (symbol-name org-export-latex-low-levels))))
-	     (insert (format "\n\\item %s\\\\\n%s%%"
-			     heading
-			     (if label (format "\\label{%s}" label) "")))
-	     (insert (org-export-latex-content content))
+	     (let ((ctnt (org-export-latex-content content)))
+	       (insert (format (if (not (equal (replace-regexp-in-string "\n" "" ctnt) ""))
+				   "\n\\item %s\\\\\n%s%%"
+				 "\n\\item %s\n%s%%")
+			       heading
+			       (if label (format "\\label{%s}" label) "")))
+	       (insert ctnt))
 	     (cond ((stringp subcontent) (insert subcontent))
 		   ((listp subcontent) (org-export-latex-sub subcontent)))
 	     (insert (format "\\end{%s} %% ends low level\n"
 			     (symbol-name org-export-latex-low-levels))))
 
-	    ((listp org-export-latex-low-levels)
+	    ((and (listp org-export-latex-low-levels)
+		  org-export-latex-low-levels)
 	     (if (string-match "% ends low level$"
 			       (buffer-substring (point-at-bol 0) (point)))
 		 (delete-region (point-at-bol 0) (point))
@@ -1917,10 +1933,14 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                          'org-label raw-table)
                   longtblp (and attr (stringp attr)
                                 (string-match "\\<longtable\\>" attr))
-		  tblenv (if (and attr (stringp attr)
-				  (or (string-match (regexp-quote "table*") attr)
-				      (string-match "\\<multicolumn\\>" attr)))
-			     "table*" "table")
+		  tblenv (if (and attr (stringp attr))
+			     (cond ((string-match "\\<sidewaystable\\>" attr)
+				    "sidewaystable")
+				   ((or (string-match (regexp-quote "table*") attr)
+					(string-match "\\<multicolumn\\>" attr))
+				    "table*")
+				   (t "table"))
+			   "table")
 		  tabular-env
 		  (if (and attr (stringp attr)
 			   (string-match "\\(tabular.\\)" attr))

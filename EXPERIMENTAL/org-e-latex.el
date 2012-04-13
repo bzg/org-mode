@@ -54,13 +54,16 @@
 (declare-function org-export-first-sibling-p "org-export" (headline info))
 (declare-function org-export-footnote-first-reference-p "org-export"
 		  (footnote-reference info))
+(declare-function org-export-format-code "org-export"
+		  (code fun &optional num-lines ref-alist))
+(declare-function org-export-format-code-default "org-export" (element info))
 (declare-function org-export-get-coderef-format "org-export" (path desc))
 (declare-function org-export-get-footnote-definition "org-export"
 		  (footnote-reference info))
 (declare-function org-export-get-footnote-number "org-export" (footnote info))
 (declare-function org-export-get-previous-element "org-export" (blob info))
 (declare-function org-export-get-relative-level "org-export" (headline info))
-(declare-function org-export-handle-code
+(declare-function org-export-unravel-code
 		  "org-export" (element info &optional num-fmt ref-fmt delayed))
 (declare-function org-export-included-file "org-export" (keyword backend info))
 (declare-function org-export-inline-image-p "org-export"
@@ -614,8 +617,14 @@ during latex export it will output
 ;;;; Plain text
 
 (defcustom org-e-latex-quotes
-  '(("fr" ("\\(\\s-\\|[[(]\\)\"" . "«~") ("\\(\\S-\\)\"" . "~»") ("\\(\\s-\\|(\\)'" . "'"))
-    ("en" ("\\(\\s-\\|[[(]\\)\"" . "``") ("\\(\\S-\\)\"" . "''") ("\\(\\s-\\|(\\)'" . "`")))
+  '(("fr"
+     ("\\(\\s-\\|[[(]\\|^\\)\"" . "«~")
+     ("\\(\\S-\\)\"" . "~»")
+     ("\\(\\s-\\|(\\|^\\)'" . "'"))
+    ("en"
+     ("\\(\\s-\\|[[(]\\|^\\)\"" . "``")
+     ("\\(\\S-\\)\"" . "''")
+     ("\\(\\s-\\|(\\|^\\)'" . "`")))
   "Alist for quotes to use when converting english double-quotes.
 
 The CAR of each item in this alist is the language code.
@@ -959,12 +968,13 @@ contextual information."
 ;;;; Example Block
 
 (defun org-e-latex-example-block (example-block contents info)
-  "Transcode a EXAMPLE-BLOCK element from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((options (or (org-element-property :options example-block) ""))
-	 (value (org-export-handle-code example-block info)))
-    (org-e-latex--wrap-label
-     example-block (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
+  "Transcode an EXAMPLE-BLOCK element from Org to LaTeX.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (org-e-latex--wrap-label
+   example-block
+   (format "\\begin{verbatim}\n%s\\end{verbatim}"
+	   (org-export-format-code-default example-block info))))
 
 
 ;;;; Export Snippet
@@ -1284,14 +1294,14 @@ contextual information."
 (defun org-e-latex-keyword (keyword contents info)
   "Transcode a KEYWORD element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((key (downcase (org-element-property :key keyword)))
+  (let ((key (org-element-property :key keyword))
 	(value (org-element-property :value keyword)))
     (cond
-     ((string= key "latex") value)
-     ((string= key "index") (format "\\index{%s}" value))
+     ((string= key "LATEX") value)
+     ((string= key "INDEX") (format "\\index{%s}" value))
      ;; Invisible targets.
-     ((string= key "target") nil)
-     ((string= key "toc")
+     ((string= key "TARGET") nil)
+     ((string= key "TOC")
       (let ((value (downcase value)))
 	(cond
 	 ((string-match "\\<headlines\\>" value)
@@ -1651,7 +1661,7 @@ TEXT is the text of the target.  INFO is a plist holding
 contextual information."
   (format "\\label{%s}%s"
 	  (org-export-solidify-link-text
-	   (org-element-property :raw-value radio-target))
+	   (org-element-property :value radio-target))
 	  text))
 
 
@@ -1674,39 +1684,68 @@ holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-property :language src-block))
-	 (code (org-export-handle-code src-block info))
 	 (caption (org-element-property :caption src-block))
 	 (label (org-element-property :name src-block))
 	 (custom-env (and lang
 			  (cadr (assq (intern lang)
-				      org-e-latex-custom-lang-environments)))))
+				      org-e-latex-custom-lang-environments))))
+	 (num-start (case (org-element-property :number-lines src-block)
+		      (continued (org-export-get-loc src-block info))
+		      (new 0)))
+	 (retain-labels (org-element-property :retain-labels src-block)))
     (cond
-     ;; No source fontification.
+     ;; Case 1.  No source fontification.
      ((not org-e-latex-listings)
-      (let ((caption-str (org-e-latex--caption/label-string
-			  caption label info))
+      (let ((caption-str (org-e-latex--caption/label-string caption label info))
 	    (float-env (when caption "\\begin{figure}[H]\n%s\n\\end{figure}")))
-	(format (or float-env "%s")
-		(concat
-		 caption-str
-		 (format "\\begin{verbatim}\n%s\\end{verbatim}" code)))))
-     ;; Custom environment.
-     (custom-env
-      (format "\\begin{%s}\n%s\\end{%s}\n" custom-env code custom-env))
-     ;; Use minted package.
+	(format
+	 (or float-env "%s")
+	 (concat caption-str
+		 (format "\\begin{verbatim}\n%s\\end{verbatim}"
+			 (org-export-format-code-default src-block info))))))
+     ;; Case 2.  Custom environment.
+     (custom-env (format "\\begin{%s}\n%s\\end{%s}\n"
+			 custom-env
+			 (org-export-format-code-default src-block info)
+			 custom-env))
+     ;; Case 3.  Use minted package.
      ((eq org-e-latex-listings 'minted)
-      (let* ((mint-lang (or (cadr (assq (intern lang) org-e-latex-minted-langs))
-			    lang))
-	     (float-env (when (or label caption)
-			  (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
-				  (org-e-latex--caption/label-string
-				   caption label info))))
-	     (body (format "\\begin{minted}[%s]{%s}\n%s\\end{minted}"
-			   (org-e-latex--make-option-string
-			    org-e-latex-minted-options)
-			   mint-lang code)))
+      (let ((float-env (when (or label caption)
+			 (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
+				 (org-e-latex--caption/label-string
+				  caption label info))))
+	    (body
+	     (format
+	      "\\begin{minted}[%s]{%s}\n%s\\end{minted}"
+	      ;; Options.
+	      (org-e-latex--make-option-string
+	       (if (not num-start) org-e-latex-minted-options
+		 (append `(("linenos")
+			   ("firstnumber" ,(number-to-string (1+ num-start))))
+			 org-e-latex-minted-options)))
+	      ;; Language.
+	      (or (cadr (assq (intern lang) org-e-latex-minted-langs)) lang)
+	      ;; Source code.
+	      (let* ((code-info (org-export-unravel-code src-block))
+		     (max-width
+		      (apply 'max
+			     (mapcar 'length
+				     (org-split-string (car code-info) "\n")))))
+		(org-export-format-code
+		 (car code-info)
+		 (lambda (loc num ref)
+		   (concat
+		    loc
+		    (when ref
+		      ;; Ensure references are flushed to the right,
+		      ;; separated with 6 spaces from the widest line
+		      ;; of code.
+		      (concat (make-string (+ (- max-width (length loc)) 6) ? )
+			      (format "(%s)" ref)))))
+		 nil (and retain-labels (cdr code-info)))))))
+	;; Return value.
 	(if float-env (format float-env body) body)))
-     ;; Use listings package.
+     ;; Case 4.  Use listings package.
      (t
       (let ((lst-lang
 	     (or (cadr (assq (intern lang) org-e-latex-listings-langs)) lang))
@@ -1719,14 +1758,39 @@ contextual information."
 		    "{[%s]%s}"
 		    (org-export-secondary-string (cdr caption) 'e-latex info)
 		    main))))))
-	(concat (format "\\lstset{%s}\n"
-			(org-e-latex--make-option-string
-			 (append org-e-latex-listings-options
-				 `(("language" ,lst-lang))
-				 (when label `(("label" ,label)))
-				 (when caption-str
-				   `(("caption" ,caption-str))))))
-		(format "\\begin{lstlisting}\n%s\\end{lstlisting}" code)))))))
+	(concat
+	 ;; Options.
+	 (format "\\lstset{%s}\n"
+		 (org-e-latex--make-option-string
+		  (append org-e-latex-listings-options
+			  `(("language" ,lst-lang))
+			  (when label `(("label" ,label)))
+			  (when caption-str `(("caption" ,caption-str)))
+			  (cond ((not num-start) '(("numbers" "none")))
+				((zerop num-start) '(("numbers" "left")))
+				(t `(("numbers" "left")
+				     ("firstnumber"
+				      ,(number-to-string (1+ num-start)))))))))
+	 ;; Source code.
+	 (format
+	  "\\begin{lstlisting}\n%s\\end{lstlisting}"
+	  (let* ((code-info (org-export-unravel-code src-block))
+		 (max-width
+		  (apply 'max
+			 (mapcar 'length
+				 (org-split-string (car code-info) "\n")))))
+	    (org-export-format-code
+	     (car code-info)
+	     (lambda (loc num ref)
+	       (concat
+		loc
+		(when ref
+		  ;; Ensure references are flushed to the right,
+		  ;; separated with 6 spaces from the widest line of
+		  ;; code
+		  (concat (make-string (+ (- max-width (length loc)) 6) ? )
+			  (format "(%s)" ref)))))
+	     nil (and retain-labels (cdr code-info)))))))))))
 
 
 ;;;; Statistics Cookie
@@ -1781,9 +1845,12 @@ table."
 		     ((string-match "\\<tabular.?\\>" attr)
 		      (org-match-string-no-properties 0 attr))
 		     (t org-e-latex-default-table-environment)))
-	 ;; If table is a float, determine environment: table or table*.
+	 ;; If table is a float, determine environment: table, table*
+	 ;; or sidewaystable.
 	 (float-env (cond
 		     ((string= "longtable" table-env) nil)
+		     ((and attr (string-match "\\<sidewaystable\\>" attr))
+		      "sidewaystables")
 		     ((and attr
 			   (or (string-match (regexp-quote "table*") attr)
 			       (string-match "\\<multicolumn\\>" attr)))

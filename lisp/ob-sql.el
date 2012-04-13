@@ -51,8 +51,9 @@
 
 (defvar org-babel-default-header-args:sql '())
 
-(defvar org-babel-header-arg-names:sql
-  '(engine out-file))
+(defvar org-babel-header-args:sql
+  '((engine   . :any)
+    (out-file . :any)))
 
 (defun org-babel-expand-body:sql (body params)
   "Expand BODY according to the values of PARAMS."
