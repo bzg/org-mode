@@ -307,36 +307,35 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
 	   "<table:table-column table:style-name=\"%sColumn\"/>" "" style))))
      col-nos "\n")))
 
-
-(defun org-e-odt-begin-table (caption label attributes short-caption)
-  ;; (setq org-e-odt-table-indentedp (not (null org-lparse-list-stack)))
-  (setq org-e-odt-table-indentedp nil)	; FIXME
-  (when org-e-odt-table-indentedp
-    ;; Within the Org file, the table is appearing within a list item.
-    ;; OpenDocument doesn't allow table to appear within list items.
-    ;; Temporarily terminate the list, emit the table and then
-    ;; re-continue the list.
-    (org-e-odt-discontinue-list)
-    ;; Put the Table in an indented section.
-    (let ((level (length org-e-odt-list-stack-stashed)))
-      (org-e-odt-begin-section (format "OrgIndentedSection-Level-%d" level))))
-  (setq attributes (org-e-odt-parse-block-attributes attributes))
-  (setq org-e-odt-table-style (plist-get attributes :style))
-  (setq org-e-odt-table-style-spec
-	(assoc org-e-odt-table-style org-e-odt-table-styles))
-  (concat
-   (org-e-odt-format-stylized-paragraph
-    'table (org-e-odt-format-entity-caption label caption "__Table__"))
-   (let ((automatic-name (org-e-odt-add-automatic-style "Table" attributes)))
-     (format
-      "\n<table:table table:name=\"%s\" table:style-name=\"%s\">\n"
-      (or short-caption (car automatic-name))
-      (or (nth 1 org-e-odt-table-style-spec) (cdr automatic-name) "OrgTable")))
-   (org-e-odt-format-table-columns) "\n")
-
-  ;; (org-e-html-pp  table-info)
-
-  )
+(defun org-e-odt-begin-table (caption-from info)
+  (let* ((captions (org-e-odt-format-label caption-from info 'definition))
+	 (caption (car captions)) (short-caption (cdr captions))
+	 (attributes (mapconcat #'identity
+				(org-element-property :attr_odt caption-from)
+				" "))
+	 (attributes (org-e-odt-parse-block-attributes attributes)))
+    ;; (setq org-e-odt-table-indentedp (not (null org-lparse-list-stack)))
+    (setq org-e-odt-table-indentedp nil) ; FIXME
+    (when org-e-odt-table-indentedp
+      ;; Within the Org file, the table is appearing within a list item.
+      ;; OpenDocument doesn't allow table to appear within list items.
+      ;; Temporarily terminate the list, emit the table and then
+      ;; re-continue the list.
+      (org-e-odt-discontinue-list)
+      ;; Put the Table in an indented section.
+      (let ((level (length org-e-odt-list-stack-stashed)))
+	(org-e-odt-begin-section (format "OrgIndentedSection-Level-%d" level))))
+    (setq org-e-odt-table-style (plist-get attributes :style))
+    (setq org-e-odt-table-style-spec
+	  (assoc org-e-odt-table-style org-e-odt-table-styles))
+    (concat
+     (and caption (org-e-odt-format-stylized-paragraph 'table caption))
+     (let ((automatic-name (org-e-odt-add-automatic-style "Table" attributes)))
+       (format
+	"\n<table:table table:name=\"%s\" table:style-name=\"%s\">\n"
+	(or short-caption (car automatic-name))
+	(or (nth 1 org-e-odt-table-style-spec) (cdr automatic-name) "OrgTable")))
+     (org-e-odt-format-table-columns) "\n")))
 
 (defun org-e-odt-end-table ()
   (concat
@@ -700,62 +699,62 @@ Update styles.xml with styles that were collected as part of
     (file-relative-name (expand-file-name path dir)
 			(expand-file-name "eyecandy" dir))))
 
-(defun org-e-odt-format-formula (src &optional caption label attr)
-  (let* ((href
+(defun org-e-odt-format-formula (element info)
+  (let* ((src (cond
+	       ((eq (org-element-type element) 'link) ; FIXME
+		(let* ((type (org-element-property :type element))
+		       (raw-path (org-element-property :path element)))
+		  (cond
+		   ((file-name-absolute-p raw-path)
+		    (expand-file-name raw-path))
+		   (t raw-path))))
+	       ((member (org-element-type element)
+			'(latex-fragment latex-environment))
+		(let* ((latex-frag (org-remove-indentation
+				    (org-element-property
+				     :value element)))
+		       (formula-link (org-e-odt-format-latex
+				      latex-frag 'mathml)))
+		  (and formula-link
+		       (string-match "file:\\([^]]*\\)" formula-link)
+		       (match-string 1 formula-link))))
+	       (t (error "what is this?"))))
+	 (caption-from
+	  (case (org-element-type element)
+	    (link (org-export-get-parent-paragraph element info))
+	    (t element)))
+	 (captions (org-e-odt-format-label caption-from info 'definition))
+	 (caption (car captions))
+	 (href
 	  (org-e-odt-format-tags
 	   "<draw:object xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
 	   (file-name-directory (org-e-odt-copy-formula-file src))))
-	 ;; FIXME
-	 ;; (caption (org-find-text-property-in-string 'org-caption src))
-	 ;; (short-caption
-	 ;;  (or (org-find-text-property-in-string 'org-caption-shortn src)
-	 ;; 	caption))
-	 ;; (caption (and caption (org-xml-format-desc caption)))
-	 ;; (short-caption (and short-caption
-	 ;; 		     (org-xml-encode-plain-text short-caption)))
-	 ;; (label (org-find-text-property-in-string 'org-label src))
-	 ;; (latex-frag (org-find-text-property-in-string 'org-latex-src src))
-	 (embed-as (or
-		    ;; FIXME
-		    ;; (and latex-frag
-		    ;;      (org-find-text-property-in-string
-		    ;;       'org-latex-src-embed-type src))
-		    (if (or caption label) 'paragraph 'character)))
+	 (embed-as (if caption 'paragraph 'character))
 	 width height)
-    ;; FIXME
-    ;; (when latex-frag
-    ;; 	(setq href (org-propertize href :title "LaTeX Fragment"
-    ;; 				   :description latex-frag)))
     (cond
      ((eq embed-as 'character)
       (org-e-odt-format-entity "InlineFormula" href width height))
      (t
-      ;; (org-lparse-end-paragraph)
-
       (let ((table-info nil)
 	    (table-info
 	     '(:alignment ["c" "c"]
 			  :column-groups [nil nil]
 			  :row-groups (0)
 			  :special-column-p nil :width [8 1]))
-	    (org-lparse-table-ncols 2)
-	    )				; FIXME
+	    (org-lparse-table-ncols 2)) ; FIXME
 	(org-e-odt-list-table
-	 `((,(org-e-odt-format-entity
-	      (if (not (or caption label)) "DisplayFormula"
-		"CaptionedDisplayFormula")
-	      href width height :caption caption :label label
-	      :short-caption short-caption)
-	    ,(if (not (or caption label)) ""
-	       (let* ((label-props (car org-e-odt-entity-labels-alist)))
-		 (setcar (last label-props) "math-label")
-		 (apply 'org-e-odt-format-label-definition
-			caption label-props)))))
-	 nil nil ":style \"OrgEquation\"" ;; nil '((1 "c" 8) (2 "c" 1)) FIXME
-	 ))
-
-      ;; (throw 'nextline nil)
-      ))))
+	 (list
+	  (list
+	   (org-e-odt-format-entity
+	    "CaptionedDisplayFormula" href width height captions)
+	   (let* ((org-e-odt-category-map-alist
+		   '(("__Table__" "Table" "value")
+		     ("__Figure__" "Illustration" "value")
+		     ("__MathFormula__" "Text" "math-label")
+		     ("__DvipngImage__" "Equation" "value")
+		     ("__Listing__" "Listing" "value"))))
+	     (car (org-e-odt-format-label caption-from info 'definition)))))
+	 '(table (:attr_odt (":style \"OrgEquation\""))) info))))))
 
 (defun org-e-odt-copy-formula-file (path)
   "Returns the internal name of the file"
@@ -921,63 +920,6 @@ ATTR is a string of other attributes of the a element."
 	(setq params (format "(%s)" params)))
       (ignore-errors (read params)))))
 
-(defun org-e-odt-format-image (src  &optional
-				    caption label attr
-				    embed-as ; FIXME
-				    category ; FIXME
-				    )
-  "Create image tag with source and attributes."
-  (let* ((href (org-e-odt-format-tags
-		"<draw:image xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
-		(org-e-odt-copy-image-file src)))
-	 ;; (caption (org-find-text-property-in-string 'org-caption src))
-	 ;; (short-caption
-	 ;;  (or (org-find-text-property-in-string 'org-caption-shortn src)
-	 ;;      caption))
-	 ;; (caption (and caption (org-xml-format-desc caption)))
-	 ;; (short-caption (and short-caption
-	 ;; 		     (org-xml-encode-plain-text short-caption)))
-	 ;; (attr (org-find-text-property-in-string 'org-attributes src))
-	 ;; (label (org-find-text-property-in-string 'org-label src))
-	 ;; (latex-frag (org-find-text-property-in-string
-	 ;; 		'org-latex-src src))
-	 ;; (category (and latex-frag "__DvipngImage__")) ; FIXME
-	 (attr-plist (org-e-odt-parse-block-attributes attr))
-	 (user-frame-anchor
-	  (car (assoc-string (plist-get attr-plist :anchor)
-			     '(("as-char") ("paragraph") ("page")) t)))
-	 (user-frame-style
-	  (and user-frame-anchor (plist-get attr-plist :style)))
-	 (user-frame-attrs
-	  (and user-frame-anchor (plist-get attr-plist :attributes)))
-	 (user-frame-params
-	  (list user-frame-style user-frame-attrs user-frame-anchor))
-	 (embed-as (or embed-as user-frame-anchor "paragraph"))
-	 ;; (embed-as (cond
-	 ;; 	      (latex-frag
-	 ;; 	       (symbol-name
-	 ;; 	      	(case (org-find-text-property-in-string ; FIXME
-	 ;; 	      	       'org-latex-src-embed-type src)
-	 ;; 	      	  (paragraph 'paragraph)
-	 ;; 	      	  (t 'as-char))))
-	 ;; 	      (user-frame-anchor)
-	 ;; 	      (t "paragraph")))
-	 (size (org-e-odt-image-size-from-file
-		src (plist-get attr-plist :width)
-		(plist-get attr-plist :height)
-		(plist-get attr-plist :scale) nil embed-as))
-	 (width (car size)) (height (cdr size)))
-    ;; (when latex-frag			; FIXME
-    ;; 	(setq href (org-propertize href :title "LaTeX Fragment"
-    ;; 				   :description latex-frag)))
-    (let ((frame-style-handle (concat (and (or caption label) "Captioned")
-				      embed-as "Image")))
-      (org-e-odt-format-entity
-       frame-style-handle href width height
-       :caption caption :label label :category category
-       :short-caption short-caption
-       :user-frame-params user-frame-params))))
-
 (defun org-e-odt-format-object-description (title description)
   (concat (and title (org-e-odt-format-tags
 		      '("<svg:title>" . "</svg:title>")
@@ -1018,39 +960,6 @@ ATTR is a string of other attributes of the a element."
     (loop for user-frame-param in user-frame-params
 	  for default-frame-param in default-frame-params
 	  collect (or user-frame-param default-frame-param))))
-
-(defun* org-e-odt-format-entity (entity href width height
-					&key caption label category
-					user-frame-params short-caption)
-  (let* ((entity-style (assoc-string entity org-e-odt-entity-frame-styles t))
-	 default-frame-params frame-params)
-    (cond
-     ((not (or caption label))
-      (setq default-frame-params (nth 2 entity-style))
-      (setq frame-params (org-e-odt-merge-frame-params
-			  default-frame-params user-frame-params))
-      (apply 'org-e-odt-format-frame href width height frame-params))
-     (t
-      (setq default-frame-params (nth 3 entity-style))
-      (setq frame-params (org-e-odt-merge-frame-params
-			  default-frame-params user-frame-params))
-      (apply 'org-e-odt-format-textbox
-	     (org-e-odt-format-stylized-paragraph
-	      'illustration
-	      (concat
-	       (apply 'org-e-odt-format-frame href width height
-		      (let ((entity-style-1 (copy-sequence
-					     (nth 2 entity-style))))
-			(setcar (cdr entity-style-1)
-				(concat
-				 (cadr entity-style-1)
-				 (and short-caption
-				      (format " draw:name=\"%s\" "
-					      short-caption))))
-			entity-style-1))
-	       (org-e-odt-format-entity-caption
-		label caption (or category (nth 1 entity-style)))))
-	     width height frame-params)))))
 
 (defun org-e-odt-copy-image-file (path)
   "Returns the internal name of the file"
@@ -1133,74 +1042,89 @@ ATTR is a string of other attributes of the a element."
 	  (setq width (* scale width) height (* scale height)))))
     (cons width height)))
 
-(defun org-e-odt-add-label-definition (label default-category)
-  "Create an entry in `org-e-odt-entity-labels-alist' and return it."
-  (let* ((label-props (assoc default-category org-e-odt-category-map-alist))
-	 ;; identify the sequence number
-	 (counter (nth 1 label-props))
-	 (sequence-var (intern counter))
-	 (seqno (1+ (or (plist-get org-e-odt-entity-counts-plist sequence-var)
-			0)))
-	 ;; assign an internal label, if user has not provided one
-	 (label (if label (substring-no-properties label)
-		  (format  "%s-%s" default-category seqno)))
-	 ;; identify label style
-	 (label-style (nth 2 label-props))
-	 ;; grok language setting
-	 (en-strings (assoc-default "en" org-e-odt-category-strings))
-	 (lang (plist-get info :language)) ; FIXME
-	 (lang-strings (assoc-default lang org-e-odt-category-strings))
-	 ;; retrieve localized category sting
-	 (pos (- (length org-e-odt-category-map-alist)
-		 (length (memq label-props org-e-odt-category-map-alist))))
-	 (category (or (nth pos lang-strings) (nth pos en-strings)))
-	 (label-props (list label category counter seqno label-style)))
-    (setq org-e-odt-entity-counts-plist
-	  (plist-put org-e-odt-entity-counts-plist sequence-var seqno))
-    ;; stash label properties for later retrieval
-    (push label-props org-e-odt-entity-labels-alist)
-    label-props))
+(defun org-e-odt-format-label (element info op)
+  (let* ((caption-from
+	  (case (org-element-type element)
+	    (link (org-export-get-parent-paragraph element info))
+	    (t element)))
+	 ;; get label and caption.
+	 (label (org-element-property :name caption-from))
+	 (caption (org-element-property :caption caption-from))
+	 (short-caption (cdr caption))
+	 ;; transcode captions.
+	 (caption (and (car caption) (org-export-secondary-string
+				      (car caption) 'e-odt info)))
+	 (short-caption (and short-caption (org-export-secondary-string
+					    short-caption 'e-odt info))))
+    (when (or label caption)
+      (let* ((default-category
+	       (cond
+		((eq (org-element-type element) 'table)
+		 "__Table__")
+		((org-e-odt-standalone-image-p element info)
+		 "__Figure__")
+		((member (org-element-type element)
+			 '(latex-environment latex-fragment))
+		 (let ((processing-type (plist-get info :LaTeX-fragments)))
+		   (cond
+		    ((eq processing-type 'dvipng) "__DvipngImage__")
+		    ((eq processing-type 'mathjax) "__MathFormula__")
+		    ((eq processing-type 't) "__MathFormula__")
+		    (t (error "Handle LaTeX:verbatim")))))
+		((eq (org-element-type element) 'src-block)
+		 "__Listing__")
+		(t (error "Handle enumeration of %S" element))))
+	     (predicate
+	      (cond
+	       ((member (org-element-type element)
+			'(table latex-environment src-block))
+		nil)
+	       ((org-e-odt-standalone-image-p element info)
+		'org-e-odt-standalone-image-p)
+	       (t (error "Handle enumeration of %S" element))))
+	     (seqno (org-e-odt-enumerate-element
+		     element info predicate)) ; FIXME
+	     ;; handle label props.
+	     (label-props (assoc default-category org-e-odt-category-map-alist))
+	     ;; identify opendocument counter
+	     (counter (nth 1 label-props))
+	     ;; identify label style
+	     (label-style (nth 2 label-props))
+	     ;; grok language setting
+	     (en-strings (assoc-default "en" org-e-odt-category-strings))
+	     (lang (plist-get info :language)) ; FIXME
+	     (lang-strings (assoc-default lang org-e-odt-category-strings))
+	     ;; retrieve localized category sting
+	     (pos (- (length org-e-odt-category-map-alist)
+		     (length (memq label-props org-e-odt-category-map-alist))))
+	     (category (or (nth pos lang-strings) (nth pos en-strings))))
+	(case op
+	  (definition
+	    ;; assign an internal label, if user has not provided one
+	    (setq label (or label (format  "%s-%s" default-category seqno)))
+	    (setq label (org-solidify-link-text label))
 
-(defun org-e-odt-format-label-reference (label default-category
-					       seqno) ; FIXME
-  (let* ((label-props (assoc default-category org-e-odt-category-map-alist))
-	 (category (nth 1 label-props))
-	 (counter category)		; FIXME
-	 (label-style (nth 2 label-props)))
-    (unless label-props
-      (error "Unknown category: %S" default-category))
-    (org-e-odt-do-format-label-reference
-     label category counter seqno label-style)))
-
-(defun org-e-odt-format-label-definition (caption label category counter
-						  seqno label-style)
-  (assert label)
-  (setq label (org-solidify-link-text label))
-  (format-spec
-   (cadr (assoc-string label-style org-e-odt-label-styles t))
-   `((?e . ,category)
-     (?n . ,(org-e-odt-format-tags-simple
-	     '("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
-	     (format "%d" seqno) label counter counter))
-     (?c . ,(or caption "")))))
-
-(defun org-e-odt-do-format-label-reference (label category counter
-						  seqno label-style)
-  (assert label)
-  (save-match-data
-    (let* ((fmt (cddr (assoc-string label-style org-e-odt-label-styles t)))
-	   (fmt1 (car fmt))
-	   (fmt2 (cadr fmt)))
-      (org-e-odt-format-tags-simple
-       '("<text:sequence-ref text:reference-format=\"%s\" text:ref-name=\"%s\">"
-	 . "</text:sequence-ref>")
-       (format-spec fmt2 `((?e . ,category)
-			   (?n . ,(format "%d" seqno)))) fmt1 label))))
-
-(defun org-e-odt-format-entity-caption (label caption category)
-  (if (not (or label caption)) ""
-    (apply 'org-e-odt-format-label-definition caption
-	   (org-e-odt-add-label-definition label category))))
+	    (cons
+	     (format-spec
+	      (cadr (assoc-string label-style org-e-odt-label-styles t))
+	      `((?e . ,category)
+		(?n . ,(org-e-odt-format-tags-simple
+			'("<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">" . "</text:sequence>")
+			seqno label counter counter))
+		(?c . ,(or caption ""))))
+	     short-caption))
+	  (reference
+	   (assert label)
+	   (setq label (org-solidify-link-text label))
+	   (let* ((fmt (cddr (assoc-string label-style org-e-odt-label-styles t)))
+		  (fmt1 (car fmt))
+		  (fmt2 (cadr fmt)))
+	     (org-e-odt-format-tags-simple
+	      '("<text:sequence-ref text:reference-format=\"%s\" text:ref-name=\"%s\">"
+		. "</text:sequence-ref>")
+	      (format-spec fmt2 `((?e . ,category)
+				  (?n . ,seqno))) fmt1 label)))
+	  (t (error "Unknow %S on label" op)))))))
 
 (defun org-e-odt-format-tags-1 (tag text prefix suffix &rest args)
   (cond
@@ -3638,23 +3562,21 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (label (org-element-property :name latex-environment)))
      (cond
       ((member processing-type '(t mathjax))
-       (let* ((formula-link (org-e-odt-format-latex latex-frag 'mathml)))
-	 (when (and formula-link
-		    (string-match "file:\\([^]]*\\)" formula-link))
-	   (org-e-odt-format-formula
-	    (match-string 1 formula-link) caption label attr))))
+       (org-e-odt-format-formula latex-environment info))
       ((equal processing-type 'dvipng)
-       (let* ((formula-link (org-e-odt-format-latex
-			     latex-frag processing-type)))
-	 (when (and formula-link
-		    (string-match "file:\\([^]]*\\)" formula-link))
-	   (org-e-odt-format-image
-	    (match-string 1 formula-link) caption label attr "paragraph"
-	    "__DvipngImage__"))))
+       (org-e-odt-format-stylized-paragraph
+	nil (org-e-odt-link--inline-image latex-environment info)))
       (t latex-frag)))))
 
 
 ;;;; Latex Fragment
+
+
+;; (when latex-frag			; FIXME
+;; 	(setq href (org-propertize href :title "LaTeX Fragment"
+;; 				   :description latex-frag)))
+;; handle verbatim
+;; provide descriptions
 
 (defun org-e-odt-latex-fragment (latex-fragment contents info)
   "Transcode a LATEX-FRAGMENT object from Org to HTML.
@@ -3663,19 +3585,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 (processing-type (plist-get info :LaTeX-fragments)))
     (cond
      ((member processing-type '(t mathjax))
-      (let* ((formula-link (org-e-odt-format-latex latex-frag 'mathml))
-	     (src (and formula-link
-		       (string-match "file:\\([^]]*\\)" formula-link)
-		       (match-string 1 formula-link))))
-	(assert src)
-	(org-e-odt-format-formula src)))
+      (org-e-odt-format-formula latex-fragment info))
      ((equal processing-type 'dvipng)
-      (let* ((formula-link (org-e-odt-format-latex latex-frag processing-type))
-	     (src (and formula-link
-		       (string-match "file:\\([^]]*\\)" formula-link)
-		       (match-string 1 formula-link))))
-	(assert src)
-	(org-e-odt-format-image src)))
+      (org-e-odt-link--inline-image latex-fragment info))
      (t latex-frag))))
 
 
@@ -3689,37 +3601,109 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Link
 
-(defun org-e-odt-link--inline-image (link desc info)
+(defun org-e-odt-link--inline-image (element info)
   "Return HTML code for an inline image.
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
-  (let* ((type (org-element-property :type link))
-	 (raw-path (org-element-property :path link))
-	 (path (cond ((member type '("http" "https"))
-		      (concat type ":" raw-path))
-		     ((file-name-absolute-p raw-path)
-		      (expand-file-name raw-path))
-		     (t raw-path)))
-	 (parent (org-export-get-parent-paragraph link info))
-	 (caption (org-element-property :caption parent))
-	 (short-caption (and (cdr caption) (org-export-secondary-string
-					    (cdr caption) 'e-odt info)))
-	 (caption (and (car caption) (org-export-secondary-string
-				      (car caption) 'e-odt info)))
-	 (label (org-element-property :name parent))
-	 ;; Retrieve latex attributes from the element around.
+  (let* ((src (cond
+	       ((eq (org-element-type element) 'link)
+		(let* ((type (org-element-property :type element))
+		       (raw-path (org-element-property :path element)))
+		  (cond ((member type '("http" "https"))
+			 (concat type ":" raw-path))
+			((file-name-absolute-p raw-path)
+			 (expand-file-name raw-path))
+			(t raw-path))))
+	       ((member (org-element-type element)
+			'(latex-fragment latex-environment))
+		(let* ((latex-frag (org-remove-indentation
+				    (org-element-property
+				     :value element)))
+		       (formula-link (org-e-odt-format-latex
+				      latex-frag 'dvipng)))
+		  (and formula-link
+		       (string-match "file:\\([^]]*\\)" formula-link)
+		       (match-string 1 formula-link))))
+	       (t (error "what is this?"))))
+	 (href (org-e-odt-format-tags
+		"<draw:image xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
+		(org-e-odt-copy-image-file src)))
+	 ;; extract attributes from #+ATTR_ODT line.
+	 (attr-from (case (org-element-type element)
+		      (link (org-export-get-parent-paragraph element info))
+		      (t element)))
 	 (attr (let ((raw-attr
 		      (mapconcat #'identity
-				 (org-element-property :attr_odt parent)
+				 (org-element-property :attr_odt attr-from)
 				 " ")))
-		 (unless (string= raw-attr "") raw-attr))))
-    ;; Now clear ATTR from any special keyword and set a default
-    ;; value if nothing is left.
-    (setq attr (if (not attr) "" (org-trim attr)))
-    ;; Return proper string, depending on DISPOSITION.
-    (org-e-odt-format-image
-     path caption label attr (if (org-e-html-standalone-image-p link info)
-				 "paragraph" "as-char"))))
+		 (unless (string= raw-attr "") raw-attr)))
+	 (attr (if (not attr) "" (org-trim attr)))
+	 ;; convert attributes to a plist.
+	 (attr-plist (org-e-odt-parse-block-attributes attr))
+	 ;; handle `:anchor', `:style' and `:attributes' properties.
+	 (user-frame-anchor
+	  (car (assoc-string (plist-get attr-plist :anchor)
+			     '(("as-char") ("paragraph") ("page")) t)))
+	 (user-frame-style
+	  (and user-frame-anchor (plist-get attr-plist :style)))
+	 (user-frame-attrs
+	  (and user-frame-anchor (plist-get attr-plist :attributes)))
+	 (user-frame-params
+	  (list user-frame-style user-frame-attrs user-frame-anchor))
+	 ;; (embed-as (or embed-as user-frame-anchor "paragraph"))
+	 ;; extrac
+	 ;; handle `:width', `:height' and `:scale' properties.
+	 (size (org-e-odt-image-size-from-file
+		src (plist-get attr-plist :width)
+		(plist-get attr-plist :height)
+		(plist-get attr-plist :scale) nil ;; embed-as
+		"paragraph"			  ; FIXME
+		))
+	 (width (car size)) (height (cdr size))
+
+
+	 (embed-as
+	  (case (org-element-type element)
+	    ((org-e-odt-standalone-image-p element info) "paragraph")
+	    (latex-fragment "as-char")
+	    (latex-environment "paragraph")
+	    (t "paragraph")))
+	 (captions (org-e-odt-format-label element info 'definition))
+	 (entity (concat (and caption "Captioned") embed-as "Image")))
+    (org-e-odt-format-entity entity href width height
+			     captions user-frame-params )))
+
+(defun org-e-odt-format-entity (entity href width height &optional
+				       captions user-frame-params)
+  (let* ((caption (car captions)) (short-caption (cdr captions))
+	 (entity-style (assoc-string entity org-e-odt-entity-frame-styles t))
+	 default-frame-params frame-params)
+    (cond
+     ((not caption)
+      (setq default-frame-params (nth 2 entity-style))
+      (setq frame-params (org-e-odt-merge-frame-params
+			  default-frame-params user-frame-params))
+      (apply 'org-e-odt-format-frame href width height frame-params))
+     (t
+      (setq default-frame-params (nth 3 entity-style))
+      (setq frame-params (org-e-odt-merge-frame-params
+			  default-frame-params user-frame-params))
+      (apply 'org-e-odt-format-textbox
+	     (org-e-odt-format-stylized-paragraph
+	      'illustration
+	      (concat
+	       (apply 'org-e-odt-format-frame href width height
+		      (let ((entity-style-1 (copy-sequence
+					     (nth 2 entity-style))))
+			(setcar (cdr entity-style-1)
+				(concat
+				 (cadr entity-style-1)
+				 (and short-caption
+				      (format " draw:name=\"%s\" "
+					      short-caption))))
+			entity-style-1))
+	       caption))
+	     width height frame-params)))))
 
 (defvar org-e-odt-standalone-image-predicate
   (function (lambda (paragraph)
@@ -3800,7 +3784,7 @@ INFO is a plist holding contextual information.  See
      ;; Image file.
      ((and (not desc) (org-export-inline-image-p
 		       link org-e-odt-inline-image-rules))
-      (org-e-odt-link--inline-image link desc info))
+      (org-e-odt-link--inline-image link info))
      ;; Radioed target: Target's name is obtained from original raw
      ;; link.  Path is parsed and transcoded in order to have a proper
      ;; display of the contents.
@@ -3845,36 +3829,21 @@ INFO is a plist holding contextual information.  See
 	     (org-e-odt-format-internal-link desc label)))
 	  ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
-	   ;; "__Table__"
-	   ;; "__Figure__"
-	   ;; "__MathFormula__"
-	   ;; "__DvipngImage__"
-	   (let ((path (org-export-solidify-link-text path)))
-	     (unless desc
-	       (setq number (cond
-			     ((org-e-odt-standalone-image-p destination info)
-			      (org-export-get-ordinal
-			       (assoc 'link (org-element-contents destination))
-			       info 'link 'org-e-odt-standalone-image-p))
-			     (t (org-export-get-ordinal destination info))))
-	       (setq desc (when number
-			    (if (atom number) (number-to-string number)
-			      (mapconcat 'number-to-string number ".")))))
-	     (let ((label path)
-		   (default-category
-		     (cond
-		      ((eq (org-element-type destination) 'table)
-		       "__Table__")
-		      ((org-e-odt-standalone-image-p destination info)
-		       "__Figure__")
-		      ((eq (org-element-type destination) 'latex-environment)
-					; FIXME: Check if it is
-					; acutally latex eqn.
-		       "__MathFormula__")
-		      ((eq (org-element-type destination) 'src-block)
-		       "__Listing__")
-		      (t (error "Handle enumeration of %S" destination)))))
-	       (org-e-odt-format-label-reference label default-category number)))))))
+	   ;; (unless desc
+	   ;;   (setq number (cond
+	   ;; 		   ((org-e-odt-standalone-image-p destination info)
+	   ;; 		    (org-export-get-ordinal
+	   ;; 		     (assoc 'link (org-element-contents destination))
+	   ;; 		     info 'link 'org-e-odt-standalone-image-p))
+	   ;; 		   (t (org-export-get-ordinal destination info))))
+	   ;;   (setq desc (when number
+	   ;; 		  (if (atom number) (number-to-string number)
+	   ;; 		    (mapconcat 'number-to-string number ".")))))
+
+	   (let ((label-reference
+		  (org-e-odt-format-label destination info 'reference)))
+	     (assert label-reference)
+	     label-reference)))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -4082,10 +4051,11 @@ contextual information."
     ;; (main (org-export-secondary-string (car caption) 'e-odt info))
     ;; (secondary (org-export-secondary-string (cdr caption) 'e-odt info))
     ;; (caption-str (org-e-odt--caption/label-string caption label info))
-    (concat
-     (org-e-odt-format-stylized-paragraph
-      'listing (org-e-odt-format-entity-caption label caption "__Listing__"))
-     (org-e-odt-format-code src-block info))))
+    (let* ((captions (org-e-odt-format-label src-block info 'definition))
+	   (caption (car captions)) (short-caption (cdr captions)))
+      (concat
+       (and caption (org-e-odt-format-stylized-paragraph 'listing caption))
+       (org-e-odt-format-code src-block info)))))
 
 
 ;;;; Statistics Cookie
@@ -4165,8 +4135,7 @@ contextual information."
 	       "</colgroup>"))))
     (concat preamble (if colgropen "</colgroup>"))))
 
-(defun org-e-odt-list-table (lines caption label attributes
-				   &optional short-caption)
+(defun org-e-odt-list-table (lines caption-from info)
   (let* ((splice nil) head
 	 (org-e-odt-table-rownum -1)
 	 i (cnt 0)
@@ -4184,7 +4153,7 @@ contextual information."
       (setq org-lparse-table-is-styled t)
 
       (concat
-       (org-e-odt-begin-table caption label attributes short-caption)
+       (org-e-odt-begin-table caption-from info)
        ;; FIXME (org-e-odt-table-preamble)
        (org-e-odt-begin-table-rowgroup head)
 
@@ -4249,16 +4218,7 @@ form (FIELD1 FIELD2 FIELD3 ...) as appropriate."
 (defun org-e-odt-table (table contents info)
   "Transcode a TABLE element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((caption (org-element-property :caption table))
-	 (short-caption (and (cdr caption) (org-export-secondary-string
-					    (cdr caption) 'e-odt info)))
-	 (caption (and (car caption) (org-export-secondary-string
-				      (car caption) 'e-odt info)))
-	 (label (org-element-property :name table))
-	 (attr (mapconcat #'identity
-			  (org-element-property :attr_odt table)
-			  " "))
-	 (raw-table (org-element-property :raw-table table))
+  (let* ((raw-table (org-element-property :raw-table table))
 	 (table-type (org-element-property :type table)))
     (case table-type
       (table.el
@@ -4275,8 +4235,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (parent (car genealogy))
 	      (parent-type (org-element-type parent)))
 	 (org-e-odt-list-table
-	  (org-e-odt-org-table-to-list-table lines)
-	  caption label attr short-caption))))))
+	  (org-e-odt-org-table-to-list-table lines) table info))))))
 
 
 ;;;; Target
@@ -4594,6 +4553,45 @@ using `org-open-file'."
    (add-to-list 'auto-mode-alist
 		(cons (concat  "\\." (car desc) "\\'") 'archive-mode)))
  org-e-odt-file-extensions)
+
+(defvar org-e-odt-display-outline-level 2)
+(defun org-e-odt-enumerate-element (element info &optional predicate n)
+  (let* ((numbered-parent-headline-at-<=-n
+	  (function
+	   (lambda (element n info)
+	     (loop for x in (org-export-get-genealogy element info)
+		   thereis (and (eq (org-element-type x) 'headline)
+		   		(<= (org-export-get-relative-level x info) n)
+		   		(org-export-numbered-headline-p x info)
+		   		x)))))
+	 (enumerate
+	  (function
+	   (lambda (element scope info &optional predicate)
+	     (let ((counter 0))
+	       (org-element-map
+		(or scope (plist-get info :parse-tree))
+		(org-element-type element)
+		(lambda (el)
+		  (and (or (not predicate) (funcall predicate el info))
+		       (incf counter)
+		       (equal element el)
+		       counter))
+		info 'first-match)))))
+	 (scope (funcall numbered-parent-headline-at-<=-n
+			 element (or n org-e-odt-display-outline-level) info))
+	 (ordinal (funcall enumerate element scope info predicate))
+	 (tag
+	  (concat
+	   ;; section number
+	   (and scope
+		(mapconcat 'number-to-string
+			   (org-export-get-headline-number scope info) "."))
+	   ;; separator
+	   (and scope ".")
+	   ;; ordinal
+	   (number-to-string ordinal))))
+    ;; (message "%s:\t%s" (org-element-property :name element) tag)
+    tag))
 
 (provide 'org-e-odt)
 
