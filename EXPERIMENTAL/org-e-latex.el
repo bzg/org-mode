@@ -63,8 +63,7 @@
 (declare-function org-export-get-footnote-number "org-export" (footnote info))
 (declare-function org-export-get-previous-element "org-export" (blob info))
 (declare-function org-export-get-relative-level "org-export" (headline info))
-(declare-function org-export-unravel-code
-		  "org-export" (element info &optional num-fmt ref-fmt delayed))
+(declare-function org-export-unravel-code "org-export" (element))
 (declare-function org-export-included-file "org-export" (keyword backend info))
 (declare-function org-export-inline-image-p "org-export"
 		  (link &optional extensions))
