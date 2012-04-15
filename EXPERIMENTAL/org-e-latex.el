@@ -1045,21 +1045,22 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	;; Retrieve all footnote references within the footnote and
 	;; add their definition after it, since LaTeX doesn't support
 	;; them inside.
-	(let (all-refs
-	      (search-refs
-	       (function
-		(lambda (data)
-		  ;; Return a list of all footnote references in DATA.
-		  (org-element-map
-		   data 'footnote-reference
-		   (lambda (ref)
-		     (when (org-export-footnote-first-reference-p ref info)
-		       (push ref all-refs)
-		       (when (eq (org-element-property :type ref) 'standard)
-			 (funcall
-			  search-refs
-			  (org-export-get-footnote-definition ref info)))))
-		   info) (reverse all-refs)))))
+	(let* (all-refs
+	       search-refs		; for byte-compiler
+	       (search-refs
+		(function
+		 (lambda (data)
+		   ;; Return a list of all footnote references in DATA.
+		   (org-element-map
+		    data 'footnote-reference
+		    (lambda (ref)
+		      (when (org-export-footnote-first-reference-p ref info)
+			(push ref all-refs)
+			(when (eq (org-element-property :type ref) 'standard)
+			  (funcall
+			   search-refs
+			   (org-export-get-footnote-definition ref info)))))
+		    info) (reverse all-refs)))))
 	  (mapconcat
 	   (lambda (ref)
 	     (format
