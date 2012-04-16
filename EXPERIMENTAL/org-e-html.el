@@ -174,7 +174,7 @@ Intended to be locally bound around a call to `org-export-as-html'." )
 
 ;;;; Debugging
 
-(defcustom org-e-html-pretty-output t
+(defcustom org-e-html-pretty-output nil
   "Enable this to generate pretty HTML."
   :group 'org-export-e-html
   :type 'boolean)
@@ -1545,9 +1545,11 @@ This function shouldn't be used for floats.  See
 
 (defun org-e-html-preamble (info)
   (when (plist-get info :html-preamble)
-    (let* ((title (plist-get info :title))
+    (let* ((title (org-export-secondary-string
+		   (plist-get info :title) 'e-html info))
 	   (date (org-e-html-format-date info))
-	   (author (plist-get info :author))
+	   (author (org-export-secondary-string
+		    (plist-get info :author) 'e-html info))
 	   (lang-words (or (assoc (plist-get info :language)
 				  org-export-language-setup)
 			   (assoc "en" org-export-language-setup)))
@@ -1698,7 +1700,8 @@ original parsed data.  INFO is a plist holding export options."
 		     (nth 1 org-e-html-divs)))
    ;; document title
    (format "
-<h1 class=\"title\"> %s </h1>\n" (plist-get info :title))
+<h1 class=\"title\">%s</h1>\n" (org-export-secondary-string
+				  (plist-get info :title) 'e-html info))
    ;; table of contents
    (let ((depth (plist-get info :with-toc)))
      (when (wholenump depth) (org-e-html-toc depth info)))
@@ -3104,10 +3107,6 @@ directory.
 
 Return output file's name."
   (interactive)
-
-  ;; FIXME
-  (with-current-buffer (get-buffer-create "*debug*")
-    (erase-buffer))
   (let* ((extension (concat "." org-e-html-extension))
 	 (file (org-export-output-file-name extension subtreep pub-dir)))
     (org-export-to-file
