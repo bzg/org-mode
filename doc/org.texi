@@ -4,7 +4,7 @@
 @setfilename ../../info/org
 @settitle The Org Manual
 
-@include git-describe.texi
+@include org-version.inc
 
 @c Use proper quote and backtick for code sections in PDF output
 @c Cf. Texinfo manual 14.2

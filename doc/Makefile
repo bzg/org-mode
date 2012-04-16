@@ -23,10 +23,10 @@ guide::		orgguide.texi
 	$(TEXI2HTML) -o $@ $<
 	../UTILITIES/guidesplit.pl $@/*
 
-git-describe.texi: org.texi
-	@echo "@c automatically generated, do not edit"  > git-describe.texi
-	@echo "@set VERSION $(ORGVERSION) ($(GITVERSION))" >> git-describe.texi
-	@echo "@set DATE $(DATE)" >> git-describe.texi
+org-version.inc:
+	@echo "@c automatically generated, do not edit"  > org-version.inc
+	@echo "@set VERSION $(ORGVERSION) ($(GITVERSION))" >> org-version.inc
+	@echo "@set DATE $(DATE)" >> org-version.inc
 
 
 install:	org
@@ -37,7 +37,7 @@ install:	org
 clean:
 	$(RM) org *.pdf *.html *_letter.tex \
 	      *.aux *.cp *.cps *.dvi *.fn *.fns *.ky *.kys *.pg *.pgs \
-	      *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps git-describe.texi
+	      *.toc *.tp *.tps *.vr *.vrs *.log *.html *.ps org-version.inc
 cleanall:	clean
 	$(RMR) guide manual
 
@@ -48,7 +48,7 @@ clean-install:
 .SUFFIXES:	.texi .tex .txt
 
 %:		%.texi
-	$(MAKE) git-describe.texi
+	$(MAKE) org-version.inc
 	$(MAKEINFO) --no-split $< -o $@
 
 %.pdf:		LC_ALL=C	# work around a bug in texi2dvi
