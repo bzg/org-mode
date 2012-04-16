@@ -201,10 +201,11 @@ and corresponding declarations."
 		  (cons (string :tag "Extension")
 			(string :tag "Declaration")))))
 
-(defcustom org-e-html-coding-system nil
-  "Coding system for HTML export, defaults to `buffer-file-coding-system'."
-  :group 'org-export-e-html
-  :type 'coding-system)
+;; Use `org-export-coding-system' instead
+;; (defcustom org-e-html-coding-system nil
+;;   "Coding system for HTML export, defaults to `buffer-file-coding-system'."
+;;   :group 'org-export-e-html
+;;   :type 'coding-system)
 
 (defvar org-e-html-content-div "content"
   "The name of the container DIV that holds all the page contents.
@@ -1491,10 +1492,11 @@ This function shouldn't be used for floats.  See
      (format "\n<title>%s</title>\n" title)
      (format
       "\n<meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>"
-      (and coding-system-for-write
-	   (fboundp 'coding-system-get)
-	   (coding-system-get coding-system-for-write
-			      'mime-charset)))
+      (or (and org-export-coding-system
+	       (fboundp 'coding-system-get)
+	       (coding-system-get org-export-coding-system
+				  'mime-charset))
+	  "iso-8859-1"))
      (format "\n<meta name=\"title\" content=\"%s\"/>" title)
      (format "\n<meta name=\"generator\" content=\"Org-mode\"/>")
      (format "\n<meta name=\"generated\" content=\"%s\"/>"
