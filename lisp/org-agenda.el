@@ -6227,6 +6227,29 @@ The category is that of the current line."
 	       (list (concat (if strip "-" "+") cat)) 'category)
 	(error "No category at point")))))
 
+(defun org-find-top-category (&optional pos)
+  (save-excursion
+    (with-current-buffer (if pos (marker-buffer pos) (current-buffer))
+     (if pos (goto-char pos))
+     ;; Skip up to the topmost parent
+     (while (ignore-errors (outline-up-heading 1) t))
+     (ignore-errors
+       (nth 4 (org-heading-components))))))
+
+(defvar org-agenda-filtered-by-top-category nil)
+
+(defun org-agenda-filter-by-top-category (strip)
+  "Keep only those lines in the agenda buffer that have a specific category.
+The category is that of the current line."
+  (interactive "P")
+  (if org-agenda-filtered-by-top-category
+      (progn
+        (setq org-agenda-filtered-by-top-category nil)
+        (org-agenda-filter-show-all-cat))
+    (let ((cat (org-find-top-category (org-get-at-bol 'org-hd-marker))))
+      (if cat (org-agenda-filter-top-category-apply cat strip)
+        (error "No top-level category at point")))))
+
 (defun org-agenda-filter-by-tag (strip &optional char narrow)
   "Keep only those lines in the agenda buffer that have a specific tag.
 The tag is selected with its fast selection letter, as configured.
@@ -6421,6 +6444,22 @@ If the line does not have an effort defined, return nil."
 	  (beginning-of-line 2))))
     (if (get-char-property (point) 'invisible)
 	(ignore-errors (org-agenda-previous-line)))))
+
+(defun org-agenda-filter-top-category-apply (category &optional negative)
+  "Set FILTER as the new agenda filter and apply it."
+  (org-agenda-set-mode-name)
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (let* ((pos (org-get-at-bol 'org-hd-marker))
+             (topcat (and pos (org-find-top-category pos))))
+        (if (and topcat (funcall (if negative 'identity 'not)
+                                 (string= category topcat)))
+            (org-agenda-filter-hide-line 'category)))
+      (beginning-of-line 2)))
+  (if (get-char-property (point) 'invisible)
+      (org-agenda-previous-line))
+  (setq org-agenda-filtered-by-top-category t))
 
 (defun org-agenda-filter-hide-line (type)
   (let (ov)
