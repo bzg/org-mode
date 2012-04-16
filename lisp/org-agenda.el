@@ -3476,7 +3476,9 @@ Org-mode keeps a list of these markers and resets them when they are
 no longer in use."
   (let ((m (copy-marker (or pos (point)))))
     (setq org-agenda-last-marker-time (org-float-time))
-    (with-current-buffer org-agenda-buffer
+    (if org-agenda-buffer 
+	(with-current-buffer org-agenda-buffer
+	  (push m org-agenda-markers))
       (push m org-agenda-markers))
     m))
 
@@ -8873,7 +8875,8 @@ details and examples."
 	 (today (org-date-to-gregorian
 		 (time-to-days (current-time))))
 	 (org-agenda-restrict nil)
-	 (files (org-agenda-files 'unrestricted)) entries file)
+	 (files (org-agenda-files 'unrestricted)) entries file
+	 (org-agenda-buffer nil))
     ;; Get all entries which may contain an appt
     (org-prepare-agenda-buffers files)
     (while (setq file (pop files))
