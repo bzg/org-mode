@@ -934,7 +934,8 @@ have been removed when this is called, as will any matches for regular
 expressions listed in `org-agenda-entry-text-exclude-regexps'.")
 
 (defvar org-agenda-include-inactive-timestamps nil
-  "Non-nil means include inactive time stamps in agenda and timeline.")
+  "Non-nil means include inactive time stamps in agenda and timeline.
+Dynamically scoped.")
 
 (defgroup org-agenda-windows nil
   "Options concerning the windows used by the Agenda in Org Mode."
@@ -1503,8 +1504,10 @@ Custom commands can set this variable in the options section."
   :group 'org-agenda-line-format)
 
 (defvar org-prefix-format-compiled nil
-  "The compiled version of the most recently used prefix format.
-See the variable `org-agenda-prefix-format'.")
+  "The compiled prefix format and associated variables.
+This is a list where first element is a list of variable bindings, and second
+element is the compiled format expression.  See the variable
+`org-agenda-prefix-format'.")
 
 (defcustom org-agenda-todo-keyword-format "%-1s"
   "Format for the TODO keyword in agenda lines.
@@ -1812,6 +1815,72 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 (defvar org-agenda-force-single-file nil)
 (defvar org-agenda-bulk-marked-entries) ;; Defined further down in this file
 
+
+;;; Multiple agenda buffers support
+
+(defun org-toggle-sticky-agenda (&optional arg)
+  "Toggle `org-agenda-sticky'."
+  (interactive "P")
+  (let ((new-value (if arg
+		       (> (prefix-numeric-value arg) 0)
+		     (not org-agenda-sticky))))
+    (if (equal new-value org-agenda-sticky)
+	(message "Sticky agenda was already %s"
+		 (if org-agenda-sticky "enabled" "disabled"))
+      (setq org-agenda-sticky new-value)
+      (org-agenda-kill-all-agenda-buffers)
+      (message "Sticky agenda was %s"
+	       (if org-agenda-sticky "enabled" "disabled")))))
+
+(defcustom org-agenda-sticky nil
+  "Non-nil means agenda q key will bury agenda buffers.
+Agenda commands will then show existing buffer instead of generating new ones.
+When nil, `q' will kill the single agenda buffer."
+  :group 'org-agenda
+  :type 'boolean
+  :set (lambda (var val)
+	 (if (boundp var)
+	     (org-toggle-sticky-agenda (if val 1 0))
+	   (set var val))))
+
+(defvar org-agenda-buffer nil
+  "Agenda buffer currently being generated.")
+
+(defvar org-agenda-last-prefix-arg nil)
+(defvar org-agenda-this-buffer-name nil)
+(defvar org-agenda-doing-sticky-redo nil)
+(defvar org-agenda-this-buffer-is-sticky nil)
+
+(defconst org-agenda-local-vars
+  '(org-agenda-this-buffer-name
+    org-agenda-undo-list
+    org-agenda-pending-undo-list
+    org-agenda-follow-mode
+    org-agenda-entry-text-mode
+    org-agenda-clockreport-mode
+    org-agenda-show-log
+    org-agenda-redo-command
+    org-agenda-query-string
+    org-agenda-type
+    org-agenda-bulk-marked-entries
+    org-agenda-undo-has-started-in
+    org-agenda-last-arguments
+    org-agenda-info
+    org-agenda-tag-filter-overlays
+    org-agenda-cat-filter-overlays
+    org-pre-agenda-window-conf
+    org-agenda-columns-active
+    org-agenda-tag-filter
+    org-agenda-category-filter
+    org-agenda-markers
+    org-agenda-last-search-view-search-was-boolean
+    org-agenda-filtered-by-category
+    org-agenda-filter-form
+    org-agenda-show-window
+    org-agenda-cycle-counter
+    org-agenda-last-prefix-arg)
+  "Variables that must be local in agenda buffers to allow multiple buffers.")
+
 (defun org-agenda-mode ()
   "Mode for time-sorted view on action items in Org-mode files.
 
@@ -1819,7 +1888,30 @@ The following commands are available:
 
 \\{org-agenda-mode-map}"
   (interactive)
-  (kill-all-local-variables)
+  (cond (org-agenda-doing-sticky-redo
+	 ;; Refreshing sticky agenda-buffer
+	 ;; 
+	 ;; Preserve the value of `org-agenda-local-vars' variables,
+	 ;; while letting `kill-all-local-variables' kill the rest
+	 (let ((save (buffer-local-variables)))
+	   (kill-all-local-variables)
+	   (mapc 'make-local-variable org-agenda-local-vars)
+	   (dolist (elem save)
+	     (let ((var (car elem))
+		   (val (cdr elem)))
+	       (when (and val
+			  (member var org-agenda-local-vars))
+		 (set var val)))))
+	 (set (make-local-variable 'org-agenda-this-buffer-is-sticky) t))
+	(org-agenda-sticky
+	 ;; Creating a sticky Agenda buffer for the first time
+	 (kill-all-local-variables)
+	 (mapc 'make-local-variable org-agenda-local-vars)
+	 (set (make-local-variable 'org-agenda-this-buffer-is-sticky) t))
+	(t
+	 ;; Creating a non-sticky agenda buffer
+	 (kill-all-local-variables)
+	 (set (make-local-variable 'org-agenda-this-buffer-is-sticky) nil)))
   (setq org-agenda-undo-list nil
 	org-agenda-pending-undo-list nil
 	org-agenda-bulk-marked-entries nil)
@@ -1933,6 +2025,7 @@ The following commands are available:
 	    'org-clock-modify-effort-estimate)
 (org-defkey org-agenda-mode-map "\C-c\C-xp" 'org-agenda-set-property)
 (org-defkey org-agenda-mode-map "q" 'org-agenda-quit)
+(org-defkey org-agenda-mode-map "Q" 'org-agenda-Quit)
 (org-defkey org-agenda-mode-map "x" 'org-agenda-exit)
 (org-defkey org-agenda-mode-map "\C-x\C-w" 'org-agenda-write)
 (org-defkey org-agenda-mode-map "\C-x\C-s" 'org-save-all-org-buffers)
@@ -2238,6 +2331,7 @@ Pressing `<' twice means to restrict to the current subtree or region
   (interactive "P")
   (catch 'exit
     (let* ((prefix-descriptions nil)
+	   (org-agenda-buffer-name org-agenda-buffer-name)
 	   (org-agenda-window-setup (if (equal (buffer-name)
 					       org-agenda-buffer-name)
 					'current-window
@@ -2276,6 +2370,11 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(setq ans (org-agenda-get-restriction-and-command prefix-descriptions)
 	      keys (car ans)
 	      restriction (cdr ans)))
+      ;; If we have sticky agenda buffers, set a name for the buffer,
+      ;; depending on the invoking keys.  The user may still set this
+      ;; as a command option, which will overwrite what we do here.
+      (if org-agenda-sticky
+	  (setq org-agenda-buffer-name (format "*Org Agenda(%s)*" keys)))
       ;; Establish the restriction, if any
       (when (and (not org-agenda-overriding-restriction) restriction)
 	(put 'org-agenda-files 'org-restrict (list bfn))
@@ -2408,15 +2507,15 @@ Agenda views are separated by `org-agenda-block-separator'."
 	(erase-buffer)
 	(insert (eval-when-compile
 		  (let ((header
-"
-Press key for an agenda command:        <   Buffer, subtree/region restriction
+"Press key for an agenda command:        <   Buffer, subtree/region restriction
 --------------------------------        >   Remove restriction
 a   Agenda for current week or day      e   Export agenda views
 t   List of all TODO entries            T   Entries with special TODO kwd
 m   Match a TAGS/PROP/TODO query        M   Like m, but only TODO entries
 L   Timeline for current buffer         #   List stuck projects (!=configure)
-s   Search for keywords                 C   Configure custom agenda commands
+s   Search for keywords                 *   Toggle sticky agenda views
 /   Multi-occur                         ?   Find :FLAGGED: entries
+                                        C   Configure custom agenda commands
 ")
 			(start 0))
 		    (while (string-match
@@ -2549,6 +2648,9 @@ s   Search for keywords                 C   Configure custom agenda commands
 					  nil
 					(cons (substring (car x) 1) (cdr x))))
 				    custom))))
+	   ((eq c ?*)
+	    (org-toggle-sticky-agenda)
+	    (sit-for 2))
 	   ((and (not restrict-ok) (memq c '(?1 ?0 ?<)))
 	    (message "Restriction is only possible in Org-mode buffers")
 	    (ding) (sit-for 1))
@@ -2584,6 +2686,9 @@ s   Search for keywords                 C   Configure custom agenda commands
   "The arguments of the previous call to `org-agenda'.")
 (defun org-agenda-run-series (name series)
   (org-let (nth 1 series) '(org-prepare-agenda name))
+  ;; We need to reset agenda markers here, because when constructing a
+  ;; block agenda, the individual blocks do not do that.
+  (org-agenda-reset-markers)
   (let* ((org-agenda-multi t)
 	 (redo (list 'org-agenda-run-series name (list 'quote series)))
 	 (org-agenda-overriding-arguments
@@ -3094,61 +3199,101 @@ the entire agenda view.  In a block agenda, it will not work reliably to
 define a filter for one of the individual blocks.  You need to set it in
 the global options and expect it to be applied to the entire view.")
 
+
+(defun org-agenda-use-sticky-p ()
+  "Return non-NIL if existing agenda buffer named
+`org-agenda-buffer-name' exists, and should be shown instead of
+generating a new one"
+  (and
+   ;; turned off by user
+   org-agenda-sticky
+   ;; For multi-agenda buffer already exists
+   (not org-agenda-multi)
+   ;; buffer found
+   (get-buffer org-agenda-buffer-name)
+   ;; C-u parameter is same as last call
+   (with-current-buffer (get-buffer org-agenda-buffer-name)
+     (and
+      (equal current-prefix-arg
+	     org-agenda-last-prefix-arg)
+      ;; In case user turned stickiness on, while having existing
+      ;; Agenda buffer active, don't reuse that buffer, because it
+      ;; does not have org variables local
+      org-agenda-this-buffer-is-sticky))))
+
+(defun org-prepare-agenda-window (abuf)
+  "Setup agenda buffer in the window"
+  (let* ((awin (get-buffer-window abuf))
+	 wconf)
+    (cond
+     ((equal (current-buffer) abuf) nil)
+     (awin (select-window awin))
+     ((not (setq wconf (current-window-configuration))))
+     ((equal org-agenda-window-setup 'current-window)
+      (org-pop-to-buffer-same-window abuf))
+     ((equal org-agenda-window-setup 'other-window)
+      (org-switch-to-buffer-other-window abuf))
+     ((equal org-agenda-window-setup 'other-frame)
+      (switch-to-buffer-other-frame abuf))
+     ((equal org-agenda-window-setup 'reorganize-frame)
+      (delete-other-windows)
+      (org-switch-to-buffer-other-window abuf)))
+    ;; additional test in case agenda is invoked from within agenda
+    ;; buffer via elisp link
+    (unless (equal (current-buffer) abuf)
+      (org-pop-to-buffer-same-window abuf))
+    (setq org-pre-agenda-window-conf wconf)))
+
 (defun org-prepare-agenda (&optional name)
-  (setq org-todo-keywords-for-agenda nil)
-  (setq org-drawers-for-agenda nil)
-  (unless org-agenda-persistent-filter
-    (setq org-agenda-tag-filter nil
-          org-agenda-category-filter nil))
-  (put 'org-agenda-tag-filter :preset-filter org-agenda-tag-filter-preset)
-  (put 'org-agenda-category-filter :preset-filter org-agenda-category-filter-preset)
-  (if org-agenda-multi
+  (if (org-agenda-use-sticky-p)
       (progn
-	(setq buffer-read-only nil)
-	(goto-char (point-max))
-	(unless (or (bobp) org-agenda-compact-blocks
-		    (not org-agenda-block-separator))
-	  (insert "\n"
-		  (if (stringp org-agenda-block-separator)
-		      org-agenda-block-separator
-		    (make-string (window-width) org-agenda-block-separator))
-		  "\n"))
-	(narrow-to-region (point) (point-max)))
-    (setq org-done-keywords-for-agenda nil)
-    (org-agenda-reset-markers)
-    (setq org-agenda-contributing-files nil)
-    (setq org-agenda-columns-active nil)
-    (org-prepare-agenda-buffers (org-agenda-files nil 'ifmode))
-    (setq org-todo-keywords-for-agenda
-	  (org-uniquify org-todo-keywords-for-agenda))
-    (setq org-done-keywords-for-agenda
-	  (org-uniquify org-done-keywords-for-agenda))
-    (setq org-drawers-for-agenda (org-uniquify org-drawers-for-agenda))
-    (let* ((abuf (get-buffer-create org-agenda-buffer-name))
-	   (awin (get-buffer-window abuf)))
-      (cond
-       ((equal (current-buffer) abuf) nil)
-       (awin (select-window awin))
-       ((not (setq org-pre-agenda-window-conf (current-window-configuration))))
-       ((equal org-agenda-window-setup 'current-window)
-	(org-pop-to-buffer-same-window abuf))
-       ((equal org-agenda-window-setup 'other-window)
-	(org-switch-to-buffer-other-window abuf))
-       ((equal org-agenda-window-setup 'other-frame)
-	(switch-to-buffer-other-frame abuf))
-       ((equal org-agenda-window-setup 'reorganize-frame)
-	(delete-other-windows)
-	(org-switch-to-buffer-other-window abuf)))
-      ;; additional test in case agenda is invoked from within agenda
-      ;; buffer via elisp link
-      (unless (equal (current-buffer) abuf)
-	(org-pop-to-buffer-same-window abuf)))
-    (setq buffer-read-only nil)
-    (let ((inhibit-read-only t)) (erase-buffer))
-    (org-agenda-mode)
-    (and name (not org-agenda-name)
-	 (org-set-local 'org-agenda-name name)))
-  (setq buffer-read-only nil))
+	;; Popup existing buffer
+	(org-prepare-agenda-window (get-buffer org-agenda-buffer-name))
+	(message "Sticky Agenda buffer, use `r' to refresh")
+	(throw 'exit nil))
+    (setq org-todo-keywords-for-agenda nil)
+    (setq org-drawers-for-agenda nil)
+    (unless org-agenda-persistent-filter
+      (setq org-agenda-tag-filter nil
+	    org-agenda-category-filter nil))
+    (put 'org-agenda-tag-filter :preset-filter org-agenda-tag-filter-preset)
+    (put 'org-agenda-category-filter :preset-filter
+	 org-agenda-category-filter-preset)
+    (if org-agenda-multi
+	(progn
+	  (setq buffer-read-only nil)
+	  (goto-char (point-max))
+	  (unless (or (bobp) org-agenda-compact-blocks
+		      (not org-agenda-block-separator))
+	    (insert "\n"
+		    (if (stringp org-agenda-block-separator)
+			org-agenda-block-separator
+		      (make-string (window-width) org-agenda-block-separator))
+		    "\n"))
+	  (narrow-to-region (point) (point-max)))
+      (setq org-done-keywords-for-agenda nil)
+
+      ;; Setting any org variables that are in org-agenda-local-vars
+      ;; list need to be done after the prepare call
+      (org-prepare-agenda-window (get-buffer-create org-agenda-buffer-name))
+      (setq buffer-read-only nil)
+      (org-agenda-reset-markers)
+      (let ((inhibit-read-only t)) (erase-buffer))
+      (org-agenda-mode)
+      (setq org-agenda-buffer (current-buffer))
+      (setq org-agenda-contributing-files nil)
+      (setq org-agenda-columns-active nil)
+      (org-prepare-agenda-buffers (org-agenda-files nil 'ifmode))
+      (setq org-todo-keywords-for-agenda
+	    (org-uniquify org-todo-keywords-for-agenda))
+      (setq org-done-keywords-for-agenda
+	    (org-uniquify org-done-keywords-for-agenda))
+      (setq org-drawers-for-agenda (org-uniquify org-drawers-for-agenda))
+      (setq org-agenda-last-prefix-arg current-prefix-arg)
+      (setq org-agenda-this-buffer-name org-agenda-buffer-name)
+      (and name (not org-agenda-name)
+	   (org-set-local 'org-agenda-name name)))
+    (setq buffer-read-only nil)))
 
 (defun org-finalize-agenda ()
   "Finishing touch for the agenda buffer, called just before displaying it."
@@ -3185,6 +3330,7 @@ the global options and expect it to be applied to the entire view.")
 	(org-agenda-filter-apply org-agenda-tag-filter 'tag))
       (when (or org-agenda-category-filter (get 'org-agenda-category-filter :preset-filter))
 	(org-agenda-filter-apply org-agenda-category-filter 'category))
+      (org-add-hook 'kill-buffer-hook 'org-agenda-reset-markers 'append 'local)
       )))
 
 (defun org-agenda-mark-clocking-task ()
@@ -3330,7 +3476,8 @@ Org-mode keeps a list of these markers and resets them when they are
 no longer in use."
   (let ((m (copy-marker (or pos (point)))))
     (setq org-agenda-last-marker-time (org-float-time))
-    (push m org-agenda-markers)
+    (with-current-buffer org-agenda-buffer
+      (push m org-agenda-markers))
     m))
 
 (defun org-agenda-reset-markers ()
@@ -3339,9 +3486,13 @@ no longer in use."
     (move-marker (pop org-agenda-markers) nil)))
 
 (defun org-agenda-save-markers-for-cut-and-paste (beg end)
-  "Save relative positions of markers in region."
-  (mapc (lambda (m) (org-check-and-save-marker m beg end))
-	org-agenda-markers))
+  "Save relative positions of markers in region.
+This check for agenda markers in all agenda buffers currently active."
+  (dolist (buf (buffer-list))
+    (with-current-buffer buf
+      (when (eq major-mode 'org-agenda-mode)
+	(mapc (lambda (m) (org-check-and-save-marker m beg end))
+	      org-agenda-markers)))))
 
 ;;; Entry text mode
 
@@ -3402,18 +3553,17 @@ under the current date.
 If the buffer contains an active region, only check the region for
 dates."
   (interactive "P")
-  (org-compile-prefix-format 'timeline)
-  (org-set-sorting-strategy 'timeline)
   (let* ((dopast t)
-	 (doclosed org-agenda-show-log)
+	 (org-agenda-show-log-scoped org-agenda-show-log)
 	 (entry (buffer-file-name (or (buffer-base-buffer (current-buffer))
 				      (current-buffer))))
 	 (date (calendar-current-date))
 	 (beg (if (org-region-active-p) (region-beginning) (point-min)))
 	 (end (if (org-region-active-p) (region-end) (point-max)))
-	 (day-numbers (org-get-all-dates beg end 'no-ranges
-					 t doclosed ; always include today
-					 org-timeline-show-empty-dates))
+	 (day-numbers (org-get-all-dates
+		       beg end 'no-ranges
+		       t org-agenda-show-log-scoped ; always include today
+		       org-timeline-show-empty-dates))
 	 (org-deadline-warning-days 0)
 	 (org-agenda-only-exact-dates t)
 	 (today (org-today))
@@ -3430,7 +3580,9 @@ dates."
 					      (if (>= x today) x nil))
 					    day-numbers))))
     (org-prepare-agenda (concat "Timeline " (file-name-nondirectory entry)))
-    (if doclosed (push :closed args))
+    (org-compile-prefix-format 'timeline)
+    (org-set-sorting-strategy 'timeline)
+    (if org-agenda-show-log-scoped (push :closed args))
     (push :timestamp args)
     (push :deadline args)
     (push :scheduled args)
@@ -3585,6 +3737,7 @@ given in `org-agenda-start-on-weekday'."
   (interactive "P")
   (if (and (integerp arg) (> arg 0))
       (setq span arg arg nil))
+  (org-prepare-agenda "Day/Week")
   (setq start-day (or start-day org-agenda-start-day))
   (if org-agenda-overriding-arguments
       (setq arg (car org-agenda-overriding-arguments)
@@ -3617,6 +3770,7 @@ given in `org-agenda-start-on-weekday'."
 	 (day-numbers (list start))
 	 (day-cnt 0)
 	 (inhibit-redisplay (not debug-on-error))
+	 (org-agenda-show-log-scoped org-agenda-show-log)
 	 s e rtn rtnall file date d start-pos end-pos todayp
 	 clocktable-start clocktable-end filter)
     (setq org-agenda-redo-command
@@ -3626,7 +3780,6 @@ given in `org-agenda-start-on-weekday'."
     (setq day-numbers (nreverse day-numbers))
     (setq clocktable-start (car day-numbers)
 	  clocktable-end (1+ (or (org-last day-numbers) 0)))
-    (org-prepare-agenda "Day/Week")
     (org-set-local 'org-starting-day (car day-numbers))
     (org-set-local 'org-arg-loc arg)
     (org-set-local 'org-agenda-current-span (org-agenda-ndays-to-span span))
@@ -3668,10 +3821,10 @@ given in `org-agenda-start-on-weekday'."
 	      (setq org-agenda-entry-types
 		    (delq :deadline org-agenda-entry-types)))
 	    (cond
-	     ((memq org-agenda-show-log '(only clockcheck))
+	     ((memq org-agenda-show-log-scoped '(only clockcheck))
 	      (setq rtn (org-agenda-get-day-entries
 			 file date :closed)))
-	     (org-agenda-show-log
+	     (org-agenda-show-log-scoped
 	      (setq rtn (apply 'org-agenda-get-day-entries
 			       file date
 			       (append '(:closed) org-agenda-entry-types))))
@@ -3739,7 +3892,7 @@ given in `org-agenda-start-on-weekday'."
 	    (recenter 1))))
     (goto-char (or start-pos 1))
     (add-text-properties (point-min) (point-max) '(org-agenda-type agenda))
-    (if (eq org-agenda-show-log 'clockcheck)
+    (if (eq org-agenda-show-log-scoped 'clockcheck)
 	(org-agenda-show-clocking-issues))
     (org-finalize-agenda)
     (setq buffer-read-only t)
@@ -3836,9 +3989,9 @@ as a whole, to include whitespace.
 This command searches the agenda files, and in addition the files listed
 in `org-agenda-text-search-extra-files'."
   (interactive "P")
+  (org-prepare-agenda "SEARCH")
   (org-compile-prefix-format 'search)
   (org-set-sorting-strategy 'search)
-  (org-prepare-agenda "SEARCH")
   (let* ((props (list 'face nil
 		      'done-face 'org-agenda-done
 		      'org-not-done-regexp org-not-done-regexp
@@ -4047,9 +4200,9 @@ the list to these.  When using \\[universal-argument], you will be prompted
 for a keyword.  A numeric prefix directly selects the Nth keyword in
 `org-todo-keywords-1'."
   (interactive "P")
+  (org-prepare-agenda "TODO")
   (org-compile-prefix-format 'todo)
   (org-set-sorting-strategy 'todo)
-  (org-prepare-agenda "TODO")
   (if (and (stringp arg) (not (string-match "\\S-" arg))) (setq arg nil))
   (let* ((today (org-today))
 	 (date (calendar-gregorian-from-absolute today))
@@ -4063,7 +4216,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
     (when (equal arg '(4))
       (setq org-select-this-todo-keyword
 	    (org-icompleting-read "Keyword (or KWD1|K2D2|...): "
-			     (mapcar 'list kwds) nil nil)))
+				  (mapcar 'list kwds) nil nil)))
     (and (equal 0 arg) (setq org-select-this-todo-keyword nil))
     (org-set-local 'org-last-arg arg)
     (setq org-agenda-redo-command
@@ -4116,8 +4269,6 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
   "Show all headlines for all `org-agenda-files' matching a TAGS criterion.
 The prefix arg TODO-ONLY limits the search to TODO entries."
   (interactive "P")
-  (org-compile-prefix-format 'tags)
-  (org-set-sorting-strategy 'tags)
   (let* ((org-tags-match-list-sublevels
 	  org-tags-match-list-sublevels)
 	 (completion-ignore-case t)
@@ -4128,6 +4279,8 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
     (setq matcher (org-make-tags-matcher match)
 	  match (car matcher) matcher (cdr matcher))
     (org-prepare-agenda (concat "TAGS " match))
+    (org-compile-prefix-format 'tags)
+    (org-set-sorting-strategy 'tags)
     (setq org-agenda-query-string match)
     (setq org-agenda-redo-command
 	  (list 'org-tags-view (list 'quote todo-only)
@@ -4547,6 +4700,8 @@ function from a program - use `org-agenda-get-day-entries' instead."
   (when (> (- (org-float-time)
 	      org-agenda-last-marker-time)
 	   5)
+    ;; I am not sure if this works with sticky agendas, because the marker
+    ;; list is then no longer a global variable.
     (org-agenda-reset-markers))
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
@@ -4989,9 +5144,9 @@ please use `org-class' instead."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
-	 (items (if (consp org-agenda-show-log)
-		    org-agenda-show-log
-		  (if (eq org-agenda-show-log 'clockcheck)
+	 (items (if (consp org-agenda-show-log-scoped)
+		    org-agenda-show-log-scoped
+		  (if (eq org-agenda-show-log-scoped 'clockcheck)
 		      '(clock)
 		    org-agenda-log-mode-items)))
 	 (parts
@@ -5529,151 +5684,163 @@ time-of-day should be extracted from TXT for sorting of this entry, and for
 the `%t' specifier in the format.  When DOTIME is a string, this string is
 searched for a time before TXT is.  TAGS can be the tags of the headline.
 Any match of REMOVE-RE will be removed from TXT."
-  (save-match-data
-    ;; Diary entries sometimes have extra whitespace at the beginning
-    (if (string-match "^ +" txt) (setq txt (replace-match "" nil nil txt)))
+  ;; We keep the org-prefix-* variable values along with a compiled
+  ;; formatter, so that multiple agendas existing at the same time, do
+  ;; not step on each other toes.
+  ;;
+  ;; It was inconvenient to make these variables buffer local in
+  ;; Agenda buffers, because this function expects to be called with
+  ;; the buffer where item comes from being current, and not agenda
+  ;; buffer
+  (let* ((bindings (car org-prefix-format-compiled))
+	 (formatter (cadr org-prefix-format-compiled)))
+    (loop for (var value) in bindings
+	  do (set var value))
+    (save-match-data
+      ;; Diary entries sometimes have extra whitespace at the beginning
+      (if (string-match "^ +" txt) (setq txt (replace-match "" nil nil txt)))
 
-    ;; Fix the tags part in txt
-    (setq txt (org-agenda-fix-displayed-tags
-	       txt tags
-	       org-agenda-show-inherited-tags
-	       org-agenda-hide-tags-regexp))
-    (let* ((category (or category
-			 (if (stringp org-category)
-			     org-category
-			   (and org-category (symbol-name org-category)))
-			 (if buffer-file-name
-			     (file-name-sans-extension
-			      (file-name-nondirectory buffer-file-name))
-			   "")))
-	   (category-icon (org-agenda-get-category-icon category))
-	   (category-icon (if category-icon
-			      (propertize " " 'display category-icon)
-			    ""))
-	   ;; time, tag, effort are needed for the eval of the prefix format
-	   (tag (if tags (nth (1- (length tags)) tags) ""))
-	   time effort neffort
-	   (ts (if dotime (concat
-			   (if (stringp dotime) dotime "")
-			   (and org-agenda-search-headline-for-time txt))))
-	   (time-of-day (and dotime (org-get-time-of-day ts)))
-	   stamp plain s0 s1 s2 rtn srp l
-	   duration thecategory)
-      (and (eq major-mode 'org-mode) buffer-file-name
-	   (add-to-list 'org-agenda-contributing-files buffer-file-name))
-      (when (and dotime time-of-day)
-	;; Extract starting and ending time and move them to prefix
-	(when (or (setq stamp (string-match org-stamp-time-of-day-regexp ts))
-		  (setq plain (string-match org-plain-time-of-day-regexp ts)))
-	  (setq s0 (match-string 0 ts)
-		srp (and stamp (match-end 3))
-		s1 (match-string (if plain 1 2) ts)
-		s2 (match-string (if plain 8 (if srp 4 6)) ts))
+      ;; Fix the tags part in txt
+      (setq txt (org-agenda-fix-displayed-tags
+		 txt tags
+		 org-agenda-show-inherited-tags
+		 org-agenda-hide-tags-regexp))
+      (let* ((category (or category
+			   (if (stringp org-category)
+			       org-category
+			     (and org-category (symbol-name org-category)))
+			   (if buffer-file-name
+			       (file-name-sans-extension
+				(file-name-nondirectory buffer-file-name))
+			     "")))
+	     (category-icon (org-agenda-get-category-icon category))
+	     (category-icon (if category-icon
+				(propertize " " 'display category-icon)
+			      ""))
+	     ;; time, tag, effort are needed for the eval of the prefix format
+	     (tag (if tags (nth (1- (length tags)) tags) ""))
+	     time effort neffort
+	     (ts (if dotime (concat
+			     (if (stringp dotime) dotime "")
+			     (and org-agenda-search-headline-for-time txt))))
+	     (time-of-day (and dotime (org-get-time-of-day ts)))
+	     stamp plain s0 s1 s2 rtn srp l
+	     duration thecategory)
+	(and (eq major-mode 'org-mode) buffer-file-name
+	     (add-to-list 'org-agenda-contributing-files buffer-file-name))
+	(when (and dotime time-of-day)
+	  ;; Extract starting and ending time and move them to prefix
+	  (when (or (setq stamp (string-match org-stamp-time-of-day-regexp ts))
+		    (setq plain (string-match org-plain-time-of-day-regexp ts)))
+	    (setq s0 (match-string 0 ts)
+		  srp (and stamp (match-end 3))
+		  s1 (match-string (if plain 1 2) ts)
+		  s2 (match-string (if plain 8 (if srp 4 6)) ts))
 
-	  ;; If the times are in TXT (not in DOTIMES), and the prefix will list
-	  ;; them, we might want to remove them there to avoid duplication.
-	  ;; The user can turn this off with a variable.
-	  (if (and org-prefix-has-time
-		   org-agenda-remove-times-when-in-prefix (or stamp plain)
-		   (string-match (concat (regexp-quote s0) " *") txt)
-		   (not (equal ?\] (string-to-char (substring txt (match-end 0)))))
-		   (if (eq org-agenda-remove-times-when-in-prefix 'beg)
-		       (= (match-beginning 0) 0)
-		     t))
-	      (setq txt (replace-match "" nil nil txt))))
-	;; Normalize the time(s) to 24 hour
-	(if s1 (setq s1 (org-get-time-of-day s1 'string t)))
-	(if s2 (setq s2 (org-get-time-of-day s2 'string t)))
+	    ;; If the times are in TXT (not in DOTIMES), and the prefix will list
+	    ;; them, we might want to remove them there to avoid duplication.
+	    ;; The user can turn this off with a variable.
+	    (if (and org-prefix-has-time
+		     org-agenda-remove-times-when-in-prefix (or stamp plain)
+		     (string-match (concat (regexp-quote s0) " *") txt)
+		     (not (equal ?\] (string-to-char (substring txt (match-end 0)))))
+		     (if (eq org-agenda-remove-times-when-in-prefix 'beg)
+			 (= (match-beginning 0) 0)
+		       t))
+		(setq txt (replace-match "" nil nil txt))))
+	  ;; Normalize the time(s) to 24 hour
+	  (if s1 (setq s1 (org-get-time-of-day s1 'string t)))
+	  (if s2 (setq s2 (org-get-time-of-day s2 'string t)))
 
-	;; Try to set s2 if s1 and `org-agenda-default-appointment-duration' are set
-	(when (and s1 (not s2) org-agenda-default-appointment-duration)
-	  (setq s2
-		(org-minutes-to-hh:mm-string
-		 (+ (org-hh:mm-string-to-minutes s1) org-agenda-default-appointment-duration))))
+	  ;; Try to set s2 if s1 and `org-agenda-default-appointment-duration' are set
+	  (when (and s1 (not s2) org-agenda-default-appointment-duration)
+	    (setq s2
+		  (org-minutes-to-hh:mm-string
+		   (+ (org-hh:mm-string-to-minutes s1) org-agenda-default-appointment-duration))))
 
-	;; Compute the duration
-	(when s2
-	  (setq duration (- (org-hh:mm-string-to-minutes s2)
-			    (org-hh:mm-string-to-minutes s1)))))
+	  ;; Compute the duration
+	  (when s2
+	    (setq duration (- (org-hh:mm-string-to-minutes s2)
+			      (org-hh:mm-string-to-minutes s1)))))
 
-      (when (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
-			  txt)
-	;; Tags are in the string
-	(if (or (eq org-agenda-remove-tags t)
-		(and org-agenda-remove-tags
-		     org-prefix-has-tag))
-	    (setq txt (replace-match "" t t txt))
-	  (setq txt (replace-match
-		     (concat (make-string (max (- 50 (length txt)) 1) ?\ )
-			     (match-string 2 txt))
-		     t t txt))))
-      (when (eq major-mode 'org-mode)
-	(setq effort
-	      (condition-case nil
-		  (org-get-effort
-		   (or (get-text-property 0 'org-hd-marker txt)
-		       (get-text-property 0 'org-marker txt)))
-		(error nil)))
-	(when effort
-	  (setq neffort (org-duration-string-to-minutes effort)
-		effort (setq effort (concat "[" effort "]")))))
-      ;; prevent erroring out with %e format when there is no effort
-      (or effort (setq effort ""))
+	(when (string-match (org-re "\\([ \t]+\\)\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$")
+			    txt)
+	  ;; Tags are in the string
+	  (if (or (eq org-agenda-remove-tags t)
+		  (and org-agenda-remove-tags
+		       org-prefix-has-tag))
+	      (setq txt (replace-match "" t t txt))
+	    (setq txt (replace-match
+		       (concat (make-string (max (- 50 (length txt)) 1) ?\ )
+			       (match-string 2 txt))
+		       t t txt))))
+	(when (eq major-mode 'org-mode)
+	  (setq effort
+		(condition-case nil
+		    (org-get-effort
+		     (or (get-text-property 0 'org-hd-marker txt)
+			 (get-text-property 0 'org-marker txt)))
+		  (error nil)))
+	  (when effort
+	    (setq neffort (org-duration-string-to-minutes effort)
+		  effort (setq effort (concat "[" effort "]")))))
+	;; prevent erroring out with %e format when there is no effort
+	(or effort (setq effort ""))
 
-      (when remove-re
-	(while (string-match remove-re txt)
-	  (setq txt (replace-match "" t t txt))))
+	(when remove-re
+	  (while (string-match remove-re txt)
+	    (setq txt (replace-match "" t t txt))))
 
-      ;; Set org-heading property on `txt' to mark the start of the
-      ;; heading.
-      (add-text-properties 0 (length txt) '(org-heading t) txt)
+	;; Set org-heading property on `txt' to mark the start of the
+	;; heading.
+	(add-text-properties 0 (length txt) '(org-heading t) txt)
 
-      ;; Prepare the variables needed in the eval of the compiled format
-      (setq time (cond (s2 (concat
-			    (org-agenda-time-of-day-to-ampm-maybe s1)
-			    "-" (org-agenda-time-of-day-to-ampm-maybe s2)
-			    (if org-agenda-timegrid-use-ampm " ")))
-		       (s1 (concat
-			    (org-agenda-time-of-day-to-ampm-maybe s1)
-			    (if org-agenda-timegrid-use-ampm
-				"........ "
-			      "......")))
-		       (t ""))
-	    extra (or (and (not habitp) extra) "")
-	    category (if (symbolp category) (symbol-name category) category)
-	    thecategory (copy-sequence category))
-      (if (string-match org-bracket-link-regexp category)
-	  (progn
-	    (setq l (if (match-end 3)
-			(- (match-end 3) (match-beginning 3))
-		      (- (match-end 1) (match-beginning 1))))
-	    (when (< l (or org-prefix-category-length 0))
-	      (setq category (copy-sequence category))
-	      (org-add-props category nil
-		'extra-space (make-string
-			      (- org-prefix-category-length l 1) ?\ ))))
-	(if (and org-prefix-category-max-length
-		 (>= (length category) org-prefix-category-max-length))
-	    (setq category (substring category 0 (1- org-prefix-category-max-length)))))
-      ;; Evaluate the compiled format
-      (setq rtn (concat (eval org-prefix-format-compiled) txt))
+	;; Prepare the variables needed in the eval of the compiled format
+	(setq time (cond (s2 (concat
+			      (org-agenda-time-of-day-to-ampm-maybe s1)
+			      "-" (org-agenda-time-of-day-to-ampm-maybe s2)
+			      (if org-agenda-timegrid-use-ampm " ")))
+			 (s1 (concat
+			      (org-agenda-time-of-day-to-ampm-maybe s1)
+			      (if org-agenda-timegrid-use-ampm
+				  "........ "
+				"......")))
+			 (t ""))
+	      extra (or (and (not habitp) extra) "")
+	      category (if (symbolp category) (symbol-name category) category)
+	      thecategory (copy-sequence category))
+	(if (string-match org-bracket-link-regexp category)
+	    (progn
+	      (setq l (if (match-end 3)
+			  (- (match-end 3) (match-beginning 3))
+			(- (match-end 1) (match-beginning 1))))
+	      (when (< l (or org-prefix-category-length 0))
+		(setq category (copy-sequence category))
+		(org-add-props category nil
+		  'extra-space (make-string
+				(- org-prefix-category-length l 1) ?\ ))))
+	  (if (and org-prefix-category-max-length
+		   (>= (length category) org-prefix-category-max-length))
+	      (setq category (substring category 0 (1- org-prefix-category-max-length)))))
+	;; Evaluate the compiled format
+	(setq rtn (concat (eval formatter) txt))
 
-      ;; And finally add the text properties
-      (remove-text-properties 0 (length rtn) '(line-prefix t wrap-prefix t) rtn)
-      (org-add-props rtn nil
-	'org-category (if thecategory (downcase thecategory) category)
-	'tags (mapcar 'org-downcase-keep-props tags)
-	'org-highest-priority org-highest-priority
-	'org-lowest-priority org-lowest-priority
-	'time-of-day time-of-day
-	'duration duration
-	'effort effort
-	'effort-minutes neffort
-	'txt txt
-	'time time
-	'extra extra
-	'format org-prefix-format-compiled
-	'dotime dotime))))
+	;; And finally add the text properties
+	(remove-text-properties 0 (length rtn) '(line-prefix t wrap-prefix t) rtn)
+	(org-add-props rtn nil
+	  'org-category (if thecategory (downcase thecategory) category)
+	  'tags (mapcar 'org-downcase-keep-props tags)
+	  'org-highest-priority org-highest-priority
+	  'org-lowest-priority org-lowest-priority
+	  'time-of-day time-of-day
+	  'duration duration
+	  'effort effort
+	  'effort-minutes neffort
+	  'txt txt
+	  'time time
+	  'extra extra
+	  'format org-prefix-format-compiled
+	  'dotime dotime)))))
 
 (defun org-agenda-fix-displayed-tags (txt tags add-inherited hide-re)
   "Remove tags string from TXT, and add a modified list of tags.
@@ -5759,8 +5926,8 @@ The modified list may contain inherited tags, and tags matched by
 
 (defun org-compile-prefix-format (key)
   "Compile the prefix format into a Lisp form that can be evaluated.
-The resulting form is returned and stored in the variable
-`org-prefix-format-compiled'."
+The resulting form and associated variable bindings is returned
+and stored in the variable `org-prefix-format-compiled'."
   (setq org-prefix-has-time nil org-prefix-has-tag nil
 	org-prefix-category-length nil
 	org-prefix-has-effort nil)
@@ -5804,7 +5971,14 @@ The resulting form is returned and stored in the variable
       (setq s (replace-match "%s" t nil s))
       (push varform vars))
     (setq vars (nreverse vars))
-    (setq org-prefix-format-compiled `(format ,s ,@vars))))
+    (with-current-buffer org-agenda-buffer
+      (setq org-prefix-format-compiled
+	    (list
+	     `((org-prefix-has-time ,org-prefix-has-time)
+	       (org-prefix-has-tag ,org-prefix-has-tag) 
+	       (org-prefix-category-length ,org-prefix-category-length) 
+	       (org-prefix-has-effort ,org-prefix-has-effort)) 
+	     `(format ,s ,@vars))))))
 
 (defun org-set-sorting-strategy (key)
   (if (symbolp (car org-agenda-sorting-strategy))
@@ -6139,24 +6313,24 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 	(error "Not allowed in %s-type agenda buffers" org-agenda-type)
       nil)))
 
-(defun org-agenda-quit ()
-  "Exit agenda by removing the window or the buffer."
+(defun org-agenda-Quit (&optional arg)
+  "Exit agenda by removing the window or the buffer"
   (interactive)
   (if org-agenda-columns-active
       (org-columns-quit)
     (let ((buf (current-buffer)))
       (if (eq org-agenda-window-setup 'other-frame)
 	  (progn
-	    (kill-buffer buf)
 	    (org-agenda-reset-markers)
+	    (kill-buffer buf)
 	    (org-columns-remove-overlays)
 	    (setq org-agenda-archives-mode nil)
 	    (delete-frame))
 	(and (not (eq org-agenda-window-setup 'current-window))
 	     (not (one-window-p))
 	     (delete-window))
-	(kill-buffer buf)
 	(org-agenda-reset-markers)
+	(kill-buffer buf)
 	(org-columns-remove-overlays)
 	(setq org-agenda-archives-mode nil)))
     ;; Maybe restore the pre-agenda window configuration.
@@ -6165,6 +6339,24 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 	 org-pre-agenda-window-conf
 	 (set-window-configuration org-pre-agenda-window-conf))))
 
+(defun org-agenda-quit ()
+  "Exit agenda by killing agenda buffer or burying it when
+`org-agenda-sticky' is non-NIL"
+  (interactive)
+  (if org-agenda-columns-active
+      (org-columns-quit)
+    (if org-agenda-sticky
+	(let ((buf (current-buffer)))
+	  (if (eq org-agenda-window-setup 'other-frame)
+	      (progn
+		(delete-frame))
+	    (and (not (eq org-agenda-window-setup 'current-window))
+		 (not (one-window-p))
+		 (delete-window)))
+	  (with-current-buffer buf
+	    (bury-buffer)))
+      (org-agenda-Quit))))
+
 (defun org-agenda-exit ()
   "Exit agenda by removing the window or the buffer.
 Also kill all Org-mode buffers which have been loaded by `org-agenda'.
@@ -6172,7 +6364,18 @@ Org-mode buffers visited directly by the user will not be touched."
   (interactive)
   (org-release-buffers org-agenda-new-buffers)
   (setq org-agenda-new-buffers nil)
-  (org-agenda-quit))
+  (org-agenda-Quit))
+
+(defun org-agenda-kill-all-agenda-buffers ()
+  "Kill all buffers in `org-agena-mode'.
+This is used when toggling sticky agendas.  You can also explicitly invoke it
+with `C-c a C-k'."
+  (interactive)
+  (let (blist)
+    (dolist (buf (buffer-list))
+      (when (with-current-buffer buf (eq major-mode 'org-agenda-mode))
+	(push buf blist)))
+    (mapc 'kill-buffer blist)))
 
 (defun org-agenda-execute (arg)
   "Execute another agenda command, keeping same window.
@@ -6186,7 +6389,11 @@ in the agenda."
   "Rebuild Agenda.
 When this is the global TODO list, a prefix argument will be interpreted."
   (interactive)
-  (let* ((org-agenda-keep-modes t)
+  (let* ((org-agenda-doing-sticky-redo org-agenda-sticky)
+	 (org-agenda-sticky nil)
+	 (org-agenda-buffer-name (or org-agenda-this-buffer-name
+				     org-agenda-buffer-name))
+	 (org-agenda-keep-modes t)
 	 (tag-filter org-agenda-tag-filter)
 	 (tag-preset (get 'org-agenda-tag-filter :preset-filter))
 	 (cat-filter org-agenda-category-filter)
@@ -6302,7 +6509,7 @@ to switch to narrowing."
 	(message "Effort%s: %s " effort-op effort-prompt)
 	(setq char (read-char-exclusive))
 	(when (or (< char ?0) (> char ?9))
-	  (error "Need 1-9,0 to select effort" ))))
+	  (error "Need 1-9,0 to select effort"))))
     (when (equal char ?\t)
       (unless (local-variable-p 'org-global-tags-completion-table (current-buffer))
 	(org-set-local 'org-global-tags-completion-table
@@ -7473,6 +7680,7 @@ If JUST-THIS is non-nil, change just the current line, not all.
 If FORCE-TAGS is non nil, the car of it returns the new tags."
   (let* ((inhibit-read-only t)
 	 (line (org-current-line))
+	 (org-agenda-buffer (current-buffer))
 	 (thetags (with-current-buffer (marker-buffer hdmarker)
 		    (save-excursion (save-restriction (widen)
 						      (goto-char hdmarker)
@@ -7493,13 +7701,13 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		new
 		(let ((org-prefix-format-compiled
 		       (or (get-text-property (point) 'format)
-			   org-prefix-format-compiled)))
+			   org-prefix-format-compiled))
+		      (extra (org-get-at-bol 'extra)))
 		  (with-current-buffer (marker-buffer hdmarker)
 		    (save-excursion
 		      (save-restriction
 			(widen)
-			(org-agenda-format-item (org-get-at-bol 'extra)
-						newhead cat tags dotime)))))
+			(org-agenda-format-item extra newhead cat tags dotime)))))
 		pl (text-property-any (point-at-bol) (point-at-eol) 'org-heading t)
 		undone-face (org-get-at-bol 'undone-face)
 		done-face (org-get-at-bol 'done-face))
