@@ -1206,9 +1206,9 @@ effects."
 	    (push (cons (car def)
 			(save-restriction
 			  (narrow-to-region (point) (nth 2 def))
-			  ;; Like `org-element-parse-buffer', but makes
-			  ;; sure the definition doesn't start with
-			  ;; a section element.
+			  ;; Like `org-element-parse-buffer', but
+			  ;; makes sure the definition doesn't start
+			  ;; with a section element.
 			  (nconc
 			   (list 'org-data nil)
 			   (org-element-parse-elements
@@ -1265,8 +1265,11 @@ DATA is the parse tree from which information is retrieved.  INFO
 is a list holding export options.  BACKEND is the back-end called
 for transcoding, as a symbol.
 
-Following tree properties are set:
+Following tree properties are set or updated:
 `:back-end'        Back-end used for transcoding.
+
+`:footnote-definition-alist' List of footnotes definitions in
+                   original buffer and current parse tree.
 
 `:headline-offset' Offset between true level of headlines and
 		   local level.  An offset of -1 means an headline
@@ -1282,20 +1285,33 @@ Following tree properties are set:
 `:parse-tree'      Whole parse tree.
 
 `:target-list'     List of all targets in the parse tree."
-  ;; First, get the list of elements and objects to ignore, and put it
-  ;; into `:ignore-list'.  Do not overwrite any user ignore that might
-  ;; have been done during parse tree filtering.
+  ;; Get the list of elements and objects to ignore, and put it into
+  ;; `:ignore-list'.  Do not overwrite any user ignore that might have
+  ;; been done during parse tree filtering.
   (setq info
 	(plist-put info
 		   :ignore-list
 		   (append (org-export-populate-ignore-list data info)
 			   (plist-get info :ignore-list))))
-  ;; Then compute `:headline-offset' in order to be able to use
+  ;; Compute `:headline-offset' in order to be able to use
   ;; `org-export-get-relative-level'.
   (setq info
 	(plist-put info
 		   :headline-offset (- 1 (org-export-get-min-level data info))))
-  ;; Now, properties order doesn't matter: get the rest of the tree
+  ;; Update footnotes definitions list with definitions in parse tree.
+  ;; This is required since buffer expansion might have modified
+  ;; boundaries of footnote definitions contained in the parse tree.
+  ;; This way, definitions in `footnote-definition-alist' are bound to
+  ;; match those in the parse tree.
+  (let ((defs (plist-get info :footnote-definition-alist)))
+    (org-element-map
+     data 'footnote-definition
+     (lambda (fn)
+       (push (cons (org-element-property :label fn)
+		   `(org-data nil ,@(org-element-contents fn)))
+	     defs)))
+    (setq info (plist-put info :footnote-definition-alist defs)))
+  ;; Properties order doesn't matter: get the rest of the tree
   ;; properties.
   (nconc
    `(:parse-tree
@@ -2108,31 +2124,23 @@ Return code as a string."
 		   backend
 		   (org-export-store-footnote-definitions
 		    (org-export-get-environment backend subtreep ext-plist))))
-	    tree)
-	;; 2. Get parse tree.
-	(if noexpand
-	    ;; If NOEXPAND is non-nil, simply parse current visible
-	    ;; part of buffer.
-	    (setq tree (org-element-parse-buffer nil visible-only))
-	  ;; Otherwise, buffer isn't parsed directly.  Instead,
-	  ;; a temporary copy is created, where include keywords are
-	  ;; expanded and code blocks are evaluated.
-	  (let ((buf (or (buffer-file-name (buffer-base-buffer))
-			 (current-buffer))))
-	    (org-export-with-current-buffer-copy
-	     (org-export-expand-include-keyword)
-	     ;; Setting `org-current-export-file' is required by Org
-	     ;; Babel to properly resolve noweb references.
-	     (let ((org-current-export-file buf))
-	       (org-export-blocks-preprocess))
-	     (setq tree (org-element-parse-buffer nil visible-only)
-		   ;; Footnote definitions must be stored again, since
-		   ;; buffer's expansion might have modified
-		   ;; boundaries of footnote definitions contained in
-		   ;; the parse tree.  This way, definitions in
-		   ;; `footnote-definition-alist' are bound to
-		   ;; coincide with those in the parse tree.
-		   info (org-export-store-footnote-definitions info)))))
+	    ;; 2. Get parse tree.  If NOEXPAND is non-nil, simply
+	    ;;    parse current visible part of buffer.
+	    (tree (if noexpand (org-element-parse-buffer nil visible-only)
+		    ;; Otherwise, buffer isn't parsed directly.
+		    ;; Instead, a temporary copy is created, where
+		    ;; include keywords are expanded and code blocks
+		    ;; are evaluated.
+		    (let ((buf (or (buffer-file-name (buffer-base-buffer))
+				   (current-buffer))))
+		      (org-export-with-current-buffer-copy
+		       (org-export-expand-include-keyword)
+		       ;; Setting `org-current-export-file' is
+		       ;; required by Org Babel to properly resolve
+		       ;; noweb references.
+		       (let ((org-current-export-file buf))
+			 (org-export-blocks-preprocess))
+		       (org-element-parse-buffer nil visible-only))))))
 	;; 3. Call parse-tree filters to get the final tree.
 	(setq tree
 	      (org-export-filter-apply-functions
