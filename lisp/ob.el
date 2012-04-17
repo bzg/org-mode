@@ -83,6 +83,8 @@
 (declare-function org-list-prevs-alist "org-list" (struct))
 (declare-function org-list-get-list-end "org-list" (item struct prevs))
 (declare-function org-strip-protective-commas "org" (beg end))
+(declare-function org-remove-if "org" (predicate seq))
+(declare-function org-completing-read "org" (&rest args))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."

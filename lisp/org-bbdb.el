@@ -116,6 +116,9 @@
 (declare-function bbdb-search-name "ext:bbdb-com" (regexp &optional layout))
 (declare-function bbdb-search-organization "ext:bbdb-com" (regexp &optional layout))
 
+;; `bbdb-record-note' is part of BBDB v3.x
+(declare-function bbdb-record-note "ext:bbdb" (record label))
+
 (declare-function calendar-leap-year-p "calendar" (year))
 (declare-function diary-ordinal-suffix "diary-lib" (n))
 

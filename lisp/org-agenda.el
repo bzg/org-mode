@@ -1818,6 +1818,17 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 
 ;;; Multiple agenda buffers support
 
+(defcustom org-agenda-sticky nil
+  "Non-nil means agenda q key will bury agenda buffers.
+Agenda commands will then show existing buffer instead of generating new ones.
+When nil, `q' will kill the single agenda buffer."
+  :group 'org-agenda
+  :type 'boolean
+  :set (lambda (var val)
+	 (if (boundp var)
+	     (org-toggle-sticky-agenda (if val 1 0))
+	   (set var val))))
+
 (defun org-toggle-sticky-agenda (&optional arg)
   "Toggle `org-agenda-sticky'."
   (interactive "P")
@@ -1831,17 +1842,6 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
       (org-agenda-kill-all-agenda-buffers)
       (message "Sticky agenda was %s"
 	       (if org-agenda-sticky "enabled" "disabled")))))
-
-(defcustom org-agenda-sticky nil
-  "Non-nil means agenda q key will bury agenda buffers.
-Agenda commands will then show existing buffer instead of generating new ones.
-When nil, `q' will kill the single agenda buffer."
-  :group 'org-agenda
-  :type 'boolean
-  :set (lambda (var val)
-	 (if (boundp var)
-	     (org-toggle-sticky-agenda (if val 1 0))
-	   (set var val))))
 
 (defvar org-agenda-buffer nil
   "Agenda buffer currently being generated.")
@@ -5136,6 +5136,7 @@ please use `org-class' instead."
      dayname skip-weeks)))
 (make-obsolete 'org-diary-class 'org-class "")
 
+(defvar org-agenda-show-log-scoped) ;; dynamically scope in ̀org-timeline' or`org-agenda-list'
 (defalias 'org-get-closed 'org-agenda-get-progress)
 (defun org-agenda-get-progress ()
   "Return the logged TODO entries for agenda display."
