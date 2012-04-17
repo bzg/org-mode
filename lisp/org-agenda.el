@@ -1890,7 +1890,7 @@ The following commands are available:
   (interactive)
   (cond (org-agenda-doing-sticky-redo
 	 ;; Refreshing sticky agenda-buffer
-	 ;; 
+	 ;;
 	 ;; Preserve the value of `org-agenda-local-vars' variables,
 	 ;; while letting `kill-all-local-variables' kill the rest
 	 (let ((save (buffer-local-variables)))
@@ -3476,7 +3476,7 @@ Org-mode keeps a list of these markers and resets them when they are
 no longer in use."
   (let ((m (copy-marker (or pos (point)))))
     (setq org-agenda-last-marker-time (org-float-time))
-    (if org-agenda-buffer 
+    (if org-agenda-buffer
 	(with-current-buffer org-agenda-buffer
 	  (push m org-agenda-markers))
       (push m org-agenda-markers))
@@ -5978,9 +5978,9 @@ and stored in the variable `org-prefix-format-compiled'."
       (setq org-prefix-format-compiled
 	    (list
 	     `((org-prefix-has-time ,org-prefix-has-time)
-	       (org-prefix-has-tag ,org-prefix-has-tag) 
-	       (org-prefix-category-length ,org-prefix-category-length) 
-	       (org-prefix-has-effort ,org-prefix-has-effort)) 
+	       (org-prefix-has-tag ,org-prefix-has-tag)
+	       (org-prefix-category-length ,org-prefix-category-length)
+	       (org-prefix-has-effort ,org-prefix-has-effort))
 	     `(format ,s ,@vars))))))
 
 (defun org-set-sorting-strategy (key)
