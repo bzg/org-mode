@@ -1518,8 +1518,19 @@ bullets between START and END."
 	 (change-bullet-maybe
 	  (function
 	   (lambda (item)
-	     (let* ((bul (org-trim (org-list-get-bullet item struct)))
-		    (new-bul-p (cdr (assoc bul org-list-demote-modify-bullet))))
+	     (let ((new-bul-p
+		    (cdr (assoc
+			  ;; Normalize ordered bullets.
+			  (let ((bul (org-trim
+				      (org-list-get-bullet item struct))))
+			    (cond ((string-match "[A-Z]\\." bul) "A.")
+				  ((string-match "[A-Z])" bul) "A)")
+				  ((string-match "[a-z]\\." bul) "a.")
+				  ((string-match "[a-z])" bul) "a)")
+				  ((string-match "[0-9]\\." bul) "1.")
+				  ((string-match "[0-9])" bul) "1)")
+				  (t bul)))
+			  org-list-demote-modify-bullet))))
 	       (when new-bul-p (org-list-set-bullet item struct new-bul-p))))))
 	 (ind
 	  (lambda (cell)
@@ -2546,7 +2557,6 @@ STRUCT is the list structure.
 
 Return t if successful."
   (save-excursion
-    (beginning-of-line)
     (let* ((regionp (org-region-active-p))
 	   (rbeg (and regionp (region-beginning)))
 	   (rend (and regionp (region-end)))
@@ -2555,7 +2565,8 @@ Return t if successful."
 	   (prevs (org-list-prevs-alist struct))
 	   ;; Are we going to move the whole list?
 	   (specialp
-	    (and (= top (point))
+	    (and (not regionp)
+		 (= top (point-at-bol))
 		 (cdr (assq 'indent org-list-automatic-rules))
 		 (if no-subtree
 		     (error
@@ -2569,12 +2580,12 @@ Return t if successful."
 	    (progn
 	      (set-marker org-last-indent-begin-marker rbeg)
 	      (set-marker org-last-indent-end-marker rend))
-	  (set-marker org-last-indent-begin-marker (point))
+	  (set-marker org-last-indent-begin-marker (point-at-bol))
 	  (set-marker org-last-indent-end-marker
 		      (cond
 		       (specialp (org-list-get-bottom-point struct))
-		       (no-subtree (1+ (point)))
-		       (t (org-list-get-item-end (point) struct))))))
+		       (no-subtree (1+ (point-at-bol)))
+		       (t (org-list-get-item-end (point-at-bol) struct))))))
       (let* ((beg (marker-position org-last-indent-begin-marker))
 	     (end (marker-position org-last-indent-end-marker)))
 	(cond
@@ -2629,19 +2640,35 @@ Return t if successful."
   "Outdent a local list item, but not its children.
 If a region is active, all items inside will be moved."
   (interactive)
-  (if (org-at-item-p)
-      (let ((struct (org-list-struct)))
-	(org-list-indent-item-generic -1 t struct))
-    (error "Not at an item")))
+  (let ((regionp (org-region-active-p)))
+    (cond
+     ((or (org-at-item-p)
+	  (and regionp
+	       (save-excursion (goto-char (region-beginning))
+			       (org-at-item-p))))
+      (let ((struct (if (not regionp) (org-list-struct)
+		      (save-excursion (goto-char (region-beginning))
+				      (org-list-struct)))))
+	(org-list-indent-item-generic -1 t struct)))
+     (regionp (error "Region not starting at an item"))
+     (t (error "Not at an item")))))
 
 (defun org-indent-item ()
   "Indent a local list item, but not its children.
 If a region is active, all items inside will be moved."
   (interactive)
-  (if (org-at-item-p)
-      (let ((struct (org-list-struct)))
-	(org-list-indent-item-generic 1 t struct))
-    (error "Not at an item")))
+  (let ((regionp (org-region-active-p)))
+    (cond
+     ((or (org-at-item-p)
+	  (and regionp
+	       (save-excursion (goto-char (region-beginning))
+			       (org-at-item-p))))
+      (let ((struct (if (not regionp) (org-list-struct)
+		      (save-excursion (goto-char (region-beginning))
+				      (org-list-struct)))))
+	(org-list-indent-item-generic 1 t struct)))
+     (regionp (error "Region not starting at an item"))
+     (t (error "Not at an item")))))
 
 (defun org-outdent-item-tree ()
   "Outdent a local list item including its children.
@@ -2650,10 +2677,12 @@ If a region is active, all items inside will be moved."
   (let ((regionp (org-region-active-p)))
     (cond
      ((or (org-at-item-p)
-	  (and (org-region-active-p)
-	       (goto-char (region-beginning))
-	       (org-at-item-p)))
-      (let ((struct (org-list-struct)))
+	  (and regionp
+	       (save-excursion (goto-char (region-beginning))
+			       (org-at-item-p))))
+      (let ((struct (if (not regionp) (org-list-struct)
+		      (save-excursion (goto-char (region-beginning))
+				      (org-list-struct)))))
 	(org-list-indent-item-generic -1 nil struct)))
      (regionp (error "Region not starting at an item"))
      (t (error "Not at an item")))))
@@ -2665,10 +2694,12 @@ If a region is active, all items inside will be moved."
   (let ((regionp (org-region-active-p)))
     (cond
      ((or (org-at-item-p)
-	  (and (org-region-active-p)
-	       (goto-char (region-beginning))
-	       (org-at-item-p)))
-      (let ((struct (org-list-struct)))
+	  (and regionp
+	       (save-excursion (goto-char (region-beginning))
+			       (org-at-item-p))))
+      (let ((struct (if (not regionp) (org-list-struct)
+		      (save-excursion (goto-char (region-beginning))
+				      (org-list-struct)))))
 	(org-list-indent-item-generic 1 nil struct)))
      (regionp (error "Region not starting at an item"))
      (t (error "Not at an item")))))
