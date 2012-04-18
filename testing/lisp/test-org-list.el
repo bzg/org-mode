@@ -113,6 +113,251 @@
 	(org-previous-item)
 	(should (looking-at "  - item 1.3"))))))
 
+(ert-deftest test-org-list/indent-item ()
+  "Test `org-indent-item' specifications."
+  ;; 1. Error when not at an item.
+  (org-test-with-temp-text "Paragraph."
+    (should-error (org-indent-item)))
+  ;; 2. Error when trying to move first item of a list.
+  (org-test-with-temp-text "
+- Item 1
+- Item 2"
+    (forward-line)
+    (should-error (org-indent-item)))
+  ;; 3. Indent a single item, not its children.
+  (org-test-with-temp-text "
+- Item 1
+- Item 2
+  - Item 2.1"
+    (search-forward "- Item 2")
+    (let (org-list-demote-modify-bullet) (org-indent-item))
+    (should (equal (buffer-string)
+		   "
+- Item 1
+  - Item 2
+  - Item 2.1")))
+  ;; 4. Follow `org-list-demote-modify-bullet' specifications.
+  ;;
+  ;; 4.1. With unordered lists.
+  (org-test-with-temp-text "
+- Item 1
+- Item 2"
+    (search-forward "- Item 2")
+    (let ((org-list-demote-modify-bullet '(("-" . "+")))) (org-indent-item))
+    (should (equal (buffer-string)
+		   "
+- Item 1
+  + Item 2")))
+  ;; 4.2. and ordered lists.
+  (org-test-with-temp-text "
+1. Item 1
+2. Item 2"
+    (search-forward "2. Item 2")
+    (let ((org-plain-list-ordered-item-terminator t)
+	  (org-list-demote-modify-bullet '(("1." . "+"))))
+      (org-indent-item))
+    (should (equal (buffer-string)
+		   "
+1. Item 1
+   + Item 2")))
+  ;; 5. When a region is selected, indent every item within.
+  (org-test-with-temp-text "
+- Item 1
+- Item 2
+- Item 3
+"
+    (search-forward "- Item 2")
+    (beginning-of-line)
+    (transient-mark-mode 1)
+    (push-mark (point) t t)
+    (goto-char (point-max))
+    (let (org-list-demote-modify-bullet) (org-indent-item))
+    (should (equal (buffer-string)
+		   "
+- Item 1
+  - Item 2
+  - Item 3
+"))))
+
+(ert-deftest test-org-list/indent-item-tree ()
+  "Test `org-indent-item-tree' specifications."
+  ;; 1. Error when not at an item.
+  (org-test-with-temp-text "Paragraph."
+    (should-error (org-indent-item-tree)))
+  ;; 2. Indent item along with its children.
+  (org-test-with-temp-text "
+- Item 1
+- Item 2
+  - Item 2.1"
+    (search-forward "- Item 2")
+    (let (org-list-demote-modify-bullet) (org-indent-item-tree))
+    (should (equal (buffer-string)
+		   "
+- Item 1
+  - Item 2
+    - Item 2.1")))
+  ;; 3. Special case: When indenting top item, move the whole list.
+  (org-test-with-temp-text "
+- Item 1
+- Item 2"
+    (search-forward "- Item 1")
+    (let (org-list-demote-modify-bullet org-odd-levels-only)
+      (org-indent-item-tree))
+    (should (equal (buffer-string)
+		   "
+ - Item 1
+ - Item 2")))
+  ;; 4. Follow `org-list-demote-modify-bullet' specifications.
+  ;;
+  ;; 4.1. With unordered lists.
+  (org-test-with-temp-text "
+- Item 1
+- Item 2
+  + Item 2.1"
+    (search-forward "- Item 2")
+    (let ((org-list-demote-modify-bullet '(("-" . "+") ("+" . "-"))))
+      (org-indent-item-tree))
+    (should (equal (buffer-string)
+		   "
+- Item 1
+  + Item 2
+    - Item 2.1")))
+  ;; 4.2. and ordered lists.
+  (org-test-with-temp-text "
+1. Item 1
+2. Item 2
+   + Item 2.1"
+    (search-forward "2. Item 2")
+    (let ((org-plain-list-ordered-item-terminator t)
+	  (org-list-demote-modify-bullet '(("1." . "+") ("+" . "1."))))
+      (org-indent-item-tree))
+    (should (equal (buffer-string)
+		   "
+1. Item 1
+   + Item 2
+     1. Item 2.1")))
+  ;; 5. When a region is selected, indent every item within.
+  (org-test-with-temp-text "
+- Item 1
+- Item 2
+  - Item 2.1
+- Item 3
+  - Item 3.1
+"
+    (search-forward "- Item 2")
+    (beginning-of-line)
+    (transient-mark-mode 1)
+    (push-mark (point) t t)
+    (goto-char (point-max))
+    (let (org-list-demote-modify-bullet) (org-indent-item-tree))
+    (should (equal (buffer-string)
+		   "
+- Item 1
+  - Item 2
+    - Item 2.1
+  - Item 3
+    - Item 3.1
+"))))
+
+(ert-deftest test-org-list/outdent-item ()
+  "Test `org-outdent-item' specifications."
+  ;; 1. Error when not at an item.
+  (org-test-with-temp-text "Paragraph."
+    (should-error (org-outdent-item)))
+  ;; 2. Error when trying to move first item of a list.
+  (org-test-with-temp-text "
+- Item 1
+- Item 2"
+    (forward-line)
+    (should-error (org-outdent-item)))
+  ;; 3. Error when trying to outdent an item without its children.
+  (org-test-with-temp-text "
+- Item 1
+  - Item 1.1
+    - Item 1.1.1"
+    (search-forward "- Item 1.1")
+    (should-error (org-outdent-item)))
+  ;; 4. Error when trying to outdent before top item.
+  (org-test-with-temp-text "
+  - Item 1
+  - Item 2"
+    (search-forward "- Item 2")
+    (should-error (org-outdent-item)))
+  ;; 5. When a region is selected, outdent every item within.
+  (org-test-with-temp-text "
+- Item 1
+  - Item 2
+  - Item 3
+"
+    (search-forward "- Item 2")
+    (beginning-of-line)
+    (transient-mark-mode 1)
+    (push-mark (point) t t)
+    (goto-char (point-max))
+    (let (org-list-demote-modify-bullet) (org-outdent-item))
+    (should (equal (buffer-string)
+		   "
+- Item 1
+- Item 2
+- Item 3
+"))))
+
+(ert-deftest test-org-list/outdent-item-tree ()
+  "Test `org-outdent-item-tree' specifications."
+  ;; 1. Error when not at an item.
+  (org-test-with-temp-text "Paragraph."
+    (should-error (org-outdent-item-tree)))
+  ;; 2. Error when trying to outdent before top item.
+  (org-test-with-temp-text "
+  - Item 1
+  - Item 2"
+    (search-forward "- Item 2")
+    (should-error (org-outdent-item-tree)))
+  ;; 3. Outdent item along with its children.
+  (org-test-with-temp-text "
+- Item 1
+  - Item 2
+    - Item 2.1"
+    (search-forward "- Item 2")
+    (org-outdent-item-tree)
+    (should (equal (buffer-string)
+		   "
+- Item 1
+- Item 2
+  - Item 2.1")))
+  ;; 3. Special case: When outdenting top item, move the whole list.
+  (org-test-with-temp-text "
+ - Item 1
+ - Item 2"
+    (search-forward "- Item 1")
+    (let (org-odd-levels-only) (org-outdent-item-tree))
+    (should (equal (buffer-string)
+		   "
+- Item 1
+- Item 2")))
+  ;; 5. When a region is selected, outdent every item within.
+  (org-test-with-temp-text "
+- Item 1
+  - Item 2
+    - Item 2.1
+  - Item 3
+    - Item 3.1
+"
+    (search-forward "- Item 2")
+    (beginning-of-line)
+    (transient-mark-mode 1)
+    (push-mark (point) t t)
+    (goto-char (point-max))
+    (org-outdent-item-tree)
+    (should (equal (buffer-string)
+		   "
+- Item 1
+- Item 2
+  - Item 2.1
+- Item 3
+  - Item 3.1
+"))))
+
 
 (provide 'test-org-list)
 ;;; test-org-list.el ends here
