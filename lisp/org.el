@@ -17968,28 +17968,34 @@ See the individual commands for more information."
 
 (defun org-shiftmetaleft ()
   "Promote subtree or delete table column.
-Calls `org-promote-subtree', `org-outdent-item',
-or `org-table-delete-column', depending on context.
-See the individual commands for more information."
+Calls `org-promote-subtree', `org-outdent-item-tree', or
+`org-table-delete-column', depending on context.  See the
+individual commands for more information."
   (interactive)
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetaleft-hook))
    ((org-at-table-p) (call-interactively 'org-table-delete-column))
    ((org-at-heading-p) (call-interactively 'org-promote-subtree))
-   ((org-at-item-p) (call-interactively 'org-outdent-item-tree))
+   ((if (not (org-region-active-p)) (org-at-item-p)
+      (save-excursion (goto-char (region-beginning))
+		      (org-at-item-p)))
+    (call-interactively 'org-outdent-item-tree))
    (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetaright ()
   "Demote subtree or insert table column.
-Calls `org-demote-subtree', `org-indent-item',
-or `org-table-insert-column', depending on context.
-See the individual commands for more information."
+Calls `org-demote-subtree', `org-indent-item-tree', or
+`org-table-insert-column', depending on context.  See the
+individual commands for more information."
   (interactive)
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetaright-hook))
    ((org-at-table-p) (call-interactively 'org-table-insert-column))
    ((org-at-heading-p) (call-interactively 'org-demote-subtree))
-   ((org-at-item-p) (call-interactively 'org-indent-item-tree))
+   ((if (not (org-region-active-p)) (org-at-item-p)
+      (save-excursion (goto-char (region-beginning))
+		      (org-at-item-p)))
+    (call-interactively 'org-indent-item-tree))
    (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetaup (&optional arg)
