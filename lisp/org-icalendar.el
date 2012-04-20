@@ -403,12 +403,12 @@ When COMBINE is non nil, add the category to each line."
 	  (if (or (string-match org-tr-regexp hd)
 		  (string-match org-ts-regexp hd))
 	      (setq hd (replace-match "" t t hd)))
-	  (if (string-match "\\+\\([0-9]+\\)\\([dwmy]\\)>" ts)
+	  (if (string-match "\\+\\([0-9]+\\)\\([hdwmy]\\)>" ts)
 	      (setq rrule
 		    (concat "\nRRULE:FREQ="
 			    (cdr (assoc
 				  (match-string 2 ts)
-				  '(("d" . "DAILY")("w" . "WEEKLY")
+				  '(("h" . "HOURLY")("d" . "DAILY")("w" . "WEEKLY")
 				    ("m" . "MONTHLY")("y" . "YEARLY"))))
 			    ";INTERVAL=" (match-string 1 ts)))
 	    (setq rrule ""))

@@ -694,7 +694,7 @@ An entry can be toggled between QUOTE and normal with
   :type 'string)
 
 (defconst org-repeat-re
-  "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*?\\([.+]?\\+[0-9]+[dwmy]\\(/[0-9]+[dwmy]\\)?\\)"
+  "<[0-9]\\{4\\}-[0-9][0-9]-[0-9][0-9] [^>\n]*?\\([.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)"
   "Regular expression for specifying repeated events.
 After a match, group 1 contains the repeat expression.")
 
@@ -7967,7 +7967,7 @@ and still retain the repeater to cover future instances of the task."
     (if (not (and (integerp n) (> n 0)))
 	(error "Invalid number of replications %s" n))
     (if (and (setq doshift (and (stringp shift) (string-match "\\S-" shift)))
-	     (not (string-match "\\`[ \t]*\\+?\\([0-9]+\\)\\([dwmy]\\)[ \t]*\\'"
+	     (not (string-match "\\`[ \t]*\\+?\\([0-9]+\\)\\([hdwmy]\\)[ \t]*\\'"
 				shift)))
 	(error "Invalid shift specification %s" shift))
     (when doshift
@@ -7985,7 +7985,7 @@ and still retain the repeater to cover future instances of the task."
     (setq end (point))
     (setq template (buffer-substring beg end))
     (when (and doshift
-	       (string-match "<[^<>\n]+ [.+]?\\+[0-9]+[dwmy][^<>\n]*>" template))
+	       (string-match "<[^<>\n]+ [.+]?\\+[0-9]+[hdwmy][^<>\n]*>" template))
       (delete-region beg end)
       (setq end beg)
       (setq nmin 0 nmax (1+ nmax) n-no-remove nmax))
@@ -8016,7 +8016,7 @@ and still retain the repeater to cover future instances of the task."
 		(while (re-search-forward org-ts-regexp nil t)
 		  (save-excursion
 		    (goto-char (match-beginning 0))
-		    (if (looking-at "<[^<>\n]+\\( +[.+]?\\+[0-9]+[dwmy]\\)")
+		    (if (looking-at "<[^<>\n]+\\( +[.+]?\\+[0-9]+[hdwmy]\\)")
 			(delete-region (match-beginning 1) (match-end 1)))))))
 	    (setq task (buffer-string)))
 	  (insert task))
@@ -11936,7 +11936,7 @@ This function is run automatically after each state change to a DONE state."
 	 (aa (assoc org-last-state org-todo-kwd-alist))
 	 (interpret (nth 1 aa))
 	 (head (nth 2 aa))
-	 (whata '(("d" . day) ("m" . month) ("y" . year)))
+	 (whata '(("h" . hour) ("d" . day) ("m" . month) ("y" . year)))
 	 (msg "Entry repeats: ")
 	 (org-log-done nil)
 	 (org-todo-log-states nil)
@@ -11972,10 +11972,12 @@ This function is run automatically after each state change to a DONE state."
 	(setq type (if (match-end 1) org-scheduled-string
 		     (if (match-end 3) org-deadline-string "Plain:"))
 	      ts (match-string (if (match-end 2) 2 (if (match-end 4) 4 0))))
-	(when (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([dwmy]\\)" ts)
+	(when (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts)
 	  (setq	n (string-to-number (match-string 2 ts))
 		what (match-string 3 ts))
 	  (if (equal what "w") (setq n (* n 7) what "d"))
+	  (if (and (equal what "h") (not (string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" ts)))
+	      (error "Cannot repeat in Repeat in %d hour(s) because no hour has been set" n))
 	  ;; Preparation, see if we need to modify the start date for the change
 	  (when (match-end 1)
 	    (setq time (save-match-data (org-time-string-to-time ts)))
@@ -12001,7 +12003,7 @@ This function is run automatically after each state change to a DONE state."
 	      ;; rematch, so that we have everything in place for the real shift
 	      (org-at-timestamp-p t)
 	      (setq ts (match-string 1))
-	      (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([dwmy]\\)" ts))))
+	      (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts))))
 	  (org-timestamp-change n (cdr (assoc what whata)))
 	  (setq msg (concat msg type " " org-last-changed-timestamp " "))))
       (setq org-log-post-message msg)
@@ -12048,7 +12050,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
     (let* ((old-date (org-entry-get nil "DEADLINE"))
 	   (repeater (and old-date
 			  (string-match
-			   "\\([.+-]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
+			   "\\([.+-]+[0-9]+[hdwmy]\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
 			   old-date)
 			  (match-string 1 old-date))))
       (if remove
@@ -12096,7 +12098,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
     (let* ((old-date (org-entry-get nil "SCHEDULED"))
 	   (repeater (and old-date
 			  (string-match
-			   "\\([.+-]+[0-9]+[dwmy]\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
+			   "\\([.+-]+[0-9]+[hdwmy]\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
 			   old-date)
 			  (match-string 1 old-date))))
       (if remove
@@ -13250,7 +13252,7 @@ epoch to the beginning of today (00:00)."
      ((string= s "<today>") (org-time-today))
      ((string= s "<tomorrow>")   (+ 86400.0 (org-time-today)))
      ((string= s "<yesterday>")  (- (org-time-today) 86400.0))
-     ((string-match "^<\\([-+][0-9]+\\)\\([dwmy]\\)>$" s)
+     ((string-match "^<\\([-+][0-9]+\\)\\([hdwmy]\\)>$" s)
       (+ (org-time-today)
 	 (* (string-to-number (match-string 1 s))
 	    (cdr (assoc (match-string 2 s)
@@ -14946,7 +14948,7 @@ at the cursor, it will be modified."
 	 	     (save-match-data
 	 	       (beginning-of-line)
 	 	       (when (re-search-forward
-			      "\\([.+-]+[0-9]+[dwmy] ?\\)+" ;;\\(?:[/ ][-+]?[0-9]+[dwmy]\\)?\\) ?"
+			      "\\([.+-]+[0-9]+[hdwmy] ?\\)+" ;;\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
 			      (save-excursion (progn (end-of-line) (point))) t)
 			 (match-string 0)))))
 	 org-time-was-given org-end-time-was-given time)
@@ -15048,7 +15050,7 @@ mean next year.  For details, see the manual.  A few examples:
   etc.
 
 Furthermore you can specify a relative date by giving, as the *first* thing
-in the input:  a plus/minus sign, a number and a letter [dwmy] to indicate
+in the input:  a plus/minus sign, a number and a letter [hdwmy] to indicate
 change in days weeks, months, years.
 With a single plus or minus, the date is relative to today.  With a double
 plus or minus, it is relative to the date in DEFAULT-TIME.  E.g.
@@ -15466,7 +15468,7 @@ DEF-FLAG   is t when a double ++ or -- indicates shift relative to
 	  (concat
 	   "\\`[ \t]*\\([-+]\\{0,2\\}\\)"
 	   "\\([0-9]+\\)?"
-	   "\\([dwmy]\\|\\(" (mapconcat 'car parse-time-weekdays "\\|") "\\)\\)?"
+	   "\\([hdwmy]\\|\\(" (mapconcat 'car parse-time-weekdays "\\|") "\\)\\)?"
 	   "\\([ \t]\\|$\\)") s)
 	 (or (> (match-end 1) (match-beginning 1)) (match-end 4)))
     (let* ((dir (if (> (match-end 1) (match-beginning 1))
@@ -15583,7 +15585,7 @@ The command returns the inserted time stamp."
 	 t1 w1 with-hm tf time str w2 (off 0))
     (save-match-data
       (setq t1 (org-parse-time-string ts t))
-      (if (string-match "\\(-[0-9]+:[0-9]+\\)?\\( [.+]?\\+[0-9]+[dwmy]\\(/[0-9]+[dwmy]\\)?\\)?\\'" ts)
+      (if (string-match "\\(-[0-9]+:[0-9]+\\)?\\( [.+]?\\+[0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)?\\'" ts)
 	  (setq off (- (match-end 0) (match-beginning 0)))))
     (setq end (- end off))
     (setq w1 (- end beg)
@@ -15654,7 +15656,7 @@ Don't touch the rest."
    ((<= org-deadline-warning-days 0)
     ;; 0 or negative, enforce this value no matter what
     (- org-deadline-warning-days))
-   ((string-match "-\\([0-9]+\\)\\([dwmy]\\)\\(\\'\\|>\\| \\)" ts)
+   ((string-match "-\\([0-9]+\\)\\([hdwmy]\\)\\(\\'\\|>\\| \\)" ts)
     ;; lead time is specified.
     (floor (* (string-to-number (match-string 1 ts))
 	      (cdr (assoc (match-string 2 ts)
@@ -15845,7 +15847,7 @@ The variable date is bound by the calendar when this is called."
     (if (org-diary-sexp-entry (match-string 1 s) "" date)
 	daynr
       (+ daynr 1000)))
-   ((and daynr (string-match "\\+[0-9]+[dwmy]" s))
+   ((and daynr (string-match "\\+[0-9]+[hdwmy]" s))
     (org-closest-date s (if (and (boundp 'daynr) (integerp daynr)) daynr
 			  (time-to-days (current-time))) (match-string 0 s)
 			  prefer show-all))
@@ -15956,7 +15958,7 @@ When SHOW-ALL is nil, only return the current occurrence of a time stamp."
 
       (if (<= cday sday) (throw 'exit sday))
 
-      (if (string-match "\\(\\+[0-9]+\\)\\([dwmy]\\)" change)
+      (if (string-match "\\(\\+[0-9]+\\)\\([hdwmy]\\)" change)
 	  (setq dn (string-to-number (match-string 1 change))
 		dw (cdr (assoc (match-string 2 change) a1)))
 	(error "Invalid change specifier: %s" change))
@@ -16140,7 +16142,7 @@ in the timestamp determines what will be changed."
 	    ts (match-string 0))
       (replace-match "")
       (if (string-match
-	   "\\(\\(-[012][0-9]:[0-5][0-9]\\)?\\( +[.+]?[-+][0-9]+[dwmy]\\(/[0-9]+[dwmy]\\)?\\)*\\)[]>]"
+	   "\\(\\(-[012][0-9]:[0-5][0-9]\\)?\\( +[.+]?[-+][0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)*\\)[]>]"
 	   ts)
 	  (setq extra (match-string 1 ts)))
       (if (string-match "^.\\{10\\}.*?[0-9]+:[0-9][0-9]" ts)

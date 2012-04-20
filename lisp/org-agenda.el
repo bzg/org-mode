@@ -4962,7 +4962,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	      (apply 'encode-time  ; DATE bound by calendar
 		     (list 0 0 0 (nth 1 date) (car date) (nth 2 date))))
 	     1 11))
-	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
+	   "\\|\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[hdwmy]>\\)"
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
 	 donep tmp priority category org-category-pos ee txt timestr tags
