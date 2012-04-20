@@ -330,6 +330,12 @@ play with them."
   :version "24.1"
   :type 'boolean)
 
+(defcustom org-clock-file-time-cell-format "*%s*"
+  "Format string for the file time cells."
+  :group 'org-clock
+  :version "24.1"
+  :type 'boolean)
+
 (defcustom org-clock-clocked-in-display 'mode-line
   "When clocked in for a task, org-mode can display the current
 task and accumulated time in the mode line and/or frame title.
@@ -2294,7 +2300,9 @@ from the dynamic block definition."
 	    (when multifile
 	      ;; Summarize the time collected from this file
 	      (insert-before-markers
-	       (format (concat "| %s %s | %s%s*" (nth 8 lwords) "* | *%s*|\n")
+	       (format (concat "| %s %s | %s%s"
+			       (format org-clock-file-time-cell-format (nth 8 lwords))
+			       " | *%s*|\n")
 		       (file-name-nondirectory (car tbl))
 		       (if level-p   "| " "") ; level column, maybe
 		       (if timestamp "| " "") ; timestamp column, maybe
