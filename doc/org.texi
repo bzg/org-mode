@@ -7938,9 +7938,9 @@ Interactively select another agenda view and append it to the current view.
 Delete other windows.
 @c
 @orgcmdkskc{v d,d,org-agenda-day-view}
-@xorgcmdkskc{v w,w,org-agenda-day-view}
+@xorgcmdkskc{v w,w,org-agenda-week-view}
 @xorgcmd{v m,org-agenda-month-view}
-@xorgcmd{v y,org-agenda-month-year}
+@xorgcmd{v y,org-agenda-year-view}
 @xorgcmd{v SPC,org-agenda-reset-view}
 @vindex org-agenda-span
 Switch to day/week/month/year view.  When switching to day or week view, this
