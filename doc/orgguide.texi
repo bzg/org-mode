@@ -1325,8 +1325,10 @@ A simple timestamp just assigns a date/time to an item.  This is just
 like writing down an appointment or event in a paper agenda.
 
 @smallexample
-* Meet Peter at the movies <2006-11-01 Wed 19:15>
-* Discussion on climate change <2006-11-02 Thu 20:00-22:00>
+* Meet Peter at the movies
+  <2006-11-01 Wed 19:15>
+* Discussion on climate change
+  <2006-11-02 Thu 20:00-22:00>
 @end smallexample
 
 @noindent @b{Timestamp with repeater interval}@*
@@ -1335,7 +1337,8 @@ applies not only on the given date, but again and again after a certain
 interval of N days (d), weeks (w), months (m), or years (y).  The
 following will show up in the agenda every Wednesday:
 @smallexample
-* Pick up Sam at school <2007-05-16 Wed 12:30 +1w>
+* Pick up Sam at school
+  <2007-05-16 Wed 12:30 +1w>
 @end smallexample
 
 @noindent @b{Diary-style sexp entries}@*
@@ -1360,7 +1363,8 @@ angular ones.  These timestamps are inactive in the sense that they do
 @emph{not} trigger an entry to show up in the agenda.
 
 @smallexample
-* Gillian comes late for the fifth time [2006-11-01 Wed]
+* Gillian comes late for the fifth time
+  [2006-11-01 Wed]
 @end smallexample
 
 
