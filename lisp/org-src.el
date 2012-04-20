@@ -311,7 +311,7 @@ buffer."
 	     (error "Language mode `%s' fails with: %S" lang-f (nth 1 e)))))
 	(dolist (pair transmitted-variables)
 	  (org-set-local (car pair) (cadr pair)))
-	(if (eq major-mode 'org-mode)
+	(if (derived-mode-p 'org-mode)
 	    (progn
 	      (goto-char (point-min))
 	      (while (re-search-forward "^," nil t)
@@ -415,7 +415,7 @@ the fragment in the Org-mode buffer."
 	(case-fold-search t)
 	(msg (substitute-command-keys
 	      "Edit, then exit with C-c ' (C-c and single quote)"))
-	(org-mode-p (eq major-mode 'org-mode))
+	(org-mode-p (derived-mode-p 'org-mode))
 	(beg (make-marker))
 	(end (make-marker))
 	(preserve-indentation org-src-preserve-indentation)
@@ -634,7 +634,7 @@ the language, a switch telling if the content should be in a single line."
       (when (org-bound-and-true-p org-edit-src-from-org-mode)
 	(goto-char (point-min))
 	(while (re-search-forward
-		(if (eq major-mode 'org-mode) "^\\(.\\)" "^\\([*]\\|[ \t]*#\\+\\)") nil t)
+		(if (derived-mode-p 'org-mode) "^\\(.\\)" "^\\([*]\\|[ \t]*#\\+\\)") nil t)
 	  (if (eq (org-current-line) line) (setq delta (1+ delta)))
 	  (replace-match ",\\1")))
       (when (org-bound-and-true-p org-edit-src-picture)

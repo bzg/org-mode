@@ -309,7 +309,7 @@ The new topic will be titled NAME (or TITLE if supplied)."
 			    activate compile)
   "Before trying to find a tag, save our current position on org mark ring."
   (save-excursion
-    (if (and (eq major-mode 'org-mode) org-ctags-enabled-p)
+    (if (and (derived-mode-p 'org-mode) org-ctags-enabled-p)
         (org-mark-ring-push))))
 
 

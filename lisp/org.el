@@ -4523,7 +4523,7 @@ but the stars and the body are.")
 
 (defun org-set-regexps-and-options ()
   "Precompute regular expressions for current buffer."
-  (when (eq major-mode 'org-mode)
+  (when (derived-mode-p 'org-mode)
     (org-set-local 'org-todo-kwd-alist nil)
     (org-set-local 'org-todo-key-alist nil)
     (org-set-local 'org-todo-key-trigger nil)
@@ -6176,7 +6176,7 @@ in special contexts.
 			  (and limit-level (1- (* limit-level 2)))
 			limit-level)))
 	   (org-outline-regexp
-	    (if (not (eq major-mode 'org-mode))
+	    (if (not (derived-mode-p 'org-mode))
 		outline-regexp
 	      (concat "\\*" (if nstars (format "\\{1,%d\\} " nstars) "+ "))))
 	   (bob-special (and org-cycle-global-at-bob (not arg) (bobp)
@@ -6422,7 +6422,7 @@ With \\[universal-argument] prefix arg, switch to startup visibility.
 With a numeric prefix, show all headlines up to that level."
   (interactive "P")
   (let ((org-cycle-include-plain-lists
-	 (if (eq major-mode 'org-mode) org-cycle-include-plain-lists nil)))
+	 (if (derived-mode-p 'org-mode) org-cycle-include-plain-lists nil)))
     (cond
      ((integerp arg)
       (show-all)
@@ -6632,7 +6632,7 @@ open and agenda-wise Org files."
   (let ((files (mapcar 'expand-file-name (org-agenda-files))))
     (dolist (buf (buffer-list))
       (with-current-buffer buf
-	(if (and (eq major-mode 'org-mode) (buffer-file-name))
+	(if (and (derived-mode-p 'org-mode) (buffer-file-name))
 	    (let ((file (expand-file-name (buffer-file-name))))
 	      (unless (member file files)
 		(push file files))))))
@@ -6648,7 +6648,7 @@ open and agenda-wise Org files."
 
 (defun org-cycle-hide-drawers (state)
   "Re-hide all drawers after a visibility state change."
-  (when (and (eq major-mode 'org-mode)
+  (when (and (derived-mode-p 'org-mode)
 	     (not (memq state '(overview folded contents))))
     (save-excursion
       (let* ((globalp (memq state '(contents all)))
@@ -8783,7 +8783,7 @@ For file links, arg negates `org-context-in-file-links'."
 	 (setq cpltxt (concat "file:" file)
 	       link (org-make-link cpltxt))))
 
-      ((and (buffer-file-name (buffer-base-buffer)) (eq major-mode 'org-mode))
+      ((and (buffer-file-name (buffer-base-buffer)) (derived-mode-p 'org-mode))
        (setq custom-id (org-entry-get nil "CUSTOM_ID"))
        (cond
 	((org-in-regexp "<<\\(.*?\\)>>")
@@ -9961,12 +9961,12 @@ visibility around point, thus ignoring
      ((string-match "^/\\(.*\\)/$" s)
       ;; A regular expression
       (cond
-       ((eq major-mode 'org-mode)
+       ((derived-mode-p 'org-mode)
 	(org-occur (match-string 1 s)))
        ;;((eq major-mode 'dired-mode)
        ;; (grep (concat "grep -n -e '" (match-string 1 s) "' *")))
        (t (org-do-occur (match-string 1 s)))))
-     ((and (eq major-mode 'org-mode) org-link-search-must-match-exact-headline)
+     ((and (derived-mode-p 'org-mode) org-link-search-must-match-exact-headline)
       (and (equal (string-to-char s) ?*) (setq s (substring s 1)))
       (goto-char (point-min))
       (cond
@@ -10034,7 +10034,7 @@ visibility around point, thus ignoring
 	      (goto-char (match-beginning 1))
 	    (goto-char pos)
 	    (error "No match"))))))
-    (and (eq major-mode 'org-mode)
+    (and (derived-mode-p 'org-mode)
 	 (not stealth)
 	 (org-show-context 'link-search))
     type))
@@ -10305,7 +10305,7 @@ If the file does not exist, an error is thrown."
 	  (set-match-data link-match-data)
 	  (eval cmd))))
      (t (funcall (cdr (assq 'file org-link-frame-setup)) file)))
-    (and (eq major-mode 'org-mode) (eq old-mode 'org-mode)
+    (and (derived-mode-p 'org-mode) (eq old-mode 'org-mode)
 	 (or (not (equal old-buffer (current-buffer)))
 	     (not (equal old-pos (point))))
 	 (org-mark-ring-push old-pos old-buffer))))
@@ -10629,7 +10629,7 @@ such as the file name."
   (interactive "P")
   (let* ((bfn (buffer-file-name (buffer-base-buffer)))
 	 (case-fold-search nil)
-	 (path (and (eq major-mode 'org-mode) (org-get-outline-path))))
+	 (path (and (derived-mode-p 'org-mode) (org-get-outline-path))))
     (if current (setq path (append path
 				   (save-excursion
 				     (org-back-to-heading t)
@@ -10817,7 +10817,7 @@ this is used for the GOTO interface."
   (let ((org-refile-targets org-refile-targets)
 	(org-refile-use-outline-path org-refile-use-outline-path)
 	excluded-entries)
-    (when (and (eq major-mode 'org-mode)
+    (when (and (derived-mode-p 'org-mode)
 	       (not org-refile-use-cache)
 	       (not no-exclude))
       (org-map-tree
@@ -11099,7 +11099,7 @@ Error if there is no such block at point."
   "Update all dynamic blocks in the buffer.
 This function can be used in a hook."
   (interactive)
-  (when (eq major-mode 'org-mode)
+  (when (derived-mode-p 'org-mode)
     (org-map-dblocks 'org-update-dblock)))
 
 
@@ -13551,7 +13551,7 @@ This works in the agenda, and also in an org-mode buffer."
   (interactive
    (list (region-beginning) (region-end)
 	 (let ((org-last-tags-completion-table
-		(if (eq major-mode 'org-mode)
+		(if (derived-mode-p 'org-mode)
 		    (org-get-buffer-tags)
 		  (org-global-tags-completion-table))))
 	   (org-icompleting-read
@@ -13570,7 +13570,7 @@ This works in the agenda, and also in an org-mode buffer."
     (loop for l from l1 to l2 do
 	  (org-goto-line l)
 	  (setq m (get-text-property (point) 'org-hd-marker))
-	  (when (or (and (eq major-mode 'org-mode) (org-at-heading-p))
+	  (when (or (and (derived-mode-p 'org-mode) (org-at-heading-p))
 		    (and agendap m))
 	    (setq buf (if agendap (marker-buffer m) (current-buffer))
 		  pos (if agendap m (point)))
@@ -14159,7 +14159,7 @@ things up because then unnecessary parsing is avoided."
 	  beg end range props sum-props key key1 value string clocksum)
       (save-excursion
 	(when (condition-case nil
-		  (and (eq major-mode 'org-mode) (org-back-to-heading t))
+		  (and (derived-mode-p 'org-mode) (org-back-to-heading t))
 		(error nil))
 	  (setq beg (point))
 	  (setq sum-props (get-text-property (point) 'org-summaries))
@@ -16381,7 +16381,7 @@ Entries containing a colon are interpreted as H:MM by
   "Save all Org-mode buffers without user confirmation."
   (interactive)
   (message "Saving all Org-mode buffers...")
-  (save-some-buffers t (lambda () (eq major-mode 'org-mode)))
+  (save-some-buffers t (lambda () (derived-mode-p 'org-mode)))
   (when (featurep 'org-id) (org-id-locations-save))
   (message "Saving all Org-mode buffers... done"))
 
@@ -16405,7 +16405,7 @@ changes from another.  I believe the procedure must be like this:
     (save-window-excursion
       (mapc
        (lambda (b)
-	 (when (and (with-current-buffer b (eq major-mode 'org-mode))
+	 (when (and (with-current-buffer b (derived-mode-p 'org-mode))
 		    (with-current-buffer b buffer-file-name))
 	   (org-pop-to-buffer-same-window b)
 	   (revert-buffer t 'no-confirm)))
@@ -16457,17 +16457,17 @@ If EXCLUDE-TMP is non-nil, ignore temporary buffers."
 	 (filter
 	  (cond
 	   ((eq predicate 'files)
-	    (lambda (b) (with-current-buffer b (eq major-mode 'org-mode))))
+	    (lambda (b) (with-current-buffer b (derived-mode-p 'org-mode))))
 	   ((eq predicate 'export)
 	    (lambda (b) (string-match "\*Org .*Export" (buffer-name b))))
 	   ((eq predicate 'agenda)
 	    (lambda (b)
 	      (with-current-buffer b
-		(and (eq major-mode 'org-mode)
+		(and (derived-mode-p 'org-mode)
 		     (setq bfn (buffer-file-name b))
 		     (member (file-truename bfn) agenda-files)))))
 	   (t (lambda (b) (with-current-buffer b
-			    (or (eq major-mode 'org-mode)
+			    (or (derived-mode-p 'org-mode)
 				(string-match "\*Org .*Export"
 					      (buffer-name b)))))))))
     (delq nil
@@ -16770,7 +16770,7 @@ an embedded LaTeX fragment, let texmathp do its job.
       (interactive)
       (let (p)
 	(cond
-	 ((not (eq major-mode 'org-mode)) ad-do-it)
+	 ((not (derived-mode-p 'org-mode)) ad-do-it)
 	 ((eq this-command 'cdlatex-math-symbol)
 	  (setq ad-return-value t
 		texmathp-why '("cdlatex-math-symbol in org-mode" . 0)))
@@ -19476,8 +19476,8 @@ Your bug report will be posted to the Org-mode mailing list.
     (save-excursion
       (while bl
 	(set-buffer (pop bl))
-	(if (eq major-mode 'org-mode) (setq bl nil)))
-      (when (eq major-mode 'org-mode)
+	(if (derived-mode-p 'org-mode) (setq bl nil)))
+      (when (derived-mode-p 'org-mode)
 	(easy-menu-change
 	 '("Org") "File List for Agenda"
 	 (append
@@ -20106,18 +20106,18 @@ block from point."
     ;; Emacs 23
     (add-hook 'occur-mode-find-occurrence-hook
 	      (lambda ()
-		(when (eq major-mode 'org-mode)
+		(when (derived-mode-p 'org-mode)
 		  (org-reveal))))
   ;; Emacs 22
   (defadvice occur-mode-goto-occurrence
     (after org-occur-reveal activate)
-    (and (eq major-mode 'org-mode) (org-reveal)))
+    (and (derived-mode-p 'org-mode) (org-reveal)))
   (defadvice occur-mode-goto-occurrence-other-window
     (after org-occur-reveal activate)
-    (and (eq major-mode 'org-mode) (org-reveal)))
+    (and (derived-mode-p 'org-mode) (org-reveal)))
   (defadvice occur-mode-display-occurrence
     (after org-occur-reveal activate)
-    (when (eq major-mode 'org-mode)
+    (when (derived-mode-p 'org-mode)
       (let ((pos (occur-mode-find-occurrence)))
 	(with-current-buffer (marker-buffer pos)
 	  (save-excursion
@@ -21282,7 +21282,7 @@ If there is no such heading, return nil."
   (org-back-to-heading invisible-OK)
   (let ((first t)
 	(level (funcall outline-level)))
-    (if (and (eq major-mode 'org-mode) (< level 1000))
+    (if (and (derived-mode-p 'org-mode) (< level 1000))
 	;; A true heading (not a plain list item), in Org-mode
 	;; This means we can easily find the end by looking
 	;; only for the right number of stars.  Using a regexp to do
@@ -21307,7 +21307,7 @@ If there is no such heading, return nil."
 
 (defadvice outline-end-of-subtree (around prefer-org-version activate compile)
   "Use Org version in org-mode, for dramatic speed-up."
-  (if (eq major-mode 'org-mode)
+  (if (derived-mode-p 'org-mode)
       (progn
 	(org-end-of-subtree nil t)
 	(unless (eobp) (backward-char 1)))
@@ -21480,7 +21480,7 @@ Show the heading too, if it is currently invisible."
   '(progn
      (add-hook 'imenu-after-jump-hook
 	       (lambda ()
-		 (if (eq major-mode 'org-mode)
+		 (if (derived-mode-p 'org-mode)
 		     (org-show-context 'org-goto))))))
 
 (defun org-link-display-format (link)
@@ -21541,7 +21541,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
       (with-current-buffer (find-file-noselect
 			    (let ((default-directory dir))
 			      (expand-file-name txt)))
-	(unless (eq major-mode 'org-mode)
+	(unless (derived-mode-p 'org-mode)
 	  (error "Cannot restrict to non-Org-mode file"))
 	(org-agenda-set-restriction-lock 'file)))
      (t (error "Don't know how to restrict Org-mode's agenda")))
@@ -21558,7 +21558,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
      (define-key speedbar-file-key-map ">" 'org-agenda-remove-restriction-lock)
      (define-key speedbar-file-key-map "\C-c\C-x>" 'org-agenda-remove-restriction-lock)
      (add-hook 'speedbar-visiting-tag-hook
-	       (lambda () (and (eq major-mode 'org-mode) (org-show-context 'org-goto))))))
+	       (lambda () (and (derived-mode-p 'org-mode) (org-show-context 'org-goto))))))
 
 ;;; Fixes and Hacks for problems with other packages
 
@@ -21601,12 +21601,12 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 (eval-after-load "ecb"
   '(defadvice ecb-method-clicked (after esf/org-show-context activate)
      "Make hierarchy visible when jumping into location from ECB tree buffer."
-     (if (eq major-mode 'org-mode)
+     (if (derived-mode-p 'org-mode)
 	 (org-show-context))))
 
 (defun org-bookmark-jump-unhide ()
   "Unhide the current position, to show the bookmark location."
-  (and (eq major-mode 'org-mode)
+  (and (derived-mode-p 'org-mode)
        (or (outline-invisible-p)
 	   (save-excursion (goto-char (max (point-min) (1- (point))))
 			   (outline-invisible-p)))

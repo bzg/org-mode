@@ -384,7 +384,7 @@ point nowhere."
 (defun org-get-limited-outline-regexp ()
   "Return outline-regexp with limited number of levels.
 The number of levels is controlled by `org-inlinetask-min-level'"
-  (if (or (not (eq major-mode 'org-mode)) (not (featurep 'org-inlinetask)))
+  (if (or (not (derived-mode-p 'org-mode)) (not (featurep 'org-inlinetask)))
       org-outline-regexp
     (let* ((limit-level (1- org-inlinetask-min-level))
 	   (nstars (if org-odd-levels-only (1- (* limit-level 2)) limit-level)))

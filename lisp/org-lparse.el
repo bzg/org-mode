@@ -101,7 +101,7 @@ itemized list in org-mode syntax in an HTML buffer and then use
 this command to convert it."
   (let (reg backend-string buf pop-up-frames)
     (save-window-excursion
-      (if (eq major-mode 'org-mode)
+      (if (derived-mode-p 'org-mode)
 	  (setq backend-string (org-lparse-region backend beg end t 'string))
 	(setq reg (buffer-substring beg end)
 	      buf (get-buffer-create "*Org tmp*"))

@@ -751,7 +751,7 @@ command to convert it."
   (interactive "r")
   (let (reg html buf pop-up-frames)
     (save-window-excursion
-      (if (eq major-mode 'org-mode)
+      (if (derived-mode-p 'org-mode)
 	  (setq html (org-export-region-as-html
 		      beg end t 'string))
 	(setq reg (buffer-substring beg end)

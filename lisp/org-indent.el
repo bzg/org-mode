@@ -223,7 +223,7 @@ during idle time." nil " Ind" nil
 (defun org-indent-indent-buffer ()
   "Add indentation properties to the accessible part of the buffer."
   (interactive)
-  (if (not (eq major-mode 'org-mode))
+  (if (not (derived-mode-p 'org-mode))
       (error "Not in Org mode")
     (message "Setting buffer indentation. It may take a few seconds...")
     (org-indent-remove-properties (point-min) (point-max))

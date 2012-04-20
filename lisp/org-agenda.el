@@ -2460,7 +2460,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 			       nil 'face 'org-warning)))))))
 	 t t))
        ((equal keys "L")
-	(unless (eq major-mode 'org-mode)
+	(unless (derived-mode-p 'org-mode)
 	  (error "This is not an Org-mode file"))
 	(unless restriction
 	  (put 'org-agenda-files 'org-restrict (list bfn))
@@ -2495,7 +2495,7 @@ Agenda views are separated by `org-agenda-block-separator'."
   "The user interface for selecting an agenda command."
   (catch 'exit
     (let* ((bfn (buffer-file-name (buffer-base-buffer)))
-	   (restrict-ok (and bfn (eq major-mode 'org-mode)))
+	   (restrict-ok (and bfn (derived-mode-p 'org-mode)))
 	   (region-p (org-region-active-p))
 	   (custom org-agenda-custom-commands)
 	   (selstring "")
@@ -3041,7 +3041,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
   (let (txt drawer-re kwd-time-re ind)
     (save-excursion
       (with-current-buffer (marker-buffer marker)
-	(if (not (eq major-mode 'org-mode))
+	(if (not (derived-mode-p 'org-mode))
 	    (setq txt "")
 	  (save-excursion
 	    (save-restriction
@@ -3157,7 +3157,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 
 (defun org-check-for-org-mode ()
   "Make sure current buffer is in org-mode.  Error if not."
-  (or (eq major-mode 'org-mode)
+  (or (derived-mode-p 'org-mode)
       (error "Cannot execute org-mode agenda command on buffer in %s"
 	     major-mode)))
 
@@ -4109,7 +4109,7 @@ in `org-agenda-text-search-extra-files'."
 				    file))))
 	(with-current-buffer buffer
 	  (with-syntax-table (org-search-syntax-table)
-	    (unless (eq major-mode 'org-mode)
+	    (unless (derived-mode-p 'org-mode)
 	      (error "Agenda file %s is not in `org-mode'" file))
 	    (let ((case-fold-search t))
 	      (save-excursion
@@ -4302,7 +4302,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 		       (format "ORG-AGENDA-ERROR: No such org-file %s" file))
 		  rtnall (append rtnall rtn))
 	  (with-current-buffer buffer
-	    (unless (eq major-mode 'org-mode)
+	    (unless (derived-mode-p 'org-mode)
 	      (error "Agenda file %s is not in `org-mode'" file))
 	    (save-excursion
 	      (save-restriction
@@ -4762,7 +4762,7 @@ the documentation of `org-diary'."
 	;; If file does not exist, make sure an error message ends up in diary
 	(list (format "ORG-AGENDA-ERROR: No such org-file %s" file))
       (with-current-buffer buffer
-	(unless (eq major-mode 'org-mode)
+	(unless (derived-mode-p 'org-mode)
 	  (error "Agenda file %s is not in `org-mode'" file))
 	(let ((case-fold-search nil))
 	  (save-excursion
@@ -5744,7 +5744,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	     (time-of-day (and dotime (org-get-time-of-day ts)))
 	     stamp plain s0 s1 s2 rtn srp l
 	     duration thecategory)
-	(and (eq major-mode 'org-mode) buffer-file-name
+	(and (derived-mode-p 'org-mode) buffer-file-name
 	     (add-to-list 'org-agenda-contributing-files buffer-file-name))
 	(when (and dotime time-of-day)
 	  ;; Extract starting and ending time and move them to prefix
@@ -5792,7 +5792,7 @@ Any match of REMOVE-RE will be removed from TXT."
 		       (concat (make-string (max (- 50 (length txt)) 1) ?\ )
 			       (match-string 2 txt))
 		       t t txt))))
-	(when (eq major-mode 'org-mode)
+	(when (derived-mode-p 'org-mode)
 	  (setq effort
 		(condition-case nil
 		    (org-get-effort
@@ -7230,7 +7230,7 @@ and by additional input from the age of a schedules or deadline entry."
     (widen)
     (push-mark)
     (goto-char pos)
-    (when (eq major-mode 'org-mode)
+    (when (derived-mode-p 'org-mode)
       (org-show-context 'agenda)
       (save-excursion
 	(and (outline-next-heading)
@@ -7259,7 +7259,7 @@ Point is in the buffer where the item originated.")
      (with-current-buffer buffer
        (save-excursion
 	 (goto-char pos)
-	 (if (and (eq major-mode 'org-mode) (not (member type '("sexp"))))
+	 (if (and (derived-mode-p 'org-mode) (not (member type '("sexp"))))
 	     (setq dbeg (progn (org-back-to-heading t) (point))
 		   dend (org-end-of-subtree t t))
 	   (setq dbeg (point-at-bol)
@@ -7311,7 +7311,7 @@ Point is in the buffer where the item originated.")
 	 (pos (marker-position marker)))
     (org-with-remote-undo buffer
       (with-current-buffer buffer
-	(if (eq major-mode 'org-mode)
+	(if (derived-mode-p 'org-mode)
 	    (if (and confirm
 		     (not (y-or-n-p "Archive this subtree or entry? ")))
 		(error "Abort")
@@ -7416,7 +7416,7 @@ at the text of the entry itself."
       (and delete-other-windows (delete-other-windows))
       (widen)
       (goto-char pos)
-      (when (eq major-mode 'org-mode)
+      (when (derived-mode-p 'org-mode)
 	(org-show-context 'agenda)
 	(save-excursion
 	  (and (outline-next-heading)
