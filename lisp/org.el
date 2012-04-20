@@ -14915,7 +14915,7 @@ So these are more for recording a certain time/date."
   (org-time-stamp arg 'inactive))
 
 (defvar org-date-ovl (make-overlay 1 1))
-(overlay-put org-date-ovl 'face 'org-warning)
+(overlay-put org-date-ovl 'face 'org-date-selected)
 (org-detach-overlay org-date-ovl)
 
 (defvar org-ans1) ; dynamically scoped parameter
