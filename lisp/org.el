@@ -3390,6 +3390,20 @@ When using MathToWeb as the converter, set this to
 	  (const :tag "None" nil)
 	  (string :tag "\nShell command")))
 
+(defcustom org-latex-create-formula-image-program 'dvipng
+  "Program to convert LaTeX fragments with.
+
+dvipng          Process the LaTeX fragments to dvi file, then convert
+                dvi files to png files using dvipng.
+                This will also include processing of non-math environments.
+imagemagick     Convert the LaTeX fragments to pdf files and use imagemagick
+                to convert pdf files to png files"
+  :group 'org-latex
+  :version "24.1"
+  :type '(choice
+	  (const :tag "dvipng" dvipng)
+	  (const :tag "imagemagick" imagemagick)))
+
 (defun org-format-latex-mathml-available-p ()
   "Return t if `org-latex-to-mathml-convert-command' is usable."
   (save-match-data
@@ -16902,7 +16916,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	 (concat "ltxpng/" (file-name-sans-extension
 			    (file-name-nondirectory
 			     buffer-file-name)))
-	 default-directory 'overlays msg at 'forbuffer 'dvipng)
+	 default-directory 'overlays msg at 'forbuffer
+	 org-latex-create-formula-image-program)
       (message msg "done.  Use `C-c C-c' to remove images.")))))
 
 (defvar org-latex-regexps
@@ -16966,7 +16981,8 @@ Some of the options can be changed using the variable
 				'(org-protected t))))
 		(add-text-properties (match-beginning n) (match-end n)
 				     '(org-protected t))))
-	     ((eq processing-type 'dvipng)
+	     ((or (eq processing-type 'dvipng)
+		  (eq processing-type 'imagemagick))
 	      ;; Process to an image
 	      (setq txt (match-string n)
 		    beg (match-beginning n) end (match-end n)
@@ -16987,17 +17003,25 @@ Some of the options can be changed using the variable
 	      (unless checkdir ; make sure the directory exists
 		(setq checkdir t)
 		(or (file-directory-p todir) (make-directory todir t)))
-
-	      (unless executables-checked
-		(org-check-external-command
-		 "latex" "needed to convert LaTeX fragments to images")
-		(org-check-external-command
-		 "dvipng" "needed to convert LaTeX fragments to images")
-		(setq executables-checked t))
-
-	      (unless (file-exists-p movefile)
-		(org-create-formula-image
-		 txt movefile opt forbuffer))
+	      (cond
+	       ((eq processing-type 'dvipng)
+		(unless executables-checked
+		  (org-check-external-command
+		   "latex" "needed to convert LaTeX fragments to images")
+		  (org-check-external-command
+		   "dvipng" "needed to convert LaTeX fragments to images")
+		  (setq executables-checked t))
+		(unless (file-exists-p movefile)
+		  (org-create-formula-image-with-dvipng
+		   txt movefile opt forbuffer)))
+	       ((eq processing-type 'imagemagick)
+		(unless executables-checked
+		  (org-check-external-command
+		   "converte" "you need to install imagemagick")
+		  (setq executables-checked t))
+		(unless (file-exists-p movefile)
+		  (org-create-formula-image-with-imagemagick
+		   txt movefile opt forbuffer))))
 	      (if overlays
 		  (progn
 		    (mapc (lambda (o)
@@ -17133,7 +17157,7 @@ inspection."
       latex-frag)))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
-(defun org-create-formula-image (string tofile options buffer)
+(defun org-create-formula-image-with-dvipng (string tofile options buffer)
   "This calls dvipng."
   (require 'org-latex)
   (let* ((tmpdir (if (featurep 'xemacs)
@@ -17195,7 +17219,111 @@ inspection."
 	    nil)
 	;; Use the requested file name and clean up
 	(copy-file pngfile tofile 'replace)
-	(loop for e in '(".dvi" ".tex" ".aux" ".log" ".png") do
+	(loop for e in '(".dvi" ".tex" ".aux" ".log" ".png" ".out") do
+	      (delete-file (concat texfilebase e)))
+	pngfile))))
+
+(defvar org-latex-to-pdf-process) ;; Defined in org-latex.el
+(defun org-create-formula-image-with-imagemagick (string tofile options buffer)
+  "This calls convert, which is included into imagemagick."
+  (require 'org-latex)
+  (let* ((tmpdir (if (featurep 'xemacs)
+		     (temp-directory)
+		   temporary-file-directory))
+	 (texfilebase (make-temp-name
+		       (expand-file-name "orgtex" tmpdir)))
+	 (texfile (concat texfilebase ".tex"))
+	 (pdffile (concat texfilebase ".pdf"))
+	 (pngfile (concat texfilebase ".png"))
+	 (fnh (if (featurep 'xemacs)
+                  (font-height (face-font 'default))
+                (face-attribute 'default :height nil)))
+	 (scale (or (plist-get options (if buffer :scale :html-scale)) 1.0))
+	 (dpi (number-to-string (* scale (floor (* 0.9 (if buffer fnh 140.))))))
+	 (fg (or (plist-get options (if buffer :foreground :html-foreground))
+		 "black"))
+	 (bg (or (plist-get options (if buffer :background :html-background))
+		 "white")))
+    (if (eq fg 'default) (setq fg (org-latex-color :foreground))
+      (setq fg (org-latex-color-format fg)))
+    (if (eq bg 'default) (setq bg (org-latex-color :background))
+      (setq bg (org-latex-color-format
+		(if (string= bg "Transparent")(setq bg "white")))))
+    (with-temp-file texfile
+      (insert (org-splice-latex-header
+	       org-format-latex-header
+	       org-export-latex-default-packages-alist
+	       org-export-latex-packages-alist t
+	       org-format-latex-header-extra))
+      (insert "\n\\begin{document}\n"
+	      "\\definecolor{fg}{rgb}{" fg "}\n"
+	      "\\definecolor{bg}{rgb}{" bg "}\n"
+	      "\n\\pagecolor{bg}\n"
+	      "\n{\\color{fg}\n"
+	      string
+	      "\n}\n"
+	      "\n\\end{document}\n" )
+      (require 'org-latex)
+      (org-export-latex-fix-inputenc))
+    (let ((dir default-directory) cmd cmds latex-frags-cmds)
+      (condition-case nil
+	  (progn
+	    (cd tmpdir)
+	    (setq cmds org-latex-to-pdf-process)
+	    (while cmds
+	      (setq latex-frags-cmds (pop cmds))
+	      (if (listp latex-frags-cmds)
+		  (setq cmds nil)
+		(setq latex-frags-cmds (list (car org-latex-to-pdf-process)))))
+	    (while latex-frags-cmds
+	      (setq cmd (pop latex-frags-cmds))
+	      (while (string-match "%b" cmd)
+		(setq cmd (replace-match
+			   (save-match-data
+			     (shell-quote-argument texfile))
+			   t t cmd)))
+	      (while (string-match "%f" cmd)
+		(setq cmd (replace-match
+			   (save-match-data
+			     (shell-quote-argument (file-name-nondirectory texfile)))
+			   t t cmd)))
+	      (while (string-match "%o" cmd)
+		(setq cmd (replace-match
+			   (save-match-data
+			     (shell-quote-argument (file-name-directory texfile)))
+			   t t cmd)))
+	      (shell-command cmd)))
+	(error nil))
+      (cd dir))
+    (if (not (file-exists-p pdffile))
+	(progn (message "Failed to create pdf file from %s" texfile) nil)
+      (condition-case nil
+	  (if (featurep 'xemacs)
+	      (call-process "convert" nil nil nil
+			    "-density" "96"
+			    "-trim"
+			    "-antialias"
+			    pdffile
+			    "-quality" "100"
+;;			    "-sharpen" "0x1.0"
+			    pngfile)
+	    (call-process "convert" nil nil nil
+			  "-density" dpi
+			  "-trim"
+			  "-antialias"
+			  pdffile
+			  "-quality" "100"
+;			  "-sharpen" "0x1.0"
+			  pngfile))
+	(error nil))
+      (if (not (file-exists-p pngfile))
+	  (if org-format-latex-signal-error
+	      (error "Failed to create png file from %s" texfile)
+	    (message "Failed to create png file from %s" texfile)
+	    nil)
+	;; Use the requested file name and clean up
+	(copy-file pngfile tofile 'replace)
+	(loop for e in '(".pdf" ".tex" ".aux" ".log" ".png") do
 	      (delete-file (concat texfilebase e)))
 	pngfile))))
 
@@ -17259,7 +17387,7 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
   (if newline (concat pkg "\n") pkg))
 
 (defun org-dvipng-color (attr)
-  "Return an rgb color specification for dvipng."
+  "Return a RGB color specification for dvipng."
   (apply 'format "rgb %s %s %s"
 	 (mapcar 'org-normalize-color
 		 (if (featurep 'xemacs)
@@ -17268,6 +17396,23 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 				     (cond ((eq attr :foreground) 'foreground)
 					   ((eq attr :background) 'background))))
 		   (color-values (face-attribute 'default attr nil))))))
+
+(defun org-latex-color (attr)
+  "Return a RGB color for the LaTeX color package."
+  (apply 'format "%s,%s,%s"
+	 (mapcar 'org-normalize-color
+		 (if (featurep 'xemacs)
+		     (color-rgb-components
+		      (face-property 'default
+				     (cond ((eq attr :foreground) 'foreground)
+					   ((eq attr :background) 'background))))
+		   (color-values (face-attribute 'default attr nil))))))
+
+(defun org-latex-color-format (color-name)
+  "Convert COLOR-NAME to a RGB color value."
+  (apply 'format "%s,%s,%s"
+	 (mapcar 'org-normalize-color
+		   (color-values color-name))))
 
 (defun org-normalize-color (value)
   "Return string to be used as color value for an RGB component."

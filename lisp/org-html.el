@@ -697,6 +697,7 @@ The default is an extended format of the ISO 8601 specification."
       ((eq (plist-get parameters :LaTeX-fragments) 'verbatim) 'verbatim)
       ((eq (plist-get parameters :LaTeX-fragments) 'mathjax ) 'mathjax)
       ((eq (plist-get parameters :LaTeX-fragments) t        ) 'mathjax)
+      ((eq (plist-get parameters :LaTeX-fragments) 'imagemagick) 'imagemagick)
       ((eq (plist-get parameters :LaTeX-fragments) 'dvipng  ) 'dvipng)
       (t nil))))
   (goto-char (point-min))

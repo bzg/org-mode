@@ -9421,10 +9421,11 @@ this regularly or on pages with significant page views, you should install
 server in order to limit the load of our server.}.  Finally, it can also
 process the mathematical expressions into images@footnote{For this to work
 you need to be on a system with a working @LaTeX{} installation.  You also
-need the @file{dvipng} program, available at
-@url{http://sourceforge.net/projects/dvipng/}.  The @LaTeX{} header that will
-be used when processing a fragment can be configured with the variable
-@code{org-format-latex-header}.}  that can be displayed in a browser or in
+need the @file{dvipng} program or the @file{convert}, respectively available
+at @url{http://sourceforge.net/projects/dvipng/} and from the
+@file{imagemagick} suite.  The @LaTeX{} header that will be used when
+processing a fragment can be configured with the variable
+@code{org-format-latex-header}.} that can be displayed in a browser or in
 DocBook documents.
 
 @LaTeX{} fragments don't need any special marking at all.  The following

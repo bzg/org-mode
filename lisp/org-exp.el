@@ -540,12 +540,14 @@ This option can also be set with the +OPTIONS line, e.g. \"LaTeX:mathjax\".
 
 Allowed values are:
 
-nil        Don't do anything.
-verbatim   Keep everything in verbatim
-dvipng     Process the LaTeX fragments to images.
-           This will also include processing of non-math environments.
-t          Do MathJax preprocessing if there is at least on math snippet,
-           and arrange for MathJax.js to be loaded.
+nil             Don't do anything.
+verbatim        Keep everything in verbatim
+dvipng          Process the LaTeX fragments to images.
+                This will also include processing of non-math environments.
+imagemagick     Convert the LaTeX fragments to pdf files and use imagemagick
+                to convert pdf files to png files.
+t               Do MathJax preprocessing if there is at least on math snippet,
+                and arrange for MathJax.js to be loaded.
 
 The default is nil, because this option needs the `dvipng' program which
 is not available on all systems."
@@ -555,6 +557,7 @@ is not available on all systems."
 	  (const :tag "Do not process math in any way" nil)
 	  (const :tag "Obsolete, use dvipng setting" t)
 	  (const :tag "Use dvipng to make images" dvipng)
+	  (const :tag "Use imagemagick to make images" imagemagick)
 	  (const :tag "Use MathJax to display math" mathjax)
 	  (const :tag "Leave math verbatim" verbatim)))
 
