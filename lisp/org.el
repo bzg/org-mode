@@ -5057,8 +5057,7 @@ The following commands are available:
        'org-parse-arguments)
   (set (make-local-variable 'pcomplete-termination-string) "")
   (when (>= emacs-major-version 23)
-    (set (make-local-variable 'buffer-face-mode-face) 'org-default)
-    (buffer-face-mode))
+    (set (make-local-variable 'buffer-face-mode-face) 'org-default))
 
   ;; If empty file that did not turn on org-mode automatically, make it to.
   (if (and org-insert-mode-line-in-empty-file
