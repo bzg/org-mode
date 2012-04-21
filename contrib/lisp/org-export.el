@@ -93,11 +93,11 @@
 (eval-when-compile (require 'cl))
 (require 'org-element)
 ;; Require major back-ends and publishing tools
-(require 'org-e-ascii "../../EXPERIMENTAL/org-e-ascii.el")
-(require 'org-e-html "../../EXPERIMENTAL/org-e-html.el")
-(require 'org-e-latex "../../EXPERIMENTAL/org-e-latex.el")
-(require 'org-e-odt "../../EXPERIMENTAL/org-e-odt.el")
-(require 'org-e-publish "../../EXPERIMENTAL/org-e-publish.el")
+(require 'org-e-ascii "./org-e-ascii.el")
+(require 'org-e-html "./org-e-html.el")
+(require 'org-e-latex "./org-e-latex.el")
+(require 'org-e-odt "./org-e-odt.el")
+(require 'org-e-publish "../org-e-publish.el")
 
 
 
