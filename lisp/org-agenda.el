@@ -6372,8 +6372,13 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 		 (not (one-window-p))
 		 (delete-window)))
 	  (with-current-buffer buf
-	    (bury-buffer)))
-      (org-agenda-Quit))))
+	    (bury-buffer) 
+	    ;; Maybe restore the pre-agenda window configuration.
+	    (and org-agenda-restore-windows-after-quit
+		 (not (eq org-agenda-window-setup 'other-frame))
+		 org-pre-agenda-window-conf
+		 (set-window-configuration org-pre-agenda-window-conf))))))
+  (org-agenda-Quit))))
 
 (defun org-agenda-exit ()
   "Exit agenda by removing the window or the buffer.
