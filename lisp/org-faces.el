@@ -292,7 +292,7 @@ column view defines special faces for each outline level.  See the file
       (((class color) (min-colors 8)  (background light)) (:foreground "red"  :bold nil))
       (((class color) (min-colors 8)  (background dark))  (:foreground "red"  :bold nil))
       (t (:inverse-video t))))
-  "Face for deadlines and TODO keywords."
+  "Face for highlighting the calendar day when using `org-read-date'."
   :group 'org-faces)
 
 (defface org-sexp-date
