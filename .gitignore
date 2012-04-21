@@ -31,11 +31,18 @@ orgcard_letter.tex
 orgcard.txt
 org
 org-install.el
+org-version.*
 org-*.tar.gz
 org-*.zip
 manual
 org_dual_license.texi
 ORGWEBPAGE/Changes.txt
+local*.mk
+.gitattributes
+
+# texi2pdf --tidy
+
+doc/*.t2d
 
 # aspell word and replacement lists
 
@@ -56,10 +63,8 @@ TODO
 .DS_Store
 *#
 .#*
+/UTILITIES/x11idle
 
 #
 # Local variables:
-# fill-column: 72
-# mode: conf
 # End:
-/UTILITIES/x11idle
