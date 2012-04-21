@@ -273,7 +273,7 @@ With optional argument MARKERP, return the position as a new marker."
     (when file
       (setq where (org-id-find-id-in-file id file markerp)))
     (unless where
-      (org-id-update-id-locations)
+      (org-id-update-id-locations nil t)
       (setq file (org-id-find-id-file id))
       (when file
 	(setq where (org-id-find-id-in-file id file markerp))))
@@ -403,7 +403,7 @@ and time is the usual three-integer representation of time."
 
 ;; Storing ID locations (files)
 
-(defun org-id-update-id-locations (&optional files)
+(defun org-id-update-id-locations (&optional files silent)
   "Scan relevant files for IDs.
 Store the relation between files and corresponding IDs.
 This will scan all agenda files, all associated archives, and all
@@ -441,8 +441,9 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 	(setq files (delq 'agenda-archives (copy-sequence files))))
       (setq nfiles (length files))
       (while (setq file (pop files))
-	(message "Finding ID locations (%d/%d files): %s"
-		 (- nfiles (length files)) nfiles file)
+	(unless silent
+	  (message "Finding ID locations (%d/%d files): %s"
+		   (- nfiles (length files)) nfiles file))
 	(setq tfile (file-truename file))
 	(when (and (file-exists-p file) (not (member tfile seen)))
 	  (push tfile seen)
