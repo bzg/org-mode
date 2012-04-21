@@ -59,7 +59,7 @@ install:	$(INSTSUB)
 
 install-info:	install-doc
 
-docs:	info html pdf card
+doc docs:	info html pdf card
 
 info html pdf card:
 	$(MAKE) -C doc $@

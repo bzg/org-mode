@@ -9,8 +9,8 @@ all::
 .PHONY:	targets help
 targets help:
 	$(info )
-	$(info make               - show this help)
-	$(info make all           - cleanly compile Org ELisp files and documentation)
+	$(info make help          - show this help)
+	$(info make               - cleanly compile Org ELisp files and documentation)
 	$(info )
 	$(info Installation)
 	$(info ============)
@@ -20,7 +20,7 @@ targets help:
 	$(info )
 	$(info Maintenance)
 	$(info ===========)
-	$(info make docs          - make all documentation)
+	$(info make doc           - make all documentation)
 	$(info make info          - make Info documentation)
 	$(info make html          - make HTML documentation)
 	$(info make pdf           - make pdf documentation)
