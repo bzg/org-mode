@@ -642,8 +642,8 @@ keyword."
       (let ((reference
 	     (org-export-get-ordinal
 	      element info nil
-	      (lambda (el) (or (org-element-property :caption el)
-			  (org-element-property :name el)))))
+	      (lambda (el info) (or (org-element-property :caption el)
+			       (org-element-property :name el)))))
 	    (title-fmt (org-e-ascii--translate
 			(case (org-element-type element)
 			  (table "Table %d: %s")
