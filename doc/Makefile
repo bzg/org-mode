@@ -2,7 +2,9 @@
 ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
-.PHONY:		all info html pdf card manual guide install clean cleanall clean-install
+.PHONY:		all info html pdf card manual guide install \
+		clean cleanall clean-install \
+		org-version.texi
 
 all:		info html pdf card
 

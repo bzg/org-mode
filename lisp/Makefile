@@ -43,11 +43,12 @@ LISPC = $(LISPF:%el=%elc)
 
 .PHONY:	all compile compile-dirty \
 	autoloads \
-	install clean cleanauto cleanall clean-install
+	install clean cleanauto cleanall clean-install \
+	org-version.el
 
 all \
 compile \
-compile-dirty:	cleanauto
+compile-dirty:	cleanauto org-version.el
 	$(ELCDIR)
 
 autoloads:	$(LISPO)
