@@ -97,7 +97,7 @@
 (require 'org-e-html "./org-e-html.el")
 (require 'org-e-latex "./org-e-latex.el")
 (require 'org-e-odt "./org-e-odt.el")
-(require 'org-e-publish "../org-e-publish.el")
+(require 'org-e-publish "./org-e-publish.el")
 
 
 
