@@ -1583,253 +1583,124 @@ contextual information."
 
 ;;;; Table
 
-;; While `org-e-ascii-table' is the callback function expected by
-;; org-export mechanism, it requires four subroutines to display
-;; tables accordingly to chosen charset, alignment and width
-;; specifications.
-
-;; Thus, `org-e-ascii-table--column-width' computes the display width
-;; for each column in the table,
-;; `org-e-ascii-table--vertical-separators' returns a vector
-;; containing separators (or lack thereof),
-;; `org-e-ascii-table--build-hline' creates various hline strings,
-;; depending on charset, separators and position within the tabl and
-;; `org-e-ascii-table--format-cell' properly aligns contents within
-;; a given cell and width.
-
 (defun org-e-ascii-table (table contents info)
   "Transcode a TABLE element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((raw-table (org-element-property :raw-table table))
-	(caption (org-e-ascii--build-caption table info)))
+  (let ((caption (org-e-ascii--build-caption table info)))
     (concat
      ;; Possibly add a caption string above.
      (when (and caption org-e-ascii-caption-above) (concat caption "\n"))
      ;; Insert table.  Note: "table.el" tables are left unmodified.
-     (if (eq (org-element-property :type table) 'table.el) raw-table
-       (let* ((utf8p (eq (plist-get info :ascii-charset) 'utf-8))
-	      ;; Extract information out of the raw table (TABLE-INFO)
-	      ;; and clean it (CLEAN-TABLE).
-	      (table-info (org-export-table-format-info raw-table))
-	      (special-col-p (plist-get table-info :special-column-p))
-	      (alignment (plist-get table-info :alignment))
-	      (clean-table (org-export-clean-table raw-table special-col-p))
-	      ;; Change table into lisp, much like
-	      ;; `org-table-to-lisp', though cells are parsed and
-	      ;; transcoded along the way.
-	      (lisp-table
-	       (mapcar
-		(lambda (line)
-		  (if (string-match org-table-hline-regexp line) 'hline
-		    (mapcar
-		     (lambda (cell)
-		       (org-trim
-			(org-export-secondary-string
-			 (org-element-parse-secondary-string
-			  cell
-			  (cdr (assq 'item org-element-string-restrictions)))
-			 'e-ascii info)))
-		     (org-split-string (org-trim line) "\\s-?|\\s-?"))))
-		(org-split-string clean-table "[ \t]*\n[ \t]*")))
-	      ;; Compute real column widths.
-	      (column-widths
-	       (org-e-ascii-table--column-width lisp-table table-info))
-	      ;; Construct separators according to column groups.
-	      (separators (org-e-ascii-table--vertical-separators table-info))
-	      ;; Build different `hline' strings, depending on
-	      ;;  separators, column widths and position.
-	      (hline-standard
-	       (org-e-ascii-table--build-hline
-		nil separators column-widths info))
-	      (hline-top
-	       (and utf8p (org-e-ascii-table--build-hline
-			   'top separators column-widths info)))
-	      (hline-bottom
-	       (and utf8p (org-e-ascii-table--build-hline
-			   'bottom separators column-widths info))))
-	 ;; Now build table back, with correct alignment, considering
-	 ;; columns widths and separators.
-	 (mapconcat
-	  (lambda (line)
-	    (cond
-	     ((eq line 'hline) hline-standard)
-	     ((eq line 'hline-bottom) hline-bottom)
-	     ((eq line 'hline-top) hline-top)
-	     (t (loop for cell in line
-		      for col from 0 to (length line)
-		      concat
-		      (concat
-		       (let ((sep (aref separators col)))
-			 (if (and utf8p (not (string= sep ""))) "│" sep))
-		       (org-e-ascii-table--format-cell
-			cell col column-widths alignment info)) into l
-			finally return
-			(concat l
-				(let ((sep (aref separators col)))
-				  (if (and utf8p (not (string= sep ""))) "│"
-				    sep)))))))
-	  ;; If charset is `utf-8', make sure lisp-table always starts
-	  ;; with `hline-top' and ends with `hline-bottom'.
-	  (if (not utf8p) lisp-table
-	    (setq lisp-table
-		  (cons 'hline-top
-			(if (eq (car lisp-table) 'hline) (cdr lisp-table)
-			  lisp-table)))
-	    (setq lisp-table
-		  (nconc
-		   (if (eq (car (last lisp-table)) 'hline) (butlast lisp-table)
-		     lisp-table)
-		   '(hline-bottom)))) "\n")))
+     (if (eq (org-element-property :type table) 'org) contents
+       (org-element-property :value table))
      ;; Possible add a caption string below.
      (when (and caption (not org-e-ascii-caption-above))
        (concat "\n" caption)))))
 
-(defun org-e-ascii-table--column-width (table table-info)
-  "Return vector of TABLE columns width.
 
-TABLE is the Lisp representation of the Org table considered.
-TABLE-INFO holds information about the table.  See
-`org-export-table-format-info'.
+;;;; Table Cell
 
-Unlike to `:width' property from `org-export-table-format-info',
-the return value is a vector containing width of every column,
-not only those with an explicit width cookie.  Special column, if
-any, is ignored."
-  ;; All rows have the same length, but be sure to ignore hlines.
-  (let ((width (make-vector
-		(loop for row in table
-		      unless (eq row 'hline)
-		      return (length row))
-		0)))
-    ;; Set column width to the maximum width of the cells in that
-    ;; column.
-    (mapc
-     (lambda (line)
-       (let ((idx 0))
-	 (unless (eq line 'hline)
-	   (mapc (lambda (cell)
-		   (let ((len (length cell)))
-		     (when (> len (aref width idx)) (aset width idx len)))
-		   (incf idx))
-		 line))))
-     table)
-    (unless org-e-ascii-table-widen-columns
-      ;; When colums are not widened, width cookies have precedence
-      ;; over string lengths.  Thus, overwrite the latter with the
-      ;; former.
-      (let ((cookies (plist-get table-info :width))
-	    (specialp (plist-get table-info :special-column-p)))
-	;; Remove special column from COOKIES vector, if any.
-	(loop for w across (if specialp (substring cookies 1) cookies)
-	      for idx from 0 to width
-	      when w do (aset width idx w))))
-    ;; Return value.
-    width))
 
-(defun org-e-ascii-table--vertical-separators (table-info)
-  "Return a vector of strings for vertical separators.
+(defun org-e-ascii--table-cell-width (table-cell info)
+  "Return width of TABLE-CELL.
 
-TABLE-INFO holds information about considered table.  See
-`org-export-table-format-info'.
+Width of a cell is determined either by a width cookie in the
+same column as the cell, or by the length of its contents.
 
-Return value is a vector whose length is one more than the number
-of columns in the table.  Special column, if any, is ignored."
-  (let* ((colgroups (plist-get table-info :column-groups))
-	 (separators (make-vector (1+ (length colgroups)) "")))
-    (if org-e-ascii-table-keep-all-vertical-lines
-	(make-vector (length separators) "|")
-      (let ((column 0))
-	(mapc (lambda (group)
-		(when (memq group '(start start-end))
-		  (aset separators column "|"))
-		(when (memq group '(end start-end))
-		  (aset separators (1+ column) "|"))
-		(incf column))
-	      colgroups)
-	;; Remove unneeded special column.
-	(if (not (plist-get table-info :special-column-p)) separators
-	  (substring separators 1))))))
+When `org-e-ascii-table-widen-columns' is non-nil, width cookies
+are ignored. "
+  (or (and (not org-e-ascii-table-widen-columns)
+	   (org-export-table-cell-width table-cell info))
+      (let* ((max-width 0)
+	     (table (org-export-get-parent-table table-cell info))
+	     (specialp (org-export-table-has-special-column-p table))
+	     (col (cdr (org-export-table-cell-address table-cell info))))
+	(org-element-map
+	 table 'table-row
+	 (lambda (row)
+	   (setq max-width
+		 (max (length
+		       (org-export-data
+			(elt (if specialp (car (org-element-contents row))
+			       (org-element-contents row))
+			     col)
+			(plist-get info :back-end) info))
+		      max-width))))
+	max-width)))
 
-(defun org-e-ascii-table--format-cell (cell col width alignment info)
-  "Format CELL with column width and alignment constraints.
-
-CELL is the contents of the cell, as a string.
-
-COL is the column containing the cell considered.
-
-WIDTH is a vector holding every column width, as returned by
-`org-e-ascii-table--column-width'.
-
-ALIGNMENT is a vector containing alignment strings for every
-column.
-
-INFO is a plist used as a communication channel."
-  (let ((col-width (if org-e-ascii-table-widen-columns (aref width col)
-		     (or (aref width col) (length cell)))))
-    ;; When CELL is too large, it has to be truncated.
-    (unless (or org-e-ascii-table-widen-columns (<= (length cell) col-width))
-      (setq cell (concat (substring cell 0 (- col-width 2)) "=>")))
+(defun org-e-ascii-table-cell (table-cell contents info)
+  "Transcode a TABLE-CELL object from Org to ASCII.
+CONTENTS is the cell contents.  INFO is a plist used as
+a communication channel."
+  ;; Determine column width.  When `org-e-ascii-table-widen-columns'
+  ;; is nil and some width cookie has set it, use that value.
+  ;; Otherwise, compute the maximum width among transcoded data of
+  ;; each cell in the column.
+  (let ((width (org-e-ascii--table-cell-width table-cell info)))
+    ;; When contents are too large, truncate them.
+    (unless (or org-e-ascii-table-widen-columns (<= (length contents) width))
+      (setq contents (concat (substring contents 0 (- width 2)) "=>")))
+    ;; Align contents correctly within the cell.
     (let* ((indent-tabs-mode nil)
-	   (align (aref alignment col))
-	   (aligned-cell
-	    (org-e-ascii--justify-string
-	     (org-trim cell) col-width
-	     (cond ((string= align "c") 'center)
-		   ((string= align "r") 'right)))))
-      ;; Return aligned cell, with missing white spaces added and
-      ;; space separators between columns.
-      (format
-       " %s "
-       (concat aligned-cell
-	       (make-string (- col-width (length aligned-cell)) ? ))))))
+	   (data
+	    (when contents
+	      (org-e-ascii--justify-string
+	       contents width
+	       (org-export-table-cell-alignment table-cell info)))))
+      (setq contents (concat data (make-string (- width (length data)) ? ))))
+    ;; Return cell.
+    (concat (format " %s " contents)
+	    (when (memq 'right (org-export-table-cell-borders table-cell info))
+	      (if (eq (plist-get info :ascii-charset) 'utf-8) "│" "|")))))
 
-(defun org-e-ascii-table--build-hline (position separators column-widths info)
-  "Return string used as an horizontal line in tables.
 
-POSITION is a symbol among `top', `bottom' and nil, which
-specifies position of the horizontal line within the table.
+;;;; Table Row
 
-SEPARATORS is a vector strings specifying separators used in the
-table, as returned by `org-e-ascii-table--vertical-separators'.
-
-COLUMN-WIDTHS is a vector of numbers specifying widths of all
-columns in the table, as returned by
-`org-e-ascii-table--column-width'.
-
-INFO is a plist used as a communication channel."
-  (let ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
-    (loop for idx from 0 to (length separators)
-	  for width across column-widths
-	  concat
-	  (concat
-	   (cond ((string= (aref separators idx) "") nil)
-		 ((and utf8p (zerop idx))
-		  (cond ((eq position 'top) "┍")
-			((eq position 'bottom) "┕")
-			(t "├")))
-		 (utf8p
-		  (cond ((eq position 'top) "┯")
-			((eq position 'bottom) "┷")
-			(t "┼")))
-		 (t "+"))
-	   ;; Hline has to cover all the cell and both white spaces
-	   ;; between columns.
-	   (make-string (+ width 2)
-			(cond ((not utf8p) ?-)
-			      ((not position) ?─)
-			      (t ?━))))
-	  into hline
-	  finally return
-	  ;; There is one separator more than columns, so handle it
-	  ;; here.
-	  (concat
-	   hline
-	   (cond
-	    ((string= (aref separators idx) "") nil)
-	    (utf8p (cond ((eq position 'top) "┑")
-			 ((eq position 'bottom) "┙")
-			 (t "┤")))
-	    (t "+"))))))
+(defun org-e-ascii-table-row (table-row contents info)
+  "Transcode a TABLE-ROW element from Org to ASCII.
+CONTENTS is the row contents.  INFO is a plist used as
+a communication channel."
+  (when (eq (org-element-property :type table-row) 'standard)
+    (let ((build-hline
+	   (function
+	    (lambda (lcorner horiz vert rcorner)
+	      (concat
+	       (apply
+		'concat
+		(org-element-map
+		 table-row 'table-cell
+		 (lambda (cell)
+		   (let ((width (org-e-ascii--table-cell-width cell info))
+			 (borders (org-export-table-cell-borders cell info)))
+		     (concat
+		      (when (and (memq 'left borders)
+				 (equal (org-element-map
+					 table-row 'table-cell 'identity info t)
+					cell)))
+		      (make-string (+ 2 width) (string-to-char horiz))
+		      (cond
+		       ((not (memq 'right borders)) nil)
+		       ((equal (car (last (org-element-contents table-row)))
+			       cell)
+			rcorner)
+		       (t vert)))))
+		 info)) "\n"))))
+	  (utf8p (eq (plist-get info :ascii-charset) 'utf-8))
+	  (borders (org-export-table-cell-borders
+		    (org-element-map table-row 'table-cell 'identity info t)
+		    info)))
+      (concat (cond
+	       ((and (memq 'top borders) (or utf8p (memq 'above borders)))
+		(if utf8p (funcall build-hline "┍" "━" "┯" "┑")
+		  (funcall build-hline "+" "-" "+" "+")))
+	       ((memq 'above borders)
+		(if utf8p (funcall build-hline "├" "─" "┼" "┤")
+		  (funcall build-hline "+" "-" "+" "+"))))
+	      (when (memq 'left borders) (if utf8p "│" "|"))
+	      contents "\n"
+	      (when (and (memq 'bottom borders) (or utf8p (memq 'below borders)))
+		(if utf8p (funcall build-hline "┕" "━" "┷" "┙")
+		  (funcall build-hline "+" "-" "+" "+")))))))
 
 
 ;;;; Target
