@@ -2736,9 +2736,9 @@ INFO is the plist used as a communication channel."
   "Return format string for code reference link.
 PATH is the link path.  DESC is its description."
   (save-match-data
-    (cond ((string-match (regexp-quote (concat "(" path ")")) desc)
+    (cond ((not desc) "%s")
+	  ((string-match (regexp-quote (concat "(" path ")")) desc)
 	   (replace-match "%s" t t desc))
-	  ((string= desc "") "%s")
 	  (t desc))))
 
 (defun org-export-inline-image-p (link &optional rules)
