@@ -54,7 +54,8 @@ compile-dirty:	cleanauto org-version.el
 autoloads:	$(LISPO)
 
 org-version.el:	$(LISPF)
-	$(ORG-VERSION)
+	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
+	@$(ORG-VERSION)
 
 org-install.el:	org-version.el
 	$(ORG-INSTALL)

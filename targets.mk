@@ -20,10 +20,13 @@ ifneq ($(GITSTATUS),)
   GITVERSION := $(GITVERSION).dirty
 endif
 
-.PHONY:	default all up2 update compile lisp doc etc \
+.PHONY:	default all oldorg up2 update compile lisp doc etc \
 	check test install info html pdf card docs $(INSTSUB) \
 	autoloads cleanall clean cleancontrib cleanrel clean-install \
 	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest
+
+# backwards compatibility target
+oldorg:	compile autoloads info
 
 all \
 compile::	lisp

@@ -2,7 +2,11 @@
 #
 # This file is not part of GNU Emacs
 
-# default target is "all"
+# set up environment
+ include default.mk	# defaults, customizable via "local.mk"
+-include local.mk	# optional local customization, use default.mk as template
+
+# default target is "all" unless overridden in local.mk
 all::
 
 # Describe valid make targets for org-mode.
@@ -34,6 +38,4 @@ targets help:
 	$(info make clean-install - remove installed Org ELisp and documentation files)
 	@echo ""
 
- include default.mk	# defaults, customizable via "local.mk"
--include local.mk	# optional local customization, use default.mk as template
  include targets.mk	# toplevel make machinery
