@@ -1402,6 +1402,7 @@ PARAMS is a property list of parameters:
 	(maxlevel (plist-get params :maxlevel))
 	(content-lines (org-split-string (plist-get params :content) "\n"))
 	(skip-empty-rows (plist-get params :skip-empty-rows))
+	(case-fold-search t)
 	tbl id idpos nfields tmp recalc line
 	id-as-string view-file view-pos)
     (when (setq id (plist-get params :id))
@@ -1467,7 +1468,7 @@ PARAMS is a property list of parameters:
       (while (setq line (pop content-lines))
 	(when (string-match "^#" line)
 	  (insert "\n" line)
-	  (when (string-match "^[ \t]*#\\+TBLFM" line)
+	  (when (string-match "^[ \t]*#\\+tblfm" line)
 	    (setq recalc t))))
       (if recalc
 	  (progn (goto-char pos) (org-table-recalculate 'all))

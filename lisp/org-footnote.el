@@ -844,7 +844,7 @@ Additional note on `org-footnote-insert-pos-for-preprocessor':
   (beginning-of-line 0)
   (while (and (not (bobp)) (= (char-after) ?#))
     (beginning-of-line 0))
-  (if (looking-at "[ \t]*#\\+TBLFM:") (beginning-of-line 2))
+  (if (let ((case-fold-search t)) (looking-at "[ \t]*#\\+tblfm:")) (beginning-of-line 2))
   (end-of-line 1)
   (skip-chars-backward "\n\r\t ")
   (forward-line))

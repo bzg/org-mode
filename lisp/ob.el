@@ -439,7 +439,7 @@ specific header arguments as well.")
   '((:session . "none") (:results . "replace") (:exports . "results"))
   "Default arguments to use when evaluating an inline source block.")
 
-(defvar org-babel-data-names '("TBLNAME" "RESULTS" "NAME"))
+(defvar org-babel-data-names '("tblname" "results" "name"))
 
 (defvar org-babel-result-regexp
   (concat "^[ \t]*#\\+"
@@ -1464,7 +1464,7 @@ to the table for reinsertion to org-mode."
 Return the point at the beginning of the current source
 block.  Specifically at the beginning of the #+BEGIN_SRC line.
 If the point is not on a source block then return nil."
-  (let ((initial (point)) top bottom)
+  (let ((initial (point)) (case-fold-search t) top bottom)
     (or
      (save-excursion ;; on a source name line or a #+header line
        (beginning-of-line 1)
@@ -1501,6 +1501,7 @@ If the point is not on a source block then return nil."
   "Go to a named source-code block."
   (interactive
    (let ((completion-ignore-case t)
+	 (case-fold-search t)
 	 (under-point (thing-at-point 'line)))
      (list (org-icompleting-read
 	    "source-block name: " (org-babel-src-block-names) nil t
@@ -1548,7 +1549,7 @@ org-babel-named-src-block-regexp."
   "Returns the names of source blocks in FILE or the current buffer."
   (save-excursion
     (when file (find-file file)) (goto-char (point-min))
-    (let (names)
+    (let ((case-fold-search t) names)
       (while (re-search-forward org-babel-src-name-w-name-regexp nil t)
 	(setq names (cons (match-string 3) names)))
       names)))
@@ -1571,23 +1572,24 @@ org-babel-named-src-block-regexp."
 Return the location of the result named NAME in the current
 buffer or nil if no such result exists."
   (save-excursion
-    (goto-char (or point (point-min)))
-    (catch 'is-a-code-block
-      (when (re-search-forward
-	     (concat org-babel-result-regexp
-		     "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]+") nil t)
-	(when (and (string= "name" (downcase (match-string 1)))
-		   (or (beginning-of-line 1)
-		       (looking-at org-babel-src-block-regexp)
-		       (looking-at org-babel-multi-line-header-regexp)))
-	  (throw 'is-a-code-block (org-babel-find-named-result name (point))))
-	(beginning-of-line 0) (point)))))
+    (let ((case-fold-search t))
+      (goto-char (or point (point-min)))
+      (catch 'is-a-code-block
+	(when (re-search-forward
+	       (concat org-babel-result-regexp
+		       "[ \t]" (regexp-quote name) "[ \t\n\f\v\r]+") nil t)
+	  (when (and (string= "name" (downcase (match-string 1)))
+		     (or (beginning-of-line 1)
+			 (looking-at org-babel-src-block-regexp)
+			 (looking-at org-babel-multi-line-header-regexp)))
+	    (throw 'is-a-code-block (org-babel-find-named-result name (point))))
+	  (beginning-of-line 0) (point))))))
 
 (defun org-babel-result-names (&optional file)
   "Returns the names of results in FILE or the current buffer."
   (save-excursion
     (when file (find-file file)) (goto-char (point-min))
-    (let (names)
+    (let ((case-fold-search t) names)
       (while (re-search-forward org-babel-result-w-name-regexp nil t)
 	(setq names (cons (match-string 4) names)))
       names)))
@@ -1685,7 +1687,8 @@ source block.  Specifically at the beginning of the results line.
 If no result exists for this block then create a results line
 following the source block."
   (save-excursion
-    (let* ((on-lob-line (save-excursion
+    (let* ((case-fold-search t)
+	   (on-lob-line (save-excursion
 			  (beginning-of-line 1)
 			  (looking-at org-babel-lob-one-liner-regexp)))
 	   (inlinep (when (org-babel-get-inline-src-block-matches)
@@ -2008,7 +2011,7 @@ code ---- the results are extracted in the syntax of the source
      ((org-at-item-p) (let* ((struct (org-list-struct))
 			     (prvs (org-list-prevs-alist struct)))
 			(org-list-get-list-end (point-at-bol) struct prvs)))
-     ((looking-at "^\\([ \t]*\\):RESULTS:")
+     ((let ((case-fold-search t)) (looking-at "^\\([ \t]*\\):results:"))
       (progn (re-search-forward (concat "^" (match-string 1) ":END:"))
 	     (forward-char 1) (point)))
      (t

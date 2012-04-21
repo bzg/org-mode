@@ -18638,7 +18638,7 @@ When in an #+include line, visit the include file.  Otherwise call
    ((or (org-at-table-p)
 	(save-excursion
 	  (beginning-of-line 1)
-	  (looking-at "[ \t]*#\\+TBLFM:")))
+	  (let ((case-fold-search )) (looking-at "[ \t]*#\\+tblfm:"))))
     (call-interactively 'org-table-edit-formulas))
    (t (call-interactively 'ffap))))
 
@@ -18792,10 +18792,12 @@ This command does many different things, depending on context:
       (beginning-of-line 1)
       (save-excursion (org-update-dblock)))
      ((save-excursion
-	(beginning-of-line 1)
-	(looking-at "[ \t]*#\\+\\([A-Z]+\\)"))
+	(let ((case-fold-search t))
+	  (beginning-of-line 1)
+	  (looking-at "[ \t]*#\\+\\([a-z]+\\)")))
       (cond
-       ((equal (match-string 1) "TBLFM")
+       ((or (equal (match-string 1) "TBLFM")
+	    (equal (match-string 1) "tblfm"))
 	;; Recalculate the table before this line
 	(save-excursion
 	  (beginning-of-line 1)

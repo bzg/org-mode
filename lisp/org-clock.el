@@ -2204,6 +2204,7 @@ from the dynamic block definition."
 	 (ntcol (max 1 (or (plist-get params :tcolumns) 100)))
 	 (rm-file-column (plist-get params :one-file-with-archives))
 	 (indent (plist-get params :indent))
+	 (case-fold-search t)
 	 range-text total-time tbl level hlc formula pcol
 	 file-time entries entry headline
 	 recalc content narrow-cut-p tcol)
@@ -2378,7 +2379,7 @@ from the dynamic block definition."
 	   (t (error "invalid formula in clocktable")))
 	;; Should we rescue an old formula?
 	(when (stringp (setq content (plist-get params :content)))
-	  (when (string-match "^\\([ \t]*#\\+TBLFM:.*\\)" content)
+	  (when (string-match "^\\([ \t]*#\\+tblfm:.*\\)" content)
 	    (setq recalc t)
 	    (insert "\n" (match-string 1 (plist-get params :content)))
 	    (beginning-of-line 0))))

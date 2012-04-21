@@ -2090,13 +2090,13 @@ When NAMED is non-nil, look for a named equation."
   (setq alist (sort alist 'org-table-formula-less-p))
   (save-excursion
     (goto-char (org-table-end))
-    (if (looking-at "\\([ \t]*\n\\)*[ \t]*#\\+TBLFM:\\(.*\n?\\)")
+    (if (looking-at "\\([ \t]*\n\\)*[ \t]*\\(#\\+tblfm:\\)\\(.*\n?\\)")
 	(progn
 	  ;; don't overwrite TBLFM, we might use text properties to store stuff
-	  (goto-char (match-beginning 2))
-	  (delete-region (match-beginning 2) (match-end 0)))
+	  (goto-char (match-beginning 3))
+	  (delete-region (match-beginning 3) (match-end 0)))
       (org-indent-line-function)
-      (insert "#+TBLFM:"))
+      (insert (match-string 2)))
     (insert " "
 	    (mapconcat (lambda (x)
 			 (concat
@@ -2133,10 +2133,10 @@ When NAMED is non-nil, look for a named equation."
 (defun org-table-get-stored-formulas (&optional noerror)
   "Return an alist with the stored formulas directly after current table."
   (interactive)
-  (let (scol eq eq-alist strings string seen)
+  (let ((case-fold-search t) scol eq eq-alist strings string seen)
     (save-excursion
       (goto-char (org-table-end))
-      (when (looking-at "\\([ \t]*\n\\)*[ \t]*#\\+TBLFM: *\\(.*\\)")
+      (when (looking-at "\\([ \t]*\n\\)*[ \t]*#\\+tblfm: *\\(.*\\)")
 	(setq strings (org-split-string (org-match-string-no-properties 2)
 					" *:: *"))
 	(while (setq string (pop strings))
@@ -2164,7 +2164,7 @@ KEY is \"@\" or \"$\".  REPLACE is an alist of numbers to replace.
 For all numbers larger than LIMIT, shift them by DELTA."
   (save-excursion
     (goto-char (org-table-end))
-    (when (looking-at "[ \t]*#\\+TBLFM:")
+    (when (let ((case-fold-search t)) (looking-at "[ \t]*#\\+tblfm:"))
       (let ((re (concat key "\\([0-9]+\\)"))
 	    (re2
 	     (when remove
@@ -3144,7 +3144,7 @@ Parameters get priority."
 (defun org-table-edit-formulas ()
   "Edit the formulas of the current table in a separate buffer."
   (interactive)
-  (when (save-excursion (beginning-of-line 1) (looking-at "[ \t]*#\\+TBLFM"))
+  (when (save-excursion (beginning-of-line 1) (let ((case-fold-search t)) (looking-at "[ \t]*#\\+TBLFM")))
     (beginning-of-line 0))
   (unless (org-at-table-p) (error "Not at a table"))
   (org-table-get-specials)
@@ -3833,7 +3833,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
   "Local variable used by `orgtbl-mode'.")
 
 (defconst orgtbl-line-start-regexp
-  "[ \t]*\\(|\\|#\\+\\(TBLFM\\|ORGTBL\\|TBLNAME\\):\\)"
+  "[ \t]*\\(|\\|#\\+\\(tblfm\\|orgtbl\\|tblname\\):\\)"
   "Matches a line belonging to an orgtbl.")
 
 (defconst orgtbl-extra-font-lock-keywords
@@ -4081,13 +4081,13 @@ to execute outside of tables."
 If it is a table to be sent away to a receiver, do it.
 With prefix arg, also recompute table."
   (interactive "P")
-  (let ((pos (point)) action consts-str consts cst const-str)
+  (let ((case-fold-search t) (pos (point)) action consts-str consts cst const-str)
     (save-excursion
       (beginning-of-line 1)
       (setq action (cond
 		    ((looking-at "[ \t]*#\\+ORGTBL:.*\n[ \t]*|") (match-end 0))
 		    ((looking-at "[ \t]*|") pos)
-		    ((looking-at "[ \t]*#\\+TBLFM:") 'recalc))))
+		    ((looking-at "[ \t]*#\\+tblfm:") 'recalc))))
     (cond
      ((integerp action)
       (goto-char action)
@@ -4346,7 +4346,8 @@ First element has index 0, or I0 if given."
 (defun orgtbl-toggle-comment ()
   "Comment or uncomment the orgtbl at point."
   (interactive)
-  (let* ((re1 (concat "^" (regexp-quote comment-start) orgtbl-line-start-regexp))
+  (let* ((case-fold-search t)
+	 (re1 (concat "^" (regexp-quote comment-start) orgtbl-line-start-regexp))
 	 (re2 (concat "^" orgtbl-line-start-regexp))
 	 (commented (save-excursion (beginning-of-line 1)
 			     (cond ((looking-at re1) t)
@@ -4724,7 +4725,7 @@ FORM is a field or range descriptor like \"@2$3\" or \"B3\" or
 The return value is either a single string for a single field, or a
 list of the fields in the rectangle ."
   (save-match-data
-    (let ((id-loc nil)
+    (let ((case-fold-search t) (id-loc nil)
 	  ;; Protect a bunch of variables from being overwritten
 	  ;; by the context of the remote table
 	  org-table-column-names org-table-column-name-regexp
@@ -4743,7 +4744,7 @@ list of the fields in the rectangle ."
 	  (save-excursion
 	    (goto-char (point-min))
 	    (if (re-search-forward
-		 (concat "^[ \t]*#\\+TBLNAME:[ \t]*" (regexp-quote name-or-id) "[ \t]*$")
+		 (concat "^[ \t]*#\\+tblname:[ \t]*" (regexp-quote name-or-id) "[ \t]*$")
 		 nil t)
 		(setq buffer (current-buffer) loc (match-beginning 0))
 	      (setq id-loc (org-id-find name-or-id 'marker))

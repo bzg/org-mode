@@ -2011,7 +2011,8 @@ When it is nil, all comments will be removed."
 
 (defun org-export-handle-table-metalines ()
   "Remove table specific metalines #+TBLNAME: and #+TBLFM:."
-  (let ((re "^[ \t]*#\\+TBL\\(NAME\\|FM\\):\\(.*\n?\\)")
+  (let ((re "^[ \t]*#\\+tbl\\(name\\|fm\\):\\(.*\n?\\)")
+	(case-fold-search t)
 	pos)
     (goto-char (point-min))
     (while (or (looking-at re)
