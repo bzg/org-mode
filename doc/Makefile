@@ -4,7 +4,7 @@ ifeq ($(MAKELEVEL), 0)
 endif
 .PHONY:		all info html pdf card manual guide install \
 		clean cleanall clean-install \
-		org-version.texi
+		org-version.inc
 
 all:		info html pdf card
 
