@@ -24,6 +24,7 @@ guide::		orgguide.texi
 	../UTILITIES/guidesplit.pl $@/*
 
 org-version.inc:
+	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
 	@echo "@c automatically generated, do not edit"  > org-version.inc
 	@echo "@set VERSION $(ORGVERSION) ($(GITVERSION))" >> org-version.inc
 	@echo "@set DATE $(DATE)" >> org-version.inc
@@ -47,18 +48,17 @@ clean-install:
 
 .SUFFIXES:	.texi .tex .txt
 
-%:		%.texi
-	$(MAKE) org-version.inc
+%:		%.texi org-version.inc
 	$(MAKEINFO) --no-split $< -o $@
 
 %.pdf:		LC_ALL=C	# work around a bug in texi2dvi
 %.pdf:		LANG=C		# work around a bug in texi2dvi
-%.pdf:		%.texi
+%.pdf:		%.texi org-version.inc
 	$(TEXI2PDF) $<
 %.pdf:		%.tex
 	PDFLATEX=$(PDFTEX) $(TEXI2PDF) $<
 
-%.html:		%.texi
+%.html:		%.texi org-version.inc
 	$(TEXI2HTML) --no-split -o $@ $<
 	../UTILITIES/manfull.pl $@
 
