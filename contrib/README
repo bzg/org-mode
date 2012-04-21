@@ -55,7 +55,7 @@ org-velocity.el          --- something like Notational Velocity for Org
 org-wikinodes.el         --- CamelCase wiki-like links for Org
 
 
-BABEL 
+BABEL
 =====
 library-of-babel.org     --- Documentation for the library of babel
 langs/ob-fomus.el        --- Org-babel functions for fomus evaluation
