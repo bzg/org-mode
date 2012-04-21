@@ -6976,16 +6976,20 @@ is invoked, the level 1 trees will be checked.
 @cindex archive locations
 The default archive location is a file in the same directory as the
 current file, with the name derived by appending @file{_archive} to the
-current file name.  For information and examples on how to change this,
+current file name.  You can also choose what heading to file archived
+items under, with the possibility to add them to a datetree in a file.
+For information and examples on how to specify the file and the heading,
 see the documentation string of the variable
-@code{org-archive-location}.  There is also an in-buffer option for
-setting this variable, for example@footnote{For backward compatibility,
-the following also works: If there are several such lines in a file,
-each specifies the archive location for the text below it.  The first
-such line also applies to any text before its definition.  However,
-using this method is @emph{strongly} deprecated as it is incompatible
-with the outline structure of the document.  The correct method for
-setting multiple archive locations in a buffer is using properties.}:
+@code{org-archive-location}.
+
+There is also an in-buffer option for setting this variable, for
+example@footnote{For backward compatibility, the following also works:
+If there are several such lines in a file, each specifies the archive
+location for the text below it.  The first such line also applies to any
+text before its definition.  However, using this method is
+@emph{strongly} deprecated as it is incompatible with the outline
+structure of the document.  The correct method for setting multiple
+archive locations in a buffer is using properties.}:
 
 @cindex #+ARCHIVE
 @example

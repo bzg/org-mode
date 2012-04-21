@@ -4176,6 +4176,15 @@ Here are a few examples:
 	Archive in file ~/org/archive.org (absolute path), under headlines
         \"From FILENAME\" where file name is the current file name.
 
+\"~/org/datetree.org::datetree/* Finished Tasks\"
+        The \"datetree/\" string is special, signifying to archive
+        items to the datetree.  Items are placed in either the CLOSED
+        date of the item, or the current date if there is no CLOSED date.
+        The heading will be a subentry to the current date.  There doesn't
+        need to be a heading, but there always needs to be a slash after
+        datetree.  For example, to store archived items directly in the
+        datetree, use \"~/org/datetree.org::datetree/\".
+
 \"basement::** Finished Tasks\"
 	Archive in file ./basement (relative path), as level 3 trees
 	below the level 2 heading \"** Finished Tasks\".

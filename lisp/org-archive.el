@@ -223,13 +223,14 @@ this heading."
 		   (current-time)))
 	    category todo priority ltags itags atags
 	    ;; end of variables that will be used for saving context
-	    location afile heading buffer level newfile-p infile-p visiting)
+	    location afile heading buffer level newfile-p infile-p visiting
+	    datetree-date datetree-subheading-p)
 
 	;; Find the local archive location
 	(setq location (org-get-local-archive-location)
 	      afile (org-extract-archive-file location)
 	      heading (org-extract-archive-heading location)
-	      infile-p (equal file (abbreviate-file-name afile)))
+	      infile-p (equal file (abbreviate-file-name (or afile ""))))
 	(unless afile
 	  (error "Invalid `org-archive-location'"))
 
@@ -240,6 +241,13 @@ this heading."
 	  (setq buffer (current-buffer)))
 	(unless buffer
 	  (error "Cannot access file \"%s\"" afile))
+	(when (string-match "\\`datetree/" heading)
+	  ;; Replace with ***, to represent the 3 levels of headings the
+	  ;; datetree has.
+	  (setq heading (replace-regexp-in-string "\\`datetree/" "***" heading))
+	  (setq datetree-subheading-p (> (length heading) 3))
+	  (setq datetree-date (org-date-to-gregorian
+			       (or (org-entry-get nil "CLOSED" t) time))))
 	(if (and (> (length heading) 0)
 		 (string-match "^\\*+" heading))
 	    (setq level (match-end 0))
@@ -272,6 +280,10 @@ this heading."
 	    (goto-char (point-max))
 	    (insert (format "\nArchived entries from file %s\n\n"
 			    (buffer-file-name this-buffer))))
+	  (when datetree-date
+	    (require 'org-datetree)
+	    (org-datetree-find-date-create datetree-date)
+	    (org-narrow-to-subtree))
 	  ;; Force the TODO keywords of the original buffer
 	  (let ((org-todo-line-regexp tr-org-todo-line-regexp)
 		(org-todo-keywords-1 tr-org-todo-keywords-1)
@@ -285,7 +297,7 @@ this heading."
 		   tr-org-odd-levels-only)))
 	    (goto-char (point-min))
 	    (show-all)
-	    (if heading
+	    (if (and heading (not (and datetree-date (not datetree-subheading-p))))
 		(progn
 		  (if (re-search-forward
 		       (concat "^" (regexp-quote heading)
@@ -295,7 +307,8 @@ this heading."
 		    ;; Heading not found, just insert it at the end
 		    (goto-char (point-max))
 		    (or (bolp) (insert "\n"))
-		    (insert "\n" heading "\n")
+		    ;; datetrees don't need too much spacing
+		    (insert (if datetree-date "" "\n") heading "\n")
 		    (end-of-line 0))
 		  ;; Make the subtree visible
 		  (show-subtree)
@@ -306,9 +319,10 @@ this heading."
 		    (org-end-of-subtree t))
 		  (skip-chars-backward " \t\r\n")
 		  (and (looking-at "[ \t\r\n]*")
-		       (replace-match "\n\n")))
+		       ;; datetree archives don't need so much spacing.
+		       (replace-match (if datetree-date "\n" "\n\n"))))
 	      ;; No specific heading, just go to end of file.
-	      (goto-char (point-max)) (insert "\n"))
+	      (goto-char (point-max)) (unless datetree-date (insert "\n")))
 	    ;; Paste
 	    (org-paste-subtree (org-get-valid-level level (and heading 1)))
 	    ;; Shall we append inherited tags?
@@ -336,6 +350,7 @@ this heading."
 		    (setq n (concat "ARCHIVE_" (upcase (symbol-name e))))
 		    (org-entry-put (point) n v)))))
 
+	    (widen)
 	    ;; Save and kill the buffer, if it is not the same buffer.
 	    (when (not (eq this-buffer buffer))
 	      (save-buffer))))
