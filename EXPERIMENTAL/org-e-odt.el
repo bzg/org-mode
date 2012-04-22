@@ -239,19 +239,6 @@
       ))
     (t (error "Unknown list type"))))
 
-(defun org-e-odt-discontinue-list ()
-  (let ((stashed-stack org-lparse-list-stack))
-    (loop for list-type in stashed-stack
-	  do (org-lparse-end-list-item-1 list-type)
-	  (org-lparse-end-list list-type))
-    (setq org-e-odt-list-stack-stashed stashed-stack)))
-
-(defun org-e-odt-continue-list ()
-  (setq org-e-odt-list-stack-stashed (nreverse org-e-odt-list-stack-stashed))
-  (loop for list-type in org-e-odt-list-stack-stashed
-	do (org-lparse-begin-list list-type)
-	(org-lparse-begin-list-item list-type)))
-
 (defun org-e-odt-write-automatic-styles ()
   "Write automatic styles to \"content.xml\"."
   (with-current-buffer
@@ -265,6 +252,25 @@
 	  (plist-get org-e-odt-automatic-styles 'Table) do
 	  (when (setq props (or (plist-get props :rel-width) 96))
 	    (insert (format org-e-odt-table-style-format style-name props))))))
+
+(defun org-e-odt-update-display-level (&optional level)
+  (with-current-buffer
+      (find-file-noselect (expand-file-name "content.xml") t)
+    ;; position the cursor.
+    (goto-char (point-min))
+    ;; remove existing sequence decls.
+    (when (re-search-forward "<text:sequence-decls" nil t)
+      (delete-region (match-beginning 0)
+		     (re-search-forward "</text:sequence-decls>" nil nil)))
+    ;; insert new ones.
+    (insert "
+      <text:sequence-decls>")
+    (loop for x in org-e-odt-category-map-alist
+	  do (insert (format "
+	<text:sequence-decl text:display-outline-level=\"%d\" text:name=\"%s\"/>"
+			     level (nth 1 x))))
+    (insert "
+      </text:sequence-decls>")))
 
 (defun org-e-odt-add-automatic-style (object-type &optional object-props)
   "Create an automatic style of type OBJECT-TYPE with param OBJECT-PROPS.
@@ -290,203 +296,6 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
 		       (append (list (list style-name object-props))
 			       (plist-get org-e-odt-automatic-styles object)))))
     (cons object-name style-name)))
-
-(defun org-e-odt-format-table-columns ()
-  (let* ((num-cols (length (plist-get table-info :alignment)))
-	 (col-nos (loop for i from 0 below num-cols collect i))
-	 (levels )
-	 (col-widths (plist-get table-info :width))
-	 (style (or (nth 1 org-e-odt-table-style-spec) "OrgTable")))
-    (mapconcat
-     (lambda (c)
-       (let* ((width (or (and org-lparse-table-is-styled (aref col-widths c))
-			 0)))
-	 (org-e-odt-make-string
-	  (1+ width)
-	  (org-e-odt-format-tags
-	   "<table:table-column table:style-name=\"%sColumn\"/>" "" style))))
-     col-nos "\n")))
-
-(defun org-e-odt-begin-table (caption-from info)
-  (let* ((captions (org-e-odt-format-label caption-from info 'definition))
-	 (caption (car captions)) (short-caption (cdr captions))
-	 (attributes (mapconcat #'identity
-				(org-element-property :attr_odt caption-from)
-				" "))
-	 (attributes (org-e-odt-parse-block-attributes attributes)))
-    ;; (setq org-e-odt-table-indentedp (not (null org-lparse-list-stack)))
-    (setq org-e-odt-table-indentedp nil) ; FIXME
-    (when org-e-odt-table-indentedp
-      ;; Within the Org file, the table is appearing within a list item.
-      ;; OpenDocument doesn't allow table to appear within list items.
-      ;; Temporarily terminate the list, emit the table and then
-      ;; re-continue the list.
-      (org-e-odt-discontinue-list)
-      ;; Put the Table in an indented section.
-      (let ((level (length org-e-odt-list-stack-stashed)))
-	(org-e-odt-begin-section (format "OrgIndentedSection-Level-%d" level))))
-    (setq org-e-odt-table-style (plist-get attributes :style))
-    (setq org-e-odt-table-style-spec
-	  (assoc org-e-odt-table-style org-e-odt-table-styles))
-    (concat
-     (and caption (org-e-odt-format-stylized-paragraph 'table caption))
-     (let ((automatic-name (org-e-odt-add-automatic-style "Table" attributes)))
-       (format
-	"\n<table:table table:name=\"%s\" table:style-name=\"%s\">\n"
-	(or short-caption (car automatic-name))
-	(or (nth 1 org-e-odt-table-style-spec) (cdr automatic-name) "OrgTable")))
-     (org-e-odt-format-table-columns) "\n")))
-
-(defun org-e-odt-end-table ()
-  (concat
-   "</table:table>"
-   ;; (when org-e-odt-table-indentedp
-   ;;   (org-e-odt-end-section)
-   ;;   (org-e-odt-continue-list))
-   ))
-
-(defun org-e-odt-begin-table-rowgroup (&optional is-header-row)
-  (prog1
-      (concat (when org-e-odt-table-rowgrp-open
-		(org-e-odt-end-table-rowgroup))
-	      (if is-header-row "<table:table-header-rows>"
-		"<table:table-rows>"))
-    (setq org-e-odt-table-rowgrp-open t)
-    (setq org-e-odt-table-cur-rowgrp-is-hdr is-header-row)))
-
-(defun org-e-odt-end-table-rowgroup ()
-  (when org-e-odt-table-rowgrp-open
-    (setq org-e-odt-table-rowgrp-open nil)
-    (if org-e-odt-table-cur-rowgrp-is-hdr
-	"</table:table-header-rows>" "</table:table-rows>")))
-
-(defun org-e-odt-format-table-row (row)
-  (org-e-odt-format-tags
-   '("<table:table-row>" . "</table:table-row>") row))
-
-(defun org-e-odt-get-column-alignment (c)
-  (let ((colalign-vector (plist-get table-info :alignment)))
-    ;; FIXME
-    (assoc-default (aref colalign-vector c)
-		   '(("l" . "left")
-		     ("r" . "right")
-		     ("c" . "center")))))
-
-(defun org-e-odt-get-table-cell-styles (r c &optional style-spec)
-  "Retrieve styles applicable to a table cell.
-R and C are (zero-based) row and column numbers of the table
-cell.  STYLE-SPEC is an entry in `org-e-odt-table-styles'
-applicable to the current table.  It is `nil' if the table is not
-associated with any style attributes.
-
-Return a cons of (TABLE-CELL-STYLE-NAME . PARAGRAPH-STYLE-NAME).
-
-When STYLE-SPEC is nil, style the table cell the conventional way
-- choose cell borders based on row and column groupings and
-choose paragraph alignment based on `org-col-cookies' text
-property.  See also
-`org-e-odt-get-paragraph-style-cookie-for-table-cell'.
-
-When STYLE-SPEC is non-nil, ignore the above cookie and return
-styles congruent with the ODF-1.2 specification."
-  (cond
-   (style-spec
-
-    ;; LibreOffice - particularly the Writer - honors neither table
-    ;; templates nor custom table-cell styles.  Inorder to retain
-    ;; inter-operability with LibreOffice, only automatic styles are
-    ;; used for styling of table-cells.  The current implementation is
-    ;; congruent with ODF-1.2 specification and hence is
-    ;; future-compatible.
-
-    ;; Additional Note: LibreOffice's AutoFormat facility for tables -
-    ;; which recognizes as many as 16 different cell types - is much
-    ;; richer. Unfortunately it is NOT amenable to easy configuration
-    ;; by hand.
-
-    (let* ((template-name (nth 1 style-spec))
-	   (cell-style-selectors (nth 2 style-spec))
-	   (cell-type
-	    (cond
-	     ((and (cdr (assoc 'use-first-column-styles cell-style-selectors))
-		   (= c 0)) "FirstColumn")
-	     ((and (cdr (assoc 'use-last-column-styles cell-style-selectors))
-		   (= c (1- org-lparse-table-ncols))) "LastColumn")
-	     ((and (cdr (assoc 'use-first-row-styles cell-style-selectors))
-		   (= r 0)) "FirstRow")
-	     ((and (cdr (assoc 'use-last-row-styles cell-style-selectors))
-		   (= r org-e-odt-table-rownum))
-	      "LastRow")
-	     ((and (cdr (assoc 'use-banding-rows-styles cell-style-selectors))
-		   (= (% r 2) 1)) "EvenRow")
-	     ((and (cdr (assoc 'use-banding-rows-styles cell-style-selectors))
-		   (= (% r 2) 0)) "OddRow")
-	     ((and (cdr (assoc 'use-banding-columns-styles cell-style-selectors))
-		   (= (% c 2) 1)) "EvenColumn")
-	     ((and (cdr (assoc 'use-banding-columns-styles cell-style-selectors))
-		   (= (% c 2) 0)) "OddColumn")
-	     (t ""))))
-      (cons
-       (concat template-name cell-type "TableCell")
-       (concat template-name cell-type "TableParagraph"))))
-   (t
-    (cons
-     (concat
-      "OrgTblCell"
-      (cond
-       ((= r 0) "T")
-       ((eq (cdr (assoc r nil ;; org-lparse-table-rowgrp-info FIXME
-			))  :start) "T")
-       (t ""))
-      (when (= r org-e-odt-table-rownum) "B")
-      (cond
-       ((= c 0) "")
-       ((or (memq (nth c org-table-colgroup-info) '(:start :startend))
-	    (memq (nth (1- c) org-table-colgroup-info) '(:end :startend))) "L")
-       (t "")))
-     (capitalize (org-e-odt-get-column-alignment c))))))
-
-(defun org-e-odt-get-paragraph-style-cookie-for-table-cell (r c)
-  (concat
-   (and (not org-e-odt-table-style-spec)
-	(cond
-	 (org-e-odt-table-cur-rowgrp-is-hdr "OrgTableHeading")
-	 ((and (= c 0) nil
-	       ;; (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS)
-	       )
-	  "OrgTableHeading")
-	 (t "OrgTableContents")))
-   (and org-lparse-table-is-styled
-	(cdr (org-e-odt-get-table-cell-styles
-	      r c org-e-odt-table-style-spec)))))
-
-(defun org-e-odt-get-style-name-cookie-for-table-cell (r c)
-  (when org-lparse-table-is-styled
-    (let* ((cell-styles (org-e-odt-get-table-cell-styles
-			 r c org-e-odt-table-style-spec))
-	   (table-cell-style (car cell-styles)))
-      table-cell-style)))
-
-(defun org-e-odt-format-table-cell (data r c horiz-span)
-  (concat
-   (let* ((paragraph-style-cookie
-	   (org-e-odt-get-paragraph-style-cookie-for-table-cell r c))
-	  (style-name-cookie
-	   (org-e-odt-get-style-name-cookie-for-table-cell r c))
-	  (extra (and style-name-cookie
-		      (format " table:style-name=\"%s\""  style-name-cookie)))
-	  (extra (concat extra
-			 (and (> horiz-span 0)
-			      (format " table:number-columns-spanned=\"%d\""
-				      (1+ horiz-span))))))
-     (org-e-odt-format-tags
-      '("<table:table-cell%s>" . "</table:table-cell>")
-      (if org-lparse-list-table-p data
-	(org-e-odt-format-stylized-paragraph paragraph-style-cookie data)) extra))
-   (let (s)
-     (dotimes (i horiz-span)
-       (setq s (concat s "\n<table:covered-table-cell/>"))) s)
-   "\n"))
 
 (defun org-e-odt-begin-toc (lang-specific-heading max-level)
   (concat
@@ -742,7 +551,7 @@ Update styles.xml with styles that were collected as part of
 			  :row-groups (0)
 			  :special-column-p nil :width [8 1]))
 	    (org-lparse-table-ncols 2)) ; FIXME
-	(org-e-odt-list-table
+	(org-e-odt-list-table		; FIXME
 	 (list
 	  (list
 	   (org-e-odt-format-entity
@@ -912,13 +721,13 @@ ATTR is a string of other attributes of the a element."
       n note-class ref-format ref-name)
      "OrgSuperscript")))
 
-(defun org-e-odt-parse-block-attributes (params)
-  (save-match-data
-    (when params
-      (setq params (org-trim params))
-      (unless (string-match "\\`(.*)\\'" params)
-	(setq params (format "(%s)" params)))
-      (ignore-errors (read params)))))
+(defun org-e-odt-element-attributes (element info)
+  (let* ((raw-attr (org-element-property :attr_odt element))
+	 (raw-attr (and raw-attr
+			(org-trim (mapconcat #'identity raw-attr " ")))))
+    (unless (and raw-attr (string-match "\\`(.*)\\'" raw-attr))
+      (setq raw-attr (format "(%s)" raw-attr)))
+    (ignore-errors (read raw-attr))))
 
 (defun org-e-odt-format-object-description (title description)
   (concat (and title (org-e-odt-format-tags
@@ -1170,11 +979,12 @@ ATTR is a string of other attributes of the a element."
 	(find-file-noselect content-file t)
       (current-buffer))))
 
-
-
 (defun org-e-odt-save-as-outfile (target opt-plist)
   ;; write automatic styles
   (org-e-odt-write-automatic-styles)
+
+  ;; update display levels
+  (org-e-odt-update-display-level org-e-odt-display-outline-level)
 
   ;; write styles file
   ;; (when (equal org-lparse-backend 'odt) FIXME
@@ -3632,14 +3442,8 @@ used as a communication channel."
 	 (attr-from (case (org-element-type element)
 		      (link (org-export-get-parent-paragraph element info))
 		      (t element)))
-	 (attr (let ((raw-attr
-		      (mapconcat #'identity
-				 (org-element-property :attr_odt attr-from)
-				 " ")))
-		 (unless (string= raw-attr "") raw-attr)))
-	 (attr (if (not attr) "" (org-trim attr)))
 	 ;; convert attributes to a plist.
-	 (attr-plist (org-e-odt-parse-block-attributes attr))
+	 (attr-plist (org-e-odt-element-attributes attr-from info))
 	 ;; handle `:anchor', `:style' and `:attributes' properties.
 	 (user-frame-anchor
 	  (car (assoc-string (plist-get attr-plist :anchor)
@@ -3660,8 +3464,6 @@ used as a communication channel."
 		"paragraph"			  ; FIXME
 		))
 	 (width (car size)) (height (cdr size))
-
-
 	 (embed-as
 	  (case (org-element-type element)
 	    ((org-e-odt-standalone-image-p element info) "paragraph")
@@ -3669,6 +3471,7 @@ used as a communication channel."
 	    (latex-environment "paragraph")
 	    (t "paragraph")))
 	 (captions (org-e-odt-format-label element info 'definition))
+	 (caption (car captions)) (short-caption (cdr captions))
 	 (entity (concat (and caption "Captioned") embed-as "Image")))
     (org-e-odt-format-entity entity href width height
 			     captions user-frame-params )))
@@ -4087,155 +3890,205 @@ contextual information."
   (org-e-odt-format-fontify contents 'superscript))
 
 
-;;;; Table
+;;;; Table Cell
 
-(defun org-e-odt-get-colwidth (c)
-  (let ((col-widths (plist-get table-info :width)))
-    (or (and org-lparse-table-is-styled (aref col-widths c)) 0)))
+(defun org-e-odt-table-style-spec (element info)
+  (let* ((table (org-export-get-parent-table element info))
+	 (table-attributes (org-e-odt-element-attributes table info))
+	 (table-style (plist-get table-attributes :style)))
+    (assoc table-style org-e-odt-table-styles)))
 
-(defun org-e-odt-table-row (fields &optional text-for-empty-fields)
-  (incf org-e-odt-table-rownum)
-  (let ((i -1))
-    (org-e-odt-format-table-row
-     (mapconcat
-      (lambda (x)
-	(when (and (string= x "") text-for-empty-fields)
-	  (setq x text-for-empty-fields))
-	(incf i)
-	(let ((horiz-span (org-e-odt-get-colwidth i)))
-	  (org-e-odt-format-table-cell
-	   x org-e-odt-table-rownum i horiz-span)))
-      fields "\n"))))
+(defun org-e-odt-get-table-cell-styles (table-cell info)
+  "Retrieve styles applicable to a table cell.
+R and C are (zero-based) row and column numbers of the table
+cell.  STYLE-SPEC is an entry in `org-e-odt-table-styles'
+applicable to the current table.  It is `nil' if the table is not
+associated with any style attributes.
 
-(defun org-e-odt-table-preamble ()
-  (let ((colgroup-vector (plist-get table-info :column-groups)) ;; FIXME
-	c gr colgropen preamble)
-    (unless (aref colgroup-vector 0)
-      (setf (aref colgroup-vector 0) 'start))
-    (dotimes (c columns-number preamble)
-      (setq gr (aref colgroup-vector c))
-      (setq preamble
-	    (concat
-	     preamble
-	     (when (memq gr '(start start-end))
-	       (prog1 (if colgropen "</colgroup>\n<colgroup>" "\n<colgroup>")
-		 (setq colgropen t)))
-	     (let* ((colalign-vector (plist-get table-info :alignment)) ;; FIXME
-		    (align (cdr (assoc (aref colalign-vector c)
-				       '(("l" . "left")
-					 ("r" . "right")
-					 ("c" . "center")))))
-		    (alignspec (if (and (boundp 'org-e-odt-format-table-no-css)
-					org-e-odt-format-table-no-css)
-				   " align=\"%s\"" " class=\"%s\""))
-		    (extra (format alignspec  align)))
-	       (format "<col%s />" extra))
-	     (when (memq gr '(end start-end))
-	       (setq colgropen nil)
-	       "</colgroup>"))))
-    (concat preamble (if colgropen "</colgroup>"))))
+Return a cons of (TABLE-CELL-STYLE-NAME . PARAGRAPH-STYLE-NAME).
 
-(defun org-e-odt-list-table (lines caption-from info)
-  (let* ((splice nil) head
-	 (org-e-odt-table-rownum -1)
-	 i (cnt 0)
-	 fields line
-	 org-e-odt-table-cur-rowgrp-is-hdr
-	 org-e-odt-table-rowgrp-open
-	 n
-	 (org-lparse-table-style 'org-table)
-	 org-lparse-table-is-styled)
-    (cond
-     (splice
-      (setq org-lparse-table-is-styled nil)
-      (mapconcat 'org-e-odt-table-row lines "\n"))
-     (t
-      (setq org-lparse-table-is-styled t)
+When STYLE-SPEC is nil, style the table cell the conventional way
+- choose cell borders based on row and column groupings and
+choose paragraph alignment based on `org-col-cookies' text
+property.  See also
+`org-e-odt-get-paragraph-style-cookie-for-table-cell'.
 
+When STYLE-SPEC is non-nil, ignore the above cookie and return
+styles congruent with the ODF-1.2 specification."
+  (let* ((table-cell-address (org-export-table-cell-address table-cell info))
+	 (r (car table-cell-address)) (c (cdr table-cell-address))
+	 (style-spec (org-e-odt-table-style-spec table-cell info))
+	 (table-dimensions (org-export-table-dimensions
+			    (org-export-get-parent-table table-cell info)
+			    info)))
+    (when style-spec
+      ;; LibreOffice - particularly the Writer - honors neither table
+      ;; templates nor custom table-cell styles.  Inorder to retain
+      ;; inter-operability with LibreOffice, only automatic styles are
+      ;; used for styling of table-cells.  The current implementation is
+      ;; congruent with ODF-1.2 specification and hence is
+      ;; future-compatible.
+
+      ;; Additional Note: LibreOffice's AutoFormat facility for tables -
+      ;; which recognizes as many as 16 different cell types - is much
+      ;; richer. Unfortunately it is NOT amenable to easy configuration
+      ;; by hand.
+      (let* ((template-name (nth 1 style-spec))
+	     (cell-style-selectors (nth 2 style-spec))
+	     (cell-type
+	      (cond
+	       ((and (cdr (assoc 'use-first-column-styles cell-style-selectors))
+		     (= c 0)) "FirstColumn")
+	       ((and (cdr (assoc 'use-last-column-styles cell-style-selectors))
+		     (= (1+ c) (cdr table-dimensions)))
+		"LastColumn")
+	       ((and (cdr (assoc 'use-first-row-styles cell-style-selectors))
+		     (= r 0)) "FirstRow")
+	       ((and (cdr (assoc 'use-last-row-styles cell-style-selectors))
+		     (= (1+ r) (car table-dimensions)))
+		"LastRow")
+	       ((and (cdr (assoc 'use-banding-rows-styles cell-style-selectors))
+		     (= (% r 2) 1)) "EvenRow")
+	       ((and (cdr (assoc 'use-banding-rows-styles cell-style-selectors))
+		     (= (% r 2) 0)) "OddRow")
+	       ((and (cdr (assoc 'use-banding-columns-styles cell-style-selectors))
+		     (= (% c 2) 1)) "EvenColumn")
+	       ((and (cdr (assoc 'use-banding-columns-styles cell-style-selectors))
+		     (= (% c 2) 0)) "OddColumn")
+	       (t ""))))
+	(concat template-name cell-type)))))
+
+(defun org-e-odt-table-cell (table-cell contents info)
+  "Transcode a TABLE-CELL element from Org to ODT.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (let* ((value (org-export-secondary-string
+		 (org-element-property :value table-cell) 'e-odt info))
+
+	 (table-cell-address (org-export-table-cell-address table-cell info))
+	 (r (car table-cell-address))
+	 (c (cdr table-cell-address))
+	 (horiz-span (or (org-export-table-cell-width table-cell info) 0))
+	 (table-row (org-export-get-parent table-cell info))
+	 (custom-style-prefix (org-e-odt-get-table-cell-styles
+			       table-cell info))
+	 (paragraph-style
+	  (or
+	   (and custom-style-prefix
+		(format "%sTableParagraph" custom-style-prefix))
+	   (concat
+	    (cond
+	     ((and (= 1 (org-export-table-row-group table-row info))
+		   (org-export-table-has-header-p
+		    (org-export-get-parent-table table-row info) info))
+	      "OrgTableHeading")
+	     ((and (zerop c) t ;; (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS)
+		   )
+	      "OrgTableHeading")
+	     (t "OrgTableContents"))
+	    (capitalize (symbol-name (org-export-table-cell-alignment
+				      table-cell info))))))
+	 (cell-style-name
+	  (or
+	   (and custom-style-prefix (format "%sTableCell"
+					    custom-style-prefix))
+	   (concat
+	    "OrgTblCell"
+	    (when (or (org-export-table-row-starts-rowgroup-p table-row info)
+		      (zerop r)) "T")
+	    (when (org-export-table-row-ends-rowgroup-p table-row info) "B")
+	    (when (and (org-export-table-cell-starts-colgroup-p table-cell info)
+		       (not (zerop c)) ) "L"))))
+	 (cell-attributes
+	  (concat
+	   (format " table:style-name=\"%s\"" cell-style-name)
+	   (and (> horiz-span 0)
+		(format " table:number-columns-spanned=\"%d\""
+			(1+ horiz-span))))))
+    (concat
+     (org-e-odt-format-tags
+      '("<table:table-cell%s>" . "</table:table-cell>")
+      (org-e-odt-format-stylized-paragraph paragraph-style value) cell-attributes)
+     (let (s)
+       (dotimes (i horiz-span s)
+	 (setq s (concat s "\n<table:covered-table-cell/>"))))
+     "\n")))
+
+
+;;;; Table Row
+
+(defun org-e-odt-table-row (table-row contents info)
+  "Transcode a TABLE-ROW element from Org to ODT.
+CONTENTS is the contents of the row.  INFO is a plist used as a
+communication channel."
+  ;; Rules are ignored since table separators are deduced from
+  ;; borders of the current row.
+  (when (eq (org-element-property :type table-row) 'standard)
+    (let* ((rowgroup-tags
+	    (if (and (= 1 (org-export-table-row-group table-row info))
+		     (org-export-table-has-header-p
+		      (org-export-get-parent-table table-row info) info))
+		;; If the row belongs to the first rowgroup and the
+		;; table has more than one row groups, then this row
+		;; belongs to the header row group.
+		'("\n<table:table-header-rows>" . "\n</table:table-header-rows>")
+	      ;; Otherwise, it belongs to non-header row group.
+	      '("\n<table:table-rows>" . "\n</table:table-rows>"))))
       (concat
-       (org-e-odt-begin-table caption-from info)
-       ;; FIXME (org-e-odt-table-preamble)
-       (org-e-odt-begin-table-rowgroup head)
+       ;; Does this row begin a rowgroup?
+       (when (org-export-table-row-starts-rowgroup-p table-row info)
+  	 (car rowgroup-tags))
+       ;; Actual table row
+       (org-e-odt-format-tags
+	'("<table:table-row>" . "</table:table-row>") contents)
+       ;; Does this row end a rowgroup?
+       (when (org-export-table-row-ends-rowgroup-p table-row info)
+  	 (cdr rowgroup-tags))))))
 
-       (mapconcat
-	(lambda (line)
-	  (cond
-	   ((equal line 'hline) (org-e-odt-begin-table-rowgroup))
-	   (t (org-e-odt-table-row line))))
-	lines "\n")
 
-       (org-e-odt-end-table-rowgroup)
-       (org-e-odt-end-table))))))
-
-(defun org-e-odt-transcode-table-row (row)
-  (if (string-match org-table-hline-regexp row) 'hline
-    (mapcar
-     (lambda (cell)
-       (org-export-secondary-string
-	(let ((cell (org-element-parse-secondary-string
-		     cell
-		     (cdr (assq 'table org-element-string-restrictions)))))
-	  cell)
-	'e-odt info))
-     (org-split-string row "[ \t]*|[ \t]*"))))
-
-(defun org-e-odt-org-table-to-list-table (lines &optional splice)
-  "Convert org-table to list-table.
-LINES is a list of the form (ROW1 ROW2 ROW3 ...) where each
-element is a `string' representing a single row of org-table.
-Thus each ROW has vertical separators \"|\" separating the table
-fields.  A ROW could also be a row-group separator of the form
-\"|---...|\".  Return a list of the form (ROW1 ROW2 ROW3
-...). ROW could either be symbol `'hline' or a list of the
-form (FIELD1 FIELD2 FIELD3 ...) as appropriate."
-  (let (line lines-1)
-    (cond
-     (splice
-      (while (setq line (pop lines))
-	(unless (string-match "^[ \t]*|-" line)
-	  (push (org-e-odt-transcode-table-row line) lines-1))))
-     (t (while (setq line (pop lines))
-	  (cond
-	   ((string-match "^[ \t]*|-" line)
-	    (when lines (push 'hline lines-1)))
-	   (t (push (org-e-odt-transcode-table-row line) lines-1))))))
-    (nreverse lines-1)))
-
-(defun org-e-odt-table-table (raw-table)
-  (require 'table)
-  (with-current-buffer (get-buffer-create "*org-export-table*")
-    (erase-buffer))
-  (let ((output (with-temp-buffer
-		  (insert raw-table)
-		  (goto-char 1)
-		  (re-search-forward "^[ \t]*|[^|]" nil t)
-		  (table-generate-source 'html "*org-export-table*")
-		  (with-current-buffer "*org-export-table*"
-		    (org-trim (buffer-string))))))
-    (kill-buffer (get-buffer "*org-export-table*"))
-    output))
+;;;; Table
 
 (defun org-e-odt-table (table contents info)
   "Transcode a TABLE element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((raw-table (org-element-property :raw-table table))
-	 (table-type (org-element-property :type table)))
-    (case table-type
-      (table.el
-       ;; (org-e-odt-table-table raw-table)
-       )
-      (t
-       (let* ((table-info (org-export-table-format-info raw-table))
-	      (columns-number (length (plist-get table-info :alignment)))
-	      (lines (org-split-string
-		      (org-export-clean-table
-		       raw-table (plist-get table-info :special-column-p)) "\n"))
-
-	      (genealogy (org-export-get-genealogy table info))
-	      (parent (car genealogy))
-	      (parent-type (org-element-type parent)))
-	 (org-e-odt-list-table
-	  (org-e-odt-org-table-to-list-table lines) table info))))))
+  (case (org-element-property :type table)
+    (table.el nil)
+    (t
+     (let* ((captions (org-e-odt-format-label table info 'definition))
+	    (caption (car captions)) (short-caption (cdr captions))
+	    (attributes (org-e-odt-element-attributes table info))
+	    (custom-table-style (nth 1 (org-e-odt-table-style-spec table info)))
+	    (table-column-specs
+	     (function
+	      (lambda (table info)
+		(let* ((table-style (or custom-table-style "OrgTable"))
+		       (column-style (format "%sColumn" table-style)))
+		  (mapconcat
+		   (lambda (table-column-properties)
+		     (let ((width (1+ (or (plist-get table-column-properties
+						     :width) 0))))
+		       (org-e-odt-make-string
+			width
+			(org-e-odt-format-tags
+			 "<table:table-column table:style-name=\"%s\"/>"
+			 "" column-style))))
+		   (org-export-table-column-properties table info) "\n"))))))
+       (concat
+	;; caption.
+	(when caption (org-e-odt-format-stylized-paragraph 'table caption))
+	;; begin table.
+	(let* ((automatic-name
+		(org-e-odt-add-automatic-style "Table" attributes)))
+	  (format
+	   "\n<table:table table:name=\"%s\" table:style-name=\"%s\">\n"
+	   (or short-caption (car automatic-name))
+	   (or custom-table-style (cdr automatic-name) "OrgTable")))
+	;; column specification.
+      	(funcall table-column-specs table info)
+	;; actual contents.
+	"\n" contents
+	;; end table.
+	"</table:table>")))))
 
 
 ;;;; Target
@@ -4507,6 +4360,38 @@ using `org-open-file'."
   (org-e-odt-do-convert in-file out-fmt prefix-arg))
 
 ;;; FIXMES, TODOS, FOR REVIEW etc
+
+;; (defun org-e-odt-discontinue-list ()
+;;   (let ((stashed-stack org-lparse-list-stack))
+;;     (loop for list-type in stashed-stack
+;; 	  do (org-lparse-end-list-item-1 list-type)
+;; 	  (org-lparse-end-list list-type))
+;;     (setq org-e-odt-list-stack-stashed stashed-stack)))
+
+;; (defun org-e-odt-continue-list ()
+;;   (setq org-e-odt-list-stack-stashed (nreverse org-e-odt-list-stack-stashed))
+;;   (loop for list-type in org-e-odt-list-stack-stashed
+;; 	do (org-lparse-begin-list list-type)
+;; 	(org-lparse-begin-list-item list-type)))
+
+;; FIXME: Begin indented table
+;; (setq org-e-odt-table-indentedp (not (null org-lparse-list-stack)))
+;; (setq org-e-odt-table-indentedp nil) ; FIXME
+;; (when org-e-odt-table-indentedp
+;;   ;; Within the Org file, the table is appearing within a list item.
+;;   ;; OpenDocument doesn't allow table to appear within list items.
+;;   ;; Temporarily terminate the list, emit the table and then
+;;   ;; re-continue the list.
+;;   (org-e-odt-discontinue-list)
+;;   ;; Put the Table in an indented section.
+;;   (let ((level (length org-e-odt-list-stack-stashed)))
+;; 	(org-e-odt-begin-section (format "OrgIndentedSection-Level-%d" level))))
+
+;; FIXME: End indented table
+;; (when org-e-odt-table-indentedp
+;;   (org-e-odt-end-section)
+;;   (org-e-odt-continue-list))
+
 
 ;;;; org-format-table-html
 ;;;; org-format-org-table-html

@@ -140,8 +140,6 @@ specific properties, define a similar variable named
 the appropriate back-end.  You can also redefine properties
 there, as they have precedence over these.")
 
-(defvar html-table-tag nil) ; dynamically scoped into this.
-
 ;; FIXME: it already exists in org-e-html.el
 (defconst org-e-html-cvt-link-fn
    nil
@@ -157,11 +155,6 @@ Intended to be locally bound around a call to `org-export-as-html'." )
 (defvar org-e-html-format-table-no-css)
 (defvar htmlize-buffer-places)  ; from htmlize.el
 (defvar body-only) ; dynamically scoped into this.
-
-(defvar org-e-html-table-rowgrp-open)
-(defvar org-e-html-table-rownum)
-(defvar org-e-html-table-cur-rowgrp-is-hdr)
-(defvar org-lparse-table-is-styled)
 
 
 
@@ -1019,24 +1012,24 @@ in order to mimic default behaviour:
 
 (defcustom org-e-html-quotes
   '(("fr"
-     ("\\(\\s-\\|[[(]\\)\"" . "«~")
+     ("\\(\\s-\\|[[(]\\|^\\)\"" . "«~")
      ("\\(\\S-\\)\"" . "~»")
-     ("\\(\\s-\\|(\\)'" . "'"))
+     ("\\(\\s-\\|(\\|^\\)'" . "'"))
     ("en"
-     ("\\(\\s-\\|[[(]\\)\"" . "``")
+     ("\\(\\s-\\|[[(]\\|^\\)\"" . "``")
      ("\\(\\S-\\)\"" . "''")
-     ("\\(\\s-\\|(\\)'" . "`")))
+     ("\\(\\s-\\|(\\|^\\)'" . "`")))
   "Alist for quotes to use when converting english double-quotes.
 
 The CAR of each item in this alist is the language code.
-The CDR of each item in this alist is a list of three CONS.
-- the first CONS defines the opening quote
-- the second CONS defines the closing quote
-- the last CONS defines single quotes
+The CDR of each item in this alist is a list of three CONS:
+- the first CONS defines the opening quote;
+- the second CONS defines the closing quote;
+- the last CONS defines single quotes.
 
-For each item in a CONS, the first string is a regexp for allowed
-characters before/after the quote, the second string defines the
-replacement string for this quote."
+For each item in a CONS, the first string is a regexp
+for allowed characters before/after the quote, the second
+string defines the replacement string for this quote."
   :group 'org-export-e-html
   :type '(list
 	  (cons :tag "Opening quote"
@@ -1048,7 +1041,6 @@ replacement string for this quote."
 	  (cons :tag "Single quote"
 		(string :tag "Regexp for char before")
 		(string :tag "Replacement quote     "))))
-
 
 ;;;; Compilation
 
@@ -1083,13 +1075,6 @@ DESC is the link description, if any.
 ATTR is a string of other attributes of the \"a\" element."
   (declare (special org-lparse-par-open))
   (save-match-data
-    (when (string= type-1 "coderef")
-      (let ((ref fragment))
-	(setq desc (format (org-export-get-coderef-format ref (and descp desc))
-			   (cdr (assoc ref org-export-code-refs)))
-	      fragment (concat  "coderef-" ref)
-	      attr (format "class=\"coderef\" onmouseover=\"CodeHighlightOn(this, '%s');\" onmouseout=\"CodeHighlightOff(this, '%s');\""
-			   fragment fragment))))
     (let* ((may-inline-p
 	    (and (member type-1 '("http" "https" "file"))
 		 (org-lparse-should-inline-p path descp)
@@ -1392,14 +1377,6 @@ Replaces invalid characters with \"_\"."
        (format
 	"<table>\n%s\n</table>\n"
 	(mapconcat 'org-e-html-format-footnote-definition fn-alist "\n"))))))
-
-(defun org-e-html-get-coding-system-for-write ()
-  (or org-e-html-coding-system
-      (and (boundp 'buffer-file-coding-system) buffer-file-coding-system)))
-
-(defun org-e-html-get-coding-system-for-save ()
-  (or org-e-html-coding-system
-      (and (boundp 'buffer-file-coding-system) buffer-file-coding-system)))
 
 (defun org-e-html-format-date (info)
   (let ((date (plist-get info :date)))
@@ -2785,208 +2762,148 @@ contextual information."
   (format "<sup>%s</sup>" contents))
 
 
+;;;; Tabel Cell
+
+(defun org-e-html-table-cell (table-cell contents info)
+  "Transcode a TABLE-CELL element from Org to HTML.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (let* ((value (org-export-secondary-string
+		 (org-element-property :value table-cell) 'e-html info))
+	 (value (if (string= "" (org-trim value)) "&nbsp;" value))
+	 (table-row (org-export-get-parent table-cell info))
+	 (cell-attrs
+	  (if (not org-e-html-table-align-individual-fields) ""
+	    (format (if (and (boundp 'org-e-html-format-table-no-css)
+			     org-e-html-format-table-no-css)
+			" align=\"%s\"" " class=\"%s\"")
+		    (org-export-table-cell-alignment table-cell info)))))
+    (cond
+     ((= 1 (org-export-table-row-group table-row info))
+      (concat "\n" (format (car org-e-html-table-header-tags) "col" cell-attrs)
+	      value (cdr org-e-html-table-header-tags)))
+     ((and org-e-html-table-use-header-tags-for-first-column
+  	   (zerop (cdr (org-export-table-cell-address table-cell info))))
+      (concat "\n" (format (car org-e-html-table-header-tags) "row" cell-attrs)
+	      value (cdr org-e-html-table-header-tags)))
+     (t (concat "\n" (format (car org-e-html-table-data-tags) cell-attrs)
+		value (cdr org-e-html-table-data-tags))))))
+
+
+;;;; Table Row
+
+(defun org-e-html-table-row (table-row contents info)
+  "Transcode a TABLE-ROW element from Org to HTML.
+CONTENTS is the contents of the row.  INFO is a plist used as a
+communication channel."
+  ;; Rules are ignored since table separators are deduced from
+  ;; borders of the current row.
+  (when (eq (org-element-property :type table-row) 'standard)
+    (let* ((first-rowgroup-p (= 1 (org-export-table-row-group table-row info)))
+  	   (rowgroup-tags
+	    (cond
+	     ;; Case 1: Row belongs to second or subsequent rowgroups.
+	     ((not (= 1 (org-export-table-row-group table-row info)))
+	      '("\n<tbody>" . "\n</tbody>"))
+	     ;; Case 2: Row is from first rowgroup.  Table has >=1 rowgroups.
+	     ((org-export-table-has-header-p
+	       (org-export-get-parent-table table-row info) info)
+	      '("\n<thead>" . "\n</thead>"))
+	     ;; Case 2: Row is from first and only row group.
+	     (t '("\n<tbody>" . "\n</tbody>")))))
+      (concat
+       ;; Begin a rowgroup?
+       (when (org-export-table-row-starts-rowgroup-p table-row info)
+  	 (car rowgroup-tags))
+       ;; Actual table row
+       (concat "\n" (eval (car org-e-html-table-row-tags))
+	       contents (eval (cdr org-e-html-table-row-tags)))
+       ;; End a rowgroup?
+       (when (org-export-table-row-ends-rowgroup-p table-row info)
+  	 (cdr rowgroup-tags))))))
+
+
 ;;;; Table
 
-(defun org-e-html-begin-table (caption label attributes)
-  (let* ((html-table-tag (or (plist-get info :html-table-tag) ; FIXME
-			     org-e-html-table-tag))
-	 (html-table-tag
-	  (org-e-html-splice-attributes html-table-tag attributes)))
-    (when label
-      (setq html-table-tag
-	    (org-e-html-splice-attributes
-	     html-table-tag
-	     (format "id=\"%s\"" (org-solidify-link-text label)))))
-    (concat "\n" html-table-tag
-	    (format "\n<caption>%s</caption>" (or caption "")))))
+(defun org-export-table-sample-row (table info)
+  "A sample row from TABLE."
+  (let ((table-row
+	 (org-element-map
+	  table 'table-row
+	  (lambda (row)
+	    (unless (eq (org-element-property :type row) 'rule) row))
+	  info 'first-match))
+	(special-column-p (org-export-table-has-special-column-p table)))
+    (if (not special-column-p) (org-element-contents table-row)
+      (cdr (org-element-contents table-row)))))
 
-(defun org-e-html-end-table ()
-  "</table>\n")
-
-(defun org-e-html-format-table-cell (text r c horiz-span)
-  (let ((cell-style-cookie
-	 (if org-e-html-table-align-individual-fields
-	     (format (if (and (boundp 'org-e-html-format-table-no-css)
-			      org-e-html-format-table-no-css)
-			 " align=\"%s\"" " class=\"%s\"")
-		     (or (aref (plist-get table-info :alignment) c) "left")) ""))) ;; FIXME
-    (cond
-     (org-e-html-table-cur-rowgrp-is-hdr
-      (concat
-       (format (car org-e-html-table-header-tags) "col" cell-style-cookie)
-       text (cdr org-e-html-table-header-tags)))
-     ((and (= c 0) org-e-html-table-use-header-tags-for-first-column)
-      (concat
-       (format (car org-e-html-table-header-tags) "row" cell-style-cookie)
-       text (cdr org-e-html-table-header-tags)))
-     (t
-      (concat
-       (format (car org-e-html-table-data-tags) cell-style-cookie)
-       text (cdr org-e-html-table-data-tags))))))
-
-(defun org-e-html-format-table-row (row)
-  (concat (eval (car org-e-html-table-row-tags)) row
-	  (eval (cdr org-e-html-table-row-tags))))
-
-(defun org-e-html-table-row (fields &optional text-for-empty-fields)
-  (incf org-e-html-table-rownum)
-  (let ((i -1))
-    (org-e-html-format-table-row
-     (mapconcat
-      (lambda (x)
-	(when (and (string= x "") text-for-empty-fields)
-	  (setq x text-for-empty-fields))
-	(incf i)
-	(let (horiz-span)
-	  (org-e-html-format-table-cell
-	   x org-e-html-table-rownum i (or horiz-span 0))))
-      fields "\n"))))
-
-(defun org-e-html-end-table-rowgroup ()
-  (when org-e-html-table-rowgrp-open
-    (setq org-e-html-table-rowgrp-open nil)
-    (if org-e-html-table-cur-rowgrp-is-hdr "</thead>" "</tbody>")))
-
-(defun org-e-html-begin-table-rowgroup (&optional is-header-row)
-  (concat
-   (when org-e-html-table-rowgrp-open
-     (org-e-html-end-table-rowgroup))
-   (progn
-     (setq org-e-html-table-rowgrp-open t)
-     (setq org-e-html-table-cur-rowgrp-is-hdr is-header-row)
-     (if is-header-row "<thead>" "<tbody>"))))
-
-(defun org-e-html-table-preamble ()
-  (let ((colgroup-vector (plist-get table-info :column-groups)) ;; FIXME
-	c gr colgropen preamble)
-    (unless (aref colgroup-vector 0)
-      (setf (aref colgroup-vector 0) 'start))
-    (dotimes (c columns-number preamble)
-      (setq gr (aref colgroup-vector c))
-      (setq preamble
-	    (concat
-	     preamble
-	     (when (memq gr '(start start-end))
-	       (prog1 (if colgropen "</colgroup>\n<colgroup>" "\n<colgroup>")
-		 (setq colgropen t)))
-	     (let* ((colalign-vector (plist-get table-info :alignment)) ;; FIXME
-		    (align (cdr (assoc (aref colalign-vector c)
-				       '(("l" . "left")
-					 ("r" . "right")
-					 ("c" . "center")))))
-		    (alignspec (if (and (boundp 'org-e-html-format-table-no-css)
-					org-e-html-format-table-no-css)
-				   " align=\"%s\"" " class=\"%s\""))
-		    (extra (format alignspec  align)))
-	       (format "<col%s />" extra))
-	     (when (memq gr '(end start-end))
-	       (setq colgropen nil)
-	       "</colgroup>"))))
-    (concat preamble (if colgropen "</colgroup>"))))
-
-(defun org-e-html-list-table (lines caption label attributes)
-  (setq lines (org-e-html-org-table-to-list-table lines))
-  (let* ((splice nil) head
-	 (org-e-html-table-rownum -1)
-	 i (cnt 0)
-	 fields line
-	 org-e-html-table-cur-rowgrp-is-hdr
-	 org-e-html-table-rowgrp-open
-	 n
-	 (org-lparse-table-style 'org-table)
-	 org-lparse-table-is-styled)
-    (cond
-     (splice
-      (setq org-lparse-table-is-styled nil)
-      (mapconcat 'org-e-html-table-row lines "\n"))
-     (t
-      (setq org-lparse-table-is-styled t)
-
-      (concat
-       (org-e-html-begin-table caption label attributes)
-       (org-e-html-table-preamble)
-       (org-e-html-begin-table-rowgroup head)
-
-       (mapconcat
-	(lambda (line)
-	  (cond
-	   ((equal line 'hline) (org-e-html-begin-table-rowgroup))
-	   (t (org-e-html-table-row line))))
-	lines "\n")
-
-       (org-e-html-end-table-rowgroup)
-       (org-e-html-end-table))))))
-
-(defun org-e-html-transcode-table-row (row)
-  (if (string-match org-table-hline-regexp row) 'hline
-    (mapcar
-     (lambda (cell)
-       (org-export-secondary-string
-	(let ((cell (org-element-parse-secondary-string
-		     cell
-		     (cdr (assq 'table org-element-string-restrictions)))))
-	  cell)
-	'e-html info))
-     (org-split-string row "[ \t]*|[ \t]*"))))
-
-(defun org-e-html-org-table-to-list-table (lines &optional splice)
-  "Convert org-table to list-table.
-LINES is a list of the form (ROW1 ROW2 ROW3 ...) where each
-element is a `string' representing a single row of org-table.
-Thus each ROW has vertical separators \"|\" separating the table
-fields.  A ROW could also be a row-group separator of the form
-\"|---...|\".  Return a list of the form (ROW1 ROW2 ROW3
-...). ROW could either be symbol `'hline' or a list of the
-form (FIELD1 FIELD2 FIELD3 ...) as appropriate."
-  (let (line lines-1)
-    (cond
-     (splice
-      (while (setq line (pop lines))
-	(unless (string-match "^[ \t]*|-" line)
-	  (push (org-e-html-transcode-table-row line) lines-1))))
-     (t (while (setq line (pop lines))
-	  (cond
-	   ((string-match "^[ \t]*|-" line)
-	    (when lines (push 'hline lines-1)))
-	   (t (push (org-e-html-transcode-table-row line) lines-1))))))
-    (nreverse lines-1)))
-
-(defun org-e-html-table-table (raw-table)
-  (require 'table)
-  (with-current-buffer (get-buffer-create "*org-export-table*")
-    (erase-buffer))
-  (let ((output (with-temp-buffer
-		  (insert raw-table)
-		  (goto-char 1)
-		  (re-search-forward "^[ \t]*|[^|]" nil t)
-		  (table-generate-source 'html "*org-export-table*")
-		  (with-current-buffer "*org-export-table*"
-		    (org-trim (buffer-string))))))
-    (kill-buffer (get-buffer "*org-export-table*"))
-    output))
+(defun org-e-html-table--table.el-table (table info)
+  (when (eq (org-element-property :type table) 'table.el)
+    (require 'table)
+    (let ((outbuf (with-current-buffer
+		      (get-buffer-create "*org-export-table*")
+		    (erase-buffer) (current-buffer))))
+      (with-temp-buffer
+	(insert (org-element-property :value table))
+	(goto-char 1)
+	(re-search-forward "^[ \t]*|[^|]" nil t)
+	(table-generate-source 'html outbuf))
+      (with-current-buffer outbuf
+	(prog1 (org-trim (buffer-string))
+	  (kill-buffer) )))))
 
 (defun org-e-html-table (table contents info)
   "Transcode a TABLE element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((label (org-element-property :name table))
-	 (caption (org-e-html--caption/label-string
-		   (org-element-property :caption table) label info))
-	 (attr (mapconcat #'identity
-			  (org-element-property :attr_html table)
-			  " "))
-	 (raw-table (org-element-property :raw-table table))
-	 (table-type (org-element-property :type table)))
-    (case table-type
-      (table.el
-       (org-e-html-table-table raw-table))
-      (t
-       (let* ((table-info (org-export-table-format-info raw-table))
-	      (columns-number (length (plist-get table-info :alignment)))
-	      (lines (org-split-string
-		      (org-export-clean-table
-		       raw-table (plist-get table-info :special-column-p)) "\n")))
-	 (org-e-html-list-table lines caption label attr))))))
-
+  (case (org-element-property :type table)
+    ;; Case 1: table.el table.  Convert it using appropriate tools.
+    (table.el (org-e-html-table--table.el-table table info))
+    ;; Case 2: Standard table.
+    (t
+     (let* ((label (org-element-property :name table))
+  	    (caption (org-e-html--caption/label-string
+  		      (org-element-property :caption table) label info))
+  	    (attributes (mapconcat #'identity
+  				   (org-element-property :attr_html table)
+  				   " "))
+  	    (alignspec
+  	     (if (and (boundp 'org-e-html-format-table-no-css)
+  		      org-e-html-format-table-no-css)
+  		 "align=\"%s\"" "class=\"%s\""))
+  	    (table-column-specs
+  	     (function
+  	      (lambda (table info)
+  		(mapconcat
+  		 (lambda (table-cell)
+  		   (let ((alignment (org-export-table-cell-alignment
+  				     table-cell info)))
+  		     (concat
+  		      ;; Begin a colgroup?
+  		      (when (org-export-table-cell-starts-colgroup-p
+  			     table-cell info)
+  			"\n<colgroup>")
+  		      ;; Add a column.  Also specify it's alignment.
+  		      (format "\n<col %s/>" (format alignspec alignment))
+  		      ;; End a colgroup?
+  		      (when (org-export-table-cell-ends-colgroup-p
+  			     table-cell info)
+  			"\n</colgroup>"))))
+  		 (org-export-table-sample-row table info) "\n"))))
+  	    (table-attributes
+  	     (let ((table-tag (plist-get info :html-table-tag)))
+  	       (concat
+  		(and (string-match  "<table\\(.*\\)>" table-tag)
+  		     (match-string 1 table-tag))
+  		(and label (format " id=\"%s\""
+  				   (org-solidify-link-text label)))))))
+       ;; Remove last blank line.
+       (setq contents (substring contents 0 -1))
+       ;; FIXME: splice
+       (format "\n<table%s>\n<caption>%s</caption>\n%s\n%s\n</table>"
+  	       table-attributes
+  	       (or caption "")
+  	       (funcall table-column-specs table info)
+  	       contents)))))
 
 ;;;; Target
 
@@ -3109,6 +3026,7 @@ directory.
 
 Return output file's name."
   (interactive)
+  (setq debug-on-error t)		; FIXME
   (let* ((extension (concat "." org-e-html-extension))
 	 (file (org-export-output-file-name extension subtreep pub-dir)))
     (org-export-to-file
