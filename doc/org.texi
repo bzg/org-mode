@@ -15551,6 +15551,10 @@ calculation marks, that column is automatically discarded as well.
 Please note that the translator function sees the table @emph{after} the
 removal of these columns, the function never knows that there have been
 additional columns.
+
+@item :no-escape t
+When non-nil, do not escape special characters @code{&%#_^} when exporting
+the table.  The default value is nil.
 @end table
 
 @noindent

@@ -4296,11 +4296,15 @@ this table."
 	       (params (plist-get dest :params))
 	       (skip (plist-get params :skip))
 	       (skipcols (plist-get params :skipcols))
+	       (no-escape (plist-get params :no-escape))
 	       beg
 	       (lines (org-table-clean-before-export
 		       (nthcdr (or skip 0)
 			       (org-split-string txt "[ \t]*\n[ \t]*"))))
 	       (i0 (if org-table-clean-did-remove-column 2 1))
+	       (lines (if no-escape lines
+			(mapcar (lambda(l) (replace-regexp-in-string
+					    "\\([&%#_^]\\)" "\\\\\\1{}" l)) lines)))
 	       (table (mapcar
 		       (lambda (x)
 			 (if (string-match org-table-hline-regexp x)
