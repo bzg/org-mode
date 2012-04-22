@@ -156,6 +156,12 @@ close   The closing string of the environment."
 	   (string :tag "Begin")
 	   (string :tag "End"))))
 
+(defcustom org-beamer-inherited-properties nil
+  "Properties that should be inherited during beamer export."
+  :group 'org-beamer
+  :type '(repeat
+	  (string :tag "Property")))
+
 (defvar org-beamer-frame-level-now nil)
 (defvar org-beamer-header-extra nil)
 (defvar org-beamer-export-is-beamer-p nil)
@@ -489,7 +495,13 @@ The effect is that these values will be accessible during export."
 	   (if (and (not (assoc "BEAMER_env" props))
 		    (looking-at ".*?:B_\\(note\\(NH\\)?\\):"))
 	       (push (cons "BEAMER_env" (match-string 1)) props))
-	   (put-text-property (point-at-bol) (point-at-eol) 'org-props props)))
+          (when (org-bound-and-true-p org-beamer-inherited-properties)
+            (mapc (lambda (p)
+		    (unless (assoc p props)
+                      (let ((v (org-entry-get nil p 'inherit)))
+                        (and v (push (cons p v) props)))))
+                  org-beamer-inherited-properties))
+	  (put-text-property (point-at-bol) (point-at-eol) 'org-props props)))
        (setq org-export-latex-options-plist
 	     (plist-put org-export-latex-options-plist :tags nil))))))
 
