@@ -1592,7 +1592,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (when (and caption org-e-ascii-caption-above) (concat caption "\n"))
      ;; Insert table.  Note: "table.el" tables are left unmodified.
      (if (eq (org-element-property :type table) 'org) contents
-       (org-element-property :value table))
+       (org-remove-indentation (org-element-property :value table)))
      ;; Possible add a caption string below.
      (when (and caption (not org-e-ascii-caption-above))
        (concat "\n" caption)))))
