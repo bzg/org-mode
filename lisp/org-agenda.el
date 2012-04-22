@@ -3179,6 +3179,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defvar org-agenda-name nil)
 (defvar org-agenda-tag-filter nil)
 (defvar org-agenda-category-filter nil)
+(defvar org-agenda-top-category-filter nil)
 (defvar org-agenda-tag-filter-while-redo nil)
 (defvar org-agenda-tag-filter-preset nil
   "A preset of the tags filter used for secondary agenda filtering.
@@ -6419,6 +6420,7 @@ When this is the global TODO list, a prefix argument will be interpreted."
 	 (org-agenda-keep-modes t)
 	 (tag-filter org-agenda-tag-filter)
 	 (tag-preset (get 'org-agenda-tag-filter :preset-filter))
+	 (top-cat-filter org-agenda-top-category-filter)
 	 (cat-filter org-agenda-category-filter)
 	 (cat-preset (get 'org-agenda-category-filter :preset-filter))
 	 (org-agenda-tag-filter-while-redo (or tag-filter tag-preset))
@@ -6438,6 +6440,7 @@ When this is the global TODO list, a prefix argument will be interpreted."
     (put 'org-agenda-category-filter :preset-filter cat-preset)
     (and (or tag-filter tag-preset) (org-agenda-filter-apply tag-filter 'tag))
     (and (or cat-filter cat-preset) (org-agenda-filter-apply cat-filter 'category))
+    (and top-cat-filter (org-agenda-filter-top-category-apply top-cat-filter))
     (and cols (org-called-interactively-p 'any) (org-agenda-columns))
     (org-goto-line line)
     (recenter window-line)))
@@ -6474,7 +6477,8 @@ The category is that of the current line."
   (interactive "P")
   (if org-agenda-filtered-by-top-category
       (progn
-        (setq org-agenda-filtered-by-top-category nil)
+        (setq org-agenda-filtered-by-top-category nil
+	      org-agenda-top-category-filter nil)
         (org-agenda-filter-show-all-cat))
     (let ((cat (org-find-top-category (org-get-at-bol 'org-hd-marker))))
       (if cat (org-agenda-filter-top-category-apply cat strip)
@@ -6689,7 +6693,8 @@ If the line does not have an effort defined, return nil."
       (beginning-of-line 2)))
   (if (get-char-property (point) 'invisible)
       (org-agenda-previous-line))
-  (setq org-agenda-filtered-by-top-category t))
+  (setq org-agenda-top-category-filter category
+	org-agenda-filtered-by-top-category t))
 
 (defun org-agenda-filter-hide-line (type)
   (let (ov)
