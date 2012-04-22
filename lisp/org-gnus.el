@@ -272,7 +272,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 			       ;; stop on integer overflows
 			       (> articles 0))
 		     (setq group-opened (gnus-group-read-group
-					 articles nil group)
+					 articles t group)
 			   articles (if (< articles 16)
 					(1+ articles)
 				      (* articles 2))))
