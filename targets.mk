@@ -21,7 +21,7 @@ ifneq ($(GITSTATUS),)
 endif
 
 .PHONY:	default all oldorg up2 update compile lisp doc etc \
-	check test install info html pdf card docs $(INSTSUB) \
+	check test install info html pdf card doc docs $(INSTSUB) \
 	autoloads cleanall clean cleancontrib cleanrel clean-install \
 	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest
 
@@ -37,8 +37,8 @@ compile-dirty::	lisp
 	$(MAKE) -C $< $@
 
 all \
-clean-install::	$(SUBDIRS)
-	$(foreach dir, $?, $(MAKE) -C $(dir) $@;)
+clean-install::
+	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)
 
 check test::	all
 
@@ -73,8 +73,8 @@ $(INSTSUB):
 autoloads: lisp
 	$(MAKE) -C $< $@
 
-cleandirs: $(SUBDIRS)
-	$(foreach dir, $?, $(MAKE) -C $(dir) cleanall;)
+cleandirs:
+	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) cleanall;)
 
 clean:	cleanrel
 	$(MAKE) -C lisp clean
