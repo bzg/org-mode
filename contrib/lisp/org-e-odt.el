@@ -1106,9 +1106,7 @@ ATTR is a string of other attributes of the a element."
       (format "<dc:date>%s</dc:date>\n" date)
       (format "<meta:creation-date>%s</meta:creation-date>\n" date)
       (format "<meta:generator>%s</meta:generator>\n"
-	      (when org-export-creator-info
-		(format "Org-%s/Emacs-%s"
-			org-version emacs-version)))
+	      (concat (and org-export-creator-info org-export-creator-string)))
       (format "<meta:keyword>%s</meta:keyword>\n" keywords)
       (format "<dc:subject>%s</dc:subject>\n" description)
       (format "<dc:title>%s</dc:title>\n" title)
@@ -2723,14 +2721,6 @@ Replaces invalid characters with \"_\"."
 ;;    (and tags (concat (org-e-odt-format-spaces 3)
 ;; 		     (org-e-odt-format-org-tags tags)))))
 
-(defun org-e-odt-get-coding-system-for-write ()
-  (or org-e-odt-coding-system
-      (and (boundp 'buffer-file-coding-system) buffer-file-coding-system)))
-
-(defun org-e-odt-get-coding-system-for-save ()
-  (or org-e-odt-coding-system
-      (and (boundp 'buffer-file-coding-system) buffer-file-coding-system)))
-
 ;; (defun org-e-odt-format-date (info)
 ;;   (let ((date (plist-get info :date)))
 ;;     (cond
@@ -3595,7 +3585,7 @@ INFO is a plist holding contextual information.  See
       (org-e-odt-format-internal-link
        (org-export-secondary-string
 	(org-element-parse-secondary-string
-	 path (cdr (assq 'radio-target org-element-object-restrictions)))
+	 path (org-element-restriction 'radio-target))
 	'e-odt info)
        (org-export-solidify-link-text path)))
      ;; Links pointing to an headline: Find destination and build
@@ -3962,10 +3952,7 @@ styles congruent with the ODF-1.2 specification."
   "Transcode a TABLE-CELL element from Org to ODT.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (let* ((value (org-export-secondary-string
-		 (org-element-property :value table-cell) 'e-odt info))
-
-	 (table-cell-address (org-export-table-cell-address table-cell info))
+  (let* ((table-cell-address (org-export-table-cell-address table-cell info))
 	 (r (car table-cell-address))
 	 (c (cdr table-cell-address))
 	 (horiz-span (or (org-export-table-cell-width table-cell info) 0))
@@ -4005,10 +3992,12 @@ channel."
 	   (and (> horiz-span 0)
 		(format " table:number-columns-spanned=\"%d\""
 			(1+ horiz-span))))))
+    (unless contents (setq contents ""))
     (concat
      (org-e-odt-format-tags
       '("<table:table-cell%s>" . "</table:table-cell>")
-      (org-e-odt-format-stylized-paragraph paragraph-style value) cell-attributes)
+      (org-e-odt-format-stylized-paragraph paragraph-style contents)
+      cell-attributes)
      (let (s)
        (dotimes (i horiz-span s)
 	 (setq s (concat s "\n<table:covered-table-cell/>"))))
@@ -4048,6 +4037,17 @@ communication channel."
 
 ;;;; Table
 
+(defun org-e-odt-table-first-row-data-cells (table info)
+  (let ((table-row
+	 (org-element-map
+	  table 'table-row
+	  (lambda (row)
+	    (unless (eq (org-element-property :type row) 'rule) row))
+	  info 'first-match))
+	(special-column-p (org-export-table-has-special-column-p table)))
+    (if (not special-column-p) (org-element-contents table-row)
+      (cdr (org-element-contents table-row)))))
+
 (defun org-e-odt-table (table contents info)
   "Transcode a TABLE element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
@@ -4064,15 +4064,15 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		(let* ((table-style (or custom-table-style "OrgTable"))
 		       (column-style (format "%sColumn" table-style)))
 		  (mapconcat
-		   (lambda (table-column-properties)
-		     (let ((width (1+ (or (plist-get table-column-properties
-						     :width) 0))))
+		   (lambda (table-cell)
+		     (let ((width (1+ (or (org-export-table-cell-width
+					   table-cell info) 0))))
 		       (org-e-odt-make-string
 			width
 			(org-e-odt-format-tags
 			 "<table:table-column table:style-name=\"%s\"/>"
 			 "" column-style))))
-		   (org-export-table-column-properties table info) "\n"))))))
+		   (org-e-odt-table-first-row-data-cells table info) "\n"))))))
        (concat
 	;; caption.
 	(when caption (org-e-odt-format-stylized-paragraph 'table caption))
@@ -4417,8 +4417,6 @@ using `org-open-file'."
 ;;;; (org-export-directory :html opt-plist)
 ;;;; (plist-get opt-plist :html-extension)
 ;;;; org-e-odt-toplevel-hlevel
-;;;; org-e-odt-coding-system
-;;;; org-e-odt-coding-system
 ;;;; org-e-odt-inline-image-extensions
 ;;;; org-e-odt-protect-char-alist
 ;;;; org-e-odt-table-use-header-tags-for-first-column

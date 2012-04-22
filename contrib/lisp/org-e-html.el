@@ -1577,9 +1577,7 @@ This function shouldn't be used for floats.  See
 			(split-string email ",+ *")
 			", "))
 	    (html-validation-link (or org-e-html-validation-link ""))
-	    (creator-info
-	     (concat "Org version " org-version " with Emacs version "
-		     (number-to-string emacs-major-version))))
+	    (creator-info org-export-creator-string))
        (concat
 	;; begin postamble
 	"
@@ -2430,7 +2428,7 @@ INFO is a plist holding contextual information.  See
 	      (org-export-solidify-link-text path)
 	      (org-export-secondary-string
 	       (org-element-parse-secondary-string
-		path (cdr (assq 'radio-target org-element-object-restrictions)))
+		path (org-element-restriction 'radio-target))
 	       'e-html info)))
      ;; Links pointing to an headline: Find destination and build
      ;; appropriate referencing command.
@@ -2768,26 +2766,27 @@ contextual information."
   "Transcode a TABLE-CELL element from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (let* ((value (org-export-secondary-string
-		 (org-element-property :value table-cell) 'e-html info))
-	 (value (if (string= "" (org-trim value)) "&nbsp;" value))
-	 (table-row (org-export-get-parent table-cell info))
+  (let* ((table-row (org-export-get-parent table-cell info))
+	 (table (org-export-get-parent-table table-cell info))
 	 (cell-attrs
 	  (if (not org-e-html-table-align-individual-fields) ""
 	    (format (if (and (boundp 'org-e-html-format-table-no-css)
 			     org-e-html-format-table-no-css)
 			" align=\"%s\"" " class=\"%s\"")
 		    (org-export-table-cell-alignment table-cell info)))))
+    (when (or (not contents) (string= "" (org-trim contents)))
+      (setq contents "&nbsp;"))
     (cond
-     ((= 1 (org-export-table-row-group table-row info))
+     ((and (org-export-table-has-header-p table info)
+	   (= 1 (org-export-table-row-group table-row info)))
       (concat "\n" (format (car org-e-html-table-header-tags) "col" cell-attrs)
-	      value (cdr org-e-html-table-header-tags)))
+	      contents (cdr org-e-html-table-header-tags)))
      ((and org-e-html-table-use-header-tags-for-first-column
   	   (zerop (cdr (org-export-table-cell-address table-cell info))))
       (concat "\n" (format (car org-e-html-table-header-tags) "row" cell-attrs)
-	      value (cdr org-e-html-table-header-tags)))
+	      contents (cdr org-e-html-table-header-tags)))
      (t (concat "\n" (format (car org-e-html-table-data-tags) cell-attrs)
-		value (cdr org-e-html-table-data-tags))))))
+		contents (cdr org-e-html-table-data-tags))))))
 
 
 ;;;; Table Row
@@ -2825,8 +2824,7 @@ communication channel."
 
 ;;;; Table
 
-(defun org-export-table-sample-row (table info)
-  "A sample row from TABLE."
+(defun org-e-html-table-first-row-data-cells (table info)
   (let ((table-row
 	 (org-element-map
 	  table 'table-row
@@ -2888,7 +2886,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   		      (when (org-export-table-cell-ends-colgroup-p
   			     table-cell info)
   			"\n</colgroup>"))))
-  		 (org-export-table-sample-row table info) "\n"))))
+  		 (org-e-html-table-first-row-data-cells table info) "\n"))))
   	    (table-attributes
   	     (let ((table-tag (plist-get info :html-table-tag)))
   	       (concat
