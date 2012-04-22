@@ -6,7 +6,7 @@ endif
 		clean cleanall clean-install \
 		org-version.inc
 
-all:		info html pdf card
+all:		$(ORG_MAKE_DOC)
 
 info:		org
 

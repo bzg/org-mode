@@ -4,6 +4,9 @@
 ##  CHECK AND ADAPT THE FOLLOWING DEFINITIONS
 ##----------------------------------------------------------------------
 
+# Override default target if desired or define your own default target
+# oldorg:	# have plain "make" do the same things the old Makefile did
+
 # Name of your emacs binary
 EMACS	= emacs
 
@@ -18,6 +21,9 @@ datadir = $(prefix)/emacs/etc/org
 
 # Where info files go.
 infodir = $(prefix)/info
+
+# Define if you only need info documentation, the default includes html and pdf
+# ORG_MAKE_DOC = info # html pdf
 
 # Where to create temporary files for the testsuite
 TMPDIR ?= /tmp

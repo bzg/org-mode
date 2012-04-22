@@ -6,6 +6,7 @@ DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
 LISPDIRS      = lisp
 SUBDIRS       = doc etc $(LISPDIRS)
 INSTSUB       = $(SUBDIRS:%=install-%)
+ORG_MAKE_DOC ?= info html pdf
 
 ifneq ($(wildcard .git),)
   GITVERSION ?= $(shell git describe --abbrev=6 HEAD)
@@ -62,7 +63,7 @@ install:	$(INSTSUB)
 
 install-info:	install-doc
 
-doc docs:	info html pdf card
+doc docs:	$(ORG_MAKE_DOC)
 
 info html pdf card:
 	$(MAKE) -C doc $@
