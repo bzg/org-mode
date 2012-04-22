@@ -1411,7 +1411,7 @@ Use this to infer values of `org-e-odt-styles-dir' and
 `org-e-odt-schema-dir'.")
 
 (defvar org-e-odt-data-dir
-  (expand-file-name "../etc/" org-e-odt-lib-dir)
+  (expand-file-name "../../etc/" org-e-odt-lib-dir)
   "Data directory for ODT exporter.
 Use this to infer values of `org-e-odt-styles-dir' and
 `org-e-odt-schema-dir'.")
@@ -1429,15 +1429,12 @@ Use this to infer values of `org-e-odt-styles-dir' and
 	(expand-file-name "./schema/" org-e-odt-data-dir)) ; bail out
    (eval-when-compile
      (and (boundp 'org-e-odt-data-dir) org-e-odt-data-dir ; see make install
-	  (expand-file-name "./schema/" org-e-odt-data-dir)))
-   (expand-file-name "../contrib/odt/etc/schema/" org-e-odt-lib-dir) ; git
-   )
+	  (expand-file-name "./schema/" org-e-odt-data-dir))))
   "List of directories to search for OpenDocument schema files.
 Use this list to set the default value of
 `org-e-odt-schema-dir'.  The entries in this list are
 populated heuristically based on the values of `org-e-odt-lib-dir'
 and `org-e-odt-data-dir'.")
-
 
 (defconst org-e-odt-styles-dir-list
   (list
@@ -1446,7 +1443,7 @@ and `org-e-odt-data-dir'.")
    (eval-when-compile
      (and (boundp 'org-e-odt-data-dir) org-e-odt-data-dir ; see make install
 	  (expand-file-name "./styles/" org-e-odt-data-dir)))
-   (expand-file-name "../etc/styles/" org-e-odt-lib-dir) ; git
+   (expand-file-name "../../etc/styles/" org-e-odt-lib-dir) ; git
    (expand-file-name "./etc/styles/" org-e-odt-lib-dir)  ; elpa
    (expand-file-name "./org/" data-directory)	       ; system
    )
