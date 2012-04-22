@@ -1836,12 +1836,14 @@ When nil, `q' will kill the single agenda buffer."
 		       (> (prefix-numeric-value arg) 0)
 		     (not org-agenda-sticky))))
     (if (equal new-value org-agenda-sticky)
-	(message "Sticky agenda was already %s"
-		 (if org-agenda-sticky "enabled" "disabled"))
+	(and (called-interactively-p 'interactive)
+	     (message "Sticky agenda was already %s"
+		      (if org-agenda-sticky "enabled" "disabled")))
       (setq org-agenda-sticky new-value)
       (org-agenda-kill-all-agenda-buffers)
-      (message "Sticky agenda was %s"
-	       (if org-agenda-sticky "enabled" "disabled")))))
+      (and (called-interactively-p 'interactive)
+	   (message "Sticky agenda was %s"
+		    (if org-agenda-sticky "enabled" "disabled"))))))
 
 (defvar org-agenda-buffer nil
   "Agenda buffer currently being generated.")
@@ -2650,7 +2652,7 @@ s   Search for keywords                 *   Toggle sticky agenda views
 					(cons (substring (car x) 1) (cdr x))))
 				    custom))))
 	   ((eq c ?*)
-	    (org-toggle-sticky-agenda)
+	    (call-interactively 'org-toggle-sticky-agenda)
 	    (sit-for 2))
 	   ((and (not restrict-ok) (memq c '(?1 ?0 ?<)))
 	    (message "Restriction is only possible in Org-mode buffers")
