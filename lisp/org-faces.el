@@ -287,12 +287,14 @@ column view defines special faces for each outline level.  See the file
 
 (defface org-date-selected
   (org-compatible-face nil
-    '((((class color) (min-colors 16) (background light)) (:foreground "Red1" :bold nil))
-      (((class color) (min-colors 16) (background dark))  (:foreground "Pink" :bold nil))
-      (((class color) (min-colors 8)  (background light)) (:foreground "red"  :bold nil))
-      (((class color) (min-colors 8)  (background dark))  (:foreground "red"  :bold nil))
+    '((((class color) (min-colors 16) (background light)) (:foreground "Red1" :inverse-video t))
+      (((class color) (min-colors 16) (background dark))  (:foreground "Pink" :inverse-video t))
+      (((class color) (min-colors 8)  (background light)) (:foreground "red"  :inverse-video t))
+      (((class color) (min-colors 8)  (background dark))  (:foreground "red"  :inverse-video t))
       (t (:inverse-video t))))
-  "Face for highlighting the calendar day when using `org-read-date'."
+  "Face for highlighting the calendar day when using `org-read-date'.
+Using a bold face here might cause discrepencies while displaying the
+calendar."
   :group 'org-faces)
 
 (defface org-sexp-date
