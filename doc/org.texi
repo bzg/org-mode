@@ -6700,7 +6700,7 @@ dynamic insertion of content.  The templates are expanded in the order given her
             @r{You may specify a default value and a completion table with}
             @r{%^@{prompt|default|completion2|completion3...@}.}
             @r{The arrow keys access a prompt-specific history.}
-%<n>        @r{Insert the text entered for at the nth %^{prompt}, where <n>
+%<n>        @r{Insert the text entered for at the nth %^{prompt}, where <n>}
             @r{represents a digit, 1 to 9.}
 %?          @r{After completing the template, position cursor here.}
 @end smallexample
