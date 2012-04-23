@@ -248,6 +248,8 @@ be replaced with content and expanded in this order:
               A default value and a completion table ca be specified like this:
               %^{prompt|default|completion2|completion3|...}.
   %?          After completing the template, position cursor here.
+  %<n>        Insert the text entered for at the nth %^{prompt}, where <n>
+              represents a digit, 1 to 9.
 
 Apart from these general escapes, you can access information specific to the
 link type that is created.  For example, calling `org-capture' in emails
@@ -1326,7 +1328,7 @@ The template may still contain \"%?\" for cursor positioning."
 	 (org-startup-folded nil)
 	 (org-inhibit-startup t)
 	 org-time-was-given org-end-time-was-given x
-	 prompt completions char time pos default histvar)
+	 prompt completions char time pos default histvar strings)
 
     (setq org-store-link-plist
 	  (plist-put org-store-link-plist :annotation v-a)
@@ -1468,11 +1470,21 @@ The template may still contain \"%?\" for cursor positioning."
 				   nil nil (list org-end-time-was-given)))
 	   (t
 	    (let (org-completion-use-ido)
-	      (insert (org-completing-read-no-i
-		       (concat (if prompt prompt "Enter string")
-			       (if default (concat " [" default "]"))
-			       ": ")
-		       completions nil nil nil histvar default)))))))
+	      (push (org-completing-read-no-i
+		     (concat (if prompt prompt "Enter string")
+			     (if default (concat " [" default "]"))
+			     ": ")
+		     completions nil nil nil histvar default)
+		    strings)
+	      (insert (car strings)))))))
+      ;; Replace %n escapes with nth %^{...} string
+      (setq strings (nreverse strings))
+      (goto-char (point-min))
+      (while (re-search-forward "%\\([1-9]\\)+" nil t)
+	(unless (org-capture-escaped-%)
+	  (replace-match
+	   (nth (1- (string-to-number (match-string 1))) strings)
+	   nil t)))
       ;; Make sure there are no empty lines before the text, and that
       ;; it ends with a newline character
       (goto-char (point-min))

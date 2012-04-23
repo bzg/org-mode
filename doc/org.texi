@@ -6670,28 +6670,28 @@ these sequences literally, escape the @kbd{%} with a backslash.}  allow
 dynamic insertion of content.  The templates are expanded in the order given here:
 
 @smallexample
-%[@var{file}]     @r{insert the contents of the file given by @var{file}.}
-%(@var{sexp})     @r{evaluate Elisp @var{sexp} and replace with the result.}
-%<...>      @r{the result of format-time-string on the ... format specification.}
-%t          @r{timestamp, date only.}
-%T          @r{timestamp with date and time.}
-%u, %U      @r{like the above, but inactive timestamps.}
-%a          @r{annotation, normally the link created with @code{org-store-link}.}
-%i          @r{initial content, the region when capture is called while the}
+%[@var{file}]     @r{Insert the contents of the file given by @var{file}.}
+%(@var{sexp})     @r{Evaluate Elisp @var{sexp} and replace with the result.}
+%<...>      @r{The result of format-time-string on the ... format specification.}
+%t          @r{Timestamp, date only.}
+%T          @r{Timestamp, with date and time.}
+%u, %U      @r{Like the above, but inactive timestamps.}
+%a          @r{Annotation, normally the link created with @code{org-store-link}.}
+%i          @r{Initial content, the region when capture is called while the}
             @r{region is active.}
             @r{The entire text will be indented like @code{%i} itself.}
-%A          @r{like @code{%a}, but prompt for the description part.}
+%A          @r{Like @code{%a}, but prompt for the description part.}
 %c          @r{Current kill ring head.}
 %x          @r{Content of the X clipboard.}
-%k          @r{title of the currently clocked task.}
-%K          @r{link to the currently clocked task.}
-%n          @r{user name (taken from @code{user-full-name}).}
-%f          @r{file visited by current buffer when org-capture was called.}
-%F          @r{full path of the file or directory visited by current buffer.}
-%:keyword   @r{specific information for certain link types, see below.}
-%^g         @r{prompt for tags, with completion on tags in target file.}
-%^G         @r{prompt for tags, with completion all tags in all agenda files.}
-%^t         @r{like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}.}
+%k          @r{Title of the currently clocked task.}
+%K          @r{Link to the currently clocked task.}
+%n          @r{User name (taken from @code{user-full-name}).}
+%f          @r{File visited by current buffer when org-capture was called.}
+%F          @r{Full path of the file or directory visited by current buffer.}
+%:keyword   @r{Specific information for certain link types, see below.}
+%^g         @r{Prompt for tags, with completion on tags in target file.}
+%^G         @r{Prompt for tags, with completion all tags in all agenda files.}
+%^t         @r{Like @code{%t}, but prompt for date.  Similarly @code{%^T}, @code{%^u}, @code{%^U}.}
             @r{You may define a prompt like @code{%^@{Birthday@}t}.}
 %^C         @r{Interactive selection of which kill or clip to use.}
 %^L         @r{Like @code{%^C}, but insert as link.}
@@ -6700,6 +6700,9 @@ dynamic insertion of content.  The templates are expanded in the order given her
             @r{You may specify a default value and a completion table with}
             @r{%^@{prompt|default|completion2|completion3...@}.}
             @r{The arrow keys access a prompt-specific history.}
+%<n>        @r{Insert the text entered for at the nth %^{prompt}, where <n>
+            @r{represents a digit, 1 to 9.}
+%?          @r{After completing the template, position cursor here.}
 @end smallexample
 
 @noindent
