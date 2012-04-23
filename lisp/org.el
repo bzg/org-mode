@@ -9200,7 +9200,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	  (org-fit-window-to-buffer))
 	(and (window-live-p cw) (select-window cw)))
       ;; Fake a link history, containing the stored links.
-      (setq tmphist (append (mapcar 'org-link-prettify org-stored-links)
+      (setq tmphist (append (mapcar 'car org-stored-links)
 			    org-insert-link-history))
       (setq all-prefixes (append (mapcar 'car org-link-abbrev-alist-local)
 				 (mapcar 'car org-link-abbrev-alist)
