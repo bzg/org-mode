@@ -21,13 +21,26 @@ ifneq ($(GITSTATUS),)
   GITVERSION := $(GITVERSION).dirty
 endif
 
-.PHONY:	default all oldorg up2 update compile lisp doc etc \
+.PHONY:	all oldorg update update2 up0 up1 up2 compile $(SUBDIRS) \
 	check test install info html pdf card doc docs $(INSTSUB) \
 	autoloads cleanall clean cleancontrib cleanrel clean-install \
-	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest
+	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest \
+	compile compile-dirty
 
-# backwards compatibility target
-oldorg:	compile autoloads info
+oldorg:	compile autoloads info # what the old makefile did when no target was specified
+refcard:	card
+update update2::	up0 all
+
+.PRECIOUS:	local.mk
+local.mk:
+	$(info ==========================================)
+	$(info Created a local.mk template.)
+	$(info Please adapt local.mk to your local setup!)
+	$(info ==========================================)
+	-@$(SED) -n \
+		-e '/-8<-/,/->8-/ {s/^\(\s*[^#]\)/#\1/;p}' \
+		-e '$$ i ## See default.mk for further configuration options.' \
+		default.mk > $@
 
 all \
 compile::	lisp
@@ -51,13 +64,13 @@ ifeq ($(TEST_NO_AUTOCLEAN),) # define this variable to leave $(testdir) around f
 	$(MAKE) cleantest
 endif
 
-up2:	update
-	$(SUDO) $(MAKE) install
-
-update:
+up0 up1 up2::
 	git remote update
 	git pull
-	$(MAKE) check
+up1 up2::	all
+	$(MAKE) test-dirty
+up2 update2::
+	$(SUDO) $(MAKE) install
 
 install:	$(INSTSUB)
 
@@ -81,7 +94,7 @@ clean:	cleanrel
 	$(MAKE) -C lisp clean
 	$(MAKE) -C doc clean
 
-cleanall: cleandirs cleantest
+cleanall: cleandirs cleantest cleancontrib
 	-$(FIND) . -name \*~ -exec $(RM) {} \;
 
 cleancontrib:

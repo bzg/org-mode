@@ -2,7 +2,7 @@
 ##  NEVER EDIT THIS FILE, PUT ANY ADAPTATIONS INTO local.mk
 ##----------------------------------------------------------------------
 ##  CHECK AND ADAPT THE FOLLOWING DEFINITIONS
-##----------------------------------------------------------------------
+##-8<-------------------------------------------------------------------
 
 # Override default target if desired or define your own default target
 # oldorg:	# have plain "make" do the same things the old Makefile did
@@ -38,7 +38,7 @@ BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave python sh # R
               # R is not activated by default because it requires ess to be installed and configured
 BTEST_EXTRA = # extra packages to require for testing
 
-##----------------------------------------------------------------------
+##->8-------------------------------------------------------------------
 ## YOU MAY NEED TO ADAPT THESE DEFINITIONS
 ##----------------------------------------------------------------------
 
