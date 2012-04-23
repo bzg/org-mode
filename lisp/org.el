@@ -6853,18 +6853,22 @@ RET=jump to location             [Q]uit and return to previous location
 (defun org-goto (&optional alternative-interface)
   "Look up a different location in the current file, keeping current visibility.
 
-When you want look-up or go to a different location in a document, the
-fastest way is often to fold the entire buffer and then dive into the tree.
-This method has the disadvantage, that the previous location will be folded,
-which may not be what you want.
+When you want look-up or go to a different location in a
+document, the fastest way is often to fold the entire buffer and
+then dive into the tree.  This method has the disadvantage, that
+the previous location will be folded, which may not be what you
+want.
 
-This command works around this by showing a copy of the current buffer
-in an indirect buffer, in overview mode.  You can dive into the tree in
-that copy, use org-occur and incremental search to find a location.
-When pressing RET or `Q', the command returns to the original buffer in
-which the visibility is still unchanged.  After RET it will also jump to
-the location selected in the indirect buffer and expose the headline
-hierarchy above."
+This command works around this by showing a copy of the current
+buffer in an indirect buffer, in overview mode.  You can dive
+into the tree in that copy, use org-occur and incremental search
+to find a location.  When pressing RET or `Q', the command
+returns to the original buffer in which the visibility is still
+unchanged.  After RET it will also jump to the location selected
+in the indirect buffer and expose the headline hierarchy above.
+
+With a prefix argument, use the alternative interface: e.g. if
+`org-goto-interface' is 'outline use 'outline-path-completion."
   (interactive "P")
   (let* ((org-refile-targets `((nil . (:maxlevel . ,org-goto-max-level))))
 	 (org-refile-use-outline-path t)
