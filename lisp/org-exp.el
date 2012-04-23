@@ -2410,13 +2410,14 @@ TYPE must be a string, any of:
 (defun org-export-handle-include-files ()
   "Include the contents of include files, with proper formatting."
   (let ((case-fold-search t)
-	params file markup lang start end prefix prefix1 switches all minlevel lines)
+	params file markup lang start end prefix prefix1 switches all minlevel currentlevel addlevel lines)
     (goto-char (point-min))
     (while (re-search-forward "^#\\+INCLUDE:?[ \t]+\\(.*\\)" nil t)
       (setq params (read (concat "(" (match-string 1) ")"))
 	    prefix (org-get-and-remove-property 'params :prefix)
 	    prefix1 (org-get-and-remove-property 'params :prefix1)
 	    minlevel (org-get-and-remove-property 'params :minlevel)
+	    addlevel (org-get-and-remove-property 'params :addlevel)
 	    lines (org-get-and-remove-property 'params :lines)
 	    file (org-symname-or-string (pop params))
 	    markup (org-symname-or-string (pop params))
@@ -2425,6 +2426,7 @@ TYPE must be a string, any of:
 	    switches (mapconcat #'(lambda (x) (format "%s" x)) params " ")
 	    start nil end nil)
       (delete-region (match-beginning 0) (match-end 0))
+      (setq currentlevel (or (org-current-level) 0))
       (if (or (not file)
 	      (not (file-exists-p file))
 	      (not (file-readable-p file)))
@@ -2440,7 +2442,7 @@ TYPE must be a string, any of:
 		  end  (format "#+end_%s" markup))))
 	(insert (or start ""))
 	(insert (org-get-file-contents (expand-file-name file)
-				       prefix prefix1 markup minlevel lines))
+				       prefix prefix1 markup currentlevel minlevel addlevel lines))
 	(or (bolp) (newline))
 	(insert (or end ""))))
     all))
@@ -2457,13 +2459,15 @@ TYPE must be a string, any of:
 	(when intersection
 	  (error "Recursive #+INCLUDE: %S" intersection))))))
 
-(defun org-get-file-contents (file &optional prefix prefix1 markup minlevel lines)
+(defun org-get-file-contents (file &optional prefix prefix1 markup minlevel parentlevel addlevel lines)
   "Get the contents of FILE and return them as a string.
 If PREFIX is a string, prepend it to each line.  If PREFIX1
 is a string, prepend it to the first line instead of PREFIX.
 If MARKUP, don't protect org-like lines, the exporter will
-take care of the block they are in.  If LINES is a string
-specifying a range of lines, include only those lines ."
+take care of the block they are in.  If ADDLEVEL is a number,
+demote included file to current heading level+ADDLEVEL.
+If LINES is a string specifying a range of lines,
+include only those lines."
   (if (stringp markup) (setq markup (downcase markup)))
   (with-temp-buffer
     (insert-file-contents file)
@@ -2496,7 +2500,15 @@ specifying a range of lines, include only those lines ."
     (when minlevel
       (dotimes (lvl minlevel)
 	(org-map-region 'org-demote (point-min) (point-max))))
-    (buffer-string)))
+    (when addlevel
+      (let ((inclevel (or (if (org-before-first-heading-p)
+			      (1- (and (outline-next-heading)
+				       (org-current-level)))
+			    (1- (org-current-level)))
+			  0)))
+	(dotimes (level (- (+ parentlevel addlevel) inclevel))
+	  (org-map-region 'org-demote (point-min) (point-max)))))
+      (buffer-string)))
 
 (defun org-get-and-remove-property (listvar prop)
   "Check if the value of LISTVAR contains PROP as a property.
