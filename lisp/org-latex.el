@@ -1998,6 +1998,9 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
                   align (and attr (stringp attr)
                              (string-match "\\<align=\\([^ \t\n\r]+\\)" attr)
                              (match-string 1 attr))
+		  hfmt (and attr (stringp attr)
+			    (string-match "\\<hfmt=\\(\\S-+\\)" attr)
+			    (match-string 1 attr))
                   floatp (or caption label (string= "table*" tblenv))
 		  placement     (if (and attr
 					 (stringp attr)
@@ -2084,6 +2087,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 				   :tend ,org-export-latex-tables-tend
 				   :hline ,org-export-latex-tables-hline
                                    :skipheadrule ,longtblp
+				   :hfmt ,hfmt
                                    :hlend ,(if longtblp
                                                (format "\\\\
 %s
