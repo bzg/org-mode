@@ -3587,7 +3587,7 @@ Jump to line 255.
 Search for a link target @samp{<<My Target>>}, or do a text search for
 @samp{my target}, similar to the search in internal links, see
 @ref{Internal links}.  In HTML export (@pxref{HTML export}), such a file
-link will become an HTML reference to the corresponding named anchor in
+link will become a HTML reference to the corresponding named anchor in
 the linked file.
 @item *My Target
 In an Org file, restrict search to headlines.
@@ -9825,7 +9825,7 @@ with special characters and symbols available in these encodings.
 @table @kbd
 @orgcmd{C-c C-e a,org-export-as-ascii}
 @cindex property, EXPORT_FILE_NAME
-Export as ASCII file.  For an Org file, @file{myfile.org}, the ASCII file
+Export as an ASCII file.  For an Org file, @file{myfile.org}, the ASCII file
 will be @file{myfile.txt}.  The file will be overwritten without
 warning.  If there is an active region@footnote{This requires
 @code{transient-mark-mode} be turned on.}, only the region will be
@@ -9874,7 +9874,7 @@ the text and the link in a note before the next heading.  See the variable
 @section HTML export
 @cindex HTML export
 
-Org mode contains an HTML (XHTML 1.0 strict) exporter with extensive
+Org mode contains a HTML (XHTML 1.0 strict) exporter with extensive
 HTML formatting, in ways similar to John Gruber's @emph{markdown}
 language, but with additional support for tables.
 
@@ -9900,7 +9900,7 @@ language, but with additional support for tables.
 @table @kbd
 @orgcmd{C-c C-e h,org-export-as-html}
 @cindex property, EXPORT_FILE_NAME
-Export as HTML file.  For an Org file @file{myfile.org},
+Export as a HTML file.  For an Org file @file{myfile.org},
 the HTML file will be @file{myfile.html}.  The file will be overwritten
 without warning.  If there is an active region@footnote{This requires
 @code{transient-mark-mode} be turned on.}, only the region will be
@@ -9909,7 +9909,7 @@ current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
 @orgcmd{C-c C-e b,org-export-as-html-and-open}
-Export as HTML file and immediately open it with a browser.
+Export as a HTML file and immediately open it with a browser.
 @orgcmd{C-c C-e H,org-export-as-html-to-buffer}
 Export to a temporary buffer.  Do not create a file.
 @orgcmd{C-c C-e R,org-export-region-as-html}
@@ -9919,7 +9919,7 @@ the region.  This is good for cut-and-paste operations.
 @item C-c C-e v h/b/H/R
 Export only the visible part of the document.
 @item M-x org-export-region-as-html
-Convert the region to HTML under the assumption that it was Org mode
+Convert the region to HTML under the assumption that it was in Org mode
 syntax before.  This is a global command that can be invoked in any
 buffer.
 @item M-x org-replace-region-by-HTML
@@ -10013,7 +10013,7 @@ includes automatic links created by radio targets (@pxref{Radio
 targets}).  Links to external files will still work if the target file is on
 the same @i{relative} path as the published Org file.  Links to other
 @file{.org} files will be translated into HTML links under the assumption
-that an HTML version also exists of the linked file, at the same relative
+that a HTML version also exists of the linked file, at the same relative
 path.  @samp{id:} links can then be used to jump to specific entries across
 files.  For information related to linking files while publishing them to a
 publishing directory see @ref{Publishing links}.
@@ -10320,7 +10320,7 @@ sections.
 @table @kbd
 @orgcmd{C-c C-e l,org-export-as-latex}
 @cindex property EXPORT_FILE_NAME
-Export as @LaTeX{} file.  For an Org file
+Export as a @LaTeX{} file.  For an Org file
 @file{myfile.org}, the @LaTeX{} file will be @file{myfile.tex}.  The file will
 be overwritten without warning.  If there is an active region@footnote{This
 requires @code{transient-mark-mode} be turned on.}, only the region will be
@@ -10333,7 +10333,7 @@ Export to a temporary buffer.  Do not create a file.
 @item C-c C-e v l/L
 Export only the visible part of the document.
 @item M-x org-export-region-as-latex
-Convert the region to @LaTeX{} under the assumption that it was Org mode
+Convert the region to @LaTeX{} under the assumption that it was in Org mode
 syntax before.  This is a global command that can be invoked in any
 buffer.
 @item M-x org-replace-region-by-latex
@@ -10677,7 +10677,7 @@ Currently DocBook exporter only supports DocBook V5.0.
 @table @kbd
 @orgcmd{C-c C-e D,org-export-as-docbook}
 @cindex property EXPORT_FILE_NAME
-Export as DocBook file.  For an Org file, @file{myfile.org}, the DocBook XML
+Export as a DocBook file.  For an Org file, @file{myfile.org}, the DocBook XML
 file will be @file{myfile.xml}.  The file will be overwritten without
 warning.  If there is an active region@footnote{This requires
 @code{transient-mark-mode} to be turned on}, only the region will be
@@ -10686,12 +10686,12 @@ current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
 @orgcmd{C-c C-e V,org-export-as-docbook-pdf-and-open}
-Export as DocBook file, process to PDF, then open the resulting PDF file.
+Export as a DocBook file, process to PDF, then open the resulting PDF file.
 
 @vindex org-export-docbook-xslt-proc-command
 @vindex org-export-docbook-xsl-fo-proc-command
-Note that, in order to produce PDF output based on exported DocBook file, you
-need to have XSLT processor and XSL-FO processor software installed on your
+Note that, in order to produce PDF output based on an exported DocBook file,
+you need to have XSLT processor and XSL-FO processor software installed on your
 system.  Check variables @code{org-export-docbook-xslt-proc-command} and
 @code{org-export-docbook-xsl-fo-proc-command}.
 
@@ -10912,7 +10912,7 @@ inherits, an @code{EXPORT_FILE_NAME} property, that name will be used for the
 export.
 
 @orgcmd{C-c C-e O,org-export-as-odt-and-open}
-Export as OpenDocument Text file and open the resulting file.
+Export as an OpenDocument Text file and open the resulting file.
 
 @vindex org-export-odt-preferred-output-format
 If @code{org-export-odt-preferred-output-format} is specified, open the
@@ -11244,11 +11244,11 @@ the @LaTeX{}-to-MathML converter.
 @table @kbd
 
 @item M-x org-export-as-odf
-Convert a @LaTeX{} math snippet to OpenDocument formula (@file{.odf}) file.
+Convert a @LaTeX{} math snippet to an OpenDocument formula (@file{.odf}) file.
 
 @item M-x org-export-as-odf-and-open
-Convert a @LaTeX{} math snippet to OpenDocument formula (@file{.odf}) file and
-open the formula file with the system-registered application.
+Convert a @LaTeX{} math snippet to an OpenDocument formula (@file{.odf}) file
+and open the formula file with the system-registered application.
 @end table
 
 @cindex dvipng
@@ -11784,10 +11784,10 @@ all the nodes.
 
 @table @kbd
 @orgcmd{C-c C-e j,org-export-as-taskjuggler}
-Export as TaskJuggler file.
+Export as a TaskJuggler file.
 
 @orgcmd{C-c C-e J,org-export-as-taskjuggler-and-open}
-Export as TaskJuggler file and then open the file with TaskJugglerUI.
+Export as a TaskJuggler file and then open the file with TaskJugglerUI.
 @end table
 
 @subsection Tasks
@@ -11897,7 +11897,7 @@ The Freemind exporter was written by Lennart Borgman.
 
 @table @kbd
 @orgcmd{C-c C-e m,org-export-as-freemind}
-Export as Freemind mind map.  For an Org file @file{myfile.org}, the Freemind
+Export as a Freemind mind map.  For an Org file @file{myfile.org}, the Freemind
 file will be @file{myfile.mm}.
 @end table
 
@@ -11911,7 +11911,7 @@ does not interpret any additional Org mode features.
 
 @table @kbd
 @orgcmd{C-c C-e x,org-export-as-xoxo}
-Export as XOXO file.  For an Org file @file{myfile.org}, the XOXO file will be
+Export as an XOXO file.  For an Org file @file{myfile.org}, the XOXO file will be
 @file{myfile.html}.
 @orgkey{C-c C-e v x}
 Export only the visible part of the document.
