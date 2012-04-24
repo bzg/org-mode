@@ -8317,6 +8317,8 @@ Jump to the running clock in another window.
 
 @tsubheading{Bulk remote editing selected entries}
 @cindex remote editing, bulk, from agenda
+@vindex org-agenda-bulk-persistent-marks
+@vindex org-agenda-bulk-custom-functions
 
 @orgcmd{m,org-agenda-bulk-mark}
 Mark the entry at point for bulk action.  With prefix arg, mark that many
@@ -8335,7 +8337,10 @@ Unmark all marked entries for bulk action.
 Bulk action: act on all marked entries in the agenda.  This will prompt for
 another key to select the action to be applied.  The prefix arg to @kbd{B}
 will be passed through to the @kbd{s} and @kbd{d} commands, to bulk-remove
-these special timestamps.
+these special timestamps.  By default, marks are removed after the bulk.  If
+you want them to persist, set @code{org-agenda-bulk-persistent-marks} to
+@code{t} or hit @kbd{p} at the prompt.
+
 @example
 r  @r{Prompt for a single refile target and move all entries.  The entries}
    @r{will no longer be in the agenda; refresh (@kbd{g}) to bring them back.}
@@ -8352,7 +8357,7 @@ s  @r{Schedule all items to a new date.  To shift existing schedule dates}
 S  @r{Reschedule randomly into the coming N days.  N will be prompted for.}
    @r{With prefix arg (@kbd{C-u B S}), scatter only across weekdays.}
 d  @r{Set deadline to a specific date.}
-f  @r{Apply a function to marked entries.}
+f  @r{Apply a function@footnote{You can also create persistent custom functions through@code{org-agenda-bulk-custom-functions}.} to marked entries.}
    @r{For example, the function below sets the CATEGORY property of the}
    @r{entries to web.}
    @r{(defun set-category ()}

@@ -8688,6 +8688,14 @@ This will remove the markers, and the overlays."
   (setq org-agenda-bulk-marked-entries nil)
   (org-agenda-bulk-remove-overlays (point-min) (point-max)))
 
+(defcustom org-agenda-persistent-marks nil
+  "Non-nil means marked items will stay marked after a bulk action.
+You can interactively and temporarily toggle by typing `p' when you
+are prompted for a bulk action."
+  :group 'org-agenda
+  :version "24.1"
+  :type 'boolean)
+
 (defun org-agenda-bulk-action (&optional arg)
   "Execute an remote-editing action on all marked entries.
 The prefix arg is passed through to the command if possible."
@@ -8704,148 +8712,159 @@ The prefix arg is passed through to the command if possible."
    org-agenda-bulk-marked-entries)
 
   ;; Prompt for the bulk command
-  (message (concat "Bulk: [r]efile [$]arch [A]rch->sib [t]odo"
-		   " [+/-]tag [s]chd [S]catter [d]eadline [f]unction"
-		   (when org-agenda-bulk-custom-functions
-		     (concat " Custom: ["
-			     (mapconcat (lambda(f) (char-to-string (car f)))
-					org-agenda-bulk-custom-functions "")
-			     "]"))))
-  (let* ((action (read-char-exclusive))
-	 (org-log-refile (if org-log-refile 'time nil))
-	 (entries (reverse org-agenda-bulk-marked-entries))
-	 redo-at-end
-	 cmd rfloc state e tag pos (cnt 0) (cntskip 0))
-    (cond
-     ((equal action ?$)
-      (setq cmd '(org-agenda-archive)))
+  (let* ((msg (if org-agenda-persistent-marks "Bulk (persistent): " "Bulk: ")))
+    (message (concat msg "[r]efile [$]arch [A]rch->sib [t]odo"
+		     " [+/-]tag [s]chd [S]catter [d]eadline [f]unction    "
+		     (when org-agenda-bulk-custom-functions
+		       (concat " Custom: ["
+			       (mapconcat (lambda(f) (char-to-string (car f)))
+					  org-agenda-bulk-custom-functions "")
+			       "]"))))
+    (catch 'exit
+      (let* ((action (read-char-exclusive))
+	     (org-log-refile (if org-log-refile 'time nil))
+	     (entries (reverse org-agenda-bulk-marked-entries))
+	     redo-at-end
+	     cmd rfloc state e tag pos (cnt 0) (cntskip 0))
+	(cond
+	 ((equal action ?p)
+	  (let ((org-agenda-persistent-marks
+		 (not org-agenda-persistent-marks)))
+	    (org-agenda-bulk-action)
+	    (throw 'exit nil)))
 
-     ((equal action ?A)
-      (setq cmd '(org-agenda-archive-to-archive-sibling)))
+	 ((equal action ?$)
+	  (setq cmd '(org-agenda-archive)))
 
-     ((member action '(?r ?w))
-      (setq rfloc (org-refile-get-location
-		   "Refile to"
-		   (marker-buffer (car org-agenda-bulk-marked-entries))
-		   org-refile-allow-creating-parent-nodes))
-      (if (nth 3 rfloc)
-	  (setcar (nthcdr 3 rfloc)
-		  (move-marker (make-marker) (nth 3 rfloc)
-			       (or (get-file-buffer (nth 1 rfloc))
-				   (find-buffer-visiting (nth 1 rfloc))
-				   (error "This should not happen")))))
+	 ((equal action ?A)
+	  (setq cmd '(org-agenda-archive-to-archive-sibling)))
 
-      (setq cmd (list 'org-agenda-refile nil (list 'quote rfloc) t)
-	    redo-at-end t))
+	 ((member action '(?r ?w))
+	  (setq rfloc (org-refile-get-location
+		       "Refile to"
+		       (marker-buffer (car org-agenda-bulk-marked-entries))
+		       org-refile-allow-creating-parent-nodes))
+	  (if (nth 3 rfloc)
+	      (setcar (nthcdr 3 rfloc)
+		      (move-marker (make-marker) (nth 3 rfloc)
+				   (or (get-file-buffer (nth 1 rfloc))
+				       (find-buffer-visiting (nth 1 rfloc))
+				       (error "This should not happen")))))
 
-     ((equal action ?t)
-      (setq state (org-icompleting-read
-		   "Todo state: "
-		   (with-current-buffer (marker-buffer (car entries))
-		     (mapcar 'list org-todo-keywords-1))))
-      (setq cmd `(let ((org-inhibit-blocking t)
-		       (org-inhibit-logging 'note))
-		   (org-agenda-todo ,state))))
+	  (setq cmd (list 'org-agenda-refile nil (list 'quote rfloc) t)
+		redo-at-end t))
 
-     ((memq action '(?- ?+))
-      (setq tag (org-icompleting-read
-		 (format "Tag to %s: " (if (eq action ?+) "add" "remove"))
-		 (with-current-buffer (marker-buffer (car entries))
-		   (delq nil
-			 (mapcar (lambda (x)
-				   (if (stringp (car x)) x)) org-tag-alist)))))
-      (setq cmd `(org-agenda-set-tags ,tag ,(if (eq action ?+) ''on ''off))))
+	 ((equal action ?t)
+	  (setq state (org-icompleting-read
+		       "Todo state: "
+		       (with-current-buffer (marker-buffer (car entries))
+			 (mapcar 'list org-todo-keywords-1))))
+	  (setq cmd `(let ((org-inhibit-blocking t)
+			   (org-inhibit-logging 'note))
+		       (org-agenda-todo ,state))))
 
-     ((memq action '(?s ?d))
-      (let* ((date (unless arg
-		     (org-read-date
-		      nil nil nil
-		      (if (eq action ?s) "(Re)Schedule to" "Set Deadline to"))))
-	     (ans (if arg nil org-read-date-final-answer))
-	     (c1 (if (eq action ?s) 'org-agenda-schedule 'org-agenda-deadline)))
-	(setq cmd `(let* ((bound (fboundp 'read-string))
-			  (old (and bound (symbol-function 'read-string))))
-		     (unwind-protect
-			 (progn
-			   (fset 'read-string (lambda (&rest ignore) ,ans))
-			   (eval '(,c1 arg)))
-		       (if bound
-			   (fset 'read-string old)
-			 (fmakunbound 'read-string)))))))
+	 ((memq action '(?- ?+))
+	  (setq tag (org-icompleting-read
+		     (format "Tag to %s: " (if (eq action ?+) "add" "remove"))
+		     (with-current-buffer (marker-buffer (car entries))
+		       (delq nil
+			     (mapcar (lambda (x)
+				       (if (stringp (car x)) x)) org-tag-alist)))))
+	  (setq cmd `(org-agenda-set-tags ,tag ,(if (eq action ?+) ''on ''off))))
 
-     ((equal action ?S)
-      (if (not (org-agenda-check-type nil 'agenda 'timeline 'todo))
-	  (error "Can't scatter tasks in \"%s\" agenda view" org-agenda-type)
-	(let ((days (read-number
-		     (format "Scatter tasks across how many %sdays: "
-			     (if arg "week" "")) 7)))
-	  (setq cmd
-		`(let ((distance (1+ (random ,days))))
-		   (if arg
-		       (let ((dist distance)
-			     (day-of-week
-			      (calendar-day-of-week
-			       (calendar-gregorian-from-absolute (org-today)))))
-			 (dotimes (i (1+ dist))
-			   (while (member day-of-week org-agenda-weekend-days)
-			     (incf distance)
-			     (incf day-of-week)
-			     (if (= day-of-week 7)
-				 (setq day-of-week 0)))
-			   (incf day-of-week)
-			   (if (= day-of-week 7)
-			       (setq day-of-week 0)))))
-		   ;; silently fail when try to replan a sexp entry
-		   (condition-case nil
-		       (let* ((date (calendar-gregorian-from-absolute
-				     (+ (org-today) distance)))
-			      (time (encode-time 0 0 0 (nth 1 date) (nth 0 date)
-						 (nth 2 date))))
-			 (org-agenda-schedule nil time))
-		     (error nil)))))))
+	 ((memq action '(?s ?d))
+	  (let* ((date (unless arg
+			 (org-read-date
+			  nil nil nil
+			  (if (eq action ?s) "(Re)Schedule to" "Set Deadline to"))))
+		 (ans (if arg nil org-read-date-final-answer))
+		 (c1 (if (eq action ?s) 'org-agenda-schedule 'org-agenda-deadline)))
+	    (setq cmd `(let* ((bound (fboundp 'read-string))
+			      (old (and bound (symbol-function 'read-string))))
+			 (unwind-protect
+			     (progn
+			       (fset 'read-string (lambda (&rest ignore) ,ans))
+			       (eval '(,c1 arg)))
+			   (if bound
+			       (fset 'read-string old)
+			     (fmakunbound 'read-string)))))))
 
-     ((assoc action org-agenda-bulk-custom-functions)
-      (setq cmd (list (cadr (assoc action org-agenda-bulk-custom-functions)))
-	    redo-at-end t))
+	 ((equal action ?S)
+	  (if (not (org-agenda-check-type nil 'agenda 'timeline 'todo))
+	      (error "Can't scatter tasks in \"%s\" agenda view" org-agenda-type)
+	    (let ((days (read-number
+			 (format "Scatter tasks across how many %sdays: "
+				 (if arg "week" "")) 7)))
+	      (setq cmd
+		    `(let ((distance (1+ (random ,days))))
+		       (if arg
+			   (let ((dist distance)
+				 (day-of-week
+				  (calendar-day-of-week
+				   (calendar-gregorian-from-absolute (org-today)))))
+			     (dotimes (i (1+ dist))
+			       (while (member day-of-week org-agenda-weekend-days)
+				 (incf distance)
+				 (incf day-of-week)
+				 (if (= day-of-week 7)
+				     (setq day-of-week 0)))
+			       (incf day-of-week)
+			       (if (= day-of-week 7)
+				   (setq day-of-week 0)))))
+		       ;; silently fail when try to replan a sexp entry
+		       (condition-case nil
+			   (let* ((date (calendar-gregorian-from-absolute
+					 (+ (org-today) distance)))
+				  (time (encode-time 0 0 0 (nth 1 date) (nth 0 date)
+						     (nth 2 date))))
+			     (org-agenda-schedule nil time))
+			 (error nil)))))))
 
-     ((equal action ?f)
-      (setq cmd (list (intern
-		       (org-icompleting-read "Function: "
-					     obarray 'fboundp t nil nil)))))
+	 ((assoc action org-agenda-bulk-custom-functions)
+	  (setq cmd (list (cadr (assoc action org-agenda-bulk-custom-functions)))
+		redo-at-end t))
 
-     (t (error "Invalid bulk action")))
+	 ((equal action ?f)
+	  (setq cmd (list (intern
+			   (org-icompleting-read "Function: "
+						 obarray 'fboundp t nil nil)))))
 
-    ;; Sort the markers, to make sure that parents are handled before children
-    (setq entries (sort entries
-			(lambda (a b)
-			  (cond
-			   ((equal (marker-buffer a) (marker-buffer b))
-			    (< (marker-position a) (marker-position b)))
-			   (t
-			    (string< (buffer-name (marker-buffer a))
-				     (buffer-name (marker-buffer b))))))))
+	 (t (error "Invalid bulk action")))
 
-    ;; Now loop over all markers and apply cmd
-    (while (setq e (pop entries))
-      (setq pos (text-property-any (point-min) (point-max) 'org-hd-marker e))
-      (if (not pos)
-	  (progn (message "Skipping removed entry at %s" e)
-		 (setq cntskip (1+ cntskip)))
-	(goto-char pos)
-	(let (org-loop-over-headlines-in-active-region)
-	  (eval cmd))
-	(setq org-agenda-bulk-marked-entries
-	      (delete e org-agenda-bulk-marked-entries))
-	(setq cnt (1+ cnt))))
-    (setq org-agenda-bulk-marked-entries nil)
-    (org-agenda-bulk-remove-all-marks)
-    (when redo-at-end (org-agenda-redo))
-    (message "Acted on %d entries%s"
-	     cnt
-	     (if (= cntskip 0)
-		 ""
-	       (format ", skipped %d (disappeared before their turn)"
-		       cntskip)))))
+	;; Sort the markers, to make sure that parents are handled before children
+	(setq entries (sort entries
+			    (lambda (a b)
+			      (cond
+			       ((equal (marker-buffer a) (marker-buffer b))
+				(< (marker-position a) (marker-position b)))
+			       (t
+				(string< (buffer-name (marker-buffer a))
+					 (buffer-name (marker-buffer b))))))))
+
+	;; Now loop over all markers and apply cmd
+	(while (setq e (pop entries))
+	  (setq pos (text-property-any (point-min) (point-max) 'org-hd-marker e))
+	  (if (not pos)
+	      (progn (message "Skipping removed entry at %s" e)
+		     (setq cntskip (1+ cntskip)))
+	    (goto-char pos)
+	    (let (org-loop-over-headlines-in-active-region)
+	      (eval cmd))
+	    (when (not org-agenda-persistent-marks)
+	      (setq org-agenda-bulk-marked-entries
+		    (delete e org-agenda-bulk-marked-entries)))
+	    (setq cnt (1+ cnt))))
+	(when (not org-agenda-persistent-marks)
+	  (org-agenda-bulk-remove-all-marks))
+	(when redo-at-end (org-agenda-redo))
+	(message "Acted on %d entries%s%s"
+		 cnt
+		 (if (= cntskip 0)
+		     ""
+		   (format ", skipped %d (disappeared before their turn)"
+			   cntskip))
+		 (if (not org-agenda-persistent-marks)
+		     "" " (kept marked)"))))))
 
 ;;; Flagging notes
 
