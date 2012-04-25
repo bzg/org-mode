@@ -313,15 +313,7 @@ Paragraph \\alpha."
 				 nil
 				 'first-match)))
       (should (stringp (org-element-property :tag item)))))
-  ;; 1.3. Test with `verse-block' type.
-  (org-test-with-temp-text "#+BEGIN_VERSE\nTest\n#+END_VERSE"
-    (let ((verse-block (org-element-map (org-element-parse-buffer 'element)
-					'verse-block
-					'identity
-					nil
-					'first-match)))
-      (should (stringp (org-element-property :value verse-block)))))
-  ;; 1.4. Test with `inlinetask' type, if avalaible.
+  ;; 1.3. Test with `inlinetask' type, if avalaible.
   (when (featurep 'org-inlinetask)
     (let ((org-inlinetask-min-level 15))
       (org-test-with-temp-text "*************** Inlinetask"
@@ -375,6 +367,45 @@ Paragraph \\alpha."
      '(org-data nil (paragraph (:caption (("long") "short")) "Paragraph")))
     "#+CAPTION[short]: long\nParagraph\n")))
 
+
+
+;;;; Normalize contents
+
+(ert-deftest test-org-element/normalize-contents ()
+  "Test `org-element-normalize-contents' specifications."
+  ;; 1. Remove maximum common indentation from element's contents.
+  (should
+   (equal
+    (org-element-normalize-contents
+     '(paragraph nil "  Two spaces\n   Three spaces"))
+    '(paragraph nil "Two spaces\n Three spaces")))
+  ;; 2. Ignore objects within contents when computing maximum common
+  ;;    indentation.
+  (should
+   (equal
+    (org-element-normalize-contents
+     '(paragraph nil " One " (emphasis nil "space") "\n  Two spaces"))
+    '(paragraph nil "One " (emphasis nil "space") "\n Two spaces")))
+  ;; 3. Ignore blank lines.
+  (should
+   (equal
+    (org-element-normalize-contents
+     '(paragraph nil "  Two spaces\n\n \n  Two spaces"))
+    '(paragraph nil "Two spaces\n\n \nTwo spaces")))
+  ;; 4. Recursively enter objects in order to compute common
+  ;;    indentation.
+  (should
+   (equal
+    (org-element-normalize-contents
+     '(paragraph nil "  Two spaces " (emphasis nil " and\n One space")))
+    '(paragraph nil " Two spaces " (emphasis nil " and\nOne space"))))
+  ;; 5. When optional argument is provided, ignore first line
+  ;;    indentation.
+  (should
+   (equal
+    (org-element-normalize-contents
+     '(paragraph nil "No space\n  Two spaces\n   Three spaces") t)
+    '(paragraph nil "No space\nTwo spaces\n Three spaces"))))
 
 
 ;;;; Navigation tools.

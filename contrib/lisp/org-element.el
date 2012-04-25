@@ -3592,7 +3592,9 @@ indentation is not done with TAB characters."
                (cond
                 ((stringp object)
                  (let ((start 0))
-                   (while (string-match "\n\\( *\\)" object start)
+		   ;; Avoid matching blank or empty lines.
+                   (while (and (string-match "\n\\( *\\)\\(.\\)" object start)
+			       (not (equal (match-string 2 object) " ")))
                      (setq start (match-end 0))
                      (push (length (match-string 1 object)) ind-list))))
                 ((memq (org-element-type object) org-element-recursive-objects)
@@ -3624,7 +3626,8 @@ indentation is not done with TAB characters."
 		     ((stringp object)
 		      (replace-regexp-in-string
 		       (format "\n \\{%d\\}" mci) "\n" object))
-		     ((memq (org-element-type object) org-element-recursive-objects)
+		     ((memq (org-element-type object)
+			    org-element-recursive-objects)
 		      (funcall build object mci first-flag))
 		     (t object)))
 		  (org-element-contents blob)))))))
