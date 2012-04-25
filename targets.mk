@@ -25,19 +25,24 @@ endif
 	check test install info html pdf card doc docs $(INSTSUB) \
 	autoloads cleanall clean cleancontrib cleanrel clean-install \
 	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest \
-	compile compile-dirty
+	compile compile-dirty uncompiled
 
-oldorg:	compile autoloads info # what the old makefile did when no target was specified
+oldorg:	compile autoloads info	# what the old makefile did when no target was specified
+uncompiled:	cleanlisp autoloads	# for developing
 refcard:	card
 update update2::	up0 all
 
 .PRECIOUS:	local.mk
 local.mk:
-	$(info ==========================================)
-	$(info Created a local.mk template.)
-	$(info Please adapt local.mk to your local setup!)
-	$(info ==========================================)
+	$(info ======================================================)
+	$(info = Invoke "make help" for a synopsis of make targets. =)
+	$(info = Created a default local.mk template.               =)
+	$(info = Setting "oldorg" as the default target.            =)
+	$(info = Please adapt local.mk to your local setup!         =)
+	$(info ======================================================)
 	-@$(SED) -n \
+		-e '1 i ## Remove the following line to make "all" the default target' \
+		-e '1 i oldorg:' \
 		-e '/-8<-/,/->8-/ {s/^\(\s*[^#]\)/#\1/;p}' \
 		-e '$$ i ## See default.mk for further configuration options.' \
 		default.mk > $@

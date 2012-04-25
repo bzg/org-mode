@@ -10,8 +10,10 @@
 all::
 
 # Describe valid make targets for org-mode.
-.PHONY:	targets help
-targets help helpall::
+.PHONY:	targets help helpall
+targets:	help
+helpall::	help
+help::
 	$(info )
 	$(info Getting Help)
 	$(info ============)
@@ -61,18 +63,18 @@ helpall::
 	$(info )
 	$(info Documentation)
 	$(info =============)
-targets help helpall::
+help::
 	$(info make doc           - build all documentation)
 helpall::
 	$(info make docs          - dito)
-targets help helpall::
+help::
 	$(info make info          - build Info documentation)
 helpall::
 	$(info make html          - build HTML documentation)
 	$(info make pdf           - build PDF documentation)
 	$(info make card          - build reference cards)
 	$(info make refcard       - dito)
-targets help helpall::
+help::
 	$(info )
 	$(info Installation)
 	$(info ============)
@@ -81,7 +83,7 @@ helpall::
 	$(info make install-etc   - build and install files in /etc)
 	$(info make install-lisp  - build and install Org Elisp files)
 	$(info make install-info  - build and install Info documentation)
-targets help helpall::
+help::
 	@echo ""
 
  include targets.mk	# toplevel make machinery
