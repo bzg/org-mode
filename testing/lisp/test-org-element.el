@@ -261,6 +261,44 @@
 
 
 
+;;;; Verse blocks
+
+(ert-deftest test-org-element/verse-block ()
+  "Test verse block parsing."
+  ;; Standard test.
+  (org-test-with-temp-text "#+BEGIN_VERSE\nVerse block\n#+END_VERSE"
+    (should
+     (equal
+      (org-element-map (org-element-parse-buffer) 'verse-block 'identity nil t)
+      '(verse-block
+	(:begin 1 :end 38 :contents-begin 15 :contents-end 27 :hiddenp nil
+		:post-blank 0)
+	"Verse block\n"))))
+  ;; Ignore case.
+  (org-test-with-temp-text "#+begin_verse\nVerse block\n#+end_verse"
+    (should
+     (equal
+      (org-element-map (org-element-parse-buffer) 'verse-block 'identity nil t)
+      '(verse-block
+	(:begin 1 :end 38 :contents-begin 15 :contents-end 27 :hiddenp nil
+		:post-blank 0)
+	"Verse block\n"))))
+  ;; Parse folding.
+  (org-test-with-temp-text "#+BEGIN_VERSE\nVerse block\n#+END_VERSE"
+    (org-hide-block-all)
+    (should
+     (equal
+      (org-element-map (org-element-parse-buffer) 'verse-block 'identity nil t)
+      '(verse-block
+	(:begin 1 :end 38 :contents-begin 15 :contents-end 27
+		:hiddenp org-hide-block :post-blank 0)
+	"Verse block\n"))))
+  ;; Parse objects in verse blocks.
+  (org-test-with-temp-text "#+BEGIN_VERSE\nVerse \\alpha\n#+END_VERSE"
+    (should (org-element-map (org-element-parse-buffer) 'entity 'identity))))
+
+
+
 ;;;; Granularity
 
 (ert-deftest test-org-element/granularity ()
@@ -366,6 +404,21 @@ Paragraph \\alpha."
     (org-element-interpret-data
      '(org-data nil (paragraph (:caption (("long") "short")) "Paragraph")))
     "#+CAPTION[short]: long\nParagraph\n")))
+
+(ert-deftest test-org-element/interpret-elements ()
+  "Test interpretation of elements and objects."
+  (let ((parse-and-interpret
+	 (function
+	  ;; Parse TEXT string in an Org buffer and transcode it back
+	  ;; to Org syntax.
+	  (lambda (text)
+	    (with-temp-buffer
+	      (org-mode)
+	      (insert text)
+	      (org-element-interpret-data (org-element-parse-buffer)))))))
+    ;; Verse blocks.
+    (equal (funcall parse-and-interpret "#+BEGIN_VERSE\nTest\n#+END_VERSE")
+	   "#+BEGIN_VERSE\nTest\n#+END_VERSE\n")))
 
 
 

@@ -4148,17 +4148,14 @@ channel."
 
 (defun org-e-odt-verse-block (verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to HTML.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is verse block contents.  INFO is a plist holding
+contextual information."
   ;; Replace each newline character with line break.  Also replace
   ;; each blank line with a line break.
   (setq contents (replace-regexp-in-string
 		  "^ *\\\\\\\\$" "<br/>\n"
 		  (replace-regexp-in-string
-		   "\\(\\\\\\\\\\)?[ \t]*\n" " <br/>\n"
-		   (org-remove-indentation
-		    (org-export-secondary-string
-		     (org-element-property :value verse-block)
-		     'e-odt info)))))
+		   "\\(\\\\\\\\\\)?[ \t]*\n" " <br/>\n" contents)))
 
   ;; Replace each white space at beginning of a line with a
   ;; non-breaking space.
