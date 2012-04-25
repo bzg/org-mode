@@ -167,22 +167,33 @@ This function is called by `org-babel-execute-src-block'."
 (defun org-babel-R-assign-elisp (name value colnames-p rownames-p)
   "Construct R code assigning the elisp VALUE to a variable named NAME."
   (if (listp value)
-      (let ((transition-file (org-babel-temp-file "R-import-")))
+      (let ((max (apply #'max (mapcar #'length value)))
+	    (min (apply #'min (mapcar #'length value)))
+	    (transition-file (org-babel-temp-file "R-import-")))
         ;; ensure VALUE has an orgtbl structure (depth of at least 2)
         (unless (listp (car value)) (setq value (list value)))
         (with-temp-file transition-file
-          (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
-          (insert "\n"))
-        (format "if (max(count.fields(\"%s\", sep=\"\\t\")) == min(count.fields(\"%s\", sep=\"\\t\"))) %s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE) else  %s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE, fill=TRUE, col.names = paste(\"V\", seq_len(max(count.fields(\"%s\", sep=\"\\t\"))), sep =\"\"))"
-		(org-babel-process-file-name transition-file 'noquote)
-		(org-babel-process-file-name transition-file 'noquote)
-                name (org-babel-process-file-name transition-file 'noquote)
-		(if (or (eq (nth 1 value) 'hline) colnames-p) "TRUE" "FALSE")
-		(if rownames-p "1" "NULL")
-                name (org-babel-process-file-name transition-file 'noquote)
-		(if (or (eq (nth 1 value) 'hline) colnames-p) "TRUE" "FALSE")
-		(if rownames-p "1" "NULL")
-		(org-babel-process-file-name transition-file 'noquote)))
+          (insert
+	   (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field))
+	   "\n"))
+	(let ((file (org-babel-process-file-name transition-file 'noquote))
+	      (header (if (or (eq (nth 1 value) 'hline) colnames-p)
+			  "TRUE" "FALSE"))
+	      (row-names (if rownames-p "1" "NULL")))
+	  (if (= max min)
+	      (format "%s <- read.table(\"%s\",
+                      header=%s,
+                      row.names=%s,
+                      sep=\"\\t\",
+                      as.is=TRUE)" name file header row-names)
+	    (format "%s <- read.table(\"%s\",
+                   header=%s,
+                   row.names=%s,
+                   sep=\"\\t\",
+                   as.is=TRUE,
+                   fill=TRUE,
+                   col.names = paste(\"V\", seq_len(%d), sep =\"\"))"
+		    name file header row-names max))))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
 (defvar ess-ask-for-ess-directory nil)
