@@ -3637,7 +3637,7 @@ INFO is a plist holding contextual information.  See
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
-      (let* ((fmt (org-export-get-coderef-format path (or desc "%s")))
+      (let* ((fmt (org-export-get-coderef-format path desc))
 	     (res (org-export-resolve-coderef path info))
 	     (org-e-odt-suppress-xref nil)
 	     (href (org-xml-format-href (concat "#coderef-" path))))

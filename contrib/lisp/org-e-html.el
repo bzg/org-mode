@@ -2485,7 +2485,7 @@ INFO is a plist holding contextual information.  See
 				" onmouseover=\"CodeHighlightOn(this, '%s');\""
 				" onmouseout=\"CodeHighlightOff(this, '%s');\"")
 			fragment fragment)
-		(format (org-export-get-coderef-format path (or desc "%s"))
+		(format (org-export-get-coderef-format path desc)
 			(org-export-resolve-coderef path info)))))
      ;; Link type is handled by a special function.
      ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
