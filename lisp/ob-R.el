@@ -173,10 +173,16 @@ This function is called by `org-babel-execute-src-block'."
         (with-temp-file transition-file
           (insert (orgtbl-to-tsv value '(:fmt org-babel-R-quote-tsv-field)))
           (insert "\n"))
-        (format "%s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE)"
+        (format "if (max(count.fields(\"%s\", sep=\"\\t\")) == min(count.fields(\"%s\", sep=\"\\t\"))) %s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE) else  %s <- read.table(\"%s\", header=%s, row.names=%s, sep=\"\\t\", as.is=TRUE, fill=TRUE, col.names = paste(\"V\", seq_len(max(count.fields(\"%s\", sep=\"\\t\"))), sep =\"\"))"
+		(org-babel-process-file-name transition-file 'noquote)
+		(org-babel-process-file-name transition-file 'noquote)
                 name (org-babel-process-file-name transition-file 'noquote)
 		(if (or (eq (nth 1 value) 'hline) colnames-p) "TRUE" "FALSE")
-		(if rownames-p "1" "NULL")))
+		(if rownames-p "1" "NULL")
+                name (org-babel-process-file-name transition-file 'noquote)
+		(if (or (eq (nth 1 value) 'hline) colnames-p) "TRUE" "FALSE")
+		(if rownames-p "1" "NULL")
+		(org-babel-process-file-name transition-file 'noquote)))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
 (defvar ess-ask-for-ess-directory nil)
