@@ -369,7 +369,7 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 	    	  (progn (goto-char (match-end 1)) (insert ", "))
 	    	(bibtex-make-field "keywords" t t))
 	      (insert (mapconcat #'identity tags ", ")))
-            (bibtex-reformat) (buffer-string)))))))
+            (buffer-string)))))))
 
 (defun org-bibtex-ask (field)
   (unless (assoc field org-bibtex-fields)
