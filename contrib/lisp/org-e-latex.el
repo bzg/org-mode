@@ -1512,7 +1512,7 @@ INFO is a plist holding contextual information.  See
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
-      (format (org-export-get-coderef-format path (or desc ""))
+      (format (org-export-get-coderef-format path desc)
 	      (org-export-resolve-coderef path info)))
      ;; Link type is handled by a special function.
      ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
@@ -2118,7 +2118,8 @@ channel."
 
 (defun org-e-latex-verse-block (verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is verse block contents. INFO is a plist holding
+contextual information."
   (org-e-latex--wrap-label
    verse-block
    ;; In a verse environment, add a line break to each newline
@@ -2129,11 +2130,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (setq contents (replace-regexp-in-string
 		     "^ *\\\\\\\\$" "\\\\vspace*{1em}"
 		     (replace-regexp-in-string
-		      "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n"
-		      (org-remove-indentation
-		       (org-export-secondary-string
-			(org-element-property :value verse-block)
-			'e-latex info)))))
+		      "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n" contents)))
      (while (string-match "^[ \t]+" contents)
        (let ((new-str (format "\\hspace*{%dem}"
 			      (length (match-string 0 contents)))))

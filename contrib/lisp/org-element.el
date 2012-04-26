@@ -25,45 +25,51 @@
 ;; Org syntax can be divided into three categories: "Greater
 ;; elements", "Elements" and "Objects".
 
-;; An object can be defined anywhere on a line.  It may span over more
-;; than a line but never contains a blank one.  Objects belong to the
-;; following types: `emphasis', `entity', `export-snippet',
-;; `footnote-reference', `inline-babel-call', `inline-src-block',
-;; `latex-fragment', `line-break', `link', `macro', `radio-target',
-;; `statistics-cookie', `subscript', `superscript', `table-cell',
-;; `target', `time-stamp' and `verbatim'.
+;; Elements are related to the structure of the document.  Indeed, all
+;; elements are a cover for the document: each position within belongs
+;; to at least one element.
 
-;; An element always starts and ends at the beginning of a line
-;; (excepted for `table-cell').  The only element's type containing
-;; objects is called a `paragraph'.  Other types are: `comment',
-;; `comment-block', `example-block', `export-block', `fixed-width',
-;; `horizontal-rule', `keyword', `latex-environment', `babel-call',
-;; `property-drawer', `quote-section', `src-block', `table',
-;; `table-row' and `verse-block'.
-
-;; Elements containing paragraphs are called greater elements.
-;; Concerned types are: `center-block', `drawer', `dynamic-block',
-;; `footnote-definition', `headline', `inlinetask', `item',
-;; `plain-list', `quote-block', `section' and `special-block'
-
-;; Greater elements (excepted `headline', `item' and `section' types)
-;; and elements (excepted `keyword', `babel-call', `property-drawer'
-;; and `table-row' types) can have a fixed set of keywords as
-;; attributes.  Those are called "affiliated keywords", to distinguish
-;; them from others keywords, which are full-fledged elements.  In
-;; particular, the "name" affiliated keyword allows to label almost
-;; any element in an Org buffer.
-
+;; An element always starts and ends at the beginning of a line.  With
+;; a few exceptions (namely `headline', `item', `section', `keyword',
+;; `babel-call' and `property-drawer' types), it can also accept
+;; a fixed set of keywords as attributes.  Those are called
+;; "affiliated keywords" to distinguish them from other keywords,
+;; which are full-fledged elements.
+;;
+;; Element containing other elements (and only elements) are called
+;; greater elements.  Concerned types are: `center-block', `drawer',
+;; `dynamic-block', `footnote-definition', `headline', `inlinetask',
+;; `item', `plain-list', `quote-block', `section' and `special-block'.
+;;
+;; Other element types are: `babel-call', `comment', `comment-block',
+;; `example-block', `export-block', `fixed-width', `horizontal-rule',
+;; `keyword', `latex-environment', `paragraph', `property-drawer',
+;; `quote-section', `src-block', `table', `table-cell', `table-row'
+;; and `verse-blocks'.  Among them, `paragraph', `table-cell' and
+;; `verse-block' types can contain Org objects and plain text.
+;;
+;; Objects are related to document's contents.  Some of them are
+;; recursive.  Associated types are of the following: `emphasis',
+;; `entity', `export-snippet', `footnote-reference',
+;; `inline-babel-call', `inline-src-block', `latex-fragment',
+;; `line-break', `link', `macro', `radio-target', `statistics-cookie',
+;; `subscript', `superscript', `table-cell', `target', `time-stamp'
+;; and `verbatim'.
+;;
+;; Some elements also have special properties whose value can hold
+;; objects themselves (i.e. an item tag or an headline name).  Such
+;; values are called "secondary strings".  Any object belongs to
+;; either an element or a secondary string.
+;;
 ;; Notwithstanding affiliated keywords, each greater element, element
 ;; and object has a fixed set of properties attached to it.  Among
 ;; them, three are shared by all types: `:begin' and `:end', which
 ;; refer to the beginning and ending buffer positions of the
 ;; considered element or object, and `:post-blank', which holds the
-;; number of blank lines, or white spaces, at its end.
-
-;; Some elements also have special properties whose value can hold
-;; objects themselves (i.e. an item tag, an headline name, a table
-;; cell).  Such values are called "secondary strings".
+;; number of blank lines, or white spaces, at its end.  Greater
+;; elements and elements containing objects will also have
+;; `:contents-begin' and `:contents-end' properties to delimit
+;; contents.
 
 ;; Lisp-wise, an element or an object can be represented as a list.
 ;; It follows the pattern (TYPE PROPERTIES CONTENTS), where:
@@ -81,7 +87,7 @@
 ;; for each type of Org syntax.
 
 ;; The next two parts introduce four accessors and a function
-;; retrieving the smallest element starting at point (respectively
+;; retrieving the element starting at point (respectively
 ;; `org-element-type', `org-element-property', `org-element-contents',
 ;; `org-element-restriction' and `org-element-current-element').
 
@@ -1584,56 +1590,40 @@ CONTENTS is the contents of the table row."
 
 ;;;; Verse Block
 
-(defun org-element-verse-block-parser (&optional raw-secondary-p)
+(defun org-element-verse-block-parser ()
   "Parse a verse block.
 
-Return a list whose car is `verse-block' and cdr is a plist
-containing `:begin', `:end', `:hiddenp', `:value' and
-`:post-blank' keywords.
+Return a list whose CAR is `verse-block' and CDR is a plist
+containing `:begin', `:end', `:contents-begin', `:contents-end',
+`:hiddenp' and `:post-blank' keywords.
 
-When optional argument RAW-SECONDARY-P is non-nil, verse-block's
-value will not be parsed as a secondary string, but as a plain
-string instead.
-
-Assume point is at beginning or end of the block."
+Assume point is at beginning of the block."
   (save-excursion
     (let* ((case-fold-search t)
-	   (keywords (progn
-		       (end-of-line)
-		       (re-search-backward
-			(concat "^[ \t]*#\\+BEGIN_VERSE") nil t)
-		       (org-element-collect-affiliated-keywords)))
+	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (hidden (progn (forward-line) (org-truely-invisible-p)))
-	   (value-begin (point))
-	   (value-end
+	   (contents-begin (point))
+	   (contents-end
 	    (progn
 	      (re-search-forward (concat "^[ \t]*#\\+END_VERSE") nil t)
 	      (point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
-		       (if (eobp) (point) (point-at-bol))))
-	   (value
-	    (if raw-secondary-p
-		(buffer-substring-no-properties value-begin value-end)
-	      (org-element-parse-secondary-string
-	       (buffer-substring-no-properties value-begin value-end)
-	       (org-element-restriction 'verse-block)))))
+		       (if (eobp) (point) (point-at-bol)))))
       `(verse-block
 	(:begin ,begin
 		:end ,end
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
 		:hiddenp ,hidden
-		:value ,value
 		:post-blank ,(count-lines pos-before-blank end)
 		,@(cadr keywords))))))
 
 (defun org-element-verse-block-interpreter (verse-block contents)
   "Interpret VERSE-BLOCK element as Org syntax.
-CONTENTS is nil."
-  (format "#+BEGIN_VERSE\n%s#+END_VERSE"
-	  (org-remove-indentation
-	   (org-element-interpret-secondary
-	    (org-element-property :value verse-block)))))
+CONTENTS is verse block contents."
+  (format "#+BEGIN_VERSE\n%s#+END_VERSE" contents))
 
 
 
@@ -2767,8 +2757,7 @@ still has an entry since one of its properties (`:title') does.")
   '((headline . :title)
     (inlinetask . :title)
     (item . :tag)
-    (footnote-reference . :inline-definition)
-    (verse-block . :value))
+    (footnote-reference . :inline-definition))
   "Alist between element types and location of secondary value.")
 
 
@@ -2884,17 +2873,11 @@ it is quicker than its counterpart, albeit more restrictive."
             (if (save-excursion
                   (re-search-forward
                    (format "[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t))
-                ;; Build appropriate parser.  `verse-block' type
-		;; elements require an additional argument, so they
-		;; must be treated separately.
-                (if (string= "VERSE" type)
-		    (org-element-verse-block-parser raw-secondary-p)
-		  (funcall
-		   (intern
-		    (format
-		     "org-element-%s-parser"
-		     (cdr (assoc type
-				 org-element-non-recursive-block-alist))))))
+                (funcall
+		 (intern
+		  (format
+		   "org-element-%s-parser"
+		   (cdr (assoc type org-element-non-recursive-block-alist)))))
               (org-element-paragraph-parser)))))
        ;; Inlinetask.
        ((org-at-heading-p) (org-element-inlinetask-parser raw-secondary-p))
@@ -3592,7 +3575,9 @@ indentation is not done with TAB characters."
                (cond
                 ((stringp object)
                  (let ((start 0))
-                   (while (string-match "\n\\( *\\)" object start)
+		   ;; Avoid matching blank or empty lines.
+                   (while (and (string-match "\n\\( *\\)\\(.\\)" object start)
+			       (not (equal (match-string 2 object) " ")))
                      (setq start (match-end 0))
                      (push (length (match-string 1 object)) ind-list))))
                 ((memq (org-element-type object) org-element-recursive-objects)
@@ -3624,7 +3609,8 @@ indentation is not done with TAB characters."
 		     ((stringp object)
 		      (replace-regexp-in-string
 		       (format "\n \\{%d\\}" mci) "\n" object))
-		     ((memq (org-element-type object) org-element-recursive-objects)
+		     ((memq (org-element-type object)
+			    org-element-recursive-objects)
 		      (funcall build object mci first-flag))
 		     (t object)))
 		  (org-element-contents blob)))))))

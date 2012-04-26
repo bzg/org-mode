@@ -1730,13 +1730,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-e-ascii-verse-block (verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to ASCII.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is verse block contents.  INFO is a plist holding
+contextual information."
   (let ((verse-width (org-e-ascii--current-text-width verse-block info)))
     (org-e-ascii--indent-string
-     (org-e-ascii--justify-string
-      (org-export-secondary-string
-       (org-element-property :value verse-block) 'e-ascii info)
-      verse-width 'left)
+     (org-e-ascii--justify-string contents verse-width 'left)
      org-e-ascii-quote-margin)))
 
 
