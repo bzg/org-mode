@@ -8575,7 +8575,8 @@ call CMD."
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
-  (let ((def-cat (cond
+  (let ((inhibit-read-only t)
+	(def-cat (cond
 		  ((null org-category)
 		   (if buffer-file-name
 		       (file-name-sans-extension
