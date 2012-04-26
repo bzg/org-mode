@@ -661,7 +661,8 @@ This uses `bibtex-parse-entry'."
 (defun org-bibtex-export-to-kill-ring ()
   "Export current headline to kill ring as bibtex entry."
   (interactive)
-  (kill-new (org-bibtex-headline)))
+  (let ((result (org-bibtex-headline)))
+    (kill-new result) result))
 
 (defun org-bibtex-search (string)
   "Search for bibliographical entries in agenda files.
