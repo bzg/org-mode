@@ -15126,7 +15126,7 @@ user."
       (save-excursion
 	(save-window-excursion
 	  (calendar)
-	  (org-eval-in-calendar '(setq cursor-type nil))
+	  (org-eval-in-calendar '(setq cursor-type nil) t)
           (unwind-protect
               (progn
 		(calendar-forward-day (- (time-to-days org-def)
