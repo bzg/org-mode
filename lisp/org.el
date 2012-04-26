@@ -4940,6 +4940,12 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (defvar bidi-paragraph-direction)
 (defvar buffer-face-mode-face)
+(defvar org-auto-fill-fallback-function nil)
+(defvar org-indent-line-fallback-function nil)
+(defvar org-fill-paragraph-fallback-function nil)
+(make-variable-buffer-local 'org-auto-fill-fallback-function)
+(make-variable-buffer-local 'org-indent-line-fallback-function)
+(make-variable-buffer-local 'org-fill-paragraph-fallback-function)
 
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
@@ -8366,7 +8372,11 @@ Note that turning off orgstruct-mode will *not* remove the
 indentation/paragraph settings.  This can only be done by refreshing the
 major mode, for example with \\[normal-mode]."
   (interactive "P")
-  (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1))))
+  (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1)))
+	;; Set fallback functions
+	org-auto-fill-fallback-function auto-fill-function
+	org-indent-line-fallback-function indent-line-function
+	org-fill-paragraph-fallback-function fill-paragraph-function)
   (if (< arg 1)
       (orgstruct-mode -1)
     (orgstruct-mode 1)
@@ -20389,113 +20399,115 @@ If point is in an inline task, mark that task instead."
 (defun org-indent-line-function ()
   "Indent line depending on context."
   (interactive)
-  (let* ((pos (point))
-	 (itemp (org-at-item-p))
-	 (case-fold-search t)
-	 (org-drawer-regexp (or org-drawer-regexp "\000"))
-	 (inline-task-p (and (featurep 'org-inlinetask)
-			     (org-inlinetask-in-task-p)))
-	 (inline-re (and inline-task-p
-			 (org-inlinetask-outline-regexp)))
-	 column)
-    (beginning-of-line 1)
-    (cond
-     ;; Comments
-     ((looking-at "# ") (setq column 0))
-     ;; Headings
-     ((looking-at org-outline-regexp) (setq column 0))
-     ;; Included files
-     ((looking-at "#\\+include:") (setq column 0))
-     ;; Footnote definition
-     ((looking-at org-footnote-definition-re) (setq column 0))
-     ;; Literal examples
-     ((looking-at "[ \t]*:\\( \\|$\\)")
-      (setq column (org-get-indentation))) ; do nothing
-     ;; Lists
-     ((ignore-errors (goto-char (org-in-item-p)))
-      (setq column (if itemp
-		       (org-get-indentation)
-		     (org-list-item-body-column (point))))
-      (goto-char pos))
-     ;; Drawers
-     ((and (looking-at "[ \t]*:END:")
-	   (save-excursion (re-search-backward org-drawer-regexp nil t)))
-      (save-excursion
-	(goto-char (1- (match-beginning 1)))
-	(setq column (current-column))))
-     ;; Special blocks
-     ((and (looking-at "[ \t]*#\\+end_\\([a-z]+\\)")
-	   (save-excursion
-	     (re-search-backward
-	      (concat "^[ \t]*#\\+begin_" (downcase (match-string 1))) nil t)))
-      (setq column (org-get-indentation (match-string 0))))
-     ((and (not (looking-at "[ \t]*#\\+begin_"))
-	   (org-between-regexps-p "^[ \t]*#\\+begin_" "[ \t]*#\\+end_"))
-      (save-excursion
-	(re-search-backward "^[ \t]*#\\+begin_\\([a-z]+\\)" nil t))
-      (setq column
-            (cond ((equal (downcase (match-string 1)) "src")
-                   ;; src blocks: let `org-edit-src-exit' handle them
-                   (org-get-indentation))
-                  ((equal (downcase (match-string 1)) "example")
-                   (max (org-get-indentation)
-			(org-get-indentation (match-string 0))))
-                  (t
-                   (org-get-indentation (match-string 0))))))
-     ;; This line has nothing special, look at the previous relevant
-     ;; line to compute indentation
-     (t
-      (beginning-of-line 0)
-      (while (and (not (bobp))
-		  (not (looking-at org-drawer-regexp))
-		  ;; When point started in an inline task, do not move
-		  ;; above task starting line.
-		  (not (and inline-task-p (looking-at inline-re)))
-		  ;; Skip drawers, blocks, empty lines, verbatim,
-		  ;; comments, tables, footnotes definitions, lists,
-		  ;; inline tasks.
-		  (or (and (looking-at "[ \t]*:END:")
-			   (re-search-backward org-drawer-regexp nil t))
-		      (and (looking-at "[ \t]*#\\+end_")
-			   (re-search-backward "[ \t]*#\\+begin_"nil t))
-		      (looking-at "[ \t]*[\n:#|]")
-		      (looking-at org-footnote-definition-re)
-		      (and (ignore-errors (goto-char (org-in-item-p)))
-			   (goto-char
-			    (org-list-get-top-point (org-list-struct))))
-		      (and (not inline-task-p)
-			   (featurep 'org-inlinetask)
-			   (org-inlinetask-in-task-p)
-			   (or (org-inlinetask-goto-beginning) t))))
-      	(beginning-of-line 0))
+  (if org-indent-line-fallback-function
+      (funcall org-indent-line-fallback-function)
+    (let* ((pos (point))
+	   (itemp (org-at-item-p))
+	   (case-fold-search t)
+	   (org-drawer-regexp (or org-drawer-regexp "\000"))
+	   (inline-task-p (and (featurep 'org-inlinetask)
+			       (org-inlinetask-in-task-p)))
+	   (inline-re (and inline-task-p
+			   (org-inlinetask-outline-regexp)))
+	   column)
+      (beginning-of-line 1)
       (cond
-       ;; There was an heading above.
-       ((looking-at "\\*+[ \t]+")
-	(if (not org-adapt-indentation)
-	    (setq column 0)
-	  (goto-char (match-end 0))
+       ;; Comments
+       ((looking-at "# ") (setq column 0))
+       ;; Headings
+       ((looking-at org-outline-regexp) (setq column 0))
+       ;; Included files
+       ((looking-at "#\\+include:") (setq column 0))
+       ;; Footnote definition
+       ((looking-at org-footnote-definition-re) (setq column 0))
+       ;; Literal examples
+       ((looking-at "[ \t]*:\\( \\|$\\)")
+	(setq column (org-get-indentation))) ; do nothing
+       ;; Lists
+       ((ignore-errors (goto-char (org-in-item-p)))
+	(setq column (if itemp
+			 (org-get-indentation)
+		       (org-list-item-body-column (point))))
+	(goto-char pos))
+       ;; Drawers
+       ((and (looking-at "[ \t]*:END:")
+	     (save-excursion (re-search-backward org-drawer-regexp nil t)))
+	(save-excursion
+	  (goto-char (1- (match-beginning 1)))
 	  (setq column (current-column))))
-       ;; A drawer had started and is unfinished
-       ((looking-at org-drawer-regexp)
-	(goto-char (1- (match-beginning 1)))
-	(setq column (current-column)))
-       ;; Else, nothing noticeable found: get indentation and go on.
-       (t (setq column (org-get-indentation))))))
-    ;; Now apply indentation and move cursor accordingly
-    (goto-char pos)
-    (if (<= (current-column) (current-indentation))
-	(org-indent-line-to column)
-      (save-excursion (org-indent-line-to column)))
-    ;; Special polishing for properties, see `org-property-format'
-    (setq column (current-column))
-    (beginning-of-line 1)
-    (if (looking-at
-	 "\\([ \t]+\\)\\(:[-_0-9a-zA-Z]+:\\)[ \t]*\\(\\S-.*\\(\\S-\\|$\\)\\)")
-	(replace-match (concat (match-string 1)
-			       (format org-property-format
-				       (match-string 2) (match-string 3)))
-		       t t))
-    (org-move-to-column column)))
+       ;; Special blocks
+       ((and (looking-at "[ \t]*#\\+end_\\([a-z]+\\)")
+	     (save-excursion
+	       (re-search-backward
+		(concat "^[ \t]*#\\+begin_" (downcase (match-string 1))) nil t)))
+	(setq column (org-get-indentation (match-string 0))))
+       ((and (not (looking-at "[ \t]*#\\+begin_"))
+	     (org-between-regexps-p "^[ \t]*#\\+begin_" "[ \t]*#\\+end_"))
+	(save-excursion
+	  (re-search-backward "^[ \t]*#\\+begin_\\([a-z]+\\)" nil t))
+	(setq column
+	      (cond ((equal (downcase (match-string 1)) "src")
+		     ;; src blocks: let `org-edit-src-exit' handle them
+		     (org-get-indentation))
+		    ((equal (downcase (match-string 1)) "example")
+		     (max (org-get-indentation)
+			  (org-get-indentation (match-string 0))))
+		    (t
+		     (org-get-indentation (match-string 0))))))
+       ;; This line has nothing special, look at the previous relevant
+       ;; line to compute indentation
+       (t
+	(beginning-of-line 0)
+	(while (and (not (bobp))
+		    (not (looking-at org-drawer-regexp))
+		    ;; When point started in an inline task, do not move
+		    ;; above task starting line.
+		    (not (and inline-task-p (looking-at inline-re)))
+		    ;; Skip drawers, blocks, empty lines, verbatim,
+		    ;; comments, tables, footnotes definitions, lists,
+		    ;; inline tasks.
+		    (or (and (looking-at "[ \t]*:END:")
+			     (re-search-backward org-drawer-regexp nil t))
+			(and (looking-at "[ \t]*#\\+end_")
+			     (re-search-backward "[ \t]*#\\+begin_"nil t))
+			(looking-at "[ \t]*[\n:#|]")
+			(looking-at org-footnote-definition-re)
+			(and (ignore-errors (goto-char (org-in-item-p)))
+			     (goto-char
+			      (org-list-get-top-point (org-list-struct))))
+			(and (not inline-task-p)
+			     (featurep 'org-inlinetask)
+			     (org-inlinetask-in-task-p)
+			     (or (org-inlinetask-goto-beginning) t))))
+	  (beginning-of-line 0))
+	(cond
+	 ;; There was an heading above.
+	 ((looking-at "\\*+[ \t]+")
+	  (if (not org-adapt-indentation)
+	      (setq column 0)
+	    (goto-char (match-end 0))
+	    (setq column (current-column))))
+	 ;; A drawer had started and is unfinished
+	 ((looking-at org-drawer-regexp)
+	  (goto-char (1- (match-beginning 1)))
+	  (setq column (current-column)))
+	 ;; Else, nothing noticeable found: get indentation and go on.
+	 (t (setq column (org-get-indentation))))))
+      ;; Now apply indentation and move cursor accordingly
+      (goto-char pos)
+      (if (<= (current-column) (current-indentation))
+	  (org-indent-line-to column)
+	(save-excursion (org-indent-line-to column)))
+      ;; Special polishing for properties, see `org-property-format'
+      (setq column (current-column))
+      (beginning-of-line 1)
+      (if (looking-at
+	   "\\([ \t]+\\)\\(:[-_0-9a-zA-Z]+:\\)[ \t]*\\(\\S-.*\\(\\S-\\|$\\)\\)")
+	  (replace-match (concat (match-string 1)
+				 (format org-property-format
+					 (match-string 2) (match-string 3)))
+			 t t))
+      (org-move-to-column column))))
 
 (defun org-indent-drawer ()
   "Indent the drawer at point."
@@ -20670,8 +20682,9 @@ the functionality can be provided as a fall-back.")
 	  ;; a paragraph adjacent to a list: make sure this paragraph
 	  ;; doesn't get merged with the end of the list by narrowing
 	  ;; buffer first.
-	  ((save-excursion (forward-paragraph -1)
-			   (setq itemp (org-in-item-p)))
+	  ((and (derived-mode-p 'org-mode)
+		(save-excursion (forward-paragraph -1)
+				(setq itemp (org-in-item-p))))
 	   (let ((struct (save-excursion (goto-char itemp)
 					 (org-list-struct))))
 	     (save-restriction
@@ -20680,13 +20693,18 @@ the functionality can be provided as a fall-back.")
 						 (point)))
 	       (fill-paragraph justify) t)))
 	  ;; Don't fill schedule/deadline line before a paragraph
-	  ((save-excursion (forward-paragraph -1)
-			   (or (looking-at (concat "^[^\n]*" org-scheduled-regexp ".*$"))
-			       (looking-at (concat "^[^\n]*" org-deadline-regexp ".*$"))))
+	  ;; This only makes sense in real org-mode buffers
+	  ((and (eq major-mode 'org-mode)
+		(save-excursion (forward-paragraph -1)
+				(or (looking-at (concat "^[^\n]*" org-scheduled-regexp ".*$"))
+				    (looking-at (concat "^[^\n]*" org-deadline-regexp ".*$")))))
 	   (save-restriction
 	     (narrow-to-region (1+ (match-end 0))
 			       (save-excursion (forward-paragraph 1) (point)))
 	     (fill-paragraph justify) t))
+	  ;; Else falls back on `org-fill-paragraph-fallback-function'
+	  (org-fill-paragraph-fallback-function
+	   (funcall org-fill-paragraph-fallback-function))
 	  ;; Else simply call `fill-paragraph'.
 	  (t nil))))
 
@@ -20725,13 +20743,16 @@ the functionality can be provided as a fall-back.")
   (let (itemp prefix)
     ;; When in a list, compute an appropriate fill-prefix and make
     ;; sure it will be used by `do-auto-fill'.
-    (if (setq itemp (org-in-item-p))
-	(progn
-	  (setq prefix (make-string (org-list-item-body-column itemp) ?\ ))
-	  (flet ((fill-context-prefix (from to &optional flr) prefix))
-	    (do-auto-fill)))
-      ;; Else just use `do-auto-fill'.
-      (do-auto-fill))))
+    (cond ((setq itemp (org-in-item-p))
+	   (progn
+	     (setq prefix (make-string (org-list-item-body-column itemp) ?\ ))
+	     (flet ((fill-context-prefix (from to &optional flr) prefix))
+	       (do-auto-fill))))
+	  (org-auto-fill-fallback-function
+	   (let ((fill-prefix ""))
+	     (funcall org-auto-fill-fallback-function)))
+	  ;; Else just use `do-auto-fill'.
+	  (t (do-auto-fill)))))
 
 ;;; Other stuff.
 
