@@ -1025,10 +1025,8 @@ containing `:begin', `:end', `:hiddenp', `:value' and
 (defun org-element-comment-block-interpreter (comment-block contents)
   "Interpret COMMENT-BLOCK element as Org syntax.
 CONTENTS is nil."
-  (concat "#+BEGIN_COMMENT\n"
-	  (org-remove-indentation
-	   (org-element-property :value comment-block))
-	  "#+BEGIN_COMMENT"))
+  (format "#+BEGIN_COMMENT\n%s#+END_COMMENT"
+	  (org-remove-indentation (org-element-property :value comment-block))))
 
 
 ;;;; Example Block
