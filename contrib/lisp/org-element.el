@@ -271,7 +271,7 @@ CONTENTS is the contents of the element."
   (format "#+BEGIN: %s%s\n%s#+END:"
 	  (org-element-property :block-name dynamic-block)
 	  (let ((args (org-element-property :arguments dynamic-block)))
-	    (and arg (concat " " args)))
+	    (and args (concat " " args)))
 	  contents))
 
 
@@ -2913,6 +2913,14 @@ it is quicker than its counterpart, albeit more restrictive."
        ;; Babel Call.
        ((looking-at org-babel-block-lob-one-liner-regexp)
         (org-element-babel-call-parser))
+       ;; Dynamic Block or Paragraph if incomplete.  This must be
+       ;; checked before regular keywords since their regexp matches
+       ;; dynamic blocks too.
+       ((looking-at "[ \t]*#\\+BEGIN:\\(?: \\|$\\)")
+        (if (save-excursion
+	      (re-search-forward "^[ \t]*#\\+END:\\(?: \\|$\\)" nil t))
+            (org-element-dynamic-block-parser)
+          (org-element-paragraph-parser)))
        ;; Keyword, or Paragraph if at an orphaned affiliated keyword.
        ((looking-at "[ \t]*#\\+\\([a-z]+\\(:?_[a-z]+\\)*\\):")
         (let ((key (upcase (match-string 1))))
@@ -2923,12 +2931,6 @@ it is quicker than its counterpart, albeit more restrictive."
        ;; Footnote definition.
        ((looking-at org-footnote-definition-re)
         (org-element-footnote-definition-parser))
-       ;; Dynamic Block or Paragraph if incomplete.
-       ((looking-at "[ \t]*#\\+BEGIN:\\(?: \\|$\\)")
-        (if (save-excursion
-              (re-search-forward "^[ \t]*#\\+END:\\(?: \\|$\\)" nil t))
-            (org-element-dynamic-block-parser)
-          (org-element-paragraph-parser)))
        ;; Comment.
        ((looking-at "\\(#\\|[ \t]*#\\+\\(?: \\|$\\)\\)")
 	(org-element-comment-parser))
