@@ -45,7 +45,7 @@
 ;; `example-block', `export-block', `fixed-width', `horizontal-rule',
 ;; `keyword', `latex-environment', `paragraph', `property-drawer',
 ;; `quote-section', `src-block', `table', `table-cell', `table-row'
-;; and `verse-blocks'.  Among them, `paragraph', `table-cell' and
+;; and `verse-block'.  Among them, `paragraph', `table-cell' and
 ;; `verse-block' types can contain Org objects and plain text.
 ;;
 ;; Objects are related to document's contents.  Some of them are
@@ -152,7 +152,7 @@
 (defun org-element-center-block-parser ()
   "Parse a center block.
 
-Return a list whose car is `center-block' and cdr is a plist
+Return a list whose CAR is `center-block' and CDR is a plist
 containing `:begin', `:end', `:hiddenp', `:contents-begin',
 `:contents-end' and `:post-blank' keywords.
 
@@ -185,7 +185,7 @@ Assume point is at beginning or end of the block."
 (defun org-element-center-block-interpreter (center-block contents)
   "Interpret CENTER-BLOCK element as Org syntax.
 CONTENTS is the contents of the element."
-  (format "#+begin_center\n%s#+end_center" contents))
+  (format "#+BEGIN_CENTER\n%s#+END_CENTER" contents))
 
 
 ;;;; Drawer
@@ -193,7 +193,7 @@ CONTENTS is the contents of the element."
 (defun org-element-drawer-parser ()
   "Parse a drawer.
 
-Return a list whose car is `drawer' and cdr is a plist containing
+Return a list whose CAR is `drawer' and CDR is a plist containing
 `:drawer-name', `:begin', `:end', `:hiddenp', `:contents-begin',
 `:contents-end' and `:post-blank' keywords.
 
@@ -234,7 +234,7 @@ CONTENTS is the contents of the element."
 (defun org-element-dynamic-block-parser ()
   "Parse a dynamic block.
 
-Return a list whose car is `dynamic-block' and cdr is a plist
+Return a list whose CAR is `dynamic-block' and CDR is a plist
 containing `:block-name', `:begin', `:end', `:hiddenp',
 `:contents-begin', `:contents-end', `:arguments' and
 `:post-blank' keywords.
@@ -325,7 +325,7 @@ CONTENTS is the contents of the footnote-definition."
 (defun org-element-headline-parser (&optional raw-secondary-p)
   "Parse an headline.
 
-Return a list whose car is `headline' and cdr is a plist
+Return a list whose CAR is `headline' and CDR is a plist
 containing `:raw-value', `:title', `:begin', `:end',
 `:pre-blank', `:hiddenp', `:contents-begin' and `:contents-end',
 `:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
@@ -483,7 +483,7 @@ CONTENTS is the contents of the element."
 (defun org-element-inlinetask-parser (&optional raw-secondary-p)
   "Parse an inline task.
 
-Return a list whose car is `inlinetask' and cdr is a plist
+Return a list whose CAR is `inlinetask' and CDR is a plist
 containing `:title', `:begin', `:end', `:hiddenp',
 `:contents-begin' and `:contents-end', `:level', `:priority',
 `:tags', `:todo-keyword', `:todo-type', `:scheduled',
@@ -590,7 +590,7 @@ CONTENTS is the contents of inlinetask."
 
 STRUCT is the structure of the plain list.
 
-Return a list whose car is `item' and cdr is a plist containing
+Return a list whose CAR is `item' and CDR is a plist containing
 `:bullet', `:begin', `:end', `:contents-begin', `:contents-end',
 `:checkbox', `:counter', `:tag', `:structure', `:hiddenp' and
 `:post-blank' keywords.
@@ -701,7 +701,7 @@ CONTENTS is the contents of the element."
 Optional argument STRUCTURE, when non-nil, is the structure of
 the plain list being parsed.
 
-Return a list whose car is `plain-list' and cdr is a plist
+Return a list whose CAR is `plain-list' and CDR is a plist
 containing `:type', `:begin', `:end', `:contents-begin' and
 `:contents-end', `:level', `:structure' and `:post-blank'
 keywords.
@@ -756,7 +756,7 @@ CONTENTS is the contents of the element."
 (defun org-element-quote-block-parser ()
   "Parse a quote block.
 
-Return a list whose car is `quote-block' and cdr is a plist
+Return a list whose CAR is `quote-block' and CDR is a plist
 containing `:begin', `:end', `:hiddenp', `:contents-begin',
 `:contents-end' and `:post-blank' keywords.
 
@@ -797,7 +797,7 @@ CONTENTS is the contents of the element."
 (defun org-element-section-parser ()
   "Parse a section.
 
-Return a list whose car is `section' and cdr is a plist
+Return a list whose CAR is `section' and CDR is a plist
 containing `:begin', `:end', `:contents-begin', `contents-end'
 and `:post-blank' keywords."
   (save-excursion
@@ -831,7 +831,7 @@ CONTENTS is the contents of the element."
 (defun org-element-special-block-parser ()
   "Parse a special block.
 
-Return a list whose car is `special-block' and cdr is a plist
+Return a list whose CAR is `special-block' and CDR is a plist
 containing `:type', `:begin', `:end', `:hiddenp',
 `:contents-begin', `:contents-end' and `:post-blank' keywords.
 
@@ -893,7 +893,7 @@ CONTENTS is the contents of the element."
 (defun org-element-babel-call-parser ()
   "Parse a babel call.
 
-Return a list whose car is `babel-call' and cdr is a plist
+Return a list whose CAR is `babel-call' and CDR is a plist
 containing `:begin', `:end', `:info' and `:post-blank' as
 keywords."
   (save-excursion
@@ -929,7 +929,7 @@ CONTENTS is nil."
 (defun org-element-comment-parser ()
   "Parse a comment.
 
-Return a list whose car is `comment' and cdr is a plist
+Return a list whose CAR is `comment' and CDR is a plist
 containing `:begin', `:end', `:value' and `:post-blank'
 keywords."
   (let (beg-coms begin end end-coms keywords)
@@ -982,7 +982,7 @@ CONTENTS is nil."
 (defun org-element-comment-block-parser ()
   "Parse an export block.
 
-Return a list whose car is `comment-block' and cdr is a plist
+Return a list whose CAR is `comment-block' and CDR is a plist
 containing `:begin', `:end', `:hiddenp', `:value' and
 `:post-blank' keywords."
   (save-excursion
@@ -1012,10 +1012,10 @@ containing `:begin', `:end', `:hiddenp', `:value' and
 (defun org-element-comment-block-interpreter (comment-block contents)
   "Interpret COMMENT-BLOCK element as Org syntax.
 CONTENTS is nil."
-  (concat "#+begin_comment\n"
+  (concat "#+BEGIN_COMMENT\n"
 	  (org-remove-indentation
 	   (org-element-property :value comment-block))
-	  "#+begin_comment"))
+	  "#+BEGIN_COMMENT"))
 
 
 ;;;; Example Block
@@ -1023,7 +1023,7 @@ CONTENTS is nil."
 (defun org-element-example-block-parser ()
   "Parse an example block.
 
-Return a list whose car is `example-block' and cdr is a plist
+Return a list whose CAR is `example-block' and CDR is a plist
 containing `:begin', `:end', `:number-lines', `:preserve-indent',
 `:retain-labels', `:use-labels', `:label-fmt', `:hiddenp',
 `:switches', `:value' and `:post-blank' keywords."
@@ -1094,7 +1094,7 @@ CONTENTS is nil."
 (defun org-element-export-block-parser ()
   "Parse an export block.
 
-Return a list whose car is `export-block' and cdr is a plist
+Return a list whose CAR is `export-block' and CDR is a plist
 containing `:begin', `:end', `:type', `:hiddenp', `:value' and
 `:post-blank' keywords."
   (save-excursion
@@ -1139,7 +1139,7 @@ CONTENTS is nil."
 (defun org-element-fixed-width-parser ()
   "Parse a fixed-width section.
 
-Return a list whose car is `fixed-width' and cdr is a plist
+Return a list whose CAR is `fixed-width' and CDR is a plist
 containing `:begin', `:end', `:value' and `:post-blank'
 keywords."
   (let ((fixed-re "[ \t]*:\\( \\|$\\)")
@@ -1188,7 +1188,7 @@ CONTENTS is nil."
 (defun org-element-horizontal-rule-parser ()
   "Parse an horizontal rule.
 
-   Return a list whose car is `horizontal-rule' and cdr is
+   Return a list whose CAR is `horizontal-rule' and CDR is
    a plist containing `:begin', `:end' and `:post-blank'
    keywords."
   (save-excursion
@@ -1214,7 +1214,7 @@ CONTENTS is nil."
 (defun org-element-keyword-parser ()
   "Parse a keyword at point.
 
-Return a list whose car is `keyword' and cdr is a plist
+Return a list whose CAR is `keyword' and CDR is a plist
 containing `:key', `:value', `:begin', `:end' and `:post-blank'
 keywords."
   (save-excursion
@@ -1247,8 +1247,9 @@ CONTENTS is nil."
 (defun org-element-latex-environment-parser ()
   "Parse a LaTeX environment.
 
-Return a list whose car is `latex-environment' and cdr is a plist
-containing `:begin', `:end', `:value' and `:post-blank' keywords."
+Return a list whose CAR is `latex-environment' and CDR is a plist
+containing `:begin', `:end', `:value' and `:post-blank'
+keywords."
   (save-excursion
     (end-of-line)
     (let* ((case-fold-search t)
@@ -1279,7 +1280,7 @@ CONTENTS is nil."
 (defun org-element-paragraph-parser ()
   "Parse a paragraph.
 
-Return a list whose car is `paragraph' and cdr is a plist
+Return a list whose CAR is `paragraph' and CDR is a plist
 containing `:begin', `:end', `:contents-begin' and
 `:contents-end' and `:post-blank' keywords.
 
@@ -1316,7 +1317,7 @@ CONTENTS is the contents of the element."
 (defun org-element-property-drawer-parser ()
   "Parse a property drawer.
 
-Return a list whose car is `property-drawer' and cdr is a plist
+Return a list whose CAR is `property-drawer' and CDR is a plist
 containing `:begin', `:end', `:hiddenp', `:contents-begin',
 `:contents-end', `:properties' and `:post-blank' keywords."
   (save-excursion
@@ -1367,9 +1368,8 @@ CONTENTS is nil."
 (defun org-element-quote-section-parser ()
   "Parse a quote section.
 
-Return a list whose car is `quote-section' and cdr is a plist
-containing `:begin', `:end', `:value' and `:post-blank'
-keywords.
+Return a list whose CAR is `quote-section' and CDR is a plist
+containing `:begin', `:end', `:value' and `:post-blank' keywords.
 
 Assume point is at beginning of the section."
   (save-excursion
@@ -1397,7 +1397,7 @@ CONTENTS is nil."
 (defun org-element-src-block-parser ()
   "Parse a src block.
 
-Return a list whose car is `src-block' and cdr is a plist
+Return a list whose CAR is `src-block' and CDR is a plist
 containing `:language', `:switches', `:parameters', `:begin',
 `:end', `:hiddenp', `:contents-begin', `:contents-end',
 `:number-lines', `:retain-labels', `:use-labels', `:label-fmt',
@@ -1635,8 +1635,8 @@ CONTENTS is verse block contents."
 ;; (i.e. `emphasis' and `verbatim' objects).
 
 ;; A successor must accept a single argument bounding the search.  It
-;; will return either a cons cell whose car is the object's type, as
-;; a symbol, and cdr the position of its next occurrence, or nil.
+;; will return either a cons cell whose CAR is the object's type, as
+;; a symbol, and CDR the position of its next occurrence, or nil.
 
 ;; Successors follow the naming convention:
 ;; org-element-NAME-successor, where NAME is the name of the
@@ -1657,7 +1657,7 @@ CONTENTS is verse block contents."
 (defun org-element-emphasis-parser ()
   "Parse text markup object at point.
 
-Return a list whose car is `emphasis' and cdr is a plist with
+Return a list whose CAR is `emphasis' and CDR is a plist with
 `:marker', `:begin', `:end', `:contents-begin' and
 `:contents-end' and `:post-blank' keywords.
 
@@ -1691,8 +1691,8 @@ CONTENTS is the contents of the object."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `emphasis' or
-`verbatim' and cdr is beginning position."
+Return value is a cons cell whose CAR is `emphasis' or `verbatim'
+and CDR is beginning position."
   (save-excursion
     (unless (bolp) (backward-char))
     (when (re-search-forward org-emph-re limit t)
@@ -1706,7 +1706,7 @@ Return value is a cons cell whose car is `emphasis' or
 (defun org-element-entity-parser ()
   "Parse entity at point.
 
-Return a list whose car is `entity' and cdr a plist with
+Return a list whose CAR is `entity' and CDR a plist with
 `:begin', `:end', `:latex', `:latex-math-p', `:html', `:latin1',
 `:utf-8', `:ascii', `:use-brackets-p' and `:post-blank' as
 keywords.
@@ -1746,8 +1746,8 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `entity' or
-`latex-fragment' and cdr is beginning position."
+Return value is a cons cell whose CAR is `entity' or
+`latex-fragment' and CDR is beginning position."
   (save-excursion
     (let ((matchers (plist-get org-format-latex-options :matchers))
 	  ;; ENTITY-RE matches both LaTeX commands and Org entities.
@@ -1781,7 +1781,7 @@ Return value is a cons cell whose car is `entity' or
 (defun org-element-export-snippet-parser ()
   "Parse export snippet at point.
 
-Return a list whose car is `export-snippet' and cdr a plist with
+Return a list whose CAR is `export-snippet' and CDR a plist with
 `:begin', `:end', `:back-end', `:value' and `:post-blank' as
 keywords.
 
@@ -1814,7 +1814,7 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `export-snippet' cdr is
+Return value is a cons cell whose CAR is `export-snippet' CDR is
 its beginning position."
   (save-excursion
     (catch 'exit
@@ -1899,8 +1899,8 @@ CDR is beginning position."
 (defun org-element-inline-babel-call-parser ()
   "Parse inline babel call at point.
 
-Return a list whose car is `inline-babel-call' and cdr a plist with
-`:begin', `:end', `:info' and `:post-blank' as keywords.
+Return a list whose CAR is `inline-babel-call' and CDR a plist
+with `:begin', `:end', `:info' and `:post-blank' as keywords.
 
 Assume point is at the beginning of the babel call."
   (save-excursion
@@ -1936,8 +1936,8 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `inline-babel-call' and
-cdr is beginning position."
+Return value is a cons cell whose CAR is `inline-babel-call' and
+CDR is beginning position."
   (save-excursion
     ;; Use a simplified version of
     ;; org-babel-inline-lob-one-liner-regexp as regexp for more speed.
@@ -1952,7 +1952,7 @@ cdr is beginning position."
 (defun org-element-inline-src-block-parser ()
   "Parse inline source block at point.
 
-Return a list whose car is `inline-src-block' and cdr a plist
+Return a list whose CAR is `inline-src-block' and CDR a plist
 with `:begin', `:end', `:language', `:value', `:parameters' and
 `:post-blank' as keywords.
 
@@ -1991,8 +1991,8 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `inline-babel-call' and
-cdr is beginning position."
+Return value is a cons cell whose CAR is `inline-babel-call' and
+CDR is beginning position."
   (save-excursion
     (when (re-search-forward org-babel-inline-src-block-regexp limit t)
       (cons 'inline-src-block (match-beginning 1)))))
@@ -2003,7 +2003,7 @@ cdr is beginning position."
 (defun org-element-latex-fragment-parser ()
   "Parse latex fragment at point.
 
-Return a list whose car is `latex-fragment' and cdr a plist with
+Return a list whose CAR is `latex-fragment' and CDR a plist with
 `:value', `:begin', `:end', and `:post-blank' as keywords.
 
 Assume point is at the beginning of the latex fragment."
@@ -2043,7 +2043,7 @@ CONTENTS is nil."
 (defun org-element-line-break-parser ()
   "Parse line break at point.
 
-Return a list whose car is `line-break', and cdr a plist with
+Return a list whose CAR is `line-break', and CDR a plist with
 `:begin', `:end' and `:post-blank' keywords.
 
 Assume point is at the beginning of the line break."
@@ -2061,7 +2061,7 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `line-break' and cdr is
+Return value is a cons cell whose CAR is `line-break' and CDR is
 beginning position."
   (save-excursion
     (let ((beg (and (re-search-forward "[^\\\\]\\(\\\\\\\\\\)[ \t]*$" limit t)
@@ -2076,7 +2076,7 @@ beginning position."
 (defun org-element-link-parser ()
   "Parse link at point.
 
-Return a list whose car is `link' and cdr a plist with `:type',
+Return a list whose CAR is `link' and CDR a plist with `:type',
 `:path', `:raw-link', `:begin', `:end', `:contents-begin',
 `:contents-end' and `:post-blank' as keywords.
 
@@ -2164,7 +2164,7 @@ CONTENTS is the contents of the object, or nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `link' and cdr is
+Return value is a cons cell whose CAR is `link' and CDR is
 beginning position."
   (save-excursion
     (let ((link-regexp
@@ -2179,7 +2179,7 @@ beginning position."
 (defun org-element-macro-parser ()
   "Parse macro at point.
 
-Return a list whose car is `macro' and cdr a plist with `:key',
+Return a list whose CAR is `macro' and CDR a plist with `:key',
 `:args', `:begin', `:end', `:value' and `:post-blank' as
 keywords.
 
@@ -2221,7 +2221,7 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is cons cell whose car is `macro' and cdr is
+Return value is cons cell whose CAR is `macro' and CDR is
 beginning position."
   (save-excursion
     (when (re-search-forward
@@ -2235,7 +2235,7 @@ beginning position."
 (defun org-element-radio-target-parser ()
   "Parse radio target at point.
 
-Return a list whose car is `radio-target' and cdr a plist with
+Return a list whose CAR is `radio-target' and CDR a plist with
 `:begin', `:end', `:contents-begin', `:contents-end', `:value'
 and `:post-blank' as keywords.
 
@@ -2267,7 +2267,7 @@ CONTENTS is the contents of the object."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `radio-target' and cdr
+Return value is a cons cell whose CAR is `radio-target' and CDR
 is beginning position."
   (save-excursion
      (when (re-search-forward org-radio-target-regexp limit t)
@@ -2279,7 +2279,7 @@ is beginning position."
 (defun org-element-statistics-cookie-parser ()
   "Parse statistics cookie at point.
 
-Return a list whose car is `statistics-cookie', and cdr a plist
+Return a list whose CAR is `statistics-cookie', and CDR a plist
 with `:begin', `:end', `:value' and `:post-blank' keywords.
 
 Assume point is at the beginning of the statistics-cookie."
@@ -2307,8 +2307,8 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `statistics-cookie' and
-cdr is beginning position."
+Return value is a cons cell whose CAR is `statistics-cookie' and
+CDR is beginning position."
   (save-excursion
     (when (re-search-forward "\\[[0-9]*\\(%\\|/[0-9]*\\)\\]" limit t)
       (cons 'statistics-cookie (match-beginning 0)))))
@@ -2319,7 +2319,7 @@ cdr is beginning position."
 (defun org-element-subscript-parser ()
   "Parse subscript at point.
 
-Return a list whose car is `subscript' and cdr a plist with
+Return a list whose CAR is `subscript' and CDR a plist with
 `:begin', `:end', `:contents-begin', `:contents-end',
 `:use-brackets-p' and `:post-blank' as keywords.
 
@@ -2356,8 +2356,8 @@ CONTENTS is the contents of the object."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is either `subscript' or
-`superscript' and cdr is beginning position."
+Return value is a cons cell whose CAR is either `subscript' or
+`superscript' and CDR is beginning position."
   (save-excursion
     (when (re-search-forward org-match-substring-regexp limit t)
       (cons (if (string= (match-string 2) "_") 'subscript 'superscript)
@@ -2369,7 +2369,7 @@ Return value is a cons cell whose car is either `subscript' or
 (defun org-element-superscript-parser ()
   "Parse superscript at point.
 
-Return a list whose car is `superscript' and cdr a plist with
+Return a list whose CAR is `superscript' and CDR a plist with
 `:begin', `:end', `:contents-begin', `:contents-end',
 `:use-brackets-p' and `:post-blank' as keywords.
 
@@ -2468,7 +2468,7 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `target' and cdr is
+Return value is a cons cell whose CAR is `target' and CDR is
 beginning position."
   (save-excursion
      (when (re-search-forward org-target-regexp limit t)
@@ -2480,7 +2480,7 @@ beginning position."
 (defun org-element-time-stamp-parser ()
   "Parse time stamp at point.
 
-Return a list whose car is `time-stamp', and cdr a plist with
+Return a list whose CAR is `time-stamp', and CDR a plist with
 `:appt-type', `:type', `:begin', `:end', `:value' and
 `:post-blank' keywords.
 
@@ -2536,7 +2536,7 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose car is `time-stamp' and cdr is
+Return value is a cons cell whose CAR is `time-stamp' and CDR is
 beginning position."
   (save-excursion
     (when (re-search-forward
@@ -2556,7 +2556,7 @@ beginning position."
 (defun org-element-verbatim-parser ()
   "Parse verbatim object at point.
 
-Return a list whose car is `verbatim' and cdr is a plist with
+Return a list whose CAR is `verbatim' and CDR is a plist with
 `:marker', `:begin', `:end' and `:post-blank' keywords.
 
 Assume point is at the first verbatim marker."
@@ -2832,7 +2832,8 @@ Optional argument SPECIAL, when non-nil, can be either `item',
 parse item wise instead of plain-list wise, using STRUCTURE as
 the current list structure.  `section' (resp. `quote-section')
 will try to parse a section (resp. a quote section) before
-anything else.
+anything else, whereas `table-row' will look for rows within
+a table.
 
 If STRUCTURE isn't provided but SPECIAL is set to `item', it will
 be computed.
@@ -2858,9 +2859,9 @@ it is quicker than its counterpart, albeit more restrictive."
        ((eq special 'item)
 	(org-element-item-parser (or structure (org-list-struct))
 				 raw-secondary-p))
-       ;; Quote section.
+       ;; Quote Section.
        ((eq special 'quote-section) (org-element-quote-section-parser))
-       ;; Table Row
+       ;; Table Row.
        ((eq special 'table-row) (org-element-table-row-parser))
        ;; Headline.
        ((org-with-limited-levels (org-at-heading-p))
