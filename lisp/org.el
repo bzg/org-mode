@@ -20706,7 +20706,7 @@ the functionality can be provided as a fall-back.")
 	     (fill-paragraph justify) t))
 	  ;; Else falls back on `org-fill-paragraph-fallback-function'
 	  (org-fill-paragraph-fallback-function
-	   (funcall org-fill-paragraph-fallback-function))
+	   (funcall org-fill-paragraph-fallback-function justify))
 	  ;; Else simply call `fill-paragraph'.
 	  (t nil))))
 
