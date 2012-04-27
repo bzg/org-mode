@@ -311,6 +311,11 @@ Note that the variable `org-tag-faces' can be used to overrule this face for
 specific tags."
   :group 'org-faces)
 
+(defface org-list-dt
+  '((t (:bold t)))
+  "Default face for definition terms in lists."
+  :group 'org-faces)
+
 (defface org-todo ; font-lock-warning-face
   (org-compatible-face nil
     '((((class color) (min-colors 16) (background light)) (:foreground "Red1" :bold t))

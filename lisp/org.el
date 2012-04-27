@@ -5893,7 +5893,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 		 (0 (org-get-checkbox-statistics-face) t)))
 	   ;; Description list items
 	   '("^[ \t]*[-+*][ \t]+\\(.*?[ \t]+::\\)\\([ \t]+\\|$\\)"
-	     1 'bold prepend)
+	     1 'org-list-dt prepend)
 	   ;; ARCHIVEd headings
 	   (list (concat
 		  org-outline-regexp-bol
