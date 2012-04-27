@@ -344,9 +344,20 @@ body\n")))
 	(org-test-with-temp-text "* Head1\n* Head2 (note)\n"
 	  (should (equal (org-export-as 'test) "* Head1\n")))))))
 
+(ert-deftest test-org-export/before-parsing-hook ()
+  "Test `org-export-before-parsing-hook'."
+  (org-test-with-backend "test"
+    (org-test-with-temp-text "* Headline 1\nBody 1\n* Headline 2\nBody 2"
+      (let ((org-export-before-parsing-hook
+	     ((lambda ()
+		(org-map-entries
+		 (lambda ()
+		   (delete-region (point) (progn (forward-line) (point)))))))))
+	(should (equal (org-export-as 'test) "Body 1\nBody 2\n"))))))
+
 
 
-;; Footnotes
+;;; Footnotes
 
 (ert-deftest test-org-export/footnotes ()
   "Test footnotes specifications."

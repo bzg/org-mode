@@ -145,8 +145,8 @@
     (:with-todo-keywords nil "todo" org-export-with-todo-keywords))
   "Alist between export properties and ways to set them.
 
-The car of the alist is the property name, and the cdr is a list
-like \(KEYWORD OPTION DEFAULT BEHAVIOUR\) where:
+The CAR of the alist is the property name, and the CDR is a list
+like (KEYWORD OPTION DEFAULT BEHAVIOUR) where:
 
 KEYWORD is a string representing a buffer keyword, or nil.
 OPTION is a string that could be found in an #+OPTIONS: line.
@@ -630,9 +630,10 @@ This variable can be either set to `buffer' or `subtree'."
 (defcustom org-export-show-temporary-export-buffer t
   "Non-nil means show buffer after exporting to temp buffer.
 When Org exports to a file, the buffer visiting that file is ever
-shown, but remains buried.  However, when exporting to a temporary
-buffer, that buffer is popped up in a second window.  When this variable
-is nil, the buffer remains buried also in these cases."
+shown, but remains buried.  However, when exporting to
+a temporary buffer, that buffer is popped up in a second window.
+When this variable is nil, the buffer remains buried also in
+these cases."
   :group 'org-export-general
   :type 'boolean)
 
@@ -1663,15 +1664,15 @@ Any element in `:ignore-list' will be skipped when using
 ;; Filters allow end-users to tweak easily the transcoded output.
 ;; They are the functional counterpart of hooks, as every filter in
 ;; a set is applied to the return value of the previous one.
-
+;;
 ;; Every set is back-end agnostic.  Although, a filter is always
 ;; called, in addition to the string it applies to, with the back-end
 ;; used as argument, so it's easy enough for the end-user to add
 ;; back-end specific filters in the set.  The communication channel,
 ;; as a plist, is required as the third argument.
-
+;;
 ;; Filters sets are defined below. There are of four types:
-
+;;
 ;; - `org-export-filter-parse-tree-functions' applies directly on the
 ;;   complete parsed tree.  It's the only filters set that doesn't
 ;;   apply to a string.
@@ -1681,32 +1682,46 @@ Any element in `:ignore-list' will be skipped when using
 ;;   not recognized as Org syntax.
 ;; - `org-export-filter-TYPE-functions' applies on the string returned
 ;;   after an element or object of type TYPE has been transcoded.
-
+;;
 ;; All filters sets are applied through
 ;; `org-export-filter-apply-functions' function.  Filters in a set are
 ;; applied in a LIFO fashion.  It allows developers to be sure that
 ;; their filters will be applied first.
+;;
+;; Filters properties are installed in communication channel with
+;; `org-export-install-filters' function.
+;;
+;; Eventually, a hook (`org-export-before-parsing-hook') is run just
+;; before parsing to allow for heavy structure modifications.
 
-;; Filters properties are installed in communication channel just
-;; before parsing, with `org-export-install-filters' function.
+
+;;;; Before Parsing Hook
+
+(defvar org-export-before-parsing-hook nil
+  "Hook run before parsing an export buffer.
+This is run after include keywords have been expanded and Babel
+code executed, on a copy of original buffer's area being
+exported.  Visibility is the same as in the original one.  Point
+is left at the beginning of the new one.")
 
 ;;;; Special Filters
+
 (defvar org-export-filter-parse-tree-functions nil
-  "Filter, or list of filters, applied to the parsed tree.
+  "List of functions applied to the parsed tree.
 Each filter is called with three arguments: the parse tree, as
 returned by `org-element-parse-buffer', the back-end, as
 a symbol, and the communication channel, as a plist.  It must
 return the modified parse tree to transcode.")
 
 (defvar org-export-filter-final-output-functions nil
-  "Filter, or list of filters, applied to the transcoded string.
+  "List of functions applied to the transcoded string.
 Each filter is called with three arguments: the full transcoded
 string, the back-end, as a symbol, and the communication channel,
 as a plist.  It must return a string that will be used as the
 final export output.")
 
 (defvar org-export-filter-plain-text-functions nil
-  "Filter, or list of filters, applied to plain text.
+  "List of functions applied to plain text.
 Each filter is called with three arguments: a string which
 contains no Org syntax, the back-end, as a symbol, and the
 communication channel, as a plist.  It must return a string or
@@ -2141,23 +2156,22 @@ Return code as a string."
 		   backend
 		   (org-export-store-footnote-definitions
 		    (org-export-get-environment backend subtreep ext-plist))))
-	    ;; 2. Get parse tree.  If NOEXPAND is non-nil, simply
-	    ;;    parse current visible part of buffer.
-	    (tree (if noexpand (org-element-parse-buffer nil visible-only)
-		    ;; Otherwise, buffer isn't parsed directly.
-		    ;; Instead, a temporary copy is created, where
-		    ;; include keywords are expanded and code blocks
-		    ;; are evaluated.
-		    (let ((buf (or (buffer-file-name (buffer-base-buffer))
-				   (current-buffer))))
-		      (org-export-with-current-buffer-copy
+	    ;; 2. Get parse tree.  Buffer isn't parsed directly.
+	    ;;    Instead, a temporary copy is created, where include
+	    ;;    keywords are expanded and code blocks are evaluated.
+	    (tree (let ((buf (or (buffer-file-name (buffer-base-buffer))
+				 (current-buffer))))
+		    (org-export-with-current-buffer-copy
+		     (unless noexpand
 		       (org-export-expand-include-keyword)
 		       ;; Setting `org-current-export-file' is
 		       ;; required by Org Babel to properly resolve
 		       ;; noweb references.
 		       (let ((org-current-export-file buf))
-			 (org-export-blocks-preprocess))
-		       (org-element-parse-buffer nil visible-only))))))
+			 (org-export-blocks-preprocess)))
+		     (goto-char (point-min))
+		     (run-hooks 'org-export-before-parsing-hook)
+		     (org-element-parse-buffer nil visible-only)))))
 	;; 3. Call parse-tree filters to get the final tree.
 	(setq tree
 	      (org-export-filter-apply-functions
