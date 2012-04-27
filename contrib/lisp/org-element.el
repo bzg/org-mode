@@ -455,25 +455,28 @@ CONTENTS is the contents of the element."
 			  (and todo (concat " " todo))
 			  (and quotedp (concat " " org-quote-string))
 			  (and commentedp (concat " " org-comment-string))
-			  (and priority (concat " " priority))
+			  (and priority
+			       (format " [#%s]" (char-to-string priority)))
 			  (cond ((and org-footnote-section
 				      (org-element-property
 				       :footnote-section-p headline))
 				 (concat " " org-footnote-section))
-				(title (concat " " title)))))
-	 ;; Align tags.
-	 (tags-fmt (when tags
-		     (let ((tags-len (length tags)))
-		       (format "%% %ds"
-			       (cond
-				((zerop org-tags-column) (1+ tags-len))
-				((< org-tags-column 0)
-				 (max (- (+ org-tags-column (length heading)))
-				      (1+ tags-len)))
-				(t (max (+ (- org-tags-column (length heading))
-					   tags-len)
-					(1+ tags-len)))))))))
-    (concat heading (and tags (format tags-fmt tags))
+				(title (concat " " title))))))
+    (concat heading
+	    ;; Align tags.
+	    (when tags
+	      (cond
+	       ((zerop org-tags-column) (format " %s" tags))
+	       ((< org-tags-column 0)
+		(concat
+		 (make-string
+		  (max (- (+ org-tags-column (length heading) (length tags))) 1)
+		  ? )
+		 tags))
+	       (t
+		(concat
+		 (make-string (max (- org-tags-column (length heading)) 1) ? )
+		 tags))))
 	    (make-string (1+ pre-blank) 10)
 	    contents)))
 
@@ -532,7 +535,8 @@ Assume point is at beginning of the inline task."
 	   ;; In the case of a single line task, CONTENTS-BEGIN and
 	   ;; CONTENTS-END might overlap.
 	   (contents-end (max contents-begin
-			      (save-excursion (forward-line -1) (point))))
+			      (if (not (bolp)) (point-at-bol)
+				(save-excursion (forward-line -1) (point)))))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
       `(inlinetask
@@ -566,21 +570,30 @@ CONTENTS is the contents of inlinetask."
 	 (tags (org-element-property :tags inlinetask))
 	 (task (concat (make-string level ?*)
 		       (and todo (concat " " todo))
-		       (and priority (concat " " priority))
-		       (and title (concat " " title))))
-	 ;; Align tags.
-	 (tags-fmt (when tags
-		     (format "%% %ds"
-			     (cond
-			      ((zerop org-tags-column) 1)
-			      ((< 0 org-tags-column)
-			       (max (+ org-tags-column
-				       (length inlinetask)
-				       (length tags))
-				    1))
-			      (t (max (- org-tags-column (length inlinetask))
-				      1)))))))
-    (concat inlinetask (and tags (format tags-fmt tags) "\n" contents))))
+		       (and priority
+			    (format " [#%s]" (char-to-string priority)))
+		       (and title (concat " " title)))))
+    (concat task
+	    ;; Align tags.
+	    (when tags
+	      (cond
+	       ((zerop org-tags-column) (format " %s" tags))
+	       ((< org-tags-column 0)
+		(concat
+		 (make-string
+		  (max (- (+ org-tags-column (length task) (length tags))) 1)
+		  ? )
+		 tags))
+	       (t
+		(concat
+		 (make-string (max (- org-tags-column (length task)) 1) ? )
+		 tags))))
+	    ;; Prefer degenerate inlinetasks when there are no
+	    ;; contents.
+	    (when contents
+	      (concat "\n"
+		      contents
+		      (make-string level ?*) " END")))))
 
 
 ;;;; Item
