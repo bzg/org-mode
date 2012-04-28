@@ -2344,7 +2344,9 @@ from the dynamic block definition."
 	       hlc (org-minutes-to-hh:mm-string (nth 3 entry)) hlc ; time
 	       "|\n"                                               ; close line
 	       )))))
-      (backward-delete-char 1)
+      ;; When exporting subtrees or regions the region might be
+      ;; activated, so let's disable ̀delete-active-region'
+      (let ((delete-active-region nil)) (backward-delete-char 1))
       (if (setq formula (plist-get params :formula))
 	  (cond
 	   ((eq formula '%)
