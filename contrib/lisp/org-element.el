@@ -30,23 +30,25 @@
 ;; to at least one element.
 
 ;; An element always starts and ends at the beginning of a line.  With
-;; a few exceptions (namely `headline', `item', `section', `keyword',
-;; `babel-call' and `property-drawer' types), it can also accept
-;; a fixed set of keywords as attributes.  Those are called
-;; "affiliated keywords" to distinguish them from other keywords,
-;; which are full-fledged elements.
+;; a few exceptions (namely `babel-call', `clock', `headline', `item',
+;; `keyword', `planning', `property-drawer' and `section' types), it
+;; can also accept a fixed set of keywords as attributes.  Those are
+;; called "affiliated keywords" to distinguish them from other
+;; keywords, which are full-fledged elements.  All affiliated keywords
+;; are referenced in `org-element-affiliated-keywords'.
 ;;
 ;; Element containing other elements (and only elements) are called
 ;; greater elements.  Concerned types are: `center-block', `drawer',
 ;; `dynamic-block', `footnote-definition', `headline', `inlinetask',
 ;; `item', `plain-list', `quote-block', `section' and `special-block'.
 ;;
-;; Other element types are: `babel-call', `comment', `comment-block',
-;; `example-block', `export-block', `fixed-width', `horizontal-rule',
-;; `keyword', `latex-environment', `paragraph', `property-drawer',
-;; `quote-section', `src-block', `table', `table-cell', `table-row'
-;; and `verse-block'.  Among them, `paragraph', `table-cell' and
-;; `verse-block' types can contain Org objects and plain text.
+;; Other element types are: `babel-call', `clock', `comment',
+;; `comment-block', `example-block', `export-block', `fixed-width',
+;; `horizontal-rule', `keyword', `latex-environment', `paragraph',
+;; `planning', `property-drawer', `quote-section', `src-block',
+;; `table', `table-cell', `table-row' and `verse-block'.  Among them,
+;; `paragraph', `table-cell' and `verse-block' types can contain Org
+;; objects and plain text.
 ;;
 ;; Objects are related to document's contents.  Some of them are
 ;; recursive.  Associated types are of the following: `bold', `code',
@@ -912,29 +914,71 @@ keywords."
   (save-excursion
     (let ((info (progn (looking-at org-babel-block-lob-one-liner-regexp)
 		       (org-babel-lob-get-info)))
-	  (beg (point-at-bol))
+	  (begin (point-at-bol))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (org-skip-whitespace)
 		      (if (eobp) (point) (point-at-bol)))))
       `(babel-call
-	(:beg ,beg
-	      :end ,end
-	      :info ,info
-	      :post-blank ,(count-lines pos-before-blank end))))))
+	(:begin ,begin
+		:end ,end
+		:info ,info
+		:post-blank ,(count-lines pos-before-blank end))))))
 
-(defun org-element-babel-call-interpreter (inline-babel-call contents)
-  "Interpret INLINE-BABEL-CALL object as Org syntax.
+(defun org-element-babel-call-interpreter (babel-call contents)
+  "Interpret BABEL-CALL element as Org syntax.
 CONTENTS is nil."
-  (let* ((babel-info (org-element-property :info inline-babel-call))
-	 (main-source (car babel-info))
+  (let* ((babel-info (org-element-property :info babel-call))
+	 (main (car babel-info))
 	 (post-options (nth 1 babel-info)))
     (concat "#+CALL: "
-	    (if (string-match "\\[\\(\\[.*?\\]\\)\\]" main-source)
-		;; Remove redundant square brackets.
-		(replace-match
-		 (match-string 1 main-source) nil nil main-source)
-	      main-source)
+	    (if (not (string-match "\\[\\(\\[.*?\\]\\)\\]" main)) main
+	      ;; Remove redundant square brackets.
+	      (replace-match (match-string 1 main) nil nil main))
 	    (and post-options (format "[%s]" post-options)))))
+
+
+;;;; Clock
+
+(defun org-element-clock-parser ()
+  "Parse a clock.
+
+Return a list whose CAR is `clock' and CDR is a plist containing
+`:status', `:value', `:time', `:begin', `:end' and `:post-blank'
+as keywords."
+  (save-excursion
+    (let* ((case-fold-search nil)
+	   (begin (point))
+	   (value (progn (search-forward org-clock-string (line-end-position) t)
+			 (org-skip-whitespace)
+			 (looking-at "\\[.*\\]")
+			 (org-match-string-no-properties 0)))
+	   (time (and (progn (goto-char (match-end 0))
+			     (looking-at " +=> +\\(\\S-+\\)[ \t]*$"))
+		      (org-match-string-no-properties 1)))
+	   (status (if time 'closed 'running))
+	   (post-blank (let ((before-blank (progn (forward-line) (point))))
+			 (org-skip-whitespace)
+			 (unless (eobp) (beginning-of-line))
+			 (count-lines before-blank (point))))
+	   (end (point)))
+      `(clock (:status ,status
+		       :value ,value
+		       :time ,time
+		       :begin ,begin
+		       :end ,end
+		       :post-blank ,post-blank)))))
+
+(defun org-element-clock-interpreter (clock contents)
+  "Interpret CLOCK element as Org syntax.
+CONTENTS is nil."
+  (concat org-clock-string " "
+	  (org-element-property :value clock)
+	  (let ((time (org-element-property :time clock)))
+	    (and time
+		 (concat " => "
+			 (apply 'format
+				"%2s:%02s"
+				(org-split-string time ":")))))))
 
 
 ;;;; Comment
@@ -1321,6 +1365,56 @@ Assume point is at the beginning of the paragraph."
   "Interpret PARAGRAPH element as Org syntax.
 CONTENTS is the contents of the element."
   contents)
+
+
+;;;; Planning
+
+(defun org-element-planning-parser ()
+  "Parse a planning.
+
+Return a list whose CAR is `planning' and CDR is a plist
+containing `:closed', `:deadline', `:scheduled', `:begin', `:end'
+and `:post-blank' keywords."
+  (save-excursion
+    (let* ((case-fold-search nil)
+	   (begin (point))
+	   (post-blank (let ((before-blank (progn (forward-line) (point))))
+			 (org-skip-whitespace)
+			 (unless (eobp) (beginning-of-line))
+			 (count-lines before-blank (point))))
+	   (end (point))
+	   closed deadline scheduled)
+      (goto-char begin)
+      (while (re-search-forward org-keyword-time-not-clock-regexp
+				(line-end-position) t)
+	(goto-char (match-end 1))
+	(org-skip-whitespace)
+	(let ((time (buffer-substring-no-properties (point) (match-end 0)))
+	      (keyword (match-string 1)))
+	  (cond ((equal keyword org-closed-string) (setq closed time))
+		((equal keyword org-deadline-string) (setq deadline time))
+		(t (setq scheduled time)))))
+      `(planning
+	(:closed ,closed
+		 :deadline ,deadline
+		 :scheduled ,scheduled
+		 :begin ,begin
+		 :end ,end
+		 :post-blank ,post-blank)))))
+
+(defun org-element-planning-interpreter (planning contents)
+  "Interpret PLANNING element as Org syntax.
+CONTENTS is nil."
+  (mapconcat
+   'identity
+   (delq nil
+	 (list (let ((closed (org-element-property :closed planning)))
+		 (when closed (concat org-closed-string " " closed)))
+	       (let ((deadline (org-element-property :deadline planning)))
+		 (when deadline (concat org-deadline-string " " deadline)))
+	       (let ((scheduled (org-element-property :scheduled planning)))
+		 (when scheduled (concat org-scheduled-string " " scheduled)))))
+   " "))
 
 
 ;;;; Property Drawer
@@ -2590,55 +2684,37 @@ beginning position."
   "Parse time stamp at point.
 
 Return a list whose CAR is `time-stamp', and CDR a plist with
-`:appt-type', `:type', `:begin', `:end', `:value' and
-`:post-blank' keywords.
+`:type', `:begin', `:end', `:value' and `:post-blank' keywords.
 
 Assume point is at the beginning of the time-stamp."
   (save-excursion
-    (let* ((appt-type (cond
-		       ((looking-at (concat org-deadline-string " +"))
-			(goto-char (match-end 0))
-			'deadline)
-		       ((looking-at (concat org-scheduled-string " +"))
-			(goto-char (match-end 0))
-			'scheduled)
-		       ((looking-at (concat org-closed-string " +"))
-			(goto-char (match-end 0))
-			'closed)))
-	   (begin (and appt-type (match-beginning 0)))
+    (let* ((begin (point))
 	   (type (cond
 		  ((looking-at org-tsr-regexp)
 		   (if (match-string 2) 'active-range 'active))
 		  ((looking-at org-tsr-regexp-both)
 		   (if (match-string 2) 'inactive-range 'inactive))
-		  ((looking-at (concat
-				"\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
-				"\\|"
-				"\\(<%%\\(([^>\n]+)\\)>\\)"))
+		  ((looking-at
+		    (concat
+		     "\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
+		     "\\|"
+		     "\\(<%%\\(([^>\n]+)\\)>\\)"))
 		   'diary)))
-	   (begin (or begin (match-beginning 0)))
-	   (value (buffer-substring-no-properties
-		   (match-beginning 0) (match-end 0)))
+	   (value (org-match-string-no-properties 0))
 	   (post-blank (progn (goto-char (match-end 0))
 			      (skip-chars-forward " \t")))
 	   (end (point)))
       `(time-stamp
-	(:appt-type ,appt-type
-		    :type ,type
-		    :value ,value
-		    :begin ,begin
-		    :end ,end
-		    :post-blank ,post-blank)))))
+	(:type ,type
+	       :value ,value
+	       :begin ,begin
+	       :end ,end
+	       :post-blank ,post-blank)))))
 
 (defun org-element-time-stamp-interpreter (time-stamp contents)
   "Interpret TIME-STAMP object as Org syntax.
 CONTENTS is nil."
-  (concat
-   (case (org-element-property :appt-type time-stamp)
-     (closed (concat org-closed-string " "))
-     (deadline (concat org-deadline-string " "))
-     (scheduled (concat org-scheduled-string " ")))
-   (org-element-property :value time-stamp)))
+  (org-element-property :value time-stamp))
 
 (defun org-element-time-stamp-successor (limit)
   "Search for the next time-stamp object.
@@ -2649,9 +2725,7 @@ Return value is a cons cell whose CAR is `time-stamp' and CDR is
 beginning position."
   (save-excursion
     (when (re-search-forward
-	   (concat "\\(?:" org-scheduled-string " +\\|"
-		   org-deadline-string " +\\|" org-closed-string " +\\)?"
-		   org-ts-regexp-both
+	   (concat org-ts-regexp-both
 		   "\\|"
 		   "\\(?:<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
 		   "\\|"
@@ -2735,7 +2809,7 @@ CONTENTS is nil."
 	  ;; Headlines and inlinetasks.
 	  org-outline-regexp-bol "\\|"
 	  ;; Comments, blocks (any type), keywords and babel calls.
-	  "^[ \t]*#\\+" "\\|" "^#\\( \\|$\\)" "\\|"
+	  "^[ \t]*#\\+" "\\|" "^#\\(?: \\|$\\)" "\\|"
 	  ;; Lists.
 	  (org-item-beginning-re) "\\|"
 	  ;; Fixed-width, drawers (any type) and tables.
@@ -2745,16 +2819,22 @@ CONTENTS is nil."
 	  ;; Horizontal rules.
 	  "^[ \t]*-\\{5,\\}[ \t]*$" "\\|"
 	  ;; LaTeX environments.
-	  "^[ \t]*\\\\\\(begin\\|end\\)")
+	  "^[ \t]*\\\\\\(begin\\|end\\)"
+	  ;; Planning and Clock lines.
+	  "^[ \t]*\\(?:"
+	  org-clock-string "\\|"
+	  org-closed-string "\\|"
+	  org-deadline-string "\\|"
+	  org-scheduled-string "\\)")
   "Regexp to separate paragraphs in an Org buffer.")
 
 (defconst org-element-all-elements
-  '(center-block comment comment-block drawer dynamic-block example-block
+  '(center-block clock comment comment-block drawer dynamic-block example-block
 		 export-block fixed-width footnote-definition headline
 		 horizontal-rule inlinetask item keyword latex-environment
-		 babel-call paragraph plain-list property-drawer quote-block
-		 quote-section section special-block src-block table table-row
-		 verse-block)
+		 babel-call paragraph plain-list planning property-drawer
+		 quote-block quote-section section special-block src-block table
+		 table-row verse-block)
   "Complete list of element types.")
 
 (defconst org-element-greater-elements
@@ -2944,11 +3024,17 @@ element or object type."
 
 
 ;;; Parsing Element Starting At Point
-
+;;
 ;; `org-element-current-element' is the core function of this section.
 ;; It returns the Lisp representation of the element starting at
 ;; point.  It uses `org-element--element-block-re' for quick access to
 ;; a common regexp.
+;;
+;; `org-element-current-element' makes use of special modes.  They are
+;; activated for fixed element chaining (i.e. `plain-list' > `item')
+;; or fixed conditional element chaining (i.e. `section' >
+;; `planning'). Special modes are: `section', `quote-section', `item'
+;; and `table-row'.
 
 (defconst org-element--element-block-re
   (format "[ \t]*#\\+BEGIN_\\(%s\\)\\(?: \\|$\\)"
@@ -2956,8 +3042,7 @@ element or object type."
            'regexp-quote
            (mapcar 'car org-element-non-recursive-block-alist) "\\|"))
   "Regexp matching the beginning of a non-recursive block type.
-Used internally by `org-element-current-element'.  Do not modify
-it directly, set `org-element-recursive-block-alist' instead.")
+Used internally by `org-element-current-element'.")
 
 (defun org-element-current-element (&optional granularity special structure)
   "Parse the element starting at point.
@@ -2974,13 +3059,8 @@ recursion.  Allowed values are `headline', `greater-element',
 nil), secondary values will not be parsed, since they only
 contain objects.
 
-Optional argument SPECIAL, when non-nil, can be either `item',
-`section', `quote-section' or `table-row'.  `item' allows to
-parse item wise instead of plain-list wise, using STRUCTURE as
-the current list structure.  `section' (resp. `quote-section')
-will try to parse a section (resp. a quote section) before
-anything else, whereas `table-row' will look for rows within
-a table.
+Optional argument SPECIAL, when non-nil, can be either `section',
+`quote-section', `table-row' and `item'.
 
 If STRUCTURE isn't provided but SPECIAL is set to `item', it will
 be computed.
@@ -3013,8 +3093,13 @@ it is quicker than its counterpart, albeit more restrictive."
        ;; Headline.
        ((org-with-limited-levels (org-at-heading-p))
         (org-element-headline-parser raw-secondary-p))
-       ;; Section (must be checked after headline)
+       ;; Section (must be checked after headline).
        ((eq special 'section) (org-element-section-parser))
+       ;; Planning and Clock.
+       ((and (looking-at org-planning-or-clock-line-re))
+	(if (equal (match-string 1) org-clock-string)
+	    (org-element-clock-parser)
+	  (org-element-planning-parser)))
        ;; Non-recursive block.
        ((when (looking-at org-element--element-block-re)
           (let ((type (upcase (match-string 1))))
@@ -3254,8 +3339,8 @@ Assume buffer is in Org mode."
     (nconc (list 'org-data nil)
 	   (org-element-parse-elements
 	    (point-at-bol) (point-max)
-	    ;; Start is section mode so text before the first headline
-	    ;; belongs to a section.
+	    ;; Start in `section' mode so text before the first
+	    ;; headline belongs to a section.
 	    'section nil granularity visible-only nil))))
 
 (defun org-element-parse-secondary-string (string restriction)
@@ -3378,10 +3463,10 @@ Nil values returned from FUN do not appear in the results."
   "Parse elements between BEG and END positions.
 
 SPECIAL prioritize some elements over the others.  It can be set
-to `quote-section', `section' `item' or `table-row', which will
-focus search, respectively, on quote sections, sections, items
-and table-rows.  Moreover, when value is `item', STRUCTURE will
-be used as the current list structure.
+to `quote-section', `section' `item' or `table-row'.
+
+When value is `item', STRUCTURE will be used as the current list
+structure.
 
 GRANULARITY determines the depth of the recursion.  See
 `org-element-parse-buffer' for more information.
@@ -3425,13 +3510,13 @@ Elements are accumulated into ACC."
 		      (eq type 'headline)))
 	     (org-element-parse-elements
 	      cbeg (org-element-property :contents-end element)
-	      ;; Possibly move to a special mode.
+	      ;; Possibly switch to a special mode.
 	      (case type
 		(headline
 		 (if (org-element-property :quotedp element) 'quote-section
 		   'section))
-		(table 'table-row)
-		(plain-list 'item))
+		(plain-list 'item)
+		(table 'table-row))
 	      (org-element-property :structure element)
 	      granularity visible-only (nreverse element)))
 	    ;; Case 3.  ELEMENT has contents.  Parse objects inside,

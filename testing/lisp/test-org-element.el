@@ -572,6 +572,21 @@ Paragraph \\alpha."
 		  "#+CALL: test[:results output]()[:results html]")
 		 "#+CALL: test[:results output]()[:results html]\n")))
 
+(ert-deftest test-org-element/clock-interpreter ()
+  "Test clock interpreter."
+  ;; Running clock.
+  (should
+   (equal (let ((org-clock-string "CLOCK:"))
+	    (org-test-parse-and-interpret "CLOCK: [2012-01-01 sun. 00:01]"))
+	  "CLOCK: [2012-01-01 sun. 00:01]\n"))
+  ;; Closed clock.
+  (should
+   (equal
+    (let ((org-clock-string "CLOCK:"))
+      (org-test-parse-and-interpret "
+CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
+    "CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01\n")))
+
 (ert-deftest test-org-element/comment-interpreter ()
   "Test comment interpreter."
   ;; Regular comment.
@@ -614,8 +629,21 @@ Paragraph \\alpha."
 (ert-deftest test-org-element/latex-environment-interpreter ()
   "Test latex environment interpreter."
   (should (equal (org-test-parse-and-interpret
-		  "\begin{equation}\n1+1=2\n\end{equation}")
-		 "\begin{equation}\n1+1=2\n\end{equation}\n")))
+		  "\\begin{equation}\n1+1=2\n\\end{equation}")
+		 "\\begin{equation}\n1+1=2\n\\end{equation}\n")))
+
+(ert-deftest test-org-element/planning-interpreter ()
+  "Test planning interpreter."
+  (let ((org-closed-string "CLOSED:")
+	(org-deadline-string "DEADLINE:")
+	(org-scheduled-string "SCHEDULED:"))
+    (should
+     (equal
+      (org-test-parse-and-interpret
+       "* Headline
+CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>")
+      "* Headline
+CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
 
 (ert-deftest test-org-element/property-drawer-interpreter ()
   "Test property drawer interpreter."
