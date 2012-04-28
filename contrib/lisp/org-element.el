@@ -2773,18 +2773,18 @@ CONTENTS is nil."
   '((subscript . sub/superscript) (superscript . sub/superscript)
     (bold . text-markup) (code . text-markup) (italic . text-markup)
     (strike-through . text-markup) (underline . text-markup)
-    (verbatim . text-markup) (verbatim . text-markup)
-    (entity . latex-or-entity) (latex-fragment . latex-or-entity))
+    (verbatim . text-markup) (entity . latex-or-entity)
+    (latex-fragment . latex-or-entity))
   "Alist of translations between object type and successor name.
 
 Sharing the same successor comes handy when, for example, the
 regexp matching one object can also match the other object.")
 
 (defconst org-element-all-objects
-  '(emphasis entity export-snippet footnote-reference inline-babel-call
-	     inline-src-block line-break latex-fragment link macro radio-target
-	     statistics-cookie subscript superscript table-cell target
-	     time-stamp verbatim)
+  '(bold code entity export-snippet footnote-reference inline-babel-call
+	 inline-src-block italic line-break latex-fragment link macro
+	 radio-target statistics-cookie strike-through subscript superscript
+	 table-cell target time-stamp underline verbatim)
   "Complete list of object types.")
 
 (defconst org-element-recursive-objects
@@ -3020,7 +3020,7 @@ it is quicker than its counterpart, albeit more restrictive."
           (let ((type (upcase (match-string 1))))
             (if (save-excursion
                   (re-search-forward
-                   (format "[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t))
+                   (format "^[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t))
                 (funcall
 		 (intern
 		  (format
@@ -3030,9 +3030,9 @@ it is quicker than its counterpart, albeit more restrictive."
        ;; Inlinetask.
        ((org-at-heading-p) (org-element-inlinetask-parser raw-secondary-p))
        ;; LaTeX Environment or Paragraph if incomplete.
-       ((looking-at "^[ \t]*\\\\begin{")
+       ((looking-at "[ \t]*\\\\begin{")
         (if (save-excursion
-              (re-search-forward "^[ \t]*\\\\end{[^}]*}[ \t]*" nil t))
+              (re-search-forward "[ \t]*\\\\end{[^}]*}[ \t]*" nil t))
             (org-element-latex-environment-parser)
           (org-element-paragraph-parser)))
        ;; Property Drawer.
@@ -3046,7 +3046,7 @@ it is quicker than its counterpart, albeit more restrictive."
           (cond
            ((not (save-excursion
                    (re-search-forward
-                    (format "[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t)))
+                    (format "^[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t)))
             (org-element-paragraph-parser))
            ((string= type "CENTER") (org-element-center-block-parser))
            ((string= type "QUOTE") (org-element-quote-block-parser))
