@@ -2088,22 +2088,23 @@ When NAMED is non-nil, look for a named equation."
 (defun org-table-store-formulas (alist)
   "Store the list of formulas below the current table."
   (setq alist (sort alist 'org-table-formula-less-p))
-  (save-excursion
-    (goto-char (org-table-end))
-    (if (looking-at "\\([ \t]*\n\\)*[ \t]*\\(#\\+tblfm:\\)\\(.*\n?\\)")
-	(progn
-	  ;; don't overwrite TBLFM, we might use text properties to store stuff
-	  (goto-char (match-beginning 3))
-	  (delete-region (match-beginning 3) (match-end 0)))
-      (org-indent-line-function)
-      (insert (match-string 2)))
-    (insert " "
-	    (mapconcat (lambda (x)
-			 (concat
-			  (if (equal (string-to-char (car x)) ?@) "" "$")
-			  (car x) "=" (cdr x)))
-		       alist "::")
-	    "\n")))
+  (let ((case-fold-search t))
+    (save-excursion
+      (goto-char (org-table-end))
+      (if (looking-at "\\([ \t]*\n\\)*[ \t]*\\(#\\+tblfm:\\)\\(.*\n?\\)")
+	  (progn
+	    ;; don't overwrite TBLFM, we might use text properties to store stuff
+	    (goto-char (match-beginning 3))
+	    (delete-region (match-beginning 3) (match-end 0)))
+	(org-indent-line-function)
+	(insert (or (match-string 2) "#+TBLFM")))
+      (insert " "
+	      (mapconcat (lambda (x)
+			   (concat
+			    (if (equal (string-to-char (car x)) ?@) "" "$")
+			    (car x) "=" (cdr x)))
+			 alist "::")
+	      "\n"))))
 
 (defsubst org-table-formula-make-cmp-string (a)
   (when (string-match "\\`$[<>]" a)
