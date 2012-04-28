@@ -2781,10 +2781,10 @@ Sharing the same successor comes handy when, for example, the
 regexp matching one object can also match the other object.")
 
 (defconst org-element-all-objects
-  '(emphasis entity export-snippet footnote-reference inline-babel-call
-	     inline-src-block line-break latex-fragment link macro radio-target
-	     statistics-cookie subscript superscript table-cell target
-	     time-stamp verbatim)
+  '(bold code entity export-snippet footnote-reference inline-babel-call
+	 inline-src-block italic line-break latex-fragment link macro
+	 radio-target statistics-cookie strike-through subscript superscript
+	 table-cell target time-stamp underline verbatim)
   "Complete list of object types.")
 
 (defconst org-element-recursive-objects
