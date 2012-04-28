@@ -47,8 +47,7 @@
 (defvar org-element-string-restrictions)
 (defvar org-element-object-restrictions)
 
-(declare-function org-export-clean-table "org-export" (table specialp))
-(declare-function org-export-data "org-export" (data backend info))
+(declare-function org-export-data "org-export" (data info))
 (declare-function org-export-directory "org-export" (type plist))
 (declare-function org-export-expand-macro "org-export" (macro info))
 (declare-function org-export-first-sibling-p "org-export" (headline info))
@@ -64,7 +63,6 @@
 (declare-function org-export-get-previous-element "org-export" (blob info))
 (declare-function org-export-get-relative-level "org-export" (headline info))
 (declare-function org-export-unravel-code "org-export" (element))
-(declare-function org-export-included-file "org-export" (keyword backend info))
 (declare-function org-export-inline-image-p "org-export"
 		  (link &optional extensions))
 (declare-function org-export-last-sibling-p "org-export" (headline info))
@@ -73,10 +71,8 @@
 		  "org-export" (extension &optional subtreep pub-dir))
 (declare-function org-export-resolve-coderef "org-export" (ref info))
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
-(declare-function org-export-secondary-string "org-export"
-		  (secondary backend info))
+(declare-function org-export-secondary-string "org-export" (secondary info))
 (declare-function org-export-solidify-link-text "org-export" (s))
-(declare-function org-export-table-format-info "org-export" (table))
 (declare-function
  org-export-to-buffer "org-export"
  (backend buffer &optional subtreep visible-only body-only ext-plist))
@@ -746,13 +742,13 @@ For non-floats, see `org-e-latex--wrap-label'."
      ;; Option caption format with short name.
      ((cdr caption)
       (format "\\caption[%s]{%s%s}\n"
-	      (org-export-secondary-string (cdr caption) 'e-latex info)
+	      (org-export-secondary-string (cdr caption) info)
 	      label-str
-	      (org-export-secondary-string (car caption) 'e-latex info)))
+	      (org-export-secondary-string (car caption) info)))
      ;; Standard caption format.
      (t (format "\\caption{%s%s}\n"
 		label-str
-		(org-export-secondary-string (car caption) 'e-latex info))))))
+		(org-export-secondary-string (car caption) info))))))
 
 (defun org-e-latex--guess-inputenc (header)
   "Set the coding system in inputenc to what the buffer is.
@@ -822,8 +818,7 @@ This function shouldn't be used for floats.  See
   "Return complete document string after LaTeX conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let ((title (org-export-secondary-string
-		(plist-get info :title) 'e-latex info)))
+  (let ((title (org-export-secondary-string (plist-get info :title) info)))
     (concat
      ;; 1. Time-stamp.
      (and (plist-get info :time-stamp-file)
@@ -855,11 +850,10 @@ holding export options."
      ;; 5. Author.
      (let ((author (and (plist-get info :with-author)
 			(let ((auth (plist-get info :author)))
-			  (and auth (org-export-secondary-string
-				     auth 'e-latex info)))))
+			  (and auth (org-export-secondary-string auth info)))))
 	   (email (and (plist-get info :with-email)
 		       (org-export-secondary-string
-			(plist-get info :email) 'e-latex info))))
+			(plist-get info :email) info))))
        (cond ((and author email (not (string= "" email)))
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     (author (format "\\author{%s}\n" author))
@@ -949,8 +943,7 @@ holding contextual information."
 (defun org-e-latex-dynamic-block (dynamic-block contents info)
   "Transcode a DYNAMIC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
-holding contextual information.  See
-`org-export-data'."
+holding contextual information.  See `org-export-data'."
   (org-e-latex--wrap-label dynamic-block contents))
 
 
@@ -1051,7 +1044,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
        (unless (eq (org-element-type def) 'org-data)
 	 (setq def (cons 'org-data (cons nil def))))
        (concat
-	(format "\\footnote{%s}" (org-trim (org-export-data def 'e-latex info)))
+	(format "\\footnote{%s}" (org-trim (org-export-data def info)))
 	;; Retrieve all footnote references within the footnote and
 	;; add their definition after it, since LaTeX doesn't support
 	;; them inside.
@@ -1081,7 +1074,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		(if (eq (org-element-property :type ref) 'inline)
 		    'org-export-secondary-string
 		  'org-export-data)
-		(org-export-get-footnote-definition ref info) 'e-latex info))))
+		(org-export-get-footnote-definition ref info) info))))
 	   (funcall search-refs def) ""))))))))
 
 
@@ -1118,11 +1111,11 @@ holding contextual information."
 	      (if numberedp (concat (car sec) "\n%s" (nth 1 sec))
 		(concat (nth 2 sec) "\n%s" (nth 3 sec)))))))
 	 (text (org-export-secondary-string
-		(org-element-property :title headline) 'e-latex info))
+		(org-element-property :title headline) info))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword headline)))
-		 (and todo (org-export-secondary-string todo 'e-latex info)))))
+		 (and todo (org-export-secondary-string todo info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
 	 (tags (and (plist-get info :with-tags)
 		    (org-element-property :tags headline)))
@@ -1237,12 +1230,12 @@ contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((title (org-export-secondary-string
-	       (org-element-property :title inlinetask) 'e-latex info))
+		(org-element-property :title inlinetask) info))
 	(todo (and (plist-get info :with-todo-keywords)
 		   (let ((todo (org-element-property
 				:todo-keyword inlinetask)))
 		     (and todo
-			  (org-export-secondary-string todo 'e-latex info)))))
+			  (org-export-secondary-string todo info)))))
 	(todo-type (org-element-property :todo-type inlinetask))
 	(tags (and (plist-get info :with-tags)
 		   (org-element-property :tags inlinetask)))
@@ -1295,8 +1288,7 @@ contextual information."
 			   ((eq checkbox 'trans) "$\\boxminus$ "))))
 	 (tag (let ((tag (org-element-property :tag item)))
 		(and tag
-		     (format "[%s]" (org-export-secondary-string
-				     tag 'e-latex info))))))
+		     (format "[%s]" (org-export-secondary-string tag info))))))
     (concat counter "\\item" tag " " checkbox contents)))
 
 
@@ -1469,7 +1461,7 @@ INFO is a plist holding contextual information.  See
 	      (org-export-secondary-string
 	       (org-element-parse-secondary-string
 		path (cdr (assq 'radio-target org-element-object-restrictions)))
-	       'e-latex info)))
+	       info)))
      ;; Links pointing to an headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
@@ -1482,8 +1474,7 @@ INFO is a plist holding contextual information.  See
 	   (format "\\texttt{%s}"
 		   (or desc
 		       (org-export-secondary-string
-			(org-element-property :raw-link link)
-			'e-latex info))))
+			(org-element-property :raw-link link) info))))
 	  ;; Fuzzy link points to an invisible target.
 	  (keyword nil)
 	  ;; LINK points to an headline.  If headlines are numbered
@@ -1502,8 +1493,7 @@ INFO is a plist holding contextual information.  See
 	       (format "\\hyperref[%s]{%s}" label
 		       (or desc
 			   (org-export-secondary-string
-			    (org-element-property :title destination)
-			    'e-latex info))))))
+			    (org-element-property :title destination) info))))))
           ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
 	   (let ((path (org-export-solidify-link-text path)))
@@ -1762,12 +1752,11 @@ contextual information."
 	     (or (cadr (assq (intern lang) org-e-latex-listings-langs)) lang))
 	    (caption-str
 	     (when caption
-	       (let ((main (org-export-secondary-string
-			    (car caption) 'e-latex info)))
+	       (let ((main (org-export-secondary-string (car caption) info)))
 		 (if (not (cdr caption)) (format "{%s}" main)
 		   (format
 		    "{[%s]%s}"
-		    (org-export-secondary-string (cdr caption) 'e-latex info)
+		    (org-export-secondary-string (cdr caption) info)
 		    main))))))
 	(concat
 	 ;; Options.

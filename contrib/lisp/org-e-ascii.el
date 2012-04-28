@@ -42,13 +42,12 @@
 (declare-function org-element-time-stamp-interpreter
 		  "org-element" (time-stamp contents))
 
-(declare-function org-export-clean-table "org-export" (table specialp))
 (declare-function org-export-collect-footnote-definitions
 		  "org-export" (data info))
 (declare-function org-export-collect-headlines "org-export" (info &optional n))
 (declare-function org-export-collect-listings "org-export" (info))
 (declare-function org-export-collect-tables "org-export" (info))
-(declare-function org-export-data "org-export" (data backend info))
+(declare-function org-export-data "org-export" (data info))
 (declare-function org-export-expand-macro "org-export" (macro info))
 (declare-function org-export-format-code-default "org-export" (element info))
 (declare-function org-export-get-coderef-format "org-export" (path desc))
@@ -58,7 +57,6 @@
 		  (element info &optional types predicate))
 (declare-function org-export-get-parent-headline "org-export" (blob info))
 (declare-function org-export-get-relative-level "org-export" (headline info))
-(declare-function org-export-included-file "org-export" (keyword backend info))
 (declare-function org-export-low-level-p "org-export" (headline info))
 (declare-function org-export-output-file-name "org-export"
 		  (extension &optional subtreep pub-dir))
@@ -66,9 +64,7 @@
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
 (declare-function org-export-resolve-id-link "org-export" (link info))
 (declare-function org-export-resolve-ref-link "org-export" (link info))
-(declare-function org-export-secondary-string
-		  "org-export" (secondary backend info))
-(declare-function org-export-table-format-info "org-export" (table))
+(declare-function org-export-secondary-string "org-export" (secondary info))
 (declare-function
  org-export-to-file "org-export"
  (backend file &optional subtreep visible-only body-only ext-plist))
@@ -592,13 +588,12 @@ title."
 		 (org-export-get-headline-number element info) ".")
 		" ")))
 	 (text (org-export-secondary-string
-		(org-element-property :title element) 'e-ascii info))
+		(org-element-property :title element) info))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword element)))
 		 (and todo
-		      (concat (org-export-secondary-string todo 'e-ascii info)
-			      " ")))))
+		      (concat (org-export-secondary-string todo info) " ")))))
 	 (tags (and (not notags)
 		    (plist-get info :with-tags)
 		    (org-element-property :tags element)))
@@ -652,7 +647,7 @@ keyword."
 	 (format
 	  title-fmt reference
 	  (if (not caption) name
-	    (org-export-secondary-string (car caption) 'e-ascii info)))
+	    (org-export-secondary-string (car caption) info)))
 	 (org-e-ascii--current-text-width element info) info)))))
 
 (defun org-e-ascii--build-toc (info &optional n keyword)
@@ -719,7 +714,7 @@ generation.  INFO is a plist used as a communication channel."
 		  (if (not caption) (org-element-property :name src-block)
 		    (org-export-secondary-string
 		     ;; Use short name in priority, if available.
-		     (or (cdr caption) (car caption)) 'e-ascii info)))
+		     (or (cdr caption) (car caption)) info)))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-listings info) "\n")))))
@@ -758,7 +753,7 @@ generation.  INFO is a plist used as a communication channel."
 		  (if (not caption) (org-element-property :name table)
 		    ;; Use short name in priority, if available.
 		    (org-export-secondary-string
-		     (or (cdr caption) (car caption)) 'e-ascii info)))
+		     (or (cdr caption) (car caption)) info)))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-tables info) "\n")))))
@@ -817,7 +812,7 @@ channel."
      (let ((type (org-element-property :type link))
 	   (anchor (let ((desc (org-element-contents link)))
 		     (if (not desc) (org-element-property :raw-link link)
-		       (org-export-secondary-string desc 'e-ascii info)))))
+		       (org-export-secondary-string desc info)))))
        (cond
 	;; Coderefs, radio links and fuzzy links are ignored.
 	((member type '("coderef" "radio" "fuzzy")) nil)
@@ -855,16 +850,12 @@ channel."
   "Return document title, as a string.
 INFO is a plist used as a communication channel."
   (let ((text-width org-e-ascii-text-width)
-	(title (org-export-secondary-string
-		(plist-get info :title) 'e-ascii info))
-	(author
-	 (and (plist-get info :with-author)
-	      (let ((auth (plist-get info :author)))
-		(and auth (org-export-secondary-string auth 'e-ascii info)))))
-	(email
-	 (and (plist-get info :with-email)
-	      (org-export-secondary-string
-	       (plist-get info :email) 'e-ascii info)))
+	(title (org-export-secondary-string (plist-get info :title) info))
+	(author (and (plist-get info :with-author)
+		     (let ((auth (plist-get info :author)))
+		       (and auth (org-export-secondary-string auth info)))))
+	(email (and (plist-get info :with-email)
+		    (org-export-secondary-string (plist-get info :email) info)))
 	(date (plist-get info :date)))
     ;; There are two types of title blocks depending on the presence
     ;; of a title to display.
@@ -968,13 +959,13 @@ holding export options."
 			;; take it into consideration.
 			(let ((first (car (org-element-contents def))))
 			  (if (not (eq (org-element-type first) 'paragraph))
-			      (concat id "\n" (org-export-data def 'e-ascii info))
+			      (concat id "\n" (org-export-data def info))
 			    (push id (nthcdr 2 first))
-			    (org-export-data def 'e-ascii info)))
+			    (org-export-data def info)))
 		      ;; Fill paragraph once footnote ID is inserted in
 		      ;; order to have a correct length for first line.
 		      (org-e-ascii--fill-string
-		       (concat id (org-export-secondary-string def 'e-ascii info))
+		       (concat id (org-export-secondary-string def info))
 		       text-width info))))))
 	     definitions "\n\n"))))
        ;; 5. Creator.  Ignore `comment' value as there are no comments in
@@ -1049,8 +1040,7 @@ holding contextual information."
 (defun org-e-ascii-dynamic-block (dynamic-block contents info)
   "Transcode a DYNAMIC-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
-holding contextual information.  See
-`org-export-data'."
+holding contextual information.  See `org-export-data'."
   contents)
 
 
@@ -1218,12 +1208,12 @@ CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((width (org-e-ascii--current-text-width inlinetask info))
 	(title (org-export-secondary-string
-		(org-element-property :title inlinetask) 'e-ascii info))
+		(org-element-property :title inlinetask) info))
 	(todo (and (plist-get info :with-todo-keywords)
 		   (let ((todo (org-element-property
 				:todo-keyword inlinetask)))
 		     (and todo
-			  (org-export-secondary-string todo 'e-ascii info)))))
+			  (org-export-secondary-string todo info)))))
 	(todo-type (org-element-property :todo-type inlinetask))
 	(tags (and (plist-get info :with-tags)
 		   (org-element-property :tags inlinetask)))
@@ -1244,7 +1234,7 @@ holding contextual information."
 	  ;; Add title.  Fill it if wider than inlinetask.
 	  (let ((title (org-e-ascii--build-title inlinetask info width)))
 	    (if (<= (length title) width) title
-		(org-e-ascii--fill-string title width info)))
+	      (org-e-ascii--fill-string title width info)))
 	  "\n"
 	  ;; If CONTENTS is not empty, insert it along with
 	  ;; a separator.
@@ -1273,7 +1263,8 @@ contextual information."
 	    (descriptive
 	     (concat
 	      (org-export-secondary-string
-	       (org-element-property :tag item) 'e-ascii info) ": "))
+	       (org-element-property :tag item) info)
+	      ": "))
 	    (ordered
 	     ;; Return correct number for ITEM, paying attention to
 	     ;; counters.
@@ -1378,7 +1369,7 @@ INFO is a plist holding contextual information."
        (org-element-parse-secondary-string
 	(org-element-property :path link)
 	(cdr (assq 'radio-target org-element-object-restrictions)))
-       'e-ascii info))
+       info))
      ;; Do not apply a special syntax on fuzzy links pointing to
      ;; targets.
      ((string= type "fuzzy")
@@ -1488,7 +1479,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(value
 	 (org-export-secondary-string
 	  (org-remove-indentation
-	   (org-element-property :value quote-section)) 'e-ascii info)))
+	   (org-element-property :value quote-section))
+	  info)))
     (org-e-ascii--indent-string
      value
      (+ org-e-ascii-quote-margin
@@ -1624,7 +1616,7 @@ are ignored. "
 			(elt (if specialp (car (org-element-contents row))
 			       (org-element-contents row))
 			     col)
-			(plist-get info :back-end) info))
+			info))
 		      max-width))))
 	max-width)))
 

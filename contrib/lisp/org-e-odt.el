@@ -47,12 +47,10 @@
 ;; progress. See org-html.el.
 
 (defun org-e-odt-format-preamble (info)
-  (let* ((title (org-export-secondary-string
-		 (plist-get info :title) 'e-odt info))
+  (let* ((title (org-export-secondary-string (plist-get info :title) info))
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
-			(and auth (org-export-secondary-string
-				   auth 'e-odt info)))))
+			(and auth (org-export-secondary-string auth info)))))
 	 (date (plist-get info :date))
 	 (iso-date (org-e-odt-format-date date))
 	 (date (org-e-odt-format-date date "%d %b %Y"))
@@ -861,10 +859,10 @@ ATTR is a string of other attributes of the a element."
 	 (caption (org-element-property :caption caption-from))
 	 (short-caption (cdr caption))
 	 ;; transcode captions.
-	 (caption (and (car caption) (org-export-secondary-string
-				      (car caption) 'e-odt info)))
-	 (short-caption (and short-caption (org-export-secondary-string
-					    short-caption 'e-odt info))))
+	 (caption (and (car caption)
+		       (org-export-secondary-string (car caption) info)))
+	 (short-caption (and short-caption
+			     (org-export-secondary-string short-caption info))))
     (when (or label caption)
       (let* ((default-category
 	       (cond
@@ -1081,11 +1079,9 @@ ATTR is a string of other attributes of the a element."
       (insert "\n</manifest:manifest>"))))
 
 (defun org-e-odt-update-meta-file (info) ; FIXME opt-plist
-  (let ((title (org-export-secondary-string
-		(plist-get info :title) 'e-odt info))
+  (let ((title (org-export-secondary-string (plist-get info :title) info))
 	(author (or (let ((auth (plist-get info :author)))
-		      (and auth (org-export-secondary-string
-				 auth 'e-odt info))) ""))
+		      (and auth (org-export-secondary-string auth info))) ""))
 	(date (org-e-odt-format-date (plist-get info :date)))
 	(email (plist-get info :email))
 	(keywords (plist-get info :keywords))
@@ -1352,8 +1348,7 @@ formula file."
 (defvar org-element-string-restrictions)
 (defvar org-element-object-restrictions)
 
-(declare-function org-export-clean-table "org-export" (table specialp))
-(declare-function org-export-data "org-export" (data backend info))
+(declare-function org-export-data "org-export" (data info))
 (declare-function org-export-directory "org-export" (type plist))
 (declare-function org-export-expand-macro "org-export" (macro info))
 (declare-function org-export-first-sibling-p "org-export" (headline info))
@@ -1376,10 +1371,8 @@ formula file."
 		  "org-export" (extension &optional subtreep pub-dir))
 (declare-function org-export-resolve-coderef "org-export" (ref info))
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
-(declare-function org-export-secondary-string "org-export"
-		  (secondary backend info))
+(declare-function org-export-secondary-string "org-export" (secondary info))
 (declare-function org-export-solidify-link-text "org-export" (s))
-(declare-function org-export-table-format-info "org-export" (table))
 (declare-function
  org-export-to-buffer "org-export"
  (backend buffer &optional subtreep visible-only body-only ext-plist))
@@ -2750,15 +2743,15 @@ For non-floats, see `org-e-odt--wrap-label'."
      ;; Option caption format with short name.
      ((cdr caption)
       (format "\\caption[%s]{%s%s}\n"
-	      (org-export-secondary-string (cdr caption) 'e-odt info)
+	      (org-export-secondary-string (cdr caption) info)
 	      label-str
-	      (org-export-secondary-string (car caption) 'e-odt info)))
+	      (org-export-secondary-string (car caption) info)))
      ;; Standard caption format.
      ;; (t (format "\\caption{%s%s}\n"
      ;; 		label-str
-     ;; 		(org-export-secondary-string (car caption) 'e-odt info)))
+     ;; 		(org-export-secondary-string (car caption) info)))
 
-     (t (org-export-secondary-string (car caption) 'e-odt info)))))
+     (t (org-export-secondary-string (car caption) info)))))
 
 (defun org-e-odt--find-verb-separator (s)
   "Return a character not used in string S.
@@ -2976,8 +2969,7 @@ holding contextual information."
 (defun org-e-odt-dynamic-block (dynamic-block contents info)
   "Transcode a DYNAMIC-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
-holding contextual information.  See
-`org-export-data'."
+holding contextual information.  See `org-export-data'."
   (org-e-odt--wrap-label dynamic-block contents))
 
 
@@ -3065,10 +3057,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-e-odt-footnote-def (raw info) ; FIXME
   (if (equal (org-element-type raw) 'org-data)
-      (org-trim (org-export-data raw 'e-odt info)) ; fix paragraph
-					; style
+      (org-trim (org-export-data raw info)) ; fix paragraph style
     (org-e-odt-format-stylized-paragraph
-     'footnote (org-trim (org-export-secondary-string raw 'e-odt info)))))
+     'footnote (org-trim (org-export-secondary-string raw info)))))
 
 (defvar org-e-odt-footnote-separator
   (org-e-odt-format-fontify "," 'superscript))
@@ -3125,12 +3116,12 @@ holding contextual information."
 		    (let ((todo (org-element-property
 				 :todo-keyword headline)))
 		      (and todo
-			   (org-export-secondary-string todo 'e-odt info)))))
+			   (org-export-secondary-string todo info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
 	 (text (org-export-secondary-string
-		(org-element-property :title headline) 'e-odt info))
+		(org-element-property :title headline) info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-element-property :tags headline)))
 	 (headline-label (concat "sec-" (mapconcat 'number-to-string
@@ -3157,7 +3148,7 @@ holding contextual information."
 	 ;; Get level relative to current parsed data.
 	 (level (org-export-get-relative-level headline info))
 	 (text (org-export-secondary-string
-		(org-element-property :title headline) 'e-odt info))
+		(org-element-property :title headline) info))
 	 ;; Create the headline text.
 	 (full-text (org-e-odt-format-headline--wrap headline info)))
     (cond
@@ -3286,7 +3277,7 @@ contextual information."
 	 (counter (org-element-property :counter item))
 	 (checkbox (org-element-property :checkbox item))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (org-export-secondary-string tag 'e-odt info)))))
+		(and tag (org-export-secondary-string tag info)))))
     (org-e-odt-format-list-item
      contents type checkbox (or tag counter))))
 
@@ -3350,10 +3341,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    (org-element-property :value latex-environment)))
 	  (processing-type (plist-get info :LaTeX-fragments))
 	  (caption (org-element-property :caption latex-environment))
-	  (short-caption (and (cdr caption) (org-export-secondary-string
-					     (cdr caption) 'e-odt info)))
-	  (caption (and (car caption) (org-export-secondary-string
-				       (car caption) 'e-odt info)))
+	  (short-caption (and (cdr caption)
+			      (org-export-secondary-string (cdr caption) info)))
+	  (caption (and (car caption)
+			(org-export-secondary-string (car caption) info)))
 	  (label (org-element-property :name latex-environment))
 	  (attr nil)			; FIXME
 	  (label (org-element-property :name latex-environment)))
@@ -3583,7 +3574,7 @@ INFO is a plist holding contextual information.  See
        (org-export-secondary-string
 	(org-element-parse-secondary-string
 	 path (org-element-restriction 'radio-target))
-	'e-odt info)
+	info)
        (org-export-solidify-link-text path)))
      ;; Links pointing to an headline: Find destination and build
      ;; appropriate referencing command.
@@ -3596,8 +3587,8 @@ INFO is a plist holding contextual information.  See
 	  ('nil
 	   (org-e-odt-format-fontify
 	    (or desc (org-export-secondary-string
-		      (org-element-property :raw-link link)
-		      'e-odt info)) 'emphasis))
+		      (org-element-property :raw-link link) info))
+	    'emphasis))
 	  ;; Fuzzy link points to an invisible target.
 	  (keyword nil)
 	  ;; LINK points to an headline.  If headlines are numbered
@@ -3614,8 +3605,7 @@ INFO is a plist holding contextual information.  See
 		    (desc desc)
 		    ((plist-get info :section-numbers) section-no)
 		    (t (org-export-secondary-string
-			(org-element-property :title destination)
-			'e-odt info))))
+			(org-element-property :title destination) info))))
 	     (org-e-odt-format-internal-link desc label)))
 	  ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
@@ -3831,15 +3821,15 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-property :language src-block))
 	 (caption (org-element-property :caption src-block))
-	 (short-caption (and (cdr caption) (org-export-secondary-string
-					    (cdr caption) 'e-odt info)))
-	 (caption (and (car caption) (org-export-secondary-string
-				      (car caption) 'e-odt info)))
+	 (short-caption (and (cdr caption)
+			     (org-export-secondary-string (cdr caption) info)))
+	 (caption (and (car caption)
+		       (org-export-secondary-string (car caption) info)))
 	 (label (org-element-property :name src-block)))
     ;; FIXME: Handle caption
     ;; caption-str (when caption)
-    ;; (main (org-export-secondary-string (car caption) 'e-odt info))
-    ;; (secondary (org-export-secondary-string (cdr caption) 'e-odt info))
+    ;; (main (org-export-secondary-string (car caption) info))
+    ;; (secondary (org-export-secondary-string (cdr caption) info))
     ;; (caption-str (org-e-odt--caption/label-string caption label info))
     (let* ((captions (org-e-odt-format-label src-block info 'definition))
 	   (caption (car captions)) (short-caption (cdr captions)))
@@ -4122,7 +4112,7 @@ information."
   (let ((value (org-element-property :value time-stamp))
         (type (org-element-property :type time-stamp))
         (appt-type (org-element-property :appt-type time-stamp)))
-    (setq value (org-export-secondary-string value 'e-odt info))
+    (setq value (org-export-secondary-string value info))
     (org-e-odt-format-fontify
      (concat
       (org-e-odt-format-fontify

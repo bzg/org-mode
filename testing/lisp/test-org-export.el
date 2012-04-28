@@ -52,7 +52,7 @@ already filled in `info'."
   (declare (debug (form body)) (indent 1))
   `(org-test-with-temp-text ,data
      (let* ((tree (org-element-parse-buffer))
-	    (info (org-export-collect-tree-properties tree nil nil)))
+	    (info (org-export-collect-tree-properties tree nil)))
        ,@body)))
 
 (ert-deftest test-org-export/parse-option-keyword ()
@@ -349,10 +349,10 @@ body\n")))
   (org-test-with-backend "test"
     (org-test-with-temp-text "* Headline 1\nBody 1\n* Headline 2\nBody 2"
       (let ((org-export-before-parsing-hook
-	     ((lambda ()
-		(org-map-entries
-		 (lambda ()
-		   (delete-region (point) (progn (forward-line) (point)))))))))
+	     '((lambda ()
+		 (org-map-entries
+		  (lambda ()
+		    (delete-region (point) (progn (forward-line) (point)))))))))
 	(should (equal (org-export-as 'test) "Body 1\nBody 2\n"))))))
 
 
@@ -437,81 +437,69 @@ Paragraph[fn:1]"
 (ert-deftest test-org-export/fuzzy-links ()
   "Test fuzzy link export specifications."
   ;; 1. Links to invisible (keyword) targets should be ignored.
-  (org-test-with-temp-text
+  (org-test-with-parsed-data
       "Paragraph.\n#+TARGET: Test\n[[Test]]"
-    (let* ((tree (org-element-parse-buffer))
-	   (info (org-export-collect-tree-properties tree nil 'test)))
-      (should-not
-       (org-element-map
-	tree 'link
-	(lambda (link)
-	  (org-export-get-ordinal
-	   (org-export-resolve-fuzzy-link link info) info)) info))))
+    (should-not
+     (org-element-map
+      tree 'link
+      (lambda (link)
+	(org-export-get-ordinal
+	 (org-export-resolve-fuzzy-link link info) info)) info)))
   ;; 2. Link to an headline should return headline's number.
-  (org-test-with-temp-text
+  (org-test-with-parsed-data
       "Paragraph.\n* Head1\n* Head2\n* Head3\n[[Head2]]"
-    (let* ((tree (org-element-parse-buffer))
-	   (info (org-export-collect-tree-properties tree nil 'test)))
-      (should
-       ;; Note: Headline's number is in fact a list of numbers.
-       (equal '(2)
-	      (org-element-map
-	       tree 'link
-	       (lambda (link)
-		 (org-export-get-ordinal
-		  (org-export-resolve-fuzzy-link link info) info)) info t)))))
+    (should
+     ;; Note: Headline's number is in fact a list of numbers.
+     (equal '(2)
+	    (org-element-map
+	     tree 'link
+	     (lambda (link)
+	       (org-export-get-ordinal
+		(org-export-resolve-fuzzy-link link info) info)) info t))))
   ;; 3. Link to a target in an item should return item's number.
-  (org-test-with-temp-text
+  (org-test-with-parsed-data
       "- Item1\n  - Item11\n  - <<test>>Item12\n- Item2\n\n\n[[test]]"
-    (let* ((tree (org-element-parse-buffer))
-	   (info (org-export-collect-tree-properties tree nil 'test)))
-      (should
-       ;; Note: Item's number is in fact a list of numbers.
-       (equal '(1 2)
-	      (org-element-map
-	       tree 'link
-	       (lambda (link)
-		 (org-export-get-ordinal
-		  (org-export-resolve-fuzzy-link link info) info)) info t)))))
+    (should
+     ;; Note: Item's number is in fact a list of numbers.
+     (equal '(1 2)
+	    (org-element-map
+	     tree 'link
+	     (lambda (link)
+	       (org-export-get-ordinal
+		(org-export-resolve-fuzzy-link link info) info)) info t))))
   ;; 4. Link to a target in a footnote should return footnote's
   ;;    number.
-  (org-test-with-temp-text
-      "Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
-    (let* ((tree (org-element-parse-buffer))
-	   (info (org-export-collect-tree-properties tree nil 'test)))
-      (should
-       (equal '(2 3)
-	      (org-element-map
-	       tree 'link
-	       (lambda (link)
-		 (org-export-get-ordinal
-		  (org-export-resolve-fuzzy-link link info) info)) info)))))
+  (org-test-with-parsed-data "
+Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
+    (should
+     (equal '(2 3)
+	    (org-element-map
+	     tree 'link
+	     (lambda (link)
+	       (org-export-get-ordinal
+		(org-export-resolve-fuzzy-link link info) info)) info))))
   ;; 5. Link to a named element should return sequence number of that
   ;;    element.
-  (org-test-with-temp-text
+  (org-test-with-parsed-data
       "#+NAME: tbl1\n|1|2|\n#+NAME: tbl2\n|3|4|\n#+NAME: tbl3\n|5|6|\n[[tbl2]]"
-    (let* ((tree (org-element-parse-buffer))
-	   (info (org-export-collect-tree-properties tree nil 'test)))
-      (should
-       (= 2
-	  (org-element-map
-	   tree 'link
-	   (lambda (link)
-	     (org-export-get-ordinal
-	      (org-export-resolve-fuzzy-link link info) info)) info t)))))
+    (should
+     (= 2
+	(org-element-map
+	 tree 'link
+	 (lambda (link)
+	   (org-export-get-ordinal
+	    (org-export-resolve-fuzzy-link link info) info)) info t))))
   ;; 6. Link to a target not within an item, a table, a footnote
   ;;    reference or definition should return section number.
-  (org-test-with-temp-text
+  (org-test-with-parsed-data
       "* Head1\n* Head2\nParagraph<<target>>\n* Head3\n[[target]]"
-    (let* ((tree (org-element-parse-buffer))
-	   (info (org-export-collect-tree-properties tree nil 'test)))
-      (should
-       (equal '(2)
-	      (org-element-map
-	       tree 'link
-	       (lambda (link)
-		 (org-export-get-ordinal
-		  (org-export-resolve-fuzzy-link link info) info)) info t))))))
+    (should
+     (equal '(2)
+	    (org-element-map
+	     tree 'link
+	     (lambda (link)
+	       (org-export-get-ordinal
+		(org-export-resolve-fuzzy-link link info) info)) info t)))))
 
 (defun test-org-export/resolve-coderef ()
   "Test `org-export-resolve-coderef' specifications."
