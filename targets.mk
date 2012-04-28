@@ -1,10 +1,11 @@
+.EXPORT_ALL_VARIABLES:
 .NOTPARALLEL: .PHONY
 # Additional distribution files
 DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
-.EXPORT_ALL_VARIABLES:
 
 LISPDIRS      = lisp
-SUBDIRS       = doc etc $(LISPDIRS)
+OTHERDIRS     = doc etc
+SUBDIRS       = $(OTHERDIRS) $(LISPDIRS)
 INSTSUB       = $(SUBDIRS:%=install-%)
 ORG_MAKE_DOC ?= info html pdf
 
@@ -23,11 +24,11 @@ endif
 
 .PHONY:	all oldorg update update2 up0 up1 up2 compile $(SUBDIRS) \
 	check test install info html pdf card doc docs $(INSTSUB) \
-	autoloads cleanall clean cleancontrib cleanrel clean-install \
+	autoloads cleanall clean cleancontrib cleanutils cleanrel clean-install \
 	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest \
-	compile compile-dirty uncompiled
+	compile compile-stop compile-dirty compile-stop-dirty uncompiled
 
-oldorg:	compile autoloads info	# what the old makefile did when no target was specified
+oldorg:	compile-stop info	# what the old makefile did when no target was specified
 uncompiled:	cleanlisp autoloads	# for developing
 refcard:	card
 update update2::	up0 all
@@ -47,24 +48,20 @@ local.mk:
 		-e '$$ i ## See default.mk for further configuration options.' \
 		default.mk > $@
 
-all \
-compile::	lisp
+all compile-stop compile::	lisp
 	$(MAKE) -C $< clean
-
-compile \
-compile-dirty::	lisp
+compile compile-stop compile-dirty compile-stop-dirty::	lisp
 	$(MAKE) -C $< $@
 
-all \
-clean-install::
+all clean-install::
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)
 
 check test::	all
-
-check test \
-test-dirty::
+check test test-dirty::
 	-$(MKDIR) $(testdir)
+	$(MAKE) autoloads
 	TMPDIR=$(testdir) $(BTEST)
+	$(MAKE) -C lisp cleanauto
 ifeq ($(TEST_NO_AUTOCLEAN),) # define this variable to leave $(testdir) around for inspection
 	$(MAKE) cleantest
 endif
@@ -75,7 +72,7 @@ up0 up1 up2::
 up1 up2::	all
 	$(MAKE) test-dirty
 up2 update2::
-	$(SUDO) $(MAKE) install
+	$(SUDO) $(MAKE) install-dirty
 
 install:	$(INSTSUB)
 
@@ -99,11 +96,14 @@ clean:	cleanrel
 	$(MAKE) -C lisp clean
 	$(MAKE) -C doc clean
 
-cleanall: cleandirs cleantest cleancontrib
+cleanall: cleandirs cleantest cleancontrib cleanutils
 	-$(FIND) . -name \*~ -exec $(RM) {} \;
 
 cleancontrib:
-	-$(FIND) contrib -name \*~ -exec $(RM) {} \;
+	-$(FIND) contrib -name \*~ -o -name \*.elc -exec $(RM) {} \;
+
+cleanutils:
+	-$(FIND) UTILITIES -name \*~ -o -name \*.elc -exec $(RM) {} \;
 
 cleanrel:
 	$(RMR) RELEASEDIR

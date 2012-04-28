@@ -45,9 +45,12 @@ BTEST_EXTRA = # extra packages to require for testing
 # How to run tests
 req-ob-lang = --eval '(require '"'"'ob-$(ob-lang))'
 req-extra   = --eval '(require '"'"'$(req))'
-BTEST	= $(EMACS) -batch -Q \
-	  $(BTEST_PRE) -L lisp/ -L testing/ $(BTEST_POST) \
-	  --eval '(defconst org-release "$(ORGVERSION)-Test")' \
+BTEST	= $(BATCH) \
+	  $(BTEST_PRE) \
+	  --eval '(add-to-list '"'"'load-path "lisp")' \
+	  --eval '(add-to-list '"'"'load-path "testing")' \
+	  $(BTEST_POST) \
+	  -l org-install.el \
 	  -l testing/org-test.el \
 	  $(foreach ob-lang,$(BTEST_OB_LANGUAGES),$(req-ob-lang)) \
 	  $(foreach req,$(BTEST_EXTRA),$(req-extra)) \
@@ -55,16 +58,13 @@ BTEST	= $(EMACS) -batch -Q \
 	  -f org-test-run-batch-tests
 
 # Using emacs in batch mode.
-BATCH	= $(EMACS) -batch -Q \
-	  -L . \
-	  --eval '(defconst org-release "$(ORGVERSION)-Make")' \
+BATCH	= $(EMACS) -batch -Q
+# BATCH = $(EMACS) -batch -vanilla # XEmacs
 
 # How to byte-compile the whole source directory
 ELCDIR	= $(BATCH) \
-	  --eval '(batch-byte-recompile-directory 0)'
-
-# How to byte-compile a single source file
-ELC	= $(BATCH) -f batch-byte-compile
+		--eval '(add-to-list '"'"'load-path ".")' \
+		--eval '(batch-byte-recompile-directory 0)'
 
 # How to make a pdf file from a texinfo file
 TEXI2PDF = texi2pdf --batch --clean
@@ -104,3 +104,17 @@ SUDO	= sudo
 # Name of the program to install info files
 # INSTALL_INFO = ginstall-info # Debian: avoid harmless warning message
 INSTALL_INFO = install-info
+
+# How to generate org-install.el
+MAKE_ORG_INSTALL = $(BATCH) \
+	--eval '(add-to-list '"'"'load-path ".")' \
+	--eval '(load "org-compat.el")' \
+	--eval '(load "../UTILITIES/org-fixup.el")' \
+	--eval '(org-make-org-install "$(PWD)/lisp/org-install.el")'
+
+# How to generate org-version.el
+MAKE_ORG_VERSION = $(BATCH) \
+	--eval '(add-to-list '"'"'load-path ".")' \
+	--eval '(load "org-compat.el")' \
+	--eval '(load "../UTILITIES/org-fixup.el")' \
+	--eval '(org-make-org-version "$(ORGVERSION)" "$(GITVERSION)" "$(datadir)")'
