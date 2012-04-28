@@ -185,7 +185,6 @@ way they are handled must be hard-coded into
     (:filter-comment-block . org-export-filter-comment-block-functions)
     (:filter-drawer . org-export-filter-drawer-functions)
     (:filter-dynamic-block . org-export-filter-dynamic-block-functions)
-    (:filter-emphasis . org-export-filter-emphasis-functions)
     (:filter-entity . org-export-filter-entity-functions)
     (:filter-example-block . org-export-filter-example-block-functions)
     (:filter-export-block . org-export-filter-export-block-functions)
