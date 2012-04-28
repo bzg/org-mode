@@ -2929,13 +2929,31 @@ original parsed data.  INFO is a plist holding export options."
 
 ;;; Transcode Functions
 
-;;;; Block
+;;;; Bold
+
+(defun org-e-odt-bold (bold contents info)
+  "Transcode BOLD from Org to HTML.
+CONTENTS is the text with bold markup.  INFO is a plist holding
+contextual information."
+  (org-e-odt-format-fontify contents 'bold))
+
+
+;;;; Center Block
 
 (defun org-e-odt-center-block (center-block contents info)
   "Transcode a CENTER-BLOCK element from Org to HTML.
-CONTENTS holds the contents of the block.  INFO is a plist
+CONTENTS holds the contents of the center block.  INFO is a plist
 holding contextual information."
   (org-e-odt--wrap-label center-block contents))
+
+
+;;;; Code
+
+(defun org-e-odt-code (code contents info)
+  "Transcode a CODE object from Org to HTML.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (org-e-odt-format-fontify (org-element-property :value code) 'code))
 
 
 ;;;; Comment
@@ -2971,26 +2989,6 @@ holding contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
   (org-e-odt--wrap-label dynamic-block contents))
-
-
-;;;; Emphasis
-
-(defun org-e-odt-emphasis (emphasis contents info)
-  "Transcode EMPHASIS from Org to HTML.
-CONTENTS is the contents of the emphasized text.  INFO is a plist
-holding contextual information.."
-  ;; (format (cdr (assoc (org-element-property :marker emphasis)
-  ;; 		      org-e-odt-emphasis-alist))
-  ;; 	  contents)
-  (org-e-odt-format-fontify
-   contents (cadr (assoc
-		   (org-element-property :marker emphasis)
-		   '(("*" bold)
-		     ("/" emphasis)
-		     ("_" underline)
-		     ("=" code)
-		     ("~" verbatim)
-		     ("+" strike))))))
 
 
 ;;;; Entity
@@ -3247,6 +3245,15 @@ holding contextual information."
 					      inlinetask info))
 		     contents)
 	     nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\""))))))
+
+;;;; Italic
+
+(defun org-e-odt-italic (italic contents info)
+  "Transcode ITALIC from Org to HTML.
+CONTENTS is the text with italic markup.  INFO is a plist holding
+contextual information."
+  (org-e-odt-format-fontify contents 'italic))
+
 
 ;;;; Item
 
@@ -3847,6 +3854,15 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (org-e-odt-format-fontify cookie-value 'code)))
 
 
+;;;; Strike-Through
+
+(defun org-e-odt-strike-through (strike-through contents info)
+  "Transcode STRIKE-THROUGH from Org to HTML.
+CONTENTS is the text with strike-through markup.  INFO is a plist
+holding contextual information."
+  (org-e-odt-format-fontify contents 'strike))
+
+
 ;;;; Subscript
 
 (defun org-e-odt-subscript (subscript contents info)
@@ -4124,14 +4140,22 @@ information."
      "timestamp-wrapper")))
 
 
+;;;; Underline
+
+(defun org-e-odt-underline (underline contents info)
+  "Transcode UNDERLINE from Org to HTML.
+CONTENTS is the text with underline markup.  INFO is a plist
+holding contextual information."
+  (org-e-odt-format-fontify contents 'underline))
+
+
 ;;;; Verbatim
 
 (defun org-e-odt-verbatim (verbatim contents info)
   "Transcode a VERBATIM object from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (org-e-odt-emphasis
-   verbatim (org-element-property :value verbatim) info))
+  (org-e-odt-format-fontify (org-element-property :value verbatim) 'verbatim))
 
 
 ;;;; Verse Block

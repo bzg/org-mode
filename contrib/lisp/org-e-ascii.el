@@ -83,8 +83,7 @@
 ;; control blank lines separating them in output string.
 
 (defconst org-e-ascii-option-alist
-  '((:ascii-charset nil nil org-e-ascii-charset)
-    )
+  '((:ascii-charset nil nil org-e-ascii-charset))
   "Alist between ASCII export properties and ways to set them.
 See `org-export-option-alist' for more information on the
 structure or the values.")
@@ -1000,6 +999,15 @@ charset, fall-back to S."
 ;; Babel Calls are ignored.
 
 
+;;;; Bold
+
+(defun org-e-ascii-bold (bold contents info)
+  "Transcode BOLD from Org to ASCII.
+CONTENTS is the text with bold markup.  INFO is a plist holding
+contextual information."
+  (format "*%s*" contents))
+
+
 ;;;; Center Block
 
 (defun org-e-ascii-center-block (center-block contents info)
@@ -1008,6 +1016,15 @@ CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (org-e-ascii--justify-string
    contents (org-e-ascii--current-text-width center-block info) 'center))
+
+
+;;;; Code
+
+(defun org-e-ascii-code (code contents info)
+  "Return a CODE object from Org to ASCII.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format org-e-ascii-verbatim-format (org-element-property :value code)))
 
 
 ;;;; Comment
@@ -1042,17 +1059,6 @@ holding contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
   contents)
-
-
-;;;; Emphasis
-
-(defun org-e-ascii-emphasis (emphasis contents info)
-  "Transcode EMPHASIS from Org to ASCII.
-CONTENTS is the contents of the emphasized text.  INFO is a plist
-holding contextual information.."
-  (let ((marker (org-element-property :marker emphasis)))
-    ;; Leave emphasis markers as-is.
-    (concat marker contents marker)))
 
 
 ;;;; Entity
@@ -1247,6 +1253,14 @@ holding contextual information."
 	    (if (not (org-export-get-parent-headline inlinetask info)) 0
 	      org-e-ascii-inner-margin)
 	    (org-e-ascii--current-text-width inlinetask info)))))))
+
+;;;; Italic
+
+(defun org-e-ascii-italic (italic contents info)
+  "Transcode italic from Org to ASCII.
+CONTENTS is the text with italic markup.  INFO is a plist holding
+contextual information."
+  (format "/%s/" contents))
 
 
 ;;;; Item
@@ -1573,6 +1587,15 @@ contextual information."
     (format "_%s" contents)))
 
 
+;;;; Strike-through
+
+(defun org-e-ascii-strike-through (strike-through contents info)
+  "Transcode STRIKE-THROUGH from Org to ASCII.
+CONTENTS is text with strike-through markup.  INFO is a plist
+holding contextual information."
+  (format "+%s+" contents))
+
+
 ;;;; Table
 
 (defun org-e-ascii-table (table contents info)
@@ -1591,7 +1614,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 
 ;;;; Table Cell
-
 
 (defun org-e-ascii--table-cell-width (table-cell info)
   "Return width of TABLE-CELL.
@@ -1707,6 +1729,15 @@ a communication channel."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   ;; Return time-stamps as-is.
   (org-element-time-stamp-interpreter time-stamp contents))
+
+
+;;;; Underline
+
+(defun org-e-ascii-underline (underline contents info)
+  "Transcode UNDERLINE from Org to ASCII.
+CONTENTS is the text with underline markup.  INFO is a plist
+holding contextual information."
+  (format "_%s_" contents))
 
 
 ;;;; Verbatim

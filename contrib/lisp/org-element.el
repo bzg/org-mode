@@ -49,12 +49,12 @@
 ;; `verse-block' types can contain Org objects and plain text.
 ;;
 ;; Objects are related to document's contents.  Some of them are
-;; recursive.  Associated types are of the following: `emphasis',
+;; recursive.  Associated types are of the following: `bold', `code',
 ;; `entity', `export-snippet', `footnote-reference',
-;; `inline-babel-call', `inline-src-block', `latex-fragment',
-;; `line-break', `link', `macro', `radio-target', `statistics-cookie',
-;; `subscript', `superscript', `table-cell', `target', `time-stamp'
-;; and `verbatim'.
+;; `inline-babel-call', `inline-src-block', `italic',
+;; `latex-fragment', `line-break', `link', `macro', `radio-target',
+;; `statistics-cookie', `strike-through', `subscript', `superscript',
+;; `table-cell', `target', `time-stamp', `underline' and `verbatim'.
 ;;
 ;; Some elements also have special properties whose value can hold
 ;; objects themselves (i.e. an item tag or an headline name).  Such
@@ -1639,78 +1639,113 @@ CONTENTS is verse block contents."
 
 
 ;;; Objects
-
+;;
 ;; Unlike to elements, interstices can be found between objects.
 ;; That's why, along with the parser, successor functions are provided
-;; for each object.  Some objects share the same successor
-;; (i.e. `emphasis' and `verbatim' objects).
-
+;; for each object. Some objects share the same successor (i.e. `code'
+;; and `verbatim' objects).
+;;
 ;; A successor must accept a single argument bounding the search.  It
 ;; will return either a cons cell whose CAR is the object's type, as
 ;; a symbol, and CDR the position of its next occurrence, or nil.
-
+;;
 ;; Successors follow the naming convention:
 ;; org-element-NAME-successor, where NAME is the name of the
 ;; successor, as defined in `org-element-all-successors'.
-
+;;
 ;; Some object types (i.e. `emphasis') are recursive.  Restrictions on
 ;; object types they can contain will be specified in
 ;; `org-element-object-restrictions'.
-
+;;
 ;; Adding a new type of object is simple.  Implement a successor,
 ;; a parser, and an interpreter for it, all following the naming
 ;; convention.  Register type in `org-element-all-objects' and
 ;; successor in `org-element-all-successors'.  Maybe tweak
 ;; restrictions about it, and that's it.
 
-;;;; Emphasis
 
-(defun org-element-emphasis-parser ()
-  "Parse text markup object at point.
+;;;; Bold
 
-Return a list whose CAR is `emphasis' and CDR is a plist with
-`:marker', `:begin', `:end', `:contents-begin' and
-`:contents-end' and `:post-blank' keywords.
+(defun org-element-bold-parser ()
+  "Parse bold object at point.
 
-Assume point is at the first emphasis marker."
+Return a list whose CAR is `bold' and CDR is a plist with
+`:begin', `:end', `:contents-begin' and `:contents-end' and
+`:post-blank' keywords.
+
+Assume point is at the first star marker."
   (save-excursion
     (unless (bolp) (backward-char 1))
     (looking-at org-emph-re)
     (let ((begin (match-beginning 2))
-	  (marker (org-match-string-no-properties 3))
 	  (contents-begin (match-beginning 4))
 	  (contents-end (match-end 4))
 	  (post-blank (progn (goto-char (match-end 2))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
-      `(emphasis
-	(:marker ,marker
-		 :begin ,begin
-		 :end ,end
-		 :contents-begin ,contents-begin
-		 :contents-end ,contents-end
-		 :post-blank ,post-blank)))))
+      `(bold
+	(:begin ,begin
+		:end ,end
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,post-blank)))))
 
-(defun org-element-emphasis-interpreter (emphasis contents)
-  "Interpret EMPHASIS object as Org syntax.
+(defun org-element-bold-interpreter (bold contents)
+  "Interpret BOLD object as Org syntax.
 CONTENTS is the contents of the object."
-  (let ((marker (org-element-property :marker emphasis)))
-    (concat marker contents marker)))
+  (format "*%s*" contents))
 
 (defun org-element-text-markup-successor (limit)
-  "Search for the next emphasis or verbatim object.
+  "Search for the next text-markup object.
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose CAR is `emphasis' or `verbatim'
+Return value is a cons cell whose CAR is a symbol among `bold',
+`italic', `underline', `strike-through', `code' and `verbatim'
 and CDR is beginning position."
   (save-excursion
     (unless (bolp) (backward-char))
     (when (re-search-forward org-emph-re limit t)
-      (cons (if (nth 4 (assoc (match-string 3) org-emphasis-alist))
-		'verbatim
-	      'emphasis)
-	    (match-beginning 2)))))
+      (let ((marker (match-string 3)))
+	(cons (cond
+	       ((equal marker "*") 'bold)
+	       ((equal marker "/") 'italic)
+	       ((equal marker "_") 'underline)
+	       ((equal marker "+") 'strike-through)
+	       ((equal marker "~") 'code)
+	       ((equal marker "=") 'verbatim)
+	       (t (error "Unknown marker at %d" (match-beginning 3))))
+	      (match-beginning 2))))))
+
+
+;;;; Code
+
+(defun org-element-code-parser ()
+  "Parse code object at point.
+
+Return a list whose CAR is `code' and CDR is a plist with
+`:value', `:begin', `:end' and `:post-blank' keywords.
+
+Assume point is at the first tilde marker."
+  (save-excursion
+    (unless (bolp) (backward-char 1))
+    (looking-at org-emph-re)
+    (let ((begin (match-beginning 2))
+	  (value (org-match-string-no-properties 4))
+	  (post-blank (progn (goto-char (match-end 2))
+			     (skip-chars-forward " \t")))
+	  (end (point)))
+      `(code
+	(:value ,value
+		:begin ,begin
+		:end ,end
+		:post-blank ,post-blank)))))
+
+(defun org-element-code-interpreter (code contents)
+  "Interpret CODE object as Org syntax.
+CONTENTS is nil."
+  (format "~%s~" (org-element-property :value code)))
+
 
 ;;;; Entity
 
@@ -2007,6 +2042,37 @@ CDR is beginning position."
   (save-excursion
     (when (re-search-forward org-babel-inline-src-block-regexp limit t)
       (cons 'inline-src-block (match-beginning 1)))))
+
+;;;; Italic
+
+(defun org-element-italic-parser ()
+  "Parse italic object at point.
+
+Return a list whose CAR is `italic' and CDR is a plist with
+`:begin', `:end', `:contents-begin' and `:contents-end' and
+`:post-blank' keywords.
+
+Assume point is at the first slash marker."
+  (save-excursion
+    (unless (bolp) (backward-char 1))
+    (looking-at org-emph-re)
+    (let ((begin (match-beginning 2))
+	  (contents-begin (match-beginning 4))
+	  (contents-end (match-end 4))
+	  (post-blank (progn (goto-char (match-end 2))
+			     (skip-chars-forward " \t")))
+	  (end (point)))
+      `(italic
+	(:begin ,begin
+		:end ,end
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,post-blank)))))
+
+(defun org-element-italic-interpreter (italic contents)
+  "Interpret ITALIC object as Org syntax.
+CONTENTS is the contents of the object."
+  (format "/%s/" contents))
 
 
 ;;;; Latex Fragment
@@ -2325,6 +2391,38 @@ CDR is beginning position."
       (cons 'statistics-cookie (match-beginning 0)))))
 
 
+;;;; Strike-Through
+
+(defun org-element-strike-through-parser ()
+  "Parse strike-through object at point.
+
+Return a list whose CAR is `strike-through' and CDR is a plist
+with `:begin', `:end', `:contents-begin' and `:contents-end' and
+`:post-blank' keywords.
+
+Assume point is at the first plus sign marker."
+  (save-excursion
+    (unless (bolp) (backward-char 1))
+    (looking-at org-emph-re)
+    (let ((begin (match-beginning 2))
+	  (contents-begin (match-beginning 4))
+	  (contents-end (match-end 4))
+	  (post-blank (progn (goto-char (match-end 2))
+			     (skip-chars-forward " \t")))
+	  (end (point)))
+      `(strike-through
+	(:begin ,begin
+		:end ,end
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,post-blank)))))
+
+(defun org-element-strike-through-interpreter (strike-through contents)
+  "Interpret STRIKE-THROUGH object as Org syntax.
+CONTENTS is the contents of the object."
+  (format "+%s+" contents))
+
+
 ;;;; Subscript
 
 (defun org-element-subscript-parser ()
@@ -2562,37 +2660,65 @@ beginning position."
       (cons 'time-stamp (match-beginning 0)))))
 
 
+;;;; Underline
+
+(defun org-element-underline-parser ()
+  "Parse underline object at point.
+
+Return a list whose CAR is `underline' and CDR is a plist with
+`:begin', `:end', `:contents-begin' and `:contents-end' and
+`:post-blank' keywords.
+
+Assume point is at the first underscore marker."
+  (save-excursion
+    (unless (bolp) (backward-char 1))
+    (looking-at org-emph-re)
+    (let ((begin (match-beginning 2))
+	  (contents-begin (match-beginning 4))
+	  (contents-end (match-end 4))
+	  (post-blank (progn (goto-char (match-end 2))
+			     (skip-chars-forward " \t")))
+	  (end (point)))
+      `(underline
+	(:begin ,begin
+		:end ,end
+		:contents-begin ,contents-begin
+		:contents-end ,contents-end
+		:post-blank ,post-blank)))))
+
+(defun org-element-underline-interpreter (underline contents)
+  "Interpret UNDERLINE object as Org syntax.
+CONTENTS is the contents of the object."
+  (format "_%s_" contents))
+
+
 ;;;; Verbatim
 
 (defun org-element-verbatim-parser ()
   "Parse verbatim object at point.
 
 Return a list whose CAR is `verbatim' and CDR is a plist with
-`:marker', `:begin', `:end' and `:post-blank' keywords.
+`:value', `:begin', `:end' and `:post-blank' keywords.
 
-Assume point is at the first verbatim marker."
+Assume point is at the first equal sign marker."
   (save-excursion
     (unless (bolp) (backward-char 1))
     (looking-at org-emph-re)
     (let ((begin (match-beginning 2))
-	  (marker (org-match-string-no-properties 3))
 	  (value (org-match-string-no-properties 4))
 	  (post-blank (progn (goto-char (match-end 2))
 			     (skip-chars-forward " \t")))
 	  (end (point)))
       `(verbatim
-	(:marker ,marker
-		 :begin ,begin
-		 :end ,end
-		 :value ,value
-		 :post-blank ,post-blank)))))
+	(:value ,value
+		:begin ,begin
+		:end ,end
+		:post-blank ,post-blank)))))
 
 (defun org-element-verbatim-interpreter (verbatim contents)
   "Interpret VERBATIM object as Org syntax.
 CONTENTS is nil."
-  (let ((marker (org-element-property :marker verbatim))
-	(value (org-element-property :value verbatim)))
-    (concat marker value marker)))
+  (format "=%s=" (org-element-property :value verbatim)))
 
 
 
@@ -2645,7 +2771,9 @@ CONTENTS is nil."
 
 (defconst org-element-object-successor-alist
   '((subscript . sub/superscript) (superscript . sub/superscript)
-    (emphasis . text-markup) (verbatim . text-markup)
+    (bold . text-markup) (code . text-markup) (italic . text-markup)
+    (strike-through . text-markup) (underline . text-markup)
+    (verbatim . text-markup) (verbatim . text-markup)
     (entity . latex-or-entity) (latex-fragment . latex-or-entity))
   "Alist of translations between object type and successor name.
 
@@ -2660,7 +2788,8 @@ regexp matching one object can also match the other object.")
   "Complete list of object types.")
 
 (defconst org-element-recursive-objects
-  '(emphasis link macro subscript radio-target superscript table-cell)
+  '(bold italic link macro subscript radio-target strike-through superscript
+	 table-cell underline)
   "List of recursive object types.")
 
 (defconst org-element-non-recursive-block-alist
@@ -2721,8 +2850,8 @@ This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
 (defconst org-element-object-restrictions
-  `((emphasis entity export-snippet inline-babel-call inline-src-block link
-	      radio-target sub/superscript target text-markup time-stamp)
+  `((bold entity export-snippet inline-babel-call inline-src-block link
+	  radio-target sub/superscript target text-markup time-stamp)
     (footnote-reference entity export-snippet footnote-reference
 			inline-babel-call inline-src-block latex-fragment
 			line-break link macro radio-target sub/superscript
@@ -2732,6 +2861,8 @@ This list is checked after translations have been applied.  See
 	      time-stamp)
     (inlinetask entity inline-babel-call inline-src-block latex-fragment link
 		macro radio-target sub/superscript text-markup time-stamp)
+    (italic entity export-snippet inline-babel-call inline-src-block link
+	    radio-target sub/superscript target text-markup time-stamp)
     (item entity inline-babel-call latex-fragment macro radio-target
 	  sub/superscript target text-markup)
     (keyword entity latex-fragment macro sub/superscript text-markup)
@@ -2740,6 +2871,9 @@ This list is checked after translations have been applied.  See
     (macro macro)
     (paragraph ,@org-element-all-successors)
     (radio-target entity export-snippet latex-fragment sub/superscript)
+    (strike-through entity export-snippet inline-babel-call inline-src-block
+		    link radio-target sub/superscript target text-markup
+		    time-stamp)
     (subscript entity export-snippet inline-babel-call inline-src-block
 	       latex-fragment sub/superscript text-markup)
     (superscript entity export-snippet inline-babel-call inline-src-block
@@ -2747,6 +2881,8 @@ This list is checked after translations have been applied.  See
     (table-cell entity export-snippet latex-fragment link macro radio-target
 		sub/superscript target text-markup time-stamp)
     (table-row table-cell)
+    (underline entity export-snippet inline-babel-call inline-src-block link
+	       radio-target sub/superscript target text-markup time-stamp)
     (verse-block entity footnote-reference inline-babel-call inline-src-block
 		 latex-fragment line-break link macro radio-target
 		 sub/superscript target text-markup time-stamp))

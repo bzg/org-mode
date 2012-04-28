@@ -290,29 +290,6 @@ order to reproduce the default set-up:
   :type 'function)
 
 
-;;;; Emphasis
-
-(defcustom org-e-latex-emphasis-alist
-  '(("*" . "\\textbf{%s}")
-    ("/" . "\\emph{%s}")
-    ("_" . "\\underline{%s}")
-    ("+" . "\\st{%s}")
-    ("=" . protectedtexttt)
-    ("~" . verb))
-  "Alist of LaTeX expressions to convert emphasis fontifiers.
-
-The key is the character used as a marker for fontification.  The
-value is a formatting string to wrap fontified text with.
-
-Value can also be set to the following symbols: `verb' and
-`protectedtexttt'.  For the former, Org will use \"\\verb\" to
-create a format string and select a delimiter character that
-isn't in the string.  For the latter, Org will use \"\\texttt\"
-to typeset and try to protect special characters."
-  :group 'org-export-e-latex
-  :type 'alist)
-
-
 ;;;; Footnotes
 
 (defcustom org-e-latex-footnote-separator "\\textsuperscript{,}\\,"
@@ -411,6 +388,33 @@ When nil, no transformation is made."
   :type '(choice
 	  (string :tag "Format string")
 	  (const :tag "No formatting")))
+
+
+;;;; Text markup
+
+(defcustom org-e-latex-text-markup-alist '((bold . "\\textbf{%s}")
+					   (code . verb)
+					   (italic . "\\emph{%s}")
+					   (strike-through . "\\st{%s}")
+					   (underline . "\\underline{%s}")
+					   (verbatim . protectedtexttt))
+  "Alist of LaTeX expressions to convert text markup.
+
+The key must be a symbol among `bold', `code', `italic',
+`strike-through', `underline' and `verbatim'.  The value is
+a formatting string to wrap fontified text with.
+
+Value can also be set to the following symbols: `verb' and
+`protectedtexttt'.  For the former, Org will use \"\\verb\" to
+create a format string and select a delimiter character that
+isn't in the string.  For the latter, Org will use \"\\texttt\"
+to typeset and try to protect special characters.
+
+If no association can be found for a given markup, text will be
+returned as-is."
+  :group 'org-export-e-latex
+  :type 'alist
+  :options '(bold code italic strike-through underline verbatim))
 
 
 ;;;; Drawers
@@ -810,6 +814,42 @@ This function shouldn't be used for floats.  See
 	output
       (concat (format "\\label{%s}\n" label) output))))
 
+(defun org-e-latex--text-markup (text markup)
+  "Format text depending on MARKUP text markup.
+See `org-e-latex-text-markup-alist' for details."
+  (let ((fmt (cdr (assq markup org-e-latex-text-markup-alist))))
+    (cond
+     ;; No format string: Return raw text.
+     ((not fmt) text)
+     ;; Handle the `verb' special case: Find and appropriate separator
+     ;; and use "\\verb" command.
+     ((eq 'verb fmt)
+      (let ((separator (org-e-latex--find-verb-separator text)))
+	(concat "\\verb" separator text separator)))
+     ;; Handle the `protectedtexttt' special case: Protect some
+     ;; special chars and use "\texttt{%s}" format string.
+     ((eq 'protectedtexttt fmt)
+      (let ((start 0)
+	    (trans '(("\\" . "\\textbackslash{}")
+		     ("~" . "\\textasciitilde{}")
+		     ("^" . "\\textasciicircum{}")))
+	    (rtn "")
+	    char)
+	(while (string-match "[\\{}$%&_#~^]" text)
+	  (setq char (match-string 0 text))
+	  (if (> (match-beginning 0) 0)
+	      (setq rtn (concat rtn (substring value 0 (match-beginning 0)))))
+	  (setq text (substring text (1+ (match-beginning 0))))
+	  (setq char (or (cdr (assoc char trans)) (concat "\\" char))
+		rtn (concat rtn char)))
+	(setq text (concat rtn text)
+	      fmt "\\texttt{%s}")
+	(while (string-match "--" text)
+	  (setq text (replace-match "-{}-" t t text)))
+	(format fmt text)))
+     ;; Else use format string.
+     (t (format fmt text)))))
+
 
 
 ;;; Template
@@ -901,15 +941,33 @@ holding export options."
 
 ;;; Transcode Functions
 
-;;;; Block
+;;;; Bold
+
+(defun org-e-latex-bold (bold contents info)
+  "Transcode BOLD from Org to LaTeX.
+CONTENTS is the text with bold markup.  INFO is a plist holding
+contextual information."
+  (org-e-latex--text-markup contents 'bold))
+
+
+;;;; Center Block
 
 (defun org-e-latex-center-block (center-block contents info)
   "Transcode a CENTER-BLOCK element from Org to LaTeX.
-CONTENTS holds the contents of the block.  INFO is a plist
+CONTENTS holds the contents of the center block.  INFO is a plist
 holding contextual information."
   (org-e-latex--wrap-label
    center-block
    (format "\\begin{center}\n%s\\end{center}" contents)))
+
+
+;;;; Code
+
+(defun org-e-latex-code (code contents info)
+  "Transcode a CODE object from Org to LaTeX.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (org-e-latex--text-markup (org-element-property :value code) 'code))
 
 
 ;;;; Comment
@@ -945,17 +1003,6 @@ holding contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
   (org-e-latex--wrap-label dynamic-block contents))
-
-
-;;;; Emphasis
-
-(defun org-e-latex-emphasis (emphasis contents info)
-  "Transcode EMPHASIS from Org to LaTeX.
-CONTENTS is the contents of the emphasized text.  INFO is a plist
-holding contextual information.."
-  (format (cdr (assoc (org-element-property :marker emphasis)
-		      org-e-latex-emphasis-alist))
-	  contents))
 
 
 ;;;; Entity
@@ -1265,6 +1312,15 @@ holding contextual information."
 			 "}\n"
 			 "\\end{center}")
 		 full-title contents))))))
+
+
+;;;; Italic
+
+(defun org-e-latex-italic (italic contents info)
+  "Transcode ITALIC from Org to LaTeX.
+CONTENTS is the text with italic markup.  INFO is a plist holding
+contextual information."
+  (org-e-latex--text-markup contents 'italic))
 
 
 ;;;; Item
@@ -1801,6 +1857,15 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-element-property :value statistics-cookie))
 
 
+;;;; Strike-Through
+
+(defun org-e-latex-strike-through (strike-through contents info)
+  "Transcode STRIKE-THROUGH from Org to LaTeX.
+CONTENTS is the text with strike-through markup.  INFO is a plist
+holding contextual information."
+  (org-e-latex--text-markup contents 'strike-through))
+
+
 ;;;; Subscript
 
 (defun org-e-latex-subscript (subscript contents info)
@@ -2065,42 +2130,22 @@ information."
 		   (format org-e-latex-diary-timestamp-format value))))))
 
 
+;;;; Underline
+
+(defun org-e-latex-underline (underline contents info)
+  "Transcode UNDERLINE from Org to LaTeX.
+CONTENTS is the text with underline markup.  INFO is a plist
+holding contextual information."
+  (org-e-latex--text-markup contents 'underline))
+
+
 ;;;; Verbatim
 
 (defun org-e-latex-verbatim (verbatim contents info)
   "Transcode a VERBATIM object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (let ((fmt (cdr (assoc (org-element-property :marker verbatim)
-			 org-e-latex-emphasis-alist)))
-	(value (org-element-property :value verbatim)))
-    (cond
-     ;; Handle the `verb' special case.
-     ((eq 'verb fmt)
-      (let ((separator (org-e-latex--find-verb-separator value)))
-	(concat "\\verb" separator value separator)))
-     ;; Handle the `protectedtexttt' special case.
-     ((eq 'protectedtexttt fmt)
-      (let ((start 0)
-	    (trans '(("\\" . "\\textbackslash{}")
-		     ("~" . "\\textasciitilde{}")
-		     ("^" . "\\textasciicircum{}")))
-	    (rtn "")
-	    char)
-	(while (string-match "[\\{}$%&_#~^]" value)
-	  (setq char (match-string 0 value))
-	  (if (> (match-beginning 0) 0)
-	      (setq rtn (concat rtn (substring value 0 (match-beginning 0)))))
-	  (setq value (substring value (1+ (match-beginning 0))))
-	  (setq char (or (cdr (assoc char trans)) (concat "\\" char))
-		rtn (concat rtn char)))
-	(setq value (concat rtn value)
-	      fmt "\\texttt{%s}")
-	(while (string-match "--" value)
-	  (setq value (replace-match "-{}-" t t value)))
-	(format fmt value)))
-     ;; Else use format string.
-     (t (format fmt value)))))
+  (org-e-latex--text-markup (org-element-property :value verbatim) 'verbatim))
 
 
 ;;;; Verse Block

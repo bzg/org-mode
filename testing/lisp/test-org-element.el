@@ -650,6 +650,14 @@ Paragraph \\alpha."
    (equal (org-test-parse-and-interpret "#+BEGIN_VERSE\nTest\n#+END_VERSE")
 	  "#+BEGIN_VERSE\nTest\n#+END_VERSE\n")))
 
+(ert-deftest test-org-element/bold-interpreter ()
+  "Test bold interpreter."
+  (should (equal (org-test-parse-and-interpret "*text*") "*text*\n")))
+
+(ert-deftest test-org-element/code-interpreter ()
+  "Test code interpreter."
+  (should (equal (org-test-parse-and-interpret "~text~") "~text~\n")))
+
 (ert-deftest test-org-element/entity-interpreter ()
   "Test entity interpreter."
   ;; 1. Without brackets.
@@ -701,6 +709,10 @@ Paragraph \\alpha."
   (should (equal (org-test-parse-and-interpret
 		  "src_emacs-lisp[:results silent]{(+ 1 1)}")
 		 "src_emacs-lisp[:results silent]{(+ 1 1)}\n")))
+
+(ert-deftest test-org-element/italic-interpreter ()
+  "Test italic interpreter."
+  (should (equal (org-test-parse-and-interpret "/text/") "/text/\n")))
 
 (ert-deftest test-org-element/latex-fragment-interpreter ()
   "Test latex fragment interpreter."
@@ -772,6 +784,10 @@ Paragraph \\alpha."
   ;; 2. With percent.
   (should (equal (org-test-parse-and-interpret "[66%]") "[66%]\n")))
 
+(ert-deftest test-org-element/strike-through-interpreter ()
+  "Test strike through interpreter."
+  (should (equal (org-test-parse-and-interpret "+target+") "+target+\n")))
+
 (ert-deftest test-org-element/subscript-interpreter ()
   "Test subscript interpreter."
   ;; 1. Without brackets.
@@ -789,6 +805,14 @@ Paragraph \\alpha."
 (ert-deftest test-org-element/target-interpreter ()
   "Test target interpreter."
   (should (equal (org-test-parse-and-interpret "<<target>>") "<<target>>\n")))
+
+(ert-deftest test-org-element/underline-interpreter ()
+  "Test underline interpreter."
+  (should (equal (org-test-parse-and-interpret "_text_") "_text_\n")))
+
+(ert-deftest test-org-element/verbatim-interpreter ()
+  "Test verbatim interpreter."
+  (should (equal (org-test-parse-and-interpret "=text=") "=text=\n")))
 
 
 
@@ -820,8 +844,8 @@ Paragraph \\alpha."
   (should
    (equal
     (org-element-normalize-contents
-     '(paragraph nil "  Two spaces " (emphasis nil " and\n One space")))
-    '(paragraph nil " Two spaces " (emphasis nil " and\nOne space"))))
+     '(paragraph nil "  Two spaces " (bold nil " and\n One space")))
+    '(paragraph nil " Two spaces " (bold nil " and\nOne space"))))
   ;; 5. When optional argument is provided, ignore first line
   ;;    indentation.
   (should

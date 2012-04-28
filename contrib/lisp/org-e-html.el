@@ -863,27 +863,28 @@ order to reproduce the default set-up:
   :group 'org-export-e-html
   :type 'function)
 
-;;;; Emphasis
 
-(defcustom org-e-html-emphasis-alist
-  '(("*" . "<b>%s</b>")
-    ("/" . "<i>%s</i>")
-    ("_" . "<span style=\"text-decoration:underline;\">%s</span>")
-    ("+" . "<del>%s</del>")
-    ("=" . "<code>%s</code>")
-    ("~" . "<code>%s</code>"))
-  "Alist of HTML expressions to convert emphasis fontifiers.
+;;;; Text Markup
 
-The key is the character used as a marker for fontification.  The
-value is a formatting string to wrap fontified text with.
+(defcustom org-e-html-text-markup-alist
+  '((bold . "<b>%s</b>")
+    (code . "<code>%s</code>")
+    (italic . "<i>%s</i>")
+    (strike-through . "<del>%s</del>")
+    (underline . "<span style=\"text-decoration:underline;\">%s</span>")
+    (verbatim . "<code>%s</code>"))
+  "Alist of HTML expressions to convert text markup
 
-Value can also be set to the following symbols: `verb' and
-`protectedtexttt'.  For the former, Org will use \"\\verb\" to
-create a format string and select a delimiter character that
-isn't in the string.  For the latter, Org will use \"\\texttt\"
-to typeset and try to protect special characters."
+The key must be a symbol among `bold', `code', `italic',
+`strike-through', `underline' and `verbatim'.  The value is
+a formatting string to wrap fontified text with.
+
+If no association can be found for a given markup, text will be
+returned as-is."
   :group 'org-export-e-html
-  :type 'alist)
+  :type '(alist :key-type (symbol :tag "Markup type")
+		:value-type (string :tag "Format string"))
+  :options '(bold code italic strike-through underline verbatim))
 
 
 ;;;; Footnotes
@@ -1830,7 +1831,17 @@ original parsed data.  INFO is a plist holding export options."
 
 ;;; Transcode Functions
 
-;;;; Block
+;;;; Bold
+
+(defun org-e-html-bold (bold contents info)
+  "Transcode BOLD from Org to HTML.
+CONTENTS is the text with bold markup.  INFO is a plist holding
+contextual information."
+  (format (or (cdr (assq 'bold org-e-html-text-markup-alist)) "%s")
+	  contents))
+
+
+;;;; Center Block
 
 (defun org-e-html-center-block (center-block contents info)
   "Transcode a CENTER-BLOCK element from Org to HTML.
@@ -1839,6 +1850,16 @@ holding contextual information."
   (org-e-html--wrap-label
    center-block
    (format "<div style=\"text-align: center\">\n%s</div>" contents)))
+
+
+;;;; Code
+
+(defun org-e-html-code (code contents info)
+  "Transcode CODE from Org to HTML.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format (or (cdr (assq 'code org-e-html-text-markup-alist)) "%s")
+	  (org-element-property :value code)))
 
 
 ;;;; Comment
@@ -1874,16 +1895,6 @@ holding contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
   (org-e-html--wrap-label dynamic-block contents))
-
-
-;;;; Emphasis
-
-(defun org-e-html-emphasis (emphasis contents info)
-  "Transcode EMPHASIS from Org to HTML.
-CONTENTS is the contents of the emphasized text.  INFO is a plist
-holding contextual information.."
-  (let* ((marker (org-element-property :marker emphasis)))
-    (format (cdr (assoc marker org-e-html-emphasis-alist)) contents)))
 
 
 ;;;; Entity
@@ -2152,6 +2163,15 @@ holding contextual information."
 	"\n<div class=\"inlinetask\">\n<b>%s</b><br/>\n%s\n</div>"
 	(org-e-html-format-headline--wrap inlinetask info)
 	contents)))))
+
+
+;;;; Italic
+
+(defun org-e-html-italic (italic contents info)
+  "Transcode ITALIC from Org to HTML.
+CONTENTS is the text with italic markup.  INFO is a plist holding
+contextual information."
+  (format (or (cdr (assq 'italic org-e-html-text-markup-alist)) "%s") contents))
 
 
 ;;;; Item
@@ -2731,6 +2751,16 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (format "<code>%s</code>" cookie-value)))
 
 
+;;;; Strike-Through
+
+(defun org-e-html-strike-through (strike-through contents info)
+  "Transcode STRIKE-THROUGH from Org to HTML.
+CONTENTS is the text with strike-through markup.  INFO is a plist
+holding contextual information."
+  (format (or (cdr (assq 'strike-through org-e-html-text-markup-alist)) "%s")
+	  contents))
+
+
 ;;;; Subscript
 
 (defun org-e-html-subscript (subscript contents info)
@@ -2923,14 +2953,24 @@ information."
 	    (format "<span class=\"timestamp\">%s</span>" value))))
 
 
+;;;; Underline
+
+(defun org-e-html-underline (underline contents info)
+  "Transcode UNDERLINE from Org to HTML.
+CONTENTS is the text with underline markup.  INFO is a plist
+holding contextual information."
+  (format (or (cdr (assq 'underline org-e-html-text-markup-alist)) "%s")
+	  contents))
+
+
 ;;;; Verbatim
 
 (defun org-e-html-verbatim (verbatim contents info)
-  "Transcode a VERBATIM object from Org to HTML.
-CONTENTS is nil.  INFO is a plist used as a communication
-channel."
-  (org-e-html-emphasis
-   verbatim (org-element-property :value verbatim) info))
+  "Transcode VERBATIM from Org to HTML.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (format (or (cdr (assq 'verbatim org-e-html-text-markup-alist)) "%s")
+	  (org-element-property :value verbatim)))
 
 
 ;;;; Verse Block
