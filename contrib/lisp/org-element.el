@@ -2773,8 +2773,8 @@ CONTENTS is nil."
   '((subscript . sub/superscript) (superscript . sub/superscript)
     (bold . text-markup) (code . text-markup) (italic . text-markup)
     (strike-through . text-markup) (underline . text-markup)
-    (verbatim . text-markup) (verbatim . text-markup)
-    (entity . latex-or-entity) (latex-fragment . latex-or-entity))
+    (verbatim . text-markup) (entity . latex-or-entity)
+    (latex-fragment . latex-or-entity))
   "Alist of translations between object type and successor name.
 
 Sharing the same successor comes handy when, for example, the
