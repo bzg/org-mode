@@ -4747,7 +4747,8 @@ function from a program - use `org-agenda-get-day-entries' instead."
     ;; I am not sure if this works with sticky agendas, because the marker
     ;; list is then no longer a global variable.
     (org-agenda-reset-markers))
-  (org-compile-prefix-format 'agenda)
+  ;; Prevent `org-compile-prefix-format' to fail when there is no agenda
+  (when org-agenda-buffer (org-compile-prefix-format 'agenda))
   (org-set-sorting-strategy 'agenda)
   (setq args (or args '(:deadline :scheduled :timestamp :sexp)))
   (let* ((files (if (and entry (stringp entry) (string-match "\\S-" entry))
