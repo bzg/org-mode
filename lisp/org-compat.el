@@ -32,6 +32,7 @@
 (eval-when-compile
   (require 'cl))
 
+(require 'find-func)
 (require 'org-macs)
 
 (declare-function find-library-name "find-func"  (library))
@@ -337,8 +338,13 @@ Works on both Emacs and XEmacs."
     ; XEmacs does not have `find-library-name'
     (flet ((find-library-name-helper (filename ignored-codesys)
 				     filename)
-	   (find-library-name (library)
-	    (find-library library nil 'find-library-name-helper)))
+	   (find-library-name
+	    (library)
+	    ;; Prevent Emacs compiler to complain about calling
+	    ;; find-library-name with three arguments, as we need need
+	    ;; to do in Xemacs
+	    (org-no-warnings
+	     (find-library library nil 'find-library-name-helper))))
       (file-name-directory (find-library-name library)))))
 
 (defun org-count-lines (s)
