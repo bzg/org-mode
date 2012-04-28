@@ -183,9 +183,11 @@ during idle time." nil " Ind" nil
       (org-set-local 'org-hide-leading-stars-before-indent-mode
 		     org-hide-leading-stars)
       (org-set-local 'org-hide-leading-stars t))
-    (make-local-variable 'buffer-substring-filters)
-    (add-to-list 'buffer-substring-filters
-		 'org-indent-remove-properties-from-string)
+    (make-local-variable 'filter-buffer-substring-functions)
+    (add-hook 'filter-buffer-substring-functions
+	      (lambda (fun start end delete)
+		(org-indent-remove-properties-from-string
+		 (funcall fun start end delete))))
     (org-add-hook 'after-change-functions 'org-indent-refresh-maybe nil 'local)
     (org-add-hook 'before-change-functions
 		  'org-indent-notify-modified-headline nil 'local)
@@ -209,9 +211,10 @@ during idle time." nil " Ind" nil
     (when (boundp 'org-hide-leading-stars-before-indent-mode)
       (org-set-local 'org-hide-leading-stars
 		     org-hide-leading-stars-before-indent-mode))
-    (setq buffer-substring-filters
-	  (delq 'org-indent-remove-properties-from-string
-		buffer-substring-filters))
+    (remove-hook 'filter-buffer-substring-functions
+	      (lambda (fun start end delete)
+		(org-indent-remove-properties-from-string
+		 (funcall fun start end delete))))
     (remove-hook 'after-change-functions 'org-indent-refresh-maybe 'local)
     (remove-hook 'before-change-functions
 		 'org-indent-notify-modified-headline 'local)
