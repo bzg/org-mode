@@ -128,7 +128,7 @@ Return interpreted string."
 	(should (org-element-property :preserve-indent element))))
     ;; 2. "-n -r -k" combination should number lines, retain labels but
     ;;    not use them in coderefs.
-    (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r -k\nText.\N#+END_EXAMPLE"
+    (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r -k\nText.\n#+END_EXAMPLE"
       (let ((element (org-element-current-element)))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)

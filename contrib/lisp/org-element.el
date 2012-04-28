@@ -3020,7 +3020,7 @@ it is quicker than its counterpart, albeit more restrictive."
           (let ((type (upcase (match-string 1))))
             (if (save-excursion
                   (re-search-forward
-                   (format "[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t))
+                   (format "^[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t))
                 (funcall
 		 (intern
 		  (format
@@ -3030,9 +3030,9 @@ it is quicker than its counterpart, albeit more restrictive."
        ;; Inlinetask.
        ((org-at-heading-p) (org-element-inlinetask-parser raw-secondary-p))
        ;; LaTeX Environment or Paragraph if incomplete.
-       ((looking-at "^[ \t]*\\\\begin{")
+       ((looking-at "[ \t]*\\\\begin{")
         (if (save-excursion
-              (re-search-forward "^[ \t]*\\\\end{[^}]*}[ \t]*" nil t))
+              (re-search-forward "[ \t]*\\\\end{[^}]*}[ \t]*" nil t))
             (org-element-latex-environment-parser)
           (org-element-paragraph-parser)))
        ;; Property Drawer.
@@ -3046,7 +3046,7 @@ it is quicker than its counterpart, albeit more restrictive."
           (cond
            ((not (save-excursion
                    (re-search-forward
-                    (format "[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t)))
+                    (format "^[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t)))
             (org-element-paragraph-parser))
            ((string= type "CENTER") (org-element-center-block-parser))
            ((string= type "QUOTE") (org-element-quote-block-parser))
