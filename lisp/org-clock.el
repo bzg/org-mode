@@ -670,7 +670,7 @@ use libnotify if available, or fall back on a message."
 	  ;; FIXME how to link to the Org icon?
 	  ;; :app-icon "~/.emacs.d/icons/mail.png"
 	  :urgency 'low))
-	((org-program-exists "notify-send")
+	((executable-find "notify-send")
 	 (start-process "emacs-timer-notification" nil
 			"notify-send" notification))
 	;; Maybe the handler will send a message, so only use message as
@@ -686,17 +686,12 @@ Use alsa's aplay tool if available."
    ((stringp org-clock-sound)
     (let ((file (expand-file-name org-clock-sound)))
       (if (file-exists-p file)
-	  (if (org-program-exists "aplay")
+	  (if (executable-find "aplay")
 	      (start-process "org-clock-play-notification" nil
 			     "aplay" file)
 	    (condition-case nil
 		(play-sound-file file)
 	      (error (beep t) (beep t)))))))))
-
-(defun org-program-exists (program-name)
-  "Checks whenever we can locate PROGRAM-NAME using the `which' executable."
-  (if (member system-type '(gnu/linux darwin))
-      (= 0 (call-process "which" nil nil nil program-name))))
 
 (defvar org-clock-mode-line-entry nil
   "Information for the modeline about the running clock.")
