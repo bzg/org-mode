@@ -6465,6 +6465,9 @@ template in the usual way.
 Visit the last stored capture item in its buffer.
 @end table
 
+To insert the capture at point in an Org buffer, call @code{org-capture} with
+a @code{C-0} prefix argument.
+
 @node Capture templates,  , Using capture, Capture
 @subsection Capture templates
 @cindex templates, for Capture
