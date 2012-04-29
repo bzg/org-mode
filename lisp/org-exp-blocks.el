@@ -234,7 +234,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 			      (file-name-as-directory
 			       (expand-file-name
 				"../contrib"
-				(file-name-directory (find-library-name "org")))))))
+				(file-name-directory (org-find-library-name "org")))))))
   "Path to the ditaa jar executable."
   :group 'org-babel
   :type 'string)
