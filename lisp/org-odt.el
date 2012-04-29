@@ -2383,8 +2383,7 @@ visually."
        (org-odt-format-tags '("\n<meta:generator>" . "</meta:generator>")
 			    (when org-export-creator-info
 			      (format "Org-%s/Emacs-%s"
-				      (if (boundp 'org-version) org-version
-					"Unknown")
+				      (org-version)
 				      emacs-version)))
        (org-odt-format-tags '("\n<meta:keyword>" . "</meta:keyword>") keywords)
        (org-odt-format-tags '("\n<dc:subject>" . "</dc:subject>") description)

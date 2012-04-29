@@ -1835,7 +1835,7 @@ PUB-DIR is set, use this as the publishing directory."
 			  (split-string email ",+ *")
 			  ", "))
 	      (creator-info
-	       (concat "Org version " org-version " with Emacs version "
+	       (concat "Org version " (org-version) " with Emacs version "
 		       (number-to-string emacs-major-version))))
 
 	  (when (plist-get opt-plist :html-postamble)
@@ -1857,7 +1857,7 @@ PUB-DIR is set, use this as the publishing directory."
 		     (insert "<p class=\"email\">" email "</p>\n"))
 		   (when (plist-get opt-plist :creator-info)
 		     (insert "<p class=\"creator\">"
-			     (concat "Org version " org-version " with Emacs version "
+			     (concat "Org version " (org-version) " with Emacs version "
 				     (number-to-string emacs-major-version) "</p>\n")))
 		   (insert html-validation-link "\n"))
 		  (t

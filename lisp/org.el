@@ -218,13 +218,15 @@ With prefix arg HERE, insert it at point."
   (let* ((origin default-directory)
 	 (version (if (boundp 'org-release) org-release "N/A"))
 	 (git-version (if (boundp 'org-git-version) org-git-version "N/A"))
-	 (org-install (ignore-errors (find-library-name "org-install"))))
-    (setq version (format "Org-mode version %s (%s @ %s)"
-			  version
-			  git-version
-			  (if org-install org-install "org-install.el can not be found!")))
-    (if here (insert version))
-    (message version)))
+	 (org-install (ignore-errors (find-library-name "org-install")))
+	 (version_ (format "Org-mode version %s (%s @ %s)"
+			   version
+			   git-version
+			   (if org-install org-install "org-install.el can not be found!"))))
+    (if (org-called-interactively-p 'interactive)
+	(if here (insert version_)
+	  (message version_))
+      version)))
 
 ;;; Compatibility constants
 
