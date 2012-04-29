@@ -4748,7 +4748,8 @@ function from a program - use `org-agenda-get-day-entries' instead."
     ;; list is then no longer a global variable.
     (org-agenda-reset-markers))
   ;; Prevent `org-compile-prefix-format' to fail when there is no agenda
-  (when org-agenda-buffer (org-compile-prefix-format 'agenda))
+  (when (buffer-live-p org-agenda-buffer)
+    (org-compile-prefix-format 'agenda))
   (org-set-sorting-strategy 'agenda)
   (setq args (or args '(:deadline :scheduled :timestamp :sexp)))
   (let* ((files (if (and entry (stringp entry) (string-match "\\S-" entry))
