@@ -1018,6 +1018,22 @@ holding contextual information."
    contents (org-e-ascii--current-text-width center-block info) 'center))
 
 
+;;;; Clock
+
+(defun org-e-ascii-clock (clock contents info)
+  "Transcode a CLOCK object from Org to ASCII.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (concat org-clock-string " "
+	  (org-translate-time (org-element-property :value clock))
+	  (let ((time (org-element-property :time clock)))
+	    (and time
+		 (concat " => "
+			 (apply 'format
+				"%2s:%02s"
+				(org-split-string time ":")))))))
+
+
 ;;;; Code
 
 (defun org-e-ascii-code (code contents info)
@@ -1460,15 +1476,30 @@ INFO is a plist used as a communication channel."
       (replace-regexp-in-string "---" "—" text)))))
 
 
-;;;; Property Drawer
+;;;; Planning
 
-(defun org-e-ascii-property-drawer (property-drawer contents info)
-  "Transcode a PROPERTY-DRAWER element from Org to ASCII.
+(defun org-e-ascii-planning (planning contents info)
+  "Transcode a PLANNING element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  ;; The property drawer isn't exported but we want separating blank
-  ;; lines nonetheless.
-  "")
+  (mapconcat
+   'identity
+   (delq nil
+	 (list (let ((closed (org-element-property :closed planning)))
+		 (when closed (concat org-closed-string " "
+				      (org-translate-time closed))))
+	       (let ((deadline (org-element-property :deadline planning)))
+		 (when deadline (concat org-deadline-string " "
+					(org-translate-time deadline))))
+	       (let ((scheduled (org-element-property :scheduled planning)))
+		 (when scheduled (concat org-scheduled-string " "
+					 (org-translate-time scheduled))))))
+   " "))
+
+
+;;;; Property Drawer
+;;
+;; Property drawers are ignored.
 
 
 ;;;; Quote Block
@@ -1727,8 +1758,7 @@ a communication channel."
 (defun org-e-ascii-time-stamp (time-stamp contents info)
   "Transcode a TIME-STAMP object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  ;; Return time-stamps as-is.
-  (org-element-time-stamp-interpreter time-stamp contents))
+  (org-translate-time (org-element-property :value time-stamp)))
 
 
 ;;;; Underline

@@ -1852,6 +1852,23 @@ holding contextual information."
    (format "<div style=\"text-align: center\">\n%s</div>" contents)))
 
 
+;;;; Clock
+
+(defun org-e-html-clock (clock contents info)
+  "Transcode a CLOCK element from Org to HTML.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (format "<p>
+<span class=\"timestamp-wrapper\">
+<span class=\"timestamp-kwd\">%s</span> <span class=\"timestamp\">%s</span>%s
+</span>
+</p>"
+	  org-clock-string
+	  (org-translate-time (org-element-property :value clock))
+	  (let ((time (org-element-property :time clock)))
+	    (and time (format " <span class=\"timestamp\">(%s)</span>" time)))))
+
+
 ;;;; Code
 
 (defun org-e-html-code (code contents info)
@@ -2634,6 +2651,34 @@ contextual information."
   text)
 
 
+;; Planning
+
+(defun org-e-html-planning (planning contents info)
+  "Transcode a PLANNING element from Org to HTML.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (let ((span-fmt "<span class=\"timestamp-kwd\">%s</span> <span class=\"timestamp\">%s</span>"))
+    (format
+     "<p><span class=\"timestamp-wrapper\">%s</span></p>"
+     (mapconcat
+      'identity
+      (delq nil
+	    (list
+	     (let ((closed (org-element-property :closed planning)))
+	       (when closed
+		 (format span-fmt org-closed-string
+			 (org-translate-time closed))))
+	     (let ((deadline (org-element-property :deadline planning)))
+	       (when deadline
+		 (format span-fmt org-deadline-string
+			 (org-translate-time deadline))))
+	     (let ((scheduled (org-element-property :scheduled planning)))
+	       (when scheduled
+		 (format span-fmt org-scheduled-string
+			 (org-translate-time scheduled))))))
+      " "))))
+
+
 ;;;; Property Drawer
 
 (defun org-e-html-property-drawer (property-drawer contents info)
@@ -2939,18 +2984,9 @@ information."
   "Transcode a TIME-STAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-element-property :value time-stamp))
-        (type (org-element-property :type time-stamp))
-        (appt-type (org-element-property :appt-type time-stamp)))
-    (setq value (org-translate-time (org-export-secondary-string value info)))
-    (setq appt-type (case appt-type
-		      (scheduled org-scheduled-string)
-		      (deadline org-deadline-string)
-		      (closed org-closed-string)))
-    (format "<span class=\"timestamp-wrapper\">%s%s</span>"
-	    (if (not appt-type) ""
-		(format "<span class=\"timestamp-kwd\">%s</span> " appt-type))
-	    (format "<span class=\"timestamp\">%s</span>" value))))
+  (let ((value (org-translate-time (org-element-property :value time-stamp))))
+    (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
+	    value)))
 
 
 ;;;; Underline

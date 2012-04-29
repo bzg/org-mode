@@ -19,9 +19,9 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
+;;
 ;; This library implements a LaTeX back-end for Org generic exporter.
-
+;;
 ;; To test it, run
 ;;
 ;;   M-: (org-export-to-buffer 'e-latex "*Test e-LaTeX*") RET
@@ -29,7 +29,7 @@
 ;; in an org-mode buffer then switch to the buffer to see the LaTeX
 ;; export.  See contrib/lisp/org-export.el for more details on how
 ;; this exporter works.
-
+;;
 ;; It introduces three new buffer keywords: "LATEX_CLASS",
 ;; "LATEX_CLASS_OPTIONS" and "LATEX_HEADER".
 
@@ -941,6 +941,11 @@ holding export options."
 
 ;;; Transcode Functions
 
+;;;; Babel Call
+;;
+;; Babel Calls are ignored.
+
+
 ;;;; Bold
 
 (defun org-e-latex-bold (bold contents info)
@@ -961,6 +966,22 @@ holding contextual information."
    (format "\\begin{center}\n%s\\end{center}" contents)))
 
 
+;;;; Clock
+
+(defun org-e-latex-clock (clock contents info)
+  "Transcode a CLOCK element from Org to LaTeX.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (concat
+   "\\noindent"
+   (format "\\textbf{%s} " org-clock-string)
+   (format org-e-latex-inactive-timestamp-format
+	   (concat (org-translate-time (org-element-property :value clock))
+		   (let ((time (org-element-property :time clock)))
+		     (and time (format " (%s)" time)))))
+   "\\\\"))
+
+
 ;;;; Code
 
 (defun org-e-latex-code (code contents info)
@@ -971,12 +992,12 @@ channel."
 
 
 ;;;; Comment
-
+;;
 ;; Comments are ignored.
 
 
 ;;;; Comment Block
-
+;;
 ;; Comment Blocks are ignored.
 
 
@@ -1059,7 +1080,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 
 ;;;; Footnote Definition
-
+;;
 ;; Footnote Definitions are ignored.
 
 
@@ -1228,7 +1249,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 
 ;;;; Inline Babel Call
-
+;;
 ;; Inline Babel Calls are ignored.
 
 
@@ -1571,11 +1592,6 @@ INFO is a plist holding contextual information.  See
      (t (format "\\texttt{%s}" desc)))))
 
 
-;;;; Babel Call
-
-;; Babel Calls are ignored.
-
-
 ;;;; Macro
 
 (defun org-e-latex-macro (macro contents info)
@@ -1667,6 +1683,40 @@ contextual information."
 					 text)))
   ;; Return value.
   text)
+
+
+;;;; Planning
+
+(defun org-e-latex-planning (planning contents info)
+  "Transcode a PLANNING element from Org to LaTeX.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (concat
+   "\\noindent"
+   (mapconcat
+    'identity
+    (delq nil
+	  (list
+	   (let ((closed (org-element-property :closed planning)))
+	     (when closed
+	       (concat
+		(format "\\textbf{%s} " org-closed-string)
+		(format org-e-latex-inactive-timestamp-format
+			(org-translate-time closed)))))
+	   (let ((deadline (org-element-property :deadline planning)))
+	     (when deadline
+	       (concat
+		(format "\\textbf{%s} " org-deadline-string)
+		(format org-e-latex-active-timestamp-format
+			(org-translate-time deadline)))))
+	   (let ((scheduled (org-element-property :scheduled planning)))
+	     (when scheduled
+	       (concat
+		(format "\\textbf{%s} " org-scheduled-string)
+		(format org-e-latex-active-timestamp-format
+			(org-translate-time scheduled)))))))
+    " ")
+   "\\\\"))
 
 
 ;;;; Property Drawer
@@ -2113,21 +2163,13 @@ information."
   "Transcode a TIME-STAMP object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-element-property :value time-stamp))
-	(type (org-element-property :type time-stamp))
-	(appt-type (org-element-property :appt-type time-stamp)))
-    (concat (cond ((eq appt-type 'scheduled)
-		   (format "\\textbf{\\textsc{%s}} " org-scheduled-string))
-		  ((eq appt-type 'deadline)
-		   (format "\\textbf{\\textsc{%s}} " org-deadline-string))
-		  ((eq appt-type 'closed)
-		   (format "\\textbf{\\textsc{%s}} " org-closed-string)))
-	    (cond ((memq type '(active active-range))
-		   (format org-e-latex-active-timestamp-format value))
-		  ((memq type '(inactive inactive-range))
-		   (format org-e-latex-inactive-timestamp-format value))
-		  (t
-		   (format org-e-latex-diary-timestamp-format value))))))
+  (let ((value (org-translate-time (org-element-property :value time-stamp)))
+	(type (org-element-property :type time-stamp)))
+    (cond ((memq type '(active active-range))
+	   (format org-e-latex-active-timestamp-format value))
+	  ((memq type '(inactive inactive-range))
+	   (format org-e-latex-inactive-timestamp-format value))
+	  (t (format org-e-latex-diary-timestamp-format value)))))
 
 
 ;;;; Underline

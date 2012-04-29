@@ -207,12 +207,42 @@ already filled in `info'."
     (org-test-with-temp-text ":TEST:\ncontents\n:END:"
       (org-test-with-backend "test"
 	(should (equal (org-export-as 'test nil nil nil '(:with-drawers nil))
-		       "")))))
-  (let ((org-drawers '("TEST")))
-    (org-test-with-temp-text ":TEST:\ncontents\n:END:"
-      (org-test-with-backend "test"
+		       ""))
 	(should (equal (org-export-as 'test nil nil nil '(:with-drawers t))
-		       ":TEST:\ncontents\n:END:\n"))))))
+		       ":TEST:\ncontents\n:END:\n")))))
+  (let ((org-drawers '("FOO" "BAR")))
+    (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
+      (org-test-with-backend "test"
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-drawers ("FOO")))
+		":FOO:\nkeep\n:END:\n")))))
+  ;; Timestamps.
+  (org-test-with-temp-text "[2012-04-29 sun. 10:45]"
+    (org-test-with-backend "test"
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps t))
+	      "[2012-04-29 sun. 10:45]\n"))
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps nil)) ""))))
+  ;; Clocks.
+  (let ((org-clock-string "CLOCK:"))
+    (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
+      (org-test-with-backend "test"
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-clocks t))
+		"CLOCK: [2012-04-29 sun. 10:45]\n"))
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-clocks nil)) "")))))
+  ;; Plannings.
+  (let ((org-closed-string "CLOSED:"))
+    (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
+      (org-test-with-backend "test"
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-plannings t))
+		"CLOSED: [2012-04-29 sun. 10:45]\n"))
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-plannings nil))
+		""))))))
 
 (ert-deftest test-org-export/comment-tree ()
   "Test if export process ignores commented trees."

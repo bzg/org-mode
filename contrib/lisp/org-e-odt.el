@@ -2947,6 +2947,22 @@ holding contextual information."
   (org-e-odt--wrap-label center-block contents))
 
 
+;;;; Clock
+
+(defun org-e-odt-clock (clock contents info)
+  "Transcode a CLOCK element from Org to HTML.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (org-e-odt-format-fontify
+   (concat (org-e-odt-format-fontify org-clock-string "timestamp-kwd")
+	   (org-e-odt-format-fontify
+	    (concat (org-translate-time (org-element-property :value clock))
+		    (let ((time (org-element-property :time clock)))
+		      (and time (format " (%s)" time))))
+	    "timestamp"))
+   "timestamp-wrapper"))
+
+
 ;;;; Code
 
 (defun org-e-odt-code (code contents info)
@@ -3759,6 +3775,32 @@ contextual information."
   text)
 
 
+;;;; Planning
+
+(defun org-e-odt-planning (planning contents info)
+  "Transcode a PLANNING element from Org to HTML.
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (org-e-odt-format-fontify
+   (concat
+    (let ((closed (org-element-property :closed planning)))
+      (when closed
+	(concat (org-e-odt-format-fontify org-closed-string "timestamp-kwd")
+		(org-e-odt-format-fontify (org-translate-time closed)
+					  "timestamp"))))
+    (let ((deadline (org-element-property :deadline planning)))
+      (when deadline
+	(concat (org-e-odt-format-fontify org-deadline-string "timestamp-kwd")
+		(org-e-odt-format-fontify (org-translate-time deadline)
+					  "timestamp"))))
+    (let ((scheduled (org-element-property :scheduled planning)))
+      (when scheduled
+	(concat (org-e-odt-format-fontify org-scheduled-string "timestamp-kwd")
+		(org-e-odt-format-fontify (org-translate-time scheduled)
+					  "timestamp")))))
+   "timestamp-wrapper"))
+
+
 ;;;; Property Drawer
 
 (defun org-e-odt-property-drawer (property-drawer contents info)
@@ -4108,36 +4150,13 @@ information."
 
 (defun org-e-odt-time-stamp (time-stamp contents info)
   "Transcode a TIME-STAMP object from Org to HTML.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  ;; (let ((value (org-element-property :value time-stamp))
-  ;; 	(type (org-element-property :type time-stamp))
-  ;; 	(appt-type (org-element-property :appt-type time-stamp)))
-  ;;   (concat (cond ((eq appt-type 'scheduled)
-  ;; 		   (format "\\textbf{\\textsc{%s}} " org-scheduled-string))
-  ;; 		  ((eq appt-type 'deadline)
-  ;; 		   (format "\\textbf{\\textsc{%s}} " org-deadline-string))
-  ;; 		  ((eq appt-type 'closed)
-  ;; 		   (format "\\textbf{\\textsc{%s}} " org-closed-string)))
-  ;; 	    (cond ((memq type '(active active-range))
-  ;; 		   (format org-e-odt-active-timestamp-format value))
-  ;; 		  ((memq type '(inactive inactive-range))
-  ;; 		   (format org-e-odt-inactive-timestamp-format value))
-  ;; 		  (t
-  ;; 		   (format org-e-odt-diary-timestamp-format value)))))
-  (let ((value (org-element-property :value time-stamp))
-        (type (org-element-property :type time-stamp))
-        (appt-type (org-element-property :appt-type time-stamp)))
-    (setq value (org-export-secondary-string value info))
-    (org-e-odt-format-fontify
-     (concat
-      (org-e-odt-format-fontify
-       (cond ((eq appt-type 'scheduled) org-scheduled-string)
-	     ((eq appt-type 'deadline) org-deadline-string)
-	     ((eq appt-type 'closed) org-closed-string)) "timestamp-kwd")
-      ;; FIXME: (org-translate-time value)
-      (org-e-odt-format-fontify value "timestamp"))
-     "timestamp-wrapper")))
+CONTENTS is nil.  INFO is a plist used as a communication
+channel."
+  (org-e-odt-format-fontify
+   (org-e-odt-format-fontify
+    (org-translate-time (org-element-property :value time-stamp))
+    "timestamp")
+   "timestamp-wrapper"))
 
 
 ;;;; Underline

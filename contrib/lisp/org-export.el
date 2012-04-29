@@ -19,33 +19,33 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
+;;
 ;; This library implements a generic export engine for Org, built on
 ;; its syntactical parser: Org Elements.
-
+;;
 ;; Besides that parser, the generic exporter is made of three distinct
 ;; parts:
-
+;;
 ;; - The communication channel consists in a property list, which is
 ;;   created and updated during the process.  Its use is to offer
 ;;   every piece of information, would it be about initial environment
 ;;   or contextual data, all in a single place.  The exhaustive list
 ;;   of properties is given in "The Communication Channel" section of
 ;;   this file.
-
+;;
 ;; - The transcoder walks the parse tree, ignores or treat as plain
 ;;   text elements and objects according to export options, and
 ;;   eventually calls back-end specific functions to do the real
 ;;   transcoding, concatenating their return value along the way.
-
+;;
 ;; - The filter system is activated at the very beginning and the very
 ;;   end of the export process, and each time an element or an object
 ;;   has been converted.  It is the entry point to fine-tune standard
 ;;   output from back-end transcoders.
-
+;;
 ;; The core function is `org-export-as'.  It returns the transcoded
 ;; buffer as a string.
-
+;;
 ;; In order to derive an exporter out of this generic implementation,
 ;; one can define a transcode function for each element or object.
 ;; Such function should return a string for the corresponding element,
@@ -54,21 +54,21 @@
 ;; 1. the element or object itself,
 ;; 2. its contents, or nil when it isn't recursive,
 ;; 3. the property list used as a communication channel.
-
+;;
 ;; If no such function is found, that element or object type will
 ;; simply be ignored, along with any separating blank line.  The same
 ;; will happen if the function returns the nil value.  If that
 ;; function returns the empty string, the type will be ignored, but
 ;; the blank lines will be kept.
-
+;;
 ;; Contents, when not nil, are stripped from any global indentation
 ;; (although the relative one is preserved).  They also always end
 ;; with a single newline character.
-
+;;
 ;; These functions must follow a strict naming convention:
 ;; `org-BACKEND-TYPE' where, obviously, BACKEND is the name of the
 ;; export back-end and TYPE the type of the element or object handled.
-
+;;
 ;; Moreover, two additional functions can be defined.  On the one
 ;; hand, `org-BACKEND-template' returns the final transcoded string,
 ;; and can be used to add a preamble and a postamble to document's
@@ -77,14 +77,14 @@
 ;; `org-BACKEND-plain-text', when defined, is to be called on every
 ;; text not recognized as an element or an object.  It must accept two
 ;; arguments: the text string and the information channel.
-
+;;
 ;; Any back-end can define its own variables.  Among them, those
 ;; customizables should belong to the `org-export-BACKEND' group.
 ;; Also, a special variable, `org-BACKEND-option-alist', allows to
 ;; define buffer keywords and "#+options:" items specific to that
 ;; back-end.  See `org-export-option-alist' for supported defaults and
 ;; syntax.
-
+;;
 ;; Tools for common tasks across back-ends are implemented in the
 ;; penultimate part of this file.  A dispatcher for standard back-ends
 ;; is provided in the last one.
@@ -102,7 +102,7 @@
 
 
 ;;; Internal Variables
-
+;;
 ;; Among internal variables, the most important is
 ;; `org-export-option-alist'.  This variable define the global export
 ;; options, shared between every exporter, and how they are acquired.
@@ -127,6 +127,7 @@
     (:title "TITLE" nil nil space)
     (:with-archived-trees nil "arch" org-export-with-archived-trees)
     (:with-author nil "author" org-export-with-author)
+    (:with-clocks nil "c" org-export-with-clocks)
     (:with-creator nil "creator" org-export-with-creator)
     (:with-drawers nil "d" org-export-with-drawers)
     (:with-email nil "email" org-export-with-email)
@@ -134,6 +135,7 @@
     (:with-entities nil "e" org-export-with-entities)
     (:with-fixed-width nil ":" org-export-with-fixed-width)
     (:with-footnotes nil "f" org-export-with-footnotes)
+    (:with-plannings nil "p" org-export-with-planning)
     (:with-priority nil "pri" org-export-with-priority)
     (:with-special-strings nil "-" org-export-with-special-strings)
     (:with-sub-superscript nil "^" org-export-with-sub-superscripts)
@@ -180,6 +182,7 @@ way they are handled must be hard-coded into
   '((:filter-bold . org-export-filter-bold-functions)
     (:filter-babel-call . org-export-filter-babel-call-functions)
     (:filter-center-block . org-export-filter-center-block-functions)
+    (:filter-clock . org-export-filter-clock-functions)
     (:filter-code . org-export-filter-code-functions)
     (:filter-comment . org-export-filter-comment-functions)
     (:filter-comment-block . org-export-filter-comment-block-functions)
@@ -210,6 +213,7 @@ way they are handled must be hard-coded into
     (:filter-parse-tree . org-export-filter-parse-tree-functions)
     (:filter-plain-list . org-export-filter-plain-list-functions)
     (:filter-plain-text . org-export-filter-plain-text-functions)
+    (:filter-planning . org-export-filter-planning-functions)
     (:filter-property-drawer . org-export-filter-property-drawer-functions)
     (:filter-quote-block . org-export-filter-quote-block-functions)
     (:filter-quote-section . org-export-filter-quote-section-functions)
@@ -259,9 +263,9 @@ rules.")
 
 
 ;;; User-configurable Variables
-
+;;
 ;; Configuration for the masses.
-
+;;
 ;; They should never be accessed directly, as their value is to be
 ;; stored in a property list (cf. `org-export-option-alist').
 ;; Back-ends will read their value from there instead.
@@ -296,6 +300,13 @@ e.g. \"arch:nil\"."
   "Non-nil means insert author name into the exported file.
 This option can also be set with the #+OPTIONS line,
 e.g. \"author:nil\"."
+  :group 'org-export-general
+  :type 'boolean)
+
+(defcustom org-export-with-clocks nil
+  "Non-nil means export CLOCK keywords.
+This option can also be set with the #+OPTIONS line,
+e.g. \"c:t\"."
   :group 'org-export-general
   :type 'boolean)
 
@@ -427,6 +438,13 @@ and the user option `org-entities-user'.
 
 This option can also be set with the #+OPTIONS line,
 e.g. \"e:nil\"."
+  :group 'org-export-general
+  :type 'boolean)
+
+(defcustom org-export-with-planning nil
+  "Non-nil means include planning info in export.
+This option can also be set with the #+OPTIONS: line,
+e.g. \"p:t\"."
   :group 'org-export-general
   :type 'boolean)
 
@@ -658,10 +676,10 @@ standard mode."
 
 
 ;;; The Communication Channel
-
+;;
 ;; During export process, every function has access to a number of
 ;; properties.  They are of three types:
-
+;;
 ;; 1. Environment options are collected once at the very beginning of
 ;;    the process, out of the original buffer and configuration.
 ;;    Collecting them is handled by `org-export-get-environment'
@@ -676,40 +694,40 @@ standard mode."
 ;; 3. Local options are updated during parsing, and their value
 ;;    depends on the level of recursion.  For now, only `:ignore-list'
 ;;    belongs to that category.
-
+;;
 ;; Here is the full list of properties available during transcode
 ;; process, with their category (option, tree or local) and their
 ;; value type.
-
+;;
 ;; + `:author' :: Author's name.
 ;;   - category :: option
 ;;   - type :: string
-
+;;
 ;; + `:back-end' :: Current back-end used for transcoding.
 ;;   - category :: tree
 ;;   - type :: symbol
-
+;;
 ;; + `:creator' :: String to write as creation information.
 ;;   - category :: option
 ;;   - type :: string
-
+;;
 ;; + `:date' :: String to use as date.
 ;;   - category :: option
 ;;   - type :: string
-
+;;
 ;; + `:description' :: Description text for the current data.
 ;;   - category :: option
 ;;   - type :: string
-
+;;
 ;; + `:email' :: Author's email.
 ;;   - category :: option
 ;;   - type :: string
-
+;;
 ;; + `:exclude-tags' :: Tags for exclusion of subtrees from export
 ;;      process.
 ;;   - category :: option
 ;;   - type :: list of strings
-
+;;
 ;; + `:footnote-definition-alist' :: Alist between footnote labels and
 ;;     their definition, as parsed data.  Only non-inlined footnotes
 ;;     are represented in this alist.  Also, every definition isn't
@@ -721,152 +739,156 @@ standard mode."
 ;;     `org-export-get-footnote-definition' instead.
 ;;   - category :: option
 ;;   - type :: alist (STRING . LIST)
-
+;;
 ;; + `:headline-levels' :: Maximum level being exported as an
 ;;      headline.  Comparison is done with the relative level of
 ;;      headlines in the parse tree, not necessarily with their
 ;;      actual level.
 ;;   - category :: option
 ;;   - type :: integer
-
+;;
 ;; + `:headline-offset' :: Difference between relative and real level
 ;;      of headlines in the parse tree.  For example, a value of -1
 ;;      means a level 2 headline should be considered as level
 ;;      1 (cf. `org-export-get-relative-level').
 ;;   - category :: tree
 ;;   - type :: integer
-
+;;
 ;; + `:headline-numbering' :: Alist between headlines and their
 ;;      numbering, as a list of numbers
 ;;      (cf. `org-export-get-headline-number').
 ;;   - category :: tree
 ;;   - type :: alist (INTEGER . LIST)
-
+;;
 ;; + `:ignore-list' :: List of elements and objects that should be
 ;;      ignored during export.
 ;;   - category :: local
 ;;   - type :: list of elements and objects
-
+;;
 ;; + `:input-file' :: Full path to input file, if any.
 ;;   - category :: option
 ;;   - type :: string or nil
-
+;;
 ;; + `:keywords' :: List of keywords attached to data.
 ;;   - category :: option
 ;;   - type :: string
-
+;;
 ;; + `:language' :: Default language used for translations.
 ;;   - category :: option
 ;;   - type :: string
-
-;; + `:macro-input-file' :: Macro returning file name of input file,
-;;   or nil.
-;;   - category :: option
-;;   - type :: string or nil
-
+;;
 ;; + `:parse-tree' :: Whole parse tree, available at any time during
 ;;                   transcoding.
 ;;   - category :: global
 ;;   - type :: list (as returned by `org-element-parse-buffer')
-
+;;
 ;; + `:preserve-breaks' :: Non-nil means transcoding should preserve
 ;;      all line breaks.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
 ;; + `:section-numbers' :: Non-nil means transcoding should add
 ;;      section numbers to headlines.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
 ;; + `:select-tags' :: List of tags enforcing inclusion of sub-trees
 ;;                    in transcoding.  When such a tag is present,
 ;;                    subtrees without it are de facto excluded from
 ;;                    the process.  See `use-select-tags'.
 ;;   - category :: option
 ;;   - type :: list of strings
-
+;;
 ;; + `:target-list' :: List of targets encountered in the parse tree.
 ;;                    This is used to partly resolve "fuzzy" links
 ;;                    (cf. `org-export-resolve-fuzzy-link').
 ;;   - category :: tree
 ;;   - type :: list of strings
-
+;;
 ;; + `:time-stamp-file' :: Non-nil means transcoding should insert
 ;;      a time stamp in the output.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
 ;; + `:with-archived-trees' :: Non-nil when archived subtrees should
 ;;      also be transcoded.  If it is set to the `headline' symbol,
 ;;      only the archived headline's name is retained.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t, `headline')
-
+;;
 ;; + `:with-author' :: Non-nil means author's name should be included
 ;;                    in the output.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
+;; + `:with-clocks' :: Non-nild means clock keywords should be exported.
+;;   - category :: option
+;;   - type :: symbol (nil, t)
+;;
 ;; + `:with-creator' :: Non-nild means a creation sentence should be
 ;;      inserted at the end of the transcoded string.  If the value
 ;;      is `comment', it should be commented.
 ;;   - category :: option
 ;;   - type :: symbol (`comment', nil, t)
-
+;;
 ;; + `:with-drawers' :: Non-nil means drawers should be exported.  If
 ;;      its value is a list of names, only drawers with such names
 ;;      will be transcoded.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t) or list of strings
-
+;;
 ;; + `:with-email' :: Non-nil means output should contain author's
 ;;                   email.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
 ;; + `:with-emphasize' :: Non-nil means emphasized text should be
 ;;      interpreted.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
 ;; + `:with-fixed-width' :: Non-nil if transcoder should interpret
 ;;      strings starting with a colon as a fixed-with (verbatim) area.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
 ;; + `:with-footnotes' :: Non-nil if transcoder should interpret
 ;;      footnotes.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
+;; + `:with-plannings' :: Non-nil means transcoding should include
+;;      planning info.
+;;   - category :: option
+;;   - type :: symbol (nil, t)
+;;
 ;; + `:with-priority' :: Non-nil means transcoding should include
 ;;      priority cookies.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
 ;; + `:with-special-strings' :: Non-nil means transcoding should
 ;;      interpret special strings in plain text.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
 ;; + `:with-sub-superscript' :: Non-nil means transcoding should
 ;;      interpret subscript and superscript.  With a value of "{}",
 ;;      only interpret those using curly brackets.
 ;;   - category :: option
 ;;   - type :: symbol (nil, {}, t)
-
+;;
 ;; + `:with-tables' :: Non-nil means transcoding should interpret
 ;;                    tables.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
-
+;;
 ;; + `:with-tags' :: Non-nil means transcoding should keep tags in
 ;;                  headlines.  A `not-in-toc' value will remove them
 ;;                  from the table of contents, if any, nonetheless.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t, `not-in-toc')
-
+;;
 ;; + `:with-tasks' :: Non-nil means transcoding should include
 ;;                   headlines with a TODO keyword.  A `todo' value
 ;;                   will only include headlines with a todo type
@@ -876,19 +898,19 @@ standard mode."
 ;;                   be kept.
 ;;   - category :: option
 ;;   - type :: symbol (t, todo, done, nil) or list of strings
-
+;;
 ;; + `:with-timestamps' :: Non-nil means transcoding should include
 ;;      time stamps and associated keywords.  Otherwise, completely
 ;;      remove them.
 ;;   - category :: option
 ;;   - type :: symbol: (t, nil)
-
+;;
 ;; + `:with-toc' :: Non-nil means that a table of contents has to be
 ;;                 added to the output.  An integer value limits its
 ;;                 depth.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t or integer)
-
+;;
 ;; + `:with-todo-keywords' :: Non-nil means transcoding should
 ;;      include TODO keywords.
 ;;   - category :: option
@@ -896,7 +918,7 @@ standard mode."
 
 
 ;;;; Environment Options
-
+;;
 ;; Environment options encompass all parameters defined outside the
 ;; scope of the parsed data.  They come from five sources, in
 ;; increasing precedence order:
@@ -906,19 +928,19 @@ standard mode."
 ;; - Options keyword symbols,
 ;; - Buffer keywords,
 ;; - Subtree properties.
-
+;;
 ;; The central internal function with regards to environment options
 ;; is `org-export-get-environment'.  It updates global variables with
 ;; "#+BIND:" keywords, then retrieve and prioritize properties from
 ;; the different sources.
-
+;;
 ;;  The internal functions doing the retrieval are:
 ;;  `org-export-get-global-options',
 ;;  `org-export-get-buffer-attributes',
 ;;  `org-export-parse-option-keyword',
 ;;  `org-export-get-subtree-options' and
 ;;  `org-export-get-inbuffer-options'
-
+;;
 ;; Also, `org-export-confirm-letbind' and `org-export-install-letbind'
 ;; take care of the part relative to "#+BIND:" keywords.
 
@@ -1254,11 +1276,11 @@ retrieved."
 
 
 ;;;; Tree Properties
-
+;;
 ;; Tree properties are infromation extracted from parse tree.  They
 ;; are initialized at the beginning of the transcoding process by
 ;; `org-export-collect-tree-properties'.
-
+;;
 ;; Dedicated functions focus on computing the value of specific tree
 ;; properties during initialization.  Thus,
 ;; `org-export-populate-ignore-list' lists elements and objects that
@@ -1478,22 +1500,26 @@ OPTIONS is the plist holding export options."
     (table-cell
      (and (org-export-table-has-special-column-p
 	   (nth 1 (org-export-get-genealogy blob options)))
-	  (not (org-export-get-previous-element blob options))))))
+	  (not (org-export-get-previous-element blob options))))
+    ;; Check clock.
+    (clock (not (plist-get options :with-clocks)))
+    ;; Check planning.
+    (planning (not (plist-get options :with-plannings)))))
 
 
 
 ;;; The Transcoder
-
+;;
 ;; This function reads Org data (obtained with, i.e.
 ;; `org-element-parse-buffer') and transcodes it into a specified
 ;; back-end output.  It takes care of updating local properties,
 ;; filtering out elements or objects according to export options and
 ;; organizing the output blank lines and white space are preserved.
-
+;;
 ;; Though, this function is inapropriate for secondary strings, which
 ;; require a fresh copy of the plist passed as INFO argument.  Thus,
 ;; `org-export-secondary-string' is provided for that specific task.
-
+;;
 ;; Internally, three functions handle the filtering of objects and
 ;; elements during the export.  In particular,
 ;; `org-export-ignore-element' marks an element or object so future
@@ -1660,7 +1686,7 @@ Any element in `:ignore-list' will be skipped when using
 
 
 ;;; The Filter System
-
+;;
 ;; Filters allow end-users to tweak easily the transcoded output.
 ;; They are the functional counterpart of hooks, as every filter in
 ;; a set is applied to the return value of the previous one.
@@ -1733,6 +1759,12 @@ nil.")
 
 (defvar org-export-filter-center-block-functions nil
   "List of functions applied to a transcoded center block.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-clock-functions nil
+  "List of functions applied to a transcoded clock.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
@@ -1835,6 +1867,12 @@ channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-paragraph-functions nil
   "List of functions applied to a transcoded paragraph.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-planning-functions nil
+  "List of functions applied to a transcoded planning.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
@@ -2070,21 +2108,21 @@ Return the updated communication channel."
 
 
 ;;; Core functions
-
+;;
 ;; This is the room for the main function, `org-export-as', along with
 ;; its derivatives, `org-export-to-buffer' and `org-export-to-file'.
 ;; They differ only by the way they output the resulting code.
-
+;;
 ;; `org-export-output-file-name' is an auxiliary function meant to be
 ;; used with `org-export-to-file'.  With a given extension, it tries
 ;; to provide a canonical file name to write export output to.
-
+;;
 ;; Note that `org-export-as' doesn't really parse the current buffer,
 ;; but a copy of it (with the same buffer-local variables and
 ;; visibility), where include keywords are expanded and Babel blocks
 ;; are executed, if appropriate.
 ;; `org-export-with-current-buffer-copy' macro prepares that copy.
-
+;;
 ;; File inclusion is taken care of by
 ;; `org-export-expand-include-keyword' and
 ;; `org-export-prepare-file-contents'.  Structure wise, including
@@ -2461,17 +2499,17 @@ file should have."
 
 
 ;;; Tools For Back-Ends
-
+;;
 ;; A whole set of tools is available to help build new exporters.  Any
 ;; function general enough to have its use across many back-ends
 ;; should be added here.
-
+;;
 ;; As of now, functions operating on footnotes, headlines, links,
 ;; macros, references, src-blocks, tables and tables of contents are
 ;; implemented.
 
 ;;;; For Export Snippets
-
+;;
 ;; Every export snippet is transmitted to the back-end.  Though, the
 ;; latter will only retain one type of export-snippet, ignoring
 ;; others, based on the former's target back-end.  The function
@@ -2489,16 +2527,16 @@ applied."
 
 
 ;;;; For Footnotes
-
+;;
 ;; `org-export-collect-footnote-definitions' is a tool to list
 ;; actually used footnotes definitions in the whole parse tree, or in
 ;; an headline, in order to add footnote listings throughout the
 ;; transcoded data.
-
+;;
 ;; `org-export-footnote-first-reference-p' is a predicate used by some
 ;; back-ends, when they need to attach the footnote definition only to
 ;; the first occurrence of the corresponding label.
-
+;;
 ;; `org-export-get-footnote-definition' and
 ;; `org-export-get-footnote-number' provide easier access to
 ;; additional information relative to a footnote reference.
@@ -2625,14 +2663,14 @@ INFO is the plist used as a communication channel."
 
 
 ;;;; For Headlines
-
+;;
 ;; `org-export-get-relative-level' is a shortcut to get headline
 ;; level, relatively to the lower headline level in the parsed tree.
-
+;;
 ;; `org-export-get-headline-number' returns the section number of an
 ;; headline, while `org-export-number-to-roman' allows to convert it
 ;; to roman numbers.
-
+;;
 ;; `org-export-low-level-p', `org-export-first-sibling-p' and
 ;; `org-export-last-sibling-p' are three useful predicates when it
 ;; comes to fulfill the `:headline-levels' property.
@@ -2699,24 +2737,24 @@ INFO is the plist used as a communication channel."
 
 
 ;;;; For Links
-
+;;
 ;; `org-export-solidify-link-text' turns a string into a safer version
 ;; for links, replacing most non-standard characters with hyphens.
-
+;;
 ;; `org-export-get-coderef-format' returns an appropriate format
 ;; string for coderefs.
-
+;;
 ;; `org-export-inline-image-p' returns a non-nil value when the link
 ;; provided should be considered as an inline image.
-
+;;
 ;; `org-export-resolve-fuzzy-link' searches destination of fuzzy links
 ;; (i.e. links with "fuzzy" as type) within the parsed tree, and
 ;; returns an appropriate unique identifier when found, or nil.
-
+;;
 ;; `org-export-resolve-id-link' returns the first headline with
 ;; specified id or custom-id in parse tree, or nil when none was
 ;; found.
-
+;;
 ;; `org-export-resolve-coderef' associates a reference to a line
 ;; number in the element it belongs, or returns the reference itself
 ;; when the element isn't numbered.
@@ -2874,7 +2912,7 @@ depending on src-block or example element's switches."
 
 
 ;;;; For Macros
-
+;;
 ;; `org-export-expand-macro' simply takes care of expanding macros.
 
 (defun org-export-expand-macro (macro info)
@@ -2904,7 +2942,7 @@ INFO is a plist holding export options."
 
 
 ;;;; For References
-
+;;
 ;; `org-export-get-ordinal' associates a sequence number to any object
 ;; or element.
 
@@ -2971,22 +3009,22 @@ objects of the same type."
 
 
 ;;;; For Src-Blocks
-
+;;
 ;; `org-export-get-loc' counts number of code lines accumulated in
 ;; src-block or example-block elements with a "+n" switch until
 ;; a given element, excluded.  Note: "-n" switches reset that count.
-
+;;
 ;; `org-export-unravel-code' extracts source code (along with a code
 ;; references alist) from an `element-block' or `src-block' type
 ;; element.
-
+;;
 ;; `org-export-format-code' applies a formatting function to each line
 ;; of code, providing relative line number and code reference when
 ;; appropriate.  Since it doesn't access the original element from
 ;; which the source code is coming, it expects from the code calling
 ;; it to know if lines should be numbered and if code references
 ;; should appear.
-
+;;
 ;; Eventually, `org-export-format-code-default' is a higher-level
 ;; function (it makes use of the two previous functions) which handles
 ;; line numbering and code references inclusion, and returns source
@@ -3150,15 +3188,15 @@ code."
 
 
 ;;;; For Tables
-
+;;
 ;; `org-export-table-has-special-column-p' and
 ;; `org-export-table-row-is-special-p' are predicates used to look for
 ;; meta-information about the table structure.
-
+;;
 ;; `org-export-table-cell-width', `org-export-table-cell-alignment'
 ;; and `org-export-table-cell-borders' extract information from
 ;; a table-cell element.
-
+;;
 ;; `org-export-table-dimensions' gives the number on rows and columns
 ;; in the table, ignoring horizontal rules and special columns.
 ;; `org-export-table-cell-address', given a table-cell object, returns
@@ -3577,11 +3615,11 @@ return nil."
 
 
 ;;;; For Tables Of Contents
-
+;;
 ;; `org-export-collect-headlines' builds a list of all exportable
 ;; headline elements, maybe limited to a certain depth.  One can then
 ;; easily parse it and transcode it.
-
+;;
 ;; Building lists of tables, figures or listings is quite similar.
 ;; Once the generic function `org-export-collect-elements' is defined,
 ;; `org-export-collect-tables', `org-export-collect-figures' and
@@ -3662,7 +3700,7 @@ affiliated keyword."
 
 
 ;;;; Topology
-
+;;
 ;; Here are various functions to retrieve information about the
 ;; neighbourhood of a given element or object.  Neighbours of interest
 ;; are direct parent (`org-export-get-parent'), parent headline
@@ -3670,7 +3708,7 @@ affiliated keyword."
 ;; (`org-export-get-parent-paragraph'), previous element or object
 ;; (`org-export-get-previous-element') and next element or object
 ;; (`org-export-get-next-element').
-
+;;
 ;; All of these functions are just a specific use of the more generic
 ;; `org-export-get-genealogy', which returns the genealogy relative to
 ;; the element or object.
@@ -3766,7 +3804,7 @@ Return next element or object, a string, or nil."
 
 
 ;;; The Dispatcher
-
+;;
 ;; `org-export-dispatch' is the standard interactive way to start an
 ;; export process.  It uses `org-export-dispatch-ui' as a subroutine
 ;; for its interface.  Most commons back-ends should have an entry in
