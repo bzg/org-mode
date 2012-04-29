@@ -229,7 +229,7 @@ way they are handled must be hard-coded into
     (:filter-table-cell . org-export-filter-table-cell-functions)
     (:filter-table-row . org-export-filter-table-row-functions)
     (:filter-target . org-export-filter-target-functions)
-    (:filter-time-stamp . org-export-filter-time-stamp-functions)
+    (:filter-timestamp . org-export-filter-timestamp-functions)
     (:filter-underline . org-export-filter-underline-functions)
     (:filter-verbatim . org-export-filter-verbatim-functions)
     (:filter-verse-block . org-export-filter-verse-block-functions))
@@ -1486,8 +1486,8 @@ OPTIONS is the plist holding export options."
 		 (and (memq with-tasks '(todo done))
 		      (not (eq todo-type with-tasks)))
 		 (and (consp with-tasks) (not (member todo with-tasks))))))))
-    ;; Check time-stamp.
-    (time-stamp (not (plist-get options :with-timestamps)))
+    ;; Check timestamp.
+    (timestamp (not (plist-get options :with-timestamps)))
     ;; Check drawer.
     (drawer
      (or (not (plist-get options :with-drawers))
@@ -2049,8 +2049,8 @@ Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
-(defvar org-export-filter-time-stamp-functions nil
-  "List of functions applied to a transcoded time-stamp.
+(defvar org-export-filter-timestamp-functions nil
+  "List of functions applied to a transcoded timestamp.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")

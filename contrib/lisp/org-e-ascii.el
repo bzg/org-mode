@@ -39,8 +39,6 @@
 (declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-map "org-element"
 		  (data types fun &optional info first-match))
-(declare-function org-element-time-stamp-interpreter
-		  "org-element" (time-stamp contents))
 
 (declare-function org-export-collect-footnote-definitions
 		  "org-export" (data info))
@@ -1753,12 +1751,12 @@ a communication channel."
 ;; Targets are invisible.
 
 
-;;;; Time-stamp
+;;;; Timestamp
 
-(defun org-e-ascii-time-stamp (time-stamp contents info)
-  "Transcode a TIME-STAMP object from Org to ASCII.
+(defun org-e-ascii-timestamp (timestamp contents info)
+  "Transcode a TIMESTAMP object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-translate-time (org-element-property :value time-stamp)))
+  (org-translate-time (org-element-property :value timestamp)))
 
 
 ;;;; Underline

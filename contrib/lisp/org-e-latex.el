@@ -298,20 +298,20 @@ order to reproduce the default set-up:
   :type 'string)
 
 
-;;;; Time-stamps
+;;;; Timestamps
 
 (defcustom org-e-latex-active-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to active time-stamps."
+  "A printf format string to be applied to active timestamps."
   :group 'org-export-e-latex
   :type 'string)
 
 (defcustom org-e-latex-inactive-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to inactive time-stamps."
+  "A printf format string to be applied to inactive timestamps."
   :group 'org-export-e-latex
   :type 'string)
 
 (defcustom org-e-latex-diary-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to diary time-stamps."
+  "A printf format string to be applied to diary timestamps."
   :group 'org-export-e-latex
   :type 'string)
 
@@ -2157,14 +2157,14 @@ information."
 	  (org-export-solidify-link-text (org-element-property :value target))))
 
 
-;;;; Time-stamp
+;;;; Timestamp
 
-(defun org-e-latex-time-stamp (time-stamp contents info)
-  "Transcode a TIME-STAMP object from Org to LaTeX.
+(defun org-e-latex-timestamp (timestamp contents info)
+  "Transcode a TIMESTAMP object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-translate-time (org-element-property :value time-stamp)))
-	(type (org-element-property :type time-stamp)))
+  (let ((value (org-translate-time (org-element-property :value timestamp)))
+	(type (org-element-property :type timestamp)))
     (cond ((memq type '(active active-range))
 	   (format org-e-latex-active-timestamp-format value))
 	  ((memq type '(inactive inactive-range))

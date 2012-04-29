@@ -582,7 +582,7 @@ CSS classes, then this prefix can be very useful."
   :group 'org-export-e-html
   :type 'string)
 
-;;;; Time-stamps
+;;;; Timestamps
 ;;;; Statistics Cookie
 ;;;; Subscript
 ;;;; Superscript
@@ -785,7 +785,7 @@ When nil, also column one will use data tags."
 
 
 ;;;; Target
-;;;; Time-stamp
+;;;; Timestamp
 
 ;;;; Verbatim
 ;;;; Verse Block
@@ -895,20 +895,20 @@ returned as-is."
   :type 'string)
 
 
-;;;; Time-stamps
+;;;; Timestamps
 
 (defcustom org-e-html-active-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to active time-stamps."
+  "A printf format string to be applied to active timestamps."
   :group 'org-export-e-html
   :type 'string)
 
 (defcustom org-e-html-inactive-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to inactive time-stamps."
+  "A printf format string to be applied to inactive timestamps."
   :group 'org-export-e-html
   :type 'string)
 
 (defcustom org-e-html-diary-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to diary time-stamps."
+  "A printf format string to be applied to diary timestamps."
   :group 'org-export-e-html
   :type 'string)
 
@@ -2978,13 +2978,13 @@ information."
     (format "<a id=\"%s\" name=\"%s\"/>" id id)))
 
 
-;;;; Time-stamp
+;;;; Timestamp
 
-(defun org-e-html-time-stamp (time-stamp contents info)
-  "Transcode a TIME-STAMP object from Org to HTML.
+(defun org-e-html-timestamp (timestamp contents info)
+  "Transcode a TIMESTAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-translate-time (org-element-property :value time-stamp))))
+  (let ((value (org-translate-time (org-element-property :value timestamp))))
     (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
 	    value)))
 

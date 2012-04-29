@@ -56,7 +56,7 @@
 ;; `inline-babel-call', `inline-src-block', `italic',
 ;; `latex-fragment', `line-break', `link', `macro', `radio-target',
 ;; `statistics-cookie', `strike-through', `subscript', `superscript',
-;; `table-cell', `target', `time-stamp', `underline' and `verbatim'.
+;; `table-cell', `target', `timestamp', `underline' and `verbatim'.
 ;;
 ;; Some elements also have special properties whose value can hold
 ;; objects themselves (i.e. an item tag or an headline name).  Such
@@ -2678,15 +2678,15 @@ beginning position."
        (cons 'target (match-beginning 0)))))
 
 
-;;;; Time-stamp
+;;;; Timestamp
 
-(defun org-element-time-stamp-parser ()
+(defun org-element-timestamp-parser ()
   "Parse time stamp at point.
 
-Return a list whose CAR is `time-stamp', and CDR a plist with
+Return a list whose CAR is `timestamp', and CDR a plist with
 `:type', `:begin', `:end', `:value' and `:post-blank' keywords.
 
-Assume point is at the beginning of the time-stamp."
+Assume point is at the beginning of the timestamp."
   (save-excursion
     (let* ((begin (point))
 	   (type (cond
@@ -2704,24 +2704,24 @@ Assume point is at the beginning of the time-stamp."
 	   (post-blank (progn (goto-char (match-end 0))
 			      (skip-chars-forward " \t")))
 	   (end (point)))
-      `(time-stamp
+      `(timestamp
 	(:type ,type
 	       :value ,value
 	       :begin ,begin
 	       :end ,end
 	       :post-blank ,post-blank)))))
 
-(defun org-element-time-stamp-interpreter (time-stamp contents)
-  "Interpret TIME-STAMP object as Org syntax.
+(defun org-element-timestamp-interpreter (timestamp contents)
+  "Interpret TIMESTAMP object as Org syntax.
 CONTENTS is nil."
-  (org-element-property :value time-stamp))
+  (org-element-property :value timestamp))
 
-(defun org-element-time-stamp-successor (limit)
-  "Search for the next time-stamp object.
+(defun org-element-timestamp-successor (limit)
+  "Search for the next timestamp object.
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose CAR is `time-stamp' and CDR is
+Return value is a cons cell whose CAR is `timestamp' and CDR is
 beginning position."
   (save-excursion
     (when (re-search-forward
@@ -2731,7 +2731,7 @@ beginning position."
 		   "\\|"
 		   "\\(?:<%%\\(?:([^>\n]+)\\)>\\)")
 	   limit t)
-      (cons 'time-stamp (match-beginning 0)))))
+      (cons 'timestamp (match-beginning 0)))))
 
 
 ;;;; Underline
@@ -2846,7 +2846,7 @@ CONTENTS is nil."
   '(export-snippet footnote-reference inline-babel-call inline-src-block
 		   latex-or-entity line-break link macro radio-target
 		   statistics-cookie sub/superscript table-cell target
-		   text-markup time-stamp)
+		   text-markup timestamp)
   "Complete list of successors.")
 
 (defconst org-element-object-successor-alist
@@ -2864,7 +2864,7 @@ regexp matching one object can also match the other object.")
   '(bold code entity export-snippet footnote-reference inline-babel-call
 	 inline-src-block italic line-break latex-fragment link macro
 	 radio-target statistics-cookie strike-through subscript superscript
-	 table-cell target time-stamp underline verbatim)
+	 table-cell target timestamp underline verbatim)
   "Complete list of object types.")
 
 (defconst org-element-recursive-objects
@@ -2931,18 +2931,18 @@ This list is checked after translations have been applied.  See
 
 (defconst org-element-object-restrictions
   `((bold entity export-snippet inline-babel-call inline-src-block link
-	  radio-target sub/superscript target text-markup time-stamp)
+	  radio-target sub/superscript target text-markup timestamp)
     (footnote-reference entity export-snippet footnote-reference
 			inline-babel-call inline-src-block latex-fragment
 			line-break link macro radio-target sub/superscript
-			target text-markup time-stamp)
+			target text-markup timestamp)
     (headline entity inline-babel-call inline-src-block latex-fragment link
 	      macro radio-target statistics-cookie sub/superscript text-markup
-	      time-stamp)
+	      timestamp)
     (inlinetask entity inline-babel-call inline-src-block latex-fragment link
-		macro radio-target sub/superscript text-markup time-stamp)
+		macro radio-target sub/superscript text-markup timestamp)
     (italic entity export-snippet inline-babel-call inline-src-block link
-	    radio-target sub/superscript target text-markup time-stamp)
+	    radio-target sub/superscript target text-markup timestamp)
     (item entity inline-babel-call latex-fragment macro radio-target
 	  sub/superscript target text-markup)
     (keyword entity latex-fragment macro sub/superscript text-markup)
@@ -2953,19 +2953,19 @@ This list is checked after translations have been applied.  See
     (radio-target entity export-snippet latex-fragment sub/superscript)
     (strike-through entity export-snippet inline-babel-call inline-src-block
 		    link radio-target sub/superscript target text-markup
-		    time-stamp)
+		    timestamp)
     (subscript entity export-snippet inline-babel-call inline-src-block
 	       latex-fragment sub/superscript text-markup)
     (superscript entity export-snippet inline-babel-call inline-src-block
 		 latex-fragment sub/superscript text-markup)
     (table-cell entity export-snippet latex-fragment link macro radio-target
-		sub/superscript target text-markup time-stamp)
+		sub/superscript target text-markup timestamp)
     (table-row table-cell)
     (underline entity export-snippet inline-babel-call inline-src-block link
-	       radio-target sub/superscript target text-markup time-stamp)
+	       radio-target sub/superscript target text-markup timestamp)
     (verse-block entity footnote-reference inline-babel-call inline-src-block
 		 latex-fragment line-break link macro radio-target
-		 sub/superscript target text-markup time-stamp))
+		 sub/superscript target text-markup timestamp))
   "Alist of objects restrictions.
 
 CAR is an element or object type containing objects and CDR is

@@ -2280,7 +2280,7 @@ configuration."
 
 ;;;; Tags
 
-;;;; Time-stamps
+;;;; Timestamps
 ;;;; Statistics Cookie
 ;;;; Subscript
 ;;;; Superscript
@@ -2327,7 +2327,7 @@ configuration."
 ;;;; Table
 
 ;;;; Target
-;;;; Time-stamp
+;;;; Timestamp
 
 ;;;; Verbatim
 ;;;; Verse Block
@@ -2378,20 +2378,20 @@ order to reproduce the default set-up:
 
 ;;;; Footnotes
 
-;;;; Time-stamps
+;;;; Timestamps
 
 (defcustom org-e-odt-active-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to active time-stamps."
+  "A printf format string to be applied to active timestamps."
   :group 'org-export-e-odt
   :type 'string)
 
 (defcustom org-e-odt-inactive-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to inactive time-stamps."
+  "A printf format string to be applied to inactive timestamps."
   :group 'org-export-e-odt
   :type 'string)
 
 (defcustom org-e-odt-diary-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to diary time-stamps."
+  "A printf format string to be applied to diary timestamps."
   :group 'org-export-e-odt
   :type 'string)
 
@@ -4146,15 +4146,15 @@ information."
    "" (org-export-solidify-link-text (org-element-property :value target))))
 
 
-;;;; Time-stamp
+;;;; Timestamp
 
-(defun org-e-odt-time-stamp (time-stamp contents info)
-  "Transcode a TIME-STAMP object from Org to HTML.
+(defun org-e-odt-timestamp (timestamp contents info)
+  "Transcode a TIMESTAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (org-e-odt-format-fontify
    (org-e-odt-format-fontify
-    (org-translate-time (org-element-property :value time-stamp))
+    (org-translate-time (org-element-property :value timestamp))
     "timestamp")
    "timestamp-wrapper"))
 
