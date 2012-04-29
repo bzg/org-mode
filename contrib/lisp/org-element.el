@@ -3032,8 +3032,8 @@ element or object type."
 ;;
 ;; `org-element-current-element' makes use of special modes.  They are
 ;; activated for fixed element chaining (i.e. `plain-list' > `item')
-;; or fixed conditional element chaining (i.e. `section' >
-;; `planning'). Special modes are: `section', `quote-section', `item'
+;; or fixed conditional element chaining (i.e. `headline' >
+;; `section'). Special modes are: `section', `quote-section', `item'
 ;; and `table-row'.
 
 (defconst org-element--element-block-re

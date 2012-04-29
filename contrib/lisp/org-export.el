@@ -600,9 +600,20 @@ e.g. \"timestamp:nil\"."
   :type 'boolean)
 
 (defcustom org-export-with-timestamps t
-  "If nil, do not export time stamps and associated keywords."
+  "Non nil means allow timestamps in export.
+
+It can be set to `active', `inactive', t or nil, in order to
+export, respectively, only active timestamps, only inactive ones,
+all of them or none.
+
+This option can also be set with the #+OPTIONS line, e.g.
+\"<:nil\"."
   :group 'org-export-general
-  :type 'boolean)
+  :type '(choice
+	  (const :tag "All timestamps" t)
+	  (const :tag "Only active timestamps" active)
+	  (const :tag "Only inactive timestamps" inactive)
+	  (const :tag "No timestamp" nil)))
 
 (defcustom org-export-with-todo-keywords t
   "Non-nil means include TODO keywords in export.
@@ -778,7 +789,7 @@ standard mode."
 ;;   - type :: string
 ;;
 ;; + `:parse-tree' :: Whole parse tree, available at any time during
-;;                   transcoding.
+;;      transcoding.
 ;;   - category :: global
 ;;   - type :: list (as returned by `org-element-parse-buffer')
 ;;
@@ -793,15 +804,15 @@ standard mode."
 ;;   - type :: symbol (nil, t)
 ;;
 ;; + `:select-tags' :: List of tags enforcing inclusion of sub-trees
-;;                    in transcoding.  When such a tag is present,
-;;                    subtrees without it are de facto excluded from
-;;                    the process.  See `use-select-tags'.
+;;      in transcoding.  When such a tag is present, subtrees without
+;;      it are de facto excluded from the process.  See
+;;      `use-select-tags'.
 ;;   - category :: option
 ;;   - type :: list of strings
 ;;
 ;; + `:target-list' :: List of targets encountered in the parse tree.
-;;                    This is used to partly resolve "fuzzy" links
-;;                    (cf. `org-export-resolve-fuzzy-link').
+;;      This is used to partly resolve "fuzzy" links
+;;      (cf. `org-export-resolve-fuzzy-link').
 ;;   - category :: tree
 ;;   - type :: list of strings
 ;;
@@ -817,7 +828,7 @@ standard mode."
 ;;   - type :: symbol (nil, t, `headline')
 ;;
 ;; + `:with-author' :: Non-nil means author's name should be included
-;;                    in the output.
+;;      in the output.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 ;;
@@ -879,35 +890,33 @@ standard mode."
 ;;   - type :: symbol (nil, {}, t)
 ;;
 ;; + `:with-tables' :: Non-nil means transcoding should interpret
-;;                    tables.
+;;      tables.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 ;;
 ;; + `:with-tags' :: Non-nil means transcoding should keep tags in
-;;                  headlines.  A `not-in-toc' value will remove them
-;;                  from the table of contents, if any, nonetheless.
+;;      headlines.  A `not-in-toc' value will remove them from the
+;;      table of contents, if any, nonetheless.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t, `not-in-toc')
 ;;
 ;; + `:with-tasks' :: Non-nil means transcoding should include
-;;                   headlines with a TODO keyword.  A `todo' value
-;;                   will only include headlines with a todo type
-;;                   keyword while a `done' value will do the
-;;                   contrary.  If a list of strings is provided, only
-;;                   tasks with keywords belonging to that list will
-;;                   be kept.
+;;      headlines with a TODO keyword.  A `todo' value will only
+;;      include headlines with a todo type keyword while a `done'
+;;      value will do the contrary.  If a list of strings is provided,
+;;      only tasks with keywords belonging to that list will be kept.
 ;;   - category :: option
 ;;   - type :: symbol (t, todo, done, nil) or list of strings
 ;;
 ;; + `:with-timestamps' :: Non-nil means transcoding should include
-;;      time stamps and associated keywords.  Otherwise, completely
-;;      remove them.
+;;      time stamps.  Special value `active' (resp. `inactive') ask to
+;;      export only active (resp. inactive) timestamps.  Otherwise,
+;;      completely remove them.
 ;;   - category :: option
-;;   - type :: symbol: (t, nil)
+;;   - type :: symbol: (`active', `inactive', t, nil)
 ;;
 ;; + `:with-toc' :: Non-nil means that a table of contents has to be
-;;                 added to the output.  An integer value limits its
-;;                 depth.
+;;      added to the output.  An integer value limits its depth.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t or integer)
 ;;
@@ -1459,7 +1468,8 @@ INFO is a plist holding export options."
 
 (defun org-export--skip-p (blob options select-tags)
   "Non-nil when element or object BLOB should be skipped during export.
-OPTIONS is the plist holding export options."
+OPTIONS is the plist holding export options.  SELECT-TAGS, when
+non-nil, is a list of tags marking a subtree as exportable."
   (case (org-element-type blob)
     ;; Check headline.
     (headline
@@ -1487,7 +1497,20 @@ OPTIONS is the plist holding export options."
 		      (not (eq todo-type with-tasks)))
 		 (and (consp with-tasks) (not (member todo with-tasks))))))))
     ;; Check timestamp.
-    (timestamp (not (plist-get options :with-timestamps)))
+    (timestamp
+     (case (plist-get options :with-timestamps)
+       ;; No timestamp allowed.
+       ('nil t)
+       ;; Only active timestamps allowed and the current one isn't
+       ;; active.
+       (active
+	(not (memq (org-element-property :type blob)
+		   '(active active-range))))
+       ;; Only inactive timestamps allowed and the current one isn't
+       ;; inactive.
+       (inactive
+	(not (memq (org-element-property :type blob)
+		   '(inactive inactive-range))))))
     ;; Check drawer.
     (drawer
      (or (not (plist-get options :with-drawers))
@@ -1510,7 +1533,7 @@ OPTIONS is the plist holding export options."
 
 ;;; The Transcoder
 ;;
-;; This function reads Org data (obtained with, i.e.
+;; `org-export-data' reads a parse tree (obtained with, i.e.
 ;; `org-element-parse-buffer') and transcodes it into a specified
 ;; back-end output.  It takes care of updating local properties,
 ;; filtering out elements or objects according to export options and

@@ -74,12 +74,12 @@ already filled in `info'."
    (equal
     (org-export-parse-option-keyword
      "arch:headline creator:comment d:(\"TEST\")
- ^:{} toc:1 tags:not-in-toc tasks:todo num:2")
+ ^:{} toc:1 tags:not-in-toc tasks:todo num:2 <:active")
     '( :section-numbers
        2
        :with-archived-trees headline :with-creator comment
        :with-drawers ("TEST") :with-sub-superscript {} :with-toc 1
-       :with-tags not-in-toc :with-tasks todo))))
+       :with-tags not-in-toc :with-tasks todo :with-timestamps active))))
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
@@ -217,13 +217,19 @@ already filled in `info'."
 	 (equal (org-export-as 'test nil nil nil '(:with-drawers ("FOO")))
 		":FOO:\nkeep\n:END:\n")))))
   ;; Timestamps.
-  (org-test-with-temp-text "[2012-04-29 sun. 10:45]"
+  (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
     (org-test-with-backend "test"
       (should
        (equal (org-export-as 'test nil nil nil '(:with-timestamps t))
-	      "[2012-04-29 sun. 10:45]\n"))
+	      "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>\n"))
       (should
-       (equal (org-export-as 'test nil nil nil '(:with-timestamps nil)) ""))))
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps nil)) ""))
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps active))
+	      "<2012-04-29 sun. 10:45>\n"))
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps inactive))
+	      "[2012-04-29 sun. 10:45]\n"))))
   ;; Clocks.
   (let ((org-clock-string "CLOCK:"))
     (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
