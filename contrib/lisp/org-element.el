@@ -1933,6 +1933,7 @@ Assume point is at the beginning of the snippet."
 	   (inner-begin (match-end 0))
 	   (inner-end
 	    (let ((count 1))
+	      (goto-char inner-begin)
 	      (while (and (> count 0) (re-search-forward "[<>]" nil t))
 		(if (equal (match-string 0) "<") (incf count) (decf count)))
 	      (1- (point))))
