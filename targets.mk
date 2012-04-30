@@ -23,12 +23,12 @@ ifneq ($(GITSTATUS),)
 endif
 
 .PHONY:	all oldorg update update2 up0 up1 up2 compile $(SUBDIRS) \
-	check test install info html pdf card doc docs $(INSTSUB) \
-	autoloads cleanall clean cleancontrib cleanutils cleanrel clean-install \
-	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest \
-	compile compile-stop compile-dirty compile-stop-dirty uncompiled
+		check test install info html pdf card doc docs $(INSTSUB) \
+		autoloads cleanall clean cleancontrib cleanutils cleanrel clean-install \
+		cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest
+		compile compile-dirty uncompiled
 
-oldorg:	compile-stop info	# what the old makefile did when no target was specified
+oldorg:	compile info	# what the old makefile did when no target was specified
 uncompiled:	cleanlisp autoloads	# for developing
 refcard:	card
 update update2::	up0 all
@@ -48,9 +48,9 @@ local.mk:
 		-e '$$ i ## See default.mk for further configuration options.' \
 		default.mk > $@
 
-all compile-stop compile::	lisp
+all compile::	lisp
 	$(MAKE) -C $< clean
-compile compile-stop compile-dirty compile-stop-dirty::	lisp
+all compile compile-dirty::	lisp
 	$(MAKE) -C $< $@
 
 all clean-install::
@@ -59,9 +59,7 @@ all clean-install::
 check test::	all
 check test test-dirty::
 	-$(MKDIR) $(testdir)
-	$(MAKE) autoloads
 	TMPDIR=$(testdir) $(BTEST)
-	$(MAKE) -C lisp cleanauto
 ifeq ($(TEST_NO_AUTOCLEAN),) # define this variable to leave $(testdir) around for inspection
 	$(MAKE) cleantest
 endif
@@ -72,7 +70,7 @@ up0 up1 up2::
 up1 up2::	all
 	$(MAKE) test-dirty
 up2 update2::
-	$(SUDO) $(MAKE) install-dirty
+	$(SUDO) $(MAKE) install
 
 install:	$(INSTSUB)
 

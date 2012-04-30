@@ -10,36 +10,32 @@ LISPA = $(LISPV) $(LISPI)
 LISPF = $(filter-out $(LISPA),$(wildcard *.el))
 LISPC = $(LISPF:%el=%elc)
 
-NOSTOP = all compile compile-dirty
-DOSTOP = compile-stop compile-stop-dirty
-
-.PHONY:	$(NOSTOP) $(DOSTOP) \
-		autoloads $(LISPA) \
-		install clean cleanauto cleanall clean-install \
+.PHONY:	all compile compile-dirty \
+		autoloads \
+		install clean cleanauto cleanall clean-install
 
 # do not clean here, done in toplevel make
-$(NOSTOP) $(DOSTOP)::	$(LISPV)
+all compile::	autoloads
+all compile compile-dirty::	$(LISPA)
 	$(ELCDIR)
-$(NOSTOP)::
-	$(MAKE) cleanauto
 
-autoloads:	$(LISPA)
+autoloads:	cleanauto $(LISPA)
 
-$(LISPV):
+$(LISPV):	$(LISPF)
 	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
+	@$(RM) $(@)
 	@$(MAKE_ORG_VERSION)
 
-$(LISPI):	$(LISPV)
+$(LISPI):	$(LISPV) $(LISPF)
 	@echo "org-install: $(ORGVERSION) ($(GITVERSION))"
-	$(MAKE_ORG_INSTALL)
+	@$(RM) $(@)
+	@$(MAKE_ORG_INSTALL)
 
 install:	$(LISPF) compile
 	if [ ! -d $(DESTDIR)$(lispdir) ] ; then \
 	  $(MKDIR) $(DESTDIR)$(lispdir) ; \
 	fi ;
-	$(MAKE) autoloads
 	$(CP) $(LISPC) $(LISPF) $(LISPA) $(DESTDIR)$(lispdir)
-	$(MAKE) cleanauto
 
 cleanauto clean cleanall::
 	$(RM) $(LISPA) $(LISPA:%el=%elc)

@@ -110,7 +110,7 @@ MAKE_ORG_INSTALL = $(BATCH) \
 	--eval '(add-to-list '"'"'load-path ".")' \
 	--eval '(load "org-compat.el")' \
 	--eval '(load "../UTILITIES/org-fixup.el")' \
-	--eval '(org-make-org-install "$(PWD)/lisp/org-install.el")'
+	--eval '(org-make-org-install "$(CURDIR)/lisp/org-install.el")'
 
 # How to generate org-version.el
 MAKE_ORG_VERSION = $(BATCH) \
