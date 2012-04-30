@@ -1535,13 +1535,9 @@ non-nil, is a list of tags marking a subtree as exportable."
 ;;
 ;; `org-export-data' reads a parse tree (obtained with, i.e.
 ;; `org-element-parse-buffer') and transcodes it into a specified
-;; back-end output.  It takes care of updating local properties,
-;; filtering out elements or objects according to export options and
-;; organizing the output blank lines and white space are preserved.
-;;
-;; Though, this function is inapropriate for secondary strings, which
-;; require a fresh copy of the plist passed as INFO argument.  Thus,
-;; `org-export-secondary-string' is provided for that specific task.
+;; back-end output.  It takes care of filtering out elements or
+;; objects according to export options and organizing the output blank
+;; lines and white space are preserved.
 ;;
 ;; Internally, three functions handle the filtering of objects and
 ;; elements during the export.  In particular,
@@ -1551,122 +1547,106 @@ non-nil, is a list of tags marking a subtree as exportable."
 ;; `org-export-expand' transforms the others back into their original
 ;; shape.
 
+(defun org-export-transcoder (blob info)
+  "Return appropriate transcoder for BLOB.
+INFO is a plist containing export directives."
+  (let ((type (org-element-type blob)))
+    ;; Return contents only for complete parse trees.
+    (if (eq type 'org-data) (lambda (blob contents info) contents)
+      (let ((transcoder
+             (intern (format "org-%s-%s" (plist-get info :back-end) type))))
+        (and (fboundp transcoder) transcoder)))))
+
 (defun org-export-data (data info)
   "Convert DATA into current back-end format.
 
-DATA is a nested list as returned by `org-element-parse-buffer'.
-
-INFO is a plist holding export options and also used as
-a communication channel between elements when walking the nested
-list.
+DATA is a parse tree, an element or an object or a secondary
+string.  INFO is a plist holding export options.
 
 Return transcoded string."
-  (mapconcat
-   ;; BLOB can be an element, an object, a string, or nil.
-   (lambda (blob)
-     (cond
-      ((not blob) nil)
-      ;; BLOB is a string.  Check if the optional transcoder for plain
-      ;; text exists, and call it in that case.  Otherwise, simply
-      ;; return string.  Also update INFO and call
-      ;; `org-export-filter-plain-text-functions'.
-      ((stringp blob)
-       (let ((transcoder (intern (format "org-%s-plain-text"
-					 (plist-get info :back-end)))))
-	 (org-export-filter-apply-functions
-	  (plist-get info :filter-plain-text)
-	  (if (fboundp transcoder) (funcall transcoder blob info) blob)
-	  info)))
-      ;; BLOB is an element or an object.
-      (t
-       (let* ((type (org-element-type blob))
-	      ;; 1. Determine the appropriate TRANSCODER.
-	      (transcoder
-	       (cond
-		;; 1.0 A full Org document is inserted.
-		((eq type 'org-data) 'identity)
-		;; 1.1. BLOB should be ignored.
-		((member blob (plist-get info :ignore-list)) nil)
-		;; 1.2. BLOB shouldn't be transcoded.  Interpret it
-		;;      back into Org syntax.
-		((not (org-export-interpret-p blob info)) 'org-export-expand)
-		;; 1.3. Else apply naming convention.
-		(t (let ((trans (intern (format "org-%s-%s"
-						(plist-get info :back-end)
-						type))))
-		     (and (fboundp trans) trans)))))
-	      ;; 2. Compute CONTENTS of BLOB.
-	      (contents
-	       (cond
-		;; Case 0. No transcoder or no contents: ignore BLOB.
-		((or (not transcoder) (not (org-element-contents blob))) nil)
-		;; Case 1. Transparently export an Org document.
-		((eq type 'org-data) (org-export-data blob info))
-		;; Case 2. For a greater element.
-		((memq type org-element-greater-elements)
-		 ;; Ignore contents of an archived tree
-		 ;; when `:with-archived-trees' is `headline'.
-		 (unless (and
-			  (eq type 'headline)
-			  (eq (plist-get info :with-archived-trees) 'headline)
-			  (org-element-property :archivedp blob))
-		   (org-element-normalize-string (org-export-data blob info))))
-		;; Case 3. For an element containing objects.
-		(t
-		 (org-export-data
-		  (org-element-normalize-contents
-		   blob
-		   ;; When normalizing contents of the first paragraph
-		   ;; in an item or a footnote definition, ignore
-		   ;; first line's indentation: there is none and it
-		   ;; might be misleading.
-		   (and (eq type 'paragraph)
-			(not (org-export-get-previous-element blob info))
-			(let ((parent (org-export-get-parent blob info)))
-			  (memq (org-element-type parent)
-				'(footnote-definition item)))))
-		  info))))
-	      ;; 3. Transcode BLOB into RESULTS string.
-	      (results (cond
-			((not transcoder) nil)
-			((eq transcoder 'org-export-expand)
-			 (org-export-data
-			  `(org-data nil ,(funcall transcoder blob contents))
-			  info))
-			(t (funcall transcoder blob contents info)))))
-	 ;; 4. Return results.
-	 (cond
-	  ((not results) nil)
-	  ;; No filter for a full document.
-	  ((eq type 'org-data) results)
-	  ;; Otherwise, update INFO, append the same white space
-	  ;; between elements or objects as in the original buffer,
-	  ;; and call appropriate filters.
-	  (t
-	   (let ((results
-		  (org-export-filter-apply-functions
-		   (plist-get info (intern (format ":filter-%s" type)))
-		   (let ((post-blank (org-element-property :post-blank blob)))
-		     (if (memq type org-element-all-elements)
-			 (concat (org-element-normalize-string results)
-				 (make-string post-blank ?\n))
-		       (concat results (make-string post-blank ? ))))
-		   info)))
-	     ;; Eventually return string.
-	     results)))))))
-   (org-element-contents data) ""))
-
-(defun org-export-secondary-string (secondary info)
-  "Convert SECONDARY string into current back-end target format.
-
-SECONDARY is a nested list as returned by
-`org-element-parse-secondary-string'.  INFO is a plist used as
-a communication channel.
-
-Return transcoded string."
-  ;; Make SECONDARY acceptable for `org-export-data'.
-  (let ((s (if (listp secondary) secondary (list secondary))))
-    (org-export-data `(org-data nil ,@s) (copy-sequence info))))
+  (let* ((type (org-element-type data))
+         (results
+          (cond
+           ;; Ignored element/object.
+           ((member data (plist-get info :ignore-list)) nil)
+           ;; Plain text.
+           ((eq type 'plain-text)
+            (org-export-filter-apply-functions
+             (plist-get info :filter-plain-text)
+             (let ((transcoder (org-export-transcoder data info)))
+               (if transcoder (funcall transcoder data info) data))
+             info))
+           ;; Uninterpreted element/object: change it back to Org
+           ;; syntax.
+           ((not (org-export-interpret-p data info))
+            (org-export-expand
+             data
+             (org-element-normalize-string
+              (mapconcat (lambda (blob) (org-export-data blob info))
+                         (org-element-contents data)
+                         ""))))
+           ;; Secondary string.
+           ((not type)
+            (mapconcat (lambda (obj) (org-export-data obj info)) data ""))
+           ;; Element/Object without contents or, as a special case,
+           ;; headline with archive tag and archived trees restricted
+           ;; to title only.
+           ((or (not (org-element-contents data))
+                (and (eq type 'headline)
+                     (eq (plist-get info :with-archived-trees) 'headline)
+                     (org-element-property :archivedp data)))
+            (let ((transcoder (org-export-transcoder data info)))
+              (and (fboundp transcoder) (funcall transcoder data nil info))))
+           ;; Element/Object with contents.
+           (t
+            (let ((transcoder (org-export-transcoder data info)))
+              (when transcoder
+                (let* ((greaterp (memq type org-element-greater-elements))
+		       (objectp (and (not greaterp)
+				     (memq type org-element-recursive-objects)))
+		       (contents
+			(mapconcat
+			 (lambda (element) (org-export-data element info))
+			 (org-element-contents
+			  (if (or greaterp objectp) data
+			    ;; Elements directly containing objects
+			    ;; must have their indentation normalized
+			    ;; first.
+			    (org-element-normalize-contents
+			     data
+			     ;; When normalizing contents of the first
+			     ;; paragraph in an item or a footnote
+			     ;; definition, ignore first line's
+			     ;; indentation: there is none and it
+			     ;; might be misleading.
+			     (when (eq type 'paragraph)
+			       (let ((parent (org-export-get-parent data info)))
+				 (and (equal (car (org-element-contents parent))
+					     data)
+				      (memq (org-element-type parent)
+					    '(footnote-definition item))))))))
+			 "")))
+                  (funcall transcoder data
+			   (if greaterp (org-element-normalize-string contents)
+			     contents)
+			   info))))))))
+    (cond
+     ((not results) nil)
+     ((memq type '(org-data plain-text nil)) results)
+     ;; Append the same white space between elements or objects as in
+     ;; the original buffer, and call appropriate filters.
+     (t
+      (let ((results
+             (org-export-filter-apply-functions
+              (plist-get info (intern (format ":filter-%s" type)))
+              (let ((post-blank (org-element-property :post-blank data)))
+                (if (memq type org-element-all-elements)
+                    (concat (org-element-normalize-string results)
+                            (make-string post-blank ?\n))
+                  (concat results (make-string post-blank ? ))))
+              info)))
+        ;; Eventually return string.
+        results)))))
 
 (defun org-export-interpret-p (blob info)
   "Non-nil if element or object BLOB should be interpreted as Org syntax.
@@ -1696,8 +1676,9 @@ a plist."
   "Expand a parsed element or object to its original state.
 BLOB is either an element or an object.  CONTENTS is its
 contents, as a string or nil."
-  (funcall (intern (format "org-element-%s-interpreter" (org-element-type blob)))
-	   blob contents))
+  (funcall
+   (intern (format "org-element-%s-interpreter" (org-element-type blob)))
+   blob contents))
 
 (defun org-export-ignore-element (element info)
   "Add ELEMENT to `:ignore-list' in INFO.
@@ -2571,10 +2552,8 @@ DATA is the parse tree from which definitions are collected.
 INFO is the plist used as a communication channel.
 
 Definitions are sorted by order of references.  They either
-appear as Org data (transcoded with `org-export-data') or as
-a secondary string for inlined footnotes (transcoded with
-`org-export-secondary-string').  Unreferenced definitions are
-ignored."
+appear as Org data or as a secondary string for inlined
+footnotes.  Unreferenced definitions are ignored."
   (let (num-alist
 	(collect-fn
 	 (function
@@ -2944,12 +2923,9 @@ INFO is a plist holding export options."
   (let* ((key (org-element-property :key macro))
 	 (args (org-element-property :args macro))
 	 ;; User's macros are stored in the communication channel with
-	 ;; a ":macro-" prefix.  If it's a string leave it as-is.
-	 ;; Otherwise, it's a secondary string that needs to be
-	 ;; expanded recursively.
-	 (value
-	  (let ((val (plist-get info (intern (format ":macro-%s" key)))))
-	    (if (stringp val) val (org-export-secondary-string val info)))))
+	 ;; a ":macro-" prefix.
+	 (value (org-export-data
+		 (plist-get info (intern (format ":macro-%s" key))) val info)))
     ;; Replace arguments in VALUE.
     (let ((s 0) n)
       (while (string-match "\\$\\([0-9]+\\)" value s)

@@ -47,10 +47,10 @@
 ;; progress. See org-html.el.
 
 (defun org-e-odt-format-preamble (info)
-  (let* ((title (org-export-secondary-string (plist-get info :title) info))
+  (let* ((title (org-export-data (plist-get info :title) info))
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
-			(and auth (org-export-secondary-string auth info)))))
+			(and auth (org-export-data auth info)))))
 	 (date (plist-get info :date))
 	 (iso-date (org-e-odt-format-date date))
 	 (date (org-e-odt-format-date date "%d %b %Y"))
@@ -859,10 +859,9 @@ ATTR is a string of other attributes of the a element."
 	 (caption (org-element-property :caption caption-from))
 	 (short-caption (cdr caption))
 	 ;; transcode captions.
-	 (caption (and (car caption)
-		       (org-export-secondary-string (car caption) info)))
+	 (caption (and (car caption) (org-export-data (car caption) info)))
 	 (short-caption (and short-caption
-			     (org-export-secondary-string short-caption info))))
+			     (org-export-data short-caption info))))
     (when (or label caption)
       (let* ((default-category
 	       (cond
@@ -1079,9 +1078,9 @@ ATTR is a string of other attributes of the a element."
       (insert "\n</manifest:manifest>"))))
 
 (defun org-e-odt-update-meta-file (info) ; FIXME opt-plist
-  (let ((title (org-export-secondary-string (plist-get info :title) info))
+  (let ((title (org-export-data (plist-get info :title) info))
 	(author (or (let ((auth (plist-get info :author)))
-		      (and auth (org-export-secondary-string auth info))) ""))
+		      (and auth (org-export-data auth info))) ""))
 	(date (org-e-odt-format-date (plist-get info :date)))
 	(email (plist-get info :email))
 	(keywords (plist-get info :keywords))
@@ -1371,7 +1370,6 @@ formula file."
 		  "org-export" (extension &optional subtreep pub-dir))
 (declare-function org-export-resolve-coderef "org-export" (ref info))
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
-(declare-function org-export-secondary-string "org-export" (secondary info))
 (declare-function org-export-solidify-link-text "org-export" (s))
 (declare-function
  org-export-to-buffer "org-export"
@@ -2743,15 +2741,14 @@ For non-floats, see `org-e-odt--wrap-label'."
      ;; Option caption format with short name.
      ((cdr caption)
       (format "\\caption[%s]{%s%s}\n"
-	      (org-export-secondary-string (cdr caption) info)
+	      (org-export-data (cdr caption) info)
 	      label-str
-	      (org-export-secondary-string (car caption) info)))
+	      (org-export-data (car caption) info)))
      ;; Standard caption format.
      ;; (t (format "\\caption{%s%s}\n"
      ;; 		label-str
-     ;; 		(org-export-secondary-string (car caption) info)))
-
-     (t (org-export-secondary-string (car caption) info)))))
+     ;; 		(org-export-data (car caption) info)))
+     (t (org-export-data (car caption) info)))))
 
 (defun org-e-odt--find-verb-separator (s)
   "Return a character not used in string S.
@@ -3073,7 +3070,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (if (equal (org-element-type raw) 'org-data)
       (org-trim (org-export-data raw info)) ; fix paragraph style
     (org-e-odt-format-stylized-paragraph
-     'footnote (org-trim (org-export-secondary-string raw info)))))
+     'footnote (org-trim (org-export-data raw info)))))
 
 (defvar org-e-odt-footnote-separator
   (org-e-odt-format-fontify "," 'superscript))
@@ -3127,15 +3124,12 @@ holding contextual information."
 			      (mapconcat 'number-to-string
 					 headline-number ".")))
 	 (todo (and (plist-get info :with-todo-keywords)
-		    (let ((todo (org-element-property
-				 :todo-keyword headline)))
-		      (and todo
-			   (org-export-secondary-string todo info)))))
+		    (let ((todo (org-element-property :todo-keyword headline)))
+		      (and todo (org-export-data todo info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
-	 (text (org-export-secondary-string
-		(org-element-property :title headline) info))
+	 (text (org-export-data (org-element-property :title headline) info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-element-property :tags headline)))
 	 (headline-label (concat "sec-" (mapconcat 'number-to-string
@@ -3161,8 +3155,7 @@ holding contextual information."
   (let* ((numberedp (org-export-numbered-headline-p headline info))
 	 ;; Get level relative to current parsed data.
 	 (level (org-export-get-relative-level headline info))
-	 (text (org-export-secondary-string
-		(org-element-property :title headline) info))
+	 (text (org-export-data (org-element-property :title headline) info))
 	 ;; Create the headline text.
 	 (full-text (org-e-odt-format-headline--wrap headline info)))
     (cond
@@ -3300,7 +3293,7 @@ contextual information."
 	 (counter (org-element-property :counter item))
 	 (checkbox (org-element-property :checkbox item))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (org-export-secondary-string tag info)))))
+		(and tag (org-export-data tag info)))))
     (org-e-odt-format-list-item
      contents type checkbox (or tag counter))))
 
@@ -3365,9 +3358,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (processing-type (plist-get info :LaTeX-fragments))
 	  (caption (org-element-property :caption latex-environment))
 	  (short-caption (and (cdr caption)
-			      (org-export-secondary-string (cdr caption) info)))
-	  (caption (and (car caption)
-			(org-export-secondary-string (car caption) info)))
+			      (org-export-data (cdr caption) info)))
+	  (caption (and (car caption) (org-export-data (car caption) info)))
 	  (label (org-element-property :name latex-environment))
 	  (attr nil)			; FIXME
 	  (label (org-element-property :name latex-environment)))
@@ -3594,7 +3586,7 @@ INFO is a plist holding contextual information.  See
      ;; display of the contents.
      ((string= type "radio")
       (org-e-odt-format-internal-link
-       (org-export-secondary-string
+       (org-export-data
 	(org-element-parse-secondary-string
 	 path (org-element-restriction 'radio-target))
 	info)
@@ -3609,7 +3601,7 @@ INFO is a plist holding contextual information.  See
 	  ;; Fuzzy link points nowhere.
 	  ('nil
 	   (org-e-odt-format-fontify
-	    (or desc (org-export-secondary-string
+	    (or desc (org-export-data
 		      (org-element-property :raw-link link) info))
 	    'emphasis))
 	  ;; Fuzzy link points to an invisible target.
@@ -3627,7 +3619,7 @@ INFO is a plist holding contextual information.  See
 		   (cond
 		    (desc desc)
 		    ((plist-get info :section-numbers) section-no)
-		    (t (org-export-secondary-string
+		    (t (org-export-data
 			(org-element-property :title destination) info))))
 	     (org-e-odt-format-internal-link desc label)))
 	  ;; Fuzzy link points to a target.  Do as above.
@@ -3871,14 +3863,13 @@ contextual information."
   (let* ((lang (org-element-property :language src-block))
 	 (caption (org-element-property :caption src-block))
 	 (short-caption (and (cdr caption)
-			     (org-export-secondary-string (cdr caption) info)))
-	 (caption (and (car caption)
-		       (org-export-secondary-string (car caption) info)))
+			     (org-export-data (cdr caption) info)))
+	 (caption (and (car caption) (org-export-data (car caption) info)))
 	 (label (org-element-property :name src-block)))
     ;; FIXME: Handle caption
     ;; caption-str (when caption)
-    ;; (main (org-export-secondary-string (car caption) info))
-    ;; (secondary (org-export-secondary-string (cdr caption) info))
+    ;; (main (org-export-data (car caption) info))
+    ;; (secondary (org-export-data (cdr caption) info))
     ;; (caption-str (org-e-odt--caption/label-string caption label info))
     (let* ((captions (org-e-odt-format-label src-block info 'definition))
 	   (caption (car captions)) (short-caption (cdr captions)))

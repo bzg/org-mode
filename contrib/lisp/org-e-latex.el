@@ -71,7 +71,6 @@
 		  "org-export" (extension &optional subtreep pub-dir))
 (declare-function org-export-resolve-coderef "org-export" (ref info))
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
-(declare-function org-export-secondary-string "org-export" (secondary info))
 (declare-function org-export-solidify-link-text "org-export" (s))
 (declare-function
  org-export-to-buffer "org-export"
@@ -746,13 +745,13 @@ For non-floats, see `org-e-latex--wrap-label'."
      ;; Option caption format with short name.
      ((cdr caption)
       (format "\\caption[%s]{%s%s}\n"
-	      (org-export-secondary-string (cdr caption) info)
+	      (org-export-data (cdr caption) info)
 	      label-str
-	      (org-export-secondary-string (car caption) info)))
+	      (org-export-data (car caption) info)))
      ;; Standard caption format.
      (t (format "\\caption{%s%s}\n"
 		label-str
-		(org-export-secondary-string (car caption) info))))))
+		(org-export-data (car caption) info))))))
 
 (defun org-e-latex--guess-inputenc (header)
   "Set the coding system in inputenc to what the buffer is.
@@ -858,7 +857,7 @@ See `org-e-latex-text-markup-alist' for details."
   "Return complete document string after LaTeX conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let ((title (org-export-secondary-string (plist-get info :title) info)))
+  (let ((title (org-export-data (plist-get info :title) info)))
     (concat
      ;; 1. Time-stamp.
      (and (plist-get info :time-stamp-file)
@@ -890,10 +889,9 @@ holding export options."
      ;; 5. Author.
      (let ((author (and (plist-get info :with-author)
 			(let ((auth (plist-get info :author)))
-			  (and auth (org-export-secondary-string auth info)))))
+			  (and auth (org-export-data auth info)))))
 	   (email (and (plist-get info :with-email)
-		       (org-export-secondary-string
-			(plist-get info :email) info))))
+		       (org-export-data (plist-get info :email) info))))
        (cond ((and author email (not (string= "" email)))
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     (author (format "\\author{%s}\n" author))
@@ -1138,10 +1136,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      "\\footnotetext[%s]{%s}"
 	      (org-export-get-footnote-number ref info)
 	      (org-trim
-	       (funcall
-		(if (eq (org-element-property :type ref) 'inline)
-		    'org-export-secondary-string
-		  'org-export-data)
+	       (org-export-data
 		(org-export-get-footnote-definition ref info) info))))
 	   (funcall search-refs def) ""))))))))
 
@@ -1178,12 +1173,11 @@ holding contextual information."
 	     ((= (length sec) 4)
 	      (if numberedp (concat (car sec) "\n%s" (nth 1 sec))
 		(concat (nth 2 sec) "\n%s" (nth 3 sec)))))))
-	 (text (org-export-secondary-string
-		(org-element-property :title headline) info))
+	 (text (org-export-data (org-element-property :title headline) info))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword headline)))
-		 (and todo (org-export-secondary-string todo info)))))
+		 (and todo (org-export-data todo info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
 	 (tags (and (plist-get info :with-tags)
 		    (org-element-property :tags headline)))
@@ -1297,13 +1291,10 @@ contextual information."
   "Transcode an INLINETASK element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((title (org-export-secondary-string
-		(org-element-property :title inlinetask) info))
+  (let ((title (org-export-data (org-element-property :title inlinetask) info))
 	(todo (and (plist-get info :with-todo-keywords)
-		   (let ((todo (org-element-property
-				:todo-keyword inlinetask)))
-		     (and todo
-			  (org-export-secondary-string todo info)))))
+		   (let ((todo (org-element-property :todo-keyword inlinetask)))
+		     (and todo (org-export-data todo info)))))
 	(todo-type (org-element-property :todo-type inlinetask))
 	(tags (and (plist-get info :with-tags)
 		   (org-element-property :tags inlinetask)))
@@ -1364,8 +1355,7 @@ contextual information."
 			   ((eq checkbox 'off) "$\\Box$ ")
 			   ((eq checkbox 'trans) "$\\boxminus$ "))))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag
-		     (format "[%s]" (org-export-secondary-string tag info))))))
+		(and tag (format "[%s]" (org-export-data tag info))))))
     (concat counter "\\item" tag " " checkbox contents)))
 
 
@@ -1535,7 +1525,7 @@ INFO is a plist holding contextual information.  See
      ((string= type "radio")
       (format "\\hyperref[%s]{%s}"
 	      (org-export-solidify-link-text path)
-	      (org-export-secondary-string
+	      (org-export-data
 	       (org-element-parse-secondary-string
 		path (cdr (assq 'radio-target org-element-object-restrictions)))
 	       info)))
@@ -1550,7 +1540,7 @@ INFO is a plist holding contextual information.  See
 	  ('nil
 	   (format "\\texttt{%s}"
 		   (or desc
-		       (org-export-secondary-string
+		       (org-export-data
 			(org-element-property :raw-link link) info))))
 	  ;; Fuzzy link points to an invisible target.
 	  (keyword nil)
@@ -1569,7 +1559,7 @@ INFO is a plist holding contextual information.  See
 		 (format "\\ref{%s}" label)
 	       (format "\\hyperref[%s]{%s}" label
 		       (or desc
-			   (org-export-secondary-string
+			   (org-export-data
 			    (org-element-property :title destination) info))))))
           ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise
@@ -1858,12 +1848,11 @@ contextual information."
 	     (or (cadr (assq (intern lang) org-e-latex-listings-langs)) lang))
 	    (caption-str
 	     (when caption
-	       (let ((main (org-export-secondary-string (car caption) info)))
+	       (let ((main (org-export-data (car caption) info)))
 		 (if (not (cdr caption)) (format "{%s}" main)
-		   (format
-		    "{[%s]%s}"
-		    (org-export-secondary-string (cdr caption) info)
-		    main))))))
+		   (format "{[%s]%s}"
+			   (org-export-data (cdr caption) info)
+			   main))))))
 	(concat
 	 ;; Options.
 	 (format "\\lstset{%s}\n"

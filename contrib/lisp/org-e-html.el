@@ -71,7 +71,6 @@
 		  "org-export" (extension &optional subtreep pub-dir))
 (declare-function org-export-resolve-coderef "org-export" (ref info))
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
-(declare-function org-export-secondary-string "org-export" (secondary info))
 (declare-function org-export-solidify-link-text "org-export" (s))
 (declare-function
  org-export-to-buffer "org-export"
@@ -1364,8 +1363,7 @@ Replaces invalid characters with \"_\"."
 		(cons n (if (equal (org-element-type raw) 'org-data)
 			    (org-trim (org-export-data raw info))
 			  (format "<p>%s</p>"
-				  (org-trim
-				   (org-export-secondary-string raw info))))))))
+				  (org-trim (org-export-data raw info))))))))
     (when fn-alist
       (org-e-html-format-footnotes-section
        (nth 4 (or (assoc (plist-get info :language)
@@ -1407,15 +1405,14 @@ For non-floats, see `org-e-html--wrap-label'."
      ;; Option caption format with short name.
      ((cdr caption)
       (format "\\caption[%s]{%s%s}\n"
-	      (org-export-secondary-string (cdr caption) info)
+	      (org-export-data (cdr caption) info)
 	      label-str
-	      (org-export-secondary-string (car caption) info)))
+	      (org-export-data (car caption) info)))
      ;; Standard caption format.
      ;; (t (format "\\caption{%s%s}\n"
      ;; 		label-str
-     ;; 		(org-export-secondary-string (car caption) info)))
-
-     (t (org-export-secondary-string (car caption) info)))))
+     ;; 		(org-export-data (car caption) info)))
+     (t (org-export-data (car caption) info)))))
 
 (defun org-e-html--find-verb-separator (s)
   "Return a character not used in string S.
@@ -1454,10 +1451,10 @@ This function shouldn't be used for floats.  See
 ;;; Template
 
 (defun org-e-html-meta-info (info)
-  (let* ((title (org-export-secondary-string (plist-get info :title) info))
+  (let* ((title (org-export-data (plist-get info :title) info))
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
-			(and auth (org-export-secondary-string auth info)))))
+			(and auth (org-export-data auth info)))))
 	 (description (plist-get info :description))
 	 (keywords (plist-get info :keywords)))
     (concat
@@ -1519,9 +1516,9 @@ This function shouldn't be used for floats.  See
 
 (defun org-e-html-preamble (info)
   (when (plist-get info :html-preamble)
-    (let* ((title (org-export-secondary-string (plist-get info :title) info))
+    (let* ((title (org-export-data (plist-get info :title) info))
 	   (date (org-e-html-format-date info))
-	   (author (org-export-secondary-string (plist-get info :author) info))
+	   (author (org-export-data (plist-get info :author) info))
 	   (lang-words (or (assoc (plist-get info :language)
 				  org-export-language-setup)
 			   (assoc "en" org-export-language-setup)))
@@ -1670,8 +1667,7 @@ original parsed data.  INFO is a plist holding export options."
 		     (nth 1 org-e-html-divs)))
    ;; document title
    (format "
-<h1 class=\"title\">%s</h1>\n" (org-export-secondary-string
-				(plist-get info :title) info))
+<h1 class=\"title\">%s</h1>\n" (org-export-data (plist-get info :title) info))
    ;; table of contents
    (let ((depth (plist-get info :with-toc)))
      (when (wholenump depth) (org-e-html-toc depth info)))
@@ -2031,15 +2027,12 @@ holding contextual information."
 			      (mapconcat 'number-to-string
 					 headline-number ".")))
 	 (todo (and (plist-get info :with-todo-keywords)
-		    (let ((todo (org-element-property
-				 :todo-keyword headline)))
-		      (and todo
-			   (org-export-secondary-string todo info)))))
+		    (let ((todo (org-element-property :todo-keyword headline)))
+		      (and todo (org-export-data todo info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
-	 (text (org-export-secondary-string
-		(org-element-property :title headline) info))
+	 (text (org-export-data (org-element-property :title headline) info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-element-property :tags headline)))
 	 (headline-label (concat "sec-" (mapconcat 'number-to-string
@@ -2064,12 +2057,10 @@ CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((numberedp (org-export-numbered-headline-p headline info))
 	 (level (org-export-get-relative-level headline info))
-	 (text (org-export-secondary-string
-		(org-element-property :title headline) info))
+	 (text (org-export-data (org-element-property :title headline) info))
 	 (todo (and (plist-get info :with-todo-keywords)
-		    (let ((todo (org-element-property
-				 :todo-keyword headline)))
-		      (and todo (org-export-secondary-string todo info)))))
+		    (let ((todo (org-element-property :todo-keyword headline)))
+		      (and todo (org-export-data todo info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
 	 (tags (and (plist-get info :with-tags)
 		    (org-element-property :tags headline)))
@@ -2237,7 +2228,7 @@ contextual information."
 	 (counter (org-element-property :counter item))
 	 (checkbox (org-element-property :checkbox item))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (org-export-secondary-string tag info)))))
+		(and tag (org-export-data tag info)))))
     (org-e-html-format-list-item
      contents type checkbox (or tag counter))))
 
@@ -2453,7 +2444,7 @@ INFO is a plist holding contextual information.  See
      ((string= type "radio")
       (format "<a href=\"#%s\">%s</a>"
 	      (org-export-solidify-link-text path)
-	      (org-export-secondary-string
+	      (org-export-data
 	       (org-element-parse-secondary-string
 		path (org-element-restriction 'radio-target))
 	       info)))
@@ -2468,7 +2459,7 @@ INFO is a plist holding contextual information.  See
 	  ('nil
 	   (format "<i>%s</i>"
 		   (or desc
-		       (org-export-secondary-string
+		       (org-export-data
 			(org-element-property :raw-link link) info))))
 	  ;; Fuzzy link points to an invisible target.
 	  (keyword nil)
@@ -2485,7 +2476,7 @@ INFO is a plist holding contextual information.  See
 		   (cond
 		    (desc desc)
 		    ((plist-get info :section-numbers) section-no)
-		    (t (org-export-secondary-string
+		    (t (org-export-data
 			(org-element-property :title destination) info))))
 	     (format "<a href=\"#%s\">%s</a>" label desc)))
           ;; Fuzzy link points to a target.  Do as above.
