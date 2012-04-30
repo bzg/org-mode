@@ -157,20 +157,16 @@ Return a list whose CAR is `center-block' and CDR is a plist
 containing `:begin', `:end', `:hiddenp', `:contents-begin',
 `:contents-end' and `:post-blank' keywords.
 
-Assume point is at beginning or end of the block."
+Assume point is at the beginning of the block."
   (save-excursion
     (let* ((case-fold-search t)
-	   (keywords (progn
-		       (end-of-line)
-		       (re-search-backward
-			(concat "^[ \t]*#\\+BEGIN_CENTER") nil t)
-		       (org-element-collect-affiliated-keywords)))
+	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
-	   (contents-end (progn (re-search-forward
-				 (concat "^[ \t]*#\\+END_CENTER") nil t)
-				(point-at-bol)))
+	   (contents-end
+	    (progn (re-search-forward "^[ \t]*#\\+END_CENTER" nil t)
+		   (point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
@@ -719,18 +715,17 @@ containing `:type', `:begin', `:end', `:contents-begin' and
 `:contents-end', `:level', `:structure' and `:post-blank'
 keywords.
 
-Assume point is at one of the list items."
+Assume point is at the beginning of the list."
   (save-excursion
     (let* ((struct (or structure (org-list-struct)))
 	   (prevs (org-list-prevs-alist struct))
 	   (parents (org-list-parents-alist struct))
 	   (type (org-list-get-list-type (point) struct prevs))
-	   (contents-begin (goto-char
-			    (org-list-get-list-begin (point) struct prevs)))
+	   (contents-begin (point))
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
-	   (contents-end (goto-char
-			  (org-list-get-list-end (point) struct prevs)))
+	   (contents-end
+	    (goto-char (org-list-get-list-end (point) struct prevs)))
 	   (end (save-excursion (org-skip-whitespace)
 				(if (eobp) (point) (point-at-bol))))
 	   (level 0))
@@ -773,19 +768,14 @@ Return a list whose CAR is `quote-block' and CDR is a plist
 containing `:begin', `:end', `:hiddenp', `:contents-begin',
 `:contents-end' and `:post-blank' keywords.
 
-Assume point is at beginning or end of the block."
+Assume point is at the beginning of the block."
   (save-excursion
     (let* ((case-fold-search t)
-	   (keywords (progn
-		       (end-of-line)
-		       (re-search-backward
-			(concat "^[ \t]*#\\+BEGIN_QUOTE") nil t)
-		       (org-element-collect-affiliated-keywords)))
+	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
-	   (contents-end (progn (re-search-forward
-				 (concat "^[ \t]*#\\+END_QUOTE") nil t)
+	   (contents-end (progn (re-search-forward "^[ \t]*#\\+END_QUOTE" nil t)
 				(point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
@@ -848,23 +838,18 @@ Return a list whose CAR is `special-block' and CDR is a plist
 containing `:type', `:begin', `:end', `:hiddenp',
 `:contents-begin', `:contents-end' and `:post-blank' keywords.
 
-Assume point is at beginning or end of the block."
+Assume point is at the beginning of the block."
   (save-excursion
     (let* ((case-fold-search t)
-	   (type (progn (looking-at
-			 "[ \t]*#\\+\\(?:BEGIN\\|END\\)_\\([-A-Za-z0-9]+\\)")
+	   (type (progn (looking-at "[ \t]*#\\+BEGIN_\\([-A-Za-z0-9]+\\)")
 			(org-match-string-no-properties 1)))
-	   (keywords (progn
-		       (end-of-line)
-		       (re-search-backward
-			(concat "^[ \t]*#\\+BEGIN_" type) nil t)
-		       (org-element-collect-affiliated-keywords)))
+	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
-	   (contents-end (progn (re-search-forward
-				 (concat "^[ \t]*#\\+END_" type) nil t)
-				(point-at-bol)))
+	   (contents-end
+	    (progn (re-search-forward (concat "^[ \t]*#\\+END_" type) nil t)
+		   (point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
@@ -986,45 +971,35 @@ CONTENTS is nil."
 
 Return a list whose CAR is `comment' and CDR is a plist
 containing `:begin', `:end', `:value' and `:post-blank'
-keywords."
-  (let (beg-coms begin end end-coms keywords)
-    (save-excursion
-      (if (looking-at "#")
-	  ;; First type of comment: comments at column 0.
-	  (let ((comment-re "^\\([^#]\\|#\\+[a-z]\\)"))
-	    (save-excursion
-	      (re-search-backward comment-re nil 'move)
-	      (if (bobp) (setq keywords nil beg-coms (point))
-		(forward-line)
-		(setq keywords (org-element-collect-affiliated-keywords)
-		      beg-coms (point))))
-	    (re-search-forward comment-re nil 'move)
-	    (setq end-coms (if (eobp) (point) (match-beginning 0))))
-	;; Second type of comment: indented comments.
-	(let ((comment-re "[ \t]*#\\+\\(?: \\|$\\)"))
-	  (unless (bobp)
-	    (while (and (not (bobp)) (looking-at comment-re))
-	      (forward-line -1))
-	    (unless (looking-at comment-re) (forward-line)))
-	  (setq beg-coms (point))
-	  (setq keywords (org-element-collect-affiliated-keywords))
-	  ;; Get comments ending.  This may not be accurate if
-	  ;; commented lines within an item are followed by commented
-	  ;; lines outside of the list.  Though, parser will always
-	  ;; get it right as it already knows surrounding element and
-	  ;; has narrowed buffer to its contents.
-	  (while (looking-at comment-re) (forward-line))
-	  (setq end-coms (point))))
-      ;; Find position after blank.
-      (goto-char end-coms)
-      (org-skip-whitespace)
-      (setq end (if (eobp) (point) (point-at-bol))))
-    `(comment
-      (:begin ,(or (car keywords) beg-coms)
-	      :end ,end
-	      :value ,(buffer-substring-no-properties beg-coms end-coms)
-	      :post-blank ,(count-lines end-coms end)
-	      ,@(cadr keywords)))))
+keywords.
+
+Assume point is at comment beginning."
+  (save-excursion
+    (let* ((com-beg (point))
+	   (keywords (org-element-collect-affiliated-keywords))
+	   (begin (car keywords))
+	   (com-end
+	    ;; Get comments ending.  This may not be accurate if
+	    ;; commented lines within an item are followed by
+	    ;; commented lines outside of a list.  Though, parser will
+	    ;; always get it right as it already knows surrounding
+	    ;; element and has narrowed buffer to its contents.
+	    (if (looking-at "#")
+		(if (re-search-forward "^\\([^#]\\|#\\+[a-z]\\)" nil 'move)
+		    (progn (goto-char (match-beginning 0)) (point))
+		  (point))
+	      (while (looking-at "[ \t]*#\\+\\(?: \\|$\\)")
+		(forward-line))
+	      (point)))
+	   (end (progn (goto-char com-end)
+		       (org-skip-whitespace)
+		       (if (eobp) (point) (point-at-bol)))))
+      `(comment
+	(:begin ,(or (car keywords) com-beg)
+		:end ,end
+		:value ,(buffer-substring-no-properties com-beg com-end)
+		:post-blank ,(count-lines com-end end)
+		,@(cadr keywords))))))
 
 (defun org-element-comment-interpreter (comment contents)
   "Interpret COMMENT element as Org syntax.
@@ -1039,19 +1014,18 @@ CONTENTS is nil."
 
 Return a list whose CAR is `comment-block' and CDR is a plist
 containing `:begin', `:end', `:hiddenp', `:value' and
-`:post-blank' keywords."
+`:post-blank' keywords.
+
+Assume point is at comment block beginning."
   (save-excursion
-    (end-of-line)
     (let* ((case-fold-search t)
-	   (keywords (progn
-		       (re-search-backward "^[ \t]*#\\+BEGIN_COMMENT" nil t)
-		       (org-element-collect-affiliated-keywords)))
+	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
-	   (contents-end (progn (re-search-forward
-				 "^[ \t]*#\\+END_COMMENT" nil t)
-				(point-at-bol)))
+	   (contents-end
+	    (progn (re-search-forward "^[ \t]*#\\+END_COMMENT" nil t)
+		   (point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol))))
@@ -1081,12 +1055,10 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 `:retain-labels', `:use-labels', `:label-fmt', `:hiddenp',
 `:switches', `:value' and `:post-blank' keywords."
   (save-excursion
-    (end-of-line)
     (let* ((case-fold-search t)
-	   (switches (progn
-		       (re-search-backward
-			"^[ \t]*#\\+BEGIN_EXAMPLE\\(?: +\\(.*\\)\\)?" nil t)
-		       (org-match-string-no-properties 1)))
+	   (switches
+	    (progn (looking-at "^[ \t]*#\\+BEGIN_EXAMPLE\\(?: +\\(.*\\)\\)?")
+		   (org-match-string-no-properties 1)))
 	   ;; Switches analysis
 	   (number-lines (cond ((not switches) nil)
 			       ((string-match "-n\\>" switches) 'new)
@@ -1104,16 +1076,16 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 	    (or (not switches)
 		(and retain-labels (not (string-match "-k\\>" switches)))))
 	   (label-fmt (and switches
-			     (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-			     (match-string 1 switches)))
+			   (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
+			   (match-string 1 switches)))
 	   ;; Standard block parsing.
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
-	   (contents-end (progn
-			   (re-search-forward "^[ \t]*#\\+END_EXAMPLE" nil t)
-			   (point-at-bol)))
+	   (contents-end
+	    (progn (re-search-forward "^[ \t]*#\\+END_EXAMPLE" nil t)
+		   (point-at-bol)))
 	   (value (buffer-substring-no-properties contents-begin contents-end))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
@@ -1149,22 +1121,20 @@ CONTENTS is nil."
 
 Return a list whose CAR is `export-block' and CDR is a plist
 containing `:begin', `:end', `:type', `:hiddenp', `:value' and
-`:post-blank' keywords."
+`:post-blank' keywords.
+
+Assume point is at export-block beginning."
   (save-excursion
-    (end-of-line)
     (let* ((case-fold-search t)
-	   (contents)
-	   (type (progn (re-search-backward
-			 (concat "[ \t]*#\\+BEGIN_"
-				 (org-re "\\([[:alnum:]]+\\)")))
+	   (type (progn (looking-at "[ \t]*#\\+BEGIN_\\([A-Za-z0-9]+\\)")
 			(upcase (org-match-string-no-properties 1))))
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-truely-invisible-p))
-	   (contents-end (progn (re-search-forward
-				 (concat "^[ \t]*#\\+END_" type) nil t)
-				(point-at-bol)))
+	   (contents-end
+	    (progn (re-search-forward (concat "^[ \t]*#\\+END_" type) nil t)
+		   (point-at-bol)))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol))))
@@ -1193,42 +1163,26 @@ CONTENTS is nil."
   "Parse a fixed-width section.
 
 Return a list whose CAR is `fixed-width' and CDR is a plist
-containing `:begin', `:end', `:value' and `:post-blank'
-keywords."
-  (let ((fixed-re "[ \t]*:\\( \\|$\\)")
-	beg-area begin end value pos-before-blank keywords)
-    (save-excursion
-      ;; Move to the beginning of the fixed-width area.
-      (unless (bobp)
-	(while (and (not (bobp)) (looking-at fixed-re))
-	  (forward-line -1))
-	(unless (looking-at fixed-re) (forward-line 1)))
-      (setq beg-area (point))
-      ;; Get affiliated keywords, if any.
-      (setq keywords (org-element-collect-affiliated-keywords))
-      ;; Store true beginning of element.
-      (setq begin (car keywords))
-      ;; Get ending of fixed-width area.  If point is in a list,
-      ;; ensure to not get outside of it.
-      (let* ((itemp (org-in-item-p))
-	     (max-pos (if itemp
-			  (org-list-get-bottom-point
-			   (save-excursion (goto-char itemp) (org-list-struct)))
-			(point-max))))
-	(while (and (looking-at fixed-re) (< (point) max-pos))
-	  (forward-line)))
-      (setq pos-before-blank (point))
-      ;; Find position after blank
-      (org-skip-whitespace)
-      (setq end (if (eobp) (point) (point-at-bol)))
-      ;; Extract value.
-      (setq value (buffer-substring-no-properties beg-area pos-before-blank)))
-    `(fixed-width
-      (:begin ,begin
-	      :end ,end
-	      :value ,value
-	      :post-blank ,(count-lines pos-before-blank end)
-	      ,@(cadr keywords)))))
+containing `:begin', `:end', `:value' and `:post-blank' keywords.
+
+Assume point is at the beginning of the fixed-width area."
+  (save-excursion
+    (let* ((beg-area (point))
+	   (keywords (org-element-collect-affiliated-keywords))
+	   (begin (car keywords))
+	   (end-area
+	    (progn (while (looking-at "[ \t]*:\\( \\|$\\)")
+		     (forward-line))
+		   (point)))
+	   (end (progn (org-skip-whitespace)
+		       (if (eobp) (point) (point-at-bol))))
+	   (value (buffer-substring-no-properties beg-area end-area)))
+      `(fixed-width
+	(:begin ,begin
+		:end ,end
+		:value ,value
+		:post-blank ,(count-lines end-area end)
+		,@(cadr keywords))))))
 
 (defun org-element-fixed-width-interpreter (fixed-width contents)
   "Interpret FIXED-WIDTH element as Org syntax.
@@ -1241,9 +1195,8 @@ CONTENTS is nil."
 (defun org-element-horizontal-rule-parser ()
   "Parse an horizontal rule.
 
-   Return a list whose CAR is `horizontal-rule' and CDR is
-   a plist containing `:begin', `:end' and `:post-blank'
-   keywords."
+Return a list whose CAR is `horizontal-rule' and CDR is a plist
+containing `:begin', `:end' and `:post-blank' keywords."
   (save-excursion
     (let* ((keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
@@ -1271,7 +1224,8 @@ Return a list whose CAR is `keyword' and CDR is a plist
 containing `:key', `:value', `:begin', `:end' and `:post-blank'
 keywords."
   (save-excursion
-    (let* ((begin (point))
+    (let* ((case-fold-search t)
+	   (begin (point))
 	   (key (progn (looking-at
 			"[ \t]*#\\+\\(\\(?:[a-z]+\\)\\(?:_[a-z]+\\)*\\):")
 		       (upcase (org-match-string-no-properties 1))))
@@ -1302,11 +1256,12 @@ CONTENTS is nil."
 
 Return a list whose CAR is `latex-environment' and CDR is a plist
 containing `:begin', `:end', `:value' and `:post-blank'
-keywords."
+keywords.
+
+Assume point is at the beginning of the latex environment."
   (save-excursion
-    (end-of-line)
     (let* ((case-fold-search t)
-	   (contents-begin (re-search-backward "^[ \t]*\\\\begin" nil t))
+	   (contents-begin (point))
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-end (progn (re-search-forward "^[ \t]*\\\\end")
@@ -1342,12 +1297,11 @@ Assume point is at the beginning of the paragraph."
     (let* ((contents-begin (point))
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
-	   (contents-end (progn
-			   (end-of-line)
-			   (if (re-search-forward
-				org-element-paragraph-separate nil 'm)
-			       (progn (forward-line -1) (end-of-line) (point))
-			     (point))))
+	   (contents-end
+	    (progn (end-of-line)
+		   (if (re-search-forward org-element-paragraph-separate nil 'm)
+		       (progn (forward-line -1) (end-of-line) (point))
+		     (point))))
 	   (pos-before-blank (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
@@ -1422,28 +1376,27 @@ CONTENTS is nil."
 
 Return a list whose CAR is `property-drawer' and CDR is a plist
 containing `:begin', `:end', `:hiddenp', `:contents-begin',
-`:contents-end', `:properties' and `:post-blank' keywords."
+`:contents-end', `:properties' and `:post-blank' keywords.
+
+Assume point is at the beginning of the property drawer."
   (save-excursion
     (let ((case-fold-search t)
-	  (begin (progn (end-of-line)
-			(re-search-backward org-property-start-re)
-			(match-beginning 0)))
-	  (contents-begin (progn (forward-line) (point)))
+	  (begin (point))
+	  (prop-begin (progn (forward-line) (point)))
 	  (hidden (org-truely-invisible-p))
-	  (properties (let (val)
-			(while (not (looking-at "^[ \t]*:END:"))
-			  (when (looking-at
-				 (org-re
-				  "[ \t]*:\\([[:alpha:]][[:alnum:]_-]*\\):"))
-			    (push (cons (match-string 1)
-					(org-trim
-					 (buffer-substring
-					  (match-end 0) (point-at-eol))))
-				  val))
-			  (forward-line))
-			val))
-	  (contents-end (progn (re-search-forward "^[ \t]*:END:" nil t)
-			       (point-at-bol)))
+	  (properties
+	   (let (val)
+	     (while (not (looking-at "^[ \t]*:END:"))
+	       (when (looking-at "[ \t]*:\\([A-Za-z][-_A-Za-z0-9]*\\):")
+		 (push (cons (org-match-string-no-properties 1)
+			     (org-trim
+			      (buffer-substring-no-properties
+			       (match-end 0) (point-at-eol))))
+		       val))
+	       (forward-line))
+	     val))
+	  (prop-end (progn (re-search-forward "^[ \t]*:END:" nil t)
+			   (point-at-bol)))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (org-skip-whitespace)
 		      (if (eobp) (point) (point-at-bol)))))
@@ -1508,16 +1461,21 @@ containing `:language', `:switches', `:parameters', `:begin',
 
 Assume point is at the beginning of the block."
   (save-excursion
-    (looking-at
-     (concat
-      "^[ \t]*#\\+BEGIN_SRC"
-      "\\(?: +\\(\\S-+\\)\\)?"				    ; language
-      "\\(\\(?: +\\(?:-l \".*?\"\\|[-+][A-Za-z]\\)\\)+\\)?" ; switches
-      "\\(.*\\)[ \t]*$"))		; parameters
     (let* ((case-fold-search t)
 	   (contents-begin (point))
+	   ;; Get affiliated keywords.
+	   (keywords (org-element-collect-affiliated-keywords))
+	   ;; Get beginning position.
+	   (begin (car keywords))
 	   ;; Get language as a string.
-	   (language (org-match-string-no-properties 1))
+	   (language
+	    (progn
+	      (looking-at
+	       (concat "^[ \t]*#\\+BEGIN_SRC"
+		       "\\(?: +\\(\\S-+\\)\\)?"
+		       "\\(\\(?: +\\(?:-l \".*?\"\\|[-+][A-Za-z]\\)\\)+\\)?"
+		       "\\(.*\\)[ \t]*$"))
+	      (org-match-string-no-properties 1)))
 	   ;; Get switches.
 	   (switches (org-match-string-no-properties 2))
 	   ;; Get parameters.
@@ -1541,10 +1499,6 @@ Assume point is at the beginning of the block."
 	   (use-labels
 	    (or (not switches)
 		(and retain-labels (not (string-match "-k\\>" switches)))))
-	   ;; Get affiliated keywords.
-	   (keywords (org-element-collect-affiliated-keywords))
-	   ;; Get beginning position.
-	   (begin (car keywords))
 	   ;; Get position at end of block.
 	   (contents-end (progn (re-search-forward "^[ \t]*#\\+END_SRC" nil t)
 				(forward-line)
@@ -1613,10 +1567,12 @@ CONTENTS is nil."
 
 Return a list whose CAR is `table' and CDR is a plist containing
 `:begin', `:end', `:tblfm', `:type', `:contents-begin',
-`:contents-end', `:value' and `:post-blank' keywords."
+`:contents-end', `:value' and `:post-blank' keywords.
+
+Assume point is at the beginning of the table."
   (save-excursion
     (let* ((case-fold-search t)
-	   (table-begin (goto-char (org-table-begin t)))
+	   (table-begin (point))
 	   (type (if (org-at-table.el-p) 'table.el 'org))
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
@@ -1632,9 +1588,9 @@ Return a list whose CAR is `table' and CDR is a plist containing
 		:end ,end
 		:type ,type
 		:tblfm ,tblfm
-		;; Only `org' tables have contents.  `table.el'
-		;; tables use a `:value' property to store raw
-		;; table as a string.
+		;; Only `org' tables have contents.  `table.el' tables
+		;; use a `:value' property to store raw table as
+		;; a string.
 		:contents-begin ,(and (eq type 'org) table-begin)
 		:contents-end ,(and (eq type 'org) table-end)
 		:value ,(and (eq type 'table.el)
