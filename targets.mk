@@ -48,11 +48,10 @@ local.mk:
 		-e '$$ i ## See default.mk for further configuration options.' \
 		default.mk > $@
 
-all compile::	lisp
+all compile::	doc lisp
 	$(MAKE) -C $< clean
-all compile compile-dirty::	lisp
+compile compile-dirty::	lisp
 	$(MAKE) -C $< $@
-
 all clean-install::
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)
 
