@@ -3369,7 +3369,7 @@ Possible values are `left', `right' and `center'."
 	;; Though, don't bother if an alignment cookie has already
 	;; defined cell's alignment.
 	((not cookie-align)
-	 (let ((value (org-element-interpret-secondary
+	 (let ((value (org-element-interpret-data
 		       (org-element-contents
 			(elt (org-element-contents row) column)))))
 	   (incf total-cells)

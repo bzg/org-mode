@@ -100,8 +100,7 @@
 ;; extent, `org-element-parse-secondary-string'.
 
 ;; The penultimate part is the cradle of an interpreter for the
-;; obtained parse tree: `org-element-interpret-data' (and its
-;; relative, `org-element-interpret-secondary').
+;; obtained parse tree: `org-element-interpret-data'.
 
 ;; The library ends by furnishing a set of interactive tools for
 ;; element's navigation and manipulation, mostly based on
@@ -441,8 +440,7 @@ CONTENTS is the contents of the element."
   (let* ((level (org-element-property :level headline))
 	 (todo (org-element-property :todo-keyword headline))
 	 (priority (org-element-property :priority headline))
-	 (title (org-element-interpret-secondary
-		 (org-element-property :title headline)))
+	 (title (org-element-interpret-data (org-element-property :title headline)))
 	 (tags (let ((tag-string (org-element-property :tags headline))
 		     (archivedp (org-element-property :archivedp headline)))
 		 (cond
@@ -567,7 +565,7 @@ CONTENTS is the contents of inlinetask."
   (let* ((level (org-element-property :level inlinetask))
 	 (todo (org-element-property :todo-keyword inlinetask))
 	 (priority (org-element-property :priority inlinetask))
-	 (title (org-element-interpret-secondary
+	 (title (org-element-interpret-data
 		 (org-element-property :title inlinetask)))
 	 (tags (org-element-property :tags inlinetask))
 	 (task (concat (make-string level ?*)
@@ -692,7 +690,7 @@ CONTENTS is the contents of the element."
 	 (checkbox (org-element-property :checkbox item))
 	 (counter (org-element-property :counter item))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (org-element-interpret-secondary tag))))
+		(and tag (org-element-interpret-data tag))))
 	 ;; Compute indentation.
 	 (ind (make-string (length bullet) 32)))
     ;; Indent contents.
@@ -2021,7 +2019,7 @@ CONTENTS is nil."
 	 (let ((inline-def
 		(org-element-property :inline-definition footnote-reference)))
 	   (if (not inline-def) ""
-	     (concat ":" (org-element-interpret-secondary inline-def))))))
+	     (concat ":" (org-element-interpret-data inline-def))))))
     (format "[%s]" (concat label def))))
 
 (defun org-element-footnote-reference-successor (limit)
@@ -3642,89 +3640,77 @@ OBJECTS is the previous candidates alist."
 
 ;; The parse tree obtained with `org-element-parse-buffer' is really
 ;; a snapshot of the corresponding Org buffer.  Therefore, it can be
-;; interpreted and expanded into a string with canonical Org
-;; syntax. Hence `org-element-interpret-data'.
+;; interpreted and expanded into a string with canonical Org syntax.
+;; Hence `org-element-interpret-data'.
 ;;
-;; Data parsed from secondary strings, whose shape is slightly
-;; different than the standard parse tree, is expanded with the
-;; equivalent function `org-element-interpret-secondary'.
-;;
-;; Both functions rely internally on
+;; The function relies internally on
 ;; `org-element-interpret--affiliated-keywords'.
 
-(defun org-element-interpret-data (data &optional genealogy previous)
-  "Interpret a parse tree representing Org data.
+(defun org-element-interpret-data (data &optional parent)
+  "Interpret DATA as Org syntax.
 
-DATA is the parse tree to interpret.
+DATA is a parse tree, an element, an object or a secondary string
+to interpret.
 
-Optional arguments GENEALOGY and PREVIOUS are used for recursive
-calls:
-GENEALOGY is the list of its parents types.
-PREVIOUS is the type of the element or object at the same level
-interpreted before.
+Optional argument PARENT is used for recursive calls. It contains
+the element or object containing data, or nil.
 
 Return Org syntax as a string."
-  (mapconcat
-   (lambda (blob)
-     ;; BLOB can be an element, an object, a string, or nil.
-     (cond
-      ((not blob) nil)
-      ((equal blob "") nil)
-      ((stringp blob) blob)
-      (t
-       (let* ((type (org-element-type blob))
-	      (interpreter
-	       (if (eq type 'org-data) 'identity
-		 (intern (format "org-element-%s-interpreter" type))))
-	      (contents
-	       (cond
-		;; Elements or objects without contents.
-		((not (org-element-contents blob)) nil)
-		;; Full Org document.
-		((eq type 'org-data)
-		 (org-element-interpret-data blob genealogy previous))
-		;; Greater elements.
-		((memq type org-element-greater-elements)
-		 (org-element-interpret-data blob (cons type genealogy) nil))
-		(t
-		 (org-element-interpret-data
-		  (org-element-normalize-contents
-		   blob
-		   ;; When normalizing first paragraph of an item or
-		   ;; a footnote-definition, ignore first line's
-		   ;; indentation.
-		   (and (eq type 'paragraph)
-			(not previous)
-			(memq (car genealogy) '(footnote-definiton item))))
-		  (cons type genealogy) nil))))
-	      (results (funcall interpreter blob contents)))
-	 ;; Update PREVIOUS.
-	 (setq previous type)
-	 ;; Build white spaces.  If no `:post-blank' property is
-	 ;; specified, assume its value is 0.
-	 (let ((post-blank (or (org-element-property :post-blank blob) 0)))
-	   (cond
-	    ((eq type 'org-data) results)
-	    ((memq type org-element-all-elements)
-	     (concat
-	      (org-element-interpret--affiliated-keywords blob)
-	      (org-element-normalize-string results)
-	      (make-string post-blank 10)))
-	    (t (concat results (make-string post-blank 32)))))))))
-   (org-element-contents data) ""))
-
-(defun org-element-interpret-secondary (secondary)
-  "Interpret SECONDARY string as Org syntax.
-
-SECONDARY-STRING is a nested list as returned by
-`org-element-parse-secondary-string'.
-
-Return interpreted string."
-  ;; Make SECONDARY acceptable for `org-element-interpret-data'.
-  (let ((s (if (listp secondary) secondary (list secondary))))
-    (org-element-interpret-data `(org-data nil ,@s) nil nil)))
-
-;; Both functions internally use `org-element--affiliated-keywords'.
+  (let* ((type (org-element-type data))
+	 (results
+	  (cond
+	   ;; Secondary string.
+	   ((not type)
+	    (mapconcat
+	     (lambda (obj) (org-element-interpret-data obj parent))
+	     data ""))
+	   ;; Full Org document.
+	   ((eq type 'org-data)
+	    (mapconcat
+	     (lambda (obj) (org-element-interpret-data obj parent))
+	     (org-element-contents data) ""))
+	   ;; Plain text.
+	   ((stringp data) data)
+	   ;; Element/Object without contents.
+	   ((not (org-element-contents data))
+	    (funcall (intern (format "org-element-%s-interpreter" type))
+		     data nil))
+	   ;; Element/Object with contents.
+	   (t
+	    (let* ((greaterp (memq type org-element-greater-elements))
+		   (objectp (and (not greaterp)
+				 (memq type org-element-recursive-objects)))
+		   (contents
+		    (mapconcat
+		     (lambda (obj) (org-element-interpret-data obj data))
+		     (org-element-contents
+		      (if (or greaterp objectp) data
+			;; Elements directly containing objects must
+			;; have their indentation normalized first.
+			(org-element-normalize-contents
+			 data
+			 ;; When normalizing first paragraph of an
+			 ;; item or a footnote-definition, ignore
+			 ;; first line's indentation.
+			 (and (eq type 'paragraph)
+			      (equal data (car (org-element-contents parent)))
+			      (memq (org-element-type parent)
+				    '(footnote-definiton item))))))
+		     "")))
+	      (funcall (intern (format "org-element-%s-interpreter" type))
+		       data
+		       (if greaterp (org-element-normalize-contents contents)
+			 contents)))))))
+    (if (memq type '(org-data plain-text nil)) results
+      ;; Build white spaces.  If no `:post-blank' property is
+      ;; specified, assume its value is 0.
+      (let ((post-blank (or (org-element-property :post-blank data) 0)))
+	(if (memq type org-element-all-objects)
+	    (concat results (make-string post-blank 32))
+	  (concat
+	   (org-element-interpret--affiliated-keywords data)
+	   (org-element-normalize-string results)
+	   (make-string post-blank 10)))))))
 
 (defun org-element-interpret--affiliated-keywords (element)
   "Return ELEMENT's affiliated keywords as Org syntax.
@@ -3737,11 +3723,10 @@ If there is no affiliated keyword, return the empty string."
 		(setq dual (cdr value) value (car value)))
 	      (concat "#+" key
 		      (and dual
-			   (format "[%s]"
-				   (org-element-interpret-secondary dual)))
+			   (format "[%s]" (org-element-interpret-data dual)))
 		      ": "
 		      (if (member key org-element-parsed-keywords)
-			  (org-element-interpret-secondary value)
+			  (org-element-interpret-data value)
 			value)
 		      "\n"))))))
     (mapconcat
