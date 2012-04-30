@@ -536,9 +536,15 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
 
 (ert-deftest test-org-element/example-block-interpreter ()
   "Test example block interpreter."
+  ;; Without switches.
   (should (equal (org-test-parse-and-interpret
 		  "#+BEGIN_EXAMPLE\nTest\n#+END_EXAMPLE")
-		 "#+BEGIN_EXAMPLE\nTest\n#+END_EXAMPLE\n")))
+		 "#+BEGIN_EXAMPLE\nTest\n#+END_EXAMPLE\n"))
+  ;; With switches.
+  (should
+   (equal (org-test-parse-and-interpret
+	   "#+BEGIN_EXAMPLE -n -k\n(+ 1 1)\n#+END_EXAMPLE")
+	  "#+BEGIN_EXAMPLE -n -k\n(+ 1 1)\n#+END_EXAMPLE\n")))
 
 (ert-deftest test-org-element/export-block-interpreter ()
   "Test export block interpreter."

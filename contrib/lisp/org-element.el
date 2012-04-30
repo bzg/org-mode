@@ -1135,8 +1135,8 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 (defun org-element-example-block-interpreter (example-block contents)
   "Interpret EXAMPLE-BLOCK element as Org syntax.
 CONTENTS is nil."
-  (let ((options (org-element-property :options example-block)))
-    (concat "#+BEGIN_EXAMPLE" (and options (concat " " options)) "\n"
+  (let ((switches (org-element-property :switches example-block)))
+    (concat "#+BEGIN_EXAMPLE" (and switches (concat " " switches)) "\n"
 	    (org-remove-indentation
 	     (org-element-property :value example-block))
 	    "#+END_EXAMPLE")))
