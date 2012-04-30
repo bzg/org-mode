@@ -1506,33 +1506,32 @@ Return a list whose CAR is `src-block' and CDR is a plist
 containing `:language', `:switches', `:parameters', `:begin',
 `:end', `:hiddenp', `:contents-begin', `:contents-end',
 `:number-lines', `:retain-labels', `:use-labels', `:label-fmt',
-`:preserve-indent', `:value' and `:post-blank' keywords."
+`:preserve-indent', `:value' and `:post-blank' keywords.
+
+Assume point is at the beginning of the block."
   (save-excursion
-    (end-of-line)
+    (looking-at
+     (concat
+      "^[ \t]*#\\+BEGIN_SRC"
+      "\\(?: +\\(\\S-+\\)\\)?"				    ; language
+      "\\(\\(?: +\\(?:-l \".*?\"\\|[-+][A-Za-z]\\)\\)+\\)?" ; switches
+      "\\(.*\\)[ \t]*$"))		; parameters
     (let* ((case-fold-search t)
-	   ;; Get position at beginning of block.
-	   (contents-begin
-	    (re-search-backward
-	     (concat
-	      "^[ \t]*#\\+BEGIN_SRC"
-	      "\\(?: +\\(\\S-+\\)\\)?"	; language
-	      "\\(\\(?: +\\(?:-l \".*?\"\\|[-+][A-Za-z]\\)\\)*\\)" ; switches
-	      "\\(.*\\)[ \t]*$")	; parameters
-	     nil t))
+	   (contents-begin (point))
 	   ;; Get language as a string.
 	   (language (org-match-string-no-properties 1))
-	   ;; Get parameters.
-	   (parameters (org-trim (org-match-string-no-properties 3)))
 	   ;; Get switches.
 	   (switches (org-match-string-no-properties 2))
+	   ;; Get parameters.
+	   (parameters (org-match-string-no-properties 3))
 	   ;; Switches analysis
 	   (number-lines (cond ((not switches) nil)
 			       ((string-match "-n\\>" switches) 'new)
 			       ((string-match "+n\\>" switches) 'continued)))
 	   (preserve-indent (and switches (string-match "-i\\>" switches)))
 	   (label-fmt (and switches
-			     (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
-			     (match-string 1 switches)))
+			   (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
+			   (match-string 1 switches)))
 	   ;; Should labels be retained in (or stripped from) src
 	   ;; blocks?
 	   (retain-labels
@@ -1567,8 +1566,10 @@ containing `:language', `:switches', `:parameters', `:begin',
 			  (org-truely-invisible-p))))
       `(src-block
 	(:language ,language
-		   :switches ,switches
-		   :parameters ,parameters
+		   :switches ,(and (org-string-nw-p switches)
+				   (org-trim switches))
+		   :parameters ,(and (org-string-nw-p parameters)
+				     (org-trim parameters))
 		   :begin ,begin
 		   :end ,end
 		   :number-lines ,number-lines

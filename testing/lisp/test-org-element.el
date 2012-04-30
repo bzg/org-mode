@@ -587,10 +587,16 @@ CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
 
 (ert-deftest test-org-element/src-block-interpreter ()
   "Test src block interpreter."
+  ;; With arguments.
   (should
    (equal (org-test-parse-and-interpret
 	   "#+BEGIN_SRC emacs-lisp :results silent\n(+ 1 1)\n#+END_SRC")
-	  "#+BEGIN_SRC emacs-lisp :results silent\n(+ 1 1)\n#+END_SRC\n")))
+	  "#+BEGIN_SRC emacs-lisp :results silent\n(+ 1 1)\n#+END_SRC\n"))
+  ;; With switches.
+  (should
+   (equal (org-test-parse-and-interpret
+	   "#+BEGIN_SRC emacs-lisp -n -k\n(+ 1 1)\n#+END_SRC")
+	  "#+BEGIN_SRC emacs-lisp -n -k\n(+ 1 1)\n#+END_SRC\n")))
 
 (ert-deftest test-org-element/table-interpreter ()
   "Test table, table-row and table-cell interpreters."
