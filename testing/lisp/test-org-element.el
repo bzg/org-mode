@@ -34,80 +34,8 @@ Return interpreted string."
 
 
 
-;;; Tests:
+;;; Test Parsers
 
-
-;;;; Headlines
-
-(ert-deftest test-org-element/headline-quote-keyword ()
-  "Test QUOTE keyword recognition."
-  ;; Reference test.
-  (org-test-with-temp-text "* Headline"
-    (let ((org-quote-string "QUOTE"))
-      (should-not (org-element-property :quotedp (org-element-at-point)))))
-  ;; Standard position.
-  (org-test-with-temp-text "* QUOTE Headline"
-    (let ((org-quote-string "QUOTE"))
-      (let ((headline (org-element-at-point)))
-	(should (org-element-property :quotedp headline))
-	;; Test removal from raw value.
-	(should (equal (org-element-property :raw-value headline) "Headline"))))
-    ;; Case sensitivity.
-    (let ((org-quote-string "Quote"))
-      (should-not (org-element-property :quotedp (org-element-at-point)))))
-  ;; With another keyword.
-  (org-test-with-temp-text "* TODO QUOTE Headline"
-    (let ((org-quote-string "QUOTE")
-	  (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (should (org-element-property :quotedp (org-element-at-point))))))
-
-(ert-deftest test-org-element/headline-comment-keyword ()
-  "Test COMMENT keyword recognition."
-  ;; Reference test.
-  (org-test-with-temp-text "* Headline"
-    (let ((org-comment-string "COMMENT"))
-      (should-not (org-element-property :commentedp (org-element-at-point)))))
-  ;; Standard position.
-  (org-test-with-temp-text "* COMMENT Headline"
-    (let ((org-comment-string "COMMENT"))
-      (let ((headline (org-element-at-point)))
-	(should (org-element-property :commentedp headline))
-	;; Test removal from raw value.
-	(should (equal (org-element-property :raw-value headline) "Headline"))))
-    ;; Case sensitivity.
-    (let ((org-comment-string "Comment"))
-      (should-not (org-element-property :commentedp (org-element-at-point)))))
-  ;; With another keyword.
-  (org-test-with-temp-text "* TODO COMMENT Headline"
-    (let ((org-comment-string "COMMENT")
-	  (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (should (org-element-property :commentedp (org-element-at-point))))))
-
-(ert-deftest test-org-element/headline-archive-tag ()
-  "Test ARCHIVE tag recognition."
-  ;; Reference test.
-  (org-test-with-temp-text "* Headline"
-    (let ((org-archive-tag "ARCHIVE"))
-      (should-not (org-element-property :archivedp (org-element-at-point)))))
-  ;; Single tag.
-  (org-test-with-temp-text "* Headline :ARCHIVE:"
-    (let ((org-archive-tag "ARCHIVE"))
-      (let ((headline (org-element-at-point)))
-	(should (org-element-property :archivedp headline))
-	;; Test tag removal.
-	(should-not (org-element-property :tags headline))))
-    (let ((org-archive-tag "Archive"))
-      (should-not (org-element-property :archivedp (org-element-at-point)))))
-  ;; Multiple tags.
-  (org-test-with-temp-text "* Headline :test:ARCHIVE:"
-    (let ((org-archive-tag "ARCHIVE"))
-      (let ((headline (org-element-at-point)))
-	(should (org-element-property :archivedp headline))
-	;; Test tag removal.
-	(should (equal (org-element-property :tags headline) ":test:"))))))
-
-
-
 ;;;; Example-blocks and Src-blocks
 
 (ert-deftest test-org-element/block-switches ()
@@ -210,8 +138,21 @@ Return interpreted string."
 	 (equal (org-element-property :label-fmt element) "[ref:%s]"))))))
 
 
-
-;;;; Footnotes references and definitions
+;;;; Export snippets
+
+(ert-deftest test-org-element/export-snippet ()
+  "Test export-snippet parsing."
+  (should
+   (equal
+    (org-test-with-temp-text "<back-end@contents>"
+      (org-element-map
+       (org-element-parse-buffer) 'export-snippet 'identity nil t))
+    '(export-snippet
+      (:back-end "back-end"
+		 :value "contents" :begin 1 :end 20 :post-blank 0)))))
+
+
+;;;; Footnotes references
 
 (ert-deftest test-org-element/footnote-reference ()
   "Test footnote-reference parsing."
@@ -267,7 +208,76 @@ Return interpreted string."
       (org-element-parse-buffer) 'footnote-reference 'identity))))
 
 
-
+;;;; Headlines
+
+(ert-deftest test-org-element/headline-quote-keyword ()
+  "Test QUOTE keyword recognition."
+  ;; Reference test.
+  (org-test-with-temp-text "* Headline"
+    (let ((org-quote-string "QUOTE"))
+      (should-not (org-element-property :quotedp (org-element-at-point)))))
+  ;; Standard position.
+  (org-test-with-temp-text "* QUOTE Headline"
+    (let ((org-quote-string "QUOTE"))
+      (let ((headline (org-element-at-point)))
+	(should (org-element-property :quotedp headline))
+	;; Test removal from raw value.
+	(should (equal (org-element-property :raw-value headline) "Headline"))))
+    ;; Case sensitivity.
+    (let ((org-quote-string "Quote"))
+      (should-not (org-element-property :quotedp (org-element-at-point)))))
+  ;; With another keyword.
+  (org-test-with-temp-text "* TODO QUOTE Headline"
+    (let ((org-quote-string "QUOTE")
+	  (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (should (org-element-property :quotedp (org-element-at-point))))))
+
+(ert-deftest test-org-element/headline-comment-keyword ()
+  "Test COMMENT keyword recognition."
+  ;; Reference test.
+  (org-test-with-temp-text "* Headline"
+    (let ((org-comment-string "COMMENT"))
+      (should-not (org-element-property :commentedp (org-element-at-point)))))
+  ;; Standard position.
+  (org-test-with-temp-text "* COMMENT Headline"
+    (let ((org-comment-string "COMMENT"))
+      (let ((headline (org-element-at-point)))
+	(should (org-element-property :commentedp headline))
+	;; Test removal from raw value.
+	(should (equal (org-element-property :raw-value headline) "Headline"))))
+    ;; Case sensitivity.
+    (let ((org-comment-string "Comment"))
+      (should-not (org-element-property :commentedp (org-element-at-point)))))
+  ;; With another keyword.
+  (org-test-with-temp-text "* TODO COMMENT Headline"
+    (let ((org-comment-string "COMMENT")
+	  (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (should (org-element-property :commentedp (org-element-at-point))))))
+
+(ert-deftest test-org-element/headline-archive-tag ()
+  "Test ARCHIVE tag recognition."
+  ;; Reference test.
+  (org-test-with-temp-text "* Headline"
+    (let ((org-archive-tag "ARCHIVE"))
+      (should-not (org-element-property :archivedp (org-element-at-point)))))
+  ;; Single tag.
+  (org-test-with-temp-text "* Headline :ARCHIVE:"
+    (let ((org-archive-tag "ARCHIVE"))
+      (let ((headline (org-element-at-point)))
+	(should (org-element-property :archivedp headline))
+	;; Test tag removal.
+	(should-not (org-element-property :tags headline))))
+    (let ((org-archive-tag "Archive"))
+      (should-not (org-element-property :archivedp (org-element-at-point)))))
+  ;; Multiple tags.
+  (org-test-with-temp-text "* Headline :test:ARCHIVE:"
+    (let ((org-archive-tag "ARCHIVE"))
+      (let ((headline (org-element-at-point)))
+	(should (org-element-property :archivedp headline))
+	;; Test tag removal.
+	(should (equal (org-element-property :tags headline) ":test:"))))))
+
+
 ;;;; Verse blocks
 
 (ert-deftest test-org-element/verse-block ()
@@ -306,84 +316,7 @@ Return interpreted string."
 
 
 
-;;;; Granularity
-
-(ert-deftest test-org-element/granularity ()
-  "Test granularity impact on buffer parsing."
-  (org-test-with-temp-text "
-* Head 1
-** Head 2
-#+BEGIN_CENTER
-Centered paragraph.
-#+END_CENTER
-Paragraph \\alpha."
-    ;; 1.1. Granularity set to `headline' should parse every headline
-    ;;      in buffer, and only them.
-    (let ((tree (org-element-parse-buffer 'headline)))
-      (should (= 2 (length (org-element-map tree 'headline 'identity))))
-      (should-not (org-element-map tree 'paragraph 'identity)))
-    ;; 1.2. Granularity set to `greater-element' should not enter
-    ;;      greater elements excepted headlines and sections.
-    (let ((tree (org-element-parse-buffer 'greater-element)))
-      (should (= 1 (length (org-element-map tree 'center-block 'identity))))
-      (should (= 1 (length (org-element-map tree 'paragraph 'identity))))
-      (should-not (org-element-map tree 'entity 'identity)))
-    ;; 1.3. Granularity set to `element' should enter every
-    ;;      greater-element.
-    (let ((tree (org-element-parse-buffer 'element)))
-      (should (= 2 (length (org-element-map tree 'paragraph 'identity))))
-      (should-not (org-element-map tree 'entity 'identity)))
-    ;; 1.4. Granularity set to `object' can see everything.
-    (let ((tree (org-element-parse-buffer 'object)))
-      (should (= 1 (length (org-element-map tree 'entity 'identity)))))))
-
-(ert-deftest test-org-element/secondary-string-parsing ()
-  "Test if granularity correctly toggles secondary strings parsing."
-  ;; 1. With a granularity bigger than `object', no secondary string
-  ;;    should be parsed.
-  ;;
-  ;; 1.1. Test with `headline' type.
-  (org-test-with-temp-text "* Headline"
-    (let ((headline
-	   (org-element-map (org-element-parse-buffer 'headline) 'headline
-			    'identity
-			    nil
-			    'first-match)))
-      (should (stringp (org-element-property :title headline)))))
-  ;; 1.2. Test with `item' type.
-  (org-test-with-temp-text "* Headline\n- tag :: item"
-    (let ((item (org-element-map (org-element-parse-buffer 'element)
-				 'item
-				 'identity
-				 nil
-				 'first-match)))
-      (should (stringp (org-element-property :tag item)))))
-  ;; 1.3. Test with `inlinetask' type, if avalaible.
-  (when (featurep 'org-inlinetask)
-    (let ((org-inlinetask-min-level 15))
-      (org-test-with-temp-text "*************** Inlinetask"
-	(let ((inlinetask (org-element-map (org-element-parse-buffer 'element)
-					   'inlinetask
-					   'identity
-					   nil
-					   'first-match)))
-	  (should (stringp (org-element-property :title inlinetask)))))))
-  ;; 2. With a default granularity, secondary strings should be
-  ;;    parsed.
-  (org-test-with-temp-text "* Headline"
-    (let ((headline
-	   (org-element-map (org-element-parse-buffer) 'headline
-			    'identity
-			    nil
-			    'first-match)))
-      (should (listp (org-element-property :title headline)))))
-  ;; 3. `org-element-at-point' should never parse a secondary string.
-  (org-test-with-temp-text "* Headline"
-    (should (stringp (org-element-property :title (org-element-at-point))))))
-
-
-
-;;;; Interpretation.
+;;; Test Interpreters.
 
 (ert-deftest test-org-element/interpret-affiliated-keywords ()
   "Test if affiliated keywords are correctly interpreted."
@@ -697,8 +630,8 @@ CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
 
 (ert-deftest test-org-element/export-snippet-interpreter ()
   "Test export snippet interpreter."
-  (should (equal (org-test-parse-and-interpret "@back-end{test}")
-		 "@back-end{test}\n")))
+  (should (equal (org-test-parse-and-interpret "<back-end@contents>")
+		 "<back-end@contents>\n")))
 
 (ert-deftest test-org-element/footnote-reference-interpreter ()
   "Test footnote reference interpreter."
@@ -844,7 +777,84 @@ CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
 
 
 
-;;;; Normalize contents
+;;; Test Granularity
+
+(ert-deftest test-org-element/granularity ()
+  "Test granularity impact on buffer parsing."
+  (org-test-with-temp-text "
+* Head 1
+** Head 2
+#+BEGIN_CENTER
+Centered paragraph.
+#+END_CENTER
+Paragraph \\alpha."
+    ;; 1.1. Granularity set to `headline' should parse every headline
+    ;;      in buffer, and only them.
+    (let ((tree (org-element-parse-buffer 'headline)))
+      (should (= 2 (length (org-element-map tree 'headline 'identity))))
+      (should-not (org-element-map tree 'paragraph 'identity)))
+    ;; 1.2. Granularity set to `greater-element' should not enter
+    ;;      greater elements excepted headlines and sections.
+    (let ((tree (org-element-parse-buffer 'greater-element)))
+      (should (= 1 (length (org-element-map tree 'center-block 'identity))))
+      (should (= 1 (length (org-element-map tree 'paragraph 'identity))))
+      (should-not (org-element-map tree 'entity 'identity)))
+    ;; 1.3. Granularity set to `element' should enter every
+    ;;      greater-element.
+    (let ((tree (org-element-parse-buffer 'element)))
+      (should (= 2 (length (org-element-map tree 'paragraph 'identity))))
+      (should-not (org-element-map tree 'entity 'identity)))
+    ;; 1.4. Granularity set to `object' can see everything.
+    (let ((tree (org-element-parse-buffer 'object)))
+      (should (= 1 (length (org-element-map tree 'entity 'identity)))))))
+
+(ert-deftest test-org-element/secondary-string-parsing ()
+  "Test if granularity correctly toggles secondary strings parsing."
+  ;; 1. With a granularity bigger than `object', no secondary string
+  ;;    should be parsed.
+  ;;
+  ;; 1.1. Test with `headline' type.
+  (org-test-with-temp-text "* Headline"
+    (let ((headline
+	   (org-element-map (org-element-parse-buffer 'headline) 'headline
+			    'identity
+			    nil
+			    'first-match)))
+      (should (stringp (org-element-property :title headline)))))
+  ;; 1.2. Test with `item' type.
+  (org-test-with-temp-text "* Headline\n- tag :: item"
+    (let ((item (org-element-map (org-element-parse-buffer 'element)
+				 'item
+				 'identity
+				 nil
+				 'first-match)))
+      (should (stringp (org-element-property :tag item)))))
+  ;; 1.3. Test with `inlinetask' type, if avalaible.
+  (when (featurep 'org-inlinetask)
+    (let ((org-inlinetask-min-level 15))
+      (org-test-with-temp-text "*************** Inlinetask"
+	(let ((inlinetask (org-element-map (org-element-parse-buffer 'element)
+					   'inlinetask
+					   'identity
+					   nil
+					   'first-match)))
+	  (should (stringp (org-element-property :title inlinetask)))))))
+  ;; 2. With a default granularity, secondary strings should be
+  ;;    parsed.
+  (org-test-with-temp-text "* Headline"
+    (let ((headline
+	   (org-element-map (org-element-parse-buffer) 'headline
+			    'identity
+			    nil
+			    'first-match)))
+      (should (listp (org-element-property :title headline)))))
+  ;; 3. `org-element-at-point' should never parse a secondary string.
+  (org-test-with-temp-text "* Headline"
+    (should (stringp (org-element-property :title (org-element-at-point))))))
+
+
+
+;;; Test Normalize Contents
 
 (ert-deftest test-org-element/normalize-contents ()
   "Test `org-element-normalize-contents' specifications."
@@ -882,8 +892,9 @@ CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
      '(paragraph nil "No space\n  Two spaces\n   Three spaces") t)
     '(paragraph nil "No space\nTwo spaces\n Three spaces"))))
 
+
 
-;;;; Navigation tools.
+;;; Test Navigation Tools.
 
 (ert-deftest test-org-element/forward-element ()
   "Test `org-element-forward' specifications."
