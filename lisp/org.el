@@ -17312,7 +17312,8 @@ inspection."
 			   (save-match-data
 			     (shell-quote-argument (file-name-directory texfile)))
 			   t t cmd)))
-	      (shell-command cmd)))
+	      (setq cmd (split-string cmd))
+	      (eval (append (list 'call-process (pop cmd) nil nil nil) cmd))))
 	(error nil))
       (cd dir))
     (if (not (file-exists-p pdffile))
