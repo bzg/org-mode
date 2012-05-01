@@ -2097,7 +2097,7 @@ When NAMED is non-nil, look for a named equation."
 	    (goto-char (match-beginning 3))
 	    (delete-region (match-beginning 3) (match-end 0)))
 	(org-indent-line-function)
-	(insert (or (match-string 2) "#+TBLFM")))
+	(insert (or (match-string 2) "#+TBLFM:")))
       (insert " "
 	      (mapconcat (lambda (x)
 			   (concat
@@ -2276,7 +2276,7 @@ If yes, store the formula and apply it."
   (when org-table-formula-evaluate-inline
     (let* ((field (org-trim (or (org-table-get-field) "")))
 	   named eq)
-      (when (string-match "^:?=\\(.*\\)" field)
+      (when (string-match "^:?=\\(.*[^=]\\)$" field)
 	(setq named (equal (string-to-char field) ?:)
 	      eq (match-string 1 field))
 	(if (or (fboundp 'calc-eval)
