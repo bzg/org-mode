@@ -140,7 +140,7 @@ Return interpreted string."
 
 ;;;; Export snippets
 
-(ert-deftest test-org-element/export-snippet ()
+(ert-deftest test-org-element/export-snippet-parser ()
   "Test export-snippet parsing."
   (should
    (equal
@@ -154,7 +154,7 @@ Return interpreted string."
 
 ;;;; Footnotes references
 
-(ert-deftest test-org-element/footnote-reference ()
+(ert-deftest test-org-element/footnote-reference-parser ()
   "Test footnote-reference parsing."
   ;; 1. Parse a standard reference.
   (org-test-with-temp-text "[fn:label]"
@@ -278,9 +278,99 @@ Return interpreted string."
 	(should (equal (org-element-property :tags headline) '("test")))))))
 
 
+;;;; Links
+
+(ert-deftest test-org-element/link-parser ()
+  "Test link parsing."
+  ;; 1. Radio target.
+  (should
+   (equal (org-test-with-temp-text "A radio link"
+	    (org-element-map
+	     (let ((org-target-link-regexp "radio")) (org-element-parse-buffer))
+	     'link 'identity nil t))
+	  '(link (:type "radio" :path "radio" :raw-link "radio" :begin 3 :end 9
+			:contents-begin nil :contents-end nil :post-blank 1))))
+  ;; 2. Standard link.
+  ;;
+  ;; 2.1. With description.
+  (should
+   (equal (org-test-with-temp-text "[[http://orgmode.org][Orgmode.org]]"
+	    (org-element-map (org-element-parse-buffer) 'link 'identity nil t))
+	  '(link (:type "http" :path "//orgmode.org"
+			:raw-link "http://orgmode.org" :begin 1 :end 36
+			:contents-begin 23 :contents-end 34 :post-blank 0)
+		 "Orgmode.org")))
+  ;; 2.2. Without description.
+  (should
+   (equal (org-test-with-temp-text "[[http://orgmode.org]]"
+	    (org-element-map (org-element-parse-buffer) 'link 'identity nil t))
+	  '(link (:type "http" :path "//orgmode.org"
+			:raw-link "http://orgmode.org" :begin 1 :end 23
+			:contents-begin nil :contents-end nil :post-blank 0))))
+  ;; 2.3. With expansion.
+  (should
+   (equal (org-test-with-temp-text "[[Org:worg]]"
+	    (let ((org-link-abbrev-alist '(("Org" . "http://orgmode.org/"))))
+	      (org-element-map
+	       (org-element-parse-buffer) 'link 'identity nil t)))
+	  '(link (:type "http" :path "//orgmode.org/worg" :raw-link "Org:worg"
+			:begin 1 :end 13 :contents-begin nil :contents-end nil
+			:post-blank 0))))
+  ;; 2.4. With translation.
+  (should
+   (equal (org-test-with-temp-text "[[http://orgmode.org]]"
+	    (flet ((link-translate (type path) (cons type "127.0.0.1")))
+	      (let ((org-link-translation-function 'link-translate))
+		(org-element-map
+		 (org-element-parse-buffer) 'link 'identity nil t))))
+	  '(link (:type "http" :path "127.0.0.1" :raw-link "http://orgmode.org"
+			:begin 1 :end 23 :contents-begin nil :contents-end nil
+			:post-blank 0))))
+  ;; 2.5. Id link.
+  (should
+   (equal (org-test-with-temp-text "[[id:aaaa]]"
+	    (org-element-map (org-element-parse-buffer) 'link 'identity nil t))
+	  '(link (:type "id" :path "aaaa" :raw-link "id:aaaa" :begin 1 :end 12
+			:contents-begin nil :contents-end nil :post-blank 0))))
+  ;; 2.6. Custom-id link.
+  (should
+   (equal (org-test-with-temp-text "[[#some-id]]"
+	    (org-element-map (org-element-parse-buffer) 'link 'identity nil t))
+	  '(link (:type "custom-id" :path "some-id" :raw-link "#some-id"
+			:begin 1 :end 13 :contents-begin nil :contents-end nil
+			:post-blank 0))))
+  ;; 2.7 Coderef link.
+  (should
+   (equal (org-test-with-temp-text "[[(reference)]]"
+	    (org-element-map (org-element-parse-buffer) 'link 'identity nil t))
+	  '(link (:type "coderef" :path "reference" :raw-link "(reference)"
+			:begin 1 :end 16 :contents-begin nil :contents-end nil
+			:post-blank 0))))
+  ;; 2.8 Fuzzy link.
+  (should
+   (equal (org-test-with-temp-text "[[target-or-title]]"
+	    (org-element-map (org-element-parse-buffer) 'link 'identity nil t))
+	  '(link (:type "fuzzy" :path "target-or-title"
+			:raw-link "target-or-title" :begin 1 :end 20
+			:contents-begin nil :contents-end nil :post-blank 0))))
+  ;; 3. Plain link.
+  (should
+   (equal (org-test-with-temp-text "A link: http://orgmode.org"
+	    (org-element-map (org-element-parse-buffer) 'link 'identity nil t))
+	  '(link (:type "http" :path "//orgmode.org"
+			:raw-link "http://orgmode.org" :begin 9 :end 27
+			:contents-begin nil :contents-end nil :post-blank 0))))
+  ;; 4. Angular link.
+  (should
+   (equal (org-test-with-temp-text "A link: <http://orgmode.org>"
+	    (org-element-map (org-element-parse-buffer) 'link 'identity nil t))
+	  '(link (:type "http" :path "//orgmode.org"
+			:raw-link "http://orgmode.org" :begin 9 :end 29
+			:contents-begin nil :contents-end nil :post-blank 0)))))
+
 ;;;; Verse blocks
 
-(ert-deftest test-org-element/verse-block ()
+(ert-deftest test-org-element/verse-block-parser ()
   "Test verse block parsing."
   ;; Standard test.
   (org-test-with-temp-text "#+BEGIN_VERSE\nVerse block\n#+END_VERSE"
