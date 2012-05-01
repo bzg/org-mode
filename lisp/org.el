@@ -8613,7 +8613,7 @@ call CMD."
 ;;; Link abbreviations
 
 (defun org-link-expand-abbrev (link)
-  "Apply replacements as defined in `org-link-abbrev-alist."
+  "Apply replacements as defined in `org-link-abbrev-alist'."
   (if (string-match "^\\([^:]*\\)\\(::?\\(.*\\)\\)?$" link)
       (let* ((key (match-string 1 link))
 	     (as (or (assoc key org-link-abbrev-alist-local)
@@ -9477,7 +9477,7 @@ If the link is in hidden text, expose it."
 	   (string-match "\\([a-zA-Z0-9]+\\):\\(.*\\)" s))
       (progn
 	(setq s (funcall org-link-translation-function
-			 (match-string 1) (match-string 2)))
+			 (match-string 1 s) (match-string 2 s)))
 	(concat (car s) ":" (cdr s)))
     s))
 
