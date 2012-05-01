@@ -4943,12 +4943,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (defvar bidi-paragraph-direction)
 (defvar buffer-face-mode-face)
-(defvar org-auto-fill-fallback-function nil)
-(defvar org-indent-line-fallback-function nil)
-(defvar org-fill-paragraph-fallback-function nil)
-(make-variable-buffer-local 'org-auto-fill-fallback-function)
-(make-variable-buffer-local 'org-indent-line-fallback-function)
-(make-variable-buffer-local 'org-fill-paragraph-fallback-function)
 
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
@@ -8366,6 +8360,8 @@ C-c C-c     Set tags / toggle checkbox"
   "Unconditionally turn on `orgstruct-mode'."
   (orgstruct-mode 1))
 
+(defvar org-fb-vars nil)
+(make-variable-buffer-local 'org-fb-vars)
 (defun orgstruct++-mode (&optional arg)
   "Toggle `orgstruct-mode', the enhanced version of it.
 In addition to setting orgstruct-mode, this also exports all indentation
@@ -8375,14 +8371,15 @@ Note that turning off orgstruct-mode will *not* remove the
 indentation/paragraph settings.  This can only be done by refreshing the
 major mode, for example with \\[normal-mode]."
   (interactive "P")
-  (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1)))
-	;; Set fallback functions
-	org-auto-fill-fallback-function auto-fill-function
-	org-indent-line-fallback-function indent-line-function
-	org-fill-paragraph-fallback-function fill-paragraph-function)
+  (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1))))
   (if (< arg 1)
-      (orgstruct-mode -1)
+      (progn (orgstruct-mode -1)
+	     (mapc (lambda(v)
+		     (org-set-local (car v)
+				    (if (eq (car-safe (cadr v)) 'quote) (cadadr v) (cadr v))))
+		   org-fb-vars))
     (orgstruct-mode 1)
+    (setq org-fb-vars nil)
     (let (var val)
       (mapc
        (lambda (x)
@@ -8390,6 +8387,7 @@ major mode, for example with \\[normal-mode]."
 		"^\\(paragraph-\\|auto-fill\\|fill-paragraph\\|adaptive-fill\\|indent-\\)"
 		(symbol-name (car x)))
 	   (setq var (car x) val (nth 1 x))
+	   (push (list var `(quote ,(eval var))) org-fb-vars)
 	   (org-set-local var (if (eq (car-safe val) 'quote) (nth 1 val) val))))
        org-local-vars)
       (org-set-local 'orgstruct-is-++ t))))
@@ -20402,11 +20400,13 @@ If point is in an inline task, mark that task instead."
 ;;; Paragraph filling stuff.
 ;; We want this to be just right, so use the full arsenal.
 
+(declare-function orgstruct++-ignore-org-filling "org-macs.el" (&rest body))
 (defun org-indent-line-function ()
   "Indent line depending on context."
   (interactive)
-  (if org-indent-line-fallback-function
-      (funcall org-indent-line-fallback-function)
+  (if orgstruct-is-++
+      (orgstruct++-ignore-org-filling
+       (funcall indent-line-function))
     (let* ((pos (point))
 	   (itemp (org-at-item-p))
 	   (case-fold-search t)
@@ -20709,8 +20709,11 @@ the functionality can be provided as a fall-back.")
 			       (save-excursion (forward-paragraph 1) (point)))
 	     (fill-paragraph justify) t))
 	  ;; Else falls back on `org-fill-paragraph-fallback-function'
-	  (org-fill-paragraph-fallback-function
-	   (funcall org-fill-paragraph-fallback-function justify))
+	  (orgstruct-is-++
+	   (orgstruct++-ignore-org-filling
+	    (fill-paragraph)))
+	  ;; (org-fill-paragraph-fallback-function
+	  ;;  (funcall org-fill-paragraph-fallback-function justify))
 	  ;; Else simply call `fill-paragraph'.
 	  (t nil))))
 
@@ -20754,10 +20757,9 @@ the functionality can be provided as a fall-back.")
 	     (setq prefix (make-string (org-list-item-body-column itemp) ?\ ))
 	     (flet ((fill-context-prefix (from to &optional flr) prefix))
 	       (do-auto-fill))))
-	  (org-auto-fill-fallback-function
-	   (let ((fill-prefix ""))
-	     (funcall org-auto-fill-fallback-function)))
-	  ;; Else just use `do-auto-fill'.
+	  (orgstruct-is-++
+	   (orgstruct++-ignore-org-filling
+	    (do-auto-fill)))
 	  (t (do-auto-fill)))))
 
 ;;; Other stuff.
