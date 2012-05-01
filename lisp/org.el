@@ -16368,7 +16368,7 @@ effort string \"2hours\" is equivalent to 120 minutes."
   :type '(alist :key-type (string :tag "Modifier")
 		:value-type (number :tag "Minutes")))
 
-(defun org-duration-string-to-minutes (s)
+(defun org-duration-string-to-minutes (s &optional output-to-string)
   "Convert a duration string S to minutes.
 
 A bare number is interpreted as minutes, modifiers can be set by
@@ -16377,15 +16377,16 @@ customizing `org-effort-durations' (which see).
 Entries containing a colon are interpreted as H:MM by
 `org-hh:mm-string-to-minutes'."
   (let ((result 0)
-	(re (concat "\\([0-9]+\\) *\\("
+	(re (concat "\\([0-9.]+\\) *\\("
 		    (regexp-opt (mapcar 'car org-effort-durations))
 		    "\\)")))
     (while (string-match re s)
       (incf result (* (cdr (assoc (match-string 2 s) org-effort-durations))
 		      (string-to-number (match-string 1 s))))
       (setq s (replace-match "" nil t s)))
+    (setq result (floor result))
     (incf result (org-hh:mm-string-to-minutes s))
-    result))
+    (if output-to-string (number-to-string result) result)))
 
 ;;;; Files
 
