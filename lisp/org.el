@@ -17037,7 +17037,7 @@ Some of the options can be changed using the variable
 	       ((eq processing-type 'imagemagick)
 		(unless executables-checked
 		  (org-check-external-command
-		   "converte" "you need to install imagemagick")
+		   "convert" "you need to install imagemagick")
 		  (setq executables-checked t))
 		(unless (file-exists-p movefile)
 		  (org-create-formula-image-with-imagemagick
