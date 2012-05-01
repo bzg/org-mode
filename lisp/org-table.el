@@ -3310,15 +3310,18 @@ If S is a string representing a number, keep this number."
   "Convert a number of seconds to a time string.
 If OUTPUT-FORMAT is non-nil, return a number of days, hours,
 minutes or seconds."
-  (cond ((eq output-format 'days)
-	 (format "%.3f" (/ (float secs) 86400)))
-	((eq output-format 'hours)
-	 (format "%.2f" (/ (float secs) 3600)))
-	((eq output-format 'minutes)
-	 (format "%.1f" (/ (float secs) 60)))
-	((eq output-format 'seconds)
-	 (format "%d" secs))
-	(t (org-format-seconds "%.2h:%.2m:%.2s" secs))))
+  (let* ((secs0 (abs secs))
+	 (res
+	  (cond ((eq output-format 'days)
+		 (format "%.3f" (/ (float secs0) 86400)))
+		((eq output-format 'hours)
+		 (format "%.2f" (/ (float secs0) 3600)))
+		((eq output-format 'minutes)
+		 (format "%.1f" (/ (float secs0) 60)))
+		((eq output-format 'seconds)
+		 (format "%d" secs0))
+		(t (org-format-seconds "%.2h:%.2m:%.2s" secs0)))))
+    (if (< secs 0) (concat "-" res) res)))
 
 (defun org-table-fedit-convert-buffer (function)
   "Convert all references in this buffer, using FUNCTION."
