@@ -2690,7 +2690,7 @@ Replaces invalid characters with \"_\"."
 	(org-e-odt-format-fontify
 	 x (concat "" ;; org-e-odt-tag-class-prefix
 		   (org-e-odt-fix-class-name x))))
-      (org-split-string tags ":")
+      tags
       (org-e-odt-format-spaces 1)) "tag")))
 
 (defun org-e-odt-format-section-number (&optional snumber level)

@@ -266,25 +266,27 @@ argument."
   "Function to format headline text.
 
 This function will be called with 5 arguments:
-TODO      the todo keyword \(string or nil\).
-TODO-TYPE the type of todo \(symbol: `todo', `done', nil\)
-PRIORITY  the priority of the headline \(integer or nil\)
-TEXT      the main headline text \(string\).
-TAGS      the tags string, separated with colons \(string or nil\).
+TODO      the todo keyword (string or nil).
+TODO-TYPE the type of todo (symbol: `todo', `done', nil)
+PRIORITY  the priority of the headline (integer or nil)
+TEXT      the main headline text (string).
+TAGS      the tags as a list of strings (list of strings or nil).
 
 The function result will be used in the section format string.
 
 As an example, one could set the variable to the following, in
 order to reproduce the default set-up:
 
-\(defun org-e-latex-format-headline \(todo todo-type priority text tags\)
+\(defun org-e-latex-format-headline (todo todo-type priority text tags)
   \"Default format function for an headline.\"
-  \(concat \(when todo
-            \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo\)\)
+  \(concat (when todo
+            \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo))
 	  \(when priority
-            \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
+            \(format \"\\\\framebox{\\\\#%c} \" priority))
 	  text
-	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)"
+	  \(when tags
+            \(format \"\\\\hfill{}\\\\textsc{%s}\"
+              \(mapconcat 'identity tags \":\"))))"
   :group 'org-export-e-latex
   :type 'function)
 
@@ -447,7 +449,7 @@ The function must accept six parameters:
   TODO-TYPE the todo type, a symbol among `todo', `done' and nil.
   PRIORITY  the inlinetask priority, as a string
   NAME      the inlinetask name, as a string.
-  TAGS      the inlinetask tags, as a string.
+  TAGS      the inlinetask tags, as a list of strings.
   CONTENTS  the contents of the inlinetask, as a string.
 
 The function should return the string to be exported.
@@ -457,22 +459,24 @@ in order to mimic default behaviour:
 
 \(defun org-e-latex-format-inlinetask \(todo type priority name tags contents\)
 \"Format an inline task element for LaTeX export.\"
-  \(let \(\(full-title
+  \(let ((full-title
 	 \(concat
 	  \(when todo
-            \(format \"\\\\textbf{\\\\textsf{\\\\textsc{%s}}} \" todo\)\)
-	  \(when priority \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
+            \(format \"\\\\textbf{\\\\textsf{\\\\textsc{%s}}} \" todo))
+	  \(when priority (format \"\\\\framebox{\\\\#%c} \" priority))
 	  title
-	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)\)
-    \(format \(concat \"\\\\begin{center}\\n\"
+	  \(when tags
+            \(format \"\\\\hfill{}\\\\textsc{:%s:}\"
+                    \(mapconcat 'identity tags \":\")))))
+    \(format (concat \"\\\\begin{center}\\n\"
 		    \"\\\\fbox{\\n\"
 		    \"\\\\begin{minipage}[c]{.6\\\\textwidth}\\n\"
 		    \"%s\\n\\n\"
 		    \"\\\\rule[.8em]{\\\\textwidth}{2pt}\\n\\n\"
 		    \"%s\"
 		    \"\\\\end{minipage}}\"
-		    \"\\\\end{center}\"\)
-	    full-title contents\)\)"
+		    \"\\\\end{center}\")
+	    full-title contents))"
   :group 'org-export-e-latex
   :type 'function)
 
@@ -1194,7 +1198,9 @@ holding contextual information."
 			 (format "\\textbf{\\textsf{\\textsc{%s}}} " todo))
 		       (when priority (format "\\framebox{\\#%c} " priority))
 		       text
-		       (when tags (format "\\hfill{}\\textsc{%s}" tags)))))
+		       (when tags
+			 (format "\\hfill{}\\textsc{:%s:}"
+				 (mapconcat 'identity tags ":"))))))
 	 ;; Associate some \label to the headline for internal links.
 	 (headline-label
 	  (format "\\label{sec-%s}\n"
@@ -1313,7 +1319,8 @@ holding contextual information."
 	       (when todo (format "\\textbf{\\textsf{\\textsc{%s}}} " todo))
 	       (when priority (format "\\framebox{\\#%c} " priority))
 	       title
-	       (when tags (format "\\hfill{}\\textsc{%s}" tags)))))
+	       (when tags (format "\\hfill{}\\textsc{:%s:}"
+				  (mapconcat 'identity tags ":"))))))
 	 (format (concat "\\begin{center}\n"
 			 "\\fbox{\n"
 			 "\\begin{minipage}[c]{.6\\textwidth}\n"

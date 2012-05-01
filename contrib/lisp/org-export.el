@@ -1450,10 +1450,8 @@ INFO is a plist holding export options."
 	       (funcall walk-data (org-element-contents data) genealogy))
 	      (headline
 	       (let ((tags (org-element-property :tags headline)))
-		 (if (and tags
-			  (loop for tag in (plist-get info :select-tags)
-				thereis (string-match
-					 (format ":%s:" tag) tags)))
+		 (if (loop for tag in (plist-get info :select-tags)
+			   thereis (member tag tags))
 		     ;; When a select tag is found, mark as acceptable
 		     ;; full genealogy and every headline within the
 		     ;; tree.
@@ -1477,12 +1475,11 @@ non-nil, is a list of tags marking a subtree as exportable."
 	   (todo (org-element-property :todo-keyword blob))
 	   (todo-type (org-element-property :todo-type blob))
 	   (archived (plist-get options :with-archived-trees))
-	   (tag-list (let ((tags (org-element-property :tags blob)))
-		       (and tags (org-split-string tags ":")))))
+	   (tags (org-element-property :tags blob)))
        (or
 	;; Ignore subtrees with an exclude tag.
 	(loop for k in (plist-get options :exclude-tags)
-	      thereis (member k tag-list))
+	      thereis (member k tags))
 	;; Ignore subtrees without a select tag, when such tag is
 	;; found in the buffer.
 	(member blob select-tags)

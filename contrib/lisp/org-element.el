@@ -344,7 +344,8 @@ Assume point is at beginning of the headline."
 	   (todo (nth 2 components))
 	   (todo-type
 	    (and todo (if (member todo org-done-keywords) 'done 'todo)))
-	   (tags (nth 5 components))
+	   (tags (let ((raw-tags (nth 5 components)))
+		   (and raw-tags (org-split-string raw-tags ":"))))
 	   (raw-value (nth 4 components))
 	   (quotedp
 	    (let ((case-fold-search nil))
@@ -352,10 +353,7 @@ Assume point is at beginning of the headline."
 	   (commentedp
 	    (let ((case-fold-search nil))
 	      (string-match (format "^%s +" org-comment-string) raw-value)))
-	   (archivedp
-	    (and tags
-		 (let ((case-fold-search nil))
-		   (string-match (format ":%s:" org-archive-tag) tags))))
+	   (archivedp (member org-archive-tag tags))
 	   (footnote-section-p (and org-footnote-section
 				    (string= org-footnote-section raw-value)))
 	   (standard-props (let (plist)
@@ -394,12 +392,7 @@ Assume point is at beginning of the headline."
 	       ""
 	       raw-value)))
       ;; Clean TAGS from archive tag, if any.
-      (when archivedp
-	(setq tags
-	      (and (not (string= tags (format ":%s:" org-archive-tag)))
-		   (replace-regexp-in-string
-		    (concat org-archive-tag ":") "" tags)))
-	(when (string= tags ":") (setq tags nil)))
+      (when archivedp (setq tags (delete org-archive-tag tags)))
       ;; Then get TITLE.
       (setq title
 	    (if raw-secondary-p raw-value
@@ -436,14 +429,14 @@ CONTENTS is the contents of the element."
   (let* ((level (org-element-property :level headline))
 	 (todo (org-element-property :todo-keyword headline))
 	 (priority (org-element-property :priority headline))
-	 (title (org-element-interpret-data (org-element-property :title headline)))
-	 (tags (let ((tag-string (org-element-property :tags headline))
-		     (archivedp (org-element-property :archivedp headline)))
-		 (cond
-		  ((and (not tag-string) archivedp)
-		   (format ":%s:" org-archive-tag))
-		  (archivedp (concat ":" org-archive-tag tag-string))
-		  (t tag-string))))
+	 (title (org-element-interpret-data
+		 (org-element-property :title headline)))
+	 (tags (let ((tag-list (if (org-element-property :archivedp headline)
+				   (cons org-archive-tag
+					 (org-element-property :tags headline))
+				 (org-element-property :tags headline))))
+		 (and tag-list
+		      (format ":%s:" (mapconcat 'identity tag-list ":")))))
 	 (commentedp (org-element-property :commentedp headline))
 	 (quotedp (org-element-property :quotedp headline))
 	 (pre-blank (or (org-element-property :pre-blank headline) 0))
@@ -504,6 +497,8 @@ Assume point is at beginning of the inline task."
 	   (todo (nth 2 components))
 	   (todo-type (and todo
 			   (if (member todo org-done-keywords) 'done 'todo)))
+	   (tags (let ((raw-tags (nth 5 components)))
+		   (and raw-tags (org-split-string raw-tags ":"))))
 	   (title (if raw-secondary-p (nth 4 components)
 		    (org-element-parse-secondary-string
 		     (nth 4 components)
@@ -544,7 +539,7 @@ Assume point is at beginning of the inline task."
 		:contents-end ,contents-end
 		:level ,(nth 1 components)
 		:priority ,(nth 3 components)
-		:tags ,(nth 5 components)
+		:tags ,tags
 		:todo-keyword ,todo
 		:todo-type ,todo-type
 		:scheduled ,scheduled
@@ -563,7 +558,9 @@ CONTENTS is the contents of inlinetask."
 	 (priority (org-element-property :priority inlinetask))
 	 (title (org-element-interpret-data
 		 (org-element-property :title inlinetask)))
-	 (tags (org-element-property :tags inlinetask))
+	 (tags (let ((tag-list (org-element-property :tags inlinetask)))
+		 (and tag-list
+		      (format ":%s:" (mapconcat 'identity tag-list ":")))))
 	 (task (concat (make-string level ?*)
 		       (and todo (concat " " todo))
 		       (and priority

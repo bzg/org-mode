@@ -275,7 +275,7 @@ Return interpreted string."
       (let ((headline (org-element-at-point)))
 	(should (org-element-property :archivedp headline))
 	;; Test tag removal.
-	(should (equal (org-element-property :tags headline) ":test:"))))))
+	(should (equal (org-element-property :tags headline) '("test")))))))
 
 
 ;;;; Verse blocks

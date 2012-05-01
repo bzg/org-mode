@@ -368,7 +368,7 @@ The function must accept six parameters:
   TODO-TYPE the todo type, a symbol among `todo', `done' and nil.
   PRIORITY  the inlinetask priority, as a string
   NAME      the inlinetask name, as a string.
-  TAGS      the inlinetask tags, as a string.
+  TAGS      the inlinetask tags, as a list of strings.
   CONTENTS  the contents of the inlinetask, as a string.
 
 The function should return either the string to be exported or
@@ -580,7 +580,7 @@ title."
 	       ;; All tests passed: build numbering string.
 	       (concat
 		(mapconcat
-		 #'number-to-string
+		 'number-to-string
 		 (org-export-get-headline-number element info) ".")
 		" ")))
 	 (text (org-export-data (org-element-property :title element) info))
@@ -590,7 +590,10 @@ title."
 		 (and todo (concat (org-export-data todo info) " ")))))
 	 (tags (and (not notags)
 		    (plist-get info :with-tags)
-		    (org-element-property :tags element)))
+		    (let ((tag-list (org-element-property :tags element)))
+		      (and tag-list
+			   (format ":%s:"
+				   (mapconcat 'identity tag-list ":"))))))
 	 (priority
 	  (and (plist-get info :with-priority)
 	       (concat (org-element-property :priority element) " ")))
@@ -1220,21 +1223,28 @@ contextual information."
   "Transcode an INLINETASK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((width (org-e-ascii--current-text-width inlinetask info))
-	(title (org-export-data (org-element-property :title inlinetask) info))
-	(todo (and (plist-get info :with-todo-keywords)
-		   (let ((todo (org-element-property :todo-keyword inlinetask)))
-		     (and todo (org-export-data todo info)))))
-	(todo-type (org-element-property :todo-type inlinetask))
-	(tags (and (plist-get info :with-tags)
-		   (org-element-property :tags inlinetask)))
-	(priority (and (plist-get info :with-priority)
-		       (org-element-property :priority inlinetask))))
+  (let ((width (org-e-ascii--current-text-width inlinetask info)))
     ;; If `org-e-ascii-format-inlinetask-function' is provided, call it
     ;; with appropriate arguments.
     (if (functionp org-e-ascii-format-inlinetask-function)
 	(funcall org-e-ascii-format-inlinetask-function
-		 todo todo-type priority title tags contents width)
+		 ;; todo.
+		 (and (plist-get info :with-todo-keywords)
+		      (let ((todo (org-element-property
+				   :todo-keyword inlinetask)))
+			(and todo (org-export-data todo info))))
+		 ;; todo-type
+		 (org-element-property :todo-type inlinetask)
+		 ;; priority
+		 (and (plist-get info :with-priority)
+		      (org-element-property :priority inlinetask))
+		 ;; title
+		 (org-export-data (org-element-property :title inlinetask) info)
+		 ;; tags
+		 (and (plist-get info :with-tags)
+		      (org-element-property :tags inlinetask))
+		 ;; contents and width
+		 contents width)
       ;; Otherwise, use a default template.
       (let* ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
 	(org-e-ascii--indent-string
