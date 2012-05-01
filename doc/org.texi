@@ -2643,7 +2643,7 @@ formulas or Elisp formulas:
 
 Input duration values must be of the form @code{[HH:MM[:SS]}, where seconds
 are optional.  With the @code{T} flag, computed durations will be displayed
-as @code{[HH:MM:SS} (see the first formula above).  With the @code{t} flag,
+as @code{HH:MM:SS} (see the first formula above).  With the @code{t} flag,
 computed durations will be displayed according to the value of the variable
 @code{org-table-duration-custom-format}, which defaults to @code{'hours} and
 will display the result as a fraction of hours (see the second formula in the
