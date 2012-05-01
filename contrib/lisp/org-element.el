@@ -446,7 +446,7 @@ CONTENTS is the contents of the element."
 		  (t tag-string))))
 	 (commentedp (org-element-property :commentedp headline))
 	 (quotedp (org-element-property :quotedp headline))
-	 (pre-blank (org-element-property :pre-blank headline))
+	 (pre-blank (or (org-element-property :pre-blank headline) 0))
 	 (heading (concat (make-string level ?*)
 			  (and todo (concat " " todo))
 			  (and quotedp (concat " " org-quote-string))
