@@ -2230,9 +2230,9 @@ Assume point is at the beginning of the link."
 	      link-end (match-end 0)
 	      ;; RAW-LINK is the original link.
 	      raw-link (org-match-string-no-properties 1)
-	      link (org-link-expand-abbrev
-		    (replace-regexp-in-string
-		     " *\n *" " " (org-link-unescape raw-link) t t)))
+	      link (org-translate-link
+		    (org-link-expand-abbrev
+		     (org-link-unescape raw-link))))
 	;; Determine TYPE of link and set PATH accordingly.
 	(cond
 	 ;; File type.
@@ -2251,8 +2251,8 @@ Assume point is at the beginning of the link."
 	 ((= (aref link 0) ?#)
 	  (setq type "custom-id" path (substring link 1)))
 	 ;; Fuzzy type: Internal link either matches a target, an
-	 ;; headline name or nothing. PATH is the target or headline's
-	 ;; name.
+	 ;; headline name or nothing.  PATH is the target or
+	 ;; headline's name.
 	 (t (setq type "fuzzy" path link))))
        ;; Type 3: Plain link, i.e. http://orgmode.org
        ((looking-at org-plain-link-re)
