@@ -972,36 +972,42 @@ keywords.
 
 Assume point is at comment beginning."
   (save-excursion
-    (let* ((com-beg (point))
-	   (keywords (org-element-collect-affiliated-keywords))
+    (let* ((keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
+	   value
 	   (com-end
 	    ;; Get comments ending.  This may not be accurate if
 	    ;; commented lines within an item are followed by
 	    ;; commented lines outside of a list.  Though, parser will
 	    ;; always get it right as it already knows surrounding
 	    ;; element and has narrowed buffer to its contents.
-	    (if (looking-at "#")
-		(if (re-search-forward "^\\([^#]\\|#\\+[a-z]\\)" nil 'move)
-		    (progn (goto-char (match-beginning 0)) (point))
-		  (point))
-	      (while (looking-at "[ \t]*#\\+\\(?: \\|$\\)")
+	    (progn
+	      (while (looking-at "\\(\\(# ?\\)[^+]\\|[ \t]*#\\+\\( \\|$\\)\\)")
+		;; Accumulate lines without leading hash and plus sign
+		;; if any.  First whitespace is also ignored.
+		(setq value
+		      (concat value
+			      (buffer-substring-no-properties
+			       (or (match-end 2) (match-end 3)) (point-at-eol))
+			      "\n"))
 		(forward-line))
 	      (point)))
 	   (end (progn (goto-char com-end)
 		       (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
       `(comment
-	(:begin ,(or (car keywords) com-beg)
+	(:begin ,begin
 		:end ,end
-		:value ,(buffer-substring-no-properties com-beg com-end)
+		:value ,value
 		:post-blank ,(count-lines com-end end)
 		,@(cadr keywords))))))
 
 (defun org-element-comment-interpreter (comment contents)
   "Interpret COMMENT element as Org syntax.
 CONTENTS is nil."
-  (org-element-property :value comment))
+  (replace-regexp-in-string
+   "^" "#+ "
+   (substring (org-element-property :value comment) 0 -1)))
 
 
 ;;;; Comment Block
@@ -1164,16 +1170,27 @@ containing `:begin', `:end', `:value' and `:post-blank' keywords.
 
 Assume point is at the beginning of the fixed-width area."
   (save-excursion
-    (let* ((beg-area (point))
-	   (keywords (org-element-collect-affiliated-keywords))
+    (let* ((keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
+	   value
 	   (end-area
-	    (progn (while (looking-at "[ \t]*:\\( \\|$\\)")
-		     (forward-line))
-		   (point)))
+	    ;; Ending position may not be accurate if fixed-width
+	    ;; lines within an item are followed by fixed-width lines
+	    ;; outside of a list.  Though, parser will always get it
+	    ;; right as it already knows surrounding element and has
+	    ;; narrowed buffer to its contents.
+	    (progn
+	      (while (looking-at "[ \t]*:\\( \\|$\\)")
+		;, Accumulate text without starting colons.
+		(setq value
+		      (concat value
+			      (buffer-substring-no-properties
+			       (match-end 0) (point-at-eol))
+			      "\n"))
+		(forward-line))
+	      (point)))
 	   (end (progn (org-skip-whitespace)
-		       (if (eobp) (point) (point-at-bol))))
-	   (value (buffer-substring-no-properties beg-area end-area)))
+		       (if (eobp) (point) (point-at-bol)))))
       `(fixed-width
 	(:begin ,begin
 		:end ,end
@@ -1184,7 +1201,8 @@ Assume point is at the beginning of the fixed-width area."
 (defun org-element-fixed-width-interpreter (fixed-width contents)
   "Interpret FIXED-WIDTH element as Org syntax.
 CONTENTS is nil."
-  (org-remove-indentation (org-element-property :value fixed-width)))
+  (replace-regexp-in-string
+   "^" ": " (substring (org-element-property :value fixed-width) 0 -1)))
 
 
 ;;;; Horizontal Rule

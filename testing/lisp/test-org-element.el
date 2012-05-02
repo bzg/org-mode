@@ -36,6 +36,37 @@ Return interpreted string."
 
 ;;; Test Parsers
 
+;;;; Comments
+
+(ert-deftest test-org-element/comment-parser ()
+  "Test `comment' parsing."
+  ;; Regular comment.
+  (should
+   (equal
+    (org-test-with-temp-text "# Comment"
+      (org-element-map (org-element-parse-buffer) 'comment 'identity nil t))
+    '(comment (:begin 1 :end 10 :value "Comment\n" :post-blank 0))))
+  ;; Inline comment.
+  (should
+   (equal
+    (org-test-with-temp-text "#+ Comment"
+      (org-element-map (org-element-parse-buffer) 'comment 'identity nil t))
+    '(comment (:begin 1 :end 11 :value "Comment\n" :post-blank 0))))
+  ;; Preserve indentation.
+  (should
+   (equal
+    (org-test-with-temp-text "#+ No blank\n#+  One blank"
+      (org-element-map (org-element-parse-buffer) 'comment 'identity nil t))
+    '(comment (:begin 1 :end 26 :value "No blank\n One blank\n" :post-blank 0))))
+  ;; Comment with blank lines.
+  (should
+   (equal
+    (org-test-with-temp-text "#+ First part\n#+ \n#+\n#+ Second part"
+      (org-element-map (org-element-parse-buffer) 'comment 'identity nil t))
+    '(comment
+      (:begin 1 :end 36 :value "First part\n\n\nSecond part\n" :post-blank 0)))))
+
+
 ;;;; Example-blocks and Src-blocks
 
 (ert-deftest test-org-element/block-switches ()
@@ -150,6 +181,43 @@ Return interpreted string."
     '(export-snippet
       (:back-end "back-end"
 		 :value "contents" :begin 1 :end 20 :post-blank 0)))))
+
+
+;;;; Fixed width
+
+(ert-deftest test-org-element/fixed-width ()
+  "Test fixed-width area parsing."
+  ;; Preserve indentation.
+  (should
+   (equal
+    (org-test-with-temp-text ": no blank\n:  one blank"
+      (org-element-map (org-element-parse-buffer) 'fixed-width 'identity nil t))
+    '(fixed-width
+      (:begin 1 :end 24 :value "no blank\n one blank\n" :post-blank 0))))
+  ;; Fixed-width with empty lines.
+  (should
+   (equal
+    (org-test-with-temp-text ": first part\n:\n: \n: second part"
+      (org-element-map (org-element-parse-buffer) 'fixed-width 'identity nil t))
+    '(fixed-width
+      (:begin 1 :end 32 :value "first part\n\n\nsecond part\n" :post-blank 0))))
+  ;; Parse indented fixed-width markers.
+  (should
+   (equal
+    (org-test-with-temp-text "Text\n  : no blank\n  :  one blank"
+      (org-element-map (org-element-parse-buffer) 'fixed-width 'identity nil t))
+    '(fixed-width
+      (:begin 6 :end 33 :value "no blank\n one blank\n" :post-blank 0))))
+  ;; Distinguish fixed-width areas within a list and outside of it.
+  (should
+   (= 2
+      (length
+       (org-test-with-temp-text "
+- Item
+  : fixed-width inside
+: fixed-width outside"
+	 (org-element-map
+	  (org-element-parse-buffer) 'fixed-width 'identity))))))
 
 
 ;;;; Footnotes references
@@ -613,10 +681,13 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
 (ert-deftest test-org-element/comment-interpreter ()
   "Test comment interpreter."
   ;; Regular comment.
-  (should (equal (org-test-parse-and-interpret "#Comment") "#Comment\n"))
+  (should (equal (org-test-parse-and-interpret "#Comment") "#+ Comment\n"))
   ;; Inline comment.
   (should (equal (org-test-parse-and-interpret "  #+ Comment")
-		 "  #+ Comment\n")))
+		 "#+ Comment\n"))
+  ;; Preserve indentation.
+  (should (equal (org-test-parse-and-interpret "  #+ No blank\n#+  One blank")
+		 "#+ No blank\n#+  One blank\n")))
 
 (ert-deftest test-org-element/comment-block-interpreter ()
   "Test comment block interpreter."
@@ -644,7 +715,11 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
 
 (ert-deftest test-org-element/fixed-width-interpreter ()
   "Test fixed width interpreter."
-  (should (equal (org-test-parse-and-interpret ": Test") ": Test\n")))
+  ;; Standard test.
+  (should (equal (org-test-parse-and-interpret ": Test") ": Test\n"))
+  ;; Preserve indentation.
+  (should (equal (org-test-parse-and-interpret ":  2 blanks\n: 1 blank")
+		 ":  2 blanks\n: 1 blank\n")))
 
 (ert-deftest test-org-element/horizontal-rule-interpreter ()
   "Test horizontal rule interpreter."

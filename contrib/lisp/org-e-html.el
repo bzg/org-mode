@@ -1972,13 +1972,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-html-fixed-width (fixed-width contents info)
   "Transcode a FIXED-WIDTH element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((value (org-element-normalize-string
-		 (replace-regexp-in-string
-		  "^[ \t]*: ?" ""
-		  (org-element-property :value fixed-width)))))
-    (org-e-html--wrap-label
-     fixed-width (format "\n<pre class=\"example\">\n%s\n</pre>"
-			 (org-e-html-do-format-code value)))))
+  (org-e-html--wrap-label
+   fixed-width
+   (format "\n<pre class=\"example\">\n%s</pre>"
+	   (org-e-html-do-format-code
+	    (org-remove-indentation
+	     (org-element-property :value fixed-width))))))
 
 
 ;;;; Footnote Definition

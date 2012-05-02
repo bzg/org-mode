@@ -1073,12 +1073,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-latex-fixed-width (fixed-width contents info)
   "Transcode a FIXED-WIDTH element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((value (org-element-normalize-string
-		 (replace-regexp-in-string
-		  "^[ \t]*: ?" ""
-		  (org-element-property :value fixed-width)))))
-    (org-e-latex--wrap-label
-     fixed-width (format "\\begin{verbatim}\n%s\\end{verbatim}" value))))
+  (org-e-latex--wrap-label
+   fixed-width
+   (format "\\begin{verbatim}\n%s\\end{verbatim}"
+	   (org-remove-indentation
+	    (org-element-property :value fixed-width)))))
 
 
 ;;;; Footnote Definition

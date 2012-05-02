@@ -1116,8 +1116,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a FIXED-WIDTH element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-e-ascii--box-string
-   (replace-regexp-in-string
-    "^[ \t]*: ?" "" (org-element-property :value fixed-width)) info))
+   (org-remove-indentation
+    (org-element-property :value fixed-width)) info))
 
 
 ;;;; Footnote Definition
