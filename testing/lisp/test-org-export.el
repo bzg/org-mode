@@ -724,8 +724,8 @@ Another text. (ref:text)
       (org-element-map
        (org-element-parse-buffer) 'table 'identity nil 'first-match)))))
 
-(ert-deftest test-org-export/special-row ()
-  "Test if special rows in a table are properly recognized."
+(ert-deftest test-org-export/table-row-is-special-p ()
+  "Test `org-export-table-row-is-special-p' specifications."
   ;; 1. A row is special if it has a special marking character in the
   ;;    special column.
   (org-test-with-parsed-data "| ! | 1 |"
@@ -746,7 +746,7 @@ Another text. (ref:text)
      (org-export-table-row-is-special-p
       (org-element-map tree 'table-row 'identity nil 'first-match) info)))
   ;; 4. Everything else isn't considered as special.
-  (org-test-with-parsed-data "| a |   | c |"
+  (org-test-with-parsed-data "| \alpha |   | c |"
     (should-not
      (org-export-table-row-is-special-p
       (org-element-map tree 'table-row 'identity nil 'first-match) info)))
@@ -894,7 +894,7 @@ Another text. (ref:text)
     (org-test-with-temp-text "
 | text      |
 | some text |
-| 12345     |"
+| \alpha    |"
       (let* ((tree (org-element-parse-buffer))
 	     (info `(:parse-tree ,tree)))
 	(should

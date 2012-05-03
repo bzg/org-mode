@@ -3262,8 +3262,11 @@ All special rows will be ignored during export."
 	   (mapc
 	    (lambda (cell)
 	      (let ((value (org-element-contents cell)))
+		;; Since VALUE is a secondary string, the following
+		;; checks avoid expanding it with `org-export-data'.
 		(cond ((not value))
 		      ((and (not (cdr value))
+			    (stringp (car value))
 			    (string-match "\\`<[lrc]?\\([0-9]+\\)?>\\'"
 					  (car value)))
 		       (setq special-row-p 'cookie))
@@ -3313,13 +3316,15 @@ same column as TABLE-CELL, or nil."
 	((org-export-table-row-is-special-p row info)
 	 (let ((value (org-element-contents
 		       (elt (org-element-contents row) column))))
-	   (cond
-	    ((not value))
-	    ((and (not (cdr value))
-		  (string-match "\\`<[lrc]?\\([0-9]+\\)?>\\'" (car value))
-		  (match-string 1 (car value)))
+	   ;; The following checks avoid expanding unnecessarily the
+	   ;; cell with `org-export-data'
+	   (when (and value
+		      (not (cdr value))
+		      (stringp (car value))
+		      (string-match "\\`<[lrc]?\\([0-9]+\\)?>\\'" (car value))
+		      (match-string 1 (car value)))
 	     (setq cookie-width
-		   (string-to-number (match-string 1 (car value))))))))
+		   (string-to-number (match-string 1 (car value)))))))
 	;; Ignore table rules.
 	((eq (org-element-property :type row) 'rule))))
      (org-element-contents table))
@@ -3352,13 +3357,15 @@ Possible values are `left', `right' and `center'."
 	((org-export-table-row-is-special-p row info)
 	 (let ((value (org-element-contents
 		       (elt (org-element-contents row) column))))
-	   (cond
-	    ((not value))
-	    ((and (not (cdr value))
-		  (string-match "\\`<\\([lrc]\\)?\\([0-9]+\\)?>\\'"
-				(car value))
-		  (match-string 1 (car value)))
-	     (setq cookie-align (match-string 1 (car value)))))))
+	   ;; Since VALUE is a secondary string, the following checks
+	   ;; avoid useless expansion through `org-export-data'.
+	   (when (and value
+		      (not (cdr value))
+		      (stringp (car value))
+		      (string-match "\\`<\\([lrc]\\)?\\([0-9]+\\)?>\\'"
+				    (car value))
+		      (match-string 1 (car value)))
+	     (setq cookie-align (match-string 1 (car value))))))
 	;; Ignore table rules.
 	((eq (org-element-property :type row) 'rule))
 	;; In a standard row, check if cell's contents are expressing
@@ -3366,9 +3373,10 @@ Possible values are `left', `right' and `center'."
 	;; Though, don't bother if an alignment cookie has already
 	;; defined cell's alignment.
 	((not cookie-align)
-	 (let ((value (org-element-interpret-data
+	 (let ((value (org-export-data
 		       (org-element-contents
-			(elt (org-element-contents row) column)))))
+			(elt (org-element-contents row) column))
+		       info)))
 	   (incf total-cells)
 	   (when (string-match org-table-number-regexp value)
 	     (incf number-cells))))))
