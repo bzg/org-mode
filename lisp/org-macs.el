@@ -414,7 +414,7 @@ the value in cdr."
   "Ignore org filling in `orgstruct++-mode'."
   `(let ,org-fb-vars
      ,@body))
-(def-edebug-spec orgstruct++-ignore-org-filling (&optional ("quote" body)))
+(def-edebug-spec orgstruct++-ignore-org-filling (body))
 
 (provide 'org-macs)
 
