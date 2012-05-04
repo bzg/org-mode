@@ -6675,6 +6675,7 @@ dynamic insertion of content.  The templates are expanded in the order given her
 @smallexample
 %[@var{file}]     @r{Insert the contents of the file given by @var{file}.}
 %(@var{sexp})     @r{Evaluate Elisp @var{sexp} and replace with the result.}
+                  @r{The sexp must return a string.}
 %<...>      @r{The result of format-time-string on the ... format specification.}
 %t          @r{Timestamp, date only.}
 %T          @r{Timestamp, with date and time.}
