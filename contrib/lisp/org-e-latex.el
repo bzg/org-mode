@@ -1347,15 +1347,17 @@ contextual information."
   "Transcode an ITEM element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  ;; Grab `:level' from plain-list properties, which is always the
-  ;; first element above current item.
-  (let* ((level (org-element-property :level (org-export-get-parent item info)))
-	 (counter (let ((count (org-element-property :counter item)))
-		    (and count
-			 (< level 4)
-			 (format "\\setcounter{enum%s}{%s}\n"
-				 (nth level '("i" "ii" "iii" "iv"))
-				 (1- count)))))
+  (let* ((counter
+	  (let ((count (org-element-property :counter item))
+		(level
+		 (loop for parent in (org-export-get-genealogy item info)
+		       count (eq (org-element-type parent) 'plain-list)
+		       until (eq (org-element-type parent) 'headline))))
+	    (and count
+		 (< level 5)
+		 (format "\\setcounter{enum%s}{%s}\n"
+			 (nth (1- level) '("i" "ii" "iii" "iv"))
+			 (1- count)))))
 	 (checkbox (let ((checkbox (org-element-property :checkbox item)))
 		     (cond ((eq checkbox 'on) "$\\boxtimes$ ")
 			   ((eq checkbox 'off) "$\\Box$ ")

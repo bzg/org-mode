@@ -708,8 +708,7 @@ the plain list being parsed.
 
 Return a list whose CAR is `plain-list' and CDR is a plist
 containing `:type', `:begin', `:end', `:contents-begin' and
-`:contents-end', `:level', `:structure' and `:post-blank'
-keywords.
+`:contents-end', `:structure' and `:post-blank' keywords.
 
 Assume point is at the beginning of the list."
   (save-excursion
@@ -723,17 +722,9 @@ Assume point is at the beginning of the list."
 	   (contents-end
 	    (goto-char (org-list-get-list-end (point) struct prevs)))
 	   (end (save-excursion (org-skip-whitespace)
-				(if (eobp) (point) (point-at-bol))))
-	   (level 0))
-      ;; Get list level.
-      (let ((item contents-begin))
-	(while (setq item
-		     (org-list-get-parent
-		      (org-list-get-list-begin item struct prevs)
-		      struct parents))
-	  (incf level)))
+				(if (eobp) (point) (point-at-bol)))))
       ;; Blank lines below list belong to the top-level list only.
-      (when (> level 0)
+      (unless (= (org-list-get-top-point struct) contents-begin)
 	(setq end (min (org-list-get-bottom-point struct)
 		       (progn (org-skip-whitespace)
 			      (if (eobp) (point) (point-at-bol))))))
@@ -744,7 +735,6 @@ Assume point is at the beginning of the list."
 	       :end ,end
 	       :contents-begin ,contents-begin
 	       :contents-end ,contents-end
-	       :level ,level
 	       :structure ,struct
 	       :post-blank ,(count-lines contents-end end)
 	       ,@(cadr keywords))))))
