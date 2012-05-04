@@ -46,9 +46,8 @@
 ;; `comment-block', `example-block', `export-block', `fixed-width',
 ;; `horizontal-rule', `keyword', `latex-environment', `paragraph',
 ;; `planning', `property-drawer', `quote-section', `src-block',
-;; `table', `table-cell', `table-row' and `verse-block'.  Among them,
-;; `paragraph', `table-cell' and `verse-block' types can contain Org
-;; objects and plain text.
+;; `table', `table-row' and `verse-block'.  Among them, `paragraph'
+;; and `verse-block' types can contain Org objects and plain text.
 ;;
 ;; Objects are related to document's contents.  Some of them are
 ;; recursive.  Associated types are of the following: `bold', `code',
@@ -892,7 +891,8 @@ Return a list whose CAR is `babel-call' and CDR is a plist
 containing `:begin', `:end', `:info' and `:post-blank' as
 keywords."
   (save-excursion
-    (let ((info (progn (looking-at org-babel-block-lob-one-liner-regexp)
+    (let ((case-fold-search t)
+	  (info (progn (looking-at org-babel-block-lob-one-liner-regexp)
 		       (org-babel-lob-get-info)))
 	  (begin (point-at-bol))
 	  (pos-before-blank (progn (forward-line) (point)))
@@ -2851,17 +2851,21 @@ regexp matching one object can also match the other object.")
 	 table-cell underline)
   "List of recursive object types.")
 
-(defconst org-element-non-recursive-block-alist
+(defconst org-element-block-name-alist
   '(("ASCII" . export-block)
+    ("CENTER" . center-block)
     ("COMMENT" . comment-block)
     ("DOCBOOK" . export-block)
     ("EXAMPLE" . example-block)
     ("HTML" . export-block)
     ("LATEX" . export-block)
     ("ODT" . export-block)
+    ("QUOTE" . quote-block)
     ("SRC" . src-block)
     ("VERSE" . verse-block))
-  "Alist between non-recursive block name and their element type.")
+  "Alist between block names and their element type.
+Any block whose name has no association in the current list has
+a `special-block' type.")
 
 (defconst org-element-affiliated-keywords
   '("ATTR_ASCII" "ATTR_DOCBOOK" "ATTR_HTML" "ATTR_LATEX" "ATTR_ODT" "CAPTION"
@@ -3044,9 +3048,8 @@ Optional argument SPECIAL, when non-nil, can be either `section',
 If STRUCTURE isn't provided but SPECIAL is set to `item', it will
 be computed.
 
-Unlike to `org-element-at-point', this function assumes point is
-always at the beginning of the element it has to parse.  As such,
-it is quicker than its counterpart, albeit more restrictive."
+This function assumes point is always at the beginning of the
+element it has to parse."
   (save-excursion
     ;; If point is at an affiliated keyword, try moving to the
     ;; beginning of the associated element.  If none is found, the
@@ -3061,7 +3064,7 @@ it is quicker than its counterpart, albeit more restrictive."
 	  ;; `org-element-secondary-value-alist'.
 	  (raw-secondary-p (and granularity (not (eq granularity 'object)))))
       (cond
-       ;; Item
+       ;; Item.
        ((eq special 'item)
 	(org-element-item-parser (or structure (org-list-struct))
 				 raw-secondary-p))
@@ -3079,67 +3082,49 @@ it is quicker than its counterpart, albeit more restrictive."
 	(if (equal (match-string 1) org-clock-string)
 	    (org-element-clock-parser)
 	  (org-element-planning-parser)))
-       ;; Non-recursive block.
-       ((when (looking-at org-element--element-block-re)
-          (let ((type (upcase (match-string 1))))
-            (if (save-excursion
-                  (re-search-forward
-                   (format "^[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t))
-                (funcall
-		 (intern
-		  (format
-		   "org-element-%s-parser"
-		   (cdr (assoc type org-element-non-recursive-block-alist)))))
-              (org-element-paragraph-parser)))))
+       ;; Blocks.
+       ((when (looking-at "[ \t]*#\\+BEGIN_\\([-A-Za-z0-9]+\\)\\(?: \\|$\\)")
+          (let ((name (upcase (match-string 1))) type)
+            (cond
+	     ((not (save-excursion
+		     (re-search-forward
+		      (format "^[ \t]*#\\+END_%s\\(?: \\|$\\)" name) nil t)))
+	      (org-element-paragraph-parser))
+	     ((setq type (assoc name org-element-block-name-alist))
+	      (funcall (intern (format "org-element-%s-parser" (cdr type)))))
+	     (t (org-element-special-block-parser))))))
        ;; Inlinetask.
        ((org-at-heading-p) (org-element-inlinetask-parser raw-secondary-p))
-       ;; LaTeX Environment or Paragraph if incomplete.
+       ;; LaTeX Environment.
        ((looking-at "[ \t]*\\\\begin{")
         (if (save-excursion
               (re-search-forward "[ \t]*\\\\end{[^}]*}[ \t]*" nil t))
             (org-element-latex-environment-parser)
           (org-element-paragraph-parser)))
-       ;; Property Drawer.
-       ((looking-at org-property-start-re)
-        (if (save-excursion (re-search-forward org-property-end-re nil t))
-            (org-element-property-drawer-parser)
-          (org-element-paragraph-parser)))
-       ;; Recursive Block, or Paragraph if incomplete.
-       ((looking-at "[ \t]*#\\+BEGIN_\\([-A-Za-z0-9]+\\)\\(?: \\|$\\)")
-        (let ((type (upcase (match-string 1))))
-          (cond
-           ((not (save-excursion
-                   (re-search-forward
-                    (format "^[ \t]*#\\+END_%s\\(?: \\|$\\)" type) nil t)))
-            (org-element-paragraph-parser))
-           ((string= type "CENTER") (org-element-center-block-parser))
-           ((string= type "QUOTE") (org-element-quote-block-parser))
-           (t (org-element-special-block-parser)))))
-       ;; Drawer.
+       ;; Drawer and Property Drawer.
        ((looking-at org-drawer-regexp)
-        (if (save-excursion (re-search-forward "^[ \t]*:END:[ \t]*$" nil t))
-            (org-element-drawer-parser)
-          (org-element-paragraph-parser)))
+        (let ((name (match-string 1)))
+	  (cond
+	   ((not (save-excursion (re-search-forward "^[ \t]*:END:[ \t]*$" nil t)))
+	    (org-element-paragraph-parser))
+	   ((equal "PROPERTIES" name) (org-element-property-drawer-parser))
+	   (t (org-element-drawer-parser)))))
+       ;; Fixed Width
        ((looking-at "[ \t]*:\\( \\|$\\)") (org-element-fixed-width-parser))
-       ;; Babel Call.
-       ((looking-at org-babel-block-lob-one-liner-regexp)
-        (org-element-babel-call-parser))
-       ;; Dynamic Block or Paragraph if incomplete.  This must be
-       ;; checked before regular keywords since their regexp matches
-       ;; dynamic blocks too.
-       ((looking-at "[ \t]*#\\+BEGIN:\\(?: \\|$\\)")
-        (if (save-excursion
-	      (re-search-forward "^[ \t]*#\\+END:\\(?: \\|$\\)" nil t))
-            (org-element-dynamic-block-parser)
-          (org-element-paragraph-parser)))
-       ;; Keyword, or Paragraph if at an orphaned affiliated keyword.
+       ;; Babel Call, Dynamic Block and Keyword.
        ((looking-at "[ \t]*#\\+\\([a-z]+\\(:?_[a-z]+\\)*\\):")
         (let ((key (upcase (match-string 1))))
-          (if (or (string= key "TBLFM")
-                  (member key org-element-affiliated-keywords))
-              (org-element-paragraph-parser)
-            (org-element-keyword-parser))))
-       ;; Footnote definition.
+          (cond
+	   ((equal key "CALL") (org-element-babel-call-parser))
+	   ((and (equal key "BEGIN")
+		 (save-excursion
+		   (re-search-forward "^[ \t]*#\\+END:\\(?: \\|$\\)" nil t)))
+	    (org-element-dynamic-block-parser))
+	   ((and (not (equal key "TBLFM"))
+		 (not (member key org-element-affiliated-keywords)))
+	    (org-element-keyword-parser))
+	   (t (org-element-paragraph-parser)))))
+       ;; Footnote Definition.
        ((looking-at org-footnote-definition-re)
         (org-element-footnote-definition-parser))
        ;; Comment.
@@ -3150,7 +3135,7 @@ it is quicker than its counterpart, albeit more restrictive."
         (org-element-horizontal-rule-parser))
        ;; Table.
        ((org-at-table-p t) (org-element-table-parser))
-       ;; List or Item.
+       ;; List.
        ((looking-at (org-item-re))
         (org-element-plain-list-parser (or structure (org-list-struct))))
        ;; Default element: Paragraph.
