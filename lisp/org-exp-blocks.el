@@ -208,6 +208,12 @@ which defaults to the value of `org-export-blocks-witheld'."
 		(let ((replacement (save-match-data
 				     (if (memq type org-export-blocks-witheld) ""
 				       (apply func body headers)))))
+		  ;; ;; un-comment this code after the org-element merge
+		  ;; (save-match-data
+		  ;;   (when (and replacement (string= replacement ""))
+		  ;;     (delete-region
+		  ;;      (car (org-element-collect-affiliated-keyword))
+		  ;;      match-start)))
 		  (when replacement
 		    (delete-region match-start match-end)
 		    (goto-char match-start) (insert replacement)
