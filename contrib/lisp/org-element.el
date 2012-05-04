@@ -294,9 +294,9 @@ Assume point is at the beginning of the footnote definition."
 			       (re-search-forward
 				(concat org-outline-regexp-bol "\\|"
 					org-footnote-definition-re "\\|"
-					"^[ \t]*$") nil t))
+					"^[ \t]*$") nil 'move))
 			     (match-beginning 0)
-			   (point-max)))
+			   (point)))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
       `(footnote-definition

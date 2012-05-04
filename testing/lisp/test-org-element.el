@@ -519,7 +519,16 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
 	      :post-blank 0)
       (paragraph
        (:begin 8 :end 18 :contents-begin 8 :contents-end 18 :post-blank 0)
-       "Definition")))))
+       "Definition"))))
+  ;; Footnote with more contents
+  (should
+   (= 28
+      (org-element-property
+       :end
+       (org-test-with-temp-text "[fn:1] Definition\n| a | b |"
+	 (org-element-map
+	  (org-element-parse-buffer)
+	  'footnote-definition 'identity nil t))))))
 
 
 ;;;; Footnotes Reference
