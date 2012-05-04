@@ -1068,7 +1068,7 @@ holding contextual information."
 (defun org-e-ascii-dynamic-block (dynamic-block contents info)
   "Transcode a DYNAMIC-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
-holding contextual information.  See `org-export-data'."
+holding contextual information."
   contents)
 
 
@@ -1661,13 +1661,12 @@ are ignored. "
 	 (lambda (row)
 	   (setq max-width
 		 (max (length
-		       (mapconcat
-			(lambda (obj) (org-export-data obj info))
+		       (org-export-data
 			(org-element-contents
 			 (elt (if specialp (car (org-element-contents row))
 				(org-element-contents row))
 			      col))
-			""))
+			info))
 		      max-width))))
 	max-width)))
 

@@ -1578,10 +1578,9 @@ Return transcoded string."
            ((not (org-export-interpret-p data info))
             (org-export-expand
              data
-             (org-element-normalize-string
-              (mapconcat (lambda (blob) (org-export-data blob info))
-                         (org-element-contents data)
-                         ""))))
+             (mapconcat (lambda (blob) (org-export-data blob info))
+			(org-element-contents data)
+			"")))
            ;; Secondary string.
            ((not type)
             (mapconcat (lambda (obj) (org-export-data obj info)) data ""))
