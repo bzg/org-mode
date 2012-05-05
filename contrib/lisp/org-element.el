@@ -1612,7 +1612,7 @@ CONTENTS is nil."
 			      (org-table-align)
 			      (buffer-string))
 	    (when (org-element-property :tblfm table)
-	      (format "#+TBLFM: " (org-element-property :tblfm table))))))
+	      (concat "#+TBLFM: " (org-element-property :tblfm table))))))
 
 
 ;;;; Table Row
@@ -3330,6 +3330,7 @@ Nil values returned from FUN do not appear in the results."
 	    'elements)
 	   (t 'objects)))
 	 --acc
+	 --walk-tree
 	 (--walk-tree
 	  (function
 	   (lambda (--data)
@@ -3716,68 +3717,70 @@ indentation to compute maximal common indentation.
 Return the normalized element that is element with global
 indentation removed from its contents.  The function assumes that
 indentation is not done with TAB characters."
-  (let (ind-list
-        (collect-inds
-         (function
-          ;; Return list of indentations within BLOB.  This is done by
-          ;; walking recursively BLOB and updating IND-LIST along the
-          ;; way.  FIRST-FLAG is non-nil when the first string hasn't
-          ;; been seen yet.  It is required as this string is the only
-          ;; one whose indentation doesn't happen after a newline
-          ;; character.
-          (lambda (blob first-flag)
-            (mapc
-             (lambda (object)
-	       (when (and first-flag (stringp object))
-                 (setq first-flag nil)
-                 (string-match "\\`\\( *\\)" object)
-		 (let ((len (length (match-string 1 object))))
-		   ;; An indentation of zero means no string will be
-		   ;; modified.  Quit the process.
-		   (if (zerop len) (throw 'zero (setq ind-list nil))
-		     (push len ind-list))))
-               (cond
-                ((stringp object)
-                 (let ((start 0))
-		   ;; Avoid matching blank or empty lines.
-                   (while (and (string-match "\n\\( *\\)\\(.\\)" object start)
-			       (not (equal (match-string 2 object) " ")))
-                     (setq start (match-end 0))
-                     (push (length (match-string 1 object)) ind-list))))
-                ((memq (org-element-type object) org-element-recursive-objects)
-                 (funcall collect-inds object first-flag))))
-             (org-element-contents blob))))))
+  (let* (ind-list			; for byte-compiler
+	 collect-inds			; for byte-compiler
+	 (collect-inds
+	  (function
+	   ;; Return list of indentations within BLOB.  This is done by
+	   ;; walking recursively BLOB and updating IND-LIST along the
+	   ;; way.  FIRST-FLAG is non-nil when the first string hasn't
+	   ;; been seen yet.  It is required as this string is the only
+	   ;; one whose indentation doesn't happen after a newline
+	   ;; character.
+	   (lambda (blob first-flag)
+	     (mapc
+	      (lambda (object)
+		(when (and first-flag (stringp object))
+		  (setq first-flag nil)
+		  (string-match "\\`\\( *\\)" object)
+		  (let ((len (length (match-string 1 object))))
+		    ;; An indentation of zero means no string will be
+		    ;; modified.  Quit the process.
+		    (if (zerop len) (throw 'zero (setq ind-list nil))
+		      (push len ind-list))))
+		(cond
+		 ((stringp object)
+		  (let ((start 0))
+		    ;; Avoid matching blank or empty lines.
+		    (while (and (string-match "\n\\( *\\)\\(.\\)" object start)
+				(not (equal (match-string 2 object) " ")))
+		      (setq start (match-end 0))
+		      (push (length (match-string 1 object)) ind-list))))
+		 ((memq (org-element-type object) org-element-recursive-objects)
+		  (funcall collect-inds object first-flag))))
+	      (org-element-contents blob))))))
     ;; Collect indentation list in ELEMENT.  Possibly remove first
     ;; value if IGNORE-FIRST is non-nil.
     (catch 'zero (funcall collect-inds element (not ignore-first)))
     (if (not ind-list) element
       ;; Build ELEMENT back, replacing each string with the same
       ;; string minus common indentation.
-      (let ((build
-	     (function
-	      (lambda (blob mci first-flag)
-		;; Return BLOB with all its strings indentation
-		;; shortened from MCI white spaces.  FIRST-FLAG is
-		;; non-nil when the first string hasn't been seen
-		;; yet.
-		(nconc
-		 (list (org-element-type blob) (nth 1 blob))
-		 (mapcar
-		  (lambda (object)
-		    (when (and first-flag (stringp object))
-		      (setq first-flag nil)
-		      (setq object
-			    (replace-regexp-in-string
-			     (format "\\` \\{%d\\}" mci) "" object)))
-		    (cond
-		     ((stringp object)
-		      (replace-regexp-in-string
-		       (format "\n \\{%d\\}" mci) "\n" object))
-		     ((memq (org-element-type object)
-			    org-element-recursive-objects)
-		      (funcall build object mci first-flag))
-		     (t object)))
-		  (org-element-contents blob)))))))
+      (let* (build			; for byte compiler
+	     (build
+	      (function
+	       (lambda (blob mci first-flag)
+		 ;; Return BLOB with all its strings indentation
+		 ;; shortened from MCI white spaces.  FIRST-FLAG is
+		 ;; non-nil when the first string hasn't been seen
+		 ;; yet.
+		 (nconc
+		  (list (org-element-type blob) (nth 1 blob))
+		  (mapcar
+		   (lambda (object)
+		     (when (and first-flag (stringp object))
+		       (setq first-flag nil)
+		       (setq object
+			     (replace-regexp-in-string
+			      (format "\\` \\{%d\\}" mci) "" object)))
+		     (cond
+		      ((stringp object)
+		       (replace-regexp-in-string
+			(format "\n \\{%d\\}" mci) "\n" object))
+		      ((memq (org-element-type object)
+			     org-element-recursive-objects)
+		       (funcall build object mci first-flag))
+		      (t object)))
+		   (org-element-contents blob)))))))
 	(funcall build element (apply 'min ind-list) (not ignore-first))))))
 
 
