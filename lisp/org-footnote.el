@@ -450,7 +450,8 @@ or new, let the user edit the definition of the footnote."
     (error "Cannot insert a footnote here"))
   (let* ((lbls (and (not (equal org-footnote-auto-label 'random))
 		    (org-footnote-all-labels)))
-	 (propose (org-footnote-unique-label lbls))
+	 (propose (and (not (equal org-footnote-auto-label 'random))
+		       (org-footnote-unique-label lbls)))
 	 (label
 	  (org-footnote-normalize-label
 	   (cond
