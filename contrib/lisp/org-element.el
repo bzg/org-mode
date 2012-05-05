@@ -2841,20 +2841,20 @@ regexp matching one object can also match the other object.")
   "List of recursive object types.")
 
 (defconst org-element-block-name-alist
-  '(("ASCII" . export-block)
-    ("CENTER" . center-block)
-    ("COMMENT" . comment-block)
-    ("DOCBOOK" . export-block)
-    ("EXAMPLE" . example-block)
-    ("HTML" . export-block)
-    ("LATEX" . export-block)
-    ("ODT" . export-block)
-    ("QUOTE" . quote-block)
-    ("SRC" . src-block)
-    ("VERSE" . verse-block))
-  "Alist between block names and their element type.
-Any block whose name has no association in the current list has
-a `special-block' type.")
+  '(("ASCII" . org-element-export-block-parser)
+    ("CENTER" . org-element-center-block-parser)
+    ("COMMENT" . org-element-comment-block-parser)
+    ("DOCBOOK" . org-element-export-block-parser)
+    ("EXAMPLE" . org-element-example-block-parser)
+    ("HTML" . org-element-export-block-parser)
+    ("LATEX" . org-element-export-block-parser)
+    ("ODT" . org-element-export-block-parser)
+    ("QUOTE" . org-element-quote-block-parser)
+    ("SRC" . org-element-src-block-parser)
+    ("VERSE" . org-element-verse-block-parser))
+  "Alist between block names and the associated parsing function.
+Names must be uppercase.  Any block whose name has no association
+is parsed with `org-element-special-block-parser'.")
 
 (defconst org-element-affiliated-keywords
   '("ATTR_ASCII" "ATTR_DOCBOOK" "ATTR_HTML" "ATTR_LATEX" "ATTR_ODT" "CAPTION"
@@ -3064,14 +3064,14 @@ element it has to parse."
 	  (org-element-planning-parser)))
        ;; Blocks.
        ((when (looking-at "[ \t]*#\\+BEGIN_\\([-A-Za-z0-9]+\\)\\(?: \\|$\\)")
-          (let ((name (upcase (match-string 1))) type)
+          (let ((name (upcase (match-string 1))) parser)
             (cond
 	     ((not (save-excursion
 		     (re-search-forward
 		      (format "^[ \t]*#\\+END_%s\\(?: \\|$\\)" name) nil t)))
 	      (org-element-paragraph-parser))
-	     ((setq type (assoc name org-element-block-name-alist))
-	      (funcall (intern (format "org-element-%s-parser" (cdr type)))))
+	     ((setq parser (assoc name org-element-block-name-alist))
+	      (funcall (cdr parser)))
 	     (t (org-element-special-block-parser))))))
        ;; Inlinetask.
        ((org-at-heading-p) (org-element-inlinetask-parser raw-secondary-p))
