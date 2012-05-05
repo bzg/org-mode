@@ -2590,10 +2590,15 @@ not overwrite the stored one."
 				   duration-output-format) ev))
 	  (or (fboundp 'calc-eval)
 	      (error "Calc does not seem to be installed, and is needed to evaluate the formula"))
-	  (setq ev (calc-eval (cons form org-tbl-calc-modes) (if numbers 'num))
+	  (setq ev (if (and duration (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" form))
+		       form
+		     (calc-eval (cons form org-tbl-calc-modes) (if numbers 'num)))
 		ev (if duration (org-table-time-seconds-to-string
-				 (string-to-number ev)
-				 duration-output-format) ev)))
+				 (if (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" ev)
+				     (string-to-number (org-table-time-string-to-seconds ev))
+				   (string-to-number ev))
+				 duration-output-format)
+		     ev)))
 
 	(when org-table-formula-debug
 	  (with-output-to-temp-buffer "*Substitution History*"
@@ -3288,8 +3293,10 @@ For example:  28 -> AB."
   "Convert a time string into numerical duration in seconds.
 S can be a string matching either -?HH:MM:SS or -?HH:MM.
 If S is a string representing a number, keep this number."
-  (let (hour minus min sec res)
-    (cond
+  (if (equal s "")
+      s
+    (let (hour minus min sec res)
+      (cond
      ((and (string-match "\\(-?\\)\\([0-9]+\\):\\([0-9]+\\):\\([0-9]+\\)" s))
       (setq minus (< 0 (length (match-string 1 s)))
 	    hour (string-to-number (match-string 2 s))
@@ -3307,7 +3314,7 @@ If S is a string representing a number, keep this number."
 	  (setq res (- (+ (* hour 3600) (* min 60))))
 	(setq res (+ (* hour 3600) (* min 60)))))
      (t (setq res (string-to-number s))))
-    (number-to-string res)))
+      (number-to-string res))))
 
 (defun org-table-time-seconds-to-string (secs &optional output-format)
   "Convert a number of seconds to a time string.
