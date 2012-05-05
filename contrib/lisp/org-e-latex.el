@@ -841,7 +841,7 @@ See `org-e-latex-text-markup-alist' for details."
 	(while (string-match "[\\{}$%&_#~^]" text)
 	  (setq char (match-string 0 text))
 	  (if (> (match-beginning 0) 0)
-	      (setq rtn (concat rtn (substring value 0 (match-beginning 0)))))
+	      (setq rtn (concat rtn (substring text 0 (match-beginning 0)))))
 	  (setq text (substring text (1+ (match-beginning 0))))
 	  (setq char (or (cdr (assoc char trans)) (concat "\\" char))
 		rtn (concat rtn char)))
