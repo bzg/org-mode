@@ -551,7 +551,7 @@ If not, show simply the clocked time like 01:50."
 			   'org-mode-line-clock-overrun 'org-mode-line-clock)))
 	       (effort-str (format org-time-clocksum-format effort-h effort-m))
 	       (clockstr (org-propertize
-			  (concat  "[%s/" effort-str
+			  (concat  " [%s/" effort-str
 				   "] (" (replace-regexp-in-string "%" "%%" org-clock-heading) ")")
 			  'face 'org-mode-line-clock)))
 	  (format clockstr work-done-str))
