@@ -21,14 +21,14 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
+;;
 ;; Org syntax can be divided into three categories: "Greater
 ;; elements", "Elements" and "Objects".
-
+;;
 ;; Elements are related to the structure of the document.  Indeed, all
 ;; elements are a cover for the document: each position within belongs
 ;; to at least one element.
-
+;;
 ;; An element always starts and ends at the beginning of a line.  With
 ;; a few exceptions (namely `babel-call', `clock', `headline', `item',
 ;; `keyword', `planning', `property-drawer' and `section' types), it
@@ -71,7 +71,7 @@
 ;; elements and elements containing objects will also have
 ;; `:contents-begin' and `:contents-end' properties to delimit
 ;; contents.
-
+;;
 ;; Lisp-wise, an element or an object can be represented as a list.
 ;; It follows the pattern (TYPE PROPERTIES CONTENTS), where:
 ;;   TYPE is a symbol describing the Org element or object.
@@ -80,27 +80,27 @@
 ;;              list.
 ;;   CONTENTS is a list of elements, objects or raw strings contained
 ;;            in the current element or object, when applicable.
-
+;;
 ;; An Org buffer is a nested list of such elements and objects, whose
 ;; type is `org-data' and properties is nil.
-
+;;
 ;; The first part of this file implements a parser and an interpreter
 ;; for each type of Org syntax.
-
+;;
 ;; The next two parts introduce four accessors and a function
 ;; retrieving the element starting at point (respectively
 ;; `org-element-type', `org-element-property', `org-element-contents',
 ;; `org-element-restriction' and `org-element-current-element').
-
+;;
 ;; The following part creates a fully recursive buffer parser.  It
 ;; also provides a tool to map a function to elements or objects
 ;; matching some criteria in the parse tree.  Functions of interest
 ;; are `org-element-parse-buffer', `org-element-map' and, to a lesser
 ;; extent, `org-element-parse-secondary-string'.
-
+;;
 ;; The penultimate part is the cradle of an interpreter for the
 ;; obtained parse tree: `org-element-interpret-data'.
-
+;;
 ;; The library ends by furnishing a set of interactive tools for
 ;; element's navigation and manipulation, mostly based on
 ;; `org-element-at-point' function.
@@ -114,10 +114,10 @@
 
 
 ;;; Greater elements
-
+;;
 ;; For each greater element type, we define a parser and an
 ;; interpreter.
-
+;;
 ;; A parser returns the element or object as the list described above.
 ;; Most of them accepts no argument.  Though, exceptions exist.  Hence
 ;; every element containing a secondary string (see
@@ -125,22 +125,22 @@
 ;; argument to toggle parsing of that secondary string.  Moreover,
 ;; `item' parser requires current list's structure as its first
 ;; element.
-
+;;
 ;; An interpreter accepts two arguments: the list representation of
 ;; the element or object, and its contents.  The latter may be nil,
 ;; depending on the element or object considered.  It returns the
 ;; appropriate Org syntax, as a string.
-
+;;
 ;; Parsing functions must follow the naming convention:
 ;; org-element-TYPE-parser, where TYPE is greater element's type, as
 ;; defined in `org-element-greater-elements'.
 ;;
 ;; Similarly, interpreting functions must follow the naming
 ;; convention: org-element-TYPE-interpreter.
-
+;;
 ;; With the exception of `headline' and `item' types, greater elements
 ;; cannot contain other greater elements of their own type.
-
+;;
 ;; Beside implementing a parser and an interpreter, adding a new
 ;; greater element requires to tweak `org-element-current-element'.
 ;; Moreover, the newly defined type must be added to both
@@ -858,15 +858,15 @@ CONTENTS is the contents of the element."
 
 
 ;;; Elements
-
+;;
 ;; For each element, a parser and an interpreter are also defined.
 ;; Both follow the same naming convention used for greater elements.
-
+;;
 ;; Also, as for greater elements, adding a new element type is done
 ;; through the following steps: implement a parser and an interpreter,
 ;; tweak `org-element-current-element' so that it recognizes the new
 ;; type and add that new type to `org-element-all-elements'.
-
+;;
 ;; As a special case, when the newly defined type is a block type,
 ;; `org-element-block-name-alist' has to be modified accordingly.
 
@@ -2765,11 +2765,11 @@ CONTENTS is nil."
 
 
 ;;; Definitions And Rules
-
+;;
 ;; Define elements, greater elements and specify recursive objects,
 ;; along with the affiliated keywords recognized.  Also set up
 ;; restrictions on recursive objects combinations.
-
+;;
 ;; These variables really act as a control center for the parsing
 ;; process.
 (defconst org-element-paragraph-separate
@@ -3126,28 +3126,28 @@ element it has to parse."
 ;; element beginning, we want to move before them, as they belong to
 ;; that element, and, in the meantime, collect information they give
 ;; into appropriate properties.  Hence the following function.
-
+;;
 ;; Usage of optional arguments may not be obvious at first glance:
-
+;;
 ;; - TRANS-LIST is used to polish keywords names that have evolved
 ;;   during Org history.  In example, even though =result= and
 ;;   =results= coexist, we want to have them under the same =result=
 ;;   property.  It's also true for "srcname" and "name", where the
 ;;   latter seems to be preferred nowadays (thus the "name" property).
-
+;;
 ;; - CONSED allows to regroup multi-lines keywords under the same
 ;;   property, while preserving their own identity.  This is mostly
 ;;   used for "attr_latex" and al.
-
+;;
 ;; - PARSED prepares a keyword value for export.  This is useful for
 ;;   "caption".  Objects restrictions for such keywords are defined in
 ;;   `org-element-object-restrictions'.
-
+;;
 ;; - DUALS is used to take care of keywords accepting a main and an
 ;;   optional secondary values.  For example "results" has its
 ;;   source's name as the main value, and may have an hash string in
 ;;   optional square brackets as the secondary one.
-
+;;
 ;; A keyword may belong to more than one category.
 
 (defconst org-element--affiliated-re
@@ -3167,8 +3167,8 @@ match group 2.
 
 Don't modify it, set `org-element-affiliated-keywords' instead.")
 
-(defun org-element-collect-affiliated-keywords (&optional key-re trans-list
-							  consed parsed duals)
+(defun org-element-collect-affiliated-keywords
+  (&optional key-re trans-list consed parsed duals)
   "Collect affiliated keywords before point.
 
 Optional argument KEY-RE is a regexp matching keywords, which
@@ -3246,13 +3246,13 @@ cdr a plist of keywords and values."
 
 
 ;;; The Org Parser
-
+;;
 ;; The two major functions here are `org-element-parse-buffer', which
 ;; parses Org syntax inside the current buffer, taking into account
 ;; region, narrowing, or even visibility if specified, and
 ;; `org-element-parse-secondary-string', which parses objects within
 ;; a given string.
-
+;;
 ;; The (almost) almighty `org-element-map' allows to apply a function
 ;; on elements or objects matching some type, and accumulate the
 ;; resulting values.  In an export situation, it also skips unneeded
@@ -3384,15 +3384,15 @@ Nil values returned from FUN do not appear in the results."
       (nreverse --acc))))
 
 ;; The following functions are internal parts of the parser.
-
+;;
 ;; The first one, `org-element-parse-elements' acts at the element's
 ;; level.
-
+;;
 ;; The second one, `org-element-parse-objects' applies on all objects
 ;; of a paragraph or a secondary string.  It uses
 ;; `org-element-get-candidates' to optimize the search of the next
 ;; object in the buffer.
-
+;;
 ;; More precisely, that function looks for every allowed object type
 ;; first.  Then, it discards failed searches, keeps further matches,
 ;; and searches again types matched behind point, for subsequent
@@ -3571,7 +3571,7 @@ OBJECTS is the previous candidates alist."
 
 
 ;;; Towards A Bijective Process
-
+;;
 ;; The parse tree obtained with `org-element-parse-buffer' is really
 ;; a snapshot of the corresponding Org buffer.  Therefore, it can be
 ;; interpreted and expanded into a string with canonical Org syntax.
@@ -3783,7 +3783,7 @@ indentation is not done with TAB characters."
 
 
 ;;; The Toolbox
-
+;;
 ;; The first move is to implement a way to obtain the smallest element
 ;; containing point.  This is the job of `org-element-at-point'.  It
 ;; basically jumps back to the beginning of section containing point
@@ -3871,17 +3871,17 @@ first element of current section."
 ;; to implement some replacements for `forward-paragraph'
 ;; `backward-paragraph', namely `org-element-forward' and
 ;; `org-element-backward'.
-
+;;
 ;; Also, `org-transpose-elements' mimics the behaviour of
 ;; `transpose-words', at the element's level, whereas
 ;; `org-element-drag-forward', `org-element-drag-backward', and
 ;; `org-element-up' generalize, respectively, functions
 ;; `org-subtree-down', `org-subtree-up' and `outline-up-heading'.
-
+;;
 ;; `org-element-unindent-buffer' will, as its name almost suggests,
 ;; smartly remove global indentation from buffer, making it possible
 ;; to use Org indent mode on a file created with hard indentation.
-
+;;
 ;; `org-element-nested-p' and `org-element-swap-A-B' are used
 ;; internally by some of the previously cited tools.
 
