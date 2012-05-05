@@ -1988,9 +1988,10 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-k"     'org-agenda-kill)
 (org-defkey org-agenda-mode-map "\C-c\C-w" 'org-agenda-refile)
 (org-defkey org-agenda-mode-map "m"        'org-agenda-bulk-mark)
+(org-defkey org-agenda-mode-map "*"        'org-agenda-bulk-mark-all)
 (org-defkey org-agenda-mode-map "%"        'org-agenda-bulk-mark-regexp)
 (org-defkey org-agenda-mode-map "u"        'org-agenda-bulk-unmark)
-(org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-remove-all-marks)
+(org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-unmark-all)
 (org-defkey org-agenda-mode-map "A"        'org-agenda-append-agenda)
 (org-defkey org-agenda-mode-map "B"        'org-agenda-bulk-action)
 (org-defkey org-agenda-mode-map "\C-c\C-x!" 'org-reload)
@@ -2197,9 +2198,10 @@ The following commands are available:
      ["Delete subtree" org-agenda-kill t])
     ("Bulk action"
      ["Mark entry" org-agenda-bulk-mark t]
+     ["Mark all" org-agenda-bulk-mark-all t]
      ["Mark matching regexp" org-agenda-bulk-mark-regexp t]
      ["Unmark entry" org-agenda-bulk-unmark t]
-     ["Unmark all entries" org-agenda-bulk-remove-all-marks :active t :keys "C-u s"])
+     ["Unmark all entries" org-agenda-bulk-unmark-all :active t :keys "C-u s"])
      ["Act on all marked" org-agenda-bulk-action t]
     "--"
     ("Tags and Properties"
@@ -8639,8 +8641,13 @@ This is a command that has to be installed in `calendar-mode-map'."
 	(message "%d entries marked for bulk action"
 		 (length org-agenda-bulk-marked-entries))))))
 
+(defun org-agenda-bulk-mark-all ()
+  "Mark all entries for future agenda bulk action."
+  (interactive)
+  (org-agenda-bulk-mark-regexp "."))
+
 (defun org-agenda-bulk-mark-regexp (regexp)
-  "Mark entries match REGEXP."
+  "Mark entries matching REGEXP for future agenda bulk action."
   (interactive "sMark entries matching regexp: ")
   (let ((entries-marked 0))
     (save-excursion
@@ -8653,20 +8660,23 @@ This is a command that has to be installed in `calendar-mode-map'."
     (if (not entries-marked)
 	(message "No entry matching this regexp."))))
 
-(defun org-agenda-bulk-unmark ()
+(defun org-agenda-bulk-unmark (&optional arg)
   "Unmark the entry at point for future bulk action."
-  (interactive)
-  (when (org-agenda-bulk-marked-p)
-    (org-agenda-bulk-remove-overlays
-     (point-at-bol) (+ 2 (point-at-bol)))
-    (setq org-agenda-bulk-marked-entries
-	  (delete (org-get-at-bol 'org-hd-marker)
-		  org-agenda-bulk-marked-entries)))
-  (beginning-of-line 2)
-  (while (and (get-char-property (point) 'invisible) (not (eobp)))
-    (beginning-of-line 2))
-  (message "%d entries marked for bulk action"
-	   (length org-agenda-bulk-marked-entries)))
+  (interactive "P")
+  (if arg
+      (org-agenda-bulk-unmark-all)
+    (cond ((org-agenda-bulk-marked-p)
+	   (org-agenda-bulk-remove-overlays
+	    (point-at-bol) (+ 2 (point-at-bol)))
+	   (setq org-agenda-bulk-marked-entries
+		 (delete (org-get-at-bol 'org-hd-marker)
+			 org-agenda-bulk-marked-entries))
+	   (beginning-of-line 2)
+	   (while (and (get-char-property (point) 'invisible) (not (eobp)))
+	     (beginning-of-line 2))
+	   (message "%d entries left marked for bulk action"
+		    (length org-agenda-bulk-marked-entries)))
+	  (t (message "No entry to unmark here")))))
 
 (defun org-agenda-bulk-toggle ()
  "Toggle marking the entry at point for bulk action."
@@ -8687,13 +8697,15 @@ from the list in `org-agenda-bulk-marked-entries'."
 	       (delete-overlay ov)))
 	(overlays-in (or beg (point-min)) (or end (point-max)))))
 
-(defun org-agenda-bulk-remove-all-marks ()
+(defun org-agenda-bulk-unmark-all ()
   "Remove all marks in the agenda buffer.
-This will remove the markers, and the overlays."
+This will remove the markers and the overlays."
   (interactive)
-  (mapc (lambda (m) (move-marker m nil)) org-agenda-bulk-marked-entries)
-  (setq org-agenda-bulk-marked-entries nil)
-  (org-agenda-bulk-remove-overlays (point-min) (point-max)))
+  (if (null org-agenda-bulk-marked-entries)
+      (message "No entry to unmark")
+    (mapc (lambda (m) (move-marker m nil)) org-agenda-bulk-marked-entries)
+    (setq org-agenda-bulk-marked-entries nil)
+    (org-agenda-bulk-remove-overlays (point-min) (point-max))))
 
 (defcustom org-agenda-persistent-marks nil
   "Non-nil means marked items will stay marked after a bulk action.
