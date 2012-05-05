@@ -2182,13 +2182,15 @@ item is invisible."
   "Mark the current list.
 If this is a sublist, only mark the sublist."
   (interactive)
-  (let* ((item (org-list-get-item-begin))
-	 (struct (org-list-struct))
-	 (prevs (org-list-prevs-alist struct))
-	 (lbeg (org-list-get-list-begin item struct prevs))
-	 (lend (org-list-get-list-end item struct prevs)))
-    (push-mark lend nil t)
-    (goto-char lbeg)))
+  (if (not (org-at-item-p))
+      (error "Not on a list")
+    (let* ((item (org-list-get-item-begin))
+	   (struct (org-list-struct))
+	   (prevs (org-list-prevs-alist struct))
+	   (lbeg (org-list-get-list-begin item struct prevs))
+	   (lend (org-list-get-list-end item struct prevs)))
+      (push-mark lend nil t)
+      (goto-char lbeg))))
 
 (defun org-list-repair ()
   "Fix indentation, bullets and checkboxes is the list at point."
