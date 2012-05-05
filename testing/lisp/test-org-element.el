@@ -34,6 +34,41 @@ Return interpreted string."
 
 
 
+;;; Test `org-element-map'
+
+(ert-deftest test-org-element/map ()
+  "Test `org-element-map'."
+  ;; Can map to `plain-text' objects.
+  (should
+   (= 2
+      (org-test-with-temp-text "Some text \alpha
+#+BEGIN_CENTER
+Some other text
+#+END_CENTER"
+	(let ((count 0))
+	  (org-element-map
+	   (org-element-parse-buffer) 'plain-text
+	   (lambda (s) (when (string-match "text" s) (incf count))))
+	  count))))
+  ;; Applies to secondary strings
+  (should
+   (org-element-map '("some " (bold nil "bold") "text") 'bold 'identity))
+  ;; Enter secondary strings before entering contents.
+  (should
+   (equal
+    "alpha"
+    (org-element-property
+     :name
+     (org-test-with-temp-text "* Some \\alpha headline\n\\beta entity."
+       (org-element-map (org-element-parse-buffer) 'entity 'identity nil t)))))
+  ;; Apply NO-RECURSION argument.
+  (should-not
+   (org-test-with-temp-text "#+BEGIN_CENTER\n\\alpha\n#+END_CENTER"
+     (org-element-map
+      (org-element-parse-buffer) 'entity 'identity nil nil 'center-block))))
+
+
+
 ;;; Test Parsers
 
 ;;;; Babel Call

@@ -3324,62 +3324,60 @@ Nil values returned from FUN do not appear in the results."
   ;; Recursion depth is determined by --CATEGORY.
   (let* ((--category
 	  (cond
-	   ((loop for type in types
-		  always (memq type org-element-greater-elements))
+	   ((every (lambda (el) (memq el org-element-greater-elements)) types)
 	    'greater-elements)
-	   ((loop for type in types
-		  always (memq type org-element-all-elements))
+	   ((every (lambda (el) (memq el org-element-all-elements)) types)
 	    'elements)
 	   (t 'objects)))
-	 ;; --RESTRICTS is a list of element types whose secondary
-	 ;; string could possibly contain an object with a type among
-	 ;; TYPES.
-	 (--restricts
-	  (and (eq --category 'objects)
-	       (loop for el in org-element-secondary-value-alist
-		     when
-		     (loop for o in types
-			   thereis (memq o (org-element-restriction (car el))))
-		     collect (car el))))
 	 --acc
 	 (--walk-tree
 	  (function
 	   (lambda (--data)
-	     ;; Recursively walk DATA.  INFO, if non-nil, is
-	     ;; a plist holding contextual information.
-	     (mapc
-	      (lambda (--blob)
-		(unless (and info (member --blob (plist-get info :ignore-list)))
-		  (let ((--type (org-element-type --blob)))
-		    ;; Check if TYPE is matching among TYPES.  If so,
-		    ;; apply FUN to --BLOB and accumulate return value
-		    ;; into --ACC (or exit if FIRST-MATCH is non-nil).
-		    (when (memq --type types)
-		      (let ((result (funcall fun --blob)))
-			(cond ((not result))
-			      (first-match (throw 'first-match result))
-			      (t (push result --acc)))))
-		    ;; If --BLOB has a secondary string that can
-		    ;; contain objects with their type among TYPES,
-		    ;; look into that string.
-		    (when (memq --type --restricts)
-		      (funcall
-		       --walk-tree
-		       `(org-data
-			 nil
-			 ,@(org-element-property
-			    (cdr (assq --type org-element-secondary-value-alist))
-			    --blob))))
-		    ;; Now determine if a recursion into --BLOB is
-		    ;; possible.  If so, do it.
-		    (unless (memq --type no-recursion)
-		      (when (or (and (memq --type org-element-greater-elements)
-				     (not (eq --category 'greater-elements)))
-				(and (memq --type org-element-all-elements)
-				     (not (eq --category 'elements)))
-				(org-element-contents --blob))
-			(funcall --walk-tree --blob))))))
-	      (org-element-contents --data))))))
+	     ;; Recursively walk DATA.  INFO, if non-nil, is a plist
+	     ;; holding contextual information.
+	     (let ((--type (org-element-type --data)))
+	       (cond
+		((not --data))
+		;; Ignored element in an export context.
+		((and info (member --data (plist-get info :ignore-list))))
+		;; Secondary string: only objects can be found there.
+		((not --type)
+		 (when (eq --category 'objects) (mapc --walk-tree --data)))
+		;; Unconditionally enter parse trees.
+		((eq --type 'org-data)
+		 (mapc --walk-tree (org-element-contents --data)))
+		(t
+		 ;; Check if TYPE is matching among TYPES.  If so,
+		 ;; apply FUN to --DATA and accumulate return value
+		 ;; into --ACC (or exit if FIRST-MATCH is non-nil).
+		 (when (memq --type types)
+		   (let ((result (funcall fun --data)))
+		     (cond ((not result))
+			   (first-match (throw 'first-match result))
+			   (t (push result --acc)))))
+		 ;; If --DATA has a secondary string that can contain
+		 ;; objects with their type among TYPES, look into it.
+		 (when (eq --category 'objects)
+		   (let ((sec-prop
+			  (assq --type org-element-secondary-value-alist)))
+		     (when sec-prop
+		       (funcall --walk-tree
+				(org-element-property (cdr sec-prop) --data)))))
+		 ;; Determine if a recursion into --DATA is possible.
+		 (cond
+		  ;; --TYPE is explicitly removed from recursion.
+		  ((memq --type no-recursion))
+		  ;; --DATA has no contents.
+		  ((not (org-element-contents --data)))
+		  ;; Looking for greater elements but --DATA is simply
+		  ;; an element or an object.
+		  ((and (eq --category 'greater-elements)
+			(not (memq --type org-element-greater-elements))))
+		  ;; Looking for elements but --DATA is an object.
+		  ((and (eq --category 'elements)
+			(memq --type org-element-all-objects)))
+		  ;; In any other case, map contents.
+		  (t (mapc --walk-tree (org-element-contents --data)))))))))))
     (catch 'first-match
       (funcall --walk-tree data)
       ;; Return value in a proper order.
