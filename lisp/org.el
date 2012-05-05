@@ -5939,16 +5939,19 @@ needs to be inserted at a specific position in the font-lock sequence.")
     (when org-pretty-entities
       (catch 'match
 	(while (re-search-forward
-		"\\\\\\(frac[13][24]\\|[a-zA-Z]+\\)\\($\\|[^[:alpha:]\n]\\)"
+		"\\\\\\(frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]\n]\\)"
 		limit t)
 	  (if (and (not (org-in-indented-comment-line))
 		   (setq ee (org-entity-get (match-string 1)))
 		   (= (length (nth 6 ee)) 1))
-	      (progn
+	      (let*
+		  ((end (if (equal (match-string 2) "{}")
+			    (match-end 2)
+			  (match-end 1))))
 		(add-text-properties
-		 (match-beginning 0) (match-end 1)
+		 (match-beginning 0) end
 		 (list 'font-lock-fontified t))
-		(compose-region (match-beginning 0) (match-end 1)
+		(compose-region (match-beginning 0) end
 				(nth 6 ee) nil)
 		(backward-char 1)
 		(throw 'match t))))
