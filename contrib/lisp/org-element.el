@@ -868,8 +868,7 @@ CONTENTS is the contents of the element."
 ;; type and add that new type to `org-element-all-elements'.
 
 ;; As a special case, when the newly defined type is a block type,
-;; `org-element-non-recursive-block-alist' has to be modified
-;; accordingly.
+;; `org-element-block-name-alist' has to be modified accordingly.
 
 
 ;;;; Babel Call
@@ -3000,22 +2999,13 @@ element or object type."
 ;;
 ;; `org-element-current-element' is the core function of this section.
 ;; It returns the Lisp representation of the element starting at
-;; point.  It uses `org-element--element-block-re' for quick access to
-;; a common regexp.
+;; point.
 ;;
 ;; `org-element-current-element' makes use of special modes.  They are
 ;; activated for fixed element chaining (i.e. `plain-list' > `item')
 ;; or fixed conditional element chaining (i.e. `headline' >
 ;; `section'). Special modes are: `section', `quote-section', `item'
 ;; and `table-row'.
-
-(defconst org-element--element-block-re
-  (format "[ \t]*#\\+BEGIN_\\(%s\\)\\(?: \\|$\\)"
-          (mapconcat
-           'regexp-quote
-           (mapcar 'car org-element-non-recursive-block-alist) "\\|"))
-  "Regexp matching the beginning of a non-recursive block type.
-Used internally by `org-element-current-element'.")
 
 (defun org-element-current-element (&optional granularity special structure)
   "Parse the element starting at point.
