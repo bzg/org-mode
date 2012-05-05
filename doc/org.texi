@@ -12420,7 +12420,7 @@ Publishing to a local directory is also much faster than to a remote one, so
 that you can afford more easily to republish entire projects.  If you set
 @code{org-publish-use-timestamps-flag} to @code{nil}, you gain the main
 benefit of re-including any changed external files such as source example
-files you might include with @code{#+INCLUDE}.  The timestamp mechanism in
+files you might include with @code{#+INCLUDE:}.  The timestamp mechanism in
 Org is not smart enough to detect if included files have been modified.
 
 @node Sample configuration, Triggering publication, Uploading files, Publishing
