@@ -8347,6 +8347,12 @@ top-level    as top-level entries at the end of the file."
   :version "24.1"
   :type 'boolean)
 
+(defcustom org-agenda-bulk-mark-char ">"
+  "A single-character string to be used as the bulk mark."
+  :group 'org-agenda
+  :version "24.1"
+  :type 'string)
+
 (defun org-agenda-add-entry-to-org-agenda-diary-file (type text &optional d1 d2)
   "Add a diary entry with TYPE to `org-agenda-diary-file'.
 If TEXT is not empty, it will become the headline of the new entry, and
@@ -8623,7 +8629,7 @@ This is a command that has to be installed in `calendar-mode-map'."
 	  (unless m (error "Nothing to mark at point"))
 	  (push m org-agenda-bulk-marked-entries)
 	  (setq ov (make-overlay (point-at-bol) (+ 2 (point-at-bol))))
-	  (org-overlay-display ov "> "
+	  (org-overlay-display ov (concat org-agenda-bulk-mark-char " ")
 			       (org-get-todo-face "TODO")
 			       'evaporate)
 	  (overlay-put ov 'type 'org-marked-entry-overlay))
