@@ -3042,7 +3042,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-odt-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (string= (org-element-property :type export-block) "latex")
+  (when (string= (org-element-property :type export-block) "ODT")
     (org-remove-indentation (org-element-property :value export-block))))
 
 

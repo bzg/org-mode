@@ -1106,7 +1106,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-ascii-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (string= (org-element-property :type export-block) "ascii")
+  (when (string= (org-element-property :type export-block) "ASCII")
     (org-remove-indentation (org-element-property :value export-block))))
 
 
