@@ -1976,23 +1976,6 @@ visible content of the card."
       (org-drill-hide-subheadings-if 'org-drill-entry-p)))))
 
 
-;;; The following macro is necessary because `org-save-outline-visibility'
-;;; currently discards the value returned by its body and returns a garbage
-;;; value instead. (as at org mode v 7.5)
-
-(defmacro org-drill-save-visibility (&rest body)
-  "Store the current visibility state of the org buffer, and restore it
-after executing BODY. Return the value of the last expression
-in BODY."
-  (let ((retval (gensym)))
-    `(let ((,retval nil))
-       (org-save-outline-visibility t
-         (setq ,retval
-               (progn
-                 ,@body)))
-       ,retval)))
-
-
 (defun org-drill-entry ()
   "Present the current topic for interactive review, as in `org-drill'.
 Review will occur regardless of whether the topic is due for review or whether
@@ -2012,38 +1995,41 @@ See `org-drill' for more details."
   ;;  (org-back-to-heading))
   (let ((card-type (org-entry-get (point) "DRILL_CARD_TYPE"))
         (answer-fn 'org-drill-present-default-answer)
-        (cont nil))
-    (org-drill-save-visibility
-     (save-restriction
-       (org-narrow-to-subtree)
-       (org-show-subtree)
-       (org-cycle-hide-drawers 'all)
+        (cont nil)
+        ;; fontification functions in `outline-view-change-hook' can cause big
+        ;; slowdowns, so we temporarily bind this variable to nil here.
+        (outline-view-change-hook nil))
+    (org-save-outline-visibility t
+      (save-restriction
+        (org-narrow-to-subtree)
+        (org-show-subtree)
+        (org-cycle-hide-drawers 'all)
 
-       (let ((presentation-fn (cdr (assoc card-type org-drill-card-type-alist))))
-         (if (listp presentation-fn)
-             (psetq answer-fn (or (second presentation-fn)
-                                  'org-drill-present-default-answer)
-                    presentation-fn (first presentation-fn)))
-         (cond
-          ((null presentation-fn)
-           (message "%s:%d: Unrecognised card type '%s', skipping..."
-                    (buffer-name) (point) card-type)
-           (sit-for 0.5)
-           'skip)
-          (t
-           (setq cont (funcall presentation-fn))
-           (cond
-            ((not cont)
-             (message "Quit")
-             nil)
-            ((eql cont 'edit)
-             'edit)
-            ((eql cont 'skip)
-             'skip)
-            (t
-             (save-excursion
-               (funcall answer-fn
-                        (lambda () (org-drill-reschedule)))))))))))))
+        (let ((presentation-fn (cdr (assoc card-type org-drill-card-type-alist))))
+          (if (listp presentation-fn)
+              (psetq answer-fn (or (second presentation-fn)
+                                   'org-drill-present-default-answer)
+                     presentation-fn (first presentation-fn)))
+          (cond
+           ((null presentation-fn)
+            (message "%s:%d: Unrecognised card type '%s', skipping..."
+                     (buffer-name) (point) card-type)
+            (sit-for 0.5)
+            'skip)
+           (t
+            (setq cont (funcall presentation-fn))
+            (cond
+             ((not cont)
+              (message "Quit")
+              nil)
+             ((eql cont 'edit)
+              'edit)
+             ((eql cont 'skip)
+              'skip)
+             (t
+              (save-excursion
+                (funcall answer-fn
+                         (lambda () (org-drill-reschedule)))))))))))))
 
 
 (defun org-drill-entries-pending-p ()
@@ -3013,4 +2999,3 @@ returns its return value."
 
 
 (provide 'org-drill)
-
