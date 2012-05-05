@@ -2787,7 +2787,7 @@ CONTENTS is nil."
 	  ;; Horizontal rules.
 	  "^[ \t]*-\\{5,\\}[ \t]*$" "\\|"
 	  ;; LaTeX environments.
-	  "^[ \t]*\\\\\\(begin\\|end\\)"
+	  "^[ \t]*\\\\\\(begin\\|end\\)" "\\|"
 	  ;; Planning and Clock lines.
 	  "^[ \t]*\\(?:"
 	  org-clock-string "\\|"
