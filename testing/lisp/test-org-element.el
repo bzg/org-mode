@@ -1673,7 +1673,22 @@ Paragraph \\alpha."
 
 ;;; Test Navigation Tools.
 
-(ert-deftest test-org-element/forward-element ()
+(ert-deftest test-org-element/at-point ()
+  "Test `org-element-at-point' specifications."
+  ;; Special case: at the very beginning of a table, return `table'
+  ;; object instead of `table-row'.
+  (should
+   (eq 'table
+       (org-test-with-temp-text "| a | b |"
+	 (org-element-type (org-element-at-point)))))
+  ;; Special case: at the very beginning of a list or sub-list, return
+  ;; `plain-list' object instead of `item'.
+  (should
+   (eq 'plain-list
+       (org-test-with-temp-text "- item"
+	 (org-element-type (org-element-at-point))))))
+
+(ert-deftest test-org-element/forward ()
   "Test `org-element-forward' specifications."
   ;; 1. At EOB: should error.
   (org-test-with-temp-text "Some text\n"
@@ -1753,7 +1768,7 @@ Outside."
     (org-element-forward)
     (should (looking-at "  - sub3"))))
 
-(ert-deftest test-org-element/backward-element ()
+(ert-deftest test-org-element/backward ()
   "Test `org-element-backward' specifications."
   ;; 1. At BOB (modulo some white spaces): should error.
   (org-test-with-temp-text "    \nParagraph."
@@ -1832,7 +1847,7 @@ Outside."
     (org-element-backward)
     (should (looking-at "- item1"))))
 
-(ert-deftest test-org-element/up-element ()
+(ert-deftest test-org-element/up ()
   "Test `org-element-up' specifications."
   ;; 1. At BOB or with no surrounding element: should error.
   (org-test-with-temp-text "Paragraph."
@@ -1883,7 +1898,7 @@ Outside."
     (org-element-up)
     (should (looking-at "\\* Top"))))
 
-(ert-deftest test-org-element/down-element ()
+(ert-deftest test-org-element/down ()
   "Test `org-element-down' specifications."
   ;; 1. Error when the element hasn't got a recursive type.
   (org-test-with-temp-text "Paragraph."

@@ -3821,19 +3821,18 @@ first row.
 
 If optional argument KEEP-TRAIL is non-nil, the function returns
 a list of of elements leading to element at point.  The list's
-CAR is always the element at point.  Its last item will be the
-element's parent, unless element was either the first in its
-section (in which case the last item in the list is the first
-element of section) or an headline (in which case the list
-contains that headline as its single element).  Elements
-in-between, if any, are siblings of the element at point."
+CAR is always the element at point.  Following positions contain
+element's siblings, then parents, siblings of parents, until the
+first element of current section."
   (org-with-wide-buffer
    ;; If at an headline, parse it.  It is the sole element that
    ;; doesn't require to know about context.  Be sure to disallow
    ;; secondary string parsing, though.
    (if (org-with-limited-levels (org-at-heading-p))
-       (if (not keep-trail) (org-element-headline-parser t)
-	 (list (org-element-headline-parser t)))
+       (progn
+	 (beginning-of-line)
+	 (if (not keep-trail) (org-element-headline-parser t)
+	   (list (org-element-headline-parser t))))
      ;; Otherwise move at the beginning of the section containing
      ;; point.
      (let ((origin (point)) element type special-flag trail struct prevs)
@@ -3843,72 +3842,39 @@ in-between, if any, are siblings of the element at point."
 	  (forward-line)))
        (org-skip-whitespace)
        (beginning-of-line)
-       ;; Starting parsing successively each element with
-       ;; `org-element-current-element'.  Skip those ending before
-       ;; original position.
+       ;; Parse successively each element, skipping those ending
+       ;; before original position.
        (catch 'exit
          (while t
            (setq element (org-element-current-element
 			  'element special-flag struct)
                  type (car element))
-	   (when keep-trail (push element trail))
+	   (push element trail)
            (cond
 	    ;; 1. Skip any element ending before point or at point.
 	    ((let ((end (org-element-property :end element)))
 	       (when (<= end origin)
 		 (if (> (point-max) end) (goto-char end)
-		   (throw 'exit (or trail element))))))
+		   (throw 'exit (if keep-trail trail element))))))
 	    ;; 2. An element containing point is always the element at
 	    ;;    point.
 	    ((not (memq type org-element-greater-elements))
 	     (throw 'exit (if keep-trail trail element)))
-	    ;; 3. At a plain list.
-	    ((eq type 'plain-list)
-	     (setq struct (org-element-property :structure element)
-		   prevs (or prevs (org-list-prevs-alist struct)))
-	     (let ((beg (org-element-property :contents-begin element)))
-	       (if (<= origin beg) (throw 'exit (or trail element))
-		 ;; Find the item at this level containing ORIGIN.
-		 (let ((items (org-list-get-all-items beg struct prevs))
-		       parent)
-		   (catch 'local
-		     (mapc
-		      (lambda (pos)
-			(cond
-			 ;; Item ends before point: skip it.
-			 ((<= (org-list-get-item-end pos struct) origin))
-			 ;; Item contains point: store is in PARENT.
-			 ((<= pos origin) (setq parent pos))
-			 ;; We went too far: return PARENT.
-			 (t (throw 'local nil)))) items))
-		   ;; No parent: no item contained point, though the
-		   ;; plain list does.  Point is in the blank lines
-		   ;; after the list: return plain list.
-		   (if (not parent) (throw 'exit (or trail element))
-		     (setq special-flag 'item)
-		     (goto-char parent))))))
-	    ;; 4. At a table.
-	    ((eq type 'table)
-	     (if (eq (org-element-property :type element) 'table.el)
-		 (throw 'exit (or trail element))
-	       (let ((beg (org-element-property :contents-begin element))
-		     (end (org-element-property :contents-end element)))
-		 (if (or (<= origin beg) (>= origin end))
-		     (throw 'exit (or trail element))
-		   (when keep-trail (setq trail (list element)))
-		   (setq special-flag 'table-row)
-		   (narrow-to-region beg end)))))
-	    ;; 4. At any other greater element type, if point is
+	    ;; 3. At any other greater element type, if point is
 	    ;;    within contents, move into it.  Otherwise, return
 	    ;;    that element.
 	    (t
-	     (when (eq type 'item) (setq special-flag nil))
 	     (let ((beg (org-element-property :contents-begin element))
 		   (end (org-element-property :contents-end element)))
-	       (if (or (not beg) (not end) (> beg origin) (< end origin))
-		   (throw 'exit (or trail element))
-		 ;; Reset trail, since we found a parent.
-		 (when keep-trail (setq trail (list element)))
+	       (if (or (not beg) (not end) (> beg origin) (<= end origin)
+		       (and (= beg origin) (memq type '(plain-list table))))
+		   (throw 'exit (if keep-trail trail element))
+		 (case type
+		   (plain-list
+		    (setq special-flag 'item
+			  struct (org-element-property :structure element)))
+		   (table (setq special-flag 'table-row))
+		   (otherwise (setq special-flag nil)))
 		 (narrow-to-region beg end)
 		 (goto-char beg)))))))))))
 
@@ -3942,84 +3908,139 @@ in-between, if any, are siblings of the element at point."
 
 (defun org-element-swap-A-B (elem-A elem-B)
   "Swap elements ELEM-A and ELEM-B.
-
-Leave point at the end of ELEM-A."
+Assume ELEM-B is after ELEM-A in the buffer.  Leave point at the
+end of ELEM-A."
   (goto-char (org-element-property :begin elem-A))
-  (let* ((beg-A (org-element-property :begin elem-A))
-	 (end-A (save-excursion
-		  (goto-char (org-element-property :end elem-A))
-		  (skip-chars-backward " \r\t\n")
-		  (point-at-eol)))
-	 (beg-B (org-element-property :begin elem-B))
-	 (end-B (save-excursion
-		  (goto-char (org-element-property :end elem-B))
-		  (skip-chars-backward " \r\t\n")
-		  (point-at-eol)))
-	 (body-A (buffer-substring beg-A end-A))
-	 (body-B (delete-and-extract-region beg-B end-B)))
-    (goto-char beg-B)
-    (insert body-A)
-    (goto-char beg-A)
-    (delete-region beg-A end-A)
-    (insert body-B)
-    (goto-char (org-element-property :end elem-B))))
+  ;; There are two special cases when an element doesn't start at bol:
+  ;; the first paragraph in an item or in a footnote definition.
+  (let ((specialp (not (bolp))))
+    ;; Only a paragraph without any affiliated keyword can be moved at
+    ;; ELEM-A position in such a situation.  Note that the case of
+    ;; a footnote definition is impossible: it cannot contain two
+    ;; paragraphs in a row because it cannot contain a blank line.
+    (if (and specialp
+	     (or (not (eq (org-element-type elem-B) 'paragraph))
+		 (/= (org-element-property :begin elem-B)
+		     (org-element-property :contents-begin elem-B))))
+	(error "Cannot swap elements"))
+    ;; In a special situation, ELEM-A will have no indentation.  We'll
+    ;; give it ELEM-B's (which will in, in turn, have no indentation).
+    (let* ((ind-B (when specialp
+		    (goto-char (org-element-property :begin elem-B))
+		    (org-get-indentation)))
+	   (beg-A (org-element-property :begin elem-A))
+	   (end-A (save-excursion
+		    (goto-char (org-element-property :end elem-A))
+		    (skip-chars-backward " \r\t\n")
+		    (point-at-eol)))
+	   (beg-B (org-element-property :begin elem-B))
+	   (end-B (save-excursion
+		    (goto-char (org-element-property :end elem-B))
+		    (skip-chars-backward " \r\t\n")
+		    (point-at-eol)))
+	   (body-A (buffer-substring beg-A end-A))
+	   (body-B (delete-and-extract-region beg-B end-B)))
+      (goto-char beg-B)
+      (when specialp
+	(setq body-B (replace-regexp-in-string "\\`[ \t]*" "" body-B))
+	(org-indent-to-column ind-B))
+      (insert body-A)
+      (goto-char beg-A)
+      (delete-region beg-A end-A)
+      (insert body-B)
+      (goto-char (org-element-property :end elem-B)))))
+
+(defun org-element-forward ()
+  "Move forward by one element.
+Move to the next element at the same level, when possible."
+  (interactive)
+  (if (org-with-limited-levels (org-at-heading-p))
+      (let ((origin (point)))
+	(org-forward-same-level 1)
+	(unless (org-with-limited-levels (org-at-heading-p))
+	  (goto-char origin)
+	  (error "Cannot move further down")))
+    (let* ((trail (org-element-at-point 'keep-trail))
+	   (elem (pop trail))
+	   (end (org-element-property :end elem))
+	   (parent (loop for prev in trail
+			 when (>= (org-element-property :end prev) end)
+			 return prev)))
+      (cond
+       ((eobp) (error "Cannot move further down"))
+       ((and parent (= (org-element-property :contents-end parent) end))
+	(goto-char (org-element-property :end parent)))
+       (t (goto-char end))))))
 
 (defun org-element-backward ()
   "Move backward by one element.
 Move to the previous element at the same level, when possible."
   (interactive)
-  (if (save-excursion (skip-chars-backward " \r\t\n") (bobp))
-      (error "Cannot move further up")
+  (if (org-with-limited-levels (org-at-heading-p))
+      ;; At an headline, move to the previous one, if any, or stay
+      ;; here.
+      (let ((origin (point)))
+	(org-backward-same-level 1)
+	(unless (org-with-limited-levels (org-at-heading-p))
+	  (goto-char origin)
+	  (error "Cannot move further up")))
     (let* ((trail (org-element-at-point 'keep-trail))
-	   (element (car trail))
-	   (beg (org-element-property :begin element)))
-      ;; Move to beginning of current element if point isn't there.
-      (if (/= (point) beg) (goto-char beg)
-	(let ((type (org-element-type element)))
-	  (cond
-	   ;; At an headline: move to previous headline at the same
-	   ;; level, a parent, or BOB.
-	   ((eq type 'headline)
-	    (let ((dest (save-excursion (org-backward-same-level 1) (point))))
-	      (if (= (point-min) dest) (error "Cannot move further up")
-		(goto-char dest))))
-	   ;; At an item: try to move to the previous item, if any.
-	   ((and (eq type 'item)
-		 (let* ((struct (org-element-property :structure element))
-			(prev (org-list-get-prev-item
-			       beg struct (org-list-prevs-alist struct))))
-		   (when prev (goto-char prev)))))
-	   ;; In any other case, find the previous element in the
-	   ;; trail and move to its beginning.  If no previous element
-	   ;; can be found, move to headline.
-	   (t (let ((prev (nth 1 trail)))
-		(if prev (goto-char (org-element-property :begin prev))
-		  (org-back-to-heading))))))))))
+	   (elem (car trail))
+	   (prev-elem (nth 1 trail))
+	   (beg (org-element-property :begin elem)))
+      (cond
+       ;; Move to beginning of current element if point isn't there
+       ;; already.
+       ((/= (point) beg) (goto-char beg))
+       ((not prev-elem) (error "Cannot move further up"))
+       (t (goto-char (org-element-property :begin prev-elem)))))))
+
+(defun org-element-up ()
+  "Move to upper element."
+  (interactive)
+  (if (org-with-limited-levels (org-at-heading-p))
+      (unless (org-up-heading-safe)
+	(error "No surrounding element"))
+    (let* ((trail (org-element-at-point 'keep-trail))
+	   (elem (pop trail))
+	   (end (org-element-property :end elem))
+	   (parent (loop for prev in trail
+			 when (>= (org-element-property :end prev) end)
+			 return prev)))
+      (cond
+       (parent (goto-char (org-element-property :begin parent)))
+       ((org-before-first-heading-p) (error "No surrounding element"))
+       (t (org-back-to-heading))))))
+
+(defun org-element-down ()
+  "Move to inner element."
+  (interactive)
+  (let ((element (org-element-at-point)))
+    (cond
+     ((memq (org-element-type element) '(plain-list table))
+      (goto-char (org-element-property :contents-begin element))
+      (forward-char))
+     ((memq (org-element-type element) org-element-greater-elements)
+      ;; If contents are hidden, first disclose them.
+      (when (org-element-property :hiddenp element) (org-cycle))
+      (goto-char (org-element-property :contents-begin element)))
+     (t (error "No inner element")))))
 
 (defun org-element-drag-backward ()
-  "Drag backward element at point."
+  "Move backward element at point."
   (interactive)
-  (let* ((pos (point))
-	 (elem (org-element-at-point)))
-    (when (= (progn (goto-char (point-min))
-		    (org-skip-whitespace)
-		    (point-at-bol))
-	     (org-element-property :end elem))
-      (error "Cannot drag element backward"))
-    (goto-char (org-element-property :begin elem))
-    (org-element-backward)
-    (let ((prev-elem (org-element-at-point)))
-      (when (or (org-element-nested-p elem prev-elem)
-		(and (eq (org-element-type elem) 'headline)
-		     (not (eq (org-element-type prev-elem) 'headline))))
-	(goto-char pos)
-	(error "Cannot drag element backward"))
-      ;; Compute new position of point: it's shifted by PREV-ELEM
-      ;; body's length.
-      (let ((size-prev (- (org-element-property :end prev-elem)
-			  (org-element-property :begin prev-elem))))
-	(org-element-swap-A-B prev-elem elem)
-	(goto-char (- pos size-prev))))))
+  (if (org-with-limited-levels (org-at-heading-p)) (org-move-subtree-up)
+    (let* ((trail (org-element-at-point 'keep-trail))
+	   (elem (car trail))
+	   (prev-elem (nth 1 trail)))
+      ;; Error out if no previous element or previous element is
+      ;; a parent of the current one.
+      (if (or (not prev-elem) (org-element-nested-p elem prev-elem))
+	  (error "Cannot drag element backward")
+	(let ((pos (point)))
+	  (org-element-swap-A-B prev-elem elem)
+	  (goto-char (+ (org-element-property :begin prev-elem)
+			(- pos (org-element-property :begin elem)))))))))
 
 (defun org-element-drag-forward ()
   "Move forward element at point."
@@ -4042,7 +4063,9 @@ Move to the previous element at the same level, when possible."
 			    (goto-char (org-element-property :end next-elem))
 			    (skip-chars-backward " \r\t\n")
 			    (forward-line)
-			    (point))
+			    ;; Small correction if buffer doesn't end
+			    ;; with a newline character.
+			    (if (and (eolp) (not (bolp))) (1+ (point)) (point)))
 			  (org-element-property :begin next-elem)))
 	    (size-blank (- (org-element-property :end elem)
 			   (save-excursion
@@ -4052,43 +4075,6 @@ Move to the previous element at the same level, when possible."
 			     (point)))))
 	(org-element-swap-A-B elem next-elem)
 	(goto-char (+ pos size-next size-blank))))))
-
-(defun org-element-forward ()
-  "Move forward by one element.
-Move to the next element at the same level, when possible."
-  (interactive)
-  (if (eobp) (error "Cannot move further down")
-    (let* ((trail (org-element-at-point 'keep-trail))
-	   (element (car trail))
-	   (type (org-element-type element))
-	   (end (org-element-property :end element)))
-      (cond
-       ;; At an headline, move to next headline at the same level.
-       ((eq type 'headline) (goto-char end))
-       ;; At an item.  Move to the next item, if possible.
-       ((and (eq type 'item)
-	     (let* ((struct (org-element-property :structure element))
-		    (prevs (org-list-prevs-alist struct))
-		    (beg (org-element-property :begin element))
-		    (next-item (org-list-get-next-item beg struct prevs)))
-	       (when next-item (goto-char next-item)))))
-       ;; In any other case, move to element's end, unless this
-       ;; position is also the end of its parent's contents, in which
-       ;; case, directly jump to parent's end.
-       (t
-	(let ((parent
-	       ;; Determine if TRAIL contains the real parent of ELEMENT.
-	       (and (> (length trail) 1)
-		    (let* ((parent-candidate (car (last trail))))
-		      (and (memq (org-element-type parent-candidate)
-				 org-element-greater-elements)
-			   (>= (org-element-property
-				:contents-end parent-candidate) end)
-			   parent-candidate)))))
-	  (cond ((not parent) (goto-char end))
-		((= (org-element-property :contents-end parent) end)
-		 (goto-char (org-element-property :end parent)))
-		(t (goto-char end)))))))))
 
 (defun org-element-mark-element ()
   "Put point at beginning of this element, mark at end.
@@ -4127,101 +4113,39 @@ ones already marked."
        (org-element-property :begin elem)
        (org-element-property :end elem))))))
 
-(defun org-transpose-elements ()
+(defun org-element-transpose ()
   "Transpose current and previous elements, keeping blank lines between.
 Point is moved after both elements."
   (interactive)
   (org-skip-whitespace)
-  (let ((pos (point))
-	(cur (org-element-at-point)))
-    (when (= (save-excursion (goto-char (point-min))
-			     (org-skip-whitespace)
-			     (point-at-bol))
-	     (org-element-property :begin cur))
-      (error "No previous element"))
-    (goto-char (org-element-property :begin cur))
-    (forward-line -1)
-    (let ((prev (org-element-at-point)))
-      (when (org-element-nested-p cur prev)
-	(goto-char pos)
-	(error "Cannot transpose nested elements"))
-      (org-element-swap-A-B prev cur))))
+  (let ((end (org-element-property :end (org-element-at-point))))
+    (org-element-drag-backward)
+    (goto-char end)))
 
 (defun org-element-unindent-buffer ()
   "Un-indent the visible part of the buffer.
-Relative indentation \(between items, inside blocks, etc.\) isn't
+Relative indentation (between items, inside blocks, etc.) isn't
 modified."
   (interactive)
   (unless (eq major-mode 'org-mode)
     (error "Cannot un-indent a buffer not in Org mode"))
   (let* ((parse-tree (org-element-parse-buffer 'greater-element))
-	 unindent-tree                   ; For byte-compiler.
+	 unindent-tree			; For byte-compiler.
 	 (unindent-tree
 	  (function
 	   (lambda (contents)
-	     (mapc (lambda (element)
-		     (if (eq (org-element-type element) 'headline)
-			 (funcall unindent-tree
-				  (org-element-contents element))
-		       (save-excursion
-			 (save-restriction
-			   (narrow-to-region
-			    (org-element-property :begin element)
-			    (org-element-property :end element))
-			   (org-do-remove-indentation)))))
-		   (reverse contents))))))
+	     (mapc
+	      (lambda (element)
+		(if (memq (org-element-type element) '(headline section))
+		    (funcall unindent-tree (org-element-contents element))
+		  (save-excursion
+		    (save-restriction
+		      (narrow-to-region
+		       (org-element-property :begin element)
+		       (org-element-property :end element))
+		      (org-do-remove-indentation)))))
+	      (reverse contents))))))
     (funcall unindent-tree (org-element-contents parse-tree))))
-
-(defun org-element-up ()
-  "Move to upper element."
-  (interactive)
-  (cond
-   ((bobp) (error "No surrounding element"))
-   ((org-with-limited-levels (org-at-heading-p))
-    (or (org-up-heading-safe) (error "No surronding element")))
-   (t
-    (let* ((trail (org-element-at-point 'keep-trail))
-	   (element (car trail))
-	   (type (org-element-type element)))
-      (cond
-       ;; At an item, with a parent in the list: move to that parent.
-       ((and (eq type 'item)
-	     (let* ((beg (org-element-property :begin element))
-		    (struct (org-element-property :structure element))
-		    (parents (org-list-parents-alist struct))
-		    (parentp (org-list-get-parent beg struct parents)))
-	       (and parentp (goto-char parentp)))))
-       ;; Determine parent in the trail.
-       (t
-	(let ((parent
-	       (and (> (length trail) 1)
-		    (let ((parentp (car (last trail))))
-		      (and (memq (org-element-type parentp)
-				 org-element-greater-elements)
-			   (>= (org-element-property :contents-end parentp)
-			       (org-element-property :end element))
-			   parentp)))))
-	  (cond
-	   ;; When parent is found move to its beginning.
-	   (parent (goto-char (org-element-property :begin parent)))
-	   ;; If no parent was found, move to headline above, if any
-	   ;; or return an error.
-	   ((org-before-first-heading-p) (error "No surrounding element"))
-	   (t (org-back-to-heading))))))))))
-
-(defun org-element-down ()
-  "Move to inner element."
-  (interactive)
-  (let ((element (org-element-at-point)))
-    (cond
-     ((memq (org-element-type element) '(plain-list table))
-      (goto-char (org-element-property :contents-begin element))
-      (forward-char))
-     ((memq (org-element-type element) org-element-greater-elements)
-      ;; If contents are hidden, first disclose them.
-      (when (org-element-property :hiddenp element) (org-cycle))
-      (goto-char (org-element-property :contents-begin element)))
-     (t (error "No inner element")))))
 
 
 (provide 'org-element)
