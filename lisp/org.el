@@ -19068,13 +19068,18 @@ argument ARG, change each line in region into an item."
   "Convert headings to normal text, or items or text to headings.
 If there is no active region, only the current line is considered.
 
-If the first non blank line is an headline, remove the stars from
-all headlines in the region.
+With a \\[universal-argument] prefix, convert the whole list at
+point into heading.
 
-If it is a plain list item, turn all plain list items into headings.
+In a region:
 
-If it is a normal line, turn each and every normal line (i.e. not
-an heading or an item) in the region into a heading.
+- If the first non blank line is an headline, remove the stars
+  from all headlines in the region.
+
+- If it is a normal line turn each and every normal line (i.e. not an
+  heading or an item) in the region into a heading.
+
+- If it is a plain list item, turn all plain list items into headings.
 
 When converting a line into a heading, the number of stars is chosen
 such that the lines become children of the current entry.  However,
@@ -19091,8 +19096,14 @@ stars to add."
 	      (skip-chars-forward " \r\t\n")
 	      (point-at-bol)))))
 	beg end)
-    ;; Determine boundaries of changes. If region ends at a bol, do
-    ;; not consider the last line to be in the region.
+    ;; Determine boundaries of changes.  If a universal prefix has
+    ;; been given, put the list in a region.  If region ends at a bol,
+    ;; do not consider the last line to be in the region.
+
+    (when (and current-prefix-arg (org-at-item-p))
+      (if (equal current-prefix-arg '(4)) (setq current-prefix-arg 1))
+      (org-mark-list))
+
     (if (org-region-active-p)
 	(setq beg (funcall skip-blanks (region-beginning))
 	      end (copy-marker (save-excursion
