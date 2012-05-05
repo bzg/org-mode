@@ -10697,7 +10697,7 @@ RFLOC can be a refile location obtained in a different way.
 See also `org-refile-use-outline-path' and `org-completion-use-ido'.
 
 If you are using target caching (see `org-refile-use-cache'),
-You have to clear the target cache in order to find new targets.
+you have to clear the target cache in order to find new targets.
 This can be done with a 0 prefix (`C-0 C-c C-w') or a triple
 prefix argument (`C-u C-u C-u C-c C-w')."
 
@@ -10980,8 +10980,7 @@ this is used for the GOTO interface."
 	    rtn))
 	  ((eq flag 'lambda)
 	   ;; exact match?
-	   (assoc string thetable)))
-	 ))
+	   (assoc string thetable)))))
      args)))
 
 ;;;; Dynamic blocks
