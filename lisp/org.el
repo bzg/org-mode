@@ -5411,6 +5411,13 @@ will be prompted for."
   :group 'org-appearance
   :group 'org-babel)
 
+(defcustom org-src-prevent-auto-filling nil
+  "When non-nil, prevent auto-filling in src blocks."
+  :type 'boolean
+  :version "24.1"
+  :group 'org-appearance
+  :group 'org-babel)
+
 (defun org-fontify-meta-lines-and-blocks (limit)
   (condition-case nil
       (org-fontify-meta-lines-and-blocks-1 limit)
@@ -20754,18 +20761,19 @@ the functionality can be provided as a fall-back.")
 
 (defun org-auto-fill-function ()
   "Auto-fill function."
-  (let (itemp prefix)
-    ;; When in a list, compute an appropriate fill-prefix and make
-    ;; sure it will be used by `do-auto-fill'.
-    (cond ((setq itemp (org-in-item-p))
-	   (progn
-	     (setq prefix (make-string (org-list-item-body-column itemp) ?\ ))
-	     (flet ((fill-context-prefix (from to &optional flr) prefix))
-	       (do-auto-fill))))
-	  (orgstruct-is-++
-	   (orgstruct++-ignore-org-filling
-	    (do-auto-fill)))
-	  (t (do-auto-fill)))))
+  (unless (and org-src-prevent-auto-filling (org-in-src-block-p))
+    (let (itemp prefix)
+      ;; When in a list, compute an appropriate fill-prefix and make
+      ;; sure it will be used by `do-auto-fill'.
+      (cond ((setq itemp (org-in-item-p))
+	     (progn
+	       (setq prefix (make-string (org-list-item-body-column itemp) ?\ ))
+	       (flet ((fill-context-prefix (from to &optional flr) prefix))
+		 (do-auto-fill))))
+	    (orgstruct-is-++
+	     (orgstruct++-ignore-org-filling
+	      (do-auto-fill)))
+	    (t (do-auto-fill))))))
 
 ;;; Other stuff.
 
