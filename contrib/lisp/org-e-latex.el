@@ -2007,13 +2007,16 @@ a communication channel."
   (let ((attr (mapconcat 'identity
 			 (org-element-property :attr_latex table)
 			 " ")))
-    (if (and attr (string-match "\\<align=\\(\\S-+\\)" attr))
-	(match-string 1 attr)
+    (if (string-match "\\<align=\\(\\S-+\\)" attr) (match-string 1 attr)
       (let (alignment)
 	;; Extract column groups and alignment from first (non-rule)
 	;; row.
 	(org-element-map
-	 (org-element-map table 'table-row 'identity info 'first-match)
+	 (org-element-map
+	  table 'table-row
+	  (lambda (row)
+	    (and (eq (org-element-property :type row) 'standard) row))
+	  info 'first-match)
 	 'table-cell
 	 (lambda (cell)
 	   (let ((borders (org-export-table-cell-borders cell info)))
