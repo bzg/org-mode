@@ -410,12 +410,6 @@ the value in cdr."
     (cons (list (car flat) (cadr flat))
          (org-make-parameter-alist (cddr flat)))))
 
-(defmacro orgstruct++-ignore-org-filling (&rest body)
-  "Ignore org filling in `orgstruct++-mode'."
-  `(let ,org-fb-vars
-     ,@body))
-(def-edebug-spec orgstruct++-ignore-org-filling (body))
-
 (provide 'org-macs)
 
 ;;; org-macs.el ends here

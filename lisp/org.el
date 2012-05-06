@@ -20422,7 +20422,6 @@ If point is in an inline task, mark that task instead."
 ;;; Paragraph filling stuff.
 ;; We want this to be just right, so use the full arsenal.
 
-(declare-function orgstruct++-ignore-org-filling "org-macs.el" (&rest body))
 (defun org-indent-line-function ()
   "Indent line depending on context."
   (interactive)
@@ -20534,8 +20533,8 @@ If point is in an inline task, mark that task instead."
 		       t t))
     (org-move-to-column column)
     (when (and orgstruct-is-++ (eq pos (point)))
-      (orgstruct++-ignore-org-filling
-       (indent-according-to-mode)))))
+      (org-let org-fb-vars
+	'(indent-according-to-mode)))))
 
 (defun org-indent-drawer ()
   "Indent the drawer at point."
@@ -20732,8 +20731,8 @@ the functionality can be provided as a fall-back.")
 	     (fill-paragraph justify) t))
 	  ;; Else falls back on `org-fill-paragraph-fallback-function'
 	  (orgstruct-is-++
-	   (orgstruct++-ignore-org-filling
-	    (fill-paragraph)))
+	   (org-let org-fb-vars
+	     '(fill-paragraph)))
 	  ;; (org-fill-paragraph-fallback-function
 	  ;;  (funcall org-fill-paragraph-fallback-function justify))
 	  ;; Else simply call `fill-paragraph'.
@@ -20781,8 +20780,8 @@ the functionality can be provided as a fall-back.")
 	       (flet ((fill-context-prefix (from to &optional flr) prefix))
 		 (do-auto-fill))))
 	    (orgstruct-is-++
-	     (orgstruct++-ignore-org-filling
-	      (do-auto-fill)))
+	     (org-let org-fb-vars
+	       '(do-auto-fill)))
 	    (t (do-auto-fill))))))
 
 ;;; Other stuff.
