@@ -8375,12 +8375,9 @@ C-c C-c     Set tags / toggle checkbox"
 (make-variable-buffer-local 'org-fb-vars)
 (defun orgstruct++-mode (&optional arg)
   "Toggle `orgstruct-mode', the enhanced version of it.
-In addition to setting orgstruct-mode, this also exports all indentation
-and autofilling variables from org-mode into the buffer.  It will also
-recognize item context in multiline items.
-Note that turning off orgstruct-mode will *not* remove the
-indentation/paragraph settings.  This can only be done by refreshing the
-major mode, for example with \\[normal-mode]."
+In addition to setting orgstruct-mode, this also exports all
+indentation and autofilling variables from org-mode into the
+buffer.  It will also recognize item context in multiline items."
   (interactive "P")
   (setq arg (prefix-numeric-value (or arg (if orgstruct-mode -1 1))))
   (if (< arg 1)
@@ -20577,6 +20574,8 @@ If point is in an inline task, mark that task instead."
     (when folded (org-cycle)))
   (message "Block at point indented"))
 
+;; For reference, this is the default value of adaptive-fill-regexp
+;;  "[ \t]*\\([-|#;>*]+[ \t]*\\|(?[0-9]+[.)][ \t]*\\)*"
 (defvar org-adaptive-fill-regexp-backup adaptive-fill-regexp
   "Variable to store copy of `adaptive-fill-regexp'.
 Since `adaptive-fill-regexp' is set to never match, we need to
@@ -20729,17 +20728,12 @@ the functionality can be provided as a fall-back.")
 	     (narrow-to-region (1+ (match-end 0))
 			       (save-excursion (forward-paragraph 1) (point)))
 	     (fill-paragraph justify) t))
-	  ;; Else falls back on `org-fill-paragraph-fallback-function'
+	  ;; Else fall back on fill-paragraph-function as possibly
+	  ;; defined in `org-fb-vars'
 	  (orgstruct-is-++
 	   (org-let org-fb-vars
-	     '(fill-paragraph)))
-	  ;; (org-fill-paragraph-fallback-function
-	  ;;  (funcall org-fill-paragraph-fallback-function justify))
-	  ;; Else simply call `fill-paragraph'.
+	     '(fill-paragraph justify)))
 	  (t nil))))
-
-;; For reference, this is the default value of adaptive-fill-regexp
-;;  "[ \t]*\\([-|#;>*]+[ \t]*\\|(?[0-9]+[.)][ \t]*\\)*"
 
 (defun org-adaptive-fill-function ()
   "Return a fill prefix for org-mode files."
