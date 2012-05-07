@@ -1106,8 +1106,10 @@ It determines the number of whitespaces to append by looking at
 
 (defun org-list-swap-items (beg-A beg-B struct)
   "Swap item starting at BEG-A with item starting at BEG-B in STRUCT.
-Blank lines at the end of items are left in place.  Return the
-new structure after the changes.
+
+Blank lines at the end of items are left in place.  Item
+visibility is preserved.  Return the new structure after the
+changes.
 
 Assume BEG-A is lesser than BEG-B and that BEG-A and BEG-B belong
 to the same sub-list.
@@ -1124,7 +1126,14 @@ This function modifies STRUCT."
 	   (body-B (buffer-substring beg-B end-B-no-blank))
 	   (between-A-no-blank-and-B (buffer-substring end-A-no-blank beg-B))
 	   (sub-A (cons beg-A (org-list-get-subtree beg-A struct)))
-	   (sub-B (cons beg-B (org-list-get-subtree beg-B struct))))
+	   (sub-B (cons beg-B (org-list-get-subtree beg-B struct)))
+	   ;; Store visibility status.
+	   (overlays (mapcar
+		      (lambda (ov) (cond ((not ov) 'subtree)
+				    ((cdr ov) 'children)
+				    (t 'folded)))
+		      (list (overlays-in beg-A end-A)
+			    (overlays-in beg-B end-B)))))
       ;; 1. Move effectively items in buffer.
       (goto-char beg-A)
       (delete-region beg-A end-B-no-blank)
@@ -1157,7 +1166,15 @@ This function modifies STRUCT."
 		    (setcar e (+ pos (- size-B size-A)))
 		    (setcar (nthcdr 6 e) (+ end-e (- size-B size-A))))))))
 	    struct)
-      (sort struct (lambda (e1 e2) (< (car e1) (car e2)))))))
+      (setq struct (sort struct (lambda (e1 e2) (< (car e1) (car e2)))))
+      ;; Restore visibility status, if needed.
+      (unless (eq (car overlays) 'subtree)
+	(org-list-set-item-visibility
+	 (+ beg-B (- size-B size-A)) struct (car overlays)))
+      (unless (eq (nth 1 overlays) 'subtree)
+	(org-list-set-item-visibility beg-A struct (nth 1 overlays)))
+      ;; Return structure.
+      struct)))
 
 (defun org-list-separating-blank-lines-number (pos struct prevs)
   "Return number of blank lines that should separate items in list.
@@ -1385,6 +1402,8 @@ added to the kill-ring.
 
 If DEST is `delete', ITEM will be deleted.
 
+Visibility of item is preserved.
+
 This function returns, destructively, the new list structure."
   (let* ((prevs (org-list-prevs-alist struct))
 	 (item-end (org-list-get-item-end item struct))
@@ -1427,7 +1446,12 @@ This function returns, destructively, the new list structure."
 			     (org-list-get-last-item item struct prevs))
 			    (point-at-eol)))))
 		     (t dest)))
-	 (org-M-RET-may-split-line nil))
+	 (org-M-RET-may-split-line nil)
+	 ;; Store visibility.
+	 (visibility (let ((ovs (overlays-in item item-end)))
+		       (cond ((not ovs) 'subtree)
+			     ((cdr ovs) 'children)
+			     (t 'folded)))))
     (cond
      ((eq dest 'delete) (org-list-delete-item item struct))
      ((eq dest 'kill)
@@ -1463,9 +1487,11 @@ This function returns, destructively, the new list structure."
 							 (+ end shift)))))))
 			       moved-items))
 		      (lambda (e1 e2) (< (car e1) (car e2))))))
-      ;; 2. Eventually delete extra copy of the item and clean marker.
-      (prog1
-	  (org-list-delete-item (marker-position item) struct)
+      ;; 2. Restore visibility if appropriate.
+      (unless (eq visibility 'subtree)
+	(org-list-set-item-visibility (point) struct visibility))
+      ;; 3. Eventually delete extra copy of the item and clean marker.
+      (prog1 (org-list-delete-item (marker-position item) struct)
 	(move-marker item nil)))
      (t struct))))
 
