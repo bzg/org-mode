@@ -89,7 +89,8 @@
   (unless (boundp 'diary-fancy-buffer)
     (defvaralias 'diary-fancy-buffer 'fancy-diary-buffer)))
 
-(require 'outline) (require 'noutline)
+(require 'outline)
+(require 'noutline "noutline" 'noerror) ;; stock XEmacs does not have it
 ;; Other stuff we need.
 (require 'time-date)
 (unless (fboundp 'time-subtract) (defalias 'time-subtract 'subtract-time))
@@ -211,16 +212,16 @@ identifier."
 (eval-when-compile
   (defun org-release () "N/A")
   (defun org-git-version () "N/A !!check installation!!")
-  (and (load (concat (org-find-library-name "org") "../UTILITIES/org-fixup.el")
-	    'noerror 'nomessage 'nosuffix 'mustsuffix)
+  (and (load (concat (org-find-library-dir "org") "../UTILITIES/org-fixup.el")
+	    'noerror 'nomessage 'nosuffix)
        (org-fixup)))
 ;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
   (interactive "P")
-  (let* ((org-dir         (ignore-errors (org-find-library-name "org")))
-	 (org-install-dir (ignore-errors (org-find-library-name "org-install.el")))
+  (let* ((org-dir         (ignore-errors (org-find-library-dir "org")))
+	 (org-install-dir (ignore-errors (org-find-library-dir "org-install.el")))
 	 (org-version (org-release))
 	 (git-version (org-git-version))
 	 (version (format "Org-mode version %s (%s @ %s)"
@@ -19581,10 +19582,10 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
   (require 'find-func)
   (let* ((file-re "^\\(org\\|orgtbl\\)\\(\\.el\\|-.*\\.el\\)")
-	 (dir-org (file-name-directory (org-find-library-name "org")))
+	 (dir-org (file-name-directory (org-find-library-dir "org")))
 	 (dir-org-contrib (ignore-errors
 			   (file-name-directory
-			    (org-find-library-name "org-contribdir"))))
+			    (org-find-library-dir "org-contribdir"))))
 	 (babel-files
 	  (mapcar (lambda (el) (concat "ob" (when el (format "-%s" el)) ".el"))
 		  (append (list nil "comint" "eval" "exp" "keys"

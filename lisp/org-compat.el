@@ -330,12 +330,8 @@ Works on both Emacs and XEmacs."
       (org-no-properties (substring string (or from 0) to))
     (substring-no-properties string from to)))
 
-(defmacro org-find-library-name (library)
-  (if (fboundp 'find-library-name)
-      `(file-name-directory (find-library-name ,library))
-    ; XEmacs does not have `find-library-name'
-    `(flet ((flnh (lib ignore) lib))
-       (file-name-directory (find-library ,library nil 'flnh)))))
+(defmacro org-find-library-dir (library)
+  `(file-name-directory (locate-library ,library)))
 
 (defun org-count-lines (s)
   "How many lines in string S?"

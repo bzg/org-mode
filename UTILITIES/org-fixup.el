@@ -68,12 +68,12 @@
 
 (defmacro org-fixup ()
   (let* ((origin default-directory)
-	 (dirlisp (org-find-library-name "org"))
+	 (dirlisp (org-find-library-dir "org"))
 	 (dirorg (concat dirlisp "../" ))
 	 (dirgit (concat dirorg ".git/" ))
 	 (org-version "N/A-fixup")
 	 (org-git-version "N/A-fixup !!check installation!!"))
-    (if (load (concat dirlisp "org-version.el") 'noerror 'nomessage 'nosuffix 'mustsuffix)
+    (if (load (concat dirlisp "org-version.el") 'noerror 'nomessage 'nosuffix)
 	(setq org-version     (org-release)
 	      org-git-version (org-git-version))
       (when (and (file-exists-p dirgit)
@@ -81,23 +81,23 @@
 	(unwind-protect
 	    (progn
 	      (cd dirorg)
-	      (when (eql 0 (shell-command "git describe --abbrev=6 HEAD"))
-		(with-current-buffer "*Shell Command Output*"
-		  (goto-char (point-min))
-		  (setq git-version (buffer-substring (point) (point-at-eol))))
-		(when (string-match "\\S-"
-				    (shell-command-to-string
-				     "git diff-index --name-only HEAD --"))
-		  (setq git-version (concat git-version "-dirty")))
-		(setq org-version (and (string-match "_\\([^-]+\\)-" git-version)
-				       (match-string 1 git-version)))
-		(setq org-git-version git-version)))
-	  (cd origin))))
+	      (setq org-git-version
+		    (concat (substring
+			     (shell-command-to-string "git describe --abbrev=6 HEAD")
+			     0 -1)
+			    (when (string-match "\\S-"
+						(shell-command-to-string
+						 "git status -uno --porcelain"))
+			      ".dirty")))
+	      (setq org-version
+		    (substring
+		     (shell-command-to-string "git describe --abbrev=0 HEAD")
+		     0 -1))))
+	(cd origin)))
     `(progn
        (defun org-release () ,org-version)
        (defun org-git-version () ,org-git-version)
-       "org-fixup.el: redefined org version."
-       )))
+       "org-fixup.el: redefined org version.")))
 
 (provide 'org-fixup)
 
