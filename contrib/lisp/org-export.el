@@ -1574,13 +1574,15 @@ Return transcoded string."
                (if transcoder (funcall transcoder data info) data))
              info))
            ;; Uninterpreted element/object: change it back to Org
-           ;; syntax.
+           ;; syntax and export again resulting raw string.
            ((not (org-export-interpret-p data info))
-            (org-export-expand
-             data
-             (mapconcat (lambda (blob) (org-export-data blob info))
-			(org-element-contents data)
-			"")))
+            (org-export-data
+	     (org-export-expand
+	      data
+	      (mapconcat (lambda (blob) (org-export-data blob info))
+			 (org-element-contents data)
+			 ""))
+	     info))
            ;; Secondary string.
            ((not type)
             (mapconcat (lambda (obj) (org-export-data obj info)) data ""))
