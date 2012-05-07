@@ -1932,16 +1932,77 @@ contextual information."
 
 
 ;;;; Table
+;;
+;; `org-e-latex-table' is the entry point for table transcoding.  It
+;; takes care of tables with a "verbatim" attribute.  Otherwise, it
+;; delegates the job to either `org-e-latex-table--table.el-table' or
+;; `org-e-latex-table--org-table' functions, depending of the type of
+;; the table.
+;;
+;; `org-e-latex-table--align-string' is a subroutine used to build
+;; alignment string for Org tables.
 
-(defun org-e-latex-table--format-string (table info)
-  "Return an appropriate format string for TABLE.
+(defun org-e-latex-table (table contents info)
+  "Transcode a TABLE element from Org to LaTeX.
+CONTENTS is nil.  INFO is a plist holding contextual information."
+  (cond
+   ;; Case 1: verbatim table.
+   ((or org-e-latex-tables-verbatim
+	(let ((attr (mapconcat 'identity
+			       (org-element-property :attr_latex table)
+			       " ")))
+	  (and attr (string-match "\\<verbatim\\>" attr))))
+    (format "\\begin{verbatim}\n%s\n\\end{verbatim}"
+	    ;; Re-create table, without affiliated keywords.
+	    (org-trim
+	     (org-element-interpret-data
+	      `(table nil ,@(org-element-contents table))))))
+   ;; Case 2: table.el table.  Convert it using appropriate tools.
+   ((eq (org-element-property :type table) 'table.el)
+    (org-e-latex-table--table.el-table table contents info))
+   ;; Case 3: Standard table.
+   (t (org-e-latex-table--org-table table contents info))))
 
-TABLE-INFO is the plist containing format info about the table,
-as returned by `org-export-table-format-info'.  INFO is a plist
-used as a communication channel.
+(defun org-e-latex-table--align-string (table info)
+  "Return an appropriate LaTeX alignment string.
+TABLE is the considered table.  INFO is a plist used as
+a communication channel."
+  (let ((attr (mapconcat 'identity
+			 (org-element-property :attr_latex table)
+			 " ")))
+    (if (string-match "\\<align=\\(\\S-+\\)" attr) (match-string 1 attr)
+      (let (alignment)
+	;; Extract column groups and alignment from first (non-rule)
+	;; row.
+	(org-element-map
+	 (org-element-map
+	  table 'table-row
+	  (lambda (row)
+	    (and (eq (org-element-property :type row) 'standard) row))
+	  info 'first-match)
+	 'table-cell
+	 (lambda (cell)
+	   (let ((borders (org-export-table-cell-borders cell info)))
+	     ;; Check left border for the first cell only.
+	     (when (and (memq 'left borders) (not alignment))
+	       (push "|" alignment))
+	     (push (case (org-export-table-cell-alignment cell info)
+		     (left "l")
+		     (right "r")
+		     (center "c"))
+		   alignment)
+	     (when (memq 'right borders) (push "|" alignment))))
+	 info)
+	(apply 'concat (reverse alignment))))))
 
-The format string leaves one placeholder for the body of the
-table."
+(defun org-e-latex-table--org-table (table contents info)
+  "Return appropriate LaTeX code for an Org table.
+
+TABLE is the table type element to transcode.  CONTENTS is its
+contents, as a string.  INFO is a plist used as a communication
+channel.
+
+This function assumes TABLE has `org' as its `:type' attribute."
   (let* ((label (org-element-property :name table))
 	 (caption (org-e-latex--caption/label-string
 		   (org-element-property :caption table) label info))
@@ -1980,10 +2041,11 @@ table."
      ;; Longtable.
      ((string= "longtable" table-env)
       (format
-       "\\begin{longtable}{%s}\n%s%%s%s\\end{longtable}"
+       "\\begin{longtable}{%s}\n%s%s%s\\end{longtable}"
        alignment
        (if (or (not org-e-latex-table-caption-above) (string= "" caption)) ""
 	 (concat (org-trim caption) "\\\\\n"))
+       contents
        (if (or org-e-latex-table-caption-above (string= "" caption)) ""
 	 (concat (org-trim caption) "\\\\\n"))))
      ;; Others.
@@ -1992,94 +2054,55 @@ table."
 		   (format "\\begin{%s}%s\n" float-env placement)
 		   (if org-e-latex-table-caption-above caption "")))
 		(when org-e-latex-tables-centered "\\begin{center}\n")
-		(format "\\begin{%s}%s{%s}\n%%s\\end{%s}"
+		(format "\\begin{%s}%s{%s}\n%s\\end{%s}"
 			table-env
-			(if width (format "{%s}" width) "") alignment table-env)
+			(if width (format "{%s}" width) "")
+			alignment
+			contents
+			table-env)
 		(when org-e-latex-tables-centered "\n\\end{center}")
 		(when float-env
 		  (concat (if org-e-latex-table-caption-above "" caption)
 			  (format "\n\\end{%s}" float-env))))))))
 
-(defun org-e-latex-table--align-string (table info)
-  "Return an appropriate LaTeX alignment string.
-TABLE is the considered table.  INFO is a plist used as
-a communication channel."
-  (let ((attr (mapconcat 'identity
-			 (org-element-property :attr_latex table)
-			 " ")))
-    (if (string-match "\\<align=\\(\\S-+\\)" attr) (match-string 1 attr)
-      (let (alignment)
-	;; Extract column groups and alignment from first (non-rule)
-	;; row.
-	(org-element-map
-	 (org-element-map
-	  table 'table-row
-	  (lambda (row)
-	    (and (eq (org-element-property :type row) 'standard) row))
-	  info 'first-match)
-	 'table-cell
-	 (lambda (cell)
-	   (let ((borders (org-export-table-cell-borders cell info)))
-	     ;; Check left border for the first cell only.
-	     (when (and (memq 'left borders) (not alignment))
-	       (push "|" alignment))
-	     (push (case (org-export-table-cell-alignment cell info)
-		     (left "l")
-		     (right "r")
-		     (center "c"))
-		   alignment)
-	     (when (memq 'right borders) (push "|" alignment))))
-	 info)
-	(apply 'concat (reverse alignment))))))
+(defun org-e-latex-table--table.el-table (table contents info)
+  "Return appropriate LaTeX code for a table.el table.
 
-(defun org-e-latex-table (table contents info)
-  "Transcode a TABLE element from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (cond
-   ;; Case 1: verbatim table.
-   ((or org-e-latex-tables-verbatim
-	(let ((attr (mapconcat 'identity
-			       (org-element-property :attr_latex table)
-			       " ")))
-	  (and attr (string-match "\\<verbatim\\>" attr))))
-    (format "\\begin{verbatim}\n%s\n\\end{verbatim}"
-	    ;; Re-create table, without affiliated keywords.
-	    (org-trim
-	     (org-element-interpret-data
-	      `(org-data nil (table nil ,@(org-element-contents table)))))))
-   ;; Case 2: table.el table.  Convert it using appropriate tools.
-   ((eq (org-element-property :type table) 'table.el)
-    (require 'table)
-    ;; Ensure "*org-export-table*" buffer is empty.
-    (with-current-buffer (get-buffer-create "*org-export-table*")
-      (erase-buffer))
-    (let ((output (with-temp-buffer
-		    (insert (org-element-property :value table))
-		    (goto-char 1)
-		    (re-search-forward "^[ \t]*|[^|]" nil t)
-		    (table-generate-source 'latex "*org-export-table*")
-		    (with-current-buffer "*org-export-table*"
-		      (org-trim (buffer-string))))))
-      (kill-buffer (get-buffer "*org-export-table*"))
-      ;; Remove left out comments.
-      (while (string-match "^%.*\n" output)
-	(setq output (replace-match "" t t output)))
-      ;; When the "rmlines" attribute is provided, remove all hlines
-      ;; but the the one separating heading from the table body.
-      (let ((attr (mapconcat 'identity
-			     (org-element-property :attr_latex table)
-			     " ")))
-	(when (and attr (string-match "\\<rmlines\\>" attr))
-	  (let ((n 0) (pos 0))
-	    (while (and (< (length output) pos)
-			(setq pos (string-match "^\\\\hline\n?" output pos)))
-	      (incf n)
-	      (unless (= n 2)
-		(setq output (replace-match "" nil nil output)))))))
-      (if (not org-e-latex-tables-centered) output
-	(format "\\begin{center}\n%s\n\\end{center}" output))))
-   ;; Case 3: Standard table.
-   (t (format (org-e-latex-table--format-string table info) contents))))
+TABLE is the table type element to transcode.  CONTENTS is its
+contents, as a string.  INFO is a plist used as a communication
+channel.
+
+This function assumes TABLE has `table.el' as its `:type'
+attribute."
+  (require 'table)
+  ;; Ensure "*org-export-table*" buffer is empty.
+  (with-current-buffer (get-buffer-create "*org-export-table*")
+    (erase-buffer))
+  (let ((output (with-temp-buffer
+		  (insert (org-element-property :value table))
+		  (goto-char 1)
+		  (re-search-forward "^[ \t]*|[^|]" nil t)
+		  (table-generate-source 'latex "*org-export-table*")
+		  (with-current-buffer "*org-export-table*"
+		    (org-trim (buffer-string))))))
+    (kill-buffer (get-buffer "*org-export-table*"))
+    ;; Remove left out comments.
+    (while (string-match "^%.*\n" output)
+      (setq output (replace-match "" t t output)))
+    ;; When the "rmlines" attribute is provided, remove all hlines but
+    ;; the the one separating heading from the table body.
+    (let ((attr (mapconcat 'identity
+			   (org-element-property :attr_latex table)
+			   " ")))
+      (when (and attr (string-match "\\<rmlines\\>" attr))
+	(let ((n 0) (pos 0))
+	  (while (and (< (length output) pos)
+		      (setq pos (string-match "^\\\\hline\n?" output pos)))
+	    (incf n)
+	    (unless (= n 2)
+	      (setq output (replace-match "" nil nil output)))))))
+    (if (not org-e-latex-tables-centered) output
+      (format "\\begin{center}\n%s\n\\end{center}" output))))
 
 
 ;;;; Table Cell
