@@ -2909,10 +2909,10 @@ This list is checked after translations have been applied.  See
 			line-break link macro radio-target sub/superscript
 			target text-markup timestamp)
     (headline entity inline-babel-call inline-src-block latex-fragment link
-	      macro radio-target statistics-cookie sub/superscript text-markup
-	      timestamp)
+	      macro radio-target statistics-cookie sub/superscript target
+	      text-markup timestamp)
     (inlinetask entity inline-babel-call inline-src-block latex-fragment link
-		macro radio-target sub/superscript text-markup timestamp)
+		macro radio-target sub/superscript target text-markup timestamp)
     (italic entity export-snippet inline-babel-call inline-src-block link
 	    radio-target sub/superscript target text-markup timestamp)
     (item entity inline-babel-call latex-fragment macro radio-target
@@ -2927,9 +2927,9 @@ This list is checked after translations have been applied.  See
 		    link radio-target sub/superscript target text-markup
 		    timestamp)
     (subscript entity export-snippet inline-babel-call inline-src-block
-	       latex-fragment sub/superscript text-markup)
+	       latex-fragment sub/superscript target text-markup)
     (superscript entity export-snippet inline-babel-call inline-src-block
-		 latex-fragment sub/superscript text-markup)
+		 latex-fragment sub/superscript target text-markup)
     (table-cell entity export-snippet latex-fragment link macro radio-target
 		sub/superscript target text-markup timestamp)
     (table-row table-cell)
