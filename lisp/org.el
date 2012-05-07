@@ -208,25 +208,34 @@ identifier."
   :group 'org-id)
 
 ;;; Version
-
-(defvaralias 'org-version 'org-release)
+(eval-when-compile
+  (defun org-release () "N/A")
+  (defun org-git-version () "N/A !!check installation!!")
+  (and (load (concat (org-find-library-name "org") "../UTILITIES/org-fixup.el")
+	    'noerror 'nomessage 'nosuffix 'mustsuffix)
+       (org-fixup)))
 ;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
   (interactive "P")
-  (let* ((origin default-directory)
-	 (version (if (boundp 'org-release) org-release "N/A"))
-	 (git-version (if (boundp 'org-git-version) org-git-version "N/A"))
-	 (org-install (ignore-errors (find-library-name "org-install")))
-	 (version_ (format "Org-mode version %s (%s @ %s)"
-			   version
-			   git-version
-			   (if org-install org-install "org-install.el can not be found!"))))
+  (let* ((org-dir         (ignore-errors (org-find-library-name "org")))
+	 (org-install-dir (ignore-errors (org-find-library-name "org-install.el")))
+	 (org-version (org-release))
+	 (git-version (org-git-version))
+	 (version (format "Org-mode version %s (%s @ %s)"
+			  org-version
+			  git-version
+			  (if org-install-dir
+			      (if (string= org-dir org-install-dir)
+				  org-install-dir
+				(concat "mixed installation! " org-install-dir " and " org-dir))
+			    "org-install.el can not be found!"))))
     (if (org-called-interactively-p 'interactive)
-	(if here (insert version_)
-	  (message version_))
-      version)))
+	(if here
+	    (insert version)
+	  (message version))
+      org-version)))
 
 ;;; Compatibility constants
 
