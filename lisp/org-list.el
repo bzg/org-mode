@@ -714,15 +714,15 @@ Assume point is at an item."
       ;;    equally indented than BEG-CELL's cdr.  Also, store ending
       ;;    position of items in END-LST-2.
       (catch 'exit
-      	(while t
-      	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
+	(while t
+	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
 			(org-get-indentation))))
-      	    (cond
-      	     ((>= (point) lim-down)
+	    (cond
+	     ((>= (point) lim-down)
 	      ;; At downward limit: this is de facto the end of the
 	      ;; list.  Save point as an ending position, and jump to
 	      ;; part 3.
-      	      (throw 'exit
+	      (throw 'exit
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
 	     ;; At a verbatim block, move to its end.  Point is at bol
 	     ;; and 'org-example property is set by whole lines:
@@ -1092,13 +1092,16 @@ This function modifies STRUCT."
 	   (between-A-no-blank-and-B (buffer-substring end-A-no-blank beg-B))
 	   (sub-A (cons beg-A (org-list-get-subtree beg-A struct)))
 	   (sub-B (cons beg-B (org-list-get-subtree beg-B struct)))
-	   ;; Store visibility status.
-	   (overlays (mapcar
-		      (lambda (ov) (cond ((not ov) 'subtree)
-				    ((cdr ov) 'children)
-				    (t 'folded)))
-		      (list (overlays-in beg-A end-A)
-			    (overlays-in beg-B end-B)))))
+	   ;; Store overlays responsible for visibility status.  We
+	   ;; also need to store their boundaries as they will be
+	   ;; removed from buffer.
+	   (overlays (cons
+		      (mapcar (lambda (ov)
+				(list ov (overlay-start ov) (overlay-end ov)))
+			      (overlays-in beg-A end-A))
+		      (mapcar (lambda (ov)
+				(list ov (overlay-start ov) (overlay-end ov)))
+			      (overlays-in beg-B end-B)))))
       ;; 1. Move effectively items in buffer.
       (goto-char beg-A)
       (delete-region beg-A end-B-no-blank)
@@ -1132,12 +1135,19 @@ This function modifies STRUCT."
 		    (setcar (nthcdr 6 e) (+ end-e (- size-B size-A))))))))
 	    struct)
       (setq struct (sort struct (lambda (e1 e2) (< (car e1) (car e2)))))
-      ;; Restore visibility status, if needed.
-      (unless (eq (car overlays) 'subtree)
-	(org-list-set-item-visibility
-	 (+ beg-B (- size-B size-A)) struct (car overlays)))
-      (unless (eq (nth 1 overlays) 'subtree)
-	(org-list-set-item-visibility beg-A struct (nth 1 overlays)))
+      ;; Restore visibility status, by moving overlays to their new
+      ;; position.
+      (mapc (lambda (ov)
+	      (move-overlay
+	       (car ov)
+	       (+ (nth 1 ov) (- (+ beg-B (- size-B size-A)) beg-A))
+	       (+ (nth 2 ov) (- (+ beg-B (- size-B size-A)) beg-A))))
+	    (car overlays))
+      (mapc (lambda (ov)
+	      (move-overlay (car ov)
+			    (+ (nth 1 ov) (- beg-A beg-B))
+			    (+ (nth 2 ov) (- beg-A beg-B))))
+	    (cdr overlays))
       ;; Return structure.
       struct)))
 
@@ -1357,8 +1367,8 @@ If DEST is a buffer position, the function will assume it points
 to another item in the same list as ITEM, and will move the
 latter just before the former.
 
-If DEST is `begin' \(respectively `end'\), ITEM will be moved at
-the beginning \(respectively end\) of the list it belongs to.
+If DEST is `begin' (respectively `end'), ITEM will be moved at
+the beginning (respectively end) of the list it belongs to.
 
 If DEST is a string like \"N\", where N is an integer, ITEM will
 be moved at the Nth position in the list.
@@ -1414,10 +1424,7 @@ This function returns, destructively, the new list structure."
 		     (t dest)))
 	 (org-M-RET-may-split-line nil)
 	 ;; Store visibility.
-	 (visibility (let ((ovs (overlays-in item item-end)))
-		       (cond ((not ovs) 'subtree)
-			     ((cdr ovs) 'children)
-			     (t 'folded)))))
+	 (visibility (overlays-in item item-end)))
     (cond
      ((eq dest 'delete) (org-list-delete-item item struct))
      ((eq dest 'kill)
@@ -1453,9 +1460,12 @@ This function returns, destructively, the new list structure."
 							 (+ end shift)))))))
 			       moved-items))
 		      (lambda (e1 e2) (< (car e1) (car e2))))))
-      ;; 2. Restore visibility if appropriate.
-      (unless (eq visibility 'subtree)
-	(org-list-set-item-visibility (point) struct visibility))
+      ;; 2. Restore visibility.
+      (mapc (lambda (ov)
+	      (move-overlay ov
+			    (+ (overlay-start ov) (- (point) item))
+			    (+ (overlay-end ov) (- (point) item))))
+	    visibility)
       ;; 3. Eventually delete extra copy of the item and clean marker.
       (prog1 (org-list-delete-item (marker-position item) struct)
 	(move-marker item nil)))
