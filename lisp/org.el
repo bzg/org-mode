@@ -17248,7 +17248,8 @@ inspection."
 	;; Use the requested file name and clean up
 	(copy-file pngfile tofile 'replace)
 	(loop for e in '(".dvi" ".tex" ".aux" ".log" ".png" ".out") do
-	      (delete-file (concat texfilebase e)))
+	      (if (file-exists-p (concat texfilebase e))
+		  (delete-file (concat texfilebase e))))
 	pngfile))))
 
 (defvar org-latex-to-pdf-process) ;; Defined in org-latex.el
@@ -17353,7 +17354,8 @@ inspection."
 	;; Use the requested file name and clean up
 	(copy-file pngfile tofile 'replace)
 	(loop for e in '(".pdf" ".tex" ".aux" ".log" ".png") do
-	      (delete-file (concat texfilebase e)))
+	      (if (file-exists-p (concat texfilebase e))
+		  (delete-file (concat texfilebase e))))
 	pngfile))))
 
 (defun org-splice-latex-header (tpl def-pkg pkg snippets-p &optional extra)
