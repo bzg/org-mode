@@ -8873,7 +8873,7 @@ The prefix arg is passed through to the command if possible."
 		    (delete e org-agenda-bulk-marked-entries)))
 	    (setq cnt (1+ cnt))))
 	(when (not org-agenda-persistent-marks)
-	  (org-agenda-bulk-remove-all-marks))
+	  (org-agenda-bulk-unmark-all))
 	(when redo-at-end (org-agenda-redo))
 	(message "Acted on %d entries%s%s"
 		 cnt
