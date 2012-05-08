@@ -70,7 +70,7 @@ called by `org-babel-execute-src-block'."
   (message "executing Maxima source code block")
   (let ((result-params (split-string (or (cdr (assoc :results params)) "")))
 	(result
-	 (let* ((cmdline (cdr (assoc :cmdline params)))
+	 (let* ((cmdline (or (cdr (assoc :cmdline params)) ""))
 		(in-file (org-babel-temp-file "maxima-" ".max"))
 		(cmd (format "%s --very-quiet -r 'batchload(%S)$' %s"
 			     org-babel-maxima-command in-file cmdline)))
