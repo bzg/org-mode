@@ -5418,6 +5418,14 @@ will be prompted for."
   :group 'org-appearance
   :group 'org-babel)
 
+(defcustom org-allow-promoting-top-level-subtree nil
+  "When non-nil, allow promoting a top level subtree.
+The leading star of the top level headline will be replaced
+by a #."
+  :type 'boolean
+  :version "24.1"
+  :group 'org-appearance)
+
 (defun org-fontify-meta-lines-and-blocks (limit)
   (condition-case nil
       (org-fontify-meta-lines-and-blocks-1 limit)
@@ -7466,6 +7474,8 @@ even level numbers will become the next higher odd number."
       (define-obsolete-function-alias 'org-get-legal-level
 	'org-get-valid-level "23.1")))
 
+(defvar org-called-with-limited-levels nil) ;; Dynamically bound in
+					    ;; ̀org-with-limited-levels'
 (defun org-promote ()
   "Promote the current heading higher up the tree.
 If the region is active in `transient-mark-mode', promote all headings
@@ -7476,11 +7486,16 @@ in the region."
 					  after-change-functions))
 	 (up-head (concat (make-string (org-get-valid-level level -1) ?*) " "))
 	 (diff (abs (- level (length up-head) -1))))
-    (if (= level 1) (error "Cannot promote to level 0.  UNDO to recover if necessary"))
-    (replace-match up-head nil t)
-    ;; Fixup tag positioning
-    (and org-auto-align-tags (org-set-tags nil t))
-    (if org-adapt-indentation (org-fixup-indentation (- diff)))
+    (cond ((and (= level 1) org-called-with-limited-levels
+		org-allow-promoting-top-level-subtree)
+	   (replace-match "# " nil t))
+	  ((= level 1)
+	   (error "Cannot promote to level 0.  UNDO to recover if necessary"))
+	  (t (replace-match up-head nil t)))
+      ;; Fixup tag positioning
+    (unless (= level 1)
+      (and org-auto-align-tags (org-set-tags nil t))
+      (if org-adapt-indentation (org-fixup-indentation (- diff))))
     (run-hooks 'org-after-promote-entry-hook)))
 
 (defun org-demote ()

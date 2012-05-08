@@ -372,7 +372,8 @@ point nowhere."
 
 (defmacro org-with-limited-levels (&rest body)
   "Execute BODY with limited number of outline levels."
-  `(let* ((org-outline-regexp (org-get-limited-outline-regexp))
+  `(let* ((org-called-with-limited-levels t)
+	  (org-outline-regexp (org-get-limited-outline-regexp))
 	  (outline-regexp org-outline-regexp)
 	  (org-outline-regexp-at-bol (concat "^" org-outline-regexp)))
      ,@body))
