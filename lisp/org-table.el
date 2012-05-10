@@ -1,5 +1,3 @@
-(string-match "^@-?[-+I0-9]+\\$-?[0-9]+$" lhs)
-
 ;;; org-table.el --- The table editor for Org-mode
 
 ;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
