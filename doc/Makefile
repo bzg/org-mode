@@ -16,8 +16,9 @@ pdf:		org.pdf orgguide.pdf
 card:		orgcard.pdf orgcard_letter.pdf orgguide.pdf
 
 manual guide::
-	$(RMR) $@ ; $(MKDIR) $@
-manual::	org.texi
+	-$(RMR) $@
+	$(MKDIR) $@
+manual::	org.texi org-version.inc
 	$(TEXI2HTML) -o $@ $<
 	../UTILITIES/mansplit.pl $@/*
 guide::		orgguide.texi
