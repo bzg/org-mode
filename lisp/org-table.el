@@ -1,3 +1,5 @@
+(string-match "^@-?[-+I0-9]+\\$-?[0-9]+$" lhs)
+
 ;;; org-table.el --- The table editor for Org-mode
 
 ;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
@@ -3000,7 +3002,7 @@ them to individual field equations for each field."
     (while (setq e (pop equations))
       (setq lhs (car e) rhs (cdr e))
       (cond
-       ((string-match "^@-?[-+I0-9]+\\$-?[0-9]+$" lhs)
+       ((string-match "^@-?[-+0-9]+\\$-?[0-9]+$" lhs)
 	;; This just refers to one fixed field
 	(push e res))
        ((string-match "^[a-zA-Z][_a-zA-Z0-9]*$" lhs)
