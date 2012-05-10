@@ -1265,20 +1265,23 @@ keywords.
 Assume point is at the beginning of the latex environment."
   (save-excursion
     (let* ((case-fold-search t)
-	   (contents-begin (point))
+	   (code-begin (point))
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
-	   (contents-end (progn (re-search-forward "^[ \t]*\\\\end")
-				(forward-line)
-				(point)))
-	   (value (buffer-substring-no-properties contents-begin contents-end))
+	   (env (progn (looking-at "^[ \t]*\\\\begin{\\([A-Za-z0-9*]+\\)}")
+		       (regexp-quote (match-string 1))))
+	   (code-end
+	    (progn (re-search-forward (format "^[ \t]*\\\\end{%s}" env))
+		   (forward-line)
+		   (point)))
+	   (value (buffer-substring-no-properties code-begin code-end))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
       `(latex-environment
 	(:begin ,begin
 		:end ,end
 		:value ,value
-		:post-blank ,(count-lines contents-end end)
+		:post-blank ,(count-lines code-end end)
 		,@(cadr keywords))))))
 
 (defun org-element-latex-environment-interpreter (latex-environment contents)
@@ -3076,9 +3079,12 @@ element it has to parse."
        ;; Inlinetask.
        ((org-at-heading-p) (org-element-inlinetask-parser raw-secondary-p))
        ;; LaTeX Environment.
-       ((looking-at "[ \t]*\\\\begin{")
+       ((looking-at "[ \t]*\\\\begin{\\([A-Za-z0-9*]+\\)}")
         (if (save-excursion
-              (re-search-forward "[ \t]*\\\\end{[^}]*}[ \t]*" nil t))
+              (re-search-forward
+	       (format "[ \t]*\\\\end{%s}[ \t]*"
+		       (regexp-quote (match-string 1)))
+	       nil t))
             (org-element-latex-environment-parser)
           (org-element-paragraph-parser)))
        ;; Drawer and Property Drawer.

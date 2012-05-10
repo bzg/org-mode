@@ -841,7 +841,25 @@ Paragraph"
   (should
    (org-test-with-temp-text "\\begin{equation}\ne^{i\\pi}+1=0\n\\end{equation}"
      (org-element-map
-      (org-element-parse-buffer) 'latex-environment 'identity))))
+      (org-element-parse-buffer) 'latex-environment 'identity)))
+  ;; Allow nested environments.
+  (should
+   (equal
+    "\\begin{outer}
+\\begin{inner}
+e^{i\\pi}+1=0
+\\end{inner}
+\\end{outer}"
+    (org-test-with-temp-text "
+\\begin{outer}
+\\begin{inner}
+e^{i\\pi}+1=0
+\\end{inner}
+\\end{outer}"
+      (org-element-property
+       :value
+       (org-element-map
+	(org-element-parse-buffer) 'latex-environment 'identity nil t))))))
 
 
 ;;;; Latex Fragment
