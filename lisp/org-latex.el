@@ -1522,7 +1522,7 @@ OPT-PLIST is the options plist for current buffer."
      (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
          (org-export-latex-fontify-headline keywords)
          (org-export-latex-fontify-headline description)
-	 (concat "Emacs Org-mode version " org-version))
+	 (concat "Emacs Org-mode version " (org-version)))
      ;; beginning of the document
      "\n\\begin{document}\n\n"
      ;; insert the title command

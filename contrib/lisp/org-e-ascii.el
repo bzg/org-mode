@@ -39,8 +39,6 @@
 (declare-function org-element-normalize-string "org-element" (s))
 (declare-function org-element-map "org-element"
 		  (data types fun &optional info first-match))
-(declare-function org-element-time-stamp-interpreter
-		  "org-element" (time-stamp contents))
 
 (declare-function org-export-collect-footnote-definitions
 		  "org-export" (data info))
@@ -64,7 +62,6 @@
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
 (declare-function org-export-resolve-id-link "org-export" (link info))
 (declare-function org-export-resolve-ref-link "org-export" (link info))
-(declare-function org-export-secondary-string "org-export" (secondary info))
 (declare-function
  org-export-to-file "org-export"
  (backend file &optional subtreep visible-only body-only ext-plist))
@@ -371,7 +368,7 @@ The function must accept six parameters:
   TODO-TYPE the todo type, a symbol among `todo', `done' and nil.
   PRIORITY  the inlinetask priority, as a string
   NAME      the inlinetask name, as a string.
-  TAGS      the inlinetask tags, as a string.
+  TAGS      the inlinetask tags, as a list of strings.
   CONTENTS  the contents of the inlinetask, as a string.
 
 The function should return either the string to be exported or
@@ -583,19 +580,20 @@ title."
 	       ;; All tests passed: build numbering string.
 	       (concat
 		(mapconcat
-		 #'number-to-string
+		 'number-to-string
 		 (org-export-get-headline-number element info) ".")
 		" ")))
-	 (text (org-export-secondary-string
-		(org-element-property :title element) info))
+	 (text (org-export-data (org-element-property :title element) info))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword element)))
-		 (and todo
-		      (concat (org-export-secondary-string todo info) " ")))))
+		 (and todo (concat (org-export-data todo info) " ")))))
 	 (tags (and (not notags)
 		    (plist-get info :with-tags)
-		    (org-element-property :tags element)))
+		    (let ((tag-list (org-element-property :tags element)))
+		      (and tag-list
+			   (format ":%s:"
+				   (mapconcat 'identity tag-list ":"))))))
 	 (priority
 	  (and (plist-get info :with-priority)
 	       (concat (org-element-property :priority element) " ")))
@@ -645,8 +643,7 @@ keyword."
 	(org-e-ascii--fill-string
 	 (format
 	  title-fmt reference
-	  (if (not caption) name
-	    (org-export-secondary-string (car caption) info)))
+	  (if (not caption) name (org-export-data (car caption) info)))
 	 (org-e-ascii--current-text-width element info) info)))))
 
 (defun org-e-ascii--build-toc (info &optional n keyword)
@@ -711,9 +708,8 @@ generation.  INFO is a plist used as a communication channel."
 	       (org-e-ascii--fill-string
 		(let ((caption (org-element-property :caption src-block)))
 		  (if (not caption) (org-element-property :name src-block)
-		    (org-export-secondary-string
 		     ;; Use short name in priority, if available.
-		     (or (cdr caption) (car caption)) info)))
+		    (org-export-data (or (cdr caption) (car caption)) info)))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-listings info) "\n")))))
@@ -751,8 +747,7 @@ generation.  INFO is a plist used as a communication channel."
 		(let ((caption (org-element-property :caption table)))
 		  (if (not caption) (org-element-property :name table)
 		    ;; Use short name in priority, if available.
-		    (org-export-secondary-string
-		     (or (cdr caption) (car caption)) info)))
+		    (org-export-data (or (cdr caption) (car caption)) info)))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-tables info) "\n")))))
@@ -811,7 +806,7 @@ channel."
      (let ((type (org-element-property :type link))
 	   (anchor (let ((desc (org-element-contents link)))
 		     (if (not desc) (org-element-property :raw-link link)
-		       (org-export-secondary-string desc info)))))
+		       (org-export-data desc info)))))
        (cond
 	;; Coderefs, radio links and fuzzy links are ignored.
 	((member type '("coderef" "radio" "fuzzy")) nil)
@@ -849,12 +844,12 @@ channel."
   "Return document title, as a string.
 INFO is a plist used as a communication channel."
   (let ((text-width org-e-ascii-text-width)
-	(title (org-export-secondary-string (plist-get info :title) info))
+	(title (org-export-data (plist-get info :title) info))
 	(author (and (plist-get info :with-author)
 		     (let ((auth (plist-get info :author)))
-		       (and auth (org-export-secondary-string auth info)))))
+		       (and auth (org-export-data auth info)))))
 	(email (and (plist-get info :with-email)
-		    (org-export-secondary-string (plist-get info :email) info)))
+		    (org-export-data (plist-get info :email) info)))
 	(date (plist-get info :date)))
     ;; There are two types of title blocks depending on the presence
     ;; of a title to display.
@@ -964,7 +959,7 @@ holding export options."
 		      ;; Fill paragraph once footnote ID is inserted in
 		      ;; order to have a correct length for first line.
 		      (org-e-ascii--fill-string
-		       (concat id (org-export-secondary-string def info))
+		       (concat id (org-export-data def info))
 		       text-width info))))))
 	     definitions "\n\n"))))
        ;; 5. Creator.  Ignore `comment' value as there are no comments in
@@ -1018,6 +1013,22 @@ holding contextual information."
    contents (org-e-ascii--current-text-width center-block info) 'center))
 
 
+;;;; Clock
+
+(defun org-e-ascii-clock (clock contents info)
+  "Transcode a CLOCK object from Org to ASCII.
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (concat org-clock-string " "
+	  (org-translate-time (org-element-property :value clock))
+	  (let ((time (org-element-property :time clock)))
+	    (and time
+		 (concat " => "
+			 (apply 'format
+				"%2s:%02s"
+				(org-split-string time ":")))))))
+
+
 ;;;; Code
 
 (defun org-e-ascii-code (code contents info)
@@ -1057,7 +1068,7 @@ holding contextual information."
 (defun org-e-ascii-dynamic-block (dynamic-block contents info)
   "Transcode a DYNAMIC-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
-holding contextual information.  See `org-export-data'."
+holding contextual information."
   contents)
 
 
@@ -1095,7 +1106,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-ascii-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (string= (org-element-property :type export-block) "ascii")
+  (when (string= (org-element-property :type export-block) "ASCII")
     (org-remove-indentation (org-element-property :value export-block))))
 
 
@@ -1105,8 +1116,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a FIXED-WIDTH element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-e-ascii--box-string
-   (replace-regexp-in-string
-    "^[ \t]*: ?" "" (org-element-property :value fixed-width)) info))
+   (org-remove-indentation
+    (org-element-property :value fixed-width)) info))
 
 
 ;;;; Footnote Definition
@@ -1212,24 +1223,28 @@ contextual information."
   "Transcode an INLINETASK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((width (org-e-ascii--current-text-width inlinetask info))
-	(title (org-export-secondary-string
-		(org-element-property :title inlinetask) info))
-	(todo (and (plist-get info :with-todo-keywords)
-		   (let ((todo (org-element-property
-				:todo-keyword inlinetask)))
-		     (and todo
-			  (org-export-secondary-string todo info)))))
-	(todo-type (org-element-property :todo-type inlinetask))
-	(tags (and (plist-get info :with-tags)
-		   (org-element-property :tags inlinetask)))
-	(priority (and (plist-get info :with-priority)
-		       (org-element-property :priority inlinetask))))
+  (let ((width (org-e-ascii--current-text-width inlinetask info)))
     ;; If `org-e-ascii-format-inlinetask-function' is provided, call it
     ;; with appropriate arguments.
     (if (functionp org-e-ascii-format-inlinetask-function)
 	(funcall org-e-ascii-format-inlinetask-function
-		 todo todo-type priority title tags contents width)
+		 ;; todo.
+		 (and (plist-get info :with-todo-keywords)
+		      (let ((todo (org-element-property
+				   :todo-keyword inlinetask)))
+			(and todo (org-export-data todo info))))
+		 ;; todo-type
+		 (org-element-property :todo-type inlinetask)
+		 ;; priority
+		 (and (plist-get info :with-priority)
+		      (org-element-property :priority inlinetask))
+		 ;; title
+		 (org-export-data (org-element-property :title inlinetask) info)
+		 ;; tags
+		 (and (plist-get info :with-tags)
+		      (org-element-property :tags inlinetask))
+		 ;; contents and width
+		 contents width)
       ;; Otherwise, use a default template.
       (let* ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
 	(org-e-ascii--indent-string
@@ -1275,10 +1290,8 @@ contextual information."
 	 (org-list-bullet-string
 	  (case (org-element-property :type (org-export-get-parent item info))
 	    (descriptive
-	     (concat
-	      (org-export-secondary-string
-	       (org-element-property :tag item) info)
-	      ": "))
+	     (concat (org-export-data (org-element-property :tag item) info)
+		     ": "))
 	    (ordered
 	     ;; Return correct number for ITEM, paying attention to
 	     ;; counters.
@@ -1379,7 +1392,7 @@ INFO is a plist holding contextual information."
      ;; Do not apply a special syntax on radio links.  Though, parse
      ;; and transcode path to have a proper display of contents.
      ((string= type "radio")
-      (org-export-secondary-string
+      (org-export-data
        (org-element-parse-secondary-string
 	(org-element-property :path link)
 	(cdr (assq 'radio-target org-element-object-restrictions)))
@@ -1460,15 +1473,30 @@ INFO is a plist used as a communication channel."
       (replace-regexp-in-string "---" "—" text)))))
 
 
-;;;; Property Drawer
+;;;; Planning
 
-(defun org-e-ascii-property-drawer (property-drawer contents info)
-  "Transcode a PROPERTY-DRAWER element from Org to ASCII.
+(defun org-e-ascii-planning (planning contents info)
+  "Transcode a PLANNING element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  ;; The property drawer isn't exported but we want separating blank
-  ;; lines nonetheless.
-  "")
+  (mapconcat
+   'identity
+   (delq nil
+	 (list (let ((closed (org-element-property :closed planning)))
+		 (when closed (concat org-closed-string " "
+				      (org-translate-time closed))))
+	       (let ((deadline (org-element-property :deadline planning)))
+		 (when deadline (concat org-deadline-string " "
+					(org-translate-time deadline))))
+	       (let ((scheduled (org-element-property :scheduled planning)))
+		 (when scheduled (concat org-scheduled-string " "
+					 (org-translate-time scheduled))))))
+   " "))
+
+
+;;;; Property Drawer
+;;
+;; Property drawers are ignored.
 
 
 ;;;; Quote Block
@@ -1491,9 +1519,8 @@ holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((width (org-e-ascii--current-text-width quote-section info))
 	(value
-	 (org-export-secondary-string
-	  (org-remove-indentation
-	   (org-element-property :value quote-section))
+	 (org-export-data
+	  (org-remove-indentation (org-element-property :value quote-section))
 	  info)))
     (org-e-ascii--indent-string
      value
@@ -1635,9 +1662,10 @@ are ignored. "
 	   (setq max-width
 		 (max (length
 		       (org-export-data
-			(elt (if specialp (car (org-element-contents row))
-			       (org-element-contents row))
-			     col)
+			(org-element-contents
+			 (elt (if specialp (car (org-element-contents row))
+				(org-element-contents row))
+			      col))
 			info))
 		      max-width))))
 	max-width)))
@@ -1722,13 +1750,12 @@ a communication channel."
 ;; Targets are invisible.
 
 
-;;;; Time-stamp
+;;;; Timestamp
 
-(defun org-e-ascii-time-stamp (time-stamp contents info)
-  "Transcode a TIME-STAMP object from Org to ASCII.
+(defun org-e-ascii-timestamp (timestamp contents info)
+  "Transcode a TIMESTAMP object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  ;; Return time-stamps as-is.
-  (org-element-time-stamp-interpreter time-stamp contents))
+  (org-translate-time (org-element-property :value timestamp)))
 
 
 ;;;; Underline

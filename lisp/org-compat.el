@@ -34,7 +34,6 @@
 
 (require 'org-macs)
 
-(declare-function find-library-name "find-func"  (library))
 (declare-function w32-focus-frame "term/w32-win" (frame))
 
 ;; The following constant is for backward compatibility.  We do not use
@@ -331,15 +330,12 @@ Works on both Emacs and XEmacs."
       (org-no-properties (substring string (or from 0) to))
     (substring-no-properties string from to)))
 
-(defun org-find-library-name (library)
+(defmacro org-find-library-name (library)
   (if (fboundp 'find-library-name)
-      (file-name-directory (find-library-name library))
+      `(file-name-directory (find-library-name ,library))
     ; XEmacs does not have `find-library-name'
-    (flet ((find-library-name-helper (filename ignored-codesys)
-				     filename)
-	   (find-library-name (library)
-	    (find-library library nil 'find-library-name-helper)))
-      (file-name-directory (find-library-name library)))))
+    `(flet ((flnh (lib ignore) lib))
+       (file-name-directory (find-library ,library nil 'flnh)))))
 
 (defun org-count-lines (s)
   "How many lines in string S?"

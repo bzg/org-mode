@@ -2643,7 +2643,7 @@ formulas or Elisp formulas:
 
 Input duration values must be of the form @code{[HH:MM[:SS]}, where seconds
 are optional.  With the @code{T} flag, computed durations will be displayed
-as @code{[HH:MM:SS} (see the first formula above).  With the @code{t} flag,
+as @code{HH:MM:SS} (see the first formula above).  With the @code{t} flag,
 computed durations will be displayed according to the value of the variable
 @code{org-table-duration-custom-format}, which defaults to @code{'hours} and
 will display the result as a fraction of hours (see the second formula in the
@@ -6465,6 +6465,9 @@ template in the usual way.
 Visit the last stored capture item in its buffer.
 @end table
 
+To insert the capture at point in an Org buffer, call @code{org-capture} with
+a @code{C-0} prefix argument.
+
 @node Capture templates,  , Using capture, Capture
 @subsection Capture templates
 @cindex templates, for Capture
@@ -6672,6 +6675,7 @@ dynamic insertion of content.  The templates are expanded in the order given her
 @smallexample
 %[@var{file}]     @r{Insert the contents of the file given by @var{file}.}
 %(@var{sexp})     @r{Evaluate Elisp @var{sexp} and replace with the result.}
+            @r{The sexp must return a string.}
 %<...>      @r{The result of format-time-string on the ... format specification.}
 %t          @r{Timestamp, date only.}
 %T          @r{Timestamp, with date and time.}
@@ -12416,7 +12420,7 @@ Publishing to a local directory is also much faster than to a remote one, so
 that you can afford more easily to republish entire projects.  If you set
 @code{org-publish-use-timestamps-flag} to @code{nil}, you gain the main
 benefit of re-including any changed external files such as source example
-files you might include with @code{#+INCLUDE}.  The timestamp mechanism in
+files you might include with @code{#+INCLUDE:}.  The timestamp mechanism in
 Org is not smart enough to detect if included files have been modified.
 
 @node Sample configuration, Triggering publication, Uploading files, Publishing

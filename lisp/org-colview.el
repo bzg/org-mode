@@ -1083,6 +1083,14 @@ Don't set this, this is meant for dynamic scoping.")
           (while l
             (setq sum (+ (string-to-number (pop l)) (/ sum 60))))
           sum))
+       ((string-match (concat "\\([0-9.]+\\) *\\("
+			      (regexp-opt (mapcar 'car org-effort-durations))
+			      "\\)") s)
+	(setq s (concat "0:" (org-duration-string-to-minutes s t)))
+        (let ((l (nreverse (org-split-string s ":"))) (sum 0.0))
+          (while l
+            (setq sum (+ (string-to-number (pop l)) (/ sum 60))))
+          sum))
        ((memq fmt '(checkbox checkbox-n-of-m checkbox-percent))
         (if (equal s "[X]") 1. 0.000001))
        ((memq fmt '(estimate)) (org-string-to-estimate s))

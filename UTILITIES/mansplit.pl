@@ -10,6 +10,7 @@
 
 $contents = <<EOF;
 <div id="table-of-contents">
+<p>This is the official manual for the latest <a href="http://orgmode.org">Org-mode</a> release.</p>
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>

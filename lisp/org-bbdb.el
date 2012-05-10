@@ -123,7 +123,6 @@
 (declare-function diary-ordinal-suffix "diary-lib" (n))
 
 (defvar date)   ;; dynamically scoped from Org
-(defvar name)   ;; dynamically scoped from Org
 
 ;; Customization
 
@@ -138,30 +137,31 @@
   :require 'bbdb)
 
 (defcustom org-bbdb-anniversary-format-alist
-  '(("birthday" lambda
-     (name years suffix)
-     (concat "Birthday: [[bbdb:" name "][" name " ("
-	     (format "%s" years)        ; handles numbers as well as strings
-	     suffix ")]]"))
-    ("wedding" lambda
-     (name years suffix)
-     (concat "[[bbdb:" name "][" name "'s "
-	     (format "%s" years)
-	     suffix " wedding anniversary]]")))
+  '(("birthday" .
+     (lambda (name years suffix)
+       (concat "Birthday: [[bbdb:" name "][" name " ("
+    	       (format "%s" years)        ; handles numbers as well as strings
+    	       suffix ")]]")))
+    ("wedding" .
+     (lambda (name years suffix)
+       (concat "[[bbdb:" name "][" name "'s "
+    	       (format "%s" years)
+    	       suffix " wedding anniversary]]"))))
   "How different types of anniversaries should be formatted.
 An alist of elements (STRING . FORMAT) where STRING is the name of an
 anniversary class and format is either:
 1) A format string with the following substitutions (in order):
-    * the name of the record containing this anniversary
-    * the number of years
-    * an ordinal suffix (st, nd, rd, th) for the year
+    - the name of the record containing this anniversary
+    - the number of years
+    - an ordinal suffix (st, nd, rd, th) for the year
 
 2) A function to be called with three arguments: NAME YEARS SUFFIX
    (string int string) returning a string for the diary or nil.
 
 3) An Emacs Lisp form that should evaluate to a string (or nil) in the
    scope of variables NAME, YEARS and SUFFIX (among others)."
-  :type 'sexp
+  :type '(alist :key-type   (string   :tag "Class")
+		:value-type (function :tag "Function"))
   :group 'org-bbdb-anniversaries
   :require 'bbdb)
 

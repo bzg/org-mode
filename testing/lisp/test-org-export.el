@@ -74,12 +74,12 @@ already filled in `info'."
    (equal
     (org-export-parse-option-keyword
      "arch:headline creator:comment d:(\"TEST\")
- ^:{} toc:1 tags:not-in-toc tasks:todo num:2")
+ ^:{} toc:1 tags:not-in-toc tasks:todo num:2 <:active")
     '( :section-numbers
        2
        :with-archived-trees headline :with-creator comment
        :with-drawers ("TEST") :with-sub-superscript {} :with-toc 1
-       :with-tags not-in-toc :with-tasks todo))))
+       :with-tags not-in-toc :with-tasks todo :with-timestamps active))))
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
@@ -207,12 +207,48 @@ already filled in `info'."
     (org-test-with-temp-text ":TEST:\ncontents\n:END:"
       (org-test-with-backend "test"
 	(should (equal (org-export-as 'test nil nil nil '(:with-drawers nil))
-		       "")))))
-  (let ((org-drawers '("TEST")))
-    (org-test-with-temp-text ":TEST:\ncontents\n:END:"
-      (org-test-with-backend "test"
+		       ""))
 	(should (equal (org-export-as 'test nil nil nil '(:with-drawers t))
-		       ":TEST:\ncontents\n:END:\n"))))))
+		       ":TEST:\ncontents\n:END:\n")))))
+  (let ((org-drawers '("FOO" "BAR")))
+    (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
+      (org-test-with-backend "test"
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-drawers ("FOO")))
+		":FOO:\nkeep\n:END:\n")))))
+  ;; Timestamps.
+  (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
+    (org-test-with-backend "test"
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps t))
+	      "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>\n"))
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps nil)) ""))
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps active))
+	      "<2012-04-29 sun. 10:45>\n"))
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps inactive))
+	      "[2012-04-29 sun. 10:45]\n"))))
+  ;; Clocks.
+  (let ((org-clock-string "CLOCK:"))
+    (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
+      (org-test-with-backend "test"
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-clocks t))
+		"CLOCK: [2012-04-29 sun. 10:45]\n"))
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-clocks nil)) "")))))
+  ;; Plannings.
+  (let ((org-closed-string "CLOSED:"))
+    (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
+      (org-test-with-backend "test"
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-plannings t))
+		"CLOSED: [2012-04-29 sun. 10:45]\n"))
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-plannings nil))
+		""))))))
 
 (ert-deftest test-org-export/comment-tree ()
   "Test if export process ignores commented trees."
@@ -267,7 +303,7 @@ text
 
 (ert-deftest test-org-export/export-snippet ()
   "Test export snippets transcoding."
-  (org-test-with-temp-text "@test{A}@t{B}"
+  (org-test-with-temp-text "<test@A><t@B>"
     (org-test-with-backend "test"
       (flet ((org-test-export-snippet
 	      (snippet contents info)
@@ -688,8 +724,8 @@ Another text. (ref:text)
       (org-element-map
        (org-element-parse-buffer) 'table 'identity nil 'first-match)))))
 
-(ert-deftest test-org-export/special-row ()
-  "Test if special rows in a table are properly recognized."
+(ert-deftest test-org-export/table-row-is-special-p ()
+  "Test `org-export-table-row-is-special-p' specifications."
   ;; 1. A row is special if it has a special marking character in the
   ;;    special column.
   (org-test-with-parsed-data "| ! | 1 |"
@@ -710,7 +746,7 @@ Another text. (ref:text)
      (org-export-table-row-is-special-p
       (org-element-map tree 'table-row 'identity nil 'first-match) info)))
   ;; 4. Everything else isn't considered as special.
-  (org-test-with-parsed-data "| a |   | c |"
+  (org-test-with-parsed-data "| \alpha |   | c |"
     (should-not
      (org-export-table-row-is-special-p
       (org-element-map tree 'table-row 'identity nil 'first-match) info)))
@@ -858,7 +894,7 @@ Another text. (ref:text)
     (org-test-with-temp-text "
 | text      |
 | some text |
-| 12345     |"
+| \alpha    |"
       (let* ((tree (org-element-parse-buffer))
 	     (info `(:parse-tree ,tree)))
 	(should

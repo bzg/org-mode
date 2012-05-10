@@ -277,9 +277,6 @@ opposite case, the default, t, is more useful."
   :group 'org-remember
   :type 'boolean)
 
-(defvar annotation) ; from remember.el, dynamically scoped in `remember-mode'
-(defvar initial)    ; from remember.el, dynamically scoped in `remember-mode'
-
 ;;;###autoload
 (defun org-remember-insinuate ()
   "Setup remember.el for use with Org-mode."
@@ -431,10 +428,10 @@ to be run from that hook to function properly."
 	     ;; `initial' and `annotation' are bound in `remember'.
 	     ;; But if the property list has them, we prefer those values
 	     (v-i (or (plist-get org-store-link-plist :initial)
-		      (and (boundp 'initial) initial)
+		      (and (boundp 'initial) (symbol-value 'initial))
 		      ""))
 	     (v-a (or (plist-get org-store-link-plist :annotation)
-		      (and (boundp 'annotation) annotation)
+		      (and (boundp 'annotation) (symbol-value 'annotation))
 		      ""))
 	     ;; Is the link empty?  Then we do not want it...
 	     (v-a (if (equal v-a "[[]]") "" v-a))
@@ -476,7 +473,7 @@ to be run from that hook to function properly."
 	(erase-buffer)
 	(insert (substitute-command-keys
 		 (format
-"## %s  \"%s\" -> \"* %s\"
+		  "## %s  \"%s\" -> \"* %s\"
 ## C-u C-c C-c  like C-c C-c, and immediately visit note at target location
 ## C-0 C-c C-c  \"%s\" -> \"* %s\"
 ## %s  to select file and header location interactively.
@@ -505,18 +502,20 @@ to be run from that hook to function properly."
 				       filename error)))))))
 	;; Simple %-escapes
 	(goto-char (point-min))
-	(while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
-	  (unless (org-remember-escaped-%)
-	    (when (and initial (equal (match-string 0) "%i"))
-	      (save-match-data
-		(let* ((lead (buffer-substring
-			      (point-at-bol) (match-beginning 0))))
-		  (setq v-i (mapconcat 'identity
-				       (org-split-string initial "\n")
-				       (concat "\n" lead))))))
-	    (replace-match
-	     (or (eval (intern (concat "v-" (match-string 1)))) "")
-	     t t)))
+	(let ((init (and (boundp 'initial)
+			 (symbol-value 'initial))))
+	  (while (re-search-forward "%\\([tTuUaiAcxkKI]\\)" nil t)
+	    (unless (org-remember-escaped-%)
+	      (when (and init (equal (match-string 0) "%i"))
+		(save-match-data
+		  (let* ((lead (buffer-substring
+				(point-at-bol) (match-beginning 0))))
+		    (setq v-i (mapconcat 'identity
+					 (org-split-string init "\n")
+					 (concat "\n" lead))))))
+	      (replace-match
+	       (or (eval (intern (concat "v-" (match-string 1)))) "")
+	       t t))))
 
 	;; %() embedded elisp
 	(goto-char (point-min))
@@ -536,10 +535,10 @@ to be run from that hook to function properly."
 	(when plist-p
 	  (goto-char (point-min))
 	  (while (re-search-forward "%\\(:[-a-zA-Z]+\\)" nil t)
-	  (unless (org-remember-escaped-%)
-	    (and (setq x (or (plist-get org-store-link-plist
-					(intern (match-string 1))) ""))
-		 (replace-match x t t)))))
+	    (unless (org-remember-escaped-%)
+	      (and (setq x (or (plist-get org-store-link-plist
+					  (intern (match-string 1))) ""))
+		   (replace-match x t t)))))
 
 	;; Turn on org-mode in the remember buffer, set local variables
 	(let ((org-inhibit-startup t)) (org-mode) (org-remember-mode 1))

@@ -38,6 +38,7 @@
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
 (defvar org-time-stamp-formats)
 (defvar org-ts-what)
+(defvar org-frame-title-format-backup frame-title-format)
 
 (defgroup org-clock nil
   "Options concerning clocking working time in Org-mode."
@@ -352,6 +353,19 @@ nil          current clock is not displayed"
 	  (const :tag "Both" both)
 	  (const :tag "None" nil)))
 
+(defcustom org-clock-frame-title-format '(t org-mode-line-string)
+  "The value for `frame-title-format' when clocking in.
+
+When `org-clock-clocked-in-display' is set to 'frame-title
+or 'both, clocking in will replace `frame-title-format' with
+this value.  Clocking out will restore `frame-title-format'.
+
+`org-frame-title-string' is a format string using the same
+specifications than `frame-title-format', which see."
+  :version "24.1"
+  :group 'org-clock
+  :type 'sexp)
+
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that
@@ -373,8 +387,6 @@ to add an effort property.")
 
 (defvar org-mode-line-string "")
 (put 'org-mode-line-string 'risky-local-variable t)
-
-(defvar org-frame-title-string '(" " org-mode-line-string))
 
 (defvar org-clock-mode-line-timer nil)
 (defvar org-clock-idle-timer nil)
@@ -551,7 +563,7 @@ If not, show simply the clocked time like 01:50."
 			   'org-mode-line-clock-overrun 'org-mode-line-clock)))
 	       (effort-str (format org-time-clocksum-format effort-h effort-m))
 	       (clockstr (org-propertize
-			  (concat  "[%s/" effort-str
+			  (concat  " [%s/" effort-str
 				   "] (" (replace-regexp-in-string "%" "%%" org-clock-heading) ")")
 			  'face 'org-mode-line-clock)))
 	  (format clockstr work-done-str))
@@ -575,8 +587,7 @@ If not, show simply the clocked time like 01:50."
 		'help-echo (concat help-text ": " org-clock-heading))
 	     (org-propertize clock-string 'help-echo help-text)))
 	 'local-map org-clock-mode-line-map
-	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)
-	 ))
+	 'mouse-face (if (featurep 'xemacs) 'highlight 'mode-line-highlight)))
   (if (and org-clock-task-overrun org-clock-task-overrun-text)
       (setq org-mode-line-string
 	    (concat (org-propertize
@@ -670,7 +681,7 @@ use libnotify if available, or fall back on a message."
 	  ;; FIXME how to link to the Org icon?
 	  ;; :app-icon "~/.emacs.d/icons/mail.png"
 	  :urgency 'low))
-	((org-program-exists "notify-send")
+	((executable-find "notify-send")
 	 (start-process "emacs-timer-notification" nil
 			"notify-send" notification))
 	;; Maybe the handler will send a message, so only use message as
@@ -686,17 +697,12 @@ Use alsa's aplay tool if available."
    ((stringp org-clock-sound)
     (let ((file (expand-file-name org-clock-sound)))
       (if (file-exists-p file)
-	  (if (org-program-exists "aplay")
+	  (if (executable-find "aplay")
 	      (start-process "org-clock-play-notification" nil
 			     "aplay" file)
 	    (condition-case nil
 		(play-sound-file file)
 	      (error (beep t) (beep t)))))))))
-
-(defun org-program-exists (program-name)
-  "Checks whenever we can locate PROGRAM-NAME using the `which' executable."
-  (if (member system-type '(gnu/linux darwin))
-      (= 0 (call-process "which" nil nil nil program-name))))
 
 (defvar org-clock-mode-line-entry nil
   "Information for the modeline about the running clock.")
@@ -1209,12 +1215,9 @@ the clocking selection, associated with the letter `d'."
 		  (setq global-mode-string
 			(append global-mode-string '(org-mode-line-string)))))
 	    ;; add to frame title
-	    (when (and (or (eq org-clock-clocked-in-display 'frame-title)
-			   (eq org-clock-clocked-in-display 'both))
-		       (listp frame-title-format))
-	      (or (memq 'org-frame-title-string frame-title-format)
-		  (setq frame-title-format
-			(append frame-title-format '(org-frame-title-string)))))
+	    (when (or (eq org-clock-clocked-in-display 'frame-title)
+		      (eq org-clock-clocked-in-display 'both))
+	      (setq frame-title-format org-clock-frame-title-format))
 	    (org-clock-update-mode-line)
 	    (when org-clock-mode-line-timer
 	      (cancel-timer org-clock-mode-line-timer)
@@ -1371,9 +1374,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
     (when (not (org-clocking-p))
       (setq global-mode-string
 	    (delq 'org-mode-line-string global-mode-string))
-      (when (listp frame-title-format)
-	(setq frame-title-format
-	      (delq 'org-frame-title-string frame-title-format)))
+      (setq frame-title-format org-frame-title-format-backup)
       (force-mode-line-update)
       (if fail-quietly (throw 'exit t) (error "No active clock")))
     (let (ts te s h m remove)
@@ -1418,9 +1419,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
 	    (setq org-clock-idle-timer nil))
 	  (setq global-mode-string
 		(delq 'org-mode-line-string global-mode-string))
-	  (when (listp frame-title-format)
-	    (setq frame-title-format
-		  (delq 'org-frame-title-string frame-title-format)))
+	  (setq frame-title-format org-frame-title-format-backup)
 	  (when org-clock-out-switch-to-state
 	    (save-excursion
 	      (org-back-to-heading t)
@@ -1520,9 +1519,7 @@ UPDOWN tells whether to change 'up or 'down."
   (when (not (org-clocking-p))
     (setq global-mode-string
          (delq 'org-mode-line-string global-mode-string))
-    (when (listp frame-title-format)
-      (setq frame-title-format
-	    (delq 'org-frame-title-string frame-title-format)))
+    (setq frame-title-format org-frame-title-format-backup)
     (force-mode-line-update)
     (error "No active clock"))
   (save-excursion ; Do not replace this with `with-current-buffer'.
@@ -1535,9 +1532,7 @@ UPDOWN tells whether to change 'up or 'down."
   (move-marker org-clock-hd-marker nil)
   (setq global-mode-string
 	(delq 'org-mode-line-string global-mode-string))
-  (when (listp frame-title-format)
-    (setq frame-title-format
-	  (delq 'org-frame-title-string frame-title-format)))
+  (setq frame-title-format org-frame-title-format-backup)
   (force-mode-line-update)
   (message "Clock canceled")
   (run-hooks 'org-clock-cancel-hook))
@@ -2349,7 +2344,9 @@ from the dynamic block definition."
 	       hlc (org-minutes-to-hh:mm-string (nth 3 entry)) hlc ; time
 	       "|\n"                                               ; close line
 	       )))))
-      (backward-delete-char 1)
+      ;; When exporting subtrees or regions the region might be
+      ;; activated, so let's disable ̀delete-active-region'
+      (let ((delete-active-region nil)) (backward-delete-char 1))
       (if (setq formula (plist-get params :formula))
 	  (cond
 	   ((eq formula '%)
