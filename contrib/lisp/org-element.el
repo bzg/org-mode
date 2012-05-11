@@ -1584,9 +1584,11 @@ Assume point is at the beginning of the table."
 	   (keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (table-end (goto-char (marker-position (org-table-end t))))
-	   (tblfm (when (looking-at "[ \t]*#\\+TBLFM: +\\(.*\\)[ \t]*$")
-		    (prog1 (org-match-string-no-properties 1)
-		      (forward-line))))
+	   (tblfm (let (acc)
+		    (while (looking-at "[ \t]*#\\+TBLFM: +\\(.*\\)[ \t]*$")
+		      (push (org-match-string-no-properties 1) acc)
+		      (forward-line))
+		    acc))
 	   (pos-before-blank (point))
 	   (end (progn (org-skip-whitespace)
 		       (if (eobp) (point) (point-at-bol)))))
@@ -1614,8 +1616,9 @@ CONTENTS is nil."
     (concat (with-temp-buffer (insert contents)
 			      (org-table-align)
 			      (buffer-string))
-	    (when (org-element-property :tblfm table)
-	      (concat "#+TBLFM: " (org-element-property :tblfm table))))))
+	    (mapconcat (lambda (fm) (concat "#+TBLFM: " fm))
+		       (reverse (org-element-property :tblfm table))
+		       "\n"))))
 
 
 ;;;; Table Row
@@ -3197,12 +3200,12 @@ it's value will be a list of parsed strings.  It defaults to
 
 DUALS is a list of strings.  Any keyword member of this list can
 have two parts: one mandatory and one optional.  Its value is
-a cons cell whose car is the former, and the cdr the latter.  If
+a cons cell whose CAR is the former, and the CDR the latter.  If
 a keyword is a member of both PARSED and DUALS, both values will
 be parsed.  It defaults to `org-element-dual-keywords'.
 
-Return a list whose car is the position at the first of them and
-cdr a plist of keywords and values."
+Return a list whose CAR is the position at the first of them and
+CDR a plist of keywords and values."
   (save-excursion
     (let ((case-fold-search t)
 	  (key-re (or key-re org-element--affiliated-re))
