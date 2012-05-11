@@ -3938,6 +3938,16 @@ end of ELEM-A."
 		    (goto-char (org-element-property :end elem-B))
 		    (skip-chars-backward " \r\t\n")
 		    (point-at-eol)))
+	   ;; Store overlays responsible for visibility status.  We
+	   ;; also need to store their boundaries as they will be
+	   ;; removed from buffer.
+	   (overlays
+	    (cons
+	     (mapcar (lambda (ov) (list ov (overlay-start ov) (overlay-end ov)))
+		     (overlays-in beg-A end-A))
+	     (mapcar (lambda (ov) (list ov (overlay-start ov) (overlay-end ov)))
+		     (overlays-in beg-B end-B))))
+	   ;; Get contents.
 	   (body-A (buffer-substring beg-A end-A))
 	   (body-B (delete-and-extract-region beg-B end-B)))
       (goto-char beg-B)
@@ -3945,9 +3955,22 @@ end of ELEM-A."
 	(setq body-B (replace-regexp-in-string "\\`[ \t]*" "" body-B))
 	(org-indent-to-column ind-B))
       (insert body-A)
+      ;; Restore ex ELEM-A overlays.
+      (mapc (lambda (ov)
+	      (move-overlay
+	       (car ov)
+	       (+ (nth 1 ov) (- beg-B beg-A))
+	       (+ (nth 2 ov) (- beg-B beg-A))))
+	    (car overlays))
       (goto-char beg-A)
       (delete-region beg-A end-A)
       (insert body-B)
+      ;; Restore ex ELEM-B overlays.
+      (mapc (lambda (ov)
+	      (move-overlay (car ov)
+			    (+ (nth 1 ov) (- beg-A beg-B))
+			    (+ (nth 2 ov) (- beg-A beg-B))))
+	    (cdr overlays))
       (goto-char (org-element-property :end elem-B)))))
 
 (defun org-element-forward ()

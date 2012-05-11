@@ -2292,7 +2292,24 @@ Outside."
     (search-forward "graph")
     (org-element-drag-backward)
     (should (equal (buffer-string) "Paragraph 2\n\n\nPara1\n\nPara3"))
-    (should (looking-at " 2"))))
+    (should (looking-at " 2")))
+  ;; 5. Preserve visibility of elements and their contents.
+  (org-test-with-temp-text "
+#+BEGIN_CENTER
+Text.
+#+END_CENTER
+- item 1
+  #+BEGIN_QUOTE
+  Text.
+  #+END_QUOTE"
+    (while (search-forward "BEGIN_" nil t) (org-cycle))
+    (search-backward "- item 1")
+    (org-element-drag-backward)
+    (should
+     (equal
+      '((63 . 82) (26 . 48))
+      (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
+	      (overlays-in (point-min) (point-max)))))))
 
 (ert-deftest test-org-element/drag-forward ()
   "Test `org-element-drag-forward' specifications."
@@ -2314,7 +2331,24 @@ Outside."
     (search-forward "graph")
     (org-element-drag-forward)
     (should (equal (buffer-string) "Para2\n\n\nParagraph 1\n\nPara3"))
-    (should (looking-at " 1"))))
+    (should (looking-at " 1")))
+  ;; 5. Preserve visibility of elements and their contents.
+  (org-test-with-temp-text "
+#+BEGIN_CENTER
+Text.
+#+END_CENTER
+- item 1
+  #+BEGIN_QUOTE
+  Text.
+  #+END_QUOTE"
+    (while (search-forward "BEGIN_" nil t) (org-cycle))
+    (search-backward "#+BEGIN_CENTER")
+    (org-element-drag-forward)
+    (should
+     (equal
+      '((63 . 82) (26 . 48))
+      (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
+	      (overlays-in (point-min) (point-max)))))))
 
 (ert-deftest test-org-element/fill-paragraph ()
   "Test `org-element-fill-paragraph' specifications."
