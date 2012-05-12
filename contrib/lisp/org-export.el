@@ -2838,8 +2838,7 @@ Assume LINK type is \"fuzzy\"."
      ;; Last case: link either points to an headline or to
      ;; nothingness.  Try to find the source, with priority given to
      ;; headlines with the closest common ancestor.  If such candidate
-     ;; is found, return its beginning position as an unique
-     ;; identifier, otherwise return nil.
+     ;; is found, return it, otherwise return nil.
      (t
       (let ((find-headline
 	       (function
