@@ -39,6 +39,7 @@
 (declare-function ess-make-buffer-current "ext:ess-inf" ())
 (declare-function ess-eval-buffer "ext:ess-inf" (vis))
 (declare-function org-number-sequence "org-compat" (from &optional to inc))
+(declare-function org-remove-if-not "org" (predicate seq))
 
 (defconst org-babel-header-args:R
   '((width		 . :any)
