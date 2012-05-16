@@ -214,7 +214,7 @@ identifier."
   (defun org-git-version () "N/A !!check installation!!")
   (and (load (concat (org-find-library-dir "org") "../UTILITIES/org-fixup.el")
 	    'noerror 'nomessage 'nosuffix)
-       (org-fixup)))
+       (with-no-warnings (org-fixup))))
 ;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
