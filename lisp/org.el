@@ -209,7 +209,13 @@ identifier."
 
 ;;; Version
 
+<<<<<<< HEAD
 (defvaralias 'org-version 'org-release)
+=======
+(defconst org-version "7.8.10"
+  "The version number of the file org.el.")
+
+>>>>>>> maint
 ;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
