@@ -94,7 +94,7 @@ clean:	cleanrel
 	$(MAKE) -C doc clean
 
 cleanall: cleandirs cleantest cleancontrib cleanutils
-	-$(FIND) . -name \*~ -exec $(RM) {} \;
+	-$(FIND) . -name \*~ -o -name \*# -o -name .#\* -exec $(RM) {} \;
 
 cleancontrib:
 	-$(FIND) contrib -name \*~ -o -name \*.elc -exec $(RM) {} \;
