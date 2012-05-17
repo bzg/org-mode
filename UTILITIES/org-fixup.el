@@ -81,19 +81,14 @@
 	(unwind-protect
 	    (progn
 	      (cd dirorg)
-	      (setq org-git-version
-		    (concat (substring
-			     (shell-command-to-string "git describe --abbrev=6 HEAD")
-			     0 -1)
-			    (when (string-match "\\S-"
-						(shell-command-to-string
-						 "git status -uno --porcelain"))
-			      ".dirty")))
-	      (setq org-version
-		    (substring
-		     (shell-command-to-string "git describe --abbrev=0 HEAD")
-		     0 -1))))
-	(cd origin)))
+	      (let (( git6 (substring (shell-command-to-string "git describe --abbrev=6 HEAD") 0 -1))
+		    ( git0 (substring (shell-command-to-string "git describe --abbrev=0 HEAD") 0 -1))
+		    ( gitd (string-match "\\S-" (shell-command-to-string "git status -uno --porcelain"))))
+		(setq org-git-version (concat git6 (when gitd ".dirty")))
+		(if (string-match "^release_" git0)
+		    (setq org-version (substring git0 8))
+		  (setq org-version git0)))
+	      (cd origin)))))
     `(progn
        (defun org-release () ,org-version)
        (defun org-git-version () ,org-git-version)
