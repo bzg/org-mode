@@ -634,6 +634,12 @@ and `org-export-with-tags' instead."
   :version "24.1"
   :type 'string)
 
+(defcustom org-export-latex-link-with-unknown-path-format "\\texttt{%s}"
+  "Format string for links with unknown path type."
+  :group 'org-export-latex
+  :version "24.2"
+  :type 'string)
+
 (defcustom org-export-latex-inline-image-extensions
   '("pdf" "jpeg" "jpg" "png" "ps" "eps")
   "Extensions of image files that can be inlined into LaTeX.
@@ -2328,8 +2334,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 	      (insert
 	       (save-match-data
 		 (funcall fnc (org-link-unescape raw-path) desc 'latex))))
-
-	     (t (insert "\\texttt{" desc "}")))))))
+	     ;; Unrecognized path type
+	     (t (insert (format org-export-latex-link-with-unknown-path-format desc))))))))
 
 
 (defun org-export-latex-format-image (path caption label attr &optional shortn)
