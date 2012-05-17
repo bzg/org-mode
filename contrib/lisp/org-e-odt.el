@@ -1504,7 +1504,7 @@ standard Emacs.")
     ("odf" . "OpenDocument Formula")
     ("odc" . "OpenDocument Chart")))
 
-(defvar org-e-odt-default-org-styles-alist
+(defconst org-e-odt-default-org-styles-alist
   '((paragraph . ((default . "Text_20_body")
 		  (fixedwidth . "OrgFixedWidthBlock")
 		  (verse . "OrgVerse")
@@ -1523,7 +1523,7 @@ standard Emacs.")
 		  (definition-term . "Text_20_body_20_bold")
 		  (horizontal-line . "Horizontal_20_Line")))
     (character . ((bold . "Bold")
-		  (emphasis . "Emphasis")
+		  (italic . "Emphasis")
 		  (code . "OrgCode")
 		  (verbatim . "OrgCode")
 		  (strike . "Strikethrough")
@@ -3598,7 +3598,7 @@ INFO is a plist holding contextual information.  See
 	   (org-e-odt-format-fontify
 	    (or desc (org-export-data
 		      (org-element-property :raw-link link) info))
-	    'emphasis))
+	    'italic))
 	  ;; Fuzzy link points to an invisible target.
 	  (keyword nil)
 	  ;; LINK points to an headline.  If headlines are numbered
@@ -3650,7 +3650,7 @@ INFO is a plist holding contextual information.  See
      ;; External link without a description part.
      (path (org-e-odt-format-link path path))
      ;; No path, only description.  Try to do something useful.
-     (t (org-e-odt-format-fontify desc 'emphasis)))))
+     (t (org-e-odt-format-fontify desc 'italic)))))
 
 
 ;;;; Babel Call
