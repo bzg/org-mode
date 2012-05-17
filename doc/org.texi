@@ -4926,6 +4926,7 @@ column view (@pxref{Column view}), or to use them in queries.  The following
 property names are special and (except for @code{:CATEGORY:}) should not be
 used as keys in the properties drawer:
 
+@cindex property, special, ID
 @cindex property, special, TODO
 @cindex property, special, TAGS
 @cindex property, special, ALLTAGS
@@ -4942,6 +4943,8 @@ used as keys in the properties drawer:
 @cindex property, special, ITEM
 @cindex property, special, FILE
 @example
+ID           @r{A globally unique ID used for synchronization during}
+             @r{iCalendar or MobileOrg export.}
 TODO         @r{The TODO keyword of the entry.}
 TAGS         @r{The tags defined directly in the headline.}
 ALLTAGS      @r{All tags, including inherited ones.}
