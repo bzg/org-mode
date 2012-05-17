@@ -1667,7 +1667,8 @@ are ignored. "
 				(org-element-contents row))
 			      col))
 			info))
-		      max-width))))
+		      max-width)))
+	 info)
 	max-width)))
 
 (defun org-e-ascii-table-cell (table-cell contents info)
