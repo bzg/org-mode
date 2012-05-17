@@ -21,7 +21,7 @@ manual guide::
 manual::	org.texi org-version.inc
 	$(TEXI2HTML) -o $@ $<
 	../UTILITIES/mansplit.pl $@/*
-guide::		orgguide.texi
+guide::		orgguide.texi org-version.inc
 	$(TEXI2HTML) -o $@ $<
 	../UTILITIES/guidesplit.pl $@/*
 
