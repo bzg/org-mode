@@ -19,7 +19,7 @@ else
 endif
 DATE          = $(shell date +%Y-%m-%d)
 ifneq ($(GITSTATUS),)
-  GITVERSION := $(GITVERSION).dirty
+  GITVERSION := $(GITVERSION:.dirty=).dirty
 endif
 
 .PHONY:	all oldorg update update2 up0 up1 up2 compile $(SUBDIRS) \
