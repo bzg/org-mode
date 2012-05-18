@@ -2228,6 +2228,8 @@ Return the updated communication channel."
 ;; why file inclusion should be done before any structure can be
 ;; associated to the file, that is before parsing.
 
+(defvar org-current-export-file)	; Dynamically scoped
+(defvar org-export-current-backend)	; Dynamically scoped
 (defun org-export-as
   (backend &optional subtreep visible-only body-only ext-plist noexpand)
   "Transcode current Org buffer into BACKEND code.
@@ -2288,7 +2290,11 @@ Return code as a string."
 		       (let ((org-current-export-file buf))
 			 (org-export-blocks-preprocess)))
 		     (goto-char (point-min))
-		     (run-hooks 'org-export-before-parsing-hook)
+		     ;; Run hook with `org-export-current-backend' set
+		     ;; to BACKEND.
+		     (let ((org-export-current-backend backend))
+		       (run-hooks 'org-export-before-parsing-hook))
+		     ;; Eventually parse buffer.
 		     (org-element-parse-buffer nil visible-only)))))
 	;; 3. Call parse-tree filters to get the final tree.
 	(setq tree
