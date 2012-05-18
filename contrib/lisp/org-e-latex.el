@@ -399,6 +399,11 @@ default we use here encompasses both."
   :type '(alist :key-type (string :tag "Type")
 		:value-type (regexp :tag "Path")))
 
+(defcustom org-e-latex-link-with-unknown-path-format "\\texttt{%s}"
+  "Format string for links with unknown path type."
+  :group 'org-export-latex
+  :type 'string)
+
 
 ;;;; Tables
 
@@ -1598,7 +1603,7 @@ INFO is a plist holding contextual information.  See
 	(case (org-element-type destination)
 	  ;; Fuzzy link points nowhere.
 	  ('nil
-	   (format "\\texttt{%s}"
+	   (format org-e-latex-link-with-unknown-path-format
 		   (or desc
 		       (org-export-data
 			(org-element-property :raw-link link) info))))
@@ -1639,7 +1644,7 @@ INFO is a plist holding contextual information.  See
      ;; External link without a description part.
      (path (format "\\url{%s}" path))
      ;; No path, only description.  Try to do something useful.
-     (t (format "\\texttt{%s}" desc)))))
+     (t (format org-e-latex-link-with-unknown-path-format desc)))))
 
 
 ;;;; Macro
