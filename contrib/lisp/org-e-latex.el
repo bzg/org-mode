@@ -42,10 +42,6 @@
 
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-normalize-string "org-element" (s))
-(declare-function org-element-parse-secondary-string
-		  "org-element" (string restriction &optional buffer))
-(defvar org-element-string-restrictions)
-(defvar org-element-object-restrictions)
 
 (declare-function org-export-data "org-export" (data info))
 (declare-function org-export-directory "org-export" (type plist))
@@ -71,6 +67,7 @@
 		  "org-export" (extension &optional subtreep pub-dir))
 (declare-function org-export-resolve-coderef "org-export" (ref info))
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
+(declare-function org-export-resolve-radio-link "org-export" (link info))
 (declare-function org-export-solidify-link-text "org-export" (s))
 (declare-function
  org-export-to-buffer "org-export"
@@ -1587,12 +1584,11 @@ INFO is a plist holding contextual information.  See
      ;; link.  Path is parsed and transcoded in order to have a proper
      ;; display of the contents.
      ((string= type "radio")
-      (format "\\hyperref[%s]{%s}"
-	      (org-export-solidify-link-text path)
-	      (org-export-data
-	       (org-element-parse-secondary-string
-		path (cdr (assq 'radio-target org-element-object-restrictions)))
-	       info)))
+      (let ((destination (org-export-resolve-radio-link link info)))
+	(when destination
+	  (format "\\hyperref[%s]{%s}"
+		  (org-export-solidify-link-text path)
+		  (org-export-data (org-element-contents destination) info)))))
      ;; Links pointing to an headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))

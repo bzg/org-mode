@@ -2891,6 +2891,34 @@ This only applies to links without a description."
 			       (org-element-property :path link))))
 	  rules))))
 
+(defun org-export-resolve-coderef (ref info)
+  "Resolve a code reference REF.
+
+INFO is a plist used as a communication channel.
+
+Return associated line number in source code, or REF itself,
+depending on src-block or example element's switches."
+  (org-element-map
+   (plist-get info :parse-tree) '(example-block src-block)
+   (lambda (el)
+     (with-temp-buffer
+       (insert (org-trim (org-element-property :value el)))
+       (let* ((label-fmt (regexp-quote
+			  (or (org-element-property :label-fmt el)
+			      org-coderef-label-format)))
+	      (ref-re
+	       (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
+		       (replace-regexp-in-string "%s" ref label-fmt nil t))))
+	 ;; Element containing REF is found.  Resolve it to either
+	 ;; a label or a line number, as needed.
+	 (when (re-search-backward ref-re nil t)
+	   (cond
+	    ((org-element-property :use-labels el) ref)
+	    ((eq (org-element-property :number-lines el) 'continued)
+	     (+ (org-export-get-loc el info) (line-number-at-pos)))
+	    (t (line-number-at-pos)))))))
+   info 'first-match))
+
 (defun org-export-resolve-fuzzy-link (link info)
   "Return LINK destination.
 
@@ -2975,33 +3003,19 @@ is either \"id\" or \"custom-id\"."
          headline))
      info 'first-match)))
 
-(defun org-export-resolve-coderef (ref info)
-  "Resolve a code reference REF.
+(defun org-export-resolve-radio-link (link info)
+  "Return radio-target object referenced as LINK destination.
 
 INFO is a plist used as a communication channel.
 
-Return associated line number in source code, or REF itself,
-depending on src-block or example element's switches."
-  (org-element-map
-   (plist-get info :parse-tree) '(example-block src-block)
-   (lambda (el)
-     (with-temp-buffer
-       (insert (org-trim (org-element-property :value el)))
-       (let* ((label-fmt (regexp-quote
-			  (or (org-element-property :label-fmt el)
-			      org-coderef-label-format)))
-	      (ref-re
-	       (format "^.*?\\S-.*?\\([ \t]*\\(%s\\)\\)[ \t]*$"
-		       (replace-regexp-in-string "%s" ref label-fmt nil t))))
-	 ;; Element containing REF is found.  Resolve it to either
-	 ;; a label or a line number, as needed.
-	 (when (re-search-backward ref-re nil t)
-	   (cond
-	    ((org-element-property :use-labels el) ref)
-	    ((eq (org-element-property :number-lines el) 'continued)
-	     (+ (org-export-get-loc el info) (line-number-at-pos)))
-	    (t (line-number-at-pos)))))))
-   info 'first-match))
+Return value can be a radio-target object or nil.  Assume LINK
+has type \"radio\"."
+  (let ((path (org-element-property :path link)))
+    (org-element-map
+     (plist-get info :parse-tree) 'radio-target
+     (lambda (radio)
+       (when (equal (org-element-property :value radio) path) radio))
+     info 'first-match)))
 
 
 ;;;; For Macros

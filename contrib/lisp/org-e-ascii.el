@@ -61,7 +61,7 @@
 (declare-function org-export-resolve-coderef "org-export" (ref info))
 (declare-function org-export-resolve-fuzzy-link "org-export" (link info))
 (declare-function org-export-resolve-id-link "org-export" (link info))
-(declare-function org-export-resolve-ref-link "org-export" (link info))
+(declare-function org-export-resolve-radio-link "org-export" (link info))
 (declare-function
  org-export-to-file "org-export"
  (backend file &optional subtreep visible-only body-only ext-plist))
@@ -1451,11 +1451,9 @@ INFO is a plist holding contextual information."
      ;; Do not apply a special syntax on radio links.  Though, parse
      ;; and transcode path to have a proper display of contents.
      ((string= type "radio")
-      (org-export-data
-       (org-element-parse-secondary-string
-	(org-element-property :path link)
-	(cdr (assq 'radio-target org-element-object-restrictions)))
-       info))
+      (let ((destination (org-export-resolve-radio-link link info)))
+	(when destination
+	  (org-export-data (org-element-contents destination) info))))
      ;; Do not apply a special syntax on fuzzy links pointing to
      ;; targets.
      ((string= type "fuzzy")

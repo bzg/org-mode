@@ -637,6 +637,27 @@ Another text. (ref:text)
 	(should (equal (org-export-resolve-coderef "text" `(:parse-tree ,tree))
 		       "text"))))))
 
+(ert-deftest test-org-export/resolve-radio-link ()
+  "Test `org-export-resolve-radio-link' specifications."
+  ;; Standard test.
+  (org-test-with-temp-text "<<<radio>>> radio"
+    (org-update-radio-target-regexp)
+    (should
+     (let* ((tree (org-element-parse-buffer))
+	    (info `(:parse-tree ,tree)))
+       (org-export-resolve-radio-link
+	(org-element-map tree 'link 'identity info t)
+	info))))
+  ;; Radio target with objects.
+  (org-test-with-temp-text "<<<radio \\alpha>>> radio \\alpha"
+    (org-update-radio-target-regexp)
+    (should
+     (let* ((tree (org-element-parse-buffer))
+	    (info `(:parse-tree ,tree)))
+       (org-export-resolve-radio-link
+	(org-element-map tree 'link 'identity info t)
+	info)))))
+
 
 
 ;;; Src-block and example-block
