@@ -91,8 +91,8 @@
 (defvar org-agenda-buffer-name)
 (defvar org-agenda-overriding-header)
 (defvar org-agenda-title-append nil)
-(with-no-warnings (defvar entry)) ;; unprefixed, from calendar.el
-(with-no-warnings (defvar date))  ;; unprefixed, from calendar.el
+(org-no-warnings (defvar entry)) ;; unprefixed, from calendar.el
+(org-no-warnings (defvar date))  ;; unprefixed, from calendar.el
 (defvar org-agenda-undo-list)
 (defvar org-agenda-pending-undo-list)
 (defvar original-date) ; dynamically scoped, calendar.el does scope this

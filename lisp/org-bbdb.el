@@ -122,7 +122,7 @@
 (declare-function calendar-leap-year-p "calendar" (year))
 (declare-function diary-ordinal-suffix "diary-lib" (n))
 
-(with-no-warnings (defvar date)) ;; unprefixed, from calendar.el
+(org-no-warnings (defvar date)) ;; unprefixed, from calendar.el
 
 ;; Customization
 

@@ -1379,7 +1379,7 @@ If there is no running clock, throw an error, unless FAIL-QUIETLY is set."
       (if fail-quietly (throw 'exit t) (error "No active clock")))
     (let (ts te s h m remove)
       (save-excursion ; Do not replace this with `with-current-buffer'.
-	(with-no-warnings (set-buffer (org-clocking-buffer)))
+	(org-no-warnings (set-buffer (org-clocking-buffer)))
 	(save-restriction
 	  (widen)
 	  (goto-char org-clock-marker)
@@ -1523,7 +1523,7 @@ UPDOWN tells whether to change 'up or 'down."
     (force-mode-line-update)
     (error "No active clock"))
   (save-excursion ; Do not replace this with `with-current-buffer'.
-    (with-no-warnings (set-buffer (org-clocking-buffer)))
+    (org-no-warnings (set-buffer (org-clocking-buffer)))
     (goto-char org-clock-marker)
     (delete-region (1- (point-at-bol)) (point-at-eol))
     ;; Just in case, remove any empty LOGBOOK left over

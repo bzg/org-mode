@@ -214,7 +214,7 @@ identifier."
   (defun org-git-version () "N/A !!check installation!!")
   (and (load (concat (org-find-library-dir "org") "../UTILITIES/org-fixup.el")
 	    'noerror 'nomessage 'nosuffix)
-       (with-no-warnings (org-fixup))))
+       (org-no-warnings (org-fixup))))
 ;;;###autoload
 (defun org-version (&optional here)
   "Show the org-mode version in the echo area.
@@ -4901,9 +4901,9 @@ This is for getting out of special buffers like remember.")
 
 ;; FIXME: Occasionally check by commenting these, to make sure
 ;;        no other functions uses these, forgetting to let-bind them.
-(with-no-warnings (defvar entry)) ;; unprefixed, from calendar.el
+(org-no-warnings (defvar entry)) ;; unprefixed, from calendar.el
 (defvar org-last-state)
-(with-no-warnings (defvar date)) ;; unprefixed, from calendar.el
+(org-no-warnings (defvar date)) ;; unprefixed, from calendar.el
 
 ;; Defined somewhere in this file, but used before definition.
 (defvar org-entities)     ;; defined in org-entities.el
@@ -15577,7 +15577,7 @@ user function argument order change dependent on argument order."
 	(list arg2 arg1 arg3))
        ((eq calendar-date-style 'iso)
 	(list arg2 arg3 arg1)))
-    (with-no-warnings ;; european-calendar-style is obsolete as of version 23.1
+    (org-no-warnings ;; european-calendar-style is obsolete as of version 23.1
       (if (org-bound-and-true-p european-calendar-style)
 	  (list arg2 arg1 arg3)
 	(list arg1 arg2 arg3)))))
