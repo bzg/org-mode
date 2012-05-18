@@ -134,10 +134,10 @@
     (verse-block . org-e-ascii-verse-block))
   "Alist between element or object types and translators.")
 
-(defconst org-e-ascii-option-alist
+(defconst org-e-ascii-options-alist
   '((:ascii-charset nil nil org-e-ascii-charset))
   "Alist between ASCII export properties and ways to set them.
-See `org-export-option-alist' for more information on the
+See `org-export-options-alist' for more information on the
 structure of the values.")
 
 (defconst org-e-ascii-filters-alist

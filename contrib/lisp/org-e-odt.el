@@ -87,7 +87,7 @@
     (verse-block . org-e-odt-verse-block))
   "Alist between element or object types and translators.")
 
-(defvar org-e-odt-option-alist
+(defconst org-e-odt-options-alist
   '(
     ;; (:agenda-style nil nil org-agenda-export-html-style)
     ;; (:convert-org-links nil nil org-e-odt-link-org-files-as-html)
@@ -109,7 +109,7 @@
     (:odt-styles-file "ODT_STYLES_FILE" nil nil t)
     (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments))
   "Alist between ODT export properties and ways to set them.
-See `org-export-option-alist' for more information on the
+See `org-export-options-alist' for more information on the
 structure of the values.")
 
 

@@ -139,13 +139,13 @@
     (verse-block . org-e-latex-verse-block))
   "Alist between element or object types and translators.")
 
-(defconst org-e-latex-option-alist
+(defconst org-e-latex-options-alist
   '((:date "DATE" nil org-e-latex-date-format t)
     (:latex-class "LATEX_CLASS" nil org-e-latex-default-class t)
     (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
     (:latex-header-extra "LATEX_HEADER" nil nil newline))
   "Alist between LaTeX export properties and ways to set them.
-See `org-export-option-alist' for more information on the
+See `org-export-options-alist' for more information on the
 structure of the values.")
 
 

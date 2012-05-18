@@ -78,10 +78,10 @@
 ;;    recognized as an element or an object.  It must accept two
 ;;    arguments: the text string and the information channel.
 ;;
-;; 2. Optionally define a variable, `org-BACKEND-option-alist', in
+;; 2. Optionally define a variable, `org-BACKEND-options-alist', in
 ;;    order to support new export options, buffer keywords or
 ;;    "#+OPTIONS:" items specific to the back-end.  See
-;;    `org-export-option-alist' for supported defaults and syntax.
+;;    `org-export-options-alist' for supported defaults and syntax.
 ;;
 ;; 3. Optionally define a variable, `org-BACKEND-filters-alist', in
 ;;    order to apply developer filters.  See "The Filter System"
@@ -114,13 +114,13 @@
 ;;; Internal Variables
 ;;
 ;; Among internal variables, the most important is
-;; `org-export-option-alist'.  This variable define the global export
+;; `org-export-options-alist'.  This variable define the global export
 ;; options, shared between every exporter, and how they are acquired.
 
 (defconst org-export-max-depth 19
   "Maximum nesting depth for headlines, counting from 0.")
 
-(defconst org-export-option-alist
+(defconst org-export-options-alist
   '((:author "AUTHOR" nil user-full-name t)
     (:creator "CREATOR" nil org-export-creator-string)
     (:date "DATE" nil nil t)
@@ -177,7 +177,7 @@ KEYWORD and OPTION have precedence over DEFAULT.
 
 All these properties should be back-end agnostic.  For back-end
 specific properties, define a similar variable named
-`org-BACKEND-option-alist', replacing BACKEND with the name of
+`org-BACKEND-options-alist', replacing BACKEND with the name of
 the appropriate back-end.  You can also redefine properties
 there, as they have precedence over these.")
 
@@ -277,7 +277,7 @@ rules.")
 ;; Configuration for the masses.
 ;;
 ;; They should never be accessed directly, as their value is to be
-;; stored in a property list (cf. `org-export-option-alist').
+;; stored in a property list (cf. `org-export-options-alist').
 ;; Back-ends will read their value from there instead.
 
 (defgroup org-export nil
@@ -753,14 +753,14 @@ The back-end could then be called with, for example:
 	       "Alist between filters keywords and back-end specific filters.
 See `org-export-filters-alist' for more information.")))
        ;; Define options.
-       ,(let ((parent-options (intern (format "org-%s-option-alist" parent))))
+       ,(let ((parent-options (intern (format "org-%s-options-alist" parent))))
 	  (when (or (boundp parent-options) options)
-	    `(defconst ,(intern (format "org-%s-option-alist" child))
+	    `(defconst ,(intern (format "org-%s-options-alist" child))
 	       ',(append options
 			 (and (boundp parent-options)
 			      (copy-sequence (symbol-value parent-options))))
 	       "Alist between LaTeX export properties and ways to set them.
-See `org-export-option-alist' for more information on the
+See `org-export-options-alist' for more information on the
 structure of the values.")))
        ;; Define translators.
        (defvar ,(intern (format "org-%s-translate-alist" child))
@@ -785,7 +785,7 @@ structure of the values.")))
 ;;    function.
 ;;
 ;;    Most environment options are defined through the
-;;    `org-export-option-alist' variable.
+;;    `org-export-options-alist' variable.
 ;;
 ;; 2. Tree properties are extracted directly from the parsed tree,
 ;;    just before export, by `org-export-collect-tree-properties'.
@@ -1080,10 +1080,10 @@ inferior to file-local settings."
 Optional argument BACKEND is a symbol specifying which back-end
 specific items to read, if any."
   (let* ((all
-	  (append org-export-option-alist
+	  (append org-export-options-alist
 		  (and backend
 		       (let ((var (intern
-				   (format "org-%s-option-alist" backend))))
+				   (format "org-%s-options-alist" backend))))
 			 (and (boundp var) (eval var))))))
 	 ;; Build an alist between #+OPTION: item and property-name.
 	 (alist (delq nil
@@ -1202,14 +1202,14 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 				  nil nil 1)
 				 restr)))))))))))
 	       (setq plist (org-combine-plists plist prop)))))))
-     ;; 2. Standard options, as in `org-export-option-alist'.
-     (let* ((all (append org-export-option-alist
+     ;; 2. Standard options, as in `org-export-options-alist'.
+     (let* ((all (append org-export-options-alist
 			 ;; Also look for back-end specific options
 			 ;; if BACKEND is defined.
 			 (and backend
 			      (let ((var
 				     (intern
-				      (format "org-%s-option-alist" backend))))
+				      (format "org-%s-options-alist" backend))))
 				(and (boundp var) (eval var))))))
 	    ;; Build alist between keyword name and property name.
 	    (alist
@@ -1291,10 +1291,10 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 Optional argument BACKEND, if non-nil, is a symbol specifying
 which back-end specific export options should also be read in the
 process."
-  (let ((all (append org-export-option-alist
+  (let ((all (append org-export-options-alist
 		     (and backend
 			  (let ((var (intern
-				      (format "org-%s-option-alist" backend))))
+				      (format "org-%s-options-alist" backend))))
 			    (and (boundp var) (eval var))))))
 	;; Output value.
 	plist)

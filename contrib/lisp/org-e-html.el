@@ -143,7 +143,7 @@
     (verse-block . org-e-html-verse-block))
   "Alist between element or object types and translators.")
 
-(defconst org-e-html-option-alist
+(defconst org-e-html-options-alist
   '((:agenda-style nil nil org-agenda-export-html-style)
     (:convert-org-links nil nil org-e-html-link-org-files-as-html)
     ;; FIXME Use (org-xml-encode-org-text-skip-links s) ??
@@ -164,7 +164,7 @@
     (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments)
     (:mathjax "MATHJAX" nil "" space))
   "Alist between HTML export properties and ways to set them.
-See `org-export-option-alist' for more information on the
+See `org-export-options-alist' for more information on the
 structure of the values.")
 
 (defconst org-e-html-filters-alist
