@@ -17,12 +17,12 @@ ORGDIR = org-$(GITVERSION)
 ORGTAR = $(ORGDIR).tar.gz
 ORGZIP = $(ORGDIR).zip
 ORGDIST = README Makefile default.mk targets.mk request-assign-future.txt \
-	  lisp/ etc/ doc/ contrib/ 
+	  lisp/ etc/ doc/ contrib/
 
 ORG_MAKE_DOC = info pdf card # do not make HTML documentation for release
 
 reltest:	cleanall doc autoloads rel-dirty
-rel-dirty:	
+rel-dirty:
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
 	tar -zcf $(ORGTAR) $(foreach dist, $(ORGDIST), $(ORGDIR)/$(dist))
