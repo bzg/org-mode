@@ -3602,8 +3602,6 @@ INFO is a plist holding contextual information.  See
 		   (setq raw-path (match-string 1 raw-path)))
 		 (if (file-name-absolute-p raw-path)
 		     (concat "file://" (expand-file-name raw-path))
-		   ;; TODO: Not implemented yet.  Concat also:
-		   ;; (org-export-directory :HTML info)
 		   (concat "file://" raw-path)))
 		(t raw-path)))
 	 protocol)
@@ -3612,9 +3610,8 @@ INFO is a plist holding contextual information.  See
      ((and (not desc) (org-export-inline-image-p
 		       link org-e-odt-inline-image-rules))
       (org-e-odt-link--inline-image link info))
-     ;; Radioed target: Target's name is obtained from original raw
-     ;; link.  Path is parsed and transcoded in order to have a proper
-     ;; display of the contents.
+     ;; Radio target: Transcode target's contents and use them as
+     ;; link's description.
      ((string= type "radio")
       (let ((destination (org-export-resolve-radio-link link info)))
 	(when destination
