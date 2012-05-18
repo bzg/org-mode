@@ -48,14 +48,14 @@ local.mk:
 		-e '$$ i ## See default.mk for further configuration options.' \
 		default.mk > $@
 
-all compile::	doc lisp
-	$(MAKE) -C $< clean
-compile compile-dirty::	lisp
-	$(MAKE) -C $< $@
+all compile::
+	$(foreach dir, doc lisp, $(MAKE) -C $(dir) clean;)
+compile compile-dirty::
+	$(MAKE) -C lisp $@
 all clean-install::
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)
 
-check test::	all
+check test::	compile
 check test test-dirty::
 	-$(MKDIR) $(testdir)
 	TMPDIR=$(testdir) $(BTEST)
