@@ -1857,8 +1857,8 @@ PUB-DIR is set, use this as the publishing directory."
 		     (insert "<p class=\"email\">" email "</p>\n"))
 		   (when (plist-get opt-plist :creator-info)
 		     (insert "<p class=\"creator\">"
-			     (concat "<a href=\"http://orgmode.org/\">Org</a> version "
-			             (org-version) " with Emacs version "
+			     (concat "<a href=\"http://orgmode.org\">Org</a> version "
+			             (org-version) " with <a href=\"http://www.gnu.org/software/emacs/\">Emacs</a> version "
 				     (number-to-string emacs-major-version) "</p>\n")))
 		   (insert html-validation-link "\n"))
 		  (t
