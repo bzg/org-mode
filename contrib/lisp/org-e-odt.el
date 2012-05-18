@@ -24,8 +24,94 @@
 ;;; Commentary:
 
 ;;; Code:
+
 (eval-when-compile
   (require 'cl))
+
+
+;;; Define Back-End
+
+(defvar org-e-odt-translate-alist
+  '((babel-call . org-e-odt-babel-call)
+    (bold . org-e-odt-bold)
+    (center-block . org-e-odt-center-block)
+    (clock . org-e-odt-clock)
+    (code . org-e-odt-code)
+    (comment . org-e-odt-comment)
+    (comment-block . org-e-odt-comment-block)
+    (drawer . org-e-odt-drawer)
+    (dynamic-block . org-e-odt-dynamic-block)
+    (entity . org-e-odt-entity)
+    (example-block . org-e-odt-example-block)
+    (export-block . org-e-odt-export-block)
+    (export-snippet . org-e-odt-export-snippet)
+    (fixed-width . org-e-odt-fixed-width)
+    (footnote-definition . org-e-odt-footnote-definition)
+    (footnote-reference . org-e-odt-footnote-reference)
+    (headline . org-e-odt-headline)
+    (horizontal-rule . org-e-odt-horizontal-rule)
+    (inline-babel-call . org-e-odt-inline-babel-call)
+    (inline-src-block . org-e-odt-inline-src-block)
+    (inlinetask . org-e-odt-inlinetask)
+    (italic . org-e-odt-italic)
+    (item . org-e-odt-item)
+    (keyword . org-e-odt-keyword)
+    (latex-environment . org-e-odt-latex-environment)
+    (latex-fragment . org-e-odt-latex-fragment)
+    (line-break . org-e-odt-line-break)
+    (link . org-e-odt-link)
+    (macro . org-e-odt-macro)
+    (paragraph . org-e-odt-paragraph)
+    (plain-list . org-e-odt-plain-list)
+    (plain-text . org-e-odt-plain-text)
+    (planning . org-e-odt-planning)
+    (property-drawer . org-e-odt-property-drawer)
+    (quote-block . org-e-odt-quote-block)
+    (quote-section . org-e-odt-quote-section)
+    (radio-target . org-e-odt-radio-target)
+    (section . org-e-odt-section)
+    (special-block . org-e-odt-special-block)
+    (src-block . org-e-odt-src-block)
+    (statistics-cookie . org-e-odt-statistics-cookie)
+    (strike-through . org-e-odt-strike-through)
+    (subscript . org-e-odt-subscript)
+    (superscript . org-e-odt-superscript)
+    (table . org-e-odt-table)
+    (table-cell . org-e-odt-table-cell)
+    (table-row . org-e-odt-table-row)
+    (target . org-e-odt-target)
+    (template . org-e-odt-template)
+    (timestamp . org-e-odt-timestamp)
+    (underline . org-e-odt-underline)
+    (verbatim . org-e-odt-verbatim)
+    (verse-block . org-e-odt-verse-block))
+  "Alist between element or object types and translators.")
+
+(defvar org-e-odt-option-alist
+  '(
+    ;; (:agenda-style nil nil org-agenda-export-html-style)
+    ;; (:convert-org-links nil nil org-e-odt-link-org-files-as-html)
+    ;; ;; FIXME Use (org-xml-encode-org-text-skip-links s) ??
+    ;; ;; (:expand-quoted-html nil "@" org-e-odt-expand)
+    ;; (:inline-images nil nil org-e-odt-inline-images)
+    ;; ;; (:link-home nil nil org-e-odt-link-home) FIXME
+    ;; ;; (:link-up nil nil org-e-odt-link-up) FIXME
+    ;; (:style nil nil org-e-odt-style)
+    ;; (:style-extra nil nil org-e-odt-style-extra)
+    ;; (:style-include-default nil nil org-e-odt-style-include-default)
+    ;; (:style-include-scripts nil nil org-e-odt-style-include-scripts)
+    ;; ;; (:timestamp nil nil org-e-odt-with-timestamp)
+    ;; (:html-extension nil nil org-e-odt-extension)
+    ;; (:html-postamble nil nil org-e-odt-postamble)
+    ;; (:html-preamble nil nil org-e-odt-preamble)
+    ;; (:html-table-tag nil nil org-e-odt-table-tag)
+    ;; (:xml-declaration nil nil org-e-odt-xml-declaration)
+    (:odt-styles-file "ODT_STYLES_FILE" nil nil t)
+    (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments))
+  "Alist between ODT export properties and ways to set them.
+See `org-export-option-alist' for more information on the
+structure of the values.")
+
 
 ;; FIXMES
 ;; org-e-odt-preprocess-latex-fragments
@@ -1761,53 +1847,6 @@ captions on export.")
 
 
 ;;;; HTML Internal Variables
-
-(defvar org-e-odt-option-alist
-  '(
-    ;; (:agenda-style nil nil org-agenda-export-html-style)
-    ;; (:convert-org-links nil nil org-e-odt-link-org-files-as-html)
-    ;; ;; FIXME Use (org-xml-encode-org-text-skip-links s) ??
-    ;; ;; (:expand-quoted-html nil "@" org-e-odt-expand)
-    ;; (:inline-images nil nil org-e-odt-inline-images)
-    ;; ;; (:link-home nil nil org-e-odt-link-home) FIXME
-    ;; ;; (:link-up nil nil org-e-odt-link-up) FIXME
-    ;; (:style nil nil org-e-odt-style)
-    ;; (:style-extra nil nil org-e-odt-style-extra)
-    ;; (:style-include-default nil nil org-e-odt-style-include-default)
-    ;; (:style-include-scripts nil nil org-e-odt-style-include-scripts)
-    ;; ;; (:timestamp nil nil org-e-odt-with-timestamp)
-    ;; (:html-extension nil nil org-e-odt-extension)
-    ;; (:html-postamble nil nil org-e-odt-postamble)
-    ;; (:html-preamble nil nil org-e-odt-preamble)
-    ;; (:html-table-tag nil nil org-e-odt-table-tag)
-    ;; (:xml-declaration nil nil org-e-odt-xml-declaration)
-    (:odt-styles-file "ODT_STYLES_FILE" nil nil t)
-    (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments))
-  "Alist between export properties and ways to set them.
-
-The car of the alist is the property name, and the cdr is a list
-like \(KEYWORD OPTION DEFAULT BEHAVIOUR\) where:
-
-KEYWORD is a string representing a buffer keyword, or nil.
-OPTION is a string that could be found in an #+OPTIONS: line.
-DEFAULT is the default value for the property.
-BEHAVIOUR determine how Org should handle multiple keywords for
-the same property.  It is a symbol among:
-  nil       Keep old value and discard the new one.
-  t         Replace old value with the new one.
-  `space'   Concatenate the values, separating them with a space.
-  `newline' Concatenate the values, separating them with
-            a newline.
-  `split'   Split values at white spaces, and cons them to the
-            previous list.
-
-KEYWORD and OPTION have precedence over DEFAULT.
-
-All these properties should be back-end agnostic.  For back-end
-specific properties, define a similar variable named
-`org-BACKEND-option-alist', replacing BACKEND with the name of
-the appropriate back-end.  You can also redefine properties
-there, as they have precedence over these.")
 
 (defvar html-table-tag nil) ; dynamically scoped into this.
 

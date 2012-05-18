@@ -46,50 +46,60 @@
 ;; The core function is `org-export-as'.  It returns the transcoded
 ;; buffer as a string.
 ;;
-;; In order to derive an exporter out of this generic implementation,
-;; one can define a transcode function for each element or object.
-;; Such function should return a string for the corresponding element,
-;; without any trailing space, or nil.  It must accept three
-;; arguments:
-;; 1. the element or object itself,
-;; 2. its contents, or nil when it isn't recursive,
-;; 3. the property list used as a communication channel.
+;; In order to implement a back-end for this generic exporter, up to
+;; three steps may be needed:
 ;;
-;; If no such function is found, that element or object type will
-;; simply be ignored, along with any separating blank line.  The same
-;; will happen if the function returns the nil value.  If that
-;; function returns the empty string, the type will be ignored, but
-;; the blank lines will be kept.
+;; 1. Define a variable, `org-BACKEND-translate-alist' where elements
+;;    and objects types are associated to translator functions.
 ;;
-;; Contents, when not nil, are stripped from any global indentation
-;; (although the relative one is preserved).  They also always end
-;; with a single newline character.
+;;    These functions should return a string without any trailing
+;;    space, or nil.  They must accept three arguments: the object or
+;;    element itself, its contents or nil when it isn't recursive and
+;;    the property list used as a communication channel.
 ;;
-;; These functions must follow a strict naming convention:
-;; `org-BACKEND-TYPE' where, obviously, BACKEND is the name of the
-;; export back-end and TYPE the type of the element or object handled.
+;;    Contents, when not nil, are stripped from any global indentation
+;;    (although the relative one is preserved).  They also always end
+;;    with a single newline character.
 ;;
-;; Moreover, two additional functions can be defined.  On the one
-;; hand, `org-BACKEND-template' returns the final transcoded string,
-;; and can be used to add a preamble and a postamble to document's
-;; body.  It must accept two arguments: the transcoded string and the
-;; property list containing export options.  On the other hand,
-;; `org-BACKEND-plain-text', when defined, is to be called on every
-;; text not recognized as an element or an object.  It must accept two
-;; arguments: the text string and the information channel.
+;;    If, for a given type, no function is found, that element or
+;;    object type will simply be ignored, along with any blank line or
+;;    white space at its end.  The same will happen if the function
+;;    returns the nil value.  If that function returns the empty
+;;    string, the type will be ignored, but the blank lines or white
+;;    spaces will be kept.
+;;
+;;    In addition to element and object types, one function can be
+;;    associated to the `template' symbol and another one to the
+;;    `plain-list' symbol.  The former returns the final transcoded
+;;    string, and can be used to add a preamble and a postamble to
+;;    document's body.  It must accept two arguments: the transcoded
+;;    string and the property list containing export options.  The
+;;    latter, when defined, is to be called on every text not
+;;    recognized as an element or an object.  It must accept two
+;;    arguments: the text string and the information channel.
+;;
+;; 2. Optionally define a variable, `org-BACKEND-option-alist', in
+;;    order to support new export options, buffer keywords or
+;;    "#+OPTIONS:" items specific to the back-end.  See
+;;    `org-export-option-alist' for supported defaults and syntax.
+;;
+;; 3. Optionally define a variable, `org-BACKEND-filters-alist', in
+;;    order to apply developer filters.  See "The Filter System"
+;;    section in this file for more information.
+;;
+;; If the new back-end shares most properties with another one,
+;; `org-export-define-derived-backend' can be used to simplify the
+;; process.
 ;;
 ;; Any back-end can define its own variables.  Among them, those
 ;; customizables should belong to the `org-export-BACKEND' group.
-;; Also, a special variable, `org-BACKEND-option-alist', allows to
-;; define buffer keywords and "#+options:" items specific to that
-;; back-end.  See `org-export-option-alist' for supported defaults and
-;; syntax.
 ;;
 ;; Tools for common tasks across back-ends are implemented in the
 ;; penultimate part of this file.  A dispatcher for standard back-ends
 ;; is provided in the last one.
 
 ;;; Code:
+
 (eval-when-compile (require 'cl))
 (require 'org-element)
 ;; Require major back-ends and publishing tools
@@ -1542,7 +1552,10 @@ non-nil, is a list of tags marking a subtree as exportable."
 ;; parse tree traversals skip it, `org-export-interpret-p' tells which
 ;; elements or objects should be seen as real Org syntax and
 ;; `org-export-expand' transforms the others back into their original
-;; shape.
+;; shape
+;;
+;; `org-export-transcoder' is an accessor returning appropriate
+;; translator function for a given element or object.
 
 (defun org-export-transcoder (blob info)
   "Return appropriate transcoder for BLOB.
@@ -1550,9 +1563,12 @@ INFO is a plist containing export directives."
   (let ((type (org-element-type blob)))
     ;; Return contents only for complete parse trees.
     (if (eq type 'org-data) (lambda (blob contents info) contents)
-      (let ((transcoder
-             (intern (format "org-%s-%s" (plist-get info :back-end) type))))
-        (and (fboundp transcoder) transcoder)))))
+      (let ((translate-alist
+	     (intern (format "org-%s-translate-alist"
+			     (plist-get info :back-end)))))
+	(when (boundp translate-alist)
+	  (let ((transcoder (cdr (assq type (symbol-value translate-alist)))))
+	    (and (fboundp transcoder) transcoder)))))))
 
 (defun org-export-data (data info)
   "Convert DATA into current back-end format.
