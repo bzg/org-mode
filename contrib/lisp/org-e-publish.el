@@ -1119,13 +1119,14 @@ If FREE-CACHE, empty the cache."
 (defun org-e-publish-cache-file-needs-publishing
   (filename &optional pub-dir pub-func)
   "Check the timestamp of the last publishing of FILENAME.
-Return `t', if the file needs publishing.  The function also
-checks if any included files have been more recently published,
-so that the file including them will be republished as well."
+Non-nil if the file needs publishing.  The function also checks
+if any included files have been more recently published, so that
+the file including them will be republished as well."
   (unless org-e-publish-cache
     (error
      "`org-e-publish-cache-file-needs-publishing' called, but no cache present"))
-  (let* ((key (org-e-publish-timestamp-filename filename pub-dir pub-func))
+  (let* ((case-fold-search t)
+	 (key (org-e-publish-timestamp-filename filename pub-dir pub-func))
 	 (pstamp (org-e-publish-cache-get key))
 	 (visiting (find-buffer-visiting filename))
 	 included-files-ctime buf)
@@ -1135,7 +1136,7 @@ so that the file including them will be republished as well."
       (with-current-buffer buf
 	(goto-char (point-min))
 	(while (re-search-forward
-		"^#\\+INCLUDE:[ \t]+\"?\\([^ \t\n\r\"]*\\)\"?[ \t]*.*$" nil t)
+		"^#\\+INCLUDE:[ \t]+\"\\([^\t\n\r\"]*\\)\"[ \t]*.*$" nil t)
 	  (let* ((included-file (expand-file-name (match-string 1))))
 	    (add-to-list 'included-files-ctime
 			 (org-e-publish-cache-ctime-of-src included-file) t))))
