@@ -1462,9 +1462,9 @@ CONTENTS is nil."
 
 Return a list whose CAR is `src-block' and CDR is a plist
 containing `:language', `:switches', `:parameters', `:begin',
-`:end', `:hiddenp', `:contents-begin', `:contents-end',
-`:number-lines', `:retain-labels', `:use-labels', `:label-fmt',
-`:preserve-indent', `:value' and `:post-blank' keywords.
+`:end', `:hiddenp', `:number-lines', `:retain-labels',
+`:use-labels', `:label-fmt', `:preserve-indent', `:value' and
+`:post-blank' keywords.
 
 Assume point is at the beginning of the block."
   (save-excursion

@@ -70,7 +70,7 @@
 ;;
 ;;    In addition to element and object types, one function can be
 ;;    associated to the `template' symbol and another one to the
-;;    `plain-list' symbol.  The former returns the final transcoded
+;;    `plain-text' symbol.  The former returns the final transcoded
 ;;    string, and can be used to add a preamble and a postamble to
 ;;    document's body.  It must accept two arguments: the transcoded
 ;;    string and the property list containing export options.  The
