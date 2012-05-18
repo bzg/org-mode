@@ -696,6 +696,84 @@ standard mode."
 
 
 
+;;; Defining New Back-ends
+
+(defmacro org-export-define-derived-backend (child parent &rest body)
+  "Create a new back-end as a variant of an existing one.
+
+CHILD is the name of the derived back-end.  PARENT is the name of
+the parent back-end.
+
+BODY can start with pre-defined keyword arguments.  The following
+keywords are understood:
+
+  `:filters-alist'
+
+    Alist of filters that will overwrite or complete filters
+    defined in PARENT back-end, if any.
+
+  `:options-alist'
+
+    Alist of buffer keywords or #+OPTIONS items that will
+    overwrite or complete those defined in PARENT back-end, if
+    any.
+
+  `:translate-alist'
+
+    Alist of element and object types and transcoders that will
+    overwrite or complete transcode table from PARENT back-end.
+
+As an example, here is how one could define \"my-latex\" back-end
+as a variant of `e-latex' back-end with a custom template
+function:
+
+  \(org-export-define-derived-backend my-latex e-latex
+     :translate-alist ((template . my-latex-template-fun)))
+
+The back-end could then be called with, for example:
+
+  \(org-export-to-buffer 'my-latex \"*Test my-latex\")"
+  (declare (debug (&define name symbolp [&rest keywordp sexp] def-body))
+	   (indent 2))
+  (let (filters options translate)
+    (while (keywordp (car body))
+      (case (pop body)
+        (:filters-alist (setq filters (pop body)))
+        (:options-alist (setq options (pop body)))
+        (:translate-alist (setq translate (pop body)))
+        (t (pop body))))
+    `(progn
+       ;; Define filters.
+       ,(let ((parent-filters (intern (format "org-%s-filters-alist" parent))))
+	  (when (or (boundp parent-filters) filters)
+	    `(defconst ,(intern (format "org-%s-filters-alist" child))
+	       ',(append filters
+			 (and (boundp parent-filters)
+			      (copy-sequence (symbol-value parent-filters))))
+	       "Alist between filters keywords and back-end specific filters.
+See `org-export-filters-alist' for more information.")))
+       ;; Define options.
+       ,(let ((parent-options (intern (format "org-%s-option-alist" parent))))
+	  (when (or (boundp parent-options) options)
+	    `(defconst ,(intern (format "org-%s-option-alist" child))
+	       ',(append options
+			 (and (boundp parent-options)
+			      (copy-sequence (symbol-value parent-options))))
+	       "Alist between LaTeX export properties and ways to set them.
+See `org-export-option-alist' for more information on the
+structure of the values.")))
+       ;; Define translators.
+       (defvar ,(intern (format "org-%s-translate-alist" child))
+	 ',(append translate
+		   (copy-sequence
+		    (symbol-value
+		     (intern (format "org-%s-translate-alist" parent)))))
+	 "Alist between element or object types and translators.")
+       ;; Splice in the body, if any.
+       ,@body)))
+
+
+
 ;;; The Communication Channel
 ;;
 ;; During export process, every function has access to a number of
