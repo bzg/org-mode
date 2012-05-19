@@ -216,7 +216,7 @@ identifier."
 	    'noerror 'nomessage 'nosuffix)
        (org-no-warnings (org-fixup))))
 ;;;###autoload
-(defun org-version (&optional here)
+(defun org-version (&optional here full message)
   "Show the org-mode version in the echo area.
 With prefix arg HERE, insert it at point."
   (interactive "P")
@@ -231,12 +231,14 @@ With prefix arg HERE, insert it at point."
 			      (if (string= org-dir org-install-dir)
 				  org-install-dir
 				(concat "mixed installation! " org-install-dir " and " org-dir))
-			    "org-install.el can not be found!"))))
+			    "org-install.el can not be found!")))
+	 (_version (if full version org-version)))
     (if (org-called-interactively-p 'interactive)
 	(if here
 	    (insert version)
 	  (message version))
-      org-version)))
+      (if message (message _version))
+      _version)))
 
 ;;; Compatibility constants
 
@@ -19500,7 +19502,7 @@ information about your Org-mode version and configuration."
   (let ((reporter-prompt-for-summary-p "Bug report subject: "))
     (reporter-submit-bug-report
      "emacs-orgmode@gnu.org"
-     (org-version)
+     (org-version nil 'full)
      (let (list)
        (save-window-excursion
 	 (org-pop-to-buffer-same-window (get-buffer-create "*Warn about privacy*"))
@@ -19581,13 +19583,13 @@ Your bug report will be posted to the Org-mode mailing list.
 With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
   (require 'find-func)
-  (let* ((file-re "^\\(org\\|orgtbl\\)\\(\\.el\\|-.*\\.el\\)")
+  (let* ((file-re "^org\\(-.*\\)?\\.el")
 	 (dir-org (file-name-directory (org-find-library-dir "org")))
 	 (dir-org-contrib (ignore-errors
 			   (file-name-directory
 			    (org-find-library-dir "org-contribdir"))))
 	 (babel-files
-	  (mapcar (lambda (el) (concat "ob" (when el (format "-%s" el)) ".el"))
+	  (mapcar (lambda (el) (concat  (concat dir-org "ob") (when el (format "-%s" el)) ".el"))
 		  (append (list nil "comint" "eval" "exp" "keys"
 				    "lob" "ref" "table" "tangle")
 			  (delq nil
@@ -19596,10 +19598,10 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 				   (when (cdr lang) (symbol-name (car lang))))
 				 org-babel-load-languages)))))
 	 (files
-	  (append (directory-files dir-org t file-re)
-		  babel-files
+	  (append  babel-files
 		  (and dir-org-contrib
-		       (directory-files dir-org-contrib t file-re))))
+		       (directory-files dir-org-contrib t file-re))
+		   (directory-files dir-org t file-re)))
 	 (remove-re (concat (if (featurep 'xemacs)
 				"org-colview" "org-colview-xemacs")
 			    "\\'")))
@@ -19613,10 +19615,11 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
        (when (featurep (intern (file-name-nondirectory f)))
 	 (if (and (not uncompiled)
 		  (file-exists-p (concat f ".elc")))
-	     (load (concat f ".elc") nil nil t)
-	   (load (concat f ".el") nil nil t))))
-     files))
-  (org-version))
+	     (load (concat f ".elc") nil nil 'nosuffix)
+	   (load (concat f ".el") nil nil 'nosuffix))))
+     files)
+    (load (concat dir-org "org-version.el") 'noerror nil 'nosuffix))
+  (org-version nil 'full 'message))
 
 ;;;###autoload
 (defun org-customize ()
