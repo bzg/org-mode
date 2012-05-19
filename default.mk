@@ -47,8 +47,8 @@ req-ob-lang = --eval '(require '"'"'ob-$(ob-lang))'
 req-extra   = --eval '(require '"'"'$(req))'
 BTEST	= $(BATCH) \
 	  $(BTEST_PRE) \
-	  --eval '(add-to-list '"'"'load-path "lisp")' \
-	  --eval '(add-to-list '"'"'load-path "testing")' \
+	  --eval '(add-to-list '"'"'load-path "./lisp")' \
+	  --eval '(add-to-list '"'"'load-path "./testing")' \
 	  $(BTEST_POST) \
 	  -l org-install.el \
 	  -l testing/org-test.el \
@@ -58,13 +58,28 @@ BTEST	= $(BATCH) \
 	  -f org-test-run-batch-tests
 
 # Using emacs in batch mode.
-BATCH	= $(EMACS) -batch -Q
 # BATCH = $(EMACS) -batch -vanilla # XEmacs
+BATCH	= $(EMACS) -batch -Q
+
+# Emacs must be started in lisp directory
+BATCHL	= $(BATCH) \
+	  --eval '(add-to-list '"'"'load-path ".")'
+
+# How to generate org-install.el
+MAKE_ORG_INSTALL = $(BATCHL) \
+	  --eval '(load "org-compat.el")' \
+	  --eval '(load "../UTILITIES/org-fixup.el")' \
+	  --eval '(org-make-org-install)'
+
+# How to generate org-version.el
+MAKE_ORG_VERSION = $(BATCHL) \
+	  --eval '(load "org-compat.el")' \
+	  --eval '(load "../UTILITIES/org-fixup.el")' \
+	  --eval '(org-make-org-version "$(ORGVERSION)" "$(GITVERSION)" "$(datadir)")'
 
 # How to byte-compile the whole source directory
-ELCDIR	= $(BATCH) \
-		--eval '(add-to-list '"'"'load-path ".")' \
-		--eval '(batch-byte-recompile-directory 0)'
+ELCDIR	= $(BATCHL) \
+	  --eval '(batch-byte-recompile-directory 0)'
 
 # How to make a pdf file from a texinfo file
 TEXI2PDF = texi2pdf --batch --clean
@@ -104,17 +119,3 @@ SUDO	= sudo
 # Name of the program to install info files
 # INSTALL_INFO = ginstall-info # Debian: avoid harmless warning message
 INSTALL_INFO = install-info
-
-# How to generate org-install.el
-MAKE_ORG_INSTALL = $(BATCH) \
-	--eval '(add-to-list '"'"'load-path ".")' \
-	--eval '(load "org-compat.el")' \
-	--eval '(load "../UTILITIES/org-fixup.el")' \
-	--eval '(org-make-org-install "$(CURDIR)/lisp/org-install.el")'
-
-# How to generate org-version.el
-MAKE_ORG_VERSION = $(BATCH) \
-	--eval '(add-to-list '"'"'load-path ".")' \
-	--eval '(load "org-compat.el")' \
-	--eval '(load "../UTILITIES/org-fixup.el")' \
-	--eval '(org-make-org-version "$(ORGVERSION)" "$(GITVERSION)" "$(datadir)")'
