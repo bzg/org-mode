@@ -963,7 +963,12 @@ Assume point is at comment beginning."
   (save-excursion
     (let* ((keywords (org-element-collect-affiliated-keywords))
 	   (begin (car keywords))
-	   value
+	   ;; Match first line with a loose regexp since it might as
+	   ;; well be an ill-defined keyword.
+	   (value (progn
+		    (looking-at "#\\+? ?")
+		    (buffer-substring-no-properties
+		     (match-end 0) (progn (forward-line) (point)))))
 	   (com-end
 	    ;; Get comments ending.  This may not be accurate if
 	    ;; commented lines within an item are followed by
@@ -977,9 +982,8 @@ Assume point is at comment beginning."
 		(setq value
 		      (concat value
 			      (buffer-substring-no-properties
-			       (or (match-end 2) (match-end 3)) (point-at-eol))
-			      "\n"))
-		(forward-line))
+			       (or (match-end 2) (match-end 3))
+			       (progn (forward-line) (point))))))
 	      (point)))
 	   (end (progn (goto-char com-end)
 		       (org-skip-whitespace)
@@ -994,9 +998,7 @@ Assume point is at comment beginning."
 (defun org-element-comment-interpreter (comment contents)
   "Interpret COMMENT element as Org syntax.
 CONTENTS is nil."
-  (replace-regexp-in-string
-   "^" "#+ "
-   (substring (org-element-property :value comment) 0 -1)))
+  (replace-regexp-in-string "^" "#+ " (org-element-property :value comment)))
 
 
 ;;;; Comment Block
