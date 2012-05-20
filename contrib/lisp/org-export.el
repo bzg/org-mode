@@ -3036,7 +3036,7 @@ INFO is a plist holding export options."
 	 ;; User's macros are stored in the communication channel with
 	 ;; a ":macro-" prefix.
 	 (value (org-export-data
-		 (plist-get info (intern (format ":macro-%s" key))) val info)))
+		 (plist-get info (intern (format ":macro-%s" key))) info)))
     ;; Replace arguments in VALUE.
     (let ((s 0) n)
       (while (string-match "\\$\\([0-9]+\\)" value s)
