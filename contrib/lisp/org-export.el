@@ -1181,9 +1181,9 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			       (value (org-match-string-no-properties 2 val)))
 			   (cond
 			    ((not value) nil)
-			    ;; Value will be evaled.  Leave it as-is.
+			    ;; Value will be evaled: do not parse it.
 			    ((string-match "\\`(eval\\>" value)
-			     (list key value))
+			     (list key (list value)))
 			    ;; Value has to be parsed for nested
 			    ;; macros.
 			    (t
@@ -3033,19 +3033,21 @@ INFO is a plist holding export options."
   (let* ((key (org-element-property :key macro))
 	 (args (org-element-property :args macro))
 	 ;; User's macros are stored in the communication channel with
-	 ;; a ":macro-" prefix.
+	 ;; a ":macro-" prefix.  Replace arguments in VALUE.  Also
+	 ;; expand recursively macros within.
 	 (value (org-export-data
-		 (plist-get info (intern (format ":macro-%s" key))) info)))
-    ;; Replace arguments in VALUE.
-    (let ((s 0) n)
-      (while (string-match "\\$\\([0-9]+\\)" value s)
-	(setq s (1+ (match-beginning 0))
-	      n (string-to-number (match-string 1 value)))
-	(and (>= (length args) n)
-	     (setq value (replace-match (nth (1- n) args) t t value)))))
+		 (mapcar
+		  (lambda (obj)
+		    (if (not (stringp obj)) (org-export-data obj info)
+		      (replace-regexp-in-string
+		       "\\$[0-9]+"
+		       (lambda (arg)
+			 (nth (1- (string-to-number (substring arg 1))) args))
+		       obj)))
+		  (plist-get info (intern (format ":macro-%s" key))))
+		 info)))
     ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
-    (when (string-match "\\`(eval\\>" value)
-      (setq value (eval (read value))))
+    (when (string-match "\\`(eval\\>" value) (setq value (eval (read value))))
     ;; Return string.
     (format "%s" (or value ""))))
 
