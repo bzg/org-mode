@@ -777,7 +777,7 @@ structure of the values.")))
 ;;; The Communication Channel
 ;;
 ;; During export process, every function has access to a number of
-;; properties.  They are of three types:
+;; properties.  They are of two types:
 ;;
 ;; 1. Environment options are collected once at the very beginning of
 ;;    the process, out of the original buffer and configuration.
@@ -789,10 +789,6 @@ structure of the values.")))
 ;;
 ;; 2. Tree properties are extracted directly from the parsed tree,
 ;;    just before export, by `org-export-collect-tree-properties'.
-;;
-;; 3. Local options are updated during parsing, and their value
-;;    depends on the level of recursion.  For now, only `:ignore-list'
-;;    belongs to that category.
 ;;
 ;; Here is the full list of properties available during transcode
 ;; process, with their category (option, tree or local) and their
@@ -861,7 +857,7 @@ structure of the values.")))
 ;;
 ;; + `:ignore-list' :: List of elements and objects that should be
 ;;      ignored during export.
-;;   - category :: local
+;;   - category :: tree
 ;;   - type :: list of elements and objects
 ;;
 ;; + `:input-file' :: Full path to input file, if any.
@@ -878,7 +874,7 @@ structure of the values.")))
 ;;
 ;; + `:parse-tree' :: Whole parse tree, available at any time during
 ;;      transcoding.
-;;   - category :: global
+;;   - category :: option
 ;;   - type :: list (as returned by `org-element-parse-buffer')
 ;;
 ;; + `:preserve-breaks' :: Non-nil means transcoding should preserve
@@ -908,6 +904,12 @@ structure of the values.")))
 ;;      a time stamp in the output.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
+;;
+;; + `:translate-alist' :: Alist between element and object types and
+;;      transcoding functions relative to the current back-end.
+;;      Special keys `template' and `plain-text' are also possible.
+;;   - category :: option
+;;   - type :: alist (SYMBOL . FUNCTION)
 ;;
 ;; + `:with-archived-trees' :: Non-nil when archived subtrees should
 ;;      also be transcoded.  If it is set to the `headline' symbol,
@@ -1056,24 +1058,25 @@ inferior to file-local settings."
   ;; First install #+BIND variables.
   (org-export-install-letbind-maybe)
   ;; Get and prioritize export options...
-  (let ((options (org-combine-plists
-		  ;; ... from global variables...
-		  (org-export-get-global-options backend)
-		  ;; ... from buffer's attributes...
-		  (org-export-get-buffer-attributes)
-		  ;; ... from an external property list...
-		  ext-plist
-		  ;; ... from in-buffer settings...
-		  (org-export-get-inbuffer-options
-		   backend
-		   (and buffer-file-name
-			(org-remove-double-quotes buffer-file-name)))
-		  ;; ... and from subtree, when appropriate.
-		  (and subtreep (org-export-get-subtree-options))
-		  ;; Also install back-end symbol.
-		  `(:back-end ,backend))))
-    ;; Return plist.
-    options))
+  (org-combine-plists
+   ;; ... from global variables...
+   (org-export-get-global-options backend)
+   ;; ... from buffer's attributes...
+   (org-export-get-buffer-attributes)
+   ;; ... from an external property list...
+   ext-plist
+   ;; ... from in-buffer settings...
+   (org-export-get-inbuffer-options
+    backend
+    (and buffer-file-name (org-remove-double-quotes buffer-file-name)))
+   ;; ... and from subtree, when appropriate.
+   (and subtreep (org-export-get-subtree-options))
+   ;; Also install back-end symbol and its translation table.
+   `(:back-end
+     ,backend
+     :translate-alist
+     ,(let ((trans-alist (intern (format "org-%s-translate-alist" backend))))
+	(when (boundp trans-alist) (symbol-value trans-alist))))))
 
 (defun org-export-parse-option-keyword (options &optional backend)
   "Parse an OPTIONS line and return values as a plist.
@@ -1641,12 +1644,8 @@ INFO is a plist containing export directives."
   (let ((type (org-element-type blob)))
     ;; Return contents only for complete parse trees.
     (if (eq type 'org-data) (lambda (blob contents info) contents)
-      (let ((translate-alist
-	     (intern (format "org-%s-translate-alist"
-			     (plist-get info :back-end)))))
-	(when (boundp translate-alist)
-	  (let ((transcoder (cdr (assq type (symbol-value translate-alist)))))
-	    (and (fboundp transcoder) transcoder)))))))
+      (let ((transcoder (cdr (assq type (plist-get info :translate-alist)))))
+	(and (fboundp transcoder) transcoder)))))
 
 (defun org-export-data (data info)
   "Convert DATA into current back-end format.
