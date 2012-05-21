@@ -676,41 +676,34 @@ title."
 	      (concat "\n"
 		      (make-string (length first-part) under-char))))))))
 
-(defun org-e-ascii--has-caption-or-name-p (element info)
-  "Non-nil when ELEMENT has a caption or a name affiliated keyword.
-
-INFO is a plist used as a communication channel.
-
-This function is meant to be used as a predicate for
-`org-export-get-ordinal'."
-  (or (org-element-property :caption element)
-      (org-element-property :name element)))
+(defun org-e-ascii--has-caption-p (element info)
+  "Non-nil when ELEMENT has a caption affiliated keyword.
+INFO is a plist used as a communication channel.  This function
+is meant to be used as a predicate for `org-export-get-ordinal'."
+  (org-element-property :caption element))
 
 (defun org-e-ascii--build-caption (element info)
   "Return caption string for ELEMENT, if applicable.
 
 INFO is a plist used as a communication channel.
 
-The caption string contains the sequence number of ELEMENT if it
-has a name affiliated keyword, along with the real caption, if
-any.  Return nil when ELEMENT has no affiliated caption or name
-keyword."
-  (let ((caption (org-element-property :caption element))
-	(name (org-element-property :name element)))
-    (when (or caption name)
+The caption string contains the sequence number of ELEMENT along
+with its real caption.  Return nil when ELEMENT has no affiliated
+caption keyword."
+  (let ((caption (org-element-property :caption element)))
+    (when caption
       ;; Get sequence number of current src-block among every
-      ;; src-block with either a caption or a name.
+      ;; src-block with a caption.
       (let ((reference
 	     (org-export-get-ordinal
-	      element info nil 'org-e-ascii--has-caption-or-name-p))
+	      element info nil 'org-e-ascii--has-caption-p))
 	    (title-fmt (org-e-ascii--translate
 			(case (org-element-type element)
 			  (table "Table %d: %s")
-			  (src-block "Listing %d: %s")) info)))
+			  (src-block "Listing %d: %s"))
+			info)))
 	(org-e-ascii--fill-string
-	 (format
-	  title-fmt reference
-	  (if (not caption) name (org-export-data (car caption) info)))
+	 (format title-fmt reference (org-export-data (car caption) info))
 	 (org-e-ascii--current-text-width element info) info)))))
 
 (defun org-e-ascii--build-toc (info &optional n keyword)
@@ -774,9 +767,8 @@ generation.  INFO is a plist used as a communication channel."
 	      (org-e-ascii--indent-string
 	       (org-e-ascii--fill-string
 		(let ((caption (org-element-property :caption src-block)))
-		  (if (not caption) (org-element-property :name src-block)
-		     ;; Use short name in priority, if available.
-		    (org-export-data (or (cdr caption) (car caption)) info)))
+		  ;; Use short name in priority, if available.
+		  (org-export-data (or (cdr caption) (car caption)) info))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-listings info) "\n")))))
@@ -812,9 +804,8 @@ generation.  INFO is a plist used as a communication channel."
 	      (org-e-ascii--indent-string
 	       (org-e-ascii--fill-string
 		(let ((caption (org-element-property :caption table)))
-		  (if (not caption) (org-element-property :name table)
-		    ;; Use short name in priority, if available.
-		    (org-export-data (or (cdr caption) (car caption)) info)))
+		  ;; Use short name in priority, if available.
+		  (org-export-data (or (cdr caption) (car caption)) info))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-tables info) "\n")))))
@@ -1472,8 +1463,7 @@ INFO is a plist holding contextual information."
 	    (when destination
 	      (let ((number
 		     (org-export-get-ordinal
-		      destination info nil
-		      'org-e-ascii--has-caption-or-name-p)))
+		      destination info nil 'org-e-ascii--has-caption-p)))
 		(when number
 		  (if (atom number) (number-to-string number)
 		    (mapconcat 'number-to-string number ".")))))))))

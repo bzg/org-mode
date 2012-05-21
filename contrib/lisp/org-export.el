@@ -3766,8 +3766,7 @@ Return a list of all exportable headlines as parsed elements."
   "Collect referenceable elements of a determined type.
 
 TYPE can be a symbol or a list of symbols specifying element
-types to search.  Only elements with a caption or a name are
-collected.
+types to search.  Only elements with a caption are collected.
 
 INFO is a plist used as a communication channel.
 
@@ -3779,18 +3778,16 @@ Return a list of all elements found, in order of appearance."
   (org-element-map
    (plist-get info :parse-tree) type
    (lambda (element)
-     (and (or (org-element-property :caption element)
-	      (org-element-property :name element))
+     (and (org-element-property :caption element)
 	  (or (not predicate) (funcall predicate element))
-	  element)) info))
+	  element))
+   info))
 
 (defun org-export-collect-tables (info)
   "Build a list of tables.
-
 INFO is a plist used as a communication channel.
 
-Return a list of table elements with a caption or a name
-affiliated keyword."
+Return a list of table elements with a caption."
   (org-export-collect-elements 'table info))
 
 (defun org-export-collect-figures (info predicate)
@@ -3801,9 +3798,9 @@ a function which accepts one argument: a paragraph element and
 whose return value is non-nil when that element should be
 collected.
 
-A figure is a paragraph type element, with a caption or a name,
-verifying PREDICATE.  The latter has to be provided since
-a \"figure\" is a vague concept that may depend on back-end.
+A figure is a paragraph type element, with a caption, verifying
+PREDICATE.  The latter has to be provided since a \"figure\" is
+a vague concept that may depend on back-end.
 
 Return a list of elements recognized as figures."
   (org-export-collect-elements 'paragraph info predicate))
@@ -3813,8 +3810,7 @@ Return a list of elements recognized as figures."
 
 INFO is a plist used as a communication channel.
 
-Return a list of src-block elements with a caption or a name
-affiliated keyword."
+Return a list of src-block elements with a caption."
   (org-export-collect-elements 'src-block info))
 
 
