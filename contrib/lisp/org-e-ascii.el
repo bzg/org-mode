@@ -814,10 +814,7 @@ generation.  INFO is a plist used as a communication channel."
   "Return a list of unique link references in ELEMENT.
 
 ELEMENT is either an headline element or a section element.  INFO
-is a plist used as a communication channel.
-
-It covers links that may be found current headline's title, in
-the following section and in any inlinetask's title there."
+is a plist used as a communication channel."
   (let* (seen
 	 (unique-link-p
 	  (function
@@ -829,28 +826,14 @@ the following section and in any inlinetask's title there."
 			  (org-element-contents link))))
 	       (unless (member footprint seen)
 		 (push footprint seen) link)))))
-	 (harvest-links-in-title
-	  (function
-	   ;; Return a list of all unique links in ELEMENT.  ELEMENT
-	   ;; may be an headline or an inlinetask element.
-	   (lambda (element)
-	     (let (acc)
-	       (dolist (obj (org-element-property :title element) acc)
-		 (when (eq (org-element-type obj) 'link)
-		   (let ((link (funcall unique-link-p obj)))
-		     (and link (push link acc)))))))))
-	 ;; Retrieve HEADLINE's section, if it exists.
-	 (section (if (eq (org-element-type element) 'section) element
-		    (let ((sec (car (org-element-contents element))))
-		      (and (eq (org-element-type sec) 'section) sec))))
-	 (headline (if (eq (org-element-type element) 'headline) element
-		     (org-export-get-parent-headline element info))))
-    (append
-     ;; Links that may be in HEADLINE's title.
-     (funcall harvest-links-in-title headline)
-     ;; Get all links in SECTION.
-     (org-element-map
-      section 'link (lambda (link) (funcall unique-link-p link)) info))))
+	 ;; If at a section, find parent headline, if any, in order to
+	 ;; count links that might be in the title.
+	 (headline
+	  (if (eq (org-element-type element) 'headline) element
+	    (or (org-export-get-parent-headline element info) element))))
+    ;; Get all links in HEADLINE.
+    (org-element-map
+     headline 'link (lambda (link) (funcall unique-link-p link)) info)))
 
 (defun org-e-ascii--describe-links (links width info)
   "Return a string describing a list of links.
