@@ -210,7 +210,7 @@
     (:year         . "The year of publication or, for an unpublished work, the year it was written.  Generally it should consist of four numerals, such as 1984, although the standard styles can handle any year whose last four nonpunctuation characters are numerals, such as '(about 1984)'"))
   "Bibtex fields with descriptions.")
 
-(defvar *org-bibtex-entries* nil
+(defvar org-bibtex-entries nil
   "List to hold parsed bibtex entries.")
 
 (defcustom org-bibtex-autogen-keys nil
@@ -597,7 +597,7 @@ With a prefix arg, query for optional fields."
   (org-bibtex-create arg t))
 
 (defun org-bibtex-read ()
-  "Read a bibtex entry and save to `*org-bibtex-entries*'.
+  "Read a bibtex entry and save to `org-bibtex-entries'.
 This uses `bibtex-parse-entry'."
   (interactive)
   (flet ((keyword (str) (intern (concat ":" (downcase str))))
@@ -617,14 +617,14 @@ This uses `bibtex-parse-entry'."
                        (otherwise field)))
                    (clean-space (strip-delim (cdr pair)))))
            (save-excursion (bibtex-beginning-of-entry) (bibtex-parse-entry)))
-          *org-bibtex-entries*)))
+          org-bibtex-entries)))
 
 (defun org-bibtex-write ()
-  "Insert a heading built from the first element of `*org-bibtex-entries*'."
+  "Insert a heading built from the first element of `org-bibtex-entries'."
   (interactive)
-  (when (= (length *org-bibtex-entries*) 0)
-    (error "No entries in `*org-bibtex-entries*'."))
-  (let ((entry (pop *org-bibtex-entries*))
+  (when (= (length org-bibtex-entries) 0)
+    (error "No entries in `org-bibtex-entries'."))
+  (let ((entry (pop org-bibtex-entries))
 	(org-special-properties nil)) ; avoids errors with `org-entry-put'
     (flet ((val (field) (cdr (assoc field entry)))
 	   (togtag (tag) (org-toggle-tag tag 'on)))
