@@ -829,37 +829,16 @@ If BEG and END are given, only do this in that region."
 	   (not (equal (downcase (substring (match-string 1) 0 2)) "f("))
 	   (incf cnt-new)))
 
+    ;; Find and apply the edits
     (goto-char beg)
     (while (re-search-forward
 	    "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)[ \t]+\\[\\[\\(\\(id\\|olp\\):\\([^]\n]+\\)\\)" end t)
-      (setq id-pos (condition-case msg
-		       (org-mobile-locate-entry (match-string 4))
-		     (error (nth 1 msg))))
-      (when (and (markerp id-pos)
-		 (not (member (marker-buffer id-pos) buf-list)))
-	(org-mobile-timestamp-buffer (marker-buffer id-pos))
-	(push (marker-buffer id-pos) buf-list))
-
-      (if (or (not id-pos) (stringp id-pos))
-	  (progn
-	    (goto-char (+ 2 (point-at-bol)))
-	    (insert id-pos " ")
-	    (incf cnt-error))
-	(add-text-properties (point-at-bol) (point-at-eol)
-			     (list 'org-mobile-marker
-				   (or id-pos "Linked entry not found")))))
-
-    ;; OK, now go back and start applying
-    (goto-char beg)
-    (while (re-search-forward "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)" end t)
       (catch 'next
-	(setq id-pos (get-text-property (point-at-bol) 'org-mobile-marker))
-	(if (not (markerp id-pos))
-	    (progn
-	      (incf cnt-error)
-	      (insert "UNKNOWN PROBLEM"))
 	  (let* ((action (match-string 1))
 		 (data (and (match-end 3) (match-string 3)))
+		 (id-pos (condition-case msg
+			     (org-mobile-locate-entry (match-string 4))
+			   (error (nth 1 msg))))
 		 (bos (point-at-bol))
 		 (eos (save-excursion (org-end-of-subtree t t)))
 		 (cmd (if (equal action "")
@@ -874,7 +853,23 @@ If BEG and END are given, only do this in that region."
 			    (buffer-substring (1+ (point-at-eol)) eos)))
 		 (org-inhibit-logging 'note) ;; Do not take notes interactively
 		 old new)
+
 	    (goto-char bos)
+	    (when (and (markerp id-pos)
+		       (not (member (marker-buffer id-pos) buf-list)))
+	      (org-mobile-timestamp-buffer (marker-buffer id-pos))
+	      (push (marker-buffer id-pos) buf-list))
+	    (unless (markerp id-pos)
+	      (goto-char (+ 2 (point-at-bol)))
+	      (if (stringp id-pos)
+		  (insert id-pos " ")
+		(insert "BAD REFERENCE "))
+		(incf cnt-error)
+		(throw 'next t))
+	    (unless cmd
+	      (insert "BAD FLAG ")
+	      (incf cnt-error)
+	      (throw 'next t))
 	    (move-marker bos-marker (point))
 	    (if (re-search-forward "^** Old value[ \t]*$" eos t)
 		(setq old (buffer-substring
@@ -897,14 +892,6 @@ If BEG and END are given, only do this in that region."
 	      (setq new (and new (org-trim new))
 		    old (and old (org-trim old))))
 	    (goto-char (+ 2 bos-marker))
-	    (unless (markerp id-pos)
-	      (insert "BAD REFERENCE ")
-	      (incf cnt-error)
-	      (throw 'next t))
-	    (unless cmd
-	      (insert "BAD FLAG ")
-	      (incf cnt-error)
-	      (throw 'next t))
 	    ;; Remember this place so that we can return
 	    (move-marker marker (point))
 	    (setq org-mobile-error nil)
@@ -913,9 +900,10 @@ If BEG and END are given, only do this in that region."
 		  (org-with-point-at id-pos
 		    (progn
 		  (eval cmd)
-		  (if (member "FLAGGED" (org-get-tags))
+		  (unless (member data (list "delete" "archive" "archive-sibling" "addheading"))
+		    (if (member "FLAGGED" (org-get-tags))
 		      (add-to-list 'org-mobile-last-flagged-files
-				   (buffer-file-name (current-buffer))))))
+				   (buffer-file-name (current-buffer)))))))
 		(error (setq org-mobile-error msg))))
 	    (when org-mobile-error
 	      (org-pop-to-buffer-same-window (marker-buffer marker))
@@ -929,7 +917,7 @@ If BEG and END are given, only do this in that region."
 	    ;; If we get here, the action has been applied successfully
 	    ;; So remove the entry
 	    (goto-char bos-marker)
-	    (delete-region (point) (org-end-of-subtree t t))))))
+	    (delete-region (point) (org-end-of-subtree t t)))))
     (save-buffer)
     (move-marker marker nil)
     (move-marker end nil)
@@ -990,7 +978,19 @@ is currently a noop.")
   (if (string-match "\\`id:\\(.*\\)$" link)
       (org-id-find (match-string 1 link) 'marker)
     (if (not (string-match "\\`olp:\\(.*?\\):\\(.*\\)$" link))
-	nil
+	; not found with path, but maybe it is to be inserted
+	; in top level of the file?
+	(if (not (string-match "\\`olp:\\(.*?\\)$" link))
+	    nil
+	  (let ((file (match-string 1 link)))
+	    (setq file (org-link-unescape file))
+	    (setq file (expand-file-name file org-directory))
+	    (save-excursion
+	      (find-file file)
+	      (goto-char (point-max))
+	      (newline)
+	      (goto-char (point-max))
+	      (move-marker (make-marker) (point)))))
       (let ((file (match-string 1 link))
 	    (path (match-string 2 link)))
 	(setq file (org-link-unescape file))
@@ -1063,6 +1063,36 @@ be returned that indicates what went wrong."
 	  (delete-region (point) (+ (point) (length current)))
 	  (org-set-tags nil 'align))
 	 (t (error "Heading changed in MobileOrg and on the computer")))))
+
+     ((eq what 'addheading)
+      (if (org-on-heading-p) ; if false we are in top-level of file
+	  (progn
+	    (end-of-line 1)
+	    (org-insert-heading-respect-content)
+	    (org-demote))
+	(beginning-of-line)
+	(insert "* "))
+      (insert new))
+
+     ((eq what 'refile)
+      (org-copy-subtree)
+      (org-with-point-at (org-mobile-locate-entry new)
+	(if (org-on-heading-p) ; if false we are in top-level of file
+	    (progn
+	      (setq level (org-get-valid-level (funcall outline-level) 1))
+	      (org-end-of-subtree t t)
+	      (org-paste-subtree level))
+	(org-paste-subtree 1)))
+	(org-cut-subtree))
+
+     ((eq what 'delete)
+      (org-cut-subtree))
+
+     ((eq what 'archive)
+      (org-archive-subtree))
+
+     ((eq what 'archive-sibling)
+      (org-archive-to-archive-sibling))
 
      ((eq what 'body)
       (setq current (buffer-substring (min (1+ (point-at-eol)) (point-max))
