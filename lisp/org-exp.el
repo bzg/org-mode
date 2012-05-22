@@ -2412,7 +2412,7 @@ TYPE must be a string, any of:
   (let ((case-fold-search t)
 	params file markup lang start end prefix prefix1 switches all minlevel currentlevel addlevel lines)
     (goto-char (point-min))
-    (while (re-search-forward "^#\\+include:?[ \t]+\\(.*\\)" nil t)
+    (while (re-search-forward "^#\\+include:[ \t]+\\(.*\\)" nil t)
       (setq params (read (concat "(" (match-string 1) ")"))
 	    prefix (org-get-and-remove-property 'params :prefix)
 	    prefix1 (org-get-and-remove-property 'params :prefix1)

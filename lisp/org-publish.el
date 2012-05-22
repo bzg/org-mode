@@ -1122,7 +1122,7 @@ so that the file including them will be republished as well."
       (setq buf (find-file (expand-file-name filename)))
       (with-current-buffer buf
 	(goto-char (point-min))
-	(while (re-search-forward "^#\\+include:?[ \t]+\"\\([^\t\n\r\"]*\\)\"[ \t]*.*$" nil t)
+	(while (re-search-forward "^#\\+include:[ \t]+\"\\([^\t\n\r\"]*\\)\"[ \t]*.*$" nil t)
 	  (let* ((included-file (expand-file-name (match-string 1))))
 	    (add-to-list 'included-files-ctime
 			 (org-publish-cache-ctime-of-src included-file) t))))
