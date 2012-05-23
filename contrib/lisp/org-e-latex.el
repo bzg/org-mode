@@ -1998,7 +1998,8 @@ contextual information."
 
 (defun org-e-latex-table (table contents info)
   "Transcode a TABLE element from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is the contents of the table.  INFO is a plist holding
+contextual information."
   (cond
    ;; Case 1: verbatim table.
    ((or org-e-latex-tables-verbatim

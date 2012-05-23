@@ -1668,7 +1668,8 @@ holding contextual information."
 
 (defun org-e-ascii-table (table contents info)
   "Transcode a TABLE element from Org to ASCII.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is the contents of the table.  INFO is a plist holding
+contextual information."
   (let ((caption (org-e-ascii--build-caption table info)))
     (concat
      ;; Possibly add a caption string above.
@@ -1686,11 +1687,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-ascii--table-cell-width (table-cell info)
   "Return width of TABLE-CELL.
 
+INFO is a plist used as a communication channel.
+
 Width of a cell is determined either by a width cookie in the
-same column as the cell, or by the length of its contents.
+same column as the cell, or by the maximum cell's length in that
+column.
 
 When `org-e-ascii-table-widen-columns' is non-nil, width cookies
-are ignored. "
+are ignored."
   (or (and (not org-e-ascii-table-widen-columns)
 	   (org-export-table-cell-width table-cell info))
       (let* ((max-width 0)

@@ -4113,7 +4113,8 @@ communication channel."
 
 (defun org-e-odt-table (table contents info)
   "Transcode a TABLE element from Org to HTML.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is the contents of the table.  INFO is a plist holding
+contextual information."
   (case (org-element-property :type table)
     (table.el nil)
     (t

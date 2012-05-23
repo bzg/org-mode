@@ -3300,9 +3300,12 @@ code."
 
 ;;;; For Tables
 ;;
-;; `org-export-table-has-special-column-p' and
+;; `org-export-table-has-special-column-p' and and
 ;; `org-export-table-row-is-special-p' are predicates used to look for
 ;; meta-information about the table structure.
+;;
+;; `org-table-has-header-p' tells when the rows before the first rule
+;;  should be considered as table's header.
 ;;
 ;; `org-export-table-cell-width', `org-export-table-cell-alignment'
 ;; and `org-export-table-cell-borders' extract information from
@@ -3313,6 +3316,14 @@ code."
 ;; `org-export-table-cell-address', given a table-cell object, returns
 ;; the absolute address of a cell. On the other hand,
 ;; `org-export-get-table-cell-at' does the contrary.
+;;
+;; `org-export-table-cell-starts-colgroup-p',
+;; `org-export-table-cell-ends-colgroup-p',
+;; `org-export-table-row-starts-rowgroup-p',
+;; `org-export-table-row-ends-rowgroup-p',
+;; `org-export-table-row-starts-header-p' and
+;; `org-export-table-row-ends-header-p' indicate position of current
+;; row or cell within the table.
 
 (defun org-export-table-has-special-column-p (table)
   "Non-nil when TABLE has a special column.
