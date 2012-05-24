@@ -1,4 +1,5 @@
 # Makefile - for the org-mode distribution
+# GNU make is required
 #
 # This file is not part of GNU Emacs
 
@@ -44,6 +45,7 @@ helpall::
 	$(info make up2           - pull from upstream, build, check and install)
 	$(info make update        - pull from upstream and build)
 	$(info make update2       - pull from upstream, build and install)
+	$(info make uncompiled    - combine cleanlisp and autoloads)
 	$(info make local.mk      - create new local.mk as template for adaptation)
 	$(info )
 	$(info Cleaning)
