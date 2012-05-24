@@ -260,6 +260,10 @@ loaded, add these packages to `org-export-latex-packages-alist'."
     ("lt" "\\textless{}" nil "&lt;" "<" "<" "<")
     ("gt" "\\textgreater{}" nil "&gt;" ">" ">" ">")
     ("tilde" "\\~{}" nil "&tilde;" "~" "~" "~")
+    ("slash" "/" nil "/" "/" "/" "/")
+    ("plus" "+" nil "+" "+" "+" "+")
+    ("under" "\\_" nil "_" "_" "_" "_")
+    ("equal" "=" nil "=" "=" "=" "=")
     ("dagger" "\\textdagger{}" nil "&dagger;" "[dagger]" "[dagger]" "†")
     ("Dagger" "\\textdaggerdbl{}" nil "&Dagger;" "[doubledagger]" "[doubledagger]" "‡")
 
