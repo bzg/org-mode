@@ -9606,6 +9606,7 @@ application the system uses for this file type."
   (org-remove-occur-highlights nil nil t)
   (cond
    ((and (org-at-heading-p)
+	 (not (org-at-timestamp-p t))
 	 (not (org-in-regexp
 	       (concat org-plain-link-re "\\|"
 		       org-bracket-link-regexp "\\|"
