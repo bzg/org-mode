@@ -24,8 +24,8 @@
 ;;
 ;;; Commentary:
 
-(require 'org-compat)
-(require 'autoload)
+(load "autoload" nil 'nomessage)
+(load "org-compat.el" nil 'nomessage 'nosuffix)
 
 (defun org-make-org-version (org-release org-git-version odt-dir)
   (with-temp-buffer
