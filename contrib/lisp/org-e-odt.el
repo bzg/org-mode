@@ -1056,6 +1056,7 @@ ATTR is a string of other attributes of the a element."
     (setq hfy-user-sheet-assoc nil)
 
     ;; init conten.xml
+    (require 'nxml-mode)
     (with-current-buffer
 	(let ((nxml-auto-insert-xml-declaration-flag nil))
 	  (find-file-noselect content-file t))
@@ -2975,10 +2976,8 @@ contextual information."
 (defun org-e-odt-example-block (example-block contents info)
   "Transcode a EXAMPLE-BLOCK element from Org to ODT.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((options (or (org-element-property :options example-block) ""))
-	 (value (org-export-handle-code example-block info nil nil t)))
-    (org-e-odt--wrap-label
-     example-block (org-e-odt-format-source-code-or-example value nil))))
+  (org-e-odt--wrap-label
+   example-block (org-e-odt-format-code example-block info)))
 
 
 ;;;; Export Snippet
@@ -3005,9 +3004,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a FIXED-WIDTH element from Org to ODT.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-e-odt--wrap-label
-   fixed-width
-   (org-e-odt-format-source-code-or-example
-    (org-element-property :value fixed-width) nil)))
+   fixed-width (org-e-odt-do-format-code
+		(org-element-property :value fixed-width))))
 
 
 ;;;; Footnote Definition
@@ -3754,7 +3752,7 @@ holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((value (org-remove-indentation
 		(org-element-property :value quote-section))))
-    (when value (org-e-odt-format-source-code-or-example value nil))))
+    (when value (org-e-odt-do-format-code value))))
 
 
 ;;;; Section
@@ -4109,22 +4107,15 @@ channel."
   "Transcode a VERSE-BLOCK element from Org to ODT.
 CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
-  ;; Replace each newline character with line break.  Also replace
-  ;; each blank line with a line break.
+  ;; Add line breaks to each line of verse.
   (setq contents (replace-regexp-in-string
-		  "^ *\\\\\\\\$" "<br/>\n"
-		  (replace-regexp-in-string
-		   "\\(\\\\\\\\\\)?[ \t]*\n" " <br/>\n" contents)))
-
-  ;; Replace each white space at beginning of a line with a
-  ;; non-breaking space.
-  (while (string-match "^[ \t]+" contents)
-    (let ((new-str (org-e-odt-format-spaces
-		    (length (match-string 0 contents)))))
-      (setq contents (replace-match new-str nil t contents))))
-
+		   "\\(<text:line-break/>\\)?[ \t]*\n"
+		   "<text:line-break/>" contents))
+  ;; Replace tabs and spaces.
+  (setq contents (org-e-odt-fill-tabs-and-spaces contents))
+  ;; Surround it in a verse environment.
   (org-e-odt--wrap-label
-   verse-block (format "<p class=\"verse\">\n%s</p>" contents)))
+   verse-block (org-e-odt-format-stylized-paragraph 'verse contents)))
 
 
 
