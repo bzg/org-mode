@@ -18923,6 +18923,8 @@ See the individual commands for more information."
 	(if (org-looking-back org-list-end-re)
 	    (org-indent-line-function)
 	  (org-indent-line-to ind)))))
+   ((and org-return-follows-link (org-at-timestamp-p t))
+    (org-follow-timestamp-link))
    ((and org-return-follows-link
          (let ((tprop (get-text-property (point) 'face)))
 	   (or (eq tprop 'org-link)
