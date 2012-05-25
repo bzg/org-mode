@@ -1820,7 +1820,7 @@ keywords.
 
 Assume point is at the beginning of the entity."
   (save-excursion
-    (looking-at "\\\\\\(frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]]\\)")
+    (looking-at "\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]]\\)")
     (let* ((value (org-entity-get (match-string 1)))
 	   (begin (match-beginning 0))
 	   (bracketsp (string= (match-string 2) "{}"))
@@ -1859,7 +1859,7 @@ Return value is a cons cell whose CAR is `entity' or
     (let ((matchers (plist-get org-format-latex-options :matchers))
 	  ;; ENTITY-RE matches both LaTeX commands and Org entities.
 	  (entity-re
-	   "\\\\\\(frac[13][24]\\|[a-zA-Z]+\\)\\($\\|[^[:alpha:]\n]\\)"))
+	   "\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]]\\)"))
       (when (re-search-forward
 	     (concat (mapconcat (lambda (e) (nth 1 (assoc e org-latex-regexps)))
 				matchers "\\|")
