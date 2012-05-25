@@ -1059,7 +1059,8 @@ ATTR is a string of other attributes of the a element."
 
     ;; init conten.xml
     (with-current-buffer
-	(find-file-noselect content-file t)
+	(let ((nxml-auto-insert-xml-declaration-flag nil))
+	  (find-file-noselect content-file t))
       (current-buffer))))
 
 (defun org-e-odt-save-as-outfile (target opt-plist)
@@ -1147,7 +1148,8 @@ ATTR is a string of other attributes of the a element."
   (make-directory "META-INF")
   (let ((manifest-file (expand-file-name "META-INF/manifest.xml")))
     (with-current-buffer
-	(find-file-noselect manifest-file t)
+	(let ((nxml-auto-insert-xml-declaration-flag nil))
+	  (find-file-noselect manifest-file t))
       (insert
        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
      <manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.2\">\n")
@@ -2523,8 +2525,15 @@ in order to mimic default behaviour:
 ;;;; Plain text
 
 (defcustom org-e-odt-quotes
-  '(("fr" ("\\(\\s-\\|[[(]\\)\"" . "«~") ("\\(\\S-\\)\"" . "~»") ("\\(\\s-\\|(\\)'" . "'"))
-    ("en" ("\\(\\s-\\|[[(]\\)\"" . "``") ("\\(\\S-\\)\"" . "''") ("\\(\\s-\\|(\\)'" . "`")))
+  '(("fr"
+     ("\\(\\s-\\|[[(]\\|^\\)\"" . "« ")
+     ("\\(\\S-\\)\"" . "» ")
+     ("\\(\\s-\\|(\\|^\\)'" . "'"))
+    ("en"
+     ("\\(\\s-\\|[[(]\\|^\\)\"" . "“")
+     ("\\(\\S-\\)\"" . "”")
+     ("\\(\\s-\\|(\\|^\\)'" . "‘")
+     ("\\(\\S-\\)'" . "’")))
   "Alist for quotes to use when converting english double-quotes.
 
 The CAR of each item in this alist is the language code.
@@ -3737,16 +3746,6 @@ contextual information."
 
 ;;;; Plain Text
 
-(defun org-e-odt-convert-special-strings (string)
-  "Convert special characters in STRING to ODT."
-  (let ((all org-e-odt-special-string-regexps)
-	e a re rpl start)
-    (while (setq a (pop all))
-      (setq re (car a) rpl (cdr a) start 0)
-      (while (string-match re string start)
-	(setq string (replace-match rpl t nil string))))
-    string))
-
 ;; (defun org-e-odt-encode-plain-text (s)
 ;;   "Convert plain text characters to HTML equivalent.
 ;; Possible conversions are set in `org-export-html-protect-char-alist'."
@@ -3779,17 +3778,17 @@ contextual information."
   ;; 		  (format "\\%s{}" (match-string 1 text)) nil t text)
   ;; 	    start (match-end 0))))
   ;; Handle quotation marks
-  ;; (setq text (org-e-odt--quotation-marks text info))
+  (setq text (org-e-odt--quotation-marks text info))
   ;; Convert special strings.
-  ;; (when (plist-get info :with-special-strings)
-  ;;   (while (string-match (regexp-quote "...") text)
-  ;;     (setq text (replace-match "\\ldots{}" nil t text))))
   (when (plist-get info :with-special-strings)
-    (setq text (org-e-odt-convert-special-strings text)))
+    (mapc
+     (lambda (pair)
+       (setq text (replace-regexp-in-string (car pair) (cdr pair) text t nil)))
+     org-e-odt-special-string-regexps))
   ;; Handle break preservation if required.
   (when (plist-get info :preserve-breaks)
-    (setq text (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n"
-					 text)))
+    (setq text (replace-regexp-in-string
+		"\\(\\\\\\\\\\)?[ \t]*\n" "<text:line-break/>\n" text t)))
   ;; Return value.
   text)
 
