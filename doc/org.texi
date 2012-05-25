@@ -6468,6 +6468,12 @@ template in the usual way.
 Visit the last stored capture item in its buffer.
 @end table
 
+@vindex org-capture-bookmark
+@cindex org-capture-last-stored
+You can also jump to the bookmark @code{org-capture-last-stored}, which will
+automatically be created unless you set @code{org-capture-bookmark} to
+@code{nil}.
+
 To insert the capture at point in an Org buffer, call @code{org-capture} with
 a @code{C-0} prefix argument.
 

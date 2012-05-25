@@ -364,6 +364,13 @@ The capture buffer is current and still narrowed."
   :version "24.1"
   :type 'hook)
 
+(defcustom org-capture-bookmark t
+  "When non-nil, add a bookmark pointing at the last stored
+position when capturing."
+  :group 'org-capture
+  :version "24.2"
+  :type 'boolean)
+
 ;;; The property list for keeping information about the capture process
 
 (defvar org-capture-plist nil
@@ -614,7 +621,8 @@ captured item after finalizing."
       ;; Store this place as the last one where we stored something
       ;; Do the marking in the base buffer, so that it makes sense after
       ;; the indirect buffer has been killed.
-      (org-capture-bookmark-last-stored-position)
+      (when org-capture-bookmark
+	(org-capture-bookmark-last-stored-position))
 
       ;; Run the hook
       (run-hooks 'org-capture-before-finalize-hook))
