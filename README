@@ -1,4 +1,4 @@
-This is the Emacs Org project, an emacs subsystem for organizing your life
+This is the Emacs Org project, an Emacs library for organizing your life.
 
 The homepage of Org is at http://orgmode.org
 
@@ -29,8 +29,8 @@ ChangeLog
     The standard ChangeLog file.
 
 Makefile
-    The makefile to compile and install Org, and also for maintenance
-    tasks.
+    The makefile to compile and install Org with GNU Make, and also
+    for maintenance tasks.
 
 request-assign-future.txt
     The form that contributors have to sign and get processed with the
