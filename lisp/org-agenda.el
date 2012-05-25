@@ -3886,10 +3886,11 @@ given in `org-agenda-start-on-weekday'."
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt)
 	    (when todayp
 	      (put-text-property s (1- (point)) 'org-today t))
+	    (setq rtnall
+		  (append rtnall
+			  (org-agenda-add-time-grid-maybe rtnall ndays todayp)))
 	    (if rtnall (insert ;; all entries
-			(org-finalize-agenda-entries
-			 (org-agenda-add-time-grid-maybe
-			  rtnall ndays todayp))
+			(org-finalize-agenda-entries rtnall)
 			"\n"))
 	    (put-text-property s (1- (point)) 'day d)
 	    (put-text-property s (1- (point)) 'org-day-cnt day-cnt))))
