@@ -4,7 +4,7 @@
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
 ;;
-;; This file is not yet part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 ;;
 ;; GNU Emacs is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -91,6 +91,47 @@
 	  (org-make-autoloads)
 	  (byte-recompile-directory dirlisp 0 force))
       (cd origin))))
+
+(defun org-make-local-mk ()
+  (let ((default "default.mk")
+	(local   "local.mk"))
+    (unwind-protect
+	(with-temp-buffer
+	  (insert-file-contents default)
+	  (goto-char (point-min))
+	  (when (search-forward "-8<-" nil t)
+	    (forward-line 1)
+	    (delete-region (point-min) (point)))
+	  (when (search-forward "->8-" nil t)
+	    (forward-line 0)
+	    (delete-region (point) (point-max)))
+	  (goto-char (point-min))
+	  (insert "
+# Remove \"oldorg:\" to switch to \"all\" as the default target.
+# Change \"oldorg:\" to an existing target to make that target the default,
+# or define your own target here to become the default target.
+oldorg:	# do what the old Makfile did by default
+
+##----------------------------------------------------------------------
+")
+	  (goto-char (point-max))
+	  (insert "\
+# See default.mk for further configuration options.
+")
+	  (toggle-read-only 0)
+	  (write-file local))
+      nil)))
+
+(defun org-make-letterformat (a4name lettername)
+  (unwind-protect
+      (with-temp-buffer
+	(insert-file-contents a4name)
+	(goto-char (point-min))
+	(while (search-forward "\\pdflayout=(0l)" nil t)
+	  (replace-match "\\pdflayout=(1l)" nil t))
+	(toggle-read-only 0)
+	(write-file lettername))
+    nil))
 
 (defmacro org-fixup ()
   (let* ((origin default-directory)

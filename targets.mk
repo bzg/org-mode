@@ -41,14 +41,7 @@ local.mk:
 	$(info = Setting "oldorg" as the default target.            =)
 	$(info = Please adapt local.mk to your local setup!         =)
 	$(info ======================================================)
-	-@$(SED) -n \
-		-e '1 i ## Remove "oldorg:" to make "all" the default target,' \
-		-e '1 i ## change to your favourite default target' \
-		-e '1 i ## or provide your own defintion here' \
-		-e '1 i oldorg:' \
-		-e '/-8<-/,/->8-/ {s/^\(\s*[^#]\)/#\1/;p}' \
-		-e '$$ i ## See default.mk for further configuration options.' \
-		default.mk > $@
+	-@$(MAKE_LOCAL_MK)
 
 all compile::
 	$(foreach dir, doc lisp, $(MAKE) -C $(dir) clean;)

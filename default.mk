@@ -1,11 +1,8 @@
 ##----------------------------------------------------------------------
 ##  NEVER EDIT THIS FILE, PUT ANY ADAPTATIONS INTO local.mk
-##----------------------------------------------------------------------
-##  CHECK AND ADAPT THE FOLLOWING DEFINITIONS
 ##-8<-------------------------------------------------------------------
-
-# Override default target if desired or define your own default target
-# oldorg:	# have plain "make" do the same things the old Makefile did
+##  CHECK AND ADAPT THE FOLLOWING DEFINITIONS
+##----------------------------------------------------------------------
 
 # Name of your emacs binary
 EMACS	= emacs
@@ -23,10 +20,10 @@ datadir = $(prefix)/emacs/etc/org
 infodir = $(prefix)/info
 
 # Define if you only need info documentation, the default includes html and pdf
-# ORG_MAKE_DOC = info # html pdf
+#ORG_MAKE_DOC = info # html pdf
 
 # Where to create temporary files for the testsuite
-TMPDIR ?= /tmp
+TMPDIR ?= /tmp # respect TMPDIR if it is already defined in the environment
 testdir = $(TMPDIR)/tmp-orgtest
 
 # Configuration for testing
@@ -61,6 +58,13 @@ BTEST	= $(BATCH) \
 # BATCH = $(EMACS) -batch -vanilla # XEmacs
 BATCH	= $(EMACS) -batch -Q
 
+# How to generate local.mk
+MAKE_LOCAL_MK = $(BATCH) \
+	  --eval '(add-to-list '"'"'load-path "./lisp")' \
+	  --eval '(load "org-compat.el")' \
+	  --eval '(load "../UTILITIES/org-fixup.el")' \
+	  --eval '(org-make-local-mk)'
+
 # Emacs must be started in lisp directory
 BATCHL	= $(BATCH) \
 	  --eval '(add-to-list '"'"'load-path ".")'
@@ -87,8 +91,9 @@ TEXI2PDF = texi2pdf --batch --clean
 # How to make a pdf file from a tex file
 PDFTEX = pdftex
 
-# How to create directories
-MKDIR	= mkdir -p
+# How to create directories with leading path components
+# MKDIR	= mkdir -m 755 -p # try this if you have no install
+MKDIR	= install -m 755 -d
 
 # How to create the info files from the texinfo file
 MAKEINFO = makeinfo
@@ -105,12 +110,9 @@ RM	= rm -f
 # How to remove files recursively
 RMR	= rm -fr
 
-# How to stream edit a file
-SED	= sed
-
 # How to copy the lisp files and elc files to their destination.
-# CP	= cp -p	# try this if there is no install
-CP	= install -p
+# CP	= cp -p	# try this if you have no install
+CP	= install -m 644 -p
 
 # How to obtain administrative privileges
 # SUDO	= 	# leave blank if you don't need this

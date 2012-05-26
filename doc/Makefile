@@ -31,7 +31,6 @@ org-version.inc:	org.texi
 	@echo "@set VERSION $(ORGVERSION) ($(GITVERSION))" >> org-version.inc
 	@echo "@set DATE $(DATE)" >> org-version.inc
 
-
 install:	org
 	if [ ! -d $(DESTDIR)$(infodir) ]; then $(MKDIR) $(DESTDIR)$(infodir); else true; fi ;
 	$(CP) org $(DESTDIR)$(infodir)
@@ -48,7 +47,7 @@ clean-install:
 	$(RM) $(DESTDIR)$(infodir)/org*
 	$(INSTALL_INFO) --infodir=$(DESTDIR)$(infodir) --remove org
 
-.SUFFIXES:	.texi .tex .txt
+.SUFFIXES:	.texi .tex .txt _letter.tex
 
 %:		%.texi org-version.inc
 	$(MAKEINFO) --no-split $< -o $@
@@ -68,5 +67,8 @@ clean-install:
 	perl ../UTILITIES/orgcard2txt.pl $< > $@
 
 %_letter.tex:	%.tex
-	$(SED) -e 's/\\pdflayout=(0l)/\\pdflayout=(1l)/' \
-                   $< > $@
+	$(BATCH) \
+	  --eval '(add-to-list '"'"'load-path "../lisp")' \
+	  --eval '(load "org-compat.el")' \
+	  --eval '(load "../UTILITIES/org-fixup.el")' \
+	  --eval '(org-make-letterformat "$(<F)" "$(@F)")'
