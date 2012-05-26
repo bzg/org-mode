@@ -649,7 +649,7 @@ title."
 		 (and todo (concat (org-export-data todo info) " ")))))
 	 (tags (and (not notags)
 		    (plist-get info :with-tags)
-		    (let ((tag-list (org-element-property :tags element)))
+		    (let ((tag-list (org-export-get-tags element info)))
 		      (and tag-list
 			   (format ":%s:"
 				   (mapconcat 'identity tag-list ":"))))))

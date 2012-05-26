@@ -2823,6 +2823,22 @@ INFO is a plist used as a communication channel."
 	  (pop roman)))
       res)))
 
+(defun org-export-get-tags (element info &optional tags)
+  "Return list of tags associated to ELEMENT.
+
+ELEMENT has either an `headline' or an `inlinetask' type.  INFO
+is a plist used as a communication channel.
+
+Select tags (see `org-export-select-tags') and exclude tags (see
+`org-export-exclude-tags') are removed from the list.
+
+When non-nil, optional argument TAGS should be a list of strings.
+Any tag belonging to this list will also be removed."
+  (org-remove-if (lambda (tag) (or (member tag (plist-get info :select-tags))
+			      (member tag (plist-get info :exclude-tags))
+			      (member tag tags)))
+		 (org-element-property :tags element)))
+
 (defun org-export-first-sibling-p (headline info)
   "Non-nil when HEADLINE is the first sibling in its sub-tree.
 INFO is the plist used as a communication channel."

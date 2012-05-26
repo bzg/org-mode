@@ -3080,7 +3080,7 @@ holding contextual information."
 			(org-element-property :priority headline)))
 	 (text (org-export-data (org-element-property :title headline) info))
 	 (tags (and (plist-get info :with-tags)
-		    (org-element-property :tags headline)))
+		    (org-export-get-tags headline info)))
 	 (headline-label (concat "sec-" (mapconcat 'number-to-string
 						   headline-number "-")))
 	 (format-function (cond

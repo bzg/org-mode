@@ -16,10 +16,6 @@
 (unless (featurep 'org-export)
   (signal 'missing-test-dependency "org-export"))
 
-
-
-;;; Tests
-
 (defmacro org-test-with-backend (backend &rest body)
   "Execute body with an export back-end defined.
 
@@ -62,6 +58,10 @@ already filled in `info'."
 	    (info (org-export-collect-tree-properties
 		   tree (org-export-get-environment))))
        ,@body)))
+
+
+
+;;; Tests
 
 (ert-deftest test-org-export/parse-option-keyword ()
   "Test reading all standard #+OPTIONS: items."
@@ -443,6 +443,42 @@ Paragraph[fn:1]"
 	  (forward-line)
 	  (should (equal "ParagraphOut of scope\n"
 			 (org-export-as 'test 'subtree))))))))
+
+
+
+;;; Headlines and Inlinetasks
+
+(ert-deftest test-org-export/get-tags ()
+  "Test `org-export-get-tags' specifications."
+  (let ((org-export-exclude-tags '("noexport"))
+	(org-export-select-tags '("export")))
+    ;; Standard test: tags which are not a select tag, an exclude tag,
+    ;; or specified as optional argument shouldn't be ignored.
+    (should
+     (org-test-with-parsed-data "* Headline :tag:"
+       (org-export-get-tags (org-element-map tree 'headline 'identity info t)
+			    info)))
+    ;; Exclude tags are removed.
+    (should-not
+     (org-test-with-parsed-data "* Headline :noexport:"
+       (org-export-get-tags (org-element-map tree 'headline 'identity info t)
+			    info)))
+    ;; Select tags are removed.
+    (should-not
+     (org-test-with-parsed-data "* Headline :export:"
+       (org-export-get-tags (org-element-map tree 'headline 'identity info t)
+			    info)))
+    (should
+     (equal
+      '("tag")
+      (org-test-with-parsed-data "* Headline :tag:export:"
+	(org-export-get-tags (org-element-map tree 'headline 'identity info t)
+			     info))))
+    ;; Tags provided in the optional argument are also ignored.
+    (should-not
+     (org-test-with-parsed-data "* Headline :ignore:"
+       (org-export-get-tags (org-element-map tree 'headline 'identity info t)
+			    info '("ignore"))))))
 
 
 
