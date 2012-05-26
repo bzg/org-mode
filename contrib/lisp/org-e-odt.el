@@ -1069,12 +1069,6 @@ ATTR is a string of other attributes of the a element."
   ;; update display levels
   (org-e-odt-update-display-level org-e-odt-display-outline-level)
 
-  ;; write styles file
-  ;; (when (equal org-lparse-backend 'odt) FIXME
-  ;;   )
-
-  ;; (org-e-odt-update-styles-file opt-plist)
-
   ;; create mimetype file
   (let ((mimetype (org-e-odt-write-mimetype-file ;; org-lparse-backend FIXME
 		   'odt)))
@@ -1138,7 +1132,6 @@ ATTR is a string of other attributes of the a element."
       (delete-directory zipdir)))
   (message "Created %s" target)
   (set-buffer (find-file-noselect target t)))
-
 
 (defun org-e-odt-create-manifest-file-entry (&rest args)
   (push args org-e-odt-manifest-file-entries))
@@ -1229,14 +1222,6 @@ ATTR is a string of other attributes of the a element."
 
 (declare-function org-create-math-formula "org"
 		  (latex-frag &optional mathml-file))
-
-(defun org-e-odt-get (what &optional opt-plist)
-  (case what
-    (EXPORT-DIR (org-export-directory :html opt-plist))
-    (TABLE-FIRST-COLUMN-AS-LABELS nil)
-    (CODING-SYSTEM-FOR-WRITE 'utf-8)
-    (CODING-SYSTEM-FOR-SAVE 'utf-8)
-    (t (error "Unknown property: %s"  what))))
 
 (defun org-e-odt-do-preprocess-latex-fragments ()
   "Convert LaTeX fragments to images."
@@ -3937,8 +3922,14 @@ channel."
 		   (org-export-table-has-header-p
 		    (org-export-get-parent-table table-row info) info))
 	      "OrgTableHeading")
-	     ((and (zerop c) t ;; (org-lparse-get 'TABLE-FIRST-COLUMN-AS-LABELS)
-		   )
+	     ((let* ((table (org-export-get-parent-table table-cell info))
+		     (table-attrs (org-e-odt-element-attributes table info))
+		     (table-header-columns (plist-get table-attrs
+						      :header-columns)))
+		(<= c (cond ((wholenump table-header-columns)
+			     (- table-header-columns 1))
+			    (table-header-columns 0)
+			    (t -1))))
 	      "OrgTableHeading")
 	     (t "OrgTableContents"))
 	    (capitalize (symbol-name (org-export-table-cell-alignment
@@ -4304,6 +4295,8 @@ using `org-open-file'."
   (org-e-odt-do-convert in-file out-fmt prefix-arg))
 
 ;;; FIXMES, TODOS, FOR REVIEW etc
+
+;; coding system
 
 ;; (defun org-e-odt-discontinue-list ()
 ;;   (let ((stashed-stack org-lparse-list-stack))
