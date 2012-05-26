@@ -123,14 +123,16 @@ already filled in `info'."
   ;; Test include tags.
   (org-test-with-temp-text "
 * Head1
-** Sub-Head1.1 :export:
-*** Sub-Head1.1.1
+* Head2
+** Sub-Head2.1 :export:
+*** Sub-Head2.1.1
 * Head2"
     (org-test-with-backend test
       (should
-       (string-match
-	"\\* Head1\n\\*\\* Sub-Head1.1[ \t]+:export:\n\\*\\*\\* Sub-Head1.1.1\n"
-	(org-export-as 'test nil nil nil '(:select-tags ("export")))))))
+       (equal
+	"* Head2\n** Sub-Head2.1 :export:\n*** Sub-Head2.1.1\n"
+	(let ((org-tags-column 0))
+	  (org-export-as 'test nil nil nil '(:select-tags ("export"))))))))
   ;; Test mixing include tags and exclude tags.
   (org-test-with-temp-text "
 * Head1 :export:

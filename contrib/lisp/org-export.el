@@ -1498,11 +1498,8 @@ associated numbering \(in the shape of a list of numbers\)."
 
 (defun org-export-populate-ignore-list (data options)
   "Return list of elements and objects to ignore during export.
-
 DATA is the parse tree to traverse.  OPTIONS is the plist holding
-export options.
-
-Return elements or objects to ignore as a list."
+export options."
   (let (ignore
 	(walk-data
 	 (function
@@ -1537,28 +1534,31 @@ INFO is a plist holding export options."
 	 (function
 	  (lambda (data genealogy)
 	    (case (org-element-type data)
-	      (org-data
-	       (funcall walk-data (org-element-contents data) genealogy))
+	      (org-data (mapc (lambda (el) (funcall walk-data el genealogy))
+			      (org-element-contents data)))
 	      (headline
-	       (let ((tags (org-element-property :tags headline)))
+	       (let ((tags (org-element-property :tags data)))
 		 (if (loop for tag in (plist-get info :select-tags)
 			   thereis (member tag tags))
-		     ;; When a select tag is found, mark as acceptable
-		     ;; full genealogy and every headline within the
-		     ;; tree.
+		     ;; When a select tag is found, mark full
+		     ;; genealogy and every headline within the tree
+		     ;; as acceptable.
 		     (setq selected-trees
 			   (append
-			    (cons data genealogy)
+			    genealogy
 			    (org-element-map data 'headline 'identity)
 			    selected-trees))
 		   ;; Else, continue searching in tree, recursively.
-		   (funcall walk-data data (cons data genealogy))))))))))
+		   (mapc
+		    (lambda (el) (funcall walk-data el (cons data genealogy)))
+		    (org-element-contents data))))))))))
     (funcall walk-data data nil) selected-trees))
 
-(defun org-export--skip-p (blob options select-tags)
+(defun org-export--skip-p (blob options selected)
   "Non-nil when element or object BLOB should be skipped during export.
-OPTIONS is the plist holding export options.  SELECT-TAGS, when
-non-nil, is a list of tags marking a subtree as exportable."
+OPTIONS is the plist holding export options.  SELECTED, when
+non-nil, is a list of headlines belonging to a tree with a select
+tag."
   (case (org-element-type blob)
     ;; Check headline.
     (headline
@@ -1571,9 +1571,9 @@ non-nil, is a list of tags marking a subtree as exportable."
 	;; Ignore subtrees with an exclude tag.
 	(loop for k in (plist-get options :exclude-tags)
 	      thereis (member k tags))
-	;; Ignore subtrees without a select tag, when such tag is
-	;; found in the buffer.
-	(member blob select-tags)
+	;; When a select tag is present in the buffer, ignore any tree
+	;; without it.
+	(and selected (not (member blob selected)))
 	;; Ignore commented sub-trees.
 	(org-element-property :commentedp blob)
 	;; Ignore archived subtrees if `:with-archived-trees' is nil.
