@@ -28,66 +28,60 @@ if ($kind ne "lisp" and $kind ne "texi" and  $kind ne "card"
 }
 
 # Run git log to get the commits the messages
-open IN,"git log $commitrange|";
+open IN,"git log --no-merges --format='%aN%n<%aE>%n%b%x0c' $commitrange|";
 undef $/;
 $log = <IN>;
-@commits = split(/^(?=commit)/m,$log);
+@commits = split(/\f/,$log);
 
-for $i (0..$#commits) {
-  $entry = ""; $tiny = "";
-  $commit = $commits[$i];
-  $author = $1 if $commit=~/^Author: ([^\n]+)/m;
-  $date   = $1 if $commit=~/^Date: ([^\n]+)/m;
-  $entry  = $1 if $commit=~/^([ \t]*\* [^\f]*?)(\n[ \t]*\n([^*]|\Z)|\Z)/m;
-  $tiny   = "  (tiny change)" if $commit =~ /TINYCHANGE/;
-
-  # split author into name and address
-  if ($author =~ /(.*?)\s+(<.*?>)/) {
-    $name = $1;
-    $address = $2;
-  } else {
-    warn "No name/address";
-    next;
-  }
+foreach my $commit (@commits) {
+  $name    = ( $commit=~ s/([^\n]+)\n//m ) ? $1 : "N/A";
+  $address = ( $commit=~ s/([^\n]+)\n//m ) ? $1 : "N/A";
+  $tiny    = $commit =~ s/TINYCHANGE//mg ? "  (tiny change)" : "";
+  $entry   = $commit;
 
   if ($entry) {
 
-    # Fix the path when directories have been omitted
+    # add linebreaks before each starred line except the very first
+    $entry =~ s/\A\n*/@/mg;
+    $entry =~ s/^\*/\n*/mg;
+    $entry =~ s/\A@//mg;
 
-    $entry =~ s/^([ \t]*\* )([-a-zA-Z]+\.el)/$1lisp\/$2/mg;
-    $entry =~ s/^([ \t]*\* )(org[a-z]*\.texi?)/$1doc\/$2/mg;
+    # normalize starred lines
+    $entry =~ s/^(\*[^(]*\S)\(/\1 (/mg;
+
+    # remove blocks of more than one empty line
+    $entry =~s/(\n\s*){3,}/\n\n/mg;
+
+    # Fix the path when directories have been omitted
+    $entry =~ s/^\* ([-a-zA-Z]+\.el)/* lisp\/$1/mg;
+    $entry =~ s/^\* (org[a-z]*\.texi?)/* doc\/$1/mg;
     
     # remove stuff which is not for this output
     if ($kind =~ /\S/) { 
-      remove_parts("contrib/","testing/","xemacs/","UTILITIES/");
+      remove_parts("contrib/","testing/","xemacs/","UTILITIES/","etc/");
       remove_parts(".*Makefile","README",".+\.mk");
     }
     if ($kind eq "lisp") { remove_parts("doc/")                               }
     if ($kind eq "texi") { remove_parts("lisp/","doc/orgcard","doc/orgguide") }
     if ($kind eq "card") { remove_parts("lisp/","doc/org\\.","doc/orgguide")  }
 
-    # indent each line by 1 TAB
-    $entry =~ s/^[ \t]*/\t/gm;
-
-    # Add empty lines if there are several files in there
-    $entry =~ s/(\n[ \t]+\* )/\n$1/g;
-
-    # remove blocks of more than one empty line
-    while ($entry =~s/\n[ \t]*\n[ \t]*\n/\n/g) {};
-
     # remove/replace parts of the path
-
-    $entry =~ s/^([ \t]+\* )lisp\//$1/mg;
-    $entry =~ s/^([ \t]+\* )doc\/orgcard/$1 refcards\/orgcard/mg;
-    $entry =~ s/^([ \t]+\* )doc\//$1misc\//mg;
+    $entry =~ s:^\* lisp/:* :mg;
+    $entry =~ s:^\* doc/orgcard:* refcards/orgcard:mg;
+    $entry =~ s:^\* doc/:* misc/:mg;
 
     # remove empty space at beginning and end
-    $entry =~ s/\A\s*/\t/;
-    $entry =~ s/\s*\Z/\n/;
+    $entry =~ s/\A\s*//;
+    $entry =~ s/\s*\Z//;
+
+    # remove everything that is not a starred entry
+    $entry = join( "\n\n", grep( /^\*/, split( /\n\n/, $entry )));
 
     # If there is anything left in the entry, print it
     if ($entry =~ /\S/) {
-      print "$syncdate  $name  $address$tiny\n\n$entry\n";
+      # indent each line by exactly one TAB
+      $entry =~ s/^/\t/mg;
+      print "$syncdate  $name  $address$tiny\n\n$entry\n\n\n";
     }
   }
 }
