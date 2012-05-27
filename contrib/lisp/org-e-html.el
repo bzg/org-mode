@@ -140,16 +140,20 @@
     (verse-block . org-e-html-verse-block))
   "Alist between element or object types and translators.")
 
+;; FIXME (`org-e-html-options-alist'): Prefix KEYWORD and OPTION with
+;; "HTML_".  Prefix corresponding properties with `:html-".  If such a
+;; renaming is taken up, some changes will be required in
+;; `org-jsinfo.el', I think.  So defer renaming for now.
+
 (defconst org-e-html-options-alist
   '((:agenda-style nil nil org-agenda-export-html-style)
     (:convert-org-links nil nil org-e-html-link-org-files-as-html)
-    ;; FIXME Use (org-xml-encode-org-text-skip-links s) ??
     ;; (:expand-quoted-html nil "@" org-e-html-expand)
     (:inline-images nil nil org-e-html-inline-images)
-    ;; (:link-home nil nil org-e-html-link-home) FIXME
-    ;; (:link-up nil nil org-e-html-link-up) FIXME
+    (:link-home "LINK_HOME" nil org-e-html-link-home)
+    (:link-up "LINK_UP" nil org-e-html-link-up)
     (:style nil nil org-e-html-style)
-    (:style-extra nil nil org-e-html-style-extra)
+    (:style-extra "STYLE" nil org-e-html-style-extra newline)
     (:style-include-default nil nil org-e-html-style-include-default)
     (:style-include-scripts nil nil org-e-html-style-include-scripts)
     ;; (:timestamp nil nil org-e-html-with-timestamp)
@@ -161,8 +165,26 @@
     (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments)
     (:mathjax "MATHJAX" nil "" space))
   "Alist between HTML export properties and ways to set them.
-See `org-export-options-alist' for more information on the
-structure of the values.")
+This variable is the HTML-specific counterpart of
+`org-export-options-alist'.
+
+The CAR of the alist is the property name, and the CDR is a list
+like (KEYWORD OPTION DEFAULT BEHAVIOUR) where:
+
+KEYWORD is a string representing a buffer keyword, or nil.
+OPTION is a string that could be found in an #+OPTIONS: line.
+DEFAULT is the default value for the property.
+BEHAVIOUR determine how Org should handle multiple keywords for
+the same property.  It is a symbol among:
+  nil       Keep old value and discard the new one.
+  t         Replace old value with the new one.
+  `space'   Concatenate the values, separating them with a space.
+  `newline' Concatenate the values, separating them with
+	    a newline.
+  `split'   Split values at white spaces, and cons them to the
+	    previous list.
+
+KEYWORD and OPTION have precedence over DEFAULT.")
 
 (defconst org-e-html-filters-alist
   '((:filter-final-output . org-e-html-final-function))
@@ -227,11 +249,11 @@ and corresponding declarations."
 		  (cons (string :tag "Extension")
 			(string :tag "Declaration")))))
 
-;; Use `org-export-coding-system' instead
-;; (defcustom org-e-html-coding-system nil
-;;   "Coding system for HTML export, defaults to `buffer-file-coding-system'."
-;;   :group 'org-export-e-html
-;;   :type 'coding-system)
+(defcustom org-e-html-coding-system org-export-coding-system
+  "Coding system for HTML export.
+Use `org-export-coding-system' as the default value."
+  :group 'org-export-e-html
+  :type 'coding-system)
 
 (defvar org-e-html-content-div "content"
   "The name of the container DIV that holds all the page contents.
@@ -512,6 +534,16 @@ If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
   :group 'org-export-e-html
   :type 'string)
+
+(defcustom org-e-html-link-up ""
+  "Where should the \"UP\" link of exported HTML pages lead?"
+  :group 'org-export-e-html
+  :type '(string :tag "File or URL"))
+
+(defcustom org-e-html-link-home ""
+  "Where should the \"HOME\" link of exported HTML pages lead?"
+  :group 'org-export-e-html
+  :type '(string :tag "File or URL"))
 
 (defcustom org-e-html-home/up-format
   "<div id=\"org-div-home-and-up\" style=\"text-align:right;font-size:70%%;white-space:nowrap;\">
@@ -1499,9 +1531,9 @@ This function shouldn't be used for floats.  See
      (format "\n<title>%s</title>\n" title)
      (format
       "\n<meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>"
-      (or (and org-export-coding-system
+      (or (and org-e-html-coding-system
 	       (fboundp 'coding-system-get)
-	       (coding-system-get org-export-coding-system
+	       (coding-system-get org-e-html-coding-system
 				  'mime-charset))
 	  "iso-8859-1"))
      (format "\n<meta name=\"title\" content=\"%s\"/>" title)
@@ -1687,13 +1719,9 @@ original parsed data.  INFO is a plist holding export options."
 
    "
 <body>"
-   (let ((link-up (and (plist-get info :link-up)
-		       (string-match "\\S-" (plist-get info :link-up))
-		       (plist-get info :link-up)))
-	 (link-home (and (plist-get info :link-home)
-			 (string-match "\\S-" (plist-get info :link-home))
-			 (plist-get info :link-home))))
-     (when (or link-up link-home)
+   (let ((link-up (org-trim (plist-get info :link-up)))
+	 (link-home (org-trim (plist-get info :link-home))))
+     (unless (and (string= link-up "") (string= link-up ""))
        (format org-e-html-home/up-format
 	       (or link-up link-home)
 	       (or link-home link-up))))
@@ -3099,7 +3127,8 @@ Return output file's name."
   (interactive)
   (setq debug-on-error t)		; FIXME
   (let* ((extension (concat "." org-e-html-extension))
-	 (file (org-export-output-file-name extension subtreep pub-dir)))
+	 (file (org-export-output-file-name extension subtreep pub-dir))
+	 (org-export-coding-system org-e-html-coding-system))
     (org-export-to-file
      'e-html file subtreep visible-only body-only ext-plist)))
 
@@ -3132,8 +3161,6 @@ Return output file's name."
 ;;;; (plist-get opt-plist :html-extension)
 ;;;; org-e-html-toplevel-hlevel
 ;;;; org-e-html-special-string-regexps
-;;;; org-e-html-coding-system
-;;;; org-e-html-coding-system
 ;;;; org-e-html-inline-images
 ;;;; org-e-html-inline-image-extensions
 ;;;; org-e-html-protect-char-alist
