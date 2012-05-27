@@ -27,11 +27,16 @@ if ($kind ne "lisp" and $kind ne "texi" and  $kind ne "card"
   die "Invalid Changelog kind";
 }
 
+# commit must touch these paths or files to be considered
+$fpath = "lisp/ doc/";
+
 # Run git log to get the commits the messages
-open IN,"git log --no-merges --format='%aN%n<%aE>%n%b%x0c' $commitrange|";
+open IN,"git log --no-merges --format='%aN%n<%aE>%n%b%x0c' $commitrange -- $fpath|";
 undef $/;
 $log = <IN>;
 @commits = split(/\f/,$log);
+
+my %entries;
 
 foreach my $commit (@commits) {
   $name    = ( $commit=~ s/([^\n]+)\n//m ) ? $1 : "N/A";
@@ -41,16 +46,19 @@ foreach my $commit (@commits) {
 
   if ($entry) {
 
+    # remove whitespace at beginning of line
+    $entry =~ s/^[ \t]*//mg;
+
     # add linebreaks before each starred line except the very first
-    $entry =~ s/\A\n*/@/mg;
-    $entry =~ s/^\*/\n*/mg;
+    $entry =~ s/\A[\n\t]*/@/mg;
+    $entry =~ s/^\*/\n\n*/mg;
     $entry =~ s/\A@//mg;
 
     # normalize starred lines
     $entry =~ s/^(\*[^(]*\S)\(/\1 (/mg;
 
     # remove blocks of more than one empty line
-    $entry =~s/(\n\s*){3,}/\n\n/mg;
+    $entry =~s/\n{3,}/\n\n/mg;
 
     # Fix the path when directories have been omitted
     $entry =~ s/^\* ([-a-zA-Z]+\.el)/* lisp\/$1/mg;
@@ -75,15 +83,28 @@ foreach my $commit (@commits) {
     $entry =~ s/\s*\Z//;
 
     # remove everything that is not a starred entry
-    $entry = join( "\n\n", grep( /^\*/, split( /\n\n/, $entry )));
+    my @entries = grep( /^\*/, split( /\n\n/, $entry ));
 
     # If there is anything left in the entry, print it
-    if ($entry =~ /\S/) {
-      # indent each line by exactly one TAB
-      $entry =~ s/^/\t/mg;
-      print "$syncdate  $name  $address$tiny\n\n$entry\n\n\n";
+    if (scalar @entries) {
+	push @{ $entries{"$syncdate  $name  $address$tiny"} }, @entries;
     }
   }
+}
+foreach my $key ( sort keys %entries ) {
+  next if (! exists $entries{"$key"} );
+  print "$key\n";
+  if ( exists $entries{"$key  (tiny change)"} ) {
+    push @{ $entries{"$key"} }, @{ $entries{"$key  (tiny change)"} };
+    delete $entries{"$key  (tiny change)"};
+  }
+  my @entries = @{ $entries{"$key"} };
+  foreach my $entry ( @entries ) {  
+    # indent each line by exactly one TAB
+    $entry =~ s/^/\t/mg;
+    print "\n$entry\n";
+  }
+  print "\n\n";
 }
  
 sub remove_parts {
