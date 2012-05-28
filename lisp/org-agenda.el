@@ -86,6 +86,7 @@
 (defvar org-mobile-force-id-on-agenda-items) ; defined in org-mobile.el
 (defvar org-habit-show-habits)
 (defvar org-habit-show-habits-only-for-today)
+(defvar org-habit-show-all-today)
 
 ;; Defined somewhere in this file, but used before definition.
 (defvar org-agenda-buffer-name)
@@ -5538,7 +5539,8 @@ FRACTION is what fraction of the head-warning time has passed."
 			      (cons (marker-position mm) a)))
 		  deadline-results))
 	 d2 diff pos pos1 category org-category-pos tags donep
-	 ee txt head pastschedp todo-state face timestr s habitp show-all)
+	 ee txt head pastschedp todo-state face timestr s habitp show-all
+	 did-habit-check-p)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -5555,12 +5557,20 @@ FRACTION is what fraction of the head-warning time has passed."
 		  (current-buffer) pos)
 	      diff (- d2 d1))
 	(setq pastschedp (and todayp (< diff 0)))
+	(setq did-habit-check-p nil)
 	;; When to show a scheduled item in the calendar:
 	;; If it is on or past the date.
 	(when (or (and (< diff 0)
 		       (< (abs diff) org-scheduled-past-days)
 		       (and todayp (not org-agenda-only-exact-dates)))
-		  (= diff 0))
+		  (= diff 0)
+		  ;; org-is-habit-p uses org-entry-get, which is expansive
+		  ;; so we go extra mile to only call it once
+		  (and todayp
+		       org-habit-show-all-today
+		       (setq did-habit-check-p t)
+		       (setq habitp (and (functionp 'org-is-habit-p)
+					 (org-is-habit-p)))))
 	  (save-excursion
 	    (setq donep (member todo-state org-done-keywords))
 	    (if (and donep
@@ -5569,8 +5579,9 @@ FRACTION is what fraction of the head-warning time has passed."
 			 (and (functionp 'org-is-habit-p)
 			      (org-is-habit-p))))
 		(setq txt nil)
-	      (setq habitp (and (functionp 'org-is-habit-p)
-				(org-is-habit-p)))
+	      (setq habitp (if did-habit-check-p habitp
+			     (and (functionp 'org-is-habit-p)
+				  (org-is-habit-p))))
 	      (setq category (org-get-category)
 		    org-category-pos (get-text-property (point) 'org-category-position))
 	      (if (not (re-search-backward "^\\*+[ \t]+" nil t))
