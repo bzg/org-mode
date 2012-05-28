@@ -102,12 +102,6 @@
 
 (eval-when-compile (require 'cl))
 (require 'org-element)
-;; Require major back-ends and publishing tools
-(require 'org-e-ascii "./org-e-ascii.el")
-(require 'org-e-html "./org-e-html.el")
-(require 'org-e-latex "./org-e-latex.el")
-(require 'org-e-odt "./org-e-odt.el")
-(require 'org-e-publish "./org-e-publish.el")
 
 
 
@@ -3976,6 +3970,7 @@ Return an error if key pressed has no associated command."
       (?q nil)
       ;; Export with `e-ascii' back-end.
       ((?A ?N ?U)
+       (require 'org-e-ascii "./org-e-ascii.el")
        (let ((outbuf
 	      (org-export-to-buffer
 	       'e-ascii "*Org E-ASCII Export*"
@@ -3986,11 +3981,13 @@ Return an error if key pressed has no associated command."
 	 (when org-export-show-temporary-export-buffer
 	   (switch-to-buffer-other-window outbuf))))
       ((?a ?n ?u)
+       (require 'org-e-ascii "./org-e-ascii.el")
        (org-e-ascii-export-to-ascii
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)
 	`(:ascii-charset ,(case raw-key (?a 'ascii) (?n 'latin1) (t 'utf-8)))))
       ;; Export with `e-latex' back-end.
       (?L
+       (require 'org-e-latex "./org-e-latex.el")
        (let ((outbuf
 	      (org-export-to-buffer
 	       'e-latex "*Org E-LaTeX Export*"
@@ -3998,15 +3995,23 @@ Return an error if key pressed has no associated command."
 	 (with-current-buffer outbuf (latex-mode))
 	 (when org-export-show-temporary-export-buffer
 	   (switch-to-buffer-other-window outbuf))))
-      (?l (org-e-latex-export-to-latex
-	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?p (org-e-latex-export-to-pdf
-	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?d (org-open-file
-	   (org-e-latex-export-to-pdf
-	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
+      (?l
+       (require 'org-e-latex "./org-e-latex.el")
+       (org-e-latex-export-to-latex
+	(require 'org-e-latex "./org-e-latex.el")
+	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
+      (?p
+       (require 'org-e-latex "./org-e-latex.el")
+       (org-e-latex-export-to-pdf
+	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
+      (?d
+       (require 'org-e-latex "./org-e-latex.el")
+       (org-open-file
+	(org-e-latex-export-to-pdf
+	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
       ;; Export with `e-html' back-end.
       (?H
+       (require 'org-e-html "./org-e-html.el")
        (let ((outbuf
 	      (org-export-to-buffer
 	       'e-html "*Org E-HTML Export*"
@@ -4016,26 +4021,42 @@ Return an error if key pressed has no associated command."
 	   (if (featurep 'nxhtml-mode) (nxhtml-mode) (nxml-mode)))
 	 (when org-export-show-temporary-export-buffer
 	   (switch-to-buffer-other-window outbuf))))
-      (?h (org-e-html-export-to-html
-	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?b (org-open-file
-	   (org-e-html-export-to-html
-	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
+      (?h
+       (require 'org-e-html "./org-e-html.el")
+       (org-e-html-export-to-html
+	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
+      (?b
+       (require 'org-e-html "./org-e-html.el")
+       (org-open-file
+	(org-e-html-export-to-html
+	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
       ;; Export with `e-odt' back-end.
-      (?o (org-e-odt-export-to-odt
-	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?O (org-open-file
-	   (org-e-odt-export-to-odt
-	    (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
+      (?o
+       (require 'org-e-odt "./org-e-odt.el")
+       (org-e-odt-export-to-odt
+	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
+      (?O
+       (require 'org-e-odt "./org-e-odt.el")
+       (org-open-file
+	(org-e-odt-export-to-odt
+	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
       ;; Publishing facilities
-      (?F (org-e-publish-current-file (memq 'force optns)))
-      (?P (org-e-publish-current-project (memq 'force optns)))
-      (?X (let ((project
-		 (assoc (org-icompleting-read
-			 "Publish project: " org-e-publish-project-alist nil t)
-			org-e-publish-project-alist)))
-	    (org-e-publish project (memq 'force optns))))
-      (?E (org-e-publish-all (memq 'force optns)))
+      (?F
+       (require 'org-e-publish "./org-e-publish.el")
+       (org-e-publish-current-file (memq 'force optns)))
+      (?P
+       (require 'org-e-publish "./org-e-publish.el")
+       (org-e-publish-current-project (memq 'force optns)))
+      (?X
+       (require 'org-e-publish "./org-e-publish.el")
+       (let ((project
+	      (assoc (org-icompleting-read
+		      "Publish project: " org-e-publish-project-alist nil t)
+		     org-e-publish-project-alist)))
+	 (org-e-publish project (memq 'force optns))))
+      (?E
+       (require 'org-e-publish "./org-e-publish.el")
+       (org-e-publish-all (memq 'force optns)))
       ;; Undefined command.
       (t (error "No command associated with key %s"
 		(char-to-string raw-key))))))
