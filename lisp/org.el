@@ -19590,7 +19590,7 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 			   (file-name-directory
 			    (org-find-library-dir "org-contribdir"))))
 	 (babel-files
-	  (mapcar (lambda (el) (concat  (concat dir-org "ob") (when el (format "-%s" el)) ".el"))
+	  (mapcar (lambda (el) (concat "ob" (when el (format "-%s" el)) ".el"))
 		  (append (list nil "comint" "eval" "exp" "keys"
 				    "lob" "ref" "table" "tangle")
 			  (delq nil
