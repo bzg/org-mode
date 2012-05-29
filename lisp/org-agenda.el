@@ -86,7 +86,7 @@
 (defvar org-mobile-force-id-on-agenda-items) ; defined in org-mobile.el
 (defvar org-habit-show-habits)
 (defvar org-habit-show-habits-only-for-today)
-(defvar org-habit-show-all-today)
+(defvar org-habit-show-all-today nil)
 
 ;; Defined somewhere in this file, but used before definition.
 (defvar org-agenda-buffer-name)
