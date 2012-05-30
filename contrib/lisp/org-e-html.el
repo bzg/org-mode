@@ -35,6 +35,7 @@
 ;;; org-e-html.el
 ;;; Dependencies
 
+(require 'org-export)
 (require 'format-spec)
 (eval-when-compile (require 'cl) (require 'table))
 
@@ -1698,10 +1699,10 @@ original parsed data.  INFO is a plist holding export options."
 	(cdr (assoc "html" org-e-html-xml-declaration))
 
 	"")
-    (or (and coding-system-for-write
-	     (fboundp 'coding-system-get)
-	     (coding-system-get coding-system-for-write
-				'mime-charset))
+    (or (and org-e-html-coding-system
+	       (fboundp 'coding-system-get)
+	       (coding-system-get org-e-html-coding-system
+				  'mime-charset))
 	"iso-8859-1"))
    "
 <!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
@@ -3097,6 +3098,7 @@ contextual information."
 
 ;;; Interactive functions
 
+;;;###autoload
 (defun org-e-html-export-to-html
   (&optional subtreep visible-only body-only ext-plist pub-dir)
   "Export current buffer to a HTML file.
