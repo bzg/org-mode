@@ -2157,26 +2157,35 @@ holding contextual information."
 	      (org-e-html-end-plain-list type)))))
      ;; Case 3. Standard headline.  Export it as a section.
      (t
-      (let* ((extra-class (org-element-property :html-container-class headline))
-	     (extra-ids (list (org-element-property :custom-id headline)
-			      (org-element-property :id headline)))
-	     (extra-ids
-	      (mapconcat
-	       (lambda (x)
-		 (when x
-		   (let ((id (org-solidify-link-text
-			      (if (org-uuidgen-p x) (concat "ID-" x) x))))
-		     (format "<a id=\"%s\" name=\"%s\"/>" id id))))
-	       extra-ids ""))
-	     (level1 (+ level (1- org-e-html-toplevel-hlevel)))
-	     (id (mapconcat 'number-to-string
-			    (org-export-get-headline-number headline info) "-")))
+      (let* ((section-number (mapconcat 'number-to-string
+					(org-export-get-headline-number
+					 headline info) "-"))
+	     (ids (remove 'nil
+			  (list (org-element-property :custom-id headline)
+				(org-element-property :id headline)
+				(concat "sec-" section-number))))
+	     (preferred-id (car ids))
+	     (extra-ids (cdr ids))
+	     (extra-class (org-element-property :html-container-class headline))
+	     (level1 (+ level (1- org-e-html-toplevel-hlevel))))
 	(format "<div id=\"%s\" class=\"%s\">%s%s</div>\n"
-		(format "outline-container-%s" id)
+		(format "outline-container-%s"
+			(if (zerop (length extra-ids)) section-number
+			  preferred-id))
 		(concat (format "outline-%d" level1) (and extra-class " ")
 			extra-class)
-		(format "\n<h%d id=\"sec-%s\">%s%s</h%d>\n"
-			level1 id extra-ids full-text level1)
+		(format "\n<h%d id=\"%s\">%s%s</h%d>\n"
+			level1
+			preferred-id
+			(mapconcat
+			 (lambda (x)
+			   (let ((id (org-solidify-link-text
+				      (if (org-uuidgen-p x) (concat "ID-" x)
+					x))))
+			     (format "<a id=\"%s\" name=\"%s\"/>" id id)))
+			 extra-ids "")
+			full-text
+			level1)
 		contents))))))
 
 
@@ -2770,15 +2779,23 @@ holding contextual information."
     ;; Before first headline: no container, just return CONTENTS.
     (if (not parent) contents
       ;; Get div's class and id references.
-      (let ((class-num (+ (org-export-get-relative-level parent info)
-			  (1- org-e-html-toplevel-hlevel)))
-            (id-num
-             (mapconcat
-              'number-to-string
-	      (org-export-get-headline-number parent info) "-")))
+      (let* ((class-num (+ (org-export-get-relative-level parent info)
+			   (1- org-e-html-toplevel-hlevel)))
+	     (section-number
+	      (mapconcat
+	       'number-to-string
+	       (org-export-get-headline-number parent info) "-"))
+	     (ids (remove 'nil
+			  (list (org-element-property :custom-id parent)
+				(org-element-property :id parent)
+				(concat "sec-" section-number))))
+	     (preferred-id (car ids))
+	     (extra-ids (cdr ids)))
         ;; Build return value.
         (format "<div class=\"outline-text-%d\" id=\"text-%s\">\n%s</div>"
-                class-num id-num contents)))))
+                class-num
+		(if (zerop (length extra-ids)) section-number preferred-id)
+		contents)))))
 
 ;;;; Radio Target
 
