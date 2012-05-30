@@ -248,26 +248,26 @@ string as argument."
   :group 'org-clock)
 
 (defcustom org-clocktable-defaults
-  `(list
-    :maxlevel 2
-    :lang ,org-export-default-language
-    :scope 'file
-    :block nil
-    :tstart nil
-    :tend nil
-    :step nil
-    :stepskip0 nil
-    :fileskip0 nil
-    :tags nil
-    :emphasize nil
-    :link nil
-    :narrow '40!
-    :indent t
-    :formula nil
-    :timestamp nil
-    :level nil
-    :tcolumns nil
-    :formatter nil)
+  (list
+   :maxlevel 2
+   :lang org-export-default-language
+   :scope 'file
+   :block nil
+   :tstart nil
+   :tend nil
+   :step nil
+   :stepskip0 nil
+   :fileskip0 nil
+   :tags nil
+   :emphasize nil
+   :link nil
+   :narrow '40!
+   :indent t
+   :formula nil
+   :timestamp nil
+   :level nil
+   :tcolumns nil
+   :formatter nil)
   "Default properties for clock tables."
   :group 'org-clock
   :version "24.1"
