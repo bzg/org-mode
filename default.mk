@@ -23,17 +23,21 @@ infodir = $(prefix)/info
 #ORG_MAKE_DOC = info # html pdf
 
 # Where to create temporary files for the testsuite
-TMPDIR ?= /tmp # respect TMPDIR if it is already defined in the environment
+# respect TMPDIR if it is already defined in the environment
+TMPDIR ?= /tmp
 testdir = $(TMPDIR)/tmp-orgtest
 
 # Configuration for testing
-BTEST_PRE   = # add options before standard load-path
-BTEST_POST  = # add options after standard load path
+# add options before standard load-path
+BTEST_PRE   =
+# add options after standard load path
+BTEST_POST  =
               # -L <path-to>/ert      # needed for Emacs23, Emacs24 has ert built in
               # -L <path-to>/htmlize  # need at least version 1.34 for source code formatting
-BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave python sh # R
+BTEST_OB_LANGUAGES = awk C fortran maxima lilypond octave python sh
               # R is not activated by default because it requires ess to be installed and configured
-BTEST_EXTRA = # extra packages to require for testing
+# extra packages to require for testing
+BTEST_EXTRA =
 
 ##->8-------------------------------------------------------------------
 ## YOU MAY NEED TO ADAPT THESE DEFINITIONS
@@ -115,7 +119,8 @@ RMR	= rm -fr
 CP	= install -m 644 -p
 
 # How to obtain administrative privileges
-# SUDO	= 	# leave blank if you don't need this
+# leave blank if you don't need this
+# SUDO	=
 SUDO	= sudo
 
 # Name of the program to install info files
