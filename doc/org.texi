@@ -2447,7 +2447,7 @@ and @code{org-table-current-column}.  Examples:
 
 @example
 if(@@# % 2, $#, string(""))   @r{column number on odd lines only}
-$3 = remote(FOO, @@@@#$2)      @r{copy column 2 from table FOO into}
+$3 = remote(FOO, @@@#$2)       @r{copy column 2 from table FOO into}
                              @r{column 3 of the current table}
 @end example
 
