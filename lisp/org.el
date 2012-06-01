@@ -16162,8 +16162,8 @@ With prefix ARG, change that many days."
 	       ((= pos (match-beginning 0))         'bracket)
 	       ;; Point is considered to be "on the bracket" whether
 	       ;; it's really on it or right after it.
-	       ((or (= pos (1- (match-end 0)))
-                    (= pos (match-end 0)))          'bracket)
+	       ((= pos (1- (match-end 0)))          'bracket)
+	       ((= pos (match-end 0))               'after)
 	       ((org-pos-in-match-range pos 2)      'year)
 	       ((org-pos-in-match-range pos 3)      'month)
 	       ((org-pos-in-match-range pos 7)      'hour)
@@ -18905,38 +18905,41 @@ Also updates the keyword regular expressions."
 Calls `org-table-next-row' or `newline', depending on context.
 See the individual commands for more information."
   (interactive)
-  (cond
-   ((or (bobp) (org-in-src-block-p))
-    (if indent (newline-and-indent) (newline)))
-   ((org-at-table-p)
-    (org-table-justify-field-maybe)
-    (call-interactively 'org-table-next-row))
-   ;; when `newline-and-indent' is called within a list, make sure
-   ;; text moved stays inside the item.
-   ((and (org-in-item-p) indent)
-    (if (and (org-at-item-p) (>= (point) (match-end 0)))
-	(progn
-	  (save-match-data (newline))
-	  (org-indent-line-to (length (match-string 0))))
-      (let ((ind (org-get-indentation)))
-	(newline)
-	(if (org-looking-back org-list-end-re)
-	    (org-indent-line-function)
-	  (org-indent-line-to ind)))))
-   ((and org-return-follows-link (org-at-timestamp-p t))
-    (org-follow-timestamp-link))
-   ((and org-return-follows-link
-         (let ((tprop (get-text-property (point) 'face)))
-	   (or (eq tprop 'org-link)
-	       (and (listp tprop) (memq 'org-link tprop)))))
-    (call-interactively 'org-open-at-point))
-   ((and (org-at-heading-p)
-	 (looking-at
-	  (org-re "\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$")))
-    (org-show-entry)
-    (end-of-line 1)
-    (newline))
-   (t (if indent (newline-and-indent) (newline)))))
+  (let (org-ts-what)
+    (cond
+     ((or (bobp) (org-in-src-block-p))
+      (if indent (newline-and-indent) (newline)))
+     ((org-at-table-p)
+      (org-table-justify-field-maybe)
+      (call-interactively 'org-table-next-row))
+     ;; when `newline-and-indent' is called within a list, make sure
+     ;; text moved stays inside the item.
+     ((and (org-in-item-p) indent)
+      (if (and (org-at-item-p) (>= (point) (match-end 0)))
+	  (progn
+	    (save-match-data (newline))
+	    (org-indent-line-to (length (match-string 0))))
+	(let ((ind (org-get-indentation)))
+	  (newline)
+	  (if (org-looking-back org-list-end-re)
+	      (org-indent-line-function)
+	    (org-indent-line-to ind)))))
+     ((and org-return-follows-link
+	   (org-at-timestamp-p t)
+	   (not (eq org-ts-what 'after)))
+      (org-follow-timestamp-link))
+     ((and org-return-follows-link
+	   (let ((tprop (get-text-property (point) 'face)))
+	     (or (eq tprop 'org-link)
+		 (and (listp tprop) (memq 'org-link tprop)))))
+      (call-interactively 'org-open-at-point))
+     ((and (org-at-heading-p)
+	   (looking-at
+	    (org-re "\\([ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)[ \t]*$")))
+      (org-show-entry)
+      (end-of-line 1)
+      (newline))
+     (t (if indent (newline-and-indent) (newline))))))
 
 (defun org-return-indent ()
   "Goto next table row or insert a newline and indent.
