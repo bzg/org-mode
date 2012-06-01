@@ -2617,7 +2617,7 @@ the plist used as a communication channel."
      ((org-e-html-standalone-image-p paragraph info)
       ;; standalone image
       contents)
-     (t (format "\n<p%s>\n%s\n</p>" extra contents)))))
+     (t (format "<p%s>\n%s\n</p>" extra contents)))))
 
 
 ;;;; Plain List
