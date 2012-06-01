@@ -1364,7 +1364,7 @@ that uses these same face definitions."
 		   text
 		   (and tags "&nbsp;&nbsp;&nbsp;") (org-e-html--tags tags))))
     (format "<a href=\"#%s\">%s</a>"
-	    headline-label
+	    (org-solidify-link-text headline-label)
 	    (if (not nil) headline
 	      (format "<span class=\"%s\">%s</span>" todo-type headline)))))
 
@@ -2101,8 +2101,9 @@ holding contextual information."
 	 (text (org-export-data (org-element-property :title headline) info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-export-get-tags headline info)))
-	 (headline-label (concat "sec-" (mapconcat 'number-to-string
-						   headline-number "-")))
+	 (headline-label (or (org-element-property :custom-id headline)
+			     (concat "sec-" (mapconcat 'number-to-string
+						       headline-number "-"))))
 	 (format-function (cond
 			   ((functionp format-function) format-function)
 			   ((functionp org-e-html-format-headline-function)
@@ -2524,31 +2525,49 @@ INFO is a plist holding contextual information.  See
 			   (org-export-resolve-id-link link info))))
 	(case (org-element-type destination)
 	  ;; Fuzzy link points nowhere.
-	  ('nil
+	  ((nil)
 	   (format "<i>%s</i>"
 		   (or desc
 		       (org-export-data
 			(org-element-property :raw-link link) info))))
 	  ;; Fuzzy link points to an invisible target.
 	  (keyword nil)
-	  ;; LINK points to an headline.  If headlines are numbered
-	  ;; and the link has no description, display headline's
-	  ;; number.  Otherwise, display description or headline's
-	  ;; title.
+	  ;; Link points to an headline.
 	  (headline
-	   (let* ((headline-no (org-export-get-headline-number destination info))
-		  (label (format "sec-%s" (mapconcat 'number-to-string
-						     headline-no "-")))
-		  (section-no (mapconcat 'number-to-string headline-no ".")))
-	     (setq desc
-		   (cond
-		    (desc desc)
-		    ((plist-get info :section-numbers) section-no)
-		    (t (org-export-data
-			(org-element-property :title destination) info))))
-	     (format "<a href=\"#%s\">%s</a>" label desc)))
+	   (let ((href
+		  ;; What href to use?
+		  (cond
+		   ;; Case 1: Headline is linked via it's CUSTOM_ID
+		   ;; property.  Use CUSTOM_ID.
+		   ((string= type "custom-id")
+		    (org-element-property :custom-id destination))
+		   ;; Case 2: Headline is linked via it's ID property
+		   ;; or through other means.  Use the default href.
+		   ((member type '("id" "fuzzy"))
+		    (format "sec-%s"
+			    (mapconcat 'number-to-string
+				       (org-export-get-headline-number
+					destination info) "-")))
+		   (t (error "Shouldn't reach here"))))
+		 (desc
+		  ;; What description to use?
+		  (cond
+		   ;; Case 1: Link already has a description.  Use it.
+		   (desc desc)
+		   ;; Case 2: Link has no description and headline is
+		   ;; numbered. Use the section number.
+		   ((org-export-numbered-headline-p destination info)
+		    (mapconcat 'number-to-string
+			       (org-export-get-headline-number
+				destination info) "."))
+		   ;; Case 3: Link has no description and headline is
+		   ;; un-numbered.  Use the headline title.
+		   (t (org-export-data
+		       (org-element-property :title destination) info)))))
+	     (format "<a href=\"#%s\">%s</a>"
+		     (org-solidify-link-text href) desc)))
           ;; Fuzzy link points to a target.  Do as above.
-	  (otherwise
+	  (t
 	   (let ((path (org-export-solidify-link-text path)) number)
 	     (unless desc
 	       (setq number (cond
