@@ -27,6 +27,7 @@
 
 (eval-when-compile
   (require 'cl))
+(require 'org-export)
 
 
 ;;; Define Back-End
@@ -4118,6 +4119,7 @@ contextual information."
 
 ;;; Interactive functions
 
+;;;###autoload
 (defun org-e-odt-export-to-odt
   (&optional subtreep visible-only body-only ext-plist pub-dir)
   "Export current buffer to a HTML file.
