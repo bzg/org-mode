@@ -1627,7 +1627,8 @@ This function shouldn't be used for floats.  See
 	      (plist-get info :html-postamble))
      (let* ((html-post (plist-get info :html-postamble))
 	    (date (org-e-html-format-date info))
-	    (author (plist-get info :author))
+	    (author (let ((author (plist-get info :author)))
+		      (and author (org-export-data author info))))
 	    (email  (plist-get info :email))
 	    (lang-words (or (assoc (plist-get info :language)
 				   org-export-language-setup)
@@ -2122,6 +2123,8 @@ holding contextual information."
   "Transcode an HEADLINE element from Org to HTML.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
+  ;; Empty contents?
+  (setq contents (or contents ""))
   (let* ((numberedp (org-export-numbered-headline-p headline info))
 	 (level (org-export-get-relative-level headline info))
 	 (text (org-export-data (org-element-property :title headline) info))
