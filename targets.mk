@@ -23,10 +23,36 @@ ifneq ($(GITSTATUS),)
 endif
 
 .PHONY:	all oldorg update update2 up0 up1 up2 compile $(SUBDIRS) \
-		check test install info html pdf card doc docs $(INSTSUB) \
-		autoloads cleanall clean cleancontrib cleanutils cleanrel clean-install \
-		cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest
-		compile compile-dirty uncompiled
+	check test install info html pdf card doc docs $(INSTSUB) \
+	autoloads cleanall clean cleancontrib cleanutils cleanrel clean-install \
+	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest \
+	compile compile-dirty uncompiled \
+	config config-test config-exe config-all config-eol
+
+CONF_BASE = EMACS lispdir infodir datadir testdir
+CONF_TEST = BTEST_PRE BTEST_POST BTEST_OB_LANGUAGES BTEST_EXTRA
+CONF_EXEC = CP MKDIR RM RMR FIND SUDO PDFTEX TEXI2PDF TEXI2HTML MAKEINFO INSTALL_INFO
+CONF_CALL = BATCH BATCHL ELCDIR BTEST MAKE_LOCAL_MK MAKE_ORG_INSTALL MAKE_ORG_VERSION
+config-eol:: EOL = \#
+config-eol:: config-all
+config config-all::
+	$(info )
+	$(info ========= Emacs executable and Installation paths)
+	$(foreach var,$(CONF_BASE),$(info $(var)	= $($(var))$(EOL)))
+config-test config-all::
+	$(info )
+	$(info ========= Test configuration)
+	$(foreach var,$(CONF_TEST),$(info $(var)	= $($(var))$(EOL)))
+config-exe config-all::
+	$(info )
+	$(info ========= Executables used by make)
+	$(foreach var,$(CONF_EXEC),$(info $(var)	= $($(var))$(EOL)))
+config-cmd config-all::
+	$(info )
+	$(info ========= Commands used by make)
+	$(foreach var,$(CONF_CALL),$(info $(var)	= $($(var))$(EOL)))
+config config-test config-exe config-all::
+	$(info )
 
 oldorg:	compile info	# what the old makefile did when no target was specified
 uncompiled:	cleanlisp autoloads	# for developing

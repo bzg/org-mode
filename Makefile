@@ -61,6 +61,17 @@ helpall::
 	$(info make cleantest     - remove check remnants)
 	$(info make clean-install - remove previous Org installation)
 	$(info )
+	$(info Configuration Check)
+	$(info ===================)
+help helpall::
+	$(info make config        - check main configuration)
+helpall::
+	$(info make config-test   - check test configuration)
+	$(info make config-exe    - check executables configuration)
+	$(info make config-cmd    - check command configuration)
+	$(info make config-all    - check all configuration)
+	$(info make config-eol    - check all configuration, mark end-of-line)
+	$(info )
 	$(info Documentation)
 	$(info =============)
 help helpall::
