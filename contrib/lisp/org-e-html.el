@@ -2501,9 +2501,8 @@ INFO is a plist holding contextual information.  See
 		((string= type "file")
 		 (when (string-match "\\(.+\\)::.+" raw-path)
 		   (setq raw-path (match-string 1 raw-path)))
-		 (if (file-name-absolute-p raw-path)
-		     (concat "file://" (expand-file-name raw-path))
-		   (concat "file://" raw-path)))
+		 (if (not (file-name-absolute-p raw-path)) raw-path
+		     (concat "file://" (expand-file-name raw-path))))
 		(t raw-path)))
 	 protocol)
     (cond
