@@ -10899,7 +10899,7 @@ special characters included in XHTML entities:
 @cindex org-odt.el
 @cindex org-modules
 
-Orgmode@footnote{Versions 7.8 or later} supports export to OpenDocument Text
+Org Mode@footnote{Versions 7.8 or later} supports export to OpenDocument Text
 (ODT) format using the @file{org-odt.el} module.  Documents created
 by this exporter use the @cite{OpenDocument-v1.2
 specification}@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
@@ -13589,10 +13589,10 @@ should be the path to a file and the second a description for the link.
 @subsubsection @code{:file-desc}
 
 The value of the @code{:file-desc} header argument is used to provide a
-description for file code block results which are inserted as Org-mode links
+description for file code block results which are inserted as Org mode links
 (see @ref{Link format}).  If the @code{:file-desc} header argument is given
 with no value the link path will be placed in both the ``link'' and the
-``description'' portion of the Org-mode link.
+``description'' portion of the Org mode link.
 
 @node dir, exports, file-desc, Specific header arguments
 @subsubsection @code{:dir} and remote execution
@@ -13892,7 +13892,7 @@ the results of evaluating code blocks.  It can be used to avoid re-evaluating
 unchanged code blocks.  Note that the @code{:cache} header argument will not
 attempt to cache results when the @code{:session} header argument is used,
 because the results of the code block execution may be stored in the session
-outside of the Org-mode buffer.  The @code{:cache} header argument can have
+outside of the Org mode buffer.  The @code{:cache} header argument can have
 one of two values: @code{yes} or @code{no}.
 
 @itemize @bullet
@@ -14252,7 +14252,7 @@ correct code is not broken in a language, such as Ruby, where
 syntactically valid in languages that you use, then please consider setting
 the default value.
 
-Note: if noweb tangling is slow in large Org-mode files consider setting the
+Note: if noweb tangling is slow in large Org mode files consider setting the
 @code{*org-babel-use-quick-and-dirty-noweb-expansion*} variable to true.
 This will result in faster noweb reference resolution at the expense of not
 correctly resolving inherited values of the @code{:noweb-ref} header
