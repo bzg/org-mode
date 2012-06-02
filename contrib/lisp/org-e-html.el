@@ -2186,7 +2186,7 @@ holding contextual information."
 			   (let ((id (org-solidify-link-text
 				      (if (org-uuidgen-p x) (concat "ID-" x)
 					x))))
-			     (format "<a id=\"%s\" name=\"%s\"/>" id id)))
+			     (format "<a id=\"%s\" name=\"%s\"></a>" id id)))
 			 extra-ids "")
 			full-text
 			level1)
@@ -3065,7 +3065,7 @@ CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (let ((id (org-export-solidify-link-text
 	     (org-element-property :value target))))
-    (format "<a id=\"%s\" name=\"%s\"/>" id id)))
+    (format "<a id=\"%s\" name=\"%s\"></a>" id id)))
 
 
 ;;;; Timestamp
