@@ -2116,7 +2116,7 @@ to make available an enhanced version of `htmlfontify' library."
   :group 'org-export-e-odt
   :version "24.1")
 
-(defcustom org-e-odt-prettify-xml t ; FIXME
+(defcustom org-e-odt-prettify-xml nil
   "Specify whether or not the xml output should be prettified.
 When this option is turned on, `indent-region' is run on all
 component xml buffers before they are saved.  Turn this off for
