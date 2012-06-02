@@ -2499,10 +2499,23 @@ INFO is a plist holding contextual information.  See
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
 		((string= type "file")
+		 ;; Extract just the file path and strip all other
+		 ;; components.
 		 (when (string-match "\\(.+\\)::.+" raw-path)
 		   (setq raw-path (match-string 1 raw-path)))
+		 ;; If the link points to "*.org" file, rewrite it as
+		 ;; though it were a link to the corresponding
+		 ;; "*.html" file, if needed.
+		 (when (and org-e-html-link-org-files-as-html
+			    (string= ".org" (downcase (file-name-extension
+						       raw-path "."))))
+		   (setq raw-path (concat
+				   (file-name-sans-extension raw-path) "."
+				   (plist-get info :html-extension))))
+		 ;; If file path is absolute, prepend it with protocol
+		 ;; component - "file://".
 		 (if (not (file-name-absolute-p raw-path)) raw-path
-		     (concat "file://" (expand-file-name raw-path))))
+		   (concat "file://" (expand-file-name raw-path))))
 		(t raw-path)))
 	 protocol)
     (cond
