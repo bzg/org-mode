@@ -485,10 +485,13 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
 (defun org-e-odt-format-horizontal-line ()
   (org-e-odt-format-stylized-paragraph 'horizontal-line ""))
 
-(defun org-e-odt-encode-plain-text (line &optional no-whitespace-filling)
-  (setq line (org-e-html-encode-plain-text line))
-  (if no-whitespace-filling line
-    (org-e-odt-fill-tabs-and-spaces line)))
+(defun org-e-odt-encode-plain-text (text &optional no-whitespace-filling)
+  (mapc
+   (lambda (pair)
+     (setq text (replace-regexp-in-string (car pair) (cdr pair) text t t)))
+   '(("&" . "&amp;") ("<" . "&lt;") (">" . "&gt;")))
+  (if no-whitespace-filling text
+    (org-e-odt-fill-tabs-and-spaces text)))
 
 (defun org-e-odt-format-line (line)
   (case org-lparse-dyn-current-environment
@@ -1832,14 +1835,6 @@ Intended to be locally bound around a call to `org-export-as-html'." )
   :tag "Org Export ODT"
   :group 'org-export)
 
-(defcustom org-e-odt-protect-char-alist
-  '(("&" . "&amp;")
-    ("<" . "&lt;")
-    (">" . "&gt;"))
-  "Alist of characters to be converted by `org-e-html-protect'."
-  :group 'org-export-e-html
-  :type '(repeat (cons (string :tag "Character")
-		       (string :tag "ODT equivalent"))))
 (defcustom org-e-odt-schema-dir
   (let* ((schema-dir
 	  (catch 'schema-dir
@@ -3638,17 +3633,6 @@ contextual information."
 
 ;;;; Plain Text
 
-;; (defun org-e-odt-encode-plain-text (s)
-;;   "Convert plain text characters to HTML equivalent.
-;; Possible conversions are set in `org-export-html-protect-char-alist'."
-;;   (let ((cl org-e-odt-protect-char-alist) c)
-;;     (while (setq c (pop cl))
-;;       (let ((start 0))
-;; 	(while (string-match (car c) s start)
-;; 	  (setq s (replace-match (cdr c) t t s)
-;; 		start (1+ (match-beginning 0))))))
-;;     s))
-
 (defun org-e-odt-plain-text (text info)
   "Transcode a TEXT string from Org to ODT.
 TEXT is the string to transcode.  INFO is a plist holding
@@ -4357,7 +4341,6 @@ using `org-open-file'."
 ;;;; (plist-get opt-plist :html-extension)
 ;;;; org-e-odt-toplevel-hlevel
 ;;;; org-e-odt-inline-image-extensions
-;;;; org-e-odt-protect-char-alist
 ;;;; org-e-odt-table-use-header-tags-for-first-column
 ;;;; org-e-odt-todo-kwd-class-prefix
 ;;;; org-e-odt-tag-class-prefix
