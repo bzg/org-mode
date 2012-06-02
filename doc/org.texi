@@ -856,23 +856,66 @@ Theory Ltd.}
 @cindex XEmacs
 
 @b{Important:} @i{If you are using a version of Org that is part of the Emacs
-distribution or an XEmacs package, please skip this section and go directly
-to @ref{Activation}.  To see what version of Org (if any) is part of your
-Emacs distribution, type @kbd{M-x load-library RET org} and then @kbd{M-x
-org-version}.}
+distribution, GNU ELPA or an XEmacs package, please skip this section and go
+directly to @ref{Activation}.  To see what version of Org (if any) is part of
+your Emacs distribution, type @kbd{M-x org-version} (if your Emacs
+distribution does not come with Org, this function will not be defined).}
 
-If you have downloaded Org from the Web, either as a distribution @file{.zip}
-or @file{.tar} file, or as a Git archive, you must take the following steps
-to install it: go into the unpacked Org distribution directory and edit the
-top section of the file @file{Makefile}.  You must set the name of the Emacs
-binary (likely either @file{emacs} or @file{xemacs}), and the paths to the
-directories where local Lisp and Info files are kept.  If you don't have
-access to the system-wide directories, you can simply run Org directly from
-the distribution directory by adding the @file{lisp} subdirectory to the
-Emacs load path.  To do this, add the following line to @file{.emacs}:
+If you have downloaded Org from the Web as a distribution @file{.zip} or
+@file{.tar} archive, you must take the following steps to install it:
+
+@itemize @bullet
+@item Unpack the distribution archive.
+@item Change into (@code{cd}) the Org directory.
+@item Run @code{make help}
+and then check and edit the file @file{local.mk}.  You must set the name of
+the Emacs binary (likely either @file{emacs} or @file{xemacs}), and the paths
+to the directories where local Lisp and Info files will be installed.
+@item Run @code{make config}
+to check the configuration.
+@item Run @code{make install} or @code{sudo make install}
+to build and install Org mode on your system.  If you use a local Git
+repository, preferrably us @code{make update2} or, if you want to run the
+complete test suite before installation, @code{make up2}.
+@end itemize
+
+If you use a cloned Git repository, then the procedure is slightly different:
+
+@itemize @bullet
+@item Change into (@code{cd}) the Org repository.
+@item Run @code{git checkout master}
+to switch to the @code{master} branch of the Org repository.
+@item Run @code{make help}
+and then check and edit the file @file{local.mk}.  You must set the name of
+the Emacs binary (likely either @file{emacs} or @file{xemacs}), and the paths
+to the directories where local Lisp and Info files will be installed.
+@item Run @code{make config}
+to check the configuration.
+@item Run @code{make update2} or @code{make up2}
+to update the Git repository and build and install Org mode.  The latter
+invocation runs the complete test suite before installation and installs only
+if the build passes all tests.
+@end itemize
+
+If you don't have access to the system-wide directories and you don't want to
+install somewhere into your home directory, you can run Org directly from the
+distribution directory or Org repository by compiling Org mode in place:
+
+@itemize @bullet
+@item Change into (@code{cd}) the Org repository.
+@item Run @code{git checkout master}
+to switch to the @code{master} branch of the Org repository.
+@item Run @code{make compile}
+@end itemize
+
+Last but not least you can also run Org mode directly from an Org repository
+without any compilation.  Simply replace the last step in the recipe above
+with @code{make uncompiled}.
+
+Then add the following line to @file{.emacs}:
 
 @example
-(setq load-path (cons "~/path/to/orgdir/lisp" load-path))
+(add-to-list 'load-path "~/path/to/orgdir/lisp")
 @end example
 
 @noindent
@@ -880,36 +923,24 @@ If you plan to use code from the @file{contrib} subdirectory, do a similar
 step for this directory:
 
 @example
-(setq load-path (cons "~/path/to/orgdir/contrib/lisp" load-path))
-@end example
-
-@noindent Now byte-compile the Lisp files with the shell command:
-
-@example
-make
-@end example
-
-@noindent If you are running Org from the distribution directory, this is
-all.  If you want to install Org into the system directories, use (as
-administrator)
-
-@example
-make install
+(add-to-list 'load-path "~/path/to/orgdir/contrib/lisp")
 @end example
 
 Installing Info files is system dependent, because of differences in the
-@file{install-info} program.  The following should correctly install the Info
-files on most systems, please send a bug report if not@footnote{The output
-from install-info (if any) is also system dependent.  In particular Debian
-and its derivatives use two different versions of install-info and you may
-see the message:
+@file{install-info} program.  The Info documentation is installed together
+with the rest of Org mode.  If you don't install Org mode, it is possible to
+install the Info documentation seperately (you need to have
+install-info@footnote{The output from install-info (if any) is system
+dependent.  In particular Debian and its derivatives use two different
+versions of install-info and you may see the message:
 
 @example
 This is not dpkg install-info anymore, but GNU install-info
 See the man page for ginstall-info for command line arguments
 @end example
 
-@noindent which can be safely ignored.}.
+@noindent which can be safely ignored.}
+on your system).
 
 @example
 make install-info
