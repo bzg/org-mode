@@ -222,6 +222,10 @@ With prefix arg HERE, insert it at point."
   (interactive "P")
   (let* ((org-dir         (ignore-errors (org-find-library-dir "org")))
 	 (org-install-dir (ignore-errors (org-find-library-dir "org-install.el")))
+	 (org-trash       (or
+			   (and (fboundp 'org-release) (fboundp 'org-git-version))
+			   (load (concat org-dir "org-version.el")
+				 'noerror 'nomessage 'nosuffix)))
 	 (org-version (org-release))
 	 (git-version (org-git-version))
 	 (version (format "Org-mode version %s (%s @ %s)"
