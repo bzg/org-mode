@@ -2605,7 +2605,7 @@ the plist used as a communication channel."
 	 (extra (if class (format " class=\"%s\"" class) ""))
 	 (parent (org-export-get-parent paragraph info)))
     (cond
-     ((and (equal (car parent) 'item)
+     ((and (equal (org-element-type parent) 'item)
 	   (= (org-element-property :begin paragraph)
 	      (org-element-property :contents-begin parent)))
       ;; leading paragraph in a list item have no tags

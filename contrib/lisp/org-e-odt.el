@@ -233,62 +233,13 @@ structure of the values.")
   "</office:annotation>")
 
 (defun org-e-odt-begin-plain-list (ltype &optional continue-numbering)
-  (let* ((style-name (org-e-odt-get-style-name-for-entity 'list ltype))
-	 (extra (concat
-		 (if continue-numbering
-		     " text:continue-numbering=\"true\""
-		   " text:continue-numbering=\"false\"")
-		 (when style-name
-		   (format " text:style-name=\"%s\""  style-name)))))
-    (case ltype
-      ((ordered unordered descriptive)
-       (concat
-	;; (org-e-odt-end-paragraph)
-	(format "<text:list%s>" extra)))
-      (t (error "Unknown list type: %s"  ltype)))))
+  (unless (member ltype '(ordered unordered descriptive))
+    (error "Unknown list type: %s"  ltype))
 
-(defun org-e-odt-end-plain-list (ltype)
-  (if ltype "</text:list>"
-    (error "Unknown list type: %s" ltype)))
-
-(defun org-e-odt-begin-list-item (ltype &optional arg headline)
-  (case ltype
-    (ordered
-     (assert (not headline) t)
-     (let* ((counter arg) (extra ""))
-       ;; "<text:list-header>"
-       "<text:list-item>"))
-    (unordered
-     (let* ((id arg) (extra ""))
-       (concat
-	;; "<text:list-header>"
-	"<text:list-item>"
-	(if headline (org-e-odt-format-target headline id)
-	  (org-e-odt-format-bookmark "" id)))))
-    (descriptive
-     (assert (not headline) t)
-     (let ((term (or arg "(no term)")))
-       (concat
-	(org-e-odt-format-tags
-    	 '("<text:list-item>" . "</text:list-item>")
-    	 (org-e-odt-format-stylized-paragraph 'definition-term term))
-	(org-e-odt-begin-list-item 'unordered)
-	(org-e-odt-begin-plain-list 'descriptive)
-	(org-e-odt-begin-list-item 'unordered))))
-    (t (error "Unknown list type"))))
-
-(defun org-e-odt-end-list-item (ltype)
-  (case ltype
-    ((ordered unordered)
-     ;; "</text:list-header>"
-     "</text:list-item>")
-    (descriptive
-     (concat
-      (org-e-odt-end-list-item 'unordered)
-      (org-e-odt-end-plain-list 'descriptive)
-      (org-e-odt-end-list-item 'unordered)
-      ))
-    (t (error "Unknown list type"))))
+  (format "<text:list text:style-name=\"%s\" %s>"
+	  (org-e-odt-get-style-name-for-entity 'list ltype)
+	  (format "text:continue-numbering=\"%s\""
+		  (if continue-numbering "true" "false"))))
 
 (defun org-e-odt-write-automatic-styles ()
   "Write automatic styles to \"content.xml\"."
@@ -2936,17 +2887,18 @@ holding contextual information."
      ;; Case 2. This is a deep sub-tree: export it as a list item.
      ;;         Also export as items headlines for which no section
      ;;         format has been found.
-     ((org-export-low-level-p headline info) ; FIXME (or (not section-fmt))
-      ;; Build the real contents of the sub-tree.
-      (let* ((type (if numberedp 'unordered 'unordered)) ; FIXME
-	     (itemized-body (org-e-odt-format-list-item
-			     contents type nil nil full-text)))
-	(concat
-	 (and (org-export-first-sibling-p headline info)
-	      (org-e-odt-begin-plain-list type))
-	 itemized-body
-	 (and (org-export-last-sibling-p headline info)
-	      (org-e-odt-end-plain-list type)))))
+     ;; FIXME
+     ;; ((org-export-low-level-p headline info)
+     ;;  ;; Build the real contents of the sub-tree.
+     ;;  (let* ((type (if numberedp 'unordered 'unordered)) ; FIXME
+     ;; 	     (itemized-body (org-e-odt-format-list-item
+     ;; 			     contents type nil nil full-text)))
+     ;; 	(concat
+     ;; 	 (and (org-export-first-sibling-p headline info)
+     ;; 	      (org-e-odt-begin-plain-list type))
+     ;; 	 itemized-body
+     ;; 	 (and (org-export-last-sibling-p headline info)
+     ;; 	      "</text:list>"))))
      ;; Case 3. Standard headline.  Export it as a section.
      (t
       (let* ((extra-ids (list (org-element-property :custom-id headline)
@@ -3038,21 +2990,6 @@ contextual information."
 
 ;;;; Item
 
-(defun org-e-odt-format-list-item (contents type checkbox
-					    &optional term-counter-id
-					    headline)
-  (when checkbox
-    (setq checkbox
-	  (org-e-odt-format-fontify (case checkbox
-				      (on "[X]")
-				      (off "[&nbsp;]")
-				      (trans "[-]")) 'code)))
-  (concat
-   (org-e-odt-begin-list-item type term-counter-id headline)
-   ;; FIXME checkbox (and checkbox " ")
-   contents
-   (org-e-odt-end-list-item type)))
-
 (defun org-e-odt-item (item contents info)
   "Transcode an ITEM element from Org to ODT.
 CONTENTS holds the contents of the item.  INFO is a plist holding
@@ -3060,11 +2997,27 @@ contextual information."
   (let* ((plain-list (org-export-get-parent item info))
 	 (type (org-element-property :type plain-list))
 	 (counter (org-element-property :counter item))
-	 (checkbox (org-element-property :checkbox item))
 	 (tag (let ((tag (org-element-property :tag item)))
 		(and tag (org-export-data tag info)))))
-    (org-e-odt-format-list-item
-     contents type checkbox (or tag counter))))
+    (case type
+      (ordered
+       (format "\n<text:list-item>\n%s\n</text:list-item>" contents))
+      (unordered
+       (format "\n<text:list-item>\n%s\n</text:list-item>" contents))
+      (descriptive
+       (concat
+	(let ((term (or tag "(no term)")))
+	  (concat
+	   (format "\n<text:list-item>\n%s\n</text:list-item>"
+		   (org-e-odt-format-stylized-paragraph 'definition-term term))
+	   (format
+	    "\n<text:list-item>\n%s\n</text:list-item>"
+	    (format "\n<text:list text:style-name=\"%s\" %s>\n%s\n</text:list>"
+		    (org-e-odt-get-style-name-for-entity 'list 'descriptive)
+		    "text:continue-numbering=\"false\""
+		    (format "\n<text:list-item>\n%s\n</text:list-item>"
+			    contents)))))))
+      (t (error "Unknown list type")))))
 
 
 ;;;; Keyword
@@ -3454,6 +3407,20 @@ the plist used as a communication channel."
 		  (center-block 'center)
 		  (footnote-definition 'footnote)
 		  (t nil))))
+    ;; If this paragraph is a leading paragraph in an item and the
+    ;; item has a checkbox, splice the checkbox and paragraph contents
+    ;; together.
+    (when (and (equal (org-element-type parent) 'item)
+	       (= (org-element-property :begin paragraph)
+		  (org-element-property :contents-begin parent)))
+      (let* ((item parent)
+	     (checkbox (org-element-property :checkbox item))
+	     (checkbox (and checkbox (org-e-odt-format-fontify
+				      (case checkbox
+					(on "[&#x2713;]") ; CHECK MARK
+					(off "[ ]")
+					(trans "[-]")) 'code))))
+	(setq contents 	(concat checkbox (and checkbox " ") contents))))
     (org-e-odt-format-stylized-paragraph style contents)))
 
 
@@ -3471,7 +3438,7 @@ contextual information."
     (org-e-odt--wrap-label
      plain-list (format "%s\n%s%s"
 			(org-e-odt-begin-plain-list type)
-			contents (org-e-odt-end-plain-list type)))))
+			contents "</text:list>"))))
 
 ;;;; Plain Text
 
