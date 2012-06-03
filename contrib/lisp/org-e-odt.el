@@ -1189,9 +1189,6 @@ ATTR is a string of other attributes of the a element."
     (write-region mimetype nil (expand-file-name "mimetype"))
     mimetype))
 
-(declare-function org-create-math-formula "org"
-		  (latex-frag &optional mathml-file))
-
 (defun org-e-odt-do-preprocess-latex-fragments ()
   "Convert LaTeX fragments to images."
   (let* ((latex-frag-opt (plist-get org-lparse-opt-plist :LaTeX-fragments))
@@ -1378,56 +1375,16 @@ formula file."
 
 ;;; Hooks
 
-;; FIXME: it already exists in org-e-odt.el
 ;;; Function Declarations
 
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-normalize-string "org-element" (s))
-
-(declare-function org-export-data "org-export" (data info))
-(declare-function org-export-directory "org-export" (type plist))
-(declare-function org-export-expand-macro "org-export" (macro info))
-(declare-function org-export-first-sibling-p "org-export" (headline info))
-(declare-function org-export-footnote-first-reference-p "org-export"
-		  (footnote-reference info))
-(declare-function org-export-get-coderef-format "org-export" (path desc))
-(declare-function org-export-get-footnote-definition "org-export"
-		  (footnote-reference info))
-(declare-function org-export-get-footnote-number "org-export" (footnote info))
-(declare-function org-export-get-previous-element "org-export" (blob info))
-(declare-function org-export-get-relative-level "org-export" (headline info))
-(declare-function org-export-handle-code
-		  "org-export" (element info &optional num-fmt ref-fmt delayed))
-(declare-function org-export-included-file "org-export" (keyword backend info))
-(declare-function org-export-inline-image-p "org-export"
-		  (link &optional extensions))
-(declare-function org-export-last-sibling-p "org-export" (headline info))
-(declare-function org-export-low-level-p "org-export" (headline info))
-(declare-function org-export-output-file-name
-		  "org-export" (extension &optional subtreep pub-dir))
-(declare-function org-export-resolve-coderef "org-export" (ref info))
-(declare-function org-export-resolve-fuzzy-link "org-export" (link info))
-(declare-function org-export-resolve-radio-link "org-export" (link info))
-(declare-function org-export-solidify-link-text "org-export" (s))
-(declare-function
- org-export-to-buffer "org-export"
- (backend buffer &optional subtreep visible-only body-only ext-plist))
-(declare-function
- org-export-to-file "org-export"
- (backend file &optional subtreep visible-only body-only ext-plist))
-
 (declare-function org-id-find-id-file "org-id" (id))
-(declare-function htmlize-region "ext:htmlize" (beg end))
-(declare-function org-pop-to-buffer-same-window
-		  "org-compat" (&optional buffer-or-name norecord label))
-
-
-
-
-
 (declare-function hfy-face-to-style "htmlfontify" (fn))
 (declare-function hfy-face-or-def-to-name "htmlfontify" (fn))
 (declare-function archive-zip-extract "arc-mode.el" (archive name))
+(declare-function org-create-math-formula "org" (latex-frag &optional mathml-file))
+
+
+
 
 ;;; Internal Variables
 
