@@ -8,7 +8,7 @@ LISPV = org-version.el
 LISPI = org-install.el
 LISPA = $(LISPV) $(LISPI)
 LISPF = $(filter-out $(LISPA),$(wildcard *.el))
-LISPC = $(LISPF:%el=%elc)
+LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 
 .PHONY:	all compile compile-dirty \
 		autoloads \
@@ -16,10 +16,10 @@ LISPC = $(LISPF:%el=%elc)
 
 # do not clean here, done in toplevel make
 all compile::	autoloads
-all compile compile-dirty::	$(LISPA)
+all compile compile-dirty::	 $(LISPI) $(LISPV)
 	$(ELCDIR)
 
-autoloads:	cleanauto $(LISPA)
+autoloads:	cleanauto $(LISPI) $(LISPV)
 
 $(LISPV):	$(LISPF)
 	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
