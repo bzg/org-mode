@@ -524,7 +524,8 @@ block."
 			   (nth 1 info))))
 	     (dir (cdr (assoc :dir params)))
 	     (default-directory
-	       (or (and dir (file-name-as-directory dir)) default-directory))
+	       (or (and dir (file-name-as-directory (expand-file-name dir)))
+		   default-directory))
 	     (org-babel-call-process-region-original
 	      (if (boundp 'org-babel-call-process-region-original)
 		  org-babel-call-process-region-original
