@@ -171,13 +171,12 @@ structure of the values.")
 	;; separator
 	"<text:p text:style-name=\"OrgSubtitle\"/>")))))
 
-(defun org-e-odt-begin-section (style &optional name)
+(defun org-e-odt-format-section (text style &optional name)
   (let ((default-name (car (org-e-odt-add-automatic-style "Section"))))
-    (format "<text:section text:style-name=\"%s\" text:name=\"%s\">"
-	    style (or name default-name))))
-
-(defun org-e-odt-end-section ()
-  "</text:section>")
+    (format "\n<text:section text:style-name=\"%s\" %s>\n%s</text:section>"
+	    style
+	    (format "text:name=\"%s\"" (or name default-name))
+	    text)))
 
 (defun org-e-odt-begin-paragraph (&optional style)
   (format "<text:p%s>" (org-e-odt-get-extra-attrs-for-paragraph-style style)))
@@ -2948,10 +2947,6 @@ contextual information."
 
 ;;;; Inlinetask
 
-(defun org-e-odt-format-section (text class &optional id)
-  (let ((extra (concat (when id (format " id=\"%s\"" id)))))
-    (concat (format "<div class=\"%s\"%s>\n" class extra) text "</div>\n")))
-
 (defun org-e-odt-inlinetask (inlinetask contents info)
   "Transcode an INLINETASK element from Org to ODT.
 CONTENTS holds the contents of the block.  INFO is a plist
@@ -3000,10 +2995,18 @@ contextual information."
 	 (tag (let ((tag (org-element-property :tag item)))
 		(and tag (org-export-data tag info)))))
     (case type
-      (ordered
-       (format "\n<text:list-item>\n%s\n</text:list-item>" contents))
-      (unordered
-       (format "\n<text:list-item>\n%s\n</text:list-item>" contents))
+      ((ordered unordered)
+       (format "\n<text:list-item>\n%s\n%s"
+	       contents
+	       (let* ((--element-has-a-table-p
+		       (function
+			(lambda (element info)
+			  (loop for el in (org-element-contents element)
+				thereis (equal (org-element-type el) 'table))))))
+		 (cond
+		  ((funcall --element-has-a-table-p item info)
+		   "</text:list-header>")
+		  (t "</text:list-item>")))))
       (descriptive
        (concat
 	(let ((term (or tag "(no term)")))
@@ -3017,7 +3020,7 @@ contextual information."
 		    "text:continue-numbering=\"false\""
 		    (format "\n<text:list-item>\n%s\n</text:list-item>"
 			    contents)))))))
-      (t (error "Unknown list type")))))
+      (t (error "Unknown list type: %S" type)))))
 
 
 ;;;; Keyword
@@ -3430,15 +3433,20 @@ the plist used as a communication channel."
   "Transcode a PLAIN-LIST element from Org to ODT.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
-  (let* (arg1 ;; FIXME
-	 (type (org-element-property :type plain-list))
-	 (attr (mapconcat #'identity
-			  (org-element-property :attr_odt plain-list)
-			  " ")))
+  (let* ((type (org-element-property :type plain-list))
+	 (continue-numbering nil))
+    (assert (member type '(ordered unordered descriptive)))
     (org-e-odt--wrap-label
-     plain-list (format "%s\n%s%s"
-			(org-e-odt-begin-plain-list type)
-			contents "</text:list>"))))
+     plain-list
+     (format "\n<text:list text:style-name=\"%s\" %s>\n%s</text:list>"
+	     (org-e-odt-get-style-name-for-entity 'list type)
+	     ;; If top-level list, re-start numbering.  Otherwise,
+	     ;; continue numbering.
+	     (format "text:continue-numbering=\"%s\""
+		     (let* ((parent (org-export-get-parent plain-list info)))
+		       (if (and parent (equal (org-element-type parent) 'item))
+			   "true" "false")))
+	     contents))))
 
 ;;;; Plain Text
 
@@ -3818,9 +3826,9 @@ contextual information."
 					   table-cell info) 0))))
 		       (org-e-odt-make-string
 			width
-			(org-e-odt-format-tags
-			 "<table:table-column table:style-name=\"%s\"/>"
-			 "" column-style))))
+			(format
+			 "\n<table:table-column table:style-name=\"%s\"/>"
+			 column-style))))
 		   (org-e-odt-table-first-row-data-cells table info) "\n"))))))
        (concat
 	;; caption.
@@ -3829,7 +3837,7 @@ contextual information."
 	(let* ((automatic-name
 		(org-e-odt-add-automatic-style "Table" attributes)))
 	  (format
-	   "\n<table:table table:name=\"%s\" table:style-name=\"%s\">\n"
+	   "\n<table:table table:name=\"%s\" table:style-name=\"%s\">"
 	   (or short-caption (car automatic-name))
 	   (or custom-table-style (cdr automatic-name) "OrgTable")))
 	;; column specification.
@@ -3839,54 +3847,66 @@ contextual information."
 	;; end table.
 	"</table:table>")))))
 
-
 (defun org-e-odt-table (table contents info)
   "Transcode a TABLE element from Org to ODT.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  (let* ((transcoded-table (org-e-odt--table table contents info))
-	 (genealogy (org-export-get-genealogy table info))
-	 (list-genealogy (and (equal (org-element-type (car genealogy)) 'item)
-			      (loop for element in genealogy
-				    when (member (org-element-type element)
-						 '(item plain-list))
-				    collect element))))
-    (when (and transcoded-table list-genealogy)
-      (let ((parent-list (nth 1 list-genealogy)))
-	(assert (equal (org-element-type parent-list) 'plain-list))
-	(assert
-	 (not (equal (org-element-property :type parent-list) 'descriptive))
-	 nil "ODT export doesn't support tables within description list."))
-
-      ;; Within the Org file, the table is appearing within a
-      ;; list item.  OpenDocument doesn't allow table to appear
-      ;; within list items.  Temporarily terminate the list, put
-      ;; the table in an indented section and then re-continue
-      ;; the list.
-
-      ;; Put the Table in an indented section.
-      (setq transcoded-table
-	    (let ((level (/ (length list-genealogy)  2)))
-	      (concat (org-e-odt-begin-section
-		       (format "OrgIndentedSection-Level-%d" level))
-		      transcoded-table (org-e-odt-end-section))))
-
-      (loop for element in list-genealogy
-	    when (equal (org-element-type element) 'plain-list)
-	    do (setq transcoded-table
-		     (concat
-		      ;; Discontinue this list.
-		      "\n</text:list-item>"
-		      "\n</text:list>"
-		      ;; Embed the table.
-		      transcoded-table
-		      ;; Continute the this list.
-		      (org-e-odt-begin-plain-list
-		       (org-element-property :type element)
-		       'continue-numbering)
-		      (if (cdr element) "\n<text:list-item>"
-			"\n<text:list-header>")))))
-    transcoded-table))
+  (let* ((--get-previous-elements
+	  (function
+	   (lambda (blob info)
+	     (let ((parent (org-export-get-parent blob info)))
+	       (cdr (member blob (reverse (org-element-contents parent))))))))
+	 (--element-preceded-by-table-p
+	  (function
+	   (lambda (element info)
+	     (loop for el in (funcall --get-previous-elements element info)
+		   thereis (equal (org-element-type el) 'table)))))
+	 (--walk-list-genealogy-and-collect-tags
+	  (function
+	   (lambda (table info)
+	     (let* ((genealogy (org-export-get-genealogy table info))
+		    (list-genealogy
+		     (when (equal (org-element-type (car genealogy)) 'item)
+		       (loop for el in genealogy
+			     when (member (org-element-type el)
+					  '(item plain-list))
+			     collect el))))
+	       (loop for el in list-genealogy
+		     with parent-list collect
+		     (case (org-element-type el)
+		       (plain-list
+			(setq parent-list el)
+			`("</text:list>"
+			  . ,(let ((type (org-element-property :type el)))
+			       (format
+				"<text:list text:style-name=\"%s\" %s>"
+				(org-e-odt-get-style-name-for-entity 'list type)
+				"text:continue-numbering=\"true\""))))
+		       (item
+			(cond
+			 ((not parent-list)
+			  (if (funcall --element-preceded-by-table-p table info)
+			      '("</text:list-header>" . "<text:list-header>")
+			    '("</text:list-item>" . "<text:list-header>")))
+			 ((funcall --element-preceded-by-table-p
+				   parent-list info)
+			  '("</text:list-header>" . "<text:list-header>"))
+			 (t '("</text:list-item>" . "<text:list-item>"))))))))))
+	 (close-open-tags (funcall --walk-list-genealogy-and-collect-tags
+				   table info)))
+    ;; OpenDocument schema does not permit table to occur within a
+    ;; list item.  So, to typeset an indented table, we make use of
+    ;; list continuations.
+    (concat "\n"
+	    ;; Discontinue the list.
+	    (mapconcat 'car close-open-tags "\n")
+	    ;; Put the table in an indented section.
+	    (let* ((table (org-e-odt--table table contents info))
+		   (level (/ (length (mapcar 'car close-open-tags)) 2))
+		   (style (format "OrgIndentedSection-Level-%d" level)))
+	      (when table (org-e-odt-format-section table style)))
+	    ;; Continue the list.
+	    (mapconcat 'cdr (nreverse close-open-tags) "\n"))))
 
 
 ;;;; Target
@@ -3997,9 +4017,7 @@ Return output file's name."
 	  (file-name-directory
 	   (org-export-output-file-name ".odt" subtreep nil)))
 
-    (org-export-to-buffer
-     'e-odt outbuf
-     (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))
+    (org-export-to-buffer 'e-odt outbuf subtreep visible-only body-only)
 
     (setq org-lparse-opt-plist nil) 	; FIXME
     (org-e-odt-save-as-outfile target	;; info
@@ -4128,6 +4146,10 @@ using `org-open-file'."
   (org-e-odt-do-convert in-file out-fmt prefix-arg))
 
 ;;; FIXMES, TODOS, FOR REVIEW etc
+
+;;;; Support listified headline
+;;;; Handle tables within a description list
+;;;  Handle tables within a listified headline
 
 ;;;; org-solidify-link-text
 ;;;; coding system
