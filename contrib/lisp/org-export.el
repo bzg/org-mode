@@ -2949,18 +2949,19 @@ Return value can be an object, an element, or nil:
 - Otherwise, return nil.
 
 Assume LINK type is \"fuzzy\"."
-  (let ((path (org-element-property :path link)))
+  (let* ((path (org-element-property :path link))
+	 (match-title-p (eq (aref path 0) ?*)))
     (cond
      ;; First try to find a matching "<<path>>" unless user specified
      ;; he was looking for an headline (path starts with a *
      ;; character).
-     ((and (not (eq (substring path 0 1) ?*))
+     ((and (not match-title-p)
 	   (loop for target in (plist-get info :target-list)
 		 when (string= (org-element-property :value target) path)
 		 return target)))
      ;; Then try to find an element with a matching "#+NAME: path"
      ;; affiliated keyword.
-     ((and (not (eq (substring path 0 1) ?*))
+     ((and (not match-title-p)
 	   (org-element-map
 	    (plist-get info :parse-tree) org-element-all-elements
 	    (lambda (el)
@@ -2972,29 +2973,31 @@ Assume LINK type is \"fuzzy\"."
      ;; is found, return it, otherwise return nil.
      (t
       (let ((find-headline
-	       (function
-		;; Return first headline whose `:raw-value' property
-		;; is NAME in parse tree DATA, or nil.
-		(lambda (name data)
-		  (org-element-map
-		   data 'headline
-		   (lambda (headline)
-		     (when (string=
-			    (org-element-property :raw-value headline)
-			    name)
-		       headline))
-		   info 'first-match)))))
-	  ;; Search among headlines sharing an ancestor with link,
-	  ;; from closest to farthest.
-	  (or (catch 'exit
-		(mapc
-		 (lambda (parent)
-		   (when (eq (org-element-type parent) 'headline)
-		     (let ((foundp (funcall find-headline path parent)))
-		       (when foundp (throw 'exit foundp)))))
-		 (org-export-get-genealogy link info)) nil)
-	      ;; No match with a common ancestor: try the full parse-tree.
-	      (funcall find-headline path (plist-get info :parse-tree))))))))
+	     (function
+	      ;; Return first headline whose `:raw-value' property
+	      ;; is NAME in parse tree DATA, or nil.
+	      (lambda (name data)
+		(org-element-map
+		 data 'headline
+		 (lambda (headline)
+		   (when (string=
+			  (org-element-property :raw-value headline)
+			  name)
+		     headline))
+		 info 'first-match)))))
+	;; Search among headlines sharing an ancestor with link,
+	;; from closest to farthest.
+	(or (catch 'exit
+	      (mapc
+	       (lambda (parent)
+		 (when (eq (org-element-type parent) 'headline)
+		   (let ((foundp (funcall find-headline path parent)))
+		     (when foundp (throw 'exit foundp)))))
+	       (org-export-get-genealogy link info)) nil)
+	    ;; No match with a common ancestor: try the full parse-tree.
+	    (funcall find-headline
+		     (if match-title-p (substring path 1) path)
+		     (plist-get info :parse-tree))))))))
 
 (defun org-export-resolve-id-link (link info)
   "Return headline referenced as LINK destination.
