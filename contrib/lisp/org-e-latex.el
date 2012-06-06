@@ -1598,6 +1598,10 @@ INFO is a plist holding contextual information.  See
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
 	(case (org-element-type destination)
+	  ;; Id link points to an external file.
+	  (plain-text
+	   (if desc (format "\\href{file://%s}{%s}" destination desc)
+	     (format "\\url{file://%s}" destination)))
 	  ;; Fuzzy link points nowhere.
 	  ('nil
 	   (format org-e-latex-link-with-unknown-path-format

@@ -1065,7 +1065,7 @@ inferior to file-local settings."
     (and buffer-file-name (org-remove-double-quotes buffer-file-name)))
    ;; ... and from subtree, when appropriate.
    (and subtreep (org-export-get-subtree-options))
-   ;; Also install back-end symbol and its translation table.
+   ;; Eventually install back-end symbol and its translation table.
    `(:back-end
      ,backend
      :translate-alist
@@ -1266,6 +1266,40 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 		     (file-name-sans-extension
 		      (file-name-nondirectory visited-file)))
 		(buffer-name (buffer-base-buffer)))
+     :footnote-definition-alist
+     ;; Footnotes definitions must be collected in the original
+     ;; buffer, as there's no insurance that they will still be in the
+     ;; parse tree, due to possible narrowing.
+     (let (alist)
+       (org-with-wide-buffer
+	(goto-char (point-min))
+	(while (re-search-forward org-footnote-definition-re nil t)
+	  (let ((def (org-footnote-at-definition-p)))
+	    (when def
+	      (org-skip-whitespace)
+	      (push (cons (car def)
+			  (save-restriction
+			    (narrow-to-region (point) (nth 2 def))
+			    ;; Like `org-element-parse-buffer', but
+			    ;; makes sure the definition doesn't start
+			    ;; with a section element.
+			    (nconc
+			     (list 'org-data nil)
+			     (org-element-parse-elements
+			      (point-min) (point-max) nil nil nil nil nil))))
+		    alist))))
+	alist))
+     :id-alist
+     ;; Collect id references.
+     (let (alist)
+       (org-with-wide-buffer
+	(goto-char (point-min))
+	(while (re-search-forward
+		"\\[\\[id:\\(\\S-+?\\)\\]\\(?:\\[.*?\\]\\)?\\]" nil t)
+	  (let* ((id (org-match-string-no-properties 1))
+		 (file (org-id-find-id-file id)))
+	    (when file (push (cons id (file-relative-name file)) alist)))))
+       alist)
      :macro-modification-time
      (and visited-file
 	  (file-exists-p visited-file)
@@ -1300,47 +1334,6 @@ process."
 	  all)
     ;; Return value.
     plist))
-
-(defun org-export-store-footnote-definitions (info)
-  "Collect and store footnote definitions from current buffer in INFO.
-
-INFO is a plist containing export options.
-
-Footnotes definitions are stored as a alist whose CAR is
-footnote's label, as a string, and CDR the contents, as a parse
-tree.  This alist will be consed to the value of
-`:footnote-definition-alist' in INFO, if any.
-
-The new plist is returned; use
-
-  \(setq info (org-export-store-footnote-definitions info))
-
-to be sure to use the new value.  INFO is modified by side
-effects."
-  ;; Footnotes definitions must be collected in the original buffer,
-  ;; as there's no insurance that they will still be in the parse
-  ;; tree, due to some narrowing.
-  (plist-put
-   info :footnote-definition-alist
-   (let ((alist (plist-get info :footnote-definition-alist)))
-     (org-with-wide-buffer
-      (goto-char (point-min))
-      (while (re-search-forward org-footnote-definition-re nil t)
-	(let ((def (org-footnote-at-definition-p)))
-	  (when def
-	    (org-skip-whitespace)
-	    (push (cons (car def)
-			(save-restriction
-			  (narrow-to-region (point) (nth 2 def))
-			  ;; Like `org-element-parse-buffer', but
-			  ;; makes sure the definition doesn't start
-			  ;; with a section element.
-			  (nconc
-			   (list 'org-data nil)
-			   (org-element-parse-elements
-			    (point-min) (point-max) nil nil nil nil nil))))
-		  alist))))
-      alist))))
 
 (defvar org-export-allow-BIND-local nil)
 (defun org-export-confirm-letbind ()
@@ -1405,7 +1398,9 @@ Following tree properties are set or updated:
 `:ignore-list'     List of elements that should be ignored during
                    export.
 
-`:target-list'     List of all targets in the parse tree."
+`:target-list'     List of all targets in the parse tree.
+
+Return updated plist."
   ;; Install the parse tree in the communication channel, in order to
   ;; use `org-export-get-genealogy' and al.
   (setq info (plist-put info :parse-tree data))
@@ -2267,8 +2262,7 @@ Return code as a string."
       ;;    they might not be accessible anymore in a narrowed parse
       ;;    tree.  Also install user's and developer's filters.
       (let ((info (org-export-install-filters
-		   (org-export-store-footnote-definitions
-		    (org-export-get-environment backend subtreep ext-plist))))
+		   (org-export-get-environment backend subtreep ext-plist)))
 	    ;; 2. Get parse tree.  Buffer isn't parsed directly.
 	    ;;    Instead, a temporary copy is created, where include
 	    ;;    keywords are expanded and code blocks are evaluated.
@@ -3007,16 +3001,20 @@ Assume LINK type is \"fuzzy\"."
 
 INFO is a plist used as a communication channel.
 
-Return value can be an headline element or nil.  Assume LINK type
-is either \"id\" or \"custom-id\"."
+Return value can be the headline element matched in current parse
+tree, a file name or nil.  Assume LINK type is either \"id\" or
+\"custom-id\"."
   (let ((id (org-element-property :path link)))
-    (org-element-map
-     (plist-get info :parse-tree) 'headline
-     (lambda (headline)
-       (when (or (string= (org-element-property :id headline) id)
-                 (string= (org-element-property :custom-id headline) id))
-         headline))
-     info 'first-match)))
+    ;; First check if id is within the current parse tree.
+    (or (org-element-map
+	 (plist-get info :parse-tree) 'headline
+	 (lambda (headline)
+	   (when (or (string= (org-element-property :id headline) id)
+		     (string= (org-element-property :custom-id headline) id))
+	     headline))
+	 info 'first-match)
+	;; Otherwise, look for external files.
+	(cdr (assoc id (plist-get info :id-alist))))))
 
 (defun org-export-resolve-radio-link (link info)
   "Return radio-target object referenced as LINK destination.

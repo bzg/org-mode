@@ -375,62 +375,56 @@ body\n")))
 
 (ert-deftest test-org-export/footnotes ()
   "Test footnotes specifications."
-  (let ((org-footnote-section nil))
+  (let ((org-footnote-section nil)
+	(org-export-with-footnotes t))
     ;; 1. Read every type of footnote.
-    (org-test-with-temp-text
+    (org-test-with-parsed-data
 	"Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
-      (let* ((tree (org-element-parse-buffer))
-	     (info (org-export-store-footnote-definitions
-		    `(:parse-tree ,tree :with-footnotes t))))
-	(should
-	 (equal
-	  '((1 . "A") (2 . "B") (3 . "C") (4 . "D"))
-	  (org-element-map
-	   tree 'footnote-reference
-	   (lambda (ref)
-	     (let ((def (org-export-get-footnote-definition ref info)))
-	       (cons (org-export-get-footnote-number ref info)
-		     (if (eq (org-element-property :type ref) 'inline) (car def)
-		       (car (org-element-contents
-			     (car (org-element-contents def))))))))
-	   info)))))
+      (should
+       (equal
+	'((1 . "A") (2 . "B") (3 . "C") (4 . "D"))
+	(org-element-map
+	 tree 'footnote-reference
+	 (lambda (ref)
+	   (let ((def (org-export-get-footnote-definition ref info)))
+	     (cons (org-export-get-footnote-number ref info)
+		   (if (eq (org-element-property :type ref) 'inline) (car def)
+		     (car (org-element-contents
+			   (car (org-element-contents def))))))))
+	 info))))
     ;; 2. Test nested footnotes order.
-    (org-test-with-temp-text
+    (org-test-with-parsed-data
 	"Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
-      (let* ((tree (org-element-parse-buffer))
-	     (info (org-export-store-footnote-definitions
-		    `(:parse-tree ,tree :with-footnotes t))))
-	(should
-	 (equal
-	  '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
-	  (org-element-map
-	   tree 'footnote-reference
-	   (lambda (ref)
-	     (when (org-export-footnote-first-reference-p ref info)
-	       (cons (org-export-get-footnote-number ref info)
-		     (org-element-property :label ref))))
-	   info)))))
+      (should
+       (equal
+	'((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
+	(org-element-map
+	 tree 'footnote-reference
+	 (lambda (ref)
+	   (when (org-export-footnote-first-reference-p ref info)
+	     (cons (org-export-get-footnote-number ref info)
+		   (org-element-property :label ref))))
+	 info))))
     ;; 3. Test nested footnote in invisible definitions.
     (org-test-with-temp-text "Text[1]\n\n[1] B [2]\n\n[2] C."
       ;; Hide definitions.
       (narrow-to-region (point) (point-at-eol))
       (let* ((tree (org-element-parse-buffer))
-	     (info (org-export-store-footnote-definitions
-		    `(:parse-tree ,tree :with-footnotes t))))
+	     (info (org-combine-plists
+		    `(:parse-tree ,tree)
+		    (org-export-collect-tree-properties
+		     tree (org-export-get-environment)))))
 	;; Both footnotes should be seen.
 	(should
 	 (= (length (org-export-collect-footnote-definitions tree info)) 2))))
     ;; 4. Test footnotes definitions collection.
-    (org-test-with-temp-text "Text[fn:1:A[fn:2]] [fn:3].
+    (org-test-with-parsed-data "Text[fn:1:A[fn:2]] [fn:3].
 
 \[fn:2] B [fn:3] [fn::D].
 
 \[fn:3] C."
-      (let* ((tree (org-element-parse-buffer))
-	     (info (org-export-store-footnote-definitions
-		    `(:parse-tree ,tree :with-footnotes t))))
-	(should (= (length (org-export-collect-footnote-definitions tree info))
-		   4))))
+      (should (= (length (org-export-collect-footnote-definitions tree info))
+		 4)))
     ;; 5. Test export of footnotes defined outside parsing scope.
     (org-test-with-temp-text "[fn:1] Out of scope
 * Title
@@ -484,8 +478,73 @@ Paragraph[fn:1]"
 
 ;;; Links
 
-(ert-deftest test-org-export/fuzzy-links ()
-  "Test fuzzy link export specifications."
+(ert-deftest test-org-export/resolve-coderef ()
+  "Test `org-export-resolve-coderef' specifications."
+  (let ((org-coderef-label-format "(ref:%s)"))
+    ;; 1. A link to a "-n -k -r" block returns line number.
+    (org-test-with-parsed-data
+	"#+BEGIN_EXAMPLE -n -k -r\nText (ref:coderef)\n#+END_EXAMPLE"
+      (should (= (org-export-resolve-coderef "coderef" info) 1)))
+    (org-test-with-parsed-data
+	"#+BEGIN_SRC emacs-lisp -n -k -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (should (= (org-export-resolve-coderef "coderef" info) 1)))
+    ;; 2. A link to a "-n -r" block returns line number.
+    (org-test-with-parsed-data
+	"#+BEGIN_EXAMPLE -n -r\nText (ref:coderef)\n#+END_EXAMPLE"
+      (should (= (org-export-resolve-coderef "coderef" info) 1)))
+    (org-test-with-parsed-data
+	"#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (should (= (org-export-resolve-coderef "coderef" info) 1)))
+    ;; 3. A link to a "-n" block returns coderef.
+    (org-test-with-parsed-data
+	"#+BEGIN_SRC emacs-lisp -n\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (should (equal (org-export-resolve-coderef "coderef" info) "coderef")))
+    (org-test-with-parsed-data
+	"#+BEGIN_EXAMPLE -n\nText (ref:coderef)\n#+END_EXAMPLE"
+      (should (equal (org-export-resolve-coderef "coderef" info) "coderef")))
+    ;; 4. A link to a "-r" block returns line number.
+    (org-test-with-parsed-data
+	"#+BEGIN_SRC emacs-lisp -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (should (= (org-export-resolve-coderef "coderef" info) 1)))
+    (org-test-with-parsed-data
+	"#+BEGIN_EXAMPLE -r\nText (ref:coderef)\n#+END_EXAMPLE"
+      (should (= (org-export-resolve-coderef "coderef" info) 1)))
+    ;; 5. A link to a block without a switch returns coderef.
+    (org-test-with-parsed-data
+	"#+BEGIN_SRC emacs-lisp\n(+ 1 1) (ref:coderef)\n#+END_SRC"
+      (should (equal (org-export-resolve-coderef "coderef" info) "coderef")))
+    (org-test-with-parsed-data
+	"#+BEGIN_EXAMPLE\nText (ref:coderef)\n#+END_EXAMPLE"
+      (should (equal (org-export-resolve-coderef "coderef" info) "coderef")))
+    ;; 6. Correctly handle continued line numbers.  A "+n" switch
+    ;;    should resume numbering from previous block with numbered
+    ;;    lines, ignoring blocks not numbering lines in the process.
+    ;;    A "-n" switch resets count.
+    (org-test-with-parsed-data "
+#+BEGIN_EXAMPLE -n
+Text.
+#+END_EXAMPLE
+
+#+BEGIN_SRC emacs-lisp
+\(- 1 1)
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp +n -r
+\(+ 1 1) (ref:addition)
+#+END_SRC
+
+#+BEGIN_EXAMPLE -n -r
+Another text. (ref:text)
+#+END_EXAMPLE"
+      (should (= (org-export-resolve-coderef "addition" info) 2))
+      (should (= (org-export-resolve-coderef "text" info) 1)))
+    ;; 7. Recognize coderef with user-specified syntax.
+    (org-test-with-parsed-data
+	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText. [ref:text]\n#+END_EXAMPLE"
+      (should (equal (org-export-resolve-coderef "text" info) "text")))))
+
+(ert-deftest test-org-export/resolve-fuzzy-link ()
+  "Test `org-export-resolve-fuzzy-link' specifications."
   ;; 1. Links to invisible (keyword) targets should be ignored.
   (org-test-with-parsed-data
       "Paragraph.\n#+TARGET: Test\n[[Test]]"
@@ -551,98 +610,44 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
 	       (org-export-get-ordinal
 		(org-export-resolve-fuzzy-link link info) info)) info t)))))
 
-(ert-deftest test-org-export/resolve-coderef ()
-  "Test `org-export-resolve-coderef' specifications."
-  (let ((org-coderef-label-format "(ref:%s)"))
-    ;; 1. A link to a "-n -k -r" block returns line number.
-    (org-test-with-temp-text
-	"#+BEGIN_EXAMPLE -n -k -r\nText (ref:coderef)\n#+END_EXAMPLE"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
-    (org-test-with-temp-text
-	"#+BEGIN_SRC emacs-lisp -n -k -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
-    ;; 2. A link to a "-n -r" block returns line number.
-    (org-test-with-temp-text
-	"#+BEGIN_EXAMPLE -n -r\nText (ref:coderef)\n#+END_EXAMPLE"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
-    (org-test-with-temp-text
-	"#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
-    ;; 3. A link to a "-n" block returns coderef.
-    (org-test-with-temp-text
-	"#+BEGIN_SRC emacs-lisp -n\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
-		"coderef"))))
-    (org-test-with-temp-text
-	"#+BEGIN_EXAMPLE -n\nText (ref:coderef)\n#+END_EXAMPLE"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
-		"coderef"))))
-    ;; 4. A link to a "-r" block returns line number.
-    (org-test-with-temp-text
-	"#+BEGIN_SRC emacs-lisp -r\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
-    (org-test-with-temp-text
-	"#+BEGIN_EXAMPLE -r\nText (ref:coderef)\n#+END_EXAMPLE"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (= (org-export-resolve-coderef "coderef" `(:parse-tree ,tree)) 1))))
-    ;; 5. A link to a block without a switch returns coderef.
-    (org-test-with-temp-text
-	"#+BEGIN_SRC emacs-lisp\n(+ 1 1) (ref:coderef)\n#+END_SRC"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
-		"coderef"))))
-    (org-test-with-temp-text
-	"#+BEGIN_EXAMPLE\nText (ref:coderef)\n#+END_EXAMPLE"
-      (let ((tree (org-element-parse-buffer)))
-	(should
-	 (equal (org-export-resolve-coderef "coderef" `(:parse-tree ,tree))
-		"coderef"))))
-    ;; 6. Correctly handle continued line numbers.  A "+n" switch
-    ;;    should resume numbering from previous block with numbered
-    ;;    lines, ignoring blocks not numbering lines in the process.
-    ;;    A "-n" switch resets count.
-    (org-test-with-temp-text "
-#+BEGIN_EXAMPLE -n
-Text.
-#+END_EXAMPLE
-
-#+BEGIN_SRC emacs-lisp
-\(- 1 1)
-#+END_SRC
-
-#+BEGIN_SRC emacs-lisp +n -r
-\(+ 1 1) (ref:addition)
-#+END_SRC
-
-#+BEGIN_EXAMPLE -n -r
-Another text. (ref:text)
-#+END_EXAMPLE"
-      (let* ((tree (org-element-parse-buffer))
-	     (info `(:parse-tree ,tree)))
-	(should (= (org-export-resolve-coderef "addition" info) 2))
-	(should (= (org-export-resolve-coderef "text" info) 1))))
-    ;; 7. Recognize coderef with user-specified syntax.
-    (org-test-with-temp-text
-	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText. [ref:text]\n#+END_EXAMPLE"
-      (let ((tree (org-element-parse-buffer)))
-	(should (equal (org-export-resolve-coderef "text" `(:parse-tree ,tree))
-		       "text"))))))
+(ert-deftest test-org-export/resolve-id-link ()
+  "Test `org-export-resolve-id-link' specifications."
+  ;; 1. Regular test for custom-id link.
+  (org-test-with-parsed-data "* Headline1
+:PROPERTIES:
+:CUSTOM-ID: test
+:END:
+* Headline 2
+\[[#test]]"
+    (should
+     (org-export-resolve-id-link
+      (org-element-map tree 'link 'identity info t) info)))
+  ;; 2. Failing test for custom-id link.
+  (org-test-with-parsed-data "* Headline1
+:PROPERTIES:
+:CUSTOM-ID: test
+:END:
+* Headline 2
+\[[#no-match]]"
+    (should-not
+     (org-export-resolve-id-link
+      (org-element-map tree 'link 'identity info t) info)))
+  ;; 3. Test for internal id target.
+  (org-test-with-parsed-data "* Headline1
+:PROPERTIES:
+:ID: aaaa
+:END:
+* Headline 2
+\[[id:aaaa]]"
+    (should
+     (org-export-resolve-id-link
+      (org-element-map tree 'link 'identity info t) info)))
+  ;; 4. Test for external id target.
+  (org-test-with-parsed-data "[[id:aaaa]]"
+    (should
+     (org-export-resolve-id-link
+      (org-element-map tree 'link 'identity info t)
+      (org-combine-plists info '(:id-alist (("aaaa" . "external-file"))))))))
 
 (ert-deftest test-org-export/resolve-radio-link ()
   "Test `org-export-resolve-radio-link' specifications."
