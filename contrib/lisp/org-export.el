@@ -1601,8 +1601,8 @@ tag."
     ;; Check table-cell.
     (table-cell
      (and (org-export-table-has-special-column-p
-	   (nth 1 (org-export-get-genealogy blob options)))
-	  (not (org-export-get-previous-element blob options))))
+	   (org-export-get-parent-table blob))
+	  (not (org-export-get-previous-element blob))))
     ;; Check clock.
     (clock (not (plist-get options :with-clocks)))
     ;; Check planning.
@@ -1702,7 +1702,7 @@ Return transcoded string."
 			     ;; indentation: there is none and it
 			     ;; might be misleading.
 			     (when (eq type 'paragraph)
-			       (let ((parent (org-export-get-parent data info)))
+			       (let ((parent (org-export-get-parent data)))
 				 (and (equal (car (org-element-contents parent))
 					     data)
 				      (memq (org-element-type parent)
@@ -2837,13 +2837,13 @@ Any tag belonging to this list will also be removed."
 (defun org-export-first-sibling-p (headline info)
   "Non-nil when HEADLINE is the first sibling in its sub-tree.
 INFO is the plist used as a communication channel."
-  (not (eq (org-element-type (org-export-get-previous-element headline info))
+  (not (eq (org-element-type (org-export-get-previous-element headline))
 	   'headline)))
 
 (defun org-export-last-sibling-p (headline info)
   "Non-nil when HEADLINE is the last sibling in its sub-tree.
 INFO is the plist used as a communication channel."
-  (not (org-export-get-next-element headline info)))
+  (not (org-export-get-next-element headline)))
 
 
 ;;;; For Links
@@ -3004,7 +3004,7 @@ Assume LINK type is \"fuzzy\"."
 		 (when (eq (org-element-type parent) 'headline)
 		   (let ((foundp (funcall find-headline path parent)))
 		     (when foundp (throw 'exit foundp)))))
-	       (org-export-get-genealogy link info)) nil)
+	       (org-export-get-genealogy link)) nil)
 	    ;; No match with a common ancestor: try the full parse-tree.
 	    (funcall find-headline
 		     (if match-title-p (substring path 1) path)
@@ -3109,7 +3109,7 @@ objects of the same type."
     ;; table, item, or headline containing the object.
     (when (eq (org-element-type element) 'target)
       (setq element
-	    (loop for parent in (org-export-get-genealogy element info)
+	    (loop for parent in (org-export-get-genealogy element)
 		  when
 		  (memq
 		   (org-element-type parent)
@@ -3402,7 +3402,7 @@ All special rows will be ignored during export."
        ;; ... the table contains a special column and the row start
        ;; with a marking character among, "^", "_", "$" or "!",
        (and (org-export-table-has-special-column-p
-	     (org-export-get-parent table-row info))
+	     (org-export-get-parent table-row))
 	    (member first-cell '(("^") ("_") ("$") ("!"))))
        ;; ... it contains only alignment cookies and empty cells.
        (let ((special-row-p 'empty))
@@ -3442,7 +3442,7 @@ rows and table rules.  Group 1 is also table's header."
 	    ((eq (org-element-property :type row) 'rule)
 	     (setq row-flag nil)))
 	   (when (equal table-row row) (throw 'found group)))
-	 (org-element-contents (org-export-get-parent table-row info)))))))
+	 (org-element-contents (org-export-get-parent table-row)))))))
 
 (defun org-export-table-cell-width (table-cell info)
   "Return TABLE-CELL contents width.
@@ -3451,11 +3451,10 @@ INFO is a plist used as the communication channel.
 
 Return value is the width given by the last width cookie in the
 same column as TABLE-CELL, or nil."
-  (let* ((genealogy (org-export-get-genealogy table-cell info))
-	 (row (car genealogy))
+  (let* ((row (org-export-get-parent table-cell))
 	 (column (let ((cells (org-element-contents row)))
 		   (- (length cells) (length (member table-cell cells)))))
-	 (table (nth 1 genealogy))
+	 (table (org-export-get-parent-table table-cell))
 	 cookie-width)
     (mapc
      (lambda (row)
@@ -3489,11 +3488,10 @@ same column as TABLE-CELL.  If no such cookie is found, a default
 alignment value will be deduced from fraction of numbers in the
 column (see `org-table-number-fraction' for more information).
 Possible values are `left', `right' and `center'."
-  (let* ((genealogy (org-export-get-genealogy table-cell info))
-	 (row (car genealogy))
+  (let* ((row (org-export-get-parent table-cell))
 	 (column (let ((cells (org-element-contents row)))
 		   (- (length cells) (length (member table-cell cells)))))
-	 (table (nth 1 genealogy))
+	 (table (org-export-get-parent-table table-cell))
 	 (number-cells 0)
 	 (total-cells 0)
 	 cookie-align)
@@ -3549,9 +3547,8 @@ Return value is a list of symbols, or nil.  Possible values are:
 row (resp. last row) of the table, ignoring table rules, if any.
 
 Returned borders ignore special rows."
-  (let* ((genealogy (org-export-get-genealogy table-cell info))
-	 (row (car genealogy))
-	 (table (nth 1 genealogy))
+  (let* ((row (org-export-get-parent table-cell))
+	 (table (org-export-get-parent-table table-cell))
 	 borders)
     ;; Top/above border?  TABLE-CELL has a border above when a rule
     ;; used to demarcate row groups can be found above.  Hence,
@@ -3635,7 +3632,7 @@ INFO is a plist used as a communication channel."
   ;; of a row (or after the special column, if any) or when it has
   ;; a left border.
   (or (equal (org-element-map
-	      (org-export-get-parent table-cell info)
+	      (org-export-get-parent table-cell)
 	      'table-cell 'identity info 'first-match)
 	     table-cell)
       (memq 'left (org-export-table-cell-borders table-cell info))))
@@ -3646,7 +3643,7 @@ INFO is a plist used as a communication channel."
   ;; A cell ends a column group either when it is at the end of a row
   ;; or when it has a right border.
   (or (equal (car (last (org-element-contents
-			 (org-export-get-parent table-cell info))))
+			 (org-export-get-parent table-cell))))
 	     table-cell)
       (memq 'right (org-export-table-cell-borders table-cell info))))
 
@@ -3672,7 +3669,7 @@ INFO is a plist used as a communication channel."
   "Non-nil when TABLE-ROW is the first table header's row.
 INFO is a plist used as a communication channel."
   (and (org-export-table-has-header-p
-	(org-export-get-parent-table table-row info) info)
+	(org-export-get-parent-table table-row) info)
        (org-export-table-row-starts-rowgroup-p table-row info)
        (= (org-export-table-row-group table-row info) 1)))
 
@@ -3680,7 +3677,7 @@ INFO is a plist used as a communication channel."
   "Non-nil when TABLE-ROW is the last table header's row.
 INFO is a plist used as a communication channel."
   (and (org-export-table-has-header-p
-	(org-export-get-parent-table table-row info) info)
+	(org-export-get-parent-table table-row) info)
        (org-export-table-row-ends-rowgroup-p table-row info)
        (= (org-export-table-row-group table-row info) 1)))
 
@@ -3714,8 +3711,8 @@ a communication channel.
 Address is a CONS cell (ROW . COLUMN), where ROW and COLUMN are
 zero-based index.  Only exportable cells are considered.  The
 function returns nil for other cells."
-  (let* ((table-row (org-export-get-parent table-cell info))
-	 (table (org-export-get-parent-table table-cell info)))
+  (let* ((table-row (org-export-get-parent table-cell))
+	 (table (org-export-get-parent-table table-cell)))
     ;; Ignore cells in special rows or in special column.
     (unless (or (org-export-table-row-is-special-p table-row info)
 		(and (org-export-table-has-special-column-p table)
@@ -3852,102 +3849,64 @@ Return a list of src-block elements with a caption."
 ;; Here are various functions to retrieve information about the
 ;; neighbourhood of a given element or object.  Neighbours of interest
 ;; are direct parent (`org-export-get-parent'), parent headline
-;; (`org-export-get-parent-headline'), parent paragraph
-;; (`org-export-get-parent-paragraph'), previous element or object
+;; (`org-export-get-parent-headline'), first element containing an
+;; object, (`org-export-get-parent-element'), parent table
+;; (`org-export-get-parent-table'), previous element or object
 ;; (`org-export-get-previous-element') and next element or object
 ;; (`org-export-get-next-element').
 ;;
-;; All of these functions are just a specific use of the more generic
-;; `org-export-get-genealogy', which returns the genealogy relative to
-;; the element or object.
+;; `org-export-get-genealogy' returns the full genealogy of a given
+;; element or object, from closest parent to full parse tree.
 
-(defun org-export-get-genealogy (blob info)
-  "Return genealogy relative to a given element or object.
-BLOB is the element or object being considered.  INFO is a plist
-used as a communication channel."
-  (let* ((type (org-element-type blob))
-	 (end (org-element-property :end blob))
-	 walk-data			; for byte-compiler.
-         (walk-data
-          (lambda (data genealogy)
-	    ;; Walk DATA, looking for BLOB.  GENEALOGY is the list of
-	    ;; parents of all elements in DATA.
-            (mapc
-             (lambda (el)
-               (cond
-		((stringp el) nil)
-                ((equal el blob) (throw 'exit genealogy))
-                ((>= (org-element-property :end el) end)
-		 ;; If BLOB is an object and EL contains a secondary
-		 ;; string, be sure to check it.
-		 (when (memq type org-element-all-objects)
-		   (let ((sec-prop
-			  (cdr (assq (org-element-type el)
-				     org-element-secondary-value-alist))))
-		     (when sec-prop
-		       (funcall
-			walk-data
-			(cons 'org-data
-			      (cons nil (org-element-property sec-prop el)))
-			(cons el genealogy)))))
-                 (funcall walk-data el (cons el genealogy)))))
-	     (org-element-contents data)))))
-    (catch 'exit (funcall walk-data (plist-get info :parse-tree) nil) nil)))
-
-(defun org-export-get-parent (blob info)
+(defun org-export-get-parent (blob)
   "Return BLOB parent or nil.
-BLOB is the element or object considered.  INFO is a plist used
-as a communication channel."
-  (car (org-export-get-genealogy blob info)))
+BLOB is the element or object considered."
+  (org-element-property :parent blob))
 
-(defun org-export-get-parent-headline (blob info)
+(defun org-export-get-genealogy (blob)
+  "Return full genealogy relative to a given element or object.
+BLOB is the element or object being considered."
+  (let (genealogy (parent blob))
+    (while (setq parent (org-element-property :parent parent))
+      (push parent genealogy))
+    (nreverse genealogy)))
+
+(defun org-export-get-parent-headline (blob)
   "Return BLOB parent headline or nil.
-BLOB is the element or object being considered.  INFO is a plist
-used as a communication channel."
-  (catch 'exit
-    (mapc
-     (lambda (el) (when (eq (org-element-type el) 'headline) (throw 'exit el)))
-     (org-export-get-genealogy blob info))
-    nil))
+BLOB is the element or object being considered."
+  (let ((parent blob))
+    (while (and (setq parent (org-element-property :parent parent))
+		(not (eq (org-element-type parent) 'headline))))
+    parent))
 
-(defun org-export-get-parent-paragraph (object info)
-  "Return OBJECT parent paragraph or nil.
-OBJECT is the object to consider.  INFO is a plist used as
-a communication channel."
-  (catch 'exit
-    (mapc
-     (lambda (el) (when (eq (org-element-type el) 'paragraph) (throw 'exit el)))
-     (org-export-get-genealogy object info))
-    nil))
+(defun org-export-get-parent-element (object)
+  "Return first element containing OBJECT or nil.
+OBJECT is the object to consider."
+  (let ((parent object))
+    (while (and (setq parent (org-element-property :parent parent))
+		(memq (org-element-type parent) org-element-all-objects)))
+    parent))
 
-(defun org-export-get-parent-table (object info)
+(defun org-export-get-parent-table (object)
   "Return OBJECT parent table or nil.
-OBJECT is either a `table-cell' or `table-element' type object.
-INFO is a plist used as a communication channel."
-  (catch 'exit
-    (mapc
-     (lambda (el) (when (eq (org-element-type el) 'table) (throw 'exit el)))
-     (org-export-get-genealogy object info))
-    nil))
+OBJECT is either a `table-cell' or `table-element' type object."
+  (let ((parent object))
+    (while (and (setq parent (org-element-property :parent parent))
+		(not (eq (org-element-type parent) 'table))))
+    parent))
 
-(defun org-export-get-previous-element (blob info)
+(defun org-export-get-previous-element (blob)
   "Return previous element or object.
-
-BLOB is an element or object.  INFO is a plist used as
-a communication channel.
-
-Return previous element or object, a string, or nil."
-  (let ((parent (org-export-get-parent blob info)))
+BLOB is an element or object.  Return previous element or object,
+a string, or nil."
+  (let ((parent (org-export-get-parent blob)))
     (cadr (member blob (reverse (org-element-contents parent))))))
 
-(defun org-export-get-next-element (blob info)
+(defun org-export-get-next-element (blob)
   "Return next element or object.
-
-BLOB is an element or object.  INFO is a plist used as
-a communication channel.
-
-Return next element or object, a string, or nil."
-  (let ((parent (org-export-get-parent blob info)))
+BLOB is an element or object.  Return next element or object,
+a string, or nil."
+  (let ((parent (org-export-get-parent blob)))
     (cadr (member blob (org-element-contents parent)))))
 
 

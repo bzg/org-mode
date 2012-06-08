@@ -50,7 +50,7 @@
 (declare-function
  org-export-to-file "org-export"
  (backend file &optional subtreep visible-only body-only ext-plist))
-(declare-function org-export-get-parent-headline "org-export" (blob info))
+(declare-function org-export-get-parent-headline "org-export" (blob))
 (declare-function org-export-get-environment "org-export"
 		  (&optional backend subtreep ext-plist))
 (declare-function org-export-get-inbuffer-options "org-export"
@@ -979,7 +979,7 @@ keyword."
        (when (string= (downcase (org-element-property :key k))
 		      "index")
 	 (let ((index (org-element-property :value k))
-	       (parent (org-export-get-parent-headline k info)))
+	       (parent (org-export-get-parent-headline k)))
 	   (list index (plist-get info :input-file) parent))))
      info)))
   ;; Return parse-tree to avoid altering output.

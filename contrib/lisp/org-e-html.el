@@ -2022,7 +2022,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
-   (let ((prev (org-export-get-previous-element footnote-reference info)))
+   (let ((prev (org-export-get-previous-element footnote-reference)))
      (when (eq (org-element-type prev) 'footnote-reference)
        org-e-html-footnote-separator))
    (cond
@@ -2261,7 +2261,7 @@ contextual information."
   "Transcode an ITEM element from Org to HTML.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((plain-list (org-export-get-parent item info))
+  (let* ((plain-list (org-export-get-parent item))
 	 (type (org-element-property :type plain-list))
 	 (counter (org-element-property :counter item))
 	 (checkbox (org-element-property :checkbox item))
@@ -2382,7 +2382,7 @@ used as a communication channel."
 		     ((file-name-absolute-p raw-path)
 		      (expand-file-name raw-path))
 		     (t raw-path)))
-	 (parent (org-export-get-parent-paragraph link info))
+	 (parent (org-export-get-parent-element link))
 	 (caption (org-e-html--caption/label-string
 		   (org-element-property :caption parent)
 		   (org-element-property :name parent)
@@ -2428,7 +2428,7 @@ standalone images, do the following.
 		     (paragraph element)
 		     (link (and (org-export-inline-image-p
 				 element org-e-html-inline-image-rules)
-				(org-export-get-parent element info)))
+				(org-export-get-parent element)))
 		     (t nil))))
     (when paragraph
       (assert (eq (org-element-type paragraph) 'paragraph))
@@ -2484,7 +2484,7 @@ INFO is a plist holding contextual information.  See
 	  (let ((attr (mapconcat
 		       'identity
 		       (org-element-property
-			:attr_html (org-export-get-parent-paragraph link info))
+			:attr_html (org-export-get-parent-element link))
 		       " ")))
 	    (if attr (concat " " attr) "")))
 	 protocol)
@@ -2615,7 +2615,7 @@ the plist used as a communication channel."
 	 (class (cdr (assoc style '((footnote . "footnote")
 				    (verse . nil)))))
 	 (extra (if class (format " class=\"%s\"" class) ""))
-	 (parent (org-export-get-parent paragraph info)))
+	 (parent (org-export-get-parent paragraph)))
     (cond
      ((and (equal (org-element-type parent) 'item)
 	   (= (org-element-property :begin paragraph)
@@ -2783,7 +2783,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Transcode a SECTION element from Org to HTML.
 CONTENTS holds the contents of the section.  INFO is a plist
 holding contextual information."
-  (let ((parent (org-export-get-parent-headline section info)))
+  (let ((parent (org-export-get-parent-headline section)))
     ;; Before first headline: no container, just return CONTENTS.
     (if (not parent) contents
       ;; Get div's class and id references.
@@ -2905,8 +2905,8 @@ contextual information."
   "Transcode a TABLE-CELL element from Org to HTML.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (let* ((table-row (org-export-get-parent table-cell info))
-	 (table (org-export-get-parent-table table-cell info))
+  (let* ((table-row (org-export-get-parent table-cell))
+	 (table (org-export-get-parent-table table-cell))
 	 (cell-attrs
 	  (if (not org-e-html-table-align-individual-fields) ""
 	    (format (if (and (boundp 'org-e-html-format-table-no-css)
@@ -2945,7 +2945,7 @@ communication channel."
 	      '("\n<tbody>" . "\n</tbody>"))
 	     ;; Case 2: Row is from first rowgroup.  Table has >=1 rowgroups.
 	     ((org-export-table-has-header-p
-	       (org-export-get-parent-table table-row info) info)
+	       (org-export-get-parent-table table-row) info)
 	      '("\n<thead>" . "\n</thead>"))
 	     ;; Case 2: Row is from first and only row group.
 	     (t '("\n<tbody>" . "\n</tbody>")))))

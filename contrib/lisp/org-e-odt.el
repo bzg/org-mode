@@ -534,7 +534,7 @@ Update styles.xml with styles that were collected as part of
 	       (t (error "what is this?"))))
 	 (caption-from
 	  (case (org-element-type element)
-	    (link (org-export-get-parent-paragraph element info))
+	    (link (org-export-get-parent-element element))
 	    (t element)))
 	 (captions (org-e-odt-format-label caption-from info 'definition))
 	 (caption (car captions))
@@ -858,7 +858,7 @@ ATTR is a string of other attributes of the a element."
 (defun org-e-odt-format-label (element info op)
   (let* ((caption-from
 	  (case (org-element-type element)
-	    (link (org-export-get-parent-paragraph element info))
+	    (link (org-export-get-parent-element element))
 	    (t element)))
 	 ;; get label and caption.
 	 (label (org-element-property :name caption-from))
@@ -2802,7 +2802,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
-   (let ((prev (org-export-get-previous-element footnote-reference info)))
+   (let ((prev (org-export-get-previous-element footnote-reference)))
      (when (eq (org-element-type prev) 'footnote-reference)
        org-e-odt-footnote-separator))
    (cond
@@ -2989,7 +2989,7 @@ contextual information."
   "Transcode an ITEM element from Org to ODT.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((plain-list (org-export-get-parent item info))
+  (let* ((plain-list (org-export-get-parent item))
 	 (type (org-element-property :type plain-list))
 	 (counter (org-element-property :counter item))
 	 (tag (let ((tag (org-element-property :tag item)))
@@ -3158,7 +3158,7 @@ used as a communication channel."
 		(org-e-odt-copy-image-file src)))
 	 ;; extract attributes from #+ATTR_ODT line.
 	 (attr-from (case (org-element-type element)
-		      (link (org-export-get-parent-paragraph element info))
+		      (link (org-export-get-parent-element element))
 		      (t element)))
 	 ;; convert attributes to a plist.
 	 (attr-plist (org-e-odt-element-attributes attr-from info))
@@ -3257,7 +3257,7 @@ standalone images, do the following.
 		     (paragraph element)
 		     (link (and (org-export-inline-image-p
 				 element org-e-odt-inline-image-rules)
-				(org-export-get-parent element info)))
+				(org-export-get-parent element)))
 		     (t nil))))
     (when paragraph
       (assert (eq (org-element-type paragraph) 'paragraph))
@@ -3403,7 +3403,7 @@ the plist used as a communication channel."
 	 (class (cdr (assoc style '((footnote . "footnote")
 				    (verse . nil)))))
 	 (extra (if class (format " class=\"%s\"" class) ""))
-	 (parent (org-export-get-parent paragraph info))
+	 (parent (org-export-get-parent paragraph))
 	 (parent-type (org-element-type parent))
 	 (style (case parent-type
 		  (quote-block 'quote)
@@ -3443,7 +3443,7 @@ contextual information."
 	     ;; If top-level list, re-start numbering.  Otherwise,
 	     ;; continue numbering.
 	     (format "text:continue-numbering=\"%s\""
-		     (let* ((parent (org-export-get-parent plain-list info)))
+		     (let* ((parent (org-export-get-parent plain-list)))
 		       (if (and parent (equal (org-element-type parent) 'item))
 			   "true" "false")))
 	     contents))))
@@ -3624,7 +3624,7 @@ contextual information."
 ;;;; Table Cell
 
 (defun org-e-odt-table-style-spec (element info)
-  (let* ((table (org-export-get-parent-table element info))
+  (let* ((table (org-export-get-parent-table element))
 	 (table-attributes (org-e-odt-element-attributes table info))
 	 (table-style (plist-get table-attributes :style)))
     (assoc table-style org-e-odt-table-styles)))
@@ -3650,7 +3650,7 @@ styles congruent with the ODF-1.2 specification."
 	 (r (car table-cell-address)) (c (cdr table-cell-address))
 	 (style-spec (org-e-odt-table-style-spec table-cell info))
 	 (table-dimensions (org-export-table-dimensions
-			    (org-export-get-parent-table table-cell info)
+			    (org-export-get-parent-table table-cell)
 			    info)))
     (when style-spec
       ;; LibreOffice - particularly the Writer - honors neither table
@@ -3697,7 +3697,7 @@ channel."
 	 (r (car table-cell-address))
 	 (c (cdr table-cell-address))
 	 (horiz-span (or (org-export-table-cell-width table-cell info) 0))
-	 (table-row (org-export-get-parent table-cell info))
+	 (table-row (org-export-get-parent table-cell))
 	 (custom-style-prefix (org-e-odt-get-table-cell-styles
 			       table-cell info))
 	 (paragraph-style
@@ -3708,9 +3708,9 @@ channel."
 	    (cond
 	     ((and (= 1 (org-export-table-row-group table-row info))
 		   (org-export-table-has-header-p
-		    (org-export-get-parent-table table-row info) info))
+		    (org-export-get-parent-table table-row) info))
 	      "OrgTableHeading")
-	     ((let* ((table (org-export-get-parent-table table-cell info))
+	     ((let* ((table (org-export-get-parent-table table-cell))
 		     (table-attrs (org-e-odt-element-attributes table info))
 		     (table-header-columns (plist-get table-attrs
 						      :header-columns)))
@@ -3763,7 +3763,7 @@ communication channel."
     (let* ((rowgroup-tags
 	    (if (and (= 1 (org-export-table-row-group table-row info))
 		     (org-export-table-has-header-p
-		      (org-export-get-parent-table table-row info) info))
+		      (org-export-get-parent-table table-row) info))
 		;; If the row belongs to the first rowgroup and the
 		;; table has more than one row groups, then this row
 		;; belongs to the header row group.
@@ -3854,7 +3854,7 @@ contextual information."
   (let* ((--get-previous-elements
 	  (function
 	   (lambda (blob info)
-	     (let ((parent (org-export-get-parent blob info)))
+	     (let ((parent (org-export-get-parent blob)))
 	       (cdr (member blob (reverse (org-element-contents parent))))))))
 	 (--element-preceded-by-table-p
 	  (function
@@ -3864,7 +3864,7 @@ contextual information."
 	 (--walk-list-genealogy-and-collect-tags
 	  (function
 	   (lambda (table info)
-	     (let* ((genealogy (org-export-get-genealogy table info))
+	     (let* ((genealogy (org-export-get-genealogy table))
 		    (list-genealogy
 		     (when (equal (org-element-type (car genealogy)) 'item)
 		       (loop for el in genealogy
@@ -4181,7 +4181,7 @@ using `org-open-file'."
   (let* ((numbered-parent-headline-at-<=-n
 	  (function
 	   (lambda (element n info)
-	     (loop for x in (org-export-get-genealogy element info)
+	     (loop for x in (org-export-get-genealogy element)
 		   thereis (and (eq (org-element-type x) 'headline)
 		   		(<= (org-export-get-relative-level x info) n)
 		   		(org-export-numbered-headline-p x info)

@@ -53,7 +53,7 @@
 (declare-function org-export-get-headline-number "org-export" (headline info))
 (declare-function org-export-get-ordinal "org-export"
 		  (element info &optional types predicate))
-(declare-function org-export-get-parent-headline "org-export" (blob info))
+(declare-function org-export-get-parent-headline "org-export" (blob))
 (declare-function org-export-get-relative-level "org-export" (headline info))
 (declare-function org-export-low-level-p "org-export" (headline info))
 (declare-function org-export-output-file-name "org-export"
@@ -564,7 +564,7 @@ INFO is a plist used as a communication channel."
     ;; Elements with a relative width: store maximum text width in
     ;; TOTAL-WIDTH.
     (otherwise
-     (let* ((genealogy (cons element (org-export-get-genealogy element info)))
+     (let* ((genealogy (cons element (org-export-get-genealogy element)))
 	    ;; Total width is determined by the presence, or not, of an
 	    ;; inline task among ELEMENT parents.
 	    (total-width
@@ -574,7 +574,7 @@ INFO is a plist used as a communication channel."
 	       ;; No inlinetask: Remove global margin from text width.
 	       (- org-e-ascii-text-width
 		  org-e-ascii-global-margin
-		  (let ((parent (org-export-get-parent-headline element info)))
+		  (let ((parent (org-export-get-parent-headline element)))
 		    ;; Inner margin doesn't apply to text before first
 		    ;; headline.
 		    (if (not parent) 0
@@ -830,7 +830,7 @@ is a plist used as a communication channel."
 	 ;; count links that might be in the title.
 	 (headline
 	  (if (eq (org-element-type element) 'headline) element
-	    (or (org-export-get-parent-headline element info) element))))
+	    (or (org-export-get-parent-headline element) element))))
     ;; Get all links in HEADLINE.
     (org-element-map
      headline 'link (lambda (link) (funcall unique-link-p link)) info)))
@@ -1306,7 +1306,7 @@ holding contextual information."
 	  (make-string width (if utf8p ?━ ?_)))
 	 ;; Flush the inlinetask to the right.
 	 (- org-e-ascii-text-width org-e-ascii-global-margin
-	    (if (not (org-export-get-parent-headline inlinetask info)) 0
+	    (if (not (org-export-get-parent-headline inlinetask)) 0
 	      org-e-ascii-inner-margin)
 	    (org-e-ascii--current-text-width inlinetask info)))))))
 
@@ -1329,7 +1329,7 @@ contextual information."
 	 ;; First parent of ITEM is always the plain-list.  Get
 	 ;; `:type' property from it.
 	 (org-list-bullet-string
-	  (case (org-element-property :type (org-export-get-parent item info))
+	  (case (org-element-property :type (org-export-get-parent item))
 	    (descriptive
 	     (concat (org-export-data (org-element-property :tag item) info)
 		     ": "))
@@ -1473,7 +1473,7 @@ information."
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (org-e-ascii--fill-string
-   (let ((parent (org-export-get-parent paragraph info)))
+   (let ((parent (org-export-get-parent paragraph)))
      ;; If PARAGRAPH is the first one in a list element, be sure to
      ;; add the check-box in front of it, before any filling.  Later,
      ;; it would interfere with line width.
@@ -1567,7 +1567,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      value
      (+ org-e-ascii-quote-margin
 	;; Don't apply inner margin if parent headline is low level.
-	(let ((headline (org-export-get-parent-headline quote-section info)))
+	(let ((headline (org-export-get-parent-headline quote-section)))
 	  (if (org-export-low-level-p headline info) 0
 	    org-e-ascii-inner-margin))))))
 
@@ -1597,7 +1597,7 @@ contextual information."
 	;; Separate list of links and section contents.
 	(when (org-string-nw-p links) (concat "\n\n" links)))))
    ;; Do not apply inner margin if parent headline is low level.
-   (let ((headline (org-export-get-parent-headline section info)))
+   (let ((headline (org-export-get-parent-headline section)))
      (if (or (not headline) (org-export-low-level-p headline info)) 0
        org-e-ascii-inner-margin))))
 
@@ -1698,7 +1698,7 @@ are ignored."
   (or (and (not org-e-ascii-table-widen-columns)
 	   (org-export-table-cell-width table-cell info))
       (let* ((max-width 0)
-	     (table (org-export-get-parent-table table-cell info))
+	     (table (org-export-get-parent-table table-cell))
 	     (specialp (org-export-table-has-special-column-p table))
 	     (col (cdr (org-export-table-cell-address table-cell info))))
 	(org-element-map

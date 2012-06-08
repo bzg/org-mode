@@ -56,7 +56,7 @@
 (declare-function org-export-get-footnote-definition "org-export"
 		  (footnote-reference info))
 (declare-function org-export-get-footnote-number "org-export" (footnote info))
-(declare-function org-export-get-previous-element "org-export" (blob info))
+(declare-function org-export-get-previous-element "org-export" (blob))
 (declare-function org-export-get-relative-level "org-export" (headline info))
 (declare-function org-export-unravel-code "org-export" (element))
 (declare-function org-export-inline-image-p "org-export"
@@ -1150,7 +1150,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
-   (let ((prev (org-export-get-previous-element footnote-reference info)))
+   (let ((prev (org-export-get-previous-element footnote-reference)))
      (when (eq (org-element-type prev) 'footnote-reference)
        org-e-latex-footnote-separator))
    (cond
@@ -1160,7 +1160,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	     (org-export-get-footnote-number footnote-reference info)))
     ;; Use also \footnotemark if reference is within another footnote
     ;; reference or footnote definition.
-    ((loop for parent in (org-export-get-genealogy footnote-reference info)
+    ((loop for parent in (org-export-get-genealogy footnote-reference)
 	   thereis (memq (org-element-type parent)
 			 '(footnote-reference footnote-definition)))
      (let ((num (org-export-get-footnote-number footnote-reference info)))
@@ -1408,7 +1408,7 @@ contextual information."
   (let* ((counter
 	  (let ((count (org-element-property :counter item))
 		(level
-		 (loop for parent in (org-export-get-genealogy item info)
+		 (loop for parent in (org-export-get-genealogy item)
 		       count (eq (org-element-type parent) 'plain-list)
 		       until (eq (org-element-type parent) 'headline))))
 	    (and count
@@ -1501,7 +1501,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   "Return LaTeX code for an inline image.
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
-  (let* ((parent (org-export-get-parent-paragraph link info))
+  (let* ((parent (org-export-get-parent-element link))
 	 (path (let ((raw-path (org-element-property :path link)))
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (expand-file-name raw-path))))
@@ -2179,7 +2179,7 @@ a communication channel."
 		      (match-string 1 contents)
 		      (match-string 2 contents))
 	    contents)
-	  (when (org-export-get-next-element table-cell info) " & ")))
+	  (when (org-export-get-next-element table-cell) " & ")))
 
 
 ;;;; Table Row
@@ -2193,7 +2193,7 @@ a communication channel."
   (when (eq (org-element-property :type table-row) 'standard)
     (let* ((attr (mapconcat 'identity
 			    (org-element-property
-			     :attr_latex (org-export-get-parent table-row info))
+			     :attr_latex (org-export-get-parent table-row))
 			    " "))
 	   (longtablep (and attr (string-match "\\<longtable\\>" attr)))
 	   (booktabsp
@@ -2221,7 +2221,7 @@ a communication channel."
 		 (if booktabsp "\\midrule" "\\hline")
 		 ;; Number of columns.
 		 (cdr (org-export-table-dimensions
-		       (org-export-get-parent-table table-row info) info))))
+		       (org-export-get-parent-table table-row) info))))
 	;; When BOOKTABS are activated enforce bottom rule even when
 	;; no hline was specifically marked.
 	((and booktabsp (memq 'bottom borders)) "\\bottomrule")
