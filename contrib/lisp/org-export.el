@@ -3126,7 +3126,7 @@ objects of the same type."
 	       struct
 	       (org-list-prevs-alist struct)
 	       (org-list-parents-alist struct))))
-      ((footnote definition footnote-reference)
+      ((footnote-definition footnote-reference)
        (org-export-get-footnote-number element info))
       (otherwise
        (let ((counter 0))
