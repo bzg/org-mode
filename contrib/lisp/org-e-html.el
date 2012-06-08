@@ -2479,6 +2479,14 @@ INFO is a plist holding contextual information.  See
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (concat "file://" (expand-file-name raw-path))))
 		(t raw-path)))
+	 ;; Extract attributes from parent's paragraph.
+	 (attributes
+	  (let ((attr (mapconcat
+		       'identity
+		       (org-element-property
+			:attr_html (org-export-get-parent-paragraph link info))
+		       " ")))
+	    (if attr (concat " " attr) "")))
 	 protocol)
     (cond
      ;; Image file.
@@ -2491,8 +2499,9 @@ INFO is a plist holding contextual information.  See
      ((string= type "radio")
       (let ((destination (org-export-resolve-radio-link link info)))
 	(when destination
-	  (format "<a href=\"#%s\">%s</a>"
+	  (format "<a href=\"#%s\"%s>%s</a>"
 		  (org-export-solidify-link-text path)
+		  attributes
 		  (org-export-data (org-element-contents destination) info)))))
      ;; Links pointing to an headline: Find destination and build
      ;; appropriate referencing command.
@@ -2541,8 +2550,8 @@ INFO is a plist holding contextual information.  See
 		   ;; un-numbered.  Use the headline title.
 		   (t (org-export-data
 		       (org-element-property :title destination) info)))))
-	     (format "<a href=\"#%s\">%s</a>"
-		     (org-solidify-link-text href) desc)))
+	     (format "<a href=\"#%s\"%s>%s</a>"
+		     (org-solidify-link-text href) attributes desc)))
           ;; Fuzzy link points to a target.  Do as above.
 	  (t
 	   (let ((path (org-export-solidify-link-text path)) number)
@@ -2556,25 +2565,28 @@ INFO is a plist holding contextual information.  See
 	       (setq desc (when number
 			    (if (atom number) (number-to-string number)
 			      (mapconcat 'number-to-string number ".")))))
-	     (format "<a href=\"#%s\">%s</a>" path (or desc "FIXME")))))))
+	     (format "<a href=\"#%s\"%s>%s</a>"
+		     path attributes (or desc "FIXME")))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
       (let ((fragment (concat "coderef-" path)))
-	(format "<a href=\"#%s\" %s>%s</a>" fragment
+	(format "<a href=\"#%s\" %s%s>%s</a>"
+		fragment
 		(format (concat "class=\"coderef\""
 				" onmouseover=\"CodeHighlightOn(this, '%s');\""
 				" onmouseout=\"CodeHighlightOff(this, '%s');\"")
 			fragment fragment)
+		attributes
 		(format (org-export-get-coderef-format path desc)
 			(org-export-resolve-coderef path info)))))
      ;; Link type is handled by a special function.
      ((functionp (setq protocol (nth 2 (assoc type org-link-protocols))))
       (funcall protocol (org-link-unescape path) desc 'html))
      ;; External link with a description part.
-     ((and path desc) (format "<a href=\"%s\">%s</a>" path desc))
+     ((and path desc) (format "<a href=\"%s\"%s>%s</a>" path attributes desc))
      ;; External link without a description part.
-     (path (format "<a href=\"%s\">%s</a>" path path))
+     (path (format "<a href=\"%s\"%s>%s</a>" path attributes path))
      ;; No path, only description.  Try to do something useful.
      (t (format "<i>%s</i>" desc)))))
 
