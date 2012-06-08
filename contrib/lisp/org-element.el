@@ -64,13 +64,13 @@
 ;;
 ;; Notwithstanding affiliated keywords, each greater element, element
 ;; and object has a fixed set of properties attached to it.  Among
-;; them, three are shared by all types: `:begin' and `:end', which
+;; them, four are shared by all types: `:begin' and `:end', which
 ;; refer to the beginning and ending buffer positions of the
-;; considered element or object, and `:post-blank', which holds the
-;; number of blank lines, or white spaces, at its end.  Greater
-;; elements and elements containing objects will also have
-;; `:contents-begin' and `:contents-end' properties to delimit
-;; contents.
+;; considered element or object, `:post-blank', which holds the number
+;; of blank lines, or white spaces, at its end and `:parent' which
+;; refers to the element or object containing it.  Greater elements
+;; and elements containing objects will also have `:contents-begin'
+;; and `:contents-end' properties to delimit contents.
 ;;
 ;; Lisp-wise, an element or an object can be represented as a list.
 ;; It follows the pattern (TYPE PROPERTIES CONTENTS), where:
@@ -3291,12 +3291,11 @@ Assume buffer is in Org mode."
   (save-excursion
     (goto-char (point-min))
     (org-skip-whitespace)
-    (nconc (list 'org-data nil)
-	   (org-element-parse-elements
-	    (point-at-bol) (point-max)
-	    ;; Start in `section' mode so text before the first
-	    ;; headline belongs to a section.
-	    'section nil granularity visible-only nil))))
+    (org-element-parse-elements
+     (point-at-bol) (point-max)
+     ;; Start in `section' mode so text before the first
+     ;; headline belongs to a section.
+     'section nil granularity visible-only (list 'org-data nil))))
 
 (defun org-element-parse-secondary-string (string restriction)
   "Recursively parse objects in STRING and return structure.
@@ -3438,52 +3437,66 @@ Elements are accumulated into ACC."
 	(org-with-limited-levels (outline-next-heading)))
       ;; Main loop start.
       (while (not (eobp))
-	(push
-	 ;; Find current element's type and parse it accordingly to
-	 ;; its category.
-	 (let* ((element (org-element-current-element
-			  granularity special structure))
-		(type (org-element-type element))
-		(cbeg (org-element-property :contents-begin element)))
-	   (goto-char (org-element-property :end element))
-	   (cond
-	    ;; Case 1.  Simply accumulate element if VISIBLE-ONLY is
-	    ;; true and element is hidden or if it has no contents
-	    ;; anyway.
-	    ((or (and visible-only (org-element-property :hiddenp element))
-		 (not cbeg)) element)
-	    ;; Case 2.  Greater element: parse it between
-	    ;; `contents-begin' and `contents-end'.  Make sure
-	    ;; GRANULARITY allows the recursion, or ELEMENT is an
-	    ;; headline, in which case going inside is mandatory, in
-	    ;; order to get sub-level headings.
-	    ((and (memq type org-element-greater-elements)
-		  (or (memq granularity '(element object nil))
-		      (and (eq granularity 'greater-element)
-			   (eq type 'section))
-		      (eq type 'headline)))
-	     (org-element-parse-elements
-	      cbeg (org-element-property :contents-end element)
-	      ;; Possibly switch to a special mode.
-	      (case type
-		(headline
-		 (if (org-element-property :quotedp element) 'quote-section
-		   'section))
-		(plain-list 'item)
-		(table 'table-row))
-	      (org-element-property :structure element)
-	      granularity visible-only (nreverse element)))
-	    ;; Case 3.  ELEMENT has contents.  Parse objects inside,
-	    ;; if GRANULARITY allows it.
-	    ((and cbeg (memq granularity '(object nil)))
-	     (org-element-parse-objects
-	      cbeg (org-element-property :contents-end element)
-	      (nreverse element) (org-element-restriction type)))
-	    ;; Case 4.  Else, just accumulate ELEMENT.
-	    (t element)))
-	 acc)))
+	;; Find current element's type and parse it accordingly to
+	;; its category.
+	(let* ((element (org-element-current-element
+			 granularity special structure))
+	       (type (org-element-type element))
+	       (cbeg (org-element-property :contents-begin element)))
+	  ;; Set ACC as parent of current element.  It will be
+	  ;; completed by side-effect.  If the element contains any
+	  ;; secondary string, also set `:parent' property of every
+	  ;; object within it as current element.
+	  (plist-put (nth 1 element) :parent acc)
+	  (let ((sec-loc (assq type org-element-secondary-value-alist)))
+	    (when sec-loc
+	      (let ((sec-value (org-element-property (cdr sec-loc) element)))
+		(unless (stringp sec-value)
+		  (mapc (lambda (obj)
+			  (unless (stringp obj)
+			    (plist-put (nth 1 obj) :parent element)))
+			sec-value)))))
+	  (goto-char (org-element-property :end element))
+	  (nconc
+	   acc
+	   (list
+	    (cond
+	     ;; Case 1.  Simply accumulate element if VISIBLE-ONLY is
+	     ;; true and element is hidden or if it has no contents
+	     ;; anyway.
+	     ((or (and visible-only (org-element-property :hiddenp element))
+		  (not cbeg)) element)
+	     ;; Case 2.  Greater element: parse it between
+	     ;; `contents-begin' and `contents-end'.  Make sure
+	     ;; GRANULARITY allows the recursion, or ELEMENT is an
+	     ;; headline, in which case going inside is mandatory, in
+	     ;; order to get sub-level headings.
+	     ((and (memq type org-element-greater-elements)
+		   (or (memq granularity '(element object nil))
+		       (and (eq granularity 'greater-element)
+			    (eq type 'section))
+		       (eq type 'headline)))
+	      (org-element-parse-elements
+	       cbeg (org-element-property :contents-end element)
+	       ;; Possibly switch to a special mode.
+	       (case type
+		 (headline
+		  (if (org-element-property :quotedp element) 'quote-section
+		    'section))
+		 (plain-list 'item)
+		 (table 'table-row))
+	       (org-element-property :structure element)
+	       granularity visible-only element))
+	     ;; Case 3.  ELEMENT has contents.  Parse objects inside,
+	     ;; if GRANULARITY allows it.
+	     ((and cbeg (memq granularity '(object nil)))
+	      (org-element-parse-objects
+	       cbeg (org-element-property :contents-end element)
+	       element (org-element-restriction type)))
+	     ;; Case 4.  Else, just accumulate ELEMENT.
+	     (t element)))))))
     ;; Return result.
-    (nreverse acc)))
+    acc))
 
 (defun org-element-parse-objects (beg end acc restriction)
   "Parse objects between BEG and END and return recursive structure.
@@ -3509,17 +3522,23 @@ current object."
       (while (setq candidates (org-element-get-next-object-candidates
 			       end restriction candidates))
 	(setq next-object (funcall get-next-object candidates))
+	;; Set ACC as parent of current element.  It will be completed
+	;; by side-effect.
+	(plist-put (nth 1 next-object) :parent acc)
 	;; 1. Text before any object.  Untabify it.
 	(let ((obj-beg (org-element-property :begin next-object)))
 	  (unless (= (point) obj-beg)
-	    (push (replace-regexp-in-string
-		   "\t" (make-string tab-width ? )
-		   (buffer-substring-no-properties (point) obj-beg))
-		  acc)))
+	    (let ((beg-text
+		   (list
+		    (replace-regexp-in-string
+		     "\t" (make-string tab-width ? )
+		     (buffer-substring-no-properties (point) obj-beg)))))
+	      (if acc (nconc acc beg-text) (setq acc beg-text)))))
 	;; 2. Object...
-	(let ((obj-end (org-element-property :end next-object))
-	      (cont-beg (org-element-property :contents-begin next-object)))
-	  (push (if (and (memq (car next-object) org-element-recursive-objects)
+	(let* ((obj-end (org-element-property :end next-object))
+	       (cont-beg (org-element-property :contents-begin next-object))
+	       (complete-next-object
+		(if (and (memq (car next-object) org-element-recursive-objects)
 			 cont-beg)
 		    ;; ... recursive.  The CONT-BEG check is for
 		    ;; links, as some of them might not be recursive
@@ -3529,22 +3548,38 @@ current object."
 		       cont-beg
 		       (org-element-property :contents-end next-object))
 		      (org-element-parse-objects
-		       (point-min) (point-max)
-		       (nreverse next-object)
+		       (point-min) (point-max) next-object
 		       ;; Restrict allowed objects.
 		       (org-element-restriction next-object)))
-		  ;; ... not recursive.  Accumulate the object.
-		  next-object)
-		acc)
+		  next-object)))
+	  (if acc (nconc acc (list complete-next-object))
+	    (setq acc (list complete-next-object)))
+	  ;; If the object contains any secondary string, also set
+	  ;; `:parent' property of every object within it as current
+	  ;; object.
+	  (let ((sec-loc (assq (org-element-type next-object)
+			       org-element-secondary-value-alist)))
+	    (when sec-loc
+	      (let ((sec-value
+		     (org-element-property (cdr sec-loc) next-object)))
+		(unless (stringp sec-value)
+		  (mapc (lambda (obj)
+			  (unless (stringp obj)
+			    (plist-put (nth 1 obj)
+				       :parent
+				       complete-next-object)))
+			sec-value)))))
 	  (goto-char obj-end)))
       ;; 3. Text after last object.  Untabify it.
       (unless (= (point) end)
-	(push (replace-regexp-in-string
-	       "\t" (make-string tab-width ? )
-	       (buffer-substring-no-properties (point) end))
-	      acc))
+	(let ((end-text
+	       (list
+		(replace-regexp-in-string
+		 "\t" (make-string tab-width ? )
+		 (buffer-substring-no-properties (point) end)))))
+	  (if acc (nconc acc end-text) (setq acc end-text))))
       ;; Result.
-      (nreverse acc))))
+      acc)))
 
 (defun org-element-get-next-object-candidates (limit restriction objects)
   "Return an alist of candidates for the next object.
