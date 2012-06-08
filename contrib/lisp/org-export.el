@@ -1116,8 +1116,7 @@ Return options as a plist."
 	    (plist-put
 	     plist :title
 	     (org-element-parse-secondary-string
-	      prop
-	      (cdr (assq 'keyword org-element-string-restrictions))))))
+	      prop (org-element-restriction 'keyword)))))
     (when (setq prop (org-entry-get (point) "EXPORT_TEXT"))
       (setq plist (plist-put plist :text prop)))
     (when (setq prop (org-entry-get (point) "EXPORT_AUTHOR"))
@@ -1489,26 +1488,28 @@ associated numbering \(in the shape of a list of numbers\)."
   "Return list of elements and objects to ignore during export.
 DATA is the parse tree to traverse.  OPTIONS is the plist holding
 export options."
-  (let (ignore
-	(walk-data
-	 (function
-	  (lambda (data options selected)
-	    ;; Collect ignored elements or objects into IGNORE-LIST.
-	    (mapc
-	     (lambda (el)
-	       (if (org-export--skip-p el options selected) (push el ignore)
-		 (let ((type (org-element-type el)))
-		   (if (and (eq (plist-get info :with-archived-trees) 'headline)
-			    (eq (org-element-type el) 'headline)
-			    (org-element-property :archivedp el))
-		       ;; If headline is archived but tree below has
-		       ;; to be skipped, add it to ignore list.
-		       (mapc (lambda (e) (push e ignore))
-			     (org-element-contents el))
-		     ;; Move into recursive objects/elements.
-		     (when (org-element-contents el)
-		       (funcall walk-data el options selected))))))
-	     (org-element-contents data))))))
+  (let* (ignore
+	 walk-data			; for byte-compiler.
+	 (walk-data
+	  (function
+	   (lambda (data options selected)
+	     ;; Collect ignored elements or objects into IGNORE-LIST.
+	     (mapc
+	      (lambda (el)
+		(if (org-export--skip-p el options selected) (push el ignore)
+		  (let ((type (org-element-type el)))
+		    (if (and (eq (plist-get options :with-archived-trees)
+				 'headline)
+			     (eq (org-element-type el) 'headline)
+			     (org-element-property :archivedp el))
+			;; If headline is archived but tree below has
+			;; to be skipped, add it to ignore list.
+			(mapc (lambda (e) (push e ignore))
+			      (org-element-contents el))
+		      ;; Move into recursive objects/elements.
+		      (when (org-element-contents el)
+			(funcall walk-data el options selected))))))
+	      (org-element-contents data))))))
     ;; Main call.  First find trees containing a select tag, if any.
     (funcall walk-data data options (org-export--selected-trees data options))
     ;; Return value.
@@ -1518,29 +1519,30 @@ export options."
   "Return list of headlines containing a select tag in their tree.
 DATA is parsed data as returned by `org-element-parse-buffer'.
 INFO is a plist holding export options."
-  (let (selected-trees
-	(walk-data
-	 (function
-	  (lambda (data genealogy)
-	    (case (org-element-type data)
-	      (org-data (mapc (lambda (el) (funcall walk-data el genealogy))
-			      (org-element-contents data)))
-	      (headline
-	       (let ((tags (org-element-property :tags data)))
-		 (if (loop for tag in (plist-get info :select-tags)
-			   thereis (member tag tags))
-		     ;; When a select tag is found, mark full
-		     ;; genealogy and every headline within the tree
-		     ;; as acceptable.
-		     (setq selected-trees
-			   (append
-			    genealogy
-			    (org-element-map data 'headline 'identity)
-			    selected-trees))
-		   ;; Else, continue searching in tree, recursively.
-		   (mapc
-		    (lambda (el) (funcall walk-data el (cons data genealogy)))
-		    (org-element-contents data))))))))))
+  (let* (selected-trees
+	 walk-data			; for byte-compiler.
+	 (walk-data
+	  (function
+	   (lambda (data genealogy)
+	     (case (org-element-type data)
+	       (org-data (mapc (lambda (el) (funcall walk-data el genealogy))
+			       (org-element-contents data)))
+	       (headline
+		(let ((tags (org-element-property :tags data)))
+		  (if (loop for tag in (plist-get info :select-tags)
+			    thereis (member tag tags))
+		      ;; When a select tag is found, mark full
+		      ;; genealogy and every headline within the tree
+		      ;; as acceptable.
+		      (setq selected-trees
+			    (append
+			     genealogy
+			     (org-element-map data 'headline 'identity)
+			     selected-trees))
+		    ;; Else, continue searching in tree, recursively.
+		    (mapc
+		     (lambda (el) (funcall walk-data el (cons data genealogy)))
+		     (org-element-contents data))))))))))
     (funcall walk-data data nil) selected-trees))
 
 (defun org-export--skip-p (blob options selected)
@@ -2367,6 +2369,9 @@ of subtree at point.
 When optional argument PUB-DIR is set, use it as the publishing
 directory.
 
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
 Return file name as a string, or nil if it couldn't be
 determined."
   (let ((base-name
@@ -2376,8 +2381,7 @@ determined."
 	  (or (and subtreep
 		   (org-entry-get
 		    (save-excursion
-		      (ignore-errors
-			(org-back-to-heading (not visible-only)) (point)))
+		      (ignore-errors (org-back-to-heading) (point)))
 		    "EXPORT_FILE_NAME" t))
 	      ;; File name may be extracted from buffer's associated
 	      ;; file, if any.
@@ -2639,27 +2643,28 @@ INFO is the plist used as a communication channel.
 Definitions are sorted by order of references.  They either
 appear as Org data or as a secondary string for inlined
 footnotes.  Unreferenced definitions are ignored."
-  (let (num-alist
-	(collect-fn
-	 (function
-	  (lambda (data)
-	    ;; Collect footnote number, label and definition in DATA.
-	    (org-element-map
-	     data 'footnote-reference
-	     (lambda (fn)
-	       (when (org-export-footnote-first-reference-p fn info)
-		 (let ((def (org-export-get-footnote-definition fn info)))
-		   (push
-		    (list (org-export-get-footnote-number fn info)
-			  (org-element-property :label fn)
-			  def)
-		    num-alist)
-		   ;; Also search in definition for nested footnotes.
-		  (when (eq (org-element-property :type fn) 'standard)
-		    (funcall collect-fn def)))))
-	     ;; Don't enter footnote definitions since it will happen
-	     ;; when their first reference is found.
-	     info nil 'footnote-definition)))))
+  (let* (num-alist
+	 collect-fn			; for byte-compiler.
+	 (collect-fn
+	  (function
+	   (lambda (data)
+	     ;; Collect footnote number, label and definition in DATA.
+	     (org-element-map
+	      data 'footnote-reference
+	      (lambda (fn)
+		(when (org-export-footnote-first-reference-p fn info)
+		  (let ((def (org-export-get-footnote-definition fn info)))
+		    (push
+		     (list (org-export-get-footnote-number fn info)
+			   (org-element-property :label fn)
+			   def)
+		     num-alist)
+		    ;; Also search in definition for nested footnotes.
+		    (when (eq (org-element-property :type fn) 'standard)
+		      (funcall collect-fn def)))))
+	      ;; Don't enter footnote definitions since it will happen
+	      ;; when their first reference is found.
+	      info nil 'footnote-definition)))))
     (funcall collect-fn (plist-get info :parse-tree))
     (reverse num-alist)))
 
@@ -2673,25 +2678,26 @@ INFO is the plist used as a communication channel."
     (if (not label) t
       ;; Otherwise, return the first footnote with the same LABEL and
       ;; test if it is equal to FOOTNOTE-REFERENCE.
-      (let ((search-refs
-	     (function
-	      (lambda (data)
-		(org-element-map
-		 data 'footnote-reference
-		 (lambda (fn)
-		   (cond
-		    ((string= (org-element-property :label fn) label)
-		     (throw 'exit fn))
-		    ;; If FN isn't inlined, be sure to traverse its
-		    ;; definition before resuming search.  See
-		    ;; comments in `org-export-get-footnote-number'
-		    ;; for more information.
-		    ((eq (org-element-property :type fn) 'standard)
-		     (funcall search-refs
-			      (org-export-get-footnote-definition fn info)))))
-		 ;; Don't enter footnote definitions since it will
-		 ;; happen when their first reference is found.
-		 info 'first-match 'footnote-definition)))))
+      (let* (search-refs		; for byte-compiler.
+	     (search-refs
+	      (function
+	       (lambda (data)
+		 (org-element-map
+		  data 'footnote-reference
+		  (lambda (fn)
+		    (cond
+		     ((string= (org-element-property :label fn) label)
+		      (throw 'exit fn))
+		     ;; If FN isn't inlined, be sure to traverse its
+		     ;; definition before resuming search.  See
+		     ;; comments in `org-export-get-footnote-number'
+		     ;; for more information.
+		     ((eq (org-element-property :type fn) 'standard)
+		      (funcall search-refs
+			       (org-export-get-footnote-definition fn info)))))
+		  ;; Don't enter footnote definitions since it will
+		  ;; happen when their first reference is found.
+		  info 'first-match 'footnote-definition)))))
 	(equal (catch 'exit (funcall search-refs (plist-get info :parse-tree)))
 	       footnote-reference)))))
 
@@ -2707,45 +2713,46 @@ INFO is the plist used as a communication channel."
 
 FOOTNOTE is either a footnote reference or a footnote definition.
 INFO is the plist used as a communication channel."
-  (let ((label (org-element-property :label footnote))
-	seen-refs
-	(search-ref
-	 (function
-	  (lambda (data)
-	    ;; Search footnote references through DATA, filling
-	    ;; SEEN-REFS along the way.
-	    (org-element-map
-	     data 'footnote-reference
-	     (lambda (fn)
-	       (let ((fn-lbl (org-element-property :label fn)))
-		 (cond
-		  ;; Anonymous footnote match: return number.
-		  ((and (not fn-lbl) (equal fn footnote))
-		   (throw 'exit (1+ (length seen-refs))))
-		  ;; Labels match: return number.
-		  ((and label (string= label fn-lbl))
-		   (throw 'exit (1+ (length seen-refs))))
-		  ;; Anonymous footnote: it's always a new one.  Also,
-		  ;; be sure to return nil from the `cond' so
-		  ;; `first-match' doesn't get us out of the loop.
-		  ((not fn-lbl) (push 'inline seen-refs) nil)
-		  ;; Label not seen so far: add it so SEEN-REFS.
-		  ;;
-		  ;; Also search for subsequent references in footnote
-		  ;; definition so numbering following reading logic.
-		  ;; Note that we don't have to care about inline
-		  ;; definitions, since `org-element-map' already
-		  ;; traverse them at the right time.
-		  ;;
-		  ;; Once again, return nil to stay in the loop.
-		  ((not (member fn-lbl seen-refs))
-		   (push fn-lbl seen-refs)
-		   (funcall search-ref
-			    (org-export-get-footnote-definition fn info))
-		   nil))))
-	     ;; Don't enter footnote definitions since it will happen
-	     ;; when their first reference is found.
-	     info 'first-match 'footnote-definition)))))
+  (let* ((label (org-element-property :label footnote))
+	 seen-refs
+	 search-ref			; for byte-compiler.
+	 (search-ref
+	  (function
+	   (lambda (data)
+	     ;; Search footnote references through DATA, filling
+	     ;; SEEN-REFS along the way.
+	     (org-element-map
+	      data 'footnote-reference
+	      (lambda (fn)
+		(let ((fn-lbl (org-element-property :label fn)))
+		  (cond
+		   ;; Anonymous footnote match: return number.
+		   ((and (not fn-lbl) (equal fn footnote))
+		    (throw 'exit (1+ (length seen-refs))))
+		   ;; Labels match: return number.
+		   ((and label (string= label fn-lbl))
+		    (throw 'exit (1+ (length seen-refs))))
+		   ;; Anonymous footnote: it's always a new one.  Also,
+		   ;; be sure to return nil from the `cond' so
+		   ;; `first-match' doesn't get us out of the loop.
+		   ((not fn-lbl) (push 'inline seen-refs) nil)
+		   ;; Label not seen so far: add it so SEEN-REFS.
+		   ;;
+		   ;; Also search for subsequent references in footnote
+		   ;; definition so numbering following reading logic.
+		   ;; Note that we don't have to care about inline
+		   ;; definitions, since `org-element-map' already
+		   ;; traverse them at the right time.
+		   ;;
+		   ;; Once again, return nil to stay in the loop.
+		   ((not (member fn-lbl seen-refs))
+		    (push fn-lbl seen-refs)
+		    (funcall search-ref
+			     (org-export-get-footnote-definition fn info))
+		    nil))))
+	      ;; Don't enter footnote definitions since it will happen
+	      ;; when their first reference is found.
+	      info 'first-match 'footnote-definition)))))
     (catch 'exit (funcall search-ref (plist-get info :parse-tree)))))
 
 
@@ -2893,12 +2900,16 @@ This only applies to links without a description."
   (and (not (org-element-contents link))
        (let ((case-fold-search t)
 	     (rules (or rules org-export-default-inline-image-rule)))
-	 (some
-	  (lambda (rule)
-	    (and (string= (org-element-property :type link) (car rule))
-		 (string-match (cdr rule)
-			       (org-element-property :path link))))
-	  rules))))
+	 (catch 'exit
+	   (mapc
+	    (lambda (rule)
+	      (and (string= (org-element-property :type link) (car rule))
+		   (string-match (cdr rule)
+				 (org-element-property :path link))
+		   (throw 'exit t)))
+	    rules)
+	   ;; Return nil if no rule matched.
+	   nil))))
 
 (defun org-export-resolve-coderef (ref info)
   "Resolve a code reference REF.
@@ -3856,6 +3867,7 @@ BLOB is the element or object being considered.  INFO is a plist
 used as a communication channel."
   (let* ((type (org-element-type blob))
 	 (end (org-element-property :end blob))
+	 walk-data			; for byte-compiler.
          (walk-data
           (lambda (data genealogy)
 	    ;; Walk DATA, looking for BLOB.  GENEALOGY is the list of
