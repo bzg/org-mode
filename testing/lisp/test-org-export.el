@@ -369,6 +369,22 @@ body\n")))
 		    (delete-region (point) (progn (forward-line) (point)))))))))
 	(should (equal (org-export-as 'test) "Body 1\nBody 2\n"))))))
 
+(ert-deftest test-org-export/set-element ()
+  "Test `org-export-set-element' property."
+  (org-test-with-parsed-data "* Headline\n*a*"
+    (org-export-set-element
+     (org-element-map tree 'bold 'identity nil t)
+     '(italic nil "b"))
+    ;; Check if object is correctly replaced.
+    (should (org-element-map tree 'italic 'identity))
+    (should-not (org-element-map tree 'bold 'identity))
+    ;; Check if new object's parent is correctly set.
+    (should
+     (equal
+      (org-element-property :parent
+			    (org-element-map tree 'italic 'identity nil t))
+      (org-element-map tree 'paragraph 'identity nil t)))))
+
 
 
 ;;; Footnotes
@@ -758,7 +774,7 @@ Another text. (ref:text)
 	("6")
 	:macro-seven
 	("1 + " (macro (:key "six" :value "{{{six}}}" :args nil :begin 5 :end 14
-			     :post-blank 0))))))))
+			     :post-blank 0 :parent nil))))))))
 
 (ert-deftest test-org-export/expand-macro ()
   "Test `org-export-expand-macro' specifications."
