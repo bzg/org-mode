@@ -1974,9 +1974,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		      (string-to-number (match-string 1 switches))
 		    (org-count-lines code))))
 	(format
-	 "\n<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s\n</textarea>\n</p>"
+	 "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
 	 cols rows code)))
-     (t (format "\n<pre class=\"example\">\n%s\n</pre>" code)))))
+     (t (format "<pre class=\"example\">\n%s</pre>" code)))))
 
 
 ;;;; Export Snippet
@@ -2004,7 +2004,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-e-html--wrap-label
    fixed-width
-   (format "\n<pre class=\"example\">\n%s</pre>"
+   (format "<pre class=\"example\">\n%s</pre>"
 	   (org-e-html-do-format-code
 	    (org-remove-indentation
 	     (org-element-property :value fixed-width))))))
@@ -2163,7 +2163,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((attr (mapconcat #'identity
 			 (org-element-property :attr_html horizontal-rule)
 			 " ")))
-    (org-e-html--wrap-label horizontal-rule "<hr/>\n")))
+    (org-e-html--wrap-label horizontal-rule "<hr/>")))
 
 
 ;;;; Inline Babel Call
@@ -2209,7 +2209,7 @@ holding contextual information."
    (t (org-e-html--wrap-label
        inlinetask
        (format
-	"\n<div class=\"inlinetask\">\n<b>%s</b><br/>\n%s\n</div>"
+	"<div class=\"inlinetask\">\n<b>%s</b><br/>\n%s</div>"
 	(org-e-html-format-headline--wrap inlinetask info)
 	contents)))))
 
@@ -2625,7 +2625,7 @@ the plist used as a communication channel."
      ((org-e-html-standalone-image-p paragraph info)
       ;; standalone image
       contents)
-     (t (format "<p%s>\n%s\n</p>" extra contents)))))
+     (t (format "<p%s>\n%s</p>" extra contents)))))
 
 
 ;;;; Plain List
@@ -2847,10 +2847,10 @@ contextual information."
 	 (code (org-e-html-format-code src-block info)))
     (cond
      (lang (format
-	    "\n<div class=\"org-src-container\">\n%s%s\n</div>"
+	    "<div class=\"org-src-container\">\n%s%s\n</div>"
 	    (if (not caption) ""
 	      (format "<label class=\"org-src-name\">%s</label>" caption-str))
-	    (format "\n<pre class=\"src src-%s\">%s\n</pre>" lang code)))
+	    (format "\n<pre class=\"src src-%s\">%s</pre>" lang code)))
      (textarea-p
       (let ((cols (if (not (string-match "-w[ \t]+\\([0-9]+\\)" switches))
 		      80 (string-to-number (match-string 1 switches))))
@@ -2858,9 +2858,9 @@ contextual information."
 		      (string-to-number (match-string 1 switches))
 		    (org-count-lines code))))
 	(format
-	 "\n<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s\n</textarea>\n</p>"
+	 "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
 	 cols rows code)))
-     (t (format "\n<pre class=\"example\">\n%s\n</pre>" code)))))
+     (t (format "<pre class=\"example\">\n%s</pre>" code)))))
 
 ;;;; Statistics Cookie
 
@@ -2942,20 +2942,22 @@ communication channel."
 	    (cond
 	     ;; Case 1: Row belongs to second or subsequent rowgroups.
 	     ((not (= 1 (org-export-table-row-group table-row info)))
-	      '("\n<tbody>" . "\n</tbody>"))
+	      '("<tbody>" . "\n</tbody>"))
 	     ;; Case 2: Row is from first rowgroup.  Table has >=1 rowgroups.
 	     ((org-export-table-has-header-p
 	       (org-export-get-parent-table table-row) info)
-	      '("\n<thead>" . "\n</thead>"))
+	      '("<thead>" . "\n</thead>"))
 	     ;; Case 2: Row is from first and only row group.
-	     (t '("\n<tbody>" . "\n</tbody>")))))
+	     (t '("<tbody>" . "\n</tbody>")))))
       (concat
        ;; Begin a rowgroup?
        (when (org-export-table-row-starts-rowgroup-p table-row info)
   	 (car rowgroup-tags))
        ;; Actual table row
        (concat "\n" (eval (car org-e-html-table-row-tags))
-	       contents (eval (cdr org-e-html-table-row-tags)))
+	       contents
+	       "\n"
+	       (eval (cdr org-e-html-table-row-tags)))
        ;; End a rowgroup?
        (when (org-export-table-row-ends-rowgroup-p table-row info)
   	 (cdr rowgroup-tags))))))
@@ -3037,7 +3039,7 @@ contextual information."
        ;; Remove last blank line.
        (setq contents (substring contents 0 -1))
        ;; FIXME: splice
-       (format "\n<table%s>\n<caption>%s</caption>\n%s\n%s\n</table>"
+       (format "<table%s>\n<caption>%s</caption>\n%s\n%s\n</table>"
   	       table-attributes
   	       (or caption "")
   	       (funcall table-column-specs table info)
