@@ -41,51 +41,52 @@
 ;; - The filter system is activated at the very beginning and the very
 ;;   end of the export process, and each time an element or an object
 ;;   has been converted.  It is the entry point to fine-tune standard
-;;   output from back-end transcoders.
+;;   output from back-end transcoders.  See "The Filter System"
+;;   section for more information.
 ;;
 ;; The core function is `org-export-as'.  It returns the transcoded
 ;; buffer as a string.
 ;;
-;; In order to implement a back-end for this generic exporter, up to
-;; three steps may be needed:
+;; A back-end is defined through one mandatory variable: his
+;; translation table.  Its name is always
+;; `org-BACKEND-translate-alist' where BACKEND stands for the name
+;; chosen for the back-end.  Its value is an alist whose keys are
+;; elements and objects types and values translator functions.
 ;;
-;; 1. Define a variable, `org-BACKEND-translate-alist' where elements
-;;    and objects types are associated to translator functions.
+;; These functions should return a string without any trailing space,
+;; or nil.  They must accept three arguments: the object or element
+;; itself, its contents or nil when it isn't recursive and the
+;; property list used as a communication channel.
 ;;
-;;    These functions should return a string without any trailing
-;;    space, or nil.  They must accept three arguments: the object or
-;;    element itself, its contents or nil when it isn't recursive and
-;;    the property list used as a communication channel.
+;; Contents, when not nil, are stripped from any global indentation
+;; (although the relative one is preserved).  They also always end
+;; with a single newline character.
 ;;
-;;    Contents, when not nil, are stripped from any global indentation
-;;    (although the relative one is preserved).  They also always end
-;;    with a single newline character.
+;; If, for a given type, no function is found, that element or object
+;; type will simply be ignored, along with any blank line or white
+;; space at its end.  The same will happen if the function returns the
+;; nil value.  If that function returns the empty string, the type
+;; will be ignored, but the blank lines or white spaces will be kept.
 ;;
-;;    If, for a given type, no function is found, that element or
-;;    object type will simply be ignored, along with any blank line or
-;;    white space at its end.  The same will happen if the function
-;;    returns the nil value.  If that function returns the empty
-;;    string, the type will be ignored, but the blank lines or white
-;;    spaces will be kept.
+;; In addition to element and object types, one function can be
+;; associated to the `template' symbol and another one to the
+;; `plain-text' symbol.
 ;;
-;;    In addition to element and object types, one function can be
-;;    associated to the `template' symbol and another one to the
-;;    `plain-text' symbol.  The former returns the final transcoded
-;;    string, and can be used to add a preamble and a postamble to
-;;    document's body.  It must accept two arguments: the transcoded
-;;    string and the property list containing export options.  The
-;;    latter, when defined, is to be called on every text not
-;;    recognized as an element or an object.  It must accept two
-;;    arguments: the text string and the information channel.
+;; The former returns the final transcoded string, and can be used to
+;; add a preamble and a postamble to document's body.  It must accept
+;; two arguments: the transcoded string and the property list
+;; containing export options.
 ;;
-;; 2. Optionally define a variable, `org-BACKEND-options-alist', in
-;;    order to support new export options, buffer keywords or
-;;    "#+OPTIONS:" items specific to the back-end.  See
-;;    `org-export-options-alist' for supported defaults and syntax.
+;; The latter, when defined, is to be called on every text not
+;; recognized as an element or an object.  It must accept two
+;; arguments: the text string and the information channel.  It is an
+;; appropriate place to protect special chars relative to the
+;; back-end.
 ;;
-;; 3. Optionally define a variable, `org-BACKEND-filters-alist', in
-;;    order to apply developer filters.  See "The Filter System"
-;;    section in this file for more information.
+;; Optionally, a back-end can support specific buffer keywords and
+;; OPTION keyword's items by setting `org-BACKEND-filters-alist'
+;; variable.  Refer to `org-export-options-alist' documentation for
+;; more information about its value.
 ;;
 ;; If the new back-end shares most properties with another one,
 ;; `org-export-define-derived-backend' can be used to simplify the
@@ -848,6 +849,13 @@ structure of the values.")))
 ;;      (cf. `org-export-get-headline-number').
 ;;   - category :: tree
 ;;   - type :: alist (INTEGER . LIST)
+;;
+;; + `:id-alist' :: Alist between ID strings and destination file's
+;;      path, relative to current directory.  It is used by
+;;      `org-export-resolve-id-link' to resolve ID links targeting an
+;;      external file.
+;;   - category :: option
+;;   - type :: alist (STRING . STRING)
 ;;
 ;; + `:ignore-list' :: List of elements and objects that should be
 ;;      ignored during export.
@@ -1778,23 +1786,33 @@ Any element in `:ignore-list' will be skipped when using
 ;;
 ;; Every set is back-end agnostic.  Although, a filter is always
 ;; called, in addition to the string it applies to, with the back-end
-;; used as argument, so it's easy enough for the end-user to add
-;; back-end specific filters in the set.  The communication channel,
-;; as a plist, is required as the third argument.
+;; used as argument, so it's easy for the end-user to add back-end
+;; specific filters in the set.  The communication channel, as
+;; a plist, is required as the third argument.
 ;;
-;; Filters sets are defined below. There are of four types:
+;; From the developer side, filters sets can be installed in the
+;; process with the help of `org-BACKEND-filters-alist' variable.
+;; Each association has a key among the following symbols and
+;; a function or a list of functions as value.
 ;;
-;; - `org-export-filter-parse-tree-functions' applies directly on the
-;;   complete parsed tree.  It's the only filters set that doesn't
-;;   apply to a string.
-;; - `org-export-filter-final-output-functions' applies to the final
-;;   transcoded string.
-;; - `org-export-filter-plain-text-functions' applies to any string
-;;   not recognized as Org syntax.
-;; - `org-export-filter-TYPE-functions' applies on the string returned
-;;   after an element or object of type TYPE has been transcoded.
+;; - `:filter-parse-tree' applies directly on the complete parsed
+;;   tree.  It's the only filters set that doesn't apply to a string.
+;;   Users can set it through `org-export-filter-parse-tree-functions'
+;;   variable.
 ;;
-;; All filters sets are applied through
+;; - `:filter-final-output' applies to the final transcoded string.
+;;   Users can set it with `org-export-filter-final-output-functions'
+;;   variable
+;;
+;; - `:filter-plain-text' applies to any string not recognized as Org
+;;   syntax.  `org-export-filter-plain-text-functions' allows users to
+;;   configure it.
+;;
+;; - `:filter-TYPE' applies on the string returned after an element or
+;;   object of type TYPE has been transcoded.  An user can modify
+;;   `org-export-filter-TYPE-functions'
+;;
+;; All filters sets are applied with
 ;; `org-export-filter-apply-functions' function.  Filters in a set are
 ;; applied in a LIFO fashion.  It allows developers to be sure that
 ;; their filters will be applied first.
@@ -2892,8 +2910,8 @@ INFO is the plist used as a communication channel."
 ;; returns an appropriate unique identifier when found, or nil.
 ;;
 ;; `org-export-resolve-id-link' returns the first headline with
-;; specified id or custom-id in parse tree, or nil when none was
-;; found.
+;; specified id or custom-id in parse tree, the path to the external
+;; file with the id or nil when neither was found.
 ;;
 ;; `org-export-resolve-coderef' associates a reference to a line
 ;; number in the element it belongs, or returns the reference itself
