@@ -2882,15 +2882,13 @@ Any tag belonging to this list will also be removed."
 			      (member tag tags)))
 		 (org-element-property :tags element)))
 
-(defun org-export-first-sibling-p (headline info)
-  "Non-nil when HEADLINE is the first sibling in its sub-tree.
-INFO is the plist used as a communication channel."
+(defun org-export-first-sibling-p (headline)
+  "Non-nil when HEADLINE is the first sibling in its sub-tree."
   (not (eq (org-element-type (org-export-get-previous-element headline))
 	   'headline)))
 
-(defun org-export-last-sibling-p (headline info)
-  "Non-nil when HEADLINE is the last sibling in its sub-tree.
-INFO is the plist used as a communication channel."
+(defun org-export-last-sibling-p (headline)
+  "Non-nil when HEADLINE is the last sibling in its sub-tree."
   (not (org-export-get-next-element headline)))
 
 

@@ -2893,10 +2893,10 @@ holding contextual information."
      ;; 	     (itemized-body (org-e-odt-format-list-item
      ;; 			     contents type nil nil full-text)))
      ;; 	(concat
-     ;; 	 (and (org-export-first-sibling-p headline info)
+     ;; 	 (and (org-export-first-sibling-p headline)
      ;; 	      (org-e-odt-begin-plain-list type))
      ;; 	 itemized-body
-     ;; 	 (and (org-export-last-sibling-p headline info)
+     ;; 	 (and (org-export-last-sibling-p headline)
      ;; 	      "</text:list>"))))
      ;; Case 3. Standard headline.  Export it as a section.
      (t

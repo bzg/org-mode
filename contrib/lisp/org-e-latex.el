@@ -46,7 +46,7 @@
 (declare-function org-export-data "org-export" (data info))
 (declare-function org-export-directory "org-export" (type plist))
 (declare-function org-export-expand-macro "org-export" (macro info))
-(declare-function org-export-first-sibling-p "org-export" (headline info))
+(declare-function org-export-first-sibling-p "org-export" (headline))
 (declare-function org-export-footnote-first-reference-p "org-export"
 		  (footnote-reference info))
 (declare-function org-export-format-code "org-export"
@@ -61,7 +61,7 @@
 (declare-function org-export-unravel-code "org-export" (element))
 (declare-function org-export-inline-image-p "org-export"
 		  (link &optional extensions))
-(declare-function org-export-last-sibling-p "org-export" (headline info))
+(declare-function org-export-last-sibling-p "org-export" (headline))
 (declare-function org-export-low-level-p "org-export" (headline info))
 (declare-function org-export-output-file-name
 		  "org-export" (extension &optional subtreep pub-dir))
@@ -1277,14 +1277,14 @@ holding contextual information."
       (let ((low-level-body
 	     (concat
 	      ;; If the headline is the first sibling, start a list.
-	      (when (org-export-first-sibling-p headline info)
+	      (when (org-export-first-sibling-p headline)
 		(format "\\begin{%s}\n" (if numberedp 'enumerate 'itemize)))
 	      ;; Itemize headline
 	      "\\item " full-text "\n" headline-label pre-blanks contents)))
 	;; If headline is not the last sibling simply return
 	;; LOW-LEVEL-BODY.  Otherwise, also close the list, before any
 	;; blank line.
-	(if (not (org-export-last-sibling-p headline info)) low-level-body
+	(if (not (org-export-last-sibling-p headline)) low-level-body
 	  (replace-regexp-in-string
 	   "[ \t\n]*\\'"
 	   (format "\n\\\\end{%s}" (if numberedp 'enumerate 'itemize))

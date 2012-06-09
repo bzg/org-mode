@@ -2116,10 +2116,10 @@ holding contextual information."
 	     (itemized-body (org-e-html-format-list-item
 			     contents type nil nil full-text)))
 	(concat
-	 (and (org-export-first-sibling-p headline info)
+	 (and (org-export-first-sibling-p headline)
 	      (org-e-html-begin-plain-list type))
 	 itemized-body
-	 (and (org-export-last-sibling-p headline info)
+	 (and (org-export-last-sibling-p headline)
 	      (org-e-html-end-plain-list type)))))
      ;; Case 3. Standard headline.  Export it as a section.
      (t
