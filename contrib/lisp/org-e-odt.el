@@ -2509,6 +2509,14 @@ This function shouldn't be used for floats.  See
   ;;     (concat (format "\\label{%s}\n" label) output)))
   output)
 
+(defun org-e-odt--checkbox (item)
+  "Return check-box string associated to ITEM."
+  (org-e-odt-format-fontify
+   (case (org-element-property :checkbox item)
+     (on "[&#x2713;] ")			; CHECK MARK
+     (off "[ ] ")
+     (trans "[-] "))
+   'code))
 
 
 ;;; Transcode Helpers
@@ -2993,7 +3001,9 @@ contextual information."
 	 (type (org-element-property :type plain-list))
 	 (counter (org-element-property :counter item))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (org-export-data tag info)))))
+		(and tag
+		     (concat (org-e-odt--checkbox item)
+			     (org-export-data tag info))))))
     (case type
       ((ordered unordered)
        (format "\n<text:list-item>\n%s\n%s"
@@ -3410,20 +3420,16 @@ the plist used as a communication channel."
 		  (center-block 'center)
 		  (footnote-definition 'footnote)
 		  (t nil))))
-    ;; If this paragraph is a leading paragraph in an item and the
-    ;; item has a checkbox, splice the checkbox and paragraph contents
-    ;; together.
-    (when (and (equal (org-element-type parent) 'item)
+    ;; If this paragraph is a leading paragraph in a non-descriptive
+    ;; item and the item has a checkbox, splice the checkbox and
+    ;; paragraph contents together.
+    (when (and (eq (org-element-type parent) 'item)
+	       (not (eq (org-element-property :type
+					      (org-export-get-parent parent))
+			'descriptive))
 	       (= (org-element-property :begin paragraph)
 		  (org-element-property :contents-begin parent)))
-      (let* ((item parent)
-	     (checkbox (org-element-property :checkbox item))
-	     (checkbox (and checkbox (org-e-odt-format-fontify
-				      (case checkbox
-					(on "[&#x2713;]") ; CHECK MARK
-					(off "[ ]")
-					(trans "[-]")) 'code))))
-	(setq contents 	(concat checkbox (and checkbox " ") contents))))
+      (setq contents (concat (org-e-odt--checkbox parent) contents)))
     (org-e-odt-format-stylized-paragraph style contents)))
 
 

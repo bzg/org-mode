@@ -2234,28 +2234,32 @@ contextual information."
 (defun org-e-html-format-list-item (contents type checkbox
 					     &optional term-counter-id
 					     headline)
-  (concat
-   (case type
-     (ordered
-      (let* ((counter term-counter-id)
-	     (extra (if counter (format " value=\"%s\"" counter) "")))
-	(format "<li%s>" extra)))
-     (unordered
-      (let* ((id term-counter-id)
-	     (extra (if id (format " id=\"%s\"" id) "")))
-	(concat
-	 (format "<li%s>" extra)
-	 (when headline (concat headline "<br/>")))))
-     (descriptive
-      (let* ((term term-counter-id))
-	(setq term (or term "(no term)"))
-	(concat (format "<dt> %s </dt>" term) "<dd>"))))
-   (org-e-html-checkbox checkbox) (and checkbox " ")
-   contents
-   (case type
-     (ordered "</li>")
-     (unordered "</li>")
-     (descriptive "</dd>"))))
+  (let ((checkbox (concat (org-e-html-checkbox checkbox) (and checkbox " "))))
+    (concat
+     (case type
+       (ordered
+	(let* ((counter term-counter-id)
+	       (extra (if counter (format " value=\"%s\"" counter) "")))
+	  (format "<li%s>" extra)))
+       (unordered
+	(let* ((id term-counter-id)
+	       (extra (if id (format " id=\"%s\"" id) "")))
+	  (concat
+	   (format "<li%s>" extra)
+	   (when headline (concat headline "<br/>")))))
+       (descriptive
+	(let* ((term term-counter-id))
+	  (setq term (or term "(no term)"))
+	  ;; Check-boxes in descriptive lists are associated to tag.
+	  (concat (format "<dt> %s </dt>"
+			  (concat checkbox term))
+		  "<dd>"))))
+     (unless (eq type 'descriptive) checkbox)
+     contents
+     (case type
+       (ordered "</li>")
+       (unordered "</li>")
+       (descriptive "</dd>")))))
 
 (defun org-e-html-item (item contents info)
   "Transcode an ITEM element from Org to HTML.

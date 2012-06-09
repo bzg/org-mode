@@ -1416,13 +1416,16 @@ contextual information."
 		 (format "\\setcounter{enum%s}{%s}\n"
 			 (nth (1- level) '("i" "ii" "iii" "iv"))
 			 (1- count)))))
-	 (checkbox (let ((checkbox (org-element-property :checkbox item)))
-		     (cond ((eq checkbox 'on) "$\\boxtimes$ ")
-			   ((eq checkbox 'off) "$\\Box$ ")
-			   ((eq checkbox 'trans) "$\\boxminus$ "))))
+	 (checkbox (case (org-element-property :checkbox item)
+		     (on "$\\boxtimes$ ")
+		     (off "$\\Box$ ")
+		     (trans "$\\boxminus$ ")))
 	 (tag (let ((tag (org-element-property :tag item)))
-		(and tag (format "[%s]" (org-export-data tag info))))))
-    (concat counter "\\item" tag " " checkbox contents)))
+		;; Check-boxes must belong to the tag.
+		(and tag (format "[%s] "
+				 (concat checkbox
+					 (org-export-data tag info)))))))
+    (concat counter "\\item" (or tag (concat " " checkbox)) contents)))
 
 
 ;;;; Keyword

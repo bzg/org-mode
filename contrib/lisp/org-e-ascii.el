@@ -607,13 +607,14 @@ INFO is a plist used as a communication channel."
 		 ;; that is the sum of the difference between its
 		 ;; indentation and the indentation of the top item in
 		 ;; the list and current item bullet's length.  Also
-		 ;; remove tag length (for description lists) or bullet
-		 ;; length.
+		 ;; remove checkbox length, and tag length (for
+		 ;; description lists) or bullet length.
 		 (let ((struct (org-element-property :structure parent-item))
 		       (beg-item (org-element-property :begin parent-item)))
 		   (+ (- (org-list-get-ind beg-item struct)
 			 (org-list-get-ind
 			  (org-list-get-top-point struct) struct))
+		      (length (org-e-ascii--checkbox parent-item info))
 		      (length
 		       (or (org-list-get-tag beg-item struct)
 			   (org-list-get-bullet beg-item struct)))))))))))))
@@ -876,6 +877,15 @@ channel."
 	   width info)
 	  "\n\n")))))
    links ""))
+
+(defun org-e-ascii--checkbox (item info)
+  "Return checkbox string for ITEM or nil.
+INFO is a plist used as a communication channel."
+  (let ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
+    (case (org-element-property :checkbox item)
+      (on (if utf8p "☑ " "[X] "))
+      (off (if utf8p "☐ " "[ ] "))
+      (trans (if utf8p "☒ " "[-] ")))))
 
 
 
@@ -1325,42 +1335,46 @@ contextual information."
   "Transcode an ITEM element from Org to ASCII.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let ((bullet
-	 ;; First parent of ITEM is always the plain-list.  Get
-	 ;; `:type' property from it.
-	 (org-list-bullet-string
-	  (case (org-element-property :type (org-export-get-parent item))
-	    (descriptive
-	     (concat (org-export-data (org-element-property :tag item) info)
-		     ": "))
-	    (ordered
-	     ;; Return correct number for ITEM, paying attention to
-	     ;; counters.
-	     (let* ((struct (org-element-property :structure item))
-		    (bul (org-element-property :bullet item))
-		    (num
-		     (number-to-string
-		      (car (last (org-list-get-item-number
-				  (org-element-property :begin item)
-				  struct
-				  (org-list-prevs-alist struct)
-				  (org-list-parents-alist struct)))))))
-	       (replace-regexp-in-string "[0-9]+" num bul)))
-	    (t (let ((bul (org-element-property :bullet item)))
-		 ;; Change bullets into more visible form if UTF-8 is active.
-		 (if (not (eq (plist-get info :ascii-charset) 'utf-8)) bul
-		   (replace-regexp-in-string
-		    "-" "•"
+  (let* ((utf8p (eq (plist-get info :ascii-charset) 'utf-8))
+	 (checkbox (org-e-ascii--checkbox item info))
+	 (list-type (org-element-property :type (org-export-get-parent item)))
+	 (bullet
+	  ;; First parent of ITEM is always the plain-list.  Get
+	  ;; `:type' property from it.
+	  (org-list-bullet-string
+	   (case list-type
+	     (descriptive
+	      (concat checkbox
+		      (org-export-data (org-element-property :tag item) info)
+		      ": "))
+	     (ordered
+	      ;; Return correct number for ITEM, paying attention to
+	      ;; counters.
+	      (let* ((struct (org-element-property :structure item))
+		     (bul (org-element-property :bullet item))
+		     (num (number-to-string
+			   (car (last (org-list-get-item-number
+				       (org-element-property :begin item)
+				       struct
+				       (org-list-prevs-alist struct)
+				       (org-list-parents-alist struct)))))))
+		(replace-regexp-in-string "[0-9]+" num bul)))
+	     (t (let ((bul (org-element-property :bullet item)))
+		  ;; Change bullets into more visible form if UTF-8 is active.
+		  (if (not utf8p) bul
 		    (replace-regexp-in-string
-		     "+" "⁃"
-		     (replace-regexp-in-string "*" "‣" bul))))))))))
+		     "-" "•"
+		     (replace-regexp-in-string
+		      "+" "⁃"
+		      (replace-regexp-in-string "*" "‣" bul))))))))))
     (concat
      bullet
+     (unless (eq list-type 'descriptive) checkbox)
      ;; Contents: Pay attention to indentation.  Note: check-boxes are
      ;; already taken care of at the paragraph level so they don't
      ;; interfere with indentation.
      (let ((contents (org-e-ascii--indent-string contents (length bullet))))
-       (if (eq (caar (org-element-contents item)) 'paragraph)
+       (if (eq (org-element-type (car (org-element-contents item))) 'paragraph)
 	   (org-trim contents)
 	 (concat "\n" contents))))))
 
@@ -1473,19 +1487,7 @@ information."
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (org-e-ascii--fill-string
-   (let ((parent (org-export-get-parent paragraph)))
-     ;; If PARAGRAPH is the first one in a list element, be sure to
-     ;; add the check-box in front of it, before any filling.  Later,
-     ;; it would interfere with line width.
-     (if (and (eq (org-element-type parent) 'item)
-	      (equal (car (org-element-contents parent)) paragraph))
-	 (let ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
-	   (concat (case (org-element-property :checkbox parent)
-		     (on (if utf8p "☑ " "[X] "))
-		     (off (if utf8p "☐ " "[ ] "))
-		     (trans (if utf8p "☒ " "[-] ")))
-		   contents))
-       contents))
+   contents
    (org-e-ascii--current-text-width paragraph info) info))
 
 
