@@ -489,7 +489,7 @@ group 4: description tag")
 
 (defun org-at-item-description-p ()
   "Is point at a description list item?"
-  (org-list-at-regexp-after-bullet-p "\\(\\S-.+\\)[ \t]+::[ \t]+"))
+  (org-list-at-regexp-after-bullet-p "\\(\\S-.+\\)[ \t]+::\\([ \t]+\\|$\\)"))
 
 (defun org-at-item-checkbox-p ()
   "Is point at a line starting a plain-list item with a checklet?"
@@ -2035,7 +2035,7 @@ Possible values are: `folded', `children' or `subtree'.  See
   (let (bpos bcol tpos tcol)
     (save-excursion
       (goto-char item)
-      (looking-at "[ \t]*\\(\\S-+\\)\\(.*[ \t]+::\\)?[ \t]+")
+      (looking-at "[ \t]*\\(\\S-+\\)\\(.*[ \t]+::\\)?\\([ \t]+\\|$\\)")
       (setq bpos (match-beginning 1) tpos (match-end 0)
 	    bcol (progn (goto-char bpos) (current-column))
 	    tcol (progn (goto-char tpos) (current-column)))
