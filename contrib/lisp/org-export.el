@@ -2652,7 +2652,9 @@ file should have."
 
 ;;;; For Affiliated Keywords
 ;;
-;; `org-export-read-attribute' is a tool
+;; `org-export-read-attribute' reads a property from a given element
+;;  as a plist.  It can be used to normalize affiliated keywords'
+;;  syntax.
 
 (defun org-export-read-attribute (attribute element)
   "Turn ATTRIBUTE property from ELEMENT into a plist.
