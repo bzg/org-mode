@@ -2649,6 +2649,20 @@ file should have."
 ;; macros, references, src-blocks, tables and tables of contents are
 ;; implemented.
 
+;;;; For Affiliated Keywords
+;;
+;; `org-export-read-attribute' is a tool
+
+(defun org-export-read-attribute (attribute element)
+  "Turn ATTRIBUTE property from ELEMENT into a plist.
+This function assumes attributes are defined as \":keyword
+value\" pairs.  It is appropriate for `:attr_html' like
+properties."
+  (let ((value (org-element-property attribute element)))
+    (and value
+	 (read (format "(%s)" (mapconcat 'identity value " "))))))
+
+
 ;;;; For Export Snippets
 ;;
 ;; Every export snippet is transmitted to the back-end.  Though, the

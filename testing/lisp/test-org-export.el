@@ -370,7 +370,7 @@ body\n")))
 	(should (equal (org-export-as 'test) "Body 1\nBody 2\n"))))))
 
 (ert-deftest test-org-export/set-element ()
-  "Test `org-export-set-element' property."
+  "Test `org-export-set-element' specifications."
   (org-test-with-parsed-data "* Headline\n*a*"
     (org-export-set-element
      (org-element-map tree 'bold 'identity nil t)
@@ -385,6 +385,25 @@ body\n")))
 			    (org-element-map tree 'italic 'identity nil t))
       (org-element-map tree 'paragraph 'identity nil t)))))
 
+
+
+;;; Affiliated Keywords
+
+(ert-deftest test-org-export/read-attribute ()
+  "Test `org-export-read-attribute' specifications."
+  ;; Standard test.
+  (should
+   (equal
+    (org-export-read-attribute
+     :attr_html
+     (org-test-with-temp-text "#+ATTR_HTML: :a 1 :b 2\nParagraph"
+       (org-element-current-element)))
+    '(:a 1 :b 2)))
+  ;; Return nil on empty attribute.
+  (should-not
+   (org-export-read-attribute
+    :attr_html
+    (org-test-with-temp-text "Paragraph" (org-element-current-element)))))
 
 
 ;;; Footnotes
