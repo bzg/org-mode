@@ -2928,8 +2928,8 @@ This list is checked after translations have been applied.  See
 		macro radio-target sub/superscript target text-markup timestamp)
     (italic entity export-snippet inline-babel-call inline-src-block link
 	    radio-target sub/superscript target text-markup timestamp)
-    (item entity inline-babel-call latex-fragment macro radio-target
-	  sub/superscript target text-markup)
+    (item entity footnote-reference inline-babel-call latex-fragment macro
+	  radio-target sub/superscript target text-markup)
     (keyword entity latex-fragment macro sub/superscript text-markup)
     (link entity export-snippet inline-babel-call inline-src-block
 	  latex-fragment link sub/superscript text-markup)
