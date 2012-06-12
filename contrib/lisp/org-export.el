@@ -2346,7 +2346,8 @@ Return code as a string."
 	;;    into a template, if required.  Eventually call
 	;;    final-output filter.
 	(let* ((body (org-element-normalize-string (org-export-data tree info)))
-	       (template (intern (format "org-%s-template" backend)))
+	       (template (cdr (assq 'template
+				    (plist-get info :translate-alist))))
 	       (output (org-export-filter-apply-functions
 			(plist-get info :filter-final-output)
 			(if (or (not (fboundp template)) body-only) body
