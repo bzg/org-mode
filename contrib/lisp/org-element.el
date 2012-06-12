@@ -684,7 +684,10 @@ CONTENTS is the contents of the element."
 	 (tag (let ((tag (org-element-property :tag item)))
 		(and tag (org-element-interpret-data tag))))
 	 ;; Compute indentation.
-	 (ind (make-string (length bullet) 32)))
+	 (ind (make-string (length bullet) 32))
+	 (item-starts-with-par-p
+	  (eq (org-element-type (car (org-element-contents item)))
+	      'paragraph)))
     ;; Indent contents.
     (concat
      bullet
@@ -694,8 +697,10 @@ CONTENTS is the contents of the element."
       ((eq checkbox 'off) "[ ] ")
       ((eq checkbox 'trans) "[-] "))
      (and tag (format "%s :: " tag))
-     (org-trim
-      (replace-regexp-in-string "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))))
+     (let ((contents (replace-regexp-in-string
+		      "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))
+       (if item-starts-with-par-p (org-trim contents)
+	 (concat "\n" contents))))))
 
 
 ;;;; Plain List
