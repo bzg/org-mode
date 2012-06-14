@@ -147,6 +147,61 @@ structure of the values.")
 
 
 
+;;; Internal Variables
+
+(defconst org-e-latex-babel-language-alist
+  '(("af" . "afrikaans")
+    ("bg" . "bulgarian")
+    ("bt-br" . "brazilian")
+    ("ca" . "catalan")
+    ("cs" . "czech")
+    ("cy" . "welsh")
+    ("da" . "danish")
+    ("de" . "germanb")
+    ("de-at" . "naustrian")
+    ("de-de" . "ngerman")
+    ("el" . "greek")
+    ("en" . "english")
+    ("en-au" . "australian")
+    ("en-ca" . "canadian")
+    ("en-gb" . "british")
+    ("en-ie" . "irish")
+    ("en-nz" . "newzealand")
+    ("en-us" . "american")
+    ("es" . "spanish")
+    ("et" . "estonian")
+    ("eu" . "basque")
+    ("fi" . "finnish")
+    ("fr" . "frenchb")
+    ("fr-ca" . "canadien")
+    ("gl" . "galician")
+    ("hr" . "croatian")
+    ("hu" . "hungarian")
+    ("id" . "indonesian")
+    ("is" . "icelandic")
+    ("it" . "italian")
+    ("la" . "latin")
+    ("ms" . "malay")
+    ("nl" . "dutch")
+    ("no-no" . "nynorsk")
+    ("pl" . "polish")
+    ("pt" . "portuguese")
+    ("ro" . "romanian")
+    ("ru" . "russian")
+    ("sa" . "sanskrit")
+    ("sb" . "uppersorbian")
+    ("sk" . "slovak")
+    ("sl" . "slovene")
+    ("sq" . "albanian")
+    ("sr" . "serbian")
+    ("sv" . "swedish")
+    ("ta" . "tamil")
+    ("tr" . "turkish")
+    ("uk" . "ukrainian"))
+  "Alist between language code and corresponding Babel option.")
+
+
+
 ;;; User Configurable Variables
 
 (defgroup org-export-e-latex nil
@@ -815,12 +870,36 @@ For non-floats, see `org-e-latex--wrap-label'."
 		label-str
 		(org-export-data (car caption) info))))))
 
-(defun org-e-latex--guess-inputenc (header)
-  "Set the coding system in inputenc to what the buffer is.
+(defun org-e-latex--guess-babel-language (header info)
+  "Set Babel's language according to LANGUAGE keyword.
 
-HEADER is the LaTeX header string.
+HEADER is the LaTeX header string.  INFO is the plist used as
+a communication channel.
+
+Insertion of guessed language only happens when Babel package has
+explicitly been loaded.  Then it is added to the rest of
+package's options.
 
 Return the new header."
+  (let ((language-code (plist-get info :language)))
+    ;; If no language is set or Babel package is not loaded, return
+    ;; HEADER as-is.
+    (if (or (not (stringp language-code))
+	    (not (string-match "\\\\usepackage\\[\\(.*\\)\\]{babel}" header)))
+	header
+      (let ((options (save-match-data
+		       (org-split-string (match-string 1 header) ",")))
+	    (language (cdr (assoc language-code
+				  org-e-latex-babel-language-alist))))
+	;; If LANGUAGE is already loaded, return header.  Otherwise,
+	;; append LANGUAGE to other options.
+	(if (member language options) header
+	  (replace-match (mapconcat 'identity (cons language options) ",")
+			 nil nil header 1))))))
+
+(defun org-e-latex--guess-inputenc (header)
+  "Set the coding system in inputenc to what the buffer is.
+HEADER is the LaTeX header string.  Return the new header."
   (let* ((cs (or (ignore-errors
 		   (latexenc-coding-system-to-inputenc
 		    buffer-file-coding-system))
@@ -936,12 +1015,15 @@ holding export options."
 			  "^[ \t]*\\\\documentclass\\(\\[.*?\\]\\)"
 			  class-options header t nil 1)
 		       header))))
-	  (org-e-latex--guess-inputenc
-	   (org-splice-latex-header
-	    document-class-string
-	    org-export-latex-default-packages-alist ; defined in org.el
-	    org-export-latex-packages-alist nil ; defined in org.el
-	    (plist-get info :latex-header-extra))))))
+	  (when document-class-string
+	    (org-e-latex--guess-babel-language
+	     (org-e-latex--guess-inputenc
+	      (org-splice-latex-header
+	       document-class-string
+	       org-export-latex-default-packages-alist ; defined in org.el
+	       org-export-latex-packages-alist nil ; defined in org.el
+	       (plist-get info :latex-header-extra)))
+	     info)))))
      ;; 3. Define alert if not yet defined.
      "\\providecommand{\\alert}[1]{\\textbf{#1}}\n"
      ;; 4. Possibly limit depth for headline numbering.
