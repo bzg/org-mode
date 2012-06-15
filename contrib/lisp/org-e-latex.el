@@ -894,7 +894,9 @@ Return the new header."
 	;; If LANGUAGE is already loaded, return header.  Otherwise,
 	;; append LANGUAGE to other options.
 	(if (member language options) header
-	  (replace-match (mapconcat 'identity (cons language options) ",")
+	  (replace-match (mapconcat 'identity
+				    (append options (list language))
+				    ",")
 			 nil nil header 1))))))
 
 (defun org-e-latex--guess-inputenc (header)
