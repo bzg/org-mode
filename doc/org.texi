@@ -2712,7 +2712,7 @@ modified in order to still reference the same field.  To avoid this from
 happening, in particular in range references, anchor ranges at the table
 borders (using @code{@@<}, @code{@@>}, @code{$<}, @code{$>}), or at hlines
 using the @code{@@I} notation.  Automatic adaptation of field references does
-of cause not happen if you edit the table structure with normal editing
+of course not happen if you edit the table structure with normal editing
 commands---then you must fix the equations yourself.
 
 Instead of typing an equation into the field, you may also use the following
