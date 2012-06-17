@@ -395,12 +395,6 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
 	(n (or n 1)))
     (insert tab)))
 
-(defun org-e-odt-format-line-break ()
-  (org-e-odt-format-tags "<text:line-break/>" ""))
-
-(defun org-e-odt-format-horizontal-line ()
-  (org-e-odt-format-stylized-paragraph 'horizontal-line ""))
-
 (defun org-e-odt-encode-plain-text (text &optional no-whitespace-filling)
   (mapc
    (lambda (pair)
@@ -724,14 +718,6 @@ ATTR is a string of other attributes of the a element."
       '("<text:note-ref text:note-class=\"%s\" text:reference-format=\"%s\" text:ref-name=\"%s\">" . "</text:note-ref>")
       n note-class ref-format ref-name)
      "OrgSuperscript")))
-
-(defun org-e-odt-element-attributes (element info)
-  (let* ((raw-attr (org-element-property :attr_odt element))
-	 (raw-attr (and raw-attr
-			(org-trim (mapconcat #'identity raw-attr " ")))))
-    (unless (and raw-attr (string-match "\\`(.*)\\'" raw-attr))
-      (setq raw-attr (format "(%s)" raw-attr)))
-    (ignore-errors (read raw-attr))))
 
 (defun org-e-odt-format-object-description (title description)
   (concat (and title (org-e-odt-format-tags
@@ -2929,11 +2915,8 @@ holding contextual information."
 (defun org-e-odt-horizontal-rule (horizontal-rule contents info)
   "Transcode an HORIZONTAL-RULE  object from Org to ODT.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((attr (mapconcat #'identity
-			 (org-element-property :attr_odt horizontal-rule)
-			 " ")))
-    (org-e-odt--wrap-label horizontal-rule
-			    (org-e-odt-format-horizontal-line))))
+  (org-e-odt--wrap-label
+   horizontal-rule (org-e-odt-format-stylized-paragraph 'horizontal-line "")))
 
 
 ;;;; Inline Babel Call
@@ -3171,7 +3154,7 @@ used as a communication channel."
 		      (link (org-export-get-parent-element element))
 		      (t element)))
 	 ;; convert attributes to a plist.
-	 (attr-plist (org-e-odt-element-attributes attr-from info))
+	 (attr-plist (org-export-read-attribute :attr_odt attr-from))
 	 ;; handle `:anchor', `:style' and `:attributes' properties.
 	 (user-frame-anchor
 	  (car (assoc-string (plist-get attr-plist :anchor)
@@ -3631,7 +3614,7 @@ contextual information."
 
 (defun org-e-odt-table-style-spec (element info)
   (let* ((table (org-export-get-parent-table element))
-	 (table-attributes (org-e-odt-element-attributes table info))
+	 (table-attributes (org-export-read-attribute :attr_odt table))
 	 (table-style (plist-get table-attributes :style)))
     (assoc table-style org-e-odt-table-styles)))
 
@@ -3717,7 +3700,7 @@ channel."
 		    (org-export-get-parent-table table-row) info))
 	      "OrgTableHeading")
 	     ((let* ((table (org-export-get-parent-table table-cell))
-		     (table-attrs (org-e-odt-element-attributes table info))
+		     (table-attrs (org-export-read-attribute :attr_odt table))
 		     (table-header-columns (plist-get table-attrs
 						      :header-columns)))
 		(<= c (cond ((wholenump table-header-columns)
@@ -3819,7 +3802,7 @@ contextual information."
     (otherwise
      (let* ((captions (org-e-odt-format-label table info 'definition))
 	    (caption (car captions)) (short-caption (cdr captions))
-	    (attributes (org-e-odt-element-attributes table info))
+	    (attributes (org-export-read-attribute :attr_odt table))
 	    (custom-table-style (nth 1 (org-e-odt-table-style-spec table info)))
 	    (table-column-specs
 	     (function
