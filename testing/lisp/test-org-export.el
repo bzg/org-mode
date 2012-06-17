@@ -253,6 +253,7 @@ text
       (should (equal (org-export-as 'test nil 'visible) "* Head1\n"))
       ;; Body only.
       (flet ((org-test-template (body info) (format "BEGIN\n%sEND" body)))
+	(push '(template . org-test-template) org-test-translate-alist)
 	(should (equal (org-export-as 'test nil nil 'body-only)
 		       "* Head1\n** Head2\ntext\n*** Head3\n"))
 	(should (equal (org-export-as 'test)
@@ -277,7 +278,20 @@ text
 #+END_SRC"
     (org-test-with-backend test
       (forward-line 1)
-      (should (equal (org-export-as 'test 'subtree) ": 3\n")))))
+      (should (equal (org-export-as 'test 'subtree) ": 3\n"))))
+  ;; Subtree's EXPORT_TITLE property.
+  (org-test-with-backend test
+    (flet ((org-test-template (body info)
+			      (org-export-data (plist-get info :title) info)))
+      (push '(template . org-test-template) org-test-translate-alist)
+      (org-test-with-temp-text "
+* Headline
+  :PROPERTIES:
+  :EXPORT_TITLE: subtree-title
+  :END:
+Paragraph"
+	(forward-line)
+	(should (equal "subtree-title" (org-export-as 'test 'subtree)))))))
 
 (ert-deftest test-org-export/export-snippet ()
   "Test export snippets transcoding."

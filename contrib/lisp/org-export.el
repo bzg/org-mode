@@ -1111,29 +1111,29 @@ specific items to read, if any."
 
 (defun org-export-get-subtree-options ()
   "Get export options in subtree at point.
-
-Assume point is at subtree's beginning.
-
 Return options as a plist."
-  (let (prop plist)
-    (when (setq prop (progn (looking-at org-todo-line-regexp)
-			    (or (save-match-data
-				  (org-entry-get (point) "EXPORT_TITLE"))
-				(org-match-string-no-properties 3))))
-      (setq plist
-	    (plist-put
-	     plist :title
-	     (org-element-parse-secondary-string
-	      prop (org-element-restriction 'keyword)))))
-    (when (setq prop (org-entry-get (point) "EXPORT_TEXT"))
-      (setq plist (plist-put plist :text prop)))
-    (when (setq prop (org-entry-get (point) "EXPORT_AUTHOR"))
-      (setq plist (plist-put plist :author prop)))
-    (when (setq prop (org-entry-get (point) "EXPORT_DATE"))
-      (setq plist (plist-put plist :date prop)))
-    (when (setq prop (org-entry-get (point) "EXPORT_OPTIONS"))
-      (setq plist (org-export-add-options-to-plist plist prop)))
-    plist))
+  (org-with-wide-buffer
+   (let (prop plist)
+     ;; Make sure point is at an heading.
+     (unless (org-at-heading-p) (org-back-to-heading t))
+     (when (setq prop (progn (looking-at org-todo-line-regexp)
+			     (or (save-match-data
+				   (org-entry-get (point) "EXPORT_TITLE"))
+				 (org-match-string-no-properties 3))))
+       (setq plist
+	     (plist-put
+	      plist :title
+	      (org-element-parse-secondary-string
+	       prop (org-element-restriction 'keyword)))))
+     (when (setq prop (org-entry-get (point) "EXPORT_TEXT"))
+       (setq plist (plist-put plist :text prop)))
+     (when (setq prop (org-entry-get (point) "EXPORT_AUTHOR"))
+       (setq plist (plist-put plist :author prop)))
+     (when (setq prop (org-entry-get (point) "EXPORT_DATE"))
+       (setq plist (plist-put plist :date prop)))
+     (when (setq prop (org-entry-get (point) "EXPORT_OPTIONS"))
+       (setq plist (org-export-add-options-to-plist plist prop)))
+     plist)))
 
 (defun org-export-get-inbuffer-options (&optional backend files)
   "Return current buffer export options, as a plist.
