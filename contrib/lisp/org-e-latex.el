@@ -1385,21 +1385,33 @@ holding contextual information."
 	   (format "\n\\\\end{%s}" (if numberedp 'enumerate 'itemize))
 	   low-level-body))))
      ;; Case 3. Standard headline.  Export it as a section.
-     (t (let ((sec-command
-	       (format section-fmt full-text
-		       (concat headline-label pre-blanks contents))))
-	  ;; If tags should be removed from table of contents, insert
-	  ;; title without tags as an alternative heading in
-	  ;; sectioning command.
-	  (if (and tags (eq (plist-get info :with-tags) 'not-in-toc))
-	      (replace-regexp-in-string
-	       "\\`\\\\\\(.*?\\){"
-	       (lambda (s)
-		 (concat (match-string 1 s)
-			 (format "[%s]" full-text-no-tag)))
-	       sec-command nil nil 1)
-	    ;; Otherwise, don't bother with alternative heading.
-	    sec-command))))))
+     (t
+      (cond
+       ((not (and tags (eq (plist-get info :with-tags) 'not-in-toc)))
+	;; Regular section.  Use specified format string.
+	(format section-fmt full-text
+		(concat headline-label pre-blanks contents)))
+       ((string-match "\\`\\\\\\(.*?\\){" section-fmt)
+	;; If tags should be removed from table of contents, insert
+	;; title without tags as an alternative heading in sectioning
+	;; command.
+	(format (replace-match (concat (match-string 1 section-fmt) "[%s]")
+			       nil nil section-fmt 1)
+		;; Replace square brackets with parenthesis since
+		;; square brackets are not supported in optional
+		;; arguments.
+		(replace-regexp-in-string
+		 "\\[" "("
+		 (replace-regexp-in-string
+		  "\\]" ")"
+		  full-text-no-tag))
+		full-text
+		(concat headline-label pre-blanks contents)))
+       (t
+	;; Impossible to add an alternative heading.  Fallback to
+	;; regular sectioning format string.
+	(format section-fmt full-text
+		(concat headline-label pre-blanks contents))))))))
 
 
 ;;;; Horizontal Rule
