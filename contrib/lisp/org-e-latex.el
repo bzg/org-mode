@@ -1249,6 +1249,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			 '(footnote-reference footnote-definition)))
      (let ((num (org-export-get-footnote-number footnote-reference info)))
        (format "\\footnotemark[%s]{}\\setcounter{footnote}{%s}" num num)))
+    ;; Use also \footnotemark if reference is within an item's tag.
+    ;; Note: this won't work if reference has already been defined
+    ;; since we cannot specify footnote number through square
+    ;; brackets, forbidden in an optional argument.
+    ((eq (org-element-type (org-export-get-parent-element footnote-reference))
+	 'item)
+     (format "\\footnotemark\\setcounter{footnote}{%s}"
+	     (org-export-get-footnote-number footnote-reference info)))
     ;; Otherwise, define it with \footnote command.
     (t
      (let ((def (org-export-get-footnote-definition footnote-reference info)))
@@ -1283,7 +1291,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (org-trim
 	       (org-export-data
 		(org-export-get-footnote-definition ref info) info))))
-	   (funcall search-refs def) ""))))))))
+	   ""))))))))
 
 
 ;;;; Headline
@@ -1545,7 +1553,41 @@ contextual information."
 		(and tag (format "[%s] "
 				 (concat checkbox
 					 (org-export-data tag info)))))))
-    (concat counter "\\item" (or tag (concat " " checkbox)) contents)))
+    (concat counter "\\item" (or tag (concat " " checkbox))
+	    (org-trim contents)
+	    ;; If there are footnotes references in tag, be sure to
+	    ;; add their definition at the end of the item.  This
+	    ;; workaround is necessary since "\footnote{}" command is
+	    ;; not supported in tags.
+	    (and tag
+		 (mapconcat
+		  (lambda (ref)
+		    (format
+		     "\\footnotetext[%s]{%s}"
+		     (org-export-get-footnote-number ref info)
+		     (org-trim
+		      (org-export-data
+		       (org-export-get-footnote-definition ref info) info))))
+		  ;; Find every footnote reference in item's tag.
+		  (let (all-refs
+			search-refs	; For byte-compiler.
+			(search-refs
+			 (function
+			  (lambda (data)
+			    ;; Return a list of all footnote
+			    ;; references never seen before in DATA.
+			    (org-element-map
+			     data 'footnote-reference
+			     (lambda (ref)
+			       (when (org-export-footnote-first-reference-p ref info)
+				 (push ref all-refs)
+				 (when (eq (org-element-property :type ref) 'standard)
+				   (funcall
+				    search-refs
+				    (org-export-get-footnote-definition ref info)))))
+			     info) (reverse all-refs)))))
+		    (funcall search-refs (org-element-property :tag item)))
+		  "")))))
 
 
 ;;;; Keyword
