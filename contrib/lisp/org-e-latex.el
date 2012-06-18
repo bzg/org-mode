@@ -957,7 +957,7 @@ This function shouldn't be used for floats.  See
       (concat (format "\\label{%s}\n" label) output))))
 
 (defun org-e-latex--text-markup (text markup)
-  "Format text depending on MARKUP text markup.
+  "Format TEXT depending on MARKUP text markup.
 See `org-e-latex-text-markup-alist' for details."
   (let ((fmt (cdr (assq markup org-e-latex-text-markup-alist))))
     (cond
@@ -991,6 +991,47 @@ See `org-e-latex-text-markup-alist' for details."
 	(format fmt text)))
      ;; Else use format string.
      (t (format fmt text)))))
+
+(defun org-e-latex--delayed-footnotes-definitions (element info)
+  "Return footnotes definitions in ELEMENT as a string.
+
+INFO is a plist used as a communication channel.
+
+Footnotes definitions are returned within \"\\footnotetxt{}\"
+commands.
+
+This functions is used within constructs that don't support
+\"\\footnote{}\" command (i.e. an item's tag).  In that case,
+\"\\footnotemark\" is used within the construct and this function
+outside of it."
+  (mapconcat
+   (lambda (ref)
+     (format
+      "\\footnotetext[%s]{%s}"
+      (org-export-get-footnote-number ref info)
+      (org-trim
+       (org-export-data
+	(org-export-get-footnote-definition ref info) info))))
+   ;; Find every footnote reference in ELEMENT.
+   (let* (all-refs
+	  search-refs			; For byte-compiler.
+	  (search-refs
+	   (function
+	    (lambda (data)
+	      ;; Return a list of all footnote references never seen
+	      ;; before in DATA.
+	      (org-element-map
+	       data 'footnote-reference
+	       (lambda (ref)
+		 (when (org-export-footnote-first-reference-p ref info)
+		   (push ref all-refs)
+		   (when (eq (org-element-property :type ref) 'standard)
+		     (funcall search-refs
+			      (org-export-get-footnote-definition ref info)))))
+	       info)
+	      (reverse all-refs)))))
+     (funcall search-refs element))
+   ""))
 
 
 
@@ -1267,31 +1308,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	;; Retrieve all footnote references within the footnote and
 	;; add their definition after it, since LaTeX doesn't support
 	;; them inside.
-	(let* (all-refs
-	       search-refs		; for byte-compiler
-	       (search-refs
-		(function
-		 (lambda (data)
-		   ;; Return a list of all footnote references in DATA.
-		   (org-element-map
-		    data 'footnote-reference
-		    (lambda (ref)
-		      (when (org-export-footnote-first-reference-p ref info)
-			(push ref all-refs)
-			(when (eq (org-element-property :type ref) 'standard)
-			  (funcall
-			   search-refs
-			   (org-export-get-footnote-definition ref info)))))
-		    info) (reverse all-refs)))))
-	  (mapconcat
-	   (lambda (ref)
-	     (format
-	      "\\footnotetext[%s]{%s}"
-	      (org-export-get-footnote-number ref info)
-	      (org-trim
-	       (org-export-data
-		(org-export-get-footnote-definition ref info) info))))
-	   ""))))))))
+	(org-e-latex--delayed-footnotes-definitions def info)))))))
 
 
 ;;;; Headline
@@ -1560,34 +1577,8 @@ contextual information."
 	    ;; workaround is necessary since "\footnote{}" command is
 	    ;; not supported in tags.
 	    (and tag
-		 (mapconcat
-		  (lambda (ref)
-		    (format
-		     "\\footnotetext[%s]{%s}"
-		     (org-export-get-footnote-number ref info)
-		     (org-trim
-		      (org-export-data
-		       (org-export-get-footnote-definition ref info) info))))
-		  ;; Find every footnote reference in item's tag.
-		  (let (all-refs
-			search-refs	; For byte-compiler.
-			(search-refs
-			 (function
-			  (lambda (data)
-			    ;; Return a list of all footnote
-			    ;; references never seen before in DATA.
-			    (org-element-map
-			     data 'footnote-reference
-			     (lambda (ref)
-			       (when (org-export-footnote-first-reference-p ref info)
-				 (push ref all-refs)
-				 (when (eq (org-element-property :type ref) 'standard)
-				   (funcall
-				    search-refs
-				    (org-export-get-footnote-definition ref info)))))
-			     info) (reverse all-refs)))))
-		    (funcall search-refs (org-element-property :tag item)))
-		  "")))))
+		 (org-e-latex--delayed-footnotes-definitions
+		  (org-element-property :tag item) info)))))
 
 
 ;;;; Keyword
