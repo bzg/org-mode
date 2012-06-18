@@ -1328,7 +1328,8 @@ holding contextual information."
 		    (org-export-get-tags headline info)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
-	 ;; Create the headline text.
+	 ;; Create the headline text along with a no-tag version.  The
+	 ;; latter is required to remove tags from table of contents.
 	 (full-text (if (functionp org-e-latex-format-headline-function)
 			;; User-defined formatting function.
 			(funcall org-e-latex-format-headline-function
@@ -1342,6 +1343,16 @@ holding contextual information."
 		       (when tags
 			 (format "\\hfill{}\\textsc{:%s:}"
 				 (mapconcat 'identity tags ":"))))))
+	 (full-text-no-tag
+	  (if (functionp org-e-latex-format-headline-function)
+	      ;; User-defined formatting function.
+	      (funcall org-e-latex-format-headline-function
+		       todo todo-type priority text nil)
+	    ;; Default formatting.
+	    (concat
+	     (when todo (format "\\textbf{\\textsf{\\textsc{%s}}} " todo))
+	     (when priority (format "\\framebox{\\#%c} " priority))
+	     text)))
 	 ;; Associate some \label to the headline for internal links.
 	 (headline-label
 	  (format "\\label{sec-%s}\n"
@@ -1374,8 +1385,21 @@ holding contextual information."
 	   (format "\n\\\\end{%s}" (if numberedp 'enumerate 'itemize))
 	   low-level-body))))
      ;; Case 3. Standard headline.  Export it as a section.
-     (t (format section-fmt full-text
-		(concat headline-label pre-blanks contents))))))
+     (t (let ((sec-command
+	       (format section-fmt full-text
+		       (concat headline-label pre-blanks contents))))
+	  ;; If tags should be removed from table of contents, insert
+	  ;; title without tags as an alternative heading in
+	  ;; sectioning command.
+	  (if (and tags (eq (plist-get info :with-tags) 'not-in-toc))
+	      (replace-regexp-in-string
+	       "\\`\\\\\\(.*?\\){"
+	       (lambda (s)
+		 (concat (match-string 1 s)
+			 (format "[%s]" full-text-no-tag)))
+	       sec-command nil nil 1)
+	    ;; Otherwise, don't bother with alternative heading.
+	    sec-command))))))
 
 
 ;;;; Horizontal Rule
