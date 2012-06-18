@@ -1279,25 +1279,26 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (when (eq (org-element-type prev) 'footnote-reference)
        org-e-latex-footnote-separator))
    (cond
+    ;; Use \footnotemark if reference is within an item's tag.  Since
+    ;; we can't specify footnote number as an optional argument within
+    ;; an item tag, juggle with footnote counter to achieve the same
+    ;; result.
+    ((eq (org-element-type (org-export-get-parent-element footnote-reference))
+	 'item)
+     (let ((num (org-export-get-footnote-number footnote-reference info)))
+       (format "\\setcounter{footnote}{%s}\\footnotemark\\setcounter{footnote}{%s}"
+	       (1- num) num)))
     ;; Use \footnotemark if the footnote has already been defined.
     ((not (org-export-footnote-first-reference-p footnote-reference info))
      (format "\\footnotemark[%s]{}"
 	     (org-export-get-footnote-number footnote-reference info)))
-    ;; Use also \footnotemark if reference is within another footnote
+    ;; Use \footnotemark if reference is within another footnote
     ;; reference or footnote definition.
     ((loop for parent in (org-export-get-genealogy footnote-reference)
 	   thereis (memq (org-element-type parent)
 			 '(footnote-reference footnote-definition)))
      (let ((num (org-export-get-footnote-number footnote-reference info)))
        (format "\\footnotemark[%s]{}\\setcounter{footnote}{%s}" num num)))
-    ;; Use also \footnotemark if reference is within an item's tag.
-    ;; Note: this won't work if reference has already been defined
-    ;; since we cannot specify footnote number through square
-    ;; brackets, forbidden in an optional argument.
-    ((eq (org-element-type (org-export-get-parent-element footnote-reference))
-	 'item)
-     (format "\\footnotemark\\setcounter{footnote}{%s}"
-	     (org-export-get-footnote-number footnote-reference info)))
     ;; Otherwise, define it with \footnote command.
     (t
      (let ((def (org-export-get-footnote-definition footnote-reference info)))
