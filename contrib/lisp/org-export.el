@@ -4033,7 +4033,6 @@ Return an error if key pressed has no associated command."
       (?l
        (require 'org-e-latex)
        (org-e-latex-export-to-latex
-	(require 'org-e-latex)
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?p
        (require 'org-e-latex)
