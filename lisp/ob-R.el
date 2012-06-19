@@ -260,7 +260,7 @@ current code buffer."
     (setq args (mapconcat
 		(lambda (pair)
 		  (if (member (car pair) allowed-args)
-		      (format ",%s=%s"
+		      (format ",%s=%S"
 			      (substring (symbol-name (car pair)) 1)
 			      (cdr pair)) ""))
 		params ""))
