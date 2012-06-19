@@ -245,27 +245,20 @@ current code buffer."
 	   (:pdf . "pdf")
 	   (:ps . "postscript")
 	   (:postscript . "postscript")))
-	(allowed-args '(:width :height :bg :units :pointsize
-			       :antialias :quality :compression :res
-			       :type :family :title :fonts :version
-			       :paper :encoding :pagecentre :colormodel
-			       :useDingbats :horizontal))
 	(device (and (string-match ".+\\.\\([^.]+\\)" out-file)
 		     (match-string 1 out-file)))
 	(extra-args (cdr (assq :R-dev-args params))) filearg args)
     (setq device (or (and device (cdr (assq (intern (concat ":" device))
 					    devices))) "png"))
-    (setq filearg
-	  (if (member device '("pdf" "postscript" "svg" "tikz")) "file" "filename"))
-    (setq args (mapconcat
-		(lambda (pair)
-		  (if (member (car pair) allowed-args)
-		      (format ",%s=%S"
-			      (substring (symbol-name (car pair)) 1)
-			      (cdr pair)) ""))
-		params ""))
     (format "%s(%s=\"%s\"%s%s%s)"
-	    device filearg out-file args
+	    device
+	    (if (member device '("pdf" "postscript" "svg" "tikz")) "file" "filename")
+	    out-file
+	    (mapconcat (lambda (pair)
+			    (format "%s=%S"
+				    (substring (symbol-name (car pair)) 1)
+				    (cdr pair)))
+			  (remove-if-not #'(lambda (pair) (eq (cdr (assoc (car pair) org-babel-header-args:R)) :any)) params) ",")
 	    (if extra-args "," "") (or extra-args ""))))
 
 (defvar org-babel-R-eoe-indicator "'org_babel_R_eoe'")
