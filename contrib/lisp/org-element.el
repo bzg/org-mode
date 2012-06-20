@@ -2893,7 +2893,7 @@ returned as the value of the property.
 This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
-(defconst org-element-parsed-keywords '("AUTHOR" "CAPTION" "TITLE")
+(defconst org-element-parsed-keywords '("AUTHOR" "CAPTION" "DATE" "TITLE")
   "List of keywords whose value can be parsed.
 
 Their value will be stored as a secondary string: a list of
