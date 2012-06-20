@@ -1084,7 +1084,7 @@ holding export options."
 	     (author (format "\\author{%s}\n" author))
 	     (t "\\author{}\n")))
      ;; 6. Date.
-     (let ((date (plist-get info :date)))
+     (let ((date (org-export-data (plist-get info :date) info)))
        (and date (format "\\date{%s}\n" date)))
      ;; 7. Title
      (format "\\title{%s}\n" title)

@@ -1407,7 +1407,7 @@ Replaces invalid characters with \"_\"."
 	(mapconcat 'org-e-html-format-footnote-definition fn-alist "\n"))))))
 
 (defun org-e-html-format-date (info)
-  (let ((date (plist-get info :date)))
+  (let ((date (org-export-data (plist-get info :date) info)))
     (cond
      ((and date (string-match "%" date))
       (format-time-string date))
