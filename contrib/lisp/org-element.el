@@ -3338,12 +3338,21 @@ Nil values returned from FUN do not appear in the results."
   (unless (listp no-recursion) (setq no-recursion (list no-recursion)))
   ;; Recursion depth is determined by --CATEGORY.
   (let* ((--category
-	  (cond
-	   ((every (lambda (el) (memq el org-element-greater-elements)) types)
-	    'greater-elements)
-	   ((every (lambda (el) (memq el org-element-all-elements)) types)
-	    'elements)
-	   (t 'objects)))
+	  (catch 'found
+	    (let ((category 'greater-elements))
+	      (mapc (lambda (type)
+		      (cond ((memq type org-element-all-objects)
+			     ;; If one object is found, the function
+			     ;; has to recurse into every object.
+			     (throw 'found 'objects))
+			    ((not (memq type org-element-greater-elements))
+			     ;; If one regular element is found, the
+			     ;; function has to recurse, at lest, into
+			     ;; every element it encounters.
+			     (and (not (eq category 'elements))
+				  (setq category 'elements)))))
+		    types)
+	      category)))
 	 --acc
 	 --walk-tree
 	 (--walk-tree
