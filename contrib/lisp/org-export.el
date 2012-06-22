@@ -1332,12 +1332,25 @@ process."
 		     (and backend
 			  (let ((var (intern
 				      (format "org-%s-options-alist" backend))))
-			    (and (boundp var) (eval var))))))
+			    (and (boundp var) (symbol-value var))))))
 	;; Output value.
 	plist)
-    (mapc (lambda (cell)
-	    (setq plist (plist-put plist (car cell) (eval (nth 3 cell)))))
-	  all)
+    (mapc
+     (lambda (cell)
+       (setq plist
+	     (plist-put
+	      plist
+	      (car cell)
+	      ;; Eval default value provided.  If keyword is a member
+	      ;; of `org-element-parsed-keywords', parse it as
+	      ;; a secondary string before storing it.
+	      (let ((value (eval (nth 3 cell))))
+		(if (not (stringp value)) value
+		  (let ((keyword (nth 1 cell)))
+		    (if (not (member keyword org-element-parsed-keywords)) value
+		      (org-element-parse-secondary-string
+		       value (org-element-restriction 'keyword)))))))))
+     all)
     ;; Return value.
     plist))
 

@@ -107,7 +107,7 @@ already filled in `info'."
 #+TITLE: with spaces"
       (org-export-get-inbuffer-options))
     '(:author
-      ("Me, Myself and I") :creator "Idem" :date "Today"
+      ("Me, Myself and I") :creator "Idem" :date ("Today")
       :description "Testing\nwith two lines" :email "some@email.org"
       :exclude-tags ("noexport" "invisible") :keywords "test" :language "en"
       :select-tags ("export") :title ("Some title with spaces")))))
