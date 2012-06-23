@@ -1269,6 +1269,56 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 
 ;;;; Footnote Reference
+;;
+;; Footnote reference export is handled by
+;; `org-e-latex-footnote-reference'.
+;;
+;; Internally, `org-e-latex--get-footnote-counter' is used to restore
+;; the value of the LaTeX "footnote" counter after a jump due to
+;; a reference to an already defined footnote.  It is only needed in
+;; item tags since the optional argument to \footnotemark is not
+;; allowed there.
+
+(defun org-e-latex--get-footnote-counter (footnote-reference info)
+  "Return \"footnote\" counter before FOOTNOTE-REFERENCE is encountered.
+INFO is a plist used as a communication channel."
+  ;; Find original counter value by counting number of footnote
+  ;; references appearing for the first time before the current
+  ;; footnote reference.
+  (let* ((label (org-element-property :label footnote-reference))
+	 seen-refs
+	 search-ref			; For byte-compiler.
+	 (search-ref
+	  (function
+	   (lambda (data)
+	     ;; Search footnote references through DATA, filling
+	     ;; SEEN-REFS along the way.
+	     (org-element-map
+	      data 'footnote-reference
+	      (lambda (fn)
+		(let ((fn-lbl (org-element-property :label fn)))
+		  (cond
+		   ;; Anonymous footnote match: return number.
+		   ((equal fn footnote-reference) (length seen-refs))
+		   ;; Anonymous footnote: it's always a new one.
+		   ;; Also, be sure to return nil from the `cond' so
+		   ;; `first-match' doesn't get us out of the loop.
+		   ((not fn-lbl) (push 'inline seen-refs) nil)
+		   ;; Label not seen so far: add it so SEEN-REFS.
+		   ;;
+		   ;; Also search for subsequent references in
+		   ;; footnote definition so numbering follows reading
+		   ;; logic.  Note that we don't have to care about
+		   ;; inline definitions, since `org-element-map'
+		   ;; already traverse them at the right time.
+		   ((not (member fn-lbl seen-refs))
+		    (push fn-lbl seen-refs)
+		    (funcall search-ref
+			     (org-export-get-footnote-definition fn info))))))
+	      ;; Don't enter footnote definitions since it will happen
+	      ;; when their first reference is found.
+	      info 'first-match 'footnote-definition)))))
+    (funcall search-ref (plist-get info :parse-tree))))
 
 (defun org-e-latex-footnote-reference (footnote-reference contents info)
   "Transcode a FOOTNOTE-REFERENCE element from Org to LaTeX.
@@ -1279,15 +1329,20 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (when (eq (org-element-type prev) 'footnote-reference)
        org-e-latex-footnote-separator))
    (cond
-    ;; Use \footnotemark if reference is within an item's tag.  Since
-    ;; we can't specify footnote number as an optional argument within
-    ;; an item tag, juggle with footnote counter to achieve the same
-    ;; result.
+    ;; Use \footnotemark if reference is within an item's tag.
     ((eq (org-element-type (org-export-get-parent-element footnote-reference))
 	 'item)
-     (let ((num (org-export-get-footnote-number footnote-reference info)))
-       (format "\\setcounter{footnote}{%s}\\footnotemark\\setcounter{footnote}{%s}"
-	       (1- num) num)))
+     (if (org-export-footnote-first-reference-p footnote-reference info)
+	 "\\footnotemark"
+       ;; Since we can't specify footnote number as an optional
+       ;; argument within an item tag, some extra work has to be done
+       ;; when the footnote has already been referenced.  In that
+       ;; case, set footnote counter to the desired number, use the
+       ;; footnotemark, then set counter back to its original value.
+       (format
+	"\\setcounter{footnote}{%s}\\footnotemark\\setcounter{footnote}{%s}"
+	(1- (org-export-get-footnote-number footnote-reference info))
+	(org-e-latex--get-footnote-counter footnote-reference info))))
     ;; Use \footnotemark if the footnote has already been defined.
     ((not (org-export-footnote-first-reference-p footnote-reference info))
      (format "\\footnotemark[%s]{}"
@@ -1297,8 +1352,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     ((loop for parent in (org-export-get-genealogy footnote-reference)
 	   thereis (memq (org-element-type parent)
 			 '(footnote-reference footnote-definition)))
-     (let ((num (org-export-get-footnote-number footnote-reference info)))
-       (format "\\footnotemark[%s]{}\\setcounter{footnote}{%s}" num num)))
+     "\\footnotemark")
     ;; Otherwise, define it with \footnote command.
     (t
      (let ((def (org-export-get-footnote-definition footnote-reference info)))
