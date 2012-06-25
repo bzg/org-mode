@@ -3341,7 +3341,8 @@ Nil values returned from FUN do not appear in the results."
 	  (catch 'found
 	    (let ((category 'greater-elements))
 	      (mapc (lambda (type)
-		      (cond ((memq type org-element-all-objects)
+		      (cond ((or (memq type org-element-all-objects)
+				 (eq type 'plain-text))
 			     ;; If one object is found, the function
 			     ;; has to recurse into every object.
 			     (throw 'found 'objects))
