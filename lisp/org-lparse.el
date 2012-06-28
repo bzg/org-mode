@@ -901,7 +901,6 @@ version."
 		(funcall f style env-options-plist)
 		(throw 'nextline nil))))
 
-	  (run-hooks 'org-export-html-after-blockquotes-hook)
 	  (when (org-lparse-current-environment-p 'verse)
 	    (let ((i (org-get-string-indentation line)))
 	      (if (> i 0)
