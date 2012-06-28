@@ -84,7 +84,7 @@ seen.  This is run after a few special cases are taken care of."
 (defun org-special-blocks-convert-html-special-cookies ()
   "Converts the special cookies into div blocks."
   ;; Uses the dynamically-bound variable `org-line'.
-  (when (string-match "^ORG-\\(.*\\)-\\(START\\|END\\)$" org-line)
+  (when (and org-line (string-match "^ORG-\\(.*\\)-\\(START\\|END\\)$" org-line))
     (message "%s" (match-string 1))
     (when (equal (match-string 2 org-line) "START")
       (org-close-par-maybe)
