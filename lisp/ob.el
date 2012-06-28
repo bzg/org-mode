@@ -1048,9 +1048,17 @@ the current subtree."
 	 (sha1 it))))))
 
 (defun org-babel-current-result-hash ()
-  "Return the in-buffer hash associated with INFO."
+  "Return the current in-buffer hash."
   (org-babel-where-is-src-block-result)
   (org-babel-clean-text-properties (match-string 3)))
+
+(defun org-babel-set-current-result-hash (hash)
+  "Set the current in-buffer hash to HASH."
+  (org-babel-where-is-src-block-result)
+  (save-excursion (goto-char (match-beginning 3))
+		  ;; (mapc #'delete-overlay (overlays-at (point)))
+		  (replace-match hash nil nil nil 3)
+		  (org-babel-hide-hash)))
 
 (defun org-babel-hide-hash ()
   "Hide the hash in the current results line.
