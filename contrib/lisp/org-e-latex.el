@@ -274,7 +274,6 @@ macro-like placeholders.
  [NO-PACKAGES]           do not include the packages
  [EXTRA]                 the stuff from #+LaTeX_HEADER
  [NO-EXTRA]              do not include #+LaTeX_HEADER stuff
- [BEAMER-HEADER-EXTRA]   the beamer extra headers
 
 So a header like
 
@@ -1043,10 +1042,10 @@ CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((title (org-export-data (plist-get info :title) info)))
     (concat
-     ;; 1. Time-stamp.
+     ;; Time-stamp.
      (and (plist-get info :time-stamp-file)
 	  (format-time-string "%% Created %Y-%m-%d %a %H:%M\n"))
-     ;; 2. Document class and packages.
+     ;; Document class and packages.
      (let ((class (plist-get info :latex-class))
 	   (class-options (plist-get info :latex-class-options)))
        (org-element-normalize-string
@@ -1067,13 +1066,11 @@ holding export options."
 	       org-export-latex-packages-alist nil ; defined in org.el
 	       (plist-get info :latex-header-extra)))
 	     info)))))
-     ;; 3. Define alert if not yet defined.
-     "\\providecommand{\\alert}[1]{\\textbf{#1}}\n"
-     ;; 4. Possibly limit depth for headline numbering.
+     ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
        (when (integerp sec-num)
 	 (format "\\setcounter{secnumdepth}{%d}\n" sec-num)))
-     ;; 5. Author.
+     ;; Author.
      (let ((author (and (plist-get info :with-author)
 			(let ((auth (plist-get info :author)))
 			  (and auth (org-export-data auth info)))))
@@ -1083,20 +1080,20 @@ holding export options."
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     (author (format "\\author{%s}\n" author))
 	     (t "\\author{}\n")))
-     ;; 6. Date.
+     ;; Date.
      (let ((date (org-export-data (plist-get info :date) info)))
        (and date (format "\\date{%s}\n" date)))
-     ;; 7. Title
+     ;; Title
      (format "\\title{%s}\n" title)
-     ;; 8. Hyperref options.
+     ;; Hyperref options.
      (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
 	     (or (plist-get info :keywords) "")
 	     (or (plist-get info :description) "")
 	     (if (not (plist-get info :with-creator)) ""
 	       (plist-get info :creator)))
-     ;; 9. Document start.
+     ;; Document start.
      "\\begin{document}\n\n"
-     ;; 10. Title command.
+     ;; Title command.
      (org-element-normalize-string
       (cond ((string= "" title) nil)
 	    ((not (stringp org-e-latex-title-command)) nil)
@@ -1104,22 +1101,22 @@ holding export options."
 			   org-e-latex-title-command)
 	     (format org-e-latex-title-command title))
 	    (t org-e-latex-title-command)))
-     ;; 11. Table of contents.
+     ;; Table of contents.
      (let ((depth (plist-get info :with-toc)))
        (when depth
 	 (concat (when (wholenump depth)
 		   (format "\\setcounter{tocdepth}{%d}\n" depth))
 		 "\\tableofcontents\n\\vspace*{1cm}\n\n")))
-     ;; 12. Document's body.
+     ;; Document's body.
      contents
-     ;; 13. Creator.
+     ;; Creator.
      (let ((creator-info (plist-get info :with-creator)))
        (cond
 	((not creator-info) "")
 	((eq creator-info 'comment)
 	 (format "%% %s\n" (plist-get info :creator)))
 	(t (concat (plist-get info :creator) "\n"))))
-     ;; 14. Document end.
+     ;; Document end.
      "\\end{document}")))
 
 
