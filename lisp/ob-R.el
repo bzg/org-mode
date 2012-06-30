@@ -70,8 +70,11 @@
 
 (defvar org-babel-default-header-args:R '())
 
-(defvar org-babel-R-command "R --slave --no-save"
-  "Name of command to use for executing R code.")
+(defcustom org-babel-R-command "R --slave --no-save"
+  "Name of command to use for executing R code."
+  :group 'org-babel
+  :version "24.1"
+  :type 'string)
 
 (defvar ess-local-process-name)
 (defun org-babel-edit-prep:R (info)
