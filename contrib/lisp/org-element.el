@@ -34,8 +34,9 @@
 ;; `keyword', `planning', `property-drawer' and `section' types), it
 ;; can also accept a fixed set of keywords as attributes.  Those are
 ;; called "affiliated keywords" to distinguish them from other
-;; keywords, which are full-fledged elements.  All affiliated keywords
-;; are referenced in `org-element-affiliated-keywords'.
+;; keywords, which are full-fledged elements.  Almost all affiliated
+;; keywords are referenced in `org-element-affiliated-keywords'; the
+;; others are export attributes and start with "ATTR_" prefix.
 ;;
 ;; Element containing other elements (and only elements) are called
 ;; greater elements.  Concerned types are: `center-block', `drawer',
@@ -2861,10 +2862,11 @@ Names must be uppercase.  Any block whose name has no association
 is parsed with `org-element-special-block-parser'.")
 
 (defconst org-element-affiliated-keywords
-  '("ATTR_ASCII" "ATTR_DOCBOOK" "ATTR_HTML" "ATTR_LATEX" "ATTR_ODT" "CAPTION"
-    "DATA" "HEADER" "HEADERS" "LABEL" "NAME" "PLOT" "RESNAME" "RESULT" "RESULTS"
-    "SOURCE" "SRCNAME" "TBLNAME")
-  "List of affiliated keywords as strings.")
+  '("CAPTION" "DATA" "HEADER" "HEADERS" "LABEL" "NAME" "PLOT" "RESNAME" "RESULT"
+    "RESULTS" "SOURCE" "SRCNAME" "TBLNAME")
+  "List of affiliated keywords as strings.
+By default, all keywords setting attributes (i.e. \"ATTR_LATEX\")
+are affiliated keywords and need not to be in this list.")
 
 (defconst org-element-keyword-translation-alist
   '(("DATA" . "NAME")  ("LABEL" . "NAME") ("RESNAME" . "NAME")
@@ -2874,15 +2876,17 @@ is parsed with `org-element-special-block-parser'.")
 The key is the old name and the value the new one.  The property
 holding their value will be named after the translated name.")
 
-(defconst org-element-multiple-keywords
-  '("ATTR_ASCII" "ATTR_DOCBOOK" "ATTR_HTML" "ATTR_LATEX" "ATTR_ODT" "HEADER")
+(defconst org-element-multiple-keywords '("HEADER")
   "List of affiliated keywords that can occur more that once in an element.
 
 Their value will be consed into a list of strings, which will be
 returned as the value of the property.
 
 This list is checked after translations have been applied.  See
-`org-element-keyword-translation-alist'.")
+`org-element-keyword-translation-alist'.
+
+By default, all keywords setting attributes (i.e. \"ATTR_LATEX\")
+allow multiple occurrences and need not to be in this list.")
 
 (defconst org-element-parsed-keywords '("AUTHOR" "CAPTION" "DATE" "TITLE")
   "List of keywords whose value can be parsed.
@@ -3158,14 +3162,10 @@ element it has to parse."
 ;; A keyword may belong to more than one category.
 
 (defconst org-element--affiliated-re
-  (format "[ \t]*#\\+\\(%s\\):"
-	  (mapconcat
-	   (lambda (keyword)
-	     (if (member keyword org-element-dual-keywords)
-		 (format "\\(%s\\)\\(?:\\[\\(.*\\)\\]\\)?"
-			 (regexp-quote keyword))
-	       (regexp-quote keyword)))
-	   org-element-affiliated-keywords "\\|"))
+  (format "[ \t]*#\\+%s:"
+	  ;; Regular affiliated keywords.
+	  (format "\\(%s\\|ATTR_[-_A-Za-z0-9]+\\)\\(?:\\[\\(.*\\)\\]\\)?"
+		  (regexp-opt org-element-affiliated-keywords)))
   "Regexp matching any affiliated keyword.
 
 Keyword name is put in match group 1.  Moreover, if keyword
@@ -3216,8 +3216,7 @@ CDR a plist of keywords and values."
 	  (restrict (org-element-restriction 'keyword))
 	  output)
       (unless (bobp)
-	(while (and (not (bobp))
-		    (progn (forward-line -1) (looking-at key-re)))
+	(while (and (not (bobp)) (progn (forward-line -1) (looking-at key-re)))
 	  (let* ((raw-kwd (upcase (or (match-string 2) (match-string 1))))
 		 ;; Apply translation to RAW-KWD.  From there, KWD is
 		 ;; the official keyword.
@@ -3243,7 +3242,8 @@ CDR a plist of keywords and values."
 	    (when (member kwd duals)
 	      ;; VALUE is mandatory.  Set it to nil if there is none.
 	      (setq value (and value (cons value dual-value))))
-	    (when (member kwd consed)
+	    ;; Attributes are always consed.
+	    (when (or (member kwd consed) (string-match "^ATTR_" kwd))
 	      (setq value (cons value (plist-get output kwd-sym))))
 	    ;; Eventually store the new value in OUTPUT.
 	    (setq output (plist-put output kwd-sym value))))
@@ -3717,21 +3717,28 @@ If there is no affiliated keyword, return the empty string."
 			value)
 		      "\n"))))))
     (mapconcat
-     (lambda (key)
-       (let ((value (org-element-property (intern (concat ":" (downcase key)))
-					  element)))
+     (lambda (prop)
+       (let ((value (org-element-property prop element))
+	     (keyword (upcase (substring (symbol-name prop) 1))))
 	 (when value
-	   (if (member key org-element-multiple-keywords)
-	       (mapconcat (lambda (line)
-			    (funcall keyword-to-org key line))
-			  value "")
-	     (funcall keyword-to-org key value)))))
-     ;; Remove translated keywords.
-     (delq nil
-	   (mapcar
-	    (lambda (key)
-	      (and (not (assoc key org-element-keyword-translation-alist)) key))
-	    org-element-affiliated-keywords))
+	   (if (or (member keyword org-element-multiple-keywords)
+		   ;; All attribute keywords can have multiple lines.
+		   (string-match "^ATTR_" keyword))
+	       (mapconcat (lambda (line) (funcall keyword-to-org keyword line))
+			  value
+			  "")
+	     (funcall keyword-to-org keyword value)))))
+     ;; List all ELEMENT's properties matching an attribute line or an
+     ;; affiliated keyword, but ignore translated keywords since they
+     ;; cannot belong to the property list.
+     (loop for prop in (nth 1 element) by 'cddr
+	   when (let ((keyword (upcase (substring (symbol-name prop) 1))))
+		  (or (string-match "^ATTR_" keyword)
+		      (and
+		       (member keyword org-element-affiliated-keywords)
+		       (not (assoc keyword
+				   org-element-keyword-translation-alist)))))
+	   collect prop)
      "")))
 
 ;; Because interpretation of the parse tree must return the same
