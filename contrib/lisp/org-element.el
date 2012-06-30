@@ -1899,17 +1899,12 @@ keywords.
 
 Assume point is at the beginning of the snippet."
   (save-excursion
-    (looking-at "<\\([-A-Za-z0-9]+\\)@")
-    (let* ((begin (point))
+    (re-search-forward "@@\\([-A-Za-z0-9]+\\):" nil t)
+    (let* ((begin (match-beginning 0))
 	   (back-end (org-match-string-no-properties 1))
-	   (inner-begin (match-end 0))
-	   (inner-end
-	    (let ((count 1))
-	      (goto-char inner-begin)
-	      (while (and (> count 0) (re-search-forward "[<>]" nil t))
-		(if (equal (match-string 0) "<") (incf count) (decf count)))
-	      (1- (point))))
-	   (value (buffer-substring-no-properties inner-begin inner-end))
+	   (value (buffer-substring-no-properties
+		   (point)
+		   (progn (re-search-forward "@@" nil t) (match-beginning 0))))
 	   (post-blank (skip-chars-forward " \t"))
 	   (end (point)))
       `(export-snippet
@@ -1922,7 +1917,7 @@ Assume point is at the beginning of the snippet."
 (defun org-element-export-snippet-interpreter (export-snippet contents)
   "Interpret EXPORT-SNIPPET object as Org syntax.
 CONTENTS is nil."
-  (format "<%s@%s>"
+  (format "@@%s:%s@@"
 	  (org-element-property :back-end export-snippet)
 	  (org-element-property :value export-snippet)))
 
@@ -1931,18 +1926,14 @@ CONTENTS is nil."
 
 LIMIT bounds the search.
 
-Return value is a cons cell whose CAR is `export-snippet' CDR is
+Return value is a cons cell whose CAR is `export-snippet' and CDR
 its beginning position."
   (save-excursion
-    (catch 'exit
-      (while (re-search-forward "<[-A-Za-z0-9]+@" limit t)
-	(save-excursion
-	  (let ((beg (match-beginning 0))
-		(count 1))
-	    (while (re-search-forward "[<>]" limit t)
-	      (if (equal (match-string 0) "<") (incf count) (decf count))
-	      (when (zerop count)
-		(throw 'exit (cons 'export-snippet beg))))))))))
+    (let (beg)
+      (when (and (re-search-forward "@@[-A-Za-z0-9]+:" limit t)
+		 (setq beg (match-beginning 0))
+		 (re-search-forward "@@" limit t))
+	(cons 'export-snippet beg)))))
 
 
 ;;;; Footnote Reference
