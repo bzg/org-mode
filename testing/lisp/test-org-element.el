@@ -470,7 +470,7 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
   (should
    (equal
     '("back-end" . "contents")
-    (org-test-with-temp-text "<back-end@contents>"
+    (org-test-with-temp-text "@@back-end:contents@@"
       (org-element-map
        (org-element-parse-buffer) 'export-snippet
        (lambda (snippet) (cons (org-element-property :back-end snippet)
@@ -1758,8 +1758,8 @@ CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
 
 (ert-deftest test-org-element/export-snippet-interpreter ()
   "Test export snippet interpreter."
-  (should (equal (org-test-parse-and-interpret "<back-end@contents>")
-		 "<back-end@contents>\n")))
+  (should (equal (org-test-parse-and-interpret "@@back-end:contents@@")
+		 "@@back-end:contents@@\n")))
 
 (ert-deftest test-org-element/footnote-reference-interpreter ()
   "Test footnote reference interpreter."

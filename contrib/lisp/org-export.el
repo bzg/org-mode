@@ -641,9 +641,9 @@ confirm the use of these lines."
 
 This variable allows to provide shortcuts for export snippets.
 
-For example, with a value of '\(\(\"h\" . \"html\"\)\), the HTML
-back-end will recognize the contents of \"@h{<b>}\" as HTML code
-while every other back-end will ignore it."
+For example, with a value of '\(\(\"h\" . \"e-html\"\)\), the
+HTML back-end will recognize the contents of \"@@h:<b>@@\" as
+HTML code while every other back-end will ignore it."
   :group 'org-export-general
   :type '(repeat
 	  (cons
@@ -2320,10 +2320,8 @@ Return code as a string."
 	     (goto-char (point-min))
 	     (forward-line)
 	     (narrow-to-region (point) (point-max))))
-      ;; 1. Get export environment from original buffer.  Store
-      ;;    original footnotes definitions in communication channel as
-      ;;    they might not be accessible anymore in a narrowed parse
-      ;;    tree.  Also install user's and developer's filters.
+      ;; 1. Get export environment from original buffer.  Also install
+      ;;    user's and developer's filters.
       (let ((info (org-export-install-filters
 		   (org-export-get-environment backend subtreep ext-plist)))
 	    ;; 2. Get parse tree.  Buffer isn't parsed directly.

@@ -295,7 +295,7 @@ Paragraph"
 
 (ert-deftest test-org-export/export-snippet ()
   "Test export snippets transcoding."
-  (org-test-with-temp-text "<test@A><t@B>"
+  (org-test-with-temp-text "@@test:A@@@@t:B@@"
     (org-test-with-backend test
       (flet ((org-test-export-snippet
 	      (snippet contents info)
