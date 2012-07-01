@@ -104,6 +104,27 @@
 (eval-when-compile (require 'cl))
 (require 'org-element)
 
+(declare-function org-e-ascii-export-to-ascii "org-e-ascii"
+		  (&optional subtreep visible-only body-only ext-plist pub-dir))
+(declare-function org-e-html-export-to-html "org-e-html"
+		  (&optional subtreep visible-only body-only ext-plist pub-dir))
+(declare-function org-e-latex-export-to-latex "org-e-latex"
+		  (&optional subtreep visible-only body-only ext-plist pub-dir))
+(declare-function org-e-latex-export-to-pdf "org-e-latex"
+		  (&optional subtreep visible-only body-only ext-plist pub-dir))
+(declare-function org-e-odt-export-to-odt "org-e-odt"
+		  (&optional subtreep visible-only body-only ext-plist pub-dir))
+(declare-function org-e-publish "org-e-publish" (project &optional force))
+(declare-function org-e-publish-all "org-e-publish" (&optional force))
+(declare-function org-e-publish-current-file "org-e-publish" (&optional force))
+(declare-function org-e-publish-current-project "org-e-publish"
+		  (&optional force))
+(declare-function org-export-blocks-preprocess "org-exp-blocks")
+
+(defvar org-e-publish-project-alist)
+(defvar org-table-number-fraction)
+(defvar org-table-number-regexp)
+
 
 
 ;;; Internal Variables
@@ -1072,7 +1093,7 @@ inferior to file-local settings."
     backend
     (and buffer-file-name (org-remove-double-quotes buffer-file-name)))
    ;; ... and from subtree, when appropriate.
-   (and subtreep (org-export-get-subtree-options))
+   (and subtreep (org-export-get-subtree-options backend))
    ;; Eventually install back-end symbol and its translation table.
    `(:back-end
      ,backend
@@ -1109,9 +1130,10 @@ specific items to read, if any."
 	  alist)
     plist))
 
-(defun org-export-get-subtree-options ()
+(defun org-export-get-subtree-options (&optional backend)
   "Get export options in subtree at point.
-Return options as a plist."
+Optional argument BACKEND is a symbol specifying back-end used
+for export.  Return options as a plist."
   (org-with-wide-buffer
    (let (prop plist)
      ;; Make sure point is at an heading.
@@ -1132,7 +1154,8 @@ Return options as a plist."
      (when (setq prop (org-entry-get (point) "EXPORT_DATE"))
        (setq plist (plist-put plist :date prop)))
      (when (setq prop (org-entry-get (point) "EXPORT_OPTIONS"))
-       (setq plist (org-export-add-options-to-plist plist prop)))
+       (setq plist
+	     (nconc plist (org-export-parse-option-keyword prop backend))))
      plist)))
 
 (defun org-export-get-inbuffer-options (&optional backend files)
@@ -1774,7 +1797,7 @@ a plist."
     (table (plist-get info :with-tables))
     (otherwise t)))
 
-(defsubst org-export-expand (blob contents)
+(defun org-export-expand (blob contents)
   "Expand a parsed element or object to its original state.
 BLOB is either an element or an object.  CONTENTS is its
 contents, as a string or nil."
@@ -4016,7 +4039,6 @@ Return an error if key pressed has no associated command."
       (?q nil)
       ;; Export with `e-ascii' back-end.
       ((?A ?N ?U)
-       (require 'org-e-ascii)
        (let ((outbuf
 	      (org-export-to-buffer
 	       'e-ascii "*Org E-ASCII Export*"
@@ -4027,13 +4049,11 @@ Return an error if key pressed has no associated command."
 	 (when org-export-show-temporary-export-buffer
 	   (switch-to-buffer-other-window outbuf))))
       ((?a ?n ?u)
-       (require 'org-e-ascii)
        (org-e-ascii-export-to-ascii
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)
 	`(:ascii-charset ,(case raw-key (?a 'ascii) (?n 'latin1) (t 'utf-8)))))
       ;; Export with `e-latex' back-end.
       (?L
-       (require 'org-e-latex)
        (let ((outbuf
 	      (org-export-to-buffer
 	       'e-latex "*Org E-LaTeX Export*"
@@ -4042,65 +4062,52 @@ Return an error if key pressed has no associated command."
 	 (when org-export-show-temporary-export-buffer
 	   (switch-to-buffer-other-window outbuf))))
       (?l
-       (require 'org-e-latex)
        (org-e-latex-export-to-latex
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?p
-       (require 'org-e-latex)
        (org-e-latex-export-to-pdf
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?d
-       (require 'org-e-latex)
        (org-open-file
 	(org-e-latex-export-to-pdf
 	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
       ;; Export with `e-html' back-end.
       (?H
-       (require 'org-e-html)
        (let ((outbuf
 	      (org-export-to-buffer
 	       'e-html "*Org E-HTML Export*"
 	       (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
 	 ;; set major mode
-	 (with-current-buffer outbuf
-	   (if (featurep 'nxhtml-mode) (nxhtml-mode) (nxml-mode)))
+	 (with-current-buffer outbuf (nxml-mode))
 	 (when org-export-show-temporary-export-buffer
 	   (switch-to-buffer-other-window outbuf))))
       (?h
-       (require 'org-e-html)
        (org-e-html-export-to-html
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?b
-       (require 'org-e-html)
        (org-open-file
 	(org-e-html-export-to-html
 	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
       ;; Export with `e-odt' back-end.
       (?o
-       (require 'org-e-odt)
        (org-e-odt-export-to-odt
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?O
-       (require 'org-e-odt)
        (org-open-file
 	(org-e-odt-export-to-odt
 	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
       ;; Publishing facilities
       (?F
-       (require 'org-e-publish)
        (org-e-publish-current-file (memq 'force optns)))
       (?P
-       (require 'org-e-publish)
        (org-e-publish-current-project (memq 'force optns)))
       (?X
-       (require 'org-e-publish)
        (let ((project
 	      (assoc (org-icompleting-read
 		      "Publish project: " org-e-publish-project-alist nil t)
 		     org-e-publish-project-alist)))
 	 (org-e-publish project (memq 'force optns))))
       (?E
-       (require 'org-e-publish)
        (org-e-publish-all (memq 'force optns)))
       ;; Undefined command.
       (t (error "No command associated with key %s"

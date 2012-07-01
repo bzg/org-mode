@@ -33,38 +33,7 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
-
-(declare-function org-element-contents "org-element" (element))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-normalize-string "org-element" (s))
-(declare-function org-element-map "org-element"
-		  (data types fun &optional info first-match))
-
-(declare-function org-export-collect-footnote-definitions
-		  "org-export" (data info))
-(declare-function org-export-collect-headlines "org-export" (info &optional n))
-(declare-function org-export-collect-listings "org-export" (info))
-(declare-function org-export-collect-tables "org-export" (info))
-(declare-function org-export-data "org-export" (data info))
-(declare-function org-export-expand-macro "org-export" (macro info))
-(declare-function org-export-format-code-default "org-export" (element info))
-(declare-function org-export-get-coderef-format "org-export" (path desc))
-(declare-function org-export-get-footnote-number "org-export" (footnote info))
-(declare-function org-export-get-headline-number "org-export" (headline info))
-(declare-function org-export-get-ordinal "org-export"
-		  (element info &optional types predicate))
-(declare-function org-export-get-parent-headline "org-export" (blob))
-(declare-function org-export-get-relative-level "org-export" (headline info))
-(declare-function org-export-low-level-p "org-export" (headline info))
-(declare-function org-export-output-file-name "org-export"
-		  (extension &optional subtreep pub-dir))
-(declare-function org-export-resolve-coderef "org-export" (ref info))
-(declare-function org-export-resolve-fuzzy-link "org-export" (link info))
-(declare-function org-export-resolve-id-link "org-export" (link info))
-(declare-function org-export-resolve-radio-link "org-export" (link info))
-(declare-function
- org-export-to-file "org-export"
- (backend file &optional subtreep visible-only body-only ext-plist))
+(require 'org-export)
 
 
 ;;; Define Back-End
