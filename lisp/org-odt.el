@@ -326,6 +326,8 @@ a per-file basis.  For example,
 
 (defconst org-export-odt-tmpdir-prefix "%s-")
 (defconst org-export-odt-bookmark-prefix "OrgXref.")
+(defvar org-odt-zip-dir nil
+  "Temporary directory that holds XML files during export.")
 
 (defvar org-export-odt-embed-images t
   "Should the images be copied in to the odt file or just linked?")
@@ -426,6 +428,33 @@ variable, the list of valid values are populated based on
 			       `(const :tag ,c ,c))
 			     (org-lparse-reachable-formats "odt")))))
 
+(defmacro org-odt-cleanup-xml-buffers (&rest body)
+  `(let ((org-odt-zip-dir
+	  (make-temp-file
+	   (format org-export-odt-tmpdir-prefix "odf") t))
+	 (--cleanup-xml-buffers
+	  (function
+	   (lambda nil
+	     (let ((xml-files '("mimetype" "META-INF/manifest.xml" "content.xml"
+				"meta.xml" "styles.xml")))
+	       ;; kill all xml buffers
+	       (mapc (lambda (file)
+		       (let ((buf (find-file-noselect
+				   (expand-file-name file org-odt-zip-dir) t)))
+			 (when (buffer-name buf)
+			   (set-buffer-modified-p nil)
+			   (kill-buffer buf))))
+		     xml-files))
+	     ;; delete temporary directory.
+	     (delete-directory org-odt-zip-dir t)))))
+     (condition-case-unless-debug err
+	 (prog1 (progn ,@body)
+	   (funcall --cleanup-xml-buffers))
+       ((quit error)
+	(funcall --cleanup-xml-buffers)
+	(message "OpenDocument export failed: %s"
+		 (error-message-string err))))))
+
 ;;;###autoload
 (defun org-export-as-odt-and-open (arg)
   "Export the outline as ODT and immediately open it with a browser.
@@ -433,8 +462,9 @@ If there is an active region, export only the region.
 The prefix ARG specifies how many levels of the outline should become
 headlines.  The default is 3.  Lower levels will become bulleted lists."
   (interactive "P")
-  (org-lparse-and-open
-   (or org-export-odt-preferred-output-format "odt") "odt" arg))
+  (org-odt-cleanup-xml-buffers
+   (org-lparse-and-open
+    (or org-export-odt-preferred-output-format "odt") "odt" arg)))
 
 ;;;###autoload
 (defun org-export-as-odt-batch ()
@@ -465,8 +495,9 @@ the file header and footer, simply return the content of
 <body>...</body>, without even the body tags themselves.  When
 PUB-DIR is set, use this as the publishing directory."
   (interactive "P")
-  (org-lparse (or org-export-odt-preferred-output-format "odt")
-	      "odt" arg hidden ext-plist to-buffer body-only pub-dir))
+  (org-odt-cleanup-xml-buffers
+   (org-lparse (or org-export-odt-preferred-output-format "odt")
+	       "odt" arg hidden ext-plist to-buffer body-only pub-dir)))
 
 (defvar org-odt-entity-control-callbacks-alist
   `((EXPORT
@@ -2207,10 +2238,7 @@ captions on export.")
     ;; Not at all OSes ship with zip by default
     (error "Executable \"zip\" needed for creating OpenDocument files"))
 
-  (let* ((outdir (make-temp-file
-		  (format org-export-odt-tmpdir-prefix org-lparse-backend) t))
-	 (content-file (expand-file-name "content.xml" outdir)))
-
+  (let* ((content-file (expand-file-name "content.xml" org-odt-zip-dir)))
     ;; init conten.xml
     (require 'nxml-mode)
     (let ((nxml-auto-insert-xml-declaration-flag nil))
@@ -2260,11 +2288,9 @@ visually."
   (org-odt-write-manifest-file)
 
   (let ((xml-files '("mimetype" "META-INF/manifest.xml" "content.xml"
-		     "meta.xml"))
-	(zipdir default-directory))
+		     "meta.xml")))
     (when (equal org-lparse-backend 'odt)
       (push "styles.xml" xml-files))
-    (message "Switching to directory %s" (expand-file-name zipdir))
 
     ;; save all xml files
     (mapc (lambda (file)
@@ -2300,15 +2326,8 @@ visually."
 	 cmds))
 
       ;; move the file from outdir to target-dir
-      (rename-file target-name target-dir)
+      (rename-file target-name target-dir)))
 
-      ;; kill all xml buffers
-      (mapc (lambda (file)
-	      (kill-buffer
-	       (find-file-noselect (expand-file-name file zipdir) t)))
-	    xml-files)
-
-      (delete-directory zipdir)))
   (message "Created %s" target)
   (set-buffer (find-file-noselect target t)))
 
@@ -2765,27 +2784,28 @@ non-nil."
 			   (file-name-directory buffer-file-name))))
 	(read-file-name "ODF filename: " nil odf-filename nil
 			(file-name-nondirectory odf-filename)))))
-  (let* ((org-lparse-backend 'odf)
-	 org-lparse-opt-plist
-	 (filename (or odf-file
-		       (expand-file-name
-			(concat
-			 (file-name-sans-extension
-			  (or (file-name-nondirectory buffer-file-name)))
-			 "." "odf")
-			(file-name-directory buffer-file-name))))
-	 (buffer (find-file-noselect (org-odt-init-outfile filename)))
-	 (coding-system-for-write 'utf-8)
-	 (save-buffer-coding-system 'utf-8))
-    (set-buffer buffer)
-    (set-buffer-file-coding-system coding-system-for-write)
-    (let ((mathml (org-create-math-formula latex-frag)))
-      (unless mathml (error "No Math formula created"))
-      (insert mathml)
-      (or (org-export-push-to-kill-ring
-	   (upcase (symbol-name org-lparse-backend)))
-	  (message "Exporting... done")))
-    (org-odt-save-as-outfile filename nil)))
+  (org-odt-cleanup-xml-buffers
+   (let* ((org-lparse-backend 'odf)
+	  org-lparse-opt-plist
+	  (filename (or odf-file
+			(expand-file-name
+			 (concat
+			  (file-name-sans-extension
+			   (or (file-name-nondirectory buffer-file-name)))
+			  "." "odf")
+			 (file-name-directory buffer-file-name))))
+	  (buffer (find-file-noselect (org-odt-init-outfile filename)))
+	  (coding-system-for-write 'utf-8)
+	  (save-buffer-coding-system 'utf-8))
+     (set-buffer buffer)
+     (set-buffer-file-coding-system coding-system-for-write)
+     (let ((mathml (org-create-math-formula latex-frag)))
+       (unless mathml (error "No Math formula created"))
+       (insert mathml)
+       (or (org-export-push-to-kill-ring
+	    (upcase (symbol-name org-lparse-backend)))
+	   (message "Exporting... done")))
+     (org-odt-save-as-outfile filename nil))))
 
 ;;;###autoload
 (defun org-export-as-odf-and-open ()
