@@ -4318,6 +4318,7 @@ translated string.  If no translation is found return S."
 ;; for its interface.  Most commons back-ends should have an entry in
 ;; it.
 
+;;;###autoload
 (defun org-export-dispatch ()
   "Export dispatcher for Org mode.
 
