@@ -92,7 +92,7 @@
 
 ;;; User-Configurable Variables
 
-(defgroup org-e-beamer nil
+(defgroup org-export-e-beamer nil
   "Options specific for using the beamer class in LaTeX export."
   :tag "Org Beamer"
   :group 'org-export-e-beamer
@@ -163,13 +163,13 @@ close   The closing string of the environment."
 
 (defcustom org-e-beamer-outline-frame-title "Outline"
   "Default title of a frame containing an outline."
-  :group 'org-e-beamer
+  :group 'org-export-e-beamer
   :type '(string :tag "Outline frame title"))
 
 (defcustom org-e-beamer-outline-frame-options nil
   "Outline frame options appended after \\begin{frame}.
 You might want to put e.g. \"allowframebreaks=0.9\" here."
-  :group 'org-e-beamer
+  :group 'org-export-e-beamer
   :type '(string :tag "Outline frame options"))
 
 
@@ -323,7 +323,7 @@ channel."
 ;; `org-e-beamer-headline'.
 ;;
 ;; Depending on the level at which an headline is considered as
-;; a frame (given by `org-beamer--frame-level'), the headline is
+;; a frame (given by `org-e-beamer--frame-level'), the headline is
 ;; either a section (`org-e-beamer--format-section'), a frame
 ;; (`org-e-beamer--format-frame') or a block
 ;; (`org-e-beamer--format-block').
@@ -808,7 +808,7 @@ holding export options."
 	  (format "\\begin{frame}%s{%s}\n"
 		  (org-e-beamer--normalize-argument
 		   org-e-beamer-outline-frame-options 'option)
-		  org-beamer-outline-frame-title)
+		  org-e-beamer-outline-frame-title)
 	  (when (wholenump depth)
 	    (format "\\setcounter{tocdepth}{%d}\n" depth))
 	  "\\tableofcontents\n"
