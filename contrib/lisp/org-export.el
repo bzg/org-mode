@@ -2496,9 +2496,9 @@ buffer.
 
 Point is at buffer's beginning when BODY is applied."
   (org-with-gensyms (original-buffer offset buffer-string overlays)
-    `(let ((,original-buffer ,(current-buffer))
-	   (,offset ,(1- (point-min)))
-	   (,buffer-string ,(buffer-string))
+    `(let ((,original-buffer (current-buffer))
+	   (,offset (1- (point-min)))
+	   (,buffer-string (buffer-string))
 	   (,overlays (mapcar
 		       'copy-overlay (overlays-in (point-min) (point-max)))))
        (with-temp-buffer
