@@ -1147,8 +1147,6 @@ for export.  Return options as a plist."
 	      plist :title
 	      (org-element-parse-secondary-string
 	       prop (org-element-restriction 'keyword)))))
-     (when (setq prop (org-entry-get (point) "EXPORT_TEXT"))
-       (setq plist (plist-put plist :text prop)))
      (when (setq prop (org-entry-get (point) "EXPORT_AUTHOR"))
        (setq plist (plist-put plist :author prop)))
      (when (setq prop (org-entry-get (point) "EXPORT_DATE"))
