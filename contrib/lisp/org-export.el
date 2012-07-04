@@ -176,11 +176,15 @@
 The CAR of the alist is the property name, and the CDR is a list
 like (KEYWORD OPTION DEFAULT BEHAVIOUR) where:
 
-KEYWORD is a string representing a buffer keyword, or nil.
+KEYWORD is a string representing a buffer keyword, or nil.  Each
+  property defined this way can also be set, during subtree
+  export, through an headline property named after the keyword
+  with the \"EXPORT_\" prefix (i.e. DATE keyword and EXPORT_DATE
+  property).
 OPTION is a string that could be found in an #+OPTIONS: line.
 DEFAULT is the default value for the property.
 BEHAVIOUR determine how Org should handle multiple keywords for
-the same property.  It is a symbol among:
+  the same property.  It is a symbol among:
   nil       Keep old value and discard the new one.
   t         Replace old value with the new one.
   `space'   Concatenate the values, separating them with a space.
@@ -1134,10 +1138,15 @@ specific items to read, if any."
   "Get export options in subtree at point.
 Optional argument BACKEND is a symbol specifying back-end used
 for export.  Return options as a plist."
+  ;; For each buffer keyword, create an headline property setting the
+  ;; same property in communication channel. The name for the property
+  ;; is the keyword with "EXPORT_" appended to it.
   (org-with-wide-buffer
    (let (prop plist)
      ;; Make sure point is at an heading.
      (unless (org-at-heading-p) (org-back-to-heading t))
+     ;; Take care of EXPORT_TITLE. If it isn't defined, use headline's
+     ;; title as its fallback value.
      (when (setq prop (progn (looking-at org-todo-line-regexp)
 			     (or (save-match-data
 				   (org-entry-get (point) "EXPORT_TITLE"))
@@ -1147,13 +1156,37 @@ for export.  Return options as a plist."
 	      plist :title
 	      (org-element-parse-secondary-string
 	       prop (org-element-restriction 'keyword)))))
-     (when (setq prop (org-entry-get (point) "EXPORT_AUTHOR"))
-       (setq plist (plist-put plist :author prop)))
-     (when (setq prop (org-entry-get (point) "EXPORT_DATE"))
-       (setq plist (plist-put plist :date prop)))
+     ;; EXPORT_OPTIONS are parsed in a non-standard way.
      (when (setq prop (org-entry-get (point) "EXPORT_OPTIONS"))
        (setq plist
 	     (nconc plist (org-export-parse-option-keyword prop backend))))
+     ;; Handle other keywords.
+     (let ((seen '("TITLE")))
+       (mapc
+	(lambda (option)
+	  (let ((property (nth 1 option)))
+	    (when (and property (not (member property seen)))
+	      (let* ((subtree-prop (concat "EXPORT_" property))
+		     (value (org-entry-get (point) subtree-prop)))
+		(push property seen)
+		(when value
+		  (setq plist
+			(plist-put
+			 plist
+			 (car option)
+			 ;; Parse VALUE if required.
+			 (if (member property org-element-parsed-keywords)
+			     (org-element-parse-secondary-string
+			      value (org-element-restriction 'keyword))
+			   value))))))))
+	;; Also look for both general keywords and back-end specific
+	;; options if BACKEND is provided.
+	(append (and backend
+		     (let ((var (intern
+				 (format "org-%s-options-alist" backend))))
+		       (and (boundp var) (symbol-value var))))
+		org-export-options-alist)))
+     ;; Return value.
      plist)))
 
 (defun org-export-get-inbuffer-options (&optional backend files)

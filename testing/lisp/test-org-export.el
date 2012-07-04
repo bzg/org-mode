@@ -99,10 +99,10 @@ already filled in `info'."
 #+DESCRIPTION: Testing
 #+DESCRIPTION: with two lines
 #+EMAIL: some@email.org
-#+EXPORT_EXCLUDE_TAGS: noexport invisible
+#+EXCLUDE_TAGS: noexport invisible
 #+KEYWORDS: test
 #+LANGUAGE: en
-#+EXPORT_SELECT_TAGS: export
+#+SELECT_TAGS: export
 #+TITLE: Some title
 #+TITLE: with spaces"
       (org-export-get-inbuffer-options))
@@ -111,6 +111,41 @@ already filled in `info'."
       :description "Testing\nwith two lines" :email "some@email.org"
       :exclude-tags ("noexport" "invisible") :keywords "test" :language "en"
       :select-tags ("export") :title ("Some title with spaces")))))
+
+(ert-deftest test-org-export/get-subtree-options ()
+  "Test setting options from headline's properties."
+  ;; EXPORT_TITLE.
+  (org-test-with-temp-text "#+TITLE: Title
+* Headline
+  :PROPERTIES:
+  :EXPORT_TITLE: Subtree Title
+  :END:
+Paragraph"
+    (forward-line)
+    (should (equal (plist-get (org-export-get-environment nil t) :title)
+		   '("Subtree Title"))))
+  :title
+  '("subtree-title")
+  ;; EXPORT_OPTIONS.
+  (org-test-with-temp-text "#+OPTIONS: H:1
+* Headline
+  :PROPERTIES:
+  :EXPORT_OPTIONS: H:2
+  :END:
+Paragraph"
+    (forward-line)
+    (should
+     (= 2 (plist-get (org-export-get-environment nil t) :headline-levels))))
+  ;; EXPORT DATE.
+  (org-test-with-temp-text "#+DATE: today
+* Headline
+  :PROPERTIES:
+  :EXPORT_DATE: 29-03-2012
+  :END:
+Paragraph"
+    (forward-line)
+    (should (equal (plist-get (org-export-get-environment nil t) :date)
+		   '("29-03-2012")))))
 
 (ert-deftest test-org-export/handle-options ()
   "Test if export options have an impact on output."
@@ -278,41 +313,7 @@ text
 #+END_SRC"
     (org-test-with-backend test
       (forward-line 1)
-      (should (equal (org-export-as 'test 'subtree) ": 3\n"))))
-  ;; Subtree's EXPORT_TITLE property.
-  (should
-   (equal
-    (plist-get (org-test-with-temp-text "* Headline
-  :PROPERTIES:
-  :EXPORT_TITLE: subtree-title
-  :END:
-Paragraph"
-		 (org-export-get-environment nil t))
-	       :title)
-    '("subtree-title")))
-  ;; Subtree's EXPORT_TITLE property.
-  (org-test-with-temp-text "#+OPTIONS: H:1
-* Headline
-  :PROPERTIES:
-  :EXPORT_OPTIONS: H:2
-  :END:
-Paragraph"
-    (forward-line)
-    (should
-     (= 2 (plist-get (org-export-get-environment nil t) :headline-levels)))))
-
-(ert-deftest test-org-export/export-snippet ()
-  "Test export snippets transcoding."
-  (org-test-with-temp-text "@@test:A@@@@t:B@@"
-    (org-test-with-backend test
-      (flet ((org-test-export-snippet
-	      (snippet contents info)
-	      (when (eq (org-export-snippet-backend snippet) 'test)
-		(org-element-property :value snippet))))
-	(let ((org-export-snippet-translation-alist nil))
-	  (should (equal (org-export-as 'test) "A\n")))
-	(let ((org-export-snippet-translation-alist '(("t" . "test"))))
-	  (should (equal (org-export-as 'test) "AB\n")))))))
+      (should (equal (org-export-as 'test 'subtree) ": 3\n")))))
 
 (ert-deftest test-org-export/expand-include ()
   "Test file inclusion in an Org buffer."
@@ -426,6 +427,24 @@ body\n")))
    (org-export-read-attribute
     :attr_html
     (org-test-with-temp-text "Paragraph" (org-element-current-element)))))
+
+
+
+;;; Export Snippets
+
+(ert-deftest test-org-export/export-snippet ()
+  "Test export snippets transcoding."
+  (org-test-with-temp-text "@@test:A@@@@t:B@@"
+    (org-test-with-backend test
+      (flet ((org-test-export-snippet
+	      (snippet contents info)
+	      (when (eq (org-export-snippet-backend snippet) 'test)
+		(org-element-property :value snippet))))
+	(let ((org-export-snippet-translation-alist nil))
+	  (should (equal (org-export-as 'test) "A\n")))
+	(let ((org-export-snippet-translation-alist '(("t" . "test"))))
+	  (should (equal (org-export-as 'test) "AB\n")))))))
+
 
 
 ;;; Footnotes
