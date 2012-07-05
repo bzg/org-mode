@@ -266,7 +266,7 @@ way they are handled must be hard-coded into
   "Alist between filters properties and initial values.
 
 The key of each association is a property name accessible through
-the communication channel its value is a configurable global
+the communication channel.  Its value is a configurable global
 variable defining initial filters.
 
 This list is meant to install user specified filters.  Back-end
