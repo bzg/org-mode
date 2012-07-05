@@ -402,8 +402,7 @@ All trees carrying any of these tags will be excluded from
 export.  This is without condition, so even subtrees inside that
 carry one of the `org-export-select-tags' will be removed.
 
-This option can also be set with the #+EXPORT_EXCLUDE_TAGS:
-keyword."
+This option can also be set with the #+EXCLUDE_TAGS: keyword."
   :group 'org-export-general
   :type '(repeat (string :tag "Tag")))
 
@@ -507,8 +506,7 @@ one of these tags will be ignored during export.  Inside trees
 that are selected like this, you can still deselect a subtree by
 tagging it with one of the `org-export-exclude-tags'.
 
-This option can also be set with the #+EXPORT_SELECT_TAGS:
-keyword."
+This option can also be set with the #+SELECT_TAGS: keyword."
   :group 'org-export-general
   :type '(repeat (string :tag "Tag")))
 
