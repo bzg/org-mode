@@ -5442,6 +5442,12 @@ by a #."
   :version "24.1"
   :group 'org-appearance)
 
+(defcustom org-doi-server-url "http://dx.doi.org/"
+  "The URL of the DOI server."
+  :type 'string
+  :version "24.2"
+  :group 'org-link)
+
 (defun org-fontify-meta-lines-and-blocks (limit)
   (condition-case nil
       (org-fontify-meta-lines-and-blocks-1 limit)
@@ -9720,10 +9726,10 @@ application the system uses for this file type."
 					 path))))
 
 	 ((string= type "doi")
-	  (browse-url (concat "http://dx.doi.org/" (if (org-string-match-p "[[:nonascii:] ]" path)
-						       (org-link-escape
-							path org-link-escape-chars-browser)
-						     path))))
+	  (browse-url (concat org-doi-server-url (if (org-string-match-p "[[:nonascii:] ]" path)
+						     (org-link-escape
+						      path org-link-escape-chars-browser)
+						   path))))
 
 	 ((member type '("message"))
 	  (browse-url (concat type ":" path)))
