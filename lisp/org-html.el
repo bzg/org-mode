@@ -1835,7 +1835,8 @@ PUB-DIR is set, use this as the publishing directory."
 			  (split-string email ",+ *")
 			  ", "))
 	      (creator-info
-	       (concat "Org version " (org-version) " with Emacs version "
+	       (concat "<a href=\"http://orgmode.org\">Org</a> version "
+		       (org-version) " with <a href=\"http://www.gnu.org/software/emacs/\">Emacs</a> version "
 		       (number-to-string emacs-major-version))))
 
 	  (when (plist-get opt-plist :html-postamble)
