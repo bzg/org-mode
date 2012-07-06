@@ -551,15 +551,18 @@ are found, lines will be split on whitespace into fields."
 (defvar org-table-last-column-widths)
 (defun org-table-export (&optional file format)
   "Export table to a file, with configurable format.
-Such a file can be imported into a spreadsheet program like Excel.
-FILE can be the output file name.  If not given, it will be taken from
-a TABLE_EXPORT_FILE property in the current entry or higher up in the
-hierarchy, or the user will be prompted for a file name.
-FORMAT can be an export format, of the same kind as it used when
-`orgtbl-mode' sends a table in a different format.  The default format can
-be found in the variable `org-table-export-default-format', but the function
-first checks if there is an export format specified in a TABLE_EXPORT_FORMAT
-property, locally or anywhere up in the hierarchy."
+Such a file can be imported into usual spreadsheet programs.
+
+FILE can be the output file name.  If not given, it will be taken
+from a TABLE_EXPORT_FILE property in the current entry or higher
+up in the hierarchy, or the user will be prompted for a file
+name.  FORMAT can be an export format, of the same kind as it
+used when `orgtbl-mode' sends a table in a different format.
+
+The command suggests a format depending on TABLE_EXPORT_FORMAT,
+whether it is set locally or up in the hierarchy, then on the
+extension of the given file name, and finally on the variable
+`org-table-export-default-format'."
   (interactive)
   (unless (org-at-table-p)
     (error "No table at point"))
@@ -569,9 +572,13 @@ property, locally or anywhere up in the hierarchy."
 	 (end (org-table-end))
 	 (txt (buffer-substring-no-properties beg end))
 	 (file (or file (org-entry-get beg "TABLE_EXPORT_FILE" t)))
+	 (formats '("orgtbl-to-tsv" "orgtbl-to-csv"
+		    "orgtbl-to-latex" "orgtbl-to-html"
+		    "orgtbl-to-generic" "orgtbl-to-texinfo"
+		    "orgtbl-to-orgtbl"))
 	 (format (or format
 		     (org-entry-get beg "TABLE_EXPORT_FORMAT" t)))
-	 buf deffmt-readable)
+	 buf deffmt-readable fileext)
     (unless file
       (setq file (read-file-name "Export table to: "))
       (unless (or (not (file-exists-p file))
@@ -583,19 +590,16 @@ property, locally or anywhere up in the hierarchy."
 	     (equal (file-truename file)
 		    (file-truename (buffer-file-name))))
 	(error "Please specify a file name that is different from current"))
+    (setq fileext (concat (file-name-extension file) "$"))
     (unless format
-      (setq deffmt-readable org-table-export-default-format)
+      (setq deffmt-readable
+	    (or (car (delq nil (mapcar (lambda(f) (if (string-match fileext f) f)) formats)))
+		org-table-export-default-format))
       (while (string-match "\t" deffmt-readable)
 	(setq deffmt-readable (replace-match "\\t" t t deffmt-readable)))
       (while (string-match "\n" deffmt-readable)
 	(setq deffmt-readable (replace-match "\\n" t t deffmt-readable)))
-      (setq format (org-completing-read
-		    "Format: "
-		    '("orgtbl-to-tsv" "orgtbl-to-csv"
-		      "orgtbl-to-latex" "orgtbl-to-html"
-		      "orgtbl-to-generic" "orgtbl-to-texinfo"
-		      "orgtbl-to-orgtbl") nil nil
-		      deffmt-readable)))
+      (setq format (org-completing-read "Format: " formats nil nil deffmt-readable)))
     (if (string-match "\\([^ \t\r\n]+\\)\\( +.*\\)?" format)
 	(let* ((transform (intern (match-string 1 format)))
 	       (params (if (match-end 2)
