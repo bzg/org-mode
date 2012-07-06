@@ -1006,7 +1006,7 @@ The edit only takes place if the current value is equal (except for
 white space) the OLD.  If this is so, OLD will be replace by NEW
 and the command will return t.  If something goes wrong, a string will
 be returned that indicates what went wrong."
-  (let (current old1 new1)
+  (let (current old1 new1 level)
     (if (stringp what) (setq what (intern what)))
 
     (cond
