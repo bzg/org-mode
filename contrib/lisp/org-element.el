@@ -3853,6 +3853,9 @@ indentation is not done with TAB characters."
 ;; and moves, element after element, with
 ;; `org-element-current-element' until the container is found.
 ;;
+;; At a deeper level, `org-element-context' lists all elements and
+;; objects containing point.
+;;
 ;; Note: When using `org-element-at-point', secondary values are never
 ;; parsed since the function focuses on elements, not on objects.
 
@@ -3928,6 +3931,85 @@ first element of current section."
 		   (otherwise (setq special-flag nil)))
 		 (narrow-to-region beg end)
 		 (goto-char beg)))))))))))
+
+(defun org-element-context ()
+  "Return list of all elements and objects around point.
+
+Return value is a list like (TYPE PROPS) where TYPE is the type
+of the element or object and PROPS a plist of properties
+associated to it.  Possible types are defined in
+`org-element-all-elements' and `org-element-all-objects'.
+
+All elements and objects returned belong to the current section
+and are ordered from closest to farthest."
+  (org-with-wide-buffer
+   (let* ((origin (point))
+	  ;; Remove elements not containing point from trail.
+	  (elements (org-remove-if
+		     (lambda (el)
+		       (or (> (org-element-property :begin el) origin)
+			   (< (org-element-property :end el) origin)))
+		     (org-element-at-point 'keep-trail)))
+	  (element (car elements))
+	  (type (car element)) end)
+     ;; Check if point is inside an element containing objects or at
+     ;; a secondary string.  In that case, move to beginning of the
+     ;; element or secondary string and set END to the other side.
+     (if (not (or (and (eq type 'item)
+		       (let ((tag (org-element-property :tag element)))
+			 (and tag
+			      (progn
+				(beginning-of-line)
+				(search-forward tag (point-at-eol))
+				(goto-char (match-beginning 0))
+				(and (>= origin (point))
+				     (<= origin
+					 ;; `1+' is required so some
+					 ;; successors can match
+					 ;; properly their object.
+					 (setq end (1+ (match-end 0)))))))))
+		  (and (memq type '(headline inlinetask))
+		       (progn (beginning-of-line)
+			      (skip-chars-forward "* ")
+			      (setq end (point-at-eol))))
+		  (and (memq (car element) '(paragraph table-cell verse-block))
+		       (let ((cbeg (org-element-property
+				    :contents-begin element))
+			     (cend (org-element-property
+				    :contents-end element)))
+			 (and (>= origin cbeg)
+			      (<= origin cend)
+			      (progn (goto-char cbeg) (setq end cend)))))))
+	 elements
+       (let ((restriction (org-element-restriction element)) candidates)
+	 (catch 'exit
+	   (while (setq candidates (org-element-get-next-object-candidates
+				    end restriction candidates))
+	     (let ((closest-cand (rassq (apply 'min (mapcar 'cdr candidates))
+					candidates)))
+	       ;; If ORIGIN is before next object in element, there's
+	       ;; no point in looking further.
+	       (if (> (cdr closest-cand) origin) (throw 'exit elements)
+		 (let* ((object
+			 (progn (goto-char (cdr closest-cand))
+				(funcall (intern (format "org-element-%s-parser"
+							 (car closest-cand))))))
+			(cbeg (org-element-property :contents-begin object))
+			(cend (org-element-property :contents-end object)))
+		   (cond
+		    ;; ORIGIN is after OBJECT, so skip it.
+		    ((< (org-element-property :end object) origin)
+		     (goto-char (org-element-property :end object)))
+		    ;; ORIGIN is within a non-recursive object or at an
+		    ;; object boundaries: Return that object.
+		    ((or (not cbeg) (> cbeg origin) (< cend origin))
+		     (throw 'exit (cons object elements)))
+		    ;; Otherwise, move within current object and restrict
+		    ;; search to the end of its contents.
+		    (t (goto-char cbeg)
+		       (setq end cend)
+		       (push object elements)))))))
+	   elements))))))
 
 
 ;; Once the local structure around point is well understood, it's easy

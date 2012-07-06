@@ -2072,6 +2072,25 @@ Paragraph \\alpha."
        (org-test-with-temp-text "- item"
 	 (org-element-type (org-element-at-point))))))
 
+(ert-deftest test-org-element/context ()
+  "Test `org-element-context' specifications."
+  ;; List all objects and elements containing point.
+  (should
+   (equal
+    '(subscript bold paragraph)
+    (mapcar 'car
+	    (org-test-with-temp-text "Some *text with _underline_*"
+	      (progn (search-forward "under")
+		     (org-element-context))))))
+  ;; Find objects in secondary strings.
+  (should
+   (equal
+    '(underline headline)
+    (mapcar 'car
+	    (org-test-with-temp-text "* Headline _with_ underlining"
+	      (progn (search-forward "w")
+		     (org-element-context)))))))
+
 (ert-deftest test-org-element/forward ()
   "Test `org-element-forward' specifications."
   ;; 1. At EOB: should error.
