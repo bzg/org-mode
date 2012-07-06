@@ -1235,6 +1235,17 @@ the clocking selection, associated with the letter `d'."
 	    (message "Clock starts at %s - %s" ts msg-extra)
 	    (run-hooks 'org-clock-in-hook)))))))
 
+;;;###autoload
+(defun org-clock-in-last (&optional arg)
+  "Clock in the last closed clocked item.
+When already clocking in, send an warning."
+  (interactive "P")
+  (if arg (org-clock-select-task)
+    (org-clock-clock-in (cons (car org-clock-history) (current-time)))
+    (message "Now clocking in: %s (in %s)"
+	     org-clock-current-task
+	     (buffer-name (marker-buffer org-clock-marker)))))
+
 (defun org-clock-mark-default-task ()
   "Mark current task as default task."
   (interactive)
