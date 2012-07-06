@@ -139,7 +139,7 @@ if so then run the appropriate source block from the Library."
 	  (prog1 (org-babel-execute-src-block
 		  nil (mkinfo (org-babel-process-params pre-params)))
 	    ;; update the hash
-	    (when hash (org-babel-set-current-result-hash new-hash)))))))
+	    (when new-hash (org-babel-set-current-result-hash new-hash)))))))
 
 (provide 'ob-lob)
 
