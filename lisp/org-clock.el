@@ -1053,7 +1053,7 @@ With a prefix argument SELECT (\\[universal-argument]), offer a list of \
 recently clocked tasks to
 clock into.  When SELECT is \\[universal-argument] \\[universal-argument], \
 clock into the current task and mark
-is as the default task, a special task that will always be offered in
+it as the default task, a special task that will always be offered in
 the clocking selection, associated with the letter `d'."
   (interactive "P")
   (setq org-clock-notification-was-shown nil)
