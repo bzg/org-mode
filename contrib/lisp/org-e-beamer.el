@@ -95,7 +95,7 @@
 (defgroup org-export-e-beamer nil
   "Options specific for using the beamer class in LaTeX export."
   :tag "Org Beamer"
-  :group 'org-export-e-beamer
+  :group 'org-export
   :version "24.2")
 
 (defcustom org-e-beamer-frame-level 1
