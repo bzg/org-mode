@@ -1842,7 +1842,11 @@ For more examples, see the system specific constants
 			(string :tag "Command")
 			(sexp :tag "Lisp form")))))
 
-
+(defcustom org-doi-server-url "http://dx.doi.org/"
+  "The URL of the DOI server."
+  :type 'string
+  :version "24.2"
+  :group 'org-link-follow)
 
 (defgroup org-refile nil
   "Options concerning refiling entries in Org-mode."
@@ -5441,12 +5445,6 @@ by a #."
   :type 'boolean
   :version "24.1"
   :group 'org-appearance)
-
-(defcustom org-doi-server-url "http://dx.doi.org/"
-  "The URL of the DOI server."
-  :type 'string
-  :version "24.2"
-  :group 'org-link)
 
 (defun org-fontify-meta-lines-and-blocks (limit)
   (condition-case nil
