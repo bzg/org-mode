@@ -1279,6 +1279,7 @@ tables, @kbd{S-@key{TAB}} jumps to the previous field.
 @cindex show all, command
 @orgcmd{C-u C-u C-u @key{TAB},show-all}
 Show all, including drawers.
+@cindex revealing context
 @orgcmd{C-c C-r,org-reveal}
 Reveal context around point, showing the current entry, the following heading
 and the hierarchy above.  Useful for working near a location that has been
@@ -1286,8 +1287,13 @@ exposed by a sparse tree command (@pxref{Sparse trees}) or an agenda command
 (@pxref{Agenda commands}).  With a prefix argument show, on each
 level, all sibling headings.  With a double prefix argument, also show the
 entire subtree of the parent.
+@cindex show branches, command
 @orgcmd{C-c C-k,show-branches}
 Expose all the headings of the subtree, CONTENT view for just one subtree.
+@cindex show children, command
+@orgcmd{C-c @key{TAB},show-children}
+Expose all direct children of the subtree.  With a numeric prefix argument N,
+expose all children down to level N.
 @orgcmd{C-c C-x b,org-tree-to-indirect-buffer}
 Show the current subtree in an indirect buffer@footnote{The indirect
 buffer
