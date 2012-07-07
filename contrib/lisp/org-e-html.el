@@ -2137,16 +2137,16 @@ holding contextual information."
 					 headline info) "-"))
 	     (ids (remove 'nil
 			  (list (org-element-property :custom-id headline)
-				(org-element-property :id headline)
-				(concat "sec-" section-number))))
+				(concat "sec-" section-number)
+				(org-element-property :id headline))))
 	     (preferred-id (car ids))
 	     (extra-ids (cdr ids))
 	     (extra-class (org-element-property :html-container-class headline))
 	     (level1 (+ level (1- org-e-html-toplevel-hlevel))))
 	(format "<div id=\"%s\" class=\"%s\">%s%s</div>\n"
 		(format "outline-container-%s"
-			(if (zerop (length extra-ids)) section-number
-			  preferred-id))
+			(or (org-element-property :custom-id headline)
+			    section-number))
 		(concat (format "outline-%d" level1) (and extra-class " ")
 			extra-class)
 		(format "\n<h%d id=\"%s\">%s%s</h%d>\n"
@@ -2466,7 +2466,19 @@ standalone images, do the following.
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((type (org-element-property :type link))
+  (let* ((--link-org-files-as-html-maybe
+	  (function
+	   (lambda (raw-path info)
+	     "Treat links to `file.org' as links to `file.html', if needed.
+           See `org-e-html-link-org-files-as-html'."
+	     (cond
+	      ((and org-e-html-link-org-files-as-html
+		    (string= ".org"
+			     (downcase (file-name-extension raw-path "."))))
+	       (concat (file-name-sans-extension raw-path) "."
+		       (plist-get info :html-extension)))
+	      (t raw-path)))))
+	 (type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
@@ -2478,15 +2490,9 @@ INFO is a plist holding contextual information.  See
 		 ;; components.
 		 (when (string-match "\\(.+\\)::.+" raw-path)
 		   (setq raw-path (match-string 1 raw-path)))
-		 ;; If the link points to "*.org" file, rewrite it as
-		 ;; though it were a link to the corresponding
-		 ;; "*.html" file, if needed.
-		 (when (and org-e-html-link-org-files-as-html
-			    (string= ".org" (downcase (file-name-extension
-						       raw-path "."))))
-		   (setq raw-path (concat
-				   (file-name-sans-extension raw-path) "."
-				   (plist-get info :html-extension))))
+		 ;; Treat links to ".org" files as ".html", if needed.
+		 (setq raw-path (funcall --link-org-files-as-html-maybe
+					 raw-path info))
 		 ;; If file path is absolute, prepend it with protocol
 		 ;; component - "file://".
 		 (if (not (file-name-absolute-p raw-path)) raw-path
@@ -2523,6 +2529,15 @@ INFO is a plist holding contextual information.  See
 			     (org-export-resolve-fuzzy-link link info)
 			   (org-export-resolve-id-link link info))))
 	(case (org-element-type destination)
+	  ;; ID link points to an external file.
+	  (plain-text
+	   (assert (org-uuidgen-p path))
+	   (let ((fragment (concat "ID-" path))
+		 ;; Treat links to ".org" files as ".html", if needed.
+		 (path (funcall --link-org-files-as-html-maybe
+				destination info)))
+	     (format "<a href=\"%s#%s\"%s>%s</a>"
+		     path fragment attributes (or desc destination))))
 	  ;; Fuzzy link points nowhere.
 	  ((nil)
 	   (format "<i>%s</i>"
@@ -2567,7 +2582,7 @@ INFO is a plist holding contextual information.  See
 					       :title destination) info)))))
 	     (format "<a href=\"#%s\"%s>%s</a>"
 		     (org-solidify-link-text href) attributes desc)))
-          ;; Fuzzy link points to a target.  Do as above.
+	  ;; Fuzzy link points to a target.  Do as above.
 	  (t
 	   (let ((path (org-export-solidify-link-text path)) number)
 	     (unless desc
@@ -2794,7 +2809,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Section
 
-(defun org-e-html-section (section contents info) ; FIXME
+(defun org-e-html-section (section contents info)
   "Transcode a SECTION element from Org to HTML.
 CONTENTS holds the contents of the section.  INFO is a plist
 holding contextual information."
@@ -2807,17 +2822,11 @@ holding contextual information."
 	     (section-number
 	      (mapconcat
 	       'number-to-string
-	       (org-export-get-headline-number parent info) "-"))
-	     (ids (remove 'nil
-			  (list (org-element-property :custom-id parent)
-				(org-element-property :id parent)
-				(concat "sec-" section-number))))
-	     (preferred-id (car ids))
-	     (extra-ids (cdr ids)))
+	       (org-export-get-headline-number parent info) "-")))
         ;; Build return value.
         (format "<div class=\"outline-text-%d\" id=\"text-%s\">\n%s</div>"
                 class-num
-		(if (zerop (length extra-ids)) section-number preferred-id)
+		(or (org-element-property :custom-id parent) section-number)
 		contents)))))
 
 ;;;; Radio Target
