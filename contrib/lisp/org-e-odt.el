@@ -368,7 +368,7 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
       (when (numberp desc)
 	(setq desc (format "%d" desc) xref-format "number"))
       (when (listp desc)
-	(setq desc (mapconcat 'identity desc ".") xref-format "chapter"))
+	(setq desc (mapconcat 'number-to-string desc ".") xref-format "chapter"))
       (setq href (concat org-e-odt-bookmark-prefix href))
       (org-e-odt-format-tags-simple
        '("<text:bookmark-ref text:reference-format=\"%s\" text:ref-name=\"%s\">" .
@@ -3321,21 +3321,26 @@ INFO is a plist holding contextual information.  See
 	    'italic))
 	  ;; Fuzzy link points to an invisible target.
 	  (keyword nil)
-	  ;; LINK points to an headline.  If headlines are numbered
-	  ;; and the link has no description, display headline's
-	  ;; number.  Otherwise, display description or headline's
-	  ;; title.
+	  ;; LINK points to an headline.  Check if LINK should display
+	  ;; section numbers.
 	  (headline
 	   (let* ((headline-no (org-export-get-headline-number destination info))
 		  (label (format "sec-%s" (mapconcat 'number-to-string
 						     headline-no "-")))
-		  (section-no (mapconcat 'number-to-string headline-no ".")))
-	     (setq desc
-		   (cond
-		    (desc desc)
-		    ((plist-get info :section-numbers) section-no)
-		    (t (org-export-data
-			(org-element-property :title destination) info))))
+		  (desc
+		   ;; Case 1: Headline is numbered and LINK has no
+		   ;; description or LINK's description matches
+		   ;; headline's title.  Display section number.
+		   (if (and (org-export-numbered-headline-p destination info)
+			    (or (not desc)
+				(string= desc (org-element-property
+					       :raw-value destination))))
+		       headline-no
+		     ;; Case 2: Either the headline is un-numbered or
+		     ;; LINK has a custom description.  Display LINK's
+		     ;; description or headline's title.
+		     (or desc (org-export-data (org-element-property
+						:title destination) info)))))
 	     (org-e-odt-format-internal-link desc label)))
 	  ;; Fuzzy link points to a target.  Do as above.
 	  (otherwise

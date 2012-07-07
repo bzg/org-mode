@@ -2548,21 +2548,23 @@ INFO is a plist holding contextual information.  See
 				       (org-export-get-headline-number
 					destination info) "-")))
 		   (t (error "Shouldn't reach here"))))
+		 ;; What description to use?
 		 (desc
-		  ;; What description to use?
-		  (cond
-		   ;; Case 1: Link already has a description.  Use it.
-		   (desc desc)
-		   ;; Case 2: Link has no description and headline is
-		   ;; numbered. Use the section number.
-		   ((org-export-numbered-headline-p destination info)
-		    (mapconcat 'number-to-string
-			       (org-export-get-headline-number
-				destination info) "."))
-		   ;; Case 3: Link has no description and headline is
-		   ;; un-numbered.  Use the headline title.
-		   (t (org-export-data
-		       (org-element-property :title destination) info)))))
+		  ;; Case 1: Headline is numbered and LINK has no
+		  ;; description or LINK's description matches
+		  ;; headline's title.  Display section number.
+		  (if (and (org-export-numbered-headline-p destination info)
+			   (or (not desc)
+			       (string= desc (org-element-property
+					      :raw-value destination))))
+		      (mapconcat 'number-to-string
+				 (org-export-get-headline-number
+				  destination info) ".")
+		    ;; Case 2: Either the headline is un-numbered or
+		    ;; LINK has a custom description.  Display LINK's
+		    ;; description or headline's title.
+		    (or desc (org-export-data (org-element-property
+					       :title destination) info)))))
 	     (format "<a href=\"#%s\"%s>%s</a>"
 		     (org-solidify-link-text href) attributes desc)))
           ;; Fuzzy link points to a target.  Do as above.
