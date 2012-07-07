@@ -195,6 +195,14 @@ Intended to be locally bound around a call to `org-export-as-html'." )
   :group 'org-export-e-html
   :type 'boolean)
 
+;;;; HTML-specific
+
+(defcustom org-e-html-allow-name-attribute-in-anchors t
+  "When nil, do not set \"name\" attribute in anchors.
+By default, anchors are formatted with both \"id\" and \"name\"
+attributes, when appropriate."
+  :group 'org-export-e-html
+  :type 'boolean)
 
 ;;;; Document
 
@@ -1379,9 +1387,10 @@ Replaces invalid characters with \"_\"."
 (defun org-e-html-format-footnote-reference (n def refcnt)
   (let ((extra (if (= refcnt 1) "" (format ".%d"  refcnt))))
     (format org-e-html-footnote-format
-	    (format
-	     "<a class=\"footref\" name=\"fnr.%s%s\" href=\"#fn.%s\">%s</a>"
-	     n extra n n))))
+	    (let* ((id (format "fnr.%s%s" n extra))
+		   (href (format " href=\"#fn.%s\"" n))
+		   (attributes (concat " class=\"footref\"" href)))
+	      (org-e-html--anchor id n attributes)))))
 
 (defun org-e-html-format-footnotes-section (section-name definitions)
   (if (not definitions) ""
@@ -1391,10 +1400,12 @@ Replaces invalid characters with \"_\"."
   (let ((n (car fn)) (def (cdr fn)))
     (format
      "<tr>\n<td>%s</td>\n<td>%s</td>\n</tr>\n"
-     (format
-      (format org-e-html-footnote-format
-	      "<a class=\"footnum\" name=\"fn.%s\" href=\"#fnr.%s\">%s</a>")
-      n n n) def)))
+     (format org-e-html-footnote-format
+	     (let* ((id (format "fn.%s" n))
+		    (href (format " href=\"#fnr.%s\"" n))
+		    (attributes (concat " class=\"footnum\"" href)))
+	       (org-e-html--anchor id n attributes)))
+     def)))
 
 (defun org-e-html-footnote-section (info)
   (let* ((fn-alist (org-export-collect-footnote-definitions
@@ -1621,7 +1632,7 @@ This function shouldn't be used for floats.  See
 	  (concat
 	   (when (plist-get info :time-stamp-file)
 	     (format "
-<p class=\"date\"> %s: %s </p> "  (nth 2 lang-words) date))
+<p class=\"date\"> %s: %s </p> " (nth 2 lang-words) date))
 	   (when (and (plist-get info :with-author) author)
 	     (format "
 <p class=\"author\"> %s : %s</p>"  (nth 1 lang-words) author))
@@ -1733,6 +1744,15 @@ original parsed data.  INFO is a plist holding export options."
 
 
 ;;; Transcode Helpers
+
+;;;; Anchor
+
+(defun org-e-html--anchor (&optional id desc attributes)
+  (let* ((name (and org-e-html-allow-name-attribute-in-anchors id))
+	 (attributes (concat (and id (format " id=\"%s\"" id))
+			     (and name (format " name=\"%s\"" name))
+			     attributes)))
+    (format "<a%s>%s</a>" attributes (or desc ""))))
 
 ;;;; Todo
 
@@ -2157,7 +2177,7 @@ holding contextual information."
 			   (let ((id (org-solidify-link-text
 				      (if (org-uuidgen-p x) (concat "ID-" x)
 					x))))
-			     (format "<a id=\"%s\" name=\"%s\"></a>" id id)))
+			     (org-e-html--anchor id)))
 			 extra-ids "")
 			full-text
 			level1)
@@ -2837,7 +2857,7 @@ TEXT is the text of the target.  INFO is a plist holding
 contextual information."
   (let ((id (org-export-solidify-link-text
 	     (org-element-property :value radio-target))))
-    (format "<a id=\"%s\" name=\"%s\">%s</a>" id id text)))
+    (org-e-html--anchor id text)))
 
 
 ;;;; Special Block
@@ -3077,7 +3097,7 @@ CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (let ((id (org-export-solidify-link-text
 	     (org-element-property :value target))))
-    (format "<a id=\"%s\" name=\"%s\"></a>" id id)))
+    (org-e-html--anchor id)))
 
 
 ;;;; Timestamp
