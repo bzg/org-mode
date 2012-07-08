@@ -3413,11 +3413,10 @@ the plist used as a communication channel."
     ;; item and the item has a checkbox, splice the checkbox and
     ;; paragraph contents together.
     (when (and (eq (org-element-type parent) 'item)
-	       (not (eq (org-element-property :type
-					      (org-export-get-parent parent))
-			'descriptive))
-	       (= (org-element-property :begin paragraph)
-		  (org-element-property :contents-begin parent)))
+    	       (not  (eq (org-element-property :type
+					       (org-export-get-parent parent))
+			 'descriptive))
+    	       (eq paragraph (car (org-element-contents parent))))
       (setq contents (concat (org-e-odt--checkbox parent) contents)))
     (org-e-odt-format-stylized-paragraph style contents)))
 
