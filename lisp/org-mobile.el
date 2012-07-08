@@ -318,7 +318,9 @@ create all custom agenda views, for upload to the mobile phone."
 	  (org-mobile-check-setup)
 	  (org-mobile-prepare-file-lists)
 	  (message "Creating agendas...")
-	  (let ((inhibit-redisplay t)) (org-mobile-create-sumo-agenda))
+	  (let ((inhibit-redisplay t)
+		(org-agenda-files (mapcar 'car org-mobile-files-alist)))
+	    (org-mobile-create-sumo-agenda))
 	  (message "Creating agendas...done")
 	  (org-save-all-org-buffers) ; to save any IDs created by this process
 	  (message "Copying files...")
