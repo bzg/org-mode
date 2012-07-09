@@ -1793,7 +1793,7 @@ Return transcoded string."
       (let ((results
              (org-export-filter-apply-functions
               (plist-get info (intern (format ":filter-%s" type)))
-              (let ((post-blank (org-element-property :post-blank data)))
+              (let ((post-blank (or (org-element-property :post-blank data) 0)))
                 (if (memq type org-element-all-elements)
                     (concat (org-element-normalize-string results)
                             (make-string post-blank ?\n))
