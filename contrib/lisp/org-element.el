@@ -2983,13 +2983,17 @@ CONTENTS is nil."
 
 
 
-;;; Accessors
+;;; Accessors and Setters
 ;;
 ;; Provide four accessors: `org-element-type', `org-element-property'
 ;; `org-element-contents' and `org-element-restriction'.
+;;
+;; Setter functions allow to modify elements by side effect.  There is
+;;`org-element-put-property', `org-element-set-contents' and
+;;`org-element-adopt-contents'.
 
 (defun org-element-type (element)
-  "Return type of element ELEMENT.
+  "Return type of ELEMENT.
 
 The function returns the type of the element or object provided.
 It can also return the following special value:
@@ -3014,6 +3018,38 @@ ELEMENT can be an element, an object or a symbol representing an
 element or object type."
   (cdr (assq (if (symbolp element) element (org-element-type element))
 	     org-element-object-restrictions)))
+
+(defsubst org-element-put-property (element property value)
+  "In ELEMENT set PROPERTY to VALUE.
+Return modified element."
+  (setcar (cdr element) (plist-put (nth 1 element) property value))
+  element)
+
+(defsubst org-element-set-contents (element &rest contents)
+  "Set ELEMENT contents to CONTENTS.
+Return modified element."
+  (setcdr (cdr element) contents))
+
+(defsubst org-element-adopt-element (parent child &optional append)
+  "Add an element to the contents of another element.
+
+PARENT is an element or object.  CHILD is an element, an object,
+or a string.
+
+CHILD is added at the beginning of PARENT contents, unless the
+optional argument APPEND is non-nil, in which case CHILD is added
+at the end.
+
+The function takes care of setting `:parent' property for CHILD.
+Return parent element."
+  (let ((contents (org-element-contents parent)))
+    (apply 'org-element-set-contents
+	   parent
+	   (if append (append contents (list child)) (cons child contents))))
+  ;; Link the child element with parent.
+  (when (consp child) (org-element-put-property child :parent parent))
+  ;; Return the parent element.
+  parent)
 
 
 

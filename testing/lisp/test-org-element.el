@@ -63,6 +63,78 @@ Some other text
      (org-element-map
       (org-element-parse-buffer) 'entity 'identity nil nil 'center-block))))
 
+
+
+;;; Test Setters
+
+(ert-deftest test-org-element/put-property ()
+  "Test `org-element-put-property' specifications."
+  (org-test-with-parsed-data "* Headline\n *a*"
+    (org-element-put-property
+     (org-element-map tree 'bold 'identity nil t) :test 1)
+    (should (org-element-property
+	     :test (org-element-map tree 'bold 'identity nil t)))))
+
+(ert-deftest test-org-element/set-contents ()
+  "Test `org-element-set-contents' specifications."
+  ;; Accept multiple entries.
+  (should
+   (equal '("b" (italic nil "a"))
+	  (org-test-with-parsed-data "* Headline\n *a*"
+	    (org-element-set-contents
+	     (org-element-map tree 'bold 'identity nil t) "b" '(italic nil "a"))
+	    (org-element-contents
+	     (org-element-map tree 'bold 'identity nil t)))))
+  ;; Accept atoms and elements.
+  (should
+   (equal '("b")
+	  (org-test-with-parsed-data "* Headline\n *a*"
+	    (org-element-set-contents
+	     (org-element-map tree 'bold 'identity nil t) "b")
+	    (org-element-contents
+	     (org-element-map tree 'bold 'identity nil t)))))
+  (should
+   (equal '((italic nil "b"))
+	  (org-test-with-parsed-data "* Headline\n *a*"
+	    (org-element-set-contents
+	     (org-element-map tree 'bold 'identity nil t) '(italic nil "b"))
+	    (org-element-contents
+	     (org-element-map tree 'bold 'identity nil t)))))
+  ;; Allow nil contents.
+  (should-not
+   (org-test-with-parsed-data "* Headline\n *a*"
+     (org-element-set-contents (org-element-map tree 'bold 'identity nil t))
+     (org-element-contents (org-element-map tree 'bold 'identity nil t)))))
+
+(ert-deftest test-org-element/adopt-element ()
+  "Test `org-element-adopt-element' specifications."
+  ;; Adopt an element.
+  (should
+   (equal '(italic plain-text)
+	  (org-test-with-parsed-data "* Headline\n *a*"
+	    (org-element-adopt-element
+	     (org-element-map tree 'bold 'identity nil t) '(italic nil "a"))
+	    (mapcar (lambda (blob) (org-element-type blob))
+		    (org-element-contents
+		     (org-element-map tree 'bold 'identity nil t))))))
+  ;; Adopt a string.
+  (should
+   (equal '("b" "a")
+	  (org-test-with-parsed-data "* Headline\n *a*"
+	    (org-element-adopt-element
+	     (org-element-map tree 'bold 'identity nil t) "b")
+	    (org-element-contents
+	     (org-element-map tree 'bold 'identity nil t)))))
+  ;; Test APPEND optional argument.
+  (should
+   (equal '("a" "b")
+	  (org-test-with-parsed-data "* Headline\n *a*"
+	    (org-element-adopt-element
+	     (org-element-map tree 'bold 'identity nil t) "b" t)
+	    (org-element-contents
+	     (org-element-map tree 'bold 'identity nil t))))))
+
+
 
 ;;; Test Parsers
 
@@ -1237,7 +1309,7 @@ Outside list"
     '("first line\nsecond line"))))
 
 
-;;; Subscript
+;;;; Subscript
 
 (ert-deftest test-org-element/subscript-parser ()
   "Test `subscript' parser."
@@ -1251,7 +1323,7 @@ Outside list"
      (org-element-map (org-element-parse-buffer) 'subscript 'identity))))
 
 
-;;; Superscript
+;;;; Superscript
 
 (ert-deftest test-org-element/superscript-parser ()
   "Test `superscript' parser."
