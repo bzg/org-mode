@@ -12940,7 +12940,7 @@ Code blocks in the following languages are supported.
 
 Language-specific documentation is available for some languages.  If
 available, it can be found at
-@uref{http://orgmode.org/worg/org-contrib/babel/languages}.
+@uref{http://orgmode.org/worg/org-contrib/babel/languages.html}.
 
 The @code{org-babel-load-languages} controls which languages are enabled for
 evaluation (by default only @code{emacs-lisp} is enabled).  This variable can
