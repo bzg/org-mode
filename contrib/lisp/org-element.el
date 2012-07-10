@@ -2989,8 +2989,10 @@ CONTENTS is nil."
 ;; `org-element-contents' and `org-element-restriction'.
 ;;
 ;; Setter functions allow to modify elements by side effect.  There is
-;;`org-element-put-property', `org-element-set-contents' and
-;;`org-element-adopt-contents'.
+;; `org-element-put-property', `org-element-set-contents',
+;; `org-element-set-element' and `org-element-adopt-element'.  Note
+;; that `org-element-set-element' and `org-element-adopt-element' are
+;; higher level functions since also update `:parent' property.
 
 (defun org-element-type (element)
   "Return type of ELEMENT.
@@ -3029,6 +3031,21 @@ Return modified element."
   "Set ELEMENT contents to CONTENTS.
 Return modified element."
   (setcdr (cdr element) contents))
+
+(defsubst org-element-set-element (old new)
+  "Replace element or object OLD with element or object NEW.
+The function takes care of setting `:parent' property for NEW."
+  ;; OLD can belong to the contents of PARENT or to its secondary
+  ;; string.
+  (let* ((parent (org-element-property :parent old))
+	 (sec-loc (cdr (assq (org-element-type parent)
+			     org-element-secondary-value-alist)))
+	 (sec-value (and sec-loc (org-element-property sec-loc parent)))
+	 (place (or (member old sec-value) (member old parent))))
+    ;; Make sure NEW has correct `:parent' property.
+    (org-element-put-property new :parent parent)
+    ;; Replace OLD with NEW in PARENT.
+    (setcar place new)))
 
 (defsubst org-element-adopt-element (parent child &optional append)
   "Add an element to the contents of another element.

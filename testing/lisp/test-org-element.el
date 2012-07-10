@@ -106,6 +106,22 @@ Some other text
      (org-element-set-contents (org-element-map tree 'bold 'identity nil t))
      (org-element-contents (org-element-map tree 'bold 'identity nil t)))))
 
+(ert-deftest test-org-element/set-element ()
+  "Test `org-element-set-element' specifications."
+  (org-test-with-parsed-data "* Headline\n*a*"
+    (org-element-set-element
+     (org-element-map tree 'bold 'identity nil t)
+     '(italic nil "b"))
+    ;; Check if object is correctly replaced.
+    (should (org-element-map tree 'italic 'identity))
+    (should-not (org-element-map tree 'bold 'identity))
+    ;; Check if new object's parent is correctly set.
+    (should
+     (equal
+      (org-element-property :parent
+			    (org-element-map tree 'italic 'identity nil t))
+      (org-element-map tree 'paragraph 'identity nil t)))))
+
 (ert-deftest test-org-element/adopt-element ()
   "Test `org-element-adopt-element' specifications."
   ;; Adopt an element.

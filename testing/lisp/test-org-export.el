@@ -392,22 +392,6 @@ body\n")))
 		    (delete-region (point) (progn (forward-line) (point)))))))))
 	(should (equal (org-export-as 'test) "Body 1\nBody 2\n"))))))
 
-(ert-deftest test-org-export/set-element ()
-  "Test `org-export-set-element' specifications."
-  (org-test-with-parsed-data "* Headline\n*a*"
-    (org-export-set-element
-     (org-element-map tree 'bold 'identity nil t)
-     '(italic nil "b"))
-    ;; Check if object is correctly replaced.
-    (should (org-element-map tree 'italic 'identity))
-    (should-not (org-element-map tree 'bold 'identity))
-    ;; Check if new object's parent is correctly set.
-    (should
-     (equal
-      (org-element-property :parent
-			    (org-element-map tree 'italic 'identity nil t))
-      (org-element-map tree 'paragraph 'identity nil t)))))
-
 
 
 ;;; Affiliated Keywords

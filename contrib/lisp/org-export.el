@@ -2245,10 +2245,6 @@ channel, as a plist.  It must return a string or nil.")
 ;; Internal function `org-export-filter-apply-functions' takes care
 ;; about applying each filter in order to a given data.  It stops
 ;; whenever a filter returns a nil value.
-;;
-;; User-oriented function `org-export-set-element' replaces one
-;; element or object in the parse tree with another one.  It is meant
-;; to be used as a tool for parse tree filters.
 
 (defun org-export-filter-apply-functions (filters value info)
   "Call every function in FILTERS.
@@ -2287,22 +2283,6 @@ Return the updated communication channel."
 	      (eval back-end-filters))))
     ;; Return new communication channel.
     (org-combine-plists info plist)))
-
-(defun org-export-set-element (old new)
-  "Replace element or object OLD with element or object NEW.
-The function takes care of setting `:parent' property for NEW."
-  ;; OLD can belong to the contents of PARENT or to its secondary
-  ;; string.
-  (let* ((parent (org-element-property :parent old))
-	 (sec-loc (cdr (assq (org-element-type parent)
-			     org-element-secondary-value-alist)))
-	 (sec-value (and sec-loc (org-element-property sec-loc parent)))
-	 (place (or (member old sec-value) (member old parent))))
-    ;; Ensure NEW has correct parent.  Then replace OLD with NEW.
-    (let ((props (nth 1 new)))
-      (if props (plist-put props :parent parent)
-	(setcar (cdr new) `(:parent ,parent))))
-    (setcar place new)))
 
 
 
