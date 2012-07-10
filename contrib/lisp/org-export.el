@@ -3991,7 +3991,11 @@ BLOB is the element or object considered."
 
 (defun org-export-get-genealogy (blob)
   "Return full genealogy relative to a given element or object.
-BLOB is the element or object being considered."
+
+BLOB is the element or object being considered.
+
+Ancestors are returned from closest to farthest, the last one
+being the full parse tree."
   (let (genealogy (parent blob))
     (while (setq parent (org-element-property :parent parent))
       (push parent genealogy))
