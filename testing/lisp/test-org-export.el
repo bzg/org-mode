@@ -1577,5 +1577,37 @@ Another text. (ref:text)
       info))))
 
 
+
+;;; Topology
+
+(ert-deftest test-org-export/get-next-element ()
+  "Test `org-export-get-next-element' specifications."
+  ;; Standard test.
+  (should
+   (equal "b"
+	  (org-test-with-parsed-data "* Headline\n*a* b"
+	    (org-export-get-next-element
+	     (org-element-map tree 'bold 'identity info t)))))
+  ;; Return nil when no previous element.
+  (should-not
+   (org-test-with-parsed-data "* Headline\na *b*"
+     (org-export-get-next-element
+      (org-element-map tree 'bold 'identity info t)))))
+
+(ert-deftest test-org-export/get-previous-element ()
+  "Test `org-export-get-previous-element' specifications."
+  ;; Standard test.
+  (should
+   (equal "a "
+	  (org-test-with-parsed-data "* Headline\na *b*"
+	    (org-export-get-previous-element
+	     (org-element-map tree 'bold 'identity info t)))))
+  ;; Return nil when no previous element.
+  (should-not
+   (org-test-with-parsed-data "* Headline\n*a* b"
+     (org-export-get-previous-element
+      (org-element-map tree 'bold 'identity info t)))))
+
+
 (provide 'test-org-export)
 ;;; test-org-export.el end here

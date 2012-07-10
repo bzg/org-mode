@@ -4010,14 +4010,14 @@ OBJECT is either a `table-cell' or `table-element' type object."
 BLOB is an element or object.  Return previous element or object,
 a string, or nil."
   (let ((parent (org-export-get-parent blob)))
-    (cadr (member blob (reverse (org-element-contents parent))))))
+    (cadr (memq blob (reverse (org-element-contents parent))))))
 
 (defun org-export-get-next-element (blob)
   "Return next element or object.
 BLOB is an element or object.  Return next element or object,
 a string, or nil."
   (let ((parent (org-export-get-parent blob)))
-    (cadr (member blob (org-element-contents parent)))))
+    (cadr (memq blob (org-element-contents parent)))))
 
 
 
