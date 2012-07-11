@@ -240,7 +240,7 @@ it in the buffer."
      ;; Else, start a new list.
      (t
       (beginning-of-line)
-      (org-indent-line-function)
+      (org-indent-line)
       (insert  "- ")
       (org-timer (when arg '(4)))
       (insert ":: ")))))

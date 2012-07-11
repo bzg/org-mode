@@ -1180,7 +1180,7 @@ the clocking selection, associated with the letter `d'."
 	     (t
 	      (insert-before-markers "\n")
 	      (backward-char 1)
-	      (org-indent-line-function)
+	      (org-indent-line)
 	      (when (and (save-excursion
 			   (end-of-line 0)
 			   (org-in-item-p)))
@@ -1348,7 +1348,7 @@ line and position cursor in that line."
 	(goto-char first)
 	(insert ":" drawer ":\n")
 	(beginning-of-line 0)
-	(org-indent-line-function)
+	(org-indent-line)
 	(org-flag-drawer t)
 	(beginning-of-line 2)
 	(or org-log-states-order-reversed
@@ -1368,10 +1368,10 @@ line and position cursor in that line."
 		     (< org-clock-into-drawer 2)))
 	(insert ":" drawer ":\n:END:\n")
 	(beginning-of-line -1)
-	(org-indent-line-function)
+	(org-indent-line)
 	(org-flag-drawer t)
 	(beginning-of-line 2)
-	(org-indent-line-function)
+	(org-indent-line)
 	(beginning-of-line)
 	(or org-log-states-order-reversed
 	    (and (re-search-forward org-property-end-re nil t)

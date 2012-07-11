@@ -2100,7 +2100,7 @@ When NAMED is non-nil, look for a named equation."
 	    ;; don't overwrite TBLFM, we might use text properties to store stuff
 	    (goto-char (match-beginning 3))
 	    (delete-region (match-beginning 3) (match-end 0)))
-	(org-indent-line-function)
+	(org-indent-line)
 	(insert (or (match-string 2) "#+TBLFM:")))
       (insert " "
 	      (mapconcat (lambda (x)

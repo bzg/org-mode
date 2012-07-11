@@ -5041,7 +5041,7 @@ The following commands are available:
   (org-add-hook 'kill-buffer-hook 'org-check-running-clock nil 'local)
   ;; Paragraphs and auto-filling
   (org-set-autofill-regexps)
-  (setq indent-line-function 'org-indent-line-function)
+  (setq indent-line-function 'org-indent-line)
   (org-update-radio-target-regexp)
   ;; Beginning/end of defun
   (org-set-local 'beginning-of-defun-function 'org-beginning-of-defun)
@@ -12403,9 +12403,9 @@ EXTRA is additional text that will be inserted into the notes buffer."
 			   (goto-char (1- (match-beginning 0))))))
 	      (insert "\n:" drawer ":\n:END:")
 	      (beginning-of-line 0)
-	      (org-indent-line-function)
+	      (org-indent-line)
 	      (beginning-of-line 2)
-	      (org-indent-line-function)
+	      (org-indent-line)
 	      (end-of-line 0)))
 	   ((and org-log-state-notes-insert-after-drawers
 		 (save-excursion
@@ -14198,7 +14198,7 @@ If the drawer does not exist and FORCE is non-nil, create the drawer."
 	  (or force (throw 'exit nil))
 	  (goto-char beg)
 	  (setq end beg)
-	  (org-indent-line-function)
+	  (org-indent-line)
 	  (insert ":END:\n"))
 	(cons beg end)))))
 
@@ -14524,10 +14524,10 @@ and the new value.")
 	    (goto-char (cdr range))
 	    (insert "\n")
 	    (backward-char 1)
-	    (org-indent-line-function))
+	    (org-indent-line))
 	  (insert ":" property ":")
 	  (and value (insert " " value))
-	  (org-indent-line-function)))))
+	  (org-indent-line)))))
     (run-hook-with-args 'org-property-changed-functions property value)))
 
 (defun org-buffer-property-keys (&optional include-specials include-defaults include-columns)
@@ -14888,7 +14888,7 @@ completion."
 	(error "Only one allowed value for this property"))
     (org-at-property-p)
     (replace-match (concat " :" key ": " nval) t t)
-    (org-indent-line-function)
+    (org-indent-line)
     (beginning-of-line 1)
     (skip-chars-forward " \t")
     (run-hook-with-args 'org-property-changed-functions key nval)))
@@ -18941,7 +18941,7 @@ See the individual commands for more information."
 	(let ((ind (org-get-indentation)))
 	  (newline)
 	  (if (org-looking-back org-list-end-re)
-	      (org-indent-line-function)
+	      (org-indent-line)
 	    (org-indent-line-to ind)))))
      ((and org-return-follows-link
 	   (org-at-timestamp-p t)
@@ -20488,7 +20488,7 @@ If point is in an inline task, mark that task instead."
 ;;; Paragraph filling stuff.
 ;; We want this to be just right, so use the full arsenal.
 
-(defun org-indent-line-function ()
+(defun org-indent-line ()
   "Indent line depending on context."
   (interactive)
   (let* ((pos (point))
