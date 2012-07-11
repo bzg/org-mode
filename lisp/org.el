@@ -5041,7 +5041,8 @@ The following commands are available:
   (org-add-hook 'kill-buffer-hook 'org-check-running-clock nil 'local)
   ;; Paragraphs and auto-filling
   (org-set-autofill-regexps)
-  (setq indent-line-function 'org-indent-line)
+  (org-set-local 'indent-line-function 'org-indent-line)
+  (org-set-local 'indent-region-function 'org-indent-region)
   (org-update-radio-target-regexp)
   ;; Beginning/end of defun
   (org-set-local 'beginning-of-defun-function 'org-beginning-of-defun)
@@ -20643,6 +20644,17 @@ If point is in an inline task, mark that task instead."
     (when folded (org-cycle)))
   (message "Block at point indented"))
 
+(defun org-indent-region (start end)
+  "Indent region."
+  (interactive "r")
+  (save-excursion
+    (let ((line-end (org-current-line end)))
+      (goto-char start)
+      (while (< (org-current-line) line-end)
+	(cond ((org-in-src-block-p) (org-src-native-tab-command-maybe))
+	      (t (call-interactively 'org-indent-line)))
+	(move-beginning-of-line 2)))))
+
 ;; For reference, this is the default value of adaptive-fill-regexp
 ;;  "[ \t]*\\([-|#;>*]+[ \t]*\\|(?[0-9]+[.)][ \t]*\\)*"
 (defvar org-adaptive-fill-regexp-backup adaptive-fill-regexp
@@ -20724,13 +20736,18 @@ the functionality can be provided as a fall-back.")
   "Re-align a table, pass through to fill-paragraph if no table."
   (let ((table-p (org-at-table-p))
 	(table.el-p (org-at-table.el-p))
-	(itemp (org-in-item-p)))
+	(itemp (org-in-item-p))
+	(srcp (org-in-src-block-p)))
     (cond ((and (equal (char-after (point-at-bol)) ?*)
 		(save-excursion (goto-char (point-at-bol))
 				(looking-at org-outline-regexp)))
 	   t)				; skip headlines
 	  (table.el-p t)		; skip table.el tables
 	  (table-p (org-table-align) t)	; align Org tables
+	  (srcp                         ; indent entire src block to prevent
+	   (save-excursion              ; fill-paragraph-as-region to mess up
+	     (org-babel-do-in-edit-buffer
+	      (indent-region (point-min) (point-max)))))
 	  (itemp			; align text in items
 	   (let* ((struct (save-excursion (goto-char itemp)
 					  (org-list-struct)))
