@@ -235,7 +235,7 @@ are written as utf8 files."
   "Alist of LaTeX expressions to convert emphasis fontifiers.
 Each element of the list is a list of three elements.
 The first element is the character used as a marker for fontification.
-The second element is a formatting string to wrap fontified text with.
+The second element is a format string to wrap fontified text with.
 If it is \"\\verb\", Org will automatically select a delimiter
 character that is not in the string.  \"\\protectedtexttt\" will use \\texttt
 to typeset and try to protect special characters.
@@ -247,7 +247,7 @@ conversions."
 (defcustom org-export-latex-title-command "\\maketitle"
   "The command used to insert the title just after \\begin{document}.
 If this string contains the formatting specification \"%s\" then
-it will be used as a formatting string, passing the title as an
+it will be used as a format string, passing the title as an
 argument."
   :group 'org-export-latex
   :type 'string)
@@ -2033,7 +2033,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
             (when org-table-clean-did-remove-column
 	      (pop org-table-last-alignment)
 	      (pop org-table-last-column-widths))
-            ;; make a formatting string to reflect alignment
+            ;; make a format string to reflect alignment
             (setq olines lines)
             (while (and (not line-fmt) (setq line (pop olines)))
               (unless (string-match "^[ \t]*|-" line)

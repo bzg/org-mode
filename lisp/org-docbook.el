@@ -163,7 +163,7 @@ avoid same set of footnote IDs being used multiple times."
   "A list of DocBook expressions to convert emphasis fontifiers.
 Each element of the list is a list of three elements.
 The first element is the character used as a marker for fontification.
-The second element is a formatting string to wrap fontified text with.
+The second element is a format string to wrap fontified text with.
 The third element decides whether to protect converted text from other
 conversions."
   :group 'org-export-docbook

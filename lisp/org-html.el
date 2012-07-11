@@ -408,7 +408,7 @@ like that: \"%%\"."
 (defcustom org-export-html-postamble 'auto
   "Non-nil means insert a postamble in HTML export.
 
-When `t', insert a string as defined by the formatting string in
+When `t', insert a string as defined by the format string in
 `org-export-html-postamble-format'.  When set to a string, this
 string overrides `org-export-html-postamble-format'.  When set to
 'auto, discard `org-export-html-postamble-format' and honor
