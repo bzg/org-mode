@@ -113,8 +113,7 @@ editing it with \\[org-edit-src-code].  Has no effect if
   :type 'integer)
 
 (defvar org-src-strip-leading-and-trailing-blank-lines nil
-  "If non-nil, blank lines are removed when exiting the code edit
-buffer.")
+  "If non-nil, blank lines are removed when exiting the code edit buffer.")
 
 (defcustom org-edit-src-persistent-message t
   "Non-nil means show persistent exit help message while editing src examples.
@@ -189,9 +188,9 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 
 (defvar org-src-ask-before-returning-to-edit-buffer t
   "If nil, when org-edit-src code is used on a block that already
-  has an active edit buffer, it will switch to that edit buffer
-  immediately; otherwise it will ask whether you want to return
-  to the existing edit buffer.")
+has an active edit buffer, it will switch to that edit buffer
+immediately; otherwise it will ask whether you want to return to
+the existing edit buffer.")
 
 (defvar org-src-babel-info nil)
 
@@ -204,13 +203,13 @@ There is a mode hook, and keybindings for `org-edit-src-exit' and
 `org-edit-src-save'")
 
 (defun org-edit-src-code (&optional context code edit-buffer-name)
-  "Edit the source code example at point.
+  "Edit the source CODE example at point.
 The example is copied to a separate buffer, and that buffer is
 switched to the correct language mode.  When done, exit with
 \\[org-edit-src-exit].  This will remove the original code in the
 Org buffer, and replace it with the edited version. Optional
 argument CONTEXT is used by \\[org-edit-src-save] when calling
-this function. See \\[org-src-window-setup] to configure the
+this function.  See \\[org-src-window-setup] to configure the
 display of windows containing the Org buffer and the code
 buffer."
   (interactive)
@@ -274,7 +273,7 @@ buffer."
 	      col (current-column)))
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
 	       (if org-src-ask-before-returning-to-edit-buffer
-		   (y-or-n-p "Return to existing edit buffer? [n] will revert changes: ") t))
+		   (y-or-n-p "Return to existing edit buffer ([n] will revert changes)? ") t))
 	  (org-src-switch-to-buffer buffer 'return)
 	(when buffer
 	  (with-current-buffer buffer
@@ -339,6 +338,7 @@ buffer."
       t)))
 
 (defun org-edit-src-continue (e)
+  "Continue editing source blocks." ;; Fixme: be more accurate
   (interactive "e")
   (mouse-set-point e)
   (let ((buf (get-char-property (point) 'edit-buffer)))
@@ -439,7 +439,7 @@ the fragment in the Org-mode buffer."
 	    code (buffer-substring-no-properties beg end)
 	    begline (save-excursion (goto-char beg) (org-current-line)))
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
-	       (y-or-n-p "Return to existing edit buffer? [n] will revert changes: "))
+	       (y-or-n-p "Return to existing edit buffer ([n] will revert changes)? "))
 	  (org-pop-to-buffer-same-window buffer)
 	(when buffer
 	  (with-current-buffer buffer
@@ -754,7 +754,7 @@ remotely with point temporarily at the start of the code block in
 the Org buffer.
 
 This command is not bound to a key by default, to avoid conflicts
-with language major mode bindings. To bind it to C-c @ in all
+with language major mode bindings.  To bind it to C-c @ in all
 language major modes, you could use
 
   (add-hook 'org-src-mode-hook
@@ -792,7 +792,7 @@ mode."
 (defun org-src-font-lock-fontify-block (lang start end)
   "Fontify code block.
 This function is called by emacs automatic fontification, as long
-as `org-src-fontify-natively' is non-nil. For manual
+as `org-src-fontify-natively' is non-nil.  For manual
 fontification of code blocks see `org-src-fontify-block' and
 `org-src-fontify-buffer'"
   (let ((lang-mode (org-src-get-lang-mode lang)))
@@ -828,7 +828,7 @@ fontification of code blocks see `org-src-fontify-block' and
       (font-lock-fontify-region (nth 0 info) (nth 1 info)))))
 
 (defun org-src-fontify-buffer ()
-  "Fontify all code blocks in the current buffer"
+  "Fontify all code blocks in the current buffer."
   (interactive)
   (org-babel-map-src-blocks nil
     (org-src-fontify-block)))
