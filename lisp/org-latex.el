@@ -321,6 +321,18 @@ will be filled with the link, the second with its description."
   :version "24.1"
   :type 'string)
 
+(defcustom org-export-latex-hyperref-options-format
+  "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={Emacs Org-mode version %s}}\n"
+  "A format string for hyperref options.
+When non-nil, it must contain three %s format specifications
+which will respectively be replaced by the document's keywords,
+its description and the Org's version number, as a string.  Set
+this option to the empty string if you don't want to include
+hyperref options altogether."
+  :type 'string
+  :version "24.2"
+  :group 'org-export-latex)
+
 (defcustom org-export-latex-footnote-separator "\\textsuperscript{,}\\,"
   "Text used to separate footnotes."
   :group 'org-export-latex
@@ -1524,11 +1536,10 @@ OPT-PLIST is the options plist for current buffer."
 	      (or (plist-get opt-plist :date)
 		  org-export-latex-date-format)))
      ;; add some hyperref options
-     ;; FIXME: let's have a defcustom for this?
-     (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
+     (format org-export-latex-hyperref-options-format
          (org-export-latex-fontify-headline keywords)
          (org-export-latex-fontify-headline description)
-	 (concat "Emacs Org-mode version " (org-version)))
+	 (org-version))
      ;; beginning of the document
      "\n\\begin{document}\n\n"
      ;; insert the title command
