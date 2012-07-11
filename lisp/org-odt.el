@@ -445,7 +445,7 @@ variable, the list of valid values are populated based on
 		     xml-files))
 	     ;; delete temporary directory.
 	     (delete-directory org-odt-zip-dir t)))))
-     (condition-case-unless-debug err
+     (condition-case-no-debug err
 	 (prog1 (progn ,@body)
 	   (funcall --cleanup-xml-buffers))
        ((quit error)
