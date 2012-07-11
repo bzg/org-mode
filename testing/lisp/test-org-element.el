@@ -69,86 +69,95 @@ Some other text
 
 (ert-deftest test-org-element/put-property ()
   "Test `org-element-put-property' specifications."
-  (org-test-with-parsed-data "* Headline\n *a*"
-    (org-element-put-property
-     (org-element-map tree 'bold 'identity nil t) :test 1)
-    (should (org-element-property
-	     :test (org-element-map tree 'bold 'identity nil t)))))
+  (org-test-with-temp-text "* Headline\n *a*"
+    (let ((tree (org-element-parse-buffer)))
+      (org-element-put-property
+       (org-element-map tree 'bold 'identity nil t) :test 1)
+      (should (org-element-property
+	       :test (org-element-map tree 'bold 'identity nil t))))))
 
 (ert-deftest test-org-element/set-contents ()
   "Test `org-element-set-contents' specifications."
   ;; Accept multiple entries.
   (should
    (equal '("b" (italic nil "a"))
-	  (org-test-with-parsed-data "* Headline\n *a*"
-	    (org-element-set-contents
-	     (org-element-map tree 'bold 'identity nil t) "b" '(italic nil "a"))
-	    (org-element-contents
-	     (org-element-map tree 'bold 'identity nil t)))))
+	  (org-test-with-temp-text "* Headline\n *a*"
+	    (let ((tree (org-element-parse-buffer)))
+	      (org-element-set-contents
+	       (org-element-map tree 'bold 'identity nil t) "b" '(italic nil "a"))
+	      (org-element-contents
+	       (org-element-map tree 'bold 'identity nil t))))))
   ;; Accept atoms and elements.
   (should
    (equal '("b")
-	  (org-test-with-parsed-data "* Headline\n *a*"
-	    (org-element-set-contents
-	     (org-element-map tree 'bold 'identity nil t) "b")
-	    (org-element-contents
-	     (org-element-map tree 'bold 'identity nil t)))))
+	  (org-test-with-temp-text "* Headline\n *a*"
+	    (let ((tree (org-element-parse-buffer)))
+	      (org-element-set-contents
+	       (org-element-map tree 'bold 'identity nil t) "b")
+	      (org-element-contents
+	       (org-element-map tree 'bold 'identity nil t))))))
   (should
    (equal '((italic nil "b"))
-	  (org-test-with-parsed-data "* Headline\n *a*"
-	    (org-element-set-contents
-	     (org-element-map tree 'bold 'identity nil t) '(italic nil "b"))
-	    (org-element-contents
-	     (org-element-map tree 'bold 'identity nil t)))))
+	  (org-test-with-temp-text "* Headline\n *a*"
+	    (let ((tree (org-element-parse-buffer)))
+	      (org-element-set-contents
+	       (org-element-map tree 'bold 'identity nil t) '(italic nil "b"))
+	      (org-element-contents
+	       (org-element-map tree 'bold 'identity nil t))))))
   ;; Allow nil contents.
   (should-not
-   (org-test-with-parsed-data "* Headline\n *a*"
-     (org-element-set-contents (org-element-map tree 'bold 'identity nil t))
-     (org-element-contents (org-element-map tree 'bold 'identity nil t)))))
+   (org-test-with-temp-text "* Headline\n *a*"
+     (let ((tree (org-element-parse-buffer)))
+       (org-element-set-contents (org-element-map tree 'bold 'identity nil t))
+       (org-element-contents (org-element-map tree 'bold 'identity nil t))))))
 
 (ert-deftest test-org-element/set-element ()
   "Test `org-element-set-element' specifications."
-  (org-test-with-parsed-data "* Headline\n*a*"
-    (org-element-set-element
-     (org-element-map tree 'bold 'identity nil t)
-     '(italic nil "b"))
-    ;; Check if object is correctly replaced.
-    (should (org-element-map tree 'italic 'identity))
-    (should-not (org-element-map tree 'bold 'identity))
-    ;; Check if new object's parent is correctly set.
-    (should
-     (equal
-      (org-element-property :parent
-			    (org-element-map tree 'italic 'identity nil t))
-      (org-element-map tree 'paragraph 'identity nil t)))))
+  (org-test-with-temp-text "* Headline\n*a*"
+    (let ((tree (org-element-parse-buffer)))
+      (org-element-set-element
+       (org-element-map tree 'bold 'identity nil t)
+       '(italic nil "b"))
+      ;; Check if object is correctly replaced.
+      (should (org-element-map tree 'italic 'identity))
+      (should-not (org-element-map tree 'bold 'identity))
+      ;; Check if new object's parent is correctly set.
+      (should
+       (equal
+	(org-element-property :parent
+			      (org-element-map tree 'italic 'identity nil t))
+	(org-element-map tree 'paragraph 'identity nil t))))))
 
 (ert-deftest test-org-element/adopt-element ()
   "Test `org-element-adopt-element' specifications."
   ;; Adopt an element.
   (should
    (equal '(italic plain-text)
-	  (org-test-with-parsed-data "* Headline\n *a*"
-	    (org-element-adopt-element
-	     (org-element-map tree 'bold 'identity nil t) '(italic nil "a"))
-	    (mapcar (lambda (blob) (org-element-type blob))
-		    (org-element-contents
-		     (org-element-map tree 'bold 'identity nil t))))))
+	  (org-test-with-temp-text "* Headline\n *a*"
+	    (let ((tree (org-element-parse-buffer)))
+	      (org-element-adopt-element
+	       (org-element-map tree 'bold 'identity nil t) '(italic nil "a"))
+	      (mapcar (lambda (blob) (org-element-type blob))
+		      (org-element-contents
+		       (org-element-map tree 'bold 'identity nil t)))))))
   ;; Adopt a string.
   (should
    (equal '("b" "a")
-	  (org-test-with-parsed-data "* Headline\n *a*"
-	    (org-element-adopt-element
-	     (org-element-map tree 'bold 'identity nil t) "b")
-	    (org-element-contents
-	     (org-element-map tree 'bold 'identity nil t)))))
+	  (org-test-with-temp-text "* Headline\n *a*"
+	    (let ((tree (org-element-parse-buffer)))
+	      (org-element-adopt-element
+	       (org-element-map tree 'bold 'identity nil t) "b")
+	      (org-element-contents
+	       (org-element-map tree 'bold 'identity nil t))))))
   ;; Test APPEND optional argument.
   (should
    (equal '("a" "b")
-	  (org-test-with-parsed-data "* Headline\n *a*"
-	    (org-element-adopt-element
-	     (org-element-map tree 'bold 'identity nil t) "b" t)
-	    (org-element-contents
-	     (org-element-map tree 'bold 'identity nil t))))))
+	  (org-test-with-temp-text "* Headline\n *a*"
+	    (let ((tree (org-element-parse-buffer)))
+	      (org-element-adopt-element
+	       (org-element-map tree 'bold 'identity nil t) "b" t)
+	      (org-element-contents
+	       (org-element-map tree 'bold 'identity nil t)))))))
 
 
 
@@ -429,97 +438,97 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
   (let ((org-coderef-label-format "(ref:%s)"))
     ;; 1. Test "-i" switch.
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should-not (org-element-property :preserve-indent element))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -i\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (org-element-property :preserve-indent element))))
     (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should-not (org-element-property :preserve-indent element))))
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -i\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (org-element-property :preserve-indent element))))
     ;; 2. "-n -r -k" combination should number lines, retain labels but
     ;;    not use them in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r -k\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (not (org-element-property :use-labels element))))))
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp -n -r -k\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (not (org-element-property :use-labels element))))))
     ;; 3. "-n -r" combination should number-lines remove labels and not
     ;;    use them in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (org-element-property :number-lines element)
 		     (not (org-element-property :retain-labels element))
 		     (not (org-element-property :use-labels element))))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (org-element-property :number-lines element)
 		     (not (org-element-property :retain-labels element))
 		     (not (org-element-property :use-labels element))))))
     ;; 4. "-n" or "+n" should number lines, retain labels and use them
     ;;    in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -n\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -n\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     (org-test-with-temp-text "#+BEGIN_EXAMPLE +n\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp +n\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     ;; 5. No switch should not number lines, but retain labels and use
     ;;    them in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (not (org-element-property :number-lines element))
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (not (org-element-property :number-lines element))
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     ;; 6. "-r" switch only: do not number lines, remove labels, and
     ;;    don't use labels in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -r\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (not (org-element-property :number-lines element))
 		     (not (org-element-property :retain-labels element))
 		     (not (org-element-property :use-labels element))))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -r\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should (and (not (org-element-property :number-lines element))
 		     (not (org-element-property :retain-labels element))
 		     (not (org-element-property :use-labels element))))))
     ;; 7. Recognize coderefs with user-defined syntax.
     (org-test-with-temp-text
 	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText [ref:text]\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should
 	 (equal (org-element-property :label-fmt element) "[ref:%s]"))))
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp -l \"[ref:%s]\"\n(+ 1 1) [ref:text]\n#+END_SRC"
-      (let ((element (org-element-current-element)))
+      (let ((element (org-element-current-element (point-max))))
 	(should
 	 (equal (org-element-property :label-fmt element) "[ref:%s]"))))))
 
