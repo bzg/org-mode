@@ -140,22 +140,27 @@ oldorg:	# do what the old Makfile did by default
 	 (dirgit (concat dirorg ".git/" ))
 	 (org-version "N/A-fixup")
 	 (org-git-version "N/A-fixup !!check installation!!"))
-    (if (load (concat dirlisp "org-version.el") 'noerror 'nomessage 'nosuffix)
-	(setq org-version     (org-release)
-	      org-git-version (org-git-version))
-      (when (and (file-exists-p dirgit)
-		 (executable-find "git"))
-	(unwind-protect
-	    (progn
-	      (cd dirorg)
-	      (let ((git6 (substring (shell-command-to-string "git describe --abbrev=6 HEAD") 0 -1))
-		    (git0 (substring (shell-command-to-string "git describe --abbrev=0 HEAD") 0 -1))
-		    (gitd (string-match "\\S-" (shell-command-to-string "git status -uno --porcelain"))))
-		(setq org-git-version (concat git6 (when gitd ".dirty")))
-		(if (string-match "^release_" git0)
-		    (setq org-version (substring git0 8))
-		  (setq org-version git0))))
-	  (cd origin))))
+    (if (and (boundp 'org-fake-release)     (stringp org-fake-release)
+	     (boundp 'org-fake-git-version) (stringp org-fake-git-version))
+	(setq org-version     org-fake-release
+	      org-git-version org-fake-git-version)
+      (if (load (concat dirlisp "org-version.el") 'noerror 'nomessage 'nosuffix)
+	  (setq org-version     (org-release)
+		org-git-version (org-git-version))
+	(when (and (file-exists-p dirgit)
+		   (executable-find "git"))
+	  (unwind-protect
+	      (progn
+		(cd dirorg)
+		(let ((git6 (substring (shell-command-to-string "git describe --abbrev=6 HEAD") 0 -1))
+		      (git0 (substring (shell-command-to-string "git describe --abbrev=0 HEAD") 0 -1))
+		      (gitd (string-match "\\S-"
+					  (shell-command-to-string "git status -uno --porcelain"))))
+		  (setq org-git-version (concat git6 (when gitd ".dirty")))
+		  (if (string-match "^release_" git0)
+		      (setq org-version (substring git0 8))
+		    (setq org-version git0))))
+	  (cd origin)))))
     `(progn
        (defun org-release () ,org-version)
        (defun org-git-version () ,org-git-version)
