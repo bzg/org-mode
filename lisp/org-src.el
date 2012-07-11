@@ -207,9 +207,9 @@ There is a mode hook, and keybindings for `org-edit-src-exit' and
 The example is copied to a separate buffer, and that buffer is
 switched to the correct language mode.  When done, exit with
 \\[org-edit-src-exit].  This will remove the original code in the
-Org buffer, and replace it with the edited version. Optional
+Org buffer, and replace it with the edited version.  An optional
 argument CONTEXT is used by \\[org-edit-src-save] when calling
-this function.  See \\[org-src-window-setup] to configure the
+this function.  See `org-src-window-setup' to configure the
 display of windows containing the Org buffer and the code
 buffer."
   (interactive)

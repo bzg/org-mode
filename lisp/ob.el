@@ -817,9 +817,9 @@ Return t if a code block was found at point, nil otherwise."
 (defun org-babel-do-key-sequence-in-edit-buffer (key)
   "Read key sequence and execute the command in edit buffer.
 Enter a key sequence to be executed in the language major-mode
-edit buffer. For example, TAB will alter the contents of the
+edit buffer.  For example, TAB will alter the contents of the
 Org-mode code block according to the effect of TAB in the
-language major-mode buffer. For languages that support
+language major-mode buffer.  For languages that support
 interactive sessions, this can be used to send code from the Org
 buffer to the session for evaluation using the native major-mode
 evaluation mechanisms."
