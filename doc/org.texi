@@ -6012,6 +6012,7 @@ what to do with it.
 @table @kbd
 @orgcmd{C-c C-x C-i,org-clock-in}
 @vindex org-clock-into-drawer
+@vindex org-clock-continuously
 @cindex property, LOG_INTO_DRAWER
 Start the clock on the current item (clock-in).  This inserts the CLOCK
 keyword together with a timestamp.  If this is not the first clocking of
@@ -6022,9 +6023,10 @@ the setting of this variable for a subtree by setting a
 @code{CLOCK_INTO_DRAWER} or @code{LOG_INTO_DRAWER} property.
 When called with a @kbd{C-u} prefix argument,
 select the task from a list of recently clocked tasks.  With two @kbd{C-u
-C-u} prefixes, clock into the task at point and mark it as the default task.
-The default task will always be available when selecting a clocking task,
-with letter @kbd{d}.@*
+C-u} prefixes, clock into the task at point and mark it as the default task;
+the default task will then always be available with letter @kbd{d} when
+selecting a clocking task.  With three @kbd{C-u C-u C-u} prefixes, force
+continuous clocking by starting the clock when the last clock stopped.@*
 @cindex property: CLOCK_MODELINE_TOTAL
 @cindex property: LAST_REPEAT
 @vindex org-clock-modeline-total
@@ -6054,6 +6056,12 @@ HH:MM}.  See the variable @code{org-log-note-clock-out} for the
 possibility to record an additional note together with the clock-out
 timestamp@footnote{The corresponding in-buffer setting is:
 @code{#+STARTUP: lognoteclock-out}}.
+@orgcmd{C-c C-x C-I,org-clock-in-last}
+@vindex org-clock-continuously
+Reclock the last clocked task.  With one @kbd{C-u} prefix argument,
+select the task from the clock history.  With two @kbd{C-u} prefixes,
+force continuous clocking by starting the clock when the last clock
+stopped.
 @orgcmd{C-c C-x C-e,org-clock-modify-effort-estimate}
 Update the effort estimate for the current clock task.
 @kindex C-c C-y
@@ -6087,6 +6095,10 @@ buffer (see variable @code{org-remove-highlights-with-change}) or press
 The @kbd{l} key may be used in the timeline (@pxref{Timeline}) and in
 the agenda (@pxref{Weekly/daily agenda}) to show which tasks have been
 worked on or closed during a day.
+
+@strong{Important:} note that both @code{org-clock-out} and
+@code{org-clock-in-last} can have a global keybinding and will not
+modify the window disposition.
 
 @node The clock table, Resolving idle time, Clocking commands, Clocking work time
 @subsection The clock table
@@ -6225,7 +6237,9 @@ would be
 @end example
 
 @node Resolving idle time,  , The clock table, Clocking work time
-@subsection Resolving idle time
+@subsection Resolving idle time and continuous clocking
+
+@subsubheading Resolving idle time
 @cindex resolve idle time
 
 @cindex idle, resolve, dangling
@@ -6291,6 +6305,18 @@ to a recovery event rather than a set amount of idle time.
 
 You can also check all the files visited by your Org agenda for dangling
 clocks at any time using @kbd{M-x org-resolve-clocks}.
+
+@subsubheading Continuous clocking
+@cindex continuous clocking
+@vindex org-clock-continuously
+
+You may want to start clocking from the time when you clocked out the
+previous task.  To enable this systematically, set @code{org-clock-continuously}
+to @code{t}.  Each time you clock in, Org retrieves the clock-out time of the
+last clocked entry for this session, and start the new clock from there.
+
+If you only want this from time to time, use three universal prefix arguments
+with @code{org-clock-in} and two @kbd{C-u C-u} with @code{org-clock-in-last}.
 
 @node Effort estimates, Relative timer, Clocking work time, Dates and Times
 @section Effort estimates

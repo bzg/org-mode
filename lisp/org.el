@@ -17793,6 +17793,7 @@ BEG and END default to the buffer boundaries."
 
 (org-defkey org-mode-map "\C-c\C-x\C-t" 'org-toggle-time-stamp-overlays)
 (org-defkey org-mode-map "\C-c\C-x\C-i" 'org-clock-in)
+(org-defkey org-mode-map "\C-c\C-x\C-I" 'org-clock-in-last)
 (org-defkey org-mode-map "\C-c\C-x\C-o" 'org-clock-out)
 (org-defkey org-mode-map "\C-c\C-x\C-j" 'org-clock-goto)
 (org-defkey org-mode-map "\C-c\C-x\C-x" 'org-clock-cancel)
