@@ -91,7 +91,9 @@ The return value is a string naming the thing at point."
 	   (save-excursion
 	     (move-beginning-of-line 1)
 	     (skip-chars-backward "[ \t\n]")
-	     (or (looking-back org-drawer-regexp)
+	     ;; org-drawer-regexp matches a whole line but while
+	     ;; looking-back, we just ignore trailing whitespaces
+	     (or (looking-back (substring org-drawer-regexp 0 -1))
 		 (looking-back org-property-re))))
       (cons "prop" nil))
      ((and (equal (char-before beg1) ?:)
