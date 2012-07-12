@@ -4040,7 +4040,19 @@ in found for a given language and a given encoding, return S."
     (or (plist-get (cdr (assoc lang translations)) encoding) s)))
 
 (defconst org-export-dictionary
-  '(("Footnotes"
+  '(("Author"
+     ("fr"
+      :ascii "Auteur"
+      :latin1 "Auteur"
+      :utf-8 "Auteur"))
+    ("Date"
+     ("fr"
+      :ascii "Date"
+      :latin1 "Date"
+      :utf-8 "Date"))
+    ("Equation")
+    ("Figure")
+    ("Footnotes"
      ("fr"
       :ascii "Notes de bas de page"
       :latin1 "Notes de bas de page"
