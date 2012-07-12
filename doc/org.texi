@@ -346,7 +346,7 @@ Introduction
 * Installation::                How to install a downloaded version of Org
 * Activation::                  How to activate Org for certain buffers
 * Feedback::                    Bug reports, ideas, patches etc.
-* Conventions::                 Type-setting conventions in the manual
+* Conventions::                 Typesetting conventions in the manual
 
 Document structure
 
@@ -559,7 +559,7 @@ Embedded @LaTeX{}
 
 * Special symbols::             Greek letters and other symbols
 * Subscripts and superscripts::  Simple syntax for raising/lowering text
-* @LaTeX{} fragments::             Complex formulas made easy
+* @LaTeX{} fragments::          Complex formulas made easy
 * Previewing @LaTeX{} fragments::  What will this snippet look like?
 * CDLaTeX mode::                Speed up entering of formulas
 
@@ -777,7 +777,7 @@ MobileOrg
 * Installation::                How to install a downloaded version of Org
 * Activation::                  How to activate Org for certain buffers
 * Feedback::                    Bug reports, ideas, patches etc.
-* Conventions::                 Type-setting conventions in the manual
+* Conventions::                 Typesetting conventions in the manual
 @end menu
 
 @node Summary, Installation, Introduction, Introduction
@@ -962,6 +962,10 @@ Do not forget to activate Org as described in the following section.
 @cindex autoload
 @cindex global key bindings
 @cindex key bindings, global
+@findex org-agenda
+@findex org-capture
+@findex org-store-link
+@findex org-iswitchb
 
 To make sure files with extension @file{.org} use Org mode, add the following
 line to your @file{.emacs} file.
@@ -1113,7 +1117,9 @@ attach it to your bug report.
 @node Conventions,  , Feedback, Introduction
 @section Typesetting conventions used in this manual
 
-Org uses three types of keywords: TODO keywords, tags and property
+@subsubheading TODO keywords, tags, properties, etc.
+
+Org mainly uses three types of keywords: TODO keywords, tags and property
 names.  In this manual we use the following conventions:
 
 @table @code
@@ -1138,17 +1144,26 @@ readability, but you can use lowercase in your Org files@footnote{Easy
 templates insert lowercase keywords and Babel dynamically inserts
 @code{#+results}.}
 
-The manual lists both the keys and the corresponding commands for accessing a
-functionality.  Org mode often uses the same key for different functions,
-depending on context.  The command that is bound to such keys has a generic
-name, like @code{org-metaright}.  In the manual we will, wherever possible,
-give the function that is internally called by the generic command.  For
-example, in the chapter on document structure, @kbd{M-@key{right}} will be
-listed to call @code{org-do-demote}, while in the chapter on tables, it will
-be listed to call org-table-move-column-right.
+@subsubheading Keybindings and commands
+@kindex C-c a
+@findex org-agenda
+@kindex C-c c
+@findex org-capture
 
-If you prefer, you can compile the manual without the command names by
-unsetting the flag @code{cmdnames} in @file{org.texi}.
+The manual suggests two global keybindings: @kbd{C-c a} for @code{org-agenda}
+and @kbd{C-c c} for @code{org-capture}.  These are only suggestions, but the
+rest of the manual assumes that you are using these keybindings.
+
+Also, the manual lists both the keys and the corresponding commands for
+accessing a functionality.  Org mode often uses the same key for different
+functions, depending on context.  The command that is bound to such keys has
+a generic name, like @code{org-metaright}.  In the manual we will, wherever
+possible, give the function that is internally called by the generic command.
+For example, in the chapter on document structure, @kbd{M-@key{right}} will
+be listed to call @code{org-do-demote}, while in the chapter on tables, it
+will be listed to call @code{org-table-move-column-right}.  If you prefer,
+you can compile the manual without the command names by unsetting the flag
+@code{cmdnames} in @file{org.texi}.
 
 @node Document Structure, Tables, Introduction, Top
 @chapter Document structure
@@ -9380,7 +9395,7 @@ readily processed to produce pretty output for a number of export backends.
 @menu
 * Special symbols::             Greek letters and other symbols
 * Subscripts and superscripts::  Simple syntax for raising/lowering text
-* @LaTeX{} fragments::             Complex formulas made easy
+* @LaTeX{} fragments::          Complex formulas made easy
 * Previewing @LaTeX{} fragments::  What will this snippet look like?
 * CDLaTeX mode::                Speed up entering of formulas
 @end menu
