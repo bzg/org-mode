@@ -503,7 +503,7 @@ frequently in plain text.
 
 Not all export backends support this, but HTML does.
 
-This option can also be set with the +OPTIONS line, e.g. \"^:nil\"."
+This option can also be set with the #+OPTIONS line, e.g. \"^:nil\"."
   :group 'org-startup
   :group 'org-export-translation
   :version "24.1"
