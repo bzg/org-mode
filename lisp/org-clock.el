@@ -1052,6 +1052,7 @@ so long."
   "Reset `org-clock-current-task' to nil."
   (setq org-clock-current-task nil))
 
+(defvar org-clock-out-time nil) ; store the time of the last clock-out
 (defun org-clock-in (&optional select start-time)
   "Start the clock on the current item.
 If necessary, clock-out of the currently active clock.
@@ -1399,7 +1400,6 @@ line and position cursor in that line."
 	    (and (re-search-forward org-property-end-re nil t)
 		 (goto-char (match-beginning 0))))))))
 
-(defvar org-clock-out-time nil) ; store the time of the last clock-out
 (defun org-clock-out (&optional fail-quietly at-time)
   "Stop the currently running clock.
 Throw an error if there is no running clock and FAIL-QUIETLY is nil."
