@@ -10839,7 +10839,9 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 				       org-log-refile)
 		    (unless (eq org-log-refile 'note)
 		      (save-excursion (org-add-log-note))))
-		  (and org-auto-align-tags (org-set-tags nil t))
+		  (and org-auto-align-tags
+		       (let ((org-loop-over-headlines-in-active-region nil))
+			 (org-set-tags nil t)))
 		  (bookmark-set "org-refile-last-stored")
 		  ;; If we are refiling for capture, make sure that the
 		  ;; last-capture pointers point here
