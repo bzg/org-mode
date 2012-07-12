@@ -4020,6 +4020,88 @@ a string, or nil."
     (cadr (memq blob (org-element-contents parent)))))
 
 
+;;;; Translation
+;;
+;; `org-export-translate' translates a string according to language
+;; specified by LANGUAGE keyword or `org-export-language-setup'
+;; variable and a specified charset.  `org-export-dictionary' contains
+;; the dictionary used for the translation.
+
+(defun org-export-translate (s encoding info)
+  "Translate string S according to language specification.
+
+ENCODING is a symbol among `:ascii', `:html', `:latex', `:latin1'
+and `:utf8'.  INFO is a plist used as a communication channel.
+
+Translation depends on `:language' property.  If no translation
+in found for a given language and a given encoding, return S."
+  (let ((lang (plist-get info :language))
+	(translations (cdr (assoc s org-export-dictionary))))
+    (or (plist-get (cdr (assoc lang translations)) encoding) s)))
+
+(defconst org-export-dictionary
+  '(("Footnotes"
+     ("fr"
+      :ascii "Notes de bas de page"
+      :latin1 "Notes de bas de page"
+      :utf-8 "Notes de bas de page"))
+    ("Listing %d: %s"
+     ("fr"
+      :ascii "Programme %d : %s"
+      :latin1 "Programme %d : %s"
+      :utf-8 "Programme nº %d : %s"))
+    ("List of Listings"
+     ("fr"
+      :ascii "Liste des programmes"
+      :latin1 "Liste des programmes"
+      :utf-8 "Liste des programmes"))
+    ("List of Tables"
+     ("fr"
+      :ascii "Liste des tableaux"
+      :latin1 "Liste des tableaux"
+      :utf-8 "Liste des tableaux"))
+    ("Listing %d:"
+     ("fr"
+      :ascii "Programme %d :"
+      :latin1 "Programme %d :"
+      :utf-8 "Programme nº %d :"))
+    ("Table of Contents"
+     ("fr"
+      :ascii "Sommaire"
+      :latin1 "Table des matières"
+      :utf-8 "Table des matières"))
+    ("Table %d: %s"
+     ("fr"
+      :ascii "Tableau %d : %s"
+      :latin1 "Tableau %d : %s"
+      :utf-8 "Tableau nº %d : %s"))
+    ("See section %s"
+     ("fr"
+      :ascii "cf. section %s"
+      :latin1 "cf. section %s"
+      :utf-8 "cf. section %s"))
+    ("Table %d:"
+     ("fr"
+      :ascii "Tableau %d :"
+      :latin1 "Tableau %d :"
+      :utf-8 "Tableau nº %d :"))
+    ("Unknown reference"
+     ("fr"
+      :ascii "Destination inconnue"
+      :latin1 "Référence inconnue"
+      :utf-8 "Référence inconnue")))
+  "Dictionary for export engine.
+
+Alist whose CAR is the string to translate and CDR is an alist
+whose CAR is the language string and CDR is a plist whose
+properties are possible charsets and values translated terms.
+
+It is used as a database for `org-export-translate'. Since this
+function returns the string as-is if no translation was found,
+the variable only needs to record values different from the
+entry.")
+
+
 
 ;;; The Dispatcher
 ;;
