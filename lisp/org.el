@@ -4507,9 +4507,9 @@ After a match, the following groups carry important information:
     ("entitiespretty" org-pretty-entities t)
     ("entitiesplain" org-pretty-entities nil))
   "Variable associated with STARTUP options for org-mode.
-Each element is a list of three items: The startup options as written
-in the #+STARTUP line, the corresponding variable, and the value to
-set this variable to if the option is found.  An optional forth element PUSH
+Each element is a list of three items: the startup options (as written
+in the #+STARTUP line), the corresponding variable, and the value to set
+this variable to if the option is found.  An optional forth element PUSH
 means to push this value onto the list in the variable.")
 
 (defun org-update-property-plist (key val props)
