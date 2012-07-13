@@ -1319,9 +1319,12 @@ The 'linkkey' must be a word word, starting with a letter, followed
 by letters, numbers, '-' or '_'.
 
 If REPLACE is a string, the tag will simply be appended to create the link.
-If the string contains \"%s\", the tag will be inserted there.  Alternatively,
-the placeholder \"%h\" will cause a url-encoded version of the tag to
-be inserted at that point (see the function `url-hexify-string').
+If the string contains \"%s\", the tag will be inserted there.  If the string
+contains \"%h\", it will cause a url-encoded version of the tag to be inserted
+at that point (see the function `url-hexify-string').  If the string contains
+the specifier \"%(my-function)\", then the custom function `my-function' will
+be invoked: this function takes the tag as its only argument and must return
+a string.
 
 REPLACE may also be a function that will be called with the tag as the
 only argument to create the link, which should be returned as a string.
@@ -8668,6 +8671,8 @@ call CMD."
 	  (setq rpl (cdr as))
 	  (cond
 	   ((symbolp rpl) (funcall rpl tag))
+	   ((string-match "%(\\([^)]+\\))" rpl)
+	    (replace-match (funcall (intern-soft (match-string 1 rpl)) tag) t t rpl))
 	   ((string-match "%s" rpl) (replace-match (or tag "") t t rpl))
 	   ((string-match "%h" rpl)
 	    (replace-match (url-hexify-string (or tag "")) t t rpl))

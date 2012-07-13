@@ -3570,18 +3570,26 @@ that relates the linkwords to replacement text.  Here is an example:
 @smalllisp
 @group
 (setq org-link-abbrev-alist
-  '(("bugzilla" . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
-    ("google"   . "http://www.google.com/search?q=")
-    ("gmap"     . "http://maps.google.com/maps?q=%s")
-    ("omap"     . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
-    ("ads"      . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")))
+  '(("bugzilla"  . "http://10.1.2.9/bugzilla/show_bug.cgi?id=")
+    ("url-to-ja" . "http://translate.google.fr/translate?sl=en&tl=ja&u=%h")
+    ("google"    . "http://www.google.com/search?q=")
+    ("gmap"      . "http://maps.google.com/maps?q=%s")
+    ("omap"      . "http://nominatim.openstreetmap.org/search?q=%s&polygon=1")
+    ("ads"       . "http://adsabs.harvard.edu/cgi-bin/nph-abs_connect?author=%s&db_key=AST")))
 @end group
 @end smalllisp
 
 If the replacement text contains the string @samp{%s}, it will be
-replaced with the tag.  Otherwise the tag will be appended to the string
-in order to create the link.  You may also specify a function that will
-be called with the tag as the only argument to create the link.
+replaced with the tag.  Using @samp{%h} instead of @samp{%s} will
+url-encode the tag (see the example above, where we need to encode
+the URL parameter.)  Using @samp{%(my-function)} will pass the tag
+to a custom function, and replace it by the resulting string.
+
+If the replacement text don't contain any specifier, it will simply
+be appended to the string in order to create the link.
+
+Instead of a string, you may also specify a function that will be
+called with the tag as the only argument to create the link.
 
 With the above setting, you could link to a specific bug with
 @code{[[bugzilla:129]]}, search the web for @samp{OrgMode} with
