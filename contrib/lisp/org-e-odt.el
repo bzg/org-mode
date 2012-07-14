@@ -243,7 +243,7 @@ structure of the values.")
 (defun org-e-odt-write-automatic-styles ()
   "Write automatic styles to \"content.xml\"."
   (with-current-buffer
-      (find-file-noselect (expand-file-name "content.xml") t)
+      (find-file-noselect (concat org-e-odt-zip-dir "content.xml") t)
     ;; position the cursor
     (goto-char (point-min))
     (re-search-forward "  </office:automatic-styles>" nil t)
@@ -256,7 +256,7 @@ structure of the values.")
 
 (defun org-e-odt-update-display-level (&optional level)
   (with-current-buffer
-      (find-file-noselect (expand-file-name "content.xml") t)
+      (find-file-noselect (concat org-e-odt-zip-dir "content.xml") t)
     ;; position the cursor.
     (goto-char (point-min))
     ;; remove existing sequence decls.
@@ -465,7 +465,7 @@ Update styles.xml with styles that were collected as part of
 `org-e-odt-hfy-face-to-css' callbacks."
   (when styles
     (with-current-buffer
-	(find-file-noselect (expand-file-name "styles.xml") t)
+	(find-file-noselect (concat org-e-odt-zip-dir "styles.xml") t)
       (goto-char (point-min))
       (when (re-search-forward "</office:styles>" nil t)
 	(goto-char (match-beginning 0))
@@ -526,6 +526,9 @@ Update styles.xml with styles that were collected as part of
 		       (string-match "file:\\([^]]*\\)" formula-link)
 		       (match-string 1 formula-link))))
 	       (t (error "what is this?"))))
+	 (src-expanded (if (file-name-absolute-p src) src
+			 (expand-file-name src (file-name-directory
+						(plist-get info :input-file)))))
 	 (caption-from
 	  (case (org-element-type element)
 	    (link (org-export-get-parent-element element))
@@ -535,7 +538,7 @@ Update styles.xml with styles that were collected as part of
 	 (href
 	  (org-e-odt-format-tags
 	   "<draw:object xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
-	   (file-name-directory (org-e-odt-copy-formula-file src))))
+	   (file-name-directory (org-e-odt-copy-formula-file src-expanded))))
 	 (embed-as (if caption 'paragraph 'character))
 	 width height)
     (cond
@@ -563,25 +566,25 @@ Update styles.xml with styles that were collected as part of
 	     (car (org-e-odt-format-label caption-from info 'definition)))))
 	 '(table (:attr_odt (":style \"OrgEquation\""))) info))))))
 
-(defun org-e-odt-copy-formula-file (path)
+(defun org-e-odt-copy-formula-file (src-file)
   "Returns the internal name of the file"
-  (let* ((src-file (expand-file-name
-		    path (file-name-directory org-current-export-file)))
-	 (target-dir (format "Formula-%04d/"
+  (let* ((target-dir (format "Formula-%04d/"
 			     (incf org-e-odt-embedded-formulas-count)))
 	 (target-file (concat target-dir "content.xml")))
-    (message "Embedding %s as %s ..."
-	     (substring-no-properties path) target-file)
+    (message "Embedding %s as %s ..." src-file target-file)
 
-    (make-directory target-dir)
+    (when (= org-e-odt-embedded-formulas-count 1)
+      (make-directory (concat org-e-odt-zip-dir target-dir)))
+
     (org-e-odt-create-manifest-file-entry
      "application/vnd.oasis.opendocument.formula" target-dir "1.2")
 
     (case (org-e-odt-is-formula-link-p src-file)
       (mathml
-       (copy-file src-file target-file 'overwrite))
+       (copy-file src-file (concat org-e-odt-zip-dir target-file) 'overwrite))
       (odf
-       (org-e-odt-zip-extract-one src-file "content.xml" target-dir))
+       (org-e-odt-zip-extract-one src-file "content.xml"
+				  (concat org-e-odt-zip-dir target-dir)))
       (t
        (error "%s is not a formula file" src-file)))
 
@@ -595,81 +598,6 @@ Update styles.xml with styles that were collected as part of
       'mathml)
      ((string-match "\\.odf\\'" file)
       'odf))))
-
-(defun org-e-odt-format-org-link (opt-plist type-1 path fragment desc attr
-					    descp)
-  "Make a OpenDocument link.
-OPT-PLIST is an options list.
-TYPE-1 is the device-type of the link (THIS://foo.html).
-PATH is the path of the link (http://THIS#location).
-FRAGMENT is the fragment part of the link, if any (foo.html#THIS).
-DESC is the link description, if any.
-ATTR is a string of other attributes of the a element."
-  (declare (special org-lparse-par-open))
-  (save-match-data
-    (let* ((may-inline-p
-	    (and (member type-1 '("http" "https" "file"))
-		 (org-lparse-should-inline-p path descp)
-		 (not fragment)))
-	   (type (if (equal type-1 "id") "file" type-1))
-	   (filename path)
-	   (thefile path))
-      (cond
-       ;; check for inlined images
-       ((and (member type '("file"))
-	     (not fragment)
-	     (org-file-image-p
-	      filename org-e-odt-inline-image-extensions)
-	     (not descp))
-	(org-e-odt-format-inline-image thefile))
-       ;; check for embedded formulas
-       ((and (member type '("file"))
-	     (not fragment)
-	     (org-e-odt-is-formula-link-p filename)
-	     (or (not descp)))
-	(org-e-odt-format-formula thefile))
-       ((string= type "coderef")
-	(let* ((ref fragment)
-	       (lineno-or-ref (cdr (assoc ref org-export-code-refs)))
-	       (desc (and descp desc))
-	       (org-e-odt-suppress-xref nil)
-	       (href (org-xml-format-href (concat "#coderef-" ref))))
-	  (cond
-	   ((and (numberp lineno-or-ref) (not desc))
-	    (org-e-odt-format-link lineno-or-ref href))
-	   ((and (numberp lineno-or-ref) desc
-		 (string-match (regexp-quote (concat "(" ref ")")) desc))
-	    (format (replace-match "%s" t t desc)
-		    (org-e-odt-format-link lineno-or-ref href)))
-	   (t
-	    (setq desc (format
-			(if (and desc (string-match
-				       (regexp-quote (concat "(" ref ")"))
-				       desc))
-			    (replace-match "%s" t t desc)
-			  (or desc "%s"))
-			lineno-or-ref))
-	    (org-e-odt-format-link (org-xml-format-desc desc) href)))))
-       (t
-	(when (string= type "file")
-	  (setq thefile
-		(cond
-		 ((file-name-absolute-p path)
-		  (concat "file://" (expand-file-name path)))
-		 (t (org-e-odt-relocate-relative-path
-		     thefile org-current-export-file)))))
-
-	(when (and (member type '("" "http" "https" "file")) fragment)
-	  (setq thefile (concat thefile "#" fragment)))
-
-	(setq thefile (org-xml-format-href thefile))
-
-	(when (not (member type '("" "file")))
-	  (setq thefile (concat type ":" thefile)))
-
-	(let ((org-e-odt-suppress-xref nil))
-	  (org-e-odt-format-link
-	   (org-xml-format-desc desc) thefile attr)))))))
 
 (defun org-e-odt-format-anchor (text name &optional class)
   (org-e-odt-format-target text name))
@@ -764,8 +692,6 @@ ATTR is a string of other attributes of the a element."
   "Returns the internal name of the file"
   (let* ((image-type (file-name-extension path))
 	 (media-type (format "image/%s" image-type))
-	 (src-file (expand-file-name
-		    path (file-name-directory org-current-export-file)))
 	 (target-dir "Images/")
 	 (target-file
 	  (format "%s%04d.%s" target-dir
@@ -774,10 +700,10 @@ ATTR is a string of other attributes of the a element."
 	     (substring-no-properties path) target-file)
 
     (when (= 1 org-e-odt-embedded-images-count)
-      (make-directory target-dir)
+      (make-directory (concat org-e-odt-zip-dir target-dir))
       (org-e-odt-create-manifest-file-entry "" target-dir))
 
-    (copy-file src-file target-file 'overwrite)
+    (copy-file path (concat org-e-odt-zip-dir target-file) 'overwrite)
     (org-e-odt-create-manifest-file-entry media-type target-file)
     target-file))
 
@@ -810,9 +736,6 @@ ATTR is a string of other attributes of the a element."
 
 (defun org-e-odt-image-size-from-file (file &optional user-width
 					    user-height scale dpi embed-as)
-  (unless (file-name-absolute-p file)
-    (setq file (expand-file-name
-		file (file-name-directory org-current-export-file))))
   (let* (size width height)
     (unless (and user-height user-width)
       (loop for probe-method in org-e-odt-image-size-probe-method
@@ -967,7 +890,7 @@ ATTR is a string of other attributes of the a element."
 	  (find-file-noselect content-file t))
       (current-buffer))))
 
-(defun org-e-odt-save-as-outfile (target opt-plist)
+(defun org-e-odt-save-as-outfile ()
   ;; write automatic styles
   (org-e-odt-write-automatic-styles)
 
@@ -983,67 +906,14 @@ ATTR is a string of other attributes of the a element."
   (org-e-odt-create-manifest-file-entry "text/xml" "content.xml")
 
   ;; write out the manifest entries before zipping
-  (org-e-odt-write-manifest-file)
-
-  (let ((xml-files '("mimetype" "META-INF/manifest.xml" "content.xml"
-		     "meta.xml"))
-	(zipdir default-directory))
-    (when (or t (equal org-lparse-backend 'odt)) ; FIXME
-      (push "styles.xml" xml-files))
-    (message "Switching to directory %s" (expand-file-name zipdir))
-
-    ;; save all xml files
-    (mapc (lambda (file)
-	    (with-current-buffer
-		(find-file-noselect (expand-file-name file) t)
-	      ;; prettify output if needed
-	      (when org-e-odt-prettify-xml
-		(indent-region (point-min) (point-max)))
-	      (save-buffer 0)))
-	  xml-files)
-
-    (let* ((target-name (file-name-nondirectory target))
-	   (target-dir (file-name-directory target))
-	   (cmds `(("zip" "-mX0" ,target-name "mimetype")
-		   ("zip" "-rmTq" ,target-name "."))))
-      (when (file-exists-p target)
-	;; FIXME: If the file is locked this throws a cryptic error
-	(delete-file target))
-
-      (let ((coding-system-for-write 'no-conversion) exitcode err-string)
-	(message "Creating odt file...")
-	(mapc
-	 (lambda (cmd)
-	   (message "Running %s" (mapconcat 'identity cmd " "))
-	   (setq err-string
-		 (with-output-to-string
-		   (setq exitcode
-			 (apply 'call-process (car cmd)
-				nil standard-output nil (cdr cmd)))))
-	   (or (zerop exitcode)
-	       (ignore (message "%s" err-string))
-	       (error "Unable to create odt file (%S)" exitcode)))
-	 cmds))
-
-      ;; move the file from outdir to target-dir
-      (rename-file target-name target-dir)
-
-      ;; kill all xml buffers
-      (mapc (lambda (file)
-	      (kill-buffer
-	       (find-file-noselect (expand-file-name file zipdir) t)))
-	    xml-files)
-
-      (delete-directory zipdir)))
-  (message "Created %s" target)
-  (set-buffer (find-file-noselect target t)))
+  (org-e-odt-write-manifest-file))
 
 (defun org-e-odt-create-manifest-file-entry (&rest args)
   (push args org-e-odt-manifest-file-entries))
 
 (defun org-e-odt-write-manifest-file ()
-  (make-directory "META-INF")
-  (let ((manifest-file (expand-file-name "META-INF/manifest.xml")))
+  (make-directory (concat org-e-odt-zip-dir "META-INF"))
+  (let ((manifest-file (concat org-e-odt-zip-dir "META-INF/manifest.xml")))
     (with-current-buffer
 	(let ((nxml-auto-insert-xml-declaration-flag nil))
 	  (find-file-noselect manifest-file t))
@@ -1093,7 +963,7 @@ ATTR is a string of other attributes of the a element."
       (format "<dc:title>%s</dc:title>\n" title)
       "\n"
       "  </office:meta>\n" "</office:document-meta>")
-     nil (expand-file-name "meta.xml")))
+     nil (concat org-e-odt-zip-dir "meta.xml")))
 
   ;; create a manifest entry for meta.xml
   (org-e-odt-create-manifest-file-entry "text/xml" "meta.xml"))
@@ -1106,7 +976,7 @@ ATTR is a string of other attributes of the a element."
 
     ;; FIXME: Who is opening an empty styles.xml before this point?
     (with-current-buffer
-	(find-file-noselect (expand-file-name "styles.xml") t)
+	(find-file-noselect (concat org-e-odt-zip-dir "styles.xml") t)
       (revert-buffer t t)))
 
   ;; Write custom styles for source blocks
@@ -1123,7 +993,7 @@ ATTR is a string of other attributes of the a element."
 	   (odt "application/vnd.oasis.opendocument.text")
 	   (odf "application/vnd.oasis.opendocument.formula")
 	   (t (error "Unknown OpenDocument backend %S" org-lparse-backend)))))
-    (write-region mimetype nil (expand-file-name "mimetype"))
+    (write-region mimetype nil (concat org-e-odt-zip-dir "mimetype"))
     mimetype))
 
 (defun org-e-odt-do-preprocess-latex-fragments ()
@@ -1216,9 +1086,10 @@ ATTR is a string of other attributes of the a element."
     (let ((styles-file-type (file-name-extension styles-file)))
       (cond
        ((string= styles-file-type "xml")
-	(copy-file styles-file (expand-file-name "styles.xml") t))
+	(copy-file styles-file (concat org-e-odt-zip-dir "styles.xml") t))
        ((member styles-file-type '("odt" "ott"))
-	(org-e-odt-zip-extract styles-file "styles.xml")))))
+	(org-e-odt-zip-extract styles-file
+			       (concat org-e-odt-zip-dir "styles.xml"))))))
    (t
     (error (format "Invalid specification of styles.xml file: %S"
 		   org-e-odt-styles-file))))
@@ -1287,8 +1158,7 @@ non-nil."
       (or (org-export-push-to-kill-ring
 	   (upcase (symbol-name org-lparse-backend)))
 	  (message "Exporting... done")))
-    (org-e-odt-save-as-outfile filename nil ; FIXME
-			       )))
+    (org-e-odt-save-as-outfile filename)))
 
 ;;;###autoload
 (defun org-export-as-odf-and-open ()
@@ -1644,26 +1514,6 @@ captions on export.")
 (defvar org-e-odt-manifest-file-entries nil)
 (defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
 (defvar org-lparse-latex-fragment-fallback) ; set by org-do-lparse
-
-
-;;;; HTML Internal Variables
-
-(defvar html-table-tag nil) ; dynamically scoped into this.
-
-;; FIXME: it already exists in org-e-odt.el
-(defconst org-e-odt-cvt-link-fn
-   nil
-   "Function to convert link URLs to exportable URLs.
-Takes two arguments, TYPE and PATH.
-Returns exportable url as (TYPE PATH), or nil to signal that it
-didn't handle this case.
-Intended to be locally bound around a call to `org-export-as-html'." )
-
-
-(defvar org-e-odt-headline-formatter
-  (lambda (level snumber todo todo-type priority
-		 title tags target extra-targets extra-class)
-    (concat snumber " " title)))
 
 
 
@@ -2627,7 +2477,7 @@ original parsed data.  INFO is a plist holding export options."
 
     ;; Update styles.xml - take care of outline numbering
     (with-current-buffer
-	(find-file-noselect (expand-file-name "styles.xml") t)
+	(find-file-noselect (concat org-e-odt-zip-dir "styles.xml") t)
       ;; Don't make automatic backup of styles.xml file. This setting
       ;; prevents the backed-up styles.xml file from being zipped in to
       ;; odt file. This is more of a hackish fix. Better alternative
@@ -3147,9 +2997,12 @@ used as a communication channel."
 		       (string-match "file:\\([^]]*\\)" formula-link)
 		       (match-string 1 formula-link))))
 	       (t (error "what is this?"))))
+	 (src-expanded (if (file-name-absolute-p src) src
+			 (expand-file-name src (file-name-directory
+						(plist-get info :input-file)))))
 	 (href (org-e-odt-format-tags
 		"<draw:image xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/>" ""
-		(org-e-odt-copy-image-file src)))
+		(org-e-odt-copy-image-file src-expanded)))
 	 ;; extract attributes from #+ATTR_ODT line.
 	 (attr-from (case (org-element-type element)
 		      (link (org-export-get-parent-element element))
@@ -3170,7 +3023,7 @@ used as a communication channel."
 	 ;; extrac
 	 ;; handle `:width', `:height' and `:scale' properties.
 	 (size (org-e-odt-image-size-from-file
-		src (plist-get attr-plist :width)
+		src-expanded (plist-get attr-plist :width)
 		(plist-get attr-plist :height)
 		(plist-get attr-plist :scale) nil ;; embed-as
 		"paragraph"			  ; FIXME
@@ -3970,6 +3823,107 @@ contextual information."
 
 ;;; Interactive functions
 
+(defvar org-e-odt-zip-dir nil
+  "Temporary work directory for OpenDocument exporter.")
+
+(defmacro org-e-odt--export-wrap (out-file &rest body)
+  `(let* ((out-file-type (file-name-extension ,out-file))
+	  (org-e-odt-xml-files '("META-INF/manifest.xml" "content.xml"
+				 "meta.xml" "styles.xml"))
+	  ;; Initialize workarea.  All files that end up in the
+	  ;; exported get created here.
+	  (org-e-odt-zip-dir (file-name-as-directory
+			      (make-temp-file (format org-e-odt-tmpdir-prefix
+						      out-file-type) t)))
+	  (--cleanup-xml-buffers
+	   (function
+	    (lambda nil
+	      ;; Kill all XML buffers.
+	      (mapc (lambda (file)
+		      (let ((buf (get-file-buffer
+				  (concat org-e-odt-zip-dir file))))
+			(when buf
+			  (set-buffer-modified-p nil)
+			  (kill-buffer buf))))
+		    org-e-odt-xml-files)
+	      ;; Delete temporary directory and also other embedded
+	      ;; files that get copied there.
+	      (delete-directory org-e-odt-zip-dir t)))))
+     (org-condition-case-unless-debug
+      err
+      (progn
+	(unless (executable-find "zip")
+	  ;; Not at all OSes ship with zip by default
+	  (error "Executable \"zip\" needed for creating OpenDocument files"))
+	;; Do export.  This creates a bunch of xml files ready to be
+	;; saved and zipped.
+	(progn ,@body)
+	;; Save all XML files.
+	(mapc (lambda (file)
+		(let ((buf (get-file-buffer (concat org-e-odt-zip-dir file))))
+		  (when buf
+		    (with-current-buffer buf
+		      ;; Prettify output if needed.
+		      (when org-e-odt-prettify-xml
+			(indent-region (point-min) (point-max)))
+		      (save-buffer 0)))))
+	      org-e-odt-xml-files)
+	;; Run zip.
+	(let* ((target ,out-file)
+	       (target-name (file-name-nondirectory target))
+	       (target-dir (file-name-directory target))
+	       (cmds `(("zip" "-mX0" ,target-name "mimetype")
+		       ("zip" "-rmTq" ,target-name "."))))
+	  ;; If a file with same name as the desired output file
+	  ;; exists, remove it.
+	  (when (file-exists-p target)
+	    (delete-file target))
+	  ;; Zip up the xml files.
+	  (let ((coding-system-for-write 'no-conversion) exitcode err-string)
+	    (message "Creating ODT file...")
+	    ;; Switch temporarily to content.xml.  This way Zip
+	    ;; process will inherit `org-e-odt-zip-dir' as the current
+	    ;; directory.
+	    (with-current-buffer
+		(find-file-noselect (concat org-e-odt-zip-dir "content.xml") t)
+	      (mapc
+	       (lambda (cmd)
+		 (message "Running %s" (mapconcat 'identity cmd " "))
+		 (setq err-string
+		       (with-output-to-string
+			 (setq exitcode
+			       (apply 'call-process (car cmd)
+				      nil standard-output nil (cdr cmd)))))
+		 (or (zerop exitcode)
+		     (error (concat "Unable to create OpenDocument file."
+				    (format "  Zip failed with error (%s)"
+					    err-string)))))
+	       cmds)
+	      ;; Zip file is now in the rightful place.
+	      (rename-file target-name target)))
+	  (message "Created %s" target)
+	  ;; Cleanup work directory and work files.
+	  (funcall --cleanup-xml-buffers)
+	  ;; Open the OpenDocument file in archive-mode for
+	  ;; examination.
+	  (find-file-noselect target t)
+	  ;; Return exported file.
+	  (cond
+	   ;; Case 1: Conversion desired on exported file.  Run the
+	   ;; converter on the OpenDocument file.  Return the
+	   ;; converted file.
+	   (org-e-odt-preferred-output-format
+	    (or (org-e-odt-convert target org-e-odt-preferred-output-format)
+		target))
+	   ;; Case 2: No further conversion.  Return exported
+	   ;; OpenDocument file.
+	   (t target))))
+      ((quit error)
+       ;; Cleanup work directory and work files.
+       (funcall --cleanup-xml-buffers)
+       (message "OpenDocument export failed: %s"
+		(error-message-string err))))))
+
 ;;;###autoload
 (defun org-e-odt-export-to-odt
   (&optional subtreep visible-only body-only ext-plist pub-dir)
@@ -3999,29 +3953,32 @@ directory.
 
 Return output file's name."
   (interactive)
-  (setq debug-on-error t)		; FIXME
+  (org-e-odt--export-wrap
+   (org-export-output-file-name ".odt" subtreep pub-dir)
+   (let* ((org-e-odt-manifest-file-entries nil)
+	  (org-e-odt-embedded-images-count 0)
+	  (org-e-odt-embedded-formulas-count 0)
+	  (org-e-odt-section-count 0)
+	  (org-e-odt-automatic-styles nil)
+	  (org-e-odt-object-counters nil)
+	  ;; Let `htmlfontify' know that we are interested in collecting
+	  ;; styles.
+	  (hfy-user-sheet-assoc nil))
+     ;; Initialize content.xml and kick-off the export process.
+     (let ((out-buf (progn
+		      (require 'nxml-mode)
+		      (let ((nxml-auto-insert-xml-declaration-flag nil))
+			(find-file-noselect
+			 (concat org-e-odt-zip-dir "content.xml") t)))))
+       (org-export-to-buffer 'e-odt out-buf subtreep visible-only body-only))
 
-  (let* ((outbuf (org-e-odt-init-outfile))
-	 (target (org-export-output-file-name ".odt" subtreep pub-dir))
-	 (outdir (file-name-directory (buffer-file-name outbuf)))
-	 (default-directory outdir))
-
-    ;; FIXME: for copying embedded images
-    (setq org-current-export-file
-	  (file-name-directory
-	   (org-export-output-file-name ".odt" subtreep nil)))
-
-    (org-export-to-buffer 'e-odt outbuf subtreep visible-only body-only)
-
-    (setq org-lparse-opt-plist nil) 	; FIXME
-    (org-e-odt-save-as-outfile target	;; info
-			       nil
-			       )
-
-    ;; return outfile
-    (if (not org-e-odt-preferred-output-format) target
-      (or (org-e-odt-convert target org-e-odt-preferred-output-format)
-	  target))))
+     ;; Prepare other XML files.
+     ;; - mimetype
+     ;; - content.xml
+     ;; - styles.xml
+     ;; - manifest.xml
+     ;; - meta.mxl
+     (org-e-odt-save-as-outfile))))
 
 
 
