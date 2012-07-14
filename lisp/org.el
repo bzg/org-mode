@@ -2196,16 +2196,16 @@ selection scheme.
 
 When nil, fast selection is never used.
 
-When the symbol `prefix', it will be used when `org-todo' is called with
-a prefix argument,  i.e. `C-u C-c C-t' in an Org-mode buffer, and `C-u t'
-in an agenda buffer.
+When the symbol `prefix', it will be used when `org-todo' is called
+with a prefix argument,  i.e. `C-u C-c C-t' in an Org-mode buffer, and
+`C-u t' in an agenda buffer.
 
 When t, fast selection is used by default.  In this case, the prefix
 argument forces cycling instead.
 
-In all cases, the special interface is only used if access keys have actually
-been assigned by the user, i.e. if keywords in the configuration are followed
-by a letter in parenthesis, like TODO(t)."
+In all cases, the special interface is only used if access keys have
+actually been assigned by the user, i.e. if keywords in the configuration
+are followed by a letter in parenthesis, like TODO(t)."
   :group 'org-todo
   :type '(choice
 	  (const :tag "Never" nil)
