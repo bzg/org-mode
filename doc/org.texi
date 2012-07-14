@@ -3924,9 +3924,10 @@ from @code{DONE} to @code{REPORT} in the example above.  See also
 @subsection Fast access to TODO states
 
 If you would like to quickly change an entry to an arbitrary TODO state
-instead of cycling through the states, you can set up keys for
-single-letter access to the states.  This is done by adding the section
-key after each keyword, in parentheses.  For example:
+instead of cycling through the states, you can set up keys for single-letter
+access to the states.  This is done by adding the selection
+letter@footnote{Only alphabetical letters are allowed for fast TODO selection
+keys.} after each keyword, in parentheses.  For example:
 
 @lisp
 (setq org-todo-keywords

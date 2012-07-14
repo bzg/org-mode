@@ -2107,11 +2107,11 @@ cycling, see the manual.
 TODO keywords and interpretation can also be set on a per-file basis with
 the special #+SEQ_TODO and #+TYP_TODO lines.
 
-Each keyword can optionally specify a character for fast state selection
+Each keyword can optionally specify a letter for fast state selection
 \(in combination with the variable `org-use-fast-todo-selection')
-and specifiers for state change logging, using the same syntax
-that is used in the \"#+TODO:\" lines.  For example, \"WAIT(w)\" says
-that the WAIT state can be selected with the \"w\" key.  \"WAIT(w!)\"
+and specifiers for state change logging, using the same syntax that
+is used in the \"#+TODO:\" lines.  For example, \"WAIT(w)\" says that
+the WAIT state can be selected with the \"w\" letter.  \"WAIT(w!)\"
 indicates to record a time stamp each time this state is selected.
 
 Each keyword may also specify if a timestamp or a note should be
@@ -2125,7 +2125,7 @@ define X.  You may omit any of the fast-selection key or X or /Y,
 so WAIT(w@), WAIT(w/@) and WAIT(@/@) are all valid.
 
 For backward compatibility, this variable may also be just a list
-of keywords - in this case the interpretation (sequence or type) will be
+of keywords.  In this case the interpretation (sequence or type) will be
 taken from the (otherwise obsolete) variable `org-todo-interpretation'."
   :group 'org-todo
   :group 'org-keywords
