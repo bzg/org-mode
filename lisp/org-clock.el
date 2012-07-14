@@ -1264,10 +1264,12 @@ last clock-out time, if any."
     (let ((start-time (if (or org-clock-continuously (equal arg '(16)))
 			  (or org-clock-out-time (current-time))
 			(current-time))))
-      (org-clock-clock-in (list (car org-clock-history)) nil start-time)
-      (message "Now clocking in: %s (in %s)"
-	       org-clock-current-task
-	       (buffer-name (marker-buffer org-clock-marker))))))
+      (if (null org-clock-history)
+	  (message "No last clock")
+	(org-clock-clock-in (list (car org-clock-history)) nil start-time)
+	(message "Clocking back: %s (in %s)"
+		 org-clock-current-task
+		 (buffer-name (marker-buffer org-clock-marker)))))))
 
 (defun org-clock-mark-default-task ()
   "Mark current task as default task."
@@ -1560,8 +1562,7 @@ UPDOWN tells whether to change 'up or 'down."
   (save-excursion ; Do not replace this with `with-current-buffer'.
     (org-no-warnings (set-buffer (org-clocking-buffer)))
     (goto-char org-clock-marker)
-    (if (save-excursion (move-beginning-of-line 1)
-			(looking-at (concat "^[ \t]*" org-clock-string)))
+    (if (looking-back (concat "^[ \t]*" org-clock-string ".*"))
 	(progn (delete-region (1- (point-at-bol)) (point-at-eol))
 	       (org-remove-empty-drawer-at "LOGBOOK" (point)))
       (message "Clock gone, cancel the timer anyway")

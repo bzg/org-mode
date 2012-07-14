@@ -6703,6 +6703,8 @@ open and agenda-wise Org files."
 	  (org-flag-drawer t))))))
 
 (defun org-flag-drawer (flag)
+  "When FLAG is non-nil, hide the drawer we are within.
+Otherwise make it visible."
   (save-excursion
     (beginning-of-line 1)
     (when (looking-at "^[ \t]*:[a-zA-Z][a-zA-Z0-9]*:")
@@ -17800,10 +17802,10 @@ BEG and END default to the buffer boundaries."
 
 (org-defkey org-mode-map "\C-c\C-x\C-t" 'org-toggle-time-stamp-overlays)
 (org-defkey org-mode-map "\C-c\C-x\C-i" 'org-clock-in)
-(org-defkey org-mode-map "\C-c\C-x\C-I" 'org-clock-in-last)
+(org-defkey org-mode-map "\C-c\C-x\C-x" 'org-clock-in-last)
 (org-defkey org-mode-map "\C-c\C-x\C-o" 'org-clock-out)
 (org-defkey org-mode-map "\C-c\C-x\C-j" 'org-clock-goto)
-(org-defkey org-mode-map "\C-c\C-x\C-x" 'org-clock-cancel)
+(org-defkey org-mode-map "\C-c\C-x\C-q" 'org-clock-cancel)
 (org-defkey org-mode-map "\C-c\C-x\C-d" 'org-clock-display)
 (org-defkey org-mode-map "\C-c\C-x\C-r" 'org-clock-report)
 (org-defkey org-mode-map "\C-c\C-x\C-u" 'org-dblock-update)
