@@ -4027,18 +4027,6 @@ a string, or nil."
 ;; variable and a specified charset.  `org-export-dictionary' contains
 ;; the dictionary used for the translation.
 
-(defun org-export-translate (s encoding info)
-  "Translate string S according to language specification.
-
-ENCODING is a symbol among `:ascii', `:html', `:latex', `:latin1'
-and `:utf8'.  INFO is a plist used as a communication channel.
-
-Translation depends on `:language' property.  If no translation
-in found for a given language and a given encoding, return S."
-  (let ((lang (plist-get info :language))
-	(translations (cdr (assoc s org-export-dictionary))))
-    (or (plist-get (cdr (assoc lang translations)) encoding) s)))
-
 (defconst org-export-dictionary
   '(("Author"
      ("fr"
@@ -4112,6 +4100,18 @@ It is used as a database for `org-export-translate'. Since this
 function returns the string as-is if no translation was found,
 the variable only needs to record values different from the
 entry.")
+
+(defun org-export-translate (s encoding info)
+  "Translate string S according to language specification.
+
+ENCODING is a symbol among `:ascii', `:html', `:latex', `:latin1'
+and `:utf8'.  INFO is a plist used as a communication channel.
+
+Translation depends on `:language' property.  If no translation
+in found for a given language and a given encoding, return S."
+  (let ((lang (plist-get info :language))
+	(translations (cdr (assoc s org-export-dictionary))))
+    (or (plist-get (cdr (assoc lang translations)) encoding) s)))
 
 
 
