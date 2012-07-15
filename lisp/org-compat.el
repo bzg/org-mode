@@ -443,6 +443,23 @@ With two arguments, return floor and remainder of their quotient."
       'condition-case-unless-debug
     'condition-case-no-debug))
 
+(defmacro org-check-version ()
+  "Try very hard to provide sensible version strings."
+  (let* ((org-dir        (org-find-library-dir "org"))
+	 (org-version.el (concat org-dir "org-version.el"))
+	 (org-fixup.el   (concat org-dir "../UTILITIES/org-fixup.el")))
+    (if (require 'org-version org-version.el 'noerror)
+	'(progn
+	   (autoload 'org-release     "org-version.el")
+	   (autoload 'org-git-version "org-version.el"))
+      (if (require 'org-fixup org-fixup.el 'noerror)
+	  '(org-fixup)
+	;; provide fallback definitions and complain
+	(warn "Could not define org version correctly.  Check installation!")
+	'(progn
+	   (defun org-release () "N/A")
+	   (defun org-git-version () "N/A !!check installation!!"))))))
+
 (provide 'org-compat)
 
 ;;; org-compat.el ends here

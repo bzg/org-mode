@@ -54,6 +54,7 @@ the Git work tree)."
 ;;;\#\#\#autoload
 \(defconst org-odt-data-dir \"" odt-dir "\"
   \"The location of ODT styles.\")
+\f\n\(provide 'org-version\)
 \f\n;; Local Variables:\n;; version-control: never
 ;; no-byte-compile: t
 ;; coding: utf-8\n;; End:\n;;; org-version.el ends here\n")

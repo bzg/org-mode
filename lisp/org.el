@@ -209,15 +209,7 @@ identifier."
   :group 'org-id)
 
 ;;; Version
-;; fallback definitions if everything goes wrong
-(defun org-release () "N/A")
-(defun org-git-version () "N/A !!check installation!!")
-;; re-define them with something sensible if possible
-(when (eval-when-compile
-	(require 'org-fixup
-		 (concat (org-find-library-dir "org") "../UTILITIES/org-fixup.el")
-		 'noerror))
-  (org-fixup))
+(org-check-version)
 ;;;###autoload
 (defun org-version (&optional here full message)
   "Show the org-mode version in the echo area.
