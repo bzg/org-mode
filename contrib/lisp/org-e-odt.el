@@ -184,9 +184,9 @@ structure of the values.")
 		     ((symbolp style) (org-e-odt-get-style-name-for-entity
 				       'paragraph style)))))
     (unless style-name
-      (error "Don't know how to handle paragraph style %s" style)))
-  (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-	  style-name text))
+      (error "Don't know how to handle paragraph style %s" style))
+    (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	    style-name text)))
 
 (defun org-e-odt-format-date (&optional org-ts fmt)
   (save-match-data
