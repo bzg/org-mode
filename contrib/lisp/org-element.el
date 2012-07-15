@@ -3100,13 +3100,16 @@ element or object type."
 (defsubst org-element-put-property (element property value)
   "In ELEMENT set PROPERTY to VALUE.
 Return modified element."
-  (setcar (cdr element) (plist-put (nth 1 element) property value))
+  (when (consp element)
+    (setcar (cdr element) (plist-put (nth 1 element) property value)))
   element)
 
 (defsubst org-element-set-contents (element &rest contents)
   "Set ELEMENT contents to CONTENTS.
 Return modified element."
-  (setcdr (cdr element) contents))
+  (cond ((not element) (list contents))
+	((cdr element) (setcdr (cdr element) contents))
+	(t (nconc element contents))))
 
 (defsubst org-element-set-element (old new)
   "Replace element or object OLD with element or object NEW.
@@ -3135,14 +3138,15 @@ at the end.
 
 The function takes care of setting `:parent' property for CHILD.
 Return parent element."
-  (let ((contents (org-element-contents parent)))
-    (apply 'org-element-set-contents
-	   parent
-	   (if append (append contents (list child)) (cons child contents))))
-  ;; Link the child element with parent.
-  (when (consp child) (org-element-put-property child :parent parent))
-  ;; Return the parent element.
-  parent)
+  (if (not parent) (list child)
+    (let ((contents (org-element-contents parent)))
+      (apply 'org-element-set-contents
+	     parent
+	     (if append (append contents (list child)) (cons child contents))))
+    ;; Link the CHILD element with PARENT.
+    (when (consp child) (org-element-put-property child :parent parent))
+    ;; Return the parent element.
+    parent))
 
 
 
@@ -3430,14 +3434,21 @@ Assume buffer is in Org mode."
      ;; headline belongs to a section.
      'section nil granularity visible-only (list 'org-data nil))))
 
-(defun org-element-parse-secondary-string (string restriction)
+(defun org-element-parse-secondary-string (string restriction &optional parent)
   "Recursively parse objects in STRING and return structure.
 
-RESTRICTION, when non-nil, is a symbol limiting the object types
-that will be looked after."
+RESTRICTION is a symbol limiting the object types that will be
+looked after.
+
+Optional argument PARENT, when non-nil, is the element or object
+containing the secondary string.  It is used to set correctly
+`:parent' property within the string."
   (with-temp-buffer
     (insert string)
-    (org-element-parse-objects (point-min) (point-max) nil restriction)))
+    (let ((secondary (org-element-parse-objects
+		      (point-min) (point-max) nil restriction)))
+      (mapc (lambda (obj) (org-element-put-property obj :parent parent))
+	    secondary))))
 
 (defun org-element-map (data types fun &optional info first-match no-recursion)
   "Map a function on selected elements or objects.
@@ -3584,58 +3595,40 @@ Elements are accumulated into ACC."
 		       end granularity special structure))
 	     (type (org-element-type element))
 	     (cbeg (org-element-property :contents-begin element)))
-	;; Set ACC as parent of current element.  It will be
-	;; completed by side-effect.  If the element contains any
-	;; secondary string, also set `:parent' property of every
-	;; object within it as current element.
-	(plist-put (nth 1 element) :parent acc)
-	(let ((sec-loc (assq type org-element-secondary-value-alist)))
-	  (when sec-loc
-	    (let ((sec-value (org-element-property (cdr sec-loc) element)))
-	      (unless (stringp sec-value)
-		(mapc (lambda (obj)
-			(unless (stringp obj)
-			  (plist-put (nth 1 obj) :parent element)))
-		      sec-value)))))
 	(goto-char (org-element-property :end element))
-	(nconc
-	 acc
-	 (list
-	  (cond
-	   ;; Case 1.  Simply accumulate element if VISIBLE-ONLY is
-	   ;; true and element is hidden or if it has no contents
-	   ;; anyway.
-	   ((or (and visible-only (org-element-property :hiddenp element))
-		(not cbeg)) element)
-	   ;; Case 2.  Greater element: parse it between
-	   ;; `contents-begin' and `contents-end'.  Make sure
-	   ;; GRANULARITY allows the recursion, or ELEMENT is an
-	   ;; headline, in which case going inside is mandatory, in
-	   ;; order to get sub-level headings.
-	   ((and (memq type org-element-greater-elements)
-		 (or (memq granularity '(element object nil))
-		     (and (eq granularity 'greater-element)
-			  (eq type 'section))
-		     (eq type 'headline)))
-	    (org-element-parse-elements
-	     cbeg (org-element-property :contents-end element)
-	     ;; Possibly switch to a special mode.
-	     (case type
-	       (headline
-		(if (org-element-property :quotedp element) 'quote-section
-		  'section))
-	       (plain-list 'item)
-	       (table 'table-row))
-	     (org-element-property :structure element)
-	     granularity visible-only element))
-	   ;; Case 3.  ELEMENT has contents.  Parse objects inside,
-	   ;; if GRANULARITY allows it.
-	   ((and cbeg (memq granularity '(object nil)))
-	    (org-element-parse-objects
-	     cbeg (org-element-property :contents-end element)
-	     element (org-element-restriction type)))
-	   ;; Case 4.  Else, just accumulate ELEMENT.
-	   (t element))))))
+	;; Fill ELEMENT contents by side-effect.
+	(cond
+	 ;; If VISIBLE-ONLY is true and element is hidden or if it has
+	 ;; no contents, don't modify it.
+	 ((or (and visible-only (org-element-property :hiddenp element))
+	      (not cbeg)))
+	 ;; Greater element: parse it between `contents-begin' and
+	 ;; `contents-end'.  Make sure GRANULARITY allows the
+	 ;; recursion, or ELEMENT is an headline, in which case going
+	 ;; inside is mandatory, in order to get sub-level headings.
+	 ((and (memq type org-element-greater-elements)
+	       (or (memq granularity '(element object nil))
+		   (and (eq granularity 'greater-element)
+			(eq type 'section))
+		   (eq type 'headline)))
+	  (org-element-parse-elements
+	   cbeg (org-element-property :contents-end element)
+	   ;; Possibly switch to a special mode.
+	   (case type
+	     (headline
+	      (if (org-element-property :quotedp element) 'quote-section
+		'section))
+	     (plain-list 'item)
+	     (table 'table-row))
+	   (org-element-property :structure element)
+	   granularity visible-only element))
+	 ;; ELEMENT has contents.  Parse objects inside, if
+	 ;; GRANULARITY allows it.
+	 ((memq granularity '(object nil))
+	  (org-element-parse-objects
+	   cbeg (org-element-property :contents-end element) element
+	   (org-element-restriction type))))
+	(org-element-adopt-element acc element t)))
     ;; Return result.
     acc))
 
@@ -3646,79 +3639,50 @@ Objects are accumulated in ACC.
 
 RESTRICTION is a list of object types which are allowed in the
 current object."
-  (let ((get-next-object
-	 (function
-	  (lambda (cand)
-	    ;; Return the parsing function associated to the nearest
-	    ;; object among list of candidates CAND.
-	    (let ((pos (apply 'min (mapcar 'cdr cand))))
-	      (save-excursion
-		(goto-char pos)
-		(funcall
-		 (intern
-		  (format "org-element-%s-parser" (car (rassq pos cand))))))))))
-	next-object candidates)
+  (let (candidates)
     (save-excursion
       (goto-char beg)
       (while (setq candidates (org-element-get-next-object-candidates
 			       end restriction candidates))
-	(setq next-object (funcall get-next-object candidates))
-	;; Set ACC as parent of current element.  It will be completed
-	;; by side-effect.
-	(plist-put (nth 1 next-object) :parent acc)
-	;; 1. Text before any object.  Untabify it.
-	(let ((obj-beg (org-element-property :begin next-object)))
-	  (unless (= (point) obj-beg)
-	    (let ((beg-text
-		   (list
-		    (replace-regexp-in-string
-		     "\t" (make-string tab-width ? )
-		     (buffer-substring-no-properties (point) obj-beg)))))
-	      (if acc (nconc acc beg-text) (setq acc beg-text)))))
-	;; 2. Object...
-	(let* ((obj-end (org-element-property :end next-object))
-	       (cont-beg (org-element-property :contents-begin next-object))
-	       (complete-next-object
-		(if (and (memq (car next-object) org-element-recursive-objects)
-			 cont-beg)
-		    ;; ... recursive.  The CONT-BEG check is for
-		    ;; links, as some of them might not be recursive
-		    ;; (i.e. plain links).
-		    (save-restriction
-		      (narrow-to-region
-		       cont-beg
-		       (org-element-property :contents-end next-object))
-		      (org-element-parse-objects
-		       (point-min) (point-max) next-object
-		       ;; Restrict allowed objects.
-		       (org-element-restriction next-object)))
-		  next-object)))
-	  (if acc (nconc acc (list complete-next-object))
-	    (setq acc (list complete-next-object)))
-	  ;; If the object contains any secondary string, also set
-	  ;; `:parent' property of every object within it as current
-	  ;; object.
-	  (let ((sec-loc (assq (org-element-type next-object)
-			       org-element-secondary-value-alist)))
-	    (when sec-loc
-	      (let ((sec-value
-		     (org-element-property (cdr sec-loc) next-object)))
-		(unless (stringp sec-value)
-		  (mapc (lambda (obj)
-			  (unless (stringp obj)
-			    (plist-put (nth 1 obj)
-				       :parent
-				       complete-next-object)))
-			sec-value)))))
-	  (goto-char obj-end)))
+	(let ((next-object
+	       (let ((pos (apply 'min (mapcar 'cdr candidates))))
+		 (save-excursion
+		   (goto-char pos)
+		   (funcall (intern (format "org-element-%s-parser"
+					    (car (rassq pos candidates)))))))))
+	  ;; 1. Text before any object.  Untabify it.
+	  (let ((obj-beg (org-element-property :begin next-object)))
+	    (unless (= (point) obj-beg)
+	      (setq acc
+		    (org-element-adopt-element
+		     acc
+		     (replace-regexp-in-string
+		      "\t" (make-string tab-width ? )
+		      (buffer-substring-no-properties (point) obj-beg)) t))))
+	  ;; 2. Object...
+	  (let ((obj-end (org-element-property :end next-object))
+		(cont-beg (org-element-property :contents-begin next-object)))
+	    ;; Fill contents of NEXT-OBJECT by side-effect, if it has
+	    ;; a recursive type.
+	    (when (and (memq (car next-object) org-element-recursive-objects)
+		       cont-beg)
+	      (save-restriction
+		(narrow-to-region
+		 cont-beg
+		 (org-element-property :contents-end next-object))
+		(org-element-parse-objects
+		 (point-min) (point-max) next-object
+		 (org-element-restriction next-object))))
+	    (setq acc (org-element-adopt-element acc next-object t))
+	    (goto-char obj-end))))
       ;; 3. Text after last object.  Untabify it.
       (unless (= (point) end)
-	(let ((end-text
-	       (list
-		(replace-regexp-in-string
-		 "\t" (make-string tab-width ? )
-		 (buffer-substring-no-properties (point) end)))))
-	  (if acc (nconc acc end-text) (setq acc end-text))))
+	(setq acc
+	      (org-element-adopt-element
+	       acc
+	       (replace-regexp-in-string
+		"\t" (make-string tab-width ? )
+		(buffer-substring-no-properties (point) end)) t)))
       ;; Result.
       acc)))
 
