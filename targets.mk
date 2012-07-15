@@ -24,9 +24,10 @@ endif
 
 .PHONY:	all oldorg update update2 up0 up1 up2 compile $(SUBDIRS) \
 	check test install info html pdf card doc docs $(INSTSUB) \
-	autoloads cleanall clean cleancontrib cleantesting cleanutils
-        cleanrel clean-install cleanelc cleandirs \
-        cleanlisp cleandoc cleandocs cleantest \
+	autoloads cleanall clean \
+	cleancontrib cleantesting cleanutils
+	cleanrel clean-install cleanelc cleandirs \
+	cleanlisp cleandoc cleandocs cleantest \
 	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol
 
