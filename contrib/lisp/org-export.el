@@ -4107,8 +4107,8 @@ entry.")
 ENCODING is a symbol among `:ascii', `:html', `:latex', `:latin1'
 and `:utf8'.  INFO is a plist used as a communication channel.
 
-Translation depends on `:language' property.  If no translation
-in found for a given language and a given encoding, return S."
+Translation depends on `:language' property.  Return the
+translated string.  If no translation is found return S."
   (let ((lang (plist-get info :language))
 	(translations (cdr (assoc s org-export-dictionary))))
     (or (plist-get (cdr (assoc lang translations)) encoding) s)))
