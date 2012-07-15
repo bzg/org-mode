@@ -28,18 +28,14 @@ syntax."
 	      (dolist (type (append org-element-all-elements
 				    org-element-all-objects)
 			    transcode-table)
-		(push (cons type (intern (format "org-%s-%s" backend type)))
-		      transcode-table)))))
-     (flet ,(let (transcoders)
-	      (dolist (type (append org-element-all-elements
-				    org-element-all-objects)
-			    transcoders)
-		(push `(,(intern (format "org-%s-%s" backend type))
-			(obj contents info)
-			(,(intern (format "org-element-%s-interpreter" type))
-			 obj contents))
-		      transcoders)))
-       ,@body)))
+		(push
+		 (cons type
+		       (lambda (obj contents info)
+			 (funcall
+			  (intern (format "org-element-%s-interpreter" type))
+			  obj contents)))
+		 transcode-table)))))
+     (progn ,@body)))
 
 (defmacro org-test-with-parsed-data (data &rest body)
   "Execute body with parsed data available.
@@ -421,10 +417,12 @@ body\n")))
   "Test export snippets transcoding."
   (org-test-with-temp-text "@@test:A@@@@t:B@@"
     (org-test-with-backend test
-      (flet ((org-test-export-snippet
-	      (snippet contents info)
-	      (when (eq (org-export-snippet-backend snippet) 'test)
-		(org-element-property :value snippet))))
+      (let ((org-test-translate-alist
+	     (cons (cons 'export-snippet
+			 (lambda (snippet contents info)
+			   (when (eq (org-export-snippet-backend snippet) 'test)
+			     (org-element-property :value snippet))))
+		   org-test-translate-alist)))
 	(let ((org-export-snippet-translation-alist nil))
 	  (should (equal (org-export-as 'test) "A\n")))
 	(let ((org-export-snippet-translation-alist '(("t" . "test"))))
@@ -491,10 +489,12 @@ body\n")))
 * Title
 Paragraph[fn:1]"
       (org-test-with-backend test
-	(flet ((org-test-footnote-reference
-		(fn-ref contents info)
-		(org-element-interpret-data
-		 (org-export-get-footnote-definition fn-ref info))))
+	(let ((org-test-translate-alist
+	       (cons (cons 'footnote-reference
+			   (lambda (fn contents info)
+			     (org-element-interpret-data
+			      (org-export-get-footnote-definition fn info))))
+		     org-test-translate-alist)))
 	  (forward-line)
 	  (should (equal "ParagraphOut of scope\n"
 			 (org-export-as 'test 'subtree))))))))

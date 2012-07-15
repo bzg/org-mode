@@ -1708,7 +1708,7 @@ INFO is a plist containing export directives."
     ;; Return contents only for complete parse trees.
     (if (eq type 'org-data) (lambda (blob contents info) contents)
       (let ((transcoder (cdr (assq type (plist-get info :translate-alist)))))
-	(and (fboundp transcoder) transcoder)))))
+	(and (functionp transcoder) transcoder)))))
 
 (defun org-export-data (data info)
   "Convert DATA into current back-end format.
@@ -1750,7 +1750,7 @@ Return transcoded string."
                      (eq (plist-get info :with-archived-trees) 'headline)
                      (org-element-property :archivedp data)))
             (let ((transcoder (org-export-transcoder data info)))
-              (and (fboundp transcoder) (funcall transcoder data nil info))))
+              (and (functionp transcoder) (funcall transcoder data nil info))))
            ;; Element/Object with contents.
            (t
             (let ((transcoder (org-export-transcoder data info)))
@@ -2393,7 +2393,7 @@ Return code as a string."
 				    (plist-get info :translate-alist))))
 	       (output (org-export-filter-apply-functions
 			(plist-get info :filter-final-output)
-			(if (or (not (fboundp template)) body-only) body
+			(if (or (not (functionp template)) body-only) body
 			  (funcall template body info))
 			info)))
 	  ;; Maybe add final OUTPUT to kill ring, then return it.
