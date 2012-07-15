@@ -3097,7 +3097,7 @@ CONTENTS is nil."
 ;; that `org-element-set-element' and `org-element-adopt-element' are
 ;; higher level functions since also update `:parent' property.
 
-(defun org-element-type (element)
+(defsubst org-element-type (element)
   "Return type of ELEMENT.
 
 The function returns the type of the element or object provided.
@@ -3109,15 +3109,15 @@ It can also return the following special value:
    ((not (consp element)) (and (stringp element) 'plain-text))
    ((symbolp (car element)) (car element))))
 
-(defun org-element-property (property element)
+(defsubst org-element-property (property element)
   "Extract the value from the PROPERTY of an ELEMENT."
   (plist-get (nth 1 element) property))
 
-(defun org-element-contents (element)
+(defsubst org-element-contents (element)
   "Extract contents from an ELEMENT."
   (and (consp element) (nthcdr 2 element)))
 
-(defun org-element-restriction (element)
+(defsubst org-element-restriction (element)
   "Return restriction associated to ELEMENT.
 ELEMENT can be an element, an object or a symbol representing an
 element or object type."
