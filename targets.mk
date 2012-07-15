@@ -24,8 +24,9 @@ endif
 
 .PHONY:	all oldorg update update2 up0 up1 up2 compile $(SUBDIRS) \
 	check test install info html pdf card doc docs $(INSTSUB) \
-	autoloads cleanall clean cleancontrib cleanutils cleanrel clean-install \
-	cleanelc cleandirs cleanlisp cleandoc cleandocs cleantest \
+	autoloads cleanall clean cleancontrib cleantesting cleanutils
+        cleanrel clean-install cleanelc cleandirs \
+        cleanlisp cleandoc cleandocs cleantest \
 	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol
 
@@ -114,11 +115,14 @@ clean:	cleanrel
 	$(MAKE) -C lisp clean
 	$(MAKE) -C doc clean
 
-cleanall: cleandirs cleantest cleancontrib cleanutils
+cleanall: cleandirs cleantest cleancontrib cleantesting cleanutils
 	-$(FIND) . -name \*~ -o -name \*# -o -name .#\* -exec $(RM) {} \;
 
 cleancontrib:
 	-$(FIND) contrib -name \*~ -o -name \*.elc -exec $(RM) {} \;
+
+cleantesting:
+	-$(FIND) testing -name \*~ -o -name \*.elc -exec $(RM) {} \;
 
 cleanutils:
 	-$(FIND) UTILITIES -name \*~ -o -name \*.elc -exec $(RM) {} \;
