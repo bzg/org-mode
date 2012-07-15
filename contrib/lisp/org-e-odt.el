@@ -178,31 +178,15 @@ structure of the values.")
 	    (format "text:name=\"%s\"" (or name default-name))
 	    text)))
 
-(defun org-e-odt-begin-paragraph (&optional style)
-  (format "<text:p%s>" (org-e-odt-get-extra-attrs-for-paragraph-style style)))
-
-(defun org-e-odt-end-paragraph ()
-  "</text:p>")
-
-(defun org-e-odt-get-extra-attrs-for-paragraph-style (style)
-  (let (style-name)
-    (setq style-name
-	  (cond
-	   ((stringp style) style)
-	   ((symbolp style) (org-e-odt-get-style-name-for-entity
-			     'paragraph style))))
-    (unless style-name
-      (error "Don't know how to handle paragraph style %s" style))
-    (format " text:style-name=\"%s\"" style-name)))
-
 (defun org-e-odt-format-stylized-paragraph (style text)
-  (format "\n<text:p%s>%s</text:p>"
-	  (org-e-odt-get-extra-attrs-for-paragraph-style style)
-	  text))
-
-(defun org-e-odt-format-author (&optional author )
-  (when (setq author (or author (plist-get org-lparse-opt-plist :author)))
-    (format "<dc:creator>%s</dc:creator>" author)))
+  (let ((style-name (cond
+		     ((stringp style) style)
+		     ((symbolp style) (org-e-odt-get-style-name-for-entity
+				       'paragraph style)))))
+    (unless style-name
+      (error "Don't know how to handle paragraph style %s" style)))
+  (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	  style-name text))
 
 (defun org-e-odt-format-date (&optional org-ts fmt)
   (save-match-data
@@ -217,19 +201,6 @@ structure of the values.")
        (fmt (format-time-string fmt time))
        (t (setq date (format-time-string "%Y-%m-%dT%H:%M:%S%z" time))
 	  (format "%s:%s" (substring date 0 -2) (substring date -2)))))))
-
-(defun org-e-odt-begin-annotation (&optional author date)
-  (concat
-   "<office:annotation>\n"
-   (and author (org-e-odt-format-author author))
-   (org-e-odt-format-tags
-    '("<dc:date>" . "</dc:date>")
-    (org-e-odt-format-date
-     (or date (plist-get org-lparse-opt-plist :date))))
-   (org-e-odt-begin-paragraph)))
-
-(defun org-e-odt-end-annotation ()
-  "</office:annotation>")
 
 (defun org-e-odt-begin-plain-list (ltype &optional continue-numbering)
   (unless (member ltype '(ordered unordered descriptive))
@@ -449,7 +420,7 @@ and prefix with \"OrgSrc\".  For example,
 	 (style (and org-e-odt-create-custom-styles-for-srcblocks
 		     (cond
 		      ((eq fn 'default)
-		       (format org-src-block-paragraph-format
+		       (format org-e-odt-src-block-paragraph-format
 			       background-color-val color-val))
 		      (t
 		       (format
@@ -811,14 +782,8 @@ Update styles.xml with styles that were collected as part of
 	     (counter (nth 1 label-props))
 	     ;; identify label style
 	     (label-style (nth 2 label-props))
-	     ;; grok language setting
-	     (en-strings (assoc-default "en" org-e-odt-category-strings))
-	     (lang (plist-get info :language)) ; FIXME
-	     (lang-strings (assoc-default lang org-e-odt-category-strings))
 	     ;; retrieve localized category sting
-	     (pos (- (length org-e-odt-category-map-alist)
-		     (length (memq label-props org-e-odt-category-map-alist))))
-	     (category (or (nth pos lang-strings) (nth pos en-strings))))
+	     (category (org-export-translate (nth 3 label-props) :utf-8 info)))
 	(case op
 	  (definition
 	    ;; assign an internal label, if user has not provided one
@@ -871,17 +836,7 @@ Update styles.xml with styles that were collected as part of
 	 (content-file (expand-file-name "content.xml" outdir)))
 
     ;; reset variables
-    (setq org-e-odt-manifest-file-entries nil
-	  org-e-odt-embedded-images-count 0
-	  org-e-odt-embedded-formulas-count 0
-	  org-e-odt-section-count 0
-	  org-e-odt-automatic-styles nil
-	  org-e-odt-object-counters nil)
-
-    ;; let `htmlfontify' know that we are interested in collecting
-    ;; styles - FIXME
-
-    (setq hfy-user-sheet-assoc nil)
+    (setq org-e-odt-manifest-file-entries nil)
 
     ;; init conten.xml
     (require 'nxml-mode)		; FIXME
@@ -889,24 +844,6 @@ Update styles.xml with styles that were collected as part of
 	(let ((nxml-auto-insert-xml-declaration-flag nil))
 	  (find-file-noselect content-file t))
       (current-buffer))))
-
-(defun org-e-odt-save-as-outfile ()
-  ;; write automatic styles
-  (org-e-odt-write-automatic-styles)
-
-  ;; update display levels
-  (org-e-odt-update-display-level org-e-odt-display-outline-level)
-
-  ;; create mimetype file
-  (let ((mimetype (org-e-odt-write-mimetype-file ;; org-lparse-backend FIXME
-		   'odt)))
-    (org-e-odt-create-manifest-file-entry mimetype "/" "1.2"))
-
-  ;; create a manifest entry for content.xml
-  (org-e-odt-create-manifest-file-entry "text/xml" "content.xml")
-
-  ;; write out the manifest entries before zipping
-  (org-e-odt-write-manifest-file))
 
 (defun org-e-odt-create-manifest-file-entry (&rest args)
   (push args org-e-odt-manifest-file-entries))
@@ -932,10 +869,10 @@ Update styles.xml with styles that were collected as part of
        org-e-odt-manifest-file-entries)
       (insert "\n</manifest:manifest>"))))
 
-(defun org-e-odt-update-meta-file (info) ; FIXME opt-plist
+(defun org-e-odt-update-meta-file (info)
   (let ((title (org-export-data (plist-get info :title) info))
-	(author (or (let ((auth (plist-get info :author)))
-		      (and auth (org-export-data auth info))) ""))
+	(author (let ((author (plist-get info :author)))
+		  (if (not author) "" (org-export-data author info))))
 	(date (org-e-odt-format-date
 	       (org-export-data (plist-get info :date) info)))
 	(email (plist-get info :email))
@@ -952,7 +889,7 @@ Update styles.xml with styles that were collected as part of
          xmlns:ooo=\"http://openoffice.org/2004/office\"
          office:version=\"1.2\">
        <office:meta>\n"
-      (org-e-odt-format-author author) "\n"
+      (format "<dc:creator>%s</dc:creator>\n" author)
       (format "<meta:initial-creator>%s</meta:initial-creator>\n" author)
       (format "<dc:date>%s</dc:date>\n" date)
       (format "<meta:creation-date>%s</meta:creation-date>\n" date)
@@ -1041,9 +978,17 @@ Update styles.xml with styles that were collected as part of
 ;; 	  (org-propertize (org-e-odt-encode-plain-text (ad-get-arg 0))
 ;; 			  'org-protected t))))
 
-(defun org-e-odt-zip-extract-one (archive member &optional target)
+(defun org-e-odt-zip-extract-one (archive member target)
   (require 'arc-mode)
-  (let* ((target (or target default-directory))
+  (let* ((--quote-file-name
+	  ;; This is shamelessly stolen from `archive-zip-extract'.
+	  (lambda (name)
+	    (if (or (not (memq system-type '(windows-nt ms-dos)))
+		    (and (boundp 'w32-quote-process-args)
+			 (null w32-quote-process-args)))
+		(shell-quote-argument name)
+	      name)))
+	 (target (funcall --quote-file-name target))
 	 (archive (expand-file-name archive))
 	 (archive-zip-extract
 	  (list "unzip" "-qq" "-o" "-d" target))
@@ -1056,7 +1001,7 @@ Update styles.xml with styles that were collected as part of
       (message command-output)
       (error "Extraction failed"))))
 
-(defun org-e-odt-zip-extract (archive members &optional target)
+(defun org-e-odt-zip-extract (archive members target)
   (when (atom members) (setq members (list members)))
   (mapc (lambda (member)
 	  (org-e-odt-zip-extract-one archive member target))
@@ -1074,7 +1019,7 @@ Update styles.xml with styles that were collected as part of
    ((listp styles-file)
     (let ((archive (nth 0 styles-file))
 	  (members (nth 1 styles-file)))
-      (org-e-odt-zip-extract archive members)
+      (org-e-odt-zip-extract archive members org-e-odt-zip-dir)
       (mapc
        (lambda (member)
 	 (when (org-file-image-p member)
@@ -1088,8 +1033,7 @@ Update styles.xml with styles that were collected as part of
        ((string= styles-file-type "xml")
 	(copy-file styles-file (concat org-e-odt-zip-dir "styles.xml") t))
        ((member styles-file-type '("odt" "ott"))
-	(org-e-odt-zip-extract styles-file
-			       (concat org-e-odt-zip-dir "styles.xml"))))))
+	(org-e-odt-zip-extract styles-file "styles.xml" org-e-odt-zip-dir)))))
    (t
     (error (format "Invalid specification of styles.xml file: %S"
 		   org-e-odt-styles-file))))
@@ -1097,7 +1041,7 @@ Update styles.xml with styles that were collected as part of
   ;; create a manifest entry for styles.xml
   (org-e-odt-create-manifest-file-entry "text/xml" "styles.xml"))
 
-(defun org-e-odt-configure-outline-numbering ()
+(defun org-e-odt-configure-outline-numbering (info)
   "Outline numbering is retained only upto LEVEL.
 To disable outline numbering pass a LEVEL of 0."
   (goto-char (point-min))
@@ -1113,7 +1057,7 @@ To disable outline numbering pass a LEVEL of 0."
   (save-buffer 0))
 
 ;;;###autoload
-(defun org-export-as-odf (latex-frag &optional odf-file)
+(defun org-e-odt-export-as-odf (latex-frag &optional odf-file)
   "Export LATEX-FRAG as OpenDocument formula file ODF-FILE.
 Use `org-create-math-formula' to convert LATEX-FRAG first to
 MathML.  When invoked as an interactive command, use
@@ -1158,16 +1102,26 @@ non-nil."
       (or (org-export-push-to-kill-ring
 	   (upcase (symbol-name org-lparse-backend)))
 	  (message "Exporting... done")))
-    (org-e-odt-save-as-outfile filename)))
+
+    ;; create mimetype file
+    (let ((mimetype (org-e-odt-write-mimetype-file ;; org-lparse-backend FIXME
+		     'odt)))
+      (org-e-odt-create-manifest-file-entry mimetype "/" "1.2"))
+
+    ;; create a manifest entry for content.xml
+    (org-e-odt-create-manifest-file-entry "text/xml" "content.xml")
+
+    ;; write out the manifest entries before zipping
+    (org-e-odt-write-manifest-file)))
 
 ;;;###autoload
-(defun org-export-as-odf-and-open ()
+(defun org-e-odt-export-as-odf-and-open ()
   "Export LaTeX fragment as OpenDocument formula and immediately open it.
-Use `org-export-as-odf' to read LaTeX fragment and OpenDocument
+Use `org-e-odt-export-as-odf' to read LaTeX fragment and OpenDocument
 formula file."
   (interactive)
   (org-lparse-and-open
-   nil nil nil (call-interactively 'org-export-as-odf)))
+   nil nil nil (call-interactively 'org-e-odt-export-as-odf)))
 
 
 
@@ -1371,7 +1325,7 @@ Use this to generate automatic names and style-names. See
 
 (defvar org-lparse-link-description-is-image nil)
 
-(defvar org-src-block-paragraph-format
+(defvar org-e-odt-src-block-paragraph-format
   "<style:style style:name=\"OrgSrcBlock\" style:family=\"paragraph\" style:parent-style-name=\"Preformatted_20_Text\">
    <style:paragraph-properties fo:background-color=\"%s\" fo:padding=\"0.049cm\" fo:border=\"0.51pt solid #000000\" style:shadow=\"none\">
     <style:background-image/>
@@ -1450,66 +1404,35 @@ specifiers - %e and %n.  %e is replaced with the CATEGORY-NAME.
 %n is replaced with SEQNO. See
 `org-e-odt-format-label-reference'.")
 
-(defcustom org-e-odt-category-strings
-  '(("en" "Table" "Figure" "Equation" "Equation" "Listing"))
-  "Specify category strings for various captionable entities.
-Captionable entity can be one of a Table, an Embedded Image, a
-LaTeX fragment (generated with dvipng) or a Math Formula.
-
-For example, when `org-export-default-language' is \"en\", an
-embedded image will be captioned as \"Figure 1: Orgmode Logo\".
-If you want the images to be captioned instead as \"Illustration
-1: Orgmode Logo\", then modify the entry for \"en\" as shown
-below.
-
-  \(setq org-e-odt-category-strings
-	'\(\(\"en\" \"Table\" \"Illustration\"
-	   \"Equation\" \"Equation\"\)\)\)"
-  :group 'org-export-e-odt
-  :version "24.1"
-  :type '(repeat (list (string :tag "Language tag")
-		       (choice :tag "Table"
-			       (const :tag "Use Default" nil)
-			       (string :tag "Category string"))
-		       (choice :tag "Figure"
-			       (const :tag "Use Default" nil)
-			       (string :tag "Category string"))
-		       (choice :tag "Math Formula"
-			       (const :tag "Use Default" nil)
-			       (string :tag "Category string"))
-		       (choice :tag "Dvipng Image"
-			       (const :tag "Use Default" nil)
-			       (string :tag "Category string"))
-		       (choice :tag "Listing"
-			       (const :tag "Use Default" nil)
-			       (string :tag "Category string")))))
-
 (defvar org-e-odt-category-map-alist
-  '(("__Table__" "Table" "value")
-    ("__Figure__" "Illustration" "value")
-    ("__MathFormula__" "Text" "math-formula")
-    ("__DvipngImage__" "Equation" "value")
-    ("__Listing__" "Listing" "value")
+  '(("__Table__" "Table" "value" "Table")
+    ("__Figure__" "Illustration" "value" "Figure")
+    ("__MathFormula__" "Text" "math-formula" "Equation")
+    ("__DvipngImage__" "Equation" "value" "Equation")
+    ("__Listing__" "Listing" "value" "Listing")
     ;; ("__Table__" "Table" "category-and-value")
     ;; ("__Figure__" "Figure" "category-and-value")
     ;; ("__DvipngImage__" "Equation" "category-and-value")
     )
   "Map a CATEGORY-HANDLE to OD-VARIABLE and LABEL-STYLE.
 This is a list where each entry is of the form \\(CATEGORY-HANDLE
-OD-VARIABLE LABEL-STYLE\\).  CATEGORY_HANDLE identifies the
-captionable entity in question.  OD-VARIABLE is the OpenDocument
-sequence counter associated with the entity.  These counters are
-declared within
+OD-VARIABLE LABEL-STYLE CATEGORY-NAME\\).  CATEGORY_HANDLE
+identifies the captionable entity in question.  OD-VARIABLE is
+the OpenDocument sequence counter associated with the entity.
+These counters are declared within
 \"<text:sequence-decls>...</text:sequence-decls>\" block of
-`org-e-odt-content-template-file'.  LABEL-STYLE is a key
-into `org-e-odt-label-styles' and specifies how a given entity
-should be captioned and referenced.
-
-The position of a CATEGORY-HANDLE in this list is used as an
-index in to per-language entry for
-`org-e-odt-category-strings' to retrieve a CATEGORY-NAME.
-This CATEGORY-NAME is then used for qualifying the user-specified
-captions on export.")
+`org-e-odt-content-template-file'.  LABEL-STYLE is a key into
+`org-e-odt-label-styles' and specifies how a given entity should
+be captioned and referenced.  CATEGORY-NAME is used for
+qualifying captions on export.  You can modify the CATEGORY-NAME
+used in the exported document by modifying
+`org-export-dictionary'.  For example, an embedded image in an
+English document is captioned as \"Figure 1: Orgmode Logo\", by
+default.  If you want the image to be captioned as \"Illustration
+1: Orgmode Logo\" instead, install an entry in
+`org-export-dictionary' which translates \"Figure\" to
+\"Illustration\" when the language is \"en\" and encoding is
+`:utf-8'.")
 
 (defvar org-e-odt-manifest-file-entries nil)
 (defvar hfy-user-sheet-assoc)		; bound during org-do-lparse
@@ -1523,6 +1446,22 @@ captions on export.")
   "Options for exporting Org mode files to ODT."
   :tag "Org Export ODT"
   :group 'org-export)
+
+
+;;;; Debugging
+
+(defcustom org-e-odt-prettify-xml nil
+  "Specify whether or not the xml output should be prettified.
+When this option is turned on, `indent-region' is run on all
+component xml buffers before they are saved.  Turn this off for
+regular use.  Turn this on if you need to examine the xml
+visually."
+  :group 'org-export-e-odt
+  :version "24.1"
+  :type 'boolean)
+
+
+;;;; Document schema
 
 (defcustom org-e-odt-schema-dir
   (let* ((schema-dir
@@ -1593,6 +1532,9 @@ Also add it to `rng-schema-locating-files'."
 		      (expand-file-name "schemas.xml"
 					org-e-odt-schema-dir))))))
 
+
+;;;; Document styles
+
 (defcustom org-e-odt-content-template-file nil
   "Template file for \"content.xml\".
 The exporter embeds the exported content just before
@@ -1649,166 +1591,7 @@ a per-file basis.  For example,
 		(repeat (file :tag "Member"))))))
 
 
-(defcustom org-e-odt-inline-image-extensions
-  '("png" "jpeg" "jpg" "gif")
-  "Extensions of image files that can be inlined into HTML."
-  :type '(repeat (string :tag "Extension"))
-  :group 'org-export-e-odt
-  :version "24.1")
-
-(defcustom org-e-odt-pixels-per-inch display-pixels-per-inch
-  "Scaling factor for converting images pixels to inches.
-Use this for sizing of embedded images.  See Info node `(org)
-Images in ODT export' for more information."
-  :type 'float
-  :group 'org-export-e-odt
-  :version "24.1")
-
-(defcustom org-e-odt-create-custom-styles-for-srcblocks t
-  "Whether custom styles for colorized source blocks be automatically created.
-When this option is turned on, the exporter creates custom styles
-for source blocks based on the advice of `htmlfontify'.  Creation
-of custom styles happen as part of `org-e-odt-hfy-face-to-css'.
-
-When this option is turned off exporter does not create such
-styles.
-
-Use the latter option if you do not want the custom styles to be
-based on your current display settings.  It is necessary that the
-styles.xml already contains needed styles for colorizing to work.
-
-This variable is effective only if
-`org-e-odt-fontify-srcblocks' is turned on."
-  :group 'org-export-e-odt
-  :version "24.1"
-  :type 'boolean)
-
-(defcustom org-e-odt-preferred-output-format nil
-  "Automatically post-process to this format after exporting to \"odt\".
-Interactive commands `org-export-as-e-odt' and
-`org-export-as-e-odt-and-open' export first to \"odt\" format and
-then use `org-e-odt-convert-process' to convert the
-resulting document to this format.  During customization of this
-variable, the list of valid values are populated based on
-`org-e-odt-convert-capabilities'."
-  :group 'org-export-e-odt
-  :version "24.1"
-  :type '(choice :convert-widget
-		 (lambda (w)
-		   (apply 'widget-convert (widget-type w)
-			  (eval (car (widget-get w :args)))))
-		 `((const :tag "None" nil)
-		   ,@(mapcar (lambda (c)
-			       `(const :tag ,c ,c))
-			     (org-e-odt-reachable-formats "odt")))))
-
-(defcustom org-e-odt-table-styles
-  '(("OrgEquation" "OrgEquation"
-     ((use-first-column-styles . t)
-      (use-last-column-styles . t))))
-  "Specify how Table Styles should be derived from a Table Template.
-This is a list where each element is of the
-form (TABLE-STYLE-NAME TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS).
-
-TABLE-STYLE-NAME is the style associated with the table through
-\"#+ATTR_ODT: :style TABLE-STYLE-NAME\" line.
-
-TABLE-TEMPLATE-NAME is a set of - upto 9 - automatic
-TABLE-CELL-STYLE-NAMEs and PARAGRAPH-STYLE-NAMEs (as defined
-below) that is included in
-`org-e-odt-content-template-file'.
-
-TABLE-CELL-STYLE-NAME := TABLE-TEMPLATE-NAME + TABLE-CELL-TYPE +
-                         \"TableCell\"
-PARAGRAPH-STYLE-NAME  := TABLE-TEMPLATE-NAME + TABLE-CELL-TYPE +
-                         \"TableParagraph\"
-TABLE-CELL-TYPE       := \"FirstRow\"   | \"LastColumn\" |
-                         \"FirstRow\"   | \"LastRow\"    |
-                         \"EvenRow\"    | \"OddRow\"     |
-                         \"EvenColumn\" | \"OddColumn\"  | \"\"
-where \"+\" above denotes string concatenation.
-
-TABLE-CELL-OPTIONS is an alist where each element is of the
-form (TABLE-CELL-STYLE-SELECTOR . ON-OR-OFF).
-TABLE-CELL-STYLE-SELECTOR := `use-first-row-styles'       |
-                             `use-last-row-styles'        |
-                             `use-first-column-styles'    |
-                             `use-last-column-styles'     |
-                             `use-banding-rows-styles'    |
-                             `use-banding-columns-styles' |
-                             `use-first-row-styles'
-ON-OR-OFF                 := `t' | `nil'
-
-For example, with the following configuration
-
-\(setq org-e-odt-table-styles
-      '\(\(\"TableWithHeaderRowsAndColumns\" \"Custom\"
-         \(\(use-first-row-styles . t\)
-          \(use-first-column-styles . t\)\)\)
-        \(\"TableWithHeaderColumns\" \"Custom\"
-         \(\(use-first-column-styles . t\)\)\)\)\)
-
-1. A table associated with \"TableWithHeaderRowsAndColumns\"
-   style will use the following table-cell styles -
-   \"CustomFirstRowTableCell\", \"CustomFirstColumnTableCell\",
-   \"CustomTableCell\" and the following paragraph styles
-   \"CustomFirstRowTableParagraph\",
-   \"CustomFirstColumnTableParagraph\", \"CustomTableParagraph\"
-   as appropriate.
-
-2. A table associated with \"TableWithHeaderColumns\" style will
-   use the following table-cell styles -
-   \"CustomFirstColumnTableCell\", \"CustomTableCell\" and the
-   following paragraph styles
-   \"CustomFirstColumnTableParagraph\", \"CustomTableParagraph\"
-   as appropriate..
-
-Note that TABLE-TEMPLATE-NAME corresponds to the
-\"<table:table-template>\" elements contained within
-\"<office:styles>\".  The entries (TABLE-STYLE-NAME
-TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS) correspond to
-\"table:template-name\" and \"table:use-first-row-styles\" etc
-attributes of \"<table:table>\" element.  Refer ODF-1.2
-specification for more information.  Also consult the
-implementation filed under `org-e-odt-get-table-cell-styles'.
-
-The TABLE-STYLE-NAME \"OrgEquation\" is used internally for
-formatting of numbered display equations.  Do not delete this
-style from the list."
-  :group 'org-export-e-odt
-  :version "24.1"
-  :type '(choice
-          (const :tag "None" nil)
-          (repeat :tag "Table Styles"
-                  (list :tag "Table Style Specification"
-			(string :tag "Table Style Name")
-			(string  :tag "Table Template Name")
-			(alist :options (use-first-row-styles
-					 use-last-row-styles
-					 use-first-column-styles
-					 use-last-column-styles
-					 use-banding-rows-styles
-					 use-banding-columns-styles)
-			       :key-type symbol
-			       :value-type (const :tag "True" t))))))
-(defcustom org-e-odt-fontify-srcblocks t
-  "Specify whether or not source blocks need to be fontified.
-Turn this option on if you want to colorize the source code
-blocks in the exported file.  For colorization to work, you need
-to make available an enhanced version of `htmlfontify' library."
-  :type 'boolean
-  :group 'org-export-e-odt
-  :version "24.1")
-
-(defcustom org-e-odt-prettify-xml nil
-  "Specify whether or not the xml output should be prettified.
-When this option is turned on, `indent-region' is run on all
-component xml buffers before they are saved.  Turn this off for
-regular use.  Turn this on if you need to examine the xml
-visually."
-  :group 'org-export-e-odt
-  :version "24.1"
-  :type 'boolean)
+;;;; Document conversion
 
 (defcustom org-e-odt-convert-processes
   '(("LibreOffice"
@@ -1926,96 +1709,48 @@ configuration."
 				 (const :tag "None" nil)
 				 (string :tag "Extra options"))))))))
 
-;;;; Debugging
+(defcustom org-e-odt-preferred-output-format nil
+  "Automatically post-process to this format after exporting to \"odt\".
+Interactive commands `org-export-as-e-odt' and
+`org-export-as-e-odt-and-open' export first to \"odt\" format and
+then use `org-e-odt-convert-process' to convert the
+resulting document to this format.  During customization of this
+variable, the list of valid values are populated based on
+`org-e-odt-convert-capabilities'."
+  :group 'org-export-e-odt
+  :version "24.1"
+  :type '(choice :convert-widget
+		 (lambda (w)
+		   (apply 'widget-convert (widget-type w)
+			  (eval (car (widget-get w :args)))))
+		 `((const :tag "None" nil)
+		   ,@(mapcar (lambda (c)
+			       `(const :tag ,c ,c))
+			     (org-e-odt-reachable-formats "odt")))))
 
 
-;;;; Document
-
-;;;; Document Header (Styles)
-
-;;;; Document Header (Scripts)
-
-;;;; Document Header (Mathjax)
-
-;;;; Preamble
-
-;;;; Postamble
-
-;;;; Emphasis
-
-;;;; Todos
-
-;;;; Tags
-
-;;;; Timestamps
-;;;; Statistics Cookie
-;;;; Subscript
-;;;; Superscript
-
-;;;; Inline images
-
-;;;; Block
-;;;; Comment
-;;;; Comment Block
-;;;; Drawer
-;;;; Dynamic Block
-;;;; Emphasis
-;;;; Entity
-;;;; Example Block
-;;;; Export Snippet
-;;;; Export Block
-;;;; Fixed Width
-;;;; Footnotes
-
-;;;; Headline
-;;;; Horizontal Rule
-;;;; Inline Babel Call
-;;;; Inline Src Block
-;;;; Inlinetask
-;;;; Item
-;;;; Keyword
-;;;; Latex Environment
-;;;; Latex Fragment
-;;;; Line Break
-;;;; Link
-;;;; Babel Call
-;;;; Macro
-;;;; Paragraph
-;;;; Plain List
-;;;; Plain Text
-;;;; Property Drawer
-;;;; Quote Block
-;;;; Quote Section
-;;;; Section
-;;;; Radio Target
-;;;; Special Block
-;;;; Src Block
-
-;;;; Table
-
-;;;; Target
-;;;; Timestamp
-
-;;;; Verbatim
-;;;; Verse Block
-;;;; Headline
-
-;;;; Links
 ;;;; Drawers
-;;;; Inlinetasks
-;;;; Publishing
 
-;;;; Compilation
+(defcustom org-e-odt-format-drawer-function nil
+  "Function called to format a drawer in HTML code.
 
+The function must accept two parameters:
+  NAME      the drawer name, like \"LOGBOOK\"
+  CONTENTS  the contents of the drawer.
 
-
-;;; User Configurable Variables (MAYBE)
+The function should return the string to be exported.
 
-;;;; Preamble
+For example, the variable could be set to the following function
+in order to mimic default behaviour:
+
+\(defun org-e-odt-format-drawer-default \(name contents\)
+  \"Format a drawer element for HTML export.\"
+  contents\)"
+  :group 'org-export-e-odt
+  :type 'function)
+
 
 ;;;; Headline
-
-;;;; Emphasis
 
 (defcustom org-e-odt-format-headline-function nil
   "Function to format headline text.
@@ -2040,73 +1775,6 @@ order to reproduce the default set-up:
             \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
 	  text
 	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)"
-  :group 'org-export-e-odt
-  :type 'function)
-
-;;;; Footnotes
-
-;;;; Timestamps
-
-(defcustom org-e-odt-active-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to active timestamps."
-  :group 'org-export-e-odt
-  :type 'string)
-
-(defcustom org-e-odt-inactive-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to inactive timestamps."
-  :group 'org-export-e-odt
-  :type 'string)
-
-(defcustom org-e-odt-diary-timestamp-format "\\textit{%s}"
-  "A printf format string to be applied to diary timestamps."
-  :group 'org-export-e-odt
-  :type 'string)
-
-
-;;;; Links
-
-(defcustom org-e-odt-inline-image-rules
-  '(("file" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\)\\'"))
-  "Rules characterizing image files that can be inlined into HTML.
-
-A rule consists in an association whose key is the type of link
-to consider, and value is a regexp that will be matched against
-link's path.
-
-Note that, by default, the image extension *actually* allowed
-depend on the way the HTML file is processed.  When used with
-pdflatex, pdf, jpg and png images are OK.  When processing
-through dvi to Postscript, only ps and eps are allowed.  The
-default we use here encompasses both."
-  :group 'org-export-e-odt
-  :type '(alist :key-type (string :tag "Type")
-		:value-type (regexp :tag "Path")))
-
-;;;; Tables
-
-(defcustom org-e-odt-table-caption-above t
-  "When non-nil, place caption string at the beginning of the table.
-Otherwise, place it near the end."
-  :group 'org-export-e-odt
-  :type 'boolean)
-
-;;;; Drawers
-
-(defcustom org-e-odt-format-drawer-function nil
-  "Function called to format a drawer in HTML code.
-
-The function must accept two parameters:
-  NAME      the drawer name, like \"LOGBOOK\"
-  CONTENTS  the contents of the drawer.
-
-The function should return the string to be exported.
-
-For example, the variable could be set to the following function
-in order to mimic default behaviour:
-
-\(defun org-e-odt-format-drawer-default \(name contents\)
-  \"Format a drawer element for HTML export.\"
-  contents\)"
   :group 'org-export-e-odt
   :type 'function)
 
@@ -2151,7 +1819,33 @@ in order to mimic default behaviour:
   :type 'function)
 
 
-;; Src blocks
+;;;; Links
+
+(defcustom org-e-odt-inline-image-rules
+  '(("file" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\)\\'"))
+  "Rules characterizing image files that can be inlined into HTML.
+
+A rule consists in an association whose key is the type of link
+to consider, and value is a regexp that will be matched against
+link's path.
+
+Note that, by default, the image extension *actually* allowed
+depend on the way the HTML file is processed.  When used with
+pdflatex, pdf, jpg and png images are OK.  When processing
+through dvi to Postscript, only ps and eps are allowed.  The
+default we use here encompasses both."
+  :group 'org-export-e-odt
+  :type '(alist :key-type (string :tag "Type")
+		:value-type (regexp :tag "Path")))
+
+(defcustom org-e-odt-pixels-per-inch display-pixels-per-inch
+  "Scaling factor for converting images pixels to inches.
+Use this for sizing of embedded images.  See Info node `(org)
+Images in ODT export' for more information."
+  :type 'float
+  :group 'org-export-e-odt
+  :version "24.1")
+
 
 ;;;; Plain text
 
@@ -2189,7 +1883,152 @@ string defines the replacement string for this quote."
 		(string :tag "Replacement quote     "))))
 
 
-;;;; Compilation
+;;;; Src Block
+
+(defcustom org-e-odt-create-custom-styles-for-srcblocks t
+  "Whether custom styles for colorized source blocks be automatically created.
+When this option is turned on, the exporter creates custom styles
+for source blocks based on the advice of `htmlfontify'.  Creation
+of custom styles happen as part of `org-e-odt-hfy-face-to-css'.
+
+When this option is turned off exporter does not create such
+styles.
+
+Use the latter option if you do not want the custom styles to be
+based on your current display settings.  It is necessary that the
+styles.xml already contains needed styles for colorizing to work.
+
+This variable is effective only if
+`org-e-odt-fontify-srcblocks' is turned on."
+  :group 'org-export-e-odt
+  :version "24.1"
+  :type 'boolean)
+
+(defcustom org-e-odt-fontify-srcblocks t
+  "Specify whether or not source blocks need to be fontified.
+Turn this option on if you want to colorize the source code
+blocks in the exported file.  For colorization to work, you need
+to make available an enhanced version of `htmlfontify' library."
+  :type 'boolean
+  :group 'org-export-e-odt
+  :version "24.1")
+
+
+;;;; Table
+
+(defcustom org-e-odt-table-caption-above t
+  "When non-nil, place caption string at the beginning of the table.
+Otherwise, place it near the end."
+  :group 'org-export-e-odt
+  :type 'boolean)
+
+(defcustom org-e-odt-table-styles
+  '(("OrgEquation" "OrgEquation"
+     ((use-first-column-styles . t)
+      (use-last-column-styles . t))))
+  "Specify how Table Styles should be derived from a Table Template.
+This is a list where each element is of the
+form (TABLE-STYLE-NAME TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS).
+
+TABLE-STYLE-NAME is the style associated with the table through
+\"#+ATTR_ODT: :style TABLE-STYLE-NAME\" line.
+
+TABLE-TEMPLATE-NAME is a set of - upto 9 - automatic
+TABLE-CELL-STYLE-NAMEs and PARAGRAPH-STYLE-NAMEs (as defined
+below) that is included in
+`org-e-odt-content-template-file'.
+
+TABLE-CELL-STYLE-NAME := TABLE-TEMPLATE-NAME + TABLE-CELL-TYPE +
+                         \"TableCell\"
+PARAGRAPH-STYLE-NAME  := TABLE-TEMPLATE-NAME + TABLE-CELL-TYPE +
+                         \"TableParagraph\"
+TABLE-CELL-TYPE       := \"FirstRow\"   | \"LastColumn\" |
+                         \"FirstRow\"   | \"LastRow\"    |
+                         \"EvenRow\"    | \"OddRow\"     |
+                         \"EvenColumn\" | \"OddColumn\"  | \"\"
+where \"+\" above denotes string concatenation.
+
+TABLE-CELL-OPTIONS is an alist where each element is of the
+form (TABLE-CELL-STYLE-SELECTOR . ON-OR-OFF).
+TABLE-CELL-STYLE-SELECTOR := `use-first-row-styles'       |
+                             `use-last-row-styles'        |
+                             `use-first-column-styles'    |
+                             `use-last-column-styles'     |
+                             `use-banding-rows-styles'    |
+                             `use-banding-columns-styles' |
+                             `use-first-row-styles'
+ON-OR-OFF                 := `t' | `nil'
+
+For example, with the following configuration
+
+\(setq org-e-odt-table-styles
+      '\(\(\"TableWithHeaderRowsAndColumns\" \"Custom\"
+         \(\(use-first-row-styles . t\)
+          \(use-first-column-styles . t\)\)\)
+        \(\"TableWithHeaderColumns\" \"Custom\"
+         \(\(use-first-column-styles . t\)\)\)\)\)
+
+1. A table associated with \"TableWithHeaderRowsAndColumns\"
+   style will use the following table-cell styles -
+   \"CustomFirstRowTableCell\", \"CustomFirstColumnTableCell\",
+   \"CustomTableCell\" and the following paragraph styles
+   \"CustomFirstRowTableParagraph\",
+   \"CustomFirstColumnTableParagraph\", \"CustomTableParagraph\"
+   as appropriate.
+
+2. A table associated with \"TableWithHeaderColumns\" style will
+   use the following table-cell styles -
+   \"CustomFirstColumnTableCell\", \"CustomTableCell\" and the
+   following paragraph styles
+   \"CustomFirstColumnTableParagraph\", \"CustomTableParagraph\"
+   as appropriate..
+
+Note that TABLE-TEMPLATE-NAME corresponds to the
+\"<table:table-template>\" elements contained within
+\"<office:styles>\".  The entries (TABLE-STYLE-NAME
+TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS) correspond to
+\"table:template-name\" and \"table:use-first-row-styles\" etc
+attributes of \"<table:table>\" element.  Refer ODF-1.2
+specification for more information.  Also consult the
+implementation filed under `org-e-odt-get-table-cell-styles'.
+
+The TABLE-STYLE-NAME \"OrgEquation\" is used internally for
+formatting of numbered display equations.  Do not delete this
+style from the list."
+  :group 'org-export-e-odt
+  :version "24.1"
+  :type '(choice
+          (const :tag "None" nil)
+          (repeat :tag "Table Styles"
+                  (list :tag "Table Style Specification"
+			(string :tag "Table Style Name")
+			(string  :tag "Table Template Name")
+			(alist :options (use-first-row-styles
+					 use-last-row-styles
+					 use-first-column-styles
+					 use-last-column-styles
+					 use-banding-rows-styles
+					 use-banding-columns-styles)
+			       :key-type symbol
+			       :value-type (const :tag "True" t))))))
+
+
+;;;; Timestamps
+
+(defcustom org-e-odt-active-timestamp-format "\\textit{%s}"
+  "A printf format string to be applied to active timestamps."
+  :group 'org-export-e-odt
+  :type 'string)
+
+(defcustom org-e-odt-inactive-timestamp-format "\\textit{%s}"
+  "A printf format string to be applied to inactive timestamps."
+  :group 'org-export-e-odt
+  :type 'string)
+
+(defcustom org-e-odt-diary-timestamp-format "\\textit{%s}"
+  "A printf format string to be applied to diary timestamps."
+  :group 'org-export-e-odt
+  :type 'string)
 
 
 
@@ -2240,9 +2079,9 @@ string defines the replacement string for this quote."
 		       headline info 'org-e-odt-format-toc-headline)
 		      (org-export-get-relative-level headline info)))))
     (when toc-entries
-      (let* ((lang-specific-heading "Table of Contents")) ; FIXME
+      (let* ((title (org-export-translate "Table of Contents" :utf-8 info)))
 	(concat
-	 (org-e-odt-begin-toc  lang-specific-heading depth)
+	 (org-e-odt-begin-toc title depth)
 	 (org-e-odt-toc-text toc-entries)
 	 (org-e-odt-end-toc))))))
 
@@ -2455,8 +2294,29 @@ This function shouldn't be used for floats.  See
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  RAW-DATA is the
 original parsed data.  INFO is a plist holding export options."
-  ;; write meta file
+  ;; Write meta file.
   (org-e-odt-update-meta-file info)
+
+  ;; Update styles file.
+  ;; Copy styles.xml.  Also dump htmlfontify styles, if there is any.
+  (org-e-odt-update-styles-file info)
+
+  ;; Update styles.xml - take care of outline numbering
+  (with-current-buffer
+      (find-file-noselect (concat org-e-odt-zip-dir "styles.xml") t)
+    ;; Don't make automatic backup of styles.xml file. This setting
+    ;; prevents the backed-up styles.xml file from being zipped in to
+    ;; odt file. This is more of a hackish fix. Better alternative
+    ;; would be to fix the zip command so that the output odt file
+    ;; includes only the needed files and excludes any auto-generated
+    ;; extra files like backups and auto-saves etc etc. Note that
+    ;; currently the zip command zips up the entire temp directory so
+    ;; that any auto-generated files created under the hood ends up in
+    ;; the resulting odt file.
+    (set (make-local-variable 'backup-inhibited) t)
+    (org-e-odt-configure-outline-numbering info))
+
+  ;; Update content.xml.
   (with-temp-buffer
     (insert-file-contents
      (or org-e-odt-content-template-file
@@ -2471,24 +2331,10 @@ original parsed data.  INFO is a plist holding export options."
     ;; Table of Contents
     (let ((depth (plist-get info :with-toc)))
       (when (wholenump depth) (insert (org-e-odt-toc depth info))))
-
-    ;; Copy styles.xml.  Also dump htmlfontify styles, if there is any.
-    (org-e-odt-update-styles-file info)
-
-    ;; Update styles.xml - take care of outline numbering
-    (with-current-buffer
-	(find-file-noselect (concat org-e-odt-zip-dir "styles.xml") t)
-      ;; Don't make automatic backup of styles.xml file. This setting
-      ;; prevents the backed-up styles.xml file from being zipped in to
-      ;; odt file. This is more of a hackish fix. Better alternative
-      ;; would be to fix the zip command so that the output odt file
-      ;; includes only the needed files and excludes any auto-generated
-      ;; extra files like backups and auto-saves etc etc. Note that
-      ;; currently the zip command zips up the entire temp directory so
-      ;; that any auto-generated files created under the hood ends up in
-      ;; the resulting odt file.
-      (set (make-local-variable 'backup-inhibited) t)
-      (org-e-odt-configure-outline-numbering))
+    ;; Write automatic styles.
+    (org-e-odt-write-automatic-styles)
+    ;; Update display level.
+    (org-e-odt-update-display-level org-e-odt-display-outline-level)
 
     ;; Contents
     (insert contents)
@@ -3400,10 +3246,39 @@ contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to ODT.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((type (downcase (org-element-property :type special-block))))
+  (let ((type (downcase (org-element-property :type special-block)))
+	(attributes (org-export-read-attribute :attr_odt special-block)))
     (org-e-odt--wrap-label
      special-block
-     (format "\\begin{%s}\n%s\\end{%s}" type contents type))))
+     (cond
+      ;; Annotation.
+      ((string= type "annotation")
+       (let ((author (or (plist-get attributes :author)
+			 (let ((author (plist-get info :author)))
+			   (and author (org-export-data author info)))))
+	     (date (or (plist-get attributes :date)
+		       (plist-get info :date))))
+
+	 (org-e-odt-format-stylized-paragraph
+	  nil (format "<office:annotation>\n%s\n</office:annotation>"
+		      (concat
+		       (and author
+			    (format "<dc:creator>%s</dc:creator>" author))
+		       (and date
+			    (format "<dc:date>%s</dc:date>"
+				    (org-e-odt-format-date date)))
+		       contents)))))
+      ;; Textbox.
+      ((string= type "textbox")
+       (let ((width (plist-get attributes :width))
+	     (height (plist-get attributes :height))
+	     (style (plist-get attributes :style))
+	     (extra (plist-get attributes :extra))
+	     (anchor (plist-get attributes :anchor)))
+	 (org-e-odt-format-stylized-paragraph
+	  nil (org-e-odt-format-textbox contents width height
+					style extra anchor))))
+      (t contents)))))
 
 
 ;;;; Src Block
@@ -3417,7 +3292,8 @@ contextual information."
 	 (short-caption (and (cdr caption)
 			     (org-export-data (cdr caption) info)))
 	 (caption (and (car caption) (org-export-data (car caption) info)))
-	 (label (org-element-property :name src-block)))
+	 (label (org-element-property :name src-block))
+	 (attributes (org-export-read-attribute :attr_odt src-block)))
     ;; FIXME: Handle caption
     ;; caption-str (when caption)
     ;; (main (org-export-data (car caption) info))
@@ -3427,7 +3303,10 @@ contextual information."
 	   (caption (car captions)) (short-caption (cdr captions)))
       (concat
        (and caption (org-e-odt-format-stylized-paragraph 'listing caption))
-       (org-e-odt-format-code src-block info)))))
+       (let ((--src-block (org-e-odt-format-code src-block info)))
+	 (if (not (plist-get attributes :textbox)) --src-block
+	   (org-e-odt-format-stylized-paragraph
+	    nil (org-e-odt-format-textbox --src-block nil nil nil))))))))
 
 
 ;;;; Statistics Cookie
@@ -3958,7 +3837,6 @@ Return output file's name."
    (let* ((org-e-odt-manifest-file-entries nil)
 	  (org-e-odt-embedded-images-count 0)
 	  (org-e-odt-embedded-formulas-count 0)
-	  (org-e-odt-section-count 0)
 	  (org-e-odt-automatic-styles nil)
 	  (org-e-odt-object-counters nil)
 	  ;; Let `htmlfontify' know that we are interested in collecting
@@ -3978,7 +3856,17 @@ Return output file's name."
      ;; - styles.xml
      ;; - manifest.xml
      ;; - meta.mxl
-     (org-e-odt-save-as-outfile))))
+
+     ;; create mimetype file
+     (let ((mimetype (org-e-odt-write-mimetype-file ;; org-lparse-backend FIXME
+		      'odt)))
+       (org-e-odt-create-manifest-file-entry mimetype "/" "1.2"))
+
+     ;; create a manifest entry for content.xml
+     (org-e-odt-create-manifest-file-entry "text/xml" "content.xml")
+
+     ;; write out the manifest entries before zipping
+     (org-e-odt-write-manifest-file))))
 
 
 
