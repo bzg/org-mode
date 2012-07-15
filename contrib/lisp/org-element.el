@@ -85,11 +85,11 @@
 ;; An Org buffer is a nested list of such elements and objects, whose
 ;; type is `org-data' and properties is nil.
 ;;
-;; The first part of this file implements a parser and an interpreter
-;; for each type of Org syntax.
+;; The first part of this file defines Org syntax, while the second
+;; one provide accessors and setters functions.
 ;;
-;; The next two parts introduce accessors, setters, and a function
-;; retrieving the element starting at point.
+;; The next part implements a parser and an interpreter for each
+;; element and object type in Org syntax.
 ;;
 ;; The following part creates a fully recursive buffer parser.  It
 ;; also provides a tool to map a function to elements or objects
@@ -102,7 +102,8 @@
 ;;
 ;; The library ends by furnishing a set of interactive tools for
 ;; element's navigation and manipulation, mostly based on
-;; `org-element-at-point' function.
+;; `org-element-at-point' function, and a way to give information
+;; about document structure around point with `org-element-context'.
 
 
 ;;; Code:
@@ -326,6 +327,97 @@ still has an entry since one of its properties (`:title') does.")
     (item . :tag)
     (footnote-reference . :inline-definition))
   "Alist between element types and location of secondary value.")
+
+
+
+;;; Accessors and Setters
+;;
+;; Provide four accessors: `org-element-type', `org-element-property'
+;; `org-element-contents' and `org-element-restriction'.
+;;
+;; Setter functions allow to modify elements by side effect.  There is
+;; `org-element-put-property', `org-element-set-contents',
+;; `org-element-set-element' and `org-element-adopt-element'.  Note
+;; that `org-element-set-element' and `org-element-adopt-element' are
+;; higher level functions since also update `:parent' property.
+
+(defsubst org-element-type (element)
+  "Return type of ELEMENT.
+
+The function returns the type of the element or object provided.
+It can also return the following special value:
+  `plain-text'       for a string
+  `org-data'         for a complete document
+  nil                in any other case."
+  (cond
+   ((not (consp element)) (and (stringp element) 'plain-text))
+   ((symbolp (car element)) (car element))))
+
+(defsubst org-element-property (property element)
+  "Extract the value from the PROPERTY of an ELEMENT."
+  (plist-get (nth 1 element) property))
+
+(defsubst org-element-contents (element)
+  "Extract contents from an ELEMENT."
+  (and (consp element) (nthcdr 2 element)))
+
+(defsubst org-element-restriction (element)
+  "Return restriction associated to ELEMENT.
+ELEMENT can be an element, an object or a symbol representing an
+element or object type."
+  (cdr (assq (if (symbolp element) element (org-element-type element))
+	     org-element-object-restrictions)))
+
+(defsubst org-element-put-property (element property value)
+  "In ELEMENT set PROPERTY to VALUE.
+Return modified element."
+  (when (consp element)
+    (setcar (cdr element) (plist-put (nth 1 element) property value)))
+  element)
+
+(defsubst org-element-set-contents (element &rest contents)
+  "Set ELEMENT contents to CONTENTS.
+Return modified element."
+  (cond ((not element) (list contents))
+	((cdr element) (setcdr (cdr element) contents))
+	(t (nconc element contents))))
+
+(defsubst org-element-set-element (old new)
+  "Replace element or object OLD with element or object NEW.
+The function takes care of setting `:parent' property for NEW."
+  ;; OLD can belong to the contents of PARENT or to its secondary
+  ;; string.
+  (let* ((parent (org-element-property :parent old))
+	 (sec-loc (cdr (assq (org-element-type parent)
+			     org-element-secondary-value-alist)))
+	 (sec-value (and sec-loc (org-element-property sec-loc parent)))
+	 (place (or (member old sec-value) (member old parent))))
+    ;; Make sure NEW has correct `:parent' property.
+    (org-element-put-property new :parent parent)
+    ;; Replace OLD with NEW in PARENT.
+    (setcar place new)))
+
+(defsubst org-element-adopt-element (parent child &optional append)
+  "Add an element to the contents of another element.
+
+PARENT is an element or object.  CHILD is an element, an object,
+or a string.
+
+CHILD is added at the beginning of PARENT contents, unless the
+optional argument APPEND is non-nil, in which case CHILD is added
+at the end.
+
+The function takes care of setting `:parent' property for CHILD.
+Return parent element."
+  (if (not parent) (list child)
+    (let ((contents (org-element-contents parent)))
+      (apply 'org-element-set-contents
+	     parent
+	     (if append (append contents (list child)) (cons child contents))))
+    ;; Link the CHILD element with PARENT.
+    (when (consp child) (org-element-put-property child :parent parent))
+    ;; Return the parent element.
+    parent))
 
 
 
@@ -3083,97 +3175,6 @@ Assume point is at the first equal sign marker."
   "Interpret VERBATIM object as Org syntax.
 CONTENTS is nil."
   (format "=%s=" (org-element-property :value verbatim)))
-
-
-
-;;; Accessors and Setters
-;;
-;; Provide four accessors: `org-element-type', `org-element-property'
-;; `org-element-contents' and `org-element-restriction'.
-;;
-;; Setter functions allow to modify elements by side effect.  There is
-;; `org-element-put-property', `org-element-set-contents',
-;; `org-element-set-element' and `org-element-adopt-element'.  Note
-;; that `org-element-set-element' and `org-element-adopt-element' are
-;; higher level functions since also update `:parent' property.
-
-(defsubst org-element-type (element)
-  "Return type of ELEMENT.
-
-The function returns the type of the element or object provided.
-It can also return the following special value:
-  `plain-text'       for a string
-  `org-data'         for a complete document
-  nil                in any other case."
-  (cond
-   ((not (consp element)) (and (stringp element) 'plain-text))
-   ((symbolp (car element)) (car element))))
-
-(defsubst org-element-property (property element)
-  "Extract the value from the PROPERTY of an ELEMENT."
-  (plist-get (nth 1 element) property))
-
-(defsubst org-element-contents (element)
-  "Extract contents from an ELEMENT."
-  (and (consp element) (nthcdr 2 element)))
-
-(defsubst org-element-restriction (element)
-  "Return restriction associated to ELEMENT.
-ELEMENT can be an element, an object or a symbol representing an
-element or object type."
-  (cdr (assq (if (symbolp element) element (org-element-type element))
-	     org-element-object-restrictions)))
-
-(defsubst org-element-put-property (element property value)
-  "In ELEMENT set PROPERTY to VALUE.
-Return modified element."
-  (when (consp element)
-    (setcar (cdr element) (plist-put (nth 1 element) property value)))
-  element)
-
-(defsubst org-element-set-contents (element &rest contents)
-  "Set ELEMENT contents to CONTENTS.
-Return modified element."
-  (cond ((not element) (list contents))
-	((cdr element) (setcdr (cdr element) contents))
-	(t (nconc element contents))))
-
-(defsubst org-element-set-element (old new)
-  "Replace element or object OLD with element or object NEW.
-The function takes care of setting `:parent' property for NEW."
-  ;; OLD can belong to the contents of PARENT or to its secondary
-  ;; string.
-  (let* ((parent (org-element-property :parent old))
-	 (sec-loc (cdr (assq (org-element-type parent)
-			     org-element-secondary-value-alist)))
-	 (sec-value (and sec-loc (org-element-property sec-loc parent)))
-	 (place (or (member old sec-value) (member old parent))))
-    ;; Make sure NEW has correct `:parent' property.
-    (org-element-put-property new :parent parent)
-    ;; Replace OLD with NEW in PARENT.
-    (setcar place new)))
-
-(defsubst org-element-adopt-element (parent child &optional append)
-  "Add an element to the contents of another element.
-
-PARENT is an element or object.  CHILD is an element, an object,
-or a string.
-
-CHILD is added at the beginning of PARENT contents, unless the
-optional argument APPEND is non-nil, in which case CHILD is added
-at the end.
-
-The function takes care of setting `:parent' property for CHILD.
-Return parent element."
-  (if (not parent) (list child)
-    (let ((contents (org-element-contents parent)))
-      (apply 'org-element-set-contents
-	     parent
-	     (if append (append contents (list child)) (cons child contents))))
-    ;; Link the CHILD element with PARENT.
-    (when (consp child) (org-element-put-property child :parent parent))
-    ;; Return the parent element.
-    parent))
 
 
 
