@@ -1262,7 +1262,7 @@ INFO is a plist used as a communication channel."
 		(let ((fn-lbl (org-element-property :label fn)))
 		  (cond
 		   ;; Anonymous footnote match: return number.
-		   ((equal fn footnote-reference) (length seen-refs))
+		   ((eq fn footnote-reference) (length seen-refs))
 		   ;; Anonymous footnote: it's always a new one.
 		   ;; Also, be sure to return nil from the `cond' so
 		   ;; `first-match' doesn't get us out of the loop.

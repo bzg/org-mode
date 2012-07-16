@@ -1311,7 +1311,7 @@ Replaces invalid characters with \"_\"."
 
 	 (fn-alist
 	  (loop for (n type raw) in fn-alist collect
-		(cons n (if (equal (org-element-type raw) 'org-data)
+		(cons n (if (eq (org-element-type raw) 'org-data)
 			    (org-trim (org-export-data raw info))
 			  (format "<p>%s</p>"
 				  (org-trim (org-export-data raw info))))))))
@@ -2275,9 +2275,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 (attr nil)			; FIXME
 	 (label (org-element-property :name latex-environment)))
      (cond
-      ((member processing-type '(t mathjax))
+      ((memq processing-type '(t mathjax))
        (org-e-html-format-latex latex-frag 'mathjax))
-      ((equal processing-type 'dvipng)
+      ((eq processing-type 'dvipng)
        (let* ((formula-link (org-e-html-format-latex
 			     latex-frag processing-type)))
 	 (when (and formula-link
@@ -2579,7 +2579,7 @@ the plist used as a communication channel."
 	 (extra (if class (format " class=\"%s\"" class) ""))
 	 (parent (org-export-get-parent paragraph)))
     (cond
-     ((and (equal (org-element-type parent) 'item)
+     ((and (eq (org-element-type parent) 'item)
 	   (= (org-element-property :begin paragraph)
 	      (org-element-property :contents-begin parent)))
       ;; leading paragraph in a list item have no tags

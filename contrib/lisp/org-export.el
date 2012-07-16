@@ -1775,7 +1775,7 @@ Return transcoded string."
 			     ;; might be misleading.
 			     (when (eq type 'paragraph)
 			       (let ((parent (org-export-get-parent data)))
-				 (and (equal (car (org-element-contents parent))
+				 (and (eq (car (org-element-contents parent))
 					     data)
 				      (memq (org-element-type parent)
 					    '(footnote-definition item))))))))
@@ -2806,7 +2806,7 @@ INFO is the plist used as a communication channel."
 		  ;; Don't enter footnote definitions since it will
 		  ;; happen when their first reference is found.
 		  info 'first-match 'footnote-definition)))))
-	(equal (catch 'exit (funcall search-refs (plist-get info :parse-tree)))
+	(eq (catch 'exit (funcall search-refs (plist-get info :parse-tree)))
 	       footnote-reference)))))
 
 (defun org-export-get-footnote-definition (footnote-reference info)
@@ -2835,7 +2835,7 @@ INFO is the plist used as a communication channel."
 		(let ((fn-lbl (org-element-property :label fn)))
 		  (cond
 		   ;; Anonymous footnote match: return number.
-		   ((and (not fn-lbl) (equal fn footnote))
+		   ((and (not fn-lbl) (eq fn footnote))
 		    (throw 'exit (1+ (length seen-refs))))
 		   ;; Labels match: return number.
 		   ((and label (string= label fn-lbl))
@@ -3241,7 +3241,7 @@ objects of the same type."
 	  (plist-get info :parse-tree) (or types (org-element-type element))
 	  (lambda (el)
 	    (cond
-	     ((equal element el) (1+ counter))
+	     ((eq element el) (1+ counter))
 	     ((not predicate) (incf counter) nil)
 	     ((funcall predicate el info) (incf counter) nil)))
 	  info 'first-match))))))
@@ -3282,7 +3282,7 @@ ELEMENT is excluded from count."
      (lambda (el)
        (cond
         ;; ELEMENT is reached: Quit the loop.
-        ((equal el element) t)
+        ((eq el element))
         ;; Only count lines from src-block and example-block elements
         ;; with a "+n" or "-n" switch.  A "-n" switch resets counter.
         ((not (memq (org-element-type el) '(src-block example-block))) nil)
@@ -3547,7 +3547,7 @@ rows and table rules.  Group 1 is also table's header."
 	     (unless row-flag (incf group) (setq row-flag t)))
 	    ((eq (org-element-property :type row) 'rule)
 	     (setq row-flag nil)))
-	   (when (equal table-row row) (throw 'found group)))
+	   (when (eq table-row row) (throw 'found group)))
 	 (org-element-contents (org-export-get-parent table-row)))))))
 
 (defun org-export-table-cell-width (table-cell info)
@@ -3737,7 +3737,7 @@ INFO is a plist used as a communication channel."
   ;; A cell starts a column group either when it is at the beginning
   ;; of a row (or after the special column, if any) or when it has
   ;; a left border.
-  (or (equal (org-element-map
+  (or (eq (org-element-map
 	      (org-export-get-parent table-cell)
 	      'table-cell 'identity info 'first-match)
 	     table-cell)
@@ -3748,7 +3748,7 @@ INFO is a plist used as a communication channel."
 INFO is a plist used as a communication channel."
   ;; A cell ends a column group either when it is at the end of a row
   ;; or when it has a right border.
-  (or (equal (car (last (org-element-contents
+  (or (eq (car (last (org-element-contents
 			 (org-export-get-parent table-cell))))
 	     table-cell)
       (memq 'right (org-export-table-cell-borders table-cell info))))
@@ -3822,7 +3822,7 @@ function returns nil for other cells."
     ;; Ignore cells in special rows or in special column.
     (unless (or (org-export-table-row-is-special-p table-row info)
 		(and (org-export-table-has-special-column-p table)
-		     (equal (car (org-element-contents table-row)) table-cell)))
+		     (eq (car (org-element-contents table-row)) table-cell)))
       (cons
        ;; Row number.
        (let ((row-count 0))
@@ -3830,7 +3830,7 @@ function returns nil for other cells."
 	  table 'table-row
 	  (lambda (row)
 	    (cond ((eq (org-element-property :type row) 'rule) nil)
-		  ((equal row table-row) row-count)
+		  ((eq row table-row) row-count)
 		  (t (incf row-count) nil)))
 	  info 'first-match))
        ;; Column number.
@@ -3838,8 +3838,7 @@ function returns nil for other cells."
 	 (org-element-map
 	  table-row 'table-cell
 	  (lambda (cell)
-	    (if (equal cell table-cell) col-count
-	      (incf col-count) nil))
+	    (if (eq cell table-cell) col-count (incf col-count) nil))
 	  info 'first-match))))))
 
 (defun org-export-get-table-cell-at (address table info)

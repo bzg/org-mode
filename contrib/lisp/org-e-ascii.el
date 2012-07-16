@@ -1623,14 +1623,13 @@ a communication channel."
 			 (borders (org-export-table-cell-borders cell info)))
 		     (concat
 		      (when (and (memq 'left borders)
-				 (equal (org-element-map
-					 table-row 'table-cell 'identity info t)
-					cell)))
+				 (eq (org-element-map
+				      table-row 'table-cell 'identity info t)
+				     cell)))
 		      (make-string (+ 2 width) (string-to-char horiz))
 		      (cond
 		       ((not (memq 'right borders)) nil)
-		       ((equal (car (last (org-element-contents table-row)))
-			       cell)
+		       ((eq (car (last (org-element-contents table-row))) cell)
 			rcorner)
 		       (t vert)))))
 		 info)) "\n"))))

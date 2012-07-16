@@ -3532,7 +3532,7 @@ Nil values returned from FUN do not appear in the results."
 	       (cond
 		((not --data))
 		;; Ignored element in an export context.
-		((and info (member --data (plist-get info :ignore-list))))
+		((and info (memq --data (plist-get info :ignore-list))))
 		;; Secondary string: only objects can be found there.
 		((not --type)
 		 (when (eq --category 'objects) (mapc --walk-tree --data)))

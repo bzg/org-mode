@@ -2264,7 +2264,7 @@ This function shouldn't be used for floats.  See
 	   num-start refs))
     (cond
      ((not num-start) code)
-     ((equal num-start 0)
+     ((eq num-start 0)
       (org-e-odt-format-tags
        '("<text:list text:style-name=\"OrgSrcBlockNumberedLine\"%s>"
 	 . "</text:list>") code " text:continue-numbering=\"false\""))
@@ -2480,7 +2480,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;;; Footnote Reference
 
 (defun org-e-odt-footnote-def (raw info) ; FIXME
-  (if (equal (org-element-type raw) 'org-data)
+  (if (eq (org-element-type raw) 'org-data)
       (org-trim (org-export-data raw info)) ; fix paragraph style
     (org-e-odt-format-stylized-paragraph
      'footnote (org-trim (org-export-data raw info)))))
@@ -2692,7 +2692,7 @@ contextual information."
 		       (function
 			(lambda (element info)
 			  (loop for el in (org-element-contents element)
-				thereis (equal (org-element-type el) 'table))))))
+				thereis (eq (org-element-type el) 'table))))))
 		 (cond
 		  ((funcall --element-has-a-table-p item info)
 		   "</text:list-header>")
@@ -2781,7 +2781,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (cond
       ((member processing-type '(t mathjax))
        (org-e-odt-format-formula latex-environment info))
-      ((equal processing-type 'dvipng)
+      ((eq processing-type 'dvipng)
        (org-e-odt-format-stylized-paragraph
 	nil (org-e-odt-link--inline-image latex-environment info)))
       (t latex-frag)))))
@@ -2804,7 +2804,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (cond
      ((member processing-type '(t mathjax))
       (org-e-odt-format-formula latex-fragment info))
-     ((equal processing-type 'dvipng)
+     ((eq processing-type 'dvipng)
       (org-e-odt-link--inline-image latex-fragment info))
      (t latex-frag))))
 
@@ -3137,7 +3137,7 @@ contextual information."
 	     ;; continue numbering.
 	     (format "text:continue-numbering=\"%s\""
 		     (let* ((parent (org-export-get-parent plain-list)))
-		       (if (and parent (equal (org-element-type parent) 'item))
+		       (if (and parent (eq (org-element-type parent) 'item))
 			   "true" "false")))
 	     contents))))
 
@@ -3586,13 +3586,13 @@ contextual information."
 	  (function
 	   (lambda (element info)
 	     (loop for el in (funcall --get-previous-elements element info)
-		   thereis (equal (org-element-type el) 'table)))))
+		   thereis (eq (org-element-type el) 'table)))))
 	 (--walk-list-genealogy-and-collect-tags
 	  (function
 	   (lambda (table info)
 	     (let* ((genealogy (org-export-get-genealogy table))
 		    (list-genealogy
-		     (when (equal (org-element-type (car genealogy)) 'item)
+		     (when (eq (org-element-type (car genealogy)) 'item)
 		       (loop for el in genealogy
 			     when (member (org-element-type el)
 					  '(item plain-list))
@@ -4035,7 +4035,7 @@ using `org-open-file'."
 		(lambda (el)
 		  (and (or (not predicate) (funcall predicate el info))
 		       (incf counter)
-		       (equal element el)
+		       (eq element el)
 		       counter))
 		info 'first-match)))))
 	 (scope (funcall numbered-parent-headline-at-<=-n
