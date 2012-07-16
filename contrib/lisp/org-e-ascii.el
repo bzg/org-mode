@@ -1569,7 +1569,7 @@ are ignored."
 		 (max (length
 		       (org-export-data
 			(org-element-contents
-			 (elt (if specialp (car (org-element-contents row))
+			 (elt (if specialp (cdr (org-element-contents row))
 				(org-element-contents row))
 			      col))
 			info))
@@ -1622,10 +1622,16 @@ a communication channel."
 		   (let ((width (org-e-ascii--table-cell-width cell info))
 			 (borders (org-export-table-cell-borders cell info)))
 		     (concat
+		      ;; In order to know if CELL starts the row, do
+		      ;; not compare it with the first cell in the row
+		      ;; as there might be a special column.  Instead,
+		      ;; compare it with the first exportable cell,
+		      ;; obtained with `org-element-map'.
 		      (when (and (memq 'left borders)
 				 (eq (org-element-map
 				      table-row 'table-cell 'identity info t)
-				     cell)))
+				     cell))
+			lcorner)
 		      (make-string (+ 2 width) (string-to-char horiz))
 		      (cond
 		       ((not (memq 'right borders)) nil)
