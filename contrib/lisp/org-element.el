@@ -3941,7 +3941,7 @@ indentation is not done with TAB characters."
     (if (not ind-list) element
       ;; Build ELEMENT back, replacing each string with the same
       ;; string minus common indentation.
-      (let* (build			; for byte compiler
+      (let* (build			; For byte compiler.
 	     (build
 	      (function
 	       (lambda (blob mci first-flag)
@@ -3949,24 +3949,24 @@ indentation is not done with TAB characters."
 		 ;; shortened from MCI white spaces.  FIRST-FLAG is
 		 ;; non-nil when the first string hasn't been seen
 		 ;; yet.
-		 (nconc
-		  (list (org-element-type blob) (nth 1 blob))
-		  (mapcar
-		   (lambda (object)
-		     (when (and first-flag (stringp object))
-		       (setq first-flag nil)
-		       (setq object
-			     (replace-regexp-in-string
-			      (format "\\` \\{%d\\}" mci) "" object)))
-		     (cond
-		      ((stringp object)
-		       (replace-regexp-in-string
-			(format "\n \\{%d\\}" mci) "\n" object))
-		      ((memq (org-element-type object)
-			     org-element-recursive-objects)
-		       (funcall build object mci first-flag))
-		      (t object)))
-		   (org-element-contents blob)))))))
+		 (setcdr (cdr blob)
+			 (mapcar
+			  (lambda (object)
+			    (when (and first-flag (stringp object))
+			      (setq first-flag nil)
+			      (setq object
+				    (replace-regexp-in-string
+				     (format "\\` \\{%d\\}" mci) "" object)))
+			    (cond
+			     ((stringp object)
+			      (replace-regexp-in-string
+			       (format "\n \\{%d\\}" mci) "\n" object))
+			     ((memq (org-element-type object)
+				    org-element-recursive-objects)
+			      (funcall build object mci first-flag))
+			     (t object)))
+			  (org-element-contents blob)))
+		 blob))))
 	(funcall build element (apply 'min ind-list) (not ignore-first))))))
 
 
