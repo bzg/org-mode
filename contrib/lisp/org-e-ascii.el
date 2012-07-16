@@ -359,8 +359,8 @@ in order to mimic default behaviour:
 ;; `org-e-ascii--describe-links' creates notes about links for
 ;; insertion at the end of a section.  It uses
 ;; `org-e-ascii--unique-links' to get the list of links to describe.
-;; Eventually, `org-e-ascii--translate' reads `org-e-ascii-dictionary'
-;; to internationalize output.
+;; Eventually, `org-e-ascii--translate' translates a string according
+;; to language and charset specification.
 
 
 (defun org-e-ascii--fill-string (s text-width info &optional justify)
