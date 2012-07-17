@@ -3102,7 +3102,9 @@ CONTENTS is nil."
 	     (org-element-property :value timestamp))
      (let ((range-end (org-element-property :range-end timestamp)))
        (when range-end
-	 (format (if (eq type 'inactive-range) "[%s]" "<%s>") range-end))))))
+	 (concat "--"
+		 (format (if (eq type 'inactive-range) "[%s]" "<%s>")
+			 range-end)))))))
 
 (defun org-element-timestamp-successor (limit)
   "Search for the next timestamp object.
