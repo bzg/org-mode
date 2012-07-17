@@ -3652,9 +3652,15 @@ information."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (org-e-odt-format-fontify
-   (org-e-odt-format-fontify
-    (org-translate-time (org-element-property :value timestamp))
-    "timestamp")
+   (concat
+    (org-e-odt-format-fontify
+     (concat (org-translate-time (org-element-property :value timestamp))
+	     (let ((range-end (org-element-property :range-end timestamp)))
+	       (when range-end
+		 (concat "&#x2013;"
+			 (org-e-odt-format-fontify
+			  (org-translate-time range-end) "timestamp")))))
+     "timestamp"))
    "timestamp-wrapper"))
 
 

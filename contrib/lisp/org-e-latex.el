@@ -2420,12 +2420,21 @@ information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (let ((value (org-translate-time (org-element-property :value timestamp)))
-	(type (org-element-property :type timestamp)))
-    (cond ((memq type '(active active-range))
-	   (format org-e-latex-active-timestamp-format value))
-	  ((memq type '(inactive inactive-range))
-	   (format org-e-latex-inactive-timestamp-format value))
-	  (t (format org-e-latex-diary-timestamp-format value)))))
+	(range-end (org-element-property :range-end timestamp)))
+    (case (org-element-property :type timestamp)
+      (active (format org-e-latex-active-timestamp-format value))
+      (active-range
+       (concat (format org-e-latex-active-timestamp-format value)
+	       "--"
+	       (format org-e-latex-active-timestamp-format
+		       (org-translate-time range-end))))
+      (inactive (format org-e-latex-inactive-timestamp-format value))
+      (inactive-range
+       (concat (format org-e-latex-inactive-timestamp-format value)
+	       "--"
+	       (format org-e-latex-inactive-timestamp-format
+		       (org-translate-time range-end))))
+      (otherwise (format org-e-latex-diary-timestamp-format value)))))
 
 
 ;;;; Underline
