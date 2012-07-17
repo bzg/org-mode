@@ -391,7 +391,7 @@ The function takes care of setting `:parent' property for NEW."
 	 (sec-loc (cdr (assq (org-element-type parent)
 			     org-element-secondary-value-alist)))
 	 (sec-value (and sec-loc (org-element-property sec-loc parent)))
-	 (place (or (member old sec-value) (member old parent))))
+	 (place (or (memq old sec-value) (memq old parent))))
     ;; Make sure NEW has correct `:parent' property.
     (org-element-put-property new :parent parent)
     ;; Replace OLD with NEW in PARENT.

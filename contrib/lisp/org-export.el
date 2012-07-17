@@ -1523,7 +1523,7 @@ OPTIONS is a plist holding export options."
       (mapc
        (lambda (blob)
 	 (when (and (eq (org-element-type blob) 'headline)
-		    (not (member blob (plist-get options :ignore-list))))
+		    (not (memq blob (plist-get options :ignore-list))))
 	   (setq min-level
 		 (min (org-element-property :level blob) min-level)))
 	 (when (= min-level 1) (throw 'exit 1)))
@@ -1636,7 +1636,7 @@ tag."
 	      thereis (member k tags))
 	;; When a select tag is present in the buffer, ignore any tree
 	;; without it.
-	(and selected (not (member blob selected)))
+	(and selected (not (memq blob selected)))
 	;; Ignore commented sub-trees.
 	(org-element-property :commentedp blob)
 	;; Ignore archived subtrees if `:with-archived-trees' is nil.
@@ -1721,7 +1721,7 @@ Return transcoded string."
          (results
           (cond
            ;; Ignored element/object.
-           ((member data (plist-get info :ignore-list)) nil)
+           ((memq data (plist-get info :ignore-list)) nil)
            ;; Plain text.
            ((eq type 'plain-text)
             (org-export-filter-apply-functions
@@ -3559,7 +3559,7 @@ Return value is the width given by the last width cookie in the
 same column as TABLE-CELL, or nil."
   (let* ((row (org-export-get-parent table-cell))
 	 (column (let ((cells (org-element-contents row)))
-		   (- (length cells) (length (member table-cell cells)))))
+		   (- (length cells) (length (memq table-cell cells)))))
 	 (table (org-export-get-parent-table table-cell))
 	 cookie-width)
     (mapc
@@ -3596,7 +3596,7 @@ column (see `org-table-number-fraction' for more information).
 Possible values are `left', `right' and `center'."
   (let* ((row (org-export-get-parent table-cell))
 	 (column (let ((cells (org-element-contents row)))
-		   (- (length cells) (length (member table-cell cells)))))
+		   (- (length cells) (length (memq table-cell cells)))))
 	 (table (org-export-get-parent-table table-cell))
 	 (number-cells 0)
 	 (total-cells 0)
@@ -3669,7 +3669,7 @@ Returned borders ignore special rows."
 		       (if rule-flag (throw 'exit (push 'above borders))
 			 (throw 'exit nil)))))
 	      ;; Look at every row before the current one.
-	      (cdr (member row (reverse (org-element-contents table)))))
+	      (cdr (memq row (reverse (org-element-contents table)))))
 	;; No rule above, or rule found starts the table (ignoring any
 	;; special row): TABLE-CELL is at the top of the table.
 	(when rule-flag (push 'above borders))
@@ -3685,7 +3685,7 @@ Returned borders ignore special rows."
 		       (if rule-flag (throw 'exit (push 'below borders))
 			 (throw 'exit nil)))))
 	      ;; Look at every row after the current one.
-	      (cdr (member row (org-element-contents table))))
+	      (cdr (memq row (org-element-contents table))))
 	;; No rule below, or rule found ends the table (modulo some
 	;; special row): TABLE-CELL is at the bottom of the table.
 	(when rule-flag (push 'below borders))
@@ -3696,7 +3696,7 @@ Returned borders ignore special rows."
     ;; cells.
     (catch 'exit
       (let ((column (let ((cells (org-element-contents row)))
-		      (- (length cells) (length (member table-cell cells))))))
+		      (- (length cells) (length (memq table-cell cells))))))
 	(mapc
 	 (lambda (row)
 	   (unless (eq (org-element-property :type row) 'rule)
