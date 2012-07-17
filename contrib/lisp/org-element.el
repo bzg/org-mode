@@ -1746,7 +1746,8 @@ and `:post-blank' keywords."
 				(line-end-position) t)
 	(goto-char (match-end 1))
 	(org-skip-whitespace)
-	(let ((time (buffer-substring-no-properties (point) (match-end 0)))
+	(let ((time (buffer-substring-no-properties
+		     (1+ (point)) (1- (match-end 0))))
 	      (keyword (match-string 1)))
 	  (cond ((equal keyword org-closed-string) (setq closed time))
 		((equal keyword org-deadline-string) (setq deadline time))
@@ -1766,11 +1767,12 @@ CONTENTS is nil."
    'identity
    (delq nil
 	 (list (let ((closed (org-element-property :closed planning)))
-		 (when closed (concat org-closed-string " " closed)))
+		 (when closed (concat org-closed-string " [" closed "]")))
 	       (let ((deadline (org-element-property :deadline planning)))
-		 (when deadline (concat org-deadline-string " " deadline)))
+		 (when deadline (concat org-deadline-string " <" deadline ">")))
 	       (let ((scheduled (org-element-property :scheduled planning)))
-		 (when scheduled (concat org-scheduled-string " " scheduled)))))
+		 (when scheduled
+		   (concat org-scheduled-string " <" scheduled ">")))))
    " "))
 
 
@@ -3069,24 +3071,24 @@ Return a list whose CAR is `timestamp', and CDR a plist with
 Assume point is at the beginning of the timestamp."
   (save-excursion
     (let* ((begin (point))
-	   (type (cond
-		  ((looking-at org-tsr-regexp)
-		   (if (match-string 2) 'active-range 'active))
-		  ((looking-at org-tsr-regexp-both)
-		   (if (match-string 2) 'inactive-range 'inactive))
-		  ((looking-at
-		    (concat
-		     "\\(<[0-9]+-[0-9]+-[0-9]+[^>\n]+?\\+[0-9]+[dwmy]>\\)"
-		     "\\|"
-		     "\\(<%%\\(([^>\n]+)\\)>\\)"))
-		   'diary)))
-	   (value (org-match-string-no-properties 0))
+	   (activep (eq (char-after) ?<))
+	   (main-value
+	    (progn
+	      (looking-at "[<[]\\(\\(%%\\)?.*?\\)[]>]\\(?:--[<[]\\(.*?\\)[]>]\\)?")
+	      (match-string-no-properties 1)))
+	   (range-end (match-string-no-properties 3))
+	   (type (cond ((match-string 2) 'diary)
+		       ((and activep range-end) 'active-range)
+		       (activep 'active)
+		       (range-end 'inactive-range)
+		       (t 'inactive)))
 	   (post-blank (progn (goto-char (match-end 0))
 			      (skip-chars-forward " \t")))
 	   (end (point)))
       (list 'timestamp
 	    (list :type type
-		  :value value
+		  :value main-value
+		  :range-end range-end
 		  :begin begin
 		  :end end
 		  :post-blank post-blank)))))
@@ -3094,7 +3096,13 @@ Assume point is at the beginning of the timestamp."
 (defun org-element-timestamp-interpreter (timestamp contents)
   "Interpret TIMESTAMP object as Org syntax.
 CONTENTS is nil."
-  (org-element-property :value timestamp))
+  (let ((type (org-element-property :type timestamp) ))
+    (concat
+     (format (if (memq type '(inactive inactive-range)) "[%s]" "<%s>")
+	     (org-element-property :value timestamp))
+     (let ((range-end (org-element-property :range-end timestamp)))
+       (when range-end
+	 (format (if (eq type 'inactive-range) "[%s]" "<%s>") range-end))))))
 
 (defun org-element-timestamp-successor (limit)
   "Search for the next timestamp object.

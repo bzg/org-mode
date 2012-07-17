@@ -1141,21 +1141,21 @@ Outside list"
      :closed
      (org-test-with-temp-text "CLOSED: [2012-03-29 thu.]"
        (org-element-map (org-element-parse-buffer) 'planning 'identity nil t)))
-    "[2012-03-29 thu.]"))
+    "2012-03-29 thu."))
   (should
    (equal
     (org-element-property
      :deadline
      (org-test-with-temp-text "DEADLINE: <2012-03-29 thu.>"
        (org-element-map (org-element-parse-buffer) 'planning 'identity nil t)))
-    "<2012-03-29 thu.>"))
+    "2012-03-29 thu."))
   (should
    (equal
     (org-element-property
      :scheduled
      (org-test-with-temp-text "SCHEDULED: <2012-03-29 thu.>"
        (org-element-map (org-element-parse-buffer) 'planning 'identity nil t)))
-    "<2012-03-29 thu.>")))
+    "2012-03-29 thu.")))
 
 
 ;;;; Property Drawer
@@ -1426,6 +1426,10 @@ Outside list"
   ;; Inactive timestamp.
   (should
    (org-test-with-temp-text "[2012-03-29 16:40]"
+     (org-element-map (org-element-parse-buffer) 'timestamp 'identity)))
+  ;; Date range.
+  (should
+   (org-test-with-temp-text "[2012-03-29 16:40]--[2012-03-29 16:41]"
      (org-element-map (org-element-parse-buffer) 'timestamp 'identity)))
   ;; Timestamps are not planning elements.
   (should-not
@@ -1781,9 +1785,9 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
      (equal
       (org-test-parse-and-interpret
        "* Headline
-CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>")
+CLOSED: [2012-01-01] DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>")
       "* Headline
-CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
+CLOSED: [2012-01-01] DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
 
 (ert-deftest test-org-element/property-drawer-interpreter ()
   "Test property drawer interpreter."
@@ -1829,6 +1833,29 @@ CLOSED: <2012-01-01> DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
    (equal (org-test-parse-and-interpret
 	   "| 2 |\n| 4 |\n| 3 |\n#+TBLFM: test1\n#+TBLFM: test2")
 	  "| 2 |\n| 4 |\n| 3 |\n#+TBLFM: test1\n#+TBLFM: test2\n")))
+
+(ert-deftest test-org-element/timestamp-interpreter ()
+  "Test timestamp interpreter."
+  ;; Active.
+  (should (equal (org-test-parse-and-interpret "<2012-03-29 16:40>")
+		 "<2012-03-29 16:40>\n"))
+  ;; Inactive.
+  (should (equal (org-test-parse-and-interpret "[2012-03-29 16:40]")
+		 "[2012-03-29 16:40]\n"))
+  ;; Active range.
+  (should (equal (org-test-parse-and-interpret
+		  "<2012-03-29 16:40>--<2012-03-29 16:41>")
+		 "<2012-03-29 16:40>--<2012-03-29 16:41>\n"))
+  ;; Inactive range.
+  (should (equal (org-test-parse-and-interpret
+		  "[2012-03-29 16:40]--[2012-03-29 16:41]")
+		 "[2012-03-29 16:40]--[2012-03-29 16:41]\n"))
+  ;; Diary.
+  (should (equal (org-test-parse-and-interpret "<%%org-float t 4 2>")
+		 "<%%org-float t 4 2>\n"))
+  ;; Timestamp with repeater interval.
+  (should (equal (org-test-parse-and-interpret "<2012-03-29 +1y>")
+		 "<2012-03-29 +1y>\n")))
 
 (ert-deftest test-org-element/verse-block-interpreter ()
   "Test verse block interpretation."
