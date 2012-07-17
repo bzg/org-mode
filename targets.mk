@@ -31,7 +31,8 @@ endif
 	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol
 
-CONF_BASE = EMACS lispdir infodir datadir testdir
+CONF_BASE = EMACS DESTDIR
+CONF_DEST = lispdir infodir datadir testdir
 CONF_TEST = BTEST_PRE BTEST_POST BTEST_OB_LANGUAGES BTEST_EXTRA
 CONF_EXEC = CP MKDIR RM RMR FIND SUDO PDFTEX TEXI2PDF TEXI2HTML MAKEINFO INSTALL_INFO
 CONF_CALL = BATCH BATCHL ELCDIR BTEST MAKE_LOCAL_MK MAKE_ORG_INSTALL MAKE_ORG_VERSION
@@ -41,6 +42,7 @@ config config-all::
 	$(info )
 	$(info ========= Emacs executable and Installation paths)
 	$(foreach var,$(CONF_BASE),$(info $(var)	= $($(var))$(EOL)))
+	$(foreach var,$(CONF_DEST),$(info $(var)	= $(DESTDIR)$($(var))$(EOL)))
 config-test config-all::
 	$(info )
 	$(info ========= Test configuration)
