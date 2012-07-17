@@ -2600,14 +2600,12 @@ Return a list whose CAR is `line-break', and CDR a plist with
 `:begin', `:end' and `:post-blank' keywords.
 
 Assume point is at the beginning of the line break."
-  (let ((begin (point))
-	(end (save-excursion (forward-line) (point))))
-    (list 'line-break (list :begin begin :end end :post-blank 0))))
+  (list 'line-break (list :begin (point) :end (point-at-eol) :post-blank 0)))
 
 (defun org-element-line-break-interpreter (line-break contents)
   "Interpret LINE-BREAK object as Org syntax.
 CONTENTS is nil."
-  "\\\\\n")
+  "\\\\")
 
 (defun org-element-line-break-successor (limit)
   "Search for the next line-break object.
@@ -3670,8 +3668,9 @@ current object."
   (let (candidates)
     (save-excursion
       (goto-char beg)
-      (while (setq candidates (org-element-get-next-object-candidates
-			       end restriction candidates))
+      (while (and (< (point) end)
+		  (setq candidates (org-element-get-next-object-candidates
+				    end restriction candidates)))
 	(let ((next-object
 	       (let ((pos (apply 'min (mapcar 'cdr candidates))))
 		 (save-excursion
@@ -3692,8 +3691,8 @@ current object."
 		(cont-beg (org-element-property :contents-begin next-object)))
 	    ;; Fill contents of NEXT-OBJECT by side-effect, if it has
 	    ;; a recursive type.
-	    (when (and (memq (car next-object) org-element-recursive-objects)
-		       cont-beg)
+	    (when (and cont-beg
+		       (memq (car next-object) org-element-recursive-objects))
 	      (save-restriction
 		(narrow-to-region
 		 cont-beg
