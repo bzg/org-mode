@@ -281,8 +281,8 @@ This list is checked after translations have been applied.  See
 		radio-target sub/superscript target text-markup timestamp)
     (italic export-snippet inline-babel-call inline-src-block latex-or-entity
 	    link radio-target sub/superscript target text-markup timestamp)
-    (item footnote-reference inline-babel-call latex-or-entity macro
-	  radio-target sub/superscript target text-markup)
+    (item export-snippet footnote-reference inline-babel-call latex-or-entity
+	  link macro radio-target sub/superscript target text-markup)
     (keyword latex-or-entity macro sub/superscript text-markup)
     (link export-snippet inline-babel-call inline-src-block latex-or-entity link
 	  sub/superscript text-markup)
