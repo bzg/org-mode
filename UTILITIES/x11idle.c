@@ -8,14 +8,25 @@
  * path
  */
 main() {
+    Status querry = 0;
     XScreenSaverInfo *info = XScreenSaverAllocInfo();
+    //open the display specified by the DISPLAY environment variable
     Display *display = XOpenDisplay(0);
 
-    //check that X11 is running or else you get a segafult/coredump
-    if (display != NULL) {
-	XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
+    //display could be null if there is no X server running
+    if (info == NULL || display == NULL) {
+    return -1;
     }
-    XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
+
+    //X11 is running, retrieve and print idle time
+	querry = XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
+
+    if (querry == 0) {
+    return -1;
+    }
+
+    //idle time was retrieved successfully, print it
     printf("%u\n", info->idle);
     return 0;
 }
+
