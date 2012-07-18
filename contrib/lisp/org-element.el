@@ -870,8 +870,8 @@ Assume point is at beginning of the inline task."
 			 :deadline deadline
 			 :timestamp timestamp
 			 :clock clock
-			 :post-blank (count-lines pos-before-blank end)
-			 standard-props)
+			 :post-blank (count-lines pos-before-blank end))
+		   standard-props
 		   (cadr keywords)))))
       (org-element-put-property
        inlinetask :title
