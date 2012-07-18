@@ -1065,9 +1065,11 @@ holding contextual information."
 	   ;; Even if HEADLINE has no section, there might be some
 	   ;; links in its title that we shouldn't forget to describe.
 	   (links
-	    (unless (eq (caar (org-element-contents headline)) 'section)
-	      (org-e-ascii--describe-links
-	       (org-e-ascii--unique-links headline info) width info))))
+	    (unless (or (eq (caar (org-element-contents headline)) 'section))
+	      (let ((title (org-element-property :title headline)))
+		(when (consp title)
+		  (org-e-ascii--describe-links
+		   (org-e-ascii--unique-links title info) width info))))))
       ;; Deep subtree: export it as a list item.
       (if low-level-rank
 	  (concat
