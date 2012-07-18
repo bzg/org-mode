@@ -2151,7 +2151,14 @@ holding contextual information."
   "Transcode a SUBSCRIPT object from Org to LaTeX.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  (format (if (= (length contents) 1) "$_%s$" "$_{\\mathrm{%s}}$") contents))
+  (format (if (or (= (length contents) 1)
+		  (let ((parsed-contents (org-element-contents subscript)))
+		    (and (not (cdr parsed-contents))
+			 (memq (org-element-type (car parsed-contents))
+			       '(entity latex-fragment)))))
+	      "$_%s$"
+	    "$_{\\mathrm{%s}}$")
+	  contents))
 
 
 ;;;; Superscript
@@ -2160,7 +2167,14 @@ contextual information."
   "Transcode a SUPERSCRIPT object from Org to LaTeX.
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
-  (format (if (= (length contents) 1) "$^%s$" "$^{\\mathrm{%s}}$") contents))
+  (format (if (or (= (length contents) 1)
+		  (let ((parsed-contents (org-element-contents superscript)))
+		    (and (not (cdr parsed-contents))
+			 (memq (org-element-type (car parsed-contents))
+			       '(entity latex-fragment)))))
+	      "$^%s$"
+	    "$^{\\mathrm{%s}}$")
+	  contents))
 
 
 ;;;; Table
