@@ -123,7 +123,7 @@ Some other text
       (should-not (org-element-map tree 'bold 'identity))
       ;; Check if new object's parent is correctly set.
       (should
-       (equal
+       (eq
 	(org-element-property :parent
 			      (org-element-map tree 'italic 'identity nil t))
 	(org-element-map tree 'paragraph 'identity nil t))))))
@@ -1422,15 +1422,27 @@ Outside list"
   ;; Active timestamp.
   (should
    (org-test-with-temp-text "<2012-03-29 16:40>"
-     (org-element-map (org-element-parse-buffer) 'timestamp 'identity)))
+     (eq (org-element-property :type
+			       (org-element-map
+				(org-element-parse-buffer)
+				'timestamp 'identity nil t))
+	 'active)))
   ;; Inactive timestamp.
   (should
    (org-test-with-temp-text "[2012-03-29 16:40]"
-     (org-element-map (org-element-parse-buffer) 'timestamp 'identity)))
+     (eq (org-element-property :type
+			       (org-element-map
+				(org-element-parse-buffer)
+				'timestamp 'identity nil t))
+	 'inactive)))
   ;; Date range.
   (should
    (org-test-with-temp-text "[2012-03-29 16:40]--[2012-03-29 16:41]"
-     (org-element-map (org-element-parse-buffer) 'timestamp 'identity)))
+     (eq (org-element-property :type
+			       (org-element-map
+				(org-element-parse-buffer)
+				'timestamp 'identity nil t))
+	 'inactive-range)))
   ;; Timestamps are not planning elements.
   (should-not
    (org-test-with-temp-text "SCHEDULED: <2012-03-29 16:40>"
@@ -2117,8 +2129,8 @@ Paragraph \\alpha."
 		    :parent
 		    (org-element-map tree 'paragraph 'identity nil t))))
       (should parent)
-      (should
-       (equal (org-element-map tree 'center-block 'identity nil t) parent))))
+      (should (eq (org-element-map tree 'center-block 'identity nil t)
+		  parent))))
   ;; Objects.
   (org-test-with-temp-text "a_{/b/}"
     (let* ((tree (org-element-parse-buffer))
@@ -2126,16 +2138,16 @@ Paragraph \\alpha."
 		    :parent
 		    (org-element-map tree 'italic 'identity nil t))))
       (should parent)
-      (should
-       (equal parent (org-element-map tree 'subscript 'identity nil t)))))
+      (should (eq parent
+		  (org-element-map tree 'subscript 'identity nil t)))))
   ;; Secondary strings
   (org-test-with-temp-text "* /italic/"
     (let* ((tree (org-element-parse-buffer))
 	   (parent (org-element-property
 		    :parent (org-element-map tree 'italic 'identity nil t))))
       (should parent)
-      (should
-       (equal parent (org-element-map tree 'headline 'identity nil t))))))
+      (should (eq parent
+		  (org-element-map tree 'headline 'identity nil t))))))
 
 
 
