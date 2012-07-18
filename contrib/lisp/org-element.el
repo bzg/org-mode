@@ -3195,8 +3195,8 @@ CONTENTS is nil."
 ;; `org-element-current-element' makes use of special modes.  They are
 ;; activated for fixed element chaining (i.e. `plain-list' > `item')
 ;; or fixed conditional element chaining (i.e. `headline' >
-;; `section'). Special modes are: `section', `quote-section', `item'
-;; and `table-row'.
+;; `section'). Special modes are: `first-section', `section',
+;; `quote-section', `item' and `table-row'.
 
 (defun org-element-current-element
   (limit &optional granularity special structure)
@@ -3216,8 +3216,9 @@ recursion.  Allowed values are `headline', `greater-element',
 nil), secondary values will not be parsed, since they only
 contain objects.
 
-Optional argument SPECIAL, when non-nil, can be either `section',
-`quote-section', `table-row' and `item'.
+Optional argument SPECIAL, when non-nil, can be either
+`first-section', `section', `quote-section', `table-row' and
+`item'.
 
 If STRUCTURE isn't provided but SPECIAL is set to `item', it will
 be computed.
@@ -3250,6 +3251,10 @@ element it has to parse."
         (org-element-headline-parser limit raw-secondary-p))
        ;; Section (must be checked after headline).
        ((eq special 'section) (org-element-section-parser limit))
+       ((eq special 'first-section)
+	(org-element-section-parser
+	 (or (save-excursion (org-with-limited-levels (outline-next-heading)))
+	     limit)))
        ;; Planning and Clock.
        ((and (looking-at org-planning-or-clock-line-re))
 	(if (equal (match-string 1) org-clock-string)
@@ -3466,9 +3471,9 @@ Assume buffer is in Org mode."
     (org-skip-whitespace)
     (org-element-parse-elements
      (point-at-bol) (point-max)
-     ;; Start in `section' mode so text before the first
+     ;; Start in `first-section' mode so text before the first
      ;; headline belongs to a section.
-     'section nil granularity visible-only (list 'org-data nil))))
+     'first-section nil granularity visible-only (list 'org-data nil))))
 
 (defun org-element-parse-secondary-string (string restriction &optional parent)
   "Recursively parse objects in STRING and return structure.
@@ -3606,7 +3611,8 @@ Nil values returned from FUN do not appear in the results."
   "Parse elements between BEG and END positions.
 
 SPECIAL prioritize some elements over the others.  It can be set
-to `quote-section', `section' `item' or `table-row'.
+to `first-section', `quote-section', `section' `item' or
+`table-row'.
 
 When value is `item', STRUCTURE will be used as the current list
 structure.
