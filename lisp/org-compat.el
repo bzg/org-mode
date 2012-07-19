@@ -446,10 +446,13 @@ With two arguments, return floor and remainder of their quotient."
     (funcall 'switch-to-buffer buffer-or-name norecord)))
 
 ;; `condition-case-unless-debug' has been introduced in Emacs 24.1
+;; `condition-case-no-debug' has been introduced in Emacs 23.1
 (defalias 'org-condition-case-unless-debug
-  (if (fboundp 'condition-case-unless-debug)
-      'condition-case-unless-debug
-    'condition-case-no-debug))
+  (or (and (fboundp 'condition-case-unless-debug)
+	   'condition-case-unless-debug)
+      (and (fboundp 'condition-case-no-debug)
+	   'condition-case-no-debug)
+      'condition-case))
 
 (provide 'org-compat)
 
