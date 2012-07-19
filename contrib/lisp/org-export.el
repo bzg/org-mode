@@ -1342,7 +1342,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			    ;; Like `org-element-parse-buffer', but
 			    ;; makes sure the definition doesn't start
 			    ;; with a section element.
-			    (org-element-parse-elements
+			    (org-element--parse-elements
 			     (point-min) (point-max) nil nil nil nil
 			     (list 'org-data nil))))
 		    alist))))

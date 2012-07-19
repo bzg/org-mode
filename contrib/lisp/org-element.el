@@ -122,6 +122,7 @@
 ;;
 ;; These variables really act as a control center for the parsing
 ;; process.
+
 (defconst org-element-paragraph-separate
   (concat "\f" "\\|" "^[ \t]*$" "\\|"
 	  ;; Headlines and inlinetasks.
@@ -450,7 +451,7 @@ Return parent element."
 ;; cannot contain other greater elements of their own type.
 ;;
 ;; Beside implementing a parser and an interpreter, adding a new
-;; greater element requires to tweak `org-element-current-element'.
+;; greater element requires to tweak `org-element--current-element'.
 ;; Moreover, the newly defined type must be added to both
 ;; `org-element-all-elements' and `org-element-greater-elements'.
 
@@ -474,7 +475,7 @@ Assume point is at the beginning of the block."
 	(org-element-comment-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
-	  (let* ((keywords (org-element-collect-affiliated-keywords))
+	  (let* ((keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
@@ -515,7 +516,7 @@ Assume point is at beginning of drawer."
     (let* ((case-fold-search t)
 	   (name (progn (looking-at org-drawer-regexp)
 			(org-match-string-no-properties 1)))
-	   (keywords (org-element-collect-affiliated-keywords))
+	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (forward-line) (point)))
 	   (hidden (org-invisible-p2))
@@ -565,7 +566,7 @@ Assume point is at beginning of dynamic block."
 	  (let* ((name (progn (looking-at org-dblock-start-re)
 			      (org-match-string-no-properties 1)))
 		 (arguments (org-match-string-no-properties 3))
-		 (keywords (org-element-collect-affiliated-keywords))
+		 (keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
@@ -611,7 +612,7 @@ Assume point is at the beginning of the footnote definition."
   (save-excursion
     (looking-at org-footnote-definition-re)
     (let* ((label (org-match-string-no-properties 1))
-	   (keywords (org-element-collect-affiliated-keywords))
+	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-begin (progn (search-forward "]")
 				  (org-skip-whitespace)
@@ -818,7 +819,7 @@ string instead.
 
 Assume point is at beginning of the inline task."
   (save-excursion
-    (let* ((keywords (org-element-collect-affiliated-keywords))
+    (let* ((keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (components (org-heading-components))
 	   (todo (nth 2 components))
@@ -1056,7 +1057,7 @@ Assume point is at the beginning of the list."
 	   (parents (org-list-parents-alist struct))
 	   (type (org-list-get-list-type (point) struct prevs))
 	   (contents-begin (point))
-	   (keywords (org-element-collect-affiliated-keywords))
+	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-end
 	    (goto-char (org-list-get-list-end (point) struct prevs)))
@@ -1104,7 +1105,7 @@ Assume point is at the beginning of the block."
 	(org-element-comment-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
-	  (let* ((keywords (org-element-collect-affiliated-keywords))
+	  (let* ((keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
@@ -1182,7 +1183,7 @@ Assume point is at the beginning of the block."
 	(org-element-comment-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
-	  (let* ((keywords (org-element-collect-affiliated-keywords))
+	  (let* ((keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
@@ -1217,7 +1218,7 @@ CONTENTS is the contents of the element."
 ;;
 ;; Also, as for greater elements, adding a new element type is done
 ;; through the following steps: implement a parser and an interpreter,
-;; tweak `org-element-current-element' so that it recognizes the new
+;; tweak `org-element--current-element' so that it recognizes the new
 ;; type and add that new type to `org-element-all-elements'.
 ;;
 ;; As a special case, when the newly defined type is a block type,
@@ -1321,7 +1322,7 @@ keywords.
 
 Assume point is at comment beginning."
   (save-excursion
-    (let* ((keywords (org-element-collect-affiliated-keywords))
+    (let* ((keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   ;; Match first line with a loose regexp since it might as
 	   ;; well be an ill-defined keyword.
@@ -1378,7 +1379,7 @@ Assume point is at comment block beginning."
 	(org-element-comment-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
-	  (let* ((keywords (org-element-collect-affiliated-keywords))
+	  (let* ((keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
@@ -1446,7 +1447,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 				 (string-match "-l +\"\\([^\"\n]+\\)\"" switches)
 				 (match-string 1 switches)))
 		 ;; Standard block parsing.
-		 (keywords (org-element-collect-affiliated-keywords))
+		 (keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
@@ -1502,7 +1503,7 @@ Assume point is at export-block beginning."
 	(org-element-comment-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
-	  (let* ((keywords (org-element-collect-affiliated-keywords))
+	  (let* ((keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
@@ -1544,7 +1545,7 @@ containing `:begin', `:end', `:value' and `:post-blank' keywords.
 
 Assume point is at the beginning of the fixed-width area."
   (save-excursion
-    (let* ((keywords (org-element-collect-affiliated-keywords))
+    (let* ((keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   value
 	   (end-area
@@ -1586,7 +1587,7 @@ LIMIT bounds the search.
 Return a list whose CAR is `horizontal-rule' and CDR is a plist
 containing `:begin', `:end' and `:post-blank' keywords."
   (save-excursion
-    (let* ((keywords (org-element-collect-affiliated-keywords))
+    (let* ((keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (post-hr (progn (forward-line) (point)))
 	   (end (progn (org-skip-whitespace)
@@ -1654,7 +1655,7 @@ Assume point is at the beginning of the latex environment."
   (save-excursion
     (let* ((case-fold-search t)
 	   (code-begin (point))
-	   (keywords (org-element-collect-affiliated-keywords))
+	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (env (progn (looking-at "^[ \t]*\\\\begin{\\([A-Za-z0-9*]+\\)}")
 		       (regexp-quote (match-string 1))))
@@ -1693,7 +1694,7 @@ containing `:begin', `:end', `:contents-begin' and
 Assume point is at the beginning of the paragraph."
   (save-excursion
     (let* ((contents-begin (point))
-	   (keywords (org-element-collect-affiliated-keywords))
+	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-end
 	    (progn (end-of-line)
@@ -1879,7 +1880,7 @@ Assume point is at the beginning of the block."
 	(org-element-comment-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
-	  (let* ((keywords (org-element-collect-affiliated-keywords))
+	  (let* ((keywords (org-element--collect-affiliated-keywords))
 		 ;; Get beginning position.
 		 (begin (car keywords))
 		 ;; Get language as a string.
@@ -1985,7 +1986,7 @@ Assume point is at the beginning of the table."
     (let* ((case-fold-search t)
 	   (table-begin (point))
 	   (type (if (org-at-table.el-p) 'table.el 'org))
-	   (keywords (org-element-collect-affiliated-keywords))
+	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (table-end (goto-char (marker-position (org-table-end t))))
 	   (tblfm (let (acc)
@@ -2084,7 +2085,7 @@ Assume point is at beginning of the block."
 	(org-element-comment-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
-	  (let* ((keywords (org-element-collect-affiliated-keywords))
+	  (let* ((keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
 		 (hidden (progn (forward-line) (org-invisible-p2)))
 		 (contents-begin (point))
@@ -3188,17 +3189,17 @@ CONTENTS is nil."
 
 ;;; Parsing Element Starting At Point
 ;;
-;; `org-element-current-element' is the core function of this section.
+;; `org-element--current-element' is the core function of this section.
 ;; It returns the Lisp representation of the element starting at
 ;; point.
 ;;
-;; `org-element-current-element' makes use of special modes.  They are
-;; activated for fixed element chaining (i.e. `plain-list' > `item')
-;; or fixed conditional element chaining (i.e. `headline' >
+;; `org-element--current-element' makes use of special modes.  They
+;; are activated for fixed element chaining (i.e. `plain-list' >
+;; `item') or fixed conditional element chaining (i.e. `headline' >
 ;; `section'). Special modes are: `first-section', `section',
 ;; `quote-section', `item' and `table-row'.
 
-(defun org-element-current-element
+(defun org-element--current-element
   (limit &optional granularity special structure)
   "Parse the element starting at point.
 
@@ -3356,7 +3357,7 @@ element it has to parse."
 ;;
 ;; A keyword may belong to more than one category.
 
-(defun org-element-collect-affiliated-keywords
+(defun org-element--collect-affiliated-keywords
   (&optional key-re trans-list consed parsed duals)
   "Collect affiliated keywords before point.
 
@@ -3469,7 +3470,7 @@ Assume buffer is in Org mode."
   (save-excursion
     (goto-char (point-min))
     (org-skip-whitespace)
-    (org-element-parse-elements
+    (org-element--parse-elements
      (point-at-bol) (point-max)
      ;; Start in `first-section' mode so text before the first
      ;; headline belongs to a section.
@@ -3486,7 +3487,7 @@ containing the secondary string.  It is used to set correctly
 `:parent' property within the string."
   (with-temp-buffer
     (insert string)
-    (let ((secondary (org-element-parse-objects
+    (let ((secondary (org-element--parse-objects
 		      (point-min) (point-max) nil restriction)))
       (mapc (lambda (obj) (org-element-put-property obj :parent parent))
 	    secondary))))
@@ -3591,13 +3592,13 @@ Nil values returned from FUN do not appear in the results."
 
 ;; The following functions are internal parts of the parser.
 ;;
-;; The first one, `org-element-parse-elements' acts at the element's
+;; The first one, `org-element--parse-elements' acts at the element's
 ;; level.
 ;;
-;; The second one, `org-element-parse-objects' applies on all objects
+;; The second one, `org-element--parse-objects' applies on all objects
 ;; of a paragraph or a secondary string.  It uses
-;; `org-element-get-candidates' to optimize the search of the next
-;; object in the buffer.
+;; `org-element--get-next-object-candidates' to optimize the search of
+;; the next object in the buffer.
 ;;
 ;; More precisely, that function looks for every allowed object type
 ;; first.  Then, it discards failed searches, keeps further matches,
@@ -3606,7 +3607,7 @@ Nil values returned from FUN do not appear in the results."
 ;; object is searched only once at top level (but sometimes more for
 ;; nested types).
 
-(defun org-element-parse-elements
+(defun org-element--parse-elements
   (beg end special structure granularity visible-only acc)
   "Parse elements between BEG and END positions.
 
@@ -3633,7 +3634,7 @@ Elements are accumulated into ACC."
     (while (< (point) end)
       ;; Find current element's type and parse it accordingly to
       ;; its category.
-      (let* ((element (org-element-current-element
+      (let* ((element (org-element--current-element
 		       end granularity special structure))
 	     (type (org-element-type element))
 	     (cbeg (org-element-property :contents-begin element)))
@@ -3653,7 +3654,7 @@ Elements are accumulated into ACC."
 		   (and (eq granularity 'greater-element)
 			(eq type 'section))
 		   (eq type 'headline)))
-	  (org-element-parse-elements
+	  (org-element--parse-elements
 	   cbeg (org-element-property :contents-end element)
 	   ;; Possibly switch to a special mode.
 	   (case type
@@ -3667,14 +3668,14 @@ Elements are accumulated into ACC."
 	 ;; ELEMENT has contents.  Parse objects inside, if
 	 ;; GRANULARITY allows it.
 	 ((memq granularity '(object nil))
-	  (org-element-parse-objects
+	  (org-element--parse-objects
 	   cbeg (org-element-property :contents-end element) element
 	   (org-element-restriction type))))
 	(org-element-adopt-element acc element t)))
     ;; Return result.
     acc))
 
-(defun org-element-parse-objects (beg end acc restriction)
+(defun org-element--parse-objects (beg end acc restriction)
   "Parse objects between BEG and END and return recursive structure.
 
 Objects are accumulated in ACC.
@@ -3685,7 +3686,7 @@ current object."
     (save-excursion
       (goto-char beg)
       (while (and (< (point) end)
-		  (setq candidates (org-element-get-next-object-candidates
+		  (setq candidates (org-element--get-next-object-candidates
 				    end restriction candidates)))
 	(let ((next-object
 	       (let ((pos (apply 'min (mapcar 'cdr candidates))))
@@ -3713,7 +3714,7 @@ current object."
 		(narrow-to-region
 		 cont-beg
 		 (org-element-property :contents-end next-object))
-		(org-element-parse-objects
+		(org-element--parse-objects
 		 (point-min) (point-max) next-object
 		 (org-element-restriction next-object))))
 	    (setq acc (org-element-adopt-element acc next-object t))
@@ -3729,7 +3730,7 @@ current object."
       ;; Result.
       acc)))
 
-(defun org-element-get-next-object-candidates (limit restriction objects)
+(defun org-element--get-next-object-candidates (limit restriction objects)
   "Return an alist of candidates for the next object.
 
 LIMIT bounds the search, and RESTRICTION narrows candidates to
@@ -3773,7 +3774,7 @@ OBJECTS is the previous candidates alist."
 ;; Hence `org-element-interpret-data'.
 ;;
 ;; The function relies internally on
-;; `org-element-interpret--affiliated-keywords'.
+;; `org-element--interpret-affiliated-keywords'.
 
 (defun org-element-interpret-data (data &optional parent)
   "Interpret DATA as Org syntax.
@@ -3837,11 +3838,11 @@ Return Org syntax as a string."
 	(if (memq type org-element-all-objects)
 	    (concat results (make-string post-blank 32))
 	  (concat
-	   (org-element-interpret--affiliated-keywords data)
+	   (org-element--interpret-affiliated-keywords data)
 	   (org-element-normalize-string results)
 	   (make-string post-blank 10)))))))
 
-(defun org-element-interpret--affiliated-keywords (element)
+(defun org-element--interpret-affiliated-keywords (element)
   "Return ELEMENT's affiliated keywords as Org syntax.
 If there is no affiliated keyword, return the empty string."
   (let ((keyword-to-org
@@ -3992,7 +3993,7 @@ indentation is not done with TAB characters."
 ;; containing point.  This is the job of `org-element-at-point'.  It
 ;; basically jumps back to the beginning of section containing point
 ;; and moves, element after element, with
-;; `org-element-current-element' until the container is found.
+;; `org-element--current-element' until the container is found.
 ;;
 ;; At a deeper level, `org-element-context' lists all elements and
 ;; objects containing point.
@@ -4044,7 +4045,7 @@ first element of current section."
        (catch 'exit
          (while t
            (setq element
-		 (org-element-current-element end 'element special-flag struct)
+		 (org-element--current-element end 'element special-flag struct)
                  type (car element))
 	   (push element trail)
            (cond
@@ -4126,7 +4127,7 @@ and are ordered from closest to farthest."
 	 elements
        (let ((restriction (org-element-restriction element)) candidates)
 	 (catch 'exit
-	   (while (setq candidates (org-element-get-next-object-candidates
+	   (while (setq candidates (org-element--get-next-object-candidates
 				    end restriction candidates))
 	     (let ((closest-cand (rassq (apply 'min (mapcar 'cdr candidates))
 					candidates)))
@@ -4502,7 +4503,7 @@ width for filling."
                 (nreverse
                  (cons beg
                        (org-element-map
-                        (org-element-parse-objects
+                        (org-element--parse-objects
                          beg end nil org-element-all-objects)
                         'line-break
                         (lambda (lb) (org-element-property :end lb)))))))) t)))

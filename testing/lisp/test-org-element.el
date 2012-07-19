@@ -438,97 +438,95 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
   (let ((org-coderef-label-format "(ref:%s)"))
     ;; 1. Test "-i" switch.
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element (point-max))))
-	(should-not (org-element-property :preserve-indent element))))
+      (should-not
+       (org-element-property :preserve-indent (org-element-at-point))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -i\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element (point-max))))
-	(should (org-element-property :preserve-indent element))))
+      (should (org-element-property :preserve-indent (org-element-at-point))))
     (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element (point-max))))
-	(should-not (org-element-property :preserve-indent element))))
+      (should-not
+       (org-element-property :preserve-indent (org-element-at-point))))
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -i\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element (point-max))))
-	(should (org-element-property :preserve-indent element))))
+      (should (org-element-property :preserve-indent (org-element-at-point))))
     ;; 2. "-n -r -k" combination should number lines, retain labels but
     ;;    not use them in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r -k\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (not (org-element-property :use-labels element))))))
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp -n -r -k\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (not (org-element-property :use-labels element))))))
     ;; 3. "-n -r" combination should number-lines remove labels and not
     ;;    use them in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -n -r\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (org-element-property :number-lines element)
 		     (not (org-element-property :retain-labels element))
 		     (not (org-element-property :use-labels element))))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -n -r\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (org-element-property :number-lines element)
 		     (not (org-element-property :retain-labels element))
 		     (not (org-element-property :use-labels element))))))
     ;; 4. "-n" or "+n" should number lines, retain labels and use them
     ;;    in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -n\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -n\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     (org-test-with-temp-text "#+BEGIN_EXAMPLE +n\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp +n\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (org-element-property :number-lines element)
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     ;; 5. No switch should not number lines, but retain labels and use
     ;;    them in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (not (org-element-property :number-lines element))
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (not (org-element-property :number-lines element))
 		     (org-element-property :retain-labels element)
 		     (org-element-property :use-labels element)))))
     ;; 6. "-r" switch only: do not number lines, remove labels, and
     ;;    don't use labels in coderefs.
     (org-test-with-temp-text "#+BEGIN_EXAMPLE -r\nText.\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (not (org-element-property :number-lines element))
 		     (not (org-element-property :retain-labels element))
 		     (not (org-element-property :use-labels element))))))
     (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp -r\n(+ 1 1)\n#+END_SRC"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should (and (not (org-element-property :number-lines element))
 		     (not (org-element-property :retain-labels element))
 		     (not (org-element-property :use-labels element))))))
     ;; 7. Recognize coderefs with user-defined syntax.
     (org-test-with-temp-text
 	"#+BEGIN_EXAMPLE -l \"[ref:%s]\"\nText [ref:text]\n#+END_EXAMPLE"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should
 	 (equal (org-element-property :label-fmt element) "[ref:%s]"))))
     (org-test-with-temp-text
 	"#+BEGIN_SRC emacs-lisp -l \"[ref:%s]\"\n(+ 1 1) [ref:text]\n#+END_SRC"
-      (let ((element (org-element-current-element (point-max))))
+      (let ((element (org-element-at-point)))
 	(should
 	 (equal (org-element-property :label-fmt element) "[ref:%s]"))))))
 
