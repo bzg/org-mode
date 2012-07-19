@@ -2031,31 +2031,37 @@ ATTR is a string of other attributes of the a element."
   "Limiting dimensions for an embedded image.")
 
 (defun org-odt-do-image-size (probe-method file &optional dpi anchor-type)
-  (setq dpi (or dpi org-export-odt-pixels-per-inch))
-  (setq anchor-type (or anchor-type "paragraph"))
-  (flet ((size-in-cms (size-in-pixels)
-		      (flet ((pixels-to-cms (pixels)
-					    (let* ((cms-per-inch 2.54)
-						   (inches (/ pixels dpi)))
-					      (* cms-per-inch inches))))
-			(and size-in-pixels
-			     (cons (pixels-to-cms (car size-in-pixels))
-				   (pixels-to-cms (cdr size-in-pixels)))))))
+  (let* ((dpi (or dpi org-export-odt-pixels-per-inch))
+	 (anchor-type (or anchor-type "paragraph"))
+	 (--pixels-to-cms
+	  (function
+	   (lambda (pixels dpi)
+	     (let* ((cms-per-inch 2.54)
+		    (inches (/ pixels dpi)))
+	       (* cms-per-inch inches)))))
+	 (--size-in-cms
+	  (function
+	   (lambda (size-in-pixels dpi)
+	     (and size-in-pixels
+		  (cons (funcall --pixels-to-cms (car size-in-pixels) dpi)
+			(funcall --pixels-to-cms (cdr size-in-pixels) dpi)))))))
     (case probe-method
       (emacs
-       (size-in-cms (ignore-errors	; Emacs could be in batch mode
-		      (clear-image-cache)
-		      (image-size (create-image file) 'pixels))))
+       (let ((size-in-pixels
+	      (ignore-errors		; Emacs could be in batch mode
+		(clear-image-cache)
+		(image-size (create-image file) 'pixels))))
+	 (funcall --size-in-cms size-in-pixels dpi)))
       (imagemagick
-       (size-in-cms
-	(let ((dim (shell-command-to-string
-		    (format "identify -format \"%%w:%%h\" \"%s\"" file))))
-	  (when (string-match "\\([0-9]+\\):\\([0-9]+\\)" dim)
-	    (cons (string-to-number (match-string 1 dim))
-		  (string-to-number (match-string 2 dim)))))))
-      (t
-       (cdr (assoc-string anchor-type
-			  org-export-odt-default-image-sizes-alist))))))
+       (let ((size-in-pixels
+	      (let ((dim (shell-command-to-string
+			  (format "identify -format \"%%w:%%h\" \"%s\"" file))))
+		(when (string-match "\\([0-9]+\\):\\([0-9]+\\)" dim)
+		  (cons (string-to-number (match-string 1 dim))
+			(string-to-number (match-string 2 dim)))))))
+	 (funcall --size-in-cms size-in-pixels dpi)))
+      (t (cdr (assoc-string anchor-type
+			    org-export-odt-default-image-sizes-alist))))))
 
 (defun org-odt-image-size-from-file (file &optional user-width
 					  user-height scale dpi embed-as)
