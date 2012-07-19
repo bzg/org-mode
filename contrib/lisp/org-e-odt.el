@@ -111,6 +111,7 @@ structure of the values.")
 (declare-function hfy-face-or-def-to-name "htmlfontify" (fn))
 (declare-function archive-zip-extract "arc-mode.el" (archive name))
 (declare-function org-create-math-formula "org" (latex-frag &optional mathml-file))
+(declare-function browse-url-file-url "browse-url" (file))
 
 
 
@@ -1230,7 +1231,9 @@ original parsed data.  INFO is a plist holding export options."
       (format "<dc:date>%s</dc:date>\n" date)
       (format "<meta:creation-date>%s</meta:creation-date>\n" date)
       (format "<meta:generator>%s</meta:generator>\n"
-	      (concat (and org-export-creator-info org-export-creator-string)))
+	      (let ((creator-info (plist-get info :with-creator)))
+		(if (or (not creator-info) (eq creator-info 'comment)) ""
+		  (plist-get info :creator))))
       (format "<meta:keyword>%s</meta:keyword>\n" keywords)
       (format "<dc:subject>%s</dc:subject>\n" description)
       (format "<dc:title>%s</dc:title>\n" title)
@@ -1730,7 +1733,7 @@ holding contextual information."
 		       (when x
 			 (let ((x (if (org-uuidgen-p x) (concat "ID-" x) x)))
 			   (org-e-odt-format-target
-			    "" (org-solidify-link-text x)))))
+			    "" (org-export-solidify-link-text x)))))
 		     extra-ids "")
 	  ;; Title.
 	  (org-e-odt-format-target full-text id))
@@ -2010,9 +2013,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       (format
        "<text:bookmark-ref text:reference-format=\"%s\" text:ref-name=\"%s\">%s</text:bookmark-ref>"
        xref-format href desc)))
-   (org-lparse-link-description-is-image
-    (format "\n<draw:a xlink:type=\"simple\" xlink:href=\"%s\">\n%s\n</draw:a>"
-	    href desc))
+   ;; (org-lparse-link-description-is-image
+   ;;  (format "\n<draw:a xlink:type=\"simple\" xlink:href=\"%s\">\n%s\n</draw:a>"
+   ;; 	    href desc))
    (t (format "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
 	      href desc))))
 
@@ -2111,7 +2114,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (definition
 	    ;; assign an internal label, if user has not provided one
 	    (setq label (or label (format  "%s-%s" default-category seqno)))
-	    (setq label (org-solidify-link-text label))
+	    (setq label (org-export-solidify-link-text label))
 
 	    (cons
 	     (format-spec
@@ -2124,7 +2127,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	     short-caption))
 	  (reference
 	   (assert label)
-	   (setq label (org-solidify-link-text label))
+	   (setq label (org-export-solidify-link-text label))
 	   (let* ((fmt (cddr (assoc-string label-style org-e-odt-label-styles t)))
 		  (fmt1 (car fmt))
 		  (fmt2 (cadr fmt)))
@@ -3579,9 +3582,9 @@ non-nil."
        (let ((mathml (org-create-math-formula latex-frag)))
 	 (unless mathml (error "No Math formula created"))
 	 (insert mathml)
-	 (or (org-export-push-to-kill-ring
-	      (upcase (symbol-name 'odf)))
-	     (message "Exporting... done")))))))
+	 ;; Add MathML to kill ring, if needed.
+	 (when org-export-copy-to-kill-ring
+	   (org-kill-new (buffer-string))))))))
 
 ;;;###autoload
 (defun org-e-odt-export-as-odf-and-open ()
