@@ -31,6 +31,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-compat)
 (require 'comint)
 (eval-when-compile (require 'cl))
 (declare-function with-parsed-tramp-file-name "tramp" (filename var &rest body))
@@ -74,7 +75,7 @@ or user `keyboard-quit' during execution of body."
 	(full-body (cadr (cdr (cdr meta)))))
     `(org-babel-comint-in-buffer ,buffer
        (let ((string-buffer "") dangling-text raw)
-	 (flet ((my-filt (text)
+	 (org-flet ((my-filt (text)
 			 (setq string-buffer (concat string-buffer text))))
 	   ;; setup filter
 	   (add-hook 'comint-output-filter-functions 'my-filt)

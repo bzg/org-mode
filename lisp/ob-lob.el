@@ -97,7 +97,7 @@ if so then run the appropriate source block from the Library."
 ;;;###autoload
 (defun org-babel-lob-get-info ()
   "Return a Library of Babel function call as a string."
-  (flet ((nonempty (a b)
+  (org-flet ((nonempty (a b)
 		   (let ((it (match-string a)))
 		     (if (= (length it) 0) (match-string b) it))))
     (let ((case-fold-search t))
@@ -119,7 +119,7 @@ if so then run the appropriate source block from the Library."
 
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."
-  (flet ((mkinfo (p) (list "emacs-lisp" "results" p nil nil (nth 2 info))))
+  (org-flet ((mkinfo (p) (list "emacs-lisp" "results" p nil nil (nth 2 info))))
     (let* ((pre-params (org-babel-merge-params
 			org-babel-default-header-args
 			(org-babel-params-from-properties)

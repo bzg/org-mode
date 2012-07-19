@@ -269,7 +269,7 @@ after the current heading."
 
 For the acceptable UNITS, see `org-timestamp-change'."
   (interactive)
-  (flet ((org-read-date (&rest rest) (current-time)))
+  (org-flet ((org-read-date (&rest rest) (current-time)))
      (org-time-stamp nil))
   (when shift
     (org-timestamp-change shift units)))
@@ -375,7 +375,7 @@ nor a function, elements of KEYWORDS are used directly."
 
 (defun org-mouse-set-priority (priority)
   "Set the priority of the current headline to PRIORITY."
-  (flet ((read-char-exclusive () priority))
+  (org-flet ((read-char-exclusive () priority))
     (org-priority)))
 
 (defvar org-mouse-priority-regexp "\\[#\\([A-Z]\\)\\]"
@@ -532,7 +532,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      ,@(org-mouse-keyword-menu
 	(mapcar 'car org-agenda-custom-commands)
 	#'(lambda (key)
-	   (eval `(flet ((read-char-exclusive () (string-to-char ,key)))
+	   (eval `(org-flet ((read-char-exclusive () (string-to-char ,key)))
 		      (org-agenda nil))))
 	nil
 	#'(lambda (key)
@@ -625,7 +625,7 @@ This means, between the beginning of line and the point."
 (defun org-mouse-context-menu (&optional event)
   (let ((stamp-prefixes (list org-deadline-string org-scheduled-string))
 	(contextlist (org-context)))
-    (flet ((get-context (context) (org-mouse-get-context contextlist context)))
+    (org-flet ((get-context (context) (org-mouse-get-context contextlist context)))
   (cond
    ((org-mouse-mark-active)
     (let ((region-string (buffer-substring (region-beginning) (region-end))))

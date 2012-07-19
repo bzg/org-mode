@@ -222,7 +222,7 @@ to \"0:-1\"."
 	    (length (length lis))
             (portion (match-string 1 index))
             (remainder (substring index (match-end 0))))
-        (flet ((wrap (num) (if (< num 0) (+ length num) num))
+        (org-flet ((wrap (num) (if (< num 0) (+ length num) num))
                (open (ls) (if (and (listp ls) (= (length ls) 1)) (car ls) ls)))
           (open
            (mapcar

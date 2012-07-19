@@ -33,6 +33,7 @@
 ;;; Code:
 (require 'ob)
 (require 'ob-eval)
+(require 'org-compat)
 (eval-when-compile (require 'cl))
 
 (declare-function org-babel-ref-resolve "ob-ref" (ref))
@@ -96,7 +97,7 @@ called by `org-babel-execute-src-block'"
 
 (defun org-babel-awk-var-to-awk (var &optional sep)
   "Return a printed value of VAR suitable for parsing with awk."
-  (flet ((echo-var (v) (if (stringp v) v (format "%S" v))))
+  (org-flet ((echo-var (v) (if (stringp v) v (format "%S" v))))
     (cond
      ((and (listp var) (listp (car var)))
       (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt #'echo-var)))

@@ -2734,7 +2734,7 @@ INDENT was the original indentation of the block."
 	      (setq rtn (org-export-number-lines rtn 0 0 num cont rpllbl fmt))
 	      (cond
 	       ((and lang org-export-latex-listings)
-		(flet ((make-option-string
+		(org-flet ((make-option-string
 			(pair)
 			(concat (first pair)
 				(if (> (length (second pair)) 0)

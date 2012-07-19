@@ -219,7 +219,7 @@ org-mode text."
 (defun org-babel-exp-do-export (info type &optional hash)
   "Return a string with the exported content of a code block.
 The function respects the value of the :exports header argument."
-  (flet ((silently () (let ((session (cdr (assoc :session (nth 2 info)))))
+  (org-flet ((silently () (let ((session (cdr (assoc :session (nth 2 info)))))
 			(when (not (and session (equal "none" session)))
 			  (org-babel-exp-results info type 'silent))))
 	 (clean () (unless (eq type 'inline) (org-babel-remove-result info))))

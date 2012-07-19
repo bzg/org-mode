@@ -58,7 +58,8 @@
      (if (or (> emacs-major-version 23)
 	     (and (>= emacs-major-version 23)
 		  (>= emacs-minor-version 2)))
-	 `(with-no-warnings (called-interactively-p ,kind)) ;; defined with no argument in <=23.1
+	 ;; defined with no argument in <=23.1
+	 `(with-no-warnings (called-interactively-p ,kind))
        `(interactive-p))))
 (def-edebug-spec org-called-interactively-p (&optional ("quote" symbolp)))
 

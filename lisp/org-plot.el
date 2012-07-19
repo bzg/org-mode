@@ -160,7 +160,7 @@ and dependant variables."
     (with-temp-file data-file
       (let ((num-rows (length table)) (num-cols (length (first table)))
 	    front-edge back-edge)
-	(flet ((gnuplot-row (col row value)
+	(org-flet ((gnuplot-row (col row value)
 			    (setf col (+ 1 col)) (setf row (+ 1 row))
 			    (format "%f  %f  %f\n%f  %f  %f\n"
 				    col (- row 0.5) value ;; lower edge
@@ -209,7 +209,7 @@ manner suitable for prepending to a user-specified script."
 		     ('3d "splot")
 		     ('grid "splot")))
 	 (script "reset") plot-lines)
-    (flet ((add-to-script (line) (setf script (format "%s\n%s" script line))))
+    (org-flet ((add-to-script (line) (setf script (format "%s\n%s" script line))))
       (when file ;; output file
 	(add-to-script (format "set term %s" (file-name-extension file)))
 	(add-to-script (format "set output '%s'" file)))

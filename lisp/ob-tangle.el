@@ -142,7 +142,7 @@ This function exports the source code using
 `org-babel-tangle' and then loads the resulting file using
 `load-file'."
   (interactive "fFile to load: ")
-  (flet ((age (file)
+  (org-flet ((age (file)
               (float-time
                (time-subtract (current-time)
                               (nth 5 (or (file-attributes (file-truename file))
@@ -221,7 +221,7 @@ exported source code blocks by language."
                 she-banged)
            (mapc
             (lambda (spec)
-              (flet ((get-spec (name)
+              (org-flet ((get-spec (name)
                                (cdr (assoc name (nth 4 spec)))))
                 (let* ((tangle (get-spec :tangle))
                        (she-bang ((lambda (sheb) (when (> (length sheb) 0) sheb))
@@ -412,7 +412,7 @@ form
 				       (if (stringp le) le (format "%S" le)))
 				     (eval el))))
 			    '(start-line file link source-name))))
-    (flet ((insert-comment (text)
+    (org-flet ((insert-comment (text)
             (when (and comments (not (string= comments "no"))
 		       (> (length text) 0))
 	      (when padline (insert "\n"))

@@ -170,7 +170,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 	  (types '())
 	  matched indentation type func
 	  start end body headers preserve-indent progress-marker)
-      (flet ((interblock (start end)
+      (org-flet ((interblock (start end)
 			 (mapcar (lambda (pair) (funcall (second pair) start end))
 				 org-export-interblocks)))
 	(goto-char (point-min))

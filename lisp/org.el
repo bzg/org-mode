@@ -14342,7 +14342,7 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 			       (assoc property org-global-properties)
 			       (assoc property org-global-properties-fixed))))
 	      val)
-	  (flet ((ap (key)
+	  (org-flet ((ap (key)
 		     (when (re-search-forward
 			    (org-re-property key) (cdr range) t)
 		       (setq props
@@ -20787,7 +20787,7 @@ the functionality can be provided as a fall-back.")
 		       (throw 'exit nil))))))
 	     ;; Use `fill-paragraph' with buffer narrowed to item
 	     ;; without any child, and with our computed PREFIX.
-	     (flet ((fill-context-prefix (from to &optional flr) prefix))
+	     (org-flet ((fill-context-prefix (from to &optional flr) prefix))
 	       (save-restriction
 		 (narrow-to-region beg end)
 		 (save-excursion (fill-paragraph justify)))) t))
@@ -20858,7 +20858,7 @@ the functionality can be provided as a fall-back.")
       (cond ((setq itemp (org-in-item-p))
 	     (progn
 	       (setq prefix (make-string (org-list-item-body-column itemp) ?\ ))
-	       (flet ((fill-context-prefix (from to &optional flr) prefix))
+	       (org-flet ((fill-context-prefix (from to &optional flr) prefix))
 		 (do-auto-fill))))
 	    (orgstruct-is-++
 	     (org-let org-fb-vars
