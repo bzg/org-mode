@@ -894,7 +894,7 @@ value."
 ;;;###autoload
 (defun org-e-beamer-export-as-latex
   (&optional subtreep visible-only body-only ext-plist)
-  "Export current buffer as a Beamer presentation.
+  "Export current buffer as a Beamer buffer.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
@@ -962,7 +962,7 @@ Return output file's name."
 ;;;###autoload
 (defun org-e-beamer-export-to-pdf
   (&optional subtreep visible-only body-only ext-plist pub-dir)
-  "Export current buffer as a BEAMER presentation (pdf).
+  "Export current buffer as a BEAMER presentation (PDF).
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
