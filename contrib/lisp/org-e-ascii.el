@@ -1728,6 +1728,43 @@ For any other back-end, HEADLINE is returned as-is."
 
 ;;; Interactive function
 
+;;;###autoload
+(defun org-e-ascii-export-as-ascii
+  (&optional subtreep visible-only body-only ext-plist)
+  "Export current buffer to a text buffer.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+When optional argument BODY-ONLY is non-nil, strip title, table
+of contents and footnote definitions from output.
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+When optional argument PUB-DIR is set, use it as the publishing
+directory.
+
+Return output file's name."
+  (interactive)
+  (let ((outbuf (org-export-to-buffer
+		 'e-ascii "*Org E-ASCII Export*"
+		 subtreep visible-only body-only ext-plist)))
+    (with-current-buffer outbuf (text-mode))
+    (when org-export-show-temporary-export-buffer
+      (switch-to-buffer-other-window outbuf))))
+
+;;;###autoload
 (defun org-e-ascii-export-to-ascii
   (&optional subtreep visible-only body-only ext-plist pub-dir)
   "Export current buffer to a text file.

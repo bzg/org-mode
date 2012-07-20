@@ -2496,6 +2496,42 @@ contextual information."
 
 ;;; Interactive functions
 
+;;;###autoload
+(defun org-e-latex-export-as-latex
+  (&optional subtreep visible-only body-only ext-plist)
+  "Export current buffer as a LaTeX buffer.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+When optional argument BODY-ONLY is non-nil, only write code
+between \"\\begin{document}\" and \"\\end{document}\".
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+Export is done in a buffer named \"*Org E-LATEX Export*\", which
+will be displayed when `org-export-show-temporary-export-buffer'
+is non-nil."
+  (interactive)
+  (let ((outbuf (org-export-to-buffer
+		 'e-latex "*Org E-LATEX Export*"
+		 subtreep visible-only body-only ext-plist)))
+    (with-current-buffer outbuf (LaTeX-mode))
+    (when org-export-show-temporary-export-buffer
+      (switch-to-buffer-other-window outbuf))))
+
+;;;###autoload
 (defun org-e-latex-export-to-latex
   (&optional subtreep visible-only body-only ext-plist pub-dir)
   "Export current buffer to a LaTeX file.
@@ -2528,6 +2564,7 @@ Return output file's name."
     (org-export-to-file
      'e-latex outfile subtreep visible-only body-only ext-plist)))
 
+;;;###autoload
 (defun org-e-latex-export-to-pdf
   (&optional subtreep visible-only body-only ext-plist pub-dir)
   "Export current buffer to LaTeX then process through to PDF.
@@ -2596,7 +2633,7 @@ Return PDF file name or an error if it couldn't be produced."
 		  outbuf))
 	       org-e-latex-pdf-process)
 	      ;; Collect standard errors from output buffer.
-	      (setq errors (org-e-latex-collect-errors outbuf))))
+	      (setq errors (org-e-latex--collect-errors outbuf))))
 	   (t (error "No valid command to process to PDF")))
 	  (let ((pdffile (concat base ".pdf")))
 	    ;; Check for process failure.  Provide collected errors if
@@ -2617,7 +2654,7 @@ Return PDF file name or an error if it couldn't be produced."
 	    pdffile))
       (set-window-configuration wconfig))))
 
-(defun org-e-latex-collect-errors (buffer)
+(defun org-e-latex--collect-errors (buffer)
   "Collect some kind of errors from \"pdflatex\" command output.
 
 BUFFER is the buffer containing output.

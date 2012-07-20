@@ -915,9 +915,9 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-Export is done in a buffer named \"*Org E-BEAMER Export*\".  It
-will be displayed if `org-export-show-temporary-export-buffer' is
-non-nil."
+Export is done in a buffer named \"*Org E-BEAMER Export*\", which
+will be displayed when `org-export-show-temporary-export-buffer'
+is non-nil."
   (interactive)
   (let ((outbuf (org-export-to-buffer
 		 'e-beamer "*Org E-BEAMER Export*"

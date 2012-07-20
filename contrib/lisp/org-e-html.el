@@ -3065,6 +3065,46 @@ contextual information."
 ;;; Interactive functions
 
 ;;;###autoload
+(defun org-e-html-export-as-html
+  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  "Export current buffer to an HTML buffer.
+
+If narrowing is active in the current buffer, only export its
+narrowed part.
+
+If a region is active, export that region.
+
+When optional argument SUBTREEP is non-nil, export the sub-tree
+at point, extracting information from the headline properties
+first.
+
+When optional argument VISIBLE-ONLY is non-nil, don't export
+contents of hidden elements.
+
+When optional argument BODY-ONLY is non-nil, only write code
+between \"<body>\" and \"</body>\" tags.
+
+EXT-PLIST, when provided, is a property list with external
+parameters overriding Org default settings, but still inferior to
+file-local settings.
+
+When optional argument PUB-DIR is set, use it as the publishing
+directory.
+
+Export is done in a buffer named \"*Org E-HTML Export*\", which
+will be displayed when `org-export-show-temporary-export-buffer'
+is non-nil."
+  (interactive)
+  (let ((outbuf
+	 (org-export-to-buffer
+	  'e-html "*Org E-HTML Export*"
+	  subtreep visible-only body-only ext-plist)))
+    ;; Set major mode.
+    (with-current-buffer outbuf (nxml-mode))
+    (when org-export-show-temporary-export-buffer
+      (switch-to-buffer-other-window outbuf))))
+
+;;;###autoload
 (defun org-e-html-export-to-html
   (&optional subtreep visible-only body-only ext-plist pub-dir)
   "Export current buffer to a HTML file.
@@ -3082,7 +3122,7 @@ When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
 When optional argument BODY-ONLY is non-nil, only write code
-between \"\\begin{document}\" and \"\\end{document}\".
+between \"<body>\" and \"</body>\" tags.
 
 EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to

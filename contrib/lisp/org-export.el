@@ -4145,28 +4145,16 @@ Return an error if key pressed has no associated command."
       (?q nil)
       ;; Export with `e-ascii' back-end.
       ((?A ?N ?U)
-       (let ((outbuf
-	      (org-export-to-buffer
-	       'e-ascii "*Org E-ASCII Export*"
-	       (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)
-	       `(:ascii-charset
-		 ,(case raw-key (?A 'ascii) (?N 'latin1) (t 'utf-8))))))
-	 (with-current-buffer outbuf (text-mode))
-	 (when org-export-show-temporary-export-buffer
-	   (switch-to-buffer-other-window outbuf))))
+       (org-e-ascii-export-as-ascii
+	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)
+	`(:ascii-charset ,(case raw-key (?A 'ascii) (?N 'latin1) (t 'utf-8)))))
       ((?a ?n ?u)
        (org-e-ascii-export-to-ascii
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)
 	`(:ascii-charset ,(case raw-key (?a 'ascii) (?n 'latin1) (t 'utf-8)))))
       ;; Export with `e-latex' back-end.
-      (?L
-       (let ((outbuf
-	      (org-export-to-buffer
-	       'e-latex "*Org E-LaTeX Export*"
-	       (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
-	 (with-current-buffer outbuf (latex-mode))
-	 (when org-export-show-temporary-export-buffer
-	   (switch-to-buffer-other-window outbuf))))
+      (?L (org-e-latex-export-as-latex
+	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?l
        (org-e-latex-export-to-latex
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
@@ -4179,14 +4167,8 @@ Return an error if key pressed has no associated command."
 	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
       ;; Export with `e-html' back-end.
       (?H
-       (let ((outbuf
-	      (org-export-to-buffer
-	       'e-html "*Org E-HTML Export*"
-	       (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
-	 ;; set major mode
-	 (with-current-buffer outbuf (nxml-mode))
-	 (when org-export-show-temporary-export-buffer
-	   (switch-to-buffer-other-window outbuf))))
+       (org-e-html-export-as-html
+	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
       (?h
        (org-e-html-export-to-html
 	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
