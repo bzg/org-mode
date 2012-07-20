@@ -74,7 +74,7 @@
 		      ((listp res) (error "calc error \"%s\" on input \"%s\""
 					  (cadr res) line))
 		      (t (replace-regexp-in-string
-			  "'\\[" "["
+			  "'" ""
 			  (calc-eval
 			   (math-evaluate-expr
 			    ;; resolve user variables, calc built in
