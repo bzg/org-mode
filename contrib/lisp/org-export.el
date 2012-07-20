@@ -104,10 +104,17 @@
 (eval-when-compile (require 'cl))
 (require 'org-element)
 
+
+(declare-function org-e-ascii-export-as-ascii "org-e-ascii"
+		  (&optional subtreep visible-only body-only ext-plist))
 (declare-function org-e-ascii-export-to-ascii "org-e-ascii"
+		  (&optional subtreep visible-only body-only ext-plist pub-dir))
+(declare-function org-e-html-export-as-html "org-e-html"
 		  (&optional subtreep visible-only body-only ext-plist pub-dir))
 (declare-function org-e-html-export-to-html "org-e-html"
 		  (&optional subtreep visible-only body-only ext-plist pub-dir))
+(declare-function org-e-latex-export-as-latex "org-e-latex"
+		  (&optional subtreep visible-only body-only ext-plist))
 (declare-function org-e-latex-export-to-latex "org-e-latex"
 		  (&optional subtreep visible-only body-only ext-plist pub-dir))
 (declare-function org-e-latex-export-to-pdf "org-e-latex"
