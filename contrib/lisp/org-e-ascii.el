@@ -1100,16 +1100,8 @@ holding contextual information."
   "Transcode an HORIZONTAL-RULE  object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((attr
-	 (read
-	  (format
-	   "(%s)"
-	   (mapconcat
-	    #'identity
-	    (org-element-property :attr_ascii horizontal-rule)
-	    " ")))))
-    (make-string (or (and (wholenump (plist-get attr :width))
-			  (plist-get attr :width))
+  (let ((width (org-export-read-attribte :attr_ascii horizontal-rule :width)))
+    (make-string (or (and (wholenump width) width)
 		     (org-e-ascii--current-text-width horizontal-rule info))
 		 (if (eq (plist-get info :ascii-charset) 'utf-8) ?― ?-))))
 

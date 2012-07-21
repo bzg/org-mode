@@ -2706,14 +2706,20 @@ file should have."
 ;;  as a plist.  It can be used to normalize affiliated keywords'
 ;;  syntax.
 
-(defun org-export-read-attribute (attribute element)
+(defun org-export-read-attribute (attribute element &optional property)
   "Turn ATTRIBUTE property from ELEMENT into a plist.
+
+When optional argument PROPERTY is non-nil, return the value of
+that property within attributes.
+
 This function assumes attributes are defined as \":keyword
 value\" pairs.  It is appropriate for `:attr_html' like
 properties."
-  (let ((value (org-element-property attribute element)))
-    (and value
-	 (read (format "(%s)" (mapconcat 'identity value " "))))))
+  (let ((attributes
+	 (let ((value (org-element-property attribute element)))
+	   (and value
+		(read (format "(%s)" (mapconcat 'identity value " ")))))))
+    (if property (plist-get attributes property) attributes)))
 
 
 ;;;; For Export Snippets
