@@ -172,11 +172,9 @@ BEHAVIOUR determine how Org should handle multiple keywords for
 
 KEYWORD and OPTION have precedence over DEFAULT.
 
-All these properties should be back-end agnostic.  For back-end
-specific properties, define a similar variable named
-`org-BACKEND-options-alist', replacing BACKEND with the name of
-the appropriate back-end.  You can also redefine properties
-there, as they have precedence over these.")
+All these properties should be back-end agnostic.  Back-end
+specific properties are set through `org-export-define-backend'.
+Properties redefined there have precedence over these.")
 
 (defconst org-export-special-keywords
   '("SETUP_FILE" "OPTIONS" "MACRO")
@@ -248,9 +246,8 @@ variable defining initial filters.
 
 This list is meant to install user specified filters.  Back-end
 developers may install their own filters using
-`org-BACKEND-filters-alist', where BACKEND is the name of the
-considered back-end.  Filters defined there will always be
-prepended to the current list, so they always get applied
+`org-export-define-backend'.  Filters defined there will always
+be prepended to the current list, so they always get applied
 first.")
 
 (defconst org-export-default-inline-image-rule
