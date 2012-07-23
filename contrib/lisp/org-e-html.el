@@ -3066,7 +3066,7 @@ contextual information."
 
 ;;;###autoload
 (defun org-e-html-export-as-html
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to an HTML buffer.
 
 If narrowing is active in the current buffer, only export its
@@ -3087,9 +3087,6 @@ between \"<body>\" and \"</body>\" tags.
 EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
-
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
 
 Export is done in a buffer named \"*Org E-HTML Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
