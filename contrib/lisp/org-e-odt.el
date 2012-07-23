@@ -34,13 +34,10 @@
 ;;; Define Back-End
 
 (org-export-define-backend e-odt
-  ((babel-call . org-e-odt-babel-call)
-   (bold . org-e-odt-bold)
+  ((bold . org-e-odt-bold)
    (center-block . org-e-odt-center-block)
    (clock . org-e-odt-clock)
    (code . org-e-odt-code)
-   (comment . org-e-odt-comment)
-   (comment-block . org-e-odt-comment-block)
    (drawer . org-e-odt-drawer)
    (dynamic-block . org-e-odt-dynamic-block)
    (entity . org-e-odt-entity)
@@ -52,7 +49,6 @@
    (footnote-reference . org-e-odt-footnote-reference)
    (headline . org-e-odt-headline)
    (horizontal-rule . org-e-odt-horizontal-rule)
-   (inline-babel-call . org-e-odt-inline-babel-call)
    (inline-src-block . org-e-odt-inline-src-block)
    (inlinetask . org-e-odt-inlinetask)
    (italic . org-e-odt-italic)

@@ -48,13 +48,10 @@
 ;; control blank lines separating them in output string.
 
 (org-export-define-backend e-ascii
-  ((babel-call . org-e-ascii-babel-call)
-   (bold . org-e-ascii-bold)
+  ((bold . org-e-ascii-bold)
    (center-block . org-e-ascii-center-block)
    (clock . org-e-ascii-clock)
    (code . org-e-ascii-code)
-   (comment . org-e-ascii-comment)
-   (comment-block . org-e-ascii-comment-block)
    (drawer . org-e-ascii-drawer)
    (dynamic-block . org-e-ascii-dynamic-block)
    (entity . org-e-ascii-entity)
@@ -66,7 +63,6 @@
    (footnote-reference . org-e-ascii-footnote-reference)
    (headline . org-e-ascii-headline)
    (horizontal-rule . org-e-ascii-horizontal-rule)
-   (inline-babel-call . org-e-ascii-inline-babel-call)
    (inline-src-block . org-e-ascii-inline-src-block)
    (inlinetask . org-e-ascii-inlinetask)
    (italic . org-e-ascii-italic)
@@ -81,7 +77,6 @@
    (plain-list . org-e-ascii-plain-list)
    (plain-text . org-e-ascii-plain-text)
    (planning . org-e-ascii-planning)
-   (property-drawer . org-e-ascii-property-drawer)
    (quote-block . org-e-ascii-quote-block)
    (quote-section . org-e-ascii-quote-section)
    (radio-target . org-e-ascii-radio-target)

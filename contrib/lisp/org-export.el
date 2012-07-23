@@ -757,13 +757,10 @@ keywords are understood:
 As an example, here is how the `e-ascii' back-end is defined:
 
 \(org-export-define-backend e-ascii
-  \((babel-call . org-e-ascii-babel-call)
-   \(bold . org-e-ascii-bold)
+  \((bold . org-e-ascii-bold)
    \(center-block . org-e-ascii-center-block)
    \(clock . org-e-ascii-clock)
    \(code . org-e-ascii-code)
-   \(comment . org-e-ascii-comment)
-   \(comment-block . org-e-ascii-comment-block)
    \(drawer . org-e-ascii-drawer)
    \(dynamic-block . org-e-ascii-dynamic-block)
    \(entity . org-e-ascii-entity)
@@ -775,7 +772,6 @@ As an example, here is how the `e-ascii' back-end is defined:
    \(footnote-reference . org-e-ascii-footnote-reference)
    \(headline . org-e-ascii-headline)
    \(horizontal-rule . org-e-ascii-horizontal-rule)
-   \(inline-babel-call . org-e-ascii-inline-babel-call)
    \(inline-src-block . org-e-ascii-inline-src-block)
    \(inlinetask . org-e-ascii-inlinetask)
    \(italic . org-e-ascii-italic)

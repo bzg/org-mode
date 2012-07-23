@@ -52,13 +52,10 @@
 ;;; Define Back-End
 
 (org-export-define-backend e-html
-  ((babel-call . org-e-html-babel-call)
-   (bold . org-e-html-bold)
+  ((bold . org-e-html-bold)
    (center-block . org-e-html-center-block)
    (clock . org-e-html-clock)
    (code . org-e-html-code)
-   (comment . org-e-html-comment)
-   (comment-block . org-e-html-comment-block)
    (drawer . org-e-html-drawer)
    (dynamic-block . org-e-html-dynamic-block)
    (entity . org-e-html-entity)
@@ -70,7 +67,6 @@
    (footnote-reference . org-e-html-footnote-reference)
    (headline . org-e-html-headline)
    (horizontal-rule . org-e-html-horizontal-rule)
-   (inline-babel-call . org-e-html-inline-babel-call)
    (inline-src-block . org-e-html-inline-src-block)
    (inlinetask . org-e-html-inlinetask)
    (italic . org-e-html-italic)
