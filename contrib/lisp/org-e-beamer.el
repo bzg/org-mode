@@ -256,6 +256,7 @@ brackets.  Return overlay specification, as a string, or nil."
 ;;; Define Back-End
 
 (org-export-define-derived-backend e-beamer e-latex
+  :export-block "BEAMER"
   :options-alist
   ((:beamer-theme "BEAMER_THEME" nil org-e-beamer-theme)
    (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)

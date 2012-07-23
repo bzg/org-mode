@@ -861,21 +861,33 @@ the parent back-end.
 BODY can start with pre-defined keyword arguments.  The following
 keywords are understood:
 
-  `:filters-alist'
+  :export-block
+
+    String, or list of strings, representing block names that
+    will not be parsed.  This is used to specify blocks that will
+    contain raw code specific to the back-end.  These blocks
+    still have to be handled by the relative `export-block' type
+    translator.
+
+  :filters-alist
 
     Alist of filters that will overwrite or complete filters
-    defined in PARENT back-end, if any.
+    defined in PARENT back-end.  See `org-export-filters-alist'
+    for more a list of allowed filters.
 
-  `:options-alist'
+  :options-alist
 
-    Alist of buffer keywords or #+OPTIONS items that will
-    overwrite or complete those defined in PARENT back-end, if
-    any.
+    Alist of back-end specific properties that will overwrite or
+    complete those defined in PARENT back-end.  Refer to
+    `org-export-options-alist' for more information about
+    structure of the values.
 
-  `:translate-alist'
+  :translate-alist
 
     Alist of element and object types and transcoders that will
     overwrite or complete transcode table from PARENT back-end.
+    Refer to `org-export-define-backend' for detailed information
+    about transcoders.
 
 As an example, here is how one could define \"my-latex\" back-end
 as a variant of `e-latex' back-end with a custom template
@@ -886,17 +898,28 @@ function:
 
 The back-end could then be called with, for example:
 
-  \(org-export-to-buffer 'my-latex \"*Test my-latex\")"
-  (declare (debug (&define name symbolp [&rest keywordp sexp] def-body))
+  \(org-export-to-buffer 'my-latex \"*Test my-latex*\")"
+  (declare (debug (&define name sexp [&rest [keywordp sexp]] def-body))
 	   (indent 2))
   (let (filters options translate)
     (while (keywordp (car body))
       (case (pop body)
+	(:export-block (let ((names (pop body)))
+			 (setq export-block
+			       (if (consp names) (mapcar 'upcase names)
+				 (list (upcase names))))))
         (:filters-alist (setq filters (pop body)))
         (:options-alist (setq options (pop body)))
         (:translate-alist (setq translate (pop body)))
         (t (pop body))))
     `(progn
+       ;; Tell parser to not parse EXPORT-BLOCK blocks.
+       ,(when export-block
+	  `(mapc
+	    (lambda (name)
+	      (add-to-list 'org-element-block-name-alist
+			   `(,name . org-element-export-block-parser)))
+	    ',export-block))
        ;; Define filters.
        ,(let ((parent-filters (intern (format "org-%s-filters-alist" parent))))
 	  (when (or (boundp parent-filters) filters)
@@ -913,9 +936,10 @@ See `org-export-filters-alist' for more information.")))
 	       ',(append options
 			 (and (boundp parent-options)
 			      (copy-sequence (symbol-value parent-options))))
-	       "Alist between LaTeX export properties and ways to set them.
+	       ,(format "Alist between %s export properties and ways to set them.
 See `org-export-options-alist' for more information on the
-structure of the values.")))
+structure of the values."
+			child))))
        ;; Define translators.
        (defvar ,(intern (format "org-%s-translate-alist" child))
 	 ',(append translate
@@ -1992,9 +2016,10 @@ Any element in `:ignore-list' will be skipped when using
 ;; a plist, is required as the third argument.
 ;;
 ;; From the developer side, filters sets can be installed in the
-;; process with the help of `org-BACKEND-filters-alist' variable.
-;; Each association has a key among the following symbols and
-;; a function or a list of functions as value.
+;; process with the help of `org-export-define-backend', which
+;; internally sets `org-BACKEND-filters-alist' variable.  Each
+;; association has a key among the following symbols and a function or
+;; a list of functions as value.
 ;;
 ;; - `:filter-parse-tree' applies directly on the complete parsed
 ;;   tree.  It's the only filters set that doesn't apply to a string.
