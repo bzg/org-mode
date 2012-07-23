@@ -47,53 +47,23 @@
 ;; The core function is `org-export-as'.  It returns the transcoded
 ;; buffer as a string.
 ;;
-;; A back-end is defined through one mandatory variable: his
-;; translation table.  Its name is always
-;; `org-BACKEND-translate-alist' where BACKEND stands for the name
-;; chosen for the back-end.  Its value is an alist whose keys are
-;; elements and objects types and values translator functions.
+;; An export back-end is defined with `org-export-define-backend',
+;; which sets one mandatory variable: his translation table.  Its name
+;; is always `org-BACKEND-translate-alist' where BACKEND stands for
+;; the name chosen for the back-end.  Its value is an alist whose keys
+;; are elements and objects types and values translator functions.
+;; See function's docstring for more information about translators.
 ;;
-;; These functions should return a string without any trailing space,
-;; or nil.  They must accept three arguments: the object or element
-;; itself, its contents or nil when it isn't recursive and the
-;; property list used as a communication channel.
-;;
-;; Contents, when not nil, are stripped from any global indentation
-;; (although the relative one is preserved).  They also always end
-;; with a single newline character.
-;;
-;; If, for a given type, no function is found, that element or object
-;; type will simply be ignored, along with any blank line or white
-;; space at its end.  The same will happen if the function returns the
-;; nil value.  If that function returns the empty string, the type
-;; will be ignored, but the blank lines or white spaces will be kept.
-;;
-;; In addition to element and object types, one function can be
-;; associated to the `template' symbol and another one to the
-;; `plain-text' symbol.
-;;
-;; The former returns the final transcoded string, and can be used to
-;; add a preamble and a postamble to document's body.  It must accept
-;; two arguments: the transcoded string and the property list
-;; containing export options.
-;;
-;; The latter, when defined, is to be called on every text not
-;; recognized as an element or an object.  It must accept two
-;; arguments: the text string and the information channel.  It is an
-;; appropriate place to protect special chars relative to the
-;; back-end.
-;;
-;; Optionally, a back-end can support specific buffer keywords and
-;; OPTION keyword's items by setting `org-BACKEND-filters-alist'
-;; variable.  Refer to `org-export-options-alist' documentation for
-;; more information about its value.
+;; Optionally, `org-export-define-backend' can also support specific
+;; buffer keywords, OPTION keyword's items and filters.  Also refer to
+;; function documentation for more information.
 ;;
 ;; If the new back-end shares most properties with another one,
 ;; `org-export-define-derived-backend' can be used to simplify the
 ;; process.
 ;;
 ;; Any back-end can define its own variables.  Among them, those
-;; customizables should belong to the `org-export-BACKEND' group.
+;; customizable should belong to the `org-export-BACKEND' group.
 ;;
 ;; Tools for common tasks across back-ends are implemented in the
 ;; penultimate part of this file.  A dispatcher for standard back-ends
@@ -722,6 +692,165 @@ standard mode."
 
 
 ;;; Defining New Back-ends
+
+(defmacro org-export-define-backend (backend translators &rest body)
+  "Define a new back-end BACKEND.
+
+TRANSLATORS is an alist between object or element types and
+functions handling them.
+
+These functions should return a string without any trailing
+space, or nil.  They must accept three arguments: the object or
+element itself, its contents or nil when it isn't recursive and
+the property list used as a communication channel.
+
+Contents, when not nil, are stripped from any global indentation
+\(although the relative one is preserved).  They also always end
+with a single newline character.
+
+If, for a given type, no function is found, that element or
+object type will simply be ignored, along with any blank line or
+white space at its end.  The same will happen if the function
+returns the nil value.  If that function returns the empty
+string, the type will be ignored, but the blank lines or white
+spaces will be kept.
+
+In addition to element and object types, one function can be
+associated to the `template' symbol and another one to the
+`plain-text' symbol.
+
+The former returns the final transcoded string, and can be used
+to add a preamble and a postamble to document's body.  It must
+accept two arguments: the transcoded string and the property list
+containing export options.
+
+The latter, when defined, is to be called on every text not
+recognized as an element or an object.  It must accept two
+arguments: the text string and the information channel.  It is an
+appropriate place to protect special chars relative to the
+back-end.
+
+BODY can start with pre-defined keyword arguments.  The following
+keywords are understood:
+
+  :export-block
+
+    String, or list of strings, representing block names that
+    will not be parsed.  This is used to specify blocks that will
+    contain raw code specific to the back-end.  These blocks
+    still have to be handled by the relative `export-block' type
+    translator.
+
+  :filters-alist
+
+    Alist between filters and function, or list of functions,
+    specific to the back-end.  See `org-export-filters-alist' for
+    a list of all allowed filters.
+
+  :options-alist
+
+    Alist between back-end specific properties introduced in
+    communication channel and how their value are acquired.  See
+    `org-export-options-alist' for more information about
+    structure of the values.
+
+As an example, here is how the `e-ascii' back-end is defined:
+
+\(org-export-define-backend e-ascii
+  \((babel-call . org-e-ascii-babel-call)
+   \(bold . org-e-ascii-bold)
+   \(center-block . org-e-ascii-center-block)
+   \(clock . org-e-ascii-clock)
+   \(code . org-e-ascii-code)
+   \(comment . org-e-ascii-comment)
+   \(comment-block . org-e-ascii-comment-block)
+   \(drawer . org-e-ascii-drawer)
+   \(dynamic-block . org-e-ascii-dynamic-block)
+   \(entity . org-e-ascii-entity)
+   \(example-block . org-e-ascii-example-block)
+   \(export-block . org-e-ascii-export-block)
+   \(export-snippet . org-e-ascii-export-snippet)
+   \(fixed-width . org-e-ascii-fixed-width)
+   \(footnote-definition . org-e-ascii-footnote-definition)
+   \(footnote-reference . org-e-ascii-footnote-reference)
+   \(headline . org-e-ascii-headline)
+   \(horizontal-rule . org-e-ascii-horizontal-rule)
+   \(inline-babel-call . org-e-ascii-inline-babel-call)
+   \(inline-src-block . org-e-ascii-inline-src-block)
+   \(inlinetask . org-e-ascii-inlinetask)
+   \(italic . org-e-ascii-italic)
+   \(item . org-e-ascii-item)
+   \(keyword . org-e-ascii-keyword)
+   \(latex-environment . org-e-ascii-latex-environment)
+   \(latex-fragment . org-e-ascii-latex-fragment)
+   \(line-break . org-e-ascii-line-break)
+   \(link . org-e-ascii-link)
+   \(macro . org-e-ascii-macro)
+   \(paragraph . org-e-ascii-paragraph)
+   \(plain-list . org-e-ascii-plain-list)
+   \(plain-text . org-e-ascii-plain-text)
+   \(planning . org-e-ascii-planning)
+   \(property-drawer . org-e-ascii-property-drawer)
+   \(quote-block . org-e-ascii-quote-block)
+   \(quote-section . org-e-ascii-quote-section)
+   \(radio-target . org-e-ascii-radio-target)
+   \(section . org-e-ascii-section)
+   \(special-block . org-e-ascii-special-block)
+   \(src-block . org-e-ascii-src-block)
+   \(statistics-cookie . org-e-ascii-statistics-cookie)
+   \(strike-through . org-e-ascii-strike-through)
+   \(subscript . org-e-ascii-subscript)
+   \(superscript . org-e-ascii-superscript)
+   \(table . org-e-ascii-table)
+   \(table-cell . org-e-ascii-table-cell)
+   \(table-row . org-e-ascii-table-row)
+   \(target . org-e-ascii-target)
+   \(template . org-e-ascii-template)
+   \(timestamp . org-e-ascii-timestamp)
+   \(underline . org-e-ascii-underline)
+   \(verbatim . org-e-ascii-verbatim)
+   \(verse-block . org-e-ascii-verse-block))
+  :export-block \"ASCII\"
+  :filters-alist ((:filter-headline . org-e-ascii-filter-headline-blank-lines)
+		  \(:filter-section . org-e-ascii-filter-headline-blank-lines))
+  :options-alist ((:ascii-charset nil nil org-e-ascii-charset)))"
+  (declare (debug (&define name sexp [&rest [keywordp sexp]] defbody))
+	   (indent 1))
+  (let (filters options block-name)
+    (while (keywordp (car body))
+      (case (pop body)
+        (:export-block (let ((names (pop body)))
+			 (setq export-block
+			       (if (consp names) (mapcar 'upcase names)
+				 (list (upcase names))))))
+	(:filters-alist (setq filters (pop body)))
+        (:options-alist (setq options (pop body)))
+        (t (pop body))))
+    `(progn
+       ;; Define translators.
+       (defvar ,(intern (format "org-%s-translate-alist" backend)) ',translators
+	 "Alist between element or object types and translators.")
+       ;; Define options.
+       ,(when options
+	  `(defconst ,(intern (format "org-%s-options-alist" backend)) ',options
+	     ,(format "Alist between %s export properties and ways to set them.
+See `org-export-options-alist' for more information on the
+structure of the values."
+		      backend)))
+       ;; Define filters.
+       ,(when filters
+	  `(defconst ,(intern (format "org-%s-filters-alist" backend)) ',filters
+	     "Alist between filters keywords and back-end specific filters.
+See `org-export-filters-alist' for more information."))
+       ;; Tell parser to not parse EXPORT-BLOCK blocks.
+       ,(when export-block
+	  `(mapc
+	    (lambda (name)
+	      (add-to-list 'org-element-block-name-alist
+			   `(,name . org-element-export-block-parser)))
+	    ',export-block))
+       ;; Splice in the body, if any.
+       ,@body)))
 
 (defmacro org-export-define-derived-backend (child parent &rest body)
   "Create a new back-end as a variant of an existing one.

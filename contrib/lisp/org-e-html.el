@@ -51,113 +51,86 @@
 
 ;;; Define Back-End
 
-(defvar org-e-html-translate-alist
-  '((babel-call . org-e-html-babel-call)
-    (bold . org-e-html-bold)
-    (center-block . org-e-html-center-block)
-    (clock . org-e-html-clock)
-    (code . org-e-html-code)
-    (comment . org-e-html-comment)
-    (comment-block . org-e-html-comment-block)
-    (drawer . org-e-html-drawer)
-    (dynamic-block . org-e-html-dynamic-block)
-    (entity . org-e-html-entity)
-    (example-block . org-e-html-example-block)
-    (export-block . org-e-html-export-block)
-    (export-snippet . org-e-html-export-snippet)
-    (fixed-width . org-e-html-fixed-width)
-    (footnote-definition . org-e-html-footnote-definition)
-    (footnote-reference . org-e-html-footnote-reference)
-    (headline . org-e-html-headline)
-    (horizontal-rule . org-e-html-horizontal-rule)
-    (inline-babel-call . org-e-html-inline-babel-call)
-    (inline-src-block . org-e-html-inline-src-block)
-    (inlinetask . org-e-html-inlinetask)
-    (italic . org-e-html-italic)
-    (item . org-e-html-item)
-    (keyword . org-e-html-keyword)
-    (latex-environment . org-e-html-latex-environment)
-    (latex-fragment . org-e-html-latex-fragment)
-    (line-break . org-e-html-line-break)
-    (link . org-e-html-link)
-    (macro . org-e-html-macro)
-    (paragraph . org-e-html-paragraph)
-    (plain-list . org-e-html-plain-list)
-    (plain-text . org-e-html-plain-text)
-    (planning . org-e-html-planning)
-    (property-drawer . org-e-html-property-drawer)
-    (quote-block . org-e-html-quote-block)
-    (quote-section . org-e-html-quote-section)
-    (radio-target . org-e-html-radio-target)
-    (section . org-e-html-section)
-    (special-block . org-e-html-special-block)
-    (src-block . org-e-html-src-block)
-    (statistics-cookie . org-e-html-statistics-cookie)
-    (strike-through . org-e-html-strike-through)
-    (subscript . org-e-html-subscript)
-    (superscript . org-e-html-superscript)
-    (table . org-e-html-table)
-    (table-cell . org-e-html-table-cell)
-    (table-row . org-e-html-table-row)
-    (target . org-e-html-target)
-    (template . org-e-html-template)
-    (timestamp . org-e-html-timestamp)
-    (underline . org-e-html-underline)
-    (verbatim . org-e-html-verbatim)
-    (verse-block . org-e-html-verse-block))
-  "Alist between element or object types and translators.")
-
-;; FIXME (`org-e-html-options-alist'): Prefix KEYWORD and OPTION with
-;; "HTML_".  Prefix corresponding properties with `:html-".  If such a
-;; renaming is taken up, some changes will be required in
-;; `org-jsinfo.el', I think.  So defer renaming for now.
-
-(defconst org-e-html-options-alist
-  '((:agenda-style nil nil org-agenda-export-html-style)
-    (:creator "CREATOR" nil org-e-html-creator-string)
-    (:convert-org-links nil nil org-e-html-link-org-files-as-html)
-    ;; (:expand-quoted-html nil "@" org-e-html-expand)
-    (:inline-images nil nil org-e-html-inline-images)
-    (:link-home "LINK_HOME" nil org-e-html-link-home)
-    (:link-up "LINK_UP" nil org-e-html-link-up)
-    (:style nil nil org-e-html-style)
-    (:style-extra "STYLE" nil org-e-html-style-extra newline)
-    (:style-include-default nil nil org-e-html-style-include-default)
-    (:style-include-scripts nil nil org-e-html-style-include-scripts)
-    ;; (:timestamp nil nil org-e-html-with-timestamp)
-    (:html-extension nil nil org-e-html-extension)
-    (:html-postamble nil nil org-e-html-postamble)
-    (:html-preamble nil nil org-e-html-preamble)
-    (:html-table-tag nil nil org-e-html-table-tag)
-    (:xml-declaration nil nil org-e-html-xml-declaration)
-    (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments)
-    (:mathjax "MATHJAX" nil "" space))
-  "Alist between HTML export properties and ways to set them.
-This variable is the HTML-specific counterpart of
-`org-export-options-alist'.
-
-The CAR of the alist is the property name, and the CDR is a list
-like (KEYWORD OPTION DEFAULT BEHAVIOUR) where:
-
-KEYWORD is a string representing a buffer keyword, or nil.
-OPTION is a string that could be found in an #+OPTIONS: line.
-DEFAULT is the default value for the property.
-BEHAVIOUR determine how Org should handle multiple keywords for
-the same property.  It is a symbol among:
-  nil       Keep old value and discard the new one.
-  t         Replace old value with the new one.
-  `space'   Concatenate the values, separating them with a space.
-  `newline' Concatenate the values, separating them with
-	    a newline.
-  `split'   Split values at white spaces, and cons them to the
-	    previous list.
-
-KEYWORD and OPTION have precedence over DEFAULT.")
-
-(defconst org-e-html-filters-alist
-  '((:filter-final-output . org-e-html-final-function))
-  "Alist between filters keywords and back-end specific filters.
-See `org-export-filters-alist' for more information.")
+(org-export-define-backend e-html
+  ((babel-call . org-e-html-babel-call)
+   (bold . org-e-html-bold)
+   (center-block . org-e-html-center-block)
+   (clock . org-e-html-clock)
+   (code . org-e-html-code)
+   (comment . org-e-html-comment)
+   (comment-block . org-e-html-comment-block)
+   (drawer . org-e-html-drawer)
+   (dynamic-block . org-e-html-dynamic-block)
+   (entity . org-e-html-entity)
+   (example-block . org-e-html-example-block)
+   (export-block . org-e-html-export-block)
+   (export-snippet . org-e-html-export-snippet)
+   (fixed-width . org-e-html-fixed-width)
+   (footnote-definition . org-e-html-footnote-definition)
+   (footnote-reference . org-e-html-footnote-reference)
+   (headline . org-e-html-headline)
+   (horizontal-rule . org-e-html-horizontal-rule)
+   (inline-babel-call . org-e-html-inline-babel-call)
+   (inline-src-block . org-e-html-inline-src-block)
+   (inlinetask . org-e-html-inlinetask)
+   (italic . org-e-html-italic)
+   (item . org-e-html-item)
+   (keyword . org-e-html-keyword)
+   (latex-environment . org-e-html-latex-environment)
+   (latex-fragment . org-e-html-latex-fragment)
+   (line-break . org-e-html-line-break)
+   (link . org-e-html-link)
+   (macro . org-e-html-macro)
+   (paragraph . org-e-html-paragraph)
+   (plain-list . org-e-html-plain-list)
+   (plain-text . org-e-html-plain-text)
+   (planning . org-e-html-planning)
+   (property-drawer . org-e-html-property-drawer)
+   (quote-block . org-e-html-quote-block)
+   (quote-section . org-e-html-quote-section)
+   (radio-target . org-e-html-radio-target)
+   (section . org-e-html-section)
+   (special-block . org-e-html-special-block)
+   (src-block . org-e-html-src-block)
+   (statistics-cookie . org-e-html-statistics-cookie)
+   (strike-through . org-e-html-strike-through)
+   (subscript . org-e-html-subscript)
+   (superscript . org-e-html-superscript)
+   (table . org-e-html-table)
+   (table-cell . org-e-html-table-cell)
+   (table-row . org-e-html-table-row)
+   (target . org-e-html-target)
+   (template . org-e-html-template)
+   (timestamp . org-e-html-timestamp)
+   (underline . org-e-html-underline)
+   (verbatim . org-e-html-verbatim)
+   (verse-block . org-e-html-verse-block))
+  :export-block "HTML"
+  :filters-alist ((:filter-final-output . org-e-html-final-function))
+  :options-alist
+  ;; FIXME: Prefix KEYWORD and OPTION with "HTML_".  Prefix
+  ;; corresponding properties with `:html-".  If such a renaming is
+  ;; taken up, some changes will be required in `org-jsinfo.el',
+  ;; I think.  So defer renaming for now.
+  ((:agenda-style nil nil org-agenda-export-html-style)
+   (:creator "CREATOR" nil org-e-html-creator-string)
+   (:convert-org-links nil nil org-e-html-link-org-files-as-html)
+   ;; (:expand-quoted-html nil "@" org-e-html-expand)
+   (:inline-images nil nil org-e-html-inline-images)
+   (:link-home "LINK_HOME" nil org-e-html-link-home)
+   (:link-up "LINK_UP" nil org-e-html-link-up)
+   (:style nil nil org-e-html-style)
+   (:style-extra "STYLE" nil org-e-html-style-extra newline)
+   (:style-include-default nil nil org-e-html-style-include-default)
+   (:style-include-scripts nil nil org-e-html-style-include-scripts)
+   ;; (:timestamp nil nil org-e-html-with-timestamp)
+   (:html-extension nil nil org-e-html-extension)
+   (:html-postamble nil nil org-e-html-postamble)
+   (:html-preamble nil nil org-e-html-preamble)
+   (:html-table-tag nil nil org-e-html-table-tag)
+   (:xml-declaration nil nil org-e-html-xml-declaration)
+   (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments)
+   (:mathjax "MATHJAX" nil "" space)))
 
 
 

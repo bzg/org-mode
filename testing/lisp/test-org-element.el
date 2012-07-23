@@ -538,7 +538,11 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
   ;; Standard test.
   (should
    (org-test-with-temp-text "#+BEGIN_LATEX\nText\n#+END_LATEX"
-     (org-element-map (org-element-parse-buffer) 'export-block 'identity)))
+     (org-element-map
+      (let ((org-element-block-name-alist
+	     '(("LATEX" . org-element-export-block-parser))))
+	(org-element-parse-buffer))
+      'export-block 'identity)))
   ;; Test folded block.
   (org-test-with-temp-text "#+BEGIN_LATEX\nText\n#+END_LATEX"
     (org-cycle)
@@ -546,16 +550,26 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
      (org-element-property
       :hiddenp
       (org-element-map
-       (org-element-parse-buffer) 'export-block 'identity nil t))))
+       (let ((org-element-block-name-alist
+	      '(("LATEX" . org-element-export-block-parser))))
+	 (org-element-parse-buffer))
+       'export-block 'identity nil t))))
   ;; Ignore case.
   (should
    (org-test-with-temp-text "#+begin_latex\nText\n#+end_latex"
-     (org-element-map (org-element-parse-buffer) 'export-block 'identity)))
+     (org-element-map
+      (let ((org-element-block-name-alist
+	     '(("LATEX" . org-element-export-block-parser))))
+	(org-element-parse-buffer))
+      'export-block 'identity)))
   ;; Ignore incomplete block.
   (should-not
    (org-test-with-temp-text "#+BEGIN_LATEX"
      (org-element-map
-      (org-element-parse-buffer) 'export-block 'identity nil t))))
+      (let ((org-element-block-name-alist
+	     '(("LATEX" . org-element-export-block-parser))))
+	(org-element-parse-buffer))
+      'export-block 'identity nil t))))
 
 
 ;;;; Export Snippet
