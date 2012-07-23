@@ -962,7 +962,7 @@ Return output file's name."
 ;;;###autoload
 (defun org-e-beamer-export-to-pdf
   (&optional subtreep visible-only body-only ext-plist pub-dir)
-  "Export current buffer as a BEAMER presentation (PDF).
+  "Export current buffer as a Beamer presentation (PDF).
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
