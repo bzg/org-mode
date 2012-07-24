@@ -994,6 +994,11 @@ structure of the values."
 ;;   - category :: option
 ;;   - type :: list of strings
 ;;
+;; + `:exported-data' :: Hash table used for memoizing
+;;     `org-export-data'.
+;;   - category :: tree
+;;   - type :: hash table
+;;
 ;; + `:footnote-definition-alist' :: Alist between footnote labels and
 ;;     their definition, as parsed data.  Only non-inlined footnotes
 ;;     are represented in this alist.  Also, every definition isn't
@@ -1609,6 +1614,10 @@ DATA is the parse tree from which information is retrieved.  INFO
 is a list holding export options.
 
 Following tree properties are set or updated:
+
+`:exported-data' Hash table used to memoize results from
+                 `org-export-data'.
+
 `:footnote-definition-alist' List of footnotes definitions in
                    original buffer and current parse tree.
 
@@ -1666,7 +1675,8 @@ Return updated plist."
 	 (when (or (eq (org-element-type blob) 'target)
 		   (string= (org-element-property :key blob) "TARGET"))
 	   blob)) info)
-     :headline-numbering ,(org-export--collect-headline-numbering data info))
+     :headline-numbering ,(org-export--collect-headline-numbering data info)
+     :exported-data ,(make-hash-table :test 'eq :size 4001))
    info))
 
 (defun org-export--get-min-level (data options)
@@ -1843,7 +1853,8 @@ tag."
 ;; `org-element-parse-buffer') and transcodes it into a specified
 ;; back-end output.  It takes care of filtering out elements or
 ;; objects according to export options and organizing the output blank
-;; lines and white space are preserved.
+;; lines and white space are preserved.  The function memoizes its
+;; results, so it is cheap to call it within translators.
 ;;
 ;; Internally, three functions handle the filtering of objects and
 ;; elements during the export.  In particular,
@@ -1872,90 +1883,99 @@ DATA is a parse tree, an element or an object or a secondary
 string.  INFO is a plist holding export options.
 
 Return transcoded string."
-  (let* ((type (org-element-type data))
-         (results
-          (cond
-           ;; Ignored element/object.
-           ((memq data (plist-get info :ignore-list)) nil)
-           ;; Plain text.
-           ((eq type 'plain-text)
-            (org-export-filter-apply-functions
-             (plist-get info :filter-plain-text)
-             (let ((transcoder (org-export-transcoder data info)))
-               (if transcoder (funcall transcoder data info) data))
-             info))
-           ;; Uninterpreted element/object: change it back to Org
-           ;; syntax and export again resulting raw string.
-           ((not (org-export--interpret-p data info))
-            (org-export-data
-	     (org-export-expand
-	      data
-	      (mapconcat (lambda (blob) (org-export-data blob info))
-			 (org-element-contents data)
-			 ""))
-	     info))
-           ;; Secondary string.
-           ((not type)
-            (mapconcat (lambda (obj) (org-export-data obj info)) data ""))
-           ;; Element/Object without contents or, as a special case,
-           ;; headline with archive tag and archived trees restricted
-           ;; to title only.
-           ((or (not (org-element-contents data))
-                (and (eq type 'headline)
-                     (eq (plist-get info :with-archived-trees) 'headline)
-                     (org-element-property :archivedp data)))
-            (let ((transcoder (org-export-transcoder data info)))
-              (and (functionp transcoder) (funcall transcoder data nil info))))
-           ;; Element/Object with contents.
-           (t
-            (let ((transcoder (org-export-transcoder data info)))
-              (when transcoder
-                (let* ((greaterp (memq type org-element-greater-elements))
-		       (objectp (and (not greaterp)
-				     (memq type org-element-recursive-objects)))
-		       (contents
-			(mapconcat
-			 (lambda (element) (org-export-data element info))
-			 (org-element-contents
-			  (if (or greaterp objectp) data
-			    ;; Elements directly containing objects
-			    ;; must have their indentation normalized
-			    ;; first.
-			    (org-element-normalize-contents
-			     data
-			     ;; When normalizing contents of the first
-			     ;; paragraph in an item or a footnote
-			     ;; definition, ignore first line's
-			     ;; indentation: there is none and it
-			     ;; might be misleading.
-			     (when (eq type 'paragraph)
-			       (let ((parent (org-export-get-parent data)))
-				 (and (eq (car (org-element-contents parent))
-					     data)
+  (let ((memo (gethash data (plist-get info :exported-data) 'no-memo)))
+    (if (not (eq memo 'no-memo)) memo
+      (let* ((type (org-element-type data))
+	     (results
+	      (cond
+	       ;; Ignored element/object.
+	       ((memq data (plist-get info :ignore-list)) nil)
+	       ;; Plain text.
+	       ((eq type 'plain-text)
+		(org-export-filter-apply-functions
+		 (plist-get info :filter-plain-text)
+		 (let ((transcoder (org-export-transcoder data info)))
+		   (if transcoder (funcall transcoder data info) data))
+		 info))
+	       ;; Uninterpreted element/object: change it back to Org
+	       ;; syntax and export again resulting raw string.
+	       ((not (org-export--interpret-p data info))
+		(org-export-data
+		 (org-export-expand
+		  data
+		  (mapconcat (lambda (blob) (org-export-data blob info))
+			     (org-element-contents data)
+			     ""))
+		 info))
+	       ;; Secondary string.
+	       ((not type)
+		(mapconcat (lambda (obj) (org-export-data obj info)) data ""))
+	       ;; Element/Object without contents or, as a special case,
+	       ;; headline with archive tag and archived trees restricted
+	       ;; to title only.
+	       ((or (not (org-element-contents data))
+		    (and (eq type 'headline)
+			 (eq (plist-get info :with-archived-trees) 'headline)
+			 (org-element-property :archivedp data)))
+		(let ((transcoder (org-export-transcoder data info)))
+		  (and (functionp transcoder)
+		       (funcall transcoder data nil info))))
+	       ;; Element/Object with contents.
+	       (t
+		(let ((transcoder (org-export-transcoder data info)))
+		  (when transcoder
+		    (let* ((greaterp (memq type org-element-greater-elements))
+			   (objectp
+			    (and (not greaterp)
+				 (memq type org-element-recursive-objects)))
+			   (contents
+			    (mapconcat
+			     (lambda (element) (org-export-data element info))
+			     (org-element-contents
+			      (if (or greaterp objectp) data
+				;; Elements directly containing objects
+				;; must have their indentation normalized
+				;; first.
+				(org-element-normalize-contents
+				 data
+				 ;; When normalizing contents of the first
+				 ;; paragraph in an item or a footnote
+				 ;; definition, ignore first line's
+				 ;; indentation: there is none and it
+				 ;; might be misleading.
+				 (when (eq type 'paragraph)
+				   (let ((parent (org-export-get-parent data)))
+				     (and
+				      (eq (car (org-element-contents parent))
+					  data)
 				      (memq (org-element-type parent)
 					    '(footnote-definition item))))))))
-			 "")))
-                  (funcall transcoder data
-			   (if greaterp (org-element-normalize-string contents)
-			     contents)
-			   info))))))))
-    (cond
-     ((not results) nil)
-     ((memq type '(org-data plain-text nil)) results)
-     ;; Append the same white space between elements or objects as in
-     ;; the original buffer, and call appropriate filters.
-     (t
-      (let ((results
-             (org-export-filter-apply-functions
-              (plist-get info (intern (format ":filter-%s" type)))
-              (let ((post-blank (or (org-element-property :post-blank data) 0)))
-                (if (memq type org-element-all-elements)
-                    (concat (org-element-normalize-string results)
-                            (make-string post-blank ?\n))
-                  (concat results (make-string post-blank ? ))))
-              info)))
-        ;; Eventually return string.
-        results)))))
+			     "")))
+		      (funcall transcoder data
+			       (if (not greaterp) contents
+				 (org-element-normalize-string contents))
+			       info))))))))
+	;; Final result will be memoized before being returned.
+	(puthash
+	 data
+	 (cond
+	  ((not results) nil)
+	  ((memq type '(org-data plain-text nil)) results)
+	  ;; Append the same white space between elements or objects as in
+	  ;; the original buffer, and call appropriate filters.
+	  (t
+	   (let ((results
+		  (org-export-filter-apply-functions
+		   (plist-get info (intern (format ":filter-%s" type)))
+		   (let ((post-blank (or (org-element-property :post-blank data)
+					 0)))
+		     (if (memq type org-element-all-elements)
+			 (concat (org-element-normalize-string results)
+				 (make-string post-blank ?\n))
+		       (concat results (make-string post-blank ? ))))
+		   info)))
+	     results)))
+	 (plist-get info :exported-data))))))
 
 (defun org-export--interpret-p (blob info)
   "Non-nil if element or object BLOB should be interpreted as Org syntax.
