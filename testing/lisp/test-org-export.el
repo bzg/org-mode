@@ -63,7 +63,7 @@ already filled in `info'."
   "Test reading all standard #+OPTIONS: items."
   (should
    (equal
-    (org-export-parse-option-keyword
+    (org-export--parse-option-keyword
      "H:1 num:t \\n:t timestamp:t arch:t author:t creator:t d:t email:t
  *:t e:t ::t f:t pri:t -:t ^:t toc:t |:t tags:t tasks:t <:t todo:t")
     '(:headline-levels
@@ -76,7 +76,7 @@ already filled in `info'."
   ;; Test some special values.
   (should
    (equal
-    (org-export-parse-option-keyword
+    (org-export--parse-option-keyword
      "arch:headline creator:comment d:(\"TEST\")
  ^:{} toc:1 tags:not-in-toc tasks:todo num:2 <:active")
     '( :section-numbers
@@ -101,7 +101,7 @@ already filled in `info'."
 #+SELECT_TAGS: export
 #+TITLE: Some title
 #+TITLE: with spaces"
-      (org-export-get-inbuffer-options))
+      (org-export--get-inbuffer-options))
     '(:author
       ("Me, Myself and I") :creator "Idem" :date ("Today")
       :description "Testing\nwith two lines" :email "some@email.org"
@@ -923,28 +923,28 @@ Another text. (ref:text)
   "Try defining various Org macro using in-buffer #+MACRO: keyword."
   ;; Parsed macro.
   (should (equal (org-test-with-temp-text "#+MACRO: one 1"
-		   (org-export-get-inbuffer-options))
+		   (org-export--get-inbuffer-options))
 		 '(:macro-one ("1"))))
   ;; Evaled macro.
   (should (equal (org-test-with-temp-text "#+MACRO: two (eval (+ 1 1))"
-		   (org-export-get-inbuffer-options))
+		   (org-export--get-inbuffer-options))
 		 '(:macro-two ("(eval (+ 1 1))"))))
   ;; Incomplete macro.
   (should-not (org-test-with-temp-text "#+MACRO: three"
-		(org-export-get-inbuffer-options)))
+		(org-export--get-inbuffer-options)))
   ;; Macro with newline character.
   (should (equal (org-test-with-temp-text "#+MACRO: four a\\nb"
-		   (org-export-get-inbuffer-options))
+		   (org-export--get-inbuffer-options))
 		 '(:macro-four ("a\nb"))))
   ;; Macro with protected newline character.
   (should (equal (org-test-with-temp-text "#+MACRO: five a\\\\nb"
-		   (org-export-get-inbuffer-options))
+		   (org-export--get-inbuffer-options))
 		 '(:macro-five ("a\\nb"))))
   ;; Recursive macro.
   (org-test-with-temp-text "#+MACRO: six 6\n#+MACRO: seven 1 + {{{six}}}"
     (should
      (equal
-      (org-export-get-inbuffer-options)
+      (org-export--get-inbuffer-options)
       '(:macro-six
 	("6")
 	:macro-seven

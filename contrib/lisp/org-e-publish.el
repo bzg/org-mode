@@ -868,7 +868,7 @@ It returns time in `current-time' format."
 	 (date (plist-get
 		(with-current-buffer file-buf
 		  (org-mode)
-		  (org-export-get-inbuffer-options))
+		  (org-export--get-inbuffer-options))
 		:date)))
     (unless visiting (kill-buffer file-buf))
     (if date (org-time-string-to-time date)

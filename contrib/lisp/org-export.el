@@ -181,7 +181,7 @@ Properties redefined there have precedence over these.")
   "List of in-buffer keywords that require special treatment.
 These keywords are not directly associated to a property.  The
 way they are handled must be hard-coded into
-`org-export-get-inbuffer-options' function.")
+`org-export--get-inbuffer-options' function.")
 
 (defconst org-export-filters-alist
   '((:filter-bold . org-export-filter-bold-functions)
@@ -1212,13 +1212,13 @@ structure of the values."
 ;; the different sources.
 ;;
 ;;  The internal functions doing the retrieval are:
-;;  `org-export-get-global-options',
-;;  `org-export-get-buffer-attributes',
-;;  `org-export-parse-option-keyword',
-;;  `org-export-get-subtree-options' and
-;;  `org-export-get-inbuffer-options'
+;;  `org-export--get-global-options',
+;;  `org-export--get-buffer-attributes',
+;;  `org-export--parse-option-keyword',
+;;  `org-export--get-subtree-options' and
+;;  `org-export--get-inbuffer-options'
 ;;
-;; Also, `org-export-confirm-letbind' and `org-export-install-letbind'
+;; Also, `org-export--confirm-letbind' and `org-export--install-letbind'
 ;; take care of the part relative to "#+BIND:" keywords.
 
 (defun org-export-get-environment (&optional backend subtreep ext-plist)
@@ -1234,21 +1234,21 @@ Third optional argument EXT-PLIST is a property list with
 external parameters overriding Org default settings, but still
 inferior to file-local settings."
   ;; First install #+BIND variables.
-  (org-export-install-letbind-maybe)
+  (org-export--install-letbind-maybe)
   ;; Get and prioritize export options...
   (org-combine-plists
    ;; ... from global variables...
-   (org-export-get-global-options backend)
+   (org-export--get-global-options backend)
    ;; ... from buffer's attributes...
-   (org-export-get-buffer-attributes)
+   (org-export--get-buffer-attributes)
    ;; ... from an external property list...
    ext-plist
    ;; ... from in-buffer settings...
-   (org-export-get-inbuffer-options
+   (org-export--get-inbuffer-options
     backend
     (and buffer-file-name (org-remove-double-quotes buffer-file-name)))
    ;; ... and from subtree, when appropriate.
-   (and subtreep (org-export-get-subtree-options backend))
+   (and subtreep (org-export--get-subtree-options backend))
    ;; Eventually install back-end symbol and its translation table.
    `(:back-end
      ,backend
@@ -1256,7 +1256,7 @@ inferior to file-local settings."
      ,(let ((trans-alist (intern (format "org-%s-translate-alist" backend))))
 	(when (boundp trans-alist) (symbol-value trans-alist))))))
 
-(defun org-export-parse-option-keyword (options &optional backend)
+(defun org-export--parse-option-keyword (options &optional backend)
   "Parse an OPTIONS line and return values as a plist.
 Optional argument BACKEND is a symbol specifying which back-end
 specific items to read, if any."
@@ -1285,7 +1285,7 @@ specific items to read, if any."
 	  alist)
     plist))
 
-(defun org-export-get-subtree-options (&optional backend)
+(defun org-export--get-subtree-options (&optional backend)
   "Get export options in subtree at point.
 Optional argument BACKEND is a symbol specifying back-end used
 for export.  Return options as a plist."
@@ -1310,7 +1310,7 @@ for export.  Return options as a plist."
      ;; EXPORT_OPTIONS are parsed in a non-standard way.
      (when (setq prop (org-entry-get (point) "EXPORT_OPTIONS"))
        (setq plist
-	     (nconc plist (org-export-parse-option-keyword prop backend))))
+	     (nconc plist (org-export--parse-option-keyword prop backend))))
      ;; Handle other keywords.
      (let ((seen '("TITLE")))
        (mapc
@@ -1340,7 +1340,7 @@ for export.  Return options as a plist."
      ;; Return value.
      plist)))
 
-(defun org-export-get-inbuffer-options (&optional backend files)
+(defun org-export--get-inbuffer-options (&optional backend files)
   "Return current buffer export options, as a plist.
 
 Optional argument BACKEND, when non-nil, is a symbol specifying
@@ -1372,10 +1372,10 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			   (with-temp-buffer
 			     (insert (org-file-contents file 'noerror))
 			     (org-mode)
-			     (org-export-get-inbuffer-options
+			     (org-export--get-inbuffer-options
 			      backend (cons file files))))))
 		      ((string= key "OPTIONS")
-		       (org-export-parse-option-keyword val backend))
+		       (org-export--parse-option-keyword val backend))
 		      ((string= key "MACRO")
 		       (when (string-match
 			      "^\\([-a-zA-Z0-9_]+\\)\\(?:[ \t]+\\(.*?\\)[ \t]*$\\)?"
@@ -1468,7 +1468,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
      ;; 3. Return final value.
      plist)))
 
-(defun org-export-get-buffer-attributes ()
+(defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."
   (let ((visited-file (buffer-file-name (buffer-base-buffer))))
     (list
@@ -1527,7 +1527,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
      :macro-time "(eval (format-time-string \"$1\"))"
      :macro-property "(eval (org-entry-get nil \"$1\" 'selective))")))
 
-(defun org-export-get-global-options (&optional backend)
+(defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
 
 Optional argument BACKEND, if non-nil, is a symbol specifying
@@ -1559,19 +1559,20 @@ process."
     ;; Return value.
     plist))
 
-(defvar org-export-allow-BIND-local nil)
-(defun org-export-confirm-letbind ()
+(defvar org-export--allow-BIND-local nil)
+(defun org-export--confirm-letbind ()
   "Can we use #+BIND values during export?
 By default this will ask for confirmation by the user, to divert
 possible security risks."
   (cond
    ((not org-export-allow-BIND) nil)
    ((eq org-export-allow-BIND t) t)
-   ((local-variable-p 'org-export-allow-BIND-local) org-export-allow-BIND-local)
-   (t (org-set-local 'org-export-allow-BIND-local
+   ((local-variable-p 'org-export--allow-BIND-local)
+    org-export--allow-BIND-local)
+   (t (org-set-local 'org-export--allow-BIND-local
 		     (yes-or-no-p "Allow BIND values in this buffer? ")))))
 
-(defun org-export-install-letbind-maybe ()
+(defun org-export--install-letbind-maybe ()
   "Install the values from #+BIND lines as local variables.
 Variables must be installed before in-buffer options are
 retrieved."
@@ -1594,11 +1595,11 @@ retrieved."
 ;;
 ;; Dedicated functions focus on computing the value of specific tree
 ;; properties during initialization.  Thus,
-;; `org-export-populate-ignore-list' lists elements and objects that
-;; should be skipped during export, `org-export-get-min-level' gets
+;; `org-export--populate-ignore-list' lists elements and objects that
+;; should be skipped during export, `org-export--get-min-level' gets
 ;; the minimal exportable level, used as a basis to compute relative
 ;; level for headlines.  Eventually
-;; `org-export-collect-headline-numbering' builds an alist between
+;; `org-export--collect-headline-numbering' builds an alist between
 ;; headlines and their numbering.
 
 (defun org-export-collect-tree-properties (data info)
@@ -1634,13 +1635,14 @@ Return updated plist."
   (setq info
 	(plist-put info
 		   :ignore-list
-		   (append (org-export-populate-ignore-list data info)
+		   (append (org-export--populate-ignore-list data info)
 			   (plist-get info :ignore-list))))
   ;; Compute `:headline-offset' in order to be able to use
   ;; `org-export-get-relative-level'.
   (setq info
 	(plist-put info
-		   :headline-offset (- 1 (org-export-get-min-level data info))))
+		   :headline-offset
+		   (- 1 (org-export--get-min-level data info))))
   ;; Update footnotes definitions list with definitions in parse tree.
   ;; This is required since buffer expansion might have modified
   ;; boundaries of footnote definitions contained in the parse tree.
@@ -1664,10 +1666,10 @@ Return updated plist."
 	 (when (or (eq (org-element-type blob) 'target)
 		   (string= (org-element-property :key blob) "TARGET"))
 	   blob)) info)
-     :headline-numbering ,(org-export-collect-headline-numbering data info))
+     :headline-numbering ,(org-export--collect-headline-numbering data info))
    info))
 
-(defun org-export-get-min-level (data options)
+(defun org-export--get-min-level (data options)
   "Return minimum exportable headline's level in DATA.
 DATA is parsed tree as returned by `org-element-parse-buffer'.
 OPTIONS is a plist holding export options."
@@ -1685,7 +1687,7 @@ OPTIONS is a plist holding export options."
       ;; minimum level to 1 nonetheless.
       (if (= min-level 10000) 1 min-level))))
 
-(defun org-export-collect-headline-numbering (data options)
+(defun org-export--collect-headline-numbering (data options)
   "Return numbering of all exportable headlines in a parse tree.
 
 DATA is the parse tree.  OPTIONS is the plist holding export
@@ -1709,7 +1711,7 @@ associated numbering \(in the shape of a list of numbers\)."
 		when (> idx relative-level) do (aset numbering idx 0)))))
      options)))
 
-(defun org-export-populate-ignore-list (data options)
+(defun org-export--populate-ignore-list (data options)
   "Return list of elements and objects to ignore during export.
 DATA is the parse tree to traverse.  OPTIONS is the plist holding
 export options."
@@ -1846,7 +1848,7 @@ tag."
 ;; Internally, three functions handle the filtering of objects and
 ;; elements during the export.  In particular,
 ;; `org-export-ignore-element' marks an element or object so future
-;; parse tree traversals skip it, `org-export-interpret-p' tells which
+;; parse tree traversals skip it, `org-export--interpret-p' tells which
 ;; elements or objects should be seen as real Org syntax and
 ;; `org-export-expand' transforms the others back into their original
 ;; shape
@@ -1884,7 +1886,7 @@ Return transcoded string."
              info))
            ;; Uninterpreted element/object: change it back to Org
            ;; syntax and export again resulting raw string.
-           ((not (org-export-interpret-p data info))
+           ((not (org-export--interpret-p data info))
             (org-export-data
 	     (org-export-expand
 	      data
@@ -1955,7 +1957,7 @@ Return transcoded string."
         ;; Eventually return string.
         results)))))
 
-(defun org-export-interpret-p (blob info)
+(defun org-export--interpret-p (blob info)
   "Non-nil if element or object BLOB should be interpreted as Org syntax.
 Check is done according to export options INFO, stored as
 a plist."
@@ -2458,7 +2460,7 @@ Return the updated communication channel."
 ;;
 ;; File inclusion is taken care of by
 ;; `org-export-expand-include-keyword' and
-;; `org-export-prepare-file-contents'.  Structure wise, including
+;; `org-export--prepare-file-contents'.  Structure wise, including
 ;; a whole Org file in a buffer often makes little sense.  For
 ;; example, if the file contains an headline and the include keyword
 ;; was within an item, the item should contain the headline.  That's
@@ -2737,7 +2739,7 @@ paths."
 		      ;; Protect sensitive contents with commas.
 		      (replace-regexp-in-string
 		       "\\(^\\)\\([*]\\|[ \t]*#\\+\\)" ","
-		       (org-export-prepare-file-contents file lines)
+		       (org-export--prepare-file-contents file lines)
 		       nil nil 1)))
 		 (format "%s#+BEGIN_EXAMPLE\n%s%s#+END_EXAMPLE\n"
 			 ind-str contents ind-str))))
@@ -2749,8 +2751,8 @@ paths."
 		      (replace-regexp-in-string
 		       (if (string= env "org") "\\(^\\)\\(.\\)"
 			 "\\(^\\)\\([*]\\|[ \t]*#\\+\\)") ","
-			 (org-export-prepare-file-contents file lines)
-			 nil nil 1)))
+		       (org-export--prepare-file-contents file lines)
+		       nil nil 1)))
 		 (format "%s#+BEGIN_SRC %s\n%s%s#+END_SRC\n"
 			 ind-str env contents ind-str))))
 	     (t
@@ -2758,13 +2760,13 @@ paths."
 	       (with-temp-buffer
 		 (org-mode)
 		 (insert
-		  (org-export-prepare-file-contents file lines ind minlevel))
+		  (org-export--prepare-file-contents file lines ind minlevel))
 		 (org-export-expand-include-keyword
 		  (cons (list file lines) included)
 		  (file-name-directory file))
 		 (buffer-string))))))))))))
 
-(defun org-export-prepare-file-contents (file &optional lines ind minlevel)
+(defun org-export--prepare-file-contents (file &optional lines ind minlevel)
   "Prepare the contents of FILE for inclusion and return them as a string.
 
 When optional argument LINES is a string specifying a range of
@@ -2833,7 +2835,7 @@ file should have."
 	      ;; sections.
 	      (org-map-entries
 	       (lambda () (if (< offset 0) (delete-char (abs offset))
-		       (insert (make-string offset ?*))))))))))
+			    (insert (make-string offset ?*))))))))))
     (buffer-string)))
 
 
