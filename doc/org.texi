@@ -6065,7 +6065,7 @@ HH:MM}.  See the variable @code{org-log-note-clock-out} for the
 possibility to record an additional note together with the clock-out
 timestamp@footnote{The corresponding in-buffer setting is:
 @code{#+STARTUP: lognoteclock-out}}.
-@orgcmd{C-c C-x C-I,org-clock-in-last}
+@orgcmd{C-c C-x C-x,org-clock-in-last}
 @vindex org-clock-continuously
 Reclock the last clocked task.  With one @kbd{C-u} prefix argument,
 select the task from the clock history.  With two @kbd{C-u} prefixes,
@@ -6085,7 +6085,7 @@ time so that duration keeps the same.
 @orgcmd{C-c C-t,org-todo}
 Changing the TODO state of an item to DONE automatically stops the clock
 if it is running in this same item.
-@orgcmd{C-c C-x C-x,org-clock-cancel}
+@orgcmd{C-c C-x C-q,org-clock-cancel}
 Cancel the current clock.  This is useful if a clock was started by
 mistake, or if you ended up working on something else.
 @orgcmd{C-c C-x C-j,org-clock-goto}
