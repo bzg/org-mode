@@ -100,6 +100,7 @@
 
 (require 'org-exp)
 (require 'assoc)
+(eval-when-compile (require 'cl))
 
 (defgroup org-export-generic nil
   "Options specific for ASCII export of Org-mode files."
