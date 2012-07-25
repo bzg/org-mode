@@ -19,16 +19,19 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-
+;;
 ;; This library implements an ASCII back-end for Org generic exporter.
-
-;; To test it, run
 ;;
-;;   M-: (org-export-to-buffer 'e-ascii "*Test e-ASCII*") RET
+;; It provides two commands for export, depending on the desired
+;; output: `org-e-ascii-export-as-ascii' (temporary buffer) and
+;; `org-e-ascii-export-to-ascii' ("txt" file).
 ;;
-;; in an Org mode buffer then switch to that buffer to see the ASCII
-;; export.  See contrib/lisp/org-export.el for more details on how
-;; this exporter works.
+;; Output encoding is specified through `org-e-ascii-charset'
+;; variable, among `ascii', `latin1' and `utf-8' symbols.
+;;
+;; By default, horizontal rules span over the full text with, but with
+;; a given width attribute (set though #+ATTR_ASCII: :width <num>)
+;; they can be shortened and centered.
 
 ;;; Code:
 
@@ -1086,10 +1089,13 @@ holding contextual information."
   "Transcode an HORIZONTAL-RULE object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((width (org-export-read-attribute :attr_ascii horizontal-rule :width)))
-    (make-string (or (and (wholenump width) width)
-		     (org-e-ascii--current-text-width horizontal-rule info))
-		 (if (eq (plist-get info :ascii-charset) 'utf-8) ?― ?-))))
+  (let ((text-width (org-e-ascii--current-text-width horizontal-rule info))
+	(spec-width
+	 (org-export-read-attribute :attr_ascii horizontal-rule :width)))
+    (org-e-ascii--justify-string
+     (make-string (if (wholenump spec-width) spec-width text-width)
+		  (if (eq (plist-get info :ascii-charset) 'utf-8) ?― ?-))
+     text-width 'center)))
 
 
 ;;;; Inline Babel Call
