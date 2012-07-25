@@ -2031,7 +2031,7 @@ the returned times will be formatted strings."
      ((memq key '(year thisyear))
       (setq txt (format-time-string "the year %Y" ts)))
      ((memq key '(quarter thisq))
-      (setq txt (concat 'string (org-count-quarter shiftedq) " quarter of " (number-to-string shiftedy))))
+      (setq txt (concat (org-count-quarter shiftedq) " quarter of " (number-to-string shiftedy))))
      )
     (if as-strings
 	(list (format-time-string fm ts) (format-time-string fm te) txt)
@@ -2109,7 +2109,7 @@ the currently selected interval size."
            (setq date (calendar-gregorian-from-absolute
 		       (calendar-absolute-from-iso (org-quarter-to-date (+ mw n) y))))
            (setq ins (format-time-string
-                      (concat 'string (number-to-string y) "-Q" (number-to-string (+ mw n)))
+                      (concat (number-to-string y) "-Q" (number-to-string (+ mw n)))
                       (encode-time 0 0 0 (nth 1 date) (car date) (nth 2 date)))))
           (mw
            (setq ins (format-time-string
