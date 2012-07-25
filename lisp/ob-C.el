@@ -88,9 +88,7 @@ or `org-babel-execute:C++'."
 			(cond
 			 ((equal org-babel-c-variant 'c) ".c")
 			 ((equal org-babel-c-variant 'cpp) ".cpp"))))
-         (tmp-bin-file (org-babel-temp-file
-			"C-bin-"
-			(if (equal system-type 'windows-nt) ".exe" "")))
+         (tmp-bin-file (org-babel-temp-file "C-bin-" org-babel-exeext))
          (cmdline (cdr (assoc :cmdline params)))
          (flags (cdr (assoc :flags params)))
          (full-body (org-babel-C-expand body params))

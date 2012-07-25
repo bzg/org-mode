@@ -28,6 +28,10 @@
 (require 'ob-eval)
 (require 'org-macs)
 
+(defconst org-babel-exeext
+  (if (memq system-type '(windows-nt cygwin))
+      ".exe"
+    nil))
 (defvar org-babel-call-process-region-original)
 (defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
