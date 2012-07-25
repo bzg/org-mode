@@ -1323,7 +1323,9 @@ for export.  Return options as a plist."
 	  (let ((property (nth 1 option)))
 	    (when (and property (not (member property seen)))
 	      (let* ((subtree-prop (concat "EXPORT_" property))
-		     (value (org-entry-get (point) subtree-prop)))
+		     ;; Export properties are not case-sensitive.
+		     (value (let ((case-fold-search t))
+			      (org-entry-get (point) subtree-prop))))
 		(push property seen)
 		(when value
 		  (setq plist
