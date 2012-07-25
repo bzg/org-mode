@@ -132,7 +132,7 @@ Paragraph"
     (forward-line)
     (should
      (= 2 (plist-get (org-export-get-environment nil t) :headline-levels))))
-  ;; EXPORT DATE.
+  ;; EXPORT_DATE.
   (org-test-with-temp-text "#+DATE: today
 * Headline
   :PROPERTIES:
@@ -140,6 +140,14 @@ Paragraph"
   :END:
 Paragraph"
     (forward-line)
+    (should (equal (plist-get (org-export-get-environment nil t) :date)
+		   '("29-03-2012"))))
+  ;; Export properties are case-insensitive.
+  (org-test-with-temp-text "* Headline
+  :PROPERTIES:
+  :EXPORT_Date: 29-03-2012
+  :END:
+Paragraph"
     (should (equal (plist-get (org-export-get-environment nil t) :date)
 		   '("29-03-2012")))))
 
