@@ -309,14 +309,15 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 
 (defun org-bibtex-headline ()
   "Return a bibtex entry of the given headline as a string."
-  (org-flet ((val (key lst) (cdr (assoc key lst)))
-         (to (string) (intern (concat ":" string)))
-         (from (key) (substring (symbol-name key) 1))
-         (flatten (&rest lsts)
-                  (apply #'append (mapcar
-                                   (lambda (e)
-                                     (if (listp e) (apply #'flatten e) (list e)))
-                                   lsts))))
+  (org-labels
+   ((val (key lst) (cdr (assoc key lst)))
+    (to (string) (intern (concat ":" string)))
+    (from (key) (substring (symbol-name key) 1))
+    (flatten (&rest lsts)
+	     (apply #'append (mapcar
+			      (lambda (e)
+				(if (listp e) (apply #'flatten e) (list e)))
+			      lsts))))
     (let ((notes (buffer-string))
           (id (org-bibtex-get org-bibtex-key-property))
           (type (org-bibtex-get org-bibtex-type-property-name))
