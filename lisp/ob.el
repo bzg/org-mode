@@ -616,8 +616,8 @@ arguments and pop open the results in a preview buffer."
   "Return the edit (levenshtein) distance between strings S1 S2."
   (let* ((l1 (length s1))
 	 (l2 (length s2))
-	 (dist (map 'vector (lambda (_) (make-vector (1+ l2) nil))
-		    (number-sequence 1 (1+ l1)))))
+	 (dist (vconcat (mapcar (lambda (_) (make-vector (1+ l2) nil))
+				(number-sequence 1 (1+ l1))))))
     (org-flet ((in (i j) (aref (aref dist i) j))
 	   (mmin (&rest lst) (apply #'min (remove nil lst))))
       (setf (aref (aref dist 0) 0) 0)
