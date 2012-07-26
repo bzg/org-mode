@@ -4288,7 +4288,7 @@ entry.")
   "Translate string S according to language specification.
 
 ENCODING is a symbol among `:ascii', `:html', `:latex', `:latin1'
-and `:utf8'.  INFO is a plist used as a communication channel.
+and `:utf-8'.  INFO is a plist used as a communication channel.
 
 Translation depends on `:language' property.  Return the
 translated string.  If no translation is found return S."

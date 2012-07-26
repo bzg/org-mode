@@ -373,10 +373,9 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
-Return output file's name."
+Export is done in a buffer named \"*Org MD Export*\", which will
+be displayed when `org-export-show-temporary-export-buffer' is
+non-nil."
   (interactive)
   (let ((outbuf (org-export-to-buffer
 		 'md "*Org MD Export*" subtreep visible-only)))
