@@ -20594,7 +20594,7 @@ If point is in an inline task, mark that task instead."
     (setq column (current-column))
     (beginning-of-line 1)
     (if (looking-at
-	 "\\([ \t]+\\)\\(:[-_0-9a-zA-Z]+:\\)[ \t]*\\(\\S-.*\\(\\S-\\|$\\)\\)")
+	 "\\([ \t]*\\)\\(:[-_0-9a-zA-Z]+:\\)[ \t]*\\(\\S-.*\\(\\S-\\|$\\)\\)")
 	(replace-match (concat (match-string 1)
 			       (format org-property-format
 				       (match-string 2) (match-string 3)))
