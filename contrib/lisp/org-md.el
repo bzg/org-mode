@@ -160,9 +160,9 @@ a communication channel."
 				     (mapconcat 'identity tag-list ":"))))))
 	   (priority (and (plist-get info :with-priority)
 			  (org-element-property :priority headline)))
-	   (heading (concat (and todo (concat " " todo))
-			    (and priority (concat " " priority))
-			    " " title)))
+	   (heading (concat (and todo (concat todo " "))
+			    (and priority (concat priority " "))
+			    title)))
       (cond
        ;; Cannot create an headline.  Fall-back to a list.
        ((or (org-export-low-level-p headline info)
@@ -186,7 +186,9 @@ a communication channel."
 		"\n\n"
 		contents))
        ;; Use "atx" style.
-       (t (concat (make-string level ?#) heading (and tags (concat "    " tags))
+       (t (concat (make-string level ?#) " "
+		  heading
+		  (and tags (concat "    " tags))
 		  "\n\n"
 		  contents))))))
 
