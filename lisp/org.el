@@ -16212,6 +16212,8 @@ With prefix ARG, change that many days."
       (message "Timestamp is now %sactive"
 	       (if (equal (char-after beg) ?<) "" "in")))))
 
+(defvar org-clock-history)                     ; defined in org-clock.el
+(defvar org-clock-adjust-closest nil)          ; defined in org-clock.el
 (defun org-timestamp-change (n &optional what updown)
   "Change the date in the time stamp at point.
 The date will be changed by N times WHAT.  WHAT can be `day', `month',
@@ -16222,7 +16224,7 @@ in the timestamp determines what will be changed."
 	(dm (max (nth 1 org-time-stamp-rounding-minutes) 1))
 	org-ts-what
 	extra rem
-	ts time time0)
+	ts time time0 fixnext clrgx)
     (if (not (org-at-timestamp-p t))
 	(error "Not at a timestamp"))
     (if (and (not what) (eq org-ts-what 'bracket))
@@ -16304,6 +16306,36 @@ in the timestamp determines what will be changed."
 		    (t origin))))
       ;; Update clock if on a CLOCK line.
       (org-clock-update-time-maybe)
+      ;; Maybe adjust the closest clock in `org-clock-history'
+      (if (not (and org-clock-adjust-closest
+		    (org-at-clock-log-p)
+		    (< 1 (length (delq nil (mapcar (lambda(m) (marker-position m))
+						   org-clock-history))))))
+	  (message "No clock to adjust")
+	(cond ((save-excursion ; fix previous clock?
+		 (re-search-backward org-ts-regexp0 nil t)
+		 (looking-back (concat org-clock-string " \\[")))
+	       (setq fixnext 1 clrgx (concat org-ts-regexp0 "\\] =>.*$")))
+	      ((save-excursion ; fix next clock?
+		 (re-search-backward org-ts-regexp0 nil t)
+		 (looking-at (concat org-ts-regexp0 "\\] =>")))
+	       (setq fixnext -1 clrgx (concat org-clock-string " \\[" org-ts-regexp0))))
+	(save-excursion
+	  ;; Find closest clock to point, adjust the previous/next one
+	  (org-back-to-heading t)
+	  (let* ((cl (mapcar (lambda(c) (abs (- (marker-position c) (point))))
+			     org-clock-history))
+		 (clfixnth (+ fixnext (position (apply #'min cl) cl)))
+		 (clfixpos (if (> 0 clfixnth) nil (nth clfixnth org-clock-history))))
+	    (if (not clfixpos)
+		(message "No clock to adjust")
+	      (goto-char clfixpos)
+	      (org-show-subtree)
+	      (when (re-search-forward clrgx nil t)
+		(goto-char (match-beginning 1))
+		(let (org-clock-adjust-closest)
+		  (org-timestamp-change n org-ts-what updown))
+		(message "Clock adjusted for heading: %s" (org-get-heading t t)))))))
       ;; Try to recenter the calendar window, if any.
       (if (and org-calendar-follow-timestamp-change
 	       (get-buffer-window "*Calendar*" t)
@@ -18344,27 +18376,31 @@ individual commands for more information."
 (defun org-shiftmetaup (&optional arg)
   "Move subtree up or kill table row.
 Calls `org-move-subtree-up' or `org-table-kill-row' or
-`org-move-item-up' depending on context.  See the individual commands
-for more information."
+`org-move-item-up' or `org-timestamp-up', depending on context.
+See the individual commands for more information."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetaup-hook))
    ((org-at-table-p) (call-interactively 'org-table-kill-row))
    ((org-at-heading-p) (call-interactively 'org-move-subtree-up))
    ((org-at-item-p) (call-interactively 'org-move-item-up))
+   ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
+			   (call-interactively 'org-timestamp-up)))
    (t (org-modifier-cursor-error))))
 
 (defun org-shiftmetadown (&optional arg)
   "Move subtree down or insert table row.
 Calls `org-move-subtree-down' or `org-table-insert-row' or
-`org-move-item-down', depending on context.  See the individual
-commands for more information."
+`org-move-item-down' or `org-timestamp-up', depending on context.
+See the individual commands for more information."
   (interactive "P")
   (cond
    ((run-hook-with-args-until-success 'org-shiftmetadown-hook))
    ((org-at-table-p) (call-interactively 'org-table-insert-row))
    ((org-at-heading-p) (call-interactively 'org-move-subtree-down))
    ((org-at-item-p) (call-interactively 'org-move-item-down))
+   ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
+			   (call-interactively 'org-timestamp-down)))
    (t (org-modifier-cursor-error))))
 
 (defsubst org-hidden-tree-error ()
