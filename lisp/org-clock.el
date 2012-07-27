@@ -1146,7 +1146,12 @@ clock in by using the last clock-out time as the start time
 	    (goto-char target-pos)
 	    (org-back-to-heading t)
 	    (or interrupting (move-marker org-clock-interrupted-task nil))
-	    (org-clock-history-push)
+	    (save-excursion
+	      (forward-char) ;; make sure the marker is not at the
+			     ;; beginning of the heading, since the
+			     ;; user is liking to insert stuff here
+			     ;; manually
+	      (org-clock-history-push))
 	    (org-clock-set-current)
 	    (cond ((functionp org-clock-in-switch-to-state)
 		   (looking-at org-complex-heading-regexp)
