@@ -152,17 +152,18 @@ a communication channel."
 	   (todo (and (plist-get info :with-todo-keywords)
 		      (let ((todo (org-element-property :todo-keyword
 							headline)))
-			(and todo (org-export-data todo info)))))
+			(and todo (concat (org-export-data todo info) " ")))))
 	   (tags (and (plist-get info :with-tags)
 		      (let ((tag-list (org-export-get-tags headline info)))
 			(and tag-list
-			     (format " :%s:"
+			     (format "     :%s:"
 				     (mapconcat 'identity tag-list ":"))))))
-	   (priority (and (plist-get info :with-priority)
-			  (org-element-property :priority headline)))
-	   (heading (concat (and todo (concat todo " "))
-			    (and priority (concat priority " "))
-			    title)))
+	   (priority
+	    (and (plist-get info :with-priority)
+		 (let ((char (org-element-property :priority headline)))
+		   (and char (format "[#%c] " char)))))
+	   ;; Headline text without tags.
+	   (heading (concat todo priority title)))
       (cond
        ;; Cannot create an headline.  Fall-back to a list.
        ((or (org-export-low-level-p headline info)
@@ -175,22 +176,18 @@ a communication channel."
 			  (car (last (org-export-get-headline-number
 				      headline info))))
 			 "."))))
-	  (concat bullet (make-string (- 4 (length bullet)) ? )
-		  heading (and tags (concat "    " tags)) "\n\n"
+	  (concat bullet (make-string (- 4 (length bullet)) ? ) heading tags
+		  "\n\n"
 		  (and contents
 		       (replace-regexp-in-string "^" "    " contents)))))
        ;; Use "Setext" style.
        ((eq org-md-headline-style 'setext)
-	(concat heading (and tags (concat "    " tags)) "\n"
+	(concat heading tags "\n"
 		(make-string (length heading) (if (= level 1) ?= ?-))
 		"\n\n"
 		contents))
        ;; Use "atx" style.
-       (t (concat (make-string level ?#) " "
-		  heading
-		  (and tags (concat "    " tags))
-		  "\n\n"
-		  contents))))))
+       (t (concat (make-string level ?#) " " heading tags "\n\n" contents))))))
 
 
 ;;;; Horizontal Rule
