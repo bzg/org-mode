@@ -23,6 +23,6 @@ main() {
     }
 
     //info was retrieved successfully, print idle time
-    printf("%u\n", info->idle);
+    printf("%lu\n", info->idle);
     return 0;
 }
