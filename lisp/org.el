@@ -16325,7 +16325,8 @@ in the timestamp determines what will be changed."
 	  (org-back-to-heading t)
 	  (let* ((cl (mapcar (lambda(c) (abs (- (marker-position c) (point))))
 			     org-clock-history))
-		 (clfixnth (+ fixnext (position (apply #'min cl) cl)))
+		 (clfixnth
+		  (+ fixnext (- (length cl) (or (length (member (apply #'min cl) cl)) 100))))
 		 (clfixpos (if (> 0 clfixnth) nil (nth clfixnth org-clock-history))))
 	    (if (not clfixpos)
 		(message "No clock to adjust")
