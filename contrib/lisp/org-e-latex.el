@@ -1279,7 +1279,7 @@ INFO is a plist used as a communication channel."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (concat
    ;; Insert separator between two footnotes in a row.
-   (let ((prev (org-export-get-previous-element footnote-reference)))
+   (let ((prev (org-export-get-previous-element footnote-reference info)))
      (when (eq (org-element-type prev) 'footnote-reference)
        org-e-latex-footnote-separator))
    (cond
@@ -1406,14 +1406,14 @@ holding contextual information."
       (let ((low-level-body
 	     (concat
 	      ;; If the headline is the first sibling, start a list.
-	      (when (org-export-first-sibling-p headline)
+	      (when (org-export-first-sibling-p headline info)
 		(format "\\begin{%s}\n" (if numberedp 'enumerate 'itemize)))
 	      ;; Itemize headline
 	      "\\item " full-text "\n" headline-label pre-blanks contents)))
 	;; If headline is not the last sibling simply return
 	;; LOW-LEVEL-BODY.  Otherwise, also close the list, before any
 	;; blank line.
-	(if (not (org-export-last-sibling-p headline)) low-level-body
+	(if (not (org-export-last-sibling-p headline info)) low-level-body
 	  (replace-regexp-in-string
 	   "[ \t\n]*\\'"
 	   (format "\n\\\\end{%s}" (if numberedp 'enumerate 'itemize))
@@ -2392,7 +2392,7 @@ a communication channel."
 		      (match-string 1 contents)
 		      (match-string 2 contents))
 	    contents)
-	  (when (org-export-get-next-element table-cell) " & ")))
+	  (when (org-export-get-next-element table-cell info) " & ")))
 
 
 ;;;; Table Row

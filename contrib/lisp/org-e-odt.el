@@ -1588,7 +1588,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 		       note-class ref-format ref-name n)))))))
     (concat
      ;; Insert separator between two footnotes in a row.
-     (let ((prev (org-export-get-previous-element footnote-reference)))
+     (let ((prev (org-export-get-previous-element footnote-reference info)))
        (and (eq (org-element-type prev) 'footnote-reference)
 	    (format "<text:span text:style-name=\"%s\">%s</text:span>"
 		    "OrgSuperscript" ",")))
@@ -1699,10 +1699,10 @@ holding contextual information."
      ;; 	     (itemized-body (org-e-odt-format-list-item
      ;; 			     contents type nil nil full-text)))
      ;; 	(concat
-     ;; 	 (and (org-export-first-sibling-p headline)
+     ;; 	 (and (org-export-first-sibling-p headline info)
      ;; 	      (org-e-odt-begin-plain-list type))
      ;; 	 itemized-body
-     ;; 	 (and (org-export-last-sibling-p headline)
+     ;; 	 (and (org-export-last-sibling-p headline info)
      ;; 	      "</text:list>"))))
      ;; Case 3. Standard headline.  Export it as a section.
      (t
