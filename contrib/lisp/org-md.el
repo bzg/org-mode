@@ -347,10 +347,7 @@ a communication channel."
   "Transcode SECTION element into Markdown format.
 CONTENTS is the section contents.  INFO is a plist used as
 a communication channel."
-  ;; Protect ambiguous #.  It isn't handled at the plain-text level
-  ;; since it requires a better view of the problem.
-  (replace-regexp-in-string
-   "^\\(?:[ \t]*>[ >]*\\)?\\(#\\)" "\\\\#" contents nil nil 1))
+  contents)
 
 
 ;;;; Template
