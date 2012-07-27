@@ -511,7 +511,8 @@ title."
 				   (mapconcat 'identity tag-list ":"))))))
 	 (priority
 	  (and (plist-get info :with-priority)
-	       (concat (org-element-property :priority element) " ")))
+	       (let ((char (org-element-property :priority element)))
+		 (and char (format "(#%c) " char)))))
 	 (first-part (concat numbers todo priority text)))
     (concat
      first-part
