@@ -313,7 +313,7 @@ channel."
     (cond ((eq backend 'e-latex) value)
 	  ;; Ignore "e-beamer" snippets specifying overlays.
 	  ((and (eq backend 'e-beamer)
-		(or (org-export-get-previous-element export-snippet)
+		(or (org-export-get-previous-element export-snippet info)
 		    (not (string-match "\\`<.*>\\'" value))))
 	   value))))
 
@@ -457,18 +457,18 @@ used as a communication channel."
 	 ;; a BEAMER_column property.
 	 (start-columns-p
 	  (and column-width
-	       (or (org-export-first-sibling-p headline)
+	       (or (org-export-first-sibling-p headline info)
 		   (not (org-element-property
 			 :beamer-col
-			 (org-export-get-previous-element headline))))))
+			 (org-export-get-previous-element headline info))))))
 	 ;; Ends a columns environment when there is no next headline
 	 ;; or the next headline do not have a BEAMER_column property.
 	 (end-columns-p
 	  (and column-width
-	       (or (org-export-last-sibling-p headline)
+	       (or (org-export-last-sibling-p headline info)
 		   (not (org-element-property
 			 :beamer-col
-			 (org-export-get-next-element headline)))))))
+			 (org-export-get-next-element headline info)))))))
     (concat
      (when start-columns-p "\\begin{columns}\n")
      (when column-width
