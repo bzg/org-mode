@@ -78,6 +78,24 @@
 (require 'find-func)
 (require 'format-spec)
 
+;; `org-outline-regexp' ought to be a defconst but is let-binding in
+;; some places -- e.g. see the macro org-with-limited-levels.
+;;
+;; In Org buffers, the value of `outline-regexp' is that of
+;; `org-outline-regexp'.  The only function still directly relying on
+;; `outline-regexp' is `org-overview' so that `org-cycle' can do its
+;; job when `orgstruct-mode' is active.
+(defvar org-outline-regexp "\\*+ "
+  "Regexp to match Org headlines.")
+(defconst org-outline-regexp-bol "^\\*+ "
+  "Regexp to match Org headlines.
+This is similar to `org-outline-regexp' but additionally makes
+sure that we are at the beginning of the line.")
+
+(defconst org-heading-regexp "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
+  "Matches an headline, putting stars and text into groups.
+Stars are put in group 1 and the trimmed body in group 2.")
+
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
 (when (fboundp 'defvaralias)
   (unless (boundp 'calendar-view-holidays-initially-flag)
@@ -89,23 +107,6 @@
   (unless (boundp 'diary-fancy-buffer)
     (defvaralias 'diary-fancy-buffer 'fancy-diary-buffer)))
 
-(require 'outline)
-(require 'noutline "noutline" 'noerror) ;; stock XEmacs does not have it
-;; Other stuff we need.
-(require 'time-date)
-(unless (fboundp 'time-subtract) (defalias 'time-subtract 'subtract-time))
-(require 'easymenu)
-(require 'overlay)
-
-(require 'org-macs)
-(require 'org-entities)
-(require 'org-compat)
-(require 'org-faces)
-(require 'org-list)
-(require 'org-pcomplete)
-(require 'org-src)
-(require 'org-footnote)
-
 (declare-function org-inlinetask-at-task-p "org-inlinetask" ())
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-inlinetask-toggle-visibility "org-inlinetask" ())
@@ -113,15 +114,6 @@
 (declare-function org-at-clock-log-p "org-clock" ())
 (declare-function org-clock-timestamps-up "org-clock" ())
 (declare-function org-clock-timestamps-down "org-clock" ())
-
-;; babel
-(require 'ob)
-(require 'ob-table)
-(require 'ob-lob)
-(require 'ob-ref)
-(require 'ob-tangle)
-(require 'ob-comint)
-(require 'ob-keys)
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
@@ -4942,26 +4934,35 @@ This variable is set by `org-before-change-function'.
 (defvar org-inhibit-blocking nil)       ; Dynamically-scoped param.
 (defvar org-table-buffer-is-an nil)
 
-;; `org-outline-regexp' ought to be a defconst but is let-binding in
-;; some places -- e.g. see the macro org-with-limited-levels.
-;;
-;; In Org buffers, the value of `outline-regexp' is that of
-;; `org-outline-regexp'.  The only function still directly relying on
-;; `outline-regexp' is `org-overview' so that `org-cycle' can do its
-;; job when `orgstruct-mode' is active.
-(defvar org-outline-regexp "\\*+ "
-  "Regexp to match Org headlines.")
-(defconst org-outline-regexp-bol "^\\*+ "
-  "Regexp to match Org headlines.
-This is similar to `org-outline-regexp' but additionally makes
-sure that we are at the beginning of the line.")
-
-(defconst org-heading-regexp "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
-  "Matches an headline, putting stars and text into groups.
-Stars are put in group 1 and the trimmed body in group 2.")
-
 (defvar bidi-paragraph-direction)
 (defvar buffer-face-mode-face)
+
+(require 'outline)
+(require 'noutline "noutline" 'noerror) ;; stock XEmacs does not have it
+;; Other stuff we need.
+(require 'time-date)
+(unless (fboundp 'time-subtract) (defalias 'time-subtract 'subtract-time))
+(require 'easymenu)
+(require 'overlay)
+
+(require 'org-macs)
+(require 'org-entities)
+(require 'org-compat)
+(require 'org-faces)
+(require 'org-list)
+(require 'org-pcomplete)
+(require 'org-src)
+(require 'org-footnote)
+(require 'org-element)
+
+;; babel
+(require 'ob)
+(require 'ob-table)
+(require 'ob-lob)
+(require 'ob-ref)
+(require 'ob-tangle)
+(require 'ob-comint)
+(require 'ob-keys)
 
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"
@@ -17749,6 +17750,10 @@ BEG and END default to the buffer boundaries."
 (if (boundp 'narrow-map)
     (org-defkey narrow-map "b" 'org-narrow-to-block)
   (org-defkey org-mode-map "\C-xnb" 'org-narrow-to-block))
+(if (boundp 'narrow-map)
+    (org-defkey narrow-map "e" 'org-narrow-to-element)
+  (org-defkey org-mode-map "\C-xne" 'org-narrow-to-element))
+(org-defkey org-mode-map "\C-\M-t"    'org-element-transpose)
 (org-defkey org-mode-map "\C-c\C-f"    'org-forward-same-level)
 (org-defkey org-mode-map "\C-c\C-b"    'org-backward-same-level)
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
@@ -18515,7 +18520,7 @@ for more information."
    ((org-at-table-p) (org-call-with-arg 'org-table-move-row 'up))
    ((org-at-heading-p) (call-interactively 'org-move-subtree-up))
    ((org-at-item-p) (call-interactively 'org-move-item-up))
-   (t (transpose-lines 1) (beginning-of-line -1))))
+   (t (org-element-drag-backward))))
 
 (defun org-metadown (&optional arg)
   "Move subtree down or move table row down.
@@ -18537,7 +18542,7 @@ commands for more information."
    ((org-at-table-p) (call-interactively 'org-table-move-row))
    ((org-at-heading-p) (call-interactively 'org-move-subtree-down))
    ((org-at-item-p) (call-interactively 'org-move-item-down))
-   (t (beginning-of-line 2) (transpose-lines 1) (beginning-of-line 0))))
+   (t (org-element-drag-forward))))
 
 (defun org-shiftup (&optional arg)
   "Increase item in timestamp or increase priority of current headline.

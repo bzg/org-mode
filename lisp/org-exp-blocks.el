@@ -72,8 +72,12 @@
 
 (eval-when-compile
   (require 'cl))
-(require 'org)
 (require 'find-func)
+
+(declare-function org-split-string "org" (string &optional separators))
+(declare-function org-remove-indentation "org" (code &optional n))
+
+(defvar org-protecting-blocks nil) ; From org.el
 
 (defun org-export-blocks-set (var value)
   "Set the value of `org-export-blocks' and install fontification."
