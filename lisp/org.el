@@ -177,6 +177,7 @@ requirements) is loaded."
 		 (const :tag "LaTeX" latex)
 		 (const :tag "Ledger" ledger)
 		 (const :tag "Lilypond" lilypond)
+		 (const :tag "Lisp" lisp)
 		 (const :tag "Maxima" maxima)
 		 (const :tag "Matlab" matlab)
 		 (const :tag "Mscgen" mscgen)
