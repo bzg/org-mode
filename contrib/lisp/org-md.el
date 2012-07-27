@@ -288,7 +288,11 @@ a communication channel."
   "Transcode PARAGRAPH element into Markdown format.
 CONTENTS is the paragraph contents.  INFO is a plist used as
 a communication channel."
-  contents)
+  (let ((first-object (car (org-element-contents paragraph))))
+    ;; If paragraph starts with a #, protect it.
+    (if (and (stringp first-object) (string-match "\\`#" first-object))
+	(replace-match "\\#" nil t first-object)
+      contents)))
 
 
 ;;;; Plain List
@@ -306,6 +310,10 @@ a communication channel."
   "Transcode a TEXT string into Markdown format.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
+  ;; Protect ambiguous #.  This will protect # at the beginning of
+  ;; a line, but not at the beginning of a paragraph.  See
+  ;; `org-md-paragraph'.
+  (setq text (replace-regexp-in-string "\n#" "\n\\\\#" text))
   ;; Protect ambiguous !
   (setq text (replace-regexp-in-string "\\(!\\)\\[" "\\\\!" text nil nil 1))
   ;; Protect `, *, _ and \
