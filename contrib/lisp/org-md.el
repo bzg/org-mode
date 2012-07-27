@@ -43,7 +43,7 @@
 
 (defcustom org-md-headline-style 'atx
   "Style used to format headlines.
-This variable can be set either `atx' or `setext'."
+This variable can be set to either `atx' or `setext'."
   :group 'org-export-md
   :type '(choice
 	  (const :tag "Use \"atx\" style" atx)
