@@ -6319,7 +6319,7 @@ identical to dealing with away time due to idleness; it is just happening due
 to a recovery event rather than a set amount of idle time.
 
 You can also check all the files visited by your Org agenda for dangling
-clocks at any time using @kbd{M-x org-resolve-clocks}.
+clocks at any time using @kbd{M-x org-resolve-clocks RET} (or @kbd{C-c C-x C-z}).
 
 @subsubheading Continuous clocking
 @cindex continuous clocking
