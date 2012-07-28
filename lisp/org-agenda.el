@@ -1221,10 +1221,18 @@ agenda display."
   :type 'boolean)
 
 (defcustom org-agenda-start-with-log-mode nil
-  "The initial value of log-mode in a newly created agenda window."
+  "The initial value of log-mode in a newly created agenda window.
+See `org-agenda-log-mode' and `org-agenda-log-mode-items' for further
+explanations on the possible values."
   :group 'org-agenda-startup
   :group 'org-agenda-daily/weekly
-  :type 'boolean)
+  :type '(choice (const :tag "Don't show log items" nil)
+		 (const :tag "Show only log items" 'only)
+		 (const :tag "Show all possible log items" 'clockcheck)
+		 (repeat :tag "Choose among possible values for `org-agenda-log-mode-items'"
+			 (choice (const :tag "Show closed log items" 'closed)
+				 (const :tag "Show clocked log items" 'clock)
+				 (const :tag "Show all logged state changes" 'state)))))
 
 (defcustom org-agenda-start-with-clockreport-mode nil
   "The initial value of clockreport-mode in a newly created agenda window."
