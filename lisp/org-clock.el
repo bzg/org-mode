@@ -26,6 +26,7 @@
 
 ;; This file contains the time clocking code for Org-mode
 
+(require 'org)
 (require 'org-exp)
 ;;; Code:
 

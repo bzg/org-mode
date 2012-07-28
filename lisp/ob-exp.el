@@ -32,18 +32,10 @@
 (defvar org-current-export-file)
 (defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-ref-split-regexp)
-(defvar org-list-forbidden-blocks)
-
 (declare-function org-babel-lob-get-info "ob-lob" ())
 (declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
-(declare-function org-heading-components "org" ())
-(declare-function org-link-search "org" (s &optional type avoid-pos stealth))
-(declare-function org-fill-template "org" (template alist))
-(declare-function org-in-verbatim-emphasis "org" ())
-(declare-function org-in-block-p "org" (names))
-(declare-function org-between-regexps-p "org" (start-re end-re &optional lim-up lim-down))
-
 (add-to-list 'org-export-interblocks '(src org-babel-exp-non-block-elements))
+
 (org-export-blocks-add-block '(src org-babel-exp-src-block nil))
 
 (defcustom org-export-babel-evaluate t
