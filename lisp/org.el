@@ -9176,6 +9176,15 @@ This command can be called in any mode to insert a link in Org-mode syntax."
   (org-load-modules-maybe)
   (org-run-like-in-org-mode 'org-insert-link))
 
+(defun org-insert-all-links (&optional keep)
+  "Insert all links in `org-stored-links'."
+  (interactive "P")
+  (let ((links (copy-sequence org-stored-links)) l)
+    (while (setq l (if keep (pop links) (pop org-stored-links)))
+      (insert "- ")
+      (org-insert-link nil (car l) (cadr l))
+      (insert "\n"))))
+
 (defun org-insert-link (&optional complete-file link-location default-description)
   "Insert a link.  At the prompt, enter the link.
 
@@ -9289,11 +9298,12 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	(kill-buffer "*Org Links*"))
       (setq entry (assoc link org-stored-links))
       (or entry (push link org-insert-link-history))
-      (if (funcall (if (equal complete-file '(64)) 'not 'identity)
-		   (not org-keep-stored-link-after-insertion))
-	  (setq org-stored-links (delq (assoc link org-stored-links)
-				       org-stored-links)))
       (setq desc (or desc (nth 1 entry)))))
+
+    (if (funcall (if (equal complete-file '(64)) 'not 'identity)
+		 (not org-keep-stored-link-after-insertion))
+	(setq org-stored-links (delq (assoc link org-stored-links)
+				     org-stored-links)))
 
     (if (string-match org-plain-link-re link)
 	;; URL-like link, normalize the use of angular brackets.
@@ -9342,9 +9352,9 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 
     (if org-make-link-description-function
 	(setq desc (funcall org-make-link-description-function link desc))
-      (if default-description (setq desc default-description)))
+      (if default-description (setq desc default-description)
+	(setq desc (read-string "Description: " desc))))
 
-    (setq desc (read-string "Description: " desc))
     (unless (string-match "\\S-" desc) (setq desc nil))
     (if remove (apply 'delete-region remove))
     (insert (org-make-link-string link desc))))
@@ -17796,6 +17806,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-n" 'org-next-link)
 (org-defkey org-mode-map "\C-c\C-x\C-p" 'org-previous-link)
 (org-defkey org-mode-map "\C-c\C-l" 'org-insert-link)
+(org-defkey org-mode-map "\C-c\C-L" 'org-insert-all-links)
 (org-defkey org-mode-map "\C-c\C-o" 'org-open-at-point)
 (org-defkey org-mode-map "\C-c%"    'org-mark-ring-push)
 (org-defkey org-mode-map "\C-c&"    'org-mark-ring-goto)
