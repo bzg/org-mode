@@ -376,7 +376,7 @@ point nowhere."
   `(let* ((org-called-with-limited-levels t)
 	  (org-outline-regexp (org-get-limited-outline-regexp))
 	  (outline-regexp org-outline-regexp)
-	  (org-outline-regexp-at-bol (concat "^" org-outline-regexp)))
+	  (org-outline-regexp-bol (concat "^" org-outline-regexp)))
      ,@body))
 (def-edebug-spec org-with-limited-levels (body))
 
