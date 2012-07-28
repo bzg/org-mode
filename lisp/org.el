@@ -20803,93 +20803,82 @@ the functionality can be provided as a fall-back.")
     (looking-at "\\\\\\\\\\($\\|[^\\\\]\\)")))
 
 (defun org-fill-paragraph (&optional justify)
-  "Re-align a table, pass through to fill-paragraph if no table."
-  (let ((table-p (org-at-table-p))
-	(table.el-p (org-at-table.el-p))
-	(itemp (org-in-item-p))
-	(srcp (org-in-src-block-p)))
-    (cond ((and (equal (char-after (point-at-bol)) ?*)
-		(save-excursion (goto-char (point-at-bol))
-				(looking-at org-outline-regexp)))
-	   t)				; skip headlines
-	  (table.el-p t)		; skip table.el tables
-	  (table-p (org-table-align) t)	; align Org tables
-	  (srcp                         ; indent entire src block to prevent
-	   (save-excursion              ; fill-paragraph-as-region to mess up
-	     (org-babel-do-in-edit-buffer
-	      (indent-region (point-min) (point-max)))))
-	  (itemp			; align text in items
-	   (let* ((struct (save-excursion (goto-char itemp)
-					  (org-list-struct)))
-		  (parents (org-list-parents-alist struct))
-		  (children (org-list-get-children itemp struct parents))
-		  beg end prev next prefix)
-	     ;; Determine in which part of item point is: before
-	     ;; first child, after last child, between two
-	     ;; sub-lists, or simply in item if there's no child.
-	     (cond
-	      ((not children)
-	       (setq prefix (make-string (org-list-item-body-column itemp) ?\ )
-		     beg itemp
-		     end (org-list-get-item-end itemp struct)))
-	      ((< (point) (setq next (car children)))
-	       (setq prefix (make-string (org-list-item-body-column itemp) ?\ )
-		     beg itemp
-		     end next))
-	      ((> (point) (setq prev (car (last children))))
-	       (setq beg (org-list-get-item-end prev struct)
-		     end (org-list-get-item-end itemp struct)
-		     prefix (save-excursion
-			      (goto-char beg)
-			      (skip-chars-forward " \t")
-			      (make-string (current-column) ?\ ))))
-	      (t (catch 'exit
-		   (while (setq next (pop children))
-		     (if (> (point) next)
-			 (setq prev next)
-		       (setq beg (org-list-get-item-end prev struct)
-			     end next
-			     prefix (save-excursion
-				      (goto-char beg)
-				      (skip-chars-forward " \t")
-				      (make-string (current-column) ?\ )))
-		       (throw 'exit nil))))))
-	     ;; Use `fill-paragraph' with buffer narrowed to item
-	     ;; without any child, and with our computed PREFIX.
-	     (org-flet ((fill-context-prefix (from to &optional flr) prefix))
-	       (save-restriction
-		 (narrow-to-region beg end)
-		 (save-excursion (fill-paragraph justify)))) t))
-	  ;; Special case where point is not in a list but is on
-	  ;; a paragraph adjacent to a list: make sure this paragraph
-	  ;; doesn't get merged with the end of the list by narrowing
-	  ;; buffer first.
-	  ((and (derived-mode-p 'org-mode)
-		(save-excursion (forward-paragraph -1)
-				(setq itemp (org-in-item-p))))
-	   (let ((struct (save-excursion (goto-char itemp)
-					 (org-list-struct))))
-	     (save-restriction
-	       (narrow-to-region (org-list-get-bottom-point struct)
-				 (save-excursion (forward-paragraph 1)
-						 (point)))
-	       (fill-paragraph justify) t)))
-	  ;; Don't fill schedule/deadline line before a paragraph
-	  ;; This only makes sense in real org-mode buffers
-	  ((and (eq major-mode 'org-mode)
-		(save-excursion (forward-paragraph -1)
-				(or (looking-at (concat "^[^\n]*" org-scheduled-regexp ".*$"))
-				    (looking-at (concat "^[^\n]*" org-deadline-regexp ".*$")))))
-	   (save-restriction
-	     (narrow-to-region (1+ (match-end 0))
-			       (save-excursion (forward-paragraph 1) (point)))
-	     (fill-paragraph justify) t))
-	  ;; Else fall back on fill-paragraph-function as possibly
-	  ;; defined in `org-fb-vars'
-	  (orgstruct-is-++
-	   (org-let org-fb-vars
-	     '(fill-paragraph justify)))
-	  (t nil))))
+  "Fill element at point, when applicable.
+
+This function only applies to paragraph, comment blocks, example
+blocks and fixed-width areas.  Also, as a special case, re-align
+table when point is at one.
+
+If JUSTIFY is non-nil (interactively, with prefix argument),
+justify as well.  If `sentence-end-double-space' is non-nil, then
+period followed by one space does not end a sentence, so don't
+break a line there.  The variable `fill-column' controls the
+width for filling."
+  (let ((element (org-element-at-point)))
+    (case (org-element-type element)
+      ;; Align Org tables, leave table.el tables as-is.
+      (table-row (org-table-align) t)
+      (table
+       (when (eq (org-element-property :type element) 'org) (org-table-align))
+       t)
+      ;; Elements that may contain `line-break' type objects.
+      ((paragraph verse-block)
+       (let ((beg (org-element-property :contents-begin element))
+             (end (org-element-property :contents-end element)))
+         ;; Do nothing if point is at an affiliated keyword or at
+         ;; verse block markers.
+         (if (or (< (point) beg) (>= (point) end)) t
+           ;; At a verse block, first narrow to current "paragraph"
+           ;; and set current element to that paragraph.
+           (save-restriction
+             (when (eq (org-element-type element) 'verse-block)
+               (narrow-to-region beg end)
+               (save-excursion
+                 (end-of-line)
+                 (let ((bol-pos (point-at-bol)))
+                   (re-search-backward org-element-paragraph-separate nil 'move)
+                   (unless (or (bobp) (= (point-at-bol) bol-pos))
+                     (forward-line))
+                   (setq element (org-element-paragraph-parser end)
+                         beg (org-element-property :contents-begin element)
+                         end (org-element-property :contents-end element)))))
+             ;; Fill paragraph, taking line breaks into consideration.
+             ;; For that, slice the paragraph using line breaks as
+             ;; separators, and fill the parts in reverse order to
+             ;; avoid messing with markers.
+             (save-excursion
+               (goto-char end)
+               (mapc
+                (lambda (pos)
+                  (fill-region-as-paragraph pos (point) justify)
+                  (goto-char pos))
+                ;; Find the list of ending positions for line breaks
+                ;; in the current paragraph.  Add paragraph beginning
+                ;; to include first slice.
+                (nreverse
+                 (cons beg
+                       (org-element-map
+                        (org-element--parse-objects
+                         beg end nil org-element-all-objects)
+                        'line-break
+                        (lambda (lb) (org-element-property :end lb)))))))) t)))
+      ;; Contents of `comment-block' type elements should be filled as
+      ;; plain text.
+      (comment-block
+       (save-excursion
+	 (fill-region-as-paragraph
+	  (save-excursion
+	    (goto-char (org-element-property :begin element))
+	    (while (looking-at org-element--affiliated-re) (forward-line))
+	    (forward-line)
+	    (point))
+	  (save-excursion
+	    (goto-char (org-element-property :end element))
+	    (if (bolp) (forward-line -1) (beginning-of-line))
+	    (point))
+	  justify)) t)
+      ;; Ignore every other element.
+      (otherwise t))))
 
 (defun org-adaptive-fill-function ()
   "Return a fill prefix for org-mode files."

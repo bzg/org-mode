@@ -2549,50 +2549,6 @@ Text.
       (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
 	      (overlays-in (point-min) (point-max)))))))
 
-(ert-deftest test-org-element/fill-paragraph ()
-  "Test `org-element-fill-paragraph' specifications."
-  ;; At an Org table, align it.
-  (org-test-with-temp-text "|a|"
-    (org-element-fill-paragraph)
-    (should (equal (buffer-string) "| a |\n")))
-  ;; At a paragraph, preserve line breaks.
-  (org-test-with-temp-text "some \\\\\nlong\ntext"
-    (let ((fill-column 20))
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string) "some \\\\\nlong text"))))
-  ;; At a verse block, fill paragraph at point, also preserving line
-  ;; breaks.  Though, do nothing when point is at the block
-  ;; boundaries.
-  (org-test-with-temp-text "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"
-    (forward-line)
-    (let ((fill-column 20))
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string)
-		     "#+BEGIN_VERSE\nSome \\\\\nlong text\n#+END_VERSE"))))
-  (org-test-with-temp-text "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"
-    (let ((fill-column 20))
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string)
-		     "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"))))
-  ;; Fill contents of `comment-block' and `example-block' elements.
-  (org-test-with-temp-text "#+BEGIN_COMMENT\nSome\ntext\n#+END_COMMENT"
-    (let ((fill-column 20))
-      (forward-line)
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string)
-		     "#+BEGIN_COMMENT\nSome text\n#+END_COMMENT"))))
-  (org-test-with-temp-text "#+BEGIN_EXAMPLE\nSome\ntext\n#+END_EXAMPLE"
-    (let ((fill-column 20))
-      (forward-line)
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string)
-		     "#+BEGIN_EXAMPLE\nSome text\n#+END_EXAMPLE"))))
-  ;; Do nothing at affiliated keywords.
-  (org-test-with-temp-text "#+NAME: para\nSome\ntext."
-    (let ((fill-column 20))
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string) "#+NAME: para\nSome\ntext.")))))
-
 
 (provide 'test-org-element)
 ;;; test-org-element.el ends here
