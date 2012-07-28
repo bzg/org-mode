@@ -4333,7 +4333,7 @@ collapsed state."
 
 ;;; Variables for pre-computed regular expressions, all buffer local
 
-(defvar org-drawer-regexp nil
+(defvar org-drawer-regexp "^[ \t]*:PROPERTIES:[ \t]*$"
   "Matches first line of a hidden block.")
 (make-variable-buffer-local 'org-drawer-regexp)
 (defvar org-todo-regexp nil
