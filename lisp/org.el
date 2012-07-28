@@ -14132,10 +14132,17 @@ value for the property."
       (call-interactively 'org-compute-property-at-point))
      (t (error "No such property action %c" c)))))
 
-(defun org-set-effort (&optional value)
+(defun org-inc-effort ()
+  "Increment the value of the effort property in the current entry."
+  (interactive)
+  (org-set-effort nil t))
+
+(defun org-set-effort (&optional value increment)
   "Set the effort property of the current entry.
-With numerical prefix arg, use the nth allowed value, 0 stands for the 10th
-allowed value."
+With numerical prefix arg, use the nth allowed value, 0 stands for the
+10th allowed value.
+
+When INCREMENT is non-nil, set the property to the next allowed value."
   (interactive "P")
   (if (equal value 0) (setq value 10))
   (let* ((completion-ignore-case t)
@@ -14149,6 +14156,9 @@ allowed value."
 	       ((and allowed (integerp value))
 		(or (car (nth (1- value) allowed))
 		    (car (org-last allowed))))
+	       ((and allowed increment)
+		(or (caadr (member (list cur) allowed))
+		    (error "Allowed effort values are not set")))
 	       (allowed
 		(message "Select 1-9,0, [RET%s]: %s"
 			 (if cur (concat "=" cur) "")
@@ -17854,6 +17864,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
 (org-defkey org-mode-map "\C-c\C-xe"    'org-set-effort)
+(org-defkey org-mode-map "\C-c\C-xE"    'org-inc-effort)
 (org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
 (org-defkey org-mode-map "\C-c\C-xi"    'org-insert-columns-dblock)
 (org-defkey org-mode-map [(control ?c) (control ?x) ?\;] 'org-timer-set-timer)
@@ -17919,6 +17930,7 @@ BEG and END default to the buffer boundaries."
     ("3" . (org-priority ?C))
     (";" . org-set-tags-command)
     ("e" . org-set-effort)
+    ("E" . org-inc-effort)
     ("Agenda Views etc")
     ("v" . org-agenda)
     ("/" . org-sparse-tree)
