@@ -98,7 +98,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 ;; a target keyword (aka an invisible target: #+TARGET: text), to
 ;; a named element (#+name: text) and to headlines (* Text).
 
-(ert-deftest test-org-export/fuzzy-links ()
+(ert-deftest test-org/fuzzy-links ()
   "Test fuzzy links specifications."
   ;; 1. Fuzzy link goes in priority to a matching target.
   (org-test-with-temp-text
@@ -127,6 +127,50 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
     (goto-line 4)
     (org-open-at-point)
     (should (looking-at "\\* Test"))))
+
+
+
+;;; Filling
+
+(ert-deftest test-org/fill-paragraph ()
+  "Test `org-fill-paragraph' specifications."
+  ;; At an Org table, align it.
+  (org-test-with-temp-text "|a|"
+    (org-fill-paragraph)
+    (should (equal (buffer-string) "| a |\n")))
+  ;; At a paragraph, preserve line breaks.
+  (org-test-with-temp-text "some \\\\\nlong\ntext"
+    (let ((fill-column 20))
+      (org-fill-paragraph)
+      (should (equal (buffer-string) "some \\\\\nlong text"))))
+  ;; At a verse block, fill paragraph at point, also preserving line
+  ;; breaks.  Though, do nothing when point is at the block
+  ;; boundaries.
+  (org-test-with-temp-text "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"
+    (forward-line)
+    (let ((fill-column 20))
+      (org-fill-paragraph)
+      (should (equal (buffer-string)
+		     "#+BEGIN_VERSE\nSome \\\\\nlong text\n#+END_VERSE"))))
+  (org-test-with-temp-text "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"
+    (let ((fill-column 20))
+      (org-fill-paragraph)
+      (should (equal (buffer-string)
+		     "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"))))
+  ;; Fill contents of `comment-block' elements.
+  (should
+   (equal
+    (org-test-with-temp-text "#+BEGIN_COMMENT\nSome\ntext\n#+END_COMMENT"
+      (let ((fill-column 20))
+	(forward-line)
+	(org-fill-paragraph)
+	(buffer-string)))
+    "#+BEGIN_COMMENT\nSome text\n#+END_COMMENT"))
+  ;; Do nothing at affiliated keywords.
+  (org-test-with-temp-text "#+NAME: para\nSome\ntext."
+    (let ((fill-column 20))
+      (org-fill-paragraph)
+      (should (equal (buffer-string) "#+NAME: para\nSome\ntext.")))))
 
 
 (provide 'test-org)

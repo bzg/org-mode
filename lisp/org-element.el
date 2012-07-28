@@ -124,7 +124,7 @@
 ;; process.
 
 (defconst org-element-paragraph-separate
-  (concat "\f" "\\|" "^[ \t]*$" "\\|"
+  (concat "^[ \t]*$" "\\|"
 	  ;; Headlines and inlinetasks.
 	  org-outline-regexp-bol "\\|"
 	  ;; Comments, blocks (any type), keywords and babel calls.
@@ -140,11 +140,7 @@
 	  ;; LaTeX environments.
 	  "^[ \t]*\\\\\\(begin\\|end\\)" "\\|"
 	  ;; Planning and Clock lines.
-	  "^[ \t]*\\(?:"
-	  org-clock-string "\\|"
-	  org-closed-string "\\|"
-	  org-deadline-string "\\|"
-	  org-scheduled-string "\\)")
+	  org-planning-or-clock-line-re)
   "Regexp to separate paragraphs in an Org buffer.")
 
 (defconst org-element-all-elements
@@ -1691,15 +1687,16 @@ Assume point is at the beginning of the paragraph."
     (let* ((contents-begin (point))
 	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
-	   (contents-end
+	   (before-blank
 	    (progn (end-of-line)
 		   (if (re-search-forward org-element-paragraph-separate
 					  limit
 					  'm)
-		       (progn (forward-line -1) (end-of-line) (point))
+		       (goto-char (match-beginning 0))
 		     (point))))
-	   (pos-before-blank (progn (forward-line) (point)))
-	   (end (progn (org-skip-whitespace)
+	   (contents-end (progn (skip-chars-backward " \r\t\n" contents-begin)
+				(line-end-position)))
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'paragraph
 	    ;; If paragraph has no affiliated keywords, it may not begin
@@ -1709,7 +1706,7 @@ Assume point is at the beginning of the paragraph."
 		   :end end
 		   :contents-begin contents-begin
 		   :contents-end contents-end
-		   :post-blank (count-lines pos-before-blank end))
+		   :post-blank (count-lines before-blank end))
 	     (cadr keywords))))))
 
 (defun org-element-paragraph-interpreter (paragraph contents)
@@ -4441,83 +4438,6 @@ modified."
 		      (org-do-remove-indentation)))))
 	      (reverse contents))))))
     (funcall unindent-tree (org-element-contents parse-tree))))
-
-(defun org-element-fill-paragraph (&optional justify)
-  "Fill element at point, when applicable.
-
-This function only applies to paragraph, comment blocks, example
-blocks and fixed-width areas.  Also, as a special case, re-align
-table when point is at one.
-
-If JUSTIFY is non-nil (interactively, with prefix argument),
-justify as well.  If `sentence-end-double-space' is non-nil, then
-period followed by one space does not end a sentence, so don't
-break a line there.  The variable `fill-column' controls the
-width for filling."
-  (let ((element (org-element-at-point)))
-    (case (org-element-type element)
-      ;; Align Org tables, leave table.el tables as-is.
-      (table-row (org-table-align) t)
-      (table
-       (when (eq (org-element-property :type element) 'org) (org-table-align))
-       t)
-      ;; Elements that may contain `line-break' type objects.
-      ((paragraph verse-block)
-       (let ((beg (org-element-property :contents-begin element))
-             (end (org-element-property :contents-end element)))
-         ;; Do nothing if point is at an affiliated keyword or at
-         ;; verse block markers.
-         (if (or (< (point) beg) (>= (point) end)) t
-           ;; At a verse block, first narrow to current "paragraph"
-           ;; and set current element to that paragraph.
-           (save-restriction
-             (when (eq (org-element-type element) 'verse-block)
-               (narrow-to-region beg end)
-               (save-excursion
-                 (end-of-line)
-                 (let ((bol-pos (point-at-bol)))
-                   (re-search-backward org-element-paragraph-separate nil 'move)
-                   (unless (or (bobp) (= (point-at-bol) bol-pos))
-                     (forward-line))
-                   (setq element (org-element-paragraph-parser end)
-                         beg (org-element-property :contents-begin element)
-                         end (org-element-property :contents-end element)))))
-             ;; Fill paragraph, taking line breaks into consideration.
-             ;; For that, slice the paragraph using line breaks as
-             ;; separators, and fill the parts in reverse order to
-             ;; avoid messing with markers.
-             (save-excursion
-               (goto-char end)
-               (mapc
-                (lambda (pos)
-                  (fill-region-as-paragraph pos (point) justify)
-                  (goto-char pos))
-                ;; Find the list of ending positions for line breaks
-                ;; in the current paragraph.  Add paragraph beginning
-                ;; to include first slice.
-                (nreverse
-                 (cons beg
-                       (org-element-map
-                        (org-element--parse-objects
-                         beg end nil org-element-all-objects)
-                        'line-break
-                        (lambda (lb) (org-element-property :end lb)))))))) t)))
-      ;; Elements whose contents should be filled as plain text.
-      ((comment-block example-block)
-       (save-restriction
-         (narrow-to-region
-          (save-excursion
-            (goto-char (org-element-property :begin element))
-            (while (looking-at org-element--affiliated-re) (forward-line))
-	    (forward-line)
-            (point))
-          (save-excursion
-	    (goto-char (org-element-property :end element))
-	    (if (bolp) (forward-line -1) (beginning-of-line))
-	    (point)))
-         (fill-paragraph justify) t))
-      ;; Ignore every other element.
-      (otherwise t))))
 
 
 (provide 'org-element)
