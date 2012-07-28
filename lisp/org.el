@@ -5058,10 +5058,6 @@ The following commands are available:
     (remove-hook 'org-blocker-hook
 		 'org-block-todo-from-checkboxes))
 
-  ;; Comment characters
-  (org-set-local 'comment-start "#")
-  (org-set-local 'comment-padding " ")
-
   ;; Align options lines
   (org-set-local
    'align-mode-rules-list
@@ -8427,7 +8423,7 @@ buffer.  It will also recognize item context in multiline items."
       (mapc
        (lambda (x)
 	 (when (string-match
-		"^\\(paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|adaptive-fill\\|indent-\\)"
+		"^\\(paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
 		(symbol-name (car x)))
 	   (setq var (car x) val (nth 1 x))
 	   (push (list var `(quote ,(eval var))) org-fb-vars)
@@ -8562,7 +8558,7 @@ Possible values in the list of contexts are `table', `headline', and `item'."
       (goto-char pos))))
 
 (defun org-get-local-variables ()
-  "Return a list of all local variables in an org-mode buffer."
+  "Return a list of all local variables in an Org mode buffer."
   (let (varlist)
     (with-current-buffer (get-buffer-create "*Org tmp*")
       (erase-buffer)
@@ -8577,7 +8573,7 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 		       (list x)
 		     (list (car x) (list 'quote (cdr x)))))
 	     (if (string-match
-		  "^\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|adaptive-fill\\|indent-\\)"
+		  "^\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
 		  (symbol-name (car x)))
 		 x nil))
 	   varlist))))
@@ -20725,71 +20721,25 @@ If point is in an inline task, mark that task instead."
 	      (t (call-interactively 'org-indent-line)))
 	(move-beginning-of-line 2)))))
 
-;; For reference, this is the default value of adaptive-fill-regexp
-;;  "[ \t]*\\([-|#;>*]+[ \t]*\\|(?[0-9]+[.)][ \t]*\\)*"
-(defvar org-adaptive-fill-regexp-backup adaptive-fill-regexp
-  "Variable to store copy of `adaptive-fill-regexp'.
-Since `adaptive-fill-regexp' is set to never match, we need to
-store a backup of its value before entering `org-mode' so that
-the functionality can be provided as a fall-back.")
-
 (defun org-set-autofill-regexps ()
   (interactive)
-  ;; In the paragraph separator we include headlines, because filling
-  ;; text in a line directly attached to a headline would otherwise
-  ;; fill the headline as well.
-  (org-set-local 'comment-start-skip "^#+[ \t]*")
-  (org-set-local 'paragraph-separate "\f\\|\\*+ \\|[ 	]*$\\|[ \t]*[:|#]")
-  ;; The paragraph starter includes hand-formatted lists.
-  (org-set-local
-   'paragraph-start
-   (concat
-    "\f" "\\|"
-    "[ 	]*$" "\\|"
-    org-outline-regexp "\\|"
-    "[ \t]*#" "\\|"
-    (org-item-re) "\\|"
-    "[ \t]*[:|]" "\\|"
-    "\\$\\$" "\\|"
-    "\\\\\\(begin\\|end\\|[][]\\)"))
-  ;; Inhibit auto-fill for headers, tables and fixed-width lines.
-  ;; But only if the user has not turned off tables or fixed-width regions
-  (org-set-local
-   'auto-fill-inhibit-regexp
-   (concat org-outline-regexp
-	   "\\|#\\+"
-	   "\\|[ \t]*" org-keyword-time-regexp
-	   (if (or org-enable-table-editor org-enable-fixed-width-editor)
-	       (concat
-		"\\|[ \t]*["
-		(if org-enable-table-editor "|" "")
-		(if org-enable-fixed-width-editor ":"  "")
-		"]"))))
-  ;; We use our own fill-paragraph function, to make sure that tables
-  ;; and fixed-width regions are not wrapped.  That function will pass
-  ;; through to `fill-paragraph' when appropriate.
+  ;; We use our own fill-paragraph and auto-fill functions.  These
+  ;; functions will shadow `fill-prefix' (computed internally with
+  ;; `org-fill-context-prefix') and pass through to
+  ;; `fill-region-as-paragraph' and `do-auto-fill' as appropriate.
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
   ;; Prevent auto-fill from inserting unwanted new items.
-  (if (boundp 'fill-nobreak-predicate)
-      (org-set-local
-       'fill-nobreak-predicate
-       (org-uniquify
-	(append fill-nobreak-predicate
-		'(org-fill-item-nobreak-p org-fill-line-break-nobreak-p)))))
-  ;; Adaptive filling: To get full control, first make sure that
-  ;; `adaptive-fill-regexp' never matches.  Then install our own matcher.
-  (unless (local-variable-p 'adaptive-fill-regexp (current-buffer))
-    (org-set-local 'org-adaptive-fill-regexp-backup
-                   adaptive-fill-regexp))
-  (org-set-local 'adaptive-fill-regexp "\000")
+  (when (boundp 'fill-nobreak-predicate)
+    (org-set-local
+     'fill-nobreak-predicate
+     (org-uniquify
+      (append fill-nobreak-predicate
+	      '(org-fill-item-nobreak-p org-fill-line-break-nobreak-p)))))
   (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
-  (org-set-local 'adaptive-fill-function
-		 'org-adaptive-fill-function)
-  (org-set-local
-   'align-mode-rules-list
-   '((org-in-buffer-settings
-      (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
-      (modes . '(org-mode))))))
+  (org-set-local 'align-mode-rules-list
+		 '((org-in-buffer-settings
+		    (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
+		    (modes . '(org-mode))))))
 
 (defun org-fill-item-nobreak-p ()
   "Non-nil when a line break at point would insert a new item."
@@ -20802,12 +20752,55 @@ the functionality can be provided as a fall-back.")
     (skip-chars-backward "\\\\")
     (looking-at "\\\\\\\\\\($\\|[^\\\\]\\)")))
 
+(defun org-fill-context-prefix (p)
+  "Compute a fill prefix for the line at point P.
+Return fill prefix, as a string, or nil if current line isn't
+meant to be filled."
+  (save-excursion
+    (let* ((elements (org-element-at-point t))
+	   (element (car elements))
+	   (type (org-element-type element))
+	   (post-affiliated
+	    (progn
+	      (goto-char (org-element-property :begin element))
+	      (while (looking-at org-element--affiliated-re) (forward-line))
+	      (point))))
+      (unless (< p post-affiliated)
+	(goto-char p)
+	(beginning-of-line)
+	(case type
+	  (comment (looking-at "[ \t]*#\\+? ?") (match-string 0))
+	  ((item plain-list)
+	   (make-string (org-list-item-body-column
+			 (org-element-property :begin element))
+			? ))
+	  (paragraph
+	   ;; Fill prefix is usually the same as the current line,
+	   ;; except if the paragraph is at the beginning of an item.
+	   (let ((parent (cadr elements)))
+	     (if (eq (org-element-type parent) 'item)
+		 (make-string (org-list-item-body-column
+			       (org-element-property :begin parent))
+			      ? )
+	       (if (looking-at "\\s-+") (match-string 0) ""))))
+	  ((comment-block verse-block)
+	   ;; Only fill contents if P is within block boundaries.
+	   (let* ((cbeg (save-excursion (goto-char post-affiliated)
+					(forward-line)
+					(point)))
+		  (cend (save-excursion
+			  (goto-char (org-element-property :end element))
+			  (skip-chars-backward " \r\t\n")
+			  (line-beginning-position))))
+	     (when (and (>= p cbeg) (< p cend))
+	       (if (looking-at "\\s-+") (match-string 0) "")))))))))
+
 (defun org-fill-paragraph (&optional justify)
   "Fill element at point, when applicable.
 
-This function only applies to paragraph, comment blocks, example
-blocks and fixed-width areas.  Also, as a special case, re-align
-table when point is at one.
+This function only applies to comment blocks, comments, example
+blocks, paragraphs and verse blocks.  Also, as a special case,
+re-align table when point is at one.
 
 If JUSTIFY is non-nil (interactively, with prefix argument),
 justify as well.  If `sentence-end-double-space' is non-nil, then
@@ -20815,113 +20808,98 @@ period followed by one space does not end a sentence, so don't
 break a line there.  The variable `fill-column' controls the
 width for filling."
   (let ((element (org-element-at-point)))
-    (case (org-element-type element)
-      ;; Align Org tables, leave table.el tables as-is.
-      (table-row (org-table-align) t)
-      (table
-       (when (eq (org-element-property :type element) 'org) (org-table-align))
-       t)
-      ;; Elements that may contain `line-break' type objects.
-      ((paragraph verse-block)
-       (let ((beg (org-element-property :contents-begin element))
-             (end (org-element-property :contents-end element)))
-         ;; Do nothing if point is at an affiliated keyword or at
-         ;; verse block markers.
-         (if (or (< (point) beg) (>= (point) end)) t
-           ;; At a verse block, first narrow to current "paragraph"
-           ;; and set current element to that paragraph.
-           (save-restriction
-             (when (eq (org-element-type element) 'verse-block)
-               (narrow-to-region beg end)
-               (save-excursion
-                 (end-of-line)
-                 (let ((bol-pos (point-at-bol)))
-                   (re-search-backward org-element-paragraph-separate nil 'move)
-                   (unless (or (bobp) (= (point-at-bol) bol-pos))
-                     (forward-line))
-                   (setq element (org-element-paragraph-parser end)
-                         beg (org-element-property :contents-begin element)
-                         end (org-element-property :contents-end element)))))
-             ;; Fill paragraph, taking line breaks into consideration.
-             ;; For that, slice the paragraph using line breaks as
-             ;; separators, and fill the parts in reverse order to
-             ;; avoid messing with markers.
-             (save-excursion
-               (goto-char end)
-               (mapc
-                (lambda (pos)
-                  (fill-region-as-paragraph pos (point) justify)
-                  (goto-char pos))
-                ;; Find the list of ending positions for line breaks
-                ;; in the current paragraph.  Add paragraph beginning
-                ;; to include first slice.
-                (nreverse
-                 (cons beg
-                       (org-element-map
-                        (org-element--parse-objects
-                         beg end nil org-element-all-objects)
-                        'line-break
-                        (lambda (lb) (org-element-property :end lb)))))))) t)))
-      ;; Contents of `comment-block' type elements should be filled as
-      ;; plain text.
-      (comment-block
-       (save-excursion
-	 (fill-region-as-paragraph
-	  (save-excursion
-	    (goto-char (org-element-property :begin element))
-	    (while (looking-at org-element--affiliated-re) (forward-line))
-	    (forward-line)
-	    (point))
-	  (save-excursion
-	    (goto-char (org-element-property :end element))
-	    (if (bolp) (forward-line -1) (beginning-of-line))
-	    (point))
-	  justify)) t)
-      ;; Ignore every other element.
-      (otherwise t))))
-
-(defun org-adaptive-fill-function ()
-  "Return a fill prefix for org-mode files."
-  (let (itemp)
-    (save-excursion
-      (cond
-       ;; Comment line
-       ((looking-at "#[ \t]+")
-	(match-string-no-properties 0))
-       ;; Plain list item
-       ((org-at-item-p)
-	(make-string (org-list-item-body-column (point-at-bol)) ?\ ))
-       ;; Point is in a list after `backward-paragraph': original
-       ;; point wasn't in the list, or filling would have been taken
-       ;; care of by `org-auto-fill-function', but the list and the
-       ;; real paragraph are not separated by a blank line. Thus, move
-       ;; point after the list to go back to real paragraph and
-       ;; determine fill-prefix.
-       ((setq itemp (org-in-item-p))
-	(goto-char itemp)
-	(let* ((struct (org-list-struct))
-	       (bottom (org-list-get-bottom-point struct)))
-	  (goto-char bottom)
-	  (make-string (org-get-indentation) ?\ )))
-       ;; Other text
-       ((looking-at org-adaptive-fill-regexp-backup)
-	(match-string-no-properties 0))))))
+    ;; First check if point is in a blank line at the beginning of the
+    ;; buffer.  In that case, ignore filling.
+    (if (< (point) (org-element-property :begin element)) t
+      (case (org-element-type element)
+	;; Align Org tables, leave table.el tables as-is.
+	(table-row (org-table-align) t)
+	(table
+	 (when (eq (org-element-property :type element) 'org) (org-table-align))
+	 t)
+	;; Elements that may contain `line-break' type objects.
+	((paragraph verse-block)
+	 (let ((beg (org-element-property :contents-begin element))
+	       (end (org-element-property :contents-end element)))
+	   ;; Do nothing if point is at an affiliated keyword or at
+	   ;; verse block markers.
+	   (if (or (< (point) beg) (>= (point) end)) t
+	     ;; At a verse block, first narrow to current "paragraph"
+	     ;; and set current element to that paragraph.
+	     (save-restriction
+	       (when (eq (org-element-type element) 'verse-block)
+		 (narrow-to-region beg end)
+		 (save-excursion
+		   (end-of-line)
+		   (let ((bol-pos (point-at-bol)))
+		     (re-search-backward org-element-paragraph-separate nil 'm)
+		     (unless (or (bobp) (= (point-at-bol) bol-pos))
+		       (forward-line))
+		     (setq element (org-element-paragraph-parser end)
+			   beg (org-element-property :contents-begin element)
+			   end (org-element-property :contents-end element)))))
+	       ;; Fill paragraph, taking line breaks into consideration.
+	       ;; For that, slice the paragraph using line breaks as
+	       ;; separators, and fill the parts in reverse order to
+	       ;; avoid messing with markers.
+	       (save-excursion
+		 (goto-char end)
+		 (mapc
+		  (lambda (pos)
+		    (let ((fill-prefix (org-fill-context-prefix pos)))
+		      (fill-region-as-paragraph pos (point) justify))
+		    (goto-char pos))
+		  ;; Find the list of ending positions for line breaks
+		  ;; in the current paragraph.  Add paragraph beginning
+		  ;; to include first slice.
+		  (nreverse
+		   (cons beg
+			 (org-element-map
+			  (org-element--parse-objects
+			   beg end nil org-element-all-objects)
+			  'line-break
+			  (lambda (lb) (org-element-property :end lb))))))))
+	     t)))
+	;; Contents of `comment-block' type elements should be filled as
+	;; plain text.
+	(comment-block
+	 (let ((fill-prefix (org-fill-context-prefix (point))))
+	   (save-excursion
+	     (fill-region-as-paragraph
+	      (progn
+		(goto-char (org-element-property :begin element))
+		(while (looking-at org-element--affiliated-re) (forward-line))
+		(forward-line)
+		(point))
+	      (progn
+		(goto-char (org-element-property :end element))
+		(skip-chars-backward " \r\t\n")
+		(line-beginning-position))
+	      justify))) t)
+	(comment
+	 (let ((fill-prefix (org-fill-context-prefix (point))))
+	   (save-excursion
+	     (fill-region-as-paragraph
+	      (progn
+		(goto-char (org-element-property :begin element))
+		(while (looking-at org-element--affiliated-re) (forward-line))
+		(point))
+	      (progn
+		(goto-char (org-element-property :end element))
+		(skip-chars-backward " \r\t\n")
+		(line-end-position))))))
+	;; Ignore every other element.
+	(otherwise t)))))
 
 (defun org-auto-fill-function ()
   "Auto-fill function."
-  (unless (and org-src-prevent-auto-filling (org-in-src-block-p))
-    (let (itemp prefix)
-      ;; When in a list, compute an appropriate fill-prefix and make
-      ;; sure it will be used by `do-auto-fill'.
-      (cond ((setq itemp (org-in-item-p))
-	     (progn
-	       (setq prefix (make-string (org-list-item-body-column itemp) ?\ ))
-	       (org-flet ((fill-context-prefix (from to &optional flr) prefix))
-		 (do-auto-fill))))
-	    (orgstruct-is-++
-	     (org-let org-fb-vars
-	       '(do-auto-fill)))
-	    (t (do-auto-fill))))))
+  ;; Check if auto-filling is meaningful before computing fill prefix.
+  (let ((fc (current-fill-column)))
+    (when (and fc (> (current-column) fc))
+      (let ((fill-prefix (org-fill-context-prefix (point))))
+	(when fill-prefix
+	  (if orgstruct-is-++ (org-let org-fb-vars '(do-auto-fill))
+	    (do-auto-fill)))))))
 
 ;;; Other stuff.
 
