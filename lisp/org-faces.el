@@ -491,9 +491,9 @@ changes."
   :version "22.1")
 
 (defface org-document-title
-  '((((class color) (background light)) (:foreground "midnight blue" :weight bold :height 1.44))
-    (((class color) (background dark)) (:foreground "pale turquoise" :weight bold :height 1.44))
-    (t (:weight bold :height 1.44)))
+  '((((class color) (background light)) (:foreground "midnight blue" :weight bold))
+    (((class color) (background dark)) (:foreground "pale turquoise" :weight bold))
+    (t (:weight bold)))
   "Face for document title, i.e. that which follows the #+TITLE: keyword."
   :group 'org-faces)
 
