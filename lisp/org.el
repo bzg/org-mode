@@ -666,6 +666,13 @@ Changes become only effective after restarting Emacs."
   :group 'org-keywords
   :type 'string)
 
+(defconst org-planning-or-clock-line-re (concat "^[ \t]*\\("
+						org-scheduled-string "\\|"
+						org-deadline-string "\\|"
+						org-closed-string "\\|"
+						org-clock-string "\\)")
+  "Matches a line with planning or clock info.")
+
 (defcustom org-comment-string "COMMENT"
   "Entries starting with this keyword will never be exported.
 An entry can be toggled between COMMENT and normal with
@@ -4397,9 +4404,6 @@ Also put tags into group 4 if tags are present.")
 (defvar org-maybe-keyword-time-regexp nil
   "Matches a timestamp, possibly preceded by a keyword.")
 (make-variable-buffer-local 'org-maybe-keyword-time-regexp)
-(defvar org-planning-or-clock-line-re nil
-  "Matches a line with planning or clock info.")
-(make-variable-buffer-local 'org-planning-or-clock-line-re)
 (defvar org-all-time-keywords nil
   "List of time keywords.")
 (make-variable-buffer-local 'org-all-time-keywords)
@@ -4818,12 +4822,6 @@ but the stars and the body are.")
 		    "\\|" org-closed-string
 		    "\\|" org-clock-string "\\)\\)?"
 		    " *\\([[<][0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^]\r\n>]*?[]>]\\|<%%([^\r\n>]*>\\)")
-	    org-planning-or-clock-line-re
-	    (concat "^[ \t]*\\("
-		    org-scheduled-string "\\|"
-		    org-deadline-string "\\|"
-		    org-closed-string "\\|"
-		    org-clock-string "\\)")
 	    org-all-time-keywords
 	    (mapcar (lambda (w) (substring w 0 -1))
 		    (list org-scheduled-string org-deadline-string
