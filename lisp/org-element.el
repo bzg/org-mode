@@ -108,8 +108,8 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
-(require 'org)
+(eval-when-compile
+  (require 'cl))
 (declare-function org-inlinetask-goto-end "org-inlinetask" ())
 
 

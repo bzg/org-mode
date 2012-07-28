@@ -1793,10 +1793,6 @@ Note that functions in this alist don't need to be quoted."
   :version "24.1"
   :group 'org-agenda)
 
-(eval-when-compile
-  (require 'cl))
-(require 'org)
-
 (defmacro org-agenda-with-point-at-orig-entry (string &rest body)
   "Execute BODY with point at location given by `org-hd-marker' property.
 If STRING is non-nil, the text property will be fetched from position 0
