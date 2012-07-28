@@ -17806,7 +17806,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-n" 'org-next-link)
 (org-defkey org-mode-map "\C-c\C-x\C-p" 'org-previous-link)
 (org-defkey org-mode-map "\C-c\C-l" 'org-insert-link)
-(org-defkey org-mode-map "\C-c\C-L" 'org-insert-all-links)
+(org-defkey org-mode-map "\C-c\C-\M-l" 'org-insert-all-links)
 (org-defkey org-mode-map "\C-c\C-o" 'org-open-at-point)
 (org-defkey org-mode-map "\C-c%"    'org-mark-ring-push)
 (org-defkey org-mode-map "\C-c&"    'org-mark-ring-goto)
