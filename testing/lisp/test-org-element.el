@@ -1119,6 +1119,24 @@ e^{i\\pi}+1=0
      (org-element-map (org-element-parse-buffer) 'macro 'identity))))
 
 
+;;;; Paragraph
+
+(ert-deftest test-org-element/paragraph-parser ()
+  "Test `paragraph' parser."
+  ;; Standard test.
+  (should
+   (org-test-with-temp-text "Paragraph"
+     (org-element-map (org-element-parse-buffer) 'paragraph 'identity nil t)))
+  ;; Property find end of a paragraph stuck to another element.
+  (should
+   (eq ?#
+       (org-test-with-temp-text "Paragraph\n# Comment"
+	 (org-element-map
+	  (org-element-parse-buffer) 'paragraph
+	  (lambda (p) (char-after (org-element-property :end p)))
+	  nil t)))))
+
+
 ;;;; Plain List
 
 (ert-deftest test-org-element/plain-list-parser ()

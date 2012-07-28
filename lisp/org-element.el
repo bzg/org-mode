@@ -124,7 +124,7 @@
 ;; process.
 
 (defconst org-element-paragraph-separate
-  (concat "\f" "\\|" "^[ \t]*$" "\\|"
+  (concat "^[ \t]*$" "\\|"
 	  ;; Headlines and inlinetasks.
 	  org-outline-regexp-bol "\\|"
 	  ;; Comments, blocks (any type), keywords and babel calls.
@@ -140,11 +140,7 @@
 	  ;; LaTeX environments.
 	  "^[ \t]*\\\\\\(begin\\|end\\)" "\\|"
 	  ;; Planning and Clock lines.
-	  "^[ \t]*\\(?:"
-	  org-clock-string "\\|"
-	  org-closed-string "\\|"
-	  org-deadline-string "\\|"
-	  org-scheduled-string "\\)")
+	  org-planning-or-clock-line-re)
   "Regexp to separate paragraphs in an Org buffer.")
 
 (defconst org-element-all-elements
@@ -1691,15 +1687,16 @@ Assume point is at the beginning of the paragraph."
     (let* ((contents-begin (point))
 	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
-	   (contents-end
+	   (before-blank
 	    (progn (end-of-line)
 		   (if (re-search-forward org-element-paragraph-separate
 					  limit
 					  'm)
-		       (progn (forward-line -1) (end-of-line) (point))
+		       (goto-char (match-beginning 0))
 		     (point))))
-	   (pos-before-blank (progn (forward-line) (point)))
-	   (end (progn (org-skip-whitespace)
+	   (contents-end (progn (skip-chars-backward " \r\t\n" contents-begin)
+				(line-end-position)))
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'paragraph
 	    ;; If paragraph has no affiliated keywords, it may not begin
@@ -1709,7 +1706,7 @@ Assume point is at the beginning of the paragraph."
 		   :end end
 		   :contents-begin contents-begin
 		   :contents-end contents-end
-		   :post-blank (count-lines pos-before-blank end))
+		   :post-blank (count-lines before-blank end))
 	     (cadr keywords))))))
 
 (defun org-element-paragraph-interpreter (paragraph contents)
