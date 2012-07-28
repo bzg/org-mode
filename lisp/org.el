@@ -14105,9 +14105,14 @@ Being in this list makes sure that they are offered for completion.")
   "Matches an entire clock drawer.")
 
 (defsubst org-re-property (property)
-  "Return a regexp matching PROPERTY.
-Match group 1 will be set to the value "
+  "Return a regexp matching a PROPERTY line.
+Match group 1 will be set to the value."
   (concat "^[ \t]*:" (regexp-quote property) ":[ \t]*\\(\\S-.*\\)"))
+
+(defsubst org-re-property-keyword (property)
+  "Return a regexp matching a PROPERTY line, possibly with no
+value for the property."
+  (concat "^[ \t]*:" (regexp-quote property) ":[ \t]*\\(\\S-.*\\)?"))
 
 (defun org-property-action ()
   "Do an action on properties."
@@ -14522,7 +14527,7 @@ and the new value.")
 	  (setq range (org-get-property-block beg end 'force))
 	  (goto-char (car range))
 	  (if (re-search-forward
-	       (org-re-property property) (cdr range) t)
+	       (org-re-property-keyword property) (cdr range) t)
 	      (progn
 		(delete-region (match-beginning 0) (match-end 0))
 		(goto-char (match-beginning 0)))
