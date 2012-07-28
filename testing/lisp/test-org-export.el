@@ -444,11 +444,11 @@ body\n")))
   (let ((org-footnote-section nil)
 	(org-export-with-footnotes t))
     ;; 1. Read every type of footnote.
-    (org-test-with-parsed-data
-	"Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
-      (should
-       (equal
-	'((1 . "A") (2 . "B") (3 . "C") (4 . "D"))
+    (should
+     (equal
+      '((1 . "A\n") (2 . "B") (3 . "C") (4 . "D"))
+      (org-test-with-parsed-data
+	  "Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
 	(org-element-map
 	 tree 'footnote-reference
 	 (lambda (ref)
