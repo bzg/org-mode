@@ -1009,9 +1009,15 @@ This routine returns a floating point number."
   (cond
    ((eq system-type 'darwin)
     (org-mac-idle-seconds))
-   ((eq window-system 'x)
-    (max (org-x11-idle-seconds) (org-emacs-idle-seconds)))
-   (t (org-emacs-idle-seconds))))
+   ((and
+     (eq window-system 'x)
+     ;; Check that x11idle exists
+     (eq (call-process-shell-command "command" nil nil nil "-v" "x11idle") 0)
+     ;; Check that x11idle can retrieve the idle time
+     (eq (call-process-shell-command "x11idle" nil nil nil ) 0))
+    (org-x11-idle-seconds))
+   (t
+    (org-emacs-idle-seconds))))
 
 (defvar org-clock-user-idle-seconds)
 
