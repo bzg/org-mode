@@ -4068,10 +4068,12 @@ first element of current section."
      ;; Otherwise move at the beginning of the section containing
      ;; point.
      (let ((origin (point))
-	   (end (save-excursion (outline-next-heading) (point)))
+	   (end (save-excursion
+		  (org-with-limited-levels (outline-next-heading)) (point)))
 	   element type special-flag trail struct prevs)
        (org-with-limited-levels
-	(if (org-before-first-heading-p) (goto-char (point-min))
+	(if (org-with-limited-levels (org-before-first-heading-p))
+	    (goto-char (point-min))
 	  (org-back-to-heading)
 	  (forward-line)))
        (org-skip-whitespace)
@@ -4085,9 +4087,13 @@ first element of current section."
                  type (car element))
 	   (push element trail)
            (cond
-	    ;; 1. Skip any element ending before point or at point.
+	    ;; 1. Skip any element ending before point or at point
+	    ;;    because the following element has started.  On the
+	    ;;    other hand, if the element ends at point and that
+	    ;;    point is also the end of the buffer, do not skip it.
 	    ((let ((end (org-element-property :end element)))
-	       (when (<= end origin)
+	       (when (or (< end origin)
+			 (and (= end origin) (/= (point-max) end)))
 		 (if (> (point-max) end) (goto-char end)
 		   (throw 'exit (if keep-trail trail element))))))
 	    ;; 2. An element containing point is always the element at
@@ -4096,11 +4102,15 @@ first element of current section."
 	     (throw 'exit (if keep-trail trail element)))
 	    ;; 3. At any other greater element type, if point is
 	    ;;    within contents, move into it.  Otherwise, return
-	    ;;    that element.
+	    ;;    that element.  As a special case, when ORIGIN is
+	    ;;    contents end and is also the end of the buffer, try
+	    ;;    to move inside the greater element to find the end
+	    ;;    of the innermost element.
 	    (t
 	     (let ((cbeg (org-element-property :contents-begin element))
 		   (cend (org-element-property :contents-end element)))
-	       (if (or (not cbeg) (not cend) (> cbeg origin) (<= cend origin)
+	       (if (or (not cbeg) (not cend) (> cbeg origin) (< cend origin)
+		       (and (= cend origin) (/= (point-max) origin))
 		       (and (= cbeg origin) (memq type '(plain-list table))))
 		   (throw 'exit (if keep-trail trail element))
 		 (case type
