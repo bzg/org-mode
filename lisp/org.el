@@ -4913,10 +4913,6 @@ This is for getting out of special buffers like remember.")
 
 ;;;; Define the Org-mode
 
-(if (and (not (keymapp outline-mode-map)) (featurep 'allout))
-    (error "Conflict with outdated version of allout.el.  Load org.el before allout.el, or upgrade to newer allout, for example by switching to Emacs 22"))
-
-
 ;; We use a before-change function to check if a table might need
 ;; an update.
 (defvar org-table-may-need-update t
@@ -4938,7 +4934,10 @@ This variable is set by `org-before-change-function'.
 (defvar buffer-face-mode-face)
 
 (require 'outline)
+(if (and (not (keymapp outline-mode-map)) (featurep 'allout))
+    (error "Conflict with outdated version of allout.el.  Load org.el before allout.el, or upgrade to newer allout, for example by switching to Emacs 22"))
 (require 'noutline "noutline" 'noerror) ;; stock XEmacs does not have it
+
 ;; Other stuff we need.
 (require 'time-date)
 (unless (fboundp 'time-subtract) (defalias 'time-subtract 'subtract-time))
