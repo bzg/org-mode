@@ -16307,36 +16307,37 @@ in the timestamp determines what will be changed."
       ;; Update clock if on a CLOCK line.
       (org-clock-update-time-maybe)
       ;; Maybe adjust the closest clock in `org-clock-history'
-      (if (not (and org-clock-adjust-closest
-		    (org-at-clock-log-p)
-		    (< 1 (length (delq nil (mapcar (lambda(m) (marker-position m))
-						   org-clock-history))))))
-	  (message "No clock to adjust")
-	(cond ((save-excursion ; fix previous clock?
-		 (re-search-backward org-ts-regexp0 nil t)
-		 (looking-back (concat org-clock-string " \\[")))
-	       (setq fixnext 1 clrgx (concat org-ts-regexp0 "\\] =>.*$")))
-	      ((save-excursion ; fix next clock?
-		 (re-search-backward org-ts-regexp0 nil t)
-		 (looking-at (concat org-ts-regexp0 "\\] =>")))
-	       (setq fixnext -1 clrgx (concat org-clock-string " \\[" org-ts-regexp0))))
-	(save-excursion
-	  ;; Find closest clock to point, adjust the previous/next one
-	  (org-back-to-heading t)
-	  (let* ((cl (mapcar (lambda(c) (abs (- (marker-position c) (point))))
-			     org-clock-history))
-		 (clfixnth
-		  (+ fixnext (- (length cl) (or (length (member (apply #'min cl) cl)) 100))))
-		 (clfixpos (if (> 0 clfixnth) nil (nth clfixnth org-clock-history))))
-	    (if (not clfixpos)
-		(message "No clock to adjust")
-	      (goto-char clfixpos)
-	      (org-show-subtree)
-	      (when (re-search-forward clrgx nil t)
-		(goto-char (match-beginning 1))
-		(let (org-clock-adjust-closest)
-		  (org-timestamp-change n org-ts-what updown))
-		(message "Clock adjusted for heading: %s" (org-get-heading t t)))))))
+      (when org-clock-adjust-closest
+	(if (not (and (org-at-clock-log-p)
+		      (< 1 (length (delq nil (mapcar (lambda(m) (marker-position m))
+						     org-clock-history))))))
+	    (message "No clock to adjust")
+	  (cond ((save-excursion ; fix previous clock?
+		   (re-search-backward org-ts-regexp0 nil t)
+		   (looking-back (concat org-clock-string " \\[")))
+		 (setq fixnext 1 clrgx (concat org-ts-regexp0 "\\] =>.*$")))
+		((save-excursion ; fix next clock?
+		   (re-search-backward org-ts-regexp0 nil t)
+		   (looking-at (concat org-ts-regexp0 "\\] =>")))
+		 (setq fixnext -1 clrgx (concat org-clock-string " \\[" org-ts-regexp0))))
+	  (save-window-excursion
+	    ;; Find closest clock to point, adjust the previous/next one in history
+	    (let* ((p (save-excursion (org-back-to-heading t)))
+		   (cl (mapcar (lambda(c) (abs (- (marker-position c) p))) org-clock-history))
+		   (clfixnth
+		    (+ fixnext (- (length cl) (or (length (member (apply #'min cl) cl)) 100))))
+		   (clfixpos (if (> 0 clfixnth) nil (nth clfixnth org-clock-history))))
+	      (if (not clfixpos)
+		  (message "No clock to adjust")
+		(org-goto-marker-or-bmk clfixpos)
+		(org-show-subtree)
+		(when (re-search-forward clrgx nil t)
+		  (goto-char (match-beginning 1))
+		  (let (org-clock-adjust-closest)
+		    (org-timestamp-change n org-ts-what updown))
+		  (message "Clock adjusted in %s for heading: %s"
+			   (file-name-nondirectory (buffer-file-name))
+			   (org-get-heading t t))))))))
       ;; Try to recenter the calendar window, if any.
       (if (and org-calendar-follow-timestamp-change
 	       (get-buffer-window "*Calendar*" t)
