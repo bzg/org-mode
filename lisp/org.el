@@ -4262,6 +4262,25 @@ collapsed state."
   :group 'org-sparse-trees
   :type 'boolean)
 
+(defcustom org-sparse-tree-default-date-type 'scheduled-or-deadline
+  "The default date type when building a sparse tree.
+When this is nil, a date is a scheduled or a deadline timestamp.
+Otherwise, these types are allowed:
+
+        all: all timestamps
+     active: only active timestamps (<...>)
+   inactive: only inactive timestamps (<...)
+  scheduled: only scheduled timestamps
+   deadline: only deadline timestamps"
+  :type '(choice (const :tag "Scheduled or deadline" 'scheduled-or-deadline)
+		 (const :tag "All timestamps" all)
+		 (const :tag "Only active timestamps" active)
+		 (const :tag "Only inactive timestamps" inactive)
+		 (const :tag "Only scheduled timestamps" scheduled)
+		 (const :tag "Only deadline timestamps" deadline))
+  :group 'org-sparse-trees
+  :version "24.2")
+
 (defun org-cycle-hide-archived-subtrees (state)
   "Re-hide all archived subtrees after a visibility state change."
   (when (and (not org-cycle-open-archived-trees)
@@ -12579,7 +12598,8 @@ POS may also be a marker."
 	     (concat "^[ \t]*:" drawer ":[ \t]*\n[ \t]*:END:[ \t]*\n?") 2)
 	    (replace-match ""))))))
 
-(defun org-sparse-tree (&optional arg)
+(defvar org-ts-type nil)
+(defun org-sparse-tree (&optional arg type)
   "Create a sparse tree, prompt for the details.
 This command can create sparse trees.  You first need to select the type
 of match used to create the tree:
@@ -12589,15 +12609,27 @@ T      Show entries with a specific TODO keyword.
 m      Show entries selected by a tags/property match.
 p      Enter a property name and its value (both with completion on existing
        names/values) and show entries with that property.
-r      Show entries matching a regular expression (`/' can be used as well)
-d      Show deadlines due within `org-deadline-warning-days'.
+r      Show entries matching a regular expression (`/' can be used as well).
 b      Show deadlines and scheduled items before a date.
-a      Show deadlines and scheduled items after a date."
+a      Show deadlines and scheduled items after a date.
+d      Show deadlines due within `org-deadline-warning-days'.
+D      Show deadlines and scheduled items between a date range."
   (interactive "P")
-  (let (ans kwd value)
-    (message "Sparse tree: [r]egexp [/]regexp [t]odo [T]odo-kwd [m]atch [p]roperty\n             [d]eadlines [b]efore-date [a]fter-date [D]ates range")
+  (let (ans kwd value ts-type)
+    (setq type (or type org-sparse-tree-default-date-type))
+    (setq org-ts-type type)
+    (message "Sparse tree: [r]egexp [/]regexp [t]odo [T]odo-kwd [m]atch [p]roperty\n             [d]eadlines [b]efore-date [a]fter-date [D]ates range\n             [c]ycle through date types: %s"
+	     (cond ((eq type 'all) "all timestamps")
+		   ((eq type 'scheduled) "only scheduled")
+		   ((eq type 'deadline) "only deadline")
+		   ((eq type 'active) "only active timestamps")
+		   ((eq type 'inactive) "only inactive timestamps")
+		   ((eq type 'scheduled-or-deadline) "scheduled/deadline")
+		   (t "scheduled/deadline")))
     (setq ans (read-char-exclusive))
     (cond
+     ((equal ans ?c)
+      (org-sparse-tree arg (cadr (member type '(scheduled-or-deadline all scheduled deadline active inactive)))))
      ((equal ans ?d)
       (call-interactively 'org-check-deadlines))
      ((equal ans ?b)
@@ -15815,16 +15847,34 @@ days.  If the prefix is a raw \\[universal-argument] prefix, all deadlines are s
 	     (org-occur regexp nil callback)
 	     org-warn-days)))
 
+(defsubst org-re-timestamp (type)
+  "Return a regexp for timestamp TYPE.
+Allowed values for TYPE are:
+
+        all: all timestamps
+     active: only active timestamps (<...>)
+   inactive: only inactive timestamps ([...])
+  scheduled: only scheduled timestamps
+   deadline: only deadline timestamps
+
+When TYPE is nil, fall back on returning a regexp that matches
+both scheduled and deadline timestamps."
+  (cond ((eq type 'all) "\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}\\(?: +[^]+0-9>\n -]+\\)?\\(?: +[0-9]\\{1,2\\}:[0-9]\\{2\\}\\)?\\)")
+	((eq type 'active) org-ts-regexp)
+	((eq type 'inactive) "\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\n>]*?\\)\\]")
+	((eq type 'scheduled) (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>"))
+	((eq type 'deadline) (concat "\\<" org-deadline-string " *<\\([^>]+\\)>"))
+	((eq type 'scheduled-or-deadline)
+	 (concat "\\<\\(?:" org-deadline-string "\\|" org-scheduled-string "\\) *<\\([^>]+\\)>"))))
+
 (defun org-check-before-date (date)
   "Check if there are deadlines or scheduled entries before DATE."
   (interactive (list (org-read-date)))
   (let ((case-fold-search nil)
-	(regexp (concat "\\<\\(" org-deadline-string
-			"\\|" org-scheduled-string
-			"\\) *<\\([^>]+\\)>"))
+	(regexp (org-re-timestamp org-ts-type))
 	(callback
 	 (lambda () (time-less-p
-		     (org-time-string-to-time (match-string 2))
+		     (org-time-string-to-time (match-string 1))
 		     (org-time-string-to-time date)))))
     (message "%d entries before %s"
 	     (org-occur regexp nil callback) date)))
@@ -15833,13 +15883,11 @@ days.  If the prefix is a raw \\[universal-argument] prefix, all deadlines are s
   "Check if there are deadlines or scheduled entries after DATE."
   (interactive (list (org-read-date)))
   (let ((case-fold-search nil)
-	(regexp (concat "\\<\\(" org-deadline-string
-			"\\|" org-scheduled-string
-			"\\) *<\\([^>]+\\)>"))
+	(regexp (org-re-timestamp org-ts-type))
 	(callback
 	 (lambda () (not
 		     (time-less-p
-		      (org-time-string-to-time (match-string 2))
+		      (org-time-string-to-time (match-string 1))
 		      (org-time-string-to-time date))))))
     (message "%d entries after %s"
 	     (org-occur regexp nil callback) date)))
@@ -15849,12 +15897,10 @@ days.  If the prefix is a raw \\[universal-argument] prefix, all deadlines are s
   (interactive (list (org-read-date nil nil nil "Range starts")
 		     (org-read-date nil nil nil "Range end")))
   (let ((case-fold-search nil)
-	(regexp (concat "\\<\\(" org-deadline-string
-			"\\|" org-scheduled-string
-			"\\) *<\\([^>]+\\)>"))
+	(regexp (org-re-timestamp org-ts-type))
 	(callback
 	 (lambda ()
-	   (let ((match (match-string 2)))
+	   (let ((match (match-string 1)))
 	     (and
 	      (not (time-less-p
 		    (org-time-string-to-time match)
