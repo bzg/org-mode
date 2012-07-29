@@ -20943,9 +20943,7 @@ width for filling."
   (let ((fc (current-fill-column)))
     (when (and fc (> (current-column) fc))
       (let ((fill-prefix (org-fill-context-prefix (point))))
-	(when fill-prefix
-	  (if orgstruct-is-++ (org-let org-fb-vars '(do-auto-fill))
-	    (do-auto-fill)))))))
+	(when fill-prefix (do-auto-fill))))))
 
 ;;; Other stuff.
 
