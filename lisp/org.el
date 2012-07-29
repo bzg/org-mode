@@ -8427,7 +8427,7 @@ buffer.  It will also recognize item context in multiline items."
       (mapc
        (lambda (x)
 	 (when (string-match
-		"^\\(paragraph-\\|auto-fill\\|fill-paragraph\\|adaptive-fill\\|indent-\\)"
+		"^\\(paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|adaptive-fill\\|indent-\\)"
 		(symbol-name (car x)))
 	   (setq var (car x) val (nth 1 x))
 	   (push (list var `(quote ,(eval var))) org-fb-vars)
@@ -8577,7 +8577,7 @@ Possible values in the list of contexts are `table', `headline', and `item'."
 		       (list x)
 		     (list (car x) (list 'quote (cdr x)))))
 	     (if (string-match
-		  "^\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|auto-fill\\|fill-paragraph\\|adaptive-fill\\|indent-\\)"
+		  "^\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|adaptive-fill\\|indent-\\)"
 		  (symbol-name (car x)))
 		 x nil))
 	   varlist))))
