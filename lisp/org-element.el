@@ -4042,8 +4042,11 @@ indentation is not done with TAB characters."
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
 of the element and PROPS a plist of properties associated to the
-element.  Possible types are defined in
-`org-element-all-elements'.
+element.
+
+Possible types are defined in `org-element-all-elements'.
+Properties depend on element or object type, but always
+include :begin, :end, :parent and :post-blank properties.
 
 As a special case, if point is at the very beginning of a list or
 sub-list, returned element will be that list instead of the first
@@ -4070,7 +4073,7 @@ first element of current section."
      (let ((origin (point))
 	   (end (save-excursion
 		  (org-with-limited-levels (outline-next-heading)) (point)))
-	   element type special-flag trail struct prevs)
+	   element type special-flag trail struct prevs parent)
        (org-with-limited-levels
 	(if (org-with-limited-levels (org-before-first-heading-p))
 	    (goto-char (point-min))
@@ -4085,7 +4088,8 @@ first element of current section."
            (setq element
 		 (org-element--current-element end 'element special-flag struct)
                  type (car element))
-	   (push element trail)
+	   (org-element-put-property element :parent parent)
+	   (when keep-trail (push element trail))
            (cond
 	    ;; 1. Skip any element ending before point or at point
 	    ;;    because the following element has started.  On the
@@ -4113,6 +4117,7 @@ first element of current section."
 		       (and (= cend origin) (/= (point-max) origin))
 		       (and (= cbeg origin) (memq type '(plain-list table))))
 		   (throw 'exit (if keep-trail trail element))
+		 (setq parent element)
 		 (case type
 		   (plain-list
 		    (setq special-flag 'item
@@ -4123,25 +4128,21 @@ first element of current section."
 		 (goto-char cbeg)))))))))))
 
 (defun org-element-context ()
-  "Return list of all elements and objects around point.
+  "Return closest element or object around point.
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
 of the element or object and PROPS a plist of properties
-associated to it.  Possible types are defined in
-`org-element-all-elements' and `org-element-all-objects'.
+associated to it.
 
-All elements and objects returned belong to the current section
-and are ordered from closest to farthest."
+Possible types are defined in `org-element-all-elements' and
+`org-element-all-objects'.  Properties depend on element or
+object type, but always include :begin, :end, :parent
+and :post-blank properties."
   (org-with-wide-buffer
    (let* ((origin (point))
-	  ;; Remove elements not containing point from trail.
-	  (elements (org-remove-if
-		     (lambda (el)
-		       (or (> (org-element-property :begin el) origin)
-			   (< (org-element-property :end el) origin)))
-		     (org-element-at-point 'keep-trail)))
-	  (element (car elements))
-	  (type (car element)) end)
+	  (element (org-element-at-point))
+	  (type (car element))
+	  end)
      ;; Check if point is inside an element containing objects or at
      ;; a secondary string.  In that case, move to beginning of the
      ;; element or secondary string and set END to the other side.
@@ -4162,7 +4163,7 @@ and are ordered from closest to farthest."
 		       (progn (beginning-of-line)
 			      (skip-chars-forward "* ")
 			      (setq end (point-at-eol))))
-		  (and (memq (car element) '(paragraph table-cell verse-block))
+		  (and (memq type '(paragraph table-cell verse-block))
 		       (let ((cbeg (org-element-property
 				    :contents-begin element))
 			     (cend (org-element-property
@@ -4170,8 +4171,10 @@ and are ordered from closest to farthest."
 			 (and (>= origin cbeg)
 			      (<= origin cend)
 			      (progn (goto-char cbeg) (setq end cend)))))))
-	 elements
-       (let ((restriction (org-element-restriction element)) candidates)
+	 element
+       (let ((restriction (org-element-restriction element))
+	     (parent element)
+	     candidates)
 	 (catch 'exit
 	   (while (setq candidates (org-element--get-next-object-candidates
 				    end restriction candidates))
@@ -4179,7 +4182,7 @@ and are ordered from closest to farthest."
 					candidates)))
 	       ;; If ORIGIN is before next object in element, there's
 	       ;; no point in looking further.
-	       (if (> (cdr closest-cand) origin) (throw 'exit elements)
+	       (if (> (cdr closest-cand) origin) (throw 'exit element)
 		 (let* ((object
 			 (progn (goto-char (cdr closest-cand))
 				(funcall (intern (format "org-element-%s-parser"
@@ -4193,13 +4196,14 @@ and are ordered from closest to farthest."
 		    ;; ORIGIN is within a non-recursive object or at an
 		    ;; object boundaries: Return that object.
 		    ((or (not cbeg) (> cbeg origin) (< cend origin))
-		     (throw 'exit (cons object elements)))
+		     (throw 'exit
+			    (org-element-put-property object :parent parent)))
 		    ;; Otherwise, move within current object and restrict
 		    ;; search to the end of its contents.
 		    (t (goto-char cbeg)
-		       (setq end cend)
-		       (push object elements)))))))
-	   elements))))))
+		       (org-element-put-property object :parent parent)
+		       (setq parent object end cend)))))))
+	   parent))))))
 
 
 ;; Once the local structure around point is well understood, it's easy
@@ -4300,23 +4304,20 @@ end of ELEM-A."
   "Move forward by one element.
 Move to the next element at the same level, when possible."
   (interactive)
-  (if (org-with-limited-levels (org-at-heading-p))
-      (let ((origin (point)))
-	(org-forward-same-level 1)
-	(unless (org-with-limited-levels (org-at-heading-p))
-	  (goto-char origin)
-	  (error "Cannot move further down")))
-    (let* ((trail (org-element-at-point 'keep-trail))
-	   (elem (pop trail))
-	   (end (org-element-property :end elem))
-	   (parent (loop for prev in trail
-			 when (>= (org-element-property :end prev) end)
-			 return prev)))
-      (cond
-       ((eobp) (error "Cannot move further down"))
-       ((and parent (= (org-element-property :contents-end parent) end))
-	(goto-char (org-element-property :end parent)))
-       (t (goto-char end))))))
+  (cond ((eobp) (error "Cannot move further down"))
+	((org-with-limited-levels (org-at-heading-p))
+	 (let ((origin (point)))
+	   (org-forward-same-level 1)
+	   (unless (org-with-limited-levels (org-at-heading-p))
+	     (goto-char origin)
+	     (error "Cannot move further down"))))
+	(t
+	 (let* ((elem (org-element-at-point))
+		(end (org-element-property :end elem))
+		(parent (org-element-property :parent elem)))
+	   (if (and parent (= (org-element-property :contents-end parent) end))
+	       (goto-char (org-element-property :end parent))
+	     (goto-char end))))))
 
 (defun org-element-backward ()
   "Move backward by one element.
@@ -4345,18 +4346,13 @@ Move to the previous element at the same level, when possible."
   "Move to upper element."
   (interactive)
   (if (org-with-limited-levels (org-at-heading-p))
-      (unless (org-up-heading-safe)
-	(error "No surrounding element"))
-    (let* ((trail (org-element-at-point 'keep-trail))
-	   (elem (pop trail))
-	   (end (org-element-property :end elem))
-	   (parent (loop for prev in trail
-			 when (>= (org-element-property :end prev) end)
-			 return prev)))
-      (cond
-       (parent (goto-char (org-element-property :begin parent)))
-       ((org-before-first-heading-p) (error "No surrounding element"))
-       (t (org-back-to-heading))))))
+      (unless (org-up-heading-safe) (error "No surrounding element"))
+    (let* ((elem (org-element-at-point))
+	   (parent (org-element-property :parent elem)))
+      (if parent (goto-char (org-element-property :begin parent))
+	(if (org-with-limited-levels (org-before-first-heading-p))
+	    (error "No surrounding element")
+	  (org-with-limited-levels (org-back-to-heading)))))))
 
 (defun org-element-down ()
   "Move to inner element."

@@ -2225,6 +2225,19 @@ Paragraph \\alpha."
 
 (ert-deftest test-org-element/at-point ()
   "Test `org-element-at-point' specifications."
+  ;; Return closest element containing point.
+  (should
+   (eq 'paragraph
+       (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER"
+	 (progn (search-forward "A")
+		(org-element-type (org-element-at-point))))))
+  ;; Correctly set `:parent' property.
+  (should
+   (eq 'center-block
+       (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER"
+	 (progn (search-forward "A")
+		(org-element-type
+		 (org-element-property :parent (org-element-at-point)))))))
   ;; Special case: at the very beginning of a table, return `table'
   ;; object instead of `table-row'.
   (should
@@ -2236,26 +2249,35 @@ Paragraph \\alpha."
   (should
    (eq 'plain-list
        (org-test-with-temp-text "- item"
-	 (org-element-type (org-element-at-point))))))
+	 (org-element-type (org-element-at-point)))))
+  ;; With an optional argument, return trail.
+  (should
+   (equal '(paragraph center-block)
+	  (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER\nZ"
+	    (progn (search-forward "Z")
+		   (mapcar 'org-element-type (org-element-at-point t)))))))
 
 (ert-deftest test-org-element/context ()
   "Test `org-element-context' specifications."
-  ;; List all objects and elements containing point.
+  ;; Return closest object containing point.
   (should
-   (equal
-    '(subscript bold paragraph)
-    (mapcar 'car
-	    (org-test-with-temp-text "Some *text with _underline_*"
-	      (progn (search-forward "under")
-		     (org-element-context))))))
+   (eq 'underline
+       (org-test-with-temp-text "Some *text with _underline_ text*"
+	 (progn (search-forward "under")
+		(org-element-type (org-element-context))))))
   ;; Find objects in secondary strings.
   (should
-   (equal
-    '(underline headline)
-    (mapcar 'car
-	    (org-test-with-temp-text "* Headline _with_ underlining"
-	      (progn (search-forward "w")
-		     (org-element-context)))))))
+   (eq 'underline
+       (org-test-with-temp-text "* Headline _with_ underlining"
+	 (progn (search-forward "w")
+		(org-element-type (org-element-context))))))
+  ;; Correctly set `:parent' property.
+  (should
+   (eq 'paragraph
+       (org-test-with-temp-text "Some *bold* text"
+	 (progn (search-forward "bold")
+		(org-element-type
+		 (org-element-property :parent (org-element-context))))))))
 
 (ert-deftest test-org-element/forward ()
   "Test `org-element-forward' specifications."
