@@ -166,11 +166,99 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	(org-fill-paragraph)
 	(buffer-string)))
     "#+BEGIN_COMMENT\nSome text\n#+END_COMMENT"))
+  ;; Fill `comment' elements, indented or not.
+  (should
+   (equal "# A B"
+	  (org-test-with-temp-text "# A\n#B"
+	    (let ((fill-column 20))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  (should
+   (equal "  #+ A B"
+	  (org-test-with-temp-text "  #+ A\n  #+ B"
+	    (let ((fill-column 20))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
   ;; Do nothing at affiliated keywords.
   (org-test-with-temp-text "#+NAME: para\nSome\ntext."
     (let ((fill-column 20))
       (org-fill-paragraph)
       (should (equal (buffer-string) "#+NAME: para\nSome\ntext.")))))
+
+(ert-deftest test-org/auto-fill-function ()
+  "Test auto-filling features."
+  ;; Auto fill paragraph.
+  (should
+   (equal "12345\n7890"
+	  (org-test-with-temp-text "12345 7890"
+	    (let ((fill-column 5))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  ;; Auto fill first paragraph in an item.
+  (should
+   (equal "- 12345\n  7890"
+	  (org-test-with-temp-text "- 12345 7890"
+	    (let ((fill-column 7))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  ;; Auto fill comments, indented or not.
+  (should
+   (equal "# 12345\n# 7890"
+	  (org-test-with-temp-text "# 12345 7890"
+	    (let ((fill-column 7))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  (should
+   (equal "  #+ 12345\n  #+ 7890"
+	  (org-test-with-temp-text "  #+ 12345 7890"
+	    (let ((fill-column 10))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  ;; Verse and comment block: auto fill contents.
+  (should
+   (equal "#+BEGIN_VERSE\n12345\n7890\n#+END_VERSE"
+	  (org-test-with-temp-text "#+BEGIN_VERSE\n12345 7890\n#+END_VERSE"
+	    (let ((fill-column 5))
+	      (forward-line)
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  (should
+   (equal "#+BEGIN_COMMENT\n12345\n7890\n#+END_COMMENT"
+	  (org-test-with-temp-text "#+BEGIN_COMMENT\n12345 7890\n#+END_COMMENT"
+	    (let ((fill-column 5))
+	      (forward-line)
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  ;; Do not fill if a new item could be created.
+  (should-not
+   (equal "12345\n- 90"
+	  (org-test-with-temp-text "12345 - 90"
+	    (let ((fill-column 5))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  ;; Do not fill if a line break could be introduced.
+  (should-not
+   (equal "123\\\\\n7890"
+	  (org-test-with-temp-text "123\\\\ 7890"
+	    (let ((fill-column 6))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  ;; Do not fill affiliated keywords.
+  (should-not
+   (equal "#+ATTR_LATEX: ABC\nDEFGHIJKL"
+	  (org-test-with-temp-text "#+ATTR_LATEX: ABC DEFGHIJKL"
+	    (let ((fill-column 20))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string))))))
 
 
 (provide 'test-org)

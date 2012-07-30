@@ -20820,8 +20820,9 @@ If point is in an inline task, mark that task instead."
 Return fill prefix, as a string, or nil if current line isn't
 meant to be filled."
   (save-excursion
-    (let* ((elements (org-element-at-point t))
-	   (element (car elements))
+    (goto-char p)
+    (beginning-of-line)
+    (let* ((element (org-element-at-point))
 	   (type (org-element-type element))
 	   (post-affiliated
 	    (progn
@@ -20829,8 +20830,6 @@ meant to be filled."
 	      (while (looking-at org-element--affiliated-re) (forward-line))
 	      (point))))
       (unless (< p post-affiliated)
-	(goto-char p)
-	(beginning-of-line)
 	(case type
 	  (comment (looking-at "[ \t]*#\\+? ?") (match-string 0))
 	  ((item plain-list)
@@ -20840,12 +20839,13 @@ meant to be filled."
 	  (paragraph
 	   ;; Fill prefix is usually the same as the current line,
 	   ;; except if the paragraph is at the beginning of an item.
-	   (let ((parent (cadr elements)))
-	     (if (eq (org-element-type parent) 'item)
-		 (make-string (org-list-item-body-column
-			       (org-element-property :begin parent))
-			      ? )
-	       (if (looking-at "\\s-+") (match-string 0) ""))))
+	   (let ((parent (org-element-property :parent element)))
+	     (cond ((eq (org-element-type parent) 'item)
+		    (make-string (org-list-item-body-column
+				  (org-element-property :begin parent))
+				 ? ))
+		   ((looking-at "\\s-+") (match-string 0))
+		   (t  ""))))
 	  ((comment-block verse-block)
 	   ;; Only fill contents if P is within block boundaries.
 	   (let* ((cbeg (save-excursion (goto-char post-affiliated)
@@ -20939,6 +20939,7 @@ width for filling."
 		(skip-chars-backward " \r\t\n")
 		(line-beginning-position))
 	      justify))) t)
+	;; Fill comments, indented or not.
 	(comment
 	 (let ((fill-prefix (org-fill-context-prefix (point))))
 	   (save-excursion
