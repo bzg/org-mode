@@ -11195,19 +11195,31 @@ This function can be used in a hook."
     "BEGIN:" "END:"
     "ORGTBL" "TBLFM:" "TBLNAME:"
     "BEGIN_EXAMPLE" "END_EXAMPLE"
+    "BEGIN_VERBATIM" "END_VERBATIM"
     "BEGIN_QUOTE" "END_QUOTE"
     "BEGIN_VERSE" "END_VERSE"
     "BEGIN_CENTER" "END_CENTER"
     "BEGIN_SRC" "END_SRC"
     "BEGIN_RESULT" "END_RESULT"
+    "BEGIN_lstlisting" "END_lstlisting"
     "NAME:" "RESULTS:"
     "HEADER:" "HEADERS:"
     "CATEGORY:" "COLUMNS:" "PROPERTY:"
     "CAPTION:" "LABEL:"
     "SETUPFILE:"
+    "STARTUP:"
+    "OPTIONS:"
     "INCLUDE:"
     "BIND:"
     "MACRO:"))
+
+(defconst org-additional-option-like-keywords-for-flyspell
+  (delete-dups
+   (split-string
+    (mapconcat (lambda(k) (replace-regexp-in-string
+			   "_\\|:" " "
+			   (concat k " " (downcase k) " " (upcase k))))
+	       org-additional-option-like-keywords " ") " +" t)))
 
 (defcustom org-structure-template-alist
   '(
@@ -21796,7 +21808,8 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	 (not (get-text-property pos 'org-no-flyspell))
 	 (not (member word org-todo-keywords-1))
 	 (not (member word org-all-time-keywords))
-	 (not (member word org-additional-option-like-keywords)))))
+	 (not (member word (mapcar 'car org-startup-options)))
+	 (not (member word org-additional-option-like-keywords-for-flyspell)))))
 
 (defun org-remove-flyspell-overlays-in (beg end)
   "Remove flyspell overlays in region."
