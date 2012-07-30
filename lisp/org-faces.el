@@ -419,7 +419,7 @@ determines if it is a foreground or a background color."
 (defface org-checkbox
   (org-compatible-face 'bold
     '((t (:bold t))))
-  "Face for checkboxes"
+  "Face for checkboxes."
   :group 'org-faces)
 
 

@@ -47,7 +47,7 @@
 (require 'org)
 
 (defgroup org-mac-flagged-mail nil
-  "Options concerning linking to flagged Mail.app messages"
+  "Options concerning linking to flagged Mail.app messages."
   :tag "Org Mail.app"
   :group 'org-link)
 

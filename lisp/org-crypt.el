@@ -75,7 +75,7 @@
 		  (context plain recipients &optional sign always-trust))
 
 (defgroup org-crypt nil
-  "Org Crypt"
+  "Org Crypt."
   :tag "Org Crypt"
   :group 'org)
 

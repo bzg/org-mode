@@ -130,7 +130,7 @@ specifying a variable of the same value."
     session))
 
 (defun org-babel-variable-assignments:js (params)
-  "Return list of Javascript statements assigning the block's variables"
+  "Return list of Javascript statements assigning the block's variables."
   (mapcar
    (lambda (pair) (format "var %s=%s;"
 			  (car pair) (org-babel-js-var-to-js (cdr pair))))

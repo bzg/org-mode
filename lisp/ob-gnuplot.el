@@ -183,7 +183,7 @@ This function is called by `org-babel-execute-src-block'."
       buffer)))
 
 (defun org-babel-variable-assignments:gnuplot (params)
-  "Return list of gnuplot statements assigning the block's variables"
+  "Return list of gnuplot statements assigning the block's variables."
   (mapcar
    (lambda (pair) (format "%s = \"%s\"" (car pair) (cdr pair)))
    (org-babel-gnuplot-process-vars params)))

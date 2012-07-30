@@ -145,7 +145,7 @@ This function is called by `org-babel-execute-src-block'."
 ;; helper functions
 
 (defun org-babel-variable-assignments:R (params)
-  "Return list of R statements assigning the block's variables"
+  "Return list of R statements assigning the block's variables."
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (mapcar
      (lambda (pair)

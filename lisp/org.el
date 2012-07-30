@@ -11330,7 +11330,7 @@ nil or a string to be used for the todo mark." )
 (defvar org-agenda-headline-snapshot-before-repeat)
 
 (defun org-current-effective-time ()
-  "Return current time adjusted for `org-extend-today-until' variable"
+  "Return current time adjusted for `org-extend-today-until' variable."
   (let* ((ct (org-current-time))
 	  (dct (decode-time ct))
 	  (ct1

@@ -60,7 +60,7 @@ This function is called by `org-babel-execute-src-block'."
   (error "Sessions are not supported for Perl."))
 
 (defun org-babel-variable-assignments:perl (params)
-  "Return list of perl statements assigning the block's variables"
+  "Return list of perl statements assigning the block's variables."
   (mapcar
    (lambda (pair)
      (format "$%s=%s;"
@@ -81,7 +81,7 @@ specifying a var of the same value."
 (defvar org-babel-perl-buffers '(:default . nil))
 
 (defun org-babel-perl-initiate-session (&optional session params)
-  "Return nil because sessions are not supported by perl"
+  "Return nil because sessions are not supported by perl."
 nil)
 
 (defvar org-babel-perl-wrapper-method

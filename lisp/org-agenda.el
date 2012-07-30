@@ -3236,9 +3236,9 @@ the global options and expect it to be applied to the entire view.")
 
 
 (defun org-agenda-use-sticky-p ()
-  "Return non-NIL if existing agenda buffer named
-`org-agenda-buffer-name' exists, and should be shown instead of
-generating a new one"
+  "Return non-nil if an agenda buffer named
+`org-agenda-buffer-name' exists and should be shown instead of
+generating a new one."
   (and
    ;; turned off by user
    org-agenda-sticky
@@ -3257,7 +3257,7 @@ generating a new one"
       org-agenda-this-buffer-is-sticky))))
 
 (defun org-prepare-agenda-window (abuf)
-  "Setup agenda buffer in the window"
+  "Setup agenda buffer in the window."
   (let* ((awin (get-buffer-window abuf))
 	 wconf)
     (cond
@@ -6385,7 +6385,7 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
       nil)))
 
 (defun org-agenda-Quit (&optional arg)
-  "Exit agenda by removing the window or the buffer"
+  "Exit agenda by removing the window or the buffer."
   (interactive)
   (if org-agenda-columns-active
       (org-columns-quit)
@@ -9036,7 +9036,7 @@ details and examples."
     (eq date today)))
 
 (defun org-agenda-todo-yesterday (&optional arg)
-  "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday"
+  "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday."
   (interactive "P")
   (let* ((hour (third (decode-time
                        (org-current-time))))

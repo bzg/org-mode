@@ -146,7 +146,6 @@ export function should accept three arguments."
 (defun org-export-blocks-html-quote (body &optional open close)
   "Protect BODY from org html export.
 The optional OPEN and CLOSE tags will be inserted around BODY."
-
   (concat
    "\n#+BEGIN_HTML\n"
    (or open "")

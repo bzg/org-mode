@@ -455,8 +455,7 @@ DRAWERS-REGEXP are converted to freemind notes."
                         note-res
                         "</body>\n"
                         "</html>\n"
-                        "</richcontent>\n"))
-        )
+                        "</richcontent>\n")))
 
       ;; There is always an LF char:
       (when (> (length text) 1)
@@ -1085,11 +1084,9 @@ PATH should be a list of steps, where each step has the form
           ;;(a (setq is-link t) )
           ((h1 h2 h3 h4 h5 h6 p)
            ;;(setq ntxt (concat "\n" ntxt))
-           (setq lf-after 2)
-           )
+           (setq lf-after 2))
           (br
-           (setq lf-after 1)
-           )
+           (setq lf-after 1))
           (t
            (cond
             ((stringp n)
@@ -1106,8 +1103,7 @@ PATH should be a list of steps, where each step has the form
                  (let ((att (car att-val))
                        (val (cdr att-val)))
                    (when (eq att 'href)
-                     (setq link val)))))
-             )))))
+                     (setq link val))))))))))
       (if lf-after
           (setq ntxt (concat ntxt (make-string lf-after ?\n)))
         (setq ntxt (concat ntxt " ")))
