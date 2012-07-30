@@ -2884,7 +2884,6 @@ This ensures the export commands can easily use it."
       (setq res (replace-match ";" t t res)))
     (org-trim res)))
 
-
 ;;;###autoload
 (defun org-store-agenda-views (&rest parameters)
   (interactive)
@@ -2897,11 +2896,13 @@ This ensures the export commands can easily use it."
 	(pop-up-frames nil)
 	(dir default-directory)
 	(pars (org-make-parameter-alist parameters))
-	cmd thiscmdkey files opts cmd-or-set)
+	cmd thiscmdkey files opts cmd-or-set bufname)
     (save-window-excursion
       (while cmds
 	(setq cmd (pop cmds)
 	      thiscmdkey (car cmd)
+	      bufname (if org-agenda-sticky (format "*Org Agenda(%s)*" thiscmdkey)
+			org-agenda-buffer-name)
 	      cmd-or-set (nth 2 cmd)
 	      opts (nth (if (listp cmd-or-set) 3 4) cmd)
 	      files (nth (if (listp cmd-or-set) 4 5) cmd))
@@ -2910,13 +2911,13 @@ This ensures the export commands can easily use it."
 	  (org-eval-in-environment (append org-agenda-exporter-settings
 					   opts pars)
 	    (org-agenda nil thiscmdkey))
-	  (set-buffer org-agenda-buffer-name)
+	  (set-buffer bufname)
 	  (while files
 	    (org-eval-in-environment (append org-agenda-exporter-settings
 					     opts pars)
-	      (org-agenda-write (expand-file-name (pop files) dir) nil t)))
-	  (and (get-buffer org-agenda-buffer-name)
-	       (kill-buffer org-agenda-buffer-name)))))))
+	      (org-agenda-write (expand-file-name (pop files) dir) nil t bufname)))
+	  (and (get-buffer bufname)
+	       (kill-buffer bufname)))))))
 (def-edebug-spec org-batch-store-agenda-views (&rest sexp))
 
 (defun org-agenda-mark-header-line (pos)
@@ -2931,7 +2932,7 @@ This ensures the export commands can easily use it."
 
 (defvar org-mobile-creating-agendas)
 (defvar org-agenda-write-buffer-name "Agenda View")
-(defun org-agenda-write (file &optional open nosettings)
+(defun org-agenda-write (file &optional open nosettings agenda-bufname)
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
 HTML (.html or .htm) or Postscript (.ps) is produced.
@@ -2942,7 +2943,8 @@ With prefix argument OPEN, open the new file immediately.
 If NOSETTINGS is given, do not scope the settings of
 `org-agenda-exporter-settings' into the export commands.  This is used when
 the settings have already been scoped and we do not wish to overrule other,
-higher priority settings."
+higher priority settings.
+If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
   (interactive "FWrite agenda to file: \nP")
   (if (not (file-writable-p file))
       (error "Cannot write agenda to file %s" file))
@@ -2969,7 +2971,6 @@ higher priority settings."
 	      ((string-match "\\.html?\\'" file)
 	       (require 'htmlize)
 	       (set-buffer (htmlize-buffer (current-buffer)))
-
 	       (when (and org-agenda-export-html-style
 			  (string-match "<style>" org-agenda-export-html-style))
 		 ;; replace <style> section with org-agenda-export-html-style
@@ -3011,7 +3012,7 @@ higher priority settings."
 		 (save-buffer 0)
 		 (kill-buffer (current-buffer))
 		 (message "Plain text written to %s" file))))))))
-    (set-buffer org-agenda-buffer-name))
+    (set-buffer (or agenda-bufname org-agenda-buffer-name)))
   (when open (org-open-file file)))
 
 (defvar org-agenda-tag-filter-overlays nil)
