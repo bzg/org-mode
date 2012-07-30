@@ -139,7 +139,7 @@
       (org-vm-select-message (org-add-angle-brackets article)))))
 
 (defun org-vm-imap-open (path)
-  "Follow a VM link to an IMAP folder"
+  "Follow a VM link to an IMAP folder."
   (require 'vm-imap)
   (when (string-match "\\([^:]+\\):\\([^#]+\\)#?\\(.+\\)?" path)
     (let* ((account-name (match-string 1 path))

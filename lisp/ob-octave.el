@@ -110,7 +110,7 @@ end")
   (org-babel-prep-session:octave session params 'matlab))
 
 (defun org-babel-variable-assignments:octave (params)
-  "Return list of octave statements assigning the block's variables"
+  "Return list of octave statements assigning the block's variables."
   (mapcar
    (lambda (pair)
      (format "%s=%s;"
@@ -265,7 +265,7 @@ This removes initial blank and comment lines and then calls
     (org-babel-import-elisp-from-file temp-file '(16))))
 
 (defun org-babel-octave-read-string (string)
-  "Strip \\\"s from around octave string"
+  "Strip \\\"s from around octave string."
   (if (string-match "^\"\\([^\000]+\\)\"$" string)
       (match-string 1 string)
     string))

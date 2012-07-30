@@ -93,7 +93,7 @@
                            (get-buffer tuareg-interactive-buffer-name))))
 
 (defun org-babel-variable-assignments:ocaml (params)
-  "Return list of ocaml statements assigning the block's variables"
+  "Return list of ocaml statements assigning the block's variables."
   (mapcar
    (lambda (pair) (format "let %s = %s;;" (car pair)
 			  (org-babel-ocaml-elisp-to-ocaml (cdr pair))))

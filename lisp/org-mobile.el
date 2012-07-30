@@ -236,7 +236,7 @@ by the mobile device, this hook should be used to copy the capture file
 directory `org-mobile-directory'.")
 
 (defvar org-mobile-post-pull-hook nil
-  "Hook run after running `org-mobile-pull'.
+  "Hook run after running `org-mobile-pull', only if new items were found.
 If Emacs does not have direct write access to the WebDAV directory used
 by the mobile device, this hook should be used to copy the emptied
 capture file `mobileorg.org' back to the WebDAV directory, for example

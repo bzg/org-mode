@@ -1255,7 +1255,7 @@ Use PREFIX as a prefix for the name of the indirect buffer."
 	 buf)))))
 
 (defun org-capture-verify-tree (tree)
-  "Throw error if TREE is not a valid tree"
+  "Throw error if TREE is not a valid tree."
   (unless (org-kill-is-subtree-p tree)
     (error "Template is not a valid Org entry or tree")))
 

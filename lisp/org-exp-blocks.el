@@ -72,8 +72,12 @@
 
 (eval-when-compile
   (require 'cl))
-(require 'org)
 (require 'find-func)
+
+(declare-function org-split-string "org" (string &optional separators))
+(declare-function org-remove-indentation "org" (code &optional n))
+
+(defvar org-protecting-blocks nil) ; From org.el
 
 (defun org-export-blocks-set (var value)
   "Set the value of `org-export-blocks' and install fontification."
@@ -142,7 +146,6 @@ export function should accept three arguments."
 (defun org-export-blocks-html-quote (body &optional open close)
   "Protect BODY from org html export.
 The optional OPEN and CLOSE tags will be inserted around BODY."
-
   (concat
    "\n#+BEGIN_HTML\n"
    (or open "")

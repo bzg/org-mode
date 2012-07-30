@@ -6080,8 +6080,14 @@ Recompute the time interval after changing one of the timestamps.  This
 is only necessary if you edit the timestamps directly.  If you change
 them with @kbd{S-@key{cursor}} keys, the update is automatic.
 @orgcmd{C-S-@key{up/down},org-clock-timestamps-up/down}
-On @code{CLOCK} log lines, increase/decrease both timestamps at the same
-time so that duration keeps the same.
+On @code{CLOCK} log lines, increase/decrease both timestamps so that the
+clock duration keeps the same. 
+@orgcmd{S-M-@key{up/down},org-timestamp-up/down}
+On @code{CLOCK} log lines, increase/decrease the timestamp at point and
+the one of the previous (or the next clock) timestamp by the same duration.
+For example, if you hit @kbd{S-M-@key{up}} to increase a clocked-out timestamp
+by five minutes, then the clocked-in timestamp of the next clock will be
+increased by five minutes.
 @orgcmd{C-c C-t,org-todo}
 Changing the TODO state of an item to DONE automatically stops the clock
 if it is running in this same item.
@@ -6313,7 +6319,7 @@ identical to dealing with away time due to idleness; it is just happening due
 to a recovery event rather than a set amount of idle time.
 
 You can also check all the files visited by your Org agenda for dangling
-clocks at any time using @kbd{M-x org-resolve-clocks}.
+clocks at any time using @kbd{M-x org-resolve-clocks RET} (or @kbd{C-c C-x C-z}).
 
 @subsubheading Continuous clocking
 @cindex continuous clocking
@@ -16459,8 +16465,8 @@ rely on outline paths, in the hope that these will be unique enough.}.
 Finally, Org writes the file @file{index.org}, containing links to all other
 files.  @i{MobileOrg} first reads this file from the server, and then
 downloads all agendas and Org files listed in it.  To speed up the download,
-MobileOrg will only read files whose checksums@footnote{stored automatically
-in the file @file{checksums.dat}} have changed.
+MobileOrg will only read files whose checksums@footnote{Checksums are stored 
+automatically in the file @file{checksums.dat}} have changed.
 
 @node Pulling from MobileOrg,  , Pushing to MobileOrg, MobileOrg
 @section Pulling from MobileOrg

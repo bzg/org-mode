@@ -99,7 +99,7 @@ VARS contains resolved variable references"
 ;; helper functions
 
 (defun org-babel-variable-assignments:python (params)
-  "Return list of python statements assigning the block's variables"
+  "Return list of python statements assigning the block's variables."
   (mapcar
    (lambda (pair)
      (format "%s=%s"
@@ -287,7 +287,7 @@ last statement in BODY, as elisp."
 	  (org-babel-eval-read-file tmp-file)))))))
 
 (defun org-babel-python-read-string (string)
-  "Strip 's from around python string"
+  "Strip 's from around python string."
   (if (string-match "^'\\([^\000]+\\)'$" string)
       (match-string 1 string)
     string))

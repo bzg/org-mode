@@ -107,7 +107,6 @@ blocks")
 
 (defun org-babel-expand-body:lilypond (body params)
   "Expand BODY according to PARAMS, return the expanded body."
-
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
     (mapc
      (lambda (pair)
@@ -127,7 +126,6 @@ Depending on whether we are in arrange mode either:
 1. Attempt to execute lilypond block according to header settings
   (This is the default basic mode)
 2. Tangle all lilypond blocks and process the result (arrange mode)"
-
   (ly-set-header-args ly-arrange-mode)
   (if ly-arrange-mode
       (ly-tangle)
@@ -137,14 +135,12 @@ Depending on whether we are in arrange mode either:
   "ob-lilypond specific tangle, attempts to invoke
 =ly-execute-tangled-ly= if tangle is successful. Also passes
 specific arguments to =org-babel-tangle="
-
   (interactive)
   (if (org-babel-tangle nil "yes" "lilypond")
       (ly-execute-tangled-ly) nil))
 
 (defun ly-process-basic (body params)
-  "Execute a lilypond block in basic mode"
-
+  "Execute a lilypond block in basic mode."
   (let* ((result-params (cdr (assoc :result-params params)))
 	 (out-file (cdr (assoc :file params)))
 	 (cmdline (or (cdr (assoc :cmdline params))
@@ -153,7 +149,6 @@ specific arguments to =org-babel-tangle="
 
     (with-temp-file in-file
       (insert (org-babel-expand-body:generic body params)))
-
     (org-babel-eval
      (concat
       (ly-determine-ly-path)
@@ -165,18 +160,15 @@ specific arguments to =org-babel-tangle="
       (file-name-sans-extension out-file)
       " "
       cmdline
-      in-file) "")
-    ) nil)
+      in-file) "")) nil)
 
 (defun org-babel-prep-session:lilypond (session params)
   "Return an error because LilyPond exporter does not support sessions."
-
   (error "Sorry, LilyPond does not currently support sessions!"))
 
 (defun ly-execute-tangled-ly ()
   "Compile result of block tangle with lilypond.
 If error in compilation, attempt to mark the error in lilypond org file"
-
   (when ly-compile-post-tangle
     (let ((ly-tangled-file (ly-switch-extension
                             (buffer-file-name) ".lilypond"))
@@ -203,7 +195,6 @@ If error in compilation, attempt to mark the error in lilypond org file"
 (defun ly-compile-lilyfile (file-name &optional test)
   "Compile lilypond file and check for compile errors
 FILE-NAME is full path to lilypond (.ly) file"
-
   (message "Compiling LilyPond...")
   (let ((arg-1 (ly-determine-ly-path)) ;program
         (arg-2 nil)                    ;infile
@@ -241,7 +232,6 @@ nil as file-name since it is unused in this context"
 (defun ly-process-compile-error (file-name)
   "Process the compilation error that has occurred.
 FILE-NAME is full path to lilypond file"
-
   (let ((line-num (ly-parse-line-num)))
     (let ((error-lines (ly-parse-error-line file-name line-num)))
       (ly-mark-error-line file-name error-lines)
@@ -251,7 +241,6 @@ FILE-NAME is full path to lilypond file"
   "Mark the erroneous lines in the lilypond org buffer.
 FILE-NAME is full path to lilypond file.
 LINE is the erroneous line"
-
   (switch-to-buffer-other-window
    (concat (file-name-nondirectory
             (ly-switch-extension file-name ".org"))))
@@ -267,7 +256,6 @@ LINE is the erroneous line"
 
 (defun ly-parse-line-num (&optional buffer)
   "Extract error line number."
-
   (when buffer
     (set-buffer buffer))
   (let ((start
@@ -292,7 +280,6 @@ LINE is the erroneous line"
   "Extract the erroneous line from the tangled .ly file
 FILE-NAME is full path to lilypond file.
 LINENO is the number of the erroneous line"
-
   (with-temp-buffer
     (insert-file-contents (ly-switch-extension file-name ".ly")
 			  nil nil nil t)
@@ -307,7 +294,6 @@ LINENO is the number of the erroneous line"
   "Attempt to display the generated pdf file
 FILE-NAME is full path to lilypond file
 If TEST is non-nil, the shell command is returned and is not run"
-
   (when ly-display-pdf-post-tangle
     (let ((pdf-file (ly-switch-extension file-name ".pdf")))
       (if (file-exists-p pdf-file)
@@ -326,7 +312,6 @@ If TEST is non-nil, the shell command is returned and is not run"
   "Attempt to play the generated MIDI file
 FILE-NAME is full path to lilypond file
 If TEST is non-nil, the shell command is returned and is not run"
-
   (when ly-play-midi-post-tangle
     (let ((midi-file (ly-switch-extension file-name ".midi")))
       (if (file-exists-p midi-file)
@@ -344,7 +329,6 @@ If TEST is non-nil, the shell command is returned and is not run"
 (defun ly-determine-ly-path (&optional test)
   "Return correct path to ly binary depending on OS
 If TEST is non-nil, it contains a simulation of the OS for test purposes"
-
   (let ((sys-type
          (or test system-type)))
     (cond ((string= sys-type  "darwin")
@@ -356,7 +340,6 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
 (defun ly-determine-pdf-path (&optional test)
   "Return correct path to pdf viewer depending on OS
 If TEST is non-nil, it contains a simulation of the OS for test purposes"
-
   (let ((sys-type
          (or test system-type)))
     (cond ((string= sys-type  "darwin")
@@ -368,7 +351,6 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
 (defun ly-determine-midi-path (&optional test)
   "Return correct path to midi player depending on OS
 If TEST is non-nil, it contains a simulation of the OS for test purposes"
-
   (let ((sys-type
          (or test test system-type)))
     (cond ((string= sys-type  "darwin")
@@ -378,8 +360,7 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
           (t ly-nix-midi-path))))
 
 (defun ly-toggle-midi-play ()
-  "Toggle whether midi will be played following a successful compilation"
-
+  "Toggle whether midi will be played following a successful compilation."
   (interactive)
   (setq ly-play-midi-post-tangle
         (not ly-play-midi-post-tangle))
@@ -388,8 +369,7 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
                        "ENABLED." "DISABLED."))))
 
 (defun ly-toggle-pdf-display ()
-  "Toggle whether pdf will be displayed following a successful compilation"
-
+  "Toggle whether pdf will be displayed following a successful compilation."
   (interactive)
   (setq ly-display-pdf-post-tangle
         (not ly-display-pdf-post-tangle))
@@ -398,35 +378,28 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
                        "ENABLED." "DISABLED."))))
 
 (defun ly-toggle-png-generation ()
-  "Toggle whether png image will be generated by compilation"
-
+  "Toggle whether png image will be generated by compilation."
   (interactive)
-  (setq ly-gen-png
-        (not ly-gen-png))
+  (setq ly-gen-png (not ly-gen-png))
   (message (concat "PNG image generation has been "
                    (if ly-gen-png "ENABLED." "DISABLED."))))
 
 (defun ly-toggle-html-generation ()
-  "Toggle whether html will be generated by compilation"
-
+  "Toggle whether html will be generated by compilation."
   (interactive)
-  (setq ly-gen-html
-        (not ly-gen-html))
+  (setq ly-gen-html (not ly-gen-html))
   (message (concat "HTML generation has been "
                    (if ly-gen-html "ENABLED." "DISABLED."))))
 
 (defun ly-toggle-pdf-generation ()
-  "Toggle whether pdf will be generated by compilation"
-
+  "Toggle whether pdf will be generated by compilation."
   (interactive)
-  (setq ly-gen-pdf
-        (not ly-gen-pdf))
+  (setq ly-gen-pdf (not ly-gen-pdf))
   (message (concat "PDF generation has been "
                    (if ly-gen-pdf "ENABLED." "DISABLED."))))
 
 (defun ly-toggle-arrange-mode ()
-  "Toggle whether in Arrange mode or Basic mode"
-
+  "Toggle whether in Arrange mode or Basic mode."
   (interactive)
   (setq ly-arrange-mode
         (not ly-arrange-mode))
@@ -435,7 +408,6 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
 
 (defun ly-switch-extension (file-name ext)
   "Utility command to swap current FILE-NAME extension with EXT"
-
   (concat (file-name-sans-extension
            file-name) ext))
 

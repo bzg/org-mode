@@ -1636,7 +1636,7 @@ With optional prefix argument ARG, jump backward ARG many source blocks."
 
 ;;;###autoload
 (defun org-babel-mark-block ()
-  "Mark current src block"
+  "Mark current src block."
   (interactive)
   ((lambda (head)
      (when head
@@ -2021,7 +2021,7 @@ code ---- the results are extracted in the syntax of the source
         (delete-region start (org-babel-result-end))))))
 
 (defun org-babel-result-end ()
-  "Return the point at the end of the current set of results"
+  "Return the point at the end of the current set of results."
   (save-excursion
     (cond
      ((org-at-table-p) (progn (goto-char (org-table-end)) (point)))

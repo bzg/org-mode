@@ -102,7 +102,7 @@ This function is called by `org-babel-execute-src-block'."
 ;; helper functions
 
 (defun org-babel-variable-assignments:ruby (params)
-  "Return list of ruby statements assigning the block's variables"
+  "Return list of ruby statements assigning the block's variables."
   (mapcar
    (lambda (pair)
      (format "%s=%s"

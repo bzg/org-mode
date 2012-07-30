@@ -386,7 +386,7 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
        (read-from-minibuffer (format "%s: " name))))))
 
 (defun org-bibtex-autokey ()
-  "Generate an autokey for the current headline"
+  "Generate an autokey for the current headline."
   (org-bibtex-put org-bibtex-key-property
                   (if org-bibtex-autogen-keys
                       (let* ((entry (org-bibtex-headline))

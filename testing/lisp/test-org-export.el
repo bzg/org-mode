@@ -444,11 +444,11 @@ body\n")))
   (let ((org-footnote-section nil)
 	(org-export-with-footnotes t))
     ;; 1. Read every type of footnote.
-    (org-test-with-parsed-data
-	"Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
-      (should
-       (equal
-	'((1 . "A") (2 . "B") (3 . "C") (4 . "D"))
+    (should
+     (equal
+      '((1 . "A\n") (2 . "B") (3 . "C") (4 . "D"))
+      (org-test-with-parsed-data
+	  "Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
 	(org-element-map
 	 tree 'footnote-reference
 	 (lambda (ref)
@@ -634,23 +634,47 @@ Paragraph[fn:1]"
 
 (ert-deftest test-org-export/first-sibling-p ()
   "Test `org-export-first-sibling-p' specifications."
+  ;; Standard test.
   (should
    (equal
     '(yes yes no)
-    (org-test-with-temp-text "* Headline\n** Headline 2\n** Headline 3"
+    (org-test-with-parsed-data "* Headline\n** Headline 2\n** Headline 3"
       (org-element-map
-       (org-element-parse-buffer) 'headline
-       (lambda (h) (if (org-export-first-sibling-p h) 'yes 'no)))))))
+       tree 'headline
+       (lambda (h) (if (org-export-first-sibling-p h info) 'yes 'no))
+       info))))
+  ;; Ignore headlines not exported.
+  (should
+   (equal
+    '(yes)
+    (let ((org-export-exclude-tags '("ignore")))
+      (org-test-with-parsed-data "* Headline :ignore:\n* Headline 2"
+	(org-element-map
+	 tree 'headline
+	 (lambda (h) (if (org-export-first-sibling-p h info) 'yes 'no))
+	 info))))))
 
 (ert-deftest test-org-export/last-sibling-p ()
   "Test `org-export-last-sibling-p' specifications."
+  ;; Standard test.
   (should
    (equal
     '(yes no yes)
-    (org-test-with-temp-text "* Headline\n** Headline 2\n** Headline 3"
+    (org-test-with-parsed-data "* Headline\n** Headline 2\n** Headline 3"
       (org-element-map
-       (org-element-parse-buffer) 'headline
-       (lambda (h) (if (org-export-last-sibling-p h) 'yes 'no)))))))
+       tree 'headline
+       (lambda (h) (if (org-export-last-sibling-p h info) 'yes 'no))
+       info))))
+  ;; Ignore headlines not exported.
+  (should
+   (equal
+    '(yes)
+    (let ((org-export-exclude-tags '("ignore")))
+      (org-test-with-parsed-data "* Headline\n* Headline 2 :ignore:"
+	(org-element-map
+	 tree 'headline
+	 (lambda (h) (if (org-export-last-sibling-p h info) 'yes 'no))
+	 info))))))
 
 
 
@@ -1595,12 +1619,18 @@ Another text. (ref:text)
    (equal "b"
 	  (org-test-with-parsed-data "* Headline\n*a* b"
 	    (org-export-get-next-element
-	     (org-element-map tree 'bold 'identity info t)))))
+	     (org-element-map tree 'bold 'identity info t) info))))
   ;; Return nil when no previous element.
   (should-not
    (org-test-with-parsed-data "* Headline\na *b*"
      (org-export-get-next-element
-      (org-element-map tree 'bold 'identity info t)))))
+      (org-element-map tree 'bold 'identity info t) info)))
+  ;; Non-exportable elements are ignored.
+  (should-not
+   (let ((org-export-with-timestamps nil))
+     (org-test-with-parsed-data "\alpha <2012-03-29 Thu>"
+       (org-export-get-next-element
+	(org-element-map tree 'entity 'identity info t) info)))))
 
 (ert-deftest test-org-export/get-previous-element ()
   "Test `org-export-get-previous-element' specifications."
@@ -1609,12 +1639,18 @@ Another text. (ref:text)
    (equal "a "
 	  (org-test-with-parsed-data "* Headline\na *b*"
 	    (org-export-get-previous-element
-	     (org-element-map tree 'bold 'identity info t)))))
+	     (org-element-map tree 'bold 'identity info t) info))))
   ;; Return nil when no previous element.
   (should-not
    (org-test-with-parsed-data "* Headline\n*a* b"
      (org-export-get-previous-element
-      (org-element-map tree 'bold 'identity info t)))))
+      (org-element-map tree 'bold 'identity info t) info)))
+  ;; Non-exportable elements are ignored.
+  (should-not
+   (let ((org-export-with-timestamps nil))
+     (org-test-with-parsed-data "<2012-03-29 Thu> \alpha"
+       (org-export-get-previous-element
+	(org-element-map tree 'entity 'identity info t) info)))))
 
 
 (provide 'test-org-export)

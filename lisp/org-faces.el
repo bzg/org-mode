@@ -419,7 +419,7 @@ determines if it is a foreground or a background color."
 (defface org-checkbox
   (org-compatible-face 'bold
     '((t (:bold t))))
-  "Face for checkboxes"
+  "Face for checkboxes."
   :group 'org-faces)
 
 
@@ -491,9 +491,9 @@ changes."
   :version "22.1")
 
 (defface org-document-title
-  '((((class color) (background light)) (:foreground "midnight blue" :weight bold :height 1.44))
-    (((class color) (background dark)) (:foreground "pale turquoise" :weight bold :height 1.44))
-    (t (:weight bold :height 1.44)))
+  '((((class color) (background light)) (:foreground "midnight blue" :weight bold))
+    (((class color) (background dark)) (:foreground "pale turquoise" :weight bold))
+    (t (:weight bold)))
   "Face for document title, i.e. that which follows the #+TITLE: keyword."
   :group 'org-faces)
 

@@ -175,7 +175,7 @@ When completing for #+STARTUP, for example, this function returns
 	    opts))))
 
 (defun pcomplete/org-mode/file-option/bind ()
-  "Complete arguments for the #+BIND file option, which are variable names"
+  "Complete arguments for the #+BIND file option, which are variable names."
   (let (vars)
     (mapatoms
      (lambda (a) (if (boundp a) (setq vars (cons (symbol-name a) vars)))))
@@ -288,7 +288,7 @@ Complete a language in the first field, the header arguments and switches."
 	    ":session" ":shebang" ":tangle" ":var"))))
 
 (defun pcomplete/org-mode/block-option/clocktable ()
-  "Complete keywords in a clocktable line"
+  "Complete keywords in a clocktable line."
   (while (pcomplete-here '(":maxlevel" ":scope"
 			   ":tstart" ":tend" ":block" ":step"
 			   ":stepskip0" ":fileskip0"

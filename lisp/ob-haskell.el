@@ -125,7 +125,7 @@ then create one.  Return the initialized session."
       (current-buffer))))
 
 (defun org-babel-variable-assignments:haskell (params)
-  "Return list of haskell statements assigning the block's variables"
+  "Return list of haskell statements assigning the block's variables."
   (mapcar (lambda (pair)
 	    (format "let %s = %s"
 		    (car pair)

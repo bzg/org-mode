@@ -26,7 +26,6 @@
 
 ;; This file contains the time clocking code for Org-mode
 
-(require 'org)
 (require 'org-exp)
 ;;; Code:
 
@@ -1000,6 +999,12 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
   "Return the current Mac idle time in seconds."
   (string-to-number (shell-command-to-string "ioreg -c IOHIDSystem | perl -ane 'if (/Idle/) {$idle=(pop @F)/1000000000; print $idle; last}'")))
 
+(defvar org-x11idle-exists-p
+  ;; Check that x11idle exists
+  (and (eq (call-process-shell-command "command" nil nil nil "-v" "x11idle") 0)
+       ;; Check that x11idle can retrieve the idle time
+       (eq (call-process-shell-command "x11idle" nil nil nil) 0)))
+
 (defun org-x11-idle-seconds ()
   "Return the current X11 idle time in seconds."
   (/ (string-to-number (shell-command-to-string "x11idle")) 1000))
@@ -1010,12 +1015,7 @@ This routine returns a floating point number."
   (cond
    ((eq system-type 'darwin)
     (org-mac-idle-seconds))
-   ((and
-     (eq window-system 'x)
-     ;; Check that x11idle exists
-     (eq (call-process-shell-command "command" nil nil nil "-v" "x11idle") 0)
-     ;; Check that x11idle can retrieve the idle time
-     (eq (call-process-shell-command "x11idle" nil nil nil ) 0))
+   ((and (eq window-system 'x) org-x11idle-exists-p)
     (org-x11-idle-seconds))
    (t
     (org-emacs-idle-seconds))))
@@ -1146,7 +1146,12 @@ clock in by using the last clock-out time as the start time
 	    (goto-char target-pos)
 	    (org-back-to-heading t)
 	    (or interrupting (move-marker org-clock-interrupted-task nil))
-	    (org-clock-history-push)
+	    (save-excursion
+	      (forward-char) ;; make sure the marker is not at the
+			     ;; beginning of the heading, since the
+			     ;; user is liking to insert stuff here
+			     ;; manually
+	      (org-clock-history-push))
 	    (org-clock-set-current)
 	    (cond ((functionp org-clock-in-switch-to-state)
 		   (looking-at org-complex-heading-regexp)

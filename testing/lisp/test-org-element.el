@@ -1119,6 +1119,24 @@ e^{i\\pi}+1=0
      (org-element-map (org-element-parse-buffer) 'macro 'identity))))
 
 
+;;;; Paragraph
+
+(ert-deftest test-org-element/paragraph-parser ()
+  "Test `paragraph' parser."
+  ;; Standard test.
+  (should
+   (org-test-with-temp-text "Paragraph"
+     (org-element-map (org-element-parse-buffer) 'paragraph 'identity nil t)))
+  ;; Property find end of a paragraph stuck to another element.
+  (should
+   (eq ?#
+       (org-test-with-temp-text "Paragraph\n# Comment"
+	 (org-element-map
+	  (org-element-parse-buffer) 'paragraph
+	  (lambda (p) (char-after (org-element-property :end p)))
+	  nil t)))))
+
+
 ;;;; Plain List
 
 (ert-deftest test-org-element/plain-list-parser ()
@@ -2207,6 +2225,19 @@ Paragraph \\alpha."
 
 (ert-deftest test-org-element/at-point ()
   "Test `org-element-at-point' specifications."
+  ;; Return closest element containing point.
+  (should
+   (eq 'paragraph
+       (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER"
+	 (progn (search-forward "A")
+		(org-element-type (org-element-at-point))))))
+  ;; Correctly set `:parent' property.
+  (should
+   (eq 'center-block
+       (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER"
+	 (progn (search-forward "A")
+		(org-element-type
+		 (org-element-property :parent (org-element-at-point)))))))
   ;; Special case: at the very beginning of a table, return `table'
   ;; object instead of `table-row'.
   (should
@@ -2218,26 +2249,35 @@ Paragraph \\alpha."
   (should
    (eq 'plain-list
        (org-test-with-temp-text "- item"
-	 (org-element-type (org-element-at-point))))))
+	 (org-element-type (org-element-at-point)))))
+  ;; With an optional argument, return trail.
+  (should
+   (equal '(paragraph center-block)
+	  (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER\nZ"
+	    (progn (search-forward "Z")
+		   (mapcar 'org-element-type (org-element-at-point t)))))))
 
 (ert-deftest test-org-element/context ()
   "Test `org-element-context' specifications."
-  ;; List all objects and elements containing point.
+  ;; Return closest object containing point.
   (should
-   (equal
-    '(subscript bold paragraph)
-    (mapcar 'car
-	    (org-test-with-temp-text "Some *text with _underline_*"
-	      (progn (search-forward "under")
-		     (org-element-context))))))
+   (eq 'underline
+       (org-test-with-temp-text "Some *text with _underline_ text*"
+	 (progn (search-forward "under")
+		(org-element-type (org-element-context))))))
   ;; Find objects in secondary strings.
   (should
-   (equal
-    '(underline headline)
-    (mapcar 'car
-	    (org-test-with-temp-text "* Headline _with_ underlining"
-	      (progn (search-forward "w")
-		     (org-element-context)))))))
+   (eq 'underline
+       (org-test-with-temp-text "* Headline _with_ underlining"
+	 (progn (search-forward "w")
+		(org-element-type (org-element-context))))))
+  ;; Correctly set `:parent' property.
+  (should
+   (eq 'paragraph
+       (org-test-with-temp-text "Some *bold* text"
+	 (progn (search-forward "bold")
+		(org-element-type
+		 (org-element-property :parent (org-element-context))))))))
 
 (ert-deftest test-org-element/forward ()
   "Test `org-element-forward' specifications."
@@ -2548,50 +2588,6 @@ Text.
       '((63 . 82) (26 . 48))
       (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
 	      (overlays-in (point-min) (point-max)))))))
-
-(ert-deftest test-org-element/fill-paragraph ()
-  "Test `org-element-fill-paragraph' specifications."
-  ;; At an Org table, align it.
-  (org-test-with-temp-text "|a|"
-    (org-element-fill-paragraph)
-    (should (equal (buffer-string) "| a |\n")))
-  ;; At a paragraph, preserve line breaks.
-  (org-test-with-temp-text "some \\\\\nlong\ntext"
-    (let ((fill-column 20))
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string) "some \\\\\nlong text"))))
-  ;; At a verse block, fill paragraph at point, also preserving line
-  ;; breaks.  Though, do nothing when point is at the block
-  ;; boundaries.
-  (org-test-with-temp-text "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"
-    (forward-line)
-    (let ((fill-column 20))
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string)
-		     "#+BEGIN_VERSE\nSome \\\\\nlong text\n#+END_VERSE"))))
-  (org-test-with-temp-text "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"
-    (let ((fill-column 20))
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string)
-		     "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"))))
-  ;; Fill contents of `comment-block' and `example-block' elements.
-  (org-test-with-temp-text "#+BEGIN_COMMENT\nSome\ntext\n#+END_COMMENT"
-    (let ((fill-column 20))
-      (forward-line)
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string)
-		     "#+BEGIN_COMMENT\nSome text\n#+END_COMMENT"))))
-  (org-test-with-temp-text "#+BEGIN_EXAMPLE\nSome\ntext\n#+END_EXAMPLE"
-    (let ((fill-column 20))
-      (forward-line)
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string)
-		     "#+BEGIN_EXAMPLE\nSome text\n#+END_EXAMPLE"))))
-  ;; Do nothing at affiliated keywords.
-  (org-test-with-temp-text "#+NAME: para\nSome\ntext."
-    (let ((fill-column 20))
-      (org-element-fill-paragraph)
-      (should (equal (buffer-string) "#+NAME: para\nSome\ntext.")))))
 
 
 (provide 'test-org-element)

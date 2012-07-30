@@ -511,7 +511,8 @@ title."
 				   (mapconcat 'identity tag-list ":"))))))
 	 (priority
 	  (and (plist-get info :with-priority)
-	       (concat (org-element-property :priority element) " ")))
+	       (let ((char (org-element-property :priority element)))
+		 (and char (format "(#%c) " char)))))
 	 (first-part (concat numbers todo priority text)))
     (concat
      first-part
@@ -1736,10 +1737,9 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
-Return output file's name."
+Export is done in a buffer named \"*Org E-ASCII Export*\", which
+will be displayed when `org-export-show-temporary-export-buffer'
+is non-nil."
   (interactive)
   (let ((outbuf (org-export-to-buffer
 		 'e-ascii "*Org E-ASCII Export*"

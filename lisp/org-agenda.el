@@ -1221,10 +1221,18 @@ agenda display."
   :type 'boolean)
 
 (defcustom org-agenda-start-with-log-mode nil
-  "The initial value of log-mode in a newly created agenda window."
+  "The initial value of log-mode in a newly created agenda window.
+See `org-agenda-log-mode' and `org-agenda-log-mode-items' for further
+explanations on the possible values."
   :group 'org-agenda-startup
   :group 'org-agenda-daily/weekly
-  :type 'boolean)
+  :type '(choice (const :tag "Don't show log items" nil)
+		 (const :tag "Show only log items" 'only)
+		 (const :tag "Show all possible log items" 'clockcheck)
+		 (repeat :tag "Choose among possible values for `org-agenda-log-mode-items'"
+			 (choice (const :tag "Show closed log items" 'closed)
+				 (const :tag "Show clocked log items" 'clock)
+				 (const :tag "Show all logged state changes" 'state)))))
 
 (defcustom org-agenda-start-with-clockreport-mode nil
   "The initial value of clockreport-mode in a newly created agenda window."
@@ -1792,10 +1800,6 @@ Note that functions in this alist don't need to be quoted."
   :type 'alist
   :version "24.1"
   :group 'org-agenda)
-
-(eval-when-compile
-  (require 'cl))
-(require 'org)
 
 (defmacro org-agenda-with-point-at-orig-entry (string &rest body)
   "Execute BODY with point at location given by `org-hd-marker' property.
@@ -2880,7 +2884,6 @@ This ensures the export commands can easily use it."
       (setq res (replace-match ";" t t res)))
     (org-trim res)))
 
-
 ;;;###autoload
 (defun org-store-agenda-views (&rest parameters)
   (interactive)
@@ -2893,11 +2896,13 @@ This ensures the export commands can easily use it."
 	(pop-up-frames nil)
 	(dir default-directory)
 	(pars (org-make-parameter-alist parameters))
-	cmd thiscmdkey files opts cmd-or-set)
+	cmd thiscmdkey files opts cmd-or-set bufname)
     (save-window-excursion
       (while cmds
 	(setq cmd (pop cmds)
 	      thiscmdkey (car cmd)
+	      bufname (if org-agenda-sticky (format "*Org Agenda(%s)*" thiscmdkey)
+			org-agenda-buffer-name)
 	      cmd-or-set (nth 2 cmd)
 	      opts (nth (if (listp cmd-or-set) 3 4) cmd)
 	      files (nth (if (listp cmd-or-set) 4 5) cmd))
@@ -2906,13 +2911,13 @@ This ensures the export commands can easily use it."
 	  (org-eval-in-environment (append org-agenda-exporter-settings
 					   opts pars)
 	    (org-agenda nil thiscmdkey))
-	  (set-buffer org-agenda-buffer-name)
+	  (set-buffer bufname)
 	  (while files
 	    (org-eval-in-environment (append org-agenda-exporter-settings
 					     opts pars)
-	      (org-agenda-write (expand-file-name (pop files) dir) nil t)))
-	  (and (get-buffer org-agenda-buffer-name)
-	       (kill-buffer org-agenda-buffer-name)))))))
+	      (org-agenda-write (expand-file-name (pop files) dir) nil t bufname)))
+	  (and (get-buffer bufname)
+	       (kill-buffer bufname)))))))
 (def-edebug-spec org-batch-store-agenda-views (&rest sexp))
 
 (defun org-agenda-mark-header-line (pos)
@@ -2927,7 +2932,7 @@ This ensures the export commands can easily use it."
 
 (defvar org-mobile-creating-agendas)
 (defvar org-agenda-write-buffer-name "Agenda View")
-(defun org-agenda-write (file &optional open nosettings)
+(defun org-agenda-write (file &optional open nosettings agenda-bufname)
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
 HTML (.html or .htm) or Postscript (.ps) is produced.
@@ -2938,7 +2943,8 @@ With prefix argument OPEN, open the new file immediately.
 If NOSETTINGS is given, do not scope the settings of
 `org-agenda-exporter-settings' into the export commands.  This is used when
 the settings have already been scoped and we do not wish to overrule other,
-higher priority settings."
+higher priority settings.
+If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
   (interactive "FWrite agenda to file: \nP")
   (if (not (file-writable-p file))
       (error "Cannot write agenda to file %s" file))
@@ -2965,7 +2971,6 @@ higher priority settings."
 	      ((string-match "\\.html?\\'" file)
 	       (require 'htmlize)
 	       (set-buffer (htmlize-buffer (current-buffer)))
-
 	       (when (and org-agenda-export-html-style
 			  (string-match "<style>" org-agenda-export-html-style))
 		 ;; replace <style> section with org-agenda-export-html-style
@@ -3007,7 +3012,7 @@ higher priority settings."
 		 (save-buffer 0)
 		 (kill-buffer (current-buffer))
 		 (message "Plain text written to %s" file))))))))
-    (set-buffer org-agenda-buffer-name))
+    (set-buffer (or agenda-bufname org-agenda-buffer-name)))
   (when open (org-open-file file)))
 
 (defvar org-agenda-tag-filter-overlays nil)
@@ -3232,9 +3237,9 @@ the global options and expect it to be applied to the entire view.")
 
 
 (defun org-agenda-use-sticky-p ()
-  "Return non-NIL if existing agenda buffer named
-`org-agenda-buffer-name' exists, and should be shown instead of
-generating a new one"
+  "Return non-nil if an agenda buffer named
+`org-agenda-buffer-name' exists and should be shown instead of
+generating a new one."
   (and
    ;; turned off by user
    org-agenda-sticky
@@ -3253,7 +3258,7 @@ generating a new one"
       org-agenda-this-buffer-is-sticky))))
 
 (defun org-prepare-agenda-window (abuf)
-  "Setup agenda buffer in the window"
+  "Setup agenda buffer in the window."
   (let* ((awin (get-buffer-window abuf))
 	 wconf)
     (cond
@@ -6381,7 +6386,7 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
       nil)))
 
 (defun org-agenda-Quit (&optional arg)
-  "Exit agenda by removing the window or the buffer"
+  "Exit agenda by removing the window or the buffer."
   (interactive)
   (if org-agenda-columns-active
       (org-columns-quit)
@@ -9032,7 +9037,7 @@ details and examples."
     (eq date today)))
 
 (defun org-agenda-todo-yesterday (&optional arg)
-  "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday"
+  "Like `org-agenda-todo' but the time of change will be 23:59 of yesterday."
   (interactive "P")
   (let* ((hour (third (decode-time
                        (org-current-time))))

@@ -108,9 +108,8 @@
 
 ;;; Code:
 
-(eval-when-compile (require 'cl))
-(require 'org)
-(declare-function org-inlinetask-goto-end "org-inlinetask" ())
+(eval-when-compile
+  (require 'cl))
 
 
 
@@ -124,7 +123,7 @@
 ;; process.
 
 (defconst org-element-paragraph-separate
-  (concat "\f" "\\|" "^[ \t]*$" "\\|"
+  (concat "^[ \t]*$" "\\|"
 	  ;; Headlines and inlinetasks.
 	  org-outline-regexp-bol "\\|"
 	  ;; Comments, blocks (any type), keywords and babel calls.
@@ -140,11 +139,7 @@
 	  ;; LaTeX environments.
 	  "^[ \t]*\\\\\\(begin\\|end\\)" "\\|"
 	  ;; Planning and Clock lines.
-	  "^[ \t]*\\(?:"
-	  org-clock-string "\\|"
-	  org-closed-string "\\|"
-	  org-deadline-string "\\|"
-	  org-scheduled-string "\\)")
+	  org-planning-or-clock-line-re)
   "Regexp to separate paragraphs in an Org buffer.")
 
 (defconst org-element-all-elements
@@ -466,28 +461,31 @@ Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_CENTER" limit t)))
-	;; Incomplete-block: parse it as a comment.
+	;; Incomplete block: parse it as a comment.
 	(org-element-comment-parser limit)
-      (let ((contents-end (match-beginning 0)))
-	(save-excursion
-	  (let* ((keywords (org-element--collect-affiliated-keywords))
-		 (begin (car keywords))
-		 (contents-begin (progn (forward-line) (point)))
-		 (hidden (org-invisible-p2))
-		 (pos-before-blank (progn (goto-char contents-end)
-					  (forward-line)
-					  (point)))
-		 (end (progn (org-skip-whitespace)
-			     (if (eobp) (point) (point-at-bol)))))
-	    (list 'center-block
-		  (nconc
-		   (list :begin begin
-			 :end end
-			 :hiddenp hidden
-			 :contents-begin contents-begin
-			 :contents-end contents-end
-			 :post-blank (count-lines pos-before-blank end))
-		   (cadr keywords)))))))))
+      (let ((block-end-line (match-beginning 0)))
+	(let* ((keywords (org-element--collect-affiliated-keywords))
+	       (begin (car keywords))
+	       ;; Empty blocks have no contents.
+	       (contents-begin (progn (forward-line)
+				      (and (< (point) block-end-line)
+					   (point))))
+	       (contents-end (and contents-begin block-end-line))
+	       (hidden (org-invisible-p2))
+	       (pos-before-blank (progn (goto-char block-end-line)
+					(forward-line)
+					(point)))
+	       (end (save-excursion (skip-chars-forward " \r\t\n" limit)
+				    (if (eobp) (point) (point-at-bol)))))
+	  (list 'center-block
+		(nconc
+		 (list :begin begin
+		       :end end
+		       :hiddenp hidden
+		       :contents-begin contents-begin
+		       :contents-end contents-end
+		       :post-blank (count-lines pos-before-blank end))
+		 (cadr keywords))))))))
 
 (defun org-element-center-block-interpreter (center-block contents)
   "Interpret CENTER-BLOCK element as Org syntax.
@@ -507,29 +505,38 @@ Return a list whose CAR is `drawer' and CDR is a plist containing
 `:contents-end' and `:post-blank' keywords.
 
 Assume point is at beginning of drawer."
-  (save-excursion
-    (let* ((case-fold-search t)
-	   (name (progn (looking-at org-drawer-regexp)
-			(org-match-string-no-properties 1)))
-	   (keywords (org-element--collect-affiliated-keywords))
-	   (begin (car keywords))
-	   (contents-begin (progn (forward-line) (point)))
-	   (hidden (org-invisible-p2))
-	   (contents-end (progn (re-search-forward "^[ \t]*:END:" limit t)
-				(point-at-bol)))
-	   (pos-before-blank (progn (forward-line) (point)))
-	   (end (progn (org-skip-whitespace)
-		       (if (eobp) (point) (point-at-bol)))))
-      (list 'drawer
-	    (nconc
-	     (list :begin begin
-		   :end end
-		   :drawer-name name
-		   :hiddenp hidden
-		   :contents-begin contents-begin
-		   :contents-end contents-end
-		   :post-blank (count-lines pos-before-blank end))
-	     (cadr keywords))))))
+  (let ((case-fold-search t))
+    (if (not (save-excursion (re-search-forward "^[ \t]*:END:" limit t)))
+	;; Incomplete drawer: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
+      (let ((drawer-end-line (match-beginning 0)))
+	(save-excursion
+	  (let* ((case-fold-search t)
+		 (name (progn (looking-at org-drawer-regexp)
+			      (org-match-string-no-properties 1)))
+		 (keywords (org-element--collect-affiliated-keywords))
+		 (begin (car keywords))
+		 ;; Empty drawers have no contents.
+		 (contents-begin (progn (forward-line)
+					(and (< (point) drawer-end-line)
+					     (point))))
+		 (contents-end (and contents-begin drawer-end-line))
+		 (hidden (org-invisible-p2))
+		 (pos-before-blank (progn (goto-char drawer-end-line)
+					  (forward-line)
+					  (point)))
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
+			     (if (eobp) (point) (point-at-bol)))))
+	    (list 'drawer
+		  (nconc
+		   (list :begin begin
+			 :end end
+			 :drawer-name name
+			 :hiddenp hidden
+			 :contents-begin contents-begin
+			 :contents-end contents-end
+			 :post-blank (count-lines pos-before-blank end))
+		   (cadr keywords)))))))))
 
 (defun org-element-drawer-interpreter (drawer contents)
   "Interpret DRAWER element as Org syntax.
@@ -556,19 +563,23 @@ Assume point is at beginning of dynamic block."
     (if (not (save-excursion (re-search-forward org-dblock-end-re limit t)))
 	;; Incomplete block: parse it as a comment.
 	(org-element-comment-parser limit)
-      (let ((contents-end (match-beginning 0)))
+      (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((name (progn (looking-at org-dblock-start-re)
 			      (org-match-string-no-properties 1)))
 		 (arguments (org-match-string-no-properties 3))
 		 (keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
-		 (contents-begin (progn (forward-line) (point)))
+		 ;; Empty blocks have no contents.
+		 (contents-begin (progn (forward-line)
+					(and (< (point) block-end-line)
+					     (point))))
+		 (contents-end (and contents-begin block-end-line))
 		 (hidden (org-invisible-p2))
-		 (pos-before-blank (progn (goto-char contents-end)
+		 (pos-before-blank (progn (goto-char block-end-line)
 					  (forward-line)
 					  (point)))
-		 (end (progn (org-skip-whitespace)
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
 			     (if (eobp) (point) (point-at-bol)))))
 	    (list 'dynamic-block
 		  (nconc
@@ -605,22 +616,25 @@ a plist containing `:label', `:begin' `:end', `:contents-begin',
 
 Assume point is at the beginning of the footnote definition."
   (save-excursion
-    (looking-at org-footnote-definition-re)
-    (let* ((label (org-match-string-no-properties 1))
+    (let* ((label (progn (looking-at org-footnote-definition-re)
+			 (org-match-string-no-properties 1)))
 	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
+	   (ending (save-excursion
+		     (if (progn
+			   (end-of-line)
+			   (re-search-forward
+			    (concat org-outline-regexp-bol "\\|"
+				    org-footnote-definition-re "\\|"
+				    "^[ \t]*$") limit 'move))
+			 (match-beginning 0)
+		       (point))))
 	   (contents-begin (progn (search-forward "]")
-				  (org-skip-whitespace)
-				  (point)))
-	   (contents-end (if (progn
-			       (end-of-line)
-			       (re-search-forward
-				(concat org-outline-regexp-bol "\\|"
-					org-footnote-definition-re "\\|"
-					"^[ \t]*$") limit 'move))
-			     (match-beginning 0)
-			   (point)))
-	   (end (progn (org-skip-whitespace)
+				  (skip-chars-forward " \r\t\n" ending)
+				  (and (/= (point) ending) (point))))
+	   (contents-end (and contents-begin ending))
+	   (end (progn (goto-char ending)
+		       (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'footnote-definition
 	    (nconc
@@ -629,7 +643,7 @@ Assume point is at the beginning of the footnote definition."
 		   :end end
 		   :contents-begin contents-begin
 		   :contents-end contents-end
-		   :post-blank (count-lines contents-end end))
+		   :post-blank (count-lines ending end))
 	     (cadr keywords))))))
 
 (defun org-element-footnote-definition-interpreter (footnote-definition contents)
@@ -679,6 +693,8 @@ Assume point is at beginning of the headline."
 	   (archivedp (member org-archive-tag tags))
 	   (footnote-section-p (and org-footnote-section
 				    (string= org-footnote-section raw-value)))
+	   ;; Normalize property names: ":SOME_PROP:" becomes
+	   ;; ":some-prop".
 	   (standard-props (let (plist)
 			     (mapc
 			      (lambda (p)
@@ -697,15 +713,17 @@ Assume point is at beginning of the headline."
 	   (clock (cdr (assoc "CLOCK" time-props)))
 	   (timestamp (cdr (assoc "TIMESTAMP" time-props)))
 	   (begin (point))
-	   (pos-after-head (save-excursion (forward-line) (point)))
-	   (contents-begin (save-excursion (forward-line)
-					   (org-skip-whitespace)
-					   (if (eobp) (point) (point-at-bol))))
-	   (hidden (save-excursion (forward-line) (org-invisible-p2)))
-	   (end (progn (goto-char (org-end-of-subtree t t))))
-	   (contents-end (progn (skip-chars-backward " \r\t\n")
-				(forward-line)
-				(point))))
+	   (end (save-excursion (goto-char (org-end-of-subtree t t))))
+	   (pos-after-head (progn (forward-line) (point)))
+	   (contents-begin (save-excursion
+			     (skip-chars-forward " \r\t\n" end)
+			     (and (/= (point) end) (line-beginning-position))))
+	   (hidden (org-invisible-p2))
+	   (contents-end (and contents-begin
+			      (progn (goto-char end)
+				     (skip-chars-backward " \r\t\n")
+				     (forward-line)
+				     (point)))))
       ;; Clean RAW-VALUE from any quote or comment string.
       (when (or quotedp commentedp)
 	(setq raw-value
@@ -721,7 +739,9 @@ Assume point is at beginning of the headline."
 		    (list :raw-value raw-value
 			  :begin begin
 			  :end end
-			  :pre-blank (count-lines pos-after-head contents-begin)
+			  :pre-blank
+			  (if (not contents-begin) 0
+			    (count-lines pos-after-head contents-begin))
 			  :hiddenp hidden
 			  :contents-begin contents-begin
 			  :contents-end contents-end
@@ -734,7 +754,12 @@ Assume point is at beginning of the headline."
 			  :deadline deadline
 			  :timestamp timestamp
 			  :clock clock
-			  :post-blank (count-lines contents-end end)
+			  :post-blank (count-lines
+				       (if (not contents-end) pos-after-head
+					 (goto-char contents-end)
+					 (forward-line)
+					 (point))
+				       end)
 			  :footnote-section-p footnote-section-p
 			  :archivedp archivedp
 			  :commentedp commentedp
@@ -822,6 +847,8 @@ Assume point is at beginning of the inline task."
 			   (if (member todo org-done-keywords) 'done 'todo)))
 	   (tags (let ((raw-tags (nth 5 components)))
 		   (and raw-tags (org-split-string raw-tags ":"))))
+	   ;; Normalize property names: ":SOME_PROP:" becomes
+	   ;; ":some-prop".
 	   (standard-props (let (plist)
 			     (mapc
 			      (lambda (p)
@@ -839,22 +866,26 @@ Assume point is at beginning of the inline task."
 	   (deadline (cdr (assoc "DEADLINE" time-props)))
 	   (clock (cdr (assoc "CLOCK" time-props)))
 	   (timestamp (cdr (assoc "TIMESTAMP" time-props)))
-	   (contents-begin (save-excursion (forward-line) (point)))
-	   (hidden (org-invisible-p2))
-	   (pos-before-blank (org-inlinetask-goto-end))
-	   ;; In the case of a single line task, CONTENTS-BEGIN and
-	   ;; CONTENTS-END might overlap.
-	   (contents-end (max contents-begin
-			      (if (not (bolp)) (point-at-bol)
-				(save-excursion (forward-line -1) (point)))))
-	   (end (progn (org-skip-whitespace)
+	   (task-end (save-excursion
+		       (end-of-line)
+		       (and (re-search-forward "^\\*+ END" limit t)
+			    (match-beginning 0))))
+	   (contents-begin (progn (forward-line)
+				  (and task-end (< (point) task-end) (point))))
+	   (hidden (and contents-begin (org-invisible-p2)))
+	   (contents-end (and contents-begin task-end))
+	   (before-blank (if (not task-end) (point)
+			   (goto-char task-end)
+			   (forward-line)
+			   (point)))
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol))))
 	   (inlinetask
 	    (list 'inlinetask
 		  (nconc
 		   (list :begin begin
 			 :end end
-			 :hiddenp (and (> contents-end contents-begin) hidden)
+			 :hiddenp hidden
 			 :contents-begin contents-begin
 			 :contents-end contents-end
 			 :level (nth 1 components)
@@ -866,7 +897,7 @@ Assume point is at beginning of the inline task."
 			 :deadline deadline
 			 :timestamp timestamp
 			 :clock clock
-			 :post-blank (count-lines pos-before-blank end))
+			 :post-blank (count-lines before-blank end))
 		   standard-props
 		   (cadr keywords)))))
       (org-element-put-property
@@ -1061,7 +1092,7 @@ Assume point is at the beginning of the list."
       ;; Blank lines below list belong to the top-level list only.
       (unless (= (org-list-get-top-point struct) contents-begin)
 	(setq end (min (org-list-get-bottom-point struct)
-		       (progn (org-skip-whitespace)
+		       (progn (skip-chars-forward " \r\t\n" limit)
 			      (if (eobp) (point) (point-at-bol))))))
       ;; Return value.
       (list 'plain-list
@@ -1098,16 +1129,20 @@ Assume point is at the beginning of the block."
 	       (re-search-forward "^[ \t]*#\\+END_QUOTE" limit t)))
 	;; Incomplete block: parse it as a comment.
 	(org-element-comment-parser limit)
-      (let ((contents-end (match-beginning 0)))
+      (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
-		 (contents-begin (progn (forward-line) (point)))
+		 ;; Empty blocks have no contents.
+		 (contents-begin (progn (forward-line)
+					(and (< (point) block-end-line)
+					     (point))))
+		 (contents-end (and contents-begin block-end-line))
 		 (hidden (org-invisible-p2))
-		 (pos-before-blank (progn (goto-char contents-end)
+		 (pos-before-blank (progn (goto-char block-end-line)
 					  (forward-line)
 					  (point)))
-		 (end (progn (org-skip-whitespace)
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
 			     (if (eobp) (point) (point-at-bol)))))
 	    (list 'quote-block
 		  (nconc
@@ -1176,13 +1211,17 @@ Assume point is at the beginning of the block."
 	       (re-search-forward (concat "^[ \t]*#\\+END_" type) limit t)))
 	;; Incomplete block: parse it as a comment.
 	(org-element-comment-parser limit)
-      (let ((contents-end (match-beginning 0)))
+      (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
 		 (begin (car keywords))
-		 (contents-begin (progn (forward-line) (point)))
+		 ;; Empty blocks have no contents.
+		 (contents-begin (progn (forward-line)
+					(and (< (point) block-end-line)
+					     (point))))
+		 (contents-end (and contents-begin block-end-line))
 		 (hidden (org-invisible-p2))
-		 (pos-before-blank (progn (goto-char contents-end)
+		 (pos-before-blank (progn (goto-char block-end-line)
 					  (forward-line)
 					  (point)))
 		 (end (progn (org-skip-whitespace)
@@ -1236,7 +1275,7 @@ keywords."
 		       (org-babel-lob-get-info)))
 	  (begin (point-at-bol))
 	  (pos-before-blank (progn (forward-line) (point)))
-	  (end (progn (org-skip-whitespace)
+	  (end (progn (skip-chars-forward " \r\t\n" limit)
 		      (if (eobp) (point) (point-at-bol)))))
       (list 'babel-call
 	    (list :begin begin
@@ -1279,7 +1318,7 @@ as keywords."
 		      (org-match-string-no-properties 1)))
 	   (status (if time 'closed 'running))
 	   (post-blank (let ((before-blank (progn (forward-line) (point))))
-			 (org-skip-whitespace)
+			 (skip-chars-forward " \r\t\n" limit)
 			 (unless (eobp) (beginning-of-line))
 			 (count-lines before-blank (point))))
 	   (end (point)))
@@ -1339,7 +1378,7 @@ Assume point is at comment beginning."
 			       (progn (forward-line) (point))))))
 	      (point)))
 	   (end (progn (goto-char com-end)
-		       (org-skip-whitespace)
+		       (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'comment
 	    (nconc
@@ -1381,7 +1420,7 @@ Assume point is at comment block beginning."
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
-		 (end (progn (org-skip-whitespace)
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
 			     (if (eobp) (point) (point-at-bol))))
 		 (value (buffer-substring-no-properties
 			 contents-begin contents-end)))
@@ -1450,7 +1489,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
-		 (end (progn (org-skip-whitespace)
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
 			     (if (eobp) (point) (point-at-bol)))))
 	    (list 'example-block
 		  (nconc
@@ -1505,7 +1544,7 @@ Assume point is at export-block beginning."
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
-		 (end (progn (org-skip-whitespace)
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
 			     (if (eobp) (point) (point-at-bol))))
 		 (value (buffer-substring-no-properties contents-begin
 							contents-end)))
@@ -1555,7 +1594,7 @@ Assume point is at the beginning of the fixed-width area."
 			      "\n"))
 		(forward-line))
 	      (point)))
-	   (end (progn (org-skip-whitespace)
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'fixed-width
 	    (nconc
@@ -1585,7 +1624,7 @@ containing `:begin', `:end' and `:post-blank' keywords."
     (let* ((keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (post-hr (progn (forward-line) (point)))
-	   (end (progn (org-skip-whitespace)
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'horizontal-rule
 	    (nconc
@@ -1618,7 +1657,7 @@ keywords."
 	   (value (org-trim (buffer-substring-no-properties
 			     (match-end 0) (point-at-eol))))
 	   (pos-before-blank (progn (forward-line) (point)))
-	   (end (progn (org-skip-whitespace)
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'keyword
 	    (list :key key
@@ -1659,7 +1698,7 @@ Assume point is at the beginning of the latex environment."
 		   (forward-line)
 		   (point)))
 	   (value (buffer-substring-no-properties code-begin code-end))
-	   (end (progn (org-skip-whitespace)
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'latex-environment
 	    (nconc
@@ -1691,15 +1730,17 @@ Assume point is at the beginning of the paragraph."
     (let* ((contents-begin (point))
 	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
-	   (contents-end
+	   (before-blank
 	    (progn (end-of-line)
 		   (if (re-search-forward org-element-paragraph-separate
 					  limit
 					  'm)
-		       (progn (forward-line -1) (end-of-line) (point))
+		       (goto-char (match-beginning 0))
 		     (point))))
-	   (pos-before-blank (progn (forward-line) (point)))
-	   (end (progn (org-skip-whitespace)
+	   (contents-end (progn (skip-chars-backward " \r\t\n" contents-begin)
+				(forward-line)
+				(point)))
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'paragraph
 	    ;; If paragraph has no affiliated keywords, it may not begin
@@ -1709,7 +1750,7 @@ Assume point is at the beginning of the paragraph."
 		   :end end
 		   :contents-begin contents-begin
 		   :contents-end contents-end
-		   :post-blank (count-lines pos-before-blank end))
+		   :post-blank (count-lines before-blank end))
 	     (cadr keywords))))))
 
 (defun org-element-paragraph-interpreter (paragraph contents)
@@ -1732,7 +1773,7 @@ and `:post-blank' keywords."
     (let* ((case-fold-search nil)
 	   (begin (point))
 	   (post-blank (let ((before-blank (progn (forward-line) (point))))
-			 (org-skip-whitespace)
+			 (skip-chars-forward " \r\t\n" limit)
 			 (unless (eobp) (beginning-of-line))
 			 (count-lines before-blank (point))))
 	   (end (point))
@@ -1803,7 +1844,7 @@ Assume point is at the beginning of the property drawer."
 	  (prop-end (progn (re-search-forward "^[ \t]*:END:" limit t)
 			   (point-at-bol)))
 	  (pos-before-blank (progn (forward-line) (point)))
-	  (end (progn (org-skip-whitespace)
+	  (end (progn (skip-chars-forward " \r\t\n" limit)
 		      (if (eobp) (point) (point-at-bol)))))
       (list 'property-drawer
 	    (list :begin begin
@@ -1918,7 +1959,7 @@ Assume point is at the beginning of the block."
 					  (forward-line)
 					  (point)))
 		 ;; Get position after ending blank lines.
-		 (end (progn (org-skip-whitespace)
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
 			     (if (eobp) (point) (point-at-bol)))))
 	    (list 'src-block
 		  (nconc
@@ -1990,7 +2031,7 @@ Assume point is at the beginning of the table."
 		      (forward-line))
 		    acc))
 	   (pos-before-blank (point))
-	   (end (progn (org-skip-whitespace)
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'table
 	    (nconc
@@ -2087,7 +2128,7 @@ Assume point is at beginning of the block."
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
-		 (end (progn (org-skip-whitespace)
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
 			     (if (eobp) (point) (point-at-bol)))))
 	    (list 'verse-block
 		  (nconc
@@ -4001,8 +4042,11 @@ indentation is not done with TAB characters."
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
 of the element and PROPS a plist of properties associated to the
-element.  Possible types are defined in
-`org-element-all-elements'.
+element.
+
+Possible types are defined in `org-element-all-elements'.
+Properties depend on element or object type, but always
+include :begin, :end, :parent and :post-blank properties.
 
 As a special case, if point is at the very beginning of a list or
 sub-list, returned element will be that list instead of the first
@@ -4027,10 +4071,12 @@ first element of current section."
      ;; Otherwise move at the beginning of the section containing
      ;; point.
      (let ((origin (point))
-	   (end (save-excursion (outline-next-heading) (point)))
-	   element type special-flag trail struct prevs)
+	   (end (save-excursion
+		  (org-with-limited-levels (outline-next-heading)) (point)))
+	   element type special-flag trail struct prevs parent)
        (org-with-limited-levels
-	(if (org-before-first-heading-p) (goto-char (point-min))
+	(if (org-with-limited-levels (org-before-first-heading-p))
+	    (goto-char (point-min))
 	  (org-back-to-heading)
 	  (forward-line)))
        (org-skip-whitespace)
@@ -4042,11 +4088,16 @@ first element of current section."
            (setq element
 		 (org-element--current-element end 'element special-flag struct)
                  type (car element))
-	   (push element trail)
+	   (org-element-put-property element :parent parent)
+	   (when keep-trail (push element trail))
            (cond
-	    ;; 1. Skip any element ending before point or at point.
+	    ;; 1. Skip any element ending before point or at point
+	    ;;    because the following element has started.  On the
+	    ;;    other hand, if the element ends at point and that
+	    ;;    point is also the end of the buffer, do not skip it.
 	    ((let ((end (org-element-property :end element)))
-	       (when (<= end origin)
+	       (when (or (< end origin)
+			 (and (= end origin) (/= (point-max) end)))
 		 (if (> (point-max) end) (goto-char end)
 		   (throw 'exit (if keep-trail trail element))))))
 	    ;; 2. An element containing point is always the element at
@@ -4055,13 +4106,18 @@ first element of current section."
 	     (throw 'exit (if keep-trail trail element)))
 	    ;; 3. At any other greater element type, if point is
 	    ;;    within contents, move into it.  Otherwise, return
-	    ;;    that element.
+	    ;;    that element.  As a special case, when ORIGIN is
+	    ;;    contents end and is also the end of the buffer, try
+	    ;;    to move inside the greater element to find the end
+	    ;;    of the innermost element.
 	    (t
 	     (let ((cbeg (org-element-property :contents-begin element))
 		   (cend (org-element-property :contents-end element)))
-	       (if (or (not cbeg) (not cend) (> cbeg origin) (<= cend origin)
+	       (if (or (not cbeg) (not cend) (> cbeg origin) (< cend origin)
+		       (and (= cend origin) (/= (point-max) origin))
 		       (and (= cbeg origin) (memq type '(plain-list table))))
 		   (throw 'exit (if keep-trail trail element))
+		 (setq parent element)
 		 (case type
 		   (plain-list
 		    (setq special-flag 'item
@@ -4072,25 +4128,21 @@ first element of current section."
 		 (goto-char cbeg)))))))))))
 
 (defun org-element-context ()
-  "Return list of all elements and objects around point.
+  "Return closest element or object around point.
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
 of the element or object and PROPS a plist of properties
-associated to it.  Possible types are defined in
-`org-element-all-elements' and `org-element-all-objects'.
+associated to it.
 
-All elements and objects returned belong to the current section
-and are ordered from closest to farthest."
+Possible types are defined in `org-element-all-elements' and
+`org-element-all-objects'.  Properties depend on element or
+object type, but always include :begin, :end, :parent
+and :post-blank properties."
   (org-with-wide-buffer
    (let* ((origin (point))
-	  ;; Remove elements not containing point from trail.
-	  (elements (org-remove-if
-		     (lambda (el)
-		       (or (> (org-element-property :begin el) origin)
-			   (< (org-element-property :end el) origin)))
-		     (org-element-at-point 'keep-trail)))
-	  (element (car elements))
-	  (type (car element)) end)
+	  (element (org-element-at-point))
+	  (type (car element))
+	  end)
      ;; Check if point is inside an element containing objects or at
      ;; a secondary string.  In that case, move to beginning of the
      ;; element or secondary string and set END to the other side.
@@ -4111,7 +4163,7 @@ and are ordered from closest to farthest."
 		       (progn (beginning-of-line)
 			      (skip-chars-forward "* ")
 			      (setq end (point-at-eol))))
-		  (and (memq (car element) '(paragraph table-cell verse-block))
+		  (and (memq type '(paragraph table-cell verse-block))
 		       (let ((cbeg (org-element-property
 				    :contents-begin element))
 			     (cend (org-element-property
@@ -4119,8 +4171,10 @@ and are ordered from closest to farthest."
 			 (and (>= origin cbeg)
 			      (<= origin cend)
 			      (progn (goto-char cbeg) (setq end cend)))))))
-	 elements
-       (let ((restriction (org-element-restriction element)) candidates)
+	 element
+       (let ((restriction (org-element-restriction element))
+	     (parent element)
+	     candidates)
 	 (catch 'exit
 	   (while (setq candidates (org-element--get-next-object-candidates
 				    end restriction candidates))
@@ -4128,7 +4182,7 @@ and are ordered from closest to farthest."
 					candidates)))
 	       ;; If ORIGIN is before next object in element, there's
 	       ;; no point in looking further.
-	       (if (> (cdr closest-cand) origin) (throw 'exit elements)
+	       (if (> (cdr closest-cand) origin) (throw 'exit element)
 		 (let* ((object
 			 (progn (goto-char (cdr closest-cand))
 				(funcall (intern (format "org-element-%s-parser"
@@ -4142,13 +4196,14 @@ and are ordered from closest to farthest."
 		    ;; ORIGIN is within a non-recursive object or at an
 		    ;; object boundaries: Return that object.
 		    ((or (not cbeg) (> cbeg origin) (< cend origin))
-		     (throw 'exit (cons object elements)))
+		     (throw 'exit
+			    (org-element-put-property object :parent parent)))
 		    ;; Otherwise, move within current object and restrict
 		    ;; search to the end of its contents.
 		    (t (goto-char cbeg)
-		       (setq end cend)
-		       (push object elements)))))))
-	   elements))))))
+		       (org-element-put-property object :parent parent)
+		       (setq parent object end cend)))))))
+	   parent))))))
 
 
 ;; Once the local structure around point is well understood, it's easy
@@ -4249,23 +4304,20 @@ end of ELEM-A."
   "Move forward by one element.
 Move to the next element at the same level, when possible."
   (interactive)
-  (if (org-with-limited-levels (org-at-heading-p))
-      (let ((origin (point)))
-	(org-forward-same-level 1)
-	(unless (org-with-limited-levels (org-at-heading-p))
-	  (goto-char origin)
-	  (error "Cannot move further down")))
-    (let* ((trail (org-element-at-point 'keep-trail))
-	   (elem (pop trail))
-	   (end (org-element-property :end elem))
-	   (parent (loop for prev in trail
-			 when (>= (org-element-property :end prev) end)
-			 return prev)))
-      (cond
-       ((eobp) (error "Cannot move further down"))
-       ((and parent (= (org-element-property :contents-end parent) end))
-	(goto-char (org-element-property :end parent)))
-       (t (goto-char end))))))
+  (cond ((eobp) (error "Cannot move further down"))
+	((org-with-limited-levels (org-at-heading-p))
+	 (let ((origin (point)))
+	   (org-forward-same-level 1)
+	   (unless (org-with-limited-levels (org-at-heading-p))
+	     (goto-char origin)
+	     (error "Cannot move further down"))))
+	(t
+	 (let* ((elem (org-element-at-point))
+		(end (org-element-property :end elem))
+		(parent (org-element-property :parent elem)))
+	   (if (and parent (= (org-element-property :contents-end parent) end))
+	       (goto-char (org-element-property :end parent))
+	     (goto-char end))))))
 
 (defun org-element-backward ()
   "Move backward by one element.
@@ -4294,18 +4346,13 @@ Move to the previous element at the same level, when possible."
   "Move to upper element."
   (interactive)
   (if (org-with-limited-levels (org-at-heading-p))
-      (unless (org-up-heading-safe)
-	(error "No surrounding element"))
-    (let* ((trail (org-element-at-point 'keep-trail))
-	   (elem (pop trail))
-	   (end (org-element-property :end elem))
-	   (parent (loop for prev in trail
-			 when (>= (org-element-property :end prev) end)
-			 return prev)))
-      (cond
-       (parent (goto-char (org-element-property :begin parent)))
-       ((org-before-first-heading-p) (error "No surrounding element"))
-       (t (org-back-to-heading))))))
+      (unless (org-up-heading-safe) (error "No surrounding element"))
+    (let* ((elem (org-element-at-point))
+	   (parent (org-element-property :parent elem)))
+      (if parent (goto-char (org-element-property :begin parent))
+	(if (org-with-limited-levels (org-before-first-heading-p))
+	    (error "No surrounding element")
+	  (org-with-limited-levels (org-back-to-heading)))))))
 
 (defun org-element-down ()
   "Move to inner element."
@@ -4441,83 +4488,6 @@ modified."
 		      (org-do-remove-indentation)))))
 	      (reverse contents))))))
     (funcall unindent-tree (org-element-contents parse-tree))))
-
-(defun org-element-fill-paragraph (&optional justify)
-  "Fill element at point, when applicable.
-
-This function only applies to paragraph, comment blocks, example
-blocks and fixed-width areas.  Also, as a special case, re-align
-table when point is at one.
-
-If JUSTIFY is non-nil (interactively, with prefix argument),
-justify as well.  If `sentence-end-double-space' is non-nil, then
-period followed by one space does not end a sentence, so don't
-break a line there.  The variable `fill-column' controls the
-width for filling."
-  (let ((element (org-element-at-point)))
-    (case (org-element-type element)
-      ;; Align Org tables, leave table.el tables as-is.
-      (table-row (org-table-align) t)
-      (table
-       (when (eq (org-element-property :type element) 'org) (org-table-align))
-       t)
-      ;; Elements that may contain `line-break' type objects.
-      ((paragraph verse-block)
-       (let ((beg (org-element-property :contents-begin element))
-             (end (org-element-property :contents-end element)))
-         ;; Do nothing if point is at an affiliated keyword or at
-         ;; verse block markers.
-         (if (or (< (point) beg) (>= (point) end)) t
-           ;; At a verse block, first narrow to current "paragraph"
-           ;; and set current element to that paragraph.
-           (save-restriction
-             (when (eq (org-element-type element) 'verse-block)
-               (narrow-to-region beg end)
-               (save-excursion
-                 (end-of-line)
-                 (let ((bol-pos (point-at-bol)))
-                   (re-search-backward org-element-paragraph-separate nil 'move)
-                   (unless (or (bobp) (= (point-at-bol) bol-pos))
-                     (forward-line))
-                   (setq element (org-element-paragraph-parser end)
-                         beg (org-element-property :contents-begin element)
-                         end (org-element-property :contents-end element)))))
-             ;; Fill paragraph, taking line breaks into consideration.
-             ;; For that, slice the paragraph using line breaks as
-             ;; separators, and fill the parts in reverse order to
-             ;; avoid messing with markers.
-             (save-excursion
-               (goto-char end)
-               (mapc
-                (lambda (pos)
-                  (fill-region-as-paragraph pos (point) justify)
-                  (goto-char pos))
-                ;; Find the list of ending positions for line breaks
-                ;; in the current paragraph.  Add paragraph beginning
-                ;; to include first slice.
-                (nreverse
-                 (cons beg
-                       (org-element-map
-                        (org-element--parse-objects
-                         beg end nil org-element-all-objects)
-                        'line-break
-                        (lambda (lb) (org-element-property :end lb)))))))) t)))
-      ;; Elements whose contents should be filled as plain text.
-      ((comment-block example-block)
-       (save-restriction
-         (narrow-to-region
-          (save-excursion
-            (goto-char (org-element-property :begin element))
-            (while (looking-at org-element--affiliated-re) (forward-line))
-	    (forward-line)
-            (point))
-          (save-excursion
-	    (goto-char (org-element-property :end element))
-	    (if (bolp) (forward-line -1) (beginning-of-line))
-	    (point)))
-         (fill-paragraph justify) t))
-      ;; Ignore every other element.
-      (otherwise t))))
 
 
 (provide 'org-element)
