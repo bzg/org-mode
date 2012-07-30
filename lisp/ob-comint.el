@@ -75,39 +75,40 @@ or user `keyboard-quit' during execution of body."
 	(full-body (cadr (cdr (cdr meta)))))
     `(org-babel-comint-in-buffer ,buffer
        (let ((string-buffer "") dangling-text raw)
-	 (org-flet ((my-filt (text)
-			 (setq string-buffer (concat string-buffer text))))
-	   ;; setup filter
-	   (add-hook 'comint-output-filter-functions 'my-filt)
-	   (unwind-protect
-	       (progn
-		 ;; got located, and save dangling text
-		 (goto-char (process-mark (get-buffer-process (current-buffer))))
-		 (let ((start (point))
-		       (end (point-max)))
-		   (setq dangling-text (buffer-substring start end))
-		   (delete-region start end))
-		 ;; pass FULL-BODY to process
-		 ,@body
-		 ;; wait for end-of-evaluation indicator
-		 (while (progn
-			  (goto-char comint-last-input-end)
-			  (not (save-excursion
-				 (and (re-search-forward
-				       (regexp-quote ,eoe-indicator) nil t)
-				      (re-search-forward
-				       comint-prompt-regexp nil t)))))
-		   (accept-process-output (get-buffer-process (current-buffer)))
-		   ;; thought the following this would allow async
-		   ;; background running, but I was wrong...
-		   ;; (run-with-timer .5 .5 'accept-process-output
-		   ;; 		 (get-buffer-process (current-buffer)))
-		   )
-		 ;; replace cut dangling text
-		 (goto-char (process-mark (get-buffer-process (current-buffer))))
-		 (insert dangling-text))
-	     ;; remove filter
-	     (remove-hook 'comint-output-filter-functions 'my-filt)))
+	 ;; setup filter
+	 (setq comint-output-filter-functions
+	       (cons (lambda (text) (setq string-buffer (concat string-buffer text)))
+		     comint-output-filter-functions))
+	 (unwind-protect
+	     (progn
+	       ;; got located, and save dangling text
+	       (goto-char (process-mark (get-buffer-process (current-buffer))))
+	       (let ((start (point))
+		     (end (point-max)))
+		 (setq dangling-text (buffer-substring start end))
+		 (delete-region start end))
+	       ;; pass FULL-BODY to process
+	       ,@body
+	       ;; wait for end-of-evaluation indicator
+	       (while (progn
+			(goto-char comint-last-input-end)
+			(not (save-excursion
+			       (and (re-search-forward
+				     (regexp-quote ,eoe-indicator) nil t)
+				    (re-search-forward
+				     comint-prompt-regexp nil t)))))
+		 (accept-process-output (get-buffer-process (current-buffer)))
+		 ;; thought the following this would allow async
+		 ;; background running, but I was wrong...
+		 ;; (run-with-timer .5 .5 'accept-process-output
+		 ;; 		 (get-buffer-process (current-buffer)))
+		 )
+	       ;; replace cut dangling text
+	       (goto-char (process-mark (get-buffer-process (current-buffer))))
+	       (insert dangling-text))
+	   ;; remove filter
+	   (setq comint-output-filter-functions
+		 (cdr comint-output-filter-functions)))
 	 ;; remove echo'd FULL-BODY from input
 	 (if (and ,remove-echo ,full-body
 		  (string-match
