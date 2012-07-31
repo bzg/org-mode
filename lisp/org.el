@@ -20894,14 +20894,17 @@ width for filling."
 	;; Elements that may contain `line-break' type objects.
 	((paragraph verse-block)
 	 (let ((beg (org-element-property :contents-begin element))
-	       (end (org-element-property :contents-end element)))
+	       (end (org-element-property :contents-end element))
+	       (type (org-element-type element)))
 	   ;; Do nothing if point is at an affiliated keyword or at
 	   ;; verse block markers.
-	   (if (or (< (point) beg) (>= (point) end)) t
+	   (if (or (< (point) beg)
+		   (and (eq type 'verse-block) (>= (point) end)))
+	       t
 	     ;; At a verse block, first narrow to current "paragraph"
 	     ;; and set current element to that paragraph.
 	     (save-restriction
-	       (when (eq (org-element-type element) 'verse-block)
+	       (when (eq type 'verse-block)
 		 (narrow-to-region beg end)
 		 (save-excursion
 		   (end-of-line)
