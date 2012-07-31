@@ -1358,24 +1358,17 @@ Assume point is at comment beginning."
   (save-excursion
     (let* ((keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
-	   ;; Match first line with a loose regexp since it might as
-	   ;; well be an ill-defined keyword.
-	   (value (progn
-		    (looking-at "#\\+? ?")
-		    (buffer-substring-no-properties
-		     (match-end 0) (progn (forward-line) (point)))))
+	   value
 	   (com-end
 	    ;; Get comments ending.
 	    (progn
-	      (while (and (< (point) limit)
-			  (looking-at "\\(\\(# ?\\)[^+]\\|[ \t]*#\\+\\( \\|$\\)\\)"))
-		;; Accumulate lines without leading hash and plus sign
-		;; if any.  First whitespace is also ignored.
+	      (while (and (< (point) limit) (looking-at "[ \t]*# ?"))
+		;; Accumulate lines without leading hash and first
+		;; whitespace.
 		(setq value
 		      (concat value
 			      (buffer-substring-no-properties
-			       (or (match-end 2) (match-end 3))
-			       (progn (forward-line) (point))))))
+			       (match-end 0) (progn (forward-line) (point))))))
 	      (point)))
 	   (end (progn (goto-char com-end)
 		       (skip-chars-forward " \r\t\n" limit)
@@ -1391,7 +1384,7 @@ Assume point is at comment beginning."
 (defun org-element-comment-interpreter (comment contents)
   "Interpret COMMENT element as Org syntax.
 CONTENTS is nil."
-  (replace-regexp-in-string "^" "#+ " (org-element-property :value comment)))
+  (replace-regexp-in-string "^" "# " (org-element-property :value comment)))
 
 
 ;;;; Comment Block
@@ -3324,32 +3317,26 @@ element it has to parse."
 	(org-element-fixed-width-parser limit))
        ;; Inline Comments, Blocks, Babel Calls, Dynamic Blocks and
        ;; Keywords.
-       ((looking-at "[ \t]*#\\+")
+       ((looking-at "[ \t]*#")
 	(goto-char (match-end 0))
-	(cond ((looking-at "$\\| ")
-	       (beginning-of-line)
-	       (org-element-comment-parser limit))
-	      ((looking-at "BEGIN_\\(\\S-+\\)")
+	(cond ((looking-at "\\+BEGIN_\\(\\S-+\\)")
 	       (beginning-of-line)
 	       (let ((parser (assoc (upcase (match-string 1))
 				    org-element-block-name-alist)))
 		 (if parser (funcall (cdr parser) limit)
 		   (org-element-special-block-parser limit))))
-	      ((looking-at "CALL")
+	      ((looking-at "\\+CALL")
 	       (beginning-of-line)
 	       (org-element-babel-call-parser limit))
-	      ((looking-at "BEGIN:? ")
+	      ((looking-at "\\+BEGIN:? ")
 	       (beginning-of-line)
 	       (org-element-dynamic-block-parser limit))
-	      ((looking-at "\\S-+:")
+	      ((looking-at "\\+\\S-+:")
 	       (beginning-of-line)
 	       (org-element-keyword-parser limit))
-	      ;; Ill-formed syntax is considered as a comment.
 	      (t
 	       (beginning-of-line)
 	       (org-element-comment-parser limit))))
-       ;; Comments.
-       ((eq (char-after) ?#) (org-element-comment-parser limit))
        ;; Footnote Definition.
        ((looking-at org-footnote-definition-re)
         (org-element-footnote-definition-parser limit))

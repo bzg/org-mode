@@ -5062,8 +5062,8 @@ The following commands are available:
   (org-update-radio-target-regexp)
   ;; Comments
   (org-set-local 'comment-use-syntax nil)
-  (org-set-local 'comment-start "#+")
-  (org-set-local 'comment-start-skip "\\(?:^#\\|#\\+\\)\\(?: \\|$\\)")
+  (org-set-local 'comment-start "#")
+  (org-set-local 'comment-start-skip "# ?")
   (org-set-local 'comment-insert-comment-function 'org-insert-comment)
   (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
   (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region)
@@ -5475,7 +5475,7 @@ by a #."
   "Fontify #+ lines and blocks, in the correct ways."
   (let ((case-fold-search t))
     (if (re-search-forward
-	 "^\\([ \t]*#\\+\\(\\([a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
+	 "^\\([ \t]*#\\(\\(\\+\\[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
 	 limit t)
 	(let ((beg (match-beginning 0))
 	      (block-start (match-end 0))
@@ -5582,7 +5582,7 @@ by a #."
 			   "[^[:space:]]" end t)
 			  (goto-char (match-beginning 0))
 			  (current-column))))
-	(while (re-search-forward "^[ \t]*\\(,\\)\\([*]\\|#\\+\\)" end t)
+	(while (re-search-forward "^[ \t]*\\(,\\)\\([*]\\|#\\)" end t)
 	  (goto-char (match-beginning 1))
 	  (when (= (current-column) front-line)
 	    (replace-match "" nil nil nil 1)))))))
@@ -20651,8 +20651,6 @@ If point is in an inline task, mark that task instead."
 	 column)
     (beginning-of-line 1)
     (cond
-     ;; Comments
-     ((looking-at "# ") (setq column 0))
      ;; Headings
      ((looking-at org-outline-regexp) (setq column 0))
      ;; Included files
@@ -20854,7 +20852,7 @@ meant to be filled."
 	      (point))))
       (unless (< p post-affiliated)
 	(case type
-	  (comment (looking-at "[ \t]*#\\+? ?") (match-string 0))
+	  (comment (looking-at "[ \t]*# ?") (match-string 0))
 	  ((item plain-list)
 	   (make-string (org-list-item-body-column
 			 (org-element-property :begin element))
@@ -21013,7 +21011,7 @@ If the line is empty, insert comment at its beginning."
   (beginning-of-line)
   (if (looking-at "\\s-*$") (replace-match "") (open-line 1))
   (org-indent-line)
-  (insert "#+ "))
+  (insert "# "))
 
 (defun org-comment-or-uncomment-region (beg end &rest ignore)
   "Comment or uncomment each non-blank line in the region.
@@ -21038,9 +21036,9 @@ contains commented lines.  Otherwise, comment them."
           (end (copy-marker end)))
       (while (< (point) end)
         (unless (looking-at "\\s-*$")
-          (if (not uncommentp) (progn (back-to-indentation) (insert "#+ "))
+          (if (not uncommentp) (progn (back-to-indentation) (insert "# "))
             ;; Only comments and blank lines in region: uncomment it.
-            (looking-at "[ \t]*\\(#\\+? ?\\)")
+            (looking-at "[ \t]*\\(# ?\\)")
             (replace-match "" nil nil nil 1)))
         (forward-line))
       (set-marker end nil))))

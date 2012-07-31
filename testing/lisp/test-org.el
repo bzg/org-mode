@@ -188,16 +188,10 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	(org-fill-paragraph)
 	(buffer-string)))
     "#+BEGIN_COMMENT\nSome text\n#+END_COMMENT"))
-  ;; Fill `comment' elements, indented or not.
+  ;; Fill `comment' elements.
   (should
-   (equal "# A B"
-	  (org-test-with-temp-text "# A\n#B"
-	    (let ((fill-column 20))
-	      (org-fill-paragraph)
-	      (buffer-string)))))
-  (should
-   (equal "  #+ A B"
-	  (org-test-with-temp-text "  #+ A\n  #+ B"
+   (equal "  # A B"
+	  (org-test-with-temp-text "  # A\n  # B"
 	    (let ((fill-column 20))
 	      (org-fill-paragraph)
 	      (buffer-string)))))
@@ -225,17 +219,10 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (end-of-line)
 	      (org-auto-fill-function)
 	      (buffer-string)))))
-  ;; Auto fill comments, indented or not.
+  ;; Auto fill comments.
   (should
-   (equal "# 12345\n# 7890"
-	  (org-test-with-temp-text "# 12345 7890"
-	    (let ((fill-column 7))
-	      (end-of-line)
-	      (org-auto-fill-function)
-	      (buffer-string)))))
-  (should
-   (equal "  #+ 12345\n  #+ 7890"
-	  (org-test-with-temp-text "  #+ 12345 7890"
+   (equal "  # 12345\n  # 7890"
+	  (org-test-with-temp-text "  # 12345 7890"
 	    (let ((fill-column 10))
 	      (end-of-line)
 	      (org-auto-fill-function)
@@ -291,21 +278,21 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   ;; No region selected, no comment on current line and line not
   ;; empty: insert comment on line above.
   (should
-   (equal "#+ \nComment"
+   (equal "# \nComment"
 	  (org-test-with-temp-text "Comment"
 	    (progn (call-interactively 'comment-dwim)
 		   (buffer-string)))))
   ;; No region selected, no comment on current line and line empty:
   ;; insert comment on this line.
   (should
-   (equal "#+ \nParagraph"
+   (equal "# \nParagraph"
 	  (org-test-with-temp-text "\nParagraph"
 	    (progn (call-interactively 'comment-dwim)
 		   (buffer-string)))))
   ;; No region selected, and a comment on this line: indent it.
   (should
-   (equal "* Headline\n  #+ Comment"
-	  (org-test-with-temp-text "* Headline\n#+ Comment"
+   (equal "* Headline\n  # Comment"
+	  (org-test-with-temp-text "* Headline\n# Comment"
 	    (progn (forward-line)
 		   (let ((org-adapt-indentation t))
 		     (call-interactively 'comment-dwim))
@@ -321,7 +308,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   ;; un-comment all commented lines.
   (should
    (equal "Comment 1\n\nComment 2"
-	  (org-test-with-temp-text "#+ Comment 1\n\n#+ Comment 2"
+	  (org-test-with-temp-text "# Comment 1\n\n# Comment 2"
 	    (progn
 	      (transient-mark-mode 1)
 	      (push-mark (point) t t)
@@ -330,7 +317,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (buffer-string)))))
   ;; Region selected without comments: comment all non-blank lines.
   (should
-   (equal "#+ Comment 1\n\n#+ Comment 2"
+   (equal "# Comment 1\n\n# Comment 2"
 	  (org-test-with-temp-text "Comment 1\n\nComment 2"
 	    (progn
 	      (transient-mark-mode 1)
