@@ -143,13 +143,26 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
     (let ((fill-column 20))
       (org-fill-paragraph)
       (should (equal (buffer-string) "some \\\\\nlong text"))))
-  ;; Special case: fill correctly a paragraph when point is at its
-  ;; very end.
+  ;; Correctly fill a paragraph when point is at its very end.
   (should
    (equal "A B"
 	  (org-test-with-temp-text "A\nB"
 	    (let ((fill-column 20))
 	      (goto-char (point-max))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  ;; Special case: Fill first paragraph when point is at an item or
+  ;; a plain-list or a footnote reference.
+  (should
+   (equal "- A B"
+	  (org-test-with-temp-text "- A\n  B"
+	    (let ((fill-column 20))
+	      (org-fill-paragraph)
+	      (buffer-string)))))
+  (should
+   (equal "[fn:1] A B"
+	  (org-test-with-temp-text "[fn:1] A\nB"
+	    (let ((fill-column 20))
 	      (org-fill-paragraph)
 	      (buffer-string)))))
   ;; At a verse block, fill paragraph at point, also preserving line
