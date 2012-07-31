@@ -5060,6 +5060,13 @@ The following commands are available:
   (org-set-local 'indent-line-function 'org-indent-line)
   (org-set-local 'indent-region-function 'org-indent-region)
   (org-update-radio-target-regexp)
+  ;; Comments
+  (org-set-local 'comment-use-syntax nil)
+  (org-set-local 'comment-start "#+")
+  (org-set-local 'comment-start-skip "\\(?:^#\\|#\\+\\)\\(?: \\|$\\)")
+  (org-set-local 'comment-insert-comment-function 'org-insert-comment)
+  (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
+  (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region)
   ;; Beginning/end of defun
   (org-set-local 'beginning-of-defun-function 'org-beginning-of-defun)
   (org-set-local 'end-of-defun-function 'org-end-of-defun)
@@ -20616,8 +20623,7 @@ If point is in an inline task, mark that task instead."
     (push-mark (point) nil t)
     (goto-char beg)))
 
-;;; Paragraph filling stuff.
-;; We want this to be just right, so use the full arsenal.
+;;; Indentation
 
 (defun org-indent-line ()
   "Indent line depending on context."
@@ -20785,12 +20791,16 @@ If point is in an inline task, mark that task instead."
 	      (t (call-interactively 'org-indent-line)))
 	(move-beginning-of-line 2)))))
 
+
+;;; Filling
+
+;; We use our own fill-paragraph and auto-fill functions.  These
+;; functions will shadow `fill-prefix' (computed internally with
+;; `org-fill-context-prefix') and pass through to
+;; `fill-region-as-paragraph' and `do-auto-fill' as appropriate.
+
 (defun org-set-autofill-regexps ()
   (interactive)
-  ;; We use our own fill-paragraph and auto-fill functions.  These
-  ;; functions will shadow `fill-prefix' (computed internally with
-  ;; `org-fill-context-prefix') and pass through to
-  ;; `fill-region-as-paragraph' and `do-auto-fill' as appropriate.
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
   ;; Prevent auto-fill from inserting unwanted new items.
   (when (boundp 'fill-nobreak-predicate)
@@ -20963,6 +20973,54 @@ width for filling."
     (when (and fc (> (current-column) fc))
       (let ((fill-prefix (org-fill-context-prefix (point))))
 	(when fill-prefix (do-auto-fill))))))
+
+
+;;; Comments
+
+;; Since difference between comments and keywords is subtle, we cannot
+;; trust `comment-only-p' when applying `comment-dwim'.  Hence, both
+;; `comment-region-function' and `uncomment-region-function' point to
+;; `org-comment-or-uncomment-region', which can tell when region only
+;; contains comments or not.
+
+(defun org-insert-comment ()
+  "Insert an empty comment above current line.
+If the line is empty, insert comment at its beginning."
+  (beginning-of-line)
+  (if (looking-at "\\s-*$") (replace-match "") (open-line 1))
+  (org-indent-line)
+  (insert "#+ "))
+
+(defun org-comment-or-uncomment-region (beg end &rest ignore)
+  "Comment or uncomment each non-blank line in the region.
+Uncomment each non-blank line between BEG and END if it only
+contains commented lines.  Otherwise, comment them."
+  (save-excursion
+    (goto-char beg)
+    (skip-chars-forward " \r\t\n" end)
+    (beginning-of-line)
+    (let ((uncommentp
+           ;; UNCOMMENTP is non-nil when every non blank line between
+           ;; BEG and END is a comment.
+           (save-excursion
+             (while (progn (and (not (eobp))
+				(let ((element (org-element-at-point)))
+				  (and (eq (org-element-type element) 'comment)
+				       (goto-char (org-element-property
+						   :end element)))))))
+             (>= (point) end)))
+          ;; Remove or adding comment markers is going to change end
+          ;; position so make it a marker.
+          (end (copy-marker end)))
+      (while (< (point) end)
+        (unless (looking-at "\\s-*$")
+          (if (not uncommentp) (progn (back-to-indentation) (insert "#+ "))
+            ;; Only comments and blank lines in region: uncomment it.
+            (looking-at "[ \t]*\\(#\\+? ?\\)")
+            (replace-match "" nil nil nil 1)))
+        (forward-line))
+      (set-marker end nil))))
+
 
 ;;; Other stuff.
 
