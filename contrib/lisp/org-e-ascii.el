@@ -243,6 +243,15 @@ Org mode, i.e. with \"=>\" as ellipsis."
   :group 'org-export-e-ascii
   :type 'boolean)
 
+(defcustom org-e-ascii-table-use-ascii-art nil
+  "Non-nil means table.el tables are turned into ascii-art.
+
+It only makes sense when export charset is `utf-8'.  It is nil by
+default since it requires ascii-art-to-unicode.el package.  You
+can download it here:
+
+  http://gnuvola.org/software/j/aa2u/ascii-art-to-unicode.el.")
+
 (defcustom org-e-ascii-caption-above nil
   "When non-nil, place caption string before the element.
 Otherwise, place it right after it."
@@ -1523,8 +1532,19 @@ contextual information."
      ;; Possibly add a caption string above.
      (when (and caption org-e-ascii-caption-above) (concat caption "\n"))
      ;; Insert table.  Note: "table.el" tables are left unmodified.
-     (if (eq (org-element-property :type table) 'org) contents
-       (org-remove-indentation (org-element-property :value table)))
+     (cond ((eq (org-element-property :type table) 'org) contents)
+	   ((and org-e-ascii-table-use-ascii-art
+		 (eq (plist-get info :ascii-charset) 'utf-8)
+		 (require 'ascii-art-to-unicode nil t))
+	    (with-temp-buffer
+	      (insert (org-remove-indentation
+		       (org-element-property :value table)))
+	      (goto-char (point-min))
+	      (aa2u)
+	      (goto-char (point-max))
+	      (skip-chars-backward " \r\t\n")
+	      (buffer-string)))
+	   (t (org-remove-indentation (org-element-property :value table))))
      ;; Possible add a caption string below.
      (when (and caption (not org-e-ascii-caption-above))
        (concat "\n" caption)))))
