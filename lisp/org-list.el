@@ -2202,20 +2202,6 @@ item is invisible."
 	  (goto-char (match-end 0))
 	  t)))))
 
-(defun org-mark-list ()
-  "Mark the current list.
-If this is a sublist, only mark the sublist."
-  (interactive)
-  (if (not (org-at-item-p))
-      (error "Not on a list")
-    (let* ((item (org-list-get-item-begin))
-	   (struct (org-list-struct))
-	   (prevs (org-list-prevs-alist struct))
-	   (lbeg (org-list-get-list-begin item struct prevs))
-	   (lend (org-list-get-list-end item struct prevs)))
-      (push-mark lend nil t)
-      (goto-char lbeg))))
-
 (defun org-list-repair ()
   "Fix indentation, bullets and checkboxes is the list at point."
   (interactive)
