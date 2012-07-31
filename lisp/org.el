@@ -19330,7 +19330,7 @@ stars to add."
 
     (when (and current-prefix-arg (org-at-item-p))
       (if (equal current-prefix-arg '(4)) (setq current-prefix-arg 1))
-      (org-mark-list))
+      (org-element-mark-element))
 
     (if (org-region-active-p)
 	(setq beg (funcall skip-blanks (region-beginning))
