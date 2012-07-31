@@ -150,14 +150,8 @@ When completing for #+STARTUP, for example, this function returns
 	      (if (= ?: (aref x (1- (length x))))
 		  (concat x " ")
 		x))
-	    (delq nil
-		  (pcomplete-uniqify-list
-		   (append
-		    (mapcar (lambda (x)
-			      (if (string-match "^#\\+\\([A-Z_]+:?\\)" x)
-				  (match-string 1 x)))
-			    (org-split-string (org-get-current-options) "\n"))
-		    (copy-sequence org-additional-option-like-keywords))))))
+	    (append org-options-keywords
+		    org-additional-option-like-keywords)))
    (substring pcomplete-stub 2)))
 
 (defvar org-startup-options)

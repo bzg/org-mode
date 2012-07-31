@@ -11212,22 +11212,32 @@ This function can be used in a hook."
     "BEGIN_lstlisting" "END_lstlisting"
     "NAME:" "RESULTS:"
     "HEADER:" "HEADERS:"
-    "CATEGORY:" "COLUMNS:" "PROPERTY:"
+    "COLUMNS:" "PROPERTY:"
     "CAPTION:" "LABEL:"
     "SETUPFILE:"
-    "STARTUP:"
-    "OPTIONS:"
     "INCLUDE:"
     "BIND:"
     "MACRO:"))
 
+(defconst org-options-keywords
+  '("TITLE:" "AUTHOR:" "EMAIL:" "DATE:"
+    "DESCRIPTION:" "KEYWORDS:" "LANGUAGE:" "OPTIONS:"
+    "EXPORT_SELECT_TAGS:" "EXPORT_EXCLUDE_TAGS:"
+    "LINK_UP:" "LINK_HOME:" "LINK:"
+    "XSLT:" "CATEGORY:" "SEQ_TODO:" "TYP_TODO:"
+    "PRIORITIES:" "DRAWERS:" "STARTUP:" "TAGS:"
+    "FILETAGS:" "ARCHIVE:"))
+
 (defconst org-additional-option-like-keywords-for-flyspell
   (delete-dups
    (split-string
-    (mapconcat (lambda(k) (replace-regexp-in-string
-			   "_\\|:" " "
-			   (concat k " " (downcase k) " " (upcase k))))
-	       org-additional-option-like-keywords " ") " +" t)))
+    (mapconcat (lambda(k)
+		 (replace-regexp-in-string
+		  "_\\|:" " "
+		  (concat k " " (downcase k) " " (upcase k))))
+	       (append org-options-keywords org-additional-option-like-keywords)
+	       " ")
+    " +" t)))
 
 (defcustom org-structure-template-alist
   '(
@@ -21873,6 +21883,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	 (not (get-text-property pos 'org-no-flyspell))
 	 (not (member word org-todo-keywords-1))
 	 (not (member word org-all-time-keywords))
+	 (not (member word org-options-keywords))
 	 (not (member word (mapcar 'car org-startup-options)))
 	 (not (member word org-additional-option-like-keywords-for-flyspell)))))
 
