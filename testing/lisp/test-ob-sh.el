@@ -25,6 +25,13 @@ unless the body of the tangled block does."
 returned empty results."
   (should (null (org-babel-execute:sh "ls NoSuchFileOrDirectory.txt" nil))))
 
+(ert-deftest test-ob-sh/session ()
+  "This also tests `org-babel-comint-with-output' in
+ob-comint.el, which was not previously tested."
+  (let ((res (org-babel-execute:sh "echo 1; echo 2" '((:session . "yes")))))
+    (should res)
+    (should (listp res))))
+
 (provide 'test-ob-sh)
 
 ;;; test-ob-sh.el ends here
