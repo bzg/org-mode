@@ -2491,10 +2491,13 @@ Outside."
 
 (ert-deftest test-org-element/down ()
   "Test `org-element-down' specifications."
-  ;; 1. Error when the element hasn't got a recursive type.
+  ;; Error when the element hasn't got a recursive type.
   (org-test-with-temp-text "Paragraph."
     (should-error (org-element-down)))
-  ;; 2. When at a plain-list, move to first item.
+  ;; Error when the element has no contents
+  (org-test-with-temp-text "* Headline"
+    (should-error (org-element-down)))
+  ;; When at a plain-list, move to first item.
   (org-test-with-temp-text "- Item 1\n  - Item 1.1\n  - Item 2.2"
     (goto-line 2)
     (org-element-down)
@@ -2502,11 +2505,11 @@ Outside."
   (org-test-with-temp-text "#+NAME: list\n- Item 1"
     (org-element-down)
     (should (looking-at " Item 1")))
-  ;; 3. When at a table, move to first row
+  ;; When at a table, move to first row
   (org-test-with-temp-text "#+NAME: table\n| a | b |"
     (org-element-down)
     (should (looking-at " a | b |")))
-  ;; 4. Otherwise, move inside the greater element.
+  ;; Otherwise, move inside the greater element.
   (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph.\n#+END_CENTER"
     (org-element-down)
     (should (looking-at "Paragraph"))))
