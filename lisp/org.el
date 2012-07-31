@@ -17730,7 +17730,7 @@ BEG and END default to the buffer boundaries."
 ;; | `outline-next-visible-heading'     | `C-c C-n'   | still same function   |
 ;; | `outline-previous-visible-heading' | `C-c C-p'   | still same function   |
 ;; | `outline-up-heading'               | `C-c C-u'   | still same function   |
-;; | `outline-move-subtree-up'          | `C-c C-^'   | better: org-shiftup   |
+;; | `outline-move-subtree-up'          | overridden  | better: org-shiftup   |
 ;; | `outline-move-subtree-down'        | overridden  | better: org-shiftdown |
 ;; | `show-entry'                       | overridden  | no replacement        |
 ;; | `show-children'                    | `C-c C-i'   | visibility cycling    |
@@ -17838,14 +17838,16 @@ BEG and END default to the buffer boundaries."
 (if (boundp 'narrow-map)
     (org-defkey narrow-map "e" 'org-narrow-to-element)
   (org-defkey org-mode-map "\C-xne" 'org-narrow-to-element))
+(org-defkey org-mode-map "\C-\M-t"  'org-element-transpose)
+(org-defkey org-mode-map [(control down)]  'org-element-forward)
+(org-defkey org-mode-map [(control up)]    'org-element-backward)
+(org-defkey org-mode-map "\M-}"    'org-element-forward)
+(org-defkey org-mode-map "\M-{"    'org-element-backward)
+(org-defkey org-mode-map "\C-c\C-^"   'org-element-up)
+(org-defkey org-mode-map "\C-c\C-_"   'org-element-down)
 (org-defkey org-mode-map "\C-\M-t"    'org-element-transpose)
-(org-defkey org-mode-map "\C-\M-f"    'org-element-forward)
-(org-defkey org-mode-map "\C-\M-b"    'org-element-backward)
-(org-defkey org-mode-map "\C-\M-u"    'org-element-up)
-(org-defkey org-mode-map "\C-\M-d"    'org-element-down)
-(org-defkey org-mode-map "\C-\M-t"    'org-element-transpose)
-(org-defkey org-mode-map "\C-c\C-f"    'org-forward-same-level)
-(org-defkey org-mode-map "\C-c\C-b"    'org-backward-same-level)
+(org-defkey org-mode-map "\C-c\C-f"   'org-forward-same-level)
+(org-defkey org-mode-map "\C-c\C-b"   'org-backward-same-level)
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-a" 'org-archive-subtree-default)
@@ -17915,7 +17917,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
 (org-defkey org-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
 (org-defkey org-mode-map "\C-c@" 'org-mark-subtree)
-(org-defkey org-mode-map "\C-c\C-@" 'org-mark-list)
+(org-defkey org-mode-map "\C-c\C-@" 'org-element-mark-element)
 (org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
 ;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
 

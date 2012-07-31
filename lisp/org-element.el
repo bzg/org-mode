@@ -4365,7 +4365,8 @@ Move to the previous element at the same level, when possible."
      ((memq (org-element-type element) org-element-greater-elements)
       ;; If contents are hidden, first disclose them.
       (when (org-element-property :hiddenp element) (org-cycle))
-      (goto-char (org-element-property :contents-begin element)))
+      (goto-char (or (org-element-property :contents-begin element)
+		     (error "No content for this element"))))
      (t (error "No inner element")))))
 
 (defun org-element-drag-backward ()
