@@ -202,6 +202,7 @@ identifier."
   :group 'org-id)
 
 ;;; Version
+(require 'org-compat)
 (org-check-version)
 ;;;###autoload
 (defun org-version (&optional here full message)
@@ -4966,7 +4967,7 @@ This variable is set by `org-before-change-function'.
 
 (require 'org-macs)
 (require 'org-entities)
-(require 'org-compat)
+;; (require 'org-compat) moved higher up in the file before it is first used
 (require 'org-faces)
 (require 'org-list)
 (require 'org-pcomplete)
