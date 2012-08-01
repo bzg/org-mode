@@ -3356,8 +3356,10 @@ points to a file, `org-agenda-diary-entry' will be used instead."
 This is a property list with the following properties:
 :foreground  the foreground color for images embedded in Emacs, e.g. \"Black\".
              `default' means use the foreground of the default face.
+             `auto' means use the foreground from the text face.
 :background  the background color, or \"Transparent\".
              `default' means use the background of the default face.
+             `auto' means use the background from the text face.
 :scale       a scaling factor for the size of the images, to get more pixels
 :html-foreground, :html-background, :html-scale
              the same numbers for HTML export.
@@ -17360,6 +17362,7 @@ Some of the options can be changed using the variable
 	 (absprefix (expand-file-name prefix dir))
 	 (todir (file-name-directory absprefix))
 	 (opt org-format-latex-options)
+	 (optnew org-format-latex-options)
 	 (matchers (plist-get opt :matchers))
 	 (re-list org-latex-regexps)
 	 (org-format-latex-header-extra
@@ -17405,14 +17408,27 @@ Some of the options can be changed using the variable
 	      (setq txt (match-string n)
 		    beg (match-beginning n) end (match-end n)
 		    cnt (1+ cnt))
-	      (let (print-length print-level) ; make sure full list is printed
+	      (let ((face (face-at-point))
+		    (fg (plist-get opt :foreground))
+		    (bg (plist-get opt :background))
+		    print-length print-level)         ; make sure full list is printed
+		(when forbuffer
+	          ; Get the colors from the face at point
+		  (goto-char beg)
+		  (when (eq fg 'auto)
+		    (setq fg (face-attribute face :foreground nil 'default)))
+		  (when (eq bg 'auto)
+		    (setq bg (face-attribute face :background nil 'default)))
+		  (setq optnew (copy-sequence opt))
+		  (plist-put optnew :foreground fg)
+		  (plist-put optnew :background bg))
 		(setq hash (sha1 (prin1-to-string
 				  (list org-format-latex-header
 					org-format-latex-header-extra
 					org-export-latex-default-packages-alist
 					org-export-latex-packages-alist
 					org-format-latex-options
-					forbuffer txt)))
+					forbuffer txt fg bg)))
 		      linkfile (format "%s_%s.png" prefix hash)
 		      movefile (format "%s_%s.png" absprefix hash)))
 	      (setq link (concat block "[[file:" linkfile "]]" block))
@@ -17422,7 +17438,7 @@ Some of the options can be changed using the variable
 		(setq checkdir t)
 		(or (file-directory-p todir) (make-directory todir t)))
 	      (org-create-formula-image
-	       txt movefile opt forbuffer processing-type)
+	       txt movefile optnew forbuffer processing-type)
 	      (if overlays
 		  (progn
 		    (mapc (lambda (o)
@@ -17601,8 +17617,10 @@ share a good deal of logic."
 		 "Black"))
 	 (bg (or (plist-get options (if buffer :background :html-background))
 		 "Transparent")))
-    (if (eq fg 'default) (setq fg (org-dvipng-color :foreground)))
-    (if (eq bg 'default) (setq bg (org-dvipng-color :background)))
+    (if (eq fg 'default) (setq fg (org-dvipng-color :foreground))
+      (setq fg (org-dvipng-color-format fg)))
+    (if (eq bg 'default) (setq bg (org-dvipng-color :background))
+      (setq bg (org-dvipng-color-format bg)))
     (with-temp-file texfile
       (insert (org-splice-latex-header
 	       org-format-latex-header
@@ -17673,7 +17691,7 @@ share a good deal of logic."
       (setq fg (org-latex-color-format fg)))
     (if (eq bg 'default) (setq bg (org-latex-color :background))
       (setq bg (org-latex-color-format
-		(if (string= bg "Transparent")(setq bg "white")))))
+		(if (string= bg "Transparent") "white" bg))))
     (with-temp-file texfile
       (insert (org-splice-latex-header
 	       org-format-latex-header
@@ -17823,6 +17841,12 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
 				     (cond ((eq attr :foreground) 'foreground)
 					   ((eq attr :background) 'background))))
 		   (color-values (face-attribute 'default attr nil))))))
+
+(defun org-dvipng-color-format (color-name)
+  "Convert COLOR-NAME to a RGB color value for dvipng."
+  (apply 'format "rgb %s %s %s"
+	 (mapcar 'org-normalize-color
+		   (color-values color-name))))
 
 (defun org-latex-color (attr)
   "Return a RGB color for the LaTeX color package."
