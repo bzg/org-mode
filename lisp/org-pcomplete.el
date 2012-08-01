@@ -132,7 +132,6 @@ When completing for #+STARTUP, for example, this function returns
 			   args)))
 	(cons (reverse args) (reverse begins))))))
 
-
 (defun org-pcomplete-initial ()
   "Calls the right completion function for first argument completions."
   (ignore
@@ -167,6 +166,38 @@ When completing for #+STARTUP, for example, this function returns
 	       ((string= arg "hidestars")
 		(setq opts (delete "showstars" opts)))))
 	    opts))))
+
+(defmacro pcomplete/org-mode/file-option/x (option)
+  "Complete arguments for OPTION."
+  `(while
+       (pcomplete-here
+	(pcomplete-uniqify-list
+	 (delq nil
+	       (mapcar (lambda(o)
+			 (when (string-match (concat "^[ \t]*#\\+"
+						     ,option ":[ \t]+\\(.*\\)[ \t]*$") o)
+			   (match-string 1 o)))
+		       (split-string (org-get-current-options) "\n")))))))
+
+(defun pcomplete/org-mode/file-option/options ()
+  "Complete arguments for the #+OPTIONS file option."
+  (pcomplete/org-mode/file-option/x "OPTIONS"))
+
+(defun pcomplete/org-mode/file-option/title ()
+ "Complete arguments for the #+TITLE file option."
+  (pcomplete/org-mode/file-option/x "TITLE"))
+
+(defun pcomplete/org-mode/file-option/author ()
+ "Complete arguments for the #+AUTHOR file option."
+  (pcomplete/org-mode/file-option/x "AUTHOR"))
+
+(defun pcomplete/org-mode/file-option/email ()
+ "Complete arguments for the #+EMAIL file option."
+  (pcomplete/org-mode/file-option/x "EMAIL"))
+
+(defun pcomplete/org-mode/file-option/date ()
+ "Complete arguments for the #+DATE file option."
+  (pcomplete/org-mode/file-option/x "DATE"))
 
 (defun pcomplete/org-mode/file-option/bind ()
   "Complete arguments for the #+BIND file option, which are variable names."
