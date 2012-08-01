@@ -3419,6 +3419,14 @@ imagemagick     Convert the LaTeX fragments to pdf files and use imagemagick
 	  (const :tag "dvipng" dvipng)
 	  (const :tag "imagemagick" imagemagick)))
 
+(defcustom org-latex-preview-ltxpng-directory "ltxpng/"
+  "Path to store latex preview images. A relative path here creates many
+   directories relative to the processed org files paths. An absolute path
+   puts all preview images at the same place."
+  :group 'org-latex
+  :version "24.2"
+  :type 'string)
+
 (defun org-format-latex-mathml-available-p ()
   "Return t if `org-latex-to-mathml-convert-command' is usable."
   (save-match-data
@@ -17163,8 +17171,8 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	(narrow-to-region beg end)
 	(goto-char beg)
 	(org-format-latex
-	 (concat "ltxpng/" (file-name-sans-extension
-			    (file-name-nondirectory
+	 (concat org-latex-preview-ltxpng-directory (file-name-sans-extension
+			     (file-name-nondirectory
 			     buffer-file-name)))
 	 default-directory 'overlays msg at 'forbuffer
 	 org-latex-create-formula-image-program)
