@@ -18021,6 +18021,8 @@ BEG and END default to the buffer boundaries."
     (";" . org-set-tags-command)
     ("e" . org-set-effort)
     ("E" . org-inc-effort)
+    ("W" . (lambda(m) (interactive "sMinutes before warning: ")
+	     (org-entry-put (point) "APPT_WARNTIME" m)))
     ("Agenda Views etc")
     ("v" . org-agenda)
     ("/" . org-sparse-tree)

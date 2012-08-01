@@ -8973,7 +8973,10 @@ belonging to the \"Work\" category.
 ARGS are symbols indicating what kind of entries to consider.
 By default `org-agenda-to-appt' will use :deadline, :scheduled
 and :timestamp entries.  See the docstring of `org-diary' for
-details and examples."
+details and examples.
+
+If an entry as a APPT_WARNTIME property, its value will be used
+to override `appt-message-warning-time'."
   (interactive "P")
   (if refresh (setq appt-time-msg-list nil))
   (if (eq filter t)
@@ -9013,7 +9016,8 @@ details and examples."
 			     (or (and (stringp cat-filter)
 				      (string-match cat-filter cat))
 				 (and (stringp evt-filter)
-				      (string-match evt-filter evt))))))))
+				      (string-match evt-filter evt)))))))
+	      (wrn (org-entry-get (point) "APPT_WARNTIME")))
 	 ;; FIXME: Shall we remove text-properties for the appt text?
 	 ;; (setq evt (set-text-properties 0 (length evt) nil evt))
 	 (when (and ok tod)
@@ -9022,7 +9026,9 @@ details and examples."
 			    "\\([0-9]\\{1,2\\}\\)\\([0-9]\\{2\\}\\)\\'" tod)
 		       (concat (match-string 1 tod) ":"
 			       (match-string 2 tod))))
-	   (appt-add tod evt)
+	   (if (version< emacs-version "23.3")
+	       (appt-add tod evt)
+	     (appt-add tod evt wrn))
 	   (setq cnt (1+ cnt))))) entries)
     (org-release-buffers org-agenda-new-buffers)
     (if (eq cnt 0)
