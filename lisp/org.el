@@ -5475,7 +5475,7 @@ by a #."
   "Fontify #+ lines and blocks, in the correct ways."
   (let ((case-fold-search t))
     (if (re-search-forward
-	 "^\\([ \t]*#\\(\\(\\+\\[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
+	 "^\\([ \t]*#\\(\\(\\+[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
 	 limit t)
 	(let ((beg (match-beginning 0))
 	      (block-start (match-end 0))
@@ -5486,7 +5486,7 @@ by a #."
 	      (dc3 (downcase (match-string 3)))
 	      end end1 quoting block-type ovl)
 	  (cond
-	   ((member dc1 '("html:" "ascii:" "latex:" "docbook:"))
+	   ((member dc1 '("+html:" "+ascii:" "+latex:" "+docbook:"))
 	    ;; a single line of backend-specific content
 	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	    (remove-text-properties (match-beginning 0) (match-end 0)
@@ -5497,7 +5497,7 @@ by a #."
 				 '(font-lock-fontified t face org-block))
 					; for backend-specific code
 	    t)
-	   ((and (match-end 4) (equal dc3 "begin"))
+	   ((and (match-end 4) (equal dc3 "+begin"))
 	    ;; Truly a block
 	    (setq block-type (downcase (match-string 5))
 		  quoting (member block-type org-protecting-blocks))
@@ -5540,7 +5540,7 @@ by a #."
       	      (add-text-properties (min (point-max) (1+ end)) (min (point-max) (1+ end1))
 				   '(face org-block-end-line))
 	      t))
-	   ((member dc1 '("title:" "author:" "email:" "date:"))
+	   ((member dc1 '("+title:" "+author:" "+email:" "+date:"))
 	    (add-text-properties
 	     beg (match-end 3)
 	     (if (member (intern (substring dc1 0 -1)) org-hidden-keywords)
@@ -5548,19 +5548,13 @@ by a #."
 	       '(font-lock-fontified t face org-document-info-keyword)))
 	    (add-text-properties
 	     (match-beginning 6) (match-end 6)
-	     (if (string-equal dc1 "title:")
+	     (if (string-equal dc1 "+title:")
 		 '(font-lock-fontified t face org-document-title)
 	       '(font-lock-fontified t face org-document-info))))
-	   ((not (member (char-after beg) '(?\  ?\t)))
-	    ;; just any other in-buffer setting, but not indented
-	    (add-text-properties
-	     beg (match-end 0)
-	     '(font-lock-fontified t face org-meta-line))
-	    t)
-	   ((or (member dc1 '("begin:" "end:" "caption:" "label:"
-			      "orgtbl:" "tblfm:" "tblname:" "results:"
-			      "call:" "header:" "headers:" "name:"))
-		(and (match-end 4) (equal dc3 "attr")))
+	   ((or (member dc1 '("+begin:" "+end:" "+caption:" "+label:"
+			      "+orgtbl:" "+tblfm:" "+tblname:" "+results:"
+			      "+call:" "+header:" "+headers:" "+name:"))
+		(and (match-end 4) (equal dc3 "+attr")))
 	    (add-text-properties
 	     beg (match-end 0)
 	     '(font-lock-fontified t face org-meta-line))
@@ -5569,6 +5563,12 @@ by a #."
 	    (add-text-properties
 	     beg (match-end 0)
 	     '(font-lock-fontified t face font-lock-comment-face)))
+	   ((not (member (char-after beg) '(?\  ?\t)))
+	    ;; just any other in-buffer setting, but not indented
+	    (add-text-properties
+	     beg (match-end 0)
+	     '(font-lock-fontified t face org-meta-line))
+	    t)
 	   (t nil))))))
 
 (defun org-strip-protective-commas (beg end)
@@ -5964,7 +5964,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 				 org-comment-string "\\|" org-quote-string
 				 "\\)"))
 		 '(2 'org-special-keyword t))
-	   '("^#.*" (0 'font-lock-comment-face t))
+	   '("^[ \t]*#.*" (0 'font-lock-comment-face t))
 	   ;; Blocks and meta lines
 	   '(org-fontify-meta-lines-and-blocks)
 	   )))
