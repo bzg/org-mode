@@ -3012,7 +3012,9 @@ If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
 		 (save-buffer 0)
 		 (kill-buffer (current-buffer))
 		 (message "Plain text written to %s" file))))))))
-    (set-buffer (or agenda-bufname org-agenda-buffer-name)))
+    (set-buffer (or agenda-bufname
+		    (and (called-interactively-p 'any) (buffer-name))
+		    org-agenda-buffer-name)))
   (when open (org-open-file file)))
 
 (defvar org-agenda-tag-filter-overlays nil)
