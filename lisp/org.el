@@ -206,7 +206,9 @@ identifier."
 ;;;###autoload
 (defun org-version (&optional here full message)
   "Show the org-mode version in the echo area.
-With prefix arg HERE, insert it at point."
+With prefix argument HERE, insert it at point.
+When FULL is non-nil, use a verbose version string.
+When MESSAGE is non-nil, display a message with the version."
   (interactive "P")
   (let* ((org-dir         (ignore-errors (org-find-library-dir "org")))
 	 (org-install-dir (ignore-errors (org-find-library-dir "org-install.el")))
@@ -1277,7 +1279,7 @@ See also the variable `org-table-auto-blank-field'."
 	  (const :tag "on" t)
 	  (const :tag "on, optimized" optimized)))
 
-(defcustom org-self-insert-cluster-for-undo t
+(defcustom org-self-insert-cluster-for-undo (version<= emacs-version "24.1")
   "Non-nil means cluster self-insert commands for undo when possible.
 If this is set, then, like in the Emacs command loop, 20 consecutive
 characters will be undone together.
