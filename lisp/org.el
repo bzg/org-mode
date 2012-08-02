@@ -17852,8 +17852,6 @@ BEG and END default to the buffer boundaries."
     (org-defkey narrow-map "e" 'org-narrow-to-element)
   (org-defkey org-mode-map "\C-xne" 'org-narrow-to-element))
 (org-defkey org-mode-map "\C-\M-t"  'org-element-transpose)
-(org-defkey org-mode-map [(control down)]  'org-element-forward)
-(org-defkey org-mode-map [(control up)]    'org-element-backward)
 (org-defkey org-mode-map "\M-}"    'org-element-forward)
 (org-defkey org-mode-map "\M-{"    'org-element-backward)
 (org-defkey org-mode-map "\C-c\C-^"   'org-element-up)
