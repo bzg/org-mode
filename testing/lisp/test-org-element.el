@@ -288,7 +288,7 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
      :value
      (org-test-with-temp-text "# No blank\n#  One blank"
        (org-element-map (org-element-parse-buffer) 'comment 'identity nil t)))
-     "No blank\n One blank"))
+    "No blank\n One blank"))
   ;; Comment with blank lines.
   (should
    (equal
@@ -300,7 +300,20 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
   ;; Keywords without colons are treated as comments.
   (should
    (org-test-with-temp-text "#+wrong_keyword something"
-     (org-element-map (org-element-parse-buffer) 'comment 'identity))))
+     (org-element-map (org-element-parse-buffer) 'comment 'identity)))
+  ;; Do not mix comments and keywords.
+  (should
+   (eq 1
+       (org-test-with-temp-text "#+keyword: value\n# comment\n#+keyword: value"
+	 (length (org-element-map
+		  (org-element-parse-buffer) 'comment 'identity)))))
+  (should
+   (equal "comment"
+	  (org-test-with-temp-text "#+keyword: value\n# comment\n#+keyword: value"
+	    (org-element-property
+	     :value
+	     (org-element-map
+	      (org-element-parse-buffer) 'comment 'identity nil t))))))
 
 
 ;;;; Comment Block

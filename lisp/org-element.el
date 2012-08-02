@@ -1358,17 +1358,24 @@ Assume point is at comment beginning."
   (save-excursion
     (let* ((keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
-	   value
+	   ;; Match first line with a loose regexp since it might as
+	   ;; well be an ill-defined keyword.
+	   (value (prog2 (looking-at "[ \t]*#\\+? ?")
+		      (buffer-substring-no-properties
+		       (match-end 0) (line-end-position))
+		    (forward-line)))
 	   (com-end
 	    ;; Get comments ending.
 	    (progn
-	      (while (and (< (point) limit) (looking-at "[ \t]*# ?"))
+	      (while (and (< (point) limit) (looking-at "[ \t]*#\\( \\|$\\)"))
 		;; Accumulate lines without leading hash and first
 		;; whitespace.
 		(setq value
 		      (concat value
+			      "\n"
 			      (buffer-substring-no-properties
-			       (match-end 0) (progn (forward-line) (point))))))
+			       (match-end 0) (line-end-position))))
+		(forward-line))
 	      (point)))
 	   (end (progn (goto-char com-end)
 		       (skip-chars-forward " \r\t\n" limit)
