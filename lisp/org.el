@@ -20858,6 +20858,7 @@ meant to be filled."
       (unless (< p post-affiliated)
 	(case type
 	  (comment (looking-at "[ \t]*# ?") (match-string 0))
+	  (footnote-definition "")
 	  ((item plain-list)
 	   (make-string (org-list-item-body-column
 			 (org-element-property :begin element))
