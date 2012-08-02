@@ -6771,7 +6771,7 @@ buffer again after capture is completed.
 @subsubsection Template expansion
 
 In the template itself, special @kbd{%}-escapes@footnote{If you need one of
-these sequences literally, escape the @kbd{%} with a backslash.}  allow
+these sequences literally, escape the @kbd{%} with a backslash.} allow
 dynamic insertion of content.  The templates are expanded in the order given here:
 
 @smallexample
@@ -6782,11 +6782,12 @@ dynamic insertion of content.  The templates are expanded in the order given her
 %t          @r{Timestamp, date only.}
 %T          @r{Timestamp, with date and time.}
 %u, %U      @r{Like the above, but inactive timestamps.}
-%a          @r{Annotation, normally the link created with @code{org-store-link}.}
 %i          @r{Initial content, the region when capture is called while the}
             @r{region is active.}
             @r{The entire text will be indented like @code{%i} itself.}
+%a          @r{Annotation, normally the link created with @code{org-store-link}.}
 %A          @r{Like @code{%a}, but prompt for the description part.}
+%l          @r{Like %a, but only insert the literal link.}
 %c          @r{Current kill ring head.}
 %x          @r{Content of the X clipboard.}
 %k          @r{Title of the currently clocked task.}

@@ -225,10 +225,11 @@ be replaced with content and expanded in this order:
   %t          time stamp, date only.
   %T          time stamp with date and time.
   %u, %U      like the above, but inactive time stamps.
-  %a          annotation, normally the link created with `org-store-link'.
   %i          initial content, copied from the active region.  If %i is
               indented, the entire inserted text will be indented as well.
+  %a          annotation, normally the link created with `org-store-link'.
   %A          like %a, but prompt for the description part.
+  %l          like %a, but only insert the literal link.
   %c          current kill ring head.
   %x          content of the X clipboard.
   %k          title of currently clocked task.
@@ -1318,10 +1319,12 @@ The template may still contain \"%?\" for cursor positioning."
 				       (org-get-x-clipboard 'CLIPBOARD)
 				       (org-get-x-clipboard 'SECONDARY)
 				       v-c)))
-	 (v-A (if (and v-a
-		       (string-match
-			"\\[\\(\\[.*?\\]\\)\\(\\[.*?\\]\\)?\\]" v-a))
-		  (replace-match "[\\1[%^{Link description}]]" nil nil v-a)
+	 (l-re "\\[\\[\\(.*?\\)\\]\\(\\[.*?\\]\\)?\\]")
+	 (v-A (if (and v-a (string-match l-re v-a))
+		  (replace-match "[[\\1][%^{Link description}]]" nil nil v-a)
+		v-a))
+	 (v-l (if (and v-a (string-match l-re v-a))
+		  (replace-match "\\1" nil nil v-a)
 		v-a))
 	 (v-n user-full-name)
 	 (v-k (if (marker-buffer org-clock-marker)
@@ -1386,7 +1389,7 @@ The template may still contain \"%?\" for cursor positioning."
 
       ;; Simple %-escapes
       (goto-char (point-min))
-      (while (re-search-forward "%\\([tTuUaiAcxkKInfF]\\)" nil t)
+      (while (re-search-forward "%\\([tTuUaliAcxkKInfF]\\)" nil t)
 	(unless (org-capture-escaped-%)
 	  (when (and initial (equal (match-string 0) "%i"))
 	    (save-match-data
