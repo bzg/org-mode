@@ -1024,22 +1024,7 @@ Assume point is at the beginning of the item."
 (defun org-element-item-interpreter (item contents)
   "Interpret ITEM element as Org syntax.
 CONTENTS is the contents of the element."
-  (let* ((bullet
-	  (let* ((beg (org-element-property :begin item))
-		 (struct (org-element-property :structure item))
-		 (pre (org-list-prevs-alist struct))
-		 (bul (org-element-property :bullet item)))
-	    (org-list-bullet-string
-	     (if (not (eq (org-list-get-list-type beg struct pre) 'ordered)) "-"
-	       (let ((num
-		      (car
-		       (last
-			(org-list-get-item-number
-			 beg struct pre (org-list-parents-alist struct))))))
-		 (format "%d%s"
-			 num
-			 (if (eq org-plain-list-ordered-item-terminator ?\)) ")"
-			   ".")))))))
+  (let* ((bullet (org-list-bullet-string (org-element-property :bullet item)))
 	 (checkbox (org-element-property :checkbox item))
 	 (counter (org-element-property :counter item))
 	 (tag (let ((tag (org-element-property :tag item)))
@@ -1109,7 +1094,11 @@ Assume point is at the beginning of the list."
 (defun org-element-plain-list-interpreter (plain-list contents)
   "Interpret PLAIN-LIST element as Org syntax.
 CONTENTS is the contents of the element."
-  contents)
+  (with-temp-buffer
+    (insert contents)
+    (goto-char (point-min))
+    (org-list-repair)
+    (buffer-string)))
 
 
 ;;;; Quote Block
