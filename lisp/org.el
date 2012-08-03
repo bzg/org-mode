@@ -1405,6 +1405,12 @@ description to use."
   :tag "Org Store Link"
   :group 'org-link)
 
+(defcustom org-url-hexify-p t
+  "When non-nil, hexify URL when creating a link."
+  :type 'boolean
+  :version "24.2"
+  :group 'org-link-store)
+
 (defcustom org-email-link-description-format "Email %c: %.30s"
   "Format of the description part of a link to an email or usenet message.
 The following %-escapes will be replaced by corresponding information:
@@ -9076,8 +9082,6 @@ according to FMT (default from `org-email-link-description-format')."
   "List of characters that should be escaped in link.
 This is the list that is used for internal purposes.")
 
-(defvar org-url-encoding-use-url-hexify nil)
-
 (defconst org-link-escape-chars-browser
   '(?\ )
   "List of escapes for characters that are problematic in links.
@@ -9090,25 +9094,24 @@ Optional argument TABLE is a list with characters that should be
 escaped.  When nil, `org-link-escape-chars' is used.
 If optional argument MERGE is set, merge TABLE into
 `org-link-escape-chars'."
-  (if (and org-url-encoding-use-url-hexify (not table))
-      (url-hexify-string text)
-    (cond
-     ((and table merge)
-      (mapc (lambda (defchr)
-	      (unless (member defchr table)
-		(setq table (cons defchr table)))) org-link-escape-chars))
-     ((null table)
-      (setq table org-link-escape-chars)))
-    (mapconcat
-     (lambda (char)
-       (if (or (member char table)
-	       (< char 32) (= char 37) (> char 126))
-	   (mapconcat (lambda (sequence-element)
-			(format "%%%.2X" sequence-element))
-		      (or (encode-coding-char char 'utf-8)
-			  (error "Unable to percent escape character: %s"
-				 (char-to-string char))) "")
-	 (char-to-string char))) text "")))
+  (cond
+   ((and table merge)
+    (mapc (lambda (defchr)
+	    (unless (member defchr table)
+	      (setq table (cons defchr table)))) org-link-escape-chars))
+   ((null table)
+    (setq table org-link-escape-chars)))
+  (mapconcat
+   (lambda (char)
+     (if (or (member char table)
+	     (and (or (< char 32) (= char 37) (> char 126))
+		  org-url-hexify-p))
+	 (mapconcat (lambda (sequence-element)
+		      (format "%%%.2X" sequence-element))
+		    (or (encode-coding-char char 'utf-8)
+			(error "Unable to percent escape character: %s"
+			       (char-to-string char))) "")
+       (char-to-string char))) text ""))
 
 (defun org-link-unescape (str)
   "Unhex hexified Unicode strings as returned from the JavaScript function
