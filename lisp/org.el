@@ -13215,7 +13215,7 @@ also TODO lines."
 
 (defun org-global-tags-completion-table (&optional files)
   "Return the list of all tags in all agenda buffer/files.
-Optional FILES argument is a list of files to which can be used
+Optional FILES argument is a list of files which can be used
 instead of the agenda files."
   (save-excursion
     (org-uniquify
