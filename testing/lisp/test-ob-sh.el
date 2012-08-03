@@ -9,6 +9,7 @@
 ;; Template test file for Org-mode tests
 
 ;;; Code:
+(org-test-for-executable "sh")
 (unless (featurep 'ob-sh)
   (signal 'missing-test-dependency "Support for Sh code blocks"))
 
