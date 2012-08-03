@@ -9307,7 +9307,8 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	(when org-stored-links
 	  (insert "\nStored links are available with <up>/<down> or M-p/n (most recent with RET):\n\n")
 	  (insert (mapconcat 'org-link-prettify
-			     (reverse org-stored-links) "\n"))))
+			     (reverse org-stored-links) "\n")))
+	(goto-char (point-min)))
       (let ((cw (selected-window)))
 	(select-window (get-buffer-window "*Org Links*" 'visible))
 	(with-current-buffer "*Org Links*" (setq truncate-lines t))
