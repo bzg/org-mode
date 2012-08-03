@@ -1454,10 +1454,10 @@ create-if-interactive
       job for remember, only use the ID if it already exists.  The
       purpose of this setting is to avoid proliferation of unwanted
       IDs, just because you happen to be in an Org file when you
-      call `org-remember' that automatically and preemptively
-      creates a link.  If you do want to get an ID link in a remember
-      template to an entry not having an ID, create it first by
-      explicitly creating a link to it, using `C-c C-l' first.
+      call `org-capture' that automatically and preemptively creates a
+      link.  If you do want to get an ID link in a remember template to
+      an entry not having an ID, create it first by explicitly creating
+      a link to it, using `C-c C-l' first.
 
 create-if-interactive-and-no-custom-id
       Like create-if-interactive, but do not create an ID if there is
@@ -8876,19 +8876,16 @@ For file links, arg negates `org-context-in-file-links'."
 	       link (org-make-link cpltxt)))
 	((and (featurep 'org-id)
 	      (or (eq org-link-to-org-use-id t)
-		  (and (eq org-link-to-org-use-id 'create-if-interactive)
-		       (org-called-interactively-p 'any))
-		  (and (eq org-link-to-org-use-id
-			   'create-if-interactive-and-no-custom-id)
-		       (org-called-interactively-p 'any)
-		       (not custom-id))
-		  (and org-link-to-org-use-id
-			   (org-entry-get nil "ID"))))
+		  (and (org-called-interactively-p 'any)
+		       (or (eq org-link-to-org-use-id 'create-if-interactive)
+			   (and (eq org-link-to-org-use-id
+				    'create-if-interactive-and-no-custom-id)
+				(not custom-id))))
+		  (and org-link-to-org-use-id (org-entry-get nil "ID"))))
 	 ;; We can make a link using the ID.
 	 (setq link (condition-case nil
 			(prog1 (org-id-store-link)
-			  (setq desc (plist-get org-store-link-plist
-						:description)))
+			  (setq desc (plist-get org-store-link-plist :description)))
 		      (error
 		       ;; probably before first headline, link to file only
 		       (concat "file:"
@@ -9190,7 +9187,7 @@ The car of LINK must be a raw link the cdr of LINK must be either
 a link description or nil."
   (let ((desc (or (cadr link) "<no description>")))
     (concat (format "%-45s" (substring desc 0 (min (length desc) 40)))
-	    "[[" (car link) "]]")))
+	    "<" (car link) ">")))
 
 ;;;###autoload
 (defun org-insert-link-global ()
@@ -9209,6 +9206,29 @@ This command can be called in any mode to insert a link in Org-mode syntax."
       (org-insert-link nil (car l) (cadr l))
       (insert "\n"))))
 
+(defun org-link-fontify-links-to-this-file ()
+  "Fontify links to the current file in `org-stored-links'."
+  (let ((f (buffer-file-name)) a b)
+    (setq a (mapcar (lambda(l)
+		      (let ((ll (car l)))
+			(when (and (string-match "^file:\\(.+\\)::" ll)
+				   (equal f (expand-file-name (match-string 1 ll))))
+			  ll)))
+		    org-stored-links))
+    (when (featurep 'org-id)
+      (setq b (mapcar (lambda(l)
+			(let ((ll (car l)))
+			  (when (and (string-match "^id:\\(.+\\)$" ll)
+				     (equal f (expand-file-name
+					       (or (org-id-find-id-file
+						    (match-string 1 ll)) ""))))
+			    ll)))
+		      org-stored-links)))
+    (mapcar (lambda(l)
+	      (put-text-property 0 (length l) 'face 'font-lock-comment-face l))
+	    (delq nil (append a b)))))
+
+(defvar org-link-links-in-this-file nil)
 (defun org-insert-link (&optional complete-file link-location default-description)
   "Insert a link.  At the prompt, enter the link.
 
@@ -9257,7 +9277,7 @@ be used as the default description."
 	 (desc region)
 	 tmphist ; byte-compile incorrectly complains about this
 	 (link link-location)
-	 entry file all-prefixes)
+	 entry file all-prefixes auto-desc)
     (cond
      (link-location) ; specified by arg, just use it.
      ((org-in-regexp org-bracket-link-regexp 1)
@@ -9278,13 +9298,16 @@ be used as the default description."
       (setq link (org-file-complete-link complete-file)))
      (t
       ;; Read link, with completion for stored links.
-      (with-output-to-temp-buffer "*Org Links*"
-	(princ "Insert a link.
+      (org-link-fontify-links-to-this-file)
+      (org-switch-to-buffer-other-window "*Org Links*")
+      (with-current-buffer "*Org Links*"
+	(erase-buffer)
+	(insert "Insert a link.
 Use TAB to complete link prefixes, then RET for type-specific completion support\n")
 	(when org-stored-links
-	  (princ "\nStored links are available with <up>/<down> or M-p/n (most recent with RET):\n\n")
-	  (princ (mapconcat 'org-link-prettify
-		  (reverse org-stored-links) "\n"))))
+	  (insert "\nStored links are available with <up>/<down> or M-p/n (most recent with RET):\n\n")
+	  (insert (mapconcat 'org-link-prettify
+			     (reverse org-stored-links) "\n"))))
       (let ((cw (selected-window)))
 	(select-window (get-buffer-window "*Org Links*" 'visible))
 	(with-current-buffer "*Org Links*" (setq truncate-lines t))
@@ -9307,12 +9330,16 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		     (append
 		      (mapcar (lambda (x) (list (concat x ":")))
 			      all-prefixes)
-		      (mapcar 'car org-stored-links))
+		      (mapcar 'car org-stored-links)
+		      (mapcar 'cadr org-stored-links))
 		     nil nil nil
 		     'tmphist
-		     (car (car org-stored-links)))))
+		     (caar org-stored-links))))
 	    (if (not (string-match "\\S-" link))
 		(error "No link selected"))
+	    (mapc (lambda(l)
+		    (when (equal link (cadr l)) (setq link (car l) auto-desc t)))
+		  org-stored-links)
 	    (if (or (member link all-prefixes)
 		    (and (equal ":" (substring link -1))
 			 (member (substring link 0 -1) all-prefixes)
@@ -9377,7 +9404,8 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
     (if org-make-link-description-function
 	(setq desc (funcall org-make-link-description-function link desc))
       (if default-description (setq desc default-description)
-	(setq desc (read-string "Description: " desc))))
+	(setq desc (or (and auto-desc desc)
+		       (read-string "Description: " desc)))))
 
     (unless (string-match "\\S-" desc) (setq desc nil))
     (if remove (apply 'delete-region remove))
