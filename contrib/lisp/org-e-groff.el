@@ -1,4 +1,4 @@
-                                        ; org-e-groff.el --- GRoff Back-End For Org Export Engine
+;; org-e-groff.el --- GRoff Back-End For Org Export Engine
 
 ;; Copyright (C) 2011-2012  Free Software Foundation, Inc.
 
@@ -483,6 +483,21 @@ string defines the replacement string for this quote."
                 (string :tag "Replacement quote     "))))
 
 
+
+(defcustom org-e-groff-special-char
+  '(
+    ("(c)" . "\\\\(co") 
+    ("(tm)" . "\\\\(tm") 
+    ("(rg)" . "\\\\(rg")
+    )
+  "CONS list in which the value of the car 
+  is replace on the value of the CDR. "
+  :group 'org-export-e-groff
+  :type '(list
+          (cons :tag "Character Subtitute"
+                (string :tag "Original Character Group")
+                (string :tag "Replacement Character"))))
+
 ;;;; Compilation
 
 (defcustom org-e-groff-pdf-process
@@ -537,6 +552,7 @@ These are the .aux, .log, .out, and .toc files."
 (add-to-list 'org-element-block-name-alist
              '("GROFF" . org-element-export-block-parser))
 
+(setq registered-references '())
 
 
 ;;; Internal Functions
@@ -899,8 +915,24 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let* (( raw (org-export-get-footnote-definition footnote-reference info))
 		 (n (org-export-get-footnote-number footnote-reference info))
 		 (data (org-trim (org-export-data raw info))))
-	(format "\\u\\s-2%s\\d\\s+2\n.FS %s\n%s\n.FE\n" n n data)
-	))
+    (setq ref-id (plist-get (nth 1 footnote-reference) :label))
+
+    ;;
+    ;; It is a reference
+    ;;
+
+     (if (string-match "fn:rl" ref-id)
+         (if (member ref-id registered-references)
+             (format "\\*[%s]" ref-id)
+           (let ()
+             (push ref-id registered-references)
+             (format "\\*(Rf\n.RS \"%s\" \n%s\n.RF\n" ref-id  data)) )
+       ;;
+       ;; else it is a footnote
+       ;;
+       (format "\\u\\s-2%s\\d\\s+2\n.FS %s\n%s\n.FE\n" n n data))
+ 	
+    	))
 
 ;;;; Headline
 
@@ -1217,7 +1249,6 @@ used as a communication channel."
          (path (let ((raw-path (org-element-property :path link)))
                  (if (not (file-name-absolute-p raw-path)) raw-path
                    (expand-file-name raw-path))))
-         
          (attr
           (read
            (format
@@ -1249,24 +1280,29 @@ used as a communication channel."
     (setq width  (or  (plist-get attr :width) "")  )
     (setq height  (or  (plist-get attr :height) "" )  )
 
+    (setq disable-caption (plist-get attr :disable-caption))
+
     (setq caption 
           (org-e-groff--caption/label-string
            (org-element-property :caption parent)
            (org-element-property :name parent)
            info)
           )
-
-    ;; Return proper string, depending on DISPOSITION.
     ;;
-    ;; TODO Needs to be expanded with attributes
-    ;; Caption needs to be added
-    ;; by adding .FG "caption"
+    ;; Return proper string.
+    ;;
 
-    (cond
-     ((string-match ".\.pic$" raw-path) 
-      (format "\n.PS\ncopy \"%s\"\n.PE\n.FG \"%s\" " raw-path caption))
-     (t (format "\n.DS L F\n.PSPIC %s \"%s\" %s %s\n.FG \"%s\"\n.DE " 
-                placement raw-path width height caption)))))
+
+    (concat 
+     (cond
+      ((string-match ".\.pic$" raw-path) 
+       (format "\n.PS\ncopy \"%s\"\n.PE" raw-path ))
+      (t (format "\n.DS L F\n.PSPIC %s \"%s\" %s %s\n.DE " 
+                 placement raw-path width height )))
+     (unless disable-caption (format "\n.FG \"%s\"" caption )))
+  ))
+    
+
 
 (defun org-e-groff-link (link desc info)
   "Transcode a LINK object from Org to Groff.
@@ -1367,17 +1403,30 @@ CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (setq parent (plist-get (nth 1 paragraph) :parent))
   (when parent
-    (let ((parent-type (car parent)) 
-          (fixed-paragraph ""))
-      (cond ((and (eq parent-type 'item)
-                  (plist-get (nth 1 parent) :bullet ) )
-             (setq fixed-paragraph (concat "" contents)) )
-            ((eq parent-type 'section)
-             (setq fixed-paragraph (concat ".P\n" contents) ) )
-            ((eq parent-type 'footnote-definition)
-             (setq fixed-paragraph (concat "" contents) ))
-            (t (setq fixed-paragraph (concat "" contents)) ) 
-            )
+    (let* ((parent-type (car parent)) 
+          (fixed-paragraph "")
+          (class (plist-get info :groff-class))
+          (class-options (plist-get info :groff-class-options))
+          (classes (assoc class org-e-groff-classes))
+          (classes-options (car (last classes)) )
+          (paragraph-option (plist-get classes-options :paragraph ) ))
+      (cond 
+       ((and (symbolp paragraph-option)
+             (fboundp paragraph-option))
+        (funcall paragraph-option parent-type parent contents))
+
+       ((and (eq parent-type 'item)
+             (plist-get (nth 1 parent) :bullet ) )
+        (setq fixed-paragraph (concat "" contents)) )
+
+       ((eq parent-type 'section)
+        (setq fixed-paragraph (concat ".P\n" contents) ) )
+
+       ((eq parent-type 'footnote-definition)
+        (setq fixed-paragraph (concat "" contents) ))
+
+       (t (setq fixed-paragraph (concat "" contents)) ) 
+       )
       fixed-paragraph)
     )
   )
@@ -1419,6 +1468,16 @@ contextual information."
   ;; Handle quotation marks
   (setq text (org-e-groff--quotation-marks text info))
 
+  (if org-e-groff-special-char
+      (dolist (special-char-list org-e-groff-special-char)
+        (setq text
+              (replace-regexp-in-string (car special-char-list) 
+                                            (cdr special-char-list) text ))
+                )
+    )
+  
+  ;; Handle Special Characters
+    
   ;; Handle break preservation if required.
   (when (plist-get info :preserve-breaks)
     (setq text (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n"
@@ -1543,23 +1602,30 @@ contextual information."
          (num-start (case (org-element-property :number-lines src-block)
                       (continued (org-export-get-loc src-block info))
                       (new 0)))
-         (retain-labels (org-element-property :retain-labels src-block)))
+         (retain-labels (org-element-property :retain-labels src-block))
+         (attr
+          (read
+           (format "(%s)"
+            (mapconcat #'identity
+                       (org-element-property :attr_groff src-block)
+                       " ")))))
+    
+    (setq disable-caption (plist-get attr :disable-caption))
+
     (cond
      ;; Case 1.  No source fontification.
      ((not org-e-groff-source-highlight)
-      (let ((caption-str (org-e-groff--caption/label-string caption label info))
-            (float-env (when caption ".DS I\n\\fC%s\\fP\n.DE\n")))
-        (format
-         (or float-env "%s")
-         (concat 
-          (format ".DS I\n\\fC%s\\fP\n.DE\n.EX \"%s\"\n"
-                  (org-export-format-code-default src-block info) 
-                  (or caption-str ""))))))
-     ( (and org-e-groff-source-highlight) 
+      (let ((caption-str (org-e-groff--caption/label-string caption label info)))
+        (concat 
+         (format ".DS I\n\\fC%s\\fP\n.DE\n"
+                 (org-export-format-code-default src-block info))
+         (unless  disable-caption (format ".EX \"%s\" "  caption-str )))))
+
+     ( (and org-e-groff-source-highlight)
        (let* ((tmpdir (if (featurep 'xemacs)
                           temp-directory 
                         temporary-file-directory ))
-              
+              (caption-str (org-e-groff--caption/label-string caption label info))
               (in-file  (make-temp-name 
                          (expand-file-name "srchilite" tmpdir))  )
               (out-file (make-temp-name 
@@ -1577,25 +1643,21 @@ contextual information."
                            )
                    ))
          
-         (if lst-lang
-             (let ((code-block "" ))
-               (with-temp-file in-file (insert code))
-               (shell-command cmd)
-               (setq code-block  (org-file-contents out-file) )
-               (delete-file in-file)
-               (delete-file out-file)
-               code-block)
-           (format ".DS I\n\\fC\\m[black]%s\\m[]\\fP\n.DE"
+         (concat 
+          (if lst-lang
+              (let ((code-block "" ))
+                (with-temp-file in-file (insert code))
+                (shell-command cmd)
+                (setq code-block  (org-file-contents out-file) )
+                (delete-file in-file)
+                (delete-file out-file)
+                (format "%s\n"  code-block))
+           (format ".DS I\n\\fC\\m[black]%s\\m[]\\fP\n.DE\n"
                    code))
-
-         )
-       )
-
-     (custom-env (format ".DS I\n\\fC%s\\fP\n.DE"
-                         custom-env
-                         (src-block)
-                         custom-env))
-
+          (unless disable-caption (format ".EX \"%s\" " caption-str) )          
+          )
+         
+         ))
      )))
 
 
@@ -1785,6 +1847,7 @@ This function assumes TABLE has `org' as its `:type' attribute."
 
     (setq title-line  (plist-get attr :title-line))
     (setq disable-caption (plist-get attr :disable-caption)) 
+    (setq long-cells (plist-get attr :long-cells))
 
     (setq table-format (concat 
                         (format "%s"
@@ -1807,7 +1870,6 @@ This function assumes TABLE has `org' as its `:type' attribute."
                     
                     (format "%s.\n"
                             (let ((final-line ""))
-
                               (when title-line
                                 (dotimes (i (length first-line))
                                   (setq final-line (concat final-line "cb" divider))
@@ -1820,18 +1882,30 @@ This function assumes TABLE has `org' as its `:type' attribute."
                                   (setq final-line (concat final-line "c" divider))))
                               final-line ))
 
-                    (format "%s.TE\n"
+                    (format "%s\n.TE\n"
                             (let ((final-line ""))
+                              (setq lines (org-split-string contents "\n"))
                               (dolist (line-item lines)
-                                (cond 
-                                 (t	
-                                  (setq lines (org-split-string contents "\n"))
+                                (setq long-line "")
 
-                                  (setq final-line (concat final-line 
-                                                           (car (org-split-string line-item "\\\\")) "\n"))
+                                (if long-cells 
+                                    (if (string= line-item "_")
+                                        (setq long-line (format "%s\n" line-item))
+                                      ;; else
+                                      (let ((cell-item-list (org-split-string line-item "\t") ))
+                                        (dolist (cell-item cell-item-list)
+
+                                          (cond  ((eq cell-item (car (last cell-item-list)))
+                                                  (setq long-line (concat long-line (format "T{\n%s\nT}\t\n"  cell-item ) )))
+                                                 (t
+                                                  (setq long-line (concat long-line (format "T{\n%s\nT}\t"  cell-item ) ))
+                                                  )))
+                                        long-line)
+                                      (setq final-line (concat final-line long-line )))
+
+                                  ;; else
+                                  (setq final-line (concat final-line line-item "\n"))
                                   )
-                                 )
-                                
                                 )  final-line))
 
                     (if (not disable-caption)
@@ -1845,16 +1919,19 @@ This function assumes TABLE has `org' as its `:type' attribute."
   "Transcode a TABLE-CELL element from Org to Groff
 CONTENTS is the cell contents.  INFO is a plist used as
 a communication channel."
-  (concat (if (and contents
-                   org-e-groff-table-scientific-notation
-                   (string-match orgtbl-exp-regexp contents))
-              ;; Use appropriate format string for scientific
-              ;; notation.
-              (format org-e-groff-table-scientific-notation
-                      (match-string 1 contents)
-                      (match-string 2 contents))
-            contents)
-          (when (org-export-get-next-element table-cell) " \t ")))
+  (let* ()
+    (concat (if (and contents
+                     org-e-groff-table-scientific-notation
+                     (string-match orgtbl-exp-regexp contents))
+                ;; Use appropriate format string for scientific
+                ;; notation.
+                (format org-e-groff-table-scientific-notation
+                        (match-string 1 contents)
+                        (match-string 2 contents))
+              contents )
+            (when (org-export-get-next-element table-cell) "\t"))
+    )
+)
 
 
 ;;;; Table Row
@@ -1877,12 +1954,13 @@ a communication channel."
       (concat
        ;; Mark "hline" for horizontal lines.
        (cond  ((and (memq 'top borders) (memq 'above borders)) "_\n"))
-       contents "\\\\\n"
+       contents 
+;;; "\\\\\n"
        (cond
         ;; When BOOKTABS are activated enforce bottom rule even when
         ;; no hline was specifically marked.
-        ((and (memq 'bottom borders) (memq 'below borders)) "_\n")
-        ((memq 'below borders) "_"))))))
+        ((and (memq 'bottom borders) (memq 'below borders)) "\n_")
+        ((memq 'below borders) "\n_"))))))
 
 
 
@@ -1958,9 +2036,6 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-When optional argument BODY-ONLY is non-nil, only write code
-between \"\\begin{document}\" and \"\\end{document}\".
-
 EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
@@ -1969,6 +2044,9 @@ When optional argument PUB-DIR is set, use it as the publishing
 directory.
 
 Return output file's name."
+
+  (setq registered-references '())
+
   (interactive)
   (let ((outfile (org-export-output-file-name ".groff" subtreep pub-dir)))
     (org-export-to-file
@@ -1989,9 +2067,6 @@ first.
 
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
-
-When optional argument BODY-ONLY is non-nil, only write code
-between \"\\begin{document}\" and \"\\end{document}\".
 
 EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
