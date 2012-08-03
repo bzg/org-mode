@@ -100,11 +100,11 @@ If `org-store-link' was called with a prefix arg the meaning of
     (if (and (string-match "^nntp" group) ;; Only for nntp groups
 	     (org-xor current-prefix-arg
 		      org-gnus-prefer-web-links))
-	(org-make-link (if (string-match "gmane" unprefixed-group)
+	(concat (if (string-match "gmane" unprefixed-group)
 			   "http://news.gmane.org/"
 			 "http://groups.google.com/group/")
 		       unprefixed-group)
-      (org-make-link "gnus:" group))))
+      (concat "gnus:" group))))
 
 (defun org-gnus-article-link (group newsgroups message-id x-no-archive)
   "Create a link to a Gnus article.
@@ -125,7 +125,7 @@ If `org-store-link' was called with a prefix arg the meaning of
 		  "http://mid.gmane.org/%s"
 		"http://groups.google.com/groups/search?as_umsgid=%s")
 	      (org-fixup-message-id-for-http message-id))
-    (org-make-link "gnus:" group "#" message-id)))
+    (concat "gnus:" group "#" message-id)))
 
 (defun org-gnus-store-link ()
   "Store a link to a Gnus folder or message."

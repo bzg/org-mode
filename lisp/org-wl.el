@@ -161,7 +161,7 @@ ENTITY is a message entity."
   "Store a link to a WL folder."
   (let* ((folder (wl-folder-get-entity-from-buffer))
 	 (petname (wl-folder-get-petname folder))
-	 (link (org-make-link "wl:" folder)))
+	 (link (concat "wl:" folder)))
     (save-excursion
       (beginning-of-line)
       (unless (and (wl-folder-buffer-group-p)
@@ -246,7 +246,7 @@ ENTITY is a message entity."
 				    :subject subject :message-id message-id
 				    :message-id-no-brackets message-id-no-brackets)
 	      (setq desc (org-email-link-description))
-	      (setq link (org-make-link "wl:" folder-name "#" message-id-no-brackets))
+	      (setq link (concat "wl:" folder-name "#" message-id-no-brackets))
 	      (org-add-link-props :link link :description desc)))
 	    (when date
 	      (org-add-link-props :date date :date-timestamp date-ts

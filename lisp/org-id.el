@@ -602,7 +602,7 @@ optional argument MARKERP, return the position as a new marker."
   "Store a link to the current entry, using its ID."
   (interactive)
   (when (and (buffer-file-name (buffer-base-buffer)) (derived-mode-p 'org-mode))
-    (let* ((link (org-make-link "id:" (org-id-get-create)))
+    (let* ((link (concat "id:" (org-id-get-create)))
 	   (case-fold-search nil)
 	   (desc (save-excursion
 		   (org-back-to-heading t)

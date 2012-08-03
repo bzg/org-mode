@@ -8839,12 +8839,12 @@ For file links, arg negates `org-context-in-file-links'."
 			     (not (string-match "Untitled" (buffer-name))))
 			(buffer-name)
 		      (url-view-url t))
-	     link (org-make-link (url-view-url t)))
+	     link (url-view-url t))
        (org-store-link-props :type "w3" :url (url-view-url t)))
 
       ((eq major-mode 'w3m-mode)
        (setq cpltxt (or w3m-current-title w3m-current-url)
-	     link (org-make-link w3m-current-url))
+	     link w3m-current-url)
        (org-store-link-props :type "w3m" :url (url-view-url t)))
 
       ((setq search (run-hook-with-args-until-success
@@ -8856,7 +8856,7 @@ For file links, arg negates `org-context-in-file-links'."
       ((eq major-mode 'image-mode)
        (setq cpltxt (concat "file:"
 			    (abbreviate-file-name buffer-file-name))
-	     link (org-make-link cpltxt))
+	     link cpltxt)
        (org-store-link-props :type "image" :file buffer-file-name))
 
       ((eq major-mode 'dired-mode)
@@ -8868,7 +8868,7 @@ For file links, arg negates `org-context-in-file-links'."
 		      ;; otherwise, no file so use current directory.
 		      default-directory))
 	 (setq cpltxt (concat "file:" file)
-	       link (org-make-link cpltxt))))
+	       link cpltxt)))
 
       ((and (buffer-file-name (buffer-base-buffer)) (derived-mode-p 'org-mode))
        (setq custom-id (org-entry-get nil "CUSTOM_ID"))
@@ -8879,7 +8879,7 @@ For file links, arg negates `org-context-in-file-links'."
 		       (abbreviate-file-name
 			(buffer-file-name (buffer-base-buffer)))
 		       "::" (match-string 1))
-	       link (org-make-link cpltxt)))
+	       link cpltxt))
 	((and (featurep 'org-id)
 	      (or (eq org-link-to-org-use-id t)
 		  (and (org-called-interactively-p 'any)
@@ -8919,7 +8919,7 @@ For file links, arg negates `org-context-in-file-links'."
 				     (org-heading-components))) "NONE"))))
 	 (if (string-match "::\\'" cpltxt)
 	     (setq cpltxt (substring cpltxt 0 -2)))
-	 (setq link (org-make-link cpltxt)))))
+	 (setq link cpltxt))))
 
       ((buffer-file-name (buffer-base-buffer))
        ;; Just link to this file here.
@@ -8936,7 +8936,7 @@ For file links, arg negates `org-context-in-file-links'."
 	   (setq cpltxt
 		 (concat cpltxt "::" (org-make-org-heading-search-string txt))
 		 desc "NONE")))
-       (setq link (org-make-link cpltxt)))
+       (setq link cpltxt))
 
       ((org-called-interactively-p 'interactive)
        (error "Cannot link to a buffer which is not visiting a file"))
@@ -9041,10 +9041,6 @@ according to FMT (default from `org-email-link-description-format')."
 		   (reverse (nthcdr (- (length slines) lines)
 				    (reverse slines))) "\n")))))
     (mapconcat 'identity (org-split-string s "[ \t]+") " ")))
-
-(defun org-make-link (&rest strings)
-  "Concatenate STRINGS."
-  (apply 'concat strings))
 
 (defun org-make-link-string (link &optional description)
   "Make a link with brackets, consisting of LINK and DESCRIPTION."
@@ -9362,7 +9358,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 
     (if (string-match org-plain-link-re link)
 	;; URL-like link, normalize the use of angular brackets.
-	(setq link (org-make-link (org-remove-angle-brackets link))))
+	(setq link (org-remove-angle-brackets link)))
 
     ;; Check if we are linking to the current file with a search option
     ;; If yes, simplify the link by using only the search option.
@@ -9431,16 +9427,16 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 					 (expand-file-name ".")))))
       (cond
        ((equal arg '(16))
-	(setq link (org-make-link
+	(setq link (concat
 		    "file:"
 		    (abbreviate-file-name (expand-file-name file)))))
        ((string-match (concat "^" (regexp-quote pwd1) "\\(.+\\)") file)
-	(setq link  (org-make-link "file:" (match-string 1 file))))
+	(setq link  (concat "file:" (match-string 1 file))))
        ((string-match (concat "^" (regexp-quote pwd) "\\(.+\\)")
 		      (expand-file-name file))
-	(setq link  (org-make-link
+	(setq link  (concat
 		     "file:" (match-string 1 (expand-file-name file)))))
-       (t (setq link (org-make-link "file:" file)))))
+       (t (setq link (concat "file:" file)))))
     link))
 
 (defun org-completing-read (&rest args)

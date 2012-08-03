@@ -48,7 +48,7 @@
   "Store a link to an Info file and node."
   (when (eq major-mode 'Info-mode)
     (let (link desc)
-      (setq link (org-make-link "info:"
+      (setq link (concat "info:"
 				(file-name-nondirectory Info-current-file)
 				"#" Info-current-node))
       (setq desc (concat (file-name-nondirectory Info-current-file)

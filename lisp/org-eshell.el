@@ -57,7 +57,7 @@
     (let* ((command (concat "cd " dired-directory))
            (link  (concat (buffer-name) ":" command)))
       (org-store-link-props
-       :link (org-make-link "eshell:" link)
+       :link (concat "eshell:" link)
        :description command))))
 
 (provide 'org-eshell)

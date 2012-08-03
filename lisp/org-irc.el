@@ -171,7 +171,7 @@ the session itself."
 	    (progn
 	      (org-store-link-props
 	       :type "irc"
-	       :link (org-make-link "irc:/" link-text)
+	       :link (concat "irc:/" link-text)
 	       :description (concat "irc session '" link-text "'")
 	       :server (car (car link))
 	       :port (or (string-to-number (cadr (pop link))) erc-default-port)

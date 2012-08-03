@@ -207,7 +207,7 @@ date year)."
 	   (company (if (fboundp 'bbdb-record-getprop)
                         (bbdb-record-getprop rec 'company)
                       (car (bbdb-record-get-field rec 'organization))))
-	   (link (org-make-link "bbdb:" name)))
+	   (link (concat "bbdb:" name)))
       (org-store-link-props :type "bbdb" :name name :company company
 			    :link link :description name)
       link)))

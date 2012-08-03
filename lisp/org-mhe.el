@@ -99,7 +99,7 @@ supported by MH-E."
 	  (org-add-link-props :date date :date-timestamp date-ts
 			      :date-timestamp-inactive date-ts-ia))
 	(setq desc (org-email-link-description))
-	(setq link (org-make-link "mhe:" (org-mhe-get-message-real-folder) "#"
+	(setq link (concat "mhe:" (org-mhe-get-message-real-folder) "#"
 				  (org-remove-angle-brackets message-id)))
 	(org-add-link-props :link link :description desc)
 	link))))

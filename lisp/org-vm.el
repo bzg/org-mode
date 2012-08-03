@@ -100,7 +100,7 @@
 	  (org-add-link-props :date date :date-timestamp date-ts
 			      :date-timestamp-inactive date-ts-ia))
 	(setq desc (org-email-link-description))
-	(setq link (org-make-link (concat link-type ":") folder "#" message-id))
+	(setq link (concat (concat link-type ":") folder "#" message-id))
 	(org-add-link-props :link link :description desc)
 	link))))
 
