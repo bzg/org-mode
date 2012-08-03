@@ -9663,6 +9663,7 @@ Functions in this hook must return t if they identify and follow
 a link at point.  If they don't find anything interesting at point,
 they must return nil.")
 
+(defvar clean-buffer-list-kill-buffer-names) ; Defined in midnight.el
 (defun org-open-at-point (&optional arg reference-buffer)
   "Open link at or after point.
 If there is no link at point, this function will search forward up to
@@ -9815,7 +9816,8 @@ application the system uses for this file type."
 	    (org-open-file path arg line search)))
 
 	 ((string= type "shell")
-	  (let ((cmd path))
+	  (let ((buf (generate-new-buffer "*Org Shell Output"))
+		(cmd path))
 	    (if (or (and (not (string= org-confirm-shell-link-not-regexp ""))
 			 (string-match org-confirm-shell-link-not-regexp cmd))
 		    (not org-confirm-shell-link-function)
@@ -9825,7 +9827,9 @@ application the system uses for this file type."
 				       'face 'org-warning))))
 		(progn
 		  (message "Executing %s" cmd)
-		  (shell-command cmd))
+		  (setq clean-buffer-list-kill-buffer-names
+			(cons buf clean-buffer-list-kill-buffer-names))
+		  (shell-command cmd buf))
 	      (error "Abort"))))
 
 	 ((string= type "elisp")
