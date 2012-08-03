@@ -261,12 +261,11 @@ complete list of what is recorded for each link type.
 Link type               |  Available information
 ------------------------+------------------------------------------------------
 bbdb                    |  %:type %:name %:company
-vm, wl, mh, mew, rmail  |  %:type %:subject %:message-id
-                        |  %:from %:fromname %:fromaddress
+vm, wl, mh, mew, rmail, |  %:type %:subject %:message-id
+gnus                    |  %:from %:fromname %:fromaddress
                         |  %:to   %:toname   %:toaddress
                         |  %:fromto (either \"to NAME\" or \"from NAME\")
-                        |  %:date
-                        |  %:date-timestamp (as active timestamp)
+                        |  %:date %:date-timestamp (as active timestamp)
                         |  %:date-timestamp-inactive (as inactive timestamp)
 gnus                    |  %:group, for messages also all email fields
 w3, w3m                 |  %:type %:url
