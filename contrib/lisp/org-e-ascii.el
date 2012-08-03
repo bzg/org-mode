@@ -38,6 +38,7 @@
 (eval-when-compile (require 'cl))
 (require 'org-export)
 
+(declare-function aa2u "ext:ascii-art-to-unicode" ())
 
 ;;; Define Back-End
 ;;
@@ -1543,7 +1544,7 @@ contextual information."
 	      (aa2u)
 	      (goto-char (point-max))
 	      (skip-chars-backward " \r\t\n")
-	      (buffer-string)))
+	      (buffer-substring (point-min) (point))))
 	   (t (org-remove-indentation (org-element-property :value table))))
      ;; Possible add a caption string below.
      (when (and caption (not org-e-ascii-caption-above))
