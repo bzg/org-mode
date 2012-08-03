@@ -1156,7 +1156,7 @@ contextual information."
 
          (checkbox (case (org-element-property :checkbox item)
                      (on "\\o'\\(sq\\(mu'")			
-                     (off "\\(sq ")					
+                     (off "\\(sq")					
                      (trans "\\o'\\(sq\\(mi'"   )))
 
          (tag (let ((tag (org-element-property :tag item)))
@@ -1167,7 +1167,7 @@ contextual information."
 
 	(cond 
 	 ((or checkbox tag)
-	  (concat ".LI " "\"" (or tag (concat " " checkbox)) "\""
+	  (concat ".LI ""\"" (or tag (concat "\\ " checkbox)) "\""
               "\n"
               (org-trim (or contents " " ) ))  )
      ((eq type 'ordered)
