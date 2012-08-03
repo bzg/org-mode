@@ -2554,13 +2554,13 @@ through DONE.  This variable forces taking a note anyway.
 
 nil     Don't force a record
 time    Record a time stamp
-note    Record a note
+note    Prompt for a note and add it with template `org-log-note-headings'
 
 This option can also be set with on a per-file-basis with
 
+   #+STARTUP: nologrepeat
    #+STARTUP: logrepeat
    #+STARTUP: lognoterepeat
-   #+STARTUP: nologrepeat
 
 You can have local logging settings for a subtree by setting the LOGGING
 property to one or more of these keywords."
