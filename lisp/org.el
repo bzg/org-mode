@@ -14304,13 +14304,16 @@ When INCREMENT is non-nil, set the property to the next allowed value."
 
 (defun org-get-property-block (&optional beg end force)
   "Return the (beg . end) range of the body of the property drawer.
-BEG and END can be beginning and end of subtree, if not given
-they will be found.
-If the drawer does not exist and FORCE is non-nil, create the drawer."
+BEG and END are the beginning and end of the current subtree, or of
+the part before the first headline.  If they are not given, they will
+be found.  If the drawer does not exist and FORCE is non-nil, create
+the drawer."
   (catch 'exit
     (save-excursion
-      (let* ((beg (or beg (progn (org-back-to-heading t) (point))))
-	     (end (or end (progn (outline-next-heading) (point)))))
+      (let* ((beg (or beg (and (org-before-first-heading-p) (point-min))
+		      (progn (org-back-to-heading t) (point))))
+	     (end (or end (and (not (outline-next-heading)) (point-max))
+		      (point))))
 	(goto-char beg)
 	(if (re-search-forward org-property-start-re end t)
 	    (setq beg (1+ (match-end 0)))
@@ -14415,8 +14418,7 @@ things up because then unnecessary parsing is avoided."
 			;; no need to search further if match is found
 			(throw 'match t))
 		    (when (or (equal key "CLOCK") (not (assoc key props)))
-		      (push (cons key string) props))))))
-	    )
+		      (push (cons key string) props)))))))
 
 	  (when (memq which '(all standard))
 	    ;; Get the standard properties, like :PROP: ...
@@ -14440,7 +14442,7 @@ things up because then unnecessary parsing is avoided."
 	  (append sum-props (nreverse props)))))))
 
 (defun org-entry-get (pom property &optional inherit literal-nil)
-  "Get value of PROPERTY for entry at point-or-marker POM.
+  "Get value of PROPERTY for entry or content at point-or-marker POM.
 If INHERIT is non-nil and the entry does not have the property,
 then also check higher levels of the hierarchy.
 If INHERIT is the symbol `selective', use inheritance only if the setting
@@ -14460,8 +14462,7 @@ when a \"nil\" value can supersede a non-nil value higher up the hierarchy."
 	  ;; We need a special property.  Use `org-entry-properties' to
 	  ;; retrieve it, but specify the wanted property
 	  (cdr (assoc property (org-entry-properties nil 'special property)))
-	(let ((range (unless (org-before-first-heading-p)
-		       (org-get-property-block)))
+	(let ((range (org-get-property-block))
 	      (props (list (or (assoc property org-file-properties)
 			       (assoc property org-global-properties)
 			       (assoc property org-global-properties-fixed))))
@@ -14575,24 +14576,25 @@ Note that also `org-entry-get' calls this function, if the INHERIT flag
 is set.")
 
 (defun org-entry-get-with-inheritance (property &optional literal-nil)
-  "Get entry property, and search higher levels if not present.
+  "Get PROPERTY of entry or content at point, search higher levels if needed.
 The search will stop at the first ancestor which has the property defined.
 If the value found is \"nil\", return nil to show that the property
 should be considered as undefined (this is the meaning of nil here).
 However, if LITERAL-NIL is set, return the string value \"nil\" instead."
   (move-marker org-entry-property-inherited-from nil)
   (let (tmp)
-    (unless (org-before-first-heading-p)
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (catch 'ex
-	    (while t
-	      (when (setq tmp (org-entry-get nil property nil 'literal-nil))
-		(org-back-to-heading t)
-		(move-marker org-entry-property-inherited-from (point))
-		(throw 'ex tmp))
-	      (or (org-up-heading-safe) (throw 'ex nil)))))))
+    (save-excursion
+      (save-restriction
+	(widen)
+	(catch 'ex
+	  (while t
+	    (when (setq tmp (org-entry-get nil property nil 'literal-nil))
+	      (or (ignore-errors (org-back-to-heading t))
+		  (goto-char (point-min)))
+	      (move-marker org-entry-property-inherited-from (point))
+	      (throw 'ex tmp))
+	    (or (ignore-errors (org-up-heading-safe))
+		(throw 'ex nil))))))
     (setq tmp (or tmp
 		  (cdr (assoc property org-file-properties))
 		  (cdr (assoc property org-global-properties))
