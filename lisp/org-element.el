@@ -1349,7 +1349,7 @@ Assume point is at comment beginning."
 	   (begin (car keywords))
 	   ;; Match first line with a loose regexp since it might as
 	   ;; well be an ill-defined keyword.
-	   (value (prog2 (looking-at "[ \t]*#\\+? ?")
+	   (value (prog2 (looking-at "[ \t]*# ?")
 		      (buffer-substring-no-properties
 		       (match-end 0) (line-end-position))
 		    (forward-line)))
@@ -2151,7 +2151,7 @@ CONTENTS is verse block contents."
 ;; org-element-NAME-successor, where NAME is the name of the
 ;; successor, as defined in `org-element-all-successors'.
 ;;
-;; Some object types (i.e. `emphasis') are recursive.  Restrictions on
+;; Some object types (i.e. `italic') are recursive.  Restrictions on
 ;; object types they can contain will be specified in
 ;; `org-element-object-restrictions'.
 ;;
