@@ -424,7 +424,8 @@ agenda view showing the flagged items."
 		     done-kwds
 		     (org-uniquify org-todo-keywords-for-agenda)))
     (setq drawers (org-uniquify org-drawers-for-agenda))
-    (setq tags (mapcar 'car (org-global-tags-completion-table files-alist)))
+    (setq tags (mapcar 'car (org-global-tags-completion-table
+			     (mapcar 'car files-alist))))
     (with-temp-file
 	(if org-mobile-use-encryption
 	    org-mobile-encryption-tempfile
