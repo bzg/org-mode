@@ -28,7 +28,7 @@ endif
 	cleancontrib cleantesting cleanutils
 	cleanrel clean-install cleanelc cleandirs \
 	cleanlisp cleandoc cleandocs cleantest \
-	compile compile-dirty uncompiled \
+	compile compile-single compile-source compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol
 
 CONF_BASE = EMACS DESTDIR
@@ -75,7 +75,7 @@ local.mk:
 
 all compile::
 	$(foreach dir, doc lisp, $(MAKE) -C $(dir) clean;)
-compile compile-dirty::
+compile compile-dirty compile-single compile-source::
 	$(MAKE) -C lisp $@
 all clean-install::
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)

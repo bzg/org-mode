@@ -90,6 +90,10 @@ MAKE_ORG_VERSION = $(BATCHL) \
 ELCDIR	= $(BATCHL) \
 	  --eval '(batch-byte-recompile-directory 0)'
 
+# How to byte-compile a single file
+ELC	= $(BATCHL) \
+	  --eval '(batch-byte-compile)'
+
 # How to make a pdf file from a texinfo file
 TEXI2PDF = texi2pdf --batch --clean
 
