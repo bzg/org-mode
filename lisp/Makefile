@@ -10,7 +10,7 @@ LISPA = $(LISPV) $(LISPI)
 LISPF = $(filter-out $(LISPA),$(wildcard *.el))
 LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 
-.PHONY:	all compile compile-dirty \
+.PHONY:	all compile compile-dirty compile-single \
 		autoloads \
 		install clean cleanauto cleanall clean-install
 
@@ -18,6 +18,12 @@ LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 all compile::	autoloads
 all compile compile-dirty::	 $(LISPI) $(LISPV)
 	$(ELCDIR)
+compile-single: clean autoloads $(LISPC)
+compile-source: clean autoloads
+	@$(foreach elc,$(LISPC),$(MAKE) $(elc) && $(RM) $(elc);)
+
+%.elc:	%.el
+	-$(ELC) $(<)
 
 autoloads:	cleanauto $(LISPI) $(LISPV)
 
