@@ -111,6 +111,56 @@
 (eval-when-compile
   (require 'cl))
 
+
+;;; Declarations
+
+(declare-function org-heading-components     "org" ())
+(declare-function org-entry-properties       "org" (&optional pom which specific))
+(declare-function org-end-of-subtree         "org" (&optional invisible-ok to-heading))
+(declare-function org-skip-whitespace        "org" ())
+(declare-function org-remove-indentation     "org" (code &optional n))
+(declare-function org-at-table.el-p   	     "org" ())
+(declare-function org-translate-link  	     "org" (s))
+(declare-function org-link-unescape   	     "org" (str))
+(declare-function org-link-expand-abbrev     "org" (link))
+(declare-function org-before-first-heading-p "org" ())
+(declare-function org-at-heading-p    	     "org" (&optional invisible-ok))
+(declare-function org-at-table-p             "org" (&optional table-type))
+(declare-function org-back-to-heading 	     "org" (&optional invisible-ok))
+(declare-function org-get-indentation 	     "org" (&optional line))
+(declare-function org-forward-same-level     "org" (arg &optional invisible-ok))
+(declare-function org-backward-same-level    "org" (arg &optional invisible-ok))
+(declare-function org-up-heading-safe        "org" ())
+(declare-function org-cycle                  "org" (&optional arg))
+(declare-function org-move-subtree-up        "org" (&optional arg))
+(declare-function org-do-remove-indentation  "org" (&optional n))
+
+(declare-function org-entity-get "org-entities" (name) t)
+
+(declare-function org-item-beginning-re  "org-list" () t)
+(declare-function org-list-get-bullet    "org-list" (item struct) t)
+(declare-function org-list-get-checkbox  "org-list" (item struct) t)
+(declare-function org-list-get-counter   "org-list" (item struct) t)
+(declare-function org-list-get-item-end  "org-list" (item struct) t)
+(declare-function org-list-get-tag       "org-list" (item struct) t)
+(declare-function org-list-bullet-string "org-list" (bullet) t)
+
+(declare-function org-item-re               "org-list" ())
+(declare-function org-list-struct           "org-list" ())
+(declare-function org-list-prevs-alist      "org-list" (struct))
+(declare-function org-list-parents-alist    "org-list" (struct))
+(declare-function org-list-get-list-end     "org-list" (item struct prevs))
+(declare-function org-list-get-list-type    "org-list" (item struct prevs))
+(declare-function org-list-get-top-point    "org-list" (struct))
+(declare-function org-list-get-bottom-point "org-list" (struct))
+(declare-function org-list-repair           "org-list" ())
+
+(declare-function org-table-end   "org-table" (&optional table-type))
+(declare-function org-table-align "org-table" ())
+
+(declare-function outline-next-heading "outline" ())
+
+(declare-function org-babel-lob-get-info "ob-lob" ())
 
 
 ;;; Definitions And Rules
