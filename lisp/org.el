@@ -87,12 +87,13 @@
 ;; job when `orgstruct-mode' is active.
 (defvar org-outline-regexp "\\*+ "
   "Regexp to match Org headlines.")
-(defconst org-outline-regexp-bol "^\\*+ "
+
+(defvar org-outline-regexp-bol "^\\*+ "
   "Regexp to match Org headlines.
 This is similar to `org-outline-regexp' but additionally makes
 sure that we are at the beginning of the line.")
 
-(defconst org-heading-regexp "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
+(defvar org-heading-regexp "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
   "Matches an headline, putting stars and text into groups.
 Stars are put in group 1 and the trimmed body in group 2.")
 
