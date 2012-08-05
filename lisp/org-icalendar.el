@@ -326,7 +326,7 @@ When COMBINE is non nil, add the category to each line."
 	      "DTSTART"))
 	hd ts ts2 state status (inc t) pos b sexp rrule
 	scheduledp deadlinep todo prefix due start tags
-	tmp pri categories location summary desc uid alarm
+	tmp pri categories location summary desc uid alarm alarm-time
 	(sexp-buffer (get-buffer-create "*ical-tmp*")))
     (org-refresh-category-properties)
     (save-excursion

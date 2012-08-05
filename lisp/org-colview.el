@@ -33,6 +33,7 @@
 
 (declare-function org-agenda-redo "org-agenda" ())
 (declare-function org-agenda-do-context-action "org-agenda" ())
+(declare-function org-clock-sum-today "org-clock" (&optional headline-filter))
 
 (when (featurep 'xemacs)
   (error "Do not load this file into XEmacs, use 'org-colview-xemacs.el'."))
