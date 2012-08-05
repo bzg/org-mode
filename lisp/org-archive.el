@@ -31,6 +31,7 @@
 (require 'org)
 
 (declare-function org-inlinetask-remove-END-maybe "org-inlinetask" ())
+(declare-function org-datetree-find-date-create "org-datetree" (date &optional keep-restriction))
 
 (defcustom org-archive-default-command 'org-archive-subtree
   "The default archiving command."
