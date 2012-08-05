@@ -14174,7 +14174,7 @@ a *different* entry, you cannot use these techniques."
 
 (defconst org-special-properties
   '("TODO" "TAGS" "ALLTAGS" "DEADLINE" "SCHEDULED" "CLOCK" "CLOSED" "PRIORITY"
-    "TIMESTAMP" "TIMESTAMP_IA" "BLOCKED" "FILE" "CLOCKSUM")
+    "TIMESTAMP" "TIMESTAMP_IA" "BLOCKED" "FILE" "CLOCKSUM" "CLOCKSUM_T")
   "The special properties valid in Org-mode.
 
 These are properties that are not defined in the property drawer,
@@ -14351,14 +14351,15 @@ things up because then unnecessary parsing is avoided."
     (let ((clockstr (substring org-clock-string 0 -1))
 	  (excluded '("TODO" "TAGS" "ALLTAGS" "PRIORITY" "BLOCKED"))
 	  (case-fold-search nil)
-	  beg end range props sum-props key key1 value string clocksum)
+	  beg end range props sum-props key key1 value string clocksum clocksumt)
       (save-excursion
 	(when (condition-case nil
 		  (and (derived-mode-p 'org-mode) (org-back-to-heading t))
 		(error nil))
 	  (setq beg (point))
 	  (setq sum-props (get-text-property (point) 'org-summaries))
-	  (setq clocksum (get-text-property (point) :org-clock-minutes))
+	  (setq clocksum (get-text-property (point) :org-clock-minutes)
+		clocksumt (get-text-property (point) :org-clock-minutes-today))
 	  (outline-next-heading)
 	  (setq end (point))
 	  (when (memq which '(all special))
@@ -14436,6 +14437,11 @@ things up because then unnecessary parsing is avoided."
 	      (push (cons "CLOCKSUM"
 			  (org-columns-number-to-string (/ (float clocksum) 60.)
 						       'add_times))
+		    props))
+	  (if clocksumt
+	      (push (cons "CLOCKSUM_T"
+			  (org-columns-number-to-string (/ (float clocksumt) 60.)
+							'add_times))
 		    props))
 	  (unless (assoc "CATEGORY" props)
 	    (push (cons "CATEGORY" (org-get-category)) props))

@@ -1618,13 +1618,20 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
   "Holds the file total time in minutes, after a call to `org-clock-sum'.")
 (make-variable-buffer-local 'org-clock-file-total-minutes)
 
-(defun org-clock-sum (&optional tstart tend headline-filter)
+(defun org-clock-sum-today (&optional headline-filter)
+  "Sum the times for each subtree for today."
+  (interactive)
+  (let ((range (org-clock-special-range 'today)))
+    (org-clock-sum (car range) (cadr range) nil :org-clock-minutes-today)))
+
+(defun org-clock-sum (&optional tstart tend headline-filter propname)
   "Sum the times for each subtree.
 Puts the resulting times in minutes as a text property on each headline.
-TSTART and TEND can mark a time range to be considered.  HEADLINE-FILTER is a
-zero-arg function that, if specified, is called for each headline in the time
-range with point at the headline.  Headlines for which HEADLINE-FILTER returns
-nil are excluded from the clock summation."
+TSTART and TEND can mark a time range to be considered.
+HEADLINE-FILTER is a zero-arg function that, if specified, is called for
+each headline in the time range with point at the headline.  Headlines for
+which HEADLINE-FILTER returns nil are excluded from the clock summation.
+PROPNAME lets you set a custom text property instead of :org-clock-minutes."
   (interactive)
   (let* ((bmp (buffer-modified-p))
 	 (re (concat "^\\(\\*+\\)[ \t]\\|^[ \t]*"
@@ -1641,7 +1648,7 @@ nil are excluded from the clock summation."
     (if (consp tstart) (setq tstart (org-float-time tstart)))
     (if (consp tend) (setq tend (org-float-time tend)))
     (remove-text-properties (point-min) (point-max)
-                            '(:org-clock-minutes t
+                            `(,(or propname :org-clock-minutes) t
                               :org-clock-force-headline-inclusion t))
     (save-excursion
       (goto-char (point-max))
@@ -1690,7 +1697,8 @@ nil are excluded from the clock summation."
                           (aset ltimes l (+ (aref ltimes l) t1))))
 		(setq time (aref ltimes level))
 		(goto-char (match-beginning 0))
-		(put-text-property (point) (point-at-eol) :org-clock-minutes time)
+		(put-text-property (point) (point-at-eol)
+				   (or propname :org-clock-minutes) time)
                 (if headline-filter
                     (save-excursion
                       (save-match-data

@@ -4999,6 +4999,7 @@ used as keys in the properties drawer:
 @cindex property, special, TIMESTAMP
 @cindex property, special, TIMESTAMP_IA
 @cindex property, special, CLOCKSUM
+@cindex property, special, CLOCKSUM_T
 @cindex property, special, BLOCKED
 @c guessing that ITEM is needed in this area; also, should this list be sorted?
 @cindex property, special, ITEM
@@ -5018,6 +5019,9 @@ TIMESTAMP    @r{The first keyword-less timestamp in the entry.}
 TIMESTAMP_IA @r{The first inactive timestamp in the entry.}
 CLOCKSUM     @r{The sum of CLOCK intervals in the subtree.  @code{org-clock-sum}}
              @r{must be run first to compute the values in the current buffer.}
+CLOCKSUM_T   @r{The sum of CLOCK intervals in the subtree for today.}
+             @r{@code{org-clock-sum-today}} must be run first to compute the}
+             @r{values in the current buffer.}
 BLOCKED      @r{"t" if task is currently blocked by children or siblings}
 ITEM         @r{The headline of the entry.}
 FILE         @r{The filename the entry is located in.}
@@ -5235,7 +5239,7 @@ values.
 
 @example
 :COLUMNS:  %25ITEM %9Approved(Approved?)@{X@} %Owner %11Status \@footnote{Please note that the COLUMNS definition must be on a single line---it is wrapped here only because of formatting constraints.}
-                   %10Time_Estimate@{:@} %CLOCKSUM
+                   %10Time_Estimate@{:@} %CLOCKSUM %CLOCKSUM_T
 :Owner_ALL:    Tammy Mark Karl Lisa Don
 :Status_ALL:   "In progress" "Not started yet" "Finished" ""
 :Approved_ALL: "[ ]" "[X]"
@@ -5254,8 +5258,9 @@ modified title (@samp{Approved?}, with a question mark).  Summaries will
 be created for the @samp{Time_Estimate} column by adding time duration
 expressions like HH:MM, and for the @samp{Approved} column, by providing
 an @samp{[X]} status if all children have been checked.  The
-@samp{CLOCKSUM} column is special, it lists the sum of CLOCK intervals
-in the subtree.
+@samp{CLOCKSUM} and @samp{CLOCKSUM_T} columns are special, they lists the
+sums of CLOCK intervals in the subtree, either for all clocks or just for
+today.
 
 @node Using column view, Capturing column view, Defining columns, Column view
 @subsection Using column view
@@ -8940,6 +8945,14 @@ a column listing the planned total effort for a task---one of the major
 applications for column view in the agenda.  If you want information about
 clocked time in the displayed period use clock table mode (press @kbd{R} in
 the agenda).
+
+@item
+@cindex property, special, CLOCKSUM_T
+When the column view in the agenda shows the @code{CLOCKSUM_T}, that is
+always today's clocked time for this item.  So even in the weekly agenda,
+the clocksum listed in column view only originates from today.  This lets
+you compare the time you spent on a task for today, with the time already
+spent (via @code{CLOCKSUM}) and with the planned total effort for it.
 @end enumerate
 
 

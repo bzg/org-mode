@@ -700,6 +700,11 @@ around it."
 	  (save-restriction
 	    (narrow-to-region beg end)
 	    (org-clock-sum))))
+      (when (assoc "CLOCKSUM_T" org-columns-current-fmt-compiled)
+	(save-excursion
+	  (save-restriction
+	    (narrow-to-region beg end)
+	    (org-clock-sum-today))))
       (while (re-search-forward org-outline-regexp-bol end t)
 	(if (and org-columns-skip-archived-trees
 		 (looking-at (concat ".*:" org-archive-tag ":")))
@@ -1406,8 +1411,8 @@ and tailing newline characters."
   "Summarize the summarizable columns in column view in the agenda.
 This will add overlays to the date lines, to show the summary for each day."
   (let* ((fmt (mapcar (lambda (x)
-			(if (equal (car x) "CLOCKSUM")
-			    (list "CLOCKSUM" (nth 1 x) (nth 2 x) ":" 'add_times
+			(if (string-match "CLOCKSUM.*" (car x))
+			    (list (match-string 0) (nth 1 x) (nth 2 x) ":" 'add_times
 				  nil '+ nil)
 			  x))
 		      org-columns-current-fmt-compiled))
@@ -1494,13 +1499,15 @@ This will add overlays to the date lines, to show the summary for each day."
 	    (goto-char (point-min))
 	    (org-columns-get-format-and-top-level)
 	    (while (setq fm (pop fmt))
-	      (if (equal (car fm) "CLOCKSUM")
-		  (org-clock-sum)
-		(when (and (nth 4 fm)
-			   (setq a (assoc (car fm)
-					  org-columns-current-fmt-compiled))
-			   (equal (nth 4 a) (nth 4 fm)))
-		  (org-columns-compute (car fm)))))))))))
+	      (cond ((equal (car fm) "CLOCKSUM")
+		     (org-clock-sum))
+		    ((equal (car fm) "CLOCKSUM_T")
+		     (org-clock-sum-today))
+		    ((and (nth 4 fm)
+			  (setq a (assoc (car fm)
+					 org-columns-current-fmt-compiled))
+			  (equal (nth 4 a) (nth 4 fm)))
+		     (org-columns-compute (car fm)))))))))))
 
 (defun org-format-time-period (interval)
   "Convert time in fractional days to days/hours/minutes/seconds."
