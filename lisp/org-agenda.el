@@ -6381,11 +6381,13 @@ in the file.  Otherwise, restriction will be to the current subtree."
 (defun org-agenda-check-type (error &rest types)
   "Check if agenda buffer is of allowed type.
 If ERROR is non-nil, throw an error, otherwise just return nil."
-  (if (memq org-agenda-type types)
-      t
-    (if error
-	(error "Not allowed in %s-type agenda buffers" org-agenda-type)
-      nil)))
+  (if (not org-agenda-type)
+      (error "No Org agenda currently displayed")
+    (if (memq org-agenda-type types)
+	t
+      (if error
+	  (error "Not allowed in %s-type agenda buffers" org-agenda-type)
+	nil))))
 
 (defun org-agenda-Quit (&optional arg)
   "Exit agenda by removing the window or the buffer."
