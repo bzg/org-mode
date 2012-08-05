@@ -9835,9 +9835,10 @@ application the system uses for this file type."
 				       'face 'org-warning))))
 		(progn
 		  (message "Executing %s" cmd)
-		  (setq clean-buffer-list-kill-buffer-names
-			(cons buf clean-buffer-list-kill-buffer-names))
-		  (shell-command cmd buf))
+		  (shell-command cmd buf)
+		  (if (featurep 'midnight)
+		      (setq clean-buffer-list-kill-buffer-names
+			    (cons buf clean-buffer-list-kill-buffer-names))))
 	      (error "Abort"))))
 
 	 ((string= type "elisp")
