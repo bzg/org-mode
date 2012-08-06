@@ -4430,6 +4430,7 @@ ones already marked."
 	(push-mark (org-element-property :end element) t t)
 	(goto-char (org-element-property :begin element))))))
 
+;;;###autoload
 (defun org-narrow-to-element ()
   "Narrow buffer to current element."
   (interactive)
