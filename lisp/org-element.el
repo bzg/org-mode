@@ -112,7 +112,7 @@
   (require 'cl))
 
 
-;;; Declarations
+;;; Declare functions
 
 (declare-function org-indent-to-column "org-compat" (column &optional minimum buffer))
 
@@ -170,6 +170,51 @@
 (declare-function outline-next-heading "outline" ())
 
 (declare-function org-babel-lob-get-info "ob-lob" ())
+
+
+
+;;; Declare variables
+
+(defvar "org-angle-link-re")                      ; From org.el
+(defvar "org-any-link-re")                        ; From org.el
+(defvar "org-archive-tag")		 	  ; From org.el
+(defvar "org-babel-inline-src-block-regexp")	  ; From ob.el
+(defvar "org-bracket-link-regexp")		  ; From org.el
+(defvar "org-clock-string")			  ; From org.el
+(defvar "org-closed-string")			  ; From org.el
+(defvar "org-comment-string")			  ; From org.el
+(defvar "org-dblock-end-re")			  ; From org.el
+(defvar "org-dblock-start-re")			  ; From org.el
+(defvar "org-deadline-string")			  ; From org.el
+(defvar "org-done-keywords")			  ; From org.el
+(defvar "org-drawer-regexp")			  ; From org.el
+(defvar "org-emph-re")				  ; From org.el
+(defvar "org-format-latex-options")		  ; From org.el
+(defvar "org-keyword-time-not-clock-regexp")	  ; From org.el
+(defvar "org-latex-regexps")			  ; From org.el
+(defvar "org-link-re-with-space3")		  ; From org.el
+(defvar "org-list-full-item-re")		  ; From org.el
+(defvar "org-match-substring-regexp")		  ; From org.el
+(defvar "org-match-substring-with-braces-regexp") ; From org.el
+(defvar "org-outline-regexp-bol")		  ; From org.el
+(defvar "org-plain-link-re")			  ; From org.el
+(defvar "org-planning-or-clock-line-re")	  ; From org.el
+(defvar "org-property-format")			  ; From org.el
+(defvar "org-quote-string")			  ; From org.el
+(defvar "org-radio-target-regexp")		  ; From org.el
+(defvar "org-scheduled-string")			  ; From org.el
+(defvar "org-tags-column")			  ; From org.el
+(defvar "org-target-link-regexp")		  ; From org.el
+(defvar "org-target-regexp")			  ; From org.el
+(defvar "org-ts-regexp-both")			  ; From org.el
+(defvar "org-edit-src-content-indentation")	  ; From org-src.el
+(defvar "org-src-preserve-indentation")		  ; From org-src.el
+(defvar "org-footnote-definition-re")		  ; From org-footnote.el
+(defvar "org-footnote-re")			  ; From org-footnote.el
+(defvar "org-footnote-section")			  ; From org-footnote.el
+(defvar "org-babel-block-lob-one-liner-regexp")	  ; From ob-lob.el
+(defvar "org-babel-inline-lob-one-liner-regexp")  ; From ob-lob.el
+
 
 
 ;;; Definitions And Rules
