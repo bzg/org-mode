@@ -2454,14 +2454,14 @@ If the table is trivial, then return it as a scalar."
   (let (result)
     (save-window-excursion
       (with-temp-buffer
-	(condition-case nil
+	(condition-case err
 	    (progn
 	      (org-table-import file-name separator)
 	      (delete-file file-name)
 	      (setq result (mapcar (lambda (row)
 				     (mapcar #'org-babel-string-read row))
 				   (org-table-to-lisp))))
-	  (error nil)))
+	  (error (message "error reading results: %s" err) nil)))
       (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
 	  (if (consp (car result))
 	      (if (null (cdr (car result)))
@@ -2475,7 +2475,7 @@ If the table is trivial, then return it as a scalar."
   (org-babel-read (or (and (stringp cell)
                            (string-match "\\\"\\(.+\\)\\\"" cell)
                            (match-string 1 cell))
-                      cell)))
+                      cell) t))
 
 (defun org-babel-reverse-string (string)
   "Return the reverse of STRING."
