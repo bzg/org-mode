@@ -114,6 +114,8 @@
 
 ;;; Declarations
 
+(declare-function org-indent-to-column "org-compat" (column &optional minimum buffer))
+
 (declare-function org-heading-components     "org" ())
 (declare-function org-entry-properties       "org" (&optional pom which specific))
 (declare-function org-end-of-subtree         "org" (&optional invisible-ok to-heading))
@@ -134,17 +136,20 @@
 (declare-function org-cycle                  "org" (&optional arg))
 (declare-function org-move-subtree-up        "org" (&optional arg))
 (declare-function org-do-remove-indentation  "org" (&optional n))
+(declare-function org-invisible-p2           "org" ())
+(declare-function org-match-string-no-properties "org" (num &optional string))
+(declare-function org-split-string           "org" (string &optional separators))
+(declare-function org-trim                   "org" (s))
 
 (declare-function org-entity-get "org-entities" (name) t)
 
-(declare-function org-item-beginning-re  "org-list" () t)
-(declare-function org-list-get-bullet    "org-list" (item struct) t)
-(declare-function org-list-get-checkbox  "org-list" (item struct) t)
-(declare-function org-list-get-counter   "org-list" (item struct) t)
-(declare-function org-list-get-item-end  "org-list" (item struct) t)
-(declare-function org-list-get-tag       "org-list" (item struct) t)
-(declare-function org-list-bullet-string "org-list" (bullet) t)
-
+(declare-function org-item-beginning-re     "org-list" () t)
+(declare-function org-list-get-bullet       "org-list" (item struct) t)
+(declare-function org-list-get-checkbox     "org-list" (item struct) t)
+(declare-function org-list-get-counter      "org-list" (item struct) t)
+(declare-function org-list-get-item-end     "org-list" (item struct) t)
+(declare-function org-list-get-tag          "org-list" (item struct) t)
+(declare-function org-list-bullet-string    "org-list" (bullet) t)
 (declare-function org-item-re               "org-list" ())
 (declare-function org-list-struct           "org-list" ())
 (declare-function org-list-prevs-alist      "org-list" (struct))
@@ -154,6 +159,10 @@
 (declare-function org-list-get-top-point    "org-list" (struct))
 (declare-function org-list-get-bottom-point "org-list" (struct))
 (declare-function org-list-repair           "org-list" ())
+
+(declare-function org-with-limited-levels   "org-macs" (&rest body))
+(declare-function org-string-nw-p           "org-macs" (s))
+(declare-function org-with-wide-buffer      "org-macs" (&rest body))
 
 (declare-function org-table-end   "org-table" (&optional table-type))
 (declare-function org-table-align "org-table" ())
