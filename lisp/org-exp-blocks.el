@@ -163,6 +163,7 @@ The optional OPEN and CLOSE tags will be inserted around BODY."
    (or close "")
    "#+END_LaTeX\n"))
 
+(defvar org-src-preserve-indentation)     ; From org-src.el
 (defun org-export-blocks-preprocess ()
   "Export all blocks according to the `org-export-blocks' block export alist.
 Does not export block types specified in specified in BLOCKS
