@@ -4331,6 +4331,8 @@ Otherwise, these types are allowed:
 	  (org-flag-subtree t)
 	  (org-end-of-subtree t))))))
 
+(declare-function outline-end-of-heading "outline" ())
+(declare-function outline-flag-region "outline" (from to flag))
 (defun org-flag-subtree (flag)
   (save-excursion
     (org-back-to-heading t)
@@ -4350,9 +4352,9 @@ Otherwise, these types are allowed:
 
 ;; Autoload Column View Code
 
-(declare-function org-columns-number-to-string "org-colview")
-(declare-function org-columns-get-format-and-top-level "org-colview")
-(declare-function org-columns-compute "org-colview")
+(declare-function org-columns-number-to-string "org-colview" (n fmt &optional printf))
+(declare-function org-columns-get-format-and-top-level "org-colview" ())
+(declare-function org-columns-compute "org-colview" (property))
 
 (org-autoload (if (featurep 'xemacs) "org-colview-xemacs" "org-colview")
  '(org-columns-number-to-string org-columns-get-format-and-top-level
@@ -4988,7 +4990,6 @@ This variable is set by `org-before-change-function'.
 (require 'org-pcomplete)
 (require 'org-src)
 (require 'org-footnote)
-(require 'org-element)
 
 ;; babel
 (require 'ob)
@@ -18659,6 +18660,16 @@ this function returns t, nil otherwise."
 		(throw 'exit t))))
 	nil))))
 
+(declare-function org-element-drag-backward "org-element" ())
+(declare-function org-element-drag-forward "org-element" ())
+(declare-function org-element-mark-element "org-element" ())
+(declare-function org-element-at-point "org-element" (&optional keep-trail))
+(declare-function org-element-type "org-element" (element))
+(declare-function org-element-property "org-element" (property element))
+(declare-function org-element-paragraph-parser "org-element" (limit))
+(declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
+(declare-function org-element--parse-objects "org-element" (beg end acc restriction))
+
 (defun org-metaup (&optional arg)
   "Move subtree up or move table row up.
 Calls `org-move-subtree-up' or `org-table-move-row' or
@@ -20889,6 +20900,7 @@ If point is in an inline task, mark that task instead."
     (skip-chars-backward "\\\\")
     (looking-at "\\\\\\\\\\($\\|[^\\\\]\\)")))
 
+(defvar org-element--affiliated-re) ; From org-element.el
 (defun org-fill-context-prefix (p)
   "Compute a fill prefix for the line at point P.
 Return fill prefix, as a string, or nil if current line isn't
@@ -20933,6 +20945,9 @@ meant to be filled."
 	     (when (and (>= p cbeg) (< p cend))
 	       (if (looking-at "\\s-+") (match-string 0) "")))))))))
 
+(declare-function message-in-body-p "message" ())
+(defvar org-element-paragraph-separate)  ; From org-element.el
+(defvar org-element-all-objects)         ; From org-element.el
 (defun org-fill-paragraph (&optional justify)
   "Fill element at point, when applicable.
 

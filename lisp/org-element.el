@@ -111,110 +111,7 @@
 (eval-when-compile
   (require 'cl))
 
-
-;;; Declare functions
-
-(declare-function org-indent-to-column "org-compat" (column &optional minimum buffer))
-
-(declare-function org-heading-components     "org" ())
-(declare-function org-entry-properties       "org" (&optional pom which specific))
-(declare-function org-end-of-subtree         "org" (&optional invisible-ok to-heading))
-(declare-function org-skip-whitespace        "org" ())
-(declare-function org-remove-indentation     "org" (code &optional n))
-(declare-function org-at-table.el-p   	     "org" ())
-(declare-function org-translate-link  	     "org" (s))
-(declare-function org-link-unescape   	     "org" (str))
-(declare-function org-link-expand-abbrev     "org" (link))
-(declare-function org-before-first-heading-p "org" ())
-(declare-function org-at-heading-p    	     "org" (&optional invisible-ok))
-(declare-function org-at-table-p             "org" (&optional table-type))
-(declare-function org-back-to-heading 	     "org" (&optional invisible-ok))
-(declare-function org-get-indentation 	     "org" (&optional line))
-(declare-function org-forward-same-level     "org" (arg &optional invisible-ok))
-(declare-function org-backward-same-level    "org" (arg &optional invisible-ok))
-(declare-function org-up-heading-safe        "org" ())
-(declare-function org-cycle                  "org" (&optional arg))
-(declare-function org-move-subtree-up        "org" (&optional arg))
-(declare-function org-do-remove-indentation  "org" (&optional n))
-(declare-function org-invisible-p2           "org" ())
-(declare-function org-match-string-no-properties "org" (num &optional string))
-(declare-function org-split-string           "org" (string &optional separators))
-(declare-function org-trim                   "org" (s))
-
-(declare-function org-entity-get "org-entities" (name) t)
-
-(declare-function org-item-beginning-re     "org-list" () t)
-(declare-function org-list-get-bullet       "org-list" (item struct) t)
-(declare-function org-list-get-checkbox     "org-list" (item struct) t)
-(declare-function org-list-get-counter      "org-list" (item struct) t)
-(declare-function org-list-get-item-end     "org-list" (item struct) t)
-(declare-function org-list-get-tag          "org-list" (item struct) t)
-(declare-function org-list-bullet-string    "org-list" (bullet) t)
-(declare-function org-item-re               "org-list" ())
-(declare-function org-list-struct           "org-list" ())
-(declare-function org-list-prevs-alist      "org-list" (struct))
-(declare-function org-list-parents-alist    "org-list" (struct))
-(declare-function org-list-get-list-end     "org-list" (item struct prevs))
-(declare-function org-list-get-list-type    "org-list" (item struct prevs))
-(declare-function org-list-get-top-point    "org-list" (struct))
-(declare-function org-list-get-bottom-point "org-list" (struct))
-(declare-function org-list-repair           "org-list" ())
-
-(declare-function org-with-limited-levels   "org-macs" (&rest body))
-(declare-function org-string-nw-p           "org-macs" (s))
-(declare-function org-with-wide-buffer      "org-macs" (&rest body))
-
-(declare-function org-table-end   "org-table" (&optional table-type))
-(declare-function org-table-align "org-table" ())
-
-(declare-function outline-next-heading "outline" ())
-
-(declare-function org-babel-lob-get-info "ob-lob" ())
-
-
-
-;;; Declare variables
-
-(defvar "org-angle-link-re")                      ; From org.el
-(defvar "org-any-link-re")                        ; From org.el
-(defvar "org-archive-tag")		 	  ; From org.el
-(defvar "org-babel-inline-src-block-regexp")	  ; From ob.el
-(defvar "org-bracket-link-regexp")		  ; From org.el
-(defvar "org-clock-string")			  ; From org.el
-(defvar "org-closed-string")			  ; From org.el
-(defvar "org-comment-string")			  ; From org.el
-(defvar "org-dblock-end-re")			  ; From org.el
-(defvar "org-dblock-start-re")			  ; From org.el
-(defvar "org-deadline-string")			  ; From org.el
-(defvar "org-done-keywords")			  ; From org.el
-(defvar "org-drawer-regexp")			  ; From org.el
-(defvar "org-emph-re")				  ; From org.el
-(defvar "org-format-latex-options")		  ; From org.el
-(defvar "org-keyword-time-not-clock-regexp")	  ; From org.el
-(defvar "org-latex-regexps")			  ; From org.el
-(defvar "org-link-re-with-space3")		  ; From org.el
-(defvar "org-list-full-item-re")		  ; From org.el
-(defvar "org-match-substring-regexp")		  ; From org.el
-(defvar "org-match-substring-with-braces-regexp") ; From org.el
-(defvar "org-outline-regexp-bol")		  ; From org.el
-(defvar "org-plain-link-re")			  ; From org.el
-(defvar "org-planning-or-clock-line-re")	  ; From org.el
-(defvar "org-property-format")			  ; From org.el
-(defvar "org-quote-string")			  ; From org.el
-(defvar "org-radio-target-regexp")		  ; From org.el
-(defvar "org-scheduled-string")			  ; From org.el
-(defvar "org-tags-column")			  ; From org.el
-(defvar "org-target-link-regexp")		  ; From org.el
-(defvar "org-target-regexp")			  ; From org.el
-(defvar "org-ts-regexp-both")			  ; From org.el
-(defvar "org-edit-src-content-indentation")	  ; From org-src.el
-(defvar "org-src-preserve-indentation")		  ; From org-src.el
-(defvar "org-footnote-definition-re")		  ; From org-footnote.el
-(defvar "org-footnote-re")			  ; From org-footnote.el
-(defvar "org-footnote-section")			  ; From org-footnote.el
-(defvar "org-babel-block-lob-one-liner-regexp")	  ; From ob-lob.el
-(defvar "org-babel-inline-lob-one-liner-regexp")  ; From ob-lob.el
-
+(require 'org)
 
 
 ;;; Definitions And Rules
@@ -4124,6 +4021,7 @@ indentation is not done with TAB characters."
 ;; Note: When using `org-element-at-point', secondary values are never
 ;; parsed since the function focuses on elements, not on objects.
 
+;;;###autoload
 (defun org-element-at-point (&optional keep-trail)
   "Determine closest element around point.
 
@@ -4387,6 +4285,7 @@ end of ELEM-A."
 	    (cdr overlays))
       (goto-char (org-element-property :end elem-B)))))
 
+;;;###autoload
 (defun org-element-forward ()
   "Move forward by one element.
 Move to the next element at the same level, when possible."
@@ -4406,6 +4305,7 @@ Move to the next element at the same level, when possible."
 	       (goto-char (org-element-property :end parent))
 	     (goto-char end))))))
 
+;;;###autoload
 (defun org-element-backward ()
   "Move backward by one element.
 Move to the previous element at the same level, when possible."
@@ -4456,6 +4356,7 @@ Move to the previous element at the same level, when possible."
 		     (error "No content for this element"))))
      (t (error "No inner element")))))
 
+;;;###autoload
 (defun org-element-drag-backward ()
   "Move backward element at point."
   (interactive)
@@ -4472,6 +4373,7 @@ Move to the previous element at the same level, when possible."
 	  (goto-char (+ (org-element-property :begin prev-elem)
 			(- pos (org-element-property :begin elem)))))))))
 
+;;;###autoload
 (defun org-element-drag-forward ()
   "Move forward element at point."
   (interactive)
@@ -4506,6 +4408,7 @@ Move to the previous element at the same level, when possible."
 	(org-element-swap-A-B elem next-elem)
 	(goto-char (+ pos size-next size-blank))))))
 
+;;;###autoload
 (defun org-element-mark-element ()
   "Put point at beginning of this element, mark at end.
 
@@ -4543,6 +4446,7 @@ ones already marked."
        (org-element-property :begin elem)
        (org-element-property :end elem))))))
 
+;;;###autoload
 (defun org-element-transpose ()
   "Transpose current and previous elements, keeping blank lines between.
 Point is moved after both elements."
@@ -4552,6 +4456,7 @@ Point is moved after both elements."
     (org-element-drag-backward)
     (goto-char end)))
 
+;;;###autoload
 (defun org-element-unindent-buffer ()
   "Un-indent the visible part of the buffer.
 Relative indentation (between items, inside blocks, etc.) isn't
