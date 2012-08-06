@@ -73,6 +73,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'find-func)
+(require 'org-compat)
 
 (declare-function org-split-string "org" (string &optional separators))
 (declare-function org-remove-indentation "org" (code &optional n))
