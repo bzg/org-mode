@@ -4329,6 +4329,7 @@ Move to the previous element at the same level, when possible."
        ((not prev-elem) (error "Cannot move further up"))
        (t (goto-char (org-element-property :begin prev-elem)))))))
 
+;;;###autoload
 (defun org-element-up ()
   "Move to upper element."
   (interactive)
@@ -4341,6 +4342,7 @@ Move to the previous element at the same level, when possible."
 	    (error "No surrounding element")
 	  (org-with-limited-levels (org-back-to-heading)))))))
 
+;;;###autoload
 (defun org-element-down ()
   "Move to inner element."
   (interactive)

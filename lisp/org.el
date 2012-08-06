@@ -17979,7 +17979,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
 (org-defkey org-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
 (org-defkey org-mode-map "\C-c@" 'org-mark-subtree)
-(org-defkey org-mode-map "\C-c\C-@" 'org-element-mark-element)
+(org-defkey org-mode-map "\M-h" 'org-element-mark-element)
 (org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
 ;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
 
@@ -20675,12 +20675,13 @@ which make use of the date at the cursor."
   (message
    "Entry marked for action; press `k' at desired date in agenda or calendar"))
 
-(defun org-mark-subtree ()
+(defun org-mark-subtree (&optional up)
   "Mark the current subtree.
-This puts point at the start of the current subtree, and mark at the end.
-
-If point is in an inline task, mark that task instead."
-  (interactive)
+This puts point at the start of the current subtree, and mark at
+the end.  If point is in an inline task, mark that task instead.
+If a numeric prefix UP is given, move up into the hierarchy of
+headlines by UP levels before marking the subtree."
+  (interactive "P")
   (let ((inline-task-p
 	 (and (featurep 'org-inlinetask)
 	      (org-inlinetask-in-task-p)))
@@ -20690,9 +20691,11 @@ If point is in an inline task, mark that task instead."
      (inline-task-p (org-inlinetask-goto-beginning))
      ((org-at-heading-p) (beginning-of-line))
      (t (org-with-limited-levels (outline-previous-visible-heading 1))))
+    ;; Move up
+    (when up (dotimes (c (abs up)) (ignore-errors (org-element-up))))
     (setq beg (point))
     ;; Get end of it
-    (if	inline-task-p
+    (if inline-task-p
 	(org-inlinetask-goto-end)
       (org-end-of-subtree))
     ;; Mark zone
