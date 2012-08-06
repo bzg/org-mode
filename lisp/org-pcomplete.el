@@ -139,7 +139,8 @@ When completing for #+STARTUP, for example, this function returns
 		 (car (org-thing-at-point)))
 		pcomplete-default-completion-function))))
 
-(defvar org-additional-option-like-keywords)
+(defvar org-options-keywords)                ; From org.el
+(defvar org-additional-option-like-keywords) ; From org.el
 (defun pcomplete/org-mode/file-option ()
   "Complete against all valid file options."
   (require 'org-exp)
