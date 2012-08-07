@@ -20679,29 +20679,15 @@ which make use of the date at the cursor."
 (defun org-mark-subtree (&optional up)
   "Mark the current subtree.
 This puts point at the start of the current subtree, and mark at
-the end.  If point is in an inline task, mark that task instead.
-If a numeric prefix UP is given, move up into the hierarchy of
-headlines by UP levels before marking the subtree."
+the end.  If a numeric prefix UP is given, move up into the
+hierarchy of headlines by UP levels before marking the subtree."
   (interactive "P")
-  (let ((inline-task-p
-	 (and (featurep 'org-inlinetask)
-	      (org-inlinetask-in-task-p)))
-	(beg))
-    ;; Get beginning of subtree
-    (cond
-     (inline-task-p (org-inlinetask-goto-beginning))
-     ((org-at-heading-p) (beginning-of-line))
-     (t (org-with-limited-levels (outline-previous-visible-heading 1))))
-    ;; Move up
-    (when up (dotimes (c (abs up)) (ignore-errors (org-element-up))))
-    (setq beg (point))
-    ;; Get end of it
-    (if inline-task-p
-	(org-inlinetask-goto-end)
-      (org-end-of-subtree))
-    ;; Mark zone
-    (push-mark (point) nil t)
-    (goto-char beg)))
+  (when (org-with-limited-levels (org-before-first-heading-p))
+    (error "Not currently in a subtree"))
+  (if (org-at-heading-p) (beginning-of-line)
+    (org-with-limited-levels (outline-previous-visible-heading 1)))
+  (when up (dotimes (c (abs up)) (ignore-errors (org-element-up))))
+  (org-element-mark-element))
 
 ;;; Indentation
 

@@ -327,6 +327,36 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (buffer-string))))))
 
 
+
+;;; Mark region
+
+(ert-deftest test-org/mark-subtree ()
+  "Test `org-mark-subtree' specifications."
+  ;; Error when point is before first headline.
+  (should-error
+   (org-test-with-temp-text "Paragraph\n* Headline\nBody"
+     (progn (transient-mark-mode 1)
+	    (org-mark-subtree))))
+  ;; Without argument, mark current subtree.
+  (should
+   (equal
+    '(12 32)
+    (org-test-with-temp-text "* Headline\n** Sub-headline\nBody"
+      (progn (transient-mark-mode 1)
+	     (forward-line 2)
+	     (org-mark-subtree)
+	     (list (region-beginning) (region-end))))))
+  ;; With an argument, move ARG up.
+  (should
+   (equal
+    '(1 32)
+    (org-test-with-temp-text "* Headline\n** Sub-headline\nBody"
+      (progn (transient-mark-mode 1)
+	     (forward-line 2)
+	     (org-mark-subtree 1)
+	     (list (region-beginning) (region-end)))))))
+
+
 (provide 'test-org)
 
 ;;; test-org.el ends here
