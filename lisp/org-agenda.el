@@ -2062,10 +2062,11 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-x\C-w" 'org-agenda-write)
 (org-defkey org-agenda-mode-map "\C-x\C-s" 'org-save-all-org-buffers)
 (org-defkey org-agenda-mode-map "s" 'org-save-all-org-buffers)
-(org-defkey org-agenda-mode-map "P" 'org-agenda-show-priority)
 (org-defkey org-agenda-mode-map "T" 'org-agenda-show-tags)
 (org-defkey org-agenda-mode-map "n" 'org-agenda-next-line)
 (org-defkey org-agenda-mode-map "p" 'org-agenda-previous-line)
+(org-defkey org-agenda-mode-map "N" 'org-agenda-next-item)
+(org-defkey org-agenda-mode-map "P" 'org-agenda-previous-item)
 (substitute-key-definition 'next-line 'org-agenda-next-line
 			   org-agenda-mode-map global-map)
 (substitute-key-definition 'previous-line 'org-agenda-previous-line
@@ -2074,7 +2075,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c\C-n" 'org-agenda-next-date-line)
 (org-defkey org-agenda-mode-map "\C-c\C-p" 'org-agenda-previous-date-line)
 (org-defkey org-agenda-mode-map "," 'org-agenda-priority)
-(org-defkey org-agenda-mode-map "\C-c," 'org-agenda-priority)
+(org-defkey org-agenda-mode-map "\C-c," 'org-agenda-show-priority)
 (org-defkey org-agenda-mode-map "i" 'org-agenda-diary-entry)
 (org-defkey org-agenda-mode-map "c" 'org-agenda-goto-calendar)
 (org-defkey org-agenda-mode-map "C" 'org-agenda-convert-date)
@@ -7255,6 +7256,29 @@ When called with a prefix argument, include all archive files as well."
   "Move cursor to the previous line, and show if follow-mode is active."
   (interactive)
   (call-interactively 'previous-line)
+  (org-agenda-do-context-action))
+
+(defun org-agenda-next-item (n)
+  "Move cursor to next agenda item."
+  (interactive "p")
+  (let ((col (current-column)))
+    (dotimes (c n)
+      (when (next-single-property-change (point-at-eol) 'org-marker)
+	(move-end-of-line 1)
+	(goto-char (next-single-property-change (point) 'org-marker))))
+    (org-move-to-column col))
+  (org-agenda-do-context-action))
+
+(defun org-agenda-previous-item (n)
+  "Move cursor to next agenda item."
+  (interactive "p")
+  (dotimes (c n)
+    (let ((col (current-column))
+	  (goto (save-excursion
+		  (move-end-of-line 0)
+		  (previous-single-property-change (point) 'org-marker))))
+      (if goto (goto-char goto))
+      (org-move-to-column col)))
   (org-agenda-do-context-action))
 
 (defun org-agenda-do-context-action ()
