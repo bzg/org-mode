@@ -18669,6 +18669,7 @@ this function returns t, nil otherwise."
 (declare-function org-element-paragraph-parser "org-element" (limit))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
 (declare-function org-element--parse-objects "org-element" (beg end acc restriction))
+(declare-function org-element-up "org-element" ())
 
 (defun org-metaup (&optional arg)
   "Move subtree up or move table row up.
