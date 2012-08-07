@@ -33,9 +33,11 @@
 (require 'org)
 
 ;; Declare external functions and variables
-(declare-function rmail-show-message "rmail" (&optional n no-summary))
-(declare-function rmail-what-message "rmail" ())
-(defvar rmail-current-message)
+(declare-function rmail-show-message  "rmail" (&optional n no-summary))
+(declare-function rmail-what-message  "rmail" (&optional POS))
+(declare-function rmail-toggle-header "rmail" (&optional arg))
+(defvar rmail-current-message)  ; From rmail.el
+(defvar rmail-header-style)     ; From rmail.el
 
 ;; Install the link type
 (org-add-link-type "rmail" 'org-rmail-open)
