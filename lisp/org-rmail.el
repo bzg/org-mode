@@ -52,6 +52,8 @@
 	  (rmail-show-message rmail-current-message))
 	(when (fboundp 'rmail-narrow-to-non-pruned-header)
 	  (rmail-narrow-to-non-pruned-header))
+	(when (eq rmail-header-style 'normal)
+	  (rmail-toggle-header -1))
 	(let* ((folder buffer-file-name)
 	       (message-id (mail-fetch-field "message-id"))
 	       (from (mail-fetch-field "from"))
@@ -98,6 +100,8 @@
 	(setq message-number
 	      (save-restriction
 		(widen)
+		(when (eq rmail-header-style 'normal)
+		  (rmail-toggle-header -1))
 		(goto-char (point-max))
 		(if (re-search-backward
 		     (concat "^Message-ID:\\s-+" (regexp-quote
