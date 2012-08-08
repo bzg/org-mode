@@ -100,10 +100,9 @@
 ;; The penultimate part is the cradle of an interpreter for the
 ;; obtained parse tree: `org-element-interpret-data'.
 ;;
-;; The library ends by furnishing a set of interactive tools for
-;; element's navigation and manipulation, mostly based on
-;; `org-element-at-point' function, and a way to give information
-;; about document structure around point with `org-element-context'.
+;; The library ends by furnishing `org-element-at-point' function, and
+;; a way to give information about document structure around point
+;; with `org-element-context'.
 
 
 ;;; Code:
@@ -4012,13 +4011,15 @@ indentation is not done with TAB characters."
 ;; containing point.  This is the job of `org-element-at-point'.  It
 ;; basically jumps back to the beginning of section containing point
 ;; and moves, element after element, with
-;; `org-element--current-element' until the container is found.
+;; `org-element--current-element' until the container is found.  Note:
+;; When using `org-element-at-point', secondary values are never
+;; parsed since the function focuses on elements, not on objects.
 ;;
 ;; At a deeper level, `org-element-context' lists all elements and
 ;; objects containing point.
 ;;
-;; Note: When using `org-element-at-point', secondary values are never
-;; parsed since the function focuses on elements, not on objects.
+;; `org-element-nested-p' and `org-element-swap-A-B' may be used
+;; internally by navigation and manipulation tools.
 
 ;;;###autoload
 (defun org-element-at-point (&optional keep-trail)
@@ -4193,25 +4194,6 @@ and :post-blank properties."
 		       (setq parent object end cend)))))))
 	   parent))))))
 
-
-;; Once the local structure around point is well understood, it's easy
-;; to implement some replacements for `forward-paragraph'
-;; `backward-paragraph', namely `org-element-forward' and
-;; `org-element-backward'.
-;;
-;; Also, `org-transpose-elements' mimics the behaviour of
-;; `transpose-words', at the element's level, whereas
-;; `org-element-drag-forward', `org-element-drag-backward', and
-;; `org-element-up' generalize, respectively, functions
-;; `org-subtree-down', `org-subtree-up' and `outline-up-heading'.
-;;
-;; `org-element-unindent-buffer' will, as its name almost suggests,
-;; smartly remove global indentation from buffer, making it possible
-;; to use Org indent mode on a file created with hard indentation.
-;;
-;; `org-element-nested-p' and `org-element-swap-A-B' are used
-;; internally by some of the previously cited tools.
-
 (defsubst org-element-nested-p (elem-A elem-B)
   "Non-nil when elements ELEM-A and ELEM-B are nested."
   (let ((beg-A (org-element-property :begin elem-A))
@@ -4287,6 +4269,7 @@ end of ELEM-A."
 			    (+ (nth 2 ov) (- beg-A beg-B))))
 	    (cdr overlays))
       (goto-char (org-element-property :end elem-B)))))
+
 
 (provide 'org-element)
 ;;; org-element.el ends here

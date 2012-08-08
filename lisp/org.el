@@ -20682,7 +20682,7 @@ hierarchy of headlines by UP levels before marking the subtree."
 	 ((org-before-first-heading-p) (error "Not in a subtree"))
 	 (t (outline-previous-visible-heading 1))))
   (when up (while (and (> up 0) (org-up-heading-safe)) (decf up)))
-  (org-element-mark-element))
+  (org-mark-element))
 
 ;;; Indentation
 
