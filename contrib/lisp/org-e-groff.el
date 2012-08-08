@@ -1572,20 +1572,16 @@ a communication channel."
               (width-cm (when raw-width (/ raw-width 5)))
               (width (if raw-width (format "w(%dc)"
                                            (if (< width-cm 1) 1 width-cm)) "")))
-
          ;; Check left border for the first cell only.
          ;; Alignment is nil on assignment
-
          (when (and (memq 'left borders) (not alignment))
-           (push "|" alignment)) ;; Not nil after push 
-
+           (push "|" alignment))
          (push
           (case (org-export-table-cell-alignment cell info)
-                (left (concat "l" width divider))
-                (right (concat "r" width divider))
-                (center (concat "c" width divider)))
+	    (left (concat "l" width divider))
+	    (right (concat "r" width divider))
+	    (center (concat "c" width divider)))
           alignment)
-
          (when (memq 'right borders) (push "|" alignment))))
      info)
     (apply 'concat (reverse alignment))))
