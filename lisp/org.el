@@ -17902,14 +17902,13 @@ BEG and END default to the buffer boundaries."
 (if (boundp 'narrow-map)
     (org-defkey narrow-map "e" 'org-narrow-to-element)
   (org-defkey org-mode-map "\C-xne" 'org-narrow-to-element))
-(org-defkey org-mode-map "\C-\M-t"  'org-element-transpose)
-(org-defkey org-mode-map "\M-}"    'org-element-forward)
-(org-defkey org-mode-map "\M-{"    'org-element-backward)
-(org-defkey org-mode-map "\C-c\C-^"   'org-element-up)
-(org-defkey org-mode-map "\C-c\C-_"   'org-element-down)
-(org-defkey org-mode-map "\C-\M-t"    'org-element-transpose)
-(org-defkey org-mode-map "\C-c\C-f"   'org-forward-same-level)
-(org-defkey org-mode-map "\C-c\C-b"   'org-backward-same-level)
+(org-defkey org-mode-map "\C-\M-t"  'org-transpose-element)
+(org-defkey org-mode-map "\M-}"     'org-forward-element)
+(org-defkey org-mode-map "\M-{"     'org-backward-element)
+(org-defkey org-mode-map "\C-c\C-^" 'org-up-element)
+(org-defkey org-mode-map "\C-c\C-_" 'org-down-element)
+(org-defkey org-mode-map "\C-c\C-f" 'org-forward-same-level)
+(org-defkey org-mode-map "\C-c\C-b" 'org-backward-same-level)
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-a" 'org-archive-subtree-default)
@@ -17979,7 +17978,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
 (org-defkey org-mode-map "\C-c\C-x\C-mp"    'org-mobile-push)
 (org-defkey org-mode-map "\C-c@" 'org-mark-subtree)
-(org-defkey org-mode-map "\M-h" 'org-element-mark-element)
+(org-defkey org-mode-map "\M-h" 'org-mark-element)
 (org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
 ;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
 
@@ -18660,15 +18659,11 @@ this function returns t, nil otherwise."
 		(throw 'exit t))))
 	nil))))
 
-(declare-function org-element-drag-backward "org-element" ())
-(declare-function org-element-drag-forward "org-element" ())
-(declare-function org-element-mark-element "org-element" ())
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-paragraph-parser "org-element" (limit))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
-(declare-function org-element--parse-objects "org-element" (beg end acc restriction))
 (declare-function org-element-up "org-element" ())
 
 (defun org-metaup (&optional arg)
@@ -21754,6 +21749,206 @@ Stop at the first and last subheadings of a superior heading."
 		  (outline-invisible-p))
 	(if (< l level) (setq arg 1)))
       (setq arg (1- arg)))))
+
+;;;###autoload
+(defun org-forward-element ()
+  "Move forward by one element.
+Move to the next element at the same level, when possible."
+  (interactive)
+  (cond ((eobp) (error "Cannot move further down"))
+	((org-with-limited-levels (org-at-heading-p))
+	 (let ((origin (point)))
+	   (org-forward-same-level 1)
+	   (unless (org-with-limited-levels (org-at-heading-p))
+	     (goto-char origin)
+	     (error "Cannot move further down"))))
+	(t
+	 (let* ((elem (org-element-at-point))
+		(end (org-element-property :end elem))
+		(parent (org-element-property :parent elem)))
+	   (if (and parent (= (org-element-property :contents-end parent) end))
+	       (goto-char (org-element-property :end parent))
+	     (goto-char end))))))
+
+;;;###autoload
+(defun org-backward-element ()
+  "Move backward by one element.
+Move to the previous element at the same level, when possible."
+  (interactive)
+  (if (org-with-limited-levels (org-at-heading-p))
+      ;; At an headline, move to the previous one, if any, or stay
+      ;; here.
+      (let ((origin (point)))
+	(org-backward-same-level 1)
+	(unless (org-with-limited-levels (org-at-heading-p))
+	  (goto-char origin)
+	  (error "Cannot move further up")))
+    (let* ((trail (org-element-at-point 'keep-trail))
+	   (elem (car trail))
+	   (prev-elem (nth 1 trail))
+	   (beg (org-element-property :begin elem)))
+      (cond
+       ;; Move to beginning of current element if point isn't there
+       ;; already.
+       ((/= (point) beg) (goto-char beg))
+       ((not prev-elem) (error "Cannot move further up"))
+       (t (goto-char (org-element-property :begin prev-elem)))))))
+
+;;;###autoload
+(defun org-up-element ()
+  "Move to upper element."
+  (interactive)
+  (if (org-with-limited-levels (org-at-heading-p))
+      (unless (org-up-heading-safe) (error "No surrounding element"))
+    (let* ((elem (org-element-at-point))
+	   (parent (org-element-property :parent elem)))
+      (if parent (goto-char (org-element-property :begin parent))
+	(if (org-with-limited-levels (org-before-first-heading-p))
+	    (error "No surrounding element")
+	  (org-with-limited-levels (org-back-to-heading)))))))
+
+;;;###autoload
+(defun org-down-element ()
+  "Move to inner element."
+  (interactive)
+  (let ((element (org-element-at-point)))
+    (cond
+     ((memq (org-element-type element) '(plain-list table))
+      (goto-char (org-element-property :contents-begin element))
+      (forward-char))
+     ((memq (org-element-type element) org-element-greater-elements)
+      ;; If contents are hidden, first disclose them.
+      (when (org-element-property :hiddenp element) (org-cycle))
+      (goto-char (or (org-element-property :contents-begin element)
+		     (error "No content for this element"))))
+     (t (error "No inner element")))))
+
+;;;###autoload
+(defun org-drag-element-backward ()
+  "Move backward element at point."
+  (interactive)
+  (if (org-with-limited-levels (org-at-heading-p)) (org-move-subtree-up)
+    (let* ((trail (org-element-at-point 'keep-trail))
+	   (elem (car trail))
+	   (prev-elem (nth 1 trail)))
+      ;; Error out if no previous element or previous element is
+      ;; a parent of the current one.
+      (if (or (not prev-elem) (org-element-nested-p elem prev-elem))
+	  (error "Cannot drag element backward")
+	(let ((pos (point)))
+	  (org-element-swap-A-B prev-elem elem)
+	  (goto-char (+ (org-element-property :begin prev-elem)
+			(- pos (org-element-property :begin elem)))))))))
+
+;;;###autoload
+(defun org-drag-element-forward ()
+  "Move forward element at point."
+  (interactive)
+  (let* ((pos (point))
+	 (elem (org-element-at-point)))
+    (when (= (point-max) (org-element-property :end elem))
+      (error "Cannot drag element forward"))
+    (goto-char (org-element-property :end elem))
+    (let ((next-elem (org-element-at-point)))
+      (when (or (org-element-nested-p elem next-elem)
+		(and (eq (org-element-type next-elem) 'headline)
+		     (not (eq (org-element-type elem) 'headline))))
+	(goto-char pos)
+	(error "Cannot drag element forward"))
+      ;; Compute new position of point: it's shifted by NEXT-ELEM
+      ;; body's length (without final blanks) and by the length of
+      ;; blanks between ELEM and NEXT-ELEM.
+      (let ((size-next (- (save-excursion
+			    (goto-char (org-element-property :end next-elem))
+			    (skip-chars-backward " \r\t\n")
+			    (forward-line)
+			    ;; Small correction if buffer doesn't end
+			    ;; with a newline character.
+			    (if (and (eolp) (not (bolp))) (1+ (point)) (point)))
+			  (org-element-property :begin next-elem)))
+	    (size-blank (- (org-element-property :end elem)
+			   (save-excursion
+			     (goto-char (org-element-property :end elem))
+			     (skip-chars-backward " \r\t\n")
+			     (forward-line)
+			     (point)))))
+	(org-element-swap-A-B elem next-elem)
+	(goto-char (+ pos size-next size-blank))))))
+
+;;;###autoload
+(defun org-mark-element ()
+  "Put point at beginning of this element, mark at end.
+
+Interactively, if this command is repeated or (in Transient Mark
+mode) if the mark is active, it marks the next element after the
+ones already marked."
+  (interactive)
+  (let (deactivate-mark)
+    (if (or (and (eq last-command this-command) (mark t))
+	    (and transient-mark-mode mark-active))
+	(set-mark
+	 (save-excursion
+	   (goto-char (mark))
+	   (goto-char (org-element-property :end (org-element-at-point)))))
+      (let ((element (org-element-at-point)))
+	(end-of-line)
+	(push-mark (org-element-property :end element) t t)
+	(goto-char (org-element-property :begin element))))))
+
+;;;###autoload
+(defun org-narrow-to-element ()
+  "Narrow buffer to current element."
+  (interactive)
+  (let ((elem (org-element-at-point)))
+    (cond
+     ((eq (car elem) 'headline)
+      (narrow-to-region
+       (org-element-property :begin elem)
+       (org-element-property :end elem)))
+     ((memq (car elem) org-element-greater-elements)
+      (narrow-to-region
+       (org-element-property :contents-begin elem)
+       (org-element-property :contents-end elem)))
+     (t
+      (narrow-to-region
+       (org-element-property :begin elem)
+       (org-element-property :end elem))))))
+
+;;;###autoload
+(defun org-transpose-element ()
+  "Transpose current and previous elements, keeping blank lines between.
+Point is moved after both elements."
+  (interactive)
+  (org-skip-whitespace)
+  (let ((end (org-element-property :end (org-element-at-point))))
+    (org-element-drag-backward)
+    (goto-char end)))
+
+;;;###autoload
+(defun org-unindent-buffer ()
+  "Un-indent the visible part of the buffer.
+Relative indentation (between items, inside blocks, etc.) isn't
+modified."
+  (interactive)
+  (unless (eq major-mode 'org-mode)
+    (error "Cannot un-indent a buffer not in Org mode"))
+  (let* ((parse-tree (org-element-parse-buffer 'greater-element))
+	 unindent-tree			; For byte-compiler.
+	 (unindent-tree
+	  (function
+	   (lambda (contents)
+	     (mapc
+	      (lambda (element)
+		(if (memq (org-element-type element) '(headline section))
+		    (funcall unindent-tree (org-element-contents element))
+		  (save-excursion
+		    (save-restriction
+		      (narrow-to-region
+		       (org-element-property :begin element)
+		       (org-element-property :end element))
+		      (org-do-remove-indentation)))))
+	      (reverse contents))))))
+    (funcall unindent-tree (org-element-contents parse-tree))))
 
 (defun org-show-subtree ()
   "Show everything after this heading at deeper levels."
