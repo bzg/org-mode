@@ -7826,7 +7826,7 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
       (save-excursion (outline-end-of-heading)
 		      (setq folded (outline-invisible-p)))
       (condition-case nil
-	  (org-forward-same-level (1- n) t)
+	  (org-forward-heading-same-level (1- n) t)
 	(error nil))
       (org-end-of-subtree t t))
     (org-back-over-empty-lines)
@@ -17771,9 +17771,9 @@ BEG and END default to the buffer boundaries."
 (define-key org-mode-map [remap outline-mark-subtree] 'org-mark-subtree)
 (define-key org-mode-map [remap show-subtree] 'org-show-subtree)
 (define-key org-mode-map [remap outline-forward-same-level]
-  'org-forward-same-level)
+  'org-forward-heading-same-level)
 (define-key org-mode-map [remap outline-backward-same-level]
-  'org-backward-same-level)
+  'org-backward-heading-same-level)
 (define-key org-mode-map [remap show-branches]
   'org-kill-note-or-show-branches)
 (define-key org-mode-map [remap outline-promote] 'org-promote-subtree)
@@ -17907,8 +17907,8 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\M-{"     'org-backward-element)
 (org-defkey org-mode-map "\C-c\C-^" 'org-up-element)
 (org-defkey org-mode-map "\C-c\C-_" 'org-down-element)
-(org-defkey org-mode-map "\C-c\C-f" 'org-forward-same-level)
-(org-defkey org-mode-map "\C-c\C-b" 'org-backward-same-level)
+(org-defkey org-mode-map "\C-c\C-f" 'org-forward-heading-same-level)
+(org-defkey org-mode-map "\C-c\C-b" 'org-backward-heading-same-level)
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-a" 'org-archive-subtree-default)
@@ -18034,8 +18034,8 @@ BEG and END default to the buffer boundaries."
     ("Outline Navigation")
     ("n" . (org-speed-move-safe 'outline-next-visible-heading))
     ("p" . (org-speed-move-safe 'outline-previous-visible-heading))
-    ("f" . (org-speed-move-safe 'org-forward-same-level))
-    ("b" . (org-speed-move-safe 'org-backward-same-level))
+    ("f" . (org-speed-move-safe 'org-forward-heading-same-level))
+    ("b" . (org-speed-move-safe 'org-backward-heading-same-level))
     ("u" . (org-speed-move-safe 'outline-up-heading))
     ("j" . org-goto)
     ("g" . (org-refile t))
@@ -21710,7 +21710,7 @@ clocking lines, and drawers."
     (and (re-search-forward "[^\n]" nil t) (backward-char 1))
     (point)))
 
-(defun org-forward-same-level (arg &optional invisible-ok)
+(defun org-forward-heading-same-level (arg &optional invisible-ok)
   "Move forward to the arg'th subheading at same level as this one.
 Stop at the first and last subheadings of a superior heading.
 Normally this only looks at visible headings, but when INVISIBLE-OK is
@@ -21732,7 +21732,7 @@ non-nil it will also look at invisible ones."
       (setq arg (1- arg)))
     (beginning-of-line 1)))
 
-(defun org-backward-same-level (arg &optional invisible-ok)
+(defun org-backward-heading-same-level (arg &optional invisible-ok)
   "Move backward to the arg'th subheading at same level as this one.
 Stop at the first and last subheadings of a superior heading."
   (interactive "p")
@@ -21758,7 +21758,7 @@ Move to the next element at the same level, when possible."
   (cond ((eobp) (error "Cannot move further down"))
 	((org-with-limited-levels (org-at-heading-p))
 	 (let ((origin (point)))
-	   (org-forward-same-level 1)
+	   (org-forward-heading-same-level 1)
 	   (unless (org-with-limited-levels (org-at-heading-p))
 	     (goto-char origin)
 	     (error "Cannot move further down"))))
@@ -21779,7 +21779,7 @@ Move to the previous element at the same level, when possible."
       ;; At an headline, move to the previous one, if any, or stay
       ;; here.
       (let ((origin (point)))
-	(org-backward-same-level 1)
+	(org-backward-heading-same-level 1)
 	(unless (org-with-limited-levels (org-at-heading-p))
 	  (goto-char origin)
 	  (error "Cannot move further up")))
