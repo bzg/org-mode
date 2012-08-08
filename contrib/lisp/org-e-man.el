@@ -634,16 +634,7 @@ contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
 
-  (let* ((counter
-          (let ((count (org-element-property :counter item))
-                (level
-                 (loop for parent in (org-export-get-genealogy item)
-                       count (eq (org-element-type parent) 'plain-list)
-                       until (eq (org-element-type parent) 'headline))))
-            (and count
-                 (< level 5)
-                 (concat ""))))
-         (bullet (org-element-property :bullet item))
+  (let* ((bullet (org-element-property :bullet item))
          (type (org-element-property :type (org-element-property :parent item)))
          (checkbox (case (org-element-property :checkbox item)
                      (on "\\o'\\(sq\\(mu'")			;;
@@ -895,13 +886,10 @@ contextual information."
     (cond
      ;; Case 1.  No source fontification.
      ((not org-e-man-source-highlight)
-      (let ((caption-str (org-e-man--caption/label-string caption label info))
-            (float-env (when caption ".RS\n.nf\\fC%s\\fP\n.fi.RE\n")))
-        (format
-         (or float-env "%s")
-         (concat
+      (let ((caption-str (org-e-man--caption/label-string caption label info)))
+        (concat
           (format ".RS\n.nf\n\\fC%s\\fP\n.fi\n.RE\n\n"
-                  (org-export-format-code-default src-block info))))))
+                  (org-export-format-code-default src-block info)))))
      ((and org-e-man-source-highlight)
        (let* ((tmpdir (if (featurep 'xemacs)
                           temp-directory
@@ -1010,22 +998,7 @@ contextual information."
   "Return an appropriate Man alignment string.
 TABLE is the considered table.  INFO is a plist used as
 a communication channel."
-  (let* ((attr
-         (read
-          (format
-           "(%s)"
-           (mapconcat
-            #'identity
-            (org-element-property :attr_man table)
-            " "))))
-
-    (align
-          (case (plist-get  attr :align)
-            ('center "c")
-            ('left "l")
-            ('right "r"))))
-
-    (let (alignment)
+(let (alignment)
       ;; Extract column groups and alignment from first (non-rule)
       ;; row.
       (org-element-map
@@ -1045,16 +1018,14 @@ a communication channel."
            (when (and (memq 'left borders) (not alignment))
              (push "|" alignment))
            (push
-            (if (not align)
-                (case (org-export-table-cell-alignment cell info)
+            (case (org-export-table-cell-alignment cell info)
                   (left (concat "l" width divider))
                   (right (concat "r" width divider))
                   (center (concat "c" width divider)))
-              (concat align divider))
             alignment)
            (when (memq 'right borders) (push "|" alignment))))
        info)
-      (apply 'concat (reverse alignment)))))
+      (apply 'concat (reverse alignment))))
 
 (defun org-e-man-table--org-table (table contents info)
   "Return appropriate Man code for an Org table.

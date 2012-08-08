@@ -1053,15 +1053,7 @@ contextual information."
   "Transcode an ITEM element from Org to Groff.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((counter
-	  ;; FIXME
-          ;; (let ((count (org-element-property :counter item))
-          ;;       (level
-          ;;        (loop for parent in (org-export-get-genealogy item)
-          ;;              count (eq (org-element-type parent) 'plain-list)
-          ;;              until (eq (org-element-type parent) 'headline)))))
-	  )
-	 (bullet (org-element-property :bullet item))
+  (let* ((bullet (org-element-property :bullet item))
 	 (type (org-element-property
 		:type (org-element-property :parent item)))
          (checkbox (case (org-element-property :checkbox item)
@@ -1566,47 +1558,37 @@ contextual information."
   "Return an appropriate Groff alignment string.
 TABLE is the considered table.  INFO is a plist used as
 a communication channel."
-  (let* ((attr
-	  (read (format "(%s)"
-			(mapconcat #'identity
-				   (org-element-property :attr_groff table)
-				   " "))))
-         (align
-          (case (plist-get  attr :align)
-            ('center "c")
-            ('left "l")
-            ('right "r"))))
+  (let (alignment)
+    (org-element-map
+     (org-element-map
+      table 'table-row
+      (lambda (row)
+        (and (eq (org-element-property :type row) 'standard) row))
+      info 'first-match)
+     'table-cell
+     (lambda (cell)
+       (let* ((borders (org-export-table-cell-borders cell info))
+              (raw-width (org-export-table-cell-width cell info))
+              (width-cm (when raw-width (/ raw-width 5)))
+              (width (if raw-width (format "w(%dc)"
+                                           (if (< width-cm 1) 1 width-cm)) "")))
 
-    (let (alignment)
-      ;; Extract column groups and alignment from first (non-rule) row.
-      (org-element-map
-       (org-element-map
-        table 'table-row
-        (lambda (row)
-          (and (eq (org-element-property :type row) 'standard) row))
-        info 'first-match)
-       'table-cell
-       (lambda (cell)
-         (let* ((borders (org-export-table-cell-borders cell info))
-                (raw-width (org-export-table-cell-width cell info))
-                (width-cm (when raw-width (/ raw-width 5)))
-                (width (if raw-width (format "w(%dc)"
-					     (if (< width-cm 1) 1 width-cm)) "")))
-           ;; Check left border for the first cell only.
-	   ;; FIXME: alignment is always nil.
-           (when (and (memq 'left borders) (not alignment)) 
-             (push "|" alignment))
-           (push
-            (if (not align)
-                (case (org-export-table-cell-alignment cell info)
-                  (left (concat "l" width divider))
-                  (right (concat "r" width divider))
-                  (center (concat "c" width divider)))
-              (concat align divider))
-            alignment)
-           (when (memq 'right borders) (push "|" alignment))))
-       info)
-      (apply 'concat (reverse alignment)))))
+         ;; Check left border for the first cell only.
+         ;; Alignment is nil on assignment
+
+         (when (and (memq 'left borders) (not alignment))
+           (push "|" alignment)) ;; Not nil after push 
+
+         (push
+          (case (org-export-table-cell-alignment cell info)
+                (left (concat "l" width divider))
+                (right (concat "r" width divider))
+                (center (concat "c" width divider)))
+          alignment)
+
+         (when (memq 'right borders) (push "|" alignment))))
+     info)
+    (apply 'concat (reverse alignment))))
 
 (defun org-e-groff-table--org-table (table contents info)
   "Return appropriate Groff code for an Org table.
