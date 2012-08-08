@@ -2263,6 +2263,13 @@ Paragraph \\alpha."
    (eq 'plain-list
        (org-test-with-temp-text "- item"
 	 (org-element-type (org-element-at-point)))))
+  ;; Special case: at the closing line of a greater element, be sure
+  ;; to return it instead of the last element in its contents.
+  (should
+   (eq 'center-block
+       (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph\n#+END_CENTER"
+	 (progn (forward-line 2)
+		(org-element-type (org-element-at-point))))))
   ;; With an optional argument, return trail.
   (should
    (equal '(paragraph center-block)
