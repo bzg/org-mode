@@ -18661,6 +18661,7 @@ this function returns t, nil otherwise."
 
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-element-contents "org-element" (element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-paragraph-parser "org-element" (limit))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
@@ -18686,7 +18687,7 @@ for more information."
    ((org-at-table-p) (org-call-with-arg 'org-table-move-row 'up))
    ((org-at-heading-p) (call-interactively 'org-move-subtree-up))
    ((org-at-item-p) (call-interactively 'org-move-item-up))
-   (t (org-element-drag-backward))))
+   (t (org-drag-element-backward))))
 
 (defun org-metadown (&optional arg)
   "Move subtree down or move table row down.
@@ -18708,7 +18709,7 @@ commands for more information."
    ((org-at-table-p) (call-interactively 'org-table-move-row))
    ((org-at-heading-p) (call-interactively 'org-move-subtree-down))
    ((org-at-item-p) (call-interactively 'org-move-item-down))
-   (t (org-element-drag-forward))))
+   (t (org-drag-element-forward))))
 
 (defun org-shiftup (&optional arg)
   "Increase item in timestamp or increase priority of current headline.
@@ -19400,7 +19401,7 @@ stars to add."
 
     (when (and current-prefix-arg (org-at-item-p))
       (if (equal current-prefix-arg '(4)) (setq current-prefix-arg 1))
-      (org-element-mark-element))
+      (org-mark-element))
 
     (if (org-region-active-p)
 	(setq beg (funcall skip-blanks (region-beginning))
@@ -21921,7 +21922,7 @@ Point is moved after both elements."
   (interactive)
   (org-skip-whitespace)
   (let ((end (org-element-property :end (org-element-at-point))))
-    (org-element-drag-backward)
+    (org-drag-element-backward)
     (goto-char end)))
 
 ;;;###autoload
