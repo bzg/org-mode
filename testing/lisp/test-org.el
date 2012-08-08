@@ -151,6 +151,15 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (goto-char (point-max))
 	      (org-fill-paragraph)
 	      (buffer-string)))))
+  ;; Correctly fill the last paragraph of a greater element.
+  (should
+   (equal "#+BEGIN_CENTER\n- 012345\n  789\n#+END_CENTER"
+	  (org-test-with-temp-text "#+BEGIN_CENTER\n- 012345 789\n#+END_CENTER"
+	    (let ((fill-column 8))
+	      (forward-line)
+	      (end-of-line)
+	      (org-fill-paragraph)
+	      (buffer-string)))))
   ;; Special case: Fill first paragraph when point is at an item or
   ;; a plain-list or a footnote reference.
   (should
