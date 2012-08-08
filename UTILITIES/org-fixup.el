@@ -185,7 +185,7 @@ oldorg:	# do what the old Makfile did by default
 		      (setq org-version (substring git0 8))
 		    (setq org-version git0))))
 	    (cd origin)))))
-    (message "org-fixup.el: redefined org version.")
+    (message "org-fixup.el: redefined Org version")
     `(progn
        (defun org-release () ,org-version)
        (defun org-git-version () ,org-git-version))))
