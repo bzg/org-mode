@@ -372,9 +372,326 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	  (progn (transient-mark-mode 1)
 		 (forward-line 1)
 		 (let ((org-inlinetask-min-level 15)) (org-mark-subtree))
-		 (region-beginning))))))
+		 (region-beginning)))))))
 
 
-  (provide 'test-org))
+ 
+;; Navigation
+
+(ert-deftest test-org/forward-element ()
+  "Test `org-forward-element' specifications."
+  ;; 1. At EOB: should error.
+  (org-test-with-temp-text "Some text\n"
+    (goto-char (point-max))
+    (should-error (org-forward-element)))
+  ;; 2. Standard move: expected to ignore blank lines.
+  (org-test-with-temp-text "First paragraph.\n\n\nSecond paragraph."
+    (org-forward-element)
+    (should (looking-at "Second paragraph.")))
+  ;; 3. Headline tests.
+  (org-test-with-temp-text "
+* Head 1
+** Head 1.1
+*** Head 1.1.1
+** Head 1.2"
+    ;; 3.1. At an headline beginning: move to next headline at the
+    ;;      same level.
+    (goto-line 3)
+    (org-forward-element)
+    (should (looking-at "** Head 1.2"))
+    ;; 3.2. At an headline beginning: move to parent headline if no
+    ;;      headline at the same level.
+    (goto-line 3)
+    (org-forward-element)
+    (should (looking-at "** Head 1.2")))
+  ;; 4. Greater element tests.
+  (org-test-with-temp-text
+      "#+BEGIN_CENTER\nInside.\n#+END_CENTER\n\nOutside."
+    ;; 4.1. At a greater element: expected to skip contents.
+    (org-forward-element)
+    (should (looking-at "Outside."))
+    ;; 4.2. At the end of greater element contents: expected to skip
+    ;;      to the end of the greater element.
+    (goto-line 2)
+    (org-forward-element)
+    (should (looking-at "Outside.")))
+  ;; 5. List tests.
+  (org-test-with-temp-text "
+- item1
+
+  - sub1
+
+  - sub2
+
+  - sub3
+
+  Inner paragraph.
+
+- item2
+
+Outside."
+    ;; 5.1. At list top point: expected to move to the element after
+    ;;      the list.
+    (goto-line 2)
+    (org-forward-element)
+    (should (looking-at "Outside."))
+    ;; 5.2. Special case: at the first line of a sub-list, but not at
+    ;;      beginning of line, move to next item.
+    (goto-line 2)
+    (forward-char)
+    (org-forward-element)
+    (should (looking-at "- item2"))
+    (goto-line 4)
+    (forward-char)
+    (org-forward-element)
+    (should (looking-at "  - sub2"))
+    ;; 5.3 At sub-list beginning: expected to move after the sub-list.
+    (goto-line 4)
+    (org-forward-element)
+    (should (looking-at "  Inner paragraph."))
+    ;; 5.4. At sub-list end: expected to move outside the sub-list.
+    (goto-line 8)
+    (org-forward-element)
+    (should (looking-at "  Inner paragraph."))
+    ;; 5.5. At an item: expected to move to next item, if any.
+    (goto-line 6)
+    (org-forward-element)
+    (should (looking-at "  - sub3"))))
+
+(ert-deftest test-org/backward-element ()
+  "Test `org-backward-element' specifications."
+  ;; 1. At BOB (modulo some white spaces): should error.
+  (org-test-with-temp-text "    \nParagraph."
+    (org-skip-whitespace)
+    (should-error (org-backward-element)))
+  ;; 2. Not at the beginning of an element: move at its beginning.
+  (org-test-with-temp-text "Paragraph1.\n\nParagraph2."
+    (goto-line 3)
+    (end-of-line)
+    (org-backward-element)
+    (should (looking-at "Paragraph2.")))
+  ;; 3. Headline tests.
+  (org-test-with-temp-text "
+* Head 1
+** Head 1.1
+*** Head 1.1.1
+** Head 1.2"
+    ;; 3.1. At an headline beginning: move to previous headline at the
+    ;;      same level.
+    (goto-line 5)
+    (org-backward-element)
+    (should (looking-at "** Head 1.1"))
+    ;; 3.2. At an headline beginning: move to parent headline if no
+    ;;      headline at the same level.
+    (goto-line 3)
+    (org-backward-element)
+    (should (looking-at "* Head 1"))
+    ;; 3.3. At the first top-level headline: should error.
+    (goto-line 2)
+    (should-error (org-backward-element)))
+  ;; 4. At beginning of first element inside a greater element:
+  ;;    expected to move to greater element's beginning.
+  (org-test-with-temp-text "Before.\n#+BEGIN_CENTER\nInside.\n#+END_CENTER."
+    (goto-line 3)
+    (org-backward-element)
+    (should (looking-at "#\\+BEGIN_CENTER")))
+  ;; 5. List tests.
+  (org-test-with-temp-text "
+- item1
+
+  - sub1
+
+  - sub2
+
+  - sub3
+
+  Inner paragraph.
+
+- item2
+
+
+Outside."
+    ;; 5.1. At beginning of sub-list: expected to move to the
+    ;;      paragraph before it.
+    (goto-line 4)
+    (org-backward-element)
+    (should (looking-at "item1"))
+    ;; 5.2. At an item in a list: expected to move at previous item.
+    (goto-line 8)
+    (org-backward-element)
+    (should (looking-at "  - sub2"))
+    (goto-line 12)
+    (org-backward-element)
+    (should (looking-at "- item1"))
+    ;; 5.3. At end of list/sub-list: expected to move to list/sub-list
+    ;;      beginning.
+    (goto-line 10)
+    (org-backward-element)
+    (should (looking-at "  - sub1"))
+    (goto-line 15)
+    (org-backward-element)
+    (should (looking-at "- item1"))
+    ;; 5.4. At blank-lines before list end: expected to move to top
+    ;; item.
+    (goto-line 14)
+    (org-backward-element)
+    (should (looking-at "- item1"))))
+
+(ert-deftest test-org/up-element ()
+  "Test `org-up-element' specifications."
+  ;; 1. At BOB or with no surrounding element: should error.
+  (org-test-with-temp-text "Paragraph."
+    (should-error (org-up-element)))
+  (org-test-with-temp-text "* Head1\n* Head2"
+    (goto-line 2)
+    (should-error (org-up-element)))
+  (org-test-with-temp-text "Paragraph1.\n\nParagraph2."
+    (goto-line 3)
+    (should-error (org-up-element)))
+  ;; 2. At an headline: move to parent headline.
+  (org-test-with-temp-text "* Head1\n** Sub-Head1\n** Sub-Head2"
+    (goto-line 3)
+    (org-up-element)
+    (should (looking-at "\\* Head1")))
+  ;; 3. Inside a greater element: move to greater element beginning.
+  (org-test-with-temp-text
+      "Before.\n#+BEGIN_CENTER\nParagraph1\nParagraph2\n#+END_CENTER\n"
+    (goto-line 3)
+    (org-up-element)
+    (should (looking-at "#\\+BEGIN_CENTER")))
+  ;; 4. List tests.
+  (org-test-with-temp-text "* Top
+- item1
+
+  - sub1
+
+  - sub2
+
+    Paragraph within sub2.
+
+- item2"
+    ;; 4.1. Within an item: move to the item beginning.
+    (goto-line 8)
+    (org-up-element)
+    (should (looking-at "  - sub2"))
+    ;; 4.2. At an item in a sub-list: move to parent item.
+    (goto-line 4)
+    (org-up-element)
+    (should (looking-at "- item1"))
+    ;; 4.3. At an item in top list: move to beginning of whole list.
+    (goto-line 10)
+    (org-up-element)
+    (should (looking-at "- item1"))
+    ;; 4.4. Special case.  At very top point: should move to parent of
+    ;;      list.
+    (goto-line 2)
+    (org-up-element)
+    (should (looking-at "\\* Top"))))
+
+(ert-deftest test-org/down-element ()
+  "Test `org-down-element' specifications."
+  ;; Error when the element hasn't got a recursive type.
+  (org-test-with-temp-text "Paragraph."
+    (should-error (org-down-element)))
+  ;; Error when the element has no contents
+  (org-test-with-temp-text "* Headline"
+    (should-error (org-down-element)))
+  ;; When at a plain-list, move to first item.
+  (org-test-with-temp-text "- Item 1\n  - Item 1.1\n  - Item 2.2"
+    (goto-line 2)
+    (org-down-element)
+    (should (looking-at " - Item 1.1")))
+  (org-test-with-temp-text "#+NAME: list\n- Item 1"
+    (org-down-element)
+    (should (looking-at " Item 1")))
+  ;; When at a table, move to first row
+  (org-test-with-temp-text "#+NAME: table\n| a | b |"
+    (org-down-element)
+    (should (looking-at " a | b |")))
+  ;; Otherwise, move inside the greater element.
+  (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph.\n#+END_CENTER"
+    (org-down-element)
+    (should (looking-at "Paragraph"))))
+
+(ert-deftest test-org/drag-element-backward ()
+  "Test `org-drag-element-backward' specifications."
+  ;; 1. Error when trying to move first element of buffer.
+  (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
+    (should-error (org-drag-element-backward)))
+  ;; 2. Error when trying to swap nested elements.
+  (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
+    (forward-line)
+    (should-error (org-drag-element-backward)))
+  ;; 3. Error when trying to swap an headline element and
+  ;;    a non-headline element.
+  (org-test-with-temp-text "Test.\n* Head 1"
+    (forward-line)
+    (should-error (org-drag-element-backward)))
+  ;; 4. Otherwise, swap elements, preserving column and blank lines
+  ;;    between elements.
+  (org-test-with-temp-text "Para1\n\n\nParagraph 2\n\nPara3"
+    (search-forward "graph")
+    (org-drag-element-backward)
+    (should (equal (buffer-string) "Paragraph 2\n\n\nPara1\n\nPara3"))
+    (should (looking-at " 2")))
+  ;; 5. Preserve visibility of elements and their contents.
+  (org-test-with-temp-text "
+#+BEGIN_CENTER
+Text.
+#+END_CENTER
+- item 1
+  #+BEGIN_QUOTE
+  Text.
+  #+END_QUOTE"
+    (while (search-forward "BEGIN_" nil t) (org-cycle))
+    (search-backward "- item 1")
+    (org-drag-element-backward)
+    (should
+     (equal
+      '((63 . 82) (26 . 48))
+      (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
+	      (overlays-in (point-min) (point-max)))))))
+
+(ert-deftest test-org/drag-element-forward ()
+  "Test `org-drag-element-forward' specifications."
+  ;; 1. Error when trying to move first element of buffer.
+  (org-test-with-temp-text "Paragraph 1.\n\nParagraph 2."
+    (goto-line 3)
+    (should-error (org-drag-element-forward)))
+  ;; 2. Error when trying to swap nested elements.
+  (org-test-with-temp-text "#+BEGIN_CENTER\nTest.\n#+END_CENTER"
+    (forward-line)
+    (should-error (org-drag-element-forward)))
+  ;; 3. Error when trying to swap a non-headline element and an
+  ;;    headline.
+  (org-test-with-temp-text "Test.\n* Head 1"
+    (should-error (org-drag-element-forward)))
+  ;; 4. Otherwise, swap elements, preserving column and blank lines
+  ;;    between elements.
+  (org-test-with-temp-text "Paragraph 1\n\n\nPara2\n\nPara3"
+    (search-forward "graph")
+    (org-drag-element-forward)
+    (should (equal (buffer-string) "Para2\n\n\nParagraph 1\n\nPara3"))
+    (should (looking-at " 1")))
+  ;; 5. Preserve visibility of elements and their contents.
+  (org-test-with-temp-text "
+#+BEGIN_CENTER
+Text.
+#+END_CENTER
+- item 1
+  #+BEGIN_QUOTE
+  Text.
+  #+END_QUOTE"
+    (while (search-forward "BEGIN_" nil t) (org-cycle))
+    (search-backward "#+BEGIN_CENTER")
+    (org-drag-element-forward)
+    (should
+     (equal
+      '((63 . 82) (26 . 48))
+      (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
+	      (overlays-in (point-min) (point-max)))))))
+
+
+(provide 'test-org)
 
 ;;; test-org.el ends here
