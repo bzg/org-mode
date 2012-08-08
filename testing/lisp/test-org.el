@@ -151,6 +151,15 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (goto-char (point-max))
 	      (org-fill-paragraph)
 	      (buffer-string)))))
+  ;; Correctly fill the last paragraph of a greater element.
+  (should
+   (equal "#+BEGIN_CENTER\n- 012345\n  789\n#+END_CENTER"
+	  (org-test-with-temp-text "#+BEGIN_CENTER\n- 012345 789\n#+END_CENTER"
+	    (let ((fill-column 8))
+	      (forward-line)
+	      (end-of-line)
+	      (org-fill-paragraph)
+	      (buffer-string)))))
   ;; Special case: Fill first paragraph when point is at an item or
   ;; a plain-list or a footnote reference.
   (should
@@ -354,9 +363,18 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
       (progn (transient-mark-mode 1)
 	     (forward-line 2)
 	     (org-mark-subtree 1)
-	     (list (region-beginning) (region-end)))))))
+	     (list (region-beginning) (region-end))))))
+  ;; Do not get fooled with inlinetasks.
+  (when (featurep 'org-inlinetask)
+    (should
+     (= 1
+	(org-test-with-temp-text "* Headline\n*************** Task\nContents"
+	  (progn (transient-mark-mode 1)
+		 (forward-line 1)
+		 (let ((org-inlinetask-min-level 15)) (org-mark-subtree))
+		 (region-beginning))))))
 
 
-(provide 'test-org)
+  (provide 'test-org))
 
 ;;; test-org.el ends here

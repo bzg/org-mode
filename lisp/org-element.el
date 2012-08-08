@@ -981,10 +981,12 @@ Assume point is at the beginning of the item."
 			   64))
 		       ((string-match "[0-9]+" c)
 			(string-to-number (match-string 0 c))))))
-	   (end (org-list-get-item-end begin struct))
+	   (end (save-excursion (goto-char (org-list-get-item-end begin struct))
+				(unless (bolp) (forward-line))
+				(point)))
 	   (contents-begin (progn (looking-at org-list-full-item-re)
 				  (goto-char (match-end 0))
-				  (org-skip-whitespace)
+				  (skip-chars-forward " \r\t\n" limit)
 				  ;; If first line isn't empty,
 				  ;; contents really start at the text
 				  ;; after item's meta-data.
@@ -1039,10 +1041,10 @@ CONTENTS is the contents of the element."
     (concat
      bullet
      (and counter (format "[@%d] " counter))
-     (cond
-      ((eq checkbox 'on) "[X] ")
-      ((eq checkbox 'off) "[ ] ")
-      ((eq checkbox 'trans) "[-] "))
+     (case checkbox
+       (on "[X] ")
+       (off "[ ] ")
+       (trans "[-] "))
      (and tag (format "%s :: " tag))
      (let ((contents (replace-regexp-in-string
 		      "\\(^\\)[ \t]*\\S-" ind contents nil nil 1)))
@@ -1072,14 +1074,11 @@ Assume point is at the beginning of the list."
 	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (contents-end
-	    (goto-char (org-list-get-list-end (point) struct prevs)))
-	   (end (save-excursion (org-skip-whitespace)
-				(if (eobp) (point) (point-at-bol)))))
-      ;; Blank lines below list belong to the top-level list only.
-      (unless (= (org-list-get-top-point struct) contents-begin)
-	(setq end (min (org-list-get-bottom-point struct)
-		       (progn (skip-chars-forward " \r\t\n" limit)
-			      (if (eobp) (point) (point-at-bol))))))
+	    (progn (goto-char (org-list-get-list-end (point) struct prevs))
+		   (unless (bolp) (forward-line))
+		   (point)))
+	   (end (progn (skip-chars-forward " \r\t\n" limit)
+		       (if (eobp) (point) (point-at-bol)))))
       ;; Return value.
       (list 'plain-list
 	    (nconc
@@ -4076,31 +4075,35 @@ first element of current section."
 	   (org-element-put-property element :parent parent)
 	   (when keep-trail (push element trail))
            (cond
-	    ;; 1. Skip any element ending before point or at point
-	    ;;    because the following element has started.  On the
-	    ;;    other hand, if the element ends at point and that
-	    ;;    point is also the end of the buffer, do not skip it.
-	    ((let ((end (org-element-property :end element)))
-	       (when (or (< end origin)
-			 (and (= end origin) (/= (point-max) end)))
-		 (if (> (point-max) end) (goto-char end)
-		   (throw 'exit (if keep-trail trail element))))))
+	    ;; 1. Skip any element ending before point.  Also skip
+	    ;;    element ending at point when we're sure that another
+	    ;;    element has started.
+	    ((let ((elem-end (org-element-property :end element)))
+	       (when (or (< elem-end origin)
+			 (and (= elem-end origin) (/= elem-end end)))
+		 (goto-char elem-end))))
 	    ;; 2. An element containing point is always the element at
 	    ;;    point.
 	    ((not (memq type org-element-greater-elements))
 	     (throw 'exit (if keep-trail trail element)))
 	    ;; 3. At any other greater element type, if point is
-	    ;;    within contents, move into it.  Otherwise, return
-	    ;;    that element.  As a special case, when ORIGIN is
-	    ;;    contents end and is also the end of the buffer, try
-	    ;;    to move inside the greater element to find the end
-	    ;;    of the innermost element.
+	    ;;    within contents, move into it.
 	    (t
 	     (let ((cbeg (org-element-property :contents-begin element))
 		   (cend (org-element-property :contents-end element)))
 	       (if (or (not cbeg) (not cend) (> cbeg origin) (< cend origin)
-		       (and (= cend origin) (/= (point-max) origin))
-		       (and (= cbeg origin) (memq type '(plain-list table))))
+		       ;; Create an anchor for tables and plain lists:
+		       ;; when point is at the very beginning of these
+		       ;; elements, ignoring affiliated keywords,
+		       ;; target them instead of their contents.
+		       (and (= cbeg origin) (memq type '(plain-list table)))
+		       ;; When point is at contents end, do not move
+		       ;; into elements with an explicit ending, but
+		       ;; return that element instead.
+		       (and (= cend origin)
+			    (memq type
+				  '(center-block drawer dynamic-block inlinetask
+						 quote-block special-block))))
 		   (throw 'exit (if keep-trail trail element))
 		 (setq parent element)
 		 (case type

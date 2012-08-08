@@ -20682,11 +20682,11 @@ This puts point at the start of the current subtree, and mark at
 the end.  If a numeric prefix UP is given, move up into the
 hierarchy of headlines by UP levels before marking the subtree."
   (interactive "P")
-  (when (org-with-limited-levels (org-before-first-heading-p))
-    (error "Not currently in a subtree"))
-  (if (org-at-heading-p) (beginning-of-line)
-    (org-with-limited-levels (outline-previous-visible-heading 1)))
-  (when up (dotimes (c (abs up)) (ignore-errors (org-element-up))))
+  (org-with-limited-levels
+   (cond ((org-at-heading-p) (beginning-of-line))
+	 ((org-before-first-heading-p) (error "Not in a subtree"))
+	 (t (outline-previous-visible-heading 1))))
+  (when up (while (and (> up 0) (org-up-heading-safe)) (decf up)))
   (org-element-mark-element))
 
 ;;; Indentation
@@ -21718,8 +21718,8 @@ clocking lines, and drawers."
 (defun org-forward-same-level (arg &optional invisible-ok)
   "Move forward to the arg'th subheading at same level as this one.
 Stop at the first and last subheadings of a superior heading.
-Normally this only looks at visible headings, but when INVISIBLE-OK is non-nil
-it wil also look at invisible ones."
+Normally this only looks at visible headings, but when INVISIBLE-OK is
+non-nil it will also look at invisible ones."
   (interactive "p")
   (org-back-to-heading invisible-ok)
   (org-at-heading-p)
