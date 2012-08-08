@@ -18666,6 +18666,10 @@ this function returns t, nil otherwise."
 (declare-function org-element-paragraph-parser "org-element" (limit))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
 (declare-function org-element-up "org-element" ())
+(declare-function org-element-nested-p "org-element" (elem-a elem-b))
+(declare-function org-element-swap-A-B "org-element" (elem-a elem-b))
+(declare-function org-element--parse-objects "org-element" (beg end acc restriction))
+(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
 
 (defun org-metaup (&optional arg)
   "Move subtree up or move table row up.
@@ -21809,6 +21813,7 @@ Move to the previous element at the same level, when possible."
 	  (org-with-limited-levels (org-back-to-heading)))))))
 
 ;;;###autoload
+(defvar org-element-greater-elements)
 (defun org-down-element ()
   "Move to inner element."
   (interactive)
