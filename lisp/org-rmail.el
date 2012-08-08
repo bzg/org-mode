@@ -101,9 +101,7 @@
 	(rmail (if (string= folder "RMAIL") rmail-file-name folder))
 	(setq message-number
 	      (save-restriction
-		(widen)
-		(when (eq rmail-header-style 'normal)
-		  (rmail-toggle-header -1))
+		(rmail-widen)
 		(goto-char (point-max))
 		(if (re-search-backward
 		     (concat "^Message-ID:\\s-+" (regexp-quote
