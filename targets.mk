@@ -28,7 +28,7 @@ endif
 	cleancontrib cleantesting cleanutils
 	cleanrel clean-install cleanelc cleandirs \
 	cleanlisp cleandoc cleandocs cleantest \
-	compile compile-single compile-source compile-dirty uncompiled \
+	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol
 
 CONF_BASE = EMACS DESTDIR
@@ -75,7 +75,7 @@ local.mk:
 
 all compile::
 	$(foreach dir, doc lisp, $(MAKE) -C $(dir) clean;)
-compile compile-dirty compile-single compile-source::
+compile compile-dirty::
 	$(MAKE) -C lisp $@
 all clean-install::
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) $@;)
@@ -118,26 +118,25 @@ clean:	cleanrel
 	$(MAKE) -C lisp clean
 	$(MAKE) -C doc clean
 
-cleanall: cleandirs cleantest cleancontrib cleantesting cleanutils
+cleanall: cleandirs cleantest
 	-$(FIND) . -name \*~ -o -name \*# -o -name .#\* -exec $(RM) {} \;
+	-$(FIND) contrib testing UTILITIES -name \*~ -o -name \*.elc -exec $(RM) {} \;
 
-cleancontrib:
-	-$(FIND) contrib -name \*~ -o -name \*.elc -exec $(RM) {} \;
+cleancontrib cleantesting cleanUTILITIES:
+	-$(FIND) $(@:clean%=%) -name \*~ -o -name \*.elc -exec $(RM) {} \;
 
-cleantesting:
-	-$(FIND) testing -name \*~ -o -name \*.elc -exec $(RM) {} \;
-
-cleanutils:
-	-$(FIND) UTILITIES -name \*~ -o -name \*.elc -exec $(RM) {} \;
+cleanutils:	cleanUTILITIES
 
 cleanrel:
 	$(RMR) RELEASEDIR
 	$(RMR) org-7.*
 	$(RMR) org-7*zip org-7*tar.gz
 
-cleanelc cleanlisp:
+cleanelc:
+	$(MAKE) -C lisp $@
+
+cleanlisp:
 	$(MAKE) -C lisp clean
-	-$(FIND) lisp -name \*~ -exec $(RM) {} \;
 
 cleandoc cleandocs:
 	$(MAKE) -C doc clean
