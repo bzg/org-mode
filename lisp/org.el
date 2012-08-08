@@ -21718,8 +21718,8 @@ clocking lines, and drawers."
 (defun org-forward-same-level (arg &optional invisible-ok)
   "Move forward to the arg'th subheading at same level as this one.
 Stop at the first and last subheadings of a superior heading.
-Normally this only looks at visible headings, but when INVISIBLE-OK is non-nil
-it wil also look at invisible ones."
+Normally this only looks at visible headings, but when INVISIBLE-OK is
+non-nil it will also look at invisible ones."
   (interactive "p")
   (org-back-to-heading invisible-ok)
   (org-at-heading-p)
