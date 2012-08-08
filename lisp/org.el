@@ -20677,11 +20677,11 @@ This puts point at the start of the current subtree, and mark at
 the end.  If a numeric prefix UP is given, move up into the
 hierarchy of headlines by UP levels before marking the subtree."
   (interactive "P")
-  (when (org-with-limited-levels (org-before-first-heading-p))
-    (error "Not currently in a subtree"))
-  (if (org-at-heading-p) (beginning-of-line)
-    (org-with-limited-levels (outline-previous-visible-heading 1)))
-  (when up (dotimes (c (abs up)) (ignore-errors (org-element-up))))
+  (org-with-limited-levels
+   (cond ((org-at-heading-p) (beginning-of-line))
+	 ((org-before-first-heading-p) (error "Not in a subtree"))
+	 (t (outline-previous-visible-heading 1))))
+  (when up (while (and (> up 0) (org-up-heading-safe)) (decf up)))
   (org-element-mark-element))
 
 ;;; Indentation

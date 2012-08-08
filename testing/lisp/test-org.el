@@ -363,9 +363,18 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
       (progn (transient-mark-mode 1)
 	     (forward-line 2)
 	     (org-mark-subtree 1)
-	     (list (region-beginning) (region-end)))))))
+	     (list (region-beginning) (region-end))))))
+  ;; Do not get fooled with inlinetasks.
+  (when (featurep 'org-inlinetask)
+    (should
+     (= 1
+	(org-test-with-temp-text "* Headline\n*************** Task\nContents"
+	  (progn (transient-mark-mode 1)
+		 (forward-line 1)
+		 (let ((org-inlinetask-min-level 15)) (org-mark-subtree))
+		 (region-beginning))))))
 
 
-(provide 'test-org)
+  (provide 'test-org))
 
 ;;; test-org.el ends here
