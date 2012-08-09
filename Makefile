@@ -27,7 +27,7 @@ help helpall::
 	$(info make                - build Org ELisp and all documentation)
 	$(info make all            - ditto)
 	$(info make compile        - build Org ELisp files)
-	$(info make autoloads      - create org-install.el to load org in-place)
+	$(info make autoloads      - create org-install.el to load Org in-place)
 	$(info make check          - build Org ELisp files and run test suite)
 helpall::
 	$(info make test           - ditto)
