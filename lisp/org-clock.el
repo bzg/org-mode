@@ -770,9 +770,9 @@ If necessary, clock-out of the currently active clock."
   (let ((temp (copy-marker (car clock)
 			   (marker-insertion-type (car clock)))))
     (if (org-is-active-clock clock)
-	(org-clock-out fail-quietly at-time)
+	(org-clock-out nil fail-quietly at-time)
       (org-with-clock clock
-	(org-clock-out fail-quietly at-time)))
+	(org-clock-out nil fail-quietly at-time)))
     (setcar clock temp)))
 
 (defsubst org-clock-clock-cancel (clock)
@@ -1061,15 +1061,14 @@ so long."
 (defun org-clock-in (&optional select start-time)
   "Start the clock on the current item.
 If necessary, clock-out of the currently active clock.
-With a prefix argument SELECT (\\[universal-argument]), offer a list of \
-recently clocked tasks to
-clock into.  When SELECT is \\[universal-argument] \\[universal-argument], \
-clock into the current task and mark
-it as the default task, a special task that will always be offered in
-the clocking selection, associated with the letter `d'.
+With a prefix argument SELECT (\\[universal-argument]), offer a list of recently clocked
+tasks to clock into.  When SELECT is \\[universal-argument] \\[universal-argument], clock into the current task
+and mark it as the default task, a special task that will always be offered
+in the clocking selection, associated with the letter `d'.
 When SELECT is \\[universal-argument] \\[universal-argument] \\[universal-argument], \
-clock in by using the last clock-out time as the start time
-\(see `org-clock-continuously' to make this the default behavior.)"
+clock in by using the last clock-out
+time as the start time \(see `org-clock-continuously' to
+make this the default behavior.)"
   (interactive "P")
   (setq org-clock-notification-was-shown nil)
   (catch 'abort
@@ -1125,7 +1124,7 @@ clock in by using the last clock-out time as the start time
 		     (marker-position org-clock-marker)
 		     (marker-buffer org-clock-marker))
 	(let ((org-clock-clocking-in t))
-	  (org-clock-out t)))
+	  (org-clock-out nil t)))
 
       ;; Clock in at which position?
       (setq target-pos
@@ -1268,18 +1267,33 @@ When already clocking in, send an warning.
 With a universal prefix argument, select the task you want to
 clock in from the last clocked in tasks.
 With two universal prefix arguments, start clocking using the
-last clock-out time, if any."
+last clock-out time, if any.
+With three universal prefix arguments, interactively prompt
+for a todo state to switch to, overriding the existing value
+`org-clock-in-switch-to-state'."
   (interactive "P")
-  (if (equal arg '(4)) (org-clock-in (org-clock-select-task))
+  (if (equal arg '(4))
+      (org-clock-in (org-clock-select-task))
     (let ((start-time (if (or org-clock-continuously (equal arg '(16)))
 			  (or org-clock-out-time (current-time))
 			(current-time))))
       (if (null org-clock-history)
 	  (message "No last clock")
-	(org-clock-clock-in (list (car org-clock-history)) nil start-time)
-	(message "Clocking back: %s (in %s)"
-		 org-clock-current-task
-		 (buffer-name (marker-buffer org-clock-marker)))))))
+	(let ((org-clock-in-switch-to-state
+	       (if (and (not org-clock-current-task) (equal arg '(64)))
+		   (completing-read "Switch to state: "
+				    (and org-clock-history
+					 (with-current-buffer
+					     (marker-buffer (car org-clock-history))
+					   org-todo-keywords-1)))
+		 org-clock-in-switch-to-state))
+	      (already-clocking org-clock-current-task))
+	  (org-clock-clock-in (list (car org-clock-history)) nil start-time)
+	  (or already-clocking
+	      ;; Don't display a message if we are already clocking in
+	      (message "Clocking back: %s (in %s)"
+		       org-clock-current-task
+		       (buffer-name (marker-buffer org-clock-marker)))))))))
 
 (defun org-clock-mark-default-task ()
   "Mark current task as default task."
@@ -1412,10 +1426,12 @@ line and position cursor in that line."
 	    (and (re-search-forward org-property-end-re nil t)
 		 (goto-char (match-beginning 0))))))))
 
-(defun org-clock-out (&optional fail-quietly at-time)
+(defun org-clock-out (&optional switch-to-state fail-quietly at-time)
   "Stop the currently running clock.
-Throw an error if there is no running clock and FAIL-QUIETLY is nil."
-  (interactive)
+Throw an error if there is no running clock and FAIL-QUIETLY is nil.
+With a universal prefix, prompt for a state to switch the clocked out task
+to, overriding the existing value of `org-clock-out-switch-to-state'."
+  (interactive "P")
   (catch 'exit
     (when (not (org-clocking-p))
       (setq global-mode-string
@@ -1423,7 +1439,16 @@ Throw an error if there is no running clock and FAIL-QUIETLY is nil."
       (setq frame-title-format org-frame-title-format-backup)
       (force-mode-line-update)
       (if fail-quietly (throw 'exit t) (error "No active clock")))
-    (let ((now (current-time)) ts te s h m remove)
+    (let ((org-clock-out-switch-to-state
+	   (if switch-to-state
+	       (completing-read "Switch to state: "
+				(with-current-buffer
+				    (marker-buffer org-clock-marker)
+				  org-todo-keywords-1)
+				nil t "DONE")
+	     org-clock-out-switch-to-state))
+	  (now (current-time))
+	  ts te s h m remove)
       (setq org-clock-out-time now)
       (save-excursion ; Do not replace this with `with-current-buffer'.
 	(org-no-warnings (set-buffer (org-clocking-buffer)))
