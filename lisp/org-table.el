@@ -4484,7 +4484,7 @@ PARAMS is a property list of parameters that can influence the conversion.
 For the generic converter, some parameters are obligatory: you need to
 specify either :lfmt, or all of (:lstart :lend :sep).
 
-Valid parameters are
+Valid parameters are:
 
 :splice     When set to t, return only table body lines, don't wrap
             them into :tstart and :tend.  Default is nil.  When :splice
@@ -4497,9 +4497,9 @@ Valid parameters are
 :sep        Separator between two fields
 :remove-nil-lines Do not include lines that evaluate to nil.
 
-
 Each in the following group may be either a string or a function
 of no arguments returning a string:
+
 :tstart     String to start the table.  Ignored when :splice is t.
 :tend       String to end the table.  Ignored when :splice is t.
 :lstart     String to start a new table line.
@@ -4510,6 +4510,7 @@ of no arguments returning a string:
 Each in the following group may be a string, a function of one
 argument (the field or line) returning a string, or a plist
 mapping columns to either of the above:
+
 :lfmt       Format for entire line, with enough %s to capture all fields.
             If this is present, :lstart, :lend, and :sep are ignored.
 :llfmt      Format for the entire last line, defaults to :lfmt.
@@ -4517,14 +4518,14 @@ mapping columns to either of the above:
             %s for the original field value.  For example, to wrap
             everything in dollars, you could use :fmt \"$%s$\".
             This may also be a property list with column numbers and
-            formats. For example :fmt (2 \"$%s$\" 4 \"%s%%\")
-
+            formats.  For example :fmt (2 \"$%s$\" 4 \"%s%%\")
 :hlstart :hllstart :hlend :hllend :hlsep :hlfmt :hllfmt :hfmt
             Same as above, specific for the header lines in the table.
             All lines before the first hline are treated as header.
             If any of these is not present, the data line value is used.
 
 This may be either a string or a function of two arguments:
+
 :efmt       Use this format to print numbers with exponentials.
             The format should have %s twice for inserting mantissa
             and exponent, for example \"%s\\\\times10^{%s}\".  This
