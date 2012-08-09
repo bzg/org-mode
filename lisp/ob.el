@@ -343,27 +343,27 @@ then run `org-babel-execute-src-block'."
 This includes header arguments, language and name, and is largely
 a window into the `org-babel-get-src-block-info' function."
   (interactive)
-  (let ((info (org-babel-get-src-block-info 'light)))
-    (org-flet ((full (it) (> (length it) 0))
-	   (printf (fmt &rest args) (princ (apply #'format fmt args))))
-      (when info
-	(with-help-window (help-buffer)
-	  (let ((name        (nth 4 info))
-		(lang        (nth 0 info))
-		(switches    (nth 3 info))
-		(header-args (nth 2 info)))
-	    (when name            (printf "Name: %s\n"     name))
-	    (when lang            (printf "Lang: %s\n"     lang))
-	    (when (full switches) (printf "Switches: %s\n" switches))
-	    (printf "Header Arguments:\n")
-	    (dolist (pair (sort header-args
-				(lambda (a b) (string< (symbol-name (car a))
-						  (symbol-name (car b))))))
-	      (when (full (cdr pair))
-		(printf "\t%S%s\t%s\n"
-			(car pair)
-			(if (> (length (format "%S" (car pair))) 7) "" "\t")
-			(cdr pair))))))))))
+  (let ((info (org-babel-get-src-block-info 'light))
+	(full (lambda (it) (> (length it) 0)))
+	(printf (lambda (fmt &rest args) (princ (apply #'format fmt args)))))
+    (when info
+      (with-help-window (help-buffer)
+	(let ((name        (nth 4 info))
+	      (lang        (nth 0 info))
+	      (switches    (nth 3 info))
+	      (header-args (nth 2 info)))
+	  (when name            (funcall printf "Name: %s\n"     name))
+	  (when lang            (funcall printf "Lang: %s\n"     lang))
+	  (when (funcall full switches) (funcall printf "Switches: %s\n" switches))
+	  (funcall printf "Header Arguments:\n")
+	  (dolist (pair (sort header-args
+			      (lambda (a b) (string< (symbol-name (car a))
+						     (symbol-name (car b))))))
+	    (when (funcall full (cdr pair))
+	      (funcall printf "\t%S%s\t%s\n"
+		       (car pair)
+		       (if (> (length (format "%S" (car pair))) 7) "" "\t")
+		       (cdr pair)))))))))
 
 ;;;###autoload
 (defun org-babel-expand-src-block-maybe ()
@@ -541,14 +541,14 @@ block."
 	     result cmd)
 	(unwind-protect
 	    (org-flet ((call-process-region (&rest args)
-		    (apply 'org-babel-tramp-handle-call-process-region args)))
-	      (org-flet ((lang-check (f)
-		       (let ((f (intern (concat "org-babel-execute:" f))))
-			 (when (fboundp f) f))))
+					    (apply 'org-babel-tramp-handle-call-process-region args)))
+	      (let ((lang-check (lambda (f)
+				  (let ((f (intern (concat "org-babel-execute:" f))))
+				    (when (fboundp f) f)))))
 		(setq cmd
-		      (or (lang-check lang)
-			  (lang-check (symbol-name
-				       (cdr (assoc lang org-src-lang-modes))))
+		      (or (funcall lang-check lang)
+			  (funcall lang-check (symbol-name
+					       (cdr (assoc lang org-src-lang-modes))))
 			  (error "No org-babel-execute function for %s!" lang))))
 	      (if (and (not arg) new-hash (equal new-hash old-hash))
 		  (save-excursion ;; return cached result
@@ -621,16 +621,18 @@ arguments and pop open the results in a preview buffer."
   (let* ((l1 (length s1))
 	 (l2 (length s2))
 	 (dist (vconcat (mapcar (lambda (_) (make-vector (1+ l2) nil))
-				(number-sequence 1 (1+ l1))))))
-    (org-flet ((in (i j) (aref (aref dist i) j))
-	   (mmin (&rest lst) (apply #'min (remove nil lst))))
+				(number-sequence 1 (1+ l1)))))
+	 (in (lambda (i j) (aref (aref dist i) j)))
+	 (mmin (lambda (&rest lst) (apply #'min (remove nil lst)))))
       (setf (aref (aref dist 0) 0) 0)
       (dolist (i (number-sequence 1 l1))
 	(dolist (j (number-sequence 1 l2))
 	  (setf (aref (aref dist i) j)
 		(+ (if (equal (aref s1 (1- i)) (aref s2 (1- j))) 0 1)
-		   (mmin (in (1- i) j) (in i (1- j)) (in (1- i) (1- j)))))))
-      (in l1 l2))))
+		   (funcall mmin (funcall in (1- i) j)
+			    (funcall in i (1- j))
+			    (funcall in (1- i) (1- j)))))))
+      (funcall in l1 l2)))
 
 (defun org-babel-combine-header-arg-lists (original &rest others)
   "Combine a number of lists of header argument names and arguments."
@@ -793,18 +795,18 @@ with a prefix argument then this is passed on to
 (defun org-babel-switch-to-session-with-code (&optional arg info)
   "Switch to code buffer and display session."
   (interactive "P")
-  (org-flet ((swap-windows
-	  ()
-	  (let ((other-window-buffer (window-buffer (next-window))))
-	    (set-window-buffer (next-window) (current-buffer))
-	    (set-window-buffer (selected-window) other-window-buffer))
-	  (other-window 1)))
-    (let ((info (org-babel-get-src-block-info))
-	  (org-src-window-setup 'reorganize-frame))
+  (let ((swap-windows
+	 (lambda ()
+	   (let ((other-window-buffer (window-buffer (next-window))))
+	     (set-window-buffer (next-window) (current-buffer))
+	     (set-window-buffer (selected-window) other-window-buffer))
+	   (other-window 1)))
+	(info (org-babel-get-src-block-info))
+	(org-src-window-setup 'reorganize-frame))
       (save-excursion
 	(org-babel-switch-to-session arg info))
-      (org-edit-src-code))
-    (swap-windows)))
+      (org-edit-src-code)
+      (funcall swap-windows)))
 
 (defmacro org-babel-do-in-edit-buffer (&rest body)
   "Evaluate BODY in edit buffer if there is a code block at point.
@@ -1268,31 +1270,32 @@ ALTS is a cons of two character options where each option may be
 either the numeric code of a single character or a list of
 character alternatives.  For example to split on balanced
 instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
-  (org-flet ((matches (ch spec) (if (listp spec) (member ch spec) (equal spec ch)))
-	 (matched (ch last)
-		  (if (consp alts)
-		      (and (matches ch (cdr alts))
-			   (matches last (car alts)))
-		    (matches ch alts))))
-    (let ((balance 0) (quote nil) (partial nil) (lst nil) (last 0))
-      (mapc (lambda (ch)  ; split on [], (), "" balanced instances of [ \t]:
-	      (setq balance (+ balance
-			       (cond ((or (equal 91 ch) (equal 40 ch)) 1)
-				     ((or (equal 93 ch) (equal 41 ch)) -1)
-				     (t 0))))
-	      (when (and (equal 34 ch) (not (equal 92 last)))
-		(setq quote (not quote)))
-	      (setq partial (cons ch partial))
-	      (when (and (= balance 0) (not quote) (matched ch last))
-		(setq lst (cons (apply #'string (nreverse
-						 (if (consp alts)
-						     (cddr partial)
-						   (cdr partial))))
-				lst))
-		(setq partial nil))
-	      (setq last ch))
-	    (string-to-list string))
-      (nreverse (cons (apply #'string (nreverse partial)) lst)))))
+  (let* ((matches (lambda (ch spec) (if (listp spec) (member ch spec) (equal spec ch))))
+	 (matched (lambda (ch last)
+		    (if (consp alts)
+			(and (funcall matches ch (cdr alts))
+			     (funcall matches last (car alts)))
+		      (funcall matches ch alts))))
+	 (balance 0) (last 0)
+	 quote partial lst)
+    (mapc (lambda (ch)  ; split on [], (), "" balanced instances of [ \t]:
+	    (setq balance (+ balance
+			     (cond ((or (equal 91 ch) (equal 40 ch)) 1)
+				   ((or (equal 93 ch) (equal 41 ch)) -1)
+				   (t 0))))
+	    (when (and (equal 34 ch) (not (equal 92 last)))
+	      (setq quote (not quote)))
+	    (setq partial (cons ch partial))
+	    (when (and (= balance 0) (not quote) (funcall matched ch last))
+	      (setq lst (cons (apply #'string (nreverse
+					       (if (consp alts)
+						   (cddr partial)
+						 (cdr partial))))
+			      lst))
+	      (setq partial nil))
+	    (setq last ch))
+	  (string-to-list string))
+    (nreverse (cons (apply #'string (nreverse partial)) lst))))
 
 (defun org-babel-join-splits-near-ch (ch list)
   "Join splits where \"=\" is on either end of the split."
@@ -1938,7 +1941,7 @@ code ---- the results are extracted in the syntax of the source
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
 	(org-flet ((wrap (start finish)
-		     (goto-char end) (insert (concat finish "\n"))
+			 (goto-char end) (insert (concat finish "\n"))
 		     (goto-char beg) (insert (concat start "\n"))
 		     (goto-char end) (goto-char (point-at-eol))
 		     (setq end (point-marker)))

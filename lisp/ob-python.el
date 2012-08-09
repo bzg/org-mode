@@ -238,22 +238,23 @@ last statement in BODY, as elisp."
 If RESULT-TYPE equals 'output then return standard output as a
 string. If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
-  (org-flet ((send-wait () (comint-send-input nil t) (sleep-for 0 5))
+  (let* ((send-wait (lambda () (comint-send-input nil t) (sleep-for 0 5)))
 	 (dump-last-value
-	  (tmp-file pp)
-	  (mapc
-	   (lambda (statement) (insert statement) (send-wait))
-	   (if pp
-	       (list
-		"import pprint"
-		(format "open('%s', 'w').write(pprint.pformat(_))"
-			(org-babel-process-file-name tmp-file 'noquote)))
-	     (list (format "open('%s', 'w').write(str(_))"
-			   (org-babel-process-file-name tmp-file 'noquote))))))
-	 (input-body (body)
-		     (mapc (lambda (line) (insert line) (send-wait))
-			   (split-string body "[\r\n]"))
-		     (send-wait)))
+	  (lambda
+	    (tmp-file pp)
+	    (mapc
+	     (lambda (statement) (insert statement) (funcall send-wait))
+	     (if pp
+		 (list
+		  "import pprint"
+		  (format "open('%s', 'w').write(pprint.pformat(_))"
+			  (org-babel-process-file-name tmp-file 'noquote)))
+	       (list (format "open('%s', 'w').write(str(_))"
+			     (org-babel-process-file-name tmp-file 'noquote)))))))
+	 (input-body (lambda (body)
+		       (mapc (lambda (line) (insert line) (funcall send-wait))
+			     (split-string body "[\r\n]"))
+		       (funcall send-wait))))
     ((lambda (results)
        (unless (string= (substring org-babel-python-eoe-indicator 1 -1) results)
 	 (if (or (member "code" result-params)
@@ -269,21 +270,21 @@ last statement in BODY, as elisp."
 	 (butlast
 	  (org-babel-comint-with-output
 	      (session org-babel-python-eoe-indicator t body)
-	    (input-body body)
-	    (send-wait) (send-wait)
+	    (funcall input-body body)
+	    (funcall send-wait) (funcall send-wait)
 	    (insert org-babel-python-eoe-indicator)
-	    (send-wait))
+	    (funcall send-wait))
 	  2) "\n"))
        (value
 	(let ((tmp-file (org-babel-temp-file "python-")))
 	  (org-babel-comint-with-output
 	      (session org-babel-python-eoe-indicator nil body)
 	    (let ((comint-process-echoes nil))
-	      (input-body body)
-	      (dump-last-value tmp-file (member "pp" result-params))
-	      (send-wait) (send-wait)
+	      (funcall input-body body)
+	      (funcall dump-last-value tmp-file (member "pp" result-params))
+	      (funcall send-wait) (funcall send-wait)
 	      (insert org-babel-python-eoe-indicator)
-	      (send-wait)))
+	      (funcall send-wait)))
 	  (org-babel-eval-read-file tmp-file)))))))
 
 (defun org-babel-python-read-string (string)

@@ -218,29 +218,30 @@ returned, or an empty string or \"*\" both of which are
 interpreted to mean the entire range and as such are equivalent
 to \"0:-1\"."
   (if (and (> (length index) 0) (string-match "^\\([^,]*\\),?" index))
-      (let ((ind-re "\\(\\([-[:digit:]]+\\):\\([-[:digit:]]+\\)\\|\*\\)")
-	    (length (length lis))
-            (portion (match-string 1 index))
-            (remainder (substring index (match-end 0))))
-        (org-flet ((wrap (num) (if (< num 0) (+ length num) num))
-               (open (ls) (if (and (listp ls) (= (length ls) 1)) (car ls) ls)))
-          (open
-           (mapcar
-            (lambda (sub-lis)
-	      (if (listp sub-lis)
-		  (org-babel-ref-index-list remainder sub-lis)
-		sub-lis))
-            (if (or (= 0 (length portion)) (string-match ind-re portion))
-                (mapcar
-		 (lambda (n) (nth n lis))
-		 (apply 'org-number-sequence
-			(if (and (> (length portion) 0) (match-string 2 portion))
-			    (list
-			     (wrap (string-to-number (match-string 2 portion)))
-			     (wrap (string-to-number (match-string 3 portion))))
-			  (list (wrap 0) (wrap -1)))))
-              (list (nth (wrap (string-to-number portion)) lis)))))))
-    lis))
+      (let* ((ind-re "\\(\\([-[:digit:]]+\\):\\([-[:digit:]]+\\)\\|\*\\)")
+	     (lgth (length lis))
+	     (portion (match-string 1 index))
+	     (remainder (substring index (match-end 0)))
+	     (wrap (lambda (num) (if (< num 0) (+ lgth num) num)))
+	     (open (lambda (ls) (if (and (listp ls) (= (length ls) 1)) (car ls) ls))))
+	(funcall
+	 open
+	 (mapcar
+	  (lambda (sub-lis)
+	    (if (listp sub-lis)
+		(org-babel-ref-index-list remainder sub-lis)
+	      sub-lis))
+	  (if (or (= 0 (length portion)) (string-match ind-re portion))
+	      (mapcar
+	       (lambda (n) (nth n lis))
+	       (apply 'org-number-sequence
+		      (if (and (> (length portion) 0) (match-string 2 portion))
+			  (list
+			   (funcall wrap (string-to-number (match-string 2 portion)))
+			   (funcall wrap (string-to-number (match-string 3 portion))))
+			(list (funcall wrap 0) (funcall wrap -1)))))
+	    (list (nth (funcall wrap (string-to-number portion)) lis)))))))
+  lis)
 
 (defun org-babel-ref-split-args (arg-string)
   "Split ARG-STRING into top-level arguments of balanced parenthesis."

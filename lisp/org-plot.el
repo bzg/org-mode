@@ -144,7 +144,8 @@ and dependant variables."
 		   (dotimes (col (length (first table)))
 		     (setf collector (cons col collector)))
 		   collector)))
-	 row-vals (counter 0))
+	 (counter 0)
+	 row-vals)
     (when (>= ind 0) ;; collect values of ind col
       (setf row-vals (mapcar (lambda (row) (setf counter (+ 1 counter))
 			       (cons counter (nth ind row))) table)))
@@ -159,26 +160,26 @@ and dependant variables."
     ;; write table to gnuplot grid datafile format
     (with-temp-file data-file
       (let ((num-rows (length table)) (num-cols (length (first table)))
+	    (gnuplot-row (lambda (col row value)
+			   (setf col (+ 1 col)) (setf row (+ 1 row))
+			   (format "%f  %f  %f\n%f  %f  %f\n"
+				   col (- row 0.5) value ;; lower edge
+				   col (+ row 0.5) value))) ;; upper edge
 	    front-edge back-edge)
-	(org-flet ((gnuplot-row (col row value)
-			    (setf col (+ 1 col)) (setf row (+ 1 row))
-			    (format "%f  %f  %f\n%f  %f  %f\n"
-				    col (- row 0.5) value ;; lower edge
-				    col (+ row 0.5) value))) ;; upper edge
-	  (dotimes (col num-cols)
-	    (dotimes (row num-rows)
-	      (setf back-edge
-		    (concat back-edge
-			    (gnuplot-row (- col 1) row (string-to-number
-							(nth col (nth row table))))))
-	      (setf front-edge
-		    (concat front-edge
-			    (gnuplot-row col row (string-to-number
-						  (nth col (nth row table)))))))
-	    ;; only insert once per row
-	    (insert back-edge) (insert "\n") ;; back edge
-	    (insert front-edge) (insert "\n") ;; front edge
-	    (setf back-edge "") (setf front-edge "")))))
+	(dotimes (col num-cols)
+	  (dotimes (row num-rows)
+	    (setf back-edge
+		  (concat back-edge
+			  (funcall gnuplot-row (- col 1) row
+				   (string-to-number (nth col (nth row table))))))
+	    (setf front-edge
+		  (concat front-edge
+			  (funcall gnuplot-row col row
+				   (string-to-number (nth col (nth row table)))))))
+	  ;; only insert once per row
+	  (insert back-edge) (insert "\n") ;; back edge
+	  (insert front-edge) (insert "\n") ;; front edge
+	  (setf back-edge "") (setf front-edge ""))))
     row-vals))
 
 (defun org-plot/gnuplot-script (data-file num-cols params &optional preface)
