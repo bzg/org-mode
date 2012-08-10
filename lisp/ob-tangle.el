@@ -144,19 +144,19 @@ This function exports the source code using
 `org-babel-tangle' and then loads the resulting file using
 `load-file'."
   (interactive "fFile to load: ")
-  (org-flet ((age (file)
-              (float-time
-               (time-subtract (current-time)
-                              (nth 5 (or (file-attributes (file-truename file))
-                                         (file-attributes file)))))))
-    (let* ((base-name (file-name-sans-extension file))
-           (exported-file (concat base-name ".el")))
-      ;; tangle if the org-mode file is newer than the elisp file
-      (unless (and (file-exists-p exported-file)
-		   (> (age file) (age exported-file)))
-        (org-babel-tangle-file file exported-file "emacs-lisp"))
-      (load-file exported-file)
-      (message "loaded %s" exported-file))))
+  (let* ((age (lambda (file)
+		(float-time
+		 (time-subtract (current-time)
+				(nth 5 (or (file-attributes (file-truename file))
+					   (file-attributes file)))))))
+	 (base-name (file-name-sans-extension file))
+	 (exported-file (concat base-name ".el")))
+    ;; tangle if the org-mode file is newer than the elisp file
+    (unless (and (file-exists-p exported-file)
+		 (> (funcall age file) (funcall age exported-file)))
+      (org-babel-tangle-file file exported-file "emacs-lisp"))
+    (load-file exported-file)
+    (message "loaded %s" exported-file)))
 
 ;;;###autoload
 (defun org-babel-tangle-file (file &optional target-file lang)

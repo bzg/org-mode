@@ -628,10 +628,10 @@ This uses `bibtex-parse-entry'."
   (interactive)
   (when (= (length org-bibtex-entries) 0)
     (error "No entries in `org-bibtex-entries'."))
-  (let ((entry (pop org-bibtex-entries))
-	(org-special-properties nil) ; avoids errors with `org-entry-put'
-	(val (lambda (field) (cdr (assoc field entry))))
-	(togtag (lambda (tag) (org-toggle-tag tag 'on))))
+  (let* ((entry (pop org-bibtex-entries))
+	 (org-special-properties nil) ; avoids errors with `org-entry-put'
+	 (val (lambda (field) (cdr (assoc field entry))))
+	 (togtag (lambda (tag) (org-toggle-tag tag 'on))))
     (org-insert-heading)
     (insert (funcall val :title))
     (org-bibtex-put "TITLE" (funcall val :title))

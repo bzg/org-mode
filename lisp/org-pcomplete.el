@@ -31,6 +31,7 @@
   (require 'cl))
 
 (require 'org-macs)
+(require 'org-compat)
 (require 'pcomplete)
 
 (declare-function org-split-string "org" (string &optional separators))
