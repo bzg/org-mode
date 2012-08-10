@@ -1070,8 +1070,7 @@ If FREE-CACHE, empty the cache."
   "Initialize the projects cache if not initialized yet and return it."
 
   (unless project-name
-    (error "%s%s" "Cannot initialize `org-e-publish-cache' without projects name"
-	   " in `org-e-publish-initialize-cache'"))
+    (error "Cannot initialize `org-e-publish-cache' without projects name in `org-e-publish-initialize-cache'"))
 
   (unless (file-exists-p org-e-publish-timestamp-directory)
     (make-directory org-e-publish-timestamp-directory t))
@@ -1184,15 +1183,11 @@ Returns value on success, else nil."
     (error "`org-e-publish-cache-set' called, but no cache present"))
   (puthash key value org-e-publish-cache))
 
-(defun org-e-publish-cache-ctime-of-src (filename)
+(defun org-publish-cache-ctime-of-src (f)
   "Get the FILENAME ctime as an integer."
-  (let* ((symlink-maybe (or (file-symlink-p filename) filename))
-	 (src-attr
-	  (file-attributes
-	   (if (file-name-absolute-p symlink-maybe) symlink-maybe
-	     (expand-file-name symlink-maybe (file-name-directory filename))))))
-    (+ (lsh (car (nth 5 src-attr)) 16)
-       (cadr (nth 5 src-attr)))))
+  (let ((attr (file-attributes (expand-file-name (or (file-symlink-p f) f)))))
+    (+ (lsh (car (nth 5 attr)) 16)
+       (cadr (nth 5 attr)))))
 
 
 (provide 'org-e-publish)
