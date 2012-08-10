@@ -315,7 +315,7 @@ You could use brackets to delimit on what part the link will be.
 			 (format "%s" (or pub-func ""))))
   (concat "X" (if (fboundp 'sha1) (sha1 filename) (md5 filename))))
 
-(defun org-publish-needed-p (filename &optional pub-dir pub-func true-pub-dir)
+(defun org-publish-needed-p (filename &optional pub-dir pub-func true-pub-dir base-dir)
   "Return t if FILENAME should be published in PUB-DIR using PUB-FUNC.
 TRUE-PUB-DIR is where the file will truly end up.  Currently we are not using
 this - maybe it can eventually be used to check if the file is present at
@@ -325,7 +325,7 @@ function can still decide about that independently."
   (let ((rtn
 	 (if org-publish-use-timestamps-flag
 	     (org-publish-cache-file-needs-publishing
-	      filename pub-dir pub-func)
+	      filename pub-dir pub-func base-dir)
 	   ;; don't use timestamps, always return t
 	   t)))
     (if rtn
@@ -334,11 +334,11 @@ function can still decide about that independently."
 	(message   "Skipping unmodified file %s" filename)))
     rtn))
 
-(defun org-publish-update-timestamp (filename &optional pub-dir pub-func)
+(defun org-publish-update-timestamp (filename &optional pub-dir pub-func base-dir)
   "Update publishing timestamp for file FILENAME.
 If there is no timestamp, create one."
   (let ((key (org-publish-timestamp-filename filename pub-dir pub-func))
-	(stamp (org-publish-cache-ctime-of-src filename)))
+	(stamp (org-publish-cache-ctime-of-src filename base-dir)))
     (org-publish-cache-set key stamp)))
 
 (defun org-publish-remove-all-timestamps ()
@@ -705,15 +705,14 @@ See `org-publish-projects'."
     (if (listp publishing-function)
 	;; allow chain of publishing functions
 	(mapc (lambda (f)
-		(when (org-publish-needed-p filename pub-dir f tmp-pub-dir)
+		(when (org-publish-needed-p filename pub-dir f tmp-pub-dir base-dir)
 		  (funcall f project-plist filename tmp-pub-dir)
-		  (org-publish-update-timestamp filename pub-dir f)))
+		  (org-publish-update-timestamp filename pub-dir f base-dir)))
 	      publishing-function)
-      (when (org-publish-needed-p filename pub-dir publishing-function
-				  tmp-pub-dir)
+      (when (org-publish-needed-p filename pub-dir publishing-function tmp-pub-dir base-dir)
 	(funcall publishing-function project-plist filename tmp-pub-dir)
 	(org-publish-update-timestamp
-	 filename pub-dir publishing-function)))
+	 filename pub-dir publishing-function base-dir)))
     (unless no-cache (org-publish-write-cache-file))))
 
 (defun org-publish-projects (projects)
@@ -1103,7 +1102,7 @@ If FREE-CACHE, empty the cache."
       (clrhash org-publish-cache))
   (setq org-publish-cache nil))
 
-(defun org-publish-cache-file-needs-publishing (filename &optional pub-dir pub-func)
+(defun org-publish-cache-file-needs-publishing (filename &optional pub-dir pub-func base-dir)
   "Check the timestamp of the last publishing of FILENAME.
 Return `t', if the file needs publishing.  The function also
 checks if any included files have been more recently published,
@@ -1123,12 +1122,12 @@ so that the file including them will be republished as well."
 	(while (re-search-forward "^#\\+include:[ \t]+\"\\([^\t\n\r\"]*\\)\"[ \t]*.*$" nil t)
 	  (let* ((included-file (expand-file-name (match-string 1))))
 	    (add-to-list 'included-files-ctime
-			 (org-publish-cache-ctime-of-src included-file) t))))
+			 (org-publish-cache-ctime-of-src included-file base-dir) t))))
       ;; FIXME don't kill current buffer
       (unless visiting (kill-buffer buf)))
     (if (null pstamp)
 	t
-      (let ((ctime (org-publish-cache-ctime-of-src filename)))
+      (let ((ctime (org-publish-cache-ctime-of-src filename base-dir)))
 	(or (< pstamp ctime)
 	    (when included-files-ctime
 	      (not (null (delq nil (mapcar (lambda(ct) (< ctime ct))
@@ -1183,9 +1182,10 @@ Returns value on success, else nil."
       (error "`org-publish-cache-set' called, but no cache present"))
   (puthash key value org-publish-cache))
 
-(defun org-publish-cache-ctime-of-src (f)
+(defun org-publish-cache-ctime-of-src (f base-dir)
   "Get the FILENAME ctime as an integer."
-  (let ((attr (file-attributes (expand-file-name (or (file-symlink-p f) f)))))
+  (let ((attr (file-attributes
+	       (expand-file-name (or (file-symlink-p f) f) base-dir))))
     (+ (lsh (car (nth 5 attr)) 16)
        (cadr (nth 5 attr)))))
 
