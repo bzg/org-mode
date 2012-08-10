@@ -219,42 +219,42 @@ will be filed as a child of the target headline.  It can also be
 freely formatted text.  Furthermore, the following %-escapes will
 be replaced with content and expanded in this order:
 
-  %[pathname] insert the contents of the file given by `pathname'.
-  %(sexp)     evaluate elisp `(sexp)' and replace with the result.
-  %<...>      the result of format-time-string on the ... format specification.
-  %t          time stamp, date only.
-  %T          time stamp with date and time.
-  %u, %U      like the above, but inactive time stamps.
-  %i          initial content, copied from the active region.  If %i is
+  %[pathname] Insert the contents of the file given by `pathname'.
+  %(sexp)     Evaluate elisp `(sexp)' and replace with the result.
+  %<...>      The result of format-time-string on the ... format specification.
+  %t          Time stamp, date only.
+  %T          Time stamp with date and time.
+  %u, %U      Like the above, but inactive time stamps.
+  %i          Initial content, copied from the active region.  If %i is
               indented, the entire inserted text will be indented as well.
-  %a          annotation, normally the link created with `org-store-link'.
-  %A          like %a, but prompt for the description part.
-  %l          like %a, but only insert the literal link.
-  %c          current kill ring head.
-  %x          content of the X clipboard.
-  %k          title of currently clocked task.
-  %K          link to currently clocked task.
-  %n          user name (taken from `user-full-name').
-  %f          file visited by current buffer when org-capture was called.
-  %F          full path of the file or directory visited by current buffer.
-  %:keyword   specific information for certain link types, see below.
-  %^g         prompt for tags, with completion on tags in target file.
-  %^G         prompt for tags, with completion on all tags in all agenda files.
-  %^t         like %t, but prompt for date.  Similarly %^T, %^u, %^U.
+  %a          Annotation, normally the link created with `org-store-link'.
+  %A          Like %a, but prompt for the description part.
+  %l          Like %a, but only insert the literal link.
+  %c          Current kill ring head.
+  %x          Content of the X clipboard.
+  %k          Title of currently clocked task.
+  %K          Link to currently clocked task.
+  %n          User name (taken from `user-full-name').
+  %f          File visited by current buffer when org-capture was called.
+  %F          Full path of the file or directory visited by current buffer.
+  %:keyword   Specific information for certain link types, see below.
+  %^g         Prompt for tags, with completion on tags in target file.
+  %^G         Prompt for tags, with completion on all tags in all agenda files.
+  %^t         Like %t, but prompt for date.  Similarly %^T, %^u, %^U.
               You may define a prompt like %^{Please specify birthday.
-  %^C         interactive selection of which kill or clip to use.
-  %^L         like %^C, but insert as link.
-  %^{prop}p   prompt the user for a value for property `prop'.
-  %^{prompt}  prompt the user for a string and replace this sequence with it.
+  %^C         Interactive selection of which kill or clip to use.
+  %^L         Like %^C, but insert as link.
+  %^{prop}p   Prompt the user for a value for property `prop'.
+  %^{prompt}  Prompt the user for a string and replace this sequence with it.
               A default value and a completion table ca be specified like this:
               %^{prompt|default|completion2|completion3|...}.
   %?          After completing the template, position cursor here.
   %\\n         Insert the text entered at the nth %^{prompt}, where `n' is
               a number, starting from 1.
 
-Apart from these general escapes, you can access information specific to the
-link type that is created.  For example, calling `org-capture' in emails
-or gnus will record the author and the subject of the message, which you
+Apart from these general escapes, you can access information specific to
+the link type that is created.  For example, calling `org-capture' in emails
+or in Gnus will record the author and the subject of the message, which you
 can access with \"%:from\" and \"%:subject\", respectively.  Here is a
 complete list of what is recorded for each link type.
 
@@ -933,8 +933,9 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
     (setq end (point))
     (org-capture-mark-kill-region beg (1- end))
     (org-capture-narrow beg (1- end))
-    (goto-char beg)
-    (if (re-search-forward "%\\?" end t) (replace-match ""))))
+    (if (or (re-search-backward "%\\?" beg t)
+	    (re-search-forward "%\\?" end t))
+	(replace-match ""))))
 
 (defun org-capture-place-item ()
   "Place the template as a new plain list item."
@@ -990,7 +991,9 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
     (setq end (point))
     (org-capture-mark-kill-region beg (1- end))
     (org-capture-narrow beg (1- end))
-    (if (re-search-forward "%\\?" end t) (replace-match ""))))
+    (if (or (re-search-backward "%\\?" beg t)
+	    (re-search-forward "%\\?" end t))
+	(replace-match ""))))
 
 (defun org-capture-place-table-line ()
   "Place the template as a table line."
@@ -1068,7 +1071,9 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
       (setq end (point))))
     (goto-char beg)
     (org-capture-position-for-last-stored 'table-line)
-    (if (re-search-forward "%\\?" end t) (replace-match ""))
+    (if (or (re-search-backward "%\\?" end t)
+	    (re-search-forward "%\\?" beg t))
+	(replace-match ""))
     (org-table-align)))
 
 (defun org-capture-place-plain-text ()
@@ -1103,7 +1108,9 @@ Of course, if exact position has been required, just put it there."
     (setq end (point))
     (org-capture-mark-kill-region beg (1- end))
     (org-capture-narrow beg (1- end))
-    (if (re-search-forward "%\\?" end t) (replace-match ""))))
+    (if (or (re-search-backward "%\\?" beg t)
+	    (re-search-forward "%\\?" end t))
+	(replace-match ""))))
 
 (defun org-capture-mark-kill-region (beg end)
   "Mark the region that will have to be killed when aborting capture."
