@@ -209,40 +209,41 @@ manner suitable for prepending to a user-specified script."
 		     ('2d "plot")
 		     ('3d "splot")
 		     ('grid "splot")))
-	 (script "reset") plot-lines)
-    (org-flet ((add-to-script (line) (setf script (format "%s\n%s" script line))))
-      (when file ;; output file
-	(add-to-script (format "set term %s" (file-name-extension file)))
-	(add-to-script (format "set output '%s'" file)))
-      (case type ;; type
-	('2d ())
-	('3d (if map (add-to-script "set map")))
-	('grid (if map
-		   (add-to-script "set pm3d map")
-		 (add-to-script "set pm3d"))))
-      (when title (add-to-script (format "set title '%s'" title))) ;; title
-      (when lines (mapc (lambda (el) (add-to-script el)) lines)) ;; line
-      (when sets ;; set
-	(mapc (lambda (el) (add-to-script (format "set %s" el))) sets))
-      (when x-labels ;; x labels (xtics)
-	(add-to-script
-	 (format "set xtics (%s)"
-		 (mapconcat (lambda (pair)
-			      (format "\"%s\" %d" (cdr pair) (car pair)))
-			    x-labels ", "))))
-      (when y-labels ;; y labels (ytics)
-	(add-to-script
-	 (format "set ytics (%s)"
-		 (mapconcat (lambda (pair)
-			      (format "\"%s\" %d" (cdr pair) (car pair)))
-			    y-labels ", "))))
-      (when time-ind ;; timestamp index
-	(add-to-script "set xdata time")
-	(add-to-script (concat "set timefmt \""
-			       (or timefmt ;; timefmt passed to gnuplot
-				   "%Y-%m-%d-%H:%M:%S") "\"")))
-      (unless preface
-        (case type ;; plot command
+	 (script "reset")
+					; ats = add-to-script
+	 (ats (lambda (line) (setf script (format "%s\n%s" script line)))) 
+	 plot-lines)
+    (when file ;; output file
+      (funcall ats (format "set term %s" (file-name-extension file)))
+      (funcall ats (format "set output '%s'" file)))
+    (case type ;; type
+      ('2d ())
+      ('3d (if map (funcall ats "set map")))
+      ('grid (if map (funcall ats "set pm3d map")
+	       (funcall ats "set pm3d"))))
+    (when title (funcall ats (format "set title '%s'" title))) ;; title
+    (when lines (mapc (lambda (el) (funcall ats el)) lines)) ;; line
+    (when sets ;; set
+      (mapc (lambda (el) (funcall ats (format "set %s" el))) sets))
+    (when x-labels ;; x labels (xtics)
+      (funcall ats
+	       (format "set xtics (%s)"
+		       (mapconcat (lambda (pair)
+				    (format "\"%s\" %d" (cdr pair) (car pair)))
+				  x-labels ", "))))
+    (when y-labels ;; y labels (ytics)
+      (funcall ats
+	       (format "set ytics (%s)"
+		       (mapconcat (lambda (pair)
+				    (format "\"%s\" %d" (cdr pair) (car pair)))
+				  y-labels ", "))))
+    (when time-ind ;; timestamp index
+      (funcall ats "set xdata time")
+      (funcall ats (concat "set timefmt \""
+			   (or timefmt ;; timefmt passed to gnuplot
+			       "%Y-%m-%d-%H:%M:%S") "\"")))
+    (unless preface
+      (case type ;; plot command
 	('2d (dotimes (col num-cols)
 	       (unless (and (equal type '2d)
 			    (or (and ind (equal (+ 1 col) ind))
@@ -264,9 +265,9 @@ manner suitable for prepending to a user-specified script."
 	('grid
 	 (setq plot-lines (list (format "'%s' with %s title ''"
 					data-file with)))))
-        (add-to-script
-         (concat plot-cmd " " (mapconcat 'identity (reverse plot-lines) ",\\\n    "))))
-      script)))
+      (funcall ats
+	       (concat plot-cmd " " (mapconcat 'identity (reverse plot-lines) ",\\\n    "))))
+    script))
 
 ;;-----------------------------------------------------------------------------
 ;; facade functions
