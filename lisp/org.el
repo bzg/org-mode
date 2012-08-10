@@ -12910,7 +12910,7 @@ from the `before-change-functions' in the current buffer."
   (org-priority 'down))
 
 (defun org-priority (&optional action)
-  "Change the priority of an item by ARG.
+  "Change the priority of an item.
 ACTION can be `set', `up', `down', or a character."
   (interactive)
   (unless org-enable-priority-commands
