@@ -1045,13 +1045,12 @@ the project."
 (defun org-publish-write-cache-file (&optional free-cache)
   "Write `org-publish-cache' to file.
 If FREE-CACHE, empty the cache."
-  (unless org-publish-cache
-    (error "%s" "`org-publish-write-cache-file' called, but no cache present"))
+  (or org-publish-cache
+      (error "`org-publish-write-cache-file' called, but no cache present"))
 
   (let ((cache-file (org-publish-cache-get ":cache-file:")))
-    (unless cache-file
-      (error
-       "%s" "Cannot find cache-file name in `org-publish-write-cache-file'"))
+    (or cache-file
+	(error "Cannot find cache-file name in `org-publish-write-cache-file'"))
     (with-temp-file cache-file
       (let ((print-level nil)
 	    (print-length nil))
@@ -1068,9 +1067,8 @@ If FREE-CACHE, empty the cache."
 (defun org-publish-initialize-cache (project-name)
   "Initialize the projects cache if not initialized yet and return it."
 
-  (unless project-name
-    (error "%s%s" "Cannot initialize `org-publish-cache' without projects name"
-	   " in `org-publish-initialize-cache'"))
+  (or project-name
+      (error "Cannot initialize `org-publish-cache' without projects name in `org-publish-initialize-cache'"))
 
   (unless (file-exists-p org-publish-timestamp-directory)
     (make-directory org-publish-timestamp-directory t))
@@ -1110,8 +1108,8 @@ If FREE-CACHE, empty the cache."
 Return `t', if the file needs publishing.  The function also
 checks if any included files have been more recently published,
 so that the file including them will be republished as well."
-  (unless org-publish-cache
-    (error "%s" "`org-publish-cache-file-needs-publishing' called, but no cache present"))
+  (or org-publish-cache
+      (error "`org-publish-cache-file-needs-publishing' called, but no cache present"))
   (let* ((key (org-publish-timestamp-filename filename pub-dir pub-func))
 	 (pstamp (org-publish-cache-get key))
 	 (visiting (find-buffer-visiting filename))
@@ -1174,15 +1172,15 @@ If the entry will be created, unless NO-CREATE is not nil."
   "Return the value stored in `org-publish-cache' for key KEY.
 Returns nil, if no value or nil is found, or the cache does not
 exist."
-  (unless org-publish-cache
-    (error "%s" "`org-publish-cache-get' called, but no cache present"))
+  (or org-publish-cache
+      (error "`org-publish-cache-get' called, but no cache present"))
   (gethash key org-publish-cache))
 
 (defun org-publish-cache-set (key value)
   "Store KEY VALUE pair in `org-publish-cache'.
 Returns value on success, else nil."
-  (unless org-publish-cache
-    (error "%s" "`org-publish-cache-set' called, but no cache present"))
+  (or org-publish-cache
+      (error "`org-publish-cache-set' called, but no cache present"))
   (puthash key value org-publish-cache))
 
 (defun org-publish-cache-ctime-of-src (f)
