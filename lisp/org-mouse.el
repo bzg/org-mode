@@ -269,10 +269,8 @@ after the current heading."
 
 For the acceptable UNITS, see `org-timestamp-change'."
   (interactive)
-  (org-flet ((org-read-date (&rest rest) (current-time)))
-     (org-time-stamp nil))
-  (when shift
-    (org-timestamp-change shift units)))
+  (org-time-stamp nil)
+  (when shift (org-timestamp-change shift units)))
 
 (defun org-mouse-keyword-menu (keywords function &optional selected itemformat)
   "A helper function.
@@ -375,8 +373,7 @@ nor a function, elements of KEYWORDS are used directly."
 
 (defun org-mouse-set-priority (priority)
   "Set the priority of the current headline to PRIORITY."
-  (org-flet ((read-char-exclusive () priority))
-    (org-priority)))
+  (org-priority priority))
 
 (defvar org-mouse-priority-regexp "\\[#\\([A-Z]\\)\\]"
   "Regular expression matching the priority indicator.
@@ -532,8 +529,7 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      ,@(org-mouse-keyword-menu
 	(mapcar 'car org-agenda-custom-commands)
 	#'(lambda (key)
-	   (eval `(org-flet ((read-char-exclusive () (string-to-char ,key)))
-		      (org-agenda nil))))
+	   (eval `(org-agenda nil (string-to-char ,key))))
 	nil
 	#'(lambda (key)
 	   (let ((entry (assoc key org-agenda-custom-commands)))
@@ -623,234 +619,234 @@ This means, between the beginning of line and the point."
   (insert-for-yank (concat " [[" (current-kill 0) "]] ")))
 
 (defun org-mouse-context-menu (&optional event)
-  (let ((stamp-prefixes (list org-deadline-string org-scheduled-string))
-	(contextlist (org-context)))
-    (org-flet ((get-context (context) (org-mouse-get-context contextlist context)))
-  (cond
-   ((org-mouse-mark-active)
-    (let ((region-string (buffer-substring (region-beginning) (region-end))))
+  (let* ((stamp-prefixes (list org-deadline-string org-scheduled-string))
+	 (contextlist (org-context))
+	 (get-context (lambda (context) (org-mouse-get-context contextlist context))))
+    (cond
+     ((org-mouse-mark-active)
+      (let ((region-string (buffer-substring (region-beginning) (region-end))))
+	(popup-menu
+	 `(nil
+	   ["Sparse Tree" (org-occur ',region-string)]
+	   ["Find in Buffer" (occur ',region-string)]
+	   ["Grep in Current Dir"
+	    (grep (format "grep -rnH -e '%s' *" ',region-string))]
+	   ["Grep in Parent Dir"
+	    (grep (format "grep -rnH -e '%s' ../*" ',region-string))]
+	   "--"
+	   ["Convert to Link"
+	    (progn (save-excursion (goto-char (region-beginning)) (insert "[["))
+		   (save-excursion (goto-char (region-end)) (insert "]]")))]
+	   ["Insert Link Here" (org-mouse-yank-link ',event)]))))
+     ((save-excursion (beginning-of-line) (looking-at "#\\+STARTUP: \\(.*\\)"))
       (popup-menu
        `(nil
-	 ["Sparse Tree" (org-occur ',region-string)]
-	 ["Find in Buffer" (occur ',region-string)]
-	 ["Grep in Current Dir"
-	  (grep (format "grep -rnH -e '%s' *" ',region-string))]
-	 ["Grep in Parent Dir"
-	  (grep (format "grep -rnH -e '%s' ../*" ',region-string))]
-	 "--"
-	 ["Convert to Link"
-	  (progn (save-excursion (goto-char (region-beginning)) (insert "[["))
-		 (save-excursion (goto-char (region-end)) (insert "]]")))]
-	 ["Insert Link Here" (org-mouse-yank-link ',event)]))))
-   ((save-excursion (beginning-of-line) (looking-at "#\\+STARTUP: \\(.*\\)"))
-    (popup-menu
-     `(nil
-       ,@(org-mouse-list-options-menu (mapcar 'car org-startup-options)
-				      'org-mode-restart))))
-   ((or (eolp)
-	(and (looking-at "\\(  \\|\t\\)\\(+:[0-9a-zA-Z_:]+\\)?\\(  \\|\t\\)+$")
-	     (org-looking-back "  \\|\t")))
-    (org-mouse-popup-global-menu))
-   ((get-context :checkbox)
-    (popup-menu
-     '(nil
-       ["Toggle" org-toggle-checkbox t]
-       ["Remove" org-mouse-remove-match-and-spaces t]
-       ""
-       ["All Clear" (org-mouse-for-each-item
-		     (lambda ()
-		       (when (save-excursion (org-at-item-checkbox-p))
-			 (replace-match "[ ]"))))]
-       ["All Set" (org-mouse-for-each-item
+	 ,@(org-mouse-list-options-menu (mapcar 'car org-startup-options)
+					'org-mode-restart))))
+     ((or (eolp)
+	  (and (looking-at "\\(  \\|\t\\)\\(+:[0-9a-zA-Z_:]+\\)?\\(  \\|\t\\)+$")
+	       (org-looking-back "  \\|\t")))
+      (org-mouse-popup-global-menu))
+     ((funcall get-context :checkbox)
+      (popup-menu
+       '(nil
+	 ["Toggle" org-toggle-checkbox t]
+	 ["Remove" org-mouse-remove-match-and-spaces t]
+	 ""
+	 ["All Clear" (org-mouse-for-each-item
+		       (lambda ()
+			 (when (save-excursion (org-at-item-checkbox-p))
+			   (replace-match "[ ]"))))]
+	 ["All Set" (org-mouse-for-each-item
 		     (lambda ()
 		       (when (save-excursion (org-at-item-checkbox-p))
 			 (replace-match "[X]"))))]
-       ["All Toggle" (org-mouse-for-each-item 'org-toggle-checkbox) t]
-       ["All Remove" (org-mouse-for-each-item
-		     (lambda ()
-		       (when (save-excursion (org-at-item-checkbox-p))
-			 (org-mouse-remove-match-and-spaces))))]
-       )))
-   ((and (org-mouse-looking-at "\\b\\w+" "a-zA-Z0-9_")
-	 (member (match-string 0) org-todo-keywords-1))
-    (popup-menu
-     `(nil
-       ,@(org-mouse-todo-menu (match-string 0))
-       "--"
-       ["Check TODOs" org-show-todo-tree t]
-       ["List all TODO keywords" org-todo-list t]
-       [,(format "List only %s" (match-string 0))
-	(org-todo-list (match-string 0)) t]
-       )))
-   ((and (org-mouse-looking-at "\\b[A-Z]+:" "A-Z")
-	 (member (match-string 0) stamp-prefixes))
-    (popup-menu
-     `(nil
-       ,@(org-mouse-keyword-replace-menu stamp-prefixes)
-       "--"
-       ["Check Deadlines" org-check-deadlines t]
-       )))
-   ((org-mouse-looking-at org-mouse-priority-regexp "[]A-Z#") ; priority
-    (popup-menu `(nil ,@(org-mouse-keyword-replace-menu
-			 (org-mouse-priority-list) 1 "Priority %s" t))))
-   ((get-context :link)
-    (popup-menu
-     '(nil
-       ["Open" org-open-at-point t]
-       ["Open in Emacs" (org-open-at-point t) t]
-       "--"
-       ["Copy link" (org-kill-new (match-string 0))]
-       ["Cut link"
-	(progn
-	  (kill-region (match-beginning 0) (match-end 0))
-	  (just-one-space))]
-       "--"
-       ["Grep for TODOs"
-	(grep (format "grep -nH -i 'todo\\|fixme' %s*" (match-string 2)))]
-;       ["Paste file link" ((insert "file:") (yank))]
-       )))
-   ((org-mouse-looking-at ":\\([A-Za-z0-9_]+\\):" "A-Za-z0-9_" -1) ;tags
-    (popup-menu
-     `(nil
-       [,(format "Display '%s'" (match-string 1))
-	(org-tags-view nil ,(match-string 1))]
-       [,(format "Sparse Tree '%s'" (match-string 1))
-	(org-tags-sparse-tree nil ,(match-string 1))]
-       "--"
-       ,@(org-mouse-tag-menu))))
-   ((org-at-timestamp-p)
-    (popup-menu
-     '(nil
-       ["Show Day" org-open-at-point t]
-       ["Change Timestamp" org-time-stamp t]
-       ["Delete Timestamp" (org-mouse-delete-timestamp) t]
-       ["Compute Time Range" org-evaluate-time-range (org-at-date-range-p)]
-       "--"
-       ["Set for Today" org-mouse-timestamp-today]
-       ["Set for Tomorrow" (org-mouse-timestamp-today 1 'day)]
-       ["Set in 1 Week" (org-mouse-timestamp-today 7 'day)]
-       ["Set in 2 Weeks" (org-mouse-timestamp-today 14 'day)]
-       ["Set in a Month" (org-mouse-timestamp-today 1 'month)]
-       "--"
-       ["+ 1 Day" (org-timestamp-change 1 'day)]
-       ["+ 1 Week" (org-timestamp-change 7 'day)]
-       ["+ 1 Month" (org-timestamp-change 1 'month)]
-       "--"
-       ["- 1 Day" (org-timestamp-change -1 'day)]
-       ["- 1 Week" (org-timestamp-change -7 'day)]
-       ["- 1 Month" (org-timestamp-change -1 'month)])))
-   ((get-context :table-special)
-    (let ((mdata (match-data)))
-      (incf (car mdata) 2)
-      (store-match-data mdata))
-    (message "match: %S" (match-string 0))
-    (popup-menu `(nil ,@(org-mouse-keyword-replace-menu
-			 '(" " "!" "^" "_" "$" "#" "*" "'") 0
-			 (lambda (mark)
-			   (case (string-to-char mark)
-			     (?  "( ) Nothing Special")
-			     (?! "(!) Column Names")
-			     (?^ "(^) Field Names Above")
-			     (?_ "(^) Field Names Below")
-			     (?$ "($) Formula Parameters")
-			     (?# "(#) Recalculation: Auto")
-			     (?* "(*) Recalculation: Manual")
-			     (?' "(') Recalculation: None"))) t))))
-   ((assq :table contextlist)
-    (popup-menu
-     '(nil
-       ["Align Table" org-ctrl-c-ctrl-c]
-       ["Blank Field" org-table-blank-field]
-       ["Edit Field" org-table-edit-field]
-	"--"
-	("Column"
-	 ["Move Column Left" org-metaleft]
-	 ["Move Column Right" org-metaright]
-	 ["Delete Column" org-shiftmetaleft]
-	 ["Insert Column" org-shiftmetaright]
-	 "--"
-	 ["Enable Narrowing" (setq org-table-limit-column-width (not org-table-limit-column-width)) :selected org-table-limit-column-width :style toggle])
-	("Row"
-	 ["Move Row Up" org-metaup]
-	 ["Move Row Down" org-metadown]
-	 ["Delete Row" org-shiftmetaup]
-	 ["Insert Row" org-shiftmetadown]
-	 ["Sort lines in region" org-table-sort-lines (org-at-table-p)]
-	 "--"
-	 ["Insert Hline" org-table-insert-hline])
-	("Rectangle"
-	 ["Copy Rectangle" org-copy-special]
-	 ["Cut Rectangle" org-cut-special]
-	 ["Paste Rectangle" org-paste-special]
-	 ["Fill Rectangle" org-table-wrap-region])
-	"--"
-	["Set Column Formula" org-table-eval-formula]
-	["Set Field Formula" (org-table-eval-formula '(4))]
-	["Edit Formulas" org-table-edit-formulas]
-	"--"
-	["Recalculate Line" org-table-recalculate]
-	["Recalculate All" (org-table-recalculate '(4))]
-	["Iterate All" (org-table-recalculate '(16))]
-	"--"
-	["Toggle Recalculate Mark" org-table-rotate-recalc-marks]
-	["Sum Column/Rectangle" org-table-sum
-	 :active (or (org-at-table-p) (org-region-active-p))]
-	["Field Info" org-table-field-info]
-	["Debug Formulas"
-	 (setq org-table-formula-debug (not org-table-formula-debug))
-	 :style toggle :selected org-table-formula-debug]
-	)))
-   ((and (assq :headline contextlist) (not (eolp)))
-    (let ((priority (org-mouse-get-priority t)))
+	 ["All Toggle" (org-mouse-for-each-item 'org-toggle-checkbox) t]
+	 ["All Remove" (org-mouse-for-each-item
+			(lambda ()
+			  (when (save-excursion (org-at-item-checkbox-p))
+			    (org-mouse-remove-match-and-spaces))))]
+	 )))
+     ((and (org-mouse-looking-at "\\b\\w+" "a-zA-Z0-9_")
+	   (member (match-string 0) org-todo-keywords-1))
       (popup-menu
-       `("Headline Menu"
-	 ("Tags and Priorities"
-	  ,@(org-mouse-keyword-menu
-	     (org-mouse-priority-list)
-	     #'(lambda (keyword)
-		(org-mouse-set-priority (string-to-char keyword)))
-	     priority "Priority %s")
-	  "--"
-	  ,@(org-mouse-tag-menu))
-	 ("TODO Status"
-	  ,@(org-mouse-todo-menu (org-get-todo-state)))
-	 ["Show Tags"
-	  (with-current-buffer org-mouse-main-buffer (org-agenda-show-tags))
-	  :visible (not org-mouse-direct)]
-	 ["Show Priority"
-	  (with-current-buffer org-mouse-main-buffer (org-agenda-show-priority))
-	  :visible (not org-mouse-direct)]
-	 ,@(if org-mouse-direct '("--") nil)
-	 ["New Heading" org-mouse-insert-heading :visible org-mouse-direct]
-	 ["Set Deadline"
-	  (progn (org-mouse-end-headline) (insert " ") (org-deadline))
-	  :active (not (save-excursion
-			 (org-mouse-re-search-line org-deadline-regexp)))]
-	 ["Schedule Task"
-	  (progn (org-mouse-end-headline) (insert " ") (org-schedule))
-	  :active (not (save-excursion
-			 (org-mouse-re-search-line org-scheduled-regexp)))]
-	 ["Insert Timestamp"
-	  (progn (org-mouse-end-headline) (insert " ") (org-time-stamp nil)) t]
-;	 ["Timestamp (inactive)" org-time-stamp-inactive t]
+       `(nil
+	 ,@(org-mouse-todo-menu (match-string 0))
 	 "--"
-	 ["Archive Subtree" org-archive-subtree]
-	 ["Cut Subtree"  org-cut-special]
-	 ["Copy Subtree"  org-copy-special]
-	 ["Paste Subtree"  org-paste-special :visible org-mouse-direct]
-	 ("Sort Children"
-	  ["Alphabetically" (org-sort-entries nil ?a)]
-	  ["Numerically" (org-sort-entries nil ?n)]
-	  ["By Time/Date" (org-sort-entries nil ?t)]
-	  "--"
-	  ["Reverse Alphabetically" (org-sort-entries nil ?A)]
-	  ["Reverse Numerically" (org-sort-entries nil ?N)]
-	  ["Reverse By Time/Date" (org-sort-entries nil ?T)])
+	 ["Check TODOs" org-show-todo-tree t]
+	 ["List all TODO keywords" org-todo-list t]
+	 [,(format "List only %s" (match-string 0))
+	  (org-todo-list (match-string 0)) t]
+	 )))
+     ((and (org-mouse-looking-at "\\b[A-Z]+:" "A-Z")
+	   (member (match-string 0) stamp-prefixes))
+      (popup-menu
+       `(nil
+	 ,@(org-mouse-keyword-replace-menu stamp-prefixes)
 	 "--"
-	 ["Move Trees" org-mouse-move-tree :active nil]
-	 ))))
-   (t
-    (org-mouse-popup-global-menu))))))
+	 ["Check Deadlines" org-check-deadlines t]
+	 )))
+     ((org-mouse-looking-at org-mouse-priority-regexp "[]A-Z#") ; priority
+      (popup-menu `(nil ,@(org-mouse-keyword-replace-menu
+			   (org-mouse-priority-list) 1 "Priority %s" t))))
+     ((funcall get-context :link)
+      (popup-menu
+       '(nil
+	 ["Open" org-open-at-point t]
+	 ["Open in Emacs" (org-open-at-point t) t]
+	 "--"
+	 ["Copy link" (org-kill-new (match-string 0))]
+	 ["Cut link"
+	  (progn
+	    (kill-region (match-beginning 0) (match-end 0))
+	    (just-one-space))]
+	 "--"
+	 ["Grep for TODOs"
+	  (grep (format "grep -nH -i 'todo\\|fixme' %s*" (match-string 2)))]
+					;       ["Paste file link" ((insert "file:") (yank))]
+	 )))
+     ((org-mouse-looking-at ":\\([A-Za-z0-9_]+\\):" "A-Za-z0-9_" -1) ;tags
+      (popup-menu
+       `(nil
+	 [,(format "Display '%s'" (match-string 1))
+	  (org-tags-view nil ,(match-string 1))]
+	 [,(format "Sparse Tree '%s'" (match-string 1))
+	  (org-tags-sparse-tree nil ,(match-string 1))]
+	 "--"
+	 ,@(org-mouse-tag-menu))))
+     ((org-at-timestamp-p)
+      (popup-menu
+       '(nil
+	 ["Show Day" org-open-at-point t]
+	 ["Change Timestamp" org-time-stamp t]
+	 ["Delete Timestamp" (org-mouse-delete-timestamp) t]
+	 ["Compute Time Range" org-evaluate-time-range (org-at-date-range-p)]
+	 "--"
+	 ["Set for Today" org-mouse-timestamp-today]
+	 ["Set for Tomorrow" (org-mouse-timestamp-today 1 'day)]
+	 ["Set in 1 Week" (org-mouse-timestamp-today 7 'day)]
+	 ["Set in 2 Weeks" (org-mouse-timestamp-today 14 'day)]
+	 ["Set in a Month" (org-mouse-timestamp-today 1 'month)]
+	 "--"
+	 ["+ 1 Day" (org-timestamp-change 1 'day)]
+	 ["+ 1 Week" (org-timestamp-change 7 'day)]
+	 ["+ 1 Month" (org-timestamp-change 1 'month)]
+	 "--"
+	 ["- 1 Day" (org-timestamp-change -1 'day)]
+	 ["- 1 Week" (org-timestamp-change -7 'day)]
+	 ["- 1 Month" (org-timestamp-change -1 'month)])))
+     ((funcall get-context :table-special)
+      (let ((mdata (match-data)))
+	(incf (car mdata) 2)
+	(store-match-data mdata))
+      (message "match: %S" (match-string 0))
+      (popup-menu `(nil ,@(org-mouse-keyword-replace-menu
+			   '(" " "!" "^" "_" "$" "#" "*" "'") 0
+			   (lambda (mark)
+			     (case (string-to-char mark)
+			       (?  "( ) Nothing Special")
+			       (?! "(!) Column Names")
+			       (?^ "(^) Field Names Above")
+			       (?_ "(^) Field Names Below")
+			       (?$ "($) Formula Parameters")
+			       (?# "(#) Recalculation: Auto")
+			       (?* "(*) Recalculation: Manual")
+			       (?' "(') Recalculation: None"))) t))))
+     ((assq :table contextlist)
+      (popup-menu
+       '(nil
+	 ["Align Table" org-ctrl-c-ctrl-c]
+	 ["Blank Field" org-table-blank-field]
+	 ["Edit Field" org-table-edit-field]
+	 "--"
+	 ("Column"
+	  ["Move Column Left" org-metaleft]
+	  ["Move Column Right" org-metaright]
+	  ["Delete Column" org-shiftmetaleft]
+	  ["Insert Column" org-shiftmetaright]
+	  "--"
+	  ["Enable Narrowing" (setq org-table-limit-column-width (not org-table-limit-column-width)) :selected org-table-limit-column-width :style toggle])
+	 ("Row"
+	  ["Move Row Up" org-metaup]
+	  ["Move Row Down" org-metadown]
+	  ["Delete Row" org-shiftmetaup]
+	  ["Insert Row" org-shiftmetadown]
+	  ["Sort lines in region" org-table-sort-lines (org-at-table-p)]
+	  "--"
+	  ["Insert Hline" org-table-insert-hline])
+	 ("Rectangle"
+	  ["Copy Rectangle" org-copy-special]
+	  ["Cut Rectangle" org-cut-special]
+	  ["Paste Rectangle" org-paste-special]
+	  ["Fill Rectangle" org-table-wrap-region])
+	 "--"
+	 ["Set Column Formula" org-table-eval-formula]
+	 ["Set Field Formula" (org-table-eval-formula '(4))]
+	 ["Edit Formulas" org-table-edit-formulas]
+	 "--"
+	 ["Recalculate Line" org-table-recalculate]
+	 ["Recalculate All" (org-table-recalculate '(4))]
+	 ["Iterate All" (org-table-recalculate '(16))]
+	 "--"
+	 ["Toggle Recalculate Mark" org-table-rotate-recalc-marks]
+	 ["Sum Column/Rectangle" org-table-sum
+	  :active (or (org-at-table-p) (org-region-active-p))]
+	 ["Field Info" org-table-field-info]
+	 ["Debug Formulas"
+	  (setq org-table-formula-debug (not org-table-formula-debug))
+	  :style toggle :selected org-table-formula-debug]
+	 )))
+     ((and (assq :headline contextlist) (not (eolp)))
+      (let ((priority (org-mouse-get-priority t)))
+	(popup-menu
+	 `("Headline Menu"
+	   ("Tags and Priorities"
+	    ,@(org-mouse-keyword-menu
+	       (org-mouse-priority-list)
+	       #'(lambda (keyword)
+		   (org-mouse-set-priority (string-to-char keyword)))
+	       priority "Priority %s")
+	    "--"
+	    ,@(org-mouse-tag-menu))
+	   ("TODO Status"
+	    ,@(org-mouse-todo-menu (org-get-todo-state)))
+	   ["Show Tags"
+	    (with-current-buffer org-mouse-main-buffer (org-agenda-show-tags))
+	    :visible (not org-mouse-direct)]
+	   ["Show Priority"
+	    (with-current-buffer org-mouse-main-buffer (org-agenda-show-priority))
+	    :visible (not org-mouse-direct)]
+	   ,@(if org-mouse-direct '("--") nil)
+	   ["New Heading" org-mouse-insert-heading :visible org-mouse-direct]
+	   ["Set Deadline"
+	    (progn (org-mouse-end-headline) (insert " ") (org-deadline))
+	    :active (not (save-excursion
+			   (org-mouse-re-search-line org-deadline-regexp)))]
+	   ["Schedule Task"
+	    (progn (org-mouse-end-headline) (insert " ") (org-schedule))
+	    :active (not (save-excursion
+			   (org-mouse-re-search-line org-scheduled-regexp)))]
+	   ["Insert Timestamp"
+	    (progn (org-mouse-end-headline) (insert " ") (org-time-stamp nil)) t]
+					;	 ["Timestamp (inactive)" org-time-stamp-inactive t]
+	   "--"
+	   ["Archive Subtree" org-archive-subtree]
+	   ["Cut Subtree"  org-cut-special]
+	   ["Copy Subtree"  org-copy-special]
+	   ["Paste Subtree"  org-paste-special :visible org-mouse-direct]
+	   ("Sort Children"
+	    ["Alphabetically" (org-sort-entries nil ?a)]
+	    ["Numerically" (org-sort-entries nil ?n)]
+	    ["By Time/Date" (org-sort-entries nil ?t)]
+	    "--"
+	    ["Reverse Alphabetically" (org-sort-entries nil ?A)]
+	    ["Reverse Numerically" (org-sort-entries nil ?N)]
+	    ["Reverse By Time/Date" (org-sort-entries nil ?T)])
+	   "--"
+	   ["Move Trees" org-mouse-move-tree :active nil]
+	   ))))
+     (t
+      (org-mouse-popup-global-menu)))))
 
 (defun org-mouse-mark-active ()
   (and mark-active transient-mark-mode))
