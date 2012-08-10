@@ -310,14 +310,14 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 (defun org-bibtex-headline ()
   "Return a bibtex entry of the given headline as a string."
   (org-labels
-   ((val (key lst) (cdr (assoc key lst)))
-    (to (string) (intern (concat ":" string)))
-    (from (key) (substring (symbol-name key) 1))
-    (flatten (&rest lsts)
-	     (apply #'append (mapcar
-			      (lambda (e)
-				(if (listp e) (apply #'flatten e) (list e)))
-			      lsts))))
+      ((val (key lst) (cdr (assoc key lst)))
+       (to (string) (intern (concat ":" string)))
+       (from (key) (substring (symbol-name key) 1))
+       (flatten (&rest lsts)
+		(apply #'append (mapcar
+				 (lambda (e)
+				   (if (listp e) (apply #'flatten e) (list e)))
+				 lsts))))
     (let ((notes (buffer-string))
           (id (org-bibtex-get org-bibtex-key-property))
           (type (org-bibtex-get org-bibtex-type-property-name))
@@ -337,30 +337,30 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
                        (lambda (pair)
 			 (format "  %s={%s}" (car pair) (cdr pair)))
                        (remove nil
-			 (if (and org-bibtex-export-arbitrary-fields
-				  org-bibtex-prefix)
-			     (mapcar
-			      (lambda (kv)
-				(let ((key (car kv)) (val (cdr kv)))
-				  (when (and
-					 (string-match org-bibtex-prefix key)
-					 (not (string=
-					       (downcase (concat org-bibtex-prefix
-								 org-bibtex-type-property-name))
-					       (downcase key))))
-				    (cons (downcase (replace-regexp-in-string
-						     org-bibtex-prefix "" key))
-					  val))))
-			      (org-entry-properties nil 'standard))
-			   (mapcar
-			    (lambda (field)
-			      (let ((value (or (org-bibtex-get (from field))
-					       (and (equal :title field)
-						    (nth 4 (org-heading-components))))))
-				(when value (cons (from field) value))))
-			    (flatten
-			     (val :required (val (to type) org-bibtex-types))
-			     (val :optional (val (to type) org-bibtex-types))))))
+			       (if (and org-bibtex-export-arbitrary-fields
+					org-bibtex-prefix)
+				   (mapcar
+				    (lambda (kv)
+				      (let ((key (car kv)) (val (cdr kv)))
+					(when (and
+					       (string-match org-bibtex-prefix key)
+					       (not (string=
+						     (downcase (concat org-bibtex-prefix
+								       org-bibtex-type-property-name))
+						     (downcase key))))
+					  (cons (downcase (replace-regexp-in-string
+							   org-bibtex-prefix "" key))
+						val))))
+				    (org-entry-properties nil 'standard))
+				 (mapcar
+				  (lambda (field)
+				    (let ((value (or (org-bibtex-get (from field))
+						     (and (equal :title field)
+							  (nth 4 (org-heading-components))))))
+				      (when value (cons (from field) value))))
+				  (flatten
+				   (val :required (val (to type) org-bibtex-types))
+				   (val :optional (val (to type) org-bibtex-types))))))
                        ",\n"))))
           (with-temp-buffer
             (insert entry)
@@ -405,24 +405,26 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
                     (read-from-minibuffer "id: "))))
 
 (defun org-bibtex-fleshout (type &optional optional)
-  "Fleshout the current heading, ensuring that all required fields are present.
+  "Fleshout current heading, ensuring all required fields are present.
 With optional argument OPTIONAL, also prompt for optional fields."
-  (org-flet ((val (key lst) (cdr (assoc key lst)))
-	 (keyword (name) (intern (concat ":" (downcase name))))
-         (name (keyword) (substring (symbol-name keyword) 1)))
+  (let ((val (lambda (key lst) (cdr (assoc key lst))))
+	(keyword (lambda (name) (intern (concat ":" (downcase name)))))
+	(name (lambda (keyword) (substring (symbol-name keyword) 1))))
     (dolist (field (append
 		    (if org-bibtex-treat-headline-as-title
-			(remove :title (val :required (val type org-bibtex-types)))
-		      (val :required (val type org-bibtex-types)))
-		    (when optional (val :optional (val type org-bibtex-types)))))
+			(remove :title (funcall val :required (funcall val type org-bibtex-types)))
+		      (funcall val :required (funcall val type org-bibtex-types)))
+		    (when optional (funcall val :optional (funcall val type org-bibtex-types)))))
       (when (consp field) ; or'd pair of fields e.g., (:editor :author)
-        (let ((present (first (remove nil
-                                (mapcar
-                                 (lambda (f) (when (org-bibtex-get (name f)) f))
-                                 field)))))
-          (setf field (or present (keyword (org-icompleting-read
-					    "Field: " (mapcar #'name field)))))))
-      (let ((name (name field)))
+        (let ((present (first (remove
+			       nil
+			       (mapcar
+				(lambda (f) (when (org-bibtex-get (funcall name f)) f))
+				field)))))
+          (setf field (or present (funcall keyword
+					   (org-icompleting-read
+					    "Field: " (mapcar name field)))))))
+      (let ((name (funcall name field)))
         (unless (org-bibtex-get name)
           (let ((prop (org-bibtex-ask field)))
             (when prop (org-bibtex-put name prop)))))))
@@ -601,22 +603,23 @@ With a prefix arg, query for optional fields."
   "Read a bibtex entry and save to `org-bibtex-entries'.
 This uses `bibtex-parse-entry'."
   (interactive)
-  (org-flet ((keyword (str) (intern (concat ":" (downcase str))))
-         (clean-space (str) (replace-regexp-in-string
-                             "[[:space:]\n\r]+" " " str))
-         (strip-delim (str)	     ; strip enclosing "..." and {...}
-		      (dolist (pair '((34 . 34) (123 . 125) (123 . 125)))
-			(when (and (= (aref str 0) (car pair))
-				   (= (aref str (1- (length str))) (cdr pair)))
-			  (setf str (substring str 1 (1- (length str)))))) str))
+  (let ((keyword (lambda (str) (intern (concat ":" (downcase str)))))
+	(clean-space (lambda (str) (replace-regexp-in-string
+				    "[[:space:]\n\r]+" " " str)))
+	(strip-delim
+	 (lambda (str)	     ; strip enclosing "..." and {...}
+	   (dolist (pair '((34 . 34) (123 . 125) (123 . 125)))
+	     (when (and (= (aref str 0) (car pair))
+			(= (aref str (1- (length str))) (cdr pair)))
+	       (setf str (substring str 1 (1- (length str)))))) str)))
     (push (mapcar
            (lambda (pair)
-             (cons (let ((field (keyword (car pair))))
+             (cons (let ((field (funcall keyword (car pair))))
                      (case field
                        (:=type= :type)
                        (:=key= :key)
                        (otherwise field)))
-                   (clean-space (strip-delim (cdr pair)))))
+                   (funcall clean-space (funcall strip-delim (cdr pair)))))
            (save-excursion (bibtex-beginning-of-entry) (bibtex-parse-entry)))
           org-bibtex-entries)))
 
@@ -625,30 +628,32 @@ This uses `bibtex-parse-entry'."
   (interactive)
   (when (= (length org-bibtex-entries) 0)
     (error "No entries in `org-bibtex-entries'."))
-  (let ((entry (pop org-bibtex-entries))
-	(org-special-properties nil)) ; avoids errors with `org-entry-put'
-    (org-flet ((val (field) (cdr (assoc field entry)))
-	   (togtag (tag) (org-toggle-tag tag 'on)))
-      (org-insert-heading)
-      (insert (val :title))
-      (org-bibtex-put "TITLE" (val :title))
-      (org-bibtex-put org-bibtex-type-property-name (downcase (val :type)))
-      (dolist (pair entry)
-        (case (car pair)
-          (:title    nil)
-          (:type     nil)
-          (:key      (org-bibtex-put org-bibtex-key-property (cdr pair)))
-	  (:keywords (if org-bibtex-tags-are-keywords
-			  (mapc
-			   (lambda (kw)
-			     (togtag
-			      (replace-regexp-in-string
-			       "[^[:alnum:]_@#%]" ""
-			       (replace-regexp-in-string "[ \t]+" "_" kw))))
-			   (split-string (cdr pair) ", *"))
-		       (org-bibtex-put (car pair) (cdr pair))))
-          (otherwise (org-bibtex-put (car pair)  (cdr pair)))))
-      (mapc #'togtag org-bibtex-tags))))
+  (let* ((entry (pop org-bibtex-entries))
+	 (org-special-properties nil) ; avoids errors with `org-entry-put'
+	 (val (lambda (field) (cdr (assoc field entry))))
+	 (togtag (lambda (tag) (org-toggle-tag tag 'on))))
+    (org-insert-heading)
+    (insert (funcall val :title))
+    (org-bibtex-put "TITLE" (funcall val :title))
+    (org-bibtex-put org-bibtex-type-property-name
+		    (downcase (funcall val :type)))
+    (dolist (pair entry)
+      (case (car pair)
+	(:title    nil)
+	(:type     nil)
+	(:key      (org-bibtex-put org-bibtex-key-property (cdr pair)))
+	(:keywords (if org-bibtex-tags-are-keywords
+		       (mapc
+			(lambda (kw)
+			  (funcall
+			   togtag
+			   (replace-regexp-in-string
+			    "[^[:alnum:]_@#%]" ""
+			    (replace-regexp-in-string "[ \t]+" "_" kw))))
+			(split-string (cdr pair) ", *"))
+		     (org-bibtex-put (car pair) (cdr pair))))
+	(otherwise (org-bibtex-put (car pair)  (cdr pair)))))
+    (mapc togtag org-bibtex-tags)))
 
 (defun org-bibtex-yank ()
   "If kill ring holds a bibtex entry yank it as an Org-mode headline."

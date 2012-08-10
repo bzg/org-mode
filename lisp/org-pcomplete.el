@@ -31,6 +31,7 @@
   (require 'cl))
 
 (require 'org-macs)
+(require 'org-compat)
 (require 'pcomplete)
 
 (declare-function org-split-string "org" (string &optional separators))
@@ -93,8 +94,8 @@ The return value is a string naming the thing at point."
 	     (skip-chars-backward "[ \t\n]")
 	     ;; org-drawer-regexp matches a whole line but while
 	     ;; looking-back, we just ignore trailing whitespaces
-	     (or (looking-back (substring org-drawer-regexp 0 -1))
-		 (looking-back org-property-re))))
+	     (or (org-looking-back (substring org-drawer-regexp 0 -1))
+		 (org-looking-back org-property-re))))
       (cons "prop" nil))
      ((and (equal (char-before beg1) ?:)
 	   (not (equal (char-after (point-at-bol)) ?*)))
