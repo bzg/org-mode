@@ -540,8 +540,9 @@ block."
 	     (indent (car (last info)))
 	     result cmd)
 	(unwind-protect
-	    (org-flet ((call-process-region (&rest args)
-					    (apply 'org-babel-tramp-handle-call-process-region args)))
+	    (let ((call-process-region
+		   (lambda (&rest args)
+		     (apply 'org-babel-tramp-handle-call-process-region args))))
 	      (let ((lang-check (lambda (f)
 				  (let ((f (intern (concat "org-babel-execute:" f))))
 				    (when (fboundp f) f)))))
@@ -1299,12 +1300,12 @@ instances of \"[ \t]:\" set ALTS to '((32 9) . 58)."
 
 (defun org-babel-join-splits-near-ch (ch list)
   "Join splits where \"=\" is on either end of the split."
-  (org-flet ((last= (str) (= ch (aref str (1- (length str)))))
-         (first= (str) (= ch (aref str 0))))
+  (let ((last= (lambda (str) (= ch (aref str (1- (length str))))))
+	(first= (lambda (str) (= ch (aref str 0)))))
     (reverse
      (org-reduce (lambda (acc el)
                (let ((head (car acc)))
-                 (if (and head (or (last= head) (first= el)))
+                 (if (and head (or (funcall last= head) (funcall first= el)))
                      (cons (concat head el) (cdr acc))
                    (cons el acc))))
              list :initial-value nil))))
@@ -1833,17 +1834,13 @@ If the path of the link is a file path it is expanded using
 
 (defun org-babel-format-result (result &optional sep)
   "Format RESULT for writing to file."
-  (org-flet ((echo-res (result)
-		   (if (stringp result) result (format "%S" result))))
+  (let ((echo-res (lambda (r) (if (stringp r) r (format "%S" r)))))
     (if (listp result)
 	;; table result
 	(orgtbl-to-generic
-	 result
-	 (list
-	  :sep (or sep "\t")
-	  :fmt 'echo-res))
+	 result (list :sep (or sep "\t") :fmt echo-res))
       ;; scalar result
-      (echo-res result))))
+      (funcall echo-res result))))
 
 (defun org-babel-insert-result
   (result &optional result-params info hash indent lang)
@@ -2065,12 +2062,12 @@ file's directory then expand relative links."
 (defun org-babel-examplize-region (beg end &optional results-switches)
   "Comment out region using the inline '==' or ': ' org example quote."
   (interactive "*r")
-  (org-flet ((chars-between (b e)
-			(not (string-match "^[\\s]*$" (buffer-substring b e))))
-	 (maybe-cap (str) (if org-babel-capitalize-examplize-region-markers
-			      (upcase str) str)))
-    (if (or (chars-between (save-excursion (goto-char beg) (point-at-bol)) beg)
-	    (chars-between end (save-excursion (goto-char end) (point-at-eol))))
+  (let ((chars-between (lambda (b e)
+			 (not (string-match "^[\\s]*$" (buffer-substring b e)))))
+	(maybe-cap (lambda (str) (if org-babel-capitalize-examplize-region-markers
+				     (upcase str) str))))
+    (if (or (funcall chars-between (save-excursion (goto-char beg) (point-at-bol)) beg)
+	    (funcall chars-between end (save-excursion (goto-char end) (point-at-eol))))
 	(save-excursion
 	  (goto-char beg)
 	  (insert (format "=%s=" (prog1 (buffer-substring beg end)
@@ -2086,11 +2083,11 @@ file's directory then expand relative links."
 		 (goto-char beg)
 		 (insert (if results-switches
 			     (format "%s%s\n"
-				     (maybe-cap "#+begin_example")
+				     (funcall maybe-cap "#+begin_example")
 				     results-switches)
-			   (maybe-cap "#+begin_example\n")))
+			   (funcall maybe-cap "#+begin_example\n")))
 		 (if (markerp end) (goto-char end) (forward-char (- end beg)))
-		 (insert (maybe-cap "#+end_example\n")))))))))
+		 (insert (funcall maybe-cap "#+end_example\n")))))))))
 
 (defun org-babel-update-block-body (new-body)
   "Update the body of the current code block to NEW-BODY."
@@ -2505,7 +2502,7 @@ of the string."
 (defvar org-babel-org-babel-call-process-region-original nil)
 (defun org-babel-tramp-handle-call-process-region
   (start end program &optional delete buffer display &rest args)
-  "Use tramp to handle call-process-region.
+  "Use Tramp to handle `call-process-region'.
 Fixes a bug in `tramp-handle-call-process-region'."
   (if (and (featurep 'tramp) (file-remote-p default-directory))
       (let ((tmpfile (tramp-compat-make-temp-file "")))
