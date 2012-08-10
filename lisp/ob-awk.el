@@ -97,13 +97,13 @@ called by `org-babel-execute-src-block'"
 
 (defun org-babel-awk-var-to-awk (var &optional sep)
   "Return a printed value of VAR suitable for parsing with awk."
-  (org-flet ((echo-var (v) (if (stringp v) v (format "%S" v))))
+  (let ((echo-var (lambda (v) (if (stringp v) v (format "%S" v)))))
     (cond
      ((and (listp var) (listp (car var)))
-      (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt #'echo-var)))
+      (orgtbl-to-generic var  (list :sep (or sep "\t") :fmt echo-var)))
      ((listp var)
-      (mapconcat #'echo-var var "\n"))
-     (t (echo-var var)))))
+      (mapconcat echo-var var "\n"))
+     (t (funcall echo-var var)))))
 
 (defun org-babel-awk-table-or-string (results)
   "If the results look like a table, then convert them into an
