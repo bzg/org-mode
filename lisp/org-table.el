@@ -3236,7 +3236,7 @@ Parameters get priority."
 Works for single references, but also for entire formulas and even the
 full TBLFM line."
   (let ((start 0))
-    (while (string-match "\\<\\([a-zA-Z]+\\)\\([0-9]+\\>\\|&\\)\\|\\(;[^\r\n:]+\\|\\<remote([^)]*)\\)" s start)
+    (while (string-match "\\<\\([a-zA-Z]+\\)\\([0-9]+\\>\\|&\\)\\|\\(;[^\r\n:]+\\|\\<remote([^,)]*)\\)" s start)
       (cond
        ((match-end 3)
 	;; format match, just advance
