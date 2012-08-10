@@ -5105,6 +5105,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	  (setq marker (org-agenda-new-marker beg)
 		category (org-get-category beg)
 		org-category-pos (get-text-property beg 'org-category-position)
+		tags (save-excursion (org-backward-heading-same-level 0) (org-get-tags))
 		todo-state (org-get-todo-state))
 
 	  (dolist (r (if (stringp result)
@@ -5123,7 +5124,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (org-add-props txt props 'org-marker marker)
 	    (org-add-props txt nil
 	      'org-category category 'date date 'todo-state todo-state
-	      'org-category-position org-category-pos
+	      'org-category-position org-category-pos 'tags tags
 	      'type "sexp")
 	    (push txt ee)))))
     (nreverse ee)))
