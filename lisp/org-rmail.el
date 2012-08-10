@@ -34,8 +34,9 @@
 
 ;; Declare external functions and variables
 (declare-function rmail-show-message  "rmail" (&optional n no-summary))
-(declare-function rmail-what-message  "rmail" (&optional POS))
+(declare-function rmail-what-message  "rmail" (&optional pos))
 (declare-function rmail-toggle-header "rmail" (&optional arg))
+(declare-function rmail-widen         "rmail" ())
 (defvar rmail-current-message)  ; From rmail.el
 (defvar rmail-header-style)     ; From rmail.el
 
