@@ -16463,7 +16463,7 @@ in the timestamp determines what will be changed."
 	    (message "No clock to adjust")
 	  (cond ((save-excursion ; fix previous clock?
 		   (re-search-backward org-ts-regexp0 nil t)
-		   (looking-back (concat org-clock-string " \\[")))
+		   (org-looking-back (concat org-clock-string " \\[")))
 		 (setq fixnext 1 clrgx (concat org-ts-regexp0 "\\] =>.*$")))
 		((save-excursion ; fix next clock?
 		   (re-search-backward org-ts-regexp0 nil t)

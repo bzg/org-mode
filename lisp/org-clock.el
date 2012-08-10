@@ -1597,7 +1597,7 @@ UPDOWN tells whether to change 'up or 'down."
   (save-excursion ; Do not replace this with `with-current-buffer'.
     (org-no-warnings (set-buffer (org-clocking-buffer)))
     (goto-char org-clock-marker)
-    (if (looking-back (concat "^[ \t]*" org-clock-string ".*"))
+    (if (org-looking-back (concat "^[ \t]*" org-clock-string ".*"))
 	(progn (delete-region (1- (point-at-bol)) (point-at-eol))
 	       (org-remove-empty-drawer-at "LOGBOOK" (point)))
       (message "Clock gone, cancel the timer anyway")
