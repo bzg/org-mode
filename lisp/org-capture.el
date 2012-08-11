@@ -1388,15 +1388,7 @@ The template may still contain \"%?\" for cursor positioning."
 	      (error (insert (format "%%![Couldn't insert %s: %s]"
 				     filename error)))))))
       ;; %() embedded elisp
-      (goto-char (point-min))
-      (while (re-search-forward "%\\((.+)\\)" nil t)
-	(unless (org-capture-escaped-%)
-	  (goto-char (match-beginning 0))
-	  (let ((template-start (point)))
-	    (forward-char 1)
-	    (let ((result (org-eval (read (current-buffer)))))
-	      (delete-region template-start (point))
-	      (insert result)))))
+      (org-capture-expand-embedded-elisp)
 
       ;; The current time
       (goto-char (point-min))
@@ -1529,6 +1521,31 @@ The template may still contain \"%?\" for cursor positioning."
 	(delete-region (1- (match-beginning 0)) (match-beginning 0))
 	t)
     nil))
+
+(defun org-capture-expand-embedded-elisp ()
+  "Evaluate embedded elisp %(sexp) and replace with the result."
+  (goto-char (point-min))
+  (while (re-search-forward "%(" nil t)
+    (unless (org-capture-escaped-%)
+      (goto-char (match-beginning 0))
+      (let ((template-start (point)))
+	(forward-char 1)
+	(let ((result (org-eval (read (current-buffer)))))
+	  (delete-region template-start (point))
+	  (insert result))))))
+
+(defun org-capture-inside-embedded-elisp-p ()
+  "Return non-nil if point is inside of embedded elisp %(sexp)."
+  (let (beg end)
+    (with-syntax-table emacs-lisp-mode-syntax-table
+      (save-excursion
+	(save-match-data
+	  (when (or (looking-at "%(")
+		    (and (search-backward "%" nil t) (looking-at "%(")))
+	    (setq beg (point))
+	    (setq end (progn (forward-char) (forward-sexp) (1- (point)))))))
+      (when (and beg end)
+	(and (<= (point) end) (>= (point) beg))))))
 
 ;;;###autoload
 (defun org-capture-import-remember-templates ()

@@ -225,12 +225,14 @@ Any fields from the feed item can be interpolated into the template with
 %name, for example %title, %description, %pubDate etc.  In addition, the
 following special escapes are valid as well:
 
-%h      the title, or the first line of the description
-%t      the date as a stamp, either from <pubDate> (if present), or
-        the current date.
-%T      date and time
-%u,%U   like %t,%T, but inactive time stamps
-%a      A link, from <guid> if that is a permalink, else from <link>"
+%h      The title, or the first line of the description
+%t      The date as a stamp, either from <pubDate> (if present), or
+        the current date
+%T      Date and time
+%u,%U   Like %t,%T, but inactive time stamps
+%a      A link, from <guid> if that is a permalink, else from <link>
+%(sexp) Evaluate elisp `(sexp)' and replace with the result, the simple
+        %-escapes above can be used as arguments, e.g. %(capitalize \\\"%h\\\")"
   :group 'org-feed
   :type '(string :tag "Template"))
 
@@ -506,9 +508,10 @@ This will find DRAWER and extract the alist."
 ENTRY is a property list.  This function adds a `:formatted-for-org' property
 and returns the full property list.
 If that property is already present, nothing changes."
+  (require 'org-capture)
   (if formatter
       (funcall formatter entry)
-    (let (dlines fmt tmp indent time name
+    (let (dlines time escape name tmp
 		 v-h v-t v-T v-u v-U v-a)
       (setq dlines (org-split-string (or (plist-get entry :description) "???")
 				     "\n")
@@ -527,20 +530,35 @@ If that property is already present, nothing changes."
 		  ""))
       (with-temp-buffer
 	(insert template)
+
+	;; Simple %-escapes
+	;; before embedded elisp to support simple %-escapes as
+	;; arguments for embedded elisp
 	(goto-char (point-min))
 	(while (re-search-forward "%\\([a-zA-Z]+\\)" nil t)
-	  (setq name (match-string 1))
-	  (cond
-	   ((member name '("h" "t" "T" "u" "U" "a"))
-	    (replace-match (symbol-value (intern (concat "v-" name))) t t))
-	   ((setq tmp (plist-get entry (intern (concat ":" name))))
-	    (save-excursion
-	      (save-match-data
-		(beginning-of-line 1)
-		(when (looking-at (concat "^\\([ \t]*\\)%" name "[ \t]*$"))
-		  (setq tmp (org-feed-make-indented-block
-			     tmp (org-get-indentation))))))
-	    (replace-match tmp t t))))
+	  (unless (org-capture-escaped-%)
+	    (setq name (match-string 1)
+		  escape (org-capture-inside-embedded-elisp-p))
+	    (cond
+	     ((member name '("h" "t" "T" "u" "U" "a"))
+	      (setq tmp (symbol-value (intern (concat "v-" name)))))
+	     ((setq tmp (plist-get entry (intern (concat ":" name))))
+	      (save-excursion
+		(save-match-data
+		  (beginning-of-line 1)
+		  (when (looking-at
+			 (concat "^\\([ \t]*\\)%" name "[ \t]*$"))
+		    (setq tmp (org-feed-make-indented-block
+			       tmp (org-get-indentation))))))))
+	    (when tmp
+	      ;; escape string delimiters `"' when inside %() embedded lisp
+	      (when escape
+		(setq tmp (replace-regexp-in-string "\"" "\\\\\"" tmp)))
+	      (replace-match tmp t t))))
+
+	;; %() embedded elisp
+	(org-capture-expand-embedded-elisp)
+
 	(decode-coding-string
 	 (buffer-string) (detect-coding-region (point-min) (point-max) t))))))
 
