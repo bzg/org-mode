@@ -5105,7 +5105,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	  (setq marker (org-agenda-new-marker beg)
 		category (org-get-category beg)
 		org-category-pos (get-text-property beg 'org-category-position)
-		tags (save-excursion (org-backward-heading-same-level 0) (org-get-tags))
+		tags (save-excursion (org-backward-heading-same-level 0)
+				     (org-get-tags-at))
 		todo-state (org-get-todo-state))
 
 	  (dolist (r (if (stringp result)
