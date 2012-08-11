@@ -123,23 +123,36 @@
 ;; process.
 
 (defconst org-element-paragraph-separate
-  (concat "^[ \t]*$" "\\|"
-	  ;; Headlines and inlinetasks.
-	  org-outline-regexp-bol "\\|"
-	  ;; Comments, blocks (any type), keywords and babel calls.
-	  "^[ \t]*#\\+" "\\|" "^#\\(?: \\|$\\)" "\\|"
-	  ;; Lists.
-	  (org-item-beginning-re) "\\|"
-	  ;; Fixed-width, drawers (any type) and tables.
-	  "^[ \t]*[:|]" "\\|"
-	  ;; Footnote definitions.
-	  org-footnote-definition-re "\\|"
-	  ;; Horizontal rules.
-	  "^[ \t]*-\\{5,\\}[ \t]*$" "\\|"
-	  ;; LaTeX environments.
-	  "^[ \t]*\\\\\\(begin\\|end\\)" "\\|"
-	  ;; Planning and Clock lines.
-	  org-planning-or-clock-line-re)
+  (concat "^\\(?:"
+          ;; Headlines, inlinetasks.
+          org-outline-regexp "\\|"
+          ;; Footnote definitions.
+	  "\\[\\(?:[0-9]+\\|fn:[-_[:word:]]+\\)\\]" "\\|"
+          "[ \t]*\\(?:"
+          ;; Empty lines.
+          "$" "\\|"
+          ;; Comments, blocks (any type), keywords, Babel calls,
+	  ;; drawers (any type) and tables.
+          "[|#]" "\\|"
+          ;; Fixed width areas.
+          ":\\(?:[ \t]\\|$\\)" "\\|"
+          ;; Horizontal rules.
+          "-\\{5,\\}[ \t]*$" "\\|"
+          ;; LaTeX environments.
+          "\\\\\\(begin\\|end\\)" "\\|"
+          ;; Planning and Clock lines.
+          (regexp-opt (list org-scheduled-string
+                            org-deadline-string
+                            org-closed-string
+                            org-clock-string))
+          "\\|"
+          ;; Lists.
+          (let ((term (case org-plain-list-ordered-item-terminator
+                        (t "[.)]") (?\) ")") (?. "\\.") (otherwise "[.)]")))
+                (alpha (and org-alphabetical-lists "\\|[A-Za-z]")))
+            (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
+                    "\\(?:[ \t]\\|$\\)"))
+          "\\)\\)")
   "Regexp to separate paragraphs in an Org buffer.")
 
 (defconst org-element-all-elements
