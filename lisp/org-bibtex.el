@@ -309,68 +309,67 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 
 (defun org-bibtex-headline ()
   "Return a bibtex entry of the given headline as a string."
-  (org-labels
-      ((val (key lst) (cdr (assoc key lst)))
-       (to (string) (intern (concat ":" string)))
-       (from (key) (substring (symbol-name key) 1))
-       (flatten (&rest lsts)
-		(apply #'append (mapcar
-				 (lambda (e)
-				   (if (listp e) (apply #'flatten e) (list e)))
-				 lsts))))
-    (let ((notes (buffer-string))
-          (id (org-bibtex-get org-bibtex-key-property))
-          (type (org-bibtex-get org-bibtex-type-property-name))
-	  (tags (when org-bibtex-tags-are-keywords
-		  (delq nil
-			(mapcar
-			 (lambda (tag)
-			   (unless (member tag
-					   (append org-bibtex-tags
-						   org-bibtex-no-export-tags))
-			     tag))
-			 (org-get-local-tags-at))))))
-      (when type
-        (let ((entry (format
-                      "@%s{%s,\n%s\n}\n" type id
-                      (mapconcat
-                       (lambda (pair)
-			 (format "  %s={%s}" (car pair) (cdr pair)))
-                       (remove nil
-			       (if (and org-bibtex-export-arbitrary-fields
-					org-bibtex-prefix)
-				   (mapcar
-				    (lambda (kv)
-				      (let ((key (car kv)) (val (cdr kv)))
-					(when (and
-					       (string-match org-bibtex-prefix key)
-					       (not (string=
-						     (downcase (concat org-bibtex-prefix
-								       org-bibtex-type-property-name))
-						     (downcase key))))
-					  (cons (downcase (replace-regexp-in-string
-							   org-bibtex-prefix "" key))
-						val))))
-				    (org-entry-properties nil 'standard))
+  (letrec ((val (lambda (key lst) (cdr (assoc key lst))))
+	   (to (lambda (string) (intern (concat ":" string))))
+	   (from (lambda (key) (substring (symbol-name key) 1)))
+	   (flatten (lambda (&rest lsts)
+		      (apply #'append (mapcar
+				       (lambda (e)
+					 (if (listp e) (apply flatten e) (list e)))
+				       lsts))))
+	   (notes (buffer-string))
+	   (id (org-bibtex-get org-bibtex-key-property))
+	   (type (org-bibtex-get org-bibtex-type-property-name))
+	   (tags (when org-bibtex-tags-are-keywords
+		   (delq nil
+			 (mapcar
+			  (lambda (tag)
+			    (unless (member tag
+					    (append org-bibtex-tags
+						    org-bibtex-no-export-tags))
+			      tag))
+			  (org-get-local-tags-at))))))
+    (when type
+      (let ((entry (format
+		    "@%s{%s,\n%s\n}\n" type id
+		    (mapconcat
+		     (lambda (pair)
+		       (format "  %s={%s}" (car pair) (cdr pair)))
+		     (remove nil
+			     (if (and org-bibtex-export-arbitrary-fields
+				      org-bibtex-prefix)
 				 (mapcar
-				  (lambda (field)
-				    (let ((value (or (org-bibtex-get (from field))
-						     (and (equal :title field)
-							  (nth 4 (org-heading-components))))))
-				      (when value (cons (from field) value))))
-				  (flatten
-				   (val :required (val (to type) org-bibtex-types))
-				   (val :optional (val (to type) org-bibtex-types))))))
-                       ",\n"))))
-          (with-temp-buffer
-            (insert entry)
-	    (when tags
-	      (bibtex-beginning-of-entry)
-	      (if (re-search-forward "keywords.*=.*{\\(.*\\)}" nil t)
-	    	  (progn (goto-char (match-end 1)) (insert ", "))
-	    	(bibtex-make-field "keywords" t t))
-	      (insert (mapconcat #'identity tags ", ")))
-            (buffer-string)))))))
+				  (lambda (kv)
+				    (let ((key (car kv)) (val (cdr kv)))
+				      (when (and
+					     (string-match org-bibtex-prefix key)
+					     (not (string=
+						   (downcase (concat org-bibtex-prefix
+								     org-bibtex-type-property-name))
+						   (downcase key))))
+					(cons (downcase (replace-regexp-in-string
+							 org-bibtex-prefix "" key))
+					      val))))
+				  (org-entry-properties nil 'standard))
+			       (mapcar
+				(lambda (field)
+				  (let ((value (or (org-bibtex-get (funcall from field))
+						   (and (equal :title field)
+							(nth 4 (org-heading-components))))))
+				    (when value (cons (funcall from field) value))))
+				(funcall flatten
+					 (funcall val :required (funcall val (funcall to type) org-bibtex-types))
+					 (funcall val :optional (funcall val (funcall to type) org-bibtex-types))))))
+		     ",\n"))))
+	(with-temp-buffer
+	  (insert entry)
+	  (when tags
+	    (bibtex-beginning-of-entry)
+	    (if (re-search-forward "keywords.*=.*{\\(.*\\)}" nil t)
+		(progn (goto-char (match-end 1)) (insert ", "))
+	      (bibtex-make-field "keywords" t t))
+	    (insert (mapconcat #'identity tags ", ")))
+	  (buffer-string))))))
 
 (defun org-bibtex-ask (field)
   (unless (assoc field org-bibtex-fields)
