@@ -2210,8 +2210,6 @@ CONTENTS is the contents of the object."
 
 LIMIT bounds the search.
 
-LIMIT bounds the search.
-
 Return value is a cons cell whose CAR is a symbol among `bold',
 `italic', `underline', `strike-through', `code' and `verbatim'
 and CDR is beginning position."
