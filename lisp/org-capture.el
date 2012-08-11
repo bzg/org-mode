@@ -352,7 +352,7 @@ widened to the entire buffer."
 
 (defcustom org-capture-after-finalize-hook nil
   "Hook that is run right after a capture process is finalized.
-  Suitable for window cleanup"
+Suitable for window cleanup."
   :group 'org-capture
   :version "24.1"
   :type 'hook)
@@ -713,8 +713,8 @@ already gone.  Any prefix argument will be passed to the refile command."
 (defun org-capture-kill ()
   "Abort the current capture process."
   (interactive)
-  ;; FIXME: This does not do the right thing, we need to remove the new stuff
-  ;; By hand it is easy: undo, then kill the buffer
+  ;; FIXME: This does not do the right thing, we need to remove the
+  ;; new stuff by hand it is easy: undo, then kill the buffer
   (let ((org-note-abort t)
 	(org-capture-before-finalize-hook nil))
     (org-capture-finalize)))
