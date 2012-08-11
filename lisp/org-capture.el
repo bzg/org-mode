@@ -470,7 +470,7 @@ bypassed."
 				org-capture-link-is-already-stored)
 			   (plist-get org-store-link-plist :annotation)
 			 (ignore-errors (org-store-link nil))))
-	   (entry (or entry (org-capture-select-template keys)))
+	   (entry (org-capture-select-template keys))
 	   initial)
       (setq initial (or org-capture-initial
 			(and (org-region-active-p)
