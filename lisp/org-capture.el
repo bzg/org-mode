@@ -1539,9 +1539,12 @@ The template may still contain \"%?\" for cursor positioning."
   (let (beg end)
     (with-syntax-table emacs-lisp-mode-syntax-table
       (save-excursion
+	;; `looking-at' and `search-backward' below do not match the "%(" if
+	;; point is in its middle
+	(when (equal (char-before) ?%)
+	  (backward-char))
 	(save-match-data
-	  (when (or (looking-at "%(")
-		    (and (search-backward "%" nil t) (looking-at "%(")))
+	  (when (or (looking-at "%(") (search-backward "%(" nil t))
 	    (setq beg (point))
 	    (setq end (progn (forward-char) (forward-sexp) (1- (point)))))))
       (when (and beg end)
