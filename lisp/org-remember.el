@@ -189,22 +189,22 @@ calendar           |  %:type %:date"
 		(character :tag "Selection Key")
 		(string :tag "Template")
 		(choice :tag "Destination file"
-		 (file :tag "Specify")
-		 (function :tag "Function")
-		 (const :tag "Use `org-default-notes-file'" nil))
+			(file :tag "Specify")
+			(function :tag "Function")
+			(const :tag "Use `org-default-notes-file'" nil))
 		(choice :tag "Destin. headline"
-		 (string :tag "Specify")
-		 (function :tag "Function")
-		 (const :tag "Use `org-remember-default-headline'" nil)
-		 (const :tag "At beginning of file" top)
-		 (const :tag "At end of file" bottom)
-		 (const :tag "In a date tree" date-tree))
+			(string :tag "Specify")
+			(function :tag "Function")
+			(const :tag "Use `org-remember-default-headline'" nil)
+			(const :tag "At beginning of file" top)
+			(const :tag "At end of file" bottom)
+			(const :tag "In a date tree" date-tree))
 		(choice :tag "Context"
-		 (const :tag "Use in all contexts" nil)
-		 (const :tag "Use in all contexts" t)
-		 (repeat :tag "Use only if in major mode"
-			 (symbol :tag "Major mode"))
-		 (function :tag "Perform a check against function")))))
+			(const :tag "Use in all contexts" nil)
+			(const :tag "Use in all contexts" t)
+			(repeat :tag "Use only if in major mode"
+				(symbol :tag "Major mode"))
+			(function :tag "Perform a check against function")))))
 
 (defcustom org-remember-delete-empty-lines-at-end t
   "Non-nil means clean up final empty lines in remember buffer."
@@ -294,7 +294,7 @@ conventions in Org-mode.  This function returns such a link."
   (org-store-link nil))
 
 (defconst org-remember-help
-"Select a destination location for the note.
+  "Select a destination location for the note.
 UP/DOWN=headline   TAB=cycle visibility  [Q]uit   RET/<left>/<right>=Store
 RET on headline   -> Store as sublevel entry to current headline
 RET at beg-of-buf -> Append to file as level 2 headline
@@ -994,7 +994,7 @@ See also the variable `org-reverse-note-order'."
 	    (cond
 	     ((and fastp (memq heading '(top bottom)))
 	      (setq spos org-goto-start-pos
-			  exitcmd (if (eq heading 'top) 'left nil)))
+		    exitcmd (if (eq heading 'top) 'left nil)))
 	     (fastp (setq spos org-goto-start-pos
 			  exitcmd 'return))
 	     ((eq org-remember-interactive-interface 'outline)

@@ -85,8 +85,8 @@ current directory string."
       (insert (org-babel-expand-body:lisp body params))
       (slime-eval `(swank:eval-and-grab-output
 		    ,(let ((dir (if (assoc :dir params)
-					    (cdr (assoc :dir params))
-					  default-directory)))
+				    (cdr (assoc :dir params))
+				  default-directory)))
 		       (format
 			(if dir (format org-babel-lisp-dir-fmt dir) "(progn %s)")
 			(buffer-substring-no-properties

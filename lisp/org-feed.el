@@ -179,34 +179,34 @@ Here are the keyword-value pair allows in `org-feed-alist'.
   :group 'org-feed
   :type '(repeat
 	  (list :value ("" "http://" "" "")
-	   (string :tag "Name")
-	   (string :tag "Feed URL")
-	   (file :tag "File for inbox")
-	   (string :tag "Headline for inbox")
-	   (repeat :inline t
-		   (choice
-		    (list :inline t :tag "Filter"
-			  (const :filter)
-			  (symbol :tag "Filter Function"))
-		    (list :inline t :tag "Template"
-			  (const :template)
-			  (string :tag "Template"))
-		    (list :inline t :tag "Formatter"
-			  (const :formatter)
-			  (symbol :tag "Formatter Function"))
-		    (list :inline t :tag "New items handler"
-			  (const :new-handler)
-			  (symbol :tag "Handler Function"))
-		    (list :inline t :tag "Changed items"
-			  (const :changed-handler)
-			  (symbol :tag "Handler Function"))
-		    (list :inline t :tag "Parse Feed"
-			  (const :parse-feed)
-			  (symbol :tag "Parse Feed Function"))
-		    (list :inline t :tag "Parse Entry"
-			  (const :parse-entry)
-			  (symbol :tag "Parse Entry Function"))
-		    )))))
+		(string :tag "Name")
+		(string :tag "Feed URL")
+		(file :tag "File for inbox")
+		(string :tag "Headline for inbox")
+		(repeat :inline t
+			(choice
+			 (list :inline t :tag "Filter"
+			       (const :filter)
+			       (symbol :tag "Filter Function"))
+			 (list :inline t :tag "Template"
+			       (const :template)
+			       (string :tag "Template"))
+			 (list :inline t :tag "Formatter"
+			       (const :formatter)
+			       (symbol :tag "Formatter Function"))
+			 (list :inline t :tag "New items handler"
+			       (const :new-handler)
+			       (symbol :tag "Handler Function"))
+			 (list :inline t :tag "Changed items"
+			       (const :changed-handler)
+			       (symbol :tag "Handler Function"))
+			 (list :inline t :tag "Parse Feed"
+			       (const :parse-feed)
+			       (symbol :tag "Parse Feed Function"))
+			 (list :inline t :tag "Parse Entry"
+			       (const :parse-entry)
+			       (symbol :tag "Parse Entry Function"))
+			 )))))
 
 (defcustom org-feed-drawer "FEEDSTATUS"
   "The name of the drawer for feed status information.
@@ -253,7 +253,7 @@ of the file pointed to by the URL."
 	  (const :tag "Externally with wget" wget)
 	  (function :tag "Function")))
 
- (defcustom org-feed-before-adding-hook nil
+(defcustom org-feed-before-adding-hook nil
   "Hook that is run before adding new feed items to a file.
 You might want to commit the file in its current state to version control,
 for example."
@@ -452,8 +452,8 @@ Switch to that buffer, and return the position of that headline."
        nil t)
       (goto-char (match-beginning 0))
     (goto-char (point-max))
-      (insert "\n\n* " heading "\n\n")
-      (org-back-to-heading t))
+    (insert "\n\n* " heading "\n\n")
+    (org-back-to-heading t))
   (point))
 
 (defun org-feed-read-previous-status (pos drawer)

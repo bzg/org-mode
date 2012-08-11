@@ -99,7 +99,7 @@ not be modified."
   :type 'boolean)
 
 (defconst org-export-html-scripts
-"<script type=\"text/javascript\">
+  "<script type=\"text/javascript\">
 <!--/*--><![CDATA[/*><!--*/
  function CodeHighlightOn(elem, id)
  {
@@ -121,10 +121,10 @@ not be modified."
  }
 /*]]>*///-->
 </script>"
-"Basic JavaScript that is needed by HTML files produced by Org-mode.")
+  "Basic JavaScript that is needed by HTML files produced by Org-mode.")
 
 (defconst org-export-html-style-default
-"<style type=\"text/css\">
+  "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/
   html { font-family: Times, serif; font-size: 12pt; }
   .title  { text-align: center; }
@@ -255,16 +255,16 @@ You can also customize this for each buffer, using something like
   :group 'org-export-html
   :version "24.1"
   :type '(list :greedy t
-	      (list :tag "path   (the path from where to load MathJax.js)"
-		    (const :format "       " path) (string))
-	      (list :tag "scale  (scaling for the displayed math)"
-		    (const :format "       " scale) (string))
-	      (list :tag "align  (alignment of displayed equations)"
-		    (const :format "       " align) (string))
-	      (list :tag "indent (indentation with left or right alignment)"
-		    (const :format "       " indent) (string))
-	      (list :tag "mathml (should MathML display be used is possible)"
-		    (const :format "       " mathml) (boolean))))
+	       (list :tag "path   (the path from where to load MathJax.js)"
+		     (const :format "       " path) (string))
+	       (list :tag "scale  (scaling for the displayed math)"
+		     (const :format "       " scale) (string))
+	       (list :tag "align  (alignment of displayed equations)"
+		     (const :format "       " align) (string))
+	       (list :tag "indent (indentation with left or right alignment)"
+		     (const :format "       " indent) (string))
+	       (list :tag "mathml (should MathML display be used is possible)"
+		     (const :format "       " mathml) (boolean))))
 
 (defun org-export-html-mathjax-config (template options in-buffer)
   "Insert the user setup into the matchjax template."
@@ -803,51 +803,51 @@ in a window.  A non-interactive call will only return the buffer."
 
 ;;; org-html-cvt-link-fn
 (defconst org-html-cvt-link-fn
-   nil
-   "Function to convert link URLs to exportable URLs.
+  nil
+  "Function to convert link URLs to exportable URLs.
 Takes two arguments, TYPE and PATH.
 Returns exportable url as (TYPE PATH), or nil to signal that it
 didn't handle this case.
 Intended to be locally bound around a call to `org-export-as-html'." )
 
 (defun org-html-cvt-org-as-html (opt-plist type path)
-   "Convert an org filename to an equivalent html filename.
+  "Convert an org filename to an equivalent html filename.
 If TYPE is not file, just return `nil'.
 See variable `org-export-html-link-org-files-as-html'"
 
-   (save-match-data
-      (and
-	 org-export-html-link-org-files-as-html
-	 (string= type "file")
-	 (string-match "\\.org$" path)
-	 (progn
-	    (list
-	       "file"
-	       (concat
-		  (substring path 0 (match-beginning 0))
-		  "."
-		  (plist-get opt-plist :html-extension)))))))
+  (save-match-data
+    (and
+     org-export-html-link-org-files-as-html
+     (string= type "file")
+     (string-match "\\.org$" path)
+     (progn
+       (list
+	"file"
+	(concat
+	 (substring path 0 (match-beginning 0))
+	 "."
+	 (plist-get opt-plist :html-extension)))))))
 
 
 ;;; org-html-should-inline-p
 (defun org-html-should-inline-p (filename descp)
-   "Return non-nil if link FILENAME should be inlined.
+  "Return non-nil if link FILENAME should be inlined.
 The decision to inline the FILENAME link is based on the current
 settings.  DESCP is the boolean of whether there was a link
 description.  See variables `org-export-html-inline-images' and
 `org-export-html-inline-image-extensions'."
-   (declare (special
-	     org-export-html-inline-images
-	     org-export-html-inline-image-extensions))
-   (and (or (eq t org-export-html-inline-images)
-	    (and org-export-html-inline-images (not descp)))
-	(org-file-image-p
-	 filename org-export-html-inline-image-extensions)))
+  (declare (special
+	    org-export-html-inline-images
+	    org-export-html-inline-image-extensions))
+  (and (or (eq t org-export-html-inline-images)
+	   (and org-export-html-inline-images (not descp)))
+       (org-file-image-p
+	filename org-export-html-inline-image-extensions)))
 
 ;;; org-html-make-link
 (defun org-html-make-link (opt-plist type path fragment desc attr
-			     may-inline-p)
-   "Make an HTML link.
+				     may-inline-p)
+  "Make an HTML link.
 OPT-PLIST is an options list.
 TYPE is the device-type of the link (THIS://foo.html).
 PATH is the path of the link (http://THIS#location).
@@ -856,80 +856,80 @@ DESC is the link description, if any.
 ATTR is a string of other attributes of the \"a\" element.
 MAY-INLINE-P allows inlining it as an image."
 
-   (declare (special org-par-open))
-   (save-match-data
-      (let* ((filename path)
-	       ;;First pass.  Just sanity stuff.
-	       (components-1
-		  (cond
-		     ((string= type "file")
-			(list
-			   type
-			   ;;Substitute just if original path was absolute.
-			   ;;(Otherwise path must remain relative)
-			   (if (file-name-absolute-p path)
-			      (concat "file://" (expand-file-name path))
-			      path)))
-		     ((string= type "")
-			(list nil path))
-		     (t (list type path))))
+  (declare (special org-par-open))
+  (save-match-data
+    (let* ((filename path)
+	   ;;First pass.  Just sanity stuff.
+	   (components-1
+	    (cond
+	     ((string= type "file")
+	      (list
+	       type
+	       ;;Substitute just if original path was absolute.
+	       ;;(Otherwise path must remain relative)
+	       (if (file-name-absolute-p path)
+		   (concat "file://" (expand-file-name path))
+		 path)))
+	     ((string= type "")
+	      (list nil path))
+	     (t (list type path))))
 
-	       ;;Second pass.  Components converted so they can refer
-	       ;;to a remote site.
-	       (components-2
-		  (or
-		     (and org-html-cvt-link-fn
-			(apply org-html-cvt-link-fn
-			   opt-plist components-1))
-		     (apply #'org-html-cvt-org-as-html
-			opt-plist components-1)
-		     components-1))
-	       (type    (first  components-2))
-	       (thefile (second components-2)))
+	   ;;Second pass.  Components converted so they can refer
+	   ;;to a remote site.
+	   (components-2
+	    (or
+	     (and org-html-cvt-link-fn
+		  (apply org-html-cvt-link-fn
+			 opt-plist components-1))
+	     (apply #'org-html-cvt-org-as-html
+		    opt-plist components-1)
+	     components-1))
+	   (type    (first  components-2))
+	   (thefile (second components-2)))
 
 
-	 ;;Third pass.  Build final link except for leading type
-	 ;;spec.
-	 (cond
-	    ((or
-		(not type)
-		(string= type "http")
-		(string= type "https")
-		(string= type "file")
-		(string= type "coderef"))
-	       (if fragment
-		  (setq thefile (concat thefile "#" fragment))))
+      ;;Third pass.  Build final link except for leading type
+      ;;spec.
+      (cond
+       ((or
+	 (not type)
+	 (string= type "http")
+	 (string= type "https")
+	 (string= type "file")
+	 (string= type "coderef"))
+	(if fragment
+	    (setq thefile (concat thefile "#" fragment))))
 
-	    (t))
+       (t))
 
-	 ;;Final URL-build, for all types.
-	 (setq thefile
+      ;;Final URL-build, for all types.
+      (setq thefile
 	    (let
-	       ((str (org-export-html-format-href thefile)))
+		((str (org-export-html-format-href thefile)))
 	      (if (and type (not (or (string= "file" type)
 				     (string= "coderef" type))))
 		  (concat type ":" str)
-		  str)))
+		str)))
 
-	 (if (and
-		may-inline-p
-		;;Can't inline a URL with a fragment.
-		(not fragment))
-	    (progn
-	       (message "image %s %s" thefile org-par-open)
-	       (org-export-html-format-image thefile org-par-open))
-	    (concat
-	       "<a href=\"" thefile "\"" (if attr (concat " " attr)) ">"
-	       (org-export-html-format-desc desc)
-	       "</a>")))))
+      (if (and
+	   may-inline-p
+	   ;;Can't inline a URL with a fragment.
+	   (not fragment))
+	  (progn
+	    (message "image %s %s" thefile org-par-open)
+	    (org-export-html-format-image thefile org-par-open))
+	(concat
+	 "<a href=\"" thefile "\"" (if attr (concat " " attr)) ">"
+	 (org-export-html-format-desc desc)
+	 "</a>")))))
 
 (defun org-html-handle-links (org-line opt-plist)
   "Return ORG-LINE with markup of Org mode links.
 OPT-PLIST is the export options list."
   (let ((start 0)
 	(current-dir (if buffer-file-name
-			  (file-name-directory buffer-file-name)
-			default-directory))
+			 (file-name-directory buffer-file-name)
+		       default-directory))
 	(link-validate (plist-get opt-plist :link-validation-function))
 	type id-file fnc
 	rpl path attr desc descp desc1 desc2 link)
@@ -1395,12 +1395,12 @@ PUB-DIR is set, use this as the publishing directory."
 		   (insert "\n</div>\n"))
 		  (t
 		   (setq html-pre-real-contents
-		    (format-spec
-		     (or (cadr (assoc (nth 0 lang-words)
-				      org-export-html-preamble-format))
-			 (cadr (assoc "en" org-export-html-preamble-format)))
-		     `((?t . ,title) (?a . ,author)
-		       (?d . ,date) (?e . ,email))))))
+			 (format-spec
+			  (or (cadr (assoc (nth 0 lang-words)
+					   org-export-html-preamble-format))
+			      (cadr (assoc "en" org-export-html-preamble-format)))
+			  `((?t . ,title) (?a . ,author)
+			    (?d . ,date) (?e . ,email))))))
 	    ;; don't output an empty preamble DIV
 	    (unless (and (functionp html-pre)
 			 (equal html-pre-real-contents ""))
@@ -1482,9 +1482,9 @@ PUB-DIR is set, use this as the publishing directory."
 				   ;; Check for targets
 				   (while (string-match org-any-target-regexp org-line)
 				     (setq org-line (replace-match
-						 (concat "@<span class=\"target\">"
-							 (match-string 1 org-line) "@</span> ")
-						 t t org-line)))
+						     (concat "@<span class=\"target\">"
+							     (match-string 1 org-line) "@</span> ")
+						     t t org-line)))
 				   (while (string-match "&lt;\\(&lt;\\)+\\|&gt;\\(&gt;\\)+" txt)
 				     (setq txt (replace-match "" t t txt)))
 				   (setq href
@@ -1604,8 +1604,8 @@ PUB-DIR is set, use this as the publishing directory."
 	    (let ((i (org-get-string-indentation org-line)))
 	      (if (> i 0)
 		  (setq org-line (concat (mapconcat 'identity
-						(make-list (* 2 i) "\\nbsp") "")
-				     " " (org-trim org-line))))
+						    (make-list (* 2 i) "\\nbsp") "")
+					 " " (org-trim org-line))))
 	      (unless (string-match "\\\\\\\\[ \t]*$" org-line)
 		(setq org-line (concat org-line "\\\\")))))
 
@@ -1618,25 +1618,25 @@ PUB-DIR is set, use this as the publishing directory."
 	      (setq start (match-end 1)))
 	     ((match-end 2)
 	      (setq org-line (replace-match
-			  (format
-			   "@<a name=\"%s\" id=\"%s\">@</a>"
-			   (org-solidify-link-text (match-string 1 org-line))
-			   (org-solidify-link-text (match-string 1 org-line)))
-			  t t org-line)))
+			      (format
+			       "@<a name=\"%s\" id=\"%s\">@</a>"
+			       (org-solidify-link-text (match-string 1 org-line))
+			       (org-solidify-link-text (match-string 1 org-line)))
+			      t t org-line)))
 	     ((and org-export-with-toc (equal (string-to-char org-line) ?*))
 	      ;; FIXME: NOT DEPENDENT on TOC?????????????????????
 	      (setq org-line (replace-match
-			  (concat "@<span class=\"target\">"
-				  (match-string 1 org-line) "@</span> ")
-			  ;; (concat "@<i>" (match-string 1 org-line) "@</i> ")
-			  t t org-line)))
+			      (concat "@<span class=\"target\">"
+				      (match-string 1 org-line) "@</span> ")
+			      ;; (concat "@<i>" (match-string 1 org-line) "@</i> ")
+			      t t org-line)))
 	     (t
 	      (setq org-line (replace-match
-			  (concat "@<a name=\""
-				  (org-solidify-link-text (match-string 1 org-line))
-				  "\" class=\"target\">" (match-string 1 org-line)
-				  "@</a> ")
-			  t t org-line)))))
+			      (concat "@<a name=\""
+				      (org-solidify-link-text (match-string 1 org-line))
+				      "\" class=\"target\">" (match-string 1 org-line)
+				      "@</a> ")
+			      t t org-line)))))
 
 	  (setq org-line (org-html-handle-time-stamps org-line))
 
@@ -1744,10 +1744,10 @@ PUB-DIR is set, use this as the publishing directory."
 	    ;; This line either is list item or end a list.
 	    (when (get-text-property 0 'list-item org-line)
 	      (setq org-line (org-html-export-list-line
-			  org-line
-			  (get-text-property 0 'list-item org-line)
-			  (get-text-property 0 'list-struct org-line)
-			  (get-text-property 0 'list-prevs org-line))))
+			      org-line
+			      (get-text-property 0 'list-item org-line)
+			      (get-text-property 0 'list-struct org-line)
+			      (get-text-property 0 'list-prevs org-line))))
 
 	    ;; Horizontal line
 	    (when (string-match "^[ \t]*-\\{5,\\}[ \t]*$" org-line)
@@ -1773,12 +1773,12 @@ PUB-DIR is set, use this as the publishing directory."
 		(let ((n (match-string 1 org-line)))
 		  (setq org-par-open t
 			org-line (replace-match
-			      (format
-			       (concat "<p class=\"footnote\">"
-				       (format org-export-html-footnote-format
-					       (concat
-						"<a class=\"footnum\" name=\"" footnote-def-prefix ".%s\" href=\"#" footnote-ref-prefix ".%s\">%s</a>")))
-			       n n n) t t org-line)))))
+				  (format
+				   (concat "<p class=\"footnote\">"
+					   (format org-export-html-footnote-format
+						   (concat
+						    "<a class=\"footnum\" name=\"" footnote-def-prefix ".%s\" href=\"#" footnote-ref-prefix ".%s\">%s</a>")))
+				   n n n) t t org-line)))))
 	    ;; Check if the line break needs to be conserved
 	    (cond
 	     ((string-match "\\\\\\\\[ \t]*$" org-line)
@@ -1857,7 +1857,7 @@ PUB-DIR is set, use this as the publishing directory."
 		   (when (plist-get opt-plist :time-stamp-file)
 		     (insert "<p class=\"date\">" (nth 2 lang-words) ": " date "</p>\n"))
 		   (when (and (plist-get opt-plist :author-info) author)
-		       (insert "<p class=\"author\">" (nth 1 lang-words) ": " author "</p>\n"))
+		     (insert "<p class=\"author\">" (nth 1 lang-words) ": " author "</p>\n"))
 		   (when (and (plist-get opt-plist :email-info) email)
 		     (insert "<p class=\"email\">" email "</p>\n"))
 		   (when (plist-get opt-plist :creator-info)
@@ -1966,21 +1966,21 @@ PUB-DIR is set, use this as the publishing directory."
 	     (label (org-find-text-property-in-string 'org-label src)))
 	(setq caption (and caption (org-html-do-expand caption)))
 	(concat
-	(if caption
-	    (format "%s<div %sclass=\"figure\">
+	 (if caption
+	     (format "%s<div %sclass=\"figure\">
 <p>"
-		    (if org-par-open "</p>\n" "")
-		    (if label (format "id=\"%s\" " (org-solidify-link-text label)) "")))
-	(format "<img src=\"%s\"%s />"
-		src
-		(if (string-match "\\<alt=" (or attr ""))
-		    (concat " " attr )
-		  (concat " " attr " alt=\"" src "\"")))
-	(if caption
-	    (format "</p>%s
+		     (if org-par-open "</p>\n" "")
+		     (if label (format "id=\"%s\" " (org-solidify-link-text label)) "")))
+	 (format "<img src=\"%s\"%s />"
+		 src
+		 (if (string-match "\\<alt=" (or attr ""))
+		     (concat " " attr )
+		   (concat " " attr " alt=\"" src "\"")))
+	 (if caption
+	     (format "</p>%s
 </div>%s"
-		(concat "\n<p>" caption "</p>")
-		(if org-par-open "\n<p>" ""))))))))
+		     (concat "\n<p>" caption "</p>")
+		     (if org-par-open "\n<p>" ""))))))))
 
 (defun org-export-html-get-bibliography ()
   "Find bibliography, cut it out and return it."
@@ -1996,7 +1996,7 @@ PUB-DIR is set, use this as the publishing directory."
 	      (and (looking-at ">") (forward-char 1))
 	      (setq bib (buffer-substring beg (point)))
 	      (delete-region beg (point))
-	    (throw 'exit bib))))
+	      (throw 'exit bib))))
 	nil))))
 
 (defvar org-table-number-regexp) ; defined in org-table.el
@@ -2145,7 +2145,7 @@ for formatting.  This is required for the DocBook exporter."
       ;; DocBook XML file valid.
       (push (format "<caption>%s</caption>" (or caption "")) html)
       (when label
-	      (setq html-table-tag (org-export-splice-attributes html-table-tag (format "id=\"%s\"" (org-solidify-link-text label)))))
+	(setq html-table-tag (org-export-splice-attributes html-table-tag (format "id=\"%s\"" (org-solidify-link-text label)))))
       (push html-table-tag html))
     (setq html (mapcar
 		(lambda (x)
@@ -2183,8 +2183,8 @@ This conversion does *not* use `table-generate-source' from table.el.
 This has the advantage that Org-mode's HTML conversions can be used.
 But it has the disadvantage, that no cell- or row-spanning is allowed."
   (let (org-line field-buffer
-	     (head org-export-highlight-first-table-line)
-	     fields html empty i)
+		 (head org-export-highlight-first-table-line)
+		 fields html empty i)
     (setq html (concat html-table-tag "\n"))
     (while (setq org-line (pop lines))
       (setq empty "&nbsp;")
@@ -2365,7 +2365,7 @@ is nil, return nil."
 	      l (match-string 0 string)
 	      string (substring string (match-end 0)))
 	(push (org-html-do-expand s) res)
-      (push l res))
+	(push l res))
       (push (org-html-do-expand string) res)
       (apply 'concat (nreverse res)))))
 
@@ -2496,22 +2496,22 @@ When TITLE is nil, just close all open levels."
     (when title
       ;; If title is nil, this means this function is called to close
       ;; all levels, so the rest is done only if title is given
-	(when (string-match (org-re "\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") title)
-	  (setq title (replace-match
-		       (if org-export-with-tags
-			   (save-match-data
-			     (concat
-			      "&nbsp;&nbsp;&nbsp;<span class=\"tag\">"
-			      (mapconcat
-			       (lambda (x)
-				 (format "<span class=\"%s\">%s</span>"
-					 (org-export-html-get-tag-class-name x)
-					 x))
-			       (org-split-string (match-string 1 title) ":")
-			       "&nbsp;")
-			      "</span>"))
-			 "")
-		       t t title)))
+      (when (string-match (org-re "\\(:[[:alnum:]_@#%:]+:\\)[ \t]*$") title)
+	(setq title (replace-match
+		     (if org-export-with-tags
+			 (save-match-data
+			   (concat
+			    "&nbsp;&nbsp;&nbsp;<span class=\"tag\">"
+			    (mapconcat
+			     (lambda (x)
+			       (format "<span class=\"%s\">%s</span>"
+				       (org-export-html-get-tag-class-name x)
+				       x))
+			     (org-split-string (match-string 1 title) ":")
+			     "&nbsp;")
+			    "</span>"))
+		       "")
+		     t t title)))
       (if (> level umax)
 	  (progn
 	    (if (aref org-levels-open (1- level))
@@ -2581,10 +2581,10 @@ Replaces invalid characters with \"_\" and then prepends a prefix."
     (insert "</ul>\n")))
 
 (defun org-html-export-list-line (org-line pos struct prevs)
-  "Insert list syntax in export buffer. Return ORG-LINE, maybe modified.
+  "Insert list syntax in export buffer.  Return ORG-LINE, maybe modified.
 
 POS is the item position or org-line position the org-line had before
-modifications to buffer. STRUCT is the list structure. PREVS is
+modifications to buffer.  STRUCT is the list structure.  PREVS is
 the alist of previous items."
   (let* ((get-type
 	  (function

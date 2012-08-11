@@ -155,42 +155,42 @@ before running this command, even though the command tries to be smart."
   (let ((dre (concat "\\<" org-deadline-string "\\>[ \t]*\\'"))
 	(sre (concat "\\<" org-scheduled-string "\\>[ \t]*\\'"))
 	dct ts tmp date year month day pos hdl-pos)
-  (while (re-search-forward org-ts-regexp nil t)
-    (catch 'next
-      (setq ts (match-string 0))
-      (setq tmp (buffer-substring
-		 (max (point-at-bol) (- (match-beginning 0)
-					org-ds-keyword-length))
-		 (match-beginning 0)))
-      (if (or (string-match "-\\'" tmp)
-	      (string-match dre tmp)
-	      (string-match sre tmp))
+    (while (re-search-forward org-ts-regexp nil t)
+      (catch 'next
+	(setq ts (match-string 0))
+	(setq tmp (buffer-substring
+		   (max (point-at-bol) (- (match-beginning 0)
+					  org-ds-keyword-length))
+		   (match-beginning 0)))
+	(if (or (string-match "-\\'" tmp)
+		(string-match dre tmp)
+		(string-match sre tmp))
+	    (throw 'next nil))
+	(setq dct (decode-time (org-time-string-to-time (match-string 0)))
+	      date (list (nth 4 dct) (nth 3 dct) (nth 5 dct))
+	      year (nth 2 date)
+	      month (car date)
+	      day (nth 1 date)
+	      pos (point))
+	(org-back-to-heading t)
+	(setq hdl-pos (point))
+	(unless (org-up-heading-safe)
+	  ;; No parent, we are not in a date tree
+	  (goto-char pos)
 	  (throw 'next nil))
-      (setq dct (decode-time (org-time-string-to-time (match-string 0)))
-	    date (list (nth 4 dct) (nth 3 dct) (nth 5 dct))
-	    year (nth 2 date)
-	    month (car date)
-	    day (nth 1 date)
-	    pos (point))
-      (org-back-to-heading t)
-      (setq hdl-pos (point))
-      (unless (org-up-heading-safe)
-	;; No parent, we are not in a date tree
-	(goto-char pos)
-	(throw 'next nil))
-      (unless (looking-at "\\*+[ \t]+[0-9]+-[0-1][0-9]-[0-3][0-9]")
-	;; Parent looks wrong, we are not in a date tree
-	(goto-char pos)
-	(throw 'next nil))
-      (when (looking-at (format "\\*+[ \t]+%d-%02d-%02d" year month day))
-	;; At correct date already, do nothing
+	(unless (looking-at "\\*+[ \t]+[0-9]+-[0-1][0-9]-[0-3][0-9]")
+	  ;; Parent looks wrong, we are not in a date tree
+	  (goto-char pos)
+	  (throw 'next nil))
+	(when (looking-at (format "\\*+[ \t]+%d-%02d-%02d" year month day))
+	  ;; At correct date already, do nothing
 	  (progn (goto-char pos) (throw 'next nil)))
-      ;; OK, we need to refile this entry
-      (goto-char hdl-pos)
-      (org-cut-subtree)
-      (save-excursion
-	(save-restriction
-	  (org-datetree-file-entry-under (current-kill 0) date)))))))
+	;; OK, we need to refile this entry
+	(goto-char hdl-pos)
+	(org-cut-subtree)
+	(save-excursion
+	  (save-restriction
+	    (org-datetree-file-entry-under (current-kill 0) date)))))))
 
 (provide 'org-datetree)
 

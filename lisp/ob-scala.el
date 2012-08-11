@@ -22,7 +22,7 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Currently only supports the external execution. No session support yet.
+;; Currently only supports the external execution.  No session support yet.
 
 ;;; Requirements:
 ;; - Scala language :: http://www.scala-lang.org/
@@ -84,14 +84,14 @@ Emacs-lisp table, otherwise return the results as a string."
 If RESULT-TYPE equals 'output then return standard output as a string.
 If RESULT-TYPE equals 'value then return the value of the last statement
 in BODY as elisp."
-  (when session (error "Sessions are not supported for Scala. Yet."))
+  (when session (error "Sessions are not supported for Scala.  Yet."))
   (case result-type
     (output
      (let ((src-file (org-babel-temp-file "scala-")))
        (progn (with-temp-file src-file (insert body))
               (org-babel-eval
                (concat org-babel-scala-command " " src-file) ""))))
-    (value 
+    (value
      (let* ((src-file (org-babel-temp-file "scala-"))
             (wrapper (format org-babel-scala-wrapper-method body)))
        (with-temp-file src-file (insert wrapper))
@@ -102,14 +102,14 @@ in BODY as elisp."
         (org-babel-eval
          (concat org-babel-scala-command " " src-file) ""))))))
 
-                    
+
 (defun org-babel-prep-session:scala (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  (error "Sessions are not supported for Scala. Yet."))
+  (error "Sessions are not supported for Scala.  Yet."))
 
 (defun org-babel-scala-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session. Sessions are not 
+then create.  Return the initialized session.  Sessions are not
 supported in Scala."
   nil)
 

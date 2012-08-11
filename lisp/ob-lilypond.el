@@ -54,14 +54,14 @@ Default value is t")
 (defvar ly-display-pdf-post-tangle t
   "Following a successful LilyPond compilation
 ly-display-pdf-post-tangle determines whether to automate the
-drawing / redrawing of the resultant pdf. If the value is nil,
-the pdf is not automatically redrawn. Default value is t")
+drawing / redrawing of the resultant pdf.  If the value is nil,
+the pdf is not automatically redrawn.  Default value is t")
 
 (defvar ly-play-midi-post-tangle t
   "Following a successful LilyPond compilation
 ly-play-midi-post-tangle determines whether to automate the
-playing of the resultant midi file. If the value is nil,
-the midi file is not automatically played. Default value is t")
+playing of the resultant midi file.  If the value is nil,
+the midi file is not automatically played.  Default value is t")
 
 (defvar ly-OSX-ly-path
   "/Applications/lilypond.app/Contents/Resources/bin/lilypond")
@@ -77,28 +77,28 @@ the midi file is not automatically played. Default value is t")
 (defvar ly-win32-midi-path "")
 
 (defvar ly-gen-png nil
-"Image generation (png) can be turned on by default by setting
+  "Image generation (png) can be turned on by default by setting
 LY-GEN-PNG to t")
 
 (defvar ly-gen-svg nil
-"Image generation (SVG) can be turned on by default by setting
+  "Image generation (SVG) can be turned on by default by setting
 LY-GEN-SVG to t")
 
 (defvar ly-gen-html nil
-"HTML generation can be turned on by default by setting
+  "HTML generation can be turned on by default by setting
 LY-GEN-HTML to t")
 
 (defvar ly-gen-pdf nil
-"PDF generation can be turned on by default by setting
+  "PDF generation can be turned on by default by setting
 LY-GEN-PDF to t")
 
 (defvar ly-use-eps nil
-"You can force the compiler to use the EPS backend by setting
+  "You can force the compiler to use the EPS backend by setting
 LY-USE-EPS to t")
 
 (defvar ly-arrange-mode nil
   "Arrange mode is turned on by setting LY-ARRANGE-MODE
-to t. In Arrange mode the following settings are altered
+to t.  In Arrange mode the following settings are altered
 from default...
 :tangle yes,    :noweb yes
 :results silent :comments yes.
@@ -133,7 +133,7 @@ Depending on whether we are in arrange mode either:
 
 (defun ly-tangle ()
   "ob-lilypond specific tangle, attempts to invoke
-=ly-execute-tangled-ly= if tangle is successful. Also passes
+=ly-execute-tangled-ly= if tangle is successful.  Also passes
 specific arguments to =org-babel-tangle="
   (interactive)
   (if (org-babel-tangle nil "yes" "lilypond")
@@ -413,8 +413,8 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
 
 (defun ly-get-header-args (mode)
   "Default arguments to use when evaluating a lilypond
-source block. These depend upon whether we are in arrange
-mode i.e. ARRANGE-MODE is t"
+source block.  These depend upon whether we are in arrange
+mode i.e.  ARRANGE-MODE is t"
   (cond (mode
          '((:tangle . "yes")
            (:noweb . "yes")

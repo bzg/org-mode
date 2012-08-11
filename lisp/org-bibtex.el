@@ -184,26 +184,26 @@
   "Bibtex entry types with required and optional parameters.")
 
 (defvar org-bibtex-fields
-  '((:address      . "Usually the address of the publisher or other type of institution. For major publishing houses, van Leunen recommends omitting the information entirely.  For small publishers, on the other hand, you can help the reader by giving the complete address.")
-    (:annote       . "An annotation. It is not used by the standard bibliography styles, but may be used by others that produce an annotated bibliography.")
+  '((:address      . "Usually the address of the publisher or other type of institution.  For major publishing houses, van Leunen recommends omitting the information entirely.  For small publishers, on the other hand, you can help the reader by giving the complete address.")
+    (:annote       . "An annotation.  It is not used by the standard bibliography styles, but may be used by others that produce an annotated bibliography.")
     (:author       . "The name(s) of the author(s), in the format described in the LaTeX book.  Remember, all names are separated with the and keyword, and not commas.")
-    (:booktitle    . "Title of a book, part of which is being cited. See the LaTeX book for how to type titles. For book entries, use the title field instead.")
+    (:booktitle    . "Title of a book, part of which is being cited.  See the LaTeX book for how to type titles.  For book entries, use the title field instead.")
     (:chapter      . "A chapter (or section or whatever) number.")
     (:crossref     . "The database key of the entry being cross referenced.")
-    (:edition      . "The edition of a book for example, 'Second'. This should be an ordinal, and should have the first letter capitalized, as shown here; the standard styles convert to lower case when necessary.")
-    (:editor       . "Name(s) of editor(s), typed as indicated in the LaTeX book. If there is also an author field, then the editor field gives the editor of the book or collection in which the reference appears.")
-    (:howpublished . "How something strange has been published. The first word should be capitalized.")
+    (:edition      . "The edition of a book for example, 'Second'.  This should be an ordinal, and should have the first letter capitalized, as shown here; the standard styles convert to lower case when necessary.")
+    (:editor       . "Name(s) of editor(s), typed as indicated in the LaTeX book.  If there is also an author field, then the editor field gives the editor of the book or collection in which the reference appears.")
+    (:howpublished . "How something strange has been published.  The first word should be capitalized.")
     (:institution  . "The sponsoring institution of a technical report.")
     (:journal      . "A journal name.")
-    (:key          . "Used for alphabetizing, cross-referencing, and creating a label when the author information is missing. This field should not be confused with the key that appears in the \cite command and at the beginning of the database entry.")
-    (:month        . "The month in which the work was published or, for an unpublished work, in which it was written. You should use the standard three-letter abbreviation,")
-    (:note         . "Any additional information that can help the reader. The first word should be capitalized.")
-    (:number       . "Any additional information that can help the reader. The first word should be capitalized.")
+    (:key          . "Used for alphabetizing, cross-referencing, and creating a label when the author information is missing.  This field should not be confused with the key that appears in the \cite command and at the beginning of the database entry.")
+    (:month        . "The month in which the work was published or, for an unpublished work, in which it was written.  You should use the standard three-letter abbreviation,")
+    (:note         . "Any additional information that can help the reader.  The first word should be capitalized.")
+    (:number       . "Any additional information that can help the reader.  The first word should be capitalized.")
     (:organization . "The organization that sponsors a conference or that publishes a manual.")
     (:pages        . "One or more page numbers or range of numbers, such as 42-111 or 7,41,73-97 or 43+ (the ‘+’ in this last example indicates pages following that don’t form simple range). BibTEX requires double dashes for page ranges (--).")
     (:publisher    . "The publisher’s name.")
     (:school       . "The name of the school where a thesis was written.")
-    (:series       . "The name of a series or set of books. When citing an entire book, the the title field gives its title and an optional series field gives the name of a series or multi-volume set in which the book is published.")
+    (:series       . "The name of a series or set of books.  When citing an entire book, the the title field gives its title and an optional series field gives the name of a series or multi-volume set in which the book is published.")
     (:title        . "The work’s title, typed as explained in the LaTeX book.")
     (:type         . "The type of a technical report for example, 'Research Note'.")
     (:volume       . "The volume of a journal or multi-volume book.")
@@ -229,7 +229,7 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
 (defcustom org-bibtex-treat-headline-as-title t
   "Treat headline text as title if title property is absent.
 If an entry is missing a title property, use the headline text as
-the property. If this value is t, `org-bibtex-check' will ignore
+the property.  If this value is t, `org-bibtex-check' will ignore
 a missing title field."
   :group 'org-bibtex
   :version "24.1"
@@ -247,7 +247,7 @@ not placed in the exported bibtex entry."
 (defcustom org-bibtex-key-property "CUSTOM_ID"
   "Property that holds the bibtex key.
 By default, this is CUSTOM_ID, which enables easy linking to
-bibtex headlines from within an org file. This can be set to ID
+bibtex headlines from within an org file.  This can be set to ID
 to enable global links, but only with great caution, as global
 IDs must be unique."
   :group 'org-bibtex
@@ -263,12 +263,12 @@ IDs must be unique."
 (defcustom org-bibtex-tags-are-keywords nil
   "Convert the value of the keywords field to tags and vice versa.
 If set to t, comma-separated entries in a bibtex entry's keywords
-field will be converted to org tags. Note: spaces will be escaped
+field will be converted to org tags.  Note: spaces will be escaped
 with underscores, and characters that are not permitted in org
 tags will be removed.
 
 If t, local tags in an org entry will be exported as a
-comma-separated string of keywords when exported to bibtex. Tags
+comma-separated string of keywords when exported to bibtex.  Tags
 defined in `org-bibtex-tags' or `org-bibtex-no-export-tags' will
 not be exported."
   :group 'org-bibtex

@@ -186,19 +186,19 @@ When completing for #+STARTUP, for example, this function returns
   (pcomplete/org-mode/file-option/x "OPTIONS"))
 
 (defun pcomplete/org-mode/file-option/title ()
- "Complete arguments for the #+TITLE file option."
+  "Complete arguments for the #+TITLE file option."
   (pcomplete/org-mode/file-option/x "TITLE"))
 
 (defun pcomplete/org-mode/file-option/author ()
- "Complete arguments for the #+AUTHOR file option."
+  "Complete arguments for the #+AUTHOR file option."
   (pcomplete/org-mode/file-option/x "AUTHOR"))
 
 (defun pcomplete/org-mode/file-option/email ()
- "Complete arguments for the #+EMAIL file option."
+  "Complete arguments for the #+EMAIL file option."
   (pcomplete/org-mode/file-option/x "EMAIL"))
 
 (defun pcomplete/org-mode/file-option/date ()
- "Complete arguments for the #+DATE file option."
+  "Complete arguments for the #+DATE file option."
   (pcomplete/org-mode/file-option/x "DATE"))
 
 (defun pcomplete/org-mode/file-option/bind ()
@@ -236,16 +236,16 @@ When completing for #+STARTUP, for example, this function returns
   "Complete against all headings.
 This needs more work, to handle headings with lots of spaces in them."
   (while
-   (pcomplete-here
-    (save-excursion
-      (goto-char (point-min))
-      (let (tbl)
-	(while (re-search-forward org-todo-line-regexp nil t)
-	  (push (org-make-org-heading-search-string
-		 (match-string-no-properties 3) t)
-		tbl))
-	(pcomplete-uniqify-list tbl)))
-    (substring pcomplete-stub 1))))
+      (pcomplete-here
+       (save-excursion
+	 (goto-char (point-min))
+	 (let (tbl)
+	   (while (re-search-forward org-todo-line-regexp nil t)
+	     (push (org-make-org-heading-search-string
+		    (match-string-no-properties 3) t)
+		   tbl))
+	   (pcomplete-uniqify-list tbl)))
+       (substring pcomplete-stub 1))))
 
 (defvar org-tag-alist)
 (defun pcomplete/org-mode/tag ()
@@ -289,14 +289,14 @@ This needs more work, to handle headings with lots of spaces in them."
 	       (match-string 1)))
 	(cpllist (mapcar (lambda (x) (concat x ": ")) org-drawers)))
     (pcomplete-here cpllist
-     (substring pcomplete-stub 1)
-     (unless (or (not (delete
-		       nil
-		       (mapcar (lambda(x)
-				 (string-match (substring pcomplete-stub 1) x))
-			       cpllist)))
-		 (looking-at "[ \t]*\n.*:END:"))
-       (save-excursion (insert "\n" spc ":END:"))))))
+		    (substring pcomplete-stub 1)
+		    (unless (or (not (delete
+				      nil
+				      (mapcar (lambda(x)
+						(string-match (substring pcomplete-stub 1) x))
+					      cpllist)))
+				(looking-at "[ \t]*\n.*:END:"))
+		      (save-excursion (insert "\n" spc ":END:"))))))
 
 (defun pcomplete/org-mode/block-option/src ()
   "Complete the arguments of a begin_src block.

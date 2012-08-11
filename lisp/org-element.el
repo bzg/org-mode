@@ -2152,7 +2152,7 @@ CONTENTS is verse block contents."
 ;;
 ;; Unlike to elements, interstices can be found between objects.
 ;; That's why, along with the parser, successor functions are provided
-;; for each object. Some objects share the same successor (i.e. `code'
+;; for each object.  Some objects share the same successor (i.e. `code'
 ;; and `verbatim' objects).
 ;;
 ;; A successor must accept a single argument bounding the search.  It
@@ -2861,8 +2861,8 @@ LIMIT bounds the search.
 Return value is a cons cell whose CAR is `radio-target' and CDR
 is beginning position."
   (save-excursion
-     (when (re-search-forward org-radio-target-regexp limit t)
-       (cons 'radio-target (match-beginning 0)))))
+    (when (re-search-forward org-radio-target-regexp limit t)
+      (cons 'radio-target (match-beginning 0)))))
 
 
 ;;;; Statistics Cookie
@@ -3094,8 +3094,8 @@ LIMIT bounds the search.
 Return value is a cons cell whose CAR is `target' and CDR is
 beginning position."
   (save-excursion
-     (when (re-search-forward org-target-regexp limit t)
-       (cons 'target (match-beginning 0)))))
+    (when (re-search-forward org-target-regexp limit t)
+      (cons 'target (match-beginning 0)))))
 
 
 ;;;; Timestamp
@@ -3813,7 +3813,7 @@ OBJECTS is the previous candidates alist."
 DATA is a parse tree, an element, an object or a secondary string
 to interpret.
 
-Optional argument PARENT is used for recursive calls. It contains
+Optional argument PARENT is used for recursive calls.  It contains
 the element or object containing data, or nil.
 
 Return Org syntax as a string."

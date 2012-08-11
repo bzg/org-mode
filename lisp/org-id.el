@@ -427,7 +427,7 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 		 (if (symbolp org-id-extra-files)
 		     (symbol-value org-id-extra-files)
 		   org-id-extra-files)
-	      ;; Files associated with live org-mode buffers
+		 ;; Files associated with live org-mode buffers
 		 (delq nil
 		       (mapcar (lambda (b)
 				 (with-current-buffer b
@@ -506,7 +506,7 @@ When CHECK is given, prepare detailed information about duplicate IDs."
 	    (goto-char (point-min))
 	    (setq org-id-locations (read (current-buffer))))
 	(error
-	 (message "Could not read org-id-values from %s. Setting it to nil."
+	 (message "Could not read org-id-values from %s.  Setting it to nil."
 		  org-id-locations-file))))
     (setq org-id-files (mapcar 'car org-id-locations))
     (setq org-id-locations (org-id-alist-to-hash org-id-locations))))

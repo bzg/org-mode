@@ -101,7 +101,7 @@ description  A short string describing the template, will be shown during
              selection.
 
 type         The type of entry.  Valid types are:
-               entry       an Org-mode node, with a headline. Will be
+               entry       an Org-mode node, with a headline.  Will be
                            filed as the child of the target entry or as
                            a top-level entry.
                item        a plain list item, will be placed in the
@@ -184,11 +184,11 @@ properties are:
                      other value is 1.
 
  :empty-lines-before Set this to the number of lines the should be inserted
-                     before the new item. Overrides :empty-lines for the
+                     before the new item.  Overrides :empty-lines for the
                      number lines inserted before.
 
  :empty-lines-after  Set this to the number of lines the should be inserted
-                     after the new item. Overrides :empty-lines for the
+                     after the new item.  Overrides :empty-lines for the
                      number of lines inserted after.
 
  :clock-in           Start the clock in this item.
@@ -276,71 +276,71 @@ calendar                |  %:type %:date"
   :type
   '(repeat
     (choice :value ("" "" entry (file "~/org/notes.org") "")
-     (list :tag "Multikey description"
-	   (string :tag "Keys       ")
-	   (string :tag "Description"))
-     (list :tag "Template entry"
-	   (string :tag "Keys           ")
-	   (string :tag "Description    ")
-	   (choice :tag "Capture Type   " :value entry
-		   (const :tag "Org entry" entry)
-		   (const :tag "Plain list item" item)
-		   (const :tag "Checkbox item" checkitem)
-		   (const :tag "Plain text" plain)
-		   (const :tag "Table line" table-line))
-	   (choice :tag "Target location"
-		   (list :tag "File"
-			 (const :format "" file)
-			 (file :tag "  File"))
-		   (list :tag "ID"
-			 (const :format "" id)
-			 (string :tag "  ID"))
-		   (list :tag "File & Headline"
-			 (const :format "" file+headline)
-			 (file   :tag "  File    ")
-			 (string :tag "  Headline"))
-		   (list :tag "File & Outline path"
-			 (const :format "" file+olp)
-			 (file   :tag "  File    ")
-			 (repeat :tag "Outline path" :inline t
-				 (string :tag "Headline")))
-		   (list :tag "File & Regexp"
-			 (const :format "" file+regexp)
-			 (file   :tag "  File  ")
-			 (regexp :tag "  Regexp"))
-		   (list :tag "File & Date tree"
-			 (const :format "" file+datetree)
-			 (file :tag "  File"))
-		   (list :tag "File & Date tree, prompt for date"
-			 (const :format "" file+datetree+prompt)
-			 (file :tag "  File"))
-		   (list :tag "File & function"
-			 (const :format "" file+function)
-			 (file :tag "  File    ")
-			 (sexp :tag "  Function"))
-		   (list :tag "Current clocking task"
-			 (const :format "" clock))
-		   (list :tag "Function"
-			 (const :format "" function)
-			 (sexp :tag "  Function")))
-	   (choice :tag "Template"
-		   (string)
-		   (list :tag "File"
-			 (const :format "" file)
-			 (file :tag "Template file"))
-		   (list :tag "Function"
-			 (const :format "" function)
-			 (function :tag "Template function")))
-	   (plist :inline t
-		  ;; Give the most common options as checkboxes
-		  :options (((const :format "%v " :prepend) (const t))
-			    ((const :format "%v " :immediate-finish) (const t))
-			    ((const :format "%v " :empty-lines) (const 1))
-			    ((const :format "%v " :clock-in) (const t))
-			    ((const :format "%v " :clock-keep) (const t))
-			    ((const :format "%v " :clock-resume) (const t))
-			    ((const :format "%v " :unnarrowed) (const t))
-			    ((const :format "%v " :kill-buffer) (const t))))))))
+	    (list :tag "Multikey description"
+		  (string :tag "Keys       ")
+		  (string :tag "Description"))
+	    (list :tag "Template entry"
+		  (string :tag "Keys           ")
+		  (string :tag "Description    ")
+		  (choice :tag "Capture Type   " :value entry
+			  (const :tag "Org entry" entry)
+			  (const :tag "Plain list item" item)
+			  (const :tag "Checkbox item" checkitem)
+			  (const :tag "Plain text" plain)
+			  (const :tag "Table line" table-line))
+		  (choice :tag "Target location"
+			  (list :tag "File"
+				(const :format "" file)
+				(file :tag "  File"))
+			  (list :tag "ID"
+				(const :format "" id)
+				(string :tag "  ID"))
+			  (list :tag "File & Headline"
+				(const :format "" file+headline)
+				(file   :tag "  File    ")
+				(string :tag "  Headline"))
+			  (list :tag "File & Outline path"
+				(const :format "" file+olp)
+				(file   :tag "  File    ")
+				(repeat :tag "Outline path" :inline t
+					(string :tag "Headline")))
+			  (list :tag "File & Regexp"
+				(const :format "" file+regexp)
+				(file   :tag "  File  ")
+				(regexp :tag "  Regexp"))
+			  (list :tag "File & Date tree"
+				(const :format "" file+datetree)
+				(file :tag "  File"))
+			  (list :tag "File & Date tree, prompt for date"
+				(const :format "" file+datetree+prompt)
+				(file :tag "  File"))
+			  (list :tag "File & function"
+				(const :format "" file+function)
+				(file :tag "  File    ")
+				(sexp :tag "  Function"))
+			  (list :tag "Current clocking task"
+				(const :format "" clock))
+			  (list :tag "Function"
+				(const :format "" function)
+				(sexp :tag "  Function")))
+		  (choice :tag "Template"
+			  (string)
+			  (list :tag "File"
+				(const :format "" file)
+				(file :tag "Template file"))
+			  (list :tag "Function"
+				(const :format "" function)
+				(function :tag "Template function")))
+		  (plist :inline t
+			 ;; Give the most common options as checkboxes
+			 :options (((const :format "%v " :prepend) (const t))
+				   ((const :format "%v " :immediate-finish) (const t))
+				   ((const :format "%v " :empty-lines) (const 1))
+				   ((const :format "%v " :clock-in) (const t))
+				   ((const :format "%v " :clock-keep) (const t))
+				   ((const :format "%v " :clock-resume) (const t))
+				   ((const :format "%v " :unnarrowed) (const t))
+				   ((const :format "%v " :kill-buffer) (const t))))))))
 
 (defcustom org-capture-before-finalize-hook nil
   "Hook that is run right before a capture process is finalized.
@@ -1456,7 +1456,7 @@ The template may still contain \"%?\" for cursor positioning."
 	      (setq ins (mapconcat 'identity
 				   (org-split-string
 				    ins (org-re "[^[:alnum:]_@#%]+"))
-				       ":"))
+				   ":"))
 	      (when (string-match "\\S-" ins)
 		(or (equal (char-before) ?:) (insert ":"))
 		(insert ins)

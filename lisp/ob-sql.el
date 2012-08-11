@@ -90,9 +90,9 @@ This function is called by `org-babel-execute-src-block'."
 				    (org-babel-process-file-name out-file)))
 		    ('postgresql (format
 				  "psql -A -P footer=off -F \"\t\"  -f %s -o %s %s"
-				    (org-babel-process-file-name in-file)
-				    (org-babel-process-file-name out-file)
-				    (or cmdline "")))
+				  (org-babel-process-file-name in-file)
+				  (org-babel-process-file-name out-file)
+				  (or cmdline "")))
                     (t (error "no support for the %s sql engine" engine)))))
     (with-temp-file in-file
       (insert
@@ -148,8 +148,8 @@ This function is called by `org-babel-execute-src-block'."
 		      (with-temp-file data-file
 			(insert (orgtbl-to-csv
 				 val '(:fmt (lambda (el) (if (stringp el)
-							el
-						      (format "%S" el)))))))
+							     el
+							   (format "%S" el)))))))
 		      data-file)
 		    (org-babel-temp-file "sql-data-"))
 		 (if (stringp val) val (format "%S" val))))

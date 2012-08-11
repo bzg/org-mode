@@ -464,8 +464,8 @@ be saved in the second match data.")
   "The minimum number of lines for block output.
 If number of lines of output is equal to or exceeds this
 value, the output is placed in a #+begin_example...#+end_example
-block. Otherwise the output is marked as literal by inserting
-colons at the starts of the lines. This variable only takes
+block.  Otherwise the output is marked as literal by inserting
+colons at the starts of the lines.  This variable only takes
 effect if the :results output option is in effect.")
 
 (defvar org-babel-noweb-error-langs nil
@@ -756,7 +756,7 @@ session."
   "Initiate session for current code block.
 If called with a prefix argument then resolve any variable
 references in the header arguments and assign these variables in
-the session. Copy the body of the code block to the kill ring."
+the session.  Copy the body of the code block to the kill ring."
   (interactive "P")
   (let* ((info (or info (org-babel-get-src-block-info (not arg))))
          (lang (nth 0 info))
@@ -783,7 +783,7 @@ the session. Copy the body of the code block to the kill ring."
 ;;;###autoload
 (defun org-babel-switch-to-session (&optional arg info)
   "Switch to the session of the current code block.
-Uses `org-babel-initiate-session' to start the session. If called
+Uses `org-babel-initiate-session' to start the session.  If called
 with a prefix argument then this is passed on to
 `org-babel-initiate-session'."
   (interactive "P")
@@ -1556,7 +1556,7 @@ If the point is not on a source block then return nil."
 (defun org-babel-find-named-block (name)
   "Find a named source-code block.
 Return the location of the source block identified by source
-NAME, or nil if no such block exists. Set match data according to
+NAME, or nil if no such block exists.  Set match data according to
 org-babel-named-src-block-regexp."
   (save-excursion
     (let ((case-fold-search t)
@@ -2130,89 +2130,89 @@ parameters when merging lists."
 		      output)))
 	 params results exports tangle noweb cache vars shebang comments padline)
 
-      (mapc
-       (lambda (plist)
-	 (mapc
-	  (lambda (pair)
-	    (case (car pair)
-	      (:var
-	       (let ((name (if (listp (cdr pair))
-			       (cadr pair)
-			     (and (string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
-						(cdr pair))
-				  (intern (match-string 1 (cdr pair)))))))
-		 (if name
-		     (setq vars
-			   (append
-			    (if (member name (mapcar #'car vars))
-				(delq nil
-				      (mapcar
-				       (lambda (p)
-					 (unless (equal (car p) name) p))
-				       vars))
-			      vars)
-			    (list (cons name pair))))
-		   ;; if no name is given and we already have named variables
-		   ;; then assign to named variables in order
-		   (if (and vars (nth variable-index vars))
-		       (prog1 (setf (cddr (nth variable-index vars))
-				    (concat (symbol-name
-					     (car (nth variable-index vars)))
-					    "=" (cdr pair)))
-			 (incf variable-index))
-		     (error "variable \"%s\" must be assigned a default value"
-			    (cdr pair))))))
-	      (:results
+    (mapc
+     (lambda (plist)
+       (mapc
+	(lambda (pair)
+	  (case (car pair)
+	    (:var
+	     (let ((name (if (listp (cdr pair))
+			     (cadr pair)
+			   (and (string-match "^\\([^= \f\t\n\r\v]+\\)[ \t]*="
+					      (cdr pair))
+				(intern (match-string 1 (cdr pair)))))))
+	       (if name
+		   (setq vars
+			 (append
+			  (if (member name (mapcar #'car vars))
+			      (delq nil
+				    (mapcar
+				     (lambda (p)
+				       (unless (equal (car p) name) p))
+				     vars))
+			    vars)
+			  (list (cons name pair))))
+		 ;; if no name is given and we already have named variables
+		 ;; then assign to named variables in order
+		 (if (and vars (nth variable-index vars))
+		     (prog1 (setf (cddr (nth variable-index vars))
+				  (concat (symbol-name
+					   (car (nth variable-index vars)))
+					  "=" (cdr pair)))
+		       (incf variable-index))
+		   (error "variable \"%s\" must be assigned a default value"
+			  (cdr pair))))))
+	    (:results
+	     (setq results (funcall e-merge results-exclusive-groups
+				    results
+				    (split-string
+				     (let ((r (cdr pair)))
+				       (if (stringp r) r (eval r)))))))
+	    (:file
+	     (when (cdr pair)
 	       (setq results (funcall e-merge results-exclusive-groups
-				      results
-				      (split-string
-				       (let ((r (cdr pair)))
-					 (if (stringp r) r (eval r)))))))
-	      (:file
-	       (when (cdr pair)
-		 (setq results (funcall e-merge results-exclusive-groups
-					results '("file")))
-		 (unless (or (member "both" exports)
-			     (member "none" exports)
-			     (member "code" exports))
-		   (setq exports (funcall e-merge exports-exclusive-groups
-					  exports '("results"))))
-		 (setq params (cons pair (assq-delete-all (car pair) params)))))
-	      (:exports
-	       (setq exports (funcall e-merge exports-exclusive-groups
-				      exports (split-string (cdr pair)))))
-	      (:tangle ;; take the latest -- always overwrite
-	       (setq tangle (or (list (cdr pair)) tangle)))
-	      (:noweb
-	       (setq noweb (funcall e-merge
-			    '(("yes" "no" "tangle" "no-export"
-			       "strip-export" "eval"))
-			    noweb
-			    (split-string (or (cdr pair) "")))))
-	      (:cache
-	       (setq cache (funcall e-merge '(("yes" "no")) cache
+				      results '("file")))
+	       (unless (or (member "both" exports)
+			   (member "none" exports)
+			   (member "code" exports))
+		 (setq exports (funcall e-merge exports-exclusive-groups
+					exports '("results"))))
+	       (setq params (cons pair (assq-delete-all (car pair) params)))))
+	    (:exports
+	     (setq exports (funcall e-merge exports-exclusive-groups
+				    exports (split-string (cdr pair)))))
+	    (:tangle ;; take the latest -- always overwrite
+	     (setq tangle (or (list (cdr pair)) tangle)))
+	    (:noweb
+	     (setq noweb (funcall e-merge
+				  '(("yes" "no" "tangle" "no-export"
+				     "strip-export" "eval"))
+				  noweb
+				  (split-string (or (cdr pair) "")))))
+	    (:cache
+	     (setq cache (funcall e-merge '(("yes" "no")) cache
+				  (split-string (or (cdr pair) "")))))
+	    (:padline
+	     (setq padline (funcall e-merge '(("yes" "no")) padline
 				    (split-string (or (cdr pair) "")))))
-	      (:padline
-	       (setq padline (funcall e-merge '(("yes" "no")) padline
-				      (split-string (or (cdr pair) "")))))
-	      (:shebang ;; take the latest -- always overwrite
-	       (setq shebang (or (list (cdr pair)) shebang)))
-	      (:comments
-	       (setq comments (funcall e-merge '(("yes" "no")) comments
-				       (split-string (or (cdr pair) "")))))
-	      (t ;; replace: this covers e.g. :session
-	       (setq params (cons pair (assq-delete-all (car pair) params))))))
-	  plist))
-       plists)
-      (setq vars (reverse vars))
-      (while vars (setq params (cons (cons :var (cddr (pop vars))) params)))
-      (mapc
-       (lambda (hd)
-	 (let ((key (intern (concat ":" (symbol-name hd))))
-	       (val (eval hd)))
-	   (setf params (cons (cons key (mapconcat 'identity val " ")) params))))
-       '(results exports tangle noweb padline cache shebang comments))
-      params))
+	    (:shebang ;; take the latest -- always overwrite
+	     (setq shebang (or (list (cdr pair)) shebang)))
+	    (:comments
+	     (setq comments (funcall e-merge '(("yes" "no")) comments
+				     (split-string (or (cdr pair) "")))))
+	    (t ;; replace: this covers e.g. :session
+	     (setq params (cons pair (assq-delete-all (car pair) params))))))
+	plist))
+     plists)
+    (setq vars (reverse vars))
+    (while vars (setq params (cons (cons :var (cddr (pop vars))) params)))
+    (mapc
+     (lambda (hd)
+       (let ((key (intern (concat ":" (symbol-name hd))))
+	     (val (eval hd)))
+	 (setf params (cons (cons key (mapconcat 'identity val " ")) params))))
+     '(results exports tangle noweb padline cache shebang comments))
+    params))
 
 (defvar *org-babel-use-quick-and-dirty-noweb-expansion* nil
   "Set to true to use regular expressions to expand noweb references.
@@ -2279,88 +2279,88 @@ block but are passed literally to the \"example-block\"."
 		     (comment-region (point) (progn (insert text) (point)))
 		     (org-babel-trim (buffer-string)))))
 	 index source-name evaluate prefix blocks-in-buffer)
-      (with-temp-buffer
-        (insert body) (goto-char (point-min))
-        (setq index (point))
-        (while (and (re-search-forward (org-babel-noweb-wrap) nil t))
-          (save-match-data (setf source-name (match-string 1)))
-          (save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
-          (save-match-data
-            (setq prefix
-                  (buffer-substring (match-beginning 0)
-                                    (save-excursion
-                                      (beginning-of-line 1) (point)))))
-          ;; add interval to new-body (removing noweb reference)
-          (goto-char (match-beginning 0))
-          (funcall nb-add (buffer-substring index (point)))
-          (goto-char (match-end 0))
-          (setq index (point))
-          (funcall nb-add
-	   (with-current-buffer parent-buffer
-	     (save-restriction
-	       (widen)
-	       (mapconcat ;; interpose PREFIX between every line
-		#'identity
-		(split-string
-		 (if evaluate
-		     (let ((raw (org-babel-ref-resolve source-name)))
-		       (if (stringp raw) raw (format "%S" raw)))
-		   (or
-		    ;; retrieve from the library of babel
-		    (nth 2 (assoc (intern source-name)
-				  org-babel-library-of-babel))
-		    ;; return the contents of headlines literally
-		    (save-excursion
-		      (when (org-babel-ref-goto-headline-id source-name)
-			(org-babel-ref-headline-body)))
-		    ;; find the expansion of reference in this buffer
-		    (let ((rx (concat rx-prefix source-name "[ \t\n]"))
-			  expansion)
-		      (save-excursion
-			(goto-char (point-min))
-			(if *org-babel-use-quick-and-dirty-noweb-expansion*
-			    (while (re-search-forward rx nil t)
-			      (let* ((i (org-babel-get-src-block-info 'light))
-				     (body (org-babel-expand-noweb-references i))
-				     (sep (or (cdr (assoc :noweb-sep (nth 2 i)))
-					      "\n"))
-				     (full (if comment
-					       ((lambda (cs)
-						  (concat (funcall c-wrap (car cs)) "\n"
-							  body "\n"
-							  (funcall c-wrap (cadr cs))))
-						(org-babel-tangle-comment-links i))
-					     body)))
-				(setq expansion (cons sep (cons full expansion)))))
-			  (org-babel-map-src-blocks nil
-			    (let ((i (org-babel-get-src-block-info 'light)))
-			      (when (equal (or (cdr (assoc :noweb-ref (nth 2 i)))
-					       (nth 4 i))
-					   source-name)
-				(let* ((body (org-babel-expand-noweb-references i))
-				       (sep (or (cdr (assoc :noweb-sep (nth 2 i)))
-						"\n"))
-				       (full (if comment
-						 ((lambda (cs)
-						    (concat (funcall c-wrap (car cs)) "\n"
-							    body "\n"
-							    (funcall c-wrap (cadr cs))))
-						  (org-babel-tangle-comment-links i))
-					       body)))
-				  (setq expansion
-					(cons sep (cons full expansion)))))))))
-		      (and expansion
-			   (mapconcat #'identity (nreverse (cdr expansion)) "")))
-		    ;; possibly raise an error if named block doesn't exist
-		    (if (member lang org-babel-noweb-error-langs)
-			(error "%s" (concat
-				     (org-babel-noweb-wrap source-name)
-				     "could not be resolved (see "
-				     "`org-babel-noweb-error-langs')"))
-		      "")))
-		 "[\n\r]") (concat "\n" prefix))))))
-        (funcall nb-add (buffer-substring index (point-max))))
-      new-body))
+    (with-temp-buffer
+      (insert body) (goto-char (point-min))
+      (setq index (point))
+      (while (and (re-search-forward (org-babel-noweb-wrap) nil t))
+	(save-match-data (setf source-name (match-string 1)))
+	(save-match-data (setq evaluate (string-match "\(.*\)" source-name)))
+	(save-match-data
+	  (setq prefix
+		(buffer-substring (match-beginning 0)
+				  (save-excursion
+				    (beginning-of-line 1) (point)))))
+	;; add interval to new-body (removing noweb reference)
+	(goto-char (match-beginning 0))
+	(funcall nb-add (buffer-substring index (point)))
+	(goto-char (match-end 0))
+	(setq index (point))
+	(funcall nb-add
+		 (with-current-buffer parent-buffer
+		   (save-restriction
+		     (widen)
+		     (mapconcat ;; interpose PREFIX between every line
+		      #'identity
+		      (split-string
+		       (if evaluate
+			   (let ((raw (org-babel-ref-resolve source-name)))
+			     (if (stringp raw) raw (format "%S" raw)))
+			 (or
+			  ;; retrieve from the library of babel
+			  (nth 2 (assoc (intern source-name)
+					org-babel-library-of-babel))
+			  ;; return the contents of headlines literally
+			  (save-excursion
+			    (when (org-babel-ref-goto-headline-id source-name)
+			      (org-babel-ref-headline-body)))
+			  ;; find the expansion of reference in this buffer
+			  (let ((rx (concat rx-prefix source-name "[ \t\n]"))
+				expansion)
+			    (save-excursion
+			      (goto-char (point-min))
+			      (if *org-babel-use-quick-and-dirty-noweb-expansion*
+				  (while (re-search-forward rx nil t)
+				    (let* ((i (org-babel-get-src-block-info 'light))
+					   (body (org-babel-expand-noweb-references i))
+					   (sep (or (cdr (assoc :noweb-sep (nth 2 i)))
+						    "\n"))
+					   (full (if comment
+						     ((lambda (cs)
+							(concat (funcall c-wrap (car cs)) "\n"
+								body "\n"
+								(funcall c-wrap (cadr cs))))
+						      (org-babel-tangle-comment-links i))
+						   body)))
+				      (setq expansion (cons sep (cons full expansion)))))
+				(org-babel-map-src-blocks nil
+				  (let ((i (org-babel-get-src-block-info 'light)))
+				    (when (equal (or (cdr (assoc :noweb-ref (nth 2 i)))
+						     (nth 4 i))
+						 source-name)
+				      (let* ((body (org-babel-expand-noweb-references i))
+					     (sep (or (cdr (assoc :noweb-sep (nth 2 i)))
+						      "\n"))
+					     (full (if comment
+						       ((lambda (cs)
+							  (concat (funcall c-wrap (car cs)) "\n"
+								  body "\n"
+								  (funcall c-wrap (cadr cs))))
+							(org-babel-tangle-comment-links i))
+						     body)))
+					(setq expansion
+					      (cons sep (cons full expansion)))))))))
+			    (and expansion
+				 (mapconcat #'identity (nreverse (cdr expansion)) "")))
+			  ;; possibly raise an error if named block doesn't exist
+			  (if (member lang org-babel-noweb-error-langs)
+			      (error "%s" (concat
+					   (org-babel-noweb-wrap source-name)
+					   "could not be resolved (see "
+					   "`org-babel-noweb-error-langs')"))
+			    "")))
+		       "[\n\r]") (concat "\n" prefix))))))
+      (funcall nb-add (buffer-substring index (point-max))))
+    new-body))
 
 (defun org-babel-clean-text-properties (text)
   "Strip all properties from text return."
@@ -2516,7 +2516,7 @@ Fixes a bug in `tramp-handle-call-process-region'."
 	    (apply 'process-file program tmpfile buffer display args)
 	  (delete-file tmpfile)))
     ;; org-babel-call-process-region-original is the original emacs
-    ;; definition. It is in scope from the let binding in
+    ;; definition.  It is in scope from the let binding in
     ;; org-babel-execute-src-block
     (apply org-babel-call-process-region-original
            start end program delete buffer display args)))
@@ -2533,10 +2533,9 @@ Fixes a bug in `tramp-handle-call-process-region'."
   "Prepare NAME to be used in an external process.
 If NAME specifies a remote location, the remote portion of the
 name is removed, since in that case the process will be executing
-remotely. The file name is then processed by
-`expand-file-name'. Unless second argument NO-QUOTE-P is non-nil,
-the file name is additionally processed by
-`shell-quote-argument'"
+remotely.  The file name is then processed by `expand-file-name'.
+Unless second argument NO-QUOTE-P is non-nil, the file name is
+additionally processed by `shell-quote-argument'"
   ((lambda (f) (if no-quote-p f (shell-quote-argument f)))
    (expand-file-name (org-babel-local-file-name name))))
 

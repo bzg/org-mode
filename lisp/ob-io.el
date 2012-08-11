@@ -22,7 +22,7 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Currently only supports the external execution. No session support yet.
+;; Currently only supports the external execution.  No session support yet.
 ;; :results output -- runs in scripting mode
 ;; :results output repl -- runs in repl mode
 
@@ -85,11 +85,11 @@ Emacs-lisp table, otherwise return the results as a string."
 If RESULT-TYPE equals 'output then return standard output as a string.
 If RESULT-TYPE equals 'value then return the value of the last statement
 in BODY as elisp."
-  (when session (error "Sessions are not supported for Io. Yet."))
+  (when session (error "Sessions are not supported for Io.  Yet."))
   (case result-type
-    (output 
+    (output
      (if (member "repl" result-params)
-         (org-babel-eval org-babel-io-command body) 
+         (org-babel-eval org-babel-io-command body)
        (let ((src-file (org-babel-temp-file "io-")))
          (progn (with-temp-file src-file (insert body))
                 (org-babel-eval
@@ -104,14 +104,14 @@ in BODY as elisp."
               (org-babel-eval
                (concat org-babel-io-command " " src-file) ""))))))
 
-                    
+
 (defun org-babel-prep-session:io (session params)
   "Prepare SESSION according to the header arguments specified in PARAMS."
-  (error "Sessions are not supported for Io. Yet."))
+  (error "Sessions are not supported for Io.  Yet."))
 
 (defun org-babel-io-initiate-session (&optional session)
   "If there is not a current inferior-process-buffer in SESSION
-then create.  Return the initialized session. Sessions are not 
+then create.  Return the initialized session.  Sessions are not
 supported in Io."
   nil)
 

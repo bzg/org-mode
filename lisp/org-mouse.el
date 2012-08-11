@@ -260,7 +260,7 @@ after the current heading."
   (interactive)
   (case (org-mouse-line-position)
     (:beginning (beginning-of-line)
-	    (org-insert-heading))
+		(org-insert-heading))
     (t (org-mouse-next-heading)
        (org-insert-heading))))
 
@@ -293,19 +293,19 @@ string to (format ITEMFORMAT keyword).  If it is neither a string
 nor a function, elements of KEYWORDS are used directly."
   (mapcar
    `(lambda (keyword)
-     (vector (cond
-	      ((functionp ,itemformat) (funcall ,itemformat keyword))
-	      ((stringp ,itemformat) (format ,itemformat keyword))
-	      (t keyword))
-	     (list 'funcall ,function keyword)
-	     :style (cond
-		     ((null ,selected) t)
-		     ((functionp ,selected) 'toggle)
-		     (t 'radio))
-	     :selected (if (functionp ,selected)
-			   (and (funcall ,selected keyword) t)
-			 (equal ,selected keyword))))
-    keywords))
+      (vector (cond
+	       ((functionp ,itemformat) (funcall ,itemformat keyword))
+	       ((stringp ,itemformat) (format ,itemformat keyword))
+	       (t keyword))
+	      (list 'funcall ,function keyword)
+	      :style (cond
+		      ((null ,selected) t)
+		      ((functionp ,selected) 'toggle)
+		      (t 'radio))
+	      :selected (if (functionp ,selected)
+			    (and (funcall ,selected keyword) t)
+			  (equal ,selected keyword))))
+   keywords))
 
 (defun org-mouse-remove-match-and-spaces ()
   "Remove the match, make just one space around the point."
@@ -407,8 +407,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 	  (> (match-end 0) point))))))
 
 (defun org-mouse-priority-list ()
-   (loop for priority from ?A to org-lowest-priority
-	 collect (char-to-string priority)))
+  (loop for priority from ?A to org-lowest-priority
+	collect (char-to-string priority)))
 
 (defun org-mouse-todo-menu (state)
   "Create the menu with TODO keywords."
@@ -461,12 +461,12 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 
 (defun org-mouse-agenda-type (type)
   (case type
-   ('tags "Tags: ")
-   ('todo "TODO: ")
-   ('tags-tree "Tags tree: ")
-   ('todo-tree "TODO tree: ")
-   ('occur-tree "Occur tree: ")
-   (t "Agenda command ???")))
+    ('tags "Tags: ")
+    ('todo "TODO: ")
+    ('tags-tree "Tags tree: ")
+    ('todo-tree "TODO tree: ")
+    ('occur-tree "Occur tree: ")
+    (t "Agenda command ???")))
 
 (defun org-mouse-list-options-menu (alloptions &optional function)
   (let ((options (save-match-data
@@ -485,8 +485,8 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
 				 " ")
 		      nil nil nil 1)
 		     (when (functionp ',function) (funcall ',function)))
-		    :style 'toggle
-		    :selected (and (member name options) t)))))
+		  :style 'toggle
+		  :selected (and (member name options) t)))))
 
 (defun org-mouse-clip-text (text maxlength)
   (if (> (length text) maxlength)
@@ -529,18 +529,18 @@ SCHEDULED: or DEADLINE: or ANYTHINGLIKETHIS:"
      ,@(org-mouse-keyword-menu
 	(mapcar 'car org-agenda-custom-commands)
 	#'(lambda (key)
-	   (eval `(org-agenda nil (string-to-char ,key))))
+	    (eval `(org-agenda nil (string-to-char ,key))))
 	nil
 	#'(lambda (key)
-	   (let ((entry (assoc key org-agenda-custom-commands)))
-	     (org-mouse-clip-text
-	      (cond
-	       ((stringp (nth 1 entry)) (nth 1 entry))
-	       ((stringp (nth 2 entry))
-		(concat (org-mouse-agenda-type (nth 1 entry))
-			(nth 2 entry)))
-	       (t "Agenda Command '%s'"))
-	      30))))
+	    (let ((entry (assoc key org-agenda-custom-commands)))
+	      (org-mouse-clip-text
+	       (cond
+		((stringp (nth 1 entry)) (nth 1 entry))
+		((stringp (nth 2 entry))
+		 (concat (org-mouse-agenda-type (nth 1 entry))
+			 (nth 2 entry)))
+		(t "Agenda Command '%s'"))
+	       30))))
      "--"
      ["Delete Blank Lines" delete-blank-lines
       :visible (org-mouse-empty-line)]
@@ -605,9 +605,9 @@ This means, between the beginning of line and the point."
 (defun org-mouse-match-closure (function)
   (let ((match (match-data t)))
     `(lambda (&rest rest)
-      (save-match-data
-	(set-match-data ',match)
-	(apply ',function rest)))))
+       (save-match-data
+	 (set-match-data ',match)
+	 (apply ',function rest)))))
 
 (defun org-mouse-yank-link (click)
   (interactive "e")
@@ -864,55 +864,55 @@ This means, between the beginning of line and the point."
     (mouse-drag-region event)))
 
 (add-hook 'org-mode-hook
-  #'(lambda ()
-     (setq org-mouse-context-menu-function 'org-mouse-context-menu)
+	  #'(lambda ()
+	      (setq org-mouse-context-menu-function 'org-mouse-context-menu)
 
-     (when (memq 'context-menu org-mouse-features)
-       (org-defkey org-mouse-map [mouse-3] nil)
-       (org-defkey org-mode-map [mouse-3] 'org-mouse-show-context-menu))
-     (org-defkey org-mode-map [down-mouse-1] 'org-mouse-down-mouse)
-     (when (memq 'context-menu org-mouse-features)
-       (org-defkey org-mouse-map [C-drag-mouse-1] 'org-mouse-move-tree)
-       (org-defkey org-mouse-map [C-down-mouse-1] 'org-mouse-move-tree-start))
-     (when (memq 'yank-link org-mouse-features)
-       (org-defkey org-mode-map [S-mouse-2] 'org-mouse-yank-link)
-       (org-defkey org-mode-map [drag-mouse-3] 'org-mouse-yank-link))
-     (when (memq 'move-tree org-mouse-features)
-       (org-defkey org-mouse-map [drag-mouse-3] 'org-mouse-move-tree)
-       (org-defkey org-mouse-map [down-mouse-3] 'org-mouse-move-tree-start))
+	      (when (memq 'context-menu org-mouse-features)
+		(org-defkey org-mouse-map [mouse-3] nil)
+		(org-defkey org-mode-map [mouse-3] 'org-mouse-show-context-menu))
+	      (org-defkey org-mode-map [down-mouse-1] 'org-mouse-down-mouse)
+	      (when (memq 'context-menu org-mouse-features)
+		(org-defkey org-mouse-map [C-drag-mouse-1] 'org-mouse-move-tree)
+		(org-defkey org-mouse-map [C-down-mouse-1] 'org-mouse-move-tree-start))
+	      (when (memq 'yank-link org-mouse-features)
+		(org-defkey org-mode-map [S-mouse-2] 'org-mouse-yank-link)
+		(org-defkey org-mode-map [drag-mouse-3] 'org-mouse-yank-link))
+	      (when (memq 'move-tree org-mouse-features)
+		(org-defkey org-mouse-map [drag-mouse-3] 'org-mouse-move-tree)
+		(org-defkey org-mouse-map [down-mouse-3] 'org-mouse-move-tree-start))
 
-     (when (memq 'activate-stars org-mouse-features)
-       (font-lock-add-keywords
-	nil
-	`((,org-outline-regexp
-	   0 `(face org-link mouse-face highlight keymap ,org-mouse-map)
-	   'prepend))
-	t))
+	      (when (memq 'activate-stars org-mouse-features)
+		(font-lock-add-keywords
+		 nil
+		 `((,org-outline-regexp
+		    0 `(face org-link mouse-face highlight keymap ,org-mouse-map)
+		    'prepend))
+		 t))
 
-     (when (memq 'activate-bullets org-mouse-features)
-       (font-lock-add-keywords
-	nil
-	`(("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +"
-	   (1 `(face org-link keymap ,org-mouse-map mouse-face highlight)
-	      'prepend)))
-	t))
+	      (when (memq 'activate-bullets org-mouse-features)
+		(font-lock-add-keywords
+		 nil
+		 `(("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +"
+		    (1 `(face org-link keymap ,org-mouse-map mouse-face highlight)
+		       'prepend)))
+		 t))
 
-     (when (memq 'activate-checkboxes org-mouse-features)
-       (font-lock-add-keywords
-	nil
-	`(("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[ X]\\]\\)"
-	   (2 `(face bold keymap ,org-mouse-map mouse-face highlight) t)))
-	t))
+	      (when (memq 'activate-checkboxes org-mouse-features)
+		(font-lock-add-keywords
+		 nil
+		 `(("^[ \t]*\\([-+*]\\|[0-9]+[.)]\\) +\\(\\[[ X]\\]\\)"
+		    (2 `(face bold keymap ,org-mouse-map mouse-face highlight) t)))
+		 t))
 
-     (defadvice org-open-at-point (around org-mouse-open-at-point activate)
-       (let ((context (org-context)))
-	 (cond
-	  ((assq :headline-stars context) (org-cycle))
-	  ((assq :checkbox context) (org-toggle-checkbox))
-	  ((assq :item-bullet context)
-	   (let ((org-cycle-include-plain-lists t)) (org-cycle)))
-	  ((org-footnote-at-reference-p) nil)
-	  (t ad-do-it))))))
+	      (defadvice org-open-at-point (around org-mouse-open-at-point activate)
+		(let ((context (org-context)))
+		  (cond
+		   ((assq :headline-stars context) (org-cycle))
+		   ((assq :checkbox context) (org-toggle-checkbox))
+		   ((assq :item-bullet context)
+		    (let ((org-cycle-include-plain-lists t)) (org-cycle)))
+		   ((org-footnote-at-reference-p) nil)
+		   (t ad-do-it))))))
 
 (defun org-mouse-move-tree-start (event)
   (interactive "e")
@@ -932,42 +932,42 @@ This means, between the beginning of line and the point."
 	   (sbuf (marker-buffer start))
 	   (ebuf (marker-buffer end)))
 
-     (when (and sbuf ebuf)
-      (set-buffer sbuf)
-      (goto-char start)
-      (org-back-to-heading)
-      (if (and (eq sbuf ebuf)
-	       (equal
-		(point)
-		(save-excursion (goto-char end) (org-back-to-heading) (point))))
-	;; if the same line then promote/demote
-	(if (>= end start) (org-demote-subtree) (org-promote-subtree))
-      ;; if different lines then move
-      (org-cut-subtree)
+      (when (and sbuf ebuf)
+	(set-buffer sbuf)
+	(goto-char start)
+	(org-back-to-heading)
+	(if (and (eq sbuf ebuf)
+		 (equal
+		  (point)
+		  (save-excursion (goto-char end) (org-back-to-heading) (point))))
+	    ;; if the same line then promote/demote
+	    (if (>= end start) (org-demote-subtree) (org-promote-subtree))
+	  ;; if different lines then move
+	  (org-cut-subtree)
 
-      (set-buffer ebuf)
-      (goto-char end)
-      (org-back-to-heading)
-      (when  (and (eq sbuf ebuf)
-		  (equal
-		   (point)
-		   (save-excursion (goto-char start)
-				   (org-back-to-heading) (point))))
-	(outline-end-of-subtree)
-	(end-of-line)
-	(if (eobp) (newline) (forward-char)))
-
-      (when (looking-at org-outline-regexp)
-	(let ((level (- (match-end 0) (match-beginning 0))))
-	  (when (> end (match-end 0))
+	  (set-buffer ebuf)
+	  (goto-char end)
+	  (org-back-to-heading)
+	  (when  (and (eq sbuf ebuf)
+		      (equal
+		       (point)
+		       (save-excursion (goto-char start)
+				       (org-back-to-heading) (point))))
 	    (outline-end-of-subtree)
 	    (end-of-line)
-	    (if (eobp) (newline) (forward-char))
-	    (setq level (1+ level)))
-	  (org-paste-subtree level)
-	  (save-excursion
-	    (outline-end-of-subtree)
-	    (when (bolp) (delete-char -1))))))))))
+	    (if (eobp) (newline) (forward-char)))
+
+	  (when (looking-at org-outline-regexp)
+	    (let ((level (- (match-end 0) (match-beginning 0))))
+	      (when (> end (match-end 0))
+		(outline-end-of-subtree)
+		(end-of-line)
+		(if (eobp) (newline) (forward-char))
+		(setq level (1+ level)))
+	      (org-paste-subtree level)
+	      (save-excursion
+		(outline-end-of-subtree)
+		(when (bolp) (delete-char -1))))))))))
 
 
 (defun org-mouse-transform-to-outline ()
@@ -990,7 +990,7 @@ This means, between the beginning of line and the point."
 (defvar org-mouse-cmd) ;dynamically scoped from `org-with-remote-undo'.
 
 (defun org-mouse-do-remotely (command)
-;  (org-agenda-check-no-diary)
+					;  (org-agenda-check-no-diary)
   (when (get-text-property (point) 'org-marker)
     (let* ((anticol (- (point-at-eol) (point)))
 	   (marker (get-text-property (point) 'org-marker))
@@ -1087,20 +1087,20 @@ This means, between the beginning of line and the point."
     (if (< (car startxy) (car endxy)) :right :left)))
 
 
-; (setq org-agenda-mode-hook nil)
+					; (setq org-agenda-mode-hook nil)
 (defvar org-agenda-mode-map)
 (add-hook 'org-agenda-mode-hook
-   #'(lambda ()
-     (setq org-mouse-context-menu-function 'org-mouse-agenda-context-menu)
-     (org-defkey org-agenda-mode-map [mouse-3] 'org-mouse-show-context-menu)
-     (org-defkey org-agenda-mode-map [down-mouse-3] 'org-mouse-move-tree-start)
-     (org-defkey org-agenda-mode-map [C-mouse-4] 'org-agenda-earlier)
-     (org-defkey org-agenda-mode-map [C-mouse-5] 'org-agenda-later)
-     (org-defkey org-agenda-mode-map [drag-mouse-3]
-       #'(lambda (event) (interactive "e")
-	  (case (org-mouse-get-gesture event)
-	    (:left (org-agenda-earlier 1))
-	    (:right (org-agenda-later 1)))))))
+	  #'(lambda ()
+	      (setq org-mouse-context-menu-function 'org-mouse-agenda-context-menu)
+	      (org-defkey org-agenda-mode-map [mouse-3] 'org-mouse-show-context-menu)
+	      (org-defkey org-agenda-mode-map [down-mouse-3] 'org-mouse-move-tree-start)
+	      (org-defkey org-agenda-mode-map [C-mouse-4] 'org-agenda-earlier)
+	      (org-defkey org-agenda-mode-map [C-mouse-5] 'org-agenda-later)
+	      (org-defkey org-agenda-mode-map [drag-mouse-3]
+			  #'(lambda (event) (interactive "e")
+			      (case (org-mouse-get-gesture event)
+				(:left (org-agenda-earlier 1))
+				(:right (org-agenda-later 1)))))))
 
 (provide 'org-mouse)
 

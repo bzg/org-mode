@@ -1018,11 +1018,11 @@ publishing directory."
 	   (t
 	    ;; This line either is list item or end a list.
 	    (when (when (get-text-property 0 'list-item line)
-	   	      (setq line (org-export-docbook-list-line
-			  line
-			  (get-text-property 0 'list-item line)
-			  (get-text-property 0 'list-struct line)
-			  (get-text-property 0 'list-prevs line)))))
+		    (setq line (org-export-docbook-list-line
+				line
+				(get-text-property 0 'list-item line)
+				(get-text-property 0 'list-struct line)
+				(get-text-property 0 'list-prevs line)))))
 
 	    ;; Empty lines start a new paragraph.  If hand-formatted lists
 	    ;; are not fully interpreted, lines starting with "-", "+", "*"
@@ -1066,7 +1066,7 @@ publishing directory."
 	(if (eq major-mode (default-value 'major-mode))
 	    (nxml-mode)))
 
-      ;; Remove empty paragraphs. Replace them with a newline.
+      ;; Remove empty paragraphs.  Replace them with a newline.
       (goto-char (point-min))
       (while (re-search-forward
 	      "[ \r\n\t]*\\(<para>\\)[ \r\n\t]*</para>[ \r\n\t]*" nil t)
@@ -1355,10 +1355,10 @@ that need to be preserved in later phase of DocBook exporting."
     (concat replaced line)))
 
 (defun org-export-docbook-list-line (line pos struct prevs)
-  "Insert list syntax in export buffer. Return LINE, maybe modified.
+  "Insert list syntax in export buffer.  Return LINE, maybe modified.
 
 POS is the item position or line position the line had before
-modifications to buffer. STRUCT is the list structure. PREVS is
+modifications to buffer.  STRUCT is the list structure.  PREVS is
 the alist of previous items."
   (let* ((get-type
 	  (function

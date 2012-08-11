@@ -201,7 +201,7 @@ open('%s', 'w').write( pprint.pformat(main()) )")
   (body &optional result-type result-params preamble)
   "Evaluate BODY in external python process.
 If RESULT-TYPE equals 'output then return standard output as a
-string. If RESULT-TYPE equals 'value then return the value of the
+string.  If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   ((lambda (raw)
      (if (or (member "code" result-params)
@@ -236,7 +236,7 @@ last statement in BODY, as elisp."
   (session body &optional result-type result-params)
   "Pass BODY to the Python process in SESSION.
 If RESULT-TYPE equals 'output then return standard output as a
-string. If RESULT-TYPE equals 'value then return the value of the
+string.  If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (let* ((send-wait (lambda () (comint-send-input nil t) (sleep-for 0 5)))
 	 (dump-last-value

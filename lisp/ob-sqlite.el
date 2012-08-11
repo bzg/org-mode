@@ -128,8 +128,8 @@ This function is called by `org-babel-execute-src-block'."
 		      (with-temp-file data-file
 			(insert (orgtbl-to-csv
 				 val '(:fmt (lambda (el) (if (stringp el)
-							el
-						      (format "%S" el)))))))
+							     el
+							   (format "%S" el)))))))
 		      data-file)
 		    (org-babel-temp-file "sqlite-data-"))
 		 (if (stringp val) val (format "%S" val))))

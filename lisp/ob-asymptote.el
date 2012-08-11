@@ -128,7 +128,7 @@ a variable of the same value."
 DATA is a list.  Return type as a symbol.
 
 The type is `string' if any element in DATA is
-a string. Otherwise, it is either `real', if some elements are
+a string.  Otherwise, it is either `real', if some elements are
 floats, or `int'."
   (let* ((type 'int)
 	 find-type			; for byte-compiler

@@ -162,7 +162,7 @@ i       Make children of the current entry inherit its attachment directory.")))
        ((memq c '(?l ?\C-l))
 	(let ((org-attach-method 'ln)) (call-interactively 'org-attach-attach)))
        ((memq c '(?y ?\C-y))
-	(let ((org-attach-method 'lns)) (call-interactively 'org-attach-attach)))       
+	(let ((org-attach-method 'lns)) (call-interactively 'org-attach-attach)))
        ((memq c '(?n ?\C-n)) (call-interactively 'org-attach-new))
        ((memq c '(?z ?\C-z)) (call-interactively 'org-attach-sync))
        ((memq c '(?o ?\C-o)) (call-interactively 'org-attach-open))
@@ -259,9 +259,9 @@ This checks for the existence of a \".git\" directory in that directory."
 	(shell-command "git add .")
 	(shell-command "git ls-files --deleted" t)
 	(mapc #'(lambda (file)
-		 (unless (string= file "")
-		   (shell-command
-		    (concat "git rm \"" file "\""))))
+		  (unless (string= file "")
+		    (shell-command
+		     (concat "git rm \"" file "\""))))
 	      (split-string (buffer-string) "\n"))
 	(shell-command "git commit -m 'Synchronized attachments'")))))
 
@@ -429,7 +429,7 @@ If IN-EMACS is non-nil, force opening in Emacs."
 	 (file (if (= (length files) 1)
 		   (car files)
 		 (org-icompleting-read "Open attachment: "
-				  (mapcar 'list files) nil t))))
+				       (mapcar 'list files) nil t))))
     (org-open-file (expand-file-name file attach-dir) in-emacs)))
 
 (defun org-attach-open-in-emacs ()

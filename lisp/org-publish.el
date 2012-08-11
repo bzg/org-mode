@@ -105,7 +105,7 @@ being published.  Its value may be a string or regexp matching
 file names you don't want to be published.
 
 The :include property may be used to include extra files.  Its
-value may be a list of filenames to include. The filenames are
+value may be a list of filenames to include.  The filenames are
 considered relative to the base directory.
 
 When both :include and :exclude properties are given values, the
@@ -418,22 +418,22 @@ This splices all the components into the list."
 		 (setq retval (if org-sitemap-ignore-case
 				  (not (string-lessp (upcase B) (upcase A)))
 				(not (string-lessp B A))))))
-		((or (equal org-sitemap-sort-files 'chronologically)
-		     (equal org-sitemap-sort-files 'anti-chronologically))
-		 (let* ((adate (org-publish-find-date a))
-			(bdate (org-publish-find-date b))
-			(A (+ (lsh (car adate) 16) (cadr adate)))
-			(B (+ (lsh (car bdate) 16) (cadr bdate))))
-		   (setq retval (if (equal org-sitemap-sort-files 'chronologically)
-				    (<= A B)
-				  (>= A B)))))))
+	      ((or (equal org-sitemap-sort-files 'chronologically)
+		   (equal org-sitemap-sort-files 'anti-chronologically))
+	       (let* ((adate (org-publish-find-date a))
+		      (bdate (org-publish-find-date b))
+		      (A (+ (lsh (car adate) 16) (cadr adate)))
+		      (B (+ (lsh (car bdate) 16) (cadr bdate))))
+		 (setq retval (if (equal org-sitemap-sort-files 'chronologically)
+				  (<= A B)
+				(>= A B)))))))
       ;; Directory-wise wins:
       (when org-sitemap-sort-folders
         ;; a is directory, b not:
         (cond
          ((and (file-directory-p a) (not (file-directory-p b)))
           (setq retval (equal org-sitemap-sort-folders 'first)))
-          ;; a is not a directory, but b is:
+	 ;; a is not a directory, but b is:
          ((and (not (file-directory-p a)) (file-directory-p b))
           (setq retval (equal org-sitemap-sort-folders 'last))))))
     retval))
@@ -506,7 +506,7 @@ matching filenames."
     (setq org-publish-temp-files nil)
     (if org-sitemap-requested
 	(pushnew (expand-file-name (concat base-dir sitemap-filename))
-		  org-publish-temp-files))
+		 org-publish-temp-files))
     (org-publish-get-base-files-1 base-dir recurse match
 				  ;; FIXME distinguish exclude regexp
 				  ;; for skip-file and skip-dir?
@@ -536,14 +536,14 @@ matching filenames."
 		 (xm (concat "^" b (if r ".+" "[^/]+") "\\.\\(" x "\\)$")))
 	    (when
 		(or
-		   (and
+		 (and
 		  i (member filename
 			    (mapcar
 			     (lambda (file) (expand-file-name file b))
 			     i)))
-		   (and
-		    (not (and e (string-match e filename)))
-		    (string-match xm filename)))
+		 (and
+		  (not (and e (string-match e filename)))
+		  (string-match xm filename)))
 	      (setq project-name (car prj))
 	      (throw 'p-found project-name))))))
     (when up
@@ -600,10 +600,10 @@ PUB-DIR is the publishing directory."
 (defmacro org-publish-with-aux-preprocess-maybe (&rest body)
   "Execute BODY with a modified hook to preprocess for index."
   `(let ((org-export-preprocess-after-headline-targets-hook
-	 (if (plist-get project-plist :makeindex)
-	     (cons 'org-publish-aux-preprocess
-		   org-export-preprocess-after-headline-targets-hook)
-	   org-export-preprocess-after-headline-targets-hook)))
+	  (if (plist-get project-plist :makeindex)
+	      (cons 'org-publish-aux-preprocess
+		    org-export-preprocess-after-headline-targets-hook)
+	    org-export-preprocess-after-headline-targets-hook)))
      ,@body))
 (def-edebug-spec org-publish-with-aux-preprocess-maybe (body))
 
@@ -624,7 +624,7 @@ See `org-publish-org-to' to the list of arguments."
   "Publish an org file to HTML.
 See `org-publish-org-to' to the list of arguments."
   (org-publish-with-aux-preprocess-maybe
-    (org-publish-org-to "html" plist filename pub-dir)))
+   (org-publish-org-to "html" plist filename pub-dir)))
 
 (defun org-publish-org-to-org (plist filename pub-dir)
   "Publish an org file to HTML.
@@ -635,19 +635,19 @@ See `org-publish-org-to' to the list of arguments."
   "Publish an org file to ASCII.
 See `org-publish-org-to' to the list of arguments."
   (org-publish-with-aux-preprocess-maybe
-    (org-publish-org-to "ascii" plist filename pub-dir)))
+   (org-publish-org-to "ascii" plist filename pub-dir)))
 
 (defun org-publish-org-to-latin1 (plist filename pub-dir)
   "Publish an org file to Latin-1.
 See `org-publish-org-to' to the list of arguments."
   (org-publish-with-aux-preprocess-maybe
-    (org-publish-org-to "latin1" plist filename pub-dir)))
+   (org-publish-org-to "latin1" plist filename pub-dir)))
 
 (defun org-publish-org-to-utf8 (plist filename pub-dir)
   "Publish an org file to UTF-8.
 See `org-publish-org-to' to the list of arguments."
   (org-publish-with-aux-preprocess-maybe
-    (org-publish-org-to "utf8" plist filename pub-dir)))
+   (org-publish-org-to "utf8" plist filename pub-dir)))
 
 (defun org-publish-attachment (plist filename pub-dir)
   "Publish a file with no transformation of any kind.
@@ -732,9 +732,9 @@ If :makeindex is set, also produce a file theindex.org."
 	  (sitemap-function (or (plist-get project-plist :sitemap-function)
 				'org-publish-org-sitemap))
 	  (org-sitemap-date-format (or (plist-get project-plist :sitemap-date-format)
-				   org-publish-sitemap-date-format))
+				       org-publish-sitemap-date-format))
 	  (org-sitemap-file-entry-format (or (plist-get project-plist :sitemap-file-entry-format)
-					 org-publish-sitemap-file-entry-format))
+					     org-publish-sitemap-file-entry-format))
 	  (preparation-function (plist-get project-plist :preparation-function))
 	  (completion-function (plist-get project-plist :completion-function))
 	  (files (org-publish-get-base-files project exclude-regexp)) file)
@@ -750,7 +750,7 @@ If :makeindex is set, also produce a file theindex.org."
 			    (plist-get project-plist :base-directory))
 			   project t))
        (when completion-function (run-hooks 'completion-function))
-     (org-publish-write-cache-file)))
+       (org-publish-write-cache-file)))
    (org-publish-expand-projects projects)))
 
 (defun org-publish-org-sitemap (project &optional sitemap-filename)
@@ -766,9 +766,9 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 	 (files (nreverse (org-publish-get-base-files project exclude-regexp)))
 	 (sitemap-filename (concat dir (or sitemap-filename "sitemap.org")))
 	 (sitemap-title (or (plist-get project-plist :sitemap-title)
-			  (concat "Sitemap for project " (car project))))
+			    (concat "Sitemap for project " (car project))))
 	 (sitemap-style (or (plist-get project-plist :sitemap-style)
-			  'tree))
+			    'tree))
 	 (sitemap-sans-extension (plist-get project-plist :sitemap-sans-extension))
 	 (visiting (find-buffer-visiting sitemap-filename))
 	 (ifn (file-name-nondirectory sitemap-filename))
@@ -832,10 +832,10 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 
 (defun org-publish-format-file-entry (fmt file project-plist)
   (format-spec fmt
-	     `((?t . ,(org-publish-find-title file t))
-	       (?d . ,(format-time-string org-sitemap-date-format
-					  (org-publish-find-date file)))
-	       (?a . ,(or (plist-get project-plist :author) user-full-name)))))
+	       `((?t . ,(org-publish-find-title file t))
+		 (?d . ,(format-time-string org-sitemap-date-format
+					    (org-publish-find-date file)))
+		 (?a . ,(or (plist-get project-plist :author) user-full-name)))))
 
 (defun org-publish-find-title (file &optional reset)
   "Find the title of FILE in project."
@@ -901,7 +901,7 @@ It returns time in `current-time' format."
 	   ;; If this function is called in batch mode,
 	   ;; project is still a string here.
 	   (list (assoc project org-publish-project-alist))
-	   (list project))))))
+	 (list project))))))
 
 ;;;###autoload
 (defun org-publish-all (&optional force)
@@ -1032,12 +1032,12 @@ the project."
     ;; Create theindex.org if it doesn't exist already
     (let ((index-file (expand-file-name "theindex.org" directory)))
       (unless (file-exists-p index-file)
-       (setq ibuffer (find-file-noselect index-file))
-       (with-current-buffer ibuffer
-         (erase-buffer)
-         (insert "\n\n#+INCLUDE: \"theindex.inc\"\n\n")
-         (save-buffer))
-       (kill-buffer ibuffer)))))
+	(setq ibuffer (find-file-noselect index-file))
+	(with-current-buffer ibuffer
+	  (erase-buffer)
+	  (insert "\n\n#+INCLUDE: \"theindex.inc\"\n\n")
+	  (save-buffer))
+	(kill-buffer ibuffer)))))
 
 ;; Caching functions:
 

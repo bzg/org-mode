@@ -289,7 +289,7 @@ current code buffer."
   (body result-type result-params column-names-p row-names-p)
   "Evaluate BODY in external R process.
 If RESULT-TYPE equals 'output then return standard output as a
-string. If RESULT-TYPE equals 'value then return the value of the
+string.  If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (case result-type
     (value
@@ -316,7 +316,7 @@ last statement in BODY, as elisp."
   (session body result-type result-params column-names-p row-names-p)
   "Evaluate BODY in SESSION.
 If RESULT-TYPE equals 'output then return standard output as a
-string. If RESULT-TYPE equals 'value then return the value of the
+string.  If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   (case result-type
     (value

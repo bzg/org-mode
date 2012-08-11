@@ -892,7 +892,7 @@ If LABEL is non-nil, delete that footnote instead."
 	   (label (cond
 		   ;; LABEL is provided as argument.
 		   (label)
-		   ;; Footnote reference at point. If the footnote is
+		   ;; Footnote reference at point.  If the footnote is
 		   ;; anonymous, delete it and exit instead.
 		   ((setq x (org-footnote-at-reference-p))
 		    (or (car x)

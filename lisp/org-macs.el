@@ -54,22 +54,22 @@
 
 (defmacro org-called-interactively-p (&optional kind)
   (if (featurep 'xemacs)
-       `(interactive-p)
-     (if (or (> emacs-major-version 23)
-	     (and (>= emacs-major-version 23)
-		  (>= emacs-minor-version 2)))
-	 ;; defined with no argument in <=23.1
-	 `(with-no-warnings (called-interactively-p ,kind))
-       `(interactive-p))))
+      `(interactive-p)
+    (if (or (> emacs-major-version 23)
+	    (and (>= emacs-major-version 23)
+		 (>= emacs-minor-version 2)))
+	;; defined with no argument in <=23.1
+	`(with-no-warnings (called-interactively-p ,kind))
+      `(interactive-p))))
 (def-edebug-spec org-called-interactively-p (&optional ("quote" symbolp)))
 
 (when (and (not (fboundp 'with-silent-modifications))
-	 (or (< emacs-major-version 23)
-	     (and (= emacs-major-version 23)
-		  (< emacs-minor-version 2))))
-    (defmacro with-silent-modifications (&rest body)
-      `(org-unmodified ,@body))
-    (def-edebug-spec with-silent-modifications (body)))
+	   (or (< emacs-major-version 23)
+	       (and (= emacs-major-version 23)
+		    (< emacs-minor-version 2))))
+  (defmacro with-silent-modifications (&rest body)
+    `(org-unmodified ,@body))
+  (def-edebug-spec with-silent-modifications (body)))
 
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
@@ -130,15 +130,15 @@ Also, do not record undo information."
   `(if (and (boundp 'partial-completion-mode)
 	    partial-completion-mode
 	    (fboundp 'partial-completion-mode))
-     (unwind-protect
-	 (progn
-	   (partial-completion-mode -1)
-	   ,@body)
-       (partial-completion-mode 1))
+       (unwind-protect
+	   (progn
+	     (partial-completion-mode -1)
+	     ,@body)
+	 (partial-completion-mode 1))
      ,@body))
 (def-edebug-spec org-without-partial-completion (body))
 
-;; FIXME: Slated for removal. Current Org mode does not support Emacs < 22
+;; FIXME: Slated for removal.  Current Org mode does not support Emacs < 22
 (defmacro org-maybe-intangible (props)
   "Add '(intangible t) to PROPS if Emacs version is earlier than Emacs 22.
 In Emacs 21, invisible text is not avoided by the command loop, so the
@@ -364,9 +364,9 @@ point nowhere."
 (def-edebug-spec org-save-outline-visibility (form body))
 
 (defmacro org-with-wide-buffer (&rest body)
- "Execute body while temporarily widening the buffer."
- `(save-excursion
-    (save-restriction
+  "Execute body while temporarily widening the buffer."
+  `(save-excursion
+     (save-restriction
        (widen)
        ,@body)))
 (def-edebug-spec org-with-wide-buffer (body))
@@ -405,12 +405,12 @@ The number of levels is controlled by `org-inlinetask-min-level'"
 
 (defun org-make-parameter-alist (flat)
   "Return alist based on FLAT.
-FLAT is a list with alternating symbol names and values. The
+FLAT is a list with alternating symbol names and values.  The
 returned alist is a list of lists with the symbol name in car and
 the value in cdr."
   (when flat
     (cons (list (car flat) (cadr flat))
-         (org-make-parameter-alist (cddr flat)))))
+	  (org-make-parameter-alist (cddr flat)))))
 
 (provide 'org-macs)
 

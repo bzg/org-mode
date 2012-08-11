@@ -60,7 +60,7 @@
 
 (require 'xml)
 (require 'org)
-;(require 'rx)
+					;(require 'rx)
 (require 'org-exp)
 (eval-when-compile (require 'cl))
 
@@ -139,7 +139,7 @@ NOT READY YET."
 
 ;;;###autoload
 (defun org-export-as-freemind (&optional hidden ext-plist
-				   to-buffer body-only pub-dir)
+					 to-buffer body-only pub-dir)
   "Export the current buffer as a Freemind file.
 If there is an active region, export only the region.  HIDDEN is
 obsolete and does nothing.  EXT-PLIST is a property list with
@@ -258,22 +258,22 @@ The characters \"&<> will be escaped."
 ;;(org-freemind-unescape-str-to-org "&#x6d;A&#x224C;B&lt;C&#x3C;&#x3D;")
 ;;(org-freemind-unescape-str-to-org "&#x3C;&lt;")
 (defun org-freemind-unescape-str-to-org (fm-str)
- "Do some html-unescaping of FM-STR and return the result.
+  "Do some html-unescaping of FM-STR and return the result.
 This is the opposite of `org-freemind-escape-str-from-org' but it
 will also unescape &#nn;."
- (let ((org-str fm-str))
-   (setq org-str (replace-regexp-in-string "&quot;" "\"" org-str))
-   (setq org-str (replace-regexp-in-string "&amp;" "&" org-str))
-   (setq org-str (replace-regexp-in-string "&lt;" "<" org-str))
-   (setq org-str (replace-regexp-in-string "&gt;" ">" org-str))
-   (setq org-str (replace-regexp-in-string
-                  "&#x\\([a-f0-9]\\{2,4\\}\\);"
-                  (lambda (m)
-                    (char-to-string
-                     (+ (string-to-number (match-string 1 m) 16)
-                        0 ;?\x800 ;; What is this for? Encoding?
-                        )))
-                  org-str))))
+  (let ((org-str fm-str))
+    (setq org-str (replace-regexp-in-string "&quot;" "\"" org-str))
+    (setq org-str (replace-regexp-in-string "&amp;" "&" org-str))
+    (setq org-str (replace-regexp-in-string "&lt;" "<" org-str))
+    (setq org-str (replace-regexp-in-string "&gt;" ">" org-str))
+    (setq org-str (replace-regexp-in-string
+		   "&#x\\([a-f0-9]\\{2,4\\}\\);"
+		   (lambda (m)
+		     (char-to-string
+		      (+ (string-to-number (match-string 1 m) 16)
+			 0 ;?\x800 ;; What is this for? Encoding?
+			 )))
+		   org-str))))
 
 ;; (let* ((str1 "a quote: \", an amp: &, lt: <; over 256: öåäÖÅÄ")
 ;;        (str2 (org-freemind-escape-str-from-org str1))
@@ -291,7 +291,7 @@ MATCHED is the link just matched."
          (is-img (and (image-type-from-file-name link)
                       (let ((url-type (substring link 0 col-pos)))
                         (member url-type '("file" "http" "https")))))
-        )
+	 )
     (if is-img
         ;; Fix-me: I can't find a way to get the border to "shrink
         ;; wrap" around the image using <div>.
@@ -380,7 +380,7 @@ MATCHED is the link just matched."
     (dolist (cc (append matched nil))
       (if (= 32 cc)
           ;;(setq res (concat res "&nbsp;"))
-          ;; We need to use the numerical version. Otherwise Freemind
+          ;; We need to use the numerical version.  Otherwise Freemind
           ;; ver 0.9.0 RC9 can not export to html/javascript.
           (progn
             (if (< 0 bi)
@@ -410,7 +410,7 @@ MATCHED is the link just matched."
 (defcustom org-freemind-node-css-style
   "p { margin-top: 3px; margin-bottom: 3px; }"
   "CSS style for Freemind nodes."
-  ;; Fix-me: I do not understand this. It worked to export from Freemind
+  ;; Fix-me: I do not understand this.  It worked to export from Freemind
   ;; with this setting now, but not before??? Was this perhaps a java
   ;; bug or is it a windows xp bug (some resource gets exhausted if you
   ;; use sticky keys which I do).
@@ -466,10 +466,10 @@ DRAWERS-REGEXP are converted to freemind notes."
                         (if (= 0 (length org-freemind-node-css-style))
                             ""
                           (concat
-                        "<style type=\"text/css\">\n"
-                        "<!--\n"
+			   "<style type=\"text/css\">\n"
+			   "<!--\n"
                            org-freemind-node-css-style
-                        "-->\n"
+			   "-->\n"
                            "</style>\n"))
                         "</head>\n"
                         "<body>\n"))
@@ -519,12 +519,12 @@ DRAWERS-REGEXP are converted to freemind notes."
       (list node-res note-res))))
 
 (defun org-freemind-write-node (mm-buffer drawers-regexp
-                                num-left-nodes base-level
-                                current-level next-level this-m2
-                                this-node-end
-                                this-children-visible
-                                next-node-start
-                                next-has-some-visible-child)
+					  num-left-nodes base-level
+					  current-level next-level this-m2
+					  this-node-end
+					  this-children-visible
+					  next-node-start
+					  next-has-some-visible-child)
   (let* (this-icons
          this-bg-color
          this-m2-escaped
@@ -783,15 +783,15 @@ Otherwise give an error say the file exists."
 ;;;             (unless (if node-at-line-last
 ;;;                         (>= (point) node-at-line-last)
 ;;;                       nil)
-              ;; Write last node:
-              (setq this-m2 next-m2)
-              (setq current-level next-level)
-              (setq next-node-start (if node-at-line-last
-                                        (1+ node-at-line-last)
-                                      (point-max)))
-              (setq num-left-nodes (org-freemind-write-node mm-buffer drawers-regexp num-left-nodes base-level current-level next-level this-m2 this-node-end this-children-visible next-node-start next-has-some-visible-child))
-              (with-current-buffer mm-buffer (insert "</node>\n"))
-              ;)
+	    ;; Write last node:
+	    (setq this-m2 next-m2)
+	    (setq current-level next-level)
+	    (setq next-node-start (if node-at-line-last
+				      (1+ node-at-line-last)
+				    (point-max)))
+	    (setq num-left-nodes (org-freemind-write-node mm-buffer drawers-regexp num-left-nodes base-level current-level next-level this-m2 this-node-end this-children-visible next-node-start next-has-some-visible-child))
+	    (with-current-buffer mm-buffer (insert "</node>\n"))
+					;)
             )
           (with-current-buffer mm-buffer
             (while (> current-level base-level)
@@ -1031,7 +1031,7 @@ PATH should be a list of steps, where each step has the form
             (let* ((child-attr-list (cadr child))
                    (step-attr-copy (copy-sequence step-attr-list)))
               (dolist (child-attr child-attr-list)
-                                   ;; Compare attr names:
+		;; Compare attr names:
                 (when (org-freemind-symbols= (caar step-attr-copy) (car child-attr))
                   ;; Compare values:
                   (let ((step-val (cdar step-attr-copy))
@@ -1065,12 +1065,12 @@ PATH should be a list of steps, where each step has the form
 
 (defun org-freemind-test-get-tree-text ()
   (let ((node '(p nil "\n"
-                 (a
-                  ((href . "link"))
-                  "text")
-                 "\n"
-                 (b nil "hej")
-                 "\n")))
+		  (a
+		   ((href . "link"))
+		   "text")
+		  "\n"
+		  (b nil "hej")
+		  "\n")))
     (org-freemind-get-tree-text node)))
 ;; (org-freemind-test-get-tree-text)
 
@@ -1180,7 +1180,7 @@ PATH should be a list of steps, where each step has the form
         (org-freemind-node-to-org child (1+ level) skip-levels)))))
 
 ;; Fix-me: put back special things, like drawers that are stored in
-;; the notes. Should maybe all notes contents be put in drawers?
+;; the notes.  Should maybe all notes contents be put in drawers?
 ;;;###autoload
 (defun org-freemind-to-org-mode (mm-file org-file)
   "Convert FreeMind file MM-FILE to `org-mode' file ORG-FILE."

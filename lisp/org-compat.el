@@ -389,7 +389,7 @@ TIME defaults to the current time."
     (save-match-data
       (apply 'looking-at args))))
 
-; XEmacs does not have `looking-back'.
+					; XEmacs does not have `looking-back'.
 (if (fboundp 'looking-back)
     (defalias 'org-looking-back 'looking-back)
   (defun org-looking-back (regexp &optional limit greedy)

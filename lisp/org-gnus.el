@@ -101,9 +101,9 @@ If `org-store-link' was called with a prefix arg the meaning of
 	     (org-xor current-prefix-arg
 		      org-gnus-prefer-web-links))
 	(concat (if (string-match "gmane" unprefixed-group)
-			   "http://news.gmane.org/"
-			 "http://groups.google.com/group/")
-		       unprefixed-group)
+		    "http://news.gmane.org/"
+		  "http://groups.google.com/group/")
+		unprefixed-group)
       (concat "gnus:" group))))
 
 (defun org-gnus-article-link (group newsgroups message-id x-no-archive)
