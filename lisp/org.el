@@ -3653,7 +3653,7 @@ When nil, the \\name form remains in the buffer."
   "Regular expression for matching emphasis.
 After a match, the match groups contain these elements:
 0  The match of the full regular expression, including the characters
-   before and after the proper match
+     before and after the proper match
 1  The character before the proper match, or empty at beginning of line
 2  The proper match, including the leading and trailing markers
 3  The leading marker like * or /, indicating the type of highlighting
@@ -3745,13 +3745,15 @@ Use customize to modify this, or restart Emacs after changing it."
 	  (integer :tag "number of newlines allowed")
 	  (option (boolean :tag "Please ignore this button"))))
 
-(defconst org-emphasis-alist
+(defcustom org-emphasis-alist
   `(("*" bold "<b>" "</b>")
     ("/" italic "<i>" "</i>")
     ("_" underline "<span style=\"text-decoration:underline;\">" "</span>")
     ("=" org-code "<code>" "</code>" verbatim)
     ("~" org-verbatim "<code>" "</code>" verbatim)
-    ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t)) "<del>" "</del>"))
+    ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))
+     "<del>" "</del>")
+    )
   "Special syntax for emphasized text.
 Text starting and ending with a special character will be emphasized, for
 example *bold*, _underlined_ and /italic/.  This variable sets the marker
@@ -3759,7 +3761,18 @@ characters, the face to be used by font-lock for highlighting in Org-mode
 Emacs buffers, and the HTML tags to be used for this.
 For LaTeX export, see the variable `org-export-latex-emphasis-alist'.
 For DocBook export, see the variable `org-export-docbook-emphasis-alist'.
-Use customize to modify this, or restart Emacs after changing it.")
+Use customize to modify this, or restart Emacs after changing it."
+  :group 'org-appearance
+  :set 'org-set-emph-re
+  :type '(repeat
+	  (list
+	   (string :tag "Marker character")
+	   (choice
+	    (face :tag "Font-lock-face")
+	    (plist :tag "Face property list"))
+	   (string :tag "HTML start tag")
+	   (string :tag "HTML end tag")
+	   (option (const verbatim)))))
 
 (defvar org-protecting-blocks
   '("src" "example" "latex" "ascii" "html" "docbook" "ditaa" "dot" "r" "R")
