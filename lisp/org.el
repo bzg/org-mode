@@ -8528,6 +8528,9 @@ buffer.  It will also recognize item context in multiline items."
 	    cmd (orgstruct-make-binding fun nfunc key))
       (org-defkey orgstruct-mode-map key cmd))
 
+    ;; Prevent an error for users who forgot to make autoloads
+    (require 'org-element)
+
     ;; Special treatment needed for TAB and RET
     (org-defkey orgstruct-mode-map [(tab)]
 		(orgstruct-make-binding 'org-cycle 102 [(tab)] "\C-i"))
