@@ -8844,6 +8844,13 @@ For file links, arg negates `org-context-in-file-links'."
 			     nil nil nil))))
 	 (org-store-link-props :type "calendar" :date cd)))
 
+      ((eq major-mode 'help-mode)
+       (setq link (concat "help:" (save-excursion
+				    (goto-char (point-min))
+				    (looking-at "^[^ ]+")
+				    (match-string 0))))
+       (org-store-link-props :type "help"))
+
       ((eq major-mode 'w3-mode)
        (setq cpltxt (if (and (buffer-name)
 			     (not (string-match "Untitled" (buffer-name))))
@@ -9722,6 +9729,8 @@ application the system uses for this file type."
 	      (setq type "file" path link))
 	     ((string-match org-link-re-with-space3 link)
 	      (setq type (match-string 1 link) path (match-string 2 link)))
+	     ((string-match "^help:+\\(.+\\)" link)
+	      (setq type "help" path (match-string 1 link)))
 	     (t (setq type "thisfile" path link)))
 	    (throw 'match t)))
 
@@ -9774,6 +9783,14 @@ application the system uses for this file type."
 
 	 ((assoc type org-link-protocols)
 	  (funcall (nth 1 (assoc type org-link-protocols)) path))
+
+	 ((equal type "help")
+	  (let ((f-or-v (intern path)))
+	    (cond ((fboundp f-or-v)
+		   (describe-function f-or-v))
+		  ((boundp f-or-v)
+		   (describe-variable f-or-v))
+		  (t (error "Not a known function or variable")))))
 
 	 ((equal type "mailto")
 	  (let ((cmd (car org-link-mailto-program))
