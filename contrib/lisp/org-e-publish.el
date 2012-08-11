@@ -1187,7 +1187,7 @@ Returns value on success, else nil."
     (error "`org-e-publish-cache-set' called, but no cache present"))
   (puthash key value org-e-publish-cache))
 
-(defun org-publish-cache-ctime-of-src (f base-dir)
+(defun org-e-publish-cache-ctime-of-src (f base-dir)
   "Get the FILENAME ctime as an integer."
   (let ((attr (file-attributes
 	       (expand-file-name (or (file-symlink-p f) f) base-dir))))
