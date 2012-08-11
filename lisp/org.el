@@ -3653,7 +3653,7 @@ When nil, the \\name form remains in the buffer."
   "Regular expression for matching emphasis.
 After a match, the match groups contain these elements:
 0  The match of the full regular expression, including the characters
-     before and after the proper match
+   before and after the proper match
 1  The character before the proper match, or empty at beginning of line
 2  The proper match, including the leading and trailing markers
 3  The leading marker like * or /, indicating the type of highlighting
