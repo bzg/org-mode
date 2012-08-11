@@ -4116,8 +4116,9 @@ first element of current section."
 		       ;; return that element instead.
 		       (and (= cend origin)
 			    (memq type
-				  '(center-block drawer dynamic-block inlinetask
-						 quote-block special-block))))
+				  '(center-block
+				    drawer dynamic-block inlinetask item
+				    plain-list quote-block special-block))))
 		   (throw 'exit (if keep-trail trail element))
 		 (setq parent element)
 		 (case type
