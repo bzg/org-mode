@@ -431,6 +431,14 @@ for a capture buffer.")
 ;;; The main commands
 
 ;;;###autoload
+(defvar org-capture-initial nil)
+(defun org-capture-string (string &optional keys)
+  (interactive "sInitial text: \n")
+  (let ((org-capture-initial string)
+	(entry (org-capture-select-template keys)))
+    (org-capture)))
+
+;;;###autoload
 (defun org-capture (&optional goto keys)
   "Capture something.
 \\<org-capture-mode-map>
@@ -462,9 +470,11 @@ bypassed."
 				org-capture-link-is-already-stored)
 			   (plist-get org-store-link-plist :annotation)
 			 (ignore-errors (org-store-link nil))))
-	   (initial (and (org-region-active-p)
-			 (buffer-substring (point) (mark))))
-	   (entry (org-capture-select-template keys)))
+	   (entry (or entry (org-capture-select-template keys)))
+	   initial)
+      (setq initial (or org-capture-initial
+			(and (org-region-active-p)
+			     (buffer-substring (point) (mark)))))
       (when (stringp initial)
 	(remove-text-properties 0 (length initial) '(read-only t) initial))
       (when (stringp annotation)
