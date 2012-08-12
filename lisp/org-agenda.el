@@ -46,6 +46,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'org-macs)
 (eval-when-compile
   (require 'cl))
 
@@ -80,6 +81,8 @@
 (declare-function org-habit-get-priority "org-habit" (habit &optional moment))
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
+(declare-function org-agenda-columns "org-colview" ())
+(declare-function org-add-archive-files "org-archive" (files))
 
 (defvar calendar-mode-map)
 (defvar org-clock-current-task) ; defined in org-clock.el
@@ -3334,6 +3337,7 @@ generating a new one."
 	   (org-set-local 'org-agenda-name name)))
     (setq buffer-read-only nil)))
 
+(defvar org-agenda-overriding-columns-format)  ; From org-colview.el
 (defun org-finalize-agenda ()
   "Finishing touch for the agenda buffer, called just before displaying it."
   (unless org-agenda-multi
@@ -3976,6 +3980,7 @@ given in `org-agenda-start-on-weekday'."
 In this table, we have single quotes not as word constituents, to
 that when \"+Ameli\" is searched as a work, it will also match \"Ameli's\"")
 
+(defvar org-mode-syntax-table) ; From org.el
 (defun org-search-syntax-table ()
   (unless org-search-syntax-table
     (setq org-search-syntax-table (copy-syntax-table org-mode-syntax-table))
