@@ -11,7 +11,9 @@ LISPF = $(filter-out $(LISPA),$(sort $(wildcard *.el)))
 LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 
 .PHONY:	all compile compile-dirty \
-	compile-single compile-source compile-slint1 compile-slint2 \
+	dirall source slint1 slint3 slint4 \
+	compile-single compile-source \
+	compile-slint1 compile-slint2 compile-slint3 compile-slint4 \
 	autoloads \
 	install clean cleanauto cleanall cleanelc clean-install
 
@@ -19,15 +21,30 @@ LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 all compile compile-dirty::	 autoloads
 	$(MAKE) compile-$(_COMPILE_)
 
-compile-dirall:
-	@$(ELCDIR)
+compile-dirall:	dirall
 compile-single: $(LISPC)
-compile-source: cleanelc
+compile-source:	source dirall
+compile-slint1:	dirall slint1
+compile-slint2:	source dirall slint1
+compile-slint3:	slint3 dirall
+compile-slint4:	slint4 dirall
+
+# internal
+dirall:
+	@$(info ==================== $@ ====================)
+	@$(ELCDIR)
+source: cleanelc
+	@$(info ==================== $@ ====================)
 	@$(foreach elc,$(LISPC),$(MAKE) $(elc) && $(RM) $(elc);)
-compile-slint1:	compile-dirall
+slint1:
+	@$(info ==================== $@ ====================)
 	@$(foreach elc,$(LISPC),$(RM) $(elc); $(MAKE) $(elc);)
-compile-slint2:
-	$(MAKE) compile-source compile-slint1
+slint3:
+	@$(info ==================== $@ ====================)
+	-@$(ELINTL) $(foreach el,$(LISPF),$(ELINTF))
+slint4:
+	@$(info ==================== $@ ====================)
+	-@$(foreach el,$(LISPF),$(ELINTL) $(ELINTF);)
 
 %.elc:	%.el
 	@$(info Compiling single $(abspath $<)...)
