@@ -73,6 +73,10 @@ MAKE_LOCAL_MK = $(BATCH) \
 # Emacs must be started in lisp directory
 BATCHL	= $(BATCH) \
 	  --eval '(add-to-list '"'"'load-path ".")'
+ELINTL	= $(BATCHL) \
+	  --eval '(load "elint")'
+ELINTF	= --eval '(elint-initialize t)' \
+	  --eval '(elint-file "./$$(el)")'
 
 # How to generate org-install.el
 MAKE_ORG_INSTALL = $(BATCHL) \
@@ -132,9 +136,12 @@ SUDO	= sudo
 # INSTALL_INFO = ginstall-info # Debian: avoid harmless warning message
 INSTALL_INFO = install-info
 
-# target variant for 'compile'
-# _COMPILE_ = single # one Emacs process per compilation
-# _COMPILE_ = source # ditto, but remove compiled file immediately
-# _COMPILE_ = slint1 # possibly elicit more warnings
-# _COMPILE_ = slint2 # possibly elicit even more warnings
+# target method for 'compile'
 _COMPILE_ = dirall
+#  (w/ slowdown compared to default variant)
+# _COMPILE_ = single #   4x one Emacs process per compilation
+# _COMPILE_ = source #   5x ditto, but remove compiled file immediately
+# _COMPILE_ = slint1 #   3x possibly elicit more warnings
+# _COMPILE_ = slint2 #   7x possibly elicit even more warnings
+# _COMPILE_ = slint3 #  25x run elint in a single Emacs process
+# _COMPILE_ = slint4 # 275x run elint in one Emacs process per source file
