@@ -666,13 +666,13 @@ around it."
     (org-open-link-from-string value arg)))
 
 (defun org-columns-get-format-and-top-level ()
-  (let (fmt (org-columns-get-format))
+  (let ((fmt (org-columns-get-format)))
     (org-columns-goto-top-level)
     fmt))
 
 (defun org-columns-get-format (&optional fmt-string)
   (interactive)
-  (let (fmt-as-property)
+  (let (fmt-as-property fmt)
     (when (condition-case nil (org-back-to-heading) (error nil))
       (setq fmt-as-property (org-entry-get nil "COLUMNS" t)))
     (setq fmt (or fmt-string fmt-as-property org-columns-default-format))
