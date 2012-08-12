@@ -17730,6 +17730,14 @@ INCLUDE-LINKED is passed to `org-display-inline-images'."
 		 (length org-inline-image-overlays))
       (message "No images to display inline"))))
 
+(defun org-redisplay-inline-images ()
+  "Refresh the display of inline images."
+  (interactive)
+  (if (not org-inline-image-overlays)
+      (org-toggle-inline-images)
+    (org-toggle-inline-images)
+    (org-toggle-inline-images)))
+
 (defun org-display-inline-images (&optional include-linked refresh beg end)
   "Display inline images.
 Normally only links without a description part are inlined, because this
@@ -18019,6 +18027,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\C-u" 'org-dblock-update)
 (org-defkey org-mode-map "\C-c\C-x\C-l" 'org-preview-latex-fragment)
 (org-defkey org-mode-map "\C-c\C-x\C-v" 'org-toggle-inline-images)
+(org-defkey org-mode-map "\C-c\C-x\C-\M-v" 'org-redisplay-inline-images)
 (org-defkey org-mode-map "\C-c\C-x\\"   'org-toggle-pretty-entities)
 (org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
