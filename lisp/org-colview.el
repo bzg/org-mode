@@ -666,27 +666,38 @@ around it."
     (org-open-link-from-string value arg)))
 
 (defun org-columns-get-format-and-top-level ()
-  (let (fmt)
-    (when (condition-case nil (org-back-to-heading) (error nil))
-      (setq fmt (org-entry-get nil "COLUMNS" t)))
-    (setq fmt (or fmt org-columns-default-format))
-    (org-set-local 'org-columns-current-fmt fmt)
-    (org-columns-compile-format fmt)
-    (if (marker-position org-entry-property-inherited-from)
-	(move-marker org-columns-top-level-marker
-		     org-entry-property-inherited-from)
-      (move-marker org-columns-top-level-marker (point)))
+  (let (fmt (org-columns-get-format))
+    (org-columns-goto-top-level)
     fmt))
 
-(defun org-columns ()
-  "Turn on column view on an org-mode file."
+(defun org-columns-get-format (&optional fmt-string)
+  (interactive)
+  (let (fmt-as-property)
+    (when (condition-case nil (org-back-to-heading) (error nil))
+      (setq fmt-as-property (org-entry-get nil "COLUMNS" t)))
+    (setq fmt (or fmt-string fmt-as-property org-columns-default-format))
+    (org-set-local 'org-columns-current-fmt fmt)
+    (org-columns-compile-format fmt)
+    fmt))
+
+(defun org-columns-goto-top-level ()
+  (when (condition-case nil (org-back-to-heading) (error nil))
+    (org-entry-get nil "COLUMNS" t)
+    (if (marker-position org-entry-property-inherited-from)
+	(move-marker org-columns-top-level-marker org-entry-property-inherited-from)
+      (move-marker org-columns-top-level-marker (point)))))
+
+(defun org-columns (&optional columns-fmt-string)
+  "Turn on column view on an org-mode file.
+When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (interactive)
   (org-verify-version 'columns)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
   (let ((org-columns-time (time-to-number-of-days (current-time)))
 	beg end fmt cache maxwidths)
-    (setq fmt (org-columns-get-format-and-top-level))
+    (org-columns-goto-top-level)
+    (setq fmt (org-columns-get-format columns-fmt-string))
     (save-excursion
       (goto-char org-columns-top-level-marker)
       (setq beg (point))
@@ -1229,13 +1240,15 @@ PARAMS is a property list of parameters:
 :vlines   When t, make each column a colgroup to enforce vertical lines.
 :maxlevel When set to a number, don't capture headlines below this level.
 :skip-empty-rows
-	  When t, skip rows where all specifiers other than ITEM are empty."
+	  When t, skip rows where all specifiers other than ITEM are empty.
+:format   When non-nil, specify the column view format to use."
   (let ((pos (move-marker (make-marker) (point)))
 	(hlines (plist-get params :hlines))
 	(vlines (plist-get params :vlines))
 	(maxlevel (plist-get params :maxlevel))
 	(content-lines (org-split-string (plist-get params :content) "\n"))
 	(skip-empty-rows (plist-get params :skip-empty-rows))
+	(columns-fmt (plist-get params :format))
 	(case-fold-search t)
 	tbl id idpos nfields tmp recalc line
 	id-as-string view-file view-pos)
@@ -1265,7 +1278,7 @@ PARAMS is a property list of parameters:
 	(save-restriction
 	  (widen)
 	  (goto-char (or view-pos (point)))
-	  (org-columns)
+	  (org-columns columns-fmt)
 	  (setq tbl (org-columns-capture-view maxlevel skip-empty-rows))
 	  (setq nfields (length (car tbl)))
 	  (org-columns-quit))))
