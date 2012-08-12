@@ -100,6 +100,10 @@
 (declare-function xml-get-attribute-or-nil "xml" (node attribute))
 (declare-function xml-substitute-special "xml" (string))
 
+(declare-function org-capture-escaped-% "org-capture" ())
+(declare-function org-capture-inside-embedded-elisp-p "org-capture" ())
+(declare-function org-capture-expand-embedded-elisp "org-capture" ())
+
 (defgroup org-feed  nil
   "Options concerning RSS feeds as inputs for Org files."
   :tag "Org Feed"
