@@ -310,15 +310,15 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords' is t."
 
 (defun org-bibtex-headline ()
   "Return a bibtex entry of the given headline as a string."
-  (org-labels
-      ((val (key lst) (cdr (assoc key lst)))
-       (to (string) (intern (concat ":" string)))
-       (from (key) (substring (symbol-name key) 1))
-       (flatten (&rest lsts)
-		(apply #'append (mapcar
-				 (lambda (e)
-				   (if (listp e) (apply #'flatten e) (list e)))
-				 lsts))))
+  (letrec ((val (lambda (key lst) (cdr (assoc key lst))))
+	   (to (lambda (string) (intern (concat ":" string))))
+	   (from (lambda (key) (substring (symbol-name key) 1)))
+	   (flatten (lambda (&rest lsts)
+		      (apply #'append
+			     (mapcar
+			      (lambda (e)
+				(if (listp e) (apply flatten e) (list e)))
+			      lsts)))))
     (let ((notes (buffer-string))
           (id (org-bibtex-get org-bibtex-key-property))
           (type (org-bibtex-get org-bibtex-type-property-name))
@@ -342,7 +342,8 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords' is t."
 					org-bibtex-prefix)
 				   (mapcar
 				    (lambda (kv)
-				      (let ((key (car kv)) (val (cdr kv)))
+				      (let ((key (car kv))
+					    (val (cdr kv)))
 					(when (and
 					       (string-match org-bibtex-prefix key)
 					       (not (string=
@@ -355,13 +356,13 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords' is t."
 				    (org-entry-properties nil 'standard))
 				 (mapcar
 				  (lambda (field)
-				    (let ((value (or (org-bibtex-get (from field))
+				    (let ((value (or (org-bibtex-get (funcall from field))
 						     (and (equal :title field)
 							  (nth 4 (org-heading-components))))))
-				      (when value (cons (from field) value))))
-				  (flatten
-				   (val :required (val (to type) org-bibtex-types))
-				   (val :optional (val (to type) org-bibtex-types))))))
+				      (when value (cons (funcall from field) value))))
+				  (funcall flatten
+					   (funcall val :required (funcall val (funcall to type) org-bibtex-types))
+					   (funcall val :optional (funcall val (funcall to type) org-bibtex-types))))))
                        ",\n"))))
           (with-temp-buffer
             (insert entry)
