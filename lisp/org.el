@@ -20924,45 +20924,47 @@ hierarchy of headlines by UP levels before marking the subtree."
   "Compute a fill prefix for the line at point P.
 Return fill prefix, as a string, or nil if current line isn't
 meant to be filled."
-  (save-excursion
-    (goto-char p)
-    (beginning-of-line)
-    (let* ((element (org-element-at-point))
-	   (type (org-element-type element))
-	   (post-affiliated
-	    (progn
-	      (goto-char (org-element-property :begin element))
-	      (while (looking-at org-element--affiliated-re) (forward-line))
-	      (point))))
-      (unless (< p post-affiliated)
-	(case type
-	  (comment (looking-at "[ \t]*# ?") (match-string 0))
-	  (footnote-definition "")
-	  ((item plain-list)
-	   (make-string (org-list-item-body-column
-			 (org-element-property :begin element))
-			? ))
-	  (paragraph
-	   ;; Fill prefix is usually the same as the current line,
-	   ;; except if the paragraph is at the beginning of an item.
-	   (let ((parent (org-element-property :parent element)))
-	     (cond ((eq (org-element-type parent) 'item)
-		    (make-string (org-list-item-body-column
-				  (org-element-property :begin parent))
-				 ? ))
-		   ((looking-at "\\s-+") (match-string 0))
-		   (t  ""))))
-	  ((comment-block verse-block)
-	   ;; Only fill contents if P is within block boundaries.
-	   (let* ((cbeg (save-excursion (goto-char post-affiliated)
-					(forward-line)
-					(point)))
-		  (cend (save-excursion
-			  (goto-char (org-element-property :end element))
-			  (skip-chars-backward " \r\t\n")
-			  (line-beginning-position))))
-	     (when (and (>= p cbeg) (< p cend))
-	       (if (looking-at "\\s-+") (match-string 0) "")))))))))
+  (unless (and (derived-mode-p 'message-mode) (not (message-in-body-p)))
+    ;; FIXME: This is really the job of orgstruct++-mode
+    (save-excursion
+      (goto-char p)
+      (beginning-of-line)
+      (let* ((element (org-element-at-point))
+	     (type (org-element-type element))
+	     (post-affiliated
+	      (progn
+		(goto-char (org-element-property :begin element))
+		(while (looking-at org-element--affiliated-re) (forward-line))
+		(point))))
+	(unless (< p post-affiliated)
+	  (case type
+	    (comment (looking-at "[ \t]*# ?") (match-string 0))
+	    (footnote-definition "")
+	    ((item plain-list)
+	     (make-string (org-list-item-body-column
+			   (org-element-property :begin element))
+			  ? ))
+	    (paragraph
+	     ;; Fill prefix is usually the same as the current line,
+	     ;; except if the paragraph is at the beginning of an item.
+	     (let ((parent (org-element-property :parent element)))
+	       (cond ((eq (org-element-type parent) 'item)
+		      (make-string (org-list-item-body-column
+				    (org-element-property :begin parent))
+				   ? ))
+		     ((looking-at "\\s-+") (match-string 0))
+		     (t  ""))))
+	    ((comment-block verse-block)
+	     ;; Only fill contents if P is within block boundaries.
+	     (let* ((cbeg (save-excursion (goto-char post-affiliated)
+					  (forward-line)
+					  (point)))
+		    (cend (save-excursion
+			    (goto-char (org-element-property :end element))
+			    (skip-chars-backward " \r\t\n")
+			    (line-beginning-position))))
+	       (when (and (>= p cbeg) (< p cend))
+		 (if (looking-at "\\s-+") (match-string 0) ""))))))))))
 
 (declare-function message-in-body-p "message" ())
 (defvar org-element-paragraph-separate)  ; From org-element.el
