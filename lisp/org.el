@@ -20919,6 +20919,7 @@ hierarchy of headlines by UP levels before marking the subtree."
     (skip-chars-backward "\\\\")
     (looking-at "\\\\\\\\\\($\\|[^\\\\]\\)")))
 
+(declare-function message-in-body-p "message" ())
 (defvar org-element--affiliated-re) ; From org-element.el
 (defun org-fill-context-prefix (p)
   "Compute a fill prefix for the line at point P.
@@ -20966,7 +20967,6 @@ meant to be filled."
 	       (when (and (>= p cbeg) (< p cend))
 		 (if (looking-at "\\s-+") (match-string 0) ""))))))))))
 
-(declare-function message-in-body-p "message" ())
 (defvar org-element-paragraph-separate)  ; From org-element.el
 (defvar org-element-all-objects)         ; From org-element.el
 (defun org-fill-paragraph (&optional justify)
