@@ -111,6 +111,11 @@ any other entries, and any resulting duplicates will be removed entirely."
       t)))
 
 
+;;; cl macros no longer available in the trunk
+(defalias 'org-labels (if (org-version-check "24.1.50" "cl" :predicate)
+			  'cl-labels
+			'labels))
+
 ;;;; Emacs/XEmacs compatibility
 
 ;; Keys
