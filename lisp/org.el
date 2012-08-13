@@ -20152,7 +20152,7 @@ N may optionally be the number of spaces to remove."
       (setq template
 	    (replace-regexp-in-string
 	     (concat "%" (regexp-quote (car entry)))
-	     (cdr entry) template t t)))
+	     (or (cdr entry) "") template t t)))
     template))
 
 (defun org-base-buffer (buffer)
