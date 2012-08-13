@@ -20830,7 +20830,7 @@ hierarchy of headlines by UP levels before marking the subtree."
     (org-move-to-column column)
     (when (and orgstruct-is-++ (eq pos (point)))
       (org-let org-fb-vars
-	'(indent-according-to-mode)))))
+	(indent-according-to-mode)))))
 
 (defun org-indent-drawer ()
   "Indent the drawer at point."
@@ -20983,11 +20983,15 @@ width for filling.
 For convenience, when point is at a plain list, an item or
 a footnote definition, try to fill the first paragraph within."
   ;; Falls back on message-fill-paragraph when necessary
+  (interactive)
   (if (and (derived-mode-p 'message-mode)
 	   (or (not (message-in-body-p))
 	       (save-excursion (move-beginning-of-line 1)
 			       (looking-at "> "))))
-      (message-fill-paragraph)
+      (org-let org-fb-vars
+	(or (and (message-point-in-header-p) (message-fill-field))
+	    (and (save-excursion (move-beginning-of-line 1) (looking-at "> "))
+		 (fill-comment-paragraph))))
     (save-excursion
       ;; Move to end of line in order to get the first paragraph within
       ;; a plain list or a footnote definition.
