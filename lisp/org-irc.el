@@ -84,7 +84,7 @@
      ((eq org-irc-client 'erc)
       (org-irc-visit-erc link))
      (t
-      (error "erc only known client")))))
+      (error "ERC only known client")))))
 
 (defun org-irc-parse-link (link)
   "Parse an IRC LINK and return the attributes found.

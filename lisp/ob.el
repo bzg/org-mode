@@ -27,6 +27,7 @@
   (require 'cl))
 (require 'ob-eval)
 (require 'org-macs)
+(require 'org-compat)
 
 (defconst org-babel-exeext
   (if (memq system-type '(windows-nt cygwin))
@@ -666,7 +667,7 @@ arguments and pop open the results in a preview buffer."
 	(when (and (not (string= header name))
 		   (<= (org-babel-edit-distance header name) too-close)
 		   (not (member header names)))
-	  (error "supplied header \"%S\" is suspiciously close to \"%S\""
+	  (error "Supplied header \"%S\" is suspiciously close to \"%S\""
 		 header name))))
     (message "No suspicious header arguments found.")))
 
@@ -1514,7 +1515,7 @@ If the point is not on a source block then return nil."
   "Go to the beginning of the current code block."
   (interactive)
   ((lambda (head)
-     (if head (goto-char head) (error "not currently in a code block")))
+     (if head (goto-char head) (error "Not currently in a code block")))
    (org-babel-where-is-src-block-head)))
 
 ;;;###autoload
@@ -2092,7 +2093,7 @@ file's directory then expand relative links."
 (defun org-babel-update-block-body (new-body)
   "Update the body of the current code block to NEW-BODY."
   (if (not (org-babel-where-is-src-block-head))
-      (error "not in source block")
+      (error "Not in a source block")
     (save-match-data
       (replace-match (concat (org-babel-trim new-body) "\n") nil t nil 5))
     (indent-rigidly (match-beginning 5) (match-end 5) 2)))
@@ -2160,7 +2161,7 @@ parameters when merging lists."
 					   (car (nth variable-index vars)))
 					  "=" (cdr pair)))
 		       (incf variable-index))
-		   (error "variable \"%s\" must be assigned a default value"
+		   (error "Variable \"%s\" must be assigned a default value"
 			  (cdr pair))))))
 	    (:results
 	     (setq results (funcall e-merge results-exclusive-groups
@@ -2463,7 +2464,7 @@ If the table is trivial, then return it as a scalar."
 	      (setq result (mapcar (lambda (row)
 				     (mapcar #'org-babel-string-read row))
 				   (org-table-to-lisp))))
-	  (error (message "error reading results: %s" err) nil)))
+	  (error (message "Error reading results: %s" err) nil)))
       (if (null (cdr result)) ;; if result is trivial vector, then scalarize it
 	  (if (consp (car result))
 	      (if (null (cdr (car result)))

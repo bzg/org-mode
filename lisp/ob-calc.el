@@ -71,7 +71,7 @@
 		     (cond
 		      ((numberp res) res)
 		      ((math-read-number res) (math-read-number res))
-		      ((listp res) (error "calc error \"%s\" on input \"%s\""
+		      ((listp res) (error "Calc error \"%s\" on input \"%s\""
 					  (cadr res) line))
 		      (t (replace-regexp-in-string
 			  "'" ""

@@ -170,7 +170,7 @@ the variable."
 	    ;;       buffer (marker-buffer id-loc)
 	    ;;       loc (marker-position id-loc))
 	    ;; (move-marker id-loc nil)
-	    (error "reference '%s' not found in this buffer" ref))
+	    (error "Reference '%s' not found in this buffer" ref))
 	  (cond
 	   (lob-info (setq type 'lob))
 	   (id (setq type 'id))
@@ -184,7 +184,7 @@ the variable."
 		(forward-line 1)
 		(beginning-of-line)
 		(if (or (= (point) (point-min)) (= (point) (point-max)))
-		    (error "reference not found")))))
+		    (error "Reference not found")))))
 	  (let ((params (append args '((:results . "silent")))))
 	    (setq result
 		  (case type

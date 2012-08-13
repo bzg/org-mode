@@ -93,7 +93,7 @@ This function is called by `org-babel-execute-src-block'."
 				  (org-babel-process-file-name in-file)
 				  (org-babel-process-file-name out-file)
 				  (or cmdline "")))
-                    (t (error "no support for the %s sql engine" engine)))))
+                    (t (error "No support for the %s SQL engine" engine)))))
     (with-temp-file in-file
       (insert
        (case (intern engine)
@@ -160,7 +160,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-prep-session:sql (session params)
   "Raise an error because Sql sessions aren't implemented."
-  (error "sql sessions not yet implemented"))
+  (error "SQL sessions not yet implemented"))
 
 (provide 'ob-sql)
 

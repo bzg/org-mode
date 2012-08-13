@@ -199,7 +199,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 		  (decf balanced)
 		(incf balanced)))
 	    (when (not (zerop balanced))
-	      (error "unbalanced begin/end_%s blocks with %S"
+	      (error "Unbalanced begin/end_%s blocks with %S"
 		     type (buffer-substring match-start (point))))
 	    (setq match-end (copy-marker (match-end 0)))
 	    (unless preserve-indent

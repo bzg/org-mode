@@ -2455,7 +2455,7 @@ from the dynamic block definition."
 	 ((stringp formula)
 	  (insert "\n#+TBLFM: " formula)
 	  (setq recalc t))
-	 (t (error "invalid formula in clocktable")))
+	 (t (error "Invalid formula in clocktable")))
       ;; Should we rescue an old formula?
       (when (stringp (setq content (plist-get params :content)))
 	(when (string-match "^\\([ \t]*#\\+tblfm:.*\\)" content)

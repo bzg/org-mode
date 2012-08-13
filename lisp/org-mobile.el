@@ -406,7 +406,7 @@ agenda view showing the flagged items."
       (error "Cannot write to encryption tempfile %s"
 	     org-mobile-encryption-tempfile))
     (unless (executable-find "openssl")
-      (error "openssl is needed to encrypt files"))))
+      (error "OpenSSL is needed to encrypt files"))))
 
 (defun org-mobile-create-index-file ()
   "Write the index file in the WebDAV directory."

@@ -155,9 +155,9 @@ This function is called by `org-babel-execute-src-block'."
     table))
 
 (defun org-babel-prep-session:sqlite (session params)
-  "Raise an error because support for sqlite sessions isn't implemented.
+  "Raise an error because support for SQLite sessions isn't implemented.
 Prepare SESSION according to the header arguments specified in PARAMS."
-  (error "sqlite sessions not yet implemented"))
+  (error "SQLite sessions not yet implemented"))
 
 (provide 'ob-sqlite)
 

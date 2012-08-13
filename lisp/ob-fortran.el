@@ -108,19 +108,19 @@ it's header arguments."
   "Wrap body in a \"program ... end program\" block if none exists."
   (if (string-match "^[ \t]*program[ \t]*.*" (capitalize body))
       (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
-	(if vars (error "cannot use :vars if 'program' statement is present"))
+	(if vars (error "Cannot use :vars if 'program' statement is present"))
 	body)
     (format "program main\n%s\nend program main\n" body)))
 
 (defun org-babel-prep-session:fortran (session params)
   "This function does nothing as fortran is a compiled language with no
 support for sessions"
-  (error "fortran is a compiled languages -- no support for sessions"))
+  (error "Fortran is a compiled languages -- no support for sessions"))
 
 (defun org-babel-load-session:fortran (session body params)
   "This function does nothing as fortran is a compiled language with no
 support for sessions"
-  (error "fortran is a compiled languages -- no support for sessions"))
+  (error "Fortran is a compiled languages -- no support for sessions"))
 
 ;; helper functions
 

@@ -111,6 +111,7 @@
 (require 'bibtex)
 (eval-when-compile
   (require 'cl))
+(require 'org-compat)
 
 (defvar org-bibtex-description nil) ; dynamically scoped from org.el
 (defvar org-id-locations)
@@ -277,7 +278,7 @@ not be exported."
 
 (defcustom org-bibtex-no-export-tags nil
   "List of tag(s) that should not be converted to keywords.
-This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
+This variable is relevant only if `org-bibtex-export-tags-as-keywords' is t."
   :group 'org-bibtex
   :version "24.1"
   :type '(repeat :tag "Tag" (string)))
@@ -373,7 +374,7 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 
 (defun org-bibtex-ask (field)
   (unless (assoc field org-bibtex-fields)
-    (error "field:%s is not known" field))
+    (error "Field:%s is not known" field))
   (save-window-excursion
     (let* ((name (substring (symbol-name field) 1))
 	   (buf-name (format "*Bibtex Help %s*" name)))
@@ -548,7 +549,7 @@ Headlines are exported using `org-bibtex-export-headline'."
 					    (error (throw 'bib (point)))))))))
        (with-temp-file filename
 	 (insert (mapconcat #'identity bibtex-entries "\n")))
-       (message "Successfully exported %d bibtex entries to %s"
+       (message "Successfully exported %d BibTeX entries to %s"
 		(length bibtex-entries) filename) nil))))
 
 (defun org-bibtex-check (&optional optional)
@@ -580,7 +581,7 @@ If nonew is t, add data to the headline of the entry at point."
 	 (type (if (keywordp type) type (intern (concat ":" type))))
 	 (org-bibtex-treat-headline-as-title (if nonew nil t)))
     (unless (assoc type org-bibtex-types)
-      (error "type:%s is not known" type))
+      (error "Type:%s is not known" type))
     (if nonew
 	(org-back-to-heading)
       (org-insert-heading)
@@ -661,7 +662,7 @@ This uses `bibtex-parse-entry'."
     (with-temp-buffer (yank 1) (setf entry (org-bibtex-read)))
     (if entry
 	(org-bibtex-write)
-      (error "yanked text does not appear to contain a bibtex entry"))))
+      (error "Yanked text does not appear to contain a BibTeX entry"))))
 
 (defun org-bibtex-export-to-kill-ring ()
   "Export current headline to kill ring as bibtex entry."
