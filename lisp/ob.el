@@ -1025,37 +1025,38 @@ the current subtree."
     (setf (nth 2 info)
 	  (sort (copy-sequence (nth 2 info))
 		(lambda (a b) (string< (car a) (car b)))))
-    (letrec ((rm (lambda (lst)
-		   (dolist (p '("replace" "silent" "append" "prepend"))
-		     (setq lst (remove p lst))))
-		 lst)
-	     (norm (lambda (arg)
-		     (let ((v (if (and (listp (cdr arg)) (null (cddr arg)))
-				  (copy-sequence (cdr arg))
-				(cdr arg))))
-		       (when (and v (not (and (sequencep v)
-					      (not (consp v))
-					      (= (length v) 0))))
-			 (cond
-			  ((and (listp v) ; lists are sorted
-				(member (car arg) '(:result-params)))
-			   (sort (funcall rm v) #'string<))
-			  ((and (stringp v) ; strings are sorted
-				(member (car arg) '(:results :exports)))
-			   (mapconcat #'identity
-				      (sort (funcall rm (split-string v))
-					    #'string<) " "))
-			  (t v)))))))
-      (let* ((it (format "%s-%s"
+    (org-labels ((rm (lst)
+		     (dolist (p '("replace" "silent" "append" "prepend"))
+		       (setq lst (remove p lst)))
+		     lst)
+		 (norm (arg)
+		       (let ((v (if (and (listp (cdr arg)) (null (cddr arg)))
+				    (copy-sequence (cdr arg))
+				  (cdr arg))))
+			 (when (and v (not (and (sequencep v)
+						(not (consp v))
+						(= (length v) 0))))
+			   (cond
+			    ((and (listp v) ; lists are sorted
+				  (member (car arg) '(:result-params)))
+			     (sort (rm v) #'string<))
+			    ((and (stringp v) ; strings are sorted
+				  (member (car arg) '(:results :exports)))
+			     (mapconcat #'identity (sort (rm (split-string v))
+							 #'string<) " "))
+			    (t v))))))
+      ((lambda (hash)
+	 (when (org-called-interactively-p 'interactive) (message hash)) hash)
+       (let ((it (format "%s-%s"
 			 (mapconcat
 			  #'identity
 			  (delq nil (mapcar (lambda (arg)
-					      (let ((n (funcall norm arg)))
-						(when n (format "%S" n))))
+					      (let ((normalized (norm arg)))
+						(when normalized
+						  (format "%S" normalized))))
 					    (nth 2 info))) ":")
-			 (nth 1 info)))
-	     (hash (sha1 it)))
-	(when (org-called-interactively-p 'interactive) (message hash)) hash))))
+			 (nth 1 info))))
+	 (sha1 it))))))
 
 (defun org-babel-current-result-hash ()
   "Return the current in-buffer hash."
@@ -2223,12 +2224,12 @@ header argument from buffer or subtree wide properties.")
 (defun org-babel-noweb-p (params context)
   "Check if PARAMS require expansion in CONTEXT.
 CONTEXT may be one of :tangle, :export or :eval."
-  (letrec ((intersect (lambda (as bs)
-			(when as
-			  (if (member (car as) bs)
-			      (car as)
-			    (funcall intersect (cdr as) bs))))))
-     (funcall intersect (case context
+  (org-labels ((intersect (as bs)
+			  (when as
+			    (if (member (car as) bs)
+				(car as)
+			      (intersect (cdr as) bs)))))
+    (intersect (case context
 		 (:tangle '("yes" "tangle" "no-export" "strip-export"))
 		 (:eval   '("yes" "no-export" "strip-export" "eval"))
 		 (:export '("yes")))
