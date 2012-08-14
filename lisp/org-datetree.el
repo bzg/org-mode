@@ -38,6 +38,15 @@ This is normally one, but if the buffer has an entry with a DATE_TREE
 property (any value), the date tree will become a subtree under that entry,
 so the base level will be properly adjusted.")
 
+(defcustom org-datetree-add-timestamp nil
+  "When non-nil, add a time stamp when create a datetree entry."
+  :group 'org-capture
+  :version "24.2"
+  :type '(choice
+	  (const :tag "Do not add a time stamp" nil)
+	  (const :tag "Add an inactive time stamp" inactive)
+	  (const :tag "Add an active time stamp" active)))
+
 ;;;###autoload
 (defun org-datetree-find-date-create (date &optional keep-restriction)
   "Find or create an entry for DATE.
@@ -119,7 +128,7 @@ tree can be found."
       (org-datetree-insert-line year month day)))))
 
 (defun org-datetree-insert-line (year &optional month day)
-  (let ((pos (point)))
+  (let ((pos (point)) ts-type)
     (skip-chars-backward " \t\n")
     (delete-region (point) pos)
     (insert "\n" (make-string org-datetree-base-level ?*) " \n")
@@ -136,6 +145,10 @@ tree can be found."
 	(insert (format " %s"
 			(format-time-string
 			 "%B" (encode-time 0 0 0 1 month year))))))
+    (when (and day (setq ts-type org-datetree-add-timestamp))
+      (insert "\n")
+      (org-indent-line)
+      (org-insert-time-stamp (encode-time 0 0 0 day month year) nil ts-type))
     (beginning-of-line 1)))
 
 (defun org-datetree-file-entry-under (txt date)
