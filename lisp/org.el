@@ -3605,6 +3605,15 @@ appear in the buffer without the initial #+TITLE: keyword."
 	      (const :tag "#+EMAIL" email)
 	      (const :tag "#+TITLE" title)))
 
+(defcustom org-custom-properties nil
+  "List of properties (as strings) with a special meaning.
+The default use of these custom properties is to let the user
+hide them with `org-toggle-custom-properties-visibility'."
+  :group 'org-properties
+  :group 'org-appearance
+  :version "24.2"
+  :type '(repeat (string :tag "Property Name")))
+
 (defcustom org-fontify-done-headline nil
   "Non-nil means change the face of a headline if it is marked DONE.
 Normally, only the TODO/DONE keyword indicates the state of a headline.
@@ -6006,6 +6015,30 @@ needs to be inserted at a specific position in the font-lock sequence.")
       (widen)
       (org-decompose-region (point-min) (point-max))
       (message "Entities are displayed plain"))))
+
+(defvar org-custom-properties-overlays nil
+  "List of overlays used for custom properties.")
+(make-variable-buffer-local 'org-custom-properties-overlays)
+
+(defun org-toggle-custom-properties-visibility ()
+  "Display or hide properties in `org-custom-properties'."
+  (interactive)
+  (if org-custom-properties-overlays
+      (progn (mapc 'delete-overlay org-custom-properties-overlays)
+	     (setq org-custom-properties-overlays nil))
+    (unless (not org-custom-properties)
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (while (re-search-forward org-property-re nil t)
+	    (mapc (lambda(p)
+		    (when (equal p (substring (match-string 1) 1 -1))
+		      (let ((o (make-overlay (match-beginning 0) (1+ (match-end 0)))))
+			(overlay-put o 'invisible t)
+			(overlay-put o 'org-custom-property t)
+			(push o org-custom-properties-overlays))))
+		  org-custom-properties)))))))
 
 (defun org-fontify-entities (limit)
   "Find an entity to fontify."
@@ -18270,29 +18303,31 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
 	       ;; (and (not invisible-at-point) invisible-before-point
 	       ;;  (memq kind '(insert delete)))
 	       )))
-
-	(when (or (memq invisible-at-point '(outline org-hide-block))
-		  (memq invisible-before-point '(outline org-hide-block)))
+	(when (or (memq invisible-at-point '(outline org-hide-block t))
+		  (memq invisible-before-point '(outline org-hide-block t)))
 	  (if (eq org-catch-invisible-edits 'error)
 	      (error "Editing in invisible areas is prohibited - make visible first"))
-	  ;; Make the area visible
-	  (save-excursion
-	    (if invisible-before-point
-		(goto-char (previous-single-char-property-change
-			    (point) 'invisible)))
-	    (org-cycle))
-	  (cond
-	   ((eq org-catch-invisible-edits 'show)
-	    ;; That's it, we do the edit after showing
-	    (message
-	     "Unfolding invisible region around point before editing")
-	    (sit-for 1))
-	   ((and (eq org-catch-invisible-edits 'smart)
-		 border-and-ok-direction)
-	    (message "Unfolding invisible region around point before editing"))
-	   (t
-	    ;; Don't do the edit, make the user repeat it in full visibility
-	    (error "Edit in invisible region aborted, repeat to confirm with text visible")))))))
+	  (if (and org-custom-properties-overlays
+		   (y-or-n-p "Display invisible properties in this buffer? "))
+	      (org-toggle-custom-properties-visibility)
+	    ;; Make the area visible
+	    (save-excursion
+	      (if invisible-before-point
+		  (goto-char (previous-single-char-property-change
+			      (point) 'invisible)))
+	      (org-cycle))
+	    (cond
+	     ((eq org-catch-invisible-edits 'show)
+	      ;; That's it, we do the edit after showing
+	      (message
+	       "Unfolding invisible region around point before editing")
+	      (sit-for 1))
+	     ((and (eq org-catch-invisible-edits 'smart)
+		   border-and-ok-direction)
+	      (message "Unfolding invisible region around point before editing"))
+	     (t
+	      ;; Don't do the edit, make the user repeat it in full visibility
+	      (error "Edit in invisible region aborted, repeat to confirm with text visible"))))))))
 
 (defun org-fix-tags-on-the-fly ()
   (when (and (equal (char-after (point-at-bol)) ?*)
