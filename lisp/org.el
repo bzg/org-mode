@@ -12642,7 +12642,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	(note (cdr (assq org-log-note-purpose org-log-note-headings)))
 	lines ind bul)
     (kill-buffer (current-buffer))
-    (while (string-match "\\`#.*\n[ \t\n]*" txt)
+    (while (string-match "\\`# .*\n[ \t\n]*" txt)
       (setq txt (replace-match "" t t txt)))
     (if (string-match "\\s-+\\'" txt)
 	(setq txt (replace-match "" t t txt)))
