@@ -4265,21 +4265,19 @@ end of ELEM-A."
 	(org-indent-to-column ind-B))
       (insert body-A)
       ;; Restore ex ELEM-A overlays.
-      (mapc (lambda (ov)
-	      (move-overlay
-	       (car ov)
-	       (+ (nth 1 ov) (- beg-B beg-A))
-	       (+ (nth 2 ov) (- beg-B beg-A))))
-	    (car overlays))
-      (goto-char beg-A)
-      (delete-region beg-A end-A)
-      (insert body-B)
-      ;; Restore ex ELEM-B overlays.
-      (mapc (lambda (ov)
-	      (move-overlay (car ov)
-			    (+ (nth 1 ov) (- beg-A beg-B))
-			    (+ (nth 2 ov) (- beg-A beg-B))))
-	    (cdr overlays))
+      (let ((offset (- beg-B beg-A)))
+	(mapc (lambda (ov)
+		(move-overlay
+		 (car ov) (+ (nth 1 ov) offset) (+ (nth 2 ov) offset)))
+	      (car overlays))
+	(goto-char beg-A)
+	(delete-region beg-A end-A)
+	(insert body-B)
+	;; Restore ex ELEM-B overlays.
+	(mapc (lambda (ov)
+		(move-overlay
+		 (car ov) (- (nth 1 ov) offset) (- (nth 2 ov) offset)))
+	      (cdr overlays)))
       (goto-char (org-element-property :end elem-B)))))
 
 
