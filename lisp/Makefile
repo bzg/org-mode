@@ -7,31 +7,23 @@ endif
 LISPV = org-version.el
 LISPI = org-install.el
 LISPA = $(LISPV) $(LISPI)
-LISPF = $(filter-out $(LISPA),$(sort $(wildcard *.el)))
+LISPF = $(filter-out $(LISPA),$(wildcard *.el))
 LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 
-.PHONY:	all compile compile-dirty \
-	compile-single compile-source compile-slint1 compile-slint2 \
-	autoloads \
-	install clean cleanauto cleanall cleanelc clean-install
+.PHONY:	all compile compile-dirty compile-single \
+		autoloads \
+		install clean cleanauto cleanall clean-install
 
 # do not clean here, done in toplevel make
-all compile compile-dirty::	 autoloads
-	$(MAKE) compile-$(_COMPILE_)
-
-compile-dirall:
-	@$(ELCDIR)
-compile-single: $(LISPC)
-compile-source: cleanelc
+all compile::	autoloads
+all compile compile-dirty::	 $(LISPI) $(LISPV)
+	$(ELCDIR)
+compile-single: clean autoloads $(LISPC)
+compile-source: clean autoloads
 	@$(foreach elc,$(LISPC),$(MAKE) $(elc) && $(RM) $(elc);)
-compile-slint1:	compile-dirall
-	@$(foreach elc,$(LISPC),$(RM) $(elc); $(MAKE) $(elc);)
-compile-slint2:
-	$(MAKE) compile-source compile-slint1
 
 %.elc:	%.el
-	@$(info Compiling single $(abspath $<)...)
-	-@$(ELC) $<
+	-$(ELC) $(<)
 
 autoloads:	cleanauto $(LISPI) $(LISPV)
 
@@ -53,7 +45,7 @@ install:	$(LISPF) compile
 
 cleanauto clean cleanall::
 	$(RM) $(LISPA) $(LISPA:%el=%elc)
-clean cleanall cleanelc::
+clean cleanall::
 	$(RM) *.elc
 
 clean-install:

@@ -32,6 +32,8 @@ help helpall::
 helpall::
 	$(info make test           - ditto)
 	$(info make compile-dirty  - build only stale Org ELisp files)
+	$(info make compile-single - build using one Emacs process per file)
+	$(info make compile-source - ditto, but immediately remove byte-compiled file )
 	$(info make test-dirty     - check without building first)
 	$(info )
 	$(info Compatibility)
