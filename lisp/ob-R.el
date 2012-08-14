@@ -80,8 +80,7 @@
 (defun org-babel-edit-prep:R (info)
   (let ((session (cdr (assoc :session (nth 2 info)))))
     (when (and session (string-match "^\\*\\(.+?\\)\\*$" session))
-      (save-match-data (org-babel-R-initiate-session session nil))
-      (setq ess-local-process-name (match-string 1 session)))))
+      (save-match-data (org-babel-R-initiate-session session nil)))))
 
 (defun org-babel-expand-body:R (body params &optional graphics-file)
   "Expand BODY according to PARAMS, return the expanded body."
