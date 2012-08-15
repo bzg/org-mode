@@ -2501,8 +2501,7 @@ not overwrite the stored one."
       (setq orig (or (get-text-property 1 :orig-formula formula) "?"))
       (while (> ndown 0)
 	(setq fields (org-split-string
-		      (org-no-properties
-		       (buffer-substring (point-at-bol) (point-at-eol)))
+		      (buffer-substring-no-properties (point-at-bol) (point-at-eol))
 		      " *| *"))
 	;; replace fields with duration values if relevant
 	(if duration
