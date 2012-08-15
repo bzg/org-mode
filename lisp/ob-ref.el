@@ -240,8 +240,8 @@ to \"0:-1\"."
 			   (funcall wrap (string-to-number (match-string 2 portion)))
 			   (funcall wrap (string-to-number (match-string 3 portion))))
 			(list (funcall wrap 0) (funcall wrap -1)))))
-	    (list (nth (funcall wrap (string-to-number portion)) lis)))))))
-  lis)
+	    (list (nth (funcall wrap (string-to-number portion)) lis))))))
+    lis))
 
 (defun org-babel-ref-split-args (arg-string)
   "Split ARG-STRING into top-level arguments of balanced parenthesis."
