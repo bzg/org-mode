@@ -16530,15 +16530,16 @@ in the timestamp determines what will be changed."
 		   (clfixpos (if (> 0 clfixnth) nil (nth clfixnth org-clock-history))))
 	      (if (not clfixpos)
 		  (message "No clock to adjust")
-		(org-goto-marker-or-bmk clfixpos)
-		(org-show-subtree)
-		(when (re-search-forward clrgx nil t)
-		  (goto-char (match-beginning 1))
-		  (let (org-clock-adjust-closest)
-		    (org-timestamp-change n org-ts-what updown))
-		  (message "Clock adjusted in %s for heading: %s"
-			   (file-name-nondirectory (buffer-file-name))
-			   (org-get-heading t t))))))))
+		(save-excursion
+		  (org-goto-marker-or-bmk clfixpos)
+		  (org-show-subtree)
+		  (when (re-search-forward clrgx nil t)
+		    (goto-char (match-beginning 1))
+		    (let (org-clock-adjust-closest)
+		      (org-timestamp-change n org-ts-what updown))
+		    (message "Clock adjusted in %s for heading: %s"
+			     (file-name-nondirectory (buffer-file-name))
+			     (org-get-heading t t)))))))))
       ;; Try to recenter the calendar window, if any.
       (if (and org-calendar-follow-timestamp-change
 	       (get-buffer-window "*Calendar*" t)
@@ -20960,6 +20961,9 @@ hierarchy of headlines by UP levels before marking the subtree."
 Return fill prefix, as a string, or nil if current line isn't
 meant to be filled."
   (unless (and (derived-mode-p 'message-mode) (not (message-in-body-p)))
+    ;; FIXME: Prevent an error for users who forgot to make autoloads?
+    ;; See also `org-fill-paragraph', which has the same.
+    (require 'org-element)
     ;; FIXME: This is really the job of orgstruct++-mode
     (save-excursion
       (goto-char p)
