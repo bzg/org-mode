@@ -14450,11 +14450,10 @@ things up because then unnecessary parsing is avoided."
 				(substring (org-match-string-no-properties 1)
 					   0 -1))
 			string (if (equal key clockstr)
-				   (org-no-properties
-				    (org-trim
-				     (buffer-substring
-				      (match-beginning 3) (goto-char
-							   (point-at-eol)))))
+				   (org-trim
+				    (buffer-substring-no-properties
+				     (match-beginning 3) (goto-char
+							  (point-at-eol))))
 				 (substring (org-match-string-no-properties 3)
 					    1 -1)))
 		  ;; Get the correct property name from the key.  This is

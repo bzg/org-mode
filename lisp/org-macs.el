@@ -239,10 +239,15 @@ We use a macro so that the test can happen at compilation time."
 	s)
     (match-string-no-properties num string)))
 
-(defsubst org-no-properties (s)
+(defsubst org-no-properties (s &optional restricted)
+  "Remove all text properties from string S.
+When RESTRICTED is non-nil, only remove the properties listed
+in `org-rm-props'."
   (if (fboundp 'set-text-properties)
       (set-text-properties 0 (length s) nil s)
-    (remove-text-properties 0 (length s) org-rm-props s))
+    (if restricted
+	(remove-text-properties 0 (length s) org-rm-props s)
+      (set-text-properties 0 (length s) nil s)))
   s)
 
 (defsubst org-get-alist-option (option key)

@@ -326,11 +326,6 @@ Works on both Emacs and XEmacs."
 	string)
     (apply 'propertize string properties)))
 
-(defun org-substring-no-properties (string &optional from to)
-  (if (featurep 'xemacs)
-      (org-no-properties (substring string (or from 0) to))
-    (substring-no-properties string from to)))
-
 (defmacro org-find-library-dir (library)
   `(file-name-directory (locate-library ,library)))
 

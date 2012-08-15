@@ -305,10 +305,9 @@ This is the compiled version of the format.")
 		       (and (looking-at "\\(\\**\\)\\(\\* \\)")
 			    (org-get-level-face 2))))
          (item (save-match-data
-                 (org-no-properties
-                  (org-remove-tabs
-                   (buffer-substring-no-properties
-                    (point-at-bol) (point-at-eol))))))
+		 (org-remove-tabs
+		  (buffer-substring-no-properties
+		   (point-at-bol) (point-at-eol)))))
 	 (color (if (featurep 'xemacs)
                     (save-excursion
                       (beginning-of-line 1)

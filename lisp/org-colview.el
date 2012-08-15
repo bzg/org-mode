@@ -189,15 +189,13 @@ This is the compiled version of the format.")
 			  ;; we'll clean it later…
 			  (if (derived-mode-p 'org-mode)
 			      (save-match-data
-				(org-no-properties
-				 (org-remove-tabs
-				  (buffer-substring-no-properties
-				   (point-at-bol) (point-at-eol)))))
+				(org-remove-tabs
+				 (buffer-substring-no-properties
+				  (point-at-bol) (point-at-eol))))
 			    ;; In agenda, just get the `txt' property
-			    (org-no-properties
-			     (or (org-get-at-bol 'txt)
-				 (buffer-substring
-				  (point) (progn (end-of-line) (point)))))))
+			    (or (org-get-at-bol 'txt)
+				(buffer-substring-no-properties
+				 (point) (progn (end-of-line) (point))))))
 		  (assoc property props))
 	    width (or (cdr (assoc property org-columns-current-maxwidths))
 		      (nth 2 column)
