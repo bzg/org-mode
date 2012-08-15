@@ -360,7 +360,7 @@ When COMBINE is non nil, add the category to each line."
 		      (or (org-id-get) (org-id-new)))
 		categories (org-export-get-categories)
 		alarm-time (org-entry-get nil "APPT_WARNTIME")
-		alarm-time (when alarm-time (string-to-number alarm-time))
+		alarm-time (if alarm-time (string-to-number alarm-time) 0)
 		alarm ""
 		deadlinep nil scheduledp nil)
 	  (if (looking-at re2)
