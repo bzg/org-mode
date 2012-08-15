@@ -254,7 +254,7 @@ Returns a list
 		   (nth 2 info)
 		   (org-babel-parse-header-arguments (match-string 1)))))
 	  (when (looking-at org-babel-src-name-w-name-regexp)
-	    (setq name (org-babel-clean-text-properties (match-string 3)))
+	    (setq name (org-no-properties (match-string 3)))
 	    (when (and (match-string 5) (> (length (match-string 5)) 0))
 	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
 		    (org-babel-merge-params
@@ -661,7 +661,7 @@ arguments and pop open the results in a preview buffer."
     (dolist (header (mapcar (lambda (arg) (substring (symbol-name (car arg)) 1))
 			    (and (org-babel-where-is-src-block-head)
 				 (org-babel-parse-header-arguments
-				  (org-babel-clean-text-properties
+				  (org-no-properties
 				   (match-string 4))))))
       (dolist (name names)
 	(when (and (not (string= header name))
@@ -1061,7 +1061,7 @@ the current subtree."
 (defun org-babel-current-result-hash ()
   "Return the current in-buffer hash."
   (org-babel-where-is-src-block-result)
-  (org-babel-clean-text-properties (match-string 3)))
+  (org-no-properties (match-string 3)))
 
 (defun org-babel-set-current-result-hash (hash)
   "Set the current in-buffer hash to HASH."
@@ -1223,10 +1223,10 @@ may be specified in the properties of the current outline entry."
 (defun org-babel-parse-src-block-match ()
   "Parse the results from a match of the `org-babel-src-block-regexp'."
   (let* ((block-indentation (length (match-string 1)))
-	 (lang (org-babel-clean-text-properties (match-string 2)))
+	 (lang (org-no-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang)))
 	 (switches (match-string 3))
-         (body (org-babel-clean-text-properties
+         (body (org-no-properties
 		(let* ((body (match-string 5))
 		       (sub-length (- (length body) 1)))
 		  (if (and (> sub-length 0)
@@ -1248,23 +1248,23 @@ may be specified in the properties of the current outline entry."
            (org-babel-params-from-properties lang)
 	   (if (boundp lang-headers) (eval lang-headers) nil)
 	   (org-babel-parse-header-arguments
-            (org-babel-clean-text-properties (or (match-string 4) ""))))
+            (org-no-properties (or (match-string 4) ""))))
 	  switches
 	  block-indentation)))
 
 (defun org-babel-parse-inline-src-block-match ()
   "Parse the results from a match of the `org-babel-inline-src-block-regexp'."
-  (let* ((lang (org-babel-clean-text-properties (match-string 2)))
+  (let* ((lang (org-no-properties (match-string 2)))
          (lang-headers (intern (concat "org-babel-default-header-args:" lang))))
     (list lang
           (org-babel-strip-protective-commas
-           (org-babel-clean-text-properties (match-string 5)) lang)
+           (org-no-properties (match-string 5)) lang)
           (org-babel-merge-params
            org-babel-default-inline-header-args
            (org-babel-params-from-properties lang)
            (if (boundp lang-headers) (eval lang-headers) nil)
            (org-babel-parse-header-arguments
-            (org-babel-clean-text-properties (or (match-string 4) "")))))))
+            (org-no-properties (or (match-string 4) "")))))))
 
 (defun org-babel-balanced-split (string alts)
   "Split STRING on instances of ALTS.
@@ -1823,7 +1823,7 @@ If the path of the link is a file path it is expanded using
 `expand-file-name'."
   (let* ((case-fold-search t)
          (raw (and (looking-at org-bracket-link-regexp)
-                   (org-babel-clean-text-properties (match-string 1))))
+                   (org-no-properties (match-string 1))))
          (type (and (string-match org-link-types-re raw)
                     (match-string 1 raw))))
     (cond
@@ -1891,7 +1891,7 @@ code ---- the results are extracted in the syntax of the source
           optional LANG argument."
   (if (stringp result)
       (progn
-        (setq result (org-babel-clean-text-properties result))
+        (setq result (org-no-properties result))
         (when (member "file" result-params)
 	  (setq result (org-babel-result-to-file
 			result (when (assoc :file-desc (nth 2 info))
@@ -2362,11 +2362,6 @@ block but are passed literally to the \"example-block\"."
 		       "[\n\r]") (concat "\n" prefix))))))
       (funcall nb-add (buffer-substring index (point-max))))
     new-body))
-
-(defun org-babel-clean-text-properties (text)
-  "Strip all properties from text return."
-  (when text
-    (set-text-properties 0 (length text) nil text) text))
 
 (defun org-babel-strip-protective-commas (body &optional lang)
   "Strip protective commas from bodies of source blocks."

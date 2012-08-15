@@ -374,7 +374,7 @@ code blocks by language."
 		   (link ((lambda (link)
 			    (and (string-match org-bracket-link-regexp link)
 				 (match-string 1 link)))
-			  (org-babel-clean-text-properties
+			  (org-no-properties
 			   (org-store-link nil))))
 		   (source-name
 		    (intern (or (nth 4 info)
@@ -441,7 +441,7 @@ code blocks by language."
   (let* ((start-line (org-babel-where-is-src-block-head))
 	 (file (buffer-file-name))
 	 (link (org-link-escape (progn (call-interactively 'org-store-link)
-				       (org-babel-clean-text-properties
+				       (org-no-properties
 					(car (pop org-stored-links))))))
 	 (source-name (nth 4 (or info (org-babel-get-src-block-info 'light))))
 	 (link-data (mapcar (lambda (el)
