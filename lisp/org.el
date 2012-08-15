@@ -2741,9 +2741,11 @@ Custom commands can set this variable in the options section."
 (defcustom org-read-date-prefer-future t
   "Non-nil means assume future for incomplete date input from user.
 This affects the following situations:
+
 1. The user gives a month but not a year.
    For example, if it is April and you enter \"feb 2\", this will be read
    as Feb 2, *next* year.  \"May 5\", however, will be this year.
+
 2. The user gives a day, but no month.
    For example, if today is the 15th, and you enter \"3\", Org-mode will
    read this as the third of *next* month.  However, if you enter \"17\",
@@ -2752,8 +2754,8 @@ This affects the following situations:
 If you set this variable to the symbol `time', then also the following
 will work:
 
-3. If the user gives a time, but no day.  If the time is before now,
-   to will be interpreted as tomorrow.
+3. If the user gives a time, but no day.
+   If the time is before now, to will be interpreted as tomorrow.
 
 Currently none of this works for ISO week specifications.
 
@@ -15651,7 +15653,11 @@ user."
 			  (substring ans (match-end 7))))))
 
     (setq tl (parse-time-string ans)
-	  day (or (nth 3 tl) (nth 3 org-defdecode))
+	  day (or (nth 3 tl)
+		  (if (and (eq org-read-date-prefer-future 'time)
+			   (nth 2 tl) (< (nth 2 tl) (nth 2 nowdecode)))
+		       (prog1 (1+ (nth 3 nowdecode)) (setq futurep t))
+		     (nth 3 org-defdecode)))
 	  month (or (nth 4 tl)
 		    (if (and org-read-date-prefer-future
 			     (nth 3 tl) (< (nth 3 tl) (nth 3 nowdecode)))
@@ -15662,7 +15668,11 @@ user."
 			    (nth 4 tl) (< (nth 4 tl) (nth 4 nowdecode)))
 		       (prog1 (1+ (nth 5 nowdecode)) (setq futurep t))
 		     (nth 5 org-defdecode)))
-	  hour (or (nth 2 tl) (nth 2 org-defdecode))
+	  hour (or (nth 2 tl)
+		  (if (and (eq org-read-date-prefer-future 'time)
+			   (nth 1 tl) (< (nth 1 tl) (nth 1 nowdecode)))
+		       (prog1 (1+ (nth 2 nowdecode)) (setq futurep t))
+		     (nth 2 org-defdecode)))
 	  minute (or (nth 1 tl) (nth 1 org-defdecode))
 	  second (or (nth 0 tl) 0)
 	  wday (nth 6 tl))
