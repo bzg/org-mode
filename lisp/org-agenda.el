@@ -881,12 +881,14 @@ N days, just insert a special line indicating the size of the gap."
 When nil, the matcher string is not shown, but is put into the help-echo
 property so than moving the mouse over the command shows it.
 Setting it to nil is good if matcher strings are very long and/or if
-you want to use two-column display (see `org-agenda-menu-two-column')."
+you want to use two-columns display (see `org-agenda-menu-two-columns')."
   :group 'org-agenda
   :version "24.1"
   :type 'boolean)
 
-(defcustom org-agenda-menu-two-column nil
+(make-obsolete-variable 'org-agenda-menu-two-column 'org-agenda-menu-two-columns "24.2")
+
+(defcustom org-agenda-menu-two-columns nil
   "Non-nil means, use two columns to show custom commands in the dispatcher.
 If you use this, you probably want to set `org-agenda-menu-show-matcher'
 to nil."
@@ -2636,7 +2638,7 @@ s   Search for keywords                 *   Toggle sticky agenda views
 		  prefixes))
 
 	  ;; Check if we should display in two columns
-	  (if org-agenda-menu-two-column
+	  (if org-agenda-menu-two-columns
 	      (progn
 		(setq n (length lines)
 		      n1 (+ (/ n 2) (mod n 2))
