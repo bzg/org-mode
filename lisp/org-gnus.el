@@ -233,9 +233,9 @@ If `org-store-link' was called with a prefix arg the meaning of
     (setq group (match-string 1 path)
 	  article (match-string 3 path))
     (when group
-      (setq group (org-substring-no-properties group)))
+      (setq group (org-no-properties group)))
     (when article
-      (setq article (org-substring-no-properties article)))
+      (setq article (org-no-properties article)))
     (org-gnus-follow-link group article)))
 
 (defun org-gnus-follow-link (&optional group article)
@@ -244,9 +244,9 @@ If `org-store-link' was called with a prefix arg the meaning of
   (funcall (cdr (assq 'gnus org-link-frame-setup)))
   (if gnus-other-frame-object (select-frame gnus-other-frame-object))
   (when group
-    (setq group (org-substring-no-properties group)))
+    (setq group (org-no-properties group)))
   (when article
-    (setq article (org-substring-no-properties article)))
+    (setq article (org-no-properties article)))
   (cond ((and group article)
 	 (gnus-activate-group group)
 	 (condition-case nil

@@ -398,8 +398,7 @@ RET at beg-of-buf -> Append to file as level 2 headline
 This function should be placed into `remember-mode-hook' and in fact requires
 to be run from that hook to function properly."
   (when (and (boundp 'initial) (stringp initial))
-    (setq initial (org-no-properties initial))
-    (remove-text-properties 0 (length initial) '(read-only t) initial))
+    (setq initial (org-no-properties initial)))
   (if org-remember-templates
       (let* ((entry (org-select-remember-template use-char))
 	     (ct (or org-overriding-default-time (org-current-time)))
@@ -446,7 +445,7 @@ to be run from that hook to function properly."
 		    v-a))
 	     (v-n user-full-name)
 	     (v-k (if (marker-buffer org-clock-marker)
-		      (org-substring-no-properties org-clock-heading)))
+		      (org-no-properties org-clock-heading)))
 	     (v-K (if (marker-buffer org-clock-marker)
 		      (org-make-link-string
 		       (buffer-file-name (marker-buffer org-clock-marker))
@@ -598,7 +597,7 @@ to be run from that hook to function properly."
 						     (car clipboards))))))
 	     ((equal char "p")
 	      (let*
-		  ((prop (org-substring-no-properties prompt))
+		  ((prop (org-no-properties prompt))
 		   (pall (concat prop "_ALL"))
 		   (allowed
 		    (with-current-buffer

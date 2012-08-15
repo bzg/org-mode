@@ -1299,8 +1299,7 @@ Lisp programs can force the template by setting KEYS to a string."
 The template may still contain \"%?\" for cursor positioning."
   (setq template (or template (org-capture-get :template)))
   (when (stringp initial)
-    (setq initial (org-no-properties initial))
-    (remove-text-properties 0 (length initial) '(read-only t) initial))
+    (setq initial (org-no-properties initial)))
   (let* ((buffer (org-capture-get :buffer))
 	 (file (buffer-file-name (or (buffer-base-buffer buffer) buffer)))
 	 (ct (org-capture-get :default-time))
@@ -1344,7 +1343,7 @@ The template may still contain \"%?\" for cursor positioning."
 		v-a))
 	 (v-n user-full-name)
 	 (v-k (if (marker-buffer org-clock-marker)
-		  (org-substring-no-properties org-clock-heading)))
+		  (org-no-properties org-clock-heading)))
 	 (v-K (if (marker-buffer org-clock-marker)
 		  (org-make-link-string
 		   (buffer-file-name (marker-buffer org-clock-marker))
@@ -1477,7 +1476,7 @@ The template may still contain \"%?\" for cursor positioning."
 						   '(clipboards . 1)
 						   (car clipboards))))))
 	   ((equal char "p")
-	    (org-set-property (org-substring-no-properties prompt) nil))
+	    (org-set-property (org-no-properties prompt) nil))
 	   (char
 	    ;; These are the date/time related ones
 	    (setq org-time-was-given (equal (upcase char) char))
