@@ -189,15 +189,13 @@ This is the compiled version of the format.")
 			  ;; we'll clean it later…
 			  (if (derived-mode-p 'org-mode)
 			      (save-match-data
-				(org-no-properties
-				 (org-remove-tabs
-				  (buffer-substring-no-properties
-				   (point-at-bol) (point-at-eol)))))
+				(org-remove-tabs
+				 (buffer-substring-no-properties
+				  (point-at-bol) (point-at-eol))))
 			    ;; In agenda, just get the `txt' property
-			    (org-no-properties
-			     (or (org-get-at-bol 'txt)
-				 (buffer-substring
-				  (point) (progn (end-of-line) (point)))))))
+			    (or (org-get-at-bol 'txt)
+				(buffer-substring-no-properties
+				 (point) (progn (end-of-line) (point))))))
 		  (assoc property props))
 	    width (or (cdr (assoc property org-columns-current-maxwidths))
 		      (nth 2 column)
@@ -241,20 +239,20 @@ This is the compiled version of the format.")
 	    (save-excursion
 	      (goto-char beg)
 	      (org-unmodified (insert " ")))))) ;; FIXME: add props and remove later?
-      ;; Make the rest of the line disappear.
-      (org-unmodified
-       (setq ov (org-columns-new-overlay beg (point-at-eol)))
-       (overlay-put ov 'invisible t)
-       (overlay-put ov 'keymap org-columns-map)
-       (overlay-put ov 'intangible t)
-       (overlay-put ov 'line-prefix "")
-       (overlay-put ov 'wrap-prefix "")
-       (push ov org-columns-overlays)
-       (setq ov (make-overlay (1- (point-at-eol)) (1+ (point-at-eol))))
-       (overlay-put ov 'keymap org-columns-map)
-       (push ov org-columns-overlays)
-       (let ((inhibit-read-only t))
-	 (put-text-property (max (point-min) (1- (point-at-bol)))
+    ;; Make the rest of the line disappear.
+    (org-unmodified
+     (setq ov (org-columns-new-overlay beg (point-at-eol)))
+     (overlay-put ov 'invisible t)
+     (overlay-put ov 'keymap org-columns-map)
+     (overlay-put ov 'intangible t)
+     (overlay-put ov 'line-prefix "")
+     (overlay-put ov 'wrap-prefix "")
+     (push ov org-columns-overlays)
+     (setq ov (make-overlay (1- (point-at-eol)) (1+ (point-at-eol))))
+     (overlay-put ov 'keymap org-columns-map)
+     (push ov org-columns-overlays)
+     (let ((inhibit-read-only t))
+       (put-text-property (max (point-min) (1- (point-at-bol)))
 			  (min (point-max) (1+ (point-at-eol)))
 			  'read-only "Type `e' to edit property")))))
 
@@ -305,7 +303,7 @@ for the duration of the command.")
     (org-set-local 'org-columns-current-widths (nreverse widths))
     (setq org-columns-full-header-line-format title)
     (setq org-columns-previous-hscroll -1)
-;    (org-columns-hscoll-title)
+					;    (org-columns-hscoll-title)
     (org-add-hook 'post-command-hook 'org-columns-hscoll-title nil 'local)))
 
 (defun org-columns-hscoll-title ()
@@ -443,8 +441,8 @@ Where possible, use the standard interface for changing this line."
 		    (org-edit-headline))))
      ((equal key "TODO")
       (setq eval '(org-with-point-at
-		   pom
-		   (call-interactively 'org-todo))))
+		      pom
+		    (call-interactively 'org-todo))))
      ((equal key "PRIORITY")
       (setq eval '(org-with-point-at pom
 		    (call-interactively 'org-priority))))
@@ -666,27 +664,38 @@ around it."
     (org-open-link-from-string value arg)))
 
 (defun org-columns-get-format-and-top-level ()
-  (let (fmt)
-    (when (condition-case nil (org-back-to-heading) (error nil))
-      (setq fmt (org-entry-get nil "COLUMNS" t)))
-    (setq fmt (or fmt org-columns-default-format))
-    (org-set-local 'org-columns-current-fmt fmt)
-    (org-columns-compile-format fmt)
-    (if (marker-position org-entry-property-inherited-from)
-	(move-marker org-columns-top-level-marker
-		     org-entry-property-inherited-from)
-      (move-marker org-columns-top-level-marker (point)))
+  (let ((fmt (org-columns-get-format)))
+    (org-columns-goto-top-level)
     fmt))
 
-(defun org-columns ()
-  "Turn on column view on an org-mode file."
+(defun org-columns-get-format (&optional fmt-string)
+  (interactive)
+  (let (fmt-as-property fmt)
+    (when (condition-case nil (org-back-to-heading) (error nil))
+      (setq fmt-as-property (org-entry-get nil "COLUMNS" t)))
+    (setq fmt (or fmt-string fmt-as-property org-columns-default-format))
+    (org-set-local 'org-columns-current-fmt fmt)
+    (org-columns-compile-format fmt)
+    fmt))
+
+(defun org-columns-goto-top-level ()
+  (when (condition-case nil (org-back-to-heading) (error nil))
+    (org-entry-get nil "COLUMNS" t)
+    (if (marker-position org-entry-property-inherited-from)
+	(move-marker org-columns-top-level-marker org-entry-property-inherited-from)
+      (move-marker org-columns-top-level-marker (point)))))
+
+(defun org-columns (&optional columns-fmt-string)
+  "Turn on column view on an org-mode file.
+When COLUMNS-FMT-STRING is non-nil, use it as the column format."
   (interactive)
   (org-verify-version 'columns)
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
   (let ((org-columns-time (time-to-number-of-days (current-time)))
 	beg end fmt cache maxwidths)
-    (setq fmt (org-columns-get-format-and-top-level))
+    (org-columns-goto-top-level)
+    (setq fmt (org-columns-get-format columns-fmt-string))
     (save-excursion
       (goto-char org-columns-top-level-marker)
       (setq beg (point))
@@ -1229,13 +1238,15 @@ PARAMS is a property list of parameters:
 :vlines   When t, make each column a colgroup to enforce vertical lines.
 :maxlevel When set to a number, don't capture headlines below this level.
 :skip-empty-rows
-	  When t, skip rows where all specifiers other than ITEM are empty."
+	  When t, skip rows where all specifiers other than ITEM are empty.
+:format   When non-nil, specify the column view format to use."
   (let ((pos (move-marker (make-marker) (point)))
 	(hlines (plist-get params :hlines))
 	(vlines (plist-get params :vlines))
 	(maxlevel (plist-get params :maxlevel))
 	(content-lines (org-split-string (plist-get params :content) "\n"))
 	(skip-empty-rows (plist-get params :skip-empty-rows))
+	(columns-fmt (plist-get params :format))
 	(case-fold-search t)
 	tbl id idpos nfields tmp recalc line
 	id-as-string view-file view-pos)
@@ -1265,7 +1276,7 @@ PARAMS is a property list of parameters:
 	(save-restriction
 	  (widen)
 	  (goto-char (or view-pos (point)))
-	  (org-columns)
+	  (org-columns columns-fmt)
 	  (setq tbl (org-columns-capture-view maxlevel skip-empty-rows))
 	  (setq nfields (length (car tbl)))
 	  (org-columns-quit))))
@@ -1352,7 +1363,7 @@ and tailing newline characters."
   (org-columns-remove-overlays)
   (move-marker org-columns-begin-marker (point))
   (let ((org-columns-time (time-to-number-of-days (current-time)))
-	 cache maxwidths m p a d fmt)
+	cache maxwidths m p a d fmt)
     (cond
      ((and (boundp 'org-agenda-overriding-columns-format)
 	   org-agenda-overriding-columns-format)
@@ -1385,7 +1396,7 @@ and tailing newline characters."
 	  (setq p (org-entry-properties m))
 
 	  (when (or (not (setq a (assoc org-effort-property p)))
-			 (not (string-match "\\S-" (or (cdr a) ""))))
+		    (not (string-match "\\S-" (or (cdr a) ""))))
 	    ;; OK, the property is not defined.  Use appointment duration?
 	    (when (and org-agenda-columns-add-appointments-to-effort-sum
 		       (setq d (get-text-property (point) 'duration)))
@@ -1513,12 +1524,12 @@ This will add overlays to the date lines, to show the summary for each day."
 (defun org-format-time-period (interval)
   "Convert time in fractional days to days/hours/minutes/seconds."
   (if (numberp interval)
-    (let* ((days (floor interval))
-	   (frac-hours (* 24 (- interval days)))
-	   (hours (floor frac-hours))
-	   (minutes (floor (* 60 (- frac-hours hours))))
-	   (seconds (floor (* 60 (- (* 60 (- frac-hours hours)) minutes)))))
-      (format "%dd %02dh %02dm %02ds" days hours minutes seconds))
+      (let* ((days (floor interval))
+	     (frac-hours (* 24 (- interval days)))
+	     (hours (floor frac-hours))
+	     (minutes (floor (* 60 (- frac-hours hours))))
+	     (seconds (floor (* 60 (- (* 60 (- frac-hours hours)) minutes)))))
+	(format "%dd %02dh %02dm %02ds" days hours minutes seconds))
     ""))
 
 (defun org-estimate-mean-and-var (v)
@@ -1536,10 +1547,10 @@ and variances (respectively) of the individual estimates."
   (let ((mean 0)
         (var 0))
     (mapc (lambda (e)
-              (let ((stats (org-estimate-mean-and-var e)))
-                (setq mean (+ mean (car stats)))
-                (setq var (+ var (cadr stats)))))
-            el)
+	    (let ((stats (org-estimate-mean-and-var e)))
+	      (setq mean (+ mean (car stats)))
+	      (setq var (+ var (cadr stats)))))
+	  el)
     (let ((stdev (sqrt var)))
       (list (- mean stdev) (+ mean stdev)))))
 

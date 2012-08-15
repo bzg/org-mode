@@ -64,12 +64,12 @@ This function is called by `org-babel-execute-src-block'."
 		     body params (org-babel-variable-assignments:ruby params)))
          (result (if (member "xmp" result-params)
 		     (with-temp-buffer
-		     (require 'rcodetools)
-		     (insert full-body)
-		     (xmp (cdr (assoc :xmp-option params)))
-		     (buffer-string))
+		       (require 'rcodetools)
+		       (insert full-body)
+		       (xmp (cdr (assoc :xmp-option params)))
+		       (buffer-string))
 		   (org-babel-ruby-evaluate
-		      session full-body result-type result-params))))
+		    session full-body result-type result-params))))
     (org-babel-reassemble-table
      result
      (org-babel-pick-name (cdr (assoc :colname-names params))

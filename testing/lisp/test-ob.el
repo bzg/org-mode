@@ -180,7 +180,11 @@
 
 #+headers: :var letters='(a b c d e f g)
 #+begin_src emacs-lisp :var numbers='(1 2 3 4 5 6 7)
-  (map 'list #'list numbers letters)
+  (require 'cl)
+  (defalias 'my-map (if (org-version-check \"24.1.50\" \"cl\" :predicate)
+                        'cl-map
+                      'map))
+  (my-map 'list #'list numbers letters)
 #+end_src"
 
     (progn

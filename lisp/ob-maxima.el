@@ -48,21 +48,21 @@
 (defun org-babel-maxima-expand (body params)
   "Expand a block of Maxima code according to its header arguments."
   (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
-     (mapconcat 'identity
-		(list
-		 ;; graphic output
-		 (let ((graphic-file (org-babel-maxima-graphical-output-file params)))
-		   (if graphic-file
-		       (format
-			"set_plot_option ([gnuplot_term, png]); set_plot_option ([gnuplot_out_file, %S]);"
-			graphic-file)
-		     ""))
-		 ;; variables
-		 (mapconcat 'org-babel-maxima-var-to-maxima vars "\n")
-		 ;; body
-		 body
-		 "gnuplot_close ()$")
-		"\n")))
+    (mapconcat 'identity
+	       (list
+		;; graphic output
+		(let ((graphic-file (org-babel-maxima-graphical-output-file params)))
+		  (if graphic-file
+		      (format
+		       "set_plot_option ([gnuplot_term, png]); set_plot_option ([gnuplot_out_file, %S]);"
+		       graphic-file)
+		    ""))
+		;; variables
+		(mapconcat 'org-babel-maxima-var-to-maxima vars "\n")
+		;; body
+		body
+		"gnuplot_close ()$")
+	       "\n")))
 
 (defun org-babel-execute:maxima (body params)
   "Execute a block of Maxima entries with org-babel.  This function is
@@ -110,8 +110,8 @@ of the same value."
       (setq val (symbol-name val))
       (when (= (length val) 1)
         (setq val (string-to-char val))))
-      (format "%S: %s$" var
-	      (org-babel-maxima-elisp-to-maxima val))))
+    (format "%S: %s$" var
+	    (org-babel-maxima-elisp-to-maxima val))))
 
 (defun org-babel-maxima-graphical-output-file (params)
   "Name of file to which maxima should send graphical output."

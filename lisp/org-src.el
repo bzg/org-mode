@@ -130,7 +130,7 @@ current-window    Show edit buffer in the current window, keeping all other
                   windows.
 other-window      Use `switch-to-buffer-other-window' to display edit buffer.
 reorganize-frame  Show only two windows on the current frame, the current
-                  window and the edit buffer. When exiting the edit buffer,
+                  window and the edit buffer.  When exiting the edit buffer,
                   return to one window.
 other-frame       Use `switch-to-buffer-other-frame' to display edit buffer.
                   Also, when exiting the edit buffer, kill that frame."
@@ -455,10 +455,10 @@ the fragment in the Org-mode buffer."
 	(overlay-put ovl 'help-echo "Click with mouse-1 to switch to buffer editing this segment")
 	(overlay-put ovl 'face 'secondary-selection)
 	(overlay-put ovl
-			 'keymap
-			 (let ((map (make-sparse-keymap)))
-			   (define-key map [mouse-1] 'org-edit-src-continue)
-			   map))
+		     'keymap
+		     (let ((map (make-sparse-keymap)))
+		       (define-key map [mouse-1] 'org-edit-src-continue)
+		       map))
 	(overlay-put ovl :read-only "Leave me alone")
 	(org-pop-to-buffer-same-window buffer)
 	(insert code)

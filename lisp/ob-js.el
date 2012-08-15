@@ -152,9 +152,9 @@ then create.  Return the initialized session."
 	  (sit-for .5)
 	  (org-babel-js-initiate-session session))))
      ((string= "node" org-babel-js-cmd )
-      (error "session evaluation with node.js is not supported"))
+      (error "Session evaluation with node.js is not supported"))
      (t
-      (error "sessions are only supported with mozrepl add \":cmd mozrepl\"")))))
+      (error "Sessions are only supported with mozrepl add \":cmd mozrepl\"")))))
 
 (provide 'ob-js)
 

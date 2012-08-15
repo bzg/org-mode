@@ -189,22 +189,22 @@ calendar           |  %:type %:date"
 		(character :tag "Selection Key")
 		(string :tag "Template")
 		(choice :tag "Destination file"
-		 (file :tag "Specify")
-		 (function :tag "Function")
-		 (const :tag "Use `org-default-notes-file'" nil))
+			(file :tag "Specify")
+			(function :tag "Function")
+			(const :tag "Use `org-default-notes-file'" nil))
 		(choice :tag "Destin. headline"
-		 (string :tag "Specify")
-		 (function :tag "Function")
-		 (const :tag "Use `org-remember-default-headline'" nil)
-		 (const :tag "At beginning of file" top)
-		 (const :tag "At end of file" bottom)
-		 (const :tag "In a date tree" date-tree))
+			(string :tag "Specify")
+			(function :tag "Function")
+			(const :tag "Use `org-remember-default-headline'" nil)
+			(const :tag "At beginning of file" top)
+			(const :tag "At end of file" bottom)
+			(const :tag "In a date tree" date-tree))
 		(choice :tag "Context"
-		 (const :tag "Use in all contexts" nil)
-		 (const :tag "Use in all contexts" t)
-		 (repeat :tag "Use only if in major mode"
-			 (symbol :tag "Major mode"))
-		 (function :tag "Perform a check against function")))))
+			(const :tag "Use in all contexts" nil)
+			(const :tag "Use in all contexts" t)
+			(repeat :tag "Use only if in major mode"
+				(symbol :tag "Major mode"))
+			(function :tag "Perform a check against function")))))
 
 (defcustom org-remember-delete-empty-lines-at-end t
   "Non-nil means clean up final empty lines in remember buffer."
@@ -294,7 +294,7 @@ conventions in Org-mode.  This function returns such a link."
   (org-store-link nil))
 
 (defconst org-remember-help
-"Select a destination location for the note.
+  "Select a destination location for the note.
 UP/DOWN=headline   TAB=cycle visibility  [Q]uit   RET/<left>/<right>=Store
 RET on headline   -> Store as sublevel entry to current headline
 RET at beg-of-buf -> Append to file as level 2 headline
@@ -398,8 +398,7 @@ RET at beg-of-buf -> Append to file as level 2 headline
 This function should be placed into `remember-mode-hook' and in fact requires
 to be run from that hook to function properly."
   (when (and (boundp 'initial) (stringp initial))
-    (setq initial (org-no-properties initial))
-    (remove-text-properties 0 (length initial) '(read-only t) initial))
+    (setq initial (org-no-properties initial)))
   (if org-remember-templates
       (let* ((entry (org-select-remember-template use-char))
 	     (ct (or org-overriding-default-time (org-current-time)))
@@ -446,7 +445,7 @@ to be run from that hook to function properly."
 		    v-a))
 	     (v-n user-full-name)
 	     (v-k (if (marker-buffer org-clock-marker)
-		      (org-substring-no-properties org-clock-heading)))
+		      (org-no-properties org-clock-heading)))
 	     (v-K (if (marker-buffer org-clock-marker)
 		      (org-make-link-string
 		       (buffer-file-name (marker-buffer org-clock-marker))
@@ -598,7 +597,7 @@ to be run from that hook to function properly."
 						     (car clipboards))))))
 	     ((equal char "p")
 	      (let*
-		  ((prop (org-substring-no-properties prompt))
+		  ((prop (org-no-properties prompt))
 		   (pall (concat prop "_ALL"))
 		   (allowed
 		    (with-current-buffer
@@ -994,7 +993,7 @@ See also the variable `org-reverse-note-order'."
 	    (cond
 	     ((and fastp (memq heading '(top bottom)))
 	      (setq spos org-goto-start-pos
-			  exitcmd (if (eq heading 'top) 'left nil)))
+		    exitcmd (if (eq heading 'top) 'left nil)))
 	     (fastp (setq spos org-goto-start-pos
 			  exitcmd 'return))
 	     ((eq org-remember-interactive-interface 'outline)

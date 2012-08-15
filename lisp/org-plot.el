@@ -211,7 +211,7 @@ manner suitable for prepending to a user-specified script."
 		     ('grid "splot")))
 	 (script "reset")
 					; ats = add-to-script
-	 (ats (lambda (line) (setf script (format "%s\n%s" script line)))) 
+	 (ats (lambda (line) (setf script (format "%s\n%s" script line))))
 	 plot-lines)
     (when file ;; output file
       (funcall ats (format "set term %s" (file-name-extension file)))

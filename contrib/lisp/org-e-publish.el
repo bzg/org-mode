@@ -328,8 +328,9 @@ You could use brackets to delimit on what part the link will be.
 			 (format "%s" (or pub-func ""))))
   (concat "X" (if (fboundp 'sha1) (sha1 filename) (md5 filename))))
 
-(defun org-e-publish-needed-p (filename &optional pub-dir pub-func true-pub-dir)
-  "Return t if FILENAME should be published in PUB-DIR using PUB-FUNC.
+(defun org-e-publish-needed-p
+  (filename &optional pub-dir pub-func true-pub-dir base-dir)
+  "Non-nil if FILENAME should be published in PUB-DIR using PUB-FUNC.
 TRUE-PUB-DIR is where the file will truly end up.  Currently we
 are not using this - maybe it can eventually be used to check if
 the file is present at the target location, and how old it is.
@@ -338,17 +339,18 @@ file name the file will be stored - the publishing function can
 still decide about that independently."
   (let ((rtn (if (not org-e-publish-use-timestamps-flag) t
 	       (org-e-publish-cache-file-needs-publishing
-		filename pub-dir pub-func))))
+		filename pub-dir pub-func base-dir))))
     (if rtn (message "Publishing file %s using `%s'" filename pub-func)
       (when org-e-publish-list-skipped-files
 	(message   "Skipping unmodified file %s" filename)))
     rtn))
 
-(defun org-e-publish-update-timestamp (filename &optional pub-dir pub-func)
+(defun org-e-publish-update-timestamp
+  (filename &optional pub-dir pub-func base-dir)
   "Update publishing timestamp for file FILENAME.
 If there is no timestamp, create one."
   (let ((key (org-e-publish-timestamp-filename filename pub-dir pub-func))
-	(stamp (org-e-publish-cache-ctime-of-src filename)))
+	(stamp (org-e-publish-cache-ctime-of-src filename base-dir)))
     (org-e-publish-cache-set key stamp)))
 
 (defun org-e-publish-remove-all-timestamps ()
@@ -705,15 +707,16 @@ See `org-e-publish-projects'."
     (if (listp publishing-function)
 	;; allow chain of publishing functions
 	(mapc (lambda (f)
-		(when (org-e-publish-needed-p filename pub-dir f tmp-pub-dir)
+		(when (org-e-publish-needed-p
+		       filename pub-dir f tmp-pub-dir base-dir)
 		  (funcall f project-plist filename tmp-pub-dir)
-		  (org-e-publish-update-timestamp filename pub-dir f)))
+		  (org-e-publish-update-timestamp filename pub-dir f base-dir)))
 	      publishing-function)
-      (when (org-e-publish-needed-p filename pub-dir publishing-function
-				  tmp-pub-dir)
+      (when (org-e-publish-needed-p
+	     filename pub-dir publishing-function tmp-pub-dir base-dir)
 	(funcall publishing-function project-plist filename tmp-pub-dir)
 	(org-e-publish-update-timestamp
-	 filename pub-dir publishing-function)))
+	 filename pub-dir publishing-function base-dir)))
     (unless no-cache (org-e-publish-write-cache-file))))
 
 (defun org-e-publish-projects (projects)
@@ -1070,8 +1073,7 @@ If FREE-CACHE, empty the cache."
   "Initialize the projects cache if not initialized yet and return it."
 
   (unless project-name
-    (error "%s%s" "Cannot initialize `org-e-publish-cache' without projects name"
-	   " in `org-e-publish-initialize-cache'"))
+    (error "Cannot initialize `org-e-publish-cache' without projects name in `org-e-publish-initialize-cache'"))
 
   (unless (file-exists-p org-e-publish-timestamp-directory)
     (make-directory org-e-publish-timestamp-directory t))
@@ -1105,7 +1107,7 @@ If FREE-CACHE, empty the cache."
   (setq org-e-publish-cache nil))
 
 (defun org-e-publish-cache-file-needs-publishing
-  (filename &optional pub-dir pub-func)
+  (filename &optional pub-dir pub-func base-dir)
   "Check the timestamp of the last publishing of FILENAME.
 Non-nil if the file needs publishing.  The function also checks
 if any included files have been more recently published, so that
@@ -1126,13 +1128,14 @@ the file including them will be republished as well."
 	(while (re-search-forward
 		"^#\\+INCLUDE:[ \t]+\"\\([^\t\n\r\"]*\\)\"[ \t]*.*$" nil t)
 	  (let* ((included-file (expand-file-name (match-string 1))))
-	    (add-to-list 'included-files-ctime
-			 (org-e-publish-cache-ctime-of-src included-file) t))))
+	    (add-to-list
+	     'included-files-ctime
+	     (org-e-publish-cache-ctime-of-src included-file base-dir)
+	     t))))
       ;; FIXME: don't kill current buffer.
       (unless visiting (kill-buffer buf)))
-    (if (null pstamp)
-	t
-      (let ((ctime (org-e-publish-cache-ctime-of-src filename)))
+    (if (null pstamp) t
+      (let ((ctime (org-e-publish-cache-ctime-of-src filename base-dir)))
 	(or (< pstamp ctime)
 	    (when included-files-ctime
 	      (not (null (delq nil (mapcar (lambda(ct) (< ctime ct))
@@ -1184,15 +1187,12 @@ Returns value on success, else nil."
     (error "`org-e-publish-cache-set' called, but no cache present"))
   (puthash key value org-e-publish-cache))
 
-(defun org-e-publish-cache-ctime-of-src (filename)
+(defun org-e-publish-cache-ctime-of-src (f base-dir)
   "Get the FILENAME ctime as an integer."
-  (let* ((symlink-maybe (or (file-symlink-p filename) filename))
-	 (src-attr
-	  (file-attributes
-	   (if (file-name-absolute-p symlink-maybe) symlink-maybe
-	     (expand-file-name symlink-maybe (file-name-directory filename))))))
-    (+ (lsh (car (nth 5 src-attr)) 16)
-       (cadr (nth 5 src-attr)))))
+  (let ((attr (file-attributes
+	       (expand-file-name (or (file-symlink-p f) f) base-dir))))
+    (+ (lsh (car (nth 5 attr)) 16)
+       (cadr (nth 5 attr)))))
 
 
 (provide 'org-e-publish)

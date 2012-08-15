@@ -360,7 +360,7 @@ When COMBINE is non nil, add the category to each line."
 		      (or (org-id-get) (org-id-new)))
 		categories (org-export-get-categories)
 		alarm-time (org-entry-get nil "APPT_WARNTIME")
-		alarm-time (when alarm-time (string-to-number alarm-time))
+		alarm-time (if alarm-time (string-to-number alarm-time) 0)
 		alarm ""
 		deadlinep nil scheduledp nil)
 	  (if (looking-at re2)
@@ -527,7 +527,7 @@ END:VEVENT\n"
 		    due (and (member 'todo-due org-icalendar-use-deadline)
 			     (org-entry-get nil "DEADLINE"))
 		    start (and (member 'todo-start org-icalendar-use-scheduled)
-			     (org-entry-get nil "SCHEDULED"))
+			       (org-entry-get nil "SCHEDULED"))
 		    categories (org-export-get-categories)
 		    uid (if org-icalendar-store-UID
 			    (org-id-get-create)
@@ -590,10 +590,10 @@ characters."
   (if (not s)
       nil
     (if is-body
-      (let ((re (concat "\\(" org-drawer-regexp "\\)[^\000]*?:END:.*\n?"))
-	    (re2 (concat "^[ \t]*" org-keyword-time-regexp ".*\n?")))
-	(while (string-match re s) (setq s (replace-match "" t t s)))
-	(while (string-match re2 s) (setq s (replace-match "" t t s))))
+	(let ((re (concat "\\(" org-drawer-regexp "\\)[^\000]*?:END:.*\n?"))
+	      (re2 (concat "^[ \t]*" org-keyword-time-regexp ".*\n?")))
+	  (while (string-match re s) (setq s (replace-match "" t t s)))
+	  (while (string-match re2 s) (setq s (replace-match "" t t s))))
       (setq s (replace-regexp-in-string "[[:space:]]+" " " s)))
     (let ((start 0))
       (while (string-match "\\([,;]\\)" s start)
@@ -682,7 +682,7 @@ a time), or the day by one (if it does not contain a time)."
 		    (replace-regexp-in-string "%Z"
 					      org-icalendar-timezone
 					      org-icalendar-date-time-format)
-		    ";VALUE=DATE:%Y%m%d"))
+		  ";VALUE=DATE:%Y%m%d"))
       (concat keyword (format-time-string fmt time
 					  (and (org-icalendar-use-UTC-date-timep)
 					       have-time))))))

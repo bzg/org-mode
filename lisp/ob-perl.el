@@ -47,7 +47,7 @@ This function is called by `org-babel-execute-src-block'."
          (result-type (cdr (assoc :result-type params)))
          (full-body (org-babel-expand-body:generic
 		     body params (org-babel-variable-assignments:perl params)))
-	(session (org-babel-perl-initiate-session session)))
+	 (session (org-babel-perl-initiate-session session)))
     (org-babel-reassemble-table
      (org-babel-perl-evaluate session full-body result-type)
      (org-babel-pick-name
@@ -82,7 +82,7 @@ specifying a var of the same value."
 
 (defun org-babel-perl-initiate-session (&optional session params)
   "Return nil because sessions are not supported by perl."
-nil)
+  nil)
 
 (defvar org-babel-perl-wrapper-method
   "

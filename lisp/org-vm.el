@@ -85,8 +85,8 @@
 				    (date-to-time date))))
 	     folder desc link)
         (if (vm-imap-folder-p)
-          (let ((spec (vm-imap-find-spec-for-buffer (current-buffer))))
-            (setq folder (vm-imap-folder-for-spec spec)))
+	    (let ((spec (vm-imap-find-spec-for-buffer (current-buffer))))
+	      (setq folder (vm-imap-folder-for-spec spec)))
           (progn
             (setq folder (abbreviate-file-name buffer-file-name))
             (if (and vm-folder-directory

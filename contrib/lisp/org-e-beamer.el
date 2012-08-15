@@ -379,55 +379,63 @@ used as a communication channel."
   "Format HEADLINE as a frame.
 CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
-  (concat "\\begin{frame}"
-	  ;; Overlay specification, if any. If is surrounded by square
-	  ;; brackets, consider it as a default specification.
-	  (let ((action (org-element-property :beamer-act headline)))
-	    (cond
-	     ((not action) "")
-	     ((string-match "\\`\\[.*\\]\\'" action )
-	      (org-e-beamer--normalize-argument action 'defaction))
-	     (t (org-e-beamer--normalize-argument action 'action))))
-	  ;; Options, if any.
-	  (let ((options
-		 ;; Collect options from default value and headline's
-		 ;; properties.  Also add a label for links.
-		 (append
-		  (org-split-string org-e-beamer-frame-default-options
-				    ",")
-		  (let ((opt (org-element-property :beamer-opt headline)))
-		    (and opt (org-split-string
-			      ;; Remove square brackets if user
-			      ;; provided them.
-			      (and (string-match "^\\[?\\(.*\\)\\]?$" opt)
-				   (match-string 1 opt))
-			      ",")))
-		  (list
-		   (format "label=sec-%s"
-			   (mapconcat
-			    'number-to-string
-			    (org-export-get-headline-number headline info)
-			    "-"))))))
-	    ;; Change options list into a string. FRAGILEP is non-nil
-	    ;; when HEADLINE contains an element among
-	    ;; `org-e-beamer-verbatim-elements'.
-	    (let ((fragilep (org-element-map
-			     headline org-e-beamer-verbatim-elements 'identity
-			     info 'first-match)))
+  (let ((fragilep
+	 ;; FRAGILEP is non-nil when HEADLINE contains an element
+	 ;; among `org-e-beamer-verbatim-elements'.
+	 (org-element-map headline org-e-beamer-verbatim-elements 'identity
+			  info 'first-match)))
+    (concat "\\begin{frame}"
+	    ;; Overlay specification, if any. If is surrounded by square
+	    ;; brackets, consider it as a default specification.
+	    (let ((action (org-element-property :beamer-act headline)))
+	      (cond
+	       ((not action) "")
+	       ((string-match "\\`\\[.*\\]\\'" action )
+		(org-e-beamer--normalize-argument action 'defaction))
+	       (t (org-e-beamer--normalize-argument action 'action))))
+	    ;; Options, if any.
+	    (let ((options
+		   ;; Collect options from default value and headline's
+		   ;; properties.  Also add a label for links.
+		   (append
+		    (org-split-string org-e-beamer-frame-default-options
+				      ",")
+		    (let ((opt (org-element-property :beamer-opt headline)))
+		      (and opt (org-split-string
+				;; Remove square brackets if user
+				;; provided them.
+				(and (string-match "^\\[?\\(.*\\)\\]?$" opt)
+				     (match-string 1 opt))
+				",")))
+		    (list
+		     (format "label=sec-%s"
+			     (mapconcat
+			      'number-to-string
+			      (org-export-get-headline-number headline info)
+			      "-"))))))
+	      ;; Change options list into a string.
 	      (org-e-beamer--normalize-argument
 	       (mapconcat
 		'identity
 		(if (or (not fragilep) (member "fragile" options)) options
 		  (cons "fragile" options))
 		",")
-	       'option)))
-	  ;; Title.
-	  (format "{%s}"
-		  (org-export-data (org-element-property :title headline)
-				   info))
-	  "\n"
-	  contents
-	  "\\end{frame}"))
+	       'option))
+	    ;; Title.
+	    (format "{%s}"
+		    (org-export-data (org-element-property :title headline)
+				     info))
+	    "\n"
+	    ;; The following workaround is required in fragile frames
+	    ;; as Beamer will append "\par" to the beginning of the
+	    ;; contents.  So we need to make sure the command is
+	    ;; separated from the contents by at least one space.  If
+	    ;; it isn't, it will create "\parfirst-word" command and
+	    ;; remove the first word from the contents in the PDF
+	    ;; output.
+	    (if (not fragilep) contents
+	      (replace-regexp-in-string "\\`\n*" "\\& " contents))
+	    "\\end{frame}")))
 
 (defun org-e-beamer--format-block (headline contents info)
   "Format HEADLINE as a block.

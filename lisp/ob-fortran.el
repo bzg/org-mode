@@ -72,8 +72,8 @@
 	(org-babel-pick-name
 	 (cdr (assoc :rowname-names params)) (cdr (assoc :rownames params)))))
      (org-babel-trim
-       (org-babel-eval
-	(concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))
+      (org-babel-eval
+       (concat tmp-bin-file (if cmdline (concat " " cmdline) "")) "")))))
 
 (defun org-babel-expand-body:fortran (body params)
   "Expand a block of fortran or fortran code with org-babel according to
@@ -85,42 +85,42 @@ it's header arguments."
         (defines (org-babel-read
                   (or (cdr (assoc :defines params))
                       (org-babel-read (org-entry-get nil "defines" t))))))
-     (mapconcat 'identity
-		(list
-		 ;; includes
-		 (mapconcat
-		  (lambda (inc) (format "#include %s" inc))
-		  (if (listp includes) includes (list includes)) "\n")
-		 ;; defines
-		 (mapconcat
-		  (lambda (inc) (format "#define %s" inc))
-		  (if (listp defines) defines (list defines)) "\n")
-		 ;; body
-		 (if main-p
-		     (org-babel-fortran-ensure-main-wrap
-		      (concat
-		       ;; variables
-		       (mapconcat 'org-babel-fortran-var-to-fortran vars "\n")
-		       body) params)
-		   body) "\n") "\n")))
+    (mapconcat 'identity
+	       (list
+		;; includes
+		(mapconcat
+		 (lambda (inc) (format "#include %s" inc))
+		 (if (listp includes) includes (list includes)) "\n")
+		;; defines
+		(mapconcat
+		 (lambda (inc) (format "#define %s" inc))
+		 (if (listp defines) defines (list defines)) "\n")
+		;; body
+		(if main-p
+		    (org-babel-fortran-ensure-main-wrap
+		     (concat
+		      ;; variables
+		      (mapconcat 'org-babel-fortran-var-to-fortran vars "\n")
+		      body) params)
+		  body) "\n") "\n")))
 
 (defun org-babel-fortran-ensure-main-wrap (body params)
   "Wrap body in a \"program ... end program\" block if none exists."
   (if (string-match "^[ \t]*program[ \t]*.*" (capitalize body))
-       (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
-	 (if vars (error "cannot use :vars if 'program' statement is present"))
-	 body)
+      (let ((vars (mapcar #'cdr (org-babel-get-header params :var))))
+	(if vars (error "Cannot use :vars if 'program' statement is present"))
+	body)
     (format "program main\n%s\nend program main\n" body)))
 
 (defun org-babel-prep-session:fortran (session params)
   "This function does nothing as fortran is a compiled language with no
 support for sessions"
-  (error "fortran is a compiled languages -- no support for sessions"))
+  (error "Fortran is a compiled languages -- no support for sessions"))
 
 (defun org-babel-load-session:fortran (session body params)
   "This function does nothing as fortran is a compiled language with no
 support for sessions"
-  (error "fortran is a compiled languages -- no support for sessions"))
+  (error "Fortran is a compiled languages -- no support for sessions"))
 
 ;; helper functions
 

@@ -99,8 +99,8 @@ means to use the maximum value consistent with other options."
 	   (lambda (x)
 	     (list 'cons (list 'const (car x))
 		   '(choice
-			    (symbol :tag "Publishing/Export property")
-			    (string :tag "Value"))))
+		     (symbol :tag "Publishing/Export property")
+		     (string :tag "Value"))))
 	   org-infojs-opts-table)))
 
 (defcustom org-infojs-template
@@ -127,67 +127,67 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
       exp-plist
     ;; We do want to use the script, set it up
     (let ((template org-infojs-template)
-	(ptoc (plist-get exp-plist :table-of-contents))
-	(hlevels (plist-get exp-plist :headline-levels))
-	tdepth sdepth s v e opt var val table default)
-    (setq sdepth hlevels
-	  tdepth hlevels)
-    (if (integerp ptoc) (setq tdepth (min ptoc tdepth)))
-    (setq v (plist-get exp-plist :infojs-opt)
-	  table org-infojs-opts-table)
-    (while (setq e (pop table))
-      (setq opt (car e) var (nth 1 e)
-	    default (cdr (assoc opt org-infojs-options)))
-      (and (symbolp default) (not (memq default '(t nil)))
-	   (setq default (plist-get exp-plist default)))
-      (if (and v (string-match (format " %s:\\(\\S-+\\)" opt) v))
-	  (setq val (match-string 1 v))
-	(setq val default))
-      (cond
-       ((eq opt 'path)
-	(and (string-match "%SCRIPT_PATH" template)
-	     (setq template (replace-match val t t template))))
-       ((eq opt 'sdepth)
-	(if (integerp (read val))
-	    (setq sdepth (min (read val) hlevels))))
-       ((eq opt 'tdepth)
-	(if (integerp (read val))
-	    (setq tdepth (min (read val) hlevels))))
-       (t
-	(setq val
-	      (cond
-	       ((or (eq val t) (equal val "t")) "1")
-	       ((or (eq val nil) (equal val "nil")) "0")
-	       ((stringp val) val)
-	       (t (format "%s" val))))
-	(push (cons var val) s))))
+	  (ptoc (plist-get exp-plist :table-of-contents))
+	  (hlevels (plist-get exp-plist :headline-levels))
+	  tdepth sdepth s v e opt var val table default)
+      (setq sdepth hlevels
+	    tdepth hlevels)
+      (if (integerp ptoc) (setq tdepth (min ptoc tdepth)))
+      (setq v (plist-get exp-plist :infojs-opt)
+	    table org-infojs-opts-table)
+      (while (setq e (pop table))
+	(setq opt (car e) var (nth 1 e)
+	      default (cdr (assoc opt org-infojs-options)))
+	(and (symbolp default) (not (memq default '(t nil)))
+	     (setq default (plist-get exp-plist default)))
+	(if (and v (string-match (format " %s:\\(\\S-+\\)" opt) v))
+	    (setq val (match-string 1 v))
+	  (setq val default))
+	(cond
+	 ((eq opt 'path)
+	  (and (string-match "%SCRIPT_PATH" template)
+	       (setq template (replace-match val t t template))))
+	 ((eq opt 'sdepth)
+	  (if (integerp (read val))
+	      (setq sdepth (min (read val) hlevels))))
+	 ((eq opt 'tdepth)
+	  (if (integerp (read val))
+	      (setq tdepth (min (read val) hlevels))))
+	 (t
+	  (setq val
+		(cond
+		 ((or (eq val t) (equal val "t")) "1")
+		 ((or (eq val nil) (equal val "nil")) "0")
+		 ((stringp val) val)
+		 (t (format "%s" val))))
+	  (push (cons var val) s))))
 
-    ;; Now we set the depth of the *generated* TOC to SDEPTH, because the
-    ;; toc will actually determine the splitting.  How much of the toc will
-    ;; actually be displayed is governed by the TDEPTH option.
-    (setq exp-plist (plist-put exp-plist :table-of-contents sdepth))
+      ;; Now we set the depth of the *generated* TOC to SDEPTH, because the
+      ;; toc will actually determine the splitting.  How much of the toc will
+      ;; actually be displayed is governed by the TDEPTH option.
+      (setq exp-plist (plist-put exp-plist :table-of-contents sdepth))
 
-    ;; The table of contents should not show more sections then we generate
-    (setq tdepth (min tdepth sdepth))
-    (push (cons "TOC_DEPTH" tdepth) s)
+      ;; The table of contents should not show more sections then we generate
+      (setq tdepth (min tdepth sdepth))
+      (push (cons "TOC_DEPTH" tdepth) s)
 
-    (setq s (mapconcat
-	     (lambda (x) (format "org_html_manager.set(\"%s\", \"%s\");"
-				 (car x) (cdr x)))
-	     s "\n"))
-    (when (and s (> (length s) 0))
-      (and (string-match "%MANAGER_OPTIONS" template)
-	   (setq s (replace-match s t t template))
-	   (setq exp-plist
-		 (plist-put
-		  exp-plist :style-extra
-		  (concat (or (plist-get exp-plist :style-extra) "") "\n" s)))))
-    ;; This script absolutely needs the table of contents, to we change that
-    ;; setting
-    (if (not (plist-get exp-plist :table-of-contents))
-	(setq exp-plist (plist-put exp-plist :table-of-contents t)))
-    ;; Return the modified property list
-    exp-plist)))
+      (setq s (mapconcat
+	       (lambda (x) (format "org_html_manager.set(\"%s\", \"%s\");"
+				   (car x) (cdr x)))
+	       s "\n"))
+      (when (and s (> (length s) 0))
+	(and (string-match "%MANAGER_OPTIONS" template)
+	     (setq s (replace-match s t t template))
+	     (setq exp-plist
+		   (plist-put
+		    exp-plist :style-extra
+		    (concat (or (plist-get exp-plist :style-extra) "") "\n" s)))))
+      ;; This script absolutely needs the table of contents, to we change that
+      ;; setting
+      (if (not (plist-get exp-plist :table-of-contents))
+	  (setq exp-plist (plist-put exp-plist :table-of-contents t)))
+      ;; Return the modified property list
+      exp-plist)))
 
 (defun org-infojs-options-inbuffer-template ()
   (format "#+INFOJS_OPT: view:%s toc:%s ltoc:%s mouse:%s buttons:%s path:%s"

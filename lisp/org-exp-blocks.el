@@ -199,7 +199,7 @@ which defaults to the value of `org-export-blocks-witheld'."
 		  (decf balanced)
 		(incf balanced)))
 	    (when (not (zerop balanced))
-	      (error "unbalanced begin/end_%s blocks with %S"
+	      (error "Unbalanced begin/end_%s blocks with %S"
 		     type (buffer-substring match-start (point))))
 	    (setq match-end (copy-marker (match-end 0)))
 	    (unless preserve-indent
@@ -243,14 +243,14 @@ which defaults to the value of `org-export-blocks-witheld'."
 ;;--------------------------------------------------------------------------------
 ;; ditaa: create images from ASCII art using the ditaa utility
 (defcustom org-ditaa-jar-path (expand-file-name
-			    "ditaa.jar"
-			    (file-name-as-directory
-			     (expand-file-name
-			      "scripts"
-			      (file-name-as-directory
-			       (expand-file-name
-				"../contrib"
-				(file-name-directory (org-find-library-dir "org")))))))
+			       "ditaa.jar"
+			       (file-name-as-directory
+				(expand-file-name
+				 "scripts"
+				 (file-name-as-directory
+				  (expand-file-name
+				   "../contrib"
+				   (file-name-directory (org-find-library-dir "org")))))))
   "Path to the ditaa jar executable."
   :group 'org-babel
   :type 'string)
@@ -283,29 +283,29 @@ passed to the ditaa utility as command line arguments."
 			    (org-split-string body "\n")
 			    "\n")))
     (prog1
-    (cond
-     ((member org-export-current-backend '(html latex docbook))
-      (unless (file-exists-p out-file)
-        (mapc ;; remove old hashed versions of this file
-         (lambda (file)
-           (when (and (string-match (concat (regexp-quote (car out-file-parts))
-                                            "_\\([[:alnum:]]+\\)\\."
-                                            (regexp-quote (cdr out-file-parts)))
-                                    file)
-                      (= (length (match-string 1 out-file)) 40))
-             (delete-file (expand-file-name file
-                                            (file-name-directory out-file)))))
-         (directory-files (or (file-name-directory out-file)
-                              default-directory)))
-        (with-temp-file data-file (insert body))
-        (message (concat "java -jar " org-ditaa-jar-path " " args " " data-file " " out-file))
-        (shell-command (concat "java -jar " org-ditaa-jar-path " " args " " data-file " " out-file)))
-      (format "\n[[file:%s]]\n" out-file))
-     (t (concat
-	 "\n#+BEGIN_EXAMPLE\n"
-	 body (if (string-match "\n$" body) "" "\n")
-	 "#+END_EXAMPLE\n")))
-    (message "begin_ditaa blocks are DEPRECATED, use begin_src blocks"))))
+	(cond
+	 ((member org-export-current-backend '(html latex docbook))
+	  (unless (file-exists-p out-file)
+	    (mapc ;; remove old hashed versions of this file
+	     (lambda (file)
+	       (when (and (string-match (concat (regexp-quote (car out-file-parts))
+						"_\\([[:alnum:]]+\\)\\."
+						(regexp-quote (cdr out-file-parts)))
+					file)
+			  (= (length (match-string 1 out-file)) 40))
+		 (delete-file (expand-file-name file
+						(file-name-directory out-file)))))
+	     (directory-files (or (file-name-directory out-file)
+				  default-directory)))
+	    (with-temp-file data-file (insert body))
+	    (message (concat "java -jar " org-ditaa-jar-path " " args " " data-file " " out-file))
+	    (shell-command (concat "java -jar " org-ditaa-jar-path " " args " " data-file " " out-file)))
+	  (format "\n[[file:%s]]\n" out-file))
+	 (t (concat
+	     "\n#+BEGIN_EXAMPLE\n"
+	     body (if (string-match "\n$" body) "" "\n")
+	     "#+END_EXAMPLE\n")))
+      (message "begin_ditaa blocks are DEPRECATED, use begin_src blocks"))))
 
 ;;--------------------------------------------------------------------------------
 ;; dot: create graphs using the dot graphing language
@@ -342,29 +342,29 @@ digraph data_relationships {
 			   (cons raw-out-file "png")))
 	 (out-file (concat (car out-file-parts) "_" hash "." (cdr out-file-parts))))
     (prog1
-    (cond
-     ((member org-export-current-backend '(html latex docbook))
-      (unless (file-exists-p out-file)
-	(mapc ;; remove old hashed versions of this file
-	 (lambda (file)
-	   (when (and (string-match (concat (regexp-quote (car out-file-parts))
-					    "_\\([[:alnum:]]+\\)\\."
-					    (regexp-quote (cdr out-file-parts)))
-				    file)
-		      (= (length (match-string 1 out-file)) 40))
-	     (delete-file (expand-file-name file
-					    (file-name-directory out-file)))))
-	 (directory-files (or (file-name-directory out-file)
-			      default-directory)))
-	(with-temp-file data-file (insert body))
-	(message (concat "dot " data-file " " args " -o " out-file))
-	(shell-command (concat "dot " data-file " " args " -o " out-file)))
-      (format "\n[[file:%s]]\n" out-file))
-     (t (concat
-	 "\n#+BEGIN_EXAMPLE\n"
-	 body (if (string-match "\n$" body) "" "\n")
-	 "#+END_EXAMPLE\n")))
-    (message "begin_dot blocks are DEPRECATED, use begin_src blocks"))))
+	(cond
+	 ((member org-export-current-backend '(html latex docbook))
+	  (unless (file-exists-p out-file)
+	    (mapc ;; remove old hashed versions of this file
+	     (lambda (file)
+	       (when (and (string-match (concat (regexp-quote (car out-file-parts))
+						"_\\([[:alnum:]]+\\)\\."
+						(regexp-quote (cdr out-file-parts)))
+					file)
+			  (= (length (match-string 1 out-file)) 40))
+		 (delete-file (expand-file-name file
+						(file-name-directory out-file)))))
+	     (directory-files (or (file-name-directory out-file)
+				  default-directory)))
+	    (with-temp-file data-file (insert body))
+	    (message (concat "dot " data-file " " args " -o " out-file))
+	    (shell-command (concat "dot " data-file " " args " -o " out-file)))
+	  (format "\n[[file:%s]]\n" out-file))
+	 (t (concat
+	     "\n#+BEGIN_EXAMPLE\n"
+	     body (if (string-match "\n$" body) "" "\n")
+	     "#+END_EXAMPLE\n")))
+      (message "begin_dot blocks are DEPRECATED, use begin_src blocks"))))
 
 ;;--------------------------------------------------------------------------------
 ;; comment: export comments in author-specific css-stylable divs

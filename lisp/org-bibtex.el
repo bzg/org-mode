@@ -111,6 +111,7 @@
 (require 'bibtex)
 (eval-when-compile
   (require 'cl))
+(require 'org-compat)
 
 (defvar org-bibtex-description nil) ; dynamically scoped from org.el
 (defvar org-id-locations)
@@ -184,26 +185,26 @@
   "Bibtex entry types with required and optional parameters.")
 
 (defvar org-bibtex-fields
-  '((:address      . "Usually the address of the publisher or other type of institution. For major publishing houses, van Leunen recommends omitting the information entirely.  For small publishers, on the other hand, you can help the reader by giving the complete address.")
-    (:annote       . "An annotation. It is not used by the standard bibliography styles, but may be used by others that produce an annotated bibliography.")
+  '((:address      . "Usually the address of the publisher or other type of institution.  For major publishing houses, van Leunen recommends omitting the information entirely.  For small publishers, on the other hand, you can help the reader by giving the complete address.")
+    (:annote       . "An annotation.  It is not used by the standard bibliography styles, but may be used by others that produce an annotated bibliography.")
     (:author       . "The name(s) of the author(s), in the format described in the LaTeX book.  Remember, all names are separated with the and keyword, and not commas.")
-    (:booktitle    . "Title of a book, part of which is being cited. See the LaTeX book for how to type titles. For book entries, use the title field instead.")
+    (:booktitle    . "Title of a book, part of which is being cited.  See the LaTeX book for how to type titles.  For book entries, use the title field instead.")
     (:chapter      . "A chapter (or section or whatever) number.")
     (:crossref     . "The database key of the entry being cross referenced.")
-    (:edition      . "The edition of a book for example, 'Second'. This should be an ordinal, and should have the first letter capitalized, as shown here; the standard styles convert to lower case when necessary.")
-    (:editor       . "Name(s) of editor(s), typed as indicated in the LaTeX book. If there is also an author field, then the editor field gives the editor of the book or collection in which the reference appears.")
-    (:howpublished . "How something strange has been published. The first word should be capitalized.")
+    (:edition      . "The edition of a book for example, 'Second'.  This should be an ordinal, and should have the first letter capitalized, as shown here; the standard styles convert to lower case when necessary.")
+    (:editor       . "Name(s) of editor(s), typed as indicated in the LaTeX book.  If there is also an author field, then the editor field gives the editor of the book or collection in which the reference appears.")
+    (:howpublished . "How something strange has been published.  The first word should be capitalized.")
     (:institution  . "The sponsoring institution of a technical report.")
     (:journal      . "A journal name.")
-    (:key          . "Used for alphabetizing, cross-referencing, and creating a label when the author information is missing. This field should not be confused with the key that appears in the \cite command and at the beginning of the database entry.")
-    (:month        . "The month in which the work was published or, for an unpublished work, in which it was written. You should use the standard three-letter abbreviation,")
-    (:note         . "Any additional information that can help the reader. The first word should be capitalized.")
-    (:number       . "Any additional information that can help the reader. The first word should be capitalized.")
+    (:key          . "Used for alphabetizing, cross-referencing, and creating a label when the author information is missing.  This field should not be confused with the key that appears in the \cite command and at the beginning of the database entry.")
+    (:month        . "The month in which the work was published or, for an unpublished work, in which it was written.  You should use the standard three-letter abbreviation,")
+    (:note         . "Any additional information that can help the reader.  The first word should be capitalized.")
+    (:number       . "Any additional information that can help the reader.  The first word should be capitalized.")
     (:organization . "The organization that sponsors a conference or that publishes a manual.")
     (:pages        . "One or more page numbers or range of numbers, such as 42-111 or 7,41,73-97 or 43+ (the ‘+’ in this last example indicates pages following that don’t form simple range). BibTEX requires double dashes for page ranges (--).")
     (:publisher    . "The publisher’s name.")
     (:school       . "The name of the school where a thesis was written.")
-    (:series       . "The name of a series or set of books. When citing an entire book, the the title field gives its title and an optional series field gives the name of a series or multi-volume set in which the book is published.")
+    (:series       . "The name of a series or set of books.  When citing an entire book, the the title field gives its title and an optional series field gives the name of a series or multi-volume set in which the book is published.")
     (:title        . "The work’s title, typed as explained in the LaTeX book.")
     (:type         . "The type of a technical report for example, 'Research Note'.")
     (:volume       . "The volume of a journal or multi-volume book.")
@@ -229,7 +230,7 @@ For example setting to 'BIB_' would allow interoperability with fireforg."
 (defcustom org-bibtex-treat-headline-as-title t
   "Treat headline text as title if title property is absent.
 If an entry is missing a title property, use the headline text as
-the property. If this value is t, `org-bibtex-check' will ignore
+the property.  If this value is t, `org-bibtex-check' will ignore
 a missing title field."
   :group 'org-bibtex
   :version "24.1"
@@ -247,7 +248,7 @@ not placed in the exported bibtex entry."
 (defcustom org-bibtex-key-property "CUSTOM_ID"
   "Property that holds the bibtex key.
 By default, this is CUSTOM_ID, which enables easy linking to
-bibtex headlines from within an org file. This can be set to ID
+bibtex headlines from within an org file.  This can be set to ID
 to enable global links, but only with great caution, as global
 IDs must be unique."
   :group 'org-bibtex
@@ -263,12 +264,12 @@ IDs must be unique."
 (defcustom org-bibtex-tags-are-keywords nil
   "Convert the value of the keywords field to tags and vice versa.
 If set to t, comma-separated entries in a bibtex entry's keywords
-field will be converted to org tags. Note: spaces will be escaped
+field will be converted to org tags.  Note: spaces will be escaped
 with underscores, and characters that are not permitted in org
 tags will be removed.
 
 If t, local tags in an org entry will be exported as a
-comma-separated string of keywords when exported to bibtex. Tags
+comma-separated string of keywords when exported to bibtex.  Tags
 defined in `org-bibtex-tags' or `org-bibtex-no-export-tags' will
 not be exported."
   :group 'org-bibtex
@@ -277,7 +278,7 @@ not be exported."
 
 (defcustom org-bibtex-no-export-tags nil
   "List of tag(s) that should not be converted to keywords.
-This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
+This variable is relevant only if `org-bibtex-export-tags-as-keywords' is t."
   :group 'org-bibtex
   :version "24.1"
   :type '(repeat :tag "Tag" (string)))
@@ -309,72 +310,72 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords` is t."
 
 (defun org-bibtex-headline ()
   "Return a bibtex entry of the given headline as a string."
-  (org-labels
-      ((val (key lst) (cdr (assoc key lst)))
-       (to (string) (intern (concat ":" string)))
-       (from (key) (substring (symbol-name key) 1))
-       (flatten (&rest lsts)
-		(apply #'append (mapcar
-				 (lambda (e)
-				   (if (listp e) (apply #'flatten e) (list e)))
-				 lsts))))
-    (let ((notes (buffer-string))
-          (id (org-bibtex-get org-bibtex-key-property))
-          (type (org-bibtex-get org-bibtex-type-property-name))
-	  (tags (when org-bibtex-tags-are-keywords
-		  (delq nil
-			(mapcar
-			 (lambda (tag)
-			   (unless (member tag
-					   (append org-bibtex-tags
-						   org-bibtex-no-export-tags))
-			     tag))
-			 (org-get-local-tags-at))))))
-      (when type
-        (let ((entry (format
-                      "@%s{%s,\n%s\n}\n" type id
-                      (mapconcat
-                       (lambda (pair)
-			 (format "  %s={%s}" (car pair) (cdr pair)))
-                       (remove nil
-			       (if (and org-bibtex-export-arbitrary-fields
-					org-bibtex-prefix)
-				   (mapcar
-				    (lambda (kv)
-				      (let ((key (car kv)) (val (cdr kv)))
-					(when (and
-					       (string-match org-bibtex-prefix key)
-					       (not (string=
-						     (downcase (concat org-bibtex-prefix
-								       org-bibtex-type-property-name))
-						     (downcase key))))
-					  (cons (downcase (replace-regexp-in-string
-							   org-bibtex-prefix "" key))
-						val))))
-				    (org-entry-properties nil 'standard))
+  (let* ((val (lambda (key lst) (cdr (assoc key lst))))
+	 (to (lambda (string) (intern (concat ":" string))))
+	 (from (lambda (key) (substring (symbol-name key) 1)))
+	 flatten ; silent compiler warning
+	 (flatten (lambda (&rest lsts)
+		    (apply #'append (mapcar
+				     (lambda (e)
+				       (if (listp e) (apply flatten e) (list e)))
+				     lsts))))
+	 (notes (buffer-string))
+	 (id (org-bibtex-get org-bibtex-key-property))
+	 (type (org-bibtex-get org-bibtex-type-property-name))
+	 (tags (when org-bibtex-tags-are-keywords
+		 (delq nil
+		       (mapcar
+			(lambda (tag)
+			  (unless (member tag
+					  (append org-bibtex-tags
+						  org-bibtex-no-export-tags))
+			    tag))
+			(org-get-local-tags-at))))))
+    (when type
+      (let ((entry (format
+		    "@%s{%s,\n%s\n}\n" type id
+		    (mapconcat
+		     (lambda (pair)
+		       (format "  %s={%s}" (car pair) (cdr pair)))
+		     (remove nil
+			     (if (and org-bibtex-export-arbitrary-fields
+				      org-bibtex-prefix)
 				 (mapcar
-				  (lambda (field)
-				    (let ((value (or (org-bibtex-get (from field))
-						     (and (equal :title field)
-							  (nth 4 (org-heading-components))))))
-				      (when value (cons (from field) value))))
-				  (flatten
-				   (val :required (val (to type) org-bibtex-types))
-				   (val :optional (val (to type) org-bibtex-types))))))
-                       ",\n"))))
-          (with-temp-buffer
-            (insert entry)
-	    (when tags
-	      (bibtex-beginning-of-entry)
-	      (if (re-search-forward "keywords.*=.*{\\(.*\\)}" nil t)
-	    	  (progn (goto-char (match-end 1)) (insert ", "))
-	    	(bibtex-make-field "keywords" t t))
-	      (insert (mapconcat #'identity tags ", ")))
-            (buffer-string)))))))
+				  (lambda (kv)
+				    (let ((key (car kv)) (val0 (cdr kv)))
+				      (when (and
+					     (string-match org-bibtex-prefix key)
+					     (not (string=
+						   (downcase (concat org-bibtex-prefix
+								     org-bibtex-type-property-name))
+						   (downcase key))))
+					(cons (downcase (replace-regexp-in-string
+							 org-bibtex-prefix "" key))
+					      val0))))
+				  (org-entry-properties nil 'standard))
+			       (mapcar
+				(lambda (field)
+				  (let ((value (or (org-bibtex-get (funcall from field))
+						   (and (equal :title field)
+							(nth 4 (org-heading-components))))))
+				    (when value (cons (funcall from field) value))))
+				(funcall flatten
+					 (funcall val :required (funcall val (funcall to type) org-bibtex-types))
+					 (funcall val :optional (funcall val (funcall to type) org-bibtex-types))))))
+		     ",\n"))))
+	(with-temp-buffer
+	  (insert entry)
+	  (when tags
+	    (bibtex-beginning-of-entry)
+	    (if (re-search-forward "keywords.*=.*{\\(.*\\)}" nil t)
+		(progn (goto-char (match-end 1)) (insert ", "))
+	      (bibtex-make-field "keywords" t t))
+	    (insert (mapconcat #'identity tags ", ")))
+	  (buffer-string))))))
 
 (defun org-bibtex-ask (field)
   (unless (assoc field org-bibtex-fields)
-    (error "field:%s is not known" field))
+    (error "Field:%s is not known" field))
   (save-window-excursion
     (let* ((name (substring (symbol-name field) 1))
 	   (buf-name (format "*Bibtex Help %s*" name)))
@@ -549,7 +550,7 @@ Headlines are exported using `org-bibtex-export-headline'."
 					    (error (throw 'bib (point)))))))))
        (with-temp-file filename
 	 (insert (mapconcat #'identity bibtex-entries "\n")))
-       (message "Successfully exported %d bibtex entries to %s"
+       (message "Successfully exported %d BibTeX entries to %s"
 		(length bibtex-entries) filename) nil))))
 
 (defun org-bibtex-check (&optional optional)
@@ -581,7 +582,7 @@ If nonew is t, add data to the headline of the entry at point."
 	 (type (if (keywordp type) type (intern (concat ":" type))))
 	 (org-bibtex-treat-headline-as-title (if nonew nil t)))
     (unless (assoc type org-bibtex-types)
-      (error "type:%s is not known" type))
+      (error "Type:%s is not known" type))
     (if nonew
 	(org-back-to-heading)
       (org-insert-heading)
@@ -662,7 +663,7 @@ This uses `bibtex-parse-entry'."
     (with-temp-buffer (yank 1) (setf entry (org-bibtex-read)))
     (if entry
 	(org-bibtex-write)
-      (error "yanked text does not appear to contain a bibtex entry"))))
+      (error "Yanked text does not appear to contain a BibTeX entry"))))
 
 (defun org-bibtex-export-to-kill-ring ()
   "Export current headline to kill ring as bibtex entry."

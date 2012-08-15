@@ -641,7 +641,7 @@ table.el tables."
 (defvar org-export-current-backend nil
   "During export, this will be bound to a symbol such as 'html,
   'latex, 'docbook, 'ascii, etc, indicating which of the export
-  backends is in use. Otherwise it has the value nil. Users
+  backends is in use.  Otherwise it has the value nil.  Users
   should not attempt to change the value of this variable
   directly, but it can be used in code to test whether export is
   in progress, and if so, what the backend is.")
@@ -720,7 +720,7 @@ Each element is a list of 3 items:
 2. The string that can be used in the OPTION lines to set this option,
    or nil if this option cannot be changed in this way
 3. The customization variable that sets the default for this option."
-)
+  )
 
 (defun org-default-export-plist ()
   "Return the property list with default settings for the export variables."
@@ -1202,7 +1202,7 @@ on this string to produce the exported version."
       (when (plist-get parameters :footnotes)
 	(org-footnote-normalize nil parameters))
 
-      ;; Change lists ending. Other parts of export may insert blank
+      ;; Change lists ending.  Other parts of export may insert blank
       ;; lines and lists' structure could be altered.
       (org-export-mark-list-end)
 
@@ -1424,53 +1424,53 @@ the current file."
   (goto-char (point-min))
   (while (re-search-forward org-bracket-link-regexp nil t)
     (org-if-unprotected-at (1+ (match-beginning 0))
-     (let* ((org-link-search-must-match-exact-headline t)
-	    (md (match-data))
-	    (desc (match-end 2))
-	    (link (org-link-unescape (match-string 1)))
-	    (slink (org-solidify-link-text link))
-	    found props pos cref
-	    (target
-	     (cond
-	      ((= (string-to-char link) ?#)
-	       ;; user wants exactly this link
-	       link)
-	      ((cdr (assoc slink target-alist))
-	       (or (cdr (assoc (assoc slink target-alist)
-			       org-export-preferred-target-alist))
-		   (cdr (assoc slink target-alist))))
-	      ((and (string-match "^id:" link)
-		    (cdr (assoc (substring link 3) target-alist))))
-	      ((string-match "^(\\(.*\\))$" link)
-	       (setq cref (match-string 1 link))
-	       (concat "coderef:" cref))
-	      ((string-match org-link-types-re link) nil)
-	      ((or (file-name-absolute-p link)
-		   (string-match "^\\." link))
-	       nil)
-	      (t
-	       (let ((org-link-search-inhibit-query t))
-		 (save-excursion
-		   (setq found (condition-case nil (org-link-search link)
-				 (error nil)))
-		   (when (and found
-			      (or (org-at-heading-p)
-				  (not (eq found 'dedicated))))
-		     (or (get-text-property (point) 'target)
-			 (get-text-property
-			  (max (point-min)
-			       (1- (or (previous-single-property-change
-					(point) 'target) 0)))
-			  'target)))))))))
-       (when target
-	 (set-match-data md)
-	 (goto-char (match-beginning 1))
-	 (setq props (text-properties-at (point)))
-	 (delete-region (match-beginning 1) (match-end 1))
-	 (setq pos (point))
-	 (insert target)
-	 (unless desc (insert "][" link))
-	 (add-text-properties pos (point) props))))))
+      (let* ((org-link-search-must-match-exact-headline t)
+	     (md (match-data))
+	     (desc (match-end 2))
+	     (link (org-link-unescape (match-string 1)))
+	     (slink (org-solidify-link-text link))
+	     found props pos cref
+	     (target
+	      (cond
+	       ((= (string-to-char link) ?#)
+		;; user wants exactly this link
+		link)
+	       ((cdr (assoc slink target-alist))
+		(or (cdr (assoc (assoc slink target-alist)
+				org-export-preferred-target-alist))
+		    (cdr (assoc slink target-alist))))
+	       ((and (string-match "^id:" link)
+		     (cdr (assoc (substring link 3) target-alist))))
+	       ((string-match "^(\\(.*\\))$" link)
+		(setq cref (match-string 1 link))
+		(concat "coderef:" cref))
+	       ((string-match org-link-types-re link) nil)
+	       ((or (file-name-absolute-p link)
+		    (string-match "^\\." link))
+		nil)
+	       (t
+		(let ((org-link-search-inhibit-query t))
+		  (save-excursion
+		    (setq found (condition-case nil (org-link-search link)
+				  (error nil)))
+		    (when (and found
+			       (or (org-at-heading-p)
+				   (not (eq found 'dedicated))))
+		      (or (get-text-property (point) 'target)
+			  (get-text-property
+			   (max (point-min)
+				(1- (or (previous-single-property-change
+					 (point) 'target) 0)))
+			   'target)))))))))
+	(when target
+	  (set-match-data md)
+	  (goto-char (match-beginning 1))
+	  (setq props (text-properties-at (point)))
+	  (delete-region (match-beginning 1) (match-end 1))
+	  (setq pos (point))
+	  (insert target)
+	  (unless desc (insert "][" link))
+	  (add-text-properties pos (point) props))))))
 
 (defun org-export-remember-html-container-classes ()
   "Store the HTML_CONTAINER_CLASS properties in a text property."
@@ -1550,8 +1550,8 @@ removed as well."
 					   select-tags "\\|")
 			 "\\):"))
 	 (re-excl (concat ":\\(" (mapconcat 'regexp-quote
-					   exclude-tags "\\|")
-			"\\):"))
+					    exclude-tags "\\|")
+			  "\\):"))
 	 beg end cont)
     (goto-char (point-min))
     (when (and select-tags
@@ -1612,8 +1612,8 @@ When it is a list of strings, keep only tasks with these TODO keywords."
 						    org-todo-keywords-1))))
 		       "\\|")
 		      "\\)\\($\\|[ \t]\\)"))
-	(case-fold-search nil)
-	beg)
+	  (case-fold-search nil)
+	  beg)
       (goto-char (point-min))
       (while (re-search-forward re nil t)
 	(org-if-unprotected
@@ -1759,7 +1759,7 @@ from the buffer."
 	    (add-text-properties
 	     (point-at-bol) (min (1+ (point-at-eol)) (point-max))
 	     `(org-protected t original-indentation ,ind org-native-text t)))))
-      ;; Delete #+ATTR_BACKEND: stuff of another backend. Those
+      ;; Delete #+ATTR_BACKEND: stuff of another backend.  Those
       ;; matching the current backend will be taken care of by
       ;; `org-export-attach-captions-and-attributes'
       (goto-char (point-min))
@@ -1837,9 +1837,9 @@ These special cookies will later be interpreted by the backend."
 	       (replace-match ""))
 	     (unless (bolp) (insert "\n"))
 	     ;; As org-list-end is inserted at column 0, it would end
-	     ;; by indentation any list. It can be problematic when
+	     ;; by indentation any list.  It can be problematic when
 	     ;; there are lists within lists: the inner list end would
-	     ;; also become the outer list end. To avoid this, text
+	     ;; also become the outer list end.  To avoid this, text
 	     ;; property `original-indentation' is added, as
 	     ;; `org-list-struct' pays attention to it when reading a
 	     ;; list.
@@ -1856,7 +1856,7 @@ These special properties will later be interpreted by the backend."
 	  ;; Mark a list with 3 properties: `list-item' which is
 	  ;; position at beginning of line, `list-struct' which is
 	  ;; list structure, and `list-prevs' which is the alist of
-	  ;; item and its predecessor. Leave point at list ending.
+	  ;; item and its predecessor.  Leave point at list ending.
 	  (lambda (ctxt)
 	    (let* ((struct (org-list-struct))
 		   (top (org-list-get-top-point struct))
@@ -1884,9 +1884,9 @@ These special properties will later be interpreted by the backend."
 					    'list-struct struct
 					    'list-prevs prevs)))
 	       poi)
-	      ;; Take care of bottom point. As babel may have inserted
+	      ;; Take care of bottom point.  As babel may have inserted
 	      ;; a new list in buffer, list ending isn't always
-	      ;; marked. Now mark every list ending and add properties
+	      ;; marked.  Now mark every list ending and add properties
 	      ;; useful to line processing exporters.
 	      (goto-char bottom)
 	      (when (or (looking-at "^ORG-LIST-END-MARKER\n")
@@ -1896,8 +1896,8 @@ These special properties will later be interpreted by the backend."
 	      (unless (bolp) (insert "\n"))
 	      (insert
 	       (org-add-props "ORG-LIST-END-MARKER\n" (list 'list-item bottom
-						     'list-struct struct
-						     'list-prevs prevs)))
+							    'list-struct struct
+							    'list-prevs prevs)))
 	      ;; Following property is used by LaTeX exporter.
 	      (add-text-properties top (point) (list 'list-context ctxt)))))))
     ;; Mark lists except for backends not interpreting them.
@@ -2165,8 +2165,8 @@ can work correctly."
   (goto-char (point-min))
   (while (re-search-forward "\\(\\(\\[\\|\\]\\)\\[[^]]*?\\)[ \t]*\n[ \t]*\\([^]]*\\]\\(\\[\\|\\]\\)\\)" nil t)
     (org-if-unprotected-at (match-beginning 1)
-     (replace-match "\\1 \\3")
-     (goto-char (match-beginning 0)))))
+      (replace-match "\\1 \\3")
+      (goto-char (match-beginning 0)))))
 
 (defun org-export-concatenate-multiline-emphasis ()
   "Find multi-line emphasis and put it all into a single line.
@@ -2391,7 +2391,7 @@ TYPE must be a string, any of:
 				       (if (stringp val) val (format "%s" val))
 				       "\n")
 				      (concat "\n" ind-str)))))
-	  ;; Eventually do the replacement, if VAL isn't nil. Move
+	  ;; Eventually do the replacement, if VAL isn't nil.  Move
 	  ;; point at beginning of macro for recursive expansions.
 	  (when val
 	    (replace-match val t t)
@@ -2508,7 +2508,7 @@ include only those lines."
 			  0)))
 	(dotimes (level (- (+ parentlevel addlevel) inclevel))
 	  (org-map-region 'org-demote (point-min) (point-max)))))
-      (buffer-string)))
+    (buffer-string)))
 
 (defun org-get-and-remove-property (listvar prop)
   "Check if the value of LISTVAR contains PROP as a property.
@@ -2593,10 +2593,10 @@ in the list) and remove property and value from the list in LISTVAR."
 The CODE is marked up in `org-export-current-backend' format.
 
 Check if a function by name
-\"org-<backend>-format-source-code-or-example\" is bound. If yes,
-use it as the custom formatter. Otherwise, use the default
-formatter. Default formatters are provided for docbook, html,
-latex and ascii backends. For example, use
+\"org-<backend>-format-source-code-or-example\" is bound.  If yes,
+use it as the custom formatter.  Otherwise, use the default
+formatter.  Default formatters are provided for docbook, html,
+latex and ascii backends.  For example, use
 `org-html-format-source-code-or-example' to provide a custom
 formatter for export to \"html\".
 
@@ -2817,7 +2817,7 @@ backend-specific lines pre-pended or appended to the original
 source block.
 
 NUMBER is non-nil if the literal example specifies \"+n\" or
-\"-n\" switch. If NUMBER is non-nil add line numbers.
+\"-n\" switch.  If NUMBER is non-nil add line numbers.
 
 CONT is non-nil if the literal example specifies \"+n\" switch.
 If CONT is nil, start numbering this block from 1.  Otherwise
@@ -2867,7 +2867,7 @@ block numbering.  When non-nil do the following:
 	   (fm
 	    (cond
 	     ((eq org-export-current-backend 'html) (format "<span class=\"linenr\">%s</span>"
-					 fmt))
+							    fmt))
 	     ((eq org-export-current-backend 'ascii) fmt)
 	     ((eq org-export-current-backend 'latex) fmt)
 	     ((eq org-export-current-backend 'docbook) fmt)
@@ -2945,7 +2945,7 @@ block numbering.  When non-nil do the following:
 	      (setq lv (- (match-end 1) (match-beginning 1))
 		    todo (and (match-beginning 2)
 			      (not (member (match-string 2 line)
-					  org-done-keywords))))
+					   org-done-keywords))))
 					; TODO, not DONE
 	      (if (<= lv level) (throw 'exit nil))
 	      (if todo (throw 'exit t))))))))

@@ -34,9 +34,9 @@
 (require 'org)
 
 (defgroup org-wl nil
- "Options concerning the Wanderlust link."
- :tag "Org Startup"
- :group 'org-link)
+  "Options concerning the Wanderlust link."
+  :tag "Org Startup"
+  :group 'org-link)
 
 (defcustom org-wl-link-to-refile-destination t
   "Create a link to the refile destination if the message is marked as refile."
@@ -309,7 +309,7 @@ for namazu index."
 						     article))
 	    (or (wl-summary-jump-to-msg (string-to-number article))
 		(error "No such message: %s" article)))
-	     (wl-summary-redisplay))))))
+	  (wl-summary-redisplay))))))
 
 (provide 'org-wl)
 

@@ -82,7 +82,7 @@ nil          current timer is not displayed"
   "Hook run before relative timer is paused.")
 
 (defvar org-timer-continue-hook nil
- "Hook run after relative timer is continued.")
+  "Hook run after relative timer is continued.")
 
 (defvar org-timer-set-hook nil
   "Hook run after countdown timer is set.")
@@ -199,7 +199,7 @@ it in the buffer."
 (defun org-timer-change-times-in-region (beg end delta)
   "Change all h:mm:ss time in region by a DELTA."
   (interactive
-   "r\nsEnter time difference like \"-1:08:26\". Default is first time to zero: ")
+   "r\nsEnter time difference like \"-1:08:26\".  Default is first time to zero: ")
   (let ((re "[-+]?[0-9]+:[0-9]\\{2\\}:[0-9]\\{2\\}") p)
     (unless (string-match "\\S-" delta)
       (save-excursion
@@ -295,7 +295,7 @@ VALUE can be `on', `off', or `pause'."
 	(setq global-mode-string
 	      (append global-mode-string '(org-timer-mode-line-string)))))
   (when (or (eq org-timer-display 'frame-title)
-	     (eq org-timer-display 'both))
+	    (eq org-timer-display 'both))
     (or (memq 'org-timer-mode-line-string frame-title-format)
 	(setq frame-title-format
 	      (append frame-title-format '(org-timer-mode-line-string)))))
@@ -314,17 +314,17 @@ VALUE can be `on', `off', or `pause'."
       (cancel-timer org-timer-mode-line-timer)
       (setq org-timer-mode-line-timer nil)))
    ((equal value 'on)
-  (when (or (eq org-timer-display 'mode-line)
-	    (eq org-timer-display 'both))
-    (or global-mode-string (setq global-mode-string '("")))
-    (or (memq 'org-timer-mode-line-string global-mode-string)
-	(setq global-mode-string
-	      (append global-mode-string '(org-timer-mode-line-string)))))
-  (when (or (eq org-timer-display 'frame-title)
-	    (eq org-timer-display 'both))
-    (or (memq 'org-timer-mode-line-string frame-title-format)
-	(setq frame-title-format
-	      (append frame-title-format '(org-timer-mode-line-string)))))
+    (when (or (eq org-timer-display 'mode-line)
+	      (eq org-timer-display 'both))
+      (or global-mode-string (setq global-mode-string '("")))
+      (or (memq 'org-timer-mode-line-string global-mode-string)
+	  (setq global-mode-string
+		(append global-mode-string '(org-timer-mode-line-string)))))
+    (when (or (eq org-timer-display 'frame-title)
+	      (eq org-timer-display 'both))
+      (or (memq 'org-timer-mode-line-string frame-title-format)
+	  (setq frame-title-format
+		(append frame-title-format '(org-timer-mode-line-string)))))
     (org-timer-update-mode-line)
     (when org-timer-mode-line-timer
       (cancel-timer org-timer-mode-line-timer)
@@ -394,48 +394,48 @@ replace any running timer."
 			  (number-to-string org-timer-default-timer))))))
     (if (not (string-match "[0-9]+" minutes))
 	(org-timer-show-remaining-time)
-    (let* ((mins (string-to-number (match-string 0 minutes)))
-	   (secs (* mins 60))
-	   (hl (cond
-		((string-match "Org Agenda" (buffer-name))
-		 (let* ((marker (or (get-text-property (point) 'org-marker)
-				    (org-agenda-error)))
-			(hdmarker (or (get-text-property (point) 'org-hd-marker)
-				      marker))
-			(pos (marker-position marker)))
-		   (with-current-buffer (marker-buffer marker)
-		     (widen)
-		     (goto-char pos)
-		     (org-show-entry)
-		     (or (ignore-errors (org-get-heading))
-			 (concat "File:" (file-name-nondirectory (buffer-file-name)))))))
-		((derived-mode-p 'org-mode)
-		 (or (ignore-errors (org-get-heading))
-		     (concat "File:" (file-name-nondirectory (buffer-file-name)))))
-		(t (error "Not in an Org buffer"))))
-	   timer-set)
-      (if (or (and org-timer-current-timer
-		   (or (equal opt '(16))
-		       (y-or-n-p "Replace current timer? ")))
-	      (not org-timer-current-timer))
-	  (progn
-	    (require 'org-clock)
-	    (when org-timer-current-timer
-	      (cancel-timer org-timer-current-timer))
-	    (setq org-timer-current-timer
-		  (run-with-timer
-		   secs nil `(lambda ()
-			       (setq org-timer-current-timer nil)
-			       (org-notify ,(format "%s: time out" hl) t)
-			       (setq org-timer-timer-is-countdown nil)
-			       (org-timer-set-mode-line 'off)
-			       (run-hooks 'org-timer-done-hook))))
-	    (run-hooks 'org-timer-set-hook)
-	    (setq org-timer-timer-is-countdown t
-		  org-timer-start-time
-		  (time-add (current-time) (seconds-to-time (* mins 60))))
-	    (org-timer-set-mode-line 'on))
-	(message "No timer set"))))))
+      (let* ((mins (string-to-number (match-string 0 minutes)))
+	     (secs (* mins 60))
+	     (hl (cond
+		  ((string-match "Org Agenda" (buffer-name))
+		   (let* ((marker (or (get-text-property (point) 'org-marker)
+				      (org-agenda-error)))
+			  (hdmarker (or (get-text-property (point) 'org-hd-marker)
+					marker))
+			  (pos (marker-position marker)))
+		     (with-current-buffer (marker-buffer marker)
+		       (widen)
+		       (goto-char pos)
+		       (org-show-entry)
+		       (or (ignore-errors (org-get-heading))
+			   (concat "File:" (file-name-nondirectory (buffer-file-name)))))))
+		  ((derived-mode-p 'org-mode)
+		   (or (ignore-errors (org-get-heading))
+		       (concat "File:" (file-name-nondirectory (buffer-file-name)))))
+		  (t (error "Not in an Org buffer"))))
+	     timer-set)
+	(if (or (and org-timer-current-timer
+		     (or (equal opt '(16))
+			 (y-or-n-p "Replace current timer? ")))
+		(not org-timer-current-timer))
+	    (progn
+	      (require 'org-clock)
+	      (when org-timer-current-timer
+		(cancel-timer org-timer-current-timer))
+	      (setq org-timer-current-timer
+		    (run-with-timer
+		     secs nil `(lambda ()
+				 (setq org-timer-current-timer nil)
+				 (org-notify ,(format "%s: time out" hl) t)
+				 (setq org-timer-timer-is-countdown nil)
+				 (org-timer-set-mode-line 'off)
+				 (run-hooks 'org-timer-done-hook))))
+	      (run-hooks 'org-timer-set-hook)
+	      (setq org-timer-timer-is-countdown t
+		    org-timer-start-time
+		    (time-add (current-time) (seconds-to-time (* mins 60))))
+	      (org-timer-set-mode-line 'on))
+	  (message "No timer set"))))))
 
 (provide 'org-timer)
 

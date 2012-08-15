@@ -2270,6 +2270,22 @@ Paragraph \\alpha."
        (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph\n#+END_CENTER"
 	 (progn (forward-line 2)
 		(org-element-type (org-element-at-point))))))
+  ;; Special case: at a blank line between two items, be sure to
+  ;; return item above instead of the last element of its contents.
+  (should
+   (eq 'item
+       (org-test-with-temp-text "- Para1\n\n- Para2"
+	 (progn (forward-line)
+		(org-element-type
+		 (let ((org-empty-line-terminates-plain-lists nil))
+		   (org-element-at-point)))))))
+  ;; Special case: at the last blank line in a plain list, return it
+  ;; instead of the last item.
+  (should
+   (eq 'plain-list
+       (org-test-with-temp-text "- Para1\n- Para2\n\nPara3"
+	 (progn (forward-line 2)
+		(org-element-type (org-element-at-point))))))
   ;; With an optional argument, return trail.
   (should
    (equal '(paragraph center-block)

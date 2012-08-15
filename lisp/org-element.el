@@ -123,23 +123,36 @@
 ;; process.
 
 (defconst org-element-paragraph-separate
-  (concat "^[ \t]*$" "\\|"
-	  ;; Headlines and inlinetasks.
-	  org-outline-regexp-bol "\\|"
-	  ;; Comments, blocks (any type), keywords and babel calls.
-	  "^[ \t]*#\\+" "\\|" "^#\\(?: \\|$\\)" "\\|"
-	  ;; Lists.
-	  (org-item-beginning-re) "\\|"
-	  ;; Fixed-width, drawers (any type) and tables.
-	  "^[ \t]*[:|]" "\\|"
-	  ;; Footnote definitions.
-	  org-footnote-definition-re "\\|"
-	  ;; Horizontal rules.
-	  "^[ \t]*-\\{5,\\}[ \t]*$" "\\|"
-	  ;; LaTeX environments.
-	  "^[ \t]*\\\\\\(begin\\|end\\)" "\\|"
-	  ;; Planning and Clock lines.
-	  org-planning-or-clock-line-re)
+  (concat "^\\(?:"
+          ;; Headlines, inlinetasks.
+          org-outline-regexp "\\|"
+          ;; Footnote definitions.
+	  "\\[\\(?:[0-9]+\\|fn:[-_[:word:]]+\\)\\]" "\\|"
+          "[ \t]*\\(?:"
+          ;; Empty lines.
+          "$" "\\|"
+          ;; Comments, blocks (any type), keywords, Babel calls,
+	  ;; drawers (any type) and tables.
+          "[|#]" "\\|"
+          ;; Fixed width areas.
+          ":\\(?:[ \t]\\|$\\)" "\\|"
+          ;; Horizontal rules.
+          "-\\{5,\\}[ \t]*$" "\\|"
+          ;; LaTeX environments.
+          "\\\\\\(begin\\|end\\)" "\\|"
+          ;; Planning and Clock lines.
+          (regexp-opt (list org-scheduled-string
+                            org-deadline-string
+                            org-closed-string
+                            org-clock-string))
+          "\\|"
+          ;; Lists.
+          (let ((term (case org-plain-list-ordered-item-terminator
+                        (t "[.)]") (?\) ")") (?. "\\.") (otherwise "[.)]")))
+                (alpha (and org-alphabetical-lists "\\|[A-Za-z]")))
+            (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
+                    "\\(?:[ \t]\\|$\\)"))
+          "\\)\\)")
   "Regexp to separate paragraphs in an Org buffer.")
 
 (defconst org-element-all-elements
@@ -2139,7 +2152,7 @@ CONTENTS is verse block contents."
 ;;
 ;; Unlike to elements, interstices can be found between objects.
 ;; That's why, along with the parser, successor functions are provided
-;; for each object. Some objects share the same successor (i.e. `code'
+;; for each object.  Some objects share the same successor (i.e. `code'
 ;; and `verbatim' objects).
 ;;
 ;; A successor must accept a single argument bounding the search.  It
@@ -2194,8 +2207,6 @@ CONTENTS is the contents of the object."
 
 (defun org-element-text-markup-successor (limit)
   "Search for the next text-markup object.
-
-LIMIT bounds the search.
 
 LIMIT bounds the search.
 
@@ -2848,8 +2859,8 @@ LIMIT bounds the search.
 Return value is a cons cell whose CAR is `radio-target' and CDR
 is beginning position."
   (save-excursion
-     (when (re-search-forward org-radio-target-regexp limit t)
-       (cons 'radio-target (match-beginning 0)))))
+    (when (re-search-forward org-radio-target-regexp limit t)
+      (cons 'radio-target (match-beginning 0)))))
 
 
 ;;;; Statistics Cookie
@@ -3081,8 +3092,8 @@ LIMIT bounds the search.
 Return value is a cons cell whose CAR is `target' and CDR is
 beginning position."
   (save-excursion
-     (when (re-search-forward org-target-regexp limit t)
-       (cons 'target (match-beginning 0)))))
+    (when (re-search-forward org-target-regexp limit t)
+      (cons 'target (match-beginning 0)))))
 
 
 ;;;; Timestamp
@@ -3800,7 +3811,7 @@ OBJECTS is the previous candidates alist."
 DATA is a parse tree, an element, an object or a secondary string
 to interpret.
 
-Optional argument PARENT is used for recursive calls. It contains
+Optional argument PARENT is used for recursive calls.  It contains
 the element or object containing data, or nil.
 
 Return Org syntax as a string."
@@ -4103,8 +4114,9 @@ first element of current section."
 		       ;; return that element instead.
 		       (and (= cend origin)
 			    (memq type
-				  '(center-block drawer dynamic-block inlinetask
-						 quote-block special-block))))
+				  '(center-block
+				    drawer dynamic-block inlinetask item
+				    plain-list quote-block special-block))))
 		   (throw 'exit (if keep-trail trail element))
 		 (setq parent element)
 		 (case type
@@ -4253,21 +4265,19 @@ end of ELEM-A."
 	(org-indent-to-column ind-B))
       (insert body-A)
       ;; Restore ex ELEM-A overlays.
-      (mapc (lambda (ov)
-	      (move-overlay
-	       (car ov)
-	       (+ (nth 1 ov) (- beg-B beg-A))
-	       (+ (nth 2 ov) (- beg-B beg-A))))
-	    (car overlays))
-      (goto-char beg-A)
-      (delete-region beg-A end-A)
-      (insert body-B)
-      ;; Restore ex ELEM-B overlays.
-      (mapc (lambda (ov)
-	      (move-overlay (car ov)
-			    (+ (nth 1 ov) (- beg-A beg-B))
-			    (+ (nth 2 ov) (- beg-A beg-B))))
-	    (cdr overlays))
+      (let ((offset (- beg-B beg-A)))
+	(mapc (lambda (ov)
+		(move-overlay
+		 (car ov) (+ (nth 1 ov) offset) (+ (nth 2 ov) offset)))
+	      (car overlays))
+	(goto-char beg-A)
+	(delete-region beg-A end-A)
+	(insert body-B)
+	;; Restore ex ELEM-B overlays.
+	(mapc (lambda (ov)
+		(move-overlay
+		 (car ov) (- (nth 1 ov) offset) (- (nth 2 ov) offset)))
+	      (cdr overlays)))
       (goto-char (org-element-property :end elem-B)))))
 
 

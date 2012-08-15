@@ -51,7 +51,7 @@ executed inside the protection of `save-excursion' and
   `(save-excursion
      (save-match-data
        (unless (org-babel-comint-buffer-livep ,buffer)
-         (error "buffer %s doesn't exist or has no process" ,buffer))
+         (error "Buffer %s does not exist or has no process" ,buffer))
        (set-buffer ,buffer)
        ,@body)))
 (def-edebug-spec org-babel-comint-in-buffer (form body))
@@ -144,10 +144,10 @@ statement (not large blocks of code)."
 (defun org-babel-comint-eval-invisibly-and-wait-for-file
   (buffer file string &optional period)
   "Evaluate STRING in BUFFER invisibly.
-Don't return until FILE exists. Code in STRING must ensure that
+Don't return until FILE exists.  Code in STRING must ensure that
 FILE exists at end of evaluation."
   (unless (org-babel-comint-buffer-livep buffer)
-    (error "buffer %s doesn't exist or has no process" buffer))
+    (error "Buffer %s does not exist or has no process" buffer))
   (if (file-exists-p file) (delete-file file))
   (process-send-string
    (get-buffer-process buffer)
@@ -156,7 +156,7 @@ FILE exists at end of evaluation."
   (if (file-remote-p default-directory)
       (let (v)
 	(with-parsed-tramp-file-name default-directory nil
-	  (tramp-flush-directory-property v ""))))
+				     (tramp-flush-directory-property v ""))))
   (while (not (file-exists-p file)) (sit-for (or period 0.25))))
 
 (provide 'ob-comint)

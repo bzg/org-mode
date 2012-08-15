@@ -156,7 +156,7 @@ This function exports the source code using
 		 (> (funcall age file) (funcall age exported-file)))
       (org-babel-tangle-file file exported-file "emacs-lisp"))
     (load-file exported-file)
-    (message "loaded %s" exported-file)))
+    (message "Loaded %s" exported-file)))
 
 ;;;###autoload
 (defun org-babel-tangle-file (file &optional target-file lang)
@@ -268,7 +268,7 @@ exported source code blocks by language."
 		      (add-to-list 'path-collector file-name)))))
 	      specs)))
 	 (org-babel-tangle-collect-blocks lang))
-	(message "tangled %d code block%s from %s" block-counter
+	(message "Tangled %d code block%s from %s" block-counter
 		 (if (= block-counter 1) "" "s")
 		 (file-name-nondirectory
 		  (buffer-file-name (or (buffer-base-buffer) (current-buffer)))))
@@ -374,7 +374,7 @@ code blocks by language."
 		   (link ((lambda (link)
 			    (and (string-match org-bracket-link-regexp link)
 				 (match-string 1 link)))
-			  (org-babel-clean-text-properties
+			  (org-no-properties
 			   (org-store-link nil))))
 		   (source-name
 		    (intern (or (nth 4 info)
@@ -441,7 +441,7 @@ code blocks by language."
   (let* ((start-line (org-babel-where-is-src-block-head))
 	 (file (buffer-file-name))
 	 (link (org-link-escape (progn (call-interactively 'org-store-link)
-				       (org-babel-clean-text-properties
+				       (org-no-properties
 					(car (pop org-stored-links))))))
 	 (source-name (nth 4 (or info (org-babel-get-src-block-info 'light))))
 	 (link-data (mapcar (lambda (el)
@@ -474,7 +474,7 @@ which enable the original code blocks to be found."
 	      (org-babel-update-block-body new-body)))
           (setq counter (+ 1 counter)))
         (goto-char end))
-      (prog1 counter (message "detangled %d code blocks" counter)))))
+      (prog1 counter (message "Detangled %d code blocks" counter)))))
 
 (defun org-babel-tangle-jump-to-org ()
   "Jump from a tangled code file to the related Org-mode file."
@@ -497,7 +497,7 @@ which enable the original code blocks to be found."
 				       " ends here") nil t)
 			      (setq end (point-at-bol))))))))
 	(unless (and start (< start mid) (< mid end))
-	  (error "not in tangled code"))
+	  (error "Not in tangled code"))
         (setq body (org-babel-trim (buffer-substring start end))))
       (when (string-match "::" path)
         (setq path (substring path 0 (match-beginning 0))))

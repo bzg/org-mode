@@ -388,8 +388,8 @@ determines if it is a foreground or a background color."
 	  (cons
 	   (string :tag "Keyword")
 	   (choice :tag "Face   "
-	    (string :tag "Color")
-	    (sexp :tag "Face")))))
+		   (string :tag "Color")
+		   (sexp :tag "Face")))))
 
 (defcustom org-priority-faces nil
   "Faces for specific Priorities.
@@ -405,8 +405,8 @@ determines if it is a foreground or a background color."
 	  (cons
 	   (character :tag "Priority")
 	   (choice    :tag "Face    "
-	    (string :tag "Color")
-	    (sexp :tag "Face")))))
+		      (string :tag "Color")
+		      (sexp :tag "Face")))))
 
 (defvar org-tags-special-faces-re nil)
 (defun org-set-tag-faces (var value)
@@ -446,8 +446,8 @@ changes."
 	  (cons
 	   (string :tag "Tag ")
 	   (choice :tag "Face"
-	    (string :tag "Foreground color")
-	    (sexp :tag "Face")))))
+		   (string :tag "Foreground color")
+		   (sexp :tag "Face")))))
 
 (defface org-table ;; originally copied from font-lock-function-name-face
   (org-compatible-face nil
@@ -556,9 +556,9 @@ follows a #+DATE:, #+AUTHOR: or #+EMAIL: keyword."
   :version "22.1")
 
 (org-copy-face 'org-block 'org-quote
-   "Face for #+BEGIN_QUOTE ... #+END_QUOTE blocks.")
+  "Face for #+BEGIN_QUOTE ... #+END_QUOTE blocks.")
 (org-copy-face 'org-block 'org-verse
-   "Face for #+BEGIN_VERSE ... #+END_VERSE blocks.")
+  "Face for #+BEGIN_VERSE ... #+END_VERSE blocks.")
 
 (defcustom org-fontify-quote-and-verse-blocks nil
   "Non-nil means, add a special face to #+begin_quote and #+begin_verse block.
@@ -581,8 +581,8 @@ content of these blocks will still be treated as Org syntax."
       (((class color) (min-colors 8))
        (:background "cyan" :foreground "black"))
       (t (:inverse-video t))))
-    "Basic face for displaying the secondary selection."
-    :group 'org-faces)
+  "Basic face for displaying the secondary selection."
+  :group 'org-faces)
 
 (defface org-agenda-structure ;; originally copied from font-lock-function-name-face
   (org-compatible-face nil
@@ -609,7 +609,7 @@ content of these blocks will still be treated as Org syntax."
   "Face used in agenda for weekend days.
 See the variable `org-agenda-weekend-days' for a definition of which days
 belong to the weekend."
-	       :weight 'bold)
+  :weight 'bold)
 
 (defface org-scheduled
   (org-compatible-face nil
@@ -734,8 +734,8 @@ month and 365.24 days for a year)."
 
 (defconst org-level-faces
   '(org-level-1 org-level-2 org-level-3 org-level-4
-    org-level-5 org-level-6 org-level-7 org-level-8
-    ))
+		org-level-5 org-level-6 org-level-7 org-level-8
+		))
 
 (defcustom org-n-level-faces (length org-level-faces)
   "The number of different faces to be used for headlines.
@@ -745,14 +745,14 @@ If it is less than 8, the level-1 face gets re-used for level N+1 etc."
   :group 'org-faces)
 
 (defcustom org-cycle-level-faces t
- "Non-nil means level styles cycle after level `org-n-level-faces'.
+  "Non-nil means level styles cycle after level `org-n-level-faces'.
 Then so level org-n-level-faces+1 is styled like level 1.
 If nil, then all levels >=org-n-level-faces are styled like
 level org-n-level-faces"
- :group 'org-appearance
- :group 'org-faces
- :version "24.1"
- :type 'boolean)
+  :group 'org-appearance
+  :group 'org-faces
+  :version "24.1"
+  :type 'boolean)
 
 (defface org-latex-and-export-specials
   (let ((font (cond ((assq :inherit custom-face-attributes)

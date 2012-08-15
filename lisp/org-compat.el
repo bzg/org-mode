@@ -111,15 +111,6 @@ any other entries, and any resulting duplicates will be removed entirely."
       t)))
 
 
-;;; cl macros no longer available in the trunk
-(defalias 'org-flet (if (org-version-check "24.1.50" "cl" :predicate)
-			'cl-flet*
-		      'flet))
-
-(defalias 'org-labels (if (org-version-check "24.1.50" "cl" :predicate)
-			  'cl-labels
-			'labels))
-
 ;;;; Emacs/XEmacs compatibility
 
 ;; Keys
@@ -335,11 +326,6 @@ Works on both Emacs and XEmacs."
 	string)
     (apply 'propertize string properties)))
 
-(defun org-substring-no-properties (string &optional from to)
-  (if (featurep 'xemacs)
-      (org-no-properties (substring string (or from 0) to))
-    (substring-no-properties string from to)))
-
 (defmacro org-find-library-dir (library)
   `(file-name-directory (locate-library ,library)))
 
@@ -398,7 +384,7 @@ TIME defaults to the current time."
     (save-match-data
       (apply 'looking-at args))))
 
-; XEmacs does not have `looking-back'.
+					; XEmacs does not have `looking-back'.
 (if (fboundp 'looking-back)
     (defalias 'org-looking-back 'looking-back)
   (defun org-looking-back (regexp &optional limit greedy)

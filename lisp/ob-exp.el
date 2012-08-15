@@ -194,7 +194,7 @@ this template."
 				      org-babel-default-lob-header-args
 				      (org-babel-params-from-properties)
 				      (org-babel-parse-header-arguments
-				       (org-babel-clean-text-properties
+				       (org-no-properties
 					(concat ":var results="
 						(mapconcat #'identity
 							   (butlast lob-info)

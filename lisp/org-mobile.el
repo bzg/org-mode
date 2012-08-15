@@ -406,7 +406,7 @@ agenda view showing the flagged items."
       (error "Cannot write to encryption tempfile %s"
 	     org-mobile-encryption-tempfile))
     (unless (executable-find "openssl")
-      (error "openssl is needed to encrypt files"))))
+      (error "OpenSSL is needed to encrypt files"))))
 
 (defun org-mobile-create-index-file ()
   "Write the index file in the WebDAV directory."
@@ -593,7 +593,7 @@ The table of checksums is written to the file mobile-checksums."
 	  (setq settings
 		(cons (list 'org-agenda-title-append
 			    (concat "<after>KEYS=" gkey "#" (number-to-string
-						      (setq cnt (1+ cnt)))
+							     (setq cnt (1+ cnt)))
 				    " TITLE: " gdesc " " match "</after>"))
 		      settings))
 	  (push (list type match settings) new)))))
@@ -829,90 +829,90 @@ If BEG and END are given, only do this in that region."
     (while (re-search-forward
 	    "^\\*+[ \t]+F(\\([^():\n]*\\)\\(:\\([^()\n]*\\)\\)?)[ \t]+\\[\\[\\(\\(id\\|olp\\):\\([^]\n]+\\)\\)" end t)
       (catch 'next
-	  (let* ((action (match-string 1))
-		 (data (and (match-end 3) (match-string 3)))
-		 (id-pos (condition-case msg
-			     (org-mobile-locate-entry (match-string 4))
-			   (error (nth 1 msg))))
-		 (bos (point-at-bol))
-		 (eos (save-excursion (org-end-of-subtree t t)))
-		 (cmd (if (equal action "")
-			  '(progn
-			     (incf cnt-flag)
-			     (org-toggle-tag "FLAGGED" 'on)
-			     (and note
-				  (org-entry-put nil "THEFLAGGINGNOTE" note)))
-			(incf cnt-edit)
-			(cdr (assoc action org-mobile-action-alist))))
-		 (note (and (equal action "")
-			    (buffer-substring (1+ (point-at-eol)) eos)))
-		 (org-inhibit-logging 'note) ;; Do not take notes interactively
-		 old new)
+	(let* ((action (match-string 1))
+	       (data (and (match-end 3) (match-string 3)))
+	       (id-pos (condition-case msg
+			   (org-mobile-locate-entry (match-string 4))
+			 (error (nth 1 msg))))
+	       (bos (point-at-bol))
+	       (eos (save-excursion (org-end-of-subtree t t)))
+	       (cmd (if (equal action "")
+			'(progn
+			   (incf cnt-flag)
+			   (org-toggle-tag "FLAGGED" 'on)
+			   (and note
+				(org-entry-put nil "THEFLAGGINGNOTE" note)))
+		      (incf cnt-edit)
+		      (cdr (assoc action org-mobile-action-alist))))
+	       (note (and (equal action "")
+			  (buffer-substring (1+ (point-at-eol)) eos)))
+	       (org-inhibit-logging 'note) ;; Do not take notes interactively
+	       old new)
 
-	    (goto-char bos)
-	    (when (and (markerp id-pos)
-		       (not (member (marker-buffer id-pos) buf-list)))
-	      (org-mobile-timestamp-buffer (marker-buffer id-pos))
-	      (push (marker-buffer id-pos) buf-list))
-	    (unless (markerp id-pos)
-	      (goto-char (+ 2 (point-at-bol)))
-	      (if (stringp id-pos)
-		  (insert id-pos " ")
-		(insert "BAD REFERENCE "))
-		(incf cnt-error)
-		(throw 'next t))
-	    (unless cmd
-	      (insert "BAD FLAG ")
-	      (incf cnt-error)
-	      (throw 'next t))
-	    (move-marker bos-marker (point))
-	    (if (re-search-forward "^** Old value[ \t]*$" eos t)
-		(setq old (buffer-substring
-			   (1+ (match-end 0))
-			   (progn (outline-next-heading) (point)))))
-	    (if (re-search-forward "^** New value[ \t]*$" eos t)
-		(setq new (buffer-substring
-			   (1+ (match-end 0))
-			   (progn (outline-next-heading)
-				  (if (eobp) (org-back-over-empty-lines))
-				  (point)))))
-	    (setq old (and old (if (string-match "\\S-" old) old nil)))
-	    (setq new (and new (if (string-match "\\S-" new) new nil)))
-	    (if (and note (> (length note) 0))
-		;; Make Note into a single line, to fit into a property
-		(setq note (mapconcat 'identity
-				      (org-split-string (org-trim note) "\n")
-				      "\\n")))
-	    (unless (equal data "body")
-	      (setq new (and new (org-trim new))
-		    old (and old (org-trim old))))
-	    (goto-char (+ 2 bos-marker))
-	    ;; Remember this place so that we can return
-	    (move-marker marker (point))
-	    (setq org-mobile-error nil)
-	    (save-excursion
-	      (condition-case msg
-		  (org-with-point-at id-pos
-		    (progn
-		  (eval cmd)
-		  (unless (member data (list "delete" "archive" "archive-sibling" "addheading"))
-		    (if (member "FLAGGED" (org-get-tags))
-		      (add-to-list 'org-mobile-last-flagged-files
-				   (buffer-file-name (current-buffer)))))))
-		(error (setq org-mobile-error msg))))
-	    (when org-mobile-error
-	      (org-pop-to-buffer-same-window (marker-buffer marker))
-	      (goto-char marker)
-	      (incf cnt-error)
-	      (insert (if (stringp (nth 1 org-mobile-error))
-			  (nth 1 org-mobile-error)
-			"EXECUTION FAILED")
-		      " ")
-	      (throw 'next t))
-	    ;; If we get here, the action has been applied successfully
-	    ;; So remove the entry
-	    (goto-char bos-marker)
-	    (delete-region (point) (org-end-of-subtree t t)))))
+	  (goto-char bos)
+	  (when (and (markerp id-pos)
+		     (not (member (marker-buffer id-pos) buf-list)))
+	    (org-mobile-timestamp-buffer (marker-buffer id-pos))
+	    (push (marker-buffer id-pos) buf-list))
+	  (unless (markerp id-pos)
+	    (goto-char (+ 2 (point-at-bol)))
+	    (if (stringp id-pos)
+		(insert id-pos " ")
+	      (insert "BAD REFERENCE "))
+	    (incf cnt-error)
+	    (throw 'next t))
+	  (unless cmd
+	    (insert "BAD FLAG ")
+	    (incf cnt-error)
+	    (throw 'next t))
+	  (move-marker bos-marker (point))
+	  (if (re-search-forward "^** Old value[ \t]*$" eos t)
+	      (setq old (buffer-substring
+			 (1+ (match-end 0))
+			 (progn (outline-next-heading) (point)))))
+	  (if (re-search-forward "^** New value[ \t]*$" eos t)
+	      (setq new (buffer-substring
+			 (1+ (match-end 0))
+			 (progn (outline-next-heading)
+				(if (eobp) (org-back-over-empty-lines))
+				(point)))))
+	  (setq old (and old (if (string-match "\\S-" old) old nil)))
+	  (setq new (and new (if (string-match "\\S-" new) new nil)))
+	  (if (and note (> (length note) 0))
+	      ;; Make Note into a single line, to fit into a property
+	      (setq note (mapconcat 'identity
+				    (org-split-string (org-trim note) "\n")
+				    "\\n")))
+	  (unless (equal data "body")
+	    (setq new (and new (org-trim new))
+		  old (and old (org-trim old))))
+	  (goto-char (+ 2 bos-marker))
+	  ;; Remember this place so that we can return
+	  (move-marker marker (point))
+	  (setq org-mobile-error nil)
+	  (save-excursion
+	    (condition-case msg
+		(org-with-point-at id-pos
+		  (progn
+		    (eval cmd)
+		    (unless (member data (list "delete" "archive" "archive-sibling" "addheading"))
+		      (if (member "FLAGGED" (org-get-tags))
+			  (add-to-list 'org-mobile-last-flagged-files
+				       (buffer-file-name (current-buffer)))))))
+	      (error (setq org-mobile-error msg))))
+	  (when org-mobile-error
+	    (org-pop-to-buffer-same-window (marker-buffer marker))
+	    (goto-char marker)
+	    (incf cnt-error)
+	    (insert (if (stringp (nth 1 org-mobile-error))
+			(nth 1 org-mobile-error)
+		      "EXECUTION FAILED")
+		    " ")
+	    (throw 'next t))
+	  ;; If we get here, the action has been applied successfully
+	  ;; So remove the entry
+	  (goto-char bos-marker)
+	  (delete-region (point) (org-end-of-subtree t t)))))
     (save-buffer)
     (move-marker marker nil)
     (move-marker end nil)
@@ -973,8 +973,8 @@ is currently a noop.")
   (if (string-match "\\`id:\\(.*\\)$" link)
       (org-id-find (match-string 1 link) 'marker)
     (if (not (string-match "\\`olp:\\(.*?\\):\\(.*\\)$" link))
-	; not found with path, but maybe it is to be inserted
-	; in top level of the file?
+					; not found with path, but maybe it is to be inserted
+					; in top level of the file?
 	(if (not (string-match "\\`olp:\\(.*?\\)$" link))
 	    nil
 	  (let ((file (match-string 1 link)))
@@ -1077,8 +1077,8 @@ be returned that indicates what went wrong."
 	      (setq level (org-get-valid-level (funcall outline-level) 1))
 	      (org-end-of-subtree t t)
 	      (org-paste-subtree level))
-	(org-paste-subtree 1)))
-	(org-cut-subtree))
+	  (org-paste-subtree 1)))
+      (org-cut-subtree))
 
      ((eq what 'delete)
       (org-cut-subtree))

@@ -90,10 +90,10 @@ This function is called by `org-babel-execute-src-block'."
 				    (org-babel-process-file-name out-file)))
 		    ('postgresql (format
 				  "psql -A -P footer=off -F \"\t\"  -f %s -o %s %s"
-				    (org-babel-process-file-name in-file)
-				    (org-babel-process-file-name out-file)
-				    (or cmdline "")))
-                    (t (error "no support for the %s sql engine" engine)))))
+				  (org-babel-process-file-name in-file)
+				  (org-babel-process-file-name out-file)
+				  (or cmdline "")))
+                    (t (error "No support for the %s SQL engine" engine)))))
     (with-temp-file in-file
       (insert
        (case (intern engine)
@@ -148,8 +148,8 @@ This function is called by `org-babel-execute-src-block'."
 		      (with-temp-file data-file
 			(insert (orgtbl-to-csv
 				 val '(:fmt (lambda (el) (if (stringp el)
-							el
-						      (format "%S" el)))))))
+							     el
+							   (format "%S" el)))))))
 		      data-file)
 		    (org-babel-temp-file "sql-data-"))
 		 (if (stringp val) val (format "%S" val))))
@@ -160,7 +160,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-prep-session:sql (session params)
   "Raise an error because Sql sessions aren't implemented."
-  (error "sql sessions not yet implemented"))
+  (error "SQL sessions not yet implemented"))
 
 (provide 'ob-sql)
 
