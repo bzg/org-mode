@@ -240,6 +240,24 @@ but before any resource and task declarations."
   :version "24.1"
   :type '(string :tag "Preamble"))
 
+(defcustom org-export-taskjuggler-valid-task-attributes
+  '(account start note duration endbuffer endcredit end
+	    flags journalentry length limits maxend maxstart minend
+	    minstart period reference responsible scheduling
+	    startbuffer startcredit statusnote)
+  "Valid attributes for Taskjuggler tasks. If one of these
+  appears as a property for a headline, it will be exported with
+  the corresponding task."
+  :group 'org-export-taskjuggler)
+
+(defcustom org-export-taskjuggler-valid-resource-attributes
+  '(limits vacation shift booking efficiency journalentry rate
+	   workinghours flags)
+  "Valid attributes for Taskjuggler resources. If one of these
+  appears as a property for a headline, it will be exported with
+  the corresponding resource."
+  :group 'org-export-taskjuggler)
+
 ;;; Hooks
 
 (defvar org-export-taskjuggler-final-hook nil
@@ -614,7 +632,7 @@ is defined it will calculate a unique id for the resource using
 		 (cdr (assoc "ID" resource))
 		 (cdr (assoc "unique-id" resource)))))
 	(headline (cdr (assoc "headline" resource)))
-	(attributes '(limits vacation shift booking efficiency journalentry rate)))
+	(attributes org-export-taskjuggler-valid-resource-attributes))
     (insert
      (concat
       "resource " id " \"" headline "\" {\n "
@@ -655,11 +673,7 @@ org-mode priority string."
 				      (cdr (assoc "duration" task))
 				      (cdr (assoc "end" task))
 				      (cdr (assoc "period" task)))))))
-	 (attributes
-	  '(account start note duration endbuffer endcredit end
-		    flags journalentry length maxend maxstart minend
-		    minstart period reference responsible scheduling
-		    startbuffer startcredit statusnote)))
+	 (attributes org-export-taskjuggler-valid-task-attributes))
     (insert
      (concat
       "task " unique-id " \"" headline "\" {\n"
