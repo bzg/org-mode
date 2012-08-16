@@ -138,8 +138,6 @@
 ;;   :END:
 ;;
 ;;;; * TODO
-;;   - Use SCHEDULED and DEADLINE information (not just start and end
-;;     properties).
 ;;   - Look at org-file-properties, org-global-properties and
 ;;     org-global-properties-fixed
 ;;   - What about property inheritance and org-property-inherit-p?
@@ -385,6 +383,10 @@ with the TaskJuggler GUI."
   (save-excursion
     (and (org-up-heading-safe) (org-entry-get (point) "ORDERED"))))
 
+(defun org-taskjuggler-date (date)
+  (let ((time (parse-time-string date)))
+    (format "%d-%02d-%02d" (nth 5 time) (nth 4 time) (nth 3 time))))
+
 (defun org-taskjuggler-components ()
   "Return an alist containing all the pertinent information for
 the current node such as the headline, the level, todo state
@@ -396,6 +398,12 @@ information, all the properties, etc."
 	  (replace-regexp-in-string
 	   "\"" "\\\"" (nth 4 components) t t)) ; quote double quotes in headlines
 	 (parent-ordered (org-taskjuggler-parent-is-ordered-p)))
+    (let ((scheduled (assoc "SCHEDULED" props))
+	  (deadline (assoc "DEADLINE" props)))
+      (when scheduled
+	(push (cons "start" (org-taskjuggler-date (cdr scheduled))) props))
+      (when deadline
+	(push (cons "end" (org-taskjuggler-date (cdr deadline))) props)))
     (push (cons "level" level) props)
     (push (cons "headline" headline) props)
     (push (cons "parent-ordered" parent-ordered) props)))
