@@ -11940,9 +11940,9 @@ nodes of a document or strictly follow the order of the nodes in the
 document.
 
 Instead the TaskJuggler exporter looks for a tree that defines the tasks and
-a optionally tree that defines the resources for this project.  It then
-creates a TaskJuggler file based on these trees and the attributes defined in
-all the nodes.
+optionally trees that define the resources and reports for this project.
+It then creates a TaskJuggler file based on these trees and the attributes
+defined in all the nodes.
 
 @subsection TaskJuggler export commands
 
@@ -11951,7 +11951,8 @@ all the nodes.
 Export as a TaskJuggler file.
 
 @orgcmd{C-c C-e J,org-export-as-taskjuggler-and-open}
-Export as a TaskJuggler file and then open the file with TaskJugglerUI.
+Export as a TaskJuggler file and then open the file with TaskJugglerUI (only
+for TaskJugglerUI 2.x).
 @end table
 
 @subsection Tasks
@@ -11989,15 +11990,17 @@ time.
 
 @subsection Export of properties
 
-The exporter also takes TODO state information into consideration, i.e.@: if a
-task is marked as done it will have the corresponding attribute in
-TaskJuggler (@samp{complete 100}).  Also it will export any property on a task
-resource or resource node which is known to TaskJuggler, such as
-@samp{limits}, @samp{vacation}, @samp{shift}, @samp{booking},
-@samp{efficiency}, @samp{journalentry}, @samp{rate} for resources or
-@samp{account}, @samp{start}, @samp{note}, @samp{duration}, @samp{end},
-@samp{journalentry}, @samp{milestone}, @samp{reference}, @samp{responsible},
-@samp{scheduling}, etc for tasks.
+The exporter also takes TODO state information into consideration, i.e.@: if
+a task is marked as done it will have the corresponding attribute in
+TaskJuggler (@samp{complete 100}).  Scheduling information is also taken into
+account to set start/end dates for tasks.
+
+The exporter will also export any property on a task resource or resource
+node which is known to TaskJuggler, such as @samp{limits}, @samp{vacation},
+@samp{shift}, @samp{booking}, @samp{efficiency}, @samp{journalentry},
+@samp{rate} for resources or @samp{account}, @samp{start}, @samp{note},
+@samp{duration}, @samp{end}, @samp{journalentry}, @samp{milestone},
+@samp{reference}, @samp{responsible}, @samp{scheduling}, etc for tasks.
 
 @subsection Dependencies
 
@@ -12043,11 +12046,20 @@ examples should illustrate this:
 @vindex org-export-taskjuggler-default-reports
 TaskJuggler can produce many kinds of reports (e.g.@: gantt chart, resource
 allocation, etc).  The user defines what kind of reports should be generated
-for a project in the TaskJuggler file.  The exporter will automatically insert
-some default reports in the file.  These defaults are defined in
-@code{org-export-taskjuggler-default-reports}.  They can be modified using
-customize along with a number of other options.  For a more complete list, see
-@kbd{M-x customize-group @key{RET} org-export-taskjuggler @key{RET}}.
+for a project in the TaskJuggler file.  By default, the exporter will
+automatically insert some pre-set reports in the file.  These defaults are
+defined in @code{org-export-taskjuggler-default-reports}.  They can be
+modified using customize along with a number of other options.  For a more
+complete list, see @kbd{M-x customize-group @key{RET} org-export-taskjuggler
+@key{RET}}.
+
+Alternately, the user can tag a tree with
+@code{org-export-taskjuggler-report-tag}, and define reports in sub-nodes,
+similarly to what is done with tasks or resources.  The properties used for
+report generation are defined in
+@code{org-export-taskjuggler-valid-report-attributes}. In addition, a special
+property named @samp{report-kind} is used to define the kind of report one
+wants to generate (by default, a @samp{taskreport}).
 
 For more information and examples see the Org-taskjuggler tutorial at
 @uref{http://orgmode.org/worg/org-tutorials/org-taskjuggler.html}.
