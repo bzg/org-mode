@@ -285,7 +285,10 @@ defined in `org-export-taskjuggler-default-reports'."
 
   (message "Exporting...")
   (setq-default org-done-keywords org-done-keywords)
-  (let* ((tasks
+  (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+                                        (org-infile-export-plist)))
+	 (org-export-opt-plist opt-plist)
+         (tasks
 	  (org-taskjuggler-resolve-dependencies
 	   (org-taskjuggler-assign-task-ids
 	    (org-taskjuggler-compute-task-leafiness
@@ -336,6 +339,14 @@ defined in `org-export-taskjuggler-default-reports'."
       (insert org-export-taskjuggler-default-global-properties)
       (insert "\n")
       (dolist (resource resources)
+      (org-install-letbind)
+      ;; create local variables for all options, to make sure all called
+      ;; functions get the correct information
+      (mapc (lambda (x)
+              (set (make-local-variable (nth 2 x))
+                   (plist-get opt-plist (car x))))
+            org-export-plist-vars)
+
 	(let ((level (cdr (assoc "level" resource))))
 	  (org-taskjuggler-close-maybe level)
 	  (org-taskjuggler-open-resource resource)
