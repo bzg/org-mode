@@ -615,9 +615,11 @@ specified it is calculated
 	 (start (cdr (assoc "start" project)))
 	 (end (cdr (assoc "end" project))))
     (insert
-     (format "project %s \"%s\" \"%s\" %s +%sd {\n }\n"
+     (format "project %s \"%s\" \"%s\" %s %s {\n }\n"
 	     unique-id headline version start
-	     org-export-taskjuggler-default-project-duration))))
+             (or (and end (format "- %s" end))
+                 (format "+%sd"
+                         org-export-taskjuggler-default-project-duration))))))
 
 (defun org-taskjuggler-filter-and-join (items)
   "Filter all nil elements from ITEMS and join the remaining ones
