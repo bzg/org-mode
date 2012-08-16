@@ -138,6 +138,7 @@
     (:with-entities nil "e" org-export-with-entities)
     (:with-fixed-width nil ":" org-export-with-fixed-width)
     (:with-footnotes nil "f" org-export-with-footnotes)
+    (:with-inlinetasks nil "inline" org-export-with-inlinetasks)
     (:with-plannings nil "p" org-export-with-planning)
     (:with-priority nil "pri" org-export-with-priority)
     (:with-special-strings nil "-" org-export-with-special-strings)
@@ -405,9 +406,7 @@ e.g. \"f:nil\"."
 (defcustom org-export-headline-levels 3
   "The last level which is still exported as a headline.
 
-Inferior levels will produce itemize lists when exported.  Note
-that a numeric prefix argument to an exporter function overrides
-this setting.
+Inferior levels will produce itemize lists when exported.
 
 This option can also be set with the #+OPTIONS line, e.g. \"H:2\"."
   :group 'org-export-general
@@ -444,6 +443,13 @@ e.g. \"e:nil\"."
   :group 'org-export-general
   :type 'boolean)
 
+(defcustom org-export-with-inlinetasks t
+  "Non-nil means inlinetasks should be exported.
+This option can also be set with the #+OPTIONS line,
+e.g. \"inline:nil\"."
+  :group 'org-export-general
+  :type 'boolean)
+
 (defcustom org-export-with-planning nil
   "Non-nil means include planning info in export.
 This option can also be set with the #+OPTIONS: line,
@@ -453,9 +459,6 @@ e.g. \"p:t\"."
 
 (defcustom org-export-with-priority nil
   "Non-nil means include priority cookies in export.
-
-When nil, remove priority cookies for export.
-
 This option can also be set with the #+OPTIONS line,
 e.g. \"pri:t\"."
   :group 'org-export-general
@@ -1814,6 +1817,8 @@ tag."
 		 (and (memq with-tasks '(todo done))
 		      (not (eq todo-type with-tasks)))
 		 (and (consp with-tasks) (not (member todo with-tasks))))))))
+    ;; Check inlinetask.
+    (inlinetask (not (plist-get options :with-inlinetasks)))
     ;; Check timestamp.
     (timestamp
      (case (plist-get options :with-timestamps)
