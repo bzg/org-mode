@@ -181,6 +181,13 @@ resources for the project."
   :version "24.1"
   :type 'string)
 
+(defcustom org-export-taskjuggler-report-tag "taskjuggler_report"
+  "Tag, property or todo used to find the tree containing all the
+reports for the project."
+  :group 'org-export-taskjuggler
+  :version "24.1"
+  :type 'string)
+
 (defcustom org-export-taskjuggler-target-version 2.4
   "Which version of TaskJuggler the exporter is targeting."
   :group 'org-export-taskjuggler
@@ -264,6 +271,14 @@ but before any resource and task declarations."
   the corresponding resource."
   :group 'org-export-taskjuggler)
 
+(defcustom org-export-taskjuggler-valid-report-attributes
+  '(headline columns definitions timeformat hideresource hidetask
+	     loadunit sorttasks formats period)
+  "Valid attributes for Taskjuggler reports. If one of these
+  appears as a property for a headline, it will be exported with
+  the corresponding report."
+  :group 'org-export-taskjuggler)
+
 (defcustom org-export-taskjuggler-keep-project-as-task t
   "Whether to keep the project headline as an umbrella task for
   all declared tasks. Setting this to nil will allow maintaining
@@ -314,6 +329,10 @@ defined in `org-export-taskjuggler-default-reports'."
 	   (org-map-entries
 	    'org-taskjuggler-components
 	    org-export-taskjuggler-resource-tag nil 'archive 'comment)))
+	 (reports
+	  (org-map-entries
+	   'org-taskjuggler-components
+	   org-export-taskjuggler-report-tag nil 'archive 'comment))
 	 (filename (expand-file-name
 		    (concat
 		     (file-name-sans-extension
@@ -379,7 +398,7 @@ defined in `org-export-taskjuggler-default-reports'."
       (org-taskjuggler-close-maybe
        (if org-export-taskjuggler-keep-project-as-task
 	   1 2))
-      (org-taskjuggler-insert-reports)
+      (org-taskjuggler-insert-reports reports)
       (save-buffer)
       (or (org-export-push-to-kill-ring "TaskJuggler")
 	  (message "Exporting... done"))
@@ -741,6 +760,16 @@ org-mode priority string."
       (org-taskjuggler-get-attributes task attributes)
       "\n"))))
 
+(defun org-taskjuggler-open-report (report)
+  (let* ((kind (or (cdr (assoc "report-kind" report)) "taskreport"))
+	 (headline (cdr (assoc "HEADLINE" report)))
+	 (attributes org-export-taskjuggler-valid-report-attributes))
+    (insert
+     (concat
+      kind " \"" headline "\" {\n"
+      (org-taskjuggler-get-attributes report attributes)
+      "\n}\n"))))
+
 (defun org-taskjuggler-close-maybe (level)
   (while (> org-export-taskjuggler-old-level level)
     (insert "}\n")
@@ -748,10 +777,13 @@ org-mode priority string."
   (when (= org-export-taskjuggler-old-level level)
     (insert "}\n")))
 
-(defun org-taskjuggler-insert-reports ()
-  (let (report)
-    (dolist (report org-export-taskjuggler-default-reports)
-      (insert report "\n"))))
+(defun org-taskjuggler-insert-reports (reports)
+  (if reports
+      (dolist (report (cdr reports))
+	(org-taskjuggler-open-report report))
+    (let (report)
+      (dolist (report org-export-taskjuggler-default-reports)
+	(insert report "\n")))))
 
 (provide 'org-taskjuggler)
 
