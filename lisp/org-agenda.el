@@ -886,7 +886,7 @@ you want to use two-columns display (see `org-agenda-menu-two-columns')."
   :version "24.1"
   :type 'boolean)
 
-(make-obsolete-variable 'org-agenda-menu-two-column 'org-agenda-menu-two-columns "24.2")
+(make-obsolete-variable 'org-agenda-menu-two-column 'org-agenda-menu-two-columns "24.3")
 
 (defcustom org-agenda-menu-two-columns nil
   "Non-nil means, use two columns to show custom commands in the dispatcher.

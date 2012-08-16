@@ -41,7 +41,7 @@ so the base level will be properly adjusted.")
 (defcustom org-datetree-add-timestamp nil
   "When non-nil, add a time stamp when create a datetree entry."
   :group 'org-capture
-  :version "24.2"
+  :version "24.3"
   :type '(choice
 	  (const :tag "Do not add a time stamp" nil)
 	  (const :tag "Add an inactive time stamp" inactive)
