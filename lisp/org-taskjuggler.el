@@ -298,7 +298,8 @@ but before any resource and task declarations."
 (defvar org-export-taskjuggler-old-level)
 
 ;;;###autoload
-(defun org-export-as-taskjuggler ()
+(defun org-export-as-taskjuggler (&optional arg hidden ext-plist
+					    to-buffer body-only pub-dir)
   "Export parts of the current buffer as a TaskJuggler file.
 The exporter looks for a tree with tag, property or todo that
 matches `org-export-taskjuggler-project-tag' and takes this as
@@ -310,11 +311,12 @@ resources for the project.  If no resources are specified, a
 default resource is created and allocated to the project.  Also
 the taskjuggler project will be created with default reports as
 defined in `org-export-taskjuggler-default-reports'."
-  (interactive)
+  (interactive "P")
 
   (message "Exporting...")
   (setq-default org-done-keywords org-done-keywords)
   (let* ((opt-plist (org-combine-plists (org-default-export-plist)
+					ext-plist
                                         (org-infile-export-plist)))
 	 (org-export-opt-plist opt-plist)
          (tasks
@@ -333,12 +335,20 @@ defined in `org-export-taskjuggler-default-reports'."
 	  (org-map-entries
 	   'org-taskjuggler-components
 	   org-export-taskjuggler-report-tag nil 'archive 'comment))
-	 (filename (expand-file-name
-		    (concat
-		     (file-name-sans-extension
-		      (file-name-nondirectory buffer-file-name))
-		     org-export-taskjuggler-extension)))
-	 (buffer (find-file-noselect filename))
+	 (filename (if to-buffer
+		       nil
+		     (concat (file-name-as-directory
+			      (or pub-dir
+				  (org-export-directory :tj opt-plist)))
+			     (file-name-sans-extension
+			      (file-name-nondirectory buffer-file-name))
+			     org-export-taskjuggler-extension)))
+	 (buffer (if to-buffer
+		     (cond
+		      ((eq to-buffer 'string)
+		       (get-buffer-create "*Org Taskjuggler Export*"))
+		      (t (get-buffer-create to-buffer)))
+		   (find-file-noselect filename)))
 	 (old-buffer (current-buffer))
 	 (org-export-taskjuggler-old-level 0)
 	 task resource)
@@ -399,10 +409,13 @@ defined in `org-export-taskjuggler-default-reports'."
        (if org-export-taskjuggler-keep-project-as-task
 	   1 2))
       (org-taskjuggler-insert-reports reports)
-      (save-buffer)
+      (or to-buffer (save-buffer))
       (or (org-export-push-to-kill-ring "TaskJuggler")
 	  (message "Exporting... done"))
-      (current-buffer))))
+      (if (eq to-buffer 'string)
+	  (prog1 (buffer-substring (point-min) (point-max))
+	    (kill-buffer (current-buffer)))
+	(current-buffer)))))
 
 ;;;###autoload
 (defun org-export-as-taskjuggler-and-open ()

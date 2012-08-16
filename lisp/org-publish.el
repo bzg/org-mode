@@ -649,6 +649,12 @@ See `org-publish-org-to' to the list of arguments."
   (org-publish-with-aux-preprocess-maybe
    (org-publish-org-to "utf8" plist filename pub-dir)))
 
+(defun org-publish-org-to-taskjuggler (plist filename pub-dir)
+  "Publish an org file to TaskJuggler.
+See `org-publish-org-to' to the list of arguments."
+  (org-publish-with-aux-preprocess-maybe
+   (org-publish-org-to "taskjuggler" plist filename pub-dir)))
+
 (defun org-publish-attachment (plist filename pub-dir)
   "Publish a file with no transformation of any kind.
 See `org-publish-org-to' to the list of arguments."
