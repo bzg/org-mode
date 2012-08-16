@@ -221,6 +221,14 @@ with `org-export-taskjuggler-project-tag'"
   :version "24.1"
   :type '(repeat (string :tag "Report")))
 
+(defcustom org-export-taskjuggler-default-global-header
+  ""
+  "Default global header for the project. This goes before
+project declaration, and might be useful for early macros"
+  :group 'org-export-taskjuggler
+  :version "24.1"
+  :type '(string :tag "Preamble"))
+
 (defcustom org-export-taskjuggler-default-global-properties
   "shift s40 \"Part time shift\" {
   workinghours wed, thu, fri off
@@ -332,11 +340,6 @@ defined in `org-export-taskjuggler-default-reports'."
 	(setcar tasks (push (cons "version" version) task))))
     (with-current-buffer buffer
       (erase-buffer)
-      (org-clone-local-variables old-buffer "^org-")
-      (org-taskjuggler-open-project (car tasks))
-      (insert org-export-taskjuggler-default-global-properties)
-      (insert "\n")
-      (dolist (resource resources)
       (org-install-letbind)
       ;; create local variables for all options, to make sure all called
       ;; functions get the correct information
@@ -345,6 +348,12 @@ defined in `org-export-taskjuggler-default-reports'."
                    (plist-get opt-plist (car x))))
             org-export-plist-vars)
 
+      (org-clone-local-variables old-buffer "^org-")
+      (insert org-export-taskjuggler-default-global-header)
+      (org-taskjuggler-open-project (car tasks))
+      (insert org-export-taskjuggler-default-global-properties)
+      (insert "\n")
+      (dolist (resource resources)
 	(let ((level (cdr (assoc "level" resource))))
 	  (org-taskjuggler-close-maybe level)
 	  (org-taskjuggler-open-resource resource)
