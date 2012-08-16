@@ -264,6 +264,14 @@ but before any resource and task declarations."
   the corresponding resource."
   :group 'org-export-taskjuggler)
 
+(defcustom org-export-taskjuggler-keep-project-as-task t
+  "Whether to keep the project headline as an umbrella task for
+  all declared tasks. Setting this to nil will allow maintaining
+  completely separated task buckets, while still sharing the same
+  resources pool."
+  :group 'org-export-taskjuggler
+  :type 'boolean)
+
 ;;; Hooks
 
 (defvar org-export-taskjuggler-final-hook nil
@@ -350,7 +358,10 @@ defined in `org-export-taskjuggler-default-reports'."
 
       (org-clone-local-variables old-buffer "^org-")
       (insert org-export-taskjuggler-default-global-header)
-      (org-taskjuggler-open-project (car tasks))
+      (org-taskjuggler-open-project
+       (if org-export-taskjuggler-keep-project-as-task
+	   (car tasks)
+	 (pop tasks)))
       (insert org-export-taskjuggler-default-global-properties)
       (insert "\n")
       (dolist (resource resources)
@@ -365,7 +376,9 @@ defined in `org-export-taskjuggler-default-reports'."
 	  (org-taskjuggler-close-maybe level)
 	  (org-taskjuggler-open-task task)
 	  (setq org-export-taskjuggler-old-level level)))
-      (org-taskjuggler-close-maybe 1)
+      (org-taskjuggler-close-maybe
+       (if org-export-taskjuggler-keep-project-as-task
+	   1 2))
       (org-taskjuggler-insert-reports)
       (save-buffer)
       (or (org-export-push-to-kill-ring "TaskJuggler")
@@ -446,7 +459,11 @@ a path to the current task."
 	  (push unique-id (car unique-ids))
 	  (setcar path unique-id)))
 	(push (cons "unique-id" unique-id) task)
-	(push (cons "path" (mapconcat 'identity (reverse path) ".")) task)
+	(push (cons "path"
+		    (mapconcat 'identity
+			       (if org-export-taskjuggler-keep-project-as-task
+				   (reverse path)
+				 (cdr (reverse path))) ".")) task)
 	(setq previous-level level)
 	(setq resolved-tasks (append resolved-tasks (list task)))))))
 
