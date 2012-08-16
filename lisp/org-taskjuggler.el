@@ -329,7 +329,7 @@ defined in `org-export-taskjuggler-default-reports'."
     (unless resources
       (setq resources
 	    `((("resource_id" . ,(user-login-name))
-	       ("headline" . ,user-full-name)
+	       ("HEADLINE" . ,user-full-name)
 	       ("level" . 1)))))
     ;; add a default allocation to the first task if none was given
     (unless (assoc "allocate" (car tasks))
@@ -427,7 +427,7 @@ information, all the properties, etc."
       (when deadline
 	(push (cons "end" (org-taskjuggler-date (cdr deadline))) props)))
     (push (cons "level" level) props)
-    (push (cons "headline" headline) props)
+    (push (cons "HEADLINE" headline) props)
     (push (cons "parent-ordered" parent-ordered) props)))
 
 (defun org-taskjuggler-assign-task-ids (tasks)
@@ -601,7 +601,7 @@ The id is derived from the headline and made unique against
 UNIQUE-IDS. If the (downcased) first token of the headline is not
 unique try to add more (downcased) tokens of the headline or
 finally add more underscore characters (\"_\")."
-  (let* ((headline (cdr (assoc "headline" item)))
+  (let* ((headline (cdr (assoc "HEADLINE" item)))
 	 (parts (split-string headline))
 	 (id (org-taskjuggler-clean-id (downcase (pop parts)))))
 					; try to add more parts of the headline to make it unique
@@ -627,7 +627,7 @@ attributes from the PROJECT alist are inserted.  If no end date is
 specified it is calculated
 `org-export-taskjuggler-default-project-duration' days from now."
   (let* ((unique-id (cdr (assoc "unique-id" project)))
-	 (headline (cdr (assoc "headline" project)))
+	 (headline (cdr (assoc "HEADLINE" project)))
 	 (version (cdr (assoc "version" project)))
 	 (start (cdr (assoc "start" project)))
 	 (end (cdr (assoc "end" project))))
@@ -678,7 +678,7 @@ is defined it will calculate a unique id for the resource using
 	     (or (cdr (assoc "resource_id" resource))
 		 (cdr (assoc "ID" resource))
 		 (cdr (assoc "unique-id" resource)))))
-	(headline (cdr (assoc "headline" resource)))
+	(headline (cdr (assoc "HEADLINE" resource)))
 	(attributes org-export-taskjuggler-valid-resource-attributes))
     (insert
      (concat
@@ -703,7 +703,7 @@ org-mode priority string."
 
 (defun org-taskjuggler-open-task (task)
   (let* ((unique-id (cdr (assoc "unique-id" task)))
-	 (headline (cdr (assoc "headline" task)))
+	 (headline (cdr (assoc "HEADLINE" task)))
 	 (effort (org-taskjuggler-clean-effort (cdr (assoc org-effort-property task))))
 	 (depends (cdr (assoc "depends" task)))
 	 (allocate (cdr (assoc "allocate" task)))
