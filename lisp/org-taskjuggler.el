@@ -689,8 +689,10 @@ org-mode priority string."
 	 (milestone (or (cdr (assoc "milestone" task))
 			(and (assoc "leaf-node" task)
 			     (not (or effort
+				      (cdr (assoc "length" task))
 				      (cdr (assoc "duration" task))
-				      (cdr (assoc "end" task))
+				      (and (cdr (assoc "start" task))
+					   (cdr (assoc "end" task)))
 				      (cdr (assoc "period" task)))))))
 	 (attributes org-export-taskjuggler-valid-task-attributes))
     (insert
