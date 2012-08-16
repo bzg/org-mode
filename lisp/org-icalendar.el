@@ -28,8 +28,7 @@
 
 (require 'org-exp)
 
-(eval-when-compile
-  (require 'cl))
+(eval-when-compile (require 'cl))
 
 (declare-function org-bbdb-anniv-export-ical "org-bbdb" nil)
 
@@ -288,20 +287,19 @@ file and store it under the name `org-combined-agenda-icalendar-file'."
 	  (let ((standard-output ical-buffer))
 	    (if combine
 		(and (not started) (setq started t)
-		     (org-start-icalendar-file org-icalendar-combined-name))
-	      (org-start-icalendar-file category))
-	    (org-print-icalendar-entries combine)
+		     (org-icalendar-start-file org-icalendar-combined-name))
+	      (org-icalendar-start-file category))
+	    (org-icalendar-print-entries combine)
 	    (when (or (and combine (not files)) (not combine))
 	      (when (and combine org-icalendar-include-bbdb-anniversaries)
 		(require 'org-bbdb)
 		(org-bbdb-anniv-export-ical))
-	      (org-finish-icalendar-file)
+	      (org-icalendar-finish-file)
 	      (set-buffer ical-buffer)
 	      (run-hooks 'org-before-save-iCalendar-file-hook)
 	      (save-buffer)
 	      (run-hooks 'org-after-save-iCalendar-file-hook)
-	      (and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))
-	      ))))
+	      (and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))))))
       (org-release-buffers org-agenda-new-buffers))))
 
 (defvar org-before-save-iCalendar-file-hook nil
@@ -315,13 +313,13 @@ A good way to use this is to tell a desktop calendar application to re-read
 the iCalendar file.")
 
 (defvar org-agenda-default-appointment-duration) ; defined in org-agenda.el
-(defun org-print-icalendar-entries (&optional combine)
+(defun org-icalendar-print-entries (&optional combine)
   "Print iCalendar entries for the current Org-mode file to `standard-output'.
 When COMBINE is non nil, add the category to each line."
   (require 'org-agenda)
   (let ((re1 (concat org-ts-regexp "\\|<%%([^>\n]+>"))
 	(re2 (concat "--?-?\\(" org-ts-regexp "\\)"))
-	(dts (org-ical-ts-to-string
+	(dts (org-icalendar-ts-to-string
 	      (format-time-string (cdr org-time-stamp-formats) (current-time))
 	      "DTSTART"))
 	hd ts ts2 state status (inc t) pos b sexp rrule
@@ -448,8 +446,8 @@ SUMMARY:%s%s%s
 CATEGORIES:%s%s
 END:VEVENT\n"
 			   (concat prefix uid)
-			   (org-ical-ts-to-string ts "DTSTART")
-			   (org-ical-ts-to-string ts2 "DTEND" inc)
+			   (org-icalendar-ts-to-string ts "DTSTART")
+			   (org-icalendar-ts-to-string ts2 "DTEND" inc)
 			   rrule summary
 			   (if (and desc (string-match "\\S-" desc))
 			       (concat "\nDESCRIPTION: " desc) "")
@@ -532,8 +530,8 @@ END:VEVENT\n"
 		    uid (if org-icalendar-store-UID
 			    (org-id-get-create)
 			  (or (org-id-get) (org-id-new))))
-	      (and due (setq due (org-ical-ts-to-string due "DUE")))
-	      (and start (setq start (org-ical-ts-to-string start "DTSTART")))
+	      (and due (setq due (org-icalendar-ts-to-string due "DUE")))
+	      (and start (setq start (org-icalendar-ts-to-string start "DTSTART")))
 
 	      (if (string-match org-bracket-link-regexp hd)
 		  (setq hd (replace-match (if (match-end 3) (match-string 3 hd)
@@ -636,7 +634,7 @@ not used right now."
     (when (string-match "[;,:]" s) (setq s (concat "\"" s "\"")))
     s))
 
-(defun org-start-icalendar-file (name)
+(defun org-icalendar-start-file (name)
   "Start an iCalendar file by inserting the header."
   (let ((user user-full-name)
 	(name (or name "unknown"))
@@ -653,11 +651,11 @@ X-WR-TIMEZONE:%s
 X-WR-CALDESC:%s
 CALSCALE:GREGORIAN\n" name user timezone description))))
 
-(defun org-finish-icalendar-file ()
+(defun org-icalendar-finish-file ()
   "Finish an iCalendar file by inserting the END statement."
   (princ "END:VCALENDAR\n"))
 
-(defun org-ical-ts-to-string (s keyword &optional inc)
+(defun org-icalendar-ts-to-string (s keyword &optional inc)
   "Take a time string S and convert it to iCalendar format.
 KEYWORD is added in front, to make a complete line like DTSTART....
 When INC is non-nil, increase the hour by two (if time string contains
