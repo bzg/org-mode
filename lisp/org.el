@@ -2752,8 +2752,8 @@ This affects the following situations:
 If you set this variable to the symbol `time', then also the following
 will work:
 
-3. If the user gives a time, but no day.  If the time is before now,
-   to will be interpreted as tomorrow.
+3. If the user gives a time.
+   If the time is before now, it will be interpreted as tomorrow.
 
 Currently none of this works for ISO week specifications.
 
@@ -15557,10 +15557,11 @@ user."
       (setq ans "+0"))
 
     (when (setq delta (org-read-date-get-relative ans (current-time) org-def))
-      (setq ans (replace-match "" t t ans)
-	    deltan (car delta)
-	    deltaw (nth 1 delta)
-            deltadef (nth 2 delta)))
+      (unless (save-match-data (string-match org-plain-time-of-day-regexp ans))
+	(setq ans (replace-match "" t t ans)
+	      deltan (car delta)
+	      deltaw (nth 1 delta)
+	      deltadef (nth 2 delta))))
 
     ;; Check if there is an iso week date in there
     ;; If yes, store the info and postpone interpreting it until the rest
@@ -15713,7 +15714,6 @@ user."
 	    ((equal deltaw "m") (setq month (+ month deltan)))
 	    ((equal deltaw "y") (setq year (+ year deltan)))))
      ((and wday (not (nth 3 tl)))
-      (setq futurep nil)
       ;; Weekday was given, but no day, so pick that day in the week
       ;; on or after the derived date.
       (setq wday1 (nth 6 (decode-time (encode-time 0 0 0 day month year))))
