@@ -297,10 +297,6 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
      (org-test-with-temp-text "# First part\n# \n#\n# Second part"
        (org-element-map (org-element-parse-buffer) 'comment 'identity nil t)))
     "First part\n\n\nSecond part"))
-  ;; Keywords without colons are treated as comments.
-  (should
-   (org-test-with-temp-text "#+wrong_keyword something"
-     (org-element-map (org-element-parse-buffer) 'comment 'identity)))
   ;; Do not mix comments and keywords.
   (should
    (eq 1
@@ -1147,7 +1143,11 @@ e^{i\\pi}+1=0
 	 (org-element-map
 	  (org-element-parse-buffer) 'paragraph
 	  (lambda (p) (char-after (org-element-property :end p)))
-	  nil t)))))
+	  nil t))))
+  ;; Keywords without colons are treated as plain text.
+  (should
+   (org-test-with-temp-text "#+wrong_keyword something"
+     (org-element-map (org-element-parse-buffer) 'paragraph 'identity))))
 
 
 ;;;; Plain List
@@ -1776,7 +1776,7 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
 (ert-deftest test-org-element/comment-interpreter ()
   "Test comment interpreter."
   ;; Regular comment.
-  (should (equal (org-test-parse-and-interpret "#Comment") "# Comment\n"))
+  (should (equal (org-test-parse-and-interpret "# Comment") "# Comment\n"))
   ;; Inline comment.
   (should (equal (org-test-parse-and-interpret "  # Comment")
 		 "# Comment\n"))

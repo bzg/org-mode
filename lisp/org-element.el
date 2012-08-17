@@ -131,11 +131,12 @@
           "[ \t]*\\(?:"
           ;; Empty lines.
           "$" "\\|"
-          ;; Comments, blocks (any type), keywords, Babel calls,
-	  ;; drawers (any type) and tables.
-          "[|#]" "\\|"
-          ;; Fixed width areas.
-          ":\\(?:[ \t]\\|$\\)" "\\|"
+	  ;; Tables (any type).
+	  "\\(?:|\\|\\+-[-+]\\)" "\\|"
+          ;; Blocks (any type), Babel calls, drawers (any type),
+	  ;; fixed-width areas and keywords.  Note: this is only an
+	  ;; indication and need some thorough check.
+          "[#:]" "\\|"
           ;; Horizontal rules.
           "-\\{5,\\}[ \t]*$" "\\|"
           ;; LaTeX environments.
@@ -153,7 +154,10 @@
             (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
                     "\\(?:[ \t]\\|$\\)"))
           "\\)\\)")
-  "Regexp to separate paragraphs in an Org buffer.")
+  "Regexp to separate paragraphs in an Org buffer.
+In the case of lines starting with \"#\" and \":\", this regexp
+is not sufficient to know if point is at a paragraph ending.  See
+`org-element-paragraph-parser' for more information.")
 
 (defconst org-element-all-elements
   '(center-block clock comment comment-block drawer dynamic-block example-block
@@ -475,7 +479,7 @@ Assume point is at the beginning of the block."
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_CENTER" limit t)))
 	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(let* ((keywords (org-element--collect-affiliated-keywords))
 	       (begin (car keywords))
@@ -575,7 +579,7 @@ Assume point is at beginning of dynamic block."
   (let ((case-fold-search t))
     (if (not (save-excursion (re-search-forward org-dblock-end-re limit t)))
 	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((name (progn (looking-at org-dblock-start-re)
@@ -1129,7 +1133,7 @@ Assume point is at the beginning of the block."
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_QUOTE" limit t)))
 	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -1211,7 +1215,7 @@ Assume point is at the beginning of the block."
     (if (not (save-excursion
 	       (re-search-forward (concat "^[ \t]*#\\+END_" type) limit t)))
 	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -1359,8 +1363,6 @@ Assume point is at comment beginning."
   (save-excursion
     (let* ((keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
-	   ;; Match first line with a loose regexp since it might as
-	   ;; well be an ill-defined keyword.
 	   (value (prog2 (looking-at "[ \t]*# ?")
 		      (buffer-substring-no-properties
 		       (match-end 0) (line-end-position))
@@ -1411,7 +1413,7 @@ Assume point is at comment block beginning."
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_COMMENT" limit t)))
 	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -1456,7 +1458,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_EXAMPLE" limit t)))
 	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((switches
@@ -1535,7 +1537,7 @@ Assume point is at export-block beginning."
     (if (not (save-excursion
 	       (re-search-forward (concat "^[ \t]*#\\+END_" type) limit t)))
 	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -1732,12 +1734,27 @@ Assume point is at the beginning of the paragraph."
 	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (before-blank
-	    (progn (end-of-line)
-		   (if (re-search-forward org-element-paragraph-separate
-					  limit
-					  'm)
-		       (goto-char (match-beginning 0))
-		     (point))))
+	    (let ((case-fold-search t))
+	      (end-of-line)
+	      (re-search-forward org-element-paragraph-separate limit 'm)
+	      (while (and (/= (point) limit)
+			  (cond ((and (looking-at "[ \t]*:\\S-")
+				      (not (looking-at org-drawer-regexp))))
+				((not (looking-at "[ \t]*#\\S-")) nil)
+				((looking-at "[ \t]*\\+BEGIN:? ")
+				 (not (save-excursion
+					(re-search-forward
+					 "^[ \t]*\\+END:" limit t))))
+				((looking-at "[ \t]*\\+BEGIN_\\(\\S-+\\)")
+				 (not (save-excursion
+					(re-search-forward
+					 (concat "^[ \t]*\\+END_"
+						 (match-string 1))
+					 limit t))))
+				((not (looking-at "[ \t]*#\\+\\S-+:")))))
+		(when (re-search-forward org-element-paragraph-separate limit 'm)
+		  (goto-char (match-beginning 0))))
+	      (if (eobp) (point) (goto-char (line-beginning-position)))))
 	   (contents-end (progn (skip-chars-backward " \r\t\n" contents-begin)
 				(forward-line)
 				(point)))
@@ -1914,7 +1931,7 @@ Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion (re-search-forward "^[ \t]*#\\+END_SRC" limit t)))
 	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -2119,7 +2136,7 @@ Assume point is at beginning of the block."
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_VERSE" limit t)))
 	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -3325,13 +3342,16 @@ element it has to parse."
        ;; Keywords.
        ((looking-at "[ \t]*#")
 	(goto-char (match-end 0))
-	(cond ((looking-at "\\+BEGIN_\\(\\S-+\\)")
+	(cond ((looking-at "\\(?: \\|$\\)")
+	       (beginning-of-line)
+	       (org-element-comment-parser limit))
+	      ((looking-at "\\+BEGIN_\\(\\S-+\\)")
 	       (beginning-of-line)
 	       (let ((parser (assoc (upcase (match-string 1))
 				    org-element-block-name-alist)))
 		 (if parser (funcall (cdr parser) limit)
 		   (org-element-special-block-parser limit))))
-	      ((looking-at "\\+CALL")
+	      ((looking-at "\\+CALL:")
 	       (beginning-of-line)
 	       (org-element-babel-call-parser limit))
 	      ((looking-at "\\+BEGIN:? ")
@@ -3342,7 +3362,7 @@ element it has to parse."
 	       (org-element-keyword-parser limit))
 	      (t
 	       (beginning-of-line)
-	       (org-element-comment-parser limit))))
+	       (org-element-paragraph-parser limit))))
        ;; Footnote Definition.
        ((looking-at org-footnote-definition-re)
         (org-element-footnote-definition-parser limit))

@@ -21005,7 +21005,6 @@ meant to be filled."
 	       (when (and (>= p cbeg) (< p cend))
 		 (if (looking-at "\\s-+") (match-string 0) ""))))))))))
 
-(defvar org-element-paragraph-separate)  ; From org-element.el
 (defvar org-element-all-objects)         ; From org-element.el
 (defun org-fill-paragraph (&optional justify)
   "Fill element at point, when applicable.
@@ -21065,8 +21064,7 @@ a footnote definition, try to fill the first paragraph within."
 		     (narrow-to-region beg end)
 		     (save-excursion
 		       (let ((bol-pos (point-at-bol)))
-			 (re-search-backward
-			  org-element-paragraph-separate nil 'm)
+			 (re-search-backward "^[ \t]*$" nil 'm)
 			 (unless (or (bobp) (= (point-at-bol) bol-pos))
 			   (forward-line))
 			 (setq element (org-element-paragraph-parser end)
