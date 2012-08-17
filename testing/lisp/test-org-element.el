@@ -1144,10 +1144,34 @@ e^{i\\pi}+1=0
 	  (org-element-parse-buffer) 'paragraph
 	  (lambda (p) (char-after (org-element-property :end p)))
 	  nil t))))
-  ;; Keywords without colons are treated as plain text.
+  ;; Include ill-formed Keywords.
   (should
    (org-test-with-temp-text "#+wrong_keyword something"
-     (org-element-map (org-element-parse-buffer) 'paragraph 'identity))))
+     (org-element-map (org-element-parse-buffer) 'paragraph 'identity)))
+  ;; Include incomplete-drawers.
+  (should
+   (let ((org-drawers '("TEST")))
+     (org-test-with-temp-text ":TEST:\nParagraph"
+       (let ((elem (org-element-at-point)))
+	 (and (eq (org-element-type elem) 'paragraph)
+	      (= (point-max) (org-element-property :end elem)))))))
+  ;; Include non-existent drawers.
+  (should
+   (let ((org-drawers '("TEST")))
+     (org-test-with-temp-text ":NONAME:"
+       (org-element-map (org-element-parse-buffer) 'paragraph 'identity))))
+  ;; Include incomplete blocks.
+  (should
+   (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (= (point-max) (org-element-property :end elem))))))
+  ;; Include incomplete dynamic blocks.
+  (should
+   (org-test-with-temp-text "#+BEGIN: \nParagraph"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (= (point-max) (org-element-property :end elem)))))))
 
 
 ;;;; Plain List

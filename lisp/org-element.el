@@ -1738,22 +1738,40 @@ Assume point is at the beginning of the paragraph."
 	      (end-of-line)
 	      (re-search-forward org-element-paragraph-separate limit 'm)
 	      (while (and (/= (point) limit)
-			  (cond ((and (looking-at "[ \t]*:\\S-")
-				      (not (looking-at org-drawer-regexp))))
-				((not (looking-at "[ \t]*#\\S-")) nil)
-				((looking-at "[ \t]*\\+BEGIN:? ")
-				 (not (save-excursion
-					(re-search-forward
-					 "^[ \t]*\\+END:" limit t))))
-				((looking-at "[ \t]*\\+BEGIN_\\(\\S-+\\)")
-				 (not (save-excursion
-					(re-search-forward
-					 (concat "^[ \t]*\\+END_"
-						 (match-string 1))
-					 limit t))))
-				((not (looking-at "[ \t]*#\\+\\S-+:")))))
-		(when (re-search-forward org-element-paragraph-separate limit 'm)
-		  (goto-char (match-beginning 0))))
+			  (cond
+			   ;; Skip non-existent or incomplete drawer.
+			   ((save-excursion
+			      (beginning-of-line)
+			      (and (looking-at "[ \t]*:\\S-")
+				   (or (not (looking-at org-drawer-regexp))
+				       (not (save-excursion
+					      (re-search-forward
+					       "^[ \t]*:END:" limit t)))))))
+			   ;; Stop at comments.
+			   ((save-excursion
+			      (beginning-of-line)
+			      (not (looking-at "[ \t]*#\\S-"))) nil)
+			   ;; Skip incomplete dynamic blocks.
+			   ((save-excursion
+			      (beginning-of-line)
+			      (looking-at "[ \t]*#\\+BEGIN: "))
+			    (not (save-excursion
+				   (re-search-forward
+				    "^[ \t]*\\+END:" limit t))))
+			   ;; Skip incomplete blocks.
+			   ((save-excursion
+			      (beginning-of-line)
+			      (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)"))
+			    (not (save-excursion
+				   (re-search-forward
+				    (concat "^[ \t]*#\\+END_"
+					    (match-string 1))
+				    limit t))))
+			   ;; Skip ill-formed keywords.
+			   ((not (save-excursion
+				   (beginning-of-line)
+				   (looking-at "[ \t]*#\\+\\S-+:"))))))
+		(re-search-forward org-element-paragraph-separate limit 'm))
 	      (if (eobp) (point) (goto-char (line-beginning-position)))))
 	   (contents-end (progn (skip-chars-backward " \r\t\n" contents-begin)
 				(forward-line)
