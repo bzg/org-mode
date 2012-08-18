@@ -5579,7 +5579,8 @@ by a #."
 	     (if (string-equal dc1 "+title:")
 		 '(font-lock-fontified t face org-document-title)
 	       '(font-lock-fontified t face org-document-info))))
-	   ((or (member dc1 '("+begin:" "+end:" "+caption:" "+label:"
+	   ((or (equal dc1 "+results")
+		(member dc1 '("+begin:" "+end:" "+caption:" "+label:"
 			      "+orgtbl:" "+tblfm:" "+tblname:" "+results:"
 			      "+call:" "+header:" "+headers:" "+name:"))
 		(and (match-end 4) (equal dc3 "+attr")))
