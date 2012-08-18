@@ -2835,10 +2835,9 @@ contextual information."
   				   (org-export-solidify-link-text label)))))))
        ;; Remove last blank line.
        (setq contents (substring contents 0 -1))
-       ;; FIXME: splice
-       (format "<table%s>\n<caption>%s</caption>\n%s\n%s\n</table>"
+       (format "<table%s>\n%s\n%s\n%s\n</table>"
   	       table-attributes
-  	       (or caption "")
+	       (if (not caption) "" (format "<caption>%s</caption>" caption))
   	       (funcall table-column-specs table info)
   	       contents)))))
 
