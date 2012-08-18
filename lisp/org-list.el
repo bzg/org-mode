@@ -236,8 +236,7 @@ Otherwise, two of them will be necessary."
   :group 'org-plain-lists
   :type 'boolean)
 
-(defcustom org-list-automatic-rules '((bullet . t)
-				      (checkbox . t)
+(defcustom org-list-automatic-rules '((checkbox . t)
 				      (indent . t))
   "Non-nil means apply set of rules when acting on lists.
 By default, automatic actions are taken when using
@@ -247,9 +246,6 @@ By default, automatic actions are taken when using
  \\[org-insert-todo-heading].  You can disable individually these
  rules by setting them to nil.  Valid rules are:
 
-bullet    when non-nil, cycling bullet do not allow lists at
-          column 0 to have * as a bullet and descriptions lists
-          to be numbered.
 checkbox  when non-nil, checkbox statistics is updated each time
           you either insert a new checkbox or toggle a checkbox.
 indent    when non-nil, indenting or outdenting list top-item
@@ -261,7 +257,6 @@ indent    when non-nil, indenting or outdenting list top-item
   :type '(alist :tag "Sets of rules"
 		:key-type
 		(choice
-		 (const :tag "Bullet" bullet)
 		 (const :tag "Checkbox" checkbox)
 		 (const :tag "Indent" indent))
 		:value-type
@@ -1013,8 +1008,8 @@ Possible types are `descriptive', `ordered' and `unordered'.  The
 type is determined by the first item of the list."
   (let ((first (org-list-get-list-begin item struct prevs)))
     (cond
-     ((org-list-get-tag first struct) 'descriptive)
      ((string-match "[[:alnum:]]" (org-list-get-bullet first struct)) 'ordered)
+     ((org-list-get-tag first struct) 'descriptive)
      (t 'unordered))))
 
 (defun org-list-get-item-number (item struct prevs parents)
@@ -2228,7 +2223,6 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
            (prevs (org-list-prevs-alist struct))
            (list-beg (org-list-get-first-item (point) struct prevs))
            (bullet (org-list-get-bullet list-beg struct))
-	   (bullet-rule-p (cdr (assq 'bullet org-list-automatic-rules)))
 	   (alpha-p (org-list-use-alpha-bul-p list-beg struct prevs))
 	   (case-fold-search nil)
 	   (current (cond
@@ -2243,22 +2237,21 @@ is an integer, 0 means `-', 1 means `+' etc.  If WHICH is
 	   (bullet-list
 	    (append '("-" "+" )
 		    ;; *-bullets are not allowed at column 0.
-		    (unless (and bullet-rule-p
-				 (looking-at "\\S-")) '("*"))
+		    (unless (looking-at "\\S-") '("*"))
 		    ;; Description items cannot be numbered.
 		    (unless (or (eq org-plain-list-ordered-item-terminator ?\))
-				(and bullet-rule-p (org-at-item-description-p)))
+				(org-at-item-description-p))
 		      '("1."))
 		    (unless (or (eq org-plain-list-ordered-item-terminator ?.)
-				(and bullet-rule-p (org-at-item-description-p)))
+				(org-at-item-description-p))
 		      '("1)"))
 		    (unless (or (not alpha-p)
 				(eq org-plain-list-ordered-item-terminator ?\))
-				(and bullet-rule-p (org-at-item-description-p)))
+				(org-at-item-description-p))
 		      '("a." "A."))
 		    (unless (or (not alpha-p)
 				(eq org-plain-list-ordered-item-terminator ?.)
-				(and bullet-rule-p (org-at-item-description-p)))
+				(org-at-item-description-p))
 		      '("a)" "A)"))))
 	   (len (length bullet-list))
 	   (item-index (- len (length (member current bullet-list))))
