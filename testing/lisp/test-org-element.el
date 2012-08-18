@@ -128,34 +128,25 @@ Some other text
 			      (org-element-map tree 'italic 'identity nil t))
 	(org-element-map tree 'paragraph 'identity nil t))))))
 
-(ert-deftest test-org-element/adopt-element ()
-  "Test `org-element-adopt-element' specifications."
+(ert-deftest test-org-element/adopt-elements ()
+  "Test `org-element-adopt-elements' specifications."
   ;; Adopt an element.
   (should
-   (equal '(italic plain-text)
+   (equal '(plain-text italic)
 	  (org-test-with-temp-text "* Headline\n *a*"
 	    (let ((tree (org-element-parse-buffer)))
-	      (org-element-adopt-element
+	      (org-element-adopt-elements
 	       (org-element-map tree 'bold 'identity nil t) '(italic nil "a"))
 	      (mapcar (lambda (blob) (org-element-type blob))
 		      (org-element-contents
 		       (org-element-map tree 'bold 'identity nil t)))))))
   ;; Adopt a string.
   (should
-   (equal '("b" "a")
-	  (org-test-with-temp-text "* Headline\n *a*"
-	    (let ((tree (org-element-parse-buffer)))
-	      (org-element-adopt-element
-	       (org-element-map tree 'bold 'identity nil t) "b")
-	      (org-element-contents
-	       (org-element-map tree 'bold 'identity nil t))))))
-  ;; Test APPEND optional argument.
-  (should
    (equal '("a" "b")
 	  (org-test-with-temp-text "* Headline\n *a*"
 	    (let ((tree (org-element-parse-buffer)))
-	      (org-element-adopt-element
-	       (org-element-map tree 'bold 'identity nil t) "b" t)
+	      (org-element-adopt-elements
+	       (org-element-map tree 'bold 'identity nil t) "b")
 	      (org-element-contents
 	       (org-element-map tree 'bold 'identity nil t)))))))
 

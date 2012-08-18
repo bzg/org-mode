@@ -346,7 +346,7 @@ still has an entry since one of its properties (`:title') does.")
 ;; Setter functions allow to modify elements by side effect.  There is
 ;; `org-element-put-property', `org-element-set-contents',
 ;; `org-element-set-element' and `org-element-adopt-element'.  Note
-;; that `org-element-set-element' and `org-element-adopt-element' are
+;; that `org-element-set-element' and `org-element-adopt-elements' are
 ;; higher level functions since also update `:parent' property.
 
 (defsubst org-element-type (element)
@@ -393,38 +393,39 @@ Return modified element."
 (defsubst org-element-set-element (old new)
   "Replace element or object OLD with element or object NEW.
 The function takes care of setting `:parent' property for NEW."
-  ;; OLD can belong to the contents of PARENT or to its secondary
-  ;; string.
-  (let* ((parent (org-element-property :parent old))
-	 (sec-loc (cdr (assq (org-element-type parent)
-			     org-element-secondary-value-alist)))
-	 (sec-value (and sec-loc (org-element-property sec-loc parent)))
-	 (place (or (memq old sec-value) (memq old parent))))
-    ;; Make sure NEW has correct `:parent' property.
-    (org-element-put-property new :parent parent)
-    ;; Replace OLD with NEW in PARENT.
-    (setcar place new)))
+  ;; Since OLD is going to be changed into NEW by side-effect, first
+  ;; make sure that every element or object within NEW has OLD as
+  ;; parent.
+  (mapc (lambda (blob) (org-element-put-property blob :parent old))
+	(org-element-contents new))
+  ;; Transfer contents.
+  (apply 'org-element-set-contents old (org-element-contents new))
+  ;; Ensure NEW has same parent as OLD, then overwrite OLD properties
+  ;; with NEW's.
+  (org-element-put-property new :parent (org-element-property :parent old))
+  (setcar (cdr old) (nth 1 new))
+  ;; Transfer type.
+  (setcar old (car new)))
 
-(defsubst org-element-adopt-element (parent child &optional append)
-  "Add an element to the contents of another element.
+(defsubst org-element-adopt-elements (parent &rest children)
+  "Append elements to the contents of another element.
 
-PARENT is an element or object.  CHILD is an element, an object,
-or a string.
-
-CHILD is added at the beginning of PARENT contents, unless the
-optional argument APPEND is non-nil, in which case CHILD is added
-at the end.
+PARENT is an element or object.  CHILDREN can be elements,
+objects, or a strings.
 
 The function takes care of setting `:parent' property for CHILD.
 Return parent element."
-  (if (not parent) (list child)
-    (let ((contents (org-element-contents parent)))
-      (apply 'org-element-set-contents
-	     parent
-	     (if append (append contents (list child)) (cons child contents))))
-    ;; Link the CHILD element with PARENT.
-    (when (consp child) (org-element-put-property child :parent parent))
-    ;; Return the parent element.
+  (if (not parent) children
+    ;; Link every child to PARENT.
+    (mapc (lambda (child)
+	    (unless (stringp child)
+	      (org-element-put-property child :parent parent)))
+	  children)
+    ;; Add CHILDREN at the end of PARENT contents.
+    (apply 'org-element-set-contents
+	   parent
+	   (nconc (org-element-contents parent) children))
+    ;; Return modified PARENT element.
     parent))
 
 
@@ -3738,7 +3739,7 @@ Elements are accumulated into ACC."
 	  (org-element--parse-objects
 	   cbeg (org-element-property :contents-end element) element
 	   (org-element-restriction type))))
-	(org-element-adopt-element acc element t)))
+	(org-element-adopt-elements acc element)))
     ;; Return result.
     acc))
 
@@ -3765,11 +3766,11 @@ current object."
 	  (let ((obj-beg (org-element-property :begin next-object)))
 	    (unless (= (point) obj-beg)
 	      (setq acc
-		    (org-element-adopt-element
+		    (org-element-adopt-elements
 		     acc
 		     (replace-regexp-in-string
 		      "\t" (make-string tab-width ? )
-		      (buffer-substring-no-properties (point) obj-beg)) t))))
+		      (buffer-substring-no-properties (point) obj-beg))))))
 	  ;; 2. Object...
 	  (let ((obj-end (org-element-property :end next-object))
 		(cont-beg (org-element-property :contents-begin next-object)))
@@ -3784,16 +3785,16 @@ current object."
 		(org-element--parse-objects
 		 (point-min) (point-max) next-object
 		 (org-element-restriction next-object))))
-	    (setq acc (org-element-adopt-element acc next-object t))
+	    (setq acc (org-element-adopt-elements acc next-object))
 	    (goto-char obj-end))))
       ;; 3. Text after last object.  Untabify it.
       (unless (= (point) end)
 	(setq acc
-	      (org-element-adopt-element
+	      (org-element-adopt-elements
 	       acc
 	       (replace-regexp-in-string
 		"\t" (make-string tab-width ? )
-		(buffer-substring-no-properties (point) end)) t)))
+		(buffer-substring-no-properties (point) end)))))
       ;; Result.
       acc)))
 
