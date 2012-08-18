@@ -1,4 +1,4 @@
-;;; org-exp.el --- ASCII, HTML, XOXO and iCalendar export for Org-mode
+;;; org-exp.el --- Export internals for Org-mode
 
 ;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
 
@@ -1318,11 +1318,8 @@ on this string to produce the exported version."
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
 
-      ;; Remove #+TBLFM and #+TBLNAME lines
-      (org-export-handle-table-metalines)
-
-      ;; Remove #+results and #+name lines
-      (org-export-res/src-name-cleanup)
+      ;; Remove #+TBLFM #+TBLNAME #+NAME #+RESULTS lines
+      (org-export-handle-metalines)
 
       ;; Run the final hook
       (run-hooks 'org-export-preprocess-final-hook)
@@ -2009,9 +2006,11 @@ When it is nil, all comments will be removed."
 	  (replace-match "")
 	  (goto-char (max (point-min) (1- pos))))))))
 
-(defun org-export-handle-table-metalines ()
-  "Remove table specific metalines #+TBLNAME: and #+TBLFM:."
-  (let ((re "^[ \t]*#\\+tbl\\(name\\|fm\\):\\(.*\n?\\)")
+(defun org-export-handle-metalines ()
+  "Remove tables and source blocks metalines.
+This function should only be called after all block processing
+has taken place."
+  (let ((re "^[ \t]*#\\+\\(tbl\\(?:name\\|fm\\)\\|results\\(?:\\[[a-z0-9]+\\]\\)?\\|name\\):\\(.*\n?\\)")
 	(case-fold-search t)
 	pos)
     (goto-char (point-min))
@@ -2023,18 +2022,6 @@ When it is nil, all comments will be removed."
 	(goto-char (1+ pos))
 	(replace-match "")
 	(goto-char (max (point-min) (1- pos)))))))
-
-(defun org-export-res/src-name-cleanup ()
-  "Clean up #+results and #+name lines for export.
-This function should only be called after all block processing
-has taken place."
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (let ((case-fold-search t))
-      (while (org-re-search-forward-unprotected
-	      "#\\+\\(name\\|results\\(\\[[a-z0-9]+\\]\\)?\\):" nil t)
-	(delete-region (match-beginning 0) (progn (forward-line) (point)))))))
 
 (defun org-export-mark-radio-links ()
   "Find all matches for radio targets and turn them into internal links."
