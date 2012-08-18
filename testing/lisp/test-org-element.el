@@ -890,6 +890,12 @@ DEADLINE: <2012-03-29 thu.>"
      :tag
      (org-test-with-temp-text "- tag :: description"
        (org-element-map (org-element-parse-buffer) 'item 'identity nil t)))))
+  ;; No tags in ordered lists.
+  (should-not
+   (org-element-property
+    :tag
+    (org-test-with-temp-text "1. tag :: description"
+      (org-element-map (org-element-parse-buffer) 'item 'identity nil t))))
   ;; Check-boxes
   (should
    (equal

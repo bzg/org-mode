@@ -621,12 +621,15 @@ Assume point is at an item."
 	     ;; Return association at point.
 	     (lambda (ind)
 	       (looking-at org-list-full-item-re)
-	       (list (point)
-		     ind
-		     (match-string-no-properties 1)	; bullet
-		     (match-string-no-properties 2)	; counter
-		     (match-string-no-properties 3)	; checkbox
-		     (match-string-no-properties 4)))))	; description tag
+	       (let ((bullet (match-string-no-properties 1)))
+		 (list (point)
+		       ind
+		       bullet
+		       (match-string-no-properties 2) ; counter
+		       (match-string-no-properties 3) ; checkbox
+		       ;; Description tag.
+		       (and (save-match-data (string-match "[-+*]" bullet))
+			    (match-string-no-properties 4)))))))
 	   (end-before-blank
 	    (function
 	     ;; Ensure list ends at the first blank line.
@@ -1253,8 +1256,15 @@ This function modifies STRUCT."
     (let* ((item (progn (goto-char pos) (goto-char (org-list-get-item-begin))))
 	   (item-end (org-list-get-item-end item struct))
 	   (item-end-no-blank (org-list-get-item-end-before-blank item struct))
-	   (beforep (and (looking-at org-list-full-item-re)
-			 (<= pos (match-end 0))))
+	   (beforep
+	    (progn
+	      (looking-at org-list-full-item-re)
+	      ;; Do not count tag in a non-descriptive list.
+	      (<= pos (if (and (match-beginning 4)
+			       (save-match-data
+				 (string-match "[.)]" (match-string 1))))
+			  (match-beginning 4)
+			(match-end 0)))))
 	   (split-line-p (org-get-alist-option org-M-RET-may-split-line 'item))
 	   (blank-nb (org-list-separating-blank-lines-number
 		      pos struct prevs))
@@ -2187,14 +2197,19 @@ item is invisible."
 				       (org-list-struct)))
 	       (prevs (org-list-prevs-alist struct))
 	       ;; If we're in a description list, ask for the new term.
-	       (desc (when (org-list-get-tag itemp struct)
+	       (desc (when (eq (org-list-get-list-type itemp struct prevs)
+			       'descriptive)
 		       (concat (read-string "Term: ") " :: "))))
 	  (setq struct
 		(org-list-insert-item pos struct prevs checkbox desc))
 	  (org-list-write-struct struct (org-list-parents-alist struct))
 	  (when checkbox (org-update-checkbox-count-maybe))
 	  (looking-at org-list-full-item-re)
-	  (goto-char (match-end 0))
+	  (goto-char (if (and (match-beginning 4)
+			      (save-match-data
+				(string-match "[.)]" (match-string 1))))
+			 (match-beginning 4)
+		       (match-end 0)))
 	  t)))))
 
 (defun org-list-repair ()

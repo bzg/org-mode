@@ -984,34 +984,39 @@ string instead.
 Assume point is at the beginning of the item."
   (save-excursion
     (beginning-of-line)
+    (looking-at org-list-full-item-re)
     (let* ((begin (point))
-	   (bullet (org-list-get-bullet (point) struct))
-	   (checkbox (let ((box (org-list-get-checkbox begin struct)))
+	   (bullet (org-match-string-no-properties 1))
+	   (checkbox (let ((box (org-match-string-no-properties 3)))
 		       (cond ((equal "[ ]" box) 'off)
 			     ((equal "[X]" box) 'on)
 			     ((equal "[-]" box) 'trans))))
-	   (counter (let ((c (org-list-get-counter begin struct)))
-		      (cond
-		       ((not c) nil)
-		       ((string-match "[A-Za-z]" c)
-			(- (string-to-char (upcase (match-string 0 c)))
-			   64))
-		       ((string-match "[0-9]+" c)
-			(string-to-number (match-string 0 c))))))
+	   (counter (let ((c (org-match-string-no-properties 2)))
+		      (save-match-data
+			(cond
+			 ((not c) nil)
+			 ((string-match "[A-Za-z]" c)
+			  (- (string-to-char (upcase (match-string 0 c)))
+			     64))
+			 ((string-match "[0-9]+" c)
+			  (string-to-number (match-string 0 c)))))))
 	   (end (save-excursion (goto-char (org-list-get-item-end begin struct))
 				(unless (bolp) (forward-line))
 				(point)))
-	   (contents-begin (progn (looking-at org-list-full-item-re)
-				  (goto-char (match-end 0))
-				  (skip-chars-forward " \r\t\n" limit)
-				  ;; If first line isn't empty,
-				  ;; contents really start at the text
-				  ;; after item's meta-data.
-				  (if (= (point-at-bol) begin) (point)
-				    (point-at-bol))))
+	   (contents-begin
+	    (progn (goto-char
+		    ;; Ignore tags in un-ordered lists: they are just
+		    ;; a part of item's body.
+		    (if (and (match-beginning 4)
+			     (save-match-data (string-match "[.)]" bullet)))
+			(match-beginning 4)
+		      (match-end 0)))
+		   (skip-chars-forward " \r\t\n" limit)
+		   ;; If first line isn't empty, contents really start
+		   ;; at the text after item's meta-data.
+		   (if (= (point-at-bol) begin) (point) (point-at-bol))))
 	   (hidden (progn (forward-line)
-			  (and (not (= (point) end))
-			       (org-invisible-p2))))
+			  (and (not (= (point) end)) (org-invisible-p2))))
 	   (contents-end (progn (goto-char end)
 				(skip-chars-backward " \r\t\n")
 				(forward-line)
