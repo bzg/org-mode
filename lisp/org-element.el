@@ -479,7 +479,7 @@ Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_CENTER" limit t)))
-	;; Incomplete block: parse it as a comment.
+	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(let* ((keywords (org-element--collect-affiliated-keywords))
@@ -579,7 +579,7 @@ containing `:block-name', `:begin', `:end', `:hiddenp',
 Assume point is at beginning of dynamic block."
   (let ((case-fold-search t))
     (if (not (save-excursion (re-search-forward org-dblock-end-re limit t)))
-	;; Incomplete block: parse it as a comment.
+	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
@@ -1138,7 +1138,7 @@ Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_QUOTE" limit t)))
-	;; Incomplete block: parse it as a comment.
+	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
@@ -1220,7 +1220,7 @@ Assume point is at the beginning of the block."
 		      (upcase (match-string-no-properties 1)))))
     (if (not (save-excursion
 	       (re-search-forward (concat "^[ \t]*#\\+END_" type) limit t)))
-	;; Incomplete block: parse it as a comment.
+	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
@@ -1418,7 +1418,7 @@ Assume point is at comment block beginning."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_COMMENT" limit t)))
-	;; Incomplete block: parse it as a comment.
+	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
@@ -1463,7 +1463,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_EXAMPLE" limit t)))
-	;; Incomplete block: parse it as a comment.
+	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
@@ -1542,7 +1542,7 @@ Assume point is at export-block beginning."
 		      (upcase (org-match-string-no-properties 1)))))
     (if (not (save-excursion
 	       (re-search-forward (concat "^[ \t]*#\\+END_" type) limit t)))
-	;; Incomplete block: parse it as a comment.
+	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
@@ -1954,7 +1954,7 @@ containing `:language', `:switches', `:parameters', `:begin',
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion (re-search-forward "^[ \t]*#\\+END_SRC" limit t)))
-	;; Incomplete block: parse it as a comment.
+	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
@@ -2159,7 +2159,7 @@ Assume point is at beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_VERSE" limit t)))
-	;; Incomplete block: parse it as a comment.
+	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
