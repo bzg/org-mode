@@ -2141,9 +2141,10 @@ for formatting.  This is required for the DocBook exporter."
       (if colgropen (setq html (cons (car html)
 				     (cons "</colgroup>" (cdr html)))))
       ;; Since the output of HTML table formatter can also be used in
-      ;; DocBook document, we want to always include the caption to make
-      ;; DocBook XML file valid.
-      (push (format "<caption>%s</caption>" (or caption "")) html)
+      ;; DocBook document, include empty captions for the DocBook
+      ;; export only so that it produces valid XML.
+      (when (or caption (eq org-export-current-backend 'docbook))
+	(push (format "<caption>%s</caption>" (or caption "")) html))
       (when label
 	(setq html-table-tag (org-export-splice-attributes html-table-tag (format "id=\"%s\"" (org-solidify-link-text label)))))
       (push html-table-tag html))
