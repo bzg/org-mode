@@ -3300,18 +3300,20 @@ If yes remove the column and the special lines."
 
 (defun org-export-cleanup-toc-line (s)
   "Remove tags and timestamps from lines going into the toc."
-  (when (memq org-export-with-tags '(not-in-toc nil))
-    (if (string-match (org-re " +:[[:alnum:]_@#%:]+: *$") s)
+  (if (not s)
+      "" ; Return a string when argument is nil
+    (when (memq org-export-with-tags '(not-in-toc nil))
+      (if (string-match (org-re " +:[[:alnum:]_@#%:]+: *$") s)
+	  (setq s (replace-match "" t t s))))
+    (when org-export-remove-timestamps-from-toc
+      (while (string-match org-maybe-keyword-time-regexp s)
 	(setq s (replace-match "" t t s))))
-  (when org-export-remove-timestamps-from-toc
-    (while (string-match org-maybe-keyword-time-regexp s)
-      (setq s (replace-match "" t t s))))
-  (while (string-match org-bracket-link-regexp s)
-    (setq s (replace-match (match-string (if (match-end 3) 3 1) s)
-			   t t s)))
-  (while (string-match "\\[\\([0-9]\\|fn:[^]]*\\)\\]" s)
-    (setq s (replace-match "" t t s)))
-  s)
+    (while (string-match org-bracket-link-regexp s)
+      (setq s (replace-match (match-string (if (match-end 3) 3 1) s)
+			     t t s)))
+    (while (string-match "\\[\\([0-9]\\|fn:[^]]*\\)\\]" s)
+      (setq s (replace-match "" t t s)))
+    s))
 
 
 (defun org-get-text-property-any (pos prop &optional object)

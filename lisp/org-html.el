@@ -1704,7 +1704,7 @@ PUB-DIR is set, use this as the publishing directory."
 	    ;; This is a headline
 	    (setq level (org-tr-level (- (match-end 1) (match-beginning 1)
 					 level-offset))
-		  txt (match-string 2 org-line))
+		  txt (or (match-string 2 org-line) ""))
 	    (if (string-match quote-re0 txt)
 		(setq txt (replace-match "" t t txt)))
 	    (if (<= level (max umax umax-toc))
