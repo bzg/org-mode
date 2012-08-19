@@ -24,7 +24,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'org-exp-blocks)
 (eval-when-compile
   (require 'cl))
 
@@ -36,15 +35,20 @@
 
 (declare-function org-babel-lob-get-info "ob-lob" ())
 (declare-function org-babel-eval-wipe-error-buffer "ob-eval" ())
+(declare-function org-between-regexps-p "org"
+		  (start-re end-re &optional lim-up lim-down))
+(declare-function org-get-indentation "org" (&optional line))
 (declare-function org-heading-components "org" ())
+(declare-function org-in-block-p "org" (names))
+(declare-function org-in-verbatim-emphasis "org" ())
 (declare-function org-link-search "org" (s &optional type avoid-pos stealth))
 (declare-function org-fill-template "org" (template alist))
-(declare-function org-in-verbatim-emphasis "org" ())
-(declare-function org-in-block-p "org" (names))
-(declare-function org-between-regexps-p "org" (start-re end-re &optional lim-up lim-down))
+(declare-function org-split-string "org" (string &optional separators))
+(declare-function org-element-at-point "org-element" (&optional keep-trail))
+(declare-function org-element-context "org-element" ())
+(declare-function org-element-property "org-element" (property element))
+(declare-function org-element-type "org-element" (element))
 
-(add-to-list 'org-export-interblocks '(src org-babel-exp-non-block-elements))
-(org-export-blocks-add-block '(src org-babel-exp-src-block nil))
 
 (defcustom org-export-babel-evaluate t
   "Switch controlling code evaluation during export.
@@ -214,6 +218,64 @@ this template."
                       (insert rep))
                   (replace-match rep t t))))))))))
 
+(defvar org-src-preserve-indentation)	; From org-src.el
+(defun org-export-blocks-preprocess ()
+  "Execute all blocks in visible part of buffer."
+  (interactive)
+  (save-window-excursion
+    (let ((case-fold-search t)
+          (start (point-min)))
+      (goto-char start)
+      (while (re-search-forward "^[ \t]*#\\+BEGIN_SRC" nil t)
+        (let ((element (save-match-data (org-element-at-point))))
+          (when (eq (org-element-type element) 'src-block)
+            (let* ((block-start (copy-marker (match-beginning 0)))
+                   (match-start (copy-marker
+                                 (org-element-property :begin element)))
+                   ;; Make sure we don't remove any blank lines after
+                   ;; the block when replacing it.
+                   (match-end (save-excursion
+                                (goto-char (org-element-property :end element))
+                                (skip-chars-backward " \r\t\n")
+                                (copy-marker (line-end-position))))
+                   (indentation (org-get-indentation))
+                   (headers
+		    (cons
+		     (org-element-property :language element)
+		     (let ((params (org-element-property :parameters element)))
+		       (and params (org-split-string params "[ \t]+")))))
+                   (preserve-indent (or org-src-preserve-indentation
+                                        (org-element-property :preserve-indent
+                                                              element))))
+              ;; Execute all non-block elements between START and
+              ;; MATCH-START.
+              (org-babel-exp-non-block-elements start match-start)
+              (let ((replacement
+                     (progn (goto-char block-start)
+                            (org-babel-exp-src-block headers))))
+                (when replacement
+                  (goto-char match-start)
+                  (delete-region (point) match-end)
+                  (insert replacement)
+                  (if preserve-indent
+                      ;; Indent only the code block markers.
+                      (save-excursion
+                        (skip-chars-backward " \r\t\n")
+                        (indent-line-to indentation)
+                        (goto-char match-start)
+                        (indent-line-to indentation))
+                    ;; Indent everything.
+                    (indent-code-rigidly match-start (point) indentation))))
+              ;; Cleanup markers.
+	      (set-marker block-start nil)
+              (set-marker match-start nil)
+              (set-marker match-end nil))))
+        (setq start (point)))
+      ;; Execute all non-block Babel elements between last src-block
+      ;; and end of buffer.
+      (org-babel-exp-non-block-elements start (point-max))
+      (run-hooks 'org-export-blocks-postblock-hook))))
+
 (defun org-babel-in-example-or-verbatim ()
   "Return true if point is in example or verbatim code.
 Example and verbatim code include escaped portions of
@@ -324,8 +386,7 @@ inhibit insertion of results into the buffer."
 	      (re-search-backward org-babel-lob-one-liner-regexp nil t)
 	      (org-babel-execute-src-block nil info)))))))))
 
+
 (provide 'ob-exp)
-
-
 
 ;;; ob-exp.el ends here
