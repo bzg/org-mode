@@ -21078,7 +21078,7 @@ a footnote definition, try to fill the first paragraph within."
 		  ;; in current paragraph nor text before message
 		  ;; body.
 		  ((derived-mode-p 'message-mode)
-		   (let ((body-start (message-goto-body)))
+		   (let ((body-start (save-excursion (message-goto-body))))
 		     (when body-start (setq beg (max body-start beg))))
 		   (when (save-excursion
 			   (re-search-forward
