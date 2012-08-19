@@ -1704,7 +1704,7 @@ PUB-DIR is set, use this as the publishing directory."
 	    ;; This is a headline
 	    (setq level (org-tr-level (- (match-end 1) (match-beginning 1)
 					 level-offset))
-		  txt (match-string 2 org-line))
+		  txt (or (match-string 2 org-line) ""))
 	    (if (string-match quote-re0 txt)
 		(setq txt (replace-match "" t t txt)))
 	    (if (<= level (max umax umax-toc))
@@ -2141,9 +2141,10 @@ for formatting.  This is required for the DocBook exporter."
       (if colgropen (setq html (cons (car html)
 				     (cons "</colgroup>" (cdr html)))))
       ;; Since the output of HTML table formatter can also be used in
-      ;; DocBook document, we want to always include the caption to make
-      ;; DocBook XML file valid.
-      (push (format "<caption>%s</caption>" (or caption "")) html)
+      ;; DocBook document, include empty captions for the DocBook
+      ;; export only so that it produces valid XML.
+      (when (or caption (eq org-export-current-backend 'docbook))
+	(push (format "<caption>%s</caption>" (or caption "")) html))
       (when label
 	(setq html-table-tag (org-export-splice-attributes html-table-tag (format "id=\"%s\"" (org-solidify-link-text label)))))
       (push html-table-tag html))

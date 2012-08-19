@@ -5579,7 +5579,8 @@ by a #."
 	     (if (string-equal dc1 "+title:")
 		 '(font-lock-fontified t face org-document-title)
 	       '(font-lock-fontified t face org-document-info))))
-	   ((or (member dc1 '("+begin:" "+end:" "+caption:" "+label:"
+	   ((or (equal dc1 "+results")
+		(member dc1 '("+begin:" "+end:" "+caption:" "+label:"
 			      "+orgtbl:" "+tblfm:" "+tblname:" "+results:"
 			      "+call:" "+header:" "+headers:" "+name:"))
 		(and (match-end 4) (equal dc3 "+attr")))
@@ -8697,7 +8698,8 @@ call CMD."
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
-  (let ((inhibit-read-only t)
+  (let ((case-fold-search t)
+	(inhibit-read-only t)
 	(def-cat (cond
 		  ((null org-category)
 		   (if buffer-file-name
@@ -11157,20 +11159,20 @@ this is used for the GOTO interface."
 (defun org-find-dblock (name)
   "Find the first dynamic block with name NAME in the buffer.
 If not found, stay at current position and return nil."
-  (let (pos)
+  (let ((case-fold-search t) pos)
     (save-excursion
       (goto-char (point-min))
-      (setq pos (and (re-search-forward (concat "^[ \t]*#\\+BEGIN:[ \t]+" name "\\>")
-					nil t)
+      (setq pos (and (re-search-forward
+		      (concat "^[ \t]*#\\+\\(?:BEGIN\\|begin\\):[ \t]+" name "\\>") nil t)
 		     (match-beginning 0))))
     (if pos (goto-char pos))
     pos))
 
 (defconst org-dblock-start-re
-  "^[ \t]*#\\+BEGIN:[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
+  "^[ \t]*#\\+\\(?:BEGIN\\|begin\\):[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
   "Matches the start line of a dynamic block, with parameters.")
 
-(defconst org-dblock-end-re "^[ \t]*#\\+END\\([: \t\r\n]\\|$\\)"
+(defconst org-dblock-end-re "^[ \t]*#\\+\\(?:END\\|end\\)\\([: \t\r\n]\\|$\\)"
   "Matches the end of a dynamic block.")
 
 (defun org-create-dblock (plist)
@@ -11322,7 +11324,7 @@ This function can be used in a hook."
   '("TITLE:" "AUTHOR:" "EMAIL:" "DATE:"
     "DESCRIPTION:" "KEYWORDS:" "LANGUAGE:" "OPTIONS:"
     "EXPORT_SELECT_TAGS:" "EXPORT_EXCLUDE_TAGS:"
-    "LINK_UP:" "LINK_HOME:" "LINK:"
+    "LINK_UP:" "LINK_HOME:" "LINK:" "TODO:"
     "XSLT:" "CATEGORY:" "SEQ_TODO:" "TYP_TODO:"
     "PRIORITIES:" "DRAWERS:" "STARTUP:" "TAGS:"
     "FILETAGS:" "ARCHIVE:"))
@@ -20351,21 +20353,22 @@ and :keyword."
       (push (list :table-table) clist)))
     (goto-char p)
 
-    ;; New the "medium" contexts: clocktables, source blocks
-    (cond ((org-in-clocktable-p)
-	   (push (list :clocktable
-		       (and (or (looking-at "#\\+BEGIN: clocktable")
-				(search-backward "#+BEGIN: clocktable" nil t))
-			    (match-beginning 0))
-		       (and (re-search-forward "#\\+END:?" nil t)
-			    (match-end 0))) clist))
-	  ((org-in-src-block-p)
-	   (push (list :src-block
-		       (and (or (looking-at "#\\+BEGIN_SRC")
-				(search-backward "#+BEGIN_SRC" nil t))
-			    (match-beginning 0))
-		       (and (search-forward "#+END_SRC" nil t)
-			    (match-beginning 0))) clist)))
+    (let ((case-fold-search t))
+      ;; New the "medium" contexts: clocktables, source blocks
+      (cond ((org-in-clocktable-p)
+	     (push (list :clocktable
+			 (and (or (looking-at "#\\+BEGIN: clocktable")
+				  (search-backward "#+BEGIN: clocktable" nil t))
+			      (match-beginning 0))
+			 (and (re-search-forward "#\\+END:?" nil t)
+			      (match-end 0))) clist))
+	    ((org-in-src-block-p)
+	     (push (list :src-block
+			 (and (or (looking-at "#\\+BEGIN_SRC")
+				  (search-backward "#+BEGIN_SRC" nil t))
+			      (match-beginning 0))
+			 (and (search-forward "#+END_SRC" nil t)
+			      (match-beginning 0))) clist))))
     (goto-char p)
 
     ;; Now the small context
@@ -22059,12 +22062,10 @@ Show the heading too, if it is currently invisible."
 (defun org-make-options-regexp (kwds &optional extra)
   "Make a regular expression for keyword lines."
   (concat
-   "^"
-   "#?[ \t]*\\+\\("
+   "^#\\+\\("
    (mapconcat 'regexp-quote kwds "\\|")
    (if extra (concat "\\|" extra))
-   "\\):[ \t]*"
-   "\\(.*\\)"))
+   "\\):[ \t]*\\(.*\\)"))
 
 ;; Make isearch reveal the necessary context
 (defun org-isearch-end ()
