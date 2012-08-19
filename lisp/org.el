@@ -8698,7 +8698,8 @@ call CMD."
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
-  (let ((inhibit-read-only t)
+  (let ((case-fold-search t)
+	(inhibit-read-only t)
 	(def-cat (cond
 		  ((null org-category)
 		   (if buffer-file-name
@@ -11158,20 +11159,20 @@ this is used for the GOTO interface."
 (defun org-find-dblock (name)
   "Find the first dynamic block with name NAME in the buffer.
 If not found, stay at current position and return nil."
-  (let (pos)
+  (let ((case-fold-search t) pos)
     (save-excursion
       (goto-char (point-min))
-      (setq pos (and (re-search-forward (concat "^[ \t]*#\\+BEGIN:[ \t]+" name "\\>")
-					nil t)
+      (setq pos (and (re-search-forward
+		      (concat "^[ \t]*#\\+\\(?:BEGIN\\|begin\\):[ \t]+" name "\\>") nil t)
 		     (match-beginning 0))))
     (if pos (goto-char pos))
     pos))
 
 (defconst org-dblock-start-re
-  "^[ \t]*#\\+BEGIN:[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
+  "^[ \t]*#\\+\\(?:BEGIN\\|begin\\):[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
   "Matches the start line of a dynamic block, with parameters.")
 
-(defconst org-dblock-end-re "^[ \t]*#\\+END\\([: \t\r\n]\\|$\\)"
+(defconst org-dblock-end-re "^[ \t]*#\\+\\(?:END\\|end\\)\\([: \t\r\n]\\|$\\)"
   "Matches the end of a dynamic block.")
 
 (defun org-create-dblock (plist)
