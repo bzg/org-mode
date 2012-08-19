@@ -87,7 +87,7 @@ process."
        results)))
 (def-edebug-spec org-babel-exp-in-export-file (form body))
 
-(defun org-babel-exp-src-block (body &rest headers)
+(defun org-babel-exp-src-block (&rest headers)
   "Process source block for export.
 Depending on the 'export' headers argument in replace the source
 code block with...
@@ -100,11 +100,12 @@ code ---- the default, display the code inside the block but do
 results - just like none only the block is run on export ensuring
           that it's results are present in the org-mode buffer
 
-none ----- do not display either code or results upon export"
+none ----- do not display either code or results upon export
+
+Assume point is at the beginning of block's starting line."
   (interactive)
   (unless noninteractive (message "org-babel-exp processing..."))
   (save-excursion
-    (goto-char (match-beginning 0))
     (let* ((info (org-babel-get-src-block-info 'light))
 	   (lang (nth 0 info))
 	   (raw-params (nth 2 info)) hash)
@@ -150,66 +151,68 @@ this template."
       (let ((m (make-marker)))
 	(set-marker m end (current-buffer))
 	(setq end m)))
-    (let ((rx (concat "\\("  org-babel-inline-src-block-regexp
+    (let ((rx (concat "\\(?:"  org-babel-inline-src-block-regexp
 		      "\\|" org-babel-lob-one-liner-regexp "\\)")))
-      (while (and (< (point) (marker-position end))
-		  (re-search-forward rx end t))
-	(if (save-excursion
-	      (goto-char (match-beginning 0))
-	      (looking-at org-babel-inline-src-block-regexp))
-	    (progn
-	      (forward-char 1)
-	      (let* ((info (save-match-data
-			     (org-babel-parse-inline-src-block-match)))
-		     (params (nth 2 info)))
-		(save-match-data
-		  (goto-char (match-beginning 2))
-		  (unless (org-babel-in-example-or-verbatim)
-		    ;; expand noweb references in the original file
-		    (setf (nth 1 info)
-			  (if (and (cdr (assoc :noweb params))
-				   (string= "yes" (cdr (assoc :noweb params))))
-			      (org-babel-expand-noweb-references
-			       info (org-babel-exp-get-export-buffer))
-			    (nth 1 info)))
-		    (let ((code-replacement (save-match-data
-					      (org-babel-exp-do-export
-					       info 'inline))))
-		      (if code-replacement
-			  (progn (replace-match code-replacement nil nil nil 1)
-				 (delete-char 1))
-			(org-babel-examplize-region (match-beginning 1)
-						    (match-end 1))
-			(forward-char 2)))))))
-	  (unless (org-babel-in-example-or-verbatim)
-	    (let* ((lob-info (org-babel-lob-get-info))
-		   (inlinep (match-string 11))
-		   (inline-start (match-end 11))
-		   (inline-end (match-end 0))
-		   (results (save-match-data
-			      (org-babel-exp-do-export
-			       (list "emacs-lisp" "results"
-				     (org-babel-merge-params
-				      org-babel-default-header-args
-				      org-babel-default-lob-header-args
-				      (org-babel-params-from-properties)
-				      (org-babel-parse-header-arguments
-				       (org-no-properties
-					(concat ":var results="
-						(mapconcat #'identity
-							   (butlast lob-info)
-							   " ")))))
-				     "" nil (car (last lob-info)))
-			       'lob)))
-		   (rep (org-fill-template
-			 org-babel-exp-call-line-template
-			 `(("line"  . ,(nth 0 lob-info))))))
-	      (if inlinep
-		  (save-excursion
-		    (goto-char inline-start)
-		    (delete-region inline-start inline-end)
-		    (insert rep))
-		(replace-match rep t t)))))))))
+      (while (re-search-forward rx end t)
+	(let* ((element (save-match-data (org-element-context)))
+               (type (org-element-type element)))
+          (cond
+           ((not (memq type '(babel-call inline-babel-call inline-src-block))))
+           ((eq type 'inline-src-block)
+            (let* ((beg (org-element-property :begin element))
+                   (end (save-excursion
+                          (goto-char (org-element-property :end element))
+                          (skip-chars-forward " \t")
+                          (point)))
+                   (info (org-babel-parse-inline-src-block-match))
+                   (params (nth 2 info)))
+              ;; Expand noweb references in the original file.
+              (setf (nth 1 info)
+                    (if (and (cdr (assoc :noweb params))
+                             (string= "yes" (cdr (assoc :noweb params))))
+                        (org-babel-expand-noweb-references
+                         info (org-babel-exp-get-export-buffer))
+                      (nth 1 info)))
+              (let ((code-replacement
+                     (save-match-data (org-babel-exp-do-export info 'inline))))
+                (if code-replacement
+                    (progn
+                      (delete-region
+                       (progn (goto-char beg)
+                              (skip-chars-backward " \t")
+                              (point))
+                       end)
+                      (insert code-replacement))
+                  (org-babel-examplize-region beg end)
+                  (forward-char 2)))))
+           (t (let* ((lob-info (org-babel-lob-get-info))
+                     (inlinep (match-string 11))
+                     (inline-start (match-end 11))
+                     (inline-end (match-end 0))
+                     (results (save-match-data
+                                (org-babel-exp-do-export
+                                 (list "emacs-lisp" "results"
+                                       (org-babel-merge-params
+                                        org-babel-default-header-args
+                                        org-babel-default-lob-header-args
+                                        (org-babel-params-from-properties)
+                                        (org-babel-parse-header-arguments
+                                         (org-no-properties
+                                          (concat ":var results="
+                                                  (mapconcat #'identity
+                                                             (butlast lob-info)
+                                                             " ")))))
+                                       "" nil (car (last lob-info)))
+                                 'lob)))
+                     (rep (org-fill-template
+                           org-babel-exp-call-line-template
+                           `(("line"  . ,(nth 0 lob-info))))))
+                (if inlinep
+                    (save-excursion
+                      (goto-char inline-start)
+                      (delete-region inline-start inline-end)
+                      (insert rep))
+                  (replace-match rep t t))))))))))
 
 (defun org-babel-in-example-or-verbatim ()
   "Return true if point is in example or verbatim code.

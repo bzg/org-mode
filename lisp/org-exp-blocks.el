@@ -166,75 +166,60 @@ The optional OPEN and CLOSE tags will be inserted around BODY."
 
 (defvar org-src-preserve-indentation)     ; From org-src.el
 (defun org-export-blocks-preprocess ()
-  "Export all blocks according to the `org-export-blocks' block export alist.
-Does not export block types specified in specified in BLOCKS
-which defaults to the value of `org-export-blocks-witheld'."
+  "Execute all blocks in visible part of buffer."
   (interactive)
   (save-window-excursion
     (let ((case-fold-search t)
-	  (interblock (lambda (start end)
-			(mapcar (lambda (pair) (funcall (second pair) start end))
-				org-export-interblocks)))
-	  matched indentation type types func
-	  start end body headers preserve-indent progress-marker)
-      (goto-char (point-min))
-      (setq start (point))
-      (let ((beg-re "^\\([ \t]*\\)#\\+begin_\\(\\S-+\\)[ \t]*\\(.*\\)?[\r\n]"))
-	(while (re-search-forward beg-re nil t)
-	  (let* ((match-start (copy-marker (match-beginning 0)))
-		 (body-start (copy-marker (match-end 0)))
-		 (indentation (length (match-string 1)))
-		 (inner-re (format "^[ \t]*#\\+\\(begin\\|end\\)_%s"
-				   (regexp-quote (downcase (match-string 2)))))
-		 (type (intern (downcase (match-string 2))))
-		 (headers (save-match-data
-			    (org-split-string (match-string 3) "[ \t]+")))
-		 (balanced 1)
-		 (preserve-indent (or org-src-preserve-indentation
-				      (member "-i" headers)))
-		 match-end)
-	    (while (and (not (zerop balanced))
-			(re-search-forward inner-re nil t))
-	      (if (string= (downcase (match-string 1)) "end")
-		  (decf balanced)
-		(incf balanced)))
-	    (when (not (zerop balanced))
-	      (error "Unbalanced begin/end_%s blocks with %S"
-		     type (buffer-substring match-start (point))))
-	    (setq match-end (copy-marker (match-end 0)))
-	    (unless preserve-indent
-	      (setq body (save-match-data (org-remove-indentation
-					   (buffer-substring
-					    body-start (match-beginning 0))))))
-	    (unless (memq type types) (setq types (cons type types)))
-	    (save-match-data (funcall interblock start match-start))
-	    (when (setq func (cadr (assoc type org-export-blocks)))
-	      (let ((replacement (save-match-data
-				   (if (memq type org-export-blocks-witheld) ""
-				     (apply func body headers)))))
-		;; ;; un-comment this code after the org-element merge
-		;; (save-match-data
-		;;   (when (and replacement (string= replacement ""))
-		;;     (delete-region
-		;;      (car (org-element-collect-affiliated-keyword))
-		;;      match-start)))
-		(when replacement
-		  (delete-region match-start match-end)
-		  (goto-char match-start) (insert replacement)
-		  (if preserve-indent
-		      ;; indent only the code block markers
-		      (save-excursion
-			(indent-line-to indentation) ; indent end_block
-			(goto-char match-start)
-			(indent-line-to indentation))	; indent begin_block
-		    ;; indent everything
-		    (indent-code-rigidly match-start (point) indentation)))))
-	    ;; cleanup markers
-	    (set-marker match-start nil)
-	    (set-marker body-start nil)
-	    (set-marker match-end nil))
-	  (setq start (point))))
-      (funcall interblock start (point-max))
+          (start (point-min)))
+      (goto-char start)
+      (while (re-search-forward "^[ \t]*#\\+BEGIN_SRC" nil t)
+        (let ((element (save-match-data (org-element-at-point))))
+          (when (eq (org-element-type element) 'src-block)
+            (let* ((block-start (copy-marker (match-beginning 0)))
+                   (match-start (copy-marker
+                                 (org-element-property :begin element)))
+                   ;; Make sure we don't remove any blank lines after
+                   ;; the block when replacing it.
+                   (match-end (save-excursion
+                                (goto-char (org-element-property :end element))
+                                (skip-chars-backward " \r\t\n")
+                                (copy-marker (line-end-position))))
+                   (indentation (org-get-indentation))
+                   (headers
+		    (cons
+		     (org-element-property :language element)
+		     (let ((params (org-element-property :parameters element)))
+		       (and params (org-split-string params "[ \t]+")))))
+                   (preserve-indent (or org-src-preserve-indentation
+                                        (org-element-property :preserve-indent
+                                                              element))))
+              ;; Execute all non-block elements between START and
+              ;; MATCH-START.
+              (org-babel-exp-non-block-elements start match-start)
+              (let ((replacement
+                     (progn (goto-char block-start)
+                            (org-babel-exp-src-block headers))))
+                (when replacement
+                  (goto-char match-start)
+                  (delete-region (point) match-end)
+                  (insert replacement)
+                  (if preserve-indent
+                      ;; Indent only the code block markers.
+                      (save-excursion
+                        (skip-chars-backward " \r\t\n")
+                        (indent-line-to indentation)
+                        (goto-char match-start)
+                        (indent-line-to indentation))
+                    ;; Indent everything.
+                    (indent-code-rigidly match-start (point) indentation))))
+              ;; Cleanup markers.
+	      (set-marker block-start nil)
+              (set-marker match-start nil)
+              (set-marker match-end nil))))
+        (setq start (point)))
+      ;; Execute all non-block Babel elements between last src-block
+      ;; and end of buffer.
+      (org-babel-exp-non-block-elements start (point-max))
       (run-hooks 'org-export-blocks-postblock-hook))))
 
 ;;================================================================================
