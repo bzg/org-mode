@@ -5,6 +5,7 @@ DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
 
 LISPDIRS      = lisp
 OTHERDIRS     = doc etc
+CLEANDIRS     = contrib testing UTILITIES
 SUBDIRS       = $(OTHERDIRS) $(LISPDIRS)
 INSTSUB       = $(SUBDIRS:%=install-%)
 ORG_MAKE_DOC ?= info html pdf
@@ -25,8 +26,7 @@ endif
 .PHONY:	all oldorg update update2 up0 up1 up2 single $(SUBDIRS) \
 	check test install $(INSTSUB) \
 	info html pdf card refcard doc docs \
-	autoloads cleanall clean \
-	cleancontrib cleantesting cleanutils
+	autoloads cleanall clean $(CLEANDIRS:%=clean%) \
 	cleanrel clean-install cleanelc cleandirs \
 	cleanlisp cleandoc cleandocs cleantest \
 	compile compile-dirty uncompiled \
@@ -57,7 +57,7 @@ config-cmd config-all::
 	$(info ========= Commands used by make)
 	$(foreach var,$(CONF_CALL),$(info $(var)	= $($(var))$(EOL)))
 config config-test config-exe config-all::
-	$(info )
+	@echo ""
 
 oldorg:	compile info	# what the old makefile did when no target was specified
 uncompiled:	cleanlisp autoloads	# for developing
@@ -123,11 +123,11 @@ clean:	cleanrel
 	$(MAKE) -C doc clean
 
 cleanall: cleandirs cleantest
-	-$(FIND) . -name \*~ -o -name \*# -o -name .#\* -exec $(RM) {} \;
-	-$(FIND) contrib testing UTILITIES -name \*~ -o -name \*.elc -exec $(RM) {} \;
+	-$(FIND) . \( -name \*~ -o -name \*# -o -name .#\* \) -exec $(RM) {} \;
+	-$(FIND) $(CLEANDIRS) \( -name \*~ -o -name \*.elc \) -exec $(RM) {} \;
 
-cleancontrib cleantesting cleanUTILITIES:
-	-$(FIND) $(@:clean%=%) -name \*~ -o -name \*.elc -exec $(RM) {} \;
+$(CLEANDIRS:%=clean%):
+	-$(FIND) $(@:clean%=%) \( -name \*~ -o -name \*.elc \) -exec $(RM) {} \;
 
 cleanutils:	cleanUTILITIES
 
@@ -139,10 +139,10 @@ cleanrel:
 cleanelc:
 	$(MAKE) -C lisp $@
 
-cleanlisp:
-	$(MAKE) -C lisp clean
+cleanlisp cleandoc:
+	$(MAKE) -C $(@:clean%=%) clean
 
-cleandoc cleandocs:
+cleandocs:
 	$(MAKE) -C doc clean
 	-$(FIND) doc -name \*~ -exec $(RM) {} \;
 
