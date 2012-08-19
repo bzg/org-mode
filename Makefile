@@ -87,6 +87,10 @@ helpall::
 	$(info make uncompiled     - combine cleanlisp and autoloads)
 	$(info make local.mk       - create new local.mk as template for adaptation)
 help helpall::
+	$(info )
+	$(info Full documentation on Worg)
+	$(info ==========================)
+	$(info http://orgmode.org/worg/dev/org-build-system.html)
 	@echo ""
 
  include targets.mk	# toplevel make machinery
