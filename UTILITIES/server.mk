@@ -1,41 +1,61 @@
 #----------------------------------------------------------------------
 # This file is used for maintenance of org on the server.
 #----------------------------------------------------------------------
-.PHONY:	helpserver reltest rel-dirty warn
+.PHONY:	helpserver release rel-dirty tagwarn
 
 help helpall helpserver::
 	$(info )
 	$(info Maintenance)
 	$(info ===========)
-	$(info reltest               - clean up and create TAR/ZIP release archives)
+	$(info release               - clean up and create TAR/ZIP release archives)
+	$(info elpa                  - clean up and create ELPA TAR archive)
 helpserver::
 	@echo ""
 
 #----------------------------------------------------------------------
 
-ORGDIR = org-$(GITVERSION)
-ORGTAR = $(ORGDIR).tar.gz
-ORGZIP = $(ORGDIR).zip
-ORGDIST = README Makefile default.mk targets.mk request-assign-future.txt \
-	  lisp/ etc/ doc/ contrib/
+ORGCOMM  = README request-assign-future.txt lisp/ doc/
+ORGFULL  = $(ORGCOMM) Makefile default.mk targets.mk etc/ contrib/
+ORGFULL := $(ORGFULL:%/=%/*)
+ORGELPA  = $(ORGCOMM) etc/styles/ org-pkg.el
+ORGELPA := $(ORGELPA:%/=%/*)
 
-ORG_MAKE_DOC = info pdf card # do not make HTML documentation for release
-
-reltest:	cleanall doc autoloads rel-dirty
+release:	ORG_MAKE_DOC=info pdf card # do not make HTML documentation
+release:	cleanall doc autoloads rel-dirty
+rel-dirty:	ORGRDIR=org-$(GITVERSION)
 rel-dirty:
-	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
-	ln -s . $(ORGDIR)
-	tar -zcf $(ORGTAR) $(foreach dist, $(ORGDIST), $(ORGDIR)/$(dist))
-	zip -r9 $(ORGZIP) $(foreach dist, $(ORGDIST), $(ORGDIR)/$(dist))
-	-@$(RM) $(ORGDIR)
+	-@$(RM) $(ORGRDIR) $(ORGRTAR) $(ORGRZIP)
+	ln -s . $(ORGRDIR)
+	tar -zcf $(ORGDIR).tar.gz $(foreach dist, $(ORGFULL), $(ORGRDIR)/$(dist))
+	zip -r9  $(ORGDIR).zip    $(foreach dist, $(ORGFULL), $(ORGRDIR)/$(dist))
+	-@$(RM) $(ORGRDIR)
 	$(if $(filter-out $(ORGVERSION), $(GITVERSION)), \
-	    @$(MAKE) warn)
+	    @$(MAKE) tagwarn)
 	@echo ORGVERSION=$(ORGVERSION) GITVERSION=$(GITVERSION)
 
-warn:
+PKG_TAG = $(shell date +%Y%m%d)
+PKG_DOC = "Outline-based notes management and organizer"
+PKG_REQ = "nil"
+
+elpa:		ORG_MAKE_DOC=info pdf card # do not make HTML documentation
+elpa:		cleanall doc elpa-dirty
+elpa-dirty:	ORGDIR=org-$(PKG_TAG)
+elpa-dirty:	autoloads
+	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
+	ln -s . $(ORGDIR)
+	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" >org-pkg.el
+	tar --exclude=Makefile --xform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
+	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
+	-@$(RM) $(ORGDIR) org-pkg.el
+	$(if $(filter-out $(ORGVERSION), $(GITVERSION)), \
+	    @$(MAKE) tagwarn)
+	@echo ORGVERSION=$(ORGVERSION) GITVERSION=$(GITVERSION)
+
+tagwarn:
 	$(info  ======================================================)
 	$(info  =                                                    =)
 	$(info  = A release should only be made from a revision that =)
 	$(info  = has an annotated tag!                              =)
 	$(info  =                                                    =)
 	$(info  ======================================================)
+	@echo ""
