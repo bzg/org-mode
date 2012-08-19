@@ -5013,7 +5013,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
 	 donep tmp priority category org-category-pos ee txt timestr tags
-	 b0 b3 e3 head todo-state end-of-match show-all)
+	 b0 b3 e3 head todo-state end-of-match show-all warntime)
     (goto-char (point-min))
     (while (setq end-of-match (re-search-forward regexp nil t))
       (setq b0 (match-beginning 0)
@@ -5045,6 +5045,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	      clockp (and org-agenda-include-inactive-timestamps
 			  (or (string-match org-clock-string tmp)
 			      (string-match "]-+\\'" tmp)))
+	      warntime (org-entry-get (point) "APPT_WARNTIME")
 	      donep (member todo-state org-done-keywords))
 	(if (or scheduledp deadlinep closedp clockp
 		(and donep org-agenda-skip-timestamp-if-done))
@@ -5077,6 +5078,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 			 'org-category category 'date date
 			 'org-category-position org-category-pos
 			 'todo-state todo-state
+			 'warntime warntime
 			 'type "timestamp")
 	  (push txt ee))
 	(if org-agenda-skip-additional-timestamps-same-entry
@@ -5094,7 +5096,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp "^&?%%(")
 	 marker category extra org-category-pos ee txt tags entry
-	 result beg b sexp sexp-entry todo-state)
+	 result beg b sexp sexp-entry todo-state warntime)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -5114,7 +5116,8 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		org-category-pos (get-text-property beg 'org-category-position)
 		tags (save-excursion (org-backward-heading-same-level 0)
 				     (org-get-tags-at))
-		todo-state (org-get-todo-state))
+		todo-state (org-get-todo-state)
+		warntime (org-entry-get (point) "APPT_WARNTIME"))
 
 	  (dolist (r (if (stringp result)
 			 (list result)
@@ -5133,7 +5136,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (org-add-props txt nil
 	      'org-category category 'date date 'todo-state todo-state
 	      'org-category-position org-category-pos 'tags tags
-	      'type "sexp")
+	      'type "sexp" 'warntime warntime)
 	    (push txt ee)))))
     (nreverse ee)))
 
@@ -5439,7 +5442,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 d2 diff dfrac wdays pos pos1 category org-category-pos
 	 tags suppress-prewarning ee txt head face s todo-state
-	 show-all upcomingp donep timestr)
+	 show-all upcomingp donep timestr warntime)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (setq suppress-prewarning nil)
@@ -5485,6 +5488,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 			   (not (= diff 0))))
 		  (setq txt nil)
 		(setq category (org-get-category)
+		      warntime (org-entry-get (point) "APPT_WARNTIME")
 		      org-category-pos (get-text-property (point) 'org-category-position))
 		(if (not (re-search-backward "^\\*+[ \t]+" nil t))
 		    (setq txt org-agenda-no-heading-message)
@@ -5515,6 +5519,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		(setq face (org-agenda-deadline-face dfrac))
 		(org-add-props txt props
 		  'org-marker (org-agenda-new-marker pos)
+		  'warntime warntime
 		  'org-hd-marker (org-agenda-new-marker pos1)
 		  'priority (+ (- diff)
 			       (org-get-priority txt))
@@ -5557,7 +5562,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		  deadline-results))
 	 d2 diff pos pos1 category org-category-pos tags donep
 	 ee txt head pastschedp todo-state face timestr s habitp show-all
-	 did-habit-check-p)
+	 did-habit-check-p warntime)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -5572,7 +5577,8 @@ FRACTION is what fraction of the head-warning time has passed."
 	      d2 (org-time-string-to-absolute
 		  (match-string 1) d1 'past show-all
 		  (current-buffer) pos)
-	      diff (- d2 d1))
+	      diff (- d2 d1)
+	      warntime (org-entry-get (point) "APPT_WARNTIME"))
 	(setq pastschedp (and todayp (< diff 0)))
 	(setq did-habit-check-p nil)
 	;; When to show a scheduled item in the calendar:
@@ -5647,6 +5653,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		'org-hd-marker (org-agenda-new-marker pos1)
 		'type (if pastschedp "past-scheduled" "scheduled")
 		'date (if pastschedp d2 date)
+		'warntime warntime
 		'priority (if habitp
 			      (org-habit-get-priority habitp)
 			    (+ 94 (- 5 diff) (org-get-priority txt)))
@@ -9046,7 +9053,7 @@ to override `appt-message-warning-time'."
 				      (string-match cat-filter cat))
 				 (and (stringp evt-filter)
 				      (string-match evt-filter evt)))))))
-	      (wrn (org-entry-get (point) "APPT_WARNTIME")))
+	      (wrn (get-text-property 1 'warntime x)))
 	 ;; FIXME: Shall we remove text-properties for the appt text?
 	 ;; (setq evt (set-text-properties 0 (length evt) nil evt))
 	 (when (and ok tod)
