@@ -131,3 +131,10 @@ SUDO	= sudo
 # Name of the program to install info files
 # INSTALL_INFO = ginstall-info # Debian: avoid harmless warning message
 INSTALL_INFO = install-info
+
+# target variant for 'compile'
+# _COMPILE_ = single # one Emacs process per compilation
+# _COMPILE_ = source # ditto, but remove compiled file immediately
+# _COMPILE_ = slint1 # possibly elicit more warnings
+# _COMPILE_ = slint2 # possibly elicit even more warnings
+_COMPILE_ = dirall
