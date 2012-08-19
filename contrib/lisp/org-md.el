@@ -334,7 +334,7 @@ a communication channel."
   (let ((first-object (car (org-element-contents paragraph))))
     ;; If paragraph starts with a #, protect it.
     (if (and (stringp first-object) (string-match "\\`#" first-object))
-	(replace-match "\\#" nil t first-object)
+	(replace-regexp-in-string "\\`#" "\\#" contents nil t)
       contents)))
 
 
