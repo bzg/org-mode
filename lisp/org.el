@@ -5450,7 +5450,12 @@ will be prompted for."
   "Run through the buffer and add overlays to links."
   (catch 'exit
     (let (f)
-      (if (re-search-forward org-plain-link-re limit t)
+      (if (and (re-search-forward (concat org-plain-link-re) limit t)
+	       (or (not (member 'bracket org-activate-links))
+		   (save-excursion
+		     (save-match-data
+		       (goto-char (match-beginning 0))
+		       (not (looking-back "\\[\\["))))))
 	  (progn
 	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	    (setq f (get-text-property (match-beginning 0) 'face))
@@ -9780,7 +9785,8 @@ application the system uses for this file type."
 
 	  (save-excursion
 	    (when (or (org-in-regexp org-angle-link-re)
-		      (org-in-regexp org-plain-link-re))
+		      (and (goto-char (car (org-in-regexp org-plain-link-re)))
+			   (save-match-data (not (looking-back "\\[\\[")))))
 	      (setq type (match-string 1)
 		    path (org-link-unescape (match-string 2)))
 	      (throw 'match t)))
