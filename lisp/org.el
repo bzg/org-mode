@@ -5091,7 +5091,7 @@ The following commands are available:
   ;; Comments
   (org-set-local 'comment-use-syntax nil)
   (org-set-local 'comment-start "# ")
-  (org-set-local 'comment-start-skip "# ?")
+  (org-set-local 'comment-start-skip "#\\(?:[ \t]\\|$\\)")
   (org-set-local 'comment-insert-comment-function 'org-insert-comment)
   (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
   (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region)
