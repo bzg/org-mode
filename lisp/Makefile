@@ -3,6 +3,7 @@
 ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
+-include local.mk
 
 LISPV = org-version.el
 LISPI = org-install.el
@@ -10,24 +11,34 @@ LISPA = $(LISPV) $(LISPI)
 LISPF = $(filter-out $(LISPA),$(sort $(wildcard *.el)))
 LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 
+_ORGCM_ = dirall single source slint1
 .PHONY:	all compile compile-dirty \
-	compile-single compile-source compile-slint1 compile-slint2 \
+	$(_ORGCM_) $(_ORGCM_:%=compile-%) compile-slint2 \
 	autoloads \
 	install clean cleanauto cleanall cleanelc clean-install
 
 # do not clean here, done in toplevel make
 all compile compile-dirty::	 autoloads
-	$(MAKE) compile-$(_COMPILE_)
+	$(MAKE) compile-$(ORGCM)
 
-compile-dirall:
+compile-dirall:	dirall
+compile-single: single $(LISPC)
+compile-source:	source dirall
+compile-slint1:	dirall slint1
+compile-slint2:	source dirall slint1
+
+# internal
+dirall:
+	@$(info ==================== $@ ====================)
 	@$(ELCDIR)
-compile-single: $(LISPC)
-compile-source: cleanelc
+single:
+	@$(info ==================== $@ ====================)
+source: cleanelc
+	@$(info ==================== $@ ====================)
 	@$(foreach elc,$(LISPC),$(MAKE) $(elc) && $(RM) $(elc);)
-compile-slint1:	compile-dirall
+slint1:
+	@$(info ==================== $@ ====================)
 	@$(foreach elc,$(LISPC),$(RM) $(elc); $(MAKE) $(elc);)
-compile-slint2:
-	$(MAKE) compile-source compile-slint1
 
 %.elc:	%.el
 	@$(info Compiling single $(abspath $<)...)

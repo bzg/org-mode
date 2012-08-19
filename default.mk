@@ -132,9 +132,10 @@ SUDO	= sudo
 # INSTALL_INFO = ginstall-info # Debian: avoid harmless warning message
 INSTALL_INFO = install-info
 
-# target variant for 'compile'
-# _COMPILE_ = single # one Emacs process per compilation
-# _COMPILE_ = source # ditto, but remove compiled file immediately
-# _COMPILE_ = slint1 # possibly elicit more warnings
-# _COMPILE_ = slint2 # possibly elicit even more warnings
-_COMPILE_ = dirall
+# target method for 'compile'
+ORGCM	= dirall
+# ORGCM	= dirall #   1x slowdown compared to default compilation method
+# ORGCM	= single #   4x one Emacs process per compilation
+# ORGCM	= source #   5x ditto, but remove compiled file immediately
+# ORGCM	= slint1 #   3x possibly elicit more warnings
+# ORGCM	= slint2 #   7x possibly elicit even more warnings

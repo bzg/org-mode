@@ -22,8 +22,9 @@ ifneq ($(GITSTATUS),)
   GITVERSION := $(GITVERSION:.dirty=).dirty
 endif
 
-.PHONY:	all oldorg update update2 up0 up1 up2 compile $(SUBDIRS) \
-	check test install info html pdf card doc docs $(INSTSUB) \
+.PHONY:	all oldorg update update2 up0 up1 up2 single $(SUBDIRS) \
+	check test install $(INSTSUB) \
+	info html pdf card refcard doc docs \
 	autoloads cleanall clean \
 	cleancontrib cleantesting cleanutils
 	cleanrel clean-install cleanelc cleandirs \
@@ -31,11 +32,11 @@ endif
 	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol
 
-CONF_BASE = EMACS DESTDIR
+CONF_BASE = EMACS DESTDIR ORGCM
 CONF_DEST = lispdir infodir datadir testdir
 CONF_TEST = BTEST_PRE BTEST_POST BTEST_OB_LANGUAGES BTEST_EXTRA
 CONF_EXEC = CP MKDIR RM RMR FIND SUDO PDFTEX TEXI2PDF TEXI2HTML MAKEINFO INSTALL_INFO
-CONF_CALL = BATCH BATCHL ELCDIR BTEST MAKE_LOCAL_MK MAKE_ORG_INSTALL MAKE_ORG_VERSION
+CONF_CALL = BATCH BATCHL ELC ELCDIR BTEST MAKE_LOCAL_MK MAKE_ORG_INSTALL MAKE_ORG_VERSION
 config-eol:: EOL = \#
 config-eol:: config-all
 config config-all::
@@ -62,6 +63,9 @@ oldorg:	compile info	# what the old makefile did when no target was specified
 uncompiled:	cleanlisp autoloads	# for developing
 refcard:	card
 update update2::	up0 all
+
+single:	ORGCM=single
+single:	compile
 
 .PRECIOUS:	local.mk
 local.mk:

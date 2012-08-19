@@ -27,6 +27,7 @@ help helpall::
 	$(info make                - build Org ELisp and all documentation)
 	$(info make all            - ditto)
 	$(info make compile        - build Org ELisp files)
+	$(info make single         - build Org ELisp files, single Emacs per source)
 	$(info make autoloads      - create org-install.el to load Org in-place)
 	$(info make test           - build Org ELisp files and run test suite)
 helpall::
