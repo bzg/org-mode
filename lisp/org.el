@@ -20352,21 +20352,22 @@ and :keyword."
       (push (list :table-table) clist)))
     (goto-char p)
 
-    ;; New the "medium" contexts: clocktables, source blocks
-    (cond ((org-in-clocktable-p)
-	   (push (list :clocktable
-		       (and (or (looking-at "#\\+BEGIN: clocktable")
-				(search-backward "#+BEGIN: clocktable" nil t))
-			    (match-beginning 0))
-		       (and (re-search-forward "#\\+END:?" nil t)
-			    (match-end 0))) clist))
-	  ((org-in-src-block-p)
-	   (push (list :src-block
-		       (and (or (looking-at "#\\+BEGIN_SRC")
-				(search-backward "#+BEGIN_SRC" nil t))
-			    (match-beginning 0))
-		       (and (search-forward "#+END_SRC" nil t)
-			    (match-beginning 0))) clist)))
+    (let ((case-fold-search t))
+      ;; New the "medium" contexts: clocktables, source blocks
+      (cond ((org-in-clocktable-p)
+	     (push (list :clocktable
+			 (and (or (looking-at "#\\+BEGIN: clocktable")
+				  (search-backward "#+BEGIN: clocktable" nil t))
+			      (match-beginning 0))
+			 (and (re-search-forward "#\\+END:?" nil t)
+			      (match-end 0))) clist))
+	    ((org-in-src-block-p)
+	     (push (list :src-block
+			 (and (or (looking-at "#\\+BEGIN_SRC")
+				  (search-backward "#+BEGIN_SRC" nil t))
+			      (match-beginning 0))
+			 (and (search-forward "#+END_SRC" nil t)
+			      (match-beginning 0))) clist))))
     (goto-char p)
 
     ;; Now the small context
