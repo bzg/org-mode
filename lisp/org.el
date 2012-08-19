@@ -20996,7 +20996,9 @@ meant to be filled."
 	      (when (and (>= p cbeg) (< p cend))
 		(if (looking-at "\\s-+") (match-string 0) ""))))))))))
 
-(defvar org-element-all-objects)         ; From org-element.el
+(declare-function message-goto-body "message" ())
+(defvar message-cite-prefix-regexp)	; From message.el
+(defvar org-element-all-objects)	; From org-element.el
 (defun org-fill-paragraph (&optional justify)
   "Fill element at point, when applicable.
 
@@ -21017,7 +21019,7 @@ a footnote definition, try to fill the first paragraph within."
   (if (and (derived-mode-p 'message-mode)
 	   (or (not (message-in-body-p))
 	       (save-excursion (move-beginning-of-line 1)
-			       (looking-at "^>+ "))))
+			       (looking-at message-cite-prefix-regexp))))
       (let ((fill-paragraph-function
 	     (cadadr (assoc 'fill-paragraph-function org-fb-vars)))
 	    (fill-prefix (cadadr (assoc 'fill-prefix org-fb-vars)))
@@ -21052,43 +21054,52 @@ a footnote definition, try to fill the first paragraph within."
 	       (if (or (< (point) beg)
 		       (and (eq type 'verse-block) (>= (point) end)))
 		   t
-		 ;; At a verse block, first narrow to current "paragraph"
-		 ;; and set current element to that paragraph.
-		 (save-restriction
-		   (narrow-to-region beg end)
-		   (when (eq type 'verse-block)
-		     (save-excursion
-		       (let ((bol-pos (point-at-bol)))
-			 (re-search-backward "^[ \t]*$" nil 'm)
-			 (unless (or (bobp) (= (point-at-bol) bol-pos))
-			   (forward-line))
-			 (setq element (org-element-paragraph-parser end)
-			       beg (org-element-property
-				    :contents-begin element)
-			       end (org-element-property
-				    :contents-end element)))))
-		   ;; Fill paragraph, taking line breaks into consideration.
-		   ;; For that, slice the paragraph using line breaks as
-		   ;; separators, and fill the parts in reverse order to
-		   ;; avoid messing with markers.
+		 ;; In verse blocks and `message-mode', boundaries of
+		 ;; region to fill have to be tweaked.
+		 (cond
+		  ;; At a verse block, fill current "paragraph", that
+		  ;; is part of text separated by blank lines.
+		  ((eq type 'verse-block)
 		   (save-excursion
-		     (goto-char end)
-		     (mapc
-		      (lambda (pos)
-			(let ((fill-prefix (org-fill-context-prefix pos)))
-			  (fill-region-as-paragraph pos (point) justify))
-			(goto-char pos))
-		      ;; Find the list of ending positions for line breaks
-		      ;; in the current paragraph.  Add paragraph beginning
-		      ;; to include first slice.
-		      (nreverse
-		       (cons
-			beg
-			(org-element-map
-			 (org-element--parse-objects
-			  beg end nil org-element-all-objects)
-			 'line-break
-			 (lambda (lb) (org-element-property :end lb))))))))
+		     (when (looking-at "[ \t]*$")
+		       (skip-chars-backward " \r\t\n" beg))
+		     (when (re-search-backward "^[ \t]*$" beg t)
+		       (forward-line)
+		       (setq beg (point))))
+		   (when (save-excursion (re-search-forward "^[ \t]*$" end t))
+		     (setq end (match-beginning 0))))
+		  ;; In `message-mode', do not fill following citation
+		  ;; in current paragraph nor text before message
+		  ;; body.
+		  ((derived-mode-p 'message-mode)
+		   (let ((body-start (message-goto-body)))
+		     (when body-start (setq beg (max body-start beg))))
+		   (when (save-excursion
+			   (re-search-forward
+			    (concat "^" message-cite-prefix-regexp) end t))
+		     (setq end (match-beginning 0)))))
+		 ;; Fill paragraph, taking line breaks into consideration.
+		 ;; For that, slice the paragraph using line breaks as
+		 ;; separators, and fill the parts in reverse order to
+		 ;; avoid messing with markers.
+		 (save-excursion
+		   (goto-char end)
+		   (mapc
+		    (lambda (pos)
+		      (let ((fill-prefix (org-fill-context-prefix pos)))
+			(fill-region-as-paragraph pos (point) justify))
+		      (goto-char pos))
+		    ;; Find the list of ending positions for line breaks
+		    ;; in the current paragraph.  Add paragraph beginning
+		    ;; to include first slice.
+		    (nreverse
+		     (cons
+		      beg
+		      (org-element-map
+		       (org-element--parse-objects
+			beg end nil org-element-all-objects)
+		       'line-break
+		       (lambda (lb) (org-element-property :end lb)))))))
 		 t)))
 	    ;; Contents of `comment-block' type elements should be filled as
 	    ;; plain text.
