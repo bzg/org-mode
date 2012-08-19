@@ -1409,7 +1409,7 @@ description to use."
 (defcustom org-url-hexify-p t
   "When non-nil, hexify URL when creating a link."
   :type 'boolean
-  :version "24.2"
+  :version "24.3"
   :group 'org-link-store)
 
 (defcustom org-email-link-description-format "Email %c: %.30s"
@@ -1853,7 +1853,7 @@ For more examples, see the system specific constants
 (defcustom org-doi-server-url "http://dx.doi.org/"
   "The URL of the DOI server."
   :type 'string
-  :version "24.2"
+  :version "24.3"
   :group 'org-link-follow)
 
 (defgroup org-refile nil
@@ -2752,8 +2752,8 @@ This affects the following situations:
 If you set this variable to the symbol `time', then also the following
 will work:
 
-3. If the user gives a time, but no day.  If the time is before now,
-   to will be interpreted as tomorrow.
+3. If the user gives a time.
+   If the time is before now, it will be interpreted as tomorrow.
 
 Currently none of this works for ISO week specifications.
 
@@ -3425,7 +3425,7 @@ imagemagick     Convert the LaTeX fragments to pdf files and use imagemagick
    directories relative to the processed org files paths.  An absolute path
    puts all preview images at the same place."
   :group 'org-latex
-  :version "24.2"
+  :version "24.3"
   :type 'string)
 
 (defun org-format-latex-mathml-available-p ()
@@ -3611,7 +3611,7 @@ The default use of these custom properties is to let the user
 hide them with `org-toggle-custom-properties-visibility'."
   :group 'org-properties
   :group 'org-appearance
-  :version "24.2"
+  :version "24.3"
   :type '(repeat (string :tag "Property Name")))
 
 (defcustom org-fontify-done-headline nil
@@ -4307,7 +4307,7 @@ Otherwise, these types are allowed:
 		 (const :tag "Only scheduled timestamps" scheduled)
 		 (const :tag "Only deadline timestamps" deadline))
   :group 'org-sparse-trees
-  :version "24.2")
+  :version "24.3")
 
 (defun org-cycle-hide-archived-subtrees (state)
   "Re-hide all archived subtrees after a visibility state change."
@@ -5090,8 +5090,8 @@ The following commands are available:
   (org-update-radio-target-regexp)
   ;; Comments
   (org-set-local 'comment-use-syntax nil)
-  (org-set-local 'comment-start "#")
-  (org-set-local 'comment-start-skip "# ?")
+  (org-set-local 'comment-start "# ")
+  (org-set-local 'comment-start-skip "#\\(?:[ \t]\\|$\\)")
   (org-set-local 'comment-insert-comment-function 'org-insert-comment)
   (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
   (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region)
@@ -5450,7 +5450,12 @@ will be prompted for."
   "Run through the buffer and add overlays to links."
   (catch 'exit
     (let (f)
-      (if (re-search-forward org-plain-link-re limit t)
+      (if (and (re-search-forward (concat org-plain-link-re) limit t)
+	       (or (not (member 'bracket org-activate-links))
+		   (save-excursion
+		     (save-match-data
+		       (goto-char (match-beginning 0))
+		       (not (looking-back "\\[\\["))))))
 	  (progn
 	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	    (setq f (get-text-property (match-beginning 0) 'face))
@@ -5579,7 +5584,8 @@ by a #."
 	     (if (string-equal dc1 "+title:")
 		 '(font-lock-fontified t face org-document-title)
 	       '(font-lock-fontified t face org-document-info))))
-	   ((or (member dc1 '("+begin:" "+end:" "+caption:" "+label:"
+	   ((or (equal dc1 "+results")
+		(member dc1 '("+begin:" "+end:" "+caption:" "+label:"
 			      "+orgtbl:" "+tblfm:" "+tblname:" "+results:"
 			      "+call:" "+header:" "+headers:" "+name:"))
 		(and (match-end 4) (equal dc3 "+attr")))
@@ -5772,8 +5778,7 @@ by a #."
 	   ((equal org-export-with-sub-superscripts '{})
 	    (list org-match-substring-with-braces-regexp))
 	   (org-export-with-sub-superscripts
-	    (list org-match-substring-regexp))
-	   (t nil)))
+	    (list org-match-substring-regexp))))
 	 (re-latex
 	  (if org-export-with-LaTeX-fragments
 	      (mapcar (lambda (x) (nth 1 x)) latexs)))
@@ -5992,7 +5997,6 @@ needs to be inserted at a specific position in the font-lock sequence.")
 				 org-comment-string "\\|" org-quote-string
 				 "\\)"))
 		 '(2 'org-special-keyword t))
-	   '("^[ \t]*#.*" (0 'font-lock-comment-face t))
 	   ;; Blocks and meta lines
 	   '(org-fontify-meta-lines-and-blocks)
 	   )))
@@ -7920,8 +7924,7 @@ the inserted text when done."
 			      (- (match-end 1) (match-beginning 1)))
 			     ((and (bolp)
 				   (looking-at org-outline-regexp))
-			      (- (match-end 0) (point) 1))
-			     (t nil)))
+			      (- (match-end 0) (point) 1))))
 	  (previous-level (save-excursion
 			    (condition-case nil
 				(progn
@@ -8373,8 +8376,7 @@ WITH-CASE, the sorting considers case as well."
          (cond
           ((= dcst ?a) 'string<)
           ((= dcst ?f) compare-func)
-          ((member dcst '(?p ?t ?s ?d ?c)) '<)
-          (t nil)))))
+          ((member dcst '(?p ?t ?s ?d ?c)) '<)))))
     (run-hooks 'org-after-sorting-entries-or-items-hook)
     (message "Sorting entries...done")))
 
@@ -8697,7 +8699,8 @@ call CMD."
 
 (defun org-refresh-category-properties ()
   "Refresh category text properties in the buffer."
-  (let ((inhibit-read-only t)
+  (let ((case-fold-search t)
+	(inhibit-read-only t)
 	(def-cat (cond
 		  ((null org-category)
 		   (if buffer-file-name
@@ -8960,8 +8963,7 @@ For file links, arg negates `org-context-in-file-links'."
 	   (setq txt (cond
 		      ((org-at-heading-p) nil)
 		      ((org-region-active-p)
-		       (buffer-substring (region-beginning) (region-end)))
-		      (t nil)))
+		       (buffer-substring (region-beginning) (region-end)))))
 	   (when (or (null txt) (string-match "\\S-" txt))
 	     (setq cpltxt
 		   (concat cpltxt "::"
@@ -9783,7 +9785,8 @@ application the system uses for this file type."
 
 	  (save-excursion
 	    (when (or (org-in-regexp org-angle-link-re)
-		      (org-in-regexp org-plain-link-re))
+		      (and (goto-char (car (org-in-regexp org-plain-link-re)))
+			   (save-match-data (not (looking-back "\\[\\[")))))
 	      (setq type (match-string 1)
 		    path (org-link-unescape (match-string 2)))
 	      (throw 'match t)))
@@ -9923,15 +9926,13 @@ application the system uses for this file type."
 	    (let ((cmd `(org-link-search
 			 ,path
 			 ,(cond ((equal arg '(4)) ''occur)
-				((equal arg '(16)) ''org-occur)
-				(t nil))
+				((equal arg '(16)) ''org-occur))
 			 ,pos)))
 	      (condition-case nil (let ((org-link-search-inhibit-query t))
 				    (eval cmd))
 		(error (progn (widen) (eval cmd))))))
 
-	   (t
-	    (browse-url-at-point)))))))
+	   (t (browse-url-at-point)))))))
     (move-marker org-open-link-marker nil)
     (run-hook-with-args 'org-follow-link-hook)))
 
@@ -10558,8 +10559,7 @@ on the system \"/user@host:\"."
          (tramp-handle-file-remote-p file))
         ((and (boundp 'ange-ftp-name-format)
               (string-match (car ange-ftp-name-format) file))
-         t)
-        (t nil)))
+         t)))
 
 
 ;;;; Refiling
@@ -11157,20 +11157,20 @@ this is used for the GOTO interface."
 (defun org-find-dblock (name)
   "Find the first dynamic block with name NAME in the buffer.
 If not found, stay at current position and return nil."
-  (let (pos)
+  (let ((case-fold-search t) pos)
     (save-excursion
       (goto-char (point-min))
-      (setq pos (and (re-search-forward (concat "^[ \t]*#\\+BEGIN:[ \t]+" name "\\>")
-					nil t)
+      (setq pos (and (re-search-forward
+		      (concat "^[ \t]*#\\+\\(?:BEGIN\\|begin\\):[ \t]+" name "\\>") nil t)
 		     (match-beginning 0))))
     (if pos (goto-char pos))
     pos))
 
 (defconst org-dblock-start-re
-  "^[ \t]*#\\+BEGIN:[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
+  "^[ \t]*#\\+\\(?:BEGIN\\|begin\\):[ \t]+\\(\\S-+\\)\\([ \t]+\\(.*\\)\\)?"
   "Matches the start line of a dynamic block, with parameters.")
 
-(defconst org-dblock-end-re "^[ \t]*#\\+END\\([: \t\r\n]\\|$\\)"
+(defconst org-dblock-end-re "^[ \t]*#\\+\\(?:END\\|end\\)\\([: \t\r\n]\\|$\\)"
   "Matches the end of a dynamic block.")
 
 (defun org-create-dblock (plist)
@@ -11322,7 +11322,7 @@ This function can be used in a hook."
   '("TITLE:" "AUTHOR:" "EMAIL:" "DATE:"
     "DESCRIPTION:" "KEYWORDS:" "LANGUAGE:" "OPTIONS:"
     "EXPORT_SELECT_TAGS:" "EXPORT_EXCLUDE_TAGS:"
-    "LINK_UP:" "LINK_HOME:" "LINK:"
+    "LINK_UP:" "LINK_HOME:" "LINK:" "TODO:"
     "XSLT:" "CATEGORY:" "SEQ_TODO:" "TYP_TODO:"
     "PRIORITIES:" "DRAWERS:" "STARTUP:" "TAGS:"
     "FILETAGS:" "ARCHIVE:"))
@@ -12537,8 +12537,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
   (let* ((org-log-into-drawer (org-log-into-drawer))
 	 (drawer (cond ((stringp org-log-into-drawer)
 			org-log-into-drawer)
-		       (org-log-into-drawer "LOGBOOK")
-		       (t nil))))
+		       (org-log-into-drawer "LOGBOOK"))))
     (save-restriction
       (save-excursion
 	(when findpos
@@ -13645,8 +13644,7 @@ If DATA is nil or the empty string, any tags will be removed."
 	  (concat ":" (mapconcat 'identity (org-split-string data ":+") ":")
 		  ":"))
 	 ((listp data)
-	  (concat ":" (mapconcat 'identity data ":") ":"))
-	 (t nil)))
+	  (concat ":" (mapconcat 'identity data ":") ":"))))
   (when data
     (save-excursion
       (org-back-to-heading t)
@@ -13962,8 +13960,7 @@ Returns the new tags string, or nil to not change the current settings."
 				   ((not (assoc tg table))
 				    (org-get-todo-face tg))
 				   ((member tg current) c-face)
-				   ((member tg inherited) i-face)
-				   (t nil))))
+				   ((member tg inherited) i-face))))
 	  (if (and (= cnt 0) (not ingroup)) (insert "  "))
 	  (insert "[" c "] " tg (make-string
 				 (- fwidth 4 (length tg)) ?\ ))
@@ -15557,10 +15554,11 @@ user."
       (setq ans "+0"))
 
     (when (setq delta (org-read-date-get-relative ans (current-time) org-def))
-      (setq ans (replace-match "" t t ans)
-	    deltan (car delta)
-	    deltaw (nth 1 delta)
-            deltadef (nth 2 delta)))
+      (unless (save-match-data (string-match org-plain-time-of-day-regexp ans))
+	(setq ans (replace-match "" t t ans)
+	      deltan (car delta)
+	      deltaw (nth 1 delta)
+	      deltadef (nth 2 delta))))
 
     ;; Check if there is an iso week date in there
     ;; If yes, store the info and postpone interpreting it until the rest
@@ -15713,7 +15711,6 @@ user."
 	    ((equal deltaw "m") (setq month (+ month deltan)))
 	    ((equal deltaw "y") (setq year (+ year deltan)))))
      ((and wday (not (nth 3 tl)))
-      (setq futurep nil)
       ;; Weekday was given, but no day, so pick that day in the week
       ;; on or after the derived date.
       (setq wday1 (nth 6 (decode-time (encode-time 0 0 0 day month year))))
@@ -16210,8 +16207,7 @@ D may be an absolute day number, or a calendar-type list (month day year)."
 		(stringp (cdr result))) (cdr result))
 	  ((and (consp result)
 		(stringp (car result))) result)
-	  (result entry)
-          (t nil))))
+	  (result entry))))
 
 (defun org-diary-to-ical-string (frombuf)
   "Get iCalendar entries from diary entries in buffer FROMBUF.
@@ -20351,21 +20347,22 @@ and :keyword."
       (push (list :table-table) clist)))
     (goto-char p)
 
-    ;; New the "medium" contexts: clocktables, source blocks
-    (cond ((org-in-clocktable-p)
-	   (push (list :clocktable
-		       (and (or (looking-at "#\\+BEGIN: clocktable")
-				(search-backward "#+BEGIN: clocktable" nil t))
-			    (match-beginning 0))
-		       (and (re-search-forward "#\\+END:?" nil t)
-			    (match-end 0))) clist))
-	  ((org-in-src-block-p)
-	   (push (list :src-block
-		       (and (or (looking-at "#\\+BEGIN_SRC")
-				(search-backward "#+BEGIN_SRC" nil t))
-			    (match-beginning 0))
-		       (and (search-forward "#+END_SRC" nil t)
-			    (match-beginning 0))) clist)))
+    (let ((case-fold-search t))
+      ;; New the "medium" contexts: clocktables, source blocks
+      (cond ((org-in-clocktable-p)
+	     (push (list :clocktable
+			 (and (or (looking-at "#\\+BEGIN: clocktable")
+				  (search-backward "#+BEGIN: clocktable" nil t))
+			      (match-beginning 0))
+			 (and (re-search-forward "#\\+END:?" nil t)
+			      (match-end 0))) clist))
+	    ((org-in-src-block-p)
+	     (push (list :src-block
+			 (and (or (looking-at "#\\+BEGIN_SRC")
+				  (search-backward "#+BEGIN_SRC" nil t))
+			      (match-beginning 0))
+			 (and (search-forward "#+END_SRC" nil t)
+			      (match-beginning 0))) clist))))
     (goto-char p)
 
     ;; Now the small context
@@ -20960,53 +20957,54 @@ hierarchy of headlines by UP levels before marking the subtree."
   "Compute a fill prefix for the line at point P.
 Return fill prefix, as a string, or nil if current line isn't
 meant to be filled."
-  (unless (and (derived-mode-p 'message-mode) (not (message-in-body-p)))
-    ;; FIXME: Prevent an error for users who forgot to make autoloads?
-    ;; See also `org-fill-paragraph', which has the same.
-    (require 'org-element)
-    ;; FIXME: This is really the job of orgstruct++-mode
-    (save-excursion
-      (goto-char p)
-      (beginning-of-line)
-      (let* ((element (org-element-at-point))
-	     (type (org-element-type element))
-	     (post-affiliated
-	      (progn
-		(goto-char (org-element-property :begin element))
-		(while (looking-at org-element--affiliated-re) (forward-line))
-		(point))))
-	(unless (< p post-affiliated)
-	  (case type
-	    (comment (looking-at "[ \t]*# ?") (match-string 0))
-	    (footnote-definition "")
-	    ((item plain-list)
-	     (make-string (org-list-item-body-column
-			   (org-element-property :begin element))
-			  ? ))
-	    (paragraph
-	     ;; Fill prefix is usually the same as the current line,
-	     ;; except if the paragraph is at the beginning of an item.
-	     (let ((parent (org-element-property :parent element)))
-	       (cond ((eq (org-element-type parent) 'item)
-		      (make-string (org-list-item-body-column
-				    (org-element-property :begin parent))
-				   ? ))
-		     ((looking-at "\\s-+") (match-string 0))
-		     (t  ""))))
-	    ((comment-block verse-block)
-	     ;; Only fill contents if P is within block boundaries.
-	     (let* ((cbeg (save-excursion (goto-char post-affiliated)
-					  (forward-line)
-					  (point)))
-		    (cend (save-excursion
-			    (goto-char (org-element-property :end element))
-			    (skip-chars-backward " \r\t\n")
-			    (line-beginning-position))))
-	       (when (and (>= p cbeg) (< p cend))
-		 (if (looking-at "\\s-+") (match-string 0) ""))))))))))
+  (org-with-wide-buffer
+   (unless (and (derived-mode-p 'message-mode) (not (message-in-body-p)))
+     ;; FIXME: Prevent an error for users who forgot to make autoloads?
+     ;; See also `org-fill-paragraph', which has the same.
+     (require 'org-element)
+     ;; FIXME: This is really the job of orgstruct++-mode
+     (goto-char p)
+     (beginning-of-line)
+     (let* ((element (org-element-at-point))
+	    (type (org-element-type element))
+	    (post-affiliated
+	     (progn
+	       (goto-char (org-element-property :begin element))
+	       (while (looking-at org-element--affiliated-re) (forward-line))
+	       (point))))
+       (unless (< p post-affiliated)
+	 (case type
+	   (comment (looking-at "[ \t]*# ?") (match-string 0))
+	   (footnote-definition "")
+	   ((item plain-list)
+	    (make-string (org-list-item-body-column
+			  (org-element-property :begin element))
+			 ? ))
+	   (paragraph
+	    ;; Fill prefix is usually the same as the current line,
+	    ;; except if the paragraph is at the beginning of an item.
+	    (let ((parent (org-element-property :parent element)))
+	      (cond ((eq (org-element-type parent) 'item)
+		     (make-string (org-list-item-body-column
+				   (org-element-property :begin parent))
+				  ? ))
+		    ((looking-at "\\s-+") (match-string 0))
+		    (t  ""))))
+	   ((comment-block verse-block)
+	    ;; Only fill contents if P is within block boundaries.
+	    (let* ((cbeg (save-excursion (goto-char post-affiliated)
+					 (forward-line)
+					 (point)))
+		   (cend (save-excursion
+			   (goto-char (org-element-property :end element))
+			   (skip-chars-backward " \r\t\n")
+			   (line-beginning-position))))
+	      (when (and (>= p cbeg) (< p cend))
+		(if (looking-at "\\s-+") (match-string 0) ""))))))))))
 
-(defvar org-element-paragraph-separate)  ; From org-element.el
-(defvar org-element-all-objects)         ; From org-element.el
+(declare-function message-goto-body "message" ())
+(defvar message-cite-prefix-regexp)	; From message.el
+(defvar org-element-all-objects)	; From org-element.el
 (defun org-fill-paragraph (&optional justify)
   "Fill element at point, when applicable.
 
@@ -21027,11 +21025,13 @@ a footnote definition, try to fill the first paragraph within."
   (if (and (derived-mode-p 'message-mode)
 	   (or (not (message-in-body-p))
 	       (save-excursion (move-beginning-of-line 1)
-			       (looking-at "^>+ "))))
-      (let ((fill-paragraph-function (cadadr (assoc 'fill-paragraph-function org-fb-vars)))
+			       (looking-at message-cite-prefix-regexp))))
+      (let ((fill-paragraph-function
+	     (cadadr (assoc 'fill-paragraph-function org-fb-vars)))
 	    (fill-prefix (cadadr (assoc 'fill-prefix org-fb-vars)))
 	    (paragraph-start (cadadr (assoc 'paragraph-start org-fb-vars)))
-	    (paragraph-separate (cadadr (assoc 'paragraph-separate org-fb-vars))))
+	    (paragraph-separate
+	     (cadadr (assoc 'paragraph-separate org-fb-vars))))
 	(fill-paragraph))
     (save-excursion
       ;; Move to end of line in order to get the first paragraph within
@@ -21050,50 +21050,62 @@ a footnote definition, try to fill the first paragraph within."
 	     t)
 	    ;; Elements that may contain `line-break' type objects.
 	    ((paragraph verse-block)
-	     (let ((beg (org-element-property :contents-begin element))
-		   (end (org-element-property :contents-end element))
+	     (let ((beg (max (point-min)
+			     (org-element-property :contents-begin element)))
+		   (end (min (point-max)
+			     (org-element-property :contents-end element)))
 		   (type (org-element-type element)))
 	       ;; Do nothing if point is at an affiliated keyword or at
 	       ;; verse block markers.
 	       (if (or (< (point) beg)
 		       (and (eq type 'verse-block) (>= (point) end)))
 		   t
-		 ;; At a verse block, first narrow to current "paragraph"
-		 ;; and set current element to that paragraph.
-		 (save-restriction
-		   (when (eq type 'verse-block)
-		     (narrow-to-region beg end)
-		     (save-excursion
-		       (let ((bol-pos (point-at-bol)))
-			 (re-search-backward
-			  org-element-paragraph-separate nil 'm)
-			 (unless (or (bobp) (= (point-at-bol) bol-pos))
-			   (forward-line))
-			 (setq element (org-element-paragraph-parser end)
-			       beg (org-element-property :contents-begin element)
-			       end (org-element-property
-				    :contents-end element)))))
-		   ;; Fill paragraph, taking line breaks into consideration.
-		   ;; For that, slice the paragraph using line breaks as
-		   ;; separators, and fill the parts in reverse order to
-		   ;; avoid messing with markers.
+		 ;; In verse blocks and `message-mode', boundaries of
+		 ;; region to fill have to be tweaked.
+		 (cond
+		  ;; At a verse block, fill current "paragraph", that
+		  ;; is part of text separated by blank lines.
+		  ((eq type 'verse-block)
 		   (save-excursion
-		     (goto-char end)
-		     (mapc
-		      (lambda (pos)
-			(let ((fill-prefix (org-fill-context-prefix pos)))
-			  (fill-region-as-paragraph pos (point) justify))
-			(goto-char pos))
-		      ;; Find the list of ending positions for line breaks
-		      ;; in the current paragraph.  Add paragraph beginning
-		      ;; to include first slice.
-		      (nreverse
-		       (cons beg
-			     (org-element-map
-			      (org-element--parse-objects
-			       beg end nil org-element-all-objects)
-			      'line-break
-			      (lambda (lb) (org-element-property :end lb))))))))
+		     (when (looking-at "[ \t]*$")
+		       (skip-chars-backward " \r\t\n" beg))
+		     (when (re-search-backward "^[ \t]*$" beg t)
+		       (forward-line)
+		       (setq beg (point))))
+		   (when (save-excursion (re-search-forward "^[ \t]*$" end t))
+		     (setq end (match-beginning 0))))
+		  ;; In `message-mode', do not fill following citation
+		  ;; in current paragraph nor text before message
+		  ;; body.
+		  ((derived-mode-p 'message-mode)
+		   (let ((body-start (save-excursion (message-goto-body))))
+		     (when body-start (setq beg (max body-start beg))))
+		   (when (save-excursion
+			   (re-search-forward
+			    (concat "^" message-cite-prefix-regexp) end t))
+		     (setq end (match-beginning 0)))))
+		 ;; Fill paragraph, taking line breaks into consideration.
+		 ;; For that, slice the paragraph using line breaks as
+		 ;; separators, and fill the parts in reverse order to
+		 ;; avoid messing with markers.
+		 (save-excursion
+		   (goto-char end)
+		   (mapc
+		    (lambda (pos)
+		      (let ((fill-prefix (org-fill-context-prefix pos)))
+			(fill-region-as-paragraph pos (point) justify))
+		      (goto-char pos))
+		    ;; Find the list of ending positions for line breaks
+		    ;; in the current paragraph.  Add paragraph beginning
+		    ;; to include first slice.
+		    (nreverse
+		     (cons
+		      beg
+		      (org-element-map
+		       (org-element--parse-objects
+			beg end nil org-element-all-objects)
+		       'line-break
+		       (lambda (lb) (org-element-property :end lb)))))))
 		 t)))
 	    ;; Contents of `comment-block' type elements should be filled as
 	    ;; plain text.
@@ -21103,7 +21115,8 @@ a footnote definition, try to fill the first paragraph within."
 		 (fill-region-as-paragraph
 		  (progn
 		    (goto-char (org-element-property :begin element))
-		    (while (looking-at org-element--affiliated-re) (forward-line))
+		    (while (looking-at org-element--affiliated-re)
+		      (forward-line))
 		    (forward-line)
 		    (point))
 		  (progn
@@ -21118,7 +21131,8 @@ a footnote definition, try to fill the first paragraph within."
 		 (fill-region-as-paragraph
 		  (progn
 		    (goto-char (org-element-property :begin element))
-		    (while (looking-at org-element--affiliated-re) (forward-line))
+		    (while (looking-at org-element--affiliated-re)
+		      (forward-line))
 		    (point))
 		  (progn
 		    (goto-char (org-element-property :end element))
@@ -22061,12 +22075,10 @@ Show the heading too, if it is currently invisible."
 (defun org-make-options-regexp (kwds &optional extra)
   "Make a regular expression for keyword lines."
   (concat
-   "^"
-   "#?[ \t]*\\+\\("
+   "^#\\+\\("
    (mapconcat 'regexp-quote kwds "\\|")
    (if extra (concat "\\|" extra))
-   "\\):[ \t]*"
-   "\\(.*\\)"))
+   "\\):[ \t]*\\(.*\\)"))
 
 ;; Make isearch reveal the necessary context
 (defun org-isearch-end ()

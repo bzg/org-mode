@@ -131,11 +131,12 @@
           "[ \t]*\\(?:"
           ;; Empty lines.
           "$" "\\|"
-          ;; Comments, blocks (any type), keywords, Babel calls,
-	  ;; drawers (any type) and tables.
-          "[|#]" "\\|"
-          ;; Fixed width areas.
-          ":\\(?:[ \t]\\|$\\)" "\\|"
+	  ;; Tables (any type).
+	  "\\(?:|\\|\\+-[-+]\\)" "\\|"
+          ;; Blocks (any type), Babel calls, drawers (any type),
+	  ;; fixed-width areas and keywords.  Note: this is only an
+	  ;; indication and need some thorough check.
+          "[#:]" "\\|"
           ;; Horizontal rules.
           "-\\{5,\\}[ \t]*$" "\\|"
           ;; LaTeX environments.
@@ -153,7 +154,10 @@
             (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
                     "\\(?:[ \t]\\|$\\)"))
           "\\)\\)")
-  "Regexp to separate paragraphs in an Org buffer.")
+  "Regexp to separate paragraphs in an Org buffer.
+In the case of lines starting with \"#\" and \":\", this regexp
+is not sufficient to know if point is at a paragraph ending.  See
+`org-element-paragraph-parser' for more information.")
 
 (defconst org-element-all-elements
   '(center-block clock comment comment-block drawer dynamic-block example-block
@@ -342,7 +346,7 @@ still has an entry since one of its properties (`:title') does.")
 ;; Setter functions allow to modify elements by side effect.  There is
 ;; `org-element-put-property', `org-element-set-contents',
 ;; `org-element-set-element' and `org-element-adopt-element'.  Note
-;; that `org-element-set-element' and `org-element-adopt-element' are
+;; that `org-element-set-element' and `org-element-adopt-elements' are
 ;; higher level functions since also update `:parent' property.
 
 (defsubst org-element-type (element)
@@ -389,38 +393,39 @@ Return modified element."
 (defsubst org-element-set-element (old new)
   "Replace element or object OLD with element or object NEW.
 The function takes care of setting `:parent' property for NEW."
-  ;; OLD can belong to the contents of PARENT or to its secondary
-  ;; string.
-  (let* ((parent (org-element-property :parent old))
-	 (sec-loc (cdr (assq (org-element-type parent)
-			     org-element-secondary-value-alist)))
-	 (sec-value (and sec-loc (org-element-property sec-loc parent)))
-	 (place (or (memq old sec-value) (memq old parent))))
-    ;; Make sure NEW has correct `:parent' property.
-    (org-element-put-property new :parent parent)
-    ;; Replace OLD with NEW in PARENT.
-    (setcar place new)))
+  ;; Since OLD is going to be changed into NEW by side-effect, first
+  ;; make sure that every element or object within NEW has OLD as
+  ;; parent.
+  (mapc (lambda (blob) (org-element-put-property blob :parent old))
+	(org-element-contents new))
+  ;; Transfer contents.
+  (apply 'org-element-set-contents old (org-element-contents new))
+  ;; Ensure NEW has same parent as OLD, then overwrite OLD properties
+  ;; with NEW's.
+  (org-element-put-property new :parent (org-element-property :parent old))
+  (setcar (cdr old) (nth 1 new))
+  ;; Transfer type.
+  (setcar old (car new)))
 
-(defsubst org-element-adopt-element (parent child &optional append)
-  "Add an element to the contents of another element.
+(defsubst org-element-adopt-elements (parent &rest children)
+  "Append elements to the contents of another element.
 
-PARENT is an element or object.  CHILD is an element, an object,
-or a string.
-
-CHILD is added at the beginning of PARENT contents, unless the
-optional argument APPEND is non-nil, in which case CHILD is added
-at the end.
+PARENT is an element or object.  CHILDREN can be elements,
+objects, or a strings.
 
 The function takes care of setting `:parent' property for CHILD.
 Return parent element."
-  (if (not parent) (list child)
-    (let ((contents (org-element-contents parent)))
-      (apply 'org-element-set-contents
-	     parent
-	     (if append (append contents (list child)) (cons child contents))))
-    ;; Link the CHILD element with PARENT.
-    (when (consp child) (org-element-put-property child :parent parent))
-    ;; Return the parent element.
+  (if (not parent) children
+    ;; Link every child to PARENT.
+    (mapc (lambda (child)
+	    (unless (stringp child)
+	      (org-element-put-property child :parent parent)))
+	  children)
+    ;; Add CHILDREN at the end of PARENT contents.
+    (apply 'org-element-set-contents
+	   parent
+	   (nconc (org-element-contents parent) children))
+    ;; Return modified PARENT element.
     parent))
 
 
@@ -474,8 +479,8 @@ Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_CENTER" limit t)))
-	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(let* ((keywords (org-element--collect-affiliated-keywords))
 	       (begin (car keywords))
@@ -574,8 +579,8 @@ containing `:block-name', `:begin', `:end', `:hiddenp',
 Assume point is at beginning of dynamic block."
   (let ((case-fold-search t))
     (if (not (save-excursion (re-search-forward org-dblock-end-re limit t)))
-	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((name (progn (looking-at org-dblock-start-re)
@@ -979,34 +984,39 @@ string instead.
 Assume point is at the beginning of the item."
   (save-excursion
     (beginning-of-line)
+    (looking-at org-list-full-item-re)
     (let* ((begin (point))
-	   (bullet (org-list-get-bullet (point) struct))
-	   (checkbox (let ((box (org-list-get-checkbox begin struct)))
+	   (bullet (org-match-string-no-properties 1))
+	   (checkbox (let ((box (org-match-string-no-properties 3)))
 		       (cond ((equal "[ ]" box) 'off)
 			     ((equal "[X]" box) 'on)
 			     ((equal "[-]" box) 'trans))))
-	   (counter (let ((c (org-list-get-counter begin struct)))
-		      (cond
-		       ((not c) nil)
-		       ((string-match "[A-Za-z]" c)
-			(- (string-to-char (upcase (match-string 0 c)))
-			   64))
-		       ((string-match "[0-9]+" c)
-			(string-to-number (match-string 0 c))))))
+	   (counter (let ((c (org-match-string-no-properties 2)))
+		      (save-match-data
+			(cond
+			 ((not c) nil)
+			 ((string-match "[A-Za-z]" c)
+			  (- (string-to-char (upcase (match-string 0 c)))
+			     64))
+			 ((string-match "[0-9]+" c)
+			  (string-to-number (match-string 0 c)))))))
 	   (end (save-excursion (goto-char (org-list-get-item-end begin struct))
 				(unless (bolp) (forward-line))
 				(point)))
-	   (contents-begin (progn (looking-at org-list-full-item-re)
-				  (goto-char (match-end 0))
-				  (skip-chars-forward " \r\t\n" limit)
-				  ;; If first line isn't empty,
-				  ;; contents really start at the text
-				  ;; after item's meta-data.
-				  (if (= (point-at-bol) begin) (point)
-				    (point-at-bol))))
+	   (contents-begin
+	    (progn (goto-char
+		    ;; Ignore tags in un-ordered lists: they are just
+		    ;; a part of item's body.
+		    (if (and (match-beginning 4)
+			     (save-match-data (string-match "[.)]" bullet)))
+			(match-beginning 4)
+		      (match-end 0)))
+		   (skip-chars-forward " \r\t\n" limit)
+		   ;; If first line isn't empty, contents really start
+		   ;; at the text after item's meta-data.
+		   (if (= (point-at-bol) begin) (point) (point-at-bol))))
 	   (hidden (progn (forward-line)
-			  (and (not (= (point) end))
-			       (org-invisible-p2))))
+			  (and (not (= (point) end)) (org-invisible-p2))))
 	   (contents-end (progn (goto-char end)
 				(skip-chars-backward " \r\t\n")
 				(forward-line)
@@ -1128,8 +1138,8 @@ Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_QUOTE" limit t)))
-	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -1210,8 +1220,8 @@ Assume point is at the beginning of the block."
 		      (upcase (match-string-no-properties 1)))))
     (if (not (save-excursion
 	       (re-search-forward (concat "^[ \t]*#\\+END_" type) limit t)))
-	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
       (let ((block-end-line (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -1359,8 +1369,6 @@ Assume point is at comment beginning."
   (save-excursion
     (let* ((keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
-	   ;; Match first line with a loose regexp since it might as
-	   ;; well be an ill-defined keyword.
 	   (value (prog2 (looking-at "[ \t]*# ?")
 		      (buffer-substring-no-properties
 		       (match-end 0) (line-end-position))
@@ -1410,8 +1418,8 @@ Assume point is at comment block beginning."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_COMMENT" limit t)))
-	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -1455,8 +1463,8 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_EXAMPLE" limit t)))
-	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((switches
@@ -1534,8 +1542,8 @@ Assume point is at export-block beginning."
 		      (upcase (org-match-string-no-properties 1)))))
     (if (not (save-excursion
 	       (re-search-forward (concat "^[ \t]*#\\+END_" type) limit t)))
-	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -1732,12 +1740,45 @@ Assume point is at the beginning of the paragraph."
 	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
 	   (before-blank
-	    (progn (end-of-line)
-		   (if (re-search-forward org-element-paragraph-separate
-					  limit
-					  'm)
-		       (goto-char (match-beginning 0))
-		     (point))))
+	    (let ((case-fold-search t))
+	      (end-of-line)
+	      (re-search-forward org-element-paragraph-separate limit 'm)
+	      (while (and (/= (point) limit)
+			  (cond
+			   ;; Skip non-existent or incomplete drawer.
+			   ((save-excursion
+			      (beginning-of-line)
+			      (and (looking-at "[ \t]*:\\S-")
+				   (or (not (looking-at org-drawer-regexp))
+				       (not (save-excursion
+					      (re-search-forward
+					       "^[ \t]*:END:" limit t)))))))
+			   ;; Stop at comments.
+			   ((save-excursion
+			      (beginning-of-line)
+			      (not (looking-at "[ \t]*#\\S-"))) nil)
+			   ;; Skip incomplete dynamic blocks.
+			   ((save-excursion
+			      (beginning-of-line)
+			      (looking-at "[ \t]*#\\+BEGIN: "))
+			    (not (save-excursion
+				   (re-search-forward
+				    "^[ \t]*\\+END:" limit t))))
+			   ;; Skip incomplete blocks.
+			   ((save-excursion
+			      (beginning-of-line)
+			      (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)"))
+			    (not (save-excursion
+				   (re-search-forward
+				    (concat "^[ \t]*#\\+END_"
+					    (match-string 1))
+				    limit t))))
+			   ;; Skip ill-formed keywords.
+			   ((not (save-excursion
+				   (beginning-of-line)
+				   (looking-at "[ \t]*#\\+\\S-+:"))))))
+		(re-search-forward org-element-paragraph-separate limit 'm))
+	      (if (eobp) (point) (goto-char (line-beginning-position)))))
 	   (contents-end (progn (skip-chars-backward " \r\t\n" contents-begin)
 				(forward-line)
 				(point)))
@@ -1913,8 +1954,8 @@ containing `:language', `:switches', `:parameters', `:begin',
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion (re-search-forward "^[ \t]*#\\+END_SRC" limit t)))
-	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -2118,8 +2159,8 @@ Assume point is at beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
 	       (re-search-forward "^[ \t]*#\\+END_VERSE" limit t)))
-	;; Incomplete block: parse it as a comment.
-	(org-element-comment-parser limit)
+	;; Incomplete block: parse it as a paragraph.
+	(org-element-paragraph-parser limit)
       (let ((contents-end (match-beginning 0)))
 	(save-excursion
 	  (let* ((keywords (org-element--collect-affiliated-keywords))
@@ -3325,13 +3366,16 @@ element it has to parse."
        ;; Keywords.
        ((looking-at "[ \t]*#")
 	(goto-char (match-end 0))
-	(cond ((looking-at "\\+BEGIN_\\(\\S-+\\)")
+	(cond ((looking-at "\\(?: \\|$\\)")
+	       (beginning-of-line)
+	       (org-element-comment-parser limit))
+	      ((looking-at "\\+BEGIN_\\(\\S-+\\)")
 	       (beginning-of-line)
 	       (let ((parser (assoc (upcase (match-string 1))
 				    org-element-block-name-alist)))
 		 (if parser (funcall (cdr parser) limit)
 		   (org-element-special-block-parser limit))))
-	      ((looking-at "\\+CALL")
+	      ((looking-at "\\+CALL:")
 	       (beginning-of-line)
 	       (org-element-babel-call-parser limit))
 	      ((looking-at "\\+BEGIN:? ")
@@ -3342,7 +3386,7 @@ element it has to parse."
 	       (org-element-keyword-parser limit))
 	      (t
 	       (beginning-of-line)
-	       (org-element-comment-parser limit))))
+	       (org-element-paragraph-parser limit))))
        ;; Footnote Definition.
        ((looking-at org-footnote-definition-re)
         (org-element-footnote-definition-parser limit))
@@ -3700,7 +3744,7 @@ Elements are accumulated into ACC."
 	  (org-element--parse-objects
 	   cbeg (org-element-property :contents-end element) element
 	   (org-element-restriction type))))
-	(org-element-adopt-element acc element t)))
+	(org-element-adopt-elements acc element)))
     ;; Return result.
     acc))
 
@@ -3727,11 +3771,11 @@ current object."
 	  (let ((obj-beg (org-element-property :begin next-object)))
 	    (unless (= (point) obj-beg)
 	      (setq acc
-		    (org-element-adopt-element
+		    (org-element-adopt-elements
 		     acc
 		     (replace-regexp-in-string
 		      "\t" (make-string tab-width ? )
-		      (buffer-substring-no-properties (point) obj-beg)) t))))
+		      (buffer-substring-no-properties (point) obj-beg))))))
 	  ;; 2. Object...
 	  (let ((obj-end (org-element-property :end next-object))
 		(cont-beg (org-element-property :contents-begin next-object)))
@@ -3746,16 +3790,16 @@ current object."
 		(org-element--parse-objects
 		 (point-min) (point-max) next-object
 		 (org-element-restriction next-object))))
-	    (setq acc (org-element-adopt-element acc next-object t))
+	    (setq acc (org-element-adopt-elements acc next-object))
 	    (goto-char obj-end))))
       ;; 3. Text after last object.  Untabify it.
       (unless (= (point) end)
 	(setq acc
-	      (org-element-adopt-element
+	      (org-element-adopt-elements
 	       acc
 	       (replace-regexp-in-string
 		"\t" (make-string tab-width ? )
-		(buffer-substring-no-properties (point) end)) t)))
+		(buffer-substring-no-properties (point) end)))))
       ;; Result.
       acc)))
 

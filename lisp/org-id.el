@@ -216,8 +216,7 @@ In any case, the ID of the entry is returned."
 	(setq id (org-id-new prefix))
 	(org-entry-put pom "ID" id)
 	(org-id-add-location id (buffer-file-name (buffer-base-buffer)))
-	id)
-       (t nil)))))
+	id)))))
 
 ;;;###autoload
 (defun org-id-get-with-outline-path-completion (&optional targets)

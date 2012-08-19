@@ -65,14 +65,14 @@ already filled in `info'."
    (equal
     (org-export--parse-option-keyword
      "H:1 num:t \\n:t timestamp:t arch:t author:t creator:t d:t email:t
- *:t e:t ::t f:t pri:t -:t ^:t toc:t |:t tags:t tasks:t <:t todo:t")
+ *:t e:t ::t f:t pri:t -:t ^:t toc:t |:t tags:t tasks:t <:t todo:t inline:nil")
     '(:headline-levels
       1 :preserve-breaks t :section-numbers t :time-stamp-file t
       :with-archived-trees t :with-author t :with-creator t :with-drawers t
       :with-email t :with-emphasize t :with-entities t :with-fixed-width t
-      :with-footnotes t :with-priority t :with-special-strings t
-      :with-sub-superscript t :with-toc t :with-tables t :with-tags t
-      :with-tasks t :with-timestamps t :with-todo-keywords t)))
+      :with-footnotes t :with-inlinetasks nil :with-priority t
+      :with-special-strings t :with-sub-superscript t :with-toc t :with-tables t
+      :with-tags t :with-tasks t :with-timestamps t :with-todo-keywords t)))
   ;; Test some special values.
   (should
    (equal
@@ -265,7 +265,24 @@ Paragraph"
 		"CLOSED: [2012-04-29 sun. 10:45]\n"))
 	(should
 	 (equal (org-export-as 'test nil nil nil '(:with-plannings nil))
-		""))))))
+		"")))))
+  ;; Inlinetasks.
+  (when (featurep 'org-inlinetask)
+    (should
+     (equal
+      (let ((org-inlinetask-min-level 15))
+	(org-test-with-temp-text "*************** Task"
+	  (org-test-with-backend test
+	    (org-export-as 'test nil nil nil '(:with-inlinetasks nil)))))
+      ""))
+    (should
+     (equal
+      (let ((org-inlinetask-min-level 15))
+	(org-test-with-temp-text
+	    "*************** Task\nContents\n*************** END"
+	  (org-test-with-backend test
+	    (org-export-as 'test nil nil nil '(:with-inlinetasks nil)))))
+      ""))))
 
 (ert-deftest test-org-export/comment-tree ()
   "Test if export process ignores commented trees."

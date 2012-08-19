@@ -1,4 +1,4 @@
-;;; org-exp.el --- ASCII, HTML, XOXO and iCalendar export for Org-mode
+;;; org-exp.el --- Export internals for Org-mode
 
 ;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
 
@@ -731,8 +731,7 @@ Each element is a list of 3 items:
       (setq s (nth 2 e)
 	    v (cond
 	       ((assq s letbind) (nth 1 (assq s letbind)))
-	       ((boundp s) (symbol-value s))
-	       (t nil))
+	       ((boundp s) (symbol-value s)))
 	    rtn (cons (car e) (cons v rtn))))
     rtn))
 
@@ -1318,11 +1317,8 @@ on this string to produce the exported version."
       ;; Remove or replace comments
       (org-export-handle-comments (plist-get parameters :comments))
 
-      ;; Remove #+TBLFM and #+TBLNAME lines
-      (org-export-handle-table-metalines)
-
-      ;; Remove #+results and #+name lines
-      (org-export-res/src-name-cleanup)
+      ;; Remove #+TBLFM #+TBLNAME #+NAME #+RESULTS lines
+      (org-export-handle-metalines)
 
       ;; Run the final hook
       (run-hooks 'org-export-preprocess-final-hook)
@@ -2009,9 +2005,11 @@ When it is nil, all comments will be removed."
 	  (replace-match "")
 	  (goto-char (max (point-min) (1- pos))))))))
 
-(defun org-export-handle-table-metalines ()
-  "Remove table specific metalines #+TBLNAME: and #+TBLFM:."
-  (let ((re "^[ \t]*#\\+tbl\\(name\\|fm\\):\\(.*\n?\\)")
+(defun org-export-handle-metalines ()
+  "Remove tables and source blocks metalines.
+This function should only be called after all block processing
+has taken place."
+  (let ((re "^[ \t]*#\\+\\(tbl\\(?:name\\|fm\\)\\|results\\(?:\\[[a-z0-9]+\\]\\)?\\|name\\):\\(.*\n?\\)")
 	(case-fold-search t)
 	pos)
     (goto-char (point-min))
@@ -2023,18 +2021,6 @@ When it is nil, all comments will be removed."
 	(goto-char (1+ pos))
 	(replace-match "")
 	(goto-char (max (point-min) (1- pos)))))))
-
-(defun org-export-res/src-name-cleanup ()
-  "Clean up #+results and #+name lines for export.
-This function should only be called after all block processing
-has taken place."
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (let ((case-fold-search t))
-      (while (org-re-search-forward-unprotected
-	      "#\\+\\(name\\|results\\(\\[[a-z0-9]+\\]\\)?\\):" nil t)
-	(delete-region (match-beginning 0) (progn (forward-line) (point)))))))
 
 (defun org-export-mark-radio-links ()
   "Find all matches for radio targets and turn them into internal links."
@@ -3273,8 +3259,7 @@ If yes remove the column and the special lines."
 			 (mapcar (lambda (x)
 				   (cond ((member x '("<" "&lt;")) :start)
 					 ((member x '(">" "&gt;")) :end)
-					 ((member x '("<>" "&lt;&gt;")) :startend)
-					 (t nil)))
+					 ((member x '("<>" "&lt;&gt;")) :startend)))
 				 (org-split-string x "[ \t]*|[ \t]*")))
 		   nil)
 		  ((org-table-cookie-line-p x)
@@ -3295,8 +3280,7 @@ If yes remove the column and the special lines."
 		     (mapcar (lambda (x)
 			       (cond ((member x '("<" "&lt;")) :start)
 				     ((member x '(">" "&gt;")) :end)
-				     ((member x '("<>" "&lt;&gt;")) :startend)
-				     (t nil)))
+				     ((member x '("<>" "&lt;&gt;")) :startend)))
 			     (cdr (org-split-string x "[ \t]*|[ \t]*"))))
 	       nil)
 	      ((org-table-cookie-line-p x)
@@ -3313,18 +3297,20 @@ If yes remove the column and the special lines."
 
 (defun org-export-cleanup-toc-line (s)
   "Remove tags and timestamps from lines going into the toc."
-  (when (memq org-export-with-tags '(not-in-toc nil))
-    (if (string-match (org-re " +:[[:alnum:]_@#%:]+: *$") s)
+  (if (not s)
+      "" ; Return a string when argument is nil
+    (when (memq org-export-with-tags '(not-in-toc nil))
+      (if (string-match (org-re " +:[[:alnum:]_@#%:]+: *$") s)
+	  (setq s (replace-match "" t t s))))
+    (when org-export-remove-timestamps-from-toc
+      (while (string-match org-maybe-keyword-time-regexp s)
 	(setq s (replace-match "" t t s))))
-  (when org-export-remove-timestamps-from-toc
-    (while (string-match org-maybe-keyword-time-regexp s)
-      (setq s (replace-match "" t t s))))
-  (while (string-match org-bracket-link-regexp s)
-    (setq s (replace-match (match-string (if (match-end 3) 3 1) s)
-			   t t s)))
-  (while (string-match "\\[\\([0-9]\\|fn:[^]]*\\)\\]" s)
-    (setq s (replace-match "" t t s)))
-  s)
+    (while (string-match org-bracket-link-regexp s)
+      (setq s (replace-match (match-string (if (match-end 3) 3 1) s)
+			     t t s)))
+    (while (string-match "\\[\\([0-9]\\|fn:[^]]*\\)\\]" s)
+      (setq s (replace-match "" t t s)))
+    s))
 
 
 (defun org-get-text-property-any (pos prop &optional object)

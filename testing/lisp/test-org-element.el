@@ -128,34 +128,25 @@ Some other text
 			      (org-element-map tree 'italic 'identity nil t))
 	(org-element-map tree 'paragraph 'identity nil t))))))
 
-(ert-deftest test-org-element/adopt-element ()
-  "Test `org-element-adopt-element' specifications."
+(ert-deftest test-org-element/adopt-elements ()
+  "Test `org-element-adopt-elements' specifications."
   ;; Adopt an element.
   (should
-   (equal '(italic plain-text)
+   (equal '(plain-text italic)
 	  (org-test-with-temp-text "* Headline\n *a*"
 	    (let ((tree (org-element-parse-buffer)))
-	      (org-element-adopt-element
+	      (org-element-adopt-elements
 	       (org-element-map tree 'bold 'identity nil t) '(italic nil "a"))
 	      (mapcar (lambda (blob) (org-element-type blob))
 		      (org-element-contents
 		       (org-element-map tree 'bold 'identity nil t)))))))
   ;; Adopt a string.
   (should
-   (equal '("b" "a")
-	  (org-test-with-temp-text "* Headline\n *a*"
-	    (let ((tree (org-element-parse-buffer)))
-	      (org-element-adopt-element
-	       (org-element-map tree 'bold 'identity nil t) "b")
-	      (org-element-contents
-	       (org-element-map tree 'bold 'identity nil t))))))
-  ;; Test APPEND optional argument.
-  (should
    (equal '("a" "b")
 	  (org-test-with-temp-text "* Headline\n *a*"
 	    (let ((tree (org-element-parse-buffer)))
-	      (org-element-adopt-element
-	       (org-element-map tree 'bold 'identity nil t) "b" t)
+	      (org-element-adopt-elements
+	       (org-element-map tree 'bold 'identity nil t) "b")
 	      (org-element-contents
 	       (org-element-map tree 'bold 'identity nil t)))))))
 
@@ -297,10 +288,6 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
      (org-test-with-temp-text "# First part\n# \n#\n# Second part"
        (org-element-map (org-element-parse-buffer) 'comment 'identity nil t)))
     "First part\n\n\nSecond part"))
-  ;; Keywords without colons are treated as comments.
-  (should
-   (org-test-with-temp-text "#+wrong_keyword something"
-     (org-element-map (org-element-parse-buffer) 'comment 'identity)))
   ;; Do not mix comments and keywords.
   (should
    (eq 1
@@ -903,6 +890,12 @@ DEADLINE: <2012-03-29 thu.>"
      :tag
      (org-test-with-temp-text "- tag :: description"
        (org-element-map (org-element-parse-buffer) 'item 'identity nil t)))))
+  ;; No tags in ordered lists.
+  (should-not
+   (org-element-property
+    :tag
+    (org-test-with-temp-text "1. tag :: description"
+      (org-element-map (org-element-parse-buffer) 'item 'identity nil t))))
   ;; Check-boxes
   (should
    (equal
@@ -1147,7 +1140,35 @@ e^{i\\pi}+1=0
 	 (org-element-map
 	  (org-element-parse-buffer) 'paragraph
 	  (lambda (p) (char-after (org-element-property :end p)))
-	  nil t)))))
+	  nil t))))
+  ;; Include ill-formed Keywords.
+  (should
+   (org-test-with-temp-text "#+wrong_keyword something"
+     (org-element-map (org-element-parse-buffer) 'paragraph 'identity)))
+  ;; Include incomplete-drawers.
+  (should
+   (let ((org-drawers '("TEST")))
+     (org-test-with-temp-text ":TEST:\nParagraph"
+       (let ((elem (org-element-at-point)))
+	 (and (eq (org-element-type elem) 'paragraph)
+	      (= (point-max) (org-element-property :end elem)))))))
+  ;; Include non-existent drawers.
+  (should
+   (let ((org-drawers '("TEST")))
+     (org-test-with-temp-text ":NONAME:"
+       (org-element-map (org-element-parse-buffer) 'paragraph 'identity))))
+  ;; Include incomplete blocks.
+  (should
+   (org-test-with-temp-text "#+BEGIN_CENTER\nParagraph"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (= (point-max) (org-element-property :end elem))))))
+  ;; Include incomplete dynamic blocks.
+  (should
+   (org-test-with-temp-text "#+BEGIN: \nParagraph"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (= (point-max) (org-element-property :end elem)))))))
 
 
 ;;;; Plain List
@@ -1776,7 +1797,7 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
 (ert-deftest test-org-element/comment-interpreter ()
   "Test comment interpreter."
   ;; Regular comment.
-  (should (equal (org-test-parse-and-interpret "#Comment") "# Comment\n"))
+  (should (equal (org-test-parse-and-interpret "# Comment") "# Comment\n"))
   ;; Inline comment.
   (should (equal (org-test-parse-and-interpret "  # Comment")
 		 "# Comment\n"))

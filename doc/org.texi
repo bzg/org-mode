@@ -1775,19 +1775,16 @@ state of the checkbox.  In any case, verify bullets and indentation
 consistency in the whole list.
 @kindex C-c -
 @vindex org-plain-list-ordered-item-terminator
-@vindex org-list-automatic-rules
 @item C-c -
 Cycle the entire list level through the different itemize/enumerate bullets
 (@samp{-}, @samp{+}, @samp{*}, @samp{1.}, @samp{1)}) or a subset of them,
 depending on @code{org-plain-list-ordered-item-terminator}, the type of list,
-and its position@footnote{See @code{bullet} rule in
-@code{org-list-automatic-rules} for more information.}.  With a numeric
-prefix argument N, select the Nth bullet from this list.  If there is an
-active region when calling this, selected text will be changed into an item.
-With a prefix argument, all lines will be converted to list items.  If the
-first line already was a list item, any item marker will be removed from the
-list.  Finally, even without an active region, a normal line will be
-converted into a list item.
+and its indentation.  With a numeric prefix argument N, select the Nth bullet
+from this list.  If there is an active region when calling this, selected
+text will be changed into an item.  With a prefix argument, all lines will be
+converted to list items.  If the first line already was a list item, any item
+marker will be removed from the list.  Finally, even without an active
+region, a normal line will be converted into a list item.
 @kindex C-c *
 @item C-c *
 Turn a plain list item into a headline (so that it becomes a subheading at

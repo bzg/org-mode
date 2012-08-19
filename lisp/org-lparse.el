@@ -1929,8 +1929,7 @@ See `org-xhtml-entity-format-callbacks-alist' for more information."
 		  (cond
 		   ((string= align "l") "left")
 		   ((string= align "r") "right")
-		   ((string= align "c") "center")
-		   (t nil))))))))
+		   ((string= align "c") "center"))))))))
   (incf org-lparse-table-rownum)
   (let ((i -1))
     (org-lparse-format

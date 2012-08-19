@@ -1798,8 +1798,8 @@ will be easy to remove."
     (org-move-to-column c)
     (unless (eolp) (skip-chars-backward "^ \t"))
     (skip-chars-backward " \t")
-    (setq ov (make-overlay (1- (point)) (point-at-eol))
-	  tx (concat (buffer-substring (1- (point)) (point))
+    (setq ov (make-overlay (point-at-bol) (point-at-eol))
+    	  tx (concat (buffer-substring (point-at-bol) (point))
 		     (make-string (+ off (max 0 (- c (current-column)))) ?.)
 		     (org-add-props (if org-time-clocksum-use-fractional
 					(format fmt
