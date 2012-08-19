@@ -1081,8 +1081,8 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
       (setq end (point))))
     (goto-char beg)
     (org-capture-position-for-last-stored 'table-line)
-    (if (or (re-search-backward "%\\?" end t)
-	    (re-search-forward "%\\?" beg t))
+    (if (or (re-search-backward "%\\?" beg t)
+	    (re-search-forward "%\\?" end t))
 	(replace-match ""))
     (org-table-align)))
 
