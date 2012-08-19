@@ -5090,7 +5090,7 @@ The following commands are available:
   (org-update-radio-target-regexp)
   ;; Comments
   (org-set-local 'comment-use-syntax nil)
-  (org-set-local 'comment-start "#")
+  (org-set-local 'comment-start "# ")
   (org-set-local 'comment-start-skip "# ?")
   (org-set-local 'comment-insert-comment-function 'org-insert-comment)
   (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
@@ -5993,7 +5993,6 @@ needs to be inserted at a specific position in the font-lock sequence.")
 				 org-comment-string "\\|" org-quote-string
 				 "\\)"))
 		 '(2 'org-special-keyword t))
-	   '("^[ \t]*#.*" (0 'font-lock-comment-face t))
 	   ;; Blocks and meta lines
 	   '(org-fontify-meta-lines-and-blocks)
 	   )))
