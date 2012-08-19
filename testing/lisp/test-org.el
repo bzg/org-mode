@@ -160,6 +160,14 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (end-of-line)
 	      (org-fill-paragraph)
 	      (buffer-string)))))
+  ;; Correctly fill an element in a narrowed buffer.
+  (should
+   (equal "01234\n6"
+	  (org-test-with-temp-text "01234 6789"
+	    (let ((fill-column 5))
+	      (narrow-to-region 1 8)
+	      (org-fill-paragraph)
+	      (buffer-string)))))
   ;; Special case: Fill first paragraph when point is at an item or
   ;; a plain-list or a footnote reference.
   (should

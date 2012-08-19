@@ -20962,50 +20962,50 @@ hierarchy of headlines by UP levels before marking the subtree."
   "Compute a fill prefix for the line at point P.
 Return fill prefix, as a string, or nil if current line isn't
 meant to be filled."
-  (unless (and (derived-mode-p 'message-mode) (not (message-in-body-p)))
-    ;; FIXME: Prevent an error for users who forgot to make autoloads?
-    ;; See also `org-fill-paragraph', which has the same.
-    (require 'org-element)
-    ;; FIXME: This is really the job of orgstruct++-mode
-    (save-excursion
-      (goto-char p)
-      (beginning-of-line)
-      (let* ((element (org-element-at-point))
-	     (type (org-element-type element))
-	     (post-affiliated
-	      (progn
-		(goto-char (org-element-property :begin element))
-		(while (looking-at org-element--affiliated-re) (forward-line))
-		(point))))
-	(unless (< p post-affiliated)
-	  (case type
-	    (comment (looking-at "[ \t]*# ?") (match-string 0))
-	    (footnote-definition "")
-	    ((item plain-list)
-	     (make-string (org-list-item-body-column
-			   (org-element-property :begin element))
-			  ? ))
-	    (paragraph
-	     ;; Fill prefix is usually the same as the current line,
-	     ;; except if the paragraph is at the beginning of an item.
-	     (let ((parent (org-element-property :parent element)))
-	       (cond ((eq (org-element-type parent) 'item)
-		      (make-string (org-list-item-body-column
-				    (org-element-property :begin parent))
-				   ? ))
-		     ((looking-at "\\s-+") (match-string 0))
-		     (t  ""))))
-	    ((comment-block verse-block)
-	     ;; Only fill contents if P is within block boundaries.
-	     (let* ((cbeg (save-excursion (goto-char post-affiliated)
-					  (forward-line)
-					  (point)))
-		    (cend (save-excursion
-			    (goto-char (org-element-property :end element))
-			    (skip-chars-backward " \r\t\n")
-			    (line-beginning-position))))
-	       (when (and (>= p cbeg) (< p cend))
-		 (if (looking-at "\\s-+") (match-string 0) ""))))))))))
+  (org-with-wide-buffer
+   (unless (and (derived-mode-p 'message-mode) (not (message-in-body-p)))
+     ;; FIXME: Prevent an error for users who forgot to make autoloads?
+     ;; See also `org-fill-paragraph', which has the same.
+     (require 'org-element)
+     ;; FIXME: This is really the job of orgstruct++-mode
+     (goto-char p)
+     (beginning-of-line)
+     (let* ((element (org-element-at-point))
+	    (type (org-element-type element))
+	    (post-affiliated
+	     (progn
+	       (goto-char (org-element-property :begin element))
+	       (while (looking-at org-element--affiliated-re) (forward-line))
+	       (point))))
+       (unless (< p post-affiliated)
+	 (case type
+	   (comment (looking-at "[ \t]*# ?") (match-string 0))
+	   (footnote-definition "")
+	   ((item plain-list)
+	    (make-string (org-list-item-body-column
+			  (org-element-property :begin element))
+			 ? ))
+	   (paragraph
+	    ;; Fill prefix is usually the same as the current line,
+	    ;; except if the paragraph is at the beginning of an item.
+	    (let ((parent (org-element-property :parent element)))
+	      (cond ((eq (org-element-type parent) 'item)
+		     (make-string (org-list-item-body-column
+				   (org-element-property :begin parent))
+				  ? ))
+		    ((looking-at "\\s-+") (match-string 0))
+		    (t  ""))))
+	   ((comment-block verse-block)
+	    ;; Only fill contents if P is within block boundaries.
+	    (let* ((cbeg (save-excursion (goto-char post-affiliated)
+					 (forward-line)
+					 (point)))
+		   (cend (save-excursion
+			   (goto-char (org-element-property :end element))
+			   (skip-chars-backward " \r\t\n")
+			   (line-beginning-position))))
+	      (when (and (>= p cbeg) (< p cend))
+		(if (looking-at "\\s-+") (match-string 0) ""))))))))))
 
 (defvar org-element-all-objects)         ; From org-element.el
 (defun org-fill-paragraph (&optional justify)
@@ -21029,10 +21029,12 @@ a footnote definition, try to fill the first paragraph within."
 	   (or (not (message-in-body-p))
 	       (save-excursion (move-beginning-of-line 1)
 			       (looking-at "^>+ "))))
-      (let ((fill-paragraph-function (cadadr (assoc 'fill-paragraph-function org-fb-vars)))
+      (let ((fill-paragraph-function
+	     (cadadr (assoc 'fill-paragraph-function org-fb-vars)))
 	    (fill-prefix (cadadr (assoc 'fill-prefix org-fb-vars)))
 	    (paragraph-start (cadadr (assoc 'paragraph-start org-fb-vars)))
-	    (paragraph-separate (cadadr (assoc 'paragraph-separate org-fb-vars))))
+	    (paragraph-separate
+	     (cadadr (assoc 'paragraph-separate org-fb-vars))))
 	(fill-paragraph))
     (save-excursion
       ;; Move to end of line in order to get the first paragraph within
@@ -21051,8 +21053,10 @@ a footnote definition, try to fill the first paragraph within."
 	     t)
 	    ;; Elements that may contain `line-break' type objects.
 	    ((paragraph verse-block)
-	     (let ((beg (org-element-property :contents-begin element))
-		   (end (org-element-property :contents-end element))
+	     (let ((beg (max (point-min)
+			     (org-element-property :contents-begin element)))
+		   (end (min (point-max)
+			     (org-element-property :contents-end element)))
 		   (type (org-element-type element)))
 	       ;; Do nothing if point is at an affiliated keyword or at
 	       ;; verse block markers.
@@ -21062,15 +21066,16 @@ a footnote definition, try to fill the first paragraph within."
 		 ;; At a verse block, first narrow to current "paragraph"
 		 ;; and set current element to that paragraph.
 		 (save-restriction
+		   (narrow-to-region beg end)
 		   (when (eq type 'verse-block)
-		     (narrow-to-region beg end)
 		     (save-excursion
 		       (let ((bol-pos (point-at-bol)))
 			 (re-search-backward "^[ \t]*$" nil 'm)
 			 (unless (or (bobp) (= (point-at-bol) bol-pos))
 			   (forward-line))
 			 (setq element (org-element-paragraph-parser end)
-			       beg (org-element-property :contents-begin element)
+			       beg (org-element-property
+				    :contents-begin element)
 			       end (org-element-property
 				    :contents-end element)))))
 		   ;; Fill paragraph, taking line breaks into consideration.
@@ -21088,12 +21093,13 @@ a footnote definition, try to fill the first paragraph within."
 		      ;; in the current paragraph.  Add paragraph beginning
 		      ;; to include first slice.
 		      (nreverse
-		       (cons beg
-			     (org-element-map
-			      (org-element--parse-objects
-			       beg end nil org-element-all-objects)
-			      'line-break
-			      (lambda (lb) (org-element-property :end lb))))))))
+		       (cons
+			beg
+			(org-element-map
+			 (org-element--parse-objects
+			  beg end nil org-element-all-objects)
+			 'line-break
+			 (lambda (lb) (org-element-property :end lb))))))))
 		 t)))
 	    ;; Contents of `comment-block' type elements should be filled as
 	    ;; plain text.
@@ -21103,7 +21109,8 @@ a footnote definition, try to fill the first paragraph within."
 		 (fill-region-as-paragraph
 		  (progn
 		    (goto-char (org-element-property :begin element))
-		    (while (looking-at org-element--affiliated-re) (forward-line))
+		    (while (looking-at org-element--affiliated-re)
+		      (forward-line))
 		    (forward-line)
 		    (point))
 		  (progn
@@ -21118,7 +21125,8 @@ a footnote definition, try to fill the first paragraph within."
 		 (fill-region-as-paragraph
 		  (progn
 		    (goto-char (org-element-property :begin element))
-		    (while (looking-at org-element--affiliated-re) (forward-line))
+		    (while (looking-at org-element--affiliated-re)
+		      (forward-line))
 		    (point))
 		  (progn
 		    (goto-char (org-element-property :end element))
