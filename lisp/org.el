@@ -11324,7 +11324,7 @@ This function can be used in a hook."
   '("TITLE:" "AUTHOR:" "EMAIL:" "DATE:"
     "DESCRIPTION:" "KEYWORDS:" "LANGUAGE:" "OPTIONS:"
     "EXPORT_SELECT_TAGS:" "EXPORT_EXCLUDE_TAGS:"
-    "LINK_UP:" "LINK_HOME:" "LINK:"
+    "LINK_UP:" "LINK_HOME:" "LINK:" "TODO:"
     "XSLT:" "CATEGORY:" "SEQ_TODO:" "TYP_TODO:"
     "PRIORITIES:" "DRAWERS:" "STARTUP:" "TAGS:"
     "FILETAGS:" "ARCHIVE:"))
@@ -22062,12 +22062,10 @@ Show the heading too, if it is currently invisible."
 (defun org-make-options-regexp (kwds &optional extra)
   "Make a regular expression for keyword lines."
   (concat
-   "^"
-   "#?[ \t]*\\+\\("
+   "^#\\+\\("
    (mapconcat 'regexp-quote kwds "\\|")
    (if extra (concat "\\|" extra))
-   "\\):[ \t]*"
-   "\\(.*\\)"))
+   "\\):[ \t]*\\(.*\\)"))
 
 ;; Make isearch reveal the necessary context
 (defun org-isearch-end ()
