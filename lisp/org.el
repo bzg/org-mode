@@ -5773,8 +5773,7 @@ by a #."
 	   ((equal org-export-with-sub-superscripts '{})
 	    (list org-match-substring-with-braces-regexp))
 	   (org-export-with-sub-superscripts
-	    (list org-match-substring-regexp))
-	   (t nil)))
+	    (list org-match-substring-regexp))))
 	 (re-latex
 	  (if org-export-with-LaTeX-fragments
 	      (mapcar (lambda (x) (nth 1 x)) latexs)))
@@ -7920,8 +7919,7 @@ the inserted text when done."
 			      (- (match-end 1) (match-beginning 1)))
 			     ((and (bolp)
 				   (looking-at org-outline-regexp))
-			      (- (match-end 0) (point) 1))
-			     (t nil)))
+			      (- (match-end 0) (point) 1))))
 	  (previous-level (save-excursion
 			    (condition-case nil
 				(progn
@@ -8373,8 +8371,7 @@ WITH-CASE, the sorting considers case as well."
          (cond
           ((= dcst ?a) 'string<)
           ((= dcst ?f) compare-func)
-          ((member dcst '(?p ?t ?s ?d ?c)) '<)
-          (t nil)))))
+          ((member dcst '(?p ?t ?s ?d ?c)) '<)))))
     (run-hooks 'org-after-sorting-entries-or-items-hook)
     (message "Sorting entries...done")))
 
@@ -8961,8 +8958,7 @@ For file links, arg negates `org-context-in-file-links'."
 	   (setq txt (cond
 		      ((org-at-heading-p) nil)
 		      ((org-region-active-p)
-		       (buffer-substring (region-beginning) (region-end)))
-		      (t nil)))
+		       (buffer-substring (region-beginning) (region-end)))))
 	   (when (or (null txt) (string-match "\\S-" txt))
 	     (setq cpltxt
 		   (concat cpltxt "::"
@@ -9924,15 +9920,13 @@ application the system uses for this file type."
 	    (let ((cmd `(org-link-search
 			 ,path
 			 ,(cond ((equal arg '(4)) ''occur)
-				((equal arg '(16)) ''org-occur)
-				(t nil))
+				((equal arg '(16)) ''org-occur))
 			 ,pos)))
 	      (condition-case nil (let ((org-link-search-inhibit-query t))
 				    (eval cmd))
 		(error (progn (widen) (eval cmd))))))
 
-	   (t
-	    (browse-url-at-point)))))))
+	   (t (browse-url-at-point)))))))
     (move-marker org-open-link-marker nil)
     (run-hook-with-args 'org-follow-link-hook)))
 
@@ -10559,8 +10553,7 @@ on the system \"/user@host:\"."
          (tramp-handle-file-remote-p file))
         ((and (boundp 'ange-ftp-name-format)
               (string-match (car ange-ftp-name-format) file))
-         t)
-        (t nil)))
+         t)))
 
 
 ;;;; Refiling
@@ -12538,8 +12531,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
   (let* ((org-log-into-drawer (org-log-into-drawer))
 	 (drawer (cond ((stringp org-log-into-drawer)
 			org-log-into-drawer)
-		       (org-log-into-drawer "LOGBOOK")
-		       (t nil))))
+		       (org-log-into-drawer "LOGBOOK"))))
     (save-restriction
       (save-excursion
 	(when findpos
@@ -13646,8 +13638,7 @@ If DATA is nil or the empty string, any tags will be removed."
 	  (concat ":" (mapconcat 'identity (org-split-string data ":+") ":")
 		  ":"))
 	 ((listp data)
-	  (concat ":" (mapconcat 'identity data ":") ":"))
-	 (t nil)))
+	  (concat ":" (mapconcat 'identity data ":") ":"))))
   (when data
     (save-excursion
       (org-back-to-heading t)
@@ -13963,8 +13954,7 @@ Returns the new tags string, or nil to not change the current settings."
 				   ((not (assoc tg table))
 				    (org-get-todo-face tg))
 				   ((member tg current) c-face)
-				   ((member tg inherited) i-face)
-				   (t nil))))
+				   ((member tg inherited) i-face))))
 	  (if (and (= cnt 0) (not ingroup)) (insert "  "))
 	  (insert "[" c "] " tg (make-string
 				 (- fwidth 4 (length tg)) ?\ ))
@@ -16211,8 +16201,7 @@ D may be an absolute day number, or a calendar-type list (month day year)."
 		(stringp (cdr result))) (cdr result))
 	  ((and (consp result)
 		(stringp (car result))) result)
-	  (result entry)
-          (t nil))))
+	  (result entry))))
 
 (defun org-diary-to-ical-string (frombuf)
   "Get iCalendar entries from diary entries in buffer FROMBUF.

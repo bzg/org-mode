@@ -5718,8 +5718,7 @@ FRACTION is what fraction of the head-warning time has passed."
                                      ((= d1 d0)
 				      (concat "<" start-time ">"))
 				     ((= d2 d0)
-				      (concat "<" end-time ">"))
-				     (t nil))
+				      (concat "<" end-time ">")))
 			       remove-re))))
 		(org-add-props txt props
 		  'org-marker marker 'org-hd-marker hdmarker
@@ -6178,8 +6177,7 @@ could bind the variable in the options section of a custom command.")
   (let ((pa (or (get-text-property 1 'priority a) 0))
 	(pb (or (get-text-property 1 'priority b) 0)))
     (cond ((> pa pb) +1)
-	  ((< pa pb) -1)
-	  (t nil))))
+	  ((< pa pb) -1))))
 
 (defsubst org-cmp-effort (a b)
   "Compare the effort values of string A and B."
@@ -6187,16 +6185,14 @@ could bind the variable in the options section of a custom command.")
 	 (ea (or (get-text-property 1 'effort-minutes a) def))
 	 (eb (or (get-text-property 1 'effort-minutes b) def)))
     (cond ((> ea eb) +1)
-	  ((< ea eb) -1)
-	  (t nil))))
+	  ((< ea eb) -1))))
 
 (defsubst org-cmp-category (a b)
   "Compare the string values of categories of strings A and B."
   (let ((ca (or (get-text-property 1 'org-category a) ""))
 	(cb (or (get-text-property 1 'org-category b) "")))
     (cond ((string-lessp ca cb) -1)
-	  ((string-lessp cb ca) +1)
-	  (t nil))))
+	  ((string-lessp cb ca) +1))))
 
 (defsubst org-cmp-todo-state (a b)
   "Compare the todo states of strings A and B."
@@ -6218,8 +6214,7 @@ could bind the variable in the options section of a custom command.")
     (cond ((and donepa (not donepb)) -1)
 	  ((and (not donepa) donepb) +1)
 	  ((< la lb) -1)
-	  ((< lb la) +1)
-	  (t nil))))
+	  ((< lb la) +1))))
 
 (defsubst org-cmp-alpha (a b)
   "Compare the headlines, alphabetically."
@@ -6240,8 +6235,7 @@ could bind the variable in the options section of a custom command.")
     (cond ((not ta) +1)
 	  ((not tb) -1)
 	  ((string-lessp ta tb) -1)
-	  ((string-lessp tb ta) +1)
-	  (t nil))))
+	  ((string-lessp tb ta) +1))))
 
 (defsubst org-cmp-tag (a b)
   "Compare the string values of the first tags of A and B."
@@ -6250,8 +6244,7 @@ could bind the variable in the options section of a custom command.")
     (cond ((not ta) +1)
 	  ((not tb) -1)
 	  ((string-lessp ta tb) -1)
-	  ((string-lessp tb ta) +1)
-	  (t nil))))
+	  ((string-lessp tb ta) +1))))
 
 (defsubst org-cmp-time (a b)
   "Compare the time-of-day values of strings A and B."
@@ -6259,16 +6252,14 @@ could bind the variable in the options section of a custom command.")
 	 (ta (or (get-text-property 1 'time-of-day a) def))
 	 (tb (or (get-text-property 1 'time-of-day b) def)))
     (cond ((< ta tb) -1)
-	  ((< tb ta) +1)
-	  (t nil))))
+	  ((< tb ta) +1))))
 
 (defsubst org-cmp-habit-p (a b)
   "Compare the todo states of strings A and B."
   (let ((ha (get-text-property 1 'org-habit-p a))
 	(hb (get-text-property 1 'org-habit-p b)))
     (cond ((and ha (not hb)) -1)
-	  ((and (not ha) hb) +1)
-	  (t nil))))
+	  ((and (not ha) hb) +1))))
 
 (defsubst org-em (x y list) (or (memq x list) (memq y list)))
 

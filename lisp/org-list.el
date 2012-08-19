@@ -2822,8 +2822,7 @@ COMPARE-FUNC to compare entries."
 	     (sort-func (cond
 			 ((= dcst ?a) 'string<)
 			 ((= dcst ?f) compare-func)
-			 ((= dcst ?t) '<)
-			 (t nil)))
+			 ((= dcst ?t) '<)))
 	     (next-record (lambda ()
 			    (skip-chars-forward " \r\t\n")
 			    (beginning-of-line)))
