@@ -3602,8 +3602,8 @@ Nil values returned from FUN do not appear in the results."
 			     (throw 'found 'objects))
 			    ((not (memq type org-element-greater-elements))
 			     ;; If one regular element is found, the
-			     ;; function has to recurse, at lest, into
-			     ;; every element it encounters.
+			     ;; function has to recurse, at least,
+			     ;; into every element it encounters.
 			     (and (not (eq category 'elements))
 				  (setq category 'elements)))))
 		    types)
