@@ -3012,7 +3012,7 @@ FOOTNOTE is either a footnote reference or a footnote definition.
 INFO is the plist used as a communication channel."
   (let* ((label (org-element-property :label footnote))
 	 seen-refs
-	 search-ref			; for byte-compiler.
+	 search-ref			; For byte-compiler.
 	 (search-ref
 	  (function
 	   (lambda (data)
@@ -3035,11 +3035,11 @@ INFO is the plist used as a communication channel."
 		   ((not fn-lbl) (push 'inline seen-refs) nil)
 		   ;; Label not seen so far: add it so SEEN-REFS.
 		   ;;
-		   ;; Also search for subsequent references in footnote
-		   ;; definition so numbering following reading logic.
-		   ;; Note that we don't have to care about inline
-		   ;; definitions, since `org-element-map' already
-		   ;; traverse them at the right time.
+		   ;; Also search for subsequent references in
+		   ;; footnote definition so numbering follows reading
+		   ;; logic.  Note that we don't have to care about
+		   ;; inline definitions, since `org-element-map'
+		   ;; already traverses them at the right time.
 		   ;;
 		   ;; Once again, return nil to stay in the loop.
 		   ((not (member fn-lbl seen-refs))
