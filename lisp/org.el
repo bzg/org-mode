@@ -20748,7 +20748,9 @@ hierarchy of headlines by UP levels before marking the subtree."
 	 ((org-before-first-heading-p) (error "Not in a subtree"))
 	 (t (outline-previous-visible-heading 1))))
   (when up (while (and (> up 0) (org-up-heading-safe)) (decf up)))
-  (org-mark-element))
+  (if (org-called-interactively-p 'any)
+      (call-interactively 'org-mark-element)
+    (org-mark-element)))
 
 ;;; Indentation
 
@@ -21979,8 +21981,9 @@ ones already marked."
   (interactive)
   (require 'org-element)
   (let (deactivate-mark)
-    (if (or (and (eq last-command this-command) (mark t))
-	    (and transient-mark-mode mark-active))
+    (if (and (org-called-interactively-p 'any)
+	     (or (and (eq last-command this-command) (mark t))
+		 (and transient-mark-mode mark-active)))
 	(set-mark
 	 (save-excursion
 	   (goto-char (mark))
