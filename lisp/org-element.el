@@ -3849,6 +3849,7 @@ OBJECTS is the previous candidates alist."
 ;; The function relies internally on
 ;; `org-element--interpret-affiliated-keywords'.
 
+;;;###autoload
 (defun org-element-interpret-data (data &optional parent)
   "Interpret DATA as Org syntax.
 
@@ -4172,6 +4173,7 @@ first element of current section."
 		 (setq end cend)
 		 (goto-char cbeg)))))))))))
 
+;;;###autoload
 (defun org-element-context ()
   "Return closest element or object around point.
 
