@@ -5484,13 +5484,6 @@ will be prompted for."
   :group 'org-appearance
   :group 'org-babel)
 
-(defcustom org-src-prevent-auto-filling nil
-  "When non-nil, prevent auto-filling in src blocks."
-  :type 'boolean
-  :version "24.1"
-  :group 'org-appearance
-  :group 'org-babel)
-
 (defcustom org-allow-promoting-top-level-subtree nil
   "When non-nil, allow promoting a top level subtree.
 The leading star of the top level headline will be replaced
