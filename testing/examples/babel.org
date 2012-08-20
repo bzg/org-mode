@@ -113,7 +113,7 @@
 #+name: pascals-triangle
 #+begin_src emacs-lisp :var n=5 :exports both
   (require 'cl)
-  (defalias 'my-map (if (org-version-check "24.1.50" "cl" :predicate)
+  (defalias 'my-map (if (org-version-check "24.2.50" "cl" :predicate)
                         'cl-map
                       'map))
   (defun pascals-triangle (n)
