@@ -8754,8 +8754,8 @@ This will remove the markers and the overlays."
 
 (defcustom org-agenda-persistent-marks nil
   "Non-nil means marked items will stay marked after a bulk action.
-You can interactively and temporarily toggle by typing `p' when you
-are prompted for a bulk action."
+You can toggle this interactively by typing `p' when prompted for a
+bulk action."
   :group 'org-agenda
   :version "24.1"
   :type 'boolean)
