@@ -368,7 +368,7 @@ The capture buffer is current and still narrowed."
   "When non-nil, add a bookmark pointing at the last stored
 position when capturing."
   :group 'org-capture
-  :version "24.3"
+  ;; :version "24.3"
   :type 'boolean)
 
 ;;; The property list for keeping information about the capture process
