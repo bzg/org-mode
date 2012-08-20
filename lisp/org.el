@@ -17394,7 +17394,7 @@ write the results in to that file.  When invoked as an
 interactive command, prompt for LATEX-FRAG, with initial value
 set to the current active region and echo the results for user
 inspection."
-  (interactive (list (let ((frag (when (region-active-p)
+  (interactive (list (let ((frag (when (org-region-active-p)
 				   (buffer-substring-no-properties
 				    (region-beginning) (region-end)))))
 		       (read-string "LaTeX Fragment: " frag nil frag))))

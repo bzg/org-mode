@@ -1685,13 +1685,13 @@ region is not active then the point is demarcated."
 			    ""
 			  (concat "\n" (make-string (current-column) ? )))))))
 	   (move-end-of-line 2))
-         (sort (if (region-active-p) (list (mark) (point)) (list (point))) #'>))
+         (sort (if (org-region-active-p) (list (mark) (point)) (list (point))) #'>))
       (let ((start (point))
 	    (lang (org-icompleting-read "Lang: "
 					(mapcar (lambda (el) (symbol-name (car el)))
 						org-babel-load-languages)))
 	    (body (delete-and-extract-region
-		   (if (region-active-p) (mark) (point)) (point))))
+		   (if (org-region-active-p) (mark) (point)) (point))))
 	(insert (concat (if (looking-at "^") "" "\n")
 			(if arg (concat stars "\n") "")
 			"#+begin_src " lang "\n"

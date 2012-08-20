@@ -2796,7 +2796,7 @@ MathML source to kill ring, if `org-export-copy-to-kill-ring' is
 non-nil."
   (interactive
    `(,(let (frag)
-	(setq frag (and (setq frag (and (region-active-p)
+	(setq frag (and (setq frag (and (org-region-active-p)
 					(buffer-substring (region-beginning)
 							  (region-end))))
 			(loop for e in org-latex-regexps
