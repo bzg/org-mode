@@ -21977,6 +21977,7 @@ Interactively, if this command is repeated or (in Transient Mark
 mode) if the mark is active, it marks the next element after the
 ones already marked."
   (interactive)
+  (require 'org-element)
   (let (deactivate-mark)
     (if (or (and (eq last-command this-command) (mark t))
 	    (and transient-mark-mode mark-active))
@@ -21993,6 +21994,7 @@ ones already marked."
 (defun org-narrow-to-element ()
   "Narrow buffer to current element."
   (interactive)
+  (require 'org-element)
   (let ((elem (org-element-at-point)))
     (cond
      ((eq (car elem) 'headline)
@@ -22013,6 +22015,7 @@ ones already marked."
   "Transpose current and previous elements, keeping blank lines between.
 Point is moved after both elements."
   (interactive)
+  (require 'org-element)
   (org-skip-whitespace)
   (let ((end (org-element-property :end (org-element-at-point))))
     (org-drag-element-backward)
@@ -22026,6 +22029,7 @@ modified."
   (interactive)
   (unless (eq major-mode 'org-mode)
     (error "Cannot un-indent a buffer not in Org mode"))
+  (require 'org-element)
   (let* ((parse-tree (org-element-parse-buffer 'greater-element))
 	 unindent-tree			; For byte-compiler.
 	 (unindent-tree
