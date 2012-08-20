@@ -18719,13 +18719,14 @@ this function returns t, nil otherwise."
 		(throw 'exit t))))
 	nil))))
 
+(autoload 'org-element-at-point "org-element")
+
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
 (declare-function org-element-type "org-element" (element))
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-paragraph-parser "org-element" (limit))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
-(declare-function org-element-up "org-element" ())
 (declare-function org-element-nested-p "org-element" (elem-a elem-b))
 (declare-function org-element-swap-A-B "org-element" (elem-a elem-b))
 (declare-function org-element--parse-objects "org-element" (beg end acc restriction))
@@ -20961,9 +20962,6 @@ Return fill prefix, as a string, or nil if current line isn't
 meant to be filled."
   (org-with-wide-buffer
    (unless (and (derived-mode-p 'message-mode) (not (message-in-body-p)))
-     ;; FIXME: Prevent an error for users who forgot to make autoloads?
-     ;; See also `org-fill-paragraph', which has the same.
-     (require 'org-element)
      ;; FIXME: This is really the job of orgstruct++-mode
      (goto-char p)
      (beginning-of-line)
@@ -21038,7 +21036,6 @@ a footnote definition, try to fill the first paragraph within."
     (save-excursion
       ;; Move to end of line in order to get the first paragraph within
       ;; a plain list or a footnote definition.
-      (require 'org-element)
       (end-of-line)
       (let ((element (org-element-at-point)))
 	;; First check if point is in a blank line at the beginning of the
@@ -21980,7 +21977,6 @@ Interactively, if this command is repeated or (in Transient Mark
 mode) if the mark is active, it marks the next element after the
 ones already marked."
   (interactive)
-  (require 'org-element)
   (let (deactivate-mark)
     (if (and (org-called-interactively-p 'any)
 	     (or (and (eq last-command this-command) (mark t))
@@ -21998,7 +21994,6 @@ ones already marked."
 (defun org-narrow-to-element ()
   "Narrow buffer to current element."
   (interactive)
-  (require 'org-element)
   (let ((elem (org-element-at-point)))
     (cond
      ((eq (car elem) 'headline)
@@ -22019,7 +22014,6 @@ ones already marked."
   "Transpose current and previous elements, keeping blank lines between.
 Point is moved after both elements."
   (interactive)
-  (require 'org-element)
   (org-skip-whitespace)
   (let ((end (org-element-property :end (org-element-at-point))))
     (org-drag-element-backward)
@@ -22033,7 +22027,6 @@ modified."
   (interactive)
   (unless (eq major-mode 'org-mode)
     (error "Cannot un-indent a buffer not in Org mode"))
-  (require 'org-element)
   (let* ((parse-tree (org-element-parse-buffer 'greater-element))
 	 unindent-tree			; For byte-compiler.
 	 (unindent-tree
