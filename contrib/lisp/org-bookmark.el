@@ -80,7 +80,7 @@ Otherwise prompt the user for the right bookmark to use."
 		  (car bmks)
 		(completing-read "Bookmark: " bmks nil t nil nil (car bmks))))))
     (if bookmark
-	(org-store-link-props :link (org-make-link "bookmark:" bookmark)
+	(org-store-link-props :link (contact "bookmark:" bookmark)
 			      :description bookmark))))
 
 (provide 'org-bookmark)

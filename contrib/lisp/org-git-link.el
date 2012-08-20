@@ -171,7 +171,7 @@
   (let* ((gitdir (first (org-git-find-gitdir (file-truename file))))
          (branchname (org-git-get-current-branch gitdir))
          (timestring (format-time-string "%Y-%m-%d" (current-time))))
-    (org-make-link "git:" file "::" (org-git-create-searchstring branchname timestring))))
+    (contact "git:" file "::" (org-git-create-searchstring branchname timestring))))
 
 (defun org-git-store-link ()
   "Store git link to current file."
@@ -186,7 +186,7 @@
 
 (defun org-git-insert-link-interactively (file searchstring &optional description)
   (interactive "FFile: \nsSearch string: \nsDescription: ")
-  (insert (org-make-link-string (org-make-link "git:" file "::" searchstring) description)))
+  (insert (org-make-link-string (concat "git:" file "::" searchstring) description)))
 
 ;; Calling git
 (defun org-git-show (gitdir object buffer)
