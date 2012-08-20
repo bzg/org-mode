@@ -21038,6 +21038,7 @@ a footnote definition, try to fill the first paragraph within."
     (save-excursion
       ;; Move to end of line in order to get the first paragraph within
       ;; a plain list or a footnote definition.
+      (require 'org-element)
       (end-of-line)
       (let ((element (org-element-at-point)))
 	;; First check if point is in a blank line at the beginning of the
