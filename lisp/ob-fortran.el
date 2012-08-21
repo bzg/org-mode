@@ -146,15 +146,15 @@ of the same value."
               (length val) var val))
      ((listp val)
       (format "real, parameter :: %S(%d) = %s\n"
-	      var (length val) (ob-fortran-transform-list val)))
+	      var (length val) (org-babel-fortran-transform-list val)))
      (t
       (error (format "the type of parameter %s is not supported by ob-fortran"
 		     var))))))
 
-(defun ob-fortran-transform-list (val)
+(defun org-babel-fortran-transform-list (val)
   "Return a fortran representation of enclose syntactic lists."
   (if (listp val)
-      (concat "(/" (mapconcat #'ob-fortran-transform-list val ", ") "/)")
+      (concat "(/" (mapconcat #'org-babel-fortran-transform-list val ", ") "/)")
     (format "%S" val)))
 
 (provide 'ob-fortran)

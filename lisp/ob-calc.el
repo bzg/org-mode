@@ -80,7 +80,7 @@
 			    ;; resolve user variables, calc built in
 			    ;; variables are handled automatically
 			    ;; upstream by calc
-			    (mapcar #'ob-calc-maybe-resolve-var
+			    (mapcar #'org-babel-calc-maybe-resolve-var
 				    ;; parse line into calc objects
 				    (car (math-read-exprs line)))))))))
 		   (calc-eval line))))))))
@@ -91,14 +91,14 @@
       (calc-eval (calc-top 1)))))
 
 (defvar var-syms) ; Dynamically scoped from org-babel-execute:calc
-(defun ob-calc-maybe-resolve-var (el)
+(defun org-babel-calc-maybe-resolve-var (el)
   (if (consp el)
       (if (and (equal 'var (car el)) (member (cadr el) var-syms))
 	  (progn
 	    (calc-recall (cadr el))
 	    (prog1 (calc-top 1)
 	      (calc-pop 1)))
-	(mapcar #'ob-calc-maybe-resolve-var el))
+	(mapcar #'org-babel-calc-maybe-resolve-var el))
     el))
 
 (provide 'ob-calc)
