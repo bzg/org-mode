@@ -98,8 +98,32 @@ not be modified."
   :group 'org-export-html
   :type 'boolean)
 
-(defconst org-export-html-scripts
+(defvar org-export-html-scripts
   "<script type=\"text/javascript\">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012  Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
 <!--/*--><![CDATA[/*><!--*/
  function CodeHighlightOn(elem, id)
  {
@@ -276,8 +300,9 @@ You can also customize this for each buffer, using something like
 	   (setq val (car (read-from-string
 			   (substring in-buffer (match-end 0))))))
        (if (not (stringp val)) (setq val (format "%s" val)))
-       (if (string-match (concat "%" (upcase (symbol-name name))) template)
-	   (setq template (replace-match val t t template))))
+       (setq template
+	     (replace-regexp-in-string
+	      (concat "%" (upcase (symbol-name name))) val template t t)))
      options)
     (setq val (nth 1 (assq 'mathml options)))
     (if (string-match (concat "\\<mathml:") in-buffer)
@@ -295,6 +320,56 @@ You can also customize this for each buffer, using something like
 
 (defcustom org-export-html-mathjax-template
   "<script type=\"text/javascript\" src=\"%PATH\">
+/**
+ *
+ * @source: %PATH
+ *
+ * @licstart  The following is the entire license notice for the
+ *  JavaScript code in %PATH.
+ *
+ * Copyright (C) 2012  MathJax
+ *
+ * Licensed under the Apache License, Version 2.0 (the \"License\");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an \"AS IS\" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @licend  The above is the entire license notice
+ * for the JavaScript code in %PATH.
+ *
+ */
+
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code below.
+
+Copyright (C) 2012  Free Software Foundation, Inc.
+
+The JavaScript code below is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code below.
+*/
 <!--/*--><![CDATA[/*><!--*/
     MathJax.Hub.Config({
         // Only one of the two following lines, depending on user settings
@@ -1290,8 +1365,7 @@ PUB-DIR is set, use this as the publishing directory."
 	 rpl path attr desc descp desc1 desc2 link
 	 snumber fnc
 	 footnotes footref-seen
-	 href
-	 )
+	 href)
 
     (let ((inhibit-read-only t))
       (org-unmodified
