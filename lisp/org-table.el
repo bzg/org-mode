@@ -3800,7 +3800,7 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
   "Toggle the display of Row/Column numbers in tables."
   (interactive)
   (setq org-table-overlay-coordinates (not org-table-overlay-coordinates))
-  (message "Row/Column number display turned %s"
+  (message "Tables Row/Column numbers display turned %s"
 	   (if org-table-overlay-coordinates "on" "off"))
   (if (and (org-at-table-p) org-table-overlay-coordinates)
       (org-table-align))
