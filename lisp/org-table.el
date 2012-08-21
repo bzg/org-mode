@@ -121,7 +121,8 @@ The default value of this option is a regular expression which allows
 anything which looks remotely like a number as used in scientific
 context.  For example, all of the following will be considered a
 number:
-    12    12.2    2.4e-08    2x10^12    4.034+-0.02    2.7(10)  >3.5
+
+   12    12.2   12,2   2.4e-08   2x10^12   4.034+-0.02   2.7(10)   >3.5
 
 Other options offered by the customize interface are more restrictive."
   :group 'org-table-settings
