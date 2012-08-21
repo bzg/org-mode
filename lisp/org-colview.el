@@ -150,6 +150,7 @@ This is the compiled version of the format.")
   "Create a new column overlay and add it to the list."
   (let ((ov (make-overlay beg end)))
     (overlay-put ov 'face (or face 'secondary-selection))
+    (remove-text-properties 0 (length string) '(face nil) string)
     (org-overlay-display ov string face)
     (push ov org-columns-overlays)
     ov))
