@@ -55,6 +55,21 @@ org-velocity.el          --- something like Notational Velocity for Org
 org-wikinodes.el         --- CamelCase wiki-like links for Org
 
 
+EXPORT ENGINE AND BACKENDS (emacs-lisp code)
+============================================
+
+org-export.el            --- the new export engine
+org-e-latex.el           --- LaTeX export backend
+org-e-ascii.el           --- ASCII export backend
+org-e-beamer.el          --- Beamer export backend
+org-e-groff.el           --- Groff export backend
+org-e-html.el            --- HTML export backend
+org-e-man.el             --- man pages export backend
+org-e-odt.el             --- ODT export backend
+org-e-texinfo.el         --- TeXinfo export backend
+org-md.el                --- MarkDown export backend
+
+
 BABEL
 =====
 library-of-babel.org     --- Documentation for the library of babel
@@ -74,6 +89,8 @@ dir2org.zsh          --- Org compatible fs structure output
 ditaa.jar            --- ASCII to PNG converter by Stathis Sideris, GPL
 org2hpda             --- Generate hipster pda style printouts from Org-mode
 org-docco.org        --- docco side-by-side annotated code export to HTML
+StartOzServer.oz     --- implements the Oz-side of the Org-babel Oz interface
+staticmathjax        --- XULRunner application to process MathJax statically
 
 This directory also contains supporting files for the following
 packages: ob-oz.el, org-docco.org, and org-static-mathjax.el.
