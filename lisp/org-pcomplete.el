@@ -58,10 +58,10 @@
   "Examine the thing at point and let the caller know what it is.
 The return value is a string naming the thing at point."
   (let ((beg1 (save-excursion
-		(skip-chars-backward (org-re "[:alnum:]_@"))
+		(skip-chars-backward (org-re "[:alnum:]-_@"))
 		(point)))
 	(beg (save-excursion
-	       (skip-chars-backward "a-zA-Z0-9_:$")
+	       (skip-chars-backward "a-zA-Z0-9-_:$")
 	       (point)))
 	(line-to-here (buffer-substring (point-at-bol) (point))))
     (cond
