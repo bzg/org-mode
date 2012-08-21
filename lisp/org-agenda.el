@@ -3300,7 +3300,8 @@ generating a new one."
     (unless org-agenda-persistent-filter
       (setq org-agenda-tag-filter nil
 	    org-agenda-category-filter nil))
-    (put 'org-agenda-tag-filter :preset-filter org-agenda-tag-filter-preset)
+    (put 'org-agenda-tag-filter :preset-filter
+	 org-agenda-tag-filter-preset)
     (put 'org-agenda-category-filter :preset-filter
 	 org-agenda-category-filter-preset)
     (if org-agenda-multi
@@ -6518,7 +6519,8 @@ When this is the global TODO list, a prefix argument will be interpreted."
   "Keep only those lines in the agenda buffer that have a specific category.
 The category is that of the current line."
   (interactive "P")
-  (if org-agenda-filtered-by-category
+  (if (and org-agenda-filtered-by-category
+	   org-agenda-category-filter)
       (org-agenda-filter-show-all-cat)
     (let ((cat (org-no-properties (get-text-property (point) 'org-category))))
       (if cat (org-agenda-filter-apply
