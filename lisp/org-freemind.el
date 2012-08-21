@@ -334,7 +334,7 @@ MATCHED is the link just matched."
      "\\[\\[\\(.*?\\)]\\[\\(.*?\\)]]"
      ;;"<a href=\"\\1\">\\2</a>"
      'org-freemind-convert-links-helper
-     fm-str)))
+     fm-str t t)))
 
 ;;(org-freemind-convert-links-to-org "<a href=\"http://www.somewhere/\">link-text</a>")
 (defun org-freemind-convert-links-to-org (fm-str)
