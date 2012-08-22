@@ -22,6 +22,10 @@ infodir = $(prefix)/info
 # Define if you only need info documentation, the default includes html and pdf
 #ORG_MAKE_DOC = info # html pdf
 
+# Define if you want to include some (or all) files from contrib/lisp
+# just the filename please (no path prefix, no .el suffix), maybe with globbing
+#ORG_ADD_CONTRIB = org-e-* org-md org-export # e.g. the new exporter
+
 # Where to create temporary files for the testsuite
 # respect TMPDIR if it is already defined in the environment
 TMPDIR ?= /tmp
