@@ -3,23 +3,27 @@
 ifeq ($(MAKELEVEL), 0)
   $(error This make needs to be started as a sub-make from the toplevel directory.)
 endif
--include local.mk
 
 LISPV = org-version.el
 LISPI = org-install.el
 LISPA = $(LISPV) $(LISPI)
 LISPF = $(filter-out $(LISPA),$(sort $(wildcard *.el)))
 LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))
+_ORGCM_ = dirall single source slint1 slint2
+-include local.mk
 
-_ORGCM_ = dirall single source slint1
 .PHONY:	all compile compile-dirty \
-	$(_ORGCM_) $(_ORGCM_:%=compile-%) compile-slint2 \
+	$(_ORGCM_) $(_ORGCM_:%=compile-%) \
 	autoloads \
 	install clean cleanauto cleanall cleanelc clean-install
 
 # do not clean here, done in toplevel make
 all compile compile-dirty::	 autoloads
+ifeq ($(filter-out $(_ORGCM_),$(ORGCM)),)
 	$(MAKE) compile-$(ORGCM)
+else
+	$(error ORGCM has illegal value $(ORGCM) (valid: $(_ORGCM_)))
+endif
 
 compile-dirall:	dirall
 compile-single: single $(LISPC)
