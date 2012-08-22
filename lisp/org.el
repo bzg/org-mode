@@ -4423,7 +4423,7 @@ TODO state, priority and tags.")
 Also put tags into group 4 if tags are present.")
 (make-variable-buffer-local 'org-todo-line-tags-regexp)
 (defvar org-ds-keyword-length 12
-  "Maximum length of the Deadline and SCHEDULED keywords.")
+  "Maximum length of the DEADLINE and SCHEDULED keywords.")
 (make-variable-buffer-local 'org-ds-keyword-length)
 (defvar org-deadline-regexp nil
   "Matches the DEADLINE keyword.")
@@ -13295,19 +13295,18 @@ instead of the agenda files."
 (defun org-make-tags-matcher (match)
   "Create the TAGS/TODO matcher form for the selection string MATCH.
 
-The variable `todo-only' is scoped dynamically into this function; it will be
-set to t if the matcher restricts matching to TODO entries,
+The variable `todo-only' is scoped dynamically into this function.
+It will be set to t if the matcher restricts matching to TODO entries,
 otherwise will not be touched.
 
 Returns a cons of the selection string MATCH and the constructed
-lisp form implementing the matcher.  The matcher is to be
-evaluated at an Org entry, with point on the headline,
-and returns t if the entry matches the
-selection string MATCH.  The returned lisp form references
-two variables with information about the entry, which must be
-bound around the form's evaluation: todo, the TODO keyword at the
-entry (or nil of none); and tags-list, the list of all tags at the
-entry including inherited ones.  Additionally, the category
+lisp form implementing the matcher.  The matcher is to be evaluated
+at an Org entry, with point on the headline, and returns t if the
+entry matches the selection string MATCH.  The returned lisp form
+references two variables with information about the entry, which
+must be bound around the form's evaluation: todo, the TODO keyword
+at the entry (or nil of none); and tags-list, the list of all tags
+at the entry including inherited ones.  Additionally, the category
 of the entry (if any) must be specified as the text property
 'org-category on the headline.
 
