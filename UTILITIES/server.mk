@@ -22,13 +22,13 @@ ORGELPA := $(ORGELPA:%/=%/*)
 
 release:	ORG_MAKE_DOC=info pdf card # do not make HTML documentation
 release:	cleanall doc autoloads rel-dirty
-rel-dirty:	ORGRDIR=org-$(GITVERSION)
+rel-dirty:	ORGDIR=org-$(GITVERSION)
 rel-dirty:
-	-@$(RM) $(ORGRDIR) $(ORGRTAR) $(ORGRZIP)
-	ln -s . $(ORGRDIR)
-	tar -zcf $(ORGDIR).tar.gz $(foreach dist, $(ORGFULL), $(ORGRDIR)/$(dist))
-	zip -r9  $(ORGDIR).zip    $(foreach dist, $(ORGFULL), $(ORGRDIR)/$(dist))
-	-@$(RM) $(ORGRDIR)
+	-@$(RM) $(ORGDIR) $(ORGRTAR) $(ORGRZIP)
+	ln -s . $(ORGDIR)
+	tar -zcf $(ORGDIR).tar.gz $(foreach dist, $(ORGFULL), $(ORGDIR)/$(dist))
+	zip -r9  $(ORGDIR).zip    $(foreach dist, $(ORGFULL), $(ORGDIR)/$(dist))
+	-@$(RM) $(ORGDIR)
 	$(if $(filter-out $(ORGVERSION), $(GITVERSION)), \
 	    @$(MAKE) tagwarn)
 	@echo ORGVERSION=$(ORGVERSION) GITVERSION=$(GITVERSION)
