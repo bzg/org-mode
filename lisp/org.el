@@ -9324,6 +9324,7 @@ be used as the default description."
 	 (desc region)
 	 tmphist ; byte-compile incorrectly complains about this
 	 (link link-location)
+	 (abbrevs org-link-abbrev-alist-local)
 	 entry file all-prefixes auto-desc)
     (cond
      (link-location) ; specified by arg, just use it.
@@ -9365,7 +9366,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
       ;; Fake a link history, containing the stored links.
       (setq tmphist (append (mapcar 'car org-stored-links)
 			    org-insert-link-history))
-      (setq all-prefixes (append (mapcar 'car org-link-abbrev-alist-local)
+      (setq all-prefixes (append (mapcar 'car abbrevs)
 				 (mapcar 'car org-link-abbrev-alist)
 				 org-link-types))
       (unwind-protect
