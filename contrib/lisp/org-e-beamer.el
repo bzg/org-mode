@@ -227,19 +227,20 @@ TYPE is a symbol among the following:
 `action'    Return ARGUMENT within angular brackets.
 `defaction' Return ARGUMENT within both square and angular brackets.
 `option'    Return ARGUMENT within square brackets."
-  (case type
-    (action (if (string-match "\\`<.*>\\'" argument) argument
-	      (format "<%s>" argument)))
-    (defaction (cond
-		((string-match "\\`\\[<.*>\\]\\'" argument) argument)
-		((string-match "\\`<.*>\\'" argument)
-		 (format "[%s]" argument))
-		((string-match "\\`\\[\\(.*\\)\\]\\'" argument)
-		 (format "[<%s>]" (match-string 1 argument)))
-		(t (format "[<%s>]" argument))))
-    (option (if (string-match "\\`\\[.*\\]\\'" argument) argument
-	      (format "[%s]" argument)))
-    (otherwise argument)))
+  (if (not (string-match "\\S-" argument)) ""
+    (case type
+      (action (if (string-match "\\`<.*>\\'" argument) argument
+		(format "<%s>" argument)))
+      (defaction (cond
+		  ((string-match "\\`\\[<.*>\\]\\'" argument) argument)
+		  ((string-match "\\`<.*>\\'" argument)
+		   (format "[%s]" argument))
+		  ((string-match "\\`\\[\\(.*\\)\\]\\'" argument)
+		   (format "[<%s>]" (match-string 1 argument)))
+		  (t (format "[<%s>]" argument))))
+      (option (if (string-match "\\`\\[.*\\]\\'" argument) argument
+		(format "[%s]" argument)))
+      (otherwise argument))))
 
 (defun org-e-beamer--element-has-overlay-p (element)
   "Non-nil when ELEMENT has an overlay specified.
