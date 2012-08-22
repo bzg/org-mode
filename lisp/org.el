@@ -5096,8 +5096,8 @@ The following commands are available:
   (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
   (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region)
   ;; Beginning/end of defun
-  (org-set-local 'beginning-of-defun-function 'org-beginning-of-defun)
-  (org-set-local 'end-of-defun-function 'org-end-of-defun)
+  (org-set-local 'beginning-of-defun-function 'org-back-to-heading)
+  (org-set-local 'end-of-defun-function (lambda () (interactive) (org-end-of-subtree nil t)))
   ;; Next error for sparse trees
   (org-set-local 'next-error-function 'org-occur-next-match)
   ;; Make sure dependence stuff works reliably, even for users who set it
@@ -21551,13 +21551,6 @@ This version does not only check the character property, but also
       (outline-back-to-heading invisible-ok)
     (error (error "Before first headline at position %d in buffer %s"
 		  (point) (current-buffer)))))
-
-(defun org-beginning-of-defun ()
-  "Go to the beginning of the subtree, i.e. back to the heading."
-  (org-back-to-heading))
-(defun org-end-of-defun ()
-  "Go to the end of the subtree."
-  (org-end-of-subtree nil t))
 
 (defun org-before-first-heading-p ()
   "Before first heading?"
