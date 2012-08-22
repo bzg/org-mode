@@ -956,10 +956,10 @@ INFO is a plist used as a communication channel.
 Footnotes definitions are returned within \"\\footnotetxt{}\"
 commands.
 
-This functions is used within constructs that don't support
+This function is used within constructs that don't support
 \"\\footnote{}\" command (i.e. an item's tag).  In that case,
-\"\\footnotemark\" is used within the construct and this function
-outside of it."
+\"\\footnotemark\" is used within the construct and the function
+just outside of it."
   (mapconcat
    (lambda (ref)
      (format
