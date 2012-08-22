@@ -34,7 +34,7 @@ endif
 	check test install $(INSTSUB) \
 	info html pdf card refcard doc docs \
 	autoloads cleanall clean $(CLEANDIRS:%=clean%) \
-	cleanrel clean-install cleanelc cleandirs \
+	clean-install cleanelc cleandirs \
 	cleanlisp cleandoc cleandocs cleantest \
 	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol
@@ -131,7 +131,7 @@ autoloads: lisp
 cleandirs:
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) cleanall;)
 
-clean:	cleanrel cleanlisp cleandoc
+clean:	cleanlisp cleandoc
 
 cleanall: cleandirs cleantest
 	-$(FIND) . \( -name \*~ -o -name \*# -o -name .#\* \) -exec $(RM) {} \;
@@ -147,11 +147,6 @@ cleanaddcontrib:
 endif
 
 cleanutils:	cleanUTILITIES
-
-cleanrel:
-	$(RMR) RELEASEDIR
-	$(RMR) org-7.*
-	$(RMR) org-7*zip org-7*tar.gz
 
 cleanelc:
 	$(MAKE) -C lisp $@
