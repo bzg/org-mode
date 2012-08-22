@@ -529,24 +529,25 @@ recurse into all children as well."
 MENU is the parse-tree to work with.  LEVEL is the starting level
 for the menu headlines and from which recursion occurs.  INFO is
 a plist containing contextual information."
-  (let ((max-depth (plist-get info :headline-levels)))
-    (when (> max-depth level)
-      (loop for headline in menu append
-	    (let* ((title (org-e-texinfo--menu-headlines headline info))
-		   ;; Create list of menu entries for the next level
-		   (sublist (org-e-texinfo--generate-menu-list
-			     headline (1+ level) info))
-		   ;; Generate the menu items for that level.  If
-		   ;; there are none omit that heading completely,
-		   ;; otherwise join the title to it's related entries.
-		   (submenu (if (org-e-texinfo--generate-menu-items sublist info)
-				(append (list title)
-					(org-e-texinfo--generate-menu-items sublist info))
-			      'nil))
-		   ;; Start the process over the next level down.
-		   (recursion (org-e-texinfo--generate-detailed sublist (1+ level) info)))
-	      (setq recursion (append submenu recursion))
-	      recursion)))))
+  (when level
+    (let ((max-depth (plist-get info :headline-levels)))
+      (when (> max-depth level)
+	(loop for headline in menu append
+	      (let* ((title (org-e-texinfo--menu-headlines headline info))
+		     ;; Create list of menu entries for the next level
+		     (sublist (org-e-texinfo--generate-menu-list
+			       headline (1+ level) info))
+		     ;; Generate the menu items for that level.  If
+		     ;; there are none omit that heading completely,
+		     ;; otherwise join the title to it's related entries.
+		     (submenu (if (org-e-texinfo--generate-menu-items sublist info)
+				  (append (list title)
+					  (org-e-texinfo--generate-menu-items sublist info))
+				'nil))
+		     ;; Start the process over the next level down.
+		     (recursion (org-e-texinfo--generate-detailed sublist (1+ level) info)))
+		(setq recursion (append submenu recursion))
+		recursion))))))
 
 (defun org-e-texinfo--generate-menu-list (tree level info)
   "Generate the list of headlines that are within a given level
@@ -656,7 +657,9 @@ holding export options."
 	 (dirdesc (plist-get info :texinfo-dirdesc))
 	 ;; Spacing to align description (column 32 - 3 for `* ' and
 	 ;; `.' in text.
-	 (dirspacing (- 29 (length dirtitle))))
+	 (dirspacing (- 29 (length dirtitle)))
+	 (menu (org-e-texinfo-make-menu info 'main))
+	 (detail-menu (org-e-texinfo-make-menu info 'detailed)))
     (concat
      ;; Header
      header "\n"
@@ -721,17 +724,20 @@ holding export options."
      "@insertcopying\n"
      "@end ifnottex\n\n"
 
-     ;; Menu
-     "@menu\n"
-     (org-e-texinfo-make-menu info 'main)
-     "\n\n"
-     ;; Detailed Menu
-     "@detailmenu\n"
-     " --- The Detailed Node Listing ---\n"
-     (org-e-texinfo-make-menu info 'detailed)
-     "\n\n"
-     "@end detailmenu\n"
-     "@end menu\n"
+     ;; Do not output menus if they are empty
+     (if menu
+	 ;; Menu
+	 (concat "@menu\n"
+		 menu
+		 "\n\n"
+		 ;; Detailed Menu
+		 (if detail-menu
+		     (concat "@detailmenu\n"
+			     " --- The Detailed Node Listing ---\n"
+			     detail-menu
+			     "\n\n"
+			     "@end detailmenu\n"))
+		   "@end menu\n"))
      "\n\n"
 
      ;; Document's body.
@@ -902,8 +908,9 @@ holding contextual information."
 	 (index (org-element-property :index headline))
 	 ;; Create node info, to insert it before section formatting.
 	 (node (format "@node %s\n"
-		       (org-export-data
-			(org-element-property :title headline) info)))
+		       (replace-regexp-in-string
+			"%" "%%"
+			(org-export-data (org-element-property :title headline) info))))
 	 ;; Menus must be generated with first child, otherwise they
 	 ;; will not nest properly
 	 (menu (let* ((first (org-export-first-sibling-p headline info))
@@ -1254,8 +1261,7 @@ are generated directly."
      ((eq level 'detailed)
       ;; Requires recursion
       ;;(org-e-texinfo--build-detailed-menu parse top info)
-      (or (org-e-texinfo--build-menu parse top info 'detailed)
-	  "detailed"))
+      (org-e-texinfo--build-menu parse top info 'detailed))
      ;; Otherwise do nothing
      (t))))
 
