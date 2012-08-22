@@ -22,7 +22,7 @@ ORGELPA := $(ORGELPA:%/=%/*)
 
 release:	ORG_MAKE_DOC=info pdf card # do not make HTML documentation
 release:	cleanall doc autoloads rel-dirty
-rel-dirty:	ORGDIR=org-$(GITVERSION)
+rel-dirty:	ORGDIR=org-$(GITVERSION:release_%=%)
 rel-dirty:
 	-@$(RM) $(ORGDIR) $(ORGRTAR) $(ORGRZIP)
 	ln -s . $(ORGDIR)
