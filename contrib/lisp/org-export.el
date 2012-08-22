@@ -2426,18 +2426,26 @@ channel, as a plist.  It must return a string or nil.")
 ;; variables (user filters) in the communication channel.
 ;;
 ;; Internal function `org-export-filter-apply-functions' takes care
-;; about applying each filter in order to a given data.  It stops
-;; whenever a filter returns a nil value.
+;; about applying each filter in order to a given data.  It ignores
+;; filters returning a nil value but stops whenever a filter returns
+;; an empty string.
 
 (defun org-export-filter-apply-functions (filters value info)
   "Call every function in FILTERS.
+
 Functions are called with arguments VALUE, current export
-back-end and INFO.  Call is done in a LIFO fashion, to be sure
-that developer specified filters, if any, are called first."
-  (loop for filter in filters
-	if (not value) return nil else
-	do (setq value (funcall filter value (plist-get info :back-end) info)))
-  value)
+back-end and INFO.  A function returning a nil value will be
+skipped.  If it returns the empty string, the process ends and
+VALUE is ignored.
+
+Call is done in a LIFO fashion, to be sure that developer
+specified filters, if any, are called first."
+  (catch 'exit
+    (dolist (filter filters value)
+      (let ((result (funcall filter value (plist-get info :back-end) info)))
+	(cond ((not value))
+	      ((equal value "") (throw 'exit nil))
+	      (t (setq value result)))))))
 
 (defun org-export-install-filters (info)
   "Install filters properties in communication channel.
