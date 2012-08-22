@@ -1590,7 +1590,7 @@ contextual information."
 				 (concat checkbox
 					 (org-export-data tag info)))))))
     (concat counter "\\item" (or tag (concat " " checkbox))
-	    (org-trim contents)
+	    (and contents (org-trim contents))
 	    ;; If there are footnotes references in tag, be sure to
 	    ;; add their definition at the end of the item.  This
 	    ;; workaround is necessary since "\footnote{}" command is
