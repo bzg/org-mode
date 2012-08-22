@@ -118,9 +118,7 @@ autoloads: lisp
 cleandirs:
 	$(foreach dir, $(SUBDIRS), $(MAKE) -C $(dir) cleanall;)
 
-clean:	cleanrel
-	$(MAKE) -C lisp clean
-	$(MAKE) -C doc clean
+clean:	cleanrel cleanlisp cleandoc
 
 cleanall: cleandirs cleantest
 	-$(FIND) . \( -name \*~ -o -name \*# -o -name .#\* \) -exec $(RM) {} \;
