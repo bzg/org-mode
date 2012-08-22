@@ -166,7 +166,7 @@ close   The closing string of the environment."
   :group 'org-export-e-beamer
   :type '(string :tag "Outline frame title"))
 
-(defcustom org-e-beamer-outline-frame-options nil
+(defcustom org-e-beamer-outline-frame-options ""
   "Outline frame options appended after \\begin{frame}.
 You might want to put e.g. \"allowframebreaks=0.9\" here."
   :group 'org-export-e-beamer
