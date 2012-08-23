@@ -442,12 +442,25 @@ for a capture buffer.")
   "Bind capture keys with rules on where to display them.
 
 For example, if you have a capture template \"c\" and you want
-this template to be accessible only from message-mode buffers,
+this template to be accessible only from `message-mode' buffers,
 use this:
 
-   '((\"c\" (in-mode . \"message-mode\")))
+   '((\"c\" \"c\" (in-mode . \"message-mode\")))
 
-Here are the available checks:
+If you replace the second \"c\" by another key (say \"d\"), then
+the \"c\" key will be associated with the \"d\" template in the
+valid contexts.  This is useful if you want to use the same key
+for different templates depending on the context:
+
+   '((\"c\" \"d\" (in-file . \"\\.txt\"))
+     (\"c\" \"e\" (in-file . \"\\.el\"))
+     (\"c\" \"f\" (in-file . \"\\.c\")))
+
+Here, the \"c\" key will be accessible from buffers visiting
+.txt, .el and .c files, and it will be a synonym for \"d\", \"e\"
+and \"f\" respectively.
+
+Here are the available contexts definition:
 
       in-file: template displayed only in matching files
       in-mode: template displayed only in matching modes
@@ -458,8 +471,9 @@ If you define several checks, the capture template will be
 accessible if there is at least one valid check."
   ;; :version "24.3"
   :group 'org-capture
-  :type '(repeat (cons :tag "Rule"
+  :type '(repeat (list :tag "Rule"
 		       (string :tag "Capture key")
+		       (string :tag "Replace by template")
 		       (repeat :tag "Available when"
 			       (cons :tag "Condition"
 				     (choice

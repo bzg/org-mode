@@ -2341,9 +2341,22 @@ For example, if you have a custom agenda command \"p\" and you
 want this command to be accessible only from plain text files,
 use this:
 
-   '((\"p\" (in-file . \"\\.txt\")))
+   '((\"p\" \"p\" (in-file . \"\\.txt\")))
 
-Here are the available checks:
+If you replace the second \"p\" by another key (say \"q\"), then
+the \"p\" key will be associated with the \"q\" command in the
+valid contexts.  This is useful if you want to use the same key
+to reach multiple commands depending on the context:
+
+   '((\"p\" \"q\" (in-file . \"\\.txt\"))
+     (\"p\" \"r\" (in-file . \"\\.el\"))
+     (\"p\" \"s\" (in-file . \"\\.c\")))
+
+Here, the \"p\" key will be accessible from buffers visiting
+.txt, .el and .c files, and it will be a synonym for \"q\", \"r\"
+and \"s\" respectively.
+
+Here are the available contexts definition:
 
       in-file: command displayed only in matching files
       in-mode: command displayed only in matching modes
@@ -2354,8 +2367,9 @@ If you define several checks, the agenda command will be
 accessible if there is at least one valid check."
   ;; :version "24.3"
   :group 'org-agenda-custom-commands
-  :type '(repeat (cons :tag "Rule"
+  :type '(repeat (list :tag "Rule"
 		       (string :tag "Agenda key")
+		       (string :tag "Replace by command")
 		       (repeat :tag "Available when"
 			       (cons :tag "Condition"
 				     (choice

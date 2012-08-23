@@ -8623,15 +8623,37 @@ to execute outside of tables."
   "Return a subset of elements in ALIST depending on CONTEXTS.
 ALIST can be either `org-agenda-custom-commands' or
 `org-capture-templates'."
-  (let ((a alist) c r)
-    (while (setq c (pop a))
-      (when (or (not (assoc (car c) contexts))
-		(and (assoc (car c) contexts)
-		     (org-rule-validate
-		      (cdr (assoc (car c) contexts)))))
-	(push c r)))
-    ;; Return the limited ALIST
-    r))
+  (let ((a alist) c r s val repl)
+    (while (setq c (pop a))  ; loop over commands or templates
+      (cond ((not (assoc (car c) contexts))
+	     (push c r))
+	    ((and (assoc (car c) contexts)
+		  (let (rr)
+		    (setq val
+			  (org-rule-validate
+			   (and (mapc ; check all contexts associations
+				 (lambda (rl)
+				   (when (equal (car rl) (car c))
+				     (setq rr (delq nil (append rr (car (last rl)))))))
+				 contexts)
+				rr)))))
+	     (setq repl
+		   (car (delq nil
+			      (mapcar (lambda(cnt)
+					(when (and (member (car val) (caddr cnt))
+						   (equal (car c) (car cnt))) cnt))
+				      contexts))))
+	     (unless (equal (car c) (cadr repl))
+	       (push (cadr repl) s))
+	     (push (cons (car c) (cdr (assoc (cadr repl) alist))) r))))
+    ;; Return limited ALIST, possibly with keys modified, and deduplicated
+    (delq nil
+	  (mapcar (lambda(x)
+		    (let ((tpl (car x)))
+		      (when (not (delq nil
+				       (mapcar (lambda(y)
+						 (equal y tpl)) s))) x)))
+		  r))))
 
 (defun org-rule-validate (rules)
   "Check if one of RULES is valid in this buffer."
