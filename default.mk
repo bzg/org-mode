@@ -71,7 +71,7 @@ BATCH	= $(EMACS) -batch -Q
 MAKE_LOCAL_MK = $(BATCH) \
 	  --eval '(add-to-list '"'"'load-path "./lisp")' \
 	  --eval '(load "org-compat.el")' \
-	  --eval '(load "../UTILITIES/org-fixup.el")' \
+	  --eval '(load "../utils/org-fixup.el")' \
 	  --eval '(org-make-local-mk)'
 
 # Emacs must be started in lisp directory
@@ -81,13 +81,13 @@ BATCHL	= $(BATCH) \
 # How to generate org-install.el
 MAKE_ORG_INSTALL = $(BATCHL) \
 	  --eval '(load "org-compat.el")' \
-	  --eval '(load "../UTILITIES/org-fixup.el")' \
+	  --eval '(load "../utils/org-fixup.el")' \
 	  --eval '(org-make-org-install)'
 
 # How to generate org-version.el
 MAKE_ORG_VERSION = $(BATCHL) \
 	  --eval '(load "org-compat.el")' \
-	  --eval '(load "../UTILITIES/org-fixup.el")' \
+	  --eval '(load "../utils/org-fixup.el")' \
 	  --eval '(org-make-org-version "$(ORGVERSION)" "$(GITVERSION)" "$(datadir)")'
 
 # How to byte-compile the whole source directory

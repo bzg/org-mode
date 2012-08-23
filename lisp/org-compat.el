@@ -446,7 +446,7 @@ With two arguments, return floor and remainder of their quotient."
   "Try very hard to provide sensible version strings."
   (let* ((org-dir        (org-find-library-dir "org"))
 	 (org-version.el (concat org-dir "org-version.el"))
-	 (org-fixup.el   (concat org-dir "../UTILITIES/org-fixup.el")))
+	 (org-fixup.el   (concat org-dir "../utils/org-fixup.el")))
     (if (require 'org-version org-version.el 'noerror)
 	'(progn
 	   (autoload 'org-release     "org-version.el")

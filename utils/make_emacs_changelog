@@ -66,7 +66,7 @@ foreach my $commit (@commits) {
     
     # remove stuff which is not for this output
     if ($kind =~ /\S/) { 
-      remove_parts("contrib/","testing/","xemacs/","UTILITIES/","etc/");
+      remove_parts("contrib/","testing/","xemacs/","utils/","etc/");
       remove_parts(".*Makefile","README",".+\.mk");
     }
     if ($kind eq "lisp") { remove_parts("doc/")                               }

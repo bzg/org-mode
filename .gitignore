@@ -63,7 +63,7 @@ TODO
 .DS_Store
 *#
 .#*
-/UTILITIES/x11idle
+/utils/x11idle
 
 #
 # Local variables:

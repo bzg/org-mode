@@ -20,10 +20,10 @@ manual guide::
 	$(MKDIR) $@
 manual::	org.texi org-version.inc
 	$(TEXI2HTML) -o $@ $<
-	../UTILITIES/mansplit.pl $@/*
+	../utils/mansplit.pl $@/*
 guide::		orgguide.texi org-version.inc
 	$(TEXI2HTML) -o $@ $<
-	../UTILITIES/guidesplit.pl $@/*
+	../utils/guidesplit.pl $@/*
 
 org-version.inc:	org.texi
 	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
@@ -61,14 +61,14 @@ clean-install:
 
 %.html:		%.texi org-version.inc
 	$(TEXI2HTML) --no-split -o $@ $<
-	../UTILITIES/manfull.pl $@
+	../utils/manfull.pl $@
 
 %.txt:		%.tex
-	perl ../UTILITIES/orgcard2txt.pl $< > $@
+	perl ../utils/orgcard2txt.pl $< > $@
 
 %_letter.tex:	%.tex
 	$(BATCH) \
 	  --eval '(add-to-list '"'"'load-path "../lisp")' \
 	  --eval '(load "org-compat.el")' \
-	  --eval '(load "../UTILITIES/org-fixup.el")' \
+	  --eval '(load "../utils/org-fixup.el")' \
 	  --eval '(org-make-letterformat "$(<F)" "$(@F)")'

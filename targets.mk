@@ -5,7 +5,7 @@ DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
 
 LISPDIRS      = lisp
 OTHERDIRS     = doc etc
-CLEANDIRS     = contrib testing UTILITIES
+CLEANDIRS     = contrib testing utils
 SUBDIRS       = $(OTHERDIRS) $(LISPDIRS)
 INSTSUB       = $(SUBDIRS:%=install-%)
 ORG_MAKE_DOC ?= info html pdf
@@ -146,7 +146,7 @@ cleanaddcontrib:
 	$(RM) $(ORG_TO_LISP)
 endif
 
-cleanutils:	cleanUTILITIES
+cleanutils:	cleanutils
 
 cleanelc:
 	$(MAKE) -C lisp $@
