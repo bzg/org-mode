@@ -146,8 +146,6 @@ cleanaddcontrib:
 	$(RM) $(ORG_TO_LISP)
 endif
 
-cleanutils:	cleanutils
-
 cleanelc:
 	$(MAKE) -C lisp $@
 
