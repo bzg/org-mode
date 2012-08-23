@@ -812,7 +812,7 @@ As an example, here is how the `e-ascii' back-end is defined:
   :options-alist ((:ascii-charset nil nil org-e-ascii-charset)))"
   (declare (debug (&define name sexp [&rest [keywordp sexp]] defbody))
 	   (indent 1))
-  (let (filters options block-name)
+  (let (filters options export-block)
     (while (keywordp (car body))
       (case (pop body)
         (:export-block (let ((names (pop body)))
@@ -897,7 +897,7 @@ The back-end could then be called with, for example:
   \(org-export-to-buffer 'my-latex \"*Test my-latex*\")"
   (declare (debug (&define name sexp [&rest [keywordp sexp]] def-body))
 	   (indent 2))
-  (let (filters options translate)
+  (let (filters options translate export-block)
     (while (keywordp (car body))
       (case (pop body)
 	(:export-block (let ((names (pop body)))
