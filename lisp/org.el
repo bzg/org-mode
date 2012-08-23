@@ -8623,54 +8623,66 @@ to execute outside of tables."
   "Return a subset of elements in ALIST depending on CONTEXTS.
 ALIST can be either `org-agenda-custom-commands' or
 `org-capture-templates'."
-  (let ((a alist) c r s val repl)
-    (while (setq c (pop a))  ; loop over commands or templates
-      (cond ((not (assoc (car c) contexts))
-	     (push c r))
-	    ((and (assoc (car c) contexts)
-		  (let (rr)
-		    (setq val
-			  (org-rule-validate
-			   (and (mapc ; check all contexts associations
-				 (lambda (rl)
-				   (when (equal (car rl) (car c))
-				     (setq rr (delq nil (append rr (car (last rl)))))))
-				 contexts)
-				rr)))))
-	     (setq repl
-		   (car (delq nil
-			      (mapcar (lambda(cnt)
-					(when (and (member (car val) (caddr cnt))
-						   (equal (car c) (car cnt))) cnt))
-				      contexts))))
-	     (unless (equal (car c) (cadr repl))
-	       (push (cadr repl) s))
-	     (push (cons (car c) (cdr (assoc (cadr repl) alist))) r))))
+  (let ((contexts
+	 ;; normalize contexts
+	 (mapcar
+	  (lambda(c) (if (listp (cadr c))
+			 (list (car c) (car c) (cadr c))
+		       c)) contexts))
+	(a alist) c r s)
+    ;; loop over all commands or templates
+    (while (setq c (pop a))
+      (let (vrules repl)
+	(cond
+	 ((not (assoc (car c) contexts))
+	  (push c r))
+	 ((and (assoc (car c) contexts)
+	       (setq vrules (org-contexts-validate
+			     (car c) contexts)))
+	  (mapc (lambda (vr)
+		  (when (not (equal (car vr) (cadr vr)))
+		    (setq repl vr))) vrules)
+	  (if (not repl) (push c r)
+	    (push (cadr repl) s)
+	    (push
+	     (cons (car c)
+		   (cdr (or (assoc (cadr repl) alist)
+			    (error "Undefined key `%s' as contextual replacement for `%s'"
+				   (cadr repl) (car c)))))
+	     r))))))
     ;; Return limited ALIST, possibly with keys modified, and deduplicated
-    (delq nil
-	  (mapcar (lambda(x)
-		    (let ((tpl (car x)))
-		      (when (not (delq nil
-				       (mapcar (lambda(y)
-						 (equal y tpl)) s))) x)))
-		  r))))
+    (delq
+     nil
+     (delete-dups
+      (mapcar (lambda (x)
+		(let ((tpl (car x)))
+		  (when (not (delq
+			      nil
+			      (mapcar (lambda(y)
+					(equal y tpl)) s))) x)))
+	      (reverse r))))))
 
-(defun org-rule-validate (rules)
-  "Check if one of RULES is valid in this buffer."
-  (let (r res)
-    (while (setq r (pop rules))
-      (when (or (and (eq (car r) 'in-file)
-		     (buffer-file-name)
-		     (string-match (cdr r) (buffer-file-name)))
-		(and (eq (car r) 'in-mode)
-		     (string-match (cdr r) (symbol-name major-mode)))
-		(when (and (eq (car r) 'not-in-file)
-			   (buffer-file-name))
-		  (not (string-match (cdr r) (buffer-file-name))))
-		(when (eq (car r) 'not-in-mode)
-		  (not (string-match (cdr r) (symbol-name major-mode)))))
-	(push r res)))
-    (delq nil res)))
+(defun org-contexts-validate (key contexts)
+  "Return valid CONTEXTS."
+  (let (r rr res)
+    (while (setq r (pop contexts))
+      (mapc
+       (lambda (rr)
+	 (when
+	  (and (equal key (car r))
+	       (or (and (eq (car rr) 'in-file)
+			(buffer-file-name)
+			(string-match (cdr rr) (buffer-file-name)))
+		   (and (eq (car rr) 'in-mode)
+			(string-match (cdr rr) (symbol-name major-mode)))
+		   (when (and (eq (car rr) 'not-in-file)
+			      (buffer-file-name))
+		     (not (string-match (cdr rr) (buffer-file-name))))
+		   (when (eq (car rr) 'not-in-mode)
+		     (not (string-match (cdr rr) (symbol-name major-mode))))))
+	  (push r res)))
+       (car (last r))))
+    (delete-dups (delq nil res))))
 
 (defun org-context-p (&rest contexts)
   "Check if local context is any of CONTEXTS.
