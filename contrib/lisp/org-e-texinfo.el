@@ -526,6 +526,24 @@ retrieved."
 	  (org-e-texinfo--sanitize-headline-contents
 	   (org-element-contents contents) info)))))
 
+;;; Menu sanitizing
+
+(defun org-e-texinfo--sanitize-menu (title)
+  "Remove invalid characters from TITLE for use in menus and
+nodes.
+
+Based on TEXINFO specifications, the following must be removed:
+@ { } ( ) : . ,"
+  (replace-regexp-in-string "[@{}():,.]" "" title))
+
+;;; Content sanitizing
+
+(defun org-e-texinfo--sanitize-content (text)
+  "Ensure characters are properly escaped when used in headlines or blocks.
+
+Escape characters are: @ { }"
+  (replace-regexp-in-string "\\\([@{}]\\\)" "@\\1" text))
+
 ;;; Menu creation
 
 (defun org-e-texinfo--build-menu (tree level info &optional detailed)
@@ -607,8 +625,9 @@ Returns a list containing the following information from each
 headline: length, title, description.  This is used to format the
 menu using `org-e-texinfo--format-menu'."
   (loop for headline in items collect
-	(let* ((title (org-e-texinfo--sanitize-headline
-		       (org-element-property :title headline) info))
+	(let* ((title (org-e-texinfo--sanitize-menu
+		       (org-e-texinfo--sanitize-headline
+			(org-element-property :title headline) info)))
 	       (descr (org-export-data
 		       (org-element-property :description headline) info))
 	       (len (length title))
@@ -904,7 +923,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (format "@example\n%s\n@end example"
 	  (org-remove-indentation
-	   (org-element-property :value fixed-width))))
+	   (org-e-texinfo--sanitize-content
+	    (org-element-property :value fixed-width)))))
 
 ;;; Footnote Definition
 ;;
@@ -939,7 +959,8 @@ holding contextual information."
 		(org-element-property :title headline) info))
 	 ;; Create node info, to insert it before section formatting.
 	 (node (format "@node %s\n"
-		       (replace-regexp-in-string "%" "%%" text)))
+		       (org-e-texinfo--sanitize-menu
+			(replace-regexp-in-string "%" "%%" text))))
 	 ;; Menus must be generated with first child, otherwise they
 	 ;; will not nest properly
 	 (menu (let* ((first (org-export-first-sibling-p headline info))
@@ -995,29 +1016,31 @@ holding contextual information."
 			(org-element-property :priority headline)))
 	 ;; Create the headline text along with a no-tag version.  The
 	 ;; latter is required to remove tags from table of contents.
-	 (full-text (if (functionp org-e-texinfo-format-headline-function)
-			;; User-defined formatting function.
-			(funcall org-e-texinfo-format-headline-function
-				 todo todo-type priority text tags)
-		      ;; Default formatting.
-		      (concat
-		       (when todo
-			 (format "@strong{%s} " todo))
-		       (when priority (format "@emph{#%s} " priority))
-		       text
-		       (when tags
-			 (format ":%s:"
-				 (mapconcat 'identity tags ":"))))))
+	 (full-text (org-e-texinfo--sanitize-content
+		     (if (functionp org-e-texinfo-format-headline-function)
+			 ;; User-defined formatting function.
+			 (funcall org-e-texinfo-format-headline-function
+				  todo todo-type priority text tags)
+		       ;; Default formatting.
+		       (concat
+			(when todo
+			  (format "@strong{%s} " todo))
+			(when priority (format "@emph{#%s} " priority))
+			text
+			(when tags
+			  (format ":%s:"
+				  (mapconcat 'identity tags ":")))))))
 	 (full-text-no-tag
-	  (if (functionp org-e-texinfo-format-headline-function)
-	      ;; User-defined formatting function.
-	      (funcall org-e-texinfo-format-headline-function
-		       todo todo-type priority text nil)
-	    ;; Default formatting.
-	    (concat
-	     (when todo (format "@strong{%s} " todo))
-	     (when priority (format "@emph{#%c} " priority))
-	     text)))
+	  (org-e-texinfo--sanitize-content
+	   (if (functionp org-e-texinfo-format-headline-function)
+	       ;; User-defined formatting function.
+	       (funcall org-e-texinfo-format-headline-function
+			todo todo-type priority text nil)
+	     ;; Default formatting.
+	     (concat
+	      (when todo (format "@strong{%s} " todo))
+	      (when priority (format "@emph{#%c} " priority))
+	      text))))
 	 (pre-blanks
 	  (make-string (org-element-property :pre-blank headline) 10)))
     (cond
@@ -1335,10 +1358,6 @@ contextual information."
   "Transcode a TEXT string from Org to Texinfo.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  ;; Protect @ { and }.
-  (while (string-match "\\([^\\]\\|^\\)\\([@{}]\\)" text)
-    (setq text
-	  (replace-match (format "\\%s" (match-string 2 text)) nil t text 2)))
   ;; LaTeX into @LaTeX{} and TeX into @TeX{}
   (let ((case-fold-search nil)
 	(start 0))
@@ -1356,8 +1375,8 @@ contextual information."
   (when (plist-get info :preserve-breaks)
     (setq text (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" " @*\n"
 					 text)))
-  ;; Return value.
-  text)
+  ;; Return value with @ { and } protected.
+  (org-e-texinfo--sanitize-content text))
 
 ;;; Planning
 
