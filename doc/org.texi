@@ -1,4 +1,3 @@
-
 \input texinfo
 @c %**start of header
 @setfilename ../../info/org
@@ -494,6 +493,7 @@ Capture templates
 
 * Template elements::           What is needed for a complete template entry
 * Template expansion::          Filling in information about time and context
+* Templates in contexts::       Only show a template in a specific context
 
 Archiving
 
@@ -6631,6 +6631,7 @@ like this:
 @menu
 * Template elements::           What is needed for a complete template entry
 * Template expansion::          Filling in information about time and context
+* Templates in contexts::       Only show a template in a specific context
 @end menu
 
 @node Template elements, Template expansion, Capture templates, Capture templates
@@ -6774,7 +6775,7 @@ buffer again after capture is completed.
 @end table
 @end table
 
-@node Template expansion,  , Template elements, Capture templates
+@node Template expansion, Templates in contexts, Template elements, Capture templates
 @subsubsection Template expansion
 
 In the template itself, special @kbd{%}-escapes@footnote{If you need one of
@@ -6852,6 +6853,20 @@ To place the cursor after template expansion use:
 %?          @r{After completing the template, position cursor here.}
 @end smallexample
 
+@node Templates in contexts,  , Template expansion, Capture templates
+@subsubsection Templates in contexts
+
+@vindex org-capture-templates-contexts
+To control whether a capture template should be accessible from a specific
+context, you can customize @var{org-capture-templates-contexts}.  Let's say
+for example that you have a capture template @code{"p"} for storing Gnus
+emails containing patches.  Then you would configure this option like this:
+
+@example
+(setq org-capture-templates-contexts '(("p" (in-mode . "message-mode"))))
+@end example
+
+See the docstring of the variable for more information.
 
 @node Attachments, RSS Feeds, Capture, Capture - Refile - Archive
 @section Attachments
@@ -8590,11 +8605,12 @@ buffer, or a sparse tree (the latter covering of course only the current
 buffer).
 @kindex C-c a C
 @vindex org-agenda-custom-commands
+
 Custom commands are configured in the variable
 @code{org-agenda-custom-commands}.  You can customize this variable, for
-example by pressing @kbd{C-c a C}.  You can also directly set it with
-Emacs Lisp in @file{.emacs}.  The following example contains all valid
-search types:
+example by pressing @kbd{C-c a C}.  You can also directly set it with Emacs
+Lisp in @file{.emacs}.  The following example contains all valid search
+types:
 
 @lisp
 @group
@@ -8754,6 +8770,18 @@ this interface, the @emph{values} are just Lisp expressions.  So if the
 value is a string, you need to add the double-quotes around the value
 yourself.
 
+@vindex org-agenda-custom-commands-contexts
+To control whether an agenda command should be accessible from a specific
+context, you can customize @var{org-agenda-custom-commands-contexts}.  Let's
+say for example that you have an agenda commands @code{"o"} displaying a view
+that you only need when reading emails.  Then you would configure this option
+like this:
+
+@example
+(setq org-agenda-custom-commands-contexts '(("o" (in-mode . "message-mode"))))
+@end example
+
+See the docstring of the variable for more information.
 
 @node Exporting Agenda Views, Agenda column view, Custom agenda views, Agenda Views
 @section Exporting Agenda Views
@@ -16819,7 +16847,6 @@ work on a tty.
 @item
 @i{Piotr Zielinski} wrote @file{org-mouse.el}, proposed agenda blocks
 and contributed various ideas and code snippets.
-@item
 @end itemize
 
 

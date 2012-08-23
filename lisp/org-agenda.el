@@ -2334,6 +2334,37 @@ that have been changed along."
 (defvar org-agenda-last-dispatch-buffer nil)
 (defvar org-agenda-overriding-restriction nil)
 
+(defcustom org-agenda-custom-commands-contexts nil
+  "Alist of custom agenda commands and valid contexts.
+
+For example, if you have a custom agenda command \"p\" and you
+want this command to be accessible only from plain text files,
+use this:
+
+   '((\"p\" (in-file . \"\\.txt\")))
+
+Here are the available checks:
+
+      in-file: command displayed only in matching files
+      in-mode: command displayed only in matching modes
+  not-in-file: command not displayed in matching files
+  not-in-mode: command not displayed in matching modes
+
+If you define several checks, the agenda command will be
+accessible if there is at least one valid check."
+  ;; :version "24.3"
+  :group 'org-agenda-custom-commands
+  :type '(repeat (cons :tag "Rule"
+		       (string :tag "Agenda key")
+		       (repeat :tag "Available when"
+			       (cons :tag "Condition"
+				     (choice
+				      (const :tag "In file" in-file)
+				      (const :tag "Not in file" not-in-file)
+				      (const :tag "In mode" in-mode)
+				      (const :tag "Not in mode" not-in-mode))
+				     (regexp))))))
+
 ;;;###autoload
 (defun org-agenda (&optional arg keys restriction)
   "Dispatch agenda commands to collect entries to the agenda buffer.
@@ -2389,6 +2420,9 @@ Pressing `<' twice means to restrict to the current subtree or region
 			   ((not (nth 1 x)) (cons (car x) (cons "" (cddr x))))
 			   (t (cons (car x) (cons "" (cdr x))))))
 		   org-agenda-custom-commands)))
+	   (org-agenda-custom-commands
+	    (org-contextualize-agenda-or-capture
+	     org-agenda-custom-commands org-agenda-custom-commands-contexts))
 	   (buf (current-buffer))
 	   (bfn (buffer-file-name (buffer-base-buffer)))
 	   entry key type match lprops ans)

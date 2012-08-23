@@ -8619,6 +8619,37 @@ to execute outside of tables."
 					   keys)
 				   '('orgstruct-error))))))))
 
+(defun org-contextualize-agenda-or-capture (alist contexts)
+  "Return a subset of elements in ALIST depending on CONTEXTS.
+ALIST can be either `org-agenda-custom-commands' or
+`org-capture-templates'."
+  (let ((a alist) c r)
+    (while (setq c (pop a))
+      (when (or (not (assoc (car c) contexts))
+		(and (assoc (car c) contexts)
+		     (org-rule-validate
+		      (cdr (assoc (car c) contexts)))))
+	(push c r)))
+    ;; Return the limited ALIST
+    r))
+
+(defun org-rule-validate (rules)
+  "Check if one of RULES is valid in this buffer."
+  (let (r res)
+    (while (setq r (pop rules))
+      (when (or (and (eq (car r) 'in-file)
+		     (buffer-file-name)
+		     (string-match (cdr r) (buffer-file-name)))
+		(and (eq (car r) 'in-mode)
+		     (string-match (cdr r) (symbol-name major-mode)))
+		(when (and (eq (car r) 'not-in-file)
+			   (buffer-file-name))
+		  (not (string-match (cdr r) (buffer-file-name))))
+		(when (eq (car r) 'not-in-mode)
+		  (not (string-match (cdr r) (symbol-name major-mode)))))
+	(push r res)))
+    (delq nil res)))
+
 (defun org-context-p (&rest contexts)
   "Check if local context is any of CONTEXTS.
 Possible values in the list of contexts are `table', `headline', and `item'."

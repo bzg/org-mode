@@ -438,6 +438,37 @@ for a capture buffer.")
 	(entry (org-capture-select-template keys)))
     (org-capture)))
 
+(defcustom org-capture-templates-contexts nil
+  "Bind capture keys with rules on where to display them.
+
+For example, if you have a capture template \"c\" and you want
+this template to be accessible only from message-mode buffers,
+use this:
+
+   '((\"c\" (in-mode . \"message-mode\")))
+
+Here are the available checks:
+
+      in-file: template displayed only in matching files
+      in-mode: template displayed only in matching modes
+  not-in-file: template not displayed in matching files
+  not-in-mode: template not displayed in matching modes
+
+If you define several checks, the capture template will be
+accessible if there is at least one valid check."
+  ;; :version "24.3"
+  :group 'org-capture
+  :type '(repeat (cons :tag "Rule"
+		       (string :tag "Capture key")
+		       (repeat :tag "Available when"
+			       (cons :tag "Condition"
+				     (choice
+				      (const :tag "In file" in-file)
+				      (const :tag "Not in file" not-in-file)
+				      (const :tag "In mode" in-mode)
+				      (const :tag "Not in mode" not-in-mode))
+				     (regexp))))))
+
 ;;;###autoload
 (defun org-capture (&optional goto keys)
   "Capture something.
@@ -1282,7 +1313,8 @@ Use PREFIX as a prefix for the name of the indirect buffer."
   "Select a capture template.
 Lisp programs can force the template by setting KEYS to a string."
   (let ((org-capture-templates
-	 (or org-capture-templates
+	 (or (org-contextualize-agenda-or-capture
+	      org-capture-templates org-capture-templates-contexts)
 	     '(("t" "Task" entry (file+headline "" "Tasks")
 		"* TODO %?\n  %u\n  %a")))))
     (if keys
