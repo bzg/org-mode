@@ -498,6 +498,34 @@ See `org-e-texinfo-text-markup-alist' for details."
      ;; Else use format string.
      (t (format fmt text)))))
 
+;;; Headline sanitizing
+
+(defun org-e-texinfo--sanitize-headline (headline info)
+  "Remove all formatting from the text of a headline for use in
+  node and menu listing."
+  (mapconcat 'identity
+	     (org-e-texinfo--sanitize-headline-contents headline info) " "))
+
+(defun org-e-texinfo--sanitize-headline-contents (headline info)
+  "Retrieve the content of the headline.
+
+Any content that can contain further formatting is checked
+recursively, to ensure that nested content is also properly
+retrieved."
+  (loop for contents in headline append
+	(cond
+	 ;; already a string
+	 ((stringp contents)
+	  (list (replace-regexp-in-string " $" "" contents)))
+	 ;; Is exported as-is (value)
+	 ((org-element-map contents '(verbatim code)
+			   (lambda (value)
+			     (org-element-property :value value))))
+	 ;; Has content and recurse into the content
+	 ((org-element-contents contents)
+	  (org-e-texinfo--sanitize-headline-contents
+	   (org-element-contents contents) info)))))
+
 ;;; Menu creation
 
 (defun org-e-texinfo--build-menu (tree level info &optional detailed)
@@ -579,7 +607,7 @@ Returns a list containing the following information from each
 headline: length, title, description.  This is used to format the
 menu using `org-e-texinfo--format-menu'."
   (loop for headline in items collect
-	(let* ((title (org-export-data
+	(let* ((title (org-e-texinfo--sanitize-headline
 		       (org-element-property :title headline) info))
 	       (descr (org-export-data
 		       (org-element-property :description headline) info))
@@ -906,16 +934,17 @@ holding contextual information."
 	 (class-sectionning (assoc class org-e-texinfo-classes))
 	 ;; Find the index type, if any
 	 (index (org-element-property :index headline))
+	 ;; Retrieve headline text
+	 (text (org-e-texinfo--sanitize-headline
+		(org-element-property :title headline) info))
 	 ;; Create node info, to insert it before section formatting.
 	 (node (format "@node %s\n"
-		       (replace-regexp-in-string
-			"%" "%%"
-			(org-export-data (org-element-property :title headline) info))))
+		       (replace-regexp-in-string "%" "%%" text)))
 	 ;; Menus must be generated with first child, otherwise they
 	 ;; will not nest properly
 	 (menu (let* ((first (org-export-first-sibling-p headline info))
 		      (parent (org-export-get-parent-headline headline))
-		      (title (org-export-data
+		      (title (org-e-texinfo--sanitize-headline
 			      (org-element-property :title parent) info))
 		      heading listing
 		      (tree (plist-get info :parse-tree)))
@@ -929,7 +958,9 @@ holding contextual information."
 		 (setq listing (org-e-texinfo--build-menu
 				(car heading) level info))
 	 	 (if listing
-	 	     (setq listing (format
+	 	     (setq listing (replace-regexp-in-string
+				    "%" "%%" listing)
+			   listing (format
 				    "\n@menu\n%s\n@end menu\n\n" listing))
 	 	   'nil)))
 	 ;; Section formatting will set two placeholders: one for the
@@ -953,8 +984,6 @@ holding contextual information."
 		(concat menu node
 			(funcall
 			 (if numberedp #'car #'cdr) sec) "\n%s"))))))
-	 (text (org-export-data
-		(org-element-property :title headline) info))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword headline)))
