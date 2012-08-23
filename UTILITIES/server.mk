@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------
 # This file is used for maintenance of org on the server.
 #----------------------------------------------------------------------
-.PHONY:	helpserver release rel-dirty cleanrel tagwarn
+.PHONY:	helpserver release rel-dirty tagwarn
 
 help helpall helpserver::
 	$(info )
@@ -59,7 +59,3 @@ tagwarn:
 	$(info  =                                                    =)
 	$(info  ======================================================)
 	@echo ""
-
-clean:	cleanrel
-cleanrel:
-	$(RM) org-7.* org-20??????*
