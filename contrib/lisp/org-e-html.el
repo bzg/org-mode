@@ -1123,8 +1123,8 @@ that uses these same face definitions."
 	      (format "<span class=\"%s\">%s</span>" todo-type headline)))))
 
 (defun org-e-html-toc (depth info)
-  (assert (wholenump depth))
-  (let* ((headlines (org-export-collect-headlines info depth))
+  (let* ((headlines (org-export-collect-headlines
+		     info (and (wholenump depth) depth)))
 	 (toc-entries
 	  (loop for headline in headlines collect
 		(list (org-e-html-format-headline--wrap
@@ -1473,7 +1473,7 @@ original parsed data.  INFO is a plist holding export options."
 <h1 class=\"title\">%s</h1>\n" (org-export-data (plist-get info :title) info))
    ;; table of contents
    (let ((depth (plist-get info :with-toc)))
-     (when (wholenump depth) (org-e-html-toc depth info)))
+     (when depth (org-e-html-toc depth info)))
    ;; document contents
    contents
    ;; footnotes section
@@ -2084,10 +2084,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((key (org-element-property :key keyword))
 	(value (org-element-property :value keyword)))
     (cond
-     ((string= key "LATEX") value)
+     ((string= key "HTML") value)
      ((string= key "INDEX") (format "\\index{%s}" value))
      ;; Invisible targets.
-     ((string= key "TARGET") nil)	; FIXME
+     ((string= key "TARGET") nil)
      ((string= key "TOC")
       (let ((value (downcase value)))
 	(cond
@@ -2095,7 +2095,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (let ((depth (or (and (string-match "[0-9]+" value)
 				(string-to-number (match-string 0 value)))
 			   (plist-get info :with-toc))))
-	    (when (wholenump depth) (org-e-html-toc depth info))))
+	    (org-e-html-toc depth info)))
 	 ((string= "tables" value) "\\listoftables")
 	 ((string= "figures" value) "\\listoffigures")
 	 ((string= "listings" value)
