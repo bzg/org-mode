@@ -1757,7 +1757,7 @@ Return INFO file name or an error if it couldn't be produced."
       (set-window-configuration wconfig))))
 
 (defun org-e-texinfo-collect-errors (buffer)
-  "Collect some kind of errors from \"pdflatex\" command output.
+  "Collect some kind of errors from \"makeinfo\" command output.
 
 BUFFER is the buffer containing output.
 
@@ -1765,9 +1765,9 @@ Return collected error types as a string, or nil if there was
 none."
   (with-current-buffer buffer
     (save-excursion
-      (goto-char (point-max))
+      (goto-char (point-min))
       ;; Find final "makeinfo" run.
-      (when (re-search-backward "^makeinfo (GNU texinfo)" nil t)
+      (when t
 	(let ((case-fold-search t)
 	      (errors ""))
 	  (when (save-excursion
@@ -1786,8 +1786,11 @@ none."
 		  (re-search-forward "requires a sectioning" nil t))
 	    (setq errors (concat errors " [invalid section command]")))
 	  (when (save-excursion
-		  (re-search-forward "[unexpected]" nil t))
+		  (re-search-forward "\\[unexpected\]" nil t))
 	    (setq errors (concat errors " [unexpected error]")))
+	  (when (save-excursion
+		  (re-search-forward "misplaced " nil t))
+	    (setq errors (concat errors " [syntax error]")))
 	  (and (org-string-nw-p errors) (org-trim errors)))))))
 
 (provide 'org-e-texinfo)
