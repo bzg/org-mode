@@ -5091,7 +5091,6 @@ The following commands are available:
   ;; Comments
   (org-set-local 'comment-use-syntax nil)
   (org-set-local 'comment-start "# ")
-  (org-set-local 'comment-start-skip "#\\(?:[ \t]\\|$\\)")
   (org-set-local 'comment-insert-comment-function 'org-insert-comment)
   (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
   (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region)
@@ -21003,6 +21002,7 @@ hierarchy of headlines by UP levels before marking the subtree."
 	      '(org-fill-paragraph-separate-nobreak-p
 		org-fill-line-break-nobreak-p)))))
   (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
+  (org-set-local 'comment-line-break-function 'org-comment-line-break-function)
   (org-set-local 'align-mode-rules-list
 		 '((org-in-buffer-settings
 		    (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
@@ -21200,11 +21200,10 @@ a footnote definition, try to fill the first paragraph within."
 
 ;;; Comments
 
-;; Since difference between comments and keywords is subtle, we cannot
-;; trust `comment-only-p' when applying `comment-dwim'.  Hence, both
-;; `comment-region-function' and `uncomment-region-function' point to
-;; `org-comment-or-uncomment-region', which can tell when region only
-;; contains comments or not.
+;; We control comments everywhere.  `org-comment-or-uncomment-region'
+;; and `org-insert-comment' takes care of `comment-dwim' behaviour
+;; while `org-comment-line-break-function' handles auto-filling in
+;; a comment.
 
 (defun org-insert-comment ()
   "Insert an empty comment above current line.
@@ -21243,6 +21242,17 @@ contains commented lines.  Otherwise, comment them."
             (replace-match "" nil nil nil 1)))
         (forward-line))
       (set-marker end nil))))
+
+(defun org-comment-line-break-function (&optional soft)
+  "Break line at point and indent, continuing comment if within one.
+The inserted newline is marked hard if variable
+`use-hard-newlines' is true, unless optional argument SOFT is
+non-nil."
+  (if soft (insert-and-inherit ?\n) (newline 1))
+  (save-excursion (forward-char -1) (delete-horizontal-space))
+  (delete-horizontal-space)
+  (indent-to-left-margin)
+  (insert-before-markers-and-inherit fill-prefix))
 
 
 ;;; Other stuff.
