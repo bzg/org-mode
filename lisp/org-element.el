@@ -140,7 +140,7 @@
           ;; Horizontal rules.
           "-\\{5,\\}[ \t]*$" "\\|"
           ;; LaTeX environments.
-          "\\\\\\(begin\\|end\\)" "\\|"
+          "\\\\begin{\\([A-Za-z0-9]+\\*?\\)}" "\\|"
           ;; Planning and Clock lines.
           (regexp-opt (list org-scheduled-string
                             org-deadline-string
@@ -1700,7 +1700,7 @@ Assume point is at the beginning of the latex environment."
 	   (code-begin (point))
 	   (keywords (org-element--collect-affiliated-keywords))
 	   (begin (car keywords))
-	   (env (progn (looking-at "^[ \t]*\\\\begin{\\([A-Za-z0-9*]+\\)}")
+	   (env (progn (looking-at "^[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}")
 		       (regexp-quote (match-string 1))))
 	   (code-end
 	    (progn (re-search-forward (format "^[ \t]*\\\\end{%s}" env) limit t)
@@ -1771,6 +1771,15 @@ Assume point is at the beginning of the paragraph."
 			    (not (save-excursion
 				   (re-search-forward
 				    (concat "^[ \t]*#\\+END_"
+					    (match-string 1))
+				    limit t))))
+			   ;; Skip incomplete latex environments.
+			   ((save-excursion
+			      (beginning-of-line)
+			      (looking-at "^[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}"))
+			    (not (save-excursion
+				   (re-search-forward
+				    (format "^[ \t]*\\\\end{%s}"
 					    (match-string 1))
 				    limit t))))
 			   ;; Skip ill-formed keywords.
@@ -2346,7 +2355,8 @@ LIMIT bounds the search.
 Return value is a cons cell whose CAR is `entity' or
 `latex-fragment' and CDR is beginning position."
   (save-excursion
-    (let ((matchers (plist-get org-format-latex-options :matchers))
+    (let ((matchers
+	   (remove "begin" (plist-get org-format-latex-options :matchers)))
 	  ;; ENTITY-RE matches both LaTeX commands and Org entities.
 	  (entity-re
 	   "\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]]\\)"))
