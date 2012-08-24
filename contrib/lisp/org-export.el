@@ -745,7 +745,9 @@ keywords are understood:
 
     Alist between filters and function, or list of functions,
     specific to the back-end.  See `org-export-filters-alist' for
-    a list of all allowed filters.
+    a list of all allowed filters.  Filters defined here
+    shouldn't make a back-end test, as it may prevent back-ends
+    derived from this one to behave properly.
 
   :options-alist
 

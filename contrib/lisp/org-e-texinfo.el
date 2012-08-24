@@ -420,9 +420,8 @@ file name, %b by the file base name \(i.e without extension) and
 
 (defun org-e-texinfo-filter-section-blank-lines (headline back-end info)
   "Filter controlling number of blank lines after a section."
-  (if (not (eq back-end 'e-texinfo)) headline
-    (let ((blanks (make-string 2 ?\n)))
-      (replace-regexp-in-string "\n\\(?:\n[ \t]*\\)*\\'" blanks headline))))
+  (let ((blanks (make-string 2 ?\n)))
+    (replace-regexp-in-string "\n\\(?:\n[ \t]*\\)*\\'" blanks headline)))
 
 (defun org-e-texinfo--find-copying (info)
   "Retrieve the headline identified by the property :copying:.

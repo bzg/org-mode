@@ -1726,7 +1726,7 @@ This function only applies to `e-ascii' back-end.  See
 `org-e-ascii-headline-spacing' for information.
 
 For any other back-end, HEADLINE is returned as-is."
-  (if (not (and (eq back-end 'e-ascii) org-e-ascii-headline-spacing)) headline
+  (if (not org-e-ascii-headline-spacing) headline
     (let ((blanks (make-string (1+ (cdr org-e-ascii-headline-spacing)) ?\n)))
       (replace-regexp-in-string "\n\\(?:\n[ \t]*\\)*\\'" blanks headline))))
 
