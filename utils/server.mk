@@ -15,7 +15,7 @@ helpserver::
 #----------------------------------------------------------------------
 
 ORGCOMM  = README request-assign-future.txt lisp/ doc/
-ORGFULL  = $(ORGCOMM) Makefile default.mk targets.mk etc/ contrib/ utils/org-fixup.el
+ORGFULL  = $(ORGCOMM) Makefile default.mk targets.mk etc/ contrib/ utils/
 ORGFULL := $(ORGFULL:%/=%/*)
 ORGELPA  = $(ORGCOMM) etc/styles/ org-pkg.el
 ORGELPA := $(ORGELPA:%/=%/*)
