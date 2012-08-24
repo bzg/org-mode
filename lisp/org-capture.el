@@ -1452,7 +1452,8 @@ The template may still contain \"%?\" for cursor positioning."
 				     (org-split-string initial "\n")
 				     (concat "\n" lead))))))
 	  (replace-match
-	   (or (eval (intern (concat "v-" (match-string 1)))) "")
+	   (or (org-add-props (eval (intern (concat "v-" (match-string 1))))
+		   '(org-protected t)) "")
 	   t t)))
 
       ;; From the property list
@@ -1469,8 +1470,8 @@ The template may still contain \"%?\" for cursor positioning."
       (let ((org-inhibit-startup t)) (org-mode))
       ;; Interactive template entries
       (goto-char (point-min))
-      (while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCLp]\\)?"
-				nil t)
+      (while (and (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCLp]\\)?" nil t)
+		  (not (get-text-property (point) 'org-protected)))
 	(unless (org-capture-escaped-%)
 	  (setq char (if (match-end 3) (match-string-no-properties 3))
 		prompt (if (match-end 2) (match-string-no-properties 2)))
