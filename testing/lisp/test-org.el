@@ -182,15 +182,6 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	    (let ((fill-column 20))
 	      (org-fill-paragraph)
 	      (buffer-string)))))
-  ;; At a verse block, fill paragraph at point, also preserving line
-  ;; breaks.  Though, do nothing when point is at the block
-  ;; boundaries.
-  (org-test-with-temp-text "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"
-    (forward-line)
-    (let ((fill-column 20))
-      (org-fill-paragraph)
-      (should (equal (buffer-string)
-		     "#+BEGIN_VERSE\nSome \\\\\nlong text\n#+END_VERSE"))))
   (org-test-with-temp-text "#+BEGIN_VERSE\nSome \\\\\nlong\ntext\n#+END_VERSE"
     (let ((fill-column 20))
       (org-fill-paragraph)
@@ -244,10 +235,10 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (end-of-line)
 	      (org-auto-fill-function)
 	      (buffer-string)))))
-  ;; Verse and comment block: auto fill contents.
+  ;; Comment block: auto fill contents.
   (should
-   (equal "#+BEGIN_VERSE\n12345\n7890\n#+END_VERSE"
-	  (org-test-with-temp-text "#+BEGIN_VERSE\n12345 7890\n#+END_VERSE"
+   (equal "#+BEGIN_COMMENT\n12345\n7890\n#+END_COMMENT"
+	  (org-test-with-temp-text "#+BEGIN_COMMENT\n12345 7890\n#+END_COMMENT"
 	    (let ((fill-column 5))
 	      (forward-line)
 	      (end-of-line)

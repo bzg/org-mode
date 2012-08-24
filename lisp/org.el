@@ -21000,16 +21000,17 @@ hierarchy of headlines by UP levels before marking the subtree."
      'fill-nobreak-predicate
      (org-uniquify
       (append fill-nobreak-predicate
-	      '(org-fill-item-nobreak-p org-fill-line-break-nobreak-p)))))
+	      '(org-fill-paragraph-separate-nobreak-p
+		org-fill-line-break-nobreak-p)))))
   (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
   (org-set-local 'align-mode-rules-list
 		 '((org-in-buffer-settings
 		    (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
 		    (modes . '(org-mode))))))
 
-(defun org-fill-item-nobreak-p ()
+(defun org-fill-paragraph-separate-nobreak-p ()
   "Non-nil when a line break at point would insert a new item."
-  (and (looking-at (org-item-re)) (org-list-in-valid-context-p)))
+  (looking-at (substring org-element-paragraph-separate 1)))
 
 (defun org-fill-line-break-nobreak-p ()
   "Non-nil when a line break at point would create an Org line break."
@@ -21054,7 +21055,7 @@ meant to be filled."
 				  ? ))
 		    ((looking-at "\\s-+") (match-string 0))
 		    (t  ""))))
-	   ((comment-block verse-block)
+	   (comment-block
 	    ;; Only fill contents if P is within block boundaries.
 	    (let* ((cbeg (save-excursion (goto-char post-affiliated)
 					 (forward-line)
@@ -21073,8 +21074,8 @@ meant to be filled."
   "Fill element at point, when applicable.
 
 This function only applies to comment blocks, comments, example
-blocks, paragraphs and verse blocks.  Also, as a special case,
-re-align table when point is at one.
+blocks and paragraphs.  Also, as a special case, re-align table
+when point is at one.
 
 If JUSTIFY is non-nil (interactively, with prefix argument),
 justify as well.  If `sentence-end-double-space' is non-nil, then
@@ -21113,41 +21114,24 @@ a footnote definition, try to fill the first paragraph within."
 	       (org-table-align))
 	     t)
 	    ;; Elements that may contain `line-break' type objects.
-	    ((paragraph verse-block)
+	    (paragraph
 	     (let ((beg (max (point-min)
 			     (org-element-property :contents-begin element)))
 		   (end (min (point-max)
 			     (org-element-property :contents-end element)))
 		   (type (org-element-type element)))
-	       ;; Do nothing if point is at an affiliated keyword or at
-	       ;; verse block markers.
-	       (if (or (< (point) beg)
-		       (and (eq type 'verse-block) (>= (point) end)))
-		   t
-		 ;; In verse blocks and `message-mode', boundaries of
-		 ;; region to fill have to be tweaked.
-		 (cond
-		  ;; At a verse block, fill current "paragraph", that
-		  ;; is part of text separated by blank lines.
-		  ((eq type 'verse-block)
-		   (save-excursion
-		     (when (looking-at "[ \t]*$")
-		       (skip-chars-backward " \r\t\n" beg))
-		     (when (re-search-backward "^[ \t]*$" beg t)
-		       (forward-line)
-		       (setq beg (point))))
-		   (when (save-excursion (re-search-forward "^[ \t]*$" end t))
-		     (setq end (match-beginning 0))))
-		  ;; In `message-mode', do not fill following citation
-		  ;; in current paragraph nor text before message
-		  ;; body.
-		  ((derived-mode-p 'message-mode)
+	       ;; Do nothing if point is at an affiliated keyword.
+	       (if (< (point) beg) t
+		 (when (derived-mode-p 'message-mode)
+		   ;; In `message-mode', do not fill following
+		   ;; citation in current paragraph nor text before
+		   ;; message body.
 		   (let ((body-start (save-excursion (message-goto-body))))
 		     (when body-start (setq beg (max body-start beg))))
 		   (when (save-excursion
 			   (re-search-forward
 			    (concat "^" message-cite-prefix-regexp) end t))
-		     (setq end (match-beginning 0)))))
+		     (setq end (match-beginning 0))))
 		 ;; Fill paragraph, taking line breaks into consideration.
 		 ;; For that, slice the paragraph using line breaks as
 		 ;; separators, and fill the parts in reverse order to
