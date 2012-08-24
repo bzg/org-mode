@@ -2770,10 +2770,13 @@ Named field, see @ref{Advanced features}.
 When you assign a formula to a simple column reference like @code{$3=}, the
 same formula will be used in all fields of that column, with the following
 very convenient exceptions: (i) If the table contains horizontal separator
-hlines, everything before the first such line is considered part of the table
-@emph{header} and will not be modified by column formulas.  (ii) Fields that
-already get a value from a field/range formula will be left alone by column
-formulas.  These conditions make column formulas very easy to use.
+hlines with rows above and below, everything before the first such hline is
+considered part of the table @emph{header} and will not be modified by column
+formulas.  Therefore a header is mandatory when you use column formulas and
+want to add hlines to group rows, like for example to separate a total row at
+the bottom from the summand rows above.  (ii) Fields that already get a value
+from a field/range formula will be left alone by column formulas.  These
+conditions make column formulas very easy to use.
 
 To assign a formula to a column, type it directly into any field in the
 column, preceded by an equal sign, like @samp{=$1+$2}.  When you press
