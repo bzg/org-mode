@@ -2508,7 +2508,6 @@ Return the updated communication channel."
 ;; why file inclusion should be done before any structure can be
 ;; associated to the file, that is before parsing.
 
-(defvar org-current-export-file)	; Dynamically scoped
 (defun org-export-as
   (backend &optional subtreep visible-only body-only ext-plist noexpand)
   "Transcode current Org buffer into BACKEND code.
@@ -2560,9 +2559,12 @@ Return code as a string."
 		    (org-export-with-current-buffer-copy
 		     (unless noexpand
 		       (org-export-expand-include-keyword)
-		       ;; Setting `org-current-export-file' is
+		       ;; TODO: Setting `org-current-export-file' is
 		       ;; required by Org Babel to properly resolve
-		       ;; noweb references.
+		       ;; noweb references.  Once "org-exp.el" is
+		       ;; removed, modify
+		       ;; `org-export-blocks-preprocess' so it accepts
+		       ;; the value as an argument instead.
 		       (let ((org-current-export-file buf))
 			 (org-export-blocks-preprocess)))
 		     (goto-char (point-min))
