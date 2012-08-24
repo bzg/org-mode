@@ -2076,10 +2076,14 @@ Any element in `:ignore-list' will be skipped when using
 
 (defvar org-export-before-parsing-hook nil
   "Hook run before parsing an export buffer.
+
 This is run after include keywords have been expanded and Babel
 code executed, on a copy of original buffer's area being
 exported.  Visibility is the same as in the original one.  Point
-is left at the beginning of the new one.")
+is left at the beginning of the new one.
+
+Every function in this hook will be called with one argument: the
+back-end currently used, as a symbol.")
 
 
 ;;;; Special Filters
@@ -2503,7 +2507,6 @@ Return the updated communication channel."
 ;; associated to the file, that is before parsing.
 
 (defvar org-current-export-file)	; Dynamically scoped
-(defvar org-export-current-backend)	; Dynamically scoped
 (defun org-export-as
   (backend &optional subtreep visible-only body-only ext-plist noexpand)
   "Transcode current Org buffer into BACKEND code.
@@ -2561,10 +2564,11 @@ Return code as a string."
 		       (let ((org-current-export-file buf))
 			 (org-export-blocks-preprocess)))
 		     (goto-char (point-min))
-		     ;; Run hook with `org-export-current-backend' set
-		     ;; to BACKEND.
-		     (let ((org-export-current-backend backend))
-		       (run-hooks 'org-export-before-parsing-hook))
+		     ;; Run hook
+		     ;; `org-export-before-parsing-hook'. with current
+		     ;; back-end as argument.
+		     (run-hook-with-args
+		      'org-export-before-parsing-hook backend)
 		     ;; Eventually parse buffer.
 		     (org-element-parse-buffer nil visible-only)))))
 	;; 3. Call parse-tree filters to get the final tree.

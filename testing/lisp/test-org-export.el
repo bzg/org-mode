@@ -407,7 +407,7 @@ body\n")))
   (org-test-with-backend test
     (org-test-with-temp-text "* Headline 1\nBody 1\n* Headline 2\nBody 2"
       (let ((org-export-before-parsing-hook
-	     '((lambda ()
+	     '((lambda (backend)
 		 (org-map-entries
 		  (lambda ()
 		    (delete-region (point) (progn (forward-line) (point)))))))))
