@@ -439,49 +439,49 @@ for a capture buffer.")
     (org-capture)))
 
 (defcustom org-capture-templates-contexts nil
-  "Bind capture keys with rules on where to display them.
+  "Alist of capture templates and valid contexts.
 
 For example, if you have a capture template \"c\" and you want
 this template to be accessible only from `message-mode' buffers,
 use this:
 
-   '((\"c\" \"c\" (in-mode . \"message-mode\")))
+   '((\"c\" (in-mode . \"message-mode\")))
 
-If you replace the second \"c\" by another key (say \"d\"), then
-the \"c\" key will be associated with the \"d\" template in the
-valid contexts.  This is useful if you want to use the same key
-for different templates depending on the context:
+Here are the available contexts definitions:
 
-   '((\"c\" \"d\" (in-file . \"\\.txt\"))
-     (\"c\" \"e\" (in-file . \"\\.el\"))
-     (\"c\" \"f\" (in-file . \"\\.c\")))
+      in-file: command displayed only in matching files
+      in-mode: command displayed only in matching modes
+  not-in-file: command not displayed in matching files
+  not-in-mode: command not displayed in matching modes
+   [function]: a custom function taking no argument
 
-Here, the \"c\" key will be accessible from buffers visiting
-.txt, .el and .c files, and it will be a synonym for \"d\", \"e\"
-and \"f\" respectively.
+If you define several checks, the agenda command will be
+accessible if there is at least one valid check.
 
-Here are the available contexts definition:
+You can also bind a key to another agenda custom command
+depending on contextual rules.
 
-      in-file: template displayed only in matching files
-      in-mode: template displayed only in matching modes
-  not-in-file: template not displayed in matching files
-  not-in-mode: template not displayed in matching modes
+    '((\"c\" \"d\" (in-mode . \"message-mode\")))
 
-If you define several checks, the capture template will be
-accessible if there is at least one valid check."
+Here it means: in `message-mode buffers', use \"d\" as the
+key for the capture template otherwise associated with \"d\".
+\(The template originally associated with \"q\" is not displayed
+to avoid duplicates.)"
   ;; :version "24.3"
   :group 'org-capture
   :type '(repeat (list :tag "Rule"
-		       (string :tag "Capture key")
+		       (string :tag "        Capture key")
 		       (string :tag "Replace by template")
 		       (repeat :tag "Available when"
+			      (choice
 			       (cons :tag "Condition"
 				     (choice
 				      (const :tag "In file" in-file)
 				      (const :tag "Not in file" not-in-file)
 				      (const :tag "In mode" in-mode)
 				      (const :tag "Not in mode" not-in-mode))
-				     (regexp))))))
+				     (regexp))
+			       (function :tag "Custom function"))))))
 
 ;;;###autoload
 (defun org-capture (&optional goto keys)
@@ -1327,7 +1327,7 @@ Use PREFIX as a prefix for the name of the indirect buffer."
   "Select a capture template.
 Lisp programs can force the template by setting KEYS to a string."
   (let ((org-capture-templates
-	 (or (org-contextualize-agenda-or-capture
+	 (or (org-contextualize-keys
 	      org-capture-templates org-capture-templates-contexts)
 	     '(("t" "Task" entry (file+headline "" "Tasks")
 		"* TODO %?\n  %u\n  %a")))))

@@ -2335,49 +2335,49 @@ that have been changed along."
 (defvar org-agenda-overriding-restriction nil)
 
 (defcustom org-agenda-custom-commands-contexts nil
-  "Alist of custom agenda commands and valid contexts.
+  "Alist of custom agenda keys and contextual rules.
 
 For example, if you have a custom agenda command \"p\" and you
 want this command to be accessible only from plain text files,
 use this:
 
-   '((\"p\" \"p\" (in-file . \"\\.txt\")))
+   '((\"p\" (in-file . \"\\.txt\")))
 
-If you replace the second \"p\" by another key (say \"q\"), then
-the \"p\" key will be associated with the \"q\" command in the
-valid contexts.  This is useful if you want to use the same key
-to reach multiple commands depending on the context:
-
-   '((\"p\" \"q\" (in-file . \"\\.txt\"))
-     (\"p\" \"r\" (in-file . \"\\.el\"))
-     (\"p\" \"s\" (in-file . \"\\.c\")))
-
-Here, the \"p\" key will be accessible from buffers visiting
-.txt, .el and .c files, and it will be a synonym for \"q\", \"r\"
-and \"s\" respectively.
-
-Here are the available contexts definition:
+Here are the available contexts definitions:
 
       in-file: command displayed only in matching files
       in-mode: command displayed only in matching modes
   not-in-file: command not displayed in matching files
   not-in-mode: command not displayed in matching modes
+   [function]: a custom function taking no argument
 
 If you define several checks, the agenda command will be
-accessible if there is at least one valid check."
+accessible if there is at least one valid check.
+
+You can also bind a key to another agenda custom command
+depending on contextual rules.
+
+    '((\"p\" \"q\" (in-file . \"\\.txt\")))
+
+Here it means: in .txt files, use \"p\" as the key for the
+agenda command otherwise associated with \"q\".  (The command
+originally associated with \"q\" is not displayed to avoid
+duplicates.)"
   ;; :version "24.3"
   :group 'org-agenda-custom-commands
   :type '(repeat (list :tag "Rule"
-		       (string :tag "Agenda key")
+		       (string :tag "        Agenda key")
 		       (string :tag "Replace by command")
 		       (repeat :tag "Available when"
+			      (choice
 			       (cons :tag "Condition"
 				     (choice
 				      (const :tag "In file" in-file)
 				      (const :tag "Not in file" not-in-file)
 				      (const :tag "In mode" in-mode)
 				      (const :tag "Not in mode" not-in-mode))
-				     (regexp))))))
+				     (regexp))
+			       (function :tag "Custom function"))))))
 
 ;;;###autoload
 (defun org-agenda (&optional arg keys restriction)
@@ -2435,7 +2435,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 			   (t (cons (car x) (cons "" (cdr x))))))
 		   org-agenda-custom-commands)))
 	   (org-agenda-custom-commands
-	    (org-contextualize-agenda-or-capture
+	    (org-contextualize-keys
 	     org-agenda-custom-commands org-agenda-custom-commands-contexts))
 	   (buf (current-buffer))
 	   (bfn (buffer-file-name (buffer-base-buffer)))

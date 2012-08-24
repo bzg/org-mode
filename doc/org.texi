@@ -6864,13 +6864,18 @@ emails containing patches.  Then you would configure this option like this:
 
 @example
 (setq org-capture-templates-contexts
-      '(("p" "p" (in-mode . "message-mode"))))
+      '(("p" (in-mode . "message-mode"))))
 @end example
 
-The second @code{"p"} tells what template to really call in the specified
-context.  You can set this to another capture template, so that @code{p} will
-transparently fall back on it.  See the docstring of the variable for more
-information.
+You can also tell that the command key @code{"p"} should refer to another
+template.  In that case, add this command key like this:
+
+@example
+(setq org-capture-templates-contexts
+      '(("p" "q" (in-mode . "message-mode"))))
+@end example
+
+See the docstring of the variable for more information.
 
 @node Attachments, RSS Feeds, Capture, Capture - Refile - Archive
 @section Attachments
@@ -8783,13 +8788,16 @@ like this:
 
 @example
 (setq org-agenda-custom-commands-contexts
-      '(("o" "o" (in-mode . "message-mode"))))
+      '(("o" (in-mode . "message-mode"))))
 @end example
 
-The second @code{"o"} tells what command to really call in the specified
-context.  You can set this to another agenda custom command, so that @code{o}
-will transparently fall back on it.  See the docstring of the variable for
-more information.
+You can also tell that the command key @code{"o"} should refer to another
+command key @code{"r"}.  In that case, add this command key like this:
+
+@example
+(setq org-agenda-custom-commands-contexts
+      '(("o" "r" (in-mode . "message-mode"))))
+@end example
 
 See the docstring of the variable for more information.
 

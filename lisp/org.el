@@ -8619,16 +8619,21 @@ to execute outside of tables."
 					   keys)
 				   '('orgstruct-error))))))))
 
-(defun org-contextualize-agenda-or-capture (alist contexts)
-  "Return a subset of elements in ALIST depending on CONTEXTS.
-ALIST can be either `org-agenda-custom-commands' or
-`org-capture-templates'."
+(defun org-contextualize-keys (alist contexts)
+  "Return valid elements in ALIST depending on CONTEXTS.
+
+`org-agenda-custom-commands' or `org-capture-templates' are the
+values used for ALIST, and `org-agenda-custom-commands-contexts'
+or `org-capture-templates-contexts' are the associated contexts
+definitions."
   (let ((contexts
 	 ;; normalize contexts
 	 (mapcar
-	  (lambda(c) (if (listp (cadr c))
-			 (list (car c) (car c) (cadr c))
-		       c)) contexts))
+	  (lambda(c) (cond ((listp (cadr c))
+			    (list (car c) (car c) (cadr c)))
+			   ((string= "" (cadr c))
+			    (list (car c) (car c) (caddr c)))
+			   (t c))) contexts))
 	(a alist) c r s)
     ;; loop over all commands or templates
     (while (setq c (pop a))
@@ -8637,7 +8642,7 @@ ALIST can be either `org-agenda-custom-commands' or
 	 ((not (assoc (car c) contexts))
 	  (push c r))
 	 ((and (assoc (car c) contexts)
-	       (setq vrules (org-contexts-validate
+	       (setq vrules (org-contextualize-validate-key
 			     (car c) contexts)))
 	  (mapc (lambda (vr)
 		  (when (not (equal (car vr) (cadr vr)))
@@ -8662,8 +8667,8 @@ ALIST can be either `org-agenda-custom-commands' or
 					(equal y tpl)) s))) x)))
 	      (reverse r))))))
 
-(defun org-contexts-validate (key contexts)
-  "Return valid CONTEXTS."
+(defun org-contextualize-validate-key (key contexts)
+  "Check CONTEXTS for agenda or capture KEY."
   (let (r rr res)
     (while (setq r (pop contexts))
       (mapc
@@ -8679,7 +8684,8 @@ ALIST can be either `org-agenda-custom-commands' or
 			      (buffer-file-name))
 		     (not (string-match (cdr rr) (buffer-file-name))))
 		   (when (eq (car rr) 'not-in-mode)
-		     (not (string-match (cdr rr) (symbol-name major-mode))))))
+		     (not (string-match (cdr rr) (symbol-name major-mode))))
+		   (when (functionp rr) (funcall rr))))
 	  (push r res)))
        (car (last r))))
     (delete-dups (delq nil res))))
