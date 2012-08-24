@@ -332,7 +332,13 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (push-mark (point) t t)
 	      (goto-char (point-max))
 	      (call-interactively 'comment-dwim)
-	      (buffer-string))))))
+	      (buffer-string)))))
+  ;; In front of a keyword without region, insert a new comment.
+  (should
+   (equal "# \n#+KEYWORD: value"
+	  (org-test-with-temp-text "#+KEYWORD: value"
+	    (progn (call-interactively 'comment-dwim)
+		   (buffer-string))))))
 
 
 
