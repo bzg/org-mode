@@ -21000,16 +21000,17 @@ hierarchy of headlines by UP levels before marking the subtree."
      'fill-nobreak-predicate
      (org-uniquify
       (append fill-nobreak-predicate
-	      '(org-fill-item-nobreak-p org-fill-line-break-nobreak-p)))))
+	      '(org-fill-paragraph-separate-nobreak-p
+		org-fill-line-break-nobreak-p)))))
   (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
   (org-set-local 'align-mode-rules-list
 		 '((org-in-buffer-settings
 		    (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
 		    (modes . '(org-mode))))))
 
-(defun org-fill-item-nobreak-p ()
+(defun org-fill-paragraph-separate-nobreak-p ()
   "Non-nil when a line break at point would insert a new item."
-  (and (looking-at (org-item-re)) (org-list-in-valid-context-p)))
+  (looking-at (substring org-element-paragraph-separate 1)))
 
 (defun org-fill-line-break-nobreak-p ()
   "Non-nil when a line break at point would create an Org line break."
