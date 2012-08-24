@@ -44,7 +44,7 @@ elpa-dirty:	autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
 	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" >org-pkg.el
-	tar --exclude=Makefile --xform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
+	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-pkg.el
 	$(if $(filter-out $(ORGVERSION), $(GITVERSION)), \
