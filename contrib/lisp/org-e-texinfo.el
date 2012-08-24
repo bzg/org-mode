@@ -783,7 +783,7 @@ holding export options."
 			     detail-menu
 			     "\n\n"
 			     "@end detailmenu\n"))
-		   "@end menu\n"))
+		 "@end menu\n"))
      "\n\n"
 
      ;; Document's body.
@@ -1563,10 +1563,10 @@ a communication channel."
     (push (loop for count from 0 to (- number-cells 1) collect
 		(loop for item in cells collect
 		      (nth count item))) counts)
-    (mapconcat '(lambda (size)
-		  (make-string size ?a)) (mapcar (lambda (ref)
-						   (apply 'max `,@ref)) (car counts))
-		  "} {")))
+    (mapconcat (lambda (size)
+		 (make-string size ?a)) (mapcar (lambda (ref)
+						  (apply 'max `,@ref)) (car counts))
+		 "} {")))
 
 (defun org-e-texinfo-table--org-table (table contents info)
   "Return appropriate Texinfo code for an Org table.
