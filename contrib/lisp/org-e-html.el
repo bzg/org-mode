@@ -1123,8 +1123,7 @@ that uses these same face definitions."
 	      (format "<span class=\"%s\">%s</span>" todo-type headline)))))
 
 (defun org-e-html-toc (depth info)
-  (let* ((headlines (org-export-collect-headlines
-		     info (and (wholenump depth) depth)))
+  (let* ((headlines (org-export-collect-headlines info depth))
 	 (toc-entries
 	  (loop for headline in headlines collect
 		(list (org-e-html-format-headline--wrap

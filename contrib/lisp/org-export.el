@@ -4075,17 +4075,20 @@ return nil."
 
 INFO is a plist used as a communication channel.
 
-When non-nil, optional argument N must be an integer.  It
-specifies the depth of the table of contents.
+When optional argument N is an integer, it specifies the depth of
+the table of contents.  Otherwise, it is set to the value of the
+last headline level.  See `org-export-headline-levels' for more
+information.
 
 Return a list of all exportable headlines as parsed elements."
+  (unless (wholenump n) (setq n (plist-get info :headline-levels)))
   (org-element-map
    (plist-get info :parse-tree)
    'headline
    (lambda (headline)
      ;; Strip contents from HEADLINE.
      (let ((relative-level (org-export-get-relative-level headline info)))
-       (unless (and n (> relative-level n)) headline)))
+       (unless (> relative-level n) headline)))
    info))
 
 (defun org-export-collect-elements (type info &optional predicate)
