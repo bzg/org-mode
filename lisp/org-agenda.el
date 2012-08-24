@@ -3334,7 +3334,8 @@ generating a new one."
     ;; buffer via elisp link
     (unless (equal (current-buffer) abuf)
       (org-pop-to-buffer-same-window abuf))
-    (setq org-pre-agenda-window-conf wconf)))
+    (setq org-pre-agenda-window-conf
+	  (or org-pre-agenda-window-conf wconf))))
 
 (defun org-prepare-agenda (&optional name)
   (if (org-agenda-use-sticky-p)
@@ -6470,7 +6471,8 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
     (and org-agenda-restore-windows-after-quit
 	 (not (eq org-agenda-window-setup 'other-frame))
 	 org-pre-agenda-window-conf
-	 (set-window-configuration org-pre-agenda-window-conf))))
+	 (set-window-configuration org-pre-agenda-window-conf)
+	 (setq org-pre-agenda-window-conf nil))))
 
 (defun org-agenda-quit ()
   "Exit agenda by killing agenda buffer or burying it when
@@ -6492,7 +6494,8 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 	    (and org-agenda-restore-windows-after-quit
 		 (not (eq org-agenda-window-setup 'other-frame))
 		 org-pre-agenda-window-conf
-		 (set-window-configuration org-pre-agenda-window-conf))))
+		 (set-window-configuration org-pre-agenda-window-conf)
+		 (setq org-pre-agenda-window-conf nil))))
       (org-agenda-Quit))))
 
 (defun org-agenda-exit ()
