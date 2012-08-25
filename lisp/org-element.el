@@ -1740,7 +1740,7 @@ Assume point is at the beginning of the paragraph."
 	   ;; beginning of an item or a footnote reference. In that
 	   ;; case, we mustn't look for affiliated keywords since they
 	   ;; belong to the container.
-	   (inner-par-p (/= (point-at-bol) (point)))
+	   (inner-par-p (not (bolp)))
 	   (contents-begin (point))
 	   (keywords (unless inner-par-p
 		       (org-element--collect-affiliated-keywords)))
@@ -2431,7 +2431,7 @@ its beginning position."
     (let (beg)
       (when (and (re-search-forward "@@[-A-Za-z0-9]+:" limit t)
 		 (setq beg (match-beginning 0))
-		 (re-search-forward "@@" limit t))
+		 (search-forward "@@" limit t))
 	(cons 'export-snippet beg)))))
 
 
@@ -2553,9 +2553,9 @@ Return value is a cons cell whose CAR is `inline-babel-call' and
 CDR is beginning position."
   (save-excursion
     ;; Use a simplified version of
-    ;; org-babel-inline-lob-one-liner-regexp as regexp for more speed.
+    ;; `org-babel-inline-lob-one-liner-regexp'.
     (when (re-search-forward
-	   "\\(?:babel\\|call\\)_\\([^()\n]+?\\)\\(\\[\\(.*\\)\\]\\|\\(\\)\\)(\\([^\n]*\\))\\(\\[\\(.*?\\)\\]\\)?"
+	   "call_\\([^()\n]+?\\)\\(?:\\[.*?\\]\\)?([^\n]*?)\\(\\[.*?\\]\\)?"
 	   limit t)
       (cons 'inline-babel-call (match-beginning 0)))))
 
