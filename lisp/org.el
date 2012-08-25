@@ -1281,7 +1281,8 @@ See also the variable `org-table-auto-blank-field'."
 	  (const :tag "on" t)
 	  (const :tag "on, optimized" optimized)))
 
-(defcustom org-self-insert-cluster-for-undo (version<= emacs-version "24.1")
+(defcustom org-self-insert-cluster-for-undo (or (featurep 'xemacs)
+						(version<= emacs-version "24.1"))
   "Non-nil means cluster self-insert commands for undo when possible.
 If this is set, then, like in the Emacs command loop, 20 consecutive
 characters will be undone together.
