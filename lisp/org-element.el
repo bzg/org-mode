@@ -1800,8 +1800,6 @@ Assume point is at the beginning of the paragraph."
 	   (end (progn (skip-chars-forward " \r\t\n" limit)
 		       (if (eobp) (point) (point-at-bol)))))
       (list 'paragraph
-	    ;; If paragraph has no affiliated keywords, it may not begin
-	    ;; at beginning of line if it starts an item.
 	    (nconc
 	     (list :begin begin
 		   :end end
