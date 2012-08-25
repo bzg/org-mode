@@ -35,6 +35,7 @@
 ;;   (org-notify-start)
 
 ;; Example setup:
+;;
 ;; (org-notify-add 'appt
 ;;                 '(:time "-1s" :period "20s" :duration 10
 ;;                   :actions (-message -ding))
@@ -42,11 +43,12 @@
 ;;                   :actions -notify)
 ;;                 '(:time "2h" :period "5m" :actions -message)
 ;;                 '(:time "3d" :actions -email))
+;;
 ;; This means for todo-items with `notify' property set to `appt': 3 days
 ;; before deadline, send a reminder-email, 2 hours before deadline, start to
 ;; send messages every 5 minutes, then 15 minutes before deadline, start to
-;; pop up notification windows every 2 minutes. The timeout of the window is
-;; set to 100 seconds. Finally, when deadline is overdue, send messages and
+;; pop up notification windows every 2 minutes.  The timeout of the window is
+;; set to 100 seconds.  Finally, when deadline is overdue, send messages and
 ;; make noise."
 
 ;; Take also a look at the function `org-notify-add'.
@@ -173,26 +175,29 @@ forgotten tasks."
             (return)))))))
 
 (defun org-notify-add (name &rest params)
-  "Add a new notification type. The NAME can be used in Org-mode property
-`notify'. If NAME is `default', the notification type applies for todo items
-without the `notify' property. This file predefines such a default
+  "Add a new notification type.
+The NAME can be used in Org-mode property `notify'.  If NAME is
+`default', the notification type applies for todo items without
+the `notify' property.  This file predefines such a default
 notification type.
 
 Each element of PARAMS is a list with parameters for a given time
-distance to the deadline. This distance must increase from one element to
-the next.
+distance to the deadline.  This distance must increase from one
+element to the next.
+
 List of possible parameters:
+
   :time      Time distance to deadline, when this type of notification shall
-             start. It's a string: an integral value (positive or negative)
+             start.  It's a string: an integral value (positive or negative)
              followed by a unit (s, m, h, d, w, M).
   :actions   A function or a list of functions to be called to notify the
-             user. Instead of a function name, you can also supply a suffix
+             user.  Instead of a function name, you can also supply a suffix
              of one of the various predefined `org-notify-action-xxx'
              functions.
-  :period    Optional: can be used to repeat the actions periodically. Same
-             format as :time.
+  :period    Optional: can be used to repeat the actions periodically.
+             Same format as :time.
   :duration  Some actions use this parameter to specify the duration of the
-             notification. It's an integral number in seconds.
+             notification.  It's an integral number in seconds.
   :audible   Overwrite the value of `org-notify-audible' for this action.
 
 For the actions, you can use your own functions or some of the predefined
@@ -200,11 +205,12 @@ ones, whose names are prefixed with `org-notify-action-'."
   (setq org-notify-map (plist-put org-notify-map name params)))
 
 (defun org-notify-start (&optional secs)
-  "Start the notification daemon. If SECS is positive, it's the
-period in seconds for processing the notifications of one
-org-agenda file, and if negative, notifications will be checked
-only when emacs is idle for -SECS seconds. The default value for
-SECS is 20."
+  "Start the notification daemon.
+If SECS is positive, it's the period in seconds for processing
+the notifications of one org-agenda file, and if negative,
+notifications will be checked only when emacs is idle for -SECS
+seconds.  The default value for SECS is 20."
+  (interactive)
   (if org-notify-timer
       (org-notify-stop))
   (setq secs (or secs 20)
@@ -216,8 +222,8 @@ SECS is 20."
 (defun org-notify-stop ()
   "Stop the notification daemon."
   (when org-notify-timer
-      (cancel-timer org-notify-timer)
-      (setq org-notify-timer nil)))
+    (cancel-timer org-notify-timer)
+    (setq org-notify-timer nil)))
 
 (defun org-notify-on-action (plist key)
   "User wants to see action."
@@ -299,7 +305,7 @@ SECS is 20."
 
 (defun org-notify-select-highest-window ()
   "Select the highest window on the frame, that is not is not an
-org-notify window. Mostly copied from `appt-select-lowest-window'."
+org-notify window.  Mostly copied from `appt-select-lowest-window'."
   (let ((highest-window (selected-window))
         (bottom-edge (nth 3 (window-edges)))
         next-bottom-edge)
@@ -370,7 +376,7 @@ terminal an emacs window."
 
 ;;; Provide a minimal default setup.
 (org-notify-add 'default '(:time "1h" :actions -notify/window
-                           :period "2m" :duration 60))
+				 :period "2m" :duration 60))
 
 (provide 'org-notify)
 
