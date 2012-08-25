@@ -670,9 +670,9 @@ and corresponding declarations."
 		  (cons (string :tag "Extension")
 			(string :tag "Declaration")))))
 
-(defcustom org-e-html-coding-system org-export-coding-system
+(defcustom org-e-html-coding-system 'utf-8
   "Coding system for HTML export.
-Use `org-export-coding-system' as the default value."
+Use utf-8 as the default value."
   :group 'org-export-e-html
   :type 'coding-system)
 
