@@ -214,6 +214,12 @@ regexp matching one object can also match the other object.")
 Names must be uppercase.  Any block whose name has no association
 is parsed with `org-element-special-block-parser'.")
 
+(defconst org-element-link-type-is-file
+  '("file" "file+emacs" "file+sys" "docview")
+  "List of link types equivalent to \"file\".
+Only these types can accept search options and an explicit
+application to open them.")
+
 (defconst org-element-affiliated-keywords
   '("CAPTION" "DATA" "HEADER" "HEADERS" "LABEL" "NAME" "PLOT" "RESNAME" "RESULT"
     "RESULTS" "SOURCE" "SRCNAME" "TBLNAME")
@@ -2717,14 +2723,15 @@ beginning position."
   "Parse link at point.
 
 Return a list whose CAR is `link' and CDR a plist with `:type',
-`:path', `:raw-link', `:begin', `:end', `:contents-begin',
-`:contents-end' and `:post-blank' as keywords.
+`:path', `:raw-link', `:application', `:search-option', `:begin',
+`:end', `:contents-begin', `:contents-end' and `:post-blank' as
+keywords.
 
 Assume point is at the beginning of the link."
   (save-excursion
     (let ((begin (point))
 	  end contents-begin contents-end link-end post-blank path type
-	  raw-link link)
+	  raw-link link search-option application)
       (cond
        ;; Type 1: Text targeted from a radio target.
        ((and org-target-link-regexp (looking-at org-target-link-regexp))
@@ -2779,10 +2786,26 @@ Assume point is at the beginning of the link."
       ;; LINK-END variable.
       (setq post-blank (progn (goto-char link-end) (skip-chars-forward " \t"))
 	    end (point))
+      ;; Extract search option and opening application out of
+      ;; "file"-type links.
+      (when (member type org-element-link-type-is-file)
+	;; Application.
+	(cond ((string-match "^file\\+\\(.*\\)$" type)
+	       (setq application (match-string 1 type)))
+	      ((not (string-match "^file" type))
+	       (setq application type)))
+	;; Extract search option from PATH.
+	(when (string-match "::\\(.*\\)$" path)
+	  (setq search-option (match-string 1 path)
+		path (replace-match "" nil nil path)))
+	;; Make sure TYPE always report "file".
+	(setq type "file"))
       (list 'link
 	    (list :type type
 		  :path path
 		  :raw-link (or raw-link path)
+		  :application application
+		  :search-option search-option
 		  :begin begin
 		  :end end
 		  :contents-begin contents-begin

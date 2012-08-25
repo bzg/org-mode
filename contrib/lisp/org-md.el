@@ -307,10 +307,6 @@ a communication channel."
 			   ((member type '("http" "https" "ftp"))
 			    (concat type ":" raw-path))
 			   ((equal type "file")
-			    ;; Extract just the file path and strip
-			    ;; all other components.
-			    (when (string-match "\\(.+\\)::.+" raw-path)
-			      (setq raw-path (match-string 1 raw-path)))
 			    ;; Treat links to ".org" files as ".html",
 			    ;; if needed.
 			    (setq raw-path

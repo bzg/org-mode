@@ -1101,6 +1101,26 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
+  ;; 2.9 File-type link with search option.
+  (should
+   (equal
+    '(("file" "projects.org" "*task title"))
+    (org-test-with-temp-text "[[file:projects.org::*task title]]"
+      (org-element-map
+       (org-element-parse-buffer) 'link
+       (lambda (l) (list (org-element-property :type l)
+		    (org-element-property :path l)
+		    (org-element-property :search-option l)))))))
+  ;; 2.10 File-type link with application.
+  (should
+   (equal
+    '(("file" "projects.org" "docview"))
+    (org-test-with-temp-text "[[docview:projects.org]]"
+      (org-element-map
+       (org-element-parse-buffer) 'link
+       (lambda (l) (list (org-element-property :type l)
+		    (org-element-property :path l)
+		    (org-element-property :application l)))))))
   ;; 3. Plain link.
   (should
    (org-test-with-temp-text "A link: http://orgmode.org"

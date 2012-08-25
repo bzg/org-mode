@@ -2277,10 +2277,6 @@ INFO is a plist holding contextual information.  See
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
 		((string= type "file")
-		 ;; Extract just the file path and strip all other
-		 ;; components.
-		 (when (string-match "\\(.+\\)::.+" raw-path)
-		   (setq raw-path (match-string 1 raw-path)))
 		 ;; Treat links to ".org" files as ".html", if needed.
 		 (setq raw-path (funcall --link-org-files-as-html-maybe
 					 raw-path info))
