@@ -1736,9 +1736,15 @@ containing `:begin', `:end', `:contents-begin' and
 
 Assume point is at the beginning of the paragraph."
   (save-excursion
-    (let* ((contents-begin (point))
-	   (keywords (org-element--collect-affiliated-keywords))
-	   (begin (car keywords))
+    (let* (;; INNER-PAR-P is non-nil when paragraph is at the
+	   ;; beginning of an item or a footnote reference. In that
+	   ;; case, we mustn't look for affiliated keywords since they
+	   ;; belong to the container.
+	   (inner-par-p (/= (point-at-bol) (point)))
+	   (contents-begin (point))
+	   (keywords (unless inner-par-p
+		       (org-element--collect-affiliated-keywords)))
+	   (begin (if inner-par-p contents-begin (car keywords)))
 	   (before-blank
 	    (let ((case-fold-search t))
 	      (end-of-line)
@@ -1797,7 +1803,7 @@ Assume point is at the beginning of the paragraph."
 	    ;; If paragraph has no affiliated keywords, it may not begin
 	    ;; at beginning of line if it starts an item.
 	    (nconc
-	     (list :begin (if (cadr keywords) begin contents-begin)
+	     (list :begin begin
 		   :end end
 		   :contents-begin contents-begin
 		   :contents-end contents-end
