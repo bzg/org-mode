@@ -21043,9 +21043,7 @@ meant to be filled."
 	   (comment (looking-at "[ \t]*# ?") (match-string 0))
 	   (footnote-definition "")
 	   ((item plain-list)
-	    (make-string (org-list-item-body-column
-			  (org-element-property :begin element))
-			 ? ))
+	    (make-string (org-list-item-body-column post-affiliated) ? ))
 	   (paragraph
 	    ;; Fill prefix is usually the same as the current line,
 	    ;; except if the paragraph is at the beginning of an item.
@@ -21119,8 +21117,7 @@ a footnote definition, try to fill the first paragraph within."
 	     (let ((beg (max (point-min)
 			     (org-element-property :contents-begin element)))
 		   (end (min (point-max)
-			     (org-element-property :contents-end element)))
-		   (type (org-element-type element)))
+			     (org-element-property :contents-end element))))
 	       ;; Do nothing if point is at an affiliated keyword.
 	       (if (< (point) beg) t
 		 (when (derived-mode-p 'message-mode)
