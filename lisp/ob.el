@@ -2270,6 +2270,8 @@ block but are passed literally to the \"example-block\"."
          (info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
          (body (nth 1 info))
+	 (ob-nww-start org-babel-noweb-wrap-start)
+	 (ob-nww-end org-babel-noweb-wrap-end)
 	 (comment (string= "noweb" (cdr (assoc :comments (nth 2 info)))))
 	 (rx-prefix (concat "\\(" org-babel-src-name-regexp "\\|"
 			    ":noweb-ref[ \t]+" "\\)"))
@@ -2282,6 +2284,8 @@ block but are passed literally to the \"example-block\"."
 		     (org-babel-trim (buffer-string)))))
 	 index source-name evaluate prefix blocks-in-buffer)
     (with-temp-buffer
+      (org-set-local 'org-babel-noweb-wrap-start ob-nww-start)
+      (org-set-local 'org-babel-noweb-wrap-end ob-nww-end)
       (insert body) (goto-char (point-min))
       (setq index (point))
       (while (and (re-search-forward (org-babel-noweb-wrap) nil t))
