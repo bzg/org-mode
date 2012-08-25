@@ -1188,7 +1188,20 @@ e^{i\\pi}+1=0
    (org-test-with-temp-text "#+BEGIN: \nParagraph"
      (let ((elem (org-element-at-point)))
        (and (eq (org-element-type elem) 'paragraph)
-	    (= (point-max) (org-element-property :end elem)))))))
+	    (= (point-max) (org-element-property :end elem))))))
+  ;; Include incomplete latex environments.
+  (should
+   (org-test-with-temp-text "\begin{equation}\nParagraph"
+     (let ((elem (org-element-at-point)))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (= (point-max) (org-element-property :end elem))))))
+  ;; Do not steal affiliated keywords from container.
+  (should
+   (org-test-with-temp-text "#+ATTR_LATEX: test\n- item 1"
+     (let ((elem (progn (search-forward "item") (org-element-at-point))))
+       (and (eq (org-element-type elem) 'paragraph)
+	    (not (org-element-property :attr_latex elem))
+	    (/= (org-element-property :begin elem) 1))))))
 
 
 ;;;; Plain List
