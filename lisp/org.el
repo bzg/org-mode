@@ -21918,24 +21918,27 @@ Move to the next element at the same level, when possible."
   "Move backward by one element.
 Move to the previous element at the same level, when possible."
   (interactive)
-  (if (org-with-limited-levels (org-at-heading-p))
-      ;; At an headline, move to the previous one, if any, or stay
-      ;; here.
-      (let ((origin (point)))
-	(org-backward-heading-same-level 1)
-	(unless (org-with-limited-levels (org-at-heading-p))
-	  (goto-char origin)
-	  (error "Cannot move further up")))
-    (let* ((trail (org-element-at-point 'keep-trail))
-	   (elem (car trail))
-	   (prev-elem (nth 1 trail))
-	   (beg (org-element-property :begin elem)))
-      (cond
-       ;; Move to beginning of current element if point isn't there
-       ;; already.
-       ((/= (point) beg) (goto-char beg))
-       ((not prev-elem) (error "Cannot move further up"))
-       (t (goto-char (org-element-property :begin prev-elem)))))))
+  (cond ((bobp) (error "Cannot move further up"))
+	((org-with-limited-levels (org-at-heading-p))
+	 ;; At an headline, move to the previous one, if any, or stay
+	 ;; here.
+	 (let ((origin (point)))
+	   (org-backward-heading-same-level 1)
+	   (unless (org-with-limited-levels (org-at-heading-p))
+	     (goto-char origin)
+	     (error "Cannot move further up"))))
+	(t
+	 (let* ((trail (org-element-at-point 'keep-trail))
+		(elem (car trail))
+		(prev-elem (nth 1 trail))
+		(beg (org-element-property :begin elem)))
+	   (cond
+	    ;; Move to beginning of current element if point isn't
+	    ;; there already.
+	    ((/= (point) beg) (goto-char beg))
+	    (prev-elem (goto-char (org-element-property :begin prev-elem)))
+	    ((org-before-first-heading-p) (goto-char (point-min)))
+	    (t (org-back-to-heading)))))))
 
 ;;;###autoload
 (defun org-up-element ()

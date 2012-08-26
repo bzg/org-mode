@@ -465,42 +465,55 @@ Outside."
 
 (ert-deftest test-org/backward-element ()
   "Test `org-backward-element' specifications."
-  ;; 1. At BOB (modulo some white spaces): should error.
+  ;; 1. Should error at BOB.
   (org-test-with-temp-text "    \nParagraph."
-    (org-skip-whitespace)
     (should-error (org-backward-element)))
-  ;; 2. Not at the beginning of an element: move at its beginning.
+  ;; 2. Should move at BOB when called on the first element in buffer.
+  (should
+   (org-test-with-temp-text "\n#+TITLE: test"
+     (progn (forward-line)
+	    (org-backward-element)
+	    (bobp))))
+  ;; 3. Not at the beginning of an element: move at its beginning.
   (org-test-with-temp-text "Paragraph1.\n\nParagraph2."
     (goto-line 3)
     (end-of-line)
     (org-backward-element)
     (should (looking-at "Paragraph2.")))
-  ;; 3. Headline tests.
+  ;; 4. Headline tests.
   (org-test-with-temp-text "
 * Head 1
 ** Head 1.1
 *** Head 1.1.1
 ** Head 1.2"
-    ;; 3.1. At an headline beginning: move to previous headline at the
+    ;; 4.1. At an headline beginning: move to previous headline at the
     ;;      same level.
     (goto-line 5)
     (org-backward-element)
     (should (looking-at "** Head 1.1"))
-    ;; 3.2. At an headline beginning: move to parent headline if no
+    ;; 4.2. At an headline beginning: move to parent headline if no
     ;;      headline at the same level.
     (goto-line 3)
     (org-backward-element)
     (should (looking-at "* Head 1"))
-    ;; 3.3. At the first top-level headline: should error.
+    ;; 4.3. At the first top-level headline: should error.
     (goto-line 2)
     (should-error (org-backward-element)))
-  ;; 4. At beginning of first element inside a greater element:
+  ;; 5. At beginning of first element inside a greater element:
   ;;    expected to move to greater element's beginning.
   (org-test-with-temp-text "Before.\n#+BEGIN_CENTER\nInside.\n#+END_CENTER."
     (goto-line 3)
     (org-backward-element)
     (should (looking-at "#\\+BEGIN_CENTER")))
-  ;; 5. List tests.
+  ;; 6. At the beginning of the first element in a section: should
+  ;;    move back to headline, if any.
+  (should
+   (org-test-with-temp-text "#+TITLE: test\n* Headline\n\nParagraph"
+     (progn (goto-char (point-max))
+	    (beginning-of-line)
+	    (org-backward-element)
+	    (org-at-heading-p))))
+  ;; 7. List tests.
   (org-test-with-temp-text "
 - item1
 
@@ -516,19 +529,19 @@ Outside."
 
 
 Outside."
-    ;; 5.1. At beginning of sub-list: expected to move to the
+    ;; 7.1. At beginning of sub-list: expected to move to the
     ;;      paragraph before it.
     (goto-line 4)
     (org-backward-element)
     (should (looking-at "item1"))
-    ;; 5.2. At an item in a list: expected to move at previous item.
+    ;; 7.2. At an item in a list: expected to move at previous item.
     (goto-line 8)
     (org-backward-element)
     (should (looking-at "  - sub2"))
     (goto-line 12)
     (org-backward-element)
     (should (looking-at "- item1"))
-    ;; 5.3. At end of list/sub-list: expected to move to list/sub-list
+    ;; 7.3. At end of list/sub-list: expected to move to list/sub-list
     ;;      beginning.
     (goto-line 10)
     (org-backward-element)
@@ -536,7 +549,7 @@ Outside."
     (goto-line 15)
     (org-backward-element)
     (should (looking-at "- item1"))
-    ;; 5.4. At blank-lines before list end: expected to move to top
+    ;; 7.4. At blank-lines before list end: expected to move to top
     ;; item.
     (goto-line 14)
     (org-backward-element)
