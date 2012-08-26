@@ -1,7 +1,12 @@
 #----------------------------------------------------------------------
 # This file is used for maintenance of org on the server.
 #----------------------------------------------------------------------
-.PHONY:	helpserver release rel-dirty cleanrel tagwarn
+.PHONY:	helpserver \
+	release rel-dirty rel-up cleanrel \
+	elpa elpa-dirty elpa-up \
+	doc-up \
+	upload-release upload-elpa upload-doc upload \
+	tagwarn
 
 help helpall helpserver::
 	$(info )
@@ -9,6 +14,7 @@ help helpall helpserver::
 	$(info ===========)
 	$(info release               - clean up and create TAR/ZIP release archives)
 	$(info elpa                  - clean up and create ELPA TAR archive)
+	$(info upload                - clean up and populate server directories)
 helpserver::
 	@echo ""
 
@@ -22,7 +28,7 @@ ORGELPA := $(ORGELPA:%/=%/*)
 
 release:	ORG_MAKE_DOC=info pdf card # do not make HTML documentation
 release:	cleanall doc autoloads rel-dirty
-rel-dirty:	ORGDIR=org-$(GITVERSION:release_%=%)
+rel-dirty rel-up:	ORGDIR=org-$(GITVERSION:release_%=%)
 rel-dirty:
 	-@$(RM) $(ORGDIR) $(ORGRTAR) $(ORGRZIP)
 	ln -s . $(ORGDIR)
@@ -32,6 +38,8 @@ rel-dirty:
 	$(if $(filter-out $(ORGVERSION), $(GITVERSION)), \
 	    @$(MAKE) tagwarn)
 	@echo ORGVERSION=$(ORGVERSION) GITVERSION=$(GITVERSION)
+rel-up:	rel-dirty
+	$(CP) $(ORGDIR).tar.gz $(ORGDIR).zip $(SERVROOT)/
 
 PKG_TAG = $(shell date +%Y%m%d)
 PKG_DOC = "Outline-based notes management and organizer"
@@ -39,7 +47,7 @@ PKG_REQ = "nil"
 
 elpa:		ORG_MAKE_DOC=info pdf card # do not make HTML documentation
 elpa:		cleanall doc elpa-dirty
-elpa-dirty:	ORGDIR=org-$(PKG_TAG)
+elpa-dirty elpa-up:	ORGDIR=org-$(PKG_TAG)
 elpa-dirty:	autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
@@ -50,6 +58,8 @@ elpa-dirty:	autoloads
 	$(if $(filter-out $(ORGVERSION), $(GITVERSION)), \
 	    @$(MAKE) tagwarn)
 	@echo ORGVERSION=$(ORGVERSION) GITVERSION=$(GITVERSION)
+elpa-up:	elpa-dirty
+	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
 
 tagwarn:
 	$(info  ======================================================)
@@ -63,3 +73,15 @@ tagwarn:
 clean:	cleanrel
 cleanrel:
 	$(RM) org-7.* org-20??????*
+
+doc-up:
+	$(MAKE) -C doc html manual guide
+	$(CP) doc/org.html $(SERVROOT)
+	$(CP) doc/manual/* $(SERVROOT)/manual
+	$(CP) doc/guide/*  $(SERVROOT)/guide
+
+upload upload-elpa upload-release upload-doc:	ORG_MAKE_DOC=info pdf card
+upload:	cleanall doc elpa-up rel-up doc-up
+upload-elpa:	cleanall doc elpa-up
+upload-release:	cleanall doc rel-up
+upload-doc:	cleanall doc doc-up
