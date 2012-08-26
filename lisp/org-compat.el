@@ -442,6 +442,7 @@ With two arguments, return floor and remainder of their quotient."
 	   'condition-case-no-debug)
       'condition-case))
 
+;;;###autoload
 (defmacro org-check-version ()
   "Try very hard to provide sensible version strings."
   (let* ((org-dir        (org-find-library-dir "org"))
