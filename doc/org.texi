@@ -856,30 +856,41 @@ Theory Ltd.}
 @cindex XEmacs
 
 @b{Important:} @i{If you are using a version of Org that is part of the Emacs
-distribution, GNU ELPA or an XEmacs package, please skip this section and go
-directly to @ref{Activation}.  To see what version of Org (if any) is part of
-your Emacs distribution, type @kbd{M-x org-version} (if your Emacs
-distribution does not come with Org, this function will not be defined).}
+distribution, GNU ELPA installed by the package manager or an XEmacs package,
+please skip this section and go directly to @ref{Activation}.  To see what
+version of Org (if any) is part of your Emacs distribution, type @kbd{M-x
+org-version} (if your Emacs distribution does not come with Org, this
+function will not be defined).}
+
+Installation of Org mode uses a build system, which is described in more
+detail on @uref{http://orgmode.org/worg/dev/org-build-system.html, Worg}.
 
 If you have downloaded Org from the Web as a distribution @file{.zip} or
-@file{.tar} archive, you must take the following steps to install it:
+@file{.tar.gz} archive, you must take the following steps to install it:
 
 @itemize @bullet
 @item Unpack the distribution archive.
 @item Change into (@code{cd}) the Org directory.
-@item Run @code{make help}
-and then check and edit the file @file{local.mk}.  You must set the name of
-the Emacs binary (likely either @file{emacs} or @file{xemacs}), and the paths
-to the directories where local Lisp and Info files will be installed.
+@item Run @code{make help config}
+and then check and edit the file @file{local.mk} if the default configuration
+does not match your system.  You must set the name of the Emacs binary
+(likely either @file{emacs} or @file{xemacs}), and the paths to the
+directories where local Lisp and Info files will be installed.  If the Emacs
+binary is not in your path, you must give the full path to the executable.
+Avoid spaces in any path names.
 @item Run @code{make config}
-to check the configuration.
+again to check the configuration.
+@item Optionally run @code{make test}
+to build Org mode and then run the full testsuite.
 @item Run @code{make install} or @code{sudo make install}
-to build and install Org mode on your system.  If you use a local Git
-repository, preferrably us @code{make update2} or, if you want to run the
-complete test suite before installation, @code{make up2}.
+to build and install Org mode on your system.
 @end itemize
 
-If you use a cloned Git repository, then the procedure is slightly different:
+If you use a cloned Git repository, then the procedure is slightly different.
+The following description assumes that you are using the @code{master} branch
+(where the development is done).  You could also use the @code{maint} branch
+instead, where the release versions are published, just replace @code{master}
+with @code{maint} in the description below.
 
 @itemize @bullet
 @item Change into (@code{cd}) the Org repository.
@@ -888,7 +899,9 @@ to switch to the @code{master} branch of the Org repository.
 @item Run @code{make help}
 and then check and edit the file @file{local.mk}.  You must set the name of
 the Emacs binary (likely either @file{emacs} or @file{xemacs}), and the paths
-to the directories where local Lisp and Info files will be installed.
+to the directories where local Lisp and Info files will be installed.  If the
+Emacs binary is not in your path, you must give the full path to the
+executable.  Avoid spaces in any path names.
 @item Run @code{make config}
 to check the configuration.
 @item Run @code{make update2} or @code{make up2}
