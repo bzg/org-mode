@@ -12,14 +12,12 @@ help helpall helpserver::
 	$(info )
 	$(info Maintenance)
 	$(info ===========)
-	$(info release               - clean up, create the distribution archives)
-	$(info upload-release        - clean up, populate the server with arhives)
-	$(info )
-	$(info elpa                  - clean up, create the ELPA archive)
-	$(info upload-elpa           - clean up, populate the server with ELPA)
-	$(info )
-	$(info upload                - clean up, populate the server with everything)
-	$(info upload-doc            - clean up, populate the server with docs)
+	$(info release             - clean up, create the distribution archives)
+	$(info elpa                - clean up, create the ELPA archive)
+	$(info upload-release      - clean up, populate the server with arhives)
+	$(info upload-elpa         - clean up, populate the server with ELPA)
+	$(info upload-doc          - clean up, populate the server with docs)
+	$(info upload              - clean up, populate the server with everything)
 
 helpserver::
 	@echo ""
