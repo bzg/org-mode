@@ -24,9 +24,8 @@ helpserver::
 
 #----------------------------------------------------------------------
 
-# no slash / at the end
-SERVROOT = /var/www/orgmode.org
-SERVERMK = true # or just any value at all, really
+SERVROOT ?= /var/www/orgmode.org
+SERVERMK ?= true # or just any value at all, really
 
 #----------------------------------------------------------------------
 
