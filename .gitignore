@@ -31,9 +31,10 @@ orgcard_letter.tex
 orgcard.txt
 org
 org-install.el
-org-version.*
-org-*.tar.gz
+org-version.el
+org-*.tar*
 org-*.zip
+version.mk
 manual
 org_dual_license.texi
 ORGWEBPAGE/Changes.txt

@@ -22,6 +22,7 @@ ifneq ($(wildcard .git),)
   ORGVERSION ?= $(subst release_,,$(shell git describe --abbrev=0 HEAD))
   GITSTATUS  ?= $(shell git status -uno --porcelain)
 else
+ -include version.mk
   GITVERSION ?= N/A
   ORGVERSION ?= N/A
 endif
