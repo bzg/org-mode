@@ -1852,18 +1852,6 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 
 
 ;;; Multiple agenda buffers support
-
-(defcustom org-agenda-sticky nil
-  "Non-nil means agenda q key will bury agenda buffers.
-Agenda commands will then show existing buffer instead of generating new ones.
-When nil, `q' will kill the single agenda buffer."
-  :group 'org-agenda
-  :type 'boolean
-  :set (lambda (var val)
-	 (if (boundp var)
-	     (org-toggle-sticky-agenda (if val 1 0))
-	   (set var val))))
-
 (defun org-toggle-sticky-agenda (&optional arg)
   "Toggle `org-agenda-sticky'."
   (interactive "P")
@@ -1879,6 +1867,17 @@ When nil, `q' will kill the single agenda buffer."
       (and (org-called-interactively-p 'interactive)
 	   (message "Sticky agenda was %s"
 		    (if org-agenda-sticky "enabled" "disabled"))))))
+
+(defcustom org-agenda-sticky nil
+  "Non-nil means agenda q key will bury agenda buffers.
+Agenda commands will then show existing buffer instead of generating new ones.
+When nil, `q' will kill the single agenda buffer."
+  :group 'org-agenda
+  :type 'boolean
+  :set (lambda (var val)
+	 (if (boundp var)
+	     (org-toggle-sticky-agenda (if val 1 0))
+	   (set var val))))
 
 (defvar org-agenda-buffer nil
   "Agenda buffer currently being generated.")
