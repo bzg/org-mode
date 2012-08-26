@@ -932,12 +932,18 @@ Then add the following line to @file{.emacs}:
 @end example
 
 @noindent
-If you plan to use code from the @file{contrib} subdirectory, do a similar
-step for this directory:
+If you plan to use code from the @file{contrib} subdirectory without
+compiling them, do a similar step for this directory:
 
 @example
 (add-to-list 'load-path "~/path/to/orgdir/contrib/lisp")
 @end example
+
+If you want to include those files with the build and install, please
+customize the variable @code{ORG_ADD_CONTRIB} instead in your @code{local.mk}
+file, for more details please see this
+@uref{http://orgmode.org/worg/dev/org-build-system.html#sec-4-1-2,
+description on Worg}.
 
 Installing Info files is system dependent, because of differences in the
 @file{install-info} program.  The Info documentation is installed together
