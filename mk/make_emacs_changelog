@@ -66,8 +66,10 @@ foreach my $commit (@commits) {
     
     # remove stuff which is not for this output
     if ($kind =~ /\S/) { 
-      remove_parts("contrib/","testing/","xemacs/","utils/","etc/");
-      remove_parts(".*Makefile","README",".+\.mk");
+      # do not delete or rename directories from the list as long as
+      # Changelog entries referring to them exist!
+      remove_parts(qw( contrib/ testing/ xemacs/ UTILITIES/ utils/ mk/ etc/ ));
+      remove_parts(qw( .*Makefile README .+\.mk ));
     }
     if ($kind eq "lisp") { remove_parts("doc/")                               }
     if ($kind eq "texi") { remove_parts("lisp/","doc/orgcard","doc/orgguide") }

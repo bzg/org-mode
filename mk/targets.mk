@@ -5,7 +5,7 @@ DISTFILES_extra=  Makefile request-assign-future.txt contrib etc
 
 LISPDIRS      = lisp
 OTHERDIRS     = doc etc
-CLEANDIRS     = contrib testing utils
+CLEANDIRS     = contrib testing mk
 SUBDIRS       = $(OTHERDIRS) $(LISPDIRS)
 INSTSUB       = $(SUBDIRS:%=install-%)
 ORG_MAKE_DOC ?= info html pdf
@@ -22,7 +22,7 @@ ifneq ($(wildcard .git),)
   ORGVERSION ?= $(subst release_,,$(shell git describe --abbrev=0 HEAD))
   GITSTATUS  ?= $(shell git status -uno --porcelain)
 else
- -include version.mk
+ -include mk/version.mk
   GITVERSION ?= N/A
   ORGVERSION ?= N/A
 endif
