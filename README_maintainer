@@ -19,7 +19,7 @@ accepting it.
 I have found that the best workflow for this is using the pw script by
 Nate Case, with the modifications for Org-mode made by John Wiegley
 and Carsten Dominik.  The correct version of this script that should
-be used with Org mode is distributed in the =utils/= directory of the
+be used with Org mode is distributed in the =mk/= directory of the
 Org mode distribution.  Here is the basic workflow for this.
 
 ** Access to the patchwork server
@@ -156,7 +156,7 @@ org-version= will spit ut complete version infor related to git, with
 the nearest commit and tag.  I you ever need to set a special version
 number, use this:
 
-: utils/set_version 7.02trans
+: mk/set_version 7.02trans
 
 and commit the result.  Note that the above command does not change
 the version string in the file from which Org's homepage is generated.
@@ -213,7 +213,7 @@ So the way I have been doing things with Emacs is this:
 
    For this, I do in the org-mode git repository
 
-   : utils/make_emacs_changelog release_7.02.05..release_7.03.02
+   : mk/make_emacs_changelog release_7.02.05..release_7.03.02
 
    This will spit out ChangeLog entries (for the given commit range)
    that need to go into the ChangeLog files in Emacs.  Org-mode
@@ -236,7 +236,7 @@ So the way I have been doing things with Emacs is this:
    second and third command line arguments to =make_emacs_changelog=,
    for example
 
-   : utils/make_emacs_changelog release_7.02.05..release_7.03.02 2010-12-11 lisp
+   : mk/make_emacs_changelog release_7.02.05..release_7.03.02 2010-12-11 lisp
 
    These entries need to be added to the ChangeLog files in Emacs.
    You should, in the ChangeLog file, select the inserted region of
@@ -253,7 +253,7 @@ So the way I have been doing things with Emacs is this:
 
   The file /org-configs/org-hooks.org/ contains a list of all hooks in
   Org.  This list has to be updated after hooks have been added or
-  removed.  The perl script /utils/list-hooks.pl/ creates the
+  removed.  The perl script =mk/list-hooks.pl= creates the
   entire section "Hooks and Function variables", including its
   level-one headline.  I guess babel code could be used to update this
   automatically, but I have not implemented this - I have been doing

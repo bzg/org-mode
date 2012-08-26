@@ -4,7 +4,7 @@
 # This file is not part of GNU Emacs
 
 # set up environment
- include default.mk	# defaults, customizable via "local.mk"
+ include mk/default.mk	# defaults, customizable via "local.mk"
 -include local.mk	# optional local customization, use default.mk as template
 
 # default target is "all" unless overridden in local.mk
@@ -93,4 +93,4 @@ help helpall::
 	$(info http://orgmode.org/worg/dev/org-build-system.html)
 	@echo ""
 
- include targets.mk	# toplevel make machinery
+ include mk/targets.mk	# toplevel make machinery
