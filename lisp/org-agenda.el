@@ -7502,7 +7502,8 @@ If this information is not given, the function uses the tree at point."
   (interactive "P")
   (if (equal goto '(16))
       (org-refile-goto-last-stored)
-    (let* ((marker (or (org-get-at-bol 'org-hd-marker)
+    (let* ((buffer-orig (buffer-name))
+	   (marker (or (org-get-at-bol 'org-hd-marker)
 		       (org-agenda-error)))
 	   (buffer (marker-buffer marker))
 	   (pos (marker-position marker))
@@ -7515,7 +7516,8 @@ If this information is not given, the function uses the tree at point."
 	  (save-restriction
 	    (widen)
 	    (goto-char marker)
-	    (org-remove-subtree-entries-from-agenda)
+	    (let ((org-agenda-buffer-name buffer-orig))
+	      (org-remove-subtree-entries-from-agenda))
 	    (org-refile goto buffer rfloc)))))
     (unless no-update (org-agenda-redo))))
 
