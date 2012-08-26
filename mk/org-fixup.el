@@ -114,7 +114,7 @@ Convenience function for easier invocation from command line."
 
 (defun org-make-local-mk ()
   "Internal function for the build system."
-  (let ((default "default.mk")
+  (let ((default "mk/default.mk")
 	(local   "local.mk"))
     (unwind-protect
 	(with-temp-buffer
