@@ -1852,6 +1852,8 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 
 
 ;;; Multiple agenda buffers support
+
+;;;###autoload
 (defun org-toggle-sticky-agenda (&optional arg)
   "Toggle `org-agenda-sticky'."
   (interactive "P")

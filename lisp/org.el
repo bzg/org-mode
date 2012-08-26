@@ -21009,6 +21009,7 @@ hierarchy of headlines by UP levels before marking the subtree."
 		    (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
 		    (modes . '(org-mode))))))
 
+(defvar org-element-paragraph-separate) ; org-element.el
 (defun org-fill-paragraph-separate-nobreak-p ()
   "Non-nil when a line break at point would insert a new item."
   (looking-at (substring org-element-paragraph-separate 1)))
