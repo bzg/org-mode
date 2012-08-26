@@ -56,7 +56,7 @@ PKG_TAG = $(shell date +%Y%m%d)
 PKG_DOC = "Outline-based notes management and organizer"
 PKG_REQ = "nil"
 
-elpa:		ORG_MAKE_DOC=info pdf card # do not make HTML documentation
+elpa:		ORG_MAKE_DOC=info # do not make HTML PDF card documentation
 elpa:		cleanall doc elpa-dirty
 elpa-dirty elpa-up:	ORGDIR=org-$(PKG_TAG)
 elpa-dirty:
