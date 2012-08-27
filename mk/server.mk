@@ -29,17 +29,17 @@ SERVERMK ?= true # or just any value at all, really
 
 #----------------------------------------------------------------------
 
-ORGCOMM  = README request-assign-future.txt lisp/ doc/
-ORGFULL  = $(ORGCOMM) Makefile \
+ORGCOMM  = README lisp/
+ORGFULL  = $(ORGCOMM) Makefile request-assign-future.txt \
 		      mk/default.mk mk/targets.mk mk/version.mk \
 		      mk/org-fixup.el \
-		      etc/ contrib/
+		      etc/ contrib/ doc/
 ORGFULL := $(ORGFULL:%/=%/*)
-ORGELPA  = $(ORGCOMM) etc/styles/ org-pkg.el
+ORGELPA  = $(ORGCOMM) doc/dir doc/org doc/orgcard.pdf \
+		      etc/styles/ org-pkg.el
 ORGELPA := $(ORGELPA:%/=%/*)
 
-release:	ORG_MAKE_DOC=info pdf card # do not make HTML documentation
-release:	cleanall doc rel-dirty tagwarn
+release:	cleanall info pdf card rel-dirty tagwarn
 rel-dirty rel-up:	ORGDIR=org-$(GITVERSION:release_%=%)
 rel-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-dist version autoloads
@@ -48,25 +48,25 @@ rel-dirty:
 	tar -zcf $(ORGDIR).tar.gz $(foreach dist, $(ORGFULL), $(ORGDIR)/$(dist))
 	zip -r9  $(ORGDIR).zip    $(foreach dist, $(ORGFULL), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR)
-rel-up:	rel-dirty
+rel-up:	info pdf card rel-dirty
 	$(CP) $(ORGDIR).tar.gz $(ORGDIR).zip $(SERVROOT)/
 
 PKG_TAG = $(shell date +%Y%m%d)
 PKG_DOC = "Outline-based notes management and organizer"
 PKG_REQ = "nil"
 
-elpa:		ORG_MAKE_DOC=info # do not make HTML PDF card documentation
-elpa:		cleanall doc elpa-dirty
+elpa:		cleanall info card elpa-dirty
 elpa-dirty elpa-up:	ORGDIR=org-$(PKG_TAG)
 elpa-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpa version autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
-	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" >org-pkg.el
+	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
+	  > org-pkg.el
 	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-pkg.el
-elpa-up:	elpa-dirty
+elpa-up:	info card elpa-dirty
 	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
 
 tagwarn:
@@ -87,14 +87,13 @@ cleanall clean:	cleanrel
 cleanrel:
 	-$(RM) org-$(PKG_TAG)* org-$(DISTVERSION)* org-*.zip org-*.tar* mk/version.mk
 
-doc-up:
-	$(MAKE) -C doc html manual guide
+doc-up:	info pdf card html
+	$(MAKE) -C doc manual guide
 	$(CP) doc/org.html $(SERVROOT)
 	$(CP) doc/manual/* $(SERVROOT)/manual
 	$(CP) doc/guide/*  $(SERVROOT)/guide
 
-upload upload-elpa upload-release upload-doc:	ORG_MAKE_DOC=info pdf card
-upload:	cleanall doc elpa-up rel-up doc-up
-upload-elpa:	cleanall doc elpa-up
-upload-release:	cleanall doc rel-up
-upload-doc:	cleanall doc doc-up
+upload:		cleanall elpa-up rel-up doc-up
+upload-elpa:	cleanall elpa-up
+upload-release:	cleanall rel-up
+upload-doc:	cleanall doc-up

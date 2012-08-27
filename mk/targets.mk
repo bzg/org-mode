@@ -40,7 +40,7 @@ endif
 	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol
 
-CONF_BASE = EMACS DESTDIR ORGCM
+CONF_BASE = EMACS DESTDIR ORGCM ORG_MAKE_DOC
 CONF_DEST = lispdir infodir datadir testdir
 CONF_TEST = BTEST_PRE BTEST_POST BTEST_OB_LANGUAGES BTEST_EXTRA
 CONF_EXEC = CP MKDIR RM RMR FIND SUDO PDFTEX TEXI2PDF TEXI2HTML MAKEINFO INSTALL_INFO

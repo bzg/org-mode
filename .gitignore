@@ -32,6 +32,7 @@ orgcard.txt
 org
 org-install.el
 org-version.el
+doc/org-version.inc
 org-*.tar*
 org-*.zip
 version.mk
