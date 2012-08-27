@@ -11427,7 +11427,7 @@ This function can be used in a hook."
     ("A" "#+ASCII: ")
     ("i" "#+INDEX: ?"
      "#+INDEX: ?")
-    ("I" "#+INCLUDE %file ?"
+    ("I" "#+INCLUDE: %file ?"
      "<include file=%file markup=\"?\">")
     )
   "Structure completion elements.
