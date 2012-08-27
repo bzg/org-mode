@@ -1985,25 +1985,20 @@ table line.  If it is a link, add it to the line containing the link."
   "Remove comments, or convert to backend-specific format.
 ORG-COMMENTSP can be a format string for publishing comments.
 When it is nil, all comments will be removed."
-  (let ((re "^\\(#\\|[ \t]*#\\+ \\)\\(.*\n?\\)")
-	pos)
+  (let ((re "^[ \t]*#\\( \\|$\\)"))
     (goto-char (point-min))
-    (while (or (looking-at re)
-	       (re-search-forward re nil t))
-      (setq pos (match-beginning 0))
-      (if (get-text-property pos 'org-protected)
-	  (goto-char (1+ pos))
-	(if (and org-commentsp
-		 (not (equal (char-before (match-end 1)) ?+)))
-	    (progn (add-text-properties
-		    (match-beginning 0) (match-end 0) '(org-protected t))
-		   (replace-match (org-add-props
-				      (format org-commentsp (match-string 2))
-				      nil 'org-protected t)
-				  t t))
-	  (goto-char (1+ pos))
-	  (replace-match "")
-	  (goto-char (max (point-min) (1- pos))))))))
+    (while (re-search-forward re nil t)
+      (let ((pos (match-beginning 0))
+	    (end (progn (forward-line) (point))))
+	(if (get-text-property pos 'org-protected)
+	    (forward-line)
+	  (if (not org-commentsp) (delete-region pos end)
+	    (add-text-properties pos end '(org-protected t))
+	    (replace-match
+	     (org-add-props
+		 (format org-commentsp (buffer-substring (match-end 0) end))
+		 nil 'org-protected t)
+	     t t)))))))
 
 (defun org-export-handle-metalines ()
   "Remove tables and source blocks metalines.
