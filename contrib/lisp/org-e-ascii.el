@@ -508,7 +508,8 @@ title."
 		 'number-to-string
 		 (org-export-get-headline-number element info) ".")
 		" ")))
-	 (text (org-export-data (org-element-property :title element) info))
+	 (text (org-trim
+		(org-export-data (org-element-property :title element) info)))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword element)))
