@@ -1998,7 +1998,13 @@ When it is nil, all comments will be removed."
 	     (org-add-props
 		 (format org-commentsp (buffer-substring (match-end 0) end))
 		 nil 'org-protected t)
-	     t t)))))))
+	     t t)))))
+    ;; Hack attack: previous implementation also removed keywords at
+    ;; column 0. Brainlessly do it again.
+    (goto-char (point-min))
+    (while (re-search-forward "^#\\+" nil t)
+      (unless (get-text-property (point-at-bol) 'org-protected)
+	(delete-region (point-at-bol) (progn (forward-line) (point)))))))
 
 (defun org-export-handle-metalines ()
   "Remove tables and source blocks metalines.
