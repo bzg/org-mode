@@ -1733,29 +1733,30 @@ associated numbering \(in the shape of a list of numbers\)."
 DATA is the parse tree to traverse.  OPTIONS is the plist holding
 export options."
   (let* (ignore
-	 walk-data			; for byte-compiler.
+	 walk-data
+	 ;; First find trees containing a select tag, if any.
+	 (selected (org-export--selected-trees data options))
 	 (walk-data
-	  (function
-	   (lambda (data options selected)
-	     ;; Collect ignored elements or objects into IGNORE-LIST.
-	     (mapc
-	      (lambda (el)
-		(if (org-export--skip-p el options selected) (push el ignore)
-		  (let ((type (org-element-type el)))
-		    (if (and (eq (plist-get options :with-archived-trees)
-				 'headline)
-			     (eq (org-element-type el) 'headline)
-			     (org-element-property :archivedp el))
-			;; If headline is archived but tree below has
-			;; to be skipped, add it to ignore list.
-			(mapc (lambda (e) (push e ignore))
-			      (org-element-contents el))
-		      ;; Move into recursive objects/elements.
-		      (when (org-element-contents el)
-			(funcall walk-data el options selected))))))
-	      (org-element-contents data))))))
-    ;; Main call.  First find trees containing a select tag, if any.
-    (funcall walk-data data options (org-export--selected-trees data options))
+	  (lambda (data)
+	    ;; Collect ignored elements or objects into IGNORE-LIST.
+	    (let ((type (org-element-type data)))
+	      (if (org-export--skip-p data options selected) (push data ignore)
+		(if (and (eq type 'headline)
+			 (eq (plist-get options :with-archived-trees) 'headline)
+			 (org-element-property :archivedp data))
+		    ;; If headline is archived but tree below has
+		    ;; to be skipped, add it to ignore list.
+		    (mapc (lambda (e) (push e ignore))
+			  (org-element-contents data))
+		  ;; Move into secondary string, if any.
+		  (let ((sec-prop
+			 (cdr (assq type org-element-secondary-value-alist))))
+		    (when sec-prop
+		      (mapc walk-data (org-element-property sec-prop data))))
+		  ;; Move into recursive objects/elements.
+		  (mapc walk-data (org-element-contents data))))))))
+    ;; Main call.
+    (funcall walk-data data)
     ;; Return value.
     ignore))
 
