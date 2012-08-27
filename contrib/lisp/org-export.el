@@ -488,16 +488,16 @@ This option can also be set with the #+SELECT_TAGS: keyword."
   :type '(repeat (string :tag "Tag")))
 
 (defcustom org-export-with-special-strings t
-  "Non-nil means interpret \"\-\", \"--\" and \"---\" for export.
+  "Non-nil means interpret \"\\-\", \"--\" and \"---\" for export.
 
 When this option is turned on, these strings will be exported as:
 
-  Org     HTML     LaTeX
- -----+----------+--------
-  \\-    &shy;      \\-
-  --    &ndash;    --
-  ---   &mdash;    ---
-  ...   &hellip;   \ldots
+   Org     HTML     LaTeX    UTF-8
+  -----+----------+--------+-------
+   \\-    &shy;      \\-
+   --    &ndash;    --         –
+   ---   &mdash;    ---        —
+   ...   &hellip;   \\ldots     …
 
 This option can also be set with the #+OPTIONS line,
 e.g. \"-:nil\"."

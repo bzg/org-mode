@@ -1885,33 +1885,36 @@ contextual information."
   "Transcode a TEXT string from Org to LaTeX.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  ;; Protect %, #, &, $, ~, ^, _,  { and }.
-  (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}~^_]\\)" text)
-    (setq text
-	  (replace-match (format "\\%s" (match-string 2 text)) nil t text 2)))
-  ;; Protect \
-  (setq text (replace-regexp-in-string
-	      "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%$#&{}~^_\\]\\|$\\)"
-	      "$\\backslash$" text nil t 1))
-  ;; LaTeX into \LaTeX{} and TeX into \TeX{}.
-  (let ((case-fold-search nil)
-	(start 0))
-    (while (string-match "\\<\\(\\(?:La\\)?TeX\\)\\>" text start)
-      (setq text (replace-match
-		  (format "\\%s{}" (match-string 1 text)) nil t text)
-	    start (match-end 0))))
-  ;; Handle quotation marks
-  (setq text (org-e-latex--quotation-marks text info))
-  ;; Convert special strings.
-  (when (plist-get info :with-special-strings)
-    (while (string-match (regexp-quote "...") text)
-      (setq text (replace-match "\\ldots{}" nil t text))))
-  ;; Handle break preservation if required.
-  (when (plist-get info :preserve-breaks)
-    (setq text (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n"
-					 text)))
-  ;; Return value.
-  text)
+  (let ((specialp (plist-get info :with-special-strings)))
+    ;; Protect %, #, &, $, ~, ^, _,  { and }.
+    (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}~^_]\\)" text)
+      (setq text
+	    (replace-match (format "\\%s" (match-string 2 text)) nil t text 2)))
+    ;; Protect \.  If special strings are used, be careful not to
+    ;; protect "\" in "\-" constructs.
+    (let ((symbols (if specialp "-%$#&{}~^_\\" "%$#&{}~^_\\")))
+      (setq text
+	    (replace-regexp-in-string
+	     (format "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%s]\\|$\\)" symbols)
+	     "$\\backslash$" text nil t 1)))
+    ;; LaTeX into \LaTeX{} and TeX into \TeX{}.
+    (let ((case-fold-search nil)
+	  (start 0))
+      (while (string-match "\\<\\(\\(?:La\\)?TeX\\)\\>" text start)
+	(setq text (replace-match
+		    (format "\\%s{}" (match-string 1 text)) nil t text)
+	      start (match-end 0))))
+    ;; Handle quotation marks.
+    (setq text (org-e-latex--quotation-marks text info))
+    ;; Convert special strings.
+    (when specialp
+      (setq text (replace-regexp-in-string "\\.\\.\\." "\\ldots{}" text nil t)))
+    ;; Handle break preservation if required.
+    (when (plist-get info :preserve-breaks)
+      (setq text (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n"
+					   text)))
+    ;; Return value.
+    text))
 
 
 ;;;; Planning
