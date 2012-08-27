@@ -257,7 +257,7 @@ but before any resource and task declarations."
   '(account start note duration endbuffer endcredit end
 	    flags journalentry length limits maxend maxstart minend
 	    minstart period reference responsible scheduling
-	    startbuffer startcredit statusnote)
+	    startbuffer startcredit statusnote chargeset charge)
   "Valid attributes for Taskjuggler tasks. If one of these
   appears as a property for a headline, it will be exported with
   the corresponding task."
