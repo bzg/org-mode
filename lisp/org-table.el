@@ -112,7 +112,7 @@ table, obtained by prompting the user."
   :type 'string)
 
 (defcustom org-table-number-regexp
-  "^\\([<>]?[-+^.,0-9]*[0-9][-+^.,0-9eEdDx()%:]*\\|\\(0[xX]\\)[0-9a-fA-F]+\\|nan\\)$"
+  "^\\([<>]?[-+^.0-9]*[0-9][-+^.0-9eEdDx()%:]*\\|\\(0[xX]\\)[0-9a-fA-F]+\\|nan\\)$"
   "Regular expression for recognizing numbers in table columns.
 If a table column contains mostly numbers, it will be aligned to the
 right.  If not, it will be aligned to the left.
@@ -121,8 +121,7 @@ The default value of this option is a regular expression which allows
 anything which looks remotely like a number as used in scientific
 context.  For example, all of the following will be considered a
 number:
-
-   12    12.2   12,2   2.4e-08   2x10^12   4.034+-0.02   2.7(10)   >3.5
+    12    12.2    2.4e-08    2x10^12    4.034+-0.02    2.7(10)  >3.5
 
 Other options offered by the customize interface are more restrictive."
   :group 'org-table-settings
@@ -132,14 +131,16 @@ Other options offered by the customize interface are more restrictive."
 	  (const :tag "Integers"
 		 "^[-+]?[0-9]+$")
 	  (const :tag "Floating Point Numbers"
-		 "^[-+]?\\([0-9]*[.,][0-9]+\\|[0-9]+[.,][0-9]*\\)$")
+		 "^[-+]?\\([0-9]*\\.[0-9]+\\|[0-9]+\\.[0-9]*\\)$")
 	  (const :tag "Floating Point Number or Integer"
-		 "^[-+]?\\([0-9]*[.,][0-9]+\\|[0-9]+[.,]?[0-9]*\\)$")
+		 "^[-+]?\\([0-9]*\\.[0-9]+\\|[0-9]+\\.?[0-9]*\\)$")
 	  (const :tag "Exponential, Floating point, Integer"
-		 "^[-+]?[0-9.,]+\\([eEdD][-+0-9]+\\)?$")
+		 "^[-+]?[0-9.]+\\([eEdD][-+0-9]+\\)?$")
 	  (const :tag "Very General Number-Like, including hex"
-		 "^\\([<>]?[-+^.,0-9]*[0-9][-+^.,0-9eEdDx()%]*\\|\\(0[xX]\\)[0-9a-fA-F]+\\|nan\\)$")
-	  (regexp :tag "Regexp:")))
+		 "^\\([<>]?[-+^.0-9]*[0-9][-+^.0-9eEdDx()%]*\\|\\(0[xX]\\)[0-9a-fA-F]+\\|nan\\)$")
+	  (const :tag "Very General Number-Like, including hex, allows comma as decimal mark"
+		 "^\\([<>]?[-+^.,0-9]*[0-9][-+^.0-9eEdDx()%]*\\|\\(0[xX]\\)[0-9a-fA-F]+\\|nan\\)$")
+	  (string :tag "Regexp:")))
 
 (defcustom org-table-number-fraction 0.5
   "Fraction of numbers in a column required to make the column align right.
