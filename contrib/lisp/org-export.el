@@ -2449,7 +2449,7 @@ specified filters, if any, are called first."
   (catch 'exit
     (dolist (filter filters value)
       (let ((result (funcall filter value (plist-get info :back-end) info)))
-	(cond ((not value))
+	(cond ((not result) value)
 	      ((equal value "") (throw 'exit nil))
 	      (t (setq value result)))))))
 
