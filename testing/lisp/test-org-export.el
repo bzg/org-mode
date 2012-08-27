@@ -65,14 +65,16 @@ already filled in `info'."
    (equal
     (org-export--parse-option-keyword
      "H:1 num:t \\n:t timestamp:t arch:t author:t creator:t d:t email:t
- *:t e:t ::t f:t pri:t -:t ^:t toc:t |:t tags:t tasks:t <:t todo:t inline:nil")
+ *:t e:t ::t f:t pri:t -:t ^:t toc:t |:t tags:t tasks:t <:t todo:t inline:nil
+ stat:t")
     '(:headline-levels
       1 :preserve-breaks t :section-numbers t :time-stamp-file t
       :with-archived-trees t :with-author t :with-creator t :with-drawers t
       :with-email t :with-emphasize t :with-entities t :with-fixed-width t
       :with-footnotes t :with-inlinetasks nil :with-priority t
-      :with-special-strings t :with-sub-superscript t :with-toc t :with-tables t
-      :with-tags t :with-tasks t :with-timestamps t :with-todo-keywords t)))
+      :with-special-strings t :with-statistics-cookies t :with-sub-superscript t
+      :with-toc t :with-tables t :with-tags t :with-tasks t :with-timestamps t
+      :with-todo-keywords t)))
   ;; Test some special values.
   (should
    (equal
@@ -282,7 +284,14 @@ Paragraph"
 	    "*************** Task\nContents\n*************** END"
 	  (org-test-with-backend test
 	    (org-export-as 'test nil nil nil '(:with-inlinetasks nil)))))
-      ""))))
+      "")))
+  ;; Statistics cookies.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "[0/0]"
+	    (org-test-with-backend test
+	      (org-export-as
+	       'test nil nil nil '(:with-statistics-cookies nil)))))))
 
 (ert-deftest test-org-export/comment-tree ()
   "Test if export process ignores commented trees."

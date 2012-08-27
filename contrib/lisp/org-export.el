@@ -142,6 +142,7 @@
     (:with-plannings nil "p" org-export-with-planning)
     (:with-priority nil "pri" org-export-with-priority)
     (:with-special-strings nil "-" org-export-with-special-strings)
+    (:with-statistics-cookies nil "stat" org-export-with-statistics-cookies)
     (:with-sub-superscript nil "^" org-export-with-sub-superscripts)
     (:with-toc nil "toc" org-export-with-toc)
     (:with-tables nil "|" org-export-with-tables)
@@ -501,6 +502,13 @@ When this option is turned on, these strings will be exported as:
 
 This option can also be set with the #+OPTIONS line,
 e.g. \"-:nil\"."
+  :group 'org-export-general
+  :type 'boolean)
+
+(defcustom org-export-with-statistics-cookies t
+  "Non-nil means include statistics cookies in export.
+This option can also be set with the #+OPTIONS: line,
+e.g. \"stat:nil\""
   :group 'org-export-general
   :type 'boolean)
 
@@ -1796,7 +1804,12 @@ OPTIONS is the plist holding export options.  SELECTED, when
 non-nil, is a list of headlines belonging to a tree with a select
 tag."
   (case (org-element-type blob)
-    ;; Check headline.
+    (clock (not (plist-get options :with-clocks)))
+    (drawer
+     (or (not (plist-get options :with-drawers))
+	 (and (consp (plist-get options :with-drawers))
+	      (not (member (org-element-property :drawer-name blob)
+			   (plist-get options :with-drawers))))))
     (headline
      (let ((with-tasks (plist-get options :with-tasks))
 	   (todo (org-element-property :todo-keyword blob))
@@ -1820,9 +1833,14 @@ tag."
 		 (and (memq with-tasks '(todo done))
 		      (not (eq todo-type with-tasks)))
 		 (and (consp with-tasks) (not (member todo with-tasks))))))))
-    ;; Check inlinetask.
     (inlinetask (not (plist-get options :with-inlinetasks)))
-    ;; Check timestamp.
+    (planning (not (plist-get options :with-plannings)))
+    (statistics-cookie (not (plist-get options :with-statistics-cookies)))
+    (table-cell
+     (and (org-export-table-has-special-column-p
+	   (org-export-get-parent-table blob))
+	  (not (org-export-get-previous-element blob options))))
+    (table-row (org-export-table-row-is-special-p blob options))
     (timestamp
      (case (plist-get options :with-timestamps)
        ;; No timestamp allowed.
@@ -1836,24 +1854,7 @@ tag."
        ;; inactive.
        (inactive
 	(not (memq (org-element-property :type blob)
-		   '(inactive inactive-range))))))
-    ;; Check drawer.
-    (drawer
-     (or (not (plist-get options :with-drawers))
-	 (and (consp (plist-get options :with-drawers))
-	      (not (member (org-element-property :drawer-name blob)
-			   (plist-get options :with-drawers))))))
-    ;; Check table-row.
-    (table-row (org-export-table-row-is-special-p blob options))
-    ;; Check table-cell.
-    (table-cell
-     (and (org-export-table-has-special-column-p
-	   (org-export-get-parent-table blob))
-	  (not (org-export-get-previous-element blob options))))
-    ;; Check clock.
-    (clock (not (plist-get options :with-clocks)))
-    ;; Check planning.
-    (planning (not (plist-get options :with-plannings)))))
+		   '(inactive inactive-range))))))))
 
 
 
