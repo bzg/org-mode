@@ -3366,6 +3366,7 @@ generating a new one."
 	;; Popup existing buffer
 	(org-prepare-agenda-window (get-buffer org-agenda-buffer-name))
 	(message "Sticky Agenda buffer, use `r' to refresh")
+	(or org-agenda-multi (org-fit-agenda-window))
 	(throw 'exit nil))
     (setq org-todo-keywords-for-agenda nil)
     (setq org-drawers-for-agenda nil)
