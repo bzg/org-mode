@@ -2460,6 +2460,12 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(setq ans (org-agenda-get-restriction-and-command prefix-descriptions)
 	      keys (car ans)
 	      restriction (cdr ans)))
+      ;; If we have sticky agenda buffers, set a name for the buffer,
+      ;; depending on the invoking keys.  The user may still set this
+      ;; as a command option, which will overwrite what we do here.
+      (if org-agenda-sticky
+	  (setq org-agenda-buffer-name
+		(format "*Org Agenda(%s)*" keys)))
       ;; Establish the restriction, if any
       (when (and (not org-agenda-overriding-restriction) restriction)
 	(put 'org-agenda-files 'org-restrict (list bfn))
@@ -2483,9 +2489,6 @@ Pressing `<' twice means to restrict to the current subtree or region
 	    (progn
 	      (setq type (nth 2 entry) match (eval (nth 3 entry))
 		    lprops (nth 4 entry))
-	      ;; If we have sticky agenda buffers, set a name for the buffer,
-	      ;; depending on the invoking keys.  The user may still set this
-	      ;; as a command option, which will overwrite what we do here.
 	      (if org-agenda-sticky
 		  (setq org-agenda-buffer-name
 			(or (and (stringp match) (format "*Org Agenda(%s:%s)*" keys match))
@@ -3874,7 +3877,7 @@ given in `org-agenda-start-on-weekday'."
 		     (format "*Org Agenda(%s:%s)*" keys match))
 		    (keys
 		     (format "*Org Agenda(%s)*" keys))
-		    (t (format "*Org Agenda(a)*")))))
+		    (t "*Org Agenda(a)*"))))
     (org-agenda-prepare "Day/Week")
     (setq start-day (or start-day org-agenda-start-day))
     (if org-agenda-overriding-arguments
