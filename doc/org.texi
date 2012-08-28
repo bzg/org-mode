@@ -7422,7 +7422,8 @@ is always up to date.  If you switch between views often and the build time
 bothers you, you can turn on sticky agenda buffers (make this the default by
 customizing the variable @code{org-agenda-sticky}).  With sticky agendas, the
 dispatcher only switches to the selected view, you need to update it by hand
-with @kbd{r} or @kbd{g}.
+with @kbd{r} or @kbd{g}.  You can toggle sticky agenda view any time with
+@code{org-toggle-sticky-agenda}.
 @end table
 
 You can also define custom commands that will be accessible through the
@@ -8584,7 +8585,7 @@ Export a single iCalendar file containing entries from all agenda files.
 This is a globally available command, and also available in the agenda menu.
 
 @tsubheading{Exporting to a file}
-@orgcmd{C-x C-w,org-write-agenda}
+@orgcmd{C-x C-w,org-agenda-write}
 @cindex exporting agenda views
 @cindex agenda views, exporting
 @vindex org-agenda-exporter-settings
@@ -8833,7 +8834,7 @@ a PDF file will also create the postscript file.}, and iCalendar files.  If
 you want to do this only occasionally, use the command
 
 @table @kbd
-@orgcmd{C-x C-w,org-write-agenda}
+@orgcmd{C-x C-w,org-agenda-write}
 @cindex exporting agenda views
 @cindex agenda views, exporting
 @vindex org-agenda-exporter-settings
