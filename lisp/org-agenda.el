@@ -2460,11 +2460,6 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(setq ans (org-agenda-get-restriction-and-command prefix-descriptions)
 	      keys (car ans)
 	      restriction (cdr ans)))
-      ;; If we have sticky agenda buffers, set a name for the buffer,
-      ;; depending on the invoking keys.  The user may still set this
-      ;; as a command option, which will overwrite what we do here.
-      (if org-agenda-sticky
-	  (setq org-agenda-buffer-name (format "*Org Agenda(%s)*" keys)))
       ;; Establish the restriction, if any
       (when (and (not org-agenda-overriding-restriction) restriction)
 	(put 'org-agenda-files 'org-restrict (list bfn))
@@ -2488,6 +2483,13 @@ Pressing `<' twice means to restrict to the current subtree or region
 	    (progn
 	      (setq type (nth 2 entry) match (eval (nth 3 entry))
 		    lprops (nth 4 entry))
+	      ;; If we have sticky agenda buffers, set a name for the buffer,
+	      ;; depending on the invoking keys.  The user may still set this
+	      ;; as a command option, which will overwrite what we do here.
+	      (if org-agenda-sticky
+		  (setq org-agenda-buffer-name
+			(or (and (stringp match) (format "*Org Agenda(%s:%s)*" keys match))
+			    (format "*Org Agenda(%s)*" keys))))
 	      (put 'org-agenda-redo-command 'org-lprops lprops)
 	      (cond
 	       ((eq type 'agenda)
@@ -2962,12 +2964,17 @@ This ensures the export commands can easily use it."
 	(pop-up-frames nil)
 	(dir default-directory)
 	(pars (org-make-parameter-alist parameters))
-	cmd thiscmdkey files opts cmd-or-set bufname)
+	cmd thiscmdkey thiscmdcmd files opts cmd-or-set bufname)
     (save-window-excursion
       (while cmds
 	(setq cmd (pop cmds)
 	      thiscmdkey (car cmd)
-	      bufname (if org-agenda-sticky (format "*Org Agenda(%s)*" thiscmdkey)
+	      thiscmdcmd (cdr cmd)
+	      match (nth 2 thiscmdcmd)
+	      bufname (if org-agenda-sticky
+			  (or (and (stringp match)
+				   (format "*Org Agenda(%s:%s)*" thiscmdkey match))
+			      (format "*Org Agenda(%s)*" thiscmdkey))
 			org-agenda-buffer-name)
 	      cmd-or-set (nth 2 cmd)
 	      opts (nth (if (listp cmd-or-set) 3 4) cmd)
