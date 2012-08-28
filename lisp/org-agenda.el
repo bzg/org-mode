@@ -3376,7 +3376,7 @@ generating a new one."
 	(org-agenda-prepare-window (get-buffer org-agenda-buffer-name))
 	(message "Sticky Agenda buffer, use `r' to refresh")
 	(or org-agenda-multi (org-fit-agenda-window))
-	(throw 'exit nil))
+	(throw 'exit "Sticky Agenda buffer, use `r' to refresh"))
     (setq org-todo-keywords-for-agenda nil)
     (setq org-drawers-for-agenda nil)
     (unless org-agenda-persistent-filter
