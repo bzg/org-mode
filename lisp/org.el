@@ -5064,7 +5064,7 @@ The following commands are available:
      org-display-table 4
      (vconcat (mapcar
 	       (lambda (c) (make-glyph-code c (and (not (stringp org-ellipsis))
-						   org-ellipsis)))
+					      org-ellipsis)))
 	       (if (stringp org-ellipsis) org-ellipsis "..."))))
     (setq buffer-display-table org-display-table))
   (org-set-regexps-and-options)
@@ -5083,18 +5083,15 @@ The following commands are available:
 		'local)
   ;; Check for running clock before killing a buffer
   (org-add-hook 'kill-buffer-hook 'org-check-running-clock nil 'local)
-  ;; Paragraphs and auto-filling
-  (org-set-autofill-regexps)
+  ;; Indentation.
   (org-set-local 'indent-line-function 'org-indent-line)
   (org-set-local 'indent-region-function 'org-indent-region)
+  ;; Initialize radio targets.
   (org-update-radio-target-regexp)
-  ;; Comments
-  (org-set-local 'comment-use-syntax nil)
-  (org-set-local 'comment-start "# ")
-  (org-set-local 'comment-start-skip "^\\s-*#\\(?: \\|$\\)")
-  (org-set-local 'comment-insert-comment-function 'org-insert-comment)
-  (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
-  (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region)
+  ;; Filling and auto-filling.
+  (org-setup-filling)
+  ;; Comments.
+  (org-setup-comments-handling)
   ;; Beginning/end of defun
   (org-set-local 'beginning-of-defun-function 'org-back-to-heading)
   (org-set-local 'end-of-defun-function (lambda () (interactive) (org-end-of-subtree nil t)))
@@ -20986,12 +20983,21 @@ hierarchy of headlines by UP levels before marking the subtree."
 
 ;;; Filling
 
-;; We use our own fill-paragraph and auto-fill functions.  These
-;; functions will shadow `fill-prefix' (computed internally with
-;; `org-adaptive-fill-function') and pass through to
-;; `fill-region-as-paragraph' and `do-auto-fill' as appropriate.
+;; We use our own fill-paragraph and auto-fill functions.
 
-(defun org-set-autofill-regexps ()
+;; `org-fill-paragraph' relies on adaptive filling and context
+;; checking.  Appropriate `fill-prefix' is computed with
+;; `org-adaptive-fill-function'.
+
+;; `org-auto-fill-function' takes care of auto-filling.  It calls
+;; `do-auto-fill' only on valid areas with `fill-prefix' shadowed with
+;; `org-adaptive-fill-function' value.  Internally,
+;; `org-comment-line-break-function' breaks the line.
+
+;; `org-setup-filling' installs filling and auto-filling related
+;; variables during `org-mode' initialization.
+
+(defun org-setup-filling ()
   (interactive)
   ;; Prevent auto-fill from inserting unwanted new items.
   (when (boundp 'fill-nobreak-predicate)
@@ -21194,6 +21200,17 @@ a footnote definition, try to fill the first paragraph within."
       (let ((fill-prefix (org-adaptive-fill-function)))
 	(when fill-prefix (do-auto-fill))))))
 
+(defun org-comment-line-break-function (&optional soft)
+  "Break line at point and indent, continuing comment if within one.
+The inserted newline is marked hard if variable
+`use-hard-newlines' is true, unless optional argument SOFT is
+non-nil."
+  (if soft (insert-and-inherit ?\n) (newline 1))
+  (save-excursion (forward-char -1) (delete-horizontal-space))
+  (delete-horizontal-space)
+  (indent-to-left-margin)
+  (insert-before-markers-and-inherit fill-prefix))
+
 
 ;;; Comments
 
@@ -21206,10 +21223,21 @@ a footnote definition, try to fill the first paragraph within."
 ;; Org still relies on `comment-dwim', but cannot trust
 ;; `comment-only-p'.  So, `comment-region-function' and
 ;; `uncomment-region-function' both point
-;; to`org-comment-or-uncomment-region'.  Also, `org-insert-comment'
-;; takes care of insertion of comments at the beginning of line while
-;; `org-comment-line-break-function' handles auto-filling in
-;; a comment.
+;; to`org-comment-or-uncomment-region'.  Eventually,
+;; `org-insert-comment' takes care of insertion of comments at the
+;; beginning of line.
+
+;; `org-setup-comments-handling' install comments related variables
+;; during `org-mode' initialization.
+
+(defun org-setup-comments-handling ()
+  (interactive)
+  (org-set-local 'comment-use-syntax nil)
+  (org-set-local 'comment-start "# ")
+  (org-set-local 'comment-start-skip "^\\s-*#\\(?: \\|$\\)")
+  (org-set-local 'comment-insert-comment-function 'org-insert-comment)
+  (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
+  (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region))
 
 (defun org-insert-comment ()
   "Insert an empty comment above current line.
@@ -21269,17 +21297,6 @@ contains commented lines.  Otherwise, comment them."
 		(org-move-to-column min-indent t)
 		(insert comment-start))
 	      (forward-line))))))))
-
-(defun org-comment-line-break-function (&optional soft)
-  "Break line at point and indent, continuing comment if within one.
-The inserted newline is marked hard if variable
-`use-hard-newlines' is true, unless optional argument SOFT is
-non-nil."
-  (if soft (insert-and-inherit ?\n) (newline 1))
-  (save-excursion (forward-char -1) (delete-horizontal-space))
-  (delete-horizontal-space)
-  (indent-to-left-margin)
-  (insert-before-markers-and-inherit fill-prefix))
 
 
 ;;; Other stuff.
