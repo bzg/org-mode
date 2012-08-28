@@ -2571,7 +2571,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 This function allows interactive building of block agendas.
 Agenda views are separated by `org-agenda-block-separator'."
   (interactive)
-  (unless (string= (buffer-name) org-agenda-buffer-name)
+  (unless (derived-mode-p 'org-agenda-mode)
     (error "Can only append from within agenda buffer"))
   (let ((org-agenda-multi t))
     (org-agenda)
