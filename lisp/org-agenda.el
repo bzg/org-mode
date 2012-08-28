@@ -1905,7 +1905,7 @@ When nil, `q' will kill the single agenda buffer."
     org-agenda-info
     org-agenda-tag-filter-overlays
     org-agenda-cat-filter-overlays
-    org-pre-agenda-window-conf
+    org-agenda-pre-window-conf
     org-agenda-columns-active
     org-agenda-tag-filter
     org-agenda-category-filter
@@ -3302,7 +3302,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 
 (defvar org-agenda-multi nil)  ; dynamically scoped
 (defvar org-agenda-buffer-name "*Org Agenda*")
-(defvar org-pre-agenda-window-conf nil)
+(defvar org-agenda-pre-window-conf nil)
 (defvar org-agenda-columns-active nil)
 (defvar org-agenda-name nil)
 (defvar org-agenda-tag-filter nil)
@@ -3372,8 +3372,8 @@ generating a new one."
     ;; buffer via elisp link
     (unless (equal (current-buffer) abuf)
       (org-pop-to-buffer-same-window abuf))
-    (setq org-pre-agenda-window-conf
-	  (or org-pre-agenda-window-conf wconf))))
+    (setq org-agenda-pre-window-conf
+	  (or org-agenda-pre-window-conf wconf))))
 
 (defun org-agenda-prepare (&optional name)
   (if (org-agenda-use-sticky-p)
@@ -6535,9 +6535,9 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
     ;; Maybe restore the pre-agenda window configuration.
     (and org-agenda-restore-windows-after-quit
 	 (not (eq org-agenda-window-setup 'other-frame))
-	 org-pre-agenda-window-conf
-	 (set-window-configuration org-pre-agenda-window-conf)
-	 (setq org-pre-agenda-window-conf nil))))
+	 org-agenda-pre-window-conf
+	 (set-window-configuration org-agenda-pre-window-conf)
+	 (setq org-agenda-pre-window-conf nil))))
 
 (defun org-agenda-quit ()
   "Exit agenda by killing agenda buffer or burying it when
@@ -6558,9 +6558,9 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 	    ;; Maybe restore the pre-agenda window configuration.
 	    (and org-agenda-restore-windows-after-quit
 		 (not (eq org-agenda-window-setup 'other-frame))
-		 org-pre-agenda-window-conf
-		 (set-window-configuration org-pre-agenda-window-conf)
-		 (setq org-pre-agenda-window-conf nil))))
+		 org-agenda-pre-window-conf
+		 (set-window-configuration org-agenda-pre-window-conf)
+		 (setq org-agenda-pre-window-conf nil))))
       (org-agenda-Quit))))
 
 (defun org-agenda-exit ()
