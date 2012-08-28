@@ -2782,7 +2782,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 (defvar org-agenda-multi-current-cmd nil)
 (defvar org-agenda-multi-overriding-arguments nil)
 (defun org-agenda-run-series (name series)
-  (org-let (nth 1 series) '(org-prepare-agenda name))
+  (org-let (nth 1 series) '(org-agenda-prepare name))
   ;; We need to reset agenda markers here, because when constructing a
   ;; block agenda, the individual blocks do not do that.
   (org-agenda-reset-markers)
@@ -3345,7 +3345,7 @@ generating a new one."
       ;; does not have org variables local
       org-agenda-this-buffer-is-sticky))))
 
-(defun org-prepare-agenda-window (abuf)
+(defun org-agenda-prepare-window (abuf)
   "Setup agenda buffer in the window."
   (let* ((awin (get-buffer-window abuf))
 	 wconf)
@@ -3369,11 +3369,11 @@ generating a new one."
     (setq org-pre-agenda-window-conf
 	  (or org-pre-agenda-window-conf wconf))))
 
-(defun org-prepare-agenda (&optional name)
+(defun org-agenda-prepare (&optional name)
   (if (org-agenda-use-sticky-p)
       (progn
 	;; Popup existing buffer
-	(org-prepare-agenda-window (get-buffer org-agenda-buffer-name))
+	(org-agenda-prepare-window (get-buffer org-agenda-buffer-name))
 	(message "Sticky Agenda buffer, use `r' to refresh")
 	(or org-agenda-multi (org-fit-agenda-window))
 	(throw 'exit nil))
@@ -3402,7 +3402,7 @@ generating a new one."
 
       ;; Setting any org variables that are in org-agenda-local-vars
       ;; list need to be done after the prepare call
-      (org-prepare-agenda-window (get-buffer-create org-agenda-buffer-name))
+      (org-agenda-prepare-window (get-buffer-create org-agenda-buffer-name))
       (setq buffer-read-only nil)
       (org-agenda-reset-markers)
       (let ((inhibit-read-only t)) (erase-buffer))
@@ -3410,7 +3410,7 @@ generating a new one."
       (setq org-agenda-buffer (current-buffer))
       (setq org-agenda-contributing-files nil)
       (setq org-agenda-columns-active nil)
-      (org-prepare-agenda-buffers (org-agenda-files nil 'ifmode))
+      (org-agenda-prepare-buffers (org-agenda-files nil 'ifmode))
       (setq org-todo-keywords-for-agenda
 	    (org-uniquify org-todo-keywords-for-agenda))
       (setq org-done-keywords-for-agenda
@@ -3709,7 +3709,7 @@ dates."
 	(setq day-numbers (delq nil (mapcar (lambda(x)
 					      (if (>= x today) x nil))
 					    day-numbers))))
-    (org-prepare-agenda (concat "Timeline " (file-name-nondirectory entry)))
+    (org-agenda-prepare (concat "Timeline " (file-name-nondirectory entry)))
     (org-compile-prefix-format 'timeline)
     (org-set-sorting-strategy 'timeline)
     (if org-agenda-show-log-scoped (push :closed args))
@@ -3867,7 +3867,7 @@ given in `org-agenda-start-on-weekday'."
   (interactive "P")
   (if (and (integerp arg) (> arg 0))
       (setq span arg arg nil))
-  (org-prepare-agenda "Day/Week")
+  (org-agenda-prepare "Day/Week")
   (setq start-day (or start-day org-agenda-start-day))
   (if org-agenda-overriding-arguments
       (setq arg (car org-agenda-overriding-arguments)
@@ -4120,7 +4120,7 @@ as a whole, to include whitespace.
 This command searches the agenda files, and in addition the files listed
 in `org-agenda-text-search-extra-files'."
   (interactive "P")
-  (org-prepare-agenda "SEARCH")
+  (org-agenda-prepare "SEARCH")
   (org-compile-prefix-format 'search)
   (org-set-sorting-strategy 'search)
   (let* ((props (list 'face nil
@@ -4331,7 +4331,7 @@ the list to these.  When using \\[universal-argument], you will be prompted
 for a keyword.  A numeric prefix directly selects the Nth keyword in
 `org-todo-keywords-1'."
   (interactive "P")
-  (org-prepare-agenda "TODO")
+  (org-agenda-prepare "TODO")
   (org-compile-prefix-format 'todo)
   (org-set-sorting-strategy 'todo)
   (if (and (stringp arg) (not (string-match "\\S-" arg))) (setq arg nil))
@@ -4409,7 +4409,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
       (setq match nil))
     (setq matcher (org-make-tags-matcher match)
 	  match (car matcher) matcher (cdr matcher))
-    (org-prepare-agenda (concat "TAGS " match))
+    (org-agenda-prepare (concat "TAGS " match))
     (org-compile-prefix-format 'tags)
     (org-set-sorting-strategy 'tags)
     (setq org-agenda-query-string match)
@@ -4657,7 +4657,7 @@ of what a project is and how to check if it stuck, customize the variable
 	 (todo (nth 1 org-stuck-projects))
 	 (todo-wds (if (member "*" todo)
 		       (progn
-			 (org-prepare-agenda-buffers (org-agenda-files
+			 (org-agenda-prepare-buffers (org-agenda-files
 						      nil 'ifmode))
 			 (org-delete-all
 			  org-done-keywords-for-agenda
@@ -4862,7 +4862,7 @@ function from a program - use `org-agenda-get-day-entries' instead."
 	      (> (- time
 		    org-diary-last-run-time)
 		 3))
-      (org-prepare-agenda-buffers files))
+      (org-agenda-prepare-buffers files))
     (setq org-diary-last-run-time time)
     ;; If this is called during org-agenda, don't return any entries to
     ;; the calendar.  Org Agenda will list these entries itself.
@@ -9164,7 +9164,7 @@ to override `appt-message-warning-time'."
 	 (files (org-agenda-files 'unrestricted)) entries file
 	 (org-agenda-buffer nil))
     ;; Get all entries which may contain an appt
-    (org-prepare-agenda-buffers files)
+    (org-agenda-prepare-buffers files)
     (while (setq file (pop files))
       (setq entries
 	    (delq nil

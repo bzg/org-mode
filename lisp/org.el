@@ -13326,7 +13326,7 @@ MATCH can contain positive and negative selection of tags, like
 If optional argument TODO-ONLY is non-nil, only select lines that are
 also TODO lines."
   (interactive "P")
-  (org-prepare-agenda-buffers (list (current-buffer)))
+  (org-agenda-prepare-buffers (list (current-buffer)))
   (org-scan-tags 'sparse-tree (cdr (org-make-tags-matcher match)) todo-only))
 
 (defalias 'org-tags-sparse-tree 'org-match-sparse-tree)
@@ -14259,7 +14259,7 @@ a *different* entry, you cannot use these techniques."
 
 	  (if (not scope)
 	      (progn
-		(org-prepare-agenda-buffers
+		(org-agenda-prepare-buffers
 		 (list (buffer-file-name (current-buffer))))
 		(setq res (org-scan-tags func matcher todo-only start-level)))
 	    ;; Get the right scope
@@ -14275,7 +14275,7 @@ a *different* entry, you cannot use these techniques."
 	      (setq scope (list (buffer-file-name))))
 	     ((eq scope 'file-with-archives)
 	      (setq scope (org-add-archive-files (list (buffer-file-name))))))
-	    (org-prepare-agenda-buffers scope)
+	    (org-agenda-prepare-buffers scope)
 	    (while (setq file (pop scope))
 	      (with-current-buffer (org-find-base-buffer-visiting file)
 		(save-excursion
@@ -17060,7 +17060,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	(with-current-buffer buf (save-buffer)))
       (kill-buffer buf))))
 
-(defun org-prepare-agenda-buffers (files)
+(defun org-agenda-prepare-buffers (files)
   "Create buffers for all agenda files, protect archived trees and comments."
   (interactive)
   (let ((pa '(:org-archived t))
