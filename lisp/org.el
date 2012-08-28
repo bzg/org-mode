@@ -5064,7 +5064,7 @@ The following commands are available:
      org-display-table 4
      (vconcat (mapcar
 	       (lambda (c) (make-glyph-code c (and (not (stringp org-ellipsis))
-						   org-ellipsis)))
+					      org-ellipsis)))
 	       (if (stringp org-ellipsis) org-ellipsis "..."))))
     (setq buffer-display-table org-display-table))
   (org-set-regexps-and-options)
@@ -5083,18 +5083,15 @@ The following commands are available:
 		'local)
   ;; Check for running clock before killing a buffer
   (org-add-hook 'kill-buffer-hook 'org-check-running-clock nil 'local)
-  ;; Paragraphs and auto-filling
-  (org-set-autofill-regexps)
+  ;; Indentation.
   (org-set-local 'indent-line-function 'org-indent-line)
   (org-set-local 'indent-region-function 'org-indent-region)
+  ;; Initialize radio targets.
   (org-update-radio-target-regexp)
-  ;; Comments
-  (org-set-local 'comment-use-syntax nil)
-  (org-set-local 'comment-start "# ")
-  (org-set-local 'comment-start-skip "^\\s-*#\\(?: \\|$\\)")
-  (org-set-local 'comment-insert-comment-function 'org-insert-comment)
-  (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
-  (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region)
+  ;; Filling and auto-filling.
+  (org-setup-filling)
+  ;; Comments.
+  (org-setup-comments-handling)
   ;; Beginning/end of defun
   (org-set-local 'beginning-of-defun-function 'org-back-to-heading)
   (org-set-local 'end-of-defun-function (lambda () (interactive) (org-end-of-subtree nil t)))
@@ -20986,14 +20983,22 @@ hierarchy of headlines by UP levels before marking the subtree."
 
 ;;; Filling
 
-;; We use our own fill-paragraph and auto-fill functions.  These
-;; functions will shadow `fill-prefix' (computed internally with
-;; `org-fill-context-prefix') and pass through to
-;; `fill-region-as-paragraph' and `do-auto-fill' as appropriate.
+;; We use our own fill-paragraph and auto-fill functions.
 
-(defun org-set-autofill-regexps ()
+;; `org-fill-paragraph' relies on adaptive filling and context
+;; checking.  Appropriate `fill-prefix' is computed with
+;; `org-adaptive-fill-function'.
+
+;; `org-auto-fill-function' takes care of auto-filling.  It calls
+;; `do-auto-fill' only on valid areas with `fill-prefix' shadowed with
+;; `org-adaptive-fill-function' value.  Internally,
+;; `org-comment-line-break-function' breaks the line.
+
+;; `org-setup-filling' installs filling and auto-filling related
+;; variables during `org-mode' initialization.
+
+(defun org-setup-filling ()
   (interactive)
-  (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
   ;; Prevent auto-fill from inserting unwanted new items.
   (when (boundp 'fill-nobreak-predicate)
     (org-set-local
@@ -21002,6 +21007,8 @@ hierarchy of headlines by UP levels before marking the subtree."
       (append fill-nobreak-predicate
 	      '(org-fill-paragraph-separate-nobreak-p
 		org-fill-line-break-nobreak-p)))))
+  (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
+  (org-set-local 'adaptive-fill-function 'org-adaptive-fill-function)
   (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
   (org-set-local 'comment-line-break-function 'org-comment-line-break-function)
   (org-set-local 'align-mode-rules-list
@@ -21023,19 +21030,19 @@ hierarchy of headlines by UP levels before marking the subtree."
 
 (declare-function message-in-body-p "message" ())
 (defvar org-element--affiliated-re) ; From org-element.el
-(defun org-fill-context-prefix (p)
-  "Compute a fill prefix for the line at point P.
+(defun org-adaptive-fill-function ()
+  "Compute a fill prefix for the current line.
 Return fill prefix, as a string, or nil if current line isn't
 meant to be filled."
   (org-with-wide-buffer
    (unless (and (derived-mode-p 'message-mode) (not (message-in-body-p)))
      ;; FIXME: This is really the job of orgstruct++-mode
-     (goto-char p)
-     (beginning-of-line)
-     (let* ((element (org-element-at-point))
+     (let* ((p (line-beginning-position))
+	    (element (save-excursion (beginning-of-line)
+				     (org-element-at-point)))
 	    (type (org-element-type element))
 	    (post-affiliated
-	     (progn
+	     (save-excursion
 	       (goto-char (org-element-property :begin element))
 	       (while (looking-at org-element--affiliated-re) (forward-line))
 	       (point))))
@@ -21053,7 +21060,7 @@ meant to be filled."
 		     (make-string (org-list-item-body-column
 				   (org-element-property :begin parent))
 				  ? ))
-		    ((looking-at "\\s-+") (match-string 0))
+		    ((looking-at "[ \t]*") (match-string 0))
 		    (t  ""))))
 	   (comment-block
 	    ;; Only fill contents if P is within block boundaries.
@@ -21065,7 +21072,7 @@ meant to be filled."
 			   (skip-chars-backward " \r\t\n")
 			   (line-beginning-position))))
 	      (when (and (>= p cbeg) (< p cend))
-		(if (looking-at "\\s-+") (match-string 0) ""))))))))))
+		(if (looking-at "[ \t]*") (match-string 0) ""))))))))))
 
 (declare-function message-goto-body "message" ())
 (defvar message-cite-prefix-regexp)	; From message.el
@@ -21099,12 +21106,12 @@ a footnote definition, try to fill the first paragraph within."
 	     (cadadr (assoc 'paragraph-separate org-fb-vars))))
 	(fill-paragraph))
     (save-excursion
-      ;; Move to end of line in order to get the first paragraph within
-      ;; a plain list or a footnote definition.
+      ;; Move to end of line in order to get the first paragraph
+      ;; within a plain list or a footnote definition.
       (end-of-line)
       (let ((element (org-element-at-point)))
-	;; First check if point is in a blank line at the beginning of the
-	;; buffer.  In that case, ignore filling.
+	;; First check if point is in a blank line at the beginning of
+	;; the buffer.  In that case, ignore filling.
 	(if (< (point) (org-element-property :begin element)) t
 	  (case (org-element-type element)
 	    ;; Align Org tables, leave table.el tables as-is.
@@ -21113,8 +21120,8 @@ a footnote definition, try to fill the first paragraph within."
 	     (when (eq (org-element-property :type element) 'org)
 	       (org-table-align))
 	     t)
-	    ;; Elements that may contain `line-break' type objects.
 	    (paragraph
+	     ;; Paragraphs may contain `line-break' type objects.
 	     (let ((beg (max (point-min)
 			     (org-element-property :contents-begin element)))
 		   (end (min (point-max)
@@ -21131,20 +21138,20 @@ a footnote definition, try to fill the first paragraph within."
 			   (re-search-forward
 			    (concat "^" message-cite-prefix-regexp) end t))
 		     (setq end (match-beginning 0))))
-		 ;; Fill paragraph, taking line breaks into consideration.
-		 ;; For that, slice the paragraph using line breaks as
-		 ;; separators, and fill the parts in reverse order to
-		 ;; avoid messing with markers.
+		 ;; Fill paragraph, taking line breaks into
+		 ;; consideration.  For that, slice the paragraph
+		 ;; using line breaks as separators, and fill the
+		 ;; parts in reverse order to avoid messing with
+		 ;; markers.
 		 (save-excursion
 		   (goto-char end)
 		   (mapc
 		    (lambda (pos)
-		      (let ((fill-prefix (org-fill-context-prefix pos)))
-			(fill-region-as-paragraph pos (point) justify))
+		      (fill-region-as-paragraph pos (point) justify)
 		      (goto-char pos))
-		    ;; Find the list of ending positions for line breaks
-		    ;; in the current paragraph.  Add paragraph beginning
-		    ;; to include first slice.
+		    ;; Find the list of ending positions for line
+		    ;; breaks in the current paragraph.  Add paragraph
+		    ;; beginning to include first slice.
 		    (nreverse
 		     (cons
 		      beg
@@ -21154,93 +21161,44 @@ a footnote definition, try to fill the first paragraph within."
 		       'line-break
 		       (lambda (lb) (org-element-property :end lb)))))))
 		 t)))
-	    ;; Contents of `comment-block' type elements should be filled as
-	    ;; plain text.
+	    ;; Contents of `comment-block' type elements should be
+	    ;; filled as plain text, but only if point is within block
+	    ;; markers.
 	    (comment-block
-	     (let ((fill-prefix (org-fill-context-prefix (point))))
-	       (save-excursion
+	     (let* ((case-fold-search t)
+		    (beg (save-excursion
+			   (goto-char (org-element-property :begin element))
+			   (re-search-forward "^[ \t]*#\\+begin_comment" nil t)
+			   (forward-line)
+			   (point)))
+		    (end (save-excursion
+			   (goto-char (org-element-property :end element))
+			   (re-search-backward "^[ \t]*#\\+end_comment" nil t)
+			   (line-beginning-position))))
+	       (when (and (>= (point) beg) (< (point) end))
 		 (fill-region-as-paragraph
-		  (progn
-		    (goto-char (org-element-property :begin element))
-		    (while (looking-at org-element--affiliated-re)
-		      (forward-line))
-		    (forward-line)
-		    (point))
-		  (progn
-		    (goto-char (org-element-property :end element))
-		    (skip-chars-backward " \r\t\n")
+		  (save-excursion
+		    (end-of-line)
+		    (re-search-backward "^[ \t]*$" beg 'move)
 		    (line-beginning-position))
-		  justify))) t)
-	    ;; Fill comments, indented or not.
-	    (comment
-	     (let ((fill-prefix (org-fill-context-prefix (point))))
-	       (save-excursion
-		 (fill-region-as-paragraph
-		  (progn
-		    (goto-char (org-element-property :begin element))
-		    (while (looking-at org-element--affiliated-re)
-		      (forward-line))
-		    (point))
-		  (progn
-		    (goto-char (org-element-property :end element))
-		    (skip-chars-backward " \r\t\n")
-		    (line-end-position))))))
+		  (save-excursion
+		    (beginning-of-line)
+		    (re-search-forward "^[ \t]*$" end 'move)
+		    (line-beginning-position))
+		  justify)))
+	     t)
+	    ;; Fill comments.
+	    (comment (fill-comment-paragraph justify))
 	    ;; Ignore every other element.
 	    (otherwise t)))))))
 
 (defun org-auto-fill-function ()
   "Auto-fill function."
-  ;; Check if auto-filling is meaningful before computing fill prefix.
+  ;; Check if auto-filling is meaningful.
   (let ((fc (current-fill-column)))
     (when (and fc (> (current-column) fc))
-      (let ((fill-prefix (org-fill-context-prefix (point))))
+      (let ((fill-prefix (org-adaptive-fill-function)))
 	(when fill-prefix (do-auto-fill))))))
-
-
-;;; Comments
-
-;; We control comments everywhere.  `org-comment-or-uncomment-region'
-;; and `org-insert-comment' takes care of `comment-dwim' behaviour
-;; while `org-comment-line-break-function' handles auto-filling in
-;; a comment.
-
-(defun org-insert-comment ()
-  "Insert an empty comment above current line.
-If the line is empty, insert comment at its beginning."
-  (beginning-of-line)
-  (if (looking-at "\\s-*$") (replace-match "") (open-line 1))
-  (org-indent-line)
-  (insert "# "))
-
-(defun org-comment-or-uncomment-region (beg end &rest ignore)
-  "Comment or uncomment each non-blank line in the region.
-Uncomment each non-blank line between BEG and END if it only
-contains commented lines.  Otherwise, comment them."
-  (save-excursion
-    (goto-char beg)
-    (skip-chars-forward " \r\t\n" end)
-    (beginning-of-line)
-    (let ((uncommentp
-           ;; UNCOMMENTP is non-nil when every non blank line between
-           ;; BEG and END is a comment.
-           (save-excursion
-             (while (progn (and (not (eobp))
-				(let ((element (org-element-at-point)))
-				  (and (eq (org-element-type element) 'comment)
-				       (goto-char (org-element-property
-						   :end element)))))))
-             (>= (point) end)))
-          ;; Remove or adding comment markers is going to change end
-          ;; position so make it a marker.
-          (end (copy-marker end)))
-      (while (< (point) end)
-        (unless (looking-at "\\s-*$")
-          (if (not uncommentp) (progn (back-to-indentation) (insert "# "))
-            ;; Only comments and blank lines in region: uncomment it.
-            (looking-at "[ \t]*\\(# ?\\)")
-            (replace-match "" nil nil nil 1)))
-        (forward-line))
-      (set-marker end nil))))
 
 (defun org-comment-line-break-function (&optional soft)
   "Break line at point and indent, continuing comment if within one.
@@ -21252,6 +21210,93 @@ non-nil."
   (delete-horizontal-space)
   (indent-to-left-margin)
   (insert-before-markers-and-inherit fill-prefix))
+
+
+;;; Comments
+
+;; Org comments syntax is quite complex.  It requires the entire line
+;; to be just a comment.  Also, even with the right syntax at the
+;; beginning of line, some some elements (i.e. verse-block or
+;; example-block) don't accept comments.  Usual Emacs comment commands
+;; cannot cope with those requirements.  Therefore, Org replaces them.
+
+;; Org still relies on `comment-dwim', but cannot trust
+;; `comment-only-p'.  So, `comment-region-function' and
+;; `uncomment-region-function' both point
+;; to`org-comment-or-uncomment-region'.  Eventually,
+;; `org-insert-comment' takes care of insertion of comments at the
+;; beginning of line.
+
+;; `org-setup-comments-handling' install comments related variables
+;; during `org-mode' initialization.
+
+(defun org-setup-comments-handling ()
+  (interactive)
+  (org-set-local 'comment-use-syntax nil)
+  (org-set-local 'comment-start "# ")
+  (org-set-local 'comment-start-skip "^\\s-*#\\(?: \\|$\\)")
+  (org-set-local 'comment-insert-comment-function 'org-insert-comment)
+  (org-set-local 'comment-region-function 'org-comment-or-uncomment-region)
+  (org-set-local 'uncomment-region-function 'org-comment-or-uncomment-region))
+
+(defun org-insert-comment ()
+  "Insert an empty comment above current line.
+If the line is empty, insert comment at its beginning."
+  (beginning-of-line)
+  (if (looking-at "\\s-*$") (replace-match "") (open-line 1))
+  (org-indent-line)
+  (insert "# "))
+
+(defvar comment-empty-lines)		; From newcomment.el.
+(defun org-comment-or-uncomment-region (beg end &rest ignore)
+  "Comment or uncomment each non-blank line in the region.
+Uncomment each non-blank line between BEG and END if it only
+contains commented lines.  Otherwise, comment them."
+  (save-restriction
+    ;; Restrict region
+    (narrow-to-region (save-excursion (goto-char beg)
+				      (skip-chars-forward " \r\t\n" end)
+				      (line-beginning-position))
+		      (save-excursion (goto-char end)
+				      (skip-chars-backward " \r\t\n" beg)
+				      (line-end-position)))
+    (let ((uncommentp
+	   ;; UNCOMMENTP is non-nil when every non blank line between
+	   ;; BEG and END is a comment.
+	   (save-excursion
+	     (goto-char (point-min))
+	     (while (and (not (eobp))
+			 (let ((element (org-element-at-point)))
+			   (and (eq (org-element-type element) 'comment)
+				(goto-char (min (point-max)
+						(org-element-property
+						 :end element)))))))
+	     (eobp))))
+      (if uncommentp
+	  ;; Only blank lines and comments in region: uncomment it.
+	  (save-excursion
+	    (goto-char (point-min))
+	    (while (not (eobp))
+	      (when (looking-at "[ \t]*\\(#\\(?: \\|$\\)\\)")
+		(replace-match "" nil nil nil 1))
+	      (forward-line)))
+	;; Comment each line in region.
+	(let ((min-indent (point-max)))
+	  ;; First find the minimum indentation across all lines.
+	  (save-excursion
+	    (goto-char (point-min))
+	    (while (and (not (eobp)) (not (zerop min-indent)))
+	      (unless (looking-at "[ \t]*$")
+		(setq min-indent (min min-indent (current-indentation))))
+	      (forward-line)))
+	  ;; Then loop over all lines.
+	  (save-excursion
+	    (goto-char (point-min))
+	    (while (not (eobp))
+	      (unless (and (not comment-empty-lines) (looking-at "[ \t]*$"))
+		(org-move-to-column min-indent t)
+		(insert comment-start))
+	      (forward-line))))))))
 
 
 ;;; Other stuff.
