@@ -2575,7 +2575,8 @@ Agenda views are separated by `org-agenda-block-separator'."
     (error "Can only append from within agenda buffer"))
   (let ((org-agenda-multi t))
     (org-agenda)
-    (widen)))
+    (widen)
+    (org-agenda-fit-window-to-buffer)))
 
 (defun org-agenda-normalize-custom-commands (cmds)
   (delq nil
