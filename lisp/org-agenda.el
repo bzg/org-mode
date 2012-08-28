@@ -4324,7 +4324,7 @@ in `org-agenda-text-search-extra-files'."
 (defvar org-last-arg nil)
 
 ;;;###autoload
-(defun org-todo-list (arg)
+(defun org-todo-list (&optional arg)
   "Show all (not done) TODO entries from all agenda file in a single list.
 The prefix arg can be used to select a specific TODO keyword and limit
 the list to these.  When using \\[universal-argument], you will be prompted
