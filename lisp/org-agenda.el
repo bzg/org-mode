@@ -2396,6 +2396,7 @@ M     Like `m', but select only TODO entries, no ordinary headlines.
 L     Create a timeline for the current buffer.
 e     Export views to associated files.
 s     Search entries for keywords.
+S     Search entries for keywords, only with TODO keywords.
 /     Multi occur across all agenda files and also files listed
       in `org-agenda-text-search-extra-files'.
 <     Restrict agenda commands to buffer, subtree, or region.
@@ -2526,6 +2527,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	(customize-variable 'org-agenda-custom-commands))
        ((equal keys "a") (call-interactively 'org-agenda-list))
        ((equal keys "s") (call-interactively 'org-search-view))
+       ((equal keys "S") (org-call-with-arg 'org-search-view (or arg '(4))))
        ((equal keys "t") (call-interactively 'org-todo-list))
        ((equal keys "T") (org-call-with-arg 'org-todo-list (or arg '(4))))
        ((equal keys "m") (call-interactively 'org-tags-view))
@@ -2601,10 +2603,10 @@ Agenda views are separated by `org-agenda-block-separator'."
 a   Agenda for current week or day      e   Export agenda views
 t   List of all TODO entries            T   Entries with special TODO kwd
 m   Match a TAGS/PROP/TODO query        M   Like m, but only TODO entries
+s   Search for keywords                 S   Like s, but only TODO entries
 L   Timeline for current buffer         #   List stuck projects (!=configure)
-s   Search for keywords                 *   Toggle sticky agenda views
-/   Multi-occur                         ?   Find :FLAGGED: entries
-                                        C   Configure custom agenda commands
+/   Multi-occur                         C   Configure custom agenda commands
+?   Find :FLAGGED: entries              *   Toggle sticky agenda views
 ")
 			(start 0))
 		    (while (string-match
@@ -2761,7 +2763,7 @@ s   Search for keywords                 *   Toggle sticky agenda views
 	   ((eq c ?>)
 	    (org-agenda-remove-restriction-lock 'noupdate)
 	    (setq restriction nil))
-	   ((and (equal selstring "") (memq c '(?s ?a ?t ?m ?L ?C ?e ?T ?M ?# ?! ?/ ??)))
+	   ((and (equal selstring "") (memq c '(?s ?S ?a ?t ?m ?L ?C ?e ?T ?M ?# ?! ?/ ??)))
 	    (throw 'exit (cons (setq selstring (char-to-string c)) restriction)))
            ((and (> (length selstring) 0) (eq c ?\d))
             (delete-window)
