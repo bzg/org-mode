@@ -2213,7 +2213,7 @@ the currently selected interval size."
 	  ;; we collect from several files
 	  (let* ((files scope)
 		 file)
-	    (org-prepare-agenda-buffers files)
+	    (org-agenda-prepare-buffers files)
 	    (while (setq file (pop files))
 	      (with-current-buffer (find-buffer-visiting file)
 		(save-excursion
@@ -2222,7 +2222,7 @@ the currently selected interval size."
 	;; Just from the current file
 	(save-restriction
 	  ;; get the right range into the restriction
-	  (org-prepare-agenda-buffers (list (buffer-file-name)))
+	  (org-agenda-prepare-buffers (list (buffer-file-name)))
 	  (cond
 	   ((not scope))  ; use the restriction as it is now
 	   ((eq scope 'file) (widen))
