@@ -1850,8 +1850,18 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 (defvar org-agenda-force-single-file nil)
 (defvar org-agenda-bulk-marked-entries) ;; Defined further down in this file
 
-
 ;;; Multiple agenda buffers support
+
+(defcustom org-agenda-sticky nil
+  "Non-nil means agenda q key will bury agenda buffers.
+Agenda commands will then show existing buffer instead of generating new ones.
+When nil, `q' will kill the single agenda buffer."
+  :group 'org-agenda
+  :type 'boolean
+  :set (lambda (var val)
+	 (if (boundp var)
+	     (org-toggle-sticky-agenda (if val 1 0))
+	   (set var val))))
 
 ;;;###autoload
 (defun org-toggle-sticky-agenda (&optional arg)
@@ -1869,17 +1879,6 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
       (and (org-called-interactively-p 'interactive)
 	   (message "Sticky agenda was %s"
 		    (if org-agenda-sticky "enabled" "disabled"))))))
-
-(defcustom org-agenda-sticky nil
-  "Non-nil means agenda q key will bury agenda buffers.
-Agenda commands will then show existing buffer instead of generating new ones.
-When nil, `q' will kill the single agenda buffer."
-  :group 'org-agenda
-  :type 'boolean
-  :set (lambda (var val)
-	 (if (boundp var)
-	     (org-toggle-sticky-agenda (if val 1 0))
-	   (set var val))))
 
 (defvar org-agenda-buffer nil
   "Agenda buffer currently being generated.")
@@ -2380,8 +2379,10 @@ duplicates.)"
 				      (regexp))
 				(function :tag "Custom function"))))))
 
+(defvar org-keys)
+(defvar org-match)
 ;;;###autoload
-(defun org-agenda (&optional arg keys restriction)
+(defun org-agenda (&optional arg org-keys restriction)
   "Dispatch agenda commands to collect entries to the agenda buffer.
 Prompts for a command to execute.  Any prefix arg will be passed
 on to the selected command.  The default selections are:
@@ -2441,7 +2442,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 	     org-agenda-custom-commands org-agenda-custom-commands-contexts))
 	   (buf (current-buffer))
 	   (bfn (buffer-file-name (buffer-base-buffer)))
-	   entry key type match lprops ans)
+	   entry key type org-match lprops ans)
       ;; Turn off restriction unless there is an overriding one,
       (unless org-agenda-overriding-restriction
 	(unless (org-bound-and-true-p org-agenda-keep-restricted-file-list)
@@ -2456,16 +2457,16 @@ Pressing `<' twice means to restrict to the current subtree or region
       (put 'org-agenda-redo-command 'last-args nil)
       ;; Remember where this call originated
       (setq org-agenda-last-dispatch-buffer (current-buffer))
-      (unless keys
+      (unless org-keys
 	(setq ans (org-agenda-get-restriction-and-command prefix-descriptions)
-	      keys (car ans)
+	      org-keys (car ans)
 	      restriction (cdr ans)))
       ;; If we have sticky agenda buffers, set a name for the buffer,
       ;; depending on the invoking keys.  The user may still set this
       ;; as a command option, which will overwrite what we do here.
       (if org-agenda-sticky
 	  (setq org-agenda-buffer-name
-		(format "*Org Agenda(%s)*" keys)))
+		(format "*Org Agenda(%s)*" org-keys)))
       ;; Establish the restriction, if any
       (when (and (not org-agenda-overriding-restriction) restriction)
 	(put 'org-agenda-files 'org-restrict (list bfn))
@@ -2484,15 +2485,15 @@ Pressing `<' twice means to restrict to the current subtree or region
 
       ;; For example the todo list should not need it (but does...)
       (cond
-       ((setq entry (assoc keys org-agenda-custom-commands))
+       ((setq entry (assoc org-keys org-agenda-custom-commands))
 	(if (or (symbolp (nth 2 entry)) (functionp (nth 2 entry)))
 	    (progn
-	      (setq type (nth 2 entry) match (eval (nth 3 entry))
+	      (setq type (nth 2 entry) org-match (eval (nth 3 entry))
 		    lprops (nth 4 entry))
 	      (if org-agenda-sticky
 		  (setq org-agenda-buffer-name
-			(or (and (stringp match) (format "*Org Agenda(%s:%s)*" keys match))
-			    (format "*Org Agenda(%s)*" keys))))
+			(or (and (stringp org-match) (format "*Org Agenda(%s:%s)*" org-keys org-match))
+			    (format "*Org Agenda(%s)*" org-keys))))
 	      (put 'org-agenda-redo-command 'org-lprops lprops)
 	      (cond
 	       ((eq type 'agenda)
@@ -2500,45 +2501,45 @@ Pressing `<' twice means to restrict to the current subtree or region
 	       ((eq type 'alltodo)
 		(org-let lprops '(org-todo-list current-prefix-arg)))
 	       ((eq type 'search)
-		(org-let lprops '(org-search-view current-prefix-arg match nil)))
+		(org-let lprops '(org-search-view current-prefix-arg org-match nil)))
 	       ((eq type 'stuck)
 		(org-let lprops '(org-agenda-list-stuck-projects
 				  current-prefix-arg)))
 	       ((eq type 'tags)
-		(org-let lprops '(org-tags-view current-prefix-arg match)))
+		(org-let lprops '(org-tags-view current-prefix-arg org-match)))
 	       ((eq type 'tags-todo)
-		(org-let lprops '(org-tags-view '(4) match)))
+		(org-let lprops '(org-tags-view '(4) org-match)))
 	       ((eq type 'todo)
-		(org-let lprops '(org-todo-list match)))
+		(org-let lprops '(org-todo-list org-match)))
 	       ((eq type 'tags-tree)
 		(org-check-for-org-mode)
-		(org-let lprops '(org-match-sparse-tree current-prefix-arg match)))
+		(org-let lprops '(org-match-sparse-tree current-prefix-arg org-match)))
 	       ((eq type 'todo-tree)
 		(org-check-for-org-mode)
 		(org-let lprops
 		  '(org-occur (concat "^" org-outline-regexp "[ \t]*"
-				      (regexp-quote match) "\\>"))))
+				      (regexp-quote org-match) "\\>"))))
 	       ((eq type 'occur-tree)
 		(org-check-for-org-mode)
-		(org-let lprops '(org-occur match)))
+		(org-let lprops '(org-occur org-match)))
 	       ((functionp type)
-		(org-let lprops '(funcall type match)))
+		(org-let lprops '(funcall type org-match)))
 	       ((fboundp type)
-		(org-let lprops '(funcall type match)))
+		(org-let lprops '(funcall type org-match)))
 	       (t (error "Invalid custom agenda command type %s" type))))
 	  (org-agenda-run-series (nth 1 entry) (cddr entry))))
-       ((equal keys "C")
+       ((equal org-keys "C")
 	(setq org-agenda-custom-commands org-agenda-custom-commands-orig)
 	(customize-variable 'org-agenda-custom-commands))
-       ((equal keys "a") (call-interactively 'org-agenda-list))
-       ((equal keys "s") (call-interactively 'org-search-view))
-       ((equal keys "S") (org-call-with-arg 'org-search-view (or arg '(4))))
-       ((equal keys "t") (call-interactively 'org-todo-list))
-       ((equal keys "T") (org-call-with-arg 'org-todo-list (or arg '(4))))
-       ((equal keys "m") (call-interactively 'org-tags-view))
-       ((equal keys "M") (org-call-with-arg 'org-tags-view (or arg '(4))))
-       ((equal keys "e") (call-interactively 'org-store-agenda-views))
-       ((equal keys "?") (org-tags-view nil "+FLAGGED")
+       ((equal org-keys "a") (call-interactively 'org-agenda-list))
+       ((equal org-keys "s") (call-interactively 'org-search-view))
+       ((equal org-keys "S") (org-call-with-arg 'org-search-view (or arg '(4))))
+       ((equal org-keys "t") (call-interactively 'org-todo-list))
+       ((equal org-keys "T") (org-call-with-arg 'org-todo-list (or arg '(4))))
+       ((equal org-keys "m") (call-interactively 'org-tags-view))
+       ((equal org-keys "M") (org-call-with-arg 'org-tags-view (or arg '(4))))
+       ((equal org-keys "e") (call-interactively 'org-store-agenda-views))
+       ((equal org-keys "?") (org-tags-view nil "+FLAGGED")
 	(org-add-hook
 	 'post-command-hook
 	 (lambda ()
@@ -2554,15 +2555,15 @@ Pressing `<' twice means to restrict to the current subtree or region
 				(copy-sequence note))
 			       nil 'face 'org-warning)))))))
 	 t t))
-       ((equal keys "L")
+       ((equal org-keys "L")
 	(unless (derived-mode-p 'org-mode)
 	  (error "This is not an Org-mode file"))
 	(unless restriction
 	  (put 'org-agenda-files 'org-restrict (list bfn))
 	  (org-call-with-arg 'org-timeline arg)))
-       ((equal keys "#") (call-interactively 'org-agenda-list-stuck-projects))
-       ((equal keys "/") (call-interactively 'org-occur-in-agenda-files))
-       ((equal keys "!") (customize-variable 'org-stuck-projects))
+       ((equal org-keys "#") (call-interactively 'org-agenda-list-stuck-projects))
+       ((equal org-keys "/") (call-interactively 'org-occur-in-agenda-files))
+       ((equal org-keys "!") (customize-variable 'org-stuck-projects))
        (t (error "Invalid agenda key"))))))
 
 (defun org-agenda-append-agenda ()
@@ -2976,7 +2977,7 @@ This ensures the export commands can easily use it."
 	(pop-up-frames nil)
 	(dir default-directory)
 	(pars (org-make-parameter-alist parameters))
-	cmd thiscmdkey thiscmdcmd files opts cmd-or-set bufname)
+	cmd thiscmdkey thiscmdcmd match files opts cmd-or-set bufname)
     (save-window-excursion
       (while cmds
 	(setq cmd (pop cmds)
@@ -3873,10 +3874,10 @@ given in `org-agenda-start-on-weekday'."
   (catch 'exit
     (if org-agenda-sticky
 	(setq org-agenda-buffer-name
-	      (cond ((and keys (stringp match))
-		     (format "*Org Agenda(%s:%s)*" keys match))
-		    (keys
-		     (format "*Org Agenda(%s)*" keys))
+	      (cond ((and org-keys (stringp org-match))
+		     (format "*Org Agenda(%s:%s)*" org-keys org-match))
+		    (org-keys
+		     (format "*Org Agenda(%s)*" org-keys))
 		    (t "*Org Agenda(a)*"))))
     (org-agenda-prepare "Day/Week")
     (setq start-day (or start-day org-agenda-start-day))
@@ -4159,7 +4160,7 @@ in `org-agenda-text-search-extra-files'."
 	  (setq org-agenda-buffer-name
 		(if (stringp string)
 		    (format "*Org Agenda(%s:%s)*"
-			    (or keys (or (and todo-only "S") "s")) string)
+			    (or org-keys (or (and todo-only "S") "s")) string)
 		  (format "*Org Agenda(%s)*" (or (and todo-only "S") "s")))))
       (org-agenda-prepare "SEARCH")
       (org-compile-prefix-format 'search)
@@ -4367,9 +4368,9 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
       (if org-agenda-sticky
 	  (setq org-agenda-buffer-name
 		(if (stringp org-select-this-todo-keyword)
-		    (format "*Org Agenda(%s:%s)*" (or keys "t")
+		    (format "*Org Agenda(%s:%s)*" (or org-keys "t")
 			    org-select-this-todo-keyword)
-		  (format "*Org Agenda(%s)*" (or keys "t")))))
+		  (format "*Org Agenda(%s)*" (or org-keys "t")))))
       (org-agenda-prepare "TODO")
       (org-compile-prefix-format 'todo)
       (org-set-sorting-strategy 'todo)
@@ -4438,7 +4439,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 	  (setq org-agenda-buffer-name
 		(if (stringp match)
 		    (format "*Org Agenda(%s:%s)*"
-			    (or keys (or (and todo-only "M") "m")) match)
+			    (or org-keys (or (and todo-only "M") "m")) match)
 		  (format "*Org Agenda(%s)*" (or (and todo-only "M") "m")))))
       (org-agenda-prepare (concat "TAGS " match))
       (org-compile-prefix-format 'tags)
