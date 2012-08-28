@@ -2774,6 +2774,15 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	   ((equal c ?q) (error "Abort"))
 	   (t (error "Invalid key %c" c))))))))
 
+(defun org-agenda-fit-window-to-buffer ()
+  "Fit the window to the buffer size."
+  (and (memq org-agenda-window-setup '(reorganize-frame))
+       (fboundp 'fit-window-to-buffer)
+       (org-fit-window-to-buffer
+	nil
+	(floor (* (frame-height) (cdr org-agenda-window-frame-fractions)))
+	(floor (* (frame-height) (car org-agenda-window-frame-fractions))))))
+
 (defvar org-agenda-overriding-arguments nil) ; dynamically scoped parameter
 (defvar org-agenda-last-arguments nil
   "The arguments of the previous call to `org-agenda'.")
@@ -2833,7 +2842,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
     (setq org-agenda-multi-current-cmd nil)
     (setq org-agenda-redo-command redo)
     (goto-char (point-min)))
-  (org-fit-agenda-window)
+  (org-agenda-fit-window-to-buffer)
   (org-let (nth 1 series) '(org-finalize-agenda)))
 
 ;;;###autoload
@@ -3283,15 +3292,6 @@ removed from the entry content.  Currently only `planning' is allowed here."
       (error "Cannot execute org-mode agenda command on buffer in %s"
 	     major-mode)))
 
-(defun org-fit-agenda-window ()
-  "Fit the window to the buffer size."
-  (and (memq org-agenda-window-setup '(reorganize-frame))
-       (fboundp 'fit-window-to-buffer)
-       (org-fit-window-to-buffer
-	nil
-	(floor (* (frame-height) (cdr org-agenda-window-frame-fractions)))
-	(floor (* (frame-height) (car org-agenda-window-frame-fractions))))))
-
 ;;; Agenda prepare and finalize
 
 (defvar org-agenda-multi nil)  ; dynamically scoped
@@ -3375,7 +3375,7 @@ generating a new one."
 	;; Popup existing buffer
 	(org-agenda-prepare-window (get-buffer org-agenda-buffer-name))
 	(message "Sticky Agenda buffer, use `r' to refresh")
-	(or org-agenda-multi (org-fit-agenda-window))
+	(or org-agenda-multi (org-agenda-fit-window-to-buffer))
 	(throw 'exit "Sticky Agenda buffer, use `r' to refresh"))
     (setq org-todo-keywords-for-agenda nil)
     (setq org-drawers-for-agenda nil)
@@ -4019,7 +4019,7 @@ given in `org-agenda-start-on-weekday'."
 	  (setq tbl (apply 'org-get-clocktable p))
 	  (insert tbl)))
       (goto-char (point-min))
-      (or org-agenda-multi (org-fit-agenda-window))
+      (or org-agenda-multi (org-agenda-fit-window-to-buffer))
       (unless (and (pos-visible-in-window-p (point-min))
 		   (pos-visible-in-window-p (point-max)))
 	(goto-char (1- (point-max)))
@@ -4321,7 +4321,7 @@ in `org-agenda-text-search-extra-files'."
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
     (goto-char (point-min))
-    (or org-agenda-multi (org-fit-agenda-window))
+    (or org-agenda-multi (org-agenda-fit-window-to-buffer))
     (add-text-properties (point-min) (point-max) '(org-agenda-type search))
     (org-finalize-agenda)
     (setq buffer-read-only t)))
@@ -4396,7 +4396,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
     (goto-char (point-min))
-    (or org-agenda-multi (org-fit-agenda-window))
+    (or org-agenda-multi (org-agenda-fit-window-to-buffer))
     (add-text-properties (point-min) (point-max) '(org-agenda-type todo))
     (org-finalize-agenda)
     (setq buffer-read-only t)))
@@ -4467,7 +4467,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
     (when rtnall
       (insert (org-finalize-agenda-entries rtnall) "\n"))
     (goto-char (point-min))
-    (or org-agenda-multi (org-fit-agenda-window))
+    (or org-agenda-multi (org-agenda-fit-window-to-buffer))
     (add-text-properties (point-min) (point-max) '(org-agenda-type tags))
     (org-finalize-agenda)
     (setq buffer-read-only t)))
