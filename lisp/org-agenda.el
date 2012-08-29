@@ -2788,10 +2788,10 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	(floor (* (frame-height) (cdr org-agenda-window-frame-fractions)))
 	(floor (* (frame-height) (car org-agenda-window-frame-fractions))))))
 
-(defvar org-cmd)                             ; Dynamically scoped
-(defvar org-agenda-overriding-cmd)           ; Ditto
-(defvar org-agenda-overriding-arguments)     ; Ditto
-(defvar org-agenda-overriding-cmd-arguments) ; Ditto
+(defvar org-cmd nil)
+(defvar org-agenda-overriding-cmd nil)
+(defvar org-agenda-overriding-arguments nil)
+(defvar org-agenda-overriding-cmd-arguments nil)
 (defun org-agenda-run-series (name series)
   (org-let (nth 1 series) '(org-agenda-prepare name))
   ;; We need to reset agenda markers here, because when constructing a
