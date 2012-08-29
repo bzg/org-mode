@@ -1901,7 +1901,6 @@ When nil, `q' will kill the single agenda buffer."
     org-agenda-type
     org-agenda-bulk-marked-entries
     org-agenda-undo-has-started-in
-    org-agenda-last-arguments
     org-agenda-info
     org-agenda-tag-filter-overlays
     org-agenda-cat-filter-overlays
@@ -2055,7 +2054,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "!" 'org-agenda-toggle-deadlines)
 (org-defkey org-agenda-mode-map "G" 'org-agenda-toggle-time-grid)
 (org-defkey org-agenda-mode-map "r" 'org-agenda-redo)
-(org-defkey org-agenda-mode-map "g" 'org-agenda-redo)
+(org-defkey org-agenda-mode-map "g" (lambda () (interactive) (org-agenda-redo t)))
 (org-defkey org-agenda-mode-map "e" 'org-agenda-set-effort)
 (org-defkey org-agenda-mode-map "\C-c\C-xe" 'org-agenda-set-effort)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-e"
@@ -2576,6 +2575,7 @@ Agenda views are separated by `org-agenda-block-separator'."
   (let ((org-agenda-multi t))
     (org-agenda)
     (widen)
+    (org-finalize-agenda)
     (org-agenda-fit-window-to-buffer)))
 
 (defun org-agenda-normalize-custom-commands (cmds)
@@ -2788,13 +2788,10 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	(floor (* (frame-height) (cdr org-agenda-window-frame-fractions)))
 	(floor (* (frame-height) (car org-agenda-window-frame-fractions))))))
 
-(defvar org-agenda-overriding-arguments nil) ; dynamically scoped parameter
-(defvar org-agenda-last-arguments nil
-  "The arguments of the previous call to `org-agenda'.")
-(defvar org-agenda-overriding-cmd nil) ; Dynamically scoped
-(defvar org-agenda-multi-multiple-agenda nil)
-(defvar org-agenda-multi-current-cmd nil)
-(defvar org-agenda-multi-overriding-arguments nil)
+(defvar org-cmd)                             ; Dynamically scoped
+(defvar org-agenda-overriding-cmd)           ; Ditto
+(defvar org-agenda-overriding-arguments)     ; Ditto
+(defvar org-agenda-overriding-cmd-arguments) ; Ditto
 (defun org-agenda-run-series (name series)
   (org-let (nth 1 series) '(org-agenda-prepare name))
   ;; We need to reset agenda markers here, because when constructing a
@@ -2805,18 +2802,15 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	 (cmds (car series))
 	 (gprops (nth 1 series))
 	 match ;; The byte compiler incorrectly complains about this.  Keep it!
-	 cmd type lprops)
-    (setq org-agenda-multi-multiple-agenda
-	  (< 1 (length
-		(delq nil (mapcar (lambda(c) (eq (car c) 'agenda)) cmds)))))
-    (while (setq cmd (pop cmds))
-      (setq org-agenda-multi-current-cmd cmd
-	    type (car cmd) match (eval (nth 1 cmd)) lprops (nth 2 cmd))
+	 org-cmd type lprops)
+    (while (setq org-cmd (pop cmds))
+      (setq type (car org-cmd)
+	    match (eval (nth 1 org-cmd))
+	    lprops (nth 2 org-cmd))
       (let ((org-agenda-overriding-arguments
-	     (cond ((not org-agenda-multi-multiple-agenda)
-		    org-agenda-multi-overriding-arguments)
-		   ((eq org-agenda-overriding-cmd cmd)
-		    org-agenda-overriding-arguments))))
+	     (if (eq org-agenda-overriding-cmd org-cmd)
+		 (or org-agenda-overriding-arguments
+		     org-agenda-overriding-cmd-arguments))))
 	(cond
 	 ((eq type 'agenda)
 	  (org-let2 gprops lprops
@@ -2844,7 +2838,9 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	    '(funcall type match)))
 	 (t (error "Invalid type in command series")))))
     (widen)
-    (setq org-agenda-multi-current-cmd nil)
+    (let ((inhibit-read-only t))
+      (add-text-properties (point-min) (point-max)
+			   `(org-serie t org-serie-redo-cmd ,redo)))
     (setq org-agenda-redo-command redo)
     (goto-char (point-min)))
   (org-agenda-fit-window-to-buffer)
@@ -3015,19 +3011,6 @@ This ensures the export commands can easily use it."
     (goto-char pos)
     (put-text-property (point-at-bol) (point-at-eol)
 		       'org-agenda-structural-header t)
-    (when org-agenda-multi-current-cmd
-      (put-text-property (point-at-bol) (point-at-eol)
-			 'org-agenda-cmd org-agenda-multi-current-cmd))
-    (when org-agenda-multi-multiple-agenda
-      (put-text-property (point-at-bol) (point-at-eol)
-			 'org-agenda-overriding-arguments
-			 org-agenda-overriding-arguments)
-      (put-text-property (point-at-bol) (point-at-eol)
-			 'org-agenda-current-span
-			 org-agenda-current-span)
-      (put-text-property (point-at-bol) (point-at-eol)
-			 'org-agenda-last-arguments
-			 org-agenda-last-arguments))
     (when org-agenda-title-append
       (put-text-property (point-at-bol) (point-at-eol)
 			 'org-agenda-title-append org-agenda-title-append))))
@@ -3870,6 +3853,10 @@ the number of days.  SPAN defaults to `org-agenda-span'.
 START-DAY defaults to TODAY, or to the most recent match for the weekday
 given in `org-agenda-start-on-weekday'."
   (interactive "P")
+  (if org-agenda-overriding-arguments
+      (setq arg (car org-agenda-overriding-arguments)
+	    start-day (nth 1 org-agenda-overriding-arguments)
+	    span (nth 2 org-agenda-overriding-arguments)))
   (if (and (integerp arg) (> arg 0))
       (setq span arg arg nil))
   (catch 'exit
@@ -3882,14 +3869,9 @@ given in `org-agenda-start-on-weekday'."
 		    (t "*Org Agenda(a)*"))))
     (org-agenda-prepare "Day/Week")
     (setq start-day (or start-day org-agenda-start-day))
-    (if org-agenda-overriding-arguments
-	(setq arg (car org-agenda-overriding-arguments)
-	      start-day (nth 1 org-agenda-overriding-arguments)
-	      span (nth 2 org-agenda-overriding-arguments)))
     (if (stringp start-day)
 	;; Convert to an absolute day number
 	(setq start-day (time-to-days (org-read-date nil t start-day))))
-    (setq org-agenda-last-arguments (list arg start-day span))
     (org-compile-prefix-format 'agenda)
     (org-set-sorting-strategy 'agenda)
     (let* ((span (org-agenda-ndays-to-span
@@ -4034,7 +4016,11 @@ given in `org-agenda-start-on-weekday'."
 	      (goto-char (or start-pos 1))
 	      (recenter 1))))
       (goto-char (or start-pos 1))
-      (add-text-properties (point-min) (point-max) '(org-agenda-type agenda))
+      (add-text-properties (point-min) (point-max)
+			   `(org-agenda-type agenda
+					     org-last-args (,arg ,start-day ,span)
+					     org-redo-cmd ,org-agenda-redo-command
+					     org-serie-cmd ,org-cmd))
       (if (eq org-agenda-show-log-scoped 'clockcheck)
 	  (org-agenda-show-clocking-issues))
       (org-finalize-agenda)
@@ -4071,7 +4057,6 @@ given in `org-agenda-start-on-weekday'."
 ;;; Agenda word search
 
 (defvar org-agenda-search-history nil)
-(defvar org-todo-only nil)
 
 (defvar org-search-syntax-table nil
   "Special syntax table for org-mode search.
@@ -4133,6 +4118,10 @@ as a whole, to include whitespace.
 This command searches the agenda files, and in addition the files listed
 in `org-agenda-text-search-extra-files'."
   (interactive "P")
+  (if org-agenda-overriding-arguments
+      (setq todo-only (car org-agenda-overriding-arguments)
+	    string (nth 1 org-agenda-overriding-arguments)
+	    edit-at (nth 2 org-agenda-overriding-arguments)))
   (let* ((props (list 'face nil
 		      'done-face 'org-agenda-done
 		      'org-not-done-regexp org-not-done-regexp
@@ -4151,7 +4140,7 @@ in `org-agenda-text-search-extra-files'."
       (setq string (read-string
 		    (if org-agenda-search-view-always-boolean
 			"[+-]Word/{Regexp} ...: "
-		      "Phrase, or [+-]Word/{Regexp} ...: ")
+		      "Phrase or [+-]Word/{Regexp} ...: ")
 		    (cond
 		     ((integerp edit-at) (cons string edit-at))
 		     (edit-at string))
@@ -4166,10 +4155,9 @@ in `org-agenda-text-search-extra-files'."
       (org-agenda-prepare "SEARCH")
       (org-compile-prefix-format 'search)
       (org-set-sorting-strategy 'search)
-      (org-set-local 'org-todo-only todo-only)
       (setq org-agenda-redo-command
-	    (list 'org-search-view (if todo-only t nil) string
-		  '(if current-prefix-arg 1 nil)))
+	    (list 'org-search-view (if todo-only t nil)
+		  (list 'if 'current-prefix-arg nil string)))
       (setq org-agenda-query-string string)
       (if (equal (string-to-char string) ?*)
 	  (setq hdl-only t
@@ -4333,7 +4321,11 @@ in `org-agenda-text-search-extra-files'."
 	(insert (org-finalize-agenda-entries rtnall) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
-      (add-text-properties (point-min) (point-max) '(org-agenda-type search))
+      (add-text-properties (point-min) (point-max)
+			   `(org-agenda-type search
+					     org-last-args (,todo-only ,string ,edit-at)
+					     org-redo-cmd ,org-agenda-redo-command
+					     org-serie-cmd ,org-cmd))
       (org-finalize-agenda)
       (setq buffer-read-only t))))
 
@@ -4350,6 +4342,8 @@ the list to these.  When using \\[universal-argument], you will be prompted
 for a keyword.  A numeric prefix directly selects the Nth keyword in
 `org-todo-keywords-1'."
   (interactive "P")
+  (if org-agenda-overriding-arguments
+      (setq arg org-agenda-overriding-arguments))
   (if (and (stringp arg) (not (string-match "\\S-" arg))) (setq arg nil))
   (let* ((today (org-today))
 	 (date (calendar-gregorian-from-absolute today))
@@ -4375,9 +4369,8 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
       (org-agenda-prepare "TODO")
       (org-compile-prefix-format 'todo)
       (org-set-sorting-strategy 'todo)
-      (org-set-local 'org-last-arg arg)
       (setq org-agenda-redo-command
-	    '(org-todo-list (or current-prefix-arg org-last-arg)))
+	    `(org-todo-list (or current-prefix-arg (quote ,arg))))
       (setq files (org-agenda-files nil 'ifmode)
 	    rtnall nil)
       (while (setq file (pop files))
@@ -4415,7 +4408,11 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 	(insert (org-finalize-agenda-entries rtnall) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
-      (add-text-properties (point-min) (point-max) '(org-agenda-type todo))
+      (add-text-properties (point-min) (point-max)
+			   `(org-agenda-type todo
+					     org-last-args ,arg
+					     org-redo-cmd ,org-agenda-redo-command
+					     org-serie-cmd ,org-cmd))
       (org-finalize-agenda)
       (setq buffer-read-only t))))
 
@@ -4426,6 +4423,9 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
   "Show all headlines for all `org-agenda-files' matching a TAGS criterion.
 The prefix arg TODO-ONLY limits the search to TODO entries."
   (interactive "P")
+  (if org-agenda-overriding-arguments
+      (setq todo-only (car org-agenda-overriding-arguments)
+	    match (nth 1 org-agenda-overriding-arguments)))
   (let* ((org-tags-match-list-sublevels
 	  org-tags-match-list-sublevels)
 	 (completion-ignore-case t)
@@ -4447,8 +4447,8 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
       (org-set-sorting-strategy 'tags)
       (setq org-agenda-query-string match)
       (setq org-agenda-redo-command
-	    (list 'org-tags-view (list 'quote todo-only)
-		  (list 'if 'current-prefix-arg nil 'org-agenda-query-string)))
+      	    (list 'org-tags-view `(quote ,todo-only)
+      		  (list 'if 'current-prefix-arg nil `(quote ,org-agenda-query-string))))
       (setq files (org-agenda-files nil 'ifmode)
 	    rtnall nil)
       (while (setq file (pop files))
@@ -4493,7 +4493,11 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 	(insert (org-finalize-agenda-entries rtnall) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
-      (add-text-properties (point-min) (point-max) '(org-agenda-type tags))
+      (add-text-properties (point-min) (point-max)
+			   `(org-agenda-type tags
+					     org-last-args (,todo-only ,match)
+					     org-redo-cmd ,org-agenda-redo-command
+					     org-serie-cmd ,org-cmd))
       (org-finalize-agenda)
       (setq buffer-read-only t))))
 
@@ -4723,8 +4727,7 @@ of what a project is and how to check if it stuck, customize the variable
     (org-tags-view nil matcher)
     (with-current-buffer org-agenda-buffer-name
       (setq org-agenda-redo-command
-	    '(org-agenda-list-stuck-projects
-	      (or current-prefix-arg org-last-arg))))))
+	    `(org-agenda-list-stuck-projects ,current-prefix-arg)))))
 
 ;;; Diary integration
 
@@ -6592,11 +6595,12 @@ in the agenda."
   (let ((org-agenda-window-setup 'current-window))
     (org-agenda arg)))
 
-(defun org-agenda-redo ()
-  "Rebuild Agenda.
-When this is the global TODO list, a prefix argument will be interpreted."
-  (interactive)
-  (let* ((org-agenda-doing-sticky-redo org-agenda-sticky)
+(defun org-agenda-redo (&optional all)
+  "Rebuild possibly ALL agenda view(s) in the current buffer."
+  (interactive "P")
+  (let* ((p (or (and (looking-at "\\'") (1- (point))) (point)))
+	 (cpa (unless (eq all t) current-prefix-arg))
+	 (org-agenda-doing-sticky-redo org-agenda-sticky)
 	 (org-agenda-sticky nil)
 	 (org-agenda-buffer-name (or org-agenda-this-buffer-name
 				     org-agenda-buffer-name))
@@ -6610,12 +6614,24 @@ When this is the global TODO list, a prefix argument will be interpreted."
 	 (cols org-agenda-columns-active)
 	 (line (org-current-line))
 	 (window-line (- line (org-current-line (window-start))))
-	 (lprops (get 'org-agenda-redo-command 'org-lprops)))
+	 (lprops (get 'org-agenda-redo-command 'org-lprops))
+	 (redo-cmd (get-text-property p 'org-redo-cmd))
+	 (last-args (get-text-property p 'org-last-args))
+	 (org-agenda-overriding-cmd (get-text-property p 'org-serie-cmd))
+	 (org-agenda-overriding-cmd-arguments
+	  (unless (eq all t)
+	    (cond ((listp last-args)
+		   (cons (or cpa (car last-args)) (cdr last-args)))
+		  ((stringp last-args)
+		   last-args))))
+	 (serie-redo-cmd (get-text-property p 'org-serie-redo-cmd)))
     (put 'org-agenda-tag-filter :preset-filter nil)
     (put 'org-agenda-category-filter :preset-filter nil)
     (and cols (org-columns-quit))
     (message "Rebuilding agenda buffer...")
-    (org-let lprops '(eval org-agenda-redo-command))
+    (if serie-redo-cmd
+	(eval serie-redo-cmd)
+      (org-let lprops '(eval redo-cmd)))
     (setq org-agenda-undo-list nil
 	  org-agenda-pending-undo-list nil)
     (message "Rebuilding agenda buffer...done")
@@ -6951,12 +6967,14 @@ Negative selection means regexp must not match for selection of an entry."
        " "))
     (setq org-agenda-redo-command
 	  (list 'org-search-view
-		org-todo-only
+		(car (get-text-property (point) 'org-last-args))
 		org-agenda-query-string
 		(+ (length org-agenda-query-string)
 		   (if (member char '(?\{ ?\})) 0 1))))
     (set-register org-agenda-query-register org-agenda-query-string)
-    (org-agenda-redo))
+    (let ((org-agenda-overriding-arguments
+	   (cdr org-agenda-redo-command)))
+      (org-agenda-redo)))
    (t (error "Cannot manipulate query for %s-type agenda buffers"
 	     org-agenda-type))))
 
@@ -6974,52 +6992,56 @@ Negative selection means regexp must not match for selection of an entry."
   "Go to today."
   (interactive)
   (org-agenda-check-type t 'timeline 'agenda)
-  (let ((tdpos (text-property-any (point-min) (point-max) 'org-today t)))
+  (let* ((args (get-text-property (point) 'org-last-args))
+	 (curspan (nth 2 args))
+	 (tdpos (text-property-any (point-min) (point-max) 'org-today t)))
     (cond
      (tdpos (goto-char tdpos))
      ((eq org-agenda-type 'agenda)
       (let* ((sd (org-agenda-compute-starting-span
-		  (org-today) (or org-agenda-current-span org-agenda-ndays org-agenda-span)))
-	     (org-agenda-overriding-arguments org-agenda-last-arguments))
+		  (org-today) (or curspan org-agenda-ndays org-agenda-span)))
+	     (org-agenda-overriding-arguments args))
 	(setf (nth 1 org-agenda-overriding-arguments) sd)
 	(org-agenda-redo)
 	(org-agenda-find-same-or-today-or-agenda)))
      (t (error "Cannot find today")))))
 
-(defvar org-agenda-multi-back-to-pos nil)
 (defun org-agenda-find-same-or-today-or-agenda (&optional cnt)
   (goto-char
-   (or (and org-agenda-multi-back-to-pos (move-beginning-of-line 1))
-       (and cnt (text-property-any (point-min) (point-max) 'org-day-cnt cnt))
+   (or (and cnt (text-property-any (point-min) (point-max) 'org-day-cnt cnt))
        (text-property-any (point-min) (point-max) 'org-today t)
        (text-property-any (point-min) (point-max) 'org-agenda-type 'agenda)
+       (and (get-text-property (point) 'org-serie)
+	    (org-agenda-goto-block-beginning))
        (point-min))))
 
-(defun org-agenda-get-text-property (prop)
-  "Find text property PROP.
-The search starts by looking backward, to find the previous text
-property PROP, then continues forward if none has been found."
-  (save-excursion
-    (unless (looking-at "\\'")
-      (forward-char))
-    (let ((p (previous-single-property-change (point) prop))
-	  (n (next-single-property-change (or (and (looking-at "\\`") 1)
-					      (1- (point))) prop)))
-      (cond ((eq n (point-at-eol))
-	     (cons (get-text-property (1- n) prop) (1- n)))
-	    (p (cons (get-text-property (1- p) prop) (1- p)))))))
+(defun org-agenda-goto-block-beginning ()
+  "Go the agenda block beginning."
+  (interactive)
+  (if (not (derived-mode-p 'org-agenda-mode))
+      (error "Cannot execute this command outside of org-agenda-mode buffers")
+    (let (dest)
+      (save-excursion
+	(unless (looking-at "\\'")
+	  (forward-char))
+	(let* ((prop 'org-agenda-structural-header)
+	       (p (previous-single-property-change (point) prop))
+	       (n (next-single-property-change (or (and (looking-at "\\`") 1)
+						   (1- (point))) prop)))
+	  (setq dest (cond ((eq n (point-at-eol)) (1- n)) (p (1- p))))))
+      (if (not dest)
+	  (error "Cannot find the beginning of the blog")
+	(goto-char dest)
+	(move-beginning-of-line 1)))))
 
 (defun org-agenda-later (arg)
   "Go forward in time by thee current span.
 With prefix ARG, go forward that many times the current span."
   (interactive "p")
   (org-agenda-check-type t 'agenda)
-  (let* ((span (or (car (org-agenda-get-text-property
-			 'org-agenda-current-span))
-		   org-agenda-current-span))
-	 (sd (or (cadr (car (org-agenda-get-text-property
-			     'org-agenda-overriding-arguments)))
-		 org-starting-day))
+  (let* ((args (get-text-property (point) 'org-last-args))
+	 (span (or (nth 2 args) org-agenda-current-span))
+	 (sd (or (nth 1 args) (org-get-at-bol 'day) org-starting-day))
 	 (greg (calendar-gregorian-from-absolute sd))
 	 (cnt (org-get-at-bol 'org-day-cnt))
 	 greg2)
@@ -7044,13 +7066,9 @@ With prefix ARG, go forward that many times the current span."
 	   ;; `cmd' may have been set by `org-agenda-run-series' which
 	   ;; uses `org-agenda-overriding-cmd' to decide whether
 	   ;; overriding is allowed for `cmd'
-	   (car (org-agenda-get-text-property 'org-agenda-cmd)))
+	   (get-text-property (point) 'org-serie-cmd))
 	  (org-agenda-overriding-arguments
-	   (list (car org-agenda-last-arguments) sd span)))
-      (setq org-agenda-multi-back-to-pos
-	    (cdr (org-agenda-get-text-property 'org-agenda-cmd))
-	    org-agenda-multi-overriding-arguments
-	    org-agenda-overriding-arguments)
+	   (list (car args) sd span)))
       (org-agenda-redo)
       (org-agenda-find-same-or-today-or-agenda cnt))))
 
@@ -7132,25 +7150,18 @@ written as 2-digit years."
   "Change the agenda view to SPAN.
 SPAN may be `day', `week', `month', `year'."
   (org-agenda-check-type t 'agenda)
-  (let ((org-agenda-cur-span
-  	 (or (car (org-agenda-get-text-property
-		   'org-agenda-current-span))
-  	     org-agenda-current-span))
-  	(org-agenda-overriding-arguments
-  	 (or (car (org-agenda-get-text-property
-		   'org-agenda-overriding-arguments))
-  	     org-agenda-overriding-arguments)))
-    (setq org-agenda-multi-back-to-pos
-	  (cdr (org-agenda-get-text-property 'org-agenda-cmd)))
-    (if (and (not n) (equal org-agenda-cur-span span))
+  (let* ((args (get-text-property (point) 'org-last-args))
+	 (curspan (nth 2 args)))
+    (if (and (not n) (equal curspan span))
 	(error "Viewing span is already \"%s\"" span))
     (let* ((sd (or (org-get-at-bol 'day)
+		   (nth 1 args)
 		   org-starting-day))
 	   (sd (org-agenda-compute-starting-span sd span n))
 	   (org-agenda-overriding-cmd
-	    (car (org-agenda-get-text-property 'org-agenda-cmd)))
+	    (get-text-property (point) 'org-serie-cmd))
 	   (org-agenda-overriding-arguments
-	    (list (car org-agenda-last-arguments) sd span)))
+	    (list (car args) sd span)))
       (org-agenda-redo)
       (org-agenda-find-same-or-today-or-agenda))
     (org-agenda-set-mode-name)
@@ -7233,11 +7244,6 @@ so that the date SD will be in that range."
   "Detach overlay INDEX."
   (org-detach-overlay org-hl))
 
-;; FIXME this is currently not used.
-(defun org-highlight-until-next-command (beg end &optional buffer)
-  "Move the highlight overlay to BEG/END, remove it before the next command."
-  (org-highlight beg end buffer)
-  (add-hook 'pre-command-hook 'org-unhighlight-once))
 (defun org-unhighlight-once ()
   "Remove the highlight from its position, and this function from the hook."
   (remove-hook 'pre-command-hook 'org-unhighlight-once)
