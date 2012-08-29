@@ -304,10 +304,14 @@ VALUE can be `on', `off', or `pause'."
     (when org-timer-mode-line-timer
       (cancel-timer org-timer-mode-line-timer)
       (setq org-timer-mode-line-timer nil))
-    (setq global-mode-string
-	  (delq 'org-timer-mode-line-string global-mode-string))
-    (setq frame-title-format
-	  (delq 'org-timer-mode-line-string frame-title-format))
+    (when (or (eq org-timer-display 'mode-line)
+	      (eq org-timer-display 'both))
+      (setq global-mode-string
+	    (delq 'org-timer-mode-line-string global-mode-string)))
+    (when (or (eq org-timer-display 'frame-title)
+	      (eq org-timer-display 'both))
+      (setq frame-title-format
+	    (delq 'org-timer-mode-line-string frame-title-format)))
     (force-mode-line-update))
    ((equal value 'pause)
     (when org-timer-mode-line-timer
