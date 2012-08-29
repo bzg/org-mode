@@ -2617,7 +2617,7 @@ holding contextual information."
   (let ((type (downcase (org-element-property :type special-block))))
     (org-e-html--wrap-label
      special-block
-     (format "\\begin{%s}\n%s\\end{%s}" type contents type))))
+     (format "<div class=\"%s\">\n%s\n</div>" type contents))))
 
 
 ;;;; Src Block
