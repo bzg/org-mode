@@ -1001,7 +1001,8 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
 
 (defvar org-x11idle-exists-p
   ;; Check that x11idle exists
-  (and (eq (call-process-shell-command "command" nil nil nil "-v" "x11idle") 0)
+  (and (eq window-system 'x)
+       (eq (call-process-shell-command "command" nil nil nil "-v" "x11idle") 0)
        ;; Check that x11idle can retrieve the idle time
        (eq (call-process-shell-command "x11idle" nil nil nil) 0)))
 
