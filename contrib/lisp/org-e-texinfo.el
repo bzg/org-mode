@@ -1623,7 +1623,19 @@ a communication channel."
   ;; Rules are ignored since table separators are deduced from
   ;; borders of the current row.
   (when (eq (org-element-property :type table-row) 'standard)
-    (concat "@item " contents "\n")))
+   (let ((rowgroup-tag
+	  (cond
+	   ;; Case 1: Belongs to second or subsequent rowgroup.
+	   ((not (= 1 (org-export-table-row-group table-row info)))
+	    "@item ")
+	   ;; Case 2: Row is from first rowgroup.  Table has >=1 rowgroups.
+	   ((org-export-table-has-header-p
+	     (org-export-get-parent-table table-row) info)
+	    "@headitem ")
+	   ;; Case 3: Row is from first and only row group.
+	   (t "@item "))))
+     (when (eq (org-element-property :type table-row) 'standard)
+       (concat rowgroup-tag contents "\n")))))
 
 ;;; Target
 
