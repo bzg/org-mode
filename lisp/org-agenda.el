@@ -85,7 +85,7 @@
 (declare-function org-add-archive-files "org-archive" (files))
 
 (defvar calendar-mode-map)                    ; defined in calendar.el
-(defvar org-clock-current-task)               ; defined in org-clock.el
+(defvar org-clock-current-task nil)           ; defined in org-clock.el
 (defvar org-mobile-force-id-on-agenda-items)  ; defined in org-mobile.el
 (defvar org-habit-show-habits)                ; defined in org-habit.el
 (defvar org-habit-show-habits-only-for-today)
@@ -3859,13 +3859,15 @@ given in `org-agenda-start-on-weekday'."
   (if (and (integerp arg) (> arg 0))
       (setq span arg arg nil))
   (catch 'exit
-    (if org-agenda-sticky
-	(setq org-agenda-buffer-name
-	      (cond ((and org-keys (stringp org-match))
-		     (format "*Org Agenda(%s:%s)*" org-keys org-match))
-		    (org-keys
-		     (format "*Org Agenda(%s)*" org-keys))
-		    (t "*Org Agenda(a)*"))))
+    (setq org-agenda-buffer-name
+	  (or org-agenda-buffer-tmp-name
+	      (if org-agenda-sticky
+		  (cond ((and org-keys (stringp org-match))
+			 (format "*Org Agenda(%s:%s)*" org-keys org-match))
+			(org-keys
+			 (format "*Org Agenda(%s)*" org-keys))
+			(t "*Org Agenda(a)*")))
+	      org-agenda-buffer-name))
     (org-agenda-prepare "Day/Week")
     (setq start-day (or start-day org-agenda-start-day))
     (if (stringp start-day)
@@ -6981,12 +6983,14 @@ Negative selection means regexp must not match for selection of an entry."
 (defun org-add-to-string (var string)
   (set var (concat (symbol-value var) string)))
 
+(defvar org-agenda-buffer-tmp-name nil)
 (defun org-agenda-goto-date (date)
   "Jump to DATE in agenda."
   (interactive (list (let ((org-read-date-prefer-future
 			    (eval org-agenda-jump-prefer-future)))
 		       (org-read-date))))
   (let ((org-agenda-sticky-orig org-agenda-sticky)
+	(org-agenda-buffer-tmp-name (buffer-name))
 	org-agenda-sticky)
     (org-agenda-list nil date)
     (setq org-agenda-sticky org-agenda-sticky-orig
