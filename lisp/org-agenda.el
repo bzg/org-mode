@@ -3839,6 +3839,7 @@ command.  A good way to set it is through options in
 somewhat less efficient) way of determining what is included in
 the daily/weekly agenda, see `org-agenda-skip-function'.")
 
+(defvar org-agenda-buffer-tmp-name nil)
 ;;;###autoload
 (defun org-agenda-list (&optional arg start-day span)
   "Produce a daily/weekly view from all files in variable `org-agenda-files'.
@@ -6981,7 +6982,6 @@ Negative selection means regexp must not match for selection of an entry."
 (defun org-add-to-string (var string)
   (set var (concat (symbol-value var) string)))
 
-(defvar org-agenda-buffer-tmp-name nil)
 (defun org-agenda-goto-date (date)
   "Jump to DATE in agenda."
   (interactive (list (let ((org-read-date-prefer-future
