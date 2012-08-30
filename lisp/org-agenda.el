@@ -84,22 +84,25 @@
 (declare-function org-agenda-columns "org-colview" ())
 (declare-function org-add-archive-files "org-archive" (files))
 
-(defvar calendar-mode-map)
-(defvar org-clock-current-task) ; defined in org-clock.el
-(defvar org-mobile-force-id-on-agenda-items) ; defined in org-mobile.el
-(defvar org-habit-show-habits)
+(defvar calendar-mode-map)                    ; defined in calendar.el
+(defvar org-clock-current-task)               ; defined in org-clock.el
+(defvar org-mobile-force-id-on-agenda-items)  ; defined in org-mobile.el
+(defvar org-habit-show-habits)                ; defined in org-habit.el
 (defvar org-habit-show-habits-only-for-today)
 (defvar org-habit-show-all-today nil)
 
 ;; Defined somewhere in this file, but used before definition.
-(defvar org-agenda-buffer-name)
-(defvar org-agenda-overriding-header)
+(defvar org-agenda-buffer-name "*Org Agenda*")
+(defvar org-agenda-overriding-header nil)
 (defvar org-agenda-title-append nil)
 (org-no-warnings (defvar entry)) ;; unprefixed, from calendar.el
 (org-no-warnings (defvar date))  ;; unprefixed, from calendar.el
-(defvar org-agenda-undo-list)
-(defvar org-agenda-pending-undo-list)
 (defvar original-date) ; dynamically scoped, calendar.el does scope this
+
+(defvar org-agenda-undo-list nil
+  "List of undoable operations in the agenda since last refresh.")
+(defvar org-agenda-pending-undo-list nil
+  "In a series of undo commands, this is the list of remaining undo items.")
 
 (defcustom org-agenda-confirm-kill 1
   "When set, remote killing from the agenda buffer needs confirmation.
@@ -1838,7 +1841,7 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
     (defvaralias 'org-agenda-keymap 'org-agenda-mode-map))
 
 (defvar org-agenda-menu) ; defined later in this file.
-(defvar org-agenda-restrict) ; defined later in this file.
+(defvar org-agenda-restrict nil) ; defined later in this file.
 (defvar org-agenda-follow-mode nil)
 (defvar org-agenda-entry-text-mode nil)
 (defvar org-agenda-clockreport-mode nil)
@@ -1849,7 +1852,8 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
   "Hook for `org-agenda-mode', run after the mode is turned on.")
 (defvar org-agenda-type nil)
 (defvar org-agenda-force-single-file nil)
-(defvar org-agenda-bulk-marked-entries) ;; Defined further down in this file
+(defvar org-agenda-bulk-marked-entries nil
+  "List of markers that refer to marked entries in the agenda.")
 
 ;;; Multiple agenda buffers support
 
@@ -2279,12 +2283,8 @@ The following commands are available:
 
 (defvar org-agenda-allow-remote-undo t
   "Non-nil means allow remote undo from the agenda buffer.")
-(defvar org-agenda-undo-list nil
-  "List of undoable operations in the agenda since last refresh.")
 (defvar org-agenda-undo-has-started-in nil
   "Buffers that have already seen `undo-start' in the current undo sequence.")
-(defvar org-agenda-pending-undo-list nil
-  "In a series of undo commands, this is the list of remaining undo items.")
 
 (defun org-agenda-undo ()
   "Undo a remote editing step in the agenda.
@@ -2328,7 +2328,6 @@ that have been changed along."
 
 ;;; Agenda dispatch
 
-(defvar org-agenda-restrict nil)
 (defvar org-agenda-restrict-begin (make-marker))
 (defvar org-agenda-restrict-end (make-marker))
 (defvar org-agenda-last-dispatch-buffer nil)
@@ -2379,8 +2378,8 @@ duplicates.)"
 				      (regexp))
 				(function :tag "Custom function"))))))
 
-(defvar org-keys)
-(defvar org-match)
+(defvar org-keys nil)
+(defvar org-match nil)
 ;;;###autoload
 (defun org-agenda (&optional arg org-keys restriction)
   "Dispatch agenda commands to collect entries to the agenda buffer.
@@ -3016,7 +3015,7 @@ This ensures the export commands can easily use it."
       (put-text-property (point-at-bol) (point-at-eol)
 			 'org-agenda-title-append org-agenda-title-append))))
 
-(defvar org-mobile-creating-agendas)
+(defvar org-mobile-creating-agendas) ; defined in org-mobile.el
 (defvar org-agenda-write-buffer-name "Agenda View")
 (defun org-agenda-write (file &optional open nosettings agenda-bufname)
   "Write the current buffer (an agenda view) as a file.
@@ -3286,7 +3285,6 @@ removed from the entry content.  Currently only `planning' is allowed here."
 ;;; Agenda prepare and finalize
 
 (defvar org-agenda-multi nil)  ; dynamically scoped
-(defvar org-agenda-buffer-name "*Org Agenda*")
 (defvar org-agenda-pre-window-conf nil)
 (defvar org-agenda-columns-active nil)
 (defvar org-agenda-name nil)
@@ -5330,7 +5328,7 @@ please use `org-class' instead."
      dayname skip-weeks)))
 (make-obsolete 'org-diary-class 'org-class "")
 
-(defvar org-agenda-show-log-scoped) ;; dynamically scope in ̀org-timeline' or`org-agenda-list'
+(defvar org-agenda-show-log-scoped) ;; dynamically scope in `org-timeline' or `org-agenda-list'
 (defalias 'org-get-closed 'org-agenda-get-progress)
 (defun org-agenda-get-progress ()
   "Return the logged TODO entries for agenda display."
@@ -7545,7 +7543,7 @@ Point is in the buffer where the item originated.")
       (with-current-buffer buffer (delete-region dbeg dend))
       (message "Agenda item and source killed"))))
 
-(defvar org-archive-default-command)
+(defvar org-archive-default-command) ; defined in org-archive.el
 (defun org-agenda-archive-default ()
   "Archive the entry or subtree belonging to the current agenda entry."
   (interactive)
@@ -8763,9 +8761,9 @@ the cursor position."
   (interactive)
   (org-agenda-execute-calendar-command 'list-calendar-holidays))
 
-(defvar calendar-longitude)
-(defvar calendar-latitude)
-(defvar calendar-location-name)
+(defvar calendar-longitude)      ; defined in calendar.el
+(defvar calendar-latitude)       ; defined in calendar.el
+(defvar calendar-location-name)  ; defined in calendar.el
 
 (defun org-agenda-sunrise-sunset (arg)
   "Display sunrise and sunset for the cursor date.
@@ -8831,9 +8829,6 @@ This is a command that has to be installed in `calendar-mode-map'."
     (org-fit-window-to-buffer (get-buffer-window "*Dates*"))))
 
 ;;; Bulk commands
-
-(defvar org-agenda-bulk-marked-entries nil
-  "List of markers that refer to marked entries in the agenda.")
 
 (defun org-agenda-bulk-marked-p ()
   (eq (get-char-property (point-at-bol) 'type)
@@ -9153,7 +9148,7 @@ tag and (if present) the flagging note."
 
 ;;; Appointment reminders
 
-(defvar appt-time-msg-list)
+(defvar appt-time-msg-list) ; defined in appt.el
 
 ;;;###autoload
 (defun org-agenda-to-appt (&optional refresh filter &rest args)
