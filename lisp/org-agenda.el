@@ -6984,7 +6984,15 @@ Negative selection means regexp must not match for selection of an entry."
   (interactive (list (let ((org-read-date-prefer-future
 			    (eval org-agenda-jump-prefer-future)))
 		       (org-read-date))))
-  (org-agenda-list nil date))
+  (let ((org-agenda-sticky-orig org-agenda-sticky)
+	org-agenda-sticky)
+    (org-agenda-list nil date)
+    (setq org-agenda-sticky org-agenda-sticky-orig
+	  org-agenda-this-buffer-is-sticky org-agenda-sticky))
+  (let ((inhibit-read-only t))
+    (add-text-properties (point-min) (point-max)
+			 `(org-last-cmd
+			   (org-agenda-list nil ,date)))))
 
 (defun org-agenda-goto-today ()
   "Go to today."
