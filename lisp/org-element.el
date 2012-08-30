@@ -149,7 +149,7 @@
           "\\|"
           ;; Lists.
           (let ((term (case org-plain-list-ordered-item-terminator
-                        (t "[.)]") (?\) ")") (?. "\\.") (otherwise "[.)]")))
+                        (?\) ")") (?. "\\.") (otherwise "[.)]")))
                 (alpha (and org-alphabetical-lists "\\|[A-Za-z]")))
             (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
                     "\\(?:[ \t]\\|$\\)"))
