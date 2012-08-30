@@ -5292,10 +5292,12 @@ DAYNAME is a number between 0 (Sunday) and 6 (Saturday).
 SKIP-WEEKS is any number of ISO weeks in the block period for which the
 item should be skipped.  If any of the SKIP-WEEKS arguments is the symbol
 `holidays', then any date that is known by the Emacs calendar to be a
-holiday will also be skipped."
+holiday will also be skipped.  If SKIP-WEEKS arguments are holiday strings,
+then those holidays will be skipped."
   (let* ((date1 (calendar-absolute-from-gregorian (list m1 d1 y1)))
 	 (date2 (calendar-absolute-from-gregorian (list m2 d2 y2)))
-	 (d (calendar-absolute-from-gregorian date)))
+	 (d (calendar-absolute-from-gregorian date))
+	 (h (when skip-weeks (calendar-check-holidays date))))
     (and
      (<= date1 d)
      (<= d date2)
@@ -5304,8 +5306,8 @@ holiday will also be skipped."
 	 (progn
 	   (require 'cal-iso)
 	   (not (member (car (calendar-iso-from-absolute d)) skip-weeks))))
-     (not (and (memq 'holidays skip-weeks)
-	       (calendar-check-holidays date)))
+     (not (or (and h (memq 'holidays skip-weeks))
+	      (delq nil (mapcar (lambda(g) (member g skip-weeks)) h))))
      entry)))
 
 (defun org-diary-class (m1 d1 y1 m2 d2 y2 dayname &rest skip-weeks)
