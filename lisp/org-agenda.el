@@ -4929,6 +4929,7 @@ the documentation of `org-diary'."
       (with-current-buffer buffer
 	(unless (derived-mode-p 'org-mode)
 	  (error "Agenda file %s is not in `org-mode'" file))
+	(setq org-agenda-buffer (or org-agenda-buffer buffer))
 	(let ((case-fold-search nil))
 	  (save-excursion
 	    (save-restriction
