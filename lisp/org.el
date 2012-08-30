@@ -21106,7 +21106,7 @@ a footnote definition, try to fill the first paragraph within."
 	    (paragraph-start (cadadr (assoc 'paragraph-start org-fb-vars)))
 	    (paragraph-separate
 	     (cadadr (assoc 'paragraph-separate org-fb-vars))))
-	(fill-paragraph))
+	(fill-paragraph nil))
     (save-excursion
       ;; Move to end of line in order to get the first paragraph
       ;; within a plain list or a footnote definition.
