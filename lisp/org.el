@@ -16730,6 +16730,13 @@ effort string \"2hours\" is equivalent to 120 minutes."
   :type '(alist :key-type (string :tag "Modifier")
 		:value-type (number :tag "Minutes")))
 
+(defcustom org-image-fixed-width nil
+  "A fixed width for images displayed in the buffer.
+This requires Emacs >= 24.1, build with imagemagick support."
+  :group 'org-appearance
+  :version "24.3"
+  :type 'integer)
+
 (defun org-duration-string-to-minutes (s &optional output-to-string)
   "Convert a duration string S to minutes.
 
@@ -17852,16 +17859,19 @@ BEG and END default to the buffer boundaries."
       (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
 			(substring (org-image-file-name-regexp) 0 -2)
 			"\\)\\]" (if include-linked "" "\\]")))
-	    old file ov img)
+	    old file ov img type width)
 	(while (re-search-forward re end t)
 	  (setq old (get-char-property-and-overlay (match-beginning 1)
-						   'org-image-overlay))
-	  (setq file (expand-file-name
-		      (concat (or (match-string 3) "") (match-string 4))))
+						   'org-image-overlay)
+		file (expand-file-name
+		      (concat (or (match-string 3) "") (match-string 4)))
+		type (if (and (image-type-available-p 'imagemagick)
+			      org-image-fixed-width) 'imagemagick)
+		width (if type org-image-fixed-width))
 	  (when (file-exists-p file)
 	    (if (and (car-safe old) refresh)
 		(image-refresh (overlay-get (cdr old) 'display))
-	      (setq img (save-match-data (create-image file)))
+	      (setq img (save-match-data (create-image file type nil :width width)))
 	      (when img
 		(setq ov (make-overlay (match-beginning 0) (match-end 0)))
 		(overlay-put ov 'display img)
