@@ -1009,11 +1009,10 @@ holding export options."
 	(let* ((header (nth 1 (assoc class org-e-latex-classes)))
 	       (document-class-string
 		(and (stringp header)
-		     (if class-options
-			 (replace-regexp-in-string
-			  "^[ \t]*\\\\documentclass\\(\\[.*?\\]\\)"
-			  class-options header t nil 1)
-		       header))))
+		     (if (not class-options) header
+		       (replace-regexp-in-string
+			"^[ \t]*\\\\documentclass\\(\\(\\[.*\\]\\)?\\)"
+			class-options header t nil 1)))))
 	  (when document-class-string
 	    (org-e-latex--guess-babel-language
 	     (org-e-latex--guess-inputenc
