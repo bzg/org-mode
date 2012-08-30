@@ -16730,12 +16730,25 @@ effort string \"2hours\" is equivalent to 120 minutes."
   :type '(alist :key-type (string :tag "Modifier")
 		:value-type (number :tag "Minutes")))
 
-(defcustom org-image-fixed-width nil
-  "A fixed width for images displayed in the buffer.
+(defcustom org-image-actual-width t
+  "Should we use the actual width of images when inlining them?
+
+When set to `t', always use the image width.
+
+When set to a number, use imagemagick (when available) to set
+the image width to this value.
+
+When set to nil, try to get the width from an #+ATTR.* keyword.
+If the image has an attribute matching a width specification
+like width=\"[0-9]+\", this value is used.
+
 This requires Emacs >= 24.1, build with imagemagick support."
   :group 'org-appearance
   :version "24.3"
-  :type 'integer)
+  :type '(choice
+	  (const :tag "Use the image width" t)
+	  (integer :tag "Resize to this # of pixels")
+	  (string :tag "Maybe use #+ATTR* to resize")))
 
 (defun org-duration-string-to-minutes (s &optional output-to-string)
   "Convert a duration string S to minutes.
@@ -17865,9 +17878,18 @@ BEG and END default to the buffer boundaries."
 						   'org-image-overlay)
 		file (expand-file-name
 		      (concat (or (match-string 3) "") (match-string 4)))
-		type (if (and (image-type-available-p 'imagemagick)
-			      org-image-fixed-width) 'imagemagick)
-		width (if type org-image-fixed-width))
+		type (if (and (not (eq org-image-actual-width t))
+			      (image-type-available-p 'imagemagick))
+			 'imagemagick)
+		width (cond ((eq org-image-actual-width t) nil)
+			   ((null org-image-actual-width)
+			    (or (save-excursion
+				  (save-match-data
+				    (move-beginning-of-line 0)
+				    (if (looking-at "#\\+ATTR.*width=\"\\([^\"]+\\)\"")
+					(string-to-number (match-string 1)))))
+				(setq type nil)))
+			   (t org-image-actual-width)))
 	  (when (file-exists-p file)
 	    (if (and (car-safe old) refresh)
 		(image-refresh (overlay-get (cdr old) 'display))
