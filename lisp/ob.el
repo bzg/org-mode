@@ -1494,7 +1494,8 @@ If the point is not on a source block then return nil."
 		(looking-at org-babel-multi-line-header-regexp))
 	    (progn
 	      (while (and (forward-line 1)
-			  (looking-at org-babel-multi-line-header-regexp)))
+			  (or (looking-at org-babel-src-name-regexp)
+			      (looking-at org-babel-multi-line-header-regexp))))
 	      (looking-at org-babel-src-block-regexp))
             (point)))
      (save-excursion ;; on a #+begin_src line
