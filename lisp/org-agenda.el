@@ -4036,8 +4036,8 @@ given in `org-agenda-start-on-weekday'."
 	((= n 7) 'week)
 	(t n)))
 
-(defun org-agenda-span-to-ndays (span start-day)
-  "Return ndays from SPAN starting at START-DAY."
+(defun org-agenda-span-to-ndays (span &optional start-day)
+  "Return ndays from SPAN, possibly starting at START-DAY."
   (cond ((numberp span) span)
 	((eq span 'day) 1)
 	((eq span 'week) 7)
@@ -6982,21 +6982,29 @@ Negative selection means regexp must not match for selection of an entry."
 (defun org-add-to-string (var string)
   (set var (concat (symbol-value var) string)))
 
-(defun org-agenda-goto-date (date)
+(defun org-agenda-goto-date (span)
   "Jump to DATE in agenda."
-  (interactive (list (let ((org-read-date-prefer-future
-			    (eval org-agenda-jump-prefer-future)))
-		       (org-read-date))))
-  (let ((org-agenda-sticky-orig org-agenda-sticky)
-	(org-agenda-buffer-tmp-name (buffer-name))
-	org-agenda-sticky)
-    (org-agenda-list nil date)
+  (interactive "P")
+  (let* ((org-read-date-prefer-future
+	  (eval org-agenda-jump-prefer-future))
+	 (date (org-read-date))
+	 (org-agenda-sticky-orig org-agenda-sticky)
+	 (org-agenda-buffer-tmp-name (buffer-name))
+	 (args (get-text-property (point) 'org-last-args))
+	 (0-arg (or current-prefix-arg (car args)))
+	 (2-arg (nth 2 args))
+	 (newcmd (list 'org-agenda-list 0-arg date
+		       (org-agenda-span-to-ndays 2-arg)))
+	 (newargs (cdr newcmd))
+	 (inhibit-read-only t)
+	 org-agenda-sticky)
+    (if (not (org-agenda-check-type t 'agenda))
+	(error "Not available in non-agenda blocks")
+      (add-text-properties (point-min) (point-max)
+			   `(org-redo-cmd ,newcmd org-last-args ,newargs))
+      (org-agenda-redo)
     (setq org-agenda-sticky org-agenda-sticky-orig
-	  org-agenda-this-buffer-is-sticky org-agenda-sticky))
-  (let ((inhibit-read-only t))
-    (add-text-properties (point-min) (point-max)
-			 `(org-last-cmd
-			   (org-agenda-list nil ,date)))))
+	  org-agenda-this-buffer-is-sticky org-agenda-sticky))))
 
 (defun org-agenda-goto-today ()
   "Go to today."
