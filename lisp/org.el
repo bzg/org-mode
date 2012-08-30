@@ -16736,19 +16736,23 @@ effort string \"2hours\" is equivalent to 120 minutes."
 When set to `t', always use the image width.
 
 When set to a number, use imagemagick (when available) to set
-the image width to this value.
+the image's width to this value.
 
-When set to nil, try to get the width from an #+ATTR.* keyword.
-If the image has an attribute matching a width specification
-like width=\"[0-9]+\", this value is used.
+When set to a number in a list, try to get the width from the
+#+ATTR.* keyword if it matches a width specification like
+width=\"[0-9]+\", and fall back on that number if none is found.
+
+When set to nil, try to get the width from an #+ATTR.* keyword
+and fall back on the original width if none is found.
 
 This requires Emacs >= 24.1, build with imagemagick support."
   :group 'org-appearance
   :version "24.3"
   :type '(choice
 	  (const :tag "Use the image width" t)
-	  (integer :tag "Resize to this # of pixels")
-	  (string :tag "Maybe use #+ATTR* to resize")))
+	  (integer :tag "Use a number of pixels")
+	  (list :tag "Use #+ATTR* or a number of pixels" (integer))
+	  (const :tag "Use #+ATTR* or don't resize" nil)))
 
 (defun org-duration-string-to-minutes (s &optional output-to-string)
   "Convert a duration string S to minutes.
@@ -17872,24 +17876,27 @@ BEG and END default to the buffer boundaries."
       (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
 			(substring (org-image-file-name-regexp) 0 -2)
 			"\\)\\]" (if include-linked "" "\\]")))
-	    old file ov img type width)
+	    old file ov img type attrwidth width)
 	(while (re-search-forward re end t)
 	  (setq old (get-char-property-and-overlay (match-beginning 1)
 						   'org-image-overlay)
 		file (expand-file-name
-		      (concat (or (match-string 3) "") (match-string 4)))
-		type (if (and (not (eq org-image-actual-width t))
-			      (image-type-available-p 'imagemagick))
-			 'imagemagick)
-		width (cond ((eq org-image-actual-width t) nil)
-			   ((null org-image-actual-width)
-			    (or (save-excursion
+		      (concat (or (match-string 3) "") (match-string 4))))
+	  (when (image-type-available-p 'imagemagick)
+	    (setq attrwidth (if (or (listp org-image-actual-width)
+				    (null org-image-actual-width))
+				(save-excursion
 				  (save-match-data
 				    (move-beginning-of-line 0)
 				    (if (looking-at "#\\+ATTR.*width=\"\\([^\"]+\\)\"")
-					(string-to-number (match-string 1)))))
-				(setq type nil)))
-			   (t org-image-actual-width)))
+					(string-to-number (match-string 1))))))
+		  width (cond ((eq org-image-actual-width t) nil)
+			      ((null org-image-actual-width) attrwidth)
+			      ((numberp org-image-actual-width)
+			       org-image-actual-width)
+			      ((listp org-image-actual-width)
+			       (or attrwidth (car org-image-actual-width))))
+		  type (if width 'imagemagick)))
 	  (when (file-exists-p file)
 	    (if (and (car-safe old) refresh)
 		(image-refresh (overlay-get (cdr old) 'display))
