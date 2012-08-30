@@ -14747,6 +14747,15 @@ and the new value.")
 	(org-priority (if (and value (stringp value) (string-match "\\S-" value))
 			  (string-to-char value) ?\ ))
 	(org-set-tags nil 'align))
+       ((equal property "CLOCKSUM")
+	(if (not (re-search-forward
+		  (concat org-clock-string "\\]--\\(\\[[^]]+\\]\\)") nil t))
+	    (error "Cannot find a clock log")
+	  (goto-char (- (match-end 1) 2))
+	  (cond
+	   ((eq value 'earlier) (org-timestamp-down))
+	   ((eq value 'later) (org-timestamp-up)))
+	  (org-clock-sum-current-item)))
        ((equal property "SCHEDULED")
 	(if (re-search-forward org-scheduled-time-regexp end t)
 	    (cond
