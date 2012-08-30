@@ -896,7 +896,8 @@ to nil."
   :version "24.1"
   :type 'boolean)
 
-(defcustom org-finalize-agenda-hook nil
+(make-obsolete-variable 'org-finalize-agenda-hook 'org-agenda-finalize-hook "24.3")
+(defcustom org-agenda-finalize-hook nil
   "Hook run just before displaying an agenda buffer."
   :group 'org-agenda-startup
   :type 'hook)
@@ -2575,7 +2576,7 @@ Agenda views are separated by `org-agenda-block-separator'."
   (let ((org-agenda-multi t))
     (org-agenda)
     (widen)
-    (org-finalize-agenda)
+    (org-agenda-finalize)
     (org-agenda-fit-window-to-buffer)))
 
 (defun org-agenda-normalize-custom-commands (cmds)
@@ -2844,7 +2845,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
     (setq org-agenda-redo-command redo)
     (goto-char (point-min)))
   (org-agenda-fit-window-to-buffer)
-  (org-let (nth 1 series) '(org-finalize-agenda)))
+  (org-let (nth 1 series) '(org-agenda-finalize)))
 
 ;;;###autoload
 (defmacro org-batch-agenda (cmd-key &rest parameters)
@@ -3413,7 +3414,7 @@ generating a new one."
     (setq buffer-read-only nil)))
 
 (defvar org-agenda-overriding-columns-format)  ; From org-colview.el
-(defun org-finalize-agenda ()
+(defun org-agenda-finalize ()
   "Finishing touch for the agenda buffer, called just before displaying it."
   (unless org-agenda-multi
     (save-excursion
@@ -3442,7 +3443,7 @@ generating a new one."
 	(org-agenda-entry-text-show))
       (if (functionp 'org-habit-insert-consistency-graphs)
 	  (org-habit-insert-consistency-graphs))
-      (run-hooks 'org-finalize-agenda-hook)
+      (run-hooks 'org-agenda-finalize-hook)
       (setq org-agenda-type (org-get-at-bol 'org-agenda-type))
       (when (or org-agenda-tag-filter (get 'org-agenda-tag-filter :preset-filter))
 	(org-agenda-filter-apply org-agenda-tag-filter 'tag))
@@ -3744,13 +3745,13 @@ dates."
 	      (put-text-property s (1- (point)) 'org-agenda-date-header t)
 	      (if (equal d today)
 		  (put-text-property s (1- (point)) 'org-today t))
-	      (and rtn (insert (org-finalize-agenda-entries rtn) "\n"))
+	      (and rtn (insert (org-agenda-finalize-entries rtn) "\n"))
 	      (put-text-property s (1- (point)) 'day d)))))
     (goto-char (point-min))
     (goto-char (or (text-property-any (point-min) (point-max) 'org-today t)
 		   (point-min)))
     (add-text-properties (point-min) (point-max) '(org-agenda-type timeline))
-    (org-finalize-agenda)
+    (org-agenda-finalize)
     (setq buffer-read-only t)))
 
 (defun org-get-all-dates (beg end &optional no-ranges force-today inactive empty pre-re)
@@ -3982,7 +3983,7 @@ given in `org-agenda-start-on-weekday'."
 	      (setq rtnall
 		    (org-agenda-add-time-grid-maybe rtnall ndays todayp))
 	      (if rtnall (insert ;; all entries
-			  (org-finalize-agenda-entries rtnall)
+			  (org-agenda-finalize-entries rtnall)
 			  "\n"))
 	      (put-text-property s (1- (point)) 'day d)
 	      (put-text-property s (1- (point)) 'org-day-cnt day-cnt))))
@@ -4023,7 +4024,7 @@ given in `org-agenda-start-on-weekday'."
 					     org-serie-cmd ,org-cmd))
       (if (eq org-agenda-show-log-scoped 'clockcheck)
 	  (org-agenda-show-clocking-issues))
-      (org-finalize-agenda)
+      (org-agenda-finalize)
       (setq buffer-read-only t)
       (message ""))))
 
@@ -4318,7 +4319,7 @@ in `org-agenda-text-search-extra-files'."
 			       (list 'face 'org-agenda-structure))))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
-	(insert (org-finalize-agenda-entries rtnall) "\n"))
+	(insert (org-agenda-finalize-entries rtnall) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
       (add-text-properties (point-min) (point-max)
@@ -4326,7 +4327,7 @@ in `org-agenda-text-search-extra-files'."
 					     org-last-args (,todo-only ,string ,edit-at)
 					     org-redo-cmd ,org-agenda-redo-command
 					     org-serie-cmd ,org-cmd))
-      (org-finalize-agenda)
+      (org-agenda-finalize)
       (setq buffer-read-only t))))
 
 ;;; Agenda TODO list
@@ -4405,7 +4406,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 	(add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure)))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
-	(insert (org-finalize-agenda-entries rtnall) "\n"))
+	(insert (org-agenda-finalize-entries rtnall) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
       (add-text-properties (point-min) (point-max)
@@ -4413,7 +4414,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 					     org-last-args ,arg
 					     org-redo-cmd ,org-agenda-redo-command
 					     org-serie-cmd ,org-cmd))
-      (org-finalize-agenda)
+      (org-agenda-finalize)
       (setq buffer-read-only t))))
 
 ;;; Agenda tags match
@@ -4490,7 +4491,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 	(add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure)))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
-	(insert (org-finalize-agenda-entries rtnall) "\n"))
+	(insert (org-agenda-finalize-entries rtnall) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
       (add-text-properties (point-min) (point-max)
@@ -4498,7 +4499,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 					     org-last-args (,todo-only ,match)
 					     org-redo-cmd ,org-agenda-redo-command
 					     org-serie-cmd ,org-cmd))
-      (org-finalize-agenda)
+      (org-agenda-finalize)
       (setq buffer-read-only t))))
 
 ;;; Agenda Finding stuck projects
@@ -4907,7 +4908,7 @@ function from a program - use `org-agenda-get-day-entries' instead."
       (setq rtn (apply 'org-agenda-get-day-entries file date args))
       (setq results (append results rtn)))
     (if results
-	(concat (org-finalize-agenda-entries results) "\n"))))
+	(concat (org-agenda-finalize-entries results) "\n"))))
 
 ;;; Agenda entry finders
 
@@ -6246,7 +6247,7 @@ You can also use this function as a filter, by returning nil for lines
 you don't want to have in the agenda at all.  For this application, you
 could bind the variable in the options section of a custom command.")
 
-(defun org-finalize-agenda-entries (list &optional nosort)
+(defun org-agenda-finalize-entries (list &optional nosort)
   "Sort and concatenate the agenda items."
   (setq list (mapcar 'org-agenda-highlight-todo list))
   (if nosort
@@ -8018,7 +8019,7 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 	    (beginning-of-line 1))
 	   (t (error "Line update did not work"))))
 	(beginning-of-line 0)))
-    (org-finalize-agenda)))
+    (org-agenda-finalize)))
 
 (defun org-agenda-align-tags (&optional line)
   "Align all tags in agenda items to `org-agenda-tags-column'."
