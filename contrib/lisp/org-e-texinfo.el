@@ -65,8 +65,7 @@
 ;;; Define Back-End
 
 (defvar org-e-texinfo-translate-alist
-  '((babel-call . org-e-texinfo-babel-call)
-    (bold . org-e-texinfo-bold)
+  '((bold . org-e-texinfo-bold)
     (center-block . org-e-texinfo-center-block)
     (clock . org-e-texinfo-clock)
     (code . org-e-texinfo-code)
@@ -83,7 +82,6 @@
     (footnote-reference . org-e-texinfo-footnote-reference)
     (headline . org-e-texinfo-headline)
     (horizontal-rule . org-e-texinfo-horizontal-rule)
-    (inline-babel-call . org-e-texinfo-inline-babel-call)
     (inline-src-block . org-e-texinfo-inline-src-block)
     (inlinetask . org-e-texinfo-inlinetask)
     (italic . org-e-texinfo-italic)
@@ -93,7 +91,6 @@
     (latex-fragment . org-e-texinfo-latex-fragment)
     (line-break . org-e-texinfo-line-break)
     (link . org-e-texinfo-link)
-    (macro . org-e-texinfo-macro)
     (paragraph . org-e-texinfo-paragraph)
     (plain-list . org-e-texinfo-plain-list)
     (plain-text . org-e-texinfo-plain-text)
@@ -1277,13 +1274,6 @@ INFO is a plist holding contextual information.  See
      ;; No path, only description.  Try to do something useful.
      (t (format org-e-texinfo-link-with-unknown-path-format desc)))))
 
-;;; Macro
-
-(defun org-e-texinfo-macro (macro contents info)
-  "Transcode a MACRO element from Org to Texinfo.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  ;; Use available tools.
-  (org-export-expand-macro macro info))
 
 ;;; Menu
 

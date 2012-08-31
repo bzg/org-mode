@@ -80,7 +80,6 @@
     (man-fragment . org-e-man-man-fragment)
     (line-break . org-e-man-line-break)
     (link . org-e-man-link)
-    (macro . org-e-man-macro)
     (paragraph . org-e-man-paragraph)
     (plain-list . org-e-man-plain-list)
     (plain-text . org-e-man-plain-text)
@@ -743,15 +742,6 @@ INFO is a plist holding contextual information.  See
      (path (format "\\fI%s\\fP" path))
      ;; No path, only description.  Try to do something useful.
      (t (format "\\fI%s\\fP" desc)))))
-
-
-;;;; Macro
-
-(defun org-e-man-macro (macro contents info)
-  "Transcode a MACRO element from Org to Man.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  ;; Use available tools.
-  (org-export-expand-macro macro info))
 
 
 ;;;; Paragraph

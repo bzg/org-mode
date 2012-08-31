@@ -76,7 +76,6 @@
     (groff-fragment . org-e-groff-groff-fragment)
     (line-break . org-e-groff-line-break)
     (link . org-e-groff-link)
-    (macro . org-e-groff-macro)
     (paragraph . org-e-groff-paragraph)
     (plain-list . org-e-groff-plain-list)
     (plain-text . org-e-groff-plain-text)
@@ -1399,13 +1398,6 @@ INFO is a plist holding contextual information.  See
      ;; No path, only description.  Try to do something useful.
      (t (format org-e-groff-link-with-unknown-path-format desc)))))
 
-;;; Macro
-
-(defun org-e-groff-macro (macro contents info)
-  "Transcode a MACRO element from Org to Groff.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  ;; Use available tools.
-  (org-export-expand-macro macro info))
 
 ;;; Paragraph
 

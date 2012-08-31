@@ -178,8 +178,7 @@ All these properties should be back-end agnostic.  Back-end
 specific properties are set through `org-export-define-backend'.
 Properties redefined there have precedence over these.")
 
-(defconst org-export-special-keywords
-  '("SETUP_FILE" "OPTIONS" "MACRO")
+(defconst org-export-special-keywords '("SETUP_FILE" "OPTIONS")
   "List of in-buffer keywords that require special treatment.
 These keywords are not directly associated to a property.  The
 way they are handled must be hard-coded into
@@ -791,7 +790,6 @@ As an example, here is how the `e-ascii' back-end is defined:
    \(latex-fragment . org-e-ascii-latex-fragment)
    \(line-break . org-e-ascii-line-break)
    \(link . org-e-ascii-link)
-   \(macro . org-e-ascii-macro)
    \(paragraph . org-e-ascii-paragraph)
    \(plain-list . org-e-ascii-plain-list)
    \(plain-text . org-e-ascii-plain-text)
@@ -1395,41 +1393,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			     (org-export--get-inbuffer-options
 			      backend (cons file files))))))
 		      ((string= key "OPTIONS")
-		       (org-export--parse-option-keyword val backend))
-		      ((string= key "MACRO")
-		       (when (string-match
-			      "^\\([-a-zA-Z0-9_]+\\)\\(?:[ \t]+\\(.*?\\)[ \t]*$\\)?"
-			      val)
-			 (let ((key
-				(intern
-				 (concat ":macro-"
-					 (downcase (match-string 1 val)))))
-			       (value (org-match-string-no-properties 2 val)))
-			   (cond
-			    ((not value) nil)
-			    ;; Value will be evaled: do not parse it.
-			    ((string-match "\\`(eval\\>" value)
-			     (list key (list value)))
-			    ;; Value has to be parsed for nested
-			    ;; macros.
-			    (t
-			     (list
-			      key
-			      (let ((restr (org-element-restriction 'macro)))
-				(org-element-parse-secondary-string
-				 ;; If user explicitly asks for
-				 ;; a newline, be sure to preserve it
-				 ;; from further filling with
-				 ;; `hard-newline'.  Also replace
-				 ;; "\\n" with "\n", "\\\n" with "\\n"
-				 ;; and so on...
-				 (replace-regexp-in-string
-				  "\\(\\\\\\\\\\)n" "\\\\"
-				  (replace-regexp-in-string
-				   "\\(?:^\\|[^\\\\]\\)\\(\\\\n\\)"
-				   hard-newline value nil nil 1)
-				  nil nil 1)
-				 restr)))))))))))
+		       (org-export--parse-option-keyword val backend)))))
 	       (setq plist (org-combine-plists plist prop)))))))
      ;; 2. Standard options, as in `org-export-options-alist'.
      (let* ((all (append org-export-options-alist
@@ -1530,22 +1494,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	  (let* ((id (org-match-string-no-properties 1))
 		 (file (org-id-find-id-file id)))
 	    (when file (push (cons id (file-relative-name file)) alist)))))
-       alist)
-     :macro-modification-time
-     (and visited-file
-	  (file-exists-p visited-file)
-	  (concat "(eval (format-time-string \"$1\" '"
-		  (prin1-to-string (nth 5 (file-attributes visited-file)))
-		  "))"))
-     ;; Store input file name as a macro.
-     :macro-input-file (and visited-file (file-name-nondirectory visited-file))
-     ;; `:macro-date', `:macro-time' and `:macro-property' could as
-     ;; well be initialized as tree properties, since they don't
-     ;; depend on buffer properties.  Though, it may be more logical
-     ;; to keep them close to other ":macro-" properties.
-     :macro-date "(eval (format-time-string \"$1\"))"
-     :macro-time "(eval (format-time-string \"$1\"))"
-     :macro-property "(eval (org-entry-get nil \"$1\" 'selective))")))
+       alist))))
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
@@ -2497,8 +2446,8 @@ Return the updated communication channel."
 ;;
 ;; Note that `org-export-as' doesn't really parse the current buffer,
 ;; but a copy of it (with the same buffer-local variables and
-;; visibility), where include keywords are expanded and Babel blocks
-;; are executed, if appropriate.
+;; visibility), where macros and include keywords are expanded and
+;; Babel blocks are executed, if appropriate.
 ;; `org-export-with-current-buffer-copy' macro prepares that copy.
 ;;
 ;; File inclusion is taken care of by
@@ -2554,12 +2503,14 @@ Return code as a string."
       (let ((info (org-export-install-filters
 		   (org-export-get-environment backend subtreep ext-plist)))
 	    ;; 2. Get parse tree.  Buffer isn't parsed directly.
-	    ;;    Instead, a temporary copy is created, where include
-	    ;;    keywords are expanded and code blocks are evaluated.
+	    ;;    Instead, a temporary copy is created, where macros
+	    ;;    and include keywords are expanded and code blocks
+	    ;;    are evaluated.
 	    (tree (let ((buf (or (buffer-file-name (buffer-base-buffer))
 				 (current-buffer))))
 		    (org-export-with-current-buffer-copy
 		     (unless noexpand
+		       (org-macro-replace-all)
 		       (org-export-expand-include-keyword)
 		       ;; TODO: Setting `org-current-export-file' is
 		       ;; required by Org Babel to properly resolve
@@ -2891,7 +2842,7 @@ file should have."
 ;; should be added here.
 ;;
 ;; As of now, functions operating on footnotes, headlines, links,
-;; macros, references, src-blocks, tables and tables of contents are
+;; references, src-blocks, tables and tables of contents are
 ;; implemented.
 
 ;;;; For Affiliated Keywords
@@ -3358,35 +3309,6 @@ has type \"radio\"."
      (lambda (radio)
        (when (equal (org-element-property :value radio) path) radio))
      info 'first-match)))
-
-
-;;;; For Macros
-;;
-;; `org-export-expand-macro' simply takes care of expanding macros.
-
-(defun org-export-expand-macro (macro info)
-  "Expand MACRO and return it as a string.
-INFO is a plist holding export options."
-  (let* ((key (org-element-property :key macro))
-	 (args (org-element-property :args macro))
-	 ;; User's macros are stored in the communication channel with
-	 ;; a ":macro-" prefix.  Replace arguments in VALUE.  Also
-	 ;; expand recursively macros within.
-	 (value (org-export-data
-		 (mapcar
-		  (lambda (obj)
-		    (if (not (stringp obj)) (org-export-data obj info)
-		      (replace-regexp-in-string
-		       "\\$[0-9]+"
-		       (lambda (arg)
-			 (nth (1- (string-to-number (substring arg 1))) args))
-		       obj)))
-		  (plist-get info (intern (format ":macro-%s" key))))
-		 info)))
-    ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
-    (when (string-match "\\`(eval\\>" value) (setq value (eval (read value))))
-    ;; Return string.
-    (format "%s" (or value ""))))
 
 
 ;;;; For References

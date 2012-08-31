@@ -76,7 +76,6 @@
    (latex-fragment . org-e-html-latex-fragment)
    (line-break . org-e-html-line-break)
    (link . org-e-html-link)
-   (macro . org-e-html-macro)
    (paragraph . org-e-html-paragraph)
    (plain-list . org-e-html-plain-list)
    (plain-text . org-e-html-plain-text)
@@ -2406,20 +2405,6 @@ INFO is a plist holding contextual information.  See
      (path (format "<a href=\"%s\"%s>%s</a>" path attributes path))
      ;; No path, only description.  Try to do something useful.
      (t (format "<i>%s</i>" desc)))))
-
-
-;;;; Babel Call
-
-;; Babel Calls are ignored.
-
-
-;;;; Macro
-
-(defun org-e-html-macro (macro contents info)
-  "Transcode a MACRO element from Org to HTML.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  ;; Use available tools.
-  (org-export-expand-macro macro info))
 
 
 ;;;; Paragraph

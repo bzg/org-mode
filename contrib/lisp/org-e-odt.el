@@ -58,7 +58,6 @@
    (latex-fragment . org-e-odt-latex-fragment)
    (line-break . org-e-odt-line-break)
    (link . org-e-odt-link)
-   (macro . org-e-odt-macro)
    (paragraph . org-e-odt-paragraph)
    (plain-list . org-e-odt-plain-list)
    (plain-text . org-e-odt-plain-text)
@@ -2604,20 +2603,6 @@ INFO is a plist holding contextual information.  See
      ;; No path, only description.  Try to do something useful.
      (t (format "<text:span text:style-name=\"%s\">%s</text:span>"
 		"Emphasis" desc)))))
-
-
-;;;; Babel Call
-
-;; Babel Calls are ignored.
-
-
-;;;; Macro
-
-(defun org-e-odt-macro (macro contents info)
-  "Transcode a MACRO element from Org to ODT.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  ;; Use available tools.
-  (org-export-expand-macro macro info))
 
 
 ;;;; Paragraph

@@ -76,7 +76,6 @@
    (latex-fragment . org-e-ascii-latex-fragment)
    (line-break . org-e-ascii-line-break)
    (link . org-e-ascii-link)
-   (macro . org-e-ascii-macro)
    (paragraph . org-e-ascii-paragraph)
    (plain-list . org-e-ascii-plain-list)
    (plain-text . org-e-ascii-plain-text)
@@ -1326,15 +1325,6 @@ INFO is a plist holding contextual information."
 	(concat
 	 (format "[%s]" desc)
 	 (unless org-e-ascii-links-to-notes (format " (%s)" raw-link))))))))
-
-
-;;;; Macro
-
-(defun org-e-ascii-macro (macro contents info)
-  "Transcode a MACRO element from Org to ASCII.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  (org-export-expand-macro macro info))
 
 
 ;;;; Paragraph

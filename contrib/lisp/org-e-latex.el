@@ -71,7 +71,6 @@
    (latex-fragment . org-e-latex-latex-fragment)
    (line-break . org-e-latex-line-break)
    (link . org-e-latex-link)
-   (macro . org-e-latex-macro)
    (paragraph . org-e-latex-paragraph)
    (plain-list . org-e-latex-plain-list)
    (plain-text . org-e-latex-plain-text)
@@ -1818,15 +1817,6 @@ INFO is a plist holding contextual information.  See
      (path (format "\\url{%s}" path))
      ;; No path, only description.  Try to do something useful.
      (t (format org-e-latex-link-with-unknown-path-format desc)))))
-
-
-;;;; Macro
-
-(defun org-e-latex-macro (macro contents info)
-  "Transcode a MACRO element from Org to LaTeX.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  ;; Use available tools.
-  (org-export-expand-macro macro info))
 
 
 ;;;; Paragraph

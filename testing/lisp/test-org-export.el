@@ -975,78 +975,6 @@ Another text. (ref:text)
 
 
 
-;;; Macro
-
-(ert-deftest test-org-export/define-macro ()
-  "Try defining various Org macro using in-buffer #+MACRO: keyword."
-  ;; Parsed macro.
-  (should (equal (org-test-with-temp-text "#+MACRO: one 1"
-		   (org-export--get-inbuffer-options))
-		 '(:macro-one ("1"))))
-  ;; Evaled macro.
-  (should (equal (org-test-with-temp-text "#+MACRO: two (eval (+ 1 1))"
-		   (org-export--get-inbuffer-options))
-		 '(:macro-two ("(eval (+ 1 1))"))))
-  ;; Incomplete macro.
-  (should-not (org-test-with-temp-text "#+MACRO: three"
-		(org-export--get-inbuffer-options)))
-  ;; Macro with newline character.
-  (should (equal (org-test-with-temp-text "#+MACRO: four a\\nb"
-		   (org-export--get-inbuffer-options))
-		 '(:macro-four ("a\nb"))))
-  ;; Macro with protected newline character.
-  (should (equal (org-test-with-temp-text "#+MACRO: five a\\\\nb"
-		   (org-export--get-inbuffer-options))
-		 '(:macro-five ("a\\nb"))))
-  ;; Recursive macro.
-  (org-test-with-temp-text "#+MACRO: six 6\n#+MACRO: seven 1 + {{{six}}}"
-    (should
-     (equal
-      (org-export--get-inbuffer-options)
-      '(:macro-six
-	("6")
-	:macro-seven
-	("1 + " (macro (:key "six" :value "{{{six}}}" :args nil :begin 5 :end 14
-			     :post-blank 0 :parent nil))))))))
-
-(ert-deftest test-org-export/expand-macro ()
-  "Test `org-export-expand-macro' specifications."
-  ;; Standard test.
-  (should
-   (equal
-    "some text"
-    (org-test-with-parsed-data "#+MACRO: macro some text\n{{{macro}}}"
-      (org-export-expand-macro
-       (org-element-map tree 'macro 'identity info t) info))))
-  ;; Macro with arguments.
-  (should
-   (equal
-    "some text"
-    (org-test-with-parsed-data "#+MACRO: macro $1 $2\n{{{macro(some,text)}}}"
-      (org-export-expand-macro
-       (org-element-map tree 'macro 'identity info t) info))))
-  ;; Macro with "eval"
-  (should
-   (equal
-    "3"
-    (org-test-with-parsed-data "#+MACRO: add (eval (+ $1 $2))\n{{{add(1,2)}}}"
-      (org-export-expand-macro
-       (org-element-map tree 'macro 'identity info t) info))))
-  ;; Nested macros.
-  (should
-   (equal
-    "inner outer"
-    (org-test-with-parsed-data
-	"#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\n{{{out}}}"
-      (flet ((translate-macro (macro contents info)
-			      (org-export-expand-macro macro info)))
-	(org-export-expand-macro
-	 (org-element-map tree 'macro 'identity info t)
-	 (org-combine-plists
-	  info `(:translate-alist ((macro . translate-macro))))))))))
-
-
-
 ;;; Src-block and example-block
 
 (ert-deftest test-org-export/unravel-code ()
