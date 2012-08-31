@@ -681,10 +681,10 @@ around it."
 
 (defun org-columns-goto-top-level ()
   (when (condition-case nil (org-back-to-heading) (error nil))
-    (org-entry-get nil "COLUMNS" t)
-    (if (marker-position org-entry-property-inherited-from)
-	(move-marker org-columns-top-level-marker org-entry-property-inherited-from)
-      (move-marker org-columns-top-level-marker (point)))))
+    (org-entry-get nil "COLUMNS" t))
+  (if (marker-position org-entry-property-inherited-from)
+      (move-marker org-columns-top-level-marker org-entry-property-inherited-from)
+    (move-marker org-columns-top-level-marker (point))))
 
 (defun org-columns (&optional columns-fmt-string)
   "Turn on column view on an org-mode file.
@@ -1368,8 +1368,7 @@ and tailing newline characters."
     (cond
      ((and (boundp 'org-agenda-overriding-columns-format)
 	   org-agenda-overriding-columns-format)
-      (setq fmt org-agenda-overriding-columns-format)
-      (org-set-local 'org-agenda-overriding-columns-format fmt))
+      (setq fmt org-agenda-overriding-columns-format))
      ((setq m (org-get-at-bol 'org-hd-marker))
       (setq fmt (or (org-entry-get m "COLUMNS" t)
 		    (with-current-buffer (marker-buffer m)
@@ -1425,7 +1424,8 @@ and tailing newline characters."
 This will add overlays to the date lines, to show the summary for each day."
   (let* ((fmt (mapcar (lambda (x)
 			(if (string-match "CLOCKSUM.*" (car x))
-			    (list (match-string 0) (nth 1 x) (nth 2 x) ":" 'add_times
+			    (list (match-string 0 (car x))
+				  (nth 1 x) (nth 2 x) ":" 'add_times
 				  nil '+ nil)
 			  x))
 		      org-columns-current-fmt-compiled))
