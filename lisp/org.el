@@ -5085,11 +5085,13 @@ The following commands are available:
 		'local)
   ;; Check for running clock before killing a buffer
   (org-add-hook 'kill-buffer-hook 'org-check-running-clock nil 'local)
+  ;; Initialize macros templates.
+  (org-macro-initialize-templates)
+  ;; Initialize radio targets.
+  (org-update-radio-target-regexp)
   ;; Indentation.
   (org-set-local 'indent-line-function 'org-indent-line)
   (org-set-local 'indent-region-function 'org-indent-region)
-  ;; Initialize radio targets.
-  (org-update-radio-target-regexp)
   ;; Filling and auto-filling.
   (org-setup-filling)
   ;; Comments.
@@ -20863,6 +20865,117 @@ hierarchy of headlines by UP levels before marking the subtree."
   (if (org-called-interactively-p 'any)
       (call-interactively 'org-mark-element)
     (org-mark-element)))
+
+
+;;; Macros
+
+;; Macros are expanded with `org-macro-replace-all', which relies
+;; internally on `org-macro-expand'.
+
+;; Templates for expansion are stored in the buffer-local variable
+;; `org-macro-templates'.  This variable is updated by
+;; `org-macro-initialize-templates'.
+
+
+(defvar org-macro-templates nil
+  "Alist containing all macro templates in current buffer.
+Associations are in the shape of (NAME . TEMPLATE) where NAME
+stands for macro's name and template for its replacement value,
+both as strings.  This is an internal variable.  Do not set it
+directly, use instead:
+
+  #+MACRO: name template")
+(make-variable-buffer-local 'org-macro-templates)
+
+(defun org-macro-expand (macro)
+  "Return expanded MACRO, as a string.
+MACRO is an object, obtained, for example, with
+`org-element-context'.  Return nil if no template was found."
+  (let ((template
+	 (cdr (assoc-string (org-element-property :key macro)
+			    org-macro-templates
+			    ;; Macro names are case-insensitive.
+			    t))))
+    (when template
+      (let ((value (replace-regexp-in-string
+                    "\\$[0-9]+"
+                    (lambda (arg)
+                      (or (nth (1- (string-to-number (substring arg 1)))
+                               (org-element-property :args macro))
+                          ;; No argument provided: remove
+                          ;; place-holder.
+                          ""))
+                    template)))
+        ;; VALUE starts with "(eval": it is a s-exp, `eval' it.
+        (when (string-match "\\`(eval\\>" value)
+          (setq value (eval (read value))))
+        ;; Return string.
+        (format "%s" (or value ""))))))
+
+(defun org-macro-replace-all ()
+  "Replace all macros in current buffer by their expansion."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "{{{[-A-Za-z0-9_]" nil t)
+      (let ((object (org-element-context)))
+        (when (eq (org-element-type object) 'macro)
+          (let ((value (org-macro-expand object)))
+            (when value
+              (delete-region
+               (org-element-property :begin object)
+               ;; Preserve white spaces after the macro.
+               (progn (goto-char (org-element-property :end object))
+                      (skip-chars-backward " \t")
+                      (point)))
+              ;; Leave point before replacement in case of recursive
+              ;; expansions.
+              (save-excursion (insert value)))))))))
+
+(defun org-macro-initialize-templates ()
+  "Collect macro templates defined in current buffer.
+Templates are stored in buffer-local variable
+`org-macro-templates'.  In addition to buffer-defined macros, the
+function installs the following ones: \"property\", \"date\",
+\"time\". and, if appropriate, \"input-file\" and
+\"modification-time\"."
+  (org-with-wide-buffer
+   (goto-char (point-min))
+   (let ((case-fold-search t)
+	 (set-template
+	  (lambda (cell)
+	    ;; Add CELL to `org-macro-templates' if there's no
+	    ;; association matching its CAR already.  Otherwise,
+	    ;; replace old association with CELL.
+	    (let* ((value (cdr cell))
+		   (key (car cell))
+		   (old-template (assoc key org-macro-templates)))
+	      (if old-template (setcdr old-template value)
+		(push cell org-macro-templates))))))
+     ;; Install buffer-local macros.
+     (while (re-search-forward "^[ \t]*#\\+MACRO:" nil t)
+       (let ((element (org-element-at-point)))
+	 (when (eq (org-element-type element) 'keyword)
+	   (let ((value (org-element-property :value element)))
+	     (when (string-match "^\\(.*?\\)\\(?:\\s-+\\(.*\\)\\)?\\s-*$" value)
+	       (funcall set-template
+			(cons (match-string 1 value)
+			      (or (match-string 2 value) ""))))))))
+     ;; Install hard-coded macros.
+     (mapc (lambda (cell) (funcall set-template cell))
+	   (list
+	    (cons "property" "(eval (org-entry-get nil \"$1\" 'selective))")
+	    (cons "date" "(eval (format-time-string \"$1\"))")
+	    (cons "time" "(eval (format-time-string \"$1\"))")))
+     (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+       (when (and visited-file (file-exists-p visited-file))
+	 (mapc (lambda (cell) (funcall set-template cell))
+	       (list
+		(cons "input-file" (file-name-nondirectory visited-file))
+		(cons "modification-time"
+		      (format "(eval (format-time-string \"$1\" '%s))"
+			      (prin1-to-string
+			       (nth 5 (file-attributes visited-file))))))))))))
+
 
 ;;; Indentation
 
