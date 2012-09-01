@@ -1548,11 +1548,14 @@ retrieved."
   (let (letbind pair)
     (org-with-wide-buffer
      (goto-char (point-min))
-     (while (re-search-forward (org-make-options-regexp '("BIND")) nil t)
-       (when (org-export-confirm-letbind)
-	 (push (read (concat "(" (org-match-string-no-properties 2) ")"))
-	       letbind))))
-    (while (setq pair (pop letbind))
+     (while (re-search-forward "^[ \t]*#\\+BIND:" nil t)
+       (let* ((element (org-element-at-point))
+	      (value (org-element-property :value element)))
+	 (when (and (eq (org-element-type element) 'keyword)
+		    (not (equal value  ""))
+		    (org-export--confirm-letbind))
+	   (push (read (format "(%s)" value)) letbind)))))
+    (dolist (pair (nreverse letbind))
       (org-set-local (car pair) (nth 1 pair)))))
 
 

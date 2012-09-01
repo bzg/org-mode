@@ -57,7 +57,38 @@ already filled in `info'."
 
 
 
-;;; Tests
+;;; Internal Tests
+
+(ert-deftest test-org-export/bind-keyword ()
+  "Test reading #+BIND: keywords."
+  ;; Test with `org-export-all-BIND' set to t.
+  (should
+   (org-test-with-temp-text "#+BIND: variable value"
+     (let ((org-export-allow-BIND t))
+       (org-export--install-letbind-maybe)
+       (eq variable 'value))))
+  ;; Test with `org-export-all-BIND' set to nil.
+  (should-not
+   (org-test-with-temp-text "#+BIND: variable value"
+     (let ((org-export-allow-BIND nil))
+       (org-export--install-letbind-maybe)
+       (boundp 'variable))))
+  ;; Test with `org-export-all-BIND' set to 'confirm and
+  ;; `org-export--allow-BIND-local' to t .
+  (should
+   (org-test-with-temp-text "#+BIND: variable value"
+     (let ((org-export-allow-BIND 'confirm))
+       (org-set-local 'org-export--allow-BIND-local t)
+       (org-export--install-letbind-maybe)
+       (eq variable 'value))))
+  ;; Test with `org-export-all-BIND' set to 'confirm and
+  ;; `org-export--allow-BIND-local' to nil.
+  (should-not
+   (org-test-with-temp-text "#+BIND: variable value"
+     (let ((org-export-allow-BIND 'confirm))
+       (org-set-local 'org-export--allow-BIND-local nil)
+       (org-export--install-letbind-maybe)
+       (boundp 'variable)))))
 
 (ert-deftest test-org-export/parse-option-keyword ()
   "Test reading all standard #+OPTIONS: items."
