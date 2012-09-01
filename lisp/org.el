@@ -20938,20 +20938,19 @@ Templates are stored in buffer-local variable
 function installs the following ones: \"property\", \"date\",
 \"time\". and, if appropriate, \"input-file\" and
 \"modification-time\"."
-  (org-with-wide-buffer
-   (goto-char (point-min))
-   (let ((case-fold-search t)
-	 (set-template
-	  (lambda (cell)
-	    ;; Add CELL to `org-macro-templates' if there's no
-	    ;; association matching its CAR already.  Otherwise,
-	    ;; replace old association with CELL.
-	    (let* ((value (cdr cell))
-		   (key (car cell))
-		   (old-template (assoc key org-macro-templates)))
-	      (if old-template (setcdr old-template value)
-		(push cell org-macro-templates))))))
-     ;; Install buffer-local macros.
+  (let ((case-fold-search t)
+	(set-template
+	 (lambda (cell)
+	   ;; Add CELL to `org-macro-templates' if there's no
+	   ;; association matching its name already.  Otherwise,
+	   ;; replace old association with the new one in that
+	   ;; variable.
+	   (let ((old-template (assoc (car cell) org-macro-templates)))
+	     (if old-template (setcdr old-template (cdr cell))
+	       (push cell org-macro-templates))))))
+    ;; Install buffer-local macros.
+    (org-with-wide-buffer
+     (goto-char (point-min))
      (while (re-search-forward "^[ \t]*#\\+MACRO:" nil t)
        (let ((element (org-element-at-point)))
 	 (when (eq (org-element-type element) 'keyword)
@@ -20959,22 +20958,22 @@ function installs the following ones: \"property\", \"date\",
 	     (when (string-match "^\\(.*?\\)\\(?:\\s-+\\(.*\\)\\)?\\s-*$" value)
 	       (funcall set-template
 			(cons (match-string 1 value)
-			      (or (match-string 2 value) ""))))))))
-     ;; Install hard-coded macros.
-     (mapc (lambda (cell) (funcall set-template cell))
-	   (list
-	    (cons "property" "(eval (org-entry-get nil \"$1\" 'selective))")
-	    (cons "date" "(eval (format-time-string \"$1\"))")
-	    (cons "time" "(eval (format-time-string \"$1\"))")))
-     (let ((visited-file (buffer-file-name (buffer-base-buffer))))
-       (when (and visited-file (file-exists-p visited-file))
-	 (mapc (lambda (cell) (funcall set-template cell))
-	       (list
-		(cons "input-file" (file-name-nondirectory visited-file))
-		(cons "modification-time"
-		      (format "(eval (format-time-string \"$1\" '%s))"
-			      (prin1-to-string
-			       (nth 5 (file-attributes visited-file))))))))))))
+			      (or (match-string 2 value) "")))))))))
+    ;; Install hard-coded macros.
+    (mapc (lambda (cell) (funcall set-template cell))
+	  (list
+	   (cons "property" "(eval (org-entry-get nil \"$1\" 'selective))")
+	   (cons "date" "(eval (format-time-string \"$1\"))")
+	   (cons "time" "(eval (format-time-string \"$1\"))")))
+    (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+      (when (and visited-file (file-exists-p visited-file))
+	(mapc (lambda (cell) (funcall set-template cell))
+	      (list
+	       (cons "input-file" (file-name-nondirectory visited-file))
+	       (cons "modification-time"
+		     (format "(eval (format-time-string \"$1\" '%s))"
+			     (prin1-to-string
+			      (nth 5 (file-attributes visited-file)))))))))))
 
 
 ;;; Indentation
