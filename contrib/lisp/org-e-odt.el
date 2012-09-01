@@ -631,12 +631,14 @@ configuration."
 
 (defcustom org-e-odt-preferred-output-format nil
   "Automatically post-process to this format after exporting to \"odt\".
-Interactive commands `org-export-as-e-odt' and
-`org-export-as-e-odt-and-open' export first to \"odt\" format and
-then use `org-e-odt-convert-process' to convert the
+Command `org-e-odt-export-to-odt' exports first to \"odt\" format
+and then uses `org-e-odt-convert-process' to convert the
 resulting document to this format.  During customization of this
 variable, the list of valid values are populated based on
-`org-e-odt-convert-capabilities'."
+`org-e-odt-convert-capabilities'.
+
+You can set this option on per-file basis using file local
+values.  See Info node `(emacs) File Variables'."
   :group 'org-export-e-odt
   :version "24.1"
   :type '(choice :convert-widget
@@ -647,6 +649,8 @@ variable, the list of valid values are populated based on
 		   ,@(mapcar (lambda (c)
 			       `(const :tag ,c ,c))
 			     (org-e-odt-reachable-formats "odt")))))
+;;;###autoload
+(put 'org-e-odt-preferred-output-format 'safe-local-variable 'stringp)
 
 
 ;;;; Drawers
