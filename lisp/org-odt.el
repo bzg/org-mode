@@ -414,7 +414,10 @@ Interactive commands `org-export-as-odt' and
 then use `org-export-odt-convert-process' to convert the
 resulting document to this format.  During customization of this
 variable, the list of valid values are populated based on
-`org-export-odt-convert-capabilities'."
+`org-export-odt-convert-capabilities'.
+
+You can set this option on per-file basis using file local
+values.  See Info node `(emacs) File Variables'."
   :group 'org-export-odt
   :version "24.1"
   :type '(choice :convert-widget
@@ -425,6 +428,8 @@ variable, the list of valid values are populated based on
 		   ,@(mapcar (lambda (c)
 			       `(const :tag ,c ,c))
 			     (org-lparse-reachable-formats "odt")))))
+;;;###autoload
+(put 'org-export-odt-preferred-output-format 'safe-local-variable 'stringp)
 
 (defmacro org-odt-cleanup-xml-buffers (&rest body)
   `(let ((org-odt-zip-dir
