@@ -1345,7 +1345,13 @@ Outside list"
   ;; A section cannot be empty.
   (should-not
    (org-test-with-temp-text "* Headline 1\n* Headline 2"
-     (org-element-map (org-element-parse-buffer) 'section 'identity))))
+     (org-element-map (org-element-parse-buffer) 'section 'identity)))
+  ;; A section doesn't contain sub-trees.
+  (should-not
+   (org-test-with-temp-text "* Head\nText\n** Sub-Head"
+     (org-element-map
+      (org-element-map (org-element-parse-buffer) 'section 'identity nil t)
+      'headline 'identity))))
 
 
 ;;;; Special Block

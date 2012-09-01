@@ -1189,18 +1189,18 @@ and `:post-blank' keywords."
   (save-excursion
     ;; Beginning of section is the beginning of the first non-blank
     ;; line after previous headline.
-    (org-with-limited-levels
-     (let ((begin (point))
-	   (end (progn (goto-char limit) (point)))
-	   (pos-before-blank (progn (skip-chars-backward " \r\t\n")
-				    (forward-line)
-				    (point))))
-       (list 'section
-	     (list :begin begin
-		   :end end
-		   :contents-begin begin
-		   :contents-end pos-before-blank
-		   :post-blank (count-lines pos-before-blank end)))))))
+    (let ((begin (point))
+	  (end (progn (org-with-limited-levels (outline-next-heading))
+		      (point)))
+	  (pos-before-blank (progn (skip-chars-backward " \r\t\n")
+				   (forward-line)
+				   (point))))
+      (list 'section
+	    (list :begin begin
+		  :end end
+		  :contents-begin begin
+		  :contents-end pos-before-blank
+		  :post-blank (count-lines pos-before-blank end))))))
 
 (defun org-element-section-interpreter (section contents)
   "Interpret SECTION element as Org syntax.
@@ -3355,15 +3355,14 @@ element it has to parse."
        ;; Item.
        ((eq special 'item)
 	(org-element-item-parser limit structure raw-secondary-p))
-       ;; Quote Section.
-       ((eq special 'quote-section) (org-element-quote-section-parser limit))
        ;; Table Row.
        ((eq special 'table-row) (org-element-table-row-parser limit))
        ;; Headline.
        ((org-with-limited-levels (org-at-heading-p))
         (org-element-headline-parser limit raw-secondary-p))
-       ;; Section (must be checked after headline).
+       ;; Sections (must be checked after headline).
        ((eq special 'section) (org-element-section-parser limit))
+       ((eq special 'quote-section) (org-element-quote-section-parser limit))
        ((eq special 'first-section)
 	(org-element-section-parser
 	 (or (save-excursion (org-with-limited-levels (outline-next-heading)))
