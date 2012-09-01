@@ -1546,7 +1546,7 @@ possible security risks."
   "Install the values from #+BIND lines as local variables.
 Variables must be installed before in-buffer options are
 retrieved."
-  (let (letbind pair)
+  (let ((case-fold-search t) letbind pair)
     (org-with-wide-buffer
      (goto-char (point-min))
      (while (re-search-forward "^[ \t]*#\\+BIND:" nil t)

@@ -88,7 +88,13 @@ already filled in `info'."
      (let ((org-export-allow-BIND 'confirm))
        (org-set-local 'org-export--allow-BIND-local nil)
        (org-export--install-letbind-maybe)
-       (boundp 'variable)))))
+       (boundp 'variable))))
+  ;; BIND keywords are case-insensitive.
+  (should
+   (org-test-with-temp-text "#+bind: variable value"
+     (let ((org-export-allow-BIND t))
+       (org-export--install-letbind-maybe)
+       (eq variable 'value)))))
 
 (ert-deftest test-org-export/parse-option-keyword ()
   "Test reading all standard #+OPTIONS: items."
