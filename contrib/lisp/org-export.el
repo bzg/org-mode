@@ -973,8 +973,7 @@ structure of the values."
 ;;    just before export, by `org-export-collect-tree-properties'.
 ;;
 ;; Here is the full list of properties available during transcode
-;; process, with their category (option, tree or local) and their
-;; value type.
+;; process, with their category and their value type.
 ;;
 ;; + `:author' :: Author's name.
 ;;   - category :: option
@@ -1373,7 +1372,8 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
    (goto-char (point-min))
    (let ((case-fold-search t) plist)
      ;; 1. Special keywords, as in `org-export-special-keywords'.
-     (let ((special-re (org-make-options-regexp org-export-special-keywords)))
+     (let ((special-re
+	    (format "^[ \t]*#\\+%s:" (regexp-opt org-export-special-keywords))))
        (while (re-search-forward special-re nil t)
 	 (let ((element (org-element-at-point)))
 	   (when (eq (org-element-type element) 'keyword)
@@ -1404,15 +1404,16 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 				     (intern
 				      (format "org-%s-options-alist" backend))))
 				(and (boundp var) (eval var))))))
-	    ;; Build alist between keyword name and property name.
+	    ;; Build ALIST between keyword name and property name.
 	    (alist
 	     (delq nil (mapcar
 			(lambda (e) (when (nth 1 e) (cons (nth 1 e) (car e))))
 			all)))
 	    ;; Build regexp matching all keywords associated to export
 	    ;; options.  Note: the search is case insensitive.
-	    (opt-re (org-make-options-regexp
-		     (delq nil (mapcar (lambda (e) (nth 1 e)) all)))))
+	    (opt-re (format "^[ \t]*#\\+%s:"
+		     (regexp-opt
+		      (delq nil (mapcar (lambda (e) (nth 1 e)) all))))))
        (goto-char (point-min))
        (while (re-search-forward opt-re nil t)
 	 (let ((element (org-element-at-point)))
