@@ -199,7 +199,7 @@ regexp matching one object can also match the other object.")
   "Complete list of object types.")
 
 (defconst org-element-recursive-objects
-  '(bold italic link macro subscript radio-target strike-through superscript
+  '(bold italic link subscript radio-target strike-through superscript
 	 table-cell underline)
   "List of recursive object types.")
 
@@ -300,7 +300,6 @@ This list is checked after translations have been applied.  See
     (keyword latex-or-entity macro sub/superscript text-markup)
     (link export-snippet inline-babel-call inline-src-block latex-or-entity link
 	  sub/superscript text-markup)
-    (macro macro)
     (paragraph export-snippet footnote-reference inline-babel-call
 	       inline-src-block latex-or-entity line-break link macro
 	       radio-target statistics-cookie sub/superscript target text-markup
