@@ -21222,7 +21222,7 @@ meant to be filled."
 		     (make-string (org-list-item-body-column
 				   (org-element-property :begin parent))
 				  ? ))
-		    ((looking-at "[ \t]*") (match-string 0))
+		    ((looking-at "[ \t]+") (match-string 0))
 		    (t  ""))))
 	   (comment-block
 	    ;; Only fill contents if P is within block boundaries.
@@ -21234,7 +21234,7 @@ meant to be filled."
 			   (skip-chars-backward " \r\t\n")
 			   (line-beginning-position))))
 	      (when (and (>= p cbeg) (< p cend))
-		(if (looking-at "[ \t]*") (match-string 0) ""))))))))))
+		(if (looking-at "[ \t]+") (match-string 0) ""))))))))))
 
 (declare-function message-goto-body "message" ())
 (defvar message-cite-prefix-regexp)	; From message.el
