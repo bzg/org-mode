@@ -505,6 +505,9 @@ Lisp programs can set KEYS to a string associated with a template in
 `org-capture-templates'.  In this case, interactive selection will be
 bypassed."
   (interactive "P")
+  (if (eq major-mode 'org-agenda-mode)
+      (setq org-overriding-default-time
+	    (org-get-cursor-date)))
   (cond
    ((equal goto '(4)) (org-capture-goto-target))
    ((equal goto '(16)) (org-capture-goto-last-stored))
