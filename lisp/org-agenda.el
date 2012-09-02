@@ -83,6 +83,7 @@
 		  (&optional buffer-or-name norecord label))
 (declare-function org-agenda-columns "org-colview" ())
 (declare-function org-add-archive-files "org-archive" (files))
+(declare-function org-capture "org-capture" (&optional goto keys))
 
 (defvar calendar-mode-map)                    ; defined in calendar.el
 (defvar org-clock-current-task nil)           ; defined in org-clock.el
@@ -2006,8 +2007,9 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "%"        'org-agenda-bulk-mark-regexp)
 (org-defkey org-agenda-mode-map "u"        'org-agenda-bulk-unmark)
 (org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-unmark-all)
-(org-defkey org-agenda-mode-map "A"        'org-agenda-append-agenda)
 (org-defkey org-agenda-mode-map "B"        'org-agenda-bulk-action)
+(org-defkey org-agenda-mode-map "k"        'org-agenda-capture)
+(org-defkey org-agenda-mode-map "A"        'org-agenda-append-agenda)
 (org-defkey org-agenda-mode-map "\C-c\C-x!" 'org-reload)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-a" 'org-agenda-archive-default)
 (org-defkey org-agenda-mode-map "\C-c\C-xa"    'org-agenda-toggle-archive-tag)
@@ -2036,8 +2038,6 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "y"        'org-agenda-year-view)
 (org-defkey org-agenda-mode-map "\C-c\C-z" 'org-agenda-add-note)
 (org-defkey org-agenda-mode-map "z"        'org-agenda-add-note)
-(org-defkey org-agenda-mode-map "k"        'org-agenda-action)
-(org-defkey org-agenda-mode-map "\C-c\C-x\C-k" 'org-agenda-action)
 (org-defkey org-agenda-mode-map [(shift right)] 'org-agenda-do-date-later)
 (org-defkey org-agenda-mode-map [(shift left)] 'org-agenda-do-date-earlier)
 (org-defkey org-agenda-mode-map [?\C-c ?\C-x (right)] 'org-agenda-do-date-later)
@@ -2192,6 +2192,7 @@ The following commands are available:
     ["Show original entry" org-agenda-show t]
     ["Go To (other window)" org-agenda-goto t]
     ["Go To (this window)" org-agenda-switch-to t]
+    ["Capture with cursor date" org-agenda-capture t]
     ["Follow Mode" org-agenda-follow-mode
      :style toggle :selected org-agenda-follow-mode :active t]
 					;    ["Tree to indirect frame" org-agenda-tree-to-indirect-buffer t]
@@ -2216,7 +2217,7 @@ The following commands are available:
      ["Mark all" org-agenda-bulk-mark-all t]
      ["Mark matching regexp" org-agenda-bulk-mark-regexp t]
      ["Unmark entry" org-agenda-bulk-unmark t]
-     ["Unmark all entries" org-agenda-bulk-unmark-all :active t :keys "C-u s"])
+     ["Unmark all entries" org-agenda-bulk-unmark-all :active t :keys "U"])
     ["Act on all marked" org-agenda-bulk-action t]
     "--"
     ("Tags and Properties"
@@ -2228,11 +2229,6 @@ The following commands are available:
     ("Deadline/Schedule"
      ["Schedule" org-agenda-schedule t]
      ["Set Deadline" org-agenda-deadline t]
-     "--"
-     ["Mark item" org-agenda-action :active t :keys "k m"]
-     ["Show mark item" org-agenda-action :active t :keys "k v"]
-     ["Schedule marked item" org-agenda-action :active t :keys "k s"]
-     ["Set Deadline for marked item" org-agenda-action :active t :keys "k d"]
      "--"
      ["Change Date +1 day" org-agenda-date-later (org-agenda-check-type nil 'agenda 'timeline)]
      ["Change Date -1 day" org-agenda-date-earlier (org-agenda-check-type nil 'agenda 'timeline)]
@@ -8395,72 +8391,6 @@ ARG is passed through to `org-deadline'."
       (org-agenda-show-new-time marker ts "D"))
     (message "Deadline for this item set to %s" ts)))
 
-(defun org-agenda-action ()
-  "Select entry for agenda action, or execute an agenda action.
-This command prompts for another letter.  Valid inputs are:
-
-m     Mark the entry at point for an agenda action
-s     Schedule the marked entry to the date at the cursor
-d     Set the deadline of the marked entry to the date at the cursor
-r     Call `org-remember' with cursor date as the default date
-c     Call `org-capture' with cursor date as the default date
-SPC   Show marked entry in other window
-TAB   Visit marked entry in other window
-
-The cursor may be at a date in the calendar, or in the Org agenda."
-  (interactive)
-  (let (ans)
-    (message "Select action: [m]ark | [s]chedule [d]eadline [r]emember [c]apture [ ]show")
-    (setq ans (read-char-exclusive))
-    (cond
-     ((equal ans ?m)
-      ;; Mark this entry
-      (if (eq major-mode 'org-agenda-mode)
-	  (let ((m (or (org-get-at-bol 'org-hd-marker)
-		       (org-get-at-bol 'org-marker))))
-	    (if m
-		(progn
-		  (move-marker org-agenda-action-marker
-			       (marker-position m) (marker-buffer m))
-		  (message "Entry marked for action; press `k' at desired date in agenda or calendar"))
-	      (error "Don't know which entry to mark")))
-	(error "This command works only in the agenda")))
-     ((equal ans ?s)
-      (org-agenda-do-action '(org-schedule nil org-overriding-default-time)))
-     ((equal ans ?d)
-      (org-agenda-do-action '(org-deadline nil org-overriding-default-time)))
-     ((equal ans ?r)
-      (org-agenda-do-action '(org-remember) t))
-     ((equal ans ?c)
-      (org-agenda-do-action '(org-capture) t))
-     ((equal ans ?\ )
-      (let ((cw (selected-window)))
-	(org-switch-to-buffer-other-window
-	 (marker-buffer org-agenda-action-marker))
-	(goto-char org-agenda-action-marker)
-	(org-show-context 'agenda)
-	(select-window cw)))
-     ((equal ans ?\C-i)
-      (org-switch-to-buffer-other-window
-       (marker-buffer org-agenda-action-marker))
-      (goto-char org-agenda-action-marker)
-      (org-show-context 'agenda))
-     (t (error "Invalid agenda action %c" ans)))))
-
-(defun org-agenda-do-action (form &optional current-buffer)
-  "Evaluate FORM at the entry pointed to by `org-agenda-action-marker'."
-  (let ((org-overriding-default-time (org-get-cursor-date)))
-    (if current-buffer
-	(eval form)
-      (if (not (marker-buffer org-agenda-action-marker))
-	  (error "No entry has been selected for agenda action")
-	(with-current-buffer (marker-buffer org-agenda-action-marker)
-	  (save-excursion
-	    (save-restriction
-	      (widen)
-	      (goto-char org-agenda-action-marker)
-	      (eval form))))))))
-
 (defun org-agenda-clock-in (&optional arg)
   "Start the clock on the currently selected item."
   (interactive "P")
@@ -8967,8 +8897,8 @@ The prefix arg is passed through to the command if possible."
 
   ;; Prompt for the bulk command
   (let* ((msg (if org-agenda-persistent-marks "Bulk (persistent): " "Bulk: ")))
-    (message (concat msg "[r]efile [$]arch [A]rch->sib [t]odo"
-		     " [+/-]tag [s]chd [S]catter [d]eadline [f]unction    "
+    (message (concat msg "[$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [d]eadline [r]efile "
+		     "[S]catter [f]unction    "
 		     (when org-agenda-bulk-custom-functions
 		       (concat " Custom: ["
 			       (mapconcat (lambda(f) (char-to-string (car f)))
@@ -8978,6 +8908,9 @@ The prefix arg is passed through to the command if possible."
       (let* ((action (read-char-exclusive))
 	     (org-log-refile (if org-log-refile 'time nil))
 	     (entries (reverse org-agenda-bulk-marked-entries))
+	     (org-overriding-default-time
+	      (if (get-text-property (point) 'org-agenda-date-header)
+		  (org-get-cursor-date)))
 	     redo-at-end
 	     cmd rfloc state e tag pos (cnt 0) (cntskip 0))
 	(cond
@@ -8996,7 +8929,7 @@ The prefix arg is passed through to the command if possible."
 	 ((member action '(?r ?w))
 	  (setq rfloc (org-refile-get-location
 		       "Refile to"
-		       (marker-buffer (car org-agenda-bulk-marked-entries))
+		       (marker-buffer (car entries))
 		       org-refile-allow-creating-parent-nodes))
 	  (if (nth 3 rfloc)
 	      (setcar (nthcdr 3 rfloc)
@@ -9028,9 +8961,12 @@ The prefix arg is passed through to the command if possible."
 
 	 ((memq action '(?s ?d))
 	  (let* ((date (unless arg
-			 (org-read-date
-			  nil nil nil
-			  (if (eq action ?s) "(Re)Schedule to" "Set Deadline to"))))
+			 (or org-overriding-default-time
+			     (org-read-date
+			      nil nil nil
+			      (if (eq action ?s) "(Re)Schedule to" "(Re)Set Deadline to")
+			      nil (format-time-string (car org-time-stamp-formats)
+						      (org-get-cursor-date))))))
 		 (ans (if arg nil org-read-date-final-answer))
 		 (c1 (if (eq action ?s) 'org-agenda-schedule 'org-agenda-deadline)))
 	    (setq cmd `(let* ((bound (fboundp 'read-string))
@@ -9104,13 +9040,10 @@ The prefix arg is passed through to the command if possible."
 	    (goto-char pos)
 	    (let (org-loop-over-headlines-in-active-region)
 	      (eval cmd))
-	    (when (not org-agenda-persistent-marks)
-	      (setq org-agenda-bulk-marked-entries
-		    (delete e org-agenda-bulk-marked-entries)))
 	    (setq cnt (1+ cnt))))
-	(when (not org-agenda-persistent-marks)
-	  (org-agenda-bulk-unmark-all))
 	(when redo-at-end (org-agenda-redo))
+	(unless org-agenda-persistent-marks
+	  (org-agenda-bulk-unmark-all))
 	(message "Acted on %d entries%s%s"
 		 cnt
 		 (if (= cntskip 0)
@@ -9119,6 +9052,15 @@ The prefix arg is passed through to the command if possible."
 			   cntskip))
 		 (if (not org-agenda-persistent-marks)
 		     "" " (kept marked)"))))))
+
+(defun org-agenda-capture ()
+  "Call `org-capture' with the date at point."
+  (interactive)
+  (if (not (eq major-mode 'org-agenda-mode))
+      (error "You cannot do this outside of agenda buffers")
+    (let ((org-overriding-default-time
+	   (org-get-cursor-date)))
+      (call-interactively 'org-capture))))
 
 ;;; Flagging notes
 

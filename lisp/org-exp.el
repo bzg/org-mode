@@ -1476,8 +1476,10 @@ the current file."
 	    "^[ \t]*:HTML_CONTAINER_CLASS:[ \t]+\\(.+\\)$" nil t)
       (setq class (match-string 1))
       (save-excursion
-	(org-back-to-heading t)
-	(put-text-property (point-at-bol) (point-at-eol) 'html-container-class class)))))
+	(when (re-search-backward "^\\*" (point-min) t)
+	  (org-back-to-heading t)
+	  (put-text-property (point-at-bol) (point-at-eol)
+			     'html-container-class class))))))
 
 (defvar org-export-format-drawer-function nil
   "Function to be called to format the contents of a drawer.

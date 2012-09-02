@@ -15424,11 +15424,11 @@ If you don't like the calendar, turn it off with
 
 With optional argument TO-TIME, the date will immediately be converted
 to an internal time.
-With an optional argument WITH-TIME, the prompt will suggest to also
-insert a time.  Note that when WITH-TIME is not set, you can still
-enter a time, and this function will inform the calling routine about
-this change.  The calling routine may then choose to change the format
-used to insert the time stamp into the buffer to include the time.
+With an optional argument ORG-WITH-TIME, the prompt will suggest to
+also insert a time.  Note that when ORG-WITH-TIME is not set, you can
+still enter a time, and this function will inform the calling routine
+about this change.  The calling routine may then choose to change the
+format used to insert the time stamp into the buffer to include the time.
 With optional argument FROM-STRING, read from this string instead from
 the user.  PROMPT can overwrite the default prompt.  DEFAULT-TIME is
 the time/date that is used for everything that is not specified by the

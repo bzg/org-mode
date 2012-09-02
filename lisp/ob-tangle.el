@@ -360,7 +360,8 @@ code blocks by language."
 	   (setq block-counter (+ 1 block-counter))))
        (replace-regexp-in-string "[ \t]" "-"
 				 (condition-case nil
-				     (nth 4 (org-heading-components))
+				     (or (nth 4 (org-heading-components))
+					 "(dummy for heading without text)")
 				   (error (buffer-file-name)))))
       (let* ((start-line (save-restriction (widen)
 					   (+ 1 (line-number-at-pos (point)))))

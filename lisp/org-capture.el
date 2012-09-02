@@ -483,6 +483,13 @@ to avoid duplicates.)"
 				     (regexp))
 			       (function :tag "Custom function"))))))
 
+(defcustom org-capture-use-agenda-date nil
+  "Non-nil means use the date at point when capturing from agendas.
+When nil, you can still capturing using the date at point with \\[org-agenda-capture]]."
+  :group 'org-capture
+  ;; :version "24.3"
+  :type 'boolean)
+
 ;;;###autoload
 (defun org-capture (&optional goto keys)
   "Capture something.
@@ -501,10 +508,17 @@ stored.
 
 When called with a `C-0' (zero) prefix, insert a template at point.
 
-Lisp programs can set KEYS to a string associated with a template in
-`org-capture-templates'.  In this case, interactive selection will be
-bypassed."
+Lisp programs can set KEYS to a string associated with a template
+in `org-capture-templates'.  In this case, interactive selection
+will be bypassed.
+
+If `org-capture-use-agenda-date' is non-nil, capturing from the
+agenda will use the date at point as the default date."
   (interactive "P")
+  (when (and org-capture-use-agenda-date
+	     (eq major-mode 'org-agenda-mode))
+    (setq org-overriding-default-time
+	  (org-get-cursor-date)))
   (cond
    ((equal goto '(4)) (org-capture-goto-target))
    ((equal goto '(16)) (org-capture-goto-last-stored))
