@@ -8427,21 +8427,6 @@ Schedule this item.  With prefix arg remove the scheduling timestamp
 @orgcmd{C-c C-d,org-agenda-deadline}
 Set a deadline for this item.  With prefix arg remove the deadline.
 @c
-@orgcmd{k,org-agenda-action}
-Agenda actions, to set dates for selected items to the cursor date.
-This command also works in the calendar!  The command prompts for an
-additional key:
-@example
-m   @r{Mark the entry at point for action.  You can also make entries}
-    @r{in Org files with @kbd{C-c C-x C-k}.}
-d   @r{Set the deadline of the marked entry to the date at point.}
-s   @r{Schedule the marked entry at the date at point.}
-r   @r{Call @code{org-capture} with the cursor date as default date.}
-@end example
-@noindent
-Press @kbd{r} afterward to refresh the agenda and see the effect of the
-command.
-@c
 @orgcmd{S-@key{right},org-agenda-do-date-later}
 Change the timestamp associated with the current line by one day into the
 future.  If the date is in the past, the first call to this command will move
@@ -8502,8 +8487,7 @@ you want them to persist, set @code{org-agenda-bulk-persistent-marks} to
 @code{t} or hit @kbd{p} at the prompt.
 
 @example
-r  @r{Prompt for a single refile target and move all entries.  The entries}
-   @r{will no longer be in the agenda; refresh (@kbd{g}) to bring them back.}
+*  @r{Toggle persistent marks.}
 $  @r{Archive all selected entries.}
 A  @r{Archive entries by moving them to their respective archive siblings.}
 t  @r{Change TODO state.  This prompts for a single TODO keyword and}
@@ -8514,9 +8498,11 @@ t  @r{Change TODO state.  This prompts for a single TODO keyword and}
 s  @r{Schedule all items to a new date.  To shift existing schedule dates}
    @r{by a fixed number of days, use something starting with double plus}
    @r{at the prompt, for example @samp{++8d} or @samp{++2w}.}
+d  @r{Set deadline to a specific date.}
+r  @r{Prompt for a single refile target and move all entries.  The entries}
+   @r{will no longer be in the agenda; refresh (@kbd{g}) to bring them back.}
 S  @r{Reschedule randomly into the coming N days.  N will be prompted for.}
    @r{With prefix arg (@kbd{C-u B S}), scatter only across weekdays.}
-d  @r{Set deadline to a specific date.}
 f  @r{Apply a function@footnote{You can also create persistent custom functions through@code{org-agenda-bulk-custom-functions}.} to marked entries.}
    @r{For example, the function below sets the CATEGORY property of the}
    @r{entries to web.}
