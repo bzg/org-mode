@@ -83,6 +83,7 @@
 		  (&optional buffer-or-name norecord label))
 (declare-function org-agenda-columns "org-colview" ())
 (declare-function org-add-archive-files "org-archive" (files))
+(declare-function org-capture "org-capture" (&optional goto keys))
 
 (defvar calendar-mode-map)                    ; defined in calendar.el
 (defvar org-clock-current-task nil)           ; defined in org-clock.el
@@ -2007,6 +2008,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "u"        'org-agenda-bulk-unmark)
 (org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-unmark-all)
 (org-defkey org-agenda-mode-map "B"        'org-agenda-bulk-action)
+(org-defkey org-agenda-mode-map "k"        'org-agenda-capture)
 (org-defkey org-agenda-mode-map "A"        'org-agenda-append-agenda)
 (org-defkey org-agenda-mode-map "\C-c\C-x!" 'org-reload)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-a" 'org-agenda-archive-default)
@@ -2190,6 +2192,7 @@ The following commands are available:
     ["Show original entry" org-agenda-show t]
     ["Go To (other window)" org-agenda-goto t]
     ["Go To (this window)" org-agenda-switch-to t]
+    ["Capture with cursor date" org-agenda-capture t]
     ["Follow Mode" org-agenda-follow-mode
      :style toggle :selected org-agenda-follow-mode :active t]
 					;    ["Tree to indirect frame" org-agenda-tree-to-indirect-buffer t]
@@ -9047,6 +9050,15 @@ The prefix arg is passed through to the command if possible."
 			   cntskip))
 		 (if (not org-agenda-persistent-marks)
 		     "" " (kept marked)"))))))
+
+(defun org-agenda-capture ()
+  "Call `org-capture' with the date at point."
+  (interactive)
+  (if (not (eq major-mode 'org-agenda-mode))
+      (error "You cannot do this outside of agenda buffers")
+    (let ((org-overriding-default-time
+	   (org-get-cursor-date)))
+      (call-interactively 'org-capture))))
 
 ;;; Flagging notes
 

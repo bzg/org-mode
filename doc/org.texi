@@ -8459,6 +8459,13 @@ Cancel the currently running clock.
 @c
 @orgcmd{J,org-agenda-clock-goto}
 Jump to the running clock in another window.
+@c
+@orgcmd{k,org-agenda-capture}
+Like @code{org-capture}, but use the date at point as the default date for
+the capture template.  See @var{org-capture-use-agenda-date} to make this
+the default behavior of @code{org-capture}.
+@cindex capturing, from agenda
+@vindex org-capture-use-agenda-date
 
 @tsubheading{Bulk remote editing selected entries}
 @cindex remote editing, bulk, from agenda
