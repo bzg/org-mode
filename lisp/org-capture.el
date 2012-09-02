@@ -501,6 +501,9 @@ stored.
 
 When called with a `C-0' (zero) prefix, insert a template at point.
 
+When called from an agenda buffer, use the date of the cursor at point
+as the default date for the capture template.
+
 Lisp programs can set KEYS to a string associated with a template in
 `org-capture-templates'.  In this case, interactive selection will be
 bypassed."
