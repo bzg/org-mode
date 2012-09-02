@@ -10545,9 +10545,9 @@ If the file does not exist, an error is thrown."
 	    (setq match-index (+ match-index 1)))))
 
       (save-window-excursion
+	(message "Running %s...done" cmd)
 	(start-process-shell-command cmd nil cmd)
-	(and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))
-	))
+	(and (boundp 'org-wait) (numberp org-wait) (sit-for org-wait))))
      ((or (stringp cmd)
 	  (eq cmd 'emacs))
       (funcall (cdr (assq 'file org-link-frame-setup)) file)
