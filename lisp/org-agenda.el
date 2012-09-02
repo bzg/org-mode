@@ -8903,6 +8903,9 @@ The prefix arg is passed through to the command if possible."
       (let* ((action (read-char-exclusive))
 	     (org-log-refile (if org-log-refile 'time nil))
 	     (entries (reverse org-agenda-bulk-marked-entries))
+	     (org-overriding-default-time
+	      (if (get-text-property (point) 'org-agenda-date-header)
+		  (org-get-cursor-date)))
 	     redo-at-end
 	     cmd rfloc state e tag pos (cnt 0) (cntskip 0))
 	(cond
@@ -8953,9 +8956,12 @@ The prefix arg is passed through to the command if possible."
 
 	 ((memq action '(?s ?d))
 	  (let* ((date (unless arg
-			 (org-read-date
-			  nil nil nil
-			  (if (eq action ?s) "(Re)Schedule to" "Set Deadline to"))))
+			 (or org-overriding-default-time
+			     (org-read-date
+			      nil nil nil
+			      (if (eq action ?s) "(Re)Schedule to" "(Re)Set Deadline to")
+			      nil (format-time-string (car org-time-stamp-formats)
+						      (org-get-cursor-date))))))
 		 (ans (if arg nil org-read-date-final-answer))
 		 (c1 (if (eq action ?s) 'org-agenda-schedule 'org-agenda-deadline)))
 	    (setq cmd `(let* ((bound (fboundp 'read-string))
