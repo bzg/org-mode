@@ -8892,8 +8892,8 @@ The prefix arg is passed through to the command if possible."
 
   ;; Prompt for the bulk command
   (let* ((msg (if org-agenda-persistent-marks "Bulk (persistent): " "Bulk: ")))
-    (message (concat msg "[r]efile [$]arch [A]rch->sib [t]odo"
-		     " [+/-]tag [s]chd [S]catter [d]eadline [f]unction    "
+    (message (concat msg "[$]arch [A]rch->sib [t]odo [+/-]tag [s]chd [d]eadline [r]efile "
+		     "[S]catter [f]unction    "
 		     (when org-agenda-bulk-custom-functions
 		       (concat " Custom: ["
 			       (mapconcat (lambda(f) (char-to-string (car f)))
