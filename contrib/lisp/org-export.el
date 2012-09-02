@@ -4394,7 +4394,8 @@ Return an error if key pressed has no associated command."
       (?O
        (org-open-file
 	(org-e-odt-export-to-odt
-	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
+	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))
+	'system))
       ;; Publishing facilities
       (?F
        (org-e-publish-current-file (memq 'force optns)))
