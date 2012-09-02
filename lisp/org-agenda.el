@@ -8924,7 +8924,7 @@ The prefix arg is passed through to the command if possible."
 	 ((member action '(?r ?w))
 	  (setq rfloc (org-refile-get-location
 		       "Refile to"
-		       (marker-buffer (car org-agenda-bulk-marked-entries))
+		       (marker-buffer (car entries))
 		       org-refile-allow-creating-parent-nodes))
 	  (if (nth 3 rfloc)
 	      (setcar (nthcdr 3 rfloc)
