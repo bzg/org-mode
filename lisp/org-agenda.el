@@ -9035,13 +9035,10 @@ The prefix arg is passed through to the command if possible."
 	    (goto-char pos)
 	    (let (org-loop-over-headlines-in-active-region)
 	      (eval cmd))
-	    (when (not org-agenda-persistent-marks)
-	      (setq org-agenda-bulk-marked-entries
-		    (delete e org-agenda-bulk-marked-entries)))
 	    (setq cnt (1+ cnt))))
-	(when (not org-agenda-persistent-marks)
-	  (org-agenda-bulk-unmark-all))
 	(when redo-at-end (org-agenda-redo))
+	(unless org-agenda-persistent-marks
+	  (org-agenda-bulk-unmark-all))
 	(message "Acted on %d entries%s%s"
 		 cnt
 		 (if (= cntskip 0)
