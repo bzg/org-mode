@@ -68,7 +68,7 @@ foreach my $commit (@commits) {
     if ($kind =~ /\S/) { 
       # do not delete or rename directories from the list as long as
       # Changelog entries referring to them exist!
-      remove_parts(qw( contrib/ testing/ xemacs/ UTILITIES/ utils/ mk/ etc/ ));
+      remove_parts(qw( contrib/ testing/ xemacs/ mk/ etc/ ));
       remove_parts(qw( .*Makefile README .+\.mk ));
     }
     if ($kind eq "lisp") { remove_parts("doc/")                               }
