@@ -67,7 +67,7 @@ lists."
 	       ((file-exists-p file-or-buf) file-or-buf)
 	       (t (error "org-lparse-and-open: This shouldn't happen"))))
       (message "Opening file %s" f)
-      (org-open-file f)
+      (org-open-file f 'system)
       (when org-export-kill-product-buffer-when-displayed
 	(kill-buffer (current-buffer))))))
 
@@ -509,7 +509,7 @@ This is a helper routine for interactive use."
       (message "Exported to %s" out-file)
       (when prefix-arg
 	(message "Opening %s..."  out-file)
-	(org-open-file out-file))
+	(org-open-file out-file 'system))
       out-file)
      (t
       (message "Export to %s failed" out-file)
