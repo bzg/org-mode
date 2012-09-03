@@ -16610,6 +16610,8 @@ the current agenda files will be searched.} using @kbd{C-c a ?}.
 @cindex history
 @cindex thanks
 
+@section From Carsten
+
 Org was born in 2003, out of frustration over the user interface of the Emacs
 Outline mode.  I was trying to organize my notes and projects, and using
 Emacs seemed to be the natural way to go.  However, having to remember eleven
@@ -16664,8 +16666,57 @@ webpages derived from Org using an Info-like or a folding interface with
 single-key navigation.
 @end table
 
-@noindent OK, now to the full list of contributions!  Again, please let me
-know what I am missing here!
+@noindent See below for the full list of contributions!  Again, please
+let me know what I am missing here!
+
+@section From Bastien
+
+I (Bastien) have been maintaining Org since January 2010.  This appendix
+would not be complete without adding a few more acknowledgements and thanks
+to Carsten's ones above.
+
+I am first grateful to Carsten for his trust while handing me over the
+maintainership of Org.  His support as been great since day one of this new
+adventure, and it helped a lot.
+
+When I took over maintainership, I knew I would have to make Org more
+collaborative than ever, as I would have to rely on people that are more
+knowledgeable than I am on many parts of the code.  Here is a list of the
+persons I could rely on, they should really be considered co-maintainers,
+either of the code or the community:
+
+@table @i
+@item Eric Schulte
+Eric is maintaining the Babel parts of Org.  His reactivity here kept me away
+from worrying about possible bugs here and let me focus on other parts.
+
+@item Nicolas Goaziou
+Nicolas is maintaining the consistency of the deepest parts of Org.  His work
+on @file{org-element.el} and @file{org-export.el} has been outstanding, and
+opened the doors for many new ideas and features.
+
+@item Jambunathan K
+Jambunathan contributed the ODT exporter, definitly a killer feature of
+Org mode.  He also contributed the new HTML exporter, which is another core
+feature of Org.  Here too, I knew I could rely on him to fix bugs in these
+areas and to patiently explain the users what was the problems and solutions.
+
+@item Achim Gratz
+Achim rewrote the building process of Org, turning some @emph{ad hoc} tools
+into a flexible and conceptually clean process.  He patiently coped with the
+many hicups that such a change can create for users.
+
+@item Nick Dokos
+The Org mode mailing list would not be such a nice place without Nick, who
+patiently helped users so many times.  It is impossible to overestimate such
+a great help, and the list would not be so active without him.
+@end table
+
+I received support from so many users that it is clearly impossible to be
+fair when shortlisting a few of them -- but Org's history would not be
+complete if the ones above were not mentioned in this manual.
+
+@section List of contributions
 
 @itemize @bullet
 
