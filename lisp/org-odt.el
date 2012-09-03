@@ -243,9 +243,6 @@ standard Emacs.")
 
 (mapc
  (lambda (desc)
-   ;; Let Org open all OpenDocument files using system-registered app
-   (add-to-list 'org-file-apps
-		(cons (concat  "\\." (car desc) "\\'") 'system))
    ;; Let Emacs open all OpenDocument files in archive mode
    (add-to-list 'auto-mode-alist
 		(cons (concat  "\\." (car desc) "\\'") 'archive-mode)))
