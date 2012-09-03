@@ -69,7 +69,7 @@
 	       ((get a 'custom-type) (setq opts (cons a opts)))
 	       ((fboundp a) (setq funcs (cons a funcs)))
 	       (t (setq vars (cons a vars)))))))
-    (find-file (or eldo-file (read-file-name "File: ")))
+    (find-file (or eldo-file (read-file-name "Write to file: ")))
     (org-mode)
     (eldo-write-hooks hks)
     (eldo-write-commands cmds)
