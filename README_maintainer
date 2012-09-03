@@ -1,10 +1,76 @@
 # -*- mode:org -*-
 
-#+title: Maintainer tasks
-#+startup: noindent
+#+TITLE: Maintainer tasks
+#+STARTUP: noindent
 
 This document describes the tasks the Org-mode maintainer has to do
 and how they are performed.
+
+* Git workflow
+
+The git repository has two branches:
+
+- master :: for current development.
+
+- maint :: for bug fixes against latest major or minor release.
+
+Bug fixes always go on =maint= then are merged on =master=.
+
+New features always go on =master=.
+
+* Releasing
+
+** Major release
+
+The release number for main releases look like this: =7.13=
+
+Main releases are made whenever Org is in a state where the feature
+set is consistent and we feel that the features that are implemented
+is something we want to support in the future.
+
+A major release turns the current state of the master branch into a
+release.
+
+When doing a /major release/, make sure all changes from the maint
+branch are merged into the the master branch, then merge the master
+branch back into maint to synchronize the two.  
+
+** Minor release
+
+The release number for minor releases look like this:  =7.13.01=
+
+Minor releases are small amends to main releases.  Usually they fix
+critical bugs discovered in a main release.  Minor bugs are usually
+not fixed -- they will be adressed in the next main release.  
+
+Only the fix to the bug is bundled into a release, without the main
+development work going on in the master branch.  Since the bug fix
+will also be needed in the master branch, usually the fix is made in
+maint then merged in master.
+
+** Tagging the release
+
+When doing a major and a minor release, after all necessary merging 
+is done, tag the _maint_ branch for the release with:
+
+  git tag -a "Adding release tag" release_7.9.1
+
+and push tags with
+
+  git push --tags
+
+** Uploading the release files from the orgmode.org server
+
+Log on the orgmode.org server as the emacs user and cd to
+~/git/org-mode
+
+From there do
+  
+  make release
+  make upload
+
+to create the .tar.gz and .zip files, the documentation, and to 
+upload everything at the right place.
 
 * Working with patchwork
 
@@ -19,8 +85,8 @@ accepting it.
 I have found that the best workflow for this is using the pw script by
 Nate Case, with the modifications for Org-mode made by John Wiegley
 and Carsten Dominik.  The correct version of this script that should
-be used with Org mode is distributed in the =mk/= directory of the
-Org mode distribution.  Here is the basic workflow for this.
+be used with Org mode is distributed in the =mk/= directory of the Org
+mode distribution.  Here is the basic workflow for this.
 
 ** Access to the patchwork server
 
@@ -91,77 +157,6 @@ has been accepted, along with the comment given in the =-m= message.
 At some point you might then want to remove the topic branch
 
 : git branch -d t/patchNNN
-
-* Releases
-
-** Main releases
-
-The release number for main releases look like this:  =7.13=
-
-Main releases are made whenever Org is in a state where the feature
-set is consistent and we feel that the features that are implemented
-is something we want to support in the future.
-
-A major release turns the current state of the master branch into a
-release.  The release process is a single make command:
-
-: make release TAG=7.13
-
-Before issuing this command, you should make sure that everything
-during the process will work right, you can do so by running
-
-: make testrelease TAG=7.13
-
-When this fails, make sure to clean up.  =git reset --hard= if
-necessary, and check if there are unwanted files, directories, or
-branches left over from the testing.
-
-** Minor releases
-
-The release number for minor releases look like this:  =7.13.01=
-
-Minor releases are small amends to main releases.  Usually they fix
-critical bugs discovered in a main release.  Minor bugs are not
-fixed - they will be adressed in the next main release.  Only the fix
-to the bug is bundled into a release, without the main development
-work going on in the master branch.  Since the bug fix will also be
-needed in the master branch, usually the fix is made in master and
-then cherry-picked into maint.  When this is done, a release is made
-from maint with this command:
-
-: make fixrelease TAG=7.13.01
-
-** Updating release files on orgmode.org server
-
-As of 2011-01-15, these directives of the Makefile are meant to be
-used /from orgmode.org server/ and will copy the release files to the
-webserver directory.
-
-- ~$ make makerelease :: creates a =RELEASE/= directory containing
-     manuals and release files (=org.tar.gz=, =org.zip=, etc.)
-
-- ~$ make sync_release :: copy the content of =RELEASE/= to the right
-     location on the server
-
-- ~$ make sync_manuals :: copy the manuals from =doc/= to the right
-     location on the server
-
-- ~$ make relup :: call the three directives described above.
-
-** Between releases
-
-While working on master between releases, I used to use something like
-7.02trans as the version string.  I no longer do this.  =M-x
-org-version= will spit ut complete version infor related to git, with
-the nearest commit and tag.  I you ever need to set a special version
-number, use this:
-
-: mk/set_version 7.02trans
-
-and commit the result.  Note that the above command does not change
-the version string in the file from which Org's homepage is generated.
-To change that as well, you would use a =--all= flag.  To change only
-this file, use =--only=.
 
 * Synchonization with Emacs
 
@@ -249,20 +244,21 @@ So the way I have been doing things with Emacs is this:
    developers often look throught the commit and make minor changes -
    these need to be merged back into our own repo.
 
-* Updating the list of hooks on Worg
+* Updating the list of hooks/commands/options on Worg
 
-  The file /org-configs/org-hooks.org/ contains a list of all hooks in
-  Org.  This list has to be updated after hooks have been added or
-  removed.  The perl script =mk/list-hooks.pl= creates the
-  entire section "Hooks and Function variables", including its
-  level-one headline.  I guess babel code could be used to update this
-  automatically, but I have not implemented this - I have been doing
-  it by hand every few months.
+  Load the =mk/eldo.el= file then =M-x eldo-make-doc RET=. 
+
+  This will produce an org file with the documentation.
+
+  Import this file into =worg/doc.org=, leaving the header untouched
+  (except for the release number).
+
+  Then commit and push the change on the =worg.git= repository.
 
 * Copyright assignments
 
   The maintainer needs to keep track of copyright assignments.  Even
-  better, find a volunteer to do this.  
+  better, find a volunteer to do this.
 
   The list of all contributors from who we have the papers is kept on
   Worg at http://orgmode.org/worg/org-contribute.php, so that
@@ -270,7 +266,7 @@ So the way I have been doing things with Emacs is this:
 
   The assignment process does not allways go smoothly, and it has
   happened several times that it gets stuck or forgotten at the FSF.
-  The contact at the FSF for this is: copyright-clerk@fsf.org 
+  The contact at the FSF for this is: copyright-clerk@fsf.org
 
   Emails from the paper submitter have been ignored in the past, but
   an email from me (Carsten) as the maintainer of Org mode has usually

@@ -10,9 +10,20 @@ README
 README_DIST
     The README file for the distribution (zip and tar files)
 
-README_GIT
+README_contribute
     Information about the git repository and how to contribute
     to Org-mode development. 
+
+README_maintainer
+    Information for the maintainer.
+
+Makefile
+    The makefile to compile and install Org.  For installation
+    instructions, see the manual or the more detailed procedure
+    on Worg: http://orgmode.org/worg/dev/org-build-system.html
+
+mk/
+    Files needed for building Org.
 
 lisp/
     Directory with all the Emacs Lisp files that make up Org.
@@ -21,22 +32,18 @@ doc/
     The documentation files.  org.texi is the source of the
     documentation, org.html and org.pdf are formatted versions of it.
 
+etc/
+    Files needed for the ODT exporter.
+
 contrib/
     A directory with third-party additions for Org.  Some really cool
     stuff is in there.
 
-ChangeLog
-    The standard ChangeLog file.
-
-Makefile
-    The makefile to compile and install Org with GNU Make, and also
-    for maintenance tasks.
+testing/
+    Testing suite for Org.
 
 request-assign-future.txt
     The form that contributors have to sign and get processed with the
     FSF before contributed changes can be integrated into the Org
-    core.  All files in this distribution except the CONTRIB directory
+    core.  All files in this distribution except the contrib/ directory
     have copyright assigned to the FSF.
-
-EXPERIMENTAL
-    Experimental code, not necessarily FSF copyright.

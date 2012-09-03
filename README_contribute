@@ -6,7 +6,6 @@ Emacs mode for organizing your life.
 The text below explains the rules for participating in Org-mode
 development.
 
-
 * Main rules
 
 1. The master git repository is hosted publicly at orgmode.org.
@@ -27,7 +26,7 @@ development.
 3. People who are interested to participate in the Org-mode
    development can to so by sending patches to this address:
 
-     emacs-orgmode@gnu.org
+     [[mailto:emacs-orgmode@gnu.org][emacs-orgmode@gnu.org]]
 
 4. An interested developer can also request push access to the
    central repository by sending her/his user-info to the
@@ -36,13 +35,13 @@ development.
    After you have been added as a user with push privileges,
    clone the repository through ssh using
 
-        git clone orgmode@orgmode.org:org-mode.git
+     git clone orgmode@orgmode.org:org-mode.git
 
    By requesting push access, you acknowledge that you have read
    and agreed with the following rules:
 
-   - Org-mode is part of Emacs.  Therefore, we need to be very
-     conscious about changes moving into the Org-mode core.
+   - Org-mode is part of GNU Emacs.  Therefore, we need to be
+     very conscious about changes moving into the Org-mode core.
      These can originate only from people who have signed the
      appropriate papers with the Free Software Foundation.  The
      files to which this applies are:
@@ -69,7 +68,6 @@ development.
      hard to preserve this and I would like to ask everyone to
      keep this in mind when developing changes.
 
-
 * The contrib directory
 
 The git repository contains a contrib directory.  This directory
@@ -80,12 +78,12 @@ Also non-Lisp extensions like scripts to process Org-mode files
 in different ways are welcome in this directory.  You should
 provide documentation with your extensions, at least in the form
 of commentary in the file, better on worg.  Please discuss your
-extensions on emacs-orgmode@gnu.org.
+extensions on [[mailto:emacs-orgmode@gnu.org][emacs-orgmode@gnu.org]].
 
 After files have been tested in contrib and found to be generally
 useful, we may decide to clarify copyright questions and then
 move the file into the Org-mode core.  This means they will be
 moved up to the root directory and will also eventually be added
-to Emacs bzr repository.  The final decision about this rests
+to GNU Emacs bzr repository.  The final decision about this rests
 with the maintainer.
 
