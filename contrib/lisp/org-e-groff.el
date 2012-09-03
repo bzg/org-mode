@@ -234,8 +234,8 @@ order to reproduce the default set-up:
 ;;; Links
 
 (defcustom org-e-groff-inline-image-rules
-  '(("file" . "\\.\\(pdf\\|ps\\|eps\\|pic\\)\\'")
-    ("fuzzy" . "\\.\\(pdf\\|ps\\|eps\\|pic\\)\\'"))
+  '(("file" . "\\.\\(jpg\\|png\\|pdf\\|ps\\|eps\\|pic\\)\\'")
+    ("fuzzy" . "\\.\\(jpg\\|png\\|pdf\\|ps\\|eps\\|pic\\)\\'"))
   "Rules characterizing image files that can be inlined into Groff.
 
 A rule consists in an association whose key is the type of link
@@ -519,6 +519,17 @@ These are the .aux, .log, .out, and .toc files."
   :group 'org-export-e-groff
   :type 'string)
 
+(defcustom org-e-groff-raster-to-ps nil
+  "Command used to convert raster to EPS. Nil for no conversion. Make sure that
+   `org-e-groff-inline-image-rules' is adjusted accordingly if not conversion is being
+   done. In this case, remove the entries for jpg and png in the file and fuzzy lists."
+  :group 'org-export-e-groff
+  :type '(choice
+         (repeat :tag "Shell Command Sequence" (string :tag "Shell Command"))
+         (const :tag "sam2p" "a=%s;b=%s;sam2p ${a} ${b} ;grep -v BeginData ${b} > b_${b};mv b_${b} ${b}" )
+         (const :tag "NetPNM"  "a=%s;b=%s;pngtopnm ${a} | pnmtops -noturn > ${b}" )
+         (const :tag "None" nil)))
+
 
 ;; Adding GROFF as a block parser to make sure that its contents
 ;; does not execute
@@ -705,12 +716,16 @@ See `org-e-groff-text-markup-alist' for details."
 
 
     ;; If FROM then get data from FROM
-    (setq from-data
-          (replace-regexp-in-string "\\.P\n" "" from-data))
-
-    (setq to-data
-          (replace-regexp-in-string "\\.P\n" "" to-data))
-
+    (if from-data 
+        (setq from-data
+              (replace-regexp-in-string "\\.P\n" "" from-data))
+      (setq from-data ""))
+    
+    (if to-data 
+        (setq to-data
+              (replace-regexp-in-string "\\.P\n" "" to-data))
+      (setq from-data ""))
+    
     (concat
      (cond
       (from-data
@@ -1309,9 +1324,15 @@ used as a communication channel."
 
     ;; Now clear ATTR from any special keyword and set a default value
     ;; if nothing is left.  Return proper string.
-
     (concat
      (cond
+      ((and org-e-groff-raster-to-ps
+            (or  (string-match ".\.png$" path) 
+                 (string-match ".\.jpg$" path)))
+       (let ((eps-path (concat path ".eps")))
+         (shell-command (format org-e-groff-raster-to-ps path eps-path))
+         (format "\n.DS L F\n.PSPIC %s \"%s\" %s %s\n.DE "
+                 placement eps-path width height)))
       ((string-match ".\.pic$" path)
        (format "\n.PS\ncopy \"%s\"\n.PE" path))
       (t (format "\n.DS L F\n.PSPIC %s \"%s\" %s %s\n.DE "
@@ -1335,6 +1356,8 @@ INFO is a plist holding contextual information.  See
                 ((member type '("http" "https" "ftp" "mailto"))
                  (concat type ":" raw-path))
                 ((string= type "file")
+                 (when (string-match "\\(.+\\)::.+" raw-path)
+                   (setq raw-path (match-string 1 raw-path)))
                  (if (file-name-absolute-p raw-path)
                      (concat "file://" (expand-file-name raw-path))
                    (concat "file://" raw-path)))
@@ -1397,7 +1420,6 @@ INFO is a plist holding contextual information.  See
      (path (format "\\fI%s\\fP" path))
      ;; No path, only description.  Try to do something useful.
      (t (format org-e-groff-link-with-unknown-path-format desc)))))
-
 
 ;;; Paragraph
 
