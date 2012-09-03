@@ -317,7 +317,7 @@ So a typical ID could look like \"Org:4nd91V40HI\"."
 (defun org-id-uuid ()
   "Return string with random (version 4) UUID."
   (let ((rnd (md5 (format "%s%s%s%s%s%s%s"
-			  (random t)
+			  (org-random)
 			  (current-time)
 			  (user-uid)
 			  (emacs-pid)
