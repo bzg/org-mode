@@ -21011,11 +21011,7 @@ hierarchy of headlines by UP levels before marking the subtree."
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
   (org-set-local 'adaptive-fill-function 'org-adaptive-fill-function)
   (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
-  (org-set-local 'comment-line-break-function 'org-comment-line-break-function)
-  (org-set-local 'align-mode-rules-list
-		 '((org-in-buffer-settings
-		    (regexp . "^#\\+[A-Z_]+:\\(\\s-*\\)\\S-+")
-		    (modes . '(org-mode))))))
+  (org-set-local 'comment-line-break-function 'org-comment-line-break-function))
 
 (defvar org-element-paragraph-separate) ; org-element.el
 (defun org-fill-paragraph-separate-nobreak-p ()
