@@ -83,7 +83,9 @@
    (verbatim . org-e-odt-verbatim)
    (verse-block . org-e-odt-verse-block))
   :export-block "ODT"
-  :filters-alist ((:filter-parse-tree . org-e-odt--translate-description-lists))
+  :filters-alist ((:filter-parse-tree
+		   . (org-e-odt--translate-description-lists
+		      org-e-odt--translate-list-tables)))
   :options-alist
   ((:odt-styles-file "ODT_STYLES_FILE" nil nil t)
    (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments)))
@@ -2886,7 +2888,7 @@ and prefix with \"OrgSrc\".  For example,
 			       (" " "<text:s/>")
 			       ("	" "<text:tab/>")))
 	 (hfy-face-to-css 'org-e-odt-hfy-face-to-css)
-	 (hfy-optimisations-1 (copy-seq hfy-optimisations))
+	 (hfy-optimisations-1 (copy-sequence hfy-optimisations))
 	 (hfy-optimisations (add-to-list 'hfy-optimisations-1
 					 'body-text-only))
 	 (hfy-begin-span-handler
@@ -3589,40 +3591,43 @@ contextual information."
 
 ;; Translate lists to tables
 
-(add-to-list 'org-export-filter-parse-tree-functions
-	     'org-e-odt--translate-list-tables)
-
 (defun org-e-odt--translate-list-tables (tree backend info)
-  (when (eq backend 'e-odt)
-    (org-element-map
-     tree 'plain-list
-     (lambda (plain-list-1)
-       (when (org-export-read-attribute :attr_odt plain-list-1 :list-table)
-	 (org-element-set-element
-	  plain-list-1
-	  (apply 'org-element-adopt-elements
-		 (list 'table nil)
-		 (org-element-map
-		  plain-list-1
-		  'item
-		  (lambda (level-1-item)
-		    (apply 'org-element-adopt-elements
-			   (list 'table-row (list :type 'standard))
-			   (org-element-adopt-elements
-			    (list 'table-cell nil)
-			    (car (org-element-contents level-1-item)))
-			   (let ((plain-list-2 (assq 'plain-list level-1-item)))
-			     (org-element-map
-			      plain-list-2
-			      'item
-			      (lambda (item)
-				(apply 'org-element-adopt-elements
-				       (list 'table-cell nil)
-				       (org-element-contents item)))
-			      info nil 'item))))
-		  info nil 'item))))
-       nil)
-     info))
+  (org-element-map
+   tree 'plain-list
+   (lambda (level-1-list)
+     (when (org-export-read-attribute :attr_odt level-1-list :list-table)
+       ;; Replace list with table.
+       (org-element-set-element
+	level-1-list
+	;; Build replacement table.
+	(apply 'org-element-adopt-elements
+	       (list 'table nil)
+	       (org-element-map
+		level-1-list
+		'item
+		(lambda (level-1-item)
+		  ;; Level-1 items start a table row.
+		  (apply 'org-element-adopt-elements
+			 (list 'table-row (list :type 'standard))
+			 ;;  Contents of level-1 item define the first
+			 ;;  table-cell.
+			 (apply 'org-element-adopt-elements
+				(list 'table-cell nil)
+				(org-element-contents level-1-item))
+			 ;; Level-2 items define subsequent
+			 ;; table-cells of the row.
+			 (let ((level-2-list (assq 'plain-list level-1-item)))
+			   (org-element-map
+			    level-2-list
+			    'item
+			    (lambda (level-2-item)
+			      (apply 'org-element-adopt-elements
+				     (list 'table-cell nil)
+				     (org-element-contents level-2-item)))
+			    info nil 'item))))
+		info nil 'item))))
+     nil)
+   info)
   tree)
 
 
