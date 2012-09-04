@@ -852,7 +852,14 @@ Otherwise, place it near the end."
 (defcustom org-e-odt-table-styles
   '(("OrgEquation" "OrgEquation"
      ((use-first-column-styles . t)
-      (use-last-column-styles . t))))
+      (use-last-column-styles . t)))
+    ("TableWithHeaderRowAndColumn" "Custom"
+     ((use-first-row-styles . t)
+      (use-first-column-styles . t)))
+    ("TableWithFirstRowandLastRow" "Custom"
+     ((use-first-row-styles . t)
+      (use-last-row-styles . t)))
+    ("GriddedTable" "Custom" nil))
   "Specify how Table Styles should be derived from a Table Template.
 This is a list where each element is of the
 form (TABLE-STYLE-NAME TABLE-TEMPLATE-NAME TABLE-CELL-OPTIONS).
@@ -3594,36 +3601,48 @@ contextual information."
 (defun org-e-odt--translate-list-tables (tree backend info)
   (org-element-map
    tree 'plain-list
-   (lambda (level-1-list)
-     (when (org-export-read-attribute :attr_odt level-1-list :list-table)
+   (lambda (l1-list)
+     (when (org-export-read-attribute :attr_odt l1-list :list-table)
        ;; Replace list with table.
        (org-element-set-element
-	level-1-list
+	l1-list
 	;; Build replacement table.
 	(apply 'org-element-adopt-elements
-	       (list 'table nil)
+	       (list 'table '(:type org :attr_odt (":style \"GriddedTable\"")))
 	       (org-element-map
-		level-1-list
+		l1-list
 		'item
-		(lambda (level-1-item)
-		  ;; Level-1 items start a table row.
-		  (apply 'org-element-adopt-elements
-			 (list 'table-row (list :type 'standard))
-			 ;;  Contents of level-1 item define the first
-			 ;;  table-cell.
-			 (apply 'org-element-adopt-elements
-				(list 'table-cell nil)
-				(org-element-contents level-1-item))
-			 ;; Level-2 items define subsequent
-			 ;; table-cells of the row.
-			 (let ((level-2-list (assq 'plain-list level-1-item)))
+		(lambda (l1-item)
+		  (let* ((l1-item-contents (org-element-contents l1-item))
+			 l1-item-leading-text l2-list)
+		    ;; Remove Level-2 list from the Level-item.  It
+		    ;; will be subsequently attached as table-cells.
+		    (let ((cur l1-item-contents) prev)
+		      (while (and cur (not (eq (org-element-type (car cur))
+					       'plain-list)))
+			(setq prev cur)
+			(setq cur (cdr cur)))
+		      (when prev
+			(setcdr prev nil)
+			(setq l2-list (car cur)))
+		      (setq l1-item-leading-text l1-item-contents))
+		    ;; Level-1 items start a table row.
+		    (apply 'org-element-adopt-elements
+			   (list 'table-row (list :type 'standard))
+			   ;;  Leading text of level-1 item define the
+			   ;;  first table-cell.
+			   (apply 'org-element-adopt-elements
+				  (list 'table-cell nil)
+				  l1-item-leading-text)
+			   ;; Level-2 items define subsequent
+			   ;; table-cells of the row.
 			   (org-element-map
-			    level-2-list
+			    l2-list
 			    'item
-			    (lambda (level-2-item)
+			    (lambda (l2-item)
 			      (apply 'org-element-adopt-elements
 				     (list 'table-cell nil)
-				     (org-element-contents level-2-item)))
+				     (org-element-contents l2-item)))
 			    info nil 'item))))
 		info nil 'item))))
      nil)
