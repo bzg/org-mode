@@ -386,8 +386,9 @@ used as a communication channel."
 	 (org-element-map headline org-e-beamer-verbatim-elements 'identity
 			  info 'first-match)))
     (concat "\\begin{frame}"
-	    ;; Overlay specification, if any. If is surrounded by square
-	    ;; brackets, consider it as a default specification.
+	    ;; Overlay specification, if any. When surrounded by
+	    ;; square brackets, consider it as a default
+	    ;; specification.
 	    (let ((action (org-element-property :beamer-act headline)))
 	      (cond
 	       ((not action) "")
@@ -395,25 +396,29 @@ used as a communication channel."
 		(org-e-beamer--normalize-argument action 'defaction))
 	       (t (org-e-beamer--normalize-argument action 'action))))
 	    ;; Options, if any.
-	    (let ((options
-		   ;; Collect options from default value and headline's
-		   ;; properties.  Also add a label for links.
-		   (append
-		    (org-split-string org-e-beamer-frame-default-options
-				      ",")
-		    (let ((opt (org-element-property :beamer-opt headline)))
-		      (and opt (org-split-string
-				;; Remove square brackets if user
-				;; provided them.
-				(and (string-match "^\\[?\\(.*\\)\\]?$" opt)
-				     (match-string 1 opt))
-				",")))
-		    (list
-		     (format "label=sec-%s"
-			     (mapconcat
-			      'number-to-string
-			      (org-export-get-headline-number headline info)
-			      "-"))))))
+	    (let* ((beamer-opt (org-element-property :beamer-opt headline))
+		   (options
+		    ;; Collect options from default value and headline's
+		    ;; properties.  Also add a label for links.
+		    (append
+		     (org-split-string org-e-beamer-frame-default-options ",")
+		     (and beamer-opt
+			  (org-split-string
+			   ;; Remove square brackets if user provided
+			   ;; them.
+			   (and (string-match "^\\[?\\(.*\\)\\]?$" beamer-opt)
+				(match-string 1 beamer-opt))
+			   ","))
+		     ;; Provide an automatic label for the frame
+		     ;; unless the user specified one.
+		     (unless (and beamer-opt
+				  (string-match "\\(^\\|,\\)label=" beamer-opt))
+		       (list
+			(format "label=sec-%s"
+				(mapconcat
+				 'number-to-string
+				 (org-export-get-headline-number headline info)
+				 "-")))))))
 	      ;; Change options list into a string.
 	      (org-e-beamer--normalize-argument
 	       (mapconcat
