@@ -83,6 +83,7 @@
    (verbatim . org-e-odt-verbatim)
    (verse-block . org-e-odt-verse-block))
   :export-block "ODT"
+  :filters-alist ((:filter-parse-tree . org-e-odt--translate-description-lists))
   :options-alist
   ((:odt-styles-file "ODT_STYLES_FILE" nil nil t)
    (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments)))
@@ -3491,9 +3492,6 @@ contextual information."
 ;; This translator is necessary to handle indented tables in a uniform
 ;; manner.  See comment in `org-e-odt--table'.
 
-(add-to-list 'org-export-filter-parse-tree-functions
-	     'org-e-odt--translate-description-lists)
-
 (defun org-e-odt--translate-description-lists (tree backend info)
   ;; OpenDocument has no notion of a description list.  So simulate it
   ;; using plain lists.  Description lists in the exported document
@@ -3525,30 +3523,29 @@ contextual information."
   ;; 2. The paragraph containing the definition term is styled to be
   ;;    in bold.
   ;;
-  (when (eq backend 'e-odt)
-    (org-element-map
-     tree 'plain-list
-     (lambda (el)
-       (when (equal (org-element-property :type el) 'descriptive)
-	 (org-element-set-element
-	  el
-	  (apply 'org-element-adopt-elements
-		 (list 'plain-list (list :type 'descriptive-1))
-		 (mapcar
-		  (lambda (item)
-		    (org-element-adopt-elements
-		     (list 'item (list :checkbox (org-element-property
-						  :checkbox item)))
-		     (list 'paragraph (list :style "Text_20_body_20_bold")
-			   (or (org-element-property :tag item) "(no term)"))
-		     (org-element-adopt-elements
-		      (list 'plain-list (list :type 'descriptive-2))
-		      (apply 'org-element-adopt-elements
-			     (list 'item nil)
-			     (org-element-contents item)))))
-		  (org-element-contents el)))))
-       nil)
-     info))
+  (org-element-map
+   tree 'plain-list
+   (lambda (el)
+     (when (equal (org-element-property :type el) 'descriptive)
+       (org-element-set-element
+	el
+	(apply 'org-element-adopt-elements
+	       (list 'plain-list (list :type 'descriptive-1))
+	       (mapcar
+		(lambda (item)
+		  (org-element-adopt-elements
+		   (list 'item (list :checkbox (org-element-property
+						:checkbox item)))
+		   (list 'paragraph (list :style "Text_20_body_20_bold")
+			 (or (org-element-property :tag item) "(no term)"))
+		   (org-element-adopt-elements
+		    (list 'plain-list (list :type 'descriptive-2))
+		    (apply 'org-element-adopt-elements
+			   (list 'item nil)
+			   (org-element-contents item)))))
+		(org-element-contents el)))))
+     nil)
+   info)
   tree)
 
 ;;;; List tables
