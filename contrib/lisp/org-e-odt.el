@@ -3622,7 +3622,7 @@ contextual information."
 				(apply 'org-element-adopt-elements
 				       (list 'table-cell nil)
 				       (org-element-contents item)))
-			      info nil t))))
+			      info nil 'item))))
 		  info nil 'item))))
        nil)
      info))
