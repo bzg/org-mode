@@ -4396,6 +4396,15 @@ Return an error if key pressed has no associated command."
 	(org-e-odt-export-to-odt
 	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))
 	'system))
+      ;; Export with `e-freemind' back-end.
+      (?m
+       (org-e-freemind-export-to-freemind
+	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
+      (?M
+       (org-open-file
+	(org-e-freemind-export-to-freemind
+	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))
+	'system))
       ;; Publishing facilities
       (?F
        (org-e-publish-current-file (memq 'force optns)))
