@@ -1476,7 +1476,7 @@ is turned on."
 			       (" " "<text:s/>")
 			       ("	" "<text:tab/>")))
 	 (hfy-face-to-css 'org-odt-hfy-face-to-css)
-	 (hfy-optimisations-1 (copy-seq hfy-optimisations))
+	 (hfy-optimisations-1 (copy-sequence hfy-optimisations))
 	 (hfy-optimisations (add-to-list 'hfy-optimisations-1
 					 'body-text-only))
 	 (hfy-begin-span-handler
