@@ -338,6 +338,23 @@ channel."
 ;; like "ignoreheading", "note", "noteNH", "appendix" and
 ;; "againframe".
 
+(defun org-e-beamer--get-label (headline info)
+  "Return label for HEADLINE, as a string.
+
+INFO is a plist used as a communication channel.
+
+The value is either the label specified in \"BEAMER_opt\"
+property, or a fallback value built from headline's number.  This
+function assumes HEADLINE will be treated as a frame."
+  (let ((opt (org-element-property :beamer-opt headline)))
+    (if (and (org-string-nw-p opt)
+	     (string-match "\\(?:^\\|,\\)label=\\(.*?\\)\\(?:$\\|,\\)" opt))
+	(match-string 1 opt)
+      (format "sec-%s"
+	      (mapconcat 'number-to-string
+			 (org-export-get-headline-number headline info)
+			 "-")))))
+
 (defun org-e-beamer--frame-level (headline info)
   "Return frame level in subtree containing HEADLINE.
 INFO is a plist used as a communication channel."
@@ -419,11 +436,8 @@ used as a communication channel."
 		     (unless (and beamer-opt
 				  (string-match "\\(^\\|,\\)label=" beamer-opt))
 		       (list
-			(format "label=sec-%s"
-				(mapconcat
-				 'number-to-string
-				 (org-export-get-headline-number headline info)
-				 "-")))))))
+			(format "label=%s"
+				(org-e-beamer--get-label headline info)))))))
 	      ;; Change options list into a string.
 	      (org-e-beamer--normalize-argument
 	       (mapconcat
@@ -549,47 +563,41 @@ as a communication channel."
       (cond
        ;; Case 1: Resume frame specified by "BEAMER_ref" property.
        ((equal environment "againframe")
-	(concat "\\againframe"
-		;; Overlay specification.
-		(let ((overlay (org-element-property :beamer-act headline)))
-		  (when overlay
-		    (org-e-beamer--normalize-argument
-		     overlay
-		     (if (string-match "^\\[.*\\]$" overlay) 'defaction
-		       'action))))
-		;; Options.
-		(let ((options (org-element-property :beamer-opt headline)))
-		  (when options
-		    (org-e-beamer--normalize-argument options 'option)))
-		;; Resolve reference provided by "BEAMER_ref"
-		;; property.  This is done by building a minimal fake
-		;; link and calling the appropriate resolve function,
-		;; depending on the reference syntax.
-		(let* ((ref (org-element-property :beamer-ref headline))
-		       (type (progn
-			       (string-match "^\\(id:\\|#\\|\\*\\)?\\(.*\\)" ref)
-			       (cond
-				((or (not (match-string 1 ref))
-				     (equal (match-string 1 ref) "*")) 'fuzzy)
-				((equal (match-string 1 ref) "id:") 'id)
-				(t 'custom-id))))
-		       (link (list 'link (list :path (match-string 2 ref))))
-		       (target (if (eq type 'fuzzy)
-				   (org-export-resolve-fuzzy-link link info)
-				 (org-export-resolve-id-link link info))))
-		  ;; Now use user-defined label provided in TARGET
-		  ;; headline, or fallback to standard one.
-		  (let ((target-opt (org-element-property :beamer-opt target)))
-		    (if (and (org-string-nw-p target-opt)
-			     (string-match
-			      "\\(?:^\\|,\\)label=\\(.*?\\)\\(?:$\\|,\\)"
-			      target-opt))
-			(format "{%s}" (match-string 1 target-opt))
-		      (format "{sec-%s}"
-			      (mapconcat
-			       'number-to-string
-			       (org-export-get-headline-number target info)
-			       "-")))))))
+	(let ((ref (org-element-property :beamer-ref headline)))
+	  ;; Reference to frame being resumed is mandatory.  Ignore
+	  ;; the whole headline if it isn't provided.
+	  (when (org-string-nw-p ref)
+	    (concat "\\againframe"
+		    ;; Overlay specification.
+		    (let ((overlay (org-element-property :beamer-act headline)))
+		      (when overlay
+			(org-e-beamer--normalize-argument
+			 overlay
+			 (if (string-match "^\\[.*\\]$" overlay) 'defaction
+			   'action))))
+		    ;; Options.
+		    (let ((options (org-element-property :beamer-opt headline)))
+		      (when options
+			(org-e-beamer--normalize-argument options 'option)))
+		    ;; Resolve reference provided by "BEAMER_ref"
+		    ;; property.  This is done by building a minimal fake
+		    ;; link and calling the appropriate resolve function,
+		    ;; depending on the reference syntax.
+		    (let* ((type
+			    (progn
+			      (string-match "^\\(id:\\|#\\|\\*\\)?\\(.*\\)" ref)
+			      (cond
+			       ((or (not (match-string 1 ref))
+				    (equal (match-string 1 ref) "*")) 'fuzzy)
+			       ((equal (match-string 1 ref) "id:") 'id)
+			       (t 'custom-id))))
+			   (link (list 'link (list :path (match-string 2 ref))))
+			   (target (if (eq type 'fuzzy)
+				       (org-export-resolve-fuzzy-link link info)
+				     (org-export-resolve-id-link link info))))
+		      ;; Now use user-defined label provided in TARGET
+		      ;; headline, or fallback to standard one.
+		      (format "{%s}" (org-e-beamer--get-label target info)))))))
        ;; Case 2: Creation of an appendix is requested.
        ((equal environment "appendix")
 	(concat "\\appendix"
@@ -611,7 +619,7 @@ as a communication channel."
 			      "\n"))
 			(org-trim contents))))
        ;; Case 5: HEADLINE is a frame.
-       ((or (equal environment "frame") (= level frame-level))
+       ((= level frame-level)
 	(org-e-beamer--format-frame headline contents info))
        ;; Case 6: Regular section, extracted from
        ;; `org-e-latex-classes'.
