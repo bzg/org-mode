@@ -1872,15 +1872,9 @@ holding contextual information."
 				(if (and parent
 					 (org-export-low-level-p parent info))
 				    "true" "false")))))
-	 (let* ((headline-has-table-p
-		 (let* ((headline-contents (org-element-contents headline))
-			(element (and (eq 'section
-					  (org-element-type
-					   (car headline-contents)))
-				      (car headline-contents))))
-		   (loop for el in (org-element-contents element)
-			 thereis (eq (org-element-type el) 'table))))
-		(closing-tag ))
+	 (let ((headline-has-table-p
+		(let ((section (assq 'section (org-element-contents headline))))
+		  (assq 'table (and section (org-element-contents section))))))
 	   (format "\n<text:list-item>\n%s\n%s"
 		   (concat
 		    (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
@@ -2566,7 +2560,6 @@ INFO is a plist holding contextual information.  See
 		   (mapconcat 'number-to-string
 			      (org-e-odt-resolve-numbered-paragraph
 			       container info) ".")))))))
-
 	  (otherwise
 	   ;; (unless desc
 	   ;;   (setq number (cond
@@ -3157,8 +3150,12 @@ channel."
      (assert paragraph-style)
      (format "\n<table:table-cell%s>\n%s\n</table:table-cell>"
 	     cell-attributes
-	     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-		     paragraph-style contents))
+	     (let ((table-cell-contents (org-element-contents table-cell)))
+	       (if (memq (org-element-type (car table-cell-contents))
+			 org-element-all-elements)
+		   contents
+		   (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+			   paragraph-style contents))))
      (let (s)
        (dotimes (i horiz-span s)
 	 (setq s (concat s "\n<table:covered-table-cell/>"))))
@@ -3345,8 +3342,11 @@ pertaining to indentation here."
 			   (if (funcall --element-preceded-by-table-p table info)
 			       '("</text:list-header>" . "<text:list-header>")
 			     '("</text:list-item>" . "<text:list-header>")))
-			  ((funcall --element-preceded-by-table-p
-				    parent-list info)
+			  ((let ((section? (org-export-get-previous-element
+					    parent-list info)))
+			     (and section?
+				  (eq (org-element-type section?) 'section)
+				  (assq 'table (org-element-contents section?))))
 			   '("</text:list-header>" . "<text:list-header>"))
 			  (t
 			   '("</text:list-item>" . "<text:list-item>")))))))))))
@@ -3547,6 +3547,83 @@ contextual information."
 			     (list 'item nil)
 			     (org-element-contents item)))))
 		  (org-element-contents el)))))
+       nil)
+     info))
+  tree)
+
+;;;; List tables
+
+;; Lists that are marked with attribute `:list-table' are called as
+;; list tables.  They will be rendered as a table within the exported
+;; document.
+
+;; Consider an example.  The following list table
+;;
+;; #+attr_odt :list-table t
+;; - Row 1
+;;   - 1.1
+;;   - 1.2
+;;   - 1.3
+;; - Row 2
+;;   - 2.1
+;;   - 2.2
+;;   - 2.3
+;;
+;; will be exported as though it were an Org table like the one show
+;; below.
+;;
+;; | Row 1 | 1.1 | 1.2 | 1.3 |
+;; | Row 2 | 2.1 | 2.2 | 2.3 |
+;;
+;; Note that org-tables are NOT multi-line and each line is mapped to
+;; a unique row in the exported document.  So if an exported table
+;; needs to contain a single paragraph (with copious text) it needs to
+;; be typed up in a single line.  Editing such long lines using the
+;; table editor will be a cumbersome task.  Furthermore inclusion of
+;; multi-paragraph text in a table cell is well-nigh impossible.
+;;
+;; A LIST-TABLE circumvents above problems.
+;;
+;; Note that in the example above the list items could be paragraphs
+;; themselves and the list can be arbitrarily deep.
+;;
+;; Inspired by following thread:
+;; https://lists.gnu.org/archive/html/emacs-orgmode/2011-03/msg01101.html
+
+;; Translate lists to tables
+
+(add-to-list 'org-export-filter-parse-tree-functions
+	     'org-e-odt--translate-list-tables)
+
+(defun org-e-odt--translate-list-tables (tree backend info)
+  (when (eq backend 'e-odt)
+    (org-element-map
+     tree 'plain-list
+     (lambda (plain-list-1)
+       (when (org-export-read-attribute :attr_odt plain-list-1 :list-table)
+	 (org-element-set-element
+	  plain-list-1
+	  (apply 'org-element-adopt-elements
+		 (list 'table nil)
+		 (org-element-map
+		  plain-list-1
+		  'item
+		  (lambda (level-1-item)
+		    (apply 'org-element-adopt-elements
+			   (list 'table-row (list :type 'standard))
+			   (org-element-adopt-elements
+			    (list 'table-cell nil)
+			    (car (org-element-contents level-1-item)))
+			   (let ((plain-list-2 (assq 'plain-list level-1-item)))
+			     (org-element-map
+			      plain-list-2
+			      'item
+			      (lambda (item)
+				(apply 'org-element-adopt-elements
+				       (list 'table-cell nil)
+				       (org-element-contents item)))
+			      info nil t))))
+		  info nil 'item))))
        nil)
      info))
   tree)
