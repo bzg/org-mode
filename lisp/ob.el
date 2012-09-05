@@ -1890,6 +1890,7 @@ code ---- the results are extracted in the syntax of the source
           inside of a #+BEGIN_SRC block with the source-code
           language set appropriately.  Note this relies on the
           optional LANG argument."
+  (save-restriction (widen)
   (if (stringp result)
       (progn
         (setq result (org-no-properties result))
@@ -2010,7 +2011,7 @@ code ---- the results are extracted in the syntax of the source
 	(if (member "value" result-params)
 	    (message "Code block returned no value.")
 	  (message "Code block produced no output."))
-      (message "Code block evaluation complete."))))
+      (message "Code block evaluation complete.")))))
 
 (defun org-babel-remove-result (&optional info)
   "Remove the result of the current source block."
