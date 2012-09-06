@@ -41,6 +41,7 @@
 
 (eval-and-compile
   (require 'org))
+(require 'gnus-util)
 
 (defgroup org-contacts nil
   "Options concerning contacts management."

@@ -32,6 +32,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'gnus-util)
 (eval-when-compile (require 'gnus-sum))
 
 ;; Declare external functions and variables
