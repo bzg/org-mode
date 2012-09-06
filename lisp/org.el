@@ -236,6 +236,8 @@ When MESSAGE is non-nil, display a message with the version."
       (if message (message _version))
       _version)))
 
+(defconst org-version (org-version))
+
 ;;; Compatibility constants
 
 ;;; The custom variables
