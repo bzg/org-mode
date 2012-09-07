@@ -2659,6 +2659,9 @@ if($1<20,teen,string(""))  @r{"teen" if age $1 less than 20, else empty}
 Note that you can also use two org-specific flags @code{T} and @code{t} for
 durations computations @ref{Durations and time values}.
 
+You can add your own Calc functions defined in Emacs Lisp with @code{defmath}
+and use them in formula syntax for Calc.
+
 @node Formula syntax for Lisp, Durations and time values, Formula syntax for Calc, The spreadsheet
 @subsection Emacs Lisp forms as formulas
 @cindex Lisp forms, as table formulas
