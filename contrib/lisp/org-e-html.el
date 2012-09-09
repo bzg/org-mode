@@ -51,6 +51,7 @@
 
 ;;; Define Back-End
 
+;;;###autoload
 (org-export-define-backend e-html
   ((bold . org-e-html-bold)
    (center-block . org-e-html-center-block)
