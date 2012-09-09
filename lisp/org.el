@@ -17365,7 +17365,7 @@ Some of the options can be changed using the variable
 	 (org-format-latex-header-extra
 	  (plist-get (org-infile-export-plist) :latex-header-extra))
 	 (cnt 0) txt hash link beg end re e checkdir
-	 executables-checked string
+	 string
 	 m n block-type block linkfile movefile ov)
     ;; Check the different regular expressions
     (while (setq e (pop re-list))
@@ -17421,25 +17421,8 @@ Some of the options can be changed using the variable
 	      (unless checkdir ; make sure the directory exists
 		(setq checkdir t)
 		(or (file-directory-p todir) (make-directory todir t)))
-	      (cond
-	       ((eq processing-type 'dvipng)
-		(unless executables-checked
-		  (org-check-external-command
-		   "latex" "needed to convert LaTeX fragments to images")
-		  (org-check-external-command
-		   "dvipng" "needed to convert LaTeX fragments to images")
-		  (setq executables-checked t))
-		(unless (file-exists-p movefile)
-		  (org-create-formula-image-with-dvipng
-		   txt movefile opt forbuffer)))
-	       ((eq processing-type 'imagemagick)
-		(unless executables-checked
-		  (org-check-external-command
-		   "convert" "you need to install imagemagick")
-		  (setq executables-checked t))
-		(unless (file-exists-p movefile)
-		  (org-create-formula-image-with-imagemagick
-		   txt movefile opt forbuffer))))
+	      (org-create-formula-image
+	       txt movefile opt forbuffer processing-type)
 	      (if overlays
 		  (progn
 		    (mapc (lambda (o)
@@ -17469,10 +17452,8 @@ Some of the options can be changed using the variable
 				  (if block-type 'paragraph 'character))))))
 	     ((eq processing-type 'mathml)
 	      ;; Process to MathML
-	      (unless executables-checked
-		(unless (save-match-data (org-format-latex-mathml-available-p))
-		  (error "LaTeX to MathML converter not configured"))
-		(setq executables-checked t))
+	      (unless (save-match-data (org-format-latex-mathml-available-p))
+		(error "LaTeX to MathML converter not configured"))
 	      (setq txt (match-string n)
 		    beg (match-beginning n) end (match-end n)
 		    cnt (1+ cnt))
@@ -17573,6 +17554,31 @@ inspection."
       (add-text-properties
        0 (1- (length latex-frag)) '(org-protected t) latex-frag)
       latex-frag)))
+
+(defun org-create-formula-image (string tofile options buffer &optional type)
+  "Create an image from LaTeX source using dvipng or convert.
+This function calls either `org-create-formula-image-with-dvipng'
+or `org-create-formula-image-with-imagemagick' depending on the
+value of `org-latex-create-formula-image-program' or on the value
+of the optional TYPE variable.
+
+Note: ultimately these two function should be combined as they
+share a good deal of logic."
+  (org-check-external-command
+   "latex" "needed to convert LaTeX fragments to images")
+  (funcall
+   (case (or type org-latex-create-formula-image-program)
+     ('dvipng
+      (org-check-external-command
+       "dvipng" "needed to convert LaTeX fragments to images")
+      #'org-create-formula-image-with-dvipng)
+     ('imagemagick
+      (org-check-external-command
+       "convert" "you need to install imagemagick")
+      #'org-create-formula-image-with-imagemagick)
+     (t (error
+         "invalid value of `org-latex-create-formula-image-program'")))
+   string tofile options buffer))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image-with-dvipng (string tofile options buffer)
