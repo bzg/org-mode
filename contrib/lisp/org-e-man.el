@@ -45,73 +45,74 @@
 (defvar org-export-man-packages-alist)
 
 
-
 
 ;;; Define Back-End
 
-(defvar org-e-man-translate-alist
-  '((babel-call . org-e-man-babel-call)
-    (bold . org-e-man-bold)
-    (center-block . org-e-man-center-block)
-    (clock . org-e-man-clock)
-    (code . org-e-man-code)
-    (comment . org-e-man-comment)
-    (comment-block . org-e-man-comment-block)
-    (drawer . org-e-man-drawer)
-    (dynamic-block . org-e-man-dynamic-block)
-    (entity . org-e-man-entity)
-    (example-block . org-e-man-example-block)
-    (export-block . org-e-man-export-block)
-    (export-snippet . org-e-man-export-snippet)
-    (fixed-width . org-e-man-fixed-width)
-    (footnote-definition . org-e-man-footnote-definition)
-    (footnote-reference . org-e-man-footnote-reference)
-    (headline . org-e-man-headline)
-    (horizontal-rule . org-e-man-horizontal-rule)
-    (inline-babel-call . org-e-man-inline-babel-call)
-    (inline-src-block . org-e-man-inline-src-block)
-    (inlinetask . org-e-man-inlinetask)
-    (italic . org-e-man-italic)
-    (item . org-e-man-item)
-    (keyword . org-e-man-keyword)
-    (man-environment . org-e-man-man-environment)
-    (man-fragment . org-e-man-man-fragment)
-    (line-break . org-e-man-line-break)
-    (link . org-e-man-link)
-    (paragraph . org-e-man-paragraph)
-    (plain-list . org-e-man-plain-list)
-    (plain-text . org-e-man-plain-text)
-    (planning . org-e-man-planning)
-    (property-drawer . org-e-man-property-drawer)
-    (quote-block . org-e-man-quote-block)
-    (quote-section . org-e-man-quote-section)
-    (radio-target . org-e-man-radio-target)
-    (section . org-e-man-section)
-    (special-block . org-e-man-special-block)
-    (src-block . org-e-man-src-block)
-    (statistics-cookie . org-e-man-statistics-cookie)
-    (strike-through . org-e-man-strike-through)
-    (subscript . org-e-man-subscript)
-    (superscript . org-e-man-superscript)
-    (table . org-e-man-table)
-    (table-cell . org-e-man-table-cell)
-    (table-row . org-e-man-table-row)
-    (target . org-e-man-target)
-    (template . org-e-man-template)
-    (timestamp . org-e-man-timestamp)
-    (underline . org-e-man-underline)
-    (verbatim . org-e-man-verbatim)
-    (verse-block . org-e-man-verse-block))
-  "Alist between element or object types and translators.")
-
-(defconst org-e-man-options-alist
-  '((:date "DATE" nil nil t)
-    (:man-class "MAN_CLASS" nil nil t)
-    (:man-class-options "MAN_CLASS_OPTIONS" nil nil t)
-    (:man-header-extra "MAN_HEADER" nil nil newline))
-  "Alist between Man export properties and ways to set them.
-See `org-export-options-alist' for more information on the
-structure of the values.")
+(org-export-define-backend e-man
+  ((babel-call . org-e-man-babel-call)
+   (bold . org-e-man-bold)
+   (center-block . org-e-man-center-block)
+   (clock . org-e-man-clock)
+   (code . org-e-man-code)
+   (comment . org-e-man-comment)
+   (comment-block . org-e-man-comment-block)
+   (drawer . org-e-man-drawer)
+   (dynamic-block . org-e-man-dynamic-block)
+   (entity . org-e-man-entity)
+   (example-block . org-e-man-example-block)
+   (export-block . org-e-man-export-block)
+   (export-snippet . org-e-man-export-snippet)
+   (fixed-width . org-e-man-fixed-width)
+   (footnote-definition . org-e-man-footnote-definition)
+   (footnote-reference . org-e-man-footnote-reference)
+   (headline . org-e-man-headline)
+   (horizontal-rule . org-e-man-horizontal-rule)
+   (inline-babel-call . org-e-man-inline-babel-call)
+   (inline-src-block . org-e-man-inline-src-block)
+   (inlinetask . org-e-man-inlinetask)
+   (italic . org-e-man-italic)
+   (item . org-e-man-item)
+   (keyword . org-e-man-keyword)
+   (man-environment . org-e-man-man-environment)
+   (man-fragment . org-e-man-man-fragment)
+   (line-break . org-e-man-line-break)
+   (link . org-e-man-link)
+   (paragraph . org-e-man-paragraph)
+   (plain-list . org-e-man-plain-list)
+   (plain-text . org-e-man-plain-text)
+   (planning . org-e-man-planning)
+   (property-drawer . org-e-man-property-drawer)
+   (quote-block . org-e-man-quote-block)
+   (quote-section . org-e-man-quote-section)
+   (radio-target . org-e-man-radio-target)
+   (section . org-e-man-section)
+   (special-block . org-e-man-special-block)
+   (src-block . org-e-man-src-block)
+   (statistics-cookie . org-e-man-statistics-cookie)
+   (strike-through . org-e-man-strike-through)
+   (subscript . org-e-man-subscript)
+   (superscript . org-e-man-superscript)
+   (table . org-e-man-table)
+   (table-cell . org-e-man-table-cell)
+   (table-row . org-e-man-table-row)
+   (target . org-e-man-target)
+   (template . org-e-man-template)
+   (timestamp . org-e-man-timestamp)
+   (underline . org-e-man-underline)
+   (verbatim . org-e-man-verbatim)
+   (verse-block . org-e-man-verse-block))
+  :export-block "MAN"
+  :menu-entry
+  (?m "Export to MAN"
+      ((?m "As MAN file" org-e-man-export-to-man)
+       (?p "As PDF file" org-e-man-export-to-pdf)
+       (?o "As PDF file and open"
+	   (lambda (s v b) (org-open-file (org-e-man-export-to-pdf s v b))))))
+  :options-alist
+  ((:date "DATE" nil nil t)
+   (:man-class "MAN_CLASS" nil nil t)
+   (:man-class-options "MAN_CLASS_OPTIONS" nil nil t)
+   (:man-header-extra "MAN_HEADER" nil nil newline)))
 
 
 
@@ -123,7 +124,6 @@ structure of the values.")
   :group 'org-export)
 
 ;;; Tables
-
 
 (defcustom org-e-man-tables-centered t
   "When non-nil, tables are exported in a center environment."
@@ -285,16 +285,6 @@ its single argument."
 These are the .aux, .log, .out, and .toc files."
   :group 'org-export-e-man
   :type 'boolean)
-
-
-
-;; Preamble
-
-;; Adding MAN as a block parser to make sure that its contents
-;; does not execute
-
-(add-to-list 'org-element-block-name-alist
-             '("MAN" . org-element-export-block-parser))
 
 
 

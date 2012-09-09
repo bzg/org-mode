@@ -56,6 +56,12 @@ This variable can be set to either `atx' or `setext'."
 (org-export-define-derived-backend md e-html
   :export-block ("MD" "MARKDOWN")
   :filters-alist ((:filter-parse-tree . org-md-separate-elements))
+  :menu-entry
+  (?m "Export to Markdown"
+      ((?M "To temporary buffer" org-md-export-as-markdown)
+       (?m "To file" org-md-export-to-markdown)
+       (?o "To file and open"
+	   (lambda (s v b) (org-open-file (org-md-export-to-markdown s v b))))))
   :translate-alist ((bold . org-md-bold)
 		    (code . org-md-verbatim)
 		    (example-block . org-md-example-block)

@@ -95,7 +95,14 @@
    (underline . org-e-latex-underline)
    (verbatim . org-e-latex-verbatim)
    (verse-block . org-e-latex-verse-block))
-  :export-block "LATEX"
+  :export-block ("LATEX" "TEX")
+  :menu-entry
+  (?l "Export to LaTeX"
+      ((?L "As TEX buffer" org-e-latex-export-as-latex)
+       (?l "As TEX file" org-e-latex-export-to-latex)
+       (?p "As PDF file" org-e-latex-export-to-pdf)
+       (?o "As PDF file and open"
+	   (lambda (s v b) (org-open-file (org-e-latex-export-to-pdf s v b))))))
   :options-alist ((:date "DATE" nil org-e-latex-date-format t)
 		  (:latex-class "LATEX_CLASS" nil org-e-latex-default-class t)
 		  (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
@@ -1202,7 +1209,7 @@ information."
 (defun org-e-latex-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (string= (org-element-property :type export-block) "LATEX")
+  (when (member (org-element-property :type export-block) ("LATEX" "TEX"))
     (org-remove-indentation (org-element-property :value export-block))))
 
 

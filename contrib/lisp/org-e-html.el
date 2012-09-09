@@ -102,6 +102,12 @@
    (verse-block . org-e-html-verse-block))
   :export-block "HTML"
   :filters-alist ((:filter-final-output . org-e-html-final-function))
+  :menu-entry
+  (?h "Export to HTML"
+      ((?H "To temporary buffer" org-e-html-export-as-html)
+       (?h "To file" org-e-html-export-to-html)
+       (?o "To file and open"
+	   (lambda (s v b) (org-open-file (org-e-html-export-to-html s v b))))))
   :options-alist
   ;; FIXME: Prefix KEYWORD and OPTION with "HTML_".  Prefix
   ;; corresponding properties with `:html-".  If such a renaming is

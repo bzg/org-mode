@@ -100,6 +100,26 @@
    (verbatim . org-e-ascii-verbatim)
    (verse-block . org-e-ascii-verse-block))
   :export-block "ASCII"
+  :menu-entry
+  (?t "Export to Plain Text"
+      ((?A "As ASCII buffer"
+	   (lambda (s v b)
+	     (org-e-ascii-export-as-ascii s v b '(:ascii-charset ascii))))
+       (?a "As ASCII file"
+	   (lambda (s v b)
+	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset ascii))))
+       (?L "As Latin1 buffer"
+	   (lambda (s v b)
+	     (org-e-ascii-export-as-ascii s v b '(:ascii-charset latin1))))
+       (?l "As Latin1 file"
+	   (lambda (s v b)
+	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset latin1))))
+       (?U "As UTF-8 buffer"
+	   (lambda (s v b)
+	     (org-e-ascii-export-as-ascii s v b '(:ascii-charset utf-8))))
+       (?u "As UTF-8 file"
+	   (lambda (s v b)
+	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset utf-8))))))
   :filters-alist ((:filter-headline . org-e-ascii-filter-headline-blank-lines)
 		  (:filter-section . org-e-ascii-filter-headline-blank-lines))
   :options-alist ((:ascii-charset nil nil org-e-ascii-charset)))

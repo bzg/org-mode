@@ -262,6 +262,13 @@ brackets.  Return overlay specification, as a string, or nil."
 
 (org-export-define-derived-backend e-beamer e-latex
   :export-block "BEAMER"
+  :sub-menu-entry
+  (?l (?B "As TEX buffer (Beamer)" org-e-beamer-export-as-latex)
+      (?b "As TEX file (Beamer)" org-e-beamer-export-to-latex)
+      (?P "As PDF file (Beamer)" org-e-beamer-export-to-pdf)
+      (?O "As PDF file and open (Beamer)"
+	  (lambda (s v b)
+	    (org-open-file (org-e-beamer-export-to-pdf s v b)))))
   :options-alist
   ((:beamer-theme "BEAMER_THEME" nil org-e-beamer-theme)
    (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)

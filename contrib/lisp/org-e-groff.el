@@ -47,7 +47,7 @@
 
 ;;; Define Back-End
 
-(defvar org-e-groff-translate-alist
+(org-export-define-backend e-groff
   '((babel-call . org-e-groff-babel-call)
     (bold . org-e-groff-bold)
     (center-block . org-e-groff-center-block)
@@ -100,16 +100,19 @@
     (underline . org-e-groff-underline)
     (verbatim . org-e-groff-verbatim)
     (verse-block . org-e-groff-verse-block))
-  "Alist between element or object types and translators.")
+  :export-block "GROFF"
+  :menu-entry
+  (?g "Export to GROFF"
+      ((?g "As GROFF file" org-e-groff-export-to-groff)
+       (?p "As PDF file" org-e-groff-export-to-pdf)
+       (?o "As PDF file and open"
+	   (lambda (s v b) (org-open-file (org-e-groff-export-to-pdf s v b))))))
+  :options-alist
+  ((:date "DATE" nil org-e-groff-date-format t)
+   (:groff-class "GROFF_CLASS" nil org-e-groff-default-class t)
+   (:groff-class-options "GROFF_CLASS_OPTIONS" nil nil t)
+   (:groff-header-extra "GROFF_HEADER" nil nil newline)))
 
-(defconst org-e-groff-options-alist
-  '((:date "DATE" nil org-e-groff-date-format t)
-    (:groff-class "GROFF_CLASS" nil org-e-groff-default-class t)
-    (:groff-class-options "GROFF_CLASS_OPTIONS" nil nil t)
-    (:groff-header-extra "GROFF_HEADER" nil nil newline))
-"Alist between Groff export properties and ways to set them.
-See `org-export-options-alist' for more information on the
-structure of the values.")
 
 
 ;;; User Configurable Variables
@@ -529,13 +532,6 @@ These are the .aux, .log, .out, and .toc files."
          (const :tag "sam2p" "a=%s;b=%s;sam2p ${a} ${b} ;grep -v BeginData ${b} > b_${b};mv b_${b} ${b}" )
          (const :tag "NetPNM"  "a=%s;b=%s;pngtopnm ${a} | pnmtops -noturn > ${b}" )
          (const :tag "None" nil)))
-
-
-;; Adding GROFF as a block parser to make sure that its contents
-;; does not execute
-
-(add-to-list 'org-element-block-name-alist
-             '("GROFF" . org-element-export-block-parser))
 
 (defvar org-e-groff-registered-references nil)
 (defvar org-e-groff-special-content nil)

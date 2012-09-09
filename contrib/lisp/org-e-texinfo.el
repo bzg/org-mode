@@ -61,90 +61,80 @@
 
 (defvar orgtbl-exp-regexp)
 
+
 
 ;;; Define Back-End
 
-(defvar org-e-texinfo-translate-alist
-  '((bold . org-e-texinfo-bold)
-    (center-block . org-e-texinfo-center-block)
-    (clock . org-e-texinfo-clock)
-    (code . org-e-texinfo-code)
-    (comment . org-e-texinfo-comment)
-    (comment-block . org-e-texinfo-comment-block)
-    (drawer . org-e-texinfo-drawer)
-    (dynamic-block . org-e-texinfo-dynamic-block)
-    (entity . org-e-texinfo-entity)
-    (example-block . org-e-texinfo-example-block)
-    (export-block . org-e-texinfo-export-block)
-    (export-snippet . org-e-texinfo-export-snippet)
-    (fixed-width . org-e-texinfo-fixed-width)
-    (footnote-definition . org-e-texinfo-footnote-definition)
-    (footnote-reference . org-e-texinfo-footnote-reference)
-    (headline . org-e-texinfo-headline)
-    (horizontal-rule . org-e-texinfo-horizontal-rule)
-    (inline-src-block . org-e-texinfo-inline-src-block)
-    (inlinetask . org-e-texinfo-inlinetask)
-    (italic . org-e-texinfo-italic)
-    (item . org-e-texinfo-item)
-    (keyword . org-e-texinfo-keyword)
-    (latex-environment . org-e-texinfo-latex-environment)
-    (latex-fragment . org-e-texinfo-latex-fragment)
-    (line-break . org-e-texinfo-line-break)
-    (link . org-e-texinfo-link)
-    (paragraph . org-e-texinfo-paragraph)
-    (plain-list . org-e-texinfo-plain-list)
-    (plain-text . org-e-texinfo-plain-text)
-    (planning . org-e-texinfo-planning)
-    (property-drawer . org-e-texinfo-property-drawer)
-    (quote-block . org-e-texinfo-quote-block)
-    (quote-section . org-e-texinfo-quote-section)
-    (radio-target . org-e-texinfo-radio-target)
-    (section . org-e-texinfo-section)
-    (special-block . org-e-texinfo-special-block)
-    (src-block . org-e-texinfo-src-block)
-    (statistics-cookie . org-e-texinfo-statistics-cookie)
-    (strike-through . org-e-texinfo-strike-through)
-    (subscript . org-e-texinfo-subscript)
-    (superscript . org-e-texinfo-superscript)
-    (table . org-e-texinfo-table)
-    (table-cell . org-e-texinfo-table-cell)
-    (table-row . org-e-texinfo-table-row)
-    (target . org-e-texinfo-target)
-    (template . org-e-texinfo-template)
-    (timestamp . org-e-texinfo-timestamp)
-    (underline . org-e-texinfo-underline)
-    (verbatim . org-e-texinfo-verbatim)
-    (verse-block . org-e-texinfo-verse-block))
-  "Alist between element or object types and translators.")
+(org-export-define-backend e-texinfo
+  ((bold . org-e-texinfo-bold)
+   (center-block . org-e-texinfo-center-block)
+   (clock . org-e-texinfo-clock)
+   (code . org-e-texinfo-code)
+   (comment . org-e-texinfo-comment)
+   (comment-block . org-e-texinfo-comment-block)
+   (drawer . org-e-texinfo-drawer)
+   (dynamic-block . org-e-texinfo-dynamic-block)
+   (entity . org-e-texinfo-entity)
+   (example-block . org-e-texinfo-example-block)
+   (export-block . org-e-texinfo-export-block)
+   (export-snippet . org-e-texinfo-export-snippet)
+   (fixed-width . org-e-texinfo-fixed-width)
+   (footnote-definition . org-e-texinfo-footnote-definition)
+   (footnote-reference . org-e-texinfo-footnote-reference)
+   (headline . org-e-texinfo-headline)
+   (horizontal-rule . org-e-texinfo-horizontal-rule)
+   (inline-src-block . org-e-texinfo-inline-src-block)
+   (inlinetask . org-e-texinfo-inlinetask)
+   (italic . org-e-texinfo-italic)
+   (item . org-e-texinfo-item)
+   (keyword . org-e-texinfo-keyword)
+   (latex-environment . org-e-texinfo-latex-environment)
+   (latex-fragment . org-e-texinfo-latex-fragment)
+   (line-break . org-e-texinfo-line-break)
+   (link . org-e-texinfo-link)
+   (paragraph . org-e-texinfo-paragraph)
+   (plain-list . org-e-texinfo-plain-list)
+   (plain-text . org-e-texinfo-plain-text)
+   (planning . org-e-texinfo-planning)
+   (property-drawer . org-e-texinfo-property-drawer)
+   (quote-block . org-e-texinfo-quote-block)
+   (quote-section . org-e-texinfo-quote-section)
+   (radio-target . org-e-texinfo-radio-target)
+   (section . org-e-texinfo-section)
+   (special-block . org-e-texinfo-special-block)
+   (src-block . org-e-texinfo-src-block)
+   (statistics-cookie . org-e-texinfo-statistics-cookie)
+   (strike-through . org-e-texinfo-strike-through)
+   (subscript . org-e-texinfo-subscript)
+   (superscript . org-e-texinfo-superscript)
+   (table . org-e-texinfo-table)
+   (table-cell . org-e-texinfo-table-cell)
+   (table-row . org-e-texinfo-table-row)
+   (target . org-e-texinfo-target)
+   (template . org-e-texinfo-template)
+   (timestamp . org-e-texinfo-timestamp)
+   (underline . org-e-texinfo-underline)
+   (verbatim . org-e-texinfo-verbatim)
+   (verse-block . org-e-texinfo-verse-block))
+  :export-block "TEXINFO"
+  :filters-alist
+  ((:filter-headline . org-e-texinfo-filter-section-blank-lines)
+   (:filter-section . org-e-texinfo-filter-section-blank-lines))
+  :menu-entry
+  (?i "Export to Texinfo"
+      ((?t "As TEXI file" org-e-texinfo-export-to-texinfo)
+       (?i "As INFO file" org-e-texinfo-export-to-info)))
+  :options-alist
+  ((:texinfo-filename "TEXINFO_FILENAME" nil org-e-texinfo-filename t)
+   (:texinfo-class "TEXINFO_CLASS" nil org-e-texinfo-default-class t)
+   (:texinfo-header "TEXINFO_HEADER" nil nil newline)
+   (:subtitle "SUBTITLE" nil nil newline)
+   (:subauthor "SUBAUTHOR" nil nil newline)
+   (:texinfo-dircat "TEXINFO_DIR_CATEGORY" nil nil t)
+   (:texinfo-dirtitle "TEXINFO_DIR_TITLE" nil nil t)
+   (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)))
 
-(defconst org-e-texinfo-options-alist
-  '((:texinfo-filename "TEXINFO_FILENAME" nil org-e-texinfo-filename t)
-    (:texinfo-class "TEXINFO_CLASS" nil org-e-texinfo-default-class t)
-    (:texinfo-header "TEXINFO_HEADER" nil nil newline)
-    (:subtitle "SUBTITLE" nil nil newline)
-    (:subauthor "SUBAUTHOR" nil nil newline)
-    (:texinfo-dircat "TEXINFO_DIR_CATEGORY" nil nil t)
-    (:texinfo-dirtitle "TEXINFO_DIR_TITLE" nil nil t)
-    (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t))
-  "Alist between Texinfo export properties and ways to set them.
-See `org-export-options-alist' for more information on the
-structure of the values.
 
-SUBAUTHOR and SUBTITLE are for the inclusion of additional author
-and title information beyond the initial variable.")
-
-(defconst org-e-texinfo-filters-alist
-  '((:filter-headline . org-e-texinfo-filter-section-blank-lines)
-    (:filter-section . org-e-texinfo-filter-section-blank-lines))
-  "Alist between filters keywords and back-end specific filters.
-  See `org-export-filters-alist' for more information")
-
-
-;;; Internal Variables
-
-;; Add TEXINFO to the list of available of available export blocks.
-(add-to-list 'org-element-block-name-alist
-	     '("TEXINFO" . org-element-export-block-parser))
 
 ;;; User Configurable Variables
 

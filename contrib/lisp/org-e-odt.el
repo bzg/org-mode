@@ -86,6 +86,12 @@
   :filters-alist ((:filter-parse-tree
 		   . (org-e-odt--translate-description-lists
 		      org-e-odt--translate-list-tables)))
+  :menu-entry
+  (?o "Export to ODT"
+      ((?o "As ODT file" org-e-odt-export-to-odt)
+       (?O "As ODT file and open"
+	   (lambda (s v b)
+	     (org-open-file (org-e-odt-export-to-odt s v b) 'system)))))
   :options-alist
   ((:odt-styles-file "ODT_STYLES_FILE" nil nil t)
    (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments)))
