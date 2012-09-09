@@ -936,12 +936,12 @@ value."
    ((equal property "BEAMER_env")
     (save-excursion
       (org-back-to-heading t)
-      (let ((tags (org-get-tags)))
-	(setq tags (delq nil (mapcar (lambda (x)
-				       (if (string-match "^B_" x) nil x))
-				     tags)))
-	(org-set-tags-to tags))
-      (when (org-string-nw-p value) (org-toggle-tag (concat "B_" value) 'on))))
+      ;; Filter out Beamer-related tags and install environment tag.
+      (let ((tags (org-remove-if (lambda (x) (string-match "^B_" x))
+				 (org-get-tags)))
+	    (env-tag (and (org-string-nw-p value) (concat "B_" value))))
+	(org-set-tags-to (if env-tag (cons env-tag tags) tags))
+	(when env-tag (org-toggle-tag env-tag 'on)))))
    ((equal property "BEAMER_col")
     (org-toggle-tag "BMCOL" (if (org-string-nw-p value) 'on 'off)))))
 
