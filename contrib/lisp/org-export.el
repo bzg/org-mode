@@ -756,71 +756,54 @@ keywords are understood:
     shouldn't make a back-end test, as it may prevent back-ends
     derived from this one to behave properly.
 
+  :menu-entry
+
+    Menu entry for the export dispatcher.  It should be a list
+    like:
+
+      \(KEY DESCRIPTION ACTION-OR-MENU)
+
+    where :
+
+      KEY is a free character selecting the back-end.
+      DESCRIPTION is a string naming the back-end.
+      ACTION-OR-MENU is either a function or an alist.
+
+      If it is an action, it will be called with three arguments:
+      SUBTREEP, VISIBLE-ONLY and BODY-ONLY.  See `org-export-as'
+      for further explanations.
+
+      If it is an alist, associations should follow the
+      pattern:
+
+        \(KEY DESCRIPTION ACTION)
+
+      where KEY, DESCRIPTION and ACTION are described above.
+
+    Valid values include:
+
+      \(?m \"My Special Back-end\" my-special-export-function)
+
+      or
+
+      \(?l \"Export to LaTeX\"
+           \((?b \"TEX (buffer)\" org-e-latex-export-as-latex)
+            \(?l \"TEX (file)\" org-e-latex-export-to-latex)
+            \(?p \"PDF file\" org-e-latex-export-to-pdf)
+            \(?o \"PDF file and open\"
+                \(lambda (subtree visible body-only)
+                   \(org-open-file
+                     \(org-e-latex-export-to-pdf subtree visible body-only))))))
+
   :options-alist
 
     Alist between back-end specific properties introduced in
     communication channel and how their value are acquired.  See
     `org-export-options-alist' for more information about
-    structure of the values.
-
-As an example, here is how the `e-ascii' back-end is defined:
-
-\(org-export-define-backend e-ascii
-  \((bold . org-e-ascii-bold)
-   \(center-block . org-e-ascii-center-block)
-   \(clock . org-e-ascii-clock)
-   \(code . org-e-ascii-code)
-   \(drawer . org-e-ascii-drawer)
-   \(dynamic-block . org-e-ascii-dynamic-block)
-   \(entity . org-e-ascii-entity)
-   \(example-block . org-e-ascii-example-block)
-   \(export-block . org-e-ascii-export-block)
-   \(export-snippet . org-e-ascii-export-snippet)
-   \(fixed-width . org-e-ascii-fixed-width)
-   \(footnote-definition . org-e-ascii-footnote-definition)
-   \(footnote-reference . org-e-ascii-footnote-reference)
-   \(headline . org-e-ascii-headline)
-   \(horizontal-rule . org-e-ascii-horizontal-rule)
-   \(inline-src-block . org-e-ascii-inline-src-block)
-   \(inlinetask . org-e-ascii-inlinetask)
-   \(italic . org-e-ascii-italic)
-   \(item . org-e-ascii-item)
-   \(keyword . org-e-ascii-keyword)
-   \(latex-environment . org-e-ascii-latex-environment)
-   \(latex-fragment . org-e-ascii-latex-fragment)
-   \(line-break . org-e-ascii-line-break)
-   \(link . org-e-ascii-link)
-   \(paragraph . org-e-ascii-paragraph)
-   \(plain-list . org-e-ascii-plain-list)
-   \(plain-text . org-e-ascii-plain-text)
-   \(planning . org-e-ascii-planning)
-   \(property-drawer . org-e-ascii-property-drawer)
-   \(quote-block . org-e-ascii-quote-block)
-   \(quote-section . org-e-ascii-quote-section)
-   \(radio-target . org-e-ascii-radio-target)
-   \(section . org-e-ascii-section)
-   \(special-block . org-e-ascii-special-block)
-   \(src-block . org-e-ascii-src-block)
-   \(statistics-cookie . org-e-ascii-statistics-cookie)
-   \(strike-through . org-e-ascii-strike-through)
-   \(subscript . org-e-ascii-subscript)
-   \(superscript . org-e-ascii-superscript)
-   \(table . org-e-ascii-table)
-   \(table-cell . org-e-ascii-table-cell)
-   \(table-row . org-e-ascii-table-row)
-   \(target . org-e-ascii-target)
-   \(template . org-e-ascii-template)
-   \(timestamp . org-e-ascii-timestamp)
-   \(underline . org-e-ascii-underline)
-   \(verbatim . org-e-ascii-verbatim)
-   \(verse-block . org-e-ascii-verse-block))
-  :export-block \"ASCII\"
-  :filters-alist ((:filter-headline . org-e-ascii-filter-headline-blank-lines)
-		  \(:filter-section . org-e-ascii-filter-headline-blank-lines))
-  :options-alist ((:ascii-charset nil nil org-e-ascii-charset)))"
+    structure of the values."
   (declare (debug (&define name sexp [&rest [keywordp sexp]] defbody))
 	   (indent 1))
-  (let (filters options export-block)
+  (let (export-block filters menu-entry options)
     (while (keywordp (car body))
       (case (pop body)
         (:export-block (let ((names (pop body)))
@@ -828,6 +811,7 @@ As an example, here is how the `e-ascii' back-end is defined:
 			       (if (consp names) (mapcar 'upcase names)
 				 (list (upcase names))))))
 	(:filters-alist (setq filters (pop body)))
+	(:menu-entry (setq menu-entry (pop body)))
         (:options-alist (setq options (pop body)))
         (t (pop body))))
     `(progn
@@ -853,6 +837,11 @@ See `org-export-filters-alist' for more information."))
 	      (add-to-list 'org-element-block-name-alist
 			   `(,name . org-element-export-block-parser)))
 	    ',export-block))
+       ;; Add an entry for back-end in `org-export-dispatch'.
+       ,(when menu-entry
+	  (let ((menu (assq (car menu-entry) org-export-dispatch-menu-entries)))
+	    (if menu `(setcdr ',menu ',(cdr menu-entry))
+	      `(push ',menu-entry org-export-dispatch-menu-entries))))
        ;; Splice in the body, if any.
        ,@body)))
 
@@ -877,7 +866,13 @@ keywords are understood:
 
     Alist of filters that will overwrite or complete filters
     defined in PARENT back-end.  See `org-export-filters-alist'
-    for more a list of allowed filters.
+    for a list of allowed filters.
+
+  :menu-entry
+
+    Menu entry for the export dispatcher.  See
+    `org-export-define-backend' for more information about the
+    expected value.
 
   :options-alist
 
@@ -885,6 +880,28 @@ keywords are understood:
     complete those defined in PARENT back-end.  Refer to
     `org-export-options-alist' for more information about
     structure of the values.
+
+  :sub-menu-entry
+
+    Append entries to an existing menu in the export dispatcher.
+    The associated value should be a list whose CAR is the
+    character selecting the menu to expand and CDR a list of
+    entries following the pattern:
+
+      \(KEY DESCRIPTION ACTION)
+
+    where KEY is a free character triggering the action,
+    DESCRIPTION is a string defining the action, and ACTION is
+    a function that will be called with three arguments:
+    SUBTREEP, VISIBLE-ONLY and BODY-ONLY.  See `org-export-as'
+    for further explanations.
+
+    Valid values include:
+
+      \(?l (?P \"As PDF file (Beamer)\" org-e-beamer-export-to-pdf)
+          \(?O \"As PDF file and open (Beamer)\"
+              \(lambda (s v b)
+                \(org-open-file (org-e-beamer-export-to-pdf s v b)))))
 
   :translate-alist
 
@@ -905,7 +922,7 @@ The back-end could then be called with, for example:
   \(org-export-to-buffer 'my-latex \"*Test my-latex*\")"
   (declare (debug (&define name sexp [&rest [keywordp sexp]] def-body))
 	   (indent 2))
-  (let (filters options translate export-block)
+  (let (export-block filters menu-entry options sub-menu-entry translate)
     (while (keywordp (car body))
       (case (pop body)
 	(:export-block (let ((names (pop body)))
@@ -913,7 +930,9 @@ The back-end could then be called with, for example:
 			       (if (consp names) (mapcar 'upcase names)
 				 (list (upcase names))))))
         (:filters-alist (setq filters (pop body)))
+	(:menu-entry (setq menu-entry (pop body)))
         (:options-alist (setq options (pop body)))
+	(:sub-menu-entry (setq sub-menu-entry (pop body)))
         (:translate-alist (setq translate (pop body)))
         (t (pop body))))
     `(progn
@@ -951,6 +970,15 @@ structure of the values."
 		    (symbol-value
 		     (intern (format "org-%s-translate-alist" parent)))))
 	 "Alist between element or object types and translators.")
+       ;; Add an entry for back-end in `org-export-dispatch'.
+       ,(when menu-entry
+	  (let ((menu (assq (car menu-entry) org-export-dispatch-menu-entries)))
+	    (if menu `(setcdr ',menu ',(cdr menu-entry))
+	      `(push ',menu-entry org-export-dispatch-menu-entries))))
+       ,(when sub-menu-entry
+	  (let ((menu (assq (car sub-menu-entry)
+			    org-export-dispatch-menu-entries)))
+	    (when menu `(nconc ',(nth 2 menu) ',(cdr sub-menu-entry)))))
        ;; Splice in the body, if any.
        ,@body)))
 
@@ -4328,8 +4356,14 @@ to `:default' encoding. If it fails, return S."
 ;;
 ;; `org-export-dispatch' is the standard interactive way to start an
 ;; export process.  It uses `org-export-dispatch-ui' as a subroutine
-;; for its interface.  Most commons back-ends should have an entry in
-;; it.
+;; for its interface, which, in turn, delegates response to key
+;; pressed to `org-export-dispatch-action'.
+
+(defvar org-export-dispatch-menu-entries nil
+  "List of menu entries available for `org-export-dispatch'.
+This variable shouldn't be set directly.  Set-up :menu-entry
+keyword in either `org-export-define-backend' or
+`org-export-define-derived-backend' instead.")
 
 ;;;###autoload
 (defun org-export-dispatch ()
@@ -4343,77 +4377,30 @@ to switch to one or the other.
 
 Return an error if key pressed has no associated command."
   (interactive)
-  (let* ((input (org-export-dispatch-ui
-		 (if (listp org-export-initial-scope) org-export-initial-scope
-		   (list org-export-initial-scope))
-		 org-export-dispatch-use-expert-ui))
-	 (raw-key (car input))
+  (let* ((input (org-export-dispatch-ui (list org-export-initial-scope)
+					nil
+					org-export-dispatch-use-expert-ui))
+	 (action (car input))
 	 (optns (cdr input)))
-    ;; Translate "C-a", "C-b"... into "a", "b"... Then take action
-    ;; depending on user's key pressed.
-    (case (if (< raw-key 27) (+ raw-key 96) raw-key)
-      ;; Allow to quit with "q" key.
-      (?q nil)
-      ;; Export with `e-ascii' back-end.
-      ((?A ?N ?U)
-       (org-e-ascii-export-as-ascii
-	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)
-	`(:ascii-charset ,(case raw-key (?A 'ascii) (?N 'latin1) (t 'utf-8)))))
-      ((?a ?n ?u)
-       (org-e-ascii-export-to-ascii
-	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)
-	`(:ascii-charset ,(case raw-key (?a 'ascii) (?n 'latin1) (t 'utf-8)))))
-      ;; Export with `e-latex' back-end.
-      (?L (org-e-latex-export-as-latex
-	   (memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?l
-       (org-e-latex-export-to-latex
-	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?p
-       (org-e-latex-export-to-pdf
-	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?d
-       (org-open-file
-	(org-e-latex-export-to-pdf
-	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
-      ;; Export with `e-html' back-end.
-      (?H
-       (org-e-html-export-as-html
-	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?h
-       (org-e-html-export-to-html
-	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?b
-       (org-open-file
-	(org-e-html-export-to-html
-	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))))
-      ;; Export with `e-odt' back-end.
-      (?o
-       (org-e-odt-export-to-odt
-	(memq 'subtree optns) (memq 'visible optns) (memq 'body optns)))
-      (?O
-       (org-open-file
-	(org-e-odt-export-to-odt
-	 (memq 'subtree optns) (memq 'visible optns) (memq 'body optns))
-	'system))
-      ;; Publishing facilities
-      (?F
-       (org-e-publish-current-file (memq 'force optns)))
-      (?P
+    (case action
+      ;; First handle special hard-coded actions.
+      (publish-current-file (org-e-publish-current-file (memq 'force optns)))
+      (publish-current-project
        (org-e-publish-current-project (memq 'force optns)))
-      (?X
-       (let ((project
-	      (assoc (org-icompleting-read
-		      "Publish project: " org-e-publish-project-alist nil t)
-		     org-e-publish-project-alist)))
-	 (org-e-publish project (memq 'force optns))))
-      (?E
-       (org-e-publish-all (memq 'force optns)))
-      ;; Undefined command.
-      (t (error "No command associated with key %s"
-		(char-to-string raw-key))))))
+      (publish-choose-project
+       (org-e-publish (assoc (org-icompleting-read
+			      "Publish project: "
+			      org-e-publish-project-alist nil t)
+			     org-e-publish-project-alist)
+		      (memq 'force optns)))
+      (publish-all (org-e-publish-all (memq 'force optns)))
+      (otherwise
+       (funcall action
+		(memq 'subtree optns)
+		(memq 'visible optns)
+		(memq 'body optns))))))
 
-(defun org-export-dispatch-ui (options expertp)
+(defun org-export-dispatch-ui (options first-key expertp)
   "Handle interface for `org-export-dispatch'.
 
 OPTIONS is a list containing current interactive options set for
@@ -4423,85 +4410,174 @@ export.  It can contain any of the following symbols:
 `visible' restricts export to visible part of buffer.
 `force'   force publishing files.
 
+FIRST-KEY is the key pressed to select the first level menu.  It
+is nil when this menu hasn't been selected yet.
+
 EXPERTP, when non-nil, triggers expert UI.  In that case, no help
 buffer is provided, but indications about currently active
 options are given in the prompt.  Moreover, \[?] allows to switch
-back to standard interface.
-
-Return value is a list with key pressed as CAR and a list of
-final interactive export options as CDR."
-  (let ((help
-	 (format "---- (Options) -------------------------------------------
-
-\[1] Body only:     %s       [2] Export scope:     %s
-\[3] Visible only:  %s       [4] Force publishing: %s
-
-
---- (ASCII/Latin-1/UTF-8 Export) -------------------------
-
-\[a/n/u] to TXT file          [A/N/U] to temporary buffer
-
---- (HTML Export) ----------------------------------------
-
-\[h] to HTML file             [b] ... and open it
-\[H] to temporary buffer
-
---- (LaTeX Export) ---------------------------------------
-
-\[l] to TEX file              [L] to temporary buffer
-\[p] to PDF file              [d] ... and open it
-
---- (ODF Export) -----------------------------------------
-
-\[o] to ODT file              [O] ... and open it
-
---- (Publish) --------------------------------------------
-
-\[F] current file             [P] current project
-\[X] a project                [E] every project"
-		 (if (memq 'body options) "On " "Off")
-		 (if (memq 'subtree options) "Subtree" "Buffer ")
-		 (if (memq 'visible options) "On " "Off")
-		 (if (memq 'force options) "On " "Off")))
-	(standard-prompt "Export command: ")
-	(expert-prompt (format "Export command (%s%s%s%s): "
-			       (if (memq 'body options) "b" "-")
-			       (if (memq 'subtree options) "s" "-")
-			       (if (memq 'visible options) "v" "-")
-			       (if (memq 'force options) "f" "-")))
-	(handle-keypress
-	 (function
-	  ;; Read a character from command input, toggling interactive
-	  ;; options when applicable.  PROMPT is the displayed prompt,
-	  ;; as a string.
-	  (lambda (prompt)
-	    (let ((key (read-char-exclusive prompt)))
-	      (cond
-	       ;; Ignore non-standard characters (i.e. "M-a").
-	       ((not (characterp key)) (org-export-dispatch-ui options expertp))
-	       ;; Help key: Switch back to standard interface if
-	       ;; expert UI was active.
-	       ((eq key ??) (org-export-dispatch-ui options nil))
-	       ;; Toggle export options.
-	       ((memq key '(?1 ?2 ?3 ?4))
-		(org-export-dispatch-ui
-		 (let ((option (case key (?1 'body) (?2 'subtree) (?3 'visible)
-				     (?4 'force))))
-		   (if (memq option options) (remq option options)
-		     (cons option options)))
-		 expertp))
-	       ;; Action selected: Send key and options back to
-	       ;; `org-export-dispatch'.
-	       (t (cons key options))))))))
+back to standard interface."
+  (let* ((fontify-key
+	  (lambda (key &optional access-key)
+	    ;; Fontify KEY string.  Optional argument ACCESS-KEY, when
+	    ;; non-nil is the required first-level key to activate
+	    ;; KEY.  When its value is t, activate KEY independently
+	    ;; on the first key, if any.  A nil value means KEY will
+	    ;; only be activated at first level.
+	    (if (or (eq access-key t) (eq access-key first-key))
+		(org-add-props key nil 'face 'org-warning)
+	      (org-no-properties key))))
+	 ;; Make sure order of menu doesn't depend on the order in
+	 ;; which back-ends are loaded.
+	 (backends (sort (copy-sequence org-export-dispatch-menu-entries)
+			 (lambda (a b) (< (car a) (car b)))))
+	 ;; Compute a list of allowed keys based on the first key
+	 ;; pressed, if any.  Some keys (?1, ?2, ?3, ?4 and ?q) are
+	 ;; always available.
+	 (allowed-keys
+	  (nconc (list ?1 ?2 ?3 ?4)
+		 (mapcar 'car
+			 (if (not first-key) backends
+			   (nth 2 (assq first-key backends))))
+		 (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
+		       ((not first-key) (list ?P)))
+		 (when expertp (list ??))
+		 (list ?q)))
+	 ;; Build the help menu for standard UI.
+	 (help
+	  (unless expertp
+	    (concat
+	     ;; Options are hard-coded.
+	     (format "Options
+    [%s] Body only:    %s       [%s] Visible only:     %s
+    [%s] Export scope: %s   [%s] Force publishing: %s\n\n"
+		     (funcall fontify-key "1" t)
+		     (if (memq 'body options) "On " "Off")
+		     (funcall fontify-key "2" t)
+		     (if (memq 'visible options) "On " "Off")
+		     (funcall fontify-key "3" t)
+		     (if (memq 'subtree options) "Subtree" "Buffer ")
+		     (funcall fontify-key "4" t)
+		     (if (memq 'force options) "On " "Off"))
+	     ;; Display registered back-end entries.
+	     (mapconcat
+	      (lambda (entry)
+		(let ((top-key (car entry)))
+		  (concat
+		   (format "[%s] %s\n"
+			   (funcall fontify-key (char-to-string top-key))
+			   (nth 1 entry))
+		   (let ((sub-menu (nth 2 entry)))
+		     (unless (functionp sub-menu)
+		       ;; Split sub-menu into two columns.
+		       (let ((index -1))
+			 (concat
+			  (mapconcat
+			   (lambda (sub-entry)
+			     (incf index)
+			     (format (if (zerop (mod index 2)) "    [%s] %-24s"
+				       "[%s] %s\n")
+				     (funcall fontify-key
+					      (char-to-string (car sub-entry))
+					      top-key)
+				     (nth 1 sub-entry)))
+			   sub-menu "")
+			  (when (zerop (mod index 2)) "\n"))))))))
+	      backends "\n")
+	     ;; Publishing menu is hard-coded.
+	     (format "\n[%s] Publish
+    [%s] Current file            [%s] Current project
+    [%s] Choose project          [%s] All projects\n\n"
+		     (funcall fontify-key "P")
+		     (funcall fontify-key "f" ?P)
+		     (funcall fontify-key "p" ?P)
+		     (funcall fontify-key "x" ?P)
+		     (funcall fontify-key "a" ?P))
+	     (format "\[%s] %s"
+		     (funcall fontify-key "q" t)
+		     (if first-key "Main menu" "Exit")))))
+	 ;; Build prompts for both standard and expert UI.
+	 (standard-prompt (unless expertp "Export command: "))
+	 (expert-prompt
+	  (when expertp
+	    (format
+	     "Export command (Options: %s%s%s%s) [%s]: "
+	     (if (memq 'body options) (funcall fontify-key "b" t) "-")
+	     (if (memq 'subtree options) (funcall fontify-key "s" t) "-")
+	     (if (memq 'visible options) (funcall fontify-key "v" t) "-")
+	     (if (memq 'force options) (funcall fontify-key "f" t) "-")
+	     (concat allowed-keys)))))
     ;; With expert UI, just read key with a fancy prompt.  In standard
     ;; UI, display an intrusive help buffer.
-    (if expertp (funcall handle-keypress expert-prompt)
+    (if expertp
+	(org-export-dispatch-action
+	 expert-prompt allowed-keys backends options first-key expertp)
       (save-window-excursion
 	(delete-other-windows)
-	(with-output-to-temp-buffer "*Org Export/Publishing Help*" (princ help))
+	(with-current-buffer (get-buffer-create "*Org Export/Publishing Help*")
+	  (erase-buffer)
+	  (save-excursion (insert help)))
 	(org-fit-window-to-buffer
-	 (get-buffer-window "*Org Export/Publishing Help*"))
-	(funcall handle-keypress standard-prompt)))))
+	 (display-buffer "*Org Export/Publishing Help*"))
+	(org-export-dispatch-action
+	 standard-prompt allowed-keys backends options first-key expertp)))))
+
+(defun org-export-dispatch-action
+  (prompt allowed-keys backends options first-key expertp)
+  "Read a character from command input and act accordingly.
+
+PROMPT is the displayed prompt, as a string.  ALLOWED-KEYS is
+a list of characters available at a given step in the process.
+BACKENDS is a list of menu entries.  OPTIONS, FIRST-KEY and
+EXPERTP are the same as defined in `org-export-dispatch-ui',
+which see.
+
+Toggle export options when required.  Otherwise, return value is
+a list with action as CAR and a list of interactive export
+options as CDR."
+  (let ((key (let ((k (read-char-exclusive prompt)))
+	       ;; Translate "C-a", "C-b"... into "a", "b"... Then take action
+	       ;; depending on user's key pressed.
+	       (if (< k 27) (+ k 96) k))))
+    (cond
+     ;; Ignore non-standard characters (i.e. "M-a") and
+     ;; undefined associations.
+     ((not (memq key allowed-keys))
+      (org-export-dispatch-ui options first-key expertp))
+     ;; q key at first level aborts export.  At second
+     ;; level, cancel first key instead.
+     ((eq key ?q) (if (not first-key) (error "Export aborted")
+		    (org-export-dispatch-ui options nil expertp)))
+     ;; Help key: Switch back to standard interface if
+     ;; expert UI was active.
+     ((eq key ??) (org-export-dispatch-ui options first-key nil))
+     ;; Toggle export options.
+     ((memq key '(?1 ?2 ?3 ?4))
+      (org-export-dispatch-ui
+       (let ((option (case key (?1 'body) (?2 'visible) (?3 'subtree)
+			   (?4 'force))))
+	 (if (memq option options) (remq option options)
+	   (cons option options)))
+       first-key expertp))
+     ;; Action selected: Send key and options back to
+     ;; `org-export-dispatch'.
+     ((or first-key
+	  (and (eq first-key ?P) (memq key '(?f ?p ?x ?a)))
+	  (functionp (nth 2 (assq key backends))))
+      (cons (cond
+	     ((not first-key) (nth 2 (assq key backends)))
+	     ;; Publishing actions are hard-coded.  Send a special
+	     ;; signal to `org-export-dispatch'.
+	     ((eq first-key ?P)
+	      (case key
+		(?f 'publish-current-file)
+		(?p 'publish-current-project)
+		(?x 'publish-choose-project)
+		(?a 'publish-all)))
+	     (t (nth 2 (assq key (nth 2 (assq first-key backends))))))
+	    options))
+     ;; Otherwise, enter sub-menu.
+     (t (org-export-dispatch-ui options key expertp)))))
 
 
 (provide 'org-export)
