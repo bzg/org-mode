@@ -706,7 +706,7 @@ Assume point is at beginning of the headline."
 	    (and todo (if (member todo org-done-keywords) 'done 'todo)))
 	   (tags (let ((raw-tags (nth 5 components)))
 		   (and raw-tags (org-split-string raw-tags ":"))))
-	   (raw-value (nth 4 components))
+	   (raw-value (or (nth 4 components) ""))
 	   (quotedp
 	    (let ((case-fold-search nil))
 	      (string-match (format "^%s +" org-quote-string) raw-value)))
@@ -849,8 +849,9 @@ CONTENTS is the contents of the element."
 Return a list whose CAR is `inlinetask' and CDR is a plist
 containing `:title', `:begin', `:end', `:hiddenp',
 `:contents-begin' and `:contents-end', `:level', `:priority',
-`:tags', `:todo-keyword', `:todo-type', `:scheduled',
-`:deadline', `:timestamp', `:clock' and `:post-blank' keywords.
+`:raw-value', `:tags', `:todo-keyword', `:todo-type',
+`:scheduled', `:deadline', `:timestamp', `:clock' and
+`:post-blank' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in lowercase, the underscores replaced with hyphens
@@ -870,6 +871,7 @@ Assume point is at beginning of the inline task."
 			   (if (member todo org-done-keywords) 'done 'todo)))
 	   (tags (let ((raw-tags (nth 5 components)))
 		   (and raw-tags (org-split-string raw-tags ":"))))
+	   (raw-value (or (nth 4 components) ""))
 	   ;; Normalize property names: ":SOME_PROP:" becomes
 	   ;; ":some-prop".
 	   (standard-props (let (plist)
@@ -906,7 +908,8 @@ Assume point is at beginning of the inline task."
 	   (inlinetask
 	    (list 'inlinetask
 		  (nconc
-		   (list :begin begin
+		   (list :raw-value raw-value
+			 :begin begin
 			 :end end
 			 :hiddenp hidden
 			 :contents-begin contents-begin
@@ -925,9 +928,9 @@ Assume point is at beginning of the inline task."
 		   (cadr keywords)))))
       (org-element-put-property
        inlinetask :title
-       (if raw-secondary-p (nth 4 components)
+       (if raw-secondary-p raw-value
 	 (org-element-parse-secondary-string
-	  (nth 4 components)
+	  raw-value
 	  (org-element-restriction 'inlinetask)
 	  inlinetask))))))
 
