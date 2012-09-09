@@ -4824,7 +4824,7 @@ but the stars and the body are.")
 	    (concat "^\\(\\*+\\)"
 		    "\\(?: +" org-todo-regexp "\\)?"
 		    "\\(?: +\\(\\[#.\\]\\)\\)?"
-		    "\\(?: +\\(.*?\\)\\)?"
+		    "\\(?: +\\(.*?\\)\\)??"
 		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]_@#%:]+:\\)\\)?")
 		    "[ \t]*$")
 	    org-complex-heading-regexp-format
@@ -4842,7 +4842,7 @@ but the stars and the body are.")
 	    org-todo-line-tags-regexp
 	    (concat "^\\(\\*+\\)"
 		    "\\(?: +" org-todo-regexp "\\)?"
-		    "\\(?: +\\(.*?\\)\\)?"
+		    "\\(?: +\\(.*?\\)\\)??"
 		    (org-re "\\(?:[ \t]+\\(:[[:alnum:]:_@#%]+:\\)\\)?")
 		    "[ \t]*$")
 	    org-deadline-regexp (concat "\\<" org-deadline-string)
