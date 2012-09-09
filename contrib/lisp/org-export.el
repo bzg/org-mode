@@ -840,7 +840,7 @@ See `org-export-filters-alist' for more information."))
        ;; Add an entry for back-end in `org-export-dispatch'.
        ,(when menu-entry
 	  (let ((menu (assq (car menu-entry) org-export-dispatch-menu-entries)))
-	    (if menu `(setcdr ',menu ',(cdr menu-entry))
+	    (unless menu
 	      `(push ',menu-entry org-export-dispatch-menu-entries))))
        ;; Splice in the body, if any.
        ,@body)))
@@ -973,12 +973,14 @@ structure of the values."
        ;; Add an entry for back-end in `org-export-dispatch'.
        ,(when menu-entry
 	  (let ((menu (assq (car menu-entry) org-export-dispatch-menu-entries)))
-	    (if menu `(setcdr ',menu ',(cdr menu-entry))
+	    (unless menu
 	      `(push ',menu-entry org-export-dispatch-menu-entries))))
        ,(when sub-menu-entry
-	  (let ((menu (assq (car sub-menu-entry)
-			    org-export-dispatch-menu-entries)))
-	    (when menu `(nconc ',(nth 2 menu) ',(cdr sub-menu-entry)))))
+	  (let ((menu (nth 2 (assq (car sub-menu-entry)
+				   org-export-dispatch-menu-entries))))
+	    (when menu `(nconc ',menu
+			       ',(org-remove-if (lambda (e) (member e menu))
+						(cdr sub-menu-entry))))))
        ;; Splice in the body, if any.
        ,@body)))
 
