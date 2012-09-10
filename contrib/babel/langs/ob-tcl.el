@@ -38,8 +38,11 @@
 
 (defvar org-babel-default-header-args:tcl nil)
 
-(defvar org-babel-tcl-command "tclsh"
-  "Name of command to use for executing tcl code.")
+(defcustom org-babel-tcl-command "tclsh"
+"Name of command to use for executing Tcl code."
+  :group 'org-babel
+  :type 'string)
+
 
 (defun org-babel-execute:tcl (body params)
   "Execute a block of Tcl code with Babel.
