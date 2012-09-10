@@ -33,7 +33,6 @@
 
 ;;; Define Back-End
 
-;;;###autoload
 (org-export-define-backend e-odt
   ((bold . org-e-odt-bold)
    (center-block . org-e-odt-center-block)
