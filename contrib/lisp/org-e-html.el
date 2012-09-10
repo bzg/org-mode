@@ -1857,7 +1857,8 @@ holding contextual information."
   (let* ((level (+ (org-export-get-relative-level headline info)
 		   (1- org-e-html-toplevel-hlevel)))
 	 (headline-number (org-export-get-headline-number headline info))
-	 (section-number (and (org-export-numbered-headline-p headline info)
+	 (section-number (and (not (org-export-low-level-p headline info))
+			      (org-export-numbered-headline-p headline info)
 			      (mapconcat 'number-to-string
 					 headline-number ".")))
 	 (todo (and (plist-get info :with-todo-keywords)
@@ -1915,9 +1916,9 @@ holding contextual information."
      ;; Case 2. This is a deep sub-tree: export it as a list item.
      ;;         Also export as items headlines for which no section
      ;;         format has been found.
-     ((org-export-low-level-p headline info) ; FIXME (or (not section-fmt))
+     ((org-export-low-level-p headline info)
       ;; Build the real contents of the sub-tree.
-      (let* ((type (if numberedp 'unordered 'unordered)) ; FIXME
+      (let* ((type (if numberedp 'ordered 'unordered))
 	     (itemized-body (org-e-html-format-list-item
 			     contents type nil nil full-text)))
 	(concat
@@ -2045,7 +2046,9 @@ contextual information."
        (ordered
 	(let* ((counter term-counter-id)
 	       (extra (if counter (format " value=\"%s\"" counter) "")))
-	  (format "<li%s>" extra)))
+	  (concat
+	   (format "<li%s>" extra)
+	   (when headline (concat headline "<br/>")))))
        (unordered
 	(let* ((id term-counter-id)
 	       (extra (if id (format " id=\"%s\"" id) "")))
