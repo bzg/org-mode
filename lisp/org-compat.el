@@ -460,12 +460,6 @@ With two arguments, return floor and remainder of their quotient."
 	   (defun org-release () "N/A")
 	   (defun org-git-version () "N/A !!check installation!!"))))))
 
-(defun org-random ()
-  "Call ̀random' appropriately."
-  (if (or (featurep 'xemacs) (version< emacs-version "24.2.50.1"))
-      (random t)
-    (random)))
-
 (provide 'org-compat)
 
 ;;; org-compat.el ends here
