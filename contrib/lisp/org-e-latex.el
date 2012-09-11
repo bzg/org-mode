@@ -2306,7 +2306,7 @@ This function assumes TABLE has `org' as its `:type' attribute."
 	 (float-env (cond
 		     ((string= "longtable" table-env) nil)
 		     ((and attr (string-match "\\<sidewaystable\\>" attr))
-		      "sidewaystables")
+		      "sidewaystable")
 		     ((and attr
 			   (or (string-match (regexp-quote "table*") attr)
 			       (string-match "\\<multicolumn\\>" attr)))
