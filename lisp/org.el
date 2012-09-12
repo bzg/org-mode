@@ -15618,15 +15618,14 @@ user."
       (setq ans "+0"))
 
     (when (setq delta (org-read-date-get-relative ans (current-time) org-def))
-      (unless (save-match-data (string-match org-plain-time-of-day-regexp ans))
-	(setq ans (replace-match "" t t ans)
-	      deltan (car delta)
-	      deltaw (nth 1 delta)
-	      deltadef (nth 2 delta))))
+      (setq ans (replace-match "" t t ans)
+	    deltan (car delta)
+	    deltaw (nth 1 delta)
+	    deltadef (nth 2 delta)))
 
-    ;; Check if there is an iso week date in there
-    ;; If yes, store the info and postpone interpreting it until the rest
-    ;; of the parsing is done
+    ;; Check if there is an iso week date in there.  If yes, store the
+    ;; info and postpone interpreting it until the rest of the parsing
+    ;; is done.
     (when (string-match "\\<\\(?:\\([0-9]+\\)-\\)?[wW]\\([0-9]\\{1,2\\}\\)\\(?:-\\([0-6]\\)\\)?\\([ \t]\\|$\\)" ans)
       (setq iso-year (if (match-end 1)
 			 (org-small-year-to-year
