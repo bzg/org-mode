@@ -329,6 +329,12 @@ argument."
   :group 'org-export-e-latex
   :type 'string)
 
+(defcustom org-e-latex-toc-command "\\tableofcontents\n\\vspace*{1cm}\n\n"
+  "LaTeX command to set the table of contents, list of figures...
+This command only applies to the table of contents generated with
+toc:nil option, not to those generated with #+TOC keyword."
+  :group 'org-export-e-latex
+  :type 'string)
 
 ;;;; Headline
 
@@ -1080,7 +1086,7 @@ holding export options."
        (when depth
 	 (concat (when (wholenump depth)
 		   (format "\\setcounter{tocdepth}{%d}\n" depth))
-		 "\\tableofcontents\n\\vspace*{1cm}\n\n")))
+		 org-e-latex-toc-command)))
      ;; Document's body.
      contents
      ;; Creator.
