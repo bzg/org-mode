@@ -631,7 +631,11 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
        (org-test-with-temp-text "[fn:1] Definition\n| a | b |"
 	 (org-element-map
 	  (org-element-parse-buffer)
-	  'footnote-definition 'identity nil t))))))
+	  'footnote-definition 'identity nil t)))))
+  ;; Footnote starting with special syntax.
+  (should-not
+   (org-test-with-temp-text "[fn:1] - no item"
+     (org-element-map (org-element-parse-buffer) 'item 'identity))))
 
 
 ;;;; Footnotes Reference.
@@ -917,7 +921,13 @@ DEADLINE: <2012-03-29 thu.>"
     (should
      (org-element-property
       :hiddenp
-      (org-element-map (org-element-parse-buffer) 'item 'identity nil t)))))
+      (org-element-map (org-element-parse-buffer) 'item 'identity nil t))))
+  ;; Item starting with special syntax.
+  (should
+   (equal '(("- item"))
+	  (org-test-with-temp-text "- - item"
+	    (org-element-map
+	     (org-element-parse-buffer) 'paragraph 'org-element-contents)))))
 
 
 ;;;; Keyword
