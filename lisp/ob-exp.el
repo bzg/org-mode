@@ -230,12 +230,14 @@ this template."
         (let ((element (save-match-data (org-element-at-point))))
           (when (eq (org-element-type element) 'src-block)
             (let* ((block-start (copy-marker (match-beginning 0)))
-                   (match-start (copy-marker
-				 (org-element-property :begin element)))
+                   (match-start
+		    (copy-marker (org-element-property :begin element)))
+		   (element-end
+		    (copy-marker (org-element-property :end element)))
                    ;; Make sure we don't remove any blank lines after
                    ;; the block when replacing it.
-                   (match-end (save-excursion
-                                (goto-char (org-element-property :end element))
+                   (block-end (save-excursion
+                                (goto-char element-end)
                                 (skip-chars-backward " \r\t\n")
                                 (copy-marker (line-end-position))))
                    (indentation (org-get-indentation))
@@ -256,13 +258,12 @@ this template."
 	      ;; should remove the block.
               (let ((replacement (progn (goto-char block-start)
 					(org-babel-exp-src-block headers))))
-                (cond ((not replacement) (goto-char match-end))
+                (cond ((not replacement) (goto-char block-end))
 		      ((equal replacement "")
-		       (delete-region (org-element-property :begin element)
-				      (org-element-property :end element)))
+		       (delete-region match-start element-end))
 		      (t
 		       (goto-char match-start)
-		       (delete-region (point) match-end)
+		       (delete-region (point) block-end)
 		       (insert replacement)
 		       (if preserve-indent
 			   ;; Indent only the code block markers.
@@ -271,12 +272,14 @@ this template."
 					   (goto-char match-start)
 					   (indent-line-to indentation))
 			 ;; Indent everything.
-			 (indent-code-rigidly match-start (point) indentation)))))
+			 (indent-code-rigidly
+			  match-start (point) indentation)))))
 	      (setq start (point))
               ;; Cleanup markers.
 	      (set-marker block-start nil)
-              (set-marker match-start nil)
-              (set-marker match-end nil)))))
+              (set-marker block-end nil)
+	      (set-marker match-start nil)
+              (set-marker element-end nil)))))
       ;; Eventually execute all non-block Babel elements between last
       ;; src-block and end of buffer.
       (org-babel-exp-non-block-elements start (point-max)))))
