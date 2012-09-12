@@ -1473,7 +1473,7 @@ When nil, such items are sorted as 0 minutes effort."
   :group 'org-agenda)
 
 (defcustom org-agenda-prefix-format
-  '((agenda  . " %i %-12:c%?-12t% s")
+  '((agenda  . " %i %-12:c%?-12t% s %l")
     (timeline  . "  % s")
     (todo  . " %i %-12:c")
     (tags  . " %i %-12:c")
@@ -6168,7 +6168,7 @@ and stored in the variable `org-prefix-format-compiled'."
     (while (string-match "%\\(\\?\\)?\\([-+]?[0-9.]*\\)\\([ .;,:!?=|/<>]?\\)\\([cltsei]\\|(.+)\\)"
 			 s start)
       (setq var (or (cdr (assoc (match-string 4 s)
-				'(("c" . category) ("t" . time) ("s" . extra)
+				'(("c" . category) ("t" . time) ("l" . level) ("s" . extra)
 				  ("i" . category-icon) ("T" . tag) ("e" . effort))))
 		    'eval)
 	    c (or (match-string 3 s) "")
