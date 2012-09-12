@@ -1209,7 +1209,7 @@ information."
 (defun org-e-latex-export-block (export-block contents info)
   "Transcode a EXPORT-BLOCK element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (when (member (org-element-property :type export-block) ("LATEX" "TEX"))
+  (when (member (org-element-property :type export-block) '("LATEX" "TEX"))
     (org-remove-indentation (org-element-property :value export-block))))
 
 
