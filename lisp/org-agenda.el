@@ -4283,11 +4283,7 @@ in `org-agenda-text-search-extra-files'."
 			(goto-char beg)
 			(setq marker (org-agenda-new-marker (point))
 			      category (org-get-category)
-			      level
-			      (make-string
-			       (1- (string-to-number
-				    (substring (symbol-name (get-text-property
-							     (match-beginning 0) 'face)) 10))) ? )
+			      level (make-string (1- (org-outline-level)) ? )
 			      category-pos (get-text-property (point) 'org-category-position)
 			      tags (org-get-tags-at (point))
 			      txt (org-agenda-format-item
@@ -5014,10 +5010,7 @@ the documentation of `org-diary'."
 	      txt (org-trim
 		   (buffer-substring (match-beginning 2) (match-end 0)))
 	      tags (org-get-tags-at (point))
-	      level (make-string
-		     (1- (string-to-number
-			  (substring (symbol-name (get-text-property
-						   (match-beginning 0) 'face)) 10))) ? )
+	      level (make-string (1- (org-outline-level)) ? )
 	      txt (org-agenda-format-item "" txt level category tags)
 	      priority (1+ (org-get-priority txt))
 	      todo-state (org-get-todo-state))
@@ -5193,10 +5186,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		(throw :skip nil))
 	    (setq hdmarker (org-agenda-new-marker)
 		  tags (org-get-tags-at)
-		  level
-		  (make-string
-		   (1- (string-to-number
-			(substring (symbol-name (get-text-property (point) 'face)) 10))) ? ))
+		  level (make-string (1- (org-outline-level)) ? ))
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 	    (setq head (or (match-string 1) ""))
 	    (setq txt (org-agenda-format-item
@@ -5244,9 +5234,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	(setq result (org-diary-sexp-entry sexp sexp-entry date))
 	(when result
 	  (setq marker (org-agenda-new-marker beg)
-		level (make-string
-		       (1- (string-to-number
-			    (substring (symbol-name (get-text-property beg 'face)) 10))) ? )
+		level (make-string (1- (org-outline-level)) ? )
 		category (org-get-category beg)
 		category-pos (get-text-property beg 'org-category-position)
 		tags (save-excursion (org-backward-heading-same-level 0)
@@ -5420,10 +5408,7 @@ please use `org-class' instead."
 	    (goto-char (match-beginning 0))
 	    (setq hdmarker (org-agenda-new-marker)
 		  tags (org-get-tags-at)
-		  level
-		  (make-string
-		   (1- (string-to-number
-			(substring (symbol-name (get-text-property (point) 'face)) 10))) ? ))
+		  level (make-string (1- (org-outline-level)) ? ))
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 	    (setq txt (match-string 1))
 	    (when extra
@@ -5634,10 +5619,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		    (setq txt org-agenda-no-heading-message)
 		  (goto-char (match-end 0))
 		  (setq pos1 (match-beginning 0))
-		  (setq level
-			(make-string
-			 (1- (string-to-number
-			      (substring (symbol-name (get-text-property pos1 'face)) 10))) ? ))
+		  (setq level (make-string (1- (org-outline-level)) ? ))
 		  (setq tags (org-get-tags-at pos1))
 		  (setq head (buffer-substring-no-properties
 			      (point)
@@ -5768,11 +5750,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		       (setq mm (assoc pos1 deadline-position-alist)))
 		      (throw :skip nil)))
 		(setq tags (org-get-tags-at))
-		(setq level
-		      (make-string
-		       (1- (string-to-number
-			       (substring (symbol-name (get-text-property
-							(match-beginning 0) 'face)) 10))) ? ))
+		(setq level (make-string (1- (org-outline-level)) ? ))
 		(setq head (buffer-substring-no-properties
 			    (point)
 			    (progn (skip-chars-forward "^\r\n") (point))))
@@ -5856,11 +5834,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		  (goto-char (match-beginning 0))
 		  (setq hdmarker (org-agenda-new-marker (point)))
 		  (setq tags (org-get-tags-at))
-		  (setq level
-			(make-string
-			 (1- (string-to-number
-			      (substring (symbol-name (get-text-property
-						       (match-beginning 0) 'face)) 10))) ? ))
+		  (setq level (make-string (1- (org-outline-level)) ? ))
 		  (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 		  (setq head (match-string 1))
 		  (let ((remove-re
