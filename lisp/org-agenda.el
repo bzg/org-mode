@@ -6109,6 +6109,11 @@ The modified list may contain inherited tags, and tags matched by
 (defvar org-agenda-sorting-strategy-selected nil)
 
 (defun org-agenda-add-time-grid-maybe (list ndays todayp)
+  "Add a time-grid for agenda items which need it.
+
+LIST is the list of agenda items formatted by `org-agenda-list'.
+NDAYS is the span of the current agenda view.
+TODAYP is `t' when the current agenda view is on today."
   (catch 'exit
     (cond ((not org-agenda-use-time-grid) (throw 'exit list))
 	  ((and todayp (member 'today (car org-agenda-time-grid))))
@@ -6130,16 +6135,14 @@ The modified list may contain inherited tags, and tags matched by
 	(unless (and remove (member time have))
 	  (setq time (replace-regexp-in-string " " "0" (format "%04s" time)))
 	  (push (org-agenda-format-item
-		 nil string "" nil
+		 nil string nil "" nil
 		 (concat (substring time 0 -2) ":" (substring time -2)))
 		new)
 	  (put-text-property
 	   2 (length (car new)) 'face 'org-time-grid (car new))))
       (when (and todayp org-agenda-show-current-time-in-grid)
 	(push (org-agenda-format-item
-	       nil
-	       org-agenda-current-time-string
-	       "" nil
+	       nil org-agenda-current-time-string nil "" nil
 	       (format-time-string "%H:%M "))
 	      new)
 	(put-text-property
