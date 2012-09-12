@@ -3856,7 +3856,7 @@ Normal means, no org-mode-specific context."
 (declare-function org-agenda-skip "org-agenda" ())
 (declare-function
  org-agenda-format-item "org-agenda"
- (extra txt &optional category tags dotime noprefix remove-re habitp))
+ (extra txt &optional level category tags dotime noprefix remove-re habitp))
 (declare-function org-agenda-new-marker "org-agenda" (&optional pos))
 (declare-function org-agenda-change-all-lines "org-agenda"
 		  (newhead hdmarker &optional fixface just-this))
@@ -13201,7 +13201,7 @@ headlines matching this string."
 	  (setq todo (if (match-end 1) (org-match-string-no-properties 2))
 		tags (if (match-end 4) (org-match-string-no-properties 4)))
 	  (goto-char (setq lspos (match-beginning 0)))
-	  (setq level (org-reduced-level (funcall outline-level))
+	  (setq level (org-reduced-level (org-outline-level))
 		category (org-get-category))
 	  (setq i llast llast level)
 	  ;; remove tag lists from same and sublevels
@@ -13260,7 +13260,6 @@ headlines matching this string."
 		      (and (eq action 'agenda) org-agenda-archives-mode))))
 
 	    ;; select this headline
-
 	    (cond
 	     ((eq action 'sparse-tree)
 	      (and org-highlight-sparse-tree-matches
@@ -13275,7 +13274,7 @@ headlines matching this string."
 			  (if (eq org-tags-match-list-sublevels 'indented)
 			      (make-string (1- level) ?.) "")
 			  (org-get-heading))
-			 category
+			 level category
 			 tags-list)
 		    priority (org-get-priority txt))
 	      (goto-char lspos)
