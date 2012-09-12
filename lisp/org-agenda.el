@@ -1473,7 +1473,7 @@ When nil, such items are sorted as 0 minutes effort."
   :group 'org-agenda)
 
 (defcustom org-agenda-prefix-format
-  '((agenda  . " %i %-12:c%?-12t% s %l")
+  '((agenda  . " %i %-12:c%?-12t% s")
     (timeline  . "  % s")
     (todo  . " %i %-12:c")
     (tags  . " %i %-12:c")
