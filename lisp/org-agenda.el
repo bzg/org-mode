@@ -8958,26 +8958,14 @@ The prefix arg is passed through to the command if possible."
 	  (setq cmd `(org-agenda-set-tags ,tag ,(if (eq action ?+) ''on ''off))))
 
 	 ((memq action '(?s ?d))
-	  (let* ((date
+	  (let* ((time
 		  (unless arg
-		    (or org-overriding-default-time
-			(and (org-read-date
-			      nil nil nil
-			      (if (eq action ?s) "(Re)Schedule to" "(Re)Set Deadline to"))
-			     (or (ignore-errors
-				   (org-time-string-to-time org-read-date-final-answer))
-				 (current-time))))))
-		 (date (format-time-string (car org-time-stamp-formats) date))
+		    (org-read-date
+		     nil nil nil
+		     (if (eq action ?s) "(Re)Schedule to" "(Re)Set Deadline to")
+		     org-overriding-default-time)))
 		 (c1 (if (eq action ?s) 'org-agenda-schedule 'org-agenda-deadline)))
-	    (setq cmd `(let* ((bound (fboundp 'read-string))
-			      (old (and bound (symbol-function 'read-string))))
-			 (unwind-protect
-			     (progn
-			       (fset 'read-string (lambda (&rest ignore) ,date))
-			       (eval '(,c1 arg)))
-			   (if bound
-			       (fset 'read-string old)
-			     (fmakunbound 'read-string)))))))
+	    (setq cmd `(eval '(,c1 arg ,time)))))
 
 	 ((equal action ?S)
 	  (if (not (org-agenda-check-type nil 'agenda 'timeline 'todo))
