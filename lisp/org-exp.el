@@ -29,7 +29,6 @@
 (require 'org)
 (require 'org-macs)
 (require 'org-agenda)
-(require 'org-exp-blocks)
 (require 'ob-exp)
 (require 'org-src)
 

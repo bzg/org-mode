@@ -34,9 +34,6 @@
 ;; 3) we are adding the "file" and "cmdline" header arguments
 ;;
 ;; 4) there are no variables (at least for now)
-;;
-;; 5) it depends on a variable defined in org-exp-blocks (namely
-;;    `org-ditaa-jar-path') so be sure you have org-exp-blocks loaded
 
 ;;; Code:
 (require 'ob)
