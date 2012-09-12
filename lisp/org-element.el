@@ -3348,6 +3348,9 @@ element it has to parse."
 	(org-element-section-parser
 	 (or (save-excursion (org-with-limited-levels (outline-next-heading)))
 	     limit)))
+       ;; When not at bol, point is at the beginning of an item or
+       ;; a footnote definition: next item is always a paragraph.
+       ((not (bolp)) (org-element-paragraph-parser limit))
        ;; Planning and Clock.
        ((and (looking-at org-planning-or-clock-line-re))
 	(if (equal (match-string 1) org-clock-string)
