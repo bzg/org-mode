@@ -2874,16 +2874,17 @@ file should have."
 ;; A whole set of tools is available to help build new exporters.  Any
 ;; function general enough to have its use across many back-ends
 ;; should be added here.
-;;
-;; As of now, functions operating on footnotes, headlines, links,
-;; references, src-blocks, tables and tables of contents are
-;; implemented.
 
 ;;;; For Affiliated Keywords
 ;;
 ;; `org-export-read-attribute' reads a property from a given element
 ;;  as a plist.  It can be used to normalize affiliated keywords'
 ;;  syntax.
+;;
+;; Since captions can span over multiple lines and accept dual values,
+;; their internal representation is a bit tricky.  Therefore,
+;; `org-export-get-caption' transparently returns a given element's
+;; caption as a secondary string.
 
 (defun org-export-read-attribute (attribute element &optional property)
   "Turn ATTRIBUTE property from ELEMENT into a plist.
