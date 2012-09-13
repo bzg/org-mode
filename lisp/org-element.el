@@ -3514,7 +3514,7 @@ CDR a plist of keywords and values."
 	  output)
       (unless (bobp)
 	(while (and (not (bobp)) (progn (forward-line -1) (looking-at key-re)))
-	  (let* ((raw-kwd (upcase (or (match-string 2) (match-string 1))))
+	  (let* ((raw-kwd (upcase (match-string 1)))
 		 ;; Apply translation to RAW-KWD.  From there, KWD is
 		 ;; the official keyword.
 		 (kwd (or (cdr (assoc raw-kwd trans-list)) raw-kwd))
@@ -3528,7 +3528,7 @@ CDR a plist of keywords and values."
 		 ;; value.  Maybe parse it.
 		 (dual-value
 		  (and (member kwd duals)
-		       (let ((sec (org-match-string-no-properties 3)))
+		       (let ((sec (org-match-string-no-properties 2)))
 			 (if (or (not sec) (not (member kwd parsed))) sec
 			   (org-element-parse-secondary-string sec restrict)))))
 		 ;; Attribute a property name to KWD.
