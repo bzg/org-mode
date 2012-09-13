@@ -5455,24 +5455,18 @@ will be prompted for."
   "Run through the buffer and add overlays to links."
   (catch 'exit
     (let (f)
-      (if (and (re-search-forward (concat org-plain-link-re) limit t)
-	       (or (not (member 'bracket org-activate-links))
-		   (save-excursion
-		     (save-match-data
-		       (goto-char (match-beginning 0))
-		       (not (looking-back "\\[\\["))))))
-	  (progn
-	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
-	    (setq f (get-text-property (match-beginning 0) 'face))
-	    (if (or (eq f 'org-tag)
-		    (and (listp f) (memq 'org-tag f)))
-		nil
-	      (add-text-properties (match-beginning 0) (match-end 0)
-				   (list 'mouse-face 'highlight
-					 'face 'org-link
-					 'keymap org-mouse-map))
-	      (org-rear-nonsticky-at (match-end 0)))
-	    t)))))
+      (when (re-search-forward (concat org-plain-link-re) limit t)
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+	(setq f (get-text-property (match-beginning 0) 'face))
+	(if (or (eq f 'org-tag)
+		(and (listp f) (memq 'org-tag f)))
+	    nil
+	  (add-text-properties (match-beginning 0) (match-end 0)
+			       (list 'mouse-face 'highlight
+				     'face 'org-link
+				     'keymap org-mouse-map))
+	  (org-rear-nonsticky-at (match-end 0)))
+	t))))
 
 (defun org-activate-code (limit)
   (if (re-search-forward "^[ \t]*\\(:\\(?: .*\\|$\\)\n?\\)" limit t)
