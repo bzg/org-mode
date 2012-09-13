@@ -272,6 +272,14 @@
    <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0.21cm"/>
   </style:style>
 
+  <style:style style:name="OrgFormula" style:family="paragraph" style:parent-style-name="Text_20_body">
+   <style:paragraph-properties>
+    <style:tab-stops>
+     <style:tab-stop style:position="17cm" style:type="right"/>
+    </style:tab-stops>
+   </style:paragraph-properties>
+  </style:style>
+
   <style:style style:name="OrgSrcBlockLastLine" style:family="paragraph" style:parent-style-name="OrgSrcBlock">
    <style:paragraph-properties fo:margin-top="0cm" fo:margin-bottom="0.21cm"/>
   </style:style>
@@ -441,7 +449,7 @@
   </style:style>
 
   <style:style style:name="OrgFormulaCaptionFrame" style:family="graphic" style:parent-style-name="Frame">
-    <style:graphic-properties fo:margin-top="0cm" fo:margin-bottom="0cm" style:vertical-pos="middle" style:vertical-rel="text" style:horizontal-pos="from-left" style:horizontal-rel="paragraph-content" fo:padding="0cm" fo:border="none"/>
+   <style:graphic-properties text:anchor-type="paragraph" fo:margin-left="0cm" fo:margin-right="0cm" fo:margin-top="0cm" fo:margin-bottom="0cm" style:wrap="right" style:number-wrapped-paragraphs="1" style:wrap-contour="false" style:vertical-pos="top" style:vertical-rel="paragraph" style:horizontal-pos="center" style:horizontal-rel="paragraph" fo:padding="0cm" fo:border="none"/>
   </style:style>
 
   <style:style style:name="OrgCaptionedFormula" style:family="graphic" style:parent-style-name="OrgFormula">
