@@ -224,43 +224,40 @@ this template."
   (interactive)
   (save-window-excursion
     (let ((case-fold-search t)
-	  (start (point-min)))
-      (goto-char start)
+	  (pos (point-min)))
+      (goto-char pos)
       (while (re-search-forward "^[ \t]*#\\+BEGIN_SRC" nil t)
         (let ((element (save-match-data (org-element-at-point))))
           (when (eq (org-element-type element) 'src-block)
-            (let* ((block-start (copy-marker (match-beginning 0)))
-                   (match-start
-		    (copy-marker (org-element-property :begin element)))
-		   (element-end
-		    (copy-marker (org-element-property :end element)))
+            (let* ((match-start (copy-marker (match-beginning 0)))
+                   (begin (copy-marker (org-element-property :begin element)))
+		   (end (copy-marker (org-element-property :end element)))
                    ;; Make sure we don't remove any blank lines after
                    ;; the block when replacing it.
                    (block-end (save-excursion
-                                (goto-char element-end)
+                                (goto-char end)
                                 (skip-chars-backward " \r\t\n")
                                 (copy-marker (line-end-position))))
-                   (indentation (org-get-indentation))
+                   (ind (org-get-indentation))
                    (headers
 		    (cons
 		     (org-element-property :language element)
 		     (let ((params (org-element-property :parameters element)))
 		       (and params (org-split-string params "[ \t]+")))))
-                   (preserve-indent (or org-src-preserve-indentation
-                                        (org-element-property :preserve-indent
-                                                              element))))
-              ;; Execute all non-block elements between START and
-              ;; MATCH-START.
-              (org-babel-exp-non-block-elements start match-start)
+                   (preserve-indent
+		    (or org-src-preserve-indentation
+			(org-element-property :preserve-indent element))))
+              ;; Execute all non-block elements between POS and
+              ;; current block.
+              (org-babel-exp-non-block-elements pos begin)
 	      ;; Take care of matched block: compute replacement
 	      ;; string. In particular, a nil REPLACEMENT means the
 	      ;; block should be left as-is while an empty string
 	      ;; should remove the block.
-              (let ((replacement (progn (goto-char block-start)
+              (let ((replacement (progn (goto-char match-start)
 					(org-babel-exp-src-block headers))))
-                (cond ((not replacement) (goto-char block-end))
-		      ((equal replacement "")
-		       (delete-region match-start element-end))
+                (cond ((not replacement) (goto-char end))
+		      ((equal replacement "") (delete-region begin end))
 		      (t
 		       (goto-char match-start)
 		       (delete-region (point) block-end)
@@ -268,21 +265,20 @@ this template."
 		       (if preserve-indent
 			   ;; Indent only the code block markers.
 			   (save-excursion (skip-chars-backward " \r\t\n")
-					   (indent-line-to indentation)
+					   (indent-line-to ind)
 					   (goto-char match-start)
-					   (indent-line-to indentation))
+					   (indent-line-to ind))
 			 ;; Indent everything.
-			 (indent-code-rigidly
-			  match-start (point) indentation)))))
-	      (setq start (point))
+			 (indent-code-rigidly match-start (point) ind)))))
+	      (setq pos (point))
               ;; Cleanup markers.
-	      (set-marker block-start nil)
-              (set-marker block-end nil)
 	      (set-marker match-start nil)
-              (set-marker element-end nil)))))
+	      (set-marker begin nil)
+	      (set-marker end nil)
+              (set-marker block-end nil)))))
       ;; Eventually execute all non-block Babel elements between last
       ;; src-block and end of buffer.
-      (org-babel-exp-non-block-elements start (point-max)))))
+      (org-babel-exp-non-block-elements pos (point-max)))))
 
 (defun org-babel-in-example-or-verbatim ()
   "Return true if point is in example or verbatim code.
