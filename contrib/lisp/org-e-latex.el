@@ -2096,12 +2096,13 @@ contextual information."
       (let ((lst-lang
 	     (or (cadr (assq (intern lang) org-e-latex-listings-langs)) lang))
 	    (caption-str
-	     (let ((main (org-export-get-caption src-block))
-		   (secondary (org-export-get-caption src-block t)))
-	       (if (not secondary) (format "{%s}" (org-export-data main info))
-		 (format "{[%s]%s}"
-			 (org-export-data secondary info)
-			 (org-export-data main info))))))
+	     (when caption
+	       (let ((main (org-export-get-caption src-block))
+		     (secondary (org-export-get-caption src-block t)))
+		 (if (not secondary) (format "{%s}" (org-export-data main info))
+		   (format "{[%s]%s}"
+			   (org-export-data secondary info)
+			   (org-export-data main info)))))))
 	(concat
 	 ;; Options.
 	 (format "\\lstset{%s}\n"
