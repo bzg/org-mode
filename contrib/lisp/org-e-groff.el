@@ -540,30 +540,24 @@ These are the .aux, .log, .out, and .toc files."
 
 ;;; Internal Functions
 
-(defun org-e-groff--caption/label-string (caption label info)
-  "Return caption and label Groff string for floats.
+(defun org-e-groff--caption/label-string (element info)
+  "Return caption and label Groff string for ELEMENT.
 
-CAPTION is a cons cell of secondary strings, the car being the
-standard caption and the cdr its short form.  LABEL is a string
-representing the label.  INFO is a plist holding contextual
-information.
-
-If there's no caption nor label, return the empty string.
+INFO is a plist holding contextual information.  If there's no
+caption nor label, return the empty string.
 
 For non-floats, see `org-e-groff--wrap-label'."
-  (let ((label-str ""))
-    (cond
-     ((and (not caption) (not label)) "")
-     ((not caption) (format "\\fI%s\\fP" label))
-     ;; Option caption format with short name.
-     ((cdr caption)
-      (format "%s\n.br\n%s - %s\n"
-              (org-export-data (cdr caption) info)
-              label-str
-              (org-export-data (car caption) info)))
-     ;; Standard caption format.
-     (t (format "\\fR%s\\fP"
-                (org-export-data (car caption) info))))))
+  (let ((main (org-export-get-caption element))
+	(short (org-export-get-caption element t))
+	(label (org-element-property :name element)))
+    (cond ((and (not main) (not label)) "")
+	  ((not main) (format "\\fI%s\\fP" label))
+	  ;; Option caption format with short name.
+	  (short (format "%s\n.br\n - %s\n"
+			 (org-export-data short info)
+			 (org-export-data main info)))
+	  ;; Standard caption format.
+	  (t (format "\\fR%s\\fP" (org-export-data main info))))))
 
 (defun org-e-groff--quotation-marks (text info)
   "Export quotation marks depending on language conventions.
@@ -1296,28 +1290,17 @@ used as a communication channel."
          (path (let ((raw-path (org-element-property :path link)))
                  (if (not (file-name-absolute-p raw-path)) raw-path
                    (expand-file-name raw-path))))
-         (attr (read (format "(%s)"
-            (mapconcat
-             #'identity
-             (org-element-property :attr_groff parent)
-             " "))))
+         (attr (org-export-read-attribute :attr_groff link))
          (placement
           (case (plist-get attr :position)
             ('center "")
             ('left "-L")
             ('right "-R")
             (t "")))
-    (width  (or (plist-get attr :width) ""))
-    (height (or (plist-get attr :height) ""))
-
-    (disable-caption (plist-get attr :disable-caption))
-
-    (caption
-          (org-e-groff--caption/label-string
-           (org-element-property :caption parent)
-           (org-element-property :name parent)
-           info)))
-
+	 (width  (or (plist-get attr :width) ""))
+	 (height (or (plist-get attr :height) ""))
+	 (caption (and (not (plist-get attr :disable-caption))
+		       (org-e-groff--caption/label-string parent info))))
     ;; Now clear ATTR from any special keyword and set a default value
     ;; if nothing is left.  Return proper string.
     (concat
@@ -1333,7 +1316,7 @@ used as a communication channel."
        (format "\n.PS\ncopy \"%s\"\n.PE" path))
       (t (format "\n.DS L F\n.PSPIC %s \"%s\" %s %s\n.DE "
                  placement path width height)))
-     (unless disable-caption (format "\n.FG \"%s\"" caption)))))
+     (and caption (format "\n.FG \"%s\"" caption)))))
 
 (defun org-e-groff-link (link desc info)
   "Transcode a LINK object from Org to Groff.
@@ -1587,7 +1570,6 @@ holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-property :language src-block))
-         (caption (org-element-property :caption src-block))
          (label (org-element-property :name src-block))
          (code (org-element-property :value src-block))
          (custom-env (and lang
@@ -1597,55 +1579,50 @@ contextual information."
                       (continued (org-export-get-loc src-block info))
                       (new 0)))
          (retain-labels (org-element-property :retain-labels src-block))
-         (attr
-          (read (format "(%s)"
-                   (mapconcat #'identity
-                              (org-element-property :attr_groff src-block)
-                              " "))))
-         (disable-caption (plist-get attr :disable-caption)))
+         (caption (and (not (org-export-read-attribute
+			     :attr_groff src-block :disable-caption))
+		       (org-e-groff--caption/label-string src-block info))))
 
     (cond
      ;; Case 1.  No source fontification.
      ((not org-e-groff-source-highlight)
-      (let ((caption-str (org-e-groff--caption/label-string caption label info)))
-        (concat
-         (format ".DS I\n\\fC%s\\fP\n.DE\n"
-                 (org-export-format-code-default src-block info))
-         (unless  disable-caption (format ".EX \"%s\" "  caption-str)))))
+      (concat
+       (format ".DS I\n\\fC%s\\fP\n.DE\n"
+	       (org-export-format-code-default src-block info))
+       (and caption (format ".EX \"%s\" " caption))))
 
      ;; Case 2.  Source fontification.
      (org-e-groff-source-highlight
-       (let* ((tmpdir (if (featurep 'xemacs)
-                          temp-directory
-                        temporary-file-directory))
-              (caption-str (org-e-groff--caption/label-string caption label info))
-              (in-file  (make-temp-name
-                         (expand-file-name "srchilite" tmpdir)))
-              (out-file (make-temp-name
-                         (expand-file-name "reshilite" tmpdir)))
+      (let* ((tmpdir (if (featurep 'xemacs)
+			 temp-directory
+		       temporary-file-directory))
+	     (in-file  (make-temp-name
+			(expand-file-name "srchilite" tmpdir)))
+	     (out-file (make-temp-name
+			(expand-file-name "reshilite" tmpdir)))
 
-              (org-lang (org-element-property :language src-block))
-              (lst-lang (cadr (assq (intern org-lang)
-                                    org-e-groff-source-highlight-langs)))
+	     (org-lang (org-element-property :language src-block))
+	     (lst-lang (cadr (assq (intern org-lang)
+				   org-e-groff-source-highlight-langs)))
 
-              (cmd (concat "source-highlight"
-                           " -s " lst-lang
-                           " -f groff_mm_color "
-                           " -i " in-file
-                           " -o " out-file)))
+	     (cmd (concat "source-highlight"
+			  " -s " lst-lang
+			  " -f groff_mm_color "
+			  " -i " in-file
+			  " -o " out-file)))
 
-         (concat
-          (if lst-lang
-              (let ((code-block ""))
-                (with-temp-file in-file (insert code))
-                (shell-command cmd)
-                (setq code-block  (org-file-contents out-file))
-                (delete-file in-file)
-                (delete-file out-file)
-                (format "%s\n"  code-block))
-            (format ".DS I\n\\fC\\m[black]%s\\m[]\\fP\n.DE\n"
-                    code))
-          (unless disable-caption (format ".EX \"%s\" " caption-str))))))))
+	(concat
+	 (if lst-lang
+	     (let ((code-block ""))
+	       (with-temp-file in-file (insert code))
+	       (shell-command cmd)
+	       (setq code-block  (org-file-contents out-file))
+	       (delete-file in-file)
+	       (delete-file out-file)
+	       (format "%s\n"  code-block))
+	   (format ".DS I\n\\fC\\m[black]%s\\m[]\\fP\n.DE\n"
+		   code))
+	 (and caption (format ".EX \"%s\" " caption))))))))
 
 
 ;;; Statistics Cookie
@@ -1756,13 +1733,10 @@ contents, as a string.  INFO is a plist used as a communication
 channel.
 
 This function assumes TABLE has `org' as its `:type' attribute."
-  (let* ((label (org-element-property :name table))
-         (caption (org-e-groff--caption/label-string
-                   (org-element-property :caption table) label info))
-         (attr (read (format "(%s)"
-                             (mapconcat #'identity
-             (org-element-property :attr_groff table)
-             " "))))
+  (let* ((attr (org-export-read-attribute :attr_groff table))
+	 (label (org-element-property :name table))
+         (caption (and (not (plist-get attr :disable-caption))
+		       (org-e-groff--caption/label-string table info)))
          (divider (if (plist-get attr :divider) "|" " "))
 
          ;; Determine alignment string.
@@ -1798,7 +1772,6 @@ This function assumes TABLE has `org' as its `:type' attribute."
             result-list))
 
          (title-line  (plist-get attr :title-line))
-         (disable-caption (plist-get attr :disable-caption))
          (long-cells (plist-get attr :long-cells))
 
          (table-format
@@ -1807,8 +1780,8 @@ This function assumes TABLE has `org' as its `:type' attribute."
                    (or (car attr-list) ""))
            (or
             (let (output-list)
-                           (when (cdr attr-list)
-                             (dolist (attr-item (cdr attr-list))
+	      (when (cdr attr-list)
+		(dolist (attr-item (cdr attr-list))
                   (setq output-list (concat output-list
 					    (format ",%s" attr-item)))))
               output-list) "")))
@@ -1821,52 +1794,50 @@ This function assumes TABLE has `org' as its `:type' attribute."
      ;; Others.
      (lines
       (concat ".TS\n " table-format ";\n"
-                    (format "%s.\n"
-                            (let ((final-line ""))
-                              (when title-line
-                                (dotimes (i (length first-line))
-                                  (setq final-line (concat final-line "cb" divider))))
+	      (format "%s.\n"
+		      (let ((final-line ""))
+			(when title-line
+			  (dotimes (i (length first-line))
+			    (setq final-line (concat final-line "cb" divider))))
 
-                              (setq final-line (concat final-line "\n"))
+			(setq final-line (concat final-line "\n"))
 
-                              (if alignment
-                                  (setq final-line (concat final-line alignment))
-                                (dotimes (i (length first-line))
-                                  (setq final-line (concat final-line "c" divider))))
-                              final-line))
+			(if alignment
+			    (setq final-line (concat final-line alignment))
+			  (dotimes (i (length first-line))
+			    (setq final-line (concat final-line "c" divider))))
+			final-line))
 
-                    (format "%s.TE\n"
-                            (let ((final-line "")
-                                  (long-line "")
-                                  (lines (org-split-string contents "\n")))
+	      (format "%s.TE\n"
+		      (let ((final-line "")
+			    (long-line "")
+			    (lines (org-split-string contents "\n")))
 
-                              (dolist (line-item lines)
-                                (setq long-line "")
+			(dolist (line-item lines)
+			  (setq long-line "")
 
-                                (if long-cells
-                                    (progn
-                                      (if (string= line-item "_")
-                                          (setq long-line (format "%s\n" line-item))
-                                        ;; else string =
-                                        (let ((cell-item-list (org-split-string line-item "\t")))
-                                          (dolist (cell-item cell-item-list)
+			  (if long-cells
+			      (progn
+				(if (string= line-item "_")
+				    (setq long-line (format "%s\n" line-item))
+				  ;; else string =
+				  (let ((cell-item-list (org-split-string line-item "\t")))
+				    (dolist (cell-item cell-item-list)
 
-                                            (cond  ((eq cell-item (car (last cell-item-list)))
-                                                    (setq long-line (concat long-line
-                                                                            (format "T{\n%s\nT}\t\n"  cell-item))))
-                                                   (t
-                                                    (setq long-line (concat long-line
-                                                                            (format "T{\n%s\nT}\t"  cell-item))))))
-                                        long-line))
-                                     ;; else long cells
-                                  (setq final-line (concat final-line long-line)))
+				      (cond  ((eq cell-item (car (last cell-item-list)))
+					      (setq long-line (concat long-line
+								      (format "T{\n%s\nT}\t\n"  cell-item))))
+					     (t
+					      (setq long-line (concat long-line
+								      (format "T{\n%s\nT}\t"  cell-item))))))
+				    long-line))
+				;; else long cells
+				(setq final-line (concat final-line long-line)))
 
-                                  (setq final-line (concat final-line line-item "\n"))))
-                              final-line))
+			    (setq final-line (concat final-line line-item "\n"))))
+			final-line))
 
-                    (if (not disable-caption)
-                        (format ".TB \"%s\""
-                                caption) ""))))))
+	      (if caption (format ".TB \"%s\"" caption) ""))))))
 
 ;;; Table Cell
 

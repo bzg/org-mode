@@ -291,30 +291,24 @@ These are the .aux, .log, .out, and .toc files."
 ;;; Internal Functions
 
 
-(defun org-e-man--caption/label-string (caption label info)
-  "Return caption and label Man string for floats.
+(defun org-e-man--caption/label-string (element info)
+  "Return caption and label Man string for ELEMENT.
 
-CAPTION is a cons cell of secondary strings, the car being the
-standard caption and the cdr its short form.  LABEL is a string
-representing the label.  INFO is a plist holding contextual
-information.
-
-If there's no caption nor label, return the empty string.
+INFO is a plist holding contextual information.  If there's no
+caption nor label, return the empty string.
 
 For non-floats, see `org-e-man--wrap-label'."
-  (let ((label-str "" ))
-    (cond
-     ((and (not caption) (not label)) "")
-     ((not caption) (format "\\fI%s\\fP" label))
-     ;; Option caption format with short name.
-     ((cdr caption)
-      (format "\\fR%s\\fP - \\fI%s\\P - %s\n"
-              (org-export-data (cdr caption) info)
-              label-str
-              (org-export-data (car caption) info)))
-     ;; Standard caption format.
-     (t (format "\\fR%s\\fP"
-                (org-export-data (car caption) info))))))
+  (let ((label (org-element-property :label element))
+	(main (org-export-get-caption element))
+	(short (org-export-get-caption element t)))
+    (cond ((and (not main) (not label)) "")
+	  ((not main) (format "\\fI%s\\fP" label))
+	  ;; Option caption format with short name.
+	  (short (format "\\fR%s\\fP - \\fI\\P - %s\n"
+			 (org-export-data short info)
+			 (org-export-data main info)))
+	  ;; Standard caption format.
+	  (t (format "\\fR%s\\fP" (org-export-data main info))))))
 
 
 
@@ -849,10 +843,7 @@ holding contextual information."
   "Transcode a SRC-BLOCK element from Org to Man.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-
   (let* ((lang (org-element-property :language src-block))
-         (caption (org-element-property :caption src-block))
-         (label (org-element-property :name src-block))
          (code (org-element-property :value src-block))
          (custom-env (and lang
                           (cadr (assq (intern lang)
@@ -864,40 +855,37 @@ contextual information."
     (cond
      ;; Case 1.  No source fontification.
      ((not org-e-man-source-highlight)
-      (let ((caption-str (org-e-man--caption/label-string caption label info)))
-         (concat
-          (format ".RS\n.nf\n\\fC%s\\fP\n.fi\n.RE\n\n"
-                  (org-export-format-code-default src-block info)))))
-     ( (and org-e-man-source-highlight)
-       (let* ((tmpdir (if (featurep 'xemacs)
-                          temp-directory
-                        temporary-file-directory ))
+      (format ".RS\n.nf\n\\fC%s\\fP\n.fi\n.RE\n\n"
+	      (org-export-format-code-default src-block info)))
+     (org-e-man-source-highlight
+      (let* ((tmpdir (if (featurep 'xemacs)
+			 temp-directory
+		       temporary-file-directory ))
 
-              (in-file  (make-temp-name
-                         (expand-file-name "srchilite" tmpdir)))
-              (out-file (make-temp-name
-                         (expand-file-name "reshilite" tmpdir)))
+	     (in-file  (make-temp-name
+			(expand-file-name "srchilite" tmpdir)))
+	     (out-file (make-temp-name
+			(expand-file-name "reshilite" tmpdir)))
 
-              (org-lang (org-element-property :language src-block))
-              (lst-lang (cadr (assq (intern org-lang)
-                                    org-e-man-source-highlight-langs)))
+	     (org-lang (org-element-property :language src-block))
+	     (lst-lang (cadr (assq (intern org-lang)
+				   org-e-man-source-highlight-langs)))
 
-              (cmd (concat "source-highlight"
-                           " -s " lst-lang
-                           " -f groff_man "
-                           " -i " in-file
-                           " -o " out-file)))
+	     (cmd (concat "source-highlight"
+			  " -s " lst-lang
+			  " -f groff_man "
+			  " -i " in-file
+			  " -o " out-file)))
 
-         (if lst-lang
-             (let ((code-block "" ))
-               (with-temp-file in-file (insert code))
-               (shell-command cmd)
-               (setq code-block  (org-file-contents out-file))
-               (delete-file in-file)
-               (delete-file out-file)
-               code-block)
-           (format ".RS\n.nf\n\\fC\\m[black]%s\\m[]\\fP\n.fi\n.RE"
-                   code)))))))
+	(if lst-lang
+	    (let ((code-block ""))
+	      (with-temp-file in-file (insert code))
+	      (shell-command cmd)
+	      (setq code-block  (org-file-contents out-file))
+	      (delete-file in-file)
+	      (delete-file out-file)
+	      code-block)
+	  (format ".RS\n.nf\n\\fC\\m[black]%s\\m[]\\fP\n.fi\n.RE" code)))))))
 
 
 ;;; Statistics Cookie
@@ -1008,19 +996,11 @@ contents, as a string.  INFO is a plist used as a communication
 channel.
 
 This function assumes TABLE has `org' as its `:type' attribute."
-  (let* ((label (org-element-property :name table))
-         (caption (org-e-man--caption/label-string
-                   (org-element-property :caption table) label info))
-         (attr (read
-           (format "(%s)"
-            (mapconcat
-             #'identity
-             (org-element-property :attr_man table)
-             " "))))
-
-         (divider (if (plist-get attr :divider)
-                      "|"
-                    " "))
+  (let* ((attr (org-export-read-attribute :attr_man table))
+	 (label (org-element-property :name table))
+         (caption (and (not (plist-get attr :disable-caption))
+		       (org-e-man--caption/label-string table info)))
+         (divider (if (plist-get attr :divider) "|" " "))
 
          ;; Determine alignment string.
          (alignment (org-e-man-table--align-string divider table info))
@@ -1055,7 +1035,6 @@ This function assumes TABLE has `org' as its `:type' attribute."
 
 
          (title-line  (plist-get attr :title-line))
-         (disable-caption (plist-get attr :disable-caption))
          (long-cells (plist-get attr :long-cells))
 
          (table-format (concat
@@ -1064,11 +1043,11 @@ This function assumes TABLE has `org' as its `:type' attribute."
                          (let ((output-list '()))
                            (when (cdr attr-list)
                              (dolist (attr-item (cdr attr-list))
-             (setq output-list (concat output-list  (format ",%s" attr-item)))))
+			       (setq output-list (concat output-list  (format ",%s" attr-item)))))
                            output-list)
                          "")))
 
-    (first-line (when lines (org-split-string (car lines) "\t"))))
+	 (first-line (when lines (org-split-string (car lines) "\t"))))
     ;; Prepare the final format string for the table.
 
 
@@ -1112,16 +1091,14 @@ This function assumes TABLE has `org' as its `:type' attribute."
                                                    (t
                                                     (setq long-line (concat long-line
                                                                             (format "T{\n%s\nT}\t"  cell-item ))))))
-                                        long-line))
-                                     ;; else long cells
-                                  (setq final-line (concat final-line long-line )))
+					  long-line))
+				      ;; else long cells
+				      (setq final-line (concat final-line long-line )))
 
                                   (setq final-line (concat final-line line-item "\n"))))
                               final-line))
 
-                    (if (not disable-caption)
-                        (format ".TB \"%s\""
-                                caption) ""))))))
+                    (and caption (format ".TB \"%s\"" caption)))))))
 
 ;;; Table Cell
 
