@@ -1202,43 +1202,6 @@ Replaces invalid characters with \"_\"."
      (date date)
      (t (format-time-string "%Y-%m-%d %T %Z")))))
 
-(defun org-e-html--caption/label-string (caption label info)
-  "Return caption and label HTML string for floats.
-
-CAPTION is a cons cell of secondary strings, the car being the
-standard caption and the cdr its short form.  LABEL is a string
-representing the label.  INFO is a plist holding contextual
-information.
-
-If there's no caption nor label, return the empty string.
-
-For non-floats, see `org-e-html--wrap-label'."
-  (setq label nil) ;; FIXME
-
-  (let ((label-str (if label (format "\\label{%s}" label) "")))
-    (cond
-     ((and (not caption) (not label)) "")
-     ((not caption) (format "\\label{%s}\n" label))
-     ;; Option caption format with short name.
-     ((cdr caption)
-      (format "\\caption[%s]{%s%s}\n"
-	      (org-export-data (cdr caption) info)
-	      label-str
-	      (org-export-data (car caption) info)))
-     ;; Standard caption format.
-     ;; (t (format "\\caption{%s%s}\n"
-     ;; 		label-str
-     ;; 		(org-export-data (car caption) info)))
-     (t (org-export-data (car caption) info)))))
-
-(defun org-e-html--find-verb-separator (s)
-  "Return a character not used in string S.
-This is used to choose a separator for constructs like \\verb."
-  (let ((ll "~,./?;':\"|!@#%^&-_=+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ<>()[]{}"))
-    (loop for c across ll
-	  when (not (string-match (regexp-quote (char-to-string c)) s))
-	  return (char-to-string c))))
-
 (defun org-e-html--quotation-marks (text info)
   "Export quotation marks depending on language conventions.
 TEXT is a string containing quotation marks to be replaced.  INFO
@@ -1252,16 +1215,6 @@ is a plist used as a communication channel."
 		 ;; Falls back on English.
 		 (assoc "en" org-e-html-quotes))))
   text)
-
-(defun org-e-html--wrap-label (element output)
-  "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
-This function shouldn't be used for floats.  See
-`org-e-html--caption/label-string'."
-  ;; (let ((label (org-element-property :name element)))
-  ;;   (if (or (not output) (not label) (string= output "") (string= label ""))
-  ;; 	output
-  ;;     (concat (format "\\label{%s}\n" label) output)))
-  output)
 
 
 
@@ -1678,9 +1631,7 @@ contextual information."
   "Transcode a CENTER-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (org-e-html--wrap-label
-   center-block
-   (format "<div style=\"text-align: center\">\n%s</div>" contents)))
+  (format "<div style=\"text-align: center\">\n%s</div>" contents))
 
 
 ;;;; Clock
@@ -1726,14 +1677,13 @@ information."
   "Transcode a DRAWER element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let* ((name (org-element-property :drawer-name drawer))
-	 (output (if (functionp org-e-html-format-drawer-function)
-		     (funcall org-e-html-format-drawer-function
-			      name contents)
-		   ;; If there's no user defined function: simply
-		   ;; display contents of the drawer.
-		   contents)))
-    (org-e-html--wrap-label drawer output)))
+  (if (functionp org-e-html-format-drawer-function)
+      (funcall org-e-html-format-drawer-function
+	       (org-element-property :drawer-name drawer)
+	       contents)
+    ;; If there's no user defined function: simply
+    ;; display contents of the drawer.
+    contents))
 
 
 ;;;; Dynamic Block
@@ -1742,7 +1692,7 @@ holding contextual information."
   "Transcode a DYNAMIC-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
-  (org-e-html--wrap-label dynamic-block contents))
+  contents)
 
 
 ;;;; Entity
@@ -1759,28 +1709,14 @@ contextual information."
 (defun org-e-html-example-block (example-block contents info)
   "Transcode a EXAMPLE-BLOCK element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let* ((options (or (org-element-property :options example-block) ""))
-	 (lang (org-element-property :language example-block))
-	 (caption (org-element-property :caption example-block))
-	 (label (org-element-property :name example-block))
-	 (caption-str (org-e-html--caption/label-string caption label info))
-	 (attr (mapconcat #'identity
-			  (org-element-property :attr_html example-block)
-			  " "))
-	 ;; (switches (org-element-property :switches example-block))
-	 (switches nil)			; FIXME
-	 (textarea-p (and switches (string-match "-t\\>" switches)))
-	 (code (org-e-html-format-code example-block info)))
+  (let ((attr (org-export-read-attribute :attr_html example-block))
+	(code (org-e-html-format-code example-block info)))
     (cond
-     (textarea-p
-      (let ((cols (if (not (string-match "-w[ \t]+\\([0-9]+\\)" switches))
-		      80 (string-to-number (match-string 1 switches))))
-	    (rows (if (string-match "-h[ \t]+\\([0-9]+\\)" switches)
-		      (string-to-number (match-string 1 switches))
-		    (org-count-lines code))))
-	(format
-	 "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
-	 cols rows code)))
+     ((plist-get attr :textarea)
+      (let ((cols (or (plist-get attr :width) 80))
+	    (rows (or (plist-get attr :height) (org-count-lines code))))
+	(format "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
+		cols rows code)))
      (t (format "<pre class=\"example\">\n%s</pre>" code)))))
 
 
@@ -1807,12 +1743,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-html-fixed-width (fixed-width contents info)
   "Transcode a FIXED-WIDTH element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-e-html--wrap-label
-   fixed-width
-   (format "<pre class=\"example\">\n%s</pre>"
-	   (org-e-html-do-format-code
-	    (org-remove-indentation
-	     (org-element-property :value fixed-width))))))
+  (format "<pre class=\"example\">\n%s</pre>"
+	  (org-e-html-do-format-code
+	   (org-remove-indentation
+	    (org-element-property :value fixed-width)))))
 
 
 ;;;; Footnote Definition
@@ -1966,10 +1900,7 @@ holding contextual information."
 (defun org-e-html-horizontal-rule (horizontal-rule contents info)
   "Transcode an HORIZONTAL-RULE  object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((attr (mapconcat #'identity
-			 (org-element-property :attr_html horizontal-rule)
-			 " ")))
-    (org-e-html--wrap-label horizontal-rule "<hr/>")))
+  "<hr/>")
 
 
 ;;;; Inline Babel Call
@@ -1984,8 +1915,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((org-lang (org-element-property :language inline-src-block))
-	 (code (org-element-property :value inline-src-block))
-	 (separator (org-e-html--find-verb-separator code)))
+	 (code (org-element-property :value inline-src-block)))
     (error "FIXME")))
 
 
@@ -2006,18 +1936,15 @@ holding contextual information."
     (let ((format-function
 	   (function*
 	    (lambda (todo todo-type priority text tags
-			  &key contents &allow-other-keys)
+		     &key contents &allow-other-keys)
 	      (funcall org-e-html-format-inlinetask-function
 		       todo todo-type priority text tags contents)))))
       (org-e-html-format-headline--wrap
        inlinetask info format-function :contents contents)))
    ;; Otherwise, use a default template.
-   (t (org-e-html--wrap-label
-       inlinetask
-       (format
-	"<div class=\"inlinetask\">\n<b>%s</b><br/>\n%s</div>"
-	(org-e-html-format-headline--wrap inlinetask info)
-	contents)))))
+   (t (format "<div class=\"inlinetask\">\n<b>%s</b><br/>\n%s</div>"
+	      (org-e-html-format-headline--wrap inlinetask info)
+	      contents))))
 
 
 ;;;; Italic
@@ -2130,28 +2057,24 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-html-latex-environment (latex-environment contents info)
   "Transcode a LATEX-ENVIRONMENT element from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-e-html--wrap-label
-   latex-environment
-   (let ((processing-type (plist-get info :LaTeX-fragments))
-	 (latex-frag (org-remove-indentation
-		      (org-element-property :value latex-environment)))
-	 (caption (org-e-html--caption/label-string
-		   (org-element-property :caption latex-environment)
-		   (org-element-property :name latex-environment)
-		   info))
-	 (attr nil)			; FIXME
-	 (label (org-element-property :name latex-environment)))
-     (cond
-      ((memq processing-type '(t mathjax))
-       (org-e-html-format-latex latex-frag 'mathjax))
-      ((eq processing-type 'dvipng)
-       (let* ((formula-link (org-e-html-format-latex
-			     latex-frag processing-type)))
-	 (when (and formula-link
-		    (string-match "file:\\([^]]*\\)" formula-link))
-	   (org-e-html-format-inline-image
-	    (match-string 1 formula-link) caption label attr t))))
-      (t latex-frag)))))
+  (let ((processing-type (plist-get info :LaTeX-fragments))
+	(latex-frag (org-remove-indentation
+		     (org-element-property :value latex-environment)))
+	(caption (org-export-data
+		  (org-export-get-caption latex-environment) info))
+	(attr nil)			; FIXME
+	(label (org-element-property :name latex-environment)))
+    (cond
+     ((memq processing-type '(t mathjax))
+      (org-e-html-format-latex latex-frag 'mathjax))
+     ((eq processing-type 'dvipng)
+      (let* ((formula-link (org-e-html-format-latex
+			    latex-frag processing-type)))
+	(when (and formula-link
+		   (string-match "file:\\([^]]*\\)" formula-link))
+	  (org-e-html-format-inline-image
+	   (match-string 1 formula-link) caption label attr t))))
+     (t latex-frag))))
 
 
 ;;;; Latex Fragment
@@ -2195,10 +2118,7 @@ used as a communication channel."
 		      (expand-file-name raw-path))
 		     (t raw-path)))
 	 (parent (org-export-get-parent-element link))
-	 (caption (org-e-html--caption/label-string
-		   (org-element-property :caption parent)
-		   (org-element-property :name parent)
-		   info))
+	 (caption (org-export-data (org-export-get-caption parent) info))
 	 (label (org-element-property :name parent))
 	 ;; Retrieve latex attributes from the element around.
 	 (attr (let ((raw-attr
@@ -2461,14 +2381,10 @@ the plist used as a communication channel."
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* (arg1 ;; FIXME
-	 (type (org-element-property :type plain-list))
-	 (attr (mapconcat #'identity
-			  (org-element-property :attr_html plain-list)
-			  " ")))
-    (org-e-html--wrap-label
-     plain-list (format "%s\n%s%s"
-			(org-e-html-begin-plain-list type)
-			contents (org-e-html-end-plain-list type)))))
+	 (type (org-element-property :type plain-list)))
+    (format "%s\n%s%s"
+	    (org-e-html-begin-plain-list type)
+	    contents (org-e-html-end-plain-list type))))
 
 ;;;; Plain Text
 
@@ -2555,8 +2471,7 @@ information."
   "Transcode a QUOTE-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (org-e-html--wrap-label
-   quote-block (format "<blockquote>\n%s</blockquote>" contents)))
+  (format "<blockquote>\n%s</blockquote>" contents))
 
 
 ;;;; Quote Section
@@ -2608,10 +2523,9 @@ contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((type (downcase (org-element-property :type special-block))))
-    (org-e-html--wrap-label
-     special-block
-     (format "<div class=\"%s\">\n%s\n</div>" type contents))))
+  (format "<div class=\"%s\">\n%s\n</div>"
+	  (downcase (org-element-property :type special-block))
+	  contents))
 
 
 ;;;; Src Block
@@ -2620,33 +2534,24 @@ holding contextual information."
   "Transcode a SRC-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((lang (org-element-property :language src-block))
-	 (caption (org-element-property :caption src-block))
-	 (label (org-element-property :name src-block))
-	 (caption-str (org-e-html--caption/label-string caption label info))
-	 (attr (mapconcat #'identity
-			  (org-element-property :attr_html src-block)
-			  " "))
-	 ;; (switches (org-element-property :switches src-block))
-	 (switches nil)			; FIXME
-	 (textarea-p (and switches (string-match "-t\\>" switches)))
-	 (code (org-e-html-format-code src-block info)))
+  (let ((lang (org-element-property :language src-block))
+	(caption (org-export-get-caption src-block))
+	(attr (org-export-read-attribute :attr_html src-block))
+	(code (org-e-html-format-code src-block info)))
     (cond
-     (lang (format
-	    "<div class=\"org-src-container\">\n%s%s\n</div>"
-	    (if (not caption) ""
-	      (format "<label class=\"org-src-name\">%s</label>" caption-str))
-	    (format "\n<pre class=\"src src-%s\">%s</pre>" lang code)))
-     (textarea-p
-      (let ((cols (if (not (string-match "-w[ \t]+\\([0-9]+\\)" switches))
-		      80 (string-to-number (match-string 1 switches))))
-	    (rows (if (string-match "-h[ \t]+\\([0-9]+\\)" switches)
-		      (string-to-number (match-string 1 switches))
-		    (org-count-lines code))))
-	(format
-	 "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
-	 cols rows code)))
+     (lang
+      (format "<div class=\"org-src-container\">\n%s%s\n</div>"
+	      (if (not caption) ""
+		(format "<label class=\"org-src-name\">%s</label>"
+			(org-export-data caption info)))
+	      (format "\n<pre class=\"src src-%s\">%s</pre>" lang code)))
+     ((plist-get attr :textarea)
+      (let ((cols (or (plist-get attr :width) 80))
+	    (rows (or (plist-get attr :height) (org-count-lines code))))
+	(format "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
+		cols rows code)))
      (t (format "<pre class=\"example\">\n%s</pre>" code)))))
+
 
 ;;;; Statistics Cookie
 
@@ -2787,8 +2692,7 @@ contextual information."
     ;; Case 2: Standard table.
     (t
      (let* ((label (org-element-property :name table))
-  	    (caption (org-e-html--caption/label-string
-  		      (org-element-property :caption table) label info))
+  	    (caption (org-export-get-caption table))
   	    (attributes (mapconcat #'identity
   				   (org-element-property :attr_html table)
   				   " "))
@@ -2826,7 +2730,9 @@ contextual information."
        (setq contents (substring contents 0 -1))
        (format "<table%s>\n%s\n%s\n%s\n</table>"
   	       table-attributes
-	       (if (not caption) "" (format "<caption>%s</caption>" caption))
+	       (if (not caption) ""
+		 (format "<caption>%s</caption>"
+			 (org-export-data caption info)))
   	       (funcall table-column-specs table info)
   	       contents)))))
 
@@ -2893,8 +2799,7 @@ contextual information."
 	   (ws (let (out) (dotimes (i num-ws out)
 			    (setq out (concat out "&nbsp;"))))))
       (setq contents (replace-match ws nil t contents))))
-  (org-e-html--wrap-label
-   verse-block (format "<p class=\"verse\">\n%s</p>" contents)))
+  (format "<p class=\"verse\">\n%s</p>" contents))
 
 
 

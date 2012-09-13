@@ -1305,49 +1305,6 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
     (cons object-name style-name)))
 
 
-;;;; Caption and Labels
-
-
-(defun org-e-odt--wrap-label (element output)
-  "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
-This function shouldn't be used for floats.  See
-`org-e-odt--caption/label-string'."
-  ;; (let ((label (org-element-property :name element)))
-  ;;   (if (or (not output) (not label) (string= output "") (string= label ""))
-  ;; 	output
-  ;;     (concat (format "\\label{%s}\n" label) output)))
-  output)
-
-
-(defun org-e-odt--caption/label-string (caption label info)
-  "Return caption and label HTML string for floats.
-
-CAPTION is a cons cell of secondary strings, the car being the
-standard caption and the cdr its short form.  LABEL is a string
-representing the label.  INFO is a plist holding contextual
-information.
-
-If there's no caption nor label, return the empty string.
-
-For non-floats, see `org-e-odt--wrap-label'."
-  (setq label nil) ;; FIXME
-
-  (let ((label-str (if label (format "\\label{%s}" label) "")))
-    (cond
-     ((and (not caption) (not label)) "")
-     ((not caption) (format "\\label{%s}\n" label))
-     ;; Option caption format with short name.
-     ((cdr caption)
-      (format "\\caption[%s]{%s%s}\n"
-	      (org-export-data (cdr caption) info)
-	      label-str
-	      (org-export-data (car caption) info)))
-     ;; Standard caption format.
-     ;; (t (format "\\caption{%s%s}\n"
-     ;; 		label-str
-     ;; 		(org-export-data (car caption) info)))
-     (t (org-export-data (car caption) info)))))
-
 ;;;; Checkbox
 
 (defun org-e-odt--checkbox (item)
@@ -1359,6 +1316,7 @@ For non-floats, see `org-e-odt--wrap-label'."
 			  (on "[&#x2713;] ") ; CHECK MARK
 			  (off "[ ] ")
 			  (trans "[-] "))))))
+
 
 ;;; Template
 
@@ -1609,7 +1567,7 @@ contextual information."
   "Transcode a CENTER-BLOCK element from Org to ODT.
 CONTENTS holds the contents of the center block.  INFO is a plist
 holding contextual information."
-  (org-e-odt--wrap-label center-block contents))
+  contents)
 
 
 ;;;; Clock
@@ -1657,14 +1615,13 @@ channel."
   "Transcode a DRAWER element from Org to ODT.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let* ((name (org-element-property :drawer-name drawer))
-	 (output (if (functionp org-e-odt-format-drawer-function)
-		     (funcall org-e-odt-format-drawer-function
-			      name contents)
-		   ;; If there's no user defined function: simply
-		   ;; display contents of the drawer.
-		   contents)))
-    (org-e-odt--wrap-label drawer output)))
+  (if (functionp org-e-odt-format-drawer-function)
+      (funcall org-e-odt-format-drawer-function
+	       (org-element-property :drawer-name drawer)
+	       contents)
+    ;; If there's no user defined function: simply display contents of
+    ;; the drawer.
+    contents))
 
 
 ;;;; Dynamic Block
@@ -1673,7 +1630,7 @@ holding contextual information."
   "Transcode a DYNAMIC-BLOCK element from Org to ODT.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
-  (org-e-odt--wrap-label dynamic-block contents))
+  contents)
 
 
 ;;;; Entity
@@ -1694,8 +1651,7 @@ contextual information."
 (defun org-e-odt-example-block (example-block contents info)
   "Transcode a EXAMPLE-BLOCK element from Org to ODT.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-e-odt--wrap-label
-   example-block (org-e-odt-format-code example-block info)))
+  (org-e-odt-format-code example-block info))
 
 
 ;;;; Export Snippet
@@ -1721,9 +1677,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-odt-fixed-width (fixed-width contents info)
   "Transcode a FIXED-WIDTH element from Org to ODT.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-e-odt--wrap-label
-   fixed-width (org-e-odt-do-format-code
-		(org-element-property :value fixed-width))))
+  (org-e-odt-do-format-code (org-element-property :value fixed-width)))
 
 
 ;;;; Footnote Definition
@@ -1918,10 +1872,8 @@ holding contextual information."
 (defun org-e-odt-horizontal-rule (horizontal-rule contents info)
   "Transcode an HORIZONTAL-RULE  object from Org to ODT.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-e-odt--wrap-label
-   horizontal-rule
-   (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-	   "Horizontal_20_Line" "")))
+  (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	  "Horizontal_20_Line" ""))
 
 
 ;;;; Inline Babel Call
@@ -1968,18 +1920,16 @@ holding contextual information."
       (org-e-odt-format-headline--wrap
        inlinetask info format-function :contents contents)))
    ;; Otherwise, use a default template.
-   (t (org-e-odt--wrap-label
-       inlinetask
-       (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-	       "Text_20_body"
-	       (org-e-odt--textbox
-		(concat
-		 (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-			 "OrgInlineTaskHeading"
-			 (org-e-odt-format-headline--wrap
-			  inlinetask info))
-		 contents)
-		nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\""))))))
+   (t (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	      "Text_20_body"
+	      (org-e-odt--textbox
+	       (concat
+		(format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+			"OrgInlineTaskHeading"
+			(org-e-odt-format-headline--wrap
+			 inlinetask info))
+		contents)
+	       nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\"")))))
 
 ;;;; Italic
 
@@ -2086,40 +2036,38 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-odt-latex-environment (latex-environment contents info)
   "Transcode a LATEX-ENVIRONMENT element from Org to ODT.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-e-odt--wrap-label
-   latex-environment
-   (let* ((latex-frag
-	   (org-remove-indentation
-	    (org-element-property :value latex-environment)))
-	  (processing-type (plist-get info :LaTeX-fragments))
-	  (caption (org-element-property :caption latex-environment))
-	  (short-caption (and (cdr caption)
-			      (org-export-data (cdr caption) info)))
-	  (caption (and (car caption) (org-export-data (car caption) info)))
-	  (label (org-element-property :name latex-environment))
-	  (attr nil)			; FIXME
-	  (label (org-element-property :name latex-environment)))
+  (let* ((latex-frag
+	  (org-remove-indentation
+	   (org-element-property :value latex-environment)))
+	 (processing-type (plist-get info :LaTeX-fragments))
+	 (caption (org-element-property :caption latex-environment))
+	 (short-caption (and (cdr caption)
+			     (org-export-data (cdr caption) info)))
+	 (caption (and (car caption) (org-export-data (car caption) info)))
+	 (label (org-element-property :name latex-environment))
+	 (attr nil)			; FIXME
+	 (label (org-element-property :name latex-environment)))
 
-     (when (memq processing-type '(t mathjax))
-       (unless (and (fboundp 'org-format-latex-mathml-available-p)
-		    (org-format-latex-mathml-available-p))
-	 (message "LaTeX to MathML converter not available.  Trying dvinpng...")
-	 (setq processing-type 'dvipng)))
+    (when (memq processing-type '(t mathjax))
+      (unless (and (fboundp 'org-format-latex-mathml-available-p)
+		   (org-format-latex-mathml-available-p))
+	(message "LaTeX to MathML converter not available.  Trying dvinpng...")
+	(setq processing-type 'dvipng)))
 
-     (when (eq processing-type 'dvipng)
-       (unless (and (org-check-external-command "latex" "" t)
-		    (org-check-external-command "dvipng" "" t))
-	 (message "LaTeX to PNG converter not available.  Using verbatim.")
-	 (setq processing-type 'verbatim)))
+    (when (eq processing-type 'dvipng)
+      (unless (and (org-check-external-command "latex" "" t)
+		   (org-check-external-command "dvipng" "" t))
+	(message "LaTeX to PNG converter not available.  Using verbatim.")
+	(setq processing-type 'verbatim)))
 
-     (case processing-type
-       ((t mathjax)
-	(org-e-odt-format-formula latex-environment info))
-       (dvipng
-	(format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-		"Text_20_body"
-		(org-e-odt-link--inline-image latex-environment info)))
-       (t (org-e-odt-do-format-code latex-frag))))))
+    (case processing-type
+      ((t mathjax)
+       (org-e-odt-format-formula latex-environment info))
+      (dvipng
+       (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	       "Text_20_body"
+	       (org-e-odt-link--inline-image latex-environment info)))
+      (t (org-e-odt-do-format-code latex-frag)))))
 
 
 ;;;; Latex Fragment
@@ -2209,9 +2157,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 ;; get label and caption.
 	 (label (org-element-property :name caption-from))
 	 (caption (org-element-property :caption caption-from))
-	 (short-caption (cdr caption))
+	 (short-caption (org-export-get-caption caption-from t))
 	 ;; transcode captions.
-	 (caption (and (car caption) (org-export-data (car caption) info)))
+	 (caption (and caption (org-export-data (car caption) info)))
 	 (short-caption (and short-caption
 			     (org-export-data short-caption info))))
     (when (or label caption)
@@ -2648,22 +2596,20 @@ the plist used as a communication channel."
   "Transcode a PLAIN-LIST element from Org to ODT.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
-  (org-e-odt--wrap-label
-   plain-list
-   (format "\n<text:list text:style-name=\"%s\" %s>\n%s</text:list>"
-	   ;; Choose style based on list type.
-	   (case (org-element-property :type plain-list)
-	     (ordered "OrgNumberedList")
-	     (unordered "OrgBulletedList")
-	     (descriptive-1 "OrgDescriptionList")
-	     (descriptive-2 "OrgDescriptionList"))
-	   ;; If top-level list, re-start numbering.  Otherwise,
-	   ;; continue numbering.
-	   (format "text:continue-numbering=\"%s\""
-		   (let* ((parent (org-export-get-parent plain-list)))
-		     (if (and parent (eq (org-element-type parent) 'item))
-			 "true" "false")))
-	   contents)))
+  (format "\n<text:list text:style-name=\"%s\" %s>\n%s</text:list>"
+	  ;; Choose style based on list type.
+	  (case (org-element-property :type plain-list)
+	    (ordered "OrgNumberedList")
+	    (unordered "OrgBulletedList")
+	    (descriptive-1 "OrgDescriptionList")
+	    (descriptive-2 "OrgDescriptionList"))
+	  ;; If top-level list, re-start numbering.  Otherwise,
+	  ;; continue numbering.
+	  (format "text:continue-numbering=\"%s\""
+		  (let* ((parent (org-export-get-parent plain-list)))
+		    (if (and parent (eq (org-element-type parent) 'item))
+			"true" "false")))
+	  contents))
 
 ;;;; Plain Text
 
@@ -2773,7 +2719,7 @@ information."
   "Transcode a QUOTE-BLOCK element from Org to ODT.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (org-e-odt--wrap-label quote-block contents))
+  contents)
 
 
 ;;;; Quote Section
@@ -2821,38 +2767,36 @@ CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((type (downcase (org-element-property :type special-block)))
 	(attributes (org-export-read-attribute :attr_odt special-block)))
-    (org-e-odt--wrap-label
-     special-block
-     (cond
-      ;; Annotation.
-      ((string= type "annotation")
-       (let ((author (or (plist-get attributes :author)
-			 (let ((author (plist-get info :author)))
-			   (and author (org-export-data author info)))))
-	     (date (or (plist-get attributes :date)
-		       (plist-get info :date))))
+    (cond
+     ;; Annotation.
+     ((string= type "annotation")
+      (let ((author (or (plist-get attributes :author)
+			(let ((author (plist-get info :author)))
+			  (and author (org-export-data author info)))))
+	    (date (or (plist-get attributes :date)
+		      (plist-get info :date))))
 
-	 (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-		 "Text_20_body"
-		 (format "<office:annotation>\n%s\n</office:annotation>"
-			 (concat
-			  (and author
-			       (format "<dc:creator>%s</dc:creator>" author))
-			  (and date
-			       (format "<dc:date>%s</dc:date>"
-				       (org-e-odt--date date)))
-			  contents)))))
-      ;; Textbox.
-      ((string= type "textbox")
-       (let ((width (plist-get attributes :width))
-	     (height (plist-get attributes :height))
-	     (style (plist-get attributes :style))
-	     (extra (plist-get attributes :extra))
-	     (anchor (plist-get attributes :anchor)))
-	 (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-		 "Text_20_body" (org-e-odt--textbox contents width height
-						    style extra anchor))))
-      (t contents)))))
+	(format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+		"Text_20_body"
+		(format "<office:annotation>\n%s\n</office:annotation>"
+			(concat
+			 (and author
+			      (format "<dc:creator>%s</dc:creator>" author))
+			 (and date
+			      (format "<dc:date>%s</dc:date>"
+				      (org-e-odt--date date)))
+			 contents)))))
+     ;; Textbox.
+     ((string= type "textbox")
+      (let ((width (plist-get attributes :width))
+	    (height (plist-get attributes :height))
+	    (style (plist-get attributes :style))
+	    (extra (plist-get attributes :extra))
+	    (anchor (plist-get attributes :anchor)))
+	(format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+		"Text_20_body" (org-e-odt--textbox contents width height
+						   style extra anchor))))
+     (t contents))))
 
 
 ;;;; Src Block
@@ -2985,11 +2929,6 @@ contextual information."
 	 (caption (and (car caption) (org-export-data (car caption) info)))
 	 (label (org-element-property :name src-block))
 	 (attributes (org-export-read-attribute :attr_odt src-block)))
-    ;; FIXME: Handle caption
-    ;; caption-str (when caption)
-    ;; (main (org-export-data (car caption) info))
-    ;; (secondary (org-export-data (cdr caption) info))
-    ;; (caption-str (org-e-odt--caption/label-string caption label info))
     (let* ((captions (org-e-odt-format-label src-block info 'definition))
 	   (caption (car captions)) (short-caption (cdr captions)))
       (concat
@@ -3493,10 +3432,8 @@ contextual information."
   ;; Replace tabs and spaces.
   (setq contents (org-e-odt-fill-tabs-and-spaces contents))
   ;; Surround it in a verse environment.
-  (org-e-odt--wrap-label
-   verse-block
-   (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-	   "OrgVerse" contents)))
+  (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	  "OrgVerse" contents))
 
 
 
