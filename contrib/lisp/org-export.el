@@ -2900,6 +2900,19 @@ properties."
 		(read (format "(%s)" (mapconcat 'identity value " ")))))))
     (if property (plist-get attributes property) attributes)))
 
+(defun org-export-get-caption (element &optional shortp)
+  "Return caption from ELEMENT as a secondary string.
+
+When optional argument SHORTP is non-nil, return short caption,
+as a secondary string, instead.
+
+Caption lines are separated by a white space."
+  (let ((full-caption (org-element-property :caption element)) caption)
+    (dolist (line full-caption (cdr caption))
+      (let ((cap (funcall (if shortp 'cdr 'car) line)))
+	(when cap
+	  (setq caption (nconc caption (list " ") (copy-sequence cap))))))))
+
 
 ;;;; For Export Snippets
 ;;

@@ -248,8 +248,8 @@ Don't modify it, set `org-element-affiliated-keywords' instead.")
 The key is the old name and the value the new one.  The property
 holding their value will be named after the translated name.")
 
-(defconst org-element-multiple-keywords '("HEADER")
-  "List of affiliated keywords that can occur more that once in an element.
+(defconst org-element-multiple-keywords '("CAPTION" "HEADER")
+  "List of affiliated keywords that can occur more than once in an element.
 
 Their value will be consed into a list of strings, which will be
 returned as the value of the property.

@@ -177,14 +177,20 @@ Some other text
   ;; Parse "parsed" keywords.
   (should
    (equal
-    '("caption")
+    '(("caption"))
     (org-test-with-temp-text "#+CAPTION: caption\nParagraph"
       (car (org-element-property :caption (org-element-at-point))))))
   ;; Parse dual keywords.
   (should
    (equal
-    '(("long") "short")
+    '((("long") "short"))
     (org-test-with-temp-text "#+CAPTION[short]: long\nParagraph"
+      (org-element-property :caption (org-element-at-point)))))
+  ;; Allow multiple caption keywords.
+  (should
+   (equal
+    '((("l1") "s1") (("l2") "s2"))
+    (org-test-with-temp-text "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph"
       (org-element-property :caption (org-element-at-point))))))
 
 
@@ -1688,14 +1694,21 @@ Outside list"
   (should
    (equal
     (org-element-interpret-data
-     '(org-data nil (paragraph (:caption ("caption")) "Paragraph")))
+     '(org-data nil (paragraph (:caption (("caption"))) "Paragraph")))
     "#+CAPTION: caption\nParagraph\n"))
   ;; Interpret dual keywords.
   (should
    (equal
     (org-element-interpret-data
-     '(org-data nil (paragraph (:caption (("long") "short")) "Paragraph")))
-    "#+CAPTION[short]: long\nParagraph\n")))
+     '(org-data nil (paragraph (:caption ((("long") "short"))) "Paragraph")))
+    "#+CAPTION[short]: long\nParagraph\n"))
+  ;; Interpret multiple parsed dual keywords.
+  (should
+   (equal
+    (org-element-interpret-data
+     '(org-data nil (paragraph
+		     (:caption ((("l1") "s1") (("l2") "s2"))) "Paragraph")))
+    "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph\n")))
 
 (ert-deftest test-org-element/center-block-interpreter ()
   "Test center block interpreter."

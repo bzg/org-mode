@@ -479,6 +479,27 @@ body\n")))
     :attr_html
     (org-test-with-temp-text "Paragraph" (org-element-at-point)))))
 
+(ert-deftest test-org-export/get-caption ()
+  "Test `org-export-get-caption' specifications."
+  ;; Without optional argument, return long caption
+  (should
+   (equal
+    '("l")
+    (org-test-with-temp-text "#+CAPTION[s]: l\nPara"
+      (org-export-get-caption (org-element-at-point)))))
+  ;; With optional argument, return short caption.
+  (should
+   (equal
+    '("s")
+    (org-test-with-temp-text "#+CAPTION[s]: l\nPara"
+      (org-export-get-caption (org-element-at-point) t))))
+  ;; Multiple lines are separated by white spaces.
+  (should
+   (equal
+    '("a" " " "b")
+    (org-test-with-temp-text "#+CAPTION: a\n#+CAPTION: b\nPara"
+      (org-export-get-caption (org-element-at-point))))))
+
 
 
 ;;; Export Snippets
