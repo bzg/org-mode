@@ -57,6 +57,12 @@
   :group 'org-babel
   :type 'string)
 
+(defcustom org-ditaa-eps-jar-path
+  (expand-file-name "DitaaEps.jar" (file-name-directory org-ditaa-jar-path))
+  "Path to the DitaaEps.jar executable."
+  :group 'org-babel
+  :type 'string)
+
 (defcustom org-ditaa-jar-option "-jar"
   "Option for the ditaa jar file.
 Do not leave leading or trailing spaces in this string."
@@ -76,16 +82,25 @@ This function is called by `org-babel-execute-src-block'."
 	 (cmdline (cdr (assoc :cmdline params)))
 	 (java (cdr (assoc :java params)))
 	 (in-file (org-babel-temp-file "ditaa-"))
+	 (eps (cdr (assoc :eps params)))
 	 (cmd (concat "java " java " " org-ditaa-jar-option " "
 		      (shell-quote-argument
-		       (expand-file-name org-ditaa-jar-path))
+		       (expand-file-name
+			(if eps org-ditaa-eps-jar-path org-ditaa-jar-path)))
 		      " " cmdline
 		      " " (org-babel-process-file-name in-file)
-		      " " (org-babel-process-file-name out-file))))
+		      " " (org-babel-process-file-name out-file)))
+	 (pdf-cmd (when (and (or (string= (file-name-extension out-file) "pdf")
+				 (cdr (assoc :pdf params))))
+		    (concat
+		     "epstopdf"
+		     " " (org-babel-process-file-name (concat in-file ".eps"))
+		     " -o=" (org-babel-process-file-name out-file)))))
     (unless (file-exists-p org-ditaa-jar-path)
       (error "Could not find ditaa.jar at %s" org-ditaa-jar-path))
     (with-temp-file in-file (insert body))
     (message cmd) (shell-command cmd)
+    (when pdf-cmd (message pdf-cmd) (shell-command pdf-cmd))
     nil)) ;; signal that output has already been written to file
 
 (defun org-babel-prep-session:ditaa (session params)
