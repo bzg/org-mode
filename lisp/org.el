@@ -17612,9 +17612,9 @@ share a good deal of logic."
 	 (bg (or (plist-get options (if buffer :background :html-background))
 		 "Transparent")))
     (if (eq fg 'default) (setq fg (org-dvipng-color :foreground))
-      (setq fg (org-dvipng-color-format fg)))
+      (unless (string= fg "Transparent") (setq fg (org-dvipng-color-format fg))))
     (if (eq bg 'default) (setq bg (org-dvipng-color :background))
-      (setq bg (org-dvipng-color-format bg)))
+      (unless (string= bg "Transparent") (setq bg (org-dvipng-color-format bg))))
     (with-temp-file texfile
       (insert (org-splice-latex-header
 	       org-format-latex-header
