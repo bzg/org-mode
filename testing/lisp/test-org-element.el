@@ -154,6 +154,40 @@ Some other text
 
 ;;; Test Parsers
 
+;;;; Affiliated Keywords
+
+(ert-deftest test-org-element/affiliated-keywords-parser ()
+  "Test affiliated keywords parsing."
+  ;; Read simple keywords.
+  (should
+   (equal "para"
+	  (org-element-property
+	   :name
+	   (org-test-with-temp-text "#+NAME: para\nParagraph"
+	     (org-element-at-point)))))
+  ;; Parse multiple keywords.
+  (should
+   (equal
+    '("line1" "line2")
+    (org-element-property
+     :attr_ascii
+     (org-test-with-temp-text
+	 "#+ATTR_ASCII: line1\n#+ATTR_ASCII: line2\nParagraph"
+       (org-element-at-point)))))
+  ;; Parse "parsed" keywords.
+  (should
+   (equal
+    '("caption")
+    (org-test-with-temp-text "#+CAPTION: caption\nParagraph"
+      (car (org-element-property :caption (org-element-at-point))))))
+  ;; Parse dual keywords.
+  (should
+   (equal
+    '(("long") "short")
+    (org-test-with-temp-text "#+CAPTION[short]: long\nParagraph"
+      (org-element-property :caption (org-element-at-point))))))
+
+
 ;;;; Babel Call
 
 (ert-deftest test-org-element/babel-call-parser ()
@@ -1616,7 +1650,7 @@ Outside list"
 
 ;;; Test Interpreters.
 
-(ert-deftest test-org-element/interpret-affiliated-keywords ()
+(ert-deftest test-org-element/affiliated-keywords-interpreter ()
   "Test if affiliated keywords are correctly interpreted."
   ;; Interpret simple keywords.
   (should
