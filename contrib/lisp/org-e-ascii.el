@@ -577,7 +577,7 @@ INFO is a plist used as a communication channel.
 The caption string contains the sequence number of ELEMENT along
 with its real caption.  Return nil when ELEMENT has no affiliated
 caption keyword."
-  (let ((caption (org-element-property :caption element)))
+  (let ((caption (org-export-get-caption element)))
     (when caption
       ;; Get sequence number of current src-block among every
       ;; src-block with a caption.
@@ -590,7 +590,7 @@ caption keyword."
 			  (src-block "Listing %d: %s"))
 			info)))
 	(org-e-ascii--fill-string
-	 (format title-fmt reference (org-export-data (car caption) info))
+	 (format title-fmt reference (org-export-data caption info))
 	 (org-e-ascii--current-text-width element info) info)))))
 
 (defun org-e-ascii--build-toc (info &optional n keyword)
@@ -653,9 +653,10 @@ generation.  INFO is a plist used as a communication channel."
 	     (org-trim
 	      (org-e-ascii--indent-string
 	       (org-e-ascii--fill-string
-		(let ((caption (org-element-property :caption src-block)))
-		  ;; Use short name in priority, if available.
-		  (org-export-data (or (cdr caption) (car caption)) info))
+		;; Use short name in priority, if available.
+		(let ((caption (or (org-export-get-caption src-block t)
+				   (org-export-get-caption src-block))))
+		  (org-export-data caption info))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-listings info) "\n")))))
@@ -690,9 +691,10 @@ generation.  INFO is a plist used as a communication channel."
 	     (org-trim
 	      (org-e-ascii--indent-string
 	       (org-e-ascii--fill-string
-		(let ((caption (org-element-property :caption table)))
-		  ;; Use short name in priority, if available.
-		  (org-export-data (or (cdr caption) (car caption)) info))
+		;; Use short name in priority, if available.
+		(let ((caption (or (org-export-get-caption table t)
+				   (org-export-get-caption table))))
+		  (org-export-data caption info))
 		(- text-width (length initial-text)) info)
 	       (length initial-text))))))
 	(org-export-collect-tables info) "\n")))))

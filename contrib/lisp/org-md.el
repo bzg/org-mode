@@ -286,10 +286,9 @@ a communication channel."
 					   ".")))))))
 	  ((org-export-inline-image-p link org-e-html-inline-image-rules)
 	   (format "![%s](%s)"
-		   (let ((caption
-			  (org-element-property
-			   :caption (org-export-get-parent-element link))))
-		     (when caption (org-export-data (car caption) info)))
+		   (let ((caption (org-export-get-caption
+				   (org-export-get-parent-element link))))
+		     (when caption (org-export-data caption info)))
 		   path))
 	  ((string= type "coderef")
 	   (let ((ref (org-element-property :path link)))

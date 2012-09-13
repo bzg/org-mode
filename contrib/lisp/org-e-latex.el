@@ -824,31 +824,27 @@ These are the .aux, .log, .out, and .toc files."
 
 ;;; Internal Functions
 
-(defun org-e-latex--caption/label-string (caption label info)
-  "Return caption and label LaTeX string for floats.
+(defun org-e-latex--caption/label-string (element info)
+  "Return caption and label LaTeX string for ELEMENT.
 
-CAPTION is a cons cell of secondary strings, the car being the
-standard caption and the cdr its short form.  LABEL is a string
-representing the label.  INFO is a plist holding contextual
-information.
-
-If there's no caption nor label, return the empty string.
+INFO is a plist holding contextual information.  If there's no
+caption nor label, return the empty string.
 
 For non-floats, see `org-e-latex--wrap-label'."
-  (let ((label-str (if label (format "\\label{%s}" label) "")))
+  (let* ((label (org-element-property :name element))
+	 (label-str (if label (format "\\label{%s}" label) ""))
+	 (main (org-export-get-caption element))
+	 (short (org-export-get-caption element t)))
     (cond
-     ((and (not caption) (not label)) "")
-     ((not caption) (format "\\label{%s}\n" label))
+     ((and (not main) (not label)) "")
+     ((not main) (format "\\label{%s}\n" label))
      ;; Option caption format with short name.
-     ((cdr caption)
-      (format "\\caption[%s]{%s%s}\n"
-	      (org-export-data (cdr caption) info)
-	      label-str
-	      (org-export-data (car caption) info)))
+     (short (format "\\caption[%s]{%s%s}\n"
+		    (org-export-data short info)
+		    label-str
+		    (org-export-data main info)))
      ;; Standard caption format.
-     (t (format "\\caption{%s%s}\n"
-		label-str
-		(org-export-data (car caption) info))))))
+     (t (format "\\caption{%s%s}\n" label-str (org-export-data main info))))))
 
 (defun org-e-latex--guess-babel-language (header info)
   "Set Babel's language according to LANGUAGE keyword.
@@ -1703,10 +1699,7 @@ used as a communication channel."
 	 (path (let ((raw-path (org-element-property :path link)))
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (expand-file-name raw-path))))
-	 (caption (org-e-latex--caption/label-string
-		   (org-element-property :caption parent)
-		   (org-element-property :name parent)
-		   info))
+	 (caption (org-e-latex--caption/label-string parent info))
 	 ;; Retrieve latex attributes from the element around.
 	 (attr (let ((raw-attr
 		      (mapconcat #'identity
@@ -2049,7 +2042,7 @@ contextual information."
     (cond
      ;; Case 1.  No source fontification.
      ((not org-e-latex-listings)
-      (let ((caption-str (org-e-latex--caption/label-string caption label info))
+      (let ((caption-str (org-e-latex--caption/label-string src-block info))
 	    (float-env (when caption "\\begin{figure}[H]\n%s\n\\end{figure}")))
 	(format
 	 (or float-env "%s")
@@ -2063,10 +2056,10 @@ contextual information."
 			 custom-env))
      ;; Case 3.  Use minted package.
      ((eq org-e-latex-listings 'minted)
-      (let ((float-env (when (or label caption)
-			 (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
-				 (org-e-latex--caption/label-string
-				  caption label info))))
+      (let ((float-env
+	     (when (or label caption)
+	       (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
+		       (org-e-latex--caption/label-string src-block info))))
 	    (body
 	     (format
 	      "\\begin{minted}[%s]{%s}\n%s\\end{minted}"
@@ -2103,12 +2096,12 @@ contextual information."
       (let ((lst-lang
 	     (or (cadr (assq (intern lang) org-e-latex-listings-langs)) lang))
 	    (caption-str
-	     (when caption
-	       (let ((main (org-export-data (car caption) info)))
-		 (if (not (cdr caption)) (format "{%s}" main)
-		   (format "{[%s]%s}"
-			   (org-export-data (cdr caption) info)
-			   main))))))
+	     (let ((main (org-export-get-caption src-block))
+		   (secondary (org-export-get-caption src-block t)))
+	       (if (not secondary) (format "{%s}" (org-export-data main info))
+		 (format "{[%s]%s}"
+			 (org-export-data secondary info)
+			 (org-export-data main info))))))
 	(concat
 	 ;; Options.
 	 (format "\\lstset{%s}\n"
@@ -2302,8 +2295,7 @@ channel.
 
 This function assumes TABLE has `org' as its `:type' attribute."
   (let* ((label (org-element-property :name table))
-	 (caption (org-e-latex--caption/label-string
-		   (org-element-property :caption table) label info))
+	 (caption (org-e-latex--caption/label-string table info))
 	 (attr (mapconcat 'identity
 			  (org-element-property :attr_latex table)
 			  " "))
