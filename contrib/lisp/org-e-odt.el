@@ -3469,7 +3469,7 @@ contextual information."
 			       (buffer-substring-no-properties
 				(point-min) (point-max)))))
 		   (if (not (string-match "file:\\([^]]*\\)" link))
-		       (message "LaTeX Conversion failed.")
+		       (prog1 nil (message "LaTeX Conversion failed."))
 		     link))))
 	   (when org-link
 	     ;; Conversion succeeded.  Parse above Org-style link to a
