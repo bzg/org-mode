@@ -4530,13 +4530,18 @@ back to standard interface."
 	 expert-prompt allowed-keys backends options first-key expertp)
       (save-window-excursion
 	(delete-other-windows)
-	(with-current-buffer (get-buffer-create "*Org Export/Publishing Help*")
-	  (erase-buffer)
-	  (save-excursion (insert help)))
-	(org-fit-window-to-buffer
-	 (display-buffer "*Org Export/Publishing Help*"))
-	(org-export-dispatch-action
-	 standard-prompt allowed-keys backends options first-key expertp)))))
+	(unwind-protect
+	    (progn
+	      (with-current-buffer
+		  (get-buffer-create "*Org Export Dispatcher*")
+		(erase-buffer)
+		(save-excursion (insert help)))
+	      (org-fit-window-to-buffer
+	       (display-buffer "*Org Export Dispatcher*"))
+	      (org-export-dispatch-action
+	       standard-prompt allowed-keys backends options first-key expertp))
+	  (and (get-buffer "*Org Export Dispatcher*")
+	       (kill-buffer "*Org Export Dispatcher*")))))))
 
 (defun org-export-dispatch-action
   (prompt allowed-keys backends options first-key expertp)
