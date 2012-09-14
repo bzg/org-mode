@@ -2658,7 +2658,7 @@ using `org-open-file'."
 	 cache-dir display-msg)
     (cond
      ((eq latex-frag-opt 'dvipng)
-      (setq cache-dir "ltxpng/")
+      (setq cache-dir org-latex-preview-ltxpng-directory)
       (setq display-msg "Creating LaTeX image %s"))
      ((member latex-frag-opt '(mathjax t))
       (setq latex-frag-opt 'mathml)

@@ -763,7 +763,7 @@ The default is an extended format of the ISO 8601 specification."
   (when (and org-current-export-file
 	     (plist-get parameters :LaTeX-fragments))
     (org-format-latex
-     (concat "ltxpng/" (file-name-sans-extension
+     (concat org-latex-preview-ltxpng-directory (file-name-sans-extension
 			(file-name-nondirectory
 			 org-current-export-file)))
      org-current-export-dir nil "Creating LaTeX image %s"
@@ -2031,7 +2031,7 @@ PUB-DIR is set, use this as the publishing directory."
 (defun org-export-html-format-image (src par-open)
   "Create image tag with source and attributes."
   (save-match-data
-    (if (string-match "^ltxpng/" src)
+    (if (string-match (regexp-quote org-latex-preview-ltxpng-directory) src)
 	(format "<img src=\"%s\" alt=\"%s\"/>"
                 src (org-find-text-property-in-string 'org-latex-src src))
       (let* ((caption (org-find-text-property-in-string 'org-caption src))
