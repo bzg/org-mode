@@ -221,6 +221,15 @@ elements in the final html."
       (org-export-as-ascii nil nil nil 'string)
       (should (equal '(5 4 3 2 1) *evaluation-collector*)))))
 
+(ert-deftest ob-exp/exports-inline ()
+  (org-test-at-id "54cb8dc3-298c-4883-a933-029b3c9d4b18"
+    (org-narrow-to-subtree)
+    (let ((html (org-export-as-html nil nil nil 'string 'body-only)))
+      (dolist (rx '("middle <\\(code\\|tt\\)>1</\\(code\\|tt\\)> of"
+		    "end of a line. <\\(code\\|tt\\)>2</\\(code\\|tt\\)>"
+		    "<\\(code\\|tt\\)>3</\\(code\\|tt\\)> Here is one"))
+	(should (string-match rx html))))))
+
 (ert-deftest ob-exp/export-call-line-information ()
   (org-test-at-id "bec63a04-491e-4caa-97f5-108f3020365c"
     (org-narrow-to-subtree)
