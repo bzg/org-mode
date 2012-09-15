@@ -69,6 +69,23 @@ elpa-dirty:
 elpa-up:	info card elpa-dirty
 	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
 
+
+elpaplus:		cleanall info card elpaplus-dirty
+elpaplus-dirty elpaplus-up:	ORG_ADD_CONTRIB=org-*
+elpaplus-dirty elpaplus-up:	ORGDIR=orgplus-$(PKG_TAG)
+elpaplus-dirty:
+	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpaplus version autoloads
+	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
+	ln -s . $(ORGDIR)
+	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
+	  > org-pkg.el
+	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
+	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
+	-@$(RM) $(ORGDIR) org-pkg.el
+	@$(MAKE) cleanlisp
+elpaplus-up:	info card elpaplus-dirty
+	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
+
 tagwarn:
 	$(if $(filter-out $(ORGVERSION), $(GITVERSION)), \
 	  $(info  ======================================================) \
@@ -93,7 +110,8 @@ doc-up:	info pdf card html
 	$(CP) doc/manual/* $(SERVROOT)/manual
 	$(CP) doc/guide/*  $(SERVROOT)/guide
 
-upload:		cleanall elpa-up rel-up doc-up
-upload-elpa:	cleanall elpa-up
-upload-release:	cleanall rel-up
-upload-doc:	cleanall doc-up
+upload:			cleanall elpa-up rel-up doc-up elpaplus-up
+upload-elpa:		cleanall elpa-up
+upload-elpaplus:	cleanall elpaplus-up
+upload-release:		cleanall rel-up
+upload-doc:		cleanall doc-up
