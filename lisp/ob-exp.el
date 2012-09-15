@@ -158,65 +158,82 @@ this template."
     (let ((rx (concat "\\(?:"  org-babel-inline-src-block-regexp
 		      "\\|" org-babel-lob-one-liner-regexp "\\)")))
       (while (re-search-forward rx end t)
-	(let* ((element (save-match-data (org-element-context)))
-               (type (org-element-type element)))
-          (cond
-           ((not (memq type '(babel-call inline-babel-call inline-src-block))))
-           ((eq type 'inline-src-block)
-            (let* ((beg (org-element-property :begin element))
-                   (end (save-excursion
-                          (goto-char (org-element-property :end element))
-                          (skip-chars-forward " \t")
-                          (point)))
-                   (info (org-babel-parse-inline-src-block-match))
-                   (params (nth 2 info)))
-              ;; Expand noweb references in the original file.
-              (setf (nth 1 info)
-                    (if (and (cdr (assoc :noweb params))
-                             (string= "yes" (cdr (assoc :noweb params))))
-                        (org-babel-expand-noweb-references
-                         info (org-babel-exp-get-export-buffer))
-                      (nth 1 info)))
-              (let ((code-replacement
-                     (save-match-data (org-babel-exp-do-export info 'inline))))
-                (if code-replacement
-                    (progn
-                      (delete-region
-                       (progn (goto-char beg)
-                              (skip-chars-backward " \t")
-                              (point))
-                       end)
-                      (insert code-replacement))
-                  (org-babel-examplize-region beg end)
-                  (forward-char 2)))))
-           (t (let* ((lob-info (org-babel-lob-get-info))
-                     (inlinep (match-string 11))
-                     (inline-start (match-end 11))
-                     (inline-end (match-end 0))
-                     (results (save-match-data
-                                (org-babel-exp-do-export
-                                 (list "emacs-lisp" "results"
-                                       (org-babel-merge-params
-                                        org-babel-default-header-args
-                                        org-babel-default-lob-header-args
-                                        (org-babel-params-from-properties)
-                                        (org-babel-parse-header-arguments
-                                         (org-no-properties
-                                          (concat ":var results="
-                                                  (mapconcat #'identity
-                                                             (butlast lob-info)
-                                                             " ")))))
-                                       "" nil (car (last lob-info)))
-                                 'lob)))
-                     (rep (org-fill-template
-                           org-babel-exp-call-line-template
-                           `(("line"  . ,(nth 0 lob-info))))))
-                (if inlinep
-                    (save-excursion
-                      (goto-char inline-start)
-                      (delete-region inline-start inline-end)
-                      (insert rep))
-                  (replace-match rep t t))))))))))
+	(save-excursion
+	  (let* ((element (save-match-data (org-element-context)))
+		 (type (org-element-type element)))
+	    (when (memq type '(babel-call inline-babel-call inline-src-block))
+	      (let ((beg-el (org-element-property :begin element))
+		    (end-el (org-element-property :end element)))
+		(case type
+		  (inline-src-block
+		   (let* ((info (org-babel-parse-inline-src-block-match))
+			  (params (nth 2 info)))
+		     (setf (nth 1 info)
+			   (if (and (cdr (assoc :noweb params))
+				    (string= "yes" (cdr (assoc :noweb params))))
+			       (org-babel-expand-noweb-references
+				info (org-babel-exp-get-export-buffer))
+			     (nth 1 info)))
+		     (goto-char beg-el)
+		     (let ((replacement (org-babel-exp-do-export info 'inline)))
+		       (if (equal replacement "")
+			   ;; Replacement code is empty: completely
+			   ;; remove inline src block, including extra
+			   ;; white space that might have been created
+			   ;; when inserting results.
+			   (delete-region beg-el
+					  (progn (goto-char end-el)
+						 (skip-chars-forward " \t")
+						 (point)))
+			 ;; Otherwise: remove inline src block but
+			 ;; preserve following white spaces.  Then
+			 ;; insert value.
+			 (delete-region beg-el
+					(progn (goto-char end-el)
+					       (skip-chars-backward " \t")
+					       (point)))
+			 (insert replacement)))))
+		  ((babel-call inline-babel-call)
+		   (let* ((lob-info (org-babel-lob-get-info))
+			  (results
+			   (org-babel-exp-do-export
+			    (list "emacs-lisp" "results"
+				  (org-babel-merge-params
+				   org-babel-default-header-args
+				   org-babel-default-lob-header-args
+				   (org-babel-params-from-properties)
+				   (org-babel-parse-header-arguments
+				    (org-no-properties
+				     (concat ":var results="
+					     (mapconcat 'identity
+							(butlast lob-info)
+							" ")))))
+				  "" nil (car (last lob-info)))
+			    'lob))
+			  (rep (org-fill-template
+				org-babel-exp-call-line-template
+				`(("line"  . ,(nth 0 lob-info))))))
+		     ;; If replacement is empty, completely remove the
+		     ;; object/element, including any extra white space
+		     ;; that might have been created when including
+		     ;; results.
+		     (if (equal rep "")
+			 (delete-region
+			  beg-el
+			  (progn (goto-char end-el)
+				 (if (not (eq type 'babel-call))
+				     (progn (skip-chars-forward " \t") (point))
+				   (skip-chars-forward " \r\t\n")
+				   (line-beginning-position))))
+		       ;; Otherwise, preserve following white
+		       ;; spaces/newlines and then, insert replacement
+		       ;; string.
+		       (goto-char beg-el)
+		       (delete-region beg-el
+				      (progn (goto-char end-el)
+					     (skip-chars-backward " \r\t\n")
+					     (point)))
+		       (insert rep)))))))))))))
 
 (defvar org-src-preserve-indentation)	; From org-src.el
 (defun org-export-blocks-preprocess ()
