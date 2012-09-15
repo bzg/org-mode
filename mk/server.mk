@@ -38,6 +38,7 @@ ORGFULL := $(ORGFULL:%/=%/*)
 ORGELPA  = $(ORGCOMM) doc/dir doc/org doc/orgcard.pdf \
 		      etc/styles/ org-pkg.el
 ORGELPA := $(ORGELPA:%/=%/*)
+ORGELPAPLUS := $(ORGELPA:org-pkg%=orgplus-pkg%)
 
 release:	cleanall info pdf card rel-dirty tagwarn
 rel-dirty rel-up:	ORGDIR=org-$(GITVERSION:release_%=%)
@@ -61,11 +62,11 @@ elpa-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpa version autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
-	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
-	  > org-pkg.el
+	echo "(define-package \"orgplus\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
+	  > orgplus-pkg.el
 	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
-	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
-	-@$(RM) $(ORGDIR) org-pkg.el
+	  $(foreach dist, $(ORGELPAPLUS), $(ORGDIR)/$(dist))
+	-@$(RM) $(ORGDIR) orgplus-pkg.el
 elpa-up:	info card elpa-dirty
 	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
 
