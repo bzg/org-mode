@@ -10,13 +10,6 @@ SUBDIRS       = $(OTHERDIRS) $(LISPDIRS)
 INSTSUB       = $(SUBDIRS:%=install-%)
 ORG_MAKE_DOC ?= info html pdf
 
-ORG_FROM_CONTRIB = $(wildcard \
-			$(addsuffix .el, \
-			$(addprefix contrib/lisp/, \
-			$(basename \
-			$(notdir $(ORG_ADD_CONTRIB))))))
-ORG_TO_LISP      = $(ORG_FROM_CONTRIB:contrib/%=%)
-
 ifneq ($(wildcard .git),)
   GITVERSION ?= $(shell git describe --abbrev=6 HEAD)
   ORGVERSION ?= $(subst release_,,$(shell git describe --abbrev=0 HEAD))
@@ -53,8 +46,12 @@ config config-all::
 	$(foreach var,$(CONF_BASE),$(info $(var)	= $($(var))$(EOL)))
 	$(foreach var,$(CONF_DEST),$(info $(var)	= $(DESTDIR)$($(var))$(EOL)))
 	$(info ========= Additional files from contrib/lisp)
-	$(info ORG_FROM_CONTRIB =)
-	$(info $(ORG_TO_LISP:lisp/%=%))
+	$(info $(notdir \
+		$(wildcard \
+		$(addsuffix .el, \
+		$(addprefix contrib/lisp/, \
+		$(basename \
+		$(notdir $(ORG_ADD_CONTRIB))))))))
 config-test config-all::
 	$(info )
 	$(info ========= Test configuration)
@@ -89,9 +86,6 @@ local.mk:
 	-@$(MAKE_LOCAL_MK)
 
 all compile::
-ifneq ($(ORG_FROM_CONTRIB),)
-	$(CP) $(ORG_FROM_CONTRIB) lisp/
-endif
 	$(foreach dir, doc lisp, $(MAKE) -C $(dir) clean;)
 compile compile-dirty::
 	$(MAKE) -C lisp $@
@@ -127,6 +121,13 @@ $(INSTSUB):
 	$(MAKE) -C $(@:install-%=%) install
 
 autoloads: lisp
+ifneq ($(ORG_ADD_CONTRIB),)
+	$(CP) $(wildcard \
+		$(addsuffix .el, \
+		$(addprefix contrib/lisp/, \
+		$(basename \
+		$(notdir $(ORG_ADD_CONTRIB)))))) lisp/
+endif
 	$(MAKE) -C $< $@
 
 cleandirs:
@@ -134,22 +135,20 @@ cleandirs:
 
 clean:	cleanlisp cleandoc
 
-cleanall: cleandirs cleantest
+cleanall: cleandirs cleantest cleanaddcontrib
 	-$(FIND) . \( -name \*~ -o -name \*# -o -name .#\* \) -exec $(RM) {} \;
 	-$(FIND) $(CLEANDIRS) \( -name \*~ -o -name \*.elc \) -exec $(RM) {} \;
 
 $(CLEANDIRS:%=clean%):
 	-$(FIND) $(@:clean%=%) \( -name \*~ -o -name \*.elc \) -exec $(RM) {} \;
 
-ifneq ($(ORG_TO_LISP),)
-cleanlisp:	cleanaddcontrib
-cleanaddcontrib:
-	$(RM) $(ORG_TO_LISP)
-endif
-
 cleanelc:
 	$(MAKE) -C lisp $@
 
+cleanaddcontrib:
+	-$(RM) $(wildcard $(addprefix lisp/,$(notdir $(wildcard contrib/lisp/*.el))))
+
+cleanlisp:	cleanaddcontrib
 cleanlisp cleandoc:
 	$(MAKE) -C $(@:clean%=%) clean
 
