@@ -820,6 +820,22 @@ These are the .aux, .log, .out, and .toc files."
   :group 'org-export-e-latex
   :type 'boolean)
 
+(defcustom org-e-latex-known-errors
+  '(("Reference.*?undefined" .  "[undefined reference]")
+    ("Citation.*?undefined" .  "[undefined citation]")
+    ("Undefined control sequence" .  "[undefined control sequence]")
+    ("^! LaTeX.*?Error" .  "[LaTeX error]")
+    ("^! Package.*?Error" .  "[package error]")
+    ("Runaway argument" .  "Runaway argument"))
+  "Alist of regular expressions and associated messages for the user.
+The regular expressions are used to find possible errors in the
+log of a latex-run."
+  :group 'org-export-e-latex
+  :type '(repeat
+	  (cons
+	   (string :tag "Regexp")
+	   (string :tag "Message"))))
+
 
 
 ;;; Internal Functions
@@ -2708,25 +2724,12 @@ none."
   (with-current-buffer buffer
     (save-excursion
       (goto-char (point-max))
-      ;; Find final "pdflatex" run.
-      (when (re-search-backward "^[ \t]*This is pdf.*?TeX.*?Version" nil t)
+      (when (re-search-backward "^[ \t]*This is .*?TeX.*?Version" nil t)
 	(let ((case-fold-search t)
 	      (errors ""))
-	  (when (save-excursion
-		  (re-search-forward "Reference.*?undefined" nil t))
-	    (setq errors (concat errors " [undefined reference]")))
-	  (when (save-excursion
-		  (re-search-forward "Citation.*?undefined" nil t))
-	    (setq errors (concat errors " [undefined citation]")))
-	  (when (save-excursion
-		  (re-search-forward "Undefined control sequence" nil t))
-	    (setq errors (concat errors " [undefined control sequence]")))
-	  (when (save-excursion
-		  (re-search-forward "^! LaTeX.*?Error" nil t))
-	    (setq errors (concat errors " [LaTeX error]")))
-	  (when (save-excursion
-		  (re-search-forward "^! Package.*?Error" nil t))
-	    (setq errors (concat errors " [package error]")))
+	  (dolist (latex-error org-e-latex-known-errors)
+	    (when (save-excursion (re-search-forward (car latex-error) nil t))
+	      (setq errors (concat errors " " (cdr latex-error)))))
 	  (and (org-string-nw-p errors) (org-trim errors)))))))
 
 
