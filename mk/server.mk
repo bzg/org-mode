@@ -62,11 +62,11 @@ elpa-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpa version autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
-	echo "(define-package \"orgplus\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
-	  > orgplus-pkg.el
+	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
+	  > org-pkg.el
 	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
-	  $(foreach dist, $(ORGELPAPLUS), $(ORGDIR)/$(dist))
-	-@$(RM) $(ORGDIR) orgplus-pkg.el
+	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
+	-@$(RM) $(ORGDIR) org-pkg.el
 elpa-up:	info card elpa-dirty
 	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
 
@@ -78,11 +78,11 @@ elpaplus-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpaplus version autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
-	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
-	  > org-pkg.el
+	echo "(define-package \"orgplus\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
+	  > orgplus-pkg.el
 	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
-	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
-	-@$(RM) $(ORGDIR) org-pkg.el
+	  $(foreach dist, $(ORGELPAPLUS), $(ORGDIR)/$(dist))
+	-@$(RM) $(ORGDIR) orgplus-pkg.el
 	@$(MAKE) cleanlisp
 elpaplus-up:	info card elpaplus-dirty
 	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
