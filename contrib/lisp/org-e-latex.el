@@ -848,12 +848,14 @@ caption nor label, return the empty string.
 
 For non-floats, see `org-e-latex--wrap-label'."
   (let* ((label (org-element-property :name element))
-	 (label-str (if label (format "\\label{%s}" label) ""))
+	 (label-str (if (not (org-string-nw-p label)) ""
+		      (format "\\label{%s}"
+			      (org-export-solidify-link-text label))))
 	 (main (org-export-get-caption element))
 	 (short (org-export-get-caption element t)))
     (cond
-     ((and (not main) (not label)) "")
-     ((not main) (format "\\label{%s}\n" label))
+     ((and (not main) (equal label-str "")) "")
+     ((not main) (concat label-str "\n"))
      ;; Option caption format with short name.
      (short (format "\\caption[%s]{%s%s}\n"
 		    (org-export-data short info)
@@ -944,9 +946,9 @@ is a plist used as a communication channel."
 This function shouldn't be used for floats.  See
 `org-e-latex--caption/label-string'."
   (let ((label (org-element-property :name element)))
-    (if (or (not output) (not label) (string= output "") (string= label ""))
-	output
-      (concat (format "\\label{%s}\n" label) output))))
+    (if (not (and (org-string-nw-p output) (org-string-nw-p label))) output
+      (concat (format "\\label{%s}\n" (org-export-solidify-link-text label))
+	      output))))
 
 (defun org-e-latex--text-markup (text markup)
   "Format TEXT depending on MARKUP text markup.
@@ -1685,7 +1687,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(insert value)
 	(goto-char (point-min))
 	(forward-line)
-	(insert (format "\\label{%s}\n" label))
+	(insert (format "\\label{%s}\n" (org-export-solidify-link-text label)))
 	(buffer-string)))))
 
 
