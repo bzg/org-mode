@@ -115,6 +115,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-at-clock-log-p "org-clock" ())
 (declare-function org-clock-timestamps-up "org-clock" ())
 (declare-function org-clock-timestamps-down "org-clock" ())
+(declare-function org-clock-sum-current-item "org-clock" (&optional tstart))
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
@@ -18780,6 +18781,7 @@ this function returns t, nil otherwise."
 
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
 (declare-function org-element-type "org-element" (element))
+(declare-function org-element-context "org-element" ())
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-paragraph-parser "org-element" (limit))
