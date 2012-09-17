@@ -90,7 +90,7 @@
 (defvar org-mobile-force-id-on-agenda-items)  ; defined in org-mobile.el
 (defvar org-habit-show-habits)                ; defined in org-habit.el
 (defvar org-habit-show-habits-only-for-today)
-(defvar org-habit-show-all-today nil)
+(defvar org-habit-show-all-today)
 
 ;; Defined somewhere in this file, but used before definition.
 (defvar org-agenda-buffer-name "*Org Agenda*")
@@ -5706,6 +5706,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		  ;; org-is-habit-p uses org-entry-get, which is expansive
 		  ;; so we go extra mile to only call it once
 		  (and todayp
+		       (boundp 'org-habit-show-all-today)
 		       org-habit-show-all-today
 		       (setq did-habit-check-p t)
 		       (setq habitp (and (functionp 'org-is-habit-p)
@@ -5730,6 +5731,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		(if habitp
 		    (if (or (not org-habit-show-habits)
 			    (and (not todayp)
+				 (boundp 'org-habit-show-habits-only-for-today)
 				 org-habit-show-habits-only-for-today))
 			(throw :skip nil))
 		  (if (and
