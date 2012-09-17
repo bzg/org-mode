@@ -1130,8 +1130,8 @@ aid, but the tag does not have any semantic meaning."
       (progn
 	(org-back-to-heading t)
 	(org-reveal)
-	(org-entry-put nil "LaTeX_CLASS" "beamer")
-	(org-entry-put nil "LaTeX_CLASS_OPTIONS" "[presentation]")
+	(org-entry-put nil "EXPORT_LaTeX_CLASS" "beamer")
+	(org-entry-put nil "EXPORT_LaTeX_CLASS_OPTIONS" "[presentation]")
 	(org-entry-put nil "EXPORT_FILE_NAME" "presentation.pdf")
 	(when org-e-beamer-column-view-format
 	  (org-entry-put nil "COLUMNS" org-e-beamer-column-view-format))
