@@ -432,10 +432,11 @@ for a capture buffer.")
 
 ;;;###autoload
 (defvar org-capture-initial nil)
+(defvar org-capture-entry nil)
 (defun org-capture-string (string &optional keys)
   (interactive "sInitial text: \n")
   (let ((org-capture-initial string)
-	(entry (org-capture-select-template keys)))
+	(org-capture-entry (org-capture-select-template keys)))
     (org-capture)))
 
 (defcustom org-capture-templates-contexts nil
@@ -529,7 +530,7 @@ agenda will use the date at point as the default date."
 				org-capture-link-is-already-stored)
 			   (plist-get org-store-link-plist :annotation)
 			 (ignore-errors (org-store-link nil))))
-	   (entry (org-capture-select-template keys))
+	   (entry (or org-capture-entry (org-capture-select-template keys)))
 	   initial)
       (setq initial (or org-capture-initial
 			(and (org-region-active-p)
