@@ -7900,19 +7900,22 @@ use the dedicated frame)."
   (interactive)
   (if (and current-prefix-arg (listp current-prefix-arg))
       (org-agenda-do-tree-to-indirect-buffer)
-    (let ((agenda-window (selected-window))
+    (let ((agenda-buffer (buffer-name))
+	  (agenda-window (selected-window))
           (indirect-window
 	   (and org-last-indirect-buffer
 		(get-buffer-window org-last-indirect-buffer))))
       (save-window-excursion (org-agenda-do-tree-to-indirect-buffer))
-      (unwind-protect
-          (progn
-            (unless (and indirect-window (window-live-p indirect-window))
-              (setq indirect-window (split-window agenda-window)))
-            (select-window indirect-window)
-            (switch-to-buffer org-last-indirect-buffer :norecord)
-            (fit-window-to-buffer indirect-window))
-        (select-window (get-buffer-window org-agenda-buffer-name))))))
+      (unless (or (eq org-indirect-buffer-display 'new-frame)
+		  (eq org-indirect-buffer-display 'dedicated-frame))
+	(unwind-protect
+	    (progn
+	      (unless (and indirect-window (window-live-p indirect-window)))
+	      (setq indirect-window (split-window agenda-window)))
+	  (and indirect-window (select-window indirect-window))
+	  (switch-to-buffer org-last-indirect-buffer :norecord)
+	  (fit-window-to-buffer indirect-window)))
+      (select-window (get-buffer-window agenda-buffer)))))
 
 (defun org-agenda-do-tree-to-indirect-buffer ()
   "Same as `org-agenda-tree-to-indirect-buffer' without saving window."
