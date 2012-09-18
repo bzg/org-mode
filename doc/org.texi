@@ -986,8 +986,9 @@ Do not forget to activate Org as described in the following section.
 @findex org-store-link
 @findex org-iswitchb
 
-To make sure files with extension @file{.org} use Org mode, add the following
-line to your @file{.emacs} file.
+Since Emacs 22.2, files with the @file{.org} extension use Org mode by
+default.  If you are using an earlier version of Emacs, add this line to
+your @file{.emacs} file:
 @lisp
 (add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
 @end lisp
