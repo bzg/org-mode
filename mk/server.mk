@@ -54,6 +54,7 @@ rel-up:	info pdf card rel-dirty
 
 PKG_TAG = $(shell date +%Y%m%d)
 PKG_DOC = "Outline-based notes management and organizer"
+PKG_REQ = "nil"
 
 elpa:		cleanall info card elpa-dirty
 elpa-dirty elpa-up:	ORGDIR=org-$(PKG_TAG)
@@ -61,7 +62,7 @@ elpa-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpa version autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
-	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\")" \
+	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
 	  > org-pkg.el
 	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
@@ -77,7 +78,7 @@ elpaplus-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpaplus version autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
-	echo "(define-package \"orgplus\" \"$(PKG_TAG)\" \"$(PKG_DOC)\")" \
+	echo "(define-package \"orgplus\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
 	  > orgplus-pkg.el
 	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPAPLUS), $(ORGDIR)/$(dist))
