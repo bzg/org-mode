@@ -973,6 +973,8 @@ Pressing `1' will switch between these two options."
   (let* ((bg (org-xor (equal arg '(16)) org-export-run-in-background))
 	 (subtree-p (or (org-region-active-p)
 			(eq org-export-initial-scope 'subtree)))
+	 (regb (and (org-region-active-p) (region-beginning)))
+	 (rege (and (org-region-active-p) (region-end)))
 	 (help "[t]   insert the export option template
 \[v]   limit export to visible part of outline tree
 \[1]   switch buffer/subtree export
@@ -1053,6 +1055,10 @@ Pressing `1' will switch between these two options."
 		((not subtree-p)
 		 (setq subtree-p t)
 		 (setq bpos (point))
+		 (org-mark-subtree)
+		 (org-activate-mark)
+		 (setq regb (and (org-region-active-p) (region-beginning)))
+		 (setq rege (and (org-region-active-p) (region-end)))
 		 (message "Export subtree: "))))
 	(when (eq r1 ?\ )
 	  (let ((case-fold-search t)
@@ -1090,8 +1096,9 @@ Pressing `1' will switch between these two options."
 		  "-f" (symbol-name (nth 1 ass)))))
 	  (set-process-sentinel p 'org-export-process-sentinel)
 	  (message "Background process \"%s\": started" p))
-      ;; background processing not requested, or not possible
-      (if subtree-p (progn (org-mark-subtree) (org-activate-mark)))
+      ;; set the mark correctly when exporting a subtree
+      (if subtree-p (let (deactivate-mark) (push-mark rege t t) (goto-char regb)))
+
       (call-interactively (nth 1 ass))
       (when (and bpos (get-buffer-window cbuf))
 	(let ((cw (selected-window)))
