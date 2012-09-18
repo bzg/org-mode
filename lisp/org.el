@@ -1462,11 +1462,11 @@ t     Create an ID if needed to make a link to the current entry.
 create-if-interactive
       If `org-store-link' is called directly (interactively, as a user
       command), do create an ID to support the link.  But when doing the
-      job for remember, only use the ID if it already exists.  The
+      job for capture, only use the ID if it already exists.  The
       purpose of this setting is to avoid proliferation of unwanted
       IDs, just because you happen to be in an Org file when you
       call `org-capture' that automatically and preemptively creates a
-      link.  If you do want to get an ID link in a remember template to
+      link.  If you do want to get an ID link in a capture template to
       an entry not having an ID, create it first by explicitly creating
       a link to it, using `C-c C-l' first.
 
@@ -1871,14 +1871,15 @@ This is just a default location to look for Org files.  There is no need
 at all to put your files into this directory.  It is only used in the
 following situations:
 
-1. When a remember template specifies a target file that is not an
+1. When a capture template specifies a target file that is not an
    absolute path.  The path will then be interpreted relative to
    `org-directory'
-2. When a remember note is filed away in an interactive way (when exiting the
+2. When a capture note is filed away in an interactive way (when exiting the
    note buffer with `C-1 C-c C-c'.  The user is prompted for an org file,
    with `org-directory' as the default path."
   :group 'org-refile
   :group 'org-remember
+  :group 'org-capture
   :type 'directory)
 
 (defcustom org-default-notes-file (convert-standard-filename "~/.notes")
@@ -1887,6 +1888,7 @@ Used as a fall back file for org-remember.el and org-capture.el, for
 templates that do not specify a target file."
   :group 'org-refile
   :group 'org-remember
+  :group 'org-capture
   :type '(choice
 	  (const :tag "Default from remember-data-file" nil)
 	  file))
@@ -1916,6 +1918,7 @@ When nil, new notes will be filed to the end of a file or entry.
 This can also be a list with cons cells of regular expressions that
 are matched against file names, and values."
   :group 'org-remember
+  :group 'org-capture
   :group 'org-refile
   :type '(choice
 	  (const :tag "Reverse always" t)
@@ -2847,7 +2850,7 @@ This has influence for the following applications:
   the time given here, the day recognized as TODAY is actually yesterday.
 - When a date is read from the user and it is still before the time given
   here, the current date and time will be assumed to be yesterday, 23:59.
-  Also, timestamps inserted in remember templates follow this rule.
+  Also, timestamps inserted in capture templates follow this rule.
 
 IMPORTANT:  This is a feature whose implementation is and likely will
 remain incomplete.  Really, it is only here because past midnight seems to
@@ -4949,7 +4952,7 @@ Respect keys that are already there."
   "Used in various places to store a window configuration.")
 (defvar org-finish-function nil
   "Function to be called when `C-c C-c' is used.
-This is for getting out of special buffers like remember.")
+This is for getting out of special buffers like capture.")
 
 
 ;; FIXME: Occasionally check by commenting these, to make sure
@@ -8862,7 +8865,7 @@ Special properties are:
               this when inserting this link into an Org-mode buffer.
 
 In addition to these, any additional properties can be specified
-and then used in remember templates.")
+and then used in capture templates.")
 
 (defun org-add-link-type (type &optional follow export)
   "Add TYPE to the list of `org-link-types'.
