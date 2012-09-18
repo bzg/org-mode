@@ -5166,7 +5166,16 @@ The following commands are available:
       (require 'org-indent)
       (org-indent-mode 1))
     (unless org-inhibit-startup-visibility-stuff
-      (org-set-startup-visibility))))
+      (org-set-startup-visibility)))
+  ;; Try to set org-hide correctly
+  (set-face-foreground
+   'org-hide
+   (or (face-background 'default)
+       (face-background 'org-default)
+       (cdr (assoc 'background-color default-frame-alist))
+       (cdr (assoc 'background-color initial-frame-alist))
+       (cdr (assoc 'background-color window-system-default-frame-alist))
+       (face-foreground 'org-hide))))
 
 (when (fboundp 'abbrev-table-put)
   (abbrev-table-put org-mode-abbrev-table
