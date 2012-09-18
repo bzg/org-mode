@@ -54,7 +54,7 @@ rel-up:	info pdf card rel-dirty
 
 PKG_TAG = $(shell date +%Y%m%d)
 PKG_DOC = "Outline-based notes management and organizer"
-PKG_REQ = "nil"
+PKG_REQ = "" # marmalade chokes on explicit "nil"
 
 elpa:		cleanall info card elpa-dirty
 elpa-dirty elpa-up:	ORGDIR=org-$(PKG_TAG)
