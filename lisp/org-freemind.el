@@ -527,6 +527,7 @@ DRAWERS-REGEXP are converted to freemind notes."
 					  next-has-some-visible-child)
   (let* (this-icons
          this-bg-color
+	 this-m2-link
          this-m2-escaped
          this-rich-node
          this-rich-note
@@ -559,6 +560,10 @@ DRAWERS-REGEXP are converted to freemind notes."
             (add-to-list 'this-icons "full-7"))
            ))))
     (setq this-m2 (org-trim this-m2))
+    (when (string-match org-bracket-link-analytic-regexp this-m2)
+      (setq this-m2-link (concat "link=\"" (match-string 1 this-m2)
+				 (match-string 3 this-m2) "\" ")
+	    this-m2 (replace-match "\\5" nil nil this-m2 0)))
     (setq this-m2-escaped (org-freemind-escape-str-from-org this-m2))
     (let ((node-notes (org-freemind-org-text-to-freemind-subnode/note
                        this-m2-escaped
@@ -568,7 +573,8 @@ DRAWERS-REGEXP are converted to freemind notes."
       (setq this-rich-node (nth 0 node-notes))
       (setq this-rich-note (nth 1 node-notes)))
     (with-current-buffer mm-buffer
-      (insert "<node text=\"" this-m2-escaped "\"")
+      (insert "<node " (if this-m2-link this-m2-link "")
+	      "text=\"" this-m2-escaped "\"")
       (org-freemind-get-node-style this-m2)
       (when (> next-level current-level)
         (unless (or this-children-visible

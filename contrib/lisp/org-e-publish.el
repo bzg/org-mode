@@ -600,7 +600,7 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
-  (org-e-publish-org-to 'e-html filename "html" plist pub-dir))
+  (org-e-publish-org-to 'e-html filename ".html" plist pub-dir))
 
 ;; TODO: Not implemented yet.
 ;; (defun org-e-publish-org-to-org (plist filename pub-dir)
