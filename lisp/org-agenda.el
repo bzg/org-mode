@@ -224,8 +224,7 @@ or, if you want to keep the style in a file,
    <link rel=\"stylesheet\" type=\"text/css\" href=\"mystyles.css\">
 
 As the value of this option simply gets inserted into the HTML <head> header,
-you can \"misuse\" it to also add other text to the header.  However,
-<style>...</style> is required, if not present the variable will be ignored."
+you can \"misuse\" it to also add other text to the header."
   :group 'org-agenda-export
   :group 'org-export-html
   :type 'string)
@@ -3057,8 +3056,7 @@ If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
 	      ((string-match "\\.html?\\'" file)
 	       (require 'htmlize)
 	       (set-buffer (htmlize-buffer (current-buffer)))
-	       (when (and org-agenda-export-html-style
-			  (string-match "<style>" org-agenda-export-html-style))
+	       (when org-agenda-export-html-style
 		 ;; replace <style> section with org-agenda-export-html-style
 		 (goto-char (point-min))
 		 (kill-region (- (search-forward "<style") 6)
