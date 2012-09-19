@@ -577,6 +577,14 @@ If not, show simply the clocked time like 01:50."
 		       h m org-clock-heading)
 		      'face 'org-mode-line-clock))))
 
+(defun org-clock-get-last-clock-out-time ()
+  "Get the last clock-out time for the current subtree."
+  (save-excursion
+    (let ((end (save-excursion (org-end-of-subtree))))
+      (when (re-search-forward (concat org-clock-string
+				       ".*\\]--\\(\\[[^]]+\\]\\)") end t)
+	(org-time-string-to-time (match-string 1))))))
+
 (defun org-clock-update-mode-line ()
   (if org-clock-effort
       (org-clock-notify-once-if-expired)

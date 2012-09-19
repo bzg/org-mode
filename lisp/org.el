@@ -2867,6 +2867,14 @@ For example, if `org-extend-today-until' is 8, and it's 4am, then the
   :version "24.1"
   :type 'boolean)
 
+(defcustom org-use-last-clock-out-time-as-effective-time nil
+  "When non-nil, use the last clock out time for `org-todo'.
+Note that this option has precedence over the combined use of
+`org-use-effective-time' and `org-extend-today-until'."
+  :group 'org-time
+  ;; :version "24.3"
+  :type 'boolean)
+
 (defcustom org-edit-timestamp-down-means-later nil
   "Non-nil means S-down will increase the time in a time stamp.
 When nil, S-up will increase."
@@ -11542,10 +11550,12 @@ nil or a string to be used for the todo mark." )
   (let* ((ct (org-current-time))
 	 (dct (decode-time ct))
 	 (ct1
-	  (if (and org-use-effective-time
-		   (< (nth 2 dct) org-extend-today-until))
-	      (encode-time 0 59 23 (1- (nth 3 dct)) (nth 4 dct) (nth 5 dct))
-	    ct)))
+	  (cond
+	   (org-use-last-clock-out-time-as-effective-time
+	    (or (org-clock-get-last-clock-out-time) ct))
+	   ((and org-use-effective-time (< (nth 2 dct) org-extend-today-until))
+	    (encode-time 0 59 23 (1- (nth 3 dct)) (nth 4 dct) (nth 5 dct)))
+	   (t ct))))
     ct1))
 
 (defun org-todo-yesterday (&optional arg)
