@@ -559,6 +559,8 @@ DRAWERS-REGEXP are converted to freemind notes."
             (add-to-list 'this-icons "full-7"))
            ))))
     (setq this-m2 (org-trim this-m2))
+    (when (string-match org-bracket-link-regexp this-m2)
+      (setq this-m2 (concat (match-string 3 this-m2) " (link)")))
     (setq this-m2-escaped (org-freemind-escape-str-from-org this-m2))
     (let ((node-notes (org-freemind-org-text-to-freemind-subnode/note
                        this-m2-escaped
