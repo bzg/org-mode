@@ -16192,6 +16192,7 @@ days in order to avoid rounding problems."
     (apply 'format fmt (nreverse l))))
 
 (defun org-time-string-to-time (s &optional buffer pos)
+  "Convert a timestamp string into internal time."
   (condition-case errdata
       (apply 'encode-time (org-parse-time-string s))
     (error (error "Bad timestamp `%s'%s\nError was: %s"
@@ -16201,6 +16202,7 @@ days in order to avoid rounding problems."
 		  (cdr errdata)))))
 
 (defun org-time-string-to-seconds (s)
+  "Convert a timestamp string to a number of seconds."
   (org-float-time (org-time-string-to-time s)))
 
 (defun org-time-string-to-absolute (s &optional daynr prefer show-all buffer pos)
@@ -21846,15 +21848,16 @@ If there is no such heading, return nil."
 	  nil
         (point)))))
 
-(defun org-end-of-subtree (&optional invisible-OK to-heading)
+(defun org-end-of-subtree (&optional invisible-ok to-heading)
+  "Goto to the end of a subtree."
   ;; This contains an exact copy of the original function, but it uses
   ;; `org-back-to-heading', to make it work also in invisible
-  ;; trees.  And is uses an invisible-OK argument.
+  ;; trees.  And is uses an invisible-ok argument.
   ;; Under Emacs this is not needed, but the old outline.el needs this fix.
   ;; Furthermore, when used inside Org, finding the end of a large subtree
   ;; with many children and grandchildren etc, this can be much faster
   ;; than the outline version.
-  (org-back-to-heading invisible-OK)
+  (org-back-to-heading invisible-ok)
   (let ((first t)
 	(level (funcall outline-level)))
     (if (and (derived-mode-p 'org-mode) (< level 1000))
