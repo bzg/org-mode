@@ -977,7 +977,7 @@ the values `folded', `children', or `subtree'."
 The function(s) in this hook must accept a single argument which indicates
 the new state that was set by the most recent `org-cycle' command.  The
 argument is a symbol.  After a global state change, it can have the values
-`overview', `content', or `all'.  After a local state change, it can have
+`overview', `contents', or `all'.  After a local state change, it can have
 the values `folded', `children', or `subtree'."
   :group 'org-cycle
   :type 'hook)
