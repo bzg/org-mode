@@ -14773,7 +14773,7 @@ and the new value.")
 	(org-set-tags nil 'align))
        ((equal property "CLOCKSUM")
 	(if (not (re-search-forward
-		  (concat org-clock-string "\\]--\\(\\[[^]]+\\]\\)") nil t))
+		  (concat org-clock-string ".*\\]--\\(\\[[^]]+\\]\\)") nil t))
 	    (error "Cannot find a clock log")
 	  (goto-char (- (match-end 1) 2))
 	  (cond
