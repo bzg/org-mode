@@ -28,7 +28,7 @@ endif
 	check test install $(INSTSUB) \
 	info html pdf card refcard doc docs \
 	autoloads cleanall clean $(CLEANDIRS:%=clean%) \
-	clean-install cleanelc cleandirs \
+	clean-install cleanelc cleandirs cleanaddcontrib \
 	cleanlisp cleandoc cleandocs cleantest \
 	compile compile-dirty uncompiled \
 	config config-test config-exe config-all config-eol
@@ -121,13 +121,6 @@ $(INSTSUB):
 	$(MAKE) -C $(@:install-%=%) install
 
 autoloads: lisp
-ifneq ($(ORG_ADD_CONTRIB),)
-	$(CP) $(wildcard \
-		$(addsuffix .el, \
-		$(addprefix contrib/lisp/, \
-		$(basename \
-		$(notdir $(ORG_ADD_CONTRIB)))))) lisp/
-endif
 	$(MAKE) -C $< $@
 
 cleandirs:
