@@ -14,7 +14,7 @@ _ORGCM_ = dirall single source slint1 slint2
 
 .PHONY:	all compile compile-dirty \
 	$(_ORGCM_) $(_ORGCM_:%=compile-%) \
-	autoloads \
+	autoloads addcontrib \
 	install clean cleanauto cleanall cleanelc clean-install
 
 # do not clean here, done in toplevel make
@@ -48,7 +48,16 @@ slint1:
 	@$(info Compiling single $(abspath $<)...)
 	-@$(ELC) $<
 
-autoloads:	cleanauto $(LISPI) $(LISPV)
+addcontrib:
+ifneq ($(ORG_ADD_CONTRIB),)
+	$(CP) $(wildcard \
+		$(addsuffix .el, \
+		$(addprefix ../contrib/lisp/, \
+		$(basename \
+		$(notdir $(ORG_ADD_CONTRIB)))))) .
+endif
+
+autoloads:	cleanauto addcontrib $(LISPI) $(LISPV)
 
 $(LISPV):	$(LISPF)
 	@echo "org-version: $(ORGVERSION) ($(GITVERSION))"
