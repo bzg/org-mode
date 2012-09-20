@@ -2612,6 +2612,7 @@ LIMIT bounds the search.
 Return value is a cons cell whose CAR is `inline-babel-call' and
 CDR is beginning position."
   (save-excursion
+    (unless (bolp) (backward-char))
     (when (re-search-forward org-babel-inline-src-block-regexp limit t)
       (cons 'inline-src-block (match-beginning 1)))))
 
