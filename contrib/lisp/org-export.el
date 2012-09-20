@@ -2912,7 +2912,7 @@ Caption lines are separated by a white space."
     (dolist (line full-caption (cdr caption))
       (let ((cap (funcall (if shortp 'cdr 'car) line)))
 	(when cap
-	  (setq caption (nconc caption (list " ") (copy-sequence cap))))))))
+	  (setq caption (nconc (list " ") (copy-sequence cap) caption)))))))
 
 
 ;;;; For Export Snippets

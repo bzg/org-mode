@@ -168,7 +168,7 @@ Some other text
   ;; Parse multiple keywords.
   (should
    (equal
-    '("line1" "line2")
+    '("line2" "line1")
     (org-element-property
      :attr_ascii
      (org-test-with-temp-text
@@ -189,7 +189,7 @@ Some other text
   ;; Allow multiple caption keywords.
   (should
    (equal
-    '((("l1") "s1") (("l2") "s2"))
+    '((("l2") "s2") (("l1") "s1"))
     (org-test-with-temp-text "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph"
       (org-element-property :caption (org-element-at-point))))))
 
@@ -1692,7 +1692,7 @@ Outside list"
   (should
    (equal
     (org-element-interpret-data
-     '(org-data nil (paragraph (:attr_ascii ("line1" "line2")) "Paragraph")))
+     '(org-data nil (paragraph (:attr_ascii ("line2" "line1")) "Paragraph")))
     "#+ATTR_ASCII: line1\n#+ATTR_ASCII: line2\nParagraph\n"))
   ;; Interpret parsed keywords.
   (should
@@ -1711,7 +1711,7 @@ Outside list"
    (equal
     (org-element-interpret-data
      '(org-data nil (paragraph
-		     (:caption ((("l1") "s1") (("l2") "s2"))) "Paragraph")))
+		     (:caption ((("l2") "s2") (("l1") "s1"))) "Paragraph")))
     "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph\n")))
 
 (ert-deftest test-org-element/center-block-interpreter ()
