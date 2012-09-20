@@ -38,7 +38,7 @@ ORGFULL := $(ORGFULL:%/=%/*)
 ORGELPA  = $(ORGCOMM) doc/dir doc/org doc/orgcard.pdf \
 		      etc/styles/ org-pkg.el
 ORGELPA := $(ORGELPA:%/=%/*)
-ORGELPAPLUS := $(ORGELPA:org-pkg%=orgplus-pkg%)
+ORGELPAPLUS := $(ORGELPA:org-pkg%=org-plus-contrib-pkg%)
 
 release:	cleanall info pdf card rel-dirty tagwarn
 rel-dirty rel-up:	ORGDIR=org-$(GITVERSION:release_%=%)
@@ -73,16 +73,16 @@ elpa-up:	info card elpa-dirty
 
 elpaplus:		cleanall info card elpaplus-dirty
 elpaplus-dirty elpaplus-up:	ORG_ADD_CONTRIB=org-*
-elpaplus-dirty elpaplus-up:	ORGDIR=orgplus-$(PKG_TAG)
+elpaplus-dirty elpaplus-up:	ORGDIR=org-plus-contrib-$(PKG_TAG)
 elpaplus-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpaplus version autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
-	echo "(define-package \"orgplus\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
-	  > orgplus-pkg.el
+	echo "(define-package \"org-plus-contrib\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
+	  > org-plus-contrib-pkg.el
 	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPAPLUS), $(ORGDIR)/$(dist))
-	-@$(RM) $(ORGDIR) orgplus-pkg.el
+	-@$(RM) $(ORGDIR) org-plus-contrib-pkg.el
 	@$(MAKE) cleanlisp
 elpaplus-up:	info card elpaplus-dirty
 	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
