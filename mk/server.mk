@@ -13,9 +13,11 @@ help helpall helpserver::
 	$(info Maintenance)
 	$(info ===========)
 	$(info release             - clean up, create the distribution archives)
-	$(info elpa                - clean up, create the ELPA archive)
+	$(info elpa                - clean up, create the org-*.tar ELPA archive)
+	$(info elpaplus            - clean up, create the org-plus-contrib-*.tar ELPA archive)
 	$(info upload-release      - clean up, populate the server with arhives)
-	$(info upload-elpa         - clean up, populate the server with ELPA)
+	$(info upload-elpa         - clean up, populate the server with org-*.tar)
+	$(info upload-elpaplus     - clean up, populate the server with org-plus-contrib-*.tar)
 	$(info upload-doc          - clean up, populate the server with docs)
 	$(info upload              - clean up, populate the server with everything)
 
@@ -29,15 +31,20 @@ SERVERMK ?= true # or just any value at all, really
 
 #----------------------------------------------------------------------
 
-ORGCOMM  = README lisp/
-ORGFULL  = $(ORGCOMM) Makefile request-assign-future.txt \
-		      mk/default.mk mk/targets.mk mk/version.mk \
-		      mk/org-fixup.el \
-		      etc/ contrib/ doc/
-ORGFULL := $(ORGFULL:%/=%/*)
-ORGELPA  = $(ORGCOMM) doc/dir doc/org doc/orgcard.pdf \
-		      etc/styles/ org-pkg.el
-ORGELPA := $(ORGELPA:%/=%/*)
+ORGREADMECOMM = README
+ORGREADMEELPA = README_ELPA
+
+ORGCOMM   = lisp/
+ORGFULL   = $(ORGCOMM) $(ORGREADMECOMM) \
+		Makefile request-assign-future.txt \
+		mk/default.mk mk/targets.mk mk/version.mk \
+		mk/org-fixup.el \
+		etc/ contrib/ doc/
+ORGFULL  := $(ORGFULL:%/=%/*)
+ORGELPA   = $(ORGCOMM) $(ORGREADMEELPA) \
+		doc/dir doc/org doc/orgcard.pdf \
+		etc/styles/ org-pkg.el
+ORGELPA  := $(ORGELPA:%/=%/*)
 ORGELPAPLUS := $(ORGELPA:org-pkg%=org-plus-contrib-pkg%)
 
 release:	cleanall info pdf card rel-dirty tagwarn

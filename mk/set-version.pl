@@ -38,8 +38,8 @@ if (not $only) {
   $c1 = "perl -pi -e '$cmd' doc/orgcard.tex";
   system($c1);
 
-  print STDERR "README_DIST\n";
+  print STDERR "README\n";
   $cmd = qq{s/^(The version of this release is:)\\s+(\\S+)[ \t]*\$/\$1 $version/;};
-  $c1 = "perl -pi -e '$cmd' README_DIST";
+  $c1 = "perl -pi -e '$cmd' README";
   system($c1);
 }
