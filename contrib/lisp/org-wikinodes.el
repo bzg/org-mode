@@ -115,7 +115,7 @@ variable `org-wikinodes-scope'.
 
 If a target headline is not found, it may be created according to the
 setting of `org-wikinodes-create-targets'."
-  (if current-prefix-arg (org-wikinodes-clear-direcory-targets-cache))
+  (if current-prefix-arg (org-wikinodes-clear-directory-targets-cache))
   (let ((create org-wikinodes-create-targets)
 	visiting buffer m pos file rpl)
     (setq pos
@@ -184,10 +184,10 @@ setting of `org-wikinodes-create-targets'."
 	     (org-in-regexp (format org-complex-heading-regexp-format
 				    org-wikinodes-camel-regexp))
 	     (org-in-regexp org-wikinodes-camel-regexp))
-    (org-wikinodes-clear-direcory-targets-cache)
+    (org-wikinodes-clear-directory-targets-cache)
     t))
 
-(defun org-wikinodes-clear-direcory-targets-cache ()
+(defun org-wikinodes-clear-directory-targets-cache ()
   "Clear the cache where to find wiki targets."
   (interactive)
   (setq org-wikinodes-directory-targets-cache nil)
