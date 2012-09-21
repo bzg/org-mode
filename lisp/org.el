@@ -14949,6 +14949,7 @@ Point is left between drawer's boundaries."
 	      (goto-char rend)
 	      (skip-chars-backward " \r\t\n")
 	      (insert "\n:END:")
+	      (deactivate-mark t)
 	      (indent-for-tab-command)
 	      (unless (eolp) (insert "\n")))
 	  ;; Clear marker, whatever the outcome of insertion is.
