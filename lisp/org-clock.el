@@ -1172,7 +1172,8 @@ make this the default behavior.)"
 		  (cond ((and org-clock-heading-function
 			      (functionp org-clock-heading-function))
 			 (funcall org-clock-heading-function))
-			((looking-at org-complex-heading-regexp)
+			((and (looking-at org-complex-heading-regexp)
+			      (match-string 4))
 			 (replace-regexp-in-string
 			  "\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]" "\\1"
 			  (match-string 4)))
