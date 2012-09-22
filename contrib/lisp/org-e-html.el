@@ -2753,11 +2753,12 @@ information."
   "Transcode a TIMESTAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-translate-time (org-element-property :value timestamp)))
-	(range-end (org-element-property :range-end timestamp)))
+  (let* ((f (if (eq (org-element-property :type timestamp) 'inactive) "[%s]" "<%s>"))
+	 (value (org-translate-time (format f (org-element-property :value timestamp))))
+	 (range-end (org-element-property :range-end timestamp)))
     (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
 	    (if (not range-end) value
-	      (concat value "&ndash;" (org-translate-time range-end))))))
+	      (concat value "&ndash;" (org-translate-time (format f range-end)))))))
 
 
 ;;;; Underline
