@@ -1486,7 +1486,7 @@ The template may still contain \"%?\" for cursor positioning."
       ;; Interactive template entries
       (goto-char (point-min))
       (while (and (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCLp]\\)?" nil t)
-		  (not (get-text-property (point) 'org-protected)))
+		  (not (get-text-property (1- (point)) 'org-protected)))
 	(unless (org-capture-escaped-%)
 	  (setq char (if (match-end 3) (match-string-no-properties 3))
 		prompt (if (match-end 2) (match-string-no-properties 2)))
