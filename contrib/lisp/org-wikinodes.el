@@ -121,7 +121,8 @@ setting of `org-wikinodes-create-targets'."
     (setq pos
 	  (or (org-find-exact-headline-in-buffer target (current-buffer))
 	      (and (eq org-wikinodes-scope 'directory)
-		   (setq file (org-wikinodes-which-file target))
+		   (setq file (org-wikinodes-which-file
+			       target (file-name-directory (buffer-file-name))))
 		   (org-find-exact-headline-in-buffer
 		    target (or (get-file-buffer file)
 			       (find-file-noselect file))))))
@@ -238,12 +239,14 @@ setting of `org-wikinodes-create-targets'."
 (defun org-wikinodes-which-file (target &optional directory)
   "Return the file for wiki headline TARGET DIRECTORY.
 If there is no such wiki target, return nil."
-  (setq directory (expand-file-name (or directory default-directory)))
-  (unless (assoc directory org-wikinodes-directory-targets-cache)
-    (push (cons directory (org-wikinodes-get-links-for-directory directory))
-	  org-wikinodes-directory-targets-cache))
-  (cdr (assoc target (cdr (assoc directory
-				 org-wikinodes-directory-targets-cache)))))
+  (let* ((directory (expand-file-name (or directory default-directory)))
+	 (founddir (assoc directory org-wikinodes-directory-targets-cache))
+	 (foundfile (cdr (assoc target (cdr founddir)))))
+    (or foundfile
+	(and (push (cons directory (org-wikinodes-get-links-for-directory directory))
+		   org-wikinodes-directory-targets-cache)
+	     (cdr (assoc target (cdr (assoc directory
+					    org-wikinodes-directory-targets-cache))))))))
 
 ;;; Exporting Wiki links
 
