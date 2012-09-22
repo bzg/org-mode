@@ -38,11 +38,8 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
-
-(defvar org-export-groff-default-packages-alist)
-(defvar org-export-groff-packages-alist)
-
 (require 'org-export)
+
 
 
 ;;; Define Back-End
