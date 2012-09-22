@@ -900,13 +900,11 @@ This can also be set in on a per-file basis with
 (defcustom org-cycle-global-at-bob nil
   "Cycle globally if cursor is at beginning of buffer and not at a headline.
 This makes it possible to do global cycling without having to use S-TAB or
-\\[universal-argument] TAB.  For this special case to work, the first line \
-of the buffer
-must not be a headline - it may be empty or some other text.  When used in
-this way, `org-cycle-hook' is disables temporarily, to make sure the
-cursor stays at the beginning of the buffer.
-When this option is nil, don't do anything special at the beginning
-of the buffer."
+\\[universal-argument] TAB.  For this special case to work, the first line
+of the buffer must not be a headline -- it may be empty or some other text.
+When used in this way, `org-cycle-hook' is disabled temporarily to make
+sure the cursor stays at the beginning of the buffer.  When this option is
+nil, don't do anything special at the beginning of the buffer."
   :group 'org-cycle
   :type 'boolean)
 
