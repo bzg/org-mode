@@ -31,17 +31,13 @@ SERVERMK ?= true # or just any value at all, really
 
 #----------------------------------------------------------------------
 
-ORGREADMECOMM = README
-ORGREADMEELPA = README_ELPA
-
-ORGCOMM   = lisp/
-ORGFULL   = $(ORGCOMM) $(ORGREADMECOMM) \
+ORGFULL   = README lisp/ \
 		Makefile request-assign-future.txt \
 		mk/default.mk mk/targets.mk mk/version.mk \
 		mk/org-fixup.el \
 		etc/ contrib/ doc/
 ORGFULL  := $(ORGFULL:%/=%/*)
-ORGELPA   = $(ORGCOMM) $(ORGREADMEELPA) \
+ORGELPA   = README_ELPA lisp/ \
 		doc/dir doc/org doc/orgcard.pdf \
 		etc/styles/ org-pkg.el
 ORGELPA  := $(ORGELPA:%/=%/*)
@@ -71,7 +67,7 @@ elpa-dirty:
 	ln -s . $(ORGDIR)
 	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
 	  > org-pkg.el
-	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
+	tar --exclude=Makefile --exclude="org-colview-xemacs.el" --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-pkg.el
 elpa-up:	info card elpa-dirty
@@ -87,7 +83,7 @@ elpaplus-dirty:
 	ln -s . $(ORGDIR)
 	echo "(define-package \"org-plus-contrib\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
 	  > org-plus-contrib-pkg.el
-	tar --exclude=Makefile --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
+	tar --exclude=Makefile --exclude="org-colview-xemacs.el" --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPAPLUS), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-plus-contrib-pkg.el
 	@$(MAKE) cleanlisp

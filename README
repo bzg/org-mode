@@ -15,6 +15,9 @@ Makefile
     instructions, see the manual or the more detailed procedure
     on Worg: http://orgmode.org/worg/dev/org-build-system.html
 
+mk/
+    Files needed for building Org.
+
 lisp/
     Directory with all the Emacs Lisp files that make up Org.
 
@@ -29,14 +32,11 @@ contrib/
 etc/
     Files needed for the ODT exporter.
 
-mk/
-    Files needed for building Org.
-
 testing/
     Testing suite for Org.
 
 request-assign-future.txt
-    The form that contributors have to sign and get processed with 
+    The form that contributors have to sign and get processed with
     the FSF before contributed changes can be integrated into the Org
     core.  All files in this distribution except the contrib/ directory
     have copyright assigned to the FSF.

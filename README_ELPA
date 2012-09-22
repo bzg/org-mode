@@ -16,12 +16,12 @@ There are other ELPA online, offering more packages.
 Some contain the org-plus-contrib-*.tar ELPA package, which bundles
 the core Org files plus many additional contributed libraries.
 
-All ELPA version of Org contain:
+All ELPA packages of Org contain:
 
 README_ELPA
     This file.
 
-*el
+*.el
     Elisp files.
 
 org
