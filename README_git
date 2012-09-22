@@ -1,19 +1,32 @@
-The is a distribution of Org, a plain text notes and project planning
-tool for Emacs.
-
-The version of this release is: 7.9
+This is the Emacs Org project, an Emacs library for organizing your life.
 
 The homepage of Org is at http://orgmode.org
 
 This distribution contains:
 
-README
+README_git
     This file.
+
+README
+    The README file for the main distribution (zip and tar files).
+
+README_ELPA
+    The README file for the ELPA packages.
+
+README_contribute
+    Information about the git repository and how to contribute
+    to Org-mode development.
+
+README_maintainer
+    Information for the maintainer.
 
 Makefile
     The makefile to compile and install Org.  For installation
     instructions, see the manual or the more detailed procedure
     on Worg: http://orgmode.org/worg/dev/org-build-system.html
+
+mk/
+    Files needed for building Org.
 
 lisp/
     Directory with all the Emacs Lisp files that make up Org.
@@ -22,21 +35,18 @@ doc/
     The documentation files.  org.texi is the source of the
     documentation, org.html and org.pdf are formatted versions of it.
 
-contrib/
-    A directory with third-party additions for Org.  Some really cool
-    stuff is in there.
-
 etc/
     Files needed for the ODT exporter.
 
-mk/
-    Files needed for building Org.
+contrib/
+    A directory with third-party additions for Org.  Some really cool
+    stuff is in there.
 
 testing/
     Testing suite for Org.
 
 request-assign-future.txt
-    The form that contributors have to sign and get processed with 
-    the FSF before contributed changes can be integrated into the Org
+    The form that contributors have to sign and get processed with the
+    FSF before contributed changes can be integrated into the Org
     core.  All files in this distribution except the contrib/ directory
     have copyright assigned to the FSF.
