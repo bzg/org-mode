@@ -39,16 +39,13 @@
 
 (eval-when-compile (require 'cl))
 
-(defvar org-export-groff-default-packages-alist)
-(defvar org-export-groff-packages-alist)
-
 (require 'org-export)
 
 
 ;;; Define Back-End
 
 (org-export-define-backend e-groff
-  '((babel-call . org-e-groff-babel-call)
+  ((babel-call . org-e-groff-babel-call)
     (bold . org-e-groff-bold)
     (center-block . org-e-groff-center-block)
     (clock . org-e-groff-clock)
