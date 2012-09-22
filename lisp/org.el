@@ -9418,6 +9418,7 @@ If the DEFAULT-DESCRIPTION parameter is non-nil, this value will
 be used as the default description."
   (interactive "P")
   (let* ((wcf (current-window-configuration))
+	 (origbuf (current-buffer))
 	 (region (if (org-region-active-p)
 		     (buffer-substring (region-beginning) (region-end))))
 	 (remove (and region (list (region-beginning) (region-end))))
@@ -9493,7 +9494,8 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		    (and (equal ":" (substring link -1))
 			 (member (substring link 0 -1) all-prefixes)
 			 (setq link (substring link 0 -1))))
-		(setq link (org-link-try-special-completion link))))
+		(setq link (with-current-buffer origbuf
+			     (org-link-try-special-completion link)))))
 	(set-window-configuration wcf)
 	(kill-buffer "*Org Links*"))
       (setq entry (assoc link org-stored-links))
