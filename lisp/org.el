@@ -970,6 +970,7 @@ the values `folded', `children', or `subtree'."
 
 (defcustom org-cycle-hook '(org-cycle-hide-archived-subtrees
 			    org-cycle-hide-drawers
+			    org-cycle-hide-inline-tasks
 			    org-cycle-show-empty-lines
 			    org-optimize-window-after-visibility-change)
   "Hook that is run after `org-cycle' has changed the buffer visibility.
@@ -6787,6 +6788,13 @@ open and agenda-wise Org files."
 	(goto-char beg)
 	(while (re-search-forward org-drawer-regexp end t)
 	  (org-flag-drawer t))))))
+
+(defun org-cycle-hide-inline-tasks (state)
+  "Re-hide inline task when switching to 'contents visibility state."
+  (when (and (eq state 'contents)
+	     (boundp 'org-inlinetask-min-level)
+	     org-inlinetask-min-level)
+    (hide-sublevels (1- org-inlinetask-min-level))))
 
 (defun org-flag-drawer (flag)
   "When FLAG is non-nil, hide the drawer we are within.
