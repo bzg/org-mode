@@ -1241,14 +1241,14 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "GROFF") value)
      (t nil))))
 
-;;; Groff Environment
+;;; LaTeX Environment
 
-(defun org-e-groff-groff-environment (groff-environment contents info)
-  "Transcode a GROFF-ENVIRONMENT element from Org to Groff.
+(defun org-e-groff-latex-environment (latex-environment contents info)
+  "Transcode a LATEX-ENVIRONMENT element from Org to Groff.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((label (org-element-property :name groff-environment))
+  (let ((label (org-element-property :name latex-environment))
         (value (org-remove-indentation
-                (org-element-property :value groff-environment))))
+                (org-element-property :value latex-environment))))
     (if (not (org-string-nw-p label)) value
       ;; Environment is labelled: label must be within the environment
       ;; (otherwise, a reference pointing to that element will count
@@ -1260,12 +1260,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
         (insert (format "%s\n" label))
         (buffer-string)))))
 
-;;; Groff Fragment
+;;; LaTeX Fragment
 
-(defun org-e-groff-groff-fragment (groff-fragment contents info)
-  "Transcode a GROFF-FRAGMENT object from Org to Groff.
+(defun org-e-groff-latex-fragment (latex-fragment contents info)
+  "Transcode a LATEX-FRAGMENT object from Org to Groff.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-element-property :value groff-fragment))
+  (org-element-property :value latex-fragment))
 
 ;;; Line Break
 
