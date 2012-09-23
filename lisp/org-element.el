@@ -3547,7 +3547,7 @@ position of point and CDR is nil."
       ;; They will be parsed as a paragraph.
       (when (looking-at "[ \t]*$") (goto-char origin) (setq output nil))
       ;; Return value.
-      (cons (point) output))))
+      (cons origin output))))
 
 
 
