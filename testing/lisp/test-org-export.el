@@ -716,6 +716,38 @@ Paragraph[fn:1]"
        (org-export-get-tags (org-element-map tree 'headline 'identity info t)
 			    info '("ignore"))))))
 
+(ert-deftest test-org-export/get-node-property ()
+  "Test`org-export-get-node-property' specifications."
+  ;; Standard test.
+  (should
+   (equal "value"
+	  (org-test-with-parsed-data "* Headline
+  :PROPERTIES:
+  :prop:     value
+  :END:"
+	    (org-export-get-node-property
+	     :prop (org-element-map tree 'headline 'identity nil t)))))
+  ;; Test inheritance.
+  (should
+   (equal "value"
+	  (org-test-with-parsed-data "* Parent
+  :PROPERTIES:
+  :prop:     value
+  :END:
+** Headline
+   Paragraph"
+	    (org-export-get-node-property
+	     :prop (org-element-map tree 'paragraph 'identity nil t) t))))
+  ;; Cannot return a value before the first headline.
+  (should-not
+   (org-test-with-parsed-data "Paragraph
+* Headline
+  :PROPERTIES:
+  :prop:     value
+  :END:"
+     (org-export-get-node-property
+      :prop (org-element-map tree 'paragraph 'identity nil t)))))
+
 (ert-deftest test-org-export/first-sibling-p ()
   "Test `org-export-first-sibling-p' specifications."
   ;; Standard test.

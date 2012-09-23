@@ -3148,6 +3148,26 @@ Any tag belonging to this list will also be removed."
 			      (member tag tags)))
 		 (org-element-property :tags element)))
 
+(defun org-export-get-node-property (property blob &optional inherited)
+  "Return node PROPERTY value for BLOB.
+
+PROPERTY is normalized symbol (i.e. `:cookie-data').  BLOB is an
+element or object.
+
+If optional argument INHERITED is non-nil, the value can be
+inherited from a parent headline.
+
+Return value is a string or nil."
+  (let ((headline (if (eq (org-element-type blob) 'headline) blob
+		    (org-export-get-parent-headline blob))))
+    (if (not inherited) (org-element-property property blob)
+      (let ((parent headline) value)
+	(catch 'found
+	  (while parent
+	    (when (plist-member (nth 1 parent) property)
+	      (throw 'found (org-element-property property parent)))
+	    (setq parent (org-element-property :parent parent))))))))
+
 (defun org-export-first-sibling-p (headline info)
   "Non-nil when HEADLINE is the first sibling in its sub-tree.
 INFO is a plist used as a communication channel."
