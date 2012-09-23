@@ -165,6 +165,12 @@ Some other text
 	   :name
 	   (org-test-with-temp-text "#+NAME: para\nParagraph"
 	     (org-element-at-point)))))
+  (should
+   (= 1
+      (org-element-property
+       :begin
+       (org-test-with-temp-text "#+NAME: para\nParagraph"
+	 (org-element-at-point)))))
   ;; Parse multiple keywords.
   (should
    (equal
