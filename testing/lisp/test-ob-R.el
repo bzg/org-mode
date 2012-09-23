@@ -14,9 +14,10 @@
   (signal 'missing-test-dependency "Support for R code blocks"))
 
 (ert-deftest test-ob-R/simple-session ()
-  (org-test-with-temp-text
-      "#+begin_src R :session R\n  paste(\"Yep!\")\n#+end_src\n"
-    (should (string= "Yep!" (org-babel-execute-src-block)))))
+  (let ((ess-ask-for-ess-directory nil))
+    (org-test-with-temp-text
+     "#+begin_src R :session R\n  paste(\"Yep!\")\n#+end_src\n"
+     (should (string= "Yep!" (org-babel-execute-src-block))))))
 
 (ert-deftest test-ob-R/colnames-yes-header-argument ()
   (org-test-with-temp-text "#+name: eg
