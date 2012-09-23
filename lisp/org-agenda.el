@@ -889,7 +889,7 @@ you want to use two-columns display (see `org-agenda-menu-two-columns')."
   :version "24.1"
   :type 'boolean)
 
-(make-obsolete-variable 'org-agenda-menu-two-column 'org-agenda-menu-two-columns "24.3")
+(define-obsolete-variable-alias 'org-agenda-menu-two-column 'org-agenda-menu-two-columns "24.3")
 
 (defcustom org-agenda-menu-two-columns nil
   "Non-nil means, use two columns to show custom commands in the dispatcher.
@@ -899,7 +899,7 @@ to nil."
   :version "24.1"
   :type 'boolean)
 
-(make-obsolete-variable 'org-finalize-agenda-hook 'org-agenda-finalize-hook "24.3")
+(define-obsolete-variable-alias 'org-finalize-agenda-hook 'org-agenda-finalize-hook "24.3")
 (defcustom org-agenda-finalize-hook nil
   "Hook run just before displaying an agenda buffer.
 The buffer is still writable when the hook is called.
@@ -1014,7 +1014,7 @@ Obsolete, see `org-agenda-span'."
   :group 'org-agenda-daily/weekly
   :type 'integer)
 
-(make-obsolete-variable 'org-agenda-ndays 'org-agenda-span "24.1")
+(define-obsolete-variable-alias 'org-agenda-ndays 'org-agenda-span "24.1")
 
 (defcustom org-agenda-span 'week
   "Number of days to include in overview display.
