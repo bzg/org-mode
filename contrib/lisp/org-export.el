@@ -215,6 +215,7 @@ way they are handled must be hard-coded into
     (:filter-line-break . org-export-filter-line-break-functions)
     (:filter-link . org-export-filter-link-functions)
     (:filter-macro . org-export-filter-macro-functions)
+    (:filter-node-property . org-export-filter-node-property-functions)
     (:filter-paragraph . org-export-filter-paragraph-functions)
     (:filter-parse-tree . org-export-filter-parse-tree-functions)
     (:filter-plain-list . org-export-filter-plain-list-functions)
@@ -2203,6 +2204,12 @@ channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-babel-call-functions nil
   "List of functions applied to a transcoded babel-call.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-node-property-functions nil
+  "List of functions applied to a transcoded node-property.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
