@@ -10934,7 +10934,16 @@ Note that this is still *before* the stuff will be removed from
 the *old* location.")
 
 (defvar org-capture-last-stored-marker)
-(defun org-refile (&optional goto default-buffer rfloc)
+(defvar org-refile-keep nil
+  "Non-nil means `org-refile' will copy instead of refile.")
+
+(defun org-copy ()
+  "Like `org-refile', but copy."
+  (interactive)
+  (let ((org-refile-keep t))
+    (funcall 'org-refile nil nil nil "Copy")))
+
+(defun org-refile (&optional goto default-buffer rfloc msg)
   "Move the entry or entries at point to another heading.
 The list of target headings is compiled using the information in
 `org-refile-targets', which see.
@@ -10957,6 +10966,9 @@ With a prefix argument of `2', refile to the running clock.
 
 RFLOC can be a refile location obtained in a different way.
 
+MSG is a string to replace \"Refile\" in the default prompt with
+another verb.  E.g. `org-copy' sets this parameter to \"Copy\".
+
 See also `org-refile-use-outline-path' and `org-completion-use-ido'.
 
 If you are using target caching (see `org-refile-use-cache'),
@@ -10967,7 +10979,8 @@ prefix argument (`C-u C-u C-u C-c C-w')."
   (interactive "P")
   (if (member goto '(0 (64)))
       (org-refile-cache-clear)
-    (let* ((cbuf (current-buffer))
+    (let* ((actionmsg (or msg "Refile"))
+	   (cbuf (current-buffer))
 	   (regionp (org-region-active-p))
 	   (region-start (and regionp (region-beginning)))
 	   (region-end (and regionp (region-end)))
@@ -11003,10 +11016,11 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 				  (org-back-to-heading t)
 				  (setq heading-text
 					(nth 4 (org-heading-components))))
+
 				(org-refile-get-location
 				 (cond (goto "Goto")
-				       (regionp "Refile region to")
-				       (t (concat "Refile subtree \""
+				       (regionp (concat actionmsg " region to"))
+				       (t (concat actionmsg " subtree \""
 						  heading-text "\" to")))
 				 default-buffer
 				 (and (not (equal '(4) goto))
@@ -11078,13 +11092,14 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		    (move-marker org-capture-last-stored-marker (point)))
 		  (if (fboundp 'deactivate-mark) (deactivate-mark))
 		  (run-hooks 'org-after-refile-insert-hook))))
-	    (if regionp
-		(delete-region (point) (+ (point) region-length))
-	      (org-cut-subtree))
+	    (unless org-refile-keep
+	      (if regionp
+		  (delete-region (point) (+ (point) region-length))
+		(org-cut-subtree)))
 	    (when (featurep 'org-inlinetask)
 	      (org-inlinetask-remove-END-maybe))
 	    (setq org-markers-to-move nil)
-	    (message "Refiled to \"%s\" in file %s" (car it) file)))))))
+	    (message (concat actionmsg " to \"%s\" in file %s: done") (car it) file)))))))
 
 (defun org-refile-goto-last-stored ()
   "Go to the location where the last refile was stored."
@@ -18158,6 +18173,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-d" 'org-deadline)
 (org-defkey org-mode-map "\C-c;"    'org-toggle-comment)
 (org-defkey org-mode-map "\C-c\C-w" 'org-refile)
+(org-defkey org-mode-map "\C-c\M-w" 'org-copy)
 (org-defkey org-mode-map "\C-c/"    'org-sparse-tree)   ; Minor-mode reserved
 (org-defkey org-mode-map "\C-c\\"   'org-match-sparse-tree) ; Minor-mode res.
 (org-defkey org-mode-map "\C-c\C-m" 'org-ctrl-c-ret)

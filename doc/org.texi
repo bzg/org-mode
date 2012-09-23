@@ -480,7 +480,7 @@ Capture - Refile - Archive
 * Attachments::                 Add files to tasks
 * RSS Feeds::                   Getting input from RSS feeds
 * Protocols::                   External (e.g.@: Browser) access to Emacs and Org
-* Refiling notes::              Moving a tree from one place to another
+* Refile and copy::             Moving/copying a tree from one place to another
 * Archiving::                   What to do with finished projects
 
 Capture
@@ -1514,7 +1514,7 @@ to create a number of tasks related to a series of lectures to prepare.  For
 more details, see the docstring of the command
 @code{org-clone-subtree-with-time-shift}.
 @orgcmd{C-c C-w,org-refile}
-Refile entry or region to a different location.  @xref{Refiling notes}.
+Refile entry or region to a different location.  @xref{Refile and copy}.
 @orgcmd{C-c ^,org-sort}
 Sort same-level entries.  When there is an active region, all entries in the
 region will be sorted.  Otherwise the children of the current headline are
@@ -6504,7 +6504,7 @@ trees to an archive file keeps the system compact and fast.
 * Attachments::                 Add files to tasks
 * RSS Feeds::                   Getting input from RSS feeds
 * Protocols::                   External (e.g.@: Browser) access to Emacs and Org
-* Refiling notes::              Moving a tree from one place to another
+* Refile and copy::             Moving/copying a tree from one place to another
 * Archiving::                   What to do with finished projects
 @end menu
 
@@ -6571,7 +6571,7 @@ so that you can resume your work without further distraction.  When called
 with a prefix arg, finalize and then jump to the captured item.
 
 @orgcmd{C-c C-w,org-capture-refile}
-Finalize the capture process by refiling (@pxref{Refiling notes}) the note to
+Finalize the capture process by refiling (@pxref{Refile and copy}) the note to
 a different place.  Please realize that this is a normal refiling command
 that will be executed---so the cursor position at the moment you run this
 command is important.  If you have inserted a tree with a parent and
@@ -7043,7 +7043,7 @@ list of drawers in that file:
 For more information, including how to read atom feeds, see
 @file{org-feed.el} and the docstring of @code{org-feed-alist}.
 
-@node Protocols, Refiling notes, RSS Feeds, Capture - Refile - Archive
+@node Protocols, Refile and copy, RSS Feeds, Capture - Refile - Archive
 @section Protocols for external access
 @cindex protocols, for external access
 @cindex emacsserver
@@ -7057,17 +7057,22 @@ a remote website you are looking at with the browser.  See
 @uref{http://orgmode.org/worg/org-contrib/org-protocol.php} for detailed
 documentation and setup instructions.
 
-@node Refiling notes, Archiving, Protocols, Capture - Refile - Archive
-@section Refiling notes
+@node Refile and copy, Archiving, Protocols, Capture - Refile - Archive
+@section Refile and copy
 @cindex refiling notes
+@cindex copying notes
 
-When reviewing the captured data, you may want to refile some of the entries
-into a different list, for example into a project.  Cutting, finding the
-right location, and then pasting the note is cumbersome.  To simplify this
-process, you can use the following special command:
+When reviewing the captured data, you may want to refile or to copy some of
+the entries into a different list, for example into a project.  Cutting,
+finding the right location, and then pasting the note is cumbersome.  To
+simplify this process, you can use the following special command:
 
 @table @kbd
+@orgcmd{C-c M-w,org-copy}
+@findex org-copy
+Copying works like refiling, except that the original note is not deleted.
 @orgcmd{C-c C-w,org-refile}
+@findex org-refile
 @vindex org-reverse-note-order
 @vindex org-refile-targets
 @vindex org-refile-use-outline-path
@@ -7104,7 +7109,7 @@ setting @code{org-refile-use-cache}.  To make the command see new possible
 targets, you have to clear the cache with this command.
 @end table
 
-@node Archiving,  , Refiling notes, Capture - Refile - Archive
+@node Archiving,  , Refile and copy, Capture - Refile - Archive
 @section Archiving
 @cindex archiving
 

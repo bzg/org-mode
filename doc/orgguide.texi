@@ -163,7 +163,7 @@ Dates and Times
 Capture - Refile - Archive
 
 * Capture::			
-* Refiling notes::		Moving a tree from one place to another
+* Refile and copy::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 
 Capture
@@ -438,7 +438,7 @@ Promote/demote the current subtree by one level.
 Move subtree up/down (swap with previous/next subtree of same
 level).
 @item C-c C-w
-Refile entry or region to a different location.  @xref{Refiling notes}.
+Refile entry or region to a different location.  @xref{Refile and copy}.
 @item C-x n s/w
 Narrow buffer to current subtree / widen it again
 @end table
@@ -1530,11 +1530,11 @@ archive file keeps the system compact and fast.
 
 @menu
 * Capture::			
-* Refiling notes::		Moving a tree from one place to another
+* Refile and copy::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 @end menu
 
-@node Capture, Refiling notes, Capture - Refile - Archive, Capture - Refile - Archive
+@node Capture, Refile and copy, Capture - Refile - Archive, Capture - Refile - Archive
 @section Capture
 
 Org's method for capturing new items is heavily inspired by John Wiegley
@@ -1574,7 +1574,7 @@ Once you are done entering information into the capture buffer,
 @kbd{C-c C-c} will return you to the window configuration before the capture
 process, so that you can resume your work without further distraction.
 @item C-c C-w
-Finalize by moving the entry to a refile location (@pxref{Refiling notes}).
+Finalize by moving the entry to a refile location (@pxref{Refile and copy}).
 @item C-c C-k
 Abort the capture process and return to the previous state.
 @end table
@@ -1622,15 +1622,18 @@ possibilities, consult the manual for more.
 %u, %U      @r{like the above, but inactive timestamps}
 @end smallexample
 
-@node Refiling notes, Archiving, Capture, Capture - Refile - Archive
-@section Refiling notes
+@node Refile and copy, Archiving, Capture, Capture - Refile - Archive
+@section Refile and copy
 
-When reviewing the captured data, you may want to refile some of the entries
-into a different list, for example into a project.  Cutting, finding the
-right location, and then pasting the note is cumbersome.  To simplify this
-process, you can use the following special command:
+When reviewing the captured data, you may want to refile or copy some of the
+entries into a different list, for example into a project.  Cutting, finding
+the right location, and then pasting the note is cumbersome.  To simplify
+this process, you can use the following special command:
 
 @table @kbd
+@item C-c M-x
+Copy the entry or region at point.  This command behaves like
+@code{org-refile}, except that the original note will not be deleted.
 @item C-c C-w
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
@@ -1644,7 +1647,7 @@ Use the refile interface to jump to a heading.
 Jump to the location where @code{org-refile} last moved a tree to.
 @end table
 
-@node Archiving,  , Refiling notes, Capture - Refile - Archive
+@node Archiving,  , Refile and copy, Capture - Refile - Archive
 @section Archiving
 
 When a project represented by a (sub)tree is finished, you may want
