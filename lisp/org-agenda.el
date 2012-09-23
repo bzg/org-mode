@@ -4293,7 +4293,11 @@ in `org-agenda-text-search-extra-files'."
 				   ""
 				   (buffer-substring-no-properties
 				    beg1 (point-at-eol))
+<<<<<<< HEAD
 				   level category tags))
+=======
+				   category tags t))
+>>>>>>> maint
 			(org-add-props txt props
 			  'org-marker marker 'org-hd-marker marker
 			  'org-todo-regexp org-todo-regexp
@@ -5013,8 +5017,12 @@ the documentation of `org-diary'."
 	      txt (org-trim
 		   (buffer-substring (match-beginning 2) (match-end 0)))
 	      tags (org-get-tags-at (point))
+<<<<<<< HEAD
 	      level (make-string (org-reduced-level (org-outline-level)) ? )
 	      txt (org-agenda-format-item "" txt level category tags)
+=======
+	      txt (org-agenda-format-item "" txt category tags t)
+>>>>>>> maint
 	      priority (1+ (org-get-priority txt))
 	      todo-state (org-get-todo-state))
 	(org-add-props txt props
@@ -5194,8 +5202,13 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (setq head (or (match-string 1) ""))
 	    (setq txt (org-agenda-format-item
 		       (if inactivep org-agenda-inactive-leader nil)
+<<<<<<< HEAD
 		       head level category tags timestr
 		       remove-re)))
+=======
+		       head category tags timestr
+		       remove-re t)))
+>>>>>>> maint
 	  (setq priority (org-get-priority txt))
 	  (org-add-props txt props 'priority priority
 			 'org-marker marker 'org-hd-marker hdmarker
@@ -5861,7 +5874,7 @@ FRACTION is what fraction of the head-warning time has passed."
 				      (concat "<" start-time ">"))
 				     ((= d2 d0)
 				      (concat "<" end-time ">")))
-			       remove-re))))
+			       remove-re t))))
 		(org-add-props txt props
 		  'org-marker marker 'org-hd-marker hdmarker
 		  'type "block" 'date date
