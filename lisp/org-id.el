@@ -83,6 +83,46 @@
   :tag "Org ID"
   :group 'org)
 
+(define-obsolete-variable-alias
+  'org-link-to-org-use-id 'org-id-link-to-org-use-id "24.3")
+(defcustom org-id-link-to-org-use-id nil
+  "Non-nil means storing a link to an Org file will use entry IDs.
+
+The variable can have the following values:
+
+t     Create an ID if needed to make a link to the current entry.
+
+create-if-interactive
+      If `org-store-link' is called directly (interactively, as a user
+      command), do create an ID to support the link.  But when doing the
+      job for capture, only use the ID if it already exists.  The
+      purpose of this setting is to avoid proliferation of unwanted
+      IDs, just because you happen to be in an Org file when you
+      call `org-capture' that automatically and preemptively creates a
+      link.  If you do want to get an ID link in a capture template to
+      an entry not having an ID, create it first by explicitly creating
+      a link to it, using `C-c C-l' first.
+
+create-if-interactive-and-no-custom-id
+      Like create-if-interactive, but do not create an ID if there is
+      a CUSTOM_ID property defined in the entry.  This is the default.
+
+use-existing
+      Use existing ID, do not create one.
+
+nil   Never use an ID to make a link, instead link using a text search for
+      the headline text."
+  :group 'org-link-store
+  :group 'org-id
+  :type '(choice
+	  (const :tag "Create ID to make link" t)
+	  (const :tag "Create if storing link interactively"
+		 create-if-interactive)
+	  (const :tag "Create if storing link interactively and no CUSTOM_ID is present"
+		 create-if-interactive-and-no-custom-id)
+	  (const :tag "Only use existing" use-existing)
+	  (const :tag "Do not use ID to create link" nil)))
+
 (defcustom org-id-uuid-program "uuidgen"
   "The uuidgen program."
   :group 'org-id
