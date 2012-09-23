@@ -31,24 +31,26 @@
 ;;
 ;; An element always starts and ends at the beginning of a line.  With
 ;; a few exceptions (`clock', `headline', `inlinetask', `item',
-;; `planning', `quote-section' `section' and `table-row' types), it
-;; can also accept a fixed set of keywords as attributes.  Those are
-;; called "affiliated keywords" to distinguish them from other
-;; keywords, which are full-fledged elements.  Almost all affiliated
-;; keywords are referenced in `org-element-affiliated-keywords'; the
-;; others are export attributes and start with "ATTR_" prefix.
+;; `planning', `node-property', `quote-section' `section' and
+;; `table-row' types), it can also accept a fixed set of keywords as
+;; attributes.  Those are called "affiliated keywords" to distinguish
+;; them from other keywords, which are full-fledged elements.  Almost
+;; all affiliated keywords are referenced in
+;; `org-element-affiliated-keywords'; the others are export attributes
+;; and start with "ATTR_" prefix.
 ;;
 ;; Element containing other elements (and only elements) are called
 ;; greater elements.  Concerned types are: `center-block', `drawer',
 ;; `dynamic-block', `footnote-definition', `headline', `inlinetask',
-;; `item', `plain-list', `quote-block', `section' and `special-block'.
+;; `item', `plain-list', `property-drawer', `quote-block', `section'
+;; and `special-block'.
 ;;
 ;; Other element types are: `babel-call', `clock', `comment',
 ;; `comment-block', `example-block', `export-block', `fixed-width',
-;; `horizontal-rule', `keyword', `latex-environment', `paragraph',
-;; `planning', `property-drawer', `quote-section', `src-block',
-;; `table', `table-row' and `verse-block'.  Among them, `paragraph'
-;; and `verse-block' types can contain Org objects and plain text.
+;; `horizontal-rule', `keyword', `latex-environment', `node-property',
+;; `paragraph', `planning', `quote-section', `src-block', `table',
+;; `table-row' and `verse-block'.  Among them, `paragraph' and
+;; `verse-block' types can contain Org objects and plain text.
 ;;
 ;; Objects are related to document's contents.  Some of them are
 ;; recursive.  Associated types are of the following: `bold', `code',
@@ -107,8 +109,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(eval-when-compile (require 'cl))
 (require 'org)
 
 
@@ -160,17 +161,18 @@ is not sufficient to know if point is at a paragraph ending.  See
 `org-element-paragraph-parser' for more information.")
 
 (defconst org-element-all-elements
-  '(center-block clock comment comment-block drawer dynamic-block example-block
-		 export-block fixed-width footnote-definition headline
-		 horizontal-rule inlinetask item keyword latex-environment
-		 babel-call paragraph plain-list planning property-drawer
-		 quote-block quote-section section special-block src-block table
-		 table-row verse-block)
+  '(babel-call center-block clock comment comment-block drawer dynamic-block
+	       example-block export-block fixed-width footnote-definition
+	       headline horizontal-rule inlinetask item keyword
+	       latex-environment node-property paragraph plain-list planning
+	       property-drawer quote-block quote-section section special-block
+	       src-block table table-row verse-block)
   "Complete list of element types.")
 
 (defconst org-element-greater-elements
   '(center-block drawer dynamic-block footnote-definition headline inlinetask
-		 item plain-list quote-block section special-block table)
+		 item plain-list property-drawer quote-block section
+		 special-block table)
   "List of recursive element types aka Greater Elements.")
 
 (defconst org-element-all-successors
@@ -537,33 +539,32 @@ Assume point is at beginning of drawer."
     (if (not (save-excursion (re-search-forward "^[ \t]*:END:" limit t)))
 	;; Incomplete drawer: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
-      (let ((drawer-end-line (match-beginning 0)))
-	(save-excursion
-	  (let* ((case-fold-search t)
-		 (name (progn (looking-at org-drawer-regexp)
-			      (org-match-string-no-properties 1)))
-		 (begin (car affiliated))
-		 ;; Empty drawers have no contents.
-		 (contents-begin (progn (forward-line)
-					(and (< (point) drawer-end-line)
-					     (point))))
-		 (contents-end (and contents-begin drawer-end-line))
-		 (hidden (org-invisible-p2))
-		 (pos-before-blank (progn (goto-char drawer-end-line)
-					  (forward-line)
-					  (point)))
-		 (end (progn (skip-chars-forward " \r\t\n" limit)
-			     (if (eobp) (point) (point-at-bol)))))
-	    (list 'drawer
-		  (nconc
-		   (list :begin begin
-			 :end end
-			 :drawer-name name
-			 :hiddenp hidden
-			 :contents-begin contents-begin
-			 :contents-end contents-end
-			 :post-blank (count-lines pos-before-blank end))
-		   (cdr affiliated)))))))))
+      (save-excursion
+	(let* ((drawer-end-line (match-beginning 0))
+	       (name (progn (looking-at org-drawer-regexp)
+			    (org-match-string-no-properties 1)))
+	       (begin (car affiliated))
+	       ;; Empty drawers have no contents.
+	       (contents-begin (progn (forward-line)
+				      (and (< (point) drawer-end-line)
+					   (point))))
+	       (contents-end (and contents-begin drawer-end-line))
+	       (hidden (org-invisible-p2))
+	       (pos-before-blank (progn (goto-char drawer-end-line)
+					(forward-line)
+					(point)))
+	       (end (progn (skip-chars-forward " \r\t\n" limit)
+			   (if (eobp) (point) (point-at-bol)))))
+	  (list 'drawer
+		(nconc
+		 (list :begin begin
+		       :end end
+		       :drawer-name name
+		       :hiddenp hidden
+		       :contents-begin contents-begin
+		       :contents-end contents-end
+		       :post-blank (count-lines pos-before-blank end))
+		 (cdr affiliated))))))))
 
 (defun org-element-drawer-interpreter (drawer contents)
   "Interpret DRAWER element as Org syntax.
@@ -1141,6 +1142,56 @@ CONTENTS is the contents of the element."
     (buffer-string)))
 
 
+;;;; Property Drawer
+
+(defun org-element-property-drawer-parser (limit affiliated)
+  "Parse a property drawer.
+
+LIMIT bounds the search.  AFFILIATED is a list of which CAR is
+the buffer position at the beginning of the first affiliated
+keyword and CDR is a plist of affiliated keywords along with
+their value.
+
+Return a list whose CAR is `property-drawer' and CDR is a plist
+containing `:begin', `:end', `:hiddenp', `:contents-begin',
+`:contents-end' and `:post-blank' keywords.
+
+Assume point is at the beginning of the property drawer."
+  (save-excursion
+    (let ((case-fold-search t))
+      (if (not (save-excursion
+		 (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)))
+	  ;; Incomplete drawer: parse it as a paragraph.
+	  (org-element-paragraph-parser limit affiliated)
+	(save-excursion
+	  (let* ((drawer-end-line (match-beginning 0))
+		 (begin (car affiliated))
+		 (contents-begin (progn (forward-line)
+					(and (< (point) drawer-end-line)
+					     (point))))
+		 (contents-end (and contents-begin drawer-end-line))
+		 (hidden (org-invisible-p2))
+		 (pos-before-blank (progn (goto-char drawer-end-line)
+					  (forward-line)
+					  (point)))
+		 (end (progn (skip-chars-forward " \r\t\n" limit)
+			     (if (eobp) (point) (point-at-bol)))))
+	    (list 'property-drawer
+		  (nconc
+		   (list :begin begin
+			 :end end
+			 :hiddenp hidden
+			 :contents-begin contents-begin
+			 :contents-end contents-end
+			 :post-blank (count-lines pos-before-blank end))
+		   (cdr affiliated)))))))))
+
+(defun org-element-property-drawer-interpreter (property-drawer contents)
+  "Interpret PROPERTY-DRAWER element as Org syntax.
+CONTENTS is the properties within the drawer."
+  (format ":PROPERTIES:\n%s:END:" contents))
+
+
 ;;;; Quote Block
 
 (defun org-element-quote-block-parser (limit affiliated)
@@ -1692,7 +1743,10 @@ CONTENTS is nil."
 (defun org-element-keyword-parser (limit affiliated)
   "Parse a keyword at point.
 
-LIMIT bounds the search.
+LIMIT bounds the search.  AFFILIATED is a list of which CAR is
+the buffer position at the beginning of the first affiliated
+keyword and CDR is a plist of affiliated keywords along with
+their value.
 
 Return a list whose CAR is `keyword' and CDR is a plist
 containing `:key', `:value', `:begin', `:end' and `:post-blank'
@@ -1700,7 +1754,7 @@ keywords."
   (save-excursion
     (let ((case-fold-search t)
 	  (begin (car affiliated))
-	  (key (progn (looking-at "[ \t]*#\\+\\(\\S-+\\):")
+	  (key (progn (looking-at "[ \t]*#\\+\\(\\S-+*\\):")
 		      (upcase (org-match-string-no-properties 1))))
 	  (value (org-trim (buffer-substring-no-properties
 			    (match-end 0) (point-at-eol))))
@@ -1764,6 +1818,40 @@ Assume point is at the beginning of the latex environment."
   "Interpret LATEX-ENVIRONMENT element as Org syntax.
 CONTENTS is nil."
   (org-element-property :value latex-environment))
+
+
+;;;; Node Property
+
+(defun org-element-node-property-parser (limit)
+  "Parse a node-property at point.
+
+LIMIT bounds the search.
+
+Return a list whose CAR is `node-property' and CDR is a plist
+containing `:key', `:value', `:begin', `:end' and `:post-blank'
+keywords."
+  (save-excursion
+    (let ((case-fold-search t)
+	  (begin (point))
+	  (key (progn (looking-at "[ \t]*:\\(.*?\\):[ \t]+\\(.*?\\)[ \t]*$")
+		      (org-match-string-no-properties 1)))
+	  (value (org-match-string-no-properties 2))
+	  (pos-before-blank (progn (forward-line) (point)))
+	  (end (progn (skip-chars-forward " \r\t\n" limit)
+		      (if (eobp) (point) (point-at-bol)))))
+      (list 'node-property
+	    (list :key key
+		  :value value
+		  :begin begin
+		  :end end
+		  :post-blank (count-lines pos-before-blank end))))))
+
+(defun org-element-node-property-interpreter (node-property contents)
+  "Interpret NODE-PROPERTY element as Org syntax.
+CONTENTS is nil."
+  (format org-property-format
+	  (format ":%s:" (org-element-property :key node-property))
+	  (org-element-property :value node-property)))
 
 
 ;;;; Paragraph
@@ -1905,63 +1993,6 @@ CONTENTS is nil."
 		 (when scheduled
 		   (concat org-scheduled-string " <" scheduled ">")))))
    " "))
-
-
-;;;; Property Drawer
-
-(defun org-element-property-drawer-parser (limit affiliated)
-  "Parse a property drawer.
-
-LIMIT bounds the search.  AFFILIATED is a list of which CAR is
-the buffer position at the beginning of the first affiliated
-keyword and CDR is a plist of affiliated keywords along with
-their value.
-
-Return a list whose CAR is `property-drawer' and CDR is a plist
-containing `:begin', `:end', `:hiddenp', `:contents-begin',
-`:contents-end', `:properties' and `:post-blank' keywords.
-
-Assume point is at the beginning of the property drawer."
-  (save-excursion
-    (let ((case-fold-search t)
-	  (begin (car affiliated))
-	  (prop-begin (progn (forward-line) (point)))
-	  (hidden (org-invisible-p2))
-	  (properties
-	   (let (val)
-	     (while (not (looking-at "^[ \t]*:END:"))
-	       (when (looking-at "[ \t]*:\\([A-Za-z][-_A-Za-z0-9]*\\):")
-		 (push (cons (org-match-string-no-properties 1)
-			     (org-trim
-			      (buffer-substring-no-properties
-			       (match-end 0) (point-at-eol))))
-		       val))
-	       (forward-line))
-	     val))
-	  (prop-end (progn (re-search-forward "^[ \t]*:END:" limit t)
-			   (point-at-bol)))
-	  (pos-before-blank (progn (forward-line) (point)))
-	  (end (progn (skip-chars-forward " \r\t\n" limit)
-		      (if (eobp) (point) (point-at-bol)))))
-      (list 'property-drawer
-	    (nconc
-	     (list :begin begin
-		   :end end
-		   :hiddenp hidden
-		   :properties properties
-		   :post-blank (count-lines pos-before-blank end))
-	     (cdr affiliated))))))
-
-(defun org-element-property-drawer-interpreter (property-drawer contents)
-  "Interpret PROPERTY-DRAWER element as Org syntax.
-CONTENTS is nil."
-  (let ((props (org-element-property :properties property-drawer)))
-    (concat
-     ":PROPERTIES:\n"
-     (mapconcat (lambda (p)
-		  (format org-property-format (format ":%s:" (car p)) (cdr p)))
-		(nreverse props) "\n")
-     "\n:END:")))
 
 
 ;;;; Quote Section
@@ -3354,8 +3385,8 @@ CONTENTS is nil."
 ;; `org-element--current-element' makes use of special modes.  They
 ;; are activated for fixed element chaining (i.e. `plain-list' >
 ;; `item') or fixed conditional element chaining (i.e. `headline' >
-;; `section'). Special modes are: `first-section', `section',
-;; `quote-section', `item' and `table-row'.
+;; `section').  Special modes are: `first-section', `item',
+;; `node-property', `quote-section', `section' and `table-row'.
 
 (defun org-element--current-element
   (limit &optional granularity special structure)
@@ -3376,8 +3407,8 @@ nil), secondary values will not be parsed, since they only
 contain objects.
 
 Optional argument SPECIAL, when non-nil, can be either
-`first-section', `section', `quote-section', `table-row' and
-`item'.
+`first-section', `item', `node-property', `quote-section',
+`section', and `table-row'.
 
 If STRUCTURE isn't provided but SPECIAL is set to `item', it will
 be computed.
@@ -3396,6 +3427,8 @@ element it has to parse."
 	(org-element-item-parser limit structure raw-secondary-p))
        ;; Table Row.
        ((eq special 'table-row) (org-element-table-row-parser limit))
+       ;; Node Property.
+       ((eq special 'node-property) (org-element-node-property-parser limit))
        ;; Headline.
        ((org-with-limited-levels (org-at-heading-p))
         (org-element-headline-parser limit raw-secondary-p))
@@ -3778,6 +3811,7 @@ Elements are accumulated into ACC."
 	      (if (org-element-property :quotedp element) 'quote-section
 		'section))
 	     (plain-list 'item)
+	     (property-drawer 'node-property)
 	     (table 'table-row))
 	   (org-element-property :structure element)
 	   granularity visible-only element))
@@ -4204,13 +4238,15 @@ first element of current section."
 			    (memq type
 				  '(center-block
 				    drawer dynamic-block inlinetask item
-				    plain-list quote-block special-block))))
+				    plain-list property-drawer quote-block
+				    special-block))))
 		   (throw 'exit (if keep-trail trail element))
 		 (setq parent element)
 		 (case type
 		   (plain-list
 		    (setq special-flag 'item
 			  struct (org-element-property :structure element)))
+		   (property-drawer (setq special-flag 'node-property))
 		   (table (setq special-flag 'table-row))
 		   (otherwise (setq special-flag nil)))
 		 (setq end cend)

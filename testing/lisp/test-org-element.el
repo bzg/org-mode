@@ -1205,6 +1205,32 @@ e^{i\\pi}+1=0
      (org-element-map (org-element-parse-buffer) 'macro 'identity))))
 
 
+;;;; Node Property
+
+(ert-deftest test-org-element/node-property ()
+  "Test `node-property' parser."
+  ;; Standard test.
+  (should
+   (equal '("abc" "value")
+	  (org-test-with-temp-text ":PROPERTIES:\n:abc: value\n:END:"
+	    (progn (forward-line)
+		   (let ((element (org-element-at-point)))
+		     (list (org-element-property :key element)
+			   (org-element-property :value element)))))))
+  ;; Value should be trimmed.
+  (should
+   (equal "value"
+	  (org-test-with-temp-text ":PROPERTIES:\n:abc: value  \n:END:"
+	    (progn (forward-line)
+		   (let ((element (org-element-at-point)))
+		     (org-element-property :value element))))))
+  ;; A node property requires to be wrapped within a property drawer.
+  (should-not
+   (eq 'node-property
+       (org-test-with-temp-text ":abc: value"
+	 (org-element-type (org-element-at-point))))))
+
+
 ;;;; Paragraph
 
 (ert-deftest test-org-element/paragraph-parser ()
