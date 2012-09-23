@@ -11114,11 +11114,7 @@ this is used for the GOTO interface."
 	  (org-refile-get-targets default-buffer excluded-entries)))
   (unless org-refile-target-table
     (error "No refile targets"))
-  (let* ((prompt (concat prompt
-			 (and (car org-refile-history)
-			      (concat " (default " (car org-refile-history) ")"))
-			 ": "))
-	 (cbuf (current-buffer))
+  (let* ((cbuf (current-buffer))
 	 (partial-completion-mode nil)
 	 (cfn (buffer-file-name (buffer-base-buffer cbuf)))
 	 (cfunc (if (and org-refile-use-outline-path
@@ -11126,6 +11122,7 @@ this is used for the GOTO interface."
 		    'org-olpath-completing-read
 		  'org-icompleting-read))
 	 (extra (if org-refile-use-outline-path "/" ""))
+	 (cbnex (concat (buffer-name) extra))
 	 (filename (and cfn (expand-file-name cfn)))
 	 (tbl (mapcar
 	       (lambda (x)
@@ -11138,10 +11135,16 @@ this is used for the GOTO interface."
 		   (cons (concat (car x) extra) (cdr x))))
 	       org-refile-target-table))
 	 (completion-ignore-case t)
+	 cdef
+	 (prompt (concat prompt
+			 (or (and (car org-refile-history)
+				  (concat " (default " (car org-refile-history) ")"))
+			     (and (assoc cbnex tbl) (setq cdef cbnex)
+				  (concat " (default " cbnex ")"))) ": "))
 	 pa answ parent-target child parent old-hist)
     (setq old-hist org-refile-history)
     (setq answ (funcall cfunc prompt tbl nil (not new-nodes)
-			nil 'org-refile-history (car org-refile-history)))
+			nil 'org-refile-history (or cdef (car org-refile-history))))
     (setq pa (or (assoc answ tbl) (assoc (concat answ "/") tbl)))
     (org-refile-check-position pa)
     (if pa
