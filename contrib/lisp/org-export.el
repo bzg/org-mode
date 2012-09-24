@@ -700,6 +700,15 @@ standard mode."
 
 
 ;;; Defining New Back-ends
+;;
+;; `org-export-define-backend' is the standard way to define an export
+;; back-end.  It allows to specify translators, filters, buffer
+;; options and a menu entry.  If the new back-end shares translators
+;; with another back-end, `org-export-define-derived-backend' may be
+;; used instead.
+;;
+;; Eventually `org-export-barf-if-invalid-backend' returns an error
+;; when a given back-end hasn't been registered yet.
 
 (defmacro org-export-define-backend (backend translators &rest body)
   "Define a new back-end BACKEND.
@@ -984,6 +993,11 @@ structure of the values."
 						(cdr sub-menu-entry))))))
        ;; Splice in the body, if any.
        ,@body)))
+
+(defun org-export-barf-if-invalid-backend (backend)
+  "Signal an error if BACKEND isn't defined."
+  (unless (boundp (intern (format "org-%s-translate-alist" backend)))
+    (error "Unknown \"%s\" back-end: Aborting export" backend)))
 
 
 
@@ -2527,6 +2541,8 @@ Optional argument NOEXPAND, when non-nil, prevents included files
 to be expanded and Babel code to be executed.
 
 Return code as a string."
+  ;; Barf if BACKEND isn't registered.
+  (org-export-barf-if-invalid-backend backend)
   (save-excursion
     (save-restriction
       ;; Narrow buffer to an appropriate region or subtree for
