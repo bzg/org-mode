@@ -418,12 +418,13 @@ for a capture buffer.")
   "Hook for the minor `org-capture-mode'.")
 
 (define-minor-mode org-capture-mode
-  "Minor mode for special key bindings in a capture buffer."
+  "Minor mode for special key bindings in a capture buffer.
+
+Turning on this mode runs the normal hook `org-capture-mode-hook'."
   nil " Rem" org-capture-mode-map
   (org-set-local
    'header-line-format
-   "Capture buffer.  Finish `C-c C-c', refile `C-c C-w', abort `C-c C-k'.")
-  (run-hooks 'org-capture-mode-hook))
+   "Capture buffer.  Finish `C-c C-c', refile `C-c C-w', abort `C-c C-k'."))
 (define-key org-capture-mode-map "\C-c\C-c" 'org-capture-finalize)
 (define-key org-capture-mode-map "\C-c\C-k" 'org-capture-kill)
 (define-key org-capture-mode-map "\C-c\C-w" 'org-capture-refile)
