@@ -10,6 +10,9 @@ This distribution contains:
 README
     This file.
 
+COPYING
+    The GNU General Public License.
+
 Makefile
     The makefile to compile and install Org.  For installation
     instructions, see the manual or the more detailed procedure
