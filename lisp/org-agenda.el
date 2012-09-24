@@ -2200,7 +2200,7 @@ The following commands are available:
     ["Capture with cursor date" org-agenda-capture t]
     ["Follow Mode" org-agenda-follow-mode
      :style toggle :selected org-agenda-follow-mode :active t]
-					;    ["Tree to indirect frame" org-agenda-tree-to-indirect-buffer t]
+    ;;    ["Tree to indirect frame" org-agenda-tree-to-indirect-buffer t]
     "--"
     ("TODO"
      ["Cycle TODO" org-agenda-todo t]
@@ -7480,7 +7480,7 @@ When called with a prefix argument, include all archive files as well."
     (when (and (markerp m) (marker-buffer m))
       (and org-agenda-follow-mode
 	   (if org-agenda-follow-indirect
-	       (org-agenda-tree-to-indirect-buffer)
+	       (org-agenda-tree-to-indirect-buffer nil)
 	     (org-agenda-show)))
       (and org-agenda-show-outline-path
 	   (org-with-point-at m (org-display-outline-path t))))))
@@ -7865,22 +7865,23 @@ docstring of `org-agenda-show-1'."
 (defun org-agenda-error ()
   (error "Command not allowed in this line"))
 
-(defun org-agenda-tree-to-indirect-buffer ()
+(defun org-agenda-tree-to-indirect-buffer (arg)
   "Show the subtree corresponding to the current entry in an indirect buffer.
-This calls the command `org-tree-to-indirect-buffer' from the original
-Org-mode buffer.
-With numerical prefix arg ARG, go up to this level and then take that tree.
+This calls the command `org-tree-to-indirect-buffer' from the original buffer.
+
+With a numerical prefix ARG, go up to this level and then take that tree.
+With a negative numeric ARG, go up by this number of levels.
 With a \\[universal-argument] prefix, make a separate frame for this tree (i.e. don't
 use the dedicated frame)."
-  (interactive)
-  (if (and current-prefix-arg (listp current-prefix-arg))
-      (org-agenda-do-tree-to-indirect-buffer)
+  (interactive "P")
+  (if current-prefix-arg
+      (org-agenda-do-tree-to-indirect-buffer arg)
     (let ((agenda-buffer (buffer-name))
 	  (agenda-window (selected-window))
           (indirect-window
 	   (and org-last-indirect-buffer
 		(get-buffer-window org-last-indirect-buffer))))
-      (save-window-excursion (org-agenda-do-tree-to-indirect-buffer))
+      (save-window-excursion (org-agenda-do-tree-to-indirect-buffer arg))
       (unless (or (eq org-indirect-buffer-display 'new-frame)
 		  (eq org-indirect-buffer-display 'dedicated-frame))
 	(unwind-protect
@@ -7892,7 +7893,7 @@ use the dedicated frame)."
 	  (fit-window-to-buffer indirect-window)))
       (select-window (get-buffer-window agenda-buffer)))))
 
-(defun org-agenda-do-tree-to-indirect-buffer ()
+(defun org-agenda-do-tree-to-indirect-buffer (arg)
   "Same as `org-agenda-tree-to-indirect-buffer' without saving window."
   (org-agenda-check-no-diary)
   (let* ((marker (or (org-get-at-bol 'org-marker)
@@ -7902,7 +7903,7 @@ use the dedicated frame)."
     (with-current-buffer buffer
       (save-excursion
 	(goto-char pos)
-	(call-interactively 'org-tree-to-indirect-buffer)))))
+	(funcall 'org-tree-to-indirect-buffer arg)))))
 
 (defvar org-last-heading-marker (make-marker)
   "Marker pointing to the headline that last changed its TODO state

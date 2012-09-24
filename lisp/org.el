@@ -7092,8 +7092,9 @@ or nil."
 
 (defun org-tree-to-indirect-buffer (&optional arg)
   "Create indirect buffer and narrow it to current subtree.
-With numerical prefix ARG, go up to this level and then take that tree.
+With a numerical prefix ARG, go up to this level and then take that tree.
 If ARG is negative, go up that many levels.
+
 If `org-indirect-buffer-display' is not `new-frame', the command removes the
 indirect buffer previously made with this command, to avoid proliferation of
 indirect buffers.  However, when you call the command with a \
@@ -7115,7 +7116,7 @@ frame is not changed."
 	(setq level (org-outline-level))
 	(if (< arg 0) (setq arg (+ level arg)))
 	(while (> (setq level (org-outline-level)) arg)
-	  (outline-up-heading 1 t)))
+	  (org-up-heading-safe)))
       (setq beg (point)
 	    heading (org-get-heading))
       (org-end-of-subtree t t)
@@ -19584,6 +19585,11 @@ See the individual commands for more information."
 
 ;;; Menu entries
 
+(defsubst org-in-subtree-not-table-p ()
+  "Are we in a subtree and not in a table?"
+  (and (not (org-before-first-heading-p))
+       (not (org-at-table-p))))
+
 ;; Define the Org-mode menus
 (easy-menu-define org-tbl-menu org-mode-map "Tbl menu"
   '("Tbl"
@@ -19666,23 +19672,25 @@ See the individual commands for more information."
      "--"
      ["Jump" org-goto t])
     ("Edit Structure"
-     ["Move Subtree Up" org-shiftmetaup (not (org-at-table-p))]
-     ["Move Subtree Down" org-shiftmetadown (not (org-at-table-p))]
+     ["Refile Subtree" org-refile (org-in-subtree-not-table-p)]
      "--"
-     ["Copy Subtree"  org-copy-special (not (org-at-table-p))]
-     ["Cut Subtree"  org-cut-special (not (org-at-table-p))]
+     ["Move Subtree Up" org-shiftmetaup (org-in-subtree-not-table-p)]
+     ["Move Subtree Down" org-shiftmetadown (org-in-subtree-not-table-p)]
+     "--"
+     ["Copy Subtree"  org-copy-special (org-in-subtree-not-table-p)]
+     ["Cut Subtree"  org-cut-special (org-in-subtree-not-table-p)]
      ["Paste Subtree"  org-paste-special (not (org-at-table-p))]
      "--"
      ["Clone subtree, shift time" org-clone-subtree-with-time-shift t]
      "--"
      ["Copy visible text"  org-copy-visible t]
      "--"
-     ["Promote Heading" org-metaleft (not (org-at-table-p))]
-     ["Promote Subtree" org-shiftmetaleft (not (org-at-table-p))]
-     ["Demote Heading"  org-metaright (not (org-at-table-p))]
-     ["Demote Subtree"  org-shiftmetaright (not (org-at-table-p))]
+     ["Promote Heading" org-metaleft (org-in-subtree-not-table-p)]
+     ["Promote Subtree" org-shiftmetaleft (org-in-subtree-not-table-p)]
+     ["Demote Heading"  org-metaright (org-in-subtree-not-table-p)]
+     ["Demote Subtree"  org-shiftmetaright (org-in-subtree-not-table-p)]
      "--"
-     ["Sort Region/Children" org-sort  (not (org-at-table-p))]
+     ["Sort Region/Children" org-sort t]
      "--"
      ["Convert to odd levels" org-convert-to-odd-levels t]
      ["Convert to odd/even levels" org-convert-to-oddeven-levels t])
@@ -19693,11 +19701,11 @@ See the individual commands for more information."
      ["Footnote new/jump" org-footnote-action t]
      ["Footnote extra" (org-footnote-action t) :active t :keys "C-u C-c C-x f"])
     ("Archive"
-     ["Archive (default method)" org-archive-subtree-default t]
+     ["Archive (default method)" org-archive-subtree-default (org-in-subtree-not-table-p)]
      "--"
-     ["Move Subtree to Archive file" org-advertized-archive-subtree t]
-     ["Toggle ARCHIVE tag" org-toggle-archive-tag t]
-     ["Move subtree to Archive sibling" org-archive-to-archive-sibling t]
+     ["Move Subtree to Archive file" org-advertized-archive-subtree (org-in-subtree-not-table-p)]
+     ["Toggle ARCHIVE tag" org-toggle-archive-tag (org-in-subtree-not-table-p)]
+     ["Move subtree to Archive sibling" org-archive-to-archive-sibling (org-in-subtree-not-table-p)]
      )
     "--"
     ("Hyperlinks"
@@ -19748,23 +19756,23 @@ See the individual commands for more information."
      ["Go to the inbox of a feed..." org-feed-goto-inbox t]
      ["Customize feeds" (customize-variable 'org-feed-alist) t])
     ("TAGS and Properties"
-     ["Set Tags" org-set-tags-command t]
+     ["Set Tags" org-set-tags-command (not (org-before-first-heading-p))]
      ["Change tag in region" org-change-tag-in-region (org-region-active-p)]
      "--"
-     ["Set property" org-set-property t]
+     ["Set property" org-set-property (not (org-before-first-heading-p))]
      ["Column view of properties" org-columns t]
      ["Insert Column View DBlock" org-insert-columns-dblock t])
     ("Dates and Scheduling"
-     ["Timestamp" org-time-stamp t]
-     ["Timestamp (inactive)" org-time-stamp-inactive t]
+     ["Timestamp" org-time-stamp (not (org-before-first-heading-p))]
+     ["Timestamp (inactive)" org-time-stamp-inactive (not (org-before-first-heading-p))]
      ("Change Date"
-      ["1 Day Later" org-shiftright t]
-      ["1 Day Earlier" org-shiftleft t]
-      ["1 ... Later" org-shiftup t]
-      ["1 ... Earlier" org-shiftdown t])
+      ["1 Day Later" org-shiftright (org-at-timestamp-p)]
+      ["1 Day Earlier" org-shiftleft (org-at-timestamp-p)]
+      ["1 ... Later" org-shiftup (org-at-timestamp-p)]
+      ["1 ... Earlier" org-shiftdown (org-at-timestamp-p)])
      ["Compute Time Range" org-evaluate-time-range t]
-     ["Schedule Item" org-schedule t]
-     ["Deadline" org-deadline t]
+     ["Schedule Item" org-schedule (not (org-before-first-heading-p))]
+     ["Deadline" org-deadline (not (org-before-first-heading-p))]
      "--"
      ["Custom time format" org-toggle-time-stamp-overlays
       :style radio :selected org-display-custom-times]
