@@ -880,11 +880,22 @@ already gone.  Any prefix argument will be passed to the refile command."
 	    (let ((prompt-time (org-read-date
 				nil t nil "Date for tree entry:"
 				(current-time))))
-	      (org-capture-put :prompt-time prompt-time
-			       :default-time prompt-time)
+	      (org-capture-put
+	       :default-time
+	       (cond ((and (not org-time-was-given)
+			   (not (= (time-to-days prompt-time) (org-today))))
+		      ;; Use 00:00 when no time is given for another date than today?
+		      (apply 'encode-time (append '(0 0 0) (cdddr (decode-time prompt-time)))))
+		     ((string-match "\\([^ ]+\\)--?[^ ]+[ ]+\\(.*\\)" org-read-date-final-answer)
+		      ;; Replace any time range by its start
+		      (apply 'encode-time
+			     (org-read-date-analyze
+			      (replace-match "\\1 \\2" nil nil org-read-date-final-answer)
+			      prompt-time (decode-time prompt-time))))
+		     (t prompt-time)))
 	      (time-to-days prompt-time)))
 	   (t
-	    ;; current date, possible corrected for late night workers
+	    ;; current date, possibly corrected for late night workers
 	    (org-today))))))
 
        ((eq (car target) 'file+function)
