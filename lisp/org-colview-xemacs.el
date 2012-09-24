@@ -1,28 +1,26 @@
 ;;; org-colview-xemacs.el --- Column View in Org-mode, XEmacs-specific version
 
 ;; Copyright (C) 2004-2012
-;;   Free Software Foundation, Inc.
+;;   Carsten Dominik
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;; Homepage: http://orgmode.org
 ;;
-;; This file is part of GNU Emacs.
+;; This file is part of Org mode, it is not part of GNU Emacs.
 ;;
-;; GNU Emacs is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
+;; You can redistribute it and/or modify it under the terms of the
+;; GNU General Public License as published by the Free Software
+;; Foundation; either version 3, or (at your option) any later
+;; version.
 
-;; GNU Emacs is distributed in the hope that it will be useful,
+;; This file is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with this file; see the file COPYING.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;
 ;;; Commentary:

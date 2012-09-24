@@ -20,6 +20,9 @@ README_contribute
 README_maintainer
     Information for the maintainer.
 
+COPYING
+    The GNU General Public License.
+
 Makefile
     The makefile to compile and install Org.  For installation
     instructions, see the manual or the more detailed procedure
