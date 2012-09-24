@@ -1014,7 +1014,7 @@ Obsolete, see `org-agenda-span'."
   :group 'org-agenda-daily/weekly
   :type 'integer)
 
-(define-obsolete-variable-alias 'org-agenda-ndays 'org-agenda-span "24.1")
+(make-obsolete-variable 'org-agenda-ndays 'org-agenda-span "24.1")
 
 (defcustom org-agenda-span 'week
   "Number of days to include in overview display.
