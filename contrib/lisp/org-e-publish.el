@@ -579,6 +579,7 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
+  (require 'org-e-latex nil t)
   (org-e-publish-org-to 'e-latex filename ".tex" plist pub-dir))
 
 (defun org-e-publish-org-to-pdf (plist filename pub-dir)
@@ -589,6 +590,7 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
+  (require 'org-e-latex nil t)
   (org-e-latex-compile
    (org-e-publish-org-to 'e-latex filename ".tex" plist pub-dir)))
 
@@ -600,6 +602,7 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
+  (require 'org-e-html nil t)
   (org-e-publish-org-to 'e-html filename ".html" plist pub-dir))
 
 ;; TODO: Not implemented yet.
@@ -621,6 +624,7 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
+  (require 'org-e-ascii nil t)
   (org-e-publish-org-to
    'e-ascii filename ".txt" `(:ascii-charset ascii ,@plist) pub-dir))
 
