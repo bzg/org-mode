@@ -2100,6 +2100,12 @@ nil.")
 
 ;;;; Elements Filters
 
+(defvar org-export-filter-babel-call-functions nil
+  "List of functions applied to a transcoded babel-call.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
 (defvar org-export-filter-center-block-functions nil
   "List of functions applied to a transcoded center block.
 Each filter is called with three arguments: the transcoded data,
@@ -2112,42 +2118,6 @@ Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
-(defvar org-export-filter-drawer-functions nil
-  "List of functions applied to a transcoded drawer.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
-
-(defvar org-export-filter-dynamic-block-functions nil
-  "List of functions applied to a transcoded dynamic-block.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
-
-(defvar org-export-filter-headline-functions nil
-  "List of functions applied to a transcoded headline.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
-
-(defvar org-export-filter-inlinetask-functions nil
-  "List of functions applied to a transcoded inlinetask.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
-
-(defvar org-export-filter-plain-list-functions nil
-  "List of functions applied to a transcoded plain-list.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
-
-(defvar org-export-filter-item-functions nil
-  "List of functions applied to a transcoded item.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
-
 (defvar org-export-filter-comment-functions nil
   "List of functions applied to a transcoded comment.
 Each filter is called with three arguments: the transcoded data,
@@ -2156,6 +2126,18 @@ channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-comment-block-functions nil
   "List of functions applied to a transcoded comment-comment.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-drawer-functions nil
+  "List of functions applied to a transcoded drawer.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-dynamic-block-functions nil
+  "List of functions applied to a transcoded dynamic-block.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
@@ -2184,8 +2166,26 @@ Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
+(defvar org-export-filter-headline-functions nil
+  "List of functions applied to a transcoded headline.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
 (defvar org-export-filter-horizontal-rule-functions nil
   "List of functions applied to a transcoded horizontal-rule.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-inlinetask-functions nil
+  "List of functions applied to a transcoded inlinetask.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-item-functions nil
+  "List of functions applied to a transcoded item.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
@@ -2202,12 +2202,6 @@ Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
-(defvar org-export-filter-babel-call-functions nil
-  "List of functions applied to a transcoded babel-call.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
-
 (defvar org-export-filter-node-property-functions nil
   "List of functions applied to a transcoded node-property.
 Each filter is called with three arguments: the transcoded data,
@@ -2216,6 +2210,12 @@ channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-paragraph-functions nil
   "List of functions applied to a transcoded paragraph.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-plain-list-functions nil
+  "List of functions applied to a transcoded plain-list.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
