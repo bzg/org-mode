@@ -418,12 +418,13 @@ for a capture buffer.")
   "Hook for the minor `org-capture-mode'.")
 
 (define-minor-mode org-capture-mode
-  "Minor mode for special key bindings in a capture buffer."
+  "Minor mode for special key bindings in a capture buffer.
+
+Turning on this mode runs the normal hook `org-capture-mode-hook'."
   nil " Rem" org-capture-mode-map
   (org-set-local
    'header-line-format
-   "Capture buffer.  Finish `C-c C-c', refile `C-c C-w', abort `C-c C-k'.")
-  (run-hooks 'org-capture-mode-hook))
+   "Capture buffer.  Finish `C-c C-c', refile `C-c C-w', abort `C-c C-k'."))
 (define-key org-capture-mode-map "\C-c\C-c" 'org-capture-finalize)
 (define-key org-capture-mode-map "\C-c\C-k" 'org-capture-kill)
 (define-key org-capture-mode-map "\C-c\C-w" 'org-capture-refile)
@@ -879,11 +880,22 @@ already gone.  Any prefix argument will be passed to the refile command."
 	    (let ((prompt-time (org-read-date
 				nil t nil "Date for tree entry:"
 				(current-time))))
-	      (org-capture-put :prompt-time prompt-time
-			       :default-time prompt-time)
+	      (org-capture-put
+	       :default-time
+	       (cond ((and (not org-time-was-given)
+			   (not (= (time-to-days prompt-time) (org-today))))
+		      ;; Use 00:00 when no time is given for another date than today?
+		      (apply 'encode-time (append '(0 0 0) (cdddr (decode-time prompt-time)))))
+		     ((string-match "\\([^ ]+\\)--?[^ ]+[ ]+\\(.*\\)" org-read-date-final-answer)
+		      ;; Replace any time range by its start
+		      (apply 'encode-time
+			     (org-read-date-analyze
+			      (replace-match "\\1 \\2" nil nil org-read-date-final-answer)
+			      prompt-time (decode-time prompt-time))))
+		     (t prompt-time)))
 	      (time-to-days prompt-time)))
 	   (t
-	    ;; current date, possible corrected for late night workers
+	    ;; current date, possibly corrected for late night workers
 	    (org-today))))))
 
        ((eq (car target) 'file+function)
