@@ -5435,16 +5435,18 @@ will be prompted for."
 (defun org-activate-plain-links (limit)
   "Run through the buffer and add overlays to links."
   (catch 'exit
-    (let (f)
+    (let (f hl)
       (when (re-search-forward (concat org-plain-link-re) limit t)
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(setq f (get-text-property (match-beginning 0) 'face))
+	(setq hl (org-match-string-no-properties 0))
 	(if (or (eq f 'org-tag)
 		(and (listp f) (memq 'org-tag f)))
 	    nil
 	  (add-text-properties (match-beginning 0) (match-end 0)
 			       (list 'mouse-face 'highlight
 				     'face 'org-link
+				     'htmlize-link `(:uri ,hl)
 				     'keymap org-mouse-map))
 	  (org-rear-nonsticky-at (match-end 0)))
 	t))))
@@ -5625,17 +5627,19 @@ by a #."
 (defun org-activate-bracket-links (limit)
   "Run through the buffer and add overlays to bracketed links."
   (if (re-search-forward org-bracket-link-regexp limit t)
-      (let* ((help (concat "LINK: "
-			   (org-match-string-no-properties 1)))
-	     ;; FIXME: above we should remove the escapes.
-	     ;; but that requires another match, protecting match data,
-	     ;; a lot of overhead for font-lock.
+      (let* ((hl (org-match-string-no-properties 1))
+	     (help (concat "LINK: " hl))
+	     ;; FIXME: Above we should remove the escapes.  But that
+	     ;; requires another match, protecting match data, a lot
+	     ;; of overhead for font-lock.
 	     (ip (org-maybe-intangible
 		  (list 'invisible 'org-link
 			'keymap org-mouse-map 'mouse-face 'highlight
-			'font-lock-multiline t 'help-echo help)))
+			'font-lock-multiline t 'help-echo help
+			'htmlize-link `(:uri ,hl))))
 	     (vp (list 'keymap org-mouse-map 'mouse-face 'highlight
-		       'font-lock-multiline t 'help-echo help)))
+		       'font-lock-multiline t 'help-echo help
+		       'htmlize-link `(:uri ,hl))))
 	;; We need to remove the invisible property here.  Table narrowing
 	;; may have made some of this invisible.
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
