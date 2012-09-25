@@ -5030,7 +5030,7 @@ the documentation of `org-diary'."
     (nreverse ee)))
 
 (defun org-agenda-todo-custom-ignore-p (time n)
-  "Check whether timestamp is farther away then n number of days.
+  "Check whether timestamp is farther away than n number of days.
 This function is invoked if `org-agenda-todo-ignore-deadlines',
 `org-agenda-todo-ignore-scheduled' or
 `org-agenda-todo-ignore-timestamp' is set to an integer."
