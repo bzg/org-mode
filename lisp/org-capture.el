@@ -698,6 +698,11 @@ captured item after finalizing."
       ;; Run the hook
       (run-hooks 'org-capture-before-finalize-hook))
 
+    (when (org-capture-get :decrypted)
+      (save-excursion
+	(goto-char (org-capture-get :decrypted))
+	(org-encrypt-entry)))
+
     ;; Kill the indirect buffer
     (save-buffer)
     (let ((return-wconf (org-capture-get :return-to-wconf 'local))
@@ -800,8 +805,9 @@ already gone.  Any prefix argument will be passed to the refile command."
   (org-capture-put :initial-target-position (point)))
 
 (defun org-capture-set-target-location (&optional target)
-  "Find target buffer and position and store then in the property list."
-  (let ((target-entry-p t))
+  "Find TARGET buffer and position.
+Store them in the capture property list."
+  (let ((target-entry-p t) decrypted-hl-pos)
     (setq target (or target (org-capture-get :target)))
     (save-excursion
       (cond
@@ -922,8 +928,14 @@ already gone.  Any prefix argument will be passed to the refile command."
 
        (t (error "Invalid capture target specification")))
 
+      (when (org-at-encrypted-entry-p)
+	(org-decrypt-entry)
+	(setq decrypted-hl-pos
+	      (save-excursion (and (org-back-to-heading t) (point)))))
+
       (org-capture-put :buffer (current-buffer) :pos (point)
-		       :target-entry-p target-entry-p))))
+		       :target-entry-p target-entry-p
+		       :decrypted decrypted-hl-pos))))
 
 (defun org-capture-expand-file (file)
   "Expand functions and symbols for FILE.
