@@ -11402,7 +11402,7 @@ This function can be used in a hook."
     "EXPORT_SELECT_TAGS:" "EXPORT_EXCLUDE_TAGS:"
     "LINK_UP:" "LINK_HOME:" "LINK:" "TODO:"
     "XSLT:" "MATHJAX:" "CATEGORY:" "SEQ_TODO:" "TYP_TODO:"
-    "PRIORITIES:" "DRAWERS:" "STARTUP:" "TAGS:"
+    "PRIORITIES:" "DRAWERS:" "STARTUP:" "TAGS:" "STYLE:"
     "FILETAGS:" "ARCHIVE:" "INFOJS_OPT:"))
 
 (defconst org-additional-option-like-keywords-for-flyspell
