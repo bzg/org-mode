@@ -10871,7 +10871,13 @@ such as the file name."
 	       path "/")))))
 
 (defun org-display-outline-path (&optional file current as-string)
-  "Display the current outline path in the echo area."
+  "Display the current outline path in the echo area.
+
+If FILE is non-nil, prepend the output with the file name.
+If CURRENT is non-nil, append the current heading to the output.
+If AS-STRING is non-nil, return a string, don't display a message.
+AS-STRING can also be a string which will then replace the \"/\"
+separator in the output."
   (interactive "P")
   (let* ((bfn (buffer-file-name (buffer-base-buffer)))
 	 (case-fold-search nil)
@@ -10887,6 +10893,8 @@ such as the file name."
 	   path
 	   (1- (frame-width))
 	   (and file bfn (concat (file-name-nondirectory bfn) "/"))))
+    (when (stringp as-string)
+      (setq res (replace-regexp-in-string "/" as-string res)))
     (if as-string (org-no-properties res) (message "%s" res))))
 
 (defvar org-refile-history nil
