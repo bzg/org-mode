@@ -10870,22 +10870,24 @@ such as the file name."
 		 h)
 	       path "/")))))
 
-(defun org-display-outline-path (&optional file current)
+(defun org-display-outline-path (&optional file current as-string)
   "Display the current outline path in the echo area."
   (interactive "P")
   (let* ((bfn (buffer-file-name (buffer-base-buffer)))
 	 (case-fold-search nil)
-	 (path (and (derived-mode-p 'org-mode) (org-get-outline-path))))
+	 (path (and (derived-mode-p 'org-mode) (org-get-outline-path)))
+	 res)
     (if current (setq path (append path
 				   (save-excursion
 				     (org-back-to-heading t)
 				     (if (looking-at org-complex-heading-regexp)
 					 (list (match-string 4)))))))
-    (message "%s"
-	     (org-format-outline-path
-	      path
-	      (1- (frame-width))
-	      (and file bfn (concat (file-name-nondirectory bfn) "/"))))))
+    (setq res
+	  (org-format-outline-path
+	   path
+	   (1- (frame-width))
+	   (and file bfn (concat (file-name-nondirectory bfn) "/"))))
+    (if as-string (org-no-properties res) (message "%s" res))))
 
 (defvar org-refile-history nil
   "History for refiling operations.")
