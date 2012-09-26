@@ -740,6 +740,20 @@ to make his option also apply to the tags-todo list."
 	  (const :tag "Show all TODOs, even if they have a deadline" nil)
 	  (integer :tag "Ignore if N or more days in past(-) or future(+).")))
 
+(defcustom org-agenda-todo-ignore-time-comparison-use-seconds nil
+  "Time unit to use when possibly ignoring an agenda item.
+
+See the docstring of various `org-agenda-todo-ignore-*' options.
+The default is to compare time stamps using days.  An item is thus
+considered to be in the future if it is at least one day after today.
+Non-nil means to compare time stamps using seconds.  An item is then
+considered future if it has a time value later than current time."
+  :group 'org-agenda-skip
+  :group 'org-agenda-todo-list
+  :type '(choice
+	  (const :tag "Compare time with days" nil)
+	  (const :tag "Compare time with seconds" t)))
+
 (defcustom org-agenda-tags-todo-honor-ignore-options nil
   "Non-nil means honor todo-list ...ignore options also in tags-todo search.
 The variables
@@ -5035,7 +5049,8 @@ the documentation of `org-diary'."
 This function is invoked if `org-agenda-todo-ignore-deadlines',
 `org-agenda-todo-ignore-scheduled' or
 `org-agenda-todo-ignore-timestamp' is set to an integer."
-  (let ((days (org-days-to-time time)))
+  (let ((days (org-time-stamp-to-now
+	       time org-agenda-todo-ignore-time-comparison-use-seconds)))
     (if (>= n 0)
 	(>= days n)
       (<= days n))))
@@ -5056,9 +5071,11 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	       (re-search-forward org-scheduled-time-regexp end t)
 	       (cond
 		((eq org-agenda-todo-ignore-scheduled 'future)
-		 (> (org-days-to-time (match-string 1)) 0))
+		 (> (org-time-stamp-to-now
+		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
 		((eq org-agenda-todo-ignore-scheduled 'past)
-		 (<= (org-days-to-time (match-string 1)) 0))
+		 (<= (org-time-stamp-to-now
+		      (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
 		((numberp org-agenda-todo-ignore-scheduled)
 		 (org-agenda-todo-custom-ignore-p
 		  (match-string 1) org-agenda-todo-ignore-scheduled))
@@ -5070,9 +5087,11 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		((eq org-agenda-todo-ignore-deadlines 'far)
 		 (not (org-deadline-close (match-string 1))))
 		((eq org-agenda-todo-ignore-deadlines 'future)
-		 (> (org-days-to-time (match-string 1)) 0))
+		 (> (org-time-stamp-to-now
+		     (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
 		((eq org-agenda-todo-ignore-deadlines 'past)
-		 (<= (org-days-to-time (match-string 1)) 0))
+		 (<= (org-time-stamp-to-now
+		      (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
 		((numberp org-agenda-todo-ignore-deadlines)
 		 (org-agenda-todo-custom-ignore-p
 		  (match-string 1) org-agenda-todo-ignore-deadlines))
@@ -5095,9 +5114,11 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 		   (when (re-search-forward org-ts-regexp nil t)
 		     (cond
 		      ((eq org-agenda-todo-ignore-timestamp 'future)
-		       (> (org-days-to-time (match-string 1)) 0))
+		       (> (org-time-stamp-to-now
+			   (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
 		      ((eq org-agenda-todo-ignore-timestamp 'past)
-		       (<= (org-days-to-time (match-string 1)) 0))
+		       (<= (org-time-stamp-to-now
+			    (match-string 1) org-agenda-todo-ignore-time-comparison-use-seconds) 0))
 		      ((numberp org-agenda-todo-ignore-timestamp)
 		       (org-agenda-todo-custom-ignore-p
 			(match-string 1) org-agenda-todo-ignore-timestamp))

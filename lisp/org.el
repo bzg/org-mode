@@ -16024,10 +16024,14 @@ Don't touch the rest."
   (let ((n 0))
     (mapcar (lambda (x) (if (< (setq n (1+ n)) 7) (or x 0) x)) time)))
 
-(defun org-days-to-time (timestamp-string)
-  "Difference between TIMESTAMP-STRING and now in days."
-  (- (time-to-days (org-time-string-to-time timestamp-string))
-     (time-to-days (current-time))))
+(define-obsolete-function-alias 'org-days-to-time 'org-time-stamp-to-now "24.3")
+
+(defun org-time-stamp-to-now (timestamp-string &optional seconds)
+  "Difference between TIMESTAMP-STRING and now in days.
+If SECONDS is non-nil, return the difference in seconds."
+  (let ((fdiff (if seconds 'time-to-seconds 'time-to-days)))
+    (- (funcall fdiff (org-time-string-to-time timestamp-string))
+       (funcall fdiff (current-time)))))
 
 (defun org-deadline-close (timestamp-string &optional ndays)
   "Is the time in TIMESTAMP-STRING close to the current date?"
