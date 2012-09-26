@@ -71,7 +71,7 @@ elpa-dirty:
 	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-pkg.el
 elpa-up:	info card elpa-dirty archive-contents
-	$(CP) archive-contents $(ORGDIR).tar $(SERVROOT)/elpa/
+	$(CP) archive-contents $(ORGDIR).tar $(SERVROOT)/pkg/daily/
 
 archive-contents:
 	echo -e "(1 (org              . [($(PKG_TAG)) nil \"$(PKG_DOC)\"])\n" > $@ \
@@ -91,7 +91,7 @@ elpaplus-dirty:
 	-@$(RM) $(ORGDIR) org-plus-contrib-pkg.el
 	@$(MAKE) cleanlisp
 elpaplus-up:	info card elpaplus-dirty archive-contents
-	$(CP) archive-contents $(ORGDIR).tar $(SERVROOT)/elpa/
+	$(CP) archive-contents $(ORGDIR).tar $(SERVROOT)/pkg/daily/
 
 tagwarn:
 	$(if $(filter-out $(ORGVERSION), $(GITVERSION)), \
