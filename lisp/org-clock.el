@@ -189,17 +189,17 @@ All this depends on running `org-clock-persistence-insinuate' in .emacs"
   :type 'boolean)
 
 (defcustom org-clock-sound nil
-  "Sound that will used for notifications.
-Possible values:
+  "Sound to use for notifications.
+Possible values are:
 
-nil        no sound played.
-t          standard Emacs beep
-file name  play this sound file.  If not possible, fall back to beep"
+nil        No sound played
+t          Standard Emacs beep
+file name  Play this sound file, fall back to beep"
   :group 'org-clock
   :type '(choice
 	  (const :tag "No sound" nil)
 	  (const :tag "Standard beep" t)
-	  (file :tag "Play sound file")))
+	  (file  :tag "Play sound file")))
 
 (defcustom org-clock-modeline-total 'auto
   "Default setting for the time included for the mode line clock.
@@ -674,9 +674,10 @@ Notification is shown only once."
 	(setq org-clock-notification-was-shown nil)))))
 
 (defun org-notify (notification &optional play-sound)
-  "Send a NOTIFICATION and maybe PLAY-SOUND."
+  "Send a NOTIFICATION and maybe PLAY-SOUND.
+If PLAY-SOUND is non-nil, it overrides `org-clock-sound'."
   (org-show-notification notification)
-  (if play-sound (org-clock-play-sound)))
+  (if play-sound (org-clock-play-sound play-sound)))
 
 (defun org-show-notification (notification)
   "Show notification.
@@ -701,21 +702,23 @@ use libnotify if available, or fall back on a message."
 	;; a fall back option
 	(t (message "%s" notification))))
 
-(defun org-clock-play-sound ()
+(defun org-clock-play-sound (&optional clock-sound)
   "Play sound as configured by `org-clock-sound'.
-Use alsa's aplay tool if available."
-  (cond
-   ((not org-clock-sound))
-   ((eq org-clock-sound t) (beep t) (beep t))
-   ((stringp org-clock-sound)
-    (let ((file (expand-file-name org-clock-sound)))
-      (if (file-exists-p file)
-	  (if (executable-find "aplay")
-	      (start-process "org-clock-play-notification" nil
-			     "aplay" file)
-	    (condition-case nil
-		(play-sound-file file)
-	      (error (beep t) (beep t)))))))))
+Use alsa's aplay tool if available.
+If CLOCK-SOUND is non-nil, it overrides `org-clock-sound'."
+  (let ((org-clock-sound (or clock-sound org-clock-sound)))
+    (cond
+     ((not org-clock-sound))
+     ((eq org-clock-sound t) (beep t) (beep t))
+     ((stringp org-clock-sound)
+      (let ((file (expand-file-name org-clock-sound)))
+	(if (file-exists-p file)
+	    (if (executable-find "aplay")
+		(start-process "org-clock-play-notification" nil
+			       "aplay" file)
+	      (condition-case nil
+		  (play-sound-file file)
+		(error (beep t) (beep t))))))))))
 
 (defvar org-clock-mode-line-entry nil
   "Information for the mode line about the running clock.")
