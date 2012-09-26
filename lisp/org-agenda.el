@@ -6039,7 +6039,8 @@ Any match of REMOVE-RE will be removed from TXT."
 			 (t ""))
 	      extra (or (and (not habitp) extra) "")
 	      category (if (symbolp category) (symbol-name category) category)
-	      thecategory (copy-sequence category))
+	      thecategory (copy-sequence category)
+	      level (or level ""))
 	(if (string-match org-bracket-link-regexp category)
 	    (progn
 	      (setq l (if (match-end 3)
@@ -6068,6 +6069,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	  'effort effort
 	  'effort-minutes neffort
 	  'txt txt
+	  'level level
 	  'time time
 	  'extra extra
 	  'format org-prefix-format-compiled
