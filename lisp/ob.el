@@ -420,7 +420,7 @@ then run `org-babel-pop-to-session'."
     (noweb-sep  . :any)
     (padline	. ((yes no)))
     (results	. ((file list vector table scalar verbatim)
-		   (raw org html latex code pp wrap)
+		   (raw org html latex code pp drawer)
 		   (replace silent append prepend)
 		   (output value)))
     (rownames	. ((no yes)))
@@ -1850,7 +1850,7 @@ If the path of the link is a file path it is expanded using
 By default RESULT is inserted after the end of the
 current source block.  With optional argument RESULT-PARAMS
 controls insertion of results in the org-mode file.
-RESULT-PARAMS can take the following values...
+RESULT-PARAMS can take the following values:
 
 replace - (default option) insert results after the source block
           replacing any previously inserted results
@@ -1866,16 +1866,9 @@ raw ----- results are added directly to the Org-mode file.  This
           is a good option if you code block will output org-mode
           formatted text.
 
-wrap ---- results are added directly to the Org-mode file as with
+drawer -- results are added directly to the Org-mode file as with
           \"raw\", but are wrapped in a RESULTS drawer, allowing
           them to later be replaced or removed automatically.
-
-org ----- similar in effect to raw, only the results are wrapped
-          in an org code block.  Similar to the raw option, on
-          export the results will be interpreted as org-formatted
-          text, however by wrapping the results in an org code
-          block they can be replaced upon re-execution of the
-          code block.
 
 html ---- results are added inside of a #+BEGIN_HTML block.  This
           is a good option if you code block will output html
@@ -1991,11 +1984,11 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "code" result-params)
 	    (funcall wrap (format "#+BEGIN_SRC %s%s" (or lang "none") results-switches)
 		     "#+END_SRC"))
-	   ((member "org" result-params)
-	    (funcall wrap "#+BEGIN_ORG" "#+END_ORG"))
 	   ((member "raw" result-params)
 	    (goto-char beg) (if (org-at-table-p) (org-cycle)))
-	   ((member "wrap" result-params)
+	   ((or (member "drawer" result-params)
+		;; Stay backward compatible with <7.9.2
+		(member "wrap" result-params))
 	    (funcall wrap ":RESULTS:" ":END:"))
 	   ((and (not (funcall proper-list-p result))
 		 (not (member "file" result-params)))
