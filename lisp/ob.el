@@ -420,7 +420,7 @@ then run `org-babel-pop-to-session'."
     (noweb-sep  . :any)
     (padline	. ((yes no)))
     (results	. ((file list vector table scalar verbatim)
-		   (raw org html latex code pp drawer)
+		   (raw html latex code pp drawer)
 		   (replace silent append prepend)
 		   (output value)))
     (rownames	. ((no yes)))
