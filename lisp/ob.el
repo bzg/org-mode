@@ -420,7 +420,7 @@ then run `org-babel-pop-to-session'."
     (noweb-sep  . :any)
     (padline	. ((yes no)))
     (results	. ((file list vector table scalar verbatim)
-		   (raw org html latex code pp wrap)
+		   (raw org html latex code pp drawer)
 		   (replace silent append prepend)
 		   (output value)))
     (rownames	. ((no yes)))
@@ -1866,7 +1866,7 @@ raw ----- results are added directly to the Org-mode file.  This
           is a good option if you code block will output org-mode
           formatted text.
 
-wrap ---- results are added directly to the Org-mode file as with
+drawer -- results are added directly to the Org-mode file as with
           \"raw\", but are wrapped in a RESULTS drawer, allowing
           them to later be replaced or removed automatically.
 
@@ -1994,7 +1994,9 @@ code ---- the results are extracted in the syntax of the source
 	    (funcall wrap "#+BEGIN_ORG" "#+END_ORG"))
 	   ((member "raw" result-params)
 	    (goto-char beg) (if (org-at-table-p) (org-cycle)))
-	   ((member "wrap" result-params)
+	   ((or (member "drawer" result-params)
+		;; Stay backward compatible with <7.9.2
+		(member "wrap" result-params))
 	    (funcall wrap ":RESULTS:" ":END:"))
 	   ((and (not (funcall proper-list-p result))
 		 (not (member "file" result-params)))
