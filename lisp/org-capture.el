@@ -807,6 +807,7 @@ already gone.  Any prefix argument will be passed to the refile command."
   ;; store the current point
   (org-capture-put :initial-target-position (point)))
 
+(defvar org-time-was-given) ; dynamically scoped parameter
 (defun org-capture-set-target-location (&optional target)
   "Find TARGET buffer and position.
 Store them in the capture property list."
