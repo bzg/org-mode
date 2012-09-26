@@ -13683,10 +13683,14 @@ buffer as quoted text.  E.g., @code{:results value verbatim}.
 @item @code{file}
 The results will be interpreted as the path to a file, and will be inserted
 into the Org mode buffer as a file link.  E.g., @code{:results value file}.
-@item @code{raw}, @code{org}
+@item @code{raw}
 The results are interpreted as raw Org mode code and are inserted directly
 into the buffer.  If the results look like a table they will be aligned as
 such by Org mode.  E.g., @code{:results value raw}.
+@item @code{org}
+The results are will be enclosed in a @code{BEGIN_SRC org} block.
+They are not comma-escaped by default but they will be if you hit @kbd{TAB}
+in the block and/or if you export the file.  E.g., @code{:results value org}.
 @item @code{html}
 Results are assumed to be HTML and will be enclosed in a @code{BEGIN_HTML}
 block.  E.g., @code{:results value html}.
@@ -13700,7 +13704,7 @@ E.g., @code{:results value code}.
 The result is converted to pretty-printed code and is enclosed in a code
 block.  This option currently supports Emacs Lisp, Python, and Ruby.  E.g.,
 @code{:results value pp}.
-@item @code{wrap}
+@item @code{drawer}
 The result is wrapped in a RESULTS drawer.  This can be useful for
 inserting @code{raw} or @code{org} syntax results in such a way that their
 extent is known and they can be automatically removed or replaced.

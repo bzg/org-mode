@@ -420,7 +420,7 @@ then run `org-babel-pop-to-session'."
     (noweb-sep  . :any)
     (padline	. ((yes no)))
     (results	. ((file list vector table scalar verbatim)
-		   (raw html latex code pp drawer)
+		   (raw html latex org code pp drawer)
 		   (replace silent append prepend)
 		   (output value)))
     (rownames	. ((no yes)))
@@ -1870,6 +1870,10 @@ drawer -- results are added directly to the Org-mode file as with
           \"raw\", but are wrapped in a RESULTS drawer, allowing
           them to later be replaced or removed automatically.
 
+org ----- results are added inside of a \"#+BEGIN_SRC org\" block.
+          They are not comma-escaped when inserted, but Org syntax
+          here will be discarded when exporting the file.
+
 html ---- results are added inside of a #+BEGIN_HTML block.  This
           is a good option if you code block will output html
           formatted text.
@@ -1981,6 +1985,8 @@ code ---- the results are extracted in the syntax of the source
 	    (funcall wrap "#+BEGIN_HTML" "#+END_HTML"))
 	   ((member "latex" result-params)
 	    (funcall wrap "#+BEGIN_LaTeX" "#+END_LaTeX"))
+	   ((member "org" result-params)
+	    (funcall wrap "#+BEGIN_SRC org" "#+END_SRC"))
 	   ((member "code" result-params)
 	    (funcall wrap (format "#+BEGIN_SRC %s%s" (or lang "none") results-switches)
 		     "#+END_SRC"))
