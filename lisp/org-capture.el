@@ -58,6 +58,9 @@
 (declare-function org-table-goto-line "org-table" (N))
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
+(declare-function org-at-encrypted-entry-p "org-crypt" ())
+(declare-function org-encrypt-entry "org-crypt" ())
+(declare-function org-decrypt-entry "org-crypt" ())
 
 (defvar org-remember-default-headline)
 (defvar org-remember-templates)
@@ -928,7 +931,7 @@ Store them in the capture property list."
 
        (t (error "Invalid capture target specification")))
 
-      (when (org-at-encrypted-entry-p)
+      (when (and (featurep 'org-crypt) (org-at-encrypted-entry-p))
 	(org-decrypt-entry)
 	(setq decrypted-hl-pos
 	      (save-excursion (and (org-back-to-heading t) (point)))))
