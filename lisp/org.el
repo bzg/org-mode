@@ -10836,11 +10836,13 @@ avoiding backtracing.  Refile target collection makes use of that."
 	      (push (org-match-string-no-properties 4) rtn)))
 	  rtn)))))
 
-(defun org-format-outline-path (path &optional width prefix)
+(defun org-format-outline-path (path &optional width prefix separator)
   "Format the outline path PATH for display.
-Width is the maximum number of characters that is available.
-Prefix is a prefix to be included in the returned string,
-such as the file name."
+WIDTH is the maximum number of characters that is available.
+PREFIX is a prefix to be included in the returned string,
+such as the file name.
+SEPARATOR is inserted between the different parts of the path, the default
+is \"/\"."
   (setq width (or width 79))
   (if prefix (setq width (- width (length prefix))))
   (if (not path)
@@ -10872,16 +10874,17 @@ such as the file name."
 				(nth (% (1- n) org-n-level-faces)
 				     org-level-faces))
 		 h)
-	       path "/")))))
+	       path (or separator "/"))))))
 
-(defun org-display-outline-path (&optional file current as-string)
+(defun org-display-outline-path (&optional file current separator
+					   just-return-string)
   "Display the current outline path in the echo area.
 
 If FILE is non-nil, prepend the output with the file name.
 If CURRENT is non-nil, append the current heading to the output.
-If AS-STRING is non-nil, return a string, don't display a message.
-AS-STRING can also be a string which will then replace the \"/\"
-separator in the output."
+SEPARATOR is passed through to `org-format-outline-path'.  It separates
+the different parts of the path and defaults to \"/\".
+If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
   (interactive "P")
   (let* ((bfn (buffer-file-name (buffer-base-buffer)))
 	 (case-fold-search nil)
@@ -10896,10 +10899,11 @@ separator in the output."
 	  (org-format-outline-path
 	   path
 	   (1- (frame-width))
-	   (and file bfn (concat (file-name-nondirectory bfn) "/"))))
-    (when (stringp as-string)
-      (setq res (replace-regexp-in-string "/" as-string res)))
-    (if as-string (org-no-properties res) (message "%s" res))))
+	   separator
+	   (and file bfn (concat (file-name-nondirectory bfn) separator))))
+    (if just-return-string
+	(org-no-properties res)
+      (message "%s" res))))
 
 (defvar org-refile-history nil
   "History for refiling operations.")
