@@ -74,8 +74,8 @@ elpa-up:	info card elpa-dirty archive-contents
 	$(CP) archive-contents $(ORGDIR).tar $(SERVROOT)/pkg/daily/
 
 archive-contents:
-	echo -e "(1 (org              . [($(PKG_TAG)) nil \"$(PKG_DOC)\"])\n" > $@ \
-		"  (org-plus-contrib . [($(PKG_TAG)) nil \"$(PKG_DOC)\"]))" >> $@
+        echo "(1 (org               . [($(PKG_TAG)) nil \"$(PKG_DOC)\"])\n" > $@ \
+                "   (org-plus-contrib . [($(PKG_TAG)) nil \"$(PKG_DOC)\"]))" >> $@
 
 elpaplus:		cleanall info card elpaplus-dirty
 elpaplus-dirty elpaplus-up:	ORG_ADD_CONTRIB=org-*
