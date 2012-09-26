@@ -10841,8 +10841,8 @@ avoiding backtracing.  Refile target collection makes use of that."
 WIDTH is the maximum number of characters that is available.
 PREFIX is a prefix to be included in the returned string,
 such as the file name.
-SEPARATOR is inserted between the different parts of the path, the default
-is \"/\"."
+SEPARATOR is inserted between the different parts of the path,
+the default is \"/\"."
   (setq width (or width 79))
   (if prefix (setq width (- width (length prefix))))
   (if (not path)
@@ -10876,8 +10876,7 @@ is \"/\"."
 		 h)
 	       path (or separator "/"))))))
 
-(defun org-display-outline-path (&optional file current separator
-					   just-return-string)
+(defun org-display-outline-path (&optional file current separator just-return-string)
   "Display the current outline path in the echo area.
 
 If FILE is non-nil, prepend the output with the file name.
@@ -10899,8 +10898,8 @@ If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
 	  (org-format-outline-path
 	   path
 	   (1- (frame-width))
-	   separator
-	   (and file bfn (concat (file-name-nondirectory bfn) separator))))
+	   (and file bfn (concat (file-name-nondirectory bfn) separator))
+	   separator))
     (if just-return-string
 	(org-no-properties res)
       (message "%s" res))))
