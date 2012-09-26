@@ -105,7 +105,7 @@ create-if-interactive
 
 create-if-interactive-and-no-custom-id
       Like create-if-interactive, but do not create an ID if there is
-      a CUSTOM_ID property defined in the entry.  This is the default.
+      a CUSTOM_ID property defined in the entry.
 
 use-existing
       Use existing ID, do not create one.
