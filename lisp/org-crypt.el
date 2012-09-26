@@ -254,10 +254,11 @@ See `org-crypt-disable-auto-save'."
 
 (defun org-at-encrypted-entry-p ()
   "Is the current entry encrypted?"
-  (save-excursion
-    (org-back-to-heading t)
-    (search-forward "-----BEGIN PGP MESSAGE-----"
-		    (save-excursion (org-end-of-subtree t)) t)))
+  (unless (org-before-first-heading-p)
+    (save-excursion
+      (org-back-to-heading t)
+      (search-forward "-----BEGIN PGP MESSAGE-----"
+		      (save-excursion (org-end-of-subtree t)) t))))
 
 (defun org-crypt-use-before-save-magic ()
   "Add a hook to automatically encrypt entries before a file is saved to disk."
