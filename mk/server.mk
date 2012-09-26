@@ -70,9 +70,12 @@ elpa-dirty:
 	tar --exclude=Makefile --exclude="org-colview-xemacs.el" --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-pkg.el
-elpa-up:	info card elpa-dirty
-	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
+elpa-up:	info card elpa-dirty archive-contents
+	$(CP) archive-contents $(ORGDIR).tar $(SERVROOT)/elpa/
 
+archive-contents:
+	echo -e "(1 (org              . [($(PKG_TAG)) nil \"$(PKG_DOC)\"])\n" > $@ \
+		"  (org-plus-contrib . [($(PKG_TAG)) nil \"$(PKG_DOC)\"]))" >> $@
 
 elpaplus:		cleanall info card elpaplus-dirty
 elpaplus-dirty elpaplus-up:	ORG_ADD_CONTRIB=org-*
@@ -87,8 +90,8 @@ elpaplus-dirty:
 	  $(foreach dist, $(ORGELPAPLUS), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-plus-contrib-pkg.el
 	@$(MAKE) cleanlisp
-elpaplus-up:	info card elpaplus-dirty
-	$(CP) $(ORGDIR).tar $(SERVROOT)/pkg/daily/
+elpaplus-up:	info card elpaplus-dirty archive-contents
+	$(CP) archive-contents $(ORGDIR).tar $(SERVROOT)/elpa/
 
 tagwarn:
 	$(if $(filter-out $(ORGVERSION), $(GITVERSION)), \
@@ -106,7 +109,7 @@ version:
 
 cleanall clean:	cleanrel
 cleanrel:
-	-$(RM) org-$(PKG_TAG)* org-$(DISTVERSION)* org-*.zip org-*.tar* mk/version.mk
+	-$(RM) archive-contents org-$(PKG_TAG)* org-$(DISTVERSION)* org-*.zip org-*.tar* mk/version.mk
 
 doc-up:	info pdf card html
 	$(MAKE) -C doc manual guide
@@ -114,7 +117,7 @@ doc-up:	info pdf card html
 	$(CP) doc/manual/* $(SERVROOT)/manual
 	$(CP) doc/guide/*  $(SERVROOT)/guide
 
-upload:			cleanall elpa-up rel-up doc-up elpaplus-up
+upload:			cleanall rel-up doc-up elpa-up elpaplus-up
 upload-elpa:		cleanall elpa-up
 upload-elpaplus:	cleanall elpaplus-up
 upload-release:		cleanall rel-up
