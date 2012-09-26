@@ -244,7 +244,7 @@ be replaced with content and expanded in this order:
   %^g         Prompt for tags, with completion on tags in target file.
   %^G         Prompt for tags, with completion on all tags in all agenda files.
   %^t         Like %t, but prompt for date.  Similarly %^T, %^u, %^U.
-              You may define a prompt like %^{Please specify birthday.
+              You may define a prompt like: %^{Please specify birthday}t
   %^C         Interactive selection of which kill or clip to use.
   %^L         Like %^C, but insert as link.
   %^{prop}p   Prompt the user for a value for property `prop'.
