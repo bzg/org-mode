@@ -805,13 +805,13 @@ fontification of code blocks see `org-src-fontify-block' and
 	      (get-buffer-create
 	       (concat " org-src-fontification:" (symbol-name lang-mode)))
 	    (delete-region (point-min) (point-max))
-	    (insert (concat string " ")) ;; so there's a final property change
+	    (insert string)
 	    (unless (eq major-mode lang-mode) (funcall lang-mode))
 	    (font-lock-fontify-buffer)
 	    (setq pos (point-min))
 	    (while (setq next (next-single-property-change pos 'face))
 	      (put-text-property
-	       (+ start (1- pos)) (+ start next) 'face
+	       (+ start (1- pos)) (1- (+ start next)) 'face
 	       (get-text-property pos 'face) org-buffer)
 	      (setq pos next)))
 	  (add-text-properties
