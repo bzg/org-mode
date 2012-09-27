@@ -1937,9 +1937,10 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "prepend" result-params)))) ; already there
 	(setq results-switches
 	      (if results-switches (concat " " results-switches) ""))
-	(let ((wrap (lambda (start finish)
+	(let ((wrap (lambda (start finish &optional escape)
 		      (goto-char end) (insert (concat finish "\n"))
 		      (goto-char beg) (insert (concat start "\n"))
+		      (if escape (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))
 		      (goto-char end) (goto-char (point-at-eol))
 		      (setq end (point-marker))))
 	      (proper-list-p (lambda (it) (and (listp it) (null (cdr (last it)))))))
@@ -1986,7 +1987,7 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "latex" result-params)
 	    (funcall wrap "#+BEGIN_LaTeX" "#+END_LaTeX"))
 	   ((member "org" result-params)
-	    (funcall wrap "#+BEGIN_SRC org" "#+END_SRC"))
+	    (funcall wrap "#+BEGIN_SRC org" "#+END_SRC" t))
 	   ((member "code" result-params)
 	    (funcall wrap (format "#+BEGIN_SRC %s%s" (or lang "none") results-switches)
 		     "#+END_SRC"))

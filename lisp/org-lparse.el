@@ -435,6 +435,10 @@ PUB-DIR specifies the publishing directory."
   (let* ((org-lparse-backend (intern native-backend))
 	 (org-lparse-other-backend (and target-backend
 					(intern target-backend))))
+    (add-hook 'org-export-preprocess-hook
+	      'org-lparse-strip-experimental-blocks-maybe)
+    (add-hook 'org-export-preprocess-after-blockquote-hook
+	      'org-lparse-preprocess-after-blockquote)
     (unless (org-lparse-backend-is-native-p native-backend)
       (error "Don't know how to export natively to backend %s" native-backend))
 
@@ -443,7 +447,11 @@ PUB-DIR specifies the publishing directory."
       (error "Don't know how to export to backend %s %s" target-backend
 	     (format "via %s" native-backend)))
     (run-hooks 'org-export-first-hook)
-    (org-do-lparse arg hidden ext-plist to-buffer body-only pub-dir)))
+    (org-do-lparse arg hidden ext-plist to-buffer body-only pub-dir)
+    (remove-hook 'org-export-preprocess-hook
+		 'org-lparse-strip-experimental-blocks-maybe)
+    (remove-hook 'org-export-preprocess-after-blockquote-hook
+		 'org-lparse-preprocess-after-blockquote)))
 
 (defcustom org-lparse-use-flashy-warning nil
   "Control flashing of messages logged with `org-lparse-warn'.
@@ -1712,7 +1720,12 @@ information."
   (org-lparse-end-paragraph)
   (org-lparse-end-list-item (or type "u")))
 
-(defun org-lparse-preprocess-after-blockquote-hook ()
+(define-obsolete-function-alias
+  'org-lparse-preprocess-after-blockquote-hook
+  'org-lparse-preprocess-after-blockquote
+  "24.3")
+
+(defun org-lparse-preprocess-after-blockquote ()
   "Treat `org-lparse-special-blocks' specially."
   (goto-char (point-min))
   (while (re-search-forward
@@ -1725,10 +1738,12 @@ information."
 	 (format "ORG-%s-END %s" (upcase (match-string 2))
 		 (match-string 3))) t t))))
 
-(add-hook 'org-export-preprocess-after-blockquote-hook
-	  'org-lparse-preprocess-after-blockquote-hook)
+(define-obsolete-function-alias
+  'org-lparse-strip-experimental-blocks-maybe-hook
+  'org-lparse-strip-experimental-blocks-maybe
+  "24.3")
 
-(defun org-lparse-strip-experimental-blocks-maybe-hook ()
+(defun org-lparse-strip-experimental-blocks-maybe ()
   "Strip \"list-table\" and \"annotation\" blocks.
 Stripping happens only when the exported backend is not one of
 \"odt\" or \"xhtml\"."
@@ -1742,9 +1757,6 @@ Stripping happens only when the exported backend is not one of
 	   nil t)
 	(when (member (match-string 1) org-lparse-special-blocks)
 	  (replace-match "" t t))))))
-
-(add-hook 'org-export-preprocess-hook
-	  'org-lparse-strip-experimental-blocks-maybe-hook)
 
 (defvar org-lparse-list-table-p nil
   "Non-nil if `org-do-lparse' is within a list-table.")
