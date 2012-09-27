@@ -272,8 +272,9 @@ buffer."
 	(setq line (org-current-line)
 	      col (current-column)))
       (if (and (setq buffer (org-edit-src-find-buffer beg end))
-	       (if org-src-ask-before-returning-to-edit-buffer
-		   (y-or-n-p "Return to existing edit buffer ([n] will revert changes)? ") t))
+	       (or (eq context 'save)
+		   (if org-src-ask-before-returning-to-edit-buffer
+		       (y-or-n-p "Return to existing edit buffer ([n] will revert changes)? ") t)))
 	  (org-src-switch-to-buffer buffer 'return)
 	(when buffer
 	  (with-current-buffer buffer
@@ -598,6 +599,7 @@ the language, a switch telling if the content should be in a single line."
   (let* ((beg org-edit-src-beg-marker)
 	 (end org-edit-src-end-marker)
 	 (ovl org-edit-src-overlay)
+	 (bufstr (buffer-string))
 	 (buffer (current-buffer))
 	 (single (org-bound-and-true-p org-edit-src-force-single-line))
 	 (macro (eq single 'macro-definition))
@@ -651,13 +653,18 @@ the language, a switch telling if the content should be in a single line."
       (if (org-bound-and-true-p org-edit-src-picture)
 	  (setq total-nindent (+ total-nindent 2)))
       (setq code (buffer-string))
+      (when (eq context 'save)
+	(erase-buffer)
+	(insert bufstr))
       (set-buffer-modified-p nil))
     (org-src-switch-to-buffer (marker-buffer beg) (or context 'exit))
-    (kill-buffer buffer)
+    (if (eq context 'save) (save-buffer)
+      (kill-buffer buffer))
     (goto-char beg)
     (when allow-write-back-p
-      (delete-region beg end)
+      (delete-region beg (1- end))
       (insert code)
+      (delete-char 1)
       (goto-char beg)
       (if single (just-one-space)))
     (if (memq t (mapcar (lambda (overlay)
@@ -669,8 +676,9 @@ the language, a switch telling if the content should be in a single line."
       ;; Block is visible, put point where it was in the code buffer
       (org-goto-line (1- (+ (org-current-line) line)))
       (org-move-to-column (if preserve-indentation col (+ col total-nindent delta))))
-    (move-marker beg nil)
-    (move-marker end nil))
+    (unless (eq context 'save)
+      (move-marker beg nil)
+      (move-marker end nil)))
   (unless (eq context 'save)
     (when org-edit-src-saved-temp-window-config
       (set-window-configuration org-edit-src-saved-temp-window-config)
