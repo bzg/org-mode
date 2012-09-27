@@ -1778,7 +1778,10 @@ This function only applies to `e-ascii' back-end.  See
     (org-element-map
      tree 'paragraph
      (lambda (p)
-       (org-element-put-property p :post-blank org-e-ascii-paragraph-spacing))))
+       (when (eq (org-element-type (org-export-get-next-element p info))
+		 'paragraph)
+	 (org-element-put-property
+	  p :post-blank org-e-ascii-paragraph-spacing)))))
   tree)
 
 
