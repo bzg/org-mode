@@ -17961,9 +17961,11 @@ BEG and END default to the buffer boundaries."
 				    (null org-image-actual-width))
 				(save-excursion
 				  (save-match-data
-				    (move-beginning-of-line 0)
-				    (if (looking-at "#\\+ATTR.*width=\"\\([^\"]+\\)\"")
-					(string-to-number (match-string 1))))))
+				    (when (re-search-backward
+					   "#\\+ATTR.*width=\"\\([^\"]+\\)\""
+					   (save-excursion
+					     (re-search-backward "^[ \t]*$\\|\\`" nil t)) t)
+				      (string-to-number (match-string 1))))))
 		  width (cond ((eq org-image-actual-width t) nil)
 			      ((null org-image-actual-width) attrwidth)
 			      ((numberp org-image-actual-width)
