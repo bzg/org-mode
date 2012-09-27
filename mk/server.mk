@@ -65,17 +65,19 @@ elpa-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpa version autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
-	echo "(define-package \"org\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
-	  > org-pkg.el
-	tar --exclude=Makefile --exclude="org-colview-xemacs.el" --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
+	echo "(define-package \"org\""                        > org-pkg.el
+	echo "  \"$(PKG_TAG)\" \"$(PKG_DOC)\" ($(PKG_REQ)))" >> org-pkg.el
+	echo ";; no-byte-compile: t"                         >> org-pkg.el
+	tar --exclude=Makefile --exclude="org-colview-xemacs.el" \
+	  --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPA), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-pkg.el
 elpa-up:	info card elpa-dirty archive-contents
 	$(CP) archive-contents $(ORGDIR).tar $(SERVROOT)/pkg/daily/
 
 archive-contents:
-        echo "(1 (org               . [($(PKG_TAG)) nil \"$(PKG_DOC)\"])\n" > $@ \
-                "   (org-plus-contrib . [($(PKG_TAG)) nil \"$(PKG_DOC)\"]))" >> $@
+	echo "(1 (org              . [($(PKG_TAG)) ($(PKG_REQ)) \"$(PKG_DOC)\" tar])"   > $@
+	echo "   (org-plus-contrib . [($(PKG_TAG)) ($(PKG_REQ)) \"$(PKG_DOC)\" tar]))" >> $@
 
 elpaplus:		cleanall info card elpaplus-dirty
 elpaplus-dirty elpaplus-up:	ORG_ADD_CONTRIB=org-*
@@ -84,9 +86,11 @@ elpaplus-dirty:
 	@$(MAKE) GITVERSION=$(GITVERSION:release_%=%)-elpaplus version autoloads
 	-@$(RM) $(ORGDIR) $(ORGTAR) $(ORGZIP)
 	ln -s . $(ORGDIR)
-	echo "(define-package \"org-plus-contrib\" \"$(PKG_TAG)\" \"$(PKG_DOC)\" $(PKG_REQ))" \
-	  > org-plus-contrib-pkg.el
-	tar --exclude=Makefile --exclude="org-colview-xemacs.el" --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
+	echo "(define-package \"org-plus-contrib\""           > org-plus-contrib-pkg.el
+	echo "  \"$(PKG_TAG)\" \"$(PKG_DOC)\" ($(PKG_REQ)))" >> org-plus-contrib-pkg.el
+	echo ";; no-byte-compile: t"                         >> org-plus-contrib-pkg.el
+	tar --exclude=Makefile --exclude="org-colview-xemacs.el" \
+	  --transform='s:\(lisp\|doc\)/::' -cf $(ORGDIR).tar \
 	  $(foreach dist, $(ORGELPAPLUS), $(ORGDIR)/$(dist))
 	-@$(RM) $(ORGDIR) org-plus-contrib-pkg.el
 	@$(MAKE) cleanlisp
