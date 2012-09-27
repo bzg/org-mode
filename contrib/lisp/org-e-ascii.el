@@ -121,6 +121,7 @@
 	   (lambda (s v b)
 	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset utf-8))))))
   :filters-alist ((:filter-headline . org-e-ascii-filter-headline-blank-lines)
+		  (:filter-parse-tree . org-e-ascii-filter-paragraph-spacing)
 		  (:filter-section . org-e-ascii-filter-headline-blank-lines))
   :options-alist ((:ascii-charset nil nil org-e-ascii-charset)))
 
@@ -179,6 +180,26 @@ original Org buffer at the same place."
 	  (cons :tag "Set an uniform spacing"
 		(integer :tag "Number of blank lines before contents")
 		(integer :tag "Number of blank lines after contents"))))
+
+(defcustom org-e-ascii-indented-line-width 'auto
+  "Additional indentation width for the first line in a paragraph.
+If the value is an integer, indent the first line of each
+paragraph by this number.  If it is the symbol `auto' preserve
+indentation from original document."
+  :group 'org-export-e-ascii
+  :type '(choice
+	  (integer :tag "Number of white spaces characters")
+	  (const :tag "Preserve original width" auto)))
+
+(defcustom org-e-ascii-paragraph-spacing 'auto
+  "Number of white lines between paragraphs.
+If the value is an integer, add this number of blank lines
+between contiguous paragraphs.  If is it the symbol `auto', keep
+the same number of blank lines as in the original document."
+  :group 'org-export-e-ascii
+  :type '(choice
+	  (integer :tag "Number of blank lines")
+	  (const :tag "Preserve original spacing" auto)))
 
 (defcustom org-e-ascii-charset 'ascii
   "The charset allowed to represent various elements and objects.
@@ -1355,9 +1376,12 @@ INFO is a plist holding contextual information."
   "Transcode a PARAGRAPH element from Org to ASCII.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  (org-e-ascii--fill-string
-   contents
-   (org-e-ascii--current-text-width paragraph info) info))
+  (let ((contents (if (not (wholenump org-e-ascii-indented-line-width)) contents
+		    (concat
+		     (make-string org-e-ascii-indented-line-width ? )
+		     (replace-regexp-in-string "\\`[ \t]+" "" contents)))))
+    (org-e-ascii--fill-string
+     contents (org-e-ascii--current-text-width paragraph info) info)))
 
 
 ;;;; Plain List
@@ -1726,7 +1750,7 @@ contextual information."
      org-e-ascii-quote-margin)))
 
 
-;;; Filter
+;;; Filters
 
 (defun org-e-ascii-filter-headline-blank-lines (headline back-end info)
   "Filter controlling number of blank lines after an headline.
@@ -1742,6 +1766,24 @@ For any other back-end, HEADLINE is returned as-is."
   (if (not org-e-ascii-headline-spacing) headline
     (let ((blanks (make-string (1+ (cdr org-e-ascii-headline-spacing)) ?\n)))
       (replace-regexp-in-string "\n\\(?:\n[ \t]*\\)*\\'" blanks headline))))
+
+(defun org-e-ascii-filter-paragraph-spacing (tree back-end info)
+  "Filter controlling number of blank lines between paragraphs.
+
+TREE is the parse tree.  BACK-END is the symbol specifying
+back-end used for export.  INFO is a plist used as
+a communication channel.
+
+This function only applies to `e-ascii' back-end.  See
+`org-e-ascii-paragraph-spacing' for information.
+
+For any other back-end, HEADLINE is returned as-is."
+  (when (wholenump org-e-ascii-paragraph-spacing)
+    (org-element-map
+     tree 'paragraph
+     (lambda (p)
+       (org-element-put-property p :post-blank org-e-ascii-paragraph-spacing))))
+  tree)
 
 
 
