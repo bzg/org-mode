@@ -5861,9 +5861,11 @@ it is installed to be used by font lock.  This can be useful if something
 needs to be inserted at a specific position in the font-lock sequence.")
 
 (defun org-font-lock-hook (limit)
+  "Run `org-font-lock-hook' within LIMIT."
   (run-hook-with-args 'org-font-lock-hook limit))
 
 (defun org-set-font-lock-defaults ()
+  "Set font lock defaults for the current buffer."
   (let* ((em org-fontify-emphasized-text)
 	 (lk org-activate-links)
 	 (org-font-lock-extra-keywords
@@ -17840,10 +17842,13 @@ BEG and END default to the buffer boundaries."
 		(overlay-put ov 'face 'default)
 		(overlay-put ov 'org-image-overlay t)
 		(overlay-put ov 'modification-hooks
-			     (list 'org-display-inline-modification-hook))
+			     (list 'org-display-inline-remove-overlay))
 		(push ov org-inline-image-overlays)))))))))
 
-(defun org-display-inline-modification-hook (ov after beg end &optional len)
+(define-obsolete-function-alias
+  'org-display-inline-modification-hook 'org-display-inline-remove-overlay "24.3")
+
+(defun org-display-inline-remove-overlay (ov after beg end &optional len)
   "Remove inline-display overlay if a corresponding region is modified."
   (let ((inhibit-modification-hooks t))
     (when (and ov after)
@@ -18220,7 +18225,10 @@ If not, return to the original position and throw an error."
 (defvar org-table-auto-blank-field) ; defined in org-table.el
 (defvar org-speed-command nil)
 
-(defun org-speed-command-default-hook (keys)
+(define-obsolete-function-alias
+  'org-speed-command-default-hook 'org-speed-command-activate "24.3")
+
+(defun org-speed-command-activate (keys)
   "Hook for activating single-letter speed commands.
 `org-speed-commands-default' specifies a minimal command set.
 Use `org-speed-commands-user' for further customization."
@@ -18230,7 +18238,10 @@ Use `org-speed-commands-user' for further customization."
     (cdr (assoc keys (append org-speed-commands-user
 			     org-speed-commands-default)))))
 
-(defun org-babel-speed-command-hook (keys)
+(define-obsolete-function-alias
+  'org-babel-speed-command-hook 'org-babel-speed-command-activate "24.3")
+
+(defun org-babel-speed-command-activate (keys)
   "Hook for activating single-letter code block commands."
   (when (and (bolp) (looking-at org-babel-src-block-regexp))
     (cdr (assoc keys org-babel-key-bindings))))
@@ -18249,7 +18260,7 @@ and return nil or a valid handler as appropriate.  Handler could
 be one of an interactive command, a function, or a form.
 
 Set `org-use-speed-commands' to non-nil value to enable this
-hook.  The default setting is `org-speed-command-default-hook'."
+hook.  The default setting is `org-speed-command-activate'."
   :group 'org-structure
   :version "24.1"
   :type 'hook)
