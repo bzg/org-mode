@@ -1760,9 +1760,7 @@ BACK-END is symbol specifying back-end used for export.  INFO is
 plist containing the communication channel.
 
 This function only applies to `e-ascii' back-end.  See
-`org-e-ascii-headline-spacing' for information.
-
-For any other back-end, HEADLINE is returned as-is."
+`org-e-ascii-headline-spacing' for information."
   (if (not org-e-ascii-headline-spacing) headline
     (let ((blanks (make-string (1+ (cdr org-e-ascii-headline-spacing)) ?\n)))
       (replace-regexp-in-string "\n\\(?:\n[ \t]*\\)*\\'" blanks headline))))
@@ -1775,9 +1773,7 @@ back-end used for export.  INFO is a plist used as
 a communication channel.
 
 This function only applies to `e-ascii' back-end.  See
-`org-e-ascii-paragraph-spacing' for information.
-
-For any other back-end, HEADLINE is returned as-is."
+`org-e-ascii-paragraph-spacing' for information."
   (when (wholenump org-e-ascii-paragraph-spacing)
     (org-element-map
      tree 'paragraph
