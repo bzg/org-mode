@@ -2103,8 +2103,8 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c\C-a" 'org-attach)
 (org-defkey org-agenda-mode-map "\C-c\C-n" 'org-agenda-next-date-line)
 (org-defkey org-agenda-mode-map "\C-c\C-p" 'org-agenda-previous-date-line)
+(org-defkey org-agenda-mode-map "\C-c," 'org-agenda-priority)
 (org-defkey org-agenda-mode-map "," 'org-agenda-priority)
-(org-defkey org-agenda-mode-map "\C-c," 'org-agenda-show-priority)
 (org-defkey org-agenda-mode-map "i" 'org-agenda-diary-entry)
 (org-defkey org-agenda-mode-map "c" 'org-agenda-goto-calendar)
 (org-defkey org-agenda-mode-map "C" 'org-agenda-convert-date)
@@ -2270,7 +2270,7 @@ The following commands are available:
      ["Set Priority" org-agenda-priority t]
      ["Increase Priority" org-agenda-priority-up t]
      ["Decrease Priority" org-agenda-priority-down t]
-     ["Show Priority" org-agenda-show-priority t])
+     ["Show Priority" org-show-priority t])
     ("Calendar/Diary"
      ["New Diary Entry" org-agenda-diary-entry (org-agenda-check-type nil 'agenda 'timeline)]
      ["Goto Calendar" org-agenda-goto-calendar (org-agenda-check-type nil 'agenda 'timeline)]
@@ -7535,14 +7535,6 @@ When called with a prefix argument, include all archive files as well."
       (and org-agenda-show-outline-path
 	   (org-with-point-at m (org-display-outline-path t))))))
 
-(defun org-agenda-show-priority ()
-  "Show the priority of the current item.
-This priority is composed of the main priority given with the [#A] cookies,
-and by additional input from the age of a schedules or deadline entry."
-  (interactive)
-  (let* ((pri (org-get-at-bol 'priority)))
-    (message "Priority is %d" (if pri pri -1000))))
-
 (defun org-agenda-show-tags ()
   "Show the tags applicable to the current item."
   (interactive)
@@ -8132,11 +8124,12 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
   (interactive)
   (org-agenda-priority 'down))
 
-(defun org-agenda-priority (&optional force-direction)
+(defun org-agenda-priority (&optional force-direction show)
   "Set the priority of line at point, also in Org-mode file.
 This changes the line at point, all other lines in the agenda referring to
 the same tree node, and the headline of the tree node in the Org-mode file."
-  (interactive)
+  (interactive "P")
+  (if (equal force-direction '(4)) (setq show t))
   (unless org-enable-priority-commands
     (error "Priority commands are disabled"))
   (org-agenda-check-no-diary)
@@ -8155,7 +8148,7 @@ the same tree node, and the headline of the tree node in the Org-mode file."
 	(save-excursion
 	  (and (outline-next-heading)
 	       (org-flag-heading nil)))   ; show the next heading
-	(funcall 'org-priority force-direction)
+	(funcall 'org-priority force-direction show)
 	(end-of-line 1)
 	(setq newhead (org-get-heading)))
       (org-agenda-change-all-lines newhead hdmarker)
