@@ -1438,7 +1438,7 @@ visual overlay, or with the string TEXT if it is supplied."
 
 (defun org-drill-hide-heading-at-point (&optional text)
   (unless (org-at-heading-p)
-    (error "Point is not on a heading."))
+    (error "Point is not on a heading"))
   (save-excursion
     (let ((beg (point)))
       (end-of-line)

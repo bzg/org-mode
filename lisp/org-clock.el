@@ -2014,9 +2014,8 @@ the returned times will be formatted strings."
      ((string-match "\\([-+][0-9]+\\)$" skey)
       (setq shift (string-to-number (match-string 1 skey))
             key (intern (substring skey 0 (match-beginning 1))))
-      (if(and (memq key '(quarter thisq)) (> shift 0))
-	  (error "Looking forward with quarters isn't implemented.")
-        ())))
+      (if (and (memq key '(quarter thisq)) (> shift 0))
+	  (error "Looking forward with quarters isn't implemented"))))
 
     (when (= shift 0)
       (cond ((eq key 'yesterday) (setq key 'today   shift -1))

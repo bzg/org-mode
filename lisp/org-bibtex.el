@@ -628,7 +628,7 @@ This uses `bibtex-parse-entry'."
   "Insert a heading built from the first element of `org-bibtex-entries'."
   (interactive)
   (when (= (length org-bibtex-entries) 0)
-    (error "No entries in `org-bibtex-entries'."))
+    (error "No entries in `org-bibtex-entries'"))
   (let* ((entry (pop org-bibtex-entries))
 	 (org-special-properties nil) ; avoids errors with `org-entry-put'
 	 (val (lambda (field) (cdr (assoc field entry))))

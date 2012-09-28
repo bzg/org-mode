@@ -211,7 +211,7 @@ heuristically based on the values of `org-odt-lib-dir' and
 		  org-odt-styles-dir-list)
 	    nil)))
     (unless styles-dir
-      (error "Error (org-odt): Cannot find factory styles files.  Aborting."))
+      (error "Error (org-odt): Cannot find factory styles files, aborting"))
     styles-dir)
   "Directory that holds auxiliary XML files used by the ODT exporter.
 
@@ -2076,7 +2076,7 @@ ATTR is a string of other attributes of the a element."
 	    until size
 	    do (setq size (org-odt-do-image-size
 			   probe-method file dpi embed-as)))
-      (or size (error "Cannot determine Image size.  Aborting ..."))
+      (or size (error "Cannot determine image size, aborting"))
       (setq width (car size) height (cdr size)))
     (cond
      (scale
