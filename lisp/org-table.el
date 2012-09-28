@@ -2179,7 +2179,8 @@ For all numbers larger than LIMIT, shift them by DELTA."
   (save-excursion
     (goto-char (org-table-end))
     (when (let ((case-fold-search t)) (looking-at "[ \t]*#\\+tblfm:"))
-      (let ((re (concat key "\\([0-9]+\\)"))
+      (let ((msg "The formulas in #+TBLFM have been updated")
+	    (re (concat key "\\([0-9]+\\)"))
 	    (re2
 	     (when remove
 	       (if (or (equal key "$") (equal key "$LR"))
@@ -2199,10 +2200,11 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	    (setq s (match-string 1) n (string-to-number s))
 	    (cond
 	     ((setq a (assoc s replace))
-	      (replace-match (concat key (cdr a)) t t))
+	      (replace-match (concat key (cdr a)) t t)
+	      (message msg))
 	     ((and limit (> n limit))
-	      (replace-match (concat key (int-to-string (+ n delta)))
-			     t t)))))))))
+	      (replace-match (concat key (int-to-string (+ n delta))) t t)
+	      (message msg)))))))))
 
 (defun org-table-get-specials ()
   "Get the column names and local parameters for this table."
