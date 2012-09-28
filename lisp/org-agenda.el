@@ -1883,11 +1883,8 @@ The buffer is still writable when this hook is called.")
 Agenda commands will then show existing buffer instead of generating new ones.
 When nil, `q' will kill the single agenda buffer."
   :group 'org-agenda
-  :type 'boolean
-  :set (lambda (var val)
-	 (if (boundp var)
-	     (org-toggle-sticky-agenda (if val 1 0))
-	   (set var val))))
+  ;; :version "24.3"
+  :type 'boolean)
 
 ;;;###autoload
 (defun org-toggle-sticky-agenda (&optional arg)
