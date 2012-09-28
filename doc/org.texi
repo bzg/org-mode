@@ -4267,10 +4267,10 @@ The TODO may also have minimum and maximum ranges specified by using the
 syntax @samp{.+2d/3d}, which says that you want to do the task at least every
 three days, but at most every two days.
 @item
-You must also have state logging for the @code{DONE} state enabled, in order
-for historical data to be represented in the consistency graph.  If it is not
-enabled it is not an error, but the consistency graphs will be largely
-meaningless.
+You must also have state logging for the @code{DONE} state enabled
+(@pxref{Tracking TODO state changes}), in order for historical data to be
+represented in the consistency graph.  If it is not enabled it is not an
+error, but the consistency graphs will be largely meaningless.
 @end enumerate
 
 To give you an idea of what the above rules look like in action, here's an
