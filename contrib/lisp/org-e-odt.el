@@ -183,7 +183,7 @@ heuristically based on the values of `org-e-odt-lib-dir' and
 		  org-e-odt-styles-dir-list)
 	    nil)))
     (unless styles-dir
-      (error "Error (org-e-odt): Cannot find factory styles files. Aborting."))
+      (error "Error (org-e-odt): Cannot find factory styles files, aborting"))
     styles-dir)
   "Directory that holds auxiliary XML files used by the ODT exporter.
 
@@ -2059,7 +2059,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    (cdr (assoc-string anchor-type
 			       org-e-odt-default-image-sizes-alist))
 	    ;; Error out.
-	    (error "Cannot determine Image size. Aborting ..."))))
+	    (error "Cannot determine image size, aborting"))))
 	 (width (car size)) (height (cdr size)))
     (cond
      (scale

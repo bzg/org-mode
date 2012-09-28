@@ -36,7 +36,7 @@
 (declare-function org-clock-sum-today "org-clock" (&optional headline-filter))
 
 (when (featurep 'xemacs)
-  (error "Do not load this file into XEmacs, use 'org-colview-xemacs.el'."))
+  (error "Do not load this file into XEmacs, use `org-colview-xemacs.el'"))
 
 ;;; Column View
 

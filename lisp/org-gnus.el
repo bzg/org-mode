@@ -213,7 +213,7 @@ If `org-store-link' was called with a prefix arg the meaning of
               desc link
               newsgroup xarchive)       ; those are always nil for gcc
           (and (not gcc)
-               (error "Can not create link: No Gcc header found."))
+               (error "Can not create link: No Gcc header found"))
           (org-store-link-props :type "gnus" :from from :subject subject
                                 :message-id id :group gcc :to to)
           (setq desc (org-email-link-description)

@@ -44,7 +44,7 @@
 (defvar org-babel-default-header-args:python '())
 
 (defvar org-babel-python-command "python"
-  "Name of command for executing python code.")
+  "Name of command for executing Python code.")
 
 (defvar org-babel-python-mode (if (featurep 'xemacs) 'python-mode 'python)
   "Preferred python mode for use in running python interactively.
@@ -99,7 +99,7 @@ VARS contains resolved variable references"
 ;; helper functions
 
 (defun org-babel-variable-assignments:python (params)
-  "Return list of python statements assigning the block's variables."
+  "Return a list of Python statements assigning the block's variables."
   (mapcar
    (lambda (pair)
      (format "%s=%s"
@@ -160,7 +160,7 @@ then create.  Return the initialized session."
 	  (py-shell)
 	  (setq python-buffer (concat "*" bufname "*"))))
        (t
-	(error "No function available for running an inferior python.")))
+	(error "No function available for running an inferior Python")))
       (setq org-babel-python-buffers
 	    (cons (cons session python-buffer)
 		  (assq-delete-all session org-babel-python-buffers)))
@@ -190,7 +190,7 @@ open('%s', 'w').write( pprint.pformat(main()) )")
 
 (defun org-babel-python-evaluate
   (session body &optional result-type result-params preamble)
-  "Evaluate BODY as python code."
+  "Evaluate BODY as Python code."
   (if session
       (org-babel-python-evaluate-session
        session body result-type result-params)
@@ -288,7 +288,7 @@ last statement in BODY, as elisp."
 	  (org-babel-eval-read-file tmp-file)))))))
 
 (defun org-babel-python-read-string (string)
-  "Strip 's from around python string."
+  "Strip 's from around Python string."
   (if (string-match "^'\\([^\000]+\\)'$" string)
       (match-string 1 string)
     string))

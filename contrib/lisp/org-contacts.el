@@ -609,7 +609,7 @@ Org-contacts does not specify how to encode the name. So we try to do our best."
   "Show contacts on a map. Requires google-maps-el."
   (interactive)
   (unless (fboundp 'google-maps-static-show)
-    (error "org-contacts-show-map requires google-maps-el."))
+    (error "`org-contacts-show-map' requires `google-maps-el'"))
   (google-maps-static-show
    :markers
    (loop

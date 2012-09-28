@@ -2191,7 +2191,7 @@ For all numbers larger than LIMIT, shift them by DELTA."
 	  (while (re-search-forward re2 (point-at-eol) t)
 	    (unless (save-match-data (org-in-regexp "remote([^)]+?)"))
 	      (if (equal (char-before (match-beginning 0)) ?.)
-		  (error "Change makes TBLFM term %s invalid.  Use undo to recover."
+		  (error "Change makes TBLFM term %s invalid, use undo to recover"
 			 (match-string 0))
 		(replace-match "")))))
 	(while (re-search-forward re (point-at-eol) t)

@@ -57,7 +57,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun org-babel-prep-session:perl (session params)
   "Prepare SESSION according to the header arguments in PARAMS."
-  (error "Sessions are not supported for Perl."))
+  (error "Sessions are not supported for Perl"))
 
 (defun org-babel-variable-assignments:perl (params)
   "Return list of perl statements assigning the block's variables."
@@ -101,7 +101,7 @@ print o join(\"\\n\", @r), \"\\n\"")
 If RESULT-TYPE equals 'output then return a list of the outputs
 of the statements in BODY, if RESULT-TYPE equals 'value then
 return the value of the last statement in BODY, as elisp."
-  (when session (error "Sessions are not supported for Perl."))
+  (when session (error "Sessions are not supported for Perl"))
   (case result-type
     (output (org-babel-eval org-babel-perl-command body))
     (value (let ((tmp-file (org-babel-temp-file "perl-")))
