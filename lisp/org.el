@@ -12997,10 +12997,12 @@ from the `before-change-functions' in the current buffer."
   (interactive)
   (org-priority 'down))
 
-(defun org-priority (&optional action)
+(defun org-priority (&optional action show)
   "Change the priority of an item.
 ACTION can be `set', `up', `down', or a character."
-  (interactive)
+  (interactive "P")
+  (if (equal action '(4))
+      (org-show-priority)
   (unless org-enable-priority-commands
     (error "Priority commands are disabled"))
   (setq action (or action 'set))
@@ -13077,7 +13079,21 @@ ACTION can be `set', `up', `down', or a character."
       (org-preserve-lc (org-set-tags nil 'align)))
     (if remove
 	(message "Priority removed")
-      (message "Priority of current item set to %s" news))))
+      (message "Priority of current item set to %s" news)))))
+
+(defun org-show-priority ()
+  "Show the priority of the current item.
+This priority is composed of the main priority given with the [#A] cookies,
+and by additional input from the age of a schedules or deadline entry."
+  (interactive)
+  (let ((pri (if (eq major-mode 'org-agenda-mode)
+		 (org-get-at-bol 'priority)
+	       (save-excursion
+		 (save-match-data
+		   (beginning-of-line)
+		   (and (looking-at org-heading-regexp)
+			(org-get-priority (match-string 0))))))))
+    (message "Priority is %d" (if pri pri -1000))))
 
 (defun org-get-priority (s)
   "Find priority cookie and return priority."
@@ -18161,6 +18177,7 @@ BEG and END default to the buffer boundaries."
     ("O" . org-clock-out)
     ("Meta Data Editing")
     ("t" . org-todo)
+    ("," . (org-priority))
     ("0" . (org-priority ?\ ))
     ("1" . (org-priority ?A))
     ("2" . (org-priority ?B))
