@@ -2604,6 +2604,8 @@ not overwrite the stored one."
 				   duration-output-format) ev))
 	  (or (fboundp 'calc-eval)
 	      (error "Calc does not seem to be installed, and is needed to evaluate the formula"))
+	  ;; "Inactivate" time-stamps so that Calc can handle them
+	  (setq form (replace-regexp-in-string org-ts-regexp3 "<\\1>" form))
 	  (setq ev (if (and duration (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" form))
 		       form
 		     (calc-eval (cons form org-tbl-calc-modes) (if numbers 'num)))
