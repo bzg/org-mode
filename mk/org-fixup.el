@@ -131,7 +131,7 @@ Convenience function for easier invocation from command line."
 # Remove \"oldorg:\" to switch to \"all\" as the default target.
 # Change \"oldorg:\" to an existing target to make that target the default,
 # or define your own target here to become the default target.
-oldorg:	# do what the old Makfile did by default
+oldorg:	# do what the old Makefile did by default.
 
 ##----------------------------------------------------------------------
 ")
