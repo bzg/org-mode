@@ -10862,6 +10862,7 @@ the default is \"/\"."
 	   (total (1+ (length prefix))))
       (setq maxwidth (max maxwidth 10))
       (concat prefix
+	      (if prefix (or separator "/"))
 	      (mapconcat
 	       (lambda (h)
 		 (setq n (1+ n))
