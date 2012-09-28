@@ -2800,7 +2800,7 @@ contextual information."
 (defun org-e-html-final-function (contents backend info)
   (if (not org-e-html-pretty-output) contents
     (with-temp-buffer
-      (nxml-mode)
+      (html-mode)
       (insert contents)
       (indent-region (point-min) (point-max))
       (buffer-substring-no-properties (point-min) (point-max)))))
