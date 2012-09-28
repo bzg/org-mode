@@ -10407,18 +10407,24 @@ onto the ring."
 ;;; Following specific links
 
 (defun org-follow-timestamp-link ()
+  "Open an agenda view for the time-stamp date/range at point."
   (cond
    ((org-at-date-range-p t)
     (let ((org-agenda-start-on-weekday)
 	  (t1 (match-string 1))
-	  (t2 (match-string 2)))
-      (setq t1 (time-to-days (org-time-string-to-time t1))
-	    t2 (time-to-days (org-time-string-to-time t2)))
-      (org-agenda-list nil t1 (1+ (- t2 t1)))))
+	  (t2 (match-string 2)) tt1 tt2)
+      (setq tt1 (time-to-days (org-time-string-to-time t1))
+	    tt2 (time-to-days (org-time-string-to-time t2)))
+      (let ((org-agenda-buffer-tmp-name
+	     (format "*Org Agenda(a:%s)"
+		     (concat (substring t1 0 10) "--" (substring t2 0 10)))))
+	(org-agenda-list nil tt1 (1+ (- tt2 tt1))))))
    ((org-at-timestamp-p t)
-    (org-agenda-list nil (time-to-days (org-time-string-to-time
-					(substring (match-string 1) 0 10)))
-		     1))
+    (let ((org-agenda-buffer-tmp-name
+	   (format "*Org Agenda(a:%s)" (substring (match-string 1) 0 10))))
+      (org-agenda-list nil (time-to-days (org-time-string-to-time
+					  (substring (match-string 1) 0 10)))
+		       1)))
    (t (error "This should not happen"))))
 
 
