@@ -278,22 +278,24 @@ Some other text
   ;; Running clock.
   (let* ((org-clock-string "CLOCK:")
 	 (clock (org-test-with-temp-text "CLOCK: [2012-01-01 sun. 00:01]"
-		  (org-element-map
-		   (org-element-parse-buffer) 'clock 'identity nil t))))
+		  (org-element-at-point))))
     (should (eq (org-element-property :status clock) 'running))
-    (should (equal (org-element-property :value clock)
-		   "[2012-01-01 sun. 00:01]"))
-    (should-not (org-element-property :time clock)))
+    (should
+     (equal (org-element-property :raw-value
+				  (org-element-property :value clock))
+	    "[2012-01-01 sun. 00:01]"))
+    (should-not (org-element-property :duration clock)))
   ;; Closed clock.
   (let* ((org-clock-string "CLOCK:")
-	 (clock (org-test-with-temp-text "
-CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
-		  (org-element-map
-		   (org-element-parse-buffer) 'clock 'identity nil t))))
+	 (clock
+	  (org-test-with-temp-text
+	      "CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
+	    (org-element-at-point))))
     (should (eq (org-element-property :status clock) 'closed))
-    (should (equal (org-element-property :value clock)
+    (should (equal (org-element-property :raw-value
+					 (org-element-property :value clock))
 		   "[2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02]"))
-    (should (equal (org-element-property :time clock) "0:01"))))
+    (should (equal (org-element-property :duration clock) "0:01"))))
 
 
 ;;;; Code
@@ -1382,26 +1384,29 @@ Outside list"
 (ert-deftest test-org-element/planning-parser ()
   "Test `planning' parser."
   (should
-   (equal
-    (org-element-property
-     :closed
-     (org-test-with-temp-text "CLOSED: [2012-03-29 thu.]"
-       (org-element-map (org-element-parse-buffer) 'planning 'identity nil t)))
-    "2012-03-29 thu."))
+   (equal "[2012-03-29 thu.]"
+	  (org-element-property
+	   :raw-value
+	   (org-element-property
+	    :closed
+	    (org-test-with-temp-text "CLOSED: [2012-03-29 thu.]"
+	      (org-element-at-point))))))
   (should
-   (equal
-    (org-element-property
-     :deadline
-     (org-test-with-temp-text "DEADLINE: <2012-03-29 thu.>"
-       (org-element-map (org-element-parse-buffer) 'planning 'identity nil t)))
-    "2012-03-29 thu."))
+   (equal "<2012-03-29 thu.>"
+	  (org-element-property
+	   :raw-value
+	   (org-element-property
+	    :deadline
+	    (org-test-with-temp-text "DEADLINE: <2012-03-29 thu.>"
+	      (org-element-at-point))))))
   (should
-   (equal
-    (org-element-property
-     :scheduled
-     (org-test-with-temp-text "SCHEDULED: <2012-03-29 thu.>"
-       (org-element-map (org-element-parse-buffer) 'planning 'identity nil t)))
-    "2012-03-29 thu.")))
+   (equal "<2012-03-29 thu.>"
+	  (org-element-property
+	   :raw-value
+	   (org-element-property
+	    :scheduled
+	    (org-test-with-temp-text "SCHEDULED: <2012-03-29 thu.>"
+	      (org-element-at-point)))))))
 
 
 ;;;; Property Drawer
@@ -1707,27 +1712,41 @@ Outside list"
   ;; Active timestamp.
   (should
    (org-test-with-temp-text "<2012-03-29 16:40>"
-     (eq (org-element-property :type
-			       (org-element-map
-				(org-element-parse-buffer)
-				'timestamp 'identity nil t))
-	 'active)))
+     (eq (org-element-property :type (org-element-context)) 'active)))
+  (should
+   (equal '(2012 3 29 16 40)
+	  (org-test-with-temp-text "<2012-03-29 16:40>"
+	    (let ((object (org-element-context)))
+	      (list (org-element-property :year-start object)
+		    (org-element-property :month-start object)
+		    (org-element-property :day-start object)
+		    (org-element-property :hour-start object)
+		    (org-element-property :minute-start object))))))
   ;; Inactive timestamp.
   (should
    (org-test-with-temp-text "[2012-03-29 16:40]"
-     (eq (org-element-property :type
-			       (org-element-map
-				(org-element-parse-buffer)
-				'timestamp 'identity nil t))
-	 'inactive)))
+     (eq (org-element-property :type (org-element-context)) 'inactive)))
+  ;; Time range.
+  (should
+   (equal '(2012 3 29 16 40 7 30)
+	  (org-test-with-temp-text "<2012-03-29 7:30-16:40>"
+	    (let ((object (org-element-context)))
+	      (list (org-element-property :year-end object)
+		    (org-element-property :month-end object)
+		    (org-element-property :day-end object)
+		    (org-element-property :hour-end object)
+		    (org-element-property :minute-end object)
+		    (org-element-property :hour-start object)
+		    (org-element-property :minute-start object))))))
   ;; Date range.
   (should
    (org-test-with-temp-text "[2012-03-29 16:40]--[2012-03-29 16:41]"
-     (eq (org-element-property :type
-			       (org-element-map
-				(org-element-parse-buffer)
-				'timestamp 'identity nil t))
-	 'inactive-range)))
+     (eq (org-element-property :type (org-element-context)) 'inactive-range)))
+  ;; With repeater.
+  (should
+   (eq 'catch-up
+       (org-test-with-temp-text "<2012-03-29 ++1y>"
+	 (org-element-property :repeater-type (org-element-context)))))
   ;; Timestamps are not planning elements.
   (should-not
    (org-test-with-temp-text "SCHEDULED: <2012-03-29 16:40>"
@@ -2102,9 +2121,9 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
      (equal
       (org-test-parse-and-interpret
        "* Headline
-CLOSED: [2012-01-01] DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>")
+DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]")
       "* Headline
-CLOSED: [2012-01-01] DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
+DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
 
 (ert-deftest test-org-element/property-drawer-interpreter ()
   "Test property drawer interpreter."
@@ -2159,25 +2178,61 @@ CLOSED: [2012-01-01] DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
 (ert-deftest test-org-element/timestamp-interpreter ()
   "Test timestamp interpreter."
   ;; Active.
-  (should (equal (org-test-parse-and-interpret "<2012-03-29 16:40>")
-		 "<2012-03-29 16:40>\n"))
+  (should (equal (org-test-parse-and-interpret "<2012-03-29 thu. 16:40>")
+		 "<2012-03-29 thu. 16:40>\n"))
+  (should
+   (string-match "<2012-03-29 .* 16:40>"
+		 (org-element-timestamp-interpreter
+		  '(timestamp
+		    (:type active :year-start 2012 :month-start 3 :day-start 29
+			   :hour-start 16 :minute-start 40)) nil)))
   ;; Inactive.
-  (should (equal (org-test-parse-and-interpret "[2012-03-29 16:40]")
-		 "[2012-03-29 16:40]\n"))
+  (should (equal (org-test-parse-and-interpret "[2012-03-29 thu. 16:40]")
+		 "[2012-03-29 thu. 16:40]\n"))
+  (should
+   (string-match
+    "\\[2012-03-29 .* 16:40\\]"
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type inactive :year-start 2012 :month-start 3 :day-start 29
+	      :hour-start 16 :minute-start 40)) nil)))
   ;; Active range.
   (should (equal (org-test-parse-and-interpret
-		  "<2012-03-29 16:40>--<2012-03-29 16:41>")
-		 "<2012-03-29 16:40>--<2012-03-29 16:41>\n"))
+		  "<2012-03-29 thu. 16:40>--<2012-03-29 thu. 16:41>")
+		 "<2012-03-29 thu. 16:40>--<2012-03-29 thu. 16:41>\n"))
+  (should
+   (string-match
+    "<2012-03-29 .* 16:40>--<2012-03-29 .* 16:41>"
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type active-range :year-start 2012 :month-start 3 :day-start 29
+	      :hour-start 16 :minute-start 40 :year-end 2012 :month-end 3
+	      :day-end 29 :hour-end 16 :minute-end 41)) nil)))
   ;; Inactive range.
   (should (equal (org-test-parse-and-interpret
-		  "[2012-03-29 16:40]--[2012-03-29 16:41]")
-		 "[2012-03-29 16:40]--[2012-03-29 16:41]\n"))
+		  "[2012-03-29 thu. 16:40]--[2012-03-29 thu. 16:41]")
+		 "[2012-03-29 thu. 16:40]--[2012-03-29 thu. 16:41]\n"))
+  (should
+   (string-match
+    "\\[2012-03-29 .* 16:40\\]--\\[2012-03-29 .* 16:41\\]"
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type inactive-range :year-start 2012 :month-start 3 :day-start 29
+	      :hour-start 16 :minute-start 40 :year-end 2012 :month-end 3
+	      :day-end 29 :hour-end 16 :minute-end 41)) nil)))
   ;; Diary.
-  (should (equal (org-test-parse-and-interpret "<%%org-float t 4 2>")
-		 "<%%org-float t 4 2>\n"))
+  (should (equal (org-test-parse-and-interpret "<%%(org-float t 4 2)>")
+		 "<%%(org-float t 4 2)>\n"))
   ;; Timestamp with repeater interval.
-  (should (equal (org-test-parse-and-interpret "<2012-03-29 +1y>")
-		 "<2012-03-29 +1y>\n")))
+  (should (equal (org-test-parse-and-interpret "<2012-03-29 thu. +1y>")
+		 "<2012-03-29 thu. +1y>\n"))
+  (should
+   (string-match
+    "<2012-03-29 .* \\+1y>"
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type active :year-start 2012 :month-start 3 :day-start 29
+	      :repeater-type cumulate :repeater-value "1y")) nil))))
 
 (ert-deftest test-org-element/verse-block-interpreter ()
   "Test verse block interpretation."

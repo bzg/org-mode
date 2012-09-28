@@ -116,6 +116,8 @@
 (eval-when-compile (require 'cl))
 (require 'org)
 
+(declare-function org-clocking-buffer "org-clock" ())
+
 
 
 ;;; Definitions And Rules
@@ -711,9 +713,8 @@ Return a list whose CAR is `headline' and CDR is a plist
 containing `:raw-value', `:title', `:begin', `:end',
 `:pre-blank', `:hiddenp', `:contents-begin' and `:contents-end',
 `:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
-`:scheduled', `:deadline', `:timestamp', `:clock', `:category',
-`:quotedp', `:archivedp', `:commentedp' and `:footnote-section-p'
-keywords.
+`:scheduled', `:deadline', `:closed', `:clockedp', `:quotedp',
+`:archivedp', `:commentedp' and `:footnote-section-p' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in lowercase, the underscores replaced with hyphens
@@ -745,23 +746,36 @@ Assume point is at beginning of the headline."
 				    (string= org-footnote-section raw-value)))
 	   ;; Normalize property names: ":SOME_PROP:" becomes
 	   ;; ":some-prop".
-	   (standard-props (let (plist)
-			     (mapc
-			      (lambda (p)
-				(let ((p-name (downcase (car p))))
-				  (while (string-match "_" p-name)
-				    (setq p-name
-					  (replace-match "-" nil nil p-name)))
-				  (setq p-name (intern (concat ":" p-name)))
-				  (setq plist
-					(plist-put plist p-name (cdr p)))))
-			      (org-entry-properties nil 'standard))
-			     plist))
-	   (time-props (org-entry-properties nil 'special "CLOCK"))
-	   (scheduled (cdr (assoc "SCHEDULED" time-props)))
-	   (deadline (cdr (assoc "DEADLINE" time-props)))
-	   (clock (cdr (assoc "CLOCK" time-props)))
-	   (timestamp (cdr (assoc "TIMESTAMP" time-props)))
+	   (standard-props
+	    (let (plist)
+	      (mapc
+	       (lambda (p)
+		 (setq plist
+		       (plist-put plist
+				  (intern (concat ":"
+						  (replace-regexp-in-string
+						   "_" "-" (downcase (car p)))))
+				  (cdr p))))
+	       (org-entry-properties nil 'standard))
+	      plist))
+	   (time-props
+	    ;; Read time properties on the line below the headline.
+	    (save-excursion
+	      (when (progn (forward-line)
+			   (looking-at org-planning-or-clock-line-re))
+		(let ((end (line-end-position)) plist)
+		  (while (re-search-forward
+			  org-keyword-time-not-clock-regexp end t)
+		    (goto-char (match-end 1))
+		    (skip-chars-forward " \t")
+		    (let ((keyword (match-string 1))
+			  (time (org-element-timestamp-parser)))
+		      (cond ((equal keyword org-scheduled-string)
+			     (setq plist (plist-put plist :scheduled time)))
+			    ((equal keyword org-deadline-string)
+			     (setq plist (plist-put plist :deadline time)))
+			    (t (setq plist (plist-put plist :closed time))))))
+		  plist))))
 	   (begin (point))
 	   (end (save-excursion (goto-char (org-end-of-subtree t t))))
 	   (pos-after-head (progn (forward-line) (point)))
@@ -773,7 +787,13 @@ Assume point is at beginning of the headline."
 			      (progn (goto-char end)
 				     (skip-chars-backward " \r\t\n")
 				     (forward-line)
-				     (point)))))
+				     (point))))
+	   (clockedp (and (eq (org-clocking-buffer)
+			      (or (buffer-base-buffer) (current-buffer)))
+			  (save-excursion
+			    (goto-char (marker-position org-clock-marker))
+			    (org-back-to-heading t)
+			    (= (point) begin)))))
       ;; Clean RAW-VALUE from any quote or comment string.
       (when (or quotedp commentedp)
 	(let ((case-fold-search nil))
@@ -803,10 +823,6 @@ Assume point is at beginning of the headline."
 			  :tags tags
 			  :todo-keyword todo
 			  :todo-type todo-type
-			  :scheduled scheduled
-			  :deadline deadline
-			  :timestamp timestamp
-			  :clock clock
 			  :post-blank (count-lines
 				       (if (not contents-end) pos-after-head
 					 (goto-char contents-end)
@@ -815,8 +831,10 @@ Assume point is at beginning of the headline."
 				       end)
 			  :footnote-section-p footnote-section-p
 			  :archivedp archivedp
+			  :clockedp clockedp
 			  :commentedp commentedp
 			  :quotedp quotedp)
+		    time-props
 		    standard-props))))
 	(org-element-put-property
 	 headline :title
@@ -880,7 +898,7 @@ Return a list whose CAR is `inlinetask' and CDR is a plist
 containing `:title', `:begin', `:end', `:hiddenp',
 `:contents-begin' and `:contents-end', `:level', `:priority',
 `:raw-value', `:tags', `:todo-keyword', `:todo-type',
-`:scheduled', `:deadline', `:timestamp', `:clock' and
+`:scheduled', `:deadline', `:clockedp', `:closed' and
 `:post-blank' keywords.
 
 The plist also contains any property set in the property drawer,
@@ -904,27 +922,45 @@ Assume point is at beginning of the inline task."
 	   (raw-value (or (nth 4 components) ""))
 	   ;; Normalize property names: ":SOME_PROP:" becomes
 	   ;; ":some-prop".
-	   (standard-props (let (plist)
-			     (mapc
-			      (lambda (p)
-				(let ((p-name (downcase (car p))))
-				  (while (string-match "_" p-name)
-				    (setq p-name
-					  (replace-match "-" nil nil p-name)))
-				  (setq p-name (intern (concat ":" p-name)))
-				  (setq plist
-					(plist-put plist p-name (cdr p)))))
-			      (org-entry-properties nil 'standard))
-			     plist))
-	   (time-props (org-entry-properties nil 'special "CLOCK"))
-	   (scheduled (cdr (assoc "SCHEDULED" time-props)))
-	   (deadline (cdr (assoc "DEADLINE" time-props)))
-	   (clock (cdr (assoc "CLOCK" time-props)))
-	   (timestamp (cdr (assoc "TIMESTAMP" time-props)))
+	   (standard-props
+	    (let (plist)
+	      (mapc
+	       (lambda (p)
+		 (setq plist
+		       (plist-put plist
+				  (intern (concat ":"
+						  (replace-regexp-in-string
+						   "_" "-" (downcase (car p)))))
+				  (cdr p))))
+	       (org-entry-properties nil 'standard))
+	      plist))
+	   (time-props
+	    ;; Read time properties on the line below the inlinetask
+	    ;; opening string.
+	    (save-excursion
+	      (when (progn (forward-line)
+			   (looking-at org-planning-or-clock-line-re))
+		(let ((end (line-end-position)) plist)
+		  (while (re-search-forward
+			  org-keyword-time-not-clock-regexp end t)
+		    (goto-char (match-end 1))
+		    (skip-chars-forward " \t")
+		    (let ((keyword (match-string 1))
+			  (time (org-element-timestamp-parser)))
+		      (cond ((equal keyword org-scheduled-string)
+			     (setq plist (plist-put plist :scheduled time)))
+			    ((equal keyword org-deadline-string)
+			     (setq plist (plist-put plist :deadline time)))
+			    (t (setq plist (plist-put plist :closed time))))))
+		  plist))))
 	   (task-end (save-excursion
 		       (end-of-line)
 		       (and (re-search-forward "^\\*+ END" limit t)
 			    (match-beginning 0))))
+	   (clockedp (and (eq (org-clocking-buffer)
+			      (or (buffer-base-buffer) (current-buffer)))
+			  (let ((clock (marker-position org-clock-marker)))
+			    (and (> clock begin) (< clock task-end)))))
 	   (contents-begin (progn (forward-line)
 				  (and task-end (< (point) task-end) (point))))
 	   (hidden (and contents-begin (org-invisible-p2)))
@@ -950,11 +986,9 @@ Assume point is at beginning of the inline task."
 			 :tags tags
 			 :todo-keyword todo
 			 :todo-type todo-type
-			 :scheduled scheduled
-			 :deadline deadline
-			 :timestamp timestamp
-			 :clock clock
+			 :clockedp clockedp
 			 :post-blank (count-lines before-blank end))
+		   time-props
 		   standard-props
 		   (cadr keywords)))))
       (org-element-put-property
@@ -1427,13 +1461,13 @@ as keywords."
     (let* ((case-fold-search nil)
 	   (begin (point))
 	   (value (progn (search-forward org-clock-string (line-end-position) t)
-			 (org-skip-whitespace)
-			 (looking-at "\\[.*\\]")
-			 (org-match-string-no-properties 0)))
-	   (time (and (progn (goto-char (match-end 0))
-			     (looking-at " +=> +\\(\\S-+\\)[ \t]*$"))
-		      (org-match-string-no-properties 1)))
-	   (status (if time 'closed 'running))
+			 (skip-chars-forward " \t")
+			 (org-element-timestamp-parser)))
+	   (duration (and (search-forward " => " (line-end-position) t)
+			  (progn (skip-chars-forward " \t")
+				 (looking-at "\\(\\S-+\\)[ \t]*$"))
+			  (org-match-string-no-properties 1)))
+	   (status (if duration 'closed 'running))
 	   (post-blank (let ((before-blank (progn (forward-line) (point))))
 			 (skip-chars-forward " \r\t\n" limit)
 			 (skip-chars-backward " \t")
@@ -1443,7 +1477,7 @@ as keywords."
       (list 'clock
 	    (list :status status
 		  :value value
-		  :time time
+		  :duration duration
 		  :begin begin
 		  :end end
 		  :post-blank post-blank)))))
@@ -1452,13 +1486,14 @@ as keywords."
   "Interpret CLOCK element as Org syntax.
 CONTENTS is nil."
   (concat org-clock-string " "
-	  (org-element-property :value clock)
-	  (let ((time (org-element-property :time clock)))
-	    (and time
+	  (org-element-timestamp-interpreter
+	   (org-element-property :value clock) nil)
+	  (let ((duration (org-element-property :duration clock)))
+	    (and duration
 		 (concat " => "
 			 (apply 'format
 				"%2s:%02s"
-				(org-split-string time ":")))))))
+				(org-split-string duration ":")))))))
 
 
 ;;;; Comment
@@ -2049,13 +2084,11 @@ and `:post-blank' keywords."
 	   (end (point))
 	   closed deadline scheduled)
       (goto-char begin)
-      (while (re-search-forward org-keyword-time-not-clock-regexp
-				(line-end-position) t)
+      (while (re-search-forward org-keyword-time-not-clock-regexp end t)
 	(goto-char (match-end 1))
-	(org-skip-whitespace)
-	(let ((time (buffer-substring-no-properties
-		     (1+ (point)) (1- (match-end 0))))
-	      (keyword (match-string 1)))
+	(skip-chars-forward " \t" end)
+	(let ((keyword (match-string 1))
+	      (time (org-element-timestamp-parser)))
 	  (cond ((equal keyword org-closed-string) (setq closed time))
 		((equal keyword org-deadline-string) (setq deadline time))
 		(t (setq scheduled time)))))
@@ -2073,13 +2106,18 @@ CONTENTS is nil."
   (mapconcat
    'identity
    (delq nil
-	 (list (let ((closed (org-element-property :closed planning)))
-		 (when closed (concat org-closed-string " [" closed "]")))
-	       (let ((deadline (org-element-property :deadline planning)))
-		 (when deadline (concat org-deadline-string " <" deadline ">")))
+	 (list (let ((deadline (org-element-property :deadline planning)))
+		 (when deadline
+		   (concat org-deadline-string " "
+			   (org-element-timestamp-interpreter deadline nil))))
 	       (let ((scheduled (org-element-property :scheduled planning)))
 		 (when scheduled
-		   (concat org-scheduled-string " <" scheduled ">")))))
+		   (concat org-scheduled-string " "
+			   (org-element-timestamp-interpreter scheduled nil))))
+	       (let ((closed (org-element-property :closed planning)))
+		 (when closed
+		   (concat org-closed-string " "
+			   (org-element-timestamp-interpreter closed nil))))))
    " "))
 
 
@@ -3358,39 +3396,168 @@ Assume point is at the beginning of the timestamp."
   (save-excursion
     (let* ((begin (point))
 	   (activep (eq (char-after) ?<))
-	   (main-value
+	   (raw-value
 	    (progn
-	      (looking-at "[<[]\\(\\(%%\\)?.*?\\)[]>]\\(?:--[<[]\\(.*?\\)[]>]\\)?")
-	      (match-string-no-properties 1)))
-	   (range-end (match-string-no-properties 3))
-	   (type (cond ((match-string 2) 'diary)
-		       ((and activep range-end) 'active-range)
+	      (looking-at "\\([<[]\\(%%\\)?.*?\\)[]>]\\(?:--\\([<[].*?[]>]\\)\\)?")
+	      (match-string-no-properties 0)))
+	   (date-start (match-string-no-properties 1))
+	   (date-end (match-string 3))
+	   (diaryp (match-beginning 2))
+	   (type (cond (diaryp 'diary)
+		       ((and activep date-end) 'active-range)
 		       (activep 'active)
-		       (range-end 'inactive-range)
+		       (date-end 'inactive-range)
 		       (t 'inactive)))
 	   (post-blank (progn (goto-char (match-end 0))
 			      (skip-chars-forward " \t")))
-	   (end (point)))
+	   (end (point))
+	   (with-time-p (string-match "[012]?[0-9]:[0-5][0-9]" date-start))
+	   (repeater-props
+	    (and (not diaryp)
+		 (string-match "\\([.+]?\\+\\)\\([0-9]+\\)\\([hdwmy]\\)>"
+			       raw-value)
+		 (list
+		  :repeater-type
+		  (let ((type (match-string 1 raw-value)))
+		    (cond ((equal "++" type) 'catch-up)
+			  ((equal ".+" type) 'restart)
+			  (t 'cumulate)))
+		  :repeater-value (string-to-number (match-string 2 raw-value))
+		  :repeater-unit
+		  (case (string-to-char (match-string 3 raw-value))
+		    (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (t 'year)))))
+	   time-range year-start month-start day-start hour-start minute-start
+	   year-end month-end day-end hour-end minute-end)
+      ;; Extract time range, if any, and remove it from date start.
+      (setq time-range
+	    (and (not diaryp)
+		 (string-match
+		  "[012]?[0-9]:[0-5][0-9]\\(-\\([012]?[0-9]\\):\\([0-5][0-9]\\)\\)"
+		  date-start)
+		 (cons (string-to-number (match-string 2 date-start))
+		       (string-to-number (match-string 3 date-start)))))
+      (when time-range
+	(setq date-start (replace-match "" nil nil date-start 1)))
+      ;; Parse date-start.
+      (unless diaryp
+	(let ((date (org-parse-time-string date-start)))
+	  (setq year-start (nth 5 date)
+		month-start (nth 4 date)
+		day-start (nth 3 date)
+		hour-start (and with-time-p (nth 2 date))
+		minute-start (and with-time-p (nth 1 date)))))
+      ;; Compute date-end.  It can be provided directly in time-stamp,
+      ;; or extracted from time range.  Otherwise, it defaults to the
+      ;; same values as date-start.
+      (unless diaryp
+	(let ((date (and date-end (org-parse-time-string date-end))))
+	  (setq year-end (or (nth 5 date) year-start)
+		month-end (or (nth 4 date) month-start)
+		day-end (or (nth 3 date) day-start)
+		hour-end (or (nth 2 date) (car time-range) hour-start)
+		minute-end (or (nth 1 date) (cdr time-range) minute-start))))
       (list 'timestamp
-	    (list :type type
-		  :value main-value
-		  :range-end range-end
-		  :begin begin
-		  :end end
-		  :post-blank post-blank)))))
+	    (nconc (list :type type
+			 :raw-value raw-value
+			 :year-start year-start
+			 :month-start month-start
+			 :day-start day-start
+			 :hour-start hour-start
+			 :minute-start minute-start
+			 :year-end year-end
+			 :month-end month-end
+			 :day-end day-end
+			 :hour-end hour-end
+			 :minute-end minute-end
+			 :begin begin
+			 :end end
+			 :post-blank post-blank)
+		   repeater-props)))))
 
 (defun org-element-timestamp-interpreter (timestamp contents)
   "Interpret TIMESTAMP object as Org syntax.
 CONTENTS is nil."
-  (let ((type (org-element-property :type timestamp) ))
-    (concat
-     (format (if (memq type '(inactive inactive-range)) "[%s]" "<%s>")
-	     (org-element-property :value timestamp))
-     (let ((range-end (org-element-property :range-end timestamp)))
-       (when range-end
-	 (concat "--"
-		 (format (if (eq type 'inactive-range) "[%s]" "<%s>")
-			 range-end)))))))
+  ;; Use `:raw-value' if specified.
+  (or (org-element-property :raw-value timestamp)
+      ;; Otherwise, build timestamp string.
+      (let ((build-ts-string
+	     ;; Build an Org timestamp string from TIME.  ACTIVEP is
+	     ;; non-nil when time stamp is active.  If WITH-TIME-P is
+	     ;; non-nil, add a time part.  HOUR-END and MINUTE-END
+	     ;; specify a time range in the timestamp.  REPEAT-STRING
+	     ;; is the repeater string, if any.
+	     (lambda (time activep
+		      &optional with-time-p hour-end minute-end repeat-string)
+	       (let ((ts (format-time-string
+			  (funcall (if with-time-p 'cdr 'car)
+				   org-time-stamp-formats)
+			  time)))
+		 (when (and hour-end minute-end)
+		   (string-match "[012]?[0-9]:[0-5][0-9]" ts)
+		   (setq ts
+			 (replace-match
+			  (format "\\&-%02d:%02d" hour-end minute-end)
+			  nil nil ts)))
+		 (unless activep (setq ts (format "[%s]" (substring ts 1 -1))))
+		 (when (org-string-nw-p repeat-string)
+		   (setq ts (concat (substring ts 0 -1)
+				    " "
+				    repeat-string
+				    (substring ts -1))))
+		 ;; Return value.
+		 ts)))
+	    (type (org-element-property :type timestamp)))
+	(case type
+	  ((active inactive)
+	   (let* ((minute-start (org-element-property :minute-start timestamp))
+		  (minute-end (org-element-property :minute-end timestamp))
+		  (hour-start (org-element-property :hour-start timestamp))
+		  (hour-end (org-element-property :hour-end timestamp))
+		  (time-range-p (and hour-start hour-end minute-start minute-end
+				     (or (/= hour-start hour-end)
+					 (/= minute-start minute-end)))))
+	     (funcall
+	      build-ts-string
+	      (encode-time 0
+			   (or minute-start 0)
+			   (or hour-start 0)
+			   (org-element-property :day-start timestamp)
+			   (org-element-property :month-start timestamp)
+			   (org-element-property :year-start timestamp))
+	      (eq type 'active)
+	      (and hour-start minute-start)
+	      (and time-range-p hour-end)
+	      (and time-range-p minute-end)
+	      (concat (case (org-element-property :repeater-type timestamp)
+			(cumulate "+") (catch-up "++") (restart ".+"))
+		      (org-element-property :repeater-value timestamp)
+		      (org-element-property :repeater-unit timestamp)))))
+	  ((active-range inactive-range)
+	   (let ((minute-start (org-element-property :minute-start timestamp))
+		 (minute-end (org-element-property :minute-end timestamp))
+		 (hour-start (org-element-property :hour-start timestamp))
+		 (hour-end (org-element-property :hour-end timestamp)))
+	     (concat
+	      (funcall
+	       build-ts-string (encode-time
+				0
+				(or minute-start 0)
+				(or hour-start 0)
+				(org-element-property :day-start timestamp)
+				(org-element-property :month-start timestamp)
+				(org-element-property :year-start timestamp))
+	       (eq type 'active-range)
+	       (and hour-start minute-start))
+	      "--"
+	      (funcall build-ts-string
+		       (encode-time 0
+				    (or minute-end 0)
+				    (or hour-end 0)
+				    (org-element-property :day-end timestamp)
+				    (org-element-property :month-end timestamp)
+				    (org-element-property :year-end timestamp))
+		       (eq type 'active-range)
+		       (and hour-end minute-end)))))))))
 
 (defun org-element-timestamp-successor (limit)
   "Search for the next timestamp object.
@@ -3539,7 +3706,7 @@ element it has to parse."
        ;; a footnote definition: next item is always a paragraph.
        ((not (bolp)) (org-element-paragraph-parser limit (list (point))))
        ;; Planning and Clock.
-       ((and (looking-at org-planning-or-clock-line-re))
+       ((looking-at org-planning-or-clock-line-re)
 	(if (equal (match-string 1) org-clock-string)
 	    (org-element-clock-parser limit)
 	  (org-element-planning-parser limit)))
