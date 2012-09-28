@@ -90,6 +90,7 @@
 (declare-function org-strip-protective-commas "org" (beg end))
 (declare-function org-remove-if "org" (predicate seq))
 (declare-function org-completing-read "org" (&rest args))
+(declare-function org-add-protective-commas "org-src" (beg end))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
@@ -1939,7 +1940,7 @@ code ---- the results are extracted in the syntax of the source
 	(let ((wrap (lambda (start finish &optional escape)
 		      (goto-char end) (insert (concat finish "\n"))
 		      (goto-char beg) (insert (concat start "\n"))
-		      (if escape (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))
+		      (if escape (org-add-protective-commas (point) end))
 		      (goto-char end) (goto-char (point-at-eol))
 		      (setq end (point-marker))))
 	      (proper-list-p (lambda (it) (and (listp it) (null (cdr (last it)))))))
@@ -1986,7 +1987,7 @@ code ---- the results are extracted in the syntax of the source
 	   ((member "latex" result-params)
 	    (funcall wrap "#+BEGIN_LaTeX" "#+END_LaTeX"))
 	   ((member "org" result-params)
-	    (funcall wrap "#+BEGIN_SRC org" "#+END_SRC" t))
+	    (funcall wrap "#+BEGIN_SRC org" "#+END_SRC" 'escape))
 	   ((member "code" result-params)
 	    (funcall wrap (format "#+BEGIN_SRC %s%s" (or lang "none") results-switches)
 		     "#+END_SRC"))

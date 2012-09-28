@@ -590,6 +590,21 @@ the language, a switch telling if the content should be in a single line."
     (goto-char pos)
     (org-get-indentation)))
 
+(defun org-add-protective-commas (beg end &optional line)
+  "Add protective commas in region.
+Return the delta in size of the region."
+  (interactive "r")
+  (let ((org-re "^\\(.\\)")
+	(other-re "^\\([*]\\|[ \t]*#\\+\\)")
+	(delta 0))
+    (save-excursion
+      (goto-char beg)
+      (while (re-search-forward (if (derived-mode-p 'org-mode) org-re other-re)
+				end t)
+	(if (and line (eq (org-current-line) line)) (setq delta (1+ delta)))
+	(replace-match ",\\1")))
+    delta))
+
 (defun org-edit-src-exit (&optional context)
   "Exit special edit and protect problematic lines."
   (interactive)
@@ -634,11 +649,8 @@ the language, a switch telling if the content should be in a single line."
 	(goto-char (point-min))
 	(if (looking-at "\\s-*") (replace-match " ")))
       (when (org-bound-and-true-p org-edit-src-from-org-mode)
-	(goto-char (point-min))
-	(while (re-search-forward
-		(if (derived-mode-p 'org-mode) "^\\(.\\)" "^\\([*]\\|[ \t]*#\\+\\)") nil t)
-	  (if (eq (org-current-line) line) (setq delta (1+ delta)))
-	  (replace-match ",\\1")))
+	(setq delta (+ delta (org-add-protective-commas
+			      (point-min) (point-max) line))))
       (when (org-bound-and-true-p org-edit-src-picture)
 	(setq preserve-indentation nil)
 	(untabify (point-min) (point-max))
