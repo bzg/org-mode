@@ -1007,11 +1007,11 @@ Line 3\"
   (org-test-with-temp-text "Block two has a space after the name.
 
   #+name: foo
-  #+begin_src emacs-lisp
+  #+begin_src emacs-lisp 
     1
   #+end_src emacs-lisp
 
-#+name: foo
+#+name: foo 
 #+begin_src emacs-lisp
   2
 #+end_src
