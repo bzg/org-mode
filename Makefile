@@ -49,6 +49,7 @@ helpall::
 help helpall::
 	$(info make config         - check main configuration)
 helpall::
+	$(info make config-version - check Org version)
 	$(info make config-test    - check test configuration)
 	$(info make config-exe     - check executables configuration)
 	$(info make config-cmd     - check command configuration)
