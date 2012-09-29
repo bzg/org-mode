@@ -1868,7 +1868,7 @@ The buffer is still writable when this hook is called.")
 Agenda commands will then show existing buffer instead of generating new ones.
 When nil, `q' will kill the single agenda buffer."
   :group 'org-agenda
-  ;; :version "24.3"
+  :version "24.3"
   :type 'boolean)
 
 ;;;###autoload
@@ -2360,7 +2360,7 @@ Here it means: in .txt files, use \"p\" as the key for the
 agenda command otherwise associated with \"q\".  (The command
 originally associated with \"q\" is not displayed to avoid
 duplicates.)"
-  ;; :version "24.3"
+  :version "24.3"
   :group 'org-agenda-custom-commands
   :type '(repeat (list :tag "Rule"
 		       (string :tag "        Agenda key")

@@ -1411,7 +1411,7 @@ return the description to use."
 (defcustom org-url-hexify-p t
   "When non-nil, hexify URL when creating a link."
   :type 'boolean
-  ;; :version "24.3"
+  :version "24.3"
   :group 'org-link-store)
 
 (defcustom org-email-link-description-format "Email %c: %.30s"
@@ -1815,7 +1815,7 @@ For more examples, see the system specific constants
 (defcustom org-doi-server-url "http://dx.doi.org/"
   "The URL of the DOI server."
   :type 'string
-  ;; :version "24.3"
+  :version "24.3"
   :group 'org-link-follow)
 
 (defgroup org-refile nil
@@ -3390,7 +3390,7 @@ imagemagick     Convert the LaTeX fragments to pdf files and use imagemagick
    directories relative to the processed org files paths.  An absolute path
    puts all preview images at the same place."
   :group 'org-latex
-  ;; :version "24.3"
+  :version "24.3"
   :type 'string)
 
 (defun org-format-latex-mathml-available-p ()
@@ -3576,7 +3576,7 @@ The default use of these custom properties is to let the user
 hide them with `org-toggle-custom-properties-visibility'."
   :group 'org-properties
   :group 'org-appearance
-  ;; :version "24.3"
+  :version "24.3"
   :type '(repeat (string :tag "Property Name")))
 
 (defcustom org-fontify-done-headline nil
@@ -4271,7 +4271,7 @@ Otherwise, these types are allowed:
 		 (const :tag "Only inactive timestamps" inactive)
 		 (const :tag "Only scheduled timestamps" scheduled)
 		 (const :tag "Only deadline timestamps" deadline))
-  ;; :version "24.3"
+  :version "24.3"
   :group 'org-sparse-trees)
 
 (defun org-cycle-hide-archived-subtrees (state)
