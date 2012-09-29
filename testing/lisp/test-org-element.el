@@ -739,6 +739,10 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
   (org-test-with-temp-text "* TODO QUOTE Headline"
     (let ((org-quote-string "QUOTE")
 	  (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (should (org-element-property :quotedp (org-element-at-point)))))
+  ;; With the keyword only.
+  (org-test-with-temp-text "* QUOTE"
+    (let ((org-quote-string "QUOTE"))
       (should (org-element-property :quotedp (org-element-at-point))))))
 
 (ert-deftest test-org-element/headline-comment-keyword ()
@@ -761,6 +765,10 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
   (org-test-with-temp-text "* TODO COMMENT Headline"
     (let ((org-comment-string "COMMENT")
 	  (org-todo-keywords '((sequence "TODO" "DONE"))))
+      (should (org-element-property :commentedp (org-element-at-point)))))
+  ;; With the keyword only.
+  (org-test-with-temp-text "* COMMENT"
+    (let ((org-comment-string "COMMENT"))
       (should (org-element-property :commentedp (org-element-at-point))))))
 
 (ert-deftest test-org-element/headline-archive-tag ()
