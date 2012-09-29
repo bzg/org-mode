@@ -7013,7 +7013,8 @@ Negative selection means regexp must not match for selection of an entry."
        " "))
     (setq org-agenda-redo-command
 	  (list 'org-search-view
-		(car (get-text-property (point) 'org-last-args))
+		(car (get-text-property (min (1- (point-max)) (point))
+					'org-last-args))
 		org-agenda-query-string
 		(+ (length org-agenda-query-string)
 		   (if (member char '(?\{ ?\})) 0 1))))
@@ -7035,7 +7036,7 @@ Negative selection means regexp must not match for selection of an entry."
 	 (date (org-read-date))
 	 (org-agenda-sticky-orig org-agenda-sticky)
 	 (org-agenda-buffer-tmp-name (buffer-name))
-	 (args (get-text-property (point) 'org-last-args))
+	 (args (get-text-property (min (1- (point-max)) (point)) 'org-last-args))
 	 (0-arg (or current-prefix-arg (car args)))
 	 (2-arg (nth 2 args))
 	 (newcmd (list 'org-agenda-list 0-arg date
@@ -7055,7 +7056,7 @@ Negative selection means regexp must not match for selection of an entry."
   "Go to today."
   (interactive)
   (org-agenda-check-type t 'timeline 'agenda)
-  (let* ((args (get-text-property (point) 'org-last-args))
+  (let* ((args (get-text-property (min (1- (point-max)) (point)) 'org-last-args))
 	 (curspan (nth 2 args))
 	 (tdpos (text-property-any (point-min) (point-max) 'org-today t)))
     (cond
@@ -7074,7 +7075,7 @@ Negative selection means regexp must not match for selection of an entry."
    (or (and cnt (text-property-any (point-min) (point-max) 'org-day-cnt cnt))
        (text-property-any (point-min) (point-max) 'org-today t)
        (text-property-any (point-min) (point-max) 'org-agenda-type 'agenda)
-       (and (get-text-property (point) 'org-serie)
+       (and (get-text-property (min (1- (point-max)) (point)) 'org-serie)
 	    (org-agenda-goto-block-beginning))
        (point-min))))
 
@@ -7102,7 +7103,7 @@ Negative selection means regexp must not match for selection of an entry."
 With prefix ARG, go forward that many times the current span."
   (interactive "p")
   (org-agenda-check-type t 'agenda)
-  (let* ((args (get-text-property (point) 'org-last-args))
+  (let* ((args (get-text-property (min (1- (point-max)) (point)) 'org-last-args))
 	 (span (or (nth 2 args) org-agenda-current-span))
 	 (sd (or (nth 1 args) (org-get-at-bol 'day) org-starting-day))
 	 (greg (calendar-gregorian-from-absolute sd))
@@ -7129,7 +7130,7 @@ With prefix ARG, go forward that many times the current span."
 	   ;; `cmd' may have been set by `org-agenda-run-series' which
 	   ;; uses `org-agenda-overriding-cmd' to decide whether
 	   ;; overriding is allowed for `cmd'
-	   (get-text-property (point) 'org-serie-cmd))
+	   (get-text-property (min (1- (point-max)) (point)) 'org-serie-cmd))
 	  (org-agenda-overriding-arguments
 	   (list (car args) sd span)))
       (org-agenda-redo)
@@ -7213,7 +7214,7 @@ written as 2-digit years."
   "Change the agenda view to SPAN.
 SPAN may be `day', `week', `month', `year'."
   (org-agenda-check-type t 'agenda)
-  (let* ((args (get-text-property (point) 'org-last-args))
+  (let* ((args (get-text-property (min (1- (point-max)) (point)) 'org-last-args))
 	 (curspan (nth 2 args)))
     (if (and (not n) (equal curspan span))
 	(error "Viewing span is already \"%s\"" span))
@@ -7222,7 +7223,7 @@ SPAN may be `day', `week', `month', `year'."
 		   org-starting-day))
 	   (sd (org-agenda-compute-starting-span sd span n))
 	   (org-agenda-overriding-cmd
-	    (get-text-property (point) 'org-serie-cmd))
+	    (get-text-property (min (1- (point-max)) (point)) 'org-serie-cmd))
 	   (org-agenda-overriding-arguments
 	    (list (car args) sd span)))
       (org-agenda-redo)
@@ -8052,7 +8053,7 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 		tags thetags
 		new
 		(let ((org-prefix-format-compiled
-		       (or (get-text-property (point) 'format)
+		       (or (get-text-property (min (1- (point-max)) (point)) 'format)
 			   org-prefix-format-compiled))
 		      (extra (org-get-at-bol 'extra)))
 		  (with-current-buffer (marker-buffer hdmarker)
@@ -8079,9 +8080,11 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
 			 undone-face done-face))))
 	    (org-agenda-highlight-todo 'line)
 	    (beginning-of-line 1))
-	   (t (error "Line update did not work"))))
-	(beginning-of-line 0)))
-    (org-agenda-finalize)))
+	   (t (error "Line update did not work")))
+	  (save-restriction
+	    (narrow-to-region (point-at-bol) (point-at-eol))
+	    (org-agenda-finalize)))
+	(beginning-of-line 0)))))
 
 (defun org-agenda-align-tags (&optional line)
   "Align all tags in agenda items to `org-agenda-tags-column'."
@@ -8728,12 +8731,11 @@ entries in that Org-mode file."
 	  (fset 'calendar-cursor-to-date oldf))))))
 
 (defun org-agenda-execute-calendar-command (cmd)
-  "Execute a calendar command from the agenda, with the date associated to
-the cursor position."
+  "Execute a calendar command from the agenda with date from cursor."
   (org-agenda-check-type t 'agenda 'timeline)
   (require 'diary-lib)
-  (unless (get-text-property (point) 'day)
-    (error "Don't know which date to use for calendar command"))
+  (unless (get-text-property (min (1- (point-max)) (point)) 'day)
+    (error "Don't know which date to use for the calendar command"))
   (let* ((oldf (symbol-function 'calendar-cursor-to-date))
 	 (point (point))
 	 (date (calendar-gregorian-from-absolute
@@ -8781,7 +8783,7 @@ argument, latitude and longitude will be prompted for."
   "Open the Emacs calendar with the date at the cursor."
   (interactive)
   (org-agenda-check-type t 'agenda 'timeline)
-  (let* ((day (or (get-text-property (point) 'day)
+  (let* ((day (or (get-text-property (min (1- (point-max)) (point)) 'day)
 		  (error "Don't know which date to open in calendar")))
 	 (date (calendar-gregorian-from-absolute day))
 	 (calendar-move-hook nil)
@@ -8802,7 +8804,7 @@ This is a command that has to be installed in `calendar-mode-map'."
 (defun org-agenda-convert-date ()
   (interactive)
   (org-agenda-check-type t 'agenda 'timeline)
-  (let ((day (get-text-property (point) 'day))
+  (let ((day (get-text-property (min (1- (point-max)) (point)) 'day))
 	date s)
     (unless day
       (error "Don't know which date to convert"))
