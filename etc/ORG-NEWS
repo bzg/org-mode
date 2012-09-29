@@ -5,7 +5,22 @@ See the end of the file for license conditions.
 
 Please send Org bug reports to emacs-orgmode@gnu.org.
 
-* Version 7.9.1
+* Version 7.9.2
+
+** New ELPA repository for Org packages
+
+You can now add the Org ELPA repository like this:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+#+END_SRC
+
+It contains both the =org-*.tar= package (the core Org distribution, also
+available through http://elpa.gnu.org) and the =org-plus*.tar= package (the
+extended Org distribution, with non-GNU packages from the =contrib/=
+directory.)
+
+See http://orgmode.org/elpa/
 
 ** Overview of the new keybindings
 
@@ -23,6 +38,7 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
    |                 | =:=    | [[doc::org-columns][org-columns]]                 |
    |                 | =W=    | Set =APPT_WARNTIME=         |
    | =k=             |        | [[doc::org-agenda-capture][org-agenda-capture]]          |
+   | C-c ,           | ,      | [[doc::org-priority][org-priority]]                |
 
 ** New package and Babel langage
 
@@ -40,6 +56,10 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 
    - If your code relies on =org-make-link=, please use =concat=
      instead.
+
+   - =org-link-to-org-use-id= has been renamed to
+     =org-id-link-to-org-use-id= and its default value is nil.  The
+     previous default was =create-if-interactive-and-no-custom-id=.
 
 ** New features and user-visible changes
 
@@ -509,7 +529,37 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
      Format string to format the date and time in HTML export.  Thanks
      to Sébastien Vauban for this patch.
 
+*** Org Babel
+
+**** New =:results drawer= parameter
+
+=:results drawer= replaces =:results wrap=, which is deprecated but still
+supported.
+
+**** =:results org= now put results in a =#+BEGIN_SRC org= block
+
+=:results org= used to put results in a =#+BEGIN_ORG= block but it now puts
+results in a =#+BEGIN_SRC org= block, wich comma-escaped lines.
+
+=#+BEGIN_ORG= blocks are obsolete.
+
+**** Exporting =#+BEGIN_SRC org= blocks exports the code
+
+It used to exports the results of the code.
+
 *** Miscellaneous
+
+**** New menu entry for [[doc::org-refile][org-refile]]
+**** Allow capturing to encrypted entries
+
+If you capture to an encrypted entry, it will be decrpyted before
+inserting the template then re-encrypted after finalizing the capture.
+
+**** Inactive timestamps are now handled in tables
+
+Calc can do computation on active time-stamps like <2012-09-29 sat.>.
+Inactive time-stamps in a table's cell are now internally deactivated so
+that Calc formulas can operate on them.
 
 **** [[doc::org-table-number-regexp][org-table-number-regexp]] can now accept comma as decimal mark
 **** Org allows a new property =APPT_WARNTIME=
