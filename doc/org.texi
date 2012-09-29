@@ -936,7 +936,7 @@ If you plan to use code from the @file{contrib} subdirectory without
 compiling them, do a similar step for this directory:
 
 @example
-(add-to-list 'load-path "~/path/to/orgdir/contrib/lisp")
+(add-to-list 'load-path "~/path/to/orgdir/contrib/lisp" t)
 @end example
 
 If you want to include those files with the build and install, please
@@ -1090,7 +1090,7 @@ is not necessary.  In that case it is sufficient to start Emacs as @code{emacs
 
 ;; add latest org-mode to load path
 (add-to-list 'load-path (expand-file-name "/path/to/org-mode/lisp"))
-(add-to-list 'load-path (expand-file-name "/path/to/org-mode/contrib/lisp"))
+(add-to-list 'load-path (expand-file-name "/path/to/org-mode/contrib/lisp" t))
 
 ;; activate org
 (require 'org-install)
@@ -14532,7 +14532,7 @@ done
 emacs -Q --batch -l $ORGINSTALL \
 --eval "(progn
 (add-to-list 'load-path (expand-file-name \"~/src/org/lisp/\"))
-(add-to-list 'load-path (expand-file-name \"~/src/org/contrib/lisp/\"))
+(add-to-list 'load-path (expand-file-name \"~/src/org/contrib/lisp/\" t))
 (require 'org)(require 'org-exp)(require 'ob)(require 'ob-tangle)
 (mapc (lambda (file)
        (find-file (expand-file-name file \"$DIR\"))
