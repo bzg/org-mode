@@ -71,10 +71,6 @@ BATCH	= $(EMACS) -batch -Q
 BATCHO	= $(BATCH) \
 	  --eval '(add-to-list '"'"'load-path "./lisp")'
 
-# How to show Org version
-SHOWVER = $(BATCHO) \
-	  --eval '(org-version nil '"'"'full '"'"'message)'
-
 # How to generate local.mk
 MAKE_LOCAL_MK = $(BATCHO) \
 	  --eval '(load "org-compat.el")' \
