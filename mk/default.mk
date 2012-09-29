@@ -67,9 +67,16 @@ BTEST	= $(BATCH) \
 # BATCH = $(EMACS) -batch -vanilla # XEmacs
 BATCH	= $(EMACS) -batch -Q
 
+# Emacs must be started in toplevel directory
+BATCHO	= $(BATCH) \
+	  --eval '(add-to-list '"'"'load-path "./lisp")'
+
+# How to show Org version
+SHOWVER = $(BATCHO) \
+	  --eval '(org-version nil '"'"'full '"'"'message)'
+
 # How to generate local.mk
-MAKE_LOCAL_MK = $(BATCH) \
-	  --eval '(add-to-list '"'"'load-path "./lisp")' \
+MAKE_LOCAL_MK = $(BATCHO) \
 	  --eval '(load "org-compat.el")' \
 	  --eval '(load "../mk/org-fixup.el")' \
 	  --eval '(org-make-local-mk)'
