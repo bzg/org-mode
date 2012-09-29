@@ -6547,6 +6547,9 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
   "Exit agenda by killing agenda buffer or burying it when
 `org-agenda-sticky' is non-NIL"
   (interactive)
+  (if (and (eq org-indirect-buffer-display 'other-window)
+	   org-last-indirect-buffer)
+      (delete-window (get-buffer-window org-last-indirect-buffer)))
   (if org-agenda-columns-active
       (org-columns-quit)
     (if org-agenda-sticky
@@ -7267,10 +7270,16 @@ so that the date SD will be in that range."
   (remove-hook 'pre-command-hook 'org-unhighlight-once)
   (org-unhighlight))
 
+(defvar org-agenda-pre-follow-window-conf nil)
 (defun org-agenda-follow-mode ()
   "Toggle follow mode in an agenda buffer."
   (interactive)
+  (unless org-agenda-follow-mode
+    (setq org-agenda-pre-follow-window-conf
+	  (current-window-configuration)))
   (setq org-agenda-follow-mode (not org-agenda-follow-mode))
+  (unless org-agenda-follow-mode
+    (set-window-configuration org-agenda-pre-follow-window-conf))
   (org-agenda-set-mode-name)
   (org-agenda-do-context-action)
   (message "Follow mode is %s"
@@ -7879,8 +7888,7 @@ use the dedicated frame)."
       (unless (or (eq org-indirect-buffer-display 'new-frame)
 		  (eq org-indirect-buffer-display 'dedicated-frame))
 	(unwind-protect
-	    (progn
-	      (unless (and indirect-window (window-live-p indirect-window)))
+	    (unless (and indirect-window (window-live-p indirect-window))
 	      (setq indirect-window (split-window agenda-window)))
 	  (and indirect-window (select-window indirect-window))
 	  (switch-to-buffer org-last-indirect-buffer :norecord)
