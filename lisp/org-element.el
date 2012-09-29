@@ -760,11 +760,14 @@ Assume point is at beginning of the headline."
 				     (point)))))
       ;; Clean RAW-VALUE from any quote or comment string.
       (when (or quotedp commentedp)
-	(setq raw-value
-	      (replace-regexp-in-string
-	       (concat "\\(" org-quote-string "\\|" org-comment-string "\\) +")
-	       ""
-	       raw-value)))
+	(let ((case-fold-search nil))
+	  (setq raw-value
+		(replace-regexp-in-string
+		 (concat
+		  (regexp-opt (list org-quote-string org-comment-string))
+		  "\\(?: \\|$\\)")
+		 ""
+		 raw-value))))
       ;; Clean TAGS from archive tag, if any.
       (when archivedp (setq tags (delete org-archive-tag tags)))
       (let ((headline
