@@ -727,23 +727,31 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
       (should-not (org-element-property :quotedp (org-element-at-point)))))
   ;; Standard position.
   (org-test-with-temp-text "* QUOTE Headline"
-    (let ((org-quote-string "QUOTE"))
-      (let ((headline (org-element-at-point)))
-	(should (org-element-property :quotedp headline))
-	;; Test removal from raw value.
-	(should (equal (org-element-property :raw-value headline) "Headline"))))
-    ;; Case sensitivity.
-    (let ((org-quote-string "Quote"))
-      (should-not (org-element-property :quotedp (org-element-at-point)))))
+    (let* ((org-quote-string "QUOTE")
+	   (headline (org-element-at-point)))
+      (should (org-element-property :quotedp headline))
+      ;; Test removal from raw value.
+      (should (equal (org-element-property :raw-value headline) "Headline"))))
+  ;; Case sensitivity.
+  (org-test-with-temp-text "* QUOTE Headline"
+    (let* ((org-quote-string "Quote")
+	   (headline (org-element-at-point)))
+      (should-not (org-element-property :quotedp headline))
+      (should (equal (org-element-property :raw-value headline)
+		     "QUOTE Headline"))))
   ;; With another keyword.
   (org-test-with-temp-text "* TODO QUOTE Headline"
-    (let ((org-quote-string "QUOTE")
-	  (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (should (org-element-property :quotedp (org-element-at-point)))))
+    (let* ((org-quote-string "QUOTE")
+	   (org-todo-keywords '((sequence "TODO" "DONE")))
+	   (headline (org-element-at-point)))
+      (should (org-element-property :quotedp headline))
+      (should (equal (org-element-property :raw-value headline) "Headline"))))
   ;; With the keyword only.
   (org-test-with-temp-text "* QUOTE"
-    (let ((org-quote-string "QUOTE"))
-      (should (org-element-property :quotedp (org-element-at-point))))))
+    (let* ((org-quote-string "QUOTE")
+	   (headline (org-element-at-point)))
+      (should (org-element-property :quotedp headline))
+      (should (equal (org-element-property :raw-value headline) "")))))
 
 (ert-deftest test-org-element/headline-comment-keyword ()
   "Test COMMENT keyword recognition."
@@ -753,23 +761,30 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
       (should-not (org-element-property :commentedp (org-element-at-point)))))
   ;; Standard position.
   (org-test-with-temp-text "* COMMENT Headline"
-    (let ((org-comment-string "COMMENT"))
-      (let ((headline (org-element-at-point)))
-	(should (org-element-property :commentedp headline))
-	;; Test removal from raw value.
-	(should (equal (org-element-property :raw-value headline) "Headline"))))
-    ;; Case sensitivity.
-    (let ((org-comment-string "Comment"))
-      (should-not (org-element-property :commentedp (org-element-at-point)))))
+    (let ((org-comment-string "COMMENT")
+	  (headline (org-element-at-point)))
+      (should (org-element-property :commentedp headline))
+      (should (equal (org-element-property :raw-value headline) "Headline"))))
+  ;; Case sensitivity.
+  (org-test-with-temp-text "* COMMENT Headline"
+    (let* ((org-comment-string "Comment")
+	   (headline (org-element-at-point)))
+      (should-not (org-element-property :commentedp headline))
+      (should (equal (org-element-property :raw-value headline)
+		     "COMMENT Headline"))))
   ;; With another keyword.
   (org-test-with-temp-text "* TODO COMMENT Headline"
-    (let ((org-comment-string "COMMENT")
-	  (org-todo-keywords '((sequence "TODO" "DONE"))))
-      (should (org-element-property :commentedp (org-element-at-point)))))
+    (let* ((org-comment-string "COMMENT")
+	   (org-todo-keywords '((sequence "TODO" "DONE")))
+	   (headline (org-element-at-point)))
+      (should (org-element-property :commentedp headline))
+      (should (equal (org-element-property :raw-value headline) "Headline"))))
   ;; With the keyword only.
   (org-test-with-temp-text "* COMMENT"
-    (let ((org-comment-string "COMMENT"))
-      (should (org-element-property :commentedp (org-element-at-point))))))
+    (let* ((org-comment-string "COMMENT")
+	   (headline (org-element-at-point)))
+      (should (org-element-property :commentedp headline))
+      (should (equal (org-element-property :raw-value headline) "")))))
 
 (ert-deftest test-org-element/headline-archive-tag ()
   "Test ARCHIVE tag recognition."
