@@ -692,7 +692,7 @@ on two lines
       (forward-line)
       (should
        (string=
-	"" 
+	""
 	(buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
   (org-test-with-temp-text-in-file "
 #+begin_src emacs-lisp
@@ -706,7 +706,7 @@ on two lines
       (forward-line)
       (should
        (string=
-	": some text" 
+	": some text"
 	(buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
 
 (ert-deftest test-ob/commented-last-block-line-with-var ()
@@ -720,7 +720,7 @@ on two lines
       (re-search-forward "\\#\\+results:" nil t)
       (forward-line)
       (should (string=
-	       "" 
+	       ""
 	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
   (org-test-with-temp-text-in-file "
 #+begin_src emacs-lisp :var a=2
@@ -732,7 +732,7 @@ on two lines
       (re-search-forward "\\#\\+results:" nil t)
       (forward-line)
       (should (string=
-	       ": 2" 
+	       ": 2"
 	       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
 
 (defun test-ob-verify-result-and-removed-result (result buffer-text)
@@ -748,7 +748,7 @@ replacement happens correctly."
       (org-babel-next-src-block) (org-ctrl-c-ctrl-c) (org-ctrl-c-ctrl-c)
       (should (re-search-forward "\\#\\+results:" nil t))
       (forward-line)
-      (should (string= result 
+      (should (string= result
 		       (buffer-substring-no-properties
 			(point-at-bol)
 			(- (point-max) 16))))
@@ -846,7 +846,7 @@ trying to find the :END: marker."
       (re-search-forward "\\#\\+results:" nil t)
       (forward-line)
       (should (string=
-	       "" 
+	       ""
 	       (buffer-substring-no-properties (point-at-bol) (point-at-eol))))))
   (org-test-with-temp-text-in-file "
 #+begin_src emacs-lisp :var a=2
@@ -858,7 +858,7 @@ trying to find the :END: marker."
       (re-search-forward "\\#\\+results:" nil t)
       (forward-line)
       (should (string=
-	       ": 2" 
+	       ": 2"
 	       (buffer-substring-no-properties (point-at-bol) (point-at-eol)))))))
 
 (defun test-ob-verify-result-and-removed-result (result buffer-text)
@@ -874,7 +874,7 @@ replacement happens correctly."
       (org-babel-next-src-block) (org-ctrl-c-ctrl-c) (org-ctrl-c-ctrl-c)
       (should (re-search-forward "\\#\\+results:" nil t))
       (forward-line)
-      (should (string= result 
+      (should (string= result
 		       (buffer-substring-no-properties
 			(point-at-bol)
 			(- (point-max) 16))))
@@ -930,9 +930,9 @@ hello there
   "Test `org-babel-remove-result' with :results org."
   (test-ob-verify-result-and-removed-result
    "#+BEGIN_SRC org
-* heading
-** subheading
-content
+,* heading
+,** subheading
+,content
 #+END_SRC"
 
 "* org-babel-remove-result
@@ -1007,11 +1007,11 @@ Line 3\"
   (org-test-with-temp-text "Block two has a space after the name.
 
   #+name: foo
-  #+begin_src emacs-lisp 
+  #+begin_src emacs-lisp
     1
   #+end_src emacs-lisp
 
-#+name: foo 
+#+name: foo
 #+begin_src emacs-lisp
   2
 #+end_src

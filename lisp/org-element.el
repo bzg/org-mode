@@ -718,10 +718,12 @@ Assume point is at beginning of the headline."
 	   (raw-value (or (nth 4 components) ""))
 	   (quotedp
 	    (let ((case-fold-search nil))
-	      (string-match (format "^%s +" org-quote-string) raw-value)))
+	      (string-match (format "^%s\\( \\|$\\)" org-quote-string)
+			    raw-value)))
 	   (commentedp
 	    (let ((case-fold-search nil))
-	      (string-match (format "^%s +" org-comment-string) raw-value)))
+	      (string-match (format "^%s\\( \\|$\\)" org-comment-string)
+			    raw-value)))
 	   (archivedp (member org-archive-tag tags))
 	   (footnote-section-p (and org-footnote-section
 				    (string= org-footnote-section raw-value)))
