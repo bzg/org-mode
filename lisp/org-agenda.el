@@ -4369,7 +4369,10 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
       (org-compile-prefix-format 'todo)
       (org-set-sorting-strategy 'todo)
       (setq org-agenda-redo-command
-	    `(org-todo-list (or current-prefix-arg (quote ,arg))))
+	    `(org-todo-list (or (and (numberp current-prefix-arg) current-prefix-arg)
+				;; (and (stringp (quote ,arg)) (quote ,arg))
+				,org-select-this-todo-keyword
+				current-prefix-arg ,arg)))
       (setq files (org-agenda-files nil 'ifmode)
 	    rtnall nil)
       (while (setq file (pop files))
