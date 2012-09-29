@@ -114,6 +114,7 @@ nil   Never use an ID to make a link, instead link using a text search for
       the headline text."
   :group 'org-link-store
   :group 'org-id
+  :version "24.3"
   :type '(choice
 	  (const :tag "Create ID to make link" t)
 	  (const :tag "Create if storing link interactively"

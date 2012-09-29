@@ -371,7 +371,7 @@ The capture buffer is current and still narrowed."
   "When non-nil, add a bookmark pointing at the last stored
 position when capturing."
   :group 'org-capture
-  ;; :version "24.3"
+  :version "24.3"
   :type 'boolean)
 
 ;;; The property list for keeping information about the capture process
@@ -472,7 +472,7 @@ Here it means: in `message-mode buffers', use \"d\" as the
 key for the capture template otherwise associated with \"d\".
 \(The template originally associated with \"q\" is not displayed
 to avoid duplicates.)"
-  ;; :version "24.3"
+  :version "24.3"
   :group 'org-capture
   :type '(repeat (list :tag "Rule"
 		       (string :tag "        Capture key")
@@ -492,7 +492,7 @@ to avoid duplicates.)"
   "Non-nil means use the date at point when capturing from agendas.
 When nil, you can still capturing using the date at point with \\[org-agenda-capture]]."
   :group 'org-capture
-  ;; :version "24.3"
+  :version "24.3"
   :type 'boolean)
 
 ;;;###autoload
