@@ -8654,7 +8654,6 @@ When `org-agenda-diary-file' points to a file,
 `org-agenda-diary-entry-in-org-file' is called instead to create
 entries in that Org-mode file."
   (interactive)
-  (org-agenda-check-type t 'agenda 'timeline)
   (if (not (eq org-agenda-diary-file 'diary-file))
       (org-agenda-diary-entry-in-org-file)
     (require 'diary-lib)
