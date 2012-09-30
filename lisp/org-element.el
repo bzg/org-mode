@@ -488,7 +488,7 @@ containing `:begin', `:end', `:hiddenp', `:contents-begin',
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
-	       (re-search-forward "^[ \t]*#\\+END_CENTER" limit t)))
+	       (re-search-forward "^[ \t]*#\\+END_CENTER[ \t]*$" limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((block-end-line (match-beginning 0)))
@@ -536,7 +536,7 @@ Return a list whose CAR is `drawer' and CDR is a plist containing
 
 Assume point is at beginning of drawer."
   (let ((case-fold-search t))
-    (if (not (save-excursion (re-search-forward "^[ \t]*:END:" limit t)))
+    (if (not (save-excursion (re-search-forward "^[ \t]*:END:[ \t]*$" limit t)))
 	;; Incomplete drawer: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (save-excursion
@@ -591,7 +591,8 @@ containing `:block-name', `:begin', `:end', `:hiddenp',
 
 Assume point is at beginning of dynamic block."
   (let ((case-fold-search t))
-    (if (not (save-excursion (re-search-forward org-dblock-end-re limit t)))
+    (if (not (save-excursion
+	       (re-search-forward "^[ \t]*#\\+END:?[ \t]*$" limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((block-end-line (match-beginning 0)))
@@ -1214,7 +1215,7 @@ containing `:begin', `:end', `:hiddenp', `:contents-begin',
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
-	       (re-search-forward "^[ \t]*#\\+END_QUOTE" limit t)))
+	       (re-search-forward "^[ \t]*#\\+END_QUOTE[ \t]*$" limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((block-end-line (match-beginning 0)))
@@ -1298,7 +1299,8 @@ Assume point is at the beginning of the block."
 	 (type (progn (looking-at "[ \t]*#\\+BEGIN_\\(S-+\\)")
 		      (upcase (match-string-no-properties 1)))))
     (if (not (save-excursion
-	       (re-search-forward (concat "^[ \t]*#\\+END_" type) limit t)))
+	       (re-search-forward
+		(format "^[ \t]*#\\+END_%s[ \t]*$" type) limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((block-end-line (match-beginning 0)))
@@ -1505,7 +1507,7 @@ containing `:begin', `:end', `:hiddenp', `:value' and
 Assume point is at comment block beginning."
   (let ((case-fold-search t))
     (if (not (save-excursion
-	       (re-search-forward "^[ \t]*#\\+END_COMMENT" limit t)))
+	       (re-search-forward "^[ \t]*#\\+END_COMMENT[ \t]*$" limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((contents-end (match-beginning 0)))
@@ -1552,7 +1554,7 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 `:switches', `:value' and `:post-blank' keywords."
   (let ((case-fold-search t))
     (if (not (save-excursion
-	       (re-search-forward "^[ \t]*#\\+END_EXAMPLE" limit t)))
+	       (re-search-forward "^[ \t]*#\\+END_EXAMPLE[ \t]*$" limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((contents-end (match-beginning 0)))
@@ -1633,7 +1635,8 @@ Assume point is at export-block beginning."
 	 (type (progn (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
 		      (upcase (org-match-string-no-properties 1)))))
     (if (not (save-excursion
-	       (re-search-forward (concat "^[ \t]*#\\+END_" type) limit t)))
+	       (re-search-forward
+		(format "^[ \t]*#\\+END_%s[ \t]*$" type) limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((contents-end (match-beginning 0)))
@@ -1805,7 +1808,8 @@ Assume point is at the beginning of the latex environment."
 	   (env (progn (looking-at "^[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}")
 		       (regexp-quote (match-string 1))))
 	   (code-end
-	    (progn (re-search-forward (format "^[ \t]*\\\\end{%s}" env) limit t)
+	    (progn (re-search-forward
+		    (format "^[ \t]*\\\\end{%s}[ \t]*$" env) limit t)
 		   (forward-line)
 		   (point)))
 	   (value (buffer-substring-no-properties code-begin code-end))
@@ -1880,52 +1884,62 @@ Assume point is at the beginning of the paragraph."
 	   (before-blank
 	    (let ((case-fold-search t))
 	      (end-of-line)
-	      (re-search-forward org-element-paragraph-separate limit 'm)
-	      (while (and (/= (point) limit)
-			  (cond
-			   ;; Skip non-existent or incomplete drawer.
-			   ((save-excursion
-			      (beginning-of-line)
-			      (and (looking-at "[ \t]*:\\S-")
-				   (or (not (looking-at org-drawer-regexp))
-				       (not (save-excursion
-					      (re-search-forward
-					       "^[ \t]*:END:" limit t)))))))
-			   ;; Stop at comments.
-			   ((save-excursion
-			      (beginning-of-line)
-			      (not (looking-at "[ \t]*#\\S-"))) nil)
-			   ;; Skip incomplete dynamic blocks.
-			   ((save-excursion
-			      (beginning-of-line)
-			      (looking-at "[ \t]*#\\+BEGIN: "))
-			    (not (save-excursion
-				   (re-search-forward
-				    "^[ \t]*\\+END:" limit t))))
-			   ;; Skip incomplete blocks.
-			   ((save-excursion
-			      (beginning-of-line)
-			      (looking-at "[ \t]*#\\+BEGIN_\\(\\S-+\\)"))
-			    (not (save-excursion
-				   (re-search-forward
-				    (concat "^[ \t]*#\\+END_"
-					    (match-string 1))
-				    limit t))))
-			   ;; Skip incomplete latex environments.
-			   ((save-excursion
-			      (beginning-of-line)
-			      (looking-at "^[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}"))
-			    (not (save-excursion
-				   (re-search-forward
-				    (format "^[ \t]*\\\\end{%s}"
-					    (match-string 1))
-				    limit t))))
-			   ;; Skip ill-formed keywords.
-			   ((not (save-excursion
-				   (beginning-of-line)
-				   (looking-at "[ \t]*#\\+\\S-+:"))))))
-		(re-search-forward org-element-paragraph-separate limit 'm))
-	      (if (eobp) (point) (goto-char (line-beginning-position)))))
+	      (if (not (re-search-forward
+			org-element-paragraph-separate limit 'm))
+		  limit
+		;; A matching `org-element-paragraph-separate' is not
+		;; necessarily the end of the paragraph.  In
+		;; particular, lines starting with # or : as a first
+		;; non-space character are ambiguous.  We have check
+		;; if they are valid Org syntax (i.e. not an
+		;; incomplete keyword).
+		(beginning-of-line)
+		(while (not
+			(or
+			 ;; There's no ambiguity for other symbols or
+			 ;; empty lines: stop here.
+			 (looking-at "[ \t]*\\(?:[^:#]\\|$\\)")
+			 ;; Stop at valid fixed-width areas.
+			 (looking-at "[ \t]*:\\(?: \\|$\\)")
+			 ;; Stop at drawers.
+			 (and (looking-at org-drawer-regexp)
+			      (save-excursion
+				(re-search-forward
+				 "^[ \t]*:END:[ \t]*$" limit t)))
+			 ;; Stop at valid comments.
+			 (looking-at "[ \t]*#\\(?: \\|$\\)")
+			 ;; Stop at valid dynamic blocks.
+			 (and (looking-at org-dblock-start-re)
+			      (save-excursion
+				(re-search-forward
+				 "^[ \t]*#\\+END:?[ \t]*$" limit t)))
+			 ;; Stop at valid blocks.
+			 (and (looking-at
+			       "[ \t]*#\\+BEGIN_\\(\\S-+\\)[ \t]*$")
+			      (save-excursion
+				(re-search-forward
+				 (format "^[ \t]*#\\+END_%s[ \t]*$"
+					 (match-string 1))
+				 limit t)))
+			 ;; Stop at valid latex environments.
+			 (and (looking-at
+			       "^[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}[ \t]*$")
+			      (save-excursion
+				(re-search-forward
+				 (format "^[ \t]*\\\\end{%s}[ \t]*$"
+					 (match-string 1))
+				 limit t)))
+			 ;; Stop at valid keywords.
+			 (looking-at "[ \t]*#\\+\\S-+:")
+			 ;; Skip everything else.
+			 (not
+			  (progn
+			    (end-of-line)
+			    (re-search-forward org-element-paragraph-separate
+					       limit 'm)))))
+		  (beginning-of-line)))
+	      (if (= (point) limit) limit
+		(goto-char (line-beginning-position)))))
 	   (contents-end (progn (skip-chars-backward " \r\t\n" contents-begin)
 				(forward-line)
 				(point)))
@@ -2049,7 +2063,8 @@ containing `:language', `:switches', `:parameters', `:begin',
 
 Assume point is at the beginning of the block."
   (let ((case-fold-search t))
-    (if (not (save-excursion (re-search-forward "^[ \t]*#\\+END_SRC" limit t)))
+    (if (not (save-excursion (re-search-forward "^[ \t]*#\\+END_SRC[ \t]*$"
+						limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((contents-end (match-beginning 0)))
@@ -2258,7 +2273,7 @@ containing `:begin', `:end', `:contents-begin', `:contents-end',
 Assume point is at beginning of the block."
   (let ((case-fold-search t))
     (if (not (save-excursion
-	       (re-search-forward "^[ \t]*#\\+END_VERSE" limit t)))
+	       (re-search-forward "^[ \t]*#\\+END_VERSE[ \t]*$" limit t)))
 	;; Incomplete block: parse it as a paragraph.
 	(org-element-paragraph-parser limit affiliated)
       (let ((contents-end (match-beginning 0)))
