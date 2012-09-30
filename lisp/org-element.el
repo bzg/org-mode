@@ -1504,7 +1504,9 @@ containing `:begin', `:end', `:number-lines', `:preserve-indent',
 		 (begin (car keywords))
 		 (contents-begin (progn (forward-line) (point)))
 		 (hidden (org-invisible-p2))
-		 (value (buffer-substring-no-properties contents-begin contents-end))
+		 (value (org-unescape-code-in-string
+			 (buffer-substring-no-properties
+			  contents-begin contents-end)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -1531,7 +1533,8 @@ CONTENTS is nil."
   (let ((switches (org-element-property :switches example-block)))
     (concat "#+BEGIN_EXAMPLE" (and switches (concat " " switches)) "\n"
 	    (org-remove-indentation
-	     (org-element-property :value example-block))
+	     (org-escape-code-in-string
+	      (org-element-property :value example-block)))
 	    "#+END_EXAMPLE")))
 
 
@@ -2032,7 +2035,8 @@ Assume point is at the beginning of the block."
 		 ;; Get visibility status.
 		 (hidden (progn (forward-line) (org-invisible-p2)))
 		 ;; Retrieve code.
-		 (value (buffer-substring-no-properties (point) contents-end))
+		 (value (org-unescape-code-in-string
+			 (buffer-substring-no-properties (point) contents-end)))
 		 (pos-before-blank (progn (goto-char contents-end)
 					  (forward-line)
 					  (point)))
@@ -2080,7 +2084,7 @@ CONTENTS is nil."
 		    (concat (and lang (concat " " lang))
 			    (and switches (concat " " switches))
 			    (and params (concat " " params))))
-	    value
+	    (org-escape-code-in-string value)
 	    "#+END_SRC")))
 
 
