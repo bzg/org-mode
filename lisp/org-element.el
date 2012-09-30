@@ -262,8 +262,8 @@ This list is checked after translations have been applied.  See
 By default, all keywords setting attributes (i.e. \"ATTR_LATEX\")
 allow multiple occurrences and need not to be in this list.")
 
-(defconst org-element-parsed-keywords '("AUTHOR" "CAPTION" "DATE" "TITLE")
-  "List of keywords whose value can be parsed.
+(defconst org-element-parsed-keywords '("CAPTION")
+  "List of affiliated keywords whose value can be parsed.
 
 Their value will be stored as a secondary string: a list of
 strings and objects.
@@ -272,16 +272,21 @@ This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
 
 (defconst org-element-dual-keywords '("CAPTION" "RESULTS")
-  "List of keywords which can have a secondary value.
+  "List of affiliated keywords which can have a secondary value.
 
 In Org syntax, they can be written with optional square brackets
-before the colons.  For example, results keyword can be
+before the colons.  For example, RESULTS keyword can be
 associated to a hash value with the following:
 
   #+RESULTS[hash-string]: some-source
 
 This list is checked after translations have been applied.  See
 `org-element-keyword-translation-alist'.")
+
+(defconst org-element-document-properties '("AUTHOR" "DATE" "TITLE")
+  "List of properties associated to the whole document.
+Any keyword in this list will have its value parsed and stored as
+a secondary string.")
 
 (defconst org-element-object-restrictions
   '((bold export-snippet inline-babel-call inline-src-block latex-or-entity link

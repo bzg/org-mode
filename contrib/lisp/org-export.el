@@ -1371,7 +1371,8 @@ for export.  Return options as a plist."
      (when (setq prop (org-entry-get (point) "EXPORT_OPTIONS"))
        (setq plist
 	     (nconc plist (org-export--parse-option-keyword prop backend))))
-     ;; Handle other keywords.
+     ;; Handle other keywords.  TITLE keyword is excluded as it has
+     ;; already been handled already.
      (let ((seen '("TITLE")))
        (mapc
 	(lambda (option)
@@ -1388,7 +1389,7 @@ for export.  Return options as a plist."
 			 plist
 			 (car option)
 			 ;; Parse VALUE if required.
-			 (if (member property org-element-parsed-keywords)
+			 (if (member property org-element-document-properties)
 			     (org-element-parse-secondary-string
 			      value (org-element-restriction 'keyword))
 			   value))))))))
@@ -1457,8 +1458,8 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	    ;; Build regexp matching all keywords associated to export
 	    ;; options.  Note: the search is case insensitive.
 	    (opt-re (format "^[ \t]*#\\+%s:"
-		     (regexp-opt
-		      (delq nil (mapcar (lambda (e) (nth 1 e)) all))))))
+			    (regexp-opt
+			     (delq nil (mapcar (lambda (e) (nth 1 e)) all))))))
        (goto-char (point-min))
        (while (re-search-forward opt-re nil t)
 	 (let ((element (org-element-at-point)))
@@ -1483,7 +1484,8 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			('t val)
 			(otherwise (if (not (plist-member plist prop)) val
 				     (plist-get plist prop))))))))))
-       ;; Parse keywords specified in `org-element-parsed-keywords'.
+       ;; Parse keywords specified in
+       ;; `org-element-document-properties'.
        (mapc
 	(lambda (key)
 	  (let* ((prop (cdr (assoc key alist)))
@@ -1494,7 +1496,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 		     plist prop
 		     (org-element-parse-secondary-string
 		      value (org-element-restriction 'keyword)))))))
-	org-element-parsed-keywords))
+	org-element-document-properties))
      ;; 3. Return final value.
      plist)))
 
@@ -1561,12 +1563,13 @@ process."
 	      plist
 	      (car cell)
 	      ;; Eval default value provided.  If keyword is a member
-	      ;; of `org-element-parsed-keywords', parse it as
+	      ;; of `org-element-document-properties', parse it as
 	      ;; a secondary string before storing it.
 	      (let ((value (eval (nth 3 cell))))
 		(if (not (stringp value)) value
 		  (let ((keyword (nth 1 cell)))
-		    (if (not (member keyword org-element-parsed-keywords)) value
+		    (if (not (member keyword org-element-document-properties))
+			value
 		      (org-element-parse-secondary-string
 		       value (org-element-restriction 'keyword)))))))))
      all)
@@ -1606,7 +1609,7 @@ retrieved."
 
 ;;;; Tree Properties
 ;;
-;; Tree properties are infromation extracted from parse tree.  They
+;; Tree properties are information extracted from parse tree.  They
 ;; are initialized at the beginning of the transcoding process by
 ;; `org-export-collect-tree-properties'.
 ;;
