@@ -1516,30 +1516,29 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
        (org-with-wide-buffer
 	(goto-char (point-min))
 	(while (re-search-forward org-footnote-definition-re nil t)
-	  (let ((def (org-footnote-at-definition-p)))
-	    (when def
-	      (org-skip-whitespace)
-	      (push (cons (car def)
-			  (save-restriction
-			    (narrow-to-region (point) (nth 2 def))
-			    ;; Like `org-element-parse-buffer', but
-			    ;; makes sure the definition doesn't start
-			    ;; with a section element.
-			    (org-element--parse-elements
-			     (point-min) (point-max) nil nil nil nil
-			     (list 'org-data nil))))
-		    alist))))
+	  (let ((def (save-match-data (org-element-at-point))))
+	    (when (eq (org-element-type def) 'footnote-definition)
+	      (push
+	       (cons (org-element-property :label def)
+		     (let ((cbeg (org-element-property :contents-begin def)))
+		       (when cbeg
+			 (org-element--parse-elements
+			  cbeg (org-element-property :contents-end def)
+			  nil nil nil nil (list 'org-data nil)))))
+	       alist))))
 	alist))
      :id-alist
      ;; Collect id references.
      (let (alist)
        (org-with-wide-buffer
 	(goto-char (point-min))
-	(while (re-search-forward
-		"\\[\\[id:\\(\\S-+?\\)\\]\\(?:\\[.*?\\]\\)?\\]" nil t)
-	  (let* ((id (org-match-string-no-properties 1))
-		 (file (org-id-find-id-file id)))
-	    (when file (push (cons id (file-relative-name file)) alist)))))
+	(while (re-search-forward "\\[\\[id:\\S-+?\\]" nil t)
+	  (let ((link (org-element-context)))
+	    (when (eq (org-element-type link) 'link)
+	      (let* ((id (org-element-property :path link))
+		     (file (org-id-find-id-file id)))
+		(when file
+		  (push (cons id (file-relative-name file)) alist)))))))
        alist))))
 
 (defun org-export--get-global-options (&optional backend)
