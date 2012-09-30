@@ -1791,7 +1791,7 @@ Assume point is at the beginning of the paragraph."
 				 "^[ \t]*#\\+END:?[ \t]*$" limit t)))
 			 ;; Stop at valid blocks.
 			 (and (looking-at
-			       "[ \t]*#\\+BEGIN_\\(\\S-+\\)[ \t]*$")
+			       "[ \t]*#\\+BEGIN_\\(\\S-+\\)")
 			      (save-excursion
 				(re-search-forward
 				 (format "^[ \t]*#\\+END_%s[ \t]*$"
