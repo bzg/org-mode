@@ -3666,7 +3666,8 @@ containing the secondary string.  It is used to set correctly
       (mapc (lambda (obj) (org-element-put-property obj :parent parent))
 	    secondary))))
 
-(defun org-element-map (data types fun &optional info first-match no-recursion)
+(defun org-element-map
+  (data types fun &optional info first-match no-recursion with-affiliated)
   "Map a function on selected elements or objects.
 
 DATA is the parsed tree, as returned by, i.e,
@@ -3686,6 +3687,9 @@ Optional argument NO-RECURSION is a symbol or a list of symbols
 representing elements or objects types.  `org-element-map' won't
 enter any recursive element or object whose type belongs to that
 list.  Though, FUN can still be applied on them.
+
+When optional argument WITH-AFFILIATED is non-nil, also move into
+affiliated keywords to find objects.
 
 Nil values returned from FUN do not appear in the results."
   ;; Ensure TYPES and NO-RECURSION are a list, even of one element.
@@ -3709,6 +3713,12 @@ Nil values returned from FUN do not appear in the results."
 				  (setq category 'elements)))))
 		    types)
 	      category)))
+	 ;; Compute properties for affiliated keywords if necessary.
+	 (--affiliated-alist
+	  (and with-affiliated
+	       (mapcar (lambda (kwd)
+			 (cons kwd (intern (concat ":" (downcase kwd)))))
+		       org-element-affiliated-keywords)))
 	 --acc
 	 --walk-tree
 	 (--walk-tree
@@ -3738,12 +3748,40 @@ Nil values returned from FUN do not appear in the results."
 			   (t (push result --acc)))))
 		 ;; If --DATA has a secondary string that can contain
 		 ;; objects with their type among TYPES, look into it.
-		 (when (eq --category 'objects)
+		 (when (and (eq --category 'objects) (not (stringp --data)))
 		   (let ((sec-prop
 			  (assq --type org-element-secondary-value-alist)))
 		     (when sec-prop
 		       (funcall --walk-tree
 				(org-element-property (cdr sec-prop) --data)))))
+		 ;; If --DATA has any affiliated keywords and
+		 ;; WITH-AFFILIATED is non-nil, look for objects in
+		 ;; them.
+		 (when (and with-affiliated
+			    (eq --category 'objects)
+			    (memq --type org-element-all-elements))
+		   (mapc (lambda (kwd-pair)
+			   (let ((kwd (car kwd-pair))
+				 (value (org-element-property
+					 (cdr kwd-pair) --data)))
+			     ;; Pay attention to the type of value.
+			     ;; Preserve order for multiple keywords.
+			     (cond
+			      ((not value))
+			      ((and (member kwd org-element-multiple-keywords)
+				    (member kwd org-element-dual-keywords))
+			       (mapc (lambda (line)
+				       (funcall --walk-tree (cdr line))
+				       (funcall --walk-tree (car line)))
+				     (reverse value)))
+			      ((member kwd org-element-multiple-keywords)
+			       (mapc (lambda (line) (funcall --walk-tree line))
+				     (reverse value)))
+			      ((member kwd org-element-dual-keywords)
+			       (funcall --walk-tree (cdr value))
+			       (funcall --walk-tree (car value)))
+			      (t (funcall --walk-tree value)))))
+			 --affiliated-alist))
 		 ;; Determine if a recursion into --DATA is possible.
 		 (cond
 		  ;; --TYPE is explicitly removed from recursion.
