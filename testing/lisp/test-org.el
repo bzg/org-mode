@@ -501,7 +501,7 @@ Outside."
     (should-error (org-backward-element)))
   ;; 5. At beginning of first element inside a greater element:
   ;;    expected to move to greater element's beginning.
-  (org-test-with-temp-text "Before.\n#+BEGIN_CENTER\nInside.\n#+END_CENTER."
+  (org-test-with-temp-text "Before.\n#+BEGIN_CENTER\nInside.\n#+END_CENTER"
     (goto-line 3)
     (org-backward-element)
     (should (looking-at "#\\+BEGIN_CENTER")))
