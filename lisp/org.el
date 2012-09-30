@@ -3274,13 +3274,6 @@ forth between agenda and calendar."
   :group 'org-agenda
   :type 'sexp)
 
-(defcustom org-calendar-agenda-action-key [?k]
-  "The key to be installed in `calendar-mode-map' for agenda-action.
-The command `org-agenda-action' will be bound to this key.  The
-default is the character `k' because we use the same key in the agenda."
-  :group 'org-agenda
-  :type 'sexp)
-
 (defcustom org-calendar-insert-diary-entry-key [?i]
   "The key to be installed in `calendar-mode-map' for adding diary entries.
 This option is irrelevant until `org-agenda-diary-file' has been configured
@@ -3306,8 +3299,6 @@ points to a file, `org-agenda-diary-entry' will be used instead."
   '(progn
      (org-defkey calendar-mode-map org-calendar-to-agenda-key
 		 'org-calendar-goto-agenda)
-     (org-defkey calendar-mode-map org-calendar-agenda-action-key
-		 'org-agenda-action)
      (add-hook 'calendar-mode-hook
 	       (lambda ()
 		 (unless (eq org-agenda-diary-file 'diary-file)
@@ -18260,7 +18251,6 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map [?\C-c (control ?*)] 'org-list-make-subtree)
 ;;(org-defkey org-mode-map [?\C-c (control ?-)] 'org-list-make-list-from-subtree)
 
-(org-defkey org-mode-map "\C-c\C-x\C-k" 'org-mark-entry-for-agenda-action)
 (org-defkey org-mode-map "\C-c\C-x\C-w" 'org-cut-special)
 (org-defkey org-mode-map "\C-c\C-x\M-w" 'org-copy-special)
 (org-defkey org-mode-map "\C-c\C-x\C-y" 'org-paste-special)
@@ -20959,20 +20949,6 @@ returns the current time."
 		defd (encode-time 0 0 0 (nth 1 date) (nth 0 date)
 				  (nth 2 date))))))
     (or defd (current-time))))
-
-(defvar org-agenda-action-marker (make-marker)
-  "Marker pointing to the entry for the next agenda action.")
-
-(defun org-mark-entry-for-agenda-action ()
-  "Mark the current entry as target of an agenda action.
-Agenda actions are actions executed from the agenda with the key `k',
-which make use of the date at the cursor."
-  (interactive)
-  (move-marker org-agenda-action-marker
-	       (save-excursion (org-back-to-heading t) (point))
-	       (current-buffer))
-  (message
-   "Entry marked for action; press `k' at desired date in agenda or calendar"))
 
 (defun org-mark-subtree (&optional up)
   "Mark the current subtree.
