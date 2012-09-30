@@ -932,7 +932,7 @@ hello there
    "#+BEGIN_SRC org
 ,* heading
 ,** subheading
-,content
+content
 #+END_SRC"
 
 "* org-babel-remove-result
