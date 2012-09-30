@@ -734,7 +734,12 @@ is a plist used as a communication channel."
 	     (let ((footprint
 		    (cons (org-element-property :raw-link link)
 			  (org-element-contents link))))
-	       (unless (member footprint seen)
+	       ;; Ignore LINK if it hasn't been translated already.
+	       ;; It can happen if it is located in an affiliated
+	       ;; keyword that was ignored.
+	       (when (and (org-string-nw-p
+			   (gethash link (plist-get info :exported-data)))
+			  (not (member footprint seen)))
 		 (push footprint seen) link)))))
 	 ;; If at a section, find parent headline, if any, in order to
 	 ;; count links that might be in the title.
@@ -743,7 +748,7 @@ is a plist used as a communication channel."
 	    (or (org-export-get-parent-headline element) element))))
     ;; Get all links in HEADLINE.
     (org-element-map
-     headline 'link (lambda (link) (funcall unique-link-p link)) info)))
+     headline 'link (lambda (l) (funcall unique-link-p l)) info nil nil t)))
 
 (defun org-e-ascii--describe-links (links width info)
   "Return a string describing a list of links.
@@ -756,8 +761,8 @@ channel."
    (lambda (link)
      (let ((type (org-element-property :type link))
 	   (anchor (let ((desc (org-element-contents link)))
-		     (if (not desc) (org-element-property :raw-link link)
-		       (org-export-data desc info)))))
+		     (if desc (org-export-data desc info)
+		       (org-element-property :raw-link link)))))
        (cond
 	;; Coderefs, radio links and fuzzy links are ignored.
 	((member type '("coderef" "radio" "fuzzy")) nil)
@@ -803,14 +808,17 @@ INFO is a plist used as a communication channel."
 (defun org-e-ascii-template--document-title (info)
   "Return document title, as a string.
 INFO is a plist used as a communication channel."
-  (let ((text-width org-e-ascii-text-width)
-	(title (org-export-data (plist-get info :title) info))
-	(author (and (plist-get info :with-author)
-		     (let ((auth (plist-get info :author)))
-		       (and auth (org-export-data auth info)))))
-	(email (and (plist-get info :with-email)
-		    (org-export-data (plist-get info :email) info)))
-	(date (org-export-data (plist-get info :date) info)))
+  (let* ((text-width org-e-ascii-text-width)
+	 ;; Links in the title will not be resolved later, so we make
+	 ;; sure their path is located right after them.
+	 (org-e-ascii-links-to-notes nil)
+	 (title (org-export-data (plist-get info :title) info))
+	 (author (and (plist-get info :with-author)
+		      (let ((auth (plist-get info :author)))
+			(and auth (org-export-data auth info)))))
+	 (email (and (plist-get info :with-email)
+		     (org-export-data (plist-get info :email) info)))
+	 (date (org-export-data (plist-get info :date) info)))
     ;; There are two types of title blocks depending on the presence
     ;; of a title to display.
     (if (string= title "")
