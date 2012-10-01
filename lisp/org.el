@@ -6179,10 +6179,9 @@ and subscripts."
 (defvar org-cycle-subtree-status nil)
 (make-variable-buffer-local 'org-cycle-subtree-status)
 
-;;;###autoload
-
 (defvar org-inlinetask-min-level)
 
+;;;###autoload
 (defun org-cycle (&optional arg)
   "TAB-action and visibility cycling for Org-mode.
 
