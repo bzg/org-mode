@@ -5159,12 +5159,13 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	   "\\|\\(<%%\\(([^>\n]+)\\)>\\)"))
 	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
 	 donep tmp priority category category-pos level ee txt timestr tags
-	 b0 b3 e3 head todo-state end-of-match show-all warntime)
+	 b0 b3 e3 head todo-state end-of-match show-all warntime habitp)
     (goto-char (point-min))
     (while (setq end-of-match (re-search-forward regexp nil t))
       (setq b0 (match-beginning 0)
 	    b3 (match-beginning 3) e3 (match-end 3)
 	    todo-state (save-match-data (ignore-errors (org-get-todo-state)))
+	    habitp (and (functionp 'org-is-habit-p) (org-is-habit-p))
 	    show-all (or (eq org-agenda-repeating-timestamp-show-all t)
 			 (member todo-state
 				 org-agenda-repeating-timestamp-show-all)))
@@ -5217,7 +5218,7 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	    (setq txt (org-agenda-format-item
 		       (if inactivep org-agenda-inactive-leader nil)
 		       head level category tags timestr
-		       remove-re t)))
+		       remove-re habitp)))
 	  (setq priority (org-get-priority txt))
 	  (org-add-props txt props 'priority priority
 			 'org-marker marker 'org-hd-marker hdmarker
@@ -5883,7 +5884,7 @@ FRACTION is what fraction of the head-warning time has passed."
 				      (concat "<" start-time ">"))
 				     ((= d2 d0)
 				      (concat "<" end-time ">")))
-			       remove-re t))))
+			       remove-re))))
 		(org-add-props txt props
 		  'org-marker marker 'org-hd-marker hdmarker
 		  'type "block" 'date date
