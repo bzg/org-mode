@@ -52,7 +52,7 @@ the Git work tree)."
    (let ((org-git-version \"" org-git-version "\"))
      org-git-version))
 ;;;\#\#\#autoload
-\(defconst org-odt-data-dir \"" odt-dir "\"
+\(defvar org-odt-data-dir \"" odt-dir "\"
   \"The location of ODT styles.\")
 \f\n\(provide 'org-version\)
 \f\n;; Local Variables:\n;; version-control: never
