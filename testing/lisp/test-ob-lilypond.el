@@ -86,17 +86,17 @@
   (should (boundp 'ly-nix-midi-path))
   (should (stringp ly-nix-midi-path)))
 
-(ert-deftest ob-lilypond/ly-win32-ly-path ()
-  (should (boundp 'ly-win32-ly-path))
-  (should (stringp ly-win32-ly-path)))
+(ert-deftest ob-lilypond/ly-w32-ly-path ()
+  (should (boundp 'ly-w32-ly-path))
+  (should (stringp ly-w32-ly-path)))
 
-(ert-deftest ob-lilypond/ly-win32-pdf-path ()
-  (should (boundp 'ly-win32-pdf-path))
-  (should (stringp ly-win32-pdf-path)))
+(ert-deftest ob-lilypond/ly-w32-pdf-path ()
+  (should (boundp 'ly-w32-pdf-path))
+  (should (stringp ly-w32-pdf-path)))
 
-(ert-deftest ob-lilypond/ly-win32-midi-path ()
-  (should (boundp 'ly-win32-midi-path))
-  (should (stringp ly-win32-midi-path)))
+(ert-deftest ob-lilypond/ly-w32-midi-path ()
+  (should (boundp 'ly-w32-midi-path))
+  (should (stringp ly-w32-midi-path)))
 
 (ert-deftest ob-lilypond/ly-gen-png ()
   (should (boundp 'ly-gen-png)))
@@ -245,24 +245,24 @@
 (ert-deftest ob-lilypond/ly-determine-ly-path ()
   (should (equal ly-OSX-ly-path
                  (ly-determine-ly-path "darwin")))
-  (should (equal ly-win32-ly-path
-                 (ly-determine-ly-path "win32")))
+  (should (equal ly-w32-ly-path
+                 (ly-determine-ly-path "windows-nt")))
   (should (equal ly-nix-ly-path
                  (ly-determine-ly-path "nix"))))
 
 (ert-deftest ob-lilypond/ly-determine-pdf-path ()
   (should (equal ly-OSX-pdf-path
                  (ly-determine-pdf-path "darwin")))
-  (should (equal ly-win32-pdf-path
-                 (ly-determine-pdf-path "win32")))
+  (should (equal ly-w32-pdf-path
+                 (ly-determine-pdf-path "windows-nt")))
   (should (equal ly-nix-pdf-path
                  (ly-determine-pdf-path "nix"))))
 
 (ert-deftest ob-lilypond/ly-determine-midi-path ()
   (should (equal ly-OSX-midi-path
                  (ly-determine-midi-path "darwin")))
-  (should (equal ly-win32-midi-path
-                 (ly-determine-midi-path "win32")))
+  (should (equal ly-w32-midi-path
+                 (ly-determine-midi-path "windows-nt")))
   (should (equal ly-nix-midi-path
                  (ly-determine-midi-path "nix"))))
 
