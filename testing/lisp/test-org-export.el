@@ -1095,20 +1095,7 @@ Another text. (ref:text)
 #+END_EXAMPLE"
       (goto-line 5)
       (should (equal (org-export-unravel-code (org-element-at-point))
-		     '("(+ 2 2)\n(+ 3 3)\n" (2 . "one")))))
-    ;; 5. Free up comma-protected lines.
-    ;;
-    ;; 5.1. In an Org source block, every line is protected.
-    (org-test-with-temp-text
-	"#+BEGIN_SRC org\n,* Test\n,# comment\n,Text\n#+END_SRC"
-      (should (equal (org-export-unravel-code (org-element-at-point))
-		     '("* Test\n# comment\nText\n"))))
-    ;; 5.2. In other blocks, only headlines, comments and keywords are
-    ;;      protected.
-    (org-test-with-temp-text
-	"#+BEGIN_EXAMPLE\n,* Headline\n, * Not headline\n,Keep\n#+END_EXAMPLE"
-      (should (equal (org-export-unravel-code (org-element-at-point))
-		     '("* Headline\n, * Not headline\n,Keep\n"))))))
+		     '("(+ 2 2)\n(+ 3 3)\n" (2 . "one")))))))
 
 
 

@@ -47,6 +47,7 @@
 (declare-function org-table-colgroup-line-p "org-table" (line))
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
+(declare-function org-unescape-code-in-region "org-src" (beg end))
 
 (autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
 
@@ -1789,7 +1790,7 @@ from the buffer."
 		 beg-content end-content
 		 `(org-protected t original-indentation ,ind org-native-text t))
 		;; strip protective commas
-		(org-strip-protective-commas beg-content end-content)
+		(org-unescape-code-in-region beg-content end-content)
 		(delete-region (match-beginning 0) (match-end 0))
 		(save-excursion
 		  (goto-char beg)
