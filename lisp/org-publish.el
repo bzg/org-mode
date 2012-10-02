@@ -916,7 +916,6 @@ directory and force publishing all files."
 	   (if force nil org-publish-use-timestamps-flag)))
       (org-publish-projects org-publish-project-alist))))
 
-
 ;;;###autoload
 (defun org-publish-current-file (&optional force)
   "Publish the current file.
