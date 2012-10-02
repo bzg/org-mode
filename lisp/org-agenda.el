@@ -1872,13 +1872,6 @@ When nil, `q' will kill the single agenda buffer."
   :type 'boolean)
 
 
-;;;### (autoloads (org-agenda-to-appt org-calendar-goto-agenda org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
-;;;;;;  org-diary org-agenda-list-stuck-projects org-tags-view org-todo-list
-;;;;;;  org-search-view org-agenda-list org-batch-store-agenda-views
-;;;;;;  org-store-agenda-views org-batch-agenda-csv org-batch-agenda
-;;;;;;  org-agenda org-toggle-sticky-agenda) "org-agenda" "org-agenda.el"
-;;;;;;  (20586 34302 212927 775000))
-;;; Generated autoloads from org-agenda.el
 ;;;###autoload
 (defun org-toggle-sticky-agenda (&optional arg)
   "Toggle `org-agenda-sticky'."
@@ -4109,7 +4102,7 @@ given in `org-agenda-start-on-weekday'."
 							""
 						      x))
 						  filter ""))))
-	  (setq tbl (apply 'org-get-clocktable p))
+	  (setq tbl (apply 'org-clock-get-clocktable p))
 	  (insert tbl)))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
@@ -5254,7 +5247,6 @@ This function is invoked if `org-agenda-todo-ignore-deadlines',
 	(>= days n)
       (<= days n))))
 
-;;;###autoload
 (defun org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item
   (&optional end)
   "Do we have a reason to ignore this TODO entry because it has a time stamp?"
@@ -9487,9 +9479,5 @@ to override `appt-message-warning-time'.
     (org-agenda-todo arg)))
 
 (provide 'org-agenda)
-
-;; Local variables:
-;; generated-autoload-file: "org-loaddefs.el"
-;; End:
 
 ;;; org-agenda.el ends here

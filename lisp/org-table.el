@@ -2997,10 +2997,9 @@ with the prefix ARG."
   "Iterate all tables in the buffer, to converge inter-table dependencies."
   (interactive)
   (let* ((imax 10)
+	 (i imax)
 	 (checksum (md5 (buffer-string)))
-
-	 c1
-	 (i imax))
+	 c1)
     (save-excursion
       (save-restriction
 	(widen)
@@ -3851,11 +3850,6 @@ Use COMMAND to do the motion, repeat if necessary to end up in a data line."
 
 (defvar orgtbl-mode-map (make-keymap)
   "Keymap for `orgtbl-mode'.")
-
-;;;###autoload
-(defun turn-on-orgtbl ()
-  "Unconditionally turn on `orgtbl-mode'."
-  (orgtbl-mode 1))
 
 (defvar org-old-auto-fill-inhibit-regexp nil
   "Local variable used by `orgtbl-mode'.")

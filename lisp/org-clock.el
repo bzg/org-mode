@@ -1859,7 +1859,7 @@ and is only done if the variable `org-clock-out-when-done' is not nil."
 	  'org-clock-out-if-current)
 
 ;;;###autoload
-(defun org-get-clocktable (&rest props)
+(defun org-clock-get-clocktable (&rest props)
   "Get a formatted clocktable with parameters according to PROPS.
 The table is created in a temporary buffer, fully formatted and
 fontified, and then returned."
@@ -2765,12 +2765,6 @@ The details of what will be saved are regulated by the variable
 		(org-clock-in)
 		(if (outline-invisible-p)
 		    (org-show-context))))))))))
-
-;;;###autoload
-(defun org-clock-persistence-insinuate ()
-  "Set up hooks for clock persistence."
-  (add-hook 'org-mode-hook 'org-clock-load)
-  (add-hook 'kill-emacs-hook 'org-clock-save))
 
 ;; Suggested bindings
 (org-defkey org-mode-map "\C-c\C-x\C-e" 'org-clock-modify-effort-estimate)

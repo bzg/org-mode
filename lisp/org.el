@@ -121,6 +121,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
+
 ;;;###autoload
 (defun org-babel-do-load-languages (sym value)
   "Load the languages defined in `org-babel-load-languages'."
@@ -208,6 +209,7 @@ identifier."
 ;;; Version
 (require 'org-compat)
 (org-check-version)
+
 ;;;###autoload
 (defun org-version (&optional here full message)
   "Show the org-mode version in the echo area.
@@ -3887,6 +3889,12 @@ This works for both table types.")
 				  orgtbl-to-generic orgtbl-to-tsv orgtbl-to-csv orgtbl-to-latex
 				  orgtbl-to-orgtbl orgtbl-to-html orgtbl-to-texinfo)))
 
+;;;###autoload
+(defun turn-on-orgtbl ()
+  "Unconditionally turn on `orgtbl-mode'."
+  (require 'org-table)
+  (orgtbl-mode 1))
+
 (defun org-at-table-p (&optional table-type)
   "Return t if the cursor is inside an org-type table.
 If TABLE-TYPE is non-nil, also check for table.el-type tables."
@@ -4100,6 +4108,13 @@ If yes, offer to stop it and to save the buffer with the changes."
   "Check if this line starts a clock table, if yes, shift the time block."
   (when (org-match-line "^[ \t]*#\\+BEGIN:[ \t]+clocktable\\>")
     (org-clocktable-shift dir n)))
+
+;;;###autoload
+(defun org-clock-persistence-insinuate ()
+  "Set up hooks for clock persistence."
+  (require 'org-clock)
+  (add-hook 'org-mode-hook 'org-clock-load)
+  (add-hook 'kill-emacs-hook 'org-clock-save))
 
 ;; Autoload org-timer.el
 
@@ -11313,7 +11328,6 @@ Error if there is no such block at point."
       (goto-char pos)
       (error "Not in a dynamic block"))))
 
-;;;###autoload
 (defun org-update-all-dblocks ()
   "Update all dynamic blocks in the buffer.
 This function can be used in a hook."
@@ -14133,7 +14147,6 @@ Returns the new tags string, or nil to not change the current settings."
 
 ;;;; The mapping API
 
-;;;###autoload
 (defun org-map-entries (func &optional match scope &rest skip)
   "Call FUNC at each headline selected by MATCH in SCOPE.
 
@@ -19960,7 +19973,6 @@ Your bug report will be posted to the Org-mode mailing list.
 
 ;;;; Documentation
 
-;;;###autoload
 (defun org-require-autoloaded-modules ()
   (interactive)
   (mapc 'require
@@ -21927,7 +21939,6 @@ Stop at the first and last subheadings of a superior heading."
 	(if (< l level) (setq arg 1)))
       (setq arg (1- arg)))))
 
-;;;###autoload
 (defun org-forward-element ()
   "Move forward by one element.
 Move to the next element at the same level, when possible."
@@ -21947,7 +21958,6 @@ Move to the next element at the same level, when possible."
 	       (goto-char (org-element-property :end parent))
 	     (goto-char end))))))
 
-;;;###autoload
 (defun org-backward-element ()
   "Move backward by one element.
 Move to the previous element at the same level, when possible."
@@ -21974,7 +21984,6 @@ Move to the previous element at the same level, when possible."
 	    ((org-before-first-heading-p) (goto-char (point-min)))
 	    (t (org-back-to-heading)))))))
 
-;;;###autoload
 (defun org-up-element ()
   "Move to upper element."
   (interactive)
@@ -21987,7 +21996,6 @@ Move to the previous element at the same level, when possible."
 	    (error "No surrounding element")
 	  (org-with-limited-levels (org-back-to-heading)))))))
 
-;;;###autoload
 (defvar org-element-greater-elements)
 (defun org-down-element ()
   "Move to inner element."
@@ -22004,7 +22012,6 @@ Move to the previous element at the same level, when possible."
 		     (error "No content for this element"))))
      (t (error "No inner element")))))
 
-;;;###autoload
 (defun org-drag-element-backward ()
   "Move backward element at point."
   (interactive)
@@ -22021,7 +22028,6 @@ Move to the previous element at the same level, when possible."
 	  (goto-char (+ (org-element-property :begin prev-elem)
 			(- pos (org-element-property :begin elem)))))))))
 
-;;;###autoload
 (defun org-drag-element-forward ()
   "Move forward element at point."
   (interactive)
@@ -22056,7 +22062,6 @@ Move to the previous element at the same level, when possible."
 	(org-element-swap-A-B elem next-elem)
 	(goto-char (+ pos size-next size-blank))))))
 
-;;;###autoload
 (defun org-mark-element ()
   "Put point at beginning of this element, mark at end.
 
@@ -22077,7 +22082,6 @@ ones already marked."
 	(push-mark (org-element-property :end element) t t)
 	(goto-char (org-element-property :begin element))))))
 
-;;;###autoload
 (defun org-narrow-to-element ()
   "Narrow buffer to current element."
   (interactive)
@@ -22096,7 +22100,6 @@ ones already marked."
        (org-element-property :begin elem)
        (org-element-property :end elem))))))
 
-;;;###autoload
 (defun org-transpose-element ()
   "Transpose current and previous elements, keeping blank lines between.
 Point is moved after both elements."
@@ -22106,7 +22109,6 @@ Point is moved after both elements."
     (org-drag-element-backward)
     (goto-char end)))
 
-;;;###autoload
 (defun org-unindent-buffer ()
   "Un-indent the visible part of the buffer.
 Relative indentation (between items, inside blocks, etc.) isn't

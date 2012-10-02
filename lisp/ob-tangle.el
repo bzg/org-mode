@@ -38,7 +38,6 @@
 (declare-function org-babel-update-block-body "org" (new-body))
 (declare-function make-directory "files" (dir &optional parents))
 
-;;;###autoload
 (defcustom org-babel-tangle-lang-exts
   '(("emacs-lisp" . "el"))
   "Alist mapping languages to their file extensions.

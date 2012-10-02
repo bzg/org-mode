@@ -680,7 +680,6 @@ The table of checksums is written to the file mobile-checksums."
   (let  ((table '(?: ?/)))
     (org-link-escape s table)))
 
-;;;###autoload
 (defun org-mobile-create-sumo-agenda ()
   "Create a file that contains all custom agenda views."
   (interactive)
