@@ -537,4 +537,8 @@ This command is set with the variable `org-archive-default-command'."
 
 (provide 'org-archive)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-archive.el ends here

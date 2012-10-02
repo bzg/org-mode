@@ -1680,4 +1680,8 @@ The template may still contain \"%?\" for cursor positioning."
 
 (provide 'org-capture)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-capture.el ends here

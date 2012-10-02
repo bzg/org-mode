@@ -1192,4 +1192,8 @@ Returns value on success, else nil."
 
 (provide 'org-publish)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-publish.el ends here

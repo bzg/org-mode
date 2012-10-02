@@ -4832,4 +4832,8 @@ list of the fields in the rectangle ."
 
 (provide 'org-table)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-table.el ends here

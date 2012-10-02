@@ -726,4 +726,8 @@ publishing directory."
 
 (provide 'org-ascii)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-ascii.el ends here

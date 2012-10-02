@@ -443,4 +443,8 @@ replace any running timer."
 
 (provide 'org-timer)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-timer.el ends here

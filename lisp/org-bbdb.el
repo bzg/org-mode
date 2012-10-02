@@ -433,4 +433,8 @@ END:VEVENT\n"
 
 (provide 'org-bbdb)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-bbdb.el ends here

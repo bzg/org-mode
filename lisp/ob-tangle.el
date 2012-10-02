@@ -514,6 +514,8 @@ which enable the original code blocks to be found."
 
 (provide 'ob-tangle)
 
-
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; ob-tangle.el ends here

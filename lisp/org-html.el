@@ -2749,4 +2749,8 @@ the alist of previous items."
 
 (provide 'org-html)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-html.el ends here

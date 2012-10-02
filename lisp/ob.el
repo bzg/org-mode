@@ -2585,6 +2585,8 @@ of `org-babel-temporary-directory'."
 
 (provide 'ob)
 
-
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; ob.el ends here

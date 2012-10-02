@@ -78,6 +78,8 @@
 (require 'find-func)
 (require 'format-spec)
 
+(load "org-loaddefs.el" nil t)
+
 ;; `org-outline-regexp' ought to be a defconst but is let-binding in
 ;; some places -- e.g. see the macro org-with-limited-levels.
 ;;

@@ -143,6 +143,8 @@ if so then run the appropriate source block from the Library."
 
 (provide 'ob-lob)
 
-
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; ob-lob.el ends here

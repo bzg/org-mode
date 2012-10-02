@@ -2847,4 +2847,8 @@ formula file."
 
 (provide 'org-odt)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-odt.el ends here

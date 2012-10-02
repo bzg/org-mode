@@ -3349,4 +3349,8 @@ The depends on the variable `org-export-copy-to-kill-ring'."
 
 (provide 'org-exp)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-exp.el ends here

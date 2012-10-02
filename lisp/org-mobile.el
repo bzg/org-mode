@@ -1129,4 +1129,8 @@ A and B must be strings or nil."
 
 (provide 'org-mobile)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-mobile.el ends here

@@ -2298,4 +2298,8 @@ Replaces invalid characters with \"_\"."
 
 (provide 'org-lparse)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-lparse.el ends here

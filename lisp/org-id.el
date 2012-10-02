@@ -681,4 +681,8 @@ optional argument MARKERP, return the position as a new marker."
 
 (provide 'org-id)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-id.el ends here

@@ -2777,4 +2777,8 @@ The details of what will be saved are regulated by the variable
 
 (provide 'org-clock)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-clock.el ends here
