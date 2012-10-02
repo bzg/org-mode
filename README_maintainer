@@ -196,13 +196,9 @@ So the way I have been doing things with Emacs is this:
 
    Careful: Copy /org.texi/ and /orgcard.tex/ into the right places,
    and also copy the lisp files with *two exceptions*: Do *not* copy
-   /org-colview-xemacs.el/ and /org-install.el/.  The former does not
+   /org-colview-xemacs.el/ and /org-loaddefs.el/.  The former does not
    belong in Emacs.  And the latter would actually be harmful because
-   Emacs generates its own autoloads.  The Emacs distribution contains
-   an empty /org-install.el/, so that users can have =(require
-   'org-install)= in .emacs with no ill effects.  So if you were to
-   copy /org-install.el/, you would overwrite that empty placeholder
-   file.
+   Emacs generates its own autoloads.
 
 4. Generate the ChangeLog entries
 
