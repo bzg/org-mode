@@ -89,6 +89,7 @@
 (declare-function org-completing-read "org" (&rest args))
 (declare-function org-escape-code-in-region "org-src" (beg end))
 (declare-function org-unescape-code-in-string "org-src" (s))
+(declare-function org-table-to-lisp "org-table" (&optional txt))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
@@ -492,8 +493,8 @@ can not be resolved.")
 
 ;;; functions
 (defvar call-process-region)
-;;;###autoload
 
+;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block.
 Insert the results of execution into the buffer.  Source code
@@ -836,6 +837,7 @@ evaluation mechanisms."
     (key-binding (or key (read-key-sequence nil))))))
 
 (defvar org-bracket-link-regexp)
+
 ;;;###autoload
 (defun org-babel-open-src-block-result (&optional re-run)
   "If `point' is on a src block then open the results of the
@@ -942,6 +944,7 @@ buffer."
 (def-edebug-spec org-babel-map-inline-src-blocks (form body))
 
 (defvar org-babel-lob-one-liner-regexp)
+
 ;;;###autoload
 (defmacro org-babel-map-call-lines (file &rest body)
   "Evaluate BODY forms on each call line in FILE.
@@ -2586,6 +2589,8 @@ of `org-babel-temporary-directory'."
 
 (provide 'ob)
 
-
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; ob.el ends here

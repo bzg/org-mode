@@ -5,7 +5,7 @@ ifeq ($(MAKELEVEL), 0)
 endif
 
 LISPV = org-version.el
-LISPI = org-install.el
+LISPI = org-loaddefs.el
 LISPA = $(LISPV) $(LISPI)
 LISPF = $(filter-out $(LISPA),$(sort $(wildcard *.el)))
 LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))

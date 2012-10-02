@@ -78,6 +78,8 @@
 (require 'find-func)
 (require 'format-spec)
 
+(load "org-loaddefs.el" t t)
+
 ;; `org-outline-regexp' ought to be a defconst but is let-binding in
 ;; some places -- e.g. see the macro org-with-limited-levels.
 ;;
@@ -118,8 +120,23 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-clock-timestamps-down "org-clock" ())
 (declare-function org-clock-sum-current-item "org-clock" (&optional tstart))
 
+(declare-function orgtbl-mode "org-table" (&optional arg))
+(declare-function org-clock-out "org-clock" (&optional switch-to-state fail-quietly at-time))
+(declare-function org-beamer-mode "org-beamer" ())
+(declare-function org-table-edit-field "org-table" (arg))
+(declare-function org-table-justify-field-maybe "org-table" (&optional new))
+(declare-function org-id-get-create "org-id" (&optional force))
+(declare-function org-id-find-id-file "org-id" (id))
+(declare-function org-tags-view "org-agenda" (&optional todo-only match))
+(declare-function org-agenda-list "org-agenda" (&optional arg start-day span))
+(declare-function org-table-align "org-table" ())
+(declare-function org-table-paste-rectangle "org-table" ())
+(declare-function org-table-maybe-eval-formula "org-table" ())
+(declare-function org-table-maybe-recalculate-line "org-table" ())
+
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
+
 ;;;###autoload
 (defun org-babel-do-load-languages (sym value)
   "Load the languages defined in `org-babel-load-languages'."
@@ -207,6 +224,7 @@ identifier."
 ;;; Version
 (require 'org-compat)
 (org-check-version)
+
 ;;;###autoload
 (defun org-version (&optional here full message)
   "Show the org-mode version in the echo area.
@@ -215,7 +233,7 @@ When FULL is non-nil, use a verbose version string.
 When MESSAGE is non-nil, display a message with the version."
   (interactive "P")
   (let* ((org-dir         (ignore-errors (org-find-library-dir "org")))
-	 (org-install-dir (ignore-errors (org-find-library-dir "org-install.el")))
+	 (org-install-dir (ignore-errors (org-find-library-dir "org-loaddefs.el")))
 	 (org-trash       (or
 			   (and (fboundp 'org-release) (fboundp 'org-git-version))
 			   (load (concat org-dir "org-version.el")
@@ -229,7 +247,7 @@ When MESSAGE is non-nil, display a message with the version."
 			      (if (string= org-dir org-install-dir)
 				  org-install-dir
 				(concat "mixed installation! " org-install-dir " and " org-dir))
-			    "org-install.el can not be found!")))
+			    "org-loaddefs.el can not be found!")))
 	 (_version (if full version org-version)))
     (if (org-called-interactively-p 'interactive)
 	(if here
@@ -3872,30 +3890,13 @@ This works for both table types.")
 
 (eval-and-compile
   (org-autoload "org-table"
-		'(org-table-align org-table-begin org-table-blank-field
-				  org-table-convert org-table-convert-region org-table-copy-down
-				  org-table-copy-region org-table-create
-				  org-table-create-or-convert-from-region
-				  org-table-create-with-table.el org-table-current-dline
-				  org-table-cut-region org-table-delete-column org-table-edit-field
-				  org-table-edit-formulas org-table-end org-table-eval-formula
-				  org-table-export org-table-field-info
-				  org-table-get-stored-formulas org-table-goto-column
-				  org-table-hline-and-move org-table-import org-table-insert-column
-				  org-table-insert-hline org-table-insert-row org-table-iterate
-				  org-table-justify-field-maybe org-table-kill-row
-				  org-table-maybe-eval-formula org-table-maybe-recalculate-line
-				  org-table-move-column org-table-move-column-left
-				  org-table-move-column-right org-table-move-row
-				  org-table-move-row-down org-table-move-row-up
-				  org-table-next-field org-table-next-row org-table-paste-rectangle
-				  org-table-previous-field org-table-recalculate
-				  org-table-rotate-recalc-marks org-table-sort-lines org-table-sum
-				  org-table-toggle-coordinate-overlays
-				  org-table-toggle-formula-debugger org-table-wrap-region
-				  orgtbl-mode turn-on-orgtbl org-table-to-lisp
-				  orgtbl-to-generic orgtbl-to-tsv orgtbl-to-csv orgtbl-to-latex
-				  orgtbl-to-orgtbl orgtbl-to-html orgtbl-to-texinfo)))
+		'(org-table-begin org-table-blank-field org-table-end)))
+
+;;;###autoload
+(defun turn-on-orgtbl ()
+  "Unconditionally turn on `orgtbl-mode'."
+  (require 'org-table)
+  (orgtbl-mode 1))
 
 (defun org-at-table-p (&optional table-type)
   "Return t if the cursor is inside an org-type table.
@@ -3974,62 +3975,14 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 (declare-function org-default-export-plist "org-exp")
 (declare-function org-infile-export-plist "org-exp")
 (declare-function org-get-current-options "org-exp")
-(eval-and-compile
-  (org-autoload "org-exp"
-		'(org-export org-export-visible
-			     org-insert-export-options-template
-			     org-table-clean-before-export))
-  (org-autoload "org-ascii"
-		'(org-export-as-ascii org-export-ascii-preprocess
-				      org-export-as-ascii-to-buffer org-replace-region-by-ascii
-				      org-export-region-as-ascii))
-  (org-autoload "org-latex"
-		'(org-export-as-latex-batch org-export-as-latex-to-buffer
-					    org-replace-region-by-latex org-export-region-as-latex
-					    org-export-as-latex org-export-as-pdf
-					    org-export-as-pdf-and-open))
-  (org-autoload "org-html"
-		'(org-export-as-html-and-open
-		  org-export-as-html-batch org-export-as-html-to-buffer
-		  org-replace-region-by-html org-export-region-as-html
-		  org-export-as-html))
-  (org-autoload "org-docbook"
-		'(org-export-as-docbook-batch org-export-as-docbook-to-buffer
-					      org-replace-region-by-docbook org-export-region-as-docbook
-					      org-export-as-docbook-pdf org-export-as-docbook-pdf-and-open
-					      org-export-as-docbook))
-  (org-autoload "org-icalendar"
-		'(org-export-icalendar-this-file
-		  org-export-icalendar-all-agenda-files
-		  org-export-icalendar-combine-agenda-files))
-  (org-autoload "org-xoxo" '(org-export-as-xoxo))
-  (org-autoload "org-beamer" '(org-beamer-mode org-beamer-sectioning)))
 
 ;; Declare and autoload functions from org-agenda.el
 
 (eval-and-compile
   (org-autoload "org-agenda"
-		'(org-agenda org-agenda-list org-search-view
-			     org-todo-list org-tags-view org-agenda-list-stuck-projects
-			     org-diary org-agenda-to-appt
-			     org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item)))
+		'(org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item)))
 
-;; Autoload org-remember
-
-(eval-and-compile
-  (org-autoload "org-remember"
-		'(org-remember-insinuate org-remember-annotation
-					 org-remember-apply-template org-remember org-remember-handler)))
-
-(eval-and-compile
-  (org-autoload "org-capture"
-		'(org-capture org-capture-insert-template-here
-			      org-capture-import-remember-templates)))
-
-;; Autoload org-clock.el
-
-(declare-function org-clock-save-markers-for-cut-and-paste "org-clock"
-		  (beg end))
+(declare-function org-clock-save-markers-for-cut-and-paste "org-clock" (beg end))
 (declare-function org-clock-update-mode-line "org-clock" ())
 (declare-function org-resolve-clocks "org-clock"
 		  (&optional also-non-dangling-p prompt last-valid))
@@ -4046,55 +3999,9 @@ The return value is actually the clock marker."
   (marker-buffer org-clock-marker))
 
 (eval-and-compile
-  (org-autoload
-   "org-clock"
-   '(org-clock-in org-clock-out org-clock-cancel
-		  org-clock-goto org-clock-sum org-clock-display
-		  org-clock-remove-overlays org-clock-report
-		  org-clocktable-shift org-dblock-write:clocktable
-		  org-get-clocktable org-resolve-clocks)))
-
-(defun org-clock-update-time-maybe ()
-  "If this is a CLOCK line, update it and return t.
-Otherwise, return nil."
-  (interactive)
-  (save-excursion
-    (beginning-of-line 1)
-    (skip-chars-forward " \t")
-    (when (looking-at org-clock-string)
-      (let ((re (concat "[ \t]*" org-clock-string
-			" *[[<]\\([^]>]+\\)[]>]\\(-+[[<]\\([^]>]+\\)[]>]"
-			"\\([ \t]*=>.*\\)?\\)?"))
-	    ts te h m s neg)
-	(cond
-	 ((not (looking-at re))
-	  nil)
-	 ((not (match-end 2))
-	  (when (and (equal (marker-buffer org-clock-marker) (current-buffer))
-		     (> org-clock-marker (point))
-		     (<= org-clock-marker (point-at-eol)))
-	    ;; The clock is running here
-	    (setq org-clock-start-time
-		  (apply 'encode-time
-			 (org-parse-time-string (match-string 1))))
-	    (org-clock-update-mode-line)))
-	 (t
-	  (and (match-end 4) (delete-region (match-beginning 4) (match-end 4)))
-	  (end-of-line 1)
-	  (setq ts (match-string 1)
-		te (match-string 3))
-	  (setq s (- (org-float-time
-		      (apply 'encode-time (org-parse-time-string te)))
-		     (org-float-time
-		      (apply 'encode-time (org-parse-time-string ts))))
-		neg (< s 0)
-		s (abs s)
-		h (floor (/ s 3600))
-		s (- s (* 3600 h))
-		m (floor (/ s 60))
-		s (- s (* 60 s)))
-	  (insert " => " (format (if neg "-%d:%02d" "%2d:%02d") h m))
-	  t))))))
+  (org-autoload "org-clock" '(org-clock-remove-overlays
+			      org-clock-update-time-maybe
+			      org-clocktable-shift)))
 
 (defun org-check-running-clock ()
   "Check if the current buffer contains the running clock.
@@ -4111,43 +4018,17 @@ If yes, offer to stop it and to save the buffer with the changes."
   (when (org-match-line "^[ \t]*#\\+BEGIN:[ \t]+clocktable\\>")
     (org-clocktable-shift dir n)))
 
-;; Autoload org-timer.el
-
-(eval-and-compile
-  (org-autoload
-   "org-timer"
-   '(org-timer-start org-timer org-timer-item
-		     org-timer-change-times-in-region
-		     org-timer-set-timer
-		     org-timer-reset-timers
-		     org-timer-show-remaining-time)))
-
-;; Autoload org-feed.el
-
-(eval-and-compile
-  (org-autoload
-   "org-feed"
-   '(org-feed-update org-feed-update-all org-feed-goto-inbox)))
-
-
-;; Autoload org-indent.el
+;;;###autoload
+(defun org-clock-persistence-insinuate ()
+  "Set up hooks for clock persistence."
+  (require 'org-clock)
+  (add-hook 'org-mode-hook 'org-clock-load)
+  (add-hook 'kill-emacs-hook 'org-clock-save))
 
 ;; Define the variable already here, to make sure we have it.
 (defvar org-indent-mode nil
   "Non-nil if Org-Indent mode is enabled.
 Use the command `org-indent-mode' to change this variable.")
-
-(eval-and-compile
-  (org-autoload
-   "org-indent"
-   '(org-indent-mode)))
-
-;; Autoload org-mobile.el
-
-(eval-and-compile
-  (org-autoload
-   "org-mobile"
-   '(org-mobile-push org-mobile-pull org-mobile-create-sumo-agenda)))
 
 ;; Autoload archiving code
 ;; The stuff that is needed for cycling and tags has to be defined here.
@@ -4322,10 +4203,7 @@ Otherwise, these types are allowed:
 
 (eval-and-compile
   (org-autoload "org-archive"
-		'(org-add-archive-files org-archive-subtree
-					org-archive-to-archive-sibling org-toggle-archive-tag
-					org-archive-subtree-default
-					org-archive-subtree-default-with-confirmation)))
+		'(org-add-archive-files)))
 
 ;; Autoload Column View Code
 
@@ -4334,9 +4212,10 @@ Otherwise, these types are allowed:
 (declare-function org-columns-compute "org-colview" (property))
 
 (org-autoload (if (featurep 'xemacs) "org-colview-xemacs" "org-colview")
-	      '(org-columns-number-to-string org-columns-get-format-and-top-level
-					     org-columns-compute org-agenda-columns org-columns-remove-overlays
-					     org-columns org-insert-columns-dblock org-dblock-write:columnview))
+	      '(org-columns-number-to-string
+		org-columns-get-format-and-top-level
+		org-columns-compute
+		org-columns-remove-overlays))
 
 ;; Autoload ID code
 
@@ -4345,15 +4224,10 @@ Otherwise, these types are allowed:
 (declare-function org-id-locations-save "org-id")
 (defvar org-id-track-globally)
 (org-autoload "org-id"
-	      '(org-id-get-create org-id-new org-id-copy org-id-get
-				  org-id-get-with-outline-path-completion
-				  org-id-get-with-outline-drilling org-id-store-link
-				  org-id-goto org-id-find org-id-store-link))
-
-;; Autoload Plotting Code
-
-(org-autoload "org-plot"
-	      '(org-plot/gnuplot))
+	      '(org-id-new
+		org-id-copy
+		org-id-get-with-outline-path-completion
+		org-id-get-with-outline-drilling))
 
 ;;; Variables for pre-computed regular expressions, all buffer local
 
@@ -5102,7 +4976,7 @@ The following commands are available:
 		   (lambda (&rest ignore) (org-show-context 'isearch))))
 
   ;; Turn on org-beamer-mode?
-  (and org-startup-with-beamer-mode (org-beamer-mode 1))
+  (and org-startup-with-beamer-mode (org-beamer-mode))
 
   ;; Setup the pcomplete hooks
   (set (make-local-variable 'pcomplete-command-completion-function)
@@ -11373,7 +11247,6 @@ Error if there is no such block at point."
       (goto-char pos)
       (error "Not in a dynamic block"))))
 
-;;;###autoload
 (defun org-update-all-dblocks ()
   "Update all dynamic blocks in the buffer.
 This function can be used in a hook."
@@ -14194,7 +14067,6 @@ Returns the new tags string, or nil to not change the current settings."
 
 ;;;; The mapping API
 
-;;;###autoload
 (defun org-map-entries (func &optional match scope &rest skip)
   "Call FUNC at each headline selected by MATCH in SCOPE.
 
@@ -20105,7 +19977,6 @@ Your bug report will be posted to the Org-mode mailing list.
 
 ;;;; Documentation
 
-;;;###autoload
 (defun org-require-autoloaded-modules ()
   (interactive)
   (mapc 'require
@@ -22182,7 +22053,6 @@ Stop at the first and last subheadings of a superior heading."
 	(if (< l level) (setq arg 1)))
       (setq arg (1- arg)))))
 
-;;;###autoload
 (defun org-forward-element ()
   "Move forward by one element.
 Move to the next element at the same level, when possible."
@@ -22202,7 +22072,6 @@ Move to the next element at the same level, when possible."
 	       (goto-char (org-element-property :end parent))
 	     (goto-char end))))))
 
-;;;###autoload
 (defun org-backward-element ()
   "Move backward by one element.
 Move to the previous element at the same level, when possible."
@@ -22229,7 +22098,6 @@ Move to the previous element at the same level, when possible."
 	    ((org-before-first-heading-p) (goto-char (point-min)))
 	    (t (org-back-to-heading)))))))
 
-;;;###autoload
 (defun org-up-element ()
   "Move to upper element."
   (interactive)
@@ -22242,7 +22110,6 @@ Move to the previous element at the same level, when possible."
 	    (error "No surrounding element")
 	  (org-with-limited-levels (org-back-to-heading)))))))
 
-;;;###autoload
 (defvar org-element-greater-elements)
 (defun org-down-element ()
   "Move to inner element."
@@ -22259,7 +22126,6 @@ Move to the previous element at the same level, when possible."
 		     (error "No content for this element"))))
      (t (error "No inner element")))))
 
-;;;###autoload
 (defun org-drag-element-backward ()
   "Move backward element at point."
   (interactive)
@@ -22276,7 +22142,6 @@ Move to the previous element at the same level, when possible."
 	  (goto-char (+ (org-element-property :begin prev-elem)
 			(- pos (org-element-property :begin elem)))))))))
 
-;;;###autoload
 (defun org-drag-element-forward ()
   "Move forward element at point."
   (interactive)
@@ -22311,7 +22176,6 @@ Move to the previous element at the same level, when possible."
 	(org-element-swap-A-B elem next-elem)
 	(goto-char (+ pos size-next size-blank))))))
 
-;;;###autoload
 (defun org-mark-element ()
   "Put point at beginning of this element, mark at end.
 
@@ -22332,7 +22196,6 @@ ones already marked."
 	(push-mark (org-element-property :end element) t t)
 	(goto-char (org-element-property :begin element))))))
 
-;;;###autoload
 (defun org-narrow-to-element ()
   "Narrow buffer to current element."
   (interactive)
@@ -22351,7 +22214,6 @@ ones already marked."
        (org-element-property :begin elem)
        (org-element-property :end elem))))))
 
-;;;###autoload
 (defun org-transpose-element ()
   "Transpose current and previous elements, keeping blank lines between.
 Point is moved after both elements."
@@ -22361,7 +22223,6 @@ Point is moved after both elements."
     (org-drag-element-backward)
     (goto-char end)))
 
-;;;###autoload
 (defun org-unindent-buffer ()
   "Un-indent the visible part of the buffer.
 Relative indentation (between items, inside blocks, etc.) isn't

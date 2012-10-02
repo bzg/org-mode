@@ -4473,6 +4473,10 @@ end of ELEM-A."
 	      (cdr overlays)))
       (goto-char (org-element-property :end elem-B)))))
 
-
 (provide 'org-element)
+
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-element.el ends here

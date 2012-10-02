@@ -3230,7 +3230,6 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    org-archive-location
    "org file:~/org/%s.org"))
 
-;;;###autoload
 (defun org-insert-export-options-template ()
   "Insert into the buffer a template with information for exporting."
   (interactive)
@@ -3347,5 +3346,9 @@ The depends on the variable `org-export-copy-to-kill-ring'."
     (message "%s export done, pushed to kill ring and clipboard" format)))
 
 (provide 'org-exp)
+
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; org-exp.el ends here

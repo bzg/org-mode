@@ -434,9 +434,10 @@ Turning on this mode runs the normal hook `org-capture-mode-hook'."
 
 ;;; The main commands
 
-;;;###autoload
 (defvar org-capture-initial nil)
 (defvar org-capture-entry nil)
+
+;;;###autoload
 (defun org-capture-string (string &optional keys)
   (interactive "sInitial text: \n")
   (let ((org-capture-initial string)
@@ -1280,7 +1281,7 @@ Point will remain at the first line after the inserted text."
     (goto-char pos)))
 
 (defvar org-clock-marker) ; Defined in org.el
-;;;###autoload
+
 (defun org-capture-insert-template-here ()
   (let* ((template (org-capture-get :template))
 	 (type  (org-capture-get :type))

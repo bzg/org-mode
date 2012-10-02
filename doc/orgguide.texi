@@ -271,13 +271,6 @@ command:
 make
 @end smallexample
 
-Then add the following line to @file{.emacs}.  It is needed so that
-Emacs can autoload functions that are located in files not immediately loaded
-when Org-mode starts.
-@smalllisp
-(require 'org-install)
-@end smalllisp
-
 @node Activation, Feedback, Installation, Introduction
 @section Activation
 

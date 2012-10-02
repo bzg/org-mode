@@ -50,7 +50,6 @@
 (require 'org-list)
 (require 'format-spec)
 
-;;;###autoload
 (defun org-lparse-and-open (target-backend native-backend arg
 					   &optional file-or-buf)
   "Export outline to TARGET-BACKEND via NATIVE-BACKEND and open exported file.
@@ -71,7 +70,6 @@ lists."
       (when org-export-kill-product-buffer-when-displayed
 	(kill-buffer (current-buffer))))))
 
-;;;###autoload
 (defun org-lparse-batch (target-backend &optional native-backend)
   "Call the function `org-lparse'.
 This function can be used in batch processing as:
@@ -83,7 +81,6 @@ emacs   --batch
   (org-lparse target-backend native-backend
 	      org-export-headline-levels 'hidden))
 
-;;;###autoload
 (defun org-lparse-to-buffer (backend arg)
   "Call `org-lparse' with output to a temporary buffer.
 No file is created.  The prefix ARG is passed through to
@@ -93,7 +90,6 @@ No file is created.  The prefix ARG is passed through to
     (when org-export-show-temporary-export-buffer
       (switch-to-buffer-other-window tempbuf))))
 
-;;;###autoload
 (defun org-replace-region-by (backend beg end)
   "Assume the current region has org-mode syntax, and convert it to HTML.
 This can be used in any buffer.  For example, you could write an
@@ -115,7 +111,6 @@ this command to convert it."
     (delete-region beg end)
     (insert backend-string)))
 
-;;;###autoload
 (defun org-lparse-region (backend beg end &optional body-only buffer)
   "Convert region from BEG to END in org-mode buffer to HTML.
 If prefix arg BODY-ONLY is set, omit file header, footer, and table of
@@ -2297,5 +2292,9 @@ Replaces invalid characters with \"_\"."
     s))
 
 (provide 'org-lparse)
+
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; org-lparse.el ends here

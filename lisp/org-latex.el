@@ -2899,4 +2899,8 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
 (provide 'org-export-latex)
 (provide 'org-latex)
 
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
 ;;; org-latex.el ends here
