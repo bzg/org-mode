@@ -858,7 +858,7 @@ Theory Ltd.}
 @b{Important:} @i{If you the version of Org that comes with Emacs or as a
 XEmacs package, please skip this section and go directly to @ref{Activation}.
 If you downloaded Org as an ELPA package, please read the instructions on the
-@uref{http://orgmode.org/elpa/, Org ELPA page}.  To see what version of Org
+@uref{http://orgmode.org/elpa.html, Org ELPA page}.  To see what version of Org
 (if any) is part of your Emacs distribution, type @kbd{M-x org-version} (if
 your Emacs distribution does not come with Org, this function will not be
 defined).}
