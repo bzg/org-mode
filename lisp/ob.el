@@ -492,8 +492,8 @@ can not be resolved.")
 
 ;;; functions
 (defvar call-process-region)
-;;;###autoload
 
+;;;###autoload
 (defun org-babel-execute-src-block (&optional arg info params)
   "Execute the current source code block.
 Insert the results of execution into the buffer.  Source code
@@ -836,6 +836,7 @@ evaluation mechanisms."
     (key-binding (or key (read-key-sequence nil))))))
 
 (defvar org-bracket-link-regexp)
+
 ;;;###autoload
 (defun org-babel-open-src-block-result (&optional re-run)
   "If `point' is on a src block then open the results of the
@@ -942,6 +943,7 @@ buffer."
 (def-edebug-spec org-babel-map-inline-src-blocks (form body))
 
 (defvar org-babel-lob-one-liner-regexp)
+
 ;;;###autoload
 (defmacro org-babel-map-call-lines (file &rest body)
   "Evaluate BODY forms on each call line in FILE.
