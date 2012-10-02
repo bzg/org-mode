@@ -15914,7 +15914,7 @@ Don't touch the rest."
 (defun org-time-stamp-to-now (timestamp-string &optional seconds)
   "Difference between TIMESTAMP-STRING and now in days.
 If SECONDS is non-nil, return the difference in seconds."
-  (let ((fdiff (if seconds 'time-to-seconds 'time-to-days)))
+  (let ((fdiff (if seconds 'org-float-time 'time-to-days)))
     (- (funcall fdiff (org-time-string-to-time timestamp-string))
        (funcall fdiff (current-time)))))
 
