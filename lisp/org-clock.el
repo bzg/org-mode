@@ -2349,13 +2349,14 @@ from the dynamic block definition."
      (or header
 	 ;; Format the standard header
 	 (concat
+	  "#+CAPTION: "
 	  (nth 9 lwords) " ["
 	  (substring
 	   (format-time-string (cdr org-time-stamp-formats))
 	   1 -1)
 	  "]"
 	  (if block (concat ", for " range-text ".") "")
-	  "\n\n")))
+	  "\n")))
 
     ;; Insert the narrowing line
     (when (and narrow (integerp narrow) (not narrow-cut-p))
