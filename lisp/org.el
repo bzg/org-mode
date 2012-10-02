@@ -78,7 +78,7 @@
 (require 'find-func)
 (require 'format-spec)
 
-(load "org-loaddefs.el" nil t)
+(load "org-loaddefs.el" t t)
 
 ;; `org-outline-regexp' ought to be a defconst but is let-binding in
 ;; some places -- e.g. see the macro org-with-limited-levels.
@@ -232,7 +232,7 @@ When FULL is non-nil, use a verbose version string.
 When MESSAGE is non-nil, display a message with the version."
   (interactive "P")
   (let* ((org-dir         (ignore-errors (org-find-library-dir "org")))
-	 (org-install-dir (ignore-errors (org-find-library-dir "org-install.el")))
+	 (org-install-dir (ignore-errors (org-find-library-dir "org-loaddefs.el")))
 	 (org-trash       (or
 			   (and (fboundp 'org-release) (fboundp 'org-git-version))
 			   (load (concat org-dir "org-version.el")
@@ -246,7 +246,7 @@ When MESSAGE is non-nil, display a message with the version."
 			      (if (string= org-dir org-install-dir)
 				  org-install-dir
 				(concat "mixed installation! " org-install-dir " and " org-dir))
-			    "org-install.el can not be found!")))
+			    "org-loaddefs.el can not be found!")))
 	 (_version (if full version org-version)))
     (if (org-called-interactively-p 'interactive)
 	(if here
