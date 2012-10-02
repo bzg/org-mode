@@ -58,10 +58,11 @@ This variable can be set to either `atx' or `setext'."
   :filters-alist ((:filter-parse-tree . org-md-separate-elements))
   :menu-entry
   (?m "Export to Markdown"
-      ((?M "To temporary buffer" org-md-export-as-markdown)
-       (?m "To file" org-md-export-to-markdown)
+      ((?M "To temporary buffer"
+	   (lambda (s v b) (org-md-export-as-markdown s v)))
+       (?m "To file" (lambda (s v b) (org-md-export-to-markdown s v)))
        (?o "To file and open"
-	   (lambda (s v b) (org-open-file (org-md-export-to-markdown s v b))))))
+	   (lambda (s v b) (org-open-file (org-md-export-to-markdown s v))))))
   :translate-alist ((bold . org-md-bold)
 		    (code . org-md-verbatim)
 		    (example-block . org-md-example-block)
