@@ -119,6 +119,20 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-clock-timestamps-down "org-clock" ())
 (declare-function org-clock-sum-current-item "org-clock" (&optional tstart))
 
+(declare-function orgtbl-mode "org-table" (&optional arg))
+(declare-function org-clock-out "org-clock" (&optional switch-to-state fail-quietly at-time))
+(declare-function org-beamer-mode "org-beamer" ())
+(declare-function org-table-edit-field "org-table" (arg))
+(declare-function org-table-justify-field-maybe "org-table" (&optional new))
+(declare-function org-id-get-create "org-id" (&optional force))
+(declare-function org-id-find-id-file "org-id" (id))
+(declare-function org-tags-view "org-agenda" (&optional todo-only match))
+(declare-function org-agenda-list "org-agenda" (&optional arg start-day span))
+(declare-function org-table-align "org-table" ())
+(declare-function org-table-paste-rectangle "org-table" ())
+(declare-function org-table-maybe-eval-formula "org-table" ())
+(declare-function org-table-maybe-recalculate-line "org-table" ())
+
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
 
@@ -4947,7 +4961,7 @@ The following commands are available:
 		   (lambda (&rest ignore) (org-show-context 'isearch))))
 
   ;; Turn on org-beamer-mode?
-  (and org-startup-with-beamer-mode (org-beamer-mode 1))
+  (and org-startup-with-beamer-mode (org-beamer-mode))
 
   ;; Setup the pcomplete hooks
   (set (make-local-variable 'pcomplete-command-completion-function)

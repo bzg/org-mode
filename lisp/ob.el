@@ -89,6 +89,7 @@
 (declare-function org-completing-read "org" (&rest args))
 (declare-function org-escape-code-in-region "org-src" (beg end))
 (declare-function org-unescape-code-in-string "org-src" (s))
+(declare-function org-table-to-lisp "org-table" (&optional txt))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
