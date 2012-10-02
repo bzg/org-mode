@@ -553,6 +553,7 @@ publishing directory."
 	  (kill-buffer (current-buffer)))
       (current-buffer))))
 
+;;;###autoload
 (defun org-export-ascii-preprocess (parameters)
   "Do extra work for ASCII export."
   ;;

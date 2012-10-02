@@ -3231,7 +3231,6 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    org-archive-location
    "org file:~/org/%s.org"))
 
-;;;###autoload
 (defun org-insert-export-options-template ()
   "Insert into the buffer a template with information for exporting."
   (interactive)

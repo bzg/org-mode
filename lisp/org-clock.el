@@ -962,6 +962,7 @@ to be CLOCKED OUT.")))
 	    (not (memq ch '(?K ?G ?S ?C))))
        fail-quietly)))))
 
+;;;###autoload
 (defun org-resolve-clocks (&optional only-dangling-p prompt-fn last-valid)
   "Resolve all currently open org-mode clocks.
 If `only-dangling-p' is non-nil, only ask to resolve dangling
@@ -1059,6 +1060,8 @@ so long."
   (setq org-clock-current-task nil))
 
 (defvar org-clock-out-time nil) ; store the time of the last clock-out
+
+;;;###autoload
 (defun org-clock-in (&optional select start-time)
   "Start the clock on the current item.
 If necessary, clock-out of the currently active clock.
@@ -1428,6 +1431,7 @@ line and position cursor in that line."
 	    (and (re-search-forward org-property-end-re nil t)
 		 (goto-char (match-beginning 0))))))))
 
+;;;###autoload
 (defun org-clock-out (&optional switch-to-state fail-quietly at-time)
   "Stop the currently running clock.
 Throw an error if there is no running clock and FAIL-QUIETLY is nil.
@@ -1587,6 +1591,7 @@ UPDOWN tells whether to change 'up or 'down."
 			     ((eq org-ts-what 'year) (* 24 3600 365.2)))))
 	     org-ts-what 'updown)))))))
 
+;;;###autoload
 (defun org-clock-cancel ()
   "Cancel the running clock by removing the start timestamp."
   (interactive)
@@ -1613,6 +1618,7 @@ UPDOWN tells whether to change 'up or 'down."
   (message "Clock canceled")
   (run-hooks 'org-clock-cancel-hook))
 
+;;;###autoload
 (defun org-clock-goto (&optional select)
   "Go to the currently clocked-in entry, or to the most recently clocked one.
 With prefix arg SELECT, offer recently clocked tasks for selection."
@@ -1651,6 +1657,7 @@ With prefix arg SELECT, offer recently clocked tasks for selection."
   (let ((range (org-clock-special-range 'today)))
     (org-clock-sum (car range) (cadr range) nil :org-clock-minutes-today)))
 
+;;;###autoload
 (defun org-clock-sum (&optional tstart tend headline-filter propname)
   "Sum the times for each subtree.
 Puts the resulting times in minutes as a text property on each headline.
@@ -1749,6 +1756,7 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
       (org-clock-sum tstart)
       org-clock-file-total-minutes)))
 
+;;;###autoload
 (defun org-clock-display (&optional total-only)
   "Show subtree times in the entire buffer.
 If TOTAL-ONLY is non-nil, only show the total time for the entire file
@@ -1879,6 +1887,7 @@ fontified, and then returned."
 				(re-search-forward "^[ \t]*#\\+END" nil t)
 				(point-at-bol)))))
 
+;;;###autoload
 (defun org-clock-report (&optional arg)
   "Create a table containing a report about clocked time.
 If the cursor is inside an existing clocktable block, then the table
@@ -2165,6 +2174,7 @@ the currently selected interval size."
 	  (org-update-dblock)
 	  t)))))
 
+;;;###autoload
 (defun org-dblock-write:clocktable (params)
   "Write the standard clocktable."
   (setq params (org-combine-plists org-clocktable-defaults params))
@@ -2674,6 +2684,48 @@ This function is made for clock tables."
 
 (defvar org-clock-loaded nil
   "Was the clock file loaded?")
+
+(defun org-clock-update-time-maybe ()
+  "If this is a CLOCK line, update it and return t.
+Otherwise, return nil."
+  (interactive)
+  (save-excursion
+    (beginning-of-line 1)
+    (skip-chars-forward " \t")
+    (when (looking-at org-clock-string)
+      (let ((re (concat "[ \t]*" org-clock-string
+			" *[[<]\\([^]>]+\\)[]>]\\(-+[[<]\\([^]>]+\\)[]>]"
+			"\\([ \t]*=>.*\\)?\\)?"))
+	    ts te h m s neg)
+	(cond
+	 ((not (looking-at re))
+	  nil)
+	 ((not (match-end 2))
+	  (when (and (equal (marker-buffer org-clock-marker) (current-buffer))
+		     (> org-clock-marker (point))
+		     (<= org-clock-marker (point-at-eol)))
+	    ;; The clock is running here
+	    (setq org-clock-start-time
+		  (apply 'encode-time
+			 (org-parse-time-string (match-string 1))))
+	    (org-clock-update-mode-line)))
+	 (t
+	  (and (match-end 4) (delete-region (match-beginning 4) (match-end 4)))
+	  (end-of-line 1)
+	  (setq ts (match-string 1)
+		te (match-string 3))
+	  (setq s (- (org-float-time
+		      (apply 'encode-time (org-parse-time-string te)))
+		     (org-float-time
+		      (apply 'encode-time (org-parse-time-string ts))))
+		neg (< s 0)
+		s (abs s)
+		h (floor (/ s 3600))
+		s (- s (* 3600 h))
+		m (floor (/ s 60))
+		s (- s (* 60 s)))
+	  (insert " => " (format (if neg "-%d:%02d" "%2d:%02d") h m))
+	  t))))))
 
 (defun org-clock-save ()
   "Persist various clock-related data to disk.
