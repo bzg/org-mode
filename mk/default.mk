@@ -13,6 +13,9 @@ prefix	= /usr/share
 # Where local lisp files go.
 lispdir= $(prefix)/emacs/site-lisp/org
 
+# Where local data files go.
+datadir = $(prefix)/emacs/etc/org
+
 # Where info files go.
 infodir = $(prefix)/info
 
