@@ -79,6 +79,7 @@ cleanauto clean cleanall::
 	$(RM) $(LISPA) $(LISPA:%el=%elc)
 clean cleanall cleanelc::
 	$(RM) *.elc
+	$(RM) org-install.el # Fix leftover from previous install method
 
 clean-install:
 	if [ -d $(DESTDIR)$(lispdir) ] ; then \
