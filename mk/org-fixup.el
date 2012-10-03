@@ -27,7 +27,7 @@
 (require 'autoload)
 (require 'org-compat "org-compat.el")
 
-(defun org-make-org-version (org-release org-git-version)
+(defun org-make-org-version (org-release org-git-version odt-dir)
   "Make the file org-version.el in the current directory.
 This function is internally used by the build system and should
 be used by foreign build systems or installers to produce this
@@ -50,11 +50,7 @@ the Git work tree)."
   \"The Git version of org-mode.
   Inserted by installing org-mode or when a release is made.\"
    (let ((org-git-version \"" org-git-version "\"))
-     org-git-version))
-\f\n\(provide 'org-version\)
-\f\n;; Local Variables:\n;; version-control: never
-;; no-byte-compile: t
-;; coding: utf-8\n;; End:\n;;; org-version.el ends here\n")
+     org-git-version))")
     (toggle-read-only 0)
     (write-file "org-version.el")))
 
@@ -89,7 +85,7 @@ manual install when the build system can't be used."
 	(progn
 	  (cd dirlisp)
 	  (org-fixup)
-	  (org-make-org-version (org-release) (org-git-version))
+	  (org-make-org-version (org-release) (org-git-version) dirodt)
 	  (org-make-org-loaddefs)
 	  (when compile (byte-recompile-directory dirlisp 0 force)))
       (cd origin))))
