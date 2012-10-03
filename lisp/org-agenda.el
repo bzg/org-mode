@@ -5381,7 +5381,7 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
       (setq b0 (match-beginning 0)
 	    b3 (match-beginning 3) e3 (match-end 3)
 	    todo-state (save-match-data (ignore-errors (org-get-todo-state)))
-	    habitp (and (functionp 'org-is-habit-p) (org-is-habit-p))
+	    habitp (and (functionp 'org-is-habit-p) (save-match-data (org-is-habit-p)))
 	    show-all (or (eq org-agenda-repeating-timestamp-show-all t)
 			 (member todo-state
 				 org-agenda-repeating-timestamp-show-all)))
