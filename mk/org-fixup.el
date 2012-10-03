@@ -27,7 +27,7 @@
 (require 'autoload)
 (require 'org-compat "org-compat.el")
 
-(defun org-make-org-version (org-release org-git-version)
+(defun org-make-org-version (org-release org-git-version odt-dir)
   "Make the file org-version.el in the current directory.
 This function is internally used by the build system and should
 be used by foreign build systems or installers to produce this
@@ -51,6 +51,9 @@ the Git work tree)."
   Inserted by installing org-mode or when a release is made.\"
    (let ((org-git-version \"" org-git-version "\"))
      org-git-version))
+;;;\#\#\#autoload
+\(defvar org-odt-data-dir \"" odt-dir "\"
+  \"The location of ODT styles.\")
 \f\n\(provide 'org-version\)
 \f\n;; Local Variables:\n;; version-control: never
 ;; no-byte-compile: t
@@ -84,12 +87,15 @@ force re-compilation.  This function is provided for easier
 manual install when the build system can't be used."
   (let* ((origin default-directory)
 	 (dirlisp (org-find-library-dir "org"))
-	 (dirorg (concat dirlisp "../" )))
+	 (dirorg (concat dirlisp "../" ))
+	 (dirodt (if (boundp 'org-odt-data-dir)
+		     org-odt-data-dir
+		   (concat dirorg "etc/"))))
     (unwind-protect
 	(progn
 	  (cd dirlisp)
 	  (org-fixup)
-	  (org-make-org-version (org-release) (org-git-version))
+	  (org-make-org-version (org-release) (org-git-version) dirodt)
 	  (org-make-org-loaddefs)
 	  (when compile (byte-recompile-directory dirlisp 0 force)))
       (cd origin))))
