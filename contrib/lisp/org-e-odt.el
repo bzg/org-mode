@@ -387,7 +387,9 @@ Also add it to `rng-schema-locating-files'."
 		(file-readable-p
 		 (expand-file-name "schemas.xml" schema-dir)))
 	       schema-dir
-	     (when value (message "No OpenDocument schema files")))))
+	     (when value
+	       (message "No OpenDocument schema files" value))
+	     nil)))
     (when org-e-odt-schema-dir
       (eval-after-load 'rng-loc
 	'(add-to-list 'rng-schema-locating-files
