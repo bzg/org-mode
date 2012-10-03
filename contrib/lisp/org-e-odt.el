@@ -117,9 +117,12 @@
 (defconst org-e-odt-styles-dir
   (let* ((d (expand-file-name (org-find-library-dir "org-e-odt.el")))
 	 (styles-dir-list (list
-			   (concat d "../../etc/styles/") ;; Git
-			   (concat d "../../etc/org/")    ;; system
-			   (concat d "../etc/org/")))     ;; ELPA org-plus
+			   (concat d "etc/styles/") ;; ELPA and Git
+			   (concat d "etc/org/")    ;; Org from Emacs
+			   (concat d "../"
+				   (number-to-string emacs-major-version) "."
+				   (number-to-string emacs-minor-version) "/etc/org/")
+			   (concat data-directory "org/"))) ;; Custom install
 	 styles-dir)
     (setq styles-dir
 	  (car
@@ -133,8 +136,8 @@
 					"OrgOdtStyles.xml" sd)))
 			     sd))
 			 styles-dir-list))))
-    (or styles-dir
-	(error "Cannot find factory styles files for Org ODT, aborting")))
+    (or (expand-file-name styles-dir)
+	(message "Cannot find factory styles files for Org ODT")))
   "Directory that holds auxiliary XML files used by the ODT exporter.
 
 This directory contains the following XML files -
@@ -1826,7 +1829,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Latex Environment
 
-(eval-after-load 'org-e-odt
+(eval-after-load 'org-odt
   '(ad-deactivate 'org-format-latex-as-mathml))
 
 ;; (defadvice org-format-latex-as-mathml	; FIXME
