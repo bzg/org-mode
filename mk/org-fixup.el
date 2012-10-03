@@ -50,7 +50,14 @@ the Git work tree)."
   \"The Git version of org-mode.
   Inserted by installing org-mode or when a release is made.\"
    (let ((org-git-version \"" org-git-version "\"))
-     org-git-version))")
+     org-git-version))
+;;;\#\#\#autoload
+\(defvar org-odt-data-dir \"" odt-dir "\"
+  \"The location of ODT styles.\")
+\f\n\(provide 'org-version\)
+\f\n;; Local Variables:\n;; version-control: never
+;; no-byte-compile: t
+;; coding: utf-8\n;; End:\n;;; org-version.el ends here\n")
     (toggle-read-only 0)
     (write-file "org-version.el")))
 
@@ -80,7 +87,10 @@ force re-compilation.  This function is provided for easier
 manual install when the build system can't be used."
   (let* ((origin default-directory)
 	 (dirlisp (org-find-library-dir "org"))
-	 (dirorg (concat dirlisp "../" )))
+	 (dirorg (concat dirlisp "../" ))
+	 (dirodt (if (boundp 'org-odt-data-dir)
+		     org-odt-data-dir
+		   (concat dirorg "etc/"))))
     (unwind-protect
 	(progn
 	  (cd dirlisp)
