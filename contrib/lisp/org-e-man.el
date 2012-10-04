@@ -43,6 +43,7 @@
 
 (defvar org-export-man-default-packages-alist)
 (defvar org-export-man-packages-alist)
+(defvar orgtbl-exp-regexp)
 
 
 

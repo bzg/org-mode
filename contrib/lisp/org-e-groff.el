@@ -40,6 +40,7 @@
 (eval-when-compile (require 'cl))
 (require 'org-export)
 
+(defvar orgtbl-exp-regexp)
 
 
 ;;; Define Back-End

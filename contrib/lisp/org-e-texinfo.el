@@ -1537,7 +1537,7 @@ a communication channel."
 				 (end (org-element-property :contents-end ref))
 				 (length (- end start)))
 			    length)) row) cells))
-    (setq cells (remove-if #'null cells))
+    (setq cells (org-remove-if 'null cells))
     (push (loop for count from 0 to (- number-cells 1) collect
 		(loop for item in cells collect
 		      (nth count item))) counts)
