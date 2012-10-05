@@ -1613,7 +1613,9 @@ Outside list"
 	(length (org-element-property
 		 :tblfm
 		 (org-element-map
-		  (org-element-parse-buffer) 'table 'identity nil t)))))))
+		  (org-element-parse-buffer) 'table 'identity nil t))))))
+  ;; Do not error when parsing a table with trailing white spaces.
+  (should (org-test-with-temp-text "| a |\n  " (org-element-parse-buffer))))
 
 
 ;;;; Table Cell
