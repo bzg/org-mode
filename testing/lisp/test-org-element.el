@@ -2512,6 +2512,17 @@ Paragraph \\alpha."
        (org-test-with-temp-text "* Headline _with_ underlining"
 	 (progn (search-forward "w")
 		(org-element-type (org-element-context))))))
+  ;; Find objects in objects.
+  (should
+   (eq 'macro
+       (org-test-with-temp-text "| a | {{{macro}}} |"
+	 (progn (search-forward "{")
+		(org-element-type (org-element-context))))))
+  (should
+   (eq 'table-cell
+       (org-test-with-temp-text "| a | b {{{macro}}} |"
+	 (progn (search-forward "b")
+		(org-element-type (org-element-context))))))
   ;; Correctly set `:parent' property.
   (should
    (eq 'paragraph

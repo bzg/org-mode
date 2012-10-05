@@ -3958,6 +3958,9 @@ Return value is an alist whose CAR is position and CDR the object
 type, as a symbol.
 
 OBJECTS is the previous candidates alist."
+  ;; Filter out any object found but not belonging to RESTRICTION.
+  (setq objects (org-remove-if-not (lambda (obj) (memq (car obj) restriction))
+				   objects))
   (let (next-candidates types-to-search)
     ;; If no previous result, search every object type in RESTRICTION.
     ;; Otherwise, keep potential candidates (old objects located after
@@ -4357,7 +4360,7 @@ and :post-blank properties."
 		       (progn (beginning-of-line)
 			      (skip-chars-forward "* ")
 			      (setq end (point-at-eol))))
-		  (and (memq type '(paragraph table-cell verse-block))
+		  (and (memq type '(paragraph table-row verse-block))
 		       (let ((cbeg (org-element-property
 				    :contents-begin element))
 			     (cend (org-element-property
@@ -4376,7 +4379,7 @@ and :post-blank properties."
 					candidates)))
 	       ;; If ORIGIN is before next object in element, there's
 	       ;; no point in looking further.
-	       (if (> (cdr closest-cand) origin) (throw 'exit element)
+	       (if (> (cdr closest-cand) origin) (throw 'exit parent)
 		 (let* ((object
 			 (progn (goto-char (cdr closest-cand))
 				(funcall (intern (format "org-element-%s-parser"
@@ -4396,7 +4399,9 @@ and :post-blank properties."
 		    ;; search to the end of its contents.
 		    (t (goto-char cbeg)
 		       (org-element-put-property object :parent parent)
-		       (setq parent object end cend)))))))
+		       (setq parent object
+			     restriction (org-element-restriction object)
+			     end cend)))))))
 	   parent))))))
 
 (defsubst org-element-nested-p (elem-A elem-B)
