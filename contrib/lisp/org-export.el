@@ -2498,6 +2498,8 @@ Return the updated communication channel."
 ;; was within an item, the item should contain the headline.  That's
 ;; why file inclusion should be done before any structure can be
 ;; associated to the file, that is before parsing.
+;;
+;; Macro are expanded with `org-export-expand-macro'.
 
 (defun org-export-as
   (backend &optional subtreep visible-only body-only ext-plist noexpand)
@@ -2542,34 +2544,34 @@ Return code as a string."
 	     (narrow-to-region (point) (point-max))))
       ;; 1. Get export environment from original buffer.  Also install
       ;;    user's and developer's filters.
-      (let ((info (org-export-install-filters
-		   (org-export-get-environment backend subtreep ext-plist)))
-	    ;; 2. Get parse tree.  Buffer isn't parsed directly.
-	    ;;    Instead, a temporary copy is created, where macros
-	    ;;    and include keywords are expanded and code blocks
-	    ;;    are evaluated.
-	    (tree (let ((buf (or (buffer-file-name (buffer-base-buffer))
-				 (current-buffer))))
-		    (org-export-with-current-buffer-copy
-		     (unless noexpand
-		       (org-macro-replace-all)
-		       (org-export-expand-include-keyword)
-		       ;; TODO: Setting `org-current-export-file' is
-		       ;; required by Org Babel to properly resolve
-		       ;; noweb references.  Once "org-exp.el" is
-		       ;; removed, modify
-		       ;; `org-export-blocks-preprocess' so it accepts
-		       ;; the value as an argument instead.
-		       (let ((org-current-export-file buf))
-			 (org-export-blocks-preprocess)))
-		     (goto-char (point-min))
-		     ;; Run hook
-		     ;; `org-export-before-parsing-hook'. with current
-		     ;; back-end as argument.
-		     (run-hook-with-args
-		      'org-export-before-parsing-hook backend)
-		     ;; Eventually parse buffer.
-		     (org-element-parse-buffer nil visible-only)))))
+      (let* ((info (org-export-install-filters
+		    (org-export-get-environment backend subtreep ext-plist)))
+	     ;; 2. Get parse tree.  Buffer isn't parsed directly.
+	     ;;    Instead, a temporary copy is created, where macros
+	     ;;    and include keywords are expanded and code blocks
+	     ;;    are evaluated.
+	     (tree (let ((buf (or (buffer-file-name (buffer-base-buffer))
+				  (current-buffer))))
+		     (org-export-with-current-buffer-copy
+		      (unless noexpand
+			(org-export-expand-macro info)
+			(org-export-expand-include-keyword)
+			;; TODO: Setting `org-current-export-file' is
+			;; required by Org Babel to properly resolve
+			;; noweb references.  Once "org-exp.el" is
+			;; removed, modify
+			;; `org-export-blocks-preprocess' so it
+			;; accepts the value as an argument instead.
+			(let ((org-current-export-file buf))
+			  (org-export-blocks-preprocess)))
+		      (goto-char (point-min))
+		      ;; Run hook
+		      ;; `org-export-before-parsing-hook'. with current
+		      ;; back-end as argument.
+		      (run-hook-with-args
+		       'org-export-before-parsing-hook backend)
+		      ;; Eventually parse buffer.
+		      (org-element-parse-buffer nil visible-only)))))
 	;; 3. Call parse-tree filters to get the final tree.
 	(setq tree
 	      (org-export-filter-apply-functions
@@ -2720,6 +2722,23 @@ Point is at buffer's beginning when BODY is applied."
 	   (goto-char (point-min))
 	   (progn ,@body))))))
 (def-edebug-spec org-export-with-current-buffer-copy (body))
+
+(defun org-export-expand-macro (info)
+  "Expand every macro in buffer.
+INFO is a plist containing export options and buffer properties."
+  (org-macro-replace-all
+   ;; Before expanding macros, install {{{author}}}, {{{date}}},
+   ;; {{{email}}} and {{{title}}} templates.
+   (nconc
+    (list (cons "author"
+		(org-element-interpret-data (plist-get info :author)))
+	  (cons "date"
+		(org-element-interpret-data (plist-get info :date)))
+	  ;; EMAIL is not a parsed keyword: store it as-is.
+	  (cons "email" (or (plist-get info :email) ""))
+	  (cons "title"
+		(org-element-interpret-data (plist-get info :title))))
+    org-macro-templates)))
 
 (defun org-export-expand-include-keyword (&optional included dir)
   "Expand every include keyword in buffer.

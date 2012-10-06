@@ -20825,9 +20825,17 @@ hierarchy of headlines by UP levels before marking the subtree."
 ;; Macros are expanded with `org-macro-replace-all', which relies
 ;; internally on `org-macro-expand'.
 
-;; Templates for expansion are stored in the buffer-local variable
-;; `org-macro-templates'.  This variable is updated by
+;; Default templates for expansion are stored in the buffer-local
+;; variable `org-macro-templates'.  This variable is updated by
 ;; `org-macro-initialize-templates'.
+
+;; Along with macros defined through #+MACRO: keyword, default
+;; templates include the following hard-coded macros:
+;; {{{time(format-string)}}}, {{{property(node-property)}}},
+;; {{{input-file}}} and {{{modification-time(format-string)}}}.
+
+;; During export, {{{author}}}, {{{date}}}, {{{email}}} and
+;; {{{title}}} will also be provided.
 
 
 (defvar org-macro-templates nil
@@ -20840,15 +20848,15 @@ directly, use instead:
   #+MACRO: name template")
 (make-variable-buffer-local 'org-macro-templates)
 
-(defun org-macro-expand (macro)
+(defun org-macro-expand (macro templates)
   "Return expanded MACRO, as a string.
 MACRO is an object, obtained, for example, with
-`org-element-context'.  Return nil if no template was found."
+`org-element-context'.  TEMPLATES is an alist of templates used
+for expansion.  See `org-macro-templates' for a buffer-local
+default value.  Return nil if no template was found."
   (let ((template
-	 (cdr (assoc-string (org-element-property :key macro)
-			    org-macro-templates
-			    ;; Macro names are case-insensitive.
-			    t))))
+	 ;; Macro names are case-insensitive.
+	 (cdr (assoc-string (org-element-property :key macro) templates t))))
     (when template
       (let ((value (replace-regexp-in-string
                     "\\$[0-9]+"
@@ -20865,14 +20873,16 @@ MACRO is an object, obtained, for example, with
         ;; Return string.
         (format "%s" (or value ""))))))
 
-(defun org-macro-replace-all ()
-  "Replace all macros in current buffer by their expansion."
+(defun org-macro-replace-all (templates)
+  "Replace all macros in current buffer by their expansion.
+TEMPLATES is an alist of templates used for expansion.  See
+`org-macro-templates' for a buffer-local default value."
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward "{{{[-A-Za-z0-9_]" nil t)
       (let ((object (org-element-context)))
         (when (eq (org-element-type object) 'macro)
-          (let ((value (org-macro-expand object)))
+          (let ((value (org-macro-expand object templates)))
             (when value
               (delete-region
                (org-element-property :begin object)
@@ -20916,7 +20926,6 @@ function installs the following ones: \"property\", \"date\",
     (mapc (lambda (cell) (funcall set-template cell))
 	  (list
 	   (cons "property" "(eval (org-entry-get nil \"$1\" 'selective))")
-	   (cons "date" "(eval (format-time-string \"$1\"))")
 	   (cons "time" "(eval (format-time-string \"$1\"))")))
     (let ((visited-file (buffer-file-name (buffer-base-buffer))))
       (when (and visited-file (file-exists-p visited-file))

@@ -140,7 +140,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
     "#+MACRO: A B\n1 B 3"
     (org-test-with-temp-text "#+MACRO: A B\n1 {{{A}}} 3"
       (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all)
+	     (org-macro-replace-all org-macro-templates)
 	     (buffer-string)))))
   ;; Macro with arguments.
   (should
@@ -148,7 +148,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
     "#+MACRO: macro $1 $2\nsome text"
     (org-test-with-temp-text "#+MACRO: macro $1 $2\n{{{macro(some,text)}}}"
       (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all)
+	     (org-macro-replace-all org-macro-templates)
 	     (buffer-string)))))
   ;; Macro with "eval".
   (should
@@ -156,7 +156,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
     "#+MACRO: add (eval (+ $1 $2))\n3"
     (org-test-with-temp-text "#+MACRO: add (eval (+ $1 $2))\n{{{add(1,2)}}}"
       (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all)
+	     (org-macro-replace-all org-macro-templates)
 	     (buffer-string)))))
   ;; Nested macros.
   (should
@@ -165,7 +165,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
     (org-test-with-temp-text
 	"#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\n{{{out}}}"
       (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all)
+	     (org-macro-replace-all org-macro-templates)
 	     (buffer-string))))))
 
 

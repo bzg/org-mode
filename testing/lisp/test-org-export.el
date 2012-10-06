@@ -429,6 +429,32 @@ body\n")))
     (should (equal (buffer-string)
 		   "#+BEGIN_SRC emacs-lisp\n(+ 2 1)\n#+END_SRC\n"))))
 
+(ert-deftest test-org-export/expand-macro ()
+  "Test macro expansion in an Org buffer."
+  ;; Standard macro expansion.
+  (should
+   (equal "#+MACRO: macro1 value\nvalue"
+	  (org-test-with-temp-text "#+MACRO: macro1 value\n{{{macro1}}}"
+	    (let (info)
+	      (org-macro-initialize-templates)
+	      (org-export-expand-macro info) (buffer-string)))))
+  ;; Export specific macros.
+  (should
+   (equal "me 2012-03-29 me@here Title"
+	  (org-test-with-temp-text
+	      "
+#+TITLE: Title
+#+DATE: 2012-03-29
+#+AUTHOR: me
+#+EMAIL: me@here
+{{{author}}} {{{date}}} {{{email}}} {{{title}}}"
+	    (let ((info (org-export-get-environment)))
+	      (org-macro-initialize-templates)
+	      (org-export-expand-macro info)
+	      (goto-char (point-max))
+	      (buffer-substring (line-beginning-position)
+				(line-end-position)))))))
+
 (ert-deftest test-org-export/user-ignore-list ()
   "Test if `:ignore-list' accepts user input."
   (org-test-with-backend test
