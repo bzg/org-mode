@@ -2774,23 +2774,16 @@ paths."
 	      (insert
 	       (let ((ind-str (make-string ind ? ))
 		     (contents
-		      ;; Protect sensitive contents with commas.
-		      (replace-regexp-in-string
-		       "\\(^\\)\\([*]\\|[ \t]*#\\+\\)" ","
-		       (org-export--prepare-file-contents file lines)
-		       nil nil 1)))
+		      (org-escape-code-in-string
+		       (org-export--prepare-file-contents file lines))))
 		 (format "%s#+BEGIN_EXAMPLE\n%s%s#+END_EXAMPLE\n"
 			 ind-str contents ind-str))))
 	     ((stringp env)
 	      (insert
 	       (let ((ind-str (make-string ind ? ))
 		     (contents
-		      ;; Protect sensitive contents with commas.
-		      (replace-regexp-in-string
-		       (if (string= env "org") "\\(^\\)\\(.\\)"
-			 "\\(^\\)\\([*]\\|[ \t]*#\\+\\)") ","
-		       (org-export--prepare-file-contents file lines)
-		       nil nil 1)))
+		      (org-escape-code-in-string
+		       (org-export--prepare-file-contents file lines))))
 		 (format "%s#+BEGIN_SRC %s\n%s%s#+END_SRC\n"
 			 ind-str env contents ind-str))))
 	     (t
