@@ -832,9 +832,8 @@ See `org-export-filters-alist' for more information."))
 	    ',export-block))
        ;; Add an entry for back-end in `org-export-dispatch'.
        ,(when menu-entry
-	  (let ((menu (assq (car menu-entry) org-export-dispatch-menu-entries)))
-	    (unless menu
-	      `(push ',menu-entry org-export-dispatch-menu-entries))))
+	  `(unless (assq (car ',menu-entry) org-export-dispatch-menu-entries)
+	     (add-to-list 'org-export-dispatch-menu-entries ',menu-entry)))
        ;; Splice in the body, if any.
        ,@body)))
 
@@ -965,9 +964,8 @@ structure of the values."
 	 "Alist between element or object types and translators.")
        ;; Add an entry for back-end in `org-export-dispatch'.
        ,(when menu-entry
-	  (let ((menu (assq (car menu-entry) org-export-dispatch-menu-entries)))
-	    (unless menu
-	      `(push ',menu-entry org-export-dispatch-menu-entries))))
+	  `(unless (assq (car ',menu-entry) org-export-dispatch-menu-entries)
+	     (add-to-list 'org-export-dispatch-menu-entries ',menu-entry)))
        ,(when sub-menu-entry
 	  (let ((menu (nth 2 (assq (car sub-menu-entry)
 				   org-export-dispatch-menu-entries))))
