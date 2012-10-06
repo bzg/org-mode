@@ -591,8 +591,14 @@ publishing directory.
 
 Return output file name."
   (require 'org-e-latex nil t)
-  (org-e-latex-compile
-   (org-e-publish-org-to 'e-latex filename ".tex" plist pub-dir)))
+  ;; Unlike to `org-e-publish-org-to-latex', PDF file is generated in
+  ;; base directory and then moved to publishing directory.
+  (org-e-publish-attachment
+   plist
+   (org-e-latex-compile
+    (org-e-publish-org-to
+     'e-latex filename ".tex" plist (plist-get plist :base-directory)))
+   pub-dir))
 
 (defun org-e-publish-org-to-html (plist filename pub-dir)
   "Publish an org file to HTML.
