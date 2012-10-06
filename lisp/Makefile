@@ -7,8 +7,9 @@ endif
 LISPV = org-version.el
 LISPI = org-loaddefs.el
 LISPA = $(LISPV) $(LISPI)
+LISPB = $(LISPA:%el=%elc) org-install.elc
 LISPF = $(filter-out $(LISPA),$(sort $(wildcard *.el)))
-LISPC = $(filter-out $(LISPN:%el=%elc),$(LISPF:%el=%elc))
+LISPC = $(filter-out $(LISPB) $(LISPN:%el=%elc),$(LISPF:%el=%elc))
 _ORGCM_ = dirall single source slint1 slint2
 -include local.mk
 
@@ -65,7 +66,7 @@ $(LISPV):	$(LISPF)
 	@$(MAKE_ORG_VERSION)
 
 $(LISPI):	$(LISPV) $(LISPF)
-	@echo "org-install: $(ORGVERSION) ($(GITVERSION))"
+	@echo "org-loaddefs: $(ORGVERSION) ($(GITVERSION))"
 	@$(RM) $(@)
 	@$(MAKE_ORG_INSTALL)
 
@@ -76,10 +77,9 @@ install:	$(LISPF) compile
 	$(CP) $(LISPC) $(LISPF) $(LISPA) $(DESTDIR)$(lispdir)
 
 cleanauto clean cleanall::
-	$(RM) $(LISPA) $(LISPA:%el=%elc)
+	$(RM) $(LISPA) $(LISPB)
 clean cleanall cleanelc::
 	$(RM) *.elc
-	$(RM) org-install.el # Fix leftover from previous install method
 
 clean-install:
 	if [ -d $(DESTDIR)$(lispdir) ] ; then \
