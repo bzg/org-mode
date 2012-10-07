@@ -101,6 +101,7 @@
 (declare-function archive-zip-extract "arc-mode" (archive name))
 (declare-function org-create-math-formula "org" (latex-frag &optional mathml-file))
 (declare-function browse-url-file-url "browse-url" (file))
+(declare-function org-solidify-link-text "org-exp" (s &optional alist))
 
 
 
