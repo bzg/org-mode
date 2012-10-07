@@ -9081,7 +9081,7 @@ If optional argument MERGE is set, merge TABLE into
 
 (defun org-link-unescape (str)
   "Unhex hexified Unicode strings as returned from the JavaScript function
-encodeURIComponent.  E.g. `%C3%B6' is the german Umlaut `ö'."
+encodeURIComponent.  E.g. `%C3%B6' is the german o-Umlaut."
   (unless (and (null str) (string= "" str))
     (let ((pos 0) (case-fold-search t) unhexed)
       (while (setq pos (string-match "\\(%[0-9a-f][0-9a-f]\\)+" str pos))
@@ -9091,9 +9091,9 @@ encodeURIComponent.  E.g. `%C3%B6' is the german Umlaut `ö'."
   str)
 
 (defun org-link-unescape-compound (hex)
-  "Unhexify Unicode hex-chars.  E.g. `%C3%B6' is the German Umlaut `ö'.
+  "Unhexify Unicode hex-chars.  E.g. `%C3%B6' is the German o-Umlaut.
 Note: this function also decodes single byte encodings like
-`%E1' (\"á\") if not followed by another `%[A-F0-9]{2}' group."
+`%E1' (a-acute) if not followed by another `%[A-F0-9]{2}' group."
   (save-match-data
     (let* ((bytes (cdr (split-string hex "%")))
 	   (ret "")
@@ -11038,7 +11038,7 @@ this is used for the GOTO interface."
 	      (org-refile-new-child parent-target child)))
 	(error "Invalid target location")))))
 
-(declare-function org-string-nw-p "org-macs.el" (s))
+(declare-function org-string-nw-p "org-macs" (s))
 (defun org-refile-check-position (refile-pointer)
   "Check if the refile pointer matches the readline to which it points."
   (let* ((file (nth 1 refile-pointer))

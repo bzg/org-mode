@@ -2718,7 +2718,7 @@ Do this when translation to MathML fails."
 (defun org-export-odt-preprocess (parameters)
   (org-export-odt-preprocess-label-references))
 
-(declare-function archive-zip-extract "arc-mode.el" (archive name))
+(declare-function archive-zip-extract "arc-mode" (archive name))
 (defun org-odt-zip-extract-one (archive member &optional target)
   (require 'arc-mode)
   (let* ((target (or target default-directory))
