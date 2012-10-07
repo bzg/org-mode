@@ -78,7 +78,8 @@
 (require 'find-func)
 (require 'format-spec)
 
-(load "org-loaddefs.el" t t)
+(let ((load-suffixes (list ".el")))
+  (load "org-loaddefs" 'noerror nil nil 'mustsuffix))
 
 ;; `org-outline-regexp' ought to be a defconst but is let-binding in
 ;; some places -- e.g. see the macro org-with-limited-levels.
@@ -233,11 +234,14 @@ When FULL is non-nil, use a verbose version string.
 When MESSAGE is non-nil, display a message with the version."
   (interactive "P")
   (let* ((org-dir         (ignore-errors (org-find-library-dir "org")))
-	 (org-install-dir (ignore-errors (org-find-library-dir "org-loaddefs.el")))
+	 (save-load-suffixes load-suffixes)
+	 (load-suffixes (list ".el"))
+	 (org-install-dir (ignore-errors (org-find-library-dir "org-loaddefs")))
 	 (org-trash       (or
 			   (and (fboundp 'org-release) (fboundp 'org-git-version))
-			   (load (concat org-dir "org-version.el")
-				 'noerror 'nomessage 'nosuffix)))
+			   (load (concat org-dir "org-version")
+				 'noerror 'nomessage nil 'mustsuffix)))
+	 (load-suffixes save-load-suffixes)
 	 (org-version (org-release))
 	 (git-version (org-git-version))
 	 (version (format "Org-mode version %s (%s @ %s)"
@@ -19991,44 +19995,46 @@ Your bug report will be posted to the Org-mode mailing list.
   "Reload all org lisp files.
 With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
-  (require 'find-func)
-  (let* ((file-re "^org\\(-.*\\)?\\.el")
-	 (dir-org (file-name-directory (org-find-library-dir "org")))
-	 (dir-org-contrib (ignore-errors
-			    (file-name-directory
-			     (org-find-library-dir "org-contribdir"))))
-	 (babel-files
-	  (mapcar (lambda (el) (concat "ob" (when el (format "-%s" el)) ".el"))
-		  (append (list nil "comint" "eval" "exp" "keys"
-				"lob" "ref" "table" "tangle")
-			  (delq nil
-				(mapcar
-				 (lambda (lang)
-				   (when (cdr lang) (symbol-name (car lang))))
-				 org-babel-load-languages)))))
-	 (files
-	  (append  babel-files
-		   (and dir-org-contrib
-			(directory-files dir-org-contrib t file-re))
-		   (directory-files dir-org t file-re)))
-	 (remove-re (concat (if (featurep 'xemacs)
-				"org-colview" "org-colview-xemacs")
-			    "\\'")))
-    (setq files (mapcar 'file-name-sans-extension files))
-    (setq files (mapcar
-		 (lambda (x) (if (string-match remove-re x) nil x))
-		 files))
-    (setq files (delq nil files))
-    (mapc
-     (lambda (f)
-       (when (featurep (intern (file-name-nondirectory f)))
-	 (if (and (not uncompiled)
-		  (file-exists-p (concat f ".elc")))
-	     (load (concat f ".elc") nil nil 'nosuffix)
-	   (load (concat f ".el") nil nil 'nosuffix))))
-     files)
-    (load (concat dir-org "org-version.el") 'noerror nil 'nosuffix))
-  (org-version nil 'full 'message))
+  (let* ((org-dir     (org-find-library-dir "org"))
+	 (babel-dir   (or (org-find-library-dir "ob") org-dir))
+	 (contrib-dir (or (org-find-library-dir "org-contribdir") org-dir))
+	 (feature-re "^\\(org\\|ob\\)\\(-.*\\)?")
+	 (remove-re (mapconcat 'identity
+		     (list
+		      (if (featurep 'xemacs) "org-colview" "org-colview-xemacs")
+		      "^org$" "^org-infojs$" "^org-loaddefs$" "^org-version$")
+		     "\\|"))
+	 (lfeat (append
+		 (sort
+		  (delq nil (mapcar
+			     (lambda (f)
+			       (let ((feature (symbol-name f)))
+				 (if (and (string-match feature-re feature)
+					  (not (string-match remove-re feature)))
+				     feature nil)))
+			     features))
+		  'string-lessp)
+		 (list "org-version" "org")))
+	 (load-suffixes (if uncompiled (reverse load-suffixes) load-suffixes))
+	 (load-misses ()))
+    (setq load-misses
+	  (delq 't
+		(mapcar (lambda (f)
+			  (or
+			   (load (concat org-dir f) 'noerror nil nil 'mustsuffix)
+			   (unless (string= org-dir babel-dir)
+			     (load (concat babel-dir f) 'noerror nil nil 'mustsuffix))
+			   (unless (string= org-dir contrib-dir)
+			     (load (concat contrib-dir f) 'noerror nil nil 'mustsuffix))
+			   (and (load (concat (org-find-library-dir f) f) 'noerror nil nil 'mustsuffix)
+				;; fallback to load-path, report as a possible error
+				(message "Had to fall back onto load-path, something is not quite right...")
+				f)))
+			lfeat)))
+    (if (not load-misses)
+	(message "Successfully reloaded Org\n%s" (org-version nil 'full))
+      (message "Some error occured while reloading Org features\n%s\nPlease check *Messages*!\n%s"
+	       load-misses (org-version nil 'full)))))
 
 ;;;###autoload
 (defun org-customize ()
