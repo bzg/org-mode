@@ -98,7 +98,7 @@
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function hfy-face-to-style "htmlfontify" (fn))
 (declare-function hfy-face-or-def-to-name "htmlfontify" (fn))
-(declare-function archive-zip-extract "arc-mode.el" (archive name))
+(declare-function archive-zip-extract "arc-mode" (archive name))
 (declare-function org-create-math-formula "org" (latex-frag &optional mathml-file))
 (declare-function browse-url-file-url "browse-url" (file))
 
