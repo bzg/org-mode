@@ -79,7 +79,7 @@
 (declare-function org-e-publish-current-file "org-e-publish" (&optional force))
 (declare-function org-e-publish-current-project "org-e-publish"
 		  (&optional force))
-(declare-function org-export-blocks-preprocess "org-exp-blocks")
+(declare-function org-export-blocks-preprocess "ob-exp")
 
 (defvar org-e-publish-project-alist)
 (defvar org-table-number-fraction)
