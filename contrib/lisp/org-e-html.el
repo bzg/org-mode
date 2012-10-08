@@ -36,6 +36,7 @@
 ;;; Dependencies
 
 (require 'org-export)
+(require 'org-e-publish)
 (require 'format-spec)
 (eval-when-compile (require 'cl) (require 'table))
 
@@ -2806,7 +2807,7 @@ contextual information."
       (buffer-substring-no-properties (point-min) (point-max)))))
 
 
-;;; Interactive functions
+;;; End-user functions
 
 ;;;###autoload
 (defun org-e-html-export-as-html
@@ -2879,6 +2880,17 @@ Return output file's name."
 	 (org-export-coding-system org-e-html-coding-system))
     (org-export-to-file
      'e-html file subtreep visible-only body-only ext-plist)))
+
+;;;###autoload
+(defun org-e-html-publish-to-html (plist filename pub-dir)
+  "Publish an org file to HTML.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to 'e-html filename ".html" plist pub-dir))
 
 
 

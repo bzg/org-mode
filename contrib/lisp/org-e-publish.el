@@ -538,7 +538,7 @@ matching filenames."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Pluggable publishing back-end functions
+;;; Tools for publishing functions in back-ends
 
 (defun org-e-publish-org-to (backend filename extension plist &optional pub-dir)
   "Publish an Org file to a specified back-end.
@@ -574,88 +574,6 @@ Return output file name."
       (unless visitingp (kill-buffer work-buffer)))))
 
 (defvar project-plist)
-(defun org-e-publish-org-to-latex (plist filename pub-dir)
-  "Publish an Org file to LaTeX.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (require 'org-e-latex nil t)
-  (org-e-publish-org-to 'e-latex filename ".tex" plist pub-dir))
-
-(defun org-e-publish-org-to-pdf (plist filename pub-dir)
-  "Publish an Org file to PDF \(via LaTeX).
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (require 'org-e-latex nil t)
-  ;; Unlike to `org-e-publish-org-to-latex', PDF file is generated in
-  ;; working directory and then moved to publishing directory.
-  (org-e-publish-attachment
-   plist
-   (org-e-latex-compile (org-e-publish-org-to 'e-latex filename ".tex" plist))
-   pub-dir))
-
-(defun org-e-publish-org-to-html (plist filename pub-dir)
-  "Publish an org file to HTML.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (require 'org-e-html nil t)
-  (org-e-publish-org-to 'e-html filename ".html" plist pub-dir))
-
-;; TODO: Not implemented yet.
-;; (defun org-e-publish-org-to-org (plist filename pub-dir)
-;;   "Publish an org file to HTML.
-;;
-;; FILENAME is the filename of the Org file to be published.  PLIST
-;; is the property list for the given project.  PUB-DIR is the
-;; publishing directory.
-;;
-;; Return output file name."
-;;   (org-e-publish-org-to "org" plist filename pub-dir))
-
-(defun org-e-publish-org-to-ascii (plist filename pub-dir)
-  "Publish an Org file to ASCII.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (require 'org-e-ascii nil t)
-  (org-e-publish-org-to
-   'e-ascii filename ".txt" `(:ascii-charset ascii ,@plist) pub-dir))
-
-(defun org-e-publish-org-to-latin1 (plist filename pub-dir)
-  "Publish an Org file to Latin-1.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (org-e-publish-org-to
-   'e-ascii filename ".txt" `(:ascii-charset latin1 ,@plist) pub-dir))
-
-(defun org-e-publish-org-to-utf8 (plist filename pub-dir)
-  "Publish an org file to UTF-8.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (org-e-publish-org-to
-   'e-ascii filename ".txt" `(:ascii-charset utf-8 ,@plist) pub-dir))
 
 (defun org-e-publish-attachment (plist filename pub-dir)
   "Publish a file with no transformation of any kind.

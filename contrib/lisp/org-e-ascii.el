@@ -37,6 +37,7 @@
 
 (eval-when-compile (require 'cl))
 (require 'org-export)
+(require 'org-e-publish)
 
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
 
@@ -1794,7 +1795,7 @@ This function only applies to `e-ascii' back-end.  See
 
 
 
-;;; Interactive function
+;;; End-user functions
 
 ;;;###autoload
 (defun org-e-ascii-export-as-ascii
@@ -1863,6 +1864,42 @@ Return output file's name."
   (let ((outfile (org-export-output-file-name ".txt" subtreep pub-dir)))
     (org-export-to-file
      'e-ascii outfile subtreep visible-only body-only ext-plist)))
+
+;;;###autoload
+(defun org-e-ascii-publish-to-ascii (plist filename pub-dir)
+  "Publish an Org file to ASCII.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to
+   'e-ascii filename ".txt" `(:ascii-charset ascii ,@plist) pub-dir))
+
+;;;###autoload
+(defun org-e-ascii-publish-to-latin1 (plist filename pub-dir)
+  "Publish an Org file to Latin-1.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to
+   'e-ascii filename ".txt" `(:ascii-charset latin1 ,@plist) pub-dir))
+
+;;;###autoload
+(defun org-e-ascii-publish-to-utf8 (plist filename pub-dir)
+  "Publish an org file to UTF-8.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to
+   'e-ascii filename ".txt" `(:ascii-charset utf-8 ,@plist) pub-dir))
 
 
 (provide 'org-e-ascii)

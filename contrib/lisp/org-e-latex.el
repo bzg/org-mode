@@ -37,6 +37,7 @@
 
 (eval-when-compile (require 'cl))
 (require 'org-export)
+(require 'org-e-publish)
 
 (defvar org-export-latex-default-packages-alist)
 (defvar org-export-latex-packages-alist)
@@ -2556,7 +2557,7 @@ contextual information."
 
 
 
-;;; Interactive functions
+;;; End-user functions
 
 ;;;###autoload
 (defun org-e-latex-export-as-latex
@@ -2733,6 +2734,33 @@ none."
 	    (when (save-excursion (re-search-forward (car latex-error) nil t))
 	      (setq errors (concat errors " " (cdr latex-error)))))
 	  (and (org-string-nw-p errors) (org-trim errors)))))))
+
+;;;###autoload
+(defun org-e-latex-publish-to-latex (plist filename pub-dir)
+  "Publish an Org file to LaTeX.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to 'e-latex filename ".tex" plist pub-dir))
+
+;;;###autoload
+(defun org-e-latex-publish-to-pdf (plist filename pub-dir)
+  "Publish an Org file to PDF (via LaTeX).
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  ;; Unlike to `org-e-latex-publish-to-latex', PDF file is generated
+  ;; in working directory and then moved to publishing directory.
+  (org-e-publish-attachment
+   plist
+   (org-e-latex-compile (org-e-publish-org-to 'e-latex filename ".tex" plist))
+   pub-dir))
 
 
 (provide 'org-e-latex)
