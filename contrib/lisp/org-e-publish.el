@@ -540,17 +540,20 @@ matching filenames."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Pluggable publishing back-end functions
 
-(defun org-e-publish-org-to (backend filename extension plist pub-dir)
+(defun org-e-publish-org-to (backend filename extension plist &optional pub-dir)
   "Publish an Org file to a specified back-end.
 
 BACKEND is a symbol representing the back-end used for
 transcoding.  FILENAME is the filename of the Org file to be
 published.  EXTENSION is the extension used for the output
 string, with the leading dot.  PLIST is the property list for the
-given project.  PUB-DIR is the publishing directory.
+given project.
+
+Optional argument PUB-DIR, when non-nil is the publishing
+directory.
 
 Return output file name."
-  (unless (file-exists-p pub-dir) (make-directory pub-dir t))
+  (unless (or (not pub-dir) (file-exists-p pub-dir)) (make-directory pub-dir t))
   ;; Check if a buffer visiting FILENAME is already open.
   (let* ((visitingp (find-buffer-visiting filename))
 	 (work-buffer (or visitingp (find-file-noselect filename))))
@@ -592,12 +595,10 @@ publishing directory.
 Return output file name."
   (require 'org-e-latex nil t)
   ;; Unlike to `org-e-publish-org-to-latex', PDF file is generated in
-  ;; base directory and then moved to publishing directory.
+  ;; working directory and then moved to publishing directory.
   (org-e-publish-attachment
    plist
-   (org-e-latex-compile
-    (org-e-publish-org-to
-     'e-latex filename ".tex" plist (plist-get plist :base-directory)))
+   (org-e-latex-compile (org-e-publish-org-to 'e-latex filename ".tex" plist))
    pub-dir))
 
 (defun org-e-publish-org-to-html (plist filename pub-dir)
