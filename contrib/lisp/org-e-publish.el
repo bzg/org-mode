@@ -127,10 +127,10 @@ set of output formats.
 
   `:publishing-function'
 
-    Function to publish file.  The default is
-    `org-e-publish-org-to-ascii', but other values are possible.
-    May also be a list of functions, in which case each function
-    in the list is invoked in turn.
+    Function to publish file.  Each back-end may define its
+    own (i.e. `org-e-latex-publish-to-pdf',
+    `org-e-html-publish-to-html').  May be a list of functions,
+    in which case each function in the list is invoked in turn.
 
 Another property allows you to insert code that prepares
 a project for publishing.  For example, you could call GNU Make
@@ -611,7 +611,7 @@ See `org-e-publish-projects'."
 	 (ftname (expand-file-name filename))
 	 (publishing-function
 	  (or (plist-get project-plist :publishing-function)
-	      'org-e-publish-org-to-ascii))
+	      (error "No publishing function chosen")))
 	 (base-dir
 	  (file-name-as-directory
 	   (expand-file-name
