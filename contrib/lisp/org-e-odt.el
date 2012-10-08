@@ -110,7 +110,6 @@
 (declare-function archive-zip-extract "arc-mode" (archive name))
 (declare-function org-create-math-formula "org" (latex-frag &optional mathml-file))
 (declare-function browse-url-file-url "browse-url" (file))
-(declare-function org-solidify-link-text "org-exp" (s &optional alist))
 
 
 
@@ -2495,7 +2494,7 @@ INFO is a plist holding contextual information.  See
 		 (item
 		  (format
 		   "<text:bookmark-ref text:reference-format=\"number-all-superior\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
-		   (org-solidify-link-text path)
+		   (org-export-solidify-link-text path)
 
 		   (mapconcat 'number-to-string
 			      (org-e-odt-resolve-numbered-paragraph
