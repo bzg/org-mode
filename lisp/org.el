@@ -20006,16 +20006,18 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 		      (if (featurep 'xemacs) "org-colview" "org-colview-xemacs")
 		      "^org$" "^org-infojs$" "^org-loaddefs$" "^org-version$")
 		     "\\|"))
+	 (feats features)
 	 (lfeat (append
 		 (sort
-		  (delq nil (mapcar
-			     (lambda (f)
-			       (let ((feature (symbol-name f)))
-				 (if (and (string-match feature-re feature)
-					  (not (string-match remove-re feature)))
-				     feature nil)))
-			     features))
-		  'string-lessp)
+		  (setq feats
+			(delq nil (mapcar
+				   (lambda (f)
+				     (let ((feat (symbol-name f)))
+				       (if (and (string-match feature-re feat)
+						(not (string-match remove-re feat)))
+					   feat nil)))
+				   feats)))
+			'string-lessp)
 		 (list "org-version" "org")))
 	 (load-suffixes (if uncompiled (reverse load-suffixes) load-suffixes))
 	 (load-misses ()))
