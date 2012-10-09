@@ -12938,6 +12938,8 @@ Include the code block in the tangled output to file @samp{filename}.
 @table @code
 @item org-babel-tangle
 Tangle the current file.  Bound to @kbd{C-c C-v t}.
+
+With prefix argument only tangle the current code block.
 @item org-babel-tangle-file
 Choose a file to tangle.  Bound to @kbd{C-c C-v f}.
 @end table
