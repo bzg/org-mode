@@ -2805,13 +2805,16 @@ COMPARE-FUNC to compare entries."
 	 (start (org-list-get-list-begin (point-at-bol) struct prevs))
 	 (end (org-list-get-list-end (point-at-bol) struct prevs))
 	 (sorting-type
-	  (progn
-	    (message
-	     "Sort plain list: [a]lpha  [n]umeric  [t]ime  [f]unc   A/N/T/F means reversed:")
-	    (read-char-exclusive)))
-	 (getkey-func (and (= (downcase sorting-type) ?f)
-			   (intern (org-icompleting-read "Sort using function: "
-							 obarray 'fboundp t nil nil)))))
+	  (or sorting-type
+	      (progn
+		(message
+		 "Sort plain list: [a]lpha  [n]umeric  [t]ime  [f]unc   A/N/T/F means reversed:")
+		(read-char-exclusive))))
+	 (getkey-func
+	  (or getkey-func
+	      (and (= (downcase sorting-type) ?f)
+		   (intern (org-icompleting-read "Sort using function: "
+						 obarray 'fboundp t nil nil))))))
     (message "Sorting items...")
     (save-restriction
       (narrow-to-region start end)
