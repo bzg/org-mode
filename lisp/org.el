@@ -8272,13 +8272,15 @@ WITH-CASE, the sorting considers case as well."
        what)
       (setq sorting-type (read-char-exclusive))
 
-      (and (= (downcase sorting-type) ?f)
-           (setq getkey-func
-                 (org-icompleting-read "Sort using function: "
-				       obarray 'fboundp t nil nil))
-           (setq getkey-func (intern getkey-func)))
+      (unless getkey-func
+	(and (= (downcase sorting-type) ?f)
+	     (setq getkey-func
+		   (org-icompleting-read "Sort using function: "
+					 obarray 'fboundp t nil nil))
+	     (setq getkey-func (intern getkey-func))))
 
       (and (= (downcase sorting-type) ?r)
+	   (not property)
            (setq property
                  (org-icompleting-read "Property: "
 				       (mapcar 'list (org-buffer-property-keys t))
