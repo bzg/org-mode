@@ -2545,14 +2545,17 @@ Return code as a string."
       (let* ((info (org-export-install-filters
 		    (org-export-get-environment backend subtreep ext-plist)))
 	     ;; 2. Get parse tree.  Buffer isn't parsed directly.
-	     ;;    Instead, a temporary copy is created, where macros
-	     ;;    and include keywords are expanded and code blocks
+	     ;;    Instead, a temporary copy is created, where include
+	     ;;    keywords and macros are expanded and code blocks
 	     ;;    are evaluated.
 	     (tree (let ((buf (or (buffer-file-name (buffer-base-buffer))
 				  (current-buffer))))
 		     (org-export-with-current-buffer-copy
 		      (unless noexpand
 			(org-export-expand-include-keyword)
+			;; Update radio targets since keyword
+			;; inclusion might have added some more.
+			(org-update-radio-target-regexp)
 			(org-export-expand-macro info)
 			;; TODO: Setting `org-current-export-file' is
 			;; required by Org Babel to properly resolve
