@@ -436,7 +436,6 @@ body\n")))
    (equal "#+MACRO: macro1 value\nvalue"
 	  (org-test-with-temp-text "#+MACRO: macro1 value\n{{{macro1}}}"
 	    (let (info)
-	      (org-macro-initialize-templates)
 	      (org-export-expand-macro info) (buffer-string)))))
   ;; Export specific macros.
   (should
@@ -449,7 +448,18 @@ body\n")))
 #+EMAIL: me@here
 {{{author}}} {{{date}}} {{{email}}} {{{title}}}"
 	    (let ((info (org-export-get-environment)))
-	      (org-macro-initialize-templates)
+	      (org-export-expand-macro info)
+	      (goto-char (point-max))
+	      (buffer-substring (line-beginning-position)
+				(line-end-position))))))
+  ;; Expand macros with templates in included files.
+  (should
+   (equal "success"
+	  (org-test-with-temp-text
+	      (format "#+INCLUDE: \"%s/examples/macro-templates.org\"
+{{{included-macro}}}" org-test-dir)
+	    (let (info)
+	      (org-export-expand-include-keyword)
 	      (org-export-expand-macro info)
 	      (goto-char (point-max))
 	      (buffer-substring (line-beginning-position)

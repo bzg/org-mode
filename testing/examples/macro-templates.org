@@ -1,0 +1,3 @@
+# Time-stamp: <2012-10-10 13:51:10 nicolas>
+#+TITLE: Macro templates
+#+MACRO: included-macro success

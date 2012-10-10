@@ -2552,8 +2552,8 @@ Return code as a string."
 				  (current-buffer))))
 		     (org-export-with-current-buffer-copy
 		      (unless noexpand
-			(org-export-expand-macro info)
 			(org-export-expand-include-keyword)
+			(org-export-expand-macro info)
 			;; TODO: Setting `org-current-export-file' is
 			;; required by Org Babel to properly resolve
 			;; noweb references.  Once "org-exp.el" is
@@ -2724,6 +2724,9 @@ Point is at buffer's beginning when BODY is applied."
 (defun org-export-expand-macro (info)
   "Expand every macro in buffer.
 INFO is a plist containing export options and buffer properties."
+  ;; First update macro templates since #+INCLUDE keywords might have
+  ;; added some new ones.
+  (org-macro-initialize-templates)
   (org-macro-replace-all
    ;; Before expanding macros, install {{{author}}}, {{{date}}},
    ;; {{{email}}} and {{{title}}} templates.
