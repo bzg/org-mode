@@ -135,6 +135,20 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-table-maybe-eval-formula "org-table" ())
 (declare-function org-table-maybe-recalculate-line "org-table" ())
 
+(autoload 'org-element-at-point "org-element")
+
+(declare-function org-element-at-point "org-element" (&optional keep-trail))
+(declare-function org-element-type "org-element" (element))
+(declare-function org-element-context "org-element" ())
+(declare-function org-element-contents "org-element" (element))
+(declare-function org-element-property "org-element" (property element))
+(declare-function org-element-paragraph-parser "org-element" (limit))
+(declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
+(declare-function org-element-nested-p "org-element" (elem-a elem-b))
+(declare-function org-element-swap-A-B "org-element" (elem-a elem-b))
+(declare-function org-element--parse-objects "org-element" (beg end acc restriction))
+(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
+
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
 
@@ -18799,20 +18813,6 @@ this function returns t, nil otherwise."
 	    (if (get-char-property (match-beginning 0) 'invisible)
 		(throw 'exit t))))
 	nil))))
-
-(autoload 'org-element-at-point "org-element")
-
-(declare-function org-element-at-point "org-element" (&optional keep-trail))
-(declare-function org-element-type "org-element" (element))
-(declare-function org-element-context "org-element" ())
-(declare-function org-element-contents "org-element" (element))
-(declare-function org-element-property "org-element" (property element))
-(declare-function org-element-paragraph-parser "org-element" (limit))
-(declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
-(declare-function org-element-nested-p "org-element" (elem-a elem-b))
-(declare-function org-element-swap-A-B "org-element" (elem-a elem-b))
-(declare-function org-element--parse-objects "org-element" (beg end acc restriction))
-(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
 
 (defun org-metaup (&optional arg)
   "Move subtree up or move table row up.
