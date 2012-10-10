@@ -16156,7 +16156,12 @@ When PREFER is `future', return a date that is either CURRENT or future.
 When SHOW-ALL is nil, only return the current occurrence of a time stamp."
   ;; Make the proper lists from the dates
   (catch 'exit
-    (let ((a1 '(("d" . day) ("w" . week) ("m" . month) ("y" . year)))
+    (let ((a1 '(("h" . hour)
+		("d" . day)
+		("w" . week)
+		("m" . month)
+		("y" . year)))
+	  (shour (nth 2 (org-parse-time-string start)))
 	  dn dw sday cday n1 n2 n0
 	  d m y y1 y2 date1 date2 nmonths nm ny m2)
 
@@ -16176,6 +16181,13 @@ When SHOW-ALL is nil, only return the current occurrence of a time stamp."
 	(error "Invalid change specifier: %s" change))
       (if (eq dw 'week) (setq dw 'day dn (* 7 dn)))
       (cond
+       ((eq dw 'hour)
+	(let ((missing-hours
+	       (mod (+ (- (* 24 (- cday sday)) shour) org-extend-today-until)
+		    dn)))
+	  (setq n1 (if (zerop missing-hours) cday
+		     (- cday (1+ (floor (/ missing-hours 24)))))
+		n2 (+ cday (floor (/ (- dn missing-hours) 24))))))
        ((eq dw 'day)
 	(setq n1 (+ sday (* dn (floor (/ (- cday sday) dn))))
 	      n2 (+ n1 dn)))
