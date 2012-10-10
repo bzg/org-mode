@@ -19999,27 +19999,34 @@ Your bug report will be posted to the Org-mode mailing list.
   "Reload all org lisp files.
 With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
+  (require 'loadhist)
   (let* ((org-dir     (org-find-library-dir "org"))
 	 (babel-dir   (or (org-find-library-dir "ob") org-dir))
 	 (contrib-dir (or (org-find-library-dir "org-contribdir") org-dir))
 	 (feature-re "^\\(org\\|ob\\)\\(-.*\\)?")
 	 (remove-re (mapconcat 'identity
-		     (list
-		      (if (featurep 'xemacs) "org-colview" "org-colview-xemacs")
-		      "^org$" "^org-infojs$" "^org-loaddefs$" "^org-version$")
-		     "\\|"))
-	 (feats features)
+			       (mapcar (lambda (f) (concat "^" f "$"))
+				       (list (if (featurep 'xemacs)
+						 "org-colview"
+					       "org-colview-xemacs")
+					     "org" "org-loaddefs" "org-version"))
+			       "\\|"))
+	 (feats (delete-dups
+		 (mapcar 'file-name-sans-extension
+			 (mapcar 'file-name-nondirectory
+				 (delq nil
+				       (mapcar 'feature-file
+					       features))))))
 	 (lfeat (append
 		 (sort
 		  (setq feats
 			(delq nil (mapcar
 				   (lambda (f)
-				     (let ((feat (symbol-name f)))
-				       (if (and (string-match feature-re feat)
-						(not (string-match remove-re feat)))
-					   feat nil)))
+				     (if (and (string-match feature-re f)
+					      (not (string-match remove-re f)))
+					 f nil))
 				   feats)))
-			'string-lessp)
+		  'string-lessp)
 		 (list "org-version" "org")))
 	 (load-suffixes (if uncompiled (reverse load-suffixes) load-suffixes))
 	 (load-misses ()))
