@@ -5678,13 +5678,15 @@ by a #."
 
 (defun org-all-targets (&optional radio)
   "Return a list of all targets in this file.
-With optional argument RADIO, only find radio targets."
-  (let ((re (if radio org-radio-target-regexp org-target-regexp))
-	rtn)
+When optional argument RADIO is non-nil, only find radio
+targets."
+  (let ((re (if radio org-radio-target-regexp org-target-regexp)) rtn)
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward re nil t)
-	(add-to-list 'rtn (downcase (org-match-string-no-properties 1))))
+	(let ((obj (org-element-context)))
+	  (when (memq (org-element-type obj) '(radio-target target))
+	    (add-to-list 'rtn (downcase (org-element-property :value obj))))))
       rtn)))
 
 (defun org-make-target-link-regexp (targets)
