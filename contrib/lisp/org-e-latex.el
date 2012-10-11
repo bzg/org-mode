@@ -2667,55 +2667,55 @@ TEXFILE is the name of the file being compiled.  Processing is
 done through the command specified in `org-e-latex-pdf-process'.
 
 Return PDF file name or an error if it couldn't be produced."
-  (let* ((wconfig (current-window-configuration))
-	 (texfile (file-truename texfile))
+  (let* ((texfile (file-truename texfile))
 	 (base (file-name-sans-extension texfile))
+	 ;; Make sure `default-directory' is set to TEXFILE directory,
+	 ;; not to whatever value the current buffer may have.
+	 (default-directory (file-name-directory texfile))
 	 errors)
     (message (format "Processing LaTeX file %s ..." texfile))
-    (unwind-protect
-	(progn
-	  (cond
-	   ;; A function is provided: Apply it.
-	   ((functionp org-e-latex-pdf-process)
-	    (funcall org-e-latex-pdf-process (shell-quote-argument texfile)))
-	   ;; A list is provided: Replace %b, %f and %o with appropriate
-	   ;; values in each command before applying it.  Output is
-	   ;; redirected to "*Org PDF LaTeX Output*" buffer.
-	   ((consp org-e-latex-pdf-process)
-	    (let* ((out-dir (or (file-name-directory texfile) "./"))
-		   (outbuf (get-buffer-create "*Org PDF LaTeX Output*")))
-	      (mapc
-	       (lambda (command)
-		 (shell-command
-		  (replace-regexp-in-string
-		   "%b" (shell-quote-argument base)
-		   (replace-regexp-in-string
-		    "%f" (shell-quote-argument texfile)
-		    (replace-regexp-in-string
-		     "%o" (shell-quote-argument out-dir) command t t) t t) t t)
-		  outbuf))
-	       org-e-latex-pdf-process)
-	      ;; Collect standard errors from output buffer.
-	      (setq errors (org-e-latex--collect-errors outbuf))))
-	   (t (error "No valid command to process to PDF")))
-	  (let ((pdffile (concat base ".pdf")))
-	    ;; Check for process failure.  Provide collected errors if
-	    ;; possible.
-	    (if (not (file-exists-p pdffile))
-		(error (concat (format "PDF file %s wasn't produced" pdffile)
-			       (when errors (concat ": " errors))))
-	      ;; Else remove log files, when specified, and signal end of
-	      ;; process to user, along with any error encountered.
-	      (when org-e-latex-remove-logfiles
-		(dolist (ext org-e-latex-logfiles-extensions)
-		  (let ((file (concat base "." ext)))
-		    (when (file-exists-p file) (delete-file file)))))
-	      (message (concat "Process completed"
-			       (if (not errors) "."
-				 (concat " with errors: " errors)))))
-	    ;; Return output file name.
-	    pdffile))
-      (set-window-configuration wconfig))))
+    (save-window-excursion
+      (cond
+       ;; A function is provided: Apply it.
+       ((functionp org-e-latex-pdf-process)
+	(funcall org-e-latex-pdf-process (shell-quote-argument texfile)))
+       ;; A list is provided: Replace %b, %f and %o with appropriate
+       ;; values in each command before applying it.  Output is
+       ;; redirected to "*Org PDF LaTeX Output*" buffer.
+       ((consp org-e-latex-pdf-process)
+	(let* ((out-dir (file-name-directory texfile))
+	       (outbuf (get-buffer-create "*Org PDF LaTeX Output*")))
+	  (mapc
+	   (lambda (command)
+	     (shell-command
+	      (replace-regexp-in-string
+	       "%b" (shell-quote-argument base)
+	       (replace-regexp-in-string
+		"%f" (shell-quote-argument texfile)
+		(replace-regexp-in-string
+		 "%o" (shell-quote-argument out-dir) command t t) t t) t t)
+	      outbuf))
+	   org-e-latex-pdf-process)
+	  ;; Collect standard errors from output buffer.
+	  (setq errors (org-e-latex--collect-errors outbuf))))
+       (t (error "No valid command to process to PDF")))
+      (let ((pdffile (concat base ".pdf")))
+	;; Check for process failure.  Provide collected errors if
+	;; possible.
+	(if (not (file-exists-p pdffile))
+	    (error (concat (format "PDF file %s wasn't produced" pdffile)
+			   (when errors (concat ": " errors))))
+	  ;; Else remove log files, when specified, and signal end of
+	  ;; process to user, along with any error encountered.
+	  (when org-e-latex-remove-logfiles
+	    (dolist (ext org-e-latex-logfiles-extensions)
+	      (let ((file (concat base "." ext)))
+		(when (file-exists-p file) (delete-file file)))))
+	  (message (concat "Process completed"
+			   (if (not errors) "."
+			     (concat " with errors: " errors)))))
+	;; Return output file name.
+	pdffile))))
 
 (defun org-e-latex--collect-errors (buffer)
   "Collect some kind of errors from \"pdflatex\" command output.
