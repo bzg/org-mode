@@ -672,11 +672,12 @@ these cases."
 (defcustom org-export-dispatch-use-expert-ui nil
   "Non-nil means using a non-intrusive `org-export-dispatch'.
 In that case, no help buffer is displayed.  Though, an indicator
-for current export scope is added to the prompt \(i.e. \"b\" when
+for current export scope is added to the prompt (\"b\" when
 output is restricted to body only, \"s\" when it is restricted to
-the current subtree and \"v\" when only visible elements are
-considered for export\).  Also, \[?] allows to switch back to
-standard mode."
+the current subtree, \"v\" when only visible elements are
+considered for export and \"f\" when publishing functions should
+be passed the FORCE argument).  Also, \[?] allows to switch back
+to standard mode."
   :group 'org-export-general
   :type 'boolean)
 
@@ -4428,13 +4429,15 @@ It provides an access to common export related tasks in a buffer.
 Its interface comes in two flavours: standard and expert.  While
 both share the same set of bindings, only the former displays the
 valid keys associations.  Set `org-export-dispatch-use-expert-ui'
-to switch to one or the other.
-
-Return an error if key pressed has no associated command."
+to switch to one or the other."
   (interactive)
-  (let* ((input (org-export-dispatch-ui (list org-export-initial-scope)
-					nil
-					org-export-dispatch-use-expert-ui))
+  (let* ((input (save-window-excursion
+		  (unwind-protect
+		      (org-export-dispatch-ui (list org-export-initial-scope)
+					      nil
+					      org-export-dispatch-use-expert-ui)
+		    (and (get-buffer "*Org Export Dispatcher*")
+			 (kill-buffer "*Org Export Dispatcher*")))))
 	 (action (car input))
 	 (optns (cdr input)))
     (case action
@@ -4558,8 +4561,8 @@ back to standard interface."
 	    (format
 	     "Export command (Options: %s%s%s%s) [%s]: "
 	     (if (memq 'body options) (funcall fontify-key "b" t) "-")
-	     (if (memq 'subtree options) (funcall fontify-key "s" t) "-")
 	     (if (memq 'visible options) (funcall fontify-key "v" t) "-")
+	     (if (memq 'subtree options) (funcall fontify-key "s" t) "-")
 	     (if (memq 'force options) (funcall fontify-key "f" t) "-")
 	     (concat allowed-keys)))))
     ;; With expert UI, just read key with a fancy prompt.  In standard
@@ -4567,20 +4570,17 @@ back to standard interface."
     (if expertp
 	(org-export-dispatch-action
 	 expert-prompt allowed-keys backends options first-key expertp)
-      (save-window-excursion
+      ;; At first call, create frame layout in order to display menu.
+      (unless (get-buffer "*Org Export Dispatcher*")
 	(delete-other-windows)
-	(unwind-protect
-	    (progn
-	      (with-current-buffer
-		  (get-buffer-create "*Org Export Dispatcher*")
-		(erase-buffer)
-		(save-excursion (insert help)))
-	      (org-fit-window-to-buffer
-	       (display-buffer "*Org Export Dispatcher*"))
-	      (org-export-dispatch-action
-	       standard-prompt allowed-keys backends options first-key expertp))
-	  (and (get-buffer "*Org Export Dispatcher*")
-	       (kill-buffer "*Org Export Dispatcher*")))))))
+	(org-switch-to-buffer-other-window
+	 (get-buffer-create "*Org Export Dispatcher*"))
+	(setq cursor-type nil))
+      (with-current-buffer "*Org Export Dispatcher*"
+	(erase-buffer)
+	(insert help))
+      (org-export-dispatch-action
+       standard-prompt allowed-keys backends options first-key expertp))))
 
 (defun org-export-dispatch-action
   (prompt allowed-keys backends options first-key expertp)
@@ -4603,6 +4603,8 @@ options as CDR."
      ;; Ignore non-standard characters (i.e. "M-a") and
      ;; undefined associations.
      ((not (memq key allowed-keys))
+      (ding)
+      (unless expertp (message "Invalid key") (sit-for 1))
       (org-export-dispatch-ui options first-key expertp))
      ;; q key at first level aborts export.  At second
      ;; level, cancel first key instead.
