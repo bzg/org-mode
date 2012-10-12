@@ -90,6 +90,25 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 
 
 
+;;; Date Analysis
+
+(ert-deftest test-org/org-read-date ()
+  "Test `org-read-date' specifications."
+  ;; Parse ISO date with abbreviated year and month.
+  (should (equal "2012-03-29 16:40"
+		 (let ((org-time-was-given t))
+		   (org-read-date t nil "12-3-29 16:40"))))
+  ;; Parse Europeans dates.
+  (should (equal "2012-03-29 16:40"
+		 (let ((org-time-was-given t))
+		   (org-read-date t nil "29.03.2012 16:40"))))
+  ;; Parse Europeans dates without year.
+  (should (string-match "2[0-9]\\{3\\}-03-29 16:40"
+			(let ((org-time-was-given t))
+			  (org-read-date t nil "29.03. 16:40")))))
+
+
+
 ;;; Links
 
 ;;;; Fuzzy links
