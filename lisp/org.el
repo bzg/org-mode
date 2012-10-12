@@ -9317,18 +9317,15 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
       (unwind-protect
 	  (progn
 	    (setq link
-		  (let ((org-completion-use-ido nil)
-			(org-completion-use-iswitchb nil))
-		    (org-completing-read
-		     "Link: "
-		     (append
-		      (mapcar (lambda (x) (list (concat x ":")))
-			      all-prefixes)
-		      (mapcar 'car org-stored-links)
-		      (mapcar 'cadr org-stored-links))
-		     nil nil nil
-		     'tmphist
-		     (caar org-stored-links))))
+		  (org-completing-read
+		   "Link: "
+		   (append
+		    (mapcar (lambda (x) (concat x ":"))
+			    all-prefixes)
+		    (mapcar 'car org-stored-links))
+		   nil nil nil
+		   'tmphist
+		   (caar org-stored-links)))
 	    (if (not (string-match "\\S-" link))
 		(error "No link selected"))
 	    (mapc (lambda(l)
@@ -9422,7 +9419,7 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 (defun org-file-complete-link (&optional arg)
   "Create a file link using completion."
   (let (file link)
-    (setq file (read-file-name "File: "))
+    (setq file (org-iread-file-name "File: "))
     (let ((pwd (file-name-as-directory (expand-file-name ".")))
 	  (pwd1 (file-name-as-directory (abbreviate-file-name
 					 (expand-file-name ".")))))
@@ -9439,6 +9436,19 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 		     "file:" (match-string 1 (expand-file-name file)))))
        (t (setq link (concat "file:" file)))))
     link))
+
+(defun org-iread-file-name (&rest args)
+  "Read-file-name using `ido-mode' speedup if available.
+ARGS are arguments that may be passed to `ido-read-file-name' or `read-file-name'.
+See `read-file-name' for a description of parameters."
+  (org-without-partial-completion
+   (if (and org-completion-use-ido
+            (fboundp 'ido-read-file-name)
+            (boundp 'ido-mode) ido-mode
+            (listp (second args)))
+       (let ((ido-enter-matching-directory nil))
+         (apply 'ido-read-file-name args))
+     (apply 'read-file-name args))))
 
 (defun org-completing-read (&rest args)
   "Completing-read with SPACE being a normal character."
