@@ -7276,7 +7276,7 @@ Negative selection means regexp must not match for selection of an entry."
 	(move-beginning-of-line 1)))))
 
 (defun org-agenda-later (arg)
-  "Go forward in time by thee current span.
+  "Go forward in time by the current span.
 With prefix ARG, go forward that many times the current span."
   (interactive "p")
   (org-agenda-check-type t 'agenda)
@@ -7288,7 +7288,7 @@ With prefix ARG, go forward that many times the current span."
 	 greg2)
     (cond
      ((numberp span)
-      (setq sd (+ span sd)))
+      (setq sd (+ (* span arg) sd)))
      ((eq span 'day)
       (setq sd (+ arg sd)))
      ((eq span 'week)
