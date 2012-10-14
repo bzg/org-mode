@@ -1093,7 +1093,13 @@ e^{i\\pi}+1=0
     (should
      (org-test-with-temp-text "\\[a\\]"
        (org-element-map
-	(org-element-parse-buffer) 'latex-fragment 'identity)))))
+	(org-element-parse-buffer) 'latex-fragment 'identity)))
+    ;; Test fragment at the beginning of an item.
+    (should
+     (eq 'latex-fragment
+	 (org-test-with-temp-text "- $x$"
+	   (progn (search-forward "$")
+		  (org-element-type (org-element-context))))))))
 
 
 ;;;; Line Break
@@ -1576,7 +1582,19 @@ Outside list"
   ;; With braces.
   (should
    (org-test-with-temp-text "a_{b}"
-     (org-element-map (org-element-parse-buffer) 'subscript 'identity))))
+     (org-element-map (org-element-parse-buffer) 'subscript 'identity)))
+  ;; At the beginning of an item.
+  (should
+   (eq 'subscript
+       (org-test-with-temp-text "- _b"
+	 (progn (search-forward "_")
+		(org-element-type (org-element-context))))))
+  ;; Multiple subscripts in a paragraph.
+  (should
+   (= 2
+      (org-test-with-temp-text "a_b and c_d"
+	(length
+	 (org-element-map (org-element-parse-buffer) 'subscript 'identity))))))
 
 
 ;;;; Superscript
@@ -1590,7 +1608,20 @@ Outside list"
   ;; With braces.
   (should
    (org-test-with-temp-text "a^{b}"
-     (org-element-map (org-element-parse-buffer) 'superscript 'identity))))
+     (org-element-map (org-element-parse-buffer) 'superscript 'identity)))
+  ;; At the beginning of an item.
+  (should
+   (eq 'superscript
+       (org-test-with-temp-text "- ^b"
+	 (progn (search-forward "^")
+		(org-element-type (org-element-context))))))
+  ;; Multiple superscript in a paragraph.
+  (should
+   (= 2
+      (org-test-with-temp-text "a^b and c^d"
+	(length
+	 (org-element-map
+	  (org-element-parse-buffer) 'superscript 'identity))))))
 
 
 ;;;; Table
