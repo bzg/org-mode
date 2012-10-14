@@ -2412,6 +2412,7 @@ LIMIT bounds the search.
 Return value is a cons cell whose CAR is `entity' or
 `latex-fragment' and CDR is beginning position."
   (save-excursion
+    (unless (bolp) (backward-char))
     (let ((matchers
 	   (remove "begin" (plist-get org-format-latex-options :matchers)))
 	  ;; ENTITY-RE matches both LaTeX commands and Org entities.
@@ -3089,6 +3090,7 @@ LIMIT bounds the search.
 Return value is a cons cell whose CAR is either `subscript' or
 `superscript' and CDR is beginning position."
   (save-excursion
+    (unless (bolp) (backward-char))
     (when (re-search-forward org-match-substring-regexp limit t)
       (cons (if (string= (match-string 2) "_") 'subscript 'superscript)
 	    (match-beginning 2)))))
