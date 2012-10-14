@@ -750,7 +750,15 @@ Paragraph[fn:1]"
     (should-not
      (org-test-with-parsed-data "* Headline :ignore:"
        (org-export-get-tags (org-element-map tree 'headline 'identity info t)
-			    info '("ignore"))))))
+			    info '("ignore"))))
+    ;; Allow tag inheritance.
+    (should
+     (equal
+      '(("tag") ("tag"))
+      (org-test-with-parsed-data "* Headline :tag:\n** Sub-heading"
+	(org-element-map
+	 tree 'headline
+	 (lambda (hl) (org-export-get-tags hl info nil t)) info))))))
 
 (ert-deftest test-org-export/get-node-property ()
   "Test`org-export-get-node-property' specifications."

@@ -3157,7 +3157,7 @@ INFO is a plist used as a communication channel."
 	  (pop roman)))
       res)))
 
-(defun org-export-get-tags (element info &optional tags)
+(defun org-export-get-tags (element info &optional tags inherited)
   "Return list of tags associated to ELEMENT.
 
 ELEMENT has either an `headline' or an `inlinetask' type.  INFO
@@ -3167,11 +3167,27 @@ Select tags (see `org-export-select-tags') and exclude tags (see
 `org-export-exclude-tags') are removed from the list.
 
 When non-nil, optional argument TAGS should be a list of strings.
-Any tag belonging to this list will also be removed."
-  (org-remove-if (lambda (tag) (or (member tag (plist-get info :select-tags))
-			      (member tag (plist-get info :exclude-tags))
-			      (member tag tags)))
-		 (org-element-property :tags element)))
+Any tag belonging to this list will also be removed.
+
+When optional argument INHERITED is non-nil, tags can also be
+inherited from parent headlines.."
+  (org-remove-if
+   (lambda (tag) (or (member tag (plist-get info :select-tags))
+		(member tag (plist-get info :exclude-tags))
+		(member tag tags)))
+   (if (not inherited) (org-element-property :tags element)
+     ;; Build complete list of inherited tags.
+     (let ((current-tag-list (org-element-property :tags element)))
+       (mapc
+	(lambda (parent)
+	  (mapc
+	   (lambda (tag)
+	     (when (and (memq (org-element-type parent) '(headline inlinetask))
+			(not (member tag current-tag-list)))
+	       (push tag current-tag-list)))
+	   (org-element-property :tags parent)))
+	(org-export-get-genealogy element))
+       current-tag-list))))
 
 (defun org-export-get-node-property (property blob &optional inherited)
   "Return node PROPERTY value for BLOB.
