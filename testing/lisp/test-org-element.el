@@ -1523,7 +1523,13 @@ Outside list"
    (eq 'subscript
        (org-test-with-temp-text "- _b"
 	 (progn (search-forward "_")
-		(org-element-type (org-element-context)))))))
+		(org-element-type (org-element-context))))))
+  ;; Multiple subscripts in a paragraph.
+  (should
+   (= 2
+      (org-test-with-temp-text "a_b and c_d"
+	(length
+	 (org-element-map (org-element-parse-buffer) 'subscript 'identity))))))
 
 
 ;;;; Superscript
@@ -1543,7 +1549,14 @@ Outside list"
    (eq 'superscript
        (org-test-with-temp-text "- ^b"
 	 (progn (search-forward "^")
-		(org-element-type (org-element-context)))))))
+		(org-element-type (org-element-context))))))
+  ;; Multiple superscript in a paragraph.
+  (should
+   (= 2
+      (org-test-with-temp-text "a^b and c^d"
+	(length
+	 (org-element-map
+	  (org-element-parse-buffer) 'superscript 'identity))))))
 
 
 ;;;; Table

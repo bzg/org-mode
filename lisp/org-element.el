@@ -3886,8 +3886,14 @@ type, as a symbol.
 
 OBJECTS is the previous candidates alist."
   ;; Filter out any object found but not belonging to RESTRICTION.
-  (setq objects (org-remove-if-not (lambda (obj) (memq (car obj) restriction))
-				   objects))
+  (setq objects
+	(org-remove-if-not
+	 (lambda (obj)
+	   (let ((type (car obj)))
+	     (memq (or (cdr (assq type org-element-object-successor-alist))
+		       type)
+		   restriction)))
+	 objects))
   (let (next-candidates types-to-search)
     ;; If no previous result, search every object type in RESTRICTION.
     ;; Otherwise, keep potential candidates (old objects located after
