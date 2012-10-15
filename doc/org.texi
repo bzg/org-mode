@@ -378,6 +378,7 @@ The spreadsheet
 * Durations and time values::   How to compute durations and time values
 * Field and range formulas::    Formula for specific (ranges of) fields
 * Column formulas::             Formulas valid for an entire column
+* Lookup functions::            Lookup functions for searching tables
 * Editing and debugging formulas::  Fixing formulas
 * Updating the table::          Recomputing all dependent fields
 * Advanced features::           Field and column names, parameters and automatic recalc
@@ -2397,6 +2398,7 @@ formula, moving these references by arrow keys
 * Durations and time values::   How to compute durations and time values
 * Field and range formulas::    Formula for specific (ranges of) fields
 * Column formulas::             Formulas valid for an entire column
+* Lookup functions::            Lookup functions for searching tables
 * Editing and debugging formulas::  Fixing formulas
 * Updating the table::          Recomputing all dependent fields
 * Advanced features::           Field and column names, parameters and automatic recalc
@@ -2782,7 +2784,7 @@ can also be used to assign a formula to some but not all fields in a row.
 Named field, see @ref{Advanced features}.
 @end table
 
-@node Column formulas, Editing and debugging formulas, Field and range formulas, The spreadsheet
+@node Column formulas, Lookup functions, Field and range formulas, The spreadsheet
 @subsection Column formulas
 @cindex column formula
 @cindex formula, for table column
@@ -2821,7 +2823,51 @@ stores it.  With a numeric prefix argument(e.g.@: @kbd{C-5 C-c =}) the command
 will apply it to that many consecutive fields in the current column.
 @end table
 
-@node Editing and debugging formulas, Updating the table, Column formulas, The spreadsheet
+@node Lookup functions, Editing and debugging formulas, Column formulas, The spreadsheet
+@subsection Lookup functions
+@cindex lookup functions in tables
+@cindex table lookup functions
+
+Org has three predefined Emacs Lisp functions for lookups in tables. 
+@table @code
+@item (org-lookup-first VAL S-LIST R-LIST &optional PREDICATE)
+@findex org-lookup-first
+Searches for the first element @code{S} in list @code{S-LIST} for which
+@lisp
+(PREDICATE VAL S)
+@end lisp
+is @code{t}; returns the value from the corresponding position in list
+@code{R-LIST}.  The default @code{PREDICATE} is @code{equal}.  Note that the
+parameters @code{VAL} and @code{S} are passed to @code{PREDICATE} in the same
+order as the correspoding parameters are in the call to
+@code{org-lookup-first}, where @code{VAL} precedes @code{S-LIST}.  If
+@code{R-LIST} is @code{nil}, the matching element @code{S} of @code{S-LIST}
+is returned.
+@item (org-lookup-last VAL S-LIST R-LIST &optional PREDICATE)
+@findex org-lookup-last
+Similar to @code{org-lookup-first} above, but searches for the @i{last}
+element for which @code{PREDICATE} is @code{t}. 
+@item (org-lookup-all VAL S-LIST R-LIST &optional PREDICATE)
+@findex org-lookup-all
+Similar to @code{org-lookup-first}, but searches for @i{all} elements for
+which @code{PREDICATE} is @code{t}, and returns @i{all} corresponding
+values.  This function can not be used by itself in a formula, because it
+returns a list of values.  However, powerful lookups can be built when this
+function is combined with other Emacs Lisp functions. 
+@end table
+
+If the ranges used in these functions contain empty fields, the @code{E} mode
+for the formula should usually be specified: otherwise empty fields will not be
+included in @code{S-LIST} and/or @code{R-LIST} which can, for example, result
+in an incorrect mapping from an element of @code{S-LIST} to the corresponding
+element of @code{R-LIST}.
+
+These three functions can be used to implement associative arrays, count
+matching cells, rank results, group data etc.  For practical examples
+see @uref{http://orgmode.org/worg/org-tutorials/org-lookups.html, this
+tutorial on Worg}.
+
+@node Editing and debugging formulas, Updating the table, Lookup functions, The spreadsheet
 @subsection Editing and debugging formulas
 @cindex formula editing
 @cindex editing, of table formulas
