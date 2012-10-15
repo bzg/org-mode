@@ -248,13 +248,12 @@ this template."
           (when (eq (org-element-type element) 'src-block)
             (let* ((match-start (copy-marker (match-beginning 0)))
                    (begin (copy-marker (org-element-property :begin element)))
-		   (end (copy-marker (org-element-property :end element)))
                    ;; Make sure we don't remove any blank lines after
                    ;; the block when replacing it.
                    (block-end (save-excursion
-                                (goto-char end)
-                                (skip-chars-backward " \r\t\n")
-                                (copy-marker (line-end-position))))
+				(goto-char (org-element-property :end element))
+				(skip-chars-backward " \r\t\n")
+				(copy-marker (line-end-position))))
                    (ind (org-get-indentation))
                    (headers
 		    (cons
@@ -273,8 +272,13 @@ this template."
 	      ;; should remove the block.
               (let ((replacement (progn (goto-char match-start)
 					(org-babel-exp-src-block headers))))
-                (cond ((not replacement) (goto-char end))
-		      ((equal replacement "") (delete-region begin end))
+                (cond ((not replacement) (goto-char block-end))
+		      ((equal replacement "")
+		       (delete-region begin
+				      (progn (goto-char block-end)
+					     (skip-chars-forward " \r\t\n")
+					     (if (eobp) (point)
+					       (line-beginning-position)))))
 		      (t
 		       (goto-char match-start)
 		       (delete-region (point) block-end)
@@ -291,7 +295,6 @@ this template."
               ;; Cleanup markers.
 	      (set-marker match-start nil)
 	      (set-marker begin nil)
-	      (set-marker end nil)
               (set-marker block-end nil)))))
       ;; Eventually execute all non-block Babel elements between last
       ;; src-block and end of buffer.
