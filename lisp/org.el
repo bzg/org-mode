@@ -12764,7 +12764,7 @@ D      Show deadlines and scheduled items between a date range."
      ((equal ans ?D)
       (call-interactively 'org-check-dates-range))
      ((equal ans ?t)
-      (org-show-todo-tree nil))
+      (call-interactively 'org-show-todo-tree))
      ((equal ans ?T)
       (org-show-todo-tree '(4)))
      ((member ans '(?T ?m))
