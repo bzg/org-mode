@@ -5630,10 +5630,9 @@ the following column).
 @vindex org-read-date-prefer-future
 When Org mode prompts for a date/time, the default is shown in default
 date/time format, and the prompt therefore seems to ask for a specific
-format.  But it will in fact accept any string containing some date and/or
-time information, and it is really smart about interpreting your input.  You
-can, for example, use @kbd{C-y} to paste a (possibly multi-line) string
-copied from an email message.  Org mode will find whatever information is in
+format.  But it will in fact accept date/time information in a variety of
+formats.  Generally, the information should start at the beginning of the
+string.  Org mode will find whatever information is in
 there and derive anything you have not specified from the @emph{default date
 and time}.  The default is usually the current date and time, but when
 modifying an existing timestamp, or when entering the second stamp of a
