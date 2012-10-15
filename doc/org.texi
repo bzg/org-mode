@@ -3776,7 +3776,7 @@ mostly if more than two TODO states are possible (@pxref{TODO
 extensions}).  See also @ref{Conflicts}, for a discussion of the interaction
 with @code{shift-selection-mode}.  See also the variable
 @code{org-treat-S-cursor-todo-selection-as-state-change}.
-@orgcmd{C-c / t,org-show-todo-key}
+@orgcmd{C-c / t,org-show-todo-tree}
 @cindex sparse tree, for TODO
 @vindex org-todo-keywords
 View TODO items in a @emph{sparse tree} (@pxref{Sparse trees}).  Folds the
