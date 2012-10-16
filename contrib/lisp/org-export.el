@@ -2880,17 +2880,18 @@ file should have."
     ;; that headlines with minimal level have a level of MINLEVEL.
     (when minlevel
       (unless (eq major-mode 'org-mode) (org-mode))
-      (let ((levels (org-map-entries
-		     (lambda () (org-reduced-level (org-current-level))))))
-	(when levels
-	  (let ((offset (- minlevel (apply 'min levels))))
-	    (unless (zerop offset)
-	      (when org-odd-levels-only (setq offset (* offset 2)))
-	      ;; Only change stars, don't bother moving whole
-	      ;; sections.
-	      (org-map-entries
-	       (lambda () (if (< offset 0) (delete-char (abs offset))
-			    (insert (make-string offset ?*))))))))))
+      (org-with-limited-levels
+       (let ((levels (org-map-entries
+		      (lambda () (org-reduced-level (org-current-level))))))
+	 (when levels
+	   (let ((offset (- minlevel (apply 'min levels))))
+	     (unless (zerop offset)
+	       (when org-odd-levels-only (setq offset (* offset 2)))
+	       ;; Only change stars, don't bother moving whole
+	       ;; sections.
+	       (org-map-entries
+		(lambda () (if (< offset 0) (delete-char (abs offset))
+			(insert (make-string offset ?*)))))))))))
     (buffer-string)))
 
 
