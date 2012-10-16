@@ -21599,45 +21599,43 @@ beyond the end of the headline."
 
 (defun org-end-of-line (&optional arg)
   "Go to the end of the line.
-If this is a headline, and `org-special-ctrl-a/e' is set, ignore tags on the
-first attempt, and only move to after the tags when the cursor is already
-beyond the end of the headline."
+If this is a headline, and `org-special-ctrl-a/e' is set, ignore
+tags on the first attempt, and only move to after the tags when
+the cursor is already beyond the end of the headline."
   (interactive "P")
-  (let ((special (if (consp org-special-ctrl-a/e)
-		     (cdr org-special-ctrl-a/e)
-		   org-special-ctrl-a/e)))
+  (let ((special (if (consp org-special-ctrl-a/e) (cdr org-special-ctrl-a/e)
+		   org-special-ctrl-a/e))
+        (type (org-element-type
+               (save-excursion (beginning-of-line) (org-element-at-point)))))
     (cond
-     ((or (not special) arg
-	  (not (or (org-at-heading-p) (org-at-item-p) (org-at-drawer-p))))
+     ((or (not special) arg)
       (call-interactively
-       (cond ((org-bound-and-true-p line-move-visual) 'end-of-visual-line)
-	     ((fboundp 'move-end-of-line) 'move-end-of-line)
-	     (t 'end-of-line))))
-     ((org-at-heading-p)
+       (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line)))
+     ((memq type '(headline inlinetask))
       (let ((pos (point)))
-	(beginning-of-line 1)
-	(if (looking-at (org-re ".*?\\(?:\\([ \t]*\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\)?$"))
-	    (if (eq special t)
-		(if (or (< pos (match-beginning 1))
-			(= pos (match-end 0)))
-		    (goto-char (match-beginning 1))
-		  (goto-char (match-end 0)))
-	      (if (or (< pos (match-end 0)) (not (eq this-command last-command)))
-		  (goto-char (match-end 0))
-		(goto-char (match-beginning 1))))
-	  (call-interactively (if (fboundp 'move-end-of-line)
-				  'move-end-of-line
-				'end-of-line)))))
-     ((org-at-drawer-p)
-      (move-end-of-line 1)
-      (when (overlays-at (1- (point))) (backward-char 1)))
-     ;; At an item: Move before any hidden text.
-     (t (call-interactively
-	 (cond ((org-bound-and-true-p line-move-visual) 'end-of-visual-line)
-	       ((fboundp 'move-end-of-line) 'move-end-of-line)
-	       (t 'end-of-line)))))
-    (org-no-warnings
-     (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
+        (beginning-of-line 1)
+        (if (looking-at (org-re ".*?\\(?:\\([ \t]*\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\)?$"))
+            (if (eq special t)
+                (if (or (< pos (match-beginning 1)) (= pos (match-end 0)))
+                    (goto-char (match-beginning 1))
+                  (goto-char (match-end 0)))
+              (if (or (< pos (match-end 0))
+                      (not (eq this-command last-command)))
+                  (goto-char (match-end 0))
+                (goto-char (match-beginning 1))))
+          (call-interactively
+           (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line)))))
+     ((memq type
+            '(center-block comment-block drawer dynamic-block example-block
+                           export-block item plain-list property-drawer
+                           quote-block special-block src-block verse-block))
+      ;; Never move past the ellipsis.
+      (or (eolp) (move-end-of-line 1))
+      (when (org-invisible-p2) (backward-char)))
+     (t
+      (call-interactively
+       (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line))))
+    (org-no-warnings (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
 (define-key org-mode-map "\C-e" 'org-end-of-line)
