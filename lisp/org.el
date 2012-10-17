@@ -20022,7 +20022,6 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   (interactive "P")
   (require 'loadhist)
   (let* ((org-dir     (org-find-library-dir "org"))
-	 (babel-dir   (or (org-find-library-dir "ob") org-dir))
 	 (contrib-dir (or (org-find-library-dir "org-contribdir") org-dir))
 	 (feature-re "^\\(org\\|ob\\)\\(-.*\\)?")
 	 (remove-re (mapconcat 'identity
@@ -20050,25 +20049,25 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 		  'string-lessp)
 		 (list "org-version" "org")))
 	 (load-suffixes (if uncompiled (reverse load-suffixes) load-suffixes))
-	 (load-misses ()))
+	 load-uncore load-misses)
     (setq load-misses
 	  (delq 't
 		(mapcar (lambda (f)
-			  (or
-			   (load (concat org-dir f) 'noerror nil nil 'mustsuffix)
-			   (unless (string= org-dir babel-dir)
-			     (load (concat babel-dir f) 'noerror nil nil 'mustsuffix))
-			   (unless (string= org-dir contrib-dir)
-			     (load (concat contrib-dir f) 'noerror nil nil 'mustsuffix))
-			   (and (load (concat (org-find-library-dir f) f) 'noerror nil nil 'mustsuffix)
-				;; fallback to load-path, report as a possible error
-				(message "Had to fall back onto load-path, something is not quite right...")
-				f)))
+			  (or (load (concat org-dir f) 'noerror nil nil 'mustsuffix)
+			      (and (string= org-dir contrib-dir)
+				   (load (concat contrib-dir f) 'noerror nil nil 'mustsuffix))
+			      (and (load (concat (org-find-library-dir f) f) 'noerror nil nil 'mustsuffix)
+				   (add-to-list 'load-uncore f 'append)
+				   't)
+			      f))
 			lfeat)))
-    (if (not load-misses)
-	(message "Successfully reloaded Org\n%s" (org-version nil 'full))
-      (message "Some error occured while reloading Org features\n%s\nPlease check *Messages*!\n%s"
-	       load-misses (org-version nil 'full)))))
+    (if load-uncore
+	(message "The following feature%s found in load-path, please check if that's correct:\n%s"
+		 (if (> (length load-uncore) 1) "s were" " was") load-uncore))
+    (if load-misses
+	(message "Some error occured while reloading Org feature%s\n%s\nPlease check *Messages*!\n%s"
+		 (if (> (length load-misses) 1) "s" "") load-misses (org-version nil 'full))
+      (message "Successfully reloaded Org\n%s" (org-version nil 'full)))))
 
 ;;;###autoload
 (defun org-customize ()
