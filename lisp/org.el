@@ -205,6 +205,7 @@ requirements) is loaded."
 		 (const :tag "Ledger" ledger)
 		 (const :tag "Lilypond" lilypond)
 		 (const :tag "Lisp" lisp)
+		 (const :tag "Makefile" makefile)
 		 (const :tag "Maxima" maxima)
 		 (const :tag "Matlab" matlab)
 		 (const :tag "Mscgen" mscgen)
