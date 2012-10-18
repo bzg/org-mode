@@ -368,7 +368,9 @@ text
       (goto-char (point-at-eol))
       (should (equal (org-export-as 'test) "text\n"))))
   ;; Subtree with a code block calling another block outside.
-  (org-test-with-temp-text "
+  (should
+   (equal ": 3\n"
+	  (org-test-with-temp-text "
 * Head1
 #+BEGIN_SRC emacs-lisp :noweb yes :exports results
 <<test>>
@@ -378,9 +380,9 @@ text
 #+BEGIN_SRC emacs-lisp
 \(+ 1 2)
 #+END_SRC"
-    (org-test-with-backend test
-      (forward-line 1)
-      (should (equal (org-export-as 'test 'subtree) ": 3\n")))))
+	    (org-test-with-backend test
+	      (forward-line 1)
+	      (org-export-as 'test 'subtree))))))
 
 (ert-deftest test-org-export/expand-include ()
   "Test file inclusion in an Org buffer."

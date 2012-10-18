@@ -2564,31 +2564,29 @@ Return code as a string."
 	     ;;    Instead, a temporary copy is created, where include
 	     ;;    keywords and macros are expanded and code blocks
 	     ;;    are evaluated.
-	     (tree (let ((buf (or (buffer-file-name (buffer-base-buffer))
-				  (current-buffer))))
-		     (org-export-with-current-buffer-copy
-		      (unless noexpand
-			(org-export-expand-include-keyword)
-			;; Update radio targets since keyword
-			;; inclusion might have added some more.
-			(org-update-radio-target-regexp)
-			(org-export-expand-macro info)
-			;; TODO: Setting `org-current-export-file' is
-			;; required by Org Babel to properly resolve
-			;; noweb references.  Once "org-exp.el" is
-			;; removed, modify
-			;; `org-export-blocks-preprocess' so it
-			;; accepts the value as an argument instead.
-			(let ((org-current-export-file buf))
-			  (org-export-blocks-preprocess)))
-		      (goto-char (point-min))
-		      ;; Run hook
-		      ;; `org-export-before-parsing-hook'. with current
-		      ;; back-end as argument.
-		      (run-hook-with-args
-		       'org-export-before-parsing-hook backend)
-		      ;; Eventually parse buffer.
-		      (org-element-parse-buffer nil visible-only)))))
+	     (tree (org-export-with-current-buffer-copy
+		    (unless noexpand
+		      (org-export-expand-include-keyword)
+		      ;; Update radio targets since keyword
+		      ;; inclusion might have added some more.
+		      (org-update-radio-target-regexp)
+		      (org-export-expand-macro info)
+		      ;; TODO: Setting `org-current-export-file' is
+		      ;; required by Org Babel to properly resolve
+		      ;; noweb references.  Once "org-exp.el" is
+		      ;; removed, modify
+		      ;; `org-export-blocks-preprocess' so it
+		      ;; accepts the value as an argument instead.
+		      (let ((org-current-export-file (current-buffer)))
+			(org-export-blocks-preprocess)))
+		    (goto-char (point-min))
+		    ;; Run hook
+		    ;; `org-export-before-parsing-hook'. with current
+		    ;; back-end as argument.
+		    (run-hook-with-args
+		     'org-export-before-parsing-hook backend)
+		    ;; Eventually parse buffer.
+		    (org-element-parse-buffer nil visible-only))))
 	;; 3. Call parse-tree filters to get the final tree.
 	(setq tree
 	      (org-export-filter-apply-functions
@@ -2717,28 +2715,25 @@ The copy preserves local variables and visibility of the original
 buffer.
 
 Point is at buffer's beginning when BODY is applied."
-  (org-with-gensyms (original-buffer offset buffer-string overlays)
-    `(let ((,original-buffer (current-buffer))
-	   (,offset (1- (point-min)))
-	   (,buffer-string (buffer-string))
-	   (,overlays (mapcar
-		       'copy-overlay (overlays-in (point-min) (point-max)))))
+  (declare (debug (body)))
+  (org-with-gensyms (original-buffer offset buffer-string overlays region)
+    `(let* ((,original-buffer (current-buffer))
+	    (,region (list (point-min) (point-max)))
+	    (,buffer-string (org-with-wide-buffer (buffer-string)))
+	    (,overlays (mapcar 'copy-overlay (apply 'overlays-in ,region))))
        (with-temp-buffer
 	 (let ((buffer-invisibility-spec nil))
 	   (org-clone-local-variables
 	    ,original-buffer
 	    "^\\(org-\\|orgtbl-\\|major-mode$\\|outline-\\(regexp\\|level\\)$\\)")
 	   (insert ,buffer-string)
+	   (apply 'narrow-to-region ,region)
 	   (mapc (lambda (ov)
 		   (move-overlay
-		    ov
-		    (- (overlay-start ov) ,offset)
-		    (- (overlay-end ov) ,offset)
-		    (current-buffer)))
+		    ov (overlay-start ov) (overlay-end ov) (current-buffer)))
 		 ,overlays)
 	   (goto-char (point-min))
 	   (progn ,@body))))))
-(def-edebug-spec org-export-with-current-buffer-copy (body))
 
 (defun org-export-expand-macro (info)
   "Expand every macro in buffer.
