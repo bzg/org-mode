@@ -21360,7 +21360,10 @@ a footnote definition, try to fill the first paragraph within."
   ;; Check if auto-filling is meaningful.
   (let ((fc (current-fill-column)))
     (when (and fc (> (current-column) fc))
-      (let ((fill-prefix (org-adaptive-fill-function)))
+      (let* ((fill-prefix (org-adaptive-fill-function))
+	     ;; Enforce empty fill prefix, if required.  Otherwise, it
+	     ;; will be computed again.
+	     (adaptive-fill-mode (not (equal fill-prefix ""))))
 	(when fill-prefix (do-auto-fill))))))
 
 (defun org-comment-line-break-function (&optional soft)
