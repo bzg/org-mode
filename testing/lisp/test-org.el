@@ -254,6 +254,22 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (end-of-line)
 	      (org-auto-fill-function)
 	      (buffer-string)))))
+  ;; A hash within a line isn't a comment.
+  (should-not
+   (equal "12345 # 7890\n# 1"
+	  (org-test-with-temp-text "12345 # 7890 1"
+	    (let ((fill-column 12))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  ;; Correctly interpret empty prefix.
+  (should-not
+   (equal "# a\n# b\nRegular\n# paragraph"
+	  (org-test-with-temp-text "# a\n# b\nRegular paragraph"
+	    (let ((fill-column 12))
+	      (end-of-line 3)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
   ;; Comment block: auto fill contents.
   (should
    (equal "#+BEGIN_COMMENT\n12345\n7890\n#+END_COMMENT"
