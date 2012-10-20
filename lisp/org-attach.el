@@ -54,6 +54,13 @@ where the Org file lives."
   :group 'org-attach
   :type 'directory)
 
+(defcustom org-attach-git-annex-cutoff (* 32 1024)
+  "If non-nil, files larger than this will be annexed instead of stored."
+  :group 'org-attach
+  :type '(choice
+	  (const :tag "None" nil)
+	  (integer :tag "Bytes")))
+
 (defcustom org-attach-auto-tag "ATTACH"
   "Tag that will be triggered automatically when an entry has an attachment."
   :group 'org-attach
@@ -252,18 +259,31 @@ the ATTACH_DIR property) their own attachment directory."
 (defun org-attach-commit ()
   "Commit changes to git if `org-attach-directory' is properly initialized.
 This checks for the existence of a \".git\" directory in that directory."
-  (let ((dir (expand-file-name org-attach-directory)))
+  (let ((dir (expand-file-name org-attach-directory))
+	(changes 0))
     (when (file-exists-p (expand-file-name ".git" dir))
       (with-temp-buffer
 	(cd dir)
-	(shell-command "git add .")
-	(shell-command "git ls-files --deleted" t)
-	(mapc #'(lambda (file)
-		  (unless (string= file "")
-		    (shell-command
-		     (concat "git rm \"" file "\""))))
-	      (split-string (buffer-string) "\n"))
-	(shell-command "git commit -m 'Synchronized attachments'")))))
+	(let ((have-annex
+	       (and org-attach-git-annex-cutoff
+		    (file-exists-p (expand-file-name ".git/annex" dir)))))
+	  (dolist (new-or-modified
+		   (split-string
+		    (shell-command-to-string
+		     "git ls-files -zmo --exclude-standard") "\0" t))
+	    (if (and have-annex
+		     (>= (nth 7 (file-attributes new-or-modified))
+			 org-attach-git-annex-cutoff))
+		(call-process "git" nil nil nil "annex" "add" new-or-modified)
+	      (call-process "git" nil nil nil "add" new-or-modified))
+	    (incf changes)))
+	(dolist (deleted
+		 (split-string
+		  (shell-command-to-string "git ls-files -z --deleted") "\0" t))
+	  (call-process "git" nil nil nil "rm" deleted)
+	  (incf changes))
+	(when (> changes 0)
+	  (shell-command "git commit -m 'Synchronized attachments'"))))))
 
 (defun org-attach-tag (&optional off)
   "Turn the autotag on or (if OFF is set) off."
