@@ -4592,7 +4592,10 @@ back to standard interface."
 	(delete-other-windows)
 	(org-switch-to-buffer-other-window
 	 (get-buffer-create "*Org Export Dispatcher*"))
+	(org-fit-window-to-buffer)
 	(setq cursor-type nil))
+      ;; At this point, the buffer containing the menu exists and is
+      ;; visible in the current window.  So, refresh it.
       (with-current-buffer "*Org Export Dispatcher*"
 	(erase-buffer)
 	(insert help))
