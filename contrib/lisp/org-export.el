@@ -2675,7 +2675,7 @@ determined."
 		    "EXPORT_FILE_NAME" t))
 	      ;; File name may be extracted from buffer's associated
 	      ;; file, if any.
-	      (buffer-file-name (buffer-base-buffer))
+	      (file-name-nondirectory (buffer-file-name (buffer-base-buffer)))
 	      ;; Can't determine file name on our own: Ask user.
 	      (let ((read-file-name-function
 		     (and org-completion-use-ido 'ido-read-file-name)))
@@ -2683,17 +2683,16 @@ determined."
 		 "Output file: " pub-dir nil nil nil
 		 (lambda (name)
 		   (string= (file-name-extension name t) extension))))))))
-    ;; Build file name. Enforce EXTENSION over whatever user may have
-    ;; come up with. PUB-DIR, if defined, always has precedence over
+    ;; Build file name.  Enforce EXTENSION over whatever user may have
+    ;; come up with.  PUB-DIR, if defined, always has precedence over
     ;; any provided path.
     (cond
      (pub-dir
       (concat (file-name-as-directory pub-dir)
 	      (file-name-nondirectory base-name)
 	      extension))
-     ((string= (file-name-nondirectory base-name) base-name)
-      (concat (file-name-as-directory ".") base-name extension))
-     (t (concat base-name extension)))))
+     ((file-name-absolute-p base-name) (concat base-name extension))
+     (t (concat (file-name-as-directory ".") base-name extension)))))
 
 (defmacro org-export-with-current-buffer-copy (&rest body)
   "Apply BODY in a copy of the current buffer.
