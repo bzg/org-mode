@@ -17636,8 +17636,9 @@ Some of the options can be changed using the variable
 	      (unless checkdir ; make sure the directory exists
 		(setq checkdir t)
 		(or (file-directory-p todir) (make-directory todir t)))
-	      (org-create-formula-image
-	       txt movefile optnew forbuffer processing-type)
+	      (unless (file-exists-p movefile)
+		(org-create-formula-image
+		 txt movefile optnew forbuffer processing-type))
 	      (if overlays
 		  (progn
 		    (mapc (lambda (o)
