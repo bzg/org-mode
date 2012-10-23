@@ -291,7 +291,7 @@ this template."
 					   (indent-line-to ind))
 			 ;; Indent everything.
 			 (indent-code-rigidly match-start (point) ind)))))
-	      (setq pos (point))
+	      (setq pos (line-beginning-position))
               ;; Cleanup markers.
 	      (set-marker match-start nil)
 	      (set-marker begin nil)
