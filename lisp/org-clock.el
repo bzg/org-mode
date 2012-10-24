@@ -201,7 +201,10 @@ file name  Play this sound file, fall back to beep"
 	  (const :tag "Standard beep" t)
 	  (file  :tag "Play sound file")))
 
-(defcustom org-clock-modeline-total 'auto
+(define-obsolete-variable-alias 'org-clock-modeline-total
+  'org-clock-mode-line-total "24.3")
+
+(defcustom org-clock-mode-line-total 'auto
   "Default setting for the time included for the mode line clock.
 This can be overruled locally using the CLOCK_MODELINE_TOTAL property.
 Allowed values are:
@@ -1324,10 +1327,10 @@ for a todo state to switch to, overriding the existing value
 This is for the currently running clock as it is displayed
 in the mode line.  This function looks at the properties
 LAST_REPEAT and in particular CLOCK_MODELINE_TOTAL and the
-corresponding variable `org-clock-modeline-total' and then
+corresponding variable `org-clock-mode-line-total' and then
 decides which time to use."
   (let ((cmt (or (org-entry-get nil "CLOCK_MODELINE_TOTAL")
-		 (symbol-name org-clock-modeline-total)))
+		 (symbol-name org-clock-mode-line-total)))
 	(lr (org-entry-get nil "LAST_REPEAT")))
     (cond
      ((equal cmt "current")
