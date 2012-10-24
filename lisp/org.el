@@ -10983,19 +10983,21 @@ this is used for the GOTO interface."
 	 (re (nth 2 refile-pointer))
 	 (pos (nth 3 refile-pointer))
 	 buffer)
-    (when (org-string-nw-p re)
-      (setq buffer (if (markerp pos)
-		       (marker-buffer pos)
-		     (or (find-buffer-visiting file)
-			 (find-file-noselect file))))
-      (with-current-buffer buffer
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (goto-char pos)
-	    (beginning-of-line 1)
-	    (unless (org-looking-at-p re)
-	      (error "Invalid refile position, please clear the cache with `C-0 C-c C-w' before refiling"))))))))
+    (if (and (not (markerp pos)) (not file))
+	(error "Please save the buffer to a file before refiling")
+      (when (org-string-nw-p re)
+	(setq buffer (if (markerp pos)
+			 (marker-buffer pos)
+		       (or (find-buffer-visiting file)
+			   (find-file-noselect file))))
+	(with-current-buffer buffer
+	  (save-excursion
+	    (save-restriction
+	      (widen)
+	      (goto-char pos)
+	      (beginning-of-line 1)
+	      (unless (org-looking-at-p re)
+		(error "Invalid refile position, please clear the cache with `C-0 C-c C-w' before refiling")))))))))
 
 (defun org-refile-new-child (parent-target child)
   "Use refile target PARENT-TARGET to add new CHILD below it."
@@ -16850,7 +16852,9 @@ end of the list."
 	(file-alist (mapcar (lambda (x)
 			      (cons (file-truename x) x))
 			    (org-agenda-files t)))
-	(ctf (file-truename buffer-file-name))
+	(ctf (file-truename
+	      (or buffer-file-name
+		  (error "Please save the current buffer to a file"))))
 	x had)
     (setq x (assoc ctf file-alist) had x)
 
@@ -16869,7 +16873,8 @@ These are the files which are being checked for agenda entries.
 Optional argument FILE means use this file instead of the current."
   (interactive)
   (let* ((org-agenda-skip-unavailable-files nil)
-	 (file (or file buffer-file-name))
+	 (file (or file buffer-file-name
+		   (error "Current buffer does not visit a file")))
 	 (true-file (file-truename file))
 	 (afile (abbreviate-file-name file))
 	 (files (delq nil (mapcar
@@ -16891,7 +16896,7 @@ Optional argument FILE means use this file instead of the current."
 (defun org-check-agenda-file (file)
   "Make sure FILE exists.  If not, ask user what to do."
   (when (not (file-exists-p file))
-    (message "non-existent agenda file %s. [R]emove from list or [A]bort?"
+    (message "Non-existent agenda file %s.  [R]emove from list or [A]bort?"
 	     (abbreviate-file-name file))
     (let ((r (downcase (read-char-exclusive))))
       (cond
@@ -18657,13 +18662,12 @@ this function returns t, nil otherwise."
 	nil))))
 
 (autoload 'org-element-at-point "org-element")
+(autoload 'org-element-type "org-element")
 
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
 (declare-function org-element-type "org-element" (element))
-(declare-function org-element-context "org-element" ())
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-property "org-element" (property element))
-(declare-function org-element-paragraph-parser "org-element" (limit))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
 (declare-function org-element-nested-p "org-element" (elem-a elem-b))
 (declare-function org-element-swap-A-B "org-element" (elem-a elem-b))
