@@ -475,6 +475,8 @@ This is a helper routine for interactive use."
 (eval-when-compile
   (require 'browse-url))
 
+(declare-function browse-url-file-url "browse-url" (file))
+
 (defun org-lparse-do-convert (in-file out-fmt &optional prefix-arg)
   "Workhorse routine for `org-export-odt-convert'."
   (require 'browse-url)
