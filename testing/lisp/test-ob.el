@@ -1033,6 +1033,86 @@ Line 3\"
       (move-beginning-of-line 0)
       (should (looking-at (format ": %d" num))))))
 
+(ert-deftest test-ob/blocks-with-spaces ()
+  "Test expansion of blocks followed by blank lines."
+  (should
+   (equal "#+BEGIN_SRC emacs-lisp
+\(+ 1 2)
+#+END_SRC
+
+#+RESULTS:
+: 3\n\n\n"
+	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp
+\(+ 1 2)
+#+END_SRC\n\n\n"
+	    (progn (org-babel-execute-src-block)
+		   (buffer-string))))))
+
+(ert-deftest test-ob/results-in-narrowed-buffer ()
+  "Test block execution in a narrowed buffer."
+  ;; If results don't exist, they should be inserted in visible part
+  ;; of the buffer.
+  (should
+   (equal
+    "#+BEGIN_SRC emacs-lisp\n(+ 1 2)\n#+END_SRC\n\n#+RESULTS:\n: 3"
+    (org-test-with-temp-text
+	"#+BEGIN_SRC emacs-lisp\n(+ 1 2)\n#+END_SRC\n\nParagraph"
+      (progn
+	(narrow-to-region (point) (save-excursion (forward-line 3) (point)))
+	(org-babel-execute-src-block)
+	(org-trim (buffer-string))))))
+  (should
+   (equal
+    "#+NAME: test\n#+BEGIN_SRC emacs-lisp\n(+ 1 2)\n#+END_SRC\n\n#+RESULTS: test\n: 3"
+    (org-test-with-temp-text
+	"#+NAME: test\n#+BEGIN_SRC emacs-lisp\n(+ 1 2)\n#+END_SRC\n\nParagraph"
+      (progn
+	(narrow-to-region (point) (save-excursion (forward-line 4) (point)))
+	(org-babel-execute-src-block)
+	(org-trim (buffer-string))))))
+  ;; Results in visible part of buffer, should be updated here.
+  (should
+   (equal
+    "#+NAME: test
+#+BEGIN_SRC emacs-lisp
+\(+ 1 2)
+#+END_SRC
+
+#+RESULTS: test
+: 3"
+    (org-test-with-temp-text
+	"#+NAME: test
+#+BEGIN_SRC emacs-lisp
+\(+ 1 2)
+#+END_SRC
+
+#+RESULTS: test
+: 4
+
+Paragraph"
+      (progn
+	(narrow-to-region (point) (save-excursion (forward-line 7) (point)))
+	(org-babel-execute-src-block)
+	(org-trim (buffer-string))))))
+  ;; Results in invisible part of buffer, should be updated there.
+  (org-test-with-temp-text
+      "#+NAME: test
+#+BEGIN_SRC emacs-lisp
+\(+ 1 2)
+#+END_SRC
+
+#+RESULTS: test
+: 4
+
+Paragraph"
+    (progn
+      (narrow-to-region (point) (save-excursion (forward-line 4) (point)))
+      (org-babel-execute-src-block)
+      (should-not (re-search-forward "^#\\+RESULTS:" nil t))
+      (widen)
+      (should (should (re-search-forward "^: 3" nil t))))))
+
+
 (provide 'test-ob)
 
 ;;; test-ob ends here

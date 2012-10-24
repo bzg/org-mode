@@ -273,17 +273,6 @@ elements in the final html."
       (should (string-match (regexp-quote (format nil "%S" '(:foo :bar)))
 			    ascii)))))
 
-(ert-deftest ob-exp/blocks-with-spaces ()
-  "Test expansion of blocks followed by blank lines."
-  (should
-   (equal "#+RESULTS:\n: 3\n\n\n"
-	  (org-test-with-temp-text "#+BEGIN_SRC emacs-lisp :exports results
-\(+ 1 2)
-#+END_SRC\n\n\n"
-	    (let ((org-current-export-file (current-buffer)))
-	      (org-export-blocks-preprocess)
-	      (buffer-string))))))
-
 
 (provide 'test-ob-exp)
 
