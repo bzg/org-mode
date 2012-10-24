@@ -10978,7 +10978,7 @@ this is used for the GOTO interface."
 
 (declare-function org-string-nw-p "org-macs" (s))
 (defun org-refile-check-position (refile-pointer)
-  "Check if the refile pointer matches the readline to which it points."
+  "Check if the refile pointer matches the headline to which it points."
   (let* ((file (nth 1 refile-pointer))
 	 (re (nth 2 refile-pointer))
 	 (pos (nth 3 refile-pointer))
