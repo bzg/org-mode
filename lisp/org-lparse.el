@@ -442,11 +442,12 @@ PUB-DIR specifies the publishing directory."
       (error "Don't know how to export to backend %s %s" target-backend
 	     (format "via %s" native-backend)))
     (run-hooks 'org-export-first-hook)
-    (org-do-lparse arg hidden ext-plist to-buffer body-only pub-dir)
-    (remove-hook 'org-export-preprocess-hook
-		 'org-lparse-strip-experimental-blocks-maybe)
-    (remove-hook 'org-export-preprocess-after-blockquote-hook
-		 'org-lparse-preprocess-after-blockquote)))
+    (prog1
+	(org-do-lparse arg hidden ext-plist to-buffer body-only pub-dir)
+      (remove-hook 'org-export-preprocess-hook
+		   'org-lparse-strip-experimental-blocks-maybe)
+      (remove-hook 'org-export-preprocess-after-blockquote-hook
+		   'org-lparse-preprocess-after-blockquote))))
 
 (defcustom org-lparse-use-flashy-warning nil
   "Control flashing of messages logged with `org-lparse-warn'.
