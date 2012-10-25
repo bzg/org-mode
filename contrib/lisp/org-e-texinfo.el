@@ -1740,58 +1740,58 @@ Return INFO file's name."
    (org-e-texinfo-export-to-texinfo
     subtreep visible-only body-only ext-plist pub-dir)))
 
-(defun org-e-texinfo-compile (texifile)
+(defun org-e-texinfo-compile (file)
   "Compile a texinfo file.
 
-TEXIFILE is the name of the file being compiled.  Processing is
+FILE is the name of the file being compiled.  Processing is
 done through the command specified in `org-e-texinfo-info-process'.
 
 Return INFO file name or an error if it couldn't be produced."
-  (let* ((wconfig (current-window-configuration))
-	 (texifile (file-truename texifile))
-	 (base (file-name-sans-extension texifile))
+  (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
+	 (full-name (file-truename file))
+	 (out-dir (file-name-directory file))
+	 ;; Make sure `default-directory' is set to FILE directory,
+	 ;; not to whatever value the current buffer may have.
+	 (default-directory (file-name-directory full-name))
 	 errors)
-    (message (format "Processing Texinfo file %s ..." texifile))
-    (unwind-protect
-	(progn
-	  (cond
-	   ;; A function is provided: Apply it.
-	   ((functionp org-e-texinfo-info-process)
-	    (funcall org-e-texinfo-info-process (shell-quote-argument texifile)))
-	   ;; A list is provided: Replace %b, %f and %o with appropriate
-	   ;; values in each command before applying it.  Output is
-	   ;; redirected to "*Org INFO Texinfo Output*" buffer.
-	   ((consp org-e-texinfo-info-process)
-	    (let* ((out-dir (or (file-name-directory texifile) "./"))
-		   (outbuf (get-buffer-create "*Org Info Texinfo Output*")))
-	      (mapc
-	       (lambda (command)
-		 (shell-command
-		  (replace-regexp-in-string
-		   "%b" (shell-quote-argument base)
-		   (replace-regexp-in-string
-		    "%f" (shell-quote-argument texifile)
-		    (replace-regexp-in-string
-		     "%o" (shell-quote-argument out-dir) command t t) t t) t t)
-		  outbuf))
-	       org-e-texinfo-info-process)
-	      ;; Collect standard errors from output buffer.
-	      (setq errors (org-e-texinfo-collect-errors outbuf))))
-	   (t (error "No valid command to process to Info")))
-	  (let ((infofile (concat base ".info")))
-	    ;; Check for process failure.  Provide collected errors if
-	    ;; possible.
-	    (if (not (file-exists-p infofile))
-		(error (concat (format "INFO file %s wasn't produced" infofile)
-			       (when errors (concat ": " errors))))
-	      ;; Else remove log files, when specified, and signal end of
-	      ;; process to user, along with any error encountered.
-	      (message (concat "Process completed"
-			       (if (not errors) "."
-				 (concat " with errors: " errors)))))
-	    ;; Return output file name.
-	    infofile))
-      (set-window-configuration wconfig))))
+    (message (format "Processing Texinfo file %s ..." file))
+    (save-window-excursion
+      (cond
+       ;; A function is provided: Apply it.
+       ((functionp org-e-texinfo-info-process)
+	(funcall org-e-texinfo-info-process (shell-quote-argument file)))
+       ;; A list is provided: Replace %b, %f and %o with appropriate
+       ;; values in each command before applying it.  Output is
+       ;; redirected to "*Org INFO Texinfo Output*" buffer.
+       ((consp org-e-texinfo-info-process)
+	(let ((outbuf (get-buffer-create "*Org INFO Texinfo Output*")))
+	  (mapc
+	   (lambda (command)
+	     (shell-command
+	      (replace-regexp-in-string
+	       "%b" (shell-quote-argument base-name)
+	       (replace-regexp-in-string
+		"%f" (shell-quote-argument full-name)
+		(replace-regexp-in-string
+		 "%o" (shell-quote-argument out-dir) command t t) t t) t t)
+	      outbuf))
+	   org-e-texinfo-info-process)
+	  ;; Collect standard errors from output buffer.
+	  (setq errors (org-e-texinfo-collect-errors outbuf))))
+       (t (error "No valid command to process to Info")))
+      (let ((infofile (concat out-dir base-name ".info")))
+	;; Check for process failure.  Provide collected errors if
+	;; possible.
+	(if (not (file-exists-p infofile))
+	    (error (concat (format "INFO file %s wasn't produced" infofile)
+			   (when errors (concat ": " errors))))
+	  ;; Else remove log files, when specified, and signal end of
+	  ;; process to user, along with any error encountered.
+	  (message (concat "Process completed"
+			   (if (not errors) "."
+			     (concat " with errors: " errors)))))
+	;; Return output file name.
+	infofile))))
 
 (defun org-e-texinfo-collect-errors (buffer)
   "Collect some kind of errors from \"makeinfo\" command output.
