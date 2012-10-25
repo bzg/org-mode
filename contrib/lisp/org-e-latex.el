@@ -753,8 +753,8 @@ string defines the replacement string for this quote."
   "Commands to process a LaTeX file to a PDF file.
 This is a list of strings, each of them will be given to the
 shell as a command.  %f in the command will be replaced by the
-full file name, %b by the file base name \(i.e. without
-extension) and %o by the base directory of the file.
+full file name, %b by the file base name (i.e. without directory
+and extension parts) and %o by the base directory of the file.
 
 The reason why this is a list is that it usually takes several
 runs of `pdflatex', maybe mixed with a call to `bibtex'.  Org
@@ -2667,11 +2667,12 @@ TEXFILE is the name of the file being compiled.  Processing is
 done through the command specified in `org-e-latex-pdf-process'.
 
 Return PDF file name or an error if it couldn't be produced."
-  (let* ((texfile (file-truename texfile))
-	 (base (file-name-sans-extension texfile))
+  (let* ((base-name (file-name-sans-extension (file-name-nondirectory texfile)))
+	 (full-name (file-truename texfile))
+	 (out-dir (file-name-directory texfile))
 	 ;; Make sure `default-directory' is set to TEXFILE directory,
 	 ;; not to whatever value the current buffer may have.
-	 (default-directory (file-name-directory texfile))
+	 (default-directory (file-name-directory full-name))
 	 errors)
     (message (format "Processing LaTeX file %s ..." texfile))
     (save-window-excursion
@@ -2683,15 +2684,14 @@ Return PDF file name or an error if it couldn't be produced."
        ;; values in each command before applying it.  Output is
        ;; redirected to "*Org PDF LaTeX Output*" buffer.
        ((consp org-e-latex-pdf-process)
-	(let* ((out-dir (file-name-directory texfile))
-	       (outbuf (get-buffer-create "*Org PDF LaTeX Output*")))
+	(let ((outbuf (get-buffer-create "*Org PDF LaTeX Output*")))
 	  (mapc
 	   (lambda (command)
 	     (shell-command
 	      (replace-regexp-in-string
-	       "%b" (shell-quote-argument base)
+	       "%b" (shell-quote-argument base-name)
 	       (replace-regexp-in-string
-		"%f" (shell-quote-argument texfile)
+		"%f" (shell-quote-argument full-name)
 		(replace-regexp-in-string
 		 "%o" (shell-quote-argument out-dir) command t t) t t) t t)
 	      outbuf))
@@ -2699,7 +2699,7 @@ Return PDF file name or an error if it couldn't be produced."
 	  ;; Collect standard errors from output buffer.
 	  (setq errors (org-e-latex--collect-errors outbuf))))
        (t (error "No valid command to process to PDF")))
-      (let ((pdffile (concat base ".pdf")))
+      (let ((pdffile (concat out-dir base-name ".pdf")))
 	;; Check for process failure.  Provide collected errors if
 	;; possible.
 	(if (not (file-exists-p pdffile))
@@ -2709,7 +2709,7 @@ Return PDF file name or an error if it couldn't be produced."
 	  ;; process to user, along with any error encountered.
 	  (when org-e-latex-remove-logfiles
 	    (dolist (ext org-e-latex-logfiles-extensions)
-	      (let ((file (concat base "." ext)))
+	      (let ((file (concat out-dir base-name "." ext)))
 		(when (file-exists-p file) (delete-file file)))))
 	  (message (concat "Process completed"
 			   (if (not errors) "."
