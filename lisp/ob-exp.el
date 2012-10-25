@@ -48,7 +48,7 @@
 (declare-function org-element-context "org-element" ())
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
-
+(declare-function org-escape-code-in-string "org-src" (s))
 
 (defcustom org-export-babel-evaluate t
   "Switch controlling code evaluation during export.
@@ -359,7 +359,7 @@ replaced with its value."
   (org-fill-template
    org-babel-exp-code-template
    `(("lang"  . ,(nth 0 info))
-     ("body"  . ,(nth 1 info))
+     ("body"  . ,(org-escape-code-in-string (nth 1 info)))
      ,@(mapcar (lambda (pair)
 		 (cons (substring (symbol-name (car pair)) 1)
 		       (format "%S" (cdr pair))))
