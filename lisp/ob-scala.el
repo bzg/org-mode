@@ -72,9 +72,17 @@ Emacs-lisp table, otherwise return the results as a string."
 
 
 (defvar org-babel-scala-wrapper-method
-  "(
+
+"var str_result :String = null;
+
+Console.withOut(new java.io.OutputStream() {def write(b: Int){
+}}) {
+  str_result = {
 %s
-) asString print
+  }.toString
+}
+
+print(str_result)
 ")
 
 
