@@ -1989,63 +1989,63 @@ Return PDF file's name."
    (org-e-groff-export-to-groff
     subtreep visible-only body-only ext-plist pub-dir)))
 
-(defun org-e-groff-compile (grofffile)
+(defun org-e-groff-compile (file)
   "Compile a Groff file.
 
-GROFFFILE is the name of the file being compiled.  Processing is
-done through the command specified in `org-e-groff-pdf-process'.
+FILE is the name of the file being compiled.  Processing is done
+through the command specified in `org-e-groff-pdf-process'.
 
 Return PDF file name or an error if it couldn't be produced."
-  (let* ((wconfig (current-window-configuration))
-         (grofffile (file-truename grofffile))
-         (base (file-name-sans-extension grofffile))
+  (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
+	 (full-name (file-truename file))
+	 (out-dir (file-name-directory file))
+	 ;; Make sure `default-directory' is set to FILE directory,
+	 ;; not to whatever value the current buffer may have.
+	 (default-directory (file-name-directory full-name))
          errors)
-    (message (format "Processing Groff file %s ..." grofffile))
-    (unwind-protect
-        (progn
-          (cond
-           ;; A function is provided: Apply it.
-           ((functionp org-e-groff-pdf-process)
-            (funcall org-e-groff-pdf-process (shell-quote-argument grofffile)))
-           ;; A list is provided: Replace %b, %f and %o with appropriate
-           ;; values in each command before applying it.  Output is
-           ;; redirected to "*Org PDF Groff Output*" buffer.
-           ((consp org-e-groff-pdf-process)
-            (let* ((out-dir (or (file-name-directory grofffile) "./"))
-                   (outbuf (get-buffer-create "*Org PDF Groff Output*")))
-              (mapc
-               (lambda (command)
-                 (shell-command
-                  (replace-regexp-in-string
-                   "%b" (shell-quote-argument base)
-                   (replace-regexp-in-string
-                    "%f" (shell-quote-argument grofffile)
-                    (replace-regexp-in-string
-                     "%o" (shell-quote-argument out-dir) command t t)
-		    t t) t t)
-                  outbuf))
-               org-e-groff-pdf-process)
-              ;; Collect standard errors from output buffer.
-              (setq errors (org-e-groff-collect-errors outbuf))))
-           (t (error "No valid command to process to PDF")))
-          (let ((pdffile (concat base ".pdf")))
-            ;; Check for process failure.  Provide collected errors if
-            ;; possible.
-            (if (not (file-exists-p pdffile))
-                (error (concat (format "PDF file %s wasn't produced" pdffile)
-                               (when errors (concat ": " errors))))
-              ;; Else remove log files, when specified, and signal end of
-              ;; process to user, along with any error encountered.
-              (when org-e-groff-remove-logfiles
-                (dolist (ext org-e-groff-logfiles-extensions)
-                  (let ((file (concat base "." ext)))
-                    (when (file-exists-p file) (delete-file file)))))
-              (message (concat "Process completed"
-                               (if (not errors) "."
-                                 (concat " with errors: " errors)))))
-            ;; Return output file name.
-            pdffile))
-      (set-window-configuration wconfig))))
+    (message (format "Processing Groff file %s ..." file))
+    (save-window-excursion
+      (cond
+       ;; A function is provided: Apply it.
+       ((functionp org-e-groff-pdf-process)
+	(funcall org-e-groff-pdf-process (shell-quote-argument file)))
+       ;; A list is provided: Replace %b, %f and %o with appropriate
+       ;; values in each command before applying it.  Output is
+       ;; redirected to "*Org PDF Groff Output*" buffer.
+       ((consp org-e-groff-pdf-process)
+	(let ((outbuf (get-buffer-create "*Org PDF Groff Output*")))
+	  (mapc
+	   (lambda (command)
+	     (shell-command
+	      (replace-regexp-in-string
+	       "%b" (shell-quote-argument base-name)
+	       (replace-regexp-in-string
+		"%f" (shell-quote-argument full-name)
+		(replace-regexp-in-string
+		 "%o" (shell-quote-argument out-dir) command t t)
+		t t) t t)
+	      outbuf))
+	   org-e-groff-pdf-process)
+	  ;; Collect standard errors from output buffer.
+	  (setq errors (org-e-groff-collect-errors outbuf))))
+       (t (error "No valid command to process to PDF")))
+      (let ((pdffile (concat out-dir base-name ".pdf")))
+	;; Check for process failure.  Provide collected errors if
+	;; possible.
+	(if (not (file-exists-p pdffile))
+	    (error (concat (format "PDF file %s wasn't produced" pdffile)
+			   (when errors (concat ": " errors))))
+	  ;; Else remove log files, when specified, and signal end of
+	  ;; process to user, along with any error encountered.
+	  (when org-e-groff-remove-logfiles
+	    (dolist (ext org-e-groff-logfiles-extensions)
+	      (let ((file (concat out-dir base-name "." ext)))
+		(when (file-exists-p file) (delete-file file)))))
+	  (message (concat "Process completed"
+			   (if (not errors) "."
+			     (concat " with errors: " errors)))))
+	;; Return output file name.
+	pdffile))))
 
 (defun org-e-groff-collect-errors (buffer)
   "Collect some kind of errors from \"groff\" output
