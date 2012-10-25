@@ -75,6 +75,9 @@
 ;; and elements containing objects will also have `:contents-begin'
 ;; and `:contents-end' properties to delimit contents.
 ;;
+;; At the lowest level, a `:parent' property is also attached to any
+;; string, as a text property.
+;;
 ;; Lisp-wise, an element or an object can be represented as a list.
 ;; It follows the pattern (TYPE PROPERTIES CONTENTS), where:
 ;;   TYPE is a symbol describing the Org element or object.
@@ -376,7 +379,8 @@ It can also return the following special value:
 
 (defsubst org-element-property (property element)
   "Extract the value from the PROPERTY of an ELEMENT."
-  (plist-get (nth 1 element) property))
+  (if (stringp element) (get-text-property 0 property element)
+    (plist-get (nth 1 element) property)))
 
 (defsubst org-element-contents (element)
   "Extract contents from an ELEMENT."
@@ -392,9 +396,9 @@ element or object type."
 (defsubst org-element-put-property (element property value)
   "In ELEMENT set PROPERTY to VALUE.
 Return modified element."
-  (when (consp element)
-    (setcar (cdr element) (plist-put (nth 1 element) property value)))
-  element)
+  (if (stringp element) (org-add-props element nil property value)
+    (setcar (cdr element) (plist-put (nth 1 element) property value))
+    element))
 
 (defsubst org-element-set-contents (element &rest contents)
   "Set ELEMENT contents to CONTENTS.
@@ -430,9 +434,7 @@ The function takes care of setting `:parent' property for CHILD.
 Return parent element."
   (if (not parent) children
     ;; Link every child to PARENT.
-    (mapc (lambda (child)
-	    (unless (stringp child)
-	      (org-element-put-property child :parent parent)))
+    (mapc (lambda (child) (org-element-put-property child :parent parent))
 	  children)
     ;; Add CHILDREN at the end of PARENT contents.
     (apply 'org-element-set-contents

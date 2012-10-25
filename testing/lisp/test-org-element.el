@@ -76,12 +76,16 @@ Some other text
 
 (ert-deftest test-org-element/put-property ()
   "Test `org-element-put-property' specifications."
+  ;; Standard test.
   (org-test-with-temp-text "* Headline\n *a*"
     (let ((tree (org-element-parse-buffer)))
       (org-element-put-property
        (org-element-map tree 'bold 'identity nil t) :test 1)
       (should (org-element-property
-	       :test (org-element-map tree 'bold 'identity nil t))))))
+	       :test (org-element-map tree 'bold 'identity nil t)))))
+  ;; Put property on a string.
+  (should
+   (org-element-property :test (org-element-put-property "Paragraph" :test t))))
 
 (ert-deftest test-org-element/set-contents ()
   "Test `org-element-set-contents' specifications."
