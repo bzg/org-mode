@@ -124,6 +124,7 @@
     (:with-inlinetasks nil "inline" org-export-with-inlinetasks)
     (:with-plannings nil "p" org-export-with-planning)
     (:with-priority nil "pri" org-export-with-priority)
+    (:with-smart-quotes nil "'" org-export-with-smart-quotes)
     (:with-special-strings nil "-" org-export-with-special-strings)
     (:with-statistics-cookies nil "stat" org-export-with-statistics-cookies)
     (:with-sub-superscript nil "^" org-export-with-sub-superscripts)
@@ -470,6 +471,13 @@ tagging it with one of the `org-export-exclude-tags'.
 This option can also be set with the #+SELECT_TAGS: keyword."
   :group 'org-export-general
   :type '(repeat (string :tag "Tag")))
+
+(defcustom org-export-with-smart-quotes nil
+  "Non-nil means activate smart quotes during export.
+This option can also be set with the #+OPTIONS: line,
+e.g. \"':t\"."
+  :group 'org-export-general
+  :type 'boolean)
 
 (defcustom org-export-with-special-strings t
   "Non-nil means interpret \"\\-\", \"--\" and \"---\" for export.
@@ -1188,6 +1196,11 @@ structure of the values."
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
 ;;
+;; + `:with-smart-quotes' :: Non-nil means activate smart quotes in
+;;      plain text.
+;;   - category :: option
+;;   - type :: symbol (nil, t)
+;;
 ;; + `:with-special-strings' :: Non-nil means transcoding should
 ;;      interpret special strings in plain text.
 ;;   - category :: option
@@ -1883,13 +1896,15 @@ Return transcoded string."
 	      (cond
 	       ;; Ignored element/object.
 	       ((memq data (plist-get info :ignore-list)) nil)
-	       ;; Plain text.
+	       ;; Plain text.  All residual text properties from parse
+	       ;; tree (i.e. `:parent' property) are removed.
 	       ((eq type 'plain-text)
-		(org-export-filter-apply-functions
-		 (plist-get info :filter-plain-text)
-		 (let ((transcoder (org-export-transcoder data info)))
-		   (if transcoder (funcall transcoder data info) data))
-		 info))
+		(org-no-properties
+		 (org-export-filter-apply-functions
+		  (plist-get info :filter-plain-text)
+		  (let ((transcoder (org-export-transcoder data info)))
+		    (if transcoder (funcall transcoder data info) data))
+		  info)))
 	       ;; Uninterpreted element/object: change it back to Org
 	       ;; syntax and export again resulting raw string.
 	       ((not (org-export--interpret-p data info))
@@ -4186,6 +4201,197 @@ INFO is a plist used as a communication channel.
 
 Return a list of src-block elements with a caption."
   (org-export-collect-elements 'src-block info))
+
+
+;;;; Smart Quotes
+
+(defconst org-export-smart-quotes-alist
+  '(("de"
+     (opening-double-quote :utf-8 "„" :html "&bdquo;" :latex "\"`"
+			   :texinfo "@quotedblbase{}")
+     (closing-double-quote :utf-8 "“" :html "&ldquo;" :latex "\"'"
+			   :texinfo "@quotedblleft{}")
+     (opening-single-quote :utf-8 "‚" :html "&sbquo;" :latex "\\glq{}"
+			   :texinfo "@quotesinglbase{}")
+     (closing-single-quote :utf-8 "‘" :html "&lsquo;" :latex "\\grq{}"
+			   :texinfo "@quoteleft{}")
+     (apostrophe :utf-8 "’" :html "&rsquo;"))
+    ("en"
+     (opening-double-quote :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
+     (closing-double-quote :utf-8 "”" :html "&rdquo;" :latex "''" :texinfo "''")
+     (opening-single-quote :utf-8 "‘" :html "&lsquo;" :latex "`" :texinfo "`")
+     (closing-single-quote :utf-8 "’" :html "&rsquo;" :latex "'" :texinfo "'")
+     (apostrophe :utf-8 "’" :html "&rsquo;"))
+    ("es"
+     (opening-double-quote :utf-8 "«" :html "&laquo;" :latex "\\guillemotleft{}"
+			   :texinfo "@guillemetleft{}")
+     (closing-double-quote :utf-8 "»" :html "&raquo;" :latex "\\guillemotright{}"
+			   :texinfo "@guillemetright{}")
+     (opening-single-quote :utf-8 "“" :html "&ldquo;" :latex "``" :texinfo "``")
+     (closing-single-quote :utf-8 "”" :html "&rdquo;" :latex "''" :texinfo "''")
+     (apostrophe :utf-8 "’" :html "&rsquo;"))
+    ("fr"
+     (opening-double-quote :utf-8 "« " :html "&laquo;&nbsp;" :latex "\\og "
+			   :texinfo "@guillemetleft{}@tie{}")
+     (closing-double-quote :utf-8 " »" :html "&nbsp;&raquo;" :latex "\\fg{}"
+			   :texinfo "@tie{}@guillemetright{}")
+     (opening-single-quote :utf-8 "« " :html "&laquo;&nbsp;" :latex "\\og "
+			   :texinfo "@guillemetleft{}@tie{}")
+     (closing-single-quote :utf-8 " »" :html "&nbsp;&raquo;" :latex "\\fg{}"
+			   :texinfo "@tie{}@guillemetright{}")
+     (apostrophe :utf-8 "’" :html "&rsquo;")))
+  "Smart quotes translations.
+
+Alist whose CAR is a language string and CDR is an alist with
+quote type as key and a plist associating various encodings to
+their translation as value.
+
+A quote type can be any symbol among `opening-double-quote',
+`closing-double-quote', `opening-single-quote',
+`closing-single-quote' and `apostrophe'.
+
+Valid encodings include `:utf-8', `:html', `:latex' and
+`:texinfo'.
+
+If no translation is found, the quote character is left as-is.")
+
+(defconst org-export-smart-quotes-regexps
+  (list
+   ;; Possible opening quote at beginning of string.
+   "\\`\\([\"']\\)\\(\\w\\|\\s.\\|\\s_\\)"
+   ;; Possible closing quote at beginning of string.
+   "\\`\\([\"']\\)\\(\\s-\\|\\s)\\|\\s.\\)"
+   ;; Possible apostrophe at beginning of string.
+   "\\`\\('\\)\\S-"
+   ;; Opening single and double quotes.
+   "\\(?:\\s-\\|\\s(\\)\\([\"']\\)\\(?:\\w\\|\\s.\\|\\s_\\)"
+   ;; Closing single and double quotes.
+   "\\(?:\\w\\|\\s.\\|\\s_\\)\\([\"']\\)\\(?:\\s-\\|\\s)\\|\\s.\\)"
+   ;; Apostrophe.
+   "\\S-\\('\\)\\S-"
+   ;; Possible opening quote at end of string.
+   "\\(?:\\s-\\|\\s(\\)\\([\"']\\)\\'"
+   ;; Possible closing quote at end of string.
+   "\\(?:\\w\\|\\s.\\|\\s_\\)\\([\"']\\)\\'"
+   ;; Possible apostrophe at end of string.
+   "\\S-\\('\\)\\'")
+  "List of regexps matching a quote or an apostrophe.
+In every regexp, quote or apostrophe matched is put in group 1.")
+
+(defun org-export-activate-smart-quotes (s encoding info &optional original)
+  "Replace regular quotes with \"smart\" quotes in string S.
+
+ENCODING is a symbol among `:html', `:latex' and `:utf-8'.  INFO
+is a plist used as a communication channel.
+
+The function has to retrieve information about string
+surroundings in parse tree.  It can only happen with an
+unmodified string.  Thus, if S has already been through another
+process, a non-nil ORIGINAL optional argument will provide that
+original string.
+
+Return the new string."
+  (if (equal s "") ""
+    (let ((quotes-alist (cdr (assoc (plist-get info :language)
+				    org-export-smart-quotes-alist))))
+      ;; 1. Replace quote character at the beginning of S.
+      (let* ((prev (org-export-get-previous-element (or original s) info))
+	     (pre-blank (and prev (org-element-property :post-blank prev))))
+	(cond
+	 ;; Apostrophe?
+	 ((and prev (zerop pre-blank)
+	       (string-match (nth 2 org-export-smart-quotes-regexps) s))
+	  (let ((smart-quote
+		 (plist-get (cdr (assq 'apostrophe quotes-alist)) encoding)))
+	    (when smart-quote
+	      (setq s (replace-match smart-quote nil t s 1)))))
+	 ;; Closing quote?
+	 ((and prev (zerop pre-blank)
+	       (string-match (nth 1 org-export-smart-quotes-regexps) s))
+	  (let ((smart-quote
+		 (plist-get (cdr (assq (if (equal (match-string 1 s) "'")
+					   'closing-single-quote
+					 'closing-double-quote)
+				       quotes-alist))
+			    encoding)))
+	    (when smart-quote
+	      (setq s (replace-match smart-quote nil t s 1)))))
+	 ;; Opening quote?
+	 ((and (or (not prev) (> pre-blank 0))
+	       (string-match (nth 0 org-export-smart-quotes-regexps) s))
+	  (let ((smart-quote
+		 (plist-get (cdr (assq (if (equal (match-string 1 s) "'")
+					   'opening-single-quote
+					 'opening-double-quote)
+				       quotes-alist))
+			    encoding)))
+	    (when smart-quote
+	      (setq s (replace-match smart-quote nil t s 1)))))))
+      ;; 2. Replace quotes in the middle of the string.
+      (setq s
+	    ;; Opening quotes.
+	    (replace-regexp-in-string
+	     (nth 3 org-export-smart-quotes-regexps)
+	     (lambda (text)
+	       (or (plist-get
+		    (cdr (assq (if (equal (match-string 1 text) "'")
+				   'opening-single-quote
+				 'opening-double-quote)
+			       quotes-alist))
+		    encoding)
+		   (match-string 1 text)))
+	     s nil t 1))
+      (setq s
+	    (replace-regexp-in-string
+	     ;; Closing quotes.
+	     (nth 4 org-export-smart-quotes-regexps)
+	     (lambda (text)
+	       (or (plist-get
+		    (cdr (assq (if (equal (match-string 1 text) "'")
+				   'closing-single-quote
+				 'closing-double-quote)
+			       quotes-alist))
+		    encoding)
+		   (match-string 1 text)))
+	     s nil t 1))
+      (setq s
+	    (replace-regexp-in-string
+	     ;; Apostrophes.
+	     (nth 5 org-export-smart-quotes-regexps)
+	     (lambda (text)
+	       (or (plist-get (cdr (assq 'apostrophe quotes-alist)) encoding)
+		   (match-string 1 text)))
+	     s nil t 1))
+      ;; 3. Replace quote character at the end of S.
+      (let ((next (org-export-get-next-element (or original s) info)))
+	(cond
+	 ;; Apostrophe?
+	 ((and next (string-match (nth 8 org-export-smart-quotes-regexps) s))
+	  (let ((smart-quote
+		 (plist-get (cdr (assq 'apostrophe quotes-alist)) encoding)))
+	    (when smart-quote (setq s (replace-match smart-quote nil t s 1)))))
+	 ;; Closing quote?
+	 ((and (not next)
+	       (string-match (nth 7 org-export-smart-quotes-regexps) s))
+	  (let ((smart-quote
+		 (plist-get (cdr (assq (if (equal (match-string 1 s) "'")
+					   'closing-single-quote
+					 'closing-double-quote)
+				       quotes-alist))
+			    encoding)))
+	    (when smart-quote (setq s (replace-match smart-quote nil t s 1)))))
+	 ;; Opening quote?
+	 ((and next (string-match (nth 6 org-export-smart-quotes-regexps) s))
+	  (let ((smart-quote
+		 (plist-get (cdr (assq (if (equal (match-string 1 s) "'")
+					   'opening-single-quote
+					 'opening-double-quote)
+				       quotes-alist))
+			    encoding)))
+	    (when smart-quote
+	      (setq s (replace-match smart-quote nil t s 1)))))))
+      ;; Return string with smart quotes.
+      s)))
 
 
 ;;;; Topology
