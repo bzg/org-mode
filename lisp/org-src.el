@@ -689,9 +689,10 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
       (kill-buffer buffer))
     (goto-char beg)
     (when allow-write-back-p
-      (delete-region beg (1- end))
-      (insert code)
-      (delete-char 1)
+      (delete-region beg (max beg (1- end)))
+      (unless (string-match "^[ \t]*$" code)
+	(insert code)
+	(delete-char 1))
       (goto-char beg)
       (if single (just-one-space)))
     (if (memq t (mapcar (lambda (overlay)
