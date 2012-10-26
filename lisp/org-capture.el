@@ -1250,7 +1250,8 @@ Of course, if exact position has been required, just put it there."
 	(save-restriction
 	  (widen)
 	  (goto-char pos)
-	  (bookmark-set "org-capture-last-stored")
+	  (with-demoted-errors
+	    (bookmark-set "org-capture-last-stored"))
 	  (move-marker org-capture-last-stored-marker (point)))))))
 
 (defun org-capture-narrow (beg end)
