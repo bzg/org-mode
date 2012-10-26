@@ -827,9 +827,10 @@ deadlines are always turned off when the item is DONE."
 This will apply on all days where a prewarning for the deadline would
 be shown, but not at the day when the entry is actually due.  On that day,
 the deadline will be shown anyway.
-This variable may be set to nil, t, or a number which will then give
-the number of days before the actual deadline when the prewarnings
-should resume.
+This variable may be set to nil, t, the symbol `pre-scheduled',
+or a number which will then give the number of days before the actual
+deadline when the prewarnings should resume.  The symbol `pre-scheduled'
+eliminates the deadline prewarning only prior to the scheduled date.
 This can be used in a workflow where the first showing of the deadline will
 trigger you to schedule it, and then you don't want to be reminded of it
 because you will take care of it on the day when scheduled."
@@ -838,6 +839,7 @@ because you will take care of it on the day when scheduled."
   :version "24.1"
   :type '(choice
 	  (const :tag "Always show prewarning" nil)
+	  (const :tag "Remove prewarning prior to scheduled date" pre-scheduled)
 	  (const :tag "Remove prewarning if entry is scheduled" t)
 	  (integer :tag "Restart prewarning N days before deadline")))
 
@@ -5813,18 +5815,8 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	 show-all upcomingp donep timestr warntime)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
-      (setq suppress-prewarning nil)
       (catch :skip
 	(org-agenda-skip)
-	(when (and org-agenda-skip-deadline-prewarning-if-scheduled
-		   (save-match-data
-		     (string-match org-scheduled-time-regexp
-				   (buffer-substring (point-at-bol)
-						     (point-at-eol)))))
-	  (setq suppress-prewarning
-		(if (integerp org-agenda-skip-deadline-prewarning-if-scheduled)
-		    org-agenda-skip-deadline-prewarning-if-scheduled
-		  0)))
 	(setq s (match-string 1)
 	      txt nil
 	      pos (1- (match-beginning 1))
@@ -5835,8 +5827,31 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	      d2 (org-time-string-to-absolute
 		  (match-string 1) d1 'past show-all
 		  (current-buffer) pos)
-	      diff (- d2 d1)
-	      wdays (if suppress-prewarning
+	      diff (- d2 d1))
+	(setq suppress-prewarning
+	      (let ((ds (and org-agenda-skip-deadline-prewarning-if-scheduled
+			     (let ((item (buffer-substring (point-at-bol)
+							   (point-at-eol))))
+			       (save-match-data
+				 (and (string-match
+				       org-scheduled-time-regexp item)
+				      (match-string 1 item)))))))
+		(if ds
+		    ;; The current item has a scheduled date (in ds),
+		    ;; so evaluate its prewarning lead time.
+		    (cond
+		     ((integerp
+		       org-agenda-skip-deadline-prewarning-if-scheduled)
+		      ;; Use globally-customized prewarning-restart lead time.
+		      org-agenda-skip-deadline-prewarning-if-scheduled)
+		     ((eq org-agenda-skip-deadline-prewarning-if-scheduled
+			  'pre-scheduled)
+		      ;; Set prewarning to no earlier than scheduled.
+		      (min (- d2 (org-time-string-to-absolute
+				  ds d1 'past show-all (current-buffer) pos))
+			   org-deadline-warning-days))
+		     (t 0))))) ;; Set prewarning to deadline.
+	(setq wdays (if suppress-prewarning
 			(let ((org-deadline-warning-days suppress-prewarning))
 			  (org-get-wdays s))
 		      (org-get-wdays s))
