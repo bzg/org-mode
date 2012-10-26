@@ -10967,11 +10967,13 @@ prefix argument (`C-u C-u C-u C-c C-w')."
 		  (and org-auto-align-tags
 		       (let ((org-loop-over-headlines-in-active-region nil))
 			 (org-set-tags nil t)))
-		  (bookmark-set "org-refile-last-stored")
+		  (with-demoted-errors
+		    (bookmark-set "org-refile-last-stored"))
 		  ;; If we are refiling for capture, make sure that the
 		  ;; last-capture pointers point here
 		  (when (org-bound-and-true-p org-refile-for-capture)
-		    (bookmark-set "org-capture-last-stored-marker")
+		    (with-demoted-errors
+		      (bookmark-set "org-capture-last-stored-marker"))
 		    (move-marker org-capture-last-stored-marker (point)))
 		  (if (fboundp 'deactivate-mark) (deactivate-mark))
 		  (run-hooks 'org-after-refile-insert-hook))))

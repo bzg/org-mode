@@ -5482,7 +5482,8 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 		tags (save-excursion (org-backward-heading-same-level 0)
 				     (org-get-tags-at))
 		todo-state (org-get-todo-state)
-		warntime (org-entry-get (point) "APPT_WARNTIME"))
+		warntime (org-entry-get (point) "APPT_WARNTIME")
+		extra nil)
 
 	  (dolist (r (if (stringp result)
 			 (list result)

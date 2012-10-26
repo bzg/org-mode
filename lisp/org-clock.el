@@ -1149,7 +1149,6 @@ make this the default behavior.)"
 	    (if (and (eobp) (not (org-at-heading-p)))
 		(point-at-bol 0)
 	      (point)))
-      (run-hooks 'org-clock-in-prepare-hook)
       (save-excursion
 	(when (and selected-task (marker-buffer selected-task))
 	  ;; There is a selected task, move to the correct buffer
@@ -1168,6 +1167,7 @@ make this the default behavior.)"
 	      ;; beginning of the heading, since the
 	      ;; user is liking to insert stuff here
 	      ;; manually
+	      (run-hooks 'org-clock-in-prepare-hook)
 	      (org-clock-history-push))
 	    (org-clock-set-current)
 	    (cond ((functionp org-clock-in-switch-to-state)
