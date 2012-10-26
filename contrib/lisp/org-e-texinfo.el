@@ -82,14 +82,11 @@
    (footnote-definition . org-e-texinfo-footnote-definition)
    (footnote-reference . org-e-texinfo-footnote-reference)
    (headline . org-e-texinfo-headline)
-   (horizontal-rule . org-e-texinfo-horizontal-rule)
    (inline-src-block . org-e-texinfo-inline-src-block)
    (inlinetask . org-e-texinfo-inlinetask)
    (italic . org-e-texinfo-italic)
    (item . org-e-texinfo-item)
    (keyword . org-e-texinfo-keyword)
-   (latex-environment . org-e-texinfo-latex-environment)
-   (latex-fragment . org-e-texinfo-latex-fragment)
    (line-break . org-e-texinfo-line-break)
    (link . org-e-texinfo-link)
    (paragraph . org-e-texinfo-paragraph)
@@ -104,7 +101,6 @@
    (special-block . org-e-texinfo-special-block)
    (src-block . org-e-texinfo-src-block)
    (statistics-cookie . org-e-texinfo-statistics-cookie)
-   (strike-through . org-e-texinfo-strike-through)
    (subscript . org-e-texinfo-subscript)
    (superscript . org-e-texinfo-superscript)
    (table . org-e-texinfo-table)
@@ -113,7 +109,6 @@
    (target . org-e-texinfo-target)
    (template . org-e-texinfo-template)
    (timestamp . org-e-texinfo-timestamp)
-   (underline . org-e-texinfo-underline)
    (verbatim . org-e-texinfo-verbatim)
    (verse-block . org-e-texinfo-verse-block))
   :export-block "TEXINFO"
@@ -359,36 +354,6 @@ in order to mimic default behaviour:
 ;;
 ;; Src Blocks are example blocks, except for LISP
 
-;;; Plain text
-
-(defcustom org-e-texinfo-quotes
-  '(("quotes"
-     ("\\(\\s-\\|[[(]\\|^\\)\"" . "``")
-     ("\\(\\S-\\)\"" . "''")
-     ("\\(\\s-\\|(\\|^\\)'" . "`")))
-  "Alist for quotes to use when converting english double-quotes.
-
-The CAR of each item in this alist is the language code.
-The CDR of each item in this alist is a list of three CONS:
-- the first CONS defines the opening quote;
-- the second CONS defines the closing quote;
-- the last CONS defines single quotes.
-
-For each item in a CONS, the first string is a regexp
-for allowed characters before/after the quote, the second
-string defines the replacement string for this quote."
-  :group 'org-export-e-texinfo
-  :type '(list
-	  (cons :tag "Opening quote"
-		(string :tag "Regexp for char before")
-		(string :tag "Replacement quote     "))
-	  (cons :tag "Closing quote"
-		(string :tag "Regexp for char after ")
-		(string :tag "Replacement quote     "))
-	  (cons :tag "Single quote"
-		(string :tag "Regexp for char before")
-		(string :tag "Replacement quote     "))))
-
 ;;; Compilation
 
 (defcustom org-e-texinfo-info-process
@@ -444,18 +409,6 @@ nil."
 			 (concat "=" (second pair)))))
 	     options
 	     ","))
-
-(defun org-e-texinfo--quotation-marks (text info)
-  "Export quotation marks using ` and ' as the markers.
-TEXT is a string containing quotation marks to be replaced.  INFO
-is a plist used as a communication channel."
-  (mapc (lambda(l)
-	  (let ((start 0))
-	    (while (setq start (string-match (car l) text start))
-	      (let ((new-quote (concat (match-string 1 text) (cdr l))))
-		(setq text (replace-match new-quote  t t text))))))
-	(cdr org-e-texinfo-quotes))
-  text)
 
 (defun org-e-texinfo--text-markup (text markup)
   "Format TEXT depending on MARKUP text markup.
@@ -790,10 +743,6 @@ holding export options."
 
 ;;; Transcode Functions
 
-;;; Babel Call
-;;
-;; Babel Calls are ignored.
-
 ;;; Bold
 
 (defun org-e-texinfo-bold (bold contents info)
@@ -803,8 +752,12 @@ contextual information."
   (org-e-texinfo--text-markup contents 'bold))
 
 ;;; Center Block
-;;
-;; Center blocks are ignored
+
+(defun org-e-texinfo-center-block (center-block contents info)
+  "Transcode a CENTER-BLOCK element from Org to Texinfo.
+CONTENTS holds the contents of the block.  INFO is a plist used
+as a communication channel."
+  contents)
 
 ;;; Clock
 
@@ -911,10 +864,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (org-remove-indentation
 	   (org-e-texinfo--sanitize-content
 	    (org-element-property :value fixed-width)))))
-
-;;; Footnote Definition
-;;
-;; Footnote Definitions are ignored.
 
 ;;; Footnote Reference
 ;;
@@ -1093,14 +1042,6 @@ holding contextual information."
 	(format (replace-regexp-in-string "%]" "%%]" section-fmt) full-text
 		(concat pre-blanks contents))))))))
 
-;;; Horizontal Rule
-;;
-;; Horizontal rules are ignored
-
-;;; Inline Babel Call
-;;
-;; Inline Babel Calls are ignored.
-
 ;;; Inline Src Block
 
 (defun org-e-texinfo-inline-src-block (inline-src-block contents info)
@@ -1178,14 +1119,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "PINDEX") (format "@pindex %s" value))
      ((string= key "TINDEX") (format "@tindex %s" value))
      ((string= key "VINDEX") (format "@vindex %s" value)))))
-
-;;; Latex Environment
-;;
-;; Latex environments are ignored
-
-;;; Latex Fragment
-;;
-;; Latex fragments are ignored.
 
 ;;; Line Break
 
@@ -1335,25 +1268,30 @@ contextual information."
   "Transcode a TEXT string from Org to Texinfo.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  ;; LaTeX into @LaTeX{} and TeX into @TeX{}
-  (let ((case-fold-search nil)
-	(start 0))
-    (while (string-match "\\(\\(?:La\\)?TeX\\)" text start)
-      (setq text (replace-match
-		  (format "@%s{}" (match-string 1 text)) nil t text)
-	    start (match-end 0))))
-  ;; Handle quotation marks
-  (setq text (org-e-texinfo--quotation-marks text info))
-  ;; Convert special strings.
-  (when (plist-get info :with-special-strings)
-    (while (string-match (regexp-quote "...") text)
-      (setq text (replace-match "@dots{}" nil t text))))
-  ;; Handle break preservation if required.
-  (when (plist-get info :preserve-breaks)
-    (setq text (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" " @*\n"
-					 text)))
-  ;; Return value with @ { and } protected.
-  (org-e-texinfo--sanitize-content text))
+  ;; First protect @, { and }.
+  (let ((output (org-e-texinfo--sanitize-content text)))
+    ;; Activate smart quotes.  Be sure to provide original TEXT string
+    ;; since OUTPUT may have been modified.
+    (when (plist-get info :with-smart-quotes)
+      (setq output
+	    (org-export-activate-smart-quotes output :texinfo info text)))
+    ;; LaTeX into @LaTeX{} and TeX into @TeX{}
+    (let ((case-fold-search nil)
+	  (start 0))
+      (while (string-match "\\(\\(?:La\\)?TeX\\)" output start)
+	(setq output (replace-match
+		      (format "@%s{}" (match-string 1 output)) nil t output)
+	      start (match-end 0))))
+    ;; Convert special strings.
+    (when (plist-get info :with-special-strings)
+      (while (string-match (regexp-quote "...") output)
+	(setq output (replace-match "@dots{}" nil t output))))
+    ;; Handle break preservation if required.
+    (when (plist-get info :preserve-breaks)
+      (setq output (replace-regexp-in-string
+		    "\\(\\\\\\\\\\)?[ \t]*\n" " @*\n" output)))
+    ;; Return value.
+    output))
 
 ;;; Planning
 
@@ -1439,8 +1377,12 @@ holding contextual information."
   contents)
 
 ;;; Special Block
-;;
-;; Are ignored at the moment
+
+(defun org-e-texinfo-special-block (special-block contents info)
+  "Transcode a SPECIAL-BLOCK element from Org to Texinfo.
+CONTENTS holds the contents of the block.  INFO is a plist used
+as a communication channel."
+  contents)
 
 ;;; Src Block
 
@@ -1466,10 +1408,6 @@ contextual information."
   "Transcode a STATISTICS-COOKIE object from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (org-element-property :value statistics-cookie))
-
-;;; Strike-Through
-;;
-;; Strikethrough is ignored
 
 ;;; Subscript
 
@@ -1639,10 +1577,6 @@ information."
 	  ((memq type '(inactive inactive-range))
 	   (format org-e-texinfo-inactive-timestamp-format value))
 	  (t (format org-e-texinfo-diary-timestamp-format value)))))
-
-;;; Underline
-;;
-;; Underline is ignored
 
 ;;; Verbatim
 

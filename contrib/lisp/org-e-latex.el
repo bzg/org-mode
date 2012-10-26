@@ -709,41 +709,6 @@ during latex export it will output
   \\end{pythoncode}")
 
 
-;;;; Plain text
-
-(defcustom org-e-latex-quotes
-  '(("fr"
-     ("\\(\\s-\\|[[(]\\|^\\)\"" . "«~")
-     ("\\(\\S-\\)\"" . "~»")
-     ("\\(\\s-\\|(\\|^\\)'" . "'"))
-    ("en"
-     ("\\(\\s-\\|[[(]\\|^\\)\"" . "``")
-     ("\\(\\S-\\)\"" . "''")
-     ("\\(\\s-\\|(\\|^\\)'" . "`")))
-  "Alist for quotes to use when converting english double-quotes.
-
-The CAR of each item in this alist is the language code.
-The CDR of each item in this alist is a list of three CONS:
-- the first CONS defines the opening quote;
-- the second CONS defines the closing quote;
-- the last CONS defines single quotes.
-
-For each item in a CONS, the first string is a regexp
-for allowed characters before/after the quote, the second
-string defines the replacement string for this quote."
-  :group 'org-export-e-latex
-  :type '(list
-	  (cons :tag "Opening quote"
-		(string :tag "Regexp for char before")
-		(string :tag "Replacement quote     "))
-	  (cons :tag "Closing quote"
-		(string :tag "Regexp for char after ")
-		(string :tag "Replacement quote     "))
-	  (cons :tag "Single quote"
-		(string :tag "Regexp for char before")
-		(string :tag "Replacement quote     "))))
-
-
 ;;;; Compilation
 
 (defcustom org-e-latex-pdf-process
@@ -927,20 +892,6 @@ nil."
 			 (concat "=" (second pair)))))
 	     options
 	     ","))
-
-(defun org-e-latex--quotation-marks (text info)
-  "Export quotation marks depending on language conventions.
-TEXT is a string containing quotation marks to be replaced.  INFO
-is a plist used as a communication channel."
-  (mapc (lambda(l)
-	  (let ((start 0))
-	    (while (setq start (string-match (car l) text start))
-	      (let ((new-quote (concat (match-string 1 text) (cdr l))))
-		(setq text (replace-match new-quote  t t text))))))
-	(cdr (or (assoc (plist-get info :language) org-e-latex-quotes)
-		 ;; Falls back on English.
-		 (assoc "en" org-e-latex-quotes))))
-  text)
 
 (defun org-e-latex--wrap-label (element output)
   "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
@@ -1911,36 +1862,41 @@ contextual information."
   "Transcode a TEXT string from Org to LaTeX.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  (let ((specialp (plist-get info :with-special-strings)))
+  (let ((specialp (plist-get info :with-special-strings))
+	(output text))
     ;; Protect %, #, &, $, ~, ^, _,  { and }.
-    (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}~^_]\\)" text)
-      (setq text
-	    (replace-match (format "\\%s" (match-string 2 text)) nil t text 2)))
+    (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}~^_]\\)" output)
+      (setq output
+	    (replace-match
+	     (format "\\%s" (match-string 2 output)) nil t output 2)))
     ;; Protect \.  If special strings are used, be careful not to
     ;; protect "\" in "\-" constructs.
     (let ((symbols (if specialp "-%$#&{}~^_\\" "%$#&{}~^_\\")))
-      (setq text
+      (setq output
 	    (replace-regexp-in-string
 	     (format "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%s]\\|$\\)" symbols)
-	     "$\\backslash$" text nil t 1)))
+	     "$\\backslash$" output nil t 1)))
+    ;; Activate smart quotes.  Be sure to provide original TEXT string
+    ;; since OUTPUT may have been modified.
+    (when (plist-get info :with-smart-quotes)
+      (setq output (org-export-activate-smart-quotes output :latex info text)))
     ;; LaTeX into \LaTeX{} and TeX into \TeX{}.
     (let ((case-fold-search nil)
 	  (start 0))
-      (while (string-match "\\<\\(\\(?:La\\)?TeX\\)\\>" text start)
-	(setq text (replace-match
-		    (format "\\%s{}" (match-string 1 text)) nil t text)
+      (while (string-match "\\<\\(\\(?:La\\)?TeX\\)\\>" output start)
+	(setq output (replace-match
+		      (format "\\%s{}" (match-string 1 output)) nil t output)
 	      start (match-end 0))))
-    ;; Handle quotation marks.
-    (setq text (org-e-latex--quotation-marks text info))
     ;; Convert special strings.
     (when specialp
-      (setq text (replace-regexp-in-string "\\.\\.\\." "\\ldots{}" text nil t)))
+      (setq output
+	    (replace-regexp-in-string "\\.\\.\\." "\\ldots{}" output nil t)))
     ;; Handle break preservation if required.
     (when (plist-get info :preserve-breaks)
-      (setq text (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n"
-					   text)))
+      (setq output (replace-regexp-in-string
+		    "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n" output)))
     ;; Return value.
-    text))
+    output))
 
 
 ;;;; Planning

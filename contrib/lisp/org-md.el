@@ -355,6 +355,8 @@ a communication channel."
   "Transcode a TEXT string into Markdown format.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
+  (when (plist-get info :with-smart-quotes)
+    (setq text (org-export-activate-smart-quotes text :html info)))
   ;; Protect ambiguous #.  This will protect # at the beginning of
   ;; a line, but not at the beginning of a paragraph.  See
   ;; `org-md-paragraph'.
@@ -362,9 +364,7 @@ contextual information."
   ;; Protect ambiguous !
   (setq text (replace-regexp-in-string "\\(!\\)\\[" "\\\\!" text nil nil 1))
   ;; Protect `, *, _ and \
-  (setq text
-	(replace-regexp-in-string
-	 "[`*_\\]" (lambda (rep) (concat "\\\\" (match-string 1 rep))) text))
+  (setq text (replace-regexp-in-string "[`*_\\]" "\\\\\\&" text))
   ;; Handle special strings, if required.
   (when (plist-get info :with-special-strings)
     (setq text (org-e-html-convert-special-strings text)))

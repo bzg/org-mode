@@ -770,42 +770,6 @@ Images in ODT export' for more information."
   :version "24.1")
 
 
-;;;; Plain text
-
-(defcustom org-e-odt-quotes
-  '(("fr"
-     ("\\(\\s-\\|[[(]\\|^\\)\"" . "« ")
-     ("\\(\\S-\\)\"" . "» ")
-     ("\\(\\s-\\|(\\|^\\)'" . "'"))
-    ("en"
-     ("\\(\\s-\\|[[(]\\|^\\)\"" . "“")
-     ("\\(\\S-\\)\"" . "”")
-     ("\\(\\s-\\|(\\|^\\)'" . "‘")
-     ("\\(\\S-\\)'" . "’")))
-  "Alist for quotes to use when converting english double-quotes.
-
-The CAR of each item in this alist is the language code.
-The CDR of each item in this alist is a list of three CONS:
-- the first CONS defines the opening quote;
-- the second CONS defines the closing quote;
-- the last CONS defines single quotes.
-
-For each item in a CONS, the first string is a regexp
-for allowed characters before/after the quote, the second
-string defines the replacement string for this quote."
-  :group 'org-export-e-odt
-  :type '(list
-	  (cons :tag "Opening quote"
-		(string :tag "Regexp for char before")
-		(string :tag "Replacement quote     "))
-	  (cons :tag "Closing quote"
-		(string :tag "Regexp for char after ")
-		(string :tag "Replacement quote     "))
-	  (cons :tag "Single quote"
-		(string :tag "Regexp for char before")
-		(string :tag "Replacement quote     "))))
-
-
 ;;;; Src Block
 
 (defcustom org-e-odt-create-custom-styles-for-srcblocks t
@@ -1477,10 +1441,6 @@ holding contextual information.  See `org-export-data'."
   "Transcode an ENTITY object from Org to ODT.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
-  ;; (let ((ent (org-element-property :latex entity)))
-  ;;   (if (org-element-property :latex-math-p entity)
-  ;; 	(format "$%s$" ent)
-  ;;     ent))
   (org-element-property :utf-8 entity))
 
 
@@ -2609,40 +2569,29 @@ contextual information."
   (if no-whitespace-filling text
     (org-e-odt--encode-tabs-and-spaces text)))
 
-(defun org-e-odt--quotation-marks (text info)
-  "Export quotation marks depending on language conventions.
-TEXT is a string containing quotation marks to be replaced.  INFO
-is a plist used as a communication channel."
-  (mapc (lambda(l)
-	  (let ((start 0))
-	    (while (setq start (string-match (car l) text start))
-	      (let ((new-quote (concat (match-string 1 text) (cdr l))))
-		(setq text (replace-match new-quote  t t text))))))
-	(cdr (or (assoc (plist-get info :language) org-e-odt-quotes)
-		 ;; Falls back on English.
-		 (assoc "en" org-e-odt-quotes))))
-  text)
-
 (defun org-e-odt-plain-text (text info)
   "Transcode a TEXT string from Org to ODT.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  ;; Protect &, < and >.
-  (setq text (org-e-odt--encode-plain-text text t))
-  ;; Handle quotation marks
-  (setq text (org-e-odt--quotation-marks text info))
-  ;; Convert special strings.
-  (when (plist-get info :with-special-strings)
-    (mapc
-     (lambda (pair)
-       (setq text (replace-regexp-in-string (car pair) (cdr pair) text t nil)))
-     org-e-odt-special-string-regexps))
-  ;; Handle break preservation if required.
-  (when (plist-get info :preserve-breaks)
-    (setq text (replace-regexp-in-string
-		"\\(\\\\\\\\\\)?[ \t]*\n" "<text:line-break/>\n" text t)))
-  ;; Return value.
-  text)
+  (let ((output text))
+    ;; Protect &, < and >.
+    (setq output (org-e-odt--encode-plain-text output t))
+    ;; Handle smart quotes.  Be sure to provide original string since
+    ;; OUTPUT may have been modified.
+    (setq output (org-export-activate-smart-quotes output :utf-8 info text))
+    ;; Convert special strings.
+    (when (plist-get info :with-special-strings)
+      (mapc
+       (lambda (pair)
+	 (setq output
+	       (replace-regexp-in-string (car pair) (cdr pair) output t nil)))
+       org-e-odt-special-string-regexps))
+    ;; Handle break preservation if required.
+    (when (plist-get info :preserve-breaks)
+      (setq output (replace-regexp-in-string
+		    "\\(\\\\\\\\\\)?[ \t]*\n" "<text:line-break/>\n" output t)))
+    ;; Return value.
+    output))
 
 
 ;;;; Planning

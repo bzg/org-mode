@@ -205,44 +205,6 @@ during man export."
 )
 
 
-
-
-;;; Plain text
-
-(defcustom org-e-man-quotes
-  '(("fr"
-     ("\\(\\s-\\|[[(]\\|^\\)\"" . "«~")
-     ("\\(\\S-\\)\"" . "~»")
-     ("\\(\\s-\\|(\\|^\\)'" . "'"))
-    ("en"
-     ("\\(\\s-\\|[[(]\\|^\\)\"" . "``")
-     ("\\(\\S-\\)\"" . "''")
-     ("\\(\\s-\\|(\\|^\\)'" . "`")))
-
-  "Alist for quotes to use when converting english double-quotes.
-
-The CAR of each item in this alist is the language code.
-The CDR of each item in this alist is a list of three CONS:
-- the first CONS defines the opening quote;
-- the second CONS defines the closing quote;
-- the last CONS defines single quotes.
-
-For each item in a CONS, the first string is a regexp
-for allowed characters before/after the quote, the second
-string defines the replacement string for this quote."
-  :group 'org-export-e-man
-  :type '(list
-          (cons :tag "Opening quote"
-                (string :tag "Regexp for char before")
-                (string :tag "Replacement quote     "))
-          (cons :tag "Closing quote"
-                (string :tag "Regexp for char after ")
-                (string :tag "Replacement quote     "))
-          (cons :tag "Single quote"
-                (string :tag "Regexp for char before")
-                (string :tag "Replacement quote     "))))
-
-
 ;;; Compilation
 
 (defcustom org-e-man-pdf-process
@@ -291,7 +253,6 @@ These are the .aux, .log, .out, and .toc files."
 
 ;;; Internal Functions
 
-
 (defun org-e-man--caption/label-string (element info)
   "Return caption and label Man string for ELEMENT.
 
@@ -311,21 +272,6 @@ For non-floats, see `org-e-man--wrap-label'."
 	  ;; Standard caption format.
 	  (t (format "\\fR%s\\fP" (org-export-data main info))))))
 
-
-
-(defun org-e-man--quotation-marks (text info)
-  "Export quotation marks depending on language conventions.
-TEXT is a string containing quotation marks to be replaced.  INFO
-is a plist used as a communication channel."
-  (mapc (lambda(l)
-          (let ((start 0))
-            (while (setq start (string-match (car l) text start))
-              (let ((new-quote (concat (match-string 1 text) (cdr l))))
-                (setq text (replace-match new-quote  t t text))))))
-        (cdr (or (assoc (plist-get info :language) org-e-man-quotes)
-                 ;; Falls back on English.
-                 (assoc "en" org-e-man-quotes)))) text)
-
 (defun org-e-man--wrap-label (element output)
   "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
 This function shouldn't be used for floats.  See
@@ -334,6 +280,7 @@ This function shouldn't be used for floats.  See
     (if (or (not output) (not label) (string= output "") (string= label ""))
         output
       (concat (format "%s\n.br\n" label) output))))
+
 
 
 ;;; Template
@@ -448,7 +395,7 @@ holding contextual information.  See `org-export-data'."
   "Transcode an ENTITY object from Org to Man.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
-  (let ((ent (org-element-property :utf8 entity))) ent))
+  (org-element-property :utf-8 entity))
 
 
 ;;; Example Block
@@ -461,6 +408,8 @@ information."
    example-block
    (format ".RS\n.nf\n%s\n.fi\n.RE"
            (org-export-format-code-default example-block info))))
+
+
 ;;; Export Block
 
 (defun org-e-man-export-block (export-block contents info)
@@ -764,21 +713,21 @@ contextual information."
   "Transcode a TEXT string from Org to Man.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  ;; Protect
-  (setq text (replace-regexp-in-string
-              "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%$#&{}~^_\\]\\|$\\)"
-              "$\\" text nil t 1))
-
-  ;; Handle quotation marks
-  (setq text (org-e-man--quotation-marks text info))
-
-  ;; Handle break preservation if required.
-
-  (when (plist-get info :preserve-breaks)
-    (setq text (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n"
-                                         text)))
-  ;; Return value.
-  text)
+  (let ((output text))
+    ;; Protect various chars.
+    (setq output (replace-regexp-in-string
+		  "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%$#&{}~^_\\]\\|$\\)"
+		  "$\\" output nil t 1))
+    ;; Activate smart quotes.  Be sure to provide original TEXT string
+    ;; since OUTPUT may have been modified.
+    (when (plist-get info :with-smart-quotes)
+      (setq output (org-export-activate-smart-quotes output :utf-8 info text)))
+    ;; Handle break preservation if required.
+    (when (plist-get info :preserve-breaks)
+      (setq output (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" ".br\n"
+					     output)))
+    ;; Return value.
+    output))
 
 
 

@@ -1407,15 +1407,18 @@ contextual information."
 (defun org-e-ascii-plain-text (text info)
   "Transcode a TEXT string from Org to ASCII.
 INFO is a plist used as a communication channel."
-  (if (not (plist-get info :with-special-strings)) text
-    (setq text (replace-regexp-in-string "\\\\-" "" text))
-    (if (not (eq (plist-get info :ascii-charset) 'utf-8)) text
-      ;; Usual replacements in utf-8 with proper option set.
-      (replace-regexp-in-string
-       "\\.\\.\\." "…"
-       (replace-regexp-in-string
-	"--" "–"
-	(replace-regexp-in-string "---" "—" text))))))
+  (let ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
+    (when (and utf8p (plist-get info :with-smart-quotes))
+      (setq text (org-export-activate-smart-quotes text :utf-8 info)))
+    (if (not (plist-get info :with-special-strings)) text
+      (setq text (replace-regexp-in-string "\\\\-" "" text))
+      (if (not utf8p) text
+	;; Usual replacements in utf-8 with proper option set.
+	(replace-regexp-in-string
+	 "\\.\\.\\." "…"
+	 (replace-regexp-in-string
+	  "--" "–"
+	  (replace-regexp-in-string "---" "—" text)))))))
 
 
 ;;;; Planning
