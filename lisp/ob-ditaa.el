@@ -37,6 +37,7 @@
 
 ;;; Code:
 (require 'ob)
+(require 'org-compat)
 
 (defvar org-babel-default-header-args:ditaa
   '((:results . "file")
