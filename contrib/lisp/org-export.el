@@ -2675,7 +2675,8 @@ determined."
 		    "EXPORT_FILE_NAME" t))
 	      ;; File name may be extracted from buffer's associated
 	      ;; file, if any.
-	      (file-name-nondirectory (buffer-file-name (buffer-base-buffer)))
+	      (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+		(and visited-file (file-name-nondirectory visited-file)))
 	      ;; Can't determine file name on our own: Ask user.
 	      (let ((read-file-name-function
 		     (and org-completion-use-ido 'ido-read-file-name)))
