@@ -133,8 +133,6 @@ active.)"
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Hook functions etc
 
-;;(defvar orgpan-this-panel-window nil)
-
 (defun orgpan-delete-panel ()
  "Remove the panel."
  (interactive)
@@ -203,8 +201,7 @@ active.)"
              (unless (and orgpan-point
                           (= (point) orgpan-point))
                ;; Go backward so it is possible to click on a "button":
-               (orgpan-backward-field)))))
-       (setq orgpan-this-panel-window nil))
+               (orgpan-backward-field))))))
    (error (lwarn 't :warning "orgpan-post: %S" err))))
 
 ;; (defun orgpan-window-config-change ()
@@ -294,7 +291,7 @@ active.)"
 
 (defun orgpan-check-panel-mode ()
  (unless (derived-mode-p 'orgpan-mode)
-   (error "Not orgpan-mode in buffer: " major-mode)))
+   (error "Not orgpan-mode in buffer: %s" major-mode)))
 
 (defun orgpan-display-bindings-help ()
  (orgpan-check-panel-mode)
@@ -400,6 +397,9 @@ There can be only one such buffer at any time.")
 
 (defvar orgpan-point nil)
 ;;(make-variable-buffer-local 'orgpan-point)
+
+(defvar viper-emacs-state-mode-list)
+(defvar viper-new-major-mode-buffer-list)
 
 (defun orgpan-avoid-viper-in-buffer ()
  ;; Fix-me: This is ugly. However see `this-major-mode-requires-vi-state':
