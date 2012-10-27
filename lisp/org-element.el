@@ -1788,16 +1788,15 @@ Return a list whose CAR is `keyword' and CDR is a plist
 containing `:key', `:value', `:begin', `:end' and `:post-blank'
 keywords."
   (save-excursion
-    (let ((case-fold-search t)
-	  (begin (car affiliated))
+    (let ((begin (car affiliated))
 	  (key (progn (looking-at "[ \t]*#\\+\\(\\S-+*\\):")
 		      (upcase (org-match-string-no-properties 1))))
 	  (value (org-trim (buffer-substring-no-properties
 			    (match-end 0) (point-at-eol))))
 	  (pos-before-blank (progn (forward-line) (point)))
 	  (end (progn (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position)))))
+		      (skip-chars-backward " \t")
+		      (if (bolp) (point) (line-end-position)))))
       (list 'keyword
 	    (nconc
 	     (list :key key
@@ -1831,27 +1830,27 @@ keywords.
 
 Assume point is at the beginning of the latex environment."
   (save-excursion
-    (let* ((case-fold-search t)
-	   (code-begin (point))
-	   (begin (car affiliated))
-	   (env (progn (looking-at "^[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}")
-		       (regexp-quote (match-string 1))))
-	   (code-end
-	    (progn (re-search-forward
-		    (format "^[ \t]*\\\\end{%s}[ \t]*$" env) limit t)
-		   (forward-line)
-		   (point)))
-	   (value (buffer-substring-no-properties code-begin code-end))
-	   (end (progn (skip-chars-forward " \r\t\n" limit)
-		       (skip-chars-backward " \t")
-		       (if (bolp) (point) (line-end-position)))))
-      (list 'latex-environment
-	    (nconc
-	     (list :begin begin
-		   :end end
-		   :value value
-		   :post-blank (count-lines code-end end))
-	     (cdr affiliated))))))
+    (let ((case-fold-search t)
+	  (code-begin (point)))
+      (looking-at "[ \t]*\\\\begin{\\([A-Za-z0-9]+\\*?\\)}")
+      (if (not (re-search-forward (format "^[ \t]*\\\\end{%s}[ \t]*$"
+					  (regexp-quote (match-string 1)))
+				  limit t))
+	  ;; Incomplete latex environment: parse it as a paragraph.
+	  (org-element-paragraph-parser limit affiliated)
+	(let* ((code-end (progn (forward-line) (point)))
+	       (begin (car affiliated))
+	       (value (buffer-substring-no-properties code-begin code-end))
+	       (end (progn (skip-chars-forward " \r\t\n" limit)
+			   (skip-chars-backward " \t")
+			   (if (bolp) (point) (line-end-position)))))
+	  (list 'latex-environment
+		(nconc
+		 (list :begin begin
+		       :end end
+		       :value value
+		       :post-blank (count-lines code-end end))
+		 (cdr affiliated))))))))
 
 (defun org-element-latex-environment-interpreter (latex-environment contents)
   "Interpret LATEX-ENVIRONMENT element as Org syntax.
@@ -3514,23 +3513,12 @@ element it has to parse."
 	    (cond
 	     ;; LaTeX Environment.
 	     ((looking-at "[ \t]*\\\\begin{\\([A-Za-z0-9*]+\\)}[ \t]*$")
-	      (if (save-excursion
-		    (re-search-forward
-		     (format "^[ \t]*\\\\end{%s}[ \t]*$"
-			     (regexp-quote (match-string 1)))
-		     nil t))
-		  (org-element-latex-environment-parser limit affiliated)
-		(org-element-paragraph-parser limit affiliated)))
+	      (org-element-latex-environment-parser limit affiliated))
 	     ;; Drawer and Property Drawer.
 	     ((looking-at org-drawer-regexp)
-	      (let ((name (match-string 1)))
-		(cond
-		 ((not (save-excursion
-			 (re-search-forward "^[ \t]*:END:[ \t]*$" nil t)))
-		  (org-element-paragraph-parser limit affiliated))
-		 ((equal "PROPERTIES" name)
-		  (org-element-property-drawer-parser limit affiliated))
-		 (t (org-element-drawer-parser limit affiliated)))))
+	      (if (equal (match-string 1) "PROPERTIES")
+		  (org-element-property-drawer-parser limit affiliated)
+		(org-element-drawer-parser limit affiliated)))
 	     ;; Fixed Width
 	     ((looking-at "[ \t]*:\\( \\|$\\)")
 	      (org-element-fixed-width-parser limit affiliated))
