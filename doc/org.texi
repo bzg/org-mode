@@ -9279,11 +9279,11 @@ a horizontal line (@samp{<hr/>} in HTML and @code{\hrule} in @LaTeX{}).
 @cindex exporting, not
 @cindex #+BEGIN_COMMENT
 
-Lines starting with zero or more whitespace characters followed by @samp{#}
-are treated as comments and will never be exported.  Also entire subtrees
-starting with the word @samp{COMMENT} will never be exported.  Finally,
-regions surrounded by @samp{#+BEGIN_COMMENT} ... @samp{#+END_COMMENT} will
-not be exported.
+Lines starting with zero or more whitespace characters followed by one
+@samp{#} and a whitespace are treated as comments and will never be exported.
+Also entire subtrees starting with the word @samp{COMMENT} will never be
+exported.  Finally, regions surrounded by @samp{#+BEGIN_COMMENT}
+... @samp{#+END_COMMENT} will not be exported.
 
 @table @kbd
 @kindex C-c ;
