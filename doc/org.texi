@@ -881,8 +881,6 @@ Lisp and Info files will be installed.  If the Emacs binary is not in your
 path, give the full path to the executable.  Avoid spaces in any path names.
 @item Run @code{make config}
 again to check the configuration.
-@item Optionally run @code{make test}
-to build Org mode and then run the full testsuite.
 @item Run @code{make install} or @code{sudo make install}
 to build and install Org mode on your system.
 @end itemize
@@ -905,6 +903,8 @@ Emacs binary is not in your path, you must give the full path to the
 executable.  Avoid spaces in any path names.
 @item Run @code{make config}
 to check the configuration.
+@item Optionally run @code{make test}
+to build Org mode and then run the full testsuite.
 @item Run @code{make update2} or @code{make up2}
 to update the Git repository and build and install Org mode.  The latter
 invocation runs the complete test suite before installation and installs only
