@@ -46,11 +46,12 @@
 ;; and `special-block'.
 ;;
 ;; Other element types are: `babel-call', `clock', `comment',
-;; `comment-block', `example-block', `export-block', `fixed-width',
-;; `horizontal-rule', `keyword', `latex-environment', `node-property',
-;; `paragraph', `planning', `quote-section', `src-block', `table',
-;; `table-row' and `verse-block'.  Among them, `paragraph' and
-;; `verse-block' types can contain Org objects and plain text.
+;; `comment-block', `diary-sexp', `example-block', `export-block',
+;; `fixed-width', `horizontal-rule', `keyword', `latex-environment',
+;; `node-property', `paragraph', `planning', `quote-section',
+;; `src-block', `table', `table-row' and `verse-block'.  Among them,
+;; `paragraph' and `verse-block' types can contain Org objects and
+;; plain text.
 ;;
 ;; Objects are related to document's contents.  Some of them are
 ;; recursive.  Associated types are of the following: `bold', `code',
@@ -132,6 +133,8 @@
           org-outline-regexp "\\|"
           ;; Footnote definitions.
 	  "\\[\\(?:[0-9]+\\|fn:[-_[:word:]]+\\)\\]" "\\|"
+	  ;; Diary sexps.
+	  "%%(" "\\|"
           "[ \t]*\\(?:"
           ;; Empty lines.
           "$" "\\|"
@@ -164,12 +167,12 @@ is not sufficient to know if point is at a paragraph ending.  See
 `org-element-paragraph-parser' for more information.")
 
 (defconst org-element-all-elements
-  '(babel-call center-block clock comment comment-block drawer dynamic-block
-	       example-block export-block fixed-width footnote-definition
-	       headline horizontal-rule inlinetask item keyword
-	       latex-environment node-property paragraph plain-list planning
-	       property-drawer quote-block quote-section section special-block
-	       src-block table table-row verse-block)
+  '(babel-call center-block clock comment comment-block diary-sexp drawer
+	       dynamic-block example-block export-block fixed-width
+	       footnote-definition headline horizontal-rule inlinetask item
+	       keyword latex-environment node-property paragraph plain-list
+	       planning property-drawer quote-block quote-section section
+	       special-block src-block table table-row verse-block)
   "Complete list of element types.")
 
 (defconst org-element-greater-elements
@@ -1557,6 +1560,41 @@ Assume point is at comment block beginning."
 CONTENTS is nil."
   (format "#+BEGIN_COMMENT\n%s#+END_COMMENT"
 	  (org-remove-indentation (org-element-property :value comment-block))))
+
+
+;;;; Diary Sexp
+
+(defun org-element-diary-sexp-parser (limit affiliated)
+  "Parse a diary sexp.
+
+LIMIT bounds the search.  AFFILIATED is a list of which CAR is
+the buffer position at the beginning of the first affiliated
+keyword and CDR is a plist of affiliated keywords along with
+their value.
+
+Return a list whose CAR is `diary-sexp' and CDR is a plist
+containing `:begin', `:end', `:value' and `:post-blank'
+keywords."
+  (save-excursion
+    (let ((begin (car affiliated))
+	  (value (progn (looking-at "\\(%%(.*\\)[ \t]*$")
+			(org-match-string-no-properties 1)))
+	  (pos-before-blank (progn (forward-line) (point)))
+	  (end (progn (skip-chars-forward " \r\t\n" limit)
+		      (skip-chars-backward " \t")
+		      (if (bolp) (point) (line-end-position)))))
+      (list 'diary-sexp
+	    (nconc
+	     (list :value value
+		   :begin begin
+		   :end end
+		   :post-blank (count-lines pos-before-blank end))
+	     (cdr affiliated))))))
+
+(defun org-element-diary-sexp-interpreter (diary-sexp contents)
+  "Interpret DIARY-SEXP as Org syntax.
+CONTENTS is nil."
+  (org-element-property :value diary-sexp))
 
 
 ;;;; Example Block
@@ -3553,6 +3591,9 @@ element it has to parse."
 	     ;; Horizontal Rule.
 	     ((looking-at "[ \t]*-\\{5,\\}[ \t]*$")
 	      (org-element-horizontal-rule-parser limit affiliated))
+	     ;; Diary Sexp.
+	     ((looking-at "%%(")
+	      (org-element-diary-sexp-parser limit affiliated))
 	     ;; Table.
 	     ((org-at-table-p t) (org-element-table-parser limit affiliated))
 	     ;; List.

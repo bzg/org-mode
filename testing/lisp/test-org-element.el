@@ -389,6 +389,23 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"
       (org-element-parse-buffer) 'comment-block 'identity nil t))))
 
 
+;;;; Diary Sexp
+
+(ert-deftest test-org-element/diary-sexp-parser ()
+  "Test `diary-sexp' parser."
+  ;; Standard test.
+  (should
+   (eq 'diary-sexp
+       (org-test-with-temp-text
+	   "%%(org-anniversary 1956  5 14)(2) Arthur Dent is %d years old"
+	 (org-element-type (org-element-at-point)))))
+  ;; Diary sexp must live at beginning of line
+  (should-not
+   (eq 'diary-sexp
+       (org-test-with-temp-text " %%(org-bbdb-anniversaries)"
+	 (org-element-type (org-element-at-point))))))
+
+
 ;;;; Drawer
 
 (ert-deftest test-org-element/drawer-parser ()
@@ -2021,6 +2038,14 @@ CLOCK: [2012-01-01 sun. 00:01]--[2012-01-01 sun. 00:02] =>  0:01"))
   (should (equal (org-test-parse-and-interpret
 		  "#+BEGIN_COMMENT\nTest\n#+END_COMMENT")
 		 "#+BEGIN_COMMENT\nTest\n#+END_COMMENT\n")))
+
+(ert-deftest test-org-element/diary-sexp ()
+  "Test diary-sexp interpreter."
+  (should
+   (equal
+    (org-test-parse-and-interpret
+     "%%(org-anniversary 1956  5 14)(2) Arthur Dent is %d years old")
+    "%%(org-anniversary 1956  5 14)(2) Arthur Dent is %d years old\n")))
 
 (ert-deftest test-org-element/example-block-interpreter ()
   "Test example block interpreter."
