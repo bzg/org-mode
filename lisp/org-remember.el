@@ -472,12 +472,12 @@ to be run from that hook to function properly."
 	(erase-buffer)
 	(insert (substitute-command-keys
 		 (format
-		  "## %s  \"%s\" -> \"* %s\"
-## C-u C-c C-c  like C-c C-c, and immediately visit note at target location
-## C-0 C-c C-c  \"%s\" -> \"* %s\"
-## %s  to select file and header location interactively.
-## C-2 C-c C-c  as child (C-3: as sibling) of the currently clocked item
-## To switch templates, use `\\[org-remember]'.  To abort use `C-c C-k'.\n\n"
+		  "# %s  \"%s\" -> \"* %s\"
+# C-u C-c C-c  like C-c C-c, and immediately visit note at target location
+# C-0 C-c C-c  \"%s\" -> \"* %s\"
+# %s  to select file and header location interactively.
+# C-2 C-c C-c  as child (C-3: as sibling) of the currently clocked item
+# To switch templates, use `\\[org-remember]'.  To abort use `C-c C-k'.\n\n"
 		  (if org-remember-store-without-prompt "    C-c C-c" "    C-1 C-c C-c")
 		  (abbreviate-file-name (or file org-default-notes-file))
 		  (or headline "")
