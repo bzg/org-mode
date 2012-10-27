@@ -598,12 +598,11 @@ button changes the binding of the arrow keys."
                org-mode-map))
  ;;(org-back-to-heading)
  ;;(remove-hook 'window-configuration-change-hook 'orgpan-window-config-change)
- (split-window)
+ (setq orgpan-org-window (selected-window))
+ (setq orgpan-panel-window (split-window nil -4 'below))
+ (select-window orgpan-panel-window)
  (set-window-buffer (selected-window) (orgpan-make-panel-buffer))
- (setq orgpan-panel-window (selected-window))
  ;;(set-window-dedicated-p (selected-window) t)
- (fit-window-to-buffer nil nil 3)
- (setq orgpan-org-window (next-window))
  ;; The minor mode version starts here:
  (when orgpan-minor-mode-version
    (select-window orgpan-org-window)
