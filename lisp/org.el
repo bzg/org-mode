@@ -2498,9 +2498,10 @@ a subtree."
   "Return the value of `org-log-into-drawer', but let properties overrule.
 If the current entry has or inherits a LOG_INTO_DRAWER property, it will be
 used instead of the default value."
-  (let ((p (org-entry-get nil "LOG_INTO_DRAWER" 'inherit)))
+  (let ((p (org-entry-get nil "LOG_INTO_DRAWER" 'inherit t)))
     (cond
-     ((or (not p) (equal p "nil")) org-log-into-drawer)
+     ((not p) org-log-into-drawer)
+     ((equal p "nil") nil)
      ((equal p "t") "LOGBOOK")
      (t p))))
 
