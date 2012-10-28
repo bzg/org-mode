@@ -840,12 +840,12 @@ See also the variable `org-reverse-note-order'."
       (if (= end beg) (setq beg (1- beg)))
       (put-text-property beg end 'org-position-cursor t)))
   (goto-char (point-min))
-  (while (looking-at "^[ \t]*\n\\|^##.*\n")
+  (while (looking-at "^[ \t]*\n\\|^# .*\n")
     (replace-match ""))
   (when org-remember-delete-empty-lines-at-end
     (goto-char (point-max))
     (beginning-of-line 1)
-    (while (and (looking-at "[ \t]*$\\|##.*") (> (point) 1))
+    (while (and (looking-at "[ \t]*$\\|[ \t]*# .*") (> (point) 1))
       (delete-region (1- (point)) (point-max))
       (beginning-of-line 1)))
   (catch 'quit
