@@ -11220,7 +11220,7 @@ This function can be used in a hook."
     "COLUMNS:" "PROPERTY:"
     "CAPTION:" "LABEL:"
     "SETUPFILE:"
-    "INCLUDE:"
+    "INCLUDE:" "INDEX:"
     "BIND:"
     "MACRO:"))
 
