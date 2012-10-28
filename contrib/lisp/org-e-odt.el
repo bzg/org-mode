@@ -3305,17 +3305,22 @@ information."
   "Transcode a TIMESTAMP object from Org to ODT.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (let ((timestamp-1 (org-element-property :value timestamp))
-	(timestamp-2 (org-element-property :range-end timestamp)))
+  (let ((value (org-translate-time
+		(org-element-property :raw-value timestamp))))
     (format "<text:span text:style-name=\"%s\">%s</text:span>"
 	    "OrgTimestampWrapper"
-	    (concat
-	     (format "<text:span text:style-name=\"%s\">%s</text:span>"
-		     "OrgTimestamp" (org-translate-time timestamp-1))
-	     (and timestamp-2
-		  "&#x2013;"
-		  (format "<text:span text:style-name=\"%s\">%s</text:span>"
-			  "OrgTimestamp" (org-translate-time timestamp-2)))))))
+	    (if (not (memq (org-element-property :type timestamp)
+			   '(active-range inactive-range)))
+		value
+	      (let ((timestamps (org-split-string value "--")))
+		(concat
+		 (format "<text:span text:style-name=\"%s\">%s</text:span>"
+			 "OrgTimestamp"
+			 (car timestamps))
+		 "&#x2013;"
+		 (format "<text:span text:style-name=\"%s\">%s</text:span>"
+			 "OrgTimestamp"
+			 (cdr timestamps))))))))
 
 
 ;;;; Underline

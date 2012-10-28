@@ -1724,12 +1724,10 @@ a communication channel."
 (defun org-e-ascii-timestamp (timestamp contents info)
   "Transcode a TIMESTAMP object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((value (org-translate-time (org-element-property :value timestamp)))
-	(range-end
-	 (org-translate-time (org-element-property :range-end timestamp)))
-	(utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
-    (concat value
-	    (when range-end (concat (if utf8p "–" "--") range-end)))))
+  (let ((value (org-translate-time
+		(org-element-property :raw-value timestamp))))
+    (if (not (eq (plist-get info :ascii-charset) 'utf-8)) value
+      (replace-regexp-in-string "--" "–" value))))
 
 
 ;;;; Underline

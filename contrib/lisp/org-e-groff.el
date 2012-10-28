@@ -1851,13 +1851,14 @@ information."
   "Transcode a TIMESTAMP object from Org to Groff.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-translate-time (org-element-property :value timestamp)))
-        (type (org-element-property :type timestamp)))
-    (cond ((memq type '(active active-range))
-           (format org-e-groff-active-timestamp-format value))
-          ((memq type '(inactive inactive-range))
-           (format org-e-groff-inactive-timestamp-format value))
-          (t (format org-e-groff-diary-timestamp-format value)))))
+  (let ((value (org-translate-time
+		(org-element-property :raw-value timestamp))))
+    (case (org-element-property :type timestamp)
+      ((active active-range)
+       (format org-e-groff-active-timestamp-format value))
+      ((inactive inactive-range)
+       (format org-e-groff-inactive-timestamp-format value))
+      (t (format org-e-groff-diary-timestamp-format value)))))
 
 ;;; Underline
 
