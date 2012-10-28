@@ -176,6 +176,7 @@ way they are handled must be hard-coded into
     (:filter-code . org-export-filter-code-functions)
     (:filter-comment . org-export-filter-comment-functions)
     (:filter-comment-block . org-export-filter-comment-block-functions)
+    (:filter-diary-sexp . org-export-filter-diary-sexp-functions)
     (:filter-drawer . org-export-filter-drawer-functions)
     (:filter-dynamic-block . org-export-filter-dynamic-block-functions)
     (:filter-entity . org-export-filter-entity-functions)
@@ -2138,7 +2139,13 @@ as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-comment-block-functions nil
-  "List of functions applied to a transcoded comment-comment.
+  "List of functions applied to a transcoded comment-block.
+Each filter is called with three arguments: the transcoded data,
+as a string, the back-end, as a symbol, and the communication
+channel, as a plist.  It must return a string or nil.")
+
+(defvar org-export-filter-diary-sexp-functions nil
+  "List of functions applied to a transcoded diary-sexp.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
