@@ -5809,7 +5809,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 			      (abbreviate-file-name buffer-file-name))))
 	 (regexp org-deadline-time-regexp)
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
-	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
+	 (d1 (calendar-absolute-from-gregorian date)) ; DATE bound by calendar
 	 d2 diff dfrac wdays pos pos1 category category-pos level
 	 tags suppress-prewarning ee txt head face s todo-state
 	 show-all upcomingp donep timestr warntime)
@@ -5836,21 +5836,21 @@ See also the user option `org-agenda-clock-consistency-checks'."
 				 (and (string-match
 				       org-scheduled-time-regexp item)
 				      (match-string 1 item)))))))
-		(if ds
-		    ;; The current item has a scheduled date (in ds),
-		    ;; so evaluate its prewarning lead time.
-		    (cond
-		     ((integerp
-		       org-agenda-skip-deadline-prewarning-if-scheduled)
-		      ;; Use globally-customized prewarning-restart lead time.
-		      org-agenda-skip-deadline-prewarning-if-scheduled)
-		     ((eq org-agenda-skip-deadline-prewarning-if-scheduled
-			  'pre-scheduled)
-		      ;; Set prewarning to no earlier than scheduled.
-		      (min (- d2 (org-time-string-to-absolute
-				  ds d1 'past show-all (current-buffer) pos))
-			   org-deadline-warning-days))
-		     (t 0))))) ;; Set prewarning to deadline.
+		(cond
+		 ((not ds) nil)
+		 ;; The current item has a scheduled date (in ds), so
+		 ;; evaluate its prewarning lead time.
+		 ((integerp org-agenda-skip-deadline-prewarning-if-scheduled)
+		  ;; Use global prewarning-restart lead time.
+		  org-agenda-skip-deadline-prewarning-if-scheduled)
+		 ((eq org-agenda-skip-deadline-prewarning-if-scheduled
+		      'pre-scheduled)
+		  ;; Set prewarning to no earlier than scheduled.
+		  (min (- d2 (org-time-string-to-absolute
+			      ds d1 'past show-all (current-buffer) pos))
+		       org-deadline-warning-days))
+		 ;; Set prewarning to deadline.
+		 (t 0))))
 	(setq wdays (if suppress-prewarning
 			(let ((org-deadline-warning-days suppress-prewarning))
 			  (org-get-wdays s))
