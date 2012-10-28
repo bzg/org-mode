@@ -208,6 +208,11 @@ Some other text
    (equal
     '((("l2") "s2") (("l1") "s1"))
     (org-test-with-temp-text "#+CAPTION[s1]: l1\n#+CAPTION[s2]: l2\nParagraph"
+      (org-element-property :caption (org-element-at-point)))))
+  (should
+   (equal
+    '((("l1")) (nil "s1"))
+    (org-test-with-temp-text "#+CAPTION[s1]:\n#+CAPTION: l1\nParagraph"
       (org-element-property :caption (org-element-at-point))))))
 
 

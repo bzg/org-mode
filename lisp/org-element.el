@@ -3822,7 +3822,8 @@ position of point and CDR is nil."
 	  ;; Now set final shape for VALUE.
 	  (when parsedp
 	    (setq value (org-element-parse-secondary-string value restrict)))
-	  (when dualp (setq value (and value (cons value dual-value))))
+	  (when dualp
+	    (setq value (and (or value dual-value) (cons value dual-value))))
 	  (when (or (member kwd org-element-multiple-keywords)
 		    ;; Attributes can always appear on multiple lines.
 		    (string-match "^ATTR_" kwd))
