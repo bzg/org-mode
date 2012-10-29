@@ -439,13 +439,12 @@ body\n")))
   "Test macro expansion in an Org buffer."
   ;; Standard macro expansion.
   (should
-   (equal "#+MACRO: macro1 value\nvalue"
+   (equal "#+MACRO: macro1 value\nvalue\n"
 	  (org-test-with-temp-text "#+MACRO: macro1 value\n{{{macro1}}}"
-	    (let (info)
-	      (org-export-expand-macro info) (buffer-string)))))
-  ;; Export specific macros.
+	    (org-test-with-backend test (org-export-as 'test)))))
+  ;; Expand specific macros.
   (should
-   (equal "me 2012-03-29 me@here Title"
+   (equal "me 2012-03-29 me@here Title\n"
 	  (org-test-with-temp-text
 	      "
 #+TITLE: Title
@@ -453,23 +452,26 @@ body\n")))
 #+AUTHOR: me
 #+EMAIL: me@here
 {{{author}}} {{{date}}} {{{email}}} {{{title}}}"
-	    (let ((info (org-export-get-environment)))
-	      (org-export-expand-macro info)
-	      (goto-char (point-max))
-	      (buffer-substring (line-beginning-position)
-				(line-end-position))))))
+	    (let ((output (org-test-with-backend test (org-export-as 'test))))
+	      (substring output (string-match ".*\n\\'" output))))))
+  ;; Expand specific macros when property contained a regular macro
+  ;; already.
+  (should
+   (equal "value\n"
+	  (org-test-with-temp-text "
+#+MACRO: macro1 value
+#+TITLE: {{{macro1}}}
+{{{title}}}"
+	    (let ((output (org-test-with-backend test (org-export-as 'test))))
+	      (substring output (string-match ".*\n\\'" output))))))
   ;; Expand macros with templates in included files.
   (should
-   (equal "success"
+   (equal "success\n"
 	  (org-test-with-temp-text
 	      (format "#+INCLUDE: \"%s/examples/macro-templates.org\"
 {{{included-macro}}}" org-test-dir)
-	    (let (info)
-	      (org-export-expand-include-keyword)
-	      (org-export-expand-macro info)
-	      (goto-char (point-max))
-	      (buffer-substring (line-beginning-position)
-				(line-end-position)))))))
+	    (let ((output (org-test-with-backend test (org-export-as 'test))))
+	      (substring output (string-match ".*\n\\'" output)))))))
 
 (ert-deftest test-org-export/user-ignore-list ()
   "Test if `:ignore-list' accepts user input."

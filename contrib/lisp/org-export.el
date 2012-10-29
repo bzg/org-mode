@@ -2563,49 +2563,65 @@ Return code as a string."
 	     (goto-char (point-min))
 	     (forward-line)
 	     (narrow-to-region (point) (point-max))))
-      ;; 1. Get export environment from original buffer.  Also install
-      ;;    user's and developer's filters.
-      (let* ((info (org-export-install-filters
-		    (org-export-get-environment backend subtreep ext-plist)))
-	     ;; 2. Get parse tree.  Buffer isn't parsed directly.
-	     ;;    Instead, a temporary copy is created, where include
-	     ;;    keywords and macros are expanded and code blocks
-	     ;;    are evaluated.
-	     (tree (org-export-with-current-buffer-copy
-		    (unless noexpand
-		      (org-export-expand-include-keyword)
-		      ;; Update radio targets since keyword
-		      ;; inclusion might have added some more.
-		      (org-update-radio-target-regexp)
-		      (org-export-expand-macro info)
-		      ;; TODO: Setting `org-current-export-file' is
-		      ;; required by Org Babel to properly resolve
-		      ;; noweb references.  Once "org-exp.el" is
-		      ;; removed, modify
-		      ;; `org-export-blocks-preprocess' so it
-		      ;; accepts the value as an argument instead.
-		      (let ((org-current-export-file (current-buffer)))
-			(org-export-blocks-preprocess)))
-		    (goto-char (point-min))
-		    ;; Run hook
-		    ;; `org-export-before-parsing-hook'. with current
-		    ;; back-end as argument.
-		    (run-hook-with-args
-		     'org-export-before-parsing-hook backend)
-		    ;; Eventually parse buffer.
-		    (org-element-parse-buffer nil visible-only))))
-	;; 3. Call parse-tree filters to get the final tree.
-	(setq tree
-	      (org-export-filter-apply-functions
-	       (plist-get info :filter-parse-tree) tree info))
-	;; 4. Now tree is complete, compute its properties and add
-	;;    them to communication channel.
+      ;; Install user's and developer's filters in communication
+      ;; channel.
+      (let (info tree)
+	(org-export-with-current-buffer-copy
+	 ;; Update communication channel and get parse tree.  Buffer
+	 ;; isn't parsed directly.  Instead, a temporary copy is
+	 ;; created, where include keywords, macros are expanded and
+	 ;; code blocks are evaluated.
+	 (unless noexpand
+	   (org-export-expand-include-keyword)
+	   ;; Update macro templates since #+INCLUDE keywords might
+	   ;; have added some new ones.
+	   (org-macro-initialize-templates)
+	   (org-macro-replace-all org-macro-templates)
+	   ;; TODO: Setting `org-current-export-file' is required by
+	   ;; Org Babel to properly resolve noweb references.  Once
+	   ;; "org-exp.el" is removed, modify
+	   ;; `org-export-blocks-preprocess' so it accepts the value
+	   ;; as an argument instead.
+	   (let ((org-current-export-file (current-buffer)))
+	     (org-export-blocks-preprocess)))
+	 ;; Update radio targets since keyword inclusion might have
+	 ;; added some more.
+	 (org-update-radio-target-regexp)
+	 ;; Run hook `org-export-before-parsing-hook'. with current
+	 ;; back-end as argument.
+	 (goto-char (point-min))
+	 (run-hook-with-args 'org-export-before-parsing-hook backend)
+	 ;; Initialize communication channel.
+	 (setq info
+	       (org-export-install-filters
+		(org-export-get-environment backend subtreep ext-plist)))
+	 ;; Expand export-specific set of macros: {{{author}}},
+	 ;; {{{date}}}, {{{email}}} and {{{title}}}.  It must be done
+	 ;; once regular macros have been expanded, since document
+	 ;; keywords may contain one of them.
+	 (unless noexpand
+	   (org-macro-replace-all
+	    (list (cons "author"
+			(org-element-interpret-data (plist-get info :author)))
+		  (cons "date"
+			(org-element-interpret-data (plist-get info :date)))
+		  ;; EMAIL is not a parsed keyword: store it as-is.
+		  (cons "email" (or (plist-get info :email) ""))
+		  (cons "title"
+			(org-element-interpret-data (plist-get info :title))))))
+	 ;; Eventually parse buffer.  Call parse-tree filters to get
+	 ;; the final tree.
+	 (setq tree
+	       (org-export-filter-apply-functions
+		(plist-get info :filter-parse-tree)
+		(org-element-parse-buffer nil visible-only) info)))
+	;; Now tree is complete, compute its properties and add them
+	;; to communication channel.
 	(setq info
 	      (org-combine-plists
 	       info (org-export-collect-tree-properties tree info)))
-	;; 5. Eventually transcode TREE.  Wrap the resulting string
-	;;    into a template, if required.  Eventually call
-	;;    final-output filter.
+	;; Eventually transcode TREE.  Wrap the resulting string into
+	;; a template, if required.  Finally call final-output filter.
 	(let* ((body (org-element-normalize-string (org-export-data tree info)))
 	       (template (cdr (assq 'template
 				    (plist-get info :translate-alist))))
@@ -2741,26 +2757,6 @@ Point is at buffer's beginning when BODY is applied."
 		 ,overlays)
 	   (goto-char (point-min))
 	   (progn ,@body))))))
-
-(defun org-export-expand-macro (info)
-  "Expand every macro in buffer.
-INFO is a plist containing export options and buffer properties."
-  ;; First update macro templates since #+INCLUDE keywords might have
-  ;; added some new ones.
-  (org-macro-initialize-templates)
-  (org-macro-replace-all
-   ;; Before expanding macros, install {{{author}}}, {{{date}}},
-   ;; {{{email}}} and {{{title}}} templates.
-   (nconc
-    (list (cons "author"
-		(org-element-interpret-data (plist-get info :author)))
-	  (cons "date"
-		(org-element-interpret-data (plist-get info :date)))
-	  ;; EMAIL is not a parsed keyword: store it as-is.
-	  (cons "email" (or (plist-get info :email) ""))
-	  (cons "title"
-		(org-element-interpret-data (plist-get info :title))))
-    org-macro-templates)))
 
 (defun org-export-expand-include-keyword (&optional included dir)
   "Expand every include keyword in buffer.
