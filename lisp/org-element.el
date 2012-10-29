@@ -4622,7 +4622,19 @@ and :post-blank properties."
      ;; Check if point is inside an element containing objects or at
      ;; a secondary string.  In that case, move to beginning of the
      ;; element or secondary string and set END to the other side.
-     (if (not (or (and (eq type 'item)
+     (if (not (or (let ((post (org-element-property :post-affiliated element)))
+		    (and post (> post origin)
+			 (< (org-element-property :begin element) origin)
+			 (progn (beginning-of-line)
+				(looking-at org-element--affiliated-re)
+				(member (upcase (match-string 1))
+					org-element-parsed-keywords))
+			 (if (and (match-end 2) (<= origin (match-end 2)))
+			     (progn (goto-char (match-beginning 2))
+				    (setq end (match-end 2)))
+			   (goto-char (match-end 0))
+			   (setq end (line-end-position)))))
+		  (and (eq type 'item)
 		       (let ((tag (org-element-property :tag element)))
 			 (and tag
 			      (progn
@@ -4646,7 +4658,14 @@ and :post-blank properties."
 				    :contents-end element)))
 			 (and (>= origin cbeg)
 			      (<= origin cend)
-			      (progn (goto-char cbeg) (setq end cend)))))))
+			      (progn (goto-char cbeg) (setq end cend)))))
+		  (and (eq type 'keyword)
+		       (let ((key (org-element-property :key element)))
+			 (and (member key org-element-document-properties)
+			      (progn (beginning-of-line)
+				     (search-forward key (line-end-position) t)
+				     (forward-char)
+				     (setq end (line-end-position))))))))
 	 element
        (let ((restriction (org-element-restriction element))
 	     (parent element)

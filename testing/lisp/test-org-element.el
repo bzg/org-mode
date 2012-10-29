@@ -2645,6 +2645,18 @@ Paragraph \\alpha."
        (org-test-with-temp-text "| a | b {{{macro}}} |"
 	 (progn (search-forward "b")
 		(org-element-type (org-element-context))))))
+  ;; Find objects in document keywords.
+  (should
+   (eq 'macro
+       (org-test-with-temp-text "#+DATE: {{{macro}}}"
+	 (progn (search-forward "{")
+		(org-element-type (org-element-context))))))
+  ;; Find objects in parsed affiliated keywords.
+  (should
+   (eq 'macro
+       (org-test-with-temp-text "#+CAPTION: {{{macro}}}\nParagraph."
+	 (progn (search-forward "{")
+		(org-element-type (org-element-context))))))
   ;; Correctly set `:parent' property.
   (should
    (eq 'paragraph
