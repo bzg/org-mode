@@ -1368,7 +1368,7 @@ for export.  Return options as a plist."
        (setq plist
 	     (nconc plist (org-export--parse-option-keyword prop backend))))
      ;; Handle other keywords.  TITLE keyword is excluded as it has
-     ;; already been handled already.
+     ;; been handled already.
      (let ((seen '("TITLE")))
        (mapc
 	(lambda (option)

@@ -72,11 +72,12 @@
 ;; refer to the beginning and ending buffer positions of the
 ;; considered element or object, `:post-blank', which holds the number
 ;; of blank lines, or white spaces, at its end and `:parent' which
-;; refers to the element or object containing it.  Greater elements
-;; and elements containing objects will also have `:contents-begin'
-;; and `:contents-end' properties to delimit contents and
-;; a `:post-affiliated', referring to the buffer position after any
-;; affiliated keyword, if applicable.
+;; refers to the element or object containing it.  Greater elements,
+;; elements and objects containing objects will also have
+;; `:contents-begin' and `:contents-end' properties to delimit
+;; contents.  Eventually, greater elements and elements accepting
+;; affiliated keywords will have a `:post-affiliated' property,
+;; referring to the buffer position after all such keywords.
 ;;
 ;; At the lowest level, a `:parent' property is also attached to any
 ;; string, as a text property.
@@ -3960,7 +3961,7 @@ containing the secondary string.  It is used to set correctly
 DATA is the parsed tree, as returned by, i.e,
 `org-element-parse-buffer'.  TYPES is a symbol or list of symbols
 of elements or objects types.  FUN is the function called on the
-matching element or object.  It must accept one arguments: the
+matching element or object.  It must accept one argument: the
 element or object itself.
 
 When optional argument INFO is non-nil, it should be a plist
