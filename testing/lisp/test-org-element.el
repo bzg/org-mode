@@ -2654,7 +2654,7 @@ Paragraph \\alpha."
   ;; Find objects in parsed affiliated keywords.
   (should
    (eq 'macro
-       (org-test-with-temp-text "#+CAPTION: {{{macro}}}\nParagraph."
+       (org-test-with-temp-text "#+CAPTION: {{{macro}}}\n| a | b |."
 	 (progn (search-forward "{")
 		(org-element-type (org-element-context))))))
   ;; Correctly set `:parent' property.

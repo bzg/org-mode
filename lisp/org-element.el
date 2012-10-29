@@ -4629,6 +4629,10 @@ and :post-blank properties."
 				(looking-at org-element--affiliated-re)
 				(member (upcase (match-string 1))
 					org-element-parsed-keywords))
+			 ;; We're at an affiliated keyword.  Change
+			 ;; type to retrieve correct restrictions.
+			 (setq type 'keyword)
+			 ;; Determine if we're at main or dual value.
 			 (if (and (match-end 2) (<= origin (match-end 2)))
 			     (progn (goto-char (match-beginning 2))
 				    (setq end (match-end 2)))
@@ -4667,7 +4671,7 @@ and :post-blank properties."
 				     (forward-char)
 				     (setq end (line-end-position))))))))
 	 element
-       (let ((restriction (org-element-restriction element))
+       (let ((restriction (org-element-restriction type))
 	     (parent element)
 	     candidates)
 	 (catch 'exit
