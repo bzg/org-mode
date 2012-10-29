@@ -4291,107 +4291,95 @@ original string.
 
 Return the new string."
   (if (equal s "") ""
-    (let ((quotes-alist (cdr (assoc (plist-get info :language)
-				    org-export-smart-quotes-alist))))
-      ;; 1. Replace quote character at the beginning of S.
-      (let* ((prev (org-export-get-previous-element (or original s) info))
-	     (pre-blank (and prev (org-element-property :post-blank prev))))
+    (let* ((prev (org-export-get-previous-element (or original s) info))
+	   (pre-blank (and prev (org-element-property :post-blank prev)))
+	   (next (org-export-get-next-element (or original s) info))
+	   (get-smart-quote
+	    (lambda (q type)
+	      ;; Return smart quote associated to a give quote Q, as
+	      ;; a string.  TYPE is a symbol among `open', `close' and
+	      ;; `apostrophe'.
+	      (let ((key (case type
+			   (apostrophe 'apostrophe)
+			   (open (if (equal "'" q) 'opening-single-quote
+				   'opening-double-quote))
+			   (otherwise (if (equal "'" q) 'closing-single-quote
+					'closing-double-quote)))))
+		(or (plist-get
+		     (cdr (assq key
+				(cdr (assoc (plist-get info :language)
+					    org-export-smart-quotes-alist))))
+		     encoding)
+		    q)))))
+      (if (or (equal "\"" s) (equal "'" s))
+	  ;; Only a quote: no regexp can match.  We have to check both
+	  ;; sides and decide what to do.
+	  (cond ((and (not prev) (not next)) s)
+		((not prev) (funcall get-smart-quote s 'open))
+		((and (not next) (zerop pre-blank))
+		 (funcall get-smart-quote s 'close))
+		((not next) s)
+		((zerop pre-blank) (funcall get-smart-quote s 'apostrophe))
+		(t (funcall get-smart-quote 'open)))
+	;; 1. Replace quote character at the beginning of S.
 	(cond
 	 ;; Apostrophe?
 	 ((and prev (zerop pre-blank)
 	       (string-match (nth 2 org-export-smart-quotes-regexps) s))
-	  (let ((smart-quote
-		 (plist-get (cdr (assq 'apostrophe quotes-alist)) encoding)))
-	    (when smart-quote
-	      (setq s (replace-match smart-quote nil t s 1)))))
+	  (setq s (replace-match
+		   (funcall get-smart-quote (match-string 1 s) 'apostrophe)
+		   nil t s 1)))
 	 ;; Closing quote?
 	 ((and prev (zerop pre-blank)
 	       (string-match (nth 1 org-export-smart-quotes-regexps) s))
-	  (let ((smart-quote
-		 (plist-get (cdr (assq (if (equal (match-string 1 s) "'")
-					   'closing-single-quote
-					 'closing-double-quote)
-				       quotes-alist))
-			    encoding)))
-	    (when smart-quote
-	      (setq s (replace-match smart-quote nil t s 1)))))
+	  (setq s (replace-match
+		   (funcall get-smart-quote (match-string 1 s) 'close)
+		   nil t s 1)))
 	 ;; Opening quote?
 	 ((and (or (not prev) (> pre-blank 0))
 	       (string-match (nth 0 org-export-smart-quotes-regexps) s))
-	  (let ((smart-quote
-		 (plist-get (cdr (assq (if (equal (match-string 1 s) "'")
-					   'opening-single-quote
-					 'opening-double-quote)
-				       quotes-alist))
-			    encoding)))
-	    (when smart-quote
-	      (setq s (replace-match smart-quote nil t s 1)))))))
-      ;; 2. Replace quotes in the middle of the string.
-      (setq s
-	    ;; Opening quotes.
-	    (replace-regexp-in-string
-	     (nth 3 org-export-smart-quotes-regexps)
-	     (lambda (text)
-	       (or (plist-get
-		    (cdr (assq (if (equal (match-string 1 text) "'")
-				   'opening-single-quote
-				 'opening-double-quote)
-			       quotes-alist))
-		    encoding)
-		   (match-string 1 text)))
-	     s nil t 1))
-      (setq s
-	    (replace-regexp-in-string
-	     ;; Closing quotes.
-	     (nth 4 org-export-smart-quotes-regexps)
-	     (lambda (text)
-	       (or (plist-get
-		    (cdr (assq (if (equal (match-string 1 text) "'")
-				   'closing-single-quote
-				 'closing-double-quote)
-			       quotes-alist))
-		    encoding)
-		   (match-string 1 text)))
-	     s nil t 1))
-      (setq s
-	    (replace-regexp-in-string
-	     ;; Apostrophes.
-	     (nth 5 org-export-smart-quotes-regexps)
-	     (lambda (text)
-	       (or (plist-get (cdr (assq 'apostrophe quotes-alist)) encoding)
-		   (match-string 1 text)))
-	     s nil t 1))
-      ;; 3. Replace quote character at the end of S.
-      (let ((next (org-export-get-next-element (or original s) info)))
+	  (setq s (replace-match
+		   (funcall get-smart-quote (match-string 1 s) 'open)
+		   nil t s 1))))
+	;; 2. Replace quotes in the middle of the string.
+	(setq s (replace-regexp-in-string
+		 ;; Opening quotes.
+		 (nth 3 org-export-smart-quotes-regexps)
+		 (lambda (text)
+		   (funcall get-smart-quote (match-string 1 text) 'open))
+		 s nil t 1))
+	(setq s (replace-regexp-in-string
+		 ;; Closing quotes.
+		 (nth 4 org-export-smart-quotes-regexps)
+		 (lambda (text)
+		   (funcall get-smart-quote (match-string 1 text) 'close))
+		 s nil t 1))
+	(setq s (replace-regexp-in-string
+		 ;; Apostrophes.
+		 (nth 5 org-export-smart-quotes-regexps)
+		 (lambda (text)
+		   (funcall get-smart-quote (match-string 1 text) 'apostrophe))
+		 s nil t 1))
+	;; 3. Replace quote character at the end of S.
 	(cond
 	 ;; Apostrophe?
 	 ((and next (string-match (nth 8 org-export-smart-quotes-regexps) s))
-	  (let ((smart-quote
-		 (plist-get (cdr (assq 'apostrophe quotes-alist)) encoding)))
-	    (when smart-quote (setq s (replace-match smart-quote nil t s 1)))))
+	  (setq s (replace-match
+		   (funcall get-smart-quote (match-string 1 s) 'apostrophe)
+		   nil t s 1)))
 	 ;; Closing quote?
 	 ((and (not next)
 	       (string-match (nth 7 org-export-smart-quotes-regexps) s))
-	  (let ((smart-quote
-		 (plist-get (cdr (assq (if (equal (match-string 1 s) "'")
-					   'closing-single-quote
-					 'closing-double-quote)
-				       quotes-alist))
-			    encoding)))
-	    (when smart-quote (setq s (replace-match smart-quote nil t s 1)))))
+	  (setq s (replace-match
+		   (funcall get-smart-quote (match-string 1 s) 'close)
+		   nil t s 1)))
 	 ;; Opening quote?
 	 ((and next (string-match (nth 6 org-export-smart-quotes-regexps) s))
-	  (let ((smart-quote
-		 (plist-get (cdr (assq (if (equal (match-string 1 s) "'")
-					   'opening-single-quote
-					 'opening-double-quote)
-				       quotes-alist))
-			    encoding)))
-	    (when smart-quote
-	      (setq s (replace-match smart-quote nil t s 1)))))))
-      ;; Return string with smart quotes.
-      s)))
-
+	  (setq s (replace-match
+		   (funcall get-smart-quote (match-string 1 s) 'open)
+		   nil t s 1))))
+	;; Return string with smart quotes.
+	s))))
 
 ;;;; Topology
 ;;

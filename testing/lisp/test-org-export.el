@@ -1234,7 +1234,16 @@ Another text. (ref:text)
 	(org-element-map
 	 tree 'plain-text
 	 (lambda (s) (org-export-activate-smart-quotes s :html info))
-	 info))))))
+	 info)))))
+  ;; Special case: isolated quotes.
+  (should
+   (equal '("&ldquo;" "&rdquo;")
+	  (let ((org-export-default-language "en"))
+	    (org-test-with-parsed-data "\"$x$\""
+	      (org-element-map
+	       tree 'plain-text
+	       (lambda (s) (org-export-activate-smart-quotes s :html info))
+	       info))))))
 
 
 
