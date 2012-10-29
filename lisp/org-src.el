@@ -690,7 +690,7 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
     (goto-char beg)
     (when allow-write-back-p
       (delete-region beg (max beg (1- end)))
-      (unless (string-match "^[ \t]*$" code)
+      (unless (string-match "\\`[ \t]*\\'" code)
 	(insert code)
 	(delete-char 1))
       (goto-char beg)
