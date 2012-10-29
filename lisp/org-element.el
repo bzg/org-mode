@@ -391,7 +391,9 @@ It can also return the following special value:
 
 (defsubst org-element-contents (element)
   "Extract contents from an ELEMENT."
-  (and (consp element) (nthcdr 2 element)))
+  (cond ((not (consp element)) nil)
+	((symbolp (car element)) (nthcdr 2 element))
+	(t element)))
 
 (defsubst org-element-restriction (element)
   "Return restriction associated to ELEMENT.
@@ -411,6 +413,7 @@ Return modified element."
   "Set ELEMENT contents to CONTENTS.
 Return modified element."
   (cond ((not element) (list contents))
+	((not (symbolp (car element))) contents)
 	((cdr element) (setcdr (cdr element) contents))
 	(t (nconc element contents))))
 
@@ -439,16 +442,18 @@ objects, or a strings.
 
 The function takes care of setting `:parent' property for CHILD.
 Return parent element."
-  (if (not parent) children
-    ;; Link every child to PARENT.
-    (mapc (lambda (child) (org-element-put-property child :parent parent))
-	  children)
-    ;; Add CHILDREN at the end of PARENT contents.
+  ;; Link every child to PARENT. If PARENT is nil, it is a secondary
+  ;; string: parent is the list itself.
+  (mapc (lambda (child)
+	  (org-element-put-property child :parent (or parent children)))
+	children)
+  ;; Add CHILDREN at the end of PARENT contents.
+  (when parent
     (apply 'org-element-set-contents
 	   parent
-	   (nconc (org-element-contents parent) children))
-    ;; Return modified PARENT element.
-    parent))
+	   (nconc (org-element-contents parent) children)))
+  ;; Return modified PARENT element.
+  (or parent children))
 
 
 
@@ -3943,8 +3948,10 @@ containing the secondary string.  It is used to set correctly
     (insert string)
     (let ((secondary (org-element--parse-objects
 		      (point-min) (point-max) nil restriction)))
-      (mapc (lambda (obj) (org-element-put-property obj :parent parent))
-	    secondary))))
+      (when parent
+	(mapc (lambda (obj) (org-element-put-property obj :parent parent))
+	      secondary))
+      secondary)))
 
 (defun org-element-map
   (data types fun &optional info first-match no-recursion with-affiliated)
