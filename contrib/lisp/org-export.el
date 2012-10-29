@@ -2771,7 +2771,7 @@ working directory.  It is used to properly resolve relative
 paths."
   (let ((case-fold-search t))
     (goto-char (point-min))
-    (while (re-search-forward "^[ \t]*#\\+INCLUDE: \\(.*\\)" nil t)
+    (while (re-search-forward "^[ \t]*#\\+INCLUDE: +\\(.*\\)[ \t]*$" nil t)
       (when (eq (org-element-type (save-match-data (org-element-at-point)))
 		'keyword)
 	(beginning-of-line)
@@ -2803,6 +2803,7 @@ paths."
 	  ;; Remove keyword.
 	  (delete-region (point) (progn (forward-line) (point)))
 	  (cond
+	   ((not file) (error "Invalid syntax in INCLUDE keyword"))
 	   ((not (file-readable-p file)) (error "Cannot include file %s" file))
 	   ;; Check if files has already been parsed.  Look after
 	   ;; inclusion lines too, as different parts of the same file

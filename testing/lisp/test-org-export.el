@@ -386,6 +386,10 @@ text
 
 (ert-deftest test-org-export/expand-include ()
   "Test file inclusion in an Org buffer."
+  ;; Error when file isn't specified.
+  (should-error
+   (org-test-with-temp-text "#+INCLUDE: dummy.org"
+     (org-export-expand-include-keyword)))
   ;; Full insertion with recursive inclusion.
   (org-test-with-temp-text
       (format "#+INCLUDE: \"%s/examples/include.org\"" org-test-dir)
