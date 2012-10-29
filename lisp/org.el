@@ -21197,7 +21197,6 @@ function installs the following ones: \"property\", \"date\",
     (looking-at "\\\\\\\\\\($\\|[^\\\\]\\)")))
 
 (declare-function message-in-body-p "message" ())
-(defvar org-element--affiliated-re) ; From org-element.el
 (defun org-adaptive-fill-function ()
   "Compute a fill prefix for the current line.
 Return fill prefix, as a string, or nil if current line isn't
@@ -21209,11 +21208,7 @@ meant to be filled."
 	    (element (save-excursion (beginning-of-line)
 				     (org-element-at-point)))
 	    (type (org-element-type element))
-	    (post-affiliated
-	     (save-excursion
-	       (goto-char (org-element-property :begin element))
-	       (while (looking-at org-element--affiliated-re) (forward-line))
-	       (point))))
+	    (post-affiliated (org-element-property :post-affiliated element)))
        (unless (< p post-affiliated)
 	 (case type
 	   (comment (looking-at "[ \t]*# ?") (match-string 0))
