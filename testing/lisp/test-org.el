@@ -410,7 +410,13 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	"#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\n{{{out}}}"
       (progn (org-macro-initialize-templates)
 	     (org-macro-replace-all org-macro-templates)
-	     (buffer-string))))))
+	     (buffer-string)))))
+  ;; Error out when macro expansion is circular.
+  (should-error
+   (org-test-with-temp-text
+       "#+MACRO: mac1 {{{mac2}}}\n#+MACRO: mac2 {{{mac1}}}\n{{{mac1}}}"
+     (org-macro-initialize-templates)
+     (org-macro-replace-all org-macro-templates))))
 
 
 

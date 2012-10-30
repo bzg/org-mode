@@ -20927,28 +20927,40 @@ TEMPLATES is an alist of templates used for expansion.  See
 `org-macro-templates' for a buffer-local default value."
   (save-excursion
     (goto-char (point-min))
-    (while (re-search-forward "{{{[-A-Za-z0-9_]" nil t)
-      (let ((object (org-element-context)))
-        (when (eq (org-element-type object) 'macro)
-          (let ((value (org-macro-expand object templates)))
-            (when value
-              (delete-region
-               (org-element-property :begin object)
-               ;; Preserve white spaces after the macro.
-               (progn (goto-char (org-element-property :end object))
-                      (skip-chars-backward " \t")
-                      (point)))
-              ;; Leave point before replacement in case of recursive
-              ;; expansions.
-              (save-excursion (insert value)))))))))
+    (let (record)
+      (while (re-search-forward "{{{[-A-Za-z0-9_]" nil t)
+	(let ((object (org-element-context)))
+	  (when (eq (org-element-type object) 'macro)
+	    (let* ((value (org-macro-expand object templates))
+		   (begin (org-element-property :begin object))
+		   (signature (list begin
+				    object
+				    (org-element-property :args object))))
+	      ;; Avoid circular dependencies by checking if the same
+	      ;; macro with the same arguments is expanded at the same
+	      ;; position twice.
+	      (if (member signature record)
+		  (error "Circular macro expansion: %s"
+			 (org-element-property :key object))
+		(when value
+		  (push signature record)
+		  (delete-region
+		   begin
+		   ;; Preserve white spaces after the macro.
+		   (progn (goto-char (org-element-property :end object))
+			  (skip-chars-backward " \t")
+			  (point)))
+		  ;; Leave point before replacement in case of recursive
+		  ;; expansions.
+		  (save-excursion (insert value)))))))))))
 
 (defun org-macro-initialize-templates ()
   "Collect macro templates defined in current buffer.
 Templates are stored in buffer-local variable
 `org-macro-templates'.  In addition to buffer-defined macros, the
-function installs the following ones: \"property\", \"date\",
-\"time\". and, if appropriate, \"input-file\" and
-\"modification-time\"."
+function installs the following ones: \"property\",
+\"time\". and, if the buffer is associated to a file,
+\"input-file\" and \"modification-time\"."
   (let ((case-fold-search t)
 	(set-template
 	 (lambda (cell)
