@@ -1295,8 +1295,6 @@ inferior to file-local settings."
   (org-combine-plists
    ;; ... from global variables...
    (org-export--get-global-options backend)
-   ;; ... from buffer's attributes...
-   (org-export--get-buffer-attributes)
    ;; ... from an external property list...
    ext-plist
    ;; ... from in-buffer settings...
@@ -1305,12 +1303,45 @@ inferior to file-local settings."
     (and buffer-file-name (org-remove-double-quotes buffer-file-name)))
    ;; ... and from subtree, when appropriate.
    (and subtreep (org-export--get-subtree-options backend))
-   ;; Eventually install back-end symbol and its translation table.
-   `(:back-end
-     ,backend
-     :translate-alist
-     ,(let ((trans-alist (intern (format "org-%s-translate-alist" backend))))
-	(when (boundp trans-alist) (symbol-value trans-alist))))))
+   ;; Eventually add misc. properties.
+   (list
+    :back-end
+    backend
+    :translate-alist
+    (let ((trans-alist (intern (format "org-%s-translate-alist" backend))))
+      (when (boundp trans-alist) (symbol-value trans-alist)))
+    :footnote-definition-alist
+    ;; Footnotes definitions must be collected in the original
+    ;; buffer, as there's no insurance that they will still be in
+    ;; the parse tree, due to possible narrowing.
+    (let (alist)
+      (org-with-wide-buffer
+       (goto-char (point-min))
+       (while (re-search-forward org-footnote-definition-re nil t)
+	 (let ((def (save-match-data (org-element-at-point))))
+	   (when (eq (org-element-type def) 'footnote-definition)
+	     (push
+	      (cons (org-element-property :label def)
+		    (let ((cbeg (org-element-property :contents-begin def)))
+		      (when cbeg
+			(org-element--parse-elements
+			 cbeg (org-element-property :contents-end def)
+			 nil nil nil nil (list 'org-data nil)))))
+	      alist))))
+       alist))
+    :id-alist
+    ;; Collect id references.
+    (let (alist)
+      (org-with-wide-buffer
+       (goto-char (point-min))
+       (while (re-search-forward "\\[\\[id:\\S-+?\\]" nil t)
+	 (let ((link (org-element-context)))
+	   (when (eq (org-element-type link) 'link)
+	     (let* ((id (org-element-property :path link))
+		    (file (org-id-find-id-file id)))
+	       (when file
+		 (push (cons id (file-relative-name file)) alist)))))))
+      alist))))
 
 (defun org-export--parse-option-keyword (options &optional backend)
   "Parse an OPTIONS line and return values as a plist.
@@ -1505,39 +1536,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
      :title (or (and visited-file
 		     (file-name-sans-extension
 		      (file-name-nondirectory visited-file)))
-		(buffer-name (buffer-base-buffer)))
-     :footnote-definition-alist
-     ;; Footnotes definitions must be collected in the original
-     ;; buffer, as there's no insurance that they will still be in the
-     ;; parse tree, due to possible narrowing.
-     (let (alist)
-       (org-with-wide-buffer
-	(goto-char (point-min))
-	(while (re-search-forward org-footnote-definition-re nil t)
-	  (let ((def (save-match-data (org-element-at-point))))
-	    (when (eq (org-element-type def) 'footnote-definition)
-	      (push
-	       (cons (org-element-property :label def)
-		     (let ((cbeg (org-element-property :contents-begin def)))
-		       (when cbeg
-			 (org-element--parse-elements
-			  cbeg (org-element-property :contents-end def)
-			  nil nil nil nil (list 'org-data nil)))))
-	       alist))))
-	alist))
-     :id-alist
-     ;; Collect id references.
-     (let (alist)
-       (org-with-wide-buffer
-	(goto-char (point-min))
-	(while (re-search-forward "\\[\\[id:\\S-+?\\]" nil t)
-	  (let ((link (org-element-context)))
-	    (when (eq (org-element-type link) 'link)
-	      (let* ((id (org-element-property :path link))
-		     (file (org-id-find-id-file id)))
-		(when file
-		  (push (cons id (file-relative-name file)) alist)))))))
-       alist))))
+		(buffer-name (buffer-base-buffer))))))
 
 (defun org-export--get-global-options (&optional backend)
   "Return global export options as a plist.
@@ -2563,9 +2562,9 @@ Return code as a string."
 	     (goto-char (point-min))
 	     (forward-line)
 	     (narrow-to-region (point) (point-max))))
-      ;; Install user's and developer's filters in communication
-      ;; channel.
-      (let (info tree)
+      ;; Initialize communication channel with original buffer
+      ;; attributes, unavailable in its copy.
+      (let ((info (org-export--get-buffer-attributes)) tree)
 	(org-export-with-current-buffer-copy
 	 ;; Update communication channel and get parse tree.  Buffer
 	 ;; isn't parsed directly.  Instead, a temporary copy is
@@ -2591,10 +2590,12 @@ Return code as a string."
 	 ;; back-end as argument.
 	 (goto-char (point-min))
 	 (run-hook-with-args 'org-export-before-parsing-hook backend)
-	 ;; Initialize communication channel.
+	 ;; Update communication channel with environment.  Also
+	 ;; install user's and developer's filters.
 	 (setq info
 	       (org-export-install-filters
-		(org-export-get-environment backend subtreep ext-plist)))
+		(org-combine-plists
+		 info (org-export-get-environment backend subtreep ext-plist))))
 	 ;; Expand export-specific set of macros: {{{author}}},
 	 ;; {{{date}}}, {{{email}}} and {{{title}}}.  It must be done
 	 ;; once regular macros have been expanded, since document
