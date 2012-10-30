@@ -21221,7 +21221,7 @@ meant to be filled."
 				     (org-element-at-point)))
 	    (type (org-element-type element))
 	    (post-affiliated (org-element-property :post-affiliated element)))
-       (unless (< p post-affiliated)
+       (unless (and post-affiliated (< p post-affiliated))
 	 (case type
 	   (comment (looking-at "[ \t]*# ?") (match-string 0))
 	   (footnote-definition "")
