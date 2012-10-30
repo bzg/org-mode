@@ -73,13 +73,13 @@
 
 (eval-when-compile (require 'cl))
 (require 'org-element)
+(require 'ob-exp)
 
 (declare-function org-e-publish "org-e-publish" (project &optional force))
 (declare-function org-e-publish-all "org-e-publish" (&optional force))
 (declare-function org-e-publish-current-file "org-e-publish" (&optional force))
 (declare-function org-e-publish-current-project "org-e-publish"
 		  (&optional force))
-(declare-function org-export-blocks-preprocess "ob-exp")
 
 (defvar org-e-publish-project-alist)
 (defvar org-table-number-fraction)
