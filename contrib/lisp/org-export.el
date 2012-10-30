@@ -580,12 +580,16 @@ e.g. \"tags:nil\"."
 
 (defcustom org-export-with-tasks t
   "Non-nil means include TODO items for export.
+
 This may have the following values:
 t                    include tasks independent of state.
-todo                 include only tasks that are not yet done.
-done                 include only tasks that are already done.
-nil                  remove all tasks before export
-list of keywords     keep only tasks with these keywords"
+`todo'               include only tasks that are not yet done.
+`done'               include only tasks that are already done.
+nil                  ignore all tasks.
+list of keywords     include tasks with these keywords.
+
+This option can also be set with the #+OPTIONS line,
+e.g. \"tasks:nil\"."
   :group 'org-export-general
   :type '(choice
 	  (const :tag "All tasks" t)
