@@ -2906,7 +2906,7 @@ file should have."
 	       (org-map-entries
 		(lambda () (if (< offset 0) (delete-char (abs offset))
 			(insert (make-string offset ?*)))))))))))
-    (buffer-string)))
+    (org-element-normalize-string (buffer-string))))
 
 
 ;;; Tools For Back-Ends
