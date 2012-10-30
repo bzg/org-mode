@@ -21226,7 +21226,10 @@ meant to be filled."
 	   (comment (looking-at "[ \t]*# ?") (match-string 0))
 	   (footnote-definition "")
 	   ((item plain-list)
-	    (make-string (org-list-item-body-column post-affiliated) ? ))
+	    (make-string (org-list-item-body-column
+			  (or post-affiliated
+			      (org-element-property :begin element)))
+			 ? ))
 	   (paragraph
 	    ;; Fill prefix is usually the same as the current line,
 	    ;; except if the paragraph is at the beginning of an item.
