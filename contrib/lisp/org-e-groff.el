@@ -830,8 +830,10 @@ information."
   (concat
    (format "\\fB%s\\fP " org-clock-string)
    (format org-e-groff-inactive-timestamp-format
-           (concat (org-translate-time (org-element-property :value clock))
-                   (let ((time (org-element-property :time clock)))
+           (concat (org-translate-time
+		    (org-element-property :raw-value
+					  (org-element-property :value clock)))
+                   (let ((time (org-element-property :duration clock)))
                      (and time (format " (%s)" time)))))))
 
 ;;; Code
@@ -1439,19 +1441,22 @@ information."
                (concat
                 (format "\\fR %s \\fP" org-closed-string)
                 (format org-e-groff-inactive-timestamp-format
-                        (org-translate-time closed)))))
+                        (org-translate-time
+			 (org-element-property :raw-value closed))))))
            (let ((deadline (org-element-property :deadline planning)))
              (when deadline
                (concat
                 (format "\\fB %s \\fP" org-deadline-string)
                 (format org-e-groff-active-timestamp-format
-                        (org-translate-time deadline)))))
+                        (org-translate-time
+			 (org-element-property :raw-value deadline))))))
            (let ((scheduled (org-element-property :scheduled planning)))
              (when scheduled
                (concat
                 (format "\\fR %s \\fP" org-scheduled-string)
                 (format org-e-groff-active-timestamp-format
-                        (org-translate-time scheduled)))))))
+                        (org-translate-time
+			 (org-element-property :raw-value scheduled))))))))
     "")
    ""))
 

@@ -982,8 +982,10 @@ holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (concat org-clock-string " "
-	  (org-translate-time (org-element-property :value clock))
-	  (let ((time (org-element-property :time clock)))
+	  (org-translate-time
+	   (org-element-property :raw-value
+				 (org-element-property :value clock)))
+	  (let ((time (org-element-property :duration clock)))
 	    (and time
 		 (concat " => "
 			 (apply 'format
@@ -1431,14 +1433,20 @@ channel."
    'identity
    (delq nil
 	 (list (let ((closed (org-element-property :closed planning)))
-		 (when closed (concat org-closed-string " "
-				      (org-translate-time closed))))
+		 (when closed
+		   (concat org-closed-string " "
+			   (org-translate-time
+			    (org-element-property :raw-value closed)))))
 	       (let ((deadline (org-element-property :deadline planning)))
-		 (when deadline (concat org-deadline-string " "
-					(org-translate-time deadline))))
+		 (when deadline
+		   (concat org-deadline-string " "
+			   (org-translate-time
+			    (org-element-property :raw-value deadline)))))
 	       (let ((scheduled (org-element-property :scheduled planning)))
-		 (when scheduled (concat org-scheduled-string " "
-					 (org-translate-time scheduled))))))
+		 (when scheduled
+		   (concat org-scheduled-string " "
+			   (org-translate-time
+			    (org-element-property :raw-value scheduled)))))))
    " "))
 
 

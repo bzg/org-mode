@@ -1384,10 +1384,12 @@ channel."
 		   "OrgTimestampKeyword" org-clock-string)
 	   (format "<text:span text:style-name=\"%s\">%s</text:span>"
 		   "OrgTimestamp"
-		   (concat (org-translate-time
-			    (org-element-property :value clock))
-			   (let ((time (org-element-property :time clock)))
-			     (and time (format " (%s)" time))))))))
+		   (concat
+		    (org-translate-time
+		     (org-element-property :raw-value
+					   (org-element-property :value clock)))
+		    (let ((time (org-element-property :duration clock)))
+		      (and time (format " (%s)" time))))))))
 
 
 ;;;; Code
@@ -2609,21 +2611,27 @@ channel."
 		(format "<text:span text:style-name=\"%s\">%s</text:span>"
 			"OrgTimestampKeyword" org-closed-string)
 		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTimestamp" (org-translate-time closed)))))
+			"OrgTimestamp"
+			(org-translate-time
+			 (org-element-property :raw-value closed))))))
 	   (let ((deadline (org-element-property :deadline planning)))
 	     (when deadline
 	       (concat
 		(format "<text:span text:style-name=\"%s\">%s</text:span>"
 			"OrgTimestampKeyword" org-deadline-string)
 		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTimestamp" (org-translate-time deadline)))))
+			"OrgTimestamp"
+			(org-translate-time
+			 (org-element-property :raw-value deadline))))))
 	   (let ((scheduled (org-element-property :scheduled planning)))
 	     (when scheduled
 	       (concat
 		(format "<text:span text:style-name=\"%s\">%s</text:span>"
 			"OrgTimestampKeyword" org-scheduled-string)
 		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTimestamp" (org-translate-time scheduled))))))))
+			"OrgTimestamp"
+			(org-translate-time
+			 (org-element-property :raw-value scheduled)))))))))
 
 
 ;;;; Property Drawer

@@ -1591,8 +1591,10 @@ channel."
 </span>
 </p>"
 	  org-clock-string
-	  (org-translate-time (org-element-property :value clock))
-	  (let ((time (org-element-property :time clock)))
+	  (org-translate-time
+	   (org-element-property :raw-value
+				 (org-element-property :value clock)))
+	  (let ((time (org-element-property :duration clock)))
 	    (and time (format " <span class=\"timestamp\">(%s)</span>" time)))))
 
 
@@ -2391,15 +2393,18 @@ channel."
 	     (let ((closed (org-element-property :closed planning)))
 	       (when closed
 		 (format span-fmt org-closed-string
-			 (org-translate-time closed))))
+			 (org-translate-time
+			  (org-element-property :raw-value closed)))))
 	     (let ((deadline (org-element-property :deadline planning)))
 	       (when deadline
 		 (format span-fmt org-deadline-string
-			 (org-translate-time deadline))))
+			 (org-translate-time
+			  (org-element-property :raw-value deadline)))))
 	     (let ((scheduled (org-element-property :scheduled planning)))
 	       (when scheduled
 		 (format span-fmt org-scheduled-string
-			 (org-translate-time scheduled))))))
+			 (org-translate-time
+			  (org-element-property :raw-value scheduled)))))))
       " "))))
 
 
