@@ -119,8 +119,6 @@
 (eval-when-compile (require 'cl))
 (require 'org)
 
-(declare-function org-clocking-buffer "org-clock" ())
-
 
 
 ;;; Definitions And Rules
@@ -729,8 +727,8 @@ Return a list whose CAR is `headline' and CDR is a plist
 containing `:raw-value', `:title', `:begin', `:end',
 `:pre-blank', `:hiddenp', `:contents-begin' and `:contents-end',
 `:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
-`:scheduled', `:deadline', `:closed', `:clockedp', `:quotedp',
-`:archivedp', `:commentedp' and `:footnote-section-p' keywords.
+`:scheduled', `:deadline', `:closed', `:quotedp', `:archivedp',
+`:commentedp' and `:footnote-section-p' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in lowercase, the underscores replaced with hyphens
@@ -803,14 +801,7 @@ Assume point is at beginning of the headline."
 			      (progn (goto-char end)
 				     (skip-chars-backward " \r\t\n")
 				     (forward-line)
-				     (point))))
-	   (clockedp (and (featurep 'org-clock)
-			  (eq (org-clocking-buffer)
-			      (or (buffer-base-buffer) (current-buffer)))
-			  (save-excursion
-			    (goto-char (marker-position org-clock-marker))
-			    (org-back-to-heading t)
-			    (= (point) begin)))))
+				     (point)))))
       ;; Clean RAW-VALUE from any quote or comment string.
       (when (or quotedp commentedp)
 	(let ((case-fold-search nil))
@@ -848,7 +839,6 @@ Assume point is at beginning of the headline."
 				       end)
 			  :footnote-section-p footnote-section-p
 			  :archivedp archivedp
-			  :clockedp clockedp
 			  :commentedp commentedp
 			  :quotedp quotedp)
 		    time-props
@@ -915,8 +905,7 @@ Return a list whose CAR is `inlinetask' and CDR is a plist
 containing `:title', `:begin', `:end', `:hiddenp',
 `:contents-begin' and `:contents-end', `:level', `:priority',
 `:raw-value', `:tags', `:todo-keyword', `:todo-type',
-`:scheduled', `:deadline', `:clockedp', `:closed' and
-`:post-blank' keywords.
+`:scheduled', `:deadline', `:closed' and `:post-blank' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in lowercase, the underscores replaced with hyphens
@@ -973,11 +962,6 @@ Assume point is at beginning of the inline task."
 		       (end-of-line)
 		       (and (re-search-forward "^\\*+ END" limit t)
 			    (match-beginning 0))))
-	   (clockedp (and (featurep 'org-clock)
-			  (eq (org-clocking-buffer)
-			      (or (buffer-base-buffer) (current-buffer)))
-			  (let ((clock (marker-position org-clock-marker)))
-			    (and (> clock begin) (< clock task-end)))))
 	   (contents-begin (progn (forward-line)
 				  (and task-end (< (point) task-end) (point))))
 	   (hidden (and contents-begin (org-invisible-p2)))
@@ -1003,7 +987,6 @@ Assume point is at beginning of the inline task."
 			 :tags tags
 			 :todo-keyword todo
 			 :todo-type todo-type
-			 :clockedp clockedp
 			 :post-blank (count-lines before-blank end))
 		   time-props
 		   standard-props))))
