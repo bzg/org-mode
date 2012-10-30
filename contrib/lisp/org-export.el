@@ -162,7 +162,7 @@ All these properties should be back-end agnostic.  Back-end
 specific properties are set through `org-export-define-backend'.
 Properties redefined there have precedence over these.")
 
-(defconst org-export-special-keywords '("SETUP_FILE" "OPTIONS")
+(defconst org-export-special-keywords '("FILETAGS" "SETUP_FILE" "OPTIONS")
   "List of in-buffer keywords that require special treatment.
 These keywords are not directly associated to a property.  The
 way they are handled must be hard-coded into
@@ -1045,6 +1045,11 @@ structure of the values."
 ;;   - category :: tree
 ;;   - type :: hash table
 ;;
+;; + `:filetags' :: List of global tags for buffer.  Used by
+;;   `org-export-get-tags' to get tags with inheritance.
+;;   - category :: option
+;;   - type :: list of strings
+;;
 ;; + `:footnote-definition-alist' :: Alist between footnote labels and
 ;;     their definition, as parsed data.  Only non-inlined footnotes
 ;;     are represented in this alist.  Also, every definition isn't
@@ -1454,7 +1459,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 		    (val (org-element-property :value element))
 		    (prop
 		     (cond
-		      ((string= key "SETUP_FILE")
+		      ((equal key "SETUP_FILE")
 		       (let ((file
 			      (expand-file-name
 			       (org-remove-double-quotes (org-trim val)))))
@@ -1465,8 +1470,13 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			     (org-mode)
 			     (org-export--get-inbuffer-options
 			      backend (cons file files))))))
-		      ((string= key "OPTIONS")
-		       (org-export--parse-option-keyword val backend)))))
+		      ((equal key "OPTIONS")
+		       (org-export--parse-option-keyword val backend))
+		      ((equal key "FILETAGS")
+		       (list :filetags
+			     (org-uniquify
+			      (append (org-split-string val ":")
+				      (plist-get plist :filetags))))))))
 	       (setq plist (org-combine-plists plist prop)))))))
      ;; 2. Standard options, as in `org-export-options-alist'.
      (let* ((all (append org-export-options-alist
@@ -3186,7 +3196,7 @@ When non-nil, optional argument TAGS should be a list of strings.
 Any tag belonging to this list will also be removed.
 
 When optional argument INHERITED is non-nil, tags can also be
-inherited from parent headlines.."
+inherited from parent headlines and FILETAGS keywords."
   (org-remove-if
    (lambda (tag) (or (member tag (plist-get info :select-tags))
 		(member tag (plist-get info :exclude-tags))
@@ -3203,7 +3213,8 @@ inherited from parent headlines.."
 	       (push tag current-tag-list)))
 	   (org-element-property :tags parent)))
 	(org-export-get-genealogy element))
-       current-tag-list))))
+       ;; Add FILETAGS keywords and return results.
+       (org-uniquify (append (plist-get info :filetags) current-tag-list))))))
 
 (defun org-export-get-node-property (property blob &optional inherited)
   "Return node PROPERTY value for BLOB.

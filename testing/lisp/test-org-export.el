@@ -766,6 +766,14 @@ Paragraph[fn:1]"
       (org-test-with-parsed-data "* Headline :tag:\n** Sub-heading"
 	(org-element-map
 	 tree 'headline
+	 (lambda (hl) (org-export-get-tags hl info nil t)) info))))
+    ;; Tag inheritance checks FILETAGS keywords.
+    (should
+     (equal
+      '(("a" "b" "tag"))
+      (org-test-with-parsed-data "#+FILETAGS: :a:b:\n* Headline :tag:"
+	(org-element-map
+	 tree 'headline
 	 (lambda (hl) (org-export-get-tags hl info nil t)) info))))))
 
 (ert-deftest test-org-export/get-node-property ()
