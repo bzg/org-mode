@@ -1251,7 +1251,34 @@ Another text. (ref:text)
 	      (org-element-map
 	       tree 'plain-text
 	       (lambda (s) (org-export-activate-smart-quotes s :html info))
-	       info))))))
+	       info)))))
+  ;; Smart quotes in secondary strings.
+  (should
+   (equal '("&ldquo;" "&rdquo;")
+	  (let ((org-export-default-language "en"))
+	    (org-test-with-parsed-data "* \"$x$\""
+	      (org-element-map
+	       tree 'plain-text
+	       (lambda (s) (org-export-activate-smart-quotes s :html info))
+	       info)))))
+  ;; Smart quotes in document keywords.
+  (should
+   (equal '("&ldquo;" "&rdquo;")
+	  (let ((org-export-default-language "en"))
+	    (org-test-with-parsed-data "#+TITLE: \"$x$\""
+	      (org-element-map
+	       (plist-get info :title) 'plain-text
+	       (lambda (s) (org-export-activate-smart-quotes s :html info))
+	       info)))))
+  ;; Smart quotes in parsed affiliated keywords.
+  (should
+   (equal '("&ldquo;" "&rdquo;" "Paragraph")
+	  (let ((org-export-default-language "en"))
+	    (org-test-with-parsed-data "#+CAPTION: \"$x$\"\nParagraph"
+	      (org-element-map
+	       tree 'plain-text
+	       (lambda (s) (org-export-activate-smart-quotes s :html info))
+	       info nil nil t))))))
 
 
 
@@ -1817,7 +1844,29 @@ Another text. (ref:text)
    (let ((org-export-with-timestamps nil))
      (org-test-with-parsed-data "\alpha <2012-03-29 Thu>"
        (org-export-get-next-element
-	(org-element-map tree 'entity 'identity info t) info)))))
+	(org-element-map tree 'entity 'identity info t) info))))
+  ;; Find next element in secondary strings.
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "* a =verb="
+	 (org-element-type
+	  (org-export-get-next-element
+	   (org-element-map tree 'plain-text 'identity info t) info)))))
+  ;; Find next element in document keywords.
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "#+TITLE: a =verb="
+	 (org-element-type
+	  (org-export-get-next-element
+	   (org-element-map
+	    (plist-get info :title) 'plain-text 'identity info t) info)))))
+  ;; Find next element in parsed affiliated keywords.
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "#+CAPTION: a =verb=\nParagraph"
+	 (org-element-type
+	  (org-export-get-next-element
+	   (org-element-map tree 'plain-text 'identity info t nil t) info))))))
 
 (ert-deftest test-org-export/get-previous-element ()
   "Test `org-export-get-previous-element' specifications."
@@ -1837,7 +1886,29 @@ Another text. (ref:text)
    (let ((org-export-with-timestamps nil))
      (org-test-with-parsed-data "<2012-03-29 Thu> \alpha"
        (org-export-get-previous-element
-	(org-element-map tree 'entity 'identity info t) info)))))
+	(org-element-map tree 'entity 'identity info t) info))))
+  ;; Find previous element in secondary strings.
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "* =verb= a"
+	 (org-element-type
+	  (org-export-get-previous-element
+	   (org-element-map tree 'plain-text 'identity info t) info)))))
+  ;; Find previous element in document keywords.
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "#+TITLE: =verb= a"
+	 (org-element-type
+	  (org-export-get-previous-element
+	   (org-element-map
+	    (plist-get info :title) 'plain-text 'identity info t) info)))))
+  ;; Find previous element in parsed affiliated keywords.
+  (should
+   (eq 'verbatim
+       (org-test-with-parsed-data "#+CAPTION: =verb= a\nParagraph"
+	 (org-element-type
+	  (org-export-get-previous-element
+	   (org-element-map tree 'plain-text 'identity info t nil t) info))))))
 
 
 (provide 'test-org-export)
