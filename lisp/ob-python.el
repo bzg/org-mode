@@ -52,6 +52,12 @@ This will typically be either 'python or 'python-mode.")
 
 (defvar org-src-preserve-indentation)
 
+(defcustom org-babel-python-hline-to "None"
+  "Replace hlines in incoming tables with this when translating to python.")
+
+(defcustom org-babel-python-None-to 'hline
+  "Replace 'None' in python tables with this before returning.")
+
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with Babel.
 This function is called by `org-babel-execute-src-block'."
@@ -114,7 +120,7 @@ specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-python-var-to-python var ", ") "]")
     (if (equal var 'hline)
-	"None"
+	org-babel-python-hline-to
       (format
        (if (and (stringp var) (string-match "[\n\r]" var)) "\"\"%S\"\"" "%S")
        var))))
@@ -123,7 +129,13 @@ specifying a variable of the same value."
   "Convert RESULTS into an appropriate elisp value.
 If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-script-escape results))
+  ((lambda (res)
+     (if (listp res)
+	 (mapcar (lambda (el) (if (equal el 'None)
+			     org-babel-python-None-to el))
+		 res)
+       res))
+   (org-babel-script-escape results)))
 
 (defvar org-babel-python-buffers '((:default . nil)))
 
