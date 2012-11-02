@@ -2651,7 +2651,8 @@ Return code as a string."
 	       info (org-export-collect-tree-properties tree info)))
 	;; Eventually transcode TREE.  Wrap the resulting string into
 	;; a template, if required.  Finally call final-output filter.
-	(let* ((body (org-element-normalize-string (org-export-data tree info)))
+	(let* ((body (org-element-normalize-string
+		      (or (org-export-data tree info) "")))
 	       (template (cdr (assq 'template
 				    (plist-get info :translate-alist))))
 	       (output (org-export-filter-apply-functions
@@ -2660,7 +2661,8 @@ Return code as a string."
 			  (funcall template body info))
 			info)))
 	  ;; Maybe add final OUTPUT to kill ring, then return it.
-	  (when org-export-copy-to-kill-ring (org-kill-new output))
+	  (when (and org-export-copy-to-kill-ring (org-string-nw-p output))
+	    (org-kill-new output))
 	  output)))))
 
 (defun org-export-to-buffer
