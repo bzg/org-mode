@@ -2083,19 +2083,32 @@ Any element in `:ignore-list' will be skipped when using
 ;; Filters properties are installed in communication channel with
 ;; `org-export-install-filters' function.
 ;;
-;; Eventually, a hook (`org-export-before-parsing-hook') is run just
-;; before parsing to allow for heavy structure modifications.
+;; Eventually, two hooks (`org-export-before-processing-hook' and
+;; `org-export-before-parsing-hook') are run at the beginning of the
+;; export process and just before parsing to allow for heavy structure
+;; modifications.
 
 
-;;;; Before Parsing Hook
+;;;; Hooks
+
+(defvar org-export-before-processing-hook nil
+  "Hook run at the beginning of the export process.
+
+This is run before include keywords and macros are expanded and
+Babel code blocks executed, on a copy of the original buffer
+being exported.  Visibility and narrowing are preserved.  Point
+is at the beginning of the buffer.
+
+Every function in this hook will be called with one argument: the
+back-end currently used, as a symbol.")
 
 (defvar org-export-before-parsing-hook nil
   "Hook run before parsing an export buffer.
 
-This is run after include keywords have been expanded and Babel
-code executed, on a copy of original buffer's area being
-exported.  Visibility is the same as in the original one.  Point
-is left at the beginning of the new one.
+This is run after include keywords and macros have been expanded
+and Babel code blocks executed, on a copy of the original buffer
+being exported.  Visibility and narrowing are preserved.  Point
+is at the beginning of the buffer.
 
 Every function in this hook will be called with one argument: the
 back-end currently used, as a symbol.")
@@ -2580,6 +2593,8 @@ Return code as a string."
       ;; attributes, unavailable in its copy.
       (let ((info (org-export--get-buffer-attributes)) tree)
 	(org-export-with-current-buffer-copy
+	 ;; Run first hook with current back-end as argument.
+	 (run-hook-with-args 'org-export-before-processing-hook backend)
 	 ;; Update communication channel and get parse tree.  Buffer
 	 ;; isn't parsed directly.  Instead, a temporary copy is
 	 ;; created, where include keywords, macros are expanded and
@@ -2600,8 +2615,7 @@ Return code as a string."
 	 ;; Update radio targets since keyword inclusion might have
 	 ;; added some more.
 	 (org-update-radio-target-regexp)
-	 ;; Run hook `org-export-before-parsing-hook'. with current
-	 ;; back-end as argument.
+	 ;; Run last hook with current back-end as argument.
 	 (goto-char (point-min))
 	 (run-hook-with-args 'org-export-before-parsing-hook backend)
 	 ;; Update communication channel with environment.  Also
