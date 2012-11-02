@@ -3240,6 +3240,35 @@ Return value is a string or nil."
 	      (throw 'found (org-element-property property parent)))
 	    (setq parent (org-element-property :parent parent))))))))
 
+(defun org-export-get-category (blob info)
+  "Return category for element or object BLOB.
+
+INFO is a plist used as a communication channel.
+
+CATEGORY is automatically inherited from a parent headline, from
+#+CATEGORY: keyword or created out of original file name.  If all
+fail, the fall-back value is \"???\"."
+  (or (let ((headline (if (eq (org-element-type blob) 'headline) blob
+			(org-export-get-parent-headline blob))))
+	;; Almost like `org-export-node-property', but we cannot trust
+	;; `plist-member' as every headline has a `:category'
+	;; property, even if nil.
+	(let ((parent headline) value)
+	  (catch 'found
+	    (while parent
+	      (let ((category (org-element-property :category parent)))
+		(and category (throw 'found category)))
+	      (setq parent (org-element-property :parent parent))))))
+      (org-element-map
+       (plist-get info :parse-tree) 'keyword
+       (lambda (kwd)
+	 (when (equal (org-element-property :key kwd) "CATEGORY")
+	   (org-element-property :value kwd)))
+       info 'first-match)
+      (let ((file (plist-get info :input-file)))
+	(and file (file-name-sans-extension (file-name-nondirectory file))))
+      "???"))
+
 (defun org-export-first-sibling-p (headline info)
   "Non-nil when HEADLINE is the first sibling in its sub-tree.
 INFO is a plist used as a communication channel."

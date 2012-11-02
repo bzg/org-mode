@@ -808,6 +808,49 @@ Paragraph[fn:1]"
      (org-export-get-node-property
       :prop (org-element-map tree 'paragraph 'identity nil t)))))
 
+(ert-deftest test-org-export/get-category ()
+  "Test `org-export-get-category' specifications."
+  ;; Standard test.
+  (should
+   (equal "value"
+	  (org-test-with-parsed-data "* Headline
+  :PROPERTIES:
+  :CATEGORY:     value
+  :END:"
+	    (org-export-get-category
+	     (org-element-map tree 'headline 'identity nil t) info))))
+  ;; Test inheritance from a parent headline.
+  (should
+   (equal '("value" "value")
+	  (org-test-with-parsed-data "* Headline1
+  :PROPERTIES:
+  :CATEGORY:     value
+  :END:
+** Headline2"
+	    (org-element-map
+	     tree 'headline
+	     (lambda (hl) (org-export-get-category hl info)) info))))
+  ;; Test inheritance from #+CATEGORY keyword
+  (should
+   (equal "value"
+	  (org-test-with-parsed-data "#+CATEGORY: value
+* Headline"
+	    (org-export-get-category
+	     (org-element-map tree 'headline 'identity nil t) info))))
+  ;; Test inheritance from file name.
+  (should
+   (equal "test"
+	  (org-test-with-parsed-data "* Headline"
+	    (let ((info (plist-put info :input-file "~/test.org")))
+	      (org-export-get-category
+	       (org-element-map tree 'headline 'identity nil t) info)))))
+  ;; Fall-back value.
+  (should
+   (equal "???"
+	  (org-test-with-parsed-data "* Headline"
+	    (org-export-get-category
+	     (org-element-map tree 'headline 'identity nil t) info)))))
+
 (ert-deftest test-org-export/first-sibling-p ()
   "Test `org-export-first-sibling-p' specifications."
   ;; Standard test.
