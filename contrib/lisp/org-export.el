@@ -3268,12 +3268,14 @@ fail, the fall-back value is \"???\"."
 			(org-export-get-parent-headline blob))))
 	;; Almost like `org-export-node-property', but we cannot trust
 	;; `plist-member' as every headline has a `:category'
-	;; property, even if nil.
+	;; property, would it be nil or equal to "???" (which has the
+	;; same meaning).
 	(let ((parent headline) value)
 	  (catch 'found
 	    (while parent
 	      (let ((category (org-element-property :category parent)))
-		(and category (throw 'found category)))
+		(and category (not (equal "???" category))
+		     (throw 'found category)))
 	      (setq parent (org-element-property :parent parent))))))
       (org-element-map
        (plist-get info :parse-tree) 'keyword
