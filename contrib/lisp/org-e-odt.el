@@ -3656,8 +3656,8 @@ contextual information."
 	  (out-file-type (file-name-extension --out-file))
 	  (org-e-odt-xml-files '("META-INF/manifest.xml" "content.xml"
 				 "meta.xml" "styles.xml"))
-	  ;; Initialize workarea.  All files that end up in the
-	  ;; exported get created here.
+	  ;; Initialize temporary workarea.  All files that end up in
+	  ;; the exported document get parked/created here.
 	  (org-e-odt-zip-dir (file-name-as-directory
 			      (make-temp-file (format "%s-" out-file-type) t)))
 	  (org-e-odt-manifest-file-entries nil)
@@ -3709,7 +3709,6 @@ contextual information."
 	   ;; Run zip.
 	   (let* ((target --out-file)
 		  (target-name (file-name-nondirectory target))
-		  (target-dir (file-name-directory target))
 		  (cmds `(("zip" "-mX0" ,target-name "mimetype")
 			  ("zip" "-rmTq" ,target-name "."))))
 	     ;; If a file with same name as the desired output file
@@ -3736,10 +3735,11 @@ contextual information."
 			(error (concat "Unable to create OpenDocument file."
 				       (format "  Zip failed with error (%s)"
 					       err-string)))))
-		  cmds)
-		 ;; Zip file is now in the rightful place.
-		 (rename-file target-name target)))
-	     (message "Created %s" target)
+		  cmds)))
+	     ;; Move the zip file from temporary work directory to
+	     ;; user-mandated location.
+	     (rename-file (concat org-e-odt-zip-dir target-name) target)
+	     (message "Created %s" (expand-file-name target))
 	     ;; Cleanup work directory and work files.
 	     (funcall --cleanup-xml-buffers)
 	     ;; Open the OpenDocument file in archive-mode for
