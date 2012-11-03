@@ -2545,8 +2545,6 @@ Return the updated communication channel."
 ;; was within an item, the item should contain the headline.  That's
 ;; why file inclusion should be done before any structure can be
 ;; associated to the file, that is before parsing.
-;;
-;; Macro are expanded with `org-export-expand-macro'.
 
 (defun org-export-as
   (backend &optional subtreep visible-only body-only ext-plist noexpand)
@@ -2986,6 +2984,28 @@ Caption lines are separated by a white space."
 	  (setq caption (nconc (list " ") (copy-sequence cap) caption)))))))
 
 
+;;;; For Derived Back-ends
+;;
+;; `org-export-with-backend' is a function allowing to locally use
+;; another back-end to transcode some object or element.  In a derived
+;; back-end, it may be used as a fall-back function once all specific
+;; cases have been treated.
+
+(defun org-export-with-backend (back-end data &rest args)
+  "Call a transcoder from BACK-END on DATA."
+  (org-export-barf-if-invalid-backend back-end)
+  (let ((type (org-element-type data)))
+    (if (or (memq type '(nil org-data)))
+	(error "No foreign transcoder available")
+      (let ((transcoder (cdr (assq type
+				   (symbol-value
+				    (intern (format "org-%s-translate-alist"
+						    back-end)))))))
+	(if (not (functionp transcoder))
+	    (error "No foreign transcoder available")
+	  (apply transcoder data args))))))
+
+
 ;;;; For Export Snippets
 ;;
 ;; Every export snippet is transmitted to the back-end.  Though, the
@@ -3153,6 +3173,10 @@ INFO is the plist used as a communication channel."
 ;; `org-export-low-level-p', `org-export-first-sibling-p' and
 ;; `org-export-last-sibling-p' are three useful predicates when it
 ;; comes to fulfill the `:headline-levels' property.
+;;
+;; `org-export-get-tags', `org-export-get-category' and
+;; `org-export-get-node-property' extract useful information from an
+;; headline or a parent headline.  They all handle inheritance.
 
 (defun org-export-get-relative-level (headline info)
   "Return HEADLINE relative level within current parsed tree.

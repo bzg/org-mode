@@ -725,8 +725,7 @@ used as a communication channel."
 			    path
 			    contents))))))))
      ;; Otherwise, use `e-latex' back-end.
-     (t (funcall (cdr (assq 'link org-e-latex-translate-alist))
-		 link contents info)))))
+     (t (org-export-with-backend 'e-latex link contents info)))))
 
 
 ;;;; Plain List
