@@ -506,7 +506,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
    (org-test-with-temp-text "#+BEGIN_CENTER\nContents\n#+END_CENTER"
      (progn (org-hide-block-toggle)
 	    (org-end-of-line)
-	    (eolp)))))
+	    (eobp)))))
 
 (ert-deftest test-org/forward-element ()
   "Test `org-forward-element' specifications."

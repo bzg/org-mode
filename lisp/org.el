@@ -21637,37 +21637,39 @@ tags on the first attempt, and only move to after the tags when
 the cursor is already beyond the end of the headline."
   (interactive "P")
   (let ((special (if (consp org-special-ctrl-a/e) (cdr org-special-ctrl-a/e)
-		   org-special-ctrl-a/e))
-        (type (org-element-type
-               (save-excursion (beginning-of-line) (org-element-at-point)))))
-    (cond
-     ((or (not special) arg)
-      (call-interactively
-       (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line)))
-     ((memq type '(headline inlinetask))
-      (let ((pos (point)))
-        (beginning-of-line 1)
-        (if (looking-at (org-re ".*?\\(?:\\([ \t]*\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\)?$"))
-            (if (eq special t)
-                (if (or (< pos (match-beginning 1)) (= pos (match-end 0)))
-                    (goto-char (match-beginning 1))
-                  (goto-char (match-end 0)))
-              (if (or (< pos (match-end 0))
-                      (not (eq this-command last-command)))
-                  (goto-char (match-end 0))
-                (goto-char (match-beginning 1))))
-          (call-interactively
-           (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line)))))
-     ((memq type
-            '(center-block comment-block drawer dynamic-block example-block
-                           export-block item plain-list property-drawer
-                           quote-block special-block src-block verse-block))
-      ;; Never move past the ellipsis.
-      (or (eolp) (move-end-of-line 1))
-      (when (org-invisible-p2) (backward-char)))
-     (t
-      (call-interactively
-       (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line))))
+		   org-special-ctrl-a/e)))
+    (if (or (not special) arg)
+	(call-interactively
+	 (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line))
+      (let* ((element (save-excursion (beginning-of-line)
+				      (org-element-at-point)))
+	     (type (org-element-type element)))
+	(cond
+	 ((memq type '(headline inlinetask))
+	  (let ((pos (point)))
+	    (beginning-of-line 1)
+	    (if (looking-at (org-re ".*?\\(?:\\([ \t]*\\)\\(:[[:alnum:]_@#%:]+:\\)?[ \t]*\\)?$"))
+		(if (eq special t)
+		    (if (or (< pos (match-beginning 1)) (= pos (match-end 0)))
+			(goto-char (match-beginning 1))
+		      (goto-char (match-end 0)))
+		  (if (or (< pos (match-end 0))
+			  (not (eq this-command last-command)))
+		      (goto-char (match-end 0))
+		    (goto-char (match-beginning 1))))
+	      (call-interactively
+	       (if (fboundp 'move-end-of-line) 'move-end-of-line
+		 'end-of-line)))))
+	 ((memq type
+		'(center-block comment-block drawer dynamic-block example-block
+			       export-block item plain-list property-drawer
+			       quote-block special-block src-block verse-block))
+	  ;; If element is hidden, `move-end-of-line' would put point
+	  ;; after it.  Use `end-of-line' to stay on current line.
+	  (call-interactively 'end-of-line))
+	 (t
+	  (call-interactively
+	   (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line))))))
     (org-no-warnings (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
