@@ -144,27 +144,6 @@ This is a list of symbols, the following are valid:
 	   (const :tag "Tags defined in current line" local-tags)
 	   (const :tag "All tags, including inherited ones" all-tags))))
 
-(defcustom org-e-icalendar-with-tasks nil
-  "Non-nil means export to iCalendar files should also cover TODO items.
-
-Valid values are:
-t                    include tasks independent of state.
-`todo'               include only tasks that are not yet done.
-`done'               include only tasks that are already done.
-nil                  ignore all tasks.
-list of keywords     include tasks with these keywords.
-`unblocked'          include all TODO items that are not blocked.
-
-This variable has precedence over `org-export-with-tasks'.  It
-can also be set with the #+OPTIONS line,
-e.g. \"tasks:unblocked\"."
-  :group 'org-export-e-icalendar
-  :type '(choice
-	  (const :tag "None" nil)
-	  (const :tag "Unfinished" t)
-	  (const :tag "Unblocked" unblocked)
-	  (const :tag "All" all)))
-
 (defcustom org-e-icalendar-with-timestamps 'active
   "Non-nil means make an event from plain time stamps.
 
@@ -180,6 +159,23 @@ It can also be set with the #+OPTIONS line, e.g. \"<:t\"."
 	  (const :tag "Only active timestamps" active)
 	  (const :tag "Only inactive timestamps" inactive)
 	  (const :tag "No timestamp" nil)))
+
+(defcustom org-e-icalendar-include-todo nil
+  "Non-nil means create VTODO components from TODO items.
+
+Valid values are:
+nil                  don't include any task.
+t                    include tasks that are not in DONE state.
+`unblocked'          include all TODO items that are not blocked.
+`all'                include both done and not done items."
+  :group 'org-export-e-icalendar
+  :type '(choice
+	  (const :tag "None" nil)
+	  (const :tag "Unfinished" t)
+	  (const :tag "Unblocked" unblocked)
+	  (const :tag "All" all)
+	  (repeat :tag "Specific TODO keywords"
+		  (string :tag "Keyword"))))
 
 (defcustom org-e-icalendar-include-bbdb-anniversaries nil
   "Non-nil means a combined iCalendar file should include anniversaries.
@@ -268,8 +264,8 @@ re-read the iCalendar file.")
   :options-alist
   ((:exclude-tags
     "ICALENDAR_EXCLUDE_TAGS" nil org-e-icalendar-exclude-tags split)
-   (:with-tasks nil "tasks" org-e-icalendar-with-tasks)
    (:with-timestamps nil "<" org-e-icalendar-with-timestamps)
+   (:with-vtodo nil nil org-e-icalendar-include-todo)
    ;; The following property will be non-nil when export has been
    ;; started from org-agenda-mode.  In this case, any entry without
    ;; a non-nil "ICALENDAR_MARK" property will be ignored.
@@ -577,10 +573,13 @@ inlinetask within the section."
 	    ;; If so, call `org-e-icalendar--vtodo' to transcode it
 	    ;; into a "VTODO" component.
 	    (when (and todo-type
-		       (not (and (eq (plist-get info :with-tasks) 'unblocked)
-				 (eq (org-element-type entry) 'headline)
-				 (org-e-icalendar-blocked-headline-p
-				  entry info))))
+		       (case (plist-get info :with-vtodo)
+			 (all t)
+			 (unblocked
+			  (and (eq type 'headline)
+			       (not (org-e-icalendar-blocked-headline-p
+				     entry info))))
+			 ('t (eq todo-type 'todo))))
 	      (org-e-icalendar--vtodo entry uid summary loc desc cat))
 	    ;; Diary-sexp: Collect every diary-sexp element within
 	    ;; ENTRY and transcode them.  If ENTRY is an headline,
