@@ -355,29 +355,42 @@ it, in order to make a complete line (e.g. \"DTSTART\").
 
 When optional argument END is non-nil, use end of time range.
 Also increase the hour by two (if time string contains a time),
-or the day by one (if it does not contain a time).
+or the day by one (if it does not contain a time) when no
+explicit ending time is specified.
 
 When optional argument UTC is non-nil, time will be expressed in
 Universal Time, ignoring `org-e-icalendar-date-time-format'.
 This is mandatory for \"DTSTAMP\" property."
-  (let* ((with-time-p (org-element-property :minute-start timestamp))
+  (let* ((year-start (org-element-property :year-start timestamp))
+	 (year-end (org-element-property :year-end timestamp))
+	 (month-start (org-element-property :month-start timestamp))
+	 (month-end (org-element-property :month-end timestamp))
+	 (day-start (org-element-property :day-start timestamp))
+	 (day-end (org-element-property :day-end timestamp))
+	 (hour-start (org-element-property :hour-start timestamp))
+	 (hour-end (org-element-property :hour-end timestamp))
+	 (minute-start (org-element-property :minute-start timestamp))
+	 (minute-end (org-element-property :minute-end timestamp))
+	 (with-time-p minute-start)
+	 (equal-bounds-p
+	  (equal (list year-start month-start day-start hour-start minute-start)
+		 (list year-end month-end day-end hour-end minute-end)))
 	 (mi (cond ((not with-time-p) 0)
-		   ((not end) (org-element-property :minute-start timestamp))
-		   (org-agenda-default-appointment-duration
-		    (+ (org-element-property :minute-end timestamp)
-		       org-agenda-default-appointment-duration))
-		   (t (org-element-property :minute-end timestamp))))
+		   ((not end) minute-start)
+		   ((and org-agenda-default-appointment-duration equal-bounds-p)
+		    (+ minute-end org-agenda-default-appointment-duration))
+		   (t minute-end)))
 	 (h (cond ((not with-time-p) 0)
-		  ((not end) (org-element-property :hour-start timestamp))
-		  (org-agenda-default-appointment-duration
-		   (org-element-property :hour-end timestamp))
-		  (t (+ (org-element-property :hour-end timestamp) 2))))
-	 (d (cond ((not end) (org-element-property :day-start timestamp))
-		  ((not with-time-p)
-		   (1+ (org-element-property :day-end timestamp)))
-		  (t (org-element-property :day-end timestamp))))
-	 (m (org-element-property (if end :month-end :month-start) timestamp))
-	 (y (org-element-property (if end :year-end :year-start) timestamp)))
+		  ((not end) hour-start)
+		  ((or (not equal-bounds-p)
+		       org-agenda-default-appointment-duration)
+		   hour-end)
+		  (t (+ hour-end 2))))
+	 (d (cond ((not end) day-start)
+		  ((not with-time-p) (1+ day-end))
+		  (t day-end)))
+	 (m (if end month-end month-start))
+	 (y (if end year-end year-start)))
     (concat
      keyword
      (format-time-string
