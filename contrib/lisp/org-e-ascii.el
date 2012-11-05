@@ -308,7 +308,7 @@ Otherwise, place it right after it."
 (defcustom org-e-ascii-format-drawer-function nil
   "Function called to format a drawer in ASCII.
 
-The function must accept two parameters:
+The function must accept three parameters:
   NAME      the drawer name, like \"LOGBOOK\"
   CONTENTS  the contents of the drawer.
   WIDTH     the text width within the drawer.
@@ -319,9 +319,9 @@ nil to ignore the drawer.
 For example, the variable could be set to the following function
 in order to mimic default behaviour:
 
-\(defun org-e-ascii-format-drawer-default \(name contents width\)
+\(defun org-e-ascii-format-drawer-default (name contents width)
   \"Format a drawer element for ASCII export.\"
-  contents\)"
+  contents)"
   :group 'org-export-e-ascii
   :type 'function)
 
