@@ -1631,8 +1631,8 @@ The template may still contain \"%?\" for cursor positioning."
 
 (defun org-capture--expand-keyword-in-embedded-elisp (attr)
   "Recursively replace capture link keywords in ATTR sexp.
-Such keywords are prefixed with "%:".  See `org-capture-template'
-for more information."
+Such keywords are prefixed with \"%:\".  See
+`org-capture-template' for more information."
   (cond ((consp attr)
 	 (mapcar 'org-capture--expand-keyword-in-embedded-elisp attr))
 	((symbolp attr)
