@@ -21331,10 +21331,12 @@ tags on the first attempt, and only move to after the tags when
 the cursor is already beyond the end of the headline."
   (interactive "P")
   (let ((special (if (consp org-special-ctrl-a/e) (cdr org-special-ctrl-a/e)
-		   org-special-ctrl-a/e)))
-    (if (or (not special) arg)
-	(call-interactively
-	 (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line))
+		   org-special-ctrl-a/e))
+	(move-fun (cond ((org-bound-and-true-p visual-line-mode)
+			 'end-of-visual-line)
+			((fboundp 'move-end-of-line) 'move-end-of-line)
+			(t 'end-of-line))))
+    (if (or (not special) arg) (call-interactively move-fun)
       (let* ((element (save-excursion (beginning-of-line)
 				      (org-element-at-point)))
 	     (type (org-element-type element)))
@@ -21351,19 +21353,12 @@ the cursor is already beyond the end of the headline."
 			  (not (eq this-command last-command)))
 		      (goto-char (match-end 0))
 		    (goto-char (match-beginning 1))))
-	      (call-interactively
-	       (if (fboundp 'move-end-of-line) 'move-end-of-line
-		 'end-of-line)))))
-	 ((memq type
-		'(center-block comment-block drawer dynamic-block example-block
-			       export-block item plain-list property-drawer
-			       quote-block special-block src-block verse-block))
+	      (call-interactively move-fun))))
+	 ((org-element-property :hiddenp element)
 	  ;; If element is hidden, `move-end-of-line' would put point
 	  ;; after it.  Use `end-of-line' to stay on current line.
 	  (call-interactively 'end-of-line))
-	 (t
-	  (call-interactively
-	   (if (fboundp 'move-end-of-line) 'move-end-of-line 'end-of-line))))))
+	 (t (call-interactively move-fun)))))
     (org-no-warnings (and (featurep 'xemacs) (setq zmacs-region-stays t)))))
 
 (define-key org-mode-map "\C-a" 'org-beginning-of-line)
