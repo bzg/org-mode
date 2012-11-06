@@ -1943,10 +1943,11 @@ code ---- the results are extracted in the syntax of the source
 		 ((member "prepend" result-params)))) ; already there
 	      (setq results-switches
 		    (if results-switches (concat " " results-switches) ""))
-	      (let ((wrap (lambda (start finish)
+	      (let ((wrap (lambda (start finish &optional no-escape)
 			    (goto-char end) (insert (concat finish "\n"))
 			    (goto-char beg) (insert (concat start "\n"))
-			    (org-escape-code-in-region (point) end)
+			    (unless no-escape
+			      (org-escape-code-in-region (point) end))
 			    (goto-char end) (goto-char (point-at-eol))
 			    (setq end (point-marker))))
 		    (proper-list-p (lambda (it) (and (listp it) (null (cdr (last it)))))))
@@ -2002,7 +2003,7 @@ code ---- the results are extracted in the syntax of the source
 		 ((or (member "drawer" result-params)
 		      ;; Stay backward compatible with <7.9.2
 		      (member "wrap" result-params))
-		  (funcall wrap ":RESULTS:" ":END:"))
+		  (funcall wrap ":RESULTS:" ":END:" 'no-escape))
 		 ((and (not (funcall proper-list-p result))
 		       (not (member "file" result-params)))
 		  (org-babel-examplize-region beg end results-switches)
