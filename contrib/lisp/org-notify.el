@@ -106,12 +106,21 @@
          (cdr (assoc (match-string 3 str) conv))
          (if (= (length (match-string 1 str)) 1) -1 1)))))
 
+(defun org-notify-convert-deadline (orig)
+  "Convert original deadline from `org-element-parse-buffer' to
+simple timestamp string."
+  (if orig
+      (replace-regexp-in-string "^<\\|>$" ""
+				(plist-get (plist-get orig 'timestamp)
+					   :raw-value))))
+
 (defun org-notify-make-todo (heading &rest ignored)
   "Create one todo item."
   (macrolet ((get (k) `(plist-get list ,k))
              (pr (k v) `(setq result (plist-put result ,k ,v))))
     (let* ((list (nth 1 heading))      (notify (or (get :notify) "default"))
-           (deadline (get :deadline))  (heading (get :raw-value))
+           (deadline (org-notify-convert-deadline (get :deadline)))
+	   (heading (get :raw-value))
            result)
       (when (and (eq (get :todo-type) 'todo) heading deadline)
         (pr :heading heading)     (pr :notify (intern notify))
