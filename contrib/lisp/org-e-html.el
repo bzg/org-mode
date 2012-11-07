@@ -2109,8 +2109,7 @@ standalone images, do the following.
 				 element org-e-html-inline-image-rules)
 				(org-export-get-parent element)))
 		     (t nil))))
-    (when paragraph
-      (assert (eq (org-element-type paragraph) 'paragraph))
+    (when (eq (org-element-type paragraph) 'paragraph)
       (when (or (not (and (boundp 'org-e-html-standalone-image-predicate)
 			  (functionp org-e-html-standalone-image-predicate)))
 		(funcall org-e-html-standalone-image-predicate paragraph))
