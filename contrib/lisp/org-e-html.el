@@ -1190,14 +1190,6 @@ Replaces invalid characters with \"_\"."
 	"<table>\n%s\n</table>\n"
 	(mapconcat 'org-e-html-format-footnote-definition fn-alist "\n"))))))
 
-(defun org-e-html-format-date (info)
-  (let ((date (org-export-data (plist-get info :date) info)))
-    (cond
-     ((and date (string-match "%" date))
-      (format-time-string date))
-     (date date)
-     (t (format-time-string "%Y-%m-%d %T %Z")))))
-
 
 
 ;;; Template
@@ -1209,6 +1201,9 @@ INFO is a plist used as a communication channel."
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
 			(and auth (org-export-data auth info)))))
+	 (date (and (plist-get info :with-date)
+		    (let ((date (plist-get info :date)))
+		      (and date (org-export-data date info)))))
 	 (description (plist-get info :description))
 	 (keywords (plist-get info :keywords)))
     (concat
@@ -1217,16 +1212,16 @@ INFO is a plist used as a communication channel."
       "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>"
       (or (and org-e-html-coding-system
 	       (fboundp 'coding-system-get)
-	       (coding-system-get org-e-html-coding-system
-				  'mime-charset))
+	       (coding-system-get org-e-html-coding-system 'mime-charset))
 	  "iso-8859-1"))
      (format "<meta name=\"title\" content=\"%s\"/>\n" title)
      (format "<meta name=\"generator\" content=\"Org-mode\"/>\n")
-     (format "<meta name=\"generated\" content=\"%s\"/>\n"
-	     (org-e-html-format-date info))
-     (format "<meta name=\"author\" content=\"%s\"/>\n" author)
-     (format "<meta name=\"description\" content=\"%s\"/>\n" description)
-     (format "<meta name=\"keywords\" content=\"%s\"/>\n" keywords))))
+     (and date (format "<meta name=\"generated\" content=\"%s\"/>\n" date))
+     (and author (format "<meta name=\"author\" content=\"%s\"/>\n" author))
+     (and description
+	  (format "<meta name=\"description\" content=\"%s\"/>\n" description))
+     (and keywords
+	  (format "<meta name=\"keywords\" content=\"%s\"/>\n" keywords)))))
 
 (defun org-e-html--build-style (info)
   "Return style information for exported document.
@@ -1278,7 +1273,8 @@ INFO is a plist used as a communication channel."
       (let ((preamble-contents
 	     (if (functionp preamble) (funcall preamble info)
 	       (let ((title (org-export-data (plist-get info :title) info))
-		     (date (org-e-html-format-date info))
+		     (date (if (not (plist-get info :with-date)) ""
+			     (org-export-data (plist-get info :date) info)))
 		     (author (if (not (plist-get info :with-author)) ""
 			       (org-export-data (plist-get info :author) info)))
 		     (email (if (not (plist-get info :with-email)) ""
@@ -1305,7 +1301,8 @@ INFO is a plist used as a communication channel."
     (when postamble
       (let ((postamble-contents
 	     (if (functionp postamble) (funcall postamble info)
-	       (let ((date (org-e-html-format-date info))
+	       (let ((date (if (not (plist-get info :with-date)) ""
+			     (org-export-data (plist-get info :date) info)))
 		     (author (let ((author (plist-get info :author)))
 			       (and author (org-export-data author info))))
 		     (email (mapconcat

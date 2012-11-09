@@ -102,8 +102,7 @@
        (?o "As PDF file and open"
 	   (lambda (s v b) (org-open-file (org-e-groff-export-to-pdf s v b))))))
   :options-alist
-  ((:date "DATE" nil org-e-groff-date-format t)
-   (:groff-class "GROFF_CLASS" nil org-e-groff-default-class t)
+  ((:groff-class "GROFF_CLASS" nil org-e-groff-default-class t)
    (:groff-class-options "GROFF_CLASS_OPTIONS" nil nil t)
    (:groff-header-extra "GROFF_HEADER" nil nil newline)))
 
@@ -170,13 +169,6 @@
                         (choice
                          (list :tag "Heading")
                          (function :tag "Hook computing sectioning"))))))
-
-
-(defcustom org-e-groff-date-format
-  (format-time-string "%Y-%m-%d")
-  "Format string for .ND "
-  :group 'org-export-e-groff
-  :type 'boolean)
 
 ;;; Headline
 
@@ -627,8 +619,9 @@ See `org-e-groff-text-markup-alist' for details."
        ""))
 
    ;; 5. Date.
-   (let ((date (org-export-data (plist-get info :date) info)))
-     (and date (format ".ND \"%s\"\n" date)))
+   (when (plist-get info :with-date)
+     (let ((date (org-export-data (plist-get info :date) info)))
+       (and date (format ".ND \"%s\"\n" date))))
 
    ;;
    ;; If Abstract, then Populate Abstract

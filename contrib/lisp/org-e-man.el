@@ -110,8 +110,7 @@
        (?o "As PDF file and open"
 	   (lambda (s v b) (org-open-file (org-e-man-export-to-pdf s v b))))))
   :options-alist
-  ((:date "DATE" nil nil t)
-   (:man-class "MAN_CLASS" nil nil t)
+  ((:man-class "MAN_CLASS" nil nil t)
    (:man-class-options "MAN_CLASS_OPTIONS" nil nil t)
    (:man-header-extra "MAN_HEADER" nil nil newline)))
 
