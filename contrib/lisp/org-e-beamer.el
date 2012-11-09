@@ -860,8 +860,9 @@ holding export options."
 	     (author (format "\\author{%s}\n" author))
 	     (t "\\author{}\n")))
      ;; 6. Date.
-     (when (plist-get info :with-date)
-       (format "\\date{%s}\n" (org-export-data (plist-get info :date) info)))
+     (let ((date (and (plist-get info :with-date)
+		      (org-export-data (plist-get info :date) info))))
+       (format "\\date{%s}\n" (or date "")))
      ;; 7. Title
      (format "\\title{%s}\n" title)
      ;; 8. Hyperref options.

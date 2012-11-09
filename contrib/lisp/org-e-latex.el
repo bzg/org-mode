@@ -1026,9 +1026,9 @@ holding export options."
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     ((or author email) (format "\\author{%s}\n" (or author email)))))
      ;; Date.
-     (if (not (plist-get info :with-date)) "\\date{}\n"
-       (let ((date (org-export-data (plist-get info :date) info)))
-	 (and date (format "\\date{%s}\n" date))))
+     (let ((date (and (plist-get info :with-date)
+		      (org-export-data (plist-get info :date) info))))
+       (format "\\date{%s}\n" (or date "")))
      ;; Title
      (format "\\title{%s}\n" title)
      ;; Hyperref options.
