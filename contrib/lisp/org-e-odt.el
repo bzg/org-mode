@@ -381,11 +381,11 @@ visually."
 	     (lambda (schema-dir)
 	       (when schema-dir
 		 (message "Debug (org-e-odt): Trying %s..." schema-dir)
-		 (when (and (file-readable-p
-			     (expand-file-name "od-manifest-schema-v1.2-cs01.rnc"
+		 (when (and (file-expand-wildcards
+			     (expand-file-name "od-manifest-schema*.rnc"
 					       schema-dir))
-			    (file-readable-p
-			     (expand-file-name "od-schema-v1.2-cs01.rnc"
+			    (file-expand-wildcards
+			     (expand-file-name "od-schema*.rnc"
 					       schema-dir))
 			    (file-readable-p
 			     (expand-file-name "schemas.xml" schema-dir)))
@@ -425,10 +425,10 @@ Also add it to `rng-schema-locating-files'."
     (let ((schema-dir value))
       (set var
 	   (if (and
-		(file-readable-p
-		 (expand-file-name "od-manifest-schema-v1.2-cs01.rnc" schema-dir))
-		(file-readable-p
-		 (expand-file-name "od-schema-v1.2-cs01.rnc" schema-dir))
+		(file-expand-wildcards
+		 (expand-file-name "od-manifest-schema*.rnc" schema-dir))
+		(file-expand-wildcards
+		 (expand-file-name "od-schema*.rnc" schema-dir))
 		(file-readable-p
 		 (expand-file-name "schemas.xml" schema-dir)))
 	       schema-dir
