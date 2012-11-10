@@ -914,18 +914,16 @@ style from the list."
 ;;;; Date
 
 (defun org-e-odt--date (&optional org-ts fmt)
-  (save-match-data
-    (let* ((time
-	    (and (stringp org-ts)
-		 (string-match org-ts-regexp0 org-ts)
-		 (apply 'encode-time
-			(org-fix-decoded-time
-			 (org-parse-time-string (match-string 0 org-ts) t)))))
-	   date)
-      (cond
-       (fmt (format-time-string fmt time))
-       (t (setq date (format-time-string "%Y-%m-%dT%H:%M:%S%z" time))
-	  (format "%s:%s" (substring date 0 -2) (substring date -2)))))))
+  (let* ((t1 (and (stringp org-ts)
+		  (string-match org-ts-regexp0 org-ts)
+		  (org-parse-time-string (match-string 0 org-ts) t)))
+	 (with-hm (and (nth 1 t1) (nth 2 t1)))
+	 (time (and t1 (apply 'encode-time (org-fix-decoded-time t1))))
+	 date)
+    (cond
+     (fmt (format-time-string fmt time))
+     (t (setq date (format-time-string "%Y-%m-%dT%H:%M:%S%z" time))
+	(format "%s:%s" (substring date 0 -2) (substring date -2))))))
 
 ;;;; Frame
 
@@ -1130,8 +1128,6 @@ original parsed data.  INFO is a plist holding export options."
   (let ((title (org-export-data (plist-get info :title) info))
 	(author (let ((author (plist-get info :author)))
 		  (if (not author) "" (org-export-data author info))))
-	(date (org-e-odt--date
-	       (org-export-data (plist-get info :date) info)))
 	(email (plist-get info :email))
 	(keywords (plist-get info :keywords))
 	(description (plist-get info :description)))
@@ -1148,8 +1144,13 @@ original parsed data.  INFO is a plist holding export options."
        <office:meta>\n"
       (format "<dc:creator>%s</dc:creator>\n" author)
       (format "<meta:initial-creator>%s</meta:initial-creator>\n" author)
-      (format "<dc:date>%s</dc:date>\n" date)
-      (format "<meta:creation-date>%s</meta:creation-date>\n" date)
+      ;; Date, if required.
+      (when (plist-get info :with-date)
+	(let ((date (org-e-odt--date (org-export-data
+				      (plist-get info :date) info))))
+	  (concat
+	   (format "<dc:date>%s</dc:date>\n" date)
+	   (format "<meta:creation-date>%s</meta:creation-date>\n" date))))
       (format "<meta:generator>%s</meta:generator>\n"
 	      (let ((creator-info (plist-get info :with-creator)))
 		(if (or (not creator-info) (eq creator-info 'comment)) ""
@@ -1289,33 +1290,29 @@ original parsed data.  INFO is a plist holding export options."
 	    (author (and (plist-get info :with-author)
 			 (let ((auth (plist-get info :author)))
 			   (and auth (org-export-data auth info)))))
-	    (date (org-export-data (plist-get info :date) info))
-	    (iso-date (org-e-odt--date date))
-	    (date (org-e-odt--date date "%d %b %Y"))
 	    (email (plist-get info :email))
-	    ;; switch on or off above vars based on user settings
+	    ;; Switch on or off above vars based on user settings
 	    (author (and (plist-get info :with-author) (or author email)))
-	    ;; (date (and (plist-get info :time-stamp-file) date))
 	    (email (and (plist-get info :with-email) email)))
        (concat
-	;; title
+	;; Title.
 	(when title
 	  (concat
 	   (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 		   "OrgTitle" (format "\n<text:title>%s</text:title>" title))
-	   ;; separator
+	   ;; Separator.
 	   "\n<text:p text:style-name=\"OrgTitle\"/>"))
 	(cond
 	 ((and author (not email))
-	  ;; author only
+	  ;; Author only.
 	  (concat
 	   (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 		   "OrgSubtitle"
 		   (format "<text:initial-creator>%s</text:initial-creator>" author))
-	   ;; separator
+	   ;; Separator.
 	   "\n<text:p text:style-name=\"OrgSubtitle\"/>"))
 	 ((and author email)
-	  ;; author and email
+	  ;; Author and E-mail.
 	  (concat
 	   (format
 	    "\n<text:p text:style-name=\"%s\">%s</text:p>"
@@ -1324,20 +1321,26 @@ original parsed data.  INFO is a plist holding export options."
 	     "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
 	     (concat "mailto:" email)
 	     (format "<text:initial-creator>%s</text:initial-creator>" author)))
-	   ;; separator
+	   ;; Separator.
 	   "\n<text:p text:style-name=\"OrgSubtitle\"/>")))
-	;; date
-	(when date
-	  (concat
-	   (format
-	    "\n<text:p text:style-name=\"%s\">%s</text:p>"
-	    "OrgSubtitle"
-	    (format
-	     "\n<text:date style:data-style-name=\"%s\" text:date-value=\"%s\">%s</text:date>"
+	;; Date, if required.
+	(when (plist-get info :with-date)
+	  (let* ((date (org-export-data (plist-get info :date) info))
+		 (iso-date (org-e-odt--date date))
+		 ;; Note that OrgOdtStyles.xml uses en/GB.  Render the
+		 ;; date in a style that is consistent with
+		 ;; "OrgDate"-style.
+		 (date (org-e-odt--date date "%d/%m/%Y")))
+	    (concat
+	     (format
+	      "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	      "OrgSubtitle"
+	      (format
+	       "\n<text:date style:data-style-name=\"%s\" text:date-value=\"%s\">%s</text:date>"
 
-	     "OrgDate" iso-date date))
-	   ;; separator
-	   "<text:p text:style-name=\"OrgSubtitle\"/>")))))
+	       "OrgDate" iso-date date))
+	     ;; Separator
+	     "<text:p text:style-name=\"OrgSubtitle\"/>"))))))
     ;; Table of Contents
     (let* ((with-toc (plist-get info :with-toc))
 	   (depth (and with-toc (if (wholenump with-toc)
