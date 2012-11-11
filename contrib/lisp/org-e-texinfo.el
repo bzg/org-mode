@@ -1749,7 +1749,7 @@ none."
 	      (errors ""))
 	  (when (save-excursion
 		  (re-search-forward "perhaps incorrect sectioning?" nil t))
-	    (setq errors (concat errors " [incorrect sectionnng]")))
+	    (setq errors (concat errors " [incorrect sectioning]")))
 	  (when (save-excursion
 		  (re-search-forward "missing close brace" nil t))
 	    (setq errors (concat errors " [syntax error]")))
