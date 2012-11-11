@@ -886,23 +886,33 @@ BACKEND is the back-end being used for transcoding.  INFO is
 a plist containing publishing options.
 
 The index relative to current file is stored as an alist.  An
-association has the following shape: \(TERM FILE-NAME PARENT),
+association has the following shape: (TERM FILE-NAME PARENT),
 where TERM is the indexed term, as a string, FILE-NAME is the
 original full path of the file where the term in encountered, and
-PARENT is the headline element containing the original index
-keyword."
-  (org-e-publish-cache-set-file-property
-   (plist-get info :input-file) :index
-   (delete-dups
-    (org-element-map
-     tree 'keyword
-     (lambda (k)
-       (when (string= (downcase (org-element-property :key k))
-		      "index")
-	 (let ((index (org-element-property :value k))
-	       (parent (org-export-get-parent-headline k)))
-	   (list index (plist-get info :input-file) parent))))
-     info)))
+PARENT is a reference to the headline, if any, containing the
+original index keyword.  When non-nil, this reference is a cons
+cell.  Its CAR is a symbol among `id', `custom-id' and `name' and
+its CDR is a string."
+  (let ((file (plist-get info :input-file)))
+    (org-e-publish-cache-set-file-property
+     file :index
+     (delete-dups
+      (org-element-map
+       tree 'keyword
+       (lambda (k)
+	 (when (equal (upcase (org-element-property :key k)) "INDEX")
+	   (let ((parent (org-export-get-parent-headline k)))
+	     (list (org-element-property :value k)
+		   file
+		   (cond
+		    ((not parent) nil)
+		    ((let ((id (org-element-property :id parent)))
+		       (and id (cons 'id id))))
+		    ((let ((id (org-element-property :custom-id parent)))
+		       (and id (cons 'custom-id id))))
+		    (t (cons 'name
+			     (org-element-property :raw-value parent))))))))
+       info))))
   ;; Return parse-tree to avoid altering output.
   tree)
 
@@ -959,14 +969,11 @@ publishing directory."
 		      (format
 		       "[[%s][%s]]"
 		       ;; Destination.
-		       (cond
-			((not target) (format "file:%s" file))
-			((let ((id (org-element-property :id target)))
-			   (and id (format "id:%s" id))))
-			((let ((id (org-element-property :custom-id target)))
-			   (and id (format "file:%s::#%s" file id))))
-			(t (format "file:%s::*%s" file
-				   (org-element-property :raw-value target))))
+		       (case (car target)
+			 ('nil (format "file:%s" file))
+			 (id (format "id:%s" (cdr target)))
+			 (custom-id (format "file:%s::#%s" file (cdr target)))
+			 (otherwise (format "file:%s::*%s" file (cdr target))))
 		       ;; Description.
 		       (car (last entry)))))
 		  "\n"))))
