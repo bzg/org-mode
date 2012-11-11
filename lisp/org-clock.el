@@ -556,28 +556,23 @@ pointing to it."
 If an effort estimate was defined for the current item, use
 01:30/01:50 format (clocked/estimated).
 If not, show simply the clocked time like 01:50."
-  (let* ((clocked-time (org-clock-get-clocked-time))
-	 (h (floor clocked-time 60))
-	 (m (- clocked-time (* 60 h))))
+  (let ((clocked-time (org-clock-get-clocked-time)))
     (if org-clock-effort
 	(let* ((effort-in-minutes
 		(org-duration-string-to-minutes org-clock-effort))
-	       (effort-h (floor effort-in-minutes 60))
-	       (effort-m (- effort-in-minutes (* effort-h 60)))
 	       (work-done-str
 		(org-propertize
-		 (format org-time-clocksum-format h m)
+		 (org-minutes-to-clocksum-string clocked-time)
 		 'face (if (and org-clock-task-overrun (not org-clock-task-overrun-text))
 			   'org-mode-line-clock-overrun 'org-mode-line-clock)))
-	       (effort-str (format org-time-clocksum-format effort-h effort-m))
+	       (effort-str (org-minutes-to-clocksum-string effort-in-minutes))
 	       (clockstr (org-propertize
 			  (concat  " [%s/" effort-str
 				   "] (" (replace-regexp-in-string "%" "%%" org-clock-heading) ")")
 			  'face 'org-mode-line-clock)))
 	  (format clockstr work-done-str))
-      (org-propertize (format
-		       (concat "[" org-time-clocksum-format " (%s)]")
-		       h m org-clock-heading)
+      (org-propertize (concat "[" (org-minutes-to-clocksum-string clocked-time)
+			      (format " (%s)" org-clock-heading) "]")
 		      'face 'org-mode-line-clock))))
 
 (defun org-clock-get-last-clock-out-time ()
@@ -650,7 +645,7 @@ the mode line."
 	      (setq value (- current value))
 	    (if (equal ?+ sign) (setq value (+ current value)))))
 	(setq value (max 0 value)
-	      org-clock-effort (org-minutes-to-hh:mm-string value))
+	      org-clock-effort (org-minutes-to-clocksum-string value))
 	(org-entry-put org-clock-marker "Effort" org-clock-effort)
 	(org-clock-update-mode-line)
 	(message "Effort is now %s" org-clock-effort))
@@ -1528,8 +1523,9 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 						"\\>"))))
 		  (org-todo org-clock-out-switch-to-state))))))
 	  (force-mode-line-update)
-	  (message (concat "Clock stopped at %s after HH:MM = " org-time-clocksum-format "%s") te h m
-		   (if remove " => LINE REMOVED" ""))
+	  (message (concat "Clock stopped at %s after "
+			   (org-minutes-to-clocksum-string (+ (* 60 h) m)) "%s")
+		   te (if remove " => LINE REMOVED" ""))
           (run-hooks 'org-clock-out-hook)
 	  (unless (org-clocking-p)
 	    (org-clock-delete-current)))))))
@@ -1797,12 +1793,9 @@ Use \\[org-clock-remove-overlays] to remove the subtree times."
 	(when org-remove-highlights-with-change
 	  (org-add-hook 'before-change-functions 'org-clock-remove-overlays
 			nil 'local))))
-    (if org-time-clocksum-use-fractional
-	(message (concat "Total file time: " org-time-clocksum-fractional-format
-			 " (%d hours and %d minutes)")
-		 (/ (+ (* h 60.0) m) 60.0) h m)
-      (message (concat "Total file time: " org-time-clocksum-format
-		       " (%d hours and %d minutes)") h m h m))))
+      (message (concat "Total file time: "
+		       (org-minutes-to-clocksum-string org-clock-file-total-minutes)
+		       " (%d hours and %d minutes)") h m)))
 
 (defvar org-clock-overlays nil)
 (make-variable-buffer-local 'org-clock-overlays)
@@ -1814,9 +1807,6 @@ This creates a new overlay and stores it in `org-clock-overlays', so that it
 will be easy to remove."
   (let* ((c 60) (h (floor (/ time 60))) (m (- time (* 60 h)))
 	 (l (if level (org-get-valid-level level 0) 0))
-	 (fmt (concat "%s " (if org-time-clocksum-use-fractional
-				org-time-clocksum-fractional-format
-			      org-time-clocksum-format) "%s"))
 	 (off 0)
 	 ov tx)
     (org-move-to-column c)
@@ -1825,14 +1815,9 @@ will be easy to remove."
     (setq ov (make-overlay (point-at-bol) (point-at-eol))
     	  tx (concat (buffer-substring (point-at-bol) (point))
 		     (make-string (+ off (max 0 (- c (current-column)))) ?.)
-		     (org-add-props (if org-time-clocksum-use-fractional
-					(format fmt
-						(make-string l ?*)
-						(/ (+ (* h 60.0) m) 60.0)
-						(make-string (- 16 l) ?\ ))
-				      (format fmt
-					      (make-string l ?*) h m
-					      (make-string (- 16 l) ?\ )))
+		     (org-add-props (concat (make-string l ?*) " "
+					    (org-minutes-to-clocksum-string time)
+					    (make-string (- 16 l) ?\ ))
 			 (list 'face 'org-clock-overlay))
 		     ""))
     (if (not (featurep 'xemacs))
@@ -2392,7 +2377,7 @@ from the dynamic block definition."
      (if properties (make-string (length properties) ?|) "")  ; properties columns, maybe
      (concat (format org-clock-total-time-cell-format (nth 7 lwords))  "| ") ; instead of a headline
      (format org-clock-total-time-cell-format
-	     (org-minutes-to-hh:mm-string (or total-time 0))) ; the time
+	     (org-minutes-to-clocksum-string (or total-time 0))) ; the time
      "|\n")                          ; close line
 
     ;; Now iterate over the tables and insert the data
@@ -2416,7 +2401,7 @@ from the dynamic block definition."
 		     (if level-p   "| " "") ; level column, maybe
 		     (if timestamp "| " "") ; timestamp column, maybe
 		     (if properties (make-string (length properties) ?|) "")  ;properties columns, maybe
-		     (org-minutes-to-hh:mm-string (nth 1 tbl))))) ; the time
+		     (org-minutes-to-clocksum-string (nth 1 tbl))))) ; the time
 
 	  ;; Get the list of node entries and iterate over it
 	  (setq entries (nth 2 tbl))
@@ -2449,7 +2434,7 @@ from the dynamic block definition."
 	     hlc headline hlc "|"                                ; headline
 	     (make-string (min (1- ntcol) (or (- level 1))) ?|)
 					; empty fields for higher levels
-	     hlc (org-minutes-to-hh:mm-string (nth 3 entry)) hlc ; time
+	     hlc (org-minutes-to-clocksum-string (nth 3 entry)) hlc ; time
 	     "|\n"                                               ; close line
 	     )))))
     ;; When exporting subtrees or regions the region might be
