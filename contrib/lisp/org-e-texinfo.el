@@ -386,7 +386,7 @@ inserted in a specific location."
     (org-element-map (plist-get info :parse-tree) 'headline
 		     (lambda (copy)
 		       (when (org-element-property :copying copy)
-			 (push copy copying))) info 't)
+			 (push copy copying))) info t)
     ;; Retrieve the single entry
     (car copying)))
 
@@ -459,7 +459,7 @@ retrieved."
 	 ;; Is exported as-is (value)
 	 ((org-element-map contents '(verbatim code)
 			   (lambda (value)
-			     (org-element-property :value value))))
+			     (org-element-property :value value)) info))
 	 ;; Has content and recurse into the content
 	 ((org-element-contents contents)
 	  (org-e-texinfo--sanitize-headline-contents
@@ -550,7 +550,8 @@ contextual information."
 		  ;; Do not take note of footnotes or copying headlines
 		  (not (org-element-property :copying head))
 		  (not (org-element-property :footnote-section-p head)))
-	     (push head seq)))))
+	     (push head seq))))
+     info)
     ;; Return the list of headlines (reverse to have in actual order)
     (reverse seq)))
 
@@ -912,7 +913,7 @@ holding contextual information."
 		      (lambda (ref)
 			(if (member title (org-element-property :title ref))
 			    (push ref heading)))
-		      info 't))
+		      info t))
 		 (setq listing (org-e-texinfo--build-menu
 				(car heading) level info))
 	 	 (if listing
@@ -1216,7 +1217,7 @@ are generated directly."
 	 (top (org-element-map
 	       parse 'headline
 	       (lambda (headline)
-		 (org-element-property :level headline)) info 't)))
+		 (org-element-property :level headline)) info t)))
     (cond
      ;; Generate the main menu
      ((eq level 'main)
@@ -1470,8 +1471,7 @@ TABLE is the table element to transcode.  INFO is a plist used as
 a communication channel."
   (let* ((rows (org-element-map table 'table-row 'identity info))
 	 (collected (loop for row in rows collect
-			  (org-element-map
-			   row 'table-cell 'identity info)))
+			  (org-element-map row 'table-cell 'identity info)))
 	 (number-cells (length (car collected)))
 	 cells counts)
     (loop for row in collected do
