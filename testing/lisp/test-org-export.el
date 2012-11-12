@@ -23,18 +23,22 @@ BACKEND is the name of the back-end.  BODY is the body to
 execute.  The defined back-end simply returns parsed data as Org
 syntax."
   (declare (debug (form body)) (indent 1))
-  `(let ((,(intern (format "org-%s-translate-alist" backend))
-	  ',(let (transcode-table)
-	      (dolist (type (append org-element-all-elements
-				    org-element-all-objects)
-			    transcode-table)
-		(push
-		 (cons type
-		       (lambda (obj contents info)
-			 (funcall
-			  (intern (format "org-element-%s-interpreter" type))
-			  obj contents)))
-		 transcode-table)))))
+  `(let ((org-export-registered-backends
+	  ',(list
+	     (list backend
+		   :translate-alist
+		   (let (transcode-table)
+		     (dolist (type (append org-element-all-elements
+					   org-element-all-objects)
+				   transcode-table)
+		       (push
+			(cons type
+			      (lambda (obj contents info)
+				(funcall
+				 (intern (format "org-element-%s-interpreter"
+						 type))
+				 obj contents)))
+			transcode-table)))))))
      (progn ,@body)))
 
 (defmacro org-test-with-parsed-data (data &rest body)
@@ -353,13 +357,6 @@ text
       (forward-line)
       (org-cycle)
       (should (equal (org-export-as 'test nil 'visible) "* Head1\n"))
-      ;; Body only.
-      (flet ((org-test-template (body info) (format "BEGIN\n%sEND" body)))
-	(push '(template . org-test-template) org-test-translate-alist)
-	(should (equal (org-export-as 'test nil nil 'body-only)
-		       "* Head1\n** Head2\ntext\n*** Head3\n"))
-	(should (equal (org-export-as 'test)
-		       "BEGIN\n* Head1\n** Head2\ntext\n*** Head3\nEND")))
       ;; Region.
       (goto-char (point-min))
       (forward-line 3)
@@ -382,7 +379,17 @@ text
 #+END_SRC"
 	    (org-test-with-backend test
 	      (forward-line 1)
-	      (org-export-as 'test 'subtree))))))
+	      (org-export-as 'test 'subtree)))))
+  ;; Body only.
+  (org-test-with-temp-text "Text"
+    (org-test-with-backend test
+      (plist-put
+       (cdr (assq 'test org-export-registered-backends))
+       :translate-alist
+       (cons (cons 'template (lambda (body info) (format "BEGIN\n%sEND" body)))
+	     (org-export-backend-translate-table 'test)))
+      (should (equal (org-export-as 'test nil nil 'body-only) "Text\n"))
+      (should (equal (org-export-as 'test) "BEGIN\nText\nEND")))))
 
 (ert-deftest test-org-export/expand-include ()
   "Test file inclusion in an Org buffer."
@@ -571,16 +578,18 @@ body\n")))
   "Test export snippets transcoding."
   (org-test-with-temp-text "@@test:A@@@@t:B@@"
     (org-test-with-backend test
-      (let ((org-test-translate-alist
-	     (cons (cons 'export-snippet
-			 (lambda (snippet contents info)
-			   (when (eq (org-export-snippet-backend snippet) 'test)
-			     (org-element-property :value snippet))))
-		   org-test-translate-alist)))
-	(let ((org-export-snippet-translation-alist nil))
-	  (should (equal (org-export-as 'test) "A\n")))
-	(let ((org-export-snippet-translation-alist '(("t" . "test"))))
-	  (should (equal (org-export-as 'test) "AB\n")))))))
+      (plist-put
+       (cdr (assq 'test org-export-registered-backends))
+       :translate-alist
+       (cons (cons 'export-snippet
+		   (lambda (snippet contents info)
+		     (when (eq (org-export-snippet-backend snippet) 'test)
+		       (org-element-property :value snippet))))
+	     (org-export-backend-translate-table 'test)))
+      (let ((org-export-snippet-translation-alist nil))
+	(should (equal (org-export-as 'test) "A\n")))
+      (let ((org-export-snippet-translation-alist '(("t" . "test"))))
+	(should (equal (org-export-as 'test) "AB\n"))))))
 
 
 
@@ -595,29 +604,29 @@ body\n")))
      (equal
       '((1 . "A\n") (2 . "B") (3 . "C") (4 . "D"))
       (org-test-with-parsed-data
-	  "Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
-	(org-element-map
-	 tree 'footnote-reference
-	 (lambda (ref)
-	   (let ((def (org-export-get-footnote-definition ref info)))
-	     (cons (org-export-get-footnote-number ref info)
-		   (if (eq (org-element-property :type ref) 'inline) (car def)
-		     (car (org-element-contents
-			   (car (org-element-contents def))))))))
-	 info))))
+       "Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
+       (org-element-map
+	tree 'footnote-reference
+	(lambda (ref)
+	  (let ((def (org-export-get-footnote-definition ref info)))
+	    (cons (org-export-get-footnote-number ref info)
+		  (if (eq (org-element-property :type ref) 'inline) (car def)
+		    (car (org-element-contents
+			  (car (org-element-contents def))))))))
+	info))))
     ;; 2. Test nested footnotes order.
     (org-test-with-parsed-data
-	"Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
-      (should
-       (equal
-	'((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
-	(org-element-map
-	 tree 'footnote-reference
-	 (lambda (ref)
-	   (when (org-export-footnote-first-reference-p ref info)
-	     (cons (org-export-get-footnote-number ref info)
-		   (org-element-property :label ref))))
-	 info))))
+     "Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
+     (should
+      (equal
+       '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
+       (org-element-map
+	tree 'footnote-reference
+	(lambda (ref)
+	  (when (org-export-footnote-first-reference-p ref info)
+	    (cons (org-export-get-footnote-number ref info)
+		  (org-element-property :label ref))))
+	info))))
     ;; 3. Test nested footnote in invisible definitions.
     (org-test-with-temp-text "Text[1]\n\n[1] B [2]\n\n[2] C."
       ;; Hide definitions.
@@ -636,22 +645,24 @@ body\n")))
 \[fn:2] B [fn:3] [fn::D].
 
 \[fn:3] C."
-      (should (= (length (org-export-collect-footnote-definitions tree info))
-		 4)))
+			       (should (= (length (org-export-collect-footnote-definitions tree info))
+					  4)))
     ;; 5. Test export of footnotes defined outside parsing scope.
     (org-test-with-temp-text "[fn:1] Out of scope
 * Title
 Paragraph[fn:1]"
       (org-test-with-backend test
-	(let ((org-test-translate-alist
-	       (cons (cons 'footnote-reference
-			   (lambda (fn contents info)
-			     (org-element-interpret-data
-			      (org-export-get-footnote-definition fn info))))
-		     org-test-translate-alist)))
-	  (forward-line)
-	  (should (equal "ParagraphOut of scope\n"
-			 (org-export-as 'test 'subtree))))))))
+	(plist-put
+	 (cdr (assq 'test org-export-registered-backends))
+	 :translate-alist
+	 (cons (cons 'footnote-reference
+		     (lambda (fn contents info)
+		       (org-element-interpret-data
+			(org-export-get-footnote-definition fn info))))
+	       (org-export-backend-translate-table 'test)))
+	(forward-line)
+	(should (equal "ParagraphOut of scope\n"
+		       (org-export-as 'test 'subtree)))))))
 
 
 

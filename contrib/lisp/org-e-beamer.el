@@ -262,13 +262,14 @@ brackets.  Return overlay specification, as a string, or nil."
 
 (org-export-define-derived-backend e-beamer e-latex
   :export-block "BEAMER"
-  :sub-menu-entry
-  (?l (?B "As TEX buffer (Beamer)" org-e-beamer-export-as-latex)
-      (?b "As TEX file (Beamer)" org-e-beamer-export-to-latex)
-      (?P "As PDF file (Beamer)" org-e-beamer-export-to-pdf)
-      (?O "As PDF file and open (Beamer)"
-	  (lambda (s v b)
-	    (org-open-file (org-e-beamer-export-to-pdf s v b)))))
+  :menu-entry
+  (?l 1
+      ((?B "As TEX buffer (Beamer)" org-e-beamer-export-as-latex)
+       (?b "As TEX file (Beamer)" org-e-beamer-export-to-latex)
+       (?P "As PDF file (Beamer)" org-e-beamer-export-to-pdf)
+       (?O "As PDF file and open (Beamer)"
+	   (lambda (s v b)
+	     (org-open-file (org-e-beamer-export-to-pdf s v b))))))
   :options-alist
   ((:beamer-theme "BEAMER_THEME" nil org-e-beamer-theme)
    (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
@@ -393,9 +394,7 @@ CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
   ;; Use `e-latex' back-end output, inserting overlay specifications
   ;; if possible.
-  (let ((latex-headline
-	 (funcall (cdr (assq 'headline org-e-latex-translate-alist))
-		  headline contents info))
+  (let ((latex-headline (org-export-with-backend 'e-latex headline contents info))
 	(mode-specs (org-element-property :beamer-act headline)))
     (if (and mode-specs
 	     (string-match "\\`\\\\\\(.*?\\)\\(?:\\*\\|\\[.*\\]\\)?{"
@@ -645,8 +644,7 @@ contextual information."
   (let ((action (let ((first-element (car (org-element-contents item))))
 		  (and (eq (org-element-type first-element) 'paragraph)
 		       (org-e-beamer--element-has-overlay-p first-element))))
-	(output (funcall (cdr (assq 'item org-e-latex-translate-alist))
-			 item contents info)))
+	(output (org-export-with-backend 'e-latex item contents info)))
     (if (not action) output
       ;; If the item starts with a paragraph and that paragraph starts
       ;; with an export snippet specifying an overlay, insert it after
@@ -677,8 +675,7 @@ channel."
 	 (when (wholenump depth) (format "\\setcounter{tocdepth}{%s}\n" depth))
 	 "\\tableofcontents" options "\n"
 	 "\\end{frame}")))
-     (t (funcall (cdr (assq 'keyword org-e-latex-translate-alist))
-		 keyword contents info)))))
+     (t (org-export-with-backend 'e-latex keyword contents info)))))
 
 
 ;;;; Link

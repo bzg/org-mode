@@ -48,11 +48,10 @@
 ;; buffer as a string.
 ;;
 ;; An export back-end is defined with `org-export-define-backend',
-;; which sets one mandatory variable: his translation table.  Its name
-;; is always `org-BACKEND-translate-alist' where BACKEND stands for
-;; the name chosen for the back-end.  Its value is an alist whose keys
-;; are elements and objects types and values translator functions.
-;; See function's docstring for more information about translators.
+;; which defines one mandatory information: his translation table.
+;; Its value is an alist whose keys are elements and objects types and
+;; values translator functions.  See function's docstring for more
+;; information about translators.
 ;;
 ;; Optionally, `org-export-define-backend' can also support specific
 ;; buffer keywords, OPTION keyword's items and filters.  Also refer to
@@ -251,6 +250,17 @@ whose extension is either \"png\", \"jpeg\", \"jpg\", \"gif\",
 \"tiff\", \"tif\", \"xbm\", \"xpm\", \"pbm\", \"pgm\" or \"ppm\".
 See `org-export-inline-image-p' for more information about
 rules.")
+
+(defconst org-export-registered-backends nil
+  "List of backends currently available in the exporter.
+
+A backend is stored as a list where CAR is its name, as a symbol,
+and CDR is a plist with the following properties:
+`:filters-alist', `:menu-entry', `:options-alist' and
+`:translate-alist'.
+
+This variable is set with `org-export-define-backend' and
+`org-export-define-derived-backend' functions.")
 
 
 
@@ -702,13 +712,19 @@ to standard mode."
 
 
 
-;;; Defining New Back-ends
+;;; Defining Back-ends
 ;;
 ;; `org-export-define-backend' is the standard way to define an export
 ;; back-end.  It allows to specify translators, filters, buffer
 ;; options and a menu entry.  If the new back-end shares translators
 ;; with another back-end, `org-export-define-derived-backend' may be
 ;; used instead.
+;;
+;; Internally, a back-end is stored as a list, of which CAR is the
+;; name of the back-end, as a symbol, and CDR a plist.  Accessors to
+;; properties of a given back-end are: `org-export-backend-filters',
+;; `org-export-backend-menu', `org-export-backend-options' and
+;; `org-export-backend-translate-table'.
 ;;
 ;; Eventually `org-export-barf-if-invalid-backend' returns an error
 ;; when a given back-end hasn't been registered yet.
@@ -774,12 +790,20 @@ keywords are understood:
     Menu entry for the export dispatcher.  It should be a list
     like:
 
-      \(KEY DESCRIPTION ACTION-OR-MENU)
+      \(KEY DESCRIPTION-OR-ORDINAL ACTION-OR-MENU)
 
     where :
 
       KEY is a free character selecting the back-end.
-      DESCRIPTION is a string naming the back-end.
+
+      DESCRIPTION-OR-ORDINAL is either a string or a number.
+
+      If it is a string, is will be used to name the back-end in
+      its menu entry.  If it is a number, the following menu will
+      be displayed as a sub-menu of the back-end with the same
+      KEY.  Also, the number will be used to determine in which
+      order such sub-menus will appear (lowest first).
+
       ACTION-OR-MENU is either a function or an alist.
 
       If it is an action, it will be called with three arguments:
@@ -828,21 +852,14 @@ keywords are understood:
         (:options-alist (setq options (pop body)))
         (t (pop body))))
     `(progn
-       ;; Define translators.
-       (defvar ,(intern (format "org-%s-translate-alist" backend)) ',translators
-	 "Alist between element or object types and translators.")
-       ;; Define options.
-       ,(when options
-	  `(defconst ,(intern (format "org-%s-options-alist" backend)) ',options
-	     ,(format "Alist between %s export properties and ways to set them.
-See `org-export-options-alist' for more information on the
-structure of the values."
-		      backend)))
-       ;; Define filters.
-       ,(when filters
-	  `(defconst ,(intern (format "org-%s-filters-alist" backend)) ',filters
-	     "Alist between filters keywords and back-end specific filters.
-See `org-export-filters-alist' for more information."))
+       ;; Register back-end.
+       (add-to-list
+	'org-export-registered-backends
+	',(cons backend
+		(append (list :translate-alist translators)
+			(and filters (list :filters-alist filters))
+			(and options (list :options-alist options))
+			(and menu-entry (list :menu-entry menu-entry)))))
        ;; Tell parser to not parse EXPORT-BLOCK blocks.
        ,(when export-block
 	  `(mapc
@@ -850,10 +867,6 @@ See `org-export-filters-alist' for more information."))
 	      (add-to-list 'org-element-block-name-alist
 			   `(,name . org-element-export-block-parser)))
 	    ',export-block))
-       ;; Add an entry for back-end in `org-export-dispatch'.
-       ,(when menu-entry
-	  `(unless (assq (car ',menu-entry) org-export-dispatch-menu-entries)
-	     (add-to-list 'org-export-dispatch-menu-entries ',menu-entry)))
        ;; Splice in the body, if any.
        ,@body)))
 
@@ -893,28 +906,6 @@ keywords are understood:
     `org-export-options-alist' for more information about
     structure of the values.
 
-  :sub-menu-entry
-
-    Append entries to an existing menu in the export dispatcher.
-    The associated value should be a list whose CAR is the
-    character selecting the menu to expand and CDR a list of
-    entries following the pattern:
-
-      \(KEY DESCRIPTION ACTION)
-
-    where KEY is a free character triggering the action,
-    DESCRIPTION is a string defining the action, and ACTION is
-    a function that will be called with three arguments:
-    SUBTREEP, VISIBLE-ONLY and BODY-ONLY.  See `org-export-as'
-    for further explanations.
-
-    Valid values include:
-
-      \(?l (?P \"As PDF file (Beamer)\" org-e-beamer-export-to-pdf)
-          \(?O \"As PDF file and open (Beamer)\"
-              \(lambda (s v b)
-                \(org-open-file (org-e-beamer-export-to-pdf s v b)))))
-
   :translate-alist
 
     Alist of element and object types and transcoders that will
@@ -934,7 +925,7 @@ The back-end could then be called with, for example:
   \(org-export-to-buffer 'my-latex \"*Test my-latex*\")"
   (declare (debug (&define name sexp [&rest [keywordp sexp]] def-body))
 	   (indent 2))
-  (let (export-block filters menu-entry options sub-menu-entry translate)
+  (let (export-block filters menu-entry options sub-menu-entry translators)
     (while (keywordp (car body))
       (case (pop body)
 	(:export-block (let ((names (pop body)))
@@ -945,9 +936,21 @@ The back-end could then be called with, for example:
 	(:menu-entry (setq menu-entry (pop body)))
         (:options-alist (setq options (pop body)))
 	(:sub-menu-entry (setq sub-menu-entry (pop body)))
-        (:translate-alist (setq translate (pop body)))
+        (:translate-alist (setq translators (pop body)))
         (t (pop body))))
     `(progn
+       ;; Register back-end.
+       (add-to-list
+	'org-export-registered-backends
+	',(cons child
+		(append
+		 (let ((p-table (org-export-backend-translate-table parent)))
+		   (list :translate-alist (append translators p-table)))
+		 (let ((p-filters (org-export-backend-filters parent)))
+		   (list :filters-alist (append filters p-filters)))
+		 (let ((p-options (org-export-backend-options parent)))
+		   (list :options-alist (append options p-options)))
+		 (and menu-entry (list :menu-entry menu-entry)))))
        ;; Tell parser to not parse EXPORT-BLOCK blocks.
        ,(when export-block
 	  `(mapc
@@ -955,49 +958,32 @@ The back-end could then be called with, for example:
 	      (add-to-list 'org-element-block-name-alist
 			   `(,name . org-element-export-block-parser)))
 	    ',export-block))
-       ;; Define filters.
-       ,(let ((parent-filters (intern (format "org-%s-filters-alist" parent))))
-	  (when (or (boundp parent-filters) filters)
-	    `(defconst ,(intern (format "org-%s-filters-alist" child))
-	       ',(append filters
-			 (and (boundp parent-filters)
-			      (copy-sequence (symbol-value parent-filters))))
-	       "Alist between filters keywords and back-end specific filters.
-See `org-export-filters-alist' for more information.")))
-       ;; Define options.
-       ,(let ((parent-options (intern (format "org-%s-options-alist" parent))))
-	  (when (or (boundp parent-options) options)
-	    `(defconst ,(intern (format "org-%s-options-alist" child))
-	       ',(append options
-			 (and (boundp parent-options)
-			      (copy-sequence (symbol-value parent-options))))
-	       ,(format "Alist between %s export properties and ways to set them.
-See `org-export-options-alist' for more information on the
-structure of the values."
-			child))))
-       ;; Define translators.
-       (defvar ,(intern (format "org-%s-translate-alist" child))
-	 ',(append translate
-		   (copy-sequence
-		    (symbol-value
-		     (intern (format "org-%s-translate-alist" parent)))))
-	 "Alist between element or object types and translators.")
-       ;; Add an entry for back-end in `org-export-dispatch'.
-       ,(when menu-entry
-	  `(unless (assq (car ',menu-entry) org-export-dispatch-menu-entries)
-	     (add-to-list 'org-export-dispatch-menu-entries ',menu-entry)))
-       ,(when sub-menu-entry
-	  (let ((menu (nth 2 (assq (car sub-menu-entry)
-				   org-export-dispatch-menu-entries))))
-	    (when menu `(nconc ',menu
-			       ',(org-remove-if (lambda (e) (member e menu))
-						(cdr sub-menu-entry))))))
        ;; Splice in the body, if any.
        ,@body)))
 
+(defun org-export-backend-filters (backend)
+  "Return filters for BACKEND."
+  (plist-get (cdr (assq backend org-export-registered-backends))
+	     :filters-alist))
+
+(defun org-export-backend-menu (backend)
+  "Return menu entry for BACKEND."
+  (plist-get (cdr (assq backend org-export-registered-backends))
+	     :menu-entry))
+
+(defun org-export-backend-options (backend)
+  "Return export options for BACKEND."
+  (plist-get (cdr (assq backend org-export-registered-backends))
+	     :options-alist))
+
+(defun org-export-backend-translate-table (backend)
+  "Return translate table for BACKEND."
+  (plist-get (cdr (assq backend org-export-registered-backends))
+	     :translate-alist))
+
 (defun org-export-barf-if-invalid-backend (backend)
   "Signal an error if BACKEND isn't defined."
-  (unless (boundp (intern (format "org-%s-translate-alist" backend)))
+  (unless (org-export-backend-translate-table backend)
     (error "Unknown \"%s\" back-end: Aborting export" backend)))
 
 
@@ -1327,8 +1313,7 @@ inferior to file-local settings."
     :back-end
     backend
     :translate-alist
-    (let ((trans-alist (intern (format "org-%s-translate-alist" backend))))
-      (when (boundp trans-alist) (symbol-value trans-alist)))
+    (org-export-backend-translate-table backend)
     :footnote-definition-alist
     ;; Footnotes definitions must be collected in the original
     ;; buffer, as there's no insurance that they will still be in
@@ -1366,12 +1351,8 @@ inferior to file-local settings."
   "Parse an OPTIONS line and return values as a plist.
 Optional argument BACKEND is a symbol specifying which back-end
 specific items to read, if any."
-  (let* ((all
-	  (append org-export-options-alist
-		  (and backend
-		       (let ((var (intern
-				   (format "org-%s-options-alist" backend))))
-			 (and (boundp var) (eval var))))))
+  (let* ((all (append org-export-options-alist
+		      (and backend (org-export-backend-options backend))))
 	 ;; Build an alist between #+OPTION: item and property-name.
 	 (alist (delq nil
 		      (mapcar (lambda (e)
@@ -1441,10 +1422,7 @@ for export.  Return options as a plist."
 			   value))))))))
 	;; Also look for both general keywords and back-end specific
 	;; options if BACKEND is provided.
-	(append (and backend
-		     (let ((var (intern
-				 (format "org-%s-options-alist" backend))))
-		       (and (boundp var) (symbol-value var))))
+	(append (and backend (org-export-backend-options backend))
 		org-export-options-alist)))
      ;; Return value.
      plist)))
@@ -1494,13 +1472,9 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 	       (setq plist (org-combine-plists plist prop)))))))
      ;; 2. Standard options, as in `org-export-options-alist'.
      (let* ((all (append org-export-options-alist
-			 ;; Also look for back-end specific options
-			 ;; if BACKEND is defined.
-			 (and backend
-			      (let ((var
-				     (intern
-				      (format "org-%s-options-alist" backend))))
-				(and (boundp var) (eval var))))))
+			 ;; Also look for back-end specific options if
+			 ;; BACKEND is defined.
+			 (and backend (org-export-backend-options backend))))
 	    ;; Build ALIST between keyword name and property name.
 	    (alist
 	     (delq nil (mapcar
@@ -1569,10 +1543,7 @@ Optional argument BACKEND, if non-nil, is a symbol specifying
 which back-end specific export options should also be read in the
 process."
   (let ((all (append org-export-options-alist
-		     (and backend
-			  (let ((var (intern
-				      (format "org-%s-options-alist" backend))))
-			    (and (boundp var) (symbol-value var))))))
+		     (and backend (org-export-backend-options backend))))
 	;; Output value.
 	plist)
     (mapc
@@ -2064,9 +2035,9 @@ Any element in `:ignore-list' will be skipped when using
 ;;
 ;; From the developer side, filters sets can be installed in the
 ;; process with the help of `org-export-define-backend', which
-;; internally sets `org-BACKEND-filters-alist' variable.  Each
-;; association has a key among the following symbols and a function or
-;; a list of functions as value.
+;; internally stores filters as an alist.  Each association has a key
+;; among the following symbols and a function or a list of functions
+;; as value.
 ;;
 ;; - `:filter-parse-tree' applies directly on the complete parsed
 ;;   tree.  It's the only filters set that doesn't apply to a string.
@@ -2513,19 +2484,16 @@ Return the updated communication channel."
 	    (setq plist (plist-put plist (car p) (eval (cdr p)))))
 	  org-export-filters-alist)
     ;; Prepend back-end specific filters to that list.
-    (let ((back-end-filters (intern (format "org-%s-filters-alist"
-					    (plist-get info :back-end)))))
-      (when (boundp back-end-filters)
-	(mapc (lambda (p)
-		;; Single values get consed, lists are prepended.
-		(let ((key (car p)) (value (cdr p)))
-		  (when value
-		    (setq plist
-			  (plist-put
-			   plist key
-			   (if (atom value) (cons value (plist-get plist key))
-			     (append value (plist-get plist key))))))))
-	      (eval back-end-filters))))
+    (mapc (lambda (p)
+	    ;; Single values get consed, lists are prepended.
+	    (let ((key (car p)) (value (cdr p)))
+	      (when value
+		(setq plist
+		      (plist-put
+		       plist key
+		       (if (atom value) (cons value (plist-get plist key))
+			 (append value (plist-get plist key))))))))
+	  (org-export-backend-filters (plist-get info :back-end)))
     ;; Return new communication channel.
     (org-combine-plists info plist)))
 
@@ -3007,13 +2975,10 @@ Caption lines are separated by a white space."
   (let ((type (org-element-type data)))
     (if (or (memq type '(nil org-data)))
 	(error "No foreign transcoder available")
-      (let ((transcoder (cdr (assq type
-				   (symbol-value
-				    (intern (format "org-%s-translate-alist"
-						    back-end)))))))
-	(if (not (functionp transcoder))
-	    (error "No foreign transcoder available")
-	  (apply transcoder data args))))))
+      (let ((transcoder
+	     (cdr (assq type (org-export-backend-translate-table back-end)))))
+	(if (functionp transcoder) (apply transcoder data args)
+	  (error "No foreign transcoder available"))))))
 
 
 ;;;; For Export Snippets
@@ -4745,12 +4710,6 @@ to `:default' encoding. If it fails, return S."
 ;; for its interface, which, in turn, delegates response to key
 ;; pressed to `org-export-dispatch-action'.
 
-(defvar org-export-dispatch-menu-entries nil
-  "List of menu entries available for `org-export-dispatch'.
-This variable shouldn't be set directly.  Set-up :menu-entry
-keyword in either `org-export-define-backend' or
-`org-export-define-derived-backend' instead.")
-
 ;;;###autoload
 (defun org-export-dispatch ()
   "Export dispatcher for Org mode.
@@ -4815,22 +4774,35 @@ back to standard interface."
 	    (if (or (eq access-key t) (eq access-key first-key))
 		(org-add-props key nil 'face 'org-warning)
 	      (org-no-properties key))))
-	 ;; Make sure order of menu doesn't depend on the order in
-	 ;; which back-ends are loaded.
-	 (backends (sort (copy-sequence org-export-dispatch-menu-entries)
-			 (lambda (a b) (< (car a) (car b)))))
+	 ;; Prepare menu entries by extracting them from
+	 ;; `org-export-registered-backends', and sorting them by
+	 ;; access key and by ordinal, if any.
+	 (backends (sort
+		    (sort
+		     (delq nil
+			   (mapcar (lambda (b)
+				     (org-export-backend-menu (car b)))
+				   org-export-registered-backends))
+		     (lambda (a b)
+		       (let ((key-a (nth 1 a))
+			     (key-b (nth 1 b)))
+			 (cond ((and (numberp key-a) (numberp key-b))
+				(< key-a key-b))
+			       ((numberp key-b) t)))))
+		    (lambda (a b) (< (car a) (car b)))))
 	 ;; Compute a list of allowed keys based on the first key
 	 ;; pressed, if any.  Some keys (?1, ?2, ?3, ?4 and ?q) are
 	 ;; always available.
 	 (allowed-keys
-	  (nconc (list ?1 ?2 ?3 ?4)
-		 (mapcar 'car
-			 (if (not first-key) backends
-			   (nth 2 (assq first-key backends))))
-		 (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
-		       ((not first-key) (list ?P)))
-		 (when expertp (list ??))
-		 (list ?q)))
+	  (org-uniquify
+	   (nconc (list ?1 ?2 ?3 ?4)
+		  (mapcar 'car
+			  (if (not first-key) backends
+			    (nth 2 (assq first-key backends))))
+		  (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
+			((not first-key) (list ?P)))
+		  (when expertp (list ??))
+		  (list ?q))))
 	 ;; Build the help menu for standard UI.
 	 (help
 	  (unless expertp
@@ -4838,7 +4810,7 @@ back to standard interface."
 	     ;; Options are hard-coded.
 	     (format "Options
     [%s] Body only:    %s       [%s] Visible only:     %s
-    [%s] Export scope: %s   [%s] Force publishing: %s\n\n"
+    [%s] Export scope: %s   [%s] Force publishing: %s\n"
 		     (funcall fontify-key "1" t)
 		     (if (memq 'body options) "On " "Off")
 		     (funcall fontify-key "2" t)
@@ -4847,31 +4819,37 @@ back to standard interface."
 		     (if (memq 'subtree options) "Subtree" "Buffer ")
 		     (funcall fontify-key "4" t)
 		     (if (memq 'force options) "On " "Off"))
-	     ;; Display registered back-end entries.
-	     (mapconcat
-	      (lambda (entry)
-		(let ((top-key (car entry)))
-		  (concat
-		   (format "[%s] %s\n"
-			   (funcall fontify-key (char-to-string top-key))
-			   (nth 1 entry))
-		   (let ((sub-menu (nth 2 entry)))
-		     (unless (functionp sub-menu)
-		       ;; Split sub-menu into two columns.
-		       (let ((index -1))
-			 (concat
-			  (mapconcat
-			   (lambda (sub-entry)
-			     (incf index)
-			     (format (if (zerop (mod index 2)) "    [%s] %-24s"
-				       "[%s] %s\n")
-				     (funcall fontify-key
-					      (char-to-string (car sub-entry))
-					      top-key)
-				     (nth 1 sub-entry)))
-			   sub-menu "")
-			  (when (zerop (mod index 2)) "\n"))))))))
-	      backends "\n")
+	     ;; Display registered back-end entries.  When a key
+	     ;; appears for the second time, do not create another
+	     ;; entry, but append its sub-menu to existing menu.
+	     (let (last-key)
+	       (mapconcat
+		(lambda (entry)
+		  (let ((top-key (car entry)))
+		    (concat
+		     (unless (eq top-key last-key)
+		       (setq last-key top-key)
+		       (format "\n[%s] %s\n"
+			       (funcall fontify-key (char-to-string top-key))
+			       (nth 1 entry)))
+		     (let ((sub-menu (nth 2 entry)))
+		       (unless (functionp sub-menu)
+			 ;; Split sub-menu into two columns.
+			 (let ((index -1))
+			   (concat
+			    (mapconcat
+			     (lambda (sub-entry)
+			       (incf index)
+			       (format
+				(if (zerop (mod index 2)) "    [%s] %-24s"
+				  "[%s] %s\n")
+				(funcall fontify-key
+					 (char-to-string (car sub-entry))
+					 top-key)
+				(nth 1 sub-entry)))
+			     sub-menu "")
+			    (when (zerop (mod index 2)) "\n"))))))))
+		backends ""))
 	     ;; Publishing menu is hard-coded.
 	     (format "\n[%s] Publish
     [%s] Current file            [%s] Current project
