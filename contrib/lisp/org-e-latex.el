@@ -1069,11 +1069,6 @@ holding export options."
 
 ;;; Transcode Functions
 
-;;;; Babel Call
-;;
-;; Babel Calls are ignored.
-
-
 ;;;; Bold
 
 (defun org-e-latex-bold (bold contents info)
@@ -1119,16 +1114,6 @@ information."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (org-e-latex--text-markup (org-element-property :value code) 'code))
-
-
-;;;; Comment
-;;
-;; Comments are ignored.
-
-
-;;;; Comment Block
-;;
-;; Comment Blocks are ignored.
 
 
 ;;;; Drawer
@@ -1206,11 +1191,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
    (format "\\begin{verbatim}\n%s\\end{verbatim}"
 	   (org-remove-indentation
 	    (org-element-property :value fixed-width)))))
-
-
-;;;; Footnote Definition
-;;
-;; Footnote Definitions are ignored.
 
 
 ;;;; Footnote Reference
@@ -1293,10 +1273,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      (format "\\footnotemark[%s]{}"
 	     (org-export-get-footnote-number footnote-reference info)))
     ;; Use \footnotemark if reference is within another footnote
-    ;; reference or footnote definition.
+    ;; reference, footnote definition or table cell.
     ((loop for parent in (org-export-get-genealogy footnote-reference)
 	   thereis (memq (org-element-type parent)
-			 '(footnote-reference footnote-definition)))
+			 '(footnote-reference footnote-definition table-cell)))
      "\\footnotemark")
     ;; Otherwise, define it with \footnote command.
     (t
@@ -1458,11 +1438,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       (format "\\rule{%s}{%s}"
 	      (or (plist-get attr :width) "\\linewidth")
 	      (or (plist-get attr :thickness) "0.5pt"))))))
-
-
-;;;; Inline Babel Call
-;;
-;; Inline Babel Calls are ignored.
 
 
 ;;;; Inline Src Block
@@ -2233,7 +2208,10 @@ contextual information."
    ((eq (org-element-property :type table) 'table.el)
     (org-e-latex-table--table.el-table table contents info))
    ;; Case 3: Standard table.
-   (t (org-e-latex-table--org-table table contents info))))
+   (t (concat (org-e-latex-table--org-table table contents info)
+	      ;; When there are footnote references within the table,
+	      ;; insert they definitions just after it.
+	      (org-e-latex--delayed-footnotes-definitions table info)))))
 
 (defun org-e-latex-table--align-string (table info)
   "Return an appropriate LaTeX alignment string.

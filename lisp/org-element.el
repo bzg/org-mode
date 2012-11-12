@@ -329,8 +329,8 @@ a secondary string.")
 	       sub/superscript target text-markup)
     (superscript export-snippet inline-babel-call inline-src-block
 		 latex-or-entity sub/superscript target text-markup)
-    (table-cell export-snippet latex-or-entity link macro radio-target
-		sub/superscript target text-markup timestamp)
+    (table-cell export-snippet footnote-reference latex-or-entity link macro
+		radio-target sub/superscript target text-markup timestamp)
     (table-row table-cell)
     (underline export-snippet inline-babel-call inline-src-block latex-or-entity
 	       link radio-target sub/superscript target text-markup timestamp)
