@@ -2302,14 +2302,13 @@ This function assumes TABLE has `org' as its `:type' attribute."
 		  (concat
 		   (format "\\begin{%s}%s\n" float-env placement)
 		   (if org-e-latex-table-caption-above caption "")))
-		(when org-e-latex-tables-centered "\\begin{center}\n")
+		(when org-e-latex-tables-centered "\\centering\n")
 		(format "\\begin{%s}%s{%s}\n%s\\end{%s}"
 			table-env
 			(if width (format "{%s}" width) "")
 			alignment
 			contents
 			table-env)
-		(when org-e-latex-tables-centered "\n\\end{center}")
 		(when float-env
 		  (concat (if org-e-latex-table-caption-above "" caption)
 			  (format "\n\\end{%s}" float-env))))))))
