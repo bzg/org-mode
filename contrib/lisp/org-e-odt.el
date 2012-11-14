@@ -1006,7 +1006,7 @@ style from the list."
 (defun org-e-odt-begin-toc (index-title depth)
   (concat
    (format "
-    <text:table-of-content text:style-name=\"Sect2\" text:protected=\"true\" text:name=\"Table of Contents1\">
+    <text:table-of-content text:style-name=\"OrgIndexSection\" text:protected=\"true\" text:name=\"Table of Contents\">
      <text:table-of-content-source text:outline-level=\"%d\">
       <text:index-title-template text:style-name=\"Contents_20_Heading\">%s</text:index-title-template>
 " depth index-title)
@@ -1381,19 +1381,23 @@ holding contextual information."
   "Transcode a CLOCK element from Org to ODT.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (format "<text:span text:style-name=\"%s\">%s</text:span>"
-	  "OrgTimestampWrapper"
-	  (concat
-	   (format "<text:span text:style-name=\"%s\">%s</text:span>"
-		   "OrgTimestampKeyword" org-clock-string)
-	   (format "<text:span text:style-name=\"%s\">%s</text:span>"
-		   "OrgTimestamp"
-		   (concat
-		    (org-translate-time
-		     (org-element-property :raw-value
-					   (org-element-property :value clock)))
-		    (let ((time (org-element-property :duration clock)))
-		      (and time (format " (%s)" time))))))))
+  (concat
+   ;; Open a paragraph before the first clock line.
+   (and (not (eq (org-element-type (org-export-get-previous-element clock info))
+		 'clock))
+	"\n<text:p text:style-name=\"OrgClock\">")
+   (let ((timestamp (org-element-property :value clock))
+	 (duration (org-element-property :duration clock)))
+     (concat
+      (format "<text:span text:style-name=\"%s\">%s</text:span>"
+	      "OrgTimestampKeyword" org-clock-string)
+      ;; Add a line break after the clock line.
+      (org-e-odt-timestamp timestamp contents info) "<text:tab/>"
+      (and duration (format " (%s)" duration)) "<text:line-break/>"))
+   ;; Close the paragraph after the last clock line.
+   (and (not (eq (org-element-type (org-export-get-next-element clock info))
+		 'clock))
+	"\n</text:p>")))
 
 
 ;;;; Code
