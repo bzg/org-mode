@@ -251,7 +251,7 @@ whose extension is either \"png\", \"jpeg\", \"jpg\", \"gif\",
 See `org-export-inline-image-p' for more information about
 rules.")
 
-(defconst org-export-registered-backends nil
+(defvar org-export-registered-backends nil
   "List of backends currently available in the exporter.
 
 A backend is stored as a list where CAR is its name, as a symbol,
@@ -840,7 +840,7 @@ keywords are understood:
     structure of the values."
   (declare (debug (&define name sexp [&rest [keywordp sexp]] defbody))
 	   (indent 1))
-  (let (export-block filters menu-entry options)
+  (let (export-block filters menu-entry options contents)
     (while (keywordp (car body))
       (case (pop body)
         (:export-block (let ((names (pop body)))
@@ -851,15 +851,15 @@ keywords are understood:
 	(:menu-entry (setq menu-entry (pop body)))
         (:options-alist (setq options (pop body)))
         (t (pop body))))
+    (setq contents (append (list :translate-alist translators)
+			   (and filters (list :filters-alist filters))
+			   (and options (list :options-alist options))
+			   (and menu-entry (list :menu-entry menu-entry))))
     `(progn
        ;; Register back-end.
-       (add-to-list
-	'org-export-registered-backends
-	',(cons backend
-		(append (list :translate-alist translators)
-			(and filters (list :filters-alist filters))
-			(and options (list :options-alist options))
-			(and menu-entry (list :menu-entry menu-entry)))))
+       (let ((registeredp (assq ',backend org-export-registered-backends)))
+	 (if registeredp (setcdr registeredp ',contents)
+	   (push (cons ',backend ',contents) org-export-registered-backends)))
        ;; Tell parser to not parse EXPORT-BLOCK blocks.
        ,(when export-block
 	  `(mapc
@@ -925,7 +925,7 @@ The back-end could then be called with, for example:
   \(org-export-to-buffer 'my-latex \"*Test my-latex*\")"
   (declare (debug (&define name sexp [&rest [keywordp sexp]] def-body))
 	   (indent 2))
-  (let (export-block filters menu-entry options sub-menu-entry translators)
+  (let (export-block filters menu-entry options translators contents)
     (while (keywordp (car body))
       (case (pop body)
 	(:export-block (let ((names (pop body)))
@@ -935,22 +935,21 @@ The back-end could then be called with, for example:
         (:filters-alist (setq filters (pop body)))
 	(:menu-entry (setq menu-entry (pop body)))
         (:options-alist (setq options (pop body)))
-	(:sub-menu-entry (setq sub-menu-entry (pop body)))
         (:translate-alist (setq translators (pop body)))
         (t (pop body))))
+    (setq contents (append
+		    (let ((p-table (org-export-backend-translate-table parent)))
+		      (list :translate-alist (append translators p-table)))
+		    (let ((p-filters (org-export-backend-filters parent)))
+		      (list :filters-alist (append filters p-filters)))
+		    (let ((p-options (org-export-backend-options parent)))
+		      (list :options-alist (append options p-options)))
+		    (and menu-entry (list :menu-entry menu-entry))))
     `(progn
        ;; Register back-end.
-       (add-to-list
-	'org-export-registered-backends
-	',(cons child
-		(append
-		 (let ((p-table (org-export-backend-translate-table parent)))
-		   (list :translate-alist (append translators p-table)))
-		 (let ((p-filters (org-export-backend-filters parent)))
-		   (list :filters-alist (append filters p-filters)))
-		 (let ((p-options (org-export-backend-options parent)))
-		   (list :options-alist (append options p-options)))
-		 (and menu-entry (list :menu-entry menu-entry)))))
+       (let ((registeredp (assq ',child org-export-registered-backends)))
+	 (if registeredp (setcdr registeredp ',contents)
+	   (push (cons ',child ',contents) org-export-registered-backends)))
        ;; Tell parser to not parse EXPORT-BLOCK blocks.
        ,(when export-block
 	  `(mapc
