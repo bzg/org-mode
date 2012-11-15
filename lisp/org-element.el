@@ -3441,14 +3441,21 @@ Assume point is at the beginning of the timestamp."
 	   (date-start (match-string-no-properties 1))
 	   (date-end (match-string 3))
 	   (diaryp (match-beginning 2))
-	   (type (cond (diaryp 'diary)
-		       ((and activep date-end) 'active-range)
-		       (activep 'active)
-		       (date-end 'inactive-range)
-		       (t 'inactive)))
 	   (post-blank (progn (goto-char (match-end 0))
 			      (skip-chars-forward " \t")))
 	   (end (point))
+	   (time-range
+	    (and (not diaryp)
+		 (string-match
+		  "[012]?[0-9]:[0-5][0-9]\\(-\\([012]?[0-9]\\):\\([0-5][0-9]\\)\\)"
+		  date-start)
+		 (cons (string-to-number (match-string 2 date-start))
+		       (string-to-number (match-string 3 date-start)))))
+	   (type (cond (diaryp 'diary)
+		       ((and activep (or date-end time-range)) 'active-range)
+		       (activep 'active)
+		       ((or date-end time-range) 'inactive-range)
+		       (t 'inactive)))
 	   (repeater-props
 	    (and (not diaryp)
 		 (string-match "\\([.+]?\\+\\)\\([0-9]+\\)\\([hdwmy]\\)>"
@@ -3463,18 +3470,8 @@ Assume point is at the beginning of the timestamp."
 		  :repeater-unit
 		  (case (string-to-char (match-string 3 raw-value))
 		    (?h 'hour) (?d 'day) (?w 'week) (?m 'month) (t 'year)))))
-	   time-range year-start month-start day-start hour-start minute-start
-	   year-end month-end day-end hour-end minute-end)
-      ;; Extract time range, if any, and remove it from date start.
-      (setq time-range
-	    (and (not diaryp)
-		 (string-match
-		  "[012]?[0-9]:[0-5][0-9]\\(-\\([012]?[0-9]\\):\\([0-5][0-9]\\)\\)"
-		  date-start)
-		 (cons (string-to-number (match-string 2 date-start))
-		       (string-to-number (match-string 3 date-start)))))
-      (when time-range
-	(setq date-start (replace-match "" nil nil date-start 1)))
+	   year-start month-start day-start hour-start minute-start year-end
+	   month-end day-end hour-end minute-end)
       ;; Parse date-start.
       (unless diaryp
 	(let ((date (org-parse-time-string date-start t)))
