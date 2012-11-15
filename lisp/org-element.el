@@ -3449,7 +3449,6 @@ Assume point is at the beginning of the timestamp."
 	   (post-blank (progn (goto-char (match-end 0))
 			      (skip-chars-forward " \t")))
 	   (end (point))
-	   (with-time-p (string-match "[012]?[0-9]:[0-5][0-9]" date-start))
 	   (repeater-props
 	    (and (not diaryp)
 		 (string-match "\\([.+]?\\+\\)\\([0-9]+\\)\\([hdwmy]\\)>"
@@ -3478,17 +3477,17 @@ Assume point is at the beginning of the timestamp."
 	(setq date-start (replace-match "" nil nil date-start 1)))
       ;; Parse date-start.
       (unless diaryp
-	(let ((date (org-parse-time-string date-start)))
+	(let ((date (org-parse-time-string date-start t)))
 	  (setq year-start (nth 5 date)
 		month-start (nth 4 date)
 		day-start (nth 3 date)
-		hour-start (and with-time-p (nth 2 date))
-		minute-start (and with-time-p (nth 1 date)))))
+		hour-start (nth 2 date)
+		minute-start (nth 1 date))))
       ;; Compute date-end.  It can be provided directly in time-stamp,
       ;; or extracted from time range.  Otherwise, it defaults to the
       ;; same values as date-start.
       (unless diaryp
-	(let ((date (and date-end (org-parse-time-string date-end))))
+	(let ((date (and date-end (org-parse-time-string date-end t))))
 	  (setq year-end (or (nth 5 date) year-start)
 		month-end (or (nth 4 date) month-start)
 		day-end (or (nth 3 date) day-start)
