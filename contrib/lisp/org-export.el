@@ -4793,15 +4793,16 @@ back to standard interface."
 	 ;; pressed, if any.  Some keys (?1, ?2, ?3, ?4 and ?q) are
 	 ;; always available.
 	 (allowed-keys
-	  (org-uniquify
-	   (nconc (list ?1 ?2 ?3 ?4)
-		  (mapcar 'car
-			  (if (not first-key) backends
-			    (nth 2 (assq first-key backends))))
-		  (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
-			((not first-key) (list ?P)))
-		  (when expertp (list ??))
-		  (list ?q))))
+	  (nconc (list ?1 ?2 ?3 ?4)
+		 (if (not first-key) (mapcar 'car backends)
+		   (let (sub-menu)
+		     (dolist (backend backends (mapcar 'car sub-menu))
+		       (when (eq (car backend) first-key)
+			 (setq sub-menu (append (nth 2 backend) sub-menu))))))
+		 (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
+		       ((not first-key) (list ?P)))
+		 (when expertp (list ??))
+		 (list ?q)))
 	 ;; Build the help menu for standard UI.
 	 (help
 	  (unless expertp
@@ -4933,9 +4934,7 @@ options as CDR."
        first-key expertp))
      ;; Action selected: Send key and options back to
      ;; `org-export-dispatch'.
-     ((or first-key
-	  (and (eq first-key ?P) (memq key '(?f ?p ?x ?a)))
-	  (functionp (nth 2 (assq key backends))))
+     ((or first-key (functionp (nth 2 (assq key backends))))
       (cons (cond
 	     ((not first-key) (nth 2 (assq key backends)))
 	     ;; Publishing actions are hard-coded.  Send a special
@@ -4946,7 +4945,14 @@ options as CDR."
 		(?p 'publish-current-project)
 		(?x 'publish-choose-project)
 		(?a 'publish-all)))
-	     (t (nth 2 (assq key (nth 2 (assq first-key backends))))))
+	     ;; Return first action associated to FIRST-KEY + KEY
+	     ;; path. Indeed, derived backends can share the same
+	     ;; FIRST-KEY.
+	     (t (catch 'found
+		  (mapc (lambda (backend)
+			  (let ((match (assq key (nth 2 backend))))
+			    (when match (throw 'found (nth 2 match)))))
+			(member (assq first-key backends) backends)))))
 	    options))
      ;; Otherwise, enter sub-menu.
      (t (org-export-dispatch-ui options key expertp)))))
