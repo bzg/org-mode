@@ -2302,20 +2302,22 @@ This function assumes TABLE has `org' as its `:type' attribute."
        (if (or org-e-latex-table-caption-above (string= "" caption)) ""
 	 (concat (org-trim caption) "\\\\\n"))))
      ;; Others.
-     (t (concat (when float-env
-		  (concat
-		   (format "\\begin{%s}%s\n" float-env placement)
-		   (if org-e-latex-table-caption-above caption "")))
-		(when org-e-latex-tables-centered "\\centering\n")
+     (t (concat (if float-env
+		    (concat
+		     (format "\\begin{%s}%s\n" float-env placement)
+		     (if org-e-latex-table-caption-above caption "")
+		     (when org-e-latex-tables-centered "\\centering\n"))
+		  (when org-e-latex-tables-centered "\\begin{center}\n"))
 		(format "\\begin{%s}%s{%s}\n%s\\end{%s}"
 			table-env
 			(if width (format "{%s}" width) "")
 			alignment
 			contents
 			table-env)
-		(when float-env
-		  (concat (if org-e-latex-table-caption-above "" caption)
-			  (format "\n\\end{%s}" float-env))))))))
+		(if float-env
+		    (concat (if org-e-latex-table-caption-above "" caption)
+			    (format "\n\\end{%s}" float-env))
+		  (when org-e-latex-tables-centered "\n\\end{center}")))))))
 
 (defun org-e-latex-table--table.el-table (table contents info)
   "Return appropriate LaTeX code for a table.el table.
