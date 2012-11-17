@@ -45,8 +45,9 @@
 ;; - Headlines become frames when their level is equal to
 ;;   `org-e-beamer-frame-level' (or "H" value in the OPTIONS line).
 ;;   Though, if an headline in the current tree has a "BEAMER_env"
-;;   (see below) property set to "frame", its level overrides the
-;;   variable.
+;;   (see below) property set to either "frame" or "fullframe", its
+;;   level overrides the variable.  A "fullframe" is a frame with an
+;;   empty (ignored) title.
 ;;
 ;; - All frames' children become block environments.  Special block
 ;;   types can be enforced by setting headline's "BEAMER_env" property
@@ -184,11 +185,12 @@ You might want to put e.g. \"allowframebreaks=0.9\" here."
 "The column widths that should be installed as allowed property values.")
 
 (defconst org-e-beamer-environments-special
-  '(("againframe"     "F")
+  '(("againframe"     "A")
     ("appendix"       "x")
     ("column"         "c")
     ("columns"        "C")
     ("frame"          "f")
+    ("fullframe"      "F")
     ("ignoreheading"  "i")
     ("note"           "n")
     ("noteNH"         "N"))
@@ -372,19 +374,22 @@ INFO is a plist used as a communication channel."
    ;;    farthest.
    (catch 'exit
      (mapc (lambda (parent)
-	     (when (equal (org-element-property :beamer-env parent) "frame")
-	       (throw 'exit (org-export-get-relative-level parent info))))
-	   (reverse (org-export-get-genealogy headline)))
+	     (let ((env (org-element-property :beamer-env parent)))
+	       (when (and env (member (downcase env) '("frame" "fullframe")))
+		 (throw 'exit (org-export-get-relative-level parent info)))))
+	   (nreverse (org-export-get-genealogy headline)))
      nil)
    ;; 2. Look for "frame" environment in HEADLINE.
-   (and (equal (org-element-property :beamer-env headline) "frame")
-	(org-export-get-relative-level headline info))
+   (let ((env (org-element-property :beamer-env headline)))
+     (and env (member (downcase env) '("frame" "fullframe"))
+	  (org-export-get-relative-level headline info)))
    ;; 3. Look for "frame" environment in sub-tree.
    (org-element-map
     headline 'headline
     (lambda (hl)
-      (when (equal (org-element-property :beamer-env hl) "frame")
-	(org-export-get-relative-level hl info)))
+      (let ((env (org-element-property :beamer-env hl)))
+	(when (and env (member (downcase env) '("frame" "fullframe")))
+	  (org-export-get-relative-level hl info))))
     info 'first-match)
    ;; 4. No "frame" environment in tree: use default value.
    (plist-get info :headline-levels)))
@@ -454,9 +459,11 @@ used as a communication channel."
 		",")
 	       'option))
 	    ;; Title.
-	    (format "{%s}"
-		    (org-export-data (org-element-property :title headline)
-				     info))
+	    (let ((env (org-element-property :beamer-env headline)))
+	      (format "{%s}"
+		      (if (and env (equal (downcase env) "fullframe")) ""
+			(org-export-data
+			 (org-element-property :title headline) info))))
 	    "\n"
 	    ;; The following workaround is required in fragile frames
 	    ;; as Beamer will append "\par" to the beginning of the
@@ -1110,7 +1117,7 @@ aid, but the tag does not have any semantic meaning."
 	  (org-delete-property "BEAMER_col")))
        ;; For an "againframe" section, automatically ask for reference
        ;; to resumed frame and overlay specifications.
-       ((eq org-last-tag-selection-key ?F)
+       ((eq org-last-tag-selection-key ?A)
 	(if (equal (org-entry-get nil "BEAMER_env") "againframe")
 	    (progn (org-entry-delete nil "BEAMER_env")
 		   (org-entry-delete nil "BEAMER_ref")
