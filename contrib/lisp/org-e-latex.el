@@ -1973,9 +1973,13 @@ holding contextual information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (let ((type (downcase (org-element-property :type special-block))))
-    (org-e-latex--wrap-label
-     special-block
-     (format "\\begin{%s}\n%s\\end{%s}" type contents type))))
+    (concat (format "\\begin{%s}\n" type)
+	    ;; Insert any label or caption within the block
+	    ;; (otherwise, a reference pointing to that element will
+	    ;; count the section instead).
+	    (org-e-latex--caption/label-string special-block info)
+	    contents
+	    (format "\\end{%s}" type))))
 
 
 ;;;; Src Block
