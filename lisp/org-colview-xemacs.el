@@ -1553,7 +1553,7 @@ and tailing newline characters."
 	    ;; OK, the property is not defined.  Use appointment duration?
 	    (when (and org-agenda-columns-add-appointments-to-effort-sum
 		       (setq d (get-text-property (point) 'duration)))
-	      (setq d (org-minutes-to-hh:mm-string d))
+	      (setq d (org-minutes-to-clocksum-string d))
 	      (put-text-property 0 (length d) 'face 'org-warning d)
 	      (push (cons org-effort-property d) p)))
 	  (push (cons (org-current-line) p) cache))

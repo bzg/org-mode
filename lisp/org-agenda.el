@@ -5732,13 +5732,13 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	 ((> dt (* 60 maxtime))
 	  ;; a very long clocking chunk
 	  (setq issue (format "Clocking interval is very long: %s"
-			      (org-minutes-to-hh:mm-string
+			      (org-minutes-to-clocksum-string
 			       (floor (/ (float dt) 60.))))
 		face (or (plist-get pl :long-face) face)))
 	 ((< dt (* 60 mintime))
 	  ;; a very short clocking chunk
 	  (setq issue (format "Clocking interval is very short: %s"
-			      (org-minutes-to-hh:mm-string
+			      (org-minutes-to-clocksum-string
 			       (floor (/ (float dt) 60.))))
 		face (or (plist-get pl :short-face) face)))
 	 ((and (> tlend 0) (< ts tlend))
@@ -6240,7 +6240,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	  ;; Try to set s2 if s1 and `org-agenda-default-appointment-duration' are set
 	  (when (and s1 (not s2) org-agenda-default-appointment-duration)
 	    (setq s2
-		  (org-minutes-to-hh:mm-string
+		  (org-minutes-to-clocksum-string
 		   (+ (org-hh:mm-string-to-minutes s1) org-agenda-default-appointment-duration))))
 
 	  ;; Compute the duration

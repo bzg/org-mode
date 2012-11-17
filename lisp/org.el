@@ -3203,7 +3203,7 @@ and the clock summary:
                    (let ((clocksum (org-clock-sum-current-item))
                          (effort (org-duration-string-to-minutes
                                    (org-entry-get (point) \"Effort\"))))
-                     (org-minutes-to-hh:mm-string (- effort clocksum))))))"
+                     (org-minutes-to-clocksum-string (- effort clocksum))))))"
   :group 'org-properties
   :version "24.1"
   :type '(alist :key-type (string     :tag "Property")
