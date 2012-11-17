@@ -187,6 +187,7 @@ You might want to put e.g. \"allowframebreaks=0.9\" here."
   '(("againframe"     "F")
     ("appendix"       "x")
     ("column"         "c")
+    ("columns"        "C")
     ("frame"          "f")
     ("ignoreheading"  "i")
     ("note"           "n")
@@ -473,51 +474,65 @@ used as a communication channel."
 CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
   (let* ((column-width (org-element-property :beamer-col headline))
-	 ;; Environment defaults to "block" if none is specified and
+	 ;; ENVIRONMENT defaults to "block" if none is specified and
 	 ;; there is no column specification.  If there is a column
 	 ;; specified but still no explicit environment, ENVIRONMENT
-	 ;; is nil.
+	 ;; is "column".
 	 (environment (let ((env (org-element-property :beamer-env headline)))
 			(cond
 			 ;; "block" is the fallback environment.
 			 ((and (not env) (not column-width)) "block")
 			 ;; "column" only.
-			 ((not env) nil)
+			 ((not env) "column")
 			 ;; Use specified environment.
 			 (t (downcase env)))))
-	 (env-format (when environment
+	 (env-format (unless (member environment '("column" "columns"))
 		       (assoc environment
 			      (append org-e-beamer-environments-special
 				      org-e-beamer-environments-extra
 				      org-e-beamer-environments-default))))
 	 (title (org-export-data (org-element-property :title headline) info))
-	 ;; Start a columns environment when there is no previous
-	 ;; headline or the previous headline do not have
-	 ;; a BEAMER_column property.
+	 (options (let ((options (org-element-property :beamer-opt headline)))
+		    (if (not options) ""
+		      (org-e-beamer--normalize-argument options 'option))))
+	 ;; Start a "columns" environment when explicitly requested or
+	 ;; when there is no previous headline or the previous
+	 ;; headline do not have a BEAMER_column property.
+	 (parent-env (org-element-property
+		      :beamer-env (org-export-get-parent-headline headline)))
 	 (start-columns-p
-	  (and column-width
-	       (or (org-export-first-sibling-p headline info)
-		   (not (org-element-property
-			 :beamer-col
-			 (org-export-get-previous-element headline info))))))
-	 ;; Ends a columns environment when there is no next headline
-	 ;; or the next headline do not have a BEAMER_column property.
+	  (or (equal environment "columns")
+	      (and column-width
+		   (not (and parent-env
+			     (equal (downcase parent-env) "columns")))
+		   (or (org-export-first-sibling-p headline info)
+		       (not (org-element-property
+			     :beamer-col
+			     (org-export-get-previous-element
+			      headline info)))))))
+	 ;; End the "columns" environment when explicitly requested or
+	 ;; when there is no next headline or the next headline do not
+	 ;; have a BEAMER_column property.
 	 (end-columns-p
-	  (and column-width
-	       (or (org-export-last-sibling-p headline info)
-		   (not (org-element-property
-			 :beamer-col
-			 (org-export-get-next-element headline info)))))))
+	  (or (equal environment "columns")
+	      (and column-width
+		   (not (and parent-env
+			     (equal (downcase parent-env) "columns")))
+		   (or (org-export-last-sibling-p headline info)
+		       (not (org-element-property
+			     :beamer-col
+			     (org-export-get-next-element headline info))))))))
     (concat
-     (when start-columns-p "\\begin{columns}\n")
+     (when start-columns-p
+       ;; Column can accept options only when the environment is
+       ;; explicitly defined.
+       (if (not (equal environment "columns")) "\\begin{columns}\n"
+	 (format "\\begin{columns}%s\n" options)))
      (when column-width
        (format "\\begin{column}%s{%s}\n"
 	       ;; One can specify placement for column only when
 	       ;; HEADLINE stands for a column on its own.
-	       (if (not environment) ""
-		 (let ((options (org-element-property :beamer-opt headline)))
-		   (if (not options) ""
-		     (org-e-beamer--normalize-argument options 'option))))
+	       (if (equal environment "column") options "")
 	       (format "%s\\textwidth" column-width)))
      ;; Block's opening string.
      (when env-format
@@ -534,19 +549,12 @@ used as a communication channel."
 	     ((not action) (list (cons "a" "") (cons "A" "")))
 	     ((string-match "\\`\\[.*\\]\\'" action)
 	      (list
-	       (cons "A"
-		     (org-e-beamer--normalize-argument action 'defaction))
+	       (cons "A" (org-e-beamer--normalize-argument action 'defaction))
 	       (cons "a" "")))
 	     (t
-	      (list
-	       (cons "a"
-		     (org-e-beamer--normalize-argument action 'action))
-	       (cons "A" "")))))
-	  (list (cons "o"
-		      (let ((options
-			     (org-element-property :beamer-opt headline)))
-			(if (not options) ""
-			  (org-e-beamer--normalize-argument options 'option))))
+	      (list (cons "a" (org-e-beamer--normalize-argument action 'action))
+		    (cons "A" "")))))
+	  (list (cons "o" options)
 		(cons "h" title)
 		(cons "H" (if (equal title "") "" (format "{%s}" title)))
 		(cons "U" (if (equal title "") "" (format "[%s]" title))))))
