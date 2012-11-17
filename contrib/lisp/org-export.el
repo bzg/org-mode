@@ -925,6 +925,7 @@ The back-end could then be called with, for example:
   \(org-export-to-buffer 'my-latex \"*Test my-latex*\")"
   (declare (debug (&define name sexp [&rest [keywordp sexp]] def-body))
 	   (indent 2))
+  (org-export-barf-if-invalid-backend parent)
   (let (export-block filters menu-entry options translators contents)
     (while (keywordp (car body))
       (case (pop body)
@@ -938,6 +939,7 @@ The back-end could then be called with, for example:
         (:translate-alist (setq translators (pop body)))
         (t (pop body))))
     (setq contents (append
+		    (list :parent parent)
 		    (let ((p-table (org-export-backend-translate-table parent)))
 		      (list :translate-alist (append translators p-table)))
 		    (let ((p-filters (org-export-backend-filters parent)))
@@ -984,6 +986,16 @@ The back-end could then be called with, for example:
   "Signal an error if BACKEND isn't defined."
   (unless (org-export-backend-translate-table backend)
     (error "Unknown \"%s\" back-end: Aborting export" backend)))
+
+(defun org-export-derived-backend-p (backend &rest backends)
+  "Non-nil if BACKEND is derived from one of BACKENDS."
+  (let ((parent backend))
+    (while (and (not (memq parent backends))
+		(setq parent
+		      (plist-get (cdr (assq parent
+					    org-export-registered-backends))
+				 :parent))))
+    parent))
 
 
 
