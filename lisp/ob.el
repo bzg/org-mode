@@ -563,7 +563,9 @@ block."
 			 (capitalize lang)
 			 (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
 		(if (member "none" result-params)
-		(message "result silenced")
+		    (progn
+		      (funcall cmd body params)
+		      (message "result silenced"))
 		(setq result
 		      ((lambda (result)
 			 (if (and (eq (cdr (assoc :result-type params)) 'value)
