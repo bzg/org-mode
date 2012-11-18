@@ -1396,9 +1396,8 @@ for export.  Return options as a plist."
      (unless (org-at-heading-p) (org-back-to-heading t))
      ;; Take care of EXPORT_TITLE. If it isn't defined, use headline's
      ;; title as its fallback value.
-     (when (setq prop (progn (looking-at org-todo-line-regexp)
-			     (or (save-match-data
-				   (org-entry-get (point) "EXPORT_TITLE"))
+     (when (setq prop (or (org-entry-get (point) "EXPORT_TITLE")
+			  (progn (looking-at org-todo-line-regexp)
 				 (org-match-string-no-properties 3))))
        (setq plist
 	     (plist-put
@@ -1426,11 +1425,15 @@ for export.  Return options as a plist."
 			(plist-put
 			 plist
 			 (car option)
-			 ;; Parse VALUE if required.
-			 (if (member property org-element-document-properties)
-			     (org-element-parse-secondary-string
-			      value (org-element-restriction 'keyword))
-			   value))))))))
+			 (cond
+			  ;; Parse VALUE if required.
+			  ((member property org-element-document-properties)
+			   (org-element-parse-secondary-string
+			    value (org-element-restriction 'keyword)))
+			  ;; If BEHAVIOUR is `split' expected value is
+			  ;; a list of strings, not a string.
+			  ((eq (nth 4 option) 'split) (org-split-string value))
+			  (t value)))))))))
 	;; Also look for both general keywords and back-end specific
 	;; options if BACKEND is provided.
 	(append (and backend (org-export-backend-options backend))

@@ -185,6 +185,32 @@ Paragraph"
     (forward-line)
     (should (equal (plist-get (org-export-get-environment nil t) :date)
 		   '("29-03-2012"))))
+  ;; Properties with `split' behaviour are stored as a list of
+  ;; strings.
+  (should
+   (equal '("a" "b")
+	  (org-test-with-temp-text "#+EXCLUDE_TAGS: noexport
+* Headline
+  :PROPERTIES:
+  :EXPORT_EXCLUDE_TAGS: a b
+  :END:
+Paragraph"
+	    (progn
+	      (forward-line)
+	      (plist-get (org-export-get-environment nil t) :exclude-tags)))))
+  ;; Handle :PROPERTY+: syntax.
+  (should
+   (equal '("a" "b")
+	  (org-test-with-temp-text "#+EXCLUDE_TAGS: noexport
+* Headline
+  :PROPERTIES:
+  :EXPORT_EXCLUDE_TAGS: a
+  :EXPORT_EXCLUDE_TAGS+: b
+  :END:
+Paragraph"
+	    (progn
+	      (forward-line)
+	      (plist-get (org-export-get-environment nil t) :exclude-tags)))))
   ;; Export properties are case-insensitive.
   (org-test-with-temp-text "* Headline
   :PROPERTIES:
