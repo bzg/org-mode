@@ -59,7 +59,10 @@
        (org-babel-result-cond (cdr (assoc :result-params params))
 	 (let ((print-level nil)
 	       (print-length nil))
-	   (format "%S" result))
+	   (if (or (member "scalar" (cdr (assoc :result-params params)))
+		   (member "verbatim" (cdr (assoc :result-params params))))
+	       (format "%S" result)
+	     (format "%s" result)))
 	 (org-babel-reassemble-table
 	  result
 	  (org-babel-pick-name (cdr (assoc :colname-names params))
