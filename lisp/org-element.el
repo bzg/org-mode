@@ -214,7 +214,7 @@ regexp matching one object can also match the other object.")
 	 table-cell underline)
   "List of recursive object types.")
 
-(defconst org-element-block-name-alist
+(defvar org-element-block-name-alist
   '(("CENTER" . org-element-center-block-parser)
     ("COMMENT" . org-element-comment-block-parser)
     ("EXAMPLE" . org-element-example-block-parser)
