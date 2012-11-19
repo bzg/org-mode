@@ -4279,6 +4279,17 @@ Return a list of src-block elements with a caption."
 
 
 ;;;; Smart Quotes
+;;
+;; The main function for the smart quotes sub-system is
+;; `org-export-activate-smart-quotes', which replaces every quote in
+;; a given string from the parse tree with its "smart" counterpart.
+;;
+;; Dictionary for smart quotes is stored in
+;; `org-export-smart-quotes-alist'.
+;;
+;; Internally, regexps matching potential smart quotes (checks at
+;; string boundaries are also necessary) are defined in
+;; `org-export-smart-quotes-regexps'.
 
 (defconst org-export-smart-quotes-alist
   '(("de"
@@ -4356,8 +4367,8 @@ In every regexp, quote or apostrophe matched is put in group 1.")
 (defun org-export-activate-smart-quotes (s encoding info &optional original)
   "Replace regular quotes with \"smart\" quotes in string S.
 
-ENCODING is a symbol among `:html', `:latex' and `:utf-8'.  INFO
-is a plist used as a communication channel.
+ENCODING is a symbol among `:html', `:latex', `:texinfo' and
+`:utf-8'.  INFO is a plist used as a communication channel.
 
 The function has to retrieve information about string
 surroundings in parse tree.  It can only happen with an
