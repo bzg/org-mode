@@ -2561,6 +2561,20 @@ additionally processed by `shell-quote-argument'"
 Used by `org-babel-temp-file'.  This directory will be removed on
 Emacs shutdown."))
 
+(defmacro org-babel-result-cond (result-params scalar-form &rest table-forms)
+  "Call the code to parse raw string results according to RESULT-PARAMS."
+  (declare (indent 1))
+  `(unless (member "none" result-params)
+     (if (or (member "scalar" result-params)
+	     (member "verbatim" result-params)
+	     (member "html" result-params)
+	     (member "code" result-params)
+	     (member "pp" result-params)
+	     (and (member "output" result-params)
+		  (not (member "table" result-params))))
+	 ,scalar-form
+       ,@table-forms)))
+
 (defun org-babel-temp-file (prefix &optional suffix)
   "Create a temporary file in the `org-babel-temporary-directory'.
 Passes PREFIX and SUFFIX directly to `make-temp-file' with the

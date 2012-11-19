@@ -216,11 +216,8 @@ If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   ((lambda (raw)
-     (if (or (member "code" result-params)
-	     (member "pp" result-params)
-	     (and (member "output" result-params)
-		  (not (member "table" result-params))))
-	 raw
+     (org-babel-result-cond result-params
+       raw
        (org-babel-python-table-or-string (org-babel-trim raw))))
    (case result-type
      (output (org-babel-eval org-babel-python-command
@@ -269,11 +266,8 @@ last statement in BODY, as elisp."
 		       (funcall send-wait))))
     ((lambda (results)
        (unless (string= (substring org-babel-python-eoe-indicator 1 -1) results)
-	 (if (or (member "code" result-params)
-		 (member "pp" result-params)
-		 (and (member "output" result-params)
-		      (not (member "table" result-params))))
-	     results
+	 (org-babel-result-cond result-params
+	   results
 	   (org-babel-python-table-or-string results))))
      (case result-type
        (output

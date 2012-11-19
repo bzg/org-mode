@@ -103,12 +103,8 @@ This function is called by `org-babel-execute-src-block'."
        (org-babel-expand-body:sql body params)))
     (message command)
     (shell-command command)
-    (if (or (member "scalar" result-params)
-	    (member "verbatim" result-params)
-	    (member "html" result-params)
-	    (member "code" result-params)
-	    (equal (point-min) (point-max)))
-	(with-temp-buffer
+    (org-babel-result-cond result-params
+      (with-temp-buffer
 	  (progn (insert-file-contents-literally out-file) (buffer-string)))
       (with-temp-buffer
 	;; need to figure out what the delimiter is for the header row

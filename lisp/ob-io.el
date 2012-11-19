@@ -98,8 +98,8 @@ in BODY as elisp."
                   (wrapper (format org-babel-io-wrapper-method body)))
              (with-temp-file src-file (insert wrapper))
              ((lambda (raw)
-                (if (member "code" result-params)
-                    raw
+                (org-babel-result-cond result-params
+		  raw
                   (org-babel-io-table-or-string raw)))
               (org-babel-eval
                (concat org-babel-io-command " " src-file) ""))))))

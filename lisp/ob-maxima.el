@@ -89,10 +89,8 @@ called by `org-babel-execute-src-block'."
 	    (org-babel-eval cmd "")))))
     (if (org-babel-maxima-graphical-output-file params)
 	nil
-      (if (or (member "scalar" result-params)
-	      (member "verbatim" result-params)
-	      (member "output" result-params))
-	  result
+      (org-babel-result-cond result-params
+	result
 	(let ((tmp-file (org-babel-temp-file "maxima-res-")))
 	  (with-temp-file tmp-file (insert result))
 	  (org-babel-import-elisp-from-file tmp-file))))))

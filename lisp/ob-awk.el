@@ -78,10 +78,8 @@ called by `org-babel-execute-src-block'"
     (org-babel-reassemble-table
      ((lambda (results)
 	(when results
-	  (if (or (member "scalar" result-params)
-		  (member "verbatim" result-params)
-		  (member "output" result-params))
-	      results
+	  (org-babel-result-cond result-params
+	    results
 	    (let ((tmp (org-babel-temp-file "awk-results-")))
 	      (with-temp-file tmp (insert results))
 	      (org-babel-import-elisp-from-file tmp)))))

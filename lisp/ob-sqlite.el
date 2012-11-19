@@ -98,23 +98,21 @@ This function is called by `org-babel-execute-src-block'."
 	  (cons "db " db)))
 	;; body of the code block
 	(org-babel-expand-body:sqlite body params)))
-      (if (or (member "scalar" result-params)
-	      (member "verbatim" result-params)
-	      (member "html" result-params)
-	      (member "code" result-params)
-	      (equal (point-min) (point-max)))
-	  (buffer-string)
-	(org-table-convert-region (point-min) (point-max)
-				  (if (or (member :csv others)
-					  (member :column others)
-					  (member :line others)
-					  (member :list others)
-					  (member :html others) separator)
-				      nil
-				    '(4)))
-	(org-babel-sqlite-table-or-scalar
-	 (org-babel-sqlite-offset-colnames
-	  (org-table-to-lisp) headers-p))))))
+      (org-babel-result-cond result-params
+	(buffer-string)
+	(if (equal (point-min) (point-max))
+	    ""
+	  (org-table-convert-region (point-min) (point-max)
+				    (if (or (member :csv others)
+					    (member :column others)
+					    (member :line others)
+					    (member :list others)
+					    (member :html others) separator)
+					nil
+				      '(4)))
+	  (org-babel-sqlite-table-or-scalar
+	   (org-babel-sqlite-offset-colnames
+	    (org-table-to-lisp) headers-p)))))))
 
 (defun org-babel-sqlite-expand-vars (body vars)
   "Expand the variables held in VARS in BODY."

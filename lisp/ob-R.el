@@ -302,11 +302,10 @@ last statement in BODY, as elisp."
 			       (format "{function ()\n{\n%s\n}}()" body)
 			       (org-babel-process-file-name tmp-file 'noquote)))
        (org-babel-R-process-value-result
-	(if (or (member "scalar" result-params)
-		(member "verbatim" result-params))
-	    (with-temp-buffer
-	      (insert-file-contents tmp-file)
-	      (buffer-string))
+	(org-babel-result-cond result-params
+	  (with-temp-buffer
+	    (insert-file-contents tmp-file)
+	    (buffer-string))
 	  (org-babel-import-elisp-from-file tmp-file '(16)))
 	column-names-p)))
     (output (org-babel-eval org-babel-R-command body))))
@@ -335,11 +334,10 @@ last statement in BODY, as elisp."
 		  "FALSE")
 		".Last.value" (org-babel-process-file-name tmp-file 'noquote)))
        (org-babel-R-process-value-result
-	(if (or (member "scalar" result-params)
-		(member "verbatim" result-params))
-	    (with-temp-buffer
-	      (insert-file-contents tmp-file)
-	      (buffer-string))
+	(org-babel-result-cond result-params
+	  (with-temp-buffer
+	    (insert-file-contents tmp-file)
+	    (buffer-string))
 	  (org-babel-import-elisp-from-file tmp-file '(16)))
 	column-names-p)))
     (output

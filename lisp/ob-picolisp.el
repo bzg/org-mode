@@ -123,13 +123,8 @@
            (t full-body))))
 
     ((lambda (result)
-       (if (or (member "verbatim" result-params)
-               (member "scalar" result-params)
-               (member "output" result-params)
-               (member "code" result-params)
-               (member "pp" result-params)
-               (= (length result) 0))
-           result
+       (org-babel-result-cond result-params
+	 result
          (read result)))
      (if (not (string= session-name "none"))
          ;; session based evaluation
