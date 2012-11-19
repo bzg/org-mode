@@ -2021,6 +2021,36 @@ Another text. (ref:text)
 
 
 
+;;; Timestamps
+
+(ert-deftest test-org-export/timestamp-has-time-p ()
+  "Test `org-export-timestamp-has-time-p' specifications."
+  ;; With time.
+  (should
+   (org-test-with-temp-text "<2012-03-29 Thu 16:40>"
+     (org-export-timestamp-has-time-p (org-element-context))))
+  ;; Without time.
+  (should-not
+   (org-test-with-temp-text "<2012-03-29 Thu>"
+     (org-export-timestamp-has-time-p (org-element-context)))))
+
+(ert-deftest test-org-export/format-timestamp ()
+  "Test `org-export-format-timestamp' specifications."
+  ;; Regular test.
+  (should
+   (equal
+    "2012-03-29 16:40"
+    (org-test-with-temp-text "<2012-03-29 Thu 16:40>"
+      (org-export-format-timestamp (org-element-context) "%Y-%m-%d %R"))))
+  ;; Range end.
+  (should
+   (equal
+    "2012-03-29"
+    (org-test-with-temp-text "[2011-07-14 Thu]--[2012-03-29 Thu]"
+      (org-export-format-timestamp (org-element-context) "%Y-%m-%d" t)))))
+
+
+
 ;;; Topology
 
 (ert-deftest test-org-export/get-next-element ()

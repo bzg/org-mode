@@ -4278,6 +4278,41 @@ Return a list of src-block elements with a caption."
   (org-export-collect-elements 'src-block info))
 
 
+;;;; For Timestamps
+;;
+;; `org-export-timestamp-has-time-p' is a predicate to know if hours
+;; and minutes are defined in a given timestamp.
+;;
+;; `org-export-format-timestamp' allows to format a timestamp object
+;; with an arbitrary format string.
+
+(defun org-export-timestamp-has-time-p (timestamp)
+  "Non-nil when TIMESTAMP has a time specified."
+  (org-element-property :hour-start timestamp))
+
+(defun org-export-format-timestamp (timestamp format &optional end utc)
+  "Format a TIMESTAMP element into a string.
+
+FORMAT is a format specifier to be passed to
+`format-time-string'.
+
+When optional argument END is non-nil, use end of date-range or
+time-range, if possible.
+
+When optional argument UTC is non-nil, time will be expressed as
+Universal Time."
+  (format-time-string
+   format
+   (apply 'encode-time
+          (cons 0
+                (mapcar
+                 (lambda (prop) (or (org-element-property prop timestamp) 0))
+                 (if end '(:minute-end :hour-end :day-end :month-end :year-end)
+                   '(:minute-start :hour-start :day-start :month-start
+                                   :year-start)))))
+   utc))
+
+
 ;;;; Smart Quotes
 ;;
 ;; The main function for the smart quotes sub-system is
