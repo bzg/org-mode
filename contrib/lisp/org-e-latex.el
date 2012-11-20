@@ -22,16 +22,54 @@
 ;;
 ;; This library implements a LaTeX back-end for Org generic exporter.
 ;;
-;; To test it, run
+;; Depending on the desired output format, three commands are provided
+;; for export: `org-e-latex-export-as-latex' (temporary buffer),
+;; `org-e-latex-export-to-latex' ("tex" file) and
+;; `org-e-latex-export-to-pdf' ("pdf" file).  Also, two publishing
+;; functions are available: `org-e-latex-publish-to-latex' and
+;; `org-e-latex-publish-to-pdf'.
 ;;
-;;   M-: (org-export-to-buffer 'e-latex "*Test e-LaTeX*") RET
-;;
-;; in an org-mode buffer then switch to the buffer to see the LaTeX
-;; export.  See contrib/lisp/org-export.el for more details on how
-;; this exporter works.
-;;
-;; It introduces three new buffer keywords: "LATEX_CLASS",
+;; The library introduces three new buffer keywords: "LATEX_CLASS",
 ;; "LATEX_CLASS_OPTIONS" and "LATEX_HEADER".
+;;
+;; Table export can be controlled with a number of attributes (through
+;; ATTR_LATEX keyword).
+;;
+;; - The main one is the `:mode' attribute, which can be set to
+;;   `table', `math', `inline-math' and `verbatim'.  In particular,
+;;   when in `math' or `inline-math' mode, every cell is exported
+;;   as-is and the table will be wrapped in a math environment.  Also,
+;;   horizontal rules are ignored.  These modes are particularly
+;;   useful to write matrices.  Default mode is stored in
+;;   `org-e-latex-default-table-mode'.
+;;
+;; - The second most important attribute is `:environment'.  It is the
+;;   environment used for the table and defaults to
+;;   `org-e-latex-default-table-environment' value.  It can be set to
+;;   anything, including "tabularx", "longtable", "array",
+;;   "bmatrix"...
+;;
+;; - `:float' attribute defines a float environment for the table.
+;;   Possible values are `sidewaystable', `multicolumn' and `table'.
+;;
+;; - `:width' and `:align' attributes set, respectively, the width of
+;;   the table and its alignment string.
+;;
+;; - `:booktabs', `:center' and `:rmlines' values are booleans.  They
+;;   toggle, respectively "booktabs" usage (assuming the package is
+;;   properly loaded), table centering and removal of every horizontal
+;;   rule but the first one (in a "table.el" table only).
+;;
+;; - `:math-prefix', `:math-suffix' and `:math-arguments' are string
+;;   which will be inserted, respectively, before the table within the
+;;   math environment, after the table within the math environment,
+;;   and between the macro name and the contents of the table.  The
+;;   latter attribute is necessary to matrix macros that require more
+;;   than one argument (i.e. "qbordermatrix").
+;;
+;; This back-end also offers enhanced support for footnotes.  Thus, it
+;; handles nested footnotes, footnotes in tables and footnotes in item
+;; descriptions.
 
 ;;; Code:
 
@@ -163,6 +201,11 @@
     ("tr" . "turkish")
     ("uk" . "ukrainian"))
   "Alist between language code and corresponding Babel option.")
+
+(defconst org-e-latex-table-matrix-macros '(("bordermatrix" . "\\cr")
+					    ("qbordermatrix" . "\\cr")
+					    ("kbordermatrix" . "\\\\"))
+  "Alist between matrix macros and their row ending.")
 
 
 
@@ -436,13 +479,36 @@ default we use here encompasses both."
   :group 'org-export-e-latex
   :type 'string)
 
+(defcustom org-e-latex-default-table-mode 'table
+  "Default mode for tables.
+
+Value can be a symbol among:
+
+  `table' Regular LaTeX table.
+
+  `math' In this mode, every cell is considered as being in math
+     mode and the complete table will be wrapped within a math
+     environment.  It is particularly useful to write matrices.
+
+  `inline-math' This mode is almost the same as `math', but the
+     math environment will be inlined.
+
+  `verbatim' The table is exported as it appears in the Org
+     buffer, within a verbatim environment.
+
+This value can be overridden locally with, i.e. \":mode math\" in
+LaTeX attributes.
+
+When modifying this variable, it may be useful to change
+`org-e-latex-default-table-environment' accordingly."
+  :group 'org-export-e-latex
+  :type '(choice (const :tag "Table" table)
+		 (const :tag "Matrix" math)
+		 (const :tag "Inline matrix" inline-math)
+		 (const :tag "Verbatim" verbatim)))
+
 (defcustom org-e-latex-tables-centered t
   "When non-nil, tables are exported in a center environment."
-  :group 'org-export-e-latex
-  :type 'boolean)
-
-(defcustom org-e-latex-tables-verbatim nil
-  "When non-nil, tables are exported verbatim."
   :group 'org-export-e-latex
   :type 'boolean)
 
@@ -450,7 +516,7 @@ default we use here encompasses both."
   "When non-nil, display tables in a formal \"booktabs\" style.
 This option assumes that the \"booktabs\" package is properly
 loaded in the header of the document.  This value can be ignored
-locally with \"booktabs=yes\" and \"booktabs=no\" LaTeX
+locally with \":booktabs t\" and \":booktabs nil\" LaTeX
 attributes."
   :group 'org-export-e-latex
   :type 'boolean)
@@ -2184,48 +2250,45 @@ contextual information."
 ;;;; Table
 ;;
 ;; `org-e-latex-table' is the entry point for table transcoding.  It
-;; takes care of tables with a "verbatim" attribute.  Otherwise, it
-;; delegates the job to either `org-e-latex-table--table.el-table' or
-;; `org-e-latex-table--org-table' functions, depending of the type of
-;; the table.
+;; takes care of tables with a "verbatim" mode.  Otherwise, it
+;; delegates the job to either `org-e-latex--table.el-table',
+;; `org-e-latex--org-table' or `org-e-latex--math-table' functions,
+;; depending of the type of the table and the mode requested.
 ;;
-;; `org-e-latex-table--align-string' is a subroutine used to build
-;; alignment string for Org tables.
+;; `org-e-latex--align-string' is a subroutine used to build alignment
+;; string for Org tables.
 
 (defun org-e-latex-table (table contents info)
   "Transcode a TABLE element from Org to LaTeX.
 CONTENTS is the contents of the table.  INFO is a plist holding
 contextual information."
-  (cond
-   ;; Case 1: verbatim table.
-   ((or org-e-latex-tables-verbatim
-	(let ((attr (mapconcat 'identity
-			       (org-element-property :attr_latex table)
-			       " ")))
-	  (and attr (string-match "\\<verbatim\\>" attr))))
-    (format "\\begin{verbatim}\n%s\n\\end{verbatim}"
-	    ;; Re-create table, without affiliated keywords.
-	    (org-trim
-	     (org-element-interpret-data
-	      `(table nil ,@(org-element-contents table))))))
-   ;; Case 2: table.el table.  Convert it using appropriate tools.
-   ((eq (org-element-property :type table) 'table.el)
-    (org-e-latex-table--table.el-table table contents info))
-   ;; Case 3: Standard table.
-   (t (concat (org-e-latex-table--org-table table contents info)
-	      ;; When there are footnote references within the table,
-	      ;; insert they definitions just after it.
-	      (org-e-latex--delayed-footnotes-definitions table info)))))
+  (if (eq (org-element-property :type table) 'table.el)
+      ;; "table.el" table.  Convert it using appropriate tools.
+      (org-e-latex--table.el-table table info)
+    (let ((type (or (org-export-read-attribute :attr_latex table :mode)
+		    org-e-latex-default-table-mode)))
+      (cond
+       ;; Case 1: Verbatim table.
+       ((string= type "verbatim")
+	(format "\\begin{verbatim}\n%s\n\\end{verbatim}"
+		;; Re-create table, without affiliated keywords.
+		(org-trim (org-element-interpret-data
+			   `(table nil ,@(org-element-contents table))))))
+       ;; Case 2: Matrix.
+       ((or (string= type "math") (string= type "inline-math"))
+	(org-e-latex--math-table table info))
+       ;; Case 3: Standard table.
+       (t (concat (org-e-latex--org-table table contents info)
+		  ;; When there are footnote references within the
+		  ;; table, insert their definition just after it.
+		  (org-e-latex--delayed-footnotes-definitions table info)))))))
 
-(defun org-e-latex-table--align-string (table info)
+(defun org-e-latex--align-string (table info)
   "Return an appropriate LaTeX alignment string.
 TABLE is the considered table.  INFO is a plist used as
 a communication channel."
-  (let ((attr (mapconcat 'identity
-			 (org-element-property :attr_latex table)
-			 " ")))
-    (if (string-match "\\<align=\\(\\S-+\\)" attr) (match-string 1 attr)
-      (let (alignment)
+  (or (org-export-read-attribute :attr_latex table :align)
+      (let (align)
 	;; Extract column groups and alignment from first (non-rule)
 	;; row.
 	(org-element-map
@@ -2238,96 +2301,89 @@ a communication channel."
 	 (lambda (cell)
 	   (let ((borders (org-export-table-cell-borders cell info)))
 	     ;; Check left border for the first cell only.
-	     (when (and (memq 'left borders) (not alignment))
-	       (push "|" alignment))
+	     (when (and (memq 'left borders) (not align))
+	       (push "|" align))
 	     (push (case (org-export-table-cell-alignment cell info)
 		     (left "l")
 		     (right "r")
 		     (center "c"))
-		   alignment)
-	     (when (memq 'right borders) (push "|" alignment))))
+		   align)
+	     (when (memq 'right borders) (push "|" align))))
 	 info)
-	(apply 'concat (reverse alignment))))))
+	(apply 'concat (nreverse align)))))
 
-(defun org-e-latex-table--org-table (table contents info)
+(defun org-e-latex--org-table (table contents info)
   "Return appropriate LaTeX code for an Org table.
 
 TABLE is the table type element to transcode.  CONTENTS is its
 contents, as a string.  INFO is a plist used as a communication
 channel.
 
-This function assumes TABLE has `org' as its `:type' attribute."
-  (let* ((label (org-element-property :name table))
-	 (caption (org-e-latex--caption/label-string table info))
-	 (attr (mapconcat 'identity
-			  (org-element-property :attr_latex table)
-			  " "))
+This function assumes TABLE has `org' as its `:type' property and
+`table' as its `:mode' attribute."
+  (let* ((caption (org-e-latex--caption/label-string table info))
+	 (attr (org-export-read-attribute :attr_latex table))
 	 ;; Determine alignment string.
-	 (alignment (org-e-latex-table--align-string table info))
+	 (alignment (org-e-latex--align-string table info))
 	 ;; Determine environment for the table: longtable, tabular...
-	 (table-env (cond
-		     ((not attr) org-e-latex-default-table-environment)
-		     ((string-match "\\<longtable\\>" attr) "longtable")
-		     ((string-match "\\<tabular.?\\>" attr)
-		      (org-match-string-no-properties 0 attr))
-		     (t org-e-latex-default-table-environment)))
+	 (table-env (let ((env (plist-get attr :environment)))
+		      (if env (format "%s" env)
+			org-e-latex-default-table-environment)))
 	 ;; If table is a float, determine environment: table, table*
 	 ;; or sidewaystable.
-	 (float-env (cond
-		     ((string= "longtable" table-env) nil)
-		     ((and attr (string-match "\\<sidewaystable\\>" attr))
-		      "sidewaystable")
-		     ((and attr
-			   (or (string-match (regexp-quote "table*") attr)
-			       (string-match "\\<multicolumn\\>" attr)))
-		      "table*")
-		     ((or (not (string= caption "")) label) "table")))
+	 (float-env (unless (equal "longtable" table-env)
+		      (let ((float (plist-get attr :float)))
+			(cond
+			 ((string= float "sidewaystable") "sidewaystable")
+			 ((string= float "multicolumn") "table*")
+			 ((or (string= float "table")
+			      (org-element-property :caption table))
+			  "table")))))
 	 ;; Extract others display options.
-	 (width (and attr (string-match "\\<width=\\(\\S-+\\)" attr)
-		     (org-match-string-no-properties 1 attr)))
-	 (placement
-	  (if (and attr (string-match "\\<placement=\\(\\S-+\\)" attr))
-	      (org-match-string-no-properties 1 attr)
-	    (format "[%s]" org-e-latex-default-figure-position))))
+	 (width (plist-get attr :width))
+	 (placement (or (plist-get attr :placement)
+			(format "[%s]" org-e-latex-default-figure-position)))
+	 (centerp (if (plist-member attr :center) (plist-get attr :center)
+		    org-e-latex-tables-centered)))
     ;; Prepare the final format string for the table.
     (cond
      ;; Longtable.
-     ((string= "longtable" table-env)
+     ((equal "longtable" table-env)
       (format
        "\\begin{longtable}{%s}\n%s%s%s\\end{longtable}"
        alignment
        (if (or (not org-e-latex-table-caption-above) (string= "" caption)) ""
-	 (concat (org-trim caption) "\\\\\n"))
+	 (concat caption "\\\\\n"))
        contents
        (if (or org-e-latex-table-caption-above (string= "" caption)) ""
-	 (concat (org-trim caption) "\\\\\n"))))
+	 (concat caption "\\\\\n"))))
      ;; Others.
-     (t (concat (if float-env
-		    (concat
-		     (format "\\begin{%s}%s\n" float-env placement)
-		     (if org-e-latex-table-caption-above caption "")
-		     (when org-e-latex-tables-centered "\\centering\n"))
-		  (when org-e-latex-tables-centered "\\begin{center}\n"))
+     (t (concat (cond
+		 (float-env
+		  (concat (format "\\begin{%s}%s\n" float-env placement)
+			  (if org-e-latex-table-caption-above caption "")
+			  (when centerp "\\centering\n")))
+		 (centerp "\\begin{center}\n"))
 		(format "\\begin{%s}%s{%s}\n%s\\end{%s}"
 			table-env
 			(if width (format "{%s}" width) "")
 			alignment
 			contents
 			table-env)
-		(if float-env
-		    (concat (if org-e-latex-table-caption-above "" caption)
-			    (format "\n\\end{%s}" float-env))
-		  (when org-e-latex-tables-centered "\n\\end{center}")))))))
+		(cond
+		 (float-env
+		  (concat (if org-e-latex-table-caption-above "" caption)
+			  (format "\n\\end{%s}" float-env)))
+		 (centerp "\n\\end{center}")))))))
 
-(defun org-e-latex-table--table.el-table (table contents info)
+(defun org-e-latex--table.el-table (table info)
   "Return appropriate LaTeX code for a table.el table.
 
-TABLE is the table type element to transcode.  CONTENTS is its
-contents, as a string.  INFO is a plist used as a communication
-channel.
+TABLE is the table type element to transcode.  INFO is a plist
+used as a communication channel.
 
 This function assumes TABLE has `table.el' as its `:type'
-attribute."
+property."
   (require 'table)
   ;; Ensure "*org-export-table*" buffer is empty.
   (with-current-buffer (get-buffer-create "*org-export-table*")
@@ -2345,18 +2401,67 @@ attribute."
       (setq output (replace-match "" t t output)))
     ;; When the "rmlines" attribute is provided, remove all hlines but
     ;; the the one separating heading from the table body.
-    (let ((attr (mapconcat 'identity
-			   (org-element-property :attr_latex table)
-			   " ")))
-      (when (and attr (string-match "\\<rmlines\\>" attr))
-	(let ((n 0) (pos 0))
-	  (while (and (< (length output) pos)
-		      (setq pos (string-match "^\\\\hline\n?" output pos)))
-	    (incf n)
-	    (unless (= n 2)
-	      (setq output (replace-match "" nil nil output)))))))
-    (if (not org-e-latex-tables-centered) output
-      (format "\\begin{center}\n%s\n\\end{center}" output))))
+    (when (org-export-read-attribute :attr_latex table :rmlines)
+      (let ((n 0) (pos 0))
+	(while (and (< (length output) pos)
+		    (setq pos (string-match "^\\\\hline\n?" output pos)))
+	  (incf n)
+	  (unless (= n 2) (setq output (replace-match "" nil nil output))))))
+    (let ((centerp (if (plist-member attr :center) (plist-get attr :center)
+		     org-e-latex-tables-centered)))
+      (if (not centerp) output
+	(format "\\begin{center}\n%s\n\\end{center}" output)))))
+
+(defun org-e-latex--math-table (table info)
+  "Return appropriate LaTeX code for a matrix.
+
+TABLE is the table type element to transcode.  INFO is a plist
+used as a communication channel.
+
+This function assumes TABLE has `org' as its `:type' property and
+`inline-math' or `math' as its `:mode' attribute.."
+  (let* ((caption (org-e-latex--caption/label-string table info))
+	 (attr (org-export-read-attribute :attr_latex table))
+	 (inlinep (eq (plist-get attr :mode) 'inline-math))
+	 (env (let ((env (plist-get attr :environment)))
+		(if env (format "%s" env)
+		  org-e-latex-default-table-environment)))
+	 (contents
+	  (mapconcat
+	   (lambda (row)
+	     ;; Ignore horizontal rules.
+	     (when (eq (org-element-property :type row) 'standard)
+	       ;; Return each cell unmodified.
+	       (concat
+		(mapconcat
+		 (lambda (cell)
+		   (substring (org-element-interpret-data cell) 0 -1))
+		 (org-element-map row 'table-cell 'identity info) "&")
+		(or (cdr (assoc env org-e-latex-table-matrix-macros)) "\\\\")
+		"\n")))
+	   (org-element-map table 'table-row 'identity info) "")))
+    (concat
+     ;; Opening string.
+     (cond (inlinep "\\(")
+	   ((org-string-nw-p caption) (concat "\\begin{equation}\n" caption))
+	   (t "\\["))
+     ;; Prefix (make sure it is a string).
+     (format "%s" (or (plist-get attr :math-prefix) ""))
+     ;; Environment.  Also treat special cases.
+     (cond ((equal env "array")
+	    (let ((align (org-e-latex--align-string table info)))
+	      (format "\\begin{array}{%s}\n%s\\end{array}" align contents)))
+	   ((assoc env org-e-latex-table-matrix-macros)
+	    (format "\\%s%s{\n%s}" env
+		    (format "%s" (or (plist-get attr :math-arguments) ""))
+		    contents))
+	   (t (format "\\begin{%s}\n%s\\end{%s}" env contents env)))
+     ;; Suffix (make sure it is a string).
+     (format "%s" (or (plist-get attr :math-suffix) ""))
+     ;; Closing string.
+     (cond (inlinep "\\)")
+	   ((org-string-nw-p caption) "\\end{equation}")
+	   (t "\\]")))))
 
 
 ;;;; Table Cell
@@ -2386,18 +2491,17 @@ a communication channel."
   ;; Rules are ignored since table separators are deduced from
   ;; borders of the current row.
   (when (eq (org-element-property :type table-row) 'standard)
-    (let* ((attr (mapconcat 'identity
-			    (org-element-property
-			     :attr_latex (org-export-get-parent table-row))
-			    " "))
-	   (longtablep (and attr (string-match "\\<longtable\\>" attr)))
-	   (booktabsp
-	    (or (and attr (string-match "\\<booktabs=\\(yes\\|t\\)\\>" attr))
-		org-e-latex-tables-booktabs))
+    (let* ((attr (org-export-read-attribute :attr_latex
+					    (org-export-get-parent table-row)))
+	   (longtablep (string= (or (plist-get attr :environment)
+				    org-e-latex-default-table-environment)
+				"longtable"))
+	   (booktabsp (if (plist-member attr :booktabs)
+			  (plist-get attr :booktabs)
+			org-e-latex-tables-booktabs))
 	   ;; TABLE-ROW's borders are extracted from its first cell.
-	   (borders
-	    (org-export-table-cell-borders
-	     (car (org-element-contents table-row)) info)))
+	   (borders (org-export-table-cell-borders
+		     (car (org-element-contents table-row)) info)))
       (concat
        ;; When BOOKTABS are activated enforce top-rule even when no
        ;; hline was specifically marked.
