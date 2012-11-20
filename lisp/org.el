@@ -12732,10 +12732,10 @@ EXTRA is additional text that will be inserted into the notes buffer."
 (defvar org-note-abort nil) ; dynamically scoped
 (defun org-store-log-note ()
   "Finish taking a log note, and insert it to where it belongs."
-  (let ((txt (buffer-string))
-	(note (cdr (assq org-log-note-purpose org-log-note-headings)))
-	lines ind bul)
+  (let ((txt (buffer-string)))
     (kill-buffer (current-buffer))
+    (let ((note (cdr (assq org-log-note-purpose org-log-note-headings)))
+	  lines ind bul)
     (while (string-match "\\`# .*\n[ \t\n]*" txt)
       (setq txt (replace-match "" t t txt)))
     (if (string-match "\\s-+\\'" txt)
@@ -12802,7 +12802,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	      (insert (pop lines))))
 	  (message "Note stored")
 	  (org-back-to-heading t)
-	  (org-cycle-hide-drawers 'children)))))
+	  (org-cycle-hide-drawers 'children))))))
   (set-window-configuration org-log-note-window-configuration)
   (with-current-buffer (marker-buffer org-log-note-return-to)
     (goto-char org-log-note-return-to))
