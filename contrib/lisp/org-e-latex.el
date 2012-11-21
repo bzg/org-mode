@@ -72,6 +72,14 @@
 ;; (i.e. "inparaenum").  The second one allows to specify optional
 ;; arguments for that environment (square brackets are not mandatory).
 ;;
+;; Images accept `:float', `:placement' and `:options' as attributes.
+;; `:float' accepts a symbol among `wrap', `multicolumn', and
+;; `figure', which defines the float environment for the table (if
+;; unspecified, an image with a caption will be set in a "figure"
+;; environment).  `:placement' is a string that will be used as
+;; argument for the environment chosen.  `:options' is a string that
+;; will be used as the optional argument for "includegraphics" macro.
+;;
 ;; This back-end also offers enhanced support for footnotes.  Thus, it
 ;; handles nested footnotes, footnotes in tables and footnotes in item
 ;; descriptions.
@@ -1709,7 +1717,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Link
 
-(defun org-e-latex-link--inline-image (link info)
+(defun org-e-latex--inline-image (link info)
   "Return LaTeX code for an inline image.
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
@@ -1719,51 +1727,45 @@ used as a communication channel."
 		   (expand-file-name raw-path))))
 	 (caption (org-e-latex--caption/label-string parent info))
 	 ;; Retrieve latex attributes from the element around.
-	 (attr (let ((raw-attr
-		      (mapconcat #'identity
-				 (org-element-property :attr_latex parent)
-				 " ")))
-		 (unless (string= raw-attr "") raw-attr)))
-	 (disposition
-	  (cond
-	   ((and attr (string-match "\\<wrap\\>" attr)) 'wrap)
-	   ((and attr (string-match "\\<multicolumn\\>" attr)) 'multicolumn)
-	   ((or (and attr (string-match "\\<float\\>" attr))
-		(not (string= caption "")))
-	    'float)))
+	 (attr (org-export-read-attribute :attr_latex parent))
+	 (float (let ((float (plist-get attr :float)))
+		  (cond ((string= float "wrap") 'wrap)
+			((string= float "multicolumn") 'multicolumn)
+			((or (string= float "figure")
+			     (org-element-property :caption parent))
+			 'figure))))
 	 (placement
-	  (cond
-	   ((and attr (string-match "\\<placement=\\(\\S-+\\)" attr))
-	    (org-match-string-no-properties 1 attr))
-	   ((eq disposition 'wrap) "{l}{0.5\\textwidth}")
-	   ((eq disposition 'float)
-	    (concat "[" org-e-latex-default-figure-position "]"))
-	   (t ""))))
-    ;; Now clear ATTR from any special keyword and set a default
-    ;; value if nothing is left.
-    (setq attr
-	  (if (not attr) ""
-	    (org-trim
-	     (replace-regexp-in-string
-	      "\\(wrap\\|multicolumn\\|float\\|placement=\\S-+\\)" "" attr))))
-    (setq attr (cond ((not (string= attr "")) attr)
-		     ((eq disposition 'float) "width=0.7\\textwidth")
-		     ((eq disposition 'wrap) "width=0.48\\textwidth")
-		     (t (or org-e-latex-image-default-option ""))))
-    ;; Return proper string, depending on DISPOSITION.
-    (case disposition
+	  (let ((place (plist-get attr :placement)))
+	    (cond (place (format "%s" place))
+		  ((eq float 'wrap) "{l}{0.5\\textwidth}")
+		  ((eq float 'figure)
+		   (format "[%s]" org-e-latex-default-figure-position))
+		  (t ""))))
+	 ;; Options for "includegraphics" macro. Make sure it is
+	 ;; a string with square brackets when non empty.  Default to
+	 ;; `org-e-latex-image-default-option' when possible.
+	 (options (let ((opt (format "%s"
+				     (or (plist-get attr :options)
+					 org-e-latex-image-default-option))))
+		    (cond ((string-match "\\`\\[.*\\]" opt) opt)
+			  ((org-string-nw-p opt) (format "[%s]" opt))
+			  ((eq float 'float) "[width=0.7\\textwidth]")
+			  ((eq float 'wrap) "[width=0.48\\textwidth]")
+			  (t "")))))
+    ;; Return proper string, depending on FLOAT.
+    (case float
       (wrap (format "\\begin{wrapfigure}%s
 \\centering
-\\includegraphics[%s]{%s}
-%s\\end{wrapfigure}" placement attr path caption))
+\\includegraphics%s{%s}
+%s\\end{wrapfigure}" placement options path caption))
       (multicolumn (format "\\begin{figure*}%s
 \\centering
-\\includegraphics[%s]{%s}
-%s\\end{figure*}" placement attr path caption))
-      (float (format "\\begin{figure}%s
+\\includegraphics%s{%s}
+%s\\end{figure*}" placement options path caption))
+      (figure (format "\\begin{figure}%s
 \\centering
-\\includegraphics[%s]{%s}
-%s\\end{figure}" placement attr path caption))
+\\includegraphics%s{%s}
+%s\\end{figure}" placement options path caption))
       (t (format "\\includegraphics[%s]{%s}" attr path)))))
 
 (defun org-e-latex-link (link desc info)
@@ -1789,7 +1791,7 @@ INFO is a plist holding contextual information.  See
 	 protocol)
     (cond
      ;; Image file.
-     (imagep (org-e-latex-link--inline-image link info))
+     (imagep (org-e-latex--inline-image link info))
      ;; Radio link: Transcode target's contents and use them as link's
      ;; description.
      ((string= type "radio")
