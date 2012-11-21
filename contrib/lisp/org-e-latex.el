@@ -67,6 +67,11 @@
 ;;   latter attribute is necessary to matrix macros that require more
 ;;   than one argument (i.e. "qbordermatrix").
 ;;
+;; Plain lists accept two optional attributes: `:environment' and
+;; `:options'.  The first one allows to use a non-standard environment
+;; (i.e. "inparaenum").  The second one allows to specify optional
+;; arguments for that environment (square brackets are not mandatory).
+;;
 ;; This back-end also offers enhanced support for footnotes.  Thus, it
 ;; handles nested footnotes, footnotes in tables and footnotes in item
 ;; descriptions.
@@ -1866,35 +1871,22 @@ the plist used as a communication channel."
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((type (org-element-property :type plain-list))
-	 (paralist-types '("inparaenum" "asparaenum" "inparaitem" "asparaitem"
-			   "inparadesc" "asparadesc"))
-	 (paralist-regexp (concat
-			   "\\("
-			   (mapconcat 'identity paralist-types "\\|")
-			   "\\)"))
-	 (attr (mapconcat #'identity
-			  (org-element-property :attr_latex plain-list)
-			  " "))
-	 (latex-type (cond
-		      ((and attr
-			    (string-match
-			     (format "\\<%s\\>" paralist-regexp) attr))
-		       (match-string 1 attr))
-		      ((eq type 'ordered) "enumerate")
-		      ((eq type 'unordered) "itemize")
-		      ((eq type 'descriptive) "description"))))
+	 (attr (org-export-read-attribute :attr_latex plain-list))
+	 (latex-type (let ((env (plist-get attr :environment)))
+		       (cond (env (format "%s" env))
+			     ((eq type 'ordered) "enumerate")
+			     ((eq type 'unordered) "itemize")
+			     ((eq type 'descriptive) "description")))))
     (org-e-latex--wrap-label
      plain-list
      (format "\\begin{%s}%s\n%s\\end{%s}"
 	     latex-type
-	     ;; Once special environment, if any, has been removed, the
-	     ;; rest of the attributes will be optional arguments.
-	     ;; They will be put inside square brackets if necessary.
-	     (let ((opt (replace-regexp-in-string
-			 (format " *%s *" paralist-regexp) "" attr)))
-	       (cond ((string= opt "") "")
-		     ((string-match "\\`\\[[^][]+\\]\\'" opt) opt)
-		     (t (format "[%s]" opt))))
+	     ;; Put optional arguments, if any inside square brackets
+	     ;; when necessary.
+	     (let ((options (format "%s" (or (plist-get attr :options) ""))))
+	       (cond ((equal options "") "")
+		     ((string-match "\\`\\[.*\\]\\'" options) options)
+		     (t (format "[%s]" options))))
 	     contents
 	     latex-type))))
 
