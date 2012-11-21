@@ -36,6 +36,9 @@
 ;; "TEXINFO_FILENAME", "TEXINFO_HEADER", "TEXINFO_DIR_CATEGORY",
 ;; "TEXINFO_DIR_TITLE", "TEXINFO_DIR_DESC" "SUBTITLE" and "SUBAUTHOR".
 ;;
+;; It introduces 1 new headline property keywords:
+;; "TEXINFO_MENU_TITLE" for optional menu titles. 
+;;
 ;; To include inline code snippets (for example for generating @kbd{}
 ;; and @key{} commands), the following export-snippet keys are
 ;; accepted:
@@ -127,7 +130,8 @@
    (:subauthor "SUBAUTHOR" nil nil newline)
    (:texinfo-dircat "TEXINFO_DIR_CATEGORY" nil nil t)
    (:texinfo-dirtitle "TEXINFO_DIR_TITLE" nil nil t)
-   (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)))
+   (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)
+   (:texinfo-menu-title "TEXINFO_MENU_TITLE" nil nil newline)))
 
 
 
@@ -541,13 +545,18 @@ of the tree for further formatting.
 TREE is the parse-tree containing the headlines.  LEVEL is the
 headline level to generate a list of.  INFO is a plist holding
 contextual information."
-  (let (seq)
+  (let (seq
+	(noexport (string= "noexport" 
+		   (and (plist-get info :with-tags)
+			    (org-export-get-tags tree info)))))
     (org-element-map
      tree 'headline
      (lambda (head)
        (when (org-element-property :level head)
 	 (if (and (eq level (org-element-property :level head))
-		  ;; Do not take note of footnotes or copying headlines
+		  ;; Do not take note of footnotes or copying
+		  ;; headlines.  Also ignore :noexport: headlines
+		  (not noexport)
 		  (not (org-element-property :copying head))
 		  (not (org-element-property :footnote-section-p head)))
 	     (push head seq))))
@@ -565,13 +574,21 @@ Returns a list containing the following information from each
 headline: length, title, description.  This is used to format the
 menu using `org-e-texinfo--format-menu'."
   (loop for headline in items collect
-	(let* ((title (org-e-texinfo--sanitize-menu
+	(let* ((menu-title (org-e-texinfo--sanitize-menu
+			    (org-export-data
+			     (org-element-property :texinfo-menu-title headline)
+			     info)))
+	       (title (org-e-texinfo--sanitize-menu
 		       (org-e-texinfo--sanitize-headline
 			(org-element-property :title headline) info)))
 	       (descr (org-export-data
-		       (org-element-property :description headline) info))
-	       (len (length title))
-	       (output (list len title descr)))
+		       (org-element-property :description headline)
+		       info))
+	       (menu-entry (if (string= "" menu-title) title menu-title))
+	       (len (length menu-entry))
+	       (output (list len menu-entry descr)))
+	  (message "%S" menu-title)
+	  ;; (message "%s" headline)
 	  output)))
 
 (defun org-e-texinfo--menu-headlines (headline info)
@@ -892,13 +909,22 @@ holding contextual information."
 	 (class-sectionning (assoc class org-e-texinfo-classes))
 	 ;; Find the index type, if any
 	 (index (org-element-property :index headline))
+	 ;; Retrieve custom menu title (if any)
+	 (menu-title (org-e-texinfo--sanitize-menu
+		      (org-export-data
+		       (org-element-property :texinfo-menu-title headline)
+		       info)))
 	 ;; Retrieve headline text
 	 (text (org-e-texinfo--sanitize-headline
 		(org-element-property :title headline) info))
 	 ;; Create node info, to insert it before section formatting.
+	 ;; Use custom menu title if present
 	 (node (format "@node %s\n"
 		       (org-e-texinfo--sanitize-menu
-			(replace-regexp-in-string "%" "%%" text))))
+			(replace-regexp-in-string "%" "%%"
+						  (if (not (string= "" menu-title))
+						      menu-title
+						    text)))))
 	 ;; Menus must be generated with first child, otherwise they
 	 ;; will not nest properly
 	 (menu (let* ((first (org-export-first-sibling-p headline info))
