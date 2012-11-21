@@ -2393,18 +2393,19 @@ property."
     ;; Remove left out comments.
     (while (string-match "^%.*\n" output)
       (setq output (replace-match "" t t output)))
-    ;; When the "rmlines" attribute is provided, remove all hlines but
-    ;; the the one separating heading from the table body.
-    (when (org-export-read-attribute :attr_latex table :rmlines)
-      (let ((n 0) (pos 0))
-	(while (and (< (length output) pos)
-		    (setq pos (string-match "^\\\\hline\n?" output pos)))
-	  (incf n)
-	  (unless (= n 2) (setq output (replace-match "" nil nil output))))))
-    (let ((centerp (if (plist-member attr :center) (plist-get attr :center)
-		     org-e-latex-tables-centered)))
-      (if (not centerp) output
-	(format "\\begin{center}\n%s\n\\end{center}" output)))))
+    (let ((attr (org-export-read-attribute :attr_latex table)))
+      (when (plist-get attr :rmlines)
+	;; When the "rmlines" attribute is provided, remove all hlines
+	;; but the the one separating heading from the table body.
+	(let ((n 0) (pos 0))
+	  (while (and (< (length output) pos)
+		      (setq pos (string-match "^\\\\hline\n?" output pos)))
+	    (incf n)
+	    (unless (= n 2) (setq output (replace-match "" nil nil output))))))
+      (let ((centerp (if (plist-member attr :center) (plist-get attr :center)
+		       org-e-latex-tables-centered)))
+	(if (not centerp) output
+	  (format "\\begin{center}\n%s\n\\end{center}" output))))))
 
 (defun org-e-latex--math-table (table info)
   "Return appropriate LaTeX code for a matrix.
