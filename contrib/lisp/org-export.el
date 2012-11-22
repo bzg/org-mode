@@ -4857,9 +4857,9 @@ back to standard interface."
 	 ;; always available.
 	 (allowed-keys
 	  (nconc (list ?1 ?2 ?3 ?4)
-		 (if (not first-key) (mapcar 'car backends)
+		 (if (not first-key) (org-uniquify (mapcar 'car backends))
 		   (let (sub-menu)
-		     (dolist (backend backends (mapcar 'car sub-menu))
+		     (dolist (backend backends (sort (mapcar 'car sub-menu) '<))
 		       (when (eq (car backend) first-key)
 			 (setq sub-menu (append (nth 2 backend) sub-menu))))))
 		 (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
