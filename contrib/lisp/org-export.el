@@ -2993,7 +2993,7 @@ channel used for export, as a plist.."
     (if (memq type '(nil org-data)) (error "No foreign transcoder available")
       (let ((transcoder
 	     (cdr (assq type (org-export-backend-translate-table back-end)))))
-	(if (functionp transcoder) (funcall transcoder contents info)
+	(if (functionp transcoder) (funcall transcoder data contents info)
 	  (error "No foreign transcoder available"))))))
 
 
