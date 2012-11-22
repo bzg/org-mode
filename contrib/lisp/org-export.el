@@ -2983,15 +2983,17 @@ Caption lines are separated by a white space."
 ;; back-end, it may be used as a fall-back function once all specific
 ;; cases have been treated.
 
-(defun org-export-with-backend (back-end data &rest args)
-  "Call a transcoder from BACK-END on DATA."
+(defun org-export-with-backend (back-end data &optional contents info)
+  "Call a transcoder from BACK-END on DATA.
+CONTENTS, when non-nil, is the transcoded contents of DATA
+element, as a string.  INFO, when non-nil, is the communication
+channel used for export, as a plist.."
   (org-export-barf-if-invalid-backend back-end)
   (let ((type (org-element-type data)))
-    (if (or (memq type '(nil org-data)))
-	(error "No foreign transcoder available")
+    (if (memq type '(nil org-data)) (error "No foreign transcoder available")
       (let ((transcoder
 	     (cdr (assq type (org-export-backend-translate-table back-end)))))
-	(if (functionp transcoder) (apply transcoder data args)
+	(if (functionp transcoder) (funcall transcoder contents info)
 	  (error "No foreign transcoder available"))))))
 
 
