@@ -1766,7 +1766,7 @@ used as a communication channel."
 \\centering
 \\includegraphics%s{%s}
 %s\\end{figure}" placement options path caption))
-      (t (format "\\includegraphics[%s]{%s}" attr path)))))
+      (t (format "\\includegraphics%s{%s}" options path)))))
 
 (defun org-e-latex-link (link desc info)
   "Transcode a LINK object from Org to LaTeX.
