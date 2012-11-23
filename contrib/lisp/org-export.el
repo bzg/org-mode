@@ -4314,6 +4314,61 @@ Universal Time."
                                    :year-start)))))
    utc))
 
+(defun org-export-split-timestamp-range (timestamp &optional end)
+  "Extract a timestamp object from a date or time range.
+
+TIMESTAMP is a timestamp object. END, when non-nil, means extract
+the end of the range.  Otherwise, extract its start.
+
+Return a new timestamp object sharing the same parent as
+TIMESTAMP."
+  (let ((type (org-element-property :type timestamp)))
+    (if (memq type '(active inactive diary)) timestamp
+      (let ((split-ts (list 'timestamp (copy-sequence (nth 1 timestamp)))))
+	;; Set new type.
+	(org-element-put-property
+	 split-ts :type (if (eq type 'active-range) 'active 'inactive))
+	;; Copy start properties over end properties if END is
+	;; non-nil.  Otherwise, copy end properties over `start' ones.
+	(let ((p-alist '((:minute-start . :minute-end)
+			 (:hour-start . :hour-end)
+			 (:day-start . :day-end)
+			 (:month-start . :month-end)
+			 (:year-start . :year-end))))
+	  (dolist (p-cell p-alist)
+	    (org-element-put-property
+	     split-ts
+	     (funcall (if end 'car 'cdr) p-cell)
+	     (org-element-property
+	      (funcall (if end 'cdr 'car) p-cell) split-ts)))
+	  ;; Eventually refresh `:raw-value'.
+	  (org-element-put-property split-ts :raw-value nil)
+	  (org-element-put-property
+	   split-ts :raw-value (org-element-interpret-data split-ts)))))))
+
+(defun org-export-translate-timestamp (timestamp &optional boundary)
+  "Apply `org-translate-time' on a TIMESTAMP object.
+When optional argument BOUNDARY is non-nil, it is either the
+symbol `start' or `end'.  In this case, only translate the
+starting or ending part of TIMESTAMP if it is a date or time
+range.  Otherwise, translate both parts."
+  (if (and (not boundary)
+	   (memq (org-element-property :type timestamp)
+		 '(active-range inactive-range)))
+      (concat
+       (org-translate-time
+	(org-element-property :raw-value
+			      (org-export-split-timestamp-range timestamp)))
+       "--"
+       (org-translate-time
+	(org-element-property :raw-value
+			      (org-export-split-timestamp-range timestamp t))))
+    (org-translate-time
+     (org-element-property
+      :raw-value
+      (if (not boundary) timestamp
+	(org-export-split-timestamp-range timestamp (eq boundary 'end)))))))
+
 
 ;;;; Smart Quotes
 ;;
