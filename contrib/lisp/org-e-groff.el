@@ -1849,8 +1849,8 @@ information."
   "Transcode a TIMESTAMP object from Org to Groff.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-translate-time
-		(org-element-property :raw-value timestamp))))
+  (let ((value (org-e-groff-plain-text
+		(org-export-translate-timestamp timestamp) info)))
     (case (org-element-property :type timestamp)
       ((active active-range)
        (format org-e-groff-active-timestamp-format value))

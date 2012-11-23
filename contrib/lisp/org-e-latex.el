@@ -2539,23 +2539,12 @@ information."
   "Transcode a TIMESTAMP object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-translate-time
-		(org-element-property :raw-value timestamp))))
+  (let ((value (org-e-latex-plain-text
+		(org-export-translate-timestamp timestamp) info)))
     (case (org-element-property :type timestamp)
-      (active (format org-e-latex-active-timestamp-format value))
-      (active-range
-       (let ((timestamps (org-split-string value "--")))
-	 (concat
-	  (format org-e-latex-active-timestamp-format (car timestamps))
-	  "--"
-	  (format org-e-latex-active-timestamp-format (cdr timestamps)))))
-      (inactive (format org-e-latex-inactive-timestamp-format value))
-      (inactive-range
-       (let ((timestamps (org-split-string value "--")))
-	 (concat
-	  (format org-e-latex-inactive-timestamp-format (car timestamps))
-	  "--"
-	  (format org-e-latex-inactive-timestamp-format (cdr timestamps)))))
+      ((active active-range) (format org-e-latex-active-timestamp-format value))
+      ((inactive inactive-range)
+       (format org-e-latex-inactive-timestamp-format value))
       (otherwise (format org-e-latex-diary-timestamp-format value)))))
 
 

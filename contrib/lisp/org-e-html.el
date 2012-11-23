@@ -2701,8 +2701,8 @@ information."
   "Transcode a TIMESTAMP object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (let ((value (org-translate-time
-		(org-element-property :raw-value timestamp))))
+  (let ((value (org-e-html-plain-text
+		(org-export-translate-timestamp timestamp) info)))
     (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
 	    (replace-regexp-in-string "--" "&ndash;" value))))
 
