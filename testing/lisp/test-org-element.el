@@ -2677,7 +2677,14 @@ Paragraph \\alpha."
        (org-test-with-temp-text "Some *bold* text"
 	 (progn (search-forward "bold")
 		(org-element-type
-		 (org-element-property :parent (org-element-context))))))))
+		 (org-element-property :parent (org-element-context)))))))
+  ;; Between two objects, return the second one.
+  (should
+   (eq 'macro
+       (org-test-with-temp-text "<<target>>{{{test}}}"
+	 (progn (search-forward "{")
+		(backward-char)
+		(org-element-type (org-element-context)))))))
 
 
 (provide 'test-org-element)
