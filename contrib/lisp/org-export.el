@@ -2595,13 +2595,7 @@ Return code as a string."
 	   ;; have added some new ones.
 	   (org-macro-initialize-templates)
 	   (org-macro-replace-all org-macro-templates)
-	   ;; TODO: Setting `org-current-export-file' is required by
-	   ;; Org Babel to properly resolve noweb references.  Once
-	   ;; "org-exp.el" is removed, modify
-	   ;; `org-export-blocks-preprocess' so it accepts the value
-	   ;; as an argument instead.
-	   (let ((org-current-export-file (current-buffer)))
-	     (org-export-blocks-preprocess)))
+	   (org-export-execute-babel-code))
 	 ;; Update radio targets since keyword inclusion might have
 	 ;; added some more.
 	 (org-update-radio-target-regexp)
@@ -2928,6 +2922,18 @@ file should have."
 		(lambda () (if (< offset 0) (delete-char (abs offset))
 			(insert (make-string offset ?*)))))))))))
     (org-element-normalize-string (buffer-string))))
+
+(defun org-export-execute-babel-code ()
+  "Execute every Babel code in the visible part of current buffer.
+This function will return an error if the current buffer is
+visiting a file."
+  ;; Get a pristine copy of current buffer so Babel references can be
+  ;; properly resolved.
+  (let* (clone-buffer-hook (reference (clone-buffer)))
+    (unwind-protect (let ((org-current-export-file reference))
+		      (org-export-blocks-preprocess))
+      (kill-buffer reference))))
+
 
 
 ;;; Tools For Back-Ends
