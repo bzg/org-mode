@@ -159,7 +159,13 @@ this template."
 		      "\\|" org-babel-lob-one-liner-regexp "\\)")))
       (while (re-search-forward rx end t)
 	(save-excursion
-	  (let* ((element (save-match-data (org-element-context)))
+	  (let* ((element (save-excursion
+			    ;; If match is inline, point is at its
+			    ;; end.  Move backward so
+			    ;; `org-element-context' can get the
+			    ;; object, not the following one.
+			    (backward-char)
+			    (save-match-data (org-element-context))))
 		 (type (org-element-type element)))
 	    (when (memq type '(babel-call inline-babel-call inline-src-block))
 	      (let ((beg-el (org-element-property :begin element))
