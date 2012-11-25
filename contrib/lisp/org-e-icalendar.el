@@ -569,14 +569,16 @@ inlinetask within the section."
 		   (org-e-icalendar--vevent
 		    entry scheduled (concat "SC-" uid)
 		    (concat "S: " summary) loc desc cat)))
-	    ;; When collecting plain timestamps from an headline, skip
-	    ;; inlinetasks since collection will happen once ENTRY is
-	    ;; one of them.
+	    ;; When collecting plain timestamps from an headline and
+	    ;; its title, skip inlinetasks since collection will
+	    ;; happen once ENTRY is one of them.
 	    (let ((counter 0))
 	      (mapconcat
 	       'identity
 	       (org-element-map
-		inside 'timestamp
+		(cons (org-element-property :title entry)
+		      (org-element-contents inside))
+		'timestamp
 		(lambda (ts)
 		  (let ((uid (format "TS%d-%s" (incf counter) uid)))
 		    (org-e-icalendar--vevent entry ts uid summary loc desc cat)))
@@ -595,13 +597,16 @@ inlinetask within the section."
 			 ('t (eq todo-type 'todo))))
 	      (org-e-icalendar--vtodo entry uid summary loc desc cat))
 	    ;; Diary-sexp: Collect every diary-sexp element within
-	    ;; ENTRY and transcode them.  If ENTRY is an headline,
-	    ;; skip inlinetasks: they will be handled separately.
+	    ;; ENTRY and its title, and transcode them.  If ENTRY is
+	    ;; an headline, skip inlinetasks: they will be handled
+	    ;; separately.
 	    (when org-e-icalendar-include-sexps
 	      (let ((counter 0))
 		(mapconcat 'identity
 			   (org-element-map
-			    inside 'diary-sexp
+			    (cons (org-element-property :title entry)
+				  (org-element-contents inside))
+			    'diary-sexp
 			    (lambda (sexp)
 			      (org-e-icalendar-transcode-diary-sexp
 			       (org-element-property :value sexp)
