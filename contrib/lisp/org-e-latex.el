@@ -30,7 +30,8 @@
 ;; `org-e-latex-publish-to-pdf'.
 ;;
 ;; The library introduces three new buffer keywords: "LATEX_CLASS",
-;; "LATEX_CLASS_OPTIONS" and "LATEX_HEADER".
+;; "LATEX_CLASS_OPTIONS" and "LATEX_HEADER".  Their value can be
+;; either a string or a symbol.
 ;;
 ;; Table export can be controlled with a number of attributes (through
 ;; ATTR_LATEX keyword).
@@ -38,10 +39,10 @@
 ;; - The main one is the `:mode' attribute, which can be set to
 ;;   `table', `math', `inline-math' and `verbatim'.  In particular,
 ;;   when in `math' or `inline-math' mode, every cell is exported
-;;   as-is and the table will be wrapped in a math environment.  Also,
-;;   horizontal rules are ignored.  These modes are particularly
-;;   useful to write matrices.  Default mode is stored in
-;;   `org-e-latex-default-table-mode'.
+;;   as-is, horizontal rules are ignored and the table will be wrapped
+;;   in a math environment.  Also, contiguous tables sharing the same
+;;   math mode will be wrapped within the same environment.  Default
+;;   mode is stored in `org-e-latex-default-table-mode'.
 ;;
 ;; - The second most important attribute is `:environment'.  It is the
 ;;   environment used for the table and defaults to
@@ -54,8 +55,7 @@
 ;;
 ;; - `:align', `:font' and `:width' attributes set, respectively, the
 ;;   alignment string of the table, its font size and its width.  They
-;;   only apply on regular tables.  Their value can be a string or
-;;   a symbol.
+;;   only apply on regular tables.
 ;;
 ;; - `:booktabs', `:center' and `:rmlines' values are booleans.  They
 ;;   toggle, respectively "booktabs" usage (assuming the package is
@@ -2444,10 +2444,22 @@ This function assumes TABLE has `org' as its `:type' property and
 		 (org-element-map row 'table-cell 'identity info) "&")
 		(or (cdr (assoc env org-e-latex-table-matrix-macros)) "\\\\")
 		"\n")))
-	   (org-element-map table 'table-row 'identity info) "")))
+	   (org-element-map table 'table-row 'identity info) ""))
+	 ;; Variables related to math clusters (contiguous math tables
+	 ;; of the same type).
+	 (mode (org-export-read-attribute :attr_latex table :mode))
+	 (prev (org-export-get-previous-element table info))
+	 (next (org-export-get-next-element table info)))
     (concat
-     ;; Opening string.
-     (cond (inlinep "\\(")
+     ;; Opening string.  If TABLE is in the middle of a table cluster,
+     ;; do not insert any.
+     (cond ((and prev
+		 (eq (org-element-type prev) 'table)
+		 (memq (org-element-property :post-blank prev) '(0 nil))
+		 (string= (org-export-read-attribute :attr_latex prev :mode)
+			  mode))
+	    nil)
+	   (inlinep "\\(")
 	   ((org-string-nw-p caption) (concat "\\begin{equation}\n" caption))
 	   (t "\\["))
      ;; Prefix (make sure it is a string).
@@ -2463,9 +2475,29 @@ This function assumes TABLE has `org' as its `:type' property and
 	   (t (format "\\begin{%s}\n%s\\end{%s}" env contents env)))
      ;; Suffix (make sure it is a string).
      (format "%s" (or (plist-get attr :math-suffix) ""))
-     ;; Closing string.
-     (cond (inlinep "\\)")
-	   ((org-string-nw-p caption) "\\end{equation}")
+     ;; Closing string.  If TABLE is in the middle of a table cluster,
+     ;; do not insert any.  If it closes such a cluster, be sure to
+     ;; close the cluster with a string matching the opening string.
+     (cond ((and next
+		 (eq (org-element-type next) 'table)
+		 (memq (org-element-property :post-blank table) '(0 nil))
+		 (string= (org-export-read-attribute :attr_latex next :mode)
+			  mode))
+	    nil)
+	   (inlinep "\\)")
+	   ;; Find cluster beginning to know which environment to use.
+	   ((let ((cluster-beg table) prev)
+	      (while (and (setq prev (org-export-get-previous-element
+				      cluster-beg info))
+			  (memq (org-element-property :post-blank prev)
+				'(0 nil))
+			  (string=
+			   (org-export-read-attribute :attr_latex prev :mode)
+			   mode))
+		(setq cluster-beg prev))
+	      (and (or (org-element-property :caption cluster-beg)
+		       (org-element-property :name cluster-beg))
+		   "\n\\end{equation}")))
 	   (t "\\]")))))
 
 
