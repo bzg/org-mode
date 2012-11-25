@@ -52,8 +52,10 @@
 ;; - `:float' attribute defines a float environment for the table.
 ;;   Possible values are `sidewaystable', `multicolumn' and `table'.
 ;;
-;; - `:width' and `:align' attributes set, respectively, the width of
-;;   the table and its alignment string.
+;; - `:align', `:font' and `:width' attributes set, respectively, the
+;;   alignment string of the table, its font size and its width.  They
+;;   only apply on regular tables.  Their value can be a string or
+;;   a symbol.
 ;;
 ;; - `:booktabs', `:center' and `:rmlines' values are booleans.  They
 ;;   toggle, respectively "booktabs" usage (assuming the package is
@@ -2334,6 +2336,8 @@ This function assumes TABLE has `org' as its `:type' property and
 			      (org-element-property :caption table))
 			  "table")))))
 	 ;; Extract others display options.
+	 (fontsize (let ((font (plist-get attr :font)))
+		     (and font (concat (org-trim (format "%s" font)) "\n"))))
 	 (width (plist-get attr :width))
 	 (placement (or (plist-get attr :placement)
 			(format "[%s]" org-e-latex-default-figure-position)))
@@ -2343,21 +2347,26 @@ This function assumes TABLE has `org' as its `:type' property and
     (cond
      ;; Longtable.
      ((equal "longtable" table-env)
-      (format
-       "\\begin{longtable}{%s}\n%s%s%s\\end{longtable}"
-       alignment
-       (if (or (not org-e-latex-table-caption-above) (string= "" caption)) ""
-	 (concat caption "\\\\\n"))
-       contents
-       (if (or org-e-latex-table-caption-above (string= "" caption)) ""
-	 (concat caption "\\\\\n"))))
+      (concat (and fontsize (concat "{" fontsize))
+	      (format "\\begin{longtable}{%s}\n" alignment)
+	      (and org-e-latex-table-caption-above
+		   (org-string-nw-p caption)
+		   (concat caption "\\\\\n"))
+	      contents
+	      (and (not org-e-latex-table-caption-above)
+		   (org-string-nw-p caption)
+		   (concat caption "\\\\\n"))
+	      "\\end{longtable}\n"
+	      (and fontsize "}")))
      ;; Others.
      (t (concat (cond
 		 (float-env
 		  (concat (format "\\begin{%s}%s\n" float-env placement)
 			  (if org-e-latex-table-caption-above caption "")
-			  (when centerp "\\centering\n")))
-		 (centerp "\\begin{center}\n"))
+			  (when centerp "\\centering\n")
+			  fontsize))
+		 (centerp (concat "\\begin{center}\n" fontsize))
+		 (fontsize (concat "{" fontsize)))
 		(format "\\begin{%s}%s{%s}\n%s\\end{%s}"
 			table-env
 			(if width (format "{%s}" width) "")
@@ -2368,7 +2377,8 @@ This function assumes TABLE has `org' as its `:type' property and
 		 (float-env
 		  (concat (if org-e-latex-table-caption-above "" caption)
 			  (format "\n\\end{%s}" float-env)))
-		 (centerp "\n\\end{center}")))))))
+		 (centerp "\n\\end{center}")
+		 (fontsize "}")))))))
 
 (defun org-e-latex--table.el-table (table info)
   "Return appropriate LaTeX code for a table.el table.
