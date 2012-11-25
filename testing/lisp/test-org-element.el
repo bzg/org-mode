@@ -2251,7 +2251,8 @@ DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
     (org-element-timestamp-interpreter
      '(timestamp
        (:type active :year-start 2012 :month-start 3 :day-start 29
-	      :repeater-type cumulate :repeater-value "1y")) nil))))
+	      :repeater-type cumulate :repeater-value 1 :repeater-unit year))
+     nil))))
 
 (ert-deftest test-org-element/verse-block-interpreter ()
   "Test verse block interpretation."
