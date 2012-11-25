@@ -2449,15 +2449,20 @@ This function assumes TABLE has `org' as its `:type' property and
 	 ;; of the same type).
 	 (mode (org-export-read-attribute :attr_latex table :mode))
 	 (prev (org-export-get-previous-element table info))
-	 (next (org-export-get-next-element table info)))
+	 (next (org-export-get-next-element table info))
+	 (same-mode-p
+	  (lambda (table)
+	    ;; Non-nil when TABLE has the same mode as current table.
+	    (string= (or (org-export-read-attribute :attr_latex table :mode)
+			 org-e-latex-default-table-mode)
+		     mode))))
     (concat
      ;; Opening string.  If TABLE is in the middle of a table cluster,
      ;; do not insert any.
      (cond ((and prev
 		 (eq (org-element-type prev) 'table)
 		 (memq (org-element-property :post-blank prev) '(0 nil))
-		 (string= (org-export-read-attribute :attr_latex prev :mode)
-			  mode))
+		 (funcall same-mode-p prev))
 	    nil)
 	   (inlinep "\\(")
 	   ((org-string-nw-p caption) (concat "\\begin{equation}\n" caption))
@@ -2481,8 +2486,7 @@ This function assumes TABLE has `org' as its `:type' property and
      (cond ((and next
 		 (eq (org-element-type next) 'table)
 		 (memq (org-element-property :post-blank table) '(0 nil))
-		 (string= (org-export-read-attribute :attr_latex next :mode)
-			  mode))
+		 (funcall same-mode-p next))
 	    nil)
 	   (inlinep "\\)")
 	   ;; Find cluster beginning to know which environment to use.
@@ -2491,9 +2495,7 @@ This function assumes TABLE has `org' as its `:type' property and
 				      cluster-beg info))
 			  (memq (org-element-property :post-blank prev)
 				'(0 nil))
-			  (string=
-			   (org-export-read-attribute :attr_latex prev :mode)
-			   mode))
+			  (funcall same-mode-p prev))
 		(setq cluster-beg prev))
 	      (and (or (org-element-property :caption cluster-beg)
 		       (org-element-property :name cluster-beg))
