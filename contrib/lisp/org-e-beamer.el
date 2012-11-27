@@ -75,9 +75,11 @@
 ;; options for the current frame ("fragile" option is added
 ;; automatically, though).
 ;;
-;; Every plain list has support for `:overlay' attribute (through
-;; ATTR_BEAMER affiliated keyword).  Also, ordered (resp. description)
-;; lists make use of `:template' (resp. `:long-text') attribute.
+;; Every plain list has support for `:environment', `:overlay' and
+;; `:options' attributes (through ATTR_BEAMER affiliated keyword).
+;; The first one allows to use a different environment, the second
+;; sets overlay specifications and the last one inserts optional
+;; arguments in current list environment.
 ;;
 ;; Eventually, an export snippet with a value enclosed within angular
 ;; brackets put at the beginning of an element or object whose type is
@@ -742,8 +744,7 @@ used as a communication channel."
 
 ;;;; Plain List
 ;;
-;; Plain lists support `:overlay' (for any type), `:template' (for
-;; ordered lists only) and `:long-text' (for description lists only)
+;; Plain lists support `:environment', `:overlay' and `:options'
 ;; attributes.
 
 (defun org-e-beamer-plain-list (plain-list contents info)
@@ -752,29 +753,23 @@ CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((type (org-element-property :type plain-list))
 	 (attributes (org-export-read-attribute :attr_beamer plain-list))
-	 (latex-type (cond ((eq type 'ordered) "enumerate")
-			   ((eq type 'descriptive) "description")
-			   (t "itemize"))))
+	 (latex-type (let ((env (plist-get attributes :environment)))
+		       (cond (env (format "%s" env))
+			     ((eq type 'ordered) "enumerate")
+			     ((eq type 'descriptive) "description")
+			     (t "itemize")))))
     (org-e-latex--wrap-label
      plain-list
      (format "\\begin{%s}%s%s\n%s\\end{%s}"
 	     latex-type
 	     ;; Default overlay specification, if any.
-	     (let ((overlay (plist-get attributes :overlay)))
-	       (if (not overlay) ""
-		 (org-e-beamer--normalize-argument overlay 'defaction)))
+	     (org-e-beamer--normalize-argument
+	      (format "%s" (or (plist-get attributes :overlay) ""))
+	      'defaction)
 	     ;; Second optional argument depends on the list type.
-	     (case type
-	       (ordered
-		(let ((template (plist-get attributes :template)))
-		  (if (not template) ""
-		    (org-e-beamer--normalize-argument template 'option))))
-	       (descriptive
-		(let ((long-text (plist-get attributes :long-text)))
-		  (if (not long-text) ""
-		    (org-e-beamer--normalize-argument long-text 'option))))
-	       ;; There's no second argument for un-ordered lists.
-	       (otherwise ""))
+	     (org-e-beamer--normalize-argument
+	      (format "%s" (or (plist-get attributes :options) ""))
+	      'option)
 	     ;; Eventually insert contents and close environment.
 	     contents
 	     latex-type))))
