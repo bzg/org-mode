@@ -3670,7 +3670,7 @@ contextual information."
 	    (lambda nil
 	      ;; Kill all XML buffers.
 	      (mapc (lambda (file)
-		      (let ((buf (get-file-buffer
+		      (let ((buf (find-buffer-visiting
 				  (concat org-e-odt-zip-dir file))))
 			(when buf
 			  (set-buffer-modified-p nil)
@@ -3702,7 +3702,8 @@ contextual information."
 	   (org-e-odt-write-manifest-file)
 	   ;; Save all XML files.
 	   (mapc (lambda (file)
-		   (let ((buf (get-file-buffer (concat org-e-odt-zip-dir file))))
+		   (let ((buf (find-buffer-visiting
+			       (concat org-e-odt-zip-dir file))))
 		     (when buf
 		       (with-current-buffer buf
 			 ;; Prettify output if needed.
