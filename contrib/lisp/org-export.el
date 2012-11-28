@@ -262,6 +262,11 @@ and CDR is a plist with the following properties:
 This variable is set with `org-export-define-backend' and
 `org-export-define-derived-backend' functions.")
 
+(defvar org-export-dispatch-last-action nil
+  "Last command called from the dispatcher.
+The value should be a list.  Its CAR is the action, as a symbol,
+and its CDR is a list of export options.")
+
 
 
 ;;; User-configurable Variables
@@ -4835,22 +4840,30 @@ to `:default' encoding. If it fails, return S."
 ;; pressed to `org-export-dispatch-action'.
 
 ;;;###autoload
-(defun org-export-dispatch ()
+(defun org-export-dispatch (&optional arg)
   "Export dispatcher for Org mode.
 
 It provides an access to common export related tasks in a buffer.
 Its interface comes in two flavours: standard and expert.  While
 both share the same set of bindings, only the former displays the
 valid keys associations.  Set `org-export-dispatch-use-expert-ui'
-to switch to one or the other."
-  (interactive)
-  (let* ((input (save-window-excursion
-		  (unwind-protect
-		      (org-export-dispatch-ui (list org-export-initial-scope)
-					      nil
-					      org-export-dispatch-use-expert-ui)
-		    (and (get-buffer "*Org Export Dispatcher*")
-			 (kill-buffer "*Org Export Dispatcher*")))))
+to switch to one or the other.
+
+When called with C-u prefix ARG, repeat the last export action,
+with the same set of options used back then, on the current
+buffer."
+  (interactive "P")
+  (let* ((input (or (and arg org-export-dispatch-last-action)
+		    (save-window-excursion
+		      (unwind-protect
+			  ;; Store this export command.
+			  (setq org-export-dispatch-last-action
+				(org-export-dispatch-ui
+				 (list org-export-initial-scope)
+				 nil
+				 org-export-dispatch-use-expert-ui))
+			(and (get-buffer "*Org Export Dispatcher*")
+			     (kill-buffer "*Org Export Dispatcher*"))))))
 	 (action (car input))
 	 (optns (cdr input)))
     (case action
