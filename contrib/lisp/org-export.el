@@ -362,11 +362,11 @@ e.g. \"email:t\"."
   :type 'boolean)
 
 (defcustom org-export-with-emphasize t
-  "Non-nil means interpret *word*, /word/, and _word_ as emphasized text.
+  "Non-nil means interpret *word*, /word/, _word_ and +word+.
 
 If the export target supports emphasizing text, the word will be
-typeset in bold, italic, or underlined, respectively.  Not all
-export backends support this.
+typeset in bold, italic, with an underline or strike-through,
+respectively.
 
 This option can also be set with the #+OPTIONS line, e.g. \"*:nil\"."
   :group 'org-export-general
@@ -2002,7 +2002,8 @@ a plist."
     ;; ... entities...
     (entity (plist-get info :with-entities))
     ;; ... emphasis...
-    (emphasis (plist-get info :with-emphasize))
+    ((bold italic strike-through underline)
+     (plist-get info :with-emphasize))
     ;; ... fixed-width areas.
     (fixed-width (plist-get info :with-fixed-width))
     ;; ... footnotes...
