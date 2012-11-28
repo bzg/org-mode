@@ -511,20 +511,20 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	    (eolp))))
   ;; At an headline with special movement.
   (should
-   (org-test-with-temp-text "* Headline :tag:\n"
+   (org-test-with-temp-text "* Headline1 :tag:\n"
      (let ((org-special-ctrl-a/e t))
        (and (progn (org-end-of-line) (looking-at " :tag:"))
 	    (progn (org-end-of-line) (eolp))
 	    (progn (org-end-of-line) (looking-at " :tag:"))))))
   ;; At an headline without special movement.
   (should
-   (org-test-with-temp-text "* Headline :tag:\n"
+   (org-test-with-temp-text "* Headline2 :tag:\n"
      (let ((org-special-ctrl-a/e nil))
        (and (progn (org-end-of-line) (eolp))
 	    (progn (org-end-of-line) (eolp))))))
   ;; At an headline, with reversed movement.
   (should
-   (org-test-with-temp-text "* Headline :tag:\n"
+   (org-test-with-temp-text "* Headline3 :tag:\n"
      (let ((org-special-ctrl-a/e 'reversed)
 	   (this-command last-command))
        (and (progn (org-end-of-line) (eolp))
