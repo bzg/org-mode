@@ -6263,7 +6263,11 @@ be selected:
              thisyear, lastyear, thisyear-@var{N}     @r{a relative year}
              @r{Use @kbd{S-@key{left}/@key{right}} keys to shift the time interval.}
 :tstart      @r{A time string specifying when to start considering times.}
+             @r{Relative times like @code{"<-2w>"} can also be used.  See}
+             @r{@ref{Matching tags and properties} for relative time syntax.}
 :tend        @r{A time string specifying when to stop considering times.}
+             @r{Relative times like @code{"<now>"} can also be used.  See}
+             @r{@ref{Matching tags and properties} for relative time syntax.}
 :step        @r{@code{week} or @code{day}, to split the table into chunks.}
              @r{To use this, @code{:block} or @code{:tstart}, @code{:tend} are needed.}
 :stepskip0   @r{Do not show steps that have zero time.}
@@ -6312,6 +6316,11 @@ only to fit it into the manual.}
 @example
 #+BEGIN: clocktable :tstart "<2006-08-10 Thu 10:00>"
                     :tend "<2006-08-10 Thu 12:00>"
+#+END: clocktable
+@end example
+A range starting a week ago and ending right now could be written as
+@example
+#+BEGIN: clocktable :tstart "<-1w>" :tend "<now>"
 #+END: clocktable
 @end example
 A summary of the current subtree with % times would be

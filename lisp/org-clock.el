@@ -2604,9 +2604,9 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
       (setq te (format "%4d-%02d-%02d" (nth 2 te) (car te) (nth 1 te))))
     ;; Now the times are strings we can parse.
     (if ts (setq ts (org-float-time
-		     (apply 'encode-time (org-parse-time-string ts)))))
+		     (seconds-to-time (org-matcher-time ts)))))
     (if te (setq te (org-float-time
-		     (apply 'encode-time (org-parse-time-string te)))))
+		     (seconds-to-time (org-matcher-time te)))))
     (save-excursion
       (org-clock-sum ts te
 		     (unless (null matcher)
