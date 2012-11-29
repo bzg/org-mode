@@ -435,7 +435,7 @@ non-nil."
 
 
 ;;;###autoload
-(defun org-md-export-to-markdown (&optional subtreep visible-only pub-dir)
+(defun org-md-export-to-markdown (&optional subtreep visible-only)
   "Export current buffer to a Markdown file.
 
 If narrowing is active in the current buffer, only export its
@@ -450,12 +450,9 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".md" subtreep pub-dir)))
+  (let ((outfile (org-export-output-file-name ".md" subtreep)))
     (org-export-to-file 'md outfile subtreep visible-only)))
 
 

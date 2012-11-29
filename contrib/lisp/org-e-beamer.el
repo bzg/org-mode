@@ -1015,7 +1015,7 @@ is non-nil."
 
 ;;;###autoload
 (defun org-e-beamer-export-to-latex
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer as a Beamer presentation (tex).
 
 If narrowing is active in the current buffer, only export its
@@ -1037,18 +1037,15 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".tex" subtreep pub-dir)))
+  (let ((outfile (org-export-output-file-name ".tex" subtreep)))
     (org-export-to-file
      'e-beamer outfile subtreep visible-only body-only ext-plist)))
 
 ;;;###autoload
 (defun org-e-beamer-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer as a Beamer presentation (PDF).
 
 If narrowing is active in the current buffer, only export its
@@ -1070,14 +1067,10 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return PDF file's name."
   (interactive)
   (org-e-latex-compile
-   (org-e-beamer-export-to-latex
-    subtreep visible-only body-only ext-plist pub-dir)))
+   (org-e-beamer-export-to-latex subtreep visible-only body-only ext-plist)))
 
 ;;;###autoload
 (defun org-e-beamer-select-environment ()

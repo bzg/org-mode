@@ -1886,7 +1886,7 @@ contextual information."
 ;;; Interactive functions
 
 (defun org-e-groff-export-to-groff
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to a Groff file.
 
 If narrowing is active in the current buffer, only export its
@@ -1905,19 +1905,16 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
   (setq org-e-groff-registered-references nil)
   (setq org-e-groff-special-content nil)
-  (let ((outfile (org-export-output-file-name ".groff" subtreep pub-dir)))
+  (let ((outfile (org-export-output-file-name ".groff" subtreep)))
     (org-export-to-file
      'e-groff outfile subtreep visible-only body-only ext-plist)))
 
 (defun org-e-groff-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to Groff then process through to PDF.
 
 If narrowing is active in the current buffer, only export its
@@ -1936,14 +1933,10 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return PDF file's name."
   (interactive)
   (org-e-groff-compile
-   (org-e-groff-export-to-groff
-    subtreep visible-only body-only ext-plist pub-dir)))
+   (org-e-groff-export-to-groff subtreep visible-only body-only ext-plist)))
 
 (defun org-e-groff-compile (file)
   "Compile a Groff file.

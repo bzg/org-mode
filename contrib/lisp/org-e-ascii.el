@@ -1815,7 +1815,7 @@ is non-nil."
 
 ;;;###autoload
 (defun org-e-ascii-export-to-ascii
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to a text file.
 
 If narrowing is active in the current buffer, only export its
@@ -1837,12 +1837,9 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".txt" subtreep pub-dir)))
+  (let ((outfile (org-export-output-file-name ".txt" subtreep)))
     (org-export-to-file
      'e-ascii outfile subtreep visible-only body-only ext-plist)))
 

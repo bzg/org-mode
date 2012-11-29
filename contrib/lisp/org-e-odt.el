@@ -3829,7 +3829,7 @@ formula file."
 
 ;;;###autoload
 (defun org-e-odt-export-to-odt
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to a HTML file.
 
 If narrowing is active in the current buffer, only export its
@@ -3851,13 +3851,10 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
   (org-e-odt--export-wrap
-   (org-export-output-file-name ".odt" subtreep pub-dir)
+   (org-export-output-file-name ".odt" subtreep)
    (let* ((org-e-odt-embedded-images-count 0)
 	  (org-e-odt-embedded-formulas-count 0)
 	  (org-e-odt-automatic-styles nil)

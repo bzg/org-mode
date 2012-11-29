@@ -2803,7 +2803,7 @@ is non-nil."
 
 ;;;###autoload
 (defun org-e-html-export-to-html
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to a HTML file.
 
 If narrowing is active in the current buffer, only export its
@@ -2825,13 +2825,10 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
   (let* ((extension (concat "." org-e-html-extension))
-	 (file (org-export-output-file-name extension subtreep pub-dir))
+	 (file (org-export-output-file-name extension subtreep))
 	 (org-export-coding-system org-e-html-coding-system))
     (org-export-to-file
      'e-html file subtreep visible-only body-only ext-plist)))

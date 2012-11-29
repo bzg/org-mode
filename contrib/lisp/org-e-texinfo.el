@@ -1643,7 +1643,7 @@ contextual information."
 ;;; Interactive functions
 
 (defun org-e-texinfo-export-to-texinfo
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to a Texinfo file.
 
 If narrowing is active in the current buffer, only export its
@@ -1665,17 +1665,14 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".texi" subtreep pub-dir)))
+  (let ((outfile (org-export-output-file-name ".texi" subtreep)))
     (org-export-to-file
      'e-texinfo outfile subtreep visible-only body-only ext-plist)))
 
 (defun org-e-texinfo-export-to-info
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to Texinfo then process through to INFO.
 
 If narrowing is active in the current buffer, only export its
@@ -1703,8 +1700,7 @@ directory.
 Return INFO file's name."
   (interactive)
   (org-e-texinfo-compile
-   (org-e-texinfo-export-to-texinfo
-    subtreep visible-only body-only ext-plist pub-dir)))
+   (org-e-texinfo-export-to-texinfo subtreep visible-only body-only ext-plist)))
 
 (defun org-e-texinfo-compile (file)
   "Compile a texinfo file.

@@ -1146,7 +1146,7 @@ contextual information."
 ;;; Interactive functions
 
 (defun org-e-man-export-to-man
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to a Man file.
 
 If narrowing is active in the current buffer, only export its
@@ -1168,17 +1168,14 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".man"  subtreep pub-dir)))
+  (let ((outfile (org-export-output-file-name ".man" subtreep)))
     (org-export-to-file
      'e-man outfile subtreep visible-only body-only ext-plist)))
 
 (defun org-e-man-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer to Groff then process through to PDF.
 
 If narrowing is active in the current buffer, only export its
@@ -1200,14 +1197,10 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return PDF file's name."
   (interactive)
   (org-e-man-compile
-   (org-e-man-export-to-man
-    subtreep visible-only body-only ext-plist pub-dir)))
+   (org-e-man-export-to-man subtreep visible-only body-only ext-plist)))
 
 (defun org-e-man-compile (file)
   "Compile a Groff file.

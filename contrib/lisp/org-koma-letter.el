@@ -263,7 +263,7 @@ non-nil."
 
 ;;;###autoload
 (defun org-koma-letter-export-to-latex
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer as a KOMA Scrlttr2 letter (tex).
 
 If narrowing is active in the current buffer, only export its
@@ -290,13 +290,13 @@ directory.
 
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".tex" subtreep pub-dir)))
+  (let ((outfile (org-export-output-file-name ".tex" subtreep)))
     (org-export-to-file
      'koma-letter outfile subtreep visible-only body-only ext-plist)))
 
 ;;;###autoload
 (defun org-koma-letter-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional subtreep visible-only body-only ext-plist)
   "Export current buffer as a KOMA Scrlttr2 letter (pdf).
 
 If narrowing is active in the current buffer, only export its
@@ -318,14 +318,10 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return PDF file's name."
   (interactive)
   (org-e-latex-compile
-   (org-koma-letter-export-to-latex
-    subtreep visible-only body-only ext-plist pub-dir)))
+   (org-koma-letter-export-to-latex subtreep visible-only body-only ext-plist)))
 
 (provide 'org-koma-letter)
 ;;; org-koma-letter.el ends here
