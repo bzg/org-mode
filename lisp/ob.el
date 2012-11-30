@@ -2236,7 +2236,7 @@ parameters when merging lists."
      '(results exports tangle noweb padline cache shebang comments))
     params))
 
-(defvar *org-babel-use-quick-and-dirty-noweb-expansion* nil
+(defvar org-babel-use-quick-and-dirty-noweb-expansion nil
   "Set to true to use regular expressions to expand noweb references.
 This results in much faster noweb reference expansion but does
 not properly allow code blocks to inherit the \":noweb-ref\"
@@ -2345,7 +2345,7 @@ block but are passed literally to the \"example-block\"."
 				expansion)
 			    (save-excursion
 			      (goto-char (point-min))
-			      (if *org-babel-use-quick-and-dirty-noweb-expansion*
+			      (if org-babel-use-quick-and-dirty-noweb-expansion
 				  (while (re-search-forward rx nil t)
 				    (let* ((i (org-babel-get-src-block-info 'light))
 					   (body (org-babel-expand-noweb-references i))
