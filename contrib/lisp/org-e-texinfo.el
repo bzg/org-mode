@@ -1657,13 +1657,17 @@ contextual information."
 ;;; Interactive functions
 
 (defun org-e-texinfo-export-to-texinfo
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a Texinfo file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1682,17 +1686,28 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".texi" subtreep)))
-    (org-export-to-file
-     'e-texinfo outfile subtreep visible-only body-only ext-plist)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-texinfo))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'e-texinfo ,outfile ,subtreep ,visible-only ,body-only
+	     ',ext-plist)))
+      (org-export-to-file
+       'e-texinfo outfile subtreep visible-only body-only ext-plist))))
 
 (defun org-e-texinfo-export-to-info
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to Texinfo then process through to INFO.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1713,8 +1728,18 @@ directory.
 
 Return INFO file's name."
   (interactive)
-  (org-e-texinfo-compile
-   (org-e-texinfo-export-to-texinfo subtreep visible-only body-only ext-plist)))
+  (if async
+      (let ((outfile (org-export-output-file-name ".texi" subtreep)))
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-texinfo))
+	  `(expand-file-name
+	    (org-e-texinfo-compile
+	     (org-export-to-file
+	      'e-texinfo ,outfile ,subtreep ,visible-only ,body-only
+	      ',ext-plist)))))
+    (org-e-texinfo-compile
+     (org-e-texinfo-export-to-texinfo
+      nil subtreep visible-only body-only ext-plist))))
 
 (defun org-e-texinfo-compile (file)
   "Compile a texinfo file.

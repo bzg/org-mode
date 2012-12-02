@@ -104,23 +104,23 @@
   :menu-entry
   (?t "Export to Plain Text"
       ((?A "As ASCII buffer"
-	   (lambda (s v b)
-	     (org-e-ascii-export-as-ascii s v b '(:ascii-charset ascii))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-as-ascii a s v b '(:ascii-charset ascii))))
        (?a "As ASCII file"
-	   (lambda (s v b)
-	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset ascii))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-to-ascii a s v b '(:ascii-charset ascii))))
        (?L "As Latin1 buffer"
-	   (lambda (s v b)
-	     (org-e-ascii-export-as-ascii s v b '(:ascii-charset latin1))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-as-ascii a s v b '(:ascii-charset latin1))))
        (?l "As Latin1 file"
-	   (lambda (s v b)
-	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset latin1))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-to-ascii a s v b '(:ascii-charset latin1))))
        (?U "As UTF-8 buffer"
-	   (lambda (s v b)
-	     (org-e-ascii-export-as-ascii s v b '(:ascii-charset utf-8))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-as-ascii a s v b '(:ascii-charset utf-8))))
        (?u "As UTF-8 file"
-	   (lambda (s v b)
-	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset utf-8))))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-to-ascii a s v b '(:ascii-charset utf-8))))))
   :filters-alist ((:filter-headline . org-e-ascii-filter-headline-blank-lines)
 		  (:filter-parse-tree . org-e-ascii-filter-paragraph-spacing)
 		  (:filter-section . org-e-ascii-filter-headline-blank-lines))
@@ -1780,13 +1780,17 @@ This function only applies to `e-ascii' back-end.  See
 
 ;;;###autoload
 (defun org-e-ascii-export-as-ascii
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a text buffer.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1806,22 +1810,37 @@ Export is done in a buffer named \"*Org E-ASCII Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (let ((outbuf (org-export-to-buffer
-		 'e-ascii "*Org E-ASCII Export*"
-		 subtreep visible-only body-only ext-plist)))
-    (with-current-buffer outbuf (text-mode))
-    (when org-export-show-temporary-export-buffer
-      (switch-to-buffer-other-window outbuf))))
+  (if async
+      (org-export-async-start
+	  (lambda (output)
+	    (with-current-buffer (get-buffer-create "*Org E-ASCII Export*")
+	      (erase-buffer)
+	      (insert output)
+	      (goto-char (point-min))
+	      (text-mode)
+	      (org-export-add-to-stack (current-buffer) 'e-ascii)))
+	`(org-export-as 'e-ascii ,subtreep ,visible-only ,body-only
+			',ext-plist))
+    (let ((outbuf (org-export-to-buffer
+		   'e-ascii "*Org E-ASCII Export*"
+		   subtreep visible-only body-only ext-plist)))
+      (with-current-buffer outbuf (text-mode))
+      (when org-export-show-temporary-export-buffer
+	(switch-to-buffer-other-window outbuf)))))
 
 ;;;###autoload
 (defun org-e-ascii-export-to-ascii
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a text file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1840,8 +1859,14 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".txt" subtreep)))
-    (org-export-to-file
-     'e-ascii outfile subtreep visible-only body-only ext-plist)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-ascii))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'e-ascii ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))
+      (org-export-to-file
+       'e-ascii outfile subtreep visible-only body-only ext-plist))))
 
 ;;;###autoload
 (defun org-e-ascii-publish-to-ascii (plist filename pub-dir)

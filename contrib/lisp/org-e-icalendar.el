@@ -274,12 +274,11 @@ re-read the iCalendar file.")
   ((:filter-headline . org-e-icalendar-clear-blank-lines))
   :menu-entry
   (?c "Export to iCalendar"
-      ((?f "Current file"
-	   (lambda (s v b) (org-e-icalendar-export-to-ics s v b)))
+      ((?f "Current file" org-e-icalendar-export-to-ics)
        (?a "All agenda files"
-	   (lambda (s v b) (org-e-icalendar-export-agenda-files)))
+	   (lambda (a s v b) (org-e-icalendar-export-agenda-files a)))
        (?c "Combine all agenda files"
-	   (lambda (s v b) (org-e-icalendar-combine-agenda-files))))))
+	   (lambda (a s v b) (org-e-icalendar-combine-agenda-files a))))))
 
 
 
@@ -789,13 +788,18 @@ CALSCALE:GREGORIAN\n"
 ;;; Interactive Functions
 
 ;;;###autoload
-(defun org-e-icalendar-export-to-ics (&optional subtreep visible-only body-only)
+(defun org-e-icalendar-export-to-ics
+  (&optional async subtreep visible-only body-only)
   "Export current buffer to an iCalendar file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -814,35 +818,76 @@ Return ICS file name."
       (org-e-icalendar-create-uid file 'warn-user)))
   ;; Export part.  Since this back-end is backed up by `e-ascii',
   ;; ensure links will not be collected at the end of sections.
-  (let ((outfile (org-export-output-file-name ".ics" subtreep))
-	(org-e-ascii-links-to-notes nil))
-    (org-export-to-file 'e-icalendar outfile subtreep visible-only body-only
-			'(:ascii-charset utf-8))
-    (run-hook-with-args 'org-e-icalendar-after-save-hook outfile)
-    outfile))
+  (let ((outfile (org-export-output-file-name ".ics" subtreep)))
+    (if async
+	(org-export-async-start
+	    (lambda (f)
+	      (org-export-add-to-stack f 'e-icalendar)
+	      (run-hook-with-args 'org-e-icalendar-after-save-hook f))
+	  `(let ((org-e-ascii-links-to-notes nil))
+	     (expand-file-name
+	      (org-export-to-file
+	       'e-icalendar ,outfile ,subtreep ,visible-only ,body-only
+	       '(:ascii-charset utf-8)))))
+      (let ((org-e-ascii-links-to-notes nil))
+	(org-export-to-file 'e-icalendar outfile subtreep visible-only body-only
+			    '(:ascii-charset utf-8)))
+      (run-hook-with-args 'org-e-icalendar-after-save-hook outfile)
+      outfile)))
 
 ;;;###autoload
-(defun org-e-icalendar-export-agenda-files ()
-  "Export all agenda files to iCalendar files."
+(defun org-e-icalendar-export-agenda-files (&optional async)
+  "Export all agenda files to iCalendar files.
+When optional argument ASYNC is non-nil, export happens in an
+external process."
   (interactive)
-  (let ((files (org-agenda-files t)))
-    (org-agenda-prepare-buffers files)
-    (unwind-protect
-	(mapc (lambda (file)
-		(catch 'nextfile
-		  (org-check-agenda-file file)
-		  (with-current-buffer (org-get-agenda-file-buffer file)
-		    (org-e-icalendar-export-to-ics))))
-	      files)
-      (org-release-buffers org-agenda-new-buffers))))
+  (if async
+      ;; Asynchronous export is not interactive, so we will not call
+      ;; `org-check-agenda-file'.  Instead we remove any non-existent
+      ;; agenda file from the list.
+      (let ((files (org-remove-if-not 'file-exists-p (org-agenda-files t))))
+	(org-export-async-start
+	    (lambda (results)
+	      (mapc (lambda (f) (org-export-add-to-stack f 'icalendar))
+		    results))
+	  `(let (output-files)
+	     (mapc (lambda (file)
+		     (with-current-buffer (org-get-agenda-file-buffer file)
+		       (push (expand-file-name (org-e-icalendar-export-to-ics))
+			     output-files)))
+		   ',files)
+	     output-files)))
+    (let ((files (org-agenda-files t)))
+      (org-agenda-prepare-buffers files)
+      (unwind-protect
+	  (mapc (lambda (file)
+		  (catch 'nextfile
+		    (org-check-agenda-file file)
+		    (with-current-buffer (org-get-agenda-file-buffer file)
+		      (org-e-icalendar-export-to-ics))))
+		files)
+	(org-release-buffers org-agenda-new-buffers)))))
 
 ;;;###autoload
-(defun org-e-icalendar-combine-agenda-files ()
+(defun org-e-icalendar-combine-agenda-files (&optional async)
   "Combine all agenda files into a single iCalendar file.
-The file is stored under the name
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
+The file is stored under the name chosen in
 `org-e-icalendar-combined-agenda-file'."
   (interactive)
-  (apply 'org-e-icalendar--combine-files nil (org-agenda-files t)))
+  (if async
+      (let ((files (org-remove-if-not 'file-exists-p (org-agenda-files t))))
+	(org-export-async-start
+	    (lambda (dummy)
+	      (org-export-add-to-stack
+	       (expand-file-name org-e-icalendar-combined-agenda-file)
+	       'e-icalendar))
+	  `(apply 'org-e-icalendar--combine-files nil ',files)))
+    (apply 'org-e-icalendar--combine-files nil (org-agenda-files t))))
 
 (defun org-e-icalendar-export-current-agenda ()
   "Export current agenda view to an iCalendar file.
