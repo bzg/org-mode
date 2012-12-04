@@ -3519,9 +3519,10 @@ imagemagick     Convert the LaTeX fragments to pdf files and use imagemagick
 	  (const :tag "imagemagick" imagemagick)))
 
 (defcustom org-latex-preview-ltxpng-directory "ltxpng/"
-  "Path to store latex preview images.  A relative path here creates many
-   directories relative to the processed org files paths.  An absolute path
-   puts all preview images at the same place."
+  "Path to store latex preview images.
+A relative path here creates many directories relative to the
+processed org files paths.  An absolute path puts all preview
+images at the same place."
   :group 'org-latex
   :version "24.3"
   :type 'string)
