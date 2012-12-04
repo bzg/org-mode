@@ -878,6 +878,9 @@ Text.
    (equal '("radio-target" "target")
 	  (org-test-with-temp-text "<<target>> <<<radio-target>>>\n: <<verb>>"
 	    (org-all-targets))))
+  (should
+   (equal '("radio-target")
+	  (org-test-with-temp-text "<<<radio-target>>>!" (org-all-targets))))
   ;; With argument.
   (should
    (equal '("radio-target")

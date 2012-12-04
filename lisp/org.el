@@ -5793,6 +5793,8 @@ targets."
     (save-excursion
       (goto-char (point-min))
       (while (re-search-forward re nil t)
+	;; Make sure point is really within the object.
+	(backward-char)
 	(let ((obj (org-element-context)))
 	  (when (memq (org-element-type obj) '(radio-target target))
 	    (add-to-list 'rtn (downcase (org-element-property :value obj))))))
