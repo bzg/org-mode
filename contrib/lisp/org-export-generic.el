@@ -8,7 +8,7 @@
 ;; Version:  6.25trans
 ;; Acks:     Much of this code was stolen form the ascii export from Carsten
 ;;
-;; This file is not yet part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 ;;
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -26,6 +26,10 @@
 ;; ----------------------------------------------------------------------
 ;;
 ;; OVERVIEW
+;;
+;; IMPORTANT: IF YOU WANT TO WRITE A NEW EXPORTER FOR ORG, PLEASE
+;; CHECK contrib/lisp/org-export.el -- ORG-EXPORT-GENERIC.EL, WHILE
+;; STILL USEFUL, SHOULD NOT BE USED FOR NEW EXPORTERS.
 ;;
 ;; org-export-generic is basically a simple translation system that
 ;; knows how to parse at least most of a .org buffer and then add
