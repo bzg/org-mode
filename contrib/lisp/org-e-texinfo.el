@@ -37,7 +37,7 @@
 ;; "TEXINFO_DIR_TITLE", "TEXINFO_DIR_DESC" "SUBTITLE" and "SUBAUTHOR".
 ;;
 ;; It introduces 1 new headline property keywords:
-;; "TEXINFO_MENU_TITLE" for optional menu titles. 
+;; "TEXINFO_MENU_TITLE" for optional menu titles.
 ;;
 ;; To include inline code snippets (for example for generating @kbd{}
 ;; and @key{} commands), the following export-snippet keys are
@@ -126,6 +126,7 @@
   ((:texinfo-filename "TEXINFO_FILENAME" nil org-e-texinfo-filename t)
    (:texinfo-class "TEXINFO_CLASS" nil org-e-texinfo-default-class t)
    (:texinfo-header "TEXINFO_HEADER" nil nil newline)
+   (:texinfo-post-header "TEXINFO_POST_HEADER" nil nil newline)
    (:subtitle "SUBTITLE" nil nil newline)
    (:subauthor "SUBAUTHOR" nil nil newline)
    (:texinfo-dircat "TEXINFO_DIR_CATEGORY" nil nil t)
@@ -546,7 +547,7 @@ TREE is the parse-tree containing the headlines.  LEVEL is the
 headline level to generate a list of.  INFO is a plist holding
 contextual information."
   (let (seq
-	(noexport (string= "noexport" 
+	(noexport (string= "noexport"
 		   (and (plist-get info :with-tags)
 			    (org-export-get-tags tree info)))))
     (org-element-map
@@ -651,6 +652,7 @@ holding export options."
 			     (org-export-output-file-name ".info"))))
 	 (author (org-export-data (plist-get info :author) info))
 	 (texinfo-header (plist-get info :texinfo-header))
+	 (texinfo-post-header (plist-get info :texinfo-post-header))
 	 (subtitle (plist-get info :subtitle))
 	 (subauthor (plist-get info :subauthor))
 	 (class (plist-get info :texinfo-class))
@@ -684,6 +686,12 @@ holding export options."
      "@c %**end of header\n"
      "@finalout\n"
      "\n\n"
+
+     ;; Additional Header Options set by #+TEXINFO_POST_HEADER
+     (if texinfo-post-header
+	 (concat "\n"
+		 texinfo-post-header
+		 "\n"))
 
      ;; Copying
      "@copying\n"
