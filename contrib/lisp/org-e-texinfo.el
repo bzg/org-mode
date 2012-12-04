@@ -32,9 +32,12 @@
 ;; export.  See contrib/lisp/org-export.el for more details on how
 ;; this exporter works.
 ;;
-;; It introduces eight new buffer keywords: "TEXINFO_CLASS",
-;; "TEXINFO_FILENAME", "TEXINFO_HEADER", "TEXINFO_DIR_CATEGORY",
-;; "TEXINFO_DIR_TITLE", "TEXINFO_DIR_DESC" "SUBTITLE" and "SUBAUTHOR".
+
+;; It introduces nine new buffer keywords: "TEXINFO_CLASS",
+;; "TEXINFO_FILENAME", "TEXINFO_HEADER", "TEXINFO_POST_HEADER",
+;; "TEXINFO_DIR_CATEGORY", "TEXINFO_DIR_TITLE", "TEXINFO_DIR_DESC"
+;; "SUBTITLE" and "SUBAUTHOR".
+
 ;;
 ;; It introduces 1 new headline property keywords:
 ;; "TEXINFO_MENU_TITLE" for optional menu titles.
