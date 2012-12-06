@@ -230,7 +230,7 @@ buffer."
 	 (beg (make-marker))
 	 ;; Move marker with inserted text for case when src block is
 	 ;; just one empty line, i.e. beg == end.
-	 (end (copy-marker nil t))
+	 (end (copy-marker (make-marker) t))
 	 (allow-write-back-p (null code))
 	 block-nindent total-nindent ovl lang lang-f single lfmt buffer msg
 	 begline markline markcol line col transmitted-variables)
