@@ -80,11 +80,12 @@
 (require 'org-element)
 (require 'ob-exp)
 
-(declare-function org-e-publish "org-e-publish" (project &optional force))
-(declare-function org-e-publish-all "org-e-publish" (&optional force))
-(declare-function org-e-publish-current-file "org-e-publish" (&optional force))
+(declare-function org-e-publish "org-e-publish" (project &optional force async))
+(declare-function org-e-publish-all "org-e-publish" (&optional force async))
+(declare-function
+ org-e-publish-current-file "org-e-publish" (&optional force async))
 (declare-function org-e-publish-current-project "org-e-publish"
-		  (&optional force))
+		  (&optional force async))
 
 (defvar org-e-publish-project-alist)
 (defvar org-table-number-fraction)
@@ -5249,16 +5250,18 @@ asynchronous export stack directly."
     (case action
       ;; First handle special hard-coded actions.
       (stack (org-export-stack))
-      (publish-current-file (org-e-publish-current-file (memq 'force optns)))
+      (publish-current-file
+       (org-e-publish-current-file (memq 'force optns) (memq 'async optns)))
       (publish-current-project
-       (org-e-publish-current-project (memq 'force optns)))
+       (org-e-publish-current-project (memq 'force optns) (memq 'async optns)))
       (publish-choose-project
        (org-e-publish (assoc (org-icompleting-read
 			      "Publish project: "
 			      org-e-publish-project-alist nil t)
 			     org-e-publish-project-alist)
-		      (memq 'force optns)))
-      (publish-all (org-e-publish-all (memq 'force optns)))
+		      (memq 'force optns)
+		      (memq 'async optns)))
+      (publish-all (org-e-publish-all (memq 'force optns) (memq 'async optns)))
       (otherwise (funcall action
 			  ;; Return a symbol instead of a list to ease
 			  ;; asynchronous export macro use.
