@@ -53,10 +53,14 @@ This will typically be either 'python or 'python-mode.")
 (defvar org-src-preserve-indentation)
 
 (defcustom org-babel-python-hline-to "None"
-  "Replace hlines in incoming tables with this when translating to python.")
+  "Replace hlines in incoming tables with this when translating to python."
+  :group 'org-babel
+  :type 'string)
 
 (defcustom org-babel-python-None-to 'hline
-  "Replace 'None' in python tables with this before returning.")
+  "Replace 'None' in python tables with this before returning."
+  :group 'org-babel
+  :type 'string)
 
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with Babel.
