@@ -145,7 +145,7 @@ contents.  The clocktable doesn't appear in the buffer."
 	(goto-char (point-min))
 	(forward-line)
 	(test-org-clock-clocktable-contents-at-point
-	 ":tstart \"<yesterday>\" :tend \"<now>\" :indent nil"))))))
+	 ":tstart \"<yesterday>\" :tend \"<tomorrow>\" :indent nil"))))))
 
 
 (provide 'test-org-clock)
