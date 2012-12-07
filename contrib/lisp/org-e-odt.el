@@ -907,23 +907,91 @@ style from the list."
 			       :key-type symbol
 			       :value-type (const :tag "True" t))))))
 
+;;;; Timestamps
+
+(defcustom org-e-odt-use-date-fields nil
+  "Non-nil, if timestamps should be exported as date fields.
+
+When nil, export timestamps as plain text.
+
+When non-nil, map `org-time-stamp-custom-formats' to a pair of
+OpenDocument date-styles with names \"OrgDate1\" and \"OrgDate2\"
+respectively.  A timestamp with no time component is formatted
+with style \"OrgDate1\" while one with explicit hour and minutes
+is formatted with style \"OrgDate2\".
+
+This feature is experimental.  Most (but not all) of the common
+%-specifiers in `format-time-string' are supported.
+Specifically, locale-dependent specifiers like \"%c\", \"%x\" are
+formatted as canonical Org timestamps.  For finer control, avoid
+these %-specifiers.
+
+Textutal specifiers like \"%b\", \"%h\", \"%B\", \"%a\", \"%A\"
+etc., are displayed by the application in the default language
+and country specified in `org-e-odt-styles-file'.  Note that the
+default styles file uses language \"en\" and country \"GB\".  You
+can localize the week day and month strings in the exported
+document by setting the default language and country either using
+the application UI or through a custom styles file.
+
+See `org-e-odt--build-date-styles' for implementation details."
+  :group 'org-export-e-odt
+  :type 'boolean)
+
 
 
 ;;; Internal functions
 
 ;;;; Date
 
-(defun org-e-odt--date (&optional org-ts fmt)
-  (let* ((t1 (and (stringp org-ts)
-		  (string-match org-ts-regexp0 org-ts)
-		  (org-parse-time-string (match-string 0 org-ts) t)))
-	 (with-hm (and (nth 1 t1) (nth 2 t1)))
-	 (time (and t1 (apply 'encode-time (org-fix-decoded-time t1))))
-	 date)
-    (cond
-     (fmt (format-time-string fmt time))
-     (t (setq date (format-time-string "%Y-%m-%dT%H:%M:%S%z" time))
-	(format "%s:%s" (substring date 0 -2) (substring date -2))))))
+(defun org-e-odt--format-timestamp (timestamp &optional end iso-date-p)
+  (let* ((format-timestamp
+	  (lambda (timestamp format &optional end utc)
+	    (if timestamp
+		(org-export-format-timestamp timestamp format end utc)
+	      (format-time-string format nil utc))))
+	 (has-time-p (or (not timestamp)
+			 (org-export-timestamp-has-time-p timestamp)))
+	 (iso-date (let ((format (if has-time-p "%Y-%m-%dT%H:%M:%S"
+				   "%Y-%m-%dT%H:%M:%S")))
+		     (funcall format-timestamp timestamp format end))))
+    (if iso-date-p iso-date
+      (let* ((style (if has-time-p "OrgDate2" "OrgDate1"))
+	     ;; LibreOffice does not care about end goes as content
+	     ;; within the "<text:date>...</text:date>" field.  The
+	     ;; displayed date is automagically corrected to match the
+	     ;; format requested by "style:data-style-name" attribute.  So
+	     ;; don't bother about formatting the date contents to be
+	     ;; compatible with "OrgDate1" and "OrgDateTime" styles.  A
+	     ;; simple Org-style date should suffice.
+	     (date (let* ((formats
+			   (if org-display-custom-times
+			       (cons (substring
+				      (car org-time-stamp-custom-formats) 1 -1)
+				     (substring
+				      (cdr org-time-stamp-custom-formats) 1 -1))
+			     '("%Y-%m-%d %a" . "%Y-%m-%d %a %H:%M")))
+			  (format (if has-time-p (cdr formats) (car formats))))
+		     (funcall format-timestamp timestamp format end)))
+	     (repeater (let ((repeater-type (org-element-property
+					     :repeater-type timestamp))
+			     (repeater-value (org-element-property
+					      :repeater-value timestamp))
+			     (repeater-unit (org-element-property
+					     :repeater-unit timestamp)))
+			 (concat
+			  (case repeater-type
+			    (catchup "++") (restart ".+") (cumulate "+"))
+			  (when repeater-value
+			    (number-to-string repeater-value))
+			  (case repeater-unit
+			    (hour "h") (day "d") (week "w") (month "m")
+			    (year "y"))))))
+	(concat
+	 (format "<text:date text:date-value=\"%s\" style:data-style-name=\"%s\" text:fixed=\"true\">%s</text:date>"
+		 iso-date style date)
+	 (and (not (string= repeater ""))  " ")
+	 repeater)))))
 
 ;;;; Frame
 
@@ -1120,6 +1188,91 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
 
 ;;; Template
 
+(defun org-e-odt--build-date-styles (fmt style)
+  ;; In LibreOffice 3.4.6, there doesn't seem to be a convenient way
+  ;; to modify the date fields.  A date could be modified by
+  ;; offsetting in days.  That's about it.  Also, date and time may
+  ;; have to be emitted as two fields - a date field and a time field
+  ;; - separately.
+
+  ;; One can add Form Controls to date and time fields so that they
+  ;; can be easily modified.  But then, the exported document will
+  ;; become tightly coupled with LibreOffice and may not function
+  ;; properly with other OpenDocument applications.
+
+  ;; I have a strange feeling that Date styles are a bit flaky at the
+  ;; moment.
+
+  ;; The feature is experimental.
+  (when (and fmt style)
+    (let* ((fmt-alist
+	    '(("%A" . "<number:day-of-week number:style=\"long\"/>")
+	      ("%B" . "<number:month number:textual=\"true\" number:style=\"long\"/>")
+	      ("%H" . "<number:hours number:style=\"long\"/>")
+	      ("%M" . "<number:minutes number:style=\"long\"/>")
+	      ("%S" . "<number:seconds number:style=\"long\"/>")
+	      ("%V" . "<number:week-of-year/>")
+	      ("%Y" . "<number:year number:style=\"long\"/>")
+	      ("%a" . "<number:day-of-week number:style=\"short\"/>")
+	      ("%b" . "<number:month number:textual=\"true\" number:style=\"short\"/>")
+	      ("%d" . "<number:day number:style=\"long\"/>")
+	      ("%e" . "<number:day number:style=\"short\"/>")
+	      ("%h" . "<number:month number:textual=\"true\" number:style=\"short\"/>")
+	      ("%k" . "<number:hours number:style=\"short\"/>")
+	      ("%m" . "<number:month number:style=\"long\"/>")
+	      ("%p" . "<number:am-pm/>")
+	      ("%y" . "<number:year number:style=\"short\"/>")))
+	   (case-fold-search nil)
+	   (re (mapconcat 'identity (mapcar 'car fmt-alist) "\\|"))
+	   match rpl (start 0) (filler-beg 0) filler-end filler output)
+      (mapc
+       (lambda (pair)
+	 (setq fmt (replace-regexp-in-string (car pair) (cdr pair) fmt t t)))
+       '(("\\(?:%[[:digit:]]*N\\)" . "") ; strip ns, us and ns
+	 ("%C" . "Y")			 ; replace century with year
+	 ("%D" . "%m/%d/%y")
+	 ("%G" . "Y")		      ; year corresponding to iso week
+	 ("%I" . "%H")		      ; hour on a 12-hour clock
+	 ("%R" . "%H:%M")
+	 ("%T" . "%H:%M:%S")
+	 ("%U\\|%W" . "%V")	      ; week no. starting on Sun./Mon.
+	 ("%Z" . "")		      ; time zone name
+	 ("%c" . "%Y-%M-%d %a %H:%M" ) ; locale's date and time format
+	 ("%g" . "%y")
+	 ("%X" . "%x" )	 ; locale's pref. time format
+	 ("%j" . "")	 ; day of the year
+	 ("%l" . "%k")	 ; like %I blank-padded
+	 ("%s" . "")	 ; no. of secs since 1970-01-01 00:00:00 +0000
+	 ("%n" . "<text:line-break/>")
+	 ("%r" . "%I:%M:%S %p")
+	 ("%t" . "<text:tab/>")
+	 ("%u\\|%w" . "")  ; numeric day of week - Mon (1-7), Sun(0-6)
+	 ("%x" . "%Y-%M-%d %a")		; locale's pref. time format
+	 ("%z" . "")			; time zone in numeric form
+	 ))
+      (while (string-match re fmt start)
+	(setq match (match-string 0 fmt))
+	(setq rpl (assoc-default match fmt-alist))
+	(setq start (match-end 0))
+	(setq filler-end (match-beginning 0))
+	(setq filler (substring fmt (prog1 filler-beg
+				      (setq filler-beg (match-end 0)))
+				filler-end))
+	(setq filler (and (not (string= filler ""))
+			  (format "<number:text>%s</number:text>"
+				  (org-e-odt--encode-plain-text filler))))
+	(setq output (concat output "\n" filler "\n" rpl)))
+      (setq filler (substring fmt filler-beg))
+      (unless (string= filler "")
+	(setq output (concat output
+			     (format "\n<number:text>%s</number:text>"
+				     (org-e-odt--encode-plain-text filler)))))
+      (format "\n<number:date-style style:name=\"%s\" %s>%s\n</number:date-style>"
+	      style
+	      (concat " number:automatic-order=\"true\""
+		      " number:format-source=\"fixed\"")
+	      output ))))
+
 (defun org-e-odt-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  RAW-DATA is the
@@ -1146,11 +1299,18 @@ original parsed data.  INFO is a plist holding export options."
       (format "<meta:initial-creator>%s</meta:initial-creator>\n" author)
       ;; Date, if required.
       (when (plist-get info :with-date)
-	(let ((date (org-e-odt--date (org-export-data
-				      (plist-get info :date) info))))
-	  (concat
-	   (format "<dc:date>%s</dc:date>\n" date)
-	   (format "<meta:creation-date>%s</meta:creation-date>\n" date))))
+	;; Check if DATE is specified as an Org-timestamp.  If yes,
+	;; include it as meta information.  Otherwise, just use
+	;; today's date.
+	(let* ((date (let ((date (plist-get info :date)))
+		       (and (not (cdr date))
+			    (eq (org-element-type (car date)) 'timestamp)
+			    (car date)))))
+	  (let ((iso-date (org-e-odt--format-timestamp date nil 'iso-date)))
+	    (concat
+	     (format "<dc:date>%s</dc:date>\n" iso-date)
+	     (format "<meta:creation-date>%s</meta:creation-date>\n"
+		     iso-date)))))
       (format "<meta:generator>%s</meta:generator>\n"
 	      (let ((creator-info (plist-get info :with-creator)))
 		(if (or (not creator-info) (eq creator-info 'comment)) ""
@@ -1170,8 +1330,7 @@ original parsed data.  INFO is a plist holding export options."
   (let* ((styles-file (plist-get info :odt-styles-file))
 	 (styles-file (and styles-file (read (org-trim styles-file))))
 	 ;; Non-availability of styles.xml is not a critical
-	 ;; error. For now throw an error purely for aesthetic
-	 ;; reasons.
+	 ;; error. For now, throw an error.
 	 (styles-file (or styles-file
 			  org-e-odt-styles-file
 			  (expand-file-name "OrgOdtStyles.xml"
@@ -1248,109 +1407,121 @@ original parsed data.  INFO is a plist holding export options."
 	    (replace-match replacement t nil))))
       (save-buffer 0)))
   ;; Update content.xml.
-  (with-temp-buffer
-    (insert-file-contents
-     (or org-e-odt-content-template-file
-	 (expand-file-name "OrgOdtContentTemplate.xml"
-			   org-e-odt-styles-dir)))
-    ;; Write automatic styles.
-    ;; - Position the cursor.
-    (goto-char (point-min))
-    (re-search-forward "  </office:automatic-styles>" nil t)
-    (goto-char (match-beginning 0))
-    ;; - Dump automatic table styles
-    (loop for (style-name props) in
-	  (plist-get org-e-odt-automatic-styles 'Table) do
-	  (when (setq props (or (plist-get props :rel-width) 96))
-	    (insert (format org-e-odt-table-style-format style-name props))))
-    ;; Update display level.
-    ;; - Remove existing sequence decls.  Also position the cursor.
-    (goto-char (point-min))
-    (when (re-search-forward "<text:sequence-decls" nil t)
-      (delete-region (match-beginning 0)
-		     (re-search-forward "</text:sequence-decls>" nil nil)))
-    ;; Update sequence decls according to user preference.
-    (insert
-     (format
-      "\n<text:sequence-decls>\n%s\n</text:sequence-decls>"
-      (mapconcat
-       (lambda (x)
-	 (format
-	  "<text:sequence-decl text:display-outline-level=\"%d\" text:name=\"%s\"/>"
-	  org-e-odt-display-outline-level (nth 1 x)))
-       org-e-odt-category-map-alist "\n")))
-    ;; Position the cursor to document body.
-    (goto-char (point-min))
-    (re-search-forward "</office:text>" nil nil)
-    (goto-char (match-beginning 0))
 
-    ;; Preamble - Title, Author, Date etc.
-    (insert
-     (let* ((title (org-export-data (plist-get info :title) info))
-	    (author (and (plist-get info :with-author)
-			 (let ((auth (plist-get info :author)))
-			   (and auth (org-export-data auth info)))))
-	    (email (plist-get info :email))
-	    ;; Switch on or off above vars based on user settings
-	    (author (and (plist-get info :with-author) (or author email)))
-	    (email (and (plist-get info :with-email) email)))
-       (concat
-	;; Title.
-	(when title
-	  (concat
-	   (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-		   "OrgTitle" (format "\n<text:title>%s</text:title>" title))
-	   ;; Separator.
-	   "\n<text:p text:style-name=\"OrgTitle\"/>"))
-	(cond
-	 ((and author (not email))
-	  ;; Author only.
-	  (concat
-	   (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-		   "OrgSubtitle"
-		   (format "<text:initial-creator>%s</text:initial-creator>" author))
-	   ;; Separator.
-	   "\n<text:p text:style-name=\"OrgSubtitle\"/>"))
-	 ((and author email)
-	  ;; Author and E-mail.
-	  (concat
+  (let* ( ;; `org-display-custom-times' should be accessed right
+	 ;; within the context of the Org buffer.  So obtain it's
+	 ;; value before moving on to temp-buffer context down below.
+	 (custom-time-fmts
+	  (if org-display-custom-times
+	      (cons (substring (car org-time-stamp-custom-formats) 1 -1)
+		    (substring (cdr org-time-stamp-custom-formats) 1 -1))
+	    '("%Y-%M-%d %a" . "%Y-%M-%d %a %H:%M"))))
+    (with-temp-buffer
+      (insert-file-contents
+       (or org-e-odt-content-template-file
+	   (expand-file-name "OrgOdtContentTemplate.xml"
+			     org-e-odt-styles-dir)))
+      ;; Write automatic styles.
+      ;; - Position the cursor.
+      (goto-char (point-min))
+      (re-search-forward "  </office:automatic-styles>" nil t)
+      (goto-char (match-beginning 0))
+      ;; - Dump automatic table styles.
+      (loop for (style-name props) in
+	    (plist-get org-e-odt-automatic-styles 'Table) do
+	    (when (setq props (or (plist-get props :rel-width) 96))
+	      (insert (format org-e-odt-table-style-format style-name props))))
+      ;; - Dump date-styles.
+      (when org-e-odt-use-date-fields
+	(insert (org-e-odt--build-date-styles (car custom-time-fmts)
+					      "OrgDate1")
+		(org-e-odt--build-date-styles (cdr custom-time-fmts)
+					      "OrgDate2")))
+      ;; Update display level.
+      ;; - Remove existing sequence decls.  Also position the cursor.
+      (goto-char (point-min))
+      (when (re-search-forward "<text:sequence-decls" nil t)
+	(delete-region (match-beginning 0)
+		       (re-search-forward "</text:sequence-decls>" nil nil)))
+      ;; Update sequence decls according to user preference.
+      (insert
+       (format
+	"\n<text:sequence-decls>\n%s\n</text:sequence-decls>"
+	(mapconcat
+	 (lambda (x)
 	   (format
-	    "\n<text:p text:style-name=\"%s\">%s</text:p>"
-	    "OrgSubtitle"
-	    (format
-	     "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
-	     (concat "mailto:" email)
-	     (format "<text:initial-creator>%s</text:initial-creator>" author)))
-	   ;; Separator.
-	   "\n<text:p text:style-name=\"OrgSubtitle\"/>")))
-	;; Date, if required.
-	(when (plist-get info :with-date)
-	  (let* ((date (org-export-data (plist-get info :date) info))
-		 (iso-date (org-e-odt--date date))
-		 ;; Note that OrgOdtStyles.xml uses en/GB.  Render the
-		 ;; date in a style that is consistent with
-		 ;; "OrgDate"-style.
-		 (date (org-e-odt--date date "%d/%m/%Y")))
+	    "<text:sequence-decl text:display-outline-level=\"%d\" text:name=\"%s\"/>"
+	    org-e-odt-display-outline-level (nth 1 x)))
+	 org-e-odt-category-map-alist "\n")))
+      ;; Position the cursor to document body.
+      (goto-char (point-min))
+      (re-search-forward "</office:text>" nil nil)
+      (goto-char (match-beginning 0))
+
+      ;; Preamble - Title, Author, Date etc.
+      (insert
+       (let* ((title (org-export-data (plist-get info :title) info))
+	      (author (and (plist-get info :with-author)
+			   (let ((auth (plist-get info :author)))
+			     (and auth (org-export-data auth info)))))
+	      (email (plist-get info :email))
+	      ;; Switch on or off above vars based on user settings
+	      (author (and (plist-get info :with-author) (or author email)))
+	      (email (and (plist-get info :with-email) email)))
+	 (concat
+	  ;; Title.
+	  (when title
+	    (concat
+	     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+		     "OrgTitle" (format "\n<text:title>%s</text:title>" title))
+	     ;; Separator.
+	     "\n<text:p text:style-name=\"OrgTitle\"/>"))
+	  (cond
+	   ((and author (not email))
+	    ;; Author only.
+	    (concat
+	     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+		     "OrgSubtitle"
+		     (format "<text:initial-creator>%s</text:initial-creator>" author))
+	     ;; Separator.
+	     "\n<text:p text:style-name=\"OrgSubtitle\"/>"))
+	   ((and author email)
+	    ;; Author and E-mail.
 	    (concat
 	     (format
 	      "\n<text:p text:style-name=\"%s\">%s</text:p>"
 	      "OrgSubtitle"
 	      (format
-	       "\n<text:date style:data-style-name=\"%s\" text:date-value=\"%s\">%s</text:date>"
-
-	       "OrgDate" iso-date date))
-	     ;; Separator
-	     "<text:p text:style-name=\"OrgSubtitle\"/>"))))))
-    ;; Table of Contents
-    (let* ((with-toc (plist-get info :with-toc))
-	   (depth (and with-toc (if (wholenump with-toc)
-				    with-toc
-				  (plist-get info :headline-levels)))))
-      (when depth (insert (or (org-e-odt-toc depth info) ""))))
-    ;; Contents.
-    (insert contents)
-    ;; Return contents.
-    (buffer-substring-no-properties (point-min) (point-max))))
+	       "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
+	       (concat "mailto:" email)
+	       (format "<text:initial-creator>%s</text:initial-creator>" author)))
+	     ;; Separator.
+	     "\n<text:p text:style-name=\"OrgSubtitle\"/>")))
+	  ;; Date, if required.
+	  (when (plist-get info :with-date)
+	    (let* ((date (plist-get info :date))
+		   ;; Check if DATE is specified as a timestamp.
+		   (timestamp (and (not (cdr date))
+				   (eq (org-element-type (car date)) 'timestamp)
+				   (car date))))
+	      (concat
+	       (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+		       "OrgSubtitle"
+		       (if (and org-e-odt-use-date-fields timestamp)
+			   (org-e-odt--format-timestamp (car date))
+			 (org-export-data (plist-get info :date) info)))
+	       ;; Separator
+	       "<text:p text:style-name=\"OrgSubtitle\"/>"))))))
+      ;; Table of Contents
+      (let* ((with-toc (plist-get info :with-toc))
+	     (depth (and with-toc (if (wholenump with-toc)
+				      with-toc
+				    (plist-get info :headline-levels)))))
+	(when depth (insert (or (org-e-odt-toc depth info) ""))))
+      ;; Contents.
+      (insert contents)
+      ;; Return contents.
+      (buffer-substring-no-properties (point-min) (point-max)))))
 
 
 
@@ -1381,23 +1552,16 @@ holding contextual information."
   "Transcode a CLOCK element from Org to ODT.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (concat
-   ;; Open a paragraph before the first clock line.
-   (and (not (eq (org-element-type (org-export-get-previous-element clock info))
-		 'clock))
-	"\n<text:p text:style-name=\"OrgClock\">")
-   (let ((timestamp (org-element-property :value clock))
-	 (duration (org-element-property :duration clock)))
-     (concat
-      (format "<text:span text:style-name=\"%s\">%s</text:span>"
-	      "OrgTimestampKeyword" org-clock-string)
-      ;; Add a line break after the clock line.
-      (org-e-odt-timestamp timestamp contents info) "<text:tab/>"
-      (and duration (format " (%s)" duration)) "<text:line-break/>"))
-   ;; Close the paragraph after the last clock line.
-   (and (not (eq (org-element-type (org-export-get-next-element clock info))
-		 'clock))
-	"\n</text:p>")))
+  (let ((timestamp (org-element-property :value clock))
+	(duration (org-element-property :duration clock)))
+    (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	    (if (eq (org-element-type (org-export-get-next-element clock info))
+		    'clock) "OrgClock" "OrgClockLastLine")
+	    (concat
+	     (format "<text:span text:style-name=\"%s\">%s</text:span>"
+		     "OrgClockKeyword" org-clock-string)
+	     (org-e-odt-timestamp timestamp contents info)
+	     (and duration (format " (%s)" duration))))))
 
 
 ;;;; Code
@@ -2610,36 +2774,27 @@ contextual information."
   "Transcode a PLANNING element from Org to ODT.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (format "<text:span text:style-name=\"%s\">%s</text:span>"
-	  "OrgTimestampWrapper"
+  (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
+	  "OrgPlanning"
 	  (concat
 	   (let ((closed (org-element-property :closed planning)))
 	     (when closed
 	       (concat
 		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTimestampKeyword" org-closed-string)
-		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTimestamp"
-			(org-translate-time
-			 (org-element-property :raw-value closed))))))
+			"OrgClosedKeyword" org-closed-string)
+		(org-e-odt-timestamp closed contents info))))
 	   (let ((deadline (org-element-property :deadline planning)))
 	     (when deadline
 	       (concat
 		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTimestampKeyword" org-deadline-string)
-		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTimestamp"
-			(org-translate-time
-			 (org-element-property :raw-value deadline))))))
+			"OrgDeadlineKeyword" org-deadline-string)
+		(org-e-odt-timestamp deadline contents info))))
 	   (let ((scheduled (org-element-property :scheduled planning)))
 	     (when scheduled
 	       (concat
 		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTimestampKeyword" org-scheduled-string)
-		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTimestamp"
-			(org-translate-time
-			 (org-element-property :raw-value scheduled)))))))))
+			"OrgScheduledKeyword" org-deadline-string)
+		(org-e-odt-timestamp scheduled contents info)))))))
 
 
 ;;;; Property Drawer
@@ -2710,11 +2865,12 @@ holding contextual information."
     (cond
      ;; Annotation.
      ((string= type "annotation")
-      (let ((author (or (plist-get attributes :author)
-			(let ((author (plist-get info :author)))
-			  (and author (org-export-data author info)))))
-	    (date (or (plist-get attributes :date)
-		      (plist-get info :date))))
+      (let* ((author (or (plist-get attributes :author)
+			 (let ((author (plist-get info :author)))
+			   (and author (org-export-data author info)))))
+	     (date (or (plist-get attributes :date)
+		       ;; FIXME: Is `car' right thing to do below?
+		       (car (plist-get info :date)))))
 
 	(format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 		"Text_20_body"
@@ -2724,7 +2880,7 @@ holding contextual information."
 			      (format "<dc:creator>%s</dc:creator>" author))
 			 (and date
 			      (format "<dc:date>%s</dc:date>"
-				      (org-e-odt--date date)))
+				      (org-e-odt--format-timestamp date nil 'iso-date)))
 			 contents)))))
      ;; Textbox.
      ((string= type "textbox")
@@ -3321,22 +3477,45 @@ information."
   "Transcode a TIMESTAMP object from Org to ODT.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (let ((value (org-translate-time
-		(org-element-property :raw-value timestamp))))
-    (format "<text:span text:style-name=\"%s\">%s</text:span>"
-	    "OrgTimestampWrapper"
-	    (if (not (memq (org-element-property :type timestamp)
-			   '(active-range inactive-range)))
-		value
-	      (let ((timestamps (org-split-string value "--")))
-		(concat
-		 (format "<text:span text:style-name=\"%s\">%s</text:span>"
-			 "OrgTimestamp"
-			 (car timestamps))
-		 "&#x2013;"
-		 (format "<text:span text:style-name=\"%s\">%s</text:span>"
-			 "OrgTimestamp"
-			 (cdr timestamps))))))))
+  (let* ((raw-value (org-element-property :raw-value timestamp))
+  	 (type (org-element-property :type timestamp)))
+    (if (not org-e-odt-use-date-fields)
+	(let ((value (org-e-odt-plain-text
+		      (org-export-translate-timestamp timestamp) info)))
+	  (case (org-element-property :type timestamp)
+	    ((active active-range)
+	     (format "<text:span text:style-name=\"%s\">%s</text:span>"
+		     "OrgActiveTimestamp" value))
+	    ((inactive inactive-range)
+	     (format "<text:span text:style-name=\"%s\">%s</text:span>"
+		     "OrgInactiveTimestamp" value))
+	    (otherwise value)))
+      (case type
+	(active
+	 (format "<text:span text:style-name=\"%s\">%s</text:span>"
+		 "OrgActiveTimestamp"
+		 (format "&lt;%s&gt;" (org-e-odt--format-timestamp timestamp))))
+	(inactive
+	 (format "<text:span text:style-name=\"%s\">%s</text:span>"
+		 "OrgInactiveTimestamp"
+		 (format "[%s]" (org-e-odt--format-timestamp timestamp))))
+	(active-range
+	 (format "<text:span text:style-name=\"%s\">%s</text:span>"
+		 "OrgActiveTimestamp"
+		 (format "&lt;%s&gt;&#x2013;&lt;%s&gt;"
+			 (org-e-odt--format-timestamp timestamp)
+			 (org-e-odt--format-timestamp timestamp 'end))))
+	(inactive-range
+	 (format "<text:span text:style-name=\"%s\">%s</text:span>"
+		 "OrgInactiveTimestamp"
+		 (format "[%s]&#x2013;[%s]"
+			 (org-e-odt--format-timestamp timestamp)
+			 (org-e-odt--format-timestamp timestamp 'end))))
+	(otherwise
+	 (format "<text:span text:style-name=\"%s\">%s</text:span>"
+		 "OrgDiaryTimestamp"
+		 (org-e-odt-plain-text (org-export-translate-timestamp
+					timestamp) info)))))))
 
 
 ;;;; Underline
