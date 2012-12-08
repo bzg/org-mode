@@ -286,11 +286,14 @@ a communication channel."
 					    destination info)
 					   ".")))))))
 	  ((org-export-inline-image-p link org-e-html-inline-image-rules)
-	   (format "![%s](%s)"
-		   (let ((caption (org-export-get-caption
-				   (org-export-get-parent-element link))))
-		     (when caption (org-export-data caption info)))
-		   path))
+	   (let ((path (let ((raw-path (org-element-property :path link)))
+			 (if (not (file-name-absolute-p raw-path)) raw-path
+			   (expand-file-name raw-path)))))
+	     (format "![%s](%s)"
+		     (let ((caption (org-export-get-caption
+				     (org-export-get-parent-element link))))
+		       (when caption (org-export-data caption info)))
+		     path)))
 	  ((string= type "coderef")
 	   (let ((ref (org-element-property :path link)))
 	     (format (org-export-get-coderef-format ref contents)
