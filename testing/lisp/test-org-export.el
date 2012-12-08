@@ -2211,7 +2211,16 @@ Another text. (ref:text)
        (org-test-with-parsed-data "#+CAPTION: a =verb=\nParagraph"
 	 (org-element-type
 	  (org-export-get-next-element
-	   (org-element-map tree 'plain-text 'identity info t nil t) info))))))
+	   (org-element-map tree 'plain-text 'identity info t nil t) info)))))
+  ;; With optional argument N, return a list containing up to
+  ;; N following elements.
+  (should
+   (equal
+    '(bold code)
+    (org-test-with-parsed-data "_a_ /b/ *c* ~d~"
+      (mapcar 'car
+	      (org-export-get-next-element
+	       (org-element-map tree 'italic 'identity info t) info 2))))))
 
 (ert-deftest test-org-export/get-previous-element ()
   "Test `org-export-get-previous-element' specifications."
@@ -2253,7 +2262,15 @@ Another text. (ref:text)
        (org-test-with-parsed-data "#+CAPTION: =verb= a\nParagraph"
 	 (org-element-type
 	  (org-export-get-previous-element
-	   (org-element-map tree 'plain-text 'identity info t nil t) info))))))
+	   (org-element-map tree 'plain-text 'identity info t nil t) info)))))
+  ;; With optional argument N, return a list containing up to
+  ;; N previous elements.
+  (should
+   (equal '(bold italic)
+	  (org-test-with-parsed-data "_a_ /b/ *c* ~d~"
+	    (mapcar 'car
+		    (org-export-get-previous-element
+		     (org-element-map tree 'code 'identity info t) info 2))))))
 
 
 (provide 'test-org-export)

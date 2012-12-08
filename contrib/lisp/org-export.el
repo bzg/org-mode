@@ -4627,53 +4627,74 @@ OBJECT is either a `table-cell' or `table-element' type object."
 		(not (eq (org-element-type parent) 'table))))
     parent))
 
-(defun org-export-get-previous-element (blob info)
+(defun org-export-get-previous-element (blob info &optional n)
   "Return previous element or object.
+
 BLOB is an element or object.  INFO is a plist used as
 a communication channel.  Return previous exportable element or
-object, a string, or nil."
-  (let (prev)
+object, a string, or nil.
+
+When optional argument N is a positive integer, return a list
+containing up to N siblings before BLOB, from closest to
+farthest."
+  (when (and n (not (wholenump n))) (setq n nil))
+  (let ((siblings
+	 ;; An object can belong to the contents of its parent or
+	 ;; to a secondary string.  We check the latter option
+	 ;; first.
+	 (let ((parent (org-export-get-parent blob)))
+	   (or (and (not (memq (org-element-type blob)
+			       org-element-all-elements))
+		    (let ((sec-value
+			   (org-element-property
+			    (cdr (assq (org-element-type parent)
+				       org-element-secondary-value-alist))
+			    parent)))
+		      (and (memq blob sec-value) sec-value)))
+	       (org-element-contents parent))))
+	prev)
     (catch 'exit
       (mapc (lambda (obj)
-	      (cond ((eq obj blob) (throw 'exit prev))
-		    ((memq obj (plist-get info :ignore-list)))
-		    (t (setq prev obj))))
-	    ;; An object can belong to the contents of its parent or
-	    ;; to a secondary string.  We check the latter option
-	    ;; first.
-	    (let ((parent (org-export-get-parent blob)))
-	      (or (and (not (memq (org-element-type blob)
-				  org-element-all-elements))
-		       (let ((sec-value
-			      (org-element-property
-			       (cdr (assq (org-element-type parent)
-					  org-element-secondary-value-alist))
-			       parent)))
-			 (and (memq blob sec-value) sec-value)))
-		  (org-element-contents parent)))))))
+	      (cond ((memq obj (plist-get info :ignore-list)))
+		    ((null n) (throw 'exit obj))
+		    ((zerop n) (throw 'exit (nreverse prev)))
+		    (t (decf n) (push obj prev))))
+	    (cdr (memq blob (reverse siblings))))
+      (nreverse prev))))
 
-(defun org-export-get-next-element (blob info)
+(defun org-export-get-next-element (blob info &optional n)
   "Return next element or object.
+
 BLOB is an element or object.  INFO is a plist used as
 a communication channel.  Return next exportable element or
-object, a string, or nil."
-  (catch 'found
-    (mapc (lambda (obj)
-	    (unless (memq obj (plist-get info :ignore-list))
-	      (throw 'found obj)))
-	  ;; An object can belong to the contents of its parent or to
-	  ;; a secondary string.  We check the latter option first.
-	  (let ((parent (org-export-get-parent blob)))
-	    (or (and (not (memq (org-element-type blob)
-				org-element-all-objects))
-		     (let ((sec-value
-			    (org-element-property
-			     (cdr (assq (org-element-type parent)
-					org-element-secondary-value-alist))
-			     parent)))
-		       (cdr (memq blob sec-value))))
-		(cdr (memq blob (org-element-contents parent))))))
-    nil))
+object, a string, or nil.
+
+When optional argument N is a positive integer, return a list
+containing up to N siblings after BLOB, from closest to
+farthest."
+  (when (and n (not (wholenump n))) (setq n nil))
+  (let ((siblings
+	 ;; An object can belong to the contents of its parent or to
+	 ;; a secondary string.  We check the latter option first.
+	 (let ((parent (org-export-get-parent blob)))
+	   (or (and (not (memq (org-element-type blob)
+			       org-element-all-objects))
+		    (let ((sec-value
+			   (org-element-property
+			    (cdr (assq (org-element-type parent)
+				       org-element-secondary-value-alist))
+			    parent)))
+		      (cdr (memq blob sec-value))))
+	       (cdr (memq blob (org-element-contents parent))))))
+	next)
+    (catch 'exit
+      (mapc (lambda (obj)
+	      (cond ((memq obj (plist-get info :ignore-list)))
+		    ((null n) (throw 'exit obj))
+		    ((zerop n) (throw 'exit (nreverse next)))
+		    (t (decf n) (push obj next))))
+	    siblings)
+      (nreverse next))))
 
 
 ;;;; Translation
