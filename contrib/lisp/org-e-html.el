@@ -1456,6 +1456,9 @@ INFO is a plist used as a communication channel."
 ;;;; Src Code
 
 (defun org-e-html-fontify-code (code lang)
+  "Color CODE with htmlize library.
+CODE is a string representing the source code to colorize.  LANG
+is the language used for CODE, as a string, or nil."
   (when code
     (cond
      ;; Case 1: No lang.  Possibly an example block.
@@ -1484,6 +1487,9 @@ INFO is a plist used as a communication channel."
 		       (insert code)
 		       ;; Switch to language-specific mode.
 		       (funcall lang-mode)
+		       ;; "Org" as language.  Be sure to disclose
+		       ;; everything when activating the major mode.
+		       (when (eq lang-mode 'org-mode) (org-cycle '(64)))
 		       ;; Fontify buffer.
 		       (font-lock-fontify-buffer)
 		       ;; Remove formatting on newline characters.
@@ -1520,7 +1526,6 @@ line of code."
 	       (format "%%%ds: "
 		       (length (number-to-string (+ code-length num-start))))))
 	 (code (org-e-html-fontify-code code lang)))
-    (assert (= code-length (length (org-split-string code "\n"))))
     (org-export-format-code
      code
      (lambda (loc line-num ref)
@@ -2020,6 +2025,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	   (org-e-html-format-inline-image
 	    (match-string 1 formula-link)))))
       (t latex-frag))))
+
 
 ;;;; Line Break
 
@@ -2660,6 +2666,7 @@ contextual information."
   	       (funcall table-column-specs table info)
   	       contents)))))
 
+
 ;;;; Target
 
 (defun org-e-html-target (target contents info)
@@ -2726,7 +2733,6 @@ contextual information."
 
 
 
-
 ;;; Filter Functions
 
 (defun org-e-html-final-function (contents backend info)
@@ -2738,6 +2744,7 @@ contextual information."
       (buffer-substring-no-properties (point-min) (point-max)))))
 
 
+
 ;;; End-user functions
 
 ;;;###autoload
