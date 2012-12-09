@@ -136,15 +136,6 @@
 
 ;;; Internal Variables
 
-;; FIXME: it already exists in org-e-html.el
-(defconst org-e-html-cvt-link-fn
-   nil
-   "Function to convert link URLs to exportable URLs.
-Takes two arguments, TYPE and PATH.
-Returns exportable url as (TYPE PATH), or nil to signal that it
-didn't handle this case.
-Intended to be locally bound around a call to `org-export-as-html'." )
-
 (defvar org-e-html-format-table-no-css)
 (defvar htmlize-buffer-places)  ; from htmlize.el
 (defvar body-only) ; dynamically scoped into this.
