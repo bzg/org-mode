@@ -2517,15 +2517,11 @@ Return nil, otherwise."
 			       (= (incf inline-image-count) 1)))
 			 (t nil))))))))
 
-(defun org-e-odt-get-previous-elements (blob info)
-  (let ((parent (org-export-get-parent blob)))
-    (cdr (memq blob (reverse (org-element-contents parent))))))
-
 (defun org-e-odt-resolve-numbered-paragraph (element info)
   (when (eq (org-element-type element) 'item)
     (let ((el element) ordinal)
       (while (eq (org-element-type el) 'item)
-	(push (1+ (length (org-e-odt-get-previous-elements el info))) ordinal)
+	(push (1+ (length (org-export-get-previous-element el info t))) ordinal)
 	(setq el (org-export-get-parent (org-export-get-parent el))))
       ordinal)))
 
@@ -3312,15 +3308,10 @@ contextual information.
 
 Use `org-e-odt--table' to typeset the table.  Handle details
 pertaining to indentation here."
-  (let* ((--get-previous-elements
-	  (function
-	   (lambda (blob info)
-	     (let ((parent (org-export-get-parent blob)))
-	       (cdr (memq blob (reverse (org-element-contents parent))))))))
-	 (--element-preceded-by-table-p
+  (let* ((--element-preceded-by-table-p
 	  (function
 	   (lambda (element info)
-	     (loop for el in (funcall --get-previous-elements element info)
+	     (loop for el in (org-export-get-previous-element element info t)
 		   thereis (eq (org-element-type el) 'table)))))
 	 (--walk-list-genealogy-and-collect-tags
 	  (function
