@@ -987,6 +987,17 @@ CSS classes, then this prefix can be very useful."
 		(when caption (format "\n<p>%s</p>" caption)))))
      (t (format "<img src=\"%s\" %s/>" src (concat attr id))))))
 
+(defun org-e-html--textarea-block (element)
+  "Transcode ELEMENT into a textarea block.
+ELEMENT is either a src block or an example block."
+  (let ((code (car (org-export-unravel-code element)))
+	(attr (org-export-read-attribute :attr_html element)))
+    (format "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
+	    (or (plist-get attr :width) 80)
+	    (or (plist-get attr :height) (org-count-lines code))
+	    code)))
+
+
 ;;;; Bibliography
 
 (defun org-e-html-bibliography ()
@@ -1083,7 +1094,8 @@ that uses these same face definitions."
   (if (looking-at " +") (replace-match ""))
   (goto-char (point-min)))
 
-(defun org-e-html-make-string (n string)
+(defun org-e-html--make-string (n string)
+  "Build a string by concatenating N times STRING."
   (let (out) (dotimes (i n out) (setq out (concat string out)))))
 
 (defun org-e-html-toc-text (toc-entries)
@@ -1100,14 +1112,13 @@ that uses these same face definitions."
 		  rtn)
 	     (setq prev-level level)
 	     (concat
-	      (org-e-html-make-string
+	      (org-e-html--make-string
 	       times (cond ((> cnt 0) "\n<ul>\n<li>")
 			   ((< cnt 0) "</li>\n</ul>\n")))
 	      (if (> cnt 0) "\n<ul>\n<li>" "</li>\n<li>")))
 	   headline)))
       toc-entries "")
-     (org-e-html-make-string
-      (- prev-level start-level) "</li>\n</ul>\n"))))
+     (org-e-html--make-string (- prev-level start-level) "</li>\n</ul>\n"))))
 
 (defun* org-e-html-format-toc-headline
     (todo todo-type priority text tags
@@ -1503,9 +1514,14 @@ INFO is a plist used as a communication channel."
 	    code))))))))
 
 (defun org-e-html-do-format-code
-  (code &optional lang refs retain-labels num-start textarea-p)
-  (when textarea-p
-    (setq num-start nil refs nil lang nil))
+  (code &optional lang refs retain-labels num-start)
+  "Format CODE string as source code.
+Optional arguments LANG, REFS, RETAIN-LABELS and NUM-START are,
+respectively, the language of the source code, as a string, an
+alist between line numbers and references (as returned by
+`org-export-unravel-code'), a boolean specifying if labels should
+appear in the source code, and the number associated to the first
+line of code."
   (let* ((code-lines (org-split-string code "\n"))
 	 (code-length (length code-lines))
 	 (num-fmt
@@ -1534,10 +1550,10 @@ INFO is a plist used as a communication channel."
      num-start refs)))
 
 (defun org-e-html-format-code (element info)
+  "Format contents of ELEMENT as source code.
+ELEMENT is either an example block or a src block.  INFO is
+a plist used as a communication channel."
   (let* ((lang (org-element-property :language element))
-	 ;; (switches (org-element-property :switches element))
-	 (switches nil)			; FIXME
-	 (textarea-p (and switches (string-match "-t\\>" switches)))
 	 ;; Extract code and references.
 	 (code-info (org-export-unravel-code element))
 	 (code (car code-info))
@@ -1548,8 +1564,7 @@ INFO is a plist used as a communication channel."
 	 (num-start (case (org-element-property :number-lines element)
 		      (continued (org-export-get-loc element info))
 		      (new 0))))
-    (org-e-html-do-format-code
-     code lang refs retain-labels num-start textarea-p)))
+    (org-e-html-do-format-code code lang refs retain-labels num-start)))
 
 
 
@@ -1603,16 +1618,6 @@ information."
 	  (org-element-property :value code)))
 
 
-;;;; Comment
-
-;; Comments are ignored.
-
-
-;;;; Comment Block
-
-;; Comment Blocks are ignored.
-
-
 ;;;; Drawer
 
 (defun org-e-html-drawer (drawer contents info)
@@ -1650,23 +1655,20 @@ contextual information."
 
 (defun org-e-html-example-block (example-block contents info)
   "Transcode a EXAMPLE-BLOCK element from Org to HTML.
-CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((attr (org-export-read-attribute :attr_html example-block))
-	(code (org-e-html-format-code example-block info)))
-    (cond
-     ((plist-get attr :textarea)
-      (let ((cols (or (plist-get attr :width) 80))
-	    (rows (or (plist-get attr :height) (org-count-lines code))))
-	(format "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
-		cols rows code)))
-     (t (format "<pre class=\"example\">\n%s</pre>" code)))))
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
+  (if (org-export-read-attribute :attr_html example-block :textarea)
+      (org-e-html--textarea-block example-block)
+    (format "<pre class=\"example\">\n%s</pre>"
+	    (org-e-html-format-code example-block info))))
 
 
 ;;;; Export Snippet
 
 (defun org-e-html-export-snippet (export-snippet contents info)
   "Transcode a EXPORT-SNIPPET object from Org to HTML.
-CONTENTS is nil.  INFO is a plist holding contextual information."
+CONTENTS is nil.  INFO is a plist holding contextual
+information."
   (when (eq (org-export-snippet-backend export-snippet) 'e-html)
     (org-element-property :value export-snippet)))
 
@@ -1689,11 +1691,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (org-e-html-do-format-code
 	   (org-remove-indentation
 	    (org-element-property :value fixed-width)))))
-
-
-;;;; Footnote Definition
-
-;; Footnote Definitions are ignored.
 
 
 ;;;; Footnote Reference
@@ -1843,11 +1840,6 @@ holding contextual information."
   "Transcode an HORIZONTAL-RULE  object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   "<hr/>")
-
-
-;;;; Inline Babel Call
-
-;; Inline Babel Calls are ignored.
 
 
 ;;;; Inline Src Block
@@ -2096,8 +2088,7 @@ standalone images, do the following.
 
   \(setq org-e-html-standalone-image-predicate
 	\(lambda \(paragraph\)
-	  \(org-element-property :caption paragraph\)\)\)
-"
+	  \(org-element-property :caption paragraph\)\)\)"
   (let ((paragraph (case (org-element-type element)
 		     (paragraph element)
 		     (link (and (org-export-inline-image-p
@@ -2482,23 +2473,17 @@ holding contextual information."
   "Transcode a SRC-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let ((lang (org-element-property :language src-block))
-	(caption (org-export-get-caption src-block))
-	(attr (org-export-read-attribute :attr_html src-block))
-	(code (org-e-html-format-code src-block info)))
-    (cond
-     (lang
-      (format "<div class=\"org-src-container\">\n%s%s\n</div>"
-	      (if (not caption) ""
-		(format "<label class=\"org-src-name\">%s</label>"
-			(org-export-data caption info)))
-	      (format "\n<pre class=\"src src-%s\">%s</pre>" lang code)))
-     ((plist-get attr :textarea)
-      (let ((cols (or (plist-get attr :width) 80))
-	    (rows (or (plist-get attr :height) (org-count-lines code))))
-	(format "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
-		cols rows code)))
-     (t (format "<pre class=\"example\">\n%s</pre>" code)))))
+  (if (org-export-read-attribute :attr_html src-block :textarea)
+      (org-e-html--textarea-block src-block)
+    (let ((lang (org-element-property :language src-block))
+	  (caption (org-export-get-caption src-block))
+	  (code (org-e-html-format-code src-block info)))
+      (if (not lang) (format "<pre class=\"example\">\n%s</pre>" code)
+	(format "<div class=\"org-src-container\">\n%s%s\n</div>"
+		(if (not caption) ""
+		  (format "<label class=\"org-src-name\">%s</label>"
+			  (org-export-data caption info)))
+		(format "\n<pre class=\"src src-%s\">%s</pre>" lang code))))))
 
 
 ;;;; Statistics Cookie
