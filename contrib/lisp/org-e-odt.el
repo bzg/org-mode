@@ -1107,8 +1107,6 @@ See `org-e-odt--build-date-styles' for implementation details."
     </text:table-of-content>
 "))
 
-
-
 (defun* org-e-odt-format-toc-headline
     (todo todo-type priority text tags
 	  &key level section-number headline-label &allow-other-keys)
@@ -1951,10 +1949,10 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(value (org-element-property :value keyword)))
     (cond
      ((string= key "ODT") value)
-     ((string= key "INDEX") (format "\\index{%s}" value))
-     ((string= key "TARGET") nil	; FIXME
-      ;; (format "\\label{%s}" (org-export-solidify-link-text value))
-      )
+     ((string= key "INDEX")
+      ;; FIXME
+      (ignore))
+     ((string= key "TARGET") nil)
      ((string= key "toc")
       (let ((value (downcase value)))
 	(cond
@@ -1963,13 +1961,9 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 				(string-to-number (match-string 0 value)))
 			   (plist-get info :with-toc))))
 	    (when (wholenump depth) (org-e-odt-toc depth info))))
-	 ((string= "tables" value) "FIXME")
-	 ((string= "figures" value) "FIXME")
-	 ((string= "listings" value)
-	  (cond
-	   ;; At the moment, src blocks with a caption are wrapped
-	   ;; into a figure environment.
-	   (t "FIXME")))))))))
+	 ((member value '("tables" "figures" "listings"))
+	  ;; FIXME
+	  (ignore))))))))
 
 
 ;;;; Latex Environment
