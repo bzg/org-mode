@@ -2212,12 +2212,21 @@ Another text. (ref:text)
 	 (org-element-type
 	  (org-export-get-next-element
 	   (org-element-map tree 'plain-text 'identity info t nil t) info)))))
-  ;; With optional argument N, return a list containing up to
+  ;; With optional argument N, return a list containing all the
+  ;; following elements.
+  (should
+   (equal
+    '(bold code underline)
+    (org-test-with-parsed-data "_a_ /b/ *c* ~d~ _e_"
+      (mapcar 'car
+	      (org-export-get-next-element
+	       (org-element-map tree 'italic 'identity info t) info t)))))
+  ;; When N is a positive integer, return a list containing up to
   ;; N following elements.
   (should
    (equal
     '(bold code)
-    (org-test-with-parsed-data "_a_ /b/ *c* ~d~"
+    (org-test-with-parsed-data "_a_ /b/ *c* ~d~ _e_"
       (mapcar 'car
 	      (org-export-get-next-element
 	       (org-element-map tree 'italic 'identity info t) info 2))))))
@@ -2264,6 +2273,14 @@ Another text. (ref:text)
 	  (org-export-get-previous-element
 	   (org-element-map tree 'plain-text 'identity info t nil t) info)))))
   ;; With optional argument N, return a list containing up to
+  ;; N previous elements.
+  (should
+   (equal '(bold italic underline)
+	  (org-test-with-parsed-data "_a_ /b/ *c* ~d~"
+	    (mapcar 'car
+		    (org-export-get-previous-element
+		     (org-element-map tree 'code 'identity info t) info t)))))
+  ;; When N is a positive integer, return a list containing up to
   ;; N previous elements.
   (should
    (equal '(bold italic)

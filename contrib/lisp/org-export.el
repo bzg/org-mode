@@ -4636,8 +4636,8 @@ object, a string, or nil.
 
 When optional argument N is a positive integer, return a list
 containing up to N siblings before BLOB, from closest to
-farthest."
-  (when (and n (not (wholenump n))) (setq n nil))
+farthest.  With any other non-nil value, return a list containing
+all of them."
   (let ((siblings
 	 ;; An object can belong to the contents of its parent or
 	 ;; to a secondary string.  We check the latter option
@@ -4657,6 +4657,7 @@ farthest."
       (mapc (lambda (obj)
 	      (cond ((memq obj (plist-get info :ignore-list)))
 		    ((null n) (throw 'exit obj))
+		    ((not (wholenump n)) (push obj prev))
 		    ((zerop n) (throw 'exit (nreverse prev)))
 		    (t (decf n) (push obj prev))))
 	    (cdr (memq blob (reverse siblings))))
@@ -4670,9 +4671,9 @@ a communication channel.  Return next exportable element or
 object, a string, or nil.
 
 When optional argument N is a positive integer, return a list
-containing up to N siblings after BLOB, from closest to
-farthest."
-  (when (and n (not (wholenump n))) (setq n nil))
+containing up to N siblings after BLOB, from closest to farthest.
+With any other non-nil value, return a list containing all of
+them."
   (let ((siblings
 	 ;; An object can belong to the contents of its parent or to
 	 ;; a secondary string.  We check the latter option first.
@@ -4691,6 +4692,7 @@ farthest."
       (mapc (lambda (obj)
 	      (cond ((memq obj (plist-get info :ignore-list)))
 		    ((null n) (throw 'exit obj))
+		    ((not (wholenump n)) (push obj next))
 		    ((zerop n) (throw 'exit (nreverse next)))
 		    (t (decf n) (push obj next))))
 	    siblings)
