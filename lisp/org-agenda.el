@@ -3531,7 +3531,11 @@ generating a new one."
 	(org-agenda-fontify-priorities))
       (when (and org-agenda-dim-blocked-tasks org-blocker-hook)
 	(org-agenda-dim-blocked-tasks))
-      (org-agenda-mark-clocking-task)
+      ;; We need to widen when `org-agenda-finalize' is called from
+      ;; `org-agenda-change-all-lines' (e.g. in `org-agenda-clock-in')
+      (save-restriction
+      	(widen)
+	(org-agenda-mark-clocking-task))
       (when org-agenda-entry-text-mode
 	(org-agenda-entry-text-hide)
 	(org-agenda-entry-text-show))
