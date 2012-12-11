@@ -8606,7 +8606,7 @@ ARG is passed through to `org-schedule'."
 	(goto-char pos)
 	(setq ts (org-schedule arg time)))
       (org-agenda-show-new-time marker ts "S"))
-    (message "Item scheduled for %s" ts)))
+    (message "%s" ts)))
 
 (defun org-agenda-deadline (arg &optional time)
   "Schedule the item at point.
@@ -8626,7 +8626,7 @@ ARG is passed through to `org-deadline'."
 	(goto-char pos)
 	(setq ts (org-deadline arg time)))
       (org-agenda-show-new-time marker ts "D"))
-    (message "Deadline for this item set to %s" ts)))
+    (message "%s" ts)))
 
 (defun org-agenda-clock-in (&optional arg)
   "Start the clock on the currently selected item."
