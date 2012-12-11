@@ -8205,7 +8205,7 @@ the car of the elements of the table.
 If WITH-CASE is non-nil, the sorting will be case-sensitive."
   (unless sorting-type
     (message
-     "Sort %s: [a]lphabetic. [n]umeric. [t]ime.  A/N/T means reversed:"
+     "Sort %s: [a]lphabetic, [n]umeric, [t]ime.  A/N/T means reversed:"
      what)
     (setq sorting-type (read-char-exclusive)))
   (let ((dcst (downcase sorting-type))
