@@ -27,7 +27,6 @@
 
 ;;; Code:
 (require 'ob)
-(eval-when-compile (require 'ob-comint))
 
 (defvar org-babel-default-header-args:emacs-lisp
   '((:hlines . "yes") (:colnames . "no"))

@@ -31,9 +31,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
-(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
 (defvar org-babel-tangle-lang-exts) ;; Autoloaded

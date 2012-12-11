@@ -28,9 +28,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
-(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
 (declare-function orgtbl-to-tsv "org-table" (table params))

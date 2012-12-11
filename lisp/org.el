@@ -4957,12 +4957,6 @@ This variable is set by `org-before-change-function'.
 
 ;; babel
 (require 'ob)
-(require 'ob-table)
-(require 'ob-lob)
-(require 'ob-ref)
-(require 'ob-tangle)
-(require 'ob-comint)
-(require 'ob-keys)
 
 ;;;###autoload
 (define-derived-mode org-mode outline-mode "Org"

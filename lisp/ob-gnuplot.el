@@ -39,8 +39,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
 (eval-when-compile (require 'cl))
 
 (declare-function org-time-string-to-time "org" (s))

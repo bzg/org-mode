@@ -28,7 +28,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-eval)
 
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("java" . "java"))

@@ -25,7 +25,7 @@
 ;;; Code:
 (eval-when-compile
   (require 'cl))
-(require 'ob)
+(require 'ob-core)
 (require 'ob-table)
 
 (declare-function org-babel-in-example-or-verbatim "ob-exp" nil)

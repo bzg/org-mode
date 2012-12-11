@@ -30,7 +30,7 @@
 ;; org-babel at large.
 
 ;;; Code:
-(require 'ob)
+(require 'ob-core)
 (require 'org-compat)
 (require 'comint)
 (eval-when-compile (require 'cl))

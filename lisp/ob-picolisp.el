@@ -54,8 +54,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-eval)
-(require 'ob-comint)
 (require 'comint)
 (eval-when-compile (require 'cl))
 

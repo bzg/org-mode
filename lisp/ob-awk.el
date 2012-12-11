@@ -32,7 +32,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-eval)
 (require 'org-compat)
 (eval-when-compile (require 'cl))
 

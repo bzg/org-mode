@@ -26,7 +26,6 @@
 ;; Extract the code from source blocks out into raw source-code files.
 
 ;;; Code:
-(require 'ob)
 (require 'org-src)
 (eval-when-compile
   (require 'cl))

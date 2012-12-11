@@ -27,8 +27,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-eval)
-(require 'ob-ref)
 
 (declare-function org-fill-template "org" (template alist))
 (declare-function org-table-convert-region "org-table"

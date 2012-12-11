@@ -1,4 +1,4 @@
-;;; ob.el --- working with code blocks in org-mode
+;;; ob-core.el --- working with code blocks in org-mode
 
 ;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
 
@@ -2622,10 +2622,10 @@ of `org-babel-temporary-directory'."
 
 (add-hook 'kill-emacs-hook 'org-babel-remove-temporary-directory)
 
-(provide 'ob)
+(provide 'ob-core)
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"
 ;; End:
 
-;;; ob.el ends here
+;;; ob-core.el ends here

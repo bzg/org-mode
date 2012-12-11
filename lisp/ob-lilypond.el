@@ -30,10 +30,7 @@
 ;; http://lilypond.org/manuals.html
 
 ;;; Code:
-
 (require 'ob)
-(require 'ob-eval)
-(require 'ob-tangle)
 (require 'outline)
 (defalias 'lilypond-mode 'LilyPond-mode)
 
