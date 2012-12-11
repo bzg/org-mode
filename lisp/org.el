@@ -8161,11 +8161,12 @@ a time stamp, by a property or by priority.
 
 The command prompts for the sorting type unless it has been given to the
 function through the SORTING-TYPE argument, which needs to be a character,
-\(?n ?N ?a ?A ?t ?T ?s ?S ?d ?D ?p ?P ?r ?R ?f ?F).  Here is the
+\(?n ?N ?a ?A ?t ?T ?s ?S ?d ?D ?p ?P ?o ?O ?r ?R ?f ?F).  Here is the
 precise meaning of each character:
 
 n   Numerically, by converting the beginning of the entry/item to a number.
 a   Alphabetically, ignoring the TODO keyword and the priority, if any.
+o   By order of TODO keywords.
 t   By date/time, either the first active time stamp in the entry, or, if
     none exist, by the first inactive one.
 s   By the scheduled date/time.
@@ -8185,6 +8186,13 @@ Comparing entries ignores case by default.  However, with an optional argument
 WITH-CASE, the sorting considers case as well."
   (interactive "P")
   (let ((case-func (if with-case 'identity 'downcase))
+	(cmstr
+	 ;; The clock marker is lost when using `sort-subr', let's
+	 ;; store the clocking string.
+	 (when (equal (marker-buffer org-clock-marker) (current-buffer))
+	   (save-excursion
+	     (goto-char org-clock-marker)
+	     (looking-back "^.*") (match-string-no-properties 0))))
         start beg end stars re re2
         txt what tmp)
     ;; Find beginning and end of region to sort
@@ -8241,7 +8249,7 @@ WITH-CASE, the sorting considers case as well."
       (message
        "Sort %s: [a]lpha  [n]umeric  [p]riority  p[r]operty  todo[o]rder  [f]unc
                [t]ime [s]cheduled  [d]eadline  [c]reated
-               A/N/T/S/D/C/P/O/F means reversed:"
+               A/N/P/R/O/F/T/S/D/C means reversed:"
        what)
       (setq sorting-type (read-char-exclusive))
 
@@ -8340,6 +8348,12 @@ WITH-CASE, the sorting considers case as well."
           ((= dcst ?f) compare-func)
           ((member dcst '(?p ?t ?s ?d ?c)) '<)))))
     (run-hooks 'org-after-sorting-entries-or-items-hook)
+    ;; Reset the clock marker if needed
+    (when cmstr
+      (save-excursion
+	(goto-char start)
+	(search-forward cmstr nil t)
+	(move-marker org-clock-marker (point))))
     (message "Sorting entries...done")))
 
 (defun org-do-sort (table what &optional with-case sorting-type)
@@ -8351,7 +8365,7 @@ the car of the elements of the table.
 If WITH-CASE is non-nil, the sorting will be case-sensitive."
   (unless sorting-type
     (message
-     "Sort %s: [a]lphabetic. [n]umeric. [t]ime.  A/N/T means reversed:"
+     "Sort %s: [a]lphabetic, [n]umeric, [t]ime.  A/N/T means reversed:"
      what)
     (setq sorting-type (read-char-exclusive)))
   (let ((dcst (downcase sorting-type))
