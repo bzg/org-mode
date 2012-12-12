@@ -830,6 +830,7 @@ issued in the language major mode buffer."
 Alter code block according to effect of TAB in the language major
 mode."
   (and org-src-tab-acts-natively
+       (not (equal this-command 'org-shifttab))
        (let ((org-src-strip-leading-and-trailing-blank-lines nil))
 	 (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))))
 
