@@ -2946,12 +2946,15 @@ Return a list whose CAR is `line-break', and CDR a plist with
 `:begin', `:end' and `:post-blank' keywords.
 
 Assume point is at the beginning of the line break."
-  (list 'line-break (list :begin (point) :end (point-at-eol) :post-blank 0)))
+  (list 'line-break
+	(list :begin (point)
+	      :end (progn (forward-line) (point))
+	      :post-blank 0)))
 
 (defun org-element-line-break-interpreter (line-break contents)
   "Interpret LINE-BREAK object as Org syntax.
 CONTENTS is nil."
-  "\\\\")
+  "\\\\\n")
 
 (defun org-element-line-break-successor (limit)
   "Search for the next line-break object.
