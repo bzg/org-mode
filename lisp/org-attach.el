@@ -425,14 +425,14 @@ This ignores files starting with a \".\", and files ending in \"~\"."
 		(directory-files dir nil "[^~]\\'"))))
 
 (defun org-attach-reveal (&optional if-exists)
-  "Show the attachment directory of the current task in dired."
+  "Show the attachment directory of the current task.
+This will attempt to use an external program to show the directory."
   (interactive "P")
   (let ((attach-dir (org-attach-dir (not if-exists))))
     (and attach-dir (org-open-file attach-dir))))
 
 (defun org-attach-reveal-in-emacs ()
-  "Show the attachment directory of the current task.
-This will attempt to use an external program to show the directory."
+  "Show the attachment directory of the current task in dired."
   (interactive)
   (let ((attach-dir (org-attach-dir t)))
     (dired attach-dir)))
