@@ -1484,12 +1484,9 @@ is the language used for CODE, as a string, or nil."
 	 (t
 	  ;; htmlize
 	  (setq code (with-temp-buffer
-		       (insert code)
 		       ;; Switch to language-specific mode.
 		       (funcall lang-mode)
-		       ;; "Org" as language.  Be sure to disclose
-		       ;; everything when activating the major mode.
-		       (when (eq lang-mode 'org-mode) (org-cycle '(64)))
+		       (insert code)
 		       ;; Fontify buffer.
 		       (font-lock-fontify-buffer)
 		       ;; Remove formatting on newline characters.
