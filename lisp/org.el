@@ -11591,6 +11591,9 @@ nil or a string to be used for the todo mark." )
 	   (org-extend-today-until (1+ hour)))
       (org-todo arg))))
 
+(defvar org-block-entry-blocking ""
+  "First entry preventing the TODO state change.")
+
 (defun org-todo (&optional arg)
   "Change the TODO state of an item.
 The state of an item is given by a keyword at the start of the heading,
@@ -11741,9 +11744,11 @@ For calling through lisp, arg is also interpreted in the following way:
 			   (run-hook-with-args-until-failure
 			    'org-blocker-hook change-plist))))
 		(if (org-called-interactively-p 'interactive)
-		    (error "TODO state change from %s to %s blocked" this org-state)
+		    (user-error "TODO state change from %s to %s blocked (by \"%s\")"
+				this org-state org-block-entry-blocking)
 		  ;; fail silently
-		  (message "TODO state change from %s to %s blocked" this org-state)
+		  (message "TODO state change from %s to %s blocked (by \"%s\")"
+			   this org-state org-block-entry-blocking)
 		  (throw 'exit nil))))
 	    (store-match-data match-data)
 	    (replace-match next t t)
@@ -11856,7 +11861,8 @@ changes.  Such blocking occurs when:
 	      ;; completed
 	      (if (and (not (org-entry-is-done-p))
 		       (org-entry-is-todo-p))
-		  (throw 'dont-block nil))
+		  (progn (setq org-block-entry-blocking (org-get-heading))
+			 (throw 'dont-block nil)))
 	      (outline-next-heading)
 	      (setq child-level (funcall outline-level))))))
       ;; Otherwise, if the task's parent has the :ORDERED: property, and
@@ -11869,6 +11875,7 @@ changes.  Such blocking occurs when:
 	  (when (and (org-not-nil (org-entry-get (point) "ORDERED"))
 		     (forward-line 1)
 		     (re-search-forward org-not-done-heading-regexp pos t))
+	    (setq org-block-entry-blocking (match-string 0))
 	    (throw 'dont-block nil))  ; block, there is an older sibling not done.
 	  ;; Search further up the hierarchy, to see if an ancestor is blocked
 	  (while t
@@ -11880,7 +11887,8 @@ changes.  Such blocking occurs when:
 	    (if (not parent-pos) (throw 'dont-block t)) ; no parent
 	    (when (and (org-not-nil (org-entry-get (point) "ORDERED"))
 		       (forward-line 1)
-		       (re-search-forward org-not-done-heading-regexp pos t))
+		       (re-search-forward org-not-done-heading-regexp pos t)
+		       (setq org-block-entry-blocking (org-get-heading)))
 	      (throw 'dont-block nil)))))))) ; block, older sibling not done.
 
 (defcustom org-track-ordered-property-with-tag nil
