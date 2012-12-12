@@ -136,12 +136,13 @@ evaluating BODY."
 (def-edebug-spec org-babel-with-temp-filebuffer (form body))
 
 ;;;###autoload
-(defun org-babel-load-file (file)
+(defun org-babel-load-file (file &optional compile)
   "Load Emacs Lisp source code blocks in the Org-mode FILE.
-This function exports the source code using
-`org-babel-tangle' and then loads the resulting file using
-`load-file'."
-  (interactive "fFile to load: ")
+This function exports the source code using `org-babel-tangle'
+and then loads the resulting file using `load-file'.  With prefix
+arg (noninteractively: 2nd arg) COMPILE the tangled Emacs Lisp
+file to byte-code before it is loaded."
+  (interactive "fFile to load: \nP")
   (let* ((age (lambda (file)
 		(float-time
 		 (time-subtract (current-time)
@@ -153,8 +154,12 @@ This function exports the source code using
     (unless (and (file-exists-p exported-file)
 		 (> (funcall age file) (funcall age exported-file)))
       (org-babel-tangle-file file exported-file "emacs-lisp"))
-    (load-file exported-file)
-    (message "Loaded %s" exported-file)))
+    (message "%s %s"
+	     (if compile
+		 (progn (byte-compile-file exported-file 'load)
+			"Compiled and loaded")
+	       (progn (load-file exported-file) "Loaded"))
+	     exported-file)))
 
 ;;;###autoload
 (defun org-babel-tangle-file (file &optional target-file lang)
