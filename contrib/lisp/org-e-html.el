@@ -2032,7 +2032,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-html-line-break (line-break contents info)
   "Transcode a LINE-BREAK object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  "<br/>")
+  "<br/>\n")
 
 
 ;;;; Link

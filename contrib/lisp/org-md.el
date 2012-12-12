@@ -248,7 +248,7 @@ a communication channel."
   "Transcode LINE-BREAK object into Markdown format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  "  ")
+  "  \n")
 
 
 ;;;; Link

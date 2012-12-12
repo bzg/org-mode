@@ -1162,7 +1162,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-texinfo-line-break (line-break contents info)
   "Transcode a LINE-BREAK object from Org to Texinfo.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  "@*")
+  "@*\n")
 
 ;;; Link
 

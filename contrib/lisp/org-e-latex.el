@@ -1714,7 +1714,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-e-latex-line-break (line-break contents info)
   "Transcode a LINE-BREAK object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  "\\\\")
+  "\\\\\n")
 
 
 ;;;; Link
