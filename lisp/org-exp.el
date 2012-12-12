@@ -88,10 +88,14 @@ is nil, the buffer remains buried also in these cases."
   :group 'org-export-general
   :type 'boolean)
 
-(defcustom org-export-copy-to-kill-ring t
-  "Non-nil means exported stuff will also be pushed onto the kill ring."
+(defcustom org-export-copy-to-kill-ring 'if-interactive
+  "Should we push exported content to the kill ring?"
   :group 'org-export-general
-  :type 'boolean)
+  :version "24.3"
+  :type '(choice
+	  (const :tag "Always" t)
+	  (const :tag "When export is done interactively" if-interactive)
+	  (const :tag "Never" nil)))
 
 (defcustom org-export-kill-product-buffer-when-displayed nil
   "Non-nil means kill the product buffer if it is displayed immediately.
@@ -3338,7 +3342,9 @@ If yes remove the column and the special lines."
 (defun org-export-push-to-kill-ring (format)
   "Push buffer content to kill ring.
 The depends on the variable `org-export-copy-to-kill-ring'."
-  (when org-export-copy-to-kill-ring
+  (when (or (and (eq org-export-copy-to-kill-ring 'if-interactive)
+		 (not (or executing-kbd-macro noninteractive)))
+	    (eq org-export-copy-to-kill-ring t))
     (org-kill-new (buffer-string))
     (when (fboundp 'x-set-selection)
       (ignore-errors (x-set-selection 'PRIMARY (buffer-string)))
