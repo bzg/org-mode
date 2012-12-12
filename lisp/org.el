@@ -9659,7 +9659,7 @@ application the system uses for this file type."
 	   (not (org-in-regexp org-bracket-link-regexp)))
       (org-follow-timestamp-link))
      ((and (or (org-footnote-at-reference-p) (org-footnote-at-definition-p))
-	   (not (org-in-regexp org-bracket-link-regexp)))
+	   (not (org-in-regexp org-any-link-re)))
       (org-footnote-action))
      (t
       (let (type path link line search (pos (point)))
