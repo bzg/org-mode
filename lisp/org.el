@@ -21021,21 +21021,31 @@ If EXTENSIONS is given, only match these."
   (save-match-data
     (string-match (org-image-file-name-regexp extensions) file)))
 
-(defun org-get-cursor-date ()
+(defun org-get-cursor-date (&optional with-time)
   "Return the date at cursor in as a time.
 This works in the calendar and in the agenda, anywhere else it just
-returns the current time."
-  (let (date day defd)
+returns the current time.
+If WITH-TIME is non-nil, returns the time of the event at point (in
+the agenda) or the current time of the day."
+  (let (date day defd tp tm hod mod)
+    (when with-time
+      (setq tp (get-text-property (point) 'time))
+      (when (and tp (string-match "\\([0-9][0-9]\\):\\([0-9][0-9]\\)" tp))
+	(setq hod (string-to-number (match-string 1 tp))
+	      mod (string-to-number (match-string 2 tp))))
+      (or tp (setq hod (nth 2 (decode-time (current-time)))
+		   mod (nth 1 (decode-time (current-time))))))
     (cond
      ((eq major-mode 'calendar-mode)
       (setq date (calendar-cursor-to-date)
-	    defd (encode-time 0 0 0 (nth 1 date) (nth 0 date) (nth 2 date))))
+	    defd (encode-time 0 (or mod 0) (or hod 0)
+			      (nth 1 date) (nth 0 date) (nth 2 date))))
      ((eq major-mode 'org-agenda-mode)
       (setq day (get-text-property (point) 'day))
       (if day
 	  (setq date (calendar-gregorian-from-absolute day)
-		defd (encode-time 0 0 0 (nth 1 date) (nth 0 date)
-				  (nth 2 date))))))
+		defd (encode-time 0 (or mod 0) (or hod 0)
+				  (nth 1 date) (nth 0 date) (nth 2 date))))))
     (or defd (current-time))))
 
 (defun org-mark-subtree (&optional up)

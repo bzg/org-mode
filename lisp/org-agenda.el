@@ -9349,13 +9349,15 @@ The prefix arg is passed through to the command if possible."
 		 (if (not org-agenda-persistent-marks)
 		     "" " (kept marked)"))))))
 
-(defun org-agenda-capture ()
-  "Call `org-capture' with the date at point."
-  (interactive)
+(defun org-agenda-capture (&optional with-time)
+  "Call `org-capture' with the date at point.
+With a `C-1' prefix, use the HH:MM value at point (if any) or the
+current HH:MM time."
+  (interactive "P")
   (if (not (eq major-mode 'org-agenda-mode))
-      (error "You cannot do this outside of agenda buffers")
+      (user-error "You cannot do this outside of agenda buffers")
     (let ((org-overriding-default-time
-	   (org-get-cursor-date)))
+	   (org-get-cursor-date (equal with-time 1))))
       (call-interactively 'org-capture))))
 
 ;;; Flagging notes

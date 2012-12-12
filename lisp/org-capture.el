@@ -516,17 +516,19 @@ stored.
 
 When called with a `C-0' (zero) prefix, insert a template at point.
 
-Lisp programs can set KEYS to a string associated with a template
+ELisp programs can set KEYS to a string associated with a template
 in `org-capture-templates'.  In this case, interactive selection
 will be bypassed.
 
 If `org-capture-use-agenda-date' is non-nil, capturing from the
-agenda will use the date at point as the default date."
+agenda will use the date at point as the default date.  Then, a
+`C-1' prefix will tell the capture process to use the HH:MM time
+of the day at point (if any) or the current HH:MM time."
   (interactive "P")
   (when (and org-capture-use-agenda-date
 	     (eq major-mode 'org-agenda-mode))
     (setq org-overriding-default-time
-	  (org-get-cursor-date)))
+	  (org-get-cursor-date (equal goto 1))))
   (cond
    ((equal goto '(4)) (org-capture-goto-target))
    ((equal goto '(16)) (org-capture-goto-last-stored))
