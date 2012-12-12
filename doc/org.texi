@@ -835,7 +835,6 @@ ends, for example:
 @r{@bullet{} an environment for literate programming}
 @end example
 
-
 @cindex FAQ
 There is a website for Org which provides links to the newest
 version of Org, as well as additional information, frequently asked
@@ -13248,6 +13247,7 @@ Code block header arguments can span multiple lines using @code{#+HEADER:} or
 @cindex #+HEADERS:
 
 Multi-line header arguments on an un-named code block:
+
 @example
  #+HEADERS: :var data1=1
  #+BEGIN_SRC emacs-lisp :var data2=2
@@ -13259,6 +13259,7 @@ Multi-line header arguments on an un-named code block:
 @end example
 
 Multi-line header arguments on a named code block:
+
 @example
    #+NAME: named-block
    #+HEADER: :var data=2
@@ -13281,12 +13282,14 @@ blocks}.
 
 The following will apply the @code{:exports results} header argument to the
 evaluation of the @code{#+CALL:} line.
+
 @example
 #+CALL: factorial(n=5) :exports results
 @end example
 
 The following will apply the @code{:session special} header argument to the
 evaluation of the @code{factorial} code block.
+
 @example
 #+CALL: factorial[:session special](n=5)
 @end example
@@ -13367,6 +13370,7 @@ Here are examples of passing values by reference:
 
 @item table
 an Org mode table named with either a @code{#+NAME:} or @code{#+TBLNAME:} line
+
 @example
 #+TBLNAME: example-table
 | 1 |
@@ -13949,7 +13953,6 @@ This code block:
 -- <<example>>
 @end example
 
-
 expands to:
 
 @example
@@ -14332,6 +14335,7 @@ process.  For example, compare the following two blocks:
 @end example
 
 In non-session mode, the `2' is not printed and does not appear.
+
 @example
 #+BEGIN_SRC python :results output :session
  print "hello"
@@ -14706,6 +14710,7 @@ ask and nil not to ask.
 
 For example, here is how to execute "ditaa" code (which is considered safe)
 without asking:
+
 @example
 (defun my-org-confirm-babel-evaluate (lang body)
   (not (string= lang "ditaa")))  ; don't ask for ditaa
