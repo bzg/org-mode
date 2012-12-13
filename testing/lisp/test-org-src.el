@@ -1,8 +1,10 @@
-;;; test-org-src.el --- Tests for org-src.el
+;;; test-org-src.el --- tests for org-src.el
 
 ;; Copyright (C) 2012  Le Wang
 
 ;; Author: Le Wang <l26wang at gmail dot com>
+
+;; This file is not part of GNU Emacs.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -17,6 +19,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Code:
 
 (require 'org-test)
 
