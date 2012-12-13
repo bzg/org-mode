@@ -1019,8 +1019,7 @@ is non-nil."
 	      (insert output)
 	      (goto-char (point-min))
 	      (LaTeX-mode)
-	      (when org-export-show-temporary-export-buffer
-		(org-export-add-to-stack (current-buffer) 'e-beamer))))
+	      (org-export-add-to-stack (current-buffer) 'e-beamer)))
 	`(org-export-as 'e-beamer ,subtreep ,visible-only ,body-only
 			',ext-plist))
     (let ((outbuf (org-export-to-buffer
