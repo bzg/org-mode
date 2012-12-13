@@ -2786,8 +2786,7 @@ is non-nil."
 	      (insert output)
 	      (goto-char (point-min))
 	      (nxml-mode)
-	      (when org-export-show-temporary-export-buffer
-		(org-export-add-to-stack (current-buffer) 'e-html))))
+	      (org-export-add-to-stack (current-buffer) 'e-html)))
 	`(org-export-as 'e-html ,subtreep ,visible-only ,body-only ',ext-plist))
     (let ((outbuf (org-export-to-buffer
 		   'e-html "*Org E-HTML Export*"
