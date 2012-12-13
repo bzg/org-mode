@@ -108,7 +108,9 @@
       ((?m "As MAN file" org-e-man-export-to-man)
        (?p "As PDF file" org-e-man-export-to-pdf)
        (?o "As PDF file and open"
-	   (lambda (s v b) (org-open-file (org-e-man-export-to-pdf s v b))))))
+	   (lambda (a s v b)
+	     (if a (org-e-man-export-to-pdf t s v b)
+	       (org-open-file (org-e-man-export-to-pdf nil s v b)))))))
   :options-alist
   ((:man-class "MAN_CLASS" nil nil t)
    (:man-class-options "MAN_CLASS_OPTIONS" nil nil t)
@@ -1146,13 +1148,17 @@ contextual information."
 ;;; Interactive functions
 
 (defun org-e-man-export-to-man
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a Man file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1171,17 +1177,27 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".man" subtreep)))
-    (org-export-to-file
-     'e-man outfile subtreep visible-only body-only ext-plist)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-man))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'e-man ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))
+      (org-export-to-file
+       'e-man outfile subtreep visible-only body-only ext-plist))))
 
 (defun org-e-man-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to Groff then process through to PDF.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1199,8 +1215,17 @@ file-local settings.
 
 Return PDF file's name."
   (interactive)
-  (org-e-man-compile
-   (org-e-man-export-to-man subtreep visible-only body-only ext-plist)))
+  (if async
+      (let ((outfile (org-export-output-file-name ".man" subtreep)))
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-man))
+	  `(expand-file-name
+	    (org-e-man-compile
+	     (org-export-to-file
+	      'e-man ,outfile ,subtreep ,visible-only ,body-only
+	      ',ext-plist)))))
+    (org-e-man-compile
+     (org-e-man-export-to-man nil subtreep visible-only body-only ext-plist))))
 
 (defun org-e-man-compile (file)
   "Compile a Groff file.

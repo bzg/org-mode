@@ -42,13 +42,9 @@
 (require 'format-spec)
 (require 'org-export)
 
-(declare-function org-e-latex-compile "org-e-latex" (texfile))
-
 
 
 ;;; Variables
-(defvar org-e-publish-initial-buffer nil
-  "The buffer `org-e-publish' has been called from.")
 
 (defvar org-e-publish-temp-files nil
   "Temporary list of files to be published.")
@@ -817,8 +813,15 @@ It returns time in `current-time' format."
 (defalias 'org-e-publish-project 'org-e-publish)
 
 ;;;###autoload
-(defun org-e-publish (project &optional force)
-  "Publish PROJECT."
+(defun org-e-publish (project &optional force async)
+  "Publish PROJECT.
+
+PROJECT is either a project name, as a string, or a project
+alist (see `org-e-publish-project-alist' variable).
+
+When optional argument FORCE is non-nil, force publishing all
+files in PROJECT.  With a non-nil optional argument ASYNC,
+publishing will be done asynchronously, in another process."
   (interactive
    (list
     (assoc (org-icompleting-read
@@ -826,52 +829,69 @@ It returns time in `current-time' format."
 	    org-e-publish-project-alist nil t)
 	   org-e-publish-project-alist)
     current-prefix-arg))
-  (setq org-e-publish-initial-buffer (current-buffer))
-  (save-window-excursion
-    (let* ((org-e-publish-use-timestamps-flag
-	    (if force nil org-e-publish-use-timestamps-flag)))
-      (org-e-publish-projects
-       (if (stringp project)
-	   ;; If this function is called in batch mode, project is
-	   ;; still a string here.
-	   (list (assoc project org-e-publish-project-alist))
-	 (list project))))))
+  (let ((project-alist  (if (not (stringp project)) (list project)
+			  ;; If this function is called in batch mode,
+			  ;; project is still a string here.
+			  (list (assoc project org-e-publish-project-alist)))))
+    (if async
+	(org-export-async-start 'ignore
+	  `(let ((org-e-publish-use-timestamps-flag
+		  (if ',force nil ,org-e-publish-use-timestamps-flag)))
+	     (org-e-publish-projects ',project-alist)))
+      (save-window-excursion
+	(let* ((org-e-publish-use-timestamps-flag
+		(if force nil org-e-publish-use-timestamps-flag)))
+	  (org-e-publish-projects project-alist))))))
 
 ;;;###autoload
-(defun org-e-publish-all (&optional force)
+(defun org-e-publish-all (&optional force async)
   "Publish all projects.
-With prefix argument, remove all files in the timestamp
-directory and force publishing all files."
+With prefix argument FORCE, remove all files in the timestamp
+directory and force publishing all projects.  With a non-nil
+optional argument ASYNC, publishing will be done asynchronously,
+in another process."
   (interactive "P")
-  (when force (org-e-publish-remove-all-timestamps))
-  (save-window-excursion
-    (let ((org-e-publish-use-timestamps-flag
-	   (if force nil org-e-publish-use-timestamps-flag)))
-      (org-e-publish-projects org-e-publish-project-alist))))
+  (if async
+      (org-export-async-start 'ignore
+	`(when ',force (org-e-publish-remove-all-timestamps))
+	`(let ((org-e-publish-use-timestamps-flag
+		(if ',force nil ,org-e-publish-use-timestamps-flag)))
+	   (org-e-publish-projects ',org-e-publish-project-alist)))
+    (when force (org-e-publish-remove-all-timestamps))
+    (save-window-excursion
+      (let ((org-e-publish-use-timestamps-flag
+	     (if force nil org-e-publish-use-timestamps-flag)))
+	(org-e-publish-projects org-e-publish-project-alist)))))
 
 
 ;;;###autoload
-(defun org-e-publish-current-file (&optional force)
+(defun org-e-publish-current-file (&optional force async)
   "Publish the current file.
-With prefix argument, force publish the file."
+With prefix argument FORCE, force publish the file.  When
+optional argument ASYNC is non-nil, publishing will be done
+asynchronously, in another process."
   (interactive "P")
-  (save-window-excursion
-    (let ((org-e-publish-use-timestamps-flag
-	   (if force nil org-e-publish-use-timestamps-flag)))
-      (org-e-publish-file (buffer-file-name (buffer-base-buffer))))))
+  (let ((file (buffer-file-name (buffer-base-buffer))))
+    (if async
+	(org-export-async-start 'ignore
+	  `(let ((org-e-publish-use-timestamps-flag
+		  (if ',force nil ,org-e-publish-use-timestamps-flag)))
+	     (org-e-publish-file ,file)))
+      (save-window-excursion
+	(let ((org-e-publish-use-timestamps-flag
+	       (if force nil org-e-publish-use-timestamps-flag)))
+	  (org-e-publish-file file))))))
 
 ;;;###autoload
-(defun org-e-publish-current-project (&optional force)
+(defun org-e-publish-current-project (&optional force async)
   "Publish the project associated with the current file.
 With a prefix argument, force publishing of all files in
 the project."
   (interactive "P")
   (save-window-excursion
     (let ((project (org-e-publish-get-project-from-filename
-		    (buffer-file-name (buffer-base-buffer)) 'up))
-	  (org-e-publish-use-timestamps-flag
-	   (if force nil org-e-publish-use-timestamps-flag)))
-      (if project (org-e-publish project)
+		    (buffer-file-name (buffer-base-buffer)) 'up)))
+      (if project (org-e-publish project force async)
 	(error "File %s is not part of any known project"
 	       (buffer-file-name (buffer-base-buffer)))))))
 

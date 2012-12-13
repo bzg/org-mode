@@ -65,8 +65,14 @@
 ;; customizable should belong to the `org-export-BACKEND' group.
 ;;
 ;; Tools for common tasks across back-ends are implemented in the
-;; penultimate part of this file.  A dispatcher for standard back-ends
-;; is provided in the last one.
+;; following part of then file.
+;;
+;; Then, a wrapper macro for asynchronous export,
+;; `org-export-async-start', along with tools to display results. are
+;; given in the penultimate part.
+;;
+;; Eventually, a dispatcher (`org-export-dispatch') for standard
+;; back-ends is provided in the last one.
 
 ;;; Code:
 
@@ -74,11 +80,12 @@
 (require 'org-element)
 (require 'ob-exp)
 
-(declare-function org-e-publish "org-e-publish" (project &optional force))
-(declare-function org-e-publish-all "org-e-publish" (&optional force))
-(declare-function org-e-publish-current-file "org-e-publish" (&optional force))
+(declare-function org-e-publish "org-e-publish" (project &optional force async))
+(declare-function org-e-publish-all "org-e-publish" (&optional force async))
+(declare-function
+ org-e-publish-current-file "org-e-publish" (&optional force async))
 (declare-function org-e-publish-current-project "org-e-publish"
-		  (&optional force))
+		  (&optional force async))
 
 (defvar org-e-publish-project-alist)
 (defvar org-table-number-fraction)
@@ -250,6 +257,25 @@ whose extension is either \"png\", \"jpeg\", \"jpg\", \"gif\",
 \"tiff\", \"tif\", \"xbm\", \"xpm\", \"pbm\", \"pgm\" or \"ppm\".
 See `org-export-inline-image-p' for more information about
 rules.")
+
+(defvar org-export-async-debug nil
+  "Non-nil means asynchronous export process should leave data behind.
+
+This data is found in the appropriate \"*Org Export Process*\"
+buffer, and in files prefixed with \"org-export-process\" and
+located in `temporary-file-directory'.
+
+When non-nil, it will also set `debug-on-error' to a non-nil
+value in the external process.")
+
+(defvar org-export-stack-contents nil
+  "Record asynchronously generated export results and processes.
+This is an alist: its CAR is the source of the
+result (destination file or buffer for a finished process,
+original buffer for a running one) and its CDR is a list
+containing the back-end used, as a symbol, and either a process
+or the time at which it finished.  It is used to build the menu
+from `org-export-stack'.")
 
 (defvar org-export-registered-backends nil
   "List of backends currently available in the exporter.
@@ -703,6 +729,21 @@ these cases."
   :group 'org-export-general
   :type 'boolean)
 
+(defcustom org-export-in-background nil
+  "Non-nil means export and publishing commands will run in background.
+Results from an asynchronous export are never displayed.  You can
+retrieve them with \\[org-export-stack]."
+  :group 'org-export-general
+  :type 'boolean)
+
+(defcustom org-export-async-init-file user-init-file
+  "File used to initialize external export process.
+Value must be an absolute file name.  It defaults to user's
+initialization file.  Though, a specific configuration makes the
+process faster and the export more portable."
+  :group 'org-export-general
+  :type '(file :must-match t))
+
 (defcustom org-export-dispatch-use-expert-ui nil
   "Non-nil means using a non-intrusive `org-export-dispatch'.
 In that case, no help buffer is displayed.  Though, an indicator
@@ -811,9 +852,10 @@ keywords are understood:
 
       ACTION-OR-MENU is either a function or an alist.
 
-      If it is an action, it will be called with three arguments:
-      SUBTREEP, VISIBLE-ONLY and BODY-ONLY.  See `org-export-as'
-      for further explanations.
+      If it is an action, it will be called with four
+      arguments (booleans): ASYNC, SUBTREEP, VISIBLE-ONLY and
+      BODY-ONLY.  See `org-export-as' for further explanations on
+      some of them.
 
       If it is an alist, associations should follow the
       pattern:
@@ -1910,15 +1952,13 @@ Return transcoded string."
 	      (cond
 	       ;; Ignored element/object.
 	       ((memq data (plist-get info :ignore-list)) nil)
-	       ;; Plain text.  All residual text properties from parse
-	       ;; tree (i.e. `:parent' property) are removed.
+	       ;; Plain text.
 	       ((eq type 'plain-text)
-		(org-no-properties
-		 (org-export-filter-apply-functions
-		  (plist-get info :filter-plain-text)
-		  (let ((transcoder (org-export-transcoder data info)))
-		    (if transcoder (funcall transcoder data info) data))
-		  info)))
+		(org-export-filter-apply-functions
+		 (plist-get info :filter-plain-text)
+		 (let ((transcoder (org-export-transcoder data info)))
+		   (if transcoder (funcall transcoder data info) data))
+		 info))
 	       ;; Uninterpreted element/object: change it back to Org
 	       ;; syntax and export again resulting raw string.
 	       ((not (org-export--interpret-p data info))
@@ -2533,7 +2573,7 @@ Return the updated communication channel."
 ;; but a copy of it (with the same buffer-local variables and
 ;; visibility), where macros and include keywords are expanded and
 ;; Babel blocks are executed, if appropriate.
-;; `org-export-with-current-buffer-copy' macro prepares that copy.
+;; `org-export-with-buffer-copy' macro prepares that copy.
 ;;
 ;; File inclusion is taken care of by
 ;; `org-export-expand-include-keyword' and
@@ -2588,7 +2628,7 @@ Return code as a string."
       ;; Initialize communication channel with original buffer
       ;; attributes, unavailable in its copy.
       (let ((info (org-export--get-buffer-attributes)) tree)
-	(org-export-with-current-buffer-copy
+	(org-export-with-buffer-copy
 	 ;; Run first hook with current back-end as argument.
 	 (run-hook-with-args 'org-export-before-processing-hook backend)
 	 ;; Update communication channel and get parse tree.  Buffer
@@ -2645,11 +2685,14 @@ Return code as a string."
 		      (or (org-export-data tree info) "")))
 	       (template (cdr (assq 'template
 				    (plist-get info :translate-alist))))
-	       (output (org-export-filter-apply-functions
-			(plist-get info :filter-final-output)
-			(if (or (not (functionp template)) body-only) body
-			  (funcall template body info))
-			info)))
+	       ;; Remove all text properties since they cannot be
+	       ;; retrieved from an external process.
+	       (output (org-no-properties
+			(org-export-filter-apply-functions
+			 (plist-get info :filter-final-output)
+			 (if (or (not (functionp template)) body-only) body
+			   (funcall template body info))
+			 info))))
 	  ;; Maybe add final OUTPUT to kill ring, then return it.
 	  (when (and org-export-copy-to-kill-ring (org-string-nw-p output))
 	    (org-kill-new output))
@@ -2752,32 +2795,94 @@ determined."
      ((file-name-absolute-p base-name) (concat base-name extension))
      (t (concat (file-name-as-directory ".") base-name extension)))))
 
-(defmacro org-export-with-current-buffer-copy (&rest body)
+(defun org-export-copy-buffer ()
+  "Return a copy of the current buffer.
+The copy preserves Org buffer-local variables, visibility and
+narrowing."
+  (let ((copy-buffer-fun (org-export--generate-copy-script (current-buffer)))
+	(new-buf (generate-new-buffer (buffer-name))))
+    (with-current-buffer new-buf
+      (funcall copy-buffer-fun)
+      (set-buffer-modified-p nil))
+    new-buf))
+
+(defmacro org-export-with-buffer-copy (&rest body)
   "Apply BODY in a copy of the current buffer.
+The copy preserves local variables, visibility and contents of
+the original buffer.  Point is at the beginning of the buffer
+when BODY is applied."
+  (declare (debug t))
+  (org-with-gensyms (buf-copy)
+    `(let ((,buf-copy (org-export-copy-buffer)))
+       (unwind-protect
+	   (with-current-buffer ,buf-copy
+	     (goto-char (point-min))
+	     (progn ,@body))
+	 (and (buffer-live-p ,buf-copy)
+	      ;; Kill copy without confirmation.
+	      (progn (with-current-buffer ,buf-copy
+		       (restore-buffer-modified-p nil))
+		     (kill-buffer ,buf-copy)))))))
 
-The copy preserves local variables and visibility of the original
-buffer.
+(defun org-export--generate-copy-script (buffer)
+  "Generate a function duplicating BUFFER.
 
-Point is at buffer's beginning when BODY is applied."
-  (declare (debug (body)))
-  (org-with-gensyms (original-buffer offset buffer-string overlays region)
-    `(let* ((,original-buffer (current-buffer))
-	    (,region (list (point-min) (point-max)))
-	    (,buffer-string (org-with-wide-buffer (buffer-string)))
-	    (,overlays (mapcar 'copy-overlay (apply 'overlays-in ,region))))
-       (with-temp-buffer
-	 (let ((buffer-invisibility-spec nil))
-	   (org-clone-local-variables
-	    ,original-buffer
-	    "^\\(org-\\|orgtbl-\\|major-mode$\\|outline-\\(regexp\\|level\\)$\\)")
-	   (insert ,buffer-string)
-	   (apply 'narrow-to-region ,region)
-	   (mapc (lambda (ov)
-		   (move-overlay
-		    ov (overlay-start ov) (overlay-end ov) (current-buffer)))
-		 ,overlays)
-	   (goto-char (point-min))
-	   (progn ,@body))))))
+The copy will preserve local variables, visibility, contents and
+narrowing of the original buffer.  If a region was active in
+BUFFER, contents will be narrowed to that region instead.
+
+The resulting function can be eval'ed at a later time, from
+another buffer, effectively cloning the original buffer there."
+  (with-current-buffer buffer
+    `(lambda ()
+       (let ((inhibit-modification-hooks t))
+	 ;; Buffer local variables.
+	 ,@(let (local-vars)
+	     (mapc
+	      (lambda (entry)
+		(when (consp entry)
+		  (let ((var (car entry))
+			(val (cdr entry)))
+		    (and (not (eq var 'org-font-lock-keywords))
+			 (or (memq var
+				   '(major-mode default-directory
+						buffer-file-name outline-level
+						outline-regexp
+						buffer-invisibility-spec))
+			     (string-match "^\\(org-\\|orgtbl-\\)"
+					   (symbol-name var)))
+			 ;; Skip unreadable values, as they cannot be
+			 ;; sent to external process.
+			 (or (not val) (ignore-errors (read (format "%S" val))))
+			 (push `(set (make-local-variable (quote ,var))
+				     (quote ,val))
+			       local-vars)))))
+	      (buffer-local-variables (buffer-base-buffer)))
+	     local-vars)
+	 ;; Whole buffer contents.
+	 (insert
+	  ,(org-with-wide-buffer
+	    (buffer-substring-no-properties
+	     (point-min) (point-max))))
+	 ;; Narrowing.
+	 ,(if (org-region-active-p)
+	      `(narrow-to-region ,(region-beginning) ,(region-end))
+	    `(narrow-to-region ,(point-min) ,(point-max)))
+	 ;; Current position of point.
+	 (goto-char ,(point))
+	 ;; Overlays with invisible property.
+	 ,@(let (ov-set)
+	     (mapc
+	      (lambda (ov)
+		(let ((invis-prop (overlay-get ov 'invisible)))
+		  (when invis-prop
+		    (push `(overlay-put
+			    (make-overlay ,(overlay-start ov)
+					  ,(overlay-end ov))
+			    'invisible (quote ,invis-prop))
+			  ov-set))))
+	      (overlays-in (point-min) (point-max)))
+	     ov-set)))))
 
 (defun org-export-expand-include-keyword (&optional included dir)
   "Expand every include keyword in buffer.
@@ -2935,7 +3040,7 @@ This function will return an error if the current buffer is
 visiting a file."
   ;; Get a pristine copy of current buffer so Babel references can be
   ;; properly resolved.
-  (let* (clone-buffer-hook (reference (clone-buffer)))
+  (let ((reference (org-export-copy-buffer)))
     (unwind-protect (let ((org-current-export-file reference))
 		      (org-export-blocks-preprocess))
       (kill-buffer reference))))
@@ -4855,6 +4960,253 @@ to `:default' encoding. If it fails, return S."
 
 
 
+;;; Asynchronous Export
+;;
+;; `org-export-async-start' is the entry point for asynchronous
+;; export.  It recreates current buffer (including visibility,
+;; narrowing and visited file) in an external Emacs process, and
+;; evaluates a command there.  It then applies a function on the
+;; returned results in the current process.
+;;
+;; Asynchronously generated results are never displayed directly.
+;; Instead, they are stored in `org-export-stack-contents'.  They can
+;; then be retrieved by calling `org-export-stack'.
+;;
+;; Export Stack is viewed through a dedicated major mode
+;;`org-export-stack-mode' and tools: `org-export--stack-refresh',
+;;`org-export--stack-delete', `org-export--stack-view' and
+;;`org-export--stack-clear'.
+;;
+;; For back-ends, `org-export-add-to-stack' add a new source to stack.
+;; It should used whenever `org-export-async-start' is called.
+
+(defmacro org-export-async-start  (fun &rest body)
+  "Call function FUN on the results returned by BODY evaluation.
+
+BODY evaluation happens in an asynchronous process, from a buffer
+which is an exact copy of the current one.
+
+Use `org-export-add-to-stack' in FUN in order to register results
+in the stack.  Examples for, respectively a temporary buffer and
+a file are:
+
+  \(org-export-async-start
+      \(lambda (output)
+        \(with-current-buffer (get-buffer-create \"*Org BACKEND Export*\")
+        \(erase-buffer)
+        \(insert output)
+        \(goto-char (point-min))
+        \(org-export-add-to-stack (current-buffer) 'backend)))
+    `(org-export-as 'backend ,subtreep ,visible-only ,body-only ',ext-plist))
+
+and
+
+  \(org-export-async-start
+      \(lambda (f) (org-export-add-to-stack f 'backend))
+    `(expand-file-name
+      \(org-export-to-file
+       'backend ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))"
+  (declare (indent 1) (debug t))
+  (org-with-gensyms (process temp-file copy-fun proc-buffer handler)
+    ;; Write the full sexp evaluating BODY in a copy of the current
+    ;; buffer to a temporary file, as it may be too long for program
+    ;; args in `start-process'.
+    `(with-temp-message "Initializing asynchronous export process"
+       (let ((,copy-fun (org-export--generate-copy-script (current-buffer)))
+	     (,temp-file (make-temp-file "org-export-process")))
+	 (with-temp-file ,temp-file
+	   (insert
+	    (format
+	     "%S"
+	     `(with-temp-buffer
+		,(when org-export-async-debug '(setq debug-on-error t))
+		;; Initialize `org-mode' in the external process.
+		(org-mode)
+		;; Re-create current buffer there.
+		(funcall ,,copy-fun)
+		(restore-buffer-modified-p nil)
+		;; Sexp to evaluate in the buffer.
+		(print (progn ,,@body))))))
+	 ;; Start external process.
+	 (let* ((process-connection-type nil)
+		(,proc-buffer (generate-new-buffer-name "*Org Export Process*"))
+		(,process
+		 (start-process
+		  "org-export-process" ,proc-buffer
+		  (expand-file-name invocation-name invocation-directory)
+		  "-Q" "--batch"
+		  "-l" org-export-async-init-file
+		  "-l" ,temp-file)))
+	   ;; Register running process in stack.
+	   (org-export-add-to-stack (get-buffer ,proc-buffer) nil ,process)
+	   ;; Set-up sentinel in order to catch results.
+	   (set-process-sentinel
+	    ,process
+	    (let ((handler #',fun))
+	      `(lambda (p status)
+		 (let ((proc-buffer (process-buffer p)))
+		   (when (eq (process-status p) 'exit)
+		     (unwind-protect
+			 (if (zerop (process-exit-status p))
+			     (unwind-protect
+				 (let ((results
+					(with-current-buffer proc-buffer
+					  (goto-char (point-max))
+					  (backward-sexp)
+					  (read (current-buffer)))))
+				   (funcall ,handler results))
+			       (unless org-export-async-debug
+				 (and (get-buffer proc-buffer)
+				      (kill-buffer proc-buffer))))
+			   (org-export-add-to-stack proc-buffer nil p)
+			   (ding)
+			   (message "Process '%s' exited abnormally" p))
+		       (unless org-export-async-debug
+			 (delete-file ,,temp-file)))))))))))))
+
+(defun org-export-add-to-stack (source backend &optional process)
+  "Add a new result to export stack if not present already.
+
+SOURCE is a buffer or a file name containing export results.
+BACKEND is a symbol representing export back-end used to generate
+it.
+
+Entries already pointing to SOURCE and unavailable entries are
+removed beforehand.  Return the new stack."
+  (setq org-export-stack-contents
+	(cons (list source backend (or process (current-time)))
+	      (org-export--stack-remove source))))
+
+(defun org-export-stack ()
+  "Menu for asynchronous export results and running processes."
+  (interactive)
+  (let ((buffer (get-buffer-create "*Org Export Stack*")))
+    (set-buffer buffer)
+    (when (zerop (buffer-size)) (org-export-stack-mode))
+    (org-export--stack-refresh)
+    (pop-to-buffer buffer))
+  (message "Type \"q\" to quit, \"?\" for help"))
+
+(defun org-export--stack-source-at-point ()
+  "Return source from export results at point in stack."
+  (let ((source (car (nth (1- (org-current-line)) org-export-stack-contents))))
+    (if (not source) (error "Source unavailable, please refresh buffer")
+      (let ((source-name (if (stringp source) source (buffer-name source))))
+	(if (save-excursion
+	      (beginning-of-line)
+	      (looking-at (concat ".* +" (regexp-quote source-name) "$")))
+	    source
+	  ;; SOURCE is not consistent with current line.  The stack
+	  ;; view is outdated.
+	  (error "Source unavailable; type `g' to update buffer"))))))
+
+(defun org-export--stack-clear ()
+  "Remove all entries from export stack."
+  (interactive)
+  (setq org-export-stack-contents nil))
+
+(defun org-export--stack-refresh (&rest dummy)
+  "Refresh the asynchronous export stack.
+DUMMY is ignored.  Unavailable sources are removed from the list.
+Return the new stack."
+  (let ((inhibit-read-only t))
+    (org-preserve-lc
+     (erase-buffer)
+     (insert (concat
+	      (let ((counter 0))
+		(mapconcat
+		 (lambda (entry)
+		   (let ((proc-p (processp (nth 2 entry))))
+		     (concat
+		      ;; Back-end.
+		      (format " %-12s  " (or (nth 1 entry) ""))
+		      ;; Age.
+		      (let ((data (nth 2 entry)))
+			(if proc-p (format " %6s  " (process-status data))
+			  ;; Compute age of the results.
+			  (org-format-seconds
+			   "%4h:%.2m  "
+			   (float-time (time-since data)))))
+		      ;; Source.
+		      (format " %s"
+			      (let ((source (car entry)))
+				(if (stringp source) source
+				  (buffer-name source)))))))
+		 ;; Clear stack from exited processes, dead buffers or
+		 ;; non-existent files.
+		 (setq org-export-stack-contents
+		       (org-remove-if-not
+			(lambda (el)
+			  (if (processp (nth 2 el))
+			      (buffer-live-p (process-buffer (nth 2 el)))
+			    (let ((source (car el)))
+			      (if (bufferp source) (buffer-live-p source)
+				(file-exists-p source)))))
+			org-export-stack-contents)) "\n")))))))
+
+(defun org-export--stack-remove (&optional source)
+  "Remove export results at point from stack.
+If optional argument SOURCE is non-nil, remove it instead."
+  (interactive)
+  (let ((source (or source (org-export--stack-source-at-point))))
+    (setq org-export-stack-contents
+	  (org-remove-if (lambda (el) (equal (car el) source))
+			 org-export-stack-contents))))
+
+(defun org-export--stack-view ()
+  "View export results at point in stack."
+  (interactive)
+  (let ((source (org-export--stack-source-at-point)))
+    (cond ((processp source)
+	   (org-switch-to-buffer-other-window (process-buffer source)))
+	  ((bufferp source) (org-switch-to-buffer-other-window source))
+	  (t (org-open-file source)))))
+
+(defconst org-export-stack-mode-map
+  (let ((km (make-sparse-keymap)))
+    (define-key km " " 'next-line)
+    (define-key km "n" 'next-line)
+    (define-key km "\C-n" 'next-line)
+    (define-key km [down] 'next-line)
+    (define-key km "p" 'previous-line)
+    (define-key km "\C-p" 'previous-line)
+    (define-key km "\C-?" 'previous-line)
+    (define-key km [up] 'previous-line)
+    (define-key km "C" 'org-export--stack-clear)
+    (define-key km "v" 'org-export--stack-view)
+    (define-key km (kbd "RET") 'org-export--stack-view)
+    (define-key km "d" 'org-export--stack-remove)
+    km)
+  "Keymap for Org Export Stack.")
+
+(define-derived-mode org-export-stack-mode special-mode "Org-Stack"
+  "Mode for displaying asynchronous export stack.
+
+Type \\[org-export-stack] to visualize the asynchronous export
+stack.
+
+In an Org Export Stack buffer, use \\[org-export--stack-view] to view export output
+on current line, \\[org-export--stack-remove] to remove it from the stack and \\[org-export--stack-clear] to clear 
+stack completely.
+
+Removal entries in an Org Export Stack buffer doesn't affect
+files or buffers, only view in the stack.
+
+\\{org-export-stack-mode-map}"
+  (abbrev-mode 0)
+  (auto-fill-mode 0)
+  (setq buffer-read-only t
+	buffer-undo-list t
+	truncate-lines t
+	header-line-format
+	'(:eval
+	  (format "  %-12s | %6s | %s" "Back-End" "Age" "Source")))
+  (add-hook 'post-command-hook 'org-export--stack-refresh nil t)
+  (set (make-local-variable 'revert-buffer-function)
+       'org-export--stack-refresh))
+
+
+
 ;;; The Dispatcher
 ;;
 ;; `org-export-dispatch' is the standard interactive way to start an
@@ -4874,38 +5226,49 @@ to switch to one or the other.
 
 When called with C-u prefix ARG, repeat the last export action,
 with the same set of options used back then, on the current
-buffer."
+buffer.
+
+When called with a double universal argument, display the
+asynchronous export stack directly."
   (interactive "P")
-  (let* ((input (or (and arg org-export-dispatch-last-action)
-		    (save-window-excursion
-		      (unwind-protect
-			  ;; Store this export command.
-			  (setq org-export-dispatch-last-action
-				(org-export-dispatch-ui
-				 (list org-export-initial-scope)
-				 nil
-				 org-export-dispatch-use-expert-ui))
-			(and (get-buffer "*Org Export Dispatcher*")
-			     (kill-buffer "*Org Export Dispatcher*"))))))
+  (let* ((input
+	  (cond ((equal arg '(16)) '(stack))
+		((and arg org-export-dispatch-last-action))
+		(t (save-window-excursion
+		     (unwind-protect
+			 ;; Store this export command.
+			 (setq org-export-dispatch-last-action
+			       (org-export-dispatch-ui
+				(list org-export-initial-scope
+				      (and org-export-in-background 'async))
+				nil
+				org-export-dispatch-use-expert-ui))
+		       (and (get-buffer "*Org Export Dispatcher*")
+			    (kill-buffer "*Org Export Dispatcher*")))))))
 	 (action (car input))
 	 (optns (cdr input)))
     (case action
       ;; First handle special hard-coded actions.
-      (publish-current-file (org-e-publish-current-file (memq 'force optns)))
+      (stack (org-export-stack))
+      (publish-current-file
+       (org-e-publish-current-file (memq 'force optns) (memq 'async optns)))
       (publish-current-project
-       (org-e-publish-current-project (memq 'force optns)))
+       (org-e-publish-current-project (memq 'force optns) (memq 'async optns)))
       (publish-choose-project
        (org-e-publish (assoc (org-icompleting-read
 			      "Publish project: "
 			      org-e-publish-project-alist nil t)
 			     org-e-publish-project-alist)
-		      (memq 'force optns)))
-      (publish-all (org-e-publish-all (memq 'force optns)))
-      (otherwise
-       (funcall action
-		(memq 'subtree optns)
-		(memq 'visible optns)
-		(memq 'body optns))))))
+		      (memq 'force optns)
+		      (memq 'async optns)))
+      (publish-all (org-e-publish-all (memq 'force optns) (memq 'async optns)))
+      (otherwise (funcall action
+			  ;; Return a symbol instead of a list to ease
+			  ;; asynchronous export macro use.
+			  (and (memq 'async optns) t)
+			  (and (memq 'subtree optns) t)
+			  (and (memq 'visible optns) t)
+			  (and (memq 'body optns) t))))))
 
 (defun org-export-dispatch-ui (options first-key expertp)
   "Handle interface for `org-export-dispatch'.
@@ -4916,6 +5279,7 @@ export.  It can contain any of the following symbols:
 `subtree' restricts export to current subtree
 `visible' restricts export to visible part of buffer.
 `force'   force publishing files.
+`async'   use asynchronous export process
 
 FIRST-KEY is the key pressed to select the first level menu.  It
 is nil when this menu hasn't been selected yet.
@@ -4951,10 +5315,10 @@ back to standard interface."
 			       ((numberp key-b) t)))))
 		    (lambda (a b) (< (car a) (car b)))))
 	 ;; Compute a list of allowed keys based on the first key
-	 ;; pressed, if any.  Some keys (?1, ?2, ?3, ?4 and ?q) are
-	 ;; always available.
+	 ;; pressed, if any.  Some keys (?1, ?2, ?3, ?4, ?5 and ?q)
+	 ;; are always available.
 	 (allowed-keys
-	  (nconc (list ?1 ?2 ?3 ?4)
+	  (nconc (list ?1 ?2 ?3 ?4 ?5)
 		 (if (not first-key) (org-uniquify (mapcar 'car backends))
 		   (let (sub-menu)
 		     (dolist (backend backends (sort (mapcar 'car sub-menu) '<))
@@ -4962,6 +5326,7 @@ back to standard interface."
 			 (setq sub-menu (append (nth 2 backend) sub-menu))))))
 		 (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
 		       ((not first-key) (list ?P)))
+		 (list ?&)
 		 (when expertp (list ??))
 		 (list ?q)))
 	 ;; Build the help menu for standard UI.
@@ -4971,7 +5336,8 @@ back to standard interface."
 	     ;; Options are hard-coded.
 	     (format "Options
     [%s] Body only:    %s       [%s] Visible only:     %s
-    [%s] Export scope: %s   [%s] Force publishing: %s\n"
+    [%s] Export scope: %s   [%s] Force publishing: %s
+    [%s] Asynchronous export: %s\n"
 		     (funcall fontify-key "1" t)
 		     (if (memq 'body options) "On " "Off")
 		     (funcall fontify-key "2" t)
@@ -4979,7 +5345,9 @@ back to standard interface."
 		     (funcall fontify-key "3" t)
 		     (if (memq 'subtree options) "Subtree" "Buffer ")
 		     (funcall fontify-key "4" t)
-		     (if (memq 'force options) "On " "Off"))
+		     (if (memq 'force options) "On " "Off")
+		     (funcall fontify-key "5" t)
+		     (if (memq 'async options) "On " "Off"))
 	     ;; Display registered back-end entries.  When a key
 	     ;; appears for the second time, do not create another
 	     ;; entry, but append its sub-menu to existing menu.
@@ -5020,6 +5388,7 @@ back to standard interface."
 		     (funcall fontify-key "p" ?P)
 		     (funcall fontify-key "x" ?P)
 		     (funcall fontify-key "a" ?P))
+	     (format "\[%s] Export stack\n" (funcall fontify-key "&" t))
 	     (format "\[%s] %s"
 		     (funcall fontify-key "q" t)
 		     (if first-key "Main menu" "Exit")))))
@@ -5028,11 +5397,12 @@ back to standard interface."
 	 (expert-prompt
 	  (when expertp
 	    (format
-	     "Export command (Options: %s%s%s%s) [%s]: "
+	     "Export command (Options: %s%s%s%s%s) [%s]: "
 	     (if (memq 'body options) (funcall fontify-key "b" t) "-")
 	     (if (memq 'visible options) (funcall fontify-key "v" t) "-")
 	     (if (memq 'subtree options) (funcall fontify-key "s" t) "-")
 	     (if (memq 'force options) (funcall fontify-key "f" t) "-")
+	     (if (memq 'async options) (funcall fontify-key "a" t) "-")
 	     (concat allowed-keys)))))
     ;; With expert UI, just read key with a fancy prompt.  In standard
     ;; UI, display an intrusive help buffer.
@@ -5085,11 +5455,13 @@ options as CDR."
      ;; Help key: Switch back to standard interface if
      ;; expert UI was active.
      ((eq key ??) (org-export-dispatch-ui options first-key nil))
+     ;; Switch to asynchronous export stack.
+     ((eq key ?&) '(stack))
      ;; Toggle export options.
-     ((memq key '(?1 ?2 ?3 ?4))
+     ((memq key '(?1 ?2 ?3 ?4 ?5))
       (org-export-dispatch-ui
        (let ((option (case key (?1 'body) (?2 'visible) (?3 'subtree)
-			   (?4 'force))))
+			   (?4 'force) (?5 'async))))
 	 (if (memq option options) (remq option options)
 	   (cons option options)))
        first-key expertp))

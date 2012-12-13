@@ -91,8 +91,9 @@
   (?o "Export to ODT"
       ((?o "As ODT file" org-e-odt-export-to-odt)
        (?O "As ODT file and open"
-	   (lambda (s v b)
-	     (org-open-file (org-e-odt-export-to-odt s v b) 'system)))))
+	   (lambda (a s v b)
+	     (if a (org-e-odt-export-to-odt t s v)
+	       (org-open-file (org-e-odt-export-to-odt nil s v) 'system))))))
   :options-alist
   ((:odt-styles-file "ODT_STYLES_FILE" nil nil t)
    (:LaTeX-fragments nil "LaTeX" org-export-with-LaTeX-fragments)))
@@ -3828,14 +3829,17 @@ formula file."
 ;;;; Export to OpenDocument Text
 
 ;;;###autoload
-(defun org-e-odt-export-to-odt
-  (&optional subtreep visible-only body-only ext-plist)
+(defun org-e-odt-export-to-odt (&optional async subtreep visible-only ext-plist)
   "Export current buffer to a HTML file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -3844,31 +3848,52 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-When optional argument BODY-ONLY is non-nil, only write code
-between \"\\begin{document}\" and \"\\end{document}\".
-
 EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
 Return output file's name."
   (interactive)
-  (org-e-odt--export-wrap
-   (org-export-output-file-name ".odt" subtreep)
-   (let* ((org-e-odt-embedded-images-count 0)
-	  (org-e-odt-embedded-formulas-count 0)
-	  (org-e-odt-automatic-styles nil)
-	  (org-e-odt-object-counters nil)
-	  ;; Let `htmlfontify' know that we are interested in collecting
-	  ;; styles.
-	  (hfy-user-sheet-assoc nil))
-     ;; Initialize content.xml and kick-off the export process.
-     (let ((out-buf (progn
-		      (require 'nxml-mode)
-		      (let ((nxml-auto-insert-xml-declaration-flag nil))
-			(find-file-noselect
-			 (concat org-e-odt-zip-dir "content.xml") t)))))
-       (org-export-to-buffer 'e-odt out-buf subtreep visible-only body-only)))))
+  (let ((outfile (org-export-output-file-name ".odt" subtreep)))
+    (if async
+	(org-export-async-start (lambda (f) (org-export-add-to-stack f 'e-odt))
+	  `(expand-file-name
+	    (org-e-odt--export-wrap
+	     ,outfile
+	     (let* ((org-e-odt-embedded-images-count 0)
+		    (org-e-odt-embedded-formulas-count 0)
+		    (org-e-odt-automatic-styles nil)
+		    (org-e-odt-object-counters nil)
+		    ;; Let `htmlfontify' know that we are interested in
+		    ;; collecting styles.
+		    (hfy-user-sheet-assoc nil))
+	       ;; Initialize content.xml and kick-off the export
+	       ;; process.
+	       (let ((out-buf
+		      (progn
+			(require 'nxml-mode)
+			(let ((nxml-auto-insert-xml-declaration-flag nil))
+			  (find-file-noselect
+			   (concat org-e-odt-zip-dir "content.xml") t)))))
+		 (org-export-to-buffer
+		  'e-odt out-buf ,subtreep ,visible-only nil ',ext-plist))))))
+      (org-e-odt--export-wrap
+       outfile
+       (let* ((org-e-odt-embedded-images-count 0)
+	      (org-e-odt-embedded-formulas-count 0)
+	      (org-e-odt-automatic-styles nil)
+	      (org-e-odt-object-counters nil)
+	      ;; Let `htmlfontify' know that we are interested in collecting
+	      ;; styles.
+	      (hfy-user-sheet-assoc nil))
+	 ;; Initialize content.xml and kick-off the export process.
+	 (let ((out-buf (progn
+			  (require 'nxml-mode)
+			  (let ((nxml-auto-insert-xml-declaration-flag nil))
+			    (find-file-noselect
+			     (concat org-e-odt-zip-dir "content.xml") t)))))
+	   (org-export-to-buffer
+	    'e-odt out-buf subtreep visible-only nil ext-plist)))))))
 
 
 ;;;; Convert between OpenDocument and other formats

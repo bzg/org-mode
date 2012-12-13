@@ -100,7 +100,9 @@
       ((?g "As GROFF file" org-e-groff-export-to-groff)
        (?p "As PDF file" org-e-groff-export-to-pdf)
        (?o "As PDF file and open"
-	   (lambda (s v b) (org-open-file (org-e-groff-export-to-pdf s v b))))))
+	   (lambda (a s v b)
+	     (if a (org-e-groff-export-to-pdf t s v b)
+	       (org-open-file (org-e-groff-export-to-pdf nil s v b)))))))
   :options-alist
   ((:groff-class "GROFF_CLASS" nil org-e-groff-default-class t)
    (:groff-class-options "GROFF_CLASS_OPTIONS" nil nil t)
@@ -1886,13 +1888,17 @@ contextual information."
 ;;; Interactive functions
 
 (defun org-e-groff-export-to-groff
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a Groff file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1907,20 +1913,33 @@ file-local settings.
 
 Return output file's name."
   (interactive)
-  (setq org-e-groff-registered-references nil)
-  (setq org-e-groff-special-content nil)
   (let ((outfile (org-export-output-file-name ".groff" subtreep)))
-    (org-export-to-file
-     'e-groff outfile subtreep visible-only body-only ext-plist)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-groff))
+	  (let ((org-e-groff-registered-references nil)
+		(org-e-groff-special-content nil))
+	    `(expand-file-name
+	      (org-export-to-file
+	       'e-groff ,outfile ,subtreep ,visible-only ,body-only
+	       ',ext-plist))))
+      (let ((org-e-groff-registered-references nil)
+	    (org-e-groff-special-content nil))
+	(org-export-to-file
+	 'e-groff outfile subtreep visible-only body-only ext-plist)))))
 
 (defun org-e-groff-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to Groff then process through to PDF.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1935,8 +1954,18 @@ file-local settings.
 
 Return PDF file's name."
   (interactive)
-  (org-e-groff-compile
-   (org-e-groff-export-to-groff subtreep visible-only body-only ext-plist)))
+  (if async
+      (let ((outfile (org-export-output-file-name ".groff" subtreep)))
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-groff))
+	  `(expand-file-name
+	    (org-e-groff-compile
+	     (org-export-to-file
+	      'e-groff ,outfile ,subtreep ,visible-only ,body-only
+	      ',ext-plist)))))
+    (org-e-groff-compile
+     (org-e-groff-export-to-groff
+      nil subtreep visible-only body-only ext-plist))))
 
 (defun org-e-groff-compile (file)
   "Compile a Groff file.

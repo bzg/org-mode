@@ -273,8 +273,9 @@ brackets.  Return overlay specification, as a string, or nil."
        (?b "As TEX file (Beamer)" org-e-beamer-export-to-latex)
        (?P "As PDF file (Beamer)" org-e-beamer-export-to-pdf)
        (?O "As PDF file and open (Beamer)"
-	   (lambda (s v b)
-	     (org-open-file (org-e-beamer-export-to-pdf s v b))))))
+	   (lambda (a s v b)
+	     (if a (org-e-beamer-export-to-pdf t s v b)
+	       (org-open-file (org-e-beamer-export-to-pdf nil s v b)))))))
   :options-alist
   ((:beamer-theme "BEAMER_THEME" nil org-e-beamer-theme)
    (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
@@ -980,13 +981,17 @@ value."
 
 ;;;###autoload
 (defun org-e-beamer-export-as-latex
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a Beamer buffer.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1006,22 +1011,38 @@ Export is done in a buffer named \"*Org E-BEAMER Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (let ((outbuf (org-export-to-buffer
-		 'e-beamer "*Org E-BEAMER Export*"
-		 subtreep visible-only body-only ext-plist)))
-    (with-current-buffer outbuf (LaTeX-mode))
-    (when org-export-show-temporary-export-buffer
-      (switch-to-buffer-other-window outbuf))))
+  (if async
+      (org-export-async-start
+	  (lambda (output)
+	    (with-current-buffer (get-buffer-create "*Org E-BEAMER Export*")
+	      (erase-buffer)
+	      (insert output)
+	      (goto-char (point-min))
+	      (LaTeX-mode)
+	      (when org-export-show-temporary-export-buffer
+		(org-export-add-to-stack (current-buffer) 'e-beamer))))
+	`(org-export-as 'e-beamer ,subtreep ,visible-only ,body-only
+			',ext-plist))
+    (let ((outbuf (org-export-to-buffer
+		   'e-beamer "*Org E-BEAMER Export*"
+		   subtreep visible-only body-only ext-plist)))
+      (with-current-buffer outbuf (LaTeX-mode))
+      (when org-export-show-temporary-export-buffer
+	(switch-to-buffer-other-window outbuf)))))
 
 ;;;###autoload
 (defun org-e-beamer-export-to-latex
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a Beamer presentation (tex).
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1040,18 +1061,29 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".tex" subtreep)))
-    (org-export-to-file
-     'e-beamer outfile subtreep visible-only body-only ext-plist)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-beamer))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'e-beamer ,outfile ,subtreep ,visible-only ,body-only
+	     ',ext-plist)))
+      (org-export-to-file
+       'e-beamer outfile subtreep visible-only body-only ext-plist))))
 
 ;;;###autoload
 (defun org-e-beamer-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a Beamer presentation (PDF).
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1069,8 +1101,18 @@ file-local settings.
 
 Return PDF file's name."
   (interactive)
-  (org-e-latex-compile
-   (org-e-beamer-export-to-latex subtreep visible-only body-only ext-plist)))
+  (if async
+      (let ((outfile (org-export-output-file-name ".tex" subtreep)))
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-beamer))
+	  `(expand-file-name
+	    (org-e-latex-compile
+	     (org-export-to-file
+	      'e-beamer ,outfile ,subtreep ,visible-only ,body-only
+	      ',ext-plist)))))
+    (org-e-latex-compile
+     (org-e-beamer-export-to-latex
+      nil subtreep visible-only body-only ext-plist))))
 
 ;;;###autoload
 (defun org-e-beamer-select-environment ()

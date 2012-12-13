@@ -156,7 +156,9 @@
        (?l "As TEX file" org-e-latex-export-to-latex)
        (?p "As PDF file" org-e-latex-export-to-pdf)
        (?o "As PDF file and open"
-	   (lambda (s v b) (org-open-file (org-e-latex-export-to-pdf s v b))))))
+	   (lambda (a s v b)
+	     (if a (org-e-latex-export-to-pdf t s v b)
+	       (org-open-file (org-e-latex-export-to-pdf nil s v b)))))))
   :options-alist ((:date "DATE" nil org-e-latex-date-format t)
 		  (:latex-class "LATEX_CLASS" nil org-e-latex-default-class t)
 		  (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
@@ -2639,13 +2641,17 @@ contextual information."
 
 ;;;###autoload
 (defun org-e-latex-export-as-latex
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a LaTeX buffer.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -2665,22 +2671,37 @@ Export is done in a buffer named \"*Org E-LATEX Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (let ((outbuf (org-export-to-buffer
-		 'e-latex "*Org E-LATEX Export*"
-		 subtreep visible-only body-only ext-plist)))
-    (with-current-buffer outbuf (LaTeX-mode))
-    (when org-export-show-temporary-export-buffer
-      (switch-to-buffer-other-window outbuf))))
+  (if async
+      (org-export-async-start
+	  (lambda (output)
+	    (with-current-buffer (get-buffer-create "*Org E-LATEX Export*")
+	      (erase-buffer)
+	      (insert output)
+	      (goto-char (point-min))
+	      (LaTeX-mode)
+	      (org-export-add-to-stack (current-buffer) 'e-latex)))
+	`(org-export-as 'e-latex ,subtreep ,visible-only ,body-only
+			',ext-plist))
+    (let ((outbuf
+	   (org-export-to-buffer 'e-latex "*Org E-LATEX Export*"
+				 subtreep visible-only body-only ext-plist)))
+      (with-current-buffer outbuf (LaTeX-mode))
+      (when org-export-show-temporary-export-buffer
+	(switch-to-buffer-other-window outbuf)))))
 
 ;;;###autoload
 (defun org-e-latex-export-to-latex
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a LaTeX file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -2699,18 +2720,28 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".tex" subtreep)))
-    (org-export-to-file
-     'e-latex outfile subtreep visible-only body-only ext-plist)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-latex))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'e-latex ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))
+      (org-export-to-file
+       'e-latex outfile subtreep visible-only body-only ext-plist))))
 
 ;;;###autoload
 (defun org-e-latex-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to LaTeX then process through to PDF.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -2728,8 +2759,18 @@ file-local settings.
 
 Return PDF file's name."
   (interactive)
-  (org-e-latex-compile
-   (org-e-latex-export-to-latex subtreep visible-only body-only ext-plist)))
+  (if async
+      (let ((outfile (org-export-output-file-name ".tex" subtreep)))
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-latex))
+	  `(expand-file-name
+	    (org-e-latex-compile
+	     (org-export-to-file
+	      'e-latex ,outfile ,subtreep ,visible-only ,body-only
+	      ',ext-plist)))))
+    (org-e-latex-compile
+     (org-e-latex-export-to-latex
+      nil subtreep visible-only body-only ext-plist))))
 
 (defun org-e-latex-compile (texfile)
   "Compile a TeX file.
