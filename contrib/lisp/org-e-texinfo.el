@@ -1199,9 +1199,12 @@ INFO is a plist holding contextual information.  See
 	     (format "@uref{file://%s}" destination)))
 	  ;; LINK points to an headline.  Use the headline as the NODE target
 	  (headline
-	   (format "@ref{%s}"
+	   (format "@ref{%s,%s}"
 		   (org-export-data
-		    (org-element-property :title destination) info)))
+		    (or
+		     (org-element-property :texinfo-menu-title destination)
+		     (org-element-property :title destination)) info)
+		   (or desc "")))
 	  (otherwise
 	   (let ((path (org-export-solidify-link-text path)))
 	     (if (not desc) (format "@ref{%s}" path)
@@ -1221,9 +1224,12 @@ INFO is a plist holding contextual information.  See
 	     (format "@uref{file://%s}" destination)))
 	  ;; LINK points to an headline.  Use the headline as the NODE target
 	  (headline
-	   (format "@ref{%s}"
+	   (format "@ref{%s,%s}"
 		   (org-export-data
-		    (org-element-property :title destination) info)))
+		    (or
+		     (org-element-property :texinfo-menu-title destination)
+		     (org-element-property :title destination)) info)
+		   (or desc "")))
 	  (otherwise
 	   (let ((path (org-export-solidify-link-text path)))
 	     (if (not desc) (format "@ref{%s}" path)
