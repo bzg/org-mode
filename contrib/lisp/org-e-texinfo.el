@@ -588,8 +588,6 @@ menu using `org-e-texinfo--format-menu'."
 	       (menu-entry (if (string= "" menu-title) title menu-title))
 	       (len (length menu-entry))
 	       (output (list len menu-entry descr)))
-	  (message "%S" menu-title)
-	  ;; (message "%s" headline)
 	  output)))
 
 (defun org-e-texinfo--menu-headlines (headline info)
