@@ -18959,12 +18959,13 @@ See the individual commands for more information."
 (defun org-edit-special (&optional arg)
   "Call a special editor for the stuff at point.
 When at a table, call the formula editor with `org-table-edit-formulas'.
-When at the first line of an src example, call `org-edit-src-code'.
-When in an #+include line, visit the include file.  Otherwise call
-`ffap' to visit the file at point."
+When in a source code block, call `org-edit-src-code'.
+When in an #+include line, visit the included file.
+On a link, call `ffap' to visit the link at point.
+Otherwise, return a user error."
   (interactive)
   ;; possibly prep session before editing source
-  (when arg
+  (when (and (org-in-src-block-p) arg)
     (let* ((info (org-babel-get-src-block-info))
            (lang (nth 0 info))
            (params (nth 2 info))
@@ -18977,16 +18978,15 @@ When in an #+include line, visit the include file.  Otherwise call
       (beginning-of-line 1)
       (looking-at "\\(?:#\\+\\(?:setupfile\\|include\\):?[ \t]+\"?\\|[ \t]*<include\\>.*?file=\"\\)\\([^\"\n>]+\\)"))
     (find-file (org-trim (match-string 1))))
-   ((org-edit-src-code))
-   ((org-edit-fixed-width-region))
-   ((org-at-table.el-p)
-    (org-edit-src-code))
    ((or (org-at-table-p)
 	(save-excursion
 	  (beginning-of-line 1)
 	  (let ((case-fold-search )) (looking-at "[ \t]*#\\+tblfm:"))))
     (call-interactively 'org-table-edit-formulas))
-   (t (call-interactively 'ffap))))
+   ((or (org-in-src-block-p) (org-at-table.el-p)) (org-edit-src-code))
+   ((org-in-fixed-width-region-p) (org-edit-fixed-width-region))
+   ((org-at-regexp-p org-any-link-re) (call-interactively 'ffap))
+   (t (user-error "No special environment to edit here"))))
 
 (defvar org-table-coordinate-overlays) ; defined in org-table.el
 (defun org-ctrl-c-ctrl-c (&optional arg)
@@ -20252,6 +20252,13 @@ when point is at #+BEGIN_SRC or #+END_SRC."
 	       (save-excursion
 		 (move-beginning-of-line 1)
 		 (looking-at ".*#\\+\\(BEGIN\\|END\\)_SRC")))))))
+
+(defun org-in-fixed-width-region-p ()
+  "Whether point is in a fixed-width region."
+  (save-match-data
+    (save-excursion
+      (beginning-of-line 1)
+      (looking-at "^: "))))
 
 (defun org-context ()
   "Return a list of contexts of the current cursor position.
