@@ -128,8 +128,9 @@
        (?k "As TEX file" org-koma-letter-export-to-latex)
        (?p "As PDF file" org-koma-letter-export-to-pdf)
        (?O "As PDF file and open"
-           (lambda (s v b)
-             (org-open-file (org-koma-letter-export-to-pdf s v b)))))))
+           (lambda (a s v b)
+             (if a (org-koma-letter-export-to-pdf t s v b)
+	       (org-open-file (org-koma-letter-export-to-pdf nil s v b))))))))
 
 
 ;;; Transcode Functions
@@ -228,13 +229,17 @@ holding export options."
 
 ;;;###autoload
 (defun org-koma-letter-export-as-latex
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a KOMA Scrlttr2 letter.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -254,22 +259,37 @@ Export is done in a buffer named \"*Org KOMA-LETTER Export*\".  It
 will be displayed if `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
-  (let ((outbuf (org-export-to-buffer
-                 'koma-letter "*Org KOMA-LETTER Export*"
-                 subtreep visible-only body-only ext-plist)))
-    (with-current-buffer outbuf (LaTeX-mode))
-    (when org-export-show-temporary-export-buffer
-      (switch-to-buffer-other-window outbuf))))
+  (if async
+      (org-export-async-start
+	  (lambda (output)
+	    (with-current-buffer (get-buffer-create "*Org KOMA-LETTER Export*")
+	      (erase-buffer)
+	      (insert output)
+	      (goto-char (point-min))
+	      (LaTeX-mode)
+	      (org-export-add-to-stack (current-buffer) 'koma-letter)))
+	`(org-export-as 'koma-letter ,subtreep ,visible-only ,body-only
+			',ext-plist))
+    (let ((outbuf (org-export-to-buffer
+		   'koma-letter "*Org KOMA-LETTER Export*"
+		   subtreep visible-only body-only ext-plist)))
+      (with-current-buffer outbuf (LaTeX-mode))
+      (when org-export-show-temporary-export-buffer
+	(switch-to-buffer-other-window outbuf)))))
 
 ;;;###autoload
 (defun org-koma-letter-export-to-latex
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a KOMA Scrlttr2 letter (tex).
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -291,18 +311,29 @@ directory.
 Return output file's name."
   (interactive)
   (let ((outfile (org-export-output-file-name ".tex" subtreep)))
-    (org-export-to-file
-     'koma-letter outfile subtreep visible-only body-only ext-plist)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'koma-letter))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'koma-letter ,outfile ,subtreep ,visible-only ,body-only
+	     ',ext-plist)))
+      (org-export-to-file
+       'koma-letter outfile subtreep visible-only body-only ext-plist))))
 
 ;;;###autoload
 (defun org-koma-letter-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a KOMA Scrlttr2 letter (pdf).
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -320,8 +351,19 @@ file-local settings.
 
 Return PDF file's name."
   (interactive)
-  (org-e-latex-compile
-   (org-koma-letter-export-to-latex subtreep visible-only body-only ext-plist)))
+  (if async
+      (let ((outfile (org-export-output-file-name ".tex" subtreep)))
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'koma-letter))
+	  `(expand-file-name
+	    (org-e-latex-compile
+	     (org-export-to-file
+	      'koma-letter ,outfile ,subtreep ,visible-only ,body-only
+	      ',ext-plist)))))
+    (org-e-latex-compile
+     (org-koma-letter-export-to-latex
+      nil subtreep visible-only body-only ext-plist))))
+
 
 (provide 'org-koma-letter)
 ;;; org-koma-letter.el ends here
