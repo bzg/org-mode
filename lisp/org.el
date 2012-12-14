@@ -20238,13 +20238,20 @@ and end of string."
   "Is S an ID created by UUIDGEN?"
   (string-match "\\`[0-9a-f]\\{8\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{4\\}-[0-9a-f]\\{12\\}\\'" (downcase s)))
 
-(defun org-in-src-block-p nil
-  "Whether point is in a code source block."
+(defun org-in-src-block-p (&optional inside)
+  "Whether point is in a code source block.
+When INSIDE is non-nil, don't consider we are within a src block
+when point is at #+BEGIN_SRC or #+END_SRC."
   (let (ov)
-    (when (setq ov (overlays-at (point)))
-      (memq 'org-block-background
-	    (overlay-properties
-	     (car ov))))))
+    (or (when (setq ov (overlays-at (point)))
+	  (memq 'org-block-background
+		(overlay-properties
+		 (car ov))))
+	(and (not inside)
+	     (save-match-data
+	       (save-excursion
+		 (move-beginning-of-line 1)
+		 (looking-at ".*#\\+\\(BEGIN\\|END\\)_SRC")))))))
 
 (defun org-context ()
   "Return a list of contexts of the current cursor position.
