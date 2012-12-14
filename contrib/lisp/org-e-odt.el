@@ -1715,18 +1715,27 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  &key level section-number headline-label &allow-other-keys)
   (concat
    ;; Todo.
-   (and todo
-	(concat
-	 (let ((style (if (member todo org-done-keywords) "OrgDone" "OrgTodo")))
-	   (format "<text:span text:style-name=\"%s\">%s</text:span>"
-		   style todo)) " "))
+   (when todo
+     (let ((style (if (member todo org-done-keywords) "OrgDone" "OrgTodo")))
+       (format "<text:span text:style-name=\"%s\">%s</text:span> "
+	       style todo)))
+   (when priority
+     (let* ((priority (format "[#%c]" priority))
+	    (style (format "OrgPriority-%s" priority)))
+       (format "<text:span text:style-name=\"%s\">%s</text:span> "
+	       style priority)))
    ;; Title.
    text
    ;; Tags.
-   (and tags
-	(concat "<text:tab/>"
-		(format "<text:span text:style-name=\"%s\">%s</text:span>"
-			"OrgTag" (mapconcat 'org-trim tags " : "))))))
+   (when tags
+     (concat
+      "<text:tab/>"
+      (format "<text:span text:style-name=\"%s\">[%s]</text:span>"
+	      "OrgTags" (mapconcat
+			 (lambda (tag)
+			   (format
+			    "<text:span text:style-name=\"%s\">%s</text:span>"
+			    "OrgTag" tag)) tags " : "))))))
 
 (defun org-e-odt-format-headline--wrap (headline info
 						 &optional format-function
