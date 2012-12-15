@@ -5185,8 +5185,8 @@ If optional argument SOURCE is non-nil, remove it instead."
 Type \\[org-export-stack] to visualize the asynchronous export
 stack.
 
-In an Org Export Stack buffer, use \\[org-export--stack-view] to view export output
-on current line, \\[org-export--stack-remove] to remove it from the stack and \\[org-export--stack-clear] to clear 
+In an Org Export Stack buffer, use \\<org-export-stack-mode-map>\\[org-export--stack-view] to view export output
+on current line, \\[org-export--stack-remove] to remove it from the stack and \\[org-export--stack-clear] to clear
 stack completely.
 
 Removal entries in an Org Export Stack buffer doesn't affect
