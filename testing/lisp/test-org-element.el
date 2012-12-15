@@ -2635,7 +2635,15 @@ Paragraph \\alpha."
    (equal '(paragraph center-block)
 	  (org-test-with-temp-text "#+BEGIN_CENTER\nA\n#+END_CENTER\nZ"
 	    (progn (search-forward "Z")
-		   (mapcar 'org-element-type (org-element-at-point t)))))))
+		   (mapcar 'org-element-type (org-element-at-point t))))))
+  ;; Parse a list within a block itself contained in a list.
+  (should
+   (eq 'plain-list
+       (org-test-with-temp-text
+	   "- outer\n  #+begin_center\n  - inner\n  #+end_center"
+	 (search-forward "inner")
+	 (beginning-of-line)
+	 (org-element-type (org-element-at-point))))))
 
 (ert-deftest test-org-element/context ()
   "Test `org-element-context' specifications."
