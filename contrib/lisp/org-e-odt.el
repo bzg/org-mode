@@ -1110,18 +1110,33 @@ See `org-e-odt--build-date-styles' for implementation details."
 (defun* org-e-odt-format-toc-headline
     (todo todo-type priority text tags
 	  &key level section-number headline-label &allow-other-keys)
-  (setq text (concat
-	      (and org-export-with-section-numbers
-		   (concat section-number ". "))
-	      text
-	      (and tags
-		   (concat
-		    "<text:tab/>"
-		    (format "<text:span text:style-name=\"%s\">%s</text:span>"
-			    "OrgTag" tags)))))
-  (when todo
-    (setq text (format "<text:span text:style-name=\"%s\">%s</text:span>"
-		       "OrgTodo" text)))
+  (setq text
+	(concat
+	 ;; Section number.
+	 (when section-number (concat section-number ". "))
+	 ;; Todo.
+	 (when todo
+	   (let ((style (if (member todo org-done-keywords)
+			    "OrgDone" "OrgTodo")))
+	     (format "<text:span text:style-name=\"%s\">%s</text:span> "
+		     style todo)))
+	 (when priority
+	   (let* ((style (format "OrgPriority-%s" priority))
+		  (priority (format "[#%c]" priority)))
+	     (format "<text:span text:style-name=\"%s\">%s</text:span> "
+		     style priority)))
+	 ;; Title.
+	 text
+	 ;; Tags.
+	 (when tags
+	   (concat
+	    (format " <text:span text:style-name=\"%s\">[%s]</text:span>"
+		    "OrgTags"
+		    (mapconcat
+		     (lambda (tag)
+		       (format
+			"<text:span text:style-name=\"%s\">%s</text:span>"
+			"OrgTag" tag)) tags " : "))))))
   (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
 	  headline-label text))
 
@@ -1720,8 +1735,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
        (format "<text:span text:style-name=\"%s\">%s</text:span> "
 	       style todo)))
    (when priority
-     (let* ((priority (format "[#%c]" priority))
-	    (style (format "OrgPriority-%s" priority)))
+     (let* ((style (format "OrgPriority-%s" priority))
+	    (priority (format "[#%c]" priority)))
        (format "<text:span text:style-name=\"%s\">%s</text:span> "
 	       style priority)))
    ;; Title.
