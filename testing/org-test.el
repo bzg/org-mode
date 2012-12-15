@@ -201,7 +201,7 @@ otherwise place the point at the beginning of the inserted text."
 		      (goto-char ,(match-beginning 0)))
 	    `(progn (insert ,inside-text)
 		    (goto-char (point-min)))))
-       (prog1 ,@body (kill-buffer)))))
+       ,@body)))
 (def-edebug-spec org-test-with-temp-text (form body))
 
 (defmacro org-test-with-temp-text-in-file (text &rest body)
