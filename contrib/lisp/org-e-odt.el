@@ -2306,21 +2306,18 @@ used as a communication channel."
 		 ((file-name-absolute-p raw-path)
 		  (expand-file-name raw-path))
 		 (t raw-path))))
-	 (full-src (if (file-name-absolute-p src) src
-		     (expand-file-name src (file-name-directory
-					    (plist-get info :input-file)))))
-	 (caption-from
-	  (case (org-element-type element)
-	    (link (org-export-get-parent-element element))
-	    (t element)))
-	 (captions (org-e-odt-format-label caption-from info 'definition))
-	 (caption (car captions))
+	 (src-expanded (if (file-name-absolute-p src) src
+			 (expand-file-name src (file-name-directory
+						(plist-get info :input-file)))))
 	 (href
-	  (format "\n<draw:object %s xlink:href=\"%s\" xlink:type=\"simple\"/>"
-		  " xlink:show=\"embed\" xlink:actuate=\"onLoad\""
-		  (file-name-directory (org-e-odt--copy-formula-file full-src))))
-	 (embed-as (if caption 'paragraph 'character))
+	  (format
+	   "\n<draw:object %s xlink:href=\"%s\" xlink:type=\"simple\"/>"
+	   " xlink:show=\"embed\" xlink:actuate=\"onLoad\""
+	   (file-name-directory (org-e-odt--copy-formula-file src-expanded))))
 	 (standalone-link-p (org-e-odt--standalone-link-p element info))
+	 (embed-as (if standalone-link-p 'paragraph 'character))
+	 (captions (org-e-odt-format-label element info 'definition))
+	 (caption (car captions)) (short-caption (cdr captions))
 	 ;; Check if this link was created by LaTeX-to-MathML
 	 ;; converter.
 	 (replaces (org-element-property
@@ -2347,7 +2344,7 @@ used as a communication channel."
 	      (let* ((org-e-odt-category-map-alist
 		      '(("__MathFormula__" "Text" "math-label" "Equation"
 			 org-e-odt--enumerable-formula-p))))
-		(car (org-e-odt-format-label caption-from info 'definition)))))
+		(car (org-e-odt-format-label element info 'definition)))))
 	(concat equation "<text:tab/>" label))))))
 
 (defun org-e-odt--copy-formula-file (src-file)
