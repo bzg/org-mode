@@ -741,7 +741,7 @@ in order to mimic default behaviour:
 ;;;; Links
 
 (defcustom org-e-odt-inline-formula-rules
-  '(("file" . "\\.\\(mathml\\|mml\\)\\'"))
+  '(("file" . "\\.\\(mathml\\|mml\\|odf\\)\\'"))
   "Rules characterizing formula files that can be inlined into HTML.
 
 A rule consists in an association whose key is the type of link
@@ -996,7 +996,7 @@ See `org-e-odt--build-date-styles' for implementation details."
 ;;;; Frame
 
 (defun org-e-odt--frame (text width height style &optional extra
-			      anchor-type)
+			      anchor-type &rest title-and-desc)
   (let ((frame-attrs
 	 (concat
 	  (if width (format " svg:width=\"%0.2fcm\"" width) "")
@@ -1007,21 +1007,21 @@ See `org-e-odt--build-date-styles' for implementation details."
      "\n<draw:frame draw:style-name=\"%s\"%s>\n%s\n</draw:frame>"
      style frame-attrs
      (concat text
-	     (let ((title (get-text-property 0 :title text))
-		   (desc (get-text-property 0 :description text)))
-	       (concat (and title
-			    (format "<svg:title>%s</svg:title>"
-				    (org-e-odt--encode-plain-text title t)))
-		       (and desc
-			    (format "<svg:desc>%s</svg:desc>"
-				    (org-e-odt--encode-plain-text desc t)))))))))
+	     (let ((title (car title-and-desc))
+		   (desc (cadr title-and-desc)))
+	       (concat (when title
+			 (format "<svg:title>%s</svg:title>"
+				 (org-e-odt--encode-plain-text title t)))
+		       (when desc
+			 (format "<svg:desc>%s</svg:desc>"
+				 (org-e-odt--encode-plain-text desc t)))))))))
 
 
 ;;;; Library wrappers
 
 (defun org-e-odt--zip-extract (archive members target)
   (when (atom members) (setq members (list members)))
-  (mapc (lambda (archive member target)
+  (mapc (lambda (member)
 	  (require 'arc-mode)
 	  (let* ((--quote-file-name
 		  ;; This is shamelessly stolen from `archive-zip-extract'.
@@ -2276,13 +2276,25 @@ used as a communication channel."
 		"paragraph"			  ; FIXME
 		))
 	 (width (car size)) (height (cdr size))
-	 (embed-as (if (org-e-odt--standalone-link-p element info) "paragraph"
-		     "as-char"))
+	 (standalone-link-p (org-e-odt--standalone-link-p element info))
+	 (embed-as (if standalone-link-p "paragraph" "as-char"))
 	 (captions (org-e-odt-format-label element info 'definition))
 	 (caption (car captions)) (short-caption (cdr captions))
-	 (entity (concat (and caption "Captioned") embed-as "Image")))
+	 (entity (concat (and caption "Captioned") embed-as "Image"))
+	 ;; Check if this link was created by LaTeX-to-PNG converter.
+	 (replaces (org-element-property
+		    :replaces (if (not standalone-link-p) element
+				(org-export-get-parent-element element))))
+	 ;; If yes, note down the type of the element - LaTeX Fragment
+	 ;; or LaTeX environment.  It will go in to frame title.
+	 (title (and replaces (capitalize
+			       (symbol-name (org-element-type replaces)))))
+
+	 ;; If yes, note down it's contents.  It will go in to frame
+	 ;; description.  This quite useful for debugging.
+	 (desc (and replaces (org-element-property :value replaces))))
     (org-e-odt--render-image/formula entity href width height
-				     captions user-frame-params )))
+				     captions user-frame-params title desc)))
 
 
 ;;;; Links :: Math formula
@@ -2308,13 +2320,29 @@ used as a communication channel."
 		  " xlink:show=\"embed\" xlink:actuate=\"onLoad\""
 		  (file-name-directory (org-e-odt--copy-formula-file full-src))))
 	 (embed-as (if caption 'paragraph 'character))
+	 (standalone-link-p (org-e-odt--standalone-link-p element info))
+	 ;; Check if this link was created by LaTeX-to-MathML
+	 ;; converter.
+	 (replaces (org-element-property
+		    :replaces (if (not standalone-link-p) element
+				(org-export-get-parent-element element))))
+	 ;; If yes, note down the type of the element - LaTeX Fragment
+	 ;; or LaTeX environment.  It will go in to frame title.
+	 (title (and replaces (capitalize
+			       (symbol-name (org-element-type replaces)))))
+
+	 ;; If yes, note down it's contents.  It will go in to frame
+	 ;; description.  This quite useful for debugging.
+	 (desc (and replaces (org-element-property :value replaces)))
 	 width height)
     (cond
      ((eq embed-as 'character)
-      (org-e-odt--render-image/formula "InlineFormula" href width height))
+      (org-e-odt--render-image/formula "InlineFormula" href width height
+				       nil nil title desc))
      (t
       (let* ((equation (org-e-odt--render-image/formula
-			"CaptionedDisplayFormula" href width height captions))
+			"CaptionedDisplayFormula" href width height
+			captions nil title desc))
 	     (label
 	      (let* ((org-e-odt-category-map-alist
 		      '(("__MathFormula__" "Text" "math-label" "Equation"
@@ -2352,7 +2380,8 @@ used as a communication channel."
 ;;;; Targets
 
 (defun org-e-odt--render-image/formula (cfg-key href width height &optional
-						captions user-frame-params)
+						captions user-frame-params
+						&rest title-and-desc)
   (let* ((frame-cfg-alist
 	  ;; Each element of this alist is of the form (CFG-HANDLE
 	  ;; INNER-FRAME-PARAMS OUTER-FRAME-PARAMS).
@@ -2426,7 +2455,8 @@ used as a communication channel."
      ((not caption)
       ;; Merge user frame params with that from configuration.
       (setq inner (funcall --merge-frame-params inner user))
-      (apply 'org-e-odt--frame href width height inner))
+      (apply 'org-e-odt--frame href width height
+	     (append inner title-and-desc)))
      ;; Case 2: Image/Formula is captioned or labeled.
      ;;         There are two frames: The inner one surrounds the
      ;;         image or formula.  The outer one contains the
@@ -2446,7 +2476,8 @@ used as a communication channel."
 	     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 		     "Illustration"
 		     (concat
-		      (apply 'org-e-odt--frame href width height inner)
+		      (apply 'org-e-odt--frame href width height
+			     (append inner title-and-desc))
 		      caption))
 	     width height outer)))))
 
