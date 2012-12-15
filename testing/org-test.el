@@ -42,7 +42,7 @@
     (setq load-path (cons org-lisp-dir load-path))
     (require 'org)
     (require 'org-id)
-     (org-babel-do-load-languages
+    (org-babel-do-load-languages
      'org-babel-load-languages '((sh . t) (org . t))))
 
   (let* ((load-path (cons
@@ -214,7 +214,7 @@ otherwise place the point at the beginning of the inserted text."
        (with-temp-file ,file (insert ,inside-text))
        (find-file ,file)
        (org-mode)
-       (setq ,results ,@body)
+       (setq ,results (progn ,@body))
        (save-buffer) (kill-buffer (current-buffer))
        (delete-file ,file)
        ,results)))
@@ -300,7 +300,7 @@ otherwise place the point at the beginning of the inserted text."
 		     (rld path)
 		   (condition-case err
 		       (when (string-match "^[A-Za-z].*\\.el$"
-					 (file-name-nondirectory path))
+					   (file-name-nondirectory path))
 			 (load-file path))
 		     (missing-test-dependency
 		      (let ((name (intern

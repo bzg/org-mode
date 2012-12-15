@@ -72,12 +72,11 @@
 |    |
   #+TBLFM: $1=vsum(@1..@-1)
 "
-    (progn    
-      (re-search-forward (regexp-quote "#+tblname: simple-formula") nil t)
-      (forward-line 1)
-      (should (org-at-table-p))
-      (should (org-table-recalculate 'all))
-      (should (string= "10" (first (nth 5 (org-table-to-lisp))))))))
+    (re-search-forward (regexp-quote "#+tblname: simple-formula") nil t)
+    (forward-line 1)
+    (should (org-at-table-p))
+    (should (org-table-recalculate 'all))
+    (should (string= "10" (first (nth 5 (org-table-to-lisp)))))))
 
 (provide 'test-org-table)
 
