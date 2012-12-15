@@ -80,22 +80,22 @@
 
 (ert-deftest test-org-src/blank-line-block ()
   "Editing block with just a blank line."
-  (org-test-with-temp-text
+  (org-test-with-temp-text-in-file
       "
 #+begin_src emacs-lisp
 
 #+end_src
 "
-    (goto-line 3)
-    (org-edit-special)
-    (insert "blah")
-    (org-edit-src-exit)
-    (should (equal (buffer-string) "
+    (progn
+      (goto-line 3)
+      (org-edit-special)
+      (insert "blah")
+      (org-edit-src-exit)
+      (should (equal (buffer-string) "
 #+begin_src emacs-lisp
   blah
 #+end_src
-"))
-    (should (equal (word-at-point) "blah"))))
+")))))
 
 (provide 'test-org-src)
 ;;; test-org-src.el ends here
