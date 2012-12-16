@@ -3893,8 +3893,9 @@ contextual information."
 		      (let ((buf (find-buffer-visiting
 				  (concat org-e-odt-zip-dir file))))
 			(when buf
-			  (set-buffer-modified-p nil)
-			  (kill-buffer buf))))
+			  (with-current-buffer buf
+			    (set-buffer-modified-p nil)
+			    (kill-buffer buf)))))
 		    org-e-odt-xml-files)
 	      ;; Delete temporary directory and also other embedded
 	      ;; files that get copied there.
