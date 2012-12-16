@@ -871,13 +871,19 @@ keywords are understood:
       or
 
       \(?l \"Export to LaTeX\"
-           \((?b \"TEX (buffer)\" org-e-latex-export-as-latex)
-            \(?l \"TEX (file)\" org-e-latex-export-to-latex)
-            \(?p \"PDF file\" org-e-latex-export-to-pdf)
-            \(?o \"PDF file and open\"
-                \(lambda (subtree visible body-only)
+           \(?p \"As PDF file\" org-e-latex-export-to-pdf)
+           \(?o \"As PDF file and open\"
+               \(lambda (a s v b)
+                 \(if a (org-e-latex-export-to-pdf t s v b)
                    \(org-open-file
-                     \(org-e-latex-export-to-pdf subtree visible body-only))))))
+                    \(org-e-latex-export-to-pdf nil s v b)))))))
+
+      or the following, which will be added to the previous
+      sub-menu,
+
+      \(?l 1
+          \((?B \"As TEX buffer (Beamer)\" org-e-beamer-export-as-latex)
+           \(?P \"As PDF file (Beamer)\" org-e-beamer-export-to-pdf)))
 
   :options-alist
 
