@@ -1045,6 +1045,19 @@ See `org-e-odt--build-date-styles' for implementation details."
 	      (error "Extraction failed"))))
 	members))
 
+(defun org-e-odt--suppress-some-translators (info types)
+  ;; See comments in `org-e-odt-format-label' and `org-e-odt-toc'.
+  (org-combine-plists
+   info (list
+	 ;; Override translators.
+	 :translate-alist
+	 (nconc (mapcar (lambda (type) (cons type (lambda (data contents info)
+						    contents))) types)
+		(plist-get info :translate-alist))
+	 ;; Reset data translation cache.  FIXME.
+	 ;; :exported-data nil
+	 )))
+
 
 ;;;; Target
 
@@ -1142,6 +1155,23 @@ See `org-e-odt--build-date-styles' for implementation details."
 
 (defun org-e-odt-toc (depth info)
   (assert (wholenump depth))
+  ;; When a headline is marked as a radio target, as in the example below:
+  ;;
+  ;; ** <<<Some Heading>>>
+  ;;    Some text.
+  ;;
+  ;; suppress generation of radio targets.  i.e., Radio targets are to
+  ;; be marked as targets within /document body/ and *not* within
+  ;; /TOC/, as otherwise there will be duplicated anchors one in TOC
+  ;; and one in the document body.
+  ;;
+  ;; FIXME-1: Currently exported headings are memoized.  `org-export.el'
+  ;; doesn't provide a way to disable memoization.  So this doesn't
+  ;; work.
+  ;;
+  ;; FIXME-2: Are there any other objects that need to be suppressed
+  ;; within TOC?
+  (setq info (org-e-odt--suppress-some-translators info (list 'radio-target)))
   (let* ((title (org-export-translate "Table of Contents" :utf-8 info))
 	 (headlines (org-export-collect-headlines
 		     info (and (wholenump depth) depth))))
@@ -2093,8 +2123,38 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 (short-caption (org-export-get-caption caption-from t))
 	 ;; Transcode captions.
 	 (caption (and caption (org-export-data caption info)))
-	 (short-caption (and short-caption
-			     (org-export-data short-caption info))))
+	 ;; Currently short caption are sneaked in as object names.
+	 ;;
+	 ;; The advantages are:
+	 ;;
+	 ;; - Table Of Contents: Currently, there is no support for
+	 ;;   building TOC for figures, listings and tables.  See
+	 ;;   `org-e-odt-keyword'.  User instead has to rely on
+	 ;;   external application for building such indices.  Within
+	 ;;   LibreOffice, building an "Illustration Index" or "Index
+	 ;;   of Tables" will create a table with long captions (only)
+	 ;;   and building a table with "Object names" will create a
+	 ;;   table with short captions.
+	 ;;
+	 ;; - Easy navigation: In LibreOffice, object names are
+	 ;;   offered via the navigation bar.  This way one can
+	 ;;   quickly locate and jump to object of his choice in the
+	 ;;   exported document.
+	 ;;
+	 ;; The main disadvantage is that there cannot be any markups
+	 ;; within object names i.e., one cannot embolden, italicize
+	 ;; or underline text within short caption.  So suppress
+	 ;; generation of <text:span >...</text:span> and other
+	 ;; markups by overriding the default translators.  We
+	 ;; probably shouldn't be suppressing translators for all
+	 ;; elements in `org-element-all-objects', but for now this
+	 ;; will do.
+	 (short-caption
+	  (let ((short-caption (or short-caption caption)))
+	    (when short-caption
+	      (org-export-data short-caption
+			       (org-e-odt--suppress-some-translators
+				info org-element-all-objects))))))
     (when (or label caption)
       (let* ((default-category
 	       (case (org-element-type element)
@@ -3337,9 +3397,10 @@ contextual information."
 	(let* ((automatic-name
 		(org-e-odt-add-automatic-style "Table" attributes)))
 	  (format
-	   "\n<table:table table:name=\"%s\" table:style-name=\"%s\">"
-	   (or short-caption (car automatic-name))
-	   (or custom-table-style (cdr automatic-name) "OrgTable")))
+	   "\n<table:table table:style-name=\"%s\"%s>"
+	   (or custom-table-style (cdr automatic-name) "OrgTable")
+	   (concat (when short-caption
+		     (format " table:name=\"%s\"" short-caption)))))
 	;; column specification.
 	(funcall table-column-specs table info)
 	;; actual contents.
