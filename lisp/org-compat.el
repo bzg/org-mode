@@ -169,6 +169,11 @@ If DELETE is non-nil, delete all those overlays."
 	(set-buffer-modified-p modified-p))
     (decompose-region beg end)))
 
+(eval-when-compile
+  ; user-error is only available from 24.2.50 on
+  (unless (fboundp 'user-error)
+    (defalias 'user-error 'error)))
+
 ;; Miscellaneous functions
 
 (defun org-add-hook (hook function &optional append local)
