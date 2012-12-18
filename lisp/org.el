@@ -21487,19 +21487,23 @@ width for filling.
 
 For convenience, when point is at a plain list, an item or
 a footnote definition, try to fill the first paragraph within."
-  ;; Falls back on message-fill-paragraph when necessary
   (interactive)
-  (if (and (derived-mode-p 'message-mode)
-	   (or (not (message-in-body-p))
-	       (save-excursion (move-beginning-of-line 1)
-			       (looking-at message-cite-prefix-regexp))))
-      (let ((fill-paragraph-function
-	     (cadadr (assoc 'fill-paragraph-function org-fb-vars)))
-	    (fill-prefix (cadadr (assoc 'fill-prefix org-fb-vars)))
-	    (paragraph-start (cadadr (assoc 'paragraph-start org-fb-vars)))
-	    (paragraph-separate
-	     (cadadr (assoc 'paragraph-separate org-fb-vars))))
-	(fill-paragraph nil))
+  (cond ;; First ensure filling in correct in message-mode
+   ((and (derived-mode-p 'message-mode)
+	 (or (not (message-in-body-p))
+	     (save-excursion (move-beginning-of-line 1)
+			     (looking-at message-cite-prefix-regexp))))
+    (let ((fill-paragraph-function
+	   (cadadr (assoc 'fill-paragraph-function org-fb-vars)))
+	  (fill-prefix (cadadr (assoc 'fill-prefix org-fb-vars)))
+	  (paragraph-start (cadadr (assoc 'paragraph-start org-fb-vars)))
+	  (paragraph-separate
+	   (cadadr (assoc 'paragraph-separate org-fb-vars))))
+      (fill-paragraph nil)))
+   ;; Correct filling in source block
+   ((org-in-src-block-p)
+    (org-babel-do-key-sequence-in-edit-buffer (kbd "M-q")))
+   (t
     (save-excursion
       ;; Move to end of line in order to get the first paragraph
       ;; within a plain list or a footnote definition.
@@ -21585,7 +21589,7 @@ a footnote definition, try to fill the first paragraph within."
 	    ;; Fill comments.
 	    (comment (fill-comment-paragraph justify))
 	    ;; Ignore every other element.
-	    (otherwise t)))))))
+	    (otherwise t))))))))
 
 (defun org-auto-fill-function ()
   "Auto-fill function."
