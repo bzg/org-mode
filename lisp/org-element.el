@@ -358,6 +358,11 @@ still has an entry since one of its properties (`:title') does.")
     (footnote-reference . :inline-definition))
   "Alist between element types and location of secondary value.")
 
+(defconst org-element-object-variables '(org-link-abbrev-alist-local)
+  "List of buffer-local variables used when parsing objects.
+These variables are copied to the temporary buffer created by
+`org-export-secondary-string'.")
+
 
 
 ;;; Accessors and Setters
@@ -2998,10 +3003,10 @@ Assume point is at the beginning of the link."
 	      contents-end (match-end 3)
 	      link-end (match-end 0)
 	      ;; RAW-LINK is the original link.
-	      raw-link (org-match-string-no-properties 1)
-	      link (org-translate-link
-		    (org-link-expand-abbrev
-		     (org-link-unescape raw-link))))
+	      raw-link (org-translate-link
+			(org-link-expand-abbrev
+			 (org-match-string-no-properties 1)))
+	      link (org-link-unescape raw-link))
 	;; Determine TYPE of link and set PATH accordingly.
 	(cond
 	 ;; File type.
@@ -3930,14 +3935,22 @@ looked after.
 Optional argument PARENT, when non-nil, is the element or object
 containing the secondary string.  It is used to set correctly
 `:parent' property within the string."
-  (with-temp-buffer
-    (insert string)
-    (let ((secondary (org-element--parse-objects
-		      (point-min) (point-max) nil restriction)))
-      (when parent
-	(mapc (lambda (obj) (org-element-put-property obj :parent parent))
-	      secondary))
-      secondary)))
+  ;; Copy buffer-local variables listed in
+  ;; `org-element-object-variables' into temporary buffer.  This is
+  ;; required since object parsing is dependent on these variables.
+  (let ((pairs (delq nil (mapcar (lambda (var)
+				   (when (boundp var)
+				     (cons var (symbol-value var))))
+				 org-element-object-variables))))
+    (with-temp-buffer
+      (mapc (lambda (pair) (org-set-local (car pair) (cdr pair))) pairs)
+      (insert string)
+      (let ((secondary (org-element--parse-objects
+			(point-min) (point-max) nil restriction)))
+	(when parent
+	  (mapc (lambda (obj) (org-element-put-property obj :parent parent))
+		secondary))
+	secondary))))
 
 (defun org-element-map
   (data types fun &optional info first-match no-recursion with-affiliated)
