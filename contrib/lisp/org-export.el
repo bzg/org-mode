@@ -153,7 +153,7 @@ KEYWORD is a string representing a buffer keyword, or nil.  Each
   property).
 OPTION is a string that could be found in an #+OPTIONS: line.
 DEFAULT is the default value for the property.
-BEHAVIOUR determine how Org should handle multiple keywords for
+BEHAVIOUR determines how Org should handle multiple keywords for
   the same property.  It is a symbol among:
   nil       Keep old value and discard the new one.
   t         Replace old value with the new one.
@@ -163,7 +163,8 @@ BEHAVIOUR determine how Org should handle multiple keywords for
   `split'   Split values at white spaces, and cons them to the
 	    previous list.
 
-KEYWORD and OPTION have precedence over DEFAULT.
+Values set through KEYWORD and OPTION have precedence over
+DEFAULT.
 
 All these properties should be back-end agnostic.  Back-end
 specific properties are set through `org-export-define-backend'.
@@ -2591,7 +2592,7 @@ Return the updated communication channel."
 ;; associated to the file, that is before parsing.
 
 (defun org-export-as
-  (backend &optional subtreep visible-only body-only ext-plist noexpand)
+  (backend &optional subtreep visible-only body-only ext-plist)
   "Transcode current Org buffer into BACKEND code.
 
 If narrowing is active in the current buffer, only transcode its
@@ -2613,9 +2614,6 @@ Optional argument EXT-PLIST, when provided, is a property list
 with external parameters overriding Org default settings, but
 still inferior to file-local settings.
 
-Optional argument NOEXPAND, when non-nil, prevents included files
-to be expanded and Babel code to be executed.
-
 Return code as a string."
   ;; Barf if BACKEND isn't registered.
   (org-export-barf-if-invalid-backend backend)
@@ -2634,20 +2632,19 @@ Return code as a string."
       ;; Initialize communication channel with original buffer
       ;; attributes, unavailable in its copy.
       (let ((info (org-export--get-buffer-attributes)) tree)
+	;; Update communication channel and get parse tree.  Buffer
+	;; isn't parsed directly.  Instead, a temporary copy is
+	;; created, where include keywords, macros are expanded and
+	;; code blocks are evaluated.
 	(org-export-with-buffer-copy
 	 ;; Run first hook with current back-end as argument.
 	 (run-hook-with-args 'org-export-before-processing-hook backend)
-	 ;; Update communication channel and get parse tree.  Buffer
-	 ;; isn't parsed directly.  Instead, a temporary copy is
-	 ;; created, where include keywords, macros are expanded and
-	 ;; code blocks are evaluated.
-	 (unless noexpand
-	   (org-export-expand-include-keyword)
-	   ;; Update macro templates since #+INCLUDE keywords might
-	   ;; have added some new ones.
-	   (org-macro-initialize-templates)
-	   (org-macro-replace-all org-macro-templates)
-	   (org-export-execute-babel-code))
+	 (org-export-expand-include-keyword)
+	 ;; Update macro templates since #+INCLUDE keywords might have
+	 ;; added some new ones.
+	 (org-macro-initialize-templates)
+	 (org-macro-replace-all org-macro-templates)
+	 (org-export-execute-babel-code)
 	 ;; Update radio targets since keyword inclusion might have
 	 ;; added some more.
 	 (org-update-radio-target-regexp)
@@ -2664,16 +2661,15 @@ Return code as a string."
 	 ;; {{{date}}}, {{{email}}} and {{{title}}}.  It must be done
 	 ;; once regular macros have been expanded, since document
 	 ;; keywords may contain one of them.
-	 (unless noexpand
-	   (org-macro-replace-all
-	    (list (cons "author"
-			(org-element-interpret-data (plist-get info :author)))
-		  (cons "date"
-			(org-element-interpret-data (plist-get info :date)))
-		  ;; EMAIL is not a parsed keyword: store it as-is.
-		  (cons "email" (or (plist-get info :email) ""))
-		  (cons "title"
-			(org-element-interpret-data (plist-get info :title))))))
+	 (org-macro-replace-all
+	  (list (cons "author"
+		      (org-element-interpret-data (plist-get info :author)))
+		(cons "date"
+		      (org-element-interpret-data (plist-get info :date)))
+		;; EMAIL is not a parsed keyword: store it as-is.
+		(cons "email" (or (plist-get info :email) ""))
+		(cons "title"
+		      (org-element-interpret-data (plist-get info :title)))))
 	 ;; Eventually parse buffer.  Call parse-tree filters to get
 	 ;; the final tree.
 	 (setq tree
@@ -2705,7 +2701,7 @@ Return code as a string."
 	  output)))))
 
 (defun org-export-to-buffer
-  (backend buffer &optional subtreep visible-only body-only ext-plist noexpand)
+  (backend buffer &optional subtreep visible-only body-only ext-plist)
   "Call `org-export-as' with output to a specified buffer.
 
 BACKEND is the back-end used for transcoding, as a symbol.
@@ -2713,13 +2709,12 @@ BACKEND is the back-end used for transcoding, as a symbol.
 BUFFER is the output buffer.  If it already exists, it will be
 erased first, otherwise, it will be created.
 
-Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY, EXT-PLIST
-and NOEXPAND are similar to those used in `org-export-as', which
+Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
+EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
 Return buffer."
-  (let ((out (org-export-as
-	      backend subtreep visible-only body-only ext-plist noexpand))
+  (let ((out (org-export-as backend subtreep visible-only body-only ext-plist))
 	(buffer (get-buffer-create buffer)))
     (with-current-buffer buffer
       (erase-buffer)
@@ -2728,14 +2723,14 @@ Return buffer."
     buffer))
 
 (defun org-export-to-file
-  (backend file &optional subtreep visible-only body-only ext-plist noexpand)
+  (backend file &optional subtreep visible-only body-only ext-plist)
   "Call `org-export-as' with output to a specified file.
 
 BACKEND is the back-end used for transcoding, as a symbol.  FILE
 is the name of the output file, as a string.
 
-Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY, EXT-PLIST
-and NOEXPAND are similar to those used in `org-export-as', which
+Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
+EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
 Return output file's name."
@@ -2743,8 +2738,7 @@ Return output file's name."
   ;; we'd rather avoid needless transcoding of parse tree.
   (unless (file-writable-p file) (error "Output file not writable"))
   ;; Insert contents to a temporary buffer and write it to FILE.
-  (let ((out (org-export-as
-	      backend subtreep visible-only body-only ext-plist noexpand)))
+  (let ((out (org-export-as backend subtreep visible-only body-only ext-plist)))
     (with-temp-buffer
       (insert out)
       (let ((coding-system-for-write org-export-coding-system))
