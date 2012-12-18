@@ -1260,7 +1260,25 @@ e^{i\\pi}+1=0
   ;; 4. Angular link.
   (should
    (org-test-with-temp-text "A link: <http://orgmode.org>"
-     (org-element-map (org-element-parse-buffer) 'link 'identity nil t))))
+     (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))
+  ;; Link abbreviation.
+  (should
+   (equal "http"
+	  (org-test-with-temp-text
+	      "#+LINK: orgmode http://www.orgmode.org/\n[[orgmode:#docs]]"
+	    (progn (org-mode-restart)
+		   (goto-char (point-max))
+		   (org-element-property :type (org-element-context))))))
+  ;; Link abbreviation in a secondary string.
+  (should
+   (equal "http"
+	  (org-test-with-temp-text
+	      "#+LINK: orgmode http://www.orgmode.org/\n* H [[orgmode:#docs]]"
+	    (progn (org-mode-restart)
+		   (org-element-map
+		    (org-element-parse-buffer) 'link
+		    (lambda (link) (org-element-property :type link))
+		    nil t nil t))))))
 
 
 ;;;; Macro
