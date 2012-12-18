@@ -20606,12 +20606,9 @@ when point is at #+BEGIN_SRC or #+END_SRC."
 		 (move-beginning-of-line 1)
 		 (looking-at ".*#\\+\\(BEGIN\\|END\\)_SRC")))))))
 
-(defun org-in-fixed-width-region-p ()
-  "Whether point is in a fixed-width region."
-  (save-match-data
-    (save-excursion
-      (beginning-of-line 1)
-      (looking-at "^: "))))
+(defsubst org-in-fixed-width-region-p ()
+  "Is point in a fixed-width region?"
+  (eq 'fixed-width (org-element-type (org-element-at-point))))
 
 (defun org-context ()
   "Return a list of contexts of the current cursor position.
