@@ -4516,6 +4516,18 @@ in `org-agenda-text-search-extra-files'.
 
 ;;; Agenda TODO list
 
+(defun org-agenda-propertize-selected-todo-keywords (keywords)
+  "Use `org-todo-keyword-faces' for the selected todo KEYWORDS."
+  (concat
+   (if (or (equal keywords "ALL") (not keywords))
+       (propertize "ALL" 'face 'warning)
+     (mapconcat
+      (lambda (kw)
+        (propertize kw 'face (org-get-todo-face kw)))
+      (org-split-string keywords "|")
+      "|"))
+   "\n"))
+
 (defvar org-select-this-todo-keyword nil)
 (defvar org-last-arg nil)
 
@@ -4576,9 +4588,8 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 				   (concat "ToDo: "
 					   (or org-select-this-todo-keyword "ALL"))))
 	(org-agenda-mark-header-line (point-min))
-	(setq pos (point))
-	(insert (or org-select-this-todo-keyword "ALL") "\n")
-	(add-text-properties pos (1- (point)) (list 'face 'org-warning))
+	(insert (org-agenda-propertize-selected-todo-keywords
+		 org-select-this-todo-keyword))
 	(setq pos (point))
 	(unless org-agenda-multi
 	  (insert "Available with `N r': (0)[ALL]")
