@@ -2292,11 +2292,11 @@ the plist used as a communication channel."
 (defun org-e-html-begin-plain-list (type &optional arg1)
   (case type
     (ordered
-     (format "<ol%s>" (if arg1		; FIXME
+     (format "<ol class=\"org-ol\"%s>" (if arg1		; FIXME
 			  (format " start=\"%d\"" arg1)
 			"")))
-    (unordered "<ul>")
-    (descriptive "<dl>")))
+    (unordered "<ul class=\"org-ul\">")
+    (descriptive "<dl class=\"org-dl\">")))
 
 (defun org-e-html-end-plain-list (type)
   (case type

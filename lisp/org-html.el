@@ -2724,12 +2724,12 @@ the alist of previous items."
 			  count-tmp)))))
 	(when firstp
 	  (org-close-par-maybe)
-	  (insert (format "<%sl>\n" type)))
+	  (insert (format "<%sl class=\"org-%sl\">\n" type type)))
 	(insert (cond
 		 ((equal type "d")
 		  (format "<dt>%s</dt><dd>" desc-tag))
 		 ((and (equal type "o") counter)
-		  (format "<li value=\"%s\">" counter))
+		  (format "<li class=\"org-li-counter\" value=\"%s\">" counter))
 		 (t "<li>")))
 	;; If line had a checkbox, some additional modification is required.
 	(when checkbox
