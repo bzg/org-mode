@@ -1553,19 +1553,22 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
     (move-beginning-of-line 1)
     (looking-at "^[ \t]*CLOCK:")))
 
-(defun org-clock-timestamps-up nil
-  "Increase CLOCK timestamps at cursor."
-  (interactive)
-  (org-clock-timestamps-change 'up))
+(defun org-clock-timestamps-up (&optional n)
+  "Increase CLOCK timestamps at cursor.
+Optional argument N tells to change by that many units."
+  (interactive "P")
+  (org-clock-timestamps-change 'up n))
 
-(defun org-clock-timestamps-down nil
-  "Increase CLOCK timestamps at cursor."
-  (interactive)
-  (org-clock-timestamps-change 'down))
+(defun org-clock-timestamps-down (&optional n)
+  "Increase CLOCK timestamps at cursor.
+Optional argument N tells to change by that many units."
+  (interactive "P")
+  (org-clock-timestamps-change 'down n))
 
-(defun org-clock-timestamps-change (updown)
+(defun org-clock-timestamps-change (updown &optional n)
   "Change CLOCK timestamps synchronously at cursor.
-UPDOWN tells whether to change 'up or 'down."
+UPDOWN tells whether to change 'up or 'down.
+Optional argument N tells to change by that many units."
   (setq org-ts-what nil)
   (when (org-at-timestamp-p t)
     (let ((tschange (if (eq updown 'up) 'org-timestamp-up
@@ -1581,9 +1584,9 @@ UPDOWN tells whether to change 'up or 'down."
       (if (<= begts2 (point)) (setq updatets1 t))
       (if (not ts2)
 	  ;; fall back on org-timestamp-up if there is only one
-	  (funcall tschange)
+	  (funcall tschange n)
 	;; setq this so that (boundp 'org-ts-what is non-nil)
-	(funcall tschange)
+	(funcall tschange n)
 	(let ((ts (if updatets1 ts2 ts1))
 	      (begts (if updatets1 begts1 begts2)))
 	  (setq tdiff

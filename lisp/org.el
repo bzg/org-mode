@@ -19222,22 +19222,24 @@ Depending on context, this does one of the following:
     (org-call-for-shift-select 'backward-word))
    (t (org-shiftselect-error))))
 
-(defun org-shiftcontrolup ()
-  "Change timestamps synchronously up in CLOCK log lines."
-  (interactive)
+(defun org-shiftcontrolup (&optional n)
+  "Change timestamps synchronously up in CLOCK log lines.
+Optional argument N tells to change by that many units."
+  (interactive "P")
   (cond ((and (not org-support-shift-select)
 	      (org-at-clock-log-p)
 	      (org-at-timestamp-p t))
-	 (org-clock-timestamps-up))
+	 (org-clock-timestamps-up n))
 	(t (org-shiftselect-error))))
 
-(defun org-shiftcontroldown ()
-  "Change timestamps synchronously down in CLOCK log lines."
-  (interactive)
+(defun org-shiftcontroldown (&optional n)
+  "Change timestamps synchronously down in CLOCK log lines.
+Optional argument N tells to change by that many units."
+  (interactive "P")
   (cond ((and (not org-support-shift-select)
 	      (org-at-clock-log-p)
 	      (org-at-timestamp-p t))
-	 (org-clock-timestamps-down))
+	 (org-clock-timestamps-down n))
 	(t (org-shiftselect-error))))
 
 (defun org-ctrl-c-ret ()
