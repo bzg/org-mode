@@ -169,11 +169,6 @@ If DELETE is non-nil, delete all those overlays."
 	(set-buffer-modified-p modified-p))
     (decompose-region beg end)))
 
-(eval-when-compile
-  ; user-error is only available from 24.2.50 on
-  (unless (fboundp 'user-error)
-    (defalias 'user-error 'error)))
-
 ;; Miscellaneous functions
 
 (defun org-add-hook (hook function &optional append local)
@@ -200,9 +195,8 @@ passed through to `fit-window-to-buffer'.  If SHRINK-ONLY is set, call
 ignored in this case."
   (cond ((if (fboundp 'window-full-width-p)
 	     (not (window-full-width-p window))
-	   (> (frame-width) (window-width window)))
-	 ;; do nothing if another window would suffer
-	 )
+	   ;; do nothing if another window would suffer
+	   (> (frame-width) (window-width window))))
 	((and (fboundp 'fit-window-to-buffer) (not shrink-only))
 	 (fit-window-to-buffer window max-height min-height))
 	((fboundp 'shrink-window-if-larger-than-buffer)
@@ -377,6 +371,10 @@ TIME defaults to the current time."
       (time-to-seconds (or time (current-time)))
     (float-time time)))
 
+;; `user-error' is only available from 24.2.50 on
+(unless (fboundp 'user-error)
+  (defalias 'user-error 'error))
+
 (if (fboundp 'string-match-p)
     (defalias 'org-string-match-p 'string-match-p)
   (defun org-string-match-p (regexp string &optional start)
@@ -389,7 +387,7 @@ TIME defaults to the current time."
     (save-match-data
       (apply 'looking-at args))))
 
-					; XEmacs does not have `looking-back'.
+;; XEmacs does not have `looking-back'.
 (if (fboundp 'looking-back)
     (defalias 'org-looking-back 'looking-back)
   (defun org-looking-back (regexp &optional limit greedy)
