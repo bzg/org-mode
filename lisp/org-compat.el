@@ -448,12 +448,13 @@ With two arguments, return floor and remainder of their quotient."
 
 ;; `condition-case-unless-debug' has been introduced in Emacs 24.1
 ;; `condition-case-no-debug' has been introduced in Emacs 23.1
-(defalias 'org-condition-case-unless-debug
+(defmacro org-condition-case-unless-debug (var bodyform &rest handlers)
+  (declare (debug condition-case) (indent 2))
   (or (and (fboundp 'condition-case-unless-debug)
-	   'condition-case-unless-debug)
+	   `(condition-case-unless-debug ,var ,bodyform ,@handlers))
       (and (fboundp 'condition-case-no-debug)
-	   'condition-case-no-debug)
-      'condition-case))
+	   `(condition-case-no-debug ,var ,bodyform ,@handlers))
+      `(condition-case ,var ,bodyform ,@handlers)))
 
 ;;;###autoload
 (defmacro org-check-version ()
