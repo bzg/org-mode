@@ -5189,14 +5189,16 @@ If optional argument SOURCE is non-nil, remove it instead."
 	  (org-remove-if (lambda (el) (equal (car el) source))
 			 org-export-stack-contents))))
 
-(defun org-export--stack-view ()
-  "View export results at point in stack."
-  (interactive)
+(defun org-export--stack-view (&optional in-emacs)
+  "View export results at point in stack.
+With an optional prefix argument IN-EMACS, force viewing files
+within Emacs."
+  (interactive "P")
   (let ((source (org-export--stack-source-at-point)))
     (cond ((processp source)
 	   (org-switch-to-buffer-other-window (process-buffer source)))
 	  ((bufferp source) (org-switch-to-buffer-other-window source))
-	  (t (org-open-file source)))))
+	  (t (org-open-file source in-emacs)))))
 
 (defconst org-export-stack-mode-map
   (let ((km (make-sparse-keymap)))
