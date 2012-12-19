@@ -1171,17 +1171,23 @@ See `org-e-odt--build-date-styles' for implementation details."
   ;;
   ;; FIXME-2: Are there any other objects that need to be suppressed
   ;; within TOC?
-  (setq info (org-e-odt--suppress-some-translators info (list 'radio-target)))
   (let* ((title (org-export-translate "Table of Contents" :utf-8 info))
 	 (headlines (org-export-collect-headlines
-		     info (and (wholenump depth) depth))))
+		     info (and (wholenump depth) depth)))
+	 (translations (nconc (mapcar
+			       (lambda (type)
+				 (cons type (lambda (data contents info)
+					      contents)))
+			       (list 'radio-target))
+			      (plist-get info :translate-alist))))
     (when headlines
       (concat
        (org-e-odt-begin-toc title depth)
        (mapconcat
 	(lambda (headline)
 	  (let* ((entry (org-e-odt-format-headline--wrap
-			 headline info 'org-e-odt-format-toc-headline))
+			 headline translations info
+			 'org-e-odt-format-toc-headline))
 		 (level (org-export-get-relative-level headline info))
 		 (style (format "Contents_20_%d" level)))
 	    (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
@@ -1782,12 +1788,13 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 			    "<text:span text:style-name=\"%s\">%s</text:span>"
 			    "OrgTag" tag)) tags " : "))))))
 
-(defun org-e-odt-format-headline--wrap (headline info
+(defun org-e-odt-format-headline--wrap (headline translations info
 						 &optional format-function
 						 &rest extra-keys)
   "Transcode an HEADLINE element from Org to ODT.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
+  (setq translations (or translations (plist-get info :translate-alist)))
   (let* ((level (+ (org-export-get-relative-level headline info)))
 	 (headline-number (org-export-get-headline-number headline info))
 	 (section-number (and (org-export-numbered-headline-p headline info)
@@ -1795,11 +1802,13 @@ holding contextual information."
 					 headline-number ".")))
 	 (todo (and (plist-get info :with-todo-keywords)
 		    (let ((todo (org-element-property :todo-keyword headline)))
-		      (and todo (org-export-data todo info)))))
+		      (and todo (org-export-data-with-translations
+				 todo translations info)))))
 	 (todo-type (and todo (org-element-property :todo-type headline)))
 	 (priority (and (plist-get info :with-priority)
 			(org-element-property :priority headline)))
-	 (text (org-export-data (org-element-property :title headline) info))
+	 (text (org-export-data-with-translations
+		(org-element-property :title headline) translations info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-export-get-tags headline info)))
 	 (headline-label (concat "sec-" (mapconcat 'number-to-string
@@ -1826,7 +1835,7 @@ holding contextual information."
   (unless (org-element-property :footnote-section-p headline)
     (let* ((text (org-export-data (org-element-property :title headline) info))
 	   ;; Create the headline text.
-	   (full-text (org-e-odt-format-headline--wrap headline info))
+	   (full-text (org-e-odt-format-headline--wrap headline nil info))
 	   ;; Get level relative to current parsed data.
 	   (level (org-export-get-relative-level headline info))
 	   ;; Get canonical label for the headline.
@@ -1942,7 +1951,7 @@ holding contextual information."
 	      (funcall org-e-odt-format-inlinetask-function
 		       todo todo-type priority text tags contents)))))
       (org-e-odt-format-headline--wrap
-       inlinetask info format-function :contents contents)))
+       inlinetask nil info format-function :contents contents)))
    ;; Otherwise, use a default template.
    (t
     (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
@@ -1951,8 +1960,7 @@ holding contextual information."
 	     (concat
 	      (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 		      "OrgInlineTaskHeading"
-		      (org-e-odt-format-headline--wrap
-		       inlinetask info))
+		      (org-e-odt-format-headline--wrap inlinetask nil info))
 	      contents)
 	     nil nil "OrgInlineTaskFrame" " style:rel-width=\"100%\"")))))
 
@@ -2150,11 +2158,16 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 ;; elements in `org-element-all-objects', but for now this
 	 ;; will do.
 	 (short-caption
-	  (let ((short-caption (or short-caption caption)))
+	  (let ((short-caption (or short-caption caption))
+		(translations (nconc (mapcar
+				      (lambda (type)
+					(cons type (lambda (data contents info)
+						     contents)))
+				      org-element-all-objects)
+				     (plist-get info :translate-alist))))
 	    (when short-caption
-	      (org-export-data short-caption
-			       (org-e-odt--suppress-some-translators
-				info org-element-all-objects))))))
+	      (org-export-data-with-translations short-caption
+						 translations info)))))
     (when (or label caption)
       (let* ((default-category
 	       (case (org-element-type element)
