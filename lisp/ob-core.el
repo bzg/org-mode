@@ -2000,7 +2000,8 @@ code ---- the results are extracted in the syntax of the source
 		(cond
 		 ((assoc :wrap (nth 2 info))
 		  (let ((name (or (cdr (assoc :wrap (nth 2 info))) "RESULTS")))
-		    (funcall wrap (concat "#+BEGIN_" name) (concat "#+END_" name))))
+		    (funcall wrap (concat "#+BEGIN_" name)
+			     (concat "#+END_" (car (org-split-string name))))))
 		 ((member "html" result-params)
 		  (funcall wrap "#+BEGIN_HTML" "#+END_HTML"))
 		 ((member "latex" result-params)
