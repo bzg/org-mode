@@ -724,6 +724,34 @@ body\n")))
 	      ((plain-text . (lambda (text contents info) "Success"))))
 	    (org-export-with-backend 'test2 "Test")))))
 
+(ert-deftest test-org-export/data-with-translations ()
+  "Test `org-export-data-with-translations' specifications."
+  (should
+   (equal
+    "Success!"
+    (org-export-data-with-translations
+     '(bold nil "Test")
+     '((plain-text . (lambda (text info) "Success"))
+       (bold . (lambda (bold contents info) (concat contents "!"))))
+     '(:with-emphasize t)))))
+
+(ert-deftest test-org-export/data-with-backend ()
+  "Test `org-export-data-with-backend' specifications."
+  ;; Error when calling an undefined back-end.
+  (should-error
+   (let (org-export-registered-backends)
+     (org-export-data-with-backend 'test "Test" nil)))
+  ;; Otherwise, export data recursively, using correct back-end.
+  (should
+   (equal
+    "Success!"
+    (let (org-export-registered-backends)
+      (org-export-define-backend test
+	((plain-text . (lambda (text info) "Success"))
+	 (bold . (lambda (bold contents info) (concat contents "!")))))
+      (org-export-data-with-backend
+       '(bold nil "Test") 'test '(:with-emphasize t))))))
+
 
 
 ;;; Export Snippets

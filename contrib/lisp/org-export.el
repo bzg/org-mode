@@ -1925,6 +1925,11 @@ tag."
 ;; lines and white space are preserved.  The function memoizes its
 ;; results, so it is cheap to call it within translators.
 ;;
+;; It is possible to modify locally the back-end used by
+;; `org-export-data' or even use a temporary back-end by using
+;; `org-export-data-with-translations' and
+;; `org-export-data-with-backend'.
+;;
 ;; Internally, three functions handle the filtering of objects and
 ;; elements during the export.  In particular,
 ;; `org-export-ignore-element' marks an element or object so future
@@ -2045,6 +2050,37 @@ Return transcoded string."
 		   info)))
 	     results)))
 	 (plist-get info :exported-data))))))
+
+(defun org-export-data-with-translations (data translations info)
+  "Convert DATA into another format using a given translation table.
+DATA is an element, an object, a secondary string or a string.
+TRANSLATIONS is an alist between element or object types and
+a functions handling them.  See `org-export-define-backend' for
+more information.  INFO is a plist used as a communication
+channel."
+  (org-export-data
+   data
+   ;; Set-up a new communication channel with TRANSLATIONS as the
+   ;; translate table and a new hash table for memoization.
+   (org-combine-plists
+    info
+    (list :translate-alist translations
+	  ;; Size of the hash table is reduced since this function
+	  ;; will probably be used on short trees.
+	  :exported-data (make-hash-table :test 'eq :size 401)))))
+
+(defun org-export-data-with-backend (data backend info)
+  "Convert DATA into BACKEND format.
+
+DATA is an element, an object, a secondary string or a string.
+BACKEND is a symbol.  INFO is a plist used as a communication
+channel.
+
+Unlike to `org-export-with-backend', this function will
+recursively convert DATA using BACKEND translation table."
+  (org-export-barf-if-invalid-backend backend)
+  (org-export-data-with-translations
+   data (org-export-backend-translate-table backend) info))
 
 (defun org-export--interpret-p (blob info)
   "Non-nil if element or object BLOB should be interpreted as Org syntax.
