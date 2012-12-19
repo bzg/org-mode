@@ -651,7 +651,7 @@ values.  See Info node `(emacs) File Variables'."
 ;;;; Drawers
 
 (defcustom org-e-odt-format-drawer-function nil
-  "Function called to format a drawer in HTML code.
+  "Function called to format a drawer in ODT code.
 
 The function must accept two parameters:
   NAME      the drawer name, like \"LOGBOOK\"
@@ -663,7 +663,7 @@ For example, the variable could be set to the following function
 in order to mimic default behaviour:
 
 \(defun org-e-odt-format-drawer-default \(name contents\)
-  \"Format a drawer element for HTML export.\"
+  \"Format a drawer element for ODT export.\"
   contents\)"
   :group 'org-export-e-odt
   :type 'function)
@@ -681,19 +681,7 @@ PRIORITY  the priority of the headline \(integer or nil\)
 TEXT      the main headline text \(string\).
 TAGS      the tags string, separated with colons \(string or nil\).
 
-The function result will be used in the section format string.
-
-As an example, one could set the variable to the following, in
-order to reproduce the default set-up:
-
-\(defun org-e-odt-format-headline \(todo todo-type priority text tags\)
-  \"Default format function for an headline.\"
-  \(concat \(when todo
-            \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo\)\)
-	  \(when priority
-            \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
-	  text
-	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)"
+The function result will be used as headline text."
   :group 'org-export-e-odt
   :type 'function)
 
@@ -701,7 +689,7 @@ order to reproduce the default set-up:
 ;;;; Inlinetasks
 
 (defcustom org-e-odt-format-inlinetask-function nil
-  "Function called to format an inlinetask in HTML code.
+  "Function called to format an inlinetask in ODT code.
 
 The function must accept six parameters:
   TODO      the todo keyword, as a string
@@ -711,29 +699,7 @@ The function must accept six parameters:
   TAGS      the inlinetask tags, as a string.
   CONTENTS  the contents of the inlinetask, as a string.
 
-The function should return the string to be exported.
-
-For example, the variable could be set to the following function
-in order to mimic default behaviour:
-
-\(defun org-e-odt-format-inlinetask \(todo type priority name tags contents\)
-\"Format an inline task element for HTML export.\"
-  \(let \(\(full-title
-	 \(concat
-	  \(when todo
-            \(format \"\\\\textbf{\\\\textsf{\\\\textsc{%s}}} \" todo\)\)
-	  \(when priority \(format \"\\\\framebox{\\\\#%c} \" priority\)\)
-	  title
-	  \(when tags \(format \"\\\\hfill{}\\\\textsc{%s}\" tags\)\)\)\)\)
-    \(format \(concat \"\\\\begin{center}\\n\"
-		    \"\\\\fbox{\\n\"
-		    \"\\\\begin{minipage}[c]{.6\\\\textwidth}\\n\"
-		    \"%s\\n\\n\"
-		    \"\\\\rule[.8em]{\\\\textwidth}{2pt}\\n\\n\"
-		    \"%s\"
-		    \"\\\\end{minipage}}\"
-		    \"\\\\end{center}\"\)
-	    full-title contents\)\)"
+The function should return the string to be exported."
   :group 'org-export-e-odt
   :type 'function)
 
@@ -742,7 +708,7 @@ in order to mimic default behaviour:
 
 (defcustom org-e-odt-inline-formula-rules
   '(("file" . "\\.\\(mathml\\|mml\\|odf\\)\\'"))
-  "Rules characterizing formula files that can be inlined into HTML.
+  "Rules characterizing formula files that can be inlined into ODT.
 
 A rule consists in an association whose key is the type of link
 to consider, and value is a regexp that will be matched against
@@ -753,7 +719,7 @@ link's path."
 
 (defcustom org-e-odt-inline-image-rules
   '(("file" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\)\\'"))
-  "Rules characterizing image files that can be inlined into HTML.
+  "Rules characterizing image files that can be inlined into ODT.
 
 A rule consists in an association whose key is the type of link
 to consider, and value is a regexp that will be matched against
@@ -803,12 +769,6 @@ to make available an enhanced version of `htmlfontify' library."
 
 
 ;;;; Table
-
-(defcustom org-e-odt-table-caption-above t
-  "When non-nil, place caption string at the beginning of the table.
-Otherwise, place it near the end."
-  :group 'org-export-e-odt
-  :type 'boolean)
 
 (defcustom org-e-odt-table-styles
   '(("OrgEquation" "OrgEquation"
@@ -1323,7 +1283,7 @@ new entry in `org-e-odt-automatic-styles'.  Return (OBJECT-NAME
 	      output ))))
 
 (defun org-e-odt-template (contents info)
-  "Return complete document string after HTML conversion.
+  "Return complete document string after ODT conversion.
 CONTENTS is the transcoded contents string.  RAW-DATA is the
 original parsed data.  INFO is a plist holding export options."
   ;; Write meta file.
@@ -2306,7 +2266,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (cons width height)))
 
 (defun org-e-odt-link--inline-image (element info)
-  "Return HTML code for an inline image.
+  "Return ODT code for an inline image.
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel."
   (assert (eq (org-element-type element) 'link))
@@ -2620,8 +2580,7 @@ Return nil, otherwise."
 			    (funcall link-predicate element))
 			(org-export-get-parent element)))
 	     (t nil))))
-    (when p
-      (assert (eq (org-element-type p) 'paragraph))
+    (when (and p (eq (org-element-type p) 'paragraph))
       (when (or (not paragraph-predicate)
 		(funcall paragraph-predicate p))
 	(let ((contents (org-element-contents p)))
@@ -2779,8 +2738,19 @@ INFO is a plist holding contextual information.  See
       (funcall protocol (org-link-unescape path) desc 'odt))
      ;; External link with a description part.
      ((and path desc)
-      (format "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
-	      path desc))
+      (let ((link-contents (org-element-contents link)))
+	;; Check if description is a link to an inline image.
+	(if (and (not (cdr link-contents))
+		 (let ((desc-element (car link-contents)))
+		   (and (eq (org-element-type desc-element) 'link)
+			(org-export-inline-image-p
+			 desc-element org-e-odt-inline-image-rules))))
+	    ;; Format link as a clickable image.
+	    (format "\n<draw:a xlink:type=\"simple\" xlink:href=\"%s\">\n%s\n</draw:a>"
+	    	    path desc)
+	  ;; Otherwise, format it as a regular link.
+	  (format "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
+		  path desc))))
      ;; External link without a description part.
      (path
       (format "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
@@ -4129,7 +4099,7 @@ formula file."
 
 ;;;###autoload
 (defun org-e-odt-export-to-odt (&optional async subtreep visible-only ext-plist)
-  "Export current buffer to a HTML file.
+  "Export current buffer to a ODT file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
@@ -4318,16 +4288,6 @@ using `org-open-file'."
    (add-to-list 'auto-mode-alist
 		(cons (concat  "\\." (car desc) "\\'") 'archive-mode)))
  org-e-odt-file-extensions)
-
-
-;;; FIXME
-
-;;;; Links whose description is image
-
-;; (org-lparse-link-description-is-image
-;;  (format "\n<draw:a xlink:type=\"simple\" xlink:href=\"%s\">\n%s\n</draw:a>"
-;; 	    href desc))
-
 
 (provide 'org-e-odt)
 
