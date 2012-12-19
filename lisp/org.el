@@ -5007,13 +5007,15 @@ The following commands are available:
 (defun org-find-invisible-foreground ()
   (let ((candidates (remove
 		     "unspecified-bg"
-		     (list
-		      (face-background 'default)
-		      (face-background 'org-default)
-		      (cdr (assoc 'background-color default-frame-alist))
-		      (cdr (assoc 'background-color initial-frame-alist))
-		      (cdr (assoc 'background-color window-system-default-frame-alist))
-		      (face-foreground 'org-hide)))))
+		     (nconc
+		      (list (face-background 'default)
+			    (face-background 'org-default))
+		      (mapcar
+		       (lambda (alist)
+			 (when (boundp alist)
+			   (cdr (assoc 'background-color (symbol-value alist)))))
+		       '(default-frame-alist initial-frame-alist window-system-default-frame-alist))
+		      (list (face-foreground 'org-hide))))))
     (car (remove nil candidates))))
 
 (defun org-current-time ()
