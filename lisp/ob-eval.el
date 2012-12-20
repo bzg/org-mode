@@ -30,6 +30,7 @@
 (eval-when-compile (require 'cl))
 
 (defvar org-babel-error-buffer-name "*Org-Babel Error Output*")
+(declare-function org-babel-temp-file "ob-core" (prefix &optional suffix))
 
 (defun org-babel-eval-error-notify (exit-code stderr)
   "Open a buffer to display STDERR and a message with the value of EXIT-CODE."
