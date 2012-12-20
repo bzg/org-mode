@@ -54,6 +54,7 @@
 (declare-function org-outline-overlay-data "org" (&optional use-markers))
 (declare-function org-set-outline-overlay-data "org" (data))
 (declare-function org-narrow-to-subtree "org" ())
+(declare-function org-split-string "org" (string &optional separators))
 (declare-function org-entry-get "org"
 		  (pom property &optional inherit literal-nil))
 (declare-function org-make-options-regexp "org" (kwds &optional extra))
