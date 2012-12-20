@@ -3531,12 +3531,14 @@ generating a new one."
     (save-excursion
       (let ((inhibit-read-only t))
 	(goto-char (point-min))
-	(while (org-activate-bracket-links (point-max))
-	  (add-text-properties (match-beginning 0) (match-end 0)
-			       '(face org-link)))
-	(while (org-activate-plain-links (point-max))
-	  (add-text-properties (match-beginning 0) (match-end 0)
-			       '(face org-link)))
+	(save-excursion
+	  (while (org-activate-bracket-links (point-max))
+	    (add-text-properties (match-beginning 0) (match-end 0)
+				 '(face org-link))))
+	(save-excursion
+	  (while (org-activate-plain-links (point-max))
+	    (add-text-properties (match-beginning 0) (match-end 0)
+				 '(face org-link))))
 	(org-agenda-align-tags)
 	(unless org-agenda-with-colors
 	  (remove-text-properties (point-min) (point-max) '(face nil))))
