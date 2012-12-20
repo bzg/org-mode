@@ -5416,7 +5416,8 @@ will be prompted for."
   "Run through the buffer and add overlays to links."
   (catch 'exit
     (let (f hl)
-      (when (re-search-forward (concat org-plain-link-re) limit t)
+      (when (and (re-search-forward (concat org-plain-link-re) limit t)
+		 (not (org-in-src-block-p)))
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(setq f (get-text-property (match-beginning 0) 'face))
 	(setq hl (org-match-string-no-properties 0))
@@ -5562,7 +5563,8 @@ by a #."
 
 (defun org-activate-angle-links (limit)
   "Run through the buffer and add overlays to links."
-  (if (re-search-forward org-angle-link-re limit t)
+  (if (and (re-search-forward org-angle-link-re limit t)
+	   (not (org-in-src-block-p)))
       (progn
 	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	(add-text-properties (match-beginning 0) (match-end 0)
@@ -5590,7 +5592,8 @@ by a #."
 
 (defun org-activate-bracket-links (limit)
   "Run through the buffer and add overlays to bracketed links."
-  (if (re-search-forward org-bracket-link-regexp limit t)
+  (if (and (re-search-forward org-bracket-link-regexp limit t)
+	   (not (org-in-src-block-p)))
       (let* ((hl (org-match-string-no-properties 1))
 	     (help (concat "LINK: " hl))
 	     ;; FIXME: Above we should remove the escapes.  But that
@@ -19301,7 +19304,8 @@ See the individual commands for more information."
 
 (defsubst org-in-fixed-width-region-p ()
   "Is point in a fixed-width region?"
-  (eq 'fixed-width (org-element-type (org-element-at-point))))
+  (save-match-data
+    (eq 'fixed-width (org-element-type (org-element-at-point)))))
 
 (defun org-edit-special (&optional arg)
   "Call a special editor for the stuff at point.
@@ -20599,7 +20603,7 @@ and end of string."
   "Whether point is in a code source block.
 When INSIDE is non-nil, don't consider we are within a src block
 when point is at #+BEGIN_SRC or #+END_SRC."
-  (let (ov)
+  (let ((case-fold-search t) ov)
     (or (when (setq ov (overlays-at (point)))
 	  (memq 'org-block-background
 		(overlay-properties
@@ -20608,7 +20612,7 @@ when point is at #+BEGIN_SRC or #+END_SRC."
 	     (save-match-data
 	       (save-excursion
 		 (move-beginning-of-line 1)
-		 (looking-at ".*#\\+\\(BEGIN\\|END\\)_SRC")))))))
+		 (looking-at ".*#\\+\\(begin\\|end\\)_src")))))))
 
 (defun org-context ()
   "Return a list of contexts of the current cursor position.
