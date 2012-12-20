@@ -80,7 +80,7 @@
   "Test the export of a variety of library babel call lines."
   (org-test-at-id "72ddeed3-2d17-4c7f-8192-a575d535d3fc"
     (org-narrow-to-subtree)
-    (let ((html (org-export-as-html nil nil nil 'string 'body-only)))
+    (let ((html (org-export-as-html nil nil 'string 'body-only)))
       ;; check the location of each exported number
       (with-temp-buffer
 	(insert html) (goto-char (point-min))
