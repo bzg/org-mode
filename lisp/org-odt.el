@@ -439,11 +439,11 @@ values.  See Info node `(emacs) File Variables'."
 				"meta.xml" "styles.xml")))
 	       ;; kill all xml buffers
 	       (mapc (lambda (file)
-		       (let ((buf (find-file-noselect
-				   (expand-file-name file org-odt-zip-dir) t)))
-			 (when (buffer-name buf)
-			   (set-buffer-modified-p nil)
-			   (kill-buffer buf))))
+		       (with-current-buffer
+			   (find-file-noselect
+			    (expand-file-name file org-odt-zip-dir) t)
+			 (set-buffer-modified-p nil)
+			 (kill-buffer)))
 		     xml-files))
 	     ;; delete temporary directory.
 	     (delete-directory org-odt-zip-dir t)))))
