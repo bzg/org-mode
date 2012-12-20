@@ -1393,7 +1393,7 @@ PARAMS is a property list of parameters:
 :maxlevel When set to a number, don't capture headlines below this level.
 :skip-empty-rows
           When t, skip rows where all specifiers other than ITEM are empty."
-  (let ((pos (move-marker (make-marker) (point)))
+  (let ((pos (point-marker))
 	(hlines (plist-get params :hlines))
 	(vlines (plist-get params :vlines))
 	(maxlevel (plist-get params :maxlevel))
