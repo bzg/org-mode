@@ -26,6 +26,6 @@
     (org-narrow-to-subtree)
     (should (string-match
              ", 2"
-             (org-export-as-ascii nil nil nil 'string)))))
+             (org-export-as-ascii nil nil 'string)))))
 
 (provide 'test-org-exp)

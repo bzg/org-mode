@@ -75,7 +75,7 @@
   (org-test-at-id "eb1f6498-5bd9-45e0-9c56-50717053e7b7"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string 'body-only))
+	   (org-export-as-html nil nil 'string 'body-only))
 	  (test-point 0))
 
       (org-test-with-temp-text-in-file
@@ -109,7 +109,7 @@
   (org-test-at-id "8701beb4-13d9-468c-997a-8e63e8b66f8d"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string 'body-only))
+	   (org-export-as-html nil nil 'string 'body-only))
 	  (test-point 0))
 
       (org-test-with-temp-text-in-file
@@ -139,7 +139,7 @@ elements in the final html."
   (org-test-at-id "92518f2a-a46a-4205-a3ab-bcce1008a4bb"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string 'body-only))
+	   (org-export-as-html nil nil 'string 'body-only))
 	  (test-point 0))
       (org-test-with-temp-text-in-file
 	  exported-html
@@ -172,7 +172,7 @@ elements in the final html."
     (org-test-at-id "5daa4d03-e3ea-46b7-b093-62c1b7632df3"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string  'body-only))
+	   (org-export-as-html nil nil 'string  'body-only))
 	  (test-point 0))
       (org-test-with-temp-text-in-file
 	  exported-html
@@ -202,7 +202,7 @@ elements in the final html."
 	 "=%name=\n#+BEGIN_SRC %lang%flags\nbody\n#+END_SRC"))
     (org-test-at-id "b02ddd8a-eeb8-42ab-8664-8a759e6f43d9"
       (org-narrow-to-subtree)
-      (let ((ascii (org-export-as-ascii nil nil nil 'string 'body-only)))
+      (let ((ascii (org-export-as-ascii nil nil 'string 'body-only)))
 	(should (string-match "qux" ascii))))))
 
 (ert-deftest ob-exp/export-with-header-argument ()
@@ -215,14 +215,14 @@ elements in the final html."
 #+BEGIN_SRC %lang%flags\nbody\n#+END_SRC"))
     (org-test-at-id "b02ddd8a-eeb8-42ab-8664-8a759e6f43d9"
       (org-narrow-to-subtree)
-      (let ((ascii (org-export-as-ascii nil nil nil 'string 'body-only)))
+      (let ((ascii (org-export-as-ascii nil nil 'string 'body-only)))
 	(should (string-match "baz" ascii))
 	(should (string-match "replace" ascii))))))
 
 (ert-deftest ob-exp/noweb-no-export-and-exports-both ()
   (org-test-at-id "8a820f6c-7980-43db-8a24-0710d33729c9"
     (org-narrow-to-subtree)
-    (let ((html (org-export-as-html nil nil nil 'string 'body-only)))
+    (let ((html (org-export-as-html nil nil 'string 'body-only)))
       (should (string-match (regexp-quote "noweb-no-export-and-exports-both-1")
 			    html)))))
 
@@ -230,14 +230,14 @@ elements in the final html."
   (org-test-at-id "96cc7073-97ec-4556-87cf-1f9bffafd317"
     (org-narrow-to-subtree)
     (let (*evaluation-collector*)
-      (org-export-as-ascii nil nil nil 'string)
+      (org-export-as-ascii nil nil 'string)
       (should (equal '(5 4 3 2 1) *evaluation-collector*)))))
 
 (ert-deftest ob-exp/export-call-line-information ()
   (org-test-at-id "bec63a04-491e-4caa-97f5-108f3020365c"
     (org-narrow-to-subtree)
     (let* ((org-babel-exp-call-line-template "\n: call: %line special-token")
-	   (html (org-export-as-html nil nil nil 'string t)))
+	   (html (org-export-as-html nil nil 'string t)))
       (should (string-match "double" html))
       (should (string-match "16" html))
       (should (string-match "special-token" html)))))
@@ -247,7 +247,7 @@ elements in the final html."
     (org-narrow-to-subtree)
     (org-babel-next-src-block 2)
     (should (= 110 (org-babel-execute-src-block)))
-    (let ((ascii (org-export-as-ascii nil nil nil 'string t)))
+    (let ((ascii (org-export-as-ascii nil nil 'string t)))
       (should-not (string-match (regexp-quote "<<strip-export-1>>") ascii))
       (should-not (string-match (regexp-quote "i=\"10\"") ascii)))))
 
@@ -272,7 +272,7 @@ elements in the final html."
 #+END_SRC
 "
     (let* ((org-current-export-file (current-buffer))
-	   (ascii (org-export-as-ascii nil nil nil 'string)))
+	   (ascii (org-export-as-ascii nil nil 'string)))
       (should (string-match (regexp-quote (format nil "%S" '(:foo :bar)))
 			    ascii)))))
 
