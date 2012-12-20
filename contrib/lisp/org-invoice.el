@@ -290,7 +290,7 @@ information about dblock parameters, please see the Org manual):
 :summary Set to nil to turn off the final summary line."
   (let ((scope (plist-get params :scope))
         (org-invoice-table-params params)
-        (zone (move-marker (make-marker) (point)))
+        (zone (point-marker))
         table)
     (unless scope (setq scope 'default))
     (unless (plist-member params :price) (plist-put params :price t))

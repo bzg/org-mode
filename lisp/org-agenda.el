@@ -2664,7 +2664,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 		      (add-text-properties (match-beginning 2) (match-end 2)
 					   '(face bold) header))
 		    header)))
-	(setq header-end (move-marker (make-marker) (point)))
+	(setq header-end (point-marker))
 	(while t
 	  (setq custom1 custom)
 	  (when (eq rmheader t)

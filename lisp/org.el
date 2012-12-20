@@ -11785,7 +11785,7 @@ This should be called with the cursor in a line with a statistics cookie."
 	(org-map-entries 'org-update-parent-todo-statistics))
     (if (not (org-at-heading-p))
 	(org-update-checkbox-count)
-      (let ((pos (move-marker (make-marker) (point)))
+      (let ((pos (point-marker))
 	    end l1 l2)
 	(ignore-errors (org-back-to-heading t))
 	(if (not (org-at-heading-p))
@@ -15060,7 +15060,7 @@ only headings."
 	    (setq lmin (1+ flevel) lmax (+ lmin (if org-odd-levels-only 1 0)))
 	    (setq end (save-excursion (org-end-of-subtree t t))))
 	  (when (org-at-heading-p)
-	    (move-marker (make-marker) (point))))))))
+	    (point-marker)))))))
 
 (defun org-find-exact-headline-in-buffer (heading &optional buffer pos-only)
   "Find node HEADING in BUFFER.
