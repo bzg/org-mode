@@ -1186,6 +1186,33 @@ aid, but the tag does not have any semantic meaning."
       (insert "#+COLUMNS: " org-e-beamer-column-view-format "\n"))
     (insert "#+PROPERTY: BEAMER_col_ALL " org-e-beamer-column-widths "\n")))
 
+;;;###autoload
+(defun org-e-beamer-publish-to-latex (plist filename pub-dir)
+  "Publish an Org file to a Beamer presentation (LaTeX).
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to 'e-beamer filename ".tex" plist pub-dir))
+
+;;;###autoload
+(defun org-e-beamer-publish-to-pdf (plist filename pub-dir)
+  "Publish an Org file to a Beamer presentation (PDF, via LaTeX).
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  ;; Unlike to `org-e-beamer-publish-to-latex', PDF file is generated
+  ;; in working directory and then moved to publishing directory.
+  (org-e-publish-attachment
+   plist
+   (org-e-latex-compile (org-e-publish-org-to 'e-beamer filename ".tex" plist))
+   pub-dir))
+
 
 (provide 'org-e-beamer)
 ;;; org-e-beamer.el ends here
