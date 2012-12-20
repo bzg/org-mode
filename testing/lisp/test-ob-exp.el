@@ -169,23 +169,19 @@ elements in the final html."
 		   "</tbody>""</table>"))))))
 
 (ert-deftest ob-exp/mixed-blocks-with-exports-both ()
-    (org-test-at-id "5daa4d03-e3ea-46b7-b093-62c1b7632df3"
+  (org-test-at-id "5daa4d03-e3ea-46b7-b093-62c1b7632df3"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string  'body-only))
+	   (org-export-as-html nil nil nil 'string 'body-only))
 	  (test-point 0))
       (org-test-with-temp-text-in-file
 	  exported-html
-
 	;; check following ouput exists and in order
 	(mapcar (lambda (x)
-		  (should (< test-point
-			     (re-search-forward
-			      x
-			      nil t)))
+		  (should (< test-point (re-search-forward x nil t)))
 		  (setq test-point (point)))
 		'("mixed blocks with exports both"
-		  "<ul>"
+		  "<ul class=\"org-ul\">"
 		  "<li>""a""</li>"
 		  "<li>""b""</li>"
 		  "<li>""c""</li>"
@@ -289,4 +285,3 @@ elements in the final html."
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here
-
