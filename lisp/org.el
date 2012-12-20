@@ -6978,48 +6978,45 @@ With a prefix argument, use the alternative interface: e.g. if
   "Let the user select a location in the Org-mode buffer BUF.
 This function uses a recursive edit.  It returns the selected position
 or nil."
-  (let ((isearch-mode-map org-goto-local-auto-isearch-map)
-	(isearch-hide-immediately nil)
-	(isearch-search-fun-function
-	 (lambda () 'org-goto-local-search-headings))
-	(org-goto-selected-point org-goto-exit-command)
-	(pop-up-frames nil)
-	(special-display-buffer-names nil)
-	(special-display-regexps nil)
-	(special-display-function nil))
-    (save-excursion
-      (save-window-excursion
-	(delete-other-windows)
-	(and (get-buffer "*org-goto*") (kill-buffer "*org-goto*"))
-	(org-pop-to-buffer-same-window
-	 (condition-case nil
-	     (make-indirect-buffer (current-buffer) "*org-goto*")
-	   (error (make-indirect-buffer (current-buffer) "*org-goto*"))))
-	(with-output-to-temp-buffer "*Help*"
-	  (princ help))
-	(org-fit-window-to-buffer (get-buffer-window "*Help*"))
-	(setq buffer-read-only nil)
-	(let ((org-startup-truncated t)
-	      (org-startup-folded nil)
-	      (org-startup-align-all-tables nil))
-	  (org-mode)
-	  (org-overview))
-	(setq buffer-read-only t)
-	(if (and (boundp 'org-goto-start-pos)
-		 (integer-or-marker-p org-goto-start-pos))
-	    (let ((org-show-hierarchy-above t)
-		  (org-show-siblings t)
-		  (org-show-following-heading t))
-	      (goto-char org-goto-start-pos)
-	      (and (outline-invisible-p) (org-show-context)))
-	  (goto-char (point-min)))
-	(let (org-special-ctrl-a/e) (org-beginning-of-line))
-	(message "Select location and press RET")
-	(use-local-map org-goto-map)
-	(recursive-edit)
-	))
-    (kill-buffer "*org-goto*")
-    (cons org-goto-selected-point org-goto-exit-command)))
+  (org-no-popups
+   (let ((isearch-mode-map org-goto-local-auto-isearch-map)
+	 (isearch-hide-immediately nil)
+	 (isearch-search-fun-function
+	  (lambda () 'org-goto-local-search-headings))
+	 (org-goto-selected-point org-goto-exit-command))
+     (save-excursion
+       (save-window-excursion
+	 (delete-other-windows)
+	 (and (get-buffer "*org-goto*") (kill-buffer "*org-goto*"))
+	 (org-pop-to-buffer-same-window
+	  (condition-case nil
+	      (make-indirect-buffer (current-buffer) "*org-goto*")
+	    (error (make-indirect-buffer (current-buffer) "*org-goto*"))))
+	 (with-output-to-temp-buffer "*Help*"
+	   (princ help))
+	 (org-fit-window-to-buffer (get-buffer-window "*Help*"))
+	 (setq buffer-read-only nil)
+	 (let ((org-startup-truncated t)
+	       (org-startup-folded nil)
+	       (org-startup-align-all-tables nil))
+	   (org-mode)
+	   (org-overview))
+	 (setq buffer-read-only t)
+	 (if (and (boundp 'org-goto-start-pos)
+		  (integer-or-marker-p org-goto-start-pos))
+	     (let ((org-show-hierarchy-above t)
+		   (org-show-siblings t)
+		   (org-show-following-heading t))
+	       (goto-char org-goto-start-pos)
+	       (and (outline-invisible-p) (org-show-context)))
+	   (goto-char (point-min)))
+	 (let (org-special-ctrl-a/e) (org-beginning-of-line))
+	 (message "Select location and press RET")
+	 (use-local-map org-goto-map)
+	 (recursive-edit)
+	 ))
+     (kill-buffer "*org-goto*")
+     (cons org-goto-selected-point org-goto-exit-command))))
 
 (defvar org-goto-local-auto-isearch-map (make-sparse-keymap))
 (set-keymap-parent org-goto-local-auto-isearch-map isearch-mode-map)
@@ -20954,9 +20951,8 @@ return nil."
   "Switch to buffer in a second window on the current frame.
 In particular, do not allow pop-up frames.
 Returns the newly created buffer."
-  (let (pop-up-frames special-display-buffer-names special-display-regexps
-		      special-display-function)
-    (apply 'switch-to-buffer-other-window args)))
+  (org-no-popups
+   (apply 'switch-to-buffer-other-window args)))
 
 (defun org-combine-plists (&rest plists)
   "Create a single property list from all plists in PLISTS.

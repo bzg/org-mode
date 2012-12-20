@@ -375,6 +375,16 @@ TIME defaults to the current time."
 (unless (fboundp 'user-error)
   (defalias 'user-error 'error))
 
+(defmacro org-no-popups (&rest body)
+  "Suppress popup windows.
+Let-bind some variables to nil around BODY to achieve the desired
+effect, which variables to use depends on the Emacs version."
+    (if (org-version-check "24.2.50" "" :predicate)
+	`(let (pop-up-frames display-buffer-alist)
+	   ,@body)
+      `(let (pop-up-frames special-display-buffer-names special-display-regexps special-display-function)
+	 ,@body)))
+
 (if (fboundp 'string-match-p)
     (defalias 'org-string-match-p 'string-match-p)
   (defun org-string-match-p (regexp string &optional start)
