@@ -9697,12 +9697,13 @@ application the system uses for this file type."
 	    (throw 'match t))
 
 	  (save-excursion
-	    (when (or (org-in-regexp org-angle-link-re)
-		      (and (goto-char (car (org-in-regexp org-plain-link-re)))
-			   (save-match-data (not (looking-back "\\[\\[")))))
-	      (setq type (match-string 1)
-		    path (org-link-unescape (match-string 2)))
-	      (throw 'match t)))
+	    (let ((linkpos (org-in-regexp org-angle-link-re)))
+	      (when (or linkpos
+			(and linkpos (goto-char (car klpos))
+			     (save-match-data (not (looking-back "\\[\\[")))))
+		(setq type (match-string 1)
+		      path (org-link-unescape (match-string 2)))
+		(throw 'match t))))
 	  (save-excursion
 	    (when (org-in-regexp (org-re "\\(:[[:alnum:]_@#%:]+\\):[ \t]*$"))
 	      (setq type "tags"
@@ -9715,7 +9716,7 @@ application the system uses for this file type."
 		  path (match-string 1))
 	    (throw 'match t)))
 	(unless path
-	  (error "No link found"))
+	  (user-error "No link found"))
 
 	;; switch back to reference buffer
 	;; needed when if called in a temporary buffer through
