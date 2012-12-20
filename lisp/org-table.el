@@ -2647,8 +2647,18 @@ not overwrite the stored one."
 				   duration-output-format) ev))
 	  (or (fboundp 'calc-eval)
 	      (error "Calc does not seem to be installed, and is needed to evaluate the formula"))
-	  ;; "Inactivate" time-stamps so that Calc can handle them
+	  ;; Use <...> time-stamps so that Calc can handle them
 	  (setq form (replace-regexp-in-string org-ts-regexp3 "<\\1>" form))
+	  ;; I18n-ize local time-stamps by setting (system-time-locale "C")
+	  (when (string-match org-ts-regexp2 form)
+	    (let* ((ts (match-string 0 form))
+		   (tsp (apply 'encode-time (save-match-data (org-parse-time-string ts))))
+		   (system-time-locale "C")
+		   (tf (or (and (save-match-data (string-match "[0-9]\\{1,2\\}:[0-9]\\{2\\}" ts))
+				(cdr org-time-stamp-formats))
+			   (car org-time-stamp-formats))))
+	      (setq form (replace-match (format-time-string tf tsp) t t form))))
+
 	  (setq ev (if (and duration (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" form))
 		       form
 		     (calc-eval (cons form org-tbl-calc-modes) (if numbers 'num)))
