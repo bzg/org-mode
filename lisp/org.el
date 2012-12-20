@@ -9697,9 +9697,9 @@ application the system uses for this file type."
 	    (throw 'match t))
 
 	  (save-excursion
-	    (let ((linkpos (org-in-regexp org-angle-link-re)))
-	      (when (or linkpos
-			(and linkpos (goto-char (car klpos))
+	    (let ((plinkpos (org-in-regexp org-plain-link-re)))
+	      (when (or (org-in-regexp org-angle-link-re)
+			(and plinkpos (goto-char (car plinkpos))
 			     (save-match-data (not (looking-back "\\[\\[")))))
 		(setq type (match-string 1)
 		      path (org-link-unescape (match-string 2)))
