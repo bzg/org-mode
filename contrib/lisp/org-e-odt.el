@@ -2160,13 +2160,20 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	      (setq label (or label (format  "%s-%s" default-category seqno)))
 	      (setq label (org-export-solidify-link-text label))
 	      (cons
-	       (format-spec
-		(cadr (assoc-string label-style org-e-odt-label-styles t))
-		`((?e . ,category)
-		  (?n . ,(format
-			  "<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">%s</text:sequence>"
-			  label counter counter seqno))
-		  (?c . ,(or caption ""))))
+	       (concat
+		;; Sneak in a bookmark.  The bookmark is used when the
+		;; labeled element is referenced with a link that
+		;; provides it's own description.
+		(format "\n<text:bookmark text:name=\"%s\"/>" label)
+		;; Label definition: Typically formatted as below:
+		;;     CATEGORY SEQ-NO: LONG CAPTION
+		(format-spec
+		 (cadr (assoc-string label-style org-e-odt-label-styles t))
+		 `((?e . ,category)
+		   (?n . ,(format
+			   "<text:sequence text:ref-name=\"%s\" text:name=\"%s\" text:formula=\"ooow:%s+1\" style:num-format=\"1\">%s</text:sequence>"
+			   label counter counter seqno))
+		   (?c . ,(or caption "")))))
 	       short-caption))
 	    ;; Case 2: Handle Label reference.
 	    (reference
@@ -2178,7 +2185,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	       (format "<text:sequence-ref text:reference-format=\"%s\" text:ref-name=\"%s\">%s</text:sequence-ref>"
 		       fmt1 label (format-spec fmt2 `((?e . ,category)
 						      (?n . ,seqno))))))
-	    (t (error "Unknow %S on label" op))))))))
+	    (t (error "Unknown %S on label" op))))))))
 
 
 ;;;; Links :: Inline Images
@@ -2665,25 +2672,26 @@ INFO is a plist holding contextual information.  See
 		  (label (format "sec-%s" (mapconcat 'number-to-string
 						     headline-no "-"))))
 	     (cond
-	      ;; Case 1: Headline is numbered and LINK has no
-	      ;; description or LINK's description matches headline's
-	      ;; title.  Display section number.
-	      ((and (org-export-numbered-headline-p destination info)
-		    (or (not desc) (string= desc (org-element-property
-						  :raw-value destination))))
-	       (format
-		"<text:bookmark-ref text:reference-format=\"chapter\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
-		label (mapconcat 'number-to-string headline-no ".")))
-	      ;; Case 2: Either the headline is un-numbered or
-	      ;; LINK has a custom description.  Display LINK's
-	      ;; description or headline's title.
-	      (t
-	       (let ((desc (or desc (org-export-data
-				     (org-element-property :title destination)
-				     info))))
-		 (format
-		  "<text:bookmark-ref text:reference-format=\"text\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
-		  label desc))))))
+	      ;; Case 1: LINK has a custom description that is
+	      ;; different from headline's title.  Create a hyperlink
+	      ;; that display LINK's description.
+	      ((and desc
+		    (let ((link-desc (org-element-contents link)))
+		      (not (string=
+			    (org-element-interpret-data link-desc)
+			    (org-element-property :raw-value destination))))
+		    (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
+			    label desc)))
+	      ;; Case 2: LINK has no custom description and HEADLINE
+	      ;; is numbered.  Display section number.
+	      ((org-export-numbered-headline-p destination info)
+	       (format "<text:bookmark-ref text:reference-format=\"chapter\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
+		       label (mapconcat 'number-to-string headline-no ".")))
+	      ;; Case 3: LINK has no custom descripiton and HEADLINE
+	      ;; is un-numbered.  Display headline's title.
+	      (t (let ((title (org-element-property :title destination)))
+		   (format "<text:bookmark-ref text:reference-format=\"text\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
+			   label (org-export-data title info)))))))
 	  ;; Fuzzy link points to a target.  Do as above.
 	  (target
 	   ;; Identify nearest meaningful container
@@ -2703,26 +2711,32 @@ INFO is a plist holding contextual information.  See
 		  (format
 		   "<text:bookmark-ref text:reference-format=\"number-all-superior\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
 		   (org-export-solidify-link-text path)
-
 		   (mapconcat 'number-to-string
 			      (org-e-odt-resolve-numbered-paragraph
 			       container info) ".")))))))
 	  (otherwise
-	   ;; (unless desc
-	   ;;   (setq number (cond
-	   ;; 		   ((org-e-odt--standalone-link-p destination info)
-	   ;; 		    (org-export-get-ordinal
-	   ;; 		     (assoc 'link (org-element-contents destination))
-	   ;; 		     info 'link 'org-e-odt--standalone-link-p))
-	   ;; 		   (t (org-export-get-ordinal destination info))))
-	   ;;   (setq desc (when number
-	   ;; 		  (if (atom number) (number-to-string number)
-	   ;; 		    (mapconcat 'number-to-string number ".")))))
-
-	   (let ((label-reference
-		  (org-e-odt-format-label destination info 'reference)))
-	     (assert label-reference)
-	     label-reference)))))
+	   (let ((label-reference (ignore-errors
+				    (org-e-odt-format-label destination info
+							    'reference))))
+	     (cond
+	      ;; Case 1: Destination is a captioned/enumerated entity.
+	      ;; But LINK has no description.  Display the sequence
+	      ;; number.
+	      ((and label-reference (not desc)) label-reference)
+	      ;; Case 2: Destination is a captioned/enumerated entity
+	      ;; and LINK has description.  Insert a cross-reference
+	      ;; with user-provided description.
+	      (label-reference
+	       (let* ((caption-from (case (org-element-type destination)
+				      (link (org-export-get-parent-element
+					     destination))
+				      (t destination)))
+		      ;; Get label and caption.
+		      (label (org-element-property :name caption-from)))
+		 (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
+			 (org-export-solidify-link-text label) desc)))
+	      ;; Case 3: Link is ending up in a no-man's land.
+	      (t (error "FIXME:  Link to no-man's land."))))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
