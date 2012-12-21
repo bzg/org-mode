@@ -87,7 +87,7 @@
 #+end_src
 "
     (progn
-      (goto-line 3)
+      (goto-line 2)
       (org-edit-special)
       (insert "blah")
       (org-edit-src-exit)
