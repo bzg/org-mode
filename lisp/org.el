@@ -19311,6 +19311,7 @@ See the individual commands for more information."
   "Call a special editor for the stuff at point.
 When at a table, call the formula editor with `org-table-edit-formulas'.
 When in a source code block, call `org-edit-src-code'.
+When in a fixed-width region, call `org-edit-fixed-width-region'.
 When in an #+include line, visit the included file.
 On a link, call `ffap' to visit the link at point.
 Otherwise, return a user error."
@@ -20604,14 +20605,13 @@ and end of string."
 When INSIDE is non-nil, don't consider we are within a src block
 when point is at #+BEGIN_SRC or #+END_SRC."
   (let ((case-fold-search t) ov)
-    (or (when (setq ov (overlays-at (point)))
-	  (memq 'org-block-background
-		(overlay-properties
-		 (car ov))))
+    (or (and (setq ov (overlays-at (point)))
+	     (memq 'org-block-background
+		   (overlay-properties (car ov))))
 	(and (not inside)
 	     (save-match-data
 	       (save-excursion
-		 (move-beginning-of-line 1)
+		 (beginning-of-line)
 		 (looking-at ".*#\\+\\(begin\\|end\\)_src")))))))
 
 (defun org-context ()
