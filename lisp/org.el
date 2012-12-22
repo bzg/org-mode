@@ -8964,11 +8964,6 @@ part of Org's core."
 	     link (url-view-url t))
        (org-store-link-props :type "w3" :url (url-view-url t)))
 
-      ((eq major-mode 'w3m-mode)
-       (setq cpltxt (or w3m-current-title w3m-current-url)
-	     link w3m-current-url)
-       (org-store-link-props :type "w3m" :url (url-view-url t)))
-
       ((setq search (run-hook-with-args-until-success
 		     'org-create-file-search-functions))
        (setq link (concat "file:" (abbreviate-file-name buffer-file-name)
@@ -9060,7 +9055,7 @@ part of Org's core."
        (setq link cpltxt))
 
       ((org-called-interactively-p 'interactive)
-       (error "Cannot link to a buffer which is not visiting a file"))
+       (user-error "No method for storing a link from this buffer"))
 
       (t (setq link nil)))
 
