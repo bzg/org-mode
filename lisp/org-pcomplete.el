@@ -290,7 +290,7 @@ This needs more work, to handle headings with lots of spaces in them."
 	(cpllist (mapcar (lambda (x) (concat x ": ")) org-drawers)))
     (pcomplete-here cpllist
 		    (substring pcomplete-stub 1)
-		    (unless (or (not (delete
+		    (unless (or (not (delq
 				      nil
 				      (mapcar (lambda(x)
 						(string-match (substring pcomplete-stub 1) x))

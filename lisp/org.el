@@ -8898,7 +8898,7 @@ part of Org's core."
      (cond
       ((and (not (equal arg '(16)))
 	    (setq sfuns
-		  (delete
+		  (delq
 		   nil (mapcar (lambda (f) (let (fs) (if (funcall f) (push f fs))))
 			       org-store-link-functions))
 		  sfunsn (mapcar (lambda (fu) (symbol-name (car fu))) sfuns))

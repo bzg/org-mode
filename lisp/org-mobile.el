@@ -276,7 +276,7 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 		      (list f))
 		     (t nil)))
 		  org-mobile-files)))
-	 (files (delete
+	 (files (delq
 		 nil
 		 (mapcar (lambda (f)
 			   (unless (and (not (string= org-mobile-files-exclude-regexp ""))
