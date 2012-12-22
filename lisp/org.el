@@ -9021,10 +9021,13 @@ part of Org's core."
 			       (buffer-file-name (buffer-base-buffer)))))
 	 ;; Add a context search string
 	 (when (org-xor org-context-in-file-links arg)
-	   (setq txt (cond
+	   (let ((e (org-element-at-point)))
+	     (setq txt (cond
 		      ((org-at-heading-p) nil)
+		      ((eq (org-element-type e) 'keyword)
+		       (plist-get (cadr e) :value))
 		      ((org-region-active-p)
-		       (buffer-substring (region-beginning) (region-end)))))
+		       (buffer-substring (region-beginning) (region-end))))))
 	   (when (or (null txt) (string-match "\\S-" txt))
 	     (setq cpltxt
 		   (concat cpltxt "::"
