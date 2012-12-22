@@ -45,12 +45,12 @@
 (require 'org-agenda)
 
 (defgroup org-contacts nil
-  "Options concerning contacts management."
+  "Options about contacts management."
   :group 'org)
 
 (defcustom org-contacts-files nil
   "List of Org files to use as contacts source.
-If set to nil, all your Org files will be used."
+When set to nil, all your Org files will be used."
   :type '(repeat file)
   :group 'org-contacts)
 
@@ -70,7 +70,8 @@ If set to nil, all your Org files will be used."
   :group 'org-contacts)
 
 (defcustom org-contacts-birthday-format "Birthday: %l (%Y)"
-  "Format of the anniversary agenda entry. The following replacements are available:
+  "Format of the anniversary agenda entry.
+The following replacements are available:
 
   %h - Heading name
   %l - Link to the heading
@@ -188,10 +189,12 @@ If both match values are nil, return all contacts."
                       (point))))
          (orig (buffer-substring start end))
          (completion-ignore-case org-contacts-completion-ignore-case)
-         (group-completion-p (org-string-match-p (concat "^" org-contacts-group-prefix) orig))
+         (group-completion-p (org-string-match-p
+			      (concat "^" org-contacts-group-prefix) orig))
          (completion-list
           (if group-completion-p
-              (mapcar (lambda (group) (propertize (concat org-contacts-group-prefix group) 'org-contacts-group group))
+              (mapcar (lambda (group) (propertize (concat org-contacts-group-prefix group)
+						  'org-contacts-group group))
                       (org-uniquify
                        (loop for contact in (org-contacts-filter)
                              with group-list
@@ -203,8 +206,8 @@ If both match values are nil, return all contacts."
                   for contact-name = (car contact)
                   ;; Build the list of the user email addresses.
                   for email-list = (split-string (or
-                                                  (cdr (assoc-string org-contacts-email-property (caddr contact)))
-                                                  ""))
+                                                  (cdr (assoc-string org-contacts-email-property
+								     (caddr contact))) ""))
                   ;; If the user has email addresses…
                   if email-list
                   ;; … append a list of USER <EMAIL>.
@@ -216,22 +219,28 @@ If both match values are nil, return all contacts."
     (when (and group-completion-p
                (= (length completion-list) 1))
       (setq completion-list
-            (list (concat (car completion-list) ";: "
-                          (mapconcat 'identity
-                                     (loop for contact in (org-contacts-filter
-                                                           nil
-                                                           (get-text-property 0 'org-contacts-group (car completion-list)))
-                                           ;; The contact name is always the car of the assoc-list
-                                           ;; returned by `org-contacts-filter'.
-                                           for contact-name = (car contact)
-                                           ;; Grab the first email of the contact
-                                           for email = (car (split-string (or
-                                                                           (cdr (assoc-string org-contacts-email-property (caddr contact)))
-                                                                           "")))
-                                           ;; If the user has an email address, append USER <EMAIL>.
-                                           if email collect (org-contacts-format-email contact-name email))
-                                     ", ")))))
-    (list start end (completion-table-case-fold completion-list (not org-contacts-completion-ignore-case)))))
+            (list (concat
+		   (car completion-list) ";: "
+		   (mapconcat 'identity
+			      (loop for contact in (org-contacts-filter
+						    nil
+						    (get-text-property 0 'org-contacts-group
+								       (car completion-list)))
+				    ;; The contact name is always the car of the assoc-list
+				    ;; returned by `org-contacts-filter'.
+				    for contact-name = (car contact)
+				    ;; Grab the first email of the contact
+				    for email = (car (split-string
+						      (or
+						       (cdr (assoc-string org-contacts-email-property
+									  (caddr contact)))
+						       "")))
+				    ;; If the user has an email address, append USER <EMAIL>.
+				    if email collect (org-contacts-format-email contact-name email))
+			      ", ")))))
+    (list start end
+	  (completion-table-case-fold completion-list
+				      (not org-contacts-completion-ignore-case)))))
 
 (defun org-contacts-message-complete-function ()
   "Function used in `completion-at-point-functions' in `message-mode'."
@@ -438,7 +447,7 @@ Depends on Wanderlust been loaded."
                                         (widen))))))
 
 (defun org-contacts-wl-get-name-email ()
-  "Get name and email address from wanderlust email.
+  "Get name and email address from Wanderlust email.
 See `org-contacts-wl-get-from-header-content' for limitations."
   (let ((from (org-contacts-wl-get-from-header-content)))
     (when from
@@ -447,13 +456,14 @@ See `org-contacts-wl-get-from-header-content' for limitations."
 
 (defun org-contacts-template-wl-name (&optional return-value)
   "Try to return the contact name for a template from wl.
-If not found return RETURN-VALUE or something that would ask the user."
+If not found, return RETURN-VALUE or something that would ask the
+user."
   (or (car (org-contacts-wl-get-name-email))
       return-value
       "%^{Name}"))
 
 (defun org-contacts-template-wl-email (&optional return-value)
-  "Try to return the contact email for a template from wl.
+  "Try to return the contact email for a template from Wanderlust.
 If not found return RETURN-VALUE or something that would ask the user."
   (or (cadr (org-contacts-wl-get-name-email))
       return-value
@@ -461,7 +471,8 @@ If not found return RETURN-VALUE or something that would ask the user."
 
 (defun org-contacts-view-send-email (&optional ask)
   "Send email to the contact at point.
-If ASK is set, ask for the email address even if there's only one address."
+If ASK is set, ask for the email address even if there's only one
+address."
   (interactive "P")
   (let ((marker (org-get-at-bol 'org-hd-marker)))
     (org-with-point-at marker
@@ -547,14 +558,22 @@ If ASK is set, ask for the email address even if there's only one address."
              `(,org-contacts-nickname-property . org-contacts-completing-read-nickname))
 
 (defun org-contacts-vcard-escape (str)
-  "Escape ; , and \n in STR for use in the VCard format.
-Thanks to http://www.emacswiki.org/cgi-bin/wiki/bbdb-vcard-export.el for the regexp."
+  "Escape ; , and \n in STR for the VCard format."
+  ;; Thanks to this library for the regexp:
+  ;; http://www.emacswiki.org/cgi-bin/wiki/bbdb-vcard-export.el
   (when str
-    (replace-regexp-in-string "\n" "\\\\n" (replace-regexp-in-string "\\(;\\|,\\|\\\\\\)" "\\\\\\1" str))))
+    (replace-regexp-in-string
+     "\n" "\\\\n"
+     (replace-regexp-in-string "\\(;\\|,\\|\\\\\\)" "\\\\\\1" str))))
 
 (defun org-contacts-vcard-encode-name (name)
-  "Try to encode NAME as VCard's N property. The N property expects FamilyName;GivenName;AdditionalNames;Prefix;Postfix.
-Org-contacts does not specify how to encode the name. So we try to do our best."
+  "Try to encode NAME as VCard's N property.
+The N property expects
+
+  FamilyName;GivenName;AdditionalNames;Prefix;Postfix.
+
+Org-contacts does not specify how to encode the name.  So we try
+to do our best."
   (concat (replace-regexp-in-string "\\(\\w+\\) \\(.*\\)" "\\2;\\1" name) ";;;"))
 
 (defun org-contacts-vcard-format (contact)
@@ -566,7 +585,6 @@ Org-contacts does not specify how to encode the name. So we try to do our best."
 	 (bday (org-contacts-vcard-escape (cdr (assoc-string org-contacts-birthday-property properties))))
 	 (addr (cdr (assoc-string org-contacts-address-property properties)))
 	 (nick (org-contacts-vcard-escape (cdr (assoc-string org-contacts-nickname-property properties))))
-
 	 (head (format "BEGIN:VCARD\nVERSION:3.0\nN:%s\nFN:%s\n" n name)))
     (concat head
 	    (when email (format "EMAIL:%s\n" email))
@@ -582,7 +600,10 @@ Org-contacts does not specify how to encode the name. So we try to do our best."
 	    "END:VCARD\n\n")))
 
 (defun org-contacts-export-as-vcard (&optional name file to-buffer)
-  "Export all contacts matching NAME as VCard 3.0. It TO-BUFFER is nil, the content is written to FILE or `org-contacts-vcard-file'. If TO-BUFFER is non-nil, the buffer is created and the VCard is written into that buffer."
+  "Export all contacts matching NAME as VCard 3.0.
+If TO-BUFFER is nil, the content is written to FILE or
+`org-contacts-vcard-file'.  If TO-BUFFER is non-nil, the buffer
+is created and the VCard is written into that buffer."
   (interactive) ; TODO ask for name?
   (let* ((filename (or file org-contacts-vcard-file))
 	 (buffer (if to-buffer
@@ -607,7 +628,8 @@ Org-contacts does not specify how to encode the name. So we try to do our best."
 	(progn (save-buffer) (kill-buffer)))))
 
 (defun org-contacts-show-map (&optional name)
-  "Show contacts on a map. Requires google-maps-el."
+  "Show contacts on a map.
+Requires google-maps-el."
   (interactive)
   (unless (fboundp 'google-maps-static-show)
     (error "`org-contacts-show-map' requires `google-maps-el'"))
