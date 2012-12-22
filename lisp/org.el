@@ -6230,7 +6230,8 @@ in special contexts.
 	      (and org-cycle-level-after-item/entry-creation
 		   (or (org-cycle-level)
 		       (org-cycle-item-indentation))))
-    (let* ((limit-level
+    (let* (message-log-max ; Don't populate the *Messages* buffer
+	   (limit-level
 	    (or org-cycle-max-level
 		(and (boundp 'org-inlinetask-min-level)
 		     org-inlinetask-min-level
@@ -6345,7 +6346,8 @@ in special contexts.
 (defun org-cycle-internal-global ()
   "Do the global cycling action."
   ;; Hack to avoid display of messages for .org  attachments in Gnus
-  (let ((ga (string-match "\\*fontification" (buffer-name))))
+  (let (message-log-max ; Don't populate the *Messages* buffer
+	(ga (string-match "\\*fontification" (buffer-name))))
     (cond
      ((and (eq last-command this-command)
 	   (eq org-cycle-global-status 'overview))
@@ -6377,7 +6379,8 @@ in special contexts.
 
 (defun org-cycle-internal-local ()
   "Do the local cycling action."
-  (let ((goal-column 0) eoh eol eos has-children children-skipped struct)
+  (let (message-log-max ; Don't populate the *Messages* buffer
+	(goal-column 0) eoh eol eos has-children children-skipped struct)
     ;; First, determine end of headline (EOH), end of subtree or item
     ;; (EOS), and if item or heading has children (HAS-CHILDREN).
     (save-excursion
@@ -10896,8 +10899,9 @@ SEPARATOR is passed through to `org-format-outline-path'.  It separates
 the different parts of the path and defaults to \"/\".
 If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
   (interactive "P")
-  (let* ((bfn (buffer-file-name (buffer-base-buffer)))
-	 (case-fold-search nil)
+  (let* (case-fold-search
+	 message-log-max ; Don't populate the *Messages* buffer
+	 (bfn (buffer-file-name (buffer-base-buffer)))
 	 (path (and (derived-mode-p 'org-mode) (org-get-outline-path)))
 	 res)
     (if current (setq path (append path
