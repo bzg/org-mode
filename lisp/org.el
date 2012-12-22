@@ -3982,9 +3982,6 @@ Normal means, no org-mode-specific context."
 (declare-function speedbar-line-directory "speedbar" (&optional depth))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
 
-(defvar w3m-current-url)
-(defvar w3m-current-title)
-
 (defvar org-latex-regexps)
 
 ;;; Autoload and prepare some org modules

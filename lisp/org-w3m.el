@@ -43,6 +43,8 @@
 
 (require 'org)
 
+(defvar w3m-current-url)
+(defvar w3m-current-title)
 
 (add-hook 'org-store-link-functions 'org-w3m-store-link)
 (defun org-w3m-store-link ()
