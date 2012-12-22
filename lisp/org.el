@@ -9062,7 +9062,12 @@ part of Org's core."
      (if (consp link) (setq cpltxt (car link) link (cdr link)))
      (setq link (or link cpltxt)
 	   desc (or desc cpltxt))
-     (if (equal desc "NONE") (setq desc nil))
+     (cond ((equal desc "NONE") (setq desc nil))
+	   ((string-match org-bracket-link-regexp desc)
+	    (setq desc (replace-regexp-in-string
+			org-bracket-link-regexp
+			(concat "\\3" (if (equal (length (match-string 0 desc))
+						 (length desc)) "*" "")) desc))))
 
      (if (and (or (org-called-interactively-p 'any) executing-kbd-macro) link)
 	 (progn
