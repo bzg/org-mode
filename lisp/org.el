@@ -3882,6 +3882,13 @@ Use customize to modify this, or restart Emacs after changing it."
 	   (string :tag "HTML end tag")
 	   (option (const verbatim)))))
 
+(defvar org-syntax-table
+  (let ((st (make-syntax-table)))
+    (mapc (lambda(c) (modify-syntax-entry
+		      (string-to-char (car c)) "w p" st))
+	  org-emphasis-alist)
+    st))
+
 (defvar org-protecting-blocks
   '("src" "example" "latex" "ascii" "html" "docbook" "ditaa" "dot" "r" "R")
   "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
@@ -3974,9 +3981,6 @@ Normal means, no org-mode-specific context."
 (defvar texmathp-why)
 (declare-function speedbar-line-directory "speedbar" (&optional depth))
 (declare-function table--at-cell-p "table" (position &optional object at-column))
-
-(defvar w3m-current-url)
-(defvar w3m-current-title)
 
 (defvar org-latex-regexps)
 
@@ -6230,7 +6234,8 @@ in special contexts.
 	      (and org-cycle-level-after-item/entry-creation
 		   (or (org-cycle-level)
 		       (org-cycle-item-indentation))))
-    (let* ((limit-level
+    (let* (message-log-max ; Don't populate the *Messages* buffer
+	   (limit-level
 	    (or org-cycle-max-level
 		(and (boundp 'org-inlinetask-min-level)
 		     org-inlinetask-min-level
@@ -6345,7 +6350,8 @@ in special contexts.
 (defun org-cycle-internal-global ()
   "Do the global cycling action."
   ;; Hack to avoid display of messages for .org  attachments in Gnus
-  (let ((ga (string-match "\\*fontification" (buffer-name))))
+  (let (message-log-max ; Don't populate the *Messages* buffer
+	(ga (string-match "\\*fontification" (buffer-name))))
     (cond
      ((and (eq last-command this-command)
 	   (eq org-cycle-global-status 'overview))
@@ -6377,7 +6383,8 @@ in special contexts.
 
 (defun org-cycle-internal-local ()
   "Do the local cycling action."
-  (let ((goal-column 0) eoh eol eos has-children children-skipped struct)
+  (let (message-log-max ; Don't populate the *Messages* buffer
+	(goal-column 0) eoh eol eos has-children children-skipped struct)
     ;; First, determine end of headline (EOH), end of subtree or item
     ;; (EOS), and if item or heading has children (HAS-CHILDREN).
     (save-excursion
@@ -7189,6 +7196,9 @@ current headline.  If point is not at the beginning, split the line,
 create the new headline with the text in the current line after point
 \(but see also the variable `org-M-RET-may-split-line').
 
+With a double prefix arg, force the heading to be inserted at the
+end of the parent subtree.
+
 When INVISIBLE-OK is set, stop at invisible headlines when going back.
 This is important for non-interactive uses of the command."
   (interactive "P")
@@ -7256,7 +7266,10 @@ This is important for non-interactive uses of the command."
 		tags pos)
 	    (cond
 	     (org-insert-heading-respect-content
-	      (org-end-of-subtree nil t)
+	      (if (not (equal force-heading '(16)))
+		  (org-end-of-subtree nil t)
+		(org-up-heading-safe)
+		(org-end-of-subtree nil t))
 	      (when (featurep 'org-inlinetask)
 		(while (and (not (eobp))
 			    (looking-at "\\(\\*+\\)[ \t]+")
@@ -7368,10 +7381,12 @@ This is a list with the following elements:
 (defun org-insert-todo-heading (arg &optional force-heading)
   "Insert a new heading with the same level and TODO state as current heading.
 If the heading has no TODO state, or if the state is DONE, use the first
-state (TODO by default).  Also with prefix arg, force first state."
+state (TODO by default).  Also one prefix arg, force first state.  With two
+prefix args, force inserting at the end of the parent subtree."
   (interactive "P")
   (when (or force-heading (not (org-insert-item 'checkbox)))
-    (org-insert-heading force-heading)
+    (org-insert-heading (or (and (equal arg '(16)) '(16))
+			    force-heading))
     (save-excursion
       (org-back-to-heading)
       (outline-previous-heading)
@@ -8870,20 +8885,31 @@ type.  For a simple example of an export function, see `org-bbdb.el'."
 This link is added to `org-stored-links' and can later be inserted
 into an org-buffer with \\[org-insert-link].
 
-For some link types, a prefix arg is interpreted:
-For links to usenet articles, arg negates `org-gnus-prefer-web-links'.
-For file links, arg negates `org-context-in-file-links'."
+For some link types, a prefix arg is interpreted.
+For links to Usenet articles, arg negates `org-gnus-prefer-web-links'.
+For file links, arg negates `org-context-in-file-links'.
+
+A double prefix arg force skipping storing functions that are not
+part of Org's core."
   (interactive "P")
   (org-load-modules-maybe)
   (setq org-store-link-plist nil)  ; reset
   (org-with-limited-levels
-   (let (link cpltxt desc description search txt custom-id agenda-link)
+   (let (link cpltxt desc description search txt custom-id agenda-link sfuns sfunsn)
      (cond
-
-      ((run-hook-with-args-until-success 'org-store-link-functions)
-       (setq link (plist-get org-store-link-plist :link)
-	     desc (or (plist-get org-store-link-plist :description) link)))
-
+      ((and (not (equal arg '(16)))
+	    (setq sfuns
+		  (delq
+		   nil (mapcar (lambda (f) (let (fs) (if (funcall f) (push f fs))))
+			       org-store-link-functions))
+		  sfunsn (mapcar (lambda (fu) (symbol-name (car fu))) sfuns))
+	    (or (and (cdr sfuns)
+		     (funcall (intern
+			       (completing-read "Which function for creating the link? "
+						sfunsn t (car sfunsn)))))
+		(funcall (caar sfuns)))
+	    (setq link (plist-get org-store-link-plist :link)
+		  desc (or (plist-get org-store-link-plist :description) link))))
       ((org-src-edit-buffer-p)
        (let (label gc)
 	 (while (or (not label)
@@ -8938,11 +8964,6 @@ For file links, arg negates `org-context-in-file-links'."
 		      (url-view-url t))
 	     link (url-view-url t))
        (org-store-link-props :type "w3" :url (url-view-url t)))
-
-      ((eq major-mode 'w3m-mode)
-       (setq cpltxt (or w3m-current-title w3m-current-url)
-	     link w3m-current-url)
-       (org-store-link-props :type "w3m" :url (url-view-url t)))
 
       ((setq search (run-hook-with-args-until-success
 		     'org-create-file-search-functions))
@@ -9001,10 +9022,13 @@ For file links, arg negates `org-context-in-file-links'."
 			       (buffer-file-name (buffer-base-buffer)))))
 	 ;; Add a context search string
 	 (when (org-xor org-context-in-file-links arg)
-	   (setq txt (cond
+	   (let ((e (org-element-at-point)))
+	     (setq txt (cond
 		      ((org-at-heading-p) nil)
+		      ((eq (org-element-type e) 'keyword)
+		       (plist-get (cadr e) :value))
 		      ((org-region-active-p)
-		       (buffer-substring (region-beginning) (region-end)))))
+		       (buffer-substring (region-beginning) (region-end))))))
 	   (when (or (null txt) (string-match "\\S-" txt))
 	     (setq cpltxt
 		   (concat cpltxt "::"
@@ -9035,14 +9059,19 @@ For file links, arg negates `org-context-in-file-links'."
        (setq link cpltxt))
 
       ((org-called-interactively-p 'interactive)
-       (error "Cannot link to a buffer which is not visiting a file"))
+       (user-error "No method for storing a link from this buffer"))
 
       (t (setq link nil)))
 
      (if (consp link) (setq cpltxt (car link) link (cdr link)))
      (setq link (or link cpltxt)
 	   desc (or desc cpltxt))
-     (if (equal desc "NONE") (setq desc nil))
+     (cond ((equal desc "NONE") (setq desc nil))
+	   ((string-match org-bracket-link-regexp desc)
+	    (setq desc (replace-regexp-in-string
+			org-bracket-link-regexp
+			(concat "\\3" (if (equal (length (match-string 0 desc))
+						 (length desc)) "*" "")) desc))))
 
      (if (and (or (org-called-interactively-p 'any) executing-kbd-macro) link)
 	 (progn
@@ -9111,23 +9140,15 @@ according to FMT (default from `org-email-link-description-format')."
 	(setq fmt (replace-match "from %f" t t fmt))))
     (org-replace-escapes fmt table)))
 
-(defun org-make-org-heading-search-string (&optional string heading)
-  "Make search string for STRING or current headline."
-  (interactive)
-  (let ((s (or string (org-get-heading)))
+(defun org-make-org-heading-search-string (&optional string)
+  "Make search string for the current headline or STRING."
+  (let ((s (or string
+	       (and (derived-mode-p 'org-mode)
+		    (save-excursion
+		      (org-back-to-heading t)
+		      (plist-get (cadr (org-element-at-point))
+				 :raw-value)))))
 	(lines org-context-in-file-links))
-    (unless (and string (not heading))
-      ;; We are using a headline, clean up garbage in there.
-      (if (string-match org-todo-regexp s)
-	  (setq s (replace-match "" t t s)))
-      (if (string-match (org-re ":[[:alnum:]_@#%:]+:[ \t]*$") s)
-	  (setq s (replace-match "" t t s)))
-      (setq s (org-trim s))
-      (if (string-match (concat "^\\(" org-quote-string "\\|"
-				org-comment-string "\\)") s)
-	  (setq s (replace-match "" t t s)))
-      (while (string-match org-ts-regexp s)
-	(setq s (replace-match "" t t s))))
     (or string (setq s (concat "*" s)))  ; Add * for headlines
     (when (and string (integerp lines) (> lines 0))
       (let ((slines (org-split-string s "\n")))
@@ -10893,8 +10914,9 @@ SEPARATOR is passed through to `org-format-outline-path'.  It separates
 the different parts of the path and defaults to \"/\".
 If JUST-RETURN-STRING is non-nil, return a string, don't display a message."
   (interactive "P")
-  (let* ((bfn (buffer-file-name (buffer-base-buffer)))
-	 (case-fold-search nil)
+  (let* (case-fold-search
+	 message-log-max ; Don't populate the *Messages* buffer
+	 (bfn (buffer-file-name (buffer-base-buffer)))
 	 (path (and (derived-mode-p 'org-mode) (org-get-outline-path)))
 	 res)
     (if current (setq path (append path
@@ -18271,6 +18293,7 @@ BEG and END default to the buffer boundaries."
     (org-defkey narrow-map "e" 'org-narrow-to-element)
   (org-defkey org-mode-map "\C-xne" 'org-narrow-to-element))
 (org-defkey org-mode-map "\C-\M-t"  'org-transpose-element)
+(org-defkey org-mode-map "\M-t"  'org-transpose-words)
 (org-defkey org-mode-map "\M-}"     'org-forward-element)
 (org-defkey org-mode-map "\M-{"     'org-backward-element)
 (org-defkey org-mode-map "\C-c\C-^" 'org-up-element)
@@ -22496,6 +22519,12 @@ ones already marked."
       (narrow-to-region
        (org-element-property :begin elem)
        (org-element-property :end elem))))))
+
+(defun org-transpose-words ()
+  "Transpose words, using `org-mode' syntax table."
+  (interactive)
+  (with-syntax-table org-syntax-table
+    (call-interactively 'transpose-words)))
 
 (defun org-transpose-element ()
   "Transpose current and previous elements, keeping blank lines between.

@@ -43,6 +43,19 @@
 
 (require 'org)
 
+(defvar w3m-current-url)
+(defvar w3m-current-title)
+
+(add-hook 'org-store-link-functions 'org-w3m-store-link)
+(defun org-w3m-store-link ()
+  "Store a link to a w3m buffer."
+  (when (eq major-mode 'w3m-mode)
+    (org-store-link-props
+     :type "w3m"
+     :link w3m-current-url
+     :url (url-view-url t)
+     :description (or w3m-current-title w3m-current-url))))
+
 (defun org-w3m-copy-for-org-mode ()
   "Copy current buffer content or active region with `org-mode' style links.
 This will encode `link-title' and `link-location' with
