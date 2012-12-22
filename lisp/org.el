@@ -3882,6 +3882,13 @@ Use customize to modify this, or restart Emacs after changing it."
 	   (string :tag "HTML end tag")
 	   (option (const verbatim)))))
 
+(defvar org-syntax-table
+  (let ((st (make-syntax-table)))
+    (mapc (lambda(c) (modify-syntax-entry
+		      (string-to-char (car c)) "w p" st))
+	  org-emphasis-alist)
+    st))
+
 (defvar org-protecting-blocks
   '("src" "example" "latex" "ascii" "html" "docbook" "ditaa" "dot" "r" "R")
   "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
@@ -18287,6 +18294,7 @@ BEG and END default to the buffer boundaries."
     (org-defkey narrow-map "e" 'org-narrow-to-element)
   (org-defkey org-mode-map "\C-xne" 'org-narrow-to-element))
 (org-defkey org-mode-map "\C-\M-t"  'org-transpose-element)
+(org-defkey org-mode-map "\M-t"  'org-transpose-words)
 (org-defkey org-mode-map "\M-}"     'org-forward-element)
 (org-defkey org-mode-map "\M-{"     'org-backward-element)
 (org-defkey org-mode-map "\C-c\C-^" 'org-up-element)
@@ -22512,6 +22520,12 @@ ones already marked."
       (narrow-to-region
        (org-element-property :begin elem)
        (org-element-property :end elem))))))
+
+(defun org-transpose-words ()
+  "Transpose words, using `org-mode' syntax table."
+  (interactive)
+  (with-syntax-table org-syntax-table
+    (call-interactively 'transpose-words)))
 
 (defun org-transpose-element ()
   "Transpose current and previous elements, keeping blank lines between.
