@@ -7192,6 +7192,9 @@ current headline.  If point is not at the beginning, split the line,
 create the new headline with the text in the current line after point
 \(but see also the variable `org-M-RET-may-split-line').
 
+With a double prefix arg, force the heading to be inserted at the
+end of the parent subtree.
+
 When INVISIBLE-OK is set, stop at invisible headlines when going back.
 This is important for non-interactive uses of the command."
   (interactive "P")
@@ -7259,7 +7262,10 @@ This is important for non-interactive uses of the command."
 		tags pos)
 	    (cond
 	     (org-insert-heading-respect-content
-	      (org-end-of-subtree nil t)
+	      (if (not (equal force-heading '(16)))
+		  (org-end-of-subtree nil t)
+		(org-up-heading-safe)
+		(org-end-of-subtree nil t))
 	      (when (featurep 'org-inlinetask)
 		(while (and (not (eobp))
 			    (looking-at "\\(\\*+\\)[ \t]+")
@@ -7371,10 +7377,12 @@ This is a list with the following elements:
 (defun org-insert-todo-heading (arg &optional force-heading)
   "Insert a new heading with the same level and TODO state as current heading.
 If the heading has no TODO state, or if the state is DONE, use the first
-state (TODO by default).  Also with prefix arg, force first state."
+state (TODO by default).  Also one prefix arg, force first state.  With two
+prefix args, force inserting at the end of the parent subtree."
   (interactive "P")
   (when (or force-heading (not (org-insert-item 'checkbox)))
-    (org-insert-heading force-heading)
+    (org-insert-heading (or (and (equal arg '(16)) '(16))
+			    force-heading))
     (save-excursion
       (org-back-to-heading)
       (outline-previous-heading)
