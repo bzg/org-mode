@@ -147,17 +147,17 @@ This overrides `org-email-link-description-format' if set."
   "Search for a contact maching NAME-MATCH and TAGS-MATCH.
 If both match values are nil, return all contacts."
   (let* (todo-only
-	(tags-matcher
-         (if tags-match
-             (cdr (org-make-tags-matcher tags-match))
-           t))
-        (name-matcher
-         (if name-match
-             '(org-string-match-p name-match (org-get-heading t))
-           t))
-        (contacts-matcher
-         (cdr (org-make-tags-matcher org-contacts-matcher)))
-        markers result)
+	 (tags-matcher
+	  (if tags-match
+	      (cdr (org-make-tags-matcher tags-match))
+	    t))
+	 (name-matcher
+	  (if name-match
+	      '(org-string-match-p name-match (org-get-heading t))
+	    t))
+	 (contacts-matcher
+	  (cdr (org-make-tags-matcher org-contacts-matcher)))
+	 markers result)
     (dolist (file (org-contacts-files))
       (org-check-agenda-file file)
       (with-current-buffer (org-get-agenda-file-buffer file)
@@ -246,8 +246,8 @@ If both match values are nil, return all contacts."
   "Function used in `completion-at-point-functions' in `message-mode'."
   (let ((mail-abbrev-mode-regexp
          "^\\(Resent-To\\|To\\|B?Cc\\|Reply-To\\|From\\|Mail-Followup-To\\|Mail-Copies-To\\|Disposition-Notification-To\\|Return-Receipt-To\\):"))
-        (when (mail-abbrev-in-expansion-header-p)
-          (org-contacts-complete-name))))
+    (when (mail-abbrev-in-expansion-header-p)
+      (org-contacts-complete-name))))
 
 (defun org-contacts-gnus-get-name-email ()
   "Get name and email address from Gnus message."
@@ -442,9 +442,9 @@ Depends on Wanderlust been loaded."
                                           (wl-summary-message-number)
                                           'from)))
      ((eq major-mode 'mime-view-mode) (std11-narrow-to-header)
-                                      (prog1
-                                          (std11-fetch-field "From")
-                                        (widen))))))
+      (prog1
+	  (std11-fetch-field "From")
+	(widen))))))
 
 (defun org-contacts-wl-get-name-email ()
   "Get name and email address from Wanderlust email.
@@ -608,7 +608,7 @@ is created and the VCard is written into that buffer."
   (let* ((filename (or file org-contacts-vcard-file))
 	 (buffer (if to-buffer
 		     (get-buffer-create to-buffer)
-		     (find-file-noselect filename))))
+		   (find-file-noselect filename))))
 
     (message "Exporting...")
 
@@ -621,11 +621,11 @@ is created and the VCard is written into that buffer."
       (set-buffer-file-coding-system coding-system-for-write))
 
     (loop for contact in (org-contacts-filter name)
-	 do (insert (org-contacts-vcard-format contact)))
+	  do (insert (org-contacts-vcard-format contact)))
 
     (if to-buffer
 	(current-buffer)
-	(progn (save-buffer) (kill-buffer)))))
+      (progn (save-buffer) (kill-buffer)))))
 
 (defun org-contacts-show-map (&optional name)
   "Show contacts on a map.
@@ -636,9 +636,9 @@ Requires google-maps-el."
   (google-maps-static-show
    :markers
    (loop
-      for contact in (org-contacts-filter name)
-      for addr = (cdr (assoc-string org-contacts-address-property (caddr contact)))
-      if addr
-      collect (cons (list addr) (list :label (string-to-char (car contact)))))))
+    for contact in (org-contacts-filter name)
+    for addr = (cdr (assoc-string org-contacts-address-property (caddr contact)))
+    if addr
+    collect (cons (list addr) (list :label (string-to-char (car contact)))))))
 
 (provide 'org-contacts)
