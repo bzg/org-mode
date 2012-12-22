@@ -39,7 +39,7 @@
 @end macro
 @copying
 
-Copyright @copyright{} 2010-2012 Free Software Foundation
+Copyright @copyright{} 2010--2012 Free Software Foundation
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -927,7 +927,7 @@ like this:
 The keywords should all be different, this helps Org mode to keep track of
 which subsequence should be used for a given entry.  The example also shows
 how to define keys for fast access of a particular state, by adding a letter
-in parenthesis after each keyword - you will be prompted for the key after
+in parenthesis after each keyword---you will be prompted for the key after
 @kbd{C-c C-t}.
 
 To define TODO keywords that are valid only in a single file, use the
@@ -1946,7 +1946,7 @@ Narrow the current agenda filter by an additional condition.
 
 @tsubheading{Remote editing (see the manual for many more commands)}
 
-@item 0-9
+@item 0--9
 Digit argument.
 @c
 @item t

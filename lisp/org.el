@@ -7812,7 +7812,6 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
     (if (org-called-interactively-p 'any)
 	(org-back-to-heading nil) ; take what looks like a subtree
       (org-back-to-heading t)) ; take what is really there
-    (org-back-over-empty-lines)
     (setq beg (point))
     (skip-chars-forward " \t\r\n")
     (save-match-data
@@ -7822,7 +7821,6 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
 	  (org-forward-heading-same-level (1- n) t)
 	(error nil))
       (org-end-of-subtree t t))
-    (org-back-over-empty-lines)
     (setq end (point))
     (goto-char beg0)
     (when (> end beg)
@@ -7913,7 +7911,6 @@ the inserted text when done."
 	 (delete-region (point-at-bol) (point)))
      ;; Paste
      (beginning-of-line (if (bolp) 1 2))
-     (unless for-yank (org-back-over-empty-lines))
      (setq beg (point))
      (and (fboundp 'org-id-paste-tracker) (org-id-paste-tracker txt))
      (insert-before-markers txt)
@@ -11631,7 +11628,8 @@ For calling through lisp, arg is also interpreted in the following way:
 	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (if (equal arg '(16)) (setq arg 'nextset))
     (let ((org-blocker-hook org-blocker-hook)
-	  (case-fold-search nil))
+	  commentp
+	  case-fold-search)
       (when (equal arg '(64))
 	(setq arg nil org-blocker-hook nil))
       (when (and org-blocker-hook
@@ -11641,6 +11639,9 @@ For calling through lisp, arg is also interpreted in the following way:
       (save-excursion
 	(catch 'exit
 	  (org-back-to-heading t)
+	  (when (looking-at (concat "^\\*+ " org-comment-string))
+	    (org-toggle-comment)
+	    (setq commentp t))
 	  (if (looking-at org-outline-regexp) (goto-char (1- (match-end 0))))
 	  (or (looking-at (concat " +" org-todo-regexp "\\( +\\|[ \t]*$\\)"))
 	      (looking-at "\\(?: *\\|[ \t]*$\\)"))
@@ -11818,7 +11819,8 @@ For calling through lisp, arg is also interpreted in the following way:
 		  (and (looking-at " ") (just-one-space))))
 	    (when org-trigger-hook
 	      (save-excursion
-		(run-hook-with-args 'org-trigger-hook change-plist)))))))))
+		(run-hook-with-args 'org-trigger-hook change-plist)))
+	    (when commentp (org-toggle-comment))))))))
 
 (defun org-block-todo-from-children-or-siblings-or-parent (change-plist)
   "Block turning an entry into a TODO, using the hierarchy.
