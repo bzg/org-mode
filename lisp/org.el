@@ -11439,7 +11439,8 @@ For calling through lisp, arg is also interpreted in the following way:
 	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (if (equal arg '(16)) (setq arg 'nextset))
     (let ((org-blocker-hook org-blocker-hook)
-	  (case-fold-search nil))
+	  commentp
+	  case-fold-search)
       (when (equal arg '(64))
 	(setq arg nil org-blocker-hook nil))
       (when (and org-blocker-hook
@@ -11449,6 +11450,9 @@ For calling through lisp, arg is also interpreted in the following way:
       (save-excursion
 	(catch 'exit
 	  (org-back-to-heading t)
+	  (when (looking-at (concat "^\\*+ " org-comment-string))
+	    (org-toggle-comment)
+	    (setq commentp t))
 	  (if (looking-at org-outline-regexp) (goto-char (1- (match-end 0))))
 	  (or (looking-at (concat " +" org-todo-regexp "\\( +\\|[ \t]*$\\)"))
 	      (looking-at "\\(?: *\\|[ \t]*$\\)"))
@@ -11624,7 +11628,8 @@ For calling through lisp, arg is also interpreted in the following way:
 		  (and (looking-at " ") (just-one-space))))
 	    (when org-trigger-hook
 	      (save-excursion
-		(run-hook-with-args 'org-trigger-hook change-plist)))))))))
+		(run-hook-with-args 'org-trigger-hook change-plist)))
+	    (when commentp (org-toggle-comment))))))))
 
 (defun org-block-todo-from-children-or-siblings-or-parent (change-plist)
   "Block turning an entry into a TODO, using the hierarchy.
