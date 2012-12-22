@@ -8876,20 +8876,31 @@ type.  For a simple example of an export function, see `org-bbdb.el'."
 This link is added to `org-stored-links' and can later be inserted
 into an org-buffer with \\[org-insert-link].
 
-For some link types, a prefix arg is interpreted:
-For links to usenet articles, arg negates `org-gnus-prefer-web-links'.
-For file links, arg negates `org-context-in-file-links'."
+For some link types, a prefix arg is interpreted.
+For links to Usenet articles, arg negates `org-gnus-prefer-web-links'.
+For file links, arg negates `org-context-in-file-links'.
+
+A double prefix arg force skipping storing functions that are not
+part of Org's core."
   (interactive "P")
   (org-load-modules-maybe)
   (setq org-store-link-plist nil)  ; reset
   (org-with-limited-levels
-   (let (link cpltxt desc description search txt custom-id agenda-link)
+   (let (link cpltxt desc description search txt custom-id agenda-link sfuns sfunsn)
      (cond
-
-      ((run-hook-with-args-until-success 'org-store-link-functions)
-       (setq link (plist-get org-store-link-plist :link)
-	     desc (or (plist-get org-store-link-plist :description) link)))
-
+      ((and (not (equal arg '(16)))
+	    (setq sfuns
+		  (delete
+		   nil (mapcar (lambda (f) (let (fs) (if (funcall f) (push f fs))))
+			       org-store-link-functions))
+		  sfunsn (mapcar (lambda (fu) (symbol-name (car fu))) sfuns))
+	    (or (and (cdr sfuns)
+		     (funcall (intern
+			       (completing-read "Which function for creating the link? "
+						sfunsn t (car sfunsn)))))
+		(funcall (caar sfuns)))
+	    (setq link (plist-get org-store-link-plist :link)
+		  desc (or (plist-get org-store-link-plist :description) link))))
       ((org-src-edit-buffer-p)
        (let (label gc)
 	 (while (or (not label)
