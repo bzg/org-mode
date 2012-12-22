@@ -2602,13 +2602,95 @@ Return nil, otherwise."
 			       (= (incf inline-image-count) 1)))
 			 (t nil))))))))
 
-(defun org-e-odt-resolve-numbered-paragraph (element info)
-  (when (eq (org-element-type element) 'item)
-    (let ((el element) ordinal)
-      (while (eq (org-element-type el) 'item)
-	(push (1+ (length (org-export-get-previous-element el info t))) ordinal)
-	(setq el (org-export-get-parent (org-export-get-parent el))))
-      ordinal)))
+(defun org-e-odt-link--infer-description (destination info)
+  ;; DESTINATION is a HEADLINE, a "<<target>>" or an element (like
+  ;; paragraph, verse-block etc) to which a "#+NAME: label" can be
+  ;; attached.  Note that labels that are attached to captioned
+  ;; entities - inline images, math formulae and tables - get resolved
+  ;; as part of `org-e-odt-format-label' and `org-e-odt--enumerate'.
+
+  ;; Create a cross-reference to DESTINATION but make best-efforts to
+  ;; create a *meaningful* description.  Check item numbers, section
+  ;; number and section title in that order.
+
+  ;; NOTE: Counterpart of `org-export-get-ordinal'.
+  ;; FIXME: Handle footnote-definition footnote-reference?
+  (let* ((genealogy (org-export-get-genealogy destination))
+	 (data (reverse genealogy))
+	 (label (case (org-element-type destination)
+		  (headline
+		   (format "sec-%s" (mapconcat 'number-to-string
+					       (org-export-get-headline-number
+						destination info) "-")))
+		  (target
+		   (org-element-property :value destination))
+		  (t (error "FIXME: Resolve %S" destination)))))
+    (or
+     (let* ( ;; Locate top-level list.
+	    (top-level-list
+	     (loop for x on data
+		   when (eq (org-element-type (car x)) 'plain-list)
+		   return x))
+	    ;; Get list item nos.
+	    (item-numbers
+	     (loop for (plain-list item . rest) on top-level-list by #'cddr
+		   until (not (eq (org-element-type plain-list) 'plain-list))
+		   collect (when (eq (org-element-property :type
+							   plain-list)
+				     'ordered)
+			     (1+ (length (org-export-get-previous-element
+					  item info t))))))
+	    ;; Locate top-most listified headline.
+	    (listified-headlines
+	     (loop for x on data
+		   when (and (eq (org-element-type (car x)) 'headline)
+			     (org-export-low-level-p (car x) info))
+		   return x))
+	    ;; Get listified headline numbers.
+	    (listified-headline-nos
+	     (loop for el in listified-headlines
+		   when (eq (org-element-type el) 'headline)
+		   collect (when (org-export-numbered-headline-p el info)
+			     (1+ (length (org-export-get-previous-element
+					  el info t)))))))
+       ;; Combine item numbers from both the listified headlines and
+       ;; regular list items.
+
+       ;; Case 1: Check if all the parents of list item are numbered.
+       ;; If yes, link to the item proper.
+       (let ((item-numbers (append listified-headline-nos item-numbers)))
+	 (when (and item-numbers (not (memq nil item-numbers)))
+	   (format "<text:bookmark-ref text:reference-format=\"number-all-superior\" text:ref-name=\"%s\">%s</text:bookmark-ref>"
+		   (org-export-solidify-link-text label)
+		   (mapconcat (lambda (n) (if (not n) " "
+					    (concat (number-to-string n) ".")))
+			      item-numbers "")))))
+     ;; Case 2: Locate a regular and numbered headline in the
+     ;; hierarchy.  Display it's section number.
+     (let ((headline (loop for el in (cons destination genealogy)
+			   when (and (eq (org-element-type el) 'headline)
+				     (not (org-export-low-level-p el info))
+				     (org-export-numbered-headline-p el info))
+			   return el)))
+       ;; We found one.
+       (when headline
+	 (format "<text:bookmark-ref text:reference-format=\"chapter\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
+		 (org-export-solidify-link-text label)
+		 (mapconcat 'number-to-string (org-export-get-headline-number
+					       headline info) "."))))
+     ;; Case 4: Locate a regular headline in the hierarchy.  Display
+     ;; it's title.
+     (let ((headline (loop for el in (cons destination genealogy)
+			   when (and (eq (org-element-type el) 'headline)
+				     (not (org-export-low-level-p el info)))
+			   return el)))
+       ;; We found one.
+       (when headline
+	 (format "<text:bookmark-ref text:reference-format=\"text\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
+		 (org-export-solidify-link-text label)
+		 (let ((title (org-element-property :title headline)))
+		   (org-export-data title info)))))
+     (error "FIXME?"))))
 
 (defun org-e-odt-link (link desc info)
   "Transcode a LINK object from Org to ODT.
@@ -2653,90 +2735,63 @@ INFO is a plist holding contextual information.  See
      ;; Links pointing to an headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
-      (let ((destination (if (string= type "fuzzy")
-			     (org-export-resolve-fuzzy-link link info)
-			   (org-export-resolve-id-link link info))))
-	(case (org-element-type destination)
-	  ;; Fuzzy link points nowhere.
-	  ('nil
+      (let* ((destination (if (string= type "fuzzy")
+			      (org-export-resolve-fuzzy-link link info)
+			    (org-export-resolve-id-link link info))))
+	(or
+	 ;; Case 1: Fuzzy link points nowhere.
+	 (when (null (org-element-type destination))
 	   (format "<text:span text:style-name=\"%s\">%s</text:span>"
 		   "Emphasis" (or desc (org-export-data
 					(org-element-property
 					 :raw-link link) info))))
-	  ;; Fuzzy link points to an invisible target.
-	  (keyword nil)
-	  ;; LINK points to an headline.  Check if LINK should display
-	  ;; section numbers.
-	  (headline
-	   (let* ((headline-no (org-export-get-headline-number destination info))
-		  (label (format "sec-%s" (mapconcat 'number-to-string
-						     headline-no "-"))))
+	 ;; Case 2: Fuzzy link points to an invisible target.  Strip it.
+	 (when (eq (org-element-type destination) 'keyword) "")
+	 ;; Case 3: LINK points to an headline.
+	 (when (eq (org-element-type destination) 'headline)
+	   ;; Case 3.1: LINK has a custom description that is
+	   ;; different from headline's title.  Create a hyperlink.
+	   (when (and desc
+		      (let ((link-desc (org-element-contents link)))
+			(not (string= (org-element-interpret-data link-desc)
+				      (org-element-property :raw-value
+							    destination)))))
+	     (let* ((headline-no (org-export-get-headline-number
+				  destination info))
+		    (label (format "sec-%s" (mapconcat 'number-to-string
+						       headline-no "-"))))
+	       (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
+		       label desc))))
+	 ;; Case 4: LINK points to an Inline image, Math formula or a Table.
+	 (let ((label-reference (ignore-errors (org-e-odt-format-label
+						destination info 'reference))))
+	   (when label-reference
 	     (cond
-	      ;; Case 1: LINK has a custom description that is
-	      ;; different from headline's title.  Create a hyperlink
-	      ;; that display LINK's description.
-	      ((and desc
-		    (let ((link-desc (org-element-contents link)))
-		      (not (string=
-			    (org-element-interpret-data link-desc)
-			    (org-element-property :raw-value destination))))
-		    (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
-			    label desc)))
-	      ;; Case 2: LINK has no custom description and HEADLINE
-	      ;; is numbered.  Display section number.
-	      ((org-export-numbered-headline-p destination info)
-	       (format "<text:bookmark-ref text:reference-format=\"chapter\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
-		       label (mapconcat 'number-to-string headline-no ".")))
-	      ;; Case 3: LINK has no custom descripiton and HEADLINE
-	      ;; is un-numbered.  Display headline's title.
-	      (t (let ((title (org-element-property :title destination)))
-		   (format "<text:bookmark-ref text:reference-format=\"text\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
-			   label (org-export-data title info)))))))
-	  ;; Fuzzy link points to a target.  Do as above.
-	  (target
-	   ;; Identify nearest meaningful container
-	   (let ((container
-		  (loop for parent in (org-export-get-genealogy destination)
-			when
-			(memq
-			 (org-element-type parent)
-			 '(footnote-definition footnote-reference headline item
-					       table))
-			return parent)))
-	     ;; There is a meaningful container
-	     (when container
-	       (case (org-element-type container)
-		 ;; Container is item
-		 (item
-		  (format
-		   "<text:bookmark-ref text:reference-format=\"number-all-superior\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
-		   (org-export-solidify-link-text path)
-		   (mapconcat 'number-to-string
-			      (org-e-odt-resolve-numbered-paragraph
-			       container info) ".")))))))
-	  (otherwise
-	   (let ((label-reference (ignore-errors
-				    (org-e-odt-format-label destination info
-							    'reference))))
-	     (cond
-	      ;; Case 1: Destination is a captioned/enumerated entity.
-	      ;; But LINK has no description.  Display the sequence
-	      ;; number.
-	      ((and label-reference (not desc)) label-reference)
-	      ;; Case 2: Destination is a captioned/enumerated entity
-	      ;; and LINK has description.  Insert a cross-reference
+	      ;; Case 4.1: LINK has no description. Create a
+	      ;; cross-reference showing entity's sequence number.
+	      ((not desc) label-reference)
+	      ;; Case 4.2: LINK has description.  Insert a hyperlink
 	      ;; with user-provided description.
-	      (label-reference
-	       (let* ((caption-from (case (org-element-type destination)
-				      (link (org-export-get-parent-element
-					     destination))
-				      (t destination)))
-		      ;; Get label and caption.
-		      (label (org-element-property :name caption-from)))
-		 (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
-			 (org-export-solidify-link-text label) desc)))
-	      ;; Case 3: Link is ending up in a no-man's land.
-	      (t (error "FIXME:  Link to no-man's land."))))))))
+	      (t (let* ((caption-from (case (org-element-type destination)
+					(link (org-export-get-parent-element
+					       destination))
+					(t destination)))
+			;; Get label and caption.
+			(label (org-element-property :name caption-from)))
+		   (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
+			   (org-export-solidify-link-text label) desc))))))
+	 ;; Case 5: Fuzzy link points to a TARGET.
+	 (when (eq (org-element-type destination) 'target)
+	   ;; Case 5.1: LINK has description.  Create a hyperlink.
+	   (when desc
+	     (let ((label (org-element-property :value destination)))
+	       (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
+		       (org-export-solidify-link-text label) desc))))
+	 ;; LINK has no description. It points to either a HEADLINE, a
+	 ;; TARGET or an ELEMENT with a #+NAME: LABEL attached to it.
+	 ;; LINK to DESTINATION, but make a best effort to provide a
+	 ;; *meaningful* description.
+	 (org-e-odt-link--infer-description destination info))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -2761,7 +2816,7 @@ INFO is a plist holding contextual information.  See
 			 desc-element org-e-odt-inline-image-rules))))
 	    ;; Format link as a clickable image.
 	    (format "\n<draw:a xlink:type=\"simple\" xlink:href=\"%s\">\n%s\n</draw:a>"
-	    	    path desc)
+		    path desc)
 	  ;; Otherwise, format it as a regular link.
 	  (format "<text:a xlink:type=\"simple\" xlink:href=\"%s\">%s</text:a>"
 		  path desc))))
