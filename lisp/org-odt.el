@@ -474,7 +474,7 @@ emacs   --batch
         --load=$HOME/lib/emacs/org.el
         --eval \"(setq org-export-headline-levels 2)\"
         --visit=MyFile --funcall org-export-as-odt-batch"
-  (org-lparse-batch "odt"))
+  (org-odt-cleanup-xml-buffers (org-lparse-batch "odt")))
 
 ;;; org-export-as-odt
 ;;;###autoload
