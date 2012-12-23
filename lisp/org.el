@@ -11259,8 +11259,7 @@ This function can be used in a hook."
     " +" t)))
 
 (defcustom org-structure-template-alist
-  '(
-    ("s" "#+BEGIN_SRC ?\n\n#+END_SRC"
+  '(("s" "#+BEGIN_SRC ?\n\n#+END_SRC"
      "<src lang=\"?\">\n\n</src>")
     ("e" "#+BEGIN_EXAMPLE\n?\n#+END_EXAMPLE"
      "<example>\n?\n</example>")
@@ -11268,6 +11267,8 @@ This function can be used in a hook."
      "<quote>\n?\n</quote>")
     ("v" "#+BEGIN_VERSE\n?\n#+END_VERSE"
      "<verse>\n?\n</verse>")
+    ("V" "#+BEGIN_VERBATIM\n?\n#+END_VERBATIM"
+     "<verbatim>\n?\n</verbatim>")
     ("c" "#+BEGIN_CENTER\n?\n#+END_CENTER"
      "<center>\n?\n</center>")
     ("l" "#+BEGIN_LaTeX\n?\n#+END_LaTeX"
@@ -11283,8 +11284,7 @@ This function can be used in a hook."
     ("i" "#+INDEX: ?"
      "#+INDEX: ?")
     ("I" "#+INCLUDE: %file ?"
-     "<include file=%file markup=\"?\">")
-    )
+     "<include file=%file markup=\"?\">"))
   "Structure completion elements.
 This is a list of abbreviation keys and values.  The value gets inserted
 if you type `<' followed by the key and then press the completion key,
@@ -18994,7 +18994,9 @@ Otherwise, return a user error."
 	  (beginning-of-line 1)
 	  (let ((case-fold-search )) (looking-at "[ \t]*#\\+tblfm:"))))
     (call-interactively 'org-table-edit-formulas))
-   ((or (org-in-src-block-p) (org-at-table.el-p)) (org-edit-src-code))
+   ((or (org-in-block-p '("src" "example" "verbatim"))
+	(org-at-table.el-p))
+    (org-edit-src-code))
    ((org-in-fixed-width-region-p) (org-edit-fixed-width-region))
    ((org-at-regexp-p org-any-link-re) (call-interactively 'ffap))
    (t (user-error "No special environment to edit here"))))
