@@ -5286,7 +5286,7 @@ will be prompted for."
     (and move (backward-char 1))))
 
 (defconst org-nonsticky-props
-  '(mouse-face highlight keymap invisible intangible help-echo org-linked-text))
+  '(mouse-face highlight keymap invisible intangible help-echo org-linked-text htmlize-link))
 
 (defsubst org-rear-nonsticky-at (pos)
   (add-text-properties (1- pos) pos (list 'rear-nonsticky org-nonsticky-props)))
