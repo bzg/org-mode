@@ -1353,7 +1353,7 @@ numbered sections and lower levels as unnumbered sections."
 	(insert (org-export-latex-content content))
 	(cond ((stringp subcontent) (insert subcontent))
 	      ((listp subcontent)
-	       (while (org-looking-back "\n\n") (backward-delete-char 1))
+	       (while (org-looking-back "\n\n") (delete-backward-char 1))
 	       (org-export-latex-sub subcontent)))
 	(when (and end (string-match "[^ \t]" end))
 	  (let ((hook (org-get-text-property-any 0 'org-insert-hook end)))
