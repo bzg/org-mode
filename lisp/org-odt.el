@@ -474,7 +474,7 @@ emacs   --batch
         --load=$HOME/lib/emacs/org.el
         --eval \"(setq org-export-headline-levels 2)\"
         --visit=MyFile --funcall org-export-as-odt-batch"
-  (org-lparse-batch "odt"))
+  (org-odt-cleanup-xml-buffers (org-lparse-batch "odt")))
 
 ;;; org-export-as-odt
 ;;;###autoload
@@ -1727,6 +1727,7 @@ ATTR is a string of other attributes of the a element."
        ((and (string= type "")
 	     (or (not thefile) (string= thefile ""))
 	     (plist-get org-lparse-opt-plist :section-numbers)
+	     (get-text-property 0 'org-no-description fragment)
 	     (setq sec-frag fragment)
 	     (or (string-match  "\\`sec\\(\\(-[0-9]+\\)+\\)" sec-frag)
 		 (and (setq sec-frag
@@ -1756,7 +1757,11 @@ ATTR is a string of other attributes of the a element."
 	(when (not (member type '("" "file")))
 	  (setq thefile (concat type ":" thefile)))
 
-	(let ((org-odt-suppress-xref nil))
+	(let ((org-odt-suppress-xref
+	       ;; Typeset link to headlines with description, as a
+	       ;; regular hyperlink.
+	       (and (string= type "")
+		    (not (get-text-property 0 'org-no-description fragment)))))
 	  (org-odt-format-link
 	   (org-xml-format-desc desc) thefile attr)))))))
 
