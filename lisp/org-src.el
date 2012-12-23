@@ -210,7 +210,7 @@ edited version.  An optional argument CONTEXT is used by \\[org-edit-src-save]
 when calling this function.  See `org-src-window-setup' to configure
 the display of windows containing the Org buffer and the code buffer."
   (interactive)
-  (if (not (org-in-src-block-p))
+  (if (not (org-in-block-p '("src" "example" "verbatim")))
       (user-error "Not in a source code block")
     (unless (eq context 'save)
       (setq org-edit-src-saved-temp-window-config (current-window-configuration)))
