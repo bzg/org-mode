@@ -1282,7 +1282,7 @@ do the following:
   TAB or RET are pressed to move to another field.  With optimization this
   happens only if changes to a field might have changed the column width.
 Optimization requires replacing the functions `self-insert-command',
-`delete-char', and `delete-backward-char' in Org-mode buffers, with a
+`delete-char', and `backward-delete-char' in Org-mode buffers, with a
 slight (in fact: unnoticeable) speed impact for normal typing.  Org-mode is
 very good at guessing when a re-align will be necessary, but you can always
 force one with \\[org-ctrl-c-ctrl-c].
@@ -7156,7 +7156,7 @@ This is important for non-interactive uses of the command."
 	(insert head) (just-one-space)
 	(setq pos (point))
 	(end-of-line 1)
-	(unless (= (point) pos) (just-one-space) (delete-backward-char 1))
+	(unless (= (point) pos) (just-one-space) (backward-delete-char 1))
         (when (and org-insert-heading-respect-content hide-previous)
 	  (save-excursion
 	    (goto-char previous-pos)
@@ -12313,7 +12313,7 @@ nil."
 	(replace-match "")
 	(if (and (string-match "\\S-" (buffer-substring (point-at-bol) (point)))
 		 (equal (char-before) ?\ ))
-	    (delete-backward-char 1)
+	    (backward-delete-char 1)
 	  (if (string-match "^[ \t]*$" (buffer-substring
 					(point-at-bol) (point-at-eol)))
 	      (delete-region (point-at-bol)
@@ -18221,7 +18221,7 @@ overwritten, and the table is not marked as requiring realignment."
      (looking-at "[^|\n]*  |"))
     (let (org-table-may-need-update)
       (goto-char (1- (match-end 0)))
-      (delete-backward-char 1)
+      (backward-delete-char 1)
       (goto-char (match-beginning 0))
       (self-insert-command N)))
    (t
@@ -18295,32 +18295,31 @@ The detailed reaction depends on the user option `org-catch-invisible-edits'."
     (org-align-tags-here org-tags-column)))
 
 (defun org-delete-backward-char (N)
-  "Like `delete-backward-char', but insert whitespace at field end in tables.
+  "Like `delete-backward-char', insert whitespace at field end in tables.
 When deleting backwards, in tables this function will insert whitespace in
 front of the next \"|\" separator, to keep the table aligned.  The table will
 still be marked for re-alignment if the field did fill the entire column,
 because, in this case the deletion might narrow the column."
   (interactive "p")
-  (save-match-data
-    (org-check-before-invisible-edit 'delete-backward)
-    (if (and (org-table-p)
-	     (eq N 1)
-	     (string-match "|" (buffer-substring (point-at-bol) (point)))
-	     (looking-at ".*?|"))
-	(let ((pos (point))
-	      (noalign (looking-at "[^|\n\r]*  |"))
-	      (c org-table-may-need-update))
-	  (delete-backward-char N)
-	  (if (not overwrite-mode)
-	      (progn
-		(skip-chars-forward "^|")
-		(insert " ")
-		(goto-char (1- pos))))
-	  ;; noalign: if there were two spaces at the end, this field
-	  ;; does not determine the width of the column.
-	  (if noalign (setq org-table-may-need-update c)))
-      (delete-backward-char N)
-      (org-fix-tags-on-the-fly))))
+  (org-check-before-invisible-edit 'delete-backward)
+  (if (and (org-table-p)
+	   (eq N 1)
+	   (string-match "|" (buffer-substring (point-at-bol) (point)))
+	   (looking-at ".*?|"))
+      (let ((pos (point))
+	    (noalign (looking-at "[^|\n\r]*  |"))
+	    (c org-table-may-need-update))
+	(backward-delete-char N)
+	(if (not overwrite-mode)
+	    (progn
+	      (skip-chars-forward "^|")
+	      (insert " ")
+	      (goto-char (1- pos))))
+	;; noalign: if there were two spaces at the end, this field
+	;; does not determine the width of the column.
+	(if noalign (setq org-table-may-need-update c)))
+    (backward-delete-char N)
+    (org-fix-tags-on-the-fly)))
 
 (defun org-delete-char (N)
   "Like `delete-char', but insert whitespace at field end in tables.
@@ -18330,25 +18329,24 @@ still be marked for re-alignment if the field did fill the entire column,
 because, in this case the deletion might narrow the column."
   (interactive "p")
   (org-check-before-invisible-edit 'delete)
-  (save-match-data
-    (if (and (org-table-p)
-	     (not (bolp))
-	     (not (= (char-after) ?|))
-	     (eq N 1))
-	(if (looking-at ".*?|")
-	    (let ((pos (point))
-		  (noalign (looking-at "[^|\n\r]*  |"))
-		  (c org-table-may-need-update))
-	      (replace-match (concat
-			      (substring (match-string 0) 1 -1)
-			      " |"))
-	      (goto-char pos)
-	      ;; noalign: if there were two spaces at the end, this field
-	      ;; does not determine the width of the column.
-	      (if noalign (setq org-table-may-need-update c)))
-	  (delete-char N))
-      (delete-char N)
-      (org-fix-tags-on-the-fly))))
+  (if (and (org-table-p)
+	   (not (bolp))
+	   (not (= (char-after) ?|))
+	   (eq N 1))
+      (if (looking-at ".*?|")
+	  (let ((pos (point))
+		(noalign (looking-at "[^|\n\r]*  |"))
+		(c org-table-may-need-update))
+	    (replace-match (concat
+			    (substring (match-string 0) 1 -1)
+			    " |"))
+	    (goto-char pos)
+	    ;; noalign: if there were two spaces at the end, this field
+	    ;; does not determine the width of the column.
+	    (if noalign (setq org-table-may-need-update c)))
+	(delete-char N))
+    (delete-char N)
+    (org-fix-tags-on-the-fly)))
 
 ;; Make `delete-selection-mode' work with org-mode and orgtbl-mode
 (put 'org-self-insert-command 'delete-selection t)
