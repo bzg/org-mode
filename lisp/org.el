@@ -18996,7 +18996,7 @@ Otherwise, return a user error."
 	  (beginning-of-line 1)
 	  (let ((case-fold-search )) (looking-at "[ \t]*#\\+tblfm:"))))
     (call-interactively 'org-table-edit-formulas))
-   ((or (org-in-block-p '("src" "example" "verbatim"))
+   ((or (org-in-block-p '("src" "example"))
 	(org-at-table.el-p))
     (org-edit-src-code))
    ((org-in-fixed-width-region-p) (org-edit-fixed-width-region))
