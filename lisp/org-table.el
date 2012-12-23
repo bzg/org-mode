@@ -3590,7 +3590,7 @@ With prefix ARG, apply the new formulas to the table."
 	    (beginning-of-line 1)
 	    (insert ind))
 	  (goto-char (point-max))
-	  (backward-delete-char 1)))
+	  (delete-backward-char 1)))
       (goto-char beg))
      (t nil))))
 
@@ -4245,7 +4245,7 @@ overwritten, and the table is not marked as requiring realignment."
 	   (looking-at "[^|\n]*  +|"))
       (let (org-table-may-need-update)
 	(goto-char (1- (match-end 0)))
-	(backward-delete-char 1)
+	(delete-backward-char 1)
 	(goto-char (match-beginning 0))
 	(self-insert-command N))
     (setq org-table-may-need-update t)
