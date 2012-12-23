@@ -567,7 +567,7 @@ publishing directory."
   (while (re-search-forward org-verbatim-re nil t)
     (org-if-unprotected-at (match-beginning 4)
       (goto-char (match-end 2))
-      (backward-delete-char 1) (insert "'")
+      (delete-backward-char 1) (insert "'")
       (goto-char (match-beginning 2))
       (delete-char 1) (insert "`")
       (goto-char (match-end 2))))
