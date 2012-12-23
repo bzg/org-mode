@@ -14974,24 +14974,32 @@ configured using these options (see variables @code{org-log-done},
 @cindex @code{logrefile}, STARTUP keyword
 @cindex @code{lognoterefile}, STARTUP keyword
 @cindex @code{nologrefile}, STARTUP keyword
+@cindex @code{logdrawer}, STARTUP keyword
+@cindex @code{nologdrawer}, STARTUP keyword
+@cindex @code{logstatesreversed}, STARTUP keyword
+@cindex @code{nologstatesreversed}, STARTUP keyword
 @example
-logdone            @r{record a timestamp when an item is marked DONE}
-lognotedone        @r{record timestamp and a note when DONE}
-nologdone          @r{don't record when items are marked DONE}
-logrepeat          @r{record a time when reinstating a repeating item}
-lognoterepeat      @r{record a note when reinstating a repeating item}
-nologrepeat        @r{do not record when reinstating repeating item}
-lognoteclock-out   @r{record a note when clocking out}
-nolognoteclock-out @r{don't record a note when clocking out}
-logreschedule      @r{record a timestamp when scheduling time changes}
-lognotereschedule  @r{record a note when scheduling time changes}
-nologreschedule    @r{do not record when a scheduling date changes}
-logredeadline      @r{record a timestamp when deadline changes}
-lognoteredeadline  @r{record a note when deadline changes}
-nologredeadline    @r{do not record when a deadline date changes}
-logrefile          @r{record a timestamp when refiling}
-lognoterefile      @r{record a note when refiling}
-nologrefile        @r{do not record when refiling}
+logdone             @r{record a timestamp when an item is marked DONE}
+lognotedone         @r{record timestamp and a note when DONE}
+nologdone           @r{don't record when items are marked DONE}
+logrepeat           @r{record a time when reinstating a repeating item}
+lognoterepeat       @r{record a note when reinstating a repeating item}
+nologrepeat         @r{do not record when reinstating repeating item}
+lognoteclock-out    @r{record a note when clocking out}
+nolognoteclock-out  @r{don't record a note when clocking out}
+logreschedule       @r{record a timestamp when scheduling time changes}
+lognotereschedule   @r{record a note when scheduling time changes}
+nologreschedule     @r{do not record when a scheduling date changes}
+logredeadline       @r{record a timestamp when deadline changes}
+lognoteredeadline   @r{record a note when deadline changes}
+nologredeadline     @r{do not record when a deadline date changes}
+logrefile           @r{record a timestamp when refiling}
+lognoterefile       @r{record a note when refiling}
+nologrefile         @r{do not record when refiling}
+logdrawer           @r{store log into drawer}
+nologdrawer         @r{store log outside of drawer}
+logstatesreversed   @r{reverse the order of states notes}
+nologstatesreversed @r{do not reverse the order of states notes}
 @end example
 @vindex org-hide-leading-stars
 @vindex org-odd-levels-only
