@@ -15083,6 +15083,7 @@ This is computed according to `org-property-set-functions-alist'."
       val)))
 
 (defvar org-last-set-property nil)
+(defvar org-last-set-property-value nil)
 (defun org-read-property-name ()
   "Read a property name."
   (let* ((completion-ignore-case t)
@@ -15100,14 +15101,30 @@ This is computed according to `org-property-set-functions-alist'."
 			    ": ")
 		    (mapcar 'list keys)
 		    nil nil nil nil
-		    default-prop
-		    )))
+		    default-prop)))
     (if (member property keys)
 	property
       (or (cdr (assoc (downcase property)
 		      (mapcar (lambda (x) (cons (downcase x) x))
 			      keys)))
 	  property))))
+
+(defun org-set-property-and-value (use-last)
+  "Allow to set [PROPERTY]: [value] direction from prompt.
+When use-default, don't even ask, just use the last
+\"[PROPERTY]: [value]\" string from the history."
+  (interactive "P")
+  (let* ((completion-ignore-case t)
+	 (pv (or (and use-last org-last-set-property-value)
+		 (org-completing-read
+		  "Enter a \"[Property]: [value]\" pair: "
+		  nil nil nil nil nil
+		  org-last-set-property-value)))
+	 prop val)
+    (when (string-match "^[ \t]*\\([^:]+\\):[ \t]*\\(.*\\)[ \t]*$" pv)
+      (setq prop (match-string 1 pv)
+	    val (match-string 2 pv))
+      (org-set-property prop val))))
 
 (defun org-set-property (property value)
   "In the current entry, set PROPERTY to VALUE.
@@ -15121,6 +15138,7 @@ in the current file."
 	 (value (or value (org-read-property-value property)))
 	 (fn (cdr (assoc property org-properties-postprocess-alist))))
     (setq org-last-set-property property)
+    (setq org-last-set-property-value (concat property ": " value))
     ;; Possibly postprocess the inserted value:
     (when fn (setq value (funcall fn value)))
     (unless (equal (org-entry-get nil property) value)
@@ -18392,6 +18410,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-x\\"   'org-toggle-pretty-entities)
 (org-defkey org-mode-map "\C-c\C-x\C-b" 'org-toggle-checkbox)
 (org-defkey org-mode-map "\C-c\C-xp"    'org-set-property)
+(org-defkey org-mode-map "\C-c\C-xP"    'org-set-property-and-value)
 (org-defkey org-mode-map "\C-c\C-xe"    'org-set-effort)
 (org-defkey org-mode-map "\C-c\C-xE"    'org-inc-effort)
 (org-defkey org-mode-map "\C-c\C-xo"    'org-toggle-ordered-property)
