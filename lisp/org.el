@@ -5134,28 +5134,13 @@ The following commands are available:
     (unless org-inhibit-startup-visibility-stuff
       (org-set-startup-visibility)))
   ;; Try to set org-hide correctly
-  (set-face-foreground 'org-hide (org-find-invisible-foreground)))
+  (set-face-foreground 'org-hide (face-background 'default nil 'default)))
 
 (when (fboundp 'abbrev-table-put)
   (abbrev-table-put org-mode-abbrev-table
 		    :parents (list text-mode-abbrev-table)))
 
 (put 'org-mode 'flyspell-mode-predicate 'org-mode-flyspell-verify)
-
-
-(defun org-find-invisible-foreground ()
-  (let ((candidates (remove
-		     "unspecified-bg"
-		     (nconc
-		      (list (face-background 'default)
-			    (face-background 'org-default))
-		      (mapcar
-		       (lambda (alist)
-			 (when (boundp alist)
-			   (cdr (assoc 'background-color (symbol-value alist)))))
-		       '(default-frame-alist initial-frame-alist window-system-default-frame-alist))
-		      (list (face-foreground 'org-hide))))))
-    (car (remove nil candidates))))
 
 (defun org-current-time ()
   "Current time, possibly rounded to `org-time-stamp-rounding-minutes'."
