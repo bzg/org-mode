@@ -3952,7 +3952,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	(beginning-of-line 1)
 	(when (and (looking-at org-table-line-regexp)
 		   ;; Exclude tables in src/example/verbatim/clocktable blocks
-		   (not (org-in-block-p '("src" "example"))))
+		   (not (org-in-block-p '("src" "example" "verbatim" "clocktable"))))
 	  (save-excursion (funcall function))
 	  (or (looking-at org-table-line-regexp)
 	      (forward-char 1)))
@@ -18996,7 +18996,7 @@ Otherwise, return a user error."
 	  (beginning-of-line 1)
 	  (let ((case-fold-search )) (looking-at "[ \t]*#\\+tblfm:"))))
     (call-interactively 'org-table-edit-formulas))
-   ((or (org-in-block-p '("src" "example"))
+   ((or (org-in-block-p '("src" "example" "latex" "html"))
 	(org-at-table.el-p))
     (org-edit-src-code))
    ((org-in-fixed-width-region-p) (org-edit-fixed-width-region))
