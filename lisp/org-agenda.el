@@ -1320,6 +1320,14 @@ When nil, they may also match part of a word."
   :version "24.1"
   :type 'boolean)
 
+(defcustom org-agenda-search-view-max-outline-level nil
+  "Maximum outline level to display in search view.
+E.g. when this is set to 1, the search view will only
+show headlines of level 1."
+  :group 'org-agenda-search-view
+  :version "24.3"
+  :type 'integer)
+
 (defgroup org-agenda-time-grid nil
   "Options concerning the time grid in the Org-mode Agenda."
   :tag "Org Agenda Time Grid"
@@ -4399,10 +4407,23 @@ in `org-agenda-text-search-extra-files'."
 		    (goto-char (max (point-min) (1- (point))))
 		    (while (re-search-forward regexp nil t)
 		      (org-back-to-heading t)
+		      (while (and org-agenda-search-view-max-outline-level
+				  (> (org-reduced-level (org-outline-level))
+				     org-agenda-search-view-max-outline-level)
+				  (forward-line -1)
+				  (outline-back-to-heading t)))
 		      (skip-chars-forward "* ")
 		      (setq beg (point-at-bol)
 			    beg1 (point)
-			    end (progn (outline-next-heading) (point)))
+			    end (progn
+				  (outline-next-heading)
+				  (while (and org-agenda-search-view-max-outline-level
+					      (> (org-reduced-level (org-outline-level))
+						 org-agenda-search-view-max-outline-level)
+					      (forward-line 1)
+					      (outline-next-heading)))
+				  (point)))
+
 		      (catch :skip
 			(goto-char beg)
 			(org-agenda-skip)
