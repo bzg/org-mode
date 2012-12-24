@@ -256,7 +256,6 @@ Works on both Emacs and XEmacs."
       (when (boundp 'zmacs-regions)
 	(setq zmacs-regions t)))))
 
-
 ;; Invisibility compatibility
 
 (defun org-remove-from-invisibility-spec (arg)
@@ -448,12 +447,34 @@ With two arguments, return floor and remainder of their quotient."
 
 ;; `condition-case-unless-debug' has been introduced in Emacs 24.1
 ;; `condition-case-no-debug' has been introduced in Emacs 23.1
-(defalias 'org-condition-case-unless-debug
+(defmacro org-condition-case-unless-debug (var bodyform &rest handlers)
+  (declare (debug condition-case) (indent 2))
   (or (and (fboundp 'condition-case-unless-debug)
-	   'condition-case-unless-debug)
+	   `(condition-case-unless-debug ,var ,bodyform ,@handlers))
       (and (fboundp 'condition-case-no-debug)
-	   'condition-case-no-debug)
-      'condition-case))
+	   `(condition-case-no-debug ,var ,bodyform ,@handlers))
+      `(condition-case ,var ,bodyform ,@handlers)))
+
+;; RECURSIVE has been introduced with Emacs 23.2.
+;; This is copying and adapted from `tramp-compat-delete-directory'
+(defun org-delete-directory (directory &optional recursive)
+  "Compatibility function for `delete-directory'."
+  (if (null recursive)
+      (delete-directory directory)
+    (condition-case nil
+	(funcall 'delete-directory directory recursive)
+      ;; This Emacs version does not support the RECURSIVE flag.  We
+      ;; use the implementation from Emacs 23.2.
+      (wrong-number-of-arguments
+       (setq directory (directory-file-name (expand-file-name directory)))
+       (if (not (file-symlink-p directory))
+	   (mapc (lambda (file)
+		   (if (eq t (car (file-attributes file)))
+		       (org-delete-directory file recursive)
+		     (delete-file file)))
+		 (directory-files
+		  directory 'full "^\\([^.]\\|\\.\\([^.]\\|\\..\\)\\).*")))
+       (delete-directory directory)))))
 
 ;;;###autoload
 (defmacro org-check-version ()
