@@ -2500,6 +2500,11 @@ also set this to a string to define the drawer of your choice.
 
 A value of t is also allowed, representing \"LOGBOOK\".
 
+A value of t or nil can also be set with on a per-file-basis with
+
+   #+STARTUP: logdrawer
+   #+STARTUP: nologdrawer
+
 If this variable is set, `org-log-state-notes-insert-after-drawers'
 will be ignored.
 
@@ -2541,7 +2546,12 @@ set."
 
 (defcustom org-log-states-order-reversed t
   "Non-nil means the latest state note will be directly after heading.
-When nil, the state change notes will be ordered according to time."
+When nil, the state change notes will be ordered according to time.
+
+This option can also be set with on a per-file-basis with
+
+   #+STARTUP: logstatesreversed
+   #+STARTUP: nologstatesreversed"
   :group 'org-todo
   :group 'org-progress
   :type 'boolean)
@@ -4481,6 +4491,10 @@ After a match, the following groups carry important information:
     ("nolognoteclock-out" org-log-note-clock-out nil)
     ("logrepeat" org-log-repeat state)
     ("lognoterepeat" org-log-repeat note)
+    ("logdrawer" org-log-into-drawer t)
+    ("nologdrawer" org-log-into-drawer nil)
+    ("logstatesreversed" org-log-states-order-reversed t)
+    ("nologstatesreversed" org-log-states-order-reversed nil)
     ("nologrepeat" org-log-repeat nil)
     ("logreschedule" org-log-reschedule time)
     ("lognotereschedule" org-log-reschedule note)
