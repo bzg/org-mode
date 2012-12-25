@@ -258,7 +258,7 @@ See `org-crypt-disable-auto-save'."
     (save-excursion
       (org-back-to-heading t)
       (search-forward "-----BEGIN PGP MESSAGE-----"
-		      (save-excursion (org-end-of-subtree t)) t))))
+		      (save-excursion (outline-next-heading)) t))))
 
 (defun org-crypt-use-before-save-magic ()
   "Add a hook to automatically encrypt entries before a file is saved to disk."
