@@ -624,6 +624,27 @@ This uses `bibtex-parse-entry'."
            (save-excursion (bibtex-beginning-of-entry) (bibtex-parse-entry)))
           org-bibtex-entries)))
 
+(defun org-bibtex-read-buffer (buffer)
+  "Read all bibtex entries in BUFFER and save to `org-bibtex-entries'.
+Return the number of saved entries."
+  (interactive "bbuffer: ")
+  (let ((start-length (length org-bibtex-entries)))
+    (with-current-buffer buffer
+      (save-excursion
+	(goto-char (point-max))
+	(while (not (= (point) (point-min)))
+	  (backward-char 1)
+	  (org-bibtex-read)
+	  (bibtex-beginning-of-entry))))
+    (let ((added (- (length org-bibtex-entries) start-length)))
+      (message "parsed %d entries" added)
+      added)))
+
+(defun org-bibtex-read-file (file)
+  "Read FILE with `org-bibtex-read-buffer'."
+  (interactive "ffile: ")
+  (org-bibtex-read-buffer (find-file-noselect file 'nowarn 'rawfile)))
+
 (defun org-bibtex-write ()
   "Insert a heading built from the first element of `org-bibtex-entries'."
   (interactive)
@@ -664,6 +685,14 @@ This uses `bibtex-parse-entry'."
     (if entry
 	(org-bibtex-write)
       (error "Yanked text does not appear to contain a BibTeX entry"))))
+
+(defun org-bibtex-import-from-file (file)
+  "Read bibtex entries from FILE and insert as Org-mode headlines after point."
+  (interactive "ffile: ")
+  (dotimes (_ (org-bibtex-read-file file))
+    (save-excursion (org-bibtex-write))
+    (re-search-forward org-property-end-re)
+    (open-line 1) (forward-char 1)))
 
 (defun org-bibtex-export-to-kill-ring ()
   "Export current headline to kill ring as bibtex entry."
