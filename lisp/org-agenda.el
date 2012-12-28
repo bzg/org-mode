@@ -6839,8 +6839,9 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 	  (error "Not allowed in %s-type agenda buffers" org-agenda-type)
 	nil))))
 
-(defun org-agenda-Quit (&optional arg)
-  "Exit agenda by removing the window or the buffer."
+(defun org-agenda-Quit ()
+  "Exit the agenda and kill buffers loaded by `org-agenda'.
+Also restore the window configuration."
   (interactive)
   (if org-agenda-columns-active
       (org-columns-quit)
@@ -6867,8 +6868,8 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
 	 (setq org-agenda-pre-window-conf nil))))
 
 (defun org-agenda-quit ()
-  "Exit agenda by killing agenda buffer or burying it when
-`org-agenda-sticky' is non-NIL"
+  "Exit the agenda and restore the window configuration.
+When `org-agenda-sticky' is non-nil, only bury the agenda."
   (interactive)
   (if (and (eq org-indirect-buffer-display 'other-window)
 	   org-last-indirect-buffer)
@@ -6894,9 +6895,9 @@ If ERROR is non-nil, throw an error, otherwise just return nil."
       (org-agenda-Quit))))
 
 (defun org-agenda-exit ()
-  "Exit agenda by removing the window or the buffer.
-Also kill all Org-mode buffers which have been loaded by `org-agenda'.
-Org-mode buffers visited directly by the user will not be touched."
+  "Exit the agenda and restore the window configuration.
+Also kill Org-mode buffers loaded by `org-agenda'.  Org-mode
+buffers visited directly by the user will not be touched."
   (interactive)
   (org-release-buffers org-agenda-new-buffers)
   (setq org-agenda-new-buffers nil)
@@ -6904,8 +6905,8 @@ Org-mode buffers visited directly by the user will not be touched."
 
 (defun org-agenda-kill-all-agenda-buffers ()
   "Kill all buffers in `org-agenda-mode'.
-This is used when toggling sticky agendas.  You can also explicitly invoke it
-with `C-c a C-k'."
+This is used when toggling sticky agendas.
+You can also explicitly invoke it with `C-c a C-k'."
   (interactive)
   (let (blist)
     (dolist (buf (buffer-list))
