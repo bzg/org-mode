@@ -159,12 +159,15 @@ the clock can be resumed from that point."
 The clock is resumed when Emacs restarts.
 When this is t, both the running clock, and the entire clock
 history are saved.  When this is the symbol `clock', only the
-running clock is saved.
+running clock is saved.  When this is the symbol `history', only
+the clock history is saved.
 
-When Emacs restarts with saved clock information, the file containing the
-running clock as well as all files mentioned in the clock history will
-be visited.
-All this depends on running `org-clock-persistence-insinuate' in .emacs"
+When Emacs restarts with saved clock information, the file containing
+the running clock as well as all files mentioned in the clock history
+will be visited.
+
+All this depends on running `org-clock-persistence-insinuate' in your
+Emacs initialization file."
   :group 'org-clock
   :type '(choice
 	  (const :tag "Just the running clock" clock)
