@@ -309,12 +309,11 @@ reference (with row).  Format specifier L."
   (org-test-table-target-expect
    references/target-normal
    ;; All the #ERROR show that for Lisp calculations N has to be used.
-   ;; TODO: Len for range reference with only empty fields should be 0.
    "
 | 0 | 1 | 0 |      1 |      1 |      1 | 2 | 2 |
 | z | 1 | z | #ERROR | #ERROR | #ERROR | 2 | 2 |
 |   | 1 |   |      1 |      1 |      1 | 1 | 1 |
-|   |   |   |      0 |      0 |      0 | 1 | 1 |
+|   |   |   |      0 |      0 |      0 | 0 | 0 |
 "
    1 (concat
       "#+TBLFM: $3 = '(identity \"$1\"); L :: $4 = '(+ $1 $2); L :: "
@@ -378,13 +377,11 @@ reference (with row).  Format specifier N."
 	  "$7 = vlen($1..$2); N :: $8 = vlen(@0$1..@0$2); N")))
     (org-test-table-target-expect
      references/target-normal
-     ;; TODO: Len for simple range reference with empty field should
-     ;; also be 1
      "
 | 0 | 1 | 0 | 1 | 1 | 1 | 2 | 2 |
 | z | 1 | 0 | 1 | 1 | 1 | 2 | 2 |
-|   | 1 | 0 | 1 | 1 | 1 | 2 | 1 |
-|   |   | 0 | 0 | 0 | 0 | 2 | 1 |
+|   | 1 | 0 | 1 | 1 | 1 | 1 | 1 |
+|   |   | 0 | 0 | 0 | 0 | 1 | 1 |
 "
      1 lisp calc)
     (org-test-table-target-expect
@@ -453,22 +450,15 @@ reference (with row).  Format specifier N."
   ;; Empty fields in simple and complex range reference: Suppress them
   ;; ($5 and $6) or keep them and use 0 ($7 and $8)
 
-  ;; Calc formula
   (org-test-table-target-expect
    "\n|   |   | 5 | 7 | replace | replace | replace | replace |\n"
    "\n|   |   | 5 | 7 | 6 | 6 | 3 | 3 |\n"
    1
+   ;; Calc formula
    (concat "#+TBLFM: "
 	   "$5 = vmean($1..$4)     :: $6 = vmean(@0$1..@0$4) :: "
-	   "$7 = vmean($1..$4); EN :: $8 = vmean(@0$1..@0$4); EN"))
-
-  ;; Lisp formula
-  ;; TODO: Len for simple range reference with empty field should also
-  ;; be 6
-  (org-test-table-target-expect
-   "\n|   |   | 5 | 7 | replace | replace | replace | replace |\n"
-   "\n|   |   | 5 | 7 | 3 | 6 | 3 | 3 |\n"
-   1
+	   "$7 = vmean($1..$4); EN :: $8 = vmean(@0$1..@0$4); EN")
+   ;; Lisp formula
    (concat "#+TBLFM: "
 	   "$5 = '(/ (+   $1..$4  ) (length '(  $1..$4  )));  N :: "
 	   "$6 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4)));  N :: "
@@ -553,9 +543,7 @@ reference (with row).  Format specifier N."
   (should (equal "0 1" (f '("0" "1") nil nil 'literal)))
   (should (equal "z 1" (f '("z" "1") nil nil 'literal)))
   (should (equal   "1" (f '(""  "1") nil nil 'literal)))
-  ;; TODO: Should result in empty string like with field reference of
-  ;; empty field.
-  (should (equal  "0"  (f '(""  "" ) nil nil 'literal))))
+  (should (equal  ""   (f '(""  "" ) nil nil 'literal))))
 
 (ert-deftest test-org-table/org-table-make-reference/format-specifier-none ()
   (fset 'f 'org-table-make-reference)
@@ -566,9 +554,7 @@ reference (with row).  Format specifier N."
   (should (equal "\"0\" \"1\"" (f '("0"    "1") nil nil t)))
   (should (equal "\"z\" \"1\"" (f '("z"    "1") nil nil t)))
   (should (equal       "\"1\"" (f '(""     "1") nil nil t)))
-  ;; TODO: Should result in empty string like with field reference of
-  ;; empty field.
-  (should (equal    "\"0\""    (f '(""     "" ) nil nil t)))
+  (should (equal    "\"\""     (f '(""     "" ) nil nil t)))
   ;; For Calc formula
   (should (equal  "(0)"        (f   "0"         nil nil nil)))
   (should (equal  "(z)"        (f   "z"         nil nil nil)))

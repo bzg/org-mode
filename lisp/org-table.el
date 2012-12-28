@@ -2557,7 +2557,10 @@ not overwrite the stored one."
 			  fields)))
 	(if (eq numbers t)
 	    (setq fields (mapcar
-			  (lambda (x) (number-to-string (string-to-number x)))
+			  (lambda (x)
+			    (if (string-match "\\S-" x)
+				(number-to-string (string-to-number x))
+			      x))
 			  fields)))
 	(setq ndown (1- ndown))
 	(setq form (copy-sequence formula)
@@ -2862,7 +2865,7 @@ LISPP means to return something appropriate for a Lisp list."
 	    (delq nil
 		  (mapcar (lambda (x) (if (string-match "\\S-" x) x nil))
 			  elements))))
-    (setq elements (or elements '("0")))
+    (setq elements (or elements '("")))
     (if lispp
 	(mapconcat
 	 (lambda (x)
@@ -2872,7 +2875,11 @@ LISPP means to return something appropriate for a Lisp list."
 	 elements " ")
       (concat "[" (mapconcat
 		   (lambda (x)
-		     (if numbers (number-to-string (string-to-number x)) x))
+		     (if (string-match "\\S-" x)
+			 (if numbers
+			     (number-to-string (string-to-number x))
+			   x)
+		       (if (or (not keep-empty) numbers) "0" "")))
 		   elements
 		   ",") "]"))))
 
