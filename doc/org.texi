@@ -2616,9 +2616,12 @@ n3 s3 e2 f4   @r{Normal, scientific, engineering, or fixed}
               @r{long as the Calc calculation precision is greater.}
 D R           @r{angle modes: degrees, radians}
 F S           @r{fraction and symbolic modes}
-N             @r{interpret all fields as numbers, use 0 for non-numbers}
-E             @r{keep empty fields in ranges}
-L             @r{literal}
+E             @r{keep empty fields in ranges; else suppress empty fields in}
+              @r{range references and use 0 for empty field references, see}
+              @r{also the notes for `Range references' in @pxref{References}}
+N             @r{interpret all fields as numbers, use 0 for non-numbers;}
+              @r{N has higher precedence than E (for the value of the field)}
+L             @r{literal, for Lisp formulas only}
 @end example
 
 @noindent
@@ -2642,7 +2645,7 @@ $0;%.1f              @r{Reformat current cell to 1 decimal}
 $c/$1/$cm            @r{Hz -> cm conversion, using @file{constants.el}}
 tan($1);Dp3s1        @r{Compute in degrees, precision 3, display SCI 1}
 sin($1);Dp3%.1e      @r{Same, but use printf specifier for display}
-vmean($2..$7)        @r{Compute column range mean, using vector function}
+vmean($2..$7)        @r{Compute column range mean, suppress empty fields}
 vmean($2..$7);EN     @r{Same, but treat empty fields as 0}
 taylor($3,x=7,2)     @r{Taylor series of $3, at x=7, second degree}
 @end example
