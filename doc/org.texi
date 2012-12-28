@@ -2616,7 +2616,9 @@ n3 s3 e2 f4   @r{Normal, scientific, engineering, or fixed}
               @r{long as the Calc calculation precision is greater.}
 D R           @r{angle modes: degrees, radians}
 F S           @r{fraction and symbolic modes}
-E             @r{keep empty fields in ranges; else suppress empty fields in}
+E             @r{keep empty fields in ranges and use nan (not a number)}
+              @r{in Calc formulas for empty fields in range references and}
+              @r{for empty field references; else suppress empty fields in}
               @r{range references and use 0 for empty field references, see}
               @r{also the notes for `Range references' in @pxref{References}}
 N             @r{interpret all fields as numbers, use 0 for non-numbers;}
@@ -2653,7 +2655,10 @@ taylor($3,x=7,2)     @r{Taylor series of $3, at x=7, second degree}
 Calc also contains a complete set of logical operations.  For example
 
 @example
-if($1<20,teen,string(""))  @r{"teen" if age $1 less than 20, else empty}
+if($1 < 20, teen, string(""))
+                     @r{"teen" if age $1 is less than 20, else empty}
+if("$1" = "nan" || "$2" = "nan", string(""), $1 + $2); E
+                     @r{sum of first two columns unless one or both empty}
 @end example
 
 Note that you can also use two org-specific flags @code{T} and @code{t} for

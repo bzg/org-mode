@@ -2637,7 +2637,8 @@ not overwrite the stored one."
 			   (match-string 0 form)))
 	  (setq form (replace-match
 		      (save-match-data
-			(org-table-make-reference x nil numbers lispp))
+			(org-table-make-reference
+			 x keep-empty numbers lispp))
 		      t t form)))
 
 	(if lispp
@@ -2664,7 +2665,8 @@ not overwrite the stored one."
 
 	  (setq ev (if (and duration (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" form))
 		       form
-		     (calc-eval (cons form org-tbl-calc-modes) (if numbers 'num)))
+		     (calc-eval (cons form org-tbl-calc-modes)
+				(when (and (not keep-empty) numbers) 'num)))
 		ev (if duration (org-table-time-seconds-to-string
 				 (if (string-match "^[0-9]+:[0-9]+\\(?::[0-9]+\\)?$" ev)
 				     (string-to-number (org-table-time-string-to-seconds ev))
@@ -2851,15 +2853,27 @@ and TABLE is a vector with line types."
   "Convert list ELEMENTS to something appropriate to insert into formula.
 KEEP-EMPTY indicated to keep empty fields, default is to skip them.
 NUMBERS indicates that everything should be converted to numbers.
-LISPP means to return something appropriate for a Lisp list."
-  (if (stringp elements) ; just a single val
+LISPP non-nil means to return something appropriate for a Lisp
+list, 'literal is for the format specifier L."
+  ;; Calc nan (not a number) is used for the conversion of the empty
+  ;; field to a reference for several reasons: (i) It is accepted in a
+  ;; Calc formula (e. g. "" or "()" would result in a Calc error).
+  ;; (ii) In a single field (not in range) it can be distinguished
+  ;; from "(nan)" which is the reference made from a single field
+  ;; containing "nan".
+  (if (stringp elements)
+      ;; field reference
       (if lispp
 	  (if (eq lispp 'literal)
 	      elements
 	    (prin1-to-string (if numbers (string-to-number elements) elements)))
-	(if (equal elements "") (setq elements "0"))
-	(if numbers (setq elements (number-to-string (string-to-number elements))))
-	(concat "(" elements ")"))
+	(if (string-match "\\S-" elements)
+	    (progn
+	      (when numbers (setq elements (number-to-string
+					    (string-to-number elements))))
+	      (concat "(" elements ")"))
+	  (if (or (not keep-empty) numbers) "(0)" "nan")))
+    ;; range reference
     (unless keep-empty
       (setq elements
 	    (delq nil
@@ -2879,7 +2893,7 @@ LISPP means to return something appropriate for a Lisp list."
 			 (if numbers
 			     (number-to-string (string-to-number x))
 			   x)
-		       (if (or (not keep-empty) numbers) "0" "")))
+		       (if (or (not keep-empty) numbers) "0" "nan")))
 		   elements
 		   ",") "]"))))
 

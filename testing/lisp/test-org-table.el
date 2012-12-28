@@ -254,10 +254,10 @@ reference (with row).  Format specifier E."
     (org-test-table-target-expect
      references/target-normal
      "
-| 0 | 1 | 0 |     1 | 1      | 1      |      2 |      2 |
-| z | 1 | z | z + 1 | z + 1  | z + 1  |      2 |      2 |
-|   | 1 | 0 |     1 | #ERROR | #ERROR | #ERROR | #ERROR |
-|   |   | 0 |     0 | #ERROR | #ERROR | #ERROR | #ERROR |
+| 0 | 1 |   0 |     1 |     1 |     1 | 2 | 2 |
+| z | 1 |   z | z + 1 | z + 1 | z + 1 | 2 | 2 |
+|   | 1 | nan |   nan |   nan |   nan | 2 | 2 |
+|   |   | nan |   nan |   nan |   nan | 2 | 2 |
 "
      1 calc)
     (org-test-table-target-expect
@@ -398,24 +398,26 @@ reference (with row).  Format specifier N."
   "Basic: Compare field references in Calc."
   (org-test-table-target-expect
    "
-|      | 0    | z    | nan  | uinf | -inf | inf  |
-|------+------+------+------+------+------+------|
-|    0 | repl | repl | repl | repl | repl | repl |
-|    z | repl | repl | repl | repl | repl | repl |
-|  nan | repl | repl | repl | repl | repl | repl |
-| uinf | repl | repl | repl | repl | repl | repl |
-| -inf | repl | repl | repl | repl | repl | repl |
-|  inf | repl | repl | repl | repl | repl | repl |
+|      | 0    | z    |      | nan  | uinf | -inf | inf  |
+|------+------+------+------+------+------+------+------|
+|    0 | repl | repl | repl | repl | repl | repl | repl |
+|    z | repl | repl | repl | repl | repl | repl | repl |
+|      | repl | repl | repl | repl | repl | repl | repl |
+|  nan | repl | repl | repl | repl | repl | repl | repl |
+| uinf | repl | repl | repl | repl | repl | repl | repl |
+| -inf | repl | repl | repl | repl | repl | repl | repl |
+|  inf | repl | repl | repl | repl | repl | repl | repl |
 "
    "
-|      | 0 | z | nan | uinf | -inf | inf |
-|------+---+---+-----+------+------+-----|
-|    0 | x |   |     |      |      |     |
-|    z |   | x |     |      |      |     |
-|  nan |   |   |   x |      |      |     |
-| uinf |   |   |     |    x |      |     |
-| -inf |   |   |     |      |    x |     |
-|  inf |   |   |     |      |      |   x |
+|      | 0 | z |   | nan | uinf | -inf | inf |
+|------+---+---+---+-----+------+------+-----|
+|    0 | x |   |   |     |      |      |     |
+|    z |   | x |   |     |      |      |     |
+|      |   |   | x |     |      |      |     |
+|  nan |   |   |   |   x |      |      |     |
+| uinf |   |   |   |     |    x |      |     |
+| -inf |   |   |   |     |      |    x |     |
+|  inf |   |   |   |     |      |      |   x |
 "
    1
    ;; Compare field reference ($1) with field reference (@1)
@@ -424,10 +426,11 @@ reference (with row).  Format specifier N."
    (concat "#+TBLFM: "
 	   "$2 = if(\"$1\" = \"(0)\"   , x, string(\"\")); E :: "
 	   "$3 = if(\"$1\" = \"(z)\"   , x, string(\"\")); E :: "
-	   "$4 = if(\"$1\" = \"(nan)\" , x, string(\"\")); E :: "
-	   "$5 = if(\"$1\" = \"(uinf)\", x, string(\"\")); E :: "
-	   "$6 = if(\"$1\" = \"(-inf)\", x, string(\"\")); E :: "
-	   "$7 = if(\"$1\" = \"(inf)\" , x, string(\"\")); E"))
+	   "$4 = if(\"$1\" = \"nan\"   , x, string(\"\")); E :: "
+	   "$5 = if(\"$1\" = \"(nan)\" , x, string(\"\")); E :: "
+	   "$6 = if(\"$1\" = \"(uinf)\", x, string(\"\")); E :: "
+	   "$7 = if(\"$1\" = \"(-inf)\", x, string(\"\")); E :: "
+	   "$8 = if(\"$1\" = \"(inf)\" , x, string(\"\")); E"))
 
   ;; Check field reference converted from an empty field: Despite this
   ;; field reference will not end up in a result, Calc evaluates it.
@@ -436,11 +439,13 @@ reference (with row).  Format specifier N."
    "
 |   0 | replace |
 |   z | replace |
+|     | replace |
 | nan | replace |
 "
    "
 |   0 |     1 |
 |   z | z + 1 |
+|     |       |
 | nan |   nan |
 "
    1 "#+TBLFM: $2 = if(\"$1\" = \"nan\", string(\"\"), $1 + 1); E"))
@@ -463,7 +468,119 @@ reference (with row).  Format specifier N."
 	   "$5 = '(/ (+   $1..$4  ) (length '(  $1..$4  )));  N :: "
 	   "$6 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4)));  N :: "
 	   "$7 = '(/ (+   $1..$4  ) (length '(  $1..$4  ))); EN :: "
-	   "$8 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4))); EN")))
+	   "$8 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4))); EN"))
+
+  ;; Test if one field is empty, else do a calculation
+  (org-test-table-target-expect
+   "
+| -1 | replace |
+|  0 | replace |
+|    | replace |
+"
+   "
+| -1 | 0 |
+|  0 | 1 |
+|    |   |
+"
+   1
+   ;; Calc formula
+   "#+TBLFM: $2 = if(\"$1\" = \"nan\", string(\"\"), $1 + 1); E"
+   ;; Lisp formula
+   "#+TBLFM: $2 = '(if (eq \"$1\" \"\") \"\" (1+ $1)); L")
+
+  ;; Test if several fields are empty, else do a calculation
+  (org-test-table-target-expect
+   "
+| 1 | 2 | replace |
+| 4 |   | replace |
+|   | 8 | replace |
+|   |   | replace |
+"
+   "
+| 1 | 2 | 3 |
+| 4 |   |   |
+|   | 8 |   |
+|   |   |   |
+"
+   1
+   ;; Calc formula
+   (concat "#+TBLFM: $3 = if(\"$1\" = \"nan\" || \"$2\" = \"nan\", "
+	   "string(\"\"), $1 + $2); E")
+   ;; Lisp formula
+   (concat "#+TBLFM: $3 = '(if (or (eq \"$1\" \"\") (eq \"$2\" \"\")) "
+	   "\"\" (+ $1 $2)); L"))
+
+  ;; $2: Use $1 + 0.5 if $1 available, else only reformat $2 if $2 available
+  (org-test-table-target-expect
+   "
+| 1.5 | 0 |
+| 3.5 |   |
+|     | 5 |
+|     |   |
+"
+   "
+| 1.5 | 2.0 |
+| 3.5 | 4.0 |
+|     | 5.0 |
+|     |     |
+"
+   1
+   ;; Calc formula
+   (concat "#+TBLFM: $2 = if(\"$1\" = \"nan\", "
+	   "if(\"$2\" = \"nan\", string(\"\"), $2 +.0), $1 + 0.5); E f-1")
+   ;; Lisp formula not implemented yet
+   ))
+
+(ert-deftest test-org-table/copy-field ()
+  "Experiments on how to copy one field into another field."
+  (let ((target
+	 "
+| 0                | replace |
+| a b              | replace |
+| c   d            | replace |
+|                  | replace |
+| 2012-12          | replace |
+| [2012-12-31 Mon] | replace |
+"))
+    ;; Lisp formula to copy literally
+    (org-test-table-target-expect
+     target
+     "
+| 0                | 0                |
+| a b              | a b              |
+| c   d            | c   d            |
+|                  |                  |
+| 2012-12          | 2012-12          |
+| [2012-12-31 Mon] | [2012-12-31 Mon] |
+"
+     1 "#+TBLFM: $2 = '(identity $1)")
+
+    ;; Calc formula to copy quite literally
+    (org-test-table-target-expect
+     target
+     "
+| 0                | 0                |
+| a b              | a b              |
+| c   d            | c   d            |
+|                  |                  |
+| 2012-12          | 2012-12          |
+| [2012-12-31 Mon] | <2012-12-31 Mon> |
+"
+     1 (concat "#+TBLFM: $2 = if(\"$1\" = \"nan\", "
+	       "string(\"\"), string(subvec(\"$1\", 2, vlen(\"$1\")))); E"))
+
+    ;; Calc formula simple
+    (org-test-table-target-expect
+     target
+     "
+| 0                | 0                |
+| a b              | a b              |
+| c   d            | c d              |
+|                  |                  |
+| 2012-12          | 2000             |
+| [2012-12-31 Mon] | <2012-12-31 Mon> |
+"
+     1 "#+TBLFM: $2 = if(\"$1\" = \"nan\", string(\"\"), $1); E")))
 
 ;; End of table examples and beginning of internal tests.
 
@@ -491,11 +608,11 @@ reference (with row).  Format specifier N."
   ;; For Calc formula
   (should (equal  "(0)"        (f   "0"         t nil nil)))
   (should (equal  "(z)"        (f   "z"         t nil nil)))
-  (should (equal  "(0)"        (f   ""          t nil nil)))
+  (should (equal  "nan"        (f   ""          t nil nil)))
   (should (equal  "[0,1]"      (f '("0"    "1") t nil nil)))
   (should (equal  "[z,1]"      (f '("z"    "1") t nil nil)))
-  (should (equal   "[,1]"      (f '(""     "1") t nil nil)))
-  (should (equal   "[,]"       (f '(""     "" ) t nil nil)))
+  (should (equal  "[nan,1]"    (f '(""     "1") t nil nil)))
+  (should (equal  "[nan,nan]"  (f '(""     "" ) t nil nil)))
   ;; For Calc formula, special numbers
   (should (equal  "(nan)"      (f    "nan"      t nil nil)))
   (should (equal "(uinf)"      (f   "uinf"      t nil nil)))
