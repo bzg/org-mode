@@ -32,9 +32,9 @@
 | ab | ab |   ab |      ab |      ab |          ab |      ab |   ab |
 ")
   (org-test-table-target-expect "
-| 0          | 0           |   0 | 0    | 0    | 0   |
+|          0 |           0 |   0 |    0 |    0 |   0 |
 | <-0x0ab.cf | >-36#0vw.yz | nan | uinf | -inf | inf |
-| ab         | ab          |  ab | ab   | ab   | ab  |
+|         ab |          ab |  ab |   ab |   ab |  ab |
 "))
 
 (ert-deftest test-org-table/org-table-convert-refs-to-an/1 ()
