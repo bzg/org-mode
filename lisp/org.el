@@ -9317,10 +9317,11 @@ Use TAB to complete link prefixes, then RET for type-specific completion support
 	;; URL-like link, normalize the use of angular brackets.
 	(setq link (org-remove-angle-brackets link)))
 
-    ;; Check if we are linking to the current file with a search option
-    ;; If yes, simplify the link by using only the search option.
+    ;; Check if we are linking to the current file with a search
+    ;; option If yes, simplify the link by using only the search
+    ;; option.
     (when (and buffer-file-name
-	       (string-match "^file:\\(.+?\\)::\\([^>]+\\)" link))
+	       (string-match "^file:\\(.+?\\)::\\(.+\\)" link))
       (let* ((path (match-string 1 link))
 	     (case-fold-search nil)
 	     (search (match-string 2 link)))
