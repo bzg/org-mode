@@ -220,6 +220,58 @@ otherwise place the point at the beginning of the inserted text."
        ,results)))
 (def-edebug-spec org-test-with-temp-text-in-file (form body))
 
+(defun org-test-table-target-expect (target &optional expect laps
+&rest tblfm)
+  "For all TBLFM: Apply the formula to TARGET, compare EXPECT with result.
+Either LAPS and TBLFM are nil and the table will only be aligned
+or LAPS is the count of recalculations that should be made on
+each TBLFM.  To save ERT run time keep LAPS as low as possible to
+get the table stable.  Anyhow, if LAPS is 'iterate then iterate,
+but this will run one recalculation longer.  When EXPECT is nil
+it will be set to TARGET.
+
+If running a test interactively in ERT is not enough and you need
+to examine the target table with e. g. the Org formula debugger
+or an Emacs Lisp debugger (e. g. with point in a data field and
+calling the instrumented `org-table-eval-formula') then copy and
+paste the table with formula from the ERT results buffer or
+temporarily substitute the `org-test-with-temp-text' of this
+function with `org-test-with-temp-text-in-file'.
+
+Consider setting `pp-escape-newlines' to nil manually."
+  (require 'pp)
+  (let ((back pp-escape-newlines) (current-tblfm))
+    (unless tblfm
+      (should-not laps)
+      (push "" tblfm))  ; Dummy formula.
+    (unless expect (setq expect target))
+    (while (setq current-tblfm (pop tblfm))
+      (org-test-with-temp-text (concat target current-tblfm)
+	;; Search table, stop ERT at end of buffer if not found.
+	(while (not (org-at-table-p))
+	  (should (eq 0 (forward-line))))
+	(when laps
+	  (if (and (symbolp laps) (eq laps 'iterate))
+	      (should (org-table-recalculate 'iterate t))
+	    (should (integerp laps))
+	    (should (< 0 laps))
+	    (let ((cnt laps))
+	      (while (< 0 cnt)
+		(should (org-table-recalculate 'all t))
+		(setq cnt (1- cnt))))))
+	(org-table-align)
+	(setq pp-escape-newlines nil)
+	;; Declutter the ERT results buffer by giving only variables
+	;; and not directly the forms to `should'.
+	(let ((expect (concat expect current-tblfm))
+	      (result (buffer-substring-no-properties
+		       (point-min) (point-max))))
+	  (should (equal expect result)))
+	;; If `should' passed then set back `pp-escape-newlines' here,
+	;; else leave it nil as a side effect to see the failed table
+	;; on multiple lines in the ERT results buffer.
+	(setq pp-escape-newlines back)))))
+
 
 ;;; Navigation Functions
 (when (featurep 'jump)

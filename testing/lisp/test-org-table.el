@@ -23,6 +23,20 @@
 ;; Template test file for Org-mode tests
 
 ;;; Code:
+
+(ert-deftest test-org-table/align ()
+  "Align columns within Org buffer, depends on `org-table-number-regexp'."
+  (org-test-table-target-expect "
+| 0  |  0 |    0 |       0 |       0 |           0 |       0 |    0 |
+| ab | 12 | 12.2 | 2.4e-08 | 2x10^12 | 4.034+-0.02 | 2.7(10) | >3.5 |
+| ab | ab |   ab |      ab |      ab |          ab |      ab |   ab |
+")
+  (org-test-table-target-expect "
+| 0          | 0           |   0 | 0    | 0    | 0   |
+| <-0x0ab.cf | >-36#0vw.yz | nan | uinf | -inf | inf |
+| ab         | ab          |  ab | ab   | ab   | ab  |
+"))
+
 (ert-deftest test-org-table/org-table-convert-refs-to-an/1 ()
   "Simple reference @1$1."
   (should
