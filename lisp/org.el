@@ -9032,21 +9032,23 @@ part of Org's core."
 			       (buffer-file-name (buffer-base-buffer)))))
 	 ;; Add a context search string
 	 (when (org-xor org-context-in-file-links arg)
-	   (let ((e (org-element-at-point)))
+	   (let* ((ee (org-element-at-point))
+		  (et (org-element-type ee))
+		  (ev (plist-get (cadr ee) :value)))
 	     (setq txt (cond
-		      ((org-at-heading-p) nil)
-		      ((eq (org-element-type e) 'keyword)
-		       (plist-get (cadr e) :value))
-		      ((org-region-active-p)
-		       (buffer-substring (region-beginning) (region-end))))))
-	   (when (or (null txt) (string-match "\\S-" txt))
-	     (setq cpltxt
-		   (concat cpltxt "::"
-			   (condition-case nil
-			       (org-make-org-heading-search-string txt)
-			     (error "")))
-		   desc (or (nth 4 (ignore-errors
-				     (org-heading-components))) "NONE"))))
+			((org-at-heading-p) nil)
+			((eq et 'keyword) ev)
+			((org-region-active-p)
+			 (buffer-substring (region-beginning) (region-end)))))
+	     (when (or (null txt) (string-match "\\S-" txt))
+	       (setq cpltxt
+		     (concat cpltxt "::"
+			     (condition-case nil
+				 (org-make-org-heading-search-string txt)
+			       (error "")))
+		     desc (or (and (eq et 'keyword) ev)
+			      (nth 4 (ignore-errors (org-heading-components)))
+			      "NONE")))))
 	 (if (string-match "::\\'" cpltxt)
 	     (setq cpltxt (substring cpltxt 0 -2)))
 	 (setq link cpltxt))))
