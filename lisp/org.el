@@ -2236,8 +2236,9 @@ Lisp variable `org-state'."
 (defvar org-blocker-hook nil
   "Hook for functions that are allowed to block a state change.
 
-Each function gets as its single argument a property list, see
-`org-trigger-hook' for more information about this list.
+Functions in this hook should not modify the buffer.
+Each function gets as its single argument a property list,
+see `org-trigger-hook' for more information about this list.
 
 If any of the functions in this hook returns nil, the state change
 is blocked.")
@@ -2245,8 +2246,8 @@ is blocked.")
 (defvar org-trigger-hook nil
   "Hook for functions that are triggered by a state change.
 
-Each function gets as its single argument a property list with at least
-the following elements:
+Each function gets as its single argument a property list with at
+least the following elements:
 
  (:type type-of-change :position pos-at-entry-start
   :from old-state :to new-state)
@@ -11772,15 +11773,16 @@ changes because there are unchecked boxes in this entry."
 
 (defun org-entry-blocked-p ()
   "Is the current entry blocked?"
-  (if (org-entry-get nil "NOBLOCKING")
-      nil ;; Never block this entry
-    (not
-     (run-hook-with-args-until-failure
-      'org-blocker-hook
-      (list :type 'todo-state-change
-	    :position (point)
-	    :from 'todo
-	    :to 'done)))))
+  (with-buffer-modified-unmodified
+   (if (org-entry-get nil "NOBLOCKING")
+       nil ;; Never block this entry
+     (not
+      (run-hook-with-args-until-failure
+       'org-blocker-hook
+       (list :type 'todo-state-change
+	     :position (point)
+	     :from 'todo
+	     :to 'done))))))
 
 (defun org-update-statistics-cookies (all)
   "Update the statistics cookie, either from TODO or from checkboxes.
