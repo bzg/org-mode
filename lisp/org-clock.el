@@ -258,6 +258,7 @@ string as argument."
    :lang org-export-default-language
    :scope 'file
    :block nil
+   :wstart 1
    :tstart nil
    :tend nil
    :step nil
@@ -1973,20 +1974,22 @@ buffer and update it."
        ((> startday 4)
 	(list 39 startday year)))))))
 
-(defun org-clock-special-range (key &optional time as-strings)
+(defun org-clock-special-range (key &optional time as-strings wstart)
   "Return two times bordering a special time range.
 Key is a symbol specifying the range and can be one of `today', `yesterday',
 `thisweek', `lastweek', `thismonth', `lastmonth', `thisyear', `lastyear'.
 A week starts Monday 0:00 and ends Sunday 24:00.
 The range is determined relative to TIME.  TIME defaults to the current time.
 The return value is a cons cell with two internal times like the ones
-returned by `current time' or `encode-time'. if AS-STRINGS is non-nil,
-the returned times will be formatted strings."
+returned by `current time' or `encode-time'.  If AS-STRINGS is non-nil,
+the returned times will be formatted strings.  If WSTART is non-nil,
+use this number to specify the starting day of a week (monday is 1)."
   (if (integerp key) (setq key (intern (number-to-string key))))
   (let* ((tm (decode-time (or time (current-time))))
 	 (s 0) (m (nth 1 tm)) (h (nth 2 tm))
 	 (d (nth 3 tm)) (month (nth 4 tm)) (y (nth 5 tm))
 	 (dow (nth 6 tm))
+	 (ws (or wstart 1))
 	 (skey (symbol-name key))
 	 (shift 0)
          (q (cond ((>= (nth 4 tm) 10) 4)
@@ -2041,7 +2044,7 @@ the returned times will be formatted strings."
      ((memq key '(day today))
       (setq d (+ d shift) h 0 m 0 h1 24 m1 0))
      ((memq key '(week thisweek))
-      (setq diff (+ (* -7 shift) (if (= dow 0) 6 (1- dow)))
+      (setq diff (+ (* -7 shift) (if (= dow 0) (- 7 ws) (- dow ws)))
 	    m 0 h 0 d (- d diff) d1 (+ 7 d)))
      ((memq key '(month thismonth))
       (setq d 1 h 0 m 0 d1 1 month (+ month shift) month1 (1+ month) h1 0 m1 0))
@@ -2190,6 +2193,7 @@ the currently selected interval size."
 	   (te (plist-get params :tend))
 	   (link (plist-get params :link))
 	   (maxlevel (or (plist-get params :maxlevel) 3))
+	   (ws (plist-get params :wstart))
 	   (step (plist-get params :step))
 	   (timestamp (plist-get params :timestamp))
 	   (formatter (or (plist-get params :formatter)
@@ -2200,7 +2204,7 @@ the currently selected interval size."
       ;; Check if we need to do steps
       (when block
 	;; Get the range text for the header
-	(setq cc (org-clock-special-range block nil t)
+	(setq cc (org-clock-special-range block nil t ws)
 	      ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
       (when step
 	;; Write many tables, in steps
@@ -2288,6 +2292,7 @@ from the dynamic block definition."
 	 (te (plist-get params :tend))
 	 (header (plist-get  params :header))
 	 (narrow (plist-get params :narrow))
+	 (ws (or (plist-get params :wstart) 1))
 	 (link (plist-get params :link))
 	 (maxlevel (or (plist-get params :maxlevel) 3))
 	 (emph (plist-get params :emphasize))
@@ -2330,7 +2335,7 @@ from the dynamic block definition."
 
     (when block
       ;; Get the range text for the header
-      (setq range-text (nth 2 (org-clock-special-range block nil t))))
+      (setq range-text (nth 2 (org-clock-special-range block nil t ws))))
 
     ;; Compute the total time
     (setq total-time (apply '+ (mapcar 'cadr tables)))
@@ -2513,13 +2518,14 @@ from the dynamic block definition."
   (let* ((p1 (copy-sequence params))
 	 (ts (plist-get p1 :tstart))
 	 (te (plist-get p1 :tend))
+	 (ws (plist-get p1 :wstart))
 	 (step0 (plist-get p1 :step))
 	 (step (cdr (assoc step0 '((day . 86400) (week . 604800)))))
 	 (stepskip0 (plist-get p1 :stepskip0))
 	 (block (plist-get p1 :block))
 	 cc range-text step-time)
     (when block
-      (setq cc (org-clock-special-range block nil t)
+      (setq cc (org-clock-special-range block nil t ws)
 	    ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
     (cond
      ((numberp ts)
@@ -2589,6 +2595,7 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 	 (timestamp (plist-get params :timestamp))
 	 (ts (plist-get params :tstart))
 	 (te (plist-get params :tend))
+	 (ws (plist-get params :wstart))
 	 (block (plist-get params :block))
 	 (link (plist-get params :link))
 	 (tags (plist-get params :tags))
@@ -2600,7 +2607,7 @@ TIME:      The sum of all time spend in this tree, in minutes.  This time
 
     (setq org-clock-file-total-minutes nil)
     (when block
-      (setq cc (org-clock-special-range block nil t)
+      (setq cc (org-clock-special-range block nil t ws)
 	    ts (car cc) te (nth 1 cc) range-text (nth 2 cc)))
     (when (integerp ts) (setq ts (calendar-gregorian-from-absolute ts)))
     (when (integerp te) (setq te (calendar-gregorian-from-absolute te)))
