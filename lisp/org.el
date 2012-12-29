@@ -9648,7 +9648,13 @@ application the system uses for this file type."
 			 org-angle-link-re "\\|"
 			 "[ \t]:[^ \t\n]+:[ \t]*$")))
 	   (not (get-text-property (point) 'org-linked-text)))
-      (or (org-offer-links-in-entry arg)
+      (or (let* ((lkall (org-offer-links-in-entry (current-buffer) (point) arg))
+		 (lk (car lkall))
+		 (lkend (cdr lkall)))
+	    (when lk
+	      (prog1 (search-forward lk nil lkend)
+		(goto-char (match-beginning 0))
+		(org-open-at-point))))
 	  (progn (require 'org-attach) (org-attach-reveal 'if-exists))))
      ((run-hook-with-args-until-success 'org-open-at-point-functions))
      ((and (org-at-timestamp-p t)
@@ -9844,68 +9850,67 @@ application the system uses for this file type."
     (move-marker org-open-link-marker nil)
     (run-hook-with-args 'org-follow-link-hook)))
 
-(defun org-offer-links-in-entry (&optional nth zero)
-  "Offer links in the current entry and follow the selected link.
-If there is only one link, follow it immediately as well.
-If NTH is an integer, immediately pick the NTH link found.
+(defun org-offer-links-in-entry (buffer marker &optional nth zero)
+  "Offer links in the current entry and return the selected link.
+If there is only one link, return it.
+If NTH is an integer, return the NTH link found.
 If ZERO is a string, check also this string for a link, and if
-there is one, offer it as link number zero."
-  (let ((re (concat "\\(" org-bracket-link-regexp "\\)\\|"
-		    "\\(" org-angle-link-re "\\)\\|"
-		    "\\(" org-plain-link-re "\\)"))
-	(cnt ?0)
-	(in-emacs (if (integerp nth) nil nth))
-	have-zero end links link c)
-    (when (and (stringp zero) (string-match org-bracket-link-regexp zero))
-      (push (match-string 0 zero) links)
-      (setq cnt (1- cnt) have-zero t))
+there is one, return it."
+  (with-current-buffer buffer
     (save-excursion
-      (org-back-to-heading t)
-      (setq end (save-excursion (outline-next-heading) (point)))
-      (while (re-search-forward re end t)
-	(push (match-string 0) links))
-      (setq links (org-uniquify (reverse links))))
-
-    (cond
-     ((null links)
-      (message "No links"))
-     ((equal (length links) 1)
-      (setq link (list (car links))))
-     ((and (integerp nth) (>= (length links) (if have-zero (1+ nth) nth)))
-      (setq link (list (nth (if have-zero nth (1- nth)) links))))
-     (t ; we have to select a link
-      (save-excursion
-	(save-window-excursion
-	  (delete-other-windows)
-	  (with-output-to-temp-buffer "*Select Link*"
-	    (mapc (lambda (l)
-		    (if (not (string-match org-bracket-link-regexp l))
-			(princ (format "[%c]  %s\n" (incf cnt)
-				       (org-remove-angle-brackets l)))
-		      (if (match-end 3)
-			  (princ (format "[%c]  %s (%s)\n" (incf cnt)
-					 (match-string 3 l) (match-string 1 l)))
-			(princ (format "[%c]  %s\n" (incf cnt)
-				       (match-string 1 l))))))
-		  links))
-	  (org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
-	  (message "Select link to open, RET to open all:")
-	  (setq c (read-char-exclusive))
-	  (and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
-      (when (equal c ?q) (error "Abort"))
-      (if (equal c ?\C-m)
-	  (setq link links)
-	(setq nth (- c ?0))
-	(if have-zero (setq nth (1+ nth)))
-	(unless (and (integerp nth) (>= (length links) nth))
-	  (error "Invalid link selection"))
-	(setq link (list (nth (1- nth) links))))))
-    (if link
-	(let ((buf (current-buffer)))
-	  (dolist (l link)
-	    (org-open-link-from-string l in-emacs buf))
-	  t)
-      nil)))
+      (save-restriction
+	(widen)
+	(goto-char marker)
+	(let ((re (concat "\\(" org-bracket-link-regexp "\\)\\|"
+			  "\\(" org-angle-link-re "\\)\\|"
+			  "\\(" org-plain-link-re "\\)"))
+	      (cnt ?0)
+	      (in-emacs (if (integerp nth) nil nth))
+	      have-zero end links link c)
+	  (when (and (stringp zero) (string-match org-bracket-link-regexp zero))
+	    (push (match-string 0 zero) links)
+	    (setq cnt (1- cnt) have-zero t))
+	  (save-excursion
+	    (org-back-to-heading t)
+	    (setq end (save-excursion (outline-next-heading) (point)))
+	    (while (re-search-forward re end t)
+	      (push (match-string 0) links))
+	    (setq links (org-uniquify (reverse links))))
+	  (cond
+	   ((null links)
+	    (message "No links"))
+	   ((equal (length links) 1)
+	    (setq link (car links)))
+	   ((and (integerp nth) (>= (length links) (if have-zero (1+ nth) nth)))
+	    (setq link (nth (if have-zero nth (1- nth)) links)))
+	   (t ; we have to select a link
+	    (save-excursion
+	      (save-window-excursion
+		(delete-other-windows)
+		(with-output-to-temp-buffer "*Select Link*"
+		  (mapc (lambda (l)
+			  (if (not (string-match org-bracket-link-regexp l))
+			      (princ (format "[%c]  %s\n" (incf cnt)
+					     (org-remove-angle-brackets l)))
+			    (if (match-end 3)
+				(princ (format "[%c]  %s (%s)\n" (incf cnt)
+					       (match-string 3 l) (match-string 1 l)))
+			      (princ (format "[%c]  %s\n" (incf cnt)
+					     (match-string 1 l))))))
+			links))
+		(org-fit-window-to-buffer (get-buffer-window "*Select Link*"))
+		(message "Select link to open, RET to open all:")
+		(setq c (read-char-exclusive))
+		(and (get-buffer "*Select Link*") (kill-buffer "*Select Link*"))))
+	    (when (equal c ?q) (error "Abort"))
+	    (if (equal c ?\C-m)
+		(setq link links)
+	      (setq nth (- c ?0))
+	      (if have-zero (setq nth (1+ nth)))
+	      (unless (and (integerp nth) (>= (length links) nth))
+		(error "Invalid link selection"))
+	      (setq link (nth (1- nth) links)))))
+	  (cons link end))))))
 
 ;; Add special file links that specify the way of opening
 

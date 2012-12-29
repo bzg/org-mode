@@ -7892,23 +7892,39 @@ If this information is not given, the function uses the tree at point."
     (unless no-update (org-agenda-redo))))
 
 (defun org-agenda-open-link (&optional arg)
-  "Follow the link in the current line, if any.
-This looks for a link in the displayed line in the agenda.  It also looks
-at the text of the entry itself."
+  "Open the link(s) in the current entry, if any.
+This looks for a link in the displayed line in the agenda.
+It also looks at the text of the entry itself."
   (interactive "P")
   (let* ((marker (or (org-get-at-bol 'org-hd-marker)
 		     (org-get-at-bol 'org-marker)))
 	 (buffer (and marker (marker-buffer marker)))
 	 (prefix (buffer-substring
-		  (point-at-bol) (point-at-eol))))
+		  (point-at-bol) (point-at-eol)))
+	 (lkall (org-offer-links-in-entry buffer marker arg prefix))
+	 (lk (car lkall))
+	 (lkend (cdr lkall))
+	 trg)
     (cond
      (buffer
       (with-current-buffer buffer
-	(save-excursion
-	  (save-restriction
-	    (widen)
-	    (goto-char marker)
-	    (org-offer-links-in-entry arg prefix)))))
+	(setq trg (and (string-match org-bracket-link-regexp lk)
+		       (match-string 1 lk)))
+	(if (or (not trg) (string-match org-any-link-re trg))
+	    (save-excursion
+	      (save-restriction
+		(widen)
+		(goto-char marker)
+		(when (search-forward lk nil lkend)
+		  (goto-char (match-beginning 0))
+		  (org-open-at-point))))
+	  ;; This is an internal link, widen the buffer
+	  (switch-to-buffer-other-window buffer)
+	  (widen)
+	  (goto-char marker)
+	  (when (search-forward lk nil lkend)
+	    (goto-char (match-beginning 0))
+	    (org-open-at-point)))))
      ((or (org-in-regexp (concat "\\(" org-bracket-link-regexp "\\)"))
 	  (save-excursion
 	    (beginning-of-line 1)
