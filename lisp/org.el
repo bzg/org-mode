@@ -5158,15 +5158,18 @@ The following commands are available:
 		      (list (face-foreground 'org-hide))))))
     (car (remove nil candidates))))
 
-(defun org-current-time ()
-  "Current time, possibly rounded to `org-time-stamp-rounding-minutes'."
-  (if (> (car org-time-stamp-rounding-minutes) 1)
-      (let ((r (car org-time-stamp-rounding-minutes))
-	    (time (decode-time)))
+(defun org-current-time (&optional rounding-minutes)
+  "Current time, possibly rounded to ROUNDING-MINUTES.
+When ROUNDING-MINUTES is not an integer, fall back on the car of
+`org-time-stamp-rounding-minutes'."
+  (let ((r (or (and (integerp rounding-minutes) rounding-minutes)
+	       (car org-time-stamp-rounding-minutes)))
+	(time (decode-time)))
+    (if (> r 1)
 	(apply 'encode-time
 	       (append (list 0 (* r (floor (+ .5 (/ (float (nth 1 time)) r)))))
-		       (nthcdr 2 time))))
-    (current-time)))
+		       (nthcdr 2 time)))
+      (current-time))))
 
 (defun org-today ()
   "Return today date, considering `org-extend-today-until'."

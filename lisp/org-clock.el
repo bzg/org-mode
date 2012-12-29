@@ -94,6 +94,23 @@ clocking out."
 	  (repeat :tag "State list"
 		  (string :tag "TODO keyword"))))
 
+(defcustom org-clock-rounding-minutes 0
+  "Rounding minutes when clocking in or out.
+The default value is 0 so that no rounding is done.
+When set to a non-integer value, use the car of
+`org-time-stamp-rounding-minutes', like for setting a time-stamp.
+
+E.g. if `org-clock-rounding-minutes' is set to 5, time is 14:47
+and you clock in: then the clock starts at 14:45.  If you clock
+out within the next 5 minutes, the clock line will be removed;
+if you clock out 8 minutes after your clocked in, the clock
+out time will be 14:50."
+  :group 'org-clock
+  :version "24.3"
+  :type '(choice
+	  (integer :tag "Minutes (0 for no rounding)")
+	  (symbol  :tag "Use `org-time-stamp-rounding-minutes'" 'same-as-time-stamp)))
+
 (defcustom org-clock-out-remove-zero-time-clocks nil
   "Non-nil means remove the clock line when the resulting time is zero."
   :group 'org-clock
@@ -1238,11 +1255,12 @@ make this the default behavior.)"
 			     (y-or-n-p
 			      (format
 			       "You stopped another clock %d mins ago; start this one from then? "
-			       (/ (- (org-float-time (current-time))
+			       (/ (- (org-float-time
+				      (org-current-time org-clock-rounding-minutes))
 				     (org-float-time leftover)) 60)))
 			     leftover)
 			start-time
-			(current-time)))
+			(org-current-time org-clock-rounding-minutes)))
 	      (setq ts (org-insert-time-stamp org-clock-start-time
 					      'with-hm 'inactive))))
 	    (move-marker org-clock-marker (point) (buffer-base-buffer))
@@ -1293,8 +1311,9 @@ for a todo state to switch to, overriding the existing value
   (if (equal arg '(4))
       (org-clock-in (org-clock-select-task))
     (let ((start-time (if (or org-clock-continuously (equal arg '(16)))
-			  (or org-clock-out-time (current-time))
-			(current-time))))
+			  (or org-clock-out-time
+			      (org-current-time org-clock-rounding-minutes))
+			(org-current-time org-clock-rounding-minutes))))
       (if (null org-clock-history)
 	  (message "No last clock")
 	(let ((org-clock-in-switch-to-state
@@ -1466,7 +1485,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 				  org-todo-keywords-1)
 				nil t "DONE")
 	     org-clock-out-switch-to-state))
-	  (now (current-time))
+	  (now (org-current-time org-clock-rounding-minutes))
 	  ts te s h m remove)
       (setq org-clock-out-time now)
       (save-excursion ; Do not replace this with `with-current-buffer'.
