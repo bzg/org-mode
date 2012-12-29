@@ -633,7 +633,8 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
   (unless (org-bound-and-true-p org-edit-src-from-org-mode)
     (error "This is not a sub-editing buffer, something is wrong"))
   (widen)
-  (let* ((beg org-edit-src-beg-marker)
+  (let* ((fixed-width-p (string-match "Fixed Width" (buffer-name)))
+	 (beg org-edit-src-beg-marker)
 	 (end org-edit-src-end-marker)
 	 (ovl org-edit-src-overlay)
 	 (bufstr (buffer-string))
@@ -670,7 +671,8 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
 	    (goto-char (point-max)) (insert "\\n")))
 	(goto-char (point-min))
 	(if (looking-at "\\s-*") (replace-match " ")))
-      (when (org-bound-and-true-p org-edit-src-from-org-mode)
+      (when (and (org-bound-and-true-p org-edit-src-from-org-mode)
+		 (not fixed-width-p))
 	(org-escape-code-in-region (point-min) (point-max))
 	(setq delta (+ delta
 		       (save-excursion
