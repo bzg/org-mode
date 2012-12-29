@@ -1978,7 +1978,7 @@ buffer and update it."
   "Return two times bordering a special time range.
 Key is a symbol specifying the range and can be one of `today', `yesterday',
 `thisweek', `lastweek', `thismonth', `lastmonth', `thisyear', `lastyear'.
-A week starts Monday 0:00 and ends Sunday 24:00.
+By default, a week starts Monday 0:00 and ends Sunday 24:00.
 The range is determined relative to TIME.  TIME defaults to the current time.
 The return value is a cons cell with two internal times like the ones
 returned by `current time' or `encode-time'.  If AS-STRINGS is non-nil,
