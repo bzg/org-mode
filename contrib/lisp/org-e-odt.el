@@ -30,6 +30,7 @@
   (require 'table))
 (require 'format-spec)
 (require 'org-export)
+(require 'org-compat)
 
 ;;; Define Back-End
 
