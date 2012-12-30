@@ -12008,7 +12008,7 @@ changes because there are unchecked boxes in this entry."
 
 (defun org-entry-blocked-p ()
   "Is the current entry blocked?"
-  (with-buffer-modified-unmodified
+  (org-with-buffer-modified-unmodified
    (if (org-entry-get nil "NOBLOCKING")
        nil ;; Never block this entry
      (not
