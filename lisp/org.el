@@ -16538,17 +16538,19 @@ When SHOW-ALL is nil, only return the current occurrence of a time stamp."
 This should be a lot faster than the normal `parse-time-string'.
 If time is not given, defaults to 0:00.  However, with optional NODEFAULT,
 hour and minute fields will be nil if not given."
-  (if (string-match org-ts-regexp0 s)
-      (list 0
-	    (if (or (match-beginning 8) (not nodefault))
-		(string-to-number (or (match-string 8 s) "0")))
-	    (if (or (match-beginning 7) (not nodefault))
-		(string-to-number (or (match-string 7 s) "0")))
-	    (string-to-number (match-string 4 s))
-	    (string-to-number (match-string 3 s))
-	    (string-to-number (match-string 2 s))
-	    nil nil nil)
-    (error "Not a standard Org-mode time string: %s" s)))
+  (cond ((string-match org-ts-regexp0 s)
+	 (list 0
+	       (if (or (match-beginning 8) (not nodefault))
+		   (string-to-number (or (match-string 8 s) "0")))
+	       (if (or (match-beginning 7) (not nodefault))
+		   (string-to-number (or (match-string 7 s) "0")))
+	       (string-to-number (match-string 4 s))
+	       (string-to-number (match-string 3 s))
+	       (string-to-number (match-string 2 s))
+	       nil nil nil))
+	((string-match "^<[^>]+>$" s)
+	 (decode-time (seconds-to-time (org-matcher-time s))))
+	(t (error "Not a standard Org-mode time string: %s" s))))
 
 (defun org-timestamp-up (&optional arg)
   "Increase the date item at the cursor by one.

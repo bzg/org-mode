@@ -88,7 +88,7 @@
 
 
 
-;;; Date Analysis
+;;; Date and time analysis
 
 (ert-deftest test-org/org-read-date ()
   "Test `org-read-date' specifications."
@@ -105,6 +105,18 @@
 			(let ((org-time-was-given t))
 			  (org-read-date t nil "29.03. 16:40")))))
 
+(ert-deftest test-org/org-parse-time-string ()
+  "Test `org-parse-time-string'."
+  (should (equal (org-parse-time-string "2012-03-29 16:40")
+		 '(0 40 16 29 3 2012 nil nil nil)))
+  (should (equal (org-parse-time-string "[2012-03-29 16:40]")
+		 '(0 40 16 29 3 2012 nil nil nil)))
+  (should (equal (org-parse-time-string "<2012-03-29 16:40>")
+		 '(0 40 16 29 3 2012 nil nil nil)))
+  (should (equal (org-parse-time-string "<2012-03-29>")
+		 '(0 0 0 29 3 2012 nil nil nil)))
+  (should (equal (org-parse-time-string "<2012-03-29>" t)
+		 '(0 nil nil 29 3 2012 nil nil nil))))
 
 
 ;;; Filling
