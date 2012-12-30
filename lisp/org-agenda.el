@@ -8426,35 +8426,37 @@ If FORCE-TAGS is non nil, the car of it returns the new tags."
   (interactive)
   (org-agenda-priority 'down))
 
-(defun org-agenda-priority (&optional force-direction show)
+(defun org-agenda-priority (&optional force-direction)
   "Set the priority of line at point, also in Org-mode file.
 This changes the line at point, all other lines in the agenda referring to
-the same tree node, and the headline of the tree node in the Org-mode file."
+the same tree node, and the headline of the tree node in the Org-mode file.
+Called with a universal prefix arg, show the priority instead of setting it."
   (interactive "P")
-  (if (equal force-direction '(4)) (setq show t))
-  (unless org-enable-priority-commands
-    (error "Priority commands are disabled"))
-  (org-agenda-check-no-diary)
-  (let* ((marker (or (org-get-at-bol 'org-marker)
-		     (org-agenda-error)))
-	 (hdmarker (org-get-at-bol 'org-hd-marker))
-	 (buffer (marker-buffer hdmarker))
-	 (pos (marker-position hdmarker))
-	 (inhibit-read-only t)
-	 newhead)
-    (org-with-remote-undo buffer
-      (with-current-buffer buffer
-	(widen)
-	(goto-char pos)
-	(org-show-context 'agenda)
-	(save-excursion
-	  (and (outline-next-heading)
-	       (org-flag-heading nil)))   ; show the next heading
-	(funcall 'org-priority force-direction show)
-	(end-of-line 1)
-	(setq newhead (org-get-heading)))
-      (org-agenda-change-all-lines newhead hdmarker)
-      (beginning-of-line 1))))
+  (if (equal force-direction '(4))
+      (org-show-priority)
+    (unless org-enable-priority-commands
+      (error "Priority commands are disabled"))
+    (org-agenda-check-no-diary)
+    (let* ((marker (or (org-get-at-bol 'org-marker)
+		       (org-agenda-error)))
+	   (hdmarker (org-get-at-bol 'org-hd-marker))
+	   (buffer (marker-buffer hdmarker))
+	   (pos (marker-position hdmarker))
+	   (inhibit-read-only t)
+	   newhead)
+      (org-with-remote-undo buffer
+	(with-current-buffer buffer
+	  (widen)
+	  (goto-char pos)
+	  (org-show-context 'agenda)
+	  (save-excursion
+	    (and (outline-next-heading)
+		 (org-flag-heading nil)))   ; show the next heading
+	  (funcall 'org-priority force-direction)
+	  (end-of-line 1)
+	  (setq newhead (org-get-heading)))
+	(org-agenda-change-all-lines newhead hdmarker)
+	(beginning-of-line 1)))))
 
 ;; FIXME: should fix the tags property of the agenda line.
 (defun org-agenda-set-tags (&optional tag onoff)
