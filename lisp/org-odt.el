@@ -27,6 +27,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'org-lparse)
+(require 'org-compat)
 
 (defgroup org-export-odt nil
   "Options specific for ODT export of Org-mode files."
