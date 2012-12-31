@@ -20792,6 +20792,7 @@ hierarchy of headlines by UP levels before marking the subtree."
        (t
 	(beginning-of-line 0)
 	(while (and (not (bobp))
+		    (not (looking-at org-table-line-regexp))
 		    (not (looking-at org-drawer-regexp))
 		    ;; When point started in an inline task, do not move
 		    ;; above task starting line.
