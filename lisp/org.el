@@ -19122,8 +19122,10 @@ This command does many different things, depending on context:
 	  (org-list-struct-fix-ind struct parents)
 	  (setq block-item
 		(org-list-struct-fix-box struct parents prevs orderedp)))
-	(org-list-struct-apply-struct struct old-struct)
-	(org-update-checkbox-count-maybe)
+	(if (equal struct old-struct)
+	    (user-error "Cannot toggle this checkbox (unchecked subitems?)")
+	  (org-list-struct-apply-struct struct old-struct)
+	  (org-update-checkbox-count-maybe))
 	(when block-item
 	  (message
 	   "Checkboxes were removed due to unchecked box at line %d"
