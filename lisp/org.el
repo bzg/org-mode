@@ -6440,7 +6440,8 @@ in special contexts.
     (cond
      ((= eos eoh)
       ;; Nothing is hidden behind this heading
-      (run-hook-with-args 'org-pre-cycle-hook 'empty)
+      (unless (org-before-first-heading-p)
+	(run-hook-with-args 'org-pre-cycle-hook 'empty))
       (message "EMPTY ENTRY")
       (setq org-cycle-subtree-status nil)
       (save-excursion
@@ -6453,7 +6454,8 @@ in special contexts.
 	       (not (setq children-skipped
 			  org-cycle-skip-children-state-if-no-children))))
       ;; Entire subtree is hidden in one line: children view
-      (run-hook-with-args 'org-pre-cycle-hook 'children)
+      (unless (org-before-first-heading-p)
+	(run-hook-with-args 'org-pre-cycle-hook 'children))
       (if (org-at-item-p)
 	  (org-list-set-item-visibility (point-at-bol) struct 'children)
 	(org-show-entry)
@@ -6481,24 +6483,28 @@ in special contexts.
 	(outline-next-heading)
 	(if (outline-invisible-p) (org-flag-heading nil)))
       (setq org-cycle-subtree-status 'children)
-      (run-hook-with-args 'org-cycle-hook 'children))
+      (unless (org-before-first-heading-p)
+	(run-hook-with-args 'org-cycle-hook 'children)))
      ((or children-skipped
 	  (and (eq last-command this-command)
 	       (eq org-cycle-subtree-status 'children)))
       ;; We just showed the children, or no children are there,
       ;; now show everything.
-      (run-hook-with-args 'org-pre-cycle-hook 'subtree)
+      (unless (org-before-first-heading-p)
+	(run-hook-with-args 'org-pre-cycle-hook 'subtree))
       (outline-flag-region eoh eos nil)
       (message (if children-skipped "SUBTREE (NO CHILDREN)" "SUBTREE"))
       (setq org-cycle-subtree-status 'subtree)
-      (run-hook-with-args 'org-cycle-hook 'subtree))
+      (unless (org-before-first-heading-p)
+	(run-hook-with-args 'org-cycle-hook 'subtree)))
      (t
       ;; Default action: hide the subtree.
       (run-hook-with-args 'org-pre-cycle-hook 'folded)
       (outline-flag-region eoh eos t)
       (message "FOLDED")
       (setq org-cycle-subtree-status 'folded)
-      (run-hook-with-args 'org-cycle-hook 'folded)))))
+      (unless (org-before-first-heading-p)
+	(run-hook-with-args 'org-cycle-hook 'folded))))))
 
 ;;;###autoload
 (defun org-global-cycle (&optional arg)
