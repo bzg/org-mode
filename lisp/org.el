@@ -5417,8 +5417,7 @@ by a #."
 	     (match-beginning 6) (match-end 6)
 	     (if (string-equal dc1 "+title:")
 		 '(font-lock-fontified t face org-document-title)
-	       '(font-lock-fontified t face org-document-info)))
-	    (org-rear-nonsticky-at (match-end 0)))
+	       '(font-lock-fontified t face org-document-info))))
 	   ((or (equal dc1 "+results")
 		(member dc1 '("+begin:" "+end:" "+caption:" "+label:"
 			      "+orgtbl:" "+tblfm:" "+tblname:" "+results:"
