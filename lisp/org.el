@@ -19528,8 +19528,10 @@ This command does many different things, depending on context:
 	  (org-list-struct-fix-ind struct parents)
 	  (setq block-item
 		(org-list-struct-fix-box struct parents prevs orderedp)))
-	(org-list-struct-apply-struct struct old-struct)
-	(org-update-checkbox-count-maybe)
+	(if (equal struct old-struct)
+	    (user-error "Cannot toggle this checkbox (unchecked subitems?)")
+	  (org-list-struct-apply-struct struct old-struct)
+	  (org-update-checkbox-count-maybe))
 	(when block-item
 	  (message
 	   "Checkboxes were removed due to unchecked box at line %d"
@@ -21349,6 +21351,7 @@ function installs the following ones: \"property\",
        (t
 	(beginning-of-line 0)
 	(while (and (not (bobp))
+		    (not (looking-at org-table-line-regexp))
 		    (not (looking-at org-drawer-regexp))
 		    ;; When point started in an inline task, do not move
 		    ;; above task starting line.
