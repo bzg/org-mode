@@ -7906,7 +7906,7 @@ It also looks at the text of the entry itself."
 	 (lkend (cdr lkall))
 	 trg)
     (cond
-     (buffer
+     ((and buffer (stringp lk))
       (with-current-buffer buffer
 	(setq trg (and (string-match org-bracket-link-regexp lk)
 		       (match-string 1 lk)))
@@ -7930,7 +7930,7 @@ It also looks at the text of the entry itself."
 	    (beginning-of-line 1)
 	    (looking-at (concat ".*?\\(" org-bracket-link-regexp "\\)"))))
       (org-open-link-from-string (match-string 1)))
-     (t (error "No link to open here")))))
+     (t (message "No link to open here")))))
 
 (defun org-agenda-copy-local-variable (var)
   "Get a variable from a referenced buffer and install it here."
