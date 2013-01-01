@@ -1,7 +1,7 @@
 ;;; org-mac-link-grabber.el --- Grab links and url from various mac
 ;;; application and insert them as links into org-mode documents
 ;;
-;; Copyright (c) 2010-2012 Free Software Foundation, Inc.
+;; Copyright (c) 2010-2013 Free Software Foundation, Inc.
 ;;
 ;; Author: Anthony Lander <anthony.lander@gmail.com>
 ;; Version: 1.0.1

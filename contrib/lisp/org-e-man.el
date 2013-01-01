@@ -1,6 +1,6 @@
 ;; org-e-man.el --- Man Back-End For Org Export Engine
 
-;; Copyright (C) 2011-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2011-2013  Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Author: Luis R Anaya <papoanaya aroba hot mail punto com>

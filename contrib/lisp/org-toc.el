@@ -1,6 +1,6 @@
 ;;; org-toc.el --- Table of contents for Org-mode buffer
 
-;; Copyright 2007-2012 Free Software Foundation, Inc.
+;; Copyright 2007-2013 Free Software Foundation, Inc.
 ;;
 ;; Author: Bastien Guerry <bzg AT gnu DOT org>
 ;; Keywords: Org table of contents

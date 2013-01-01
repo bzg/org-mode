@@ -1,6 +1,6 @@
 ;;; org-mairix.el - Support for hooking mairix search into Org for different MUAs
 ;;
-;; Copyright (C) 2007-2012 Georg C. F. Greve
+;; Copyright (C) 2007-2013 Georg C. F. Greve
 ;; mutt support by Adam Spiers <orgmode at adamspiers dot org>
 ;;
 ;; Author: Georg C. F. Greve <greve at fsfeurope dot org>
