@@ -3047,7 +3047,7 @@ to the value of `temporary-file-directory'."
 	  (eval ;; convert to fmt -- mimicking `org-run-like-in-org-mode'
 	   (list 'let org-local-vars
 		 (list (intern (format "org-export-as-%s" fmt))
-		       nil nil nil ''string t dir))))
+		       nil nil ''string t dir))))
       (delete-file tmp-file))))
 
 ;;;###autoload
