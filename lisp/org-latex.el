@@ -2307,8 +2307,7 @@ The conversion is made depending of STRING-BEFORE and STRING-AFTER."
        ;; process with link inserting
        (apply 'delete-region remove)
        (setq caption (and caption (org-export-latex-fontify-headline caption)))
-       (cond ((and imgp
-		   (plist-get org-export-latex-options-plist :inline-images))
+       (cond ((and imgp (plist-get org-export-latex-options-plist :latex-inline-images))
 	      ;; OK, we need to inline an image
 	      (insert
 	       (org-export-latex-format-image raw-path caption label attr shortn)))
