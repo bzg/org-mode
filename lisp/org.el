@@ -12916,7 +12916,7 @@ D      Show deadlines and scheduled items between a date range."
   (let (ans kwd value ts-type)
     (setq type (or type org-sparse-tree-default-date-type))
     (setq org-ts-type type)
-    (message "Sparse tree: [r]egexp [/]regexp [t]odo [T]odo-kwd [m]atch [p]roperty\n             [d]eadlines [b]efore-date [a]fter-date [D]ates range\n             [c]ycle through date types: %s"
+    (message "Sparse tree: [/]regexp [t]odo [T]odo-kwd [m]atch [p]roperty\n             [d]eadlines [b]efore-date [a]fter-date [D]ates range\n             [c]ycle through date types: %s"
 	     (cond ((eq type 'all) "all timestamps")
 		   ((eq type 'scheduled) "only scheduled")
 		   ((eq type 'deadline) "only deadline")
