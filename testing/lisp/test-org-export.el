@@ -1,6 +1,6 @@
 ;;; test-org-export.el --- Tests for org-export.el
 
-;; Copyright (C) 2012  Nicolas Goaziou
+;; Copyright (C) 2012, 2013  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 

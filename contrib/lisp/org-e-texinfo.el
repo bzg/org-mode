@@ -1,6 +1,6 @@
 ;;; org-e-texinfo.el --- Texinfo Back-End For Org Export Engine
 
-;; Copyright (C) 2012  Jonathan Leech-Pepin
+;; Copyright (C) 2012, 2013  Jonathan Leech-Pepin
 ;; Author: Jonathan Leech-Pepin <jonathan.leechpepin at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
 ;;
