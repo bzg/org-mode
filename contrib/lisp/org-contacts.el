@@ -388,12 +388,17 @@ This function should be called from `gnus-article-prepare-hook'."
   (org-completing-read
    prompt (org-contacts-filter) predicate t initial-input hist def inherit-input-method))
 
+(defun org-contacts-format-name (name)
+  "Trim any local formatting to get a bare name."
+  ;; Remove radio targets characters
+  (replace-regexp-in-string org-radio-target-regexp "\\1" name))
+
 (defun org-contacts-format-email (name email)
   "Format a mail address."
   (unless email
     (error "`email' cannot be nul"))
   (if name
-      (concat name " <" email ">")
+      (concat (org-contacts-format-name name) " <" email ">")
     email))
 
 (defun org-contacts-check-mail-address (mail)
