@@ -5566,9 +5566,9 @@ by a #."
 		 '(font-lock-fontified t invisible t)
 	       '(font-lock-fontified t face org-document-info-keyword)))
 	    (add-text-properties
-	     (match-beginning 6) (match-end 6)
+	     (match-beginning 6) (1+ (match-end 6))
 	     (if (string-equal dc1 "+title:")
-		 '(font-lock-fontified t face org-document-title)
+	    	 '(font-lock-fontified t face org-document-title)
 	       '(font-lock-fontified t face org-document-info))))
 	   ((or (equal dc1 "+results")
 		(member dc1 '("+begin:" "+end:" "+caption:" "+label:"
@@ -9034,13 +9034,13 @@ part of Org's core."
 		       "::" (match-string 1))
 	       link cpltxt))
 	((and (featurep 'org-id)
-	      (or (eq org-link-to-org-use-id t)
+	      (or (eq org-id-link-to-org-use-id t)
 		  (and (org-called-interactively-p 'any)
-		       (or (eq org-link-to-org-use-id 'create-if-interactive)
-			   (and (eq org-link-to-org-use-id
+		       (or (eq org-id-link-to-org-use-id 'create-if-interactive)
+			   (and (eq org-id-link-to-org-use-id
 				    'create-if-interactive-and-no-custom-id)
 				(not custom-id))))
-		  (and org-link-to-org-use-id (org-entry-get nil "ID"))))
+		  (and org-id-link-to-org-use-id (org-entry-get nil "ID"))))
 	 ;; We can make a link using the ID.
 	 (setq link (condition-case nil
 			(prog1 (org-id-store-link)
