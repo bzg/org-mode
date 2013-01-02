@@ -8856,13 +8856,13 @@ For file links, arg negates `org-context-in-file-links'."
 		       "::" (match-string 1))
 	       link cpltxt))
 	((and (featurep 'org-id)
-	      (or (eq org-link-to-org-use-id t)
+	      (or (eq org-id-link-to-org-use-id t)
 		  (and (org-called-interactively-p 'any)
-		       (or (eq org-link-to-org-use-id 'create-if-interactive)
-			   (and (eq org-link-to-org-use-id
+		       (or (eq org-id-link-to-org-use-id 'create-if-interactive)
+			   (and (eq org-id-link-to-org-use-id
 				    'create-if-interactive-and-no-custom-id)
 				(not custom-id))))
-		  (and org-link-to-org-use-id (org-entry-get nil "ID"))))
+		  (and org-id-link-to-org-use-id (org-entry-get nil "ID"))))
 	 ;; We can make a link using the ID.
 	 (setq link (condition-case nil
 			(prog1 (org-id-store-link)
