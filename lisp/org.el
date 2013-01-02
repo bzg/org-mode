@@ -1240,7 +1240,15 @@ See also the QUOTE keyword."
   :type 'boolean)
 
 (defcustom org-goto-auto-isearch t
-  "Non-nil means typing characters in `org-goto' starts incremental search."
+  "Non-nil means typing characters in `org-goto' starts incremental search.
+When nil, you can use these keybindings to navigate the buffer:
+
+  q    Quit the org-goto interface
+  n    Go to the next visible heading
+  p    Go to the previous visible heading
+  f    Go one heading forward on same level
+  b    Go one heading backward on same level
+  u    Go one heading up"
   :group 'org-edit-structure
   :type 'boolean)
 
@@ -6915,42 +6923,47 @@ Optional arguments START and END can be used to limit the range."
 
 (defvar org-goto-window-configuration nil)
 (defvar org-goto-marker nil)
-(defvar org-goto-map
-  (let ((map (make-sparse-keymap)))
-    (let ((cmds '(isearch-forward isearch-backward kill-ring-save set-mark-command mouse-drag-region universal-argument org-occur)) cmd)
-      (while (setq cmd (pop cmds))
-	(substitute-key-definition cmd cmd map global-map)))
-    (suppress-keymap map)
-    (org-defkey map "\C-m"     'org-goto-ret)
-    (org-defkey map [(return)] 'org-goto-ret)
-    (org-defkey map [(left)]   'org-goto-left)
-    (org-defkey map [(right)]  'org-goto-right)
-    (org-defkey map [(control ?g)] 'org-goto-quit)
-    (org-defkey map "\C-i" 'org-cycle)
-    (org-defkey map [(tab)] 'org-cycle)
-    (org-defkey map [(down)] 'outline-next-visible-heading)
-    (org-defkey map [(up)] 'outline-previous-visible-heading)
-    (if org-goto-auto-isearch
-	(if (fboundp 'define-key-after)
-	    (define-key-after map [t] 'org-goto-local-auto-isearch)
-	  nil)
-      (org-defkey map "q" 'org-goto-quit)
-      (org-defkey map "n" 'outline-next-visible-heading)
-      (org-defkey map "p" 'outline-previous-visible-heading)
-      (org-defkey map "f" 'outline-forward-same-level)
-      (org-defkey map "b" 'outline-backward-same-level)
-      (org-defkey map "u" 'outline-up-heading))
-    (org-defkey map "/" 'org-occur)
-    (org-defkey map "\C-c\C-n" 'outline-next-visible-heading)
-    (org-defkey map "\C-c\C-p" 'outline-previous-visible-heading)
-    (org-defkey map "\C-c\C-f" 'outline-forward-same-level)
-    (org-defkey map "\C-c\C-b" 'outline-backward-same-level)
-    (org-defkey map "\C-c\C-u" 'outline-up-heading)
-    map))
+(defvar org-goto-map)
+(defun org-goto-map ()
+  "Set the keymap `org-goto'."
+  (setq org-goto-map
+	(let ((map (make-sparse-keymap)))
+	  (let ((cmds '(isearch-forward isearch-backward kill-ring-save set-mark-command
+					mouse-drag-region universal-argument org-occur))
+		cmd)
+	    (while (setq cmd (pop cmds))
+	      (substitute-key-definition cmd cmd map global-map)))
+	  (suppress-keymap map)
+	  (org-defkey map "\C-m"     'org-goto-ret)
+	  (org-defkey map [(return)] 'org-goto-ret)
+	  (org-defkey map [(left)]   'org-goto-left)
+	  (org-defkey map [(right)]  'org-goto-right)
+	  (org-defkey map [(control ?g)] 'org-goto-quit)
+	  (org-defkey map "\C-i" 'org-cycle)
+	  (org-defkey map [(tab)] 'org-cycle)
+	  (org-defkey map [(down)] 'outline-next-visible-heading)
+	  (org-defkey map [(up)] 'outline-previous-visible-heading)
+	  (if org-goto-auto-isearch
+	      (if (fboundp 'define-key-after)
+		  (define-key-after map [t] 'org-goto-local-auto-isearch)
+		nil)
+	    (org-defkey map "q" 'org-goto-quit)
+	    (org-defkey map "n" 'outline-next-visible-heading)
+	    (org-defkey map "p" 'outline-previous-visible-heading)
+	    (org-defkey map "f" 'outline-forward-same-level)
+	    (org-defkey map "b" 'outline-backward-same-level)
+	    (org-defkey map "u" 'outline-up-heading))
+	  (org-defkey map "/" 'org-occur)
+	  (org-defkey map "\C-c\C-n" 'outline-next-visible-heading)
+	  (org-defkey map "\C-c\C-p" 'outline-previous-visible-heading)
+	  (org-defkey map "\C-c\C-f" 'outline-forward-same-level)
+	  (org-defkey map "\C-c\C-b" 'outline-backward-same-level)
+	  (org-defkey map "\C-c\C-u" 'outline-up-heading)
+	  map)))
 
 (defconst org-goto-help
-  "Browse buffer copy, to find location or copy text.  Just type for auto-isearch.
-RET=jump to location             [Q]uit and return to previous location
+  "Browse buffer copy, to find location or copy text.%s
+RET=jump to location             C-g=quit and return to previous location
 \[Up]/[Down]=next/prev headline   TAB=cycle visibility   [/] org-occur")
 
 (defvar org-goto-start-pos) ; dynamically scoped parameter
@@ -6976,6 +6989,7 @@ in the indirect buffer and expose the headline hierarchy above.
 With a prefix argument, use the alternative interface: e.g. if
 `org-goto-interface' is 'outline use 'outline-path-completion."
   (interactive "P")
+  (org-goto-map)
   (let* ((org-refile-targets `((nil . (:maxlevel . ,org-goto-max-level))))
 	 (org-refile-use-outline-path t)
 	 (org-refile-target-verify-function nil)
@@ -7022,9 +7036,11 @@ or nil."
 	  (condition-case nil
 	      (make-indirect-buffer (current-buffer) "*org-goto*")
 	    (error (make-indirect-buffer (current-buffer) "*org-goto*"))))
-	 (with-output-to-temp-buffer "*Help*"
-	   (princ help))
-	 (org-fit-window-to-buffer (get-buffer-window "*Help*"))
+	 (with-output-to-temp-buffer "*Org Help*"
+	   (princ (format help (if org-goto-auto-isearch
+				   "  Just type for auto-isearch."
+				 "  n/p/f/b/u to navigate, q to quit."))))
+	 (org-fit-window-to-buffer (get-buffer-window "*Org Help*"))
 	 (setq buffer-read-only nil)
 	 (let ((org-startup-truncated t)
 	       (org-startup-folded nil)
@@ -7043,8 +7059,7 @@ or nil."
 	 (let (org-special-ctrl-a/e) (org-beginning-of-line))
 	 (message "Select location and press RET")
 	 (use-local-map org-goto-map)
-	 (recursive-edit)
-	 ))
+	 (recursive-edit)))
      (kill-buffer "*org-goto*")
      (cons org-goto-selected-point org-goto-exit-command))))
 
