@@ -652,6 +652,17 @@ and `org-export-with-tags' instead."
   :version "24.3"
   :type 'string)
 
+(defcustom org-export-latex-inline-images 'maybe
+  "Non-nil means inline images into exported LaTeX pages.
+If this option is `maybe', then images in links with an empty
+description will be inlined, while images with a description will
+be linked only."
+  :group 'org-export-html
+  :version "24.3"
+  :type '(choice (const :tag "Never" nil)
+		 (const :tag "Always" t)
+		 (const :tag "When there is no description" maybe)))
+
 (defcustom org-export-latex-inline-image-extensions
   '("pdf" "jpeg" "jpg" "png" "ps" "eps")
   "Extensions of image files that can be inlined into LaTeX.
