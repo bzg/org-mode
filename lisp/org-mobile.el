@@ -310,12 +310,13 @@ Also exclude files matching `org-mobile-files-exclude-regexp'."
 
 ;;;###autoload
 (defun org-mobile-push ()
-  "Push the current state of Org affairs to the WebDAV directory.
+  "Push the current state of Org affairs to the target directory.
 This will create the index file, copy all agenda files there, and also
 create all custom agenda views, for upload to the mobile phone."
   (interactive)
   (let ((a-buffer (get-buffer org-agenda-buffer-name)))
-    (let ((org-agenda-buffer-name "*SUMO*")
+    (let ((org-agenda-curbuf-name org-agenda-buffer-name)
+	  (org-agenda-buffer-name "*SUMO*")
 	  (org-agenda-tag-filter org-agenda-tag-filter)
 	  (org-agenda-redo-command org-agenda-redo-command))
       (save-excursion
@@ -335,15 +336,17 @@ create all custom agenda views, for upload to the mobile phone."
 	  (org-mobile-create-index-file)
 	  (message "Writing checksums...")
 	  (org-mobile-write-checksums)
-	  (run-hooks 'org-mobile-post-push-hook))))
+	  (run-hooks 'org-mobile-post-push-hook)))
+      (setq org-agenda-buffer-name org-agenda-curbuf-name
+	    org-agenda-this-buffer-name org-agenda-curbuf-name))
     (redraw-display)
-    (when (and a-buffer (buffer-live-p a-buffer))
+    (when (buffer-live-p a-buffer)
       (if (not (get-buffer-window a-buffer))
-	  (kill-buffer a-buffer)
-	(let ((cw (selected-window)))
-	  (select-window (get-buffer-window a-buffer))
-	  (org-agenda-redo)
-	  (select-window cw)))))
+    	  (kill-buffer a-buffer)
+    	(let ((cw (selected-window)))
+    	  (select-window (get-buffer-window a-buffer))
+    	  (org-agenda-redo)
+    	  (select-window cw)))))
   (message "Files for mobile viewer staged"))
 
 (defvar org-mobile-before-process-capture-hook nil
@@ -423,7 +426,8 @@ agenda view showing the flagged items."
 	(target-file (expand-file-name org-mobile-index-file
 				       org-mobile-directory))
 	file link-name todo-kwds done-kwds tags drawers entry kwds dwds twds)
-
+    (when (stringp (car def-todo))
+      (setq def-todo (list (cons 'sequence def-todo))))
     (org-agenda-prepare-buffers (mapcar 'car files-alist))
     (setq done-kwds (org-uniquify org-done-keywords-for-agenda))
     (setq todo-kwds (org-delete-all
