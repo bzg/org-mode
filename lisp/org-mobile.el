@@ -420,7 +420,8 @@ agenda view showing the flagged items."
 	(target-file (expand-file-name org-mobile-index-file
 				       org-mobile-directory))
 	file link-name todo-kwds done-kwds tags drawers entry kwds dwds twds)
-
+    (when (stringp (car def-todo))
+      (setq def-todo (list (cons 'sequence def-todo))))
     (org-agenda-prepare-buffers (mapcar 'car files-alist))
     (setq done-kwds (org-uniquify org-done-keywords-for-agenda))
     (setq todo-kwds (org-delete-all
