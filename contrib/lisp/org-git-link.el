@@ -171,7 +171,7 @@
   (let* ((gitdir (first (org-git-find-gitdir (file-truename file))))
          (branchname (org-git-get-current-branch gitdir))
          (timestring (format-time-string "%Y-%m-%d" (current-time))))
-    (contact "git:" file "::" (org-git-create-searchstring branchname timestring))))
+    (concat "git:" file "::" (org-git-create-searchstring branchname timestring))))
 
 (defun org-git-store-link ()
   "Store git link to current file."
