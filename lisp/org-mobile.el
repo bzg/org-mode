@@ -540,7 +540,7 @@ The table of checksums is written to the file mobile-checksums."
 			(t (cons (car x) (cons "" (cdr x))))))
 		org-agenda-custom-commands)))
 	(default-list '(("a" "Agenda" agenda) ("t" "All TODO" alltodo)))
-	thelist	new e key desc type match settings cmds gkey gdesc gsettings cnt)
+	thelist	atitle new e key desc type match settings cmds gkey gdesc gsettings cnt)
     (cond
      ((eq org-mobile-agendas 'custom)
       (setq thelist custom-list))
@@ -592,12 +592,13 @@ The table of checksums is written to the file mobile-checksums."
 	(setq cnt 0)
 	(while (setq e (pop cmds))
 	  (setq type (car e) match (nth 1 e) settings (nth 2 e))
+	  (setq atitle (if (string= "" gdesc) match gdesc))
 	  (setq settings (append gsettings settings))
 	  (setq settings
 		(cons (list 'org-agenda-title-append
 			    (concat "<after>KEYS=" gkey "#" (number-to-string
 							     (setq cnt (1+ cnt)))
-				    " TITLE: " gdesc " " match "</after>"))
+				    " TITLE: " atitle "</after>"))
 		      settings))
 	  (push (list type match settings) new)))))
     (and new (list "X" "SUMO" (reverse new)
