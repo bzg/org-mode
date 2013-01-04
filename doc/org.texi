@@ -8622,6 +8622,13 @@ buffer, or a sparse tree (the latter covering of course only the current
 buffer).
 @kindex C-c a C
 @vindex org-agenda-custom-commands
+@cindex agenda views, main example
+@cindex tags, as an agenda view
+@cindex todo, as an agenda view
+@cindex tags-todo
+@cindex todo-tree
+@cindex occur-tree
+@cindex tags-tree
 
 Custom commands are configured in the variable
 @code{org-agenda-custom-commands}.  You can customize this variable, for
@@ -8681,6 +8688,9 @@ as a prefix command for a HOME tags search where you have to press an
 additional key (@kbd{l}, @kbd{p} or @kbd{k}) to select a name (Lisa,
 Peter, or Kim) as additional tag to match.
 @end table
+
+Note that the @code{*-tree} agenda views need to be called from an
+Org buffer as they operate on the current buffer only.
 
 @node Block agenda, Setting Options, Storing searches, Custom agenda views
 @subsection Block agenda
