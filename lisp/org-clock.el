@@ -2318,6 +2318,8 @@ from the dynamic block definition."
 	 (maxlevel (or (plist-get params :maxlevel) 3))
 	 (emph (plist-get params :emphasize))
 	 (level-p (plist-get params :level))
+	 (org-time-clocksum-use-effort-durations
+	  (plist-get params :effort-durations))
 	 (timestamp (plist-get params :timestamp))
 	 (properties (plist-get params :properties))
 	 (ntcol (max 1 (or (plist-get params :tcolumns) 100)))

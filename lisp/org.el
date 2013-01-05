@@ -2775,6 +2775,8 @@ means durations longer than a day will be expressed in days and
 minutes, and durations less than a day will be expressed entirely
 in minutes (even for durations longer than an hour)."
   :group 'org-time
+  :group 'org-clock
+  :version "24.3"
   :type '(choice (string :tag "Format string")
 		 (set :tag "Plist"
 		      (group :inline t (const :tag "Years" :years)
@@ -2809,9 +2811,24 @@ in minutes (even for durations longer than an hour)."
 			     (const t)))))
 
 (defcustom org-time-clocksum-use-fractional nil
-  "If non-nil, \\[org-clock-display] uses fractional times.
-org-mode generates a time duration."
+  "When non-nil, \\[org-clock-display] uses fractional times.
+See `org-time-clocksum-format' for more on time clock formats."
   :group 'org-time
+  :group 'org-clock
+  :version "24.3"
+  :type 'boolean)
+
+(defcustom org-time-clocksum-use-effort-durations t
+  "When non-nil, \\[org-clock-display] uses effort durations.
+E.g. by default, one day is considered to be a 8 hours effort,
+so a task that has been clocked for 16 hours will be displayed
+as during 2 days in the clock display or in the clocktable.
+
+See `org-effort-durations' on how to set effort durations
+and `org-time-clocksum-format' for more on time clock formats."
+  :group 'org-time
+  :group 'org-clock
+  :version "24.3"
   :type 'boolean)
 
 (defcustom org-time-clocksum-fractional-format "%.2f"
@@ -16884,72 +16901,83 @@ If there is already a time stamp at the cursor position, update it."
   "Format number of minutes as a clocksum string.
 The format is determined by `org-time-clocksum-format',
 `org-time-clocksum-use-fractional' and
-`org-time-clocksum-fractional-format'."
-  (let ((clocksum "") fmt n)
+`org-time-clocksum-fractional-format' and
+`org-time-clocksum-use-effort-durations'."
+  (let ((clocksum "") h d w mo y fmt n)
+    (setq h (if org-time-clocksum-use-effort-durations
+		(cdr (assoc "h" org-effort-durations)) 60)
+	  d (if org-time-clocksum-use-effort-durations
+		(/ (cdr (assoc "d" org-effort-durations)) h) 24)
+	  w (if org-time-clocksum-use-effort-durations
+		(/ (cdr (assoc "w" org-effort-durations)) (* d h)) 7)
+	  mo (if org-time-clocksum-use-effort-durations
+		 (/ (cdr (assoc "m" org-effort-durations)) (* d h)) 30)
+	  y (if org-time-clocksum-use-effort-durations
+		(/ (cdr (assoc "y" org-effort-durations)) (* d h)) 365))
     ;; fractional format
     (if org-time-clocksum-use-fractional
 	(cond
 	 ;; single format string
 	 ((stringp org-time-clocksum-fractional-format)
-	  (format org-time-clocksum-fractional-format (/ m 60.0)))
+	  (format org-time-clocksum-fractional-format (/ m (float h))))
 	 ;; choice of fractional formats for different time units
 	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :years))
-	       (> (/ (truncate m) (* 365 24 60)) 0))
-	  (format fmt (/ m (* 365 24 60.0))))
+	       (> (/ (truncate m) (* y d h)) 0))
+	  (format fmt (/ m (* y d (float h)))))
 	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :months))
-	       (> (/ (truncate m) (* 30 24 60)) 0))
-	  (format fmt (/ m (* 30 24 60.0))))
+	       (> (/ (truncate m) (* mo d h)) 0))
+	  (format fmt (/ m (* mo d (float h)))))
 	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :weeks))
-	       (> (/ (truncate m) (* 7 24 60)) 0))
-	  (format fmt (/ m (* 7 24 60.0))))
+	       (> (/ (truncate m) (* w d h)) 0))
+	  (format fmt (/ m (* w d (float h)))))
 	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :days))
-	       (> (/ (truncate m) (* 24 60)) 0))
-	  (format fmt (/ m (* 24 60.0))))
+	       (> (/ (truncate m) (* d h)) 0))
+	  (format fmt (/ m (* d (float h)))))
 	 ((and (setq fmt (plist-get org-time-clocksum-fractional-format :hours))
-	       (> (/ (truncate m) 60) 0))
-	  (format fmt (/ m 60.0)))
+	       (> (/ (truncate m) h) 0))
+	  (format fmt (/ m (float h))))
 	 ((setq fmt (plist-get org-time-clocksum-fractional-format :minutes))
 	  (format fmt m))
 	 ;; fall back to smallest time unit with a format
 	 ((setq fmt (plist-get org-time-clocksum-fractional-format :hours))
-	  (format fmt (/ m 60.0)))
+	  (format fmt (/ m (float h))))
 	 ((setq fmt (plist-get org-time-clocksum-fractional-format :days))
-	  (format fmt (/ m (* 24 60.0))))
+	  (format fmt (/ m (* d (float h)))))
 	 ((setq fmt (plist-get org-time-clocksum-fractional-format :weeks))
-	  (format fmt (/ m (* 7 24 60.0))))
+	  (format fmt (/ m (* w d (float h)))))
 	 ((setq fmt (plist-get org-time-clocksum-fractional-format :months))
-	  (format fmt (/ m (* 30 24 60.0))))
+	  (format fmt (/ m (* mo d (float h)))))
 	 ((setq fmt (plist-get org-time-clocksum-fractional-format :years))
-	  (format fmt (/ m (* 365 24 60.0)))))
+	  (format fmt (/ m (* y d (float h))))))
       ;; standard (non-fractional) format, with single format string
       (if (stringp org-time-clocksum-format)
-	  (format org-time-clocksum-format (setq n (/ m 60)) (- m (* 60 n)))
+	  (format org-time-clocksum-format (setq n (/ m h)) (- m (* h n)))
 	;; separate formats components
 	(and (setq fmt (plist-get org-time-clocksum-format :years))
-	     (or (> (setq n (/ (truncate m) (* 365 24 60))) 0)
+	     (or (> (setq n (/ (truncate m) (* y d h))) 0)
 		 (plist-get org-time-clocksum-format :require-years))
 	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n 365 24 60))))
+		   m (- m (* n y d h))))
 	(and (setq fmt (plist-get org-time-clocksum-format :months))
-	     (or (> (setq n (/ (truncate m) (* 30 24 60))) 0)
+	     (or (> (setq n (/ (truncate m) (* mo d h))) 0)
 		 (plist-get org-time-clocksum-format :require-months))
 	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n 30 24 60))))
+		   m (- m (* n mo d h))))
 	(and (setq fmt (plist-get org-time-clocksum-format :weeks))
-	     (or (> (setq n (/ (truncate m) (* 7 24 60))) 0)
+	     (or (> (setq n (/ (truncate m) (* w d h))) 0)
 		 (plist-get org-time-clocksum-format :require-weeks))
 	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n 7 24 60))))
+		   m (- m (* n w d h))))
 	(and (setq fmt (plist-get org-time-clocksum-format :days))
-	     (or (> (setq n (/ (truncate m) (* 24 60))) 0)
+	     (or (> (setq n (/ (truncate m) (* d h))) 0)
 		 (plist-get org-time-clocksum-format :require-days))
 	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n 24 60))))
+		   m (- m (* n d h))))
 	(and (setq fmt (plist-get org-time-clocksum-format :hours))
-	     (or (> (setq n (/ (truncate m) 60)) 0)
+	     (or (> (setq n (/ (truncate m) h)) 0)
 		 (plist-get org-time-clocksum-format :require-hours))
 	     (setq clocksum (concat clocksum (format fmt n))
-		   m (- m (* n 60))))
+		   m (- m (* n h))))
 	(and (setq fmt (plist-get org-time-clocksum-format :minutes))
 	     (or (> m 0) (plist-get org-time-clocksum-format :require-minutes))
 	     (setq clocksum (concat clocksum (format fmt m))))
