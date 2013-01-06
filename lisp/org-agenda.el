@@ -3545,7 +3545,8 @@ generating a new one."
       (when org-agenda-entry-text-mode
 	(org-agenda-entry-text-hide)
 	(org-agenda-entry-text-show))
-      (if (functionp 'org-habit-insert-consistency-graphs)
+      (if (and (functionp 'org-habit-insert-consistency-graphs)
+	       (save-excursion (next-single-property-change (point-min) 'org-habit-p)))
 	  (org-habit-insert-consistency-graphs))
       (let ((inhibit-read-only t))
 	(run-hooks 'org-agenda-finalize-hook))
