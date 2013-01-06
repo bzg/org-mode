@@ -169,6 +169,24 @@ If DELETE is non-nil, delete all those overlays."
 	(set-buffer-modified-p modified-p))
     (decompose-region beg end)))
 
+(defmacro org-define-obsolete-function-alias (o-name c-name when &optional doc)
+  "Reconcile the two-argument form of
+`define-obsolete-function-alias' in XEmacs/Emacs 22 with the 3-4
+argument form in Emacs 23 and later."
+  (if (or (featurep 'xemacs)
+	  (< emacs-major-version 23))
+      `(define-obsolete-function-alias ,o-name ,c-name)
+    `(define-obsolete-function-alias ,o-name ,c-name ,when ,doc)))
+
+(defmacro org-define-obsolete-variable-alias (o-name c-name when &optional doc)
+  "Reconcile the two-argument form of
+`define-obsolete-variable-alias' in XEmacs/Emacs 22 with the 3-4
+argument form in Emacs 23 and later."
+  (if (or (featurep 'xemacs)
+	  (< emacs-major-version 23))
+      `(define-obsolete-variable-alias ,o-name ,c-name)
+    `(define-obsolete-variable-alias ,o-name ,c-name ,when ,doc)))
+
 ;; Miscellaneous functions
 
 (defun org-add-hook (hook function &optional append local)

@@ -3103,7 +3103,7 @@ and prefix with \"OrgSrc\".  For example,
 	  (lambda (style text-block text-id text-begins-block-p)
 	    (insert (format "<text:span text:style-name=\"%s\">" style))))
 	 (hfy-end-span-handler (lambda nil (insert "</text:span>"))))
-    (with-no-warnings (htmlfontify-string line))))
+    (org-no-warnings (htmlfontify-string line))))
 
 (defun org-e-odt-do-format-code
   (code &optional lang refs retain-labels num-start)
