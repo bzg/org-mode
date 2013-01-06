@@ -3522,7 +3522,9 @@ generating a new one."
 	  (while (org-activate-plain-links (point-max))
 	    (add-text-properties (match-beginning 0) (match-end 0)
 				 '(face org-link))))
-	(org-agenda-align-tags)
+	(when (cadr (assoc 'org-prefix-has-tag
+			   (car org-prefix-format-compiled)))
+	  (org-agenda-align-tags))
 	(unless org-agenda-with-colors
 	  (remove-text-properties (point-min) (point-max) '(face nil))))
       (if (and (boundp 'org-agenda-overriding-columns-format)
