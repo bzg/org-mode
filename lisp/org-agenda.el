@@ -840,7 +840,7 @@ entry, the rest of the entry will not be searched."
   :group 'org-agenda-daily/weekly
   :type 'boolean)
 
-(defcustom org-agenda-dim-blocked-tasks t
+(defcustom org-agenda-dim-blocked-tasks nil
   "Non-nil means dim blocked tasks in the agenda display.
 This causes some overhead during agenda construction, but if you
 have turned on `org-enforce-todo-dependencies',
@@ -857,6 +857,7 @@ that is blocked because of checkboxes will never be made invisible, it
 will only be dimmed."
   :group 'org-agenda-daily/weekly
   :group 'org-agenda-todo-list
+  :version "24.3"
   :type '(choice
 	  (const :tag "Do not dim" nil)
 	  (const :tag "Dim to a gray face" t)
@@ -2012,6 +2013,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-c\C-w" 'org-agenda-refile)
 (org-defkey org-agenda-mode-map "m"        'org-agenda-bulk-mark)
 (org-defkey org-agenda-mode-map "*"        'org-agenda-bulk-mark-all)
+(org-defkey org-agenda-mode-map "#"        'org-agenda-dim-blocked-tasks)
 (org-defkey org-agenda-mode-map "%"        'org-agenda-bulk-mark-regexp)
 (org-defkey org-agenda-mode-map "u"        'org-agenda-bulk-unmark)
 (org-defkey org-agenda-mode-map "U"        'org-agenda-bulk-unmark-all)
@@ -3522,7 +3524,9 @@ generating a new one."
 	  (while (org-activate-plain-links (point-max))
 	    (add-text-properties (match-beginning 0) (match-end 0)
 				 '(face org-link))))
-	(org-agenda-align-tags)
+	(when (cadr (assoc 'org-prefix-has-tag
+			   (car org-prefix-format-compiled)))
+	  (org-agenda-align-tags))
 	(unless org-agenda-with-colors
 	  (remove-text-properties (point-min) (point-max) '(face nil))))
       (if (and (boundp 'org-agenda-overriding-columns-format)
@@ -3535,16 +3539,18 @@ generating a new one."
       (when org-agenda-fontify-priorities
 	(org-agenda-fontify-priorities))
       (when (and org-agenda-dim-blocked-tasks org-blocker-hook)
-	(org-agenda-dim-blocked-tasks))
+      	(org-agenda-dim-blocked-tasks))
       ;; We need to widen when `org-agenda-finalize' is called from
       ;; `org-agenda-change-all-lines' (e.g. in `org-agenda-clock-in')
-      (save-restriction
-      	(widen)
-	(org-agenda-mark-clocking-task))
+      (when org-clock-current-task
+	(save-restriction
+	  (widen)
+	  (org-agenda-mark-clocking-task)))
       (when org-agenda-entry-text-mode
 	(org-agenda-entry-text-hide)
 	(org-agenda-entry-text-show))
-      (if (functionp 'org-habit-insert-consistency-graphs)
+      (if (and (functionp 'org-habit-insert-consistency-graphs)
+	       (save-excursion (next-single-property-change (point-min) 'org-habit-p)))
 	  (org-habit-insert-consistency-graphs))
       (let ((inhibit-read-only t))
 	(run-hooks 'org-agenda-finalize-hook))
@@ -3609,15 +3615,18 @@ generating a new one."
 	       ((equal p h) 'bold)))
 	(overlay-put ov 'org-type 'org-priority)))))
 
-(defun org-agenda-dim-blocked-tasks ()
+(defun org-agenda-dim-blocked-tasks (&optional invisible)
+  (interactive "P")
   "Dim currently blocked TODO's in the agenda display."
+  (message "Dim or hide blocked tasks...")
   (mapc (lambda (o) (if (eq (overlay-get o 'org-type) 'org-blocked-todo)
 			(delete-overlay o)))
 	(overlays-in (point-min) (point-max)))
   (save-excursion
     (let ((inhibit-read-only t)
 	  (org-depend-tag-blocked nil)
-	  (invis (eq org-agenda-dim-blocked-tasks 'invisible))
+	  (invis (or (not (null invisible))
+		     (eq org-agenda-dim-blocked-tasks 'invisible)))
 	  org-blocked-by-checkboxes
 	  invis1 b e p ov h l)
       (goto-char (point-min))
@@ -3638,7 +3647,8 @@ generating a new one."
 	    (if invis1
 		(overlay-put ov 'invisible t)
 	      (overlay-put ov 'face 'org-agenda-dimmed-todo-face))
-	    (overlay-put ov 'org-type 'org-blocked-todo)))))))
+	    (overlay-put ov 'org-type 'org-blocked-todo))))))
+    (message "Dim or hide blocked tasks...done"))
 
 (defvar org-agenda-skip-function nil
   "Function to be called at each match during agenda construction.
