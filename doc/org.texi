@@ -3808,6 +3808,8 @@ The most important commands to work with TODO entries are:
 @table @kbd
 @orgcmd{C-c C-t,org-todo}
 @cindex cycling, of TODO states
+@vindex org-use-fast-todo-selection
+
 Rotate the TODO state of the current item among
 
 @example
@@ -3815,14 +3817,19 @@ Rotate the TODO state of the current item among
 '--------------------------------'
 @end example
 
-The same rotation can also be done ``remotely'' from the timeline and
-agenda buffers with the @kbd{t} command key (@pxref{Agenda commands}).
+If TODO keywords have fast access keys (see @ref{Fast access to TODO
+states}), you will be prompted for a TODO keyword through the fast selection
+interface; this is the default behavior when
+@var{org-use-fast-todo-selection} is @code{non-nil}.  
+
+The same rotation can also be done ``remotely'' from the timeline and agenda
+buffers with the @kbd{t} command key (@pxref{Agenda commands}).
 
 @orgkey{C-u C-c C-t}
-Select a specific keyword using completion or (if it has been set up)
-the fast selection interface.  For the latter, you need to assign keys
-to TODO states, see @ref{Per-file keywords}, and @ref{Setting tags}, for
-more information.
+When TODO keywords have no selection keys, select a specific keyword using
+completion; otherwise force cycling through TODO states with no prompt.  When
+@var{org-use-fast-todo-selection} is set to @code{prefix}, use the fast
+selection interface.
 
 @kindex S-@key{right}
 @kindex S-@key{left}
