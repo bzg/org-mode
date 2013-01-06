@@ -318,6 +318,7 @@ loaded, add these packages to `org-export-latex-packages-alist'."
     ("prop" "\\propto" t "&prop;" "[proportional to]" "[proportional to]" "∝")
     ("proptp" "\\propto" t "&prop;" "[proportional to]" "[proportional to]" "∝")
     ("not" "\\textlnot{}" nil "&not;" "[angled dash]" "¬" "¬")
+    ("neg" "\\neg{}" nil "&not;" "[angled dash]" "¬" "¬")
     ("land" "\\land" t "&and;" "[logical and]" "[logical and]" "∧")
     ("wedge" "\\wedge" t "&and;" "[logical and]" "[logical and]" "∧")
     ("lor" "\\lor" t "&or;" "[logical or]" "[logical or]" "∨")
