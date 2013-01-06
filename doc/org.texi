@@ -16555,14 +16555,18 @@ to the directory @code{org-mobile-directory}.  By default this list contains
 all agenda files (as listed in @code{org-agenda-files}), but additional files
 can be included by customizing @code{org-mobile-files}.  File names will be
 staged with paths relative to @code{org-directory}, so all files should be
-inside this directory.  The push operation also creates a special Org file
-@file{agendas.org} with all custom agenda view defined by the
-user@footnote{While creating the agendas, Org mode will force ID properties
-on all referenced entries, so that these entries can be uniquely identified
-if @i{MobileOrg} flags them for further action.  If you do not want to get
-these properties in so many entries, you can set the variable
-@code{org-mobile-force-id-on-agenda-items} to @code{nil}.  Org mode will then
-rely on outline paths, in the hope that these will be unique enough.}.
+inside this directory@footnote{Note that symbolic links are not supported,
+you need to store files @emph{physically} in @code{org-directory}.}.
+
+The push operation also creates a special Org file @file{agendas.org} with
+all custom agenda view defined by the user@footnote{While creating the
+agendas, Org mode will force ID properties on all referenced entries, so that
+these entries can be uniquely identified if @i{MobileOrg} flags them for
+further action.  If you do not want to get these properties in so many
+entries, you can set the variable @code{org-mobile-force-id-on-agenda-items}
+to @code{nil}.  Org mode will then rely on outline paths, in the hope that
+these will be unique enough.}.
+
 Finally, Org writes the file @file{index.org}, containing links to all other
 files.  @i{MobileOrg} first reads this file from the server, and then
 downloads all agendas and Org files listed in it.  To speed up the download,
