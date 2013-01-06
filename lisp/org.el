@@ -15598,6 +15598,7 @@ user."
 		    (setcar (nthcdr 1 org-defdecode) 59)
 		    (setq org-def (apply 'encode-time org-defdecode)
 			  org-defdecode (decode-time org-def)))))
+	 (mouse-autoselect-window nil) ; Don't let the mouse jump
 	 (calendar-frame-setup nil)
 	 (calendar-setup nil)
 	 (calendar-move-hook nil)
