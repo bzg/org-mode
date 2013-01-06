@@ -78,8 +78,11 @@
 (require 'find-func)
 (require 'format-spec)
 
+(require 'org-macs)
+(require 'org-compat)
+
 (let ((load-suffixes (list ".el")))
-  (load "org-loaddefs" 'noerror nil nil 'mustsuffix))
+  (org-load-noerror-mustsuffix "org-loaddefs"))
 
 ;; `org-outline-regexp' ought to be a defconst but is let-binding in
 ;; some places -- e.g. see the macro org-with-limited-levels.
@@ -238,7 +241,6 @@ identifier."
   :group 'org-id)
 
 ;;; Version
-(require 'org-compat)
 (org-check-version)
 
 ;;;###autoload
@@ -249,13 +251,12 @@ When FULL is non-nil, use a verbose version string.
 When MESSAGE is non-nil, display a message with the version."
   (interactive "P")
   (let* ((org-dir         (ignore-errors (org-find-library-dir "org")))
-	 (save-load-suffixes load-suffixes)
+	 (save-load-suffixes (when (boundp 'load-suffixes) load-suffixes))
 	 (load-suffixes (list ".el"))
 	 (org-install-dir (ignore-errors (org-find-library-dir "org-loaddefs")))
 	 (org-trash       (or
 			   (and (fboundp 'org-release) (fboundp 'org-git-version))
-			   (load (concat org-dir "org-version")
-				 'noerror 'nomessage nil 'mustsuffix)))
+			   (org-load-noerror-mustsuffix (concat org-dir "org-version"))))
 	 (load-suffixes save-load-suffixes)
 	 (org-version (org-release))
 	 (git-version (org-git-version))
@@ -4973,7 +4974,7 @@ This variable is set by `org-before-change-function'.
 (require 'easymenu)
 (require 'overlay)
 
-(require 'org-macs)
+;; (require 'org-macs) moved higher up in the file before it is first used
 (require 'org-entities)
 ;; (require 'org-compat) moved higher up in the file before it is first used
 (require 'org-faces)
@@ -20349,15 +20350,16 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 				   feats)))
 		  'string-lessp)
 		 (list "org-version" "org")))
+	 (load-suffixes (when (boundp 'load-suffixes) load-suffixes))
 	 (load-suffixes (if uncompiled (reverse load-suffixes) load-suffixes))
 	 load-uncore load-misses)
     (setq load-misses
 	  (delq 't
 		(mapcar (lambda (f)
-			  (or (load (concat org-dir f) 'noerror nil nil 'mustsuffix)
+			  (or (org-load-noerror-mustsuffix (concat org-dir f))
 			      (and (string= org-dir contrib-dir)
-				   (load (concat contrib-dir f) 'noerror nil nil 'mustsuffix))
-			      (and (load (concat (org-find-library-dir f) f) 'noerror nil nil 'mustsuffix)
+				   (org-load-noerror-mustsuffix (concat contrib-dir f)))
+			      (and (org-load-noerror-mustsuffix (concat (org-find-library-dir f) f))
 				   (add-to-list 'load-uncore f 'append)
 				   't)
 			      f))
