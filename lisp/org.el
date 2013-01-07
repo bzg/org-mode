@@ -3120,7 +3120,7 @@ When nil, only the tags directly given in a specific line apply there.
 This may also be a list of tags that should be inherited, or a regexp that
 matches tags that should be inherited.  Additional control is possible
 with the variable  `org-tags-exclude-from-inheritance' which gives an
-explicit list of tags to be excluded from inheritance., even if the value of
+explicit list of tags to be excluded from inheritance, even if the value of
 `org-use-tag-inheritance' would select it for inheritance.
 
 If this option is t, a match early-on in a tree can lead to a large
@@ -8815,6 +8815,24 @@ call CMD."
 	   (put-text-property beg end 'org-category-position beg)
 	   (goto-char pos)))))))
 
+(defun org-refresh-properties (dprop tprop)
+  "Refresh buffer text properties.
+DPROP is the drawer property and TPROP is the corresponding text
+property to set."
+  (let ((case-fold-search t)
+	(inhibit-read-only t) p)
+    (org-unmodified
+     (save-excursion
+       (save-restriction
+	 (widen)
+	 (goto-char (point-min))
+	 (while (re-search-forward (concat "^[ \t]*:" dprop ": +\\(.*\\)[ \t]*$") nil t)
+	   (setq p (org-match-string-no-properties 1))
+	   (save-excursion
+	     (org-back-to-heading t)
+	     (put-text-property
+	      (point-at-bol) (point-at-eol) tprop p))))))))
+
 
 ;;;; Link Stuff
 
@@ -8908,7 +8926,7 @@ type.  For a simple example of an export function, see `org-bbdb.el'."
     (push (list type follow export) org-link-protocols)))
 
 (defvar org-agenda-buffer-name) ; Defined in org-agenda.el
-(defvar org-link-to-org-use-id) ; Defined in org-id.el
+(defvar org-id-link-to-org-use-id) ; Defined in org-id.el
 
 ;;;###autoload
 (defun org-store-link (arg)
@@ -10141,12 +10159,6 @@ there is one, return it."
 (eval-after-load "org-exp"
   '(add-hook 'org-export-preprocess-before-normalizing-links-hook
 	     'org-remove-file-link-modifiers))
-
-;;;; Time estimates
-
-(defun org-get-effort (&optional pom)
-  "Get the effort estimate for the current entry."
-  (org-entry-get pom org-effort-property))
 
 ;;; File search
 
@@ -13374,15 +13386,7 @@ headlines matching this string."
 		 (or (not todo-only)
 		     (and (member todo org-not-done-keywords)
 			  (or (not org-agenda-tags-todo-honor-ignore-options)
-			      (not (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item)))))
-
-		 ;; Extra check for the archive tag
-		 ;; FIXME: Does the skipper already do this????
-		 (or
-		  (not (member org-archive-tag tags-list))
-		  ;; we have an archive tag, should we use this anyway?
-		  (or (not org-agenda-skip-archived-trees)
-		      (and (eq action 'agenda) org-agenda-archives-mode))))
+			      (not (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item))))))
 
 	    ;; select this headline
 	    (cond
@@ -14536,6 +14540,9 @@ When INCREMENT is non-nil, set the property to the next allowed value."
 		   existing nil nil "" nil cur))))))
     (unless (equal (org-entry-get nil prop) val)
       (org-entry-put nil prop val))
+    (save-excursion
+      (org-back-to-heading t)
+      (put-text-property (point-at-bol) (point-at-eol) 'org-effort val))
     (message "%s is now %s" prop val)))
 
 (defun org-at-property-p ()
@@ -15283,7 +15290,8 @@ completion."
   (interactive)
   (unless (org-at-property-p)
     (error "Not at a property"))
-  (let* ((key (match-string 2))
+  (let* ((prop (car (save-match-data (org-split-string (match-string 1) ":"))))
+	 (key (match-string 2))
 	 (value (match-string 3))
 	 (allowed (or (org-property-get-allowed-values (point) key)
 		      (and (member value  '("[ ]" "[-]" "[X]"))
@@ -15302,6 +15310,10 @@ completion."
     (org-indent-line)
     (beginning-of-line 1)
     (skip-chars-forward " \t")
+    (when (equal prop org-effort-property)
+      (save-excursion
+	(org-back-to-heading t)
+	(put-text-property (point-at-bol) (point-at-eol) 'org-effort nval)))
     (run-hook-with-args 'org-property-changed-functions key nval)))
 
 (defun org-find-olp (path &optional this-buffer)
@@ -17362,6 +17374,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (widen)
 	    (setq bmp (buffer-modified-p))
 	    (org-refresh-category-properties)
+	    (org-refresh-properties org-effort-property 'org-effort)
+	    (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
 	    (setq org-todo-keywords-for-agenda
 		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
 	    (setq org-done-keywords-for-agenda

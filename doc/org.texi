@@ -5580,7 +5580,7 @@ example with optional time
 
 @example
 * 22:00-23:00 The nerd meeting on every 2nd Thursday of the month
-  <%%(org-float t 4 2)>
+  <%%(diary-float t 4 2)>
 @end example
 
 @item Time/Date range
@@ -5917,7 +5917,7 @@ entries.  Org mode will issue early and late warnings based on the
 assumption that the timestamp represents the @i{nearest instance} of
 the repeater.  However, the use of diary sexp entries like
 @c
-@code{<%%(org-float t 42)>}
+@code{<%%(diary-float t 42)>}
 @c
 in scheduling and deadline timestamps is limited.  Org mode does not
 know enough about the internals of each sexp function to issue early and
