@@ -8642,6 +8642,23 @@ call CMD."
 	   (put-text-property beg end 'org-category-position beg)
 	   (goto-char pos)))))))
 
+(defun org-refresh-effort-properties ()
+  "Refresh effort text properties in the buffer."
+  (let ((case-fold-search t)
+	(inhibit-read-only t) e)
+    (org-unmodified
+     (save-excursion
+       (save-restriction
+	 (widen)
+	 (goto-char (point-min))
+	 (put-text-property (point) (point-max) 'org-effort-timestamp (current-time))
+	 (while (re-search-forward (concat "^[ \t]*:" org-effort-property
+					   ": +\\(.*\\)[ \t]*$") nil t)
+	   (setq e (org-match-string-no-properties 1))
+	   (save-excursion
+	     (org-back-to-heading t)
+	     (put-text-property
+	      (point-at-bol) (point-at-eol) 'org-effort e))))))))
 
 ;;;; Link Stuff
 
@@ -9948,12 +9965,6 @@ there is one, return it."
 (eval-after-load "org-exp"
   '(add-hook 'org-export-preprocess-before-normalizing-links-hook
 	     'org-remove-file-link-modifiers))
-
-;;;; Time estimates
-
-(defun org-get-effort (&optional pom)
-  "Get the effort estimate for the current entry."
-  (org-entry-get pom org-effort-property))
 
 ;;; File search
 
@@ -14301,6 +14312,9 @@ When INCREMENT is non-nil, set the property to the next allowed value."
 		   existing nil nil "" nil cur))))))
     (unless (equal (org-entry-get nil prop) val)
       (org-entry-put nil prop val))
+    (save-excursion
+      (org-back-to-heading t)
+      (put-text-property (point-at-bol) (point-at-eol) 'org-effort val))
     (message "%s is now %s" prop val)))
 
 (defun org-at-property-p ()
@@ -15021,7 +15035,8 @@ completion."
   (interactive)
   (unless (org-at-property-p)
     (error "Not at a property"))
-  (let* ((key (match-string 2))
+  (let* ((prop (car (save-match-data (org-split-string (match-string 1) ":"))))
+	 (key (match-string 2))
 	 (value (match-string 3))
 	 (allowed (or (org-property-get-allowed-values (point) key)
 		      (and (member value  '("[ ]" "[-]" "[X]"))
@@ -15040,6 +15055,10 @@ completion."
     (org-indent-line)
     (beginning-of-line 1)
     (skip-chars-forward " \t")
+    (when (equal prop org-effort-property)
+      (save-excursion
+	(org-back-to-heading t)
+	(put-text-property (point-at-bol) (point-at-eol) 'org-effort nval)))
     (run-hook-with-args 'org-property-changed-functions key nval)))
 
 (defun org-find-olp (path &optional this-buffer)
@@ -16992,6 +17011,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (widen)
 	    (setq bmp (buffer-modified-p))
 	    (org-refresh-category-properties)
+	    (org-refresh-effort-properties)
 	    (setq org-todo-keywords-for-agenda
 		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
 	    (setq org-done-keywords-for-agenda

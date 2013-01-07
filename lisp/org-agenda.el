@@ -5470,8 +5470,7 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 	  (setq marker (org-agenda-new-marker beg)
 		category (org-get-category beg)
 		category-pos (get-text-property beg 'org-category-position)
-		tags (save-excursion (org-backward-heading-same-level 0)
-				     (org-get-tags-at))
+		tags (save-excursion (org-back-to-heading t) (org-get-tags-at))
 		todo-state (org-get-todo-state)
 		warntime (org-entry-get (point) "APPT_WARNTIME")
 		extra nil)
@@ -6224,12 +6223,7 @@ Any match of REMOVE-RE will be removed from TXT."
 			       (match-string 2 txt))
 		       t t txt))))
 	(when (derived-mode-p 'org-mode)
-	  (setq effort
-		(condition-case nil
-		    (org-get-effort
-		     (or (get-text-property 0 'org-hd-marker txt)
-			 (get-text-property 0 'org-marker txt)))
-		  (error nil)))
+	  (setq effort (ignore-errors (get-text-property 0 'org-effort txt)))
 	  (when effort
 	    (setq neffort (org-duration-string-to-minutes effort)
 		  effort (setq effort (concat "[" effort "]")))))
