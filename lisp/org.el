@@ -8642,23 +8642,24 @@ call CMD."
 	   (put-text-property beg end 'org-category-position beg)
 	   (goto-char pos)))))))
 
-(defun org-refresh-effort-properties ()
-  "Refresh effort text properties in the buffer."
+(defun org-refresh-properties (dprop tprop)
+  "Refresh buffer text properties.
+DPROP is the drawer property and TPROP is the corresponding text
+property to set."
   (let ((case-fold-search t)
-	(inhibit-read-only t) e)
+	(inhibit-read-only t) p)
     (org-unmodified
      (save-excursion
        (save-restriction
 	 (widen)
 	 (goto-char (point-min))
-	 (put-text-property (point) (point-max) 'org-effort-timestamp (current-time))
-	 (while (re-search-forward (concat "^[ \t]*:" org-effort-property
-					   ": +\\(.*\\)[ \t]*$") nil t)
-	   (setq e (org-match-string-no-properties 1))
+	 (while (re-search-forward (concat "^[ \t]*:" dprop ": +\\(.*\\)[ \t]*$") nil t)
+	   (setq p (org-match-string-no-properties 1))
 	   (save-excursion
 	     (org-back-to-heading t)
 	     (put-text-property
-	      (point-at-bol) (point-at-eol) 'org-effort e))))))))
+	      (point-at-bol) (point-at-eol) tprop p))))))))
+
 
 ;;;; Link Stuff
 
@@ -17011,7 +17012,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	    (widen)
 	    (setq bmp (buffer-modified-p))
 	    (org-refresh-category-properties)
-	    (org-refresh-effort-properties)
+	    (org-refresh-properties org-effort-property 'org-effort)
+	    (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
 	    (setq org-todo-keywords-for-agenda
 		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
 	    (setq org-done-keywords-for-agenda

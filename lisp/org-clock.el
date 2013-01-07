@@ -35,7 +35,7 @@
 (declare-function calendar-absolute-from-iso "cal-iso" (&optional date))
 (declare-function notifications-notify "notifications" (&rest params))
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
-(declare-function org-refresh-effort-properties "org" ())
+(declare-function org-refresh-properties "org" (dprop tprop))
 (defvar org-time-stamp-formats)
 (defvar org-ts-what)
 (defvar org-frame-title-format-backup frame-title-format)
@@ -1082,7 +1082,7 @@ time as the start time \(see `org-clock-continuously' to
 make this the default behavior.)"
   (interactive "P")
   (setq org-clock-notification-was-shown nil)
-  (org-refresh-effort-properties)
+  (org-refresh-properties org-effort-property)
   (catch 'abort
     (let ((interrupting (and (not org-clock-resolving-clocks-due-to-idleness)
 			     (org-clocking-p)))

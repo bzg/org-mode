@@ -5401,7 +5401,7 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 	      clockp (and org-agenda-include-inactive-timestamps
 			  (or (string-match org-clock-string tmp)
 			      (string-match "]-+\\'" tmp)))
-	      warntime (org-entry-get (point) "APPT_WARNTIME")
+	      warntime (get-text-property (point) 'org-appt-warntime)
 	      donep (member todo-state org-done-keywords))
 	(if (or scheduledp deadlinep closedp clockp
 		(and donep org-agenda-skip-timestamp-if-done))
@@ -5472,7 +5472,7 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 		category-pos (get-text-property beg 'org-category-position)
 		tags (save-excursion (org-back-to-heading t) (org-get-tags-at))
 		todo-state (org-get-todo-state)
-		warntime (org-entry-get (point) "APPT_WARNTIME")
+		warntime (get-text-property (point) 'org-appt-warntime)
 		extra nil)
 
 	  (dolist (r (if (stringp result)
@@ -5844,7 +5844,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 			   (not (= diff 0))))
 		  (setq txt nil)
 		(setq category (org-get-category)
-		      warntime (org-entry-get (point) "APPT_WARNTIME")
+		      warntime (get-text-property (point) 'org-appt-warntime)
 		      category-pos (get-text-property (point) 'org-category-position))
 		(if (not (re-search-backward "^\\*+[ \t]+" nil t))
 		    (setq txt org-agenda-no-heading-message)
@@ -5934,7 +5934,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		  (match-string 1) d1 'past show-all
 		  (current-buffer) pos)
 	      diff (- d2 d1)
-	      warntime (org-entry-get (point) "APPT_WARNTIME"))
+	      warntime (get-text-property (point) 'org-appt-warntime))
 	(setq pastschedp (and todayp (< diff 0)))
 	(setq did-habit-check-p nil)
 	;; When to show a scheduled item in the calendar:
