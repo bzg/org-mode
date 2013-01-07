@@ -8752,7 +8752,7 @@ type.  For a simple example of an export function, see `org-bbdb.el'."
     (push (list type follow export) org-link-protocols)))
 
 (defvar org-agenda-buffer-name) ; Defined in org-agenda.el
-(defvar org-link-to-org-use-id) ; Defined in org-id.el
+(defvar org-id-link-to-org-use-id) ; Defined in org-id.el
 
 ;;;###autoload
 (defun org-store-link (arg)
@@ -21002,36 +21002,36 @@ meant to be filled."
 		   (goto-char (org-element-property :begin element))
 		   (while (looking-at org-element--affiliated-re) (forward-line))
 		   (point))))
-	   (unless (< p post-affiliated))
-	   (case type
-	     (comment (looking-at "[ \t]*# ?") (match-string 0))
-	     (footnote-definition "")
-	     ((item plain-list)
-	      (make-string (org-list-item-body-column post-affiliated) ? ))
-	     (paragraph
-	      ;; Fill prefix is usually the same as the current line,
-	      ;; except if the paragraph is at the beginning of an item.
-	      (let ((parent (org-element-property :parent element)))
-		(cond ((eq (org-element-type parent) 'item)
-		       (make-string (org-list-item-body-column
-				     (org-element-property :begin parent))
-				    ? ))
-		      ((save-excursion (beginning-of-line) (looking-at "[ \t]+"))
-		       (match-string 0))
-		      (t  ""))))
-	     (comment-block
-	      ;; Only fill contents if P is within block boundaries.
-	      (let* ((cbeg (save-excursion (goto-char post-affiliated)
-					   (forward-line)
-					   (point)))
-		     (cend (save-excursion
-			     (goto-char (org-element-property :end element))
-			     (skip-chars-backward " \r\t\n")
-			     (line-beginning-position))))
-		(when (and (>= p cbeg) (< p cend))
-		  (if (save-excursion (beginning-of-line) (looking-at "[ \t]+"))
-		      (match-string 0)
-		    ""))))))))))
+	   (unless (< p post-affiliated)
+	     (case type
+	       (comment (looking-at "[ \t]*# ?") (match-string 0))
+	       (footnote-definition "")
+	       ((item plain-list)
+		(make-string (org-list-item-body-column post-affiliated) ? ))
+	       (paragraph
+		;; Fill prefix is usually the same as the current line,
+		;; except if the paragraph is at the beginning of an item.
+		(let ((parent (org-element-property :parent element)))
+		  (cond ((eq (org-element-type parent) 'item)
+			 (make-string (org-list-item-body-column
+				       (org-element-property :begin parent))
+				      ? ))
+			((save-excursion (beginning-of-line) (looking-at "[ \t]+"))
+			 (match-string 0))
+			(t  ""))))
+	       (comment-block
+		;; Only fill contents if P is within block boundaries.
+		(let* ((cbeg (save-excursion (goto-char post-affiliated)
+					     (forward-line)
+					     (point)))
+		       (cend (save-excursion
+			       (goto-char (org-element-property :end element))
+			       (skip-chars-backward " \r\t\n")
+			       (line-beginning-position))))
+		  (when (and (>= p cbeg) (< p cend))
+		    (if (save-excursion (beginning-of-line) (looking-at "[ \t]+"))
+			(match-string 0)
+		      "")))))))))))
 
 (declare-function message-goto-body "message" ())
 (defvar message-cite-prefix-regexp)	; From message.el
