@@ -13150,18 +13150,9 @@ headlines matching this string."
 		 (or (not todo-only)
 		     (and (member todo org-not-done-keywords)
 			  (or (not org-agenda-tags-todo-honor-ignore-options)
-			      (not (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item)))))
-
-		 ;; Extra check for the archive tag
-		 ;; FIXME: Does the skipper already do this????
-		 (or
-		  (not (member org-archive-tag tags-list))
-		  ;; we have an archive tag, should we use this anyway?
-		  (or (not org-agenda-skip-archived-trees)
-		      (and (eq action 'agenda) org-agenda-archives-mode))))
+			      (not (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item))))))
 
 	    ;; select this headline
-
 	    (cond
 	     ((eq action 'sparse-tree)
 	      (and org-highlight-sparse-tree-matches
