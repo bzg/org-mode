@@ -1686,8 +1686,13 @@ controlled by `org-use-tag-inheritance'.  In other agenda types,
 entries, but you may want the agenda to use the inherited tags
 anyway, e.g. for later tag filtering.
 
-Setting this to nil will speed up non-tags agenda view a lot."
-  :version "24.3")
+The default value reset tags in every agenda type.  Setting this
+option to nil will speed up non-tags agenda view a lot.
+
+Allowed value are 'todo, 'search, 'timeline and 'agenda."
+  :version "24.3"
+  :group 'org-agenda
+  :type '(repeat (symbol :tag "Agenda type")))
 
 (defcustom org-agenda-hide-tags-regexp nil
   "Regular expression used to filter away specific tags in agenda views.
