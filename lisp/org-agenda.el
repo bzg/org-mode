@@ -1652,6 +1652,18 @@ When non-nil, this must be the number of minutes, e.g. 60 for one hour."
   :group 'org-agenda-line-format
   :type 'boolean)
 
+(defcustom org-agenda-use-tag-inheritance '(todo search timeline agenda)
+  "List of agenda view types where to use tag inheritance.
+
+In tags/tags-todo/tags-tree agenda views, tag inheritance is
+controlled by `org-use-tag-inheritance'.  In other agenda types,
+`org-use-tag-inheritance' is not used when selecting the agenda
+entries, but you may want the agenda to use the inherited tags
+anyway, e.g. for later tag filtering.
+
+Setting this to nil will speed up non-tags agenda view a lot."
+  :version "24.3")
+
 (defcustom org-agenda-hide-tags-regexp nil
   "Regular expression used to filter away specific tags in agenda views.
 This means that these tags will be present, but not be shown in the agenda
@@ -3552,9 +3564,20 @@ generating a new one."
       (if (and (functionp 'org-habit-insert-consistency-graphs)
 	       (save-excursion (next-single-property-change (point-min) 'org-habit-p)))
 	  (org-habit-insert-consistency-graphs))
+      (setq org-agenda-type (org-get-at-bol 'org-agenda-type))
+      (when (delq nil (mapcar (lambda (tp) (org-agenda-check-type nil tp))
+			      org-agenda-use-tag-inheritance))
+	(let (mrk)
+	  (save-excursion
+	    (goto-char (point-min))
+	    (while (equal (forward-line) 0)
+	      (when (setq mrk (or (get-text-property (point) 'org-hd-marker)
+				  (get-text-property (point) 'org-hd-marker)))
+		(put-text-property (point-at-bol) (point-at-eol)
+				   'tags (org-with-point-at mrk
+					   (delete-dups (org-get-tags-at)))))))))
       (let ((inhibit-read-only t))
 	(run-hooks 'org-agenda-finalize-hook))
-      (setq org-agenda-type (org-get-at-bol 'org-agenda-type))
       (when (or org-agenda-tag-filter (get 'org-agenda-tag-filter :preset-filter))
 	(org-agenda-filter-apply org-agenda-tag-filter 'tag))
       (when (or org-agenda-category-filter (get 'org-agenda-category-filter :preset-filter))
@@ -4417,7 +4440,7 @@ in `org-agenda-text-search-extra-files'."
 			(setq marker (org-agenda-new-marker (point))
 			      category (org-get-category)
 			      category-pos (get-text-property (point) 'org-category-position)
-			      tags (org-get-tags-at (point))
+			      tags (org-get-tags-at nil t)
 			      txt (org-agenda-format-item
 				   ""
 				   (buffer-substring-no-properties
@@ -5241,7 +5264,7 @@ the documentation of `org-diary'."
 	      category-pos (get-text-property (point) 'org-category-position)
 	      txt (org-trim
 		   (buffer-substring (match-beginning 2) (match-end 0)))
-	      tags (org-get-tags-at (point))
+	      tags (org-get-tags-at nil t)
 	      txt (org-agenda-format-item "" txt category tags t)
 	      priority (1+ (org-get-priority txt))
 	      todo-state (org-get-todo-state))
@@ -5420,7 +5443,7 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 		     (assoc (point) deadline-position-alist))
 		(throw :skip nil))
 	    (setq hdmarker (org-agenda-new-marker)
-		  tags (org-get-tags-at))
+		  tags (org-get-tags-at nil t))
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 	    (setq head (or (match-string 1) ""))
 	    (setq txt (org-agenda-format-item
@@ -5470,7 +5493,7 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 	  (setq marker (org-agenda-new-marker beg)
 		category (org-get-category beg)
 		category-pos (get-text-property beg 'org-category-position)
-		tags (save-excursion (org-back-to-heading t) (org-get-tags-at))
+		tags (save-excursion (org-back-to-heading t) (org-get-tags-at nil t))
 		todo-state (org-get-todo-state)
 		warntime (get-text-property (point) 'org-appt-warntime)
 		extra nil)
@@ -5639,7 +5662,7 @@ please use `org-class' instead."
 	      (setq txt org-agenda-no-heading-message)
 	    (goto-char (match-beginning 0))
 	    (setq hdmarker (org-agenda-new-marker)
-		  tags (org-get-tags-at))
+		  tags (org-get-tags-at nil t))
 	    (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 	    (setq txt (match-string 1))
 	    (when extra
@@ -5849,7 +5872,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		    (setq txt org-agenda-no-heading-message)
 		  (goto-char (match-end 0))
 		  (setq pos1 (match-beginning 0))
-		  (setq tags (org-get-tags-at pos1))
+		  (setq tags (org-get-tags-at pos1 t))
 		  (setq head (buffer-substring-no-properties
 			      (point)
 			      (progn (skip-chars-forward "^\r\n")
@@ -5979,7 +6002,7 @@ FRACTION is what fraction of the head-warning time has passed."
 				pastschedp))
 		       (setq mm (assoc pos1 deadline-position-alist)))
 		      (throw :skip nil)))
-		(setq tags (org-get-tags-at))
+		(setq tags (org-get-tags-at nil t))
 		(setq head (buffer-substring-no-properties
 			    (point)
 			    (progn (skip-chars-forward "^\r\n") (point))))
@@ -6061,7 +6084,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		    (setq txt org-agenda-no-heading-message)
 		  (goto-char (match-beginning 0))
 		  (setq hdmarker (org-agenda-new-marker (point)))
-		  (setq tags (org-get-tags-at))
+		  (setq tags (org-get-tags-at nil t))
 		  (looking-at "\\*+[ \t]+\\([^\r\n]+\\)")
 		  (setq head (match-string 1))
 		  (let ((remove-re
@@ -6740,7 +6763,8 @@ in the file.  Otherwise, restriction will be to the current subtree."
 
 (defun org-agenda-check-type (error &rest types)
   "Check if agenda buffer is of allowed type.
-If ERROR is non-nil, throw an error, otherwise just return nil."
+If ERROR is non-nil, throw an error, otherwise just return nil.
+Allowed types are 'agenda 'timeline 'todo 'tags 'search."
   (if (not org-agenda-type)
       (error "No Org agenda currently displayed")
     (if (memq org-agenda-type types)
