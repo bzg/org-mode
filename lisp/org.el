@@ -2988,7 +2988,7 @@ When nil, only the tags directly given in a specific line apply there.
 This may also be a list of tags that should be inherited, or a regexp that
 matches tags that should be inherited.  Additional control is possible
 with the variable  `org-tags-exclude-from-inheritance' which gives an
-explicit list of tags to be excluded from inheritance., even if the value of
+explicit list of tags to be excluded from inheritance, even if the value of
 `org-use-tag-inheritance' would select it for inheritance.
 
 If this option is t, a match early-on in a tree can lead to a large
