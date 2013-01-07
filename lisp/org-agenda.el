@@ -5521,7 +5521,6 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
   (org-no-warnings
    (let ((calendar-date-style 'european)	(european-calendar-style t))
      (diary-date day month year mark))))
-(defalias 'org-float 'diary-float)
 
 ;; Define the` org-class' function
 (defun org-class (y1 m1 d1 y2 m2 d2 dayname &rest skip-weeks)

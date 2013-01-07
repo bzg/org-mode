@@ -2074,8 +2074,8 @@ CLOSED: [2012-01-01] DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01>\n"))))
 		  "[2012-03-29 16:40]--[2012-03-29 16:41]")
 		 "[2012-03-29 16:40]--[2012-03-29 16:41]\n"))
   ;; Diary.
-  (should (equal (org-test-parse-and-interpret "<%%org-float t 4 2>")
-		 "<%%org-float t 4 2>\n"))
+  (should (equal (org-test-parse-and-interpret "<%%diary-float t 4 2>")
+		 "<%%diary-float t 4 2>\n"))
   ;; Timestamp with repeater interval.
   (should (equal (org-test-parse-and-interpret "<2012-03-29 +1y>")
 		 "<2012-03-29 +1y>\n")))
