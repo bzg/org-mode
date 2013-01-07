@@ -16555,8 +16555,8 @@ to the directory @code{org-mobile-directory}.  By default this list contains
 all agenda files (as listed in @code{org-agenda-files}), but additional files
 can be included by customizing @code{org-mobile-files}.  File names will be
 staged with paths relative to @code{org-directory}, so all files should be
-inside this directory@footnote{Note that symbolic links are not supported,
-you need to store files @emph{physically} in @code{org-directory}.}.
+inside this directory@footnote{Symbolic links in @code{org-directory} need to
+have the same name than their targets.}.
 
 The push operation also creates a special Org file @file{agendas.org} with
 all custom agenda view defined by the user@footnote{While creating the
