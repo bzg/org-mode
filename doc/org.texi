@@ -14197,7 +14197,8 @@ values @code{yes} or @code{no}, with a default value of @code{no}.
 Strips horizontal lines from the input table.  In most languages this is the
 desired effect because an @code{hline} symbol is interpreted as an unbound
 variable and raises an error.  Setting @code{:hlines no} or relying on the
-default value yields the following results.
+default value yields the following results.  Note that the @code{:hline}
+header argument has no effect for Emacs Lisp code blocks.
 
 @example
 #+TBLNAME: many-cols
