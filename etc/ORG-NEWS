@@ -2,7 +2,7 @@ ORG NEWS -- history of user-visible changes.           -*- org -*-
 
 #+LINK: doc http://orgmode.org/worg/doc.html#%s
 
-Copyright (C) 2012-2013  Free Software Foundation, Inc.
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
 See the end of the file for license conditions.
 
 Please send Org bug reports to emacs-orgmode@gnu.org.
@@ -49,7 +49,7 @@ There used to be a GPL version of the Org manual, but this is not the
 case anymore, the Free Software Foundation does not permit this.
 
 The GNU FDL license is now included in the manual directly.
-    
+
 ** Enhanced compatibility with Emacs 22 and XEmacs
 
 Thanks to Achim for his work on enhancing Org's compatibility with

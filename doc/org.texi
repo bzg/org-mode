@@ -3760,7 +3760,7 @@ Rotate the TODO state of the current item among
 If TODO keywords have fast access keys (see @ref{Fast access to TODO
 states}), you will be prompted for a TODO keyword through the fast selection
 interface; this is the default behavior when
-@var{org-use-fast-todo-selection} is @code{non-nil}.  
+@var{org-use-fast-todo-selection} is @code{non-nil}.
 
 The same rotation can also be done ``remotely'' from the timeline and agenda
 buffers with the @kbd{t} command key (@pxref{Agenda commands}).
