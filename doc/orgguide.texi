@@ -98,6 +98,8 @@ modify this GNU manual.''
 * Working With Source Code::	Source code snippets embedded in Org
 * Miscellaneous::		All the rest which did not fit elsewhere
 
+* GNU Free Documentation License:: This manual license.
+
 @detailmenu
  --- The Detailed Node Listing ---
 
@@ -207,7 +209,7 @@ Exporting
 * HTML export::			Exporting to HTML
 * @LaTeX{} and PDF export::	Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::		Exporting to DocBook
-* iCalendar export::		
+* iCalendar export::
 
 Miscellaneous
 
@@ -1516,8 +1518,8 @@ projects need to be moved around.  Moving completed project trees to an
 archive file keeps the system compact and fast.
 
 @menu
-* Capture::			
-* Refile and copy::		Moving a tree from one place to another
+* Capture::
+* Refiling notes::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 @end menu
 
@@ -2288,7 +2290,7 @@ that planning information can be incorporated into desktop calendars.
 * HTML export::			Exporting to HTML
 * @LaTeX{} and PDF export::	Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::		Exporting to DocBook
-* iCalendar export::		
+* iCalendar export::
 @end menu
 
 @node Export options, The export dispatcher, Exporting, Exporting
