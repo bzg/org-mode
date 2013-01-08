@@ -3605,7 +3605,8 @@ generating a new one."
 				  (get-text-property (point) 'org-hd-marker)))
 		(put-text-property (point-at-bol) (point-at-eol)
 				   'tags (org-with-point-at mrk
-					   (delete-dups (org-get-tags-at)))))))))
+					   (delete-dups
+					    (mapcar 'downcase (org-get-tags-at))))))))))
       (let ((inhibit-read-only t))
 	(run-hooks 'org-agenda-finalize-hook))
       (when (or org-agenda-tag-filter (get 'org-agenda-tag-filter :preset-filter))
