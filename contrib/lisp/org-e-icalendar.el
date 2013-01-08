@@ -397,7 +397,8 @@ This is mandatory for \"DTSTAMP\" property."
 	    ((not with-time-p) ";VALUE=DATE:%Y%m%d")
 	    (t (replace-regexp-in-string "%Z"
 					 org-e-icalendar-timezone
-					 org-e-icalendar-date-time-format)))
+					 org-e-icalendar-date-time-format
+					 t)))
       ;; Convert timestamp into internal time in order to use
       ;; `format-time-string' and fix any mistake (i.e. MI >= 60).
       (encode-time 0 mi h d m y)
