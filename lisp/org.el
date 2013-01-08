@@ -21545,6 +21545,7 @@ function installs the following ones: \"property\",
 	      '(org-fill-paragraph-separate-nobreak-p
 		org-fill-line-break-nobreak-p)))))
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
+  (org-set-local 'auto-fill-inhibit-regexp org-outline-regexp)
   (org-set-local 'adaptive-fill-function 'org-adaptive-fill-function)
   (org-set-local 'normal-auto-fill-function 'org-auto-fill-function)
   (org-set-local 'comment-line-break-function 'org-comment-line-break-function))
