@@ -104,7 +104,7 @@ not be modified."
 @licstart  The following is the entire license notice for the
 JavaScript code in this tag.
 
-Copyright (C) 2012 Free Software Foundation, Inc.
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
 
 The JavaScript code in this tag is free software: you can
 redistribute it and/or modify it under the terms of the GNU
@@ -328,7 +328,7 @@ You can also customize this for each buffer, using something like
  * @licstart  The following is the entire license notice for the
  *  JavaScript code in %PATH.
  *
- * Copyright (C) 2012  MathJax
+ * Copyright (C) 2012-2013  MathJax
  *
  * Licensed under the Apache License, Version 2.0 (the \"License\");
  * you may not use this file except in compliance with the License.
@@ -351,7 +351,7 @@ You can also customize this for each buffer, using something like
 @licstart  The following is the entire license notice for the
 JavaScript code below.
 
-Copyright (C) 2012 Free Software Foundation, Inc.
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
 
 The JavaScript code below is free software: you can
 redistribute it and/or modify it under the terms of the GNU
