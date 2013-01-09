@@ -3385,13 +3385,16 @@ be the description@footnote{If the headline contains a timestamp, it will be
 removed from the link and result in a wrong link---you should avoid putting
 timestamp in the headline.}.
 
-@vindex org-link-to-org-use-id
+@vindex org-id-link-to-org-use-id
 @cindex property, CUSTOM_ID
 @cindex property, ID
 If the headline has a @code{CUSTOM_ID} property, a link to this custom ID
 will be stored.  In addition or alternatively (depending on the value of
-@code{org-link-to-org-use-id}), a globally unique @code{ID} property will be
-created and/or used to construct a link.  So using this command in Org
+@code{org-id-link-to-org-use-id}), a globally unique @code{ID} property will
+be created and/or used to construct a link@footnote{The library @code{org-id}
+must first be loaded, either through @code{org-customize} by enabling
+@code{id} in @code{org-modules} , or by adding @code{(require 'org-id)} in
+your @file{.emacs}.}. So using this command in Org
 buffers will potentially create two links: a human-readable from the custom
 ID, and one that is globally unique and works even if the entry is moved from
 file to file.  Later, when inserting the link, you need to decide which one
