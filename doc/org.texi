@@ -14313,8 +14313,10 @@ hline)
 @node rownames, shebang, colnames, Specific header arguments
 @subsubsection @code{:rownames}
 
-The @code{:rownames} header argument can take on the values @code{yes}
-or @code{no}, with a default value of @code{no}.
+The @code{:rownames} header argument can take on the values @code{yes} or
+@code{no}, with a default value of @code{no}.  Note that Emacs Lisp code
+blocks ignore the @code{:rownames} header argument entirely given the ease
+with which tables with row names may be handled directly in Emacs Lisp.
 
 @itemize @bullet
 @item @code{no}
