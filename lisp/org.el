@@ -143,7 +143,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
 (declare-function org-element-type "org-element" (element))
-(declare-function org-element-context "org-element" ())
+(declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
@@ -19441,38 +19441,48 @@ See the individual commands for more information."
     (eq 'fixed-width (org-element-type (org-element-at-point)))))
 
 (defun org-edit-special (&optional arg)
-  "Call a special editor for the stuff at point.
+  "Call a special editor for the element at point.
 When at a table, call the formula editor with `org-table-edit-formulas'.
 When in a source code block, call `org-edit-src-code'.
 When in a fixed-width region, call `org-edit-fixed-width-region'.
-When in an #+include line, visit the included file.
+When at an #+INCLUDE keyword, visit the included file.
 On a link, call `ffap' to visit the link at point.
-Otherwise, return a user error."
+Otherwise, return an user error."
   (interactive)
-  ;; possibly prep session before editing source
-  (when (and (org-in-src-block-p) arg)
-    (let* ((info (org-babel-get-src-block-info))
-           (lang (nth 0 info))
-           (params (nth 2 info))
-           (session (cdr (assoc :session params))))
-      (when (and info session) ;; we are in a source-code block with a session
-        (funcall
-         (intern (concat "org-babel-prep-session:" lang)) session params))))
-  (cond ;; proceed with `org-edit-special'
-   ((save-excursion
-      (beginning-of-line 1)
-      (looking-at "\\(?:#\\+\\(?:setupfile\\|include\\):?[ \t]+\"?\\|[ \t]*<include\\>.*?file=\"\\)\\([^\"\n>]+\\)"))
-    (find-file (org-trim (match-string 1))))
-   ((org-at-table.el-p) (org-edit-src-code))
-   ((or (org-at-table-p)
-	(save-excursion
-	  (beginning-of-line 1)
-	  (let ((case-fold-search )) (looking-at "[ \t]*#\\+tblfm:"))))
-    (call-interactively 'org-table-edit-formulas))
-   ((org-in-block-p '("src" "example" "latex" "html")) (org-edit-src-code))
-   ((org-in-fixed-width-region-p) (org-edit-fixed-width-region))
-   ((org-at-regexp-p org-any-link-re) (call-interactively 'ffap))
-   (t (user-error "No special environment to edit here"))))
+  (let ((element (org-element-at-point)))
+    (case (org-element-type element)
+      (src-block
+       (if (not arg) (org-edit-src-code)
+         (let* ((info (org-babel-get-src-block-info))
+                (lang (nth 0 info))
+                (params (nth 2 info))
+                (session (cdr (assq :session params))))
+           (if (not session) (org-edit-src-code)
+             ;; At a src-block with a session and function called with
+             ;; an ARG: switch to the buffer related to the inferior
+             ;; process.
+             (funcall (intern (concat "org-babel-prep-session:" lang))
+                      session params)))))
+      (keyword
+       (if (equal (org-element-property :key element) "INCLUDE")
+           (find-file
+            (org-remove-double-quotes
+             (car (org-split-string (org-element-property :value element)))))
+         (user-error "No special environment to edit here")))
+      (table
+       (if (eq (org-element-property :type element) 'table.el)
+           (org-edit-src-code)
+         (call-interactively 'org-table-edit-formulas)))
+      ;; Only Org tables contain `table-row' type elements.
+      (table-row (call-interactively 'org-table-edit-formulas))
+      ((example-block export-block) (org-edit-src-code))
+      (fixed-width (org-edit-fixed-width-region))
+      (otherwise
+       ;; No notable element at point.  Though, we may be at a link,
+       ;; which is an object.  Thus, scan deeper.
+       (if (eq (org-element-type (org-element-context element)) 'link)
+	   (call-interactively 'ffap)
+	 (user-error "No special environment to edit here"))))))
 
 (defvar org-table-coordinate-overlays) ; defined in org-table.el
 (defun org-ctrl-c-ctrl-c (&optional arg)
