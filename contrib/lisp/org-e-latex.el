@@ -74,13 +74,15 @@
 ;; (i.e. "inparaenum").  The second one allows to specify optional
 ;; arguments for that environment (square brackets are not mandatory).
 ;;
-;; Images accept `:float', `:placement' and `:options' as attributes.
-;; `:float' accepts a symbol among `wrap', `multicolumn', and
-;; `figure', which defines the float environment for the table (if
-;; unspecified, an image with a caption will be set in a "figure"
-;; environment).  `:placement' is a string that will be used as
-;; argument for the environment chosen.  `:options' is a string that
-;; will be used as the optional argument for "includegraphics" macro.
+;; Images accept `:float', `:placement', `:comment-include', and
+;; `:options' as attributes.  `:float' accepts a symbol among `wrap',
+;; `multicolumn', and `figure', which defines the float environment
+;; for the table (if unspecified, an image with a caption will be set
+;; in a "figure" environment).  `:comment-include' is a boolean that
+;; toggles whether to comment out the \includegraphics
+;; call. `:placement' is a string that will be used as argument for
+;; the environment chosen.  `:options' is a string that will be used
+;; as the optional argument for "includegraphics" macro.
 ;;
 ;; This back-end also offers enhanced support for footnotes.  Thus, it
 ;; handles nested footnotes, footnotes in tables and footnotes in item
@@ -1745,6 +1747,7 @@ used as a communication channel."
 		  ((eq float 'figure)
 		   (format "[%s]" org-e-latex-default-figure-position))
 		  (t ""))))
+	 (comment-include (if (plist-get attr :comment-include) "%" ""))
 	 ;; Options for "includegraphics" macro. Make sure it is
 	 ;; a string with square brackets when non empty.  Default to
 	 ;; `org-e-latex-image-default-option' when possible.
@@ -1760,16 +1763,16 @@ used as a communication channel."
     (case float
       (wrap (format "\\begin{wrapfigure}%s
 \\centering
-\\includegraphics%s{%s}
-%s\\end{wrapfigure}" placement options path caption))
+%s\\includegraphics%s{%s}
+%s\\end{wrapfigure}" placement comment-include options path caption))
       (multicolumn (format "\\begin{figure*}%s
 \\centering
-\\includegraphics%s{%s}
-%s\\end{figure*}" placement options path caption))
+%s\\includegraphics%s{%s}
+%s\\end{figure*}" placement comment-include options path caption))
       (figure (format "\\begin{figure}%s
 \\centering
-\\includegraphics%s{%s}
-%s\\end{figure}" placement options path caption))
+%s\\includegraphics%s{%s}
+%s\\end{figure}" placement comment-include options path caption))
       (t (format "\\includegraphics%s{%s}" options path)))))
 
 (defun org-e-latex-link (link desc info)
