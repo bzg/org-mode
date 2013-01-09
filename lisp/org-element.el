@@ -4614,7 +4614,7 @@ first element of current section."
 		 (goto-char cbeg)))))))))))
 
 ;;;###autoload
-(defun org-element-context ()
+(defun org-element-context (&optional element)
   "Return closest element or object around point.
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
@@ -4624,10 +4624,14 @@ associated to it.
 Possible types are defined in `org-element-all-elements' and
 `org-element-all-objects'.  Properties depend on element or
 object type, but always include :begin, :end, :parent
-and :post-blank properties."
+and :post-blank properties.
+
+Optional argument ELEMENT, when non-nil, is the closest element
+containing point, as returned by `org-element-at-point'.
+Providing it allows for quicker computation."
   (org-with-wide-buffer
    (let* ((origin (point))
-	  (element (org-element-at-point))
+	  (element (or element (org-element-at-point)))
 	  (type (car element))
 	  end)
      ;; Check if point is inside an element containing objects or at

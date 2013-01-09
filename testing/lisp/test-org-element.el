@@ -2713,7 +2713,14 @@ Paragraph \\alpha."
        (org-test-with-temp-text "<<target>>{{{test}}}"
 	 (progn (search-forward "{")
 		(backward-char)
-		(org-element-type (org-element-context)))))))
+		(org-element-type (org-element-context))))))
+  ;; Test optional argument.
+  (should
+   (eq 'underline
+       (org-test-with-temp-text "Some *text with _underline_ text*"
+	 (progn
+	   (search-forward "under")
+	   (org-element-type (org-element-context (org-element-at-point))))))))
 
 
 (provide 'test-org-element)
