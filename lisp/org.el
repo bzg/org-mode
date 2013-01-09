@@ -19447,7 +19447,7 @@ When in a source code block, call `org-edit-src-code'.
 When in a fixed-width region, call `org-edit-fixed-width-region'.
 When at an #+INCLUDE keyword, visit the included file.
 On a link, call `ffap' to visit the link at point.
-Otherwise, return an user error."
+Otherwise, return a user error."
   (interactive)
   (let ((element (org-element-at-point)))
     (case (org-element-type element)
