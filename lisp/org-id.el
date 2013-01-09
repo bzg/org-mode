@@ -186,7 +186,7 @@ the link."
   :type 'boolean)
 
 (defcustom org-id-locations-file (convert-standard-filename
-				  "~/.emacs.d/.org-id-locations")
+				  (concat user-emacs-directory ".org-id-locations"))
   "The file for remembering in which file an ID was defined.
 This variable is only relevant when `org-id-track-globally' is set."
   :group 'org-id

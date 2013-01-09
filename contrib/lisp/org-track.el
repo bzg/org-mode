@@ -72,7 +72,7 @@ time to time."
   :version "22.1"
   :group 'org)
 
-(defcustom org-track-directory "~/.emacs.d/org/lisp"
+(defcustom org-track-directory (concat user-emacs-directory "org/lisp")
   "Directory where your org-mode/ directory lives.
 If that directory does not exist, it will be created."
   :type 'directory)

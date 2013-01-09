@@ -194,7 +194,7 @@ Emacs initialization file."
 	  (const :tag "No persistence" nil)))
 
 (defcustom org-clock-persist-file (convert-standard-filename
-				   "~/.emacs.d/org-clock-save.el")
+				   (concat user-emacs-directory "org-clock-save.el"))
   "File to save clock data to."
   :group 'org-clock
   :type 'string)
