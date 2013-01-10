@@ -3522,33 +3522,40 @@ CONTENTS is nil."
   ;; Use `:raw-value' if specified.
   (or (org-element-property :raw-value timestamp)
       ;; Otherwise, build timestamp string.
-      (let ((build-ts-string
-	     ;; Build an Org timestamp string from TIME.  ACTIVEP is
-	     ;; non-nil when time stamp is active.  If WITH-TIME-P is
-	     ;; non-nil, add a time part.  HOUR-END and MINUTE-END
-	     ;; specify a time range in the timestamp.  REPEAT-STRING
-	     ;; is the repeater string, if any.
-	     (lambda (time activep
-		      &optional with-time-p hour-end minute-end repeat-string)
-	       (let ((ts (format-time-string
-			  (funcall (if with-time-p 'cdr 'car)
-				   org-time-stamp-formats)
-			  time)))
-		 (when (and hour-end minute-end)
-		   (string-match "[012]?[0-9]:[0-5][0-9]" ts)
-		   (setq ts
-			 (replace-match
-			  (format "\\&-%02d:%02d" hour-end minute-end)
-			  nil nil ts)))
-		 (unless activep (setq ts (format "[%s]" (substring ts 1 -1))))
-		 (when (org-string-nw-p repeat-string)
-		   (setq ts (concat (substring ts 0 -1)
-				    " "
-				    repeat-string
-				    (substring ts -1))))
-		 ;; Return value.
-		 ts)))
-	    (type (org-element-property :type timestamp)))
+      (let* ((repeat-string
+	      (concat
+	       (case (org-element-property :repeater-type timestamp)
+		 (cumulate "+") (catch-up "++") (restart ".+"))
+	       (let ((val (org-element-property :repeater-value timestamp)))
+		 (and val (number-to-string val)))
+	       (case (org-element-property :repeater-unit timestamp)
+		 (hour "h") (day "d") (week "w") (month "m") (year "y"))))
+	     (build-ts-string
+	      ;; Build an Org timestamp string from TIME.  ACTIVEP is
+	      ;; non-nil when time stamp is active.  If WITH-TIME-P is
+	      ;; non-nil, add a time part.  HOUR-END and MINUTE-END
+	      ;; specify a time range in the timestamp.  REPEAT-STRING
+	      ;; is the repeater string, if any.
+	      (lambda (time activep &optional with-time-p hour-end minute-end)
+		(let ((ts (format-time-string
+			   (funcall (if with-time-p 'cdr 'car)
+				    org-time-stamp-formats)
+			   time)))
+		  (when (and hour-end minute-end)
+		    (string-match "[012]?[0-9]:[0-5][0-9]" ts)
+		    (setq ts
+			  (replace-match
+			   (format "\\&-%02d:%02d" hour-end minute-end)
+			   nil nil ts)))
+		  (unless activep (setq ts (format "[%s]" (substring ts 1 -1))))
+		  (when (org-string-nw-p repeat-string)
+		    (setq ts (concat (substring ts 0 -1)
+				     " "
+				     repeat-string
+				     (substring ts -1))))
+		  ;; Return value.
+		  ts)))
+	     (type (org-element-property :type timestamp)))
 	(case type
 	  ((active inactive)
 	   (let* ((minute-start (org-element-property :minute-start timestamp))
@@ -3569,14 +3576,7 @@ CONTENTS is nil."
 	      (eq type 'active)
 	      (and hour-start minute-start)
 	      (and time-range-p hour-end)
-	      (and time-range-p minute-end)
-	      (concat
-	       (case (org-element-property :repeater-type timestamp)
-		 (cumulate "+") (catch-up "++") (restart ".+"))
-	       (let ((val (org-element-property :repeater-value timestamp)))
-		 (and val (number-to-string val)))
-	       (case (org-element-property :repeater-unit timestamp)
-		 (hour "h") (day "d") (week "w") (month "m") (year "y"))))))
+	      (and time-range-p minute-end))))
 	  ((active-range inactive-range)
 	   (let ((minute-start (org-element-property :minute-start timestamp))
 		 (minute-end (org-element-property :minute-end timestamp))

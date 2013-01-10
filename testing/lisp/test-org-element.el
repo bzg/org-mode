@@ -2272,6 +2272,19 @@ DEADLINE: <2012-01-01> SCHEDULED: <2012-01-01> CLOSED: [2012-01-01]\n"))))
      '(timestamp
        (:type active :year-start 2012 :month-start 3 :day-start 29
 	      :repeater-type cumulate :repeater-value 1 :repeater-unit year))
+     nil)))
+  ;; Timestamp range with repeater interval
+  (should (equal (org-test-parse-and-interpret
+		  "<2012-03-29 Thu +1y>--<2012-03-30 Thu +1y>")
+		 "<2012-03-29 Thu +1y>--<2012-03-30 Thu +1y>\n"))
+  (should
+   (string-match
+    "<2012-03-29 .* \\+1y>--<2012-03-30 .* \\+1y>"
+    (org-element-timestamp-interpreter
+     '(timestamp
+       (:type active-range :year-start 2012 :month-start 3 :day-start 29
+	      :year-end 2012 :month-end 3 :day-end 30 :repeater-type cumulate
+	      :repeater-value 1 :repeater-unit year))
      nil))))
 
 (ert-deftest test-org-element/verse-block-interpreter ()
