@@ -4974,7 +4974,7 @@ of what a project is and how to check if it stuck, customize the variable
 	 (pop-up-frames nil)
 	 (diary-list-entries-hook
 	  (cons 'org-diary-default-entry diary-list-entries-hook))
-	 (diary-file-name-prefix-function nil) ; turn this feature off
+	 (diary-file-name-prefix nil) ; turn this feature off
 	 (diary-modify-entry-list-string-function 'org-modify-diary-entry-string)
 	 entries
 	 (org-disable-agenda-to-diary t))
