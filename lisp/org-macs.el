@@ -426,6 +426,7 @@ the value in cdr."
     (cons (list (car flat) (cadr flat))
 	  (org-make-parameter-alist (cddr flat)))))
 
+;;;###autoload
 (defmacro org-load-noerror-mustsuffix (file)
   "Load FILE with optional arguments NOERROR and MUSTSUFFIX.  Drop the MUSTSUFFIX argument for XEmacs, which doesn't recognize it."
   (if (featurep 'xemacs)
