@@ -1852,7 +1852,7 @@ information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (let ((value (org-e-groff-plain-text
-		(org-export-translate-timestamp timestamp) info)))
+		(org-timestamp-translate timestamp) info)))
     (case (org-element-property :type timestamp)
       ((active active-range)
        (format org-e-groff-active-timestamp-format value))

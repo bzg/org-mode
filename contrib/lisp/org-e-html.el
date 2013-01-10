@@ -2684,7 +2684,7 @@ information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (let ((value (org-e-html-plain-text
-		(org-export-translate-timestamp timestamp) info)))
+		(org-timestamp-translate timestamp) info)))
     (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
 	    (replace-regexp-in-string "--" "&ndash;" value))))
 
