@@ -78,11 +78,10 @@
 (require 'find-func)
 (require 'format-spec)
 
+(load "org-loaddefs.el" t t t)
+
 (require 'org-macs)
 (require 'org-compat)
-
-(let ((load-suffixes (list ".el")))
-  (org-load-noerror-mustsuffix "org-loaddefs"))
 
 ;; `org-outline-regexp' ought to be a defconst but is let-binding in
 ;; some places -- e.g. see the macro org-with-limited-levels.
@@ -16897,6 +16896,27 @@ If there is already a time stamp at the cursor position, update it."
       (org-insert-time-stamp
        (encode-time 0 0 0 (nth 1 cal-date) (car cal-date) (nth 2 cal-date))))))
 
+(defcustom org-effort-durations
+  `(("h" . 60)
+    ("d" . ,(* 60 8))
+    ("w" . ,(* 60 8 5))
+    ("m" . ,(* 60 8 5 4))
+    ("y" . ,(* 60 8 5 40)))
+  "Conversion factor to minutes for an effort modifier.
+
+Each entry has the form (MODIFIER . MINUTES).
+
+In an effort string, a number followed by MODIFIER is multiplied
+by the specified number of MINUTES to obtain an effort in
+minutes.
+
+For example, if the value of this variable is ((\"hours\" . 60)), then an
+effort string \"2hours\" is equivalent to 120 minutes."
+  :group 'org-agenda
+  :version "24.1"
+  :type '(alist :key-type (string :tag "Modifier")
+		:value-type (number :tag "Minutes")))
+
 (defun org-minutes-to-clocksum-string (m)
   "Format number of minutes as a clocksum string.
 The format is determined by `org-time-clocksum-format',
@@ -17005,27 +17025,6 @@ If no number is found, the return value is 0."
    ((string-match "\\([0-9]+\\)" s)
     (string-to-number (match-string 1 s)))
    (t 0)))
-
-(defcustom org-effort-durations
-  `(("h" . 60)
-    ("d" . ,(* 60 8))
-    ("w" . ,(* 60 8 5))
-    ("m" . ,(* 60 8 5 4))
-    ("y" . ,(* 60 8 5 40)))
-  "Conversion factor to minutes for an effort modifier.
-
-Each entry has the form (MODIFIER . MINUTES).
-
-In an effort string, a number followed by MODIFIER is multiplied
-by the specified number of MINUTES to obtain an effort in
-minutes.
-
-For example, if the value of this variable is ((\"hours\" . 60)), then an
-effort string \"2hours\" is equivalent to 120 minutes."
-  :group 'org-agenda
-  :version "24.1"
-  :type '(alist :key-type (string :tag "Modifier")
-		:value-type (number :tag "Minutes")))
 
 (defcustom org-image-actual-width t
   "Should we use the actual width of images when inlining them?
