@@ -13526,7 +13526,10 @@ ignore inherited ones."
 		(error nil)))))
 	(if local
 	    tags
-	  (append (org-remove-uninherited-tags org-file-tags) tags))))))
+	  (reverse (delete-dups
+		    (reverse (append
+			      (org-remove-uninherited-tags
+			       org-file-tags) tags)))))))))
 
 (defun org-add-prop-inherited (s)
   (add-text-properties 0 (length s) '(inherited t) s)
