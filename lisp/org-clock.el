@@ -396,6 +396,19 @@ specifications than `frame-title-format', which see."
   :group 'org-clock
   :type 'sexp)
 
+(defcustom org-clock-x11idle-program-name "x11idle"
+  "Name of the program which prints X11 idle time in milliseconds.
+
+You can find x11idle.c in the contrib/scripts directory of the
+Org git distribution. Or, you can do:
+
+    sudo apt-get install xprintidle
+
+if you are using Debian."
+  :group 'org-clock
+  :version "24.3"
+  :type 'string)
+
 (defvar org-clock-in-prepare-hook nil
   "Hook run when preparing the clock.
 This hook is run before anything happens to the task that
@@ -1034,13 +1047,13 @@ If `only-dangling-p' is non-nil, only ask to resolve dangling
 (defvar org-x11idle-exists-p
   ;; Check that x11idle exists
   (and (eq window-system 'x)
-       (eq (call-process-shell-command "command" nil nil nil "-v" "x11idle") 0)
+       (eq (call-process-shell-command "command" nil nil nil "-v" org-clock-x11idle-program-name) 0)
        ;; Check that x11idle can retrieve the idle time
-       (eq (call-process-shell-command "x11idle" nil nil nil) 0)))
+       (eq (call-process-shell-command org-clock-x11idle-program-name nil nil nil) 0)))
 
 (defun org-x11-idle-seconds ()
   "Return the current X11 idle time in seconds."
-  (/ (string-to-number (shell-command-to-string "x11idle")) 1000))
+  (/ (string-to-number (shell-command-to-string org-clock-x11idle-program-name)) 1000))
 
 (defun org-user-idle-seconds ()
   "Return the number of seconds the user has been idle for.
