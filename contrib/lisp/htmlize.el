@@ -819,7 +819,7 @@ This is used to protect mailto links without modifying their meaning."
              (uri (concat "mailto:" (htmlize-despam-address address))))
         (htmlize-make-link-overlay beg end uri)))
     (goto-char (point-min))
-    (while (re-search-forward "<\\(\\(URL:\\)?\\([a-zA-Z]+://[^;]+\\)\\)>"
+    (while (re-search-forward "<\\(\\(URL:\\)?\\([a-zA-Z]+://[^;>]+\\)\\)>"
                               nil t)
       (htmlize-make-link-overlay
        (match-beginning 0) (match-end 0) (match-string 3)))))
