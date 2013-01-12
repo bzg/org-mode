@@ -206,14 +206,14 @@ This does two different kinds of triggers:
   corresponding ID property and switches it to the state TODO as well."
 
   ;; Refresh the effort text properties
-  (org-refresh-effort-properties)
+  (org-refresh-properties org-effort-property 'org-effort)
   ;; Get information from the plist
   (let* ((type (plist-get change-plist :type))
 	       (pos (plist-get change-plist :position))
 	 (from (plist-get change-plist :from))
 	 (to (plist-get change-plist :to))
 	 (org-log-done nil) ; IMPROTANT!: no logging during automatic trigger!
-	 trigger triggers tr p1 kwd)
+	 trigger triggers tr p1 kwd id)
     (catch 'return
       (unless (eq type 'todo-state-change)
 	;; We are only handling todo-state-change....
@@ -313,15 +313,15 @@ This does two different kinds of triggers:
 			     (cond (priority-up
 				    (or p1-gt
 					(and (equal p1 p2)
-					     (or (and effort-up e1-gt)
-						 (and effort-down e1-lt)))))
+					     (or (and effort-up e1-lt)
+						 (and effort-down e2-gt)))))
 				   (priority-down
 				    (or p1-lt
 					(and (equal p1 p2)
-					     (or (and effort-up e1-gt)
-						 (and effort-down e1-lt)))))
+					     (or (and effort-up e1-lt)
+						 (and effort-down e2-gt)))))
 				   (effort-up
-				    (or e1-gt (and (equal e1 e2) p1-gt)))
+				    (or e2-gt (and (equal e1 e2) p1-gt)))
 				   (effort-down
 				    (or e1-lt (and (equal e1 e2) p1-gt))))))))
 		  (when items
