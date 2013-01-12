@@ -30,8 +30,8 @@
 ;; `org-e-latex-publish-to-pdf'.
 ;;
 ;; The library introduces three new buffer keywords: "LATEX_CLASS",
-;; "LATEX_CLASS_OPTIONS" and "LATEX_HEADER".  Their value can be
-;; either a string or a symbol.
+;; "LATEX_CLASS_OPTIONS" and "LATEX_HEADER", and a new OPTIONS item:
+;; "textht".
 ;;
 ;; Table export can be controlled with a number of attributes (through
 ;; ATTR_LATEX keyword).
@@ -164,7 +164,8 @@
   :options-alist ((:date "DATE" nil org-e-latex-date-format t)
 		  (:latex-class "LATEX_CLASS" nil org-e-latex-default-class t)
 		  (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
-		  (:latex-header-extra "LATEX_HEADER" nil nil newline)))
+		  (:latex-header-extra "LATEX_HEADER" nil nil newline)
+		  (:latex-hyperref-p nil "texht" org-e-latex-with-hyperref t)))
 
 
 
@@ -398,6 +399,12 @@ This command only applies to the table of contents generated with
 toc:nil option, not to those generated with #+TOC keyword."
   :group 'org-export-e-latex
   :type 'string)
+
+(defcustom org-e-latex-with-hyperref t
+  "Toggle insertion of \hypersetup{...} in the preamble."
+  :group 'org-export-e-latex
+  :type 'boolean)
+
 
 ;;;; Headline
 
@@ -1117,11 +1124,12 @@ holding export options."
      ;; Title
      (format "\\title{%s}\n" title)
      ;; Hyperref options.
-     (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
-	     (or (plist-get info :keywords) "")
-	     (or (plist-get info :description) "")
-	     (if (not (plist-get info :with-creator)) ""
-	       (plist-get info :creator)))
+     (when (plist-get info :latex-hyperref-p)
+       (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
+	       (or (plist-get info :keywords) "")
+	       (or (plist-get info :description) "")
+	       (if (not (plist-get info :with-creator)) ""
+		 (plist-get info :creator))))
      ;; Document start.
      "\\begin{document}\n\n"
      ;; Title command.
