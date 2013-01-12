@@ -113,6 +113,11 @@ any other entries, and any resulting duplicates will be removed entirely."
 
 ;;;; Emacs/XEmacs compatibility
 
+(eval-and-compile
+  (when (and (not (boundp 'user-emacs-directory))
+	     (boundp 'user-init-directory))
+    (defvaralias 'user-emacs-directory 'user-init-directory)))
+
 ;; Keys
 (defconst org-xemacs-key-equivalents
   '(([mouse-1] . [button1])
