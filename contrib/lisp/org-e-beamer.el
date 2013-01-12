@@ -30,11 +30,11 @@
 ;; `org-e-beamer-export-to-latex' ("tex" file) and
 ;; `org-e-beamer-export-to-pdf' ("pdf" file).
 ;;
-;; On top of buffer keywords supported by `e-latex' back-end (see
-;; `org-e-latex-options-alist'), this back-end introduces the
-;; following keywords: "BEAMER_THEME", "BEAMER_COLOR_THEME",
-;; "BEAMER_FONT_THEME", "BEAMER_INNER_THEME" and "BEAMER_OUTER_THEME".
-;; All accept options in square brackets.
+;; On top of buffer keywords and options items supported by `e-latex'
+;; back-end (see `org-e-latex-options-alist'), this back-end
+;; introduces the following keywords: "BEAMER_THEME",
+;; "BEAMER_COLOR_THEME", "BEAMER_FONT_THEME", "BEAMER_INNER_THEME" and
+;; "BEAMER_OUTER_THEME".  All accept options in square brackets.
 ;;
 ;; Moreover, headlines now fall into three categories: sectioning
 ;; elements, frames and blocks.
@@ -874,11 +874,12 @@ holding export options."
      ;; 7. Title
      (format "\\title{%s}\n" title)
      ;; 8. Hyperref options.
-     (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
-	     (or (plist-get info :keywords) "")
-	     (or (plist-get info :description) "")
-	     (if (not (plist-get info :with-creator)) ""
-	       (plist-get info :creator)))
+     (when (plist-get info :latex-hyperref-p)
+       (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
+	       (or (plist-get info :keywords) "")
+	       (or (plist-get info :description) "")
+	       (if (not (plist-get info :with-creator)) ""
+		 (plist-get info :creator))))
      ;; 9. Document start.
      "\\begin{document}\n\n"
      ;; 10. Title command.
