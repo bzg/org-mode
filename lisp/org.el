@@ -7589,7 +7589,12 @@ even level numbers will become the next higher odd number."
 	    ((< change 0) (max 1 (1+ (* 2 (/ (+ level (* 2 change)) 2))))))
     (max 1 (+ level (or change 0)))))
 
-(org-define-obsolete-function-alias 'org-get-legal-level 'org-get-valid-level "23.1")
+(if (boundp 'define-obsolete-function-alias)
+    (if (or (featurep 'xemacs) (< emacs-major-version 23))
+	(define-obsolete-function-alias 'org-get-legal-level
+	  'org-get-valid-level)
+      (define-obsolete-function-alias 'org-get-legal-level
+	'org-get-valid-level "23.1")))
 
 (defvar org-called-with-limited-levels nil) ;; Dynamically bound in
 ;; ̀org-with-limited-levels'
@@ -18248,7 +18253,7 @@ BEG and END default to the buffer boundaries."
 			     (list 'org-display-inline-remove-overlay))
 		(push ov org-inline-image-overlays)))))))))
 
-(org-define-obsolete-function-alias
+(define-obsolete-function-alias
   'org-display-inline-modification-hook 'org-display-inline-remove-overlay "24.3")
 
 (defun org-display-inline-remove-overlay (ov after beg end &optional len)
@@ -18630,7 +18635,7 @@ If not, return to the original position and throw an error."
 (defvar org-table-auto-blank-field) ; defined in org-table.el
 (defvar org-speed-command nil)
 
-(org-define-obsolete-function-alias
+(define-obsolete-function-alias
   'org-speed-command-default-hook 'org-speed-command-activate "24.3")
 
 (defun org-speed-command-activate (keys)
@@ -18643,7 +18648,7 @@ Use `org-speed-commands-user' for further customization."
     (cdr (assoc keys (append org-speed-commands-user
 			     org-speed-commands-default)))))
 
-(org-define-obsolete-function-alias
+(define-obsolete-function-alias
   'org-babel-speed-command-hook 'org-babel-speed-command-activate "24.3")
 
 (defun org-babel-speed-command-activate (keys)
