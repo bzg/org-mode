@@ -445,15 +445,6 @@ With two arguments, return floor and remainder of their quotient."
        'pop-to-buffer-same-window buffer-or-name norecord)
     (funcall 'switch-to-buffer buffer-or-name norecord)))
 
-;; `condition-case-unless-debug' has been introduced in Emacs 24.1
-;; `condition-case-no-debug' has been introduced in Emacs 23.1
-(defalias 'org-condition-case-unless-debug
-  (or (and (fboundp 'condition-case-unless-debug)
-	   'condition-case-unless-debug)
-      (and (fboundp 'condition-case-no-debug)
-	   'condition-case-no-debug)
-      'condition-case))
-
 ;; RECURSIVE has been introduced with Emacs 23.2.
 ;; This is copying and adapted from `tramp-compat-delete-directory'
 (defun org-delete-directory (directory &optional recursive)
