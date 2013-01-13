@@ -447,13 +447,12 @@ With two arguments, return floor and remainder of their quotient."
 
 ;; `condition-case-unless-debug' has been introduced in Emacs 24.1
 ;; `condition-case-no-debug' has been introduced in Emacs 23.1
-(defmacro org-condition-case-unless-debug (var bodyform &rest handlers)
-  (declare (debug condition-case) (indent 2))
+(defalias 'org-condition-case-unless-debug
   (or (and (fboundp 'condition-case-unless-debug)
-	   `(condition-case-unless-debug ,var ,bodyform ,@handlers))
+	   'condition-case-unless-debug)
       (and (fboundp 'condition-case-no-debug)
-	   `(condition-case-no-debug ,var ,bodyform ,@handlers))
-      `(condition-case ,var ,bodyform ,@handlers)))
+	   'condition-case-no-debug)
+      'condition-case))
 
 ;; RECURSIVE has been introduced with Emacs 23.2.
 ;; This is copying and adapted from `tramp-compat-delete-directory'
