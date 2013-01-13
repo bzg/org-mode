@@ -5244,8 +5244,12 @@ back to standard interface."
 	    ;; on the first key, if any.  A nil value means KEY will
 	    ;; only be activated at first level.
 	    (if (or (eq access-key t) (eq access-key first-key))
-		(org-add-props key nil 'face 'org-warning)
-	      (org-no-properties key))))
+		(org-propertize key 'face 'org-warning)
+	      key)))
+	 (fontify-value
+	  (lambda (value)
+	    ;; Fontify VALUE string.
+	    (org-propertize value 'face 'font-lock-variable-name-face)))
 	 ;; Prepare menu entries by extracting them from
 	 ;; `org-export-registered-backends', and sorting them by
 	 ;; access key and by ordinal, if any.
@@ -5263,10 +5267,10 @@ back to standard interface."
 			       ((numberp key-b) t)))))
 		    (lambda (a b) (< (car a) (car b)))))
 	 ;; Compute a list of allowed keys based on the first key
-	 ;; pressed, if any.  Some keys (?1, ?2, ?3, ?4, ?5 and ?q)
-	 ;; are always available.
+	 ;; pressed, if any.  Some keys (?^B, ?^V, ?^S, ?^F, ?^A
+	 ;; and ?q) are always available.
 	 (allowed-keys
-	  (nconc (list ?1 ?2 ?3 ?4 ?5)
+	  (nconc (list ? ? ? ? ?)
 		 (if (not first-key) (org-uniquify (mapcar 'car backends))
 		   (let (sub-menu)
 		     (dolist (backend backends (sort (mapcar 'car sub-menu) '<))
@@ -5285,17 +5289,22 @@ back to standard interface."
 	     (format "Options
     [%s] Body only:    %s       [%s] Visible only:     %s
     [%s] Export scope: %s   [%s] Force publishing: %s
-    [%s] Asynchronous export: %s\n"
-		     (funcall fontify-key "1" t)
-		     (if (memq 'body options) "On " "Off")
-		     (funcall fontify-key "2" t)
-		     (if (memq 'visible options) "On " "Off")
-		     (funcall fontify-key "3" t)
-		     (if (memq 'subtree options) "Subtree" "Buffer ")
-		     (funcall fontify-key "4" t)
-		     (if (memq 'force options) "On " "Off")
-		     (funcall fontify-key "5" t)
-		     (if (memq 'async options) "On " "Off"))
+    [%s] Async export: %s\n"
+		     (funcall fontify-key "C-b" t)
+		     (funcall fontify-value
+			      (if (memq 'body options) "On " "Off"))
+		     (funcall fontify-key "C-v" t)
+		     (funcall fontify-value
+			      (if (memq 'visible options) "On " "Off"))
+		     (funcall fontify-key "C-s" t)
+		     (funcall fontify-value
+			      (if (memq 'subtree options) "Subtree" "Buffer "))
+		     (funcall fontify-key "C-f" t)
+		     (funcall fontify-value
+			      (if (memq 'force options) "On " "Off"))
+		     (funcall fontify-key "C-a" t)
+		     (funcall fontify-value
+			      (if (memq 'async options) "On " "Off")))
 	     ;; Display registered back-end entries.  When a key
 	     ;; appears for the second time, do not create another
 	     ;; entry, but append its sub-menu to existing menu.
@@ -5346,12 +5355,15 @@ back to standard interface."
 	  (when expertp
 	    (format
 	     "Export command (Options: %s%s%s%s%s) [%s]: "
-	     (if (memq 'body options) (funcall fontify-key "b" t) "-")
-	     (if (memq 'visible options) (funcall fontify-key "v" t) "-")
-	     (if (memq 'subtree options) (funcall fontify-key "s" t) "-")
-	     (if (memq 'force options) (funcall fontify-key "f" t) "-")
-	     (if (memq 'async options) (funcall fontify-key "a" t) "-")
-	     (concat allowed-keys)))))
+	     (if (memq 'body options) (funcall fontify-key "b" t) "b")
+	     (if (memq 'visible options) (funcall fontify-key "v" t) "v")
+	     (if (memq 'subtree options) (funcall fontify-key "s" t) "s")
+	     (if (memq 'force options) (funcall fontify-key "f" t) "f")
+	     (if (memq 'async options) (funcall fontify-key "a" t) "a")
+	     (mapconcat (lambda (k)
+			  ;; Strip control characters.
+			  (unless (< k 27) (char-to-string k)))
+			allowed-keys "")))))
     ;; With expert UI, just read key with a fancy prompt.  In standard
     ;; UI, display an intrusive help buffer.
     (if expertp
@@ -5385,13 +5397,9 @@ which see.
 Toggle export options when required.  Otherwise, return value is
 a list with action as CAR and a list of interactive export
 options as CDR."
-  (let ((key (let ((k (read-char-exclusive prompt)))
-	       ;; Translate "C-a", "C-b"... into "a", "b"... Then take action
-	       ;; depending on user's key pressed.
-	       (if (< k 27) (+ k 96) k))))
+  (let ((key (read-char-exclusive prompt)))
     (cond
-     ;; Ignore non-standard characters (i.e. "M-a") and
-     ;; undefined associations.
+     ;; Ignore undefined associations.
      ((not (memq key allowed-keys))
       (ding)
       (unless expertp (message "Invalid key") (sit-for 1))
@@ -5406,10 +5414,10 @@ options as CDR."
      ;; Switch to asynchronous export stack.
      ((eq key ?&) '(stack))
      ;; Toggle export options.
-     ((memq key '(?1 ?2 ?3 ?4 ?5))
+     ((memq key '(? ? ? ? ?))
       (org-export-dispatch-ui
-       (let ((option (case key (?1 'body) (?2 'visible) (?3 'subtree)
-			   (?4 'force) (?5 'async))))
+       (let ((option (case key (? 'body) (? 'visible) (? 'subtree)
+			   (? 'force) (? 'async))))
 	 (if (memq option options) (remq option options)
 	   (cons option options)))
        first-key expertp))
