@@ -21864,6 +21864,94 @@ contains commented lines.  Otherwise, comment them."
 	      (forward-line))))))))
 
 
+;;; Planning
+
+;; This section contains tools to operate on timestamp objects, as
+;; returned by, e.g. `org-element-context'.
+
+(defun org-timestamp-has-time-p (timestamp)
+  "Non-nil when TIMESTAMP has a time specified."
+  (org-element-property :hour-start timestamp))
+
+(defun org-timestamp-format (timestamp format &optional end utc)
+  "Format a TIMESTAMP element into a string.
+
+FORMAT is a format specifier to be passed to
+`format-time-string'.
+
+When optional argument END is non-nil, use end of date-range or
+time-range, if possible.
+
+When optional argument UTC is non-nil, time will be expressed as
+Universal Time."
+  (format-time-string
+   format
+   (apply 'encode-time
+          (cons 0
+                (mapcar
+                 (lambda (prop) (or (org-element-property prop timestamp) 0))
+                 (if end '(:minute-end :hour-end :day-end :month-end :year-end)
+                   '(:minute-start :hour-start :day-start :month-start
+                                   :year-start)))))
+   utc))
+
+(defun org-timestamp-split-range (timestamp &optional end)
+  "Extract a timestamp object from a date or time range.
+
+TIMESTAMP is a timestamp object. END, when non-nil, means extract
+the end of the range.  Otherwise, extract its start.
+
+Return a new timestamp object sharing the same parent as
+TIMESTAMP."
+  (let ((type (org-element-property :type timestamp)))
+    (if (memq type '(active inactive diary)) timestamp
+      (let ((split-ts (list 'timestamp (copy-sequence (nth 1 timestamp)))))
+	;; Set new type.
+	(org-element-put-property
+	 split-ts :type (if (eq type 'active-range) 'active 'inactive))
+	;; Copy start properties over end properties if END is
+	;; non-nil.  Otherwise, copy end properties over `start' ones.
+	(let ((p-alist '((:minute-start . :minute-end)
+			 (:hour-start . :hour-end)
+			 (:day-start . :day-end)
+			 (:month-start . :month-end)
+			 (:year-start . :year-end))))
+	  (dolist (p-cell p-alist)
+	    (org-element-put-property
+	     split-ts
+	     (funcall (if end 'car 'cdr) p-cell)
+	     (org-element-property
+	      (funcall (if end 'cdr 'car) p-cell) split-ts)))
+	  ;; Eventually refresh `:raw-value'.
+	  (org-element-put-property split-ts :raw-value nil)
+	  (org-element-put-property
+	   split-ts :raw-value (org-element-interpret-data split-ts)))))))
+
+(defun org-timestamp-translate (timestamp &optional boundary)
+  "Apply `org-translate-time' on a TIMESTAMP object.
+When optional argument BOUNDARY is non-nil, it is either the
+symbol `start' or `end'.  In this case, only translate the
+starting or ending part of TIMESTAMP if it is a date or time
+range.  Otherwise, translate both parts."
+  (if (and (not boundary)
+	   (memq (org-element-property :type timestamp)
+		 '(active-range inactive-range)))
+      (concat
+       (org-translate-time
+	(org-element-property :raw-value
+			      (org-timestamp-split-range timestamp)))
+       "--"
+       (org-translate-time
+	(org-element-property :raw-value
+			      (org-timestamp-split-range timestamp t))))
+    (org-translate-time
+     (org-element-property
+      :raw-value
+      (if (not boundary) timestamp
+	(org-timestamp-split-range timestamp (eq boundary 'end)))))))
+
+
+
 ;;; Other stuff.
 
 (defun org-toggle-fixed-width-section (arg)

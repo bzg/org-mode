@@ -1706,7 +1706,7 @@ a communication channel."
 (defun org-e-ascii-timestamp (timestamp contents info)
   "Transcode a TIMESTAMP object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (org-e-ascii-plain-text (org-export-translate-timestamp timestamp) info))
+  (org-e-ascii-plain-text (org-timestamp-translate timestamp) info))
 
 
 ;;;; Underline

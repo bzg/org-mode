@@ -909,10 +909,10 @@ See `org-e-odt--build-date-styles' for implementation details."
   (let* ((format-timestamp
 	  (lambda (timestamp format &optional end utc)
 	    (if timestamp
-		(org-export-format-timestamp timestamp format end utc)
+		(org-timestamp-format timestamp format end utc)
 	      (format-time-string format nil utc))))
 	 (has-time-p (or (not timestamp)
-			 (org-export-timestamp-has-time-p timestamp)))
+			 (org-timestamp-has-time-p timestamp)))
 	 (iso-date (let ((format (if has-time-p "%Y-%m-%dT%H:%M:%S"
 				   "%Y-%m-%dT%H:%M:%S")))
 		     (funcall format-timestamp timestamp format end))))
@@ -3632,7 +3632,7 @@ channel."
   	 (type (org-element-property :type timestamp)))
     (if (not org-e-odt-use-date-fields)
 	(let ((value (org-e-odt-plain-text
-		      (org-export-translate-timestamp timestamp) info)))
+		      (org-timestamp-translate timestamp) info)))
 	  (case (org-element-property :type timestamp)
 	    ((active active-range)
 	     (format "<text:span text:style-name=\"%s\">%s</text:span>"
@@ -3665,8 +3665,8 @@ channel."
 	(otherwise
 	 (format "<text:span text:style-name=\"%s\">%s</text:span>"
 		 "OrgDiaryTimestamp"
-		 (org-e-odt-plain-text (org-export-translate-timestamp
-					timestamp) info)))))))
+		 (org-e-odt-plain-text (org-timestamp-translate timestamp)
+				       info)))))))
 
 
 ;;;; Underline
