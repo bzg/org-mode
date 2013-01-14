@@ -4518,7 +4518,8 @@ in `org-agenda-text-search-extra-files'."
 			      category-pos (get-text-property (point) 'org-category-position)
 			      inherited-tags
 			      (or (eq org-agenda-show-inherited-tags 'always)
-				  (memq 'todo org-agenda-show-inherited-tags)
+				  (and (listp org-agenda-show-inherited-tags)
+				       (memq 'todo org-agenda-show-inherited-tags))
 				  (and (eq org-agenda-show-inherited-tags t)
 				       (or (eq org-agenda-use-tag-inheritance t)
 					   (memq 'todo org-agenda-use-tag-inheritance))))
