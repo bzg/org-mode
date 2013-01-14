@@ -4014,7 +4014,7 @@ contextual information."
 	      ;; Delete temporary directory and also other embedded
 	      ;; files that get copied there.
 	      (delete-directory org-e-odt-zip-dir t)))))
-     (org-condition-case-unless-debug err
+     (condition-case err
 	 (progn
 	   (unless (executable-find "zip")
 	     ;; Not at all OSes ship with zip by default
