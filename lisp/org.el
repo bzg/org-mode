@@ -16182,8 +16182,7 @@ Don't touch the rest."
   (let ((n 0))
     (mapcar (lambda (x) (if (< (setq n (1+ n)) 7) (or x 0) x)) time)))
 
-(org-define-obsolete-function-alias
-  'org-days-to-time 'org-time-stamp-to-now "24.3")
+(define-obsolete-function-alias 'org-days-to-time 'org-time-stamp-to-now "24.3")
 
 (defun org-time-stamp-to-now (timestamp-string &optional seconds)
   "Difference between TIMESTAMP-STRING and now in days.
