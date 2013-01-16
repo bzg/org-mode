@@ -8109,32 +8109,34 @@ It also looks at the text of the entry itself."
   (let* ((marker (or (org-get-at-bol 'org-hd-marker)
 		     (org-get-at-bol 'org-marker)))
 	 (buffer (and marker (marker-buffer marker)))
-	 (prefix (buffer-substring
-		  (point-at-bol) (point-at-eol)))
+	 (prefix (buffer-substring (point-at-bol) (point-at-eol)))
 	 (lkall (org-offer-links-in-entry buffer marker arg prefix))
-	 (lk (car lkall))
+	 (lk0 (car lkall))
+	 (lk (if (stringp lk0) (list lk0) lk0))
 	 (lkend (cdr lkall))
 	 trg)
     (cond
-     ((and buffer (stringp lk))
-      (with-current-buffer buffer
-	(setq trg (and (string-match org-bracket-link-regexp lk)
-		       (match-string 1 lk)))
-	(if (or (not trg) (string-match org-any-link-re trg))
-	    (save-excursion
-	      (save-restriction
-		(widen)
-		(goto-char marker)
-		(when (search-forward lk nil lkend)
-		  (goto-char (match-beginning 0))
-		  (org-open-at-point))))
-	  ;; This is an internal link, widen the buffer
-	  (switch-to-buffer-other-window buffer)
-	  (widen)
-	  (goto-char marker)
-	  (when (search-forward lk nil lkend)
-	    (goto-char (match-beginning 0))
-	    (org-open-at-point)))))
+     ((and buffer lk)
+      (mapcar (lambda(l)
+		(with-current-buffer buffer
+		  (setq trg (and (string-match org-bracket-link-regexp l)
+				 (match-string 1 l)))
+		  (if (or (not trg) (string-match org-any-link-re trg))
+		      (save-excursion
+			(save-restriction
+			  (widen)
+			  (goto-char marker)
+			  (when (search-forward l nil lkend)
+			    (goto-char (match-beginning 0))
+			    (org-open-at-point))))
+		    ;; This is an internal link, widen the buffer
+		    (switch-to-buffer-other-window buffer)
+		    (widen)
+		    (goto-char marker)
+		    (when (search-forward l nil lkend)
+		      (goto-char (match-beginning 0))
+		      (org-open-at-point)))))
+	      lk))
      ((or (org-in-regexp (concat "\\(" org-bracket-link-regexp "\\)"))
 	  (save-excursion
 	    (beginning-of-line 1)
