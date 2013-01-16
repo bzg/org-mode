@@ -4988,7 +4988,7 @@ and
 	   ;; Set-up sentinel in order to catch results.
 	   (set-process-sentinel
 	    ,process
-	    (let ((handler #',fun))
+	    (let ((handler ',fun))
 	      `(lambda (p status)
 		 (let ((proc-buffer (process-buffer p)))
 		   (when (eq (process-status p) 'exit)
