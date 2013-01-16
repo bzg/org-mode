@@ -19472,7 +19472,7 @@ Otherwise, return a user error."
              (funcall (intern (concat "org-babel-prep-session:" lang))
                       session params)))))
       (keyword
-       (if (equal (org-element-property :key element) "INCLUDE")
+       (if (member (org-element-property :key element) '("INCLUDE" "SETUPFILE"))
            (find-file
             (org-remove-double-quotes
              (car (org-split-string (org-element-property :value element)))))
