@@ -4529,7 +4529,8 @@ As a special case, if point is at the very beginning of a list or
 sub-list, returned element will be that list instead of the first
 item.  In the same way, if point is at the beginning of the first
 row of a table, returned element will be the table instead of the
-first row.
+first row.  Also, if point is within the first blank lines of
+a buffer, return nil.
 
 If optional argument KEEP-TRAIL is non-nil, the function returns
 a list of of elements leading to element at point.  The list's
@@ -4545,73 +4546,84 @@ first element of current section."
 	 (beginning-of-line)
 	 (if (not keep-trail) (org-element-headline-parser (point-max) t)
 	   (list (org-element-headline-parser (point-max) t))))
-     ;; Otherwise move at the beginning of the section containing
-     ;; point.
+     ;; Otherwise try to move at the beginning of the section
+     ;; containing point.
      (let ((origin (point))
 	   (end (save-excursion
 		  (org-with-limited-levels (outline-next-heading)) (point)))
 	   element type special-flag trail struct prevs parent)
        (org-with-limited-levels
-	(if (org-with-limited-levels (org-before-first-heading-p))
-	    (goto-char (point-min))
+	(if (org-before-first-heading-p) (goto-char (point-min))
 	  (org-back-to-heading)
 	  (forward-line)))
-       (org-skip-whitespace)
+       (skip-chars-forward " \r\t\n" origin)
        (beginning-of-line)
-       ;; Parse successively each element, skipping those ending
-       ;; before original position.
-       (catch 'exit
-         (while t
-           (setq element
-		 (org-element--current-element end 'element special-flag struct)
-                 type (car element))
-	   (org-element-put-property element :parent parent)
-	   (when keep-trail (push element trail))
-           (cond
-	    ;; 1. Skip any element ending before point.  Also skip
-	    ;;    element ending at point when we're sure that another
-	    ;;    element has started.
-	    ((let ((elem-end (org-element-property :end element)))
-	       (when (or (< elem-end origin)
-			 (and (= elem-end origin) (/= elem-end end)))
-		 (goto-char elem-end))))
-	    ;; 2. An element containing point is always the element at
-	    ;;    point.
-	    ((not (memq type org-element-greater-elements))
-	     (throw 'exit (if keep-trail trail element)))
-	    ;; 3. At any other greater element type, if point is
-	    ;;    within contents, move into it.
-	    (t
-	     (let ((cbeg (org-element-property :contents-begin element))
-		   (cend (org-element-property :contents-end element)))
-	       (if (or (not cbeg) (not cend) (> cbeg origin) (< cend origin)
-		       ;; Create an anchor for tables and plain lists:
-		       ;; when point is at the very beginning of these
-		       ;; elements, ignoring affiliated keywords,
-		       ;; target them instead of their contents.
-		       (and (= cbeg origin) (memq type '(plain-list table)))
-		       ;; When point is at contents end, do not move
-		       ;; into elements with an explicit ending, but
-		       ;; return that element instead.
-		       (and (= cend origin)
-			    (memq type
-				  '(center-block
-				    drawer dynamic-block inlinetask item
-				    plain-list property-drawer quote-block
-				    special-block))))
-		   (throw 'exit (if keep-trail trail element))
-		 (setq parent element)
-		 (case type
-		   (plain-list
-		    (setq special-flag 'item
-			  struct (org-element-property :structure element)))
-		   (item (setq special-flag nil))
-		   (property-drawer
-		    (setq special-flag 'node-property struct nil))
-		   (table (setq special-flag 'table-row struct nil))
-		   (otherwise (setq special-flag nil struct nil)))
-		 (setq end cend)
-		 (goto-char cbeg)))))))))))
+       (if (looking-at "[ \t]*$")
+	   ;; If point is still at a blank line, we didn't reach
+	   ;; section beginning.  it means we started either at the
+	   ;; beginning of the buffer, before any element, or in the
+	   ;; blank area after an headline.  In the first case, return
+	   ;; a dummy `org-data' element.  In the second case, return
+	   ;; the headline.
+	   (progn (skip-chars-backward " \r\t\n")
+		  (cond ((bobp) nil)
+			(keep-trail
+			 (list (org-element-headline-parser (point-max) t)))
+			(t (org-element-headline-parser (point-max) t))))
+	 ;; Parse successively each element, skipping those ending
+	 ;; before original position.
+	 (catch 'exit
+	   (while t
+	     (setq element (org-element--current-element
+			    end 'element special-flag struct)
+		   type (car element))
+	     (org-element-put-property element :parent parent)
+	     (when keep-trail (push element trail))
+	     (cond
+	      ;; 1. Skip any element ending before point.  Also skip
+	      ;;    element ending at point when we're sure that another
+	      ;;    element has started.
+	      ((let ((elem-end (org-element-property :end element)))
+		 (when (or (< elem-end origin)
+			   (and (= elem-end origin) (/= elem-end end)))
+		   (goto-char elem-end))))
+	      ;; 2. An element containing point is always the element at
+	      ;;    point.
+	      ((not (memq type org-element-greater-elements))
+	       (throw 'exit (if keep-trail trail element)))
+	      ;; 3. At any other greater element type, if point is
+	      ;;    within contents, move into it.
+	      (t
+	       (let ((cbeg (org-element-property :contents-begin element))
+		     (cend (org-element-property :contents-end element)))
+		 (if (or (not cbeg) (not cend) (> cbeg origin) (< cend origin)
+			 ;; Create an anchor for tables and plain lists:
+			 ;; when point is at the very beginning of these
+			 ;; elements, ignoring affiliated keywords,
+			 ;; target them instead of their contents.
+			 (and (= cbeg origin) (memq type '(plain-list table)))
+			 ;; When point is at contents end, do not move
+			 ;; into elements with an explicit ending, but
+			 ;; return that element instead.
+			 (and (= cend origin)
+			      (memq type
+				    '(center-block
+				      drawer dynamic-block inlinetask item
+				      plain-list property-drawer quote-block
+				      special-block))))
+		     (throw 'exit (if keep-trail trail element))
+		   (setq parent element)
+		   (case type
+		     (plain-list
+		      (setq special-flag 'item
+			    struct (org-element-property :structure element)))
+		     (item (setq special-flag nil))
+		     (property-drawer
+		      (setq special-flag 'node-property struct nil))
+		     (table (setq special-flag 'table-row struct nil))
+		     (otherwise (setq special-flag nil struct nil)))
+		   (setq end cend)
+		   (goto-char cbeg))))))))))))
 
 ;;;###autoload
 (defun org-element-context (&optional element)
@@ -4619,12 +4631,13 @@ first element of current section."
 
 Return value is a list like (TYPE PROPS) where TYPE is the type
 of the element or object and PROPS a plist of properties
-associated to it.
+associated to it, or nil if point is within the first blank lines
+of the buffer.
 
 Possible types are defined in `org-element-all-elements' and
 `org-element-all-objects'.  Properties depend on element or
-object type, but always include :begin, :end, :parent
-and :post-blank properties.
+object type, but always include `:begin', `:end', `:parent' and
+`:post-blank' properties.
 
 Optional argument ELEMENT, when non-nil, is the closest element
 containing point, as returned by `org-element-at-point'.
@@ -4632,60 +4645,65 @@ Providing it allows for quicker computation."
   (org-with-wide-buffer
    (let* ((origin (point))
 	  (element (or element (org-element-at-point)))
-	  (type (car element))
+	  (type (org-element-type element))
 	  end)
-     ;; Check if point is inside an element containing objects or at
-     ;; a secondary string.  In that case, move to beginning of the
-     ;; element or secondary string and set END to the other side.
-     (if (not (or (let ((post (org-element-property :post-affiliated element)))
-		    (and post (> post origin)
-			 (< (org-element-property :begin element) origin)
-			 (progn (beginning-of-line)
-				(looking-at org-element--affiliated-re)
-				(member (upcase (match-string 1))
-					org-element-parsed-keywords))
-			 ;; We're at an affiliated keyword.  Change
-			 ;; type to retrieve correct restrictions.
-			 (setq type 'keyword)
-			 ;; Determine if we're at main or dual value.
-			 (if (and (match-end 2) (<= origin (match-end 2)))
-			     (progn (goto-char (match-beginning 2))
-				    (setq end (match-end 2)))
-			   (goto-char (match-end 0))
-			   (setq end (line-end-position)))))
-		  (and (eq type 'item)
-		       (let ((tag (org-element-property :tag element)))
-			 (and tag
-			      (progn
-				(beginning-of-line)
-				(search-forward tag (point-at-eol))
-				(goto-char (match-beginning 0))
-				(and (>= origin (point))
-				     (<= origin
-					 ;; `1+' is required so some
-					 ;; successors can match
-					 ;; properly their object.
-					 (setq end (1+ (match-end 0)))))))))
-		  (and (memq type '(headline inlinetask))
+     (cond
+      ;; If point is within blank lines at the beginning of the
+      ;; buffer, return nil.
+      ((not element) nil)
+      ;; Check if point is inside an element containing objects or at
+      ;; a secondary string.  In that case, move to beginning of the
+      ;; element or secondary string and set END to the other side.
+      ((not (or (let ((post (org-element-property :post-affiliated element)))
+		  (and post (> post origin)
+		       (< (org-element-property :begin element) origin)
 		       (progn (beginning-of-line)
-			      (skip-chars-forward "* ")
-			      (setq end (point-at-eol))))
-		  (and (memq type '(paragraph table-row verse-block))
-		       (let ((cbeg (org-element-property
-				    :contents-begin element))
-			     (cend (org-element-property
-				    :contents-end element)))
-			 (and (>= origin cbeg)
-			      (<= origin cend)
-			      (progn (goto-char cbeg) (setq end cend)))))
-		  (and (eq type 'keyword)
-		       (let ((key (org-element-property :key element)))
-			 (and (member key org-element-document-properties)
-			      (progn (beginning-of-line)
-				     (search-forward key (line-end-position) t)
-				     (forward-char)
-				     (setq end (line-end-position))))))))
-	 element
+			      (looking-at org-element--affiliated-re)
+			      (member (upcase (match-string 1))
+				      org-element-parsed-keywords))
+		       ;; We're at an affiliated keyword.  Change
+		       ;; type to retrieve correct restrictions.
+		       (setq type 'keyword)
+		       ;; Determine if we're at main or dual value.
+		       (if (and (match-end 2) (<= origin (match-end 2)))
+			   (progn (goto-char (match-beginning 2))
+				  (setq end (match-end 2)))
+			 (goto-char (match-end 0))
+			 (setq end (line-end-position)))))
+		(and (eq type 'item)
+		     (let ((tag (org-element-property :tag element)))
+		       (and tag
+			    (progn
+			      (beginning-of-line)
+			      (search-forward tag (point-at-eol))
+			      (goto-char (match-beginning 0))
+			      (and (>= origin (point))
+				   (<= origin
+				       ;; `1+' is required so some
+				       ;; successors can match
+				       ;; properly their object.
+				       (setq end (1+ (match-end 0)))))))))
+		(and (memq type '(headline inlinetask))
+		     (progn (beginning-of-line)
+			    (skip-chars-forward "* ")
+			    (setq end (point-at-eol))))
+		(and (memq type '(paragraph table-row verse-block))
+		     (let ((cbeg (org-element-property
+				  :contents-begin element))
+			   (cend (org-element-property
+				  :contents-end element)))
+		       (and (>= origin cbeg)
+			    (<= origin cend)
+			    (progn (goto-char cbeg) (setq end cend)))))
+		(and (eq type 'keyword)
+		     (let ((key (org-element-property :key element)))
+		       (and (member key org-element-document-properties)
+			    (progn (beginning-of-line)
+				   (search-forward key (line-end-position) t)
+				   (forward-char)
+				   (setq end (line-end-position))))))))
+       element)
+      (t
        (let ((restriction (org-element-restriction type))
 	     (parent element)
 	     candidates)
@@ -4723,7 +4741,7 @@ Providing it allows for quicker computation."
 		       (setq parent object
 			     restriction (org-element-restriction object)
 			     end cend)))))))
-	   parent))))))
+	   parent)))))))
 
 (defsubst org-element-nested-p (elem-A elem-B)
   "Non-nil when elements ELEM-A and ELEM-B are nested."
