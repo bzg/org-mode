@@ -1,6 +1,6 @@
 ;;; test-org-list.el --- Tests for org-list.el
 
-;; Copyright (C) 2012  Nicolas Goaziou
+;; Copyright (C) 2012, 2013  Nicolas Goaziou
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 
@@ -625,6 +625,93 @@
     (should (org-invisible-p2))
     (search-forward "Text1")
     (should (org-invisible-p2))))
+
+(ert-deftest test-org-list/insert-item ()
+  "Test item insertion."
+  ;; Blank lines specifications.
+  ;;
+  ;; Non-nil `org-blank-before-new-entry': insert a blank line, unless
+  ;; `org-empty-line-terminates-plain-lists' is non-nil.
+  (should
+   (org-test-with-temp-text "- a"
+     (let ((org-empty-line-terminates-plain-lists nil)
+	   (org-blank-before-new-entry '((plain-list-item . t))))
+       (end-of-line)
+       (org-insert-item)
+       (forward-line -1)
+       (looking-at "$"))))
+  (should-not
+   (org-test-with-temp-text "- a"
+     (let ((org-empty-line-terminates-plain-lists t)
+	   (org-blank-before-new-entry '((plain-list-item . t))))
+       (end-of-line)
+       (org-insert-item)
+       (forward-line -1)
+       (looking-at "$"))))
+  ;; Nil `org-blank-before-new-entry': do not insert a blank line.
+  (should-not
+   (org-test-with-temp-text "- a"
+     (let ((org-empty-line-terminates-plain-lists nil)
+	   (org-blank-before-new-entry '((plain-list-item . nil))))
+       (end-of-line)
+       (org-insert-item)
+       (forward-line -1)
+       (looking-at "$"))))
+  ;; `org-blank-before-new-entry' set to auto: if there's no blank
+  ;; line already in the sole item, do not insert one.
+  (should-not
+   (org-test-with-temp-text "- a"
+     (let ((org-empty-line-terminates-plain-lists nil)
+	   (org-blank-before-new-entry '((plain-list-item . auto))))
+       (end-of-line)
+       (org-insert-item)
+       (forward-line -1)
+       (looking-at "$"))))
+  ;; `org-blank-before-new-entry' set to `auto': if there's a blank
+  ;; line in the sole item, insert another one.
+  (should
+   (org-test-with-temp-text "- a\n\n  b"
+     (let ((org-empty-line-terminates-plain-lists nil)
+	   (org-blank-before-new-entry '((plain-list-item . auto))))
+       (goto-char (point-max))
+       (org-insert-item)
+       (forward-line -1)
+       (looking-at "$"))))
+  ;; `org-blank-before-new-entry' set to `auto': if the user specified
+  ;; a blank line, preserve it.
+  (should
+   (org-test-with-temp-text "- a\n\n"
+     (let ((org-empty-line-terminates-plain-lists nil)
+	   (org-blank-before-new-entry '((plain-list-item . auto))))
+       (goto-char (point-max))
+       (org-insert-item)
+       (forward-line -1)
+       (looking-at "$"))))
+  ;; `org-blank-before-new-entry' set to `auto': if some items in list
+  ;; are already separated by blank lines, insert one.
+  (should
+   (org-test-with-temp-text "- a\n\n- b"
+     (let ((org-empty-line-terminates-plain-lists nil)
+	   (org-blank-before-new-entry '((plain-list-item . auto))))
+       (goto-char (point-max))
+       (org-insert-item)
+       (forward-line -1)
+       (looking-at "$"))))
+  (should
+   (org-test-with-temp-text "- a\n\n- b"
+     (let ((org-empty-line-terminates-plain-lists nil)
+	   (org-blank-before-new-entry '((plain-list-item . auto))))
+       (org-insert-item)
+       (forward-line)
+       (looking-at "$"))))
+  (should
+   (org-test-with-temp-text "- a\n  #+BEGIN_EXAMPLE\n\n  x\n  #+END_EXAMPLE"
+     (let ((org-empty-line-terminates-plain-lists nil)
+	   (org-blank-before-new-entry '((plain-list-item . auto))))
+       (goto-char (point-max))
+       (org-insert-item)
+       (forward-line -1)
+       (looking-at "$")))))
 
 
 (provide 'test-org-list)

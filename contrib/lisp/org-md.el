@@ -1,6 +1,6 @@
 ;;; org-md.el --- Markdown Back-End for Org Export Engine
 
-;; Copyright (C) 2012  Free Software Foundation, Inc.
+;; Copyright (C) 2012, 2013  Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou@gmail.com>
 ;; Keywords: org, wp, tex
@@ -58,10 +58,13 @@ This variable can be set to either `atx' or `setext'."
   :filters-alist ((:filter-parse-tree . org-md-separate-elements))
   :menu-entry
   (?m "Export to Markdown"
-      ((?M "To temporary buffer" org-md-export-as-markdown)
-       (?m "To file" org-md-export-to-markdown)
+      ((?M "To temporary buffer"
+	   (lambda (a s v b) (org-md-export-as-markdown a s v)))
+       (?m "To file" (lambda (a s v b) (org-md-export-to-markdown a s v)))
        (?o "To file and open"
-	   (lambda (s v b) (org-open-file (org-md-export-to-markdown s v b))))))
+	   (lambda (a s v b)
+	     (if a (org-md-export-to-markdown t s v)
+	       (org-open-file (org-md-export-to-markdown nil s v)))))))
   :translate-alist ((bold . org-md-bold)
 		    (code . org-md-verbatim)
 		    (example-block . org-md-example-block)
@@ -247,7 +250,7 @@ a communication channel."
   "Transcode LINE-BREAK object into Markdown format.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  "  ")
+  "  \n")
 
 
 ;;;; Link
@@ -285,11 +288,14 @@ a communication channel."
 					    destination info)
 					   ".")))))))
 	  ((org-export-inline-image-p link org-e-html-inline-image-rules)
-	   (format "![%s](%s)"
-		   (let ((caption (org-export-get-caption
-				   (org-export-get-parent-element link))))
-		     (when caption (org-export-data caption info)))
-		   path))
+	   (let ((path (let ((raw-path (org-element-property :path link)))
+			 (if (not (file-name-absolute-p raw-path)) raw-path
+			   (expand-file-name raw-path)))))
+	     (format "![%s](%s)"
+		     (let ((caption (org-export-get-caption
+				     (org-export-get-parent-element link))))
+		       (when caption (org-export-data caption info)))
+		     path)))
 	  ((string= type "coderef")
 	   (let ((ref (org-element-property :path link)))
 	     (format (org-export-get-coderef-format ref contents)
@@ -354,6 +360,8 @@ a communication channel."
   "Transcode a TEXT string into Markdown format.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
+  (when (plist-get info :with-smart-quotes)
+    (setq text (org-export-activate-smart-quotes text :html info)))
   ;; Protect ambiguous #.  This will protect # at the beginning of
   ;; a line, but not at the beginning of a paragraph.  See
   ;; `org-md-paragraph'.
@@ -361,9 +369,7 @@ contextual information."
   ;; Protect ambiguous !
   (setq text (replace-regexp-in-string "\\(!\\)\\[" "\\\\!" text nil nil 1))
   ;; Protect `, *, _ and \
-  (setq text
-	(replace-regexp-in-string
-	 "[`*_\\]" (lambda (rep) (concat "\\\\" (match-string 1 rep))) text))
+  (setq text (replace-regexp-in-string "[`*_\\]" "\\\\\\&" text))
   ;; Handle special strings, if required.
   (when (plist-get info :with-special-strings)
     (setq text (org-e-html-convert-special-strings text)))
@@ -407,13 +413,17 @@ as a communication channel."
 ;;; Interactive function
 
 ;;;###autoload
-(defun org-md-export-as-markdown (&optional subtreep visible-only)
+(defun org-md-export-as-markdown (&optional async subtreep visible-only)
   "Export current buffer to a text buffer.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -426,21 +436,35 @@ Export is done in a buffer named \"*Org MD Export*\", which will
 be displayed when `org-export-show-temporary-export-buffer' is
 non-nil."
   (interactive)
-  (let ((outbuf (org-export-to-buffer
-		 'md "*Org MD Export*" subtreep visible-only)))
-    (with-current-buffer outbuf (text-mode))
-    (when org-export-show-temporary-export-buffer
-      (switch-to-buffer-other-window outbuf))))
+  (if async
+      (org-export-async-start
+	  (lambda (output)
+	    (with-current-buffer (get-buffer-create "*Org MD Export*")
+	      (erase-buffer)
+	      (insert output)
+	      (goto-char (point-min))
+	      (text-mode)
+	      (org-export-add-to-stack (current-buffer) 'md)))
+	`(org-export-as 'md ,subtreep ,visible-only))
+    (let ((outbuf (org-export-to-buffer
+		   'md "*Org MD Export*" subtreep visible-only)))
+      (with-current-buffer outbuf (text-mode))
+      (when org-export-show-temporary-export-buffer
+	(switch-to-buffer-other-window outbuf)))))
 
 
 ;;;###autoload
-(defun org-md-export-to-markdown (&optional subtreep visible-only pub-dir)
+(defun org-md-export-to-markdown (&optional async subtreep visible-only)
   "Export current buffer to a Markdown file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -449,13 +473,15 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".md" subtreep pub-dir)))
-    (org-export-to-file 'md outfile subtreep visible-only)))
+  (let ((outfile (org-export-output-file-name ".md" subtreep)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'md))
+	  `(expand-file-name
+	    (org-export-to-file 'md ,outfile ,subtreep ,visible-only)))
+      (org-export-to-file 'md outfile subtreep visible-only))))
 
 
 (provide 'org-md)

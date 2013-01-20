@@ -1,6 +1,6 @@
 ;;; org-crypt.el --- Public key encryption for org-mode entries
 
-;; Copyright (C) 2007, 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2007-2013 Free Software Foundation, Inc.
 
 ;; Emacs Lisp Archive Entry
 ;; Filename: org-crypt.el
@@ -251,6 +251,14 @@ See `org-crypt-disable-auto-save'."
      'org-decrypt-entry
      (cdr (org-make-tags-matcher org-crypt-tag-matcher))
      todo-only)))
+
+(defun org-at-encrypted-entry-p ()
+  "Is the current entry encrypted?"
+  (unless (org-before-first-heading-p)
+    (save-excursion
+      (org-back-to-heading t)
+      (search-forward "-----BEGIN PGP MESSAGE-----"
+		      (save-excursion (outline-next-heading)) t))))
 
 (defun org-crypt-use-before-save-magic ()
   "Add a hook to automatically encrypt entries before a file is saved to disk."

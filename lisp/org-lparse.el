@@ -1,6 +1,6 @@
 ;;; org-lparse.el --- Line-oriented parser-exporter for Org-mode
 
-;; Copyright (C) 2010-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2010-2013 Free Software Foundation, Inc.
 
 ;; Author: Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -50,7 +50,6 @@
 (require 'org-list)
 (require 'format-spec)
 
-;;;###autoload
 (defun org-lparse-and-open (target-backend native-backend arg
 					   &optional file-or-buf)
   "Export outline to TARGET-BACKEND via NATIVE-BACKEND and open exported file.
@@ -71,7 +70,6 @@ lists."
       (when org-export-kill-product-buffer-when-displayed
 	(kill-buffer (current-buffer))))))
 
-;;;###autoload
 (defun org-lparse-batch (target-backend &optional native-backend)
   "Call the function `org-lparse'.
 This function can be used in batch processing as:
@@ -83,7 +81,6 @@ emacs   --batch
   (org-lparse target-backend native-backend
 	      org-export-headline-levels 'hidden))
 
-;;;###autoload
 (defun org-lparse-to-buffer (backend arg)
   "Call `org-lparse' with output to a temporary buffer.
 No file is created.  The prefix ARG is passed through to
@@ -93,7 +90,6 @@ No file is created.  The prefix ARG is passed through to
     (when org-export-show-temporary-export-buffer
       (switch-to-buffer-other-window tempbuf))))
 
-;;;###autoload
 (defun org-replace-region-by (backend beg end)
   "Assume the current region has org-mode syntax, and convert it to HTML.
 This can be used in any buffer.  For example, you could write an
@@ -115,7 +111,6 @@ this command to convert it."
     (delete-region beg end)
     (insert backend-string)))
 
-;;;###autoload
 (defun org-lparse-region (backend beg end &optional body-only buffer)
   "Convert region from BEG to END in org-mode buffer to HTML.
 If prefix arg BODY-ONLY is set, omit file header, footer, and table of
@@ -435,6 +430,10 @@ PUB-DIR specifies the publishing directory."
   (let* ((org-lparse-backend (intern native-backend))
 	 (org-lparse-other-backend (and target-backend
 					(intern target-backend))))
+    (add-hook 'org-export-preprocess-hook
+	      'org-lparse-strip-experimental-blocks-maybe)
+    (add-hook 'org-export-preprocess-after-blockquote-hook
+	      'org-lparse-preprocess-after-blockquote)
     (unless (org-lparse-backend-is-native-p native-backend)
       (error "Don't know how to export natively to backend %s" native-backend))
 
@@ -443,7 +442,12 @@ PUB-DIR specifies the publishing directory."
       (error "Don't know how to export to backend %s %s" target-backend
 	     (format "via %s" native-backend)))
     (run-hooks 'org-export-first-hook)
-    (org-do-lparse arg hidden ext-plist to-buffer body-only pub-dir)))
+    (prog1
+	(org-do-lparse arg hidden ext-plist to-buffer body-only pub-dir)
+      (remove-hook 'org-export-preprocess-hook
+		   'org-lparse-strip-experimental-blocks-maybe)
+      (remove-hook 'org-export-preprocess-after-blockquote-hook
+		   'org-lparse-preprocess-after-blockquote))))
 
 (defcustom org-lparse-use-flashy-warning nil
   "Control flashing of messages logged with `org-lparse-warn'.
@@ -471,6 +475,8 @@ This is a helper routine for interactive use."
 
 (eval-when-compile
   (require 'browse-url))
+
+(declare-function browse-url-file-url "browse-url" (file))
 
 (defun org-lparse-do-convert (in-file out-fmt &optional prefix-arg)
   "Workhorse routine for `org-export-odt-convert'."
@@ -1712,7 +1718,12 @@ information."
   (org-lparse-end-paragraph)
   (org-lparse-end-list-item (or type "u")))
 
-(defun org-lparse-preprocess-after-blockquote-hook ()
+(define-obsolete-function-alias
+  'org-lparse-preprocess-after-blockquote-hook
+  'org-lparse-preprocess-after-blockquote
+  "24.3")
+
+(defun org-lparse-preprocess-after-blockquote ()
   "Treat `org-lparse-special-blocks' specially."
   (goto-char (point-min))
   (while (re-search-forward
@@ -1725,10 +1736,12 @@ information."
 	 (format "ORG-%s-END %s" (upcase (match-string 2))
 		 (match-string 3))) t t))))
 
-(add-hook 'org-export-preprocess-after-blockquote-hook
-	  'org-lparse-preprocess-after-blockquote-hook)
+(define-obsolete-function-alias
+  'org-lparse-strip-experimental-blocks-maybe-hook
+  'org-lparse-strip-experimental-blocks-maybe
+  "24.3")
 
-(defun org-lparse-strip-experimental-blocks-maybe-hook ()
+(defun org-lparse-strip-experimental-blocks-maybe ()
   "Strip \"list-table\" and \"annotation\" blocks.
 Stripping happens only when the exported backend is not one of
 \"odt\" or \"xhtml\"."
@@ -1742,9 +1755,6 @@ Stripping happens only when the exported backend is not one of
 	   nil t)
 	(when (member (match-string 1) org-lparse-special-blocks)
 	  (replace-match "" t t))))))
-
-(add-hook 'org-export-preprocess-hook
-	  'org-lparse-strip-experimental-blocks-maybe-hook)
 
 (defvar org-lparse-list-table-p nil
   "Non-nil if `org-do-lparse' is within a list-table.")
@@ -2285,5 +2295,9 @@ Replaces invalid characters with \"_\"."
     s))
 
 (provide 'org-lparse)
+
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; org-lparse.el ends here

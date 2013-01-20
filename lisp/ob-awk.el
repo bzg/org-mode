@@ -1,6 +1,6 @@
 ;;; ob-awk.el --- org-babel functions for awk evaluation
 
-;; Copyright (C) 2011-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2011-2013 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
@@ -32,7 +32,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-eval)
 (require 'org-compat)
 (eval-when-compile (require 'cl))
 
@@ -78,10 +77,8 @@ called by `org-babel-execute-src-block'"
     (org-babel-reassemble-table
      ((lambda (results)
 	(when results
-	  (if (or (member "scalar" result-params)
-		  (member "verbatim" result-params)
-		  (member "output" result-params))
-	      results
+	  (org-babel-result-cond result-params
+	    results
 	    (let ((tmp (org-babel-temp-file "awk-results-")))
 	      (with-temp-file tmp (insert results))
 	      (org-babel-import-elisp-from-file tmp)))))

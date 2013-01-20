@@ -1,6 +1,6 @@
 ;;; org-pcomplete.el --- In-buffer completion code
 
-;; Copyright (C) 2004-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2004-2013 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;;         John Wiegley <johnw at gnu dot org>
@@ -290,7 +290,7 @@ This needs more work, to handle headings with lots of spaces in them."
 	(cpllist (mapcar (lambda (x) (concat x ": ")) org-drawers)))
     (pcomplete-here cpllist
 		    (substring pcomplete-stub 1)
-		    (unless (or (not (delete
+		    (unless (or (not (delq
 				      nil
 				      (mapcar (lambda(x)
 						(string-match (substring pcomplete-stub 1) x))

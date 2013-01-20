@@ -1,173 +1,122 @@
-;;; test-org.el
+;;; test-org.el --- tests for org.el
 
-;; Copyright (c) ߚ David Maus
+;; Copyright (c)  David Maus
 ;; Authors: David Maus
 
-;; Released under the GNU General Public License version 3
-;; see: http://www.gnu.org/licenses/gpl-3.0.html
+;; This file is not part of GNU Emacs.
 
-;;;; Comments:
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Comments:
 
 ;; Template test file for Org-mode tests
 
 ;;; Code:
-(ert-deftest test-org/org-link-escape-ascii-character ()
-  "Escape an ascii character."
-  (should
-   (string=
-    "%5B"
-    (org-link-escape "["))))
 
-(ert-deftest test-org/org-link-escape-ascii-ctrl-character ()
-  "Escape an ascii control character."
-  (should
-   (string=
-    "%09"
-    (org-link-escape "\t"))))
+
+;;; Comments
 
-(ert-deftest test-org/org-link-escape-multibyte-character ()
-  "Escape an unicode multibyte character."
+(ert-deftest test-org/comment-dwim ()
+  "Test `comment-dwim' behaviour in an Org buffer."
+  ;; No region selected, no comment on current line and line not
+  ;; empty: insert comment on line above.
   (should
-   (string=
-    "%E2%82%AC"
-    (org-link-escape "€"))))
-
-(ert-deftest test-org/org-link-escape-custom-table ()
-  "Escape string with custom character table."
+   (equal "# \nComment"
+	  (org-test-with-temp-text "Comment"
+	    (progn (call-interactively 'comment-dwim)
+		   (buffer-string)))))
+  ;; No region selected, no comment on current line and line empty:
+  ;; insert comment on this line.
   (should
-   (string=
-    "Foo%3A%42ar%0A"
-    (org-link-escape "Foo:Bar\n" '(?\: ?\B)))))
-
-(ert-deftest test-org/org-link-escape-custom-table-merge ()
-  "Escape string with custom table merged with default table."
+   (equal "# \nParagraph"
+	  (org-test-with-temp-text "\nParagraph"
+	    (progn (call-interactively 'comment-dwim)
+		   (buffer-string)))))
+  ;; No region selected, and a comment on this line: indent it.
   (should
-   (string=
-    "%5BF%6F%6F%3A%42ar%0A%5D"
-    (org-link-escape "[Foo:Bar\n]" '(?\: ?\B ?\o) t))))
-
-(ert-deftest test-org/org-link-unescape-ascii-character ()
-  "Unescape an ascii character."
+   (equal "* Headline\n  # Comment"
+	  (org-test-with-temp-text "* Headline\n# Comment"
+	    (progn (forward-line)
+		   (let ((org-adapt-indentation t))
+		     (call-interactively 'comment-dwim))
+		   (buffer-string)))))
+  ;; Also recognize single # at column 0 as comments.
   (should
-   (string=
-    "["
-    (org-link-unescape "%5B"))))
-
-(ert-deftest test-org/org-link-unescape-ascii-ctrl-character ()
-  "Unescpae an ascii control character."
+   (equal "# Comment"
+	  (org-test-with-temp-text "# Comment"
+	    (progn (forward-line)
+		   (call-interactively 'comment-dwim)
+		   (buffer-string)))))
+  ;; Region selected and only comments and blank lines within it:
+  ;; un-comment all commented lines.
   (should
-   (string=
-    "\n"
-    (org-link-unescape "%0A"))))
-
-(ert-deftest test-org/org-link-unescape-multibyte-character ()
-  "Unescape unicode multibyte character."
+   (equal "Comment 1\n\nComment 2"
+	  (org-test-with-temp-text "# Comment 1\n\n# Comment 2"
+	    (progn
+	      (transient-mark-mode 1)
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (call-interactively 'comment-dwim)
+	      (buffer-string)))))
+  ;; Region selected without comments: comment all non-blank lines.
   (should
-   (string=
-    "€"
-    (org-link-unescape "%E2%82%AC"))))
-
-(ert-deftest test-org/org-link-unescape-ascii-extended-char ()
-  "Unescape old style percent escaped character."
+   (equal "# Comment 1\n\n# Comment 2"
+	  (org-test-with-temp-text "Comment 1\n\nComment 2"
+	    (progn
+	      (transient-mark-mode 1)
+	      (push-mark (point) t t)
+	      (goto-char (point-max))
+	      (call-interactively 'comment-dwim)
+	      (buffer-string)))))
+  ;; In front of a keyword without region, insert a new comment.
   (should
-   (string=
-    "àâçèéêîôùû"
-        (decode-coding-string (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB") 'latin-1))))
-
-(ert-deftest test-org/org-link-escape-url-with-escaped-char ()
-  "Escape and unscape a URL that includes an escaped char.
-http://article.gmane.org/gmane.emacs.orgmode/21459/"
-  (should
-   (string=
-    "http://some.host.com/form?&id=blah%2Bblah25"
-    (org-link-unescape (org-link-escape "http://some.host.com/form?&id=blah%2Bblah25")))))
-
-(ert-deftest test-org/accumulated-properties-in-drawers ()
-  "Ensure properties accumulate in subtree drawers."
-  (org-test-at-id "75282ba2-f77a-4309-a970-e87c149fe125"
-    (org-babel-next-src-block)
-    (should (equal '(2 1) (org-babel-execute-src-block)))))
+   (equal "# \n#+KEYWORD: value"
+	  (org-test-with-temp-text "#+KEYWORD: value"
+	    (progn (call-interactively 'comment-dwim)
+		   (buffer-string))))))
 
 
 
-;;; Links
+;;; Date and time analysis
 
-;;;; Fuzzy links
+(ert-deftest test-org/org-read-date ()
+  "Test `org-read-date' specifications."
+  ;; Parse ISO date with abbreviated year and month.
+  (should (equal "2012-03-29 16:40"
+		 (let ((org-time-was-given t))
+		   (org-read-date t nil "12-3-29 16:40"))))
+  ;; Parse Europeans dates.
+  (should (equal "2012-03-29 16:40"
+		 (let ((org-time-was-given t))
+		   (org-read-date t nil "29.03.2012 16:40"))))
+  ;; Parse Europeans dates without year.
+  (should (string-match "2[0-9]\\{3\\}-03-29 16:40"
+			(let ((org-time-was-given t))
+			  (org-read-date t nil "29.03. 16:40")))))
 
-;; Fuzzy links [[text]] encompass links to a target (<<text>>), to
-;; a target keyword (aka an invisible target: #+TARGET: text), to
-;; a named element (#+name: text) and to headlines (* Text).
-
-(ert-deftest test-org/fuzzy-links ()
-  "Test fuzzy links specifications."
-  ;; 1. Fuzzy link goes in priority to a matching target.
-  (org-test-with-temp-text
-      "#+TARGET: Test\n#+NAME: Test\n|a|b|\n<<Test>>\n* Test\n[[Test]]"
-    (goto-line 6)
-    (org-open-at-point)
-    (should (looking-at "<<Test>>")))
-  ;; 2. Fuzzy link should then go to a matching target keyword.
-  (org-test-with-temp-text
-      "#+NAME: Test\n|a|b|\n#+TARGET: Test\n* Test\n[[Test]]"
-    (goto-line 5)
-    (org-open-at-point)
-    (should (looking-at "#\\+TARGET: Test")))
-  ;; 3. Then fuzzy link points to an element with a given name.
-  (org-test-with-temp-text "Test\n#+NAME: Test\n|a|b|\n* Test\n[[Test]]"
-    (goto-line 5)
-    (org-open-at-point)
-    (should (looking-at "#\\+NAME: Test")))
-  ;; 4. A target still lead to a matching headline otherwise.
-  (org-test-with-temp-text "* Head1\n* Head2\n*Head3\n[[Head2]]"
-    (goto-line 4)
-    (org-open-at-point)
-    (should (looking-at "\\* Head2")))
-  ;; 5. With a leading star in link, enforce heading match.
-  (org-test-with-temp-text "#+TARGET: Test\n* Test\n<<Test>>\n[[*Test]]"
-    (goto-line 4)
-    (org-open-at-point)
-    (should (looking-at "\\* Test"))))
-
-
-
-;;; Macros
-
-(ert-deftest test-org/macro-replace-all ()
-  "Test `org-macro-replace-all' specifications."
-  ;; Standard test.
-  (should
-   (equal
-    "#+MACRO: A B\n1 B 3"
-    (org-test-with-temp-text "#+MACRO: A B\n1 {{{A}}} 3"
-      (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all)
-	     (buffer-string)))))
-  ;; Macro with arguments.
-  (should
-   (equal
-    "#+MACRO: macro $1 $2\nsome text"
-    (org-test-with-temp-text "#+MACRO: macro $1 $2\n{{{macro(some,text)}}}"
-      (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all)
-	     (buffer-string)))))
-  ;; Macro with "eval".
-  (should
-   (equal
-    "#+MACRO: add (eval (+ $1 $2))\n3"
-    (org-test-with-temp-text "#+MACRO: add (eval (+ $1 $2))\n{{{add(1,2)}}}"
-      (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all)
-	     (buffer-string)))))
-  ;; Nested macros.
-  (should
-   (equal
-    "#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\ninner outer"
-    (org-test-with-temp-text
-	"#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\n{{{out}}}"
-      (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all)
-	     (buffer-string))))))
-
+(ert-deftest test-org/org-parse-time-string ()
+  "Test `org-parse-time-string'."
+  (should (equal (org-parse-time-string "2012-03-29 16:40")
+		 '(0 40 16 29 3 2012 nil nil nil)))
+  (should (equal (org-parse-time-string "[2012-03-29 16:40]")
+		 '(0 40 16 29 3 2012 nil nil nil)))
+  (should (equal (org-parse-time-string "<2012-03-29 16:40>")
+		 '(0 40 16 29 3 2012 nil nil nil)))
+  (should (equal (org-parse-time-string "<2012-03-29>")
+		 '(0 0 0 29 3 2012 nil nil nil)))
+  (should (equal (org-parse-time-string "<2012-03-29>" t)
+		 '(0 nil nil 29 3 2012 nil nil nil))))
 
 
 ;;; Filling
@@ -275,6 +224,22 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	      (end-of-line)
 	      (org-auto-fill-function)
 	      (buffer-string)))))
+  ;; A hash within a line isn't a comment.
+  (should-not
+   (equal "12345 # 7890\n# 1"
+	  (org-test-with-temp-text "12345 # 7890 1"
+	    (let ((fill-column 12))
+	      (end-of-line)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
+  ;; Correctly interpret empty prefix.
+  (should-not
+   (equal "# a\n# b\nRegular\n# paragraph"
+	  (org-test-with-temp-text "# a\n# b\nRegular paragraph"
+	    (let ((fill-column 12))
+	      (end-of-line 3)
+	      (org-auto-fill-function)
+	      (buffer-string)))))
   ;; Comment block: auto fill contents.
   (should
    (equal "#+BEGIN_COMMENT\n12345\n7890\n#+END_COMMENT"
@@ -319,70 +284,177 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 
 
 
-;;; Comments
+;;; Links
 
-(ert-deftest test-org/comment-dwim ()
-  "Test `comment-dwim' behaviour in an Org buffer."
-  ;; No region selected, no comment on current line and line not
-  ;; empty: insert comment on line above.
+;;;; Fuzzy Links
+
+;; Fuzzy links [[text]] encompass links to a target (<<text>>), to
+;; a target keyword (aka an invisible target: #+TARGET: text), to
+;; a named element (#+name: text) and to headlines (* Text).
+
+(ert-deftest test-org/fuzzy-links ()
+  "Test fuzzy links specifications."
+  ;; 1. Fuzzy link goes in priority to a matching target.
+  (org-test-with-temp-text
+      "#+TARGET: Test\n#+NAME: Test\n|a|b|\n<<Test>>\n* Test\n[[Test]]"
+    (goto-line 6)
+    (org-open-at-point)
+    (should (looking-at "<<Test>>")))
+  ;; 2. Fuzzy link should then go to a matching target keyword.
+  (org-test-with-temp-text
+      "#+NAME: Test\n|a|b|\n#+TARGET: Test\n* Test\n[[Test]]"
+    (goto-line 5)
+    (org-open-at-point)
+    (should (looking-at "#\\+TARGET: Test")))
+  ;; 3. Then fuzzy link points to an element with a given name.
+  (org-test-with-temp-text "Test\n#+NAME: Test\n|a|b|\n* Test\n[[Test]]"
+    (goto-line 5)
+    (org-open-at-point)
+    (should (looking-at "#\\+NAME: Test")))
+  ;; 4. A target still lead to a matching headline otherwise.
+  (org-test-with-temp-text "* Head1\n* Head2\n*Head3\n[[Head2]]"
+    (goto-line 4)
+    (org-open-at-point)
+    (should (looking-at "\\* Head2")))
+  ;; 5. With a leading star in link, enforce heading match.
+  (org-test-with-temp-text "#+TARGET: Test\n* Test\n<<Test>>\n[[*Test]]"
+    (goto-line 4)
+    (org-open-at-point)
+    (should (looking-at "\\* Test"))))
+
+
+;;;; Link Escaping
+
+(ert-deftest test-org/org-link-escape-ascii-character ()
+  "Escape an ascii character."
   (should
-   (equal "# \nComment"
-	  (org-test-with-temp-text "Comment"
-	    (progn (call-interactively 'comment-dwim)
-		   (buffer-string)))))
-  ;; No region selected, no comment on current line and line empty:
-  ;; insert comment on this line.
+   (string=
+    "%5B"
+    (org-link-escape "["))))
+
+(ert-deftest test-org/org-link-escape-ascii-ctrl-character ()
+  "Escape an ascii control character."
   (should
-   (equal "# \nParagraph"
-	  (org-test-with-temp-text "\nParagraph"
-	    (progn (call-interactively 'comment-dwim)
-		   (buffer-string)))))
-  ;; No region selected, and a comment on this line: indent it.
+   (string=
+    "%09"
+    (org-link-escape "\t"))))
+
+(ert-deftest test-org/org-link-escape-multibyte-character ()
+  "Escape an unicode multibyte character."
   (should
-   (equal "* Headline\n  # Comment"
-	  (org-test-with-temp-text "* Headline\n# Comment"
-	    (progn (forward-line)
-		   (let ((org-adapt-indentation t))
-		     (call-interactively 'comment-dwim))
-		   (buffer-string)))))
-  ;; Also recognize single # at column 0 as comments.
+   (string=
+    "%E2%82%AC"
+    (org-link-escape "€"))))
+
+(ert-deftest test-org/org-link-escape-custom-table ()
+  "Escape string with custom character table."
   (should
-   (equal "# Comment"
-	  (org-test-with-temp-text "# Comment"
-	    (progn (forward-line)
-		   (call-interactively 'comment-dwim)
-		   (buffer-string)))))
-  ;; Region selected and only comments and blank lines within it:
-  ;; un-comment all commented lines.
+   (string=
+    "Foo%3A%42ar%0A"
+    (org-link-escape "Foo:Bar\n" '(?\: ?\B)))))
+
+(ert-deftest test-org/org-link-escape-custom-table-merge ()
+  "Escape string with custom table merged with default table."
   (should
-   (equal "Comment 1\n\nComment 2"
-	  (org-test-with-temp-text "# Comment 1\n\n# Comment 2"
-	    (progn
-	      (transient-mark-mode 1)
-	      (push-mark (point) t t)
-	      (goto-char (point-max))
-	      (call-interactively 'comment-dwim)
-	      (buffer-string)))))
-  ;; Region selected without comments: comment all non-blank lines.
+   (string=
+    "%5BF%6F%6F%3A%42ar%0A%5D"
+    (org-link-escape "[Foo:Bar\n]" '(?\: ?\B ?\o) t))))
+
+(ert-deftest test-org/org-link-unescape-ascii-character ()
+  "Unescape an ascii character."
   (should
-   (equal "# Comment 1\n\n# Comment 2"
-	  (org-test-with-temp-text "Comment 1\n\nComment 2"
-	    (progn
-	      (transient-mark-mode 1)
-	      (push-mark (point) t t)
-	      (goto-char (point-max))
-	      (call-interactively 'comment-dwim)
-	      (buffer-string)))))
-  ;; In front of a keyword without region, insert a new comment.
+   (string=
+    "["
+    (org-link-unescape "%5B"))))
+
+(ert-deftest test-org/org-link-unescape-ascii-ctrl-character ()
+  "Unescpae an ascii control character."
   (should
-   (equal "# \n#+KEYWORD: value"
-	  (org-test-with-temp-text "#+KEYWORD: value"
-	    (progn (call-interactively 'comment-dwim)
-		   (buffer-string))))))
+   (string=
+    "\n"
+    (org-link-unescape "%0A"))))
+
+(ert-deftest test-org/org-link-unescape-multibyte-character ()
+  "Unescape unicode multibyte character."
+  (should
+   (string=
+    "€"
+    (org-link-unescape "%E2%82%AC"))))
+
+(ert-deftest test-org/org-link-unescape-ascii-extended-char ()
+  "Unescape old style percent escaped character."
+  (should
+   (string=
+    "àâçèéêîôùû"
+        (decode-coding-string (org-link-unescape "%E0%E2%E7%E8%E9%EA%EE%F4%F9%FB") 'latin-1))))
+
+(ert-deftest test-org/org-link-escape-url-with-escaped-char ()
+  "Escape and unscape a URL that includes an escaped char.
+http://article.gmane.org/gmane.emacs.orgmode/21459/"
+  (should
+   (string=
+    "http://some.host.com/form?&id=blah%2Bblah25"
+    (org-link-unescape (org-link-escape "http://some.host.com/form?&id=blah%2Bblah25")))))
 
 
 
-;;; Mark region
+;;; Macros
+
+(ert-deftest test-org/macro-replace-all ()
+  "Test `org-macro-replace-all' specifications."
+  ;; Standard test.
+  (should
+   (equal
+    "#+MACRO: A B\n1 B 3"
+    (org-test-with-temp-text "#+MACRO: A B\n1 {{{A}}} 3"
+      (progn (org-macro-initialize-templates)
+	     (org-macro-replace-all org-macro-templates)
+	     (buffer-string)))))
+  ;; Macro with arguments.
+  (should
+   (equal
+    "#+MACRO: macro $1 $2\nsome text"
+    (org-test-with-temp-text "#+MACRO: macro $1 $2\n{{{macro(some,text)}}}"
+      (progn (org-macro-initialize-templates)
+	     (org-macro-replace-all org-macro-templates)
+	     (buffer-string)))))
+  ;; Macro with "eval".
+  (should
+   (equal
+    "#+MACRO: add (eval (+ $1 $2))\n3"
+    (org-test-with-temp-text "#+MACRO: add (eval (+ $1 $2))\n{{{add(1,2)}}}"
+      (progn (org-macro-initialize-templates)
+	     (org-macro-replace-all org-macro-templates)
+	     (buffer-string)))))
+  ;; Nested macros.
+  (should
+   (equal
+    "#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\ninner outer"
+    (org-test-with-temp-text
+	"#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\n{{{out}}}"
+      (progn (org-macro-initialize-templates)
+	     (org-macro-replace-all org-macro-templates)
+	     (buffer-string)))))
+  ;; Error out when macro expansion is circular.
+  (should-error
+   (org-test-with-temp-text
+       "#+MACRO: mac1 {{{mac2}}}\n#+MACRO: mac2 {{{mac1}}}\n{{{mac1}}}"
+     (org-macro-initialize-templates)
+     (org-macro-replace-all org-macro-templates))))
+
+
+
+;;; Node Properties
+
+(ert-deftest test-org/accumulated-properties-in-drawers ()
+  "Ensure properties accumulate in subtree drawers."
+  (org-test-at-id "75282ba2-f77a-4309-a970-e87c149fe125"
+    (org-babel-next-src-block)
+    (should (equal '(2 1) (org-babel-execute-src-block)))))
+
+
+
+;;; Mark Region
 
 (ert-deftest test-org/mark-subtree ()
   "Test `org-mark-subtree' specifications."
@@ -409,7 +481,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 	     (forward-line 2)
 	     (org-mark-subtree 1)
 	     (list (region-beginning) (region-end))))))
-  ;; Do not get fooled with inlinetasks.
+  ;; Do not get fooled by inlinetasks.
   (when (featurep 'org-inlinetask)
     (should
      (= 1
@@ -421,7 +493,77 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 
 
  
-;; Navigation
+;;; Navigation
+
+(ert-deftest test-org/beginning-of-line ()
+  "Test `org-beginning-of-line' specifications."
+  ;; Standard test.
+  (should
+   (org-test-with-temp-text "Some text\nSome other text"
+     (progn (org-beginning-of-line) (bolp))))
+  ;; Standard test with `visual-line-mode'.
+  (should-not
+   (org-test-with-temp-text "A long line of text\nSome other text"
+     (progn (visual-line-mode)
+	    (forward-char 2)
+	    (dotimes (i 1000) (insert "very "))
+	    (org-beginning-of-line)
+	    (bolp))))
+  ;; At an headline with special movement.
+  (should
+   (org-test-with-temp-text "* TODO Headline"
+     (let ((org-special-ctrl-a/e t))
+       (org-end-of-line)
+       (and (progn (org-beginning-of-line) (looking-at "Headline"))
+	    (progn (org-beginning-of-line) (bolp))
+	    (progn (org-beginning-of-line) (looking-at "Headline")))))))
+
+(ert-deftest test-org/end-of-line ()
+  "Test `org-end-of-line' specifications."
+  ;; Standard test.
+  (should
+   (org-test-with-temp-text "Some text\nSome other text"
+     (progn (org-end-of-line) (eolp))))
+  ;; Standard test with `visual-line-mode'.
+  (should-not
+   (org-test-with-temp-text "A long line of text\nSome other text"
+     (progn (visual-line-mode)
+	    (forward-char 2)
+	    (dotimes (i 1000) (insert "very "))
+	    (goto-char (point-min))
+	    (org-end-of-line)
+	    (eolp))))
+  ;; At an headline with special movement.
+  (should
+   (org-test-with-temp-text "* Headline1 :tag:\n"
+     (let ((org-special-ctrl-a/e t))
+       (and (progn (org-end-of-line) (looking-at " :tag:"))
+	    (progn (org-end-of-line) (eolp))
+	    (progn (org-end-of-line) (looking-at " :tag:"))))))
+  ;; At an headline without special movement.
+  (should
+   (org-test-with-temp-text "* Headline2 :tag:\n"
+     (let ((org-special-ctrl-a/e nil))
+       (and (progn (org-end-of-line) (eolp))
+	    (progn (org-end-of-line) (eolp))))))
+  ;; At an headline, with reversed movement.
+  (should
+   (org-test-with-temp-text "* Headline3 :tag:\n"
+     (let ((org-special-ctrl-a/e 'reversed)
+	   (this-command last-command))
+       (and (progn (org-end-of-line) (eolp))
+	    (progn (org-end-of-line) (looking-at " :tag:"))))))
+  ;; At a block without hidden contents.
+  (should
+   (org-test-with-temp-text "#+BEGIN_CENTER\nContents\n#+END_CENTER"
+     (progn (org-end-of-line) (eolp))))
+  ;; At a block with hidden contents.
+  (should-not
+   (org-test-with-temp-text "#+BEGIN_CENTER\nContents\n#+END_CENTER"
+     (let ((org-special-ctrl-a/e t))
+       (org-hide-block-toggle)
+       (org-end-of-line)
+       (eobp)))))
 
 (ert-deftest test-org/forward-element ()
   "Test `org-forward-element' specifications."
@@ -541,7 +683,7 @@ Outside."
     (should-error (org-backward-element)))
   ;; 5. At beginning of first element inside a greater element:
   ;;    expected to move to greater element's beginning.
-  (org-test-with-temp-text "Before.\n#+BEGIN_CENTER\nInside.\n#+END_CENTER."
+  (org-test-with-temp-text "Before.\n#+BEGIN_CENTER\nInside.\n#+END_CENTER"
     (goto-line 3)
     (org-backward-element)
     (should (looking-at "#\\+BEGIN_CENTER")))
@@ -748,6 +890,152 @@ Text.
       '((63 . 82) (26 . 48))
       (mapcar (lambda (ov) (cons (overlay-start ov) (overlay-end ov)))
 	      (overlays-in (point-min) (point-max)))))))
+
+
+
+;;; Planning
+
+(ert-deftest test-org/timestamp-has-time-p ()
+  "Test `org-timestamp-has-time-p' specifications."
+  ;; With time.
+  (should
+   (org-test-with-temp-text "<2012-03-29 Thu 16:40>"
+     (org-timestamp-has-time-p (org-element-context))))
+  ;; Without time.
+  (should-not
+   (org-test-with-temp-text "<2012-03-29 Thu>"
+     (org-timestamp-has-time-p (org-element-context)))))
+
+(ert-deftest test-org/timestamp-format ()
+  "Test `org-timestamp-format' specifications."
+  ;; Regular test.
+  (should
+   (equal
+    "2012-03-29 16:40"
+    (org-test-with-temp-text "<2012-03-29 Thu 16:40>"
+      (org-timestamp-format (org-element-context) "%Y-%m-%d %R"))))
+  ;; Range end.
+  (should
+   (equal
+    "2012-03-29"
+    (org-test-with-temp-text "[2011-07-14 Thu]--[2012-03-29 Thu]"
+      (org-timestamp-format (org-element-context) "%Y-%m-%d" t)))))
+
+(ert-deftest test-org/timestamp-split-range ()
+  "Test `org-timestamp-split-range' specifications."
+  ;; Extract range start (active).
+  (should
+   (equal '(2012 3 29)
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((ts (org-timestamp-split-range (org-element-context))))
+	      (mapcar (lambda (p) (org-element-property p ts))
+		      '(:year-end :month-end :day-end))))))
+  ;; Extract range start (inactive)
+  (should
+   (equal '(2012 3 29)
+	  (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
+	    (let ((ts (org-timestamp-split-range (org-element-context))))
+	      (mapcar (lambda (p) (org-element-property p ts))
+		      '(:year-end :month-end :day-end))))))
+  ;; Extract range end (active).
+  (should
+   (equal '(2012 3 30)
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((ts (org-timestamp-split-range
+		       (org-element-context) t)))
+	      (mapcar (lambda (p) (org-element-property p ts))
+		      '(:year-end :month-end :day-end))))))
+  ;; Extract range end (inactive)
+  (should
+   (equal '(2012 3 30)
+	  (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
+	    (let ((ts (org-timestamp-split-range
+		       (org-element-context) t)))
+	      (mapcar (lambda (p) (org-element-property p ts))
+		      '(:year-end :month-end :day-end))))))
+  ;; Return the timestamp if not a range.
+  (should
+   (org-test-with-temp-text "[2012-03-29 Thu]"
+     (let* ((ts-orig (org-element-context))
+	    (ts-copy (org-timestamp-split-range ts-orig)))
+       (eq ts-orig ts-copy))))
+  (should
+   (org-test-with-temp-text "<%%(org-float t 4 2)>"
+     (let* ((ts-orig (org-element-context))
+	    (ts-copy (org-timestamp-split-range ts-orig)))
+       (eq ts-orig ts-copy))))
+  ;; Check that parent is the same when a range was split.
+  (should
+   (org-test-with-temp-text "[2012-03-29 Thu]--[2012-03-30 Fri]"
+     (let* ((ts-orig (org-element-context))
+	    (ts-copy (org-timestamp-split-range ts-orig)))
+       (eq (org-element-property :parent ts-orig)
+	   (org-element-property :parent ts-copy))))))
+
+(ert-deftest test-org/timestamp-translate ()
+  "Test `org-timestamp-translate' specifications."
+  ;; Translate whole date range.
+  (should
+   (equal "<29>--<30>"
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context))))))
+  ;; Translate date range start.
+  (should
+   (equal "<29>"
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context) 'start)))))
+  ;; Translate date range end.
+  (should
+   (equal "<30>"
+	  (org-test-with-temp-text "<2012-03-29 Thu>--<2012-03-30 Fri>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context) 'end)))))
+  ;; Translate time range.
+  (should
+   (equal "<08>--<16>"
+	  (org-test-with-temp-text "<2012-03-29 Thu 8:30-16:40>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%H>")))
+	      (org-timestamp-translate (org-element-context))))))
+  ;; Translate non-range timestamp.
+  (should
+   (equal "<29>"
+	  (org-test-with-temp-text "<2012-03-29 Thu>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context))))))
+  ;; Do not change `diary' timestamps.
+  (should
+   (equal "<%%(org-float t 4 2)>"
+	  (org-test-with-temp-text "<%%(org-float t 4 2)>"
+	    (let ((org-display-custom-times t)
+		  (org-time-stamp-custom-formats '("<%d>" . "<%d>")))
+	      (org-timestamp-translate (org-element-context)))))))
+
+
+
+;;; Targets and Radio Targets
+
+(ert-deftest test-org/all-targets ()
+  "Test `org-all-targets' specifications."
+  ;; Without an argument.
+  (should
+   (equal '("radio-target" "target")
+	  (org-test-with-temp-text "<<target>> <<<radio-target>>>\n: <<verb>>"
+	    (org-all-targets))))
+  (should
+   (equal '("radio-target")
+	  (org-test-with-temp-text "<<<radio-target>>>!" (org-all-targets))))
+  ;; With argument.
+  (should
+   (equal '("radio-target")
+	  (org-test-with-temp-text "<<target>> <<<radio-target>>>"
+	    (org-all-targets t)))))
 
 
 (provide 'test-org)

@@ -1,6 +1,6 @@
 ;;; ob-R.el --- org-babel functions for R code evaluation
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;;	Dan Davison
@@ -28,9 +28,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
-(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
 (declare-function orgtbl-to-tsv "org-table" (table params))
@@ -76,7 +73,7 @@
   :version "24.1"
   :type 'string)
 
-(defvar ess-local-process-name)
+(defvar ess-local-process-name) ; dynamically scoped
 (defun org-babel-edit-prep:R (info)
   (let ((session (cdr (assoc :session (nth 2 info)))))
     (when (and session (string-match "^\\*\\(.+?\\)\\*$" session))
@@ -201,13 +198,14 @@ This function is called by `org-babel-execute-src-block'."
 		    name file header row-names max))))
     (format "%s <- %s" name (org-babel-R-quote-tsv-field value))))
 
-(defvar ess-ask-for-ess-directory nil)
+(defvar ess-ask-for-ess-directory) ; dynamically scoped
 (defun org-babel-R-initiate-session (session params)
   "If there is not a current R process then create one."
   (unless (string= session "none")
     (let ((session (or session "*R*"))
 	  (ess-ask-for-ess-directory
-	   (and ess-ask-for-ess-directory (not (cdr (assoc :dir params))))))
+	   (and (and (boundp 'ess-ask-for-ess-directory) ess-ask-for-ess-directory)
+		(not (cdr (assoc :dir params))))))
       (if (org-babel-comint-buffer-livep session)
 	  session
 	(save-window-excursion
@@ -220,7 +218,6 @@ This function is called by `org-babel-execute-src-block'."
 	       (buffer-name))))
 	  (current-buffer))))))
 
-(defvar ess-local-process-name nil)
 (defun org-babel-R-associate-session (session)
   "Associate R code buffer with an R session.
 Make SESSION be the inferior ESS process associated with the
@@ -302,11 +299,10 @@ last statement in BODY, as elisp."
 			       (format "{function ()\n{\n%s\n}}()" body)
 			       (org-babel-process-file-name tmp-file 'noquote)))
        (org-babel-R-process-value-result
-	(if (or (member "scalar" result-params)
-		(member "verbatim" result-params))
-	    (with-temp-buffer
-	      (insert-file-contents tmp-file)
-	      (buffer-string))
+	(org-babel-result-cond result-params
+	  (with-temp-buffer
+	    (insert-file-contents tmp-file)
+	    (buffer-string))
 	  (org-babel-import-elisp-from-file tmp-file '(16)))
 	column-names-p)))
     (output (org-babel-eval org-babel-R-command body))))
@@ -335,11 +331,10 @@ last statement in BODY, as elisp."
 		  "FALSE")
 		".Last.value" (org-babel-process-file-name tmp-file 'noquote)))
        (org-babel-R-process-value-result
-	(if (or (member "scalar" result-params)
-		(member "verbatim" result-params))
-	    (with-temp-buffer
-	      (insert-file-contents tmp-file)
-	      (buffer-string))
+	(org-babel-result-cond result-params
+	  (with-temp-buffer
+	    (insert-file-contents tmp-file)
+	    (buffer-string))
 	  (org-babel-import-elisp-from-file tmp-file '(16)))
 	column-names-p)))
     (output

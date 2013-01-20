@@ -1,6 +1,6 @@
 ;;; ob-js.el --- org-babel functions for Javascript
 
-;; Copyright (C) 2010-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2010-2013 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research, js
@@ -39,9 +39,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
-(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
 (declare-function run-mozilla "ext:moz" (arg))

@@ -1,12 +1,24 @@
 ;;; test-ob-exp.el
 
-;; Copyright (c) 2010-2012 Eric Schulte
+;; Copyright (c) 2010-2013 Eric Schulte
 ;; Authors: Eric Schulte
 
-;; Released under the GNU General Public License version 3
-;; see: http://www.gnu.org/licenses/gpl-3.0.html
+;; This file is not part of GNU Emacs.
 
-;;;; Comments:
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Comments:
 
 ;; Template test file for Org-mode tests
 
@@ -63,7 +75,7 @@
   (org-test-at-id "eb1f6498-5bd9-45e0-9c56-50717053e7b7"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string 'body-only))
+	   (org-export-as-html nil nil 'string 'body-only))
 	  (test-point 0))
 
       (org-test-with-temp-text-in-file
@@ -97,7 +109,7 @@
   (org-test-at-id "8701beb4-13d9-468c-997a-8e63e8b66f8d"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string 'body-only))
+	   (org-export-as-html nil nil 'string 'body-only))
 	  (test-point 0))
 
       (org-test-with-temp-text-in-file
@@ -127,7 +139,7 @@ elements in the final html."
   (org-test-at-id "92518f2a-a46a-4205-a3ab-bcce1008a4bb"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string 'body-only))
+	   (org-export-as-html nil nil 'string 'body-only))
 	  (test-point 0))
       (org-test-with-temp-text-in-file
 	  exported-html
@@ -157,23 +169,19 @@ elements in the final html."
 		   "</tbody>""</table>"))))))
 
 (ert-deftest ob-exp/mixed-blocks-with-exports-both ()
-    (org-test-at-id "5daa4d03-e3ea-46b7-b093-62c1b7632df3"
+  (org-test-at-id "5daa4d03-e3ea-46b7-b093-62c1b7632df3"
     (org-narrow-to-subtree)
     (let ((exported-html
-	   (org-export-as-html nil nil nil 'string  'body-only))
+	   (org-export-as-html nil nil 'string  'body-only))
 	  (test-point 0))
       (org-test-with-temp-text-in-file
 	  exported-html
-
 	;; check following ouput exists and in order
 	(mapcar (lambda (x)
-		  (should (< test-point
-			     (re-search-forward
-			      x
-			      nil t)))
+		  (should (< test-point (re-search-forward x nil t)))
 		  (setq test-point (point)))
 		'("mixed blocks with exports both"
-		  "<ul>"
+		  "<ul class=\"org-ul\">"
 		  "<li>""a""</li>"
 		  "<li>""b""</li>"
 		  "<li>""c""</li>"
@@ -190,7 +198,7 @@ elements in the final html."
 	 "=%name=\n#+BEGIN_SRC %lang%flags\nbody\n#+END_SRC"))
     (org-test-at-id "b02ddd8a-eeb8-42ab-8664-8a759e6f43d9"
       (org-narrow-to-subtree)
-      (let ((ascii (org-export-as-ascii nil nil nil 'string 'body-only)))
+      (let ((ascii (org-export-as-ascii nil nil 'string 'body-only)))
 	(should (string-match "qux" ascii))))))
 
 (ert-deftest ob-exp/export-with-header-argument ()
@@ -203,14 +211,14 @@ elements in the final html."
 #+BEGIN_SRC %lang%flags\nbody\n#+END_SRC"))
     (org-test-at-id "b02ddd8a-eeb8-42ab-8664-8a759e6f43d9"
       (org-narrow-to-subtree)
-      (let ((ascii (org-export-as-ascii nil nil nil 'string 'body-only)))
+      (let ((ascii (org-export-as-ascii nil nil 'string 'body-only)))
 	(should (string-match "baz" ascii))
 	(should (string-match "replace" ascii))))))
 
 (ert-deftest ob-exp/noweb-no-export-and-exports-both ()
   (org-test-at-id "8a820f6c-7980-43db-8a24-0710d33729c9"
     (org-narrow-to-subtree)
-    (let ((html (org-export-as-html nil nil nil 'string 'body-only)))
+    (let ((html (org-export-as-html nil nil 'string 'body-only)))
       (should (string-match (regexp-quote "noweb-no-export-and-exports-both-1")
 			    html)))))
 
@@ -218,13 +226,13 @@ elements in the final html."
   (org-test-at-id "96cc7073-97ec-4556-87cf-1f9bffafd317"
     (org-narrow-to-subtree)
     (let (*evaluation-collector*)
-      (org-export-as-ascii nil nil nil 'string)
+      (org-export-as-ascii nil nil 'string)
       (should (equal '(5 4 3 2 1) *evaluation-collector*)))))
 
 (ert-deftest ob-exp/exports-inline ()
   (org-test-at-id "54cb8dc3-298c-4883-a933-029b3c9d4b18"
     (org-narrow-to-subtree)
-    (let ((html (org-export-as-html nil nil nil 'string 'body-only)))
+    (let ((html (org-export-as-html nil nil 'string 'body-only)))
       (dolist (rx '("middle <\\(code\\|tt\\)>1</\\(code\\|tt\\)> of"
 		    "end of a line. <\\(code\\|tt\\)>2</\\(code\\|tt\\)>"
 		    "<\\(code\\|tt\\)>3</\\(code\\|tt\\)> Here is one"))
@@ -234,7 +242,7 @@ elements in the final html."
   (org-test-at-id "bec63a04-491e-4caa-97f5-108f3020365c"
     (org-narrow-to-subtree)
     (let* ((org-babel-exp-call-line-template "\n: call: %line special-token")
-	   (html (org-export-as-html nil nil nil 'string t)))
+	   (html (org-export-as-html nil nil 'string t)))
       (should (string-match "double" html))
       (should (string-match "16" html))
       (should (string-match "special-token" html)))))
@@ -244,7 +252,7 @@ elements in the final html."
     (org-narrow-to-subtree)
     (org-babel-next-src-block 2)
     (should (= 110 (org-babel-execute-src-block)))
-    (let ((ascii (org-export-as-ascii nil nil nil 'string t)))
+    (let ((ascii (org-export-as-ascii nil nil 'string t)))
       (should-not (string-match (regexp-quote "<<strip-export-1>>") ascii))
       (should-not (string-match (regexp-quote "i=\"10\"") ascii)))))
 
@@ -269,11 +277,11 @@ elements in the final html."
 #+END_SRC
 "
     (let* ((org-current-export-file (current-buffer))
-	   (ascii (org-export-as-ascii nil nil nil 'string)))
+	   (ascii (org-export-as-ascii nil nil 'string)))
       (should (string-match (regexp-quote (format nil "%S" '(:foo :bar)))
 			    ascii)))))
+
 
 (provide 'test-ob-exp)
 
 ;;; test-ob-exp.el ends here
-

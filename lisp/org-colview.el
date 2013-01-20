@@ -1,6 +1,6 @@
 ;;; org-colview.el --- Column View in Org-mode
 
-;; Copyright (C) 2004-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2004-2013 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -36,7 +36,7 @@
 (declare-function org-clock-sum-today "org-clock" (&optional headline-filter))
 
 (when (featurep 'xemacs)
-  (error "Do not load this file into XEmacs, use 'org-colview-xemacs.el'."))
+  (error "Do not load this file into XEmacs, use `org-colview-xemacs.el'"))
 
 ;;; Column View
 
@@ -686,6 +686,7 @@ around it."
       (move-marker org-columns-top-level-marker org-entry-property-inherited-from)
     (move-marker org-columns-top-level-marker (point))))
 
+;;;###autoload
 (defun org-columns (&optional columns-fmt-string)
   "Turn on column view on an org-mode file.
 When COLUMNS-FMT-STRING is non-nil, use it as the column format."
@@ -1057,8 +1058,7 @@ Don't set this, this is meant for dynamic scoping.")
    ((memq fmt '(estimate)) (org-estimate-print n printf))
    ((not (numberp n)) "")
    ((memq fmt '(add_times max_times min_times mean_times))
-    (let* ((h (floor n)) (m (floor (+ 0.5 (* 60 (- n h))))))
-      (format org-time-clocksum-format h m)))
+    (org-hours-to-clocksum-string n))
    ((eq fmt 'checkbox)
     (cond ((= n (floor n)) "[X]")
 	  ((> n 1.) "[-]")
@@ -1222,6 +1222,7 @@ of fields."
 	      (push row tbl)))))
       (append (list title 'hline) (nreverse tbl)))))
 
+;;;###autoload
 (defun org-dblock-write:columnview (params)
   "Write the column view table.
 PARAMS is a property list of parameters:
@@ -1241,7 +1242,7 @@ PARAMS is a property list of parameters:
 :skip-empty-rows
 	  When t, skip rows where all specifiers other than ITEM are empty.
 :format   When non-nil, specify the column view format to use."
-  (let ((pos (move-marker (make-marker) (point)))
+  (let ((pos (point-marker))
 	(hlines (plist-get params :hlines))
 	(vlines (plist-get params :vlines))
 	(maxlevel (plist-get params :maxlevel))
@@ -1334,6 +1335,7 @@ and tailing newline characters."
       (t (error "Garbage in listtable: %s" x))))
    tbl "\n"))
 
+;;;###autoload
 (defun org-insert-columns-dblock ()
   "Create a dynamic block capturing a column view table."
   (interactive)
@@ -1357,6 +1359,7 @@ and tailing newline characters."
 (defvar org-agenda-columns-compute-summary-properties); defined in org-agenda.el
 (defvar org-agenda-columns-add-appointments-to-effort-sum); as well
 
+;;;###autoload
 (defun org-agenda-columns ()
   "Turn on or update column view in the agenda."
   (interactive)
@@ -1400,7 +1403,7 @@ and tailing newline characters."
 	    ;; OK, the property is not defined.  Use appointment duration?
 	    (when (and org-agenda-columns-add-appointments-to-effort-sum
 		       (setq d (get-text-property (point) 'duration)))
-	      (setq d (org-minutes-to-hh:mm-string d))
+	      (setq d (org-minutes-to-clocksum-string d))
 	      (put-text-property 0 (length d) 'face 'org-warning d)
 	      (push (cons org-effort-property d) p)))
 	  (push (cons (org-current-line) p) cache))

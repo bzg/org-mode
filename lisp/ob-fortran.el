@@ -1,26 +1,26 @@
 ;;; ob-fortran.el --- org-babel functions for fortran
 
-;; Copyright (C) 2011-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2011-2013 Free Software Foundation, Inc.
 
 ;; Authors: Sergey Litvinov
 ;;       Eric Schulte
 ;; Keywords: literate programming, reproducible research, fortran
 ;; Homepage: http://orgmode.org
 
-;; This program is free software; you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
+;; This file is part of GNU Emacs.
 ;;
-;; This program is distributed in the hope that it will be useful,
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 
@@ -28,7 +28,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-eval)
 (require 'cc-mode)
 
 (declare-function org-entry-get "org"
@@ -62,11 +61,11 @@
 		     (org-babel-process-file-name tmp-src-file)) ""))))
     ((lambda (results)
        (org-babel-reassemble-table
-	(if (member "vector" (cdr (assoc :result-params params)))
-	    (let ((tmp-file (org-babel-temp-file "f-")))
-	      (with-temp-file tmp-file (insert results))
-	      (org-babel-import-elisp-from-file tmp-file))
-	  (org-babel-read results))
+	(org-babel-result-cond (cdr (assoc :result-params params))
+	  (org-babel-read results)
+	  (let ((tmp-file (org-babel-temp-file "f-")))
+	    (with-temp-file tmp-file (insert results))
+	    (org-babel-import-elisp-from-file tmp-file)))
 	(org-babel-pick-name
 	 (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
 	(org-babel-pick-name

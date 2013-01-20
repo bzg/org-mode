@@ -1,4 +1,7 @@
-This is the Emacs Org project, an Emacs library for organizing your life.
+The is a distribution of Org, a plain text notes and project planning
+tool for Emacs.
+
+The version of this release is: 7.9.1
 
 The homepage of Org is at http://orgmode.org
 
@@ -7,15 +10,8 @@ This distribution contains:
 README
     This file.
 
-README_DIST
-    The README file for the distribution (zip and tar files)
-
-README_contribute
-    Information about the git repository and how to contribute
-    to Org-mode development. 
-
-README_maintainer
-    Information for the maintainer.
+COPYING
+    The GNU General Public License.
 
 Makefile
     The makefile to compile and install Org.  For installation
@@ -32,18 +28,18 @@ doc/
     The documentation files.  org.texi is the source of the
     documentation, org.html and org.pdf are formatted versions of it.
 
-etc/
-    Files needed for the ODT exporter.
-
 contrib/
     A directory with third-party additions for Org.  Some really cool
     stuff is in there.
+
+etc/
+    Files needed for the ODT exporter.
 
 testing/
     Testing suite for Org.
 
 request-assign-future.txt
-    The form that contributors have to sign and get processed with the
-    FSF before contributed changes can be integrated into the Org
+    The form that contributors have to sign and get processed with
+    the FSF before contributed changes can be integrated into the Org
     core.  All files in this distribution except the contrib/ directory
     have copyright assigned to the FSF.

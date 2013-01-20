@@ -1,6 +1,6 @@
 ;;; org-mime.el --- org html export for text/html MIME emails
 
-;; Copyright (C) 2010-2012 Eric Schulte
+;; Copyright (C) 2010-2013 Eric Schulte
 
 ;; Author: Eric Schulte
 ;; Keywords: mime, mail, email, html
@@ -204,7 +204,8 @@ export that region, otherwise export the entire body."
          (html-end (or (and region-p (region-end))
                        ;; TODO: should catch signature...
                        (point-max)))
-         (raw-body (buffer-substring html-start html-end))
+         (raw-body (concat org-mime-default-header
+			   (buffer-substring html-start html-end)))
          (tmp-file (make-temp-name (expand-file-name
 				    "mail" temporary-file-directory)))
          (body (org-export-string raw-body 'org (file-name-directory tmp-file)))

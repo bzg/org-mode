@@ -1,6 +1,6 @@
 ;; org-e-man.el --- Man Back-End For Org Export Engine
 
-;; Copyright (C) 2011-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2011-2013  Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Author: Luis R Anaya <papoanaya aroba hot mail punto com>
@@ -43,6 +43,7 @@
 
 (defvar org-export-man-default-packages-alist)
 (defvar org-export-man-packages-alist)
+(defvar orgtbl-exp-regexp)
 
 
 
@@ -107,10 +108,11 @@
       ((?m "As MAN file" org-e-man-export-to-man)
        (?p "As PDF file" org-e-man-export-to-pdf)
        (?o "As PDF file and open"
-	   (lambda (s v b) (org-open-file (org-e-man-export-to-pdf s v b))))))
+	   (lambda (a s v b)
+	     (if a (org-e-man-export-to-pdf t s v b)
+	       (org-open-file (org-e-man-export-to-pdf nil s v b)))))))
   :options-alist
-  ((:date "DATE" nil nil t)
-   (:man-class "MAN_CLASS" nil nil t)
+  ((:man-class "MAN_CLASS" nil nil t)
    (:man-class-options "MAN_CLASS_OPTIONS" nil nil t)
    (:man-header-extra "MAN_HEADER" nil nil newline)))
 
@@ -204,44 +206,6 @@ during man export."
 )
 
 
-
-
-;;; Plain text
-
-(defcustom org-e-man-quotes
-  '(("fr"
-     ("\\(\\s-\\|[[(]\\|^\\)\"" . "«~")
-     ("\\(\\S-\\)\"" . "~»")
-     ("\\(\\s-\\|(\\|^\\)'" . "'"))
-    ("en"
-     ("\\(\\s-\\|[[(]\\|^\\)\"" . "``")
-     ("\\(\\S-\\)\"" . "''")
-     ("\\(\\s-\\|(\\|^\\)'" . "`")))
-
-  "Alist for quotes to use when converting english double-quotes.
-
-The CAR of each item in this alist is the language code.
-The CDR of each item in this alist is a list of three CONS:
-- the first CONS defines the opening quote;
-- the second CONS defines the closing quote;
-- the last CONS defines single quotes.
-
-For each item in a CONS, the first string is a regexp
-for allowed characters before/after the quote, the second
-string defines the replacement string for this quote."
-  :group 'org-export-e-man
-  :type '(list
-          (cons :tag "Opening quote"
-                (string :tag "Regexp for char before")
-                (string :tag "Replacement quote     "))
-          (cons :tag "Closing quote"
-                (string :tag "Regexp for char after ")
-                (string :tag "Replacement quote     "))
-          (cons :tag "Single quote"
-                (string :tag "Regexp for char before")
-                (string :tag "Replacement quote     "))))
-
-
 ;;; Compilation
 
 (defcustom org-e-man-pdf-process
@@ -252,8 +216,8 @@ string defines the replacement string for this quote."
   "Commands to process a Man file to a PDF file.
 This is a list of strings, each of them will be given to the
 shell as a command.  %f in the command will be replaced by the
-full file name, %b by the file base name \(i.e. without
-extension) and %o by the base directory of the file.
+full file name, %b by the file base name (i.e. without directory
+and extension parts) and %o by the base directory of the file.
 
 
 By default, Org uses 3 runs of to do the processing.
@@ -290,7 +254,6 @@ These are the .aux, .log, .out, and .toc files."
 
 ;;; Internal Functions
 
-
 (defun org-e-man--caption/label-string (element info)
   "Return caption and label Man string for ELEMENT.
 
@@ -310,21 +273,6 @@ For non-floats, see `org-e-man--wrap-label'."
 	  ;; Standard caption format.
 	  (t (format "\\fR%s\\fP" (org-export-data main info))))))
 
-
-
-(defun org-e-man--quotation-marks (text info)
-  "Export quotation marks depending on language conventions.
-TEXT is a string containing quotation marks to be replaced.  INFO
-is a plist used as a communication channel."
-  (mapc (lambda(l)
-          (let ((start 0))
-            (while (setq start (string-match (car l) text start))
-              (let ((new-quote (concat (match-string 1 text) (cdr l))))
-                (setq text (replace-match new-quote  t t text))))))
-        (cdr (or (assoc (plist-get info :language) org-e-man-quotes)
-                 ;; Falls back on English.
-                 (assoc "en" org-e-man-quotes)))) text)
-
 (defun org-e-man--wrap-label (element output)
   "Wrap label associated to ELEMENT around OUTPUT, if appropriate.
 This function shouldn't be used for floats.  See
@@ -333,6 +281,7 @@ This function shouldn't be used for floats.  See
     (if (or (not output) (not label) (string= output "") (string= label ""))
         output
       (concat (format "%s\n.br\n" label) output))))
+
 
 
 ;;; Template
@@ -447,7 +396,7 @@ holding contextual information.  See `org-export-data'."
   "Transcode an ENTITY object from Org to Man.
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
-  (let ((ent (org-element-property :utf8 entity))) ent))
+  (org-element-property :utf-8 entity))
 
 
 ;;; Example Block
@@ -460,6 +409,8 @@ information."
    example-block
    (format ".RS\n.nf\n%s\n.fi\n.RE"
            (org-export-format-code-default example-block info))))
+
+
 ;;; Export Block
 
 (defun org-e-man-export-block (export-block contents info)
@@ -763,21 +714,21 @@ contextual information."
   "Transcode a TEXT string from Org to Man.
 TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
-  ;; Protect
-  (setq text (replace-regexp-in-string
-              "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%$#&{}~^_\\]\\|$\\)"
-              "$\\" text nil t 1))
-
-  ;; Handle quotation marks
-  (setq text (org-e-man--quotation-marks text info))
-
-  ;; Handle break preservation if required.
-
-  (when (plist-get info :preserve-breaks)
-    (setq text (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" " \\\\\\\\\n"
-                                         text)))
-  ;; Return value.
-  text)
+  (let ((output text))
+    ;; Protect various chars.
+    (setq output (replace-regexp-in-string
+		  "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%$#&{}~^_\\]\\|$\\)"
+		  "$\\" output nil t 1))
+    ;; Activate smart quotes.  Be sure to provide original TEXT string
+    ;; since OUTPUT may have been modified.
+    (when (plist-get info :with-smart-quotes)
+      (setq output (org-export-activate-smart-quotes output :utf-8 info text)))
+    ;; Handle break preservation if required.
+    (when (plist-get info :preserve-breaks)
+      (setq output (replace-regexp-in-string "\\(\\\\\\\\\\)?[ \t]*\n" ".br\n"
+					     output)))
+    ;; Return value.
+    output))
 
 
 
@@ -1197,13 +1148,17 @@ contextual information."
 ;;; Interactive functions
 
 (defun org-e-man-export-to-man
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a Man file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1219,23 +1174,30 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".man"  subtreep pub-dir)))
-    (org-export-to-file
-     'e-man outfile subtreep visible-only body-only ext-plist)))
+  (let ((outfile (org-export-output-file-name ".man" subtreep)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-man))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'e-man ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))
+      (org-export-to-file
+       'e-man outfile subtreep visible-only body-only ext-plist))))
 
 (defun org-e-man-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to Groff then process through to PDF.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1251,71 +1213,76 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return PDF file's name."
   (interactive)
-  (org-e-man-compile
-   (org-e-man-export-to-man
-    subtreep visible-only body-only ext-plist pub-dir)))
+  (if async
+      (let ((outfile (org-export-output-file-name ".man" subtreep)))
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-man))
+	  `(expand-file-name
+	    (org-e-man-compile
+	     (org-export-to-file
+	      'e-man ,outfile ,subtreep ,visible-only ,body-only
+	      ',ext-plist)))))
+    (org-e-man-compile
+     (org-e-man-export-to-man nil subtreep visible-only body-only ext-plist))))
 
-(defun org-e-man-compile (grofffile)
+(defun org-e-man-compile (file)
   "Compile a Groff file.
 
-GROFFFILE is the name of the file being compiled.  Processing is
-done through the command specified in `org-e-man-pdf-process'.
+FILE is the name of the file being compiled.  Processing is done
+through the command specified in `org-e-man-pdf-process'.
 
 Return PDF file name or an error if it couldn't be produced."
-  (let* ((wconfig (current-window-configuration))
-         (grofffile (file-truename grofffile))
-         (base (file-name-sans-extension grofffile))
+  (let* ((base-name (file-name-sans-extension (file-name-nondirectory file)))
+	 (full-name (file-truename file))
+	 (out-dir (file-name-directory file))
+	 ;; Make sure `default-directory' is set to FILE directory,
+	 ;; not to whatever value the current buffer may have.
+	 (default-directory (file-name-directory full-name))
          errors)
-    (message (format "Processing Groff file %s ..." grofffile))
-    (unwind-protect
-        (progn
-          (cond
-           ;; A function is provided: Apply it.
-           ((functionp org-e-man-pdf-process)
-            (funcall org-e-man-pdf-process (shell-quote-argument grofffile)))
-           ;; A list is provided: Replace %b, %f and %o with appropriate
-           ;; values in each command before applying it.  Output is
-           ;; redirected to "*Org PDF Groff Output*" buffer.
-           ((consp org-e-man-pdf-process)
-            (let* ((out-dir (or (file-name-directory grofffile) "./"))
-                   (outbuf (get-buffer-create "*Org PDF Groff Output*")))
-              (mapc
-               (lambda (command)
-                 (shell-command
-                  (replace-regexp-in-string
-                   "%b" (shell-quote-argument base)
-                   (replace-regexp-in-string
-                    "%f" (shell-quote-argument grofffile)
-                    (replace-regexp-in-string
-                     "%o" (shell-quote-argument out-dir) command t t) t t) t t)
-                  outbuf))
-               org-e-man-pdf-process)
-              ;; Collect standard errors from output buffer.
-              (setq errors (org-e-man-collect-errors outbuf))))
-           (t (error "No valid command to process to PDF")))
-          (let ((pdffile (concat base ".pdf")))
-            ;; Check for process failure.  Provide collected errors if
-            ;; possible.
-            (if (not (file-exists-p pdffile))
-                (error (concat (format "PDF file %s wasn't produced" pdffile)
-                               (when errors (concat ": " errors))))
-              ;; Else remove log files, when specified, and signal end of
-              ;; process to user, along with any error encountered.
-              (when org-e-man-remove-logfiles
-                (dolist (ext org-e-man-logfiles-extensions)
-                  (let ((file (concat base "." ext)))
-                    (when (file-exists-p file) (delete-file file)))))
-              (message (concat "Process completed"
-                               (if (not errors) "."
-                                 (concat " with errors: " errors)))))
-            ;; Return output file name.
-            pdffile))
-      (set-window-configuration wconfig))))
+    (message (format "Processing Groff file %s ..." file))
+    (save-window-excursion
+      (cond
+       ;; A function is provided: Apply it.
+       ((functionp org-e-man-pdf-process)
+	(funcall org-e-man-pdf-process (shell-quote-argument file)))
+       ;; A list is provided: Replace %b, %f and %o with appropriate
+       ;; values in each command before applying it.  Output is
+       ;; redirected to "*Org PDF Groff Output*" buffer.
+       ((consp org-e-man-pdf-process)
+	(let ((outbuf (get-buffer-create "*Org PDF Groff Output*")))
+	  (mapc
+	   (lambda (command)
+	     (shell-command
+	      (replace-regexp-in-string
+	       "%b" (shell-quote-argument base-name)
+	       (replace-regexp-in-string
+		"%f" (shell-quote-argument full-name)
+		(replace-regexp-in-string
+		 "%o" (shell-quote-argument out-dir) command t t) t t) t t)
+	      outbuf))
+	   org-e-man-pdf-process)
+	  ;; Collect standard errors from output buffer.
+	  (setq errors (org-e-man-collect-errors outbuf))))
+       (t (error "No valid command to process to PDF")))
+      (let ((pdffile (concat out-dir base-name ".pdf")))
+	;; Check for process failure.  Provide collected errors if
+	;; possible.
+	(if (not (file-exists-p pdffile))
+	    (error (concat (format "PDF file %s wasn't produced" pdffile)
+			   (when errors (concat ": " errors))))
+	  ;; Else remove log files, when specified, and signal end of
+	  ;; process to user, along with any error encountered.
+	  (when org-e-man-remove-logfiles
+	    (dolist (ext org-e-man-logfiles-extensions)
+	      (let ((file (concat out-dir base-name "." ext)))
+		(when (file-exists-p file) (delete-file file)))))
+	  (message (concat "Process completed"
+			   (if (not errors) "."
+			     (concat " with errors: " errors)))))
+	;; Return output file name.
+	pdffile))))
 
 (defun org-e-man-collect-errors (buffer)
   "Collect some kind of errors from \"groff\" output

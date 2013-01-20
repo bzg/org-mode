@@ -1,6 +1,6 @@
 ;;; org-mac-iCal.el --- Imports events from iCal.app to the Emacs diary
 
-;; Copyright (C) 2009-2012 Christopher Suckling
+;; Copyright (C) 2009-2013 Christopher Suckling
 
 ;; Author: Christopher Suckling <suckling at gmail dot com>
 
@@ -99,7 +99,7 @@ the the Emacs diary"
   ;; for each calendar, concatenate individual events into a single ics file
   (with-temp-buffer
     (shell-command "sw_vers" (current-buffer))
-    (when (re-search-backward "10\\.[567]" nil t)
+    (when (re-search-backward "10\\.[5678]" nil t)
       (omi-concat-leopard-ics all-calendars)))
 
   ;; move all caldav ics files to the same place as local ics files

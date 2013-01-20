@@ -1,6 +1,6 @@
 ;;; org-e-ascii.el --- ASCII Back-End For Org Export Engine
 
-;; Copyright (C) 2012  Free Software Foundation, Inc.
+;; Copyright (C) 2012, 2013  Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -37,6 +37,7 @@
 
 (eval-when-compile (require 'cl))
 (require 'org-export)
+(require 'org-e-publish)
 
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
 
@@ -103,24 +104,25 @@
   :menu-entry
   (?t "Export to Plain Text"
       ((?A "As ASCII buffer"
-	   (lambda (s v b)
-	     (org-e-ascii-export-as-ascii s v b '(:ascii-charset ascii))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-as-ascii a s v b '(:ascii-charset ascii))))
        (?a "As ASCII file"
-	   (lambda (s v b)
-	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset ascii))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-to-ascii a s v b '(:ascii-charset ascii))))
        (?L "As Latin1 buffer"
-	   (lambda (s v b)
-	     (org-e-ascii-export-as-ascii s v b '(:ascii-charset latin1))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-as-ascii a s v b '(:ascii-charset latin1))))
        (?l "As Latin1 file"
-	   (lambda (s v b)
-	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset latin1))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-to-ascii a s v b '(:ascii-charset latin1))))
        (?U "As UTF-8 buffer"
-	   (lambda (s v b)
-	     (org-e-ascii-export-as-ascii s v b '(:ascii-charset utf-8))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-as-ascii a s v b '(:ascii-charset utf-8))))
        (?u "As UTF-8 file"
-	   (lambda (s v b)
-	     (org-e-ascii-export-to-ascii s v b '(:ascii-charset utf-8))))))
+	   (lambda (a s v b)
+	     (org-e-ascii-export-to-ascii a s v b '(:ascii-charset utf-8))))))
   :filters-alist ((:filter-headline . org-e-ascii-filter-headline-blank-lines)
+		  (:filter-parse-tree . org-e-ascii-filter-paragraph-spacing)
 		  (:filter-section . org-e-ascii-filter-headline-blank-lines))
   :options-alist ((:ascii-charset nil nil org-e-ascii-charset)))
 
@@ -179,6 +181,26 @@ original Org buffer at the same place."
 	  (cons :tag "Set an uniform spacing"
 		(integer :tag "Number of blank lines before contents")
 		(integer :tag "Number of blank lines after contents"))))
+
+(defcustom org-e-ascii-indented-line-width 'auto
+  "Additional indentation width for the first line in a paragraph.
+If the value is an integer, indent the first line of each
+paragraph by this number.  If it is the symbol `auto' preserve
+indentation from original document."
+  :group 'org-export-e-ascii
+  :type '(choice
+	  (integer :tag "Number of white spaces characters")
+	  (const :tag "Preserve original width" auto)))
+
+(defcustom org-e-ascii-paragraph-spacing 'auto
+  "Number of white lines between paragraphs.
+If the value is an integer, add this number of blank lines
+between contiguous paragraphs.  If is it the symbol `auto', keep
+the same number of blank lines as in the original document."
+  :group 'org-export-e-ascii
+  :type '(choice
+	  (integer :tag "Number of blank lines")
+	  (const :tag "Preserve original spacing" auto)))
 
 (defcustom org-e-ascii-charset 'ascii
   "The charset allowed to represent various elements and objects.
@@ -286,7 +308,7 @@ Otherwise, place it right after it."
 (defcustom org-e-ascii-format-drawer-function nil
   "Function called to format a drawer in ASCII.
 
-The function must accept two parameters:
+The function must accept three parameters:
   NAME      the drawer name, like \"LOGBOOK\"
   CONTENTS  the contents of the drawer.
   WIDTH     the text width within the drawer.
@@ -297,9 +319,9 @@ nil to ignore the drawer.
 For example, the variable could be set to the following function
 in order to mimic default behaviour:
 
-\(defun org-e-ascii-format-drawer-default \(name contents width\)
+\(defun org-e-ascii-format-drawer-default (name contents width)
   \"Format a drawer element for ASCII export.\"
-  contents\)"
+  contents)"
   :group 'org-export-e-ascii
   :type 'function)
 
@@ -713,7 +735,12 @@ is a plist used as a communication channel."
 	     (let ((footprint
 		    (cons (org-element-property :raw-link link)
 			  (org-element-contents link))))
-	       (unless (member footprint seen)
+	       ;; Ignore LINK if it hasn't been translated already.
+	       ;; It can happen if it is located in an affiliated
+	       ;; keyword that was ignored.
+	       (when (and (org-string-nw-p
+			   (gethash link (plist-get info :exported-data)))
+			  (not (member footprint seen)))
 		 (push footprint seen) link)))))
 	 ;; If at a section, find parent headline, if any, in order to
 	 ;; count links that might be in the title.
@@ -722,7 +749,7 @@ is a plist used as a communication channel."
 	    (or (org-export-get-parent-headline element) element))))
     ;; Get all links in HEADLINE.
     (org-element-map
-     headline 'link (lambda (link) (funcall unique-link-p link)) info)))
+     headline 'link (lambda (l) (funcall unique-link-p l)) info nil nil t)))
 
 (defun org-e-ascii--describe-links (links width info)
   "Return a string describing a list of links.
@@ -735,8 +762,8 @@ channel."
    (lambda (link)
      (let ((type (org-element-property :type link))
 	   (anchor (let ((desc (org-element-contents link)))
-		     (if (not desc) (org-element-property :raw-link link)
-		       (org-export-data desc info)))))
+		     (if desc (org-export-data desc info)
+		       (org-element-property :raw-link link)))))
        (cond
 	;; Coderefs, radio links and fuzzy links are ignored.
 	((member type '("coderef" "radio" "fuzzy")) nil)
@@ -782,14 +809,18 @@ INFO is a plist used as a communication channel."
 (defun org-e-ascii-template--document-title (info)
   "Return document title, as a string.
 INFO is a plist used as a communication channel."
-  (let ((text-width org-e-ascii-text-width)
-	(title (org-export-data (plist-get info :title) info))
-	(author (and (plist-get info :with-author)
-		     (let ((auth (plist-get info :author)))
-		       (and auth (org-export-data auth info)))))
-	(email (and (plist-get info :with-email)
-		    (org-export-data (plist-get info :email) info)))
-	(date (org-export-data (plist-get info :date) info)))
+  (let* ((text-width org-e-ascii-text-width)
+	 ;; Links in the title will not be resolved later, so we make
+	 ;; sure their path is located right after them.
+	 (org-e-ascii-links-to-notes nil)
+	 (title (org-export-data (plist-get info :title) info))
+	 (author (and (plist-get info :with-author)
+		      (let ((auth (plist-get info :author)))
+			(and auth (org-export-data auth info)))))
+	 (email (and (plist-get info :with-email)
+		     (org-export-data (plist-get info :email) info)))
+	 (date (and (plist-get info :with-date)
+		    (org-export-data (plist-get info :date) info))))
     ;; There are two types of title blocks depending on the presence
     ;; of a title to display.
     (if (string= title "")
@@ -921,11 +952,6 @@ INFO is a plist used as a communication channel."
 
 ;;; Transcode Functions
 
-;;;; Babel Call
-
-;; Babel Calls are ignored.
-
-
 ;;;; Bold
 
 (defun org-e-ascii-bold (bold contents info)
@@ -952,8 +978,10 @@ holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (concat org-clock-string " "
-	  (org-translate-time (org-element-property :value clock))
-	  (let ((time (org-element-property :time clock)))
+	  (org-translate-time
+	   (org-element-property :raw-value
+				 (org-element-property :value clock)))
+	  (let ((time (org-element-property :duration clock)))
 	    (and time
 		 (concat " => "
 			 (apply 'format
@@ -968,16 +996,6 @@ information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format org-e-ascii-verbatim-format (org-element-property :value code)))
-
-
-;;;; Comment
-
-;; Comments are ignored.
-
-
-;;;; Comment Block
-
-;; Comment Blocks are ignored.
 
 
 ;;;; Drawer
@@ -1131,11 +1149,6 @@ information."
      text-width 'center)))
 
 
-;;;; Inline Babel Call
-
-;; Inline Babel Calls are ignored.
-
-
 ;;;; Inline Src Block
 
 (defun org-e-ascii-inline-src-block (inline-src-block contents info)
@@ -1197,6 +1210,7 @@ holding contextual information."
 	    (if (not (org-export-get-parent-headline inlinetask)) 0
 	      org-e-ascii-inner-margin)
 	    (org-e-ascii--current-text-width inlinetask info)))))))
+
 
 ;;;; Italic
 
@@ -1355,9 +1369,12 @@ INFO is a plist holding contextual information."
   "Transcode a PARAGRAPH element from Org to ASCII.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  (org-e-ascii--fill-string
-   contents
-   (org-e-ascii--current-text-width paragraph info) info))
+  (let ((contents (if (not (wholenump org-e-ascii-indented-line-width)) contents
+		    (concat
+		     (make-string org-e-ascii-indented-line-width ? )
+		     (replace-regexp-in-string "\\`[ \t]+" "" contents)))))
+    (org-e-ascii--fill-string
+     contents (org-e-ascii--current-text-width paragraph info) info)))
 
 
 ;;;; Plain List
@@ -1374,15 +1391,18 @@ contextual information."
 (defun org-e-ascii-plain-text (text info)
   "Transcode a TEXT string from Org to ASCII.
 INFO is a plist used as a communication channel."
-  (if (not (plist-get info :with-special-strings)) text
-    (setq text (replace-regexp-in-string "\\\\-" "" text))
-    (if (not (eq (plist-get info :ascii-charset) 'utf-8)) text
-      ;; Usual replacements in utf-8 with proper option set.
-      (replace-regexp-in-string
-       "\\.\\.\\." "…"
-       (replace-regexp-in-string
-	"--" "–"
-	(replace-regexp-in-string "---" "—" text))))))
+  (let ((utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
+    (when (and utf8p (plist-get info :with-smart-quotes))
+      (setq text (org-export-activate-smart-quotes text :utf-8 info)))
+    (if (not (plist-get info :with-special-strings)) text
+      (setq text (replace-regexp-in-string "\\\\-" "" text))
+      (if (not utf8p) text
+	;; Usual replacements in utf-8 with proper option set.
+	(replace-regexp-in-string
+	 "\\.\\.\\." "…"
+	 (replace-regexp-in-string
+	  "--" "–"
+	  (replace-regexp-in-string "---" "—" text)))))))
 
 
 ;;;; Planning
@@ -1395,20 +1415,21 @@ channel."
    'identity
    (delq nil
 	 (list (let ((closed (org-element-property :closed planning)))
-		 (when closed (concat org-closed-string " "
-				      (org-translate-time closed))))
+		 (when closed
+		   (concat org-closed-string " "
+			   (org-translate-time
+			    (org-element-property :raw-value closed)))))
 	       (let ((deadline (org-element-property :deadline planning)))
-		 (when deadline (concat org-deadline-string " "
-					(org-translate-time deadline))))
+		 (when deadline
+		   (concat org-deadline-string " "
+			   (org-translate-time
+			    (org-element-property :raw-value deadline)))))
 	       (let ((scheduled (org-element-property :scheduled planning)))
-		 (when scheduled (concat org-scheduled-string " "
-					 (org-translate-time scheduled))))))
+		 (when scheduled
+		   (concat org-scheduled-string " "
+			   (org-translate-time
+			    (org-element-property :raw-value scheduled)))))))
    " "))
-
-
-;;;; Property Drawer
-;;
-;; Property drawers are ignored.
 
 
 ;;;; Quote Block
@@ -1450,6 +1471,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 CONTENTS is the contents of the target.  INFO is a plist holding
 contextual information."
   contents)
+
 
 ;;;; Section
 
@@ -1495,6 +1517,7 @@ contextual information."
       (org-export-format-code-default src-block info) info)
      (when (and caption (not org-e-ascii-caption-above))
        (concat "\n" caption)))))
+
 
 ;;;; Statistics Cookie
 
@@ -1678,22 +1701,12 @@ a communication channel."
 		  (funcall build-hline "+" "-" "+" "+")))))))
 
 
-;;;; Target
-
-;; Targets are invisible.
-
-
 ;;;; Timestamp
 
 (defun org-e-ascii-timestamp (timestamp contents info)
   "Transcode a TIMESTAMP object from Org to ASCII.
 CONTENTS is nil.  INFO is a plist holding contextual information."
-  (let ((value (org-translate-time (org-element-property :value timestamp)))
-	(range-end
-	 (org-translate-time (org-element-property :range-end timestamp)))
-	(utf8p (eq (plist-get info :ascii-charset) 'utf-8)))
-    (concat value
-	    (when range-end (concat (if utf8p "–" "--") range-end)))))
+  (org-e-ascii-plain-text (org-timestamp-translate timestamp) info))
 
 
 ;;;; Underline
@@ -1725,8 +1738,9 @@ contextual information."
      (org-e-ascii--justify-string contents verse-width 'left)
      org-e-ascii-quote-margin)))
 
+
 
-;;; Filter
+;;; Filters
 
 (defun org-e-ascii-filter-headline-blank-lines (headline back-end info)
   "Filter controlling number of blank lines after an headline.
@@ -1736,26 +1750,47 @@ BACK-END is symbol specifying back-end used for export.  INFO is
 plist containing the communication channel.
 
 This function only applies to `e-ascii' back-end.  See
-`org-e-ascii-headline-spacing' for information.
-
-For any other back-end, HEADLINE is returned as-is."
+`org-e-ascii-headline-spacing' for information."
   (if (not org-e-ascii-headline-spacing) headline
     (let ((blanks (make-string (1+ (cdr org-e-ascii-headline-spacing)) ?\n)))
       (replace-regexp-in-string "\n\\(?:\n[ \t]*\\)*\\'" blanks headline))))
 
+(defun org-e-ascii-filter-paragraph-spacing (tree back-end info)
+  "Filter controlling number of blank lines between paragraphs.
+
+TREE is the parse tree.  BACK-END is the symbol specifying
+back-end used for export.  INFO is a plist used as
+a communication channel.
+
+This function only applies to `e-ascii' back-end.  See
+`org-e-ascii-paragraph-spacing' for information."
+  (when (wholenump org-e-ascii-paragraph-spacing)
+    (org-element-map
+     tree 'paragraph
+     (lambda (p)
+       (when (eq (org-element-type (org-export-get-next-element p info))
+		 'paragraph)
+	 (org-element-put-property
+	  p :post-blank org-e-ascii-paragraph-spacing)))))
+  tree)
+
 
 
-;;; Interactive function
+;;; End-user functions
 
 ;;;###autoload
 (defun org-e-ascii-export-as-ascii
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a text buffer.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1775,22 +1810,37 @@ Export is done in a buffer named \"*Org E-ASCII Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (let ((outbuf (org-export-to-buffer
-		 'e-ascii "*Org E-ASCII Export*"
-		 subtreep visible-only body-only ext-plist)))
-    (with-current-buffer outbuf (text-mode))
-    (when org-export-show-temporary-export-buffer
-      (switch-to-buffer-other-window outbuf))))
+  (if async
+      (org-export-async-start
+	  (lambda (output)
+	    (with-current-buffer (get-buffer-create "*Org E-ASCII Export*")
+	      (erase-buffer)
+	      (insert output)
+	      (goto-char (point-min))
+	      (text-mode)
+	      (org-export-add-to-stack (current-buffer) 'e-ascii)))
+	`(org-export-as 'e-ascii ,subtreep ,visible-only ,body-only
+			',ext-plist))
+    (let ((outbuf (org-export-to-buffer
+		   'e-ascii "*Org E-ASCII Export*"
+		   subtreep visible-only body-only ext-plist)))
+      (with-current-buffer outbuf (text-mode))
+      (when org-export-show-temporary-export-buffer
+	(switch-to-buffer-other-window outbuf)))))
 
 ;;;###autoload
 (defun org-e-ascii-export-to-ascii
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a text file.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -1806,14 +1856,53 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".txt" subtreep pub-dir)))
-    (org-export-to-file
-     'e-ascii outfile subtreep visible-only body-only ext-plist)))
+  (let ((outfile (org-export-output-file-name ".txt" subtreep)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-ascii))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'e-ascii ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))
+      (org-export-to-file
+       'e-ascii outfile subtreep visible-only body-only ext-plist))))
+
+;;;###autoload
+(defun org-e-ascii-publish-to-ascii (plist filename pub-dir)
+  "Publish an Org file to ASCII.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to
+   'e-ascii filename ".txt" `(:ascii-charset ascii ,@plist) pub-dir))
+
+;;;###autoload
+(defun org-e-ascii-publish-to-latin1 (plist filename pub-dir)
+  "Publish an Org file to Latin-1.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to
+   'e-ascii filename ".txt" `(:ascii-charset latin1 ,@plist) pub-dir))
+
+;;;###autoload
+(defun org-e-ascii-publish-to-utf8 (plist filename pub-dir)
+  "Publish an org file to UTF-8.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to
+   'e-ascii filename ".txt" `(:ascii-charset utf-8 ,@plist) pub-dir))
 
 
 (provide 'org-e-ascii)

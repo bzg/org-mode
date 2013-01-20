@@ -1,5 +1,5 @@
 ;;; org-e-publish.el --- publish related org-mode files as a website
-;; Copyright (C) 2006-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2006-2013 Free Software Foundation, Inc.
 
 ;; Author: David O'Toole <dto@gnu.org>
 ;; Maintainer: Carsten Dominik <carsten DOT dominik AT gmail DOT com>
@@ -42,13 +42,9 @@
 (require 'format-spec)
 (require 'org-export)
 
-(declare-function org-e-latex-compile "org-e-latex" (texfile))
-
 
 
 ;;; Variables
-(defvar org-e-publish-initial-buffer nil
-  "The buffer `org-e-publish' has been called from.")
 
 (defvar org-e-publish-temp-files nil
   "Temporary list of files to be published.")
@@ -127,10 +123,10 @@ set of output formats.
 
   `:publishing-function'
 
-    Function to publish file.  The default is
-    `org-e-publish-org-to-ascii', but other values are possible.
-    May also be a list of functions, in which case each function
-    in the list is invoked in turn.
+    Function to publish file.  Each back-end may define its
+    own (i.e. `org-e-latex-publish-to-pdf',
+    `org-e-html-publish-to-html').  May be a list of functions,
+    in which case each function in the list is invoked in turn.
 
 Another property allows you to insert code that prepares
 a project for publishing.  For example, you could call GNU Make
@@ -350,7 +346,7 @@ still decide about that independently."
   "Update publishing timestamp for file FILENAME.
 If there is no timestamp, create one."
   (let ((key (org-e-publish-timestamp-filename filename pub-dir pub-func))
-	(stamp (org-e-publish-cache-ctime-of-src filename base-dir)))
+	(stamp (org-e-publish-cache-ctime-of-src filename)))
     (org-e-publish-cache-set key stamp)))
 
 (defun org-e-publish-remove-all-timestamps ()
@@ -538,19 +534,22 @@ matching filenames."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;; Pluggable publishing back-end functions
+;;; Tools for publishing functions in back-ends
 
-(defun org-e-publish-org-to (backend filename extension plist pub-dir)
+(defun org-e-publish-org-to (backend filename extension plist &optional pub-dir)
   "Publish an Org file to a specified back-end.
 
 BACKEND is a symbol representing the back-end used for
 transcoding.  FILENAME is the filename of the Org file to be
 published.  EXTENSION is the extension used for the output
 string, with the leading dot.  PLIST is the property list for the
-given project.  PUB-DIR is the publishing directory.
+given project.
+
+Optional argument PUB-DIR, when non-nil is the publishing
+directory.
 
 Return output file name."
-  (unless (file-exists-p pub-dir) (make-directory pub-dir t))
+  (unless (or (not pub-dir) (file-exists-p pub-dir)) (make-directory pub-dir t))
   ;; Check if a buffer visiting FILENAME is already open.
   (let* ((visitingp (find-buffer-visiting filename))
 	 (work-buffer (or visitingp (find-file-noselect filename))))
@@ -571,80 +570,6 @@ Return output file name."
       (unless visitingp (kill-buffer work-buffer)))))
 
 (defvar project-plist)
-(defun org-e-publish-org-to-latex (plist filename pub-dir)
-  "Publish an Org file to LaTeX.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (org-e-publish-org-to 'e-latex filename ".tex" plist pub-dir))
-
-(defun org-e-publish-org-to-pdf (plist filename pub-dir)
-  "Publish an Org file to PDF \(via LaTeX).
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (org-e-latex-compile
-   (org-e-publish-org-to 'e-latex filename ".tex" plist pub-dir)))
-
-(defun org-e-publish-org-to-html (plist filename pub-dir)
-  "Publish an org file to HTML.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (org-e-publish-org-to 'e-html filename ".html" plist pub-dir))
-
-;; TODO: Not implemented yet.
-;; (defun org-e-publish-org-to-org (plist filename pub-dir)
-;;   "Publish an org file to HTML.
-;;
-;; FILENAME is the filename of the Org file to be published.  PLIST
-;; is the property list for the given project.  PUB-DIR is the
-;; publishing directory.
-;;
-;; Return output file name."
-;;   (org-e-publish-org-to "org" plist filename pub-dir))
-
-(defun org-e-publish-org-to-ascii (plist filename pub-dir)
-  "Publish an Org file to ASCII.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (org-e-publish-org-to
-   'e-ascii filename ".txt" `(:ascii-charset ascii ,@plist) pub-dir))
-
-(defun org-e-publish-org-to-latin1 (plist filename pub-dir)
-  "Publish an Org file to Latin-1.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (org-e-publish-org-to
-   'e-ascii filename ".txt" `(:ascii-charset latin1 ,@plist) pub-dir))
-
-(defun org-e-publish-org-to-utf8 (plist filename pub-dir)
-  "Publish an org file to UTF-8.
-
-FILENAME is the filename of the Org file to be published.  PLIST
-is the property list for the given project.  PUB-DIR is the
-publishing directory.
-
-Return output file name."
-  (org-e-publish-org-to
-   'e-ascii filename ".txt" `(:ascii-charset utf-8 ,@plist) pub-dir))
 
 (defun org-e-publish-attachment (plist filename pub-dir)
   "Publish a file with no transformation of any kind.
@@ -682,7 +607,7 @@ See `org-e-publish-projects'."
 	 (ftname (expand-file-name filename))
 	 (publishing-function
 	  (or (plist-get project-plist :publishing-function)
-	      'org-e-publish-org-to-ascii))
+	      (error "No publishing function chosen")))
 	 (base-dir
 	  (file-name-as-directory
 	   (expand-file-name
@@ -854,7 +779,8 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
      (with-current-buffer buffer
        (org-mode)
        (setq title
-	     (or (plist-get (org-export-get-environment) :title)
+	     (or (org-element-interpret-data
+		  (plist-get (org-export-get-environment) :title))
 		 (file-name-nondirectory (file-name-sans-extension file)))))
      (unless visiting (kill-buffer buffer))
      (org-e-publish-cache-set-file-property file :title title)
@@ -887,8 +813,15 @@ It returns time in `current-time' format."
 (defalias 'org-e-publish-project 'org-e-publish)
 
 ;;;###autoload
-(defun org-e-publish (project &optional force)
-  "Publish PROJECT."
+(defun org-e-publish (project &optional force async)
+  "Publish PROJECT.
+
+PROJECT is either a project name, as a string, or a project
+alist (see `org-e-publish-project-alist' variable).
+
+When optional argument FORCE is non-nil, force publishing all
+files in PROJECT.  With a non-nil optional argument ASYNC,
+publishing will be done asynchronously, in another process."
   (interactive
    (list
     (assoc (org-icompleting-read
@@ -896,52 +829,69 @@ It returns time in `current-time' format."
 	    org-e-publish-project-alist nil t)
 	   org-e-publish-project-alist)
     current-prefix-arg))
-  (setq org-e-publish-initial-buffer (current-buffer))
-  (save-window-excursion
-    (let* ((org-e-publish-use-timestamps-flag
-	    (if force nil org-e-publish-use-timestamps-flag)))
-      (org-e-publish-projects
-       (if (stringp project)
-	   ;; If this function is called in batch mode, project is
-	   ;; still a string here.
-	   (list (assoc project org-e-publish-project-alist))
-	 (list project))))))
+  (let ((project-alist  (if (not (stringp project)) (list project)
+			  ;; If this function is called in batch mode,
+			  ;; project is still a string here.
+			  (list (assoc project org-e-publish-project-alist)))))
+    (if async
+	(org-export-async-start 'ignore
+	  `(let ((org-e-publish-use-timestamps-flag
+		  (if ',force nil ,org-e-publish-use-timestamps-flag)))
+	     (org-e-publish-projects ',project-alist)))
+      (save-window-excursion
+	(let* ((org-e-publish-use-timestamps-flag
+		(if force nil org-e-publish-use-timestamps-flag)))
+	  (org-e-publish-projects project-alist))))))
 
 ;;;###autoload
-(defun org-e-publish-all (&optional force)
+(defun org-e-publish-all (&optional force async)
   "Publish all projects.
-With prefix argument, remove all files in the timestamp
-directory and force publishing all files."
+With prefix argument FORCE, remove all files in the timestamp
+directory and force publishing all projects.  With a non-nil
+optional argument ASYNC, publishing will be done asynchronously,
+in another process."
   (interactive "P")
-  (when force (org-e-publish-remove-all-timestamps))
-  (save-window-excursion
-    (let ((org-e-publish-use-timestamps-flag
-	   (if force nil org-e-publish-use-timestamps-flag)))
-      (org-e-publish-projects org-e-publish-project-alist))))
+  (if async
+      (org-export-async-start 'ignore
+	`(when ',force (org-e-publish-remove-all-timestamps))
+	`(let ((org-e-publish-use-timestamps-flag
+		(if ',force nil ,org-e-publish-use-timestamps-flag)))
+	   (org-e-publish-projects ',org-e-publish-project-alist)))
+    (when force (org-e-publish-remove-all-timestamps))
+    (save-window-excursion
+      (let ((org-e-publish-use-timestamps-flag
+	     (if force nil org-e-publish-use-timestamps-flag)))
+	(org-e-publish-projects org-e-publish-project-alist)))))
 
 
 ;;;###autoload
-(defun org-e-publish-current-file (&optional force)
+(defun org-e-publish-current-file (&optional force async)
   "Publish the current file.
-With prefix argument, force publish the file."
+With prefix argument FORCE, force publish the file.  When
+optional argument ASYNC is non-nil, publishing will be done
+asynchronously, in another process."
   (interactive "P")
-  (save-window-excursion
-    (let ((org-e-publish-use-timestamps-flag
-	   (if force nil org-e-publish-use-timestamps-flag)))
-      (org-e-publish-file (buffer-file-name (buffer-base-buffer))))))
+  (let ((file (buffer-file-name (buffer-base-buffer))))
+    (if async
+	(org-export-async-start 'ignore
+	  `(let ((org-e-publish-use-timestamps-flag
+		  (if ',force nil ,org-e-publish-use-timestamps-flag)))
+	     (org-e-publish-file ,file)))
+      (save-window-excursion
+	(let ((org-e-publish-use-timestamps-flag
+	       (if force nil org-e-publish-use-timestamps-flag)))
+	  (org-e-publish-file file))))))
 
 ;;;###autoload
-(defun org-e-publish-current-project (&optional force)
+(defun org-e-publish-current-project (&optional force async)
   "Publish the project associated with the current file.
 With a prefix argument, force publishing of all files in
 the project."
   (interactive "P")
   (save-window-excursion
     (let ((project (org-e-publish-get-project-from-filename
-		    (buffer-file-name (buffer-base-buffer)) 'up))
-	  (org-e-publish-use-timestamps-flag
-	   (if force nil org-e-publish-use-timestamps-flag)))
-      (if project (org-e-publish project)
+		    (buffer-file-name (buffer-base-buffer)) 'up)))
+      (if project (org-e-publish project force async)
 	(error "File %s is not part of any known project"
 	       (buffer-file-name (buffer-base-buffer)))))))
 
@@ -956,23 +906,33 @@ BACKEND is the back-end being used for transcoding.  INFO is
 a plist containing publishing options.
 
 The index relative to current file is stored as an alist.  An
-association has the following shape: \(TERM FILE-NAME PARENT),
+association has the following shape: (TERM FILE-NAME PARENT),
 where TERM is the indexed term, as a string, FILE-NAME is the
 original full path of the file where the term in encountered, and
-PARENT is the headline element containing the original index
-keyword."
-  (org-e-publish-cache-set-file-property
-   (plist-get info :input-file) :index
-   (delete-dups
-    (org-element-map
-     tree 'keyword
-     (lambda (k)
-       (when (string= (downcase (org-element-property :key k))
-		      "index")
-	 (let ((index (org-element-property :value k))
-	       (parent (org-export-get-parent-headline k)))
-	   (list index (plist-get info :input-file) parent))))
-     info)))
+PARENT is a reference to the headline, if any, containing the
+original index keyword.  When non-nil, this reference is a cons
+cell.  Its CAR is a symbol among `id', `custom-id' and `name' and
+its CDR is a string."
+  (let ((file (plist-get info :input-file)))
+    (org-e-publish-cache-set-file-property
+     file :index
+     (delete-dups
+      (org-element-map
+       tree 'keyword
+       (lambda (k)
+	 (when (equal (upcase (org-element-property :key k)) "INDEX")
+	   (let ((parent (org-export-get-parent-headline k)))
+	     (list (org-element-property :value k)
+		   file
+		   (cond
+		    ((not parent) nil)
+		    ((let ((id (org-element-property :id parent)))
+		       (and id (cons 'id id))))
+		    ((let ((id (org-element-property :custom-id parent)))
+		       (and id (cons 'custom-id id))))
+		    (t (cons 'name
+			     (org-element-property :raw-value parent))))))))
+       info))))
   ;; Return parse-tree to avoid altering output.
   tree)
 
@@ -1029,14 +989,11 @@ publishing directory."
 		      (format
 		       "[[%s][%s]]"
 		       ;; Destination.
-		       (cond
-			((not target) (format "file:%s" file))
-			((let ((id (org-element-property :id target)))
-			   (and id (format "id:%s" id))))
-			((let ((id (org-element-property :custom-id target)))
-			   (and id (format "file:%s::#%s" file id))))
-			(t (format "file:%s::*%s" file
-				   (org-element-property :raw-value target))))
+		       (case (car target)
+			 ('nil (format "file:%s" file))
+			 (id (format "id:%s" (cdr target)))
+			 (custom-id (format "file:%s::#%s" file (cdr target)))
+			 (otherwise (format "file:%s::*%s" file (cdr target))))
 		       ;; Description.
 		       (car (last entry)))))
 		  "\n"))))
@@ -1128,14 +1085,11 @@ the file including them will be republished as well."
 	(while (re-search-forward
 		"^#\\+INCLUDE:[ \t]+\"\\([^\t\n\r\"]*\\)\"[ \t]*.*$" nil t)
 	  (let* ((included-file (expand-file-name (match-string 1))))
-	    (add-to-list
-	     'included-files-ctime
-	     (org-e-publish-cache-ctime-of-src included-file base-dir)
-	     t))))
-      ;; FIXME: don't kill current buffer.
+	    (add-to-list 'included-files-ctime
+			 (org-e-publish-cache-ctime-of-src included-file) t))))
       (unless visiting (kill-buffer buf)))
     (if (null pstamp) t
-      (let ((ctime (org-e-publish-cache-ctime-of-src filename base-dir)))
+      (let ((ctime (org-e-publish-cache-ctime-of-src filename)))
 	(or (< pstamp ctime)
 	    (when included-files-ctime
 	      (not (null (delq nil (mapcar (lambda(ct) (< ctime ct))
@@ -1187,10 +1141,11 @@ Returns value on success, else nil."
     (error "`org-e-publish-cache-set' called, but no cache present"))
   (puthash key value org-e-publish-cache))
 
-(defun org-e-publish-cache-ctime-of-src (f base-dir)
-  "Get the FILENAME ctime as an integer."
+(defun org-e-publish-cache-ctime-of-src (file)
+  "Get the ctime of FILE as an integer."
   (let ((attr (file-attributes
-	       (expand-file-name (or (file-symlink-p f) f) base-dir))))
+	       (expand-file-name (or (file-symlink-p file) file)
+				 (file-name-directory file)))))
     (+ (lsh (car (nth 5 attr)) 16)
        (cadr (nth 5 attr)))))
 

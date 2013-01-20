@@ -1,6 +1,6 @@
 ;;; org-exp-bibtex.el --- Export bibtex fragments
 
-;; Copyright (C) 2009-2012 Taru Karttunen
+;; Copyright (C) 2009-2013 Taru Karttunen
 
 ;; Author: Taru Karttunen <taruti@taruti.net>
 

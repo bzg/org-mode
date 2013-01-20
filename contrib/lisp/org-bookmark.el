@@ -1,5 +1,5 @@
 ;;; org-bookmark.el - Support for links to bookmark
-;; Copyright (C) 2008-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2013 Free Software Foundation, Inc.
 ;;
 ;; Author: Tokuya Kameshima <kames AT fa2.so-net.ne.jp>
 ;; Version: 1.0
@@ -80,7 +80,7 @@ Otherwise prompt the user for the right bookmark to use."
 		  (car bmks)
 		(completing-read "Bookmark: " bmks nil t nil nil (car bmks))))))
     (if bookmark
-	(org-store-link-props :link (contact "bookmark:" bookmark)
+	(org-store-link-props :link (concat "bookmark:" bookmark)
 			      :description bookmark))))
 
 (provide 'org-bookmark)

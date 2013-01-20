@@ -1,6 +1,6 @@
 ;;; org-git-link.el --- Provide org links to specific file version
 
-;; Copyright (C) 2009-2012  Reimar Finken
+;; Copyright (C) 2009-2013  Reimar Finken
 
 ;; Author: Reimar Finken <reimar.finken@gmx.de>
 ;; Keywords: files, calendar, hypermedia
@@ -171,7 +171,7 @@
   (let* ((gitdir (first (org-git-find-gitdir (file-truename file))))
          (branchname (org-git-get-current-branch gitdir))
          (timestring (format-time-string "%Y-%m-%d" (current-time))))
-    (contact "git:" file "::" (org-git-create-searchstring branchname timestring))))
+    (concat "git:" file "::" (org-git-create-searchstring branchname timestring))))
 
 (defun org-git-store-link ()
   "Store git link to current file."

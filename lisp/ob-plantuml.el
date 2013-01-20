@@ -1,6 +1,6 @@
 ;;; ob-plantuml.el --- org-babel functions for plantuml evaluation
 
-;; Copyright (C) 2010-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2010-2013 Free Software Foundation, Inc.
 
 ;; Author: Zhang Weize
 ;; Keywords: literate programming, reproducible research
@@ -35,7 +35,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-eval)
 
 (defvar org-babel-default-header-args:plantuml
   '((:results . "file") (:exports . "results"))

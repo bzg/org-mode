@@ -1,6 +1,6 @@
 ;;; org-e-beamer.el --- Beamer Back-End for Org Export Engine
 
-;; Copyright (C) 2007-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2007-2013  Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten.dominik AT gmail DOT com>
 ;;         Nicolas Goaziou <n.goaziou AT gmail DOT com>
@@ -30,11 +30,11 @@
 ;; `org-e-beamer-export-to-latex' ("tex" file) and
 ;; `org-e-beamer-export-to-pdf' ("pdf" file).
 ;;
-;; On top of buffer keywords supported by `e-latex' back-end (see
-;; `org-e-latex-options-alist'), this back-end introduces the
-;; following keywords: "BEAMER_THEME", "BEAMER_COLOR_THEME",
-;; "BEAMER_FONT_THEME", "BEAMER_INNER_THEME" and "BEAMER_OUTER_THEME".
-;; All accept options in square brackets.
+;; On top of buffer keywords and options items supported by `e-latex'
+;; back-end (see `org-e-latex-options-alist'), this back-end
+;; introduces the following keywords: "BEAMER_THEME",
+;; "BEAMER_COLOR_THEME", "BEAMER_FONT_THEME", "BEAMER_INNER_THEME" and
+;; "BEAMER_OUTER_THEME".  All accept options in square brackets.
 ;;
 ;; Moreover, headlines now fall into three categories: sectioning
 ;; elements, frames and blocks.
@@ -45,8 +45,9 @@
 ;; - Headlines become frames when their level is equal to
 ;;   `org-e-beamer-frame-level' (or "H" value in the OPTIONS line).
 ;;   Though, if an headline in the current tree has a "BEAMER_env"
-;;   (see below) property set to "frame", its level overrides the
-;;   variable.
+;;   (see below) property set to either "frame" or "fullframe", its
+;;   level overrides the variable.  A "fullframe" is a frame with an
+;;   empty (ignored) title.
 ;;
 ;; - All frames' children become block environments.  Special block
 ;;   types can be enforced by setting headline's "BEAMER_env" property
@@ -74,9 +75,11 @@
 ;; options for the current frame ("fragile" option is added
 ;; automatically, though).
 ;;
-;; Every plain list has support for `:overlay' attribute (through
-;; ATTR_BEAMER affiliated keyword).  Also, ordered (resp. description)
-;; lists make use of `:template' (resp. `:long-text') attribute.
+;; Every plain list has support for `:environment', `:overlay' and
+;; `:options' attributes (through ATTR_BEAMER affiliated keyword).
+;; The first one allows to use a different environment, the second
+;; sets overlay specifications and the last one inserts optional
+;; arguments in current list environment.
 ;;
 ;; Eventually, an export snippet with a value enclosed within angular
 ;; brackets put at the beginning of an element or object whose type is
@@ -184,10 +187,12 @@ You might want to put e.g. \"allowframebreaks=0.9\" here."
 "The column widths that should be installed as allowed property values.")
 
 (defconst org-e-beamer-environments-special
-  '(("againframe"     "F")
+  '(("againframe"     "A")
     ("appendix"       "x")
     ("column"         "c")
+    ("columns"        "C")
     ("frame"          "f")
+    ("fullframe"      "F")
     ("ignoreheading"  "i")
     ("note"           "n")
     ("noteNH"         "N"))
@@ -262,13 +267,15 @@ brackets.  Return overlay specification, as a string, or nil."
 
 (org-export-define-derived-backend e-beamer e-latex
   :export-block "BEAMER"
-  :sub-menu-entry
-  (?l (?B "As TEX buffer (Beamer)" org-e-beamer-export-as-latex)
-      (?b "As TEX file (Beamer)" org-e-beamer-export-to-latex)
-      (?P "As PDF file (Beamer)" org-e-beamer-export-to-pdf)
-      (?O "As PDF file and open (Beamer)"
-	  (lambda (s v b)
-	    (org-open-file (org-e-beamer-export-to-pdf s v b)))))
+  :menu-entry
+  (?l 1
+      ((?B "As TEX buffer (Beamer)" org-e-beamer-export-as-latex)
+       (?b "As TEX file (Beamer)" org-e-beamer-export-to-latex)
+       (?P "As PDF file (Beamer)" org-e-beamer-export-to-pdf)
+       (?O "As PDF file and open (Beamer)"
+	   (lambda (a s v b)
+	     (if a (org-e-beamer-export-to-pdf t s v b)
+	       (org-open-file (org-e-beamer-export-to-pdf nil s v b)))))))
   :options-alist
   ((:beamer-theme "BEAMER_THEME" nil org-e-beamer-theme)
    (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
@@ -370,19 +377,22 @@ INFO is a plist used as a communication channel."
    ;;    farthest.
    (catch 'exit
      (mapc (lambda (parent)
-	     (when (equal (org-element-property :beamer-env parent) "frame")
-	       (throw 'exit (org-export-get-relative-level parent info))))
-	   (reverse (org-export-get-genealogy headline)))
+	     (let ((env (org-element-property :beamer-env parent)))
+	       (when (and env (member (downcase env) '("frame" "fullframe")))
+		 (throw 'exit (org-export-get-relative-level parent info)))))
+	   (nreverse (org-export-get-genealogy headline)))
      nil)
    ;; 2. Look for "frame" environment in HEADLINE.
-   (and (equal (org-element-property :beamer-env headline) "frame")
-	(org-export-get-relative-level headline info))
+   (let ((env (org-element-property :beamer-env headline)))
+     (and env (member (downcase env) '("frame" "fullframe"))
+	  (org-export-get-relative-level headline info)))
    ;; 3. Look for "frame" environment in sub-tree.
    (org-element-map
     headline 'headline
     (lambda (hl)
-      (when (equal (org-element-property :beamer-env hl) "frame")
-	(org-export-get-relative-level hl info)))
+      (let ((env (org-element-property :beamer-env hl)))
+	(when (and env (member (downcase env) '("frame" "fullframe")))
+	  (org-export-get-relative-level hl info))))
     info 'first-match)
    ;; 4. No "frame" environment in tree: use default value.
    (plist-get info :headline-levels)))
@@ -393,9 +403,7 @@ CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
   ;; Use `e-latex' back-end output, inserting overlay specifications
   ;; if possible.
-  (let ((latex-headline
-	 (funcall (cdr (assq 'headline org-e-latex-translate-alist))
-		  headline contents info))
+  (let ((latex-headline (org-export-with-backend 'e-latex headline contents info))
 	(mode-specs (org-element-property :beamer-act headline)))
     (if (and mode-specs
 	     (string-match "\\`\\\\\\(.*?\\)\\(?:\\*\\|\\[.*\\]\\)?{"
@@ -454,9 +462,11 @@ used as a communication channel."
 		",")
 	       'option))
 	    ;; Title.
-	    (format "{%s}"
-		    (org-export-data (org-element-property :title headline)
-				     info))
+	    (let ((env (org-element-property :beamer-env headline)))
+	      (format "{%s}"
+		      (if (and env (equal (downcase env) "fullframe")) ""
+			(org-export-data
+			 (org-element-property :title headline) info))))
 	    "\n"
 	    ;; The following workaround is required in fragile frames
 	    ;; as Beamer will append "\par" to the beginning of the
@@ -474,51 +484,65 @@ used as a communication channel."
 CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
   (let* ((column-width (org-element-property :beamer-col headline))
-	 ;; Environment defaults to "block" if none is specified and
+	 ;; ENVIRONMENT defaults to "block" if none is specified and
 	 ;; there is no column specification.  If there is a column
 	 ;; specified but still no explicit environment, ENVIRONMENT
-	 ;; is nil.
+	 ;; is "column".
 	 (environment (let ((env (org-element-property :beamer-env headline)))
 			(cond
 			 ;; "block" is the fallback environment.
 			 ((and (not env) (not column-width)) "block")
 			 ;; "column" only.
-			 ((not env) nil)
+			 ((not env) "column")
 			 ;; Use specified environment.
 			 (t (downcase env)))))
-	 (env-format (when environment
+	 (env-format (unless (member environment '("column" "columns"))
 		       (assoc environment
 			      (append org-e-beamer-environments-special
 				      org-e-beamer-environments-extra
 				      org-e-beamer-environments-default))))
 	 (title (org-export-data (org-element-property :title headline) info))
-	 ;; Start a columns environment when there is no previous
-	 ;; headline or the previous headline do not have
-	 ;; a BEAMER_column property.
+	 (options (let ((options (org-element-property :beamer-opt headline)))
+		    (if (not options) ""
+		      (org-e-beamer--normalize-argument options 'option))))
+	 ;; Start a "columns" environment when explicitly requested or
+	 ;; when there is no previous headline or the previous
+	 ;; headline do not have a BEAMER_column property.
+	 (parent-env (org-element-property
+		      :beamer-env (org-export-get-parent-headline headline)))
 	 (start-columns-p
-	  (and column-width
-	       (or (org-export-first-sibling-p headline info)
-		   (not (org-element-property
-			 :beamer-col
-			 (org-export-get-previous-element headline info))))))
-	 ;; Ends a columns environment when there is no next headline
-	 ;; or the next headline do not have a BEAMER_column property.
+	  (or (equal environment "columns")
+	      (and column-width
+		   (not (and parent-env
+			     (equal (downcase parent-env) "columns")))
+		   (or (org-export-first-sibling-p headline info)
+		       (not (org-element-property
+			     :beamer-col
+			     (org-export-get-previous-element
+			      headline info)))))))
+	 ;; End the "columns" environment when explicitly requested or
+	 ;; when there is no next headline or the next headline do not
+	 ;; have a BEAMER_column property.
 	 (end-columns-p
-	  (and column-width
-	       (or (org-export-last-sibling-p headline info)
-		   (not (org-element-property
-			 :beamer-col
-			 (org-export-get-next-element headline info)))))))
+	  (or (equal environment "columns")
+	      (and column-width
+		   (not (and parent-env
+			     (equal (downcase parent-env) "columns")))
+		   (or (org-export-last-sibling-p headline info)
+		       (not (org-element-property
+			     :beamer-col
+			     (org-export-get-next-element headline info))))))))
     (concat
-     (when start-columns-p "\\begin{columns}\n")
+     (when start-columns-p
+       ;; Column can accept options only when the environment is
+       ;; explicitly defined.
+       (if (not (equal environment "columns")) "\\begin{columns}\n"
+	 (format "\\begin{columns}%s\n" options)))
      (when column-width
        (format "\\begin{column}%s{%s}\n"
 	       ;; One can specify placement for column only when
 	       ;; HEADLINE stands for a column on its own.
-	       (if (not environment) ""
-		 (let ((options (org-element-property :beamer-opt headline)))
-		   (if (not options) ""
-		     (org-e-beamer--normalize-argument options 'option))))
+	       (if (equal environment "column") options "")
 	       (format "%s\\textwidth" column-width)))
      ;; Block's opening string.
      (when env-format
@@ -535,19 +559,12 @@ used as a communication channel."
 	     ((not action) (list (cons "a" "") (cons "A" "")))
 	     ((string-match "\\`\\[.*\\]\\'" action)
 	      (list
-	       (cons "A"
-		     (org-e-beamer--normalize-argument action 'defaction))
+	       (cons "A" (org-e-beamer--normalize-argument action 'defaction))
 	       (cons "a" "")))
 	     (t
-	      (list
-	       (cons "a"
-		     (org-e-beamer--normalize-argument action 'action))
-	       (cons "A" "")))))
-	  (list (cons "o"
-		      (let ((options
-			     (org-element-property :beamer-opt headline)))
-			(if (not options) ""
-			  (org-e-beamer--normalize-argument options 'option))))
+	      (list (cons "a" (org-e-beamer--normalize-argument action 'action))
+		    (cons "A" "")))))
+	  (list (cons "o" options)
 		(cons "h" title)
 		(cons "H" (if (equal title "") "" (format "{%s}" title)))
 		(cons "U" (if (equal title "") "" (format "[%s]" title))))))
@@ -645,8 +662,7 @@ contextual information."
   (let ((action (let ((first-element (car (org-element-contents item))))
 		  (and (eq (org-element-type first-element) 'paragraph)
 		       (org-e-beamer--element-has-overlay-p first-element))))
-	(output (funcall (cdr (assq 'item org-e-latex-translate-alist))
-			 item contents info)))
+	(output (org-export-with-backend 'e-latex item contents info)))
     (if (not action) output
       ;; If the item starts with a paragraph and that paragraph starts
       ;; with an export snippet specifying an overlay, insert it after
@@ -677,8 +693,7 @@ channel."
 	 (when (wholenump depth) (format "\\setcounter{tocdepth}{%s}\n" depth))
 	 "\\tableofcontents" options "\n"
 	 "\\end{frame}")))
-     (t (funcall (cdr (assq 'keyword org-e-latex-translate-alist))
-		 keyword contents info)))))
+     (t (org-export-with-backend 'e-latex keyword contents info)))))
 
 
 ;;;; Link
@@ -725,14 +740,12 @@ used as a communication channel."
 			    path
 			    contents))))))))
      ;; Otherwise, use `e-latex' back-end.
-     (t (funcall (cdr (assq 'link org-e-latex-translate-alist))
-		 link contents info)))))
+     (t (org-export-with-backend 'e-latex link contents info)))))
 
 
 ;;;; Plain List
 ;;
-;; Plain lists support `:overlay' (for any type), `:template' (for
-;; ordered lists only) and `:long-text' (for description lists only)
+;; Plain lists support `:environment', `:overlay' and `:options'
 ;; attributes.
 
 (defun org-e-beamer-plain-list (plain-list contents info)
@@ -741,29 +754,23 @@ CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((type (org-element-property :type plain-list))
 	 (attributes (org-export-read-attribute :attr_beamer plain-list))
-	 (latex-type (cond ((eq type 'ordered) "enumerate")
-			   ((eq type 'descriptive) "description")
-			   (t "itemize"))))
+	 (latex-type (let ((env (plist-get attributes :environment)))
+		       (cond (env (format "%s" env))
+			     ((eq type 'ordered) "enumerate")
+			     ((eq type 'descriptive) "description")
+			     (t "itemize")))))
     (org-e-latex--wrap-label
      plain-list
      (format "\\begin{%s}%s%s\n%s\\end{%s}"
 	     latex-type
 	     ;; Default overlay specification, if any.
-	     (let ((overlay (plist-get attributes :overlay)))
-	       (if (not overlay) ""
-		 (org-e-beamer--normalize-argument overlay 'defaction)))
+	     (org-e-beamer--normalize-argument
+	      (format "%s" (or (plist-get attributes :overlay) ""))
+	      'defaction)
 	     ;; Second optional argument depends on the list type.
-	     (case type
-	       (ordered
-		(let ((template (plist-get attributes :template)))
-		  (if (not template) ""
-		    (org-e-beamer--normalize-argument template 'option))))
-	       (descriptive
-		(let ((long-text (plist-get attributes :long-text)))
-		  (if (not long-text) ""
-		    (org-e-beamer--normalize-argument long-text 'option))))
-	       ;; There's no second argument for un-ordered lists.
-	       (otherwise ""))
+	     (org-e-beamer--normalize-argument
+	      (format "%s" (or (plist-get attributes :options) ""))
+	      'option)
 	     ;; Eventually insert contents and close environment.
 	     contents
 	     latex-type))))
@@ -861,15 +868,18 @@ holding export options."
 	     (author (format "\\author{%s}\n" author))
 	     (t "\\author{}\n")))
      ;; 6. Date.
-     (format "\\date{%s}\n" (org-export-data (plist-get info :date) info))
+     (let ((date (and (plist-get info :with-date)
+		      (org-export-data (plist-get info :date) info))))
+       (format "\\date{%s}\n" (or date "")))
      ;; 7. Title
      (format "\\title{%s}\n" title)
      ;; 8. Hyperref options.
-     (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
-	     (or (plist-get info :keywords) "")
-	     (or (plist-get info :description) "")
-	     (if (not (plist-get info :with-creator)) ""
-	       (plist-get info :creator)))
+     (when (plist-get info :latex-hyperref-p)
+       (format "\\hypersetup{\n  pdfkeywords={%s},\n  pdfsubject={%s},\n  pdfcreator={%s}}\n"
+	       (or (plist-get info :keywords) "")
+	       (or (plist-get info :description) "")
+	       (if (not (plist-get info :with-creator)) ""
+		 (plist-get info :creator))))
      ;; 9. Document start.
      "\\begin{document}\n\n"
      ;; 10. Title command.
@@ -972,13 +982,17 @@ value."
 
 ;;;###autoload
 (defun org-e-beamer-export-as-latex
-  (&optional subtreep visible-only body-only ext-plist)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a Beamer buffer.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
 
 If a region is active, export that region.
+
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting buffer should be accessible
+through the `org-export-stack' interface.
 
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
@@ -998,16 +1012,27 @@ Export is done in a buffer named \"*Org E-BEAMER Export*\", which
 will be displayed when `org-export-show-temporary-export-buffer'
 is non-nil."
   (interactive)
-  (let ((outbuf (org-export-to-buffer
-		 'e-beamer "*Org E-BEAMER Export*"
-		 subtreep visible-only body-only ext-plist)))
-    (with-current-buffer outbuf (LaTeX-mode))
-    (when org-export-show-temporary-export-buffer
-      (switch-to-buffer-other-window outbuf))))
+  (if async
+      (org-export-async-start
+	  (lambda (output)
+	    (with-current-buffer (get-buffer-create "*Org E-BEAMER Export*")
+	      (erase-buffer)
+	      (insert output)
+	      (goto-char (point-min))
+	      (LaTeX-mode)
+	      (org-export-add-to-stack (current-buffer) 'e-beamer)))
+	`(org-export-as 'e-beamer ,subtreep ,visible-only ,body-only
+			',ext-plist))
+    (let ((outbuf (org-export-to-buffer
+		   'e-beamer "*Org E-BEAMER Export*"
+		   subtreep visible-only body-only ext-plist)))
+      (with-current-buffer outbuf (LaTeX-mode))
+      (when org-export-show-temporary-export-buffer
+	(switch-to-buffer-other-window outbuf)))))
 
 ;;;###autoload
 (defun org-e-beamer-export-to-latex
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a Beamer presentation (tex).
 
 If narrowing is active in the current buffer, only export its
@@ -1015,6 +1040,10 @@ narrowed part.
 
 If a region is active, export that region.
 
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
 first.
@@ -1029,18 +1058,22 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".tex" subtreep pub-dir)))
-    (org-export-to-file
-     'e-beamer outfile subtreep visible-only body-only ext-plist)))
+  (let ((outfile (org-export-output-file-name ".tex" subtreep)))
+    (if async
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-beamer))
+	  `(expand-file-name
+	    (org-export-to-file
+	     'e-beamer ,outfile ,subtreep ,visible-only ,body-only
+	     ',ext-plist)))
+      (org-export-to-file
+       'e-beamer outfile subtreep visible-only body-only ext-plist))))
 
 ;;;###autoload
 (defun org-e-beamer-export-to-pdf
-  (&optional subtreep visible-only body-only ext-plist pub-dir)
+  (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer as a Beamer presentation (PDF).
 
 If narrowing is active in the current buffer, only export its
@@ -1048,6 +1081,10 @@ narrowed part.
 
 If a region is active, export that region.
 
+A non-nil optional argument ASYNC means the process should happen
+asynchronously.  The resulting file should be accessible through
+the `org-export-stack' interface.
+
 When optional argument SUBTREEP is non-nil, export the sub-tree
 at point, extracting information from the headline properties
 first.
@@ -1062,14 +1099,20 @@ EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
 file-local settings.
 
-When optional argument PUB-DIR is set, use it as the publishing
-directory.
-
 Return PDF file's name."
   (interactive)
-  (org-e-latex-compile
-   (org-e-beamer-export-to-latex
-    subtreep visible-only body-only ext-plist pub-dir)))
+  (if async
+      (let ((outfile (org-export-output-file-name ".tex" subtreep)))
+	(org-export-async-start
+	    (lambda (f) (org-export-add-to-stack f 'e-beamer))
+	  `(expand-file-name
+	    (org-e-latex-compile
+	     (org-export-to-file
+	      'e-beamer ,outfile ,subtreep ,visible-only ,body-only
+	      ',ext-plist)))))
+    (org-e-latex-compile
+     (org-e-beamer-export-to-latex
+      nil subtreep visible-only body-only ext-plist))))
 
 ;;;###autoload
 (defun org-e-beamer-select-environment ()
@@ -1104,7 +1147,7 @@ aid, but the tag does not have any semantic meaning."
 	  (org-delete-property "BEAMER_col")))
        ;; For an "againframe" section, automatically ask for reference
        ;; to resumed frame and overlay specifications.
-       ((eq org-last-tag-selection-key ?F)
+       ((eq org-last-tag-selection-key ?A)
 	(if (equal (org-entry-get nil "BEAMER_env") "againframe")
 	    (progn (org-entry-delete nil "BEAMER_env")
 		   (org-entry-delete nil "BEAMER_ref")
@@ -1143,6 +1186,33 @@ aid, but the tag does not have any semantic meaning."
     (when org-e-beamer-column-view-format
       (insert "#+COLUMNS: " org-e-beamer-column-view-format "\n"))
     (insert "#+PROPERTY: BEAMER_col_ALL " org-e-beamer-column-widths "\n")))
+
+;;;###autoload
+(defun org-e-beamer-publish-to-latex (plist filename pub-dir)
+  "Publish an Org file to a Beamer presentation (LaTeX).
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-e-publish-org-to 'e-beamer filename ".tex" plist pub-dir))
+
+;;;###autoload
+(defun org-e-beamer-publish-to-pdf (plist filename pub-dir)
+  "Publish an Org file to a Beamer presentation (PDF, via LaTeX).
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  ;; Unlike to `org-e-beamer-publish-to-latex', PDF file is generated
+  ;; in working directory and then moved to publishing directory.
+  (org-e-publish-attachment
+   plist
+   (org-e-latex-compile (org-e-publish-org-to 'e-beamer filename ".tex" plist))
+   pub-dir))
 
 
 (provide 'org-e-beamer)

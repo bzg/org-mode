@@ -1,6 +1,6 @@
 ;;; org-odt.el --- OpenDocument Text exporter for Org-mode
 
-;; Copyright (C) 2010-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2010-2013 Free Software Foundation, Inc.
 
 ;; Author: Jambunathan K <kjambunathan at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -27,6 +27,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'org-lparse)
+(require 'org-compat)
 
 (defgroup org-export-odt nil
   "Options specific for ODT export of Org-mode files."
@@ -115,11 +116,11 @@ and `org-odt-data-dir'.")
 	     (lambda (schema-dir)
 	       (when schema-dir
 		 (message "Debug (org-odt): Trying %s..." schema-dir)
-		 (when (and (file-readable-p
-			     (expand-file-name "od-manifest-schema-v1.2-cs01.rnc"
+		 (when (and (file-expand-wildcards
+			     (expand-file-name "od-manifest-schema*.rnc"
 					       schema-dir))
-			    (file-readable-p
-			     (expand-file-name "od-schema-v1.2-cs01.rnc"
+			    (file-expand-wildcards
+			     (expand-file-name "od-schema*.rnc"
 					       schema-dir))
 			    (file-readable-p
 			     (expand-file-name "schemas.xml" schema-dir)))
@@ -159,10 +160,10 @@ Also add it to `rng-schema-locating-files'."
     (let ((schema-dir value))
       (set var
 	   (if (and
-		(file-readable-p
-		 (expand-file-name "od-manifest-schema-v1.2-cs01.rnc" schema-dir))
-		(file-readable-p
-		 (expand-file-name "od-schema-v1.2-cs01.rnc" schema-dir))
+		(file-expand-wildcards
+		 (expand-file-name "od-manifest-schema*.rnc" schema-dir))
+		(file-expand-wildcards
+		 (expand-file-name "od-schema*.rnc" schema-dir))
 		(file-readable-p
 		 (expand-file-name "schemas.xml" schema-dir)))
 	       schema-dir
@@ -211,7 +212,7 @@ heuristically based on the values of `org-odt-lib-dir' and
 		  org-odt-styles-dir-list)
 	    nil)))
     (unless styles-dir
-      (error "Error (org-odt): Cannot find factory styles files.  Aborting."))
+      (error "Error (org-odt): Cannot find factory styles files, aborting"))
     styles-dir)
   "Directory that holds auxiliary XML files used by the ODT exporter.
 
@@ -439,15 +440,15 @@ values.  See Info node `(emacs) File Variables'."
 				"meta.xml" "styles.xml")))
 	       ;; kill all xml buffers
 	       (mapc (lambda (file)
-		       (let ((buf (find-file-noselect
-				   (expand-file-name file org-odt-zip-dir) t)))
-			 (when (buffer-name buf)
-			   (set-buffer-modified-p nil)
-			   (kill-buffer buf))))
+		       (with-current-buffer
+			   (find-file-noselect
+			    (expand-file-name file org-odt-zip-dir) t)
+			 (set-buffer-modified-p nil)
+			 (kill-buffer)))
 		     xml-files))
 	     ;; delete temporary directory.
-	     (delete-directory org-odt-zip-dir t)))))
-     (org-condition-case-unless-debug err
+	     (org-delete-directory org-odt-zip-dir t)))))
+     (condition-case err
 	 (prog1 (progn ,@body)
 	   (funcall --cleanup-xml-buffers))
        ((quit error)
@@ -474,7 +475,7 @@ emacs   --batch
         --load=$HOME/lib/emacs/org.el
         --eval \"(setq org-export-headline-levels 2)\"
         --visit=MyFile --funcall org-export-as-odt-batch"
-  (org-lparse-batch "odt"))
+  (org-odt-cleanup-xml-buffers (org-lparse-batch "odt")))
 
 ;;; org-export-as-odt
 ;;;###autoload
@@ -1727,6 +1728,7 @@ ATTR is a string of other attributes of the a element."
        ((and (string= type "")
 	     (or (not thefile) (string= thefile ""))
 	     (plist-get org-lparse-opt-plist :section-numbers)
+	     (get-text-property 0 'org-no-description fragment)
 	     (setq sec-frag fragment)
 	     (or (string-match  "\\`sec\\(\\(-[0-9]+\\)+\\)" sec-frag)
 		 (and (setq sec-frag
@@ -1756,7 +1758,11 @@ ATTR is a string of other attributes of the a element."
 	(when (not (member type '("" "file")))
 	  (setq thefile (concat type ":" thefile)))
 
-	(let ((org-odt-suppress-xref nil))
+	(let ((org-odt-suppress-xref
+	       ;; Typeset link to headlines with description, as a
+	       ;; regular hyperlink.
+	       (and (string= type "")
+		    (not (get-text-property 0 'org-no-description fragment)))))
 	  (org-odt-format-link
 	   (org-xml-format-desc desc) thefile attr)))))))
 
@@ -2076,7 +2082,7 @@ ATTR is a string of other attributes of the a element."
 	    until size
 	    do (setq size (org-odt-do-image-size
 			   probe-method file dpi embed-as)))
-      (or size (error "Cannot determine Image size.  Aborting ..."))
+      (or size (error "Cannot determine image size, aborting"))
       (setq width (car size) height (cdr size)))
     (cond
      (scale
@@ -2718,7 +2724,7 @@ Do this when translation to MathML fails."
 (defun org-export-odt-preprocess (parameters)
   (org-export-odt-preprocess-label-references))
 
-(declare-function archive-zip-extract "arc-mode.el" (archive name))
+(declare-function archive-zip-extract "arc-mode" (archive name))
 (defun org-odt-zip-extract-one (archive member &optional target)
   (require 'arc-mode)
   (let* ((target (or target default-directory))
@@ -2846,5 +2852,9 @@ formula file."
    nil nil nil (call-interactively 'org-export-as-odf)))
 
 (provide 'org-odt)
+
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; org-odt.el ends here

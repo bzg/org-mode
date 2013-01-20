@@ -1,6 +1,6 @@
 ;;; org-test-ob-consts.el --- constants for use in code block tests
 
-;; Copyright (c) 2010-2012 Eric Schulte
+;; Copyright (c) 2010-2013 Eric Schulte
 ;; Authors: Eric Schulte
 
 ;; Released under the GNU General Public License version 3

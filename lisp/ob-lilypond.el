@@ -1,6 +1,6 @@
 ;;; ob-lilypond.el --- org-babel functions for lilypond evaluation
 
-;; Copyright (C) 2010-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2010-2013 Free Software Foundation, Inc.
 
 ;; Author: Martyn Jago
 ;; Keywords: babel language, literate programming
@@ -30,10 +30,7 @@
 ;; http://lilypond.org/manuals.html
 
 ;;; Code:
-
 (require 'ob)
-(require 'ob-eval)
-(require 'ob-tangle)
 (require 'outline)
 (defalias 'lilypond-mode 'LilyPond-mode)
 
@@ -72,9 +69,9 @@ the midi file is not automatically played.  Default value is t")
 (defvar ly-nix-pdf-path "evince")
 (defvar ly-nix-midi-path "timidity")
 
-(defvar ly-win32-ly-path "lilypond")
-(defvar ly-win32-pdf-path "")
-(defvar ly-win32-midi-path "")
+(defvar ly-w32-ly-path "lilypond")
+(defvar ly-w32-pdf-path "")
+(defvar ly-w32-midi-path "")
 
 (defvar ly-gen-png nil
   "Image generation (png) can be turned on by default by setting
@@ -333,8 +330,8 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
          (or test system-type)))
     (cond ((string= sys-type  "darwin")
            ly-OSX-ly-path)
-          ((string= sys-type "win32")
-           ly-win32-ly-path)
+          ((string= sys-type "windows-nt")
+           ly-w32-ly-path)
           (t ly-nix-ly-path))))
 
 (defun ly-determine-pdf-path (&optional test)
@@ -344,8 +341,8 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
          (or test system-type)))
     (cond ((string= sys-type  "darwin")
            ly-OSX-pdf-path)
-          ((string= sys-type "win32")
-           ly-win32-pdf-path)
+          ((string= sys-type "windows-nt")
+           ly-w32-pdf-path)
           (t ly-nix-pdf-path))))
 
 (defun ly-determine-midi-path (&optional test)
@@ -355,8 +352,8 @@ If TEST is non-nil, it contains a simulation of the OS for test purposes"
          (or test test system-type)))
     (cond ((string= sys-type  "darwin")
            ly-OSX-midi-path)
-          ((string= sys-type "win32")
-           ly-win32-midi-path)
+          ((string= sys-type "windows-nt")
+           ly-w32-midi-path)
           (t ly-nix-midi-path))))
 
 (defun ly-toggle-midi-play ()

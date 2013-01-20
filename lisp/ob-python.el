@@ -1,6 +1,6 @@
 ;;; ob-python.el --- org-babel functions for python evaluation
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
 ;; Authors: Eric Schulte
 ;;	 Dan Davison
@@ -28,9 +28,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
-(require 'ob-eval)
 (eval-when-compile (require 'cl))
 
 (declare-function org-remove-indentation "org" )
@@ -44,13 +41,23 @@
 (defvar org-babel-default-header-args:python '())
 
 (defvar org-babel-python-command "python"
-  "Name of command for executing python code.")
+  "Name of command for executing Python code.")
 
 (defvar org-babel-python-mode (if (featurep 'xemacs) 'python-mode 'python)
   "Preferred python mode for use in running python interactively.
 This will typically be either 'python or 'python-mode.")
 
 (defvar org-src-preserve-indentation)
+
+(defcustom org-babel-python-hline-to "None"
+  "Replace hlines in incoming tables with this when translating to python."
+  :group 'org-babel
+  :type 'string)
+
+(defcustom org-babel-python-None-to 'hline
+  "Replace 'None' in python tables with this before returning."
+  :group 'org-babel
+  :type 'string)
 
 (defun org-babel-execute:python (body params)
   "Execute a block of Python code with Babel.
@@ -99,7 +106,7 @@ VARS contains resolved variable references"
 ;; helper functions
 
 (defun org-babel-variable-assignments:python (params)
-  "Return list of python statements assigning the block's variables."
+  "Return a list of Python statements assigning the block's variables."
   (mapcar
    (lambda (pair)
      (format "%s=%s"
@@ -114,7 +121,7 @@ specifying a variable of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-python-var-to-python var ", ") "]")
     (if (equal var 'hline)
-	"None"
+	org-babel-python-hline-to
       (format
        (if (and (stringp var) (string-match "[\n\r]" var)) "\"\"%S\"\"" "%S")
        var))))
@@ -123,7 +130,13 @@ specifying a variable of the same value."
   "Convert RESULTS into an appropriate elisp value.
 If the results look like a list or tuple, then convert them into an
 Emacs-lisp table, otherwise return the results as a string."
-  (org-babel-script-escape results))
+  ((lambda (res)
+     (if (listp res)
+	 (mapcar (lambda (el) (if (equal el 'None)
+			     org-babel-python-None-to el))
+		 res)
+       res))
+   (org-babel-script-escape results)))
 
 (defvar org-babel-python-buffers '((:default . nil)))
 
@@ -160,7 +173,7 @@ then create.  Return the initialized session."
 	  (py-shell)
 	  (setq python-buffer (concat "*" bufname "*"))))
        (t
-	(error "No function available for running an inferior python.")))
+	(error "No function available for running an inferior Python")))
       (setq org-babel-python-buffers
 	    (cons (cons session python-buffer)
 		  (assq-delete-all session org-babel-python-buffers)))
@@ -190,7 +203,7 @@ open('%s', 'w').write( pprint.pformat(main()) )")
 
 (defun org-babel-python-evaluate
   (session body &optional result-type result-params preamble)
-  "Evaluate BODY as python code."
+  "Evaluate BODY as Python code."
   (if session
       (org-babel-python-evaluate-session
        session body result-type result-params)
@@ -204,11 +217,8 @@ If RESULT-TYPE equals 'output then return standard output as a
 string.  If RESULT-TYPE equals 'value then return the value of the
 last statement in BODY, as elisp."
   ((lambda (raw)
-     (if (or (member "code" result-params)
-	     (member "pp" result-params)
-	     (and (member "output" result-params)
-		  (not (member "table" result-params))))
-	 raw
+     (org-babel-result-cond result-params
+       raw
        (org-babel-python-table-or-string (org-babel-trim raw))))
    (case result-type
      (output (org-babel-eval org-babel-python-command
@@ -257,11 +267,8 @@ last statement in BODY, as elisp."
 		       (funcall send-wait))))
     ((lambda (results)
        (unless (string= (substring org-babel-python-eoe-indicator 1 -1) results)
-	 (if (or (member "code" result-params)
-		 (member "pp" result-params)
-		 (and (member "output" result-params)
-		      (not (member "table" result-params))))
-	     results
+	 (org-babel-result-cond result-params
+	   results
 	   (org-babel-python-table-or-string results))))
      (case result-type
        (output
@@ -288,7 +295,7 @@ last statement in BODY, as elisp."
 	  (org-babel-eval-read-file tmp-file)))))))
 
 (defun org-babel-python-read-string (string)
-  "Strip 's from around python string."
+  "Strip 's from around Python string."
   (if (string-match "^'\\([^\000]+\\)'$" string)
       (match-string 1 string)
     string))

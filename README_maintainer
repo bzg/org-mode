@@ -33,7 +33,7 @@ release.
 
 When doing a /major release/, make sure all changes from the maint
 branch are merged into the the master branch, then merge the master
-branch back into maint to synchronize the two.  
+branch back into maint to synchronize the two.
 
 ** Minor release
 
@@ -41,7 +41,7 @@ The release number for minor releases look like this:  =7.13.01=
 
 Minor releases are small amends to main releases.  Usually they fix
 critical bugs discovered in a main release.  Minor bugs are usually
-not fixed -- they will be adressed in the next main release.  
+not fixed -- they will be adressed in the next main release.
 
 Only the fix to the bug is bundled into a release, without the main
 development work going on in the master branch.  Since the bug fix
@@ -50,7 +50,7 @@ maint then merged in master.
 
 ** Tagging the release
 
-When doing a major and a minor release, after all necessary merging 
+When doing a major and a minor release, after all necessary merging
 is done, tag the _maint_ branch for the release with:
 
   git tag -a "Adding release tag" release_7.9.1
@@ -65,11 +65,11 @@ Log on the orgmode.org server as the emacs user and cd to
 ~/git/org-mode
 
 From there do
-  
+
   make release
   make upload
 
-to create the .tar.gz and .zip files, the documentation, and to 
+to create the .tar.gz and .zip files, the documentation, and to
 upload everything at the right place.
 
 * Working with patchwork
@@ -196,13 +196,9 @@ So the way I have been doing things with Emacs is this:
 
    Careful: Copy /org.texi/ and /orgcard.tex/ into the right places,
    and also copy the lisp files with *two exceptions*: Do *not* copy
-   /org-colview-xemacs.el/ and /org-install.el/.  The former does not
+   /org-colview-xemacs.el/ and /org-loaddefs.el/.  The former does not
    belong in Emacs.  And the latter would actually be harmful because
-   Emacs generates its own autoloads.  The Emacs distribution contains
-   an empty /org-install.el/, so that users can have =(require
-   'org-install)= in .emacs with no ill effects.  So if you were to
-   copy /org-install.el/, you would overwrite that empty placeholder
-   file.
+   Emacs generates its own autoloads.
 
 4. Generate the ChangeLog entries
 
@@ -246,7 +242,7 @@ So the way I have been doing things with Emacs is this:
 
 * Updating the list of hooks/commands/options on Worg
 
-  Load the =mk/eldo.el= file then =M-x eldo-make-doc RET=. 
+  Load the =mk/eldo.el= file then =M-x eldo-make-doc RET=.
 
   This will produce an org file with the documentation.
 

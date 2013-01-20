@@ -1,6 +1,6 @@
 ;;; ob-exp.el --- Exportation of org-babel source blocks
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
 ;; Authors: Eric Schulte
 ;;	Dan Davison
@@ -23,11 +23,10 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Code:
-(require 'ob)
+(require 'ob-core)
 (eval-when-compile
   (require 'cl))
 
-(defvar obe-marker nil)
 (defvar org-current-export-file)
 (defvar org-babel-lob-one-liner-regexp)
 (defvar org-babel-ref-split-regexp)
@@ -48,7 +47,7 @@
 (declare-function org-element-context "org-element" ())
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
-
+(declare-function org-escape-code-in-string "org-src" (s))
 
 (defcustom org-export-babel-evaluate t
   "Switch controlling code evaluation during export.
@@ -159,7 +158,13 @@ this template."
 		      "\\|" org-babel-lob-one-liner-regexp "\\)")))
       (while (re-search-forward rx end t)
 	(save-excursion
-	  (let* ((element (save-match-data (org-element-context)))
+	  (let* ((element (save-excursion
+			    ;; If match is inline, point is at its
+			    ;; end.  Move backward so
+			    ;; `org-element-context' can get the
+			    ;; object, not the following one.
+			    (backward-char)
+			    (save-match-data (org-element-context))))
 		 (type (org-element-type element)))
 	    (when (memq type '(babel-call inline-babel-call inline-src-block))
 	      (let ((beg-el (org-element-property :begin element))
@@ -248,13 +253,12 @@ this template."
           (when (eq (org-element-type element) 'src-block)
             (let* ((match-start (copy-marker (match-beginning 0)))
                    (begin (copy-marker (org-element-property :begin element)))
-		   (end (copy-marker (org-element-property :end element)))
                    ;; Make sure we don't remove any blank lines after
                    ;; the block when replacing it.
                    (block-end (save-excursion
-                                (goto-char end)
-                                (skip-chars-backward " \r\t\n")
-                                (copy-marker (line-end-position))))
+				(goto-char (org-element-property :end element))
+				(skip-chars-backward " \r\t\n")
+				(copy-marker (line-end-position))))
                    (ind (org-get-indentation))
                    (headers
 		    (cons
@@ -273,8 +277,13 @@ this template."
 	      ;; should remove the block.
               (let ((replacement (progn (goto-char match-start)
 					(org-babel-exp-src-block headers))))
-                (cond ((not replacement) (goto-char end))
-		      ((equal replacement "") (delete-region begin end))
+                (cond ((not replacement) (goto-char block-end))
+		      ((equal replacement "")
+		       (delete-region begin
+				      (progn (goto-char block-end)
+					     (skip-chars-forward " \r\t\n")
+					     (if (eobp) (point)
+					       (line-beginning-position)))))
 		      (t
 		       (goto-char match-start)
 		       (delete-region (point) block-end)
@@ -287,11 +296,10 @@ this template."
 					   (indent-line-to ind))
 			 ;; Indent everything.
 			 (indent-code-rigidly match-start (point) ind)))))
-	      (setq pos (point))
+	      (setq pos (line-beginning-position))
               ;; Cleanup markers.
 	      (set-marker match-start nil)
 	      (set-marker begin nil)
-	      (set-marker end nil)
               (set-marker block-end nil)))))
       ;; Eventually execute all non-block Babel elements between last
       ;; src-block and end of buffer.
@@ -356,9 +364,7 @@ replaced with its value."
   (org-fill-template
    org-babel-exp-code-template
    `(("lang"  . ,(nth 0 info))
-     ("body"  . ,(if (string= (nth 0 info) "org")
-		     (replace-regexp-in-string "^" "," (nth 1 info))
-		   (nth 1 info)))
+     ("body"  . ,(org-escape-code-in-string (nth 1 info)))
      ,@(mapcar (lambda (pair)
 		 (cons (substring (symbol-name (car pair)) 1)
 		       (format "%S" (cdr pair))))

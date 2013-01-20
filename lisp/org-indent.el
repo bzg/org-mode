@@ -1,5 +1,5 @@
 ;;; org-indent.el --- Dynamic indentation for  Org-mode
-;; Copyright (C) 2009-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
 ;;
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -430,5 +430,9 @@ This function is meant to be called by `after-change-functions'."
 	(org-indent-add-properties beg end)))))
 
 (provide 'org-indent)
+
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; org-indent.el ends here

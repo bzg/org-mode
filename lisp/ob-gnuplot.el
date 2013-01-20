@@ -1,6 +1,6 @@
 ;;; ob-gnuplot.el --- org-babel functions for gnuplot evaluation
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
 ;; Author: Eric Schulte
 ;; Keywords: literate programming, reproducible research
@@ -39,8 +39,6 @@
 
 ;;; Code:
 (require 'ob)
-(require 'ob-ref)
-(require 'ob-comint)
 (eval-when-compile (require 'cl))
 
 (declare-function org-time-string-to-time "org" (s))

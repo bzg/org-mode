@@ -56,7 +56,7 @@ BTEST	= $(BATCH) \
 	  --eval '(add-to-list '"'"'load-path "./lisp")' \
 	  --eval '(add-to-list '"'"'load-path "./testing")' \
 	  $(BTEST_POST) \
-	  -l org-install.el \
+	  -l org-loaddefs.el \
 	  -l testing/org-test.el \
 	  $(foreach ob-lang,$(BTEST_OB_LANGUAGES),$(req-ob-lang)) \
 	  $(foreach req,$(BTEST_EXTRA),$(req-extra)) \
@@ -67,9 +67,12 @@ BTEST	= $(BATCH) \
 # BATCH = $(EMACS) -batch -vanilla # XEmacs
 BATCH	= $(EMACS) -batch -Q
 
+# Emacs must be started in toplevel directory
+BATCHO	= $(BATCH) \
+	  --eval '(add-to-list '"'"'load-path "./lisp")'
+
 # How to generate local.mk
-MAKE_LOCAL_MK = $(BATCH) \
-	  --eval '(add-to-list '"'"'load-path "./lisp")' \
+MAKE_LOCAL_MK = $(BATCHO) \
 	  --eval '(load "org-compat.el")' \
 	  --eval '(load "../mk/org-fixup.el")' \
 	  --eval '(org-make-local-mk)'
@@ -78,11 +81,11 @@ MAKE_LOCAL_MK = $(BATCH) \
 BATCHL	= $(BATCH) \
 	  --eval '(add-to-list '"'"'load-path ".")'
 
-# How to generate org-install.el
+# How to generate org-loaddefs.el
 MAKE_ORG_INSTALL = $(BATCHL) \
 	  --eval '(load "org-compat.el")' \
 	  --eval '(load "../mk/org-fixup.el")' \
-	  --eval '(org-make-org-install)'
+	  --eval '(org-make-org-loaddefs)'
 
 # How to generate org-version.el
 MAKE_ORG_VERSION = $(BATCHL) \

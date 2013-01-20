@@ -1,6 +1,6 @@
 ;;; org-w3m.el --- Support from copy and paste from w3m to Org-mode
 
-;; Copyright (C) 2008-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2013 Free Software Foundation, Inc.
 
 ;; Author: Andy Stewart <lazycat dot manatee at gmail dot com>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -42,6 +42,19 @@
 ;;; Code:
 
 (require 'org)
+
+(defvar w3m-current-url)
+(defvar w3m-current-title)
+
+(add-hook 'org-store-link-functions 'org-w3m-store-link)
+(defun org-w3m-store-link ()
+  "Store a link to a w3m buffer."
+  (when (eq major-mode 'w3m-mode)
+    (org-store-link-props
+     :type "w3m"
+     :link w3m-current-url
+     :url (url-view-url t)
+     :description (or w3m-current-title w3m-current-url))))
 
 (defun org-w3m-copy-for-org-mode ()
   "Copy current buffer content or active region with `org-mode' style links.

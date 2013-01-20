@@ -1,6 +1,6 @@
 ;;; org-exp.el --- Export internals for Org-mode
 
-;; Copyright (C) 2004-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2004-2013 Free Software Foundation, Inc.
 
 ;; Author: Carsten Dominik <carsten at orgmode dot org>
 ;; Keywords: outlines, hypermedia, calendar, wp
@@ -47,6 +47,7 @@
 (declare-function org-table-colgroup-line-p "org-table" (line))
 (declare-function org-pop-to-buffer-same-window "org-compat"
 		  (&optional buffer-or-name norecord label))
+(declare-function org-unescape-code-in-region "org-src" (beg end))
 
 (autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
 
@@ -87,10 +88,14 @@ is nil, the buffer remains buried also in these cases."
   :group 'org-export-general
   :type 'boolean)
 
-(defcustom org-export-copy-to-kill-ring t
-  "Non-nil means exported stuff will also be pushed onto the kill ring."
+(defcustom org-export-copy-to-kill-ring 'if-interactive
+  "Should we push exported content to the kill ring?"
   :group 'org-export-general
-  :type 'boolean)
+  :version "24.3"
+  :type '(choice
+	  (const :tag "Always" t)
+	  (const :tag "When export is done interactively" if-interactive)
+	  (const :tag "Never" nil)))
 
 (defcustom org-export-kill-product-buffer-when-displayed nil
   "Non-nil means kill the product buffer if it is displayed immediately.
@@ -700,7 +705,10 @@ table.el tables."
     (:style-extra	      nil	  org-export-html-style-extra)
     (:agenda-style	      nil	  org-agenda-export-html-style)
     (:convert-org-links	      nil	  org-export-html-link-org-files-as-html)
-    (:inline-images	      nil	  org-export-html-inline-images)
+    (:html-inline-images      nil	  org-export-html-inline-images)
+    (:latex-inline-images     nil	  org-export-latex-inline-images)
+    (:odt-inline-images       nil	  org-export-odt-inline-images)
+    (:docbook-inline-images   nil	  org-export-docbook-inline-images)
     (:html-extension	      nil	  org-export-html-extension)
     (:html-preamble	      nil	  org-export-html-preamble)
     (:html-postamble	      nil	  org-export-html-postamble)
@@ -1789,7 +1797,7 @@ from the buffer."
 		 beg-content end-content
 		 `(org-protected t original-indentation ,ind org-native-text t))
 		;; strip protective commas
-		(org-strip-protective-commas beg-content end-content)
+		(org-unescape-code-in-region beg-content end-content)
 		(delete-region (match-beginning 0) (match-end 0))
 		(save-excursion
 		  (goto-char beg)
@@ -3045,12 +3053,11 @@ to the value of `temporary-file-directory'."
 	  (eval ;; convert to fmt -- mimicking `org-run-like-in-org-mode'
 	   (list 'let org-local-vars
 		 (list (intern (format "org-export-as-%s" fmt))
-		       nil nil nil ''string t))))
+		       nil nil ''string t dir))))
       (delete-file tmp-file))))
 
 ;;;###autoload
-(defun org-export-as-org (arg &optional hidden ext-plist
-			      to-buffer body-only pub-dir)
+(defun org-export-as-org (arg &optional ext-plist to-buffer body-only pub-dir)
   "Make a copy with not-exporting stuff removed.
 The purpose of this function is to provide a way to export the source
 Org file of a webpage in Org format, but with sensitive and/or irrelevant
@@ -3229,7 +3236,6 @@ Does include HTML export options as well as TODO and CATEGORY stuff."
    org-archive-location
    "org file:~/org/%s.org"))
 
-;;;###autoload
 (defun org-insert-export-options-template ()
   "Insert into the buffer a template with information for exporting."
   (interactive)
@@ -3338,7 +3344,9 @@ If yes remove the column and the special lines."
 (defun org-export-push-to-kill-ring (format)
   "Push buffer content to kill ring.
 The depends on the variable `org-export-copy-to-kill-ring'."
-  (when org-export-copy-to-kill-ring
+  (when (or (and (eq org-export-copy-to-kill-ring 'if-interactive)
+		 (not (or executing-kbd-macro noninteractive)))
+	    (eq org-export-copy-to-kill-ring t))
     (org-kill-new (buffer-string))
     (when (fboundp 'x-set-selection)
       (ignore-errors (x-set-selection 'PRIMARY (buffer-string)))
@@ -3346,5 +3354,9 @@ The depends on the variable `org-export-copy-to-kill-ring'."
     (message "%s export done, pushed to kill ring and clipboard" format)))
 
 (provide 'org-exp)
+
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
 
 ;;; org-exp.el ends here

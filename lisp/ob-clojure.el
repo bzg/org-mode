@@ -1,6 +1,6 @@
 ;;; ob-clojure.el --- org-babel functions for clojure evaluation
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
 ;; Author: Joel Boehland
 ;;	Eric Schulte
@@ -79,9 +79,8 @@
     (insert (org-babel-expand-body:clojure body params))
     ((lambda (result)
        (let ((result-params (cdr (assoc :result-params params))))
-	 (if (or (member "scalar" result-params)
-		 (member "verbatim" result-params))
-	     result
+	 (org-babel-result-cond result-params
+	   result
 	   (condition-case nil (org-babel-script-escape result)
 	     (error result)))))
      (slime-eval

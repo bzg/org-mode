@@ -1,6 +1,6 @@
 ;;; ob-lisp.el --- org-babel functions for common lisp evaluation
 
-;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
 
 ;; Authors: Joel Boehland
 ;;	 Eric Schulte
@@ -76,8 +76,8 @@ current directory string."
   (require 'slime)
   (org-babel-reassemble-table
    ((lambda (result)
-      (if (member "output" (cdr (assoc :result-params params)))
-	  (car result)
+      (org-babel-result-cond (cdr (assoc :result-params params))
+	(car result)
 	(condition-case nil
 	    (read (org-babel-lisp-vector-to-list (cadr result)))
 	  (error (cadr result)))))

@@ -39,7 +39,7 @@
 @end macro
 @copying
 
-Copyright @copyright{} 2010-2012 Free Software Foundation
+Copyright @copyright{} 2010--2013 Free Software Foundation
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -50,13 +50,7 @@ and with the Back-Cover Texts as in (a) below.  A copy of the license
 is included in the section entitled ``GNU Free Documentation License.''
 
 (a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
-modify this GNU manual.  Buying copies from the FSF supports it in
-developing GNU and promoting software freedom.''
-
-This document is part of a collection distributed under the GNU Free
-Documentation License.  If you want to distribute this document
-separately from the collection, you can do so by adding a copy of the
-license to the document, as described in section 6 of the license.
+modify this GNU manual.''
 @end quotation
 @end copying
 
@@ -103,6 +97,8 @@ license to the document, as described in section 6 of the license.
 * Publishing::			Create a web site of linked Org files
 * Working With Source Code::	Source code snippets embedded in Org
 * Miscellaneous::		All the rest which did not fit elsewhere
+
+* GNU Free Documentation License:: This manual license.
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -163,7 +159,7 @@ Dates and Times
 Capture - Refile - Archive
 
 * Capture::			
-* Refiling notes::		Moving a tree from one place to another
+* Refile and copy::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 
 Capture
@@ -213,7 +209,7 @@ Exporting
 * HTML export::			Exporting to HTML
 * @LaTeX{} and PDF export::	Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::		Exporting to DocBook
-* iCalendar export::		
+* iCalendar export::
 
 Miscellaneous
 
@@ -271,13 +267,6 @@ command:
 make
 @end smallexample
 
-Then add the following line to @file{.emacs}.  It is needed so that
-Emacs can autoload functions that are located in files not immediately loaded
-when Org-mode starts.
-@smalllisp
-(require 'org-install)
-@end smalllisp
-
 @node Activation, Feedback, Installation, Introduction
 @section Activation
 
@@ -287,7 +276,7 @@ yourself.
 
 @smalllisp
 ;; The following lines are always needed.  Choose your own keys.
-(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode))
+(add-to-list 'auto-mode-alist '("\\.org\\'" . org-mode)) ; not needed since Emacs 22.2
 (add-hook 'org-mode-hook 'turn-on-font-lock) ; not needed when global-font-lock-mode is on
 (global-set-key "\C-cl" 'org-store-link)
 (global-set-key "\C-ca" 'org-agenda)
@@ -438,7 +427,7 @@ Promote/demote the current subtree by one level.
 Move subtree up/down (swap with previous/next subtree of same
 level).
 @item C-c C-w
-Refile entry or region to a different location.  @xref{Refiling notes}.
+Refile entry or region to a different location.  @xref{Refile and copy}.
 @item C-x n s/w
 Narrow buffer to current subtree / widen it again
 @end table
@@ -940,7 +929,7 @@ like this:
 The keywords should all be different, this helps Org mode to keep track of
 which subsequence should be used for a given entry.  The example also shows
 how to define keys for fast access of a particular state, by adding a letter
-in parenthesis after each keyword - you will be prompted for the key after
+in parenthesis after each keyword---you will be prompted for the key after
 @kbd{C-c C-t}.
 
 To define TODO keywords that are valid only in a single file, use the
@@ -1529,12 +1518,12 @@ projects need to be moved around.  Moving completed project trees to an
 archive file keeps the system compact and fast.
 
 @menu
-* Capture::			
+* Capture::
 * Refiling notes::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 @end menu
 
-@node Capture, Refiling notes, Capture - Refile - Archive, Capture - Refile - Archive
+@node Capture, Refile and copy, Capture - Refile - Archive, Capture - Refile - Archive
 @section Capture
 
 Org's method for capturing new items is heavily inspired by John Wiegley
@@ -1574,7 +1563,7 @@ Once you are done entering information into the capture buffer,
 @kbd{C-c C-c} will return you to the window configuration before the capture
 process, so that you can resume your work without further distraction.
 @item C-c C-w
-Finalize by moving the entry to a refile location (@pxref{Refiling notes}).
+Finalize by moving the entry to a refile location (@pxref{Refile and copy}).
 @item C-c C-k
 Abort the capture process and return to the previous state.
 @end table
@@ -1622,15 +1611,18 @@ possibilities, consult the manual for more.
 %u, %U      @r{like the above, but inactive timestamps}
 @end smallexample
 
-@node Refiling notes, Archiving, Capture, Capture - Refile - Archive
-@section Refiling notes
+@node Refile and copy, Archiving, Capture, Capture - Refile - Archive
+@section Refile and copy
 
-When reviewing the captured data, you may want to refile some of the entries
-into a different list, for example into a project.  Cutting, finding the
-right location, and then pasting the note is cumbersome.  To simplify this
-process, you can use the following special command:
+When reviewing the captured data, you may want to refile or copy some of the
+entries into a different list, for example into a project.  Cutting, finding
+the right location, and then pasting the note is cumbersome.  To simplify
+this process, you can use the following special command:
 
 @table @kbd
+@item C-c M-x
+Copy the entry or region at point.  This command behaves like
+@code{org-refile}, except that the original note will not be deleted.
 @item C-c C-w
 Refile the entry or region at point.  This command offers possible locations
 for refiling the entry and lets you select one with completion.  The item (or
@@ -1644,7 +1636,7 @@ Use the refile interface to jump to a heading.
 Jump to the location where @code{org-refile} last moved a tree to.
 @end table
 
-@node Archiving,  , Refiling notes, Capture - Refile - Archive
+@node Archiving,  , Refile and copy, Capture - Refile - Archive
 @section Archiving
 
 When a project represented by a (sub)tree is finished, you may want
@@ -1956,7 +1948,7 @@ Narrow the current agenda filter by an additional condition.
 
 @tsubheading{Remote editing (see the manual for many more commands)}
 
-@item 0-9
+@item 0--9
 Digit argument.
 @c
 @item t
@@ -2298,7 +2290,7 @@ that planning information can be incorporated into desktop calendars.
 * HTML export::			Exporting to HTML
 * @LaTeX{} and PDF export::	Exporting to @LaTeX{}, and processing to PDF
 * DocBook export::		Exporting to DocBook
-* iCalendar export::		
+* iCalendar export::
 @end menu
 
 @node Export options, The export dispatcher, Exporting, Exporting
@@ -2600,7 +2592,7 @@ Chapter 11.3 of the manual}@*
 @uref{http://orgmode.org/worg/org-contrib/babel/index.php,
 The Babel site on Worg}}
 
-@node Miscellaneous,  , Working With Source Code, Top
+@node Miscellaneous, GNU Free Documentation License, Working With Source Code, Top
 @chapter Miscellaneous
 
 @menu
@@ -2684,6 +2676,12 @@ of the manual}@*
 @uref{http://orgmode.org/manual/MobileOrg.html#MobileOrg, Appendix B of the
 manual}@*
 @uref{http://orgmode.org/orgcard.pdf,Key reference card}}
+
+
+@node GNU Free Documentation License,  , Miscellaneous, Top
+@appendix GNU Free Documentation License
+@include doclicense.texi
+
 
 @bye
 

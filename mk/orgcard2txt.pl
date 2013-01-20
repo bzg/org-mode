@@ -1,5 +1,5 @@
 # orgcard2txt.pl - a script to generate orgcard.txt from orgcard.tex
-# Copyright (C) 2010 Osamu OKANO
+# Copyright (C) 2010, 2013 Osamu OKANO
 #
 # Version: 0.1
 #

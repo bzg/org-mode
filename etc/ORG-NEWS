@@ -1,11 +1,77 @@
 ORG NEWS -- history of user-visible changes.           -*- org -*-
 
-Copyright (C) 2012  Free Software Foundation, Inc.
+#+LINK: doc http://orgmode.org/worg/doc.html#%s
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
 See the end of the file for license conditions.
 
 Please send Org bug reports to emacs-orgmode@gnu.org.
 
-* Version 7.9.1
+* Version 7.9.3
+
+** New option [[doc::org-agenda-use-tag-inheritance][org-agenda-use-tag-inheritance]]
+
+[[doc::org-use-tag-inheritance][org-use-tag-inheritance]] controls whether tags are inherited when
+org-tags-view is called (either in =tags=, =tags-tree= or =tags-todo=
+agenda views.)
+
+When generating other agenda types such as =agenda=, =todo= and
+=todo-tree=, tags inheritance is not used when selecting the entries
+to display.  Still, you might want to have all tag information correct
+in the agenda buffer, e.g. for tag filtering.  In that case, add the
+agenda type to this variable.
+
+Setting this variable to nil should considerably speeds up the agenda
+generation.
+
+Note that the default was to display inherited tags in the agenda
+lines even if `org-use-tag-inheritance' was nil.  The default is now
+to *never* display inherited tags in agenda lines, but to /know/ about
+them when the agenda type is listed in [[doc::org-agenda-use-tag-inheritance][org-agenda-use-tag-inheritance]].
+
+** New default value nil for [[doc::org-agenda-dim-blocked-tasks][org-agenda-dim-blocked-tasks]]
+
+Using `nil' as the default value speeds up the agenda generation.  You
+can hit `#' (or `C-u #') in agenda buffers to temporarily dim (or turn
+invisible) blocked tasks.
+
+** New speedy keys for [[doc::org-speed-commands-default][org-speed-commands-default]]
+
+You can now use `:' (instead of `;') for setting tags---this is
+consistent with using the `:' key in agenda view.
+
+You can now use `=' for [[doc::org-columns][org-columns]].
+
+** =org-float= is now obsolete, use =diary-float= instead
+** No GPL manual anymore
+
+There used to be a GPL version of the Org manual, but this is not the
+case anymore, the Free Software Foundation does not permit this.
+
+The GNU FDL license is now included in the manual directly.
+
+** Enhanced compatibility with Emacs 22 and XEmacs
+
+Thanks to Achim for his work on enhancing Org's compatibility with
+various Emacsen.  Things may not be perfect, but Org should work okay
+in most environments.
+
+* Version 7.9.2
+
+** New ELPA repository for Org packages
+
+You can now add the Org ELPA repository like this:
+
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+#+END_SRC
+
+It contains both the =org-*.tar= package (the core Org distribution, also
+available through http://elpa.gnu.org) and the =org-plus*.tar= package (the
+extended Org distribution, with non-GNU packages from the =contrib/=
+directory.)
+
+See http://orgmode.org/elpa/
 
 ** Overview of the new keybindings
 
@@ -23,6 +89,7 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
    |                 | =:=    | [[doc::org-columns][org-columns]]                 |
    |                 | =W=    | Set =APPT_WARNTIME=         |
    | =k=             |        | [[doc::org-agenda-capture][org-agenda-capture]]          |
+   | C-c ,           | ,      | [[doc::org-priority][org-priority]]                |
 
 ** New package and Babel langage
 
@@ -41,16 +108,20 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
    - If your code relies on =org-make-link=, please use =concat=
      instead.
 
+   - =org-link-to-org-use-id= has been renamed to
+     =org-id-link-to-org-use-id= and its default value is nil.  The
+     previous default was =create-if-interactive-and-no-custom-id=.
+
 ** New features and user-visible changes
 
 *** Org Element
 
-    =org-element.el= is a toolbox for parsing and analysing "elements"
+    =org-element.el= is a toolbox for parsing and analyzing "elements"
     in an Org-mode buffer.  This has been written by Nicolas Goaziou
     and has been tested for quite some time.  It is now part of Org's
     core and many core functions rely on this package.
 
-    Two functions might be particularily handy for users:
+    Two functions might be particularly handy for users:
     =org-element-at-point= and =org-element-context=.
 
     See the docstrings for more details.
@@ -509,7 +580,37 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
      Format string to format the date and time in HTML export.  Thanks
      to Sébastien Vauban for this patch.
 
+*** Org Babel
+
+**** New =:results drawer= parameter
+
+=:results drawer= replaces =:results wrap=, which is deprecated but still
+supported.
+
+**** =:results org= now put results in a =#+BEGIN_SRC org= block
+
+=:results org= used to put results in a =#+BEGIN_ORG= block but it now puts
+results in a =#+BEGIN_SRC org= block, with comma-escaped lines.
+
+=#+BEGIN_ORG= blocks are obsolete.
+
+**** Exporting =#+BEGIN_SRC org= blocks exports the code
+
+It used to exports the results of the code.
+
 *** Miscellaneous
+
+**** New menu entry for [[doc::org-refile][org-refile]]
+**** Allow capturing to encrypted entries
+
+If you capture to an encrypted entry, it will be decrypted before
+inserting the template then re-encrypted after finalizing the capture.
+
+**** Inactive timestamps are now handled in tables
+
+Calc can do computation on active time-stamps like <2012-09-29 sat.>.
+Inactive time-stamps in a table's cell are now internally deactivated so
+that Calc formulas can operate on them.
 
 **** [[doc::org-table-number-regexp][org-table-number-regexp]] can now accept comma as decimal mark
 **** Org allows a new property =APPT_WARNTIME=
@@ -882,7 +983,7 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 
 **** org-gnus.el now allows link creation from messages
 
-     You can now create links from messages.  This is particularily
+     You can now create links from messages.  This is particularly
      useful when the user wants to stored messages that he sends, for
      later check.  Thanks to Ulf Stegemann for the patch.
 
@@ -1065,7 +1166,7 @@ Please send Org bug reports to emacs-orgmode@gnu.org.
 
 *** Completion
 
-**** In-buffer completion is now done using John Wiegleys pcomplete.el
+**** In-buffer completion is now done using John Wiegley's pcomplete.el
 
      Thanks to John Wiegley for much of this code.
 
