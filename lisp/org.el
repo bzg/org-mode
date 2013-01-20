@@ -19561,14 +19561,25 @@ This command does many different things, depending on context:
 		     (>= (point) (org-element-property :end context)))))
 	  (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
 	      (user-error "C-c C-c can do nothing useful at this location"))
+	;; For convenience: at the first line of a paragraph on the
+	;; same line as an item, apply function on that item instead.
+	(when (eq type 'paragraph)
+	  (let ((parent (org-element-property :parent context)))
+	    (when (and (eq (org-element-type parent) 'item)
+		       (= (point-at-bol) (org-element-property :begin parent)))
+	      (setq context parent type 'item))))
+	;; Act according to type of element or object at point.
 	(case type
 	  (clock (org-clock-update-time-maybe))
 	  (dynamic-block
 	   (save-excursion
 	     (goto-char (org-element-property :post-affiliated context))
 	     (org-update-dblock)))
-	  ((footnote-definition footnote-reference)
-	   (call-interactively 'org-footnote-action))
+	  (footnote-definition
+	   (save-excursion
+	     (goto-char (org-element-property :post-affiliated context))
+	     (call-interactively 'org-footnote-action)))
+	  (footnote-reference (call-interactively 'org-footnote-action))
 	  ((headline inlinetask)
 	   (save-excursion (goto-char (org-element-property :begin context))
 			   (call-interactively 'org-set-tags)))
