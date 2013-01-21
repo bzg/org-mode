@@ -2661,15 +2661,6 @@ Paragraph \\alpha."
        (org-test-with-temp-text "- Para1\n- Para2\n\nPara3"
 	 (progn (forward-line 2)
 		(org-element-type (org-element-at-point))))))
-  ;; Special case: within the first blank lines in buffer, return nil.
-  (should-not (org-test-with-temp-text "\nParagraph" (org-element-at-point)))
-  ;; Special case: within the blank lines after a headline, return
-  ;; that headline.
-  (should
-   (eq 'headline
-       (org-test-with-temp-text "* Headline\n\nParagraph"
-	 (progn (forward-line)
-		(org-element-type (org-element-at-point))))))
   ;; With an optional argument, return trail.
   (should
    (equal '(paragraph center-block)
@@ -2742,9 +2733,7 @@ Paragraph \\alpha."
        (org-test-with-temp-text "Some *text with _underline_ text*"
 	 (progn
 	   (search-forward "under")
-	   (org-element-type (org-element-context (org-element-at-point)))))))
-  ;; Return nil when point is within the first blank lines.
-  (should-not (org-test-with-temp-text "\n* Headline" (org-element-context))))
+	   (org-element-type (org-element-context (org-element-at-point))))))))
 
 
 (provide 'test-org-element)
