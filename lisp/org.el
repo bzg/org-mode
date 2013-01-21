@@ -19653,8 +19653,8 @@ This command does many different things, depending on context:
 	       (org-list-set-checkbox begin struct new-box)))
 	     (org-list-write-struct
 	      struct (org-list-parents-alist struct) old-struct)
-	     (org-update-checkbox-count-maybe))
-	   (org-list-send-list 'maybe))
+	     (org-update-checkbox-count-maybe)
+	     (save-excursion (goto-char begin) (org-list-send-list 'maybe))))
 	  ((property-drawer node-property)
 	   (call-interactively 'org-property-action))
 	  ((radio-target target)
