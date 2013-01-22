@@ -19610,7 +19610,12 @@ This command does many different things, depending on context:
 	     (let ((block-item
 		    (org-list-struct-fix-box struct parents prevs orderedp)))
 	       (if (and box (equal struct old-struct))
-		   (user-error "Cannot toggle this checkbox (empty subitems?)")
+		   (if (equal arg '(16))
+		       (message "Checkboxes already reset")
+		     (user-error "Cannot toggle this checkbox: %s"
+				 (if (eq box 'on)
+				     "all subitems checked"
+				   "unchecked subitems")))
 		 (org-list-struct-apply-struct struct old-struct)
 		 (org-update-checkbox-count-maybe))
 	       (when block-item
