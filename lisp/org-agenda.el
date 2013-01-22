@@ -5828,7 +5828,8 @@ please use `org-class' instead."
   "Add overlays, showing issues with clocking.
 See also the user option `org-agenda-clock-consistency-checks'."
   (interactive)
-  (let* ((pl org-agenda-clock-consistency-checks)
+  (let* ((org-time-clocksum-use-effort-durations nil)
+	 (pl org-agenda-clock-consistency-checks)
 	 (re (concat "^[ \t]*"
 		     org-clock-string
 		     "[ \t]+"
@@ -6399,10 +6400,12 @@ Any match of REMOVE-RE will be removed from TXT."
 	  (if s2 (setq s2 (org-get-time-of-day s2 'string t)))
 
 	  ;; Try to set s2 if s1 and `org-agenda-default-appointment-duration' are set
-	  (when (and s1 (not s2) org-agenda-default-appointment-duration)
-	    (setq s2
-		  (org-minutes-to-clocksum-string
-		   (+ (org-hh:mm-string-to-minutes s1) org-agenda-default-appointment-duration))))
+	  (let (org-time-clocksum-use-effort-durations)
+	    (when (and s1 (not s2) org-agenda-default-appointment-duration)
+	      (setq s2
+		    (org-minutes-to-clocksum-string
+		     (+ (org-hh:mm-string-to-minutes s1)
+			org-agenda-default-appointment-duration)))))
 
 	  ;; Compute the duration
 	  (when s2
