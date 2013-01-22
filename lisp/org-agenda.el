@@ -6989,7 +6989,10 @@ When `org-agenda-sticky' is non-nil, only bury the agenda."
   (interactive)
   (if (and (eq org-indirect-buffer-display 'other-window)
 	   org-last-indirect-buffer)
-      (delete-window (get-buffer-window org-last-indirect-buffer)))
+      (let ((org-last-indirect-window
+	     (get-buffer-window org-last-indirect-buffer)))
+	(if org-last-indirect-window
+	    (delete-window org-last-indirect-window))))
   (if org-agenda-columns-active
       (org-columns-quit)
     (if org-agenda-sticky
