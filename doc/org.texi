@@ -2060,7 +2060,7 @@ table.  But it is easier just to start typing, like
 
 @tsubheading{Re-aligning and field motion}
 @orgcmd{C-c C-c,org-table-align}
-Re-align the table without moving the cursor.
+Re-align the table and don't move to another field.
 @c
 @orgcmd{<TAB>,org-table-next-field}
 Re-align the table, move to the next field.  Creates a new row if
