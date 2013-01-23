@@ -4234,8 +4234,8 @@ row of a table, returned element will be the table instead of the
 first row.
 
 If optional argument KEEP-TRAIL is non-nil, the function returns
-a list of of elements leading to element at point.  The list's
-CAR is always the element at point.  Following positions contain
+a list of elements leading to element at point.  The list's CAR
+is always the element at point.  The following positions contain
 element's siblings, then parents, siblings of parents, until the
 first element of current section."
   (org-with-wide-buffer
