@@ -3024,9 +3024,9 @@ functions.
 
 Org-Plot can produce 2D and 3D graphs of information stored in org tables
 using @file{Gnuplot} @uref{http://www.gnuplot.info/} and @file{gnuplot-mode}
-@uref{http://cars9.uchicago.edu/~ravel/software/gnuplot-mode.html}.  To see
-this in action, ensure that you have both Gnuplot and Gnuplot mode installed
-on your system, then call @code{org-plot/gnuplot} on the following table.
+@uref{http://xafs.org/BruceRavel/GnuplotMode}.  To see this in action, ensure
+that you have both Gnuplot and Gnuplot mode installed on your system, then
+call @code{org-plot/gnuplot} on the following table.
 
 @example
 @group
