@@ -1241,7 +1241,7 @@ make this the default behavior.)"
 	      (setq org-clock-start-time
 		    (apply 'encode-time
 			   (org-parse-time-string (match-string 1))))
-	      (setq org-clock-effort (get-text-property (point) 'org-effort))
+	      (setq org-clock-effort (org-entry-get (point) org-effort-property))
 	      (setq org-clock-total-time (org-clock-sum-current-item
 					  (org-clock-get-sum-start))))
 	     ((eq org-clock-in-resume 'auto-restart)
@@ -1261,7 +1261,7 @@ make this the default behavior.)"
 		(beginning-of-line 1)
 		(org-indent-line-to (- (org-get-indentation) 2)))
 	      (insert org-clock-string " ")
-	      (setq org-clock-effort (get-text-property (point) 'org-effort))
+	      (setq org-clock-effort (org-entry-get (point) org-effort-property))
 	      (setq org-clock-total-time (org-clock-sum-current-item
 					  (org-clock-get-sum-start)))
 	      (setq org-clock-start-time
