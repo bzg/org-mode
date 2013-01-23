@@ -1547,6 +1547,7 @@ This format works similar to a printf format, with the following meaning:
   %T   the last tag of the item (ignore inherited tags, which come first)
   %t   the HH:MM time-of-day specification if one applies to the entry
   %s   Scheduling/Deadline information, a short string
+  %b   show breadcrumbs, i.e., the names of the higher levels
   %(expression) Eval EXPRESSION and replace the control string
                 by the result
 
@@ -6494,6 +6495,9 @@ The flag is set if the currently compiled format contains a `%T'.")
 (defvar org-prefix-has-effort nil
   "A flag, set by `org-compile-prefix-format'.
 The flag is set if the currently compiled format contains a `%e'.")
+(defvar org-prefix-has-breadcrumbs nil
+  "A flag, set by `org-compile-prefix-format'.
+The flag is set if the currently compiled format contains a `%b'.")
 (defvar org-prefix-category-length nil
   "Used by `org-compile-prefix-format' to remember the category field width.")
 (defvar org-prefix-category-max-length nil
@@ -6643,6 +6647,9 @@ Any match of REMOVE-RE will be removed from TXT."
 				"......")))
 			 (t ""))
 	      extra (or (and (not habitp) extra) "")
+	      breadcrumbs (org-with-point-at (org-get-at-bol 'org-marker)
+			    (let ((s (org-display-outline-path nil nil "->" t)))
+				 (if (eq "" s) "" (concat s "->"))))
 	      category (if (symbolp category) (symbol-name category) category)
 	      thecategory (copy-sequence category)
 	      level (or level ""))
@@ -6673,6 +6680,7 @@ Any match of REMOVE-RE will be removed from TXT."
 	  'duration duration
 	  'effort effort
 	  'effort-minutes neffort
+	  'breadcrumbs breadcrumbs
 	  'txt txt
 	  'level level
 	  'time time
@@ -6771,7 +6779,8 @@ and stored in the variable `org-prefix-format-compiled'."
   (setq org-prefix-has-time nil
 	org-prefix-has-tag nil
 	org-prefix-category-length nil
-	org-prefix-has-effort nil)
+	org-prefix-has-effort nil
+	org-prefix-has-breadcrumbs nil)
   (let ((s (cond
 	    ((stringp org-agenda-prefix-format)
 	     org-agenda-prefix-format)
@@ -6780,11 +6789,11 @@ and stored in the variable `org-prefix-format-compiled'."
 	    (t "  %-12:c%?-12t% s")))
 	(start 0)
 	varform vars var e c f opt)
-    (while (string-match "%\\(\\?\\)?\\([-+]?[0-9.]*\\)\\([ .;,:!?=|/<>]?\\)\\([cltsei]\\|(.+)\\)"
+    (while (string-match "%\\(\\?\\)?\\([-+]?[0-9.]*\\)\\([ .;,:!?=|/<>]?\\)\\([cltseib]\\|(.+)\\)"
 			 s start)
       (setq var (or (cdr (assoc (match-string 4 s)
 				'(("c" . category) ("t" . time) ("l" . level) ("s" . extra)
-				  ("i" . category-icon) ("T" . tag) ("e" . effort))))
+				  ("i" . category-icon) ("T" . tag) ("e" . effort) ("b" . breadcrumbs))))
 		    'eval)
 	    c (or (match-string 3 s) "")
 	    opt (match-beginning 1)
@@ -6792,6 +6801,7 @@ and stored in the variable `org-prefix-format-compiled'."
       (if (equal var 'time) (setq org-prefix-has-time t))
       (if (equal var 'tag)  (setq org-prefix-has-tag  t))
       (if (equal var 'effort) (setq org-prefix-has-effort t))
+      (if (equal var 'breadcrumbs) (setq org-prefix-has-breadcumbs t))
       (setq f (concat "%" (match-string 2 s) "s"))
       (when (equal var 'category)
 	(setq org-prefix-category-length
@@ -6818,7 +6828,8 @@ and stored in the variable `org-prefix-format-compiled'."
 	     `((org-prefix-has-time ,org-prefix-has-time)
 	       (org-prefix-has-tag ,org-prefix-has-tag)
 	       (org-prefix-category-length ,org-prefix-category-length)
-	       (org-prefix-has-effort ,org-prefix-has-effort))
+	       (org-prefix-has-effort ,org-prefix-has-effort)
+	       (org-prefix-has-breadcrumbs ,org-prefix-has-breadcrumbs))
 	     `(format ,s ,@vars))))))
 
 (defun org-set-sorting-strategy (key)
