@@ -145,6 +145,8 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-contents "org-element" (element))
 (declare-function org-element-property "org-element" (property element))
+(declare-function org-element-put-property "org-element"
+		  (element property value))
 (declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
 (declare-function org-element-nested-p "org-element" (elem-a elem-b))
 (declare-function org-element-swap-A-B "org-element" (elem-a elem-b))
