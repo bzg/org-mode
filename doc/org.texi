@@ -4964,6 +4964,9 @@ file, use a line like
 #+PROPERTY: NDisks_ALL 1 2 3 4
 @end example
 
+Contrary to properties set from a special drawer, you have to refresh the
+buffer with @kbd{C-c C-c} to activate this changes.
+
 If you want to add to the value of an existing property, append a @code{+} to
 the property name.  The following results in the property @code{var} having
 the value ``foo=1 bar=2''.
