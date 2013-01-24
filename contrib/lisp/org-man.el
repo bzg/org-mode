@@ -27,7 +27,7 @@
 
 (require 'org)
 
-(org-add-link-type "man" 'org-man-open)
+(org-add-link-type "man" 'org-man-open 'org-man-export)
 (add-hook 'org-store-link-functions 'org-man-store-link)
 
 (defcustom org-man-command 'man
@@ -58,6 +58,16 @@ PATH should be a topic that can be thrown at the man command."
   (if (string-match " \\(\\S-+\\)\\*" (buffer-name))
       (match-string 1 (buffer-name))
     (error "Cannot create link to this man page")))
+
+(defun org-man-export (link description format)
+  "Export a man page link from Org files."
+  (let ((path (format "http://man.he.net/?topic=%s&section=all" link))
+	(desc (or description link)))
+    (cond
+     ((eq format 'html) (format "<a target=\"_blank\" href=\"%s\">%s</a>" path desc))
+     ((eq format 'latex) (format "\href{%s}{%s}" path desc))
+     ((eq format 'ascii) (format "%s (%s)" desc path))
+     (t path))))
 
 (provide 'org-man)
 
