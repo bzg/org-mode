@@ -3673,8 +3673,7 @@ generating a new one."
 			(delete-overlay o)))
 	(overlays-in (point-min) (point-max)))
   (save-excursion
-    (let ((inhibit-read-only t)
-	  b e p ov h l)
+    (let (b e p ov h l)
       (goto-char (point-min))
       (while (re-search-forward "\\[#\\(.\\)\\]" nil t)
 	(setq h (or (get-char-property (point) 'org-highest-priority)
@@ -3689,15 +3688,16 @@ generating a new one."
 	      ov (make-overlay b e))
 	(overlay-put
 	 ov 'face
-	 (cond ((org-face-from-face-or-color
-		 'priority nil
-		 (cdr (assoc p org-priority-faces))))
-	       ((and (listp org-agenda-fontify-priorities)
-		     (org-face-from-face-or-color
-		      'priority nil
-		      (cdr (assoc p org-agenda-fontify-priorities)))))
-	       ((equal p l) 'italic)
-	       ((equal p h) 'bold)))
+	 (cons (cond ((org-face-from-face-or-color
+		       'priority nil
+		       (cdr (assoc p org-priority-faces))))
+		     ((and (listp org-agenda-fontify-priorities)
+			   (org-face-from-face-or-color
+			    'priority nil
+			    (cdr (assoc p org-agenda-fontify-priorities)))))
+		     ((equal p l) 'italic)
+		     ((equal p h) 'bold))
+	       'org-priority))
 	(overlay-put ov 'org-type 'org-priority)))))
 
 (defun org-agenda-dim-blocked-tasks (&optional invisible)

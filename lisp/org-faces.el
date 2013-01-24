@@ -394,6 +394,14 @@ determines if it is a foreground or a background color."
 		   (string :tag "Color")
 		   (sexp :tag "Face")))))
 
+(defface org-priority ;; originally copied from font-lock-string-face
+  (org-compatible-face 'font-lock-keyword-face
+    '((((class color) (min-colors 16) (background light)) (:foreground "RosyBrown"))
+      (((class color) (min-colors 16) (background dark)) (:foreground "LightSalmon"))
+      (t (:italic t))))
+  "Face used for priority cookies."
+  :group 'org-faces)
+
 (defcustom org-priority-faces nil
   "Faces for specific Priorities.
 This is a list of cons cells, with priority character in the car

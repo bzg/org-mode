@@ -6128,10 +6128,10 @@ When FACE-OR-COLOR is not a string, just return it."
       (add-text-properties
        (match-beginning 0) (match-end 0)
        (list 'face (or (org-face-from-face-or-color
-			'priority 'org-special-keyword
+			'priority 'org-priority
 			(cdr (assoc (char-after (match-beginning 1))
 				    org-priority-faces)))
-		       'org-special-keyword)
+		       'org-priority)
 	     'font-lock-fontified t)))))
 
 (defun org-get-tag-face (kwd)
