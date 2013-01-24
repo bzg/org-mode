@@ -21609,6 +21609,7 @@ function installs the following ones: \"property\",
     (looking-at "\\\\\\\\\\($\\|[^\\\\]\\)")))
 
 (declare-function message-in-body-p "message" ())
+(defvar orgtbl-line-start-regexp) ; From org-table.el
 (defun org-adaptive-fill-function ()
   "Compute a fill prefix for the current line.
 Return fill prefix, as a string, or nil if current line isn't
