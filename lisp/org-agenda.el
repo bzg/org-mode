@@ -5226,6 +5226,9 @@ function from a program - use `org-agenda-get-day-entries' instead."
       (setq rtn (apply 'org-agenda-get-day-entries file date args))
       (setq results (append results rtn)))
     (if results
+	(setq results
+	      (mapcar (lambda (i) (replace-regexp-in-string
+				   org-bracket-link-regexp "\\3" i)) results))
 	(concat (org-agenda-finalize-entries results) "\n"))))
 
 (autoload 'org-diary "org-agenda" "\
