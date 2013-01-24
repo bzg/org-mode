@@ -905,17 +905,20 @@ $ git clone git://orgmode.org/org-mode.git
 $ make autoloads
 @end example
 
-Note that @code{make autoloads} is mandatory: it defines Org's version and
-Org's autoloaded functions, respectively in @file{org-version.el} and in
+Note that in this case, @code{make autoloads} is mandatory: it defines Org's
+version in @file{org-version.el} and Org's autoloads in
 @file{org-loaddefs.el}.
 
 Remember to add the correct load-path as described in the method above.
 
-You can also compile and install Org from this git repository: check
-@code{make help} to get the list of compilation/installation options.
+You can also compile with @code{make}, generate the documentation with
+@code{make doc}, create a local configuration with @code{make config} and
+install Org with @code{make install}.  Please run @code{make help} to get
+the list of compilation/installation options.
 
 For more detailed explanations on Org's build system, please check the Org
-Build System page on @uref{http://orgmode.org/worg/dev/org-build-system.html, Worg}.
+Build System page on @uref{http://orgmode.org/worg/dev/org-build-system.html,
+Worg}.
 
 @node Activation, Feedback, Installation, Introduction
 @section Activation
