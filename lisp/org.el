@@ -20984,6 +20984,7 @@ hierarchy of headlines by UP levels before marking the subtree."
 
 (declare-function message-in-body-p "message" ())
 (defvar org-element--affiliated-re) ; From org-element.el
+(defvar orgtbl-line-start-regexp) ; From org-table.el
 (defun org-adaptive-fill-function ()
   "Compute a fill prefix for the current line.
 Return fill prefix, as a string, or nil if current line isn't
