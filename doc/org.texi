@@ -9782,6 +9782,19 @@ some aspects of the preview.  In particular, the @code{:scale} (and for HTML
 export, @code{:html-scale}) property can be used to adjust the size of the
 preview images.
 
+@vindex org-startup-with-latex-preview
+You can turn on the previewing of all @LaTeX{} fragments in a file with
+
+@example
+#+STARTUP: latexpreview
+@end example
+
+To disable it, simply use
+
+@example
+#+STARTUP: nolatexpreview
+@end example
+
 @node CDLaTeX mode,  , Previewing @LaTeX{} fragments, Embedded @LaTeX{}
 @subsection Using CD@LaTeX{} to enter math
 @cindex CD@LaTeX{}
@@ -14979,6 +14992,18 @@ inlineimages   @r{show inline images}
 noinlineimages @r{don't show inline images on startup}
 @end example
 
+@vindex org-startup-with-latex-preview
+When visiting a file, @LaTeX{} fragments can be converted to images
+automatically.  The variable @code{org-startup-with-latex-preview} which
+controls this behavior, is set to @code{nil} by default to avoid delays on
+startup.
+@cindex @code{latexpreview}, STARTUP keyword
+@cindex @code{nolatexpreview}, STARTUP keyword
+@example
+latexpreview   @r{preview @LaTeX{} fragments}
+nolatexpreview @r{don't preview @LaTeX{} fragments}
+@end example
+
 @vindex org-log-done
 @vindex org-log-note-clock-out
 @vindex org-log-repeat
@@ -15029,6 +15054,7 @@ nologdrawer         @r{store log outside of drawer}
 logstatesreversed   @r{reverse the order of states notes}
 nologstatesreversed @r{do not reverse the order of states notes}
 @end example
+
 @vindex org-hide-leading-stars
 @vindex org-odd-levels-only
 Here are the options for hiding leading stars in outline headings, and for
@@ -15047,6 +15073,7 @@ noindent   @r{no virtual indentation according to outline level}
 odd        @r{allow only odd outline levels (1,3,...)}
 oddeven    @r{allow all outline levels}
 @end example
+
 @vindex org-put-time-stamp-overlays
 @vindex org-time-stamp-overlay-formats
 To turn on custom format overlays over timestamps (variables
@@ -15056,6 +15083,7 @@ To turn on custom format overlays over timestamps (variables
 @example
 customtime @r{overlay custom time format}
 @end example
+
 @vindex constants-unit-system
 The following options influence the table spreadsheet (variable
 @code{constants-unit-system}).
@@ -15065,6 +15093,7 @@ The following options influence the table spreadsheet (variable
 constcgs   @r{@file{constants.el} should use the c-g-s unit system}
 constSI    @r{@file{constants.el} should use the SI unit system}
 @end example
+
 @vindex org-footnote-define-inline
 @vindex org-footnote-auto-label
 @vindex org-footnote-auto-adjust
@@ -15091,6 +15120,7 @@ fnplain     @r{create @code{[1]}-like labels automatically}
 fnadjust    @r{automatically renumber and sort footnotes}
 nofnadjust  @r{do not renumber and sort automatically}
 @end example
+
 @cindex org-hide-block-startup
 To hide blocks on startup, use these keywords.  The corresponding variable is
 @code{org-hide-block-startup}.
@@ -15100,6 +15130,7 @@ To hide blocks on startup, use these keywords.  The corresponding variable is
 hideblocks   @r{Hide all begin/end blocks on startup}
 nohideblocks @r{Do not hide blocks on startup}
 @end example
+
 @cindex org-pretty-entities
 The display of entities as UTF-8 characters is governed by the variable
 @code{org-pretty-entities} and the keywords
@@ -15109,6 +15140,7 @@ The display of entities as UTF-8 characters is governed by the variable
 entitiespretty  @r{Show entities as UTF-8 characters where possible}
 entitiesplain   @r{Leave entities plain}
 @end example
+
 @item #+TAGS:  TAG1(c1) TAG2(c2)
 @vindex org-tag-alist
 These lines (several such lines are allowed) specify the valid tags in
