@@ -15702,6 +15702,10 @@ user."
 		  (org-defkey minibuffer-local-map [(shift right)]
 			      (lambda () (interactive)
 				(org-eval-in-calendar '(calendar-forward-day 1))))
+		  (org-defkey minibuffer-local-map "?"
+			      (lambda () (interactive)
+				(org-eval-in-calendar '(diary-view-entries))
+				(message "")))
 		  (org-defkey minibuffer-local-map ">"
 			      (lambda () (interactive)
 				(org-eval-in-calendar '(scroll-calendar-left 1))))
