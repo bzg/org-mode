@@ -5469,9 +5469,6 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 
 \(fn &optional END)" nil nil)
 
-(defconst org-agenda-no-heading-message
-  "No heading for this item in buffer or region.")
-
 (defun org-agenda-get-timestamps (&optional deadline-results)
   "Return the date stamp information for agenda display."
   (let* ((props (list 'face 'org-agenda-calendar-event
@@ -5551,7 +5548,7 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 	      category-pos (get-text-property b0 'org-category-position))
 	(save-excursion
 	  (if (not (re-search-backward org-outline-regexp-bol nil t))
-	      (setq txt org-agenda-no-heading-message)
+	      (throw :skip nil)
 	    (goto-char (match-beginning 0))
 	    (if (and (eq t org-agenda-skip-timestamp-if-deadline-is-shown)
 		     (assoc (point) deadline-position-alist))
@@ -5789,7 +5786,7 @@ please use `org-class' instead."
 		  (and (looking-at ".*\n[ \t]*-[ \t]+\\([^-\n \t].*?\\)[ \t]*$")
 		       (match-string 1)))))
 	  (if (not (re-search-backward org-outline-regexp-bol nil t))
-	      (setq txt org-agenda-no-heading-message)
+	      (throw :skip nil)
 	    (goto-char (match-beginning 0))
 	    (setq hdmarker (org-agenda-new-marker)
 		  inherited-tags
@@ -6022,7 +6019,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		      warntime (get-text-property (point) 'org-appt-warntime)
 		      category-pos (get-text-property (point) 'org-category-position))
 		(if (not (re-search-backward "^\\*+[ \t]+" nil t))
-		    (setq txt org-agenda-no-heading-message)
+		    (throw :skip nil)
 		  (goto-char (match-end 0))
 		  (setq pos1 (match-beginning 0))
 		  (setq level (make-string (org-reduced-level (org-outline-level)) ? ))
@@ -6149,7 +6146,7 @@ FRACTION is what fraction of the head-warning time has passed."
 	      (setq category (org-get-category)
 		    category-pos (get-text-property (point) 'org-category-position))
 	      (if (not (re-search-backward "^\\*+[ \t]+" nil t))
-		  (setq txt org-agenda-no-heading-message)
+		  (throw :skip nil)
 		(goto-char (match-end 0))
 		(setq pos1 (match-beginning 0))
 		(if habitp
@@ -6253,7 +6250,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		(setq category (org-get-category)
 		      category-pos (get-text-property (point) 'org-category-position))
 		(if (not (re-search-backward org-outline-regexp-bol nil t))
-		    (setq txt org-agenda-no-heading-message)
+		    (throw :skip nil)
 		  (goto-char (match-beginning 0))
 		  (setq hdmarker (org-agenda-new-marker (point))
 			inherited-tags
