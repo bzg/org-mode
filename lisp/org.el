@@ -4970,9 +4970,6 @@ The following commands are available:
     (org-set-local 'outline-isearch-open-invisible-function
 		   (lambda (&rest ignore) (org-show-context 'isearch))))
 
-  ;; Turn on org-beamer-mode?
-  (and org-startup-with-beamer-mode (org-beamer-mode))
-
   ;; Setup the pcomplete hooks
   (set (make-local-variable 'pcomplete-command-completion-function)
        'org-pcomplete-initial)
@@ -4992,6 +4989,7 @@ The following commands are available:
 	   (= (point-min) (point-max)))
       (insert "#    -*- mode: org -*-\n\n"))
   (unless org-inhibit-startup
+    (and org-startup-with-beamer-mode (org-beamer-mode))
     (when org-startup-align-all-tables
       (let ((bmp (buffer-modified-p)))
 	(org-table-map-tables 'org-table-align 'quietly)
