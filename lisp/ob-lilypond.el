@@ -152,7 +152,10 @@ specific arguments to =org-babel-tangle="
       " -dbackend=eps "
       "-dno-gs-load-fonts "
       "-dinclude-eps-fonts "
-      "--png "
+      (cond (ly-gen-png  "--png ")
+	    (ly-gen-pdf  "--pdf ")
+	    (ly-gen-eps  "--ps ")
+	    (t "--png "))
       "--output="
       (file-name-sans-extension out-file)
       " "
