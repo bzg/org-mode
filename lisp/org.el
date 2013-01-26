@@ -16662,6 +16662,20 @@ effort string \"2hours\" is equivalent to 120 minutes."
   :type '(alist :key-type (string :tag "Modifier")
 		:value-type (number :tag "Minutes")))
 
+(defcustom org-agenda-inhibit-startup-visibility-cycling t
+  "Turn off visibility cycling when preparing agenda buffers.
+
+When preparing agenda buffers, Org visits agenda files.  When
+this variable is `t' (the default), the visited buffers for
+agenda files will not honor `org-startup-folded' or any
+#+STARTUP: fold option.  Turning this option off may slow down
+the generation of agenda, both because folding takes time and
+because finding entries in folded buffers takes longer than
+finding entries in unfolded ones."
+  :type 'boolean
+  :version "24.3"
+  :group 'org-agenda)
+
 (defun org-duration-string-to-minutes (s &optional output-to-string)
   "Convert a duration string S to minutes.
 
@@ -17001,6 +17015,8 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	(pc '(:org-comment t))
 	(pall '(:org-archived t :org-comment t))
 	(inhibit-read-only t)
+	(org-inhibit-startup-visibility-stuff
+	 org-agenda-inhibit-startup-visibility-cycling)
 	(rea (concat ":" org-archive-tag ":"))
 	bmp file re)
     (save-excursion
