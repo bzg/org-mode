@@ -3754,7 +3754,7 @@ Also moves point to the end of the skipped region, so that search can
 continue from there."
   (let ((p (point-at-bol)) to)
     (when (or
-	   (eq (get-text-property p 'face) 'font-lock-comment-face)
+	   (save-excursion (goto-char p) (looking-at comment-start-skip))
 	   (and org-agenda-skip-archived-trees (not org-agenda-archives-mode)
 		(get-text-property p :org-archived)
 		(org-end-of-subtree t))
