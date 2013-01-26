@@ -152,6 +152,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-element-swap-A-B "org-element" (elem-a elem-b))
 (declare-function org-element--parse-objects "org-element" (beg end acc restriction))
 (declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
+(declare-function org-element-interpret-data "org-element" (data &optional parent))
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
