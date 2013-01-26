@@ -93,6 +93,7 @@
 (declare-function org-escape-code-in-region "org-src" (beg end))
 (declare-function org-unescape-code-in-string "org-src" (s))
 (declare-function org-table-to-lisp "org-table" (&optional txt))
+(declare-function org-reverse-string "org" (string))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
@@ -2502,10 +2503,6 @@ If the table is trivial, then return it as a scalar."
                            (match-string 1 cell))
                       cell) t))
 
-(defun org-babel-reverse-string (string)
-  "Return the reverse of STRING."
-  (apply 'string (reverse (string-to-list string))))
-
 (defun org-babel-chomp (string &optional regexp)
   "Strip trailing spaces and carriage returns from STRING.
 Default regexp used is \"[ \f\t\n\r\v]\" but can be
@@ -2520,8 +2517,8 @@ overwritten by specifying a regexp as a second argument."
   "Strip leading and trailing spaces and carriage returns from STRING.
 Like `org-babel-chomp' only it runs on both the front and back
 of the string."
-  (org-babel-chomp (org-babel-reverse-string
-                    (org-babel-chomp (org-babel-reverse-string string) regexp))
+  (org-babel-chomp (org-reverse-string
+                    (org-babel-chomp (org-reverse-string string) regexp))
                    regexp))
 
 (defvar org-babel-org-babel-call-process-region-original nil)

@@ -21126,6 +21126,10 @@ for the search purpose."
 		(error "Unable to create a link to here"))))
     (org-occur-in-agenda-files (regexp-quote link))))
 
+(defun org-reverse-string (string)
+  "Return the reverse of STRING."
+  (apply 'string (reverse (string-to-list string))))
+
 (defun org-uniquify (list)
   "Remove duplicate elements from LIST."
   (let (res)
