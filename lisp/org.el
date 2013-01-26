@@ -2965,10 +2965,16 @@ When nil, only the minibuffer will be available."
     (defvaralias 'org-popup-calendar-for-date-prompt
       'org-read-date-popup-calendar))
 
+(make-obsolete-variable
+ 'org-read-date-minibuffer-setup-hook
+ "Set `org-read-date-minibuffer-local-map' instead." "24.3")
 (defcustom org-read-date-minibuffer-setup-hook nil
   "Hook to be used to set up keys for the date/time interface.
-Add key definitions to `minibuffer-local-map', which will be a temporary
-copy."
+Add key definitions to `minibuffer-local-map', which will be a
+temporary copy.
+
+WARNING: This option is obsolete, you should use
+`org-read-date-minibuffer-local-map' to set up keys."
   :group 'org-time
   :type 'hook)
 
@@ -15571,6 +15577,66 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-analyze-forced-year nil)
 (defvar org-read-date-inactive)
 
+(defvar org-read-date-minibuffer-local-map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map minibuffer-local-map)
+    (org-defkey minibuffer-local-map [(meta shift left)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-backward-month 1))))
+    (org-defkey minibuffer-local-map [(meta shift right)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-forward-month 1))))
+    (org-defkey minibuffer-local-map [(meta shift up)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-backward-year 1))))
+    (org-defkey minibuffer-local-map [(meta shift down)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-forward-year 1))))
+    (org-defkey minibuffer-local-map [?\e (shift left)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-backward-month 1))))
+    (org-defkey minibuffer-local-map [?\e (shift right)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-forward-month 1))))
+    (org-defkey minibuffer-local-map [?\e (shift up)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-backward-year 1))))
+    (org-defkey minibuffer-local-map [?\e (shift down)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-forward-year 1))))
+    (org-defkey minibuffer-local-map [(shift up)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-backward-week 1))))
+    (org-defkey minibuffer-local-map [(shift down)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-forward-week 1))))
+    (org-defkey minibuffer-local-map [(shift left)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-backward-day 1))))
+    (org-defkey minibuffer-local-map [(shift right)]
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-forward-day 1))))
+    (org-defkey minibuffer-local-map "?"
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(diary-view-entries))
+                  (message "")))
+    (org-defkey minibuffer-local-map ">"
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(scroll-calendar-left 1))))
+    (org-defkey minibuffer-local-map "<"
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(scroll-calendar-right 1))))
+    (org-defkey minibuffer-local-map "\C-v"
+                (lambda () (interactive)
+                  (org-eval-in-calendar
+                   '(calendar-scroll-left-three-months 1))))
+    (org-defkey minibuffer-local-map "\M-v"
+                (lambda () (interactive)
+                  (org-eval-in-calendar
+                   '(calendar-scroll-right-three-months 1))))
+    map)
+  "Keymap for minibuffer commands when using `org-read-date'.")
+
 (defun org-read-date (&optional org-with-time to-time from-string prompt
 				default-time default-input inactive)
   "Read a date, possibly a time, and make things smooth for the user.
@@ -15663,65 +15729,11 @@ user."
 		(org-eval-in-calendar nil t)
 		(let* ((old-map (current-local-map))
 		       (map (copy-keymap calendar-mode-map))
-		       (minibuffer-local-map (copy-keymap minibuffer-local-map)))
+		       (minibuffer-local-map
+			(copy-keymap org-read-date-minibuffer-local-map)))
 		  (org-defkey map (kbd "RET") 'org-calendar-select)
 		  (org-defkey map [mouse-1] 'org-calendar-select-mouse)
 		  (org-defkey map [mouse-2] 'org-calendar-select-mouse)
-		  (org-defkey minibuffer-local-map [(meta shift left)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-backward-month 1))))
-		  (org-defkey minibuffer-local-map [(meta shift right)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-forward-month 1))))
-		  (org-defkey minibuffer-local-map [(meta shift up)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-backward-year 1))))
-		  (org-defkey minibuffer-local-map [(meta shift down)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-forward-year 1))))
-		  (org-defkey minibuffer-local-map [?\e (shift left)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-backward-month 1))))
-		  (org-defkey minibuffer-local-map [?\e (shift right)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-forward-month 1))))
-		  (org-defkey minibuffer-local-map [?\e (shift up)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-backward-year 1))))
-		  (org-defkey minibuffer-local-map [?\e (shift down)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-forward-year 1))))
-		  (org-defkey minibuffer-local-map [(shift up)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-backward-week 1))))
-		  (org-defkey minibuffer-local-map [(shift down)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-forward-week 1))))
-		  (org-defkey minibuffer-local-map [(shift left)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-backward-day 1))))
-		  (org-defkey minibuffer-local-map [(shift right)]
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(calendar-forward-day 1))))
-		  (org-defkey minibuffer-local-map "?"
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(diary-view-entries))
-				(message "")))
-		  (org-defkey minibuffer-local-map ">"
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(scroll-calendar-left 1))))
-		  (org-defkey minibuffer-local-map "<"
-			      (lambda () (interactive)
-				(org-eval-in-calendar '(scroll-calendar-right 1))))
-		  (org-defkey minibuffer-local-map "\C-v"
-			      (lambda () (interactive)
-				(org-eval-in-calendar
-				 '(calendar-scroll-left-three-months 1))))
-		  (org-defkey minibuffer-local-map "\M-v"
-			      (lambda () (interactive)
-				(org-eval-in-calendar
-				 '(calendar-scroll-right-three-months 1))))
-		  (run-hooks 'org-read-date-minibuffer-setup-hook)
 		  (unwind-protect
 		      (progn
 			(use-local-map map)
