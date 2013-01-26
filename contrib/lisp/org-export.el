@@ -1447,7 +1447,7 @@ for export.  Return options as a plist."
   (org-with-wide-buffer
    (let (prop plist)
      ;; Make sure point is at an heading.
-     (unless (org-at-heading-p) (org-back-to-heading t))
+     (if (org-at-heading-p) (org-up-heading-safe) (org-back-to-heading t))
      ;; Take care of EXPORT_TITLE. If it isn't defined, use headline's
      ;; title as its fallback value.
      (when (setq prop (or (org-entry-get (point) "EXPORT_TITLE")

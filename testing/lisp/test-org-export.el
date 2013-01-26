@@ -226,7 +226,13 @@ Paragraph"
   :END:
 Paragraph"
     (should (equal (plist-get (org-export-get-environment nil t) :date)
-		   '("29-03-2012")))))
+		   '("29-03-2012"))))
+  ;; Still grab correct options when section above is empty.
+  (should
+   (equal '("H1")
+	  (org-test-with-temp-text "* H1\n** H11\n** H12"
+	    (progn (forward-line 2)
+		   (plist-get (org-export-get-environment nil t) :title))))))
 
 (ert-deftest test-org-export/handle-options ()
   "Test if export options have an impact on output."
