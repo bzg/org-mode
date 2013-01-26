@@ -19582,9 +19582,8 @@ This command does many different things, depending on context:
 	     (goto-char (org-element-property :post-affiliated context))
 	     (org-update-dblock)))
 	  (footnote-definition
-	   (save-excursion
-	     (goto-char (org-element-property :post-affiliated context))
-	     (call-interactively 'org-footnote-action)))
+	   (goto-char (org-element-property :post-affiliated context))
+	   (call-interactively 'org-footnote-action))
 	  (footnote-reference (call-interactively 'org-footnote-action))
 	  ((headline inlinetask)
 	   (save-excursion (goto-char (org-element-property :begin context))
