@@ -202,7 +202,14 @@ exported source code blocks by language."
 		    target-file)
 	  (setq target-file
 		(read-from-minibuffer "Tangle to: " (buffer-file-name)))))
-      (narrow-to-region (match-beginning 0) (match-end 0)))
+      (narrow-to-region
+       (save-match-data
+	 (save-excursion
+	   (goto-char (org-babel-where-is-src-block-head))
+	   (while (and (forward-line -1)
+		       (looking-at org-babel-multi-line-header-regexp)))
+	   (point)))
+       (match-end 0)))
     (save-excursion
       (let ((block-counter 0)
 	    (org-babel-default-header-args
