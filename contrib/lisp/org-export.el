@@ -209,6 +209,7 @@ way they are handled must be hard-coded into
     (:filter-link . org-export-filter-link-functions)
     (:filter-macro . org-export-filter-macro-functions)
     (:filter-node-property . org-export-filter-node-property-functions)
+    (:filter-options . org-export-filter-options-functions)
     (:filter-paragraph . org-export-filter-paragraph-functions)
     (:filter-parse-tree . org-export-filter-parse-tree-functions)
     (:filter-plain-list . org-export-filter-plain-list-functions)
@@ -2142,10 +2143,15 @@ Any element in `:ignore-list' will be skipped when using
 ;; among the following symbols and a function or a list of functions
 ;; as value.
 ;;
-;; - `:filter-parse-tree' applies directly on the complete parsed
-;;   tree.  It's the only filters set that doesn't apply to a string.
-;;   Users can set it through `org-export-filter-parse-tree-functions'
-;;   variable.
+;; - `:filter-options' applies to the property list containing export
+;;   options.  Unlike to other filters, functions in this list accept
+;;   two arguments instead of three: the property list containing
+;;   export options and the back-end.  Users can set its value through
+;;   `org-export-filter-options-functions' variable.
+;;
+;; - `:filter-parse-tree' applies directly to the complete parsed
+;;   tree.  Users can set it through
+;;   `org-export-filter-parse-tree-functions' variable.
 ;;
 ;; - `:filter-final-output' applies to the final transcoded string.
 ;;   Users can set it with `org-export-filter-final-output-functions'
@@ -2200,6 +2206,12 @@ back-end currently used, as a symbol.")
 
 ;;;; Special Filters
 
+(defvar org-export-filter-options-functions nil
+  "List of functions applied to the export options.
+Each filter is called with two arguments: the export options, as
+a plist, and the back-end, as a symbol.  It must return
+a property list containing export options.")
+
 (defvar org-export-filter-parse-tree-functions nil
   "List of functions applied to the parsed tree.
 Each filter is called with three arguments: the parse tree, as
@@ -2207,19 +2219,19 @@ returned by `org-element-parse-buffer', the back-end, as
 a symbol, and the communication channel, as a plist.  It must
 return the modified parse tree to transcode.")
 
-(defvar org-export-filter-final-output-functions nil
-  "List of functions applied to the transcoded string.
-Each filter is called with three arguments: the full transcoded
-string, the back-end, as a symbol, and the communication channel,
-as a plist.  It must return a string that will be used as the
-final export output.")
-
 (defvar org-export-filter-plain-text-functions nil
   "List of functions applied to plain text.
 Each filter is called with three arguments: a string which
 contains no Org syntax, the back-end, as a symbol, and the
 communication channel, as a plist.  It must return a string or
 nil.")
+
+(defvar org-export-filter-final-output-functions nil
+  "List of functions applied to the transcoded string.
+Each filter is called with three arguments: the full transcoded
+string, the back-end, as a symbol, and the communication channel,
+as a plist.  It must return a string that will be used as the
+final export output.")
 
 
 ;;;; Elements Filters
@@ -2577,9 +2589,7 @@ specified filters, if any, are called first."
 
 (defun org-export-install-filters (info)
   "Install filters properties in communication channel.
-
 INFO is a plist containing the current communication channel.
-
 Return the updated communication channel."
   (let (plist)
     ;; Install user defined filters with `org-export-filters-alist'.
@@ -2706,8 +2716,13 @@ Return code as a string."
 		(cons "email" (or (plist-get info :email) ""))
 		(cons "title"
 		      (org-element-interpret-data (plist-get info :title)))))
-	 ;; Eventually parse buffer.  Call parse-tree filters to get
-	 ;; the final tree.
+	 ;; Call options filters and update export options.  We do not
+	 ;; use `org-export-filter-apply-functions' here since the
+	 ;; arity of such filters is different.
+	 (dolist (filter (plist-get info :filter-options))
+	   (let ((result (funcall filter info backend)))
+	     (when result (setq info result))))
+	 ;; Parse buffer and call parse-tree filter on it.
 	 (setq tree
 	       (org-export-filter-apply-functions
 		(plist-get info :filter-parse-tree)
