@@ -136,18 +136,19 @@ currently executed.")
 	  (id-file (car id-location))
 	  (visited-p (get-file-buffer id-file))
 	  to-be-removed)
-     (save-window-excursion
-       (save-match-data
-	 (org-id-goto ,id)
-	 (setq to-be-removed (current-buffer))
-	 (condition-case nil
-	     (progn
-	       (org-show-subtree)
-	       (org-show-block-all))
-	   (error nil))
-	 (save-restriction ,@body)))
-     (unless visited-p
-       (kill-buffer to-be-removed))))
+     (unwind-protect
+	 (save-window-excursion
+	   (save-match-data
+	     (org-id-goto ,id)
+	     (setq to-be-removed (current-buffer))
+	     (condition-case nil
+		 (progn
+		   (org-show-subtree)
+		   (org-show-block-all))
+	       (error nil))
+	     (save-restriction ,@body)))
+       (unless (or visited-p (not to-be-removed))
+	 (kill-buffer to-be-removed)))))
 (def-edebug-spec org-test-at-id (form body))
 
 (defmacro org-test-in-example-file (file &rest body)

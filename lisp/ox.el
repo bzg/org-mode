@@ -3142,7 +3142,7 @@ file should have."
   ;; properly resolved.
   (let ((reference (org-export-copy-buffer)))
     (unwind-protect (let ((org-current-export-file reference))
-		      (org-export-blocks-preprocess))
+		      (org-babel-exp-process-buffer))
       (kill-buffer reference))))
 
 

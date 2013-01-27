@@ -241,7 +241,7 @@ this template."
 		       (insert rep)))))))))))))
 
 (defvar org-src-preserve-indentation)	; From org-src.el
-(defun org-export-blocks-preprocess ()
+(defun org-babel-exp-process-buffer ()
   "Execute all blocks in visible part of buffer."
   (interactive)
   (save-window-excursion
