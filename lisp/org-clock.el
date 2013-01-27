@@ -26,11 +26,11 @@
 
 ;; This file contains the time clocking code for Org-mode
 
-(require 'org-exp)
 ;;; Code:
 
 (eval-when-compile
   (require 'cl))
+(require 'org)
 
 (declare-function calendar-absolute-from-iso "cal-iso" (&optional date))
 (declare-function notifications-notify "notifications" (&rest params))
@@ -273,7 +273,7 @@ string as argument."
 (defcustom org-clocktable-defaults
   (list
    :maxlevel 2
-   :lang org-export-default-language
+   :lang (or (org-bound-and-true-p org-export-default-language) "en")
    :scope 'file
    :block nil
    :wstart 1
@@ -2317,7 +2317,8 @@ from the dynamic block definition."
   ;; well-defined number of columns...
   (let* ((hlchars '((1 . "*") (2 . "/")))
 	 (lwords (assoc (or (plist-get params :lang)
-			    org-export-default-language)
+			    (org-bound-and-true-p org-export-default-language)
+			    "en")
 			org-clock-clocktable-language-setup))
 	 (multifile (plist-get params :multifile))
 	 (block (plist-get params :block))

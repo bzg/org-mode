@@ -533,7 +533,7 @@ the following lines anywhere in the buffer:
 	  (const :tag "Globally (slow on startup in large files)" t)))
 
 (defcustom org-use-sub-superscripts t
-  "Non-nil means interpret \"_\" and \"^\" for export.
+  "Non-nil means interpret \"_\" and \"^\" for display.
 When this option is turned on, you can use TeX-like syntax for sub- and
 superscripts.  Several characters after \"_\" or \"^\" will be
 considered as a single item - so grouping with {} is normally not
@@ -546,26 +546,17 @@ sub- or superscripts.
 			 terminated by almost any nonword/nondigit char.
  x_{i^2} or   x^(2-i)    braces or parenthesis do grouping.
 
-Still, ambiguity is possible - so when in doubt use {} to enclose the
-sub/superscript.  If you set this variable to the symbol `{}',
-the braces are *required* in order to trigger interpretations as
-sub/superscript.  This can be helpful in documents that need \"_\"
-frequently in plain text.
-
-Not all export backends support this, but HTML does.
-
-This option can also be set with the #+OPTIONS line, e.g. \"^:nil\"."
+Still, ambiguity is possible - so when in doubt use {} to enclose
+the sub/superscript.  If you set this variable to the symbol
+`{}', the braces are *required* in order to trigger
+interpretations as sub/superscript.  This can be helpful in
+documents that need \"_\" frequently in plain text."
   :group 'org-startup
-  :group 'org-export-translation
   :version "24.1"
   :type '(choice
 	  (const :tag "Always interpret" t)
 	  (const :tag "Only with braces" {})
 	  (const :tag "Never interpret" nil)))
-
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-export-with-sub-superscripts 'org-use-sub-superscripts))
-
 
 (defcustom org-startup-with-beamer-mode nil
   "Non-nil means turn on `org-beamer-mode' on startup.
@@ -3808,11 +3799,6 @@ org-level-* faces."
   :group 'org-appearance
   :type 'boolean)
 
-(defcustom org-highlight-latex-fragments-and-specials nil
-  "Non-nil means fontify what is treated specially by the exporters."
-  :group 'org-appearance
-  :type 'boolean)
-
 (defcustom org-hide-emphasis-markers nil
   "Non-nil mean font-lock should hide the emphasis marker characters."
   :group 'org-appearance
@@ -4911,9 +4897,7 @@ but the stars and the body are.")
 	    org-all-time-keywords
 	    (mapcar (lambda (w) (substring w 0 -1))
 		    (list org-scheduled-string org-deadline-string
-			  org-clock-string org-closed-string))
-	    )
-      (org-compute-latex-and-specials-regexp)
+			  org-clock-string org-closed-string)))
       (org-set-font-lock-defaults))))
 
 (defun org-file-contents (file &optional noerror)
@@ -5279,11 +5263,8 @@ Here is what the match groups contain after a match:
 (defvar org-any-link-re nil
   "Regular expression matching any link.")
 
-(defcustom org-match-sexp-depth 3
-  "Number of stacked braces for sub/superscript matching.
-This has to be set before loading org.el to be effective."
-  :group 'org-export-translation ; ??????????????????????????/
-  :type 'integer)
+(defconst org-match-sexp-depth 3
+  "Number of stacked braces for sub/superscript matching.")
 
 (defun org-create-multibrace-regexp (left right n)
   "Create a regular expression which will match a balanced sexp.
@@ -5767,97 +5748,8 @@ by a #."
       (goto-char e)
       t)))
 
-(defvar org-latex-and-specials-regexp nil
-  "Regular expression for highlighting export special stuff.")
 (defvar org-match-substring-regexp)
 (defvar org-match-substring-with-braces-regexp)
-
-;; This should be with the exporter code, but we also use if for font-locking
-(defconst org-export-html-special-string-regexps
-  '(("\\\\-" . "&shy;")
-    ("---\\([^-]\\)" . "&mdash;\\1")
-    ("--\\([^-]\\)" . "&ndash;\\1")
-    ("\\.\\.\\." . "&hellip;"))
-  "Regular expressions for special string conversion.")
-
-
-(defun org-compute-latex-and-specials-regexp ()
-  "Compute regular expression for stuff treated specially by exporters."
-  (if (not org-highlight-latex-fragments-and-specials)
-      (org-set-local 'org-latex-and-specials-regexp nil)
-    (require 'org-exp)
-    (let*
-	((matchers (plist-get org-format-latex-options :matchers))
-	 (latexs (delq nil (mapcar (lambda (x) (if (member (car x) matchers) x))
-				   org-latex-regexps)))
-	 (org-export-allow-BIND nil)
-	 (options (org-combine-plists (org-default-export-plist)
-				      (org-infile-export-plist)))
-	 (org-export-with-sub-superscripts (plist-get options :sub-superscript))
-	 (org-export-with-LaTeX-fragments (plist-get options :LaTeX-fragments))
-	 (org-export-with-TeX-macros (plist-get options :TeX-macros))
-	 (org-export-html-expand (plist-get options :expand-quoted-html))
-	 (org-export-with-special-strings (plist-get options :special-strings))
-	 (re-sub
-	  (cond
-	   ((equal org-export-with-sub-superscripts '{})
-	    (list org-match-substring-with-braces-regexp))
-	   (org-export-with-sub-superscripts
-	    (list org-match-substring-regexp))))
-	 (re-latex
-	  (if org-export-with-LaTeX-fragments
-	      (mapcar (lambda (x) (nth 1 x)) latexs)))
-	 (re-macros
-	  (if org-export-with-TeX-macros
-	      (list (concat "\\\\"
-			    (regexp-opt
-			     (append
-
-			      (delq nil
-				    (mapcar 'car-safe
-					    (append org-entities-user
-						    org-entities)))
-			      (if (boundp 'org-latex-entities)
-				  (mapcar (lambda (x)
-					    (or (car-safe x) x))
-					  org-latex-entities)
-				nil))
-			     'words))) ; FIXME
-	    ))
-	 ;;			(list "\\\\\\(?:[a-zA-Z]+\\)")))
-	 (re-special (if org-export-with-special-strings
-			 (mapcar (lambda (x) (car x))
-				 org-export-html-special-string-regexps)))
-	 (re-rest
-	  (delq nil
-		(list
-		 (if org-export-html-expand "@<[^>\n]+>")
-		 ))))
-      (org-set-local
-       'org-latex-and-specials-regexp
-       (mapconcat 'identity (append re-latex re-sub re-macros re-special
-				    re-rest) "\\|")))))
-
-(defun org-do-latex-and-special-faces (limit)
-  "Run through the buffer and add overlays to links."
-  (when org-latex-and-specials-regexp
-    (let (rtn d)
-      (while (and (not rtn) (re-search-forward org-latex-and-specials-regexp
-					       limit t))
-	(if (not (memq (car-safe (get-text-property (1+ (match-beginning 0))
-						    'face))
-		       '(org-code org-verbatim underline)))
-	    (progn
-	      (setq rtn t
-		    d (cond ((member (char-after (1+ (match-beginning 0)))
-				     '(?_ ?^)) 1)
-			    (t 0)))
-	      (font-lock-prepend-text-property
-	       (+ d (match-beginning 0)) (match-end 0)
-	       'face 'org-latex-and-export-specials)
-	      (add-text-properties (+ d (match-beginning 0)) (match-end 0)
-				   '(font-lock-multiline t)))))
-      rtn)))
 
 (defun org-restart-font-lock ()
   "Restart `font-lock-mode', to force refontification."
@@ -6019,7 +5911,6 @@ needs to be inserted at a specific position in the font-lock sequence.")
 		  "\\(.*:" org-archive-tag ":.*\\)")
 		 '(1 'org-archived prepend))
 	   ;; Specials
-	   '(org-do-latex-and-special-faces)
 	   '(org-fontify-entities)
 	   '(org-raise-scripts)
 	   ;; Code
@@ -10211,15 +10102,7 @@ there is one, return it."
 (defun org-open-file-with-emacs (path)
   "Open file at PATH in Emacs."
   (org-open-file path 'emacs))
-(defun org-remove-file-link-modifiers ()
-  "Remove the file link modifiers in `file+sys:' and `file+emacs:' links."
-  (goto-char (point-min))
-  (while (re-search-forward "\\<file\\+\\(sys\\|emacs\\):" nil t)
-    (org-if-unprotected
-     (replace-match "file:" t t))))
-(eval-after-load "org-exp"
-  '(add-hook 'org-export-preprocess-before-normalizing-links-hook
-	     'org-remove-file-link-modifiers))
+
 
 ;;; File search
 
@@ -11532,49 +11415,29 @@ This function can be used in a hook."
 
 ;;;; Completion
 
-(defconst org-additional-option-like-keywords
-  '("BEGIN_HTML"  "END_HTML"  "HTML:" "ATTR_HTML:"
-    "BEGIN_DocBook"  "END_DocBook"  "DocBook:" "ATTR_DocBook:"
-    "BEGIN_LaTeX" "END_LaTeX" "LaTeX:" "LATEX_HEADER:"
-    "LATEX_CLASS:" "LATEX_CLASS_OPTIONS:" "ATTR_LaTeX:"
-    "BEGIN:" "END:"
-    "ORGTBL" "TBLFM:" "TBLNAME:"
-    "BEGIN_EXAMPLE" "END_EXAMPLE"
-    "BEGIN_VERBATIM" "END_VERBATIM"
-    "BEGIN_QUOTE" "END_QUOTE"
-    "BEGIN_VERSE" "END_VERSE"
-    "BEGIN_CENTER" "END_CENTER"
-    "BEGIN_SRC" "END_SRC"
-    "BEGIN_RESULT" "END_RESULT"
-    "BEGIN_lstlisting" "END_lstlisting"
-    "NAME:" "RESULTS:"
-    "HEADER:" "HEADERS:"
-    "COLUMNS:" "PROPERTY:"
-    "CAPTION:" "LABEL:"
-    "SETUPFILE:"
-    "INCLUDE:" "INDEX:"
-    "BIND:"
-    "MACRO:"))
+(defun org-get-export-keywords ()
+  "Return a list of all currently understood export keywords.
+Export keywords include options, block names, attributes and
+keywords relative to each registered export back-end."
+  (delq nil
+	(let (keywords)
+	  (mapc
+	   (lambda (back-end)
+	     (let ((props (cdr back-end)))
+	       ;; Back-end name (for keywords, like #+LATEX:)
+	       (push (upcase (symbol-name (car back-end))) keywords)
+	       ;; Back-end options.
+	       (mapc (lambda (option) (push (cadr option) keywords))
+		     (plist-get (cdr back-end) :options-alist))))
+	   (org-bound-and-true-p org-export-registered-backends))
+	  keywords)))
 
 (defconst org-options-keywords
-  '("TITLE:" "AUTHOR:" "EMAIL:" "DATE:"
-    "DESCRIPTION:" "KEYWORDS:" "LANGUAGE:" "OPTIONS:"
-    "EXPORT_SELECT_TAGS:" "EXPORT_EXCLUDE_TAGS:"
-    "LINK_UP:" "LINK_HOME:" "LINK:" "TODO:"
-    "XSLT:" "MATHJAX:" "CATEGORY:" "SEQ_TODO:" "TYP_TODO:"
-    "PRIORITIES:" "DRAWERS:" "STARTUP:" "TAGS:" "STYLE:"
-    "FILETAGS:" "ARCHIVE:" "INFOJS_OPT:"))
-
-(defconst org-additional-option-like-keywords-for-flyspell
-  (delete-dups
-   (split-string
-    (mapconcat (lambda(k)
-		 (replace-regexp-in-string
-		  "_\\|:" " "
-		  (concat k " " (downcase k) " " (upcase k))))
-	       (append org-options-keywords org-additional-option-like-keywords)
-	       " ")
-    " +" t)))
+  '("ARCHIVE:" "AUTHOR:" "BIND:" "CATEGORY:" "COLUMNS:" "CREATOR:" "DATE"
+    "DESCRIPTION:" "DRAWERS:" "EMAIL:" "EXCLUDE_TAGS:" "FILETAGS:" "INCLUDE:"
+    "INDEX:" "KEYWORDS:" "LANGUAGE:" "MACRO:" "OPTIONS:" "PROPERTY"
+    "PRIORITIES:" "SELECT_TAGS:" "SEQ_TODO:" "SETUPFILE:" "STARTUP:" "TAGS:"
+    "TITLE:" "TODO:" "TYP_TODO:"))
 
 (defcustom org-structure-template-alist
   '(("s" "#+BEGIN_SRC ?\n\n#+END_SRC"
@@ -20497,11 +20360,8 @@ Your bug report will be posted to the Org-mode mailing list.
 (defun org-require-autoloaded-modules ()
   (interactive)
   (mapc 'require
-	'(org-agenda org-archive org-ascii org-attach org-clock org-colview
-		     org-docbook org-exp org-html org-icalendar
-		     org-id org-latex
-		     org-publish org-remember org-table
-		     org-timer org-xoxo)))
+	'(org-agenda org-archive org-attach org-clock org-colview org-id
+		     org-remember org-table org-timer)))
 
 ;;;###autoload
 (defun org-reload (&optional uncompiled)
@@ -23107,6 +22967,8 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 ;;; Fixes and Hacks for problems with other packages
 
 ;; Make flyspell not check words in links, to not mess up our keymap
+(defvar org-element-affiliated-keywords) ; From org-element.el
+(defvar org-element-block-name-alist)	 ; From org-element.el
 (defun org-mode-flyspell-verify ()
   "Don't let flyspell put overlays at active buttons, or on
    {todo,all-time,additional-option-like}-keywords."
@@ -23118,7 +22980,11 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 	 (not (member word org-all-time-keywords))
 	 (not (member word org-options-keywords))
 	 (not (member word (mapcar 'car org-startup-options)))
-	 (not (member word org-additional-option-like-keywords-for-flyspell)))))
+	 (not (member-ignore-case word org-element-affiliated-keywords))
+	 (not (member-ignore-case word (org-get-export-keywords)))
+	 (not (member-ignore-case
+	       word (mapcar 'car org-element-block-name-alist)))
+	 (not (member-ignore-case word '("BEGIN" "END" "ATTR"))))))
 
 (defun org-remove-flyspell-overlays-in (beg end)
   "Remove flyspell overlays in region."
