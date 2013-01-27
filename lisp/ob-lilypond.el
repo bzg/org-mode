@@ -154,7 +154,7 @@ specific arguments to =org-babel-tangle="
       "-dinclude-eps-fonts "
       (cond (ly-gen-png  "--png ")
 	    (ly-gen-pdf  "--pdf ")
-	    (ly-gen-eps  "--ps ")
+	    (ly-use-eps  "--ps ")
 	    (t "--png "))
       "--output="
       (file-name-sans-extension out-file)
