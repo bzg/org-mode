@@ -38,9 +38,8 @@
   (require 'cl))
 (require 'org)
 
-(declare-function org-table-clean-before-export "org-exp"
-		  (lines &optional maybe-quoted))
-(declare-function org-format-org-table-html "org-html" (lines &optional splice))
+(declare-function org-export-string-as "ox"
+		  (string backend &optional body-only ext-plist))
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
 (defvar orgtbl-mode) ; defined below
 (defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
@@ -419,6 +418,70 @@ available parameters."
 			 (org-split-string (match-string 1 line)
 					   "[ \t]*|[ \t]*")))))))
 
+(defvar org-table-colgroup-info nil)	; Dynamically scoped.
+(defun org-table-clean-before-export (lines &optional maybe-quoted)
+  "Check if the table has a marking column.
+If yes remove the column and the special lines."
+  (setq org-table-colgroup-info nil)
+  (if (memq nil
+	    (mapcar
+	     (lambda (x) (or (string-match "^[ \t]*|-" x)
+			     (string-match
+			      (if maybe-quoted
+				  "^[ \t]*| *\\\\?\\([\#!$*_^ /]\\) *|"
+				"^[ \t]*| *\\([\#!$*_^ /]\\) *|")
+			      x)))
+	     lines))
+      ;; No special marking column
+      (progn
+	(setq org-table-clean-did-remove-column nil)
+	(delq nil
+	      (mapcar
+	       (lambda (x)
+		 (cond
+		  ((org-table-colgroup-line-p x)
+		   ;; This line contains colgroup info, extract it
+		   ;; and then discard the line
+		   (setq org-table-colgroup-info
+			 (mapcar (lambda (x)
+				   (cond ((member x '("<" "&lt;")) :start)
+					 ((member x '(">" "&gt;")) :end)
+					 ((member x '("<>" "&lt;&gt;")) :startend)))
+				 (org-split-string x "[ \t]*|[ \t]*")))
+		   nil)
+		  ((org-table-cookie-line-p x)
+		   ;; This line contains formatting cookies, discard it
+		   nil)
+		  (t x)))
+	       lines)))
+    ;; there is a special marking column
+    (setq org-table-clean-did-remove-column t)
+    (delq nil
+	  (mapcar
+	   (lambda (x)
+	     (cond
+	      ((org-table-colgroup-line-p x)
+	       ;; This line contains colgroup info, extract it
+	       ;; and then discard the line
+	       (setq org-table-colgroup-info
+		     (mapcar (lambda (x)
+			       (cond ((member x '("<" "&lt;")) :start)
+				     ((member x '(">" "&gt;")) :end)
+				     ((member x '("<>" "&lt;&gt;")) :startend)))
+			     (cdr (org-split-string x "[ \t]*|[ \t]*"))))
+	       nil)
+	      ((org-table-cookie-line-p x)
+	       ;; This line contains formatting cookies, discard it
+	       nil)
+	      ((string-match "^[ \t]*| *\\([!_^/$]\\|\\\\\\$\\) *|" x)
+	       ;; ignore this line
+	       nil)
+	      ((or (string-match "^\\([ \t]*\\)|-+\\+" x)
+		   (string-match "^\\([ \t]*\\)|[^|]*|" x))
+	       ;; remove the first column
+	       (replace-match "\\1|" t nil x))))
+	   lines))))
+
 (defconst org-table-translate-regexp
   (concat "\\(" "@[-0-9I$]+" "\\|" "[a-zA-Z]\\{1,2\\}\\([0-9]+\\|&\\)" "\\)")
   "Match a reference that needs translation, for reference display.")
@@ -579,9 +642,7 @@ whether it is set locally or up in the hierarchy, then on the
 extension of the given file name, and finally on the variable
 `org-table-export-default-format'."
   (interactive)
-  (unless (org-at-table-p)
-    (error "No table at point"))
-  (require 'org-exp)
+  (unless (org-at-table-p) (error "No table at point"))
   (org-table-align) ;; make sure we have everything we need
   (let* ((beg (org-table-begin))
 	 (end (org-table-end))
@@ -4296,7 +4357,6 @@ overwritten, and the table is not marked as requiring realignment."
   "Regular expression matching exponentials as produced by calc.")
 
 (defun orgtbl-export (table target)
-  (require 'org-exp)
   (let ((func (intern (concat "orgtbl-to-" (symbol-name target))))
 	(lines (org-split-string table "[ \t]*\n[ \t]*"))
 	org-table-last-alignment org-table-last-column-widths
@@ -4745,22 +4805,14 @@ Currently this function recognizes the following parameters:
 The general parameters :skip and :skipcols have already been applied when
 this function is called.  The function does *not* use `orgtbl-to-generic',
 so you cannot specify parameters for it."
-  (let* ((splicep (plist-get params :splice))
-	 (html-table-tag org-export-html-table-tag)
-	 html)
-    ;; Just call the formatter we already have
-    ;; We need to make text lines for it, so put the fields back together.
-    (setq html (org-format-org-table-html
-		(mapcar
-		 (lambda (x)
-		   (if (eq x 'hline)
-		       "|----+----|"
-		     (concat "| " (mapconcat 'org-html-expand x " | ") " |")))
-		 table)
-		splicep))
-    (if (string-match "\n+\\'" html)
-	(setq html (replace-match "" t t html)))
-    html))
+  (require 'ox-html)
+  (let ((output (org-export-string-as
+		 (orgtbl-to-orgtbl table nil) 'html t '(:with-tables t))))
+    (if (not (plist-get params :splice)) output
+      (org-trim
+       (replace-regexp-in-string
+	"\\`<table .*>\n" ""
+	(replace-regexp-in-string "</table>\n*\\'" "" output))))))
 
 ;;;###autoload
 (defun orgtbl-to-texinfo (table params)

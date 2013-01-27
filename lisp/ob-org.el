@@ -29,7 +29,8 @@
 ;;; Code:
 (require 'ob)
 
-(declare-function org-export-string "org-exp" (string fmt &optional dir))
+(declare-function org-export-string-as "ox"
+		  (string backend &optional body-only ext-plist))
 
 (defvar org-babel-default-header-args:org
   '((:results . "raw silent") (:exports . "code"))
@@ -53,10 +54,10 @@ This function is called by `org-babel-execute-src-block'."
 	(body (org-babel-expand-body:org
 	       (replace-regexp-in-string "^," "" body) params)))
     (cond
-     ((member "latex" result-params) (org-export-string
-				      (concat "#+Title: \n" body) "latex"))
-     ((member "html" result-params)  (org-export-string body "html"))
-     ((member "ascii" result-params) (org-export-string body "ascii"))
+     ((member "latex" result-params)
+      (org-export-string-as (concat "#+Title: \n" body) 'latex t))
+     ((member "html" result-params) (org-export-string-as  body 'html t))
+     ((member "ascii" result-params) (org-export-string-as body 'ascii t))
      (t body))))
 
 (defun org-babel-prep-session:org (session params)

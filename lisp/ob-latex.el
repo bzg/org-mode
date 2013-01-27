@@ -35,7 +35,7 @@
 (declare-function org-create-formula-image "org" (string tofile options buffer))
 (declare-function org-splice-latex-header "org"
 		  (tpl def-pkg pkg snippets-p &optional extra))
-(declare-function org-export-latex-fix-inputenc "org-latex" ())
+(declare-function org-latex--guess-inputenc "ox-latex" (header))
 (defvar org-babel-tangle-lang-exts)
 (add-to-list 'org-babel-tangle-lang-exts '("latex" . "tex"))
 
@@ -89,20 +89,21 @@ This function is called by `org-babel-execute-src-block'."
           (org-create-formula-image
            body out-file org-format-latex-options in-buffer))
          ((or (string-match "\\.pdf$" out-file) imagemagick)
-	  (require 'org-latex)
+	  (require 'ox-latex)
 	  (with-temp-file tex-file
 	    (insert
-	     (org-splice-latex-header
-	      org-format-latex-header
-	      (delq
-	       nil
-	       (mapcar
-		(lambda (el)
-		  (unless (and (listp el) (string= "hyperref" (cadr el)))
-		    el))
-		org-export-latex-default-packages-alist))
-	      org-export-latex-packages-alist
-	      org-format-latex-header-extra)
+	     (org-latex--guess-inputenc
+	      (org-splice-latex-header
+	       org-format-latex-header
+	       (delq
+		nil
+		(mapcar
+		 (lambda (el)
+		   (unless (and (listp el) (string= "hyperref" (cadr el)))
+		     el))
+		 org-export-latex-default-packages-alist))
+	       org-export-latex-packages-alist
+	       org-format-latex-header-extra))
 	     (if fit "\n\\usepackage[active, tightpage]{preview}\n" "")
 	     (if border (format "\\setlength{\\PreviewBorder}{%s}" border) "")
 	     (if height (concat "\n" (format "\\pdfpageheight %s" height)) "")
@@ -119,8 +120,7 @@ This function is called by `org-babel-execute-src-block'."
 	     (if fit
 		 (concat "\n\\begin{document}\n\\begin{preview}\n" body
 			 "\n\\end{preview}\n\\end{document}\n")
-	       (concat "\n\\begin{document}\n" body "\n\\end{document}\n")))
-	    (org-export-latex-fix-inputenc))
+	       (concat "\n\\begin{document}\n" body "\n\\end{document}\n"))))
           (when (file-exists-p out-file) (delete-file out-file))
 	  (let ((transient-pdf-file (org-babel-latex-tex-to-pdf tex-file)))
 	    (cond

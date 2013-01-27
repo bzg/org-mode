@@ -2363,7 +2363,7 @@ The following commands are available:
      ["Holidays" org-agenda-holidays (org-agenda-check-type nil 'agenda 'timeline)]
      ["Convert" org-agenda-convert-date (org-agenda-check-type nil 'agenda 'timeline)]
      "--"
-     ["Create iCalendar File" org-export-icalendar-combine-agenda-files t])
+     ["Create iCalendar File" org-icalendar-combine-agenda-files t])
     "--"
     ["Undo Remote Editing" org-agenda-undo org-agenda-undo-list]
     "--"
@@ -3349,14 +3349,8 @@ If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
 	       (delete-file (concat (file-name-sans-extension file) ".ps"))
 	       (message "PDF written to %s" file))
 	      ((string-match "\\.ics\\'" file)
-	       (require 'org-icalendar)
-	       (let ((org-agenda-marker-table
-		      (org-create-marker-find-array
-		       (org-agenda-collect-markers)))
-		     (org-icalendar-verify-function 'org-check-agenda-marker-table)
-		     (org-combined-agenda-icalendar-file file))
-		 (apply 'org-export-icalendar 'combine
-			(org-agenda-files nil 'ifmode))))
+	       (require 'ox-icalendar)
+	       (org-icalendar-export-current-agenda (expand-file-name file)))
 	      (t
 	       (let ((bs (buffer-string)))
 		 (find-file file)

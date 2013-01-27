@@ -125,7 +125,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 
 (declare-function orgtbl-mode "org-table" (&optional arg))
 (declare-function org-clock-out "org-clock" (&optional switch-to-state fail-quietly at-time))
-(declare-function org-beamer-mode "org-beamer" ())
+(declare-function org-beamer-mode "ox-beamer" ())
 (declare-function org-table-edit-field "org-table" (arg))
 (declare-function org-table-justify-field-maybe "org-table" (&optional new))
 (declare-function org-id-get-create "org-id" (&optional force))
@@ -140,19 +140,28 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (autoload 'org-element-at-point "org-element")
 (autoload 'org-element-type "org-element")
 
+(declare-function org-element--parse-objects "org-element"
+		  (beg end acc restriction))
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
-(declare-function org-element-type "org-element" (element))
-(declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-contents "org-element" (element))
+(declare-function org-element-context "org-element" (&optional element))
+(declare-function org-element-interpret-data "org-element"
+		  (data &optional parent))
+(declare-function org-element-map "org-element"
+		  (data types fun &optional info first-match no-recursion))
+(declare-function org-element-nested-p "org-element" (elem-a elem-b))
+(declare-function org-element-parse-buffer "org-element"
+		  (&optional granularity visible-only))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-put-property "org-element"
 		  (element property value))
-(declare-function org-element-map "org-element" (data types fun &optional info first-match no-recursion))
-(declare-function org-element-nested-p "org-element" (elem-a elem-b))
 (declare-function org-element-swap-A-B "org-element" (elem-a elem-b))
-(declare-function org-element--parse-objects "org-element" (beg end acc restriction))
-(declare-function org-element-parse-buffer "org-element" (&optional granularity visible-only))
-(declare-function org-element-interpret-data "org-element" (data &optional parent))
+(declare-function org-element--parse-objects "org-element"
+		  (beg end acc restriction))
+(declare-function org-element-parse-buffer "org-element"
+		  (&optional granularity visible-only))
+(declare-function org-element-interpret-data "org-element"
+		  (data &optional parent))
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)
@@ -325,22 +334,18 @@ When MESSAGE is non-nil, display a message with the version."
   (when (featurep 'org)
     (org-load-modules-maybe 'force)))
 
-(when (org-bound-and-true-p org-modules)
-  (let ((a (member 'org-infojs org-modules)))
-    (and a (setcar a 'org-jsinfo))))
-
-(defcustom org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-jsinfo org-irc org-mew org-mhe org-rmail org-vm org-w3m org-wl)
+(defcustom org-modules '(ox-ascii org-bbdb org-bibtex org-docview org-gnus ox-html org-info org-irc ox-latex org-mew org-mhe org-rmail org-vm org-w3m org-wl)
   "Modules that should always be loaded together with org.el.
 If a description starts with <C>, the file is not part of Emacs
-and loading it will require that you have downloaded and properly installed
-the org-mode distribution.
+and loading it will require that you have downloaded and properly
+installed the Org mode distribution.
 
 You can also use this system to load external packages (i.e. neither Org
 core modules, nor modules from the CONTRIB directory).  Just add symbols
 to the end of the list.  If the package is called org-xyz.el, then you need
 to add the symbol `xyz', and the package must have a call to
 
-   (provide 'org-xyz)"
+   \(provide 'org-xyz)"
   :group 'org
   :set 'org-set-modules
   :type
@@ -353,7 +358,16 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   gnus:              Links to GNUS folders/messages" org-gnus)
 	(const :tag "   id:                Global IDs for identifying entries" org-id)
 	(const :tag "   info:              Links to Info nodes" org-info)
-	(const :tag "   jsinfo:            Set up Sebastian Rose's JavaScript org-info.js" org-jsinfo)
+	(const :tag "   ascii              Export buffer to ASCII format" ox-ascii)
+	(const :tag "   beamer             Export buffer to LaTeX Beamer presentation" ox-beamer)
+	(const :tag "   html               Export buffer to HTML format" ox-html)
+	(const :tag "   icalendar          Export buffer to iCalendar format" ox-icalendar)
+	(const :tag "   latex              Export buffer to LaTeX format" ox-latex)
+	(const :tag "   man                Export buffer to MAN format" ox-man)
+	(const :tag "   md                 Export buffer to Markdown format" ox-md)
+	(const :tag "   odt                Export buffer to ODT format" ox-odt)
+	(const :tag "   texinfo            Export buffer to Texinfo format" ox-texinfo)
+	(const :tag "   infojs:            Set up Sebastian Rose's JavaScript org-info.js" ox-jsinfo)
 	(const :tag "   habit:             Track your consistency with habits" org-habit)
 	(const :tag "   inlinetask:        Tasks independent of outline hierarchy" org-inlinetask)
 	(const :tag "   irc:               Links to IRC/ERC chat sessions" org-irc)
@@ -362,18 +376,17 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   mhe:               Links to MHE folders/messages" org-mhe)
 	(const :tag "   protocol:          Intercept calls from emacsclient" org-protocol)
 	(const :tag "   rmail:             Links to RMAIL folders/messages" org-rmail)
-	(const :tag "   special-blocks:    Turn blocks into LaTeX envs and HTML divs" org-special-blocks)
 	(const :tag "   vm:                Links to VM folders/messages" org-vm)
 	(const :tag "   wl:                Links to Wanderlust folders/messages" org-wl)
 	(const :tag "   w3m:               Special cut/paste from w3m to Org-mode." org-w3m)
 	(const :tag "   mouse:             Additional mouse support" org-mouse)
-	(const :tag "   TaskJuggler:       Export tasks to a TaskJuggler project" org-taskjuggler)
 
 	(const :tag "C  annotate-file:     Annotate a file with org syntax" org-annotate-file)
 	(const :tag "C  bookmark:          Org-mode links to bookmarks" org-bookmark)
 	(const :tag "C  checklist:         Extra functions for checklists in repeated tasks" org-checklist)
 	(const :tag "C  choose:            Use TODO keywords to mark decisions states" org-choose)
 	(const :tag "C  collector:         Collect properties into tables" org-collector)
+	(const :tag "C  confluence         Export buffer to Confluence Wiki format" ox-confluence)
 	(const :tag "C  depend:            TODO dependencies for Org-mode\n\t\t\t(PARTIALLY OBSOLETE, see built-in dependency support))" org-depend)
 	(const :tag "C  drill:             Flashcards and spaced repetition for Org-mode" org-drill)
 	(const :tag "C  elisp-symbol:      Org-mode links to emacs-lisp symbols" org-elisp-symbol)
@@ -383,11 +396,13 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  expiry:            Expiry mechanism for Org-mode entries" org-expiry)
 	(const :tag "C  exp-bibtex:        Export citations using BibTeX" org-exp-bibtex)
 	(const :tag "C  git-link:          Provide org links to specific file version" org-git-link)
+	(const :tag "C  groff              Export buffer to Groff format" ox-groff)
 	(const :tag "C  interactive-query: Interactive modification of tags query\n\t\t\t(PARTIALLY OBSOLETE, see secondary filtering)" org-interactive-query)
 
         (const :tag "C  invoice:           Help manage client invoices in Org-mode" org-invoice)
 
 	(const :tag "C  jira:              Add a jira:ticket protocol to Org-mode" org-jira)
+	(const :tag "C  koma-letter        Export buffer to KOMA Scrlttrl2 format" ox-koma-letter)
 	(const :tag "C  learn:             SuperMemo's incremental learning algorithm" org-learn)
 	(const :tag "C  mairix:            Hook mairix search into Org-mode for different MUAs" org-mairix)
 	(const :tag "C  notmuch:           Provide org links to notmuch searches or messages" org-notmuch)
@@ -4034,7 +4049,7 @@ Normal means, no org-mode-specific context."
 (declare-function org-indent-mode "org-indent" (&optional arg))
 (declare-function parse-time-string "parse-time" (string))
 (declare-function org-attach-reveal "org-attach" (&optional if-exists))
-(declare-function org-export-latex-fix-inputenc "org-latex" ())
+(declare-function org-latex--guess-inputenc "ox-latex" (header))
 (declare-function orgtbl-send-table "org-table" (&optional maybe))
 (defvar remember-data-file)
 (defvar texmathp-why)
@@ -4146,11 +4161,11 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 	(re-search-forward org-table-any-border-regexp nil 1))))
   (unless quietly (message "Mapping tables: done")))
 
-;; Declare and autoload functions from org-exp.el  & Co
+;; Declare and autoload functions from ox.el and al.
 
-(declare-function org-default-export-plist "org-exp")
-(declare-function org-infile-export-plist "org-exp")
-(declare-function org-get-current-options "org-exp")
+(declare-function org-export-get-environment "ox"
+		  (&optional backend subtreep ext-plist))
+(declare-function org-latex--guess-inputenc "ox-latex" (header))
 
 ;; Declare and autoload functions from org-agenda.el
 
@@ -17752,7 +17767,7 @@ Some of the options can be changed using the variable
 	 (matchers (plist-get opt :matchers))
 	 (re-list org-latex-regexps)
 	 (org-format-latex-header-extra
-	  (plist-get (org-infile-export-plist) :latex-header-extra))
+	  (plist-get (org-export-get-environment) :latex-header-extra))
 	 (cnt 0) txt hash link beg end re e checkdir
 	 string
 	 m n block-type block linkfile movefile ov)
@@ -17986,7 +18001,6 @@ share a good deal of logic."
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image-with-dvipng (string tofile options buffer)
   "This calls dvipng."
-  (require 'org-latex)
   (let* ((tmpdir (if (featurep 'xemacs)
 		     (temp-directory)
 		   temporary-file-directory))
@@ -18009,14 +18023,14 @@ share a good deal of logic."
     (if (eq bg 'default) (setq bg (org-dvipng-color :background))
       (unless (string= bg "Transparent") (setq bg (org-dvipng-color-format bg))))
     (with-temp-file texfile
-      (insert (org-splice-latex-header
-	       org-format-latex-header
-	       org-export-latex-default-packages-alist
-	       org-export-latex-packages-alist t
-	       org-format-latex-header-extra))
-      (insert "\n\\begin{document}\n" string "\n\\end{document}\n")
-      (require 'org-latex)
-      (org-export-latex-fix-inputenc))
+      (require 'ox-latex)
+      (insert (org-latex--guess-inputenc
+	       (org-splice-latex-header
+		org-format-latex-header
+		org-export-latex-default-packages-alist
+		org-export-latex-packages-alist t
+		org-format-latex-header-extra)))
+      (insert "\n\\begin{document}\n" string "\n\\end{document}\n"))
     (let ((dir default-directory))
       (condition-case nil
 	  (progn
@@ -18056,7 +18070,6 @@ share a good deal of logic."
 (defvar org-latex-to-pdf-process) ;; Defined in org-latex.el
 (defun org-create-formula-image-with-imagemagick (string tofile options buffer)
   "This calls convert, which is included into imagemagick."
-  (require 'org-latex)
   (let* ((tmpdir (if (featurep 'xemacs)
 		     (temp-directory)
 		   temporary-file-directory))
@@ -18080,11 +18093,13 @@ share a good deal of logic."
       (setq bg (org-latex-color-format
 		(if (string= bg "Transparent") "white" bg))))
     (with-temp-file texfile
-      (insert (org-splice-latex-header
-	       org-format-latex-header
-	       org-export-latex-default-packages-alist
-	       org-export-latex-packages-alist t
-	       org-format-latex-header-extra))
+      (require 'ox-latex)
+      (insert (org-latex--guess-inputenc
+	       (org-splice-latex-header
+		org-format-latex-header
+		org-export-latex-default-packages-alist
+		org-export-latex-packages-alist t
+		org-format-latex-header-extra)))
       (insert "\n\\begin{document}\n"
 	      "\\definecolor{fg}{rgb}{" fg "}\n"
 	      "\\definecolor{bg}{rgb}{" bg "}\n"
@@ -18092,9 +18107,7 @@ share a good deal of logic."
 	      "\n{\\color{fg}\n"
 	      string
 	      "\n}\n"
-	      "\n\\end{document}\n" )
-      (require 'org-latex)
-      (org-export-latex-fix-inputenc))
+	      "\n\\end{document}\n"))
     (let ((dir default-directory) cmd cmds latex-frags-cmds)
       (condition-case nil
 	  (progn
@@ -18567,7 +18580,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-a" 'org-attach)
 (org-defkey org-mode-map "\C-c}"    'org-table-toggle-coordinate-overlays)
 (org-defkey org-mode-map "\C-c{"    'org-table-toggle-formula-debugger)
-(org-defkey org-mode-map "\C-c\C-e" 'org-export)
+(org-defkey org-mode-map "\C-c\C-e" 'org-export-dispatch)
 (org-defkey org-mode-map "\C-c:"    'org-toggle-fixed-width-section)
 (org-defkey org-mode-map "\C-c\C-x\C-f" 'org-emphasize)
 (org-defkey org-mode-map "\C-c\C-xf"    'org-footnote-action)
@@ -20358,7 +20371,7 @@ See the individual commands for more information."
      ["Timeline" org-timeline t]
      ["Tags/Property tree" org-match-sparse-tree t])
     "--"
-    ["Export/Publish..." org-export t]
+    ["Export/Publish..." org-export-dispatch t]
     ("LaTeX"
      ["Org CDLaTeX mode" org-cdlatex-mode :style toggle
       :selected org-cdlatex-mode]
@@ -20368,7 +20381,7 @@ See the individual commands for more information."
       (org-inside-LaTeX-fragment-p)]
      ["Insert citation" org-reftex-citation t]
      "--"
-     ["Template for BEAMER" (progn (require 'org-beamer)
+     ["Template for BEAMER" (progn (require 'ox-beamer)
 				   (org-insert-beamer-options-template)) t])
     "--"
     ("MobileOrg"
@@ -21501,8 +21514,6 @@ function installs the following ones: \"property\",
       (cond
        ;; Headings
        ((looking-at org-outline-regexp) (setq column 0))
-       ;; Included files
-       ((looking-at "#\\+include:") (setq column 0))
        ;; Footnote definition
        ((looking-at org-footnote-definition-re) (setq column 0))
        ;; Literal examples

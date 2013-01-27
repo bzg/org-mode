@@ -146,8 +146,9 @@ specifying a variable of the same value."
     (format "%S" var)))
 
 (defvar org-src-preserve-indentation)
-(declare-function org-export-as-latex "org-latex"
-		  (arg &optional ext-plist to-buffer body-only pub-dir))
+(declare-function org-export-to-file "ox"
+		  (backend file
+			   &optional subtreep visible-only body-only ext-plist))
 (defun org-babel-haskell-export-to-lhs (&optional arg)
   "Export to a .lhs file with all haskell code blocks escaped.
 When called with a prefix argument the resulting
@@ -191,7 +192,11 @@ constructs (header arguments, no-web syntax etc...) are ignored."
         (indent-code-rigidly (match-beginning 0) (match-end 0) indentation)))
     (save-excursion
       ;; export to latex w/org and save as .lhs
-      (find-file tmp-org-file) (funcall 'org-export-as-latex nil)
+      (require 'ox-latex)
+      (find-file tmp-org-file)
+      ;; Ensure we do not clutter kill ring with incomplete results.
+      (let (org-export-copy-to-kill-ring)
+	(org-export-to-file 'latex tmp-tex-file))
       (kill-buffer nil)
       (delete-file tmp-org-file)
       (find-file tmp-tex-file)
