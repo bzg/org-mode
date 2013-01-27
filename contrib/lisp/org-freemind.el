@@ -137,7 +137,6 @@ NOT READY YET."
                                   (integer :tag "Font size" :value 12)))))))
   :group 'org-freemind)
 
-;;;###autoload
 (defun org-export-as-freemind (&optional hidden ext-plist
 					 to-buffer body-only pub-dir)
   "Export the current buffer as a Freemind file.
@@ -191,7 +190,6 @@ See `org-freemind-from-org-mode' for more information."
 				       filename))
      (t (org-freemind-from-org-mode bfname filename)))))
 
-;;;###autoload
 (defun org-freemind-show (mm-file)
   "Show file MM-FILE in Freemind."
   (interactive
@@ -888,7 +886,6 @@ Otherwise give an error say the file exists."
         (insert (format " size=\"%s\"" font-size))
         ))))
 
-;;;###autoload
 (defun org-freemind-from-org-mode-node (node-line mm-file)
   "Convert node at line NODE-LINE to the FreeMind file MM-FILE.
 See `org-freemind-from-org-mode' for more information."
@@ -915,7 +912,6 @@ See `org-freemind-from-org-mode' for more information."
           (when (y-or-n-p "Show in FreeMind? ")
             (org-freemind-show buffer-file-name)))))))
 
-;;;###autoload
 (defun org-freemind-from-org-mode (org-file mm-file)
   "Convert the `org-mode' file ORG-FILE to the FreeMind file MM-FILE.
 All the nodes will be opened or closed in Freemind just as you
@@ -948,7 +944,6 @@ can use a CSS stylesheet to style it)."
           (when (y-or-n-p "Show in FreeMind? ")
             (org-freemind-show buffer-file-name)))))))
 
-;;;###autoload
 (defun org-freemind-from-org-sparse-tree (org-buffer mm-file)
   "Convert visible part of buffer ORG-BUFFER to FreeMind file MM-FILE."
   (interactive
@@ -1187,7 +1182,6 @@ PATH should be a list of steps, where each step has the form
 
 ;; Fix-me: put back special things, like drawers that are stored in
 ;; the notes.  Should maybe all notes contents be put in drawers?
-;;;###autoload
 (defun org-freemind-to-org-mode (mm-file org-file)
   "Convert FreeMind file MM-FILE to `org-mode' file ORG-FILE."
   (interactive

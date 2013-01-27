@@ -264,7 +264,6 @@ the variable to
 
 ;;; Autoload functions:
 
-;;;###autoload
 (defun org-export-as-docbook-batch ()
   "Call `org-export-as-docbook' in batch style.
 This function can be used in batch processing.
@@ -276,7 +275,6 @@ $ emacs --batch
         --visit=MyOrgFile.org --funcall org-export-as-docbook-batch"
   (org-export-as-docbook))
 
-;;;###autoload
 (defun org-export-as-docbook-to-buffer ()
   "Call `org-export-as-docbook' with output to a temporary buffer.
 No file is created."
@@ -285,7 +283,6 @@ No file is created."
   (when org-export-show-temporary-export-buffer
     (switch-to-buffer-other-window "*Org DocBook Export*")))
 
-;;;###autoload
 (defun org-replace-region-by-docbook (beg end)
   "Replace the region from BEG to END with its DocBook export.
 It assumes the region has `org-mode' syntax, and then convert it to
@@ -310,7 +307,6 @@ then use this command to convert it."
     (delete-region beg end)
     (insert docbook)))
 
-;;;###autoload
 (defun org-export-region-as-docbook (beg end &optional body-only buffer)
   "Convert region from BEG to END in `org-mode' buffer to DocBook.
 If prefix arg BODY-ONLY is set, omit file header and footer and
@@ -340,7 +336,6 @@ in a window.  A non-interactive call will only return the buffer."
 	(switch-to-buffer-other-window rtn)
       rtn)))
 
-;;;###autoload
 (defun org-export-as-docbook-pdf (&optional ext-plist to-buffer body-only pub-dir)
   "Export as DocBook XML file, and generate PDF file."
   (interactive "P")
@@ -382,7 +377,6 @@ in a window.  A non-interactive call will only return the buffer."
       (message "Exporting to PDF...done")
       pdffile)))
 
-;;;###autoload
 (defun org-export-as-docbook-pdf-and-open ()
   "Export as DocBook XML file, generate PDF file, and open it."
   (interactive)
@@ -393,7 +387,6 @@ in a window.  A non-interactive call will only return the buffer."
 
 (defvar org-heading-keyword-regexp-format) ; defined in org.el
 
-;;;###autoload
 (defun org-export-as-docbook (&optional ext-plist to-buffer body-only pub-dir)
   "Export the current buffer as a DocBook file.
 If there is an active region, export only the region.  When

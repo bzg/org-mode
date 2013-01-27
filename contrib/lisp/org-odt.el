@@ -426,7 +426,6 @@ values.  See Info node `(emacs) File Variables'."
 		   ,@(mapcar (lambda (c)
 			       `(const :tag ,c ,c))
 			     (org-lparse-reachable-formats "odt")))))
-;;;###autoload
 (put 'org-export-odt-preferred-output-format 'safe-local-variable 'stringp)
 
 (defmacro org-odt-cleanup-xml-buffers (&rest body)
@@ -456,7 +455,6 @@ values.  See Info node `(emacs) File Variables'."
 	(message "OpenDocument export failed: %s"
 		 (error-message-string err))))))
 
-;;;###autoload
 (defun org-export-as-odt-and-open (arg)
   "Export the outline as ODT and immediately open it with a browser.
 If there is an active region, export only the region.
@@ -467,7 +465,6 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
    (org-lparse-and-open
     (or org-export-odt-preferred-output-format "odt") "odt" arg)))
 
-;;;###autoload
 (defun org-export-as-odt-batch ()
   "Call the function `org-lparse-batch'.
 This function can be used in batch processing as:
@@ -478,7 +475,6 @@ emacs   --batch
   (org-odt-cleanup-xml-buffers (org-lparse-batch "odt")))
 
 ;;; org-export-as-odt
-;;;###autoload
 (defun org-export-as-odt (arg &optional hidden ext-plist
 			      to-buffer body-only pub-dir)
   "Export the outline as a OpenDocumentText file.
@@ -2603,7 +2599,6 @@ configuration."
 (declare-function org-create-math-formula "org"
 		  (latex-frag &optional mathml-file))
 
-;;;###autoload
 (defun org-export-odt-convert (&optional in-file out-fmt prefix-arg)
   "Convert IN-FILE to format OUT-FMT using a command line converter.
 IN-FILE is the file to be converted.  If unspecified, it defaults
@@ -2793,7 +2788,6 @@ To disable outline numbering pass a LEVEL of 0."
 	(replace-match replacement t nil))))
   (save-buffer 0))
 
-;;;###autoload
 (defun org-export-as-odf (latex-frag &optional odf-file)
   "Export LATEX-FRAG as OpenDocument formula file ODF-FILE.
 Use `org-create-math-formula' to convert LATEX-FRAG first to
@@ -2842,7 +2836,6 @@ non-nil."
 	   (message "Exporting... done")))
      (org-odt-save-as-outfile filename nil))))
 
-;;;###autoload
 (defun org-export-as-odf-and-open ()
   "Export LaTeX fragment as OpenDocument formula and immediately open it.
 Use `org-export-as-odf' to read LaTeX fragment and OpenDocument

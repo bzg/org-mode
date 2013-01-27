@@ -888,10 +888,8 @@ It returns time in `current-time' format."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Interactive publishing functions
 
-;;;###autoload
 (defalias 'org-publish-project 'org-publish)
 
-;;;###autoload
 (defun org-publish (project &optional force)
   "Publish PROJECT."
   (interactive
@@ -912,7 +910,6 @@ It returns time in `current-time' format."
 	   (list (assoc project org-publish-project-alist))
 	 (list project))))))
 
-;;;###autoload
 (defun org-publish-all (&optional force)
   "Publish all projects.
 With prefix argument, remove all files in the timestamp
@@ -925,7 +922,6 @@ directory and force publishing all files."
 	   (if force nil org-publish-use-timestamps-flag)))
       (org-publish-projects org-publish-project-alist))))
 
-;;;###autoload
 (defun org-publish-current-file (&optional force)
   "Publish the current file.
 With prefix argument, force publish the file."
@@ -935,7 +931,6 @@ With prefix argument, force publish the file."
 	   (if force nil org-publish-use-timestamps-flag)))
       (org-publish-file (buffer-file-name)))))
 
-;;;###autoload
 (defun org-publish-current-project (&optional force)
   "Publish the project associated with the current file.
 With a prefix argument, force publishing of all files in

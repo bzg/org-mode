@@ -297,7 +297,6 @@ but before any resource and task declarations."
 ;; avoid compiler warning about free variable
 (defvar org-export-taskjuggler-old-level)
 
-;;;###autoload
 (defun org-export-as-taskjuggler (&optional arg hidden ext-plist
 					    to-buffer body-only pub-dir)
   "Export parts of the current buffer as a TaskJuggler file.
@@ -417,7 +416,6 @@ defined in `org-export-taskjuggler-default-reports'."
 	    (kill-buffer (current-buffer)))
 	(current-buffer)))))
 
-;;;###autoload
 (defun org-export-as-taskjuggler-and-open ()
   "Export the current buffer as a TaskJuggler file and open it
 with the TaskJuggler GUI."

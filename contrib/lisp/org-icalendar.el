@@ -228,7 +228,6 @@ Interesting value are:
 
 ;;; iCalendar export
 
-;;;###autoload
 (defun org-export-icalendar-this-file ()
   "Export current file as an iCalendar file.
 The iCalendar file will be located in the same directory as the Org-mode
@@ -236,7 +235,6 @@ file, but with extension `.ics'."
   (interactive)
   (org-export-icalendar nil buffer-file-name))
 
-;;;###autoload
 (defun org-export-icalendar-all-agenda-files ()
   "Export all files in the variable `org-agenda-files' to iCalendar .ics files.
 Each iCalendar file will be located in the same directory as the Org-mode
@@ -244,7 +242,6 @@ file, but with extension `.ics'."
   (interactive)
   (apply 'org-export-icalendar nil (org-agenda-files t)))
 
-;;;###autoload
 (defun org-export-icalendar-combine-agenda-files ()
   "Export all files in `org-agenda-files' to a single combined iCalendar file.
 The file is stored under the name `org-combined-agenda-icalendar-file'."

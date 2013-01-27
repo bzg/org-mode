@@ -514,7 +514,6 @@ in this way, it will be wrapped."
 (defvar org-export-generic-section-type "")
 (defvar org-export-generic-section-suffix "")
 
-;;;###autoload
 (defun org-set-generic-type (type definition)
   "Adds a TYPE and DEFINITION to the existing list of defined generic
 export definitions."
@@ -570,7 +569,6 @@ suffix a later change time."
     (if prefix
 	(insert prefix))))
 
-;;;###autoload
 (defun org-export-generic (arg)
   "Export the outline as generic output.
 If there is an active region, export only the region.

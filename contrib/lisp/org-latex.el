@@ -789,7 +789,6 @@ have been determined from the environment.")
 
 ;;; Autoload functions:
 
-;;;###autoload
 (defun org-export-as-latex-batch ()
   "Call `org-export-as-latex', may be used in batch processing.
 For example:
@@ -800,7 +799,6 @@ emacs   --batch
         --visit=MyFile --funcall org-export-as-latex-batch"
   (org-export-as-latex org-export-headline-levels))
 
-;;;###autoload
 (defun org-export-as-latex-to-buffer (arg)
   "Call `org-export-as-latex` with output to a temporary buffer.
 No file is created.  The prefix ARG is passed through to `org-export-as-latex'."
@@ -809,7 +807,6 @@ No file is created.  The prefix ARG is passed through to `org-export-as-latex'."
   (when org-export-show-temporary-export-buffer
     (switch-to-buffer-other-window "*Org LaTeX Export*")))
 
-;;;###autoload
 (defun org-replace-region-by-latex (beg end)
   "Replace the region from BEG to END with its LaTeX export.
 It assumes the region has `org-mode' syntax, and then convert it to
@@ -834,7 +831,6 @@ then use this command to convert it."
     (delete-region beg end)
     (insert latex)))
 
-;;;###autoload
 (defun org-export-region-as-latex (beg end &optional body-only buffer)
   "Convert region from BEG to END in `org-mode' buffer to LaTeX.
 If prefix arg BODY-ONLY is set, omit file header, footer, and table of
@@ -866,7 +862,6 @@ in a window.  A non-interactive call will only return the buffer."
 	(switch-to-buffer-other-window rtn)
       rtn)))
 
-;;;###autoload
 (defun org-export-as-latex (arg &optional ext-plist to-buffer body-only pub-dir)
   "Export current buffer to a LaTeX file.
 If there is an active region, export only the region.  The prefix
@@ -1121,7 +1116,6 @@ When PUB-DIR is set, use this as the publishing directory."
 	  (current-buffer))
       (set-window-configuration wcf))))
 
-;;;###autoload
 (defun org-export-as-pdf (arg &optional hidden ext-plist
 			      to-buffer body-only pub-dir)
   "Export as LaTeX, then process through to PDF."
@@ -1207,7 +1201,6 @@ When PUB-DIR is set, use this as the publishing directory."
 	      (setq errors (concat errors " [undefined control sequence]")))
 	  (and (org-string-nw-p errors) errors))))))
 
-;;;###autoload
 (defun org-export-as-pdf-and-open (arg)
   "Export as LaTeX, then process through to PDF, and open."
   (interactive "P")

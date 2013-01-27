@@ -37,7 +37,6 @@
     (apply 'insert output)))
 (put 'org-export-as-xoxo-insert-into 'lisp-indent-function 1)
 
-;;;###autoload
 (defun org-export-as-xoxo (&optional buffer)
   "Export the org buffer as XOXO.
 The XOXO buffer is named *xoxo-<source buffer name>*"

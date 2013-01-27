@@ -211,7 +211,6 @@ your own style information."
   :group 'org-export-html
   :type 'boolean)
 
-;;;###autoload
 (put 'org-export-html-style-include-default 'safe-local-variable 'booleanp)
 
 (defcustom org-export-html-style ""
@@ -243,7 +242,6 @@ you can \"misuse\" it to add arbitrary text to the header.
 See also the variable `org-export-html-style-extra'."
   :group 'org-export-html
   :type 'string)
-;;;###autoload
 (put 'org-export-html-style 'safe-local-variable 'stringp)
 
 (defcustom org-export-html-style-extra ""
@@ -254,7 +252,6 @@ settings of style information, and do not forget to surround the style
 settings with <style>...</style> tags."
   :group 'org-export-html
   :type 'string)
-;;;###autoload
 (put 'org-export-html-style-extra 'safe-local-variable 'stringp)
 
 (defcustom org-export-html-mathjax-options
@@ -792,7 +789,6 @@ The default is an extended format of the ISO 8601 specification."
 	    (setq l1 label)))
 	(replace-match (format "[[#%s][%s]]" label l1) t t)))))
 
-;;;###autoload
 (defun org-export-as-html-and-open (arg)
   "Export the outline as HTML and immediately open it with a browser.
 If there is an active region, export only the region.
@@ -804,7 +800,6 @@ headlines.  The default is 3.  Lower levels will become bulleted lists."
   (when org-export-kill-product-buffer-when-displayed
     (kill-buffer (current-buffer))))
 
-;;;###autoload
 (defun org-export-as-html-batch ()
   "Call the function `org-export-as-html'.
 This function can be used in batch processing as:
@@ -814,7 +809,6 @@ emacs   --batch
         --visit=MyFile --funcall org-export-as-html-batch"
   (org-export-as-html org-export-headline-levels))
 
-;;;###autoload
 (defun org-export-as-html-to-buffer (arg)
   "Call `org-export-as-html` with output to a temporary buffer.
 No file is created.  The prefix ARG is passed through to `org-export-as-html'."
@@ -823,7 +817,6 @@ No file is created.  The prefix ARG is passed through to `org-export-as-html'."
   (when org-export-show-temporary-export-buffer
     (switch-to-buffer-other-window "*Org HTML Export*")))
 
-;;;###autoload
 (defun org-replace-region-by-html (beg end)
   "Assume the current region has org-mode syntax, and convert it to HTML.
 This can be used in any buffer.  For example, you could write an
@@ -847,7 +840,6 @@ command to convert it."
     (delete-region beg end)
     (insert html)))
 
-;;;###autoload
 (defun org-export-region-as-html (beg end &optional body-only buffer)
   "Convert region from BEG to END in org-mode buffer to HTML.
 If prefix arg BODY-ONLY is set, omit file header, footer, and table of
@@ -1177,7 +1169,6 @@ OPT-PLIST is the export options list."
 
 (defvar org-heading-keyword-regexp-format) ; defined in org.el
 
-;;;###autoload
 (defun org-export-as-html (arg &optional ext-plist to-buffer body-only pub-dir)
   "Export the outline as a pretty HTML file.
 If there is an active region, export only the region.  The prefix

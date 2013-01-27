@@ -90,21 +90,18 @@ utf8      Use all UTF-8 characters")
 
 (defvar org-ascii-current-indentation nil) ; For communication
 
-;;;###autoload
 (defun org-export-as-latin1 (&rest args)
   "Like `org-export-as-ascii', use latin1 encoding for special symbols."
   (interactive)
   (org-export-as-encoding 'org-export-as-ascii (org-called-interactively-p 'any)
 			  'latin1 args))
 
-;;;###autoload
 (defun org-export-as-latin1-to-buffer (&rest args)
   "Like `org-export-as-ascii-to-buffer', use latin1 encoding for symbols."
   (interactive)
   (org-export-as-encoding 'org-export-as-ascii-to-buffer
 			  (org-called-interactively-p 'any) 'latin1 args))
 
-;;;###autoload
 (defun org-export-as-utf8 (&rest args)
   "Like `org-export-as-ascii', use encoding for special symbols."
   (interactive)
@@ -112,7 +109,6 @@ utf8      Use all UTF-8 characters")
 			  (org-called-interactively-p 'any)
 			  'utf8 args))
 
-;;;###autoload
 (defun org-export-as-utf8-to-buffer (&rest args)
   "Like `org-export-as-ascii-to-buffer', use utf8 encoding for symbols."
   (interactive)
@@ -126,7 +122,6 @@ utf8      Use all UTF-8 characters")
       (apply command args))))
 
 
-;;;###autoload
 (defun org-export-as-ascii-to-buffer (arg)
   "Call `org-export-as-ascii` with output to a temporary buffer.
 No file is created.  The prefix ARG is passed through to `org-export-as-ascii'."
@@ -135,7 +130,6 @@ No file is created.  The prefix ARG is passed through to `org-export-as-ascii'."
   (when org-export-show-temporary-export-buffer
     (switch-to-buffer-other-window "*Org ASCII Export*")))
 
-;;;###autoload
 (defun org-replace-region-by-ascii (beg end)
   "Assume the current region has org-mode syntax, and convert it to plain ASCII.
 This can be used in any buffer.  For example, you could write an
@@ -159,7 +153,6 @@ command to convert it."
     (delete-region beg end)
     (insert ascii)))
 
-;;;###autoload
 (defun org-export-region-as-ascii (beg end &optional body-only buffer)
   "Convert region from BEG to END in org-mode buffer to plain ASCII.
 If prefix arg BODY-ONLY is set, omit file header, footer, and table of
@@ -189,7 +182,6 @@ in a window.  A non-interactive call will only return the buffer."
 	(switch-to-buffer-other-window rtn)
       rtn)))
 
-;;;###autoload
 (defun org-export-as-ascii (arg &optional ext-plist to-buffer body-only pub-dir)
   "Export the outline as a pretty ASCII file.
 If there is an active region, export only the region.
@@ -549,7 +541,6 @@ publishing directory."
 	  (kill-buffer (current-buffer)))
       (current-buffer))))
 
-;;;###autoload
 (defun org-export-ascii-preprocess (parameters)
   "Do extra work for ASCII export."
   ;;
@@ -724,7 +715,6 @@ publishing directory."
 (provide 'org-ascii)
 
 ;; Local variables:
-;; generated-autoload-file: "org-loaddefs.el"
 ;; End:
 
 ;;; org-ascii.el ends here

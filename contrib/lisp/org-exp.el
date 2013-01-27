@@ -49,12 +49,7 @@
 		  (&optional buffer-or-name norecord label))
 (declare-function org-unescape-code-in-region "org-src" (beg end))
 
-(autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
 
-(autoload 'org-export-as-odt "org-odt"
-  "Export the outline to a OpenDocument Text file." t)
-(autoload 'org-export-as-odt-and-open "org-odt"
-  "Export the outline to a OpenDocument Text file and open it." t)
 
 (defgroup org-export nil
   "Options for exporting org-listings."
@@ -962,7 +957,6 @@ security risks."
       (setq plist (funcall f plist))))
   plist)
 
-;;;###autoload
 (defun org-export (&optional arg)
   "Export dispatcher for Org-mode.
 When `org-export-run-in-background' is non-nil, try to run the command
@@ -2954,7 +2948,6 @@ block numbering.  When non-nil do the following:
 	      (if (<= lv level) (throw 'exit nil))
 	      (if todo (throw 'exit t))))))))
 
-;;;###autoload
 (defun org-export-visible (type arg)
   "Create a copy of the visible part of the current buffer, and export it.
 The copy is created in a temporary buffer and removed after use.
@@ -3057,7 +3050,6 @@ to the value of `temporary-file-directory'."
 		       nil nil ''string t dir))))
       (delete-file tmp-file))))
 
-;;;###autoload
 (defun org-export-as-org (arg &optional ext-plist to-buffer body-only pub-dir)
   "Make a copy with not-exporting stuff removed.
 The purpose of this function is to provide a way to export the source
