@@ -15578,57 +15578,57 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-minibuffer-local-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map minibuffer-local-map)
-    (org-defkey minibuffer-local-map [(meta shift left)]
+    (org-defkey map [(meta shift left)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-month 1))))
-    (org-defkey minibuffer-local-map [(meta shift right)]
+    (org-defkey map [(meta shift right)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-month 1))))
-    (org-defkey minibuffer-local-map [(meta shift up)]
+    (org-defkey map [(meta shift up)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-year 1))))
-    (org-defkey minibuffer-local-map [(meta shift down)]
+    (org-defkey map [(meta shift down)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-year 1))))
-    (org-defkey minibuffer-local-map [?\e (shift left)]
+    (org-defkey map [?\e (shift left)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-month 1))))
-    (org-defkey minibuffer-local-map [?\e (shift right)]
+    (org-defkey map [?\e (shift right)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-month 1))))
-    (org-defkey minibuffer-local-map [?\e (shift up)]
+    (org-defkey map [?\e (shift up)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-year 1))))
-    (org-defkey minibuffer-local-map [?\e (shift down)]
+    (org-defkey map [?\e (shift down)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-year 1))))
-    (org-defkey minibuffer-local-map [(shift up)]
+    (org-defkey map [(shift up)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-week 1))))
-    (org-defkey minibuffer-local-map [(shift down)]
+    (org-defkey map [(shift down)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-week 1))))
-    (org-defkey minibuffer-local-map [(shift left)]
+    (org-defkey map [(shift left)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-day 1))))
-    (org-defkey minibuffer-local-map [(shift right)]
+    (org-defkey map [(shift right)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-day 1))))
-    (org-defkey minibuffer-local-map "?"
+    (org-defkey map "?"
                 (lambda () (interactive)
                   (org-eval-in-calendar '(diary-view-entries))
                   (message "")))
-    (org-defkey minibuffer-local-map ">"
+    (org-defkey map ">"
                 (lambda () (interactive)
                   (org-eval-in-calendar '(scroll-calendar-left 1))))
-    (org-defkey minibuffer-local-map "<"
+    (org-defkey map "<"
                 (lambda () (interactive)
                   (org-eval-in-calendar '(scroll-calendar-right 1))))
-    (org-defkey minibuffer-local-map "\C-v"
+    (org-defkey map "\C-v"
                 (lambda () (interactive)
                   (org-eval-in-calendar
                    '(calendar-scroll-left-three-months 1))))
-    (org-defkey minibuffer-local-map "\M-v"
+    (org-defkey map "\M-v"
                 (lambda () (interactive)
                   (org-eval-in-calendar
                    '(calendar-scroll-right-three-months 1))))
