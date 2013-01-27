@@ -27,7 +27,6 @@ org-eval.el              --- The <lisp> tag, adapted from Muse
 org-eval-light.el        --- Evaluate in-buffer code on demand
 org-exp-bibtex.el        --- Export citations to LaTeX and HTML
 org-expiry.el 	         --- Expiry mechanism for Org entries
-org-export.el            --- Generic Export Engine For Org
 org-export-generic.el    --- Export framework for configurable backends
 org-git-link.el          --- Provide org links to specific file version
 org-interactive-query.el --- Interactive modification of tags query
@@ -53,21 +52,6 @@ org-toc.el 	         --- Table of contents for Org-mode buffer
 org-track.el             --- Keep up with Org development
 org-velocity.el          --- something like Notational Velocity for Org
 org-wikinodes.el         --- CamelCase wiki-like links for Org
-
-
-EXPORT ENGINE AND BACKENDS (emacs-lisp code)
-============================================
-
-org-export.el            --- the new export engine
-org-e-latex.el           --- LaTeX export backend
-org-e-ascii.el           --- ASCII export backend
-org-e-beamer.el          --- Beamer export backend
-org-e-groff.el           --- Groff export backend
-org-e-html.el            --- HTML export backend
-org-e-man.el             --- man pages export backend
-org-e-odt.el             --- ODT export backend
-org-e-texinfo.el         --- TeXinfo export backend
-org-md.el                --- MarkDown export backend
 
 
 BABEL

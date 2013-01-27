@@ -1,4 +1,4 @@
-;;; org-e-confluence --- Confluence Wiki Back-End for Org Export Engine
+;;; ox-confluence --- Confluence Wiki Back-End for Org Export Engine
 
 ;; Copyright (C) 2012 Sébastien Delafond
 
@@ -22,58 +22,58 @@
 
 ;;; Commentary:
 ;;
-;; org-confluence.el lets you convert Org files to confluence files using
-;; the org-export.el experimental engine.
+;; ox-confluence.el lets you convert Org files to confluence files
+;; using the ox.el export engine.
 ;;
 ;; Put this file into your load-path and the following into your ~/.emacs:
-;;	 (require 'org-confluence)
+;;	 (require 'ox-confluence)
 ;;
 ;; Export Org files to confluence:
-;; M-x org-e-confluence-export-as-confluence RET
+;; M-x org-confluence-export-as-confluence RET
 ;;
 ;;; Code:
 
-(require 'org-export)
-(require 'org-e-ascii)
+(require 'ox)
+(require 'ox-ascii)
 
 ;; Define the backend itself
-(org-export-define-derived-backend e-confluence e-ascii
-  :translate-alist ((bold . org-e-confluence-bold)
-                    (example-block . org-e-confluence-example-block)
-                    (fixed-width . org-e-confluence-fixed-width)
-                    (footnote-definition . org-e-confluence-empty)
-                    (footnote-reference . org-e-confluence-empty)
-                    (headline . org-e-confluence-headline)
-                    (italic . org-e-confluence-italic)
-                    (link . org-e-confluence-link)
-                    (section . org-e-confluence-section)
-                    (src-block . org-e-confluence-src-block)
-                    (strike-through . org-e-confluence-strike-through)
-                    (table . org-e-confluence-table)
-                    (table-cell . org-e-confluence-table-cell)
-                    (table-row . org-e-confluence-table-row)
-                    (template . org-e-confluence-template)
-                    (underline . org-e-confluence-underline)))
+(org-export-define-derived-backend confluence ascii
+  :translate-alist ((bold . org-confluence-bold)
+                    (example-block . org-confluence-example-block)
+                    (fixed-width . org-confluence-fixed-width)
+                    (footnote-definition . org-confluence-empty)
+                    (footnote-reference . org-confluence-empty)
+                    (headline . org-confluence-headline)
+                    (italic . org-confluence-italic)
+                    (link . org-confluence-link)
+                    (section . org-confluence-section)
+                    (src-block . org-confluence-src-block)
+                    (strike-through . org-confluence-strike-through)
+                    (table . org-confluence-table)
+                    (table-cell . org-confluence-table-cell)
+                    (table-row . org-confluence-table-row)
+                    (template . org-confluence-template)
+                    (underline . org-confluence-underline)))
 
 ;; All the functions we use
-(defun org-e-confluence-bold (bold contents info)
+(defun org-confluence-bold (bold contents info)
   (format "*%s*" contents))
 
-(defun org-e-confluence-empty (empy contents info)
+(defun org-confluence-empty (empy contents info)
   "")
 
-(defun org-e-confluence-example-block (example-block contents info)
+(defun org-confluence-example-block (example-block contents info)
   ;; FIXME: provide a user-controlled variable for theme
   (let ((content (org-export-format-code-default example-block info)))
-    (org-e-confluence--block "none" "Confluence" content)))
+    (org-confluence--block "none" "Confluence" content)))
 
-(defun org-e-confluence-italic (italic contents info)
+(defun org-confluence-italic (italic contents info)
   (format "_%s_" contents))
 
-(defun org-e-confluence-fixed-width (fixed-width contents info)
+(defun org-confluence-fixed-width (fixed-width contents info)
   (format "\{\{%s\}\}" contents))
 
-(defun org-e-confluence-headline (headline contents info)
+(defun org-confluence-headline (headline contents info)
   (let ((low-level-rank (org-export-low-level-p headline info))
         (text (org-export-data (org-element-property :title headline)
                                info))
@@ -83,7 +83,7 @@
             (if (org-string-nw-p contents) contents
               ""))))
 
-(defun org-e-confluence-link (link desc info)
+(defun org-confluence-link (link desc info)
   (let ((raw-link (org-element-property :raw-link link)))
     (concat "["
             (when (org-string-nw-p desc) (format "%s|" desc))
@@ -93,45 +93,45 @@
              (t
               raw-link))
             "]")))
-(defun org-e-confluence-section (section contents info)
+(defun org-confluence-section (section contents info)
   contents)
 
-(defun org-e-confluence-src-block (src-block contents info)
+(defun org-confluence-src-block (src-block contents info)
   ;; FIXME: provide a user-controlled variable for theme
   (let* ((lang (org-element-property :language src-block))
          (language (if (string= lang "sh") "bash" ;; FIXME: provide a mapping of some sort
                      lang))
          (content (org-export-format-code-default src-block info)))
-    (org-e-confluence--block language "Emacs" content)))
+    (org-confluence--block language "Emacs" content)))
 
-(defun org-e-confluence-strike-through (strike-through contents info)
+(defun org-confluence-strike-through (strike-through contents info)
   (format "-%s-" contents))
 
-(defun org-e-confluence-table (table contents info)
+(defun org-confluence-table (table contents info)
   contents)
 
-(defun org-e-confluence-table-row  (table-row contents info)
+(defun org-confluence-table-row  (table-row contents info)
   (concat
    (if (org-string-nw-p contents) (format "|%s" contents)
      "")
    (when (org-export-table-row-ends-header-p table-row info)
      "|")))
 
-(defun org-e-confluence-table-cell  (table-cell contents info)
+(defun org-confluence-table-cell  (table-cell contents info)
   (let ((table-row (org-export-get-parent table-cell)))
     (concat
      (when (org-export-table-row-starts-header-p table-row info)
        "|")
      contents "|")))
 
-(defun org-e-confluence-template (contents info)
+(defun org-confluence-template (contents info)
   (let ((depth (plist-get info :with-toc)))
     (concat (when depth "\{toc\}\n\n") contents)))
 
-(defun org-e-confluence-underline (underline contents info)
+(defun org-confluence-underline (underline contents info)
   (format "+%s+" contents))
 
-(defun org-e-confluence--block (language theme contents)
+(defun org-confluence--block (language theme contents)
   (concat "\{code:theme=" theme
           (when language (format "|language=%s" language))
           "}\n"
@@ -139,7 +139,7 @@
           "\{code\}\n"))
 
 ;; main interactive entrypoint
-(defun org-e-confluence-export-as-confluence
+(defun org-confluence-export-as-confluence
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a text buffer.
 
@@ -178,14 +178,14 @@ is non-nil."
 	      (insert output)
 	      (goto-char (point-min))
 	      (text-mode)
-	      (org-export-add-to-stack (current-buffer) 'e-confluence)))
-	`(org-export-as 'e-confluence ,subtreep ,visible-only ,body-only
+	      (org-export-add-to-stack (current-buffer) 'confluence)))
+	`(org-export-as 'confluence ,subtreep ,visible-only ,body-only
 			',ext-plist))
     (let ((outbuf (org-export-to-buffer
-		   'e-confluence "*Org E-Confluence Export*"
+		   'confluence "*Org E-Confluence Export*"
 		   subtreep visible-only body-only ext-plist)))
       (with-current-buffer outbuf (text-mode))
       (when org-export-show-temporary-export-buffer
 	(switch-to-buffer-other-window outbuf)))))
 
-(provide 'org-e-confluence)
+(provide 'ox-confluence)

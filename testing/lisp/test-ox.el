@@ -1,4 +1,4 @@
-;;; test-org-export.el --- Tests for org-export.el
+;;; test-ox.el --- Tests for ox.el
 
 ;; Copyright (C) 2012, 2013  Nicolas Goaziou
 
@@ -21,7 +21,7 @@
 
 ;;; Code:
 
-(unless (featurep 'org-export)
+(unless (featurep 'ox)
   (signal 'missing-test-dependency "org-export"))
 
 (defmacro org-test-with-backend (backend &rest body)
@@ -73,38 +73,22 @@ already filled in `info'."
 
 (ert-deftest test-org-export/bind-keyword ()
   "Test reading #+BIND: keywords."
-  ;; Test with `org-export-all-BIND' set to t.
+  ;; Test with `org-export-allow-bind-keywords' set to t.
   (should
    (org-test-with-temp-text "#+BIND: variable value"
-     (let ((org-export-allow-BIND t))
+     (let ((org-export-allow-bind-keywords t))
        (org-export--install-letbind-maybe)
        (eq variable 'value))))
-  ;; Test with `org-export-all-BIND' set to nil.
+  ;; Test with `org-export-allow-bind-keywords' set to nil.
   (should-not
    (org-test-with-temp-text "#+BIND: variable value"
-     (let ((org-export-allow-BIND nil))
-       (org-export--install-letbind-maybe)
-       (boundp 'variable))))
-  ;; Test with `org-export-all-BIND' set to 'confirm and
-  ;; `org-export--allow-BIND-local' to t .
-  (should
-   (org-test-with-temp-text "#+BIND: variable value"
-     (let ((org-export-allow-BIND 'confirm))
-       (org-set-local 'org-export--allow-BIND-local t)
-       (org-export--install-letbind-maybe)
-       (eq variable 'value))))
-  ;; Test with `org-export-all-BIND' set to 'confirm and
-  ;; `org-export--allow-BIND-local' to nil.
-  (should-not
-   (org-test-with-temp-text "#+BIND: variable value"
-     (let ((org-export-allow-BIND 'confirm))
-       (org-set-local 'org-export--allow-BIND-local nil)
+     (let ((org-export-allow-bind-keywords nil))
        (org-export--install-letbind-maybe)
        (boundp 'variable))))
   ;; BIND keywords are case-insensitive.
   (should
    (org-test-with-temp-text "#+bind: variable value"
-     (let ((org-export-allow-BIND t))
+     (let ((org-export-allow-bind-keywords t))
        (org-export--install-letbind-maybe)
        (eq variable 'value)))))
 
@@ -302,6 +286,15 @@ Paragraph"
 	 (string-match
 	  "\\`\\* Head1[ \t]+:archive:\n\\'"
 	  (org-export-as 'test nil nil nil '(:with-archived-trees t)))))))
+  ;; Clocks.
+  (let ((org-clock-string "CLOCK:"))
+    (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
+      (org-test-with-backend test
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-clocks t))
+		"CLOCK: [2012-04-29 sun. 10:45]\n"))
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-clocks nil)) "")))))
   ;; Drawers.
   (let ((org-drawers '("TEST")))
     (org-test-with-temp-text ":TEST:\ncontents\n:END:"
@@ -316,39 +309,12 @@ Paragraph"
 	(should
 	 (equal (org-export-as 'test nil nil nil '(:with-drawers ("FOO")))
 		":FOO:\nkeep\n:END:\n")))))
-  ;; Timestamps.
-  (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
-    (org-test-with-backend test
-      (should
-       (equal (org-export-as 'test nil nil nil '(:with-timestamps t))
-	      "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>\n"))
-      (should
-       (equal (org-export-as 'test nil nil nil '(:with-timestamps nil)) ""))
-      (should
-       (equal (org-export-as 'test nil nil nil '(:with-timestamps active))
-	      "<2012-04-29 sun. 10:45>\n"))
-      (should
-       (equal (org-export-as 'test nil nil nil '(:with-timestamps inactive))
-	      "[2012-04-29 sun. 10:45]\n"))))
-  ;; Clocks.
-  (let ((org-clock-string "CLOCK:"))
-    (org-test-with-temp-text "CLOCK: [2012-04-29 sun. 10:45]"
+  (let ((org-drawers '("FOO" "BAR")))
+    (org-test-with-temp-text ":FOO:\nkeep\n:END:\n:BAR:\nremove\n:END:"
       (org-test-with-backend test
 	(should
-	 (equal (org-export-as 'test nil nil nil '(:with-clocks t))
-		"CLOCK: [2012-04-29 sun. 10:45]\n"))
-	(should
-	 (equal (org-export-as 'test nil nil nil '(:with-clocks nil)) "")))))
-  ;; Plannings.
-  (let ((org-closed-string "CLOSED:"))
-    (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
-      (org-test-with-backend test
-	(should
-	 (equal (org-export-as 'test nil nil nil '(:with-plannings t))
-		"CLOSED: [2012-04-29 sun. 10:45]\n"))
-	(should
-	 (equal (org-export-as 'test nil nil nil '(:with-plannings nil))
-		"")))))
+	 (equal (org-export-as 'test nil nil nil '(:with-drawers (not "BAR")))
+		":FOO:\nkeep\n:END:\n")))))
   ;; Inlinetasks.
   (when (featurep 'org-inlinetask)
     (should
@@ -366,13 +332,37 @@ Paragraph"
 	  (org-test-with-backend test
 	    (org-export-as 'test nil nil nil '(:with-inlinetasks nil)))))
       "")))
+  ;; Plannings.
+  (let ((org-closed-string "CLOSED:"))
+    (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
+      (org-test-with-backend test
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-plannings t))
+		"CLOSED: [2012-04-29 sun. 10:45]\n"))
+	(should
+	 (equal (org-export-as 'test nil nil nil '(:with-plannings nil))
+		"")))))
   ;; Statistics cookies.
   (should
    (equal ""
 	  (org-test-with-temp-text "[0/0]"
 	    (org-test-with-backend test
 	      (org-export-as
-	       'test nil nil nil '(:with-statistics-cookies nil)))))))
+	       'test nil nil nil '(:with-statistics-cookies nil))))))
+  ;; Timestamps.
+  (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
+    (org-test-with-backend test
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps t))
+	      "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>\n"))
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps nil)) ""))
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps active))
+	      "<2012-04-29 sun. 10:45>\n"))
+      (should
+       (equal (org-export-as 'test nil nil nil '(:with-timestamps inactive))
+	      "[2012-04-29 sun. 10:45]\n")))))
 
 (ert-deftest test-org-export/comment-tree ()
   "Test if export process ignores commented trees."
@@ -669,7 +659,18 @@ body\n")))
 	    (org-export-define-backend parent ((:headline . parent)))
 	    (org-export-define-derived-backend test parent
 	      :translate-alist ((:headline . test)))
-	    (org-export-backend-translate-table 'test)))))
+	    (org-export-backend-translate-table 'test))))
+  ;; Options defined in the new back have priority over those defined
+  ;; in parent.
+  (should
+   (eq 'test
+       (let (org-export-registered-backends)
+	 (org-export-define-backend parent
+	   ((:headline . parent))
+	   :options-alist ((:a nil nil 'parent)))
+	 (org-export-define-derived-backend test parent
+	   :options-alist ((:a nil nil 'test)))
+	 (plist-get (org-export--get-global-options 'test) :a)))))
 
 (ert-deftest test-org-export/derived-backend-p ()
   "Test `org-export-derived-backend-p' specifications."
@@ -2213,5 +2214,5 @@ Another text. (ref:text)
 		     (org-element-map tree 'code 'identity info t) info 2))))))
 
 
-(provide 'test-org-export)
+(provide 'test-ox)
 ;;; test-org-export.el end here

@@ -1,4 +1,4 @@
-;;; org-koma-letter.el --- KOMA Scrlttr2 Back-End for Org Export Engine
+;;; ox-koma-letter.el --- KOMA Scrlttr2 Back-End for Org Export Engine
 
 ;; Copyright (C) 2007-2012  Free Software Foundation, Inc.
 
@@ -29,7 +29,7 @@
 ;; `org-koma-letter-export-to-latex' ("tex" file) and
 ;; `org-koma-letter-export-to-pdf' ("pdf" file).
 ;;
-;; On top of buffer keywords supported by `e-latex' back-end (see
+;; On top of buffer keywords supported by `latex' back-end (see
 ;; `org-e-latex-options-alist'), this back-end introduces the
 ;; following keywords: "CLOSING" (see `org-koma-letter-closing'),
 ;; "FROM_ADDRESS" (see `org-koma-letter-from-address'), "LCO" (see
@@ -42,7 +42,7 @@
 ;; `org-e-latex-classes' in order to use the KOMA Scrlttr2 class.  For
 ;; example, you can use the following code:
 ;;
-;;   (add-to-list 'org-e-latex-classes
+;;   (add-to-list 'org-latex-classes
 ;;                '("my-letter"
 ;;                  "\\documentclass\[%
 ;;   DIV=14,
@@ -65,7 +65,7 @@
 
 ;;; Code:
 
-(require 'org-e-latex)
+(require 'ox-latex)
 
 
 ;;; User-Configurable Variables
@@ -109,7 +109,7 @@
 
 ;;; Define Back-End
 
-(org-export-define-derived-backend koma-letter e-latex
+(org-export-define-derived-backend koma-letter latex
   :options-alist
   ((:closing "CLOSING" nil org-koma-letter-closing)
    (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
@@ -164,7 +164,7 @@ channel."
     ;; Handle specifically BEAMER and TOC (headlines only) keywords.
     ;; Otherwise, fallback to `e-latex' back-end.
     (if (equal key "KOMA-LETTER") value
-      (org-export-with-backend 'e-latex keyword contents info))))
+      (org-export-with-backend 'latex keyword contents info))))
 
 ;;;; Template
 
@@ -213,7 +213,8 @@ holding export options."
    "\\begin{document}\n\n"
    (format "\\setkomavar{subject}{%s}\n\n"
            (org-export-data (plist-get info :title) info))
-   (format "\\begin{letter}{%%\n%s}\n\n" (or (plist-get info :to-address) "no address given"))
+   (format "\\begin{letter}{%%\n%s}\n\n"
+	   (or (plist-get info :to-address) "no address given"))
    ;; Opening.
    (format "\\opening{%s}\n\n" (plist-get info :opening))
    ;; Letter body.
@@ -365,5 +366,5 @@ Return PDF file's name."
       nil subtreep visible-only body-only ext-plist))))
 
 
-(provide 'org-koma-letter)
-;;; org-koma-letter.el ends here
+(provide 'ox-koma-letter)
+;;; ox-koma-letter.el ends here

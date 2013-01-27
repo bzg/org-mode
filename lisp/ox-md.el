@@ -1,4 +1,4 @@
-;;; org-md.el --- Markdown Back-End for Org Export Engine
+;;; ox-md.el --- Markdown Back-End for Org Export Engine
 
 ;; Copyright (C) 2012, 2013  Free Software Foundation, Inc.
 
@@ -21,7 +21,7 @@
 ;;; Commentary:
 
 ;; This library implements a Markdown back-end (vanilla flavour) for
-;; Org exporter, based on `e-html'.
+;; Org exporter, based on `html' back-end.
 ;;
 ;; It provides two commands for export, depending on the desired
 ;; output: `org-md-export-as-markdown' (temporary buffer) and
@@ -29,7 +29,7 @@
 
 ;;; Code:
 
-(require 'org-e-html)
+(require 'ox-html)
 
 
 
@@ -53,7 +53,7 @@ This variable can be set to either `atx' or `setext'."
 
 ;;; Define Back-End
 
-(org-export-define-derived-backend md e-html
+(org-export-define-derived-backend md html
   :export-block ("MD" "MARKDOWN")
   :filters-alist ((:filter-parse-tree . org-md-separate-elements))
   :menu-entry
@@ -99,14 +99,13 @@ TREE is the parse tree being exported.  BACKEND is the export
 back-end used.  INFO is a plist used as a communication channel.
 
 Assume BACKEND is `md'."
-  (org-element-map
-   tree org-element-all-elements
-   (lambda (elem)
-     (unless (eq (org-element-type elem) 'org-data)
-       (org-element-put-property
-	elem :post-blank
-	(let ((post-blank (org-element-property :post-blank elem)))
-	  (if (not post-blank) 1 (max 1 post-blank)))))))
+  (org-element-map tree org-element-all-elements
+    (lambda (elem)
+      (unless (eq (org-element-type elem) 'org-data)
+	(org-element-put-property
+	 elem :post-blank
+	 (let ((post-blank (org-element-property :post-blank elem)))
+	   (if (not post-blank) 1 (max 1 post-blank)))))))
   ;; Return updated tree.
   tree)
 
@@ -264,9 +263,9 @@ a communication channel."
 	 (function
 	  (lambda (raw-path info)
 	    ;; Treat links to `file.org' as links to `file.html', if
-            ;; needed.  See `org-e-html-link-org-files-as-html'.
+            ;; needed.  See `org-html-link-org-files-as-html'.
 	    (cond
-	     ((and org-e-html-link-org-files-as-html
+	     ((and org-html-link-org-files-as-html
 		   (string= ".org"
 			    (downcase (file-name-extension raw-path "."))))
 	      (concat (file-name-sans-extension raw-path) "."
@@ -288,7 +287,7 @@ a communication channel."
 					   (org-export-get-headline-number
 					    destination info)
 					   ".")))))))
-	  ((org-export-inline-image-p link org-e-html-inline-image-rules)
+	  ((org-export-inline-image-p link org-html-inline-image-rules)
 	   (let ((path (let ((raw-path (org-element-property :path link)))
 			 (if (not (file-name-absolute-p raw-path)) raw-path
 			   (expand-file-name raw-path)))))
@@ -373,7 +372,7 @@ contextual information."
   (setq text (replace-regexp-in-string "[`*_\\]" "\\\\\\&" text))
   ;; Handle special strings, if required.
   (when (plist-get info :with-special-strings)
-    (setq text (org-e-html-convert-special-strings text)))
+    (setq text (org-html-convert-special-strings text)))
   ;; Handle break preservation, if required.
   (when (plist-get info :preserve-breaks)
     (setq text (replace-regexp-in-string "[ \t]*\n" "  \n" text)))
@@ -485,5 +484,10 @@ Return output file's name."
       (org-export-to-file 'md outfile subtreep visible-only))))
 
 
-(provide 'org-md)
-;;; org-md.el ends here
+(provide 'ox-md)
+
+;; Local variables:
+;; generated-autoload-file: "org-loaddefs.el"
+;; End:
+
+;;; ox-md.el ends here
