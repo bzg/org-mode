@@ -179,75 +179,250 @@ If both match values are nil, return all contacts."
       (let ((completion-ignore-case (not dont-fold)))
 	(complete-with-action action table string pred)))))
 
-(defun org-contacts-complete-name (&optional start)
-  "Complete text at START with a user name and email."
-  (let* ((end (point))
-         (start (or start
-                    (save-excursion
-                      (re-search-backward "\\(\\`\\|[\n:,]\\)[ \t]*")
-                      (goto-char (match-end 0))
-                      (point))))
-         (orig (buffer-substring start end))
-         (completion-ignore-case org-contacts-completion-ignore-case)
-         (group-completion-p (org-string-match-p
-			      (concat "^" org-contacts-group-prefix) orig))
-         (completion-list
-          (if group-completion-p
-              (mapcar (lambda (group) (propertize (concat org-contacts-group-prefix group)
-						  'org-contacts-group group))
-                      (org-uniquify
-                       (loop for contact in (org-contacts-filter)
-                             with group-list
-                             nconc (org-split-string
-                                    (or (cdr (assoc-string "ALLTAGS" (caddr contact))) "") ":"))))
-            (loop for contact in (org-contacts-filter)
-                  ;; The contact name is always the car of the assoc-list
-                  ;; returned by `org-contacts-filter'.
-                  for contact-name = (car contact)
-                  ;; Build the list of the user email addresses.
-                  for email-list = (split-string (or
-                                                  (cdr (assoc-string org-contacts-email-property
-								     (caddr contact))) ""))
-                  ;; If the user has email addresses…
-                  if email-list
-                  ;; … append a list of USER <EMAIL>.
-                  nconc (loop for email in email-list
-                              collect (org-contacts-format-email contact-name email)))))
-         (completion-list (all-completions orig completion-list)))
-    ;; If we are completing a group, and that's the only group, just return
-    ;; the real result.
-    (when (and group-completion-p
-               (= (length completion-list) 1))
-      (setq completion-list
-            (list (concat
-		   (car completion-list) ";: "
-		   (mapconcat 'identity
-			      (loop for contact in (org-contacts-filter
-						    nil
-						    (get-text-property 0 'org-contacts-group
-								       (car completion-list)))
-				    ;; The contact name is always the car of the assoc-list
-				    ;; returned by `org-contacts-filter'.
-				    for contact-name = (car contact)
-				    ;; Grab the first email of the contact
-				    for email = (car (split-string
-						      (or
-						       (cdr (assoc-string org-contacts-email-property
-									  (caddr contact)))
-						       "")))
-				    ;; If the user has an email address, append USER <EMAIL>.
-				    if email collect (org-contacts-format-email contact-name email))
-			      ", ")))))
-    (list start end
-	  (completion-table-case-fold completion-list
-				      (not org-contacts-completion-ignore-case)))))
+(defun org-contacts-try-completion-prefix (to-match collection &optional predicate)
+  "Like `try-completion' but:
+- works only with list and alist;
+- looks at all prefixes rather than just the beginning of the string;"
+  (loop with regexp = (concat "\\b" (regexp-quote to-match))
+	with ret = nil
+	with ret-start = nil
+	with ret-end = nil
 
-(defun org-contacts-message-complete-function ()
+	for el in collection
+	for string = (if (listp el) (car el) el)
+
+	for start = (when (or (null predicate) (funcall predicate string))
+		      (string-match regexp string))
+
+	if start
+	do (let ((end (match-end 0))
+		 (len (length string)))
+	     (if (= end len)
+		 (return t)
+	       (destructuring-bind (string start end)
+		   (if (null ret)
+		       (values string start end)
+		     (org-contacts-common-substring
+		      ret ret-start ret-end
+		      string start end))
+		 (setf ret string
+		       ret-start start
+		       ret-end end))))
+
+	finally (return
+		 (replace-regexp-in-string "\\`[ \t\n]*" "" ret))))
+
+(defun org-contacts-compare-strings (s1 start1 end1 s2 start2 end2 &optional ignore-case)
+  "Compare the contents of two strings, using `compare-strings'.
+
+This function works like `compare-strings' excepted that it
+returns a cons.
+- The CAR is the number of characters that match at the beginning.
+- The CDR is T is the two strings are the same and NIL otherwise."
+  (let ((ret (compare-strings s1 start1 end1 s2 start2 end2 ignore-case)))
+    (if (eq ret t)
+	(cons (or end1 (length s1)) t)
+      (cons (1- (abs ret)) nil))))
+
+(defun org-contacts-common-substring (s1 start1 end1 s2 start2 end2)
+  "Extract the common substring between S1 and S2.
+
+This function extracts the common substring between S1 and S2 and
+adjust the part that remains common.
+
+START1 and END1 delimit the part in S1 that we know is common
+between the two strings. This applies to START2 and END2 for S2.
+
+This function returns a list whose contains:
+- The common substring found.
+- The new value of the start of the known inner substring.
+- The new value of the end of the known inner substring."
+  ;; Given two strings:
+  ;; s1: "foo bar baz"
+  ;; s2: "fooo bar baz"
+  ;; and the inner substring is "bar"
+  ;; then: start1 = 4, end1 = 6, start2 = 5, end2 = 7
+  ;;
+  ;; To find the common substring we will compare two substrings:
+  ;; " oof" and " ooof" to find the beginning of the common substring.
+  ;; " baz" and " baz" to find the end of the common substring.
+  (let* ((len1 (length s1))
+	 (start1 (or start1 0))
+	 (end1 (or end1 len1))
+
+	 (len2 (length s2))
+	 (start2 (or start2 0))
+	 (end2 (or end2 len2))
+	 
+	 (new-start (car (org-contacts-compare-strings
+			  (substring (org-reverse-string s1) (- len1 start1)) nil nil
+			  (substring (org-reverse-string s2) (- len2 start2)) nil nil)))
+	 
+	 (new-end (+ end1 (car (org-contacts-compare-strings
+				(substring s1 end1) nil nil
+				(substring s2 end2) nil nil)))))
+    (list (substring s1 (- start1 new-start) new-end)
+	  new-start
+	  (+ new-start (- end1 start1)))))
+
+(defun org-contacts-all-completions-prefix (to-match collection &optional predicate)
+  "Like `all-completions' but:
+- works only with list and alist;
+- looks at all prefixes rather than just the beginning of the string;"
+  (loop with regexp = (concat "\\b" (regexp-quote to-match))
+	for el in collection
+	for string = (if (listp el) (car el) el)
+	for match? = (when (and (or (null predicate) (funcall predicate string)))
+		       (string-match regexp string))
+	if match?
+	collect (progn
+		  (let ((end (match-end 0)))
+		    (org-no-properties string)
+		    (when (< end (length string))
+		      ;; Here we add a text property that will be used
+		      ;; later to highlight the character right after
+		      ;; the common part between each addresses.
+		      ;; See `org-contacts-display-sort-function'.
+		      (put-text-property end (1+ end) 'org-contacts-prefix 't string)))
+		  string)))
+
+(defun org-contacts-make-collection-prefix (collection)
+  "Makes a collection function from COLLECTION which will match
+on prefixes."
+  (lexical-let ((collection collection))
+    (lambda (string predicate flag)
+      (cond ((eq flag nil)
+	     (org-contacts-try-completion-prefix string collection predicate))
+	    ((eq flag t)
+	     ;; `org-contacts-all-completions-prefix' has already been
+	     ;; used to compute `all-completions'.
+	     collection)
+	    ((eq flag 'lambda)
+	     (org-contacts-test-completion-prefix string collection predicate))
+	    ((and (listp flag) (eq (car flag) 'boundaries))
+	     (destructuring-bind (to-ignore &rest suffix)
+		 flag
+	       (org-contacts-boundaries-prefix string collection predicate suffix)))
+	    ((eq flag 'metadata)
+	     (org-contacts-metadata-prefix string collection predicate))
+	    (t nil			; operation unsupported
+	       )))))
+
+(defun org-contacts-display-sort-function (completions)
+  (mapcar (lambda (string)
+	    (loop with len = (1- (length string))
+		  for i upfrom 0 to len
+		  if (memq 'org-contacts-prefix
+			   (text-properties-at i string))
+		  do (set-text-properties
+		      i (1+ i)
+		      (list 'font-lock-face
+			    (if (char-equal (aref string i)
+					    (string-to-char " "))
+				;; Spaces can't be bold.
+				'underline
+			      'bold)) string)
+		  else
+		  do (set-text-properties i (1+ i) nil string)
+		  finally (return string)))
+	  completions))
+
+(defun org-contacts-test-completion-prefix (string collection predicate)
+  (find-if (lambda (el)
+	     (and (or (null predicate) (funcall predicate el))
+		  (string= string el)))
+	   collection))
+
+(defun org-contacts-boundaries-prefix (string collection predicate suffix)
+  (list* 'boundaries (completion-boundaries string collection predicate suffix)))
+
+(defun org-contacts-metadata-prefix (string collection predicate)
+  '(metadata .
+	     ((display-sort-function . org-contacts-display-sort-function))))
+
+(defun org-contacts-complete-group (start end string)
+  "Complete text at START from a group.
+
+A group FOO is composed of contacts with the tag FOO."
+  (let* ((completion-ignore-case org-contacts-completion-ignore-case)
+	 (group-completion-p (org-string-match-p
+			      (concat "^" org-contacts-group-prefix) string)))
+    (when group-completion-p
+      (let ((completion-list
+	     (all-completions
+	      string
+	      (mapcar (lambda (group)
+			(propertize (concat org-contacts-group-prefix group)
+				    'org-contacts-group group))
+		      (org-uniquify
+		       (loop for contact in (org-contacts-filter)
+			     nconc (org-split-string
+				    (or (cdr (assoc-string "ALLTAGS" (caddr contact))) "") ":")))))))
+	(list start end
+	      (if (= (length completion-list) 1)
+		  ;; We've foudn the correct group, returns the address
+		  (lexical-let ((tag (get-text-property 0 'org-contacts-group
+							(car completion-list))))
+		    (lambda (string pred &optional to-ignore)
+		      (mapconcat 'identity
+				 (loop for contact in (org-contacts-filter
+						       nil
+						       tag)
+				       ;; The contact name is always the car of the assoc-list
+				       ;; returned by `org-contacts-filter'.
+				       for contact-name = (car contact)
+				       ;; Grab the first email of the contact
+				       for email = (car (split-string
+							 (or
+							  (cdr (assoc-string org-contacts-email-property
+									     (caddr contact)))
+							  "")))
+				       ;; If the user has an email address, append USER <EMAIL>.
+				       if email collect (org-contacts-format-email contact-name email))
+				 ", ")))
+		;; We haven't found the correct group
+		(completion-table-case-fold completion-list
+					    (not org-contacts-completion-ignore-case))))))))
+
+(defun org-contacts-complete-name (start end string)
+  "Complete text at START with a user name and email."
+  (let* ((completion-ignore-case org-contacts-completion-ignore-case)
+         (completion-list
+	  (loop for contact in (org-contacts-filter)
+		;; The contact name is always the car of the assoc-list
+		;; returned by `org-contacts-filter'.
+		for contact-name = (car contact)
+		;; Build the list of the user email addresses.
+		for email-list = (split-string (or
+						(cdr (assoc-string org-contacts-email-property
+								   (caddr contact))) ""))
+		;; If the user has email addresses…
+		if email-list
+		;; … append a list of USER <EMAIL>.
+		nconc (loop for email in email-list
+			    collect (org-contacts-format-email contact-name email)))))
+    (when completion-list
+      (list start end
+	    (org-contacts-make-collection-prefix
+	     (org-contacts-all-completions-prefix
+	      string
+	      (remove-duplicates completion-list :test #'equalp)))))))
+
+(defun org-contacts-message-complete-function (&optional start)
   "Function used in `completion-at-point-functions' in `message-mode'."
   (let ((mail-abbrev-mode-regexp
          "^\\(Resent-To\\|To\\|B?Cc\\|Reply-To\\|From\\|Mail-Followup-To\\|Mail-Copies-To\\|Disposition-Notification-To\\|Return-Receipt-To\\):"))
     (when (mail-abbrev-in-expansion-header-p)
-      (org-contacts-complete-name))))
+      (lexical-let*
+	  ((end (point))
+	   (start (or start
+		      (save-excursion
+			(re-search-backward "\\(\\`\\|[\n:,]\\)[ \t]*")
+			(goto-char (match-end 0))
+			(point))))
+	   (string (buffer-substring start end)))
+	(or (org-contacts-complete-group start end string)
+	    (org-contacts-complete-name start end string))))))
 
 (defun org-contacts-gnus-get-name-email ()
   "Get name and email address from Gnus message."
