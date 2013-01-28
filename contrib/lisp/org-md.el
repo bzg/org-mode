@@ -68,6 +68,7 @@ This variable can be set to either `atx' or `setext'."
   :translate-alist ((bold . org-md-bold)
 		    (code . org-md-verbatim)
 		    (example-block . org-md-example-block)
+		    (fixed-width . org-md-example-block)
 		    (footnote-definition . ignore)
 		    (footnote-reference . ignore)
 		    (headline . org-md-headline)
