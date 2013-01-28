@@ -3814,7 +3814,7 @@ line (string)."
 	 (code (let ((c (replace-regexp-in-string
 			 "\\`\\([ \t]*\n\\)+" ""
 			 (replace-regexp-in-string
-			  "\\(:?[ \t]*\n\\)*[ \t]*\\'" "\n"
+			  "\\([ \t]*\n\\)*[ \t]*\\'" "\n"
 			  (org-element-property :value element)))))
 		 ;; If appropriate, remove global indentation.
 		 (if (or org-src-preserve-indentation
