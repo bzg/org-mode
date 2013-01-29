@@ -1371,9 +1371,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	   thereis (memq (org-element-type parent)
 			 '(footnote-reference footnote-definition table-cell)))
      "\\footnotemark")
-    ;; Otherwise, define it with \footnote command.
+    ;; Otherwise, define it with \footnote command.  If no definition
+    ;; is available, notify it with an intrusive fallback one.
     (t
-     (let ((def (org-export-get-footnote-definition footnote-reference info)))
+     (let ((def (or (org-export-get-footnote-definition footnote-reference info)
+		    '("FOOTNOTE DEFINITION NOT FOUND."))))
        (unless (eq (org-element-type def) 'org-data)
 	 (setq def (cons 'org-data (cons nil def))))
        (concat
