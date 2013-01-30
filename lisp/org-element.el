@@ -4000,6 +4000,10 @@ representing elements or objects types.  `org-element-map' won't
 enter any recursive element or object whose type belongs to that
 list.  Though, FUN can still be applied on them.
 
+When optional argument WITH-AFFILIATED is non-nil, FUN will also
+apply to matching objects within parsed affiliated keywords (see
+`org-element-parsed-keywords').
+
 Nil values returned from FUN do not appear in the results.
 
 
@@ -4015,22 +4019,26 @@ and `example-block' elements in it:
 The following snippet will find the first headline with a level
 of 1 and a \"phone\" tag, and will return its beginning position:
 
-  \(org-element-map
-   tree 'headline
+  \(org-element-map tree 'headline
    \(lambda (hl)
      \(and (= (org-element-property :level hl) 1)
           \(member \"phone\" (org-element-property :tags hl))
           \(org-element-property :begin hl)))
    nil t)
 
-Eventually, this last example will return a flat list of all
-`bold' type objects containing a `latex-snippet' type object:
+The next example will return a flat list of all `plain-list' type
+elements in TREE that are not a sub-list themselves:
 
-  \(org-element-map
-   tree 'bold
+  \(org-element-map tree 'plain-list 'identity nil nil 'plain-list)
+
+Eventually, this example will return a flat list of all `bold'
+type objects containing a `latex-snippet' type object, even
+looking into captions:
+
+  \(org-element-map tree 'bold
    \(lambda (b)
-     \(and (org-element-map b 'latex-snippet 'identity nil t)
-          b)))"
+     \(and (org-element-map b 'latex-snippet 'identity nil t) b))
+   nil nil nil t)"
   ;; Ensure TYPES and NO-RECURSION are a list, even of one element.
   (unless (listp types) (setq types (list types)))
   (unless (listp no-recursion) (setq no-recursion (list no-recursion)))
@@ -4140,6 +4148,7 @@ Eventually, this last example will return a flat list of all
       (funcall --walk-tree data)
       ;; Return value in a proper order.
       (nreverse --acc))))
+(put 'org-element-map 'lisp-indent-function 2)
 
 ;; The following functions are internal parts of the parser.
 ;;
