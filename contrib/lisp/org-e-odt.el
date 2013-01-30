@@ -4015,6 +4015,7 @@ contextual information."
 	      ;; files that get copied there.
 	      (delete-directory org-e-odt-zip-dir t)))))
      (condition-case err
+     (condition-case err
 	 (progn
 	   (unless (executable-find "zip")
 	     ;; Not at all OSes ship with zip by default
