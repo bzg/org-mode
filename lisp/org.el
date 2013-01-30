@@ -4915,6 +4915,7 @@ The following commands are available:
   (org-set-local 'calc-embedded-open-mode "# ")
   (modify-syntax-entry ?@ "w")
   (if org-startup-truncated (setq truncate-lines t))
+  (when org-startup-indented (require 'org-indent) (org-indent-mode 1))
   (org-set-local 'font-lock-unfontify-region-function
 		 'org-unfontify-region)
   ;; Activate before-change-function
@@ -4996,9 +4997,6 @@ The following commands are available:
 	(set-buffer-modified-p bmp)))
     (when org-startup-with-inline-images
       (org-display-inline-images))
-    (when org-startup-indented
-      (require 'org-indent)
-      (org-indent-mode 1))
     (unless org-inhibit-startup-visibility-stuff
       (org-set-startup-visibility)))
   ;; Try to set org-hide correctly
