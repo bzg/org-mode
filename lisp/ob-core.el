@@ -36,7 +36,8 @@
 (defvar org-babel-call-process-region-original)
 (defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
-(defvar org-ts-regexp)
+(defconst org-ts-regexp "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>"
+  "Regular expression for fast time stamp matching.")
 (declare-function show-all "outline" ())
 (declare-function org-reduce "org" (CL-FUNC CL-SEQ &rest CL-KEYS))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
