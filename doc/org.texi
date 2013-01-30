@@ -2448,7 +2448,7 @@ $1..$3        @r{first three fields in the current row}
 $P..$Q        @r{range, using column names (see under Advanced)}
 $<<<..$>>     @r{start in third column, continue to the one but last}
 @@2$1..@@4$3    @r{6 fields between these two fields (same as @code{A2..C4})}
-@@-1$-2..@@-1   @r{3 numbers from the column to the left, 2 up to current row}
+@@-1$-2..@@-1   @r{in the first row up, 3 fields from 2 columns on the left}
 @@I..II        @r{between first and second hline, short for @code{@@I..@@II}}
 @end example
 
