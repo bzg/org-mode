@@ -17642,30 +17642,21 @@ Some of the options can be changed using the variable
 	(goto-char (point-min))
 	(while (re-search-forward re nil t)
 	  (when (and (or (not at) (equal (cdr at) (match-beginning n)))
-		     (not (get-text-property (match-beginning n)
-					     'org-protected))
 		     (or (not overlays)
 			 (not (eq (get-char-property (match-beginning n)
 						     'org-overlay-type)
 				  'org-latex-overlay))))
 	    (setq org-export-have-math t)
 	    (cond
-	     ((eq processing-type 'verbatim)
-	      ;; Leave the text verbatim, just protect it
-	      (add-text-properties (match-beginning n) (match-end n)
-				   '(org-protected t)))
+	     ((eq processing-type 'verbatim))
 	     ((eq processing-type 'mathjax)
-	      ;; Prepare for MathJax processing
+	      ;; Prepare for MathJax processing.
 	      (setq string (match-string n))
-	      (if (member m '("$" "$1"))
-		  (save-excursion
-		    (delete-region (match-beginning n) (match-end n))
-		    (goto-char (match-beginning n))
-		    (insert (org-add-props (concat "\\(" (substring string 1 -1)
-						   "\\)")
-				'(org-protected t))))
-		(add-text-properties (match-beginning n) (match-end n)
-				     '(org-protected t))))
+	      (when (member m '("$" "$1"))
+		(save-excursion
+		  (delete-region (match-beginning n) (match-end n))
+		  (goto-char (match-beginning n))
+		  (insert (concat "\\(" (substring string 1 -1) "\\)")))))
 	     ((or (eq processing-type 'dvipng)
 		  (eq processing-type 'imagemagick))
 	      ;; Process to an image
@@ -17832,8 +17823,6 @@ inspection."
 		  'org-latex-src-embed-type (if latex-frag-type
 						'paragraph 'character)))
       ;; Failed conversion.  Return the LaTeX fragment verbatim
-      (add-text-properties
-       0 (1- (length latex-frag)) '(org-protected t) latex-frag)
       latex-frag)))
 
 (defun org-create-formula-image (string tofile options buffer &optional type)

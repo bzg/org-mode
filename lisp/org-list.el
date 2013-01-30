@@ -642,8 +642,7 @@ Assume point is at an item."
       (save-excursion
 	(catch 'exit
 	  (while t
-	    (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
-			  (org-get-indentation))))
+	    (let ((ind (org-get-indentation)))
 	      (cond
 	       ((<= (point) lim-up)
 		;; At upward limit: if we ended at an item, store it,
@@ -651,18 +650,10 @@ Assume point is at an item."
 		;; Jump to part 2.
 		(throw 'exit
 		       (setq itm-lst
-			     (if (or (not (looking-at item-re))
-				     (get-text-property (point) 'org-example))
+			     (if (not (looking-at item-re))
 				 (memq (assq (car beg-cell) itm-lst) itm-lst)
 			       (setq beg-cell (cons (point) ind))
 			       (cons (funcall assoc-at-point ind) itm-lst)))))
-	       ;; At a verbatim block, go before its beginning.  Move
-	       ;; from eol to ensure `previous-single-property-change'
-	       ;; will return a value.
-	       ((get-text-property (point) 'org-example)
-		(goto-char (previous-single-property-change
-			    (point-at-eol) 'org-example nil lim-up))
-		(forward-line -1))
 	       ;; Looking at a list ending regexp.  Dismiss useless
 	       ;; data recorded above BEG-CELL.  Jump to part 2.
 	       ((looking-at org-list-end-re)
@@ -711,8 +702,7 @@ Assume point is at an item."
       ;;    position of items in END-LST-2.
       (catch 'exit
 	(while t
-	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
-			(org-get-indentation))))
+	  (let ((ind (org-get-indentation)))
 	    (cond
 	     ((>= (point) lim-down)
 	      ;; At downward limit: this is de facto the end of the
@@ -720,12 +710,6 @@ Assume point is at an item."
 	      ;; part 3.
 	      (throw 'exit
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
-	     ;; At a verbatim block, move to its end.  Point is at bol
-	     ;; and 'org-example property is set by whole lines:
-	     ;; `next-single-property-change' always return a value.
-	     ((get-text-property (point) 'org-example)
-	      (goto-char
-	       (next-single-property-change (point) 'org-example nil lim-down)))
 	     ;; Looking at a list ending regexp.  Save point as an
 	     ;; ending position and jump to part 3.
 	     ((looking-at org-list-end-re)

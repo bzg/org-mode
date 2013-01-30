@@ -176,34 +176,6 @@ We use a macro so that the test can happen at compilation time."
   (cons (if (fboundp 'with-no-warnings) 'with-no-warnings 'progn) body))
 (def-edebug-spec org-no-warnings (body))
 
-(defmacro org-if-unprotected (&rest body)
-  "Execute BODY if there is no `org-protected' text property at point."
-  `(unless (get-text-property (point) 'org-protected)
-     ,@body))
-(def-edebug-spec org-if-unprotected (body))
-
-(defmacro org-if-unprotected-1 (&rest body)
-  "Execute BODY if there is no `org-protected' text property at point-1."
-  `(unless (get-text-property (1- (point)) 'org-protected)
-     ,@body))
-(def-edebug-spec org-if-unprotected-1 (body))
-
-(defmacro org-if-unprotected-at (pos &rest body)
-  "Execute BODY if there is no `org-protected' text property at POS."
-  `(unless (get-text-property ,pos 'org-protected)
-     ,@body))
-(def-edebug-spec org-if-unprotected-at (form body))
-(put 'org-if-unprotected-at 'lisp-indent-function 1)
-
-(defun org-re-search-forward-unprotected (&rest args)
-  "Like re-search-forward, but stop only in unprotected places."
-  (catch 'exit
-    (while t
-      (unless (apply 're-search-forward args)
-	(throw 'exit nil))
-      (unless (get-text-property (match-beginning 0) 'org-protected)
-	(throw 'exit (point))))))
-
 ;; FIXME: Normalize argument names
 (defmacro org-with-remote-undo (_buffer &rest _body)
   "Execute BODY while recording undo information in two buffers."

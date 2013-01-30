@@ -281,30 +281,29 @@ with working links."
 	link file)
     (goto-char (point-min))
     (while (re-search-forward re nil t)
-      (org-if-unprotected-at (match-beginning 0)
-	(unless (save-match-data
-		  (or (org-at-heading-p)
-		      (org-in-regexp org-bracket-link-regexp)
-		      (org-in-regexp org-plain-link-re)
-		      (org-in-regexp "<<[^<>]+>>")))
-	  (setq link (match-string 0))
-	  (delete-region (match-beginning 0) (match-end 0))
-	  (save-match-data
-	    (cond
-	     ((org-find-exact-headline-in-buffer link (current-buffer))
-	      ;; Found in current buffer
-	      (insert (format "[[#%s][%s]]" link link)))
-	     ((eq org-wikinodes-scope 'file)
-	      ;; No match in file, and other files are not allowed
-	      (insert (format "%s" link)))
-	     ((setq file
-		    (and (org-string-nw-p org-current-export-file)
-			 (org-wikinodes-which-file
-			  link (file-name-directory org-current-export-file))))
-	      ;; Match in another file in the current directory
-	      (insert (format "[[file:%s::%s][%s]]" file link link)))
-	     (t ;; No match for this link
-	      (insert (format "%s" link))))))))))
+      (unless (save-match-data
+		(or (org-at-heading-p)
+		    (org-in-regexp org-bracket-link-regexp)
+		    (org-in-regexp org-plain-link-re)
+		    (org-in-regexp "<<[^<>]+>>")))
+	(setq link (match-string 0))
+	(delete-region (match-beginning 0) (match-end 0))
+	(save-match-data
+	  (cond
+	   ((org-find-exact-headline-in-buffer link (current-buffer))
+	    ;; Found in current buffer
+	    (insert (format "[[#%s][%s]]" link link)))
+	   ((eq org-wikinodes-scope 'file)
+	    ;; No match in file, and other files are not allowed
+	    (insert (format "%s" link)))
+	   ((setq file
+		  (and (org-string-nw-p org-current-export-file)
+		       (org-wikinodes-which-file
+			link (file-name-directory org-current-export-file))))
+	    ;; Match in another file in the current directory
+	    (insert (format "[[file:%s::%s][%s]]" file link link)))
+	   (t ;; No match for this link
+	    (insert (format "%s" link)))))))))
 
 ;;; Hook the WikiNode mechanism into Org
 

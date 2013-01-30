@@ -230,13 +230,7 @@ positions, and the definition, when inlined."
 				 (org-in-regexp org-bracket-link-regexp))))
 			  (and linkp (< (point) (cdr linkp))))))
 		 ;; Verify point doesn't belong to a LaTeX macro.
-		 ;; Beware though, when two footnotes are side by
-		 ;; side, once the first one is changed into LaTeX,
-		 ;; the second one might then be considered as an
-		 ;; optional argument of the command.  Thus, check
-		 ;; the `org-protected' property of that command.
-		 (or (not (org-inside-latex-macro-p))
-		     (get-text-property (1- beg) 'org-protected)))
+		 (not (org-inside-latex-macro-p)))
 	(list label beg end
 	      ;; Definition: ensure this is an inline footnote first.
 	      (and (or (not label) (match-string 1))
