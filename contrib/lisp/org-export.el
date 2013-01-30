@@ -3267,10 +3267,13 @@ INFO is the plist used as a communication channel."
 
 (defun org-export-get-footnote-definition (footnote-reference info)
   "Return definition of FOOTNOTE-REFERENCE as parsed data.
-INFO is the plist used as a communication channel."
+INFO is the plist used as a communication channel.  If no such
+definition can be found, return the \"DEFINITION NOT FOUND\"
+string."
   (let ((label (org-element-property :label footnote-reference)))
     (or (org-element-property :inline-definition footnote-reference)
-        (cdr (assoc label (plist-get info :footnote-definition-alist))))))
+        (cdr (assoc label (plist-get info :footnote-definition-alist)))
+	"DEFINITION NOT FOUND.")))
 
 (defun org-export-get-footnote-number (footnote info)
   "Return number associated to a footnote.

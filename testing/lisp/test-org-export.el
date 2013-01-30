@@ -850,7 +850,13 @@ Paragraph[fn:1]"
 	       (org-export-backend-translate-table 'test)))
 	(forward-line)
 	(should (equal "ParagraphOut of scope\n"
-		       (org-export-as 'test 'subtree)))))))
+		       (org-export-as 'test 'subtree)))))
+    ;; 6. Footnotes without a definition should be provided a fallback
+    ;;    definition.
+    (should
+     (org-test-with-parsed-data "[fn:1]"
+       (org-export-get-footnote-definition
+	(org-element-map tree 'footnote-reference 'identity info t) info)))))
 
 
 
