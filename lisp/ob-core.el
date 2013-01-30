@@ -36,6 +36,7 @@
 (defvar org-babel-call-process-region-original)
 (defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
+(defvar org-ts-regexp)
 (declare-function show-all "outline" ())
 (declare-function org-reduce "org" (CL-FUNC CL-SEQ &rest CL-KEYS))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
@@ -453,7 +454,9 @@ specific header arguments as well.")
 (defvar org-babel-result-regexp
   (concat "^[ \t]*#\\+"
 	  (regexp-opt org-babel-data-names t)
-	  "\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*")
+	  "\\(\\[\\([[:alnum:]]+\\)\\]\\|\\[\\[\\([[:alnum:]]+\\)\\]\\["
+	  org-ts-regexp
+	  "\\]\\]\\)?\\:[ \t]*")
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
 be saved in the second match data.")
@@ -478,6 +481,9 @@ can not be resolved.")
 
 (defvar org-babel-hash-show 4
   "Number of initial characters to show of a hidden results hash.")
+
+(defvar org-babel-hash-show-time nil
+  "When not nil show the time the code block was evaluated in the result hash.")
 
 (defvar org-babel-after-execute-hook nil
   "Hook for functions to be called after `org-babel-execute-src-block'")
@@ -1073,7 +1079,7 @@ the current subtree."
 (defun org-babel-current-result-hash ()
   "Return the current in-buffer hash."
   (org-babel-where-is-src-block-result)
-  (org-no-properties (match-string 3)))
+  (org-no-properties (or (match-string 3) (match-string 4))))
 
 (defun org-babel-set-current-result-hash (hash)
   "Set the current in-buffer hash to HASH."
@@ -1107,7 +1113,8 @@ Only the initial `org-babel-hash-show' characters of each hash
 will remain visible.  This function should be called as part of
 the `org-mode-hook'."
   (save-excursion
-    (while (re-search-forward org-babel-result-regexp nil t)
+    (while (and (not org-babel-hash-show-time)
+		(re-search-forward org-babel-result-regexp nil t))
       (goto-char (match-beginning 0))
       (org-babel-hide-hash)
       (goto-char (match-end 0)))))
@@ -1745,7 +1752,8 @@ following the source block."
 	  ;; - if it does need to be rebuilt then do set end
 	  name (setq beg (org-babel-find-named-result name))
 	  (prog1 beg
-	    (when (and hash (not (string= hash (match-string 3))))
+	    (when (and hash (not (string= hash (or (match-string 3)
+						   (match-string 4)))))
 	      (goto-char beg) (setq end beg) ;; beginning of result
 	      (forward-line 1)
 	      (delete-region end (org-babel-result-end)) nil)))
@@ -1763,14 +1771,17 @@ following the source block."
 			    (beginning-of-line 1)
 			    (looking-at
 			     (concat org-babel-result-regexp "\n")))
-			  (prog1 (point)
-			    ;; must remove and rebuild if hash!=old-hash
-			    (if (and hash (not (string= hash (match-string 3))))
-				(prog1 nil
-				  (forward-line 1)
-				  (delete-region
-				   end (org-babel-result-end)))
-			      (setq end nil))))))))))
+			  (let ((this-hash (or ;; from org-babel-result-regexp
+					    (match-string 3)
+					    (match-string 4))))
+			    (prog1 (point)
+			      ;; must remove and rebuild if hash!=old-hash
+			      (if (and hash (not (string= hash this-hash)))
+				  (prog1 nil
+				    (forward-line 1)
+				    (delete-region
+				     end (org-babel-result-end)))
+				(setq end nil)))))))))))
       (if (not (and insert end)) found
 	(goto-char end)
 	(unless beg
@@ -1778,12 +1789,18 @@ following the source block."
 	(insert (concat
 		 (when (wholenump indent) (make-string indent ? ))
 		 "#+" org-babel-results-keyword
-		 (when hash (concat "["hash"]"))
+		 (when hash
+		   (if org-babel-hash-show-time
+		       (concat "[[" hash
+			       "]["
+			       (format-time-string "<%Y-%m-%d %H:%M:%S>")
+			       "]]")
+		       (concat "["hash"]")))
 		 ":"
 		 (when name (concat " " name)) "\n"))
 	(unless beg (insert "\n") (backward-char))
 	(beginning-of-line 0)
-	(if hash (org-babel-hide-hash))
+	(when (and hash (not org-babel-hash-show-time)) (org-babel-hide-hash))
 	(point)))))
 
 (defvar org-block-regexp)
