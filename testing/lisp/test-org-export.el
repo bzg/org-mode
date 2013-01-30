@@ -561,13 +561,14 @@ body\n")))
   (should
    (equal "Body 1\nBody 2\n"
 	  (org-test-with-backend test
-	    (org-test-with-temp-text "* Headline 1\nBody 1\n* Headline 2\nBody 2"
-	      (let ((org-export-before-parsing-hook
-		     '((lambda (backend)
-			 (org-map-entries
-			  (lambda ()
-			    (delete-region (point) (progn (forward-line) (point)))))))))
-		(org-export-as 'test)))))))
+            (org-test-with-temp-text "* Headline 1\nBody 1\n* Headline 2\nBody 2"
+              (let ((org-export-before-parsing-hook
+                     '((lambda (backend)
+                         (goto-char (point-min))
+                         (while (re-search-forward org-outline-regexp-bol nil t)
+                           (delete-region
+                            (point-at-bol) (progn (forward-line) (point))))))))
+                (org-export-as 'test)))))))
 
 
 
