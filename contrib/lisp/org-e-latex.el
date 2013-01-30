@@ -161,7 +161,8 @@
 	   (lambda (a s v b)
 	     (if a (org-e-latex-export-to-pdf t s v b)
 	       (org-open-file (org-e-latex-export-to-pdf nil s v b)))))))
-  :options-alist ((:date "DATE" nil org-e-latex-date-format t)
+  :options-alist ((:date "DATE" nil "\\today" t)
+		  (:date-format nil nil org-e-latex-date-timestamp-format)
 		  (:latex-class "LATEX_CLASS" nil org-e-latex-default-class t)
 		  (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
 		  (:latex-header-extra "LATEX_HEADER" nil nil newline)
@@ -379,11 +380,18 @@ are written as utf8 files."
 	   (string :tag "Derived from buffer")
 	   (string :tag "Use this instead"))))
 
-(defcustom org-e-latex-date-format
-  "\\today"
-  "Format string for \\date{...}."
+(defcustom org-e-latex-date-timestamp-format nil
+  "Time-stamp format string to use for DATE keyword.
+
+The format string, when specified, only applies if date consists
+in a single time-stamp.  Otherwise its value will be ignored.
+
+See `format-time-string' for details on how to build this
+string."
   :group 'org-export-e-latex
-  :type 'boolean)
+  :type '(choice
+	  (string :tag "Time-stamp format string")
+	  (const :tag "No format string" nil)))
 
 (defcustom org-e-latex-title-command "\\maketitle"
   "The command used to insert the title just after \\begin{document}.
@@ -1118,9 +1126,17 @@ holding export options."
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     ((or author email) (format "\\author{%s}\n" (or author email)))))
      ;; Date.
-     (let ((date (and (plist-get info :with-date)
-		      (org-export-data (plist-get info :date) info))))
-       (format "\\date{%s}\n" (or date "")))
+     (let ((date (and (plist-get info :with-date) (plist-get info :date))))
+       (format "\\date{%s}\n"
+	       (cond ((not date) "")
+		     ;; If `:date' consists in a single timestamp and
+		     ;; `:date-format' is provided, apply it.
+		     ((and (plist-get info :date-format)
+			   (not (cdr date))
+			   (eq (org-element-type (car date)) 'timestamp))
+		      (org-timestamp-format
+		       (car date) (plist-get info :date-format)))
+		     (t (org-export-data date info)))))
      ;; Title
      (format "\\title{%s}\n" title)
      ;; Hyperref options.
