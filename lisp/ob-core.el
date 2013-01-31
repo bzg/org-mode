@@ -36,8 +36,6 @@
 (defvar org-babel-call-process-region-original)
 (defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
-(defconst org-ts-regexp "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>"
-  "Regular expression for fast time stamp matching.")
 (declare-function show-all "outline" ())
 (declare-function org-reduce "org" (CL-FUNC CL-SEQ &rest CL-KEYS))
 (declare-function org-mark-ring-push "org" (&optional pos buffer))
@@ -456,7 +454,8 @@ specific header arguments as well.")
   (concat "^[ \t]*#\\+"
 	  (regexp-opt org-babel-data-names t)
 	  "\\(\\[\\([[:alnum:]]+\\)\\]\\|\\[\\[\\([[:alnum:]]+\\)\\]\\["
-	  org-ts-regexp
+	  ;; FIXME The string below is `org-ts-regexp'
+	  "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>"
 	  "\\]\\]\\)?\\:[ \t]*")
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
