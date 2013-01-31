@@ -17469,7 +17469,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	(inhibit-read-only t)
 	(org-inhibit-startup org-agenda-inhibit-startup)
 	(rea (concat ":" org-archive-tag ":"))
-	bmp file re)
+	file re)
     (save-excursion
       (save-restriction
 	(while (setq file (pop files))
@@ -17479,7 +17479,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (org-check-agenda-file file)
 	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
-	    (setq bmp (buffer-modified-p))
+	    (org-unmodified
 	    (org-refresh-category-properties)
 	    (org-refresh-properties org-effort-property 'org-effort)
 	    (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
@@ -17506,8 +17506,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 			       org-comment-string))
 	      (while (re-search-forward re nil t)
 		(add-text-properties
-		 (match-beginning 0) (org-end-of-subtree t) pc)))
-	    (set-buffer-modified-p bmp)))))
+		 (match-beginning 0) (org-end-of-subtree t) pc))))))))
     (setq org-todo-keywords-for-agenda
           (org-uniquify org-todo-keywords-for-agenda))
     (setq org-todo-keyword-alist-for-agenda
