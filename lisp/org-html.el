@@ -464,6 +464,9 @@ precedence over this variable."
 (defcustom org-export-html-preamble-format '(("en" ""))
   "Alist of languages and format strings for the HTML preamble.
 
+To enable the HTML exporter to use these formats, you need to set
+`org-export-html-preamble' to `t'.
+
 The first element of each list is the language code, as used for
 the #+LANGUAGE keyword.
 
@@ -509,6 +512,9 @@ precedence over this variable."
 <p class=\"xhtml-validation\">%v</p>
 "))
   "Alist of languages and format strings for the HTML postamble.
+
+To enable the HTML exporter to use these formats, you need to set
+`org-export-html-postamble' to `t'.
 
 The first element of each list is the language code, as used for
 the #+LANGUAGE keyword.
