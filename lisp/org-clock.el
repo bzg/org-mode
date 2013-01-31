@@ -1718,8 +1718,8 @@ each headline in the time range with point at the headline.  Headlines for
 which HEADLINE-FILTER returns nil are excluded from the clock summation.
 PROPNAME lets you set a custom text property instead of :org-clock-minutes."
   (interactive)
-  (let* ((bmp (buffer-modified-p))
-	 (re (concat "^\\(\\*+\\)[ \t]\\|^[ \t]*"
+  (org-unmodified
+    (let* ((re (concat "^\\(\\*+\\)[ \t]\\|^[ \t]*"
 		     org-clock-string
 		     "[ \t]*\\(?:\\(\\[.*?\\]\\)-+\\(\\[.*?\\]\\)\\|=>[ \t]+\\([0-9]+\\):\\([0-9]+\\)\\)"))
 	 (lmax 30)
@@ -1796,8 +1796,7 @@ PROPNAME lets you set a custom text property instead of :org-clock-minutes."
 	      (setq t1 0)
 	      (loop for l from level to (1- lmax) do
 		    (aset ltimes l 0)))))))
-      (setq org-clock-file-total-minutes (aref ltimes 0)))
-    (set-buffer-modified-p bmp)))
+	(setq org-clock-file-total-minutes (aref ltimes 0))))))
 
 (defun org-clock-sum-current-item (&optional tstart)
   "Return time, clocked on current item in total."
