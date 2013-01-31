@@ -1207,7 +1207,18 @@ e^{i\\pi}+1=0
   ;; With arguments.
   (should
    (org-test-with-temp-text "{{{macro(arg1,arg2)}}}"
-     (org-element-map (org-element-parse-buffer) 'macro 'identity))))
+     (org-element-map (org-element-parse-buffer) 'macro 'identity)))
+  ;; Properly handle protected commas in arguments...
+  (should
+   (= 2
+      (length
+       (org-test-with-temp-text "{{{macro(arg1\\,arg1,arg2)}}}"
+	 (org-element-property :args (org-element-context))))))
+  ;; ... even when last argument ends with a protected comma.
+  (should
+   (equal '("C-,")
+	  (org-test-with-temp-text "{{{macro(C-\\,)}}}"
+	    (org-element-property :args (org-element-context))))))
 
 
 ;;;; Paragraph

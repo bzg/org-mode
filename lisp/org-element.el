@@ -2893,10 +2893,13 @@ Assume point is at the macro."
 	  (end (point))
 	  (args (let ((args (org-match-string-no-properties 3)) args2)
 		  (when args
-		    (setq args (org-split-string args ","))
+		    ;; Do not use `org-split-string' since empty
+		    ;; strings are meaningful here.
+		    (setq args (split-string args ","))
 		    (while args
 		      (while (string-match "\\\\\\'" (car args))
-			;; Repair bad splits.
+			;; Repair bad splits, when comma is protected,
+                        ;; and thus not a real separator.
 			(setcar (cdr args) (concat (substring (car args) 0 -1)
 						   "," (nth 1 args)))
 			(pop args))
