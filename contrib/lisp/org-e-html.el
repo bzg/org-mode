@@ -2141,15 +2141,17 @@ INFO is a plist holding contextual information.  See
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (concat "file://" (expand-file-name raw-path))))
 		(t raw-path)))
-	 ;; Extract attributes from parent's paragraph.
-	 (attributes
-	  (let ((attr (mapconcat
-		       'identity
-		       (org-element-property
-			:attr_html (org-export-get-parent-element link))
-		       " ")))
-	    (if attr (concat " " attr) "")))
-	 protocol)
+	 attributes protocol)
+    ;; Extract attributes from parent's paragraph.
+    (and (setq attributes
+	       (mapconcat
+		'identity
+		(let ((att (org-element-property
+			    :attr_html (org-export-get-parent-element link))))
+		  (unless (and desc (string-match (regexp-quote (car att)) desc)) att))
+		" "))
+	 (setq attributes (concat " " attributes)))
+
     (cond
      ;; Image file.
      ((and (or (eq t org-e-html-inline-images)
