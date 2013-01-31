@@ -1030,7 +1030,10 @@ OPT-PLIST is the export options list."
 	  (if (string-match "^file:" desc)
 	      (setq desc (substring desc (match-end 0)))))
 	(setq desc (org-add-props
-		       (concat "<img src=\"" desc "\" alt=\""
+		       (concat "<img src=\"" desc "\" "
+			       (when (save-match-data (string-match "width=" attr))
+				 (prog1 (concat attr " ") (setq attr "")))
+			       "alt=\""
 			       (file-name-nondirectory desc) "\"/>")
 		       '(org-protected t))))
       (cond
