@@ -2423,6 +2423,8 @@ Here are the available contexts definitions:
       in-mode: command displayed only in matching modes
   not-in-file: command not displayed in matching files
   not-in-mode: command not displayed in matching modes
+    in-buffer: command displayed only in matching buffers
+not-in-buffer: command not displayed in matching buffers
    [function]: a custom function taking no argument
 
 If you define several checks, the agenda command will be
@@ -2448,6 +2450,8 @@ duplicates.)"
 				      (choice
 				       (const :tag "In file" in-file)
 				       (const :tag "Not in file" not-in-file)
+				       (const :tag "In buffer" in-buffer)
+				       (const :tag "Not in buffer" not-in-buffer)
 				       (const :tag "In mode" in-mode)
 				       (const :tag "Not in mode" not-in-mode))
 				      (regexp))
