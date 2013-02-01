@@ -434,7 +434,10 @@ HOW determines the type of justification: it can be `left',
   (with-temp-buffer
     (insert s)
     (goto-char (point-min))
-    (let ((fill-column text-width))
+    (let ((fill-column text-width)
+	  ;; Disable `adaptive-fill-mode' so it doesn't prevent
+	  ;; filling lines matching `adaptive-fill-regexp'.
+	  (adaptive-fill-mode nil))
       (while (< (point) (point-max))
 	(justify-current-line how)
 	(forward-line)))
