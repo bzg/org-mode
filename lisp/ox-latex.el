@@ -97,8 +97,8 @@
 (require 'ox)
 (require 'ox-publish)
 
-(defvar org-export-latex-default-packages-alist)
-(defvar org-export-latex-packages-alist)
+(defvar org-latex-default-packages-alist)
+(defvar org-latex-packages-alist)
 (defvar orgtbl-exp-regexp)
 
 
@@ -288,9 +288,9 @@ anything else that is needed for this setup.  To this header, the
 following commands will be added:
 
 - Calls to \\usepackage for all packages mentioned in the
-  variables `org-export-latex-default-packages-alist' and
-  `org-export-latex-packages-alist'.  Thus, your header
-  definitions should avoid to also request these packages.
+  variables `org-latex-default-packages-alist' and
+  `org-latex-packages-alist'.  Thus, your header definitions
+  should avoid to also request these packages.
 
 - Lines specified via \"#+LaTeX_HEADER:\"
 
@@ -317,15 +317,14 @@ So a header like
 will omit the default packages, and will include the
 #+LaTeX_HEADER lines, then have a call to \\providecommand, and
 then place \\usepackage commands based on the content of
-`org-export-latex-packages-alist'.
+`org-latex-packages-alist'.
 
-If your header, `org-export-latex-default-packages-alist' or
-`org-export-latex-packages-alist' inserts
+If your header, `org-latex-default-packages-alist' or
+`org-latex-packages-alist' inserts
 \"\\usepackage[AUTO]{inputenc}\", AUTO will automatically be
 replaced with a coding system derived from
 `buffer-file-coding-system'.  See also the variable
-`org-latex-inputenc-alist' for a way to influence this
-mechanism.
+`org-latex-inputenc-alist' for a way to influence this mechanism.
 
 The sectioning structure
 ------------------------
@@ -673,12 +672,12 @@ in order to mimic default behaviour:
 This package will fontify source code, possibly even with color.
 If you want to use this, you also need to make LaTeX use the
 listings package, and if you want to have color, the color
-package.  Just add these to `org-export-latex-packages-alist',
-for example using customize, or with something like:
+package.  Just add these to `org-latex-packages-alist', for
+example using customize, or with something like:
 
   \(require 'ox-latex)
-  \(add-to-list 'org-export-latex-packages-alist '\(\"\" \"listings\"))
-  \(add-to-list 'org-export-latex-packages-alist '\(\"\" \"color\"))
+  \(add-to-list 'org-latex-packages-alist '\(\"\" \"listings\"))
+  \(add-to-list 'org-latex-packages-alist '\(\"\" \"color\"))
 
 Alternatively,
 
@@ -686,11 +685,11 @@ Alternatively,
 
 causes source code to be exported using the minted package as
 opposed to listings.  If you want to use minted, you need to add
-the minted package to `org-export-latex-packages-alist', for
-example using customize, or with
+the minted package to `org-latex-packages-alist', for example
+using customize, or with
 
   \(require 'ox-latex)
-  \(add-to-list 'org-export-latex-packages-alist '\(\"\" \"minted\"))
+  \(add-to-list 'org-latex-packages-alist '\(\"\" \"minted\"))
 
 In addition, it is necessary to install pygments
 \(http://pygments.org), and to configure the variable
@@ -933,7 +932,25 @@ For non-floats, see `org-latex--wrap-label'."
      ;; Standard caption format.
      (t (format "\\caption{%s%s}\n" label-str (org-export-data main info))))))
 
-(defun org-latex--guess-babel-language (header info)
+(defun org-latex-guess-inputenc (header)
+  "Set the coding system in inputenc to what the buffer is.
+
+HEADER is the LaTeX header string.  This function only applies
+when specified inputenc option is \"AUTO\".
+
+Return the new header, as a string."
+  (let* ((cs (or (ignore-errors
+		   (latexenc-coding-system-to-inputenc
+		    buffer-file-coding-system))
+		 "utf8")))
+    (if (not cs) header
+      ;; First translate if that is requested.
+      (setq cs (or (cdr (assoc cs org-latex-inputenc-alist)) cs))
+      ;; Then find the \usepackage statement and replace the option.
+      (replace-regexp-in-string "\\\\usepackage\\[\\(AUTO\\)\\]{inputenc}"
+				cs header t nil 1))))
+
+(defun org-latex-guess-babel-language (header info)
   "Set Babel's language according to LANGUAGE keyword.
 
 HEADER is the LaTeX header string.  INFO is the plist used as
@@ -961,20 +978,6 @@ Return the new header."
 				    (append options (list language))
 				    ",")
 			 nil nil header 1))))))
-
-(defun org-latex--guess-inputenc (header)
-  "Set the coding system in inputenc to what the buffer is.
-HEADER is the LaTeX header string.  Return the new header."
-  (let* ((cs (or (ignore-errors
-		   (latexenc-coding-system-to-inputenc
-		    buffer-file-coding-system))
-		 "utf8")))
-    (if (not cs) header
-      ;; First translate if that is requested.
-      (setq cs (or (cdr (assoc cs org-latex-inputenc-alist)) cs))
-      ;; Then find the \usepackage statement and replace the option.
-      (replace-regexp-in-string "\\\\usepackage\\[\\(AUTO\\)\\]{inputenc}"
-				cs header t nil 1))))
 
 (defun org-latex--find-verb-separator (s)
   "Return a character not used in string S.
@@ -1106,12 +1109,12 @@ holding export options."
 			"^[ \t]*\\\\documentclass\\(\\(\\[.*\\]\\)?\\)"
 			class-options header t nil 1)))))
 	  (when document-class-string
-	    (org-latex--guess-babel-language
-	     (org-latex--guess-inputenc
+	    (org-latex-guess-babel-language
+	     (org-latex-guess-inputenc
 	      (org-splice-latex-header
 	       document-class-string
-	       org-export-latex-default-packages-alist ; defined in org.el
-	       org-export-latex-packages-alist nil ; defined in org.el
+	       org-latex-default-packages-alist
+	       org-latex-packages-alist nil
 	       (plist-get info :latex-header-extra)))
 	     info)))))
      ;; Possibly limit depth for headline numbering.

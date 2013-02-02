@@ -66,8 +66,8 @@ ASCII replacement    Plain ASCII, no extensions.  Symbols that cannot be
 Latin1 replacement   Use the special characters available in latin1.
 utf-8 replacement    Use the special characters available in utf-8.
 
-If you define new entities here that require specific LaTeX packages to be
-loaded, add these packages to `org-export-latex-packages-alist'."
+If you define new entities here that require specific LaTeX
+packages to be loaded, add these packages to `org-latex-packages-alist'."
   :group 'org-entities
   :version "24.1"
   :type '(repeat

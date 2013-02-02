@@ -3628,13 +3628,11 @@ images at the same place."
   "The document header used for processing LaTeX fragments.
 It is imperative that this header make sure that no page number
 appears on the page.  The package defined in the variables
-`org-export-latex-default-packages-alist' and `org-export-latex-packages-alist'
-will either replace the placeholder \"[PACKAGES]\" in this header, or they
-will be appended."
+`org-latex-default-packages-alist' and `org-latex-packages-alist'
+will either replace the placeholder \"[PACKAGES]\" in this
+header, or they will be appended."
   :group 'org-latex
   :type 'string)
-
-(defvar org-format-latex-header-extra nil)
 
 (defun org-set-packages-alist (var val)
   "Set the packages alist and make sure it has 3 elements per entry."
@@ -3645,7 +3643,6 @@ will be appended."
 		   val)))
 
 (defun org-get-packages-alist (var)
-
   "Get the packages alist and make sure it has 3 elements per entry."
   (mapcar (lambda (x)
 	    (if (and (consp x) (= (length x) 2))
@@ -3653,10 +3650,7 @@ will be appended."
 	      x))
 	  (default-value var)))
 
-;; The following variables are defined here because is it also used
-;; when formatting latex fragments.  Originally it was part of the
-;; LaTeX exporter, which is why the name includes "export".
-(defcustom org-export-latex-default-packages-alist
+(defcustom org-latex-default-packages-alist
   '(("AUTO" "inputenc"  t)
     ("T1"   "fontenc"   t)
     (""     "fixltx2e"  nil)
@@ -3671,29 +3665,33 @@ will be appended."
     (""     "latexsym"  t)
     (""     "amssymb"   t)
     (""     "hyperref"  nil)
-    "\\tolerance=1000"
-    )
+    "\\tolerance=1000")
   "Alist of default packages to be inserted in the header.
-Change this only if one of the packages here causes an incompatibility
-with another package you are using.
-The packages in this list are needed by one part or another of Org-mode
-to function properly.
+
+Change this only if one of the packages here causes an
+incompatibility with another package you are using.
+
+The packages in this list are needed by one part or another of
+Org mode to function properly:
 
 - inputenc, fontenc:  for basic font and character selection
-- textcomp, marvosymb, wasysym, latexsym, amssym: for various symbols used
-  for interpreting the entities in `org-entities'.  You can skip some of these
-  packages if you don't use any of the symbols in it.
+- textcomp, marvosymb, wasysym, latexsym, amssym: for various
+  symbols used for interpreting the entities in `org-entities'.
+  You can skip some of these packages if you don't use any of the
+  symbols in it.
 - graphicx: for including images
 - float, wrapfig: for figure placement
 - longtable: for long tables
 - hyperref: for cross references
 
-Therefore you should not modify this variable unless you know what you
-are doing.  The one reason to change it anyway is that you might be loading
-some other package that conflicts with one of the default packages.
-Each cell is of the format \( \"options\" \"package\" snippet-flag\).
-If SNIPPET-FLAG is t, the package also needs to be included when
-compiling LaTeX snippets into images for inclusion into HTML."
+Therefore you should not modify this variable unless you know
+what you are doing.  The one reason to change it anyway is that
+you might be loading some other package that conflicts with one
+of the default packages.  Each cell is of the format
+\( \"options\" \"package\" snippet-flag).  If SNIPPET-FLAG is t,
+the package also needs to be included when compiling LaTeX
+snippets into images for inclusion into non-LaTeX output."
+  :group 'org-latex
   :group 'org-export-latex
   :set 'org-set-packages-alist
   :get 'org-get-packages-alist
@@ -3706,17 +3704,25 @@ compiling LaTeX snippets into images for inclusion into HTML."
 		 (boolean :tag "Snippet"))
 	   (string :tag "A line of LaTeX"))))
 
-(defcustom org-export-latex-packages-alist nil
+(defcustom org-latex-packages-alist nil
   "Alist of packages to be inserted in every LaTeX header.
-These will be inserted after `org-export-latex-default-packages-alist'.
-Each cell is of the format \( \"options\" \"package\" snippet-flag \).
-SNIPPET-FLAG, when t, indicates that this package is also needed when
-turning LaTeX snippets into images for inclusion into HTML.
+
+These will be inserted after `org-latex-default-packages-alist'.
+Each cell is of the format:
+
+    \(\"options\" \"package\" snippet-flag)
+
+SNIPPET-FLAG, when t, indicates that this package is also needed
+when turning LaTeX snippets into images for inclusion into
+non-LaTeX output.
+
 Make sure that you only list packages here which:
-- you want in every file
-- do not conflict with the default packages in
-  `org-export-latex-default-packages-alist'
-- do not conflict with the setup in `org-format-latex-header'."
+
+  - you want in every file
+  - do not conflict with the setup in `org-format-latex-header'.
+  - do not conflict with the default packages in
+    `org-latex-default-packages-alist'."
+  :group 'org-latex
   :group 'org-export-latex
   :set 'org-set-packages-alist
   :get 'org-get-packages-alist
@@ -3727,7 +3733,6 @@ Make sure that you only list packages here which:
 		 (string :tag "package")
 		 (boolean :tag "Snippet"))
 	   (string :tag "A line of LaTeX"))))
-
 
 (defgroup org-appearance nil
   "Settings for Org-mode appearance."
@@ -4035,7 +4040,6 @@ Normal means, no org-mode-specific context."
 (declare-function org-indent-mode "org-indent" (&optional arg))
 (declare-function parse-time-string "parse-time" (string))
 (declare-function org-attach-reveal "org-attach" (&optional if-exists))
-(declare-function org-latex--guess-inputenc "ox-latex" (header))
 (declare-function orgtbl-send-table "org-table" (&optional maybe))
 (defvar remember-data-file)
 (defvar texmathp-why)
@@ -4151,7 +4155,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 
 (declare-function org-export-get-environment "ox"
 		  (&optional backend subtreep ext-plist))
-(declare-function org-latex--guess-inputenc "ox-latex" (header))
+(declare-function org-latex-guess-inputenc "ox-latex" (header))
 
 ;; Declare and autoload functions from org-agenda.el
 
@@ -17413,7 +17417,9 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	  (org-uniquify org-todo-keyword-alist-for-agenda)
 	  org-tag-alist-for-agenda (org-uniquify org-tag-alist-for-agenda))))
 
-;;;; Embedded LaTeX
+
+
+;;;; CDLaTeX minor mode
 
 (defvar org-cdlatex-mode-map (make-sparse-keymap)
   "Keymap for the minor `org-cdlatex-mode'.")
@@ -17462,6 +17468,58 @@ an embedded LaTeX fragment, let texmathp do its job.
 (defun turn-on-org-cdlatex ()
   "Unconditionally turn on `org-cdlatex-mode'."
   (org-cdlatex-mode 1))
+
+(defun org-try-cdlatex-tab ()
+  "Check if it makes sense to execute `cdlatex-tab', and do it if yes.
+It makes sense to do so if `org-cdlatex-mode' is active and if the cursor is
+  - inside a LaTeX fragment, or
+  - after the first word in a line, where an abbreviation expansion could
+    insert a LaTeX environment."
+  (when org-cdlatex-mode
+    (cond
+     ;; Before any word on the line: No expansion possible.
+     ((save-excursion (skip-chars-backward " \t") (bolp)) nil)
+     ;; Just after first word on the line: Expand it.  Make sure it
+     ;; cannot happen on headlines, though.
+     ((save-excursion
+	(skip-chars-backward "a-zA-Z0-9*")
+	(skip-chars-backward " \t")
+	(and (bolp) (not (org-at-heading-p))))
+      (cdlatex-tab) t)
+     ((org-inside-LaTeX-fragment-p) (cdlatex-tab) t))))
+
+(defun org-cdlatex-underscore-caret (&optional arg)
+  "Execute `cdlatex-sub-superscript' in LaTeX fragments.
+Revert to the normal definition outside of these fragments."
+  (interactive "P")
+  (if (org-inside-LaTeX-fragment-p)
+      (call-interactively 'cdlatex-sub-superscript)
+    (let (org-cdlatex-mode)
+      (call-interactively (key-binding (vector last-input-event))))))
+
+(defun org-cdlatex-math-modify (&optional arg)
+  "Execute `cdlatex-math-modify' in LaTeX fragments.
+Revert to the normal definition outside of these fragments."
+  (interactive "P")
+  (if (org-inside-LaTeX-fragment-p)
+      (call-interactively 'cdlatex-math-modify)
+    (let (org-cdlatex-mode)
+      (call-interactively (key-binding (vector last-input-event))))))
+
+
+
+;;;; LaTeX fragments
+
+(defvar org-latex-regexps
+  '(("begin" "^[ \t]*\\(\\\\begin{\\([a-zA-Z0-9\\*]+\\)[^\000]+?\\\\end{\\2}\\)" 1 t)
+    ;; ("$" "\\([ 	(]\\|^\\)\\(\\(\\([$]\\)\\([^ 	\r\n,.$].*?\\(\n.*?\\)\\{0,5\\}[^ 	\r\n,.$]\\)\\4\\)\\)\\([ 	.,?;:'\")]\\|$\\)" 2 nil)
+    ;; \000 in the following regex is needed for org-inside-LaTeX-fragment-p
+    ("$1" "\\([^$]\\|^\\)\\(\\$[^ 	\r\n,;.$]\\$\\)\\([- 	.,?;:'\")\000]\\|$\\)" 2 nil)
+    ("$" "\\([^$]\\|^\\)\\(\\(\\$\\([^ 	\r\n,;.$][^$\n\r]*?\\(\n[^$\n\r]*?\\)\\{0,2\\}[^ 	\r\n,.$]\\)\\$\\)\\)\\([- 	.,?;:'\")\000]\\|$\\)" 2 nil)
+    ("\\(" "\\\\([^\000]*?\\\\)" 0 nil)
+    ("\\[" "\\\\\\[[^\000]*?\\\\\\]" 0 nil)
+    ("$$" "\\$\\$[^\000]*?\\$\\$" 0 nil))
+  "Regular expressions for matching embedded LaTeX.")
 
 (defun org-inside-LaTeX-fragment-p ()
   "Test if point is inside a LaTeX fragment.
@@ -17512,43 +17570,6 @@ looks only before point, not after."
   (save-match-data
     (org-in-regexp
      "\\\\[a-zA-Z]+\\*?\\(\\(\\[[^][\n{}]*\\]\\)\\|\\({[^{}\n]*}\\)\\)*")))
-
-(defun org-try-cdlatex-tab ()
-  "Check if it makes sense to execute `cdlatex-tab', and do it if yes.
-It makes sense to do so if `org-cdlatex-mode' is active and if the cursor is
-  - inside a LaTeX fragment, or
-  - after the first word in a line, where an abbreviation expansion could
-    insert a LaTeX environment."
-  (when org-cdlatex-mode
-    (cond
-     ;; Before any word on the line: No expansion possible.
-     ((save-excursion (skip-chars-backward " \t") (bolp)) nil)
-     ;; Just after first word on the line: Expand it.  Make sure it
-     ;; cannot happen on headlines, though.
-     ((save-excursion
-	(skip-chars-backward "a-zA-Z0-9*")
-	(skip-chars-backward " \t")
-	(and (bolp) (not (org-at-heading-p))))
-      (cdlatex-tab) t)
-     ((org-inside-LaTeX-fragment-p) (cdlatex-tab) t))))
-
-(defun org-cdlatex-underscore-caret (&optional arg)
-  "Execute `cdlatex-sub-superscript' in LaTeX fragments.
-Revert to the normal definition outside of these fragments."
-  (interactive "P")
-  (if (org-inside-LaTeX-fragment-p)
-      (call-interactively 'cdlatex-sub-superscript)
-    (let (org-cdlatex-mode)
-      (call-interactively (key-binding (vector last-input-event))))))
-
-(defun org-cdlatex-math-modify (&optional arg)
-  "Execute `cdlatex-math-modify' in LaTeX fragments.
-Revert to the normal definition outside of these fragments."
-  (interactive "P")
-  (if (org-inside-LaTeX-fragment-p)
-      (call-interactively 'cdlatex-math-modify)
-    (let (org-cdlatex-mode)
-      (call-interactively (key-binding (vector last-input-event))))))
 
 (defvar org-latex-fragment-image-overlays nil
   "List of overlays carrying the images of latex fragments.")
@@ -17604,18 +17625,6 @@ The images can be removed again with \\[org-ctrl-c-ctrl-c]."
 	 org-latex-create-formula-image-program)
 	(message msg "done.  Use `C-c C-c' to remove images.")))))
 
-(defvar org-latex-regexps
-  '(("begin" "^[ \t]*\\(\\\\begin{\\([a-zA-Z0-9\\*]+\\)[^\000]+?\\\\end{\\2}\\)" 1 t)
-    ;; ("$" "\\([ 	(]\\|^\\)\\(\\(\\([$]\\)\\([^ 	\r\n,.$].*?\\(\n.*?\\)\\{0,5\\}[^ 	\r\n,.$]\\)\\4\\)\\)\\([ 	.,?;:'\")]\\|$\\)" 2 nil)
-    ;; \000 in the following regex is needed for org-inside-LaTeX-fragment-p
-    ("$1" "\\([^$]\\|^\\)\\(\\$[^ 	\r\n,;.$]\\$\\)\\([- 	.,?;:'\")\000]\\|$\\)" 2 nil)
-    ("$" "\\([^$]\\|^\\)\\(\\(\\$\\([^ 	\r\n,;.$][^$\n\r]*?\\(\n[^$\n\r]*?\\)\\{0,2\\}[^ 	\r\n,.$]\\)\\$\\)\\)\\([- 	.,?;:'\")\000]\\|$\\)" 2 nil)
-    ("\\(" "\\\\([^\000]*?\\\\)" 0 nil)
-    ("\\[" "\\\\\\[[^\000]*?\\\\\\]" 0 nil)
-    ("$$" "\\$\\$[^\000]*?\\$\\$" 0 nil))
-  "Regular expressions for matching embedded LaTeX.")
-
-(defvar org-export-have-math nil) ;; dynamic scoping
 (defun org-format-latex (prefix &optional dir overlays msg at
 				forbuffer processing-type)
   "Replace LaTeX fragments with links to an image, and produce images.
@@ -17629,8 +17638,6 @@ Some of the options can be changed using the variable
 	 (optnew org-format-latex-options)
 	 (matchers (plist-get opt :matchers))
 	 (re-list org-latex-regexps)
-	 (org-format-latex-header-extra
-	  (plist-get (org-export-get-environment) :latex-header-extra))
 	 (cnt 0) txt hash link beg end re e checkdir
 	 string
 	 m n block-type block linkfile movefile ov)
@@ -17646,7 +17653,6 @@ Some of the options can be changed using the variable
 			 (not (eq (get-char-property (match-beginning n)
 						     'org-overlay-type)
 				  'org-latex-overlay))))
-	    (setq org-export-have-math t)
 	    (cond
 	     ((eq processing-type 'verbatim))
 	     ((eq processing-type 'mathjax)
@@ -17659,16 +17665,17 @@ Some of the options can be changed using the variable
 		  (insert (concat "\\(" (substring string 1 -1) "\\)")))))
 	     ((or (eq processing-type 'dvipng)
 		  (eq processing-type 'imagemagick))
-	      ;; Process to an image
+	      ;; Process to an image.
 	      (setq txt (match-string n)
 		    beg (match-beginning n) end (match-end n)
 		    cnt (1+ cnt))
 	      (let ((face (face-at-point))
 		    (fg (plist-get opt :foreground))
 		    (bg (plist-get opt :background))
-		    print-length print-level)         ; make sure full list is printed
+		    ;; Ensure full list is printed.
+		    print-length print-level)
 		(when forbuffer
-	          ; Get the colors from the face at point
+		  ;; Get the colors from the face at point.
 		  (goto-char beg)
 		  (when (eq fg 'auto)
 		    (setq fg (face-attribute face :foreground nil 'default)))
@@ -17679,9 +17686,8 @@ Some of the options can be changed using the variable
 		  (plist-put optnew :background bg))
 		(setq hash (sha1 (prin1-to-string
 				  (list org-format-latex-header
-					org-format-latex-header-extra
-					org-export-latex-default-packages-alist
-					org-export-latex-packages-alist
+					org-latex-default-packages-alist
+					org-latex-packages-alist
 					org-format-latex-options
 					forbuffer txt fg bg)))
 		      linkfile (format "%s_%s.png" prefix hash)
@@ -17689,7 +17695,7 @@ Some of the options can be changed using the variable
 	      (setq link (concat block "[[file:" linkfile "]]" block))
 	      (if msg (message msg cnt))
 	      (goto-char beg)
-	      (unless checkdir ; make sure the directory exists
+	      (unless checkdir	      ; Ensure the directory exists.
 		(setq checkdir t)
 		(or (file-directory-p todir) (make-directory todir t)))
 	      (unless (file-exists-p movefile)
@@ -17876,12 +17882,11 @@ share a good deal of logic."
       (unless (string= bg "Transparent") (setq bg (org-dvipng-color-format bg))))
     (with-temp-file texfile
       (require 'ox-latex)
-      (insert (org-latex--guess-inputenc
+      (insert (org-latex-guess-inputenc
 	       (org-splice-latex-header
 		org-format-latex-header
-		org-export-latex-default-packages-alist
-		org-export-latex-packages-alist t
-		org-format-latex-header-extra)))
+		org-latex-default-packages-alist
+		org-latex-packages-alist t)))
       (insert "\n\\begin{document}\n" string "\n\\end{document}\n"))
     (let ((dir default-directory))
       (condition-case nil
@@ -17919,7 +17924,7 @@ share a good deal of logic."
 		  (delete-file (concat texfilebase e))))
 	pngfile))))
 
-(defvar org-latex-to-pdf-process) ;; Defined in org-latex.el
+(defvar org-latex-pdf-process)		; From ox-latex.el
 (defun org-create-formula-image-with-imagemagick (string tofile options buffer)
   "This calls convert, which is included into imagemagick."
   (let* ((tmpdir (if (featurep 'xemacs)
@@ -17946,12 +17951,11 @@ share a good deal of logic."
 		(if (string= bg "Transparent") "white" bg))))
     (with-temp-file texfile
       (require 'ox-latex)
-      (insert (org-latex--guess-inputenc
+      (insert (org-latex-guess-inputenc
 	       (org-splice-latex-header
 		org-format-latex-header
-		org-export-latex-default-packages-alist
-		org-export-latex-packages-alist t
-		org-format-latex-header-extra)))
+		org-latex-default-packages-alist
+		org-latex-packages-alist t)))
       (insert "\n\\begin{document}\n"
 	      "\\definecolor{fg}{rgb}{" fg "}\n"
 	      "\\definecolor{bg}{rgb}{" bg "}\n"
@@ -17964,12 +17968,12 @@ share a good deal of logic."
       (condition-case nil
 	  (progn
 	    (cd tmpdir)
-	    (setq cmds org-latex-to-pdf-process)
+	    (setq cmds org-latex-pdf-process)
 	    (while cmds
 	      (setq latex-frags-cmds (pop cmds))
 	      (if (listp latex-frags-cmds)
 		  (setq cmds nil)
-		(setq latex-frags-cmds (list (car org-latex-to-pdf-process)))))
+		(setq latex-frags-cmds (list (car org-latex-pdf-process)))))
 	    (while latex-frags-cmds
 	      (setq cmd (pop latex-frags-cmds))
 	      (while (string-match "%b" cmd)
@@ -17980,12 +17984,14 @@ share a good deal of logic."
 	      (while (string-match "%f" cmd)
 		(setq cmd (replace-match
 			   (save-match-data
-			     (shell-quote-argument (file-name-nondirectory texfile)))
+			     (shell-quote-argument
+			      (file-name-nondirectory texfile)))
 			   t t cmd)))
 	      (while (string-match "%o" cmd)
 		(setq cmd (replace-match
 			   (save-match-data
-			     (shell-quote-argument (file-name-directory texfile)))
+			     (shell-quote-argument
+			      (file-name-directory texfile)))
 			   t t cmd)))
 	      (setq cmd (split-string cmd))
 	      (eval (append (list 'call-process (pop cmd) nil nil nil) cmd))))
@@ -18001,7 +18007,7 @@ share a good deal of logic."
 			    "-antialias"
 			    pdffile
 			    "-quality" "100"
-			    ;;			    "-sharpen" "0x1.0"
+			    ;; "-sharpen" "0x1.0"
 			    pngfile)
 	    (call-process "convert" nil nil nil
 			  "-density" dpi
@@ -18009,7 +18015,7 @@ share a good deal of logic."
 			  "-antialias"
 			  pdffile
 			  "-quality" "100"
-					;			  "-sharpen" "0x1.0"
+			  ;; "-sharpen" "0x1.0"
 			  pngfile))
 	(error nil))
       (if (not (file-exists-p pngfile))
@@ -18121,8 +18127,9 @@ SNIPPETS-P indicates if this is run to create snippet images for HTML."
   "Return string to be used as color value for an RGB component."
   (format "%g" (/ value 65535.0)))
 
-;; Image display
 
+
+;; Image display
 
 (defvar org-inline-image-overlays nil)
 (make-variable-buffer-local 'org-inline-image-overlays)
