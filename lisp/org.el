@@ -334,8 +334,9 @@ When MESSAGE is non-nil, display a message with the version."
   (when (featurep 'org)
     (org-load-modules-maybe 'force)))
 
-(defcustom org-modules '(ox-ascii org-bbdb org-bibtex org-docview org-gnus ox-html org-info org-irc ox-latex org-mew org-mhe org-rmail org-vm org-w3m org-wl)
+(defcustom org-modules '(org-bbdb org-bibtex org-docview org-gnus org-info org-irc org-mew org-mhe org-rmail org-vm org-w3m org-wl)
   "Modules that should always be loaded together with org.el.
+
 If a description starts with <C>, the file is not part of Emacs
 and loading it will require that you have downloaded and properly
 installed the Org mode distribution.
@@ -343,9 +344,11 @@ installed the Org mode distribution.
 You can also use this system to load external packages (i.e. neither Org
 core modules, nor modules from the CONTRIB directory).  Just add symbols
 to the end of the list.  If the package is called org-xyz.el, then you need
-to add the symbol `xyz', and the package must have a call to
+to add the symbol `xyz', and the package must have a call to:
 
-   \(provide 'org-xyz)"
+   \(provide 'org-xyz)
+
+For export specific modules, see also `org-export-backends'."
   :group 'org
   :set 'org-set-modules
   :type
@@ -358,16 +361,6 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "   gnus:              Links to GNUS folders/messages" org-gnus)
 	(const :tag "   id:                Global IDs for identifying entries" org-id)
 	(const :tag "   info:              Links to Info nodes" org-info)
-	(const :tag "   ascii              Export buffer to ASCII format" ox-ascii)
-	(const :tag "   beamer             Export buffer to LaTeX Beamer presentation" ox-beamer)
-	(const :tag "   html               Export buffer to HTML format" ox-html)
-	(const :tag "   icalendar          Export buffer to iCalendar format" ox-icalendar)
-	(const :tag "   latex              Export buffer to LaTeX format" ox-latex)
-	(const :tag "   man                Export buffer to MAN format" ox-man)
-	(const :tag "   md                 Export buffer to Markdown format" ox-md)
-	(const :tag "   odt                Export buffer to ODT format" ox-odt)
-	(const :tag "   texinfo            Export buffer to Texinfo format" ox-texinfo)
-	(const :tag "   infojs:            Set up Sebastian Rose's JavaScript org-info.js" ox-jsinfo)
 	(const :tag "   habit:             Track your consistency with habits" org-habit)
 	(const :tag "   inlinetask:        Tasks independent of outline hierarchy" org-inlinetask)
 	(const :tag "   irc:               Links to IRC/ERC chat sessions" org-irc)
@@ -386,7 +379,6 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  checklist:         Extra functions for checklists in repeated tasks" org-checklist)
 	(const :tag "C  choose:            Use TODO keywords to mark decisions states" org-choose)
 	(const :tag "C  collector:         Collect properties into tables" org-collector)
-	(const :tag "C  confluence         Export buffer to Confluence Wiki format" ox-confluence)
 	(const :tag "C  depend:            TODO dependencies for Org-mode\n\t\t\t(PARTIALLY OBSOLETE, see built-in dependency support))" org-depend)
 	(const :tag "C  drill:             Flashcards and spaced repetition for Org-mode" org-drill)
 	(const :tag "C  elisp-symbol:      Org-mode links to emacs-lisp symbols" org-elisp-symbol)
@@ -396,13 +388,11 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  expiry:            Expiry mechanism for Org-mode entries" org-expiry)
 	(const :tag "C  exp-bibtex:        Export citations using BibTeX" org-exp-bibtex)
 	(const :tag "C  git-link:          Provide org links to specific file version" org-git-link)
-	(const :tag "C  groff              Export buffer to Groff format" ox-groff)
 	(const :tag "C  interactive-query: Interactive modification of tags query\n\t\t\t(PARTIALLY OBSOLETE, see secondary filtering)" org-interactive-query)
 
         (const :tag "C  invoice:           Help manage client invoices in Org-mode" org-invoice)
 
 	(const :tag "C  jira:              Add a jira:ticket protocol to Org-mode" org-jira)
-	(const :tag "C  koma-letter        Export buffer to KOMA Scrlttrl2 format" ox-koma-letter)
 	(const :tag "C  learn:             SuperMemo's incremental learning algorithm" org-learn)
 	(const :tag "C  mairix:            Hook mairix search into Org-mode for different MUAs" org-mairix)
 	(const :tag "C  notmuch:           Provide org links to notmuch searches or messages" org-notmuch)
@@ -421,6 +411,102 @@ to add the symbol `xyz', and the package must have a call to
 	(const :tag "C  velocity           Something like Notational Velocity for Org" org-velocity)
 	(const :tag "C  wikinodes:         CamelCase wiki-like links" org-wikinodes)
 	(repeat :tag "External packages" :inline t (symbol :tag "Package"))))
+
+(defvar org-export-registered-backends)	; From ox.el
+(declare-function org-export-derived-backend-p "ox" (backend &rest backends))
+(defcustom org-export-backends '(ascii html icalendar latex)
+  "List of export back-ends that should be always available.
+
+If a description starts with <C>, the file is not part of Emacs
+and loading it will require that you have downloaded and properly
+installed the Org mode distribution.
+
+Unlike to `org-modules', libraries in this list will not be
+loaded along with Org, but only once the export framework is
+needed.
+
+This variable needs to be set before org.el is loaded.  If you
+need to make a change while Emacs is running, use the customize
+interface or run the following code, , where VALUE stands for the
+new value of the variable, after updating it:
+
+  \(progn
+    \(setq org-export-registered-backends
+          \(org-remove-if-not
+           \(lambda (backend)
+             \(or (memq backend val)
+                 \(catch 'parentp
+                   \(mapc
+                    \(lambda (b)
+                      \(and (org-export-derived-backend-p b (car backend))
+                           \(throw 'parentp t)))
+                    val)
+                   nil)))
+           org-export-registered-backends))
+    \(let ((new-list (mapcar 'car org-export-registered-backends)))
+      \(dolist (backend val)
+        \(cond
+         \((not (load (format \"ox-%s\" backend) t t))
+          \(message \"Problems while trying to load export back-end `%s'\"
+                   backend))
+         \((not (memq backend new-list)) (push backend new-list))))
+      \(set-default var new-list)))
+
+Adding a back-end to this list will also pull the back-end it
+depends on, if any."
+  :group 'org
+  :group 'org-export
+  :set (lambda (var val)
+	 (if (not (featurep 'ox)) (set-default var val)
+	   ;; Any back-end not required anymore (not present in VAL and not
+	   ;; a parent of any back-end in the new value) is removed from the
+	   ;; list of registered back-ends.
+	   (setq org-export-registered-backends
+		 (org-remove-if-not
+		  (lambda (backend)
+		    (or (memq backend val)
+			(catch 'parentp
+			  (mapc
+			   (lambda (b)
+			     (and (org-export-derived-backend-p b (car backend))
+				  (throw 'parentp t)))
+			   val)
+			  nil)))
+		  org-export-registered-backends))
+	   ;; Now build NEW-LIST of both new back-ends and required
+	   ;; parents.
+	   (let ((new-list (mapcar 'car org-export-registered-backends)))
+	     (dolist (backend val)
+	       (cond
+		((not (load (format "ox-%s" backend) t t))
+		 (message "Problems while trying to load export back-end `%s'"
+			  backend))
+		((not (memq backend new-list)) (push backend new-list))))
+	     ;; Set VAR to that list with fixed dependencies.
+	     (set-default var new-list))))
+  :initialize 'custom-initialize-default
+  :type '(set :greedy t
+	      (const :tag "   ascii       Export buffer to ASCII format" ascii)
+	      (const :tag "   beamer      Export buffer to Beamer presentation" beamer)
+	      (const :tag "   html        Export buffer to HTML format" html)
+	      (const :tag "   icalendar   Export buffer to iCalendar format" icalendar)
+	      (const :tag "   latex       Export buffer to LaTeX format" latex)
+	      (const :tag "   man         Export buffer to MAN format" man)
+	      (const :tag "   md          Export buffer to Markdown format" md)
+	      (const :tag "   odt         Export buffer to ODT format" odt)
+	      (const :tag "   texinfo     Export buffer to Texinfo format" texinfo)
+	      (const :tag "   infojs:     Set up Sebastian Rose's JavaScript org-info.js" jsinfo)
+	      (const :tag "C  confluence  Export buffer to Confluence Wiki format" confluence)
+	      (const :tag "C  groff       Export buffer to Groff format" groff)
+	      (const :tag "C  koma-letter Export buffer to KOMA Scrlttrl2 format" koma-letter)))
+
+(eval-after-load 'ox
+  '(mapc
+    (lambda (backend)
+      (condition-case nil (require (intern (format "ox-%s" backend)))
+	(error (message "Problems while trying to load export back-end `%s'"
+			backend))))
+    org-export-backends))
 
 (defcustom org-support-shift-select nil
   "Non-nil means make shift-cursor commands select text when possible.

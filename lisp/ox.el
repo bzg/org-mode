@@ -2688,7 +2688,6 @@ with external parameters overriding Org default settings, but
 still inferior to file-local settings.
 
 Return code as a string."
-  ;; Barf if BACKEND isn't registered.
   (org-export-barf-if-invalid-backend backend)
   (save-excursion
     (save-restriction
@@ -5031,8 +5030,10 @@ and
 	     "%S"
 	     `(with-temp-buffer
 		,(when org-export-async-debug '(setq debug-on-error t))
-		;; Initialize `org-mode' in the external process.
+		;; Initialize `org-mode' and export framework in the
+		;; external process.
 		(org-mode)
+		(require 'ox)
 		;; Re-create current buffer there.
 		(funcall ,,copy-fun)
 		(restore-buffer-modified-p nil)
@@ -5519,6 +5520,7 @@ options as CDR."
 	    options))
      ;; Otherwise, enter sub-menu.
      (t (org-export-dispatch-ui options key expertp)))))
+
 
 
 (provide 'ox)
