@@ -4552,7 +4552,18 @@ original string.
 Return the new string."
   (if (equal s "") ""
     (let* ((prev (org-export-get-previous-element (or original s) info))
-	   (pre-blank (and prev (org-element-property :post-blank prev)))
+	   ;; Try to be flexible when computing number of blanks
+	   ;; before object.  The previous object may be a string
+	   ;; introduced by the back-end and not completely parsed.
+	   (pre-blank (and prev
+			   (or (org-element-property :post-blank prev)
+			       ;; A string with missing `:post-blank'
+			       ;; property.
+			       (and (stringp prev)
+				    (string-match " *\\'" prev)
+				    (length (match-string 0 prev)))
+			       ;; Fallback value.
+			       0)))
 	   (next (org-export-get-next-element (or original s) info))
 	   (get-smart-quote
 	    (lambda (q type)
