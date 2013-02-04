@@ -16227,7 +16227,8 @@ If SECONDS is non-nil, return the difference in seconds."
     (floor (* (string-to-number (match-string 1 ts))
 	      (cdr (assoc (match-string 2 ts)
 			  '(("d" . 1)    ("w" . 7)
-			    ("m" . 30.4) ("y" . 365.25)))))))
+			    ("m" . 30.4) ("y" . 365.25)
+			    ("h" . 0.041667)))))))
    ;; go for the default.
    (t org-deadline-warning-days)))
 
