@@ -1417,6 +1417,16 @@ symbols are recognized:
 
 time-up            Put entries with time-of-day indications first, early first
 time-down          Put entries with time-of-day indications first, late first
+timestamp-up       Sort by any timestamp, early first
+timestamp-down     Sort by any timestamp, late first
+scheduled-up       Sort by scheduled timestamp, early first
+scheduled-down     Sort by scheduled timestamp, late first
+deadline-up        Sort by deadline timestamp, early first
+deadline-down      Sort by deadline timestamp, late first
+ts-up              Sort by active timestamp, early first
+ts-down            Sort by active timestamp, late first
+tsia-up            Sort by inactive timestamp, early first
+tsia-down          Sort by inactive timestamp, late first
 category-keep      Keep the default order of categories, corresponding to the
 		   sequence in `org-agenda-files'.
 category-up        Sort alphabetically by category, A-Z.
@@ -5346,7 +5356,7 @@ the documentation of `org-diary'."
 					       "|")
 					      "\\|") "\\)"))
 			  (t org-not-done-regexp))))
-	 marker priority category category-pos level tags todo-state
+	 marker priority category category-pos level tags todo-state ts-date ts-date-type
 	 ee txt beg end inherited-tags)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
@@ -5362,6 +5372,33 @@ the documentation of `org-diary'."
 	(goto-char (match-beginning 2))
 	(setq marker (org-agenda-new-marker (match-beginning 0))
 	      category (org-get-category)
+	      ts-date (let (ts)
+			(save-match-data
+			  (cond ((org-em 'scheduled-up 'scheduled-down
+					 org-agenda-sorting-strategy-selected)
+				 (setq ts (org-entry-get (point) "SCHEDULED")
+				       ts-date-type " scheduled"))
+				((org-em 'deadline-up 'deadline-down
+					 org-agenda-sorting-strategy-selected)
+				 (setq ts (org-entry-get (point) "DEADLINE")
+				       ts-date-type " deadline"))
+				((org-em 'ts-up 'ts-down
+					 org-agenda-sorting-strategy-selected)
+				 (setq ts (org-entry-get (point) "TIMESTAMP")
+				       ts-date-type " timestamp"))
+				((org-em 'tsia-up 'tsia-down
+					 org-agenda-sorting-strategy-selected)
+				 (setq ts (org-entry-get (point) "TIMESTAMP_IA")
+				       ts-date-type " timestamp_ia"))
+				((org-em 'timestamp-up 'timestamp-down
+					 org-agenda-sorting-strategy-selected)
+				 (setq ts (or (org-entry-get (point) "SCHEDULED")
+					      (org-entry-get (point) "DEADLINE")
+					      (org-entry-get (point) "TIMESTAMP")
+					      (org-entry-get (point) "TIMESTAMP_IA"))
+				       ts-date-type ""))
+				(t (setq ts-date-type "")))
+			  (when ts (org-time-string-to-absolute ts))))
 	      category-pos (get-text-property (point) 'org-category-position)
 	      txt (org-trim
 		   (buffer-substring (match-beginning 2) (match-end 0)))
@@ -5381,8 +5418,9 @@ the documentation of `org-diary'."
 	  'org-marker marker 'org-hd-marker marker
 	  'priority priority 'org-category category
 	  'level level
+	  'ts-date ts-date
 	  'org-category-position category-pos
-	  'type "todo" 'todo-state todo-state)
+	  'type (concat "todo" ts-date-type) 'todo-state todo-state)
 	(push txt ee)
 	(if org-agenda-todo-list-sublevels
 	    (goto-char (match-end 2))
@@ -5506,7 +5544,7 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 	 marker hdmarker deadlinep scheduledp clockp closedp inactivep
 	 donep tmp priority category category-pos level ee txt timestr tags
 	 b0 b3 e3 head todo-state end-of-match show-all warntime habitp
-	 inherited-tags)
+	 inherited-tags ts-date)
     (goto-char (point-min))
     (while (setq end-of-match (re-search-forward regexp nil t))
       (setq b0 (match-beginning 0)
@@ -5578,6 +5616,7 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 			 'org-marker marker 'org-hd-marker hdmarker
 			 'org-category category 'date date
 			 'level level
+			 'ts-date (org-time-string-to-absolute timestr)
 			 'org-category-position category-pos
 			 'todo-state todo-state
 			 'warntime warntime
@@ -5961,7 +6000,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	 (d1 (calendar-absolute-from-gregorian date)) ; DATE bound by calendar
 	 d2 diff dfrac wdays pos pos1 category category-pos level
 	 tags suppress-prewarning ee txt head face s todo-state
-	 show-all upcomingp donep timestr warntime inherited-tags)
+	 show-all upcomingp donep timestr warntime inherited-tags ts-date)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -6061,6 +6100,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		  'org-marker (org-agenda-new-marker pos)
 		  'warntime warntime
 		  'level level
+		  'ts-date d2
 		  'org-hd-marker (org-agenda-new-marker pos1)
 		  'priority (+ (- diff)
 			       (org-get-priority txt))
@@ -6103,7 +6143,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		  deadline-results))
 	 d2 diff pos pos1 category category-pos level tags donep
 	 ee txt head pastschedp todo-state face timestr s habitp show-all
-	 did-habit-check-p warntime inherited-tags)
+	 did-habit-check-p warntime inherited-tags ts-date)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -6205,6 +6245,7 @@ FRACTION is what fraction of the head-warning time has passed."
 		'org-hd-marker (org-agenda-new-marker pos1)
 		'type (if pastschedp "past-scheduled" "scheduled")
 		'date (if pastschedp d2 date)
+		'ts-date d2
 		'warntime warntime
 		'level level
 		'priority (if habitp
@@ -6831,6 +6872,20 @@ could bind the variable in the options section of a custom command.")
     (cond ((< ta tb) -1)
 	  ((< tb ta) +1))))
 
+(defsubst org-cmp-ts (a b &optional type)
+  "Compare the timestamps values of entries A and B.
+When TYPE is \"scheduled\", \"deadline\", \"timestamp\"
+or \"timestamp_ia\", compare within each of these type.
+When TYPE is the empty string, compare all timestamps
+without respect of their type."
+  (let* ((def (if org-sort-agenda-notime-is-late 9901 -1))
+	 (ta (or (and (string-match type (get-text-property 1 'type a))
+		      (get-text-property 1 'ts-date a)) def))
+	 (tb (or (and (string-match type (get-text-property 1 'type b))
+		      (get-text-property 1 'ts-date b)) def)))
+    (cond ((< ta tb) -1)
+	  ((< tb ta) +1))))
+
 (defsubst org-cmp-habit-p (a b)
   "Compare the todo states of strings A and B."
   (let ((ha (get-text-property 1 'org-habit-p a))
@@ -6838,13 +6893,30 @@ could bind the variable in the options section of a custom command.")
     (cond ((and ha (not hb)) -1)
 	  ((and (not ha) hb) +1))))
 
-(defsubst org-em (x y list) (or (memq x list) (memq y list)))
+(defsubst org-em (x y list)
+  "Is X or Y a member of LIST?"
+  (or (memq x list) (memq y list)))
 
 (defun org-entries-lessp (a b)
   "Predicate for sorting agenda entries."
   ;; The following variables will be used when the form is evaluated.
   ;; So even though the compiler complains, keep them.
   (let* ((ss org-agenda-sorting-strategy-selected)
+	 (timestamp-up    (and (org-em 'timestamp-up 'timestamp-down ss)
+			       (org-cmp-ts a b "")))
+	 (timestamp-down  (if timestamp-up (- timestamp-up) nil))
+	 (scheduled-up    (and (org-em 'scheduled-up 'scheduled-down ss)
+			       (org-cmp-ts a b "scheduled")))
+	 (scheduled-down  (if scheduled-up (- scheduled-up) nil))
+	 (deadline-up     (and (org-em 'deadline-up 'deadline-down ss)
+			       (org-cmp-ts a b "deadline")))
+	 (deadline-down   (if deadline-up (- deadline-up) nil))
+	 (tsia-up         (and (org-em 'tsia-up 'tsia-down ss)
+			       (org-cmp-ts a b "iatimestamp_ia")))
+	 (tsia-down       (if tsia-up (- tsia-up) nil))
+	 (ts-up           (and (org-em 'ts-up 'ts-down ss)
+			       (org-cmp-ts a b "timestamp")))
+	 (ts-down         (if ts-up (- ts-up) nil))
 	 (time-up         (and (org-em 'time-up 'time-down ss)
 			       (org-cmp-time a b)))
 	 (time-down       (if time-up (- time-up) nil))
