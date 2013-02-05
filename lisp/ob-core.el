@@ -2572,7 +2572,8 @@ Emacs shutdown."))
 
 (defmacro org-babel-result-cond (result-params scalar-form &rest table-forms)
   "Call the code to parse raw string results according to RESULT-PARAMS."
-  (declare (indent 1))
+  (declare (indent 1)
+	   (debug (form form &rest form)))
   `(unless (member "none" ,result-params)
      (if (or (member "scalar" ,result-params)
 	     (member "verbatim" ,result-params)
