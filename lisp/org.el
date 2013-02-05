@@ -2864,7 +2864,7 @@ is used."
 			     (string :tag "Format string")))))
 
 (defcustom org-deadline-warning-days 14
-  "No. of days before expiration during which a deadline becomes active.
+  "Number of days before expiration during which a deadline becomes active.
 This variable governs the display in sparse trees and in the agenda.
 When 0 or negative, it means use this number (the absolute value of it)
 even if a deadline has a different individual lead time specified.
@@ -2872,6 +2872,20 @@ even if a deadline has a different individual lead time specified.
 Custom commands can set this variable in the options section."
   :group 'org-time
   :group 'org-agenda-daily/weekly
+  :type 'integer)
+
+(defcustom org-scheduled-delay-days 0
+  "Number of days before a scheduled item becomes active.
+This variable governs the display in sparse trees and in the agenda.
+The default value (i.e. 0) means: don't delay scheduled item.
+When negative, it means use this number (the absolute value of it)
+even if a scheduled item has a different individual delay time
+specified.
+
+Custom commands can set this variable in the options section."
+  :group 'org-time
+  :group 'org-agenda-daily/weekly
+  :version "24.3"
   :type 'integer)
 
 (defcustom org-read-date-prefer-future t
@@ -16216,21 +16230,29 @@ If SECONDS is non-nil, return the difference in seconds."
   (and (< (org-time-stamp-to-now timestamp-string) ndays)
        (not (org-entry-is-done-p))))
 
-(defun org-get-wdays (ts)
-  "Get the deadline lead time appropriate for timestring TS."
-  (cond
-   ((<= org-deadline-warning-days 0)
-    ;; 0 or negative, enforce this value no matter what
-    (- org-deadline-warning-days))
-   ((string-match "-\\([0-9]+\\)\\([hdwmy]\\)\\(\\'\\|>\\| \\)" ts)
-    ;; lead time is specified.
-    (floor (* (string-to-number (match-string 1 ts))
-	      (cdr (assoc (match-string 2 ts)
-			  '(("d" . 1)    ("w" . 7)
-			    ("m" . 30.4) ("y" . 365.25)
-			    ("h" . 0.041667)))))))
-   ;; go for the default.
-   (t org-deadline-warning-days)))
+(defun org-get-wdays (ts &optional delay zero-delay)
+  "Get the deadline lead time appropriate for timestring TS.
+When DELAY is non-nil, get the delay time for scheduled items
+instead of the deadline lead time.  When ZERO-DELAY is non-nil
+and `org-scheduled-delay-days' is 0, enforce 0 as the delay,
+don't try to find the delay cookie in the scheduled timestamp."
+  (let ((tv (if delay org-scheduled-delay-days
+	      org-deadline-warning-days)))
+    (cond
+     ((or (and delay (< tv 0))
+	  (and delay zero-delay (<= tv 0))
+	  (and (not delay) (<= tv 0)))
+      ;; Enforce this value no matter what
+      (- tv))
+     ((string-match "-\\([0-9]+\\)\\([hdwmy]\\)\\(\\'\\|>\\| \\)" ts)
+      ;; lead time is specified.
+      (floor (* (string-to-number (match-string 1 ts))
+		(cdr (assoc (match-string 2 ts)
+			    '(("d" . 1)    ("w" . 7)
+			      ("m" . 30.4) ("y" . 365.25)
+			      ("h" . 0.041667)))))))
+     ;; go for the default.
+     (t tv))))
 
 (defun org-calendar-select-mouse (ev)
   "Return to `org-read-date' with the date currently selected.

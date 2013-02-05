@@ -843,6 +843,21 @@ because you will take care of it on the day when scheduled."
 	  (const :tag "Remove prewarning if entry is scheduled" t)
 	  (integer :tag "Restart prewarning N days before deadline")))
 
+(defcustom org-agenda-skip-scheduled-delay-if-deadline nil
+  "Non-nil means skip scheduled delay when entry also has a deadline.
+This variable may be set to nil, t, the symbol `post-deadline',
+or a number which will then give the number of days after the actual
+scheduled date when the delay should expire.  The symbol `post-deadline'
+eliminates the schedule delay when the date is posterior to the deadline."
+  :group 'org-agenda-skip
+  :group 'org-agenda-daily/weekly
+  :version "24.3"
+  :type '(choice
+	  (const :tag "Always honor delay" nil)
+	  (const :tag "Ignore delay if posterior to the deadline" post-deadline)
+	  (const :tag "Ignore delay if entry has a deadline" t)
+	  (integer :tag "Honor delay up until N days after the scheduled date")))
+
 (defcustom org-agenda-skip-additional-timestamps-same-entry nil
   "When nil, multiple same-day timestamps in entry make multiple agenda lines.
 When non-nil, after the search for timestamps has matched once in an
@@ -5331,7 +5346,13 @@ the documentation of `org-diary'."
 		  (setq results (append results rtn))))))))
 	results))))
 
+(defsubst org-em (x y list)
+  "Is X or Y a member of LIST?"
+  (or (memq x list) (memq y list)))
+
 (defvar org-heading-keyword-regexp-format) ; defined in org.el
+(defvar org-agenda-sorting-strategy-selected nil)
+
 (defun org-agenda-get-todos ()
   "Return the TODO information for agenda display."
   (let* ((props (list 'face nil
@@ -6143,7 +6164,8 @@ FRACTION is what fraction of the head-warning time has passed."
 		  deadline-results))
 	 d2 diff pos pos1 category category-pos level tags donep
 	 ee txt head pastschedp todo-state face timestr s habitp show-all
-	 did-habit-check-p warntime inherited-tags ts-date)
+	 did-habit-check-p warntime inherited-tags ts-date suppress-delay
+	 ddays)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -6162,12 +6184,38 @@ FRACTION is what fraction of the head-warning time has passed."
 	      warntime (get-text-property (point) 'org-appt-warntime))
 	(setq pastschedp (and todayp (< diff 0)))
 	(setq did-habit-check-p nil)
+	(setq suppress-delay
+	      (let ((ds (and org-agenda-skip-scheduled-delay-if-deadline
+			     (let ((item (buffer-substring (point-at-bol) (point-at-eol))))
+			       (save-match-data
+				 (and (string-match
+				       org-deadline-time-regexp item)
+				      (match-string 1 item)))))))
+		(cond
+		 ((not ds) nil)
+		 ;; The current item has a deadline date (in ds), so
+		 ;; evaluate its delay time.
+		 ((integerp org-agenda-skip-scheduled-delay-if-deadline)
+		  ;; Use global delay time.
+		  (- org-agenda-skip-scheduled-delay-if-deadline))
+		 ((eq org-agenda-skip-scheduled-delay-if-deadline
+		      'post-deadline)
+		  ;; Set delay to no later than deadline.
+		  (min (- d2 (org-time-string-to-absolute
+			      ds d1 'past show-all (current-buffer) pos))
+		       org-scheduled-delay-days))
+		 (t 0))))
+	(setq ddays (if suppress-delay
+			(let ((org-scheduled-delay-days suppress-delay))
+			  (org-get-wdays s t t))
+		      (org-get-wdays s t)))
 	;; When to show a scheduled item in the calendar:
 	;; If it is on or past the date.
-	(when (or (and (< diff 0)
+	(when (or (and (> ddays 0) (= diff (- ddays)))
+		  (and (zerop ddays) (= diff 0))
+		  (and (< diff 0)
 		       (< (abs diff) org-scheduled-past-days)
 		       (and todayp (not org-agenda-only-exact-dates)))
-		  (= diff 0)
 		  ;; org-is-habit-p uses org-entry-get, which is expansive
 		  ;; so we go extra mile to only call it once
 		  (and todayp
@@ -6578,7 +6626,6 @@ The modified list may contain inherited tags, and tags matched by
     s))
 
 (defvar org-agenda-sorting-strategy) ;; because the def is in a let form
-(defvar org-agenda-sorting-strategy-selected nil)
 
 (defun org-agenda-add-time-grid-maybe (list ndays todayp)
   "Add a time-grid for agenda items which need it.
@@ -6892,10 +6939,6 @@ without respect of their type."
 	(hb (get-text-property 1 'org-habit-p b)))
     (cond ((and ha (not hb)) -1)
 	  ((and (not ha) hb) +1))))
-
-(defsubst org-em (x y list)
-  "Is X or Y a member of LIST?"
-  (or (memq x list) (memq y list)))
 
 (defun org-entries-lessp (a b)
   "Predicate for sorting agenda entries."
