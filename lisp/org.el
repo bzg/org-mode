@@ -12503,9 +12503,10 @@ of `org-todo-keywords-1'."
     (message "%d TODO entries found"
 	     (org-occur (concat "^" org-outline-regexp " *" kwd-re )))))
 
-(defun org-deadline (&optional remove time)
+(defun org-deadline (&optional arg time)
   "Insert the \"DEADLINE:\" string with a timestamp to make a deadline.
-With argument REMOVE, remove any deadline from the item.
+With one universal prefix argument, remove any deadline from the item.
+With two universal prefix arguments, prompt for a warning delay.
 With argument TIME, set the deadline at the corresponding date.  TIME
 can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
   (interactive "P")
@@ -12514,7 +12515,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		    'region-start-level 'region))
 	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
-	 `(org-deadline ',remove ,time)
+	 `(org-deadline ',arg ,time)
 	 org-loop-over-headlines-in-active-region
 	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (let* ((old-date (org-entry-get nil "DEADLINE"))
@@ -12523,13 +12524,31 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 			   "\\([.+-]+[0-9]+[hdwmy]\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
 			   old-date)
 			  (match-string 1 old-date))))
-      (if remove
-	  (progn
-	    (when (and old-date org-log-redeadline)
-	      (org-add-log-setup 'deldeadline nil old-date 'findpos
-				 org-log-redeadline))
-	    (org-remove-timestamp-with-keyword org-deadline-string)
-	    (message "Item no longer has a deadline."))
+      (cond
+       ((equal arg '(4))
+	(when (and old-date org-log-redeadline)
+	  (org-add-log-setup 'deldeadline nil old-date 'findpos
+			     org-log-redeadline))
+	(org-remove-timestamp-with-keyword org-deadline-string)
+	(message "Item no longer has a deadline."))
+       ((equal arg '(16))
+	(save-excursion
+	  (if (re-search-forward
+	       org-deadline-time-regexp
+	       (save-excursion (outline-next-heading) (point)) t)
+	      (let* ((rpl0 (match-string 1))
+		     (rpl (replace-regexp-in-string " -[0-9]+[hdwmy]" "" rpl0)))
+		(replace-match
+		 (concat org-deadline-string
+			 " <" rpl
+			 (format " -%dd" (abs
+					  (- (time-to-days
+					      (save-match-data
+						(org-read-date nil t nil "Warn starting from")))
+					     (time-to-days nil))))
+			 ">") t t))
+	    (user-error "No deadline information to update"))))
+       (t
 	(org-add-planning-info 'deadline time 'closed)
 	(when (and old-date org-log-redeadline
 		   (not (equal old-date
@@ -12549,11 +12568,12 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		    (concat (substring org-last-inserted-timestamp 0 -1)
 			    " " repeater
 			    (substring org-last-inserted-timestamp -1))))))
-	(message "Deadline on %s" org-last-inserted-timestamp)))))
+	(message "Deadline on %s" org-last-inserted-timestamp))))))
 
-(defun org-schedule (&optional remove time)
+(defun org-schedule (&optional arg time)
   "Insert the SCHEDULED: string with a timestamp to schedule a TODO item.
-With argument REMOVE, remove any scheduling date from the item.
+With one universal prefix argument, remove any scheduling date from the item.
+With two universal prefix arguments, prompt for a delay cookie.
 With argument TIME, scheduled at the corresponding date.  TIME can
 either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
   (interactive "P")
@@ -12562,7 +12582,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		    'region-start-level 'region))
 	    org-loop-over-headlines-in-active-region)
 	(org-map-entries
-	 `(org-schedule ',remove ,time)
+	 `(org-schedule ',arg ,time)
 	 org-loop-over-headlines-in-active-region
 	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (let* ((old-date (org-entry-get nil "SCHEDULED"))
@@ -12571,13 +12591,32 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 			   "\\([.+-]+[0-9]+[hdwmy]\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
 			   old-date)
 			  (match-string 1 old-date))))
-      (if remove
-	  (progn
-	    (when (and old-date org-log-reschedule)
-	      (org-add-log-setup 'delschedule nil old-date 'findpos
-				 org-log-reschedule))
-	    (org-remove-timestamp-with-keyword org-scheduled-string)
-	    (message "Item is no longer scheduled."))
+      (cond
+       ((equal arg '(4))
+	(progn
+	  (when (and old-date org-log-reschedule)
+	    (org-add-log-setup 'delschedule nil old-date 'findpos
+			       org-log-reschedule))
+	  (org-remove-timestamp-with-keyword org-scheduled-string)
+	  (message "Item is no longer scheduled.")))
+       ((equal arg '(16))
+	(save-excursion
+	  (if (re-search-forward
+	       org-scheduled-time-regexp
+	       (save-excursion (outline-next-heading) (point)) t)
+	      (let* ((rpl0 (match-string 1))
+		     (rpl (replace-regexp-in-string " -[0-9]+[hdwmy]" "" rpl0)))
+		(replace-match
+		 (concat org-scheduled-string
+			 " <" rpl
+			 (format " -%dd" (abs
+					  (- (time-to-days
+					      (save-match-data
+						(org-read-date nil t nil "Delay until")))
+					     (time-to-days nil))))
+			 ">") t t))
+	    (user-error "No scheduled information to update"))))
+       (t
 	(org-add-planning-info 'scheduled time 'closed)
 	(when (and old-date org-log-reschedule
 		   (not (equal old-date
@@ -12597,7 +12636,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		    (concat (substring org-last-inserted-timestamp 0 -1)
 			    " " repeater
 			    (substring org-last-inserted-timestamp -1))))))
-	(message "Scheduled to %s" org-last-inserted-timestamp)))))
+	(message "Scheduled to %s" org-last-inserted-timestamp))))))
 
 (defun org-get-scheduled-time (pom &optional inherit)
   "Get the scheduled time as a time tuple, of a format suitable
