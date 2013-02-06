@@ -2482,6 +2482,78 @@ duplicates.)"
 				      (regexp))
 				(function :tag "Custom function"))))))
 
+(defcustom org-agenda-max-entries nil
+  "Maximum number of entries to display in an agenda.
+This can be nil (no limit) or an integer or an alist of agenda
+types with an associated number of entries to display in this
+type."
+  :version "24.3"
+  :group 'org-agenda-custom-commands
+  :type '(choice (symbol :tag "No limit" nil)
+		 (integer :tag "Max number of entries")
+		 (repeat
+		  (cons (choice :tag "Agenda type"
+				(const agenda)
+				(const todo)
+				(const tags)
+				(const search)
+				(const timeline))
+			(integer :tag "Max number of entries")))))
+
+(defcustom org-agenda-max-todos nil
+  "Maximum number of TODOs to display in an agenda.
+This can be nil (no limit) or an integer or an alist of agenda
+types with an associated number of entries to display in this
+type."
+  :version "24.3"
+  :group 'org-agenda-custom-commands
+  :type '(choice (symbol :tag "No limit" nil)
+		 (integer :tag "Max number of entries")
+		 (repeat
+		  (cons (choice :tag "Agenda type"
+				(const agenda)
+				(const todo)
+				(const tags)
+				(const search)
+				(const timeline))
+			(integer :tag "Max number of entries")))))
+
+(defcustom org-agenda-max-tags nil
+  "Maximum number of tagged entries to display in an agenda.
+This can be nil (no limit) or an integer or an alist of agenda
+types with an associated number of entries to display in this
+type."
+  :version "24.3"
+  :group 'org-agenda-custom-commands
+  :type '(choice (symbol :tag "No limit" nil)
+		 (integer :tag "Max number of entries")
+		 (repeat
+		  (cons (choice :tag "Agenda type"
+				(const agenda)
+				(const todo)
+				(const tags)
+				(const search)
+				(const timeline))
+			(integer :tag "Max number of entries")))))
+
+(defcustom org-agenda-max-effort nil
+  "Maximum cumulated effort duration for the agenda.
+This can be nil (no limit) or a number of minutes (as an integer)
+or an alist of agenda types with an associated number of minutes
+to limit entries to in this type."
+  :version "24.3"
+  :group 'org-agenda-custom-commands
+  :type '(choice (symbol :tag "No limit" nil)
+		 (integer :tag "Max number of entries")
+		 (repeat
+		  (cons (choice :tag "Agenda type"
+				(const agenda)
+				(const todo)
+				(const tags)
+				(const search)
+				(const timeline))
+			(integer :tag "Max number of entries")))))
+
 (defvar org-keys nil)
 (defvar org-match nil)
 ;;;###autoload
@@ -3972,7 +4044,7 @@ dates."
 	      (put-text-property s (1- (point)) 'org-agenda-date-header t)
 	      (if (equal d today)
 		  (put-text-property s (1- (point)) 'org-today t))
-	      (and rtn (insert (org-agenda-finalize-entries rtn) "\n"))
+	      (and rtn (insert (org-agenda-finalize-entries rtn 'timeline) "\n"))
 	      (put-text-property s (1- (point)) 'day d)))))
     (goto-char (point-min))
     (goto-char (or (text-property-any (point-min) (point-max) 'org-today t)
@@ -4213,7 +4285,7 @@ given in `org-agenda-start-on-weekday'."
 	      (setq rtnall
 		    (org-agenda-add-time-grid-maybe rtnall ndays todayp))
 	      (if rtnall (insert ;; all entries
-			  (org-agenda-finalize-entries rtnall)
+			  (org-agenda-finalize-entries rtnall 'agenda)
 			  "\n"))
 	      (put-text-property s (1- (point)) 'day d)
 	      (put-text-property s (1- (point)) 'org-day-cnt day-cnt))))
@@ -4585,7 +4657,7 @@ in `org-agenda-text-search-extra-files'."
 			       (list 'face 'org-agenda-structure))))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
-	(insert (org-agenda-finalize-entries rtnall) "\n"))
+	(insert (org-agenda-finalize-entries rtnall 'search) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
       (add-text-properties (point-min) (point-max)
@@ -4732,7 +4804,7 @@ for a keyword.  A numeric prefix directly selects the Nth keyword in
 	(add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure)))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
-	(insert (org-agenda-finalize-entries rtnall) "\n"))
+	(insert (org-agenda-finalize-entries rtnall 'todo) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
       (add-text-properties (point-min) (point-max)
@@ -4826,7 +4898,7 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 	(add-text-properties pos (1- (point)) (list 'face 'org-agenda-structure)))
       (org-agenda-mark-header-line (point-min))
       (when rtnall
-	(insert (org-agenda-finalize-entries rtnall) "\n"))
+	(insert (org-agenda-finalize-entries rtnall 'tags) "\n"))
       (goto-char (point-min))
       (or org-agenda-multi (org-agenda-fit-window-to-buffer))
       (add-text-properties (point-min) (point-max)
@@ -6524,11 +6596,11 @@ Any match of REMOVE-RE will be removed from TXT."
 		       t t txt))))
 	(when (derived-mode-p 'org-mode)
 	  (setq effort (ignore-errors (get-text-property 0 'org-effort txt)))
-	  (when effort
-	    (setq neffort (org-duration-string-to-minutes effort)
-		  effort (setq effort (concat "[" effort "]")))))
-	;; prevent erroring out with %e format when there is no effort
-	(or effort (setq effort ""))
+	  (if effort
+	      (setq neffort (org-duration-string-to-minutes effort)
+		    effort (setq effort (concat "[" effort "]")))
+	    ;; prevent erroring out with %e format when there is no effort
+	    (setq effort "")))
 
 	(when remove-re
 	  (while (string-match remove-re txt)
@@ -6785,14 +6857,47 @@ You can also use this function as a filter, by returning nil for lines
 you don't want to have in the agenda at all.  For this application, you
 could bind the variable in the options section of a custom command.")
 
-(defun org-agenda-finalize-entries (list &optional nosort)
-  "Sort and concatenate the agenda items."
-  (setq list (mapcar 'org-agenda-highlight-todo list))
-  (if nosort
-      list
+(defun org-agenda-finalize-entries (list &optional type)
+  "Sort, limit and concatenate the LIST of agenda items.
+The optional argument TYPE tells the agenda type."
+  (let ((max-effort (cond ((listp org-agenda-max-effort)
+			   (cdr (assoc type org-agenda-max-effort)))
+			  (t org-agenda-max-effort)))
+	(max-todo (cond ((listp org-agenda-max-todos)
+			 (cdr (assoc type org-agenda-max-todos)))
+			(t org-agenda-max-todos)))
+	(max-tags (cond ((listp org-agenda-max-tags)
+			 (cdr (assoc type org-agenda-max-tags)))
+			(t org-agenda-max-tags)))
+	(max-entries (cond ((listp org-agenda-max-entries)
+			    (cdr (assoc type org-agenda-max-entries)))
+			   (t org-agenda-max-entries))) l)
     (when org-agenda-before-sorting-filter-function
-      (setq list (delq nil (mapcar org-agenda-before-sorting-filter-function list))))
-    (mapconcat 'identity (sort list 'org-entries-lessp) "\n")))
+      (setq list
+	    (delq nil
+		  (mapcar
+		   org-agenda-before-sorting-filter-function list))))
+    (setq list (mapcar 'org-agenda-highlight-todo list)
+	  list (mapcar 'identity (sort list 'org-entries-lessp))
+	  list (org-agenda-limit-entries
+		list 'effort-minutes max-effort 'identity)
+	  list (org-agenda-limit-entries list 'todo-state max-todo)
+	  list (org-agenda-limit-entries list 'tags max-tags)
+	  list (org-agenda-limit-entries list 'org-hd-marker max-entries)
+	  list (mapconcat 'identity list "\n"))))
+
+(defun org-agenda-limit-entries (list prop limit &optional fn)
+  "Limit the number of agenda entries."
+  (if limit
+      (let ((f (or fn (lambda (p) (and p 1)))) (lim 0))
+	(delq nil
+	      (mapcar
+	       (lambda (e)
+		 (let ((pval (funcall f (get-text-property 1 prop e))))
+		   (if pval (setq lim (+ lim pval)))
+		   (if (or (not pval) (<= lim limit)) e)))
+	       list)))
+    list))
 
 (defun org-agenda-highlight-todo (x)
   (let ((org-done-keywords org-done-keywords-for-agenda)
