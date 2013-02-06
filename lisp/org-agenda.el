@@ -5949,7 +5949,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 				 (or (eq org-agenda-use-tag-inheritance t)
 				     (memq 'agenda org-agenda-use-tag-inheritance))))
 			tags (org-get-tags-at pos1 (not inherited-tags)))
-		  (setq head (buffer-substring-no-properties
+		  (setq head (buffer-substring
 			      (point)
 			      (progn (skip-chars-forward "^\r\n")
 				     (point))))
@@ -6086,7 +6086,7 @@ FRACTION is what fraction of the head-warning time has passed."
 			       (or (eq org-agenda-use-tag-inheritance t)
 				   (memq 'agenda org-agenda-use-tag-inheritance))))
 		      tags (org-get-tags-at nil (not inherited-tags)))
-		(setq head (buffer-substring-no-properties
+		(setq head (buffer-substring
 			    (point)
 			    (progn (skip-chars-forward "^\r\n") (point))))
 		(if (string-match " \\([012]?[0-9]:[0-9][0-9]\\)" s)
