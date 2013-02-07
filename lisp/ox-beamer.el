@@ -44,9 +44,6 @@
 ;; Moreover, headlines now fall into three categories: sectioning
 ;; elements, frames and blocks.
 ;;
-;; - Like `latex' back-end sectioning elements are still set through
-;;   `org-latex-classes' variable.
-;;
 ;; - Headlines become frames when their level is equal to
 ;;   `org-beamer-frame-level' (or "H" value in the OPTIONS line).
 ;;   Though, if an headline in the current tree has a "BEAMER_env"
@@ -68,17 +65,30 @@
 ;;   a "BEAMER_ref" property is mandatory in order to refer to the
 ;;   frame being resumed, and contents are ignored.
 ;;
-;;   Also, an headline with an "ignoreheading" value will have its
-;;   contents only inserted in the output.  This special value is
+;;   Also, an headline with an "ignoreheading" environment will have
+;;   its contents only inserted in the output.  This special value is
 ;;   useful to have data between frames, or to properly close
 ;;   a "column" environment.
 ;;
-;; Along with "BEAMER_env", headlines also support "BEAMER_act" and
-;; "BEAMER_opt" properties.  The former is translated as an
+;; Along with "BEAMER_env", headlines also support the "BEAMER_act"
+;; and "BEAMER_opt" properties.  The former is translated as an
 ;; overlay/action specification (or a default overlay specification
 ;; when enclosed within square brackets) whereas the latter specifies
 ;; options for the current frame ("fragile" option is added
 ;; automatically, though).
+;;
+;; Moreover, headlines handle the "BEAMER_col" property.  Its value
+;; should be a decimal number representing the width of the column as
+;; a fraction of the total text width.  If the headline has no
+;; specific environment, its title will be ignored and its contents
+;; will fill the column created.  Otherwise, the block will fill the
+;; whole column and the title will be preserved.  Two contiguous
+;; headlines with a non-nil "BEAMER_col" value share the same
+;; "columns" LaTeX environment.  It will end before the next headline
+;; without such a property.  This environment is generated
+;; automatically.  Although, it can also be explicitly created, with
+;; a special "columns" value for "BEAMER_env" property (if it needs to
+;; be set up with some specific options, for example).
 ;;
 ;; Every plain list has support for `:environment', `:overlay' and
 ;; `:options' attributes (through ATTR_BEAMER affiliated keyword).
