@@ -484,7 +484,6 @@ depends on, if any."
 		((not (memq backend new-list)) (push backend new-list))))
 	     ;; Set VAR to that list with fixed dependencies.
 	     (set-default var new-list))))
-  :initialize 'custom-initialize-default
   :type '(set :greedy t
 	      (const :tag "   ascii       Export buffer to ASCII format" ascii)
 	      (const :tag "   beamer      Export buffer to Beamer presentation" beamer)
