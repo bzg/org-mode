@@ -5485,9 +5485,7 @@ the documentation of `org-diary'."
 					      (org-entry-get (point) "TIMESTAMP_IA"))
 				       ts-date-type ""))
 				(t (setq ts-date-type "")))
-			  (when ts (or (ignore-errors (org-time-string-to-absolute ts))
-				       ;; We skip diary sexp because `date' is not bound
-				       (time-to-days nil)))))
+			  (when ts (ignore-errors (org-time-string-to-absolute ts)))))
 	      category-pos (get-text-property (point) 'org-category-position)
 	      txt (org-trim
 		   (buffer-substring (match-beginning 2) (match-end 0)))
@@ -5705,7 +5703,8 @@ Do we have a reason to ignore this TODO entry because it has a time stamp?
 			 'org-marker marker 'org-hd-marker hdmarker
 			 'org-category category 'date date
 			 'level level
-			 'ts-date (org-time-string-to-absolute timestr)
+			 'ts-date
+			 (ignore-errors (org-time-string-to-absolute timestr))
 			 'org-category-position category-pos
 			 'todo-state todo-state
 			 'warntime warntime
