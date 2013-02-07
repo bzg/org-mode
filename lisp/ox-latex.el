@@ -1272,10 +1272,11 @@ contextual information."
   "Transcode an EXAMPLE-BLOCK element from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
-  (org-latex--wrap-label
-   example-block
-   (format "\\begin{verbatim}\n%s\\end{verbatim}"
-	   (org-export-format-code-default example-block info))))
+  (when (org-string-nw-p (org-element-property :value example-block))
+    (org-latex--wrap-label
+     example-block
+     (format "\\begin{verbatim}\n%s\\end{verbatim}"
+	     (org-export-format-code-default example-block info)))))
 
 
 ;;;; Export Block
@@ -2085,113 +2086,117 @@ holding contextual information."
   "Transcode a SRC-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let* ((lang (org-element-property :language src-block))
-	 (caption (org-element-property :caption src-block))
-	 (label (org-element-property :name src-block))
-	 (custom-env (and lang
-			  (cadr (assq (intern lang)
-				      org-latex-custom-lang-environments))))
-	 (num-start (case (org-element-property :number-lines src-block)
-		      (continued (org-export-get-loc src-block info))
-		      (new 0)))
-	 (retain-labels (org-element-property :retain-labels src-block)))
-    (cond
-     ;; Case 1.  No source fontification.
-     ((not org-latex-listings)
-      (let ((caption-str (org-latex--caption/label-string src-block info))
-	    (float-env (when caption "\\begin{figure}[H]\n%s\n\\end{figure}")))
-	(format
-	 (or float-env "%s")
-	 (concat caption-str
-		 (format "\\begin{verbatim}\n%s\\end{verbatim}"
-			 (org-export-format-code-default src-block info))))))
-     ;; Case 2.  Custom environment.
-     (custom-env (format "\\begin{%s}\n%s\\end{%s}\n"
-			 custom-env
-			 (org-export-format-code-default src-block info)
-			 custom-env))
-     ;; Case 3.  Use minted package.
-     ((eq org-latex-listings 'minted)
-      (let ((float-env
-	     (when (or label caption)
-	       (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
-		       (org-latex--caption/label-string src-block info))))
-	    (body
-	     (format
-	      "\\begin{minted}[%s]{%s}\n%s\\end{minted}"
-	      ;; Options.
-	      (org-latex--make-option-string
-	       (if (not num-start) org-latex-minted-options
-		 (append `(("linenos")
-			   ("firstnumber" ,(number-to-string (1+ num-start))))
-			 org-latex-minted-options)))
-	      ;; Language.
-	      (or (cadr (assq (intern lang) org-latex-minted-langs)) lang)
-	      ;; Source code.
-	      (let* ((code-info (org-export-unravel-code src-block))
-		     (max-width
-		      (apply 'max
-			     (mapcar 'length
-				     (org-split-string (car code-info) "\n")))))
-		(org-export-format-code
-		 (car code-info)
-		 (lambda (loc num ref)
-		   (concat
-		    loc
-		    (when ref
-		      ;; Ensure references are flushed to the right,
-		      ;; separated with 6 spaces from the widest line
-		      ;; of code.
-		      (concat (make-string (+ (- max-width (length loc)) 6) ? )
-			      (format "(%s)" ref)))))
-		 nil (and retain-labels (cdr code-info)))))))
-	;; Return value.
-	(if float-env (format float-env body) body)))
-     ;; Case 4.  Use listings package.
-     (t
-      (let ((lst-lang
-	     (or (cadr (assq (intern lang) org-latex-listings-langs)) lang))
-	    (caption-str
-	     (when caption
-	       (let ((main (org-export-get-caption src-block))
-		     (secondary (org-export-get-caption src-block t)))
-		 (if (not secondary) (format "{%s}" (org-export-data main info))
-		   (format "{[%s]%s}"
-			   (org-export-data secondary info)
-			   (org-export-data main info)))))))
-	(concat
-	 ;; Options.
-	 (format "\\lstset{%s}\n"
-		 (org-latex--make-option-string
-		  (append org-latex-listings-options
-			  `(("language" ,lst-lang))
-			  (when label `(("label" ,label)))
-			  (when caption-str `(("caption" ,caption-str)))
-			  (cond ((not num-start) '(("numbers" "none")))
-				((zerop num-start) '(("numbers" "left")))
-				(t `(("numbers" "left")
-				     ("firstnumber"
-				      ,(number-to-string (1+ num-start)))))))))
-	 ;; Source code.
-	 (format
-	  "\\begin{lstlisting}\n%s\\end{lstlisting}"
-	  (let* ((code-info (org-export-unravel-code src-block))
-		 (max-width
-		  (apply 'max
-			 (mapcar 'length
-				 (org-split-string (car code-info) "\n")))))
-	    (org-export-format-code
-	     (car code-info)
-	     (lambda (loc num ref)
-	       (concat
-		loc
-		(when ref
-		  ;; Ensure references are flushed to the right,
-		  ;; separated with 6 spaces from the widest line of
-		  ;; code
-		  (concat (make-string (+ (- max-width (length loc)) 6) ? )
-			  (format "(%s)" ref)))))
-	     nil (and retain-labels (cdr code-info)))))))))))
+  (when (org-string-nw-p (org-element-property :value src-block))
+    (let* ((lang (org-element-property :language src-block))
+	   (caption (org-element-property :caption src-block))
+	   (label (org-element-property :name src-block))
+	   (custom-env (and lang
+			    (cadr (assq (intern lang)
+					org-latex-custom-lang-environments))))
+	   (num-start (case (org-element-property :number-lines src-block)
+			(continued (org-export-get-loc src-block info))
+			(new 0)))
+	   (retain-labels (org-element-property :retain-labels src-block)))
+      (cond
+       ;; Case 1.  No source fontification.
+       ((not org-latex-listings)
+	(let ((caption-str (org-latex--caption/label-string src-block info))
+	      (float-env (and caption "\\begin{figure}[H]\n%s\n\\end{figure}")))
+	  (format
+	   (or float-env "%s")
+	   (concat caption-str
+		   (format "\\begin{verbatim}\n%s\\end{verbatim}"
+			   (org-export-format-code-default src-block info))))))
+       ;; Case 2.  Custom environment.
+       (custom-env (format "\\begin{%s}\n%s\\end{%s}\n"
+			   custom-env
+			   (org-export-format-code-default src-block info)
+			   custom-env))
+       ;; Case 3.  Use minted package.
+       ((eq org-latex-listings 'minted)
+	(let ((float-env
+	       (when (or label caption)
+		 (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
+			 (org-latex--caption/label-string src-block info))))
+	      (body
+	       (format
+		"\\begin{minted}[%s]{%s}\n%s\\end{minted}"
+		;; Options.
+		(org-latex--make-option-string
+		 (if (not num-start) org-latex-minted-options
+		   (append `(("linenos")
+			     ("firstnumber" ,(number-to-string (1+ num-start))))
+			   org-latex-minted-options)))
+		;; Language.
+		(or (cadr (assq (intern lang) org-latex-minted-langs)) lang)
+		;; Source code.
+		(let* ((code-info (org-export-unravel-code src-block))
+		       (max-width
+			(apply 'max
+			       (mapcar 'length
+				       (org-split-string (car code-info)
+							 "\n")))))
+		  (org-export-format-code
+		   (car code-info)
+		   (lambda (loc num ref)
+		     (concat
+		      loc
+		      (when ref
+			;; Ensure references are flushed to the right,
+			;; separated with 6 spaces from the widest line
+			;; of code.
+			(concat (make-string (+ (- max-width (length loc)) 6)
+					     ?\s)
+				(format "(%s)" ref)))))
+		   nil (and retain-labels (cdr code-info)))))))
+	  ;; Return value.
+	  (if float-env (format float-env body) body)))
+       ;; Case 4.  Use listings package.
+       (t
+	(let ((lst-lang
+	       (or (cadr (assq (intern lang) org-latex-listings-langs)) lang))
+	      (caption-str
+	       (when caption
+		 (let ((main (org-export-get-caption src-block))
+		       (secondary (org-export-get-caption src-block t)))
+		   (if (not secondary)
+		       (format "{%s}" (org-export-data main info))
+		     (format "{[%s]%s}"
+			     (org-export-data secondary info)
+			     (org-export-data main info)))))))
+	  (concat
+	   ;; Options.
+	   (format "\\lstset{%s}\n"
+		   (org-latex--make-option-string
+		    (append org-latex-listings-options
+			    `(("language" ,lst-lang))
+			    (when label `(("label" ,label)))
+			    (when caption-str `(("caption" ,caption-str)))
+			    (cond ((not num-start) '(("numbers" "none")))
+				  ((zerop num-start) '(("numbers" "left")))
+				  (t `(("numbers" "left")
+				       ("firstnumber"
+					,(number-to-string (1+ num-start)))))))))
+	   ;; Source code.
+	   (format
+	    "\\begin{lstlisting}\n%s\\end{lstlisting}"
+	    (let* ((code-info (org-export-unravel-code src-block))
+		   (max-width
+		    (apply 'max
+			   (mapcar 'length
+				   (org-split-string (car code-info) "\n")))))
+	      (org-export-format-code
+	       (car code-info)
+	       (lambda (loc num ref)
+		 (concat
+		  loc
+		  (when ref
+		    ;; Ensure references are flushed to the right,
+		    ;; separated with 6 spaces from the widest line of
+		    ;; code
+		    (concat (make-string (+ (- max-width (length loc)) 6) ? )
+			    (format "(%s)" ref)))))
+	       nil (and retain-labels (cdr code-info))))))))))))
 
 
 ;;;; Statistics Cookie
