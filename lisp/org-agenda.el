@@ -5485,7 +5485,9 @@ the documentation of `org-diary'."
 					      (org-entry-get (point) "TIMESTAMP_IA"))
 				       ts-date-type ""))
 				(t (setq ts-date-type "")))
-			  (when ts (org-time-string-to-absolute ts))))
+			  (when ts (or (ignore-errors (org-time-string-to-absolute ts))
+				       ;; We skip diary sexp because `date' is not bound
+				       (time-to-days nil)))))
 	      category-pos (get-text-property (point) 'org-category-position)
 	      txt (org-trim
 		   (buffer-substring (match-beginning 2) (match-end 0)))
