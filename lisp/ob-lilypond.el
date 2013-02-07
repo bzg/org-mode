@@ -152,7 +152,7 @@ specific arguments to =org-babel-tangle="
       " -dbackend=eps "
       "-dno-gs-load-fonts "
       "-dinclude-eps-fonts "
-      (or (cdr (assoc (file-name-extension "test.pdf")
+      (or (cdr (assoc (file-name-extension out-file)
 		      '(("pdf" . "--pdf ")
 			("ps" . "--ps ")
 			("png" . "--png "))))
