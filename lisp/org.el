@@ -20453,7 +20453,7 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
   (require 'loadhist)
   (let* ((org-dir     (org-find-library-dir "org"))
 	 (contrib-dir (or (org-find-library-dir "org-contribdir") org-dir))
-	 (feature-re "^\\(org\\|ob\\)\\(-.*\\)?")
+	 (feature-re "^\\(org\\|ob\\|ox\\)\\(-.*\\)?")
 	 (remove-re (mapconcat 'identity
 			       (mapcar (lambda (f) (concat "^" f "$"))
 				       (list (if (featurep 'xemacs)
