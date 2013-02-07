@@ -2169,7 +2169,7 @@ INFO is a plist holding contextual information.  See
 		'identity
 		(let ((att (org-element-property
 			    :attr_html (org-export-get-parent-element link))))
-		  (unless (and desc (string-match (regexp-quote (car att)) desc)) att))
+		  (unless (and desc att (string-match (regexp-quote (car att)) desc)) att))
 		" "))
 	 (setq attributes (concat " " attributes)))
 
