@@ -2463,6 +2463,13 @@ is nil, return nil."
 	      (setq start (+ start (length wd))))))))
   s)
 
+(defconst org-export-html-special-string-regexps
+  '(("\\\\-" . "&shy;")
+    ("---\\([^-]\\)" . "&mdash;\\1")
+    ("--\\([^-]\\)" . "&ndash;\\1")
+    ("\\.\\.\\." . "&hellip;"))
+  "Regular expressions for special string conversion.")
+
 (defun org-export-html-convert-special-strings (string)
   "Convert special characters in STRING to HTML."
   (let ((all org-export-html-special-string-regexps)
