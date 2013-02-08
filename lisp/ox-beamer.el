@@ -38,8 +38,9 @@
 ;;
 ;; On top of this, the `beamer' back-end also introduces the following
 ;; keywords: "BEAMER_THEME", "BEAMER_COLOR_THEME",
-;; "BEAMER_FONT_THEME", "BEAMER_INNER_THEME" and "BEAMER_OUTER_THEME".
-;; All accept options in square brackets.
+;; "BEAMER_FONT_THEME", "BEAMER_INNER_THEME", "BEAMER_OUTER_THEME" and
+;; "BEAMER_HEADER".  All but the latter accept options in square
+;; brackets.
 ;;
 ;; Moreover, headlines now fall into three categories: sectioning
 ;; elements, frames and blocks.
@@ -297,6 +298,7 @@ Return overlay specification, as a string, or nil."
    (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
    (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
    (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
+   (:beamer-header-extra "BEAMER_HEADER" nil nil newline)
    (:headline-levels nil "H" org-beamer-frame-level))
   :translate-alist ((bold . org-beamer-bold)
 		    (export-block . org-beamer-export-block)
@@ -846,7 +848,8 @@ holding export options."
 	       document-class-string
 	       org-latex-default-packages-alist
 	       org-latex-packages-alist nil
-	       (plist-get info :latex-header-extra)))
+	       (concat (plist-get info :latex-header-extra)
+		       (plist-get info :beamer-header-extra))))
 	     info)))))
      ;; 3. Insert themes.
      (let ((format-theme
