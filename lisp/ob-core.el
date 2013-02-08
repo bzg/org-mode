@@ -59,6 +59,8 @@
 		  (pom property &optional inherit literal-nil))
 (declare-function org-make-options-regexp "org" (kwds &optional extra))
 (declare-function org-do-remove-indentation "org" (&optional n))
+(declare-function org-next-block "org" (arg &optional backward block-regexp))
+(declare-function org-previous-block "org" (arg &optional block-regexp))
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-at-table-p "org" (&optional table-type))
 (declare-function org-cycle "org" (&optional arg))
