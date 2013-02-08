@@ -193,8 +193,8 @@ holding export options."
            (org-e-latex--guess-inputenc
             (org-splice-latex-header
              document-class-string
-             org-export-latex-default-packages-alist ; defined in org.el
-             org-export-latex-packages-alist nil ; defined in org.el
+             org-latex-default-packages-alist ; defined in org.el
+             org-latex-packages-alist nil ; defined in org.el
              (plist-get info :latex-header-extra)))
            info)))))
    ;; Define "From" data.
