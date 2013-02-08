@@ -3334,7 +3334,7 @@ If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
 		     (push (save-excursion
 			     (set-buffer (marker-buffer m))
 			     (goto-char m)
-			     (org-copy-subtree)
+			     (org-copy-subtree 1 nil t t)
 			     org-subtree-clip)
 			   content)))
 		 (find-file file)

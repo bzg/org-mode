@@ -7880,7 +7880,7 @@ This is a short-hand for marking the subtree and then cutting it."
   (interactive "p")
   (org-copy-subtree n 'cut))
 
-(defun org-copy-subtree (&optional n cut force-store-markers)
+(defun org-copy-subtree (&optional n cut force-store-markers nosubtrees)
   "Cut the current subtree into the clipboard.
 With prefix arg N, cut this many sequential subtrees.
 This is a short-hand for marking the subtree and then copying it.
@@ -7896,12 +7896,14 @@ useful if the caller implements cut-and-paste as copy-then-paste-then-cut."
     (setq beg (point))
     (skip-chars-forward " \t\r\n")
     (save-match-data
-      (save-excursion (outline-end-of-heading)
-		      (setq folded (outline-invisible-p)))
-      (condition-case nil
-	  (org-forward-heading-same-level (1- n) t)
-	(error nil))
-      (org-end-of-subtree t t))
+      (if nosubtrees
+	  (outline-next-heading)
+	(save-excursion (outline-end-of-heading)
+			(setq folded (outline-invisible-p)))
+	(condition-case nil
+	    (org-forward-heading-same-level (1- n) t)
+	  (error nil))
+	(org-end-of-subtree t t)))
     (setq end (point))
     (goto-char beg0)
     (when (> end beg)
