@@ -124,8 +124,8 @@
                     (template . org-koma-letter-template))
   :menu-entry
   (?k "Export with KOMA Scrlttr2"
-      ((?K "As TEX buffer" org-koma-letter-export-as-latex)
-       (?k "As TEX file" org-koma-letter-export-to-latex)
+      ((?K "As LaTeX buffer" org-koma-letter-export-as-latex)
+       (?k "As LaTeX file" org-koma-letter-export-to-latex)
        (?p "As PDF file" org-koma-letter-export-to-pdf)
        (?O "As PDF file and open"
            (lambda (a s v b)
@@ -150,7 +150,7 @@ channel."
   "Transcode an EXPORT-SNIPPET object into KOMA Scrlttr2 code.
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
-  (when (memq (org-export-snippet-backend export-snippet) '(e-latex koma-letter))
+  (when (memq (org-export-snippet-backend export-snippet) '(latex koma-letter))
     (org-element-property :value export-snippet)))
 
 ;;;; Keyword
@@ -162,7 +162,7 @@ channel."
   (let ((key (org-element-property :key keyword))
         (value (org-element-property :value keyword)))
     ;; Handle specifically BEAMER and TOC (headlines only) keywords.
-    ;; Otherwise, fallback to `e-latex' back-end.
+    ;; Otherwise, fallback to `latex' back-end.
     (if (equal key "KOMA-LETTER") value
       (org-export-with-backend 'latex keyword contents info))))
 
