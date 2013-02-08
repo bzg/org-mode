@@ -3289,10 +3289,12 @@ Run all custom agenda commands that have a file argument.
 (defun org-agenda-write (file &optional open nosettings agenda-bufname)
   "Write the current buffer (an agenda view) as a file.
 Depending on the extension of the file name, plain text (.txt),
-HTML (.html or .htm) or Postscript (.ps) is produced.
+HTML (.html or .htm), PDF (.pdf) or Postscript (.ps) is produced.
 If the extension is .ics, run icalendar export over all files used
 to construct the agenda and limit the export to entries listed in the
 agenda now.
+If the extension is .org, collect all subtrees corresponding to the
+agenda entries and add them in an .org file.
 With prefix argument OPEN, open the new file immediately.
 If NOSETTINGS is given, do not scope the settings of
 `org-agenda-exporter-settings' into the export commands.  This is used when
@@ -3306,7 +3308,7 @@ If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
     '(save-excursion
        (save-window-excursion
 	 (org-agenda-mark-filtered-text)
-	 (let ((bs (copy-sequence (buffer-string))) beg)
+	 (let ((bs (copy-sequence (buffer-string))) beg content)
 	   (org-agenda-unmark-filtered-text)
 	   (with-temp-buffer
 	     (rename-buffer org-agenda-write-buffer-name t)
@@ -3322,6 +3324,25 @@ If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
 	     (cond
 	      ((org-bound-and-true-p org-mobile-creating-agendas)
 	       (org-mobile-write-agenda-for-mobile file))
+	      ((string-match "\\.org\\'" file)
+	       (let (content p m message-log-max)
+		 (goto-char (point-min))
+		 (while (setq p (next-single-property-change (point) 'org-hd-marker nil))
+		   (goto-char p)
+		   (setq m (get-text-property (point) 'org-hd-marker))
+		   (when m
+		     (push (save-excursion
+			     (set-buffer (marker-buffer m))
+			     (goto-char m)
+			     (org-copy-subtree)
+			     org-subtree-clip)
+			   content)))
+		 (find-file file)
+		 (erase-buffer)
+		 (mapcar (lambda (s) (org-paste-subtree 1 s)) (reverse content))
+		 (write-file file)
+		 (kill-buffer (current-buffer))
+		 (message "Org file written to %s" file)))
 	      ((string-match "\\.html?\\'" file)
 	       (require 'htmlize)
 	       (set-buffer (htmlize-buffer (current-buffer)))
