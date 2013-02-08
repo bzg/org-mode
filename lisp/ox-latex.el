@@ -442,7 +442,7 @@ order to reproduce the default set-up:
 	  text
 	  \(when tags
             \(format \"\\\\hfill{}\\\\textsc{%s}\"
-              \(mapconcat 'identity tags \":\"))))"
+              \(mapconcat 'identity tags \":\")))))"
   :group 'org-export-latex
   :type 'function)
 
