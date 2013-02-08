@@ -284,8 +284,8 @@ Return overlay specification, as a string, or nil."
   :export-block "BEAMER"
   :menu-entry
   (?l 1
-      ((?B "As TEX buffer (Beamer)" org-beamer-export-as-latex)
-       (?b "As TEX file (Beamer)" org-beamer-export-to-latex)
+      ((?B "As LaTeX buffer (Beamer)" org-beamer-export-as-latex)
+       (?b "As LaTeX file (Beamer)" org-beamer-export-to-latex)
        (?P "As PDF file (Beamer)" org-beamer-export-to-pdf)
        (?O "As PDF file and open (Beamer)"
 	   (lambda (a s v b)
