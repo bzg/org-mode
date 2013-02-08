@@ -15641,7 +15641,7 @@ So these are more for recording a certain time/date."
     (org-defkey map [(shift right)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-forward-day 1))))
-    (org-defkey map "?"
+    (org-defkey map "!"
                 (lambda () (interactive)
                   (org-eval-in-calendar '(diary-view-entries))
                   (message "")))
