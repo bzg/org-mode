@@ -87,6 +87,9 @@
 ;; the environment chosen.  `:options' is a string that will be used
 ;; as the optional argument for "includegraphics" macro.
 ;;
+;; Special blocks accept `:options' as attribute.  Its value will be
+;; appended as-is to the opening string of the environment created.
+;;
 ;; This back-end also offers enhanced support for footnotes.  Thus, it
 ;; handles nested footnotes, footnotes in tables and footnotes in item
 ;; descriptions.
@@ -2070,8 +2073,9 @@ holding contextual information."
   "Transcode a SPECIAL-BLOCK element from Org to LaTeX.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((type (downcase (org-element-property :type special-block))))
-    (concat (format "\\begin{%s}\n" type)
+  (let ((type (downcase (org-element-property :type special-block)))
+	(opt (org-export-read-attribute :attr_latex special-block :options)))
+    (concat (format "\\begin{%s}%s\n" type (or opt ""))
 	    ;; Insert any label or caption within the block
 	    ;; (otherwise, a reference pointing to that element will
 	    ;; count the section instead).
