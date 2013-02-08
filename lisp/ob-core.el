@@ -1639,22 +1639,15 @@ buffer or nil if no such result exists."
 (defun org-babel-next-src-block (&optional arg)
   "Jump to the next source block.
 With optional prefix argument ARG, jump forward ARG many source blocks."
-  (interactive "P")
-  (when (looking-at org-babel-src-block-regexp) (forward-char 1))
-  (condition-case nil
-      (re-search-forward org-babel-src-block-regexp nil nil (or arg 1))
-    (error (error "No further code blocks")))
-  (goto-char (match-beginning 0)) (org-show-context))
+  (interactive "p")
+  (org-next-block arg nil org-babel-src-block-regexp))
 
 ;;;###autoload
 (defun org-babel-previous-src-block (&optional arg)
   "Jump to the previous source block.
 With optional prefix argument ARG, jump backward ARG many source blocks."
-  (interactive "P")
-  (condition-case nil
-      (re-search-backward org-babel-src-block-regexp nil nil (or arg 1))
-    (error (error "No previous code blocks")))
-  (goto-char (match-beginning 0)) (org-show-context))
+  (interactive "p")
+  (org-previous-block arg org-babel-src-block-regexp))
 
 (defvar org-babel-load-languages)
 

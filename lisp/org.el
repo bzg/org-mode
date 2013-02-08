@@ -18463,6 +18463,8 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-_" 'org-down-element)
 (org-defkey org-mode-map "\C-c\C-f" 'org-forward-heading-same-level)
 (org-defkey org-mode-map "\C-c\C-b" 'org-backward-heading-same-level)
+(org-defkey org-mode-map "\C-c\C-F" 'org-next-block)
+(org-defkey org-mode-map "\C-c\C-B" 'org-previous-block)
 (org-defkey org-mode-map "\C-c$"    'org-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-s" 'org-advertized-archive-subtree)
 (org-defkey org-mode-map "\C-c\C-x\C-a" 'org-archive-subtree-default)
@@ -22658,6 +22660,28 @@ Stop at the first and last subheadings of a superior heading."
 		    (outline-invisible-p))
 	  (if (< l level) (setq arg 1)))
 	(setq arg (1- arg))))))
+
+(defun org-next-block (arg &optional backward block-regexp)
+  "Jump to the next block.
+With a prefix argument ARG, jump forward ARG many source blocks.
+When BACKWARD is non-nil, jump to the previous block.
+When BLOCK-REGEXP is non-nil, use this regexp to find blocks."
+  (interactive "p")
+  (let ((re (or block-regexp org-babel-src-block-regexp))
+	(re-search-fn (or (and backward 're-search-backward)
+			   're-search-forward)))
+    (if (looking-at re) (forward-char 1))
+    (condition-case nil
+	(funcall re-search-fn re nil nil arg)
+      (error (error "No %s code blocks" (if backward "previous" "further" ))))
+    (goto-char (match-beginning 0)) (org-show-context)))
+
+(defun org-previous-block (arg &optional block-regexp)
+  "Jump to the previous block.
+With a prefix argument ARG, jump backward ARG many source blocks.
+When BLOCK-REGEXP is non-nil, use this regexp to find blocks."
+  (interactive "p")
+  (org-next-block arg t block-regexp))
 
 (defun org-forward-element ()
   "Move forward by one element.
