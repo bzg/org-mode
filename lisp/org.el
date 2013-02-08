@@ -15602,6 +15602,9 @@ So these are more for recording a certain time/date."
 (defvar org-read-date-minibuffer-local-map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map minibuffer-local-map)
+    (org-defkey map (kbd ".")
+                (lambda () (interactive)
+                  (org-eval-in-calendar '(calendar-goto-today))))
     (org-defkey map [(meta shift left)]
                 (lambda () (interactive)
                   (org-eval-in-calendar '(calendar-backward-month 1))))
