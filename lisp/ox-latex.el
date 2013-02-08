@@ -157,8 +157,8 @@
   :export-block ("LATEX" "TEX")
   :menu-entry
   (?l "Export to LaTeX"
-      ((?L "As TEX buffer" org-latex-export-as-latex)
-       (?l "As TEX file" org-latex-export-to-latex)
+      ((?L "As LaTeX buffer" org-latex-export-as-latex)
+       (?l "As LaTeX file" org-latex-export-to-latex)
        (?p "As PDF file" org-latex-export-to-pdf)
        (?o "As PDF file and open"
 	   (lambda (a s v b)

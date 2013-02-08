@@ -103,9 +103,9 @@
   :filters-alist ((:filter-final-output . org-html-final-function))
   :menu-entry
   (?h "Export to HTML"
-      ((?H "To temporary buffer" org-html-export-as-html)
-       (?h "To file" org-html-export-to-html)
-       (?o "To file and open"
+      ((?H "As HTML buffer" org-html-export-as-html)
+       (?h "As HTML file" org-html-export-to-html)
+       (?o "As HTML file and open"
 	   (lambda (a s v b)
 	     (if a (org-html-export-to-html t s v b)
 	       (org-open-file (org-html-export-to-html nil s v b)))))))
