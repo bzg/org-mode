@@ -5402,7 +5402,7 @@ back to standard interface."
 			     (lambda (sub-entry)
 			       (incf index)
 			       (format
-				(if (zerop (mod index 2)) "    [%s] %-24s"
+				(if (zerop (mod index 2)) "    [%s] %-26s"
 				  "[%s] %s\n")
 				(funcall fontify-key
 					 (char-to-string (car sub-entry))
@@ -5413,8 +5413,8 @@ back to standard interface."
 		backends ""))
 	     ;; Publishing menu is hard-coded.
 	     (format "\n[%s] Publish
-    [%s] Current file            [%s] Current project
-    [%s] Choose project          [%s] All projects\n\n"
+    [%s] Current file              [%s] Current project
+    [%s] Choose project            [%s] All projects\n\n"
 		     (funcall fontify-key "P")
 		     (funcall fontify-key "f" ?P)
 		     (funcall fontify-key "p" ?P)
