@@ -18597,6 +18597,8 @@ BEG and END default to the buffer boundaries."
     ("p" . (org-speed-move-safe 'outline-previous-visible-heading))
     ("f" . (org-speed-move-safe 'org-forward-heading-same-level))
     ("b" . (org-speed-move-safe 'org-backward-heading-same-level))
+    ("F" . (org-speed-move-safe 'org-next-block))
+    ("B" . (org-speed-move-safe 'org-previous-block))
     ("u" . (org-speed-move-safe 'outline-up-heading))
     ("j" . org-goto)
     ("g" . (org-refile t))
@@ -18617,7 +18619,7 @@ BEG and END default to the buffer boundaries."
     ("^" . org-sort)
     ("w" . org-refile)
     ("a" . org-archive-subtree-default-with-confirmation)
-    ("." . org-mark-subtree)
+    ("." . org-mark-subtree) ;; FIXME Better use @ (see C-c @) here?
     ("#" . org-toggle-comment)
     ("Clock Commands")
     ("I" . org-clock-in)
