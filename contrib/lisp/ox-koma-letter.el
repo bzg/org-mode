@@ -30,16 +30,16 @@
 ;; `org-koma-letter-export-to-pdf' ("pdf" file).
 ;;
 ;; On top of buffer keywords supported by `latex' back-end (see
-;; `org-e-latex-options-alist'), this back-end introduces the
-;; following keywords: "CLOSING" (see `org-koma-letter-closing'),
-;; "FROM_ADDRESS" (see `org-koma-letter-from-address'), "LCO" (see
+;; `org-latex-options-alist'), this back-end introduces the following
+;; keywords: "CLOSING" (see `org-koma-letter-closing'), "FROM_ADDRESS"
+;; (see `org-koma-letter-from-address'), "LCO" (see
 ;; `org-koma-letter-class-option-file'), "OPENING" (see
 ;; `org-koma-letter-opening'), "PHONE_NUMBER" (see
 ;; `org-koma-letter-phone-number'), "SIGNATURE" (see
 ;; `org-koma-letter-signature') and "TO_ADDRESS".
 ;;
 ;; You will need to add an appropriate association in
-;; `org-e-latex-classes' in order to use the KOMA Scrlttr2 class.  For
+;; `org-latex-classes' in order to use the KOMA Scrlttr2 class.  For
 ;; example, you can use the following code:
 ;;
 ;;   (add-to-list 'org-latex-classes
@@ -180,7 +180,7 @@ holding export options."
    (let ((class (plist-get info :latex-class))
          (class-options (plist-get info :latex-class-options)))
      (org-element-normalize-string
-      (let* ((header (nth 1 (assoc class org-e-latex-classes)))
+      (let* ((header (nth 1 (assoc class org-latex-classes)))
              (document-class-string
               (and (stringp header)
                    (if class-options
@@ -188,13 +188,14 @@ holding export options."
                         "^[ \t]*\\\\documentclass\\(\\[.*?\\]\\)"
                         class-options header t nil 1)
                      header))))
-        (when document-class-string
-          (org-e-latex--guess-babel-language
-           (org-e-latex--guess-inputenc
+        (if (not document-class-string)
+	    (user-error "Unknown LaTeX class `%s'")
+          (org-latex-guess-babel-language
+           (org-latex-guess-inputenc
             (org-splice-latex-header
              document-class-string
              org-latex-default-packages-alist ; defined in org.el
-             org-latex-packages-alist nil ; defined in org.el
+             org-latex-packages-alist nil     ; defined in org.el
              (plist-get info :latex-header-extra)))
            info)))))
    ;; Define "From" data.
@@ -357,11 +358,11 @@ Return PDF file's name."
 	(org-export-async-start
 	    (lambda (f) (org-export-add-to-stack f 'koma-letter))
 	  `(expand-file-name
-	    (org-e-latex-compile
+	    (org-latex-compile
 	     (org-export-to-file
 	      'koma-letter ,outfile ,subtreep ,visible-only ,body-only
 	      ',ext-plist)))))
-    (org-e-latex-compile
+    (org-latex-compile
      (org-koma-letter-export-to-latex
       nil subtreep visible-only body-only ext-plist))))
 
