@@ -40,6 +40,7 @@
 (eval-when-compile (require 'cl))
 
 (declare-function tuareg-run-caml "ext:tuareg" ())
+(declare-function tuareg-run-ocaml "ext:tuareg" ())
 (declare-function tuareg-interactive-send-input "ext:tuareg" ())
 
 (defvar org-babel-tangle-lang-exts)
@@ -88,8 +89,9 @@
                                                  (stringp session))
                                             session
                                           tuareg-interactive-buffer-name)))
-    (save-window-excursion (tuareg-run-caml)
-                           (get-buffer tuareg-interactive-buffer-name))))
+    (save-window-excursion
+      (if (fboundp 'tuareg-run-caml) (tuareg-run-caml) (tuareg-run-ocaml))
+      (get-buffer tuareg-interactive-buffer-name))))
 
 (defun org-babel-variable-assignments:ocaml (params)
   "Return list of ocaml statements assigning the block's variables."
