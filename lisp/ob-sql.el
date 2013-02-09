@@ -135,7 +135,7 @@ This function is called by `org-babel-execute-src-block'."
 	 (t ""))
        (org-babel-expand-body:sql body params)))
     (message command)
-    (shell-command command)
+    (org-babel-eval command "")
     (org-babel-result-cond result-params
       (with-temp-buffer
 	  (progn (insert-file-contents-literally out-file) (buffer-string)))
