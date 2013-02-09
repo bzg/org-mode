@@ -35,9 +35,11 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'cl))
 (require 'ox-html)
 
 (add-to-list 'org-export-filter-options-functions 'org-infojs-install-script)
+
 
 (defgroup org-export-infojs nil
   "Options specific for using org-info.js in HTML export."
