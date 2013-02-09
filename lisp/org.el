@@ -20334,8 +20334,7 @@ See the individual commands for more information."
       (org-inside-LaTeX-fragment-p)]
      ["Insert citation" org-reftex-citation t]
      "--"
-     ["Template for BEAMER" (progn (require 'ox-beamer)
-				   (org-insert-beamer-options-template)) t])
+     ["Template for BEAMER" (org-beamer-insert-options-template) t])
     "--"
     ("MobileOrg"
      ["Push Files and Views" org-mobile-push t]
