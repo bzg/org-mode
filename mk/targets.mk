@@ -102,6 +102,7 @@ ifeq ($(TEST_NO_AUTOCLEAN),) # define this variable to leave $(testdir) around f
 	$(MAKE) cleantest
 endif
 
+up0::	cleanaddcontrib
 up0 up1 up2::
 	git remote update
 	git pull
