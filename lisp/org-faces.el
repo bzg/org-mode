@@ -765,7 +765,7 @@ level org-n-level-faces"
   :version "24.1"
   :type 'boolean)
 
-(defface org-latex-and-export-specials
+(defface org-latex-and-related
   (let ((font (cond ((assq :inherit custom-face-attributes)
 		     '(:inherit underline))
 		    (t '(:underline t)))))
@@ -778,7 +778,7 @@ level org-n-level-faces"
       (((class color) (background dark))
        (:foreground "burlywood"))
       (t (,@font))))
-  "Face used to highlight math latex and other special exporter stuff."
+  "Face used to highlight LaTeX data, entities and sub/superscript."
   :group 'org-faces)
 
 (org-copy-face 'mode-line 'org-mode-line-clock

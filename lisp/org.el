@@ -3901,6 +3901,21 @@ org-level-* faces."
   :group 'org-appearance
   :type 'boolean)
 
+(defcustom org-highlight-latex-and-related nil
+  "Non-nil means highlight LaTeX related syntax in the buffer.
+When non nil, the value should be a list containing any of the
+following symbols:
+  `latex'    Highlight LaTeX snippets and environments.
+  `script'   Highlight subscript and superscript.
+  `entities' Highlight entities."
+  :group 'org-appearance
+  :type '(choice
+	  (const :tag "No highlighting" nil)
+	  (set :greedy t :tag "Highlight"
+	       (const :tag "LaTeX snippets and environments" latex)
+	       (const :tag "Subscript and superscript" script)
+	       (const :tag "Entities" entities))))
+
 (defcustom org-hide-emphasis-markers nil
   "Non-nil mean font-lock should hide the emphasis marker characters."
   :group 'org-appearance
@@ -4990,6 +5005,7 @@ but the stars and the body are.")
 	    (mapcar (lambda (w) (substring w 0 -1))
 		    (list org-scheduled-string org-deadline-string
 			  org-clock-string org-closed-string)))
+      (org-compute-latex-and-related-regexp)
       (org-set-font-lock-defaults))))
 
 (defun org-file-contents (file &optional noerror)
@@ -5848,8 +5864,55 @@ by a #."
       (goto-char e)
       t)))
 
+(defvar org-latex-and-related-regexp nil
+  "Regular expression for highlighting LaTeX, entities and sub/superscript.")
 (defvar org-match-substring-regexp)
 (defvar org-match-substring-with-braces-regexp)
+
+(defun org-compute-latex-and-related-regexp ()
+  "Compute regular expression for LaTeX, entities and sub/superscript.
+Result depends on variable `org-highlight-latex-and-related'."
+  (org-set-local
+   'org-latex-and-related-regexp
+   (let* ((re-sub
+	   (cond ((not (memq 'script org-highlight-latex-and-related)) nil)
+		 ((eq org-use-sub-superscripts '{})
+		  (list org-match-substring-with-braces-regexp))
+		 (org-use-sub-superscripts (list org-match-substring-regexp))))
+	  (re-latex
+	   (when (memq 'latex org-highlight-latex-and-related)
+	     (let ((matchers (plist-get org-format-latex-options :matchers)))
+	       (delq nil
+		     (mapcar (lambda (x)
+			       (and (member (car x) matchers) (nth 1 x)))
+			     org-latex-regexps)))))
+	  (re-entities
+	   (when (memq 'entities org-highlight-latex-and-related)
+	     (list "\\\\\\(there4\\|sup[123]\\|frac[13][24]\\|[a-zA-Z]+\\)\\($\\|{}\\|[^[:alpha:]]\\)"))))
+     (mapconcat 'identity (append re-latex re-entities re-sub) "\\|"))))
+
+(defun org-do-latex-and-related (limit)
+  "Highlight LaTeX snippets and environments, entities and sub/superscript.
+LIMIT bounds the search for syntax to highlight.  Stop at first
+highlighted object, if any.  Return t if some highlighting was
+done, nil otherwise."
+  (when org-highlight-latex-and-related
+    (catch 'found
+      (while (re-search-forward org-latex-and-related-regexp limit t)
+	(unless (memq (car-safe (get-text-property (1+ (match-beginning 0))
+						   'face))
+		      '(org-code org-verbatim underline))
+	  (let ((offset (if (memq (char-after (1+ (match-beginning 0)))
+				  '(?_ ?^))
+			    1
+			  0)))
+	    (font-lock-prepend-text-property
+	     (+ offset (match-beginning 0)) (match-end 0)
+	     'face 'org-latex-and-related)
+	    (add-text-properties (+ offset (match-beginning 0)) (match-end 0)
+				 '(font-lock-multiline t)))
+	  (throw 'found t)))
+      nil)))
 
 (defun org-restart-font-lock ()
   "Restart `font-lock-mode', to force refontification."
@@ -6011,6 +6074,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 		  "\\(.*:" org-archive-tag ":.*\\)")
 		 '(1 'org-archived prepend))
 	   ;; Specials
+	   '(org-do-latex-and-related)
 	   '(org-fontify-entities)
 	   '(org-raise-scripts)
 	   ;; Code
