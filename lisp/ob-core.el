@@ -455,10 +455,7 @@ specific header arguments as well.")
 (defvar org-babel-result-regexp
   (concat "^[ \t]*#\\+"
 	  (regexp-opt org-babel-data-names t)
-	  "\\(\\[\\([[:alnum:]]+\\)\\]\\|\\[\\[\\([[:alnum:]]+\\)\\]\\["
-	  ;; FIXME The string below is `org-ts-regexp'
-	  "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>"
-	  "\\]\\]\\)?\\:[ \t]*")
+	  "\\(\\[\\("org-ts-regexp " \\)?\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*")
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
 be saved in the second match data.")
@@ -1081,7 +1078,7 @@ the current subtree."
 (defun org-babel-current-result-hash ()
   "Return the current in-buffer hash."
   (org-babel-where-is-src-block-result)
-  (org-no-properties (or (match-string 3) (match-string 4))))
+  (org-no-properties (match-string 5)))
 
 (defun org-babel-set-current-result-hash (hash)
   "Set the current in-buffer hash to HASH."
@@ -1098,11 +1095,11 @@ will remain visible."
   (add-to-invisibility-spec '(org-babel-hide-hash . t))
   (save-excursion
     (when (and (re-search-forward org-babel-result-regexp nil t)
-               (match-string 3))
-      (let* ((start (match-beginning 3))
+               (match-string 5))
+      (let* ((start (match-beginning 5))
              (hide-start (+ org-babel-hash-show start))
-             (end (match-end 3))
-             (hash (match-string 3))
+             (end (match-end 5))
+             (hash (match-string 5))
              ov1 ov2)
         (setq ov1 (make-overlay start hide-start))
         (setq ov2 (make-overlay hide-start end))
@@ -1747,8 +1744,7 @@ following the source block."
 	  ;; - if it does need to be rebuilt then do set end
 	  name (setq beg (org-babel-find-named-result name))
 	  (prog1 beg
-	    (when (and hash (not (string= hash (or (match-string 3)
-						   (match-string 4)))))
+	    (when (and hash (not (string= hash (match-string 5))))
 	      (goto-char beg) (setq end beg) ;; beginning of result
 	      (forward-line 1)
 	      (delete-region end (org-babel-result-end)) nil)))
@@ -1766,9 +1762,7 @@ following the source block."
 			    (beginning-of-line 1)
 			    (looking-at
 			     (concat org-babel-result-regexp "\n")))
-			  (let ((this-hash (or ;; from org-babel-result-regexp
-					    (match-string 3)
-					    (match-string 4))))
+			  (let ((this-hash (match-string 5)))
 			    (prog1 (point)
 			      ;; must remove and rebuild if hash!=old-hash
 			      (if (and hash (not (string= hash this-hash)))
@@ -1786,16 +1780,14 @@ following the source block."
 		 "#+" org-babel-results-keyword
 		 (when hash
 		   (if org-babel-hash-show-time
-		       (concat "[[" hash
-			       "]["
-			       (format-time-string "<%Y-%m-%d %H:%M:%S>")
-			       "]]")
-		       (concat "["hash"]")))
+		       (concat
+			"["(format-time-string "<%Y-%m-%d %H:%M:%S>")" "hash"]")
+		     (concat "["hash"]")))
 		 ":"
 		 (when name (concat " " name)) "\n"))
 	(unless beg (insert "\n") (backward-char))
 	(beginning-of-line 0)
-	(when (and hash (not org-babel-hash-show-time)) (org-babel-hide-hash))
+	(if hash (org-babel-hide-hash))
 	(point)))))
 
 (defvar org-block-regexp)
