@@ -1173,10 +1173,8 @@ INFO is a plist holding contextual information.  See
 	  ;; LINK points to an headline.  Use the headline as the NODE target
 	  (headline
 	   (format "@ref{%s,%s}"
-		   (org-export-data
-		    (or
-		     (org-element-property :texinfo-menu-title destination)
-		     (org-element-property :title destination)) info)
+		   (or (org-element-property :texinfo-menu-title destination)
+		       (org-element-property :title destination))
 		   (or desc "")))
 	  (otherwise
 	   (let ((path (org-export-solidify-link-text path)))
@@ -1198,10 +1196,8 @@ INFO is a plist holding contextual information.  See
 	  ;; LINK points to an headline.  Use the headline as the NODE target
 	  (headline
 	   (format "@ref{%s,%s}"
-		   (org-export-data
-		    (or
-		     (org-element-property :texinfo-menu-title destination)
-		     (org-element-property :title destination)) info)
+		   (or (org-element-property :texinfo-menu-title destination)
+		       (org-element-property :title destination))
 		   (or desc "")))
 	  (otherwise
 	   (let ((path (org-export-solidify-link-text path)))
