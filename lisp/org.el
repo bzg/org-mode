@@ -22672,7 +22672,7 @@ With a prefix argument ARG, jump forward ARG many source blocks.
 When BACKWARD is non-nil, jump to the previous block.
 When BLOCK-REGEXP is non-nil, use this regexp to find blocks."
   (interactive "p")
-  (let ((re (or block-regexp org-babel-src-block-regexp))
+  (let ((re (or block-regexp org-block-regexp))
 	(re-search-fn (or (and backward 're-search-backward)
 			   're-search-forward)))
     (if (looking-at re) (forward-char 1))
