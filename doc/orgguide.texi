@@ -949,7 +949,7 @@ the line to make the changes known to Org mode.
 
 Org mode can automatically record a timestamp and possibly a note when
 you mark a TODO item as DONE, or even each time you change the state of
-a TODO item.  This system is highly configurable, settings can be on a
+a TODO item.  This system is highly configurable; settings can be on a
 per-keyword basis and can be localized to a file or even a subtree.  For
 information on how to clock working time for a task, see @ref{Clocking
 work time}.
@@ -1056,7 +1056,7 @@ cookie.  For example:
 @section Checkboxes
 
 Every item in a plain list (@pxref{Plain lists}) can be made into a checkbox
-by starting it with the string @samp{[ ]}.  Checkboxes are not included into
+by starting it with the string @samp{[ ]}.  Checkboxes are not included in
 the global TODO list, so they are often great to split a task into a number
 of simple steps.
 Here is an example of a checkbox list.
@@ -1225,7 +1225,7 @@ Sacha Chua's article about tagging in Org-mode}}
 @node Properties, Dates and Times, Tags, Top
 @chapter Properties
 
-Properties are key-value pairs associates with and entry.  They live in a
+Properties are key-value pairs associated with an entry.  They live in a
 special drawer with the name @code{PROPERTIES}.  Each
 property is specified on a single line, with the key (surrounded by colons)
 first, and the value after it:
