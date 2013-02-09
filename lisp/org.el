@@ -427,7 +427,7 @@ needed.
 
 This variable needs to be set before org.el is loaded.  If you
 need to make a change while Emacs is running, use the customize
-interface or run the following code, , where VALUE stands for the
+interface or run the following code, where VALUE stands for the
 new value of the variable, after updating it:
 
   \(progn

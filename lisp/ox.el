@@ -5235,14 +5235,14 @@ files or buffers, only view in the stack.
 It provides an access to common export related tasks in a buffer.
 Its interface comes in two flavours: standard and expert.  While
 both share the same set of bindings, only the former displays the
-valid keys associations.  Set `org-export-dispatch-use-expert-ui'
-to switch to one or the other.
+valid keys associations in a dedicated buffer.  Set
+`org-export-dispatch-use-expert-ui' to switch to one flavour or
+the other.
 
 When ARG is \\[universal-argument], repeat the last export action, with the same set
 of options used back then, on the current buffer.
 
-When ARG is \\[universal-argument] \\[universal-argument], display the asynchronous export stack
-directly."
+When ARG is \\[universal-argument] \\[universal-argument], display the asynchronous export stack."
   (interactive "P")
   (let* ((input
 	  (cond ((equal arg '(16)) '(stack))
