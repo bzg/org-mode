@@ -455,7 +455,10 @@ specific header arguments as well.")
 (defvar org-babel-result-regexp
   (concat "^[ \t]*#\\+"
 	  (regexp-opt org-babel-data-names t)
-	  "\\(\\[\\("org-ts-regexp " \\)?\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*")
+	  "\\(\\[\\("
+	  ;; FIXME The string below is `org-ts-regexp'
+	  "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>"
+	  " \\)?\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*")
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
 be saved in the second match data.")
