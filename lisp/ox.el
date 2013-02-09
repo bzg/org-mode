@@ -1376,8 +1376,8 @@ The back-end could then be called with, for example:
 ;;  `org-export--get-subtree-options' and
 ;;  `org-export--get-inbuffer-options'
 ;;
-;; Also, `org-export--confirm-letbind' and `org-export--install-letbind'
-;; take care of the part relative to "#+BIND:" keywords.
+;; Also, `org-export--install-letbind-maybe' takes care of the part
+;; relative to "#+BIND:" keywords.
 
 (defun org-export-get-environment (&optional backend subtreep ext-plist)
   "Collect export options from the current buffer.
