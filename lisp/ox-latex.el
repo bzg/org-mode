@@ -1420,15 +1420,15 @@ holding contextual information."
 	 ;; Section formatting will set two placeholders: one for the
 	 ;; title and the other for the contents.
 	 (section-fmt
-	  (let ((sec (if (and (symbolp (nth 2 class-sectionning))
-			      (fboundp (nth 2 class-sectionning)))
+	  (let ((sec (if (functionp (nth 2 class-sectionning))
 			 (funcall (nth 2 class-sectionning) level numberedp)
 		       (nth (1+ level) class-sectionning))))
 	    (cond
 	     ;; No section available for that LEVEL.
 	     ((not sec) nil)
-	     ;; Section format directly returned by a function.
-	     ((stringp sec) sec)
+	     ;; Section format directly returned by a function.  Add
+	     ;; placeholder for contents.
+	     ((stringp sec) (concat sec "\n%s"))
 	     ;; (numbered-section . unnumbered-section)
 	     ((not (consp (cdr sec)))
 	      (concat (funcall (if numberedp #'car #'cdr) sec) "\n%s"))
