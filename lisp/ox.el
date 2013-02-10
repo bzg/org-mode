@@ -2663,6 +2663,95 @@ Return the updated communication channel."
 ;; why file inclusion should be done before any structure can be
 ;; associated to the file, that is before parsing.
 
+(defun org-export-copy-buffer ()
+  "Return a copy of the current buffer.
+The copy preserves Org buffer-local variables, visibility and
+narrowing."
+  (let ((copy-buffer-fun (org-export--generate-copy-script (current-buffer)))
+	(new-buf (generate-new-buffer (buffer-name))))
+    (with-current-buffer new-buf
+      (funcall copy-buffer-fun)
+      (set-buffer-modified-p nil))
+    new-buf))
+
+(defmacro org-export-with-buffer-copy (&rest body)
+  "Apply BODY in a copy of the current buffer.
+The copy preserves local variables, visibility and contents of
+the original buffer.  Point is at the beginning of the buffer
+when BODY is applied."
+  (declare (debug t))
+  (org-with-gensyms (buf-copy)
+    `(let ((,buf-copy (org-export-copy-buffer)))
+       (unwind-protect
+	   (with-current-buffer ,buf-copy
+	     (goto-char (point-min))
+	     (progn ,@body))
+	 (and (buffer-live-p ,buf-copy)
+	      ;; Kill copy without confirmation.
+	      (progn (with-current-buffer ,buf-copy
+		       (restore-buffer-modified-p nil))
+		     (kill-buffer ,buf-copy)))))))
+
+(defun org-export--generate-copy-script (buffer)
+  "Generate a function duplicating BUFFER.
+
+The copy will preserve local variables, visibility, contents and
+narrowing of the original buffer.  If a region was active in
+BUFFER, contents will be narrowed to that region instead.
+
+The resulting function can be eval'ed at a later time, from
+another buffer, effectively cloning the original buffer there."
+  (with-current-buffer buffer
+    `(lambda ()
+       (let ((inhibit-modification-hooks t))
+	 ;; Buffer local variables.
+	 ,@(let (local-vars)
+	     (mapc
+	      (lambda (entry)
+		(when (consp entry)
+		  (let ((var (car entry))
+			(val (cdr entry)))
+		    (and (not (eq var 'org-font-lock-keywords))
+			 (or (memq var
+				   '(major-mode default-directory
+						buffer-file-name outline-level
+						outline-regexp
+						buffer-invisibility-spec))
+			     (string-match "^\\(org-\\|orgtbl-\\)"
+					   (symbol-name var)))
+			 ;; Skip unreadable values, as they cannot be
+			 ;; sent to external process.
+			 (or (not val) (ignore-errors (read (format "%S" val))))
+			 (push `(set (make-local-variable (quote ,var))
+				     (quote ,val))
+			       local-vars)))))
+	      (buffer-local-variables (buffer-base-buffer)))
+	     local-vars)
+	 ;; Whole buffer contents.
+	 (insert
+	  ,(org-with-wide-buffer
+	    (buffer-substring-no-properties
+	     (point-min) (point-max))))
+	 ;; Narrowing.
+	 ,(if (org-region-active-p)
+	      `(narrow-to-region ,(region-beginning) ,(region-end))
+	    `(narrow-to-region ,(point-min) ,(point-max)))
+	 ;; Current position of point.
+	 (goto-char ,(point))
+	 ;; Overlays with invisible property.
+	 ,@(let (ov-set)
+	     (mapc
+	      (lambda (ov)
+		(let ((invis-prop (overlay-get ov 'invisible)))
+		  (when invis-prop
+		    (push `(overlay-put
+			    (make-overlay ,(overlay-start ov)
+					  ,(overlay-end ov))
+			    'invisible (quote ,invis-prop))
+			  ov-set))))
+	      (overlays-in (point-min) (point-max)))
+	     ov-set)))))
+
 ;;;###autoload
 (defun org-export-as
   (backend &optional subtreep visible-only body-only ext-plist)
@@ -2895,95 +2984,6 @@ determined."
 	      extension))
      ((file-name-absolute-p base-name) (concat base-name extension))
      (t (concat (file-name-as-directory ".") base-name extension)))))
-
-(defun org-export-copy-buffer ()
-  "Return a copy of the current buffer.
-The copy preserves Org buffer-local variables, visibility and
-narrowing."
-  (let ((copy-buffer-fun (org-export--generate-copy-script (current-buffer)))
-	(new-buf (generate-new-buffer (buffer-name))))
-    (with-current-buffer new-buf
-      (funcall copy-buffer-fun)
-      (set-buffer-modified-p nil))
-    new-buf))
-
-(defmacro org-export-with-buffer-copy (&rest body)
-  "Apply BODY in a copy of the current buffer.
-The copy preserves local variables, visibility and contents of
-the original buffer.  Point is at the beginning of the buffer
-when BODY is applied."
-  (declare (debug t))
-  (org-with-gensyms (buf-copy)
-    `(let ((,buf-copy (org-export-copy-buffer)))
-       (unwind-protect
-	   (with-current-buffer ,buf-copy
-	     (goto-char (point-min))
-	     (progn ,@body))
-	 (and (buffer-live-p ,buf-copy)
-	      ;; Kill copy without confirmation.
-	      (progn (with-current-buffer ,buf-copy
-		       (restore-buffer-modified-p nil))
-		     (kill-buffer ,buf-copy)))))))
-
-(defun org-export--generate-copy-script (buffer)
-  "Generate a function duplicating BUFFER.
-
-The copy will preserve local variables, visibility, contents and
-narrowing of the original buffer.  If a region was active in
-BUFFER, contents will be narrowed to that region instead.
-
-The resulting function can be eval'ed at a later time, from
-another buffer, effectively cloning the original buffer there."
-  (with-current-buffer buffer
-    `(lambda ()
-       (let ((inhibit-modification-hooks t))
-	 ;; Buffer local variables.
-	 ,@(let (local-vars)
-	     (mapc
-	      (lambda (entry)
-		(when (consp entry)
-		  (let ((var (car entry))
-			(val (cdr entry)))
-		    (and (not (eq var 'org-font-lock-keywords))
-			 (or (memq var
-				   '(major-mode default-directory
-						buffer-file-name outline-level
-						outline-regexp
-						buffer-invisibility-spec))
-			     (string-match "^\\(org-\\|orgtbl-\\)"
-					   (symbol-name var)))
-			 ;; Skip unreadable values, as they cannot be
-			 ;; sent to external process.
-			 (or (not val) (ignore-errors (read (format "%S" val))))
-			 (push `(set (make-local-variable (quote ,var))
-				     (quote ,val))
-			       local-vars)))))
-	      (buffer-local-variables (buffer-base-buffer)))
-	     local-vars)
-	 ;; Whole buffer contents.
-	 (insert
-	  ,(org-with-wide-buffer
-	    (buffer-substring-no-properties
-	     (point-min) (point-max))))
-	 ;; Narrowing.
-	 ,(if (org-region-active-p)
-	      `(narrow-to-region ,(region-beginning) ,(region-end))
-	    `(narrow-to-region ,(point-min) ,(point-max)))
-	 ;; Current position of point.
-	 (goto-char ,(point))
-	 ;; Overlays with invisible property.
-	 ,@(let (ov-set)
-	     (mapc
-	      (lambda (ov)
-		(let ((invis-prop (overlay-get ov 'invisible)))
-		  (when invis-prop
-		    (push `(overlay-put
-			    (make-overlay ,(overlay-start ov)
-					  ,(overlay-end ov))
-			    'invisible (quote ,invis-prop))
-			  ov-set))))
-	      (overlays-in (point-min) (point-max)))
-	     ov-set)))))
 
 (defun org-export-expand-include-keyword (&optional included dir)
   "Expand every include keyword in buffer.
