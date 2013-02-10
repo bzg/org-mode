@@ -1405,11 +1405,11 @@ contextual information."
     (cond
      ;; Case 1.  Lisp Block
      (lisp-p
-      (format "@lisp\n%s\n@end lisp"
+      (format "@lisp\n%s@end lisp"
 	      (org-export-format-code-default src-block info)))
      ;; Case 2.  Other blocks
      (t
-      (format "@example\n%s\n@end example"
+      (format "@example\n%s@end example"
 	      (org-export-format-code-default src-block info))))))
 
 ;;; Statistics Cookie
