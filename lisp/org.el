@@ -137,9 +137,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-table-maybe-eval-formula "org-table" ())
 (declare-function org-table-maybe-recalculate-line "org-table" ())
 
-(autoload 'org-element-at-point "org-element")
-(autoload 'org-element-type "org-element")
-
 (declare-function org-element--parse-objects "org-element"
 		  (beg end acc restriction))
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
@@ -160,8 +157,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 		  (beg end acc restriction))
 (declare-function org-element-parse-buffer "org-element"
 		  (&optional granularity visible-only))
-(declare-function org-element-interpret-data "org-element"
-		  (data &optional parent))
+(declare-function org-element-type "org-element" (element))
 
 ;; load languages based on value of `org-babel-load-languages'
 (defvar org-babel-load-languages)

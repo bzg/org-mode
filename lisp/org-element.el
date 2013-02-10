@@ -4789,7 +4789,7 @@ Providing it allows for quicker computation."
 			     end cend)))))))
 	   parent))))))
 
-(defsubst org-element-nested-p (elem-A elem-B)
+(defun org-element-nested-p (elem-A elem-B)
   "Non-nil when elements ELEM-A and ELEM-B are nested."
   (let ((beg-A (org-element-property :begin elem-A))
 	(beg-B (org-element-property :begin elem-B))
