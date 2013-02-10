@@ -6228,8 +6228,10 @@ and subscripts."
 
 (defvar org-cycle-global-status nil)
 (make-variable-buffer-local 'org-cycle-global-status)
+(put 'org-cycle-global-status 'org-state t)
 (defvar org-cycle-subtree-status nil)
 (make-variable-buffer-local 'org-cycle-subtree-status)
+(put 'org-cycle-subtree-status 'org-state t)
 
 (defvar org-inlinetask-min-level)
 
@@ -7408,13 +7410,24 @@ This is a list with the following elements:
 - the tags string, or nil."
   (save-excursion
     (org-back-to-heading t)
-    (if (let (case-fold-search) (looking-at org-complex-heading-regexp))
-	(list (length (match-string 1))
-	      (org-reduced-level (length (match-string 1)))
-	      (org-match-string-no-properties 2)
-	      (and (match-end 3) (aref (match-string 3) 2))
-	      (org-match-string-no-properties 4)
-	      (org-match-string-no-properties 5)))))
+    (if (let (case-fold-search)
+          (looking-at
+           (if orgstruct-mode
+               org-heading-regexp
+             org-complex-heading-regexp)))
+        (if orgstruct-mode
+            (list (length (match-string 1))
+                  (org-reduced-level (length (match-string 1)))
+                  nil
+                  nil
+                  (match-string 2)
+                  nil)
+          (list (length (match-string 1))
+                (org-reduced-level (length (match-string 1)))
+                (org-match-string-no-properties 2)
+                (and (match-end 3) (aref (match-string 3) 2))
+                (org-match-string-no-properties 4)
+                (org-match-string-no-properties 5))))))
 
 (defun org-get-entry ()
   "Get the entry text, after heading, entire subtree."
@@ -8489,12 +8502,19 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 ;; command.  There might be problems if any of the keys is otherwise
 ;; used as a prefix key.
 
-;; Another challenge is that the key binding for TAB can be tab or \C-i,
-;; likewise the binding for RET can be return or \C-m.  Orgtbl-mode
-;; addresses this by checking explicitly for both bindings.
+(defcustom orgstruct-heading-prefix-regexp ""
+  "Regexp that matches the custom prefix of Org headlines in
+orgstruct(++)-mode."
+  :group 'org
+  :type 'string)
+;;;###autoload(put 'orgstruct-heading-prefix-regexp 'safe-local-variable 'stringp)
 
-(defvar orgstruct-mode-map (make-sparse-keymap)
-  "Keymap for the minor `orgstruct-mode'.")
+(defcustom orgstruct-setup-hook nil
+  "Hook run after orgstruct-mode-map is filled."
+  :group 'org
+  :type 'hook)
+
+(defvar orgstruct-initialized nil)
 
 (defvar org-local-vars nil
   "List of local variables, for use by `orgstruct-mode'.")
@@ -8505,26 +8525,13 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 This mode is for using Org-mode structure commands in other
 modes.  The following keys behave as if Org-mode were active, if
 the cursor is on a headline, or on a plain list item (both as
-defined by Org-mode).
-
-M-up        Move entry/item up
-M-down	    Move entry/item down
-M-left	    Promote
-M-right	    Demote
-M-S-up	    Move entry/item up
-M-S-down    Move entry/item down
-M-S-left    Promote subtree
-M-S-right   Demote subtree
-M-q	    Fill paragraph and items like in Org-mode
-C-c ^	    Sort entries
-C-c -	    Cycle list bullet
-TAB         Cycle item visibility
-M-RET       Insert new heading/item
-S-M-RET     Insert new TODO heading / Checkbox item
-C-c C-c     Set tags / toggle checkbox"
-  nil " OrgStruct" nil
-  (org-load-modules-maybe)
-  (and (orgstruct-setup) (defun orgstruct-setup () nil)))
+defined by Org-mode)."
+  nil " OrgStruct" (make-sparse-keymap)
+  (when orgstruct-mode
+    (org-load-modules-maybe)
+    (unless orgstruct-initialized
+      (orgstruct-setup)
+      (setq orgstruct-initialized t))))
 
 ;;;###autoload
 (defun turn-on-orgstruct ()
@@ -8575,104 +8582,100 @@ buffer.  It will also recognize item context in multiline items."
   (error "This key has no function outside structure elements"))
 
 (defun orgstruct-setup ()
-  "Setup orgstruct keymaps."
-  (let ((nfunc 0)
-	(bindings
-	 (list
-	  '([(meta up)]           org-metaup)
-	  '([(meta down)]         org-metadown)
-	  '([(meta left)]         org-metaleft)
-	  '([(meta right)]        org-metaright)
-	  '([(meta shift up)]     org-shiftmetaup)
-	  '([(meta shift down)]   org-shiftmetadown)
-	  '([(meta shift left)]   org-shiftmetaleft)
-	  '([(meta shift right)]  org-shiftmetaright)
-	  '([?\e (up)]            org-metaup)
-	  '([?\e (down)]          org-metadown)
-	  '([?\e (left)]          org-metaleft)
-	  '([?\e (right)]         org-metaright)
-	  '([?\e (shift up)]      org-shiftmetaup)
-	  '([?\e (shift down)]    org-shiftmetadown)
-	  '([?\e (shift left)]    org-shiftmetaleft)
-	  '([?\e (shift right)]   org-shiftmetaright)
-	  '([(shift up)]          org-shiftup)
-	  '([(shift down)]        org-shiftdown)
-	  '([(shift left)]        org-shiftleft)
-	  '([(shift right)]       org-shiftright)
-	  '("\C-c\C-c"            org-ctrl-c-ctrl-c)
-	  '("\M-q"                fill-paragraph)
-	  '("\C-c^"               org-sort)
-	  '("\C-c-"               org-cycle-list-bullet)))
-	elt key fun cmd)
-    (while (setq elt (pop bindings))
-      (setq nfunc (1+ nfunc))
-      (setq key (org-key (car elt))
-	    fun (nth 1 elt)
-	    cmd (orgstruct-make-binding fun nfunc key))
-      (org-defkey orgstruct-mode-map key cmd))
+  "Setup orgstruct keymap."
+  (dolist (f
+           '("org-meta"
+             "org-shiftmeta"
+             org-shifttab
+             org-backward-element
+             org-backward-heading-same-level
+             org-ctrl-c-ret
+             org-cycle
+             org-forward-heading-same-level
+             org-insert-heading
+             org-insert-heading-respect-content
+             org-kill-note-or-show-branches
+             org-mark-subtree
+             org-narrow-to-subtree
+             org-promote-subtree
+             org-reveal
+             org-show-subtree
+             org-sort
+             org-up-element
+             outline-demote
+             outline-next-visible-heading
+             outline-previous-visible-heading
+             outline-promote
+             outline-up-heading
+             show-children))
+    (dolist (f (if (stringp f)
+                   (let ((flist))
+                     (dolist (postfix
+                              '("-return" "tab" "left" "right" "up" "down")
+                              flist)
+                       (let ((f (intern (concat f postfix))))
+                         (when (fboundp f)
+                           (push f flist)))))
+                 (list f)))
+      (dolist (binding (nconc (where-is-internal f org-mode-map)
+                              (where-is-internal f outline-mode-map)))
+        ;; TODO use local-function-key-map
+        (dolist (rep '(("<tab>" . "TAB")
+                       ("<ret>" . "RET")
+                       ("<esc>" . "ESC")
+                       ("<del>" . "DEL")))
+          (setq binding (read-kbd-macro (replace-regexp-in-string
+					 (regexp-quote (car rep))
+					 (cdr rep)
+					 (key-description binding)))))
+        (let ((key (lookup-key orgstruct-mode-map binding)))
+          (when (or (not key) (numberp key))
+            (org-defkey orgstruct-mode-map
+                        binding
+                        (orgstruct-make-binding f binding)))))))
+  (run-hooks 'orgstruct-setup-hook))
 
-    ;; Prevent an error for users who forgot to make autoloads
-    (require 'org-element)
-
-    ;; Special treatment needed for TAB and RET
-    (org-defkey orgstruct-mode-map [(tab)]
-		(orgstruct-make-binding 'org-cycle 102 [(tab)] "\C-i"))
-    (org-defkey orgstruct-mode-map "\C-i"
-		(orgstruct-make-binding 'org-cycle 103 "\C-i" [(tab)]))
-
-    (org-defkey orgstruct-mode-map "\M-\C-m"
-		(orgstruct-make-binding 'org-insert-heading 105
-					"\M-\C-m" [(meta return)]))
-    (org-defkey orgstruct-mode-map [(meta return)]
-		(orgstruct-make-binding 'org-insert-heading 106
-					[(meta return)] "\M-\C-m"))
-
-    (org-defkey orgstruct-mode-map [(shift meta return)]
-		(orgstruct-make-binding 'org-insert-todo-heading 107
-					[(meta return)] "\M-\C-m"))
-
-    (org-defkey orgstruct-mode-map "\e\C-m"
-		(orgstruct-make-binding 'org-insert-heading 108
-					"\e\C-m" [?\e (return)]))
-    (org-defkey orgstruct-mode-map [?\e (return)]
-		(orgstruct-make-binding 'org-insert-heading 109
-					[?\e (return)] "\e\C-m"))
-    (org-defkey orgstruct-mode-map [?\e (shift return)]
-		(orgstruct-make-binding 'org-insert-todo-heading 110
-					[?\e (return)] "\e\C-m"))
-
-    (unless org-local-vars
-      (setq org-local-vars (org-get-local-variables)))
-
-    t))
-
-(defun orgstruct-make-binding (fun n &rest keys)
+(defun orgstruct-make-binding (fun key)
   "Create a function for binding in the structure minor mode.
-FUN is the command to call inside a table.  N is used to create a unique
-command name.  KEYS are keys that should be checked in for a command
-to execute outside of tables."
-  (eval
-   (list 'defun
-	 (intern (concat "orgstruct-hijacker-command-" (int-to-string n)))
-	 '(arg)
-	 (concat "In Structure, run `" (symbol-name fun) "'.\n"
-		 "Outside of structure, run the binding of `"
-		 (mapconcat (lambda (x) (format "%s" x)) keys "' or `")
-		 "'.")
-	 '(interactive "p")
-	 (list 'if
-	       `(org-context-p 'headline 'item
-			       (and orgstruct-is-++
-				    ,(and (memq fun '(org-insert-heading org-insert-todo-heading)) t)
-				    'item-body))
-	       (list 'org-run-like-in-org-mode (list 'quote fun))
-	       (list 'let '(orgstruct-mode)
-		     (list 'call-interactively
-			   (append '(or)
-				   (mapcar (lambda (k)
-					     (list 'key-binding k))
-					   keys)
-				   '('orgstruct-error))))))))
+FUN is the command to call inside a table.  KEY is the key that
+should be checked in for a command to execute outside of tables."
+  (let ((name (concat "orgstruct-hijacker-" (symbol-name fun))))
+    (let ((nname name)
+          (i 0))
+      (while (fboundp (intern nname))
+        (setq nname (format "%s-%d" name (setq i (1+ i)))))
+      (setq name (intern nname)))
+    (eval
+     `(defun ,name (arg)
+        ,(concat "In Structure, run `" (symbol-name fun) "'.\n"
+                 "Outside of structure, run the binding of `"
+                 (key-description key) "'.")
+        (interactive "p")
+        (unless
+            (let* ((org-heading-regexp
+		    (concat "^"
+			    orgstruct-heading-prefix-regexp
+			    "\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ 	]*$"))
+		   (org-outline-regexp
+		    (concat orgstruct-heading-prefix-regexp "\\*+ "))
+		   (org-outline-regexp-bol
+		    (concat "^" org-outline-regexp))
+		   (outline-regexp org-outline-regexp)
+		   (outline-heading-end-regexp "\n")
+		   (outline-level 'outline-level)
+		   (outline-heading-alist))
+              (when (org-context-p 'headline 'item
+                                   ,(when (memq fun '(org-insert-heading))
+                                      '(when orgstruct-is-++
+                                         'item-body)))
+                (org-run-like-in-org-mode ',fun)
+                t))
+          (let ((binding (let ((orgstruct-mode)) (key-binding ,key))))
+            (if (keymapp binding)
+                (set-temporary-overlay-map binding)
+              (call-interactively
+               (or binding 'orgstruct-error)))))))
+    name))
 
 (defun org-contextualize-keys (alist contexts)
   "Return valid elements in ALIST depending on CONTEXTS.
@@ -8773,17 +8776,18 @@ Possible values in the list of contexts are `table', `headline', and `item'."
       (setq varlist (buffer-local-variables)))
     (kill-buffer "*Org tmp*")
     (delq nil
-	  (mapcar
-	   (lambda (x)
-	     (setq x
-		   (if (symbolp x)
-		       (list x)
-		     (list (car x) (list 'quote (cdr x)))))
-	     (if (string-match
-		  "^\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
-		  (symbol-name (car x)))
-		 x nil))
-	   varlist))))
+          (mapcar
+           (lambda (x)
+             (setq x
+                   (if (symbolp x)
+                       (list x)
+                     (list (car x) (cdr x))))
+             (if (and (not (get (car x) 'org-state))
+                      (string-match
+                       "^\\(org-\\|orgtbl-\\|outline-\\|comment-\\|paragraph-\\|auto-fill\\|normal-auto-fill\\|fill-paragraph\\|indent-\\)"
+                       (symbol-name (car x))))
+                 x nil))
+           varlist))))
 
 (defun org-clone-local-variables (from-buffer &optional regexp)
   "Clone local variables from FROM-BUFFER.
@@ -8806,8 +8810,15 @@ call CMD."
   (org-load-modules-maybe)
   (unless org-local-vars
     (setq org-local-vars (org-get-local-variables)))
-  (eval (list 'let org-local-vars
-	      (list 'call-interactively (list 'quote cmd)))))
+  (let (symbols values)
+    (dolist (var org-local-vars)
+      (when (or (not (boundp (car var)))
+		(eq (symbol-value (car var))
+		    (default-value (car var))))
+        (push (car var) symbols)
+        (push (cadr var) values)))
+    (progv symbols values
+      (call-interactively cmd))))
 
 ;;;; Archiving
 
@@ -22620,46 +22631,43 @@ clocking lines, and drawers."
     (point)))
 
 (defun org-forward-heading-same-level (arg &optional invisible-ok)
-  "Move forward to the arg'th subheading at same level as this one.
+  "Move forward to the ARG'th subheading at same level as this one.
 Stop at the first and last subheadings of a superior heading.
 Normally this only looks at visible headings, but when INVISIBLE-OK is
 non-nil it will also look at invisible ones."
   (interactive "p")
   (if (not (ignore-errors (org-back-to-heading invisible-ok)))
-      (outline-next-heading)
+      (if (and arg (< arg 0))
+          (goto-char (point-min))
+        (outline-next-heading))
     (org-at-heading-p)
-    (let* ((level (- (match-end 0) (match-beginning 0) 1))
-	   (re (format "^\\*\\{1,%d\\} " level))
-	   l)
-      (forward-char 1)
-      (while (> arg 0)
-	(while (and (re-search-forward re nil 'move)
-		    (setq l (- (match-end 0) (match-beginning 0) 1))
-		    (= l level)
-		    (not invisible-ok)
-		    (progn (backward-char 1) (outline-invisible-p)))
-	  (if (< l level) (setq arg 1)))
-	(setq arg (1- arg)))
-      (beginning-of-line 1))))
+    (let ((level (- (match-end 0) (match-beginning 0) 1))
+          (f (if (and arg (< arg 0))
+                 're-search-backward
+               're-search-forward))
+          (count (if arg (abs arg) 1))
+          (result (point)))
+      (forward-char (if (and arg (< arg 0)) -1 1))
+      (while (and (> count 0)
+                  (funcall f org-outline-regexp-bol nil 'move))
+        (let ((l (- (match-end 0) (match-beginning 0) 1)))
+          (cond ((< l level) (setq count 0))
+                ((and (= l level)
+                      (or invisible-ok
+                          (progn
+                            (goto-char (line-beginning-position))
+                            (not (outline-invisible-p)))))
+                 (setq count (1- count))
+                 (when (eq l level)
+                   (setq result (point)))))))
+      (goto-char result))
+    (beginning-of-line 1)))
 
 (defun org-backward-heading-same-level (arg &optional invisible-ok)
-  "Move backward to the arg'th subheading at same level as this one.
+  "Move backward to the ARG'th subheading at same level as this one.
 Stop at the first and last subheadings of a superior heading."
   (interactive "p")
-  (if (not (ignore-errors (org-back-to-heading)))
-      (goto-char (point-min))
-    (org-at-heading-p)
-    (let* ((level (- (match-end 0) (match-beginning 0) 1))
-	   (re (format "^\\*\\{1,%d\\} " level))
-	   l)
-      (while (> arg 0)
-	(while (and (re-search-backward re nil 'move)
-		    (setq l (- (match-end 0) (match-beginning 0) 1))
-		    (= l level)
-		    (not invisible-ok)
-		    (outline-invisible-p))
-	  (if (< l level) (setq arg 1)))
-	(setq arg (1- arg))))))
+  (org-forward-heading-same-level (if arg (- arg) -1) invisible-ok))
 
 (defun org-next-block (arg &optional backward block-regexp)
   "Jump to the next block.
