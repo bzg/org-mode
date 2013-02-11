@@ -21640,7 +21640,8 @@ function installs the following ones: \"property\",
      (org-uniquify
       (append fill-nobreak-predicate
 	      '(org-fill-paragraph-separate-nobreak-p
-		org-fill-line-break-nobreak-p)))))
+		org-fill-line-break-nobreak-p
+		org-fill-paragraph-with-timestamp-nobreak-p)))))
   (org-set-local 'fill-paragraph-function 'org-fill-paragraph)
   (org-set-local 'auto-fill-inhibit-regexp nil)
   (org-set-local 'adaptive-fill-function 'org-adaptive-fill-function)
@@ -21658,6 +21659,11 @@ function installs the following ones: \"property\",
     (skip-chars-backward "[ \t]")
     (skip-chars-backward "\\\\")
     (looking-at "\\\\\\\\\\($\\|[^\\\\]\\)")))
+
+(defun org-fill-paragraph-with-timestamp-nobreak-p ()
+  "Non-nil when a line break at point would insert a new item."
+  (and (org-at-timestamp-p t)
+       (not (looking-at org-ts-regexp-both))))
 
 (declare-function message-in-body-p "message" ())
 (defvar orgtbl-line-start-regexp) ; From org-table.el
