@@ -22705,7 +22705,7 @@ Move to the next element at the same level, when possible."
   (cond ((eobp) (error "Cannot move further down"))
 	((org-with-limited-levels (org-at-heading-p))
 	 (let ((origin (point)))
-	   (org-forward-heading-same-level 1)
+	   (goto-char (org-end-of-subtree nil t))
 	   (unless (org-with-limited-levels (org-at-heading-p))
 	     (goto-char origin)
 	     (error "Cannot move further down"))))
@@ -22726,10 +22726,13 @@ Move to the previous element at the same level, when possible."
 	 ;; At an headline, move to the previous one, if any, or stay
 	 ;; here.
 	 (let ((origin (point)))
-	   (org-backward-heading-same-level 1)
-	   (unless (org-with-limited-levels (org-at-heading-p))
-	     (goto-char origin)
-	     (error "Cannot move further up"))))
+	   (org-with-limited-levels (org-backward-heading-same-level 1))
+	   ;; When current headline has no sibling above, move to its
+	   ;; parent.
+	   (when (= (point) origin)
+	     (or (org-with-limited-levels (org-up-heading-safe))
+		 (progn (goto-char origin)
+			(error "Cannot move further up"))))))
 	(t
 	 (let* ((trail (org-element-at-point 'keep-trail))
 		(elem (car trail))
