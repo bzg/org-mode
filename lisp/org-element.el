@@ -3002,11 +3002,16 @@ Assume point is at the beginning of the link."
 	(setq contents-begin (match-beginning 3)
 	      contents-end (match-end 3)
 	      link-end (match-end 0)
-	      ;; RAW-LINK is the original link.
+	      ;; RAW-LINK is the original link.  Expand any
+	      ;; abbreviation in it.
 	      raw-link (org-translate-link
 			(org-link-expand-abbrev
 			 (org-match-string-no-properties 1)))
-	      link (org-link-unescape raw-link))
+	      ;; Remove newline characters due to filling.  Headlines,
+	      ;; targets, radio targets and name affiliated keywords
+	      ;; cannot contain any.
+	      link (org-link-unescape
+		    (replace-regexp-in-string "\n" " " raw-link)))
 	;; Determine TYPE of link and set PATH accordingly.
 	(cond
 	 ;; File type.
