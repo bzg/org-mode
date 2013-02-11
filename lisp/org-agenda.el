@@ -8686,9 +8686,8 @@ Called with a universal prefix arg, show the priority instead of setting it."
 (defun org-agenda-show-new-time (marker stamp &optional prefix)
   "Show new date stamp via text properties."
   ;; We use text properties to make this undoable
-  (let ((inhibit-read-only t)
-	(buffer-invisibility-spec))
-    (setq stamp (concat " " prefix " => " stamp))
+  (let ((inhibit-read-only t))
+    (setq stamp (concat prefix " => " stamp " "))
     (save-excursion
       (goto-char (point-max))
       (while (not (bobp))
@@ -8750,7 +8749,7 @@ ARG is passed through to `org-schedule'."
 	(widen)
 	(goto-char pos)
 	(setq ts (org-schedule arg time)))
-      (org-agenda-show-new-time marker ts "S"))
+      (org-agenda-show-new-time marker ts " S"))
     (message "%s" ts)))
 
 (defun org-agenda-deadline (arg &optional time)
@@ -8770,7 +8769,7 @@ ARG is passed through to `org-deadline'."
 	(widen)
 	(goto-char pos)
 	(setq ts (org-deadline arg time)))
-      (org-agenda-show-new-time marker ts "D"))
+      (org-agenda-show-new-time marker ts " D"))
     (message "%s" ts)))
 
 (defun org-agenda-clock-in (&optional arg)
