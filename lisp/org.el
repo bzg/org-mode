@@ -19521,6 +19521,8 @@ On a link, call `ffap' to visit the link at point.
 Otherwise, return a user error."
   (interactive)
   (let ((element (org-element-at-point)))
+    (assert (not buffer-read-only) nil
+	    "Buffer is read-only: %s" (buffer-name))
     (case (org-element-type element)
       (src-block
        (if (not arg) (org-edit-src-code)
