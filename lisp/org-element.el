@@ -3762,8 +3762,13 @@ element it has to parse."
        ((org-at-heading-p)
 	(org-element-inlinetask-parser limit raw-secondary-p))
        ;; From there, elements can have affiliated keywords.
-       (t (let ((affiliated (org-element--collect-affiliated-keywords)))
+       (t (let ((affiliated (org-element--collect-affiliated-keywords limit)))
 	    (cond
+	     ;; Jumping over affiliated keywords put point off-limits.
+	     ;; Parse them as regular keywords.
+	     ((>= (point) limit)
+	      (goto-char (car affiliated))
+	      (org-element-keyword-parser limit nil))
 	     ;; LaTeX Environment.
 	     ((looking-at "[ \t]*\\\\begin{\\([A-Za-z0-9*]+\\)}[ \t]*$")
 	      (org-element-latex-environment-parser limit affiliated))
@@ -3824,8 +3829,8 @@ element it has to parse."
 ;; that element, and, in the meantime, collect information they give
 ;; into appropriate properties.  Hence the following function.
 
-(defun org-element--collect-affiliated-keywords ()
-  "Collect affiliated keywords from point.
+(defun org-element--collect-affiliated-keywords (limit)
+  "Collect affiliated keywords from point down to LIMIT.
 
 Return a list whose CAR is the position at the first of them and
 CDR a plist of keywords and values and move point to the
@@ -3841,7 +3846,7 @@ position of point and CDR is nil."
 	  ;; keywords value.
 	  (restrict (org-element-restriction 'keyword))
 	  output)
-      (while (and (not (eobp)) (looking-at org-element--affiliated-re))
+      (while (and (< (point) limit) (looking-at org-element--affiliated-re))
 	(let* ((raw-kwd (upcase (match-string 1)))
 	       ;; Apply translation to RAW-KWD.  From there, KWD is
 	       ;; the official keyword.

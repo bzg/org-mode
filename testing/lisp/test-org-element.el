@@ -215,7 +215,17 @@ Some other text
    (equal
     '((("l1")) (nil "s1"))
     (org-test-with-temp-text "#+CAPTION[s1]:\n#+CAPTION: l1\nParagraph"
-      (org-element-property :caption (org-element-at-point))))))
+      (org-element-property :caption (org-element-at-point)))))
+  ;; Corner case: orphaned keyword at the end of an element.
+  (should
+   (eq 'keyword
+       (org-test-with-temp-text "- item\n  #+name: name\nSome paragraph"
+	 (progn (search-forward "name")
+		(org-element-type (org-element-at-point))))))
+  (should-not
+   (org-test-with-temp-text "- item\n  #+name: name\nSome paragraph"
+     (progn (search-forward "Some")
+	    (org-element-property :name (org-element-at-point))))))
 
 
 ;;;; Babel Call
