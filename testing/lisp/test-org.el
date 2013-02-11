@@ -574,7 +574,7 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
   ;; 2. Standard move: expected to ignore blank lines.
   (org-test-with-temp-text "First paragraph.\n\n\nSecond paragraph."
     (org-forward-element)
-    (should (looking-at "Second paragraph.")))
+    (should (looking-at (regexp-quote "Second paragraph."))))
   ;; 3. Headline tests.
   (org-test-with-temp-text "
 * Head 1
@@ -585,23 +585,23 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
     ;;      same level.
     (goto-line 3)
     (org-forward-element)
-    (should (looking-at "** Head 1.2"))
+    (should (looking-at (regexp-quote "** Head 1.2")))
     ;; 3.2. At an headline beginning: move to parent headline if no
     ;;      headline at the same level.
     (goto-line 3)
     (org-forward-element)
-    (should (looking-at "** Head 1.2")))
+    (should (looking-at (regexp-quote "** Head 1.2"))))
   ;; 4. Greater element tests.
   (org-test-with-temp-text
       "#+BEGIN_CENTER\nInside.\n#+END_CENTER\n\nOutside."
     ;; 4.1. At a greater element: expected to skip contents.
     (org-forward-element)
-    (should (looking-at "Outside."))
+    (should (looking-at (regexp-quote "Outside.")))
     ;; 4.2. At the end of greater element contents: expected to skip
     ;;      to the end of the greater element.
     (goto-line 2)
     (org-forward-element)
-    (should (looking-at "Outside.")))
+    (should (looking-at (regexp-quote "Outside."))))
   ;; 5. List tests.
   (org-test-with-temp-text "
 - item1
@@ -621,7 +621,7 @@ Outside."
     ;;      the list.
     (goto-line 2)
     (org-forward-element)
-    (should (looking-at "Outside."))
+    (should (looking-at (regexp-quote "Outside.")))
     ;; 5.2. Special case: at the first line of a sub-list, but not at
     ;;      beginning of line, move to next item.
     (goto-line 2)
@@ -635,11 +635,11 @@ Outside."
     ;; 5.3 At sub-list beginning: expected to move after the sub-list.
     (goto-line 4)
     (org-forward-element)
-    (should (looking-at "  Inner paragraph."))
+    (should (looking-at (regexp-quote "  Inner paragraph.")))
     ;; 5.4. At sub-list end: expected to move outside the sub-list.
     (goto-line 8)
     (org-forward-element)
-    (should (looking-at "  Inner paragraph."))
+    (should (looking-at (regexp-quote "  Inner paragraph.")))
     ;; 5.5. At an item: expected to move to next item, if any.
     (goto-line 6)
     (org-forward-element)
@@ -661,7 +661,7 @@ Outside."
     (goto-line 3)
     (end-of-line)
     (org-backward-element)
-    (should (looking-at "Paragraph2.")))
+    (should (looking-at (regexp-quote "Paragraph2."))))
   ;; 4. Headline tests.
   (org-test-with-temp-text "
 * Head 1
@@ -672,12 +672,12 @@ Outside."
     ;;      same level.
     (goto-line 5)
     (org-backward-element)
-    (should (looking-at "** Head 1.1"))
+    (should (looking-at (regexp-quote "** Head 1.1")))
     ;; 4.2. At an headline beginning: move to parent headline if no
     ;;      headline at the same level.
     (goto-line 3)
     (org-backward-element)
-    (should (looking-at "* Head 1"))
+    (should (looking-at (regexp-quote "* Head 1")))
     ;; 4.3. At the first top-level headline: should error.
     (goto-line 2)
     (should-error (org-backward-element)))
