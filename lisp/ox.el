@@ -830,13 +830,15 @@ string, the type will be ignored, but the blank lines or white
 spaces will be kept.
 
 In addition to element and object types, one function can be
-associated to the `template' symbol and another one to the
-`plain-text' symbol.
+associated to the `template' (or `inner-template') symbol and
+another one to the `plain-text' symbol.
 
 The former returns the final transcoded string, and can be used
 to add a preamble and a postamble to document's body.  It must
 accept two arguments: the transcoded string and the property list
-containing export options.
+containing export options.  A function associated to `template'
+will not be applied if export has option \"body-only\".
+A function associated to `inner-template' is always applied.
 
 The latter, when defined, is to be called on every text not
 recognized as an element or an object.  It must accept two
@@ -1227,7 +1229,8 @@ The back-end could then be called with, for example:
 ;;
 ;; + `:translate-alist' :: Alist between element and object types and
 ;;      transcoding functions relative to the current back-end.
-;;      Special keys `template' and `plain-text' are also possible.
+;;      Special keys `inner-template', `template' and `plain-text' are
+;;      also possible.
 ;;   - category :: option
 ;;   - type :: alist (SYMBOL . FUNCTION)
 ;;
@@ -1286,8 +1289,8 @@ The back-end could then be called with, for example:
 ;; + `:with-latex' :: Non-nil means `latex-environment' elements and
 ;;    `latex-fragment' objects should appear in export output.  When
 ;;    this property is set to `verbatim', they will be left as-is.
-;;    - category :: option
-;;    - symbol (`verbatim', nil, t)
+;;   - category :: option
+;;   - type :: symbol (`verbatim', nil, t)
 ;;
 ;; + `:with-plannings' :: Non-nil means transcoding should include
 ;;      planning info.
@@ -2848,18 +2851,23 @@ Return code as a string."
 	       (org-combine-plists
 		info (org-export-collect-tree-properties tree info)))
 	 ;; Eventually transcode TREE.  Wrap the resulting string into
-	 ;; a template, if needed.  Finally call final-output filter.
-	 (let ((body (org-element-normalize-string
-		      (or (org-export-data tree info) "")))
-	       (template (cdr (assq 'template
-				    (plist-get info :translate-alist)))))
+	 ;; a template.
+	 (let* ((body (org-element-normalize-string
+		       (or (org-export-data tree info) "")))
+		(inner-template (cdr (assq 'inner-template
+					   (plist-get info :translate-alist))))
+		(full-body (if (not (functionp inner-template)) body
+			     (funcall inner-template body info)))
+		(template (cdr (assq 'template
+				     (plist-get info :translate-alist)))))
 	   ;; Remove all text properties since they cannot be
-	   ;; retrieved from an external process, and return result.
+	   ;; retrieved from an external process.  Finally call
+	   ;; final-output filter and return result.
 	   (org-no-properties
 	    (org-export-filter-apply-functions
 	     (plist-get info :filter-final-output)
-	     (if (or (not (functionp template)) body-only) body
-	       (funcall template body info))
+	     (if (or (not (functionp template)) body-only) full-body
+	       (funcall template full-body info))
 	     info))))))))
 
 ;;;###autoload

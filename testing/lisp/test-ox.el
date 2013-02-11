@@ -2093,6 +2093,50 @@ Another text. (ref:text)
 
 
 
+;;; Templates
+
+(ert-deftest test-org-export/inner-template ()
+  "Test `inner-template' translator specifications."
+  (should
+   (equal "Success!"
+	  (let (org-export-registered-backends)
+	    (org-export-define-backend test
+	      ((inner-template . (lambda (contents info) "Success!"))
+	       (headline . (lambda (h c i) "Headline"))))
+	    (org-test-with-temp-text "* Headline"
+	      (org-export-as 'test)))))
+  ;; Inner template is applied even in a "body-only" export.
+  (should
+   (equal "Success!"
+	  (let (org-export-registered-backends)
+	    (org-export-define-backend test
+	      ((inner-template . (lambda (contents info) "Success!"))
+	       (headline . (lambda (h c i) "Headline"))))
+	    (org-test-with-temp-text "* Headline"
+	      (org-export-as 'test nil nil 'body-only))))))
+
+(ert-deftest test-org-export/template ()
+  "Test `template' translator specifications."
+  (should
+   (equal "Success!"
+	  (let (org-export-registered-backends)
+	    (org-export-define-backend test
+	      ((template . (lambda (contents info) "Success!"))
+	       (headline . (lambda (h c i) "Headline"))))
+	    (org-test-with-temp-text "* Headline"
+	      (org-export-as 'test)))))
+  ;; Template is not applied in a "body-only" export.
+  (should-not
+   (equal "Success!"
+	  (let (org-export-registered-backends)
+	    (org-export-define-backend test
+	      ((template . (lambda (contents info) "Success!"))
+	       (headline . (lambda (h c i) "Headline"))))
+	    (org-test-with-temp-text "* Headline"
+	      (org-export-as 'test nil nil 'body-only))))))
+
+
+
 ;;; Topology
 
 (ert-deftest test-org-export/get-next-element ()

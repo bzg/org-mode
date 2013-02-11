@@ -68,6 +68,7 @@
    (horizontal-rule . org-html-horizontal-rule)
    (inline-src-block . org-html-inline-src-block)
    (inlinetask . org-html-inlinetask)
+   (inner-template . org-html-inner-template)
    (italic . org-html-italic)
    (item . org-html-item)
    (keyword . org-html-keyword)
@@ -1369,6 +1370,26 @@ INFO is a plist used as a communication channel."
 	   (org-element-normalize-string postamble-contents)
 	   "</div>\n"))))))
 
+(defun org-html-inner-template (contents info)
+  "Return body of document string after HTML conversion.
+CONTENTS is the transcoded contents string.  INFO is a plist
+holding export options."
+  (concat
+   (format "<div id=\"%s\">\n" (nth 1 org-html-divs))
+   ;; Document title.
+   (format "<h1 class=\"title\">%s</h1>\n"
+	   (org-export-data (plist-get info :title) info))
+   ;; Table of contents.
+   (let ((depth (plist-get info :with-toc)))
+     (when depth (org-html-toc depth info)))
+   ;; Document contents.
+   contents
+   ;; Footnotes section.
+   (org-html-footnote-section info)
+   ;; Bibliography.
+   (org-html-bibliography)
+   "\n</div>"))
+
 (defun org-html-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
@@ -1405,22 +1426,8 @@ holding export options."
 	       (or link-home link-up))))
    ;; Preamble.
    (org-html--build-preamble info)
-   ;; Begin content.
-   (format "<div id=\"%s\">\n" (nth 1 org-html-divs))
-   ;; Document title.
-   (format "<h1 class=\"title\">%s</h1>\n"
-	   (org-export-data (plist-get info :title) info))
-   ;; Table of contents.
-   (let ((depth (plist-get info :with-toc)))
-     (when depth (org-html-toc depth info)))
    ;; Document contents.
    contents
-   ;; Footnotes section.
-   (org-html-footnote-section info)
-   ;; Bibliography.
-   (org-html-bibliography)
-   ;; End content.
-   "\n</div>"
    ;; Postamble.
    (org-html--build-postamble info)
    ;; Closing document.
