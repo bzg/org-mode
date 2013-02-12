@@ -4347,7 +4347,7 @@ This is a helper routine for interactive use."
 	 (out-fmt-choices (org-odt-reachable-formats in-fmt))
 	 (out-fmt
 	  (or (and out-fmt-choices
-		   (funcall input "Output format:  "
+		   (funcall input "Output format: "
 			    out-fmt-choices nil nil nil))
 	      (error
 	       "No known converter or no known output formats for %s files"
