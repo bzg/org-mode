@@ -2000,7 +2000,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-html-format-latex (latex-frag processing-type)
   "Format LaTeX fragments into HTML."
-  (let (cache-relpath cache-dir bfn)
+  (let ((cache-relpath "") (cache-dir "") bfn)
     (unless (eq processing-type 'mathjax)
       (setq bfn (buffer-file-name)
 	    cache-relpath
