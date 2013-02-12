@@ -976,6 +976,14 @@ CSS classes, then this prefix can be very useful."
   :group 'org-export-html
   :type 'string)
 
+(defcustom org-html-display-buffer-mode 'html-mode
+  "Default mode when visiting the HTML output."
+  :group 'org-export-html
+  :version "24.3"
+  :type '(choice (function 'html-mode)
+		 (function 'nxml-mode)
+		 (function :tag "Other mode")))
+
 
 
 ;;; Internal Functions
@@ -2817,14 +2825,14 @@ is non-nil."
 	      (erase-buffer)
 	      (insert output)
 	      (goto-char (point-min))
-	      (nxml-mode)
+	      (funcall org-html-display-buffer-mode)
 	      (org-export-add-to-stack (current-buffer) 'html)))
 	`(org-export-as 'html ,subtreep ,visible-only ,body-only ',ext-plist))
     (let ((outbuf (org-export-to-buffer
 		   'html "*Org HTML Export*"
 		   subtreep visible-only body-only ext-plist)))
       ;; Set major mode.
-      (with-current-buffer outbuf (nxml-mode))
+      (with-current-buffer outbuf (funcall org-html-display-buffer-mode))
       (when org-export-show-temporary-export-buffer
 	(switch-to-buffer-other-window outbuf)))))
 
