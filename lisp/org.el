@@ -16461,8 +16461,8 @@ days in order to avoid rounding problems."
 
 (defun org-time-string-to-absolute (s &optional daynr prefer show-all buffer pos)
   "Convert a time stamp to an absolute day number.
-If there is a specifier for a cyclic time stamp, get the closest date to
-DAYNR.
+If there is a specifier for a cyclic time stamp, get the closest
+date to DAYNR.
 PREFER and SHOW-ALL are passed through to `org-closest-date'.
 The variable date is bound by the calendar when this is called."
   (cond
