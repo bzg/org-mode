@@ -12450,7 +12450,7 @@ This function is run automatically after each state change to a DONE state."
 	      (org-at-timestamp-p t)
 	      (setq ts (match-string 1))
 	      (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts))))
-	  (org-timestamp-change n (cdr (assoc what whata)))
+	  (org-timestamp-change n (cdr (assoc what whata)) nil t)
 	  (setq msg (concat msg type " " org-last-changed-timestamp " "))))
       (setq org-log-post-message msg)
       (message "%s" msg))))
@@ -16751,11 +16751,12 @@ With prefix ARG, change that many days."
 
 (defvar org-clock-history)                     ; defined in org-clock.el
 (defvar org-clock-adjust-closest nil)          ; defined in org-clock.el
-(defun org-timestamp-change (n &optional what updown)
+(defun org-timestamp-change (n &optional what updown suppress-tmp-delay)
   "Change the date in the time stamp at point.
 The date will be changed by N times WHAT.  WHAT can be `day', `month',
 `year', `minute', `second'.  If WHAT is not given, the cursor position
-in the timestamp determines what will be changed."
+in the timestamp determines what will be changed.
+When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
   (let ((origin (point)) origin-cat
 	with-hm inactive
 	(dm (max (nth 1 org-time-stamp-rounding-minutes) 1))
@@ -16779,10 +16780,12 @@ in the timestamp determines what will be changed."
 	    inactive (= (char-after (match-beginning 0)) ?\[)
 	    ts (match-string 0))
       (replace-match "")
-      (if (string-match
-	   "\\(\\(-[012][0-9]:[0-5][0-9]\\)?\\( +[.+]?[-+][0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)*\\)[]>]"
-	   ts)
-	  (setq extra (match-string 1 ts)))
+      (when (string-match
+	     "\\(\\(-[012][0-9]:[0-5][0-9]\\)?\\( +[.+]?-?[-+][0-9]+[hdwmy]\\(/[0-9]+[hdwmy]\\)?\\)*\\)[]>]"
+	     ts)
+	(setq extra (match-string 1 ts))
+	(if suppress-tmp-delay
+	    (setq extra (replace-regexp-in-string " --[0-9]+[hdwmy]" "" extra))))
       (if (string-match "^.\\{10\\}.*?[0-9]+:[0-9][0-9]" ts)
 	  (setq with-hm t))
       (setq time0 (org-parse-time-string ts))
