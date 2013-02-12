@@ -6295,6 +6295,12 @@ FRACTION is what fraction of the head-warning time has passed."
 			(let ((org-scheduled-delay-days suppress-delay))
 			  (org-get-wdays s t t))
 		      (org-get-wdays s t)))
+	;; Use a delay of 0 when there is a repeater and the delay is
+	;; of the form --3d
+	(when (and (save-match-data (string-match "--[0-9]+[hdwmy]" s))
+		   (not (= (org-time-string-to-absolute
+			    s d1 'past nil (current-buffer) pos) d2)))
+	  (setq ddays 0))
 	;; When to show a scheduled item in the calendar:
 	;; If it is on or past the date.
 	(when (or (and (> ddays 0) (= diff (- ddays)))
