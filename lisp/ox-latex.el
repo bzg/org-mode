@@ -1538,7 +1538,7 @@ holding contextual information."
 ;;;; Horizontal Rule
 
 (defun org-latex-horizontal-rule (horizontal-rule contents info)
-  "Transcode an HORIZONTAL-RULE  object from Org to LaTeX.
+  "Transcode an HORIZONTAL-RULE object from Org to LaTeX.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((attr (org-export-read-attribute :attr_latex horizontal-rule))
 	(prev (org-export-get-previous-element horizontal-rule info)))
