@@ -12450,7 +12450,7 @@ This function is run automatically after each state change to a DONE state."
 	      (org-at-timestamp-p t)
 	      (setq ts (match-string 1))
 	      (string-match "\\([.+]\\)?\\(\\+[0-9]+\\)\\([hdwmy]\\)" ts))))
-	  (org-timestamp-change n (cdr (assoc what whata)) nil t)
+	  (save-excursion (org-timestamp-change n (cdr (assoc what whata)) nil t))
 	  (setq msg (concat msg type " " org-last-changed-timestamp " "))))
       (setq org-log-post-message msg)
       (message "%s" msg))))
