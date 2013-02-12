@@ -1967,7 +1967,7 @@ code ---- the results are extracted in the syntax of the source
 			    (goto-char end) (insert (concat finish "\n"))
 			    (goto-char beg) (insert (concat start "\n"))
 			    (unless no-escape
-			      (org-escape-code-in-region (point) end))
+			      (org-escape-code-in-region (min (point) end) end))
 			    (goto-char end) (goto-char (point-at-eol))
 			    (setq end (point-marker))))
 		    (proper-list-p (lambda (it) (and (listp it) (null (cdr (last it)))))))
