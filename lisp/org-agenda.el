@@ -6298,14 +6298,15 @@ FRACTION is what fraction of the head-warning time has passed."
 	;; Use a delay of 0 when there is a repeater and the delay is
 	;; of the form --3d
 	(when (and (save-match-data (string-match "--[0-9]+[hdwmy]" s))
-		   (not (= (org-time-string-to-absolute
-			    s d1 'past nil (current-buffer) pos) d2)))
+		   (< (org-time-string-to-absolute s)
+		      (org-time-string-to-absolute
+		       s d2 'past nil (current-buffer) pos)))
 	  (setq ddays 0))
 	;; When to show a scheduled item in the calendar:
 	;; If it is on or past the date.
 	(when (or (and (> ddays 0) (= diff (- ddays)))
 		  (and (zerop ddays) (= diff 0))
-		  (and (< diff 0)
+		  (and (< (+ diff ddays) 0)
 		       (< (abs diff) org-scheduled-past-days)
 		       (and todayp (not org-agenda-only-exact-dates)))
 		  ;; org-is-habit-p uses org-entry-get, which is expansive
