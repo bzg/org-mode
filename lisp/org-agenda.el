@@ -6122,8 +6122,7 @@ See also the user option `org-agenda-clock-consistency-checks'."
 			   (member todo-state
 				   org-agenda-repeating-timestamp-show-all))
 	      d2 (org-time-string-to-absolute
-		  (match-string 1) d1 'past show-all
-		  (current-buffer) pos)
+		  s d1 'past show-all (current-buffer) pos)
 	      diff (- d2 d1))
 	(setq suppress-prewarning
 	      (let ((ds (and org-agenda-skip-deadline-prewarning-if-scheduled
@@ -6266,8 +6265,7 @@ FRACTION is what fraction of the head-warning time has passed."
 			   (member todo-state
 				   org-agenda-repeating-timestamp-show-all))
 	      d2 (org-time-string-to-absolute
-		  (match-string 1) d1 'past show-all
-		  (current-buffer) pos)
+		  s d1 'past show-all (current-buffer) pos)
 	      diff (- d2 d1)
 	      warntime (get-text-property (point) 'org-appt-warntime))
 	(setq pastschedp (and todayp (< diff 0)))
