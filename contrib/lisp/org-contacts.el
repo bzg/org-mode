@@ -436,6 +436,9 @@ A group FOO is composed of contacts with the tag FOO."
 
 (defun org-contacts-message-complete-function (&optional start)
   "Function used in `completion-at-point-functions' in `message-mode'."
+  ;; Avoid to complete in `post-command-hook'.
+  (when completion-in-region-mode
+    (remove-hook 'post-command-hook #'completion-in-region--postch))
   (let ((mail-abbrev-mode-regexp
          "^\\(Resent-To\\|To\\|B?Cc\\|Reply-To\\|From\\|Mail-Followup-To\\|Mail-Copies-To\\|Disposition-Notification-To\\|Return-Receipt-To\\):"))
     (when (mail-abbrev-in-expansion-header-p)
