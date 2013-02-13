@@ -8672,7 +8672,8 @@ should be checked in for a command to execute outside of tables."
                                          'item-body)))
                 (org-run-like-in-org-mode ',fun)
                 t))
-          (let ((binding (let ((orgstruct-mode)) (key-binding ,key))))
+          (let* ((orgstruct-mode)
+		 (binding (key-binding ,key)))
             (if (keymapp binding)
                 (set-temporary-overlay-map binding)
               (call-interactively
