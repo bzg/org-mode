@@ -3011,7 +3011,7 @@ Assume point is at the beginning of the link."
 	      ;; targets, radio targets and name affiliated keywords
 	      ;; cannot contain any.
 	      link (org-link-unescape
-		    (replace-regexp-in-string "\n" " " raw-link)))
+		    (replace-regexp-in-string "\n[ \t]*" " " raw-link)))
 	;; Determine TYPE of link and set PATH accordingly.
 	(cond
 	 ;; File type.
