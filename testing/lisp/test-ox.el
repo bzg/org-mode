@@ -794,29 +794,29 @@ body\n")))
      (equal
       '((1 . "A\n") (2 . "B") (3 . "C") (4 . "D"))
       (org-test-with-parsed-data
-       "Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
-       (org-element-map
-	tree 'footnote-reference
-	(lambda (ref)
-	  (let ((def (org-export-get-footnote-definition ref info)))
-	    (cons (org-export-get-footnote-number ref info)
-		  (if (eq (org-element-property :type ref) 'inline) (car def)
-		    (car (org-element-contents
-			  (car (org-element-contents def))))))))
-	info))))
+	  "Text[fn:1] [1] [fn:label:C] [fn::D]\n\n[fn:1] A\n\n[1] B"
+	(org-element-map
+	    tree 'footnote-reference
+	  (lambda (ref)
+	    (let ((def (org-export-get-footnote-definition ref info)))
+	      (cons (org-export-get-footnote-number ref info)
+		    (if (eq (org-element-property :type ref) 'inline) (car def)
+		      (car (org-element-contents
+			    (car (org-element-contents def))))))))
+	  info))))
     ;; 2. Test nested footnotes order.
     (org-test-with-parsed-data
-     "Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
-     (should
-      (equal
-       '((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
-       (org-element-map
-	tree 'footnote-reference
-	(lambda (ref)
-	  (when (org-export-footnote-first-reference-p ref info)
-	    (cons (org-export-get-footnote-number ref info)
-		  (org-element-property :label ref))))
-	info))))
+	"Text[fn:1:A[fn:2]] [fn:3].\n\n[fn:2] B [fn:3] [fn::D].\n\n[fn:3] C."
+      (should
+       (equal
+	'((1 . "fn:1") (2 . "fn:2") (3 . "fn:3") (4))
+	(org-element-map
+	    tree 'footnote-reference
+	  (lambda (ref)
+	    (when (org-export-footnote-first-reference-p ref info)
+	      (cons (org-export-get-footnote-number ref info)
+		    (org-element-property :label ref))))
+	  info))))
     ;; 3. Test nested footnote in invisible definitions.
     (org-test-with-temp-text "Text[1]\n\n[1] B [2]\n\n[2] C."
       ;; Hide definitions.
@@ -835,8 +835,8 @@ body\n")))
 \[fn:2] B [fn:3] [fn::D].
 
 \[fn:3] C."
-			       (should (= (length (org-export-collect-footnote-definitions tree info))
-					  4)))
+      (should (= (length (org-export-collect-footnote-definitions tree info))
+		 4)))
     ;; 5. Test export of footnotes defined outside parsing scope.
     (org-test-with-temp-text "[fn:1] Out of scope
 * Title
@@ -858,7 +858,22 @@ Paragraph[fn:1]"
     (should
      (org-test-with-parsed-data "[fn:1]"
        (org-export-get-footnote-definition
-	(org-element-map tree 'footnote-reference 'identity info t) info)))))
+	(org-element-map tree 'footnote-reference 'identity info t) info)))
+    ;; 7. Footnote section should be ignored in TOC and in headlines
+    ;;    numbering.
+    (should
+     (= 1 (let ((org-footnote-section "Footnotes"))
+	    (length (org-test-with-parsed-data "* H1\n* Footnotes\n"
+		      (org-export-collect-headlines info))))))
+    (should
+     (equal '(2)
+	    (let ((org-footnote-section "Footnotes"))
+	      (org-test-with-parsed-data "* H1\n* Footnotes\n* H2"
+		(org-element-map tree 'headline
+		  (lambda (hl)
+		    (when (equal (org-element-property :raw-value hl) "H2")
+		      (org-export-get-headline-number hl info)))
+		  info t)))))))
 
 
 

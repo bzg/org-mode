@@ -1795,19 +1795,21 @@ DATA is the parse tree.  OPTIONS is the plist holding export
 options.
 
 Return an alist whose key is an headline and value is its
-associated numbering \(in the shape of a list of numbers\)."
+associated numbering \(in the shape of a list of numbers\) or nil
+for a footnotes section."
   (let ((numbering (make-vector org-export-max-depth 0)))
     (org-element-map data 'headline
       (lambda (headline)
-	(let ((relative-level
-	       (1- (org-export-get-relative-level headline options))))
-	  (cons
-	   headline
-	   (loop for n across numbering
-		 for idx from 0 to org-export-max-depth
-		 when (< idx relative-level) collect n
-		 when (= idx relative-level) collect (aset numbering idx (1+ n))
-		 when (> idx relative-level) do (aset numbering idx 0)))))
+	(unless (org-element-property :footnote-section-p headline)
+	  (let ((relative-level
+		 (1- (org-export-get-relative-level headline options))))
+	    (cons
+	     headline
+	     (loop for n across numbering
+		   for idx from 0 to org-export-max-depth
+		   when (< idx relative-level) collect n
+		   when (= idx relative-level) collect (aset numbering idx (1+ n))
+		   when (> idx relative-level) do (aset numbering idx 0))))))
       options)))
 
 (defun org-export--populate-ignore-list (data options)
@@ -4434,13 +4436,15 @@ the table of contents.  Otherwise, it is set to the value of the
 last headline level.  See `org-export-headline-levels' for more
 information.
 
-Return a list of all exportable headlines as parsed elements."
+Return a list of all exportable headlines as parsed elements.
+Footnote sections, if any, will be ignored."
   (unless (wholenump n) (setq n (plist-get info :headline-levels)))
   (org-element-map (plist-get info :parse-tree) 'headline
     (lambda (headline)
-      ;; Strip contents from HEADLINE.
-      (let ((relative-level (org-export-get-relative-level headline info)))
-	(unless (> relative-level n) headline)))
+      (unless (org-element-property :footnote-section-p headline)
+	;; Strip contents from HEADLINE.
+	(let ((relative-level (org-export-get-relative-level headline info)))
+	  (unless (> relative-level n) headline))))
     info))
 
 (defun org-export-collect-elements (type info &optional predicate)
