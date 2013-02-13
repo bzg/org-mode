@@ -72,6 +72,7 @@
    (horizontal-rule . org-ascii-horizontal-rule)
    (inline-src-block . org-ascii-inline-src-block)
    (inlinetask . org-ascii-inlinetask)
+   (inner-template . org-ascii-inner-template)
    (italic . org-ascii-italic)
    (item . org-ascii-item)
    (keyword . org-ascii-keyword)
@@ -882,40 +883,32 @@ INFO is a plist used as a communication channel."
 		 (when (org-string-nw-p date) (concat "\n\n\n" date))
 		 "\n\n\n") text-width 'center)))))
 
-(defun org-ascii-template (contents info)
+(defun org-ascii-inner-template (contents info)
   "Return complete document string after ASCII conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (org-element-normalize-string
    (org-ascii--indent-string
-    (let ((text-width (- org-ascii-text-width org-ascii-global-margin)))
-      ;; 1. Build title block.
-      (concat
-       (org-ascii-template--document-title info)
-       ;; 2. Table of contents.
-       (let ((depth (plist-get info :with-toc)))
-	 (when depth
-	   (concat
-	    (org-ascii--build-toc info (and (wholenump depth) depth))
-	    "\n\n\n")))
-       ;; 3. Document's body.
-       contents
-       ;; 4. Footnote definitions.
-       (let ((definitions (org-export-collect-footnote-definitions
-			   (plist-get info :parse-tree) info))
-	     ;; Insert full links right inside the footnote definition
-	     ;; as they have no chance to be inserted later.
-	     (org-ascii-links-to-notes nil))
-	 (when definitions
-	   (concat
-	    "\n\n\n"
-	    (let ((title (org-ascii--translate "Footnotes" info)))
-	      (concat
-	       title "\n"
-	       (make-string
-		(length title)
-		(if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))))
-	    "\n\n"
+    (concat
+     ;; 1. Document's body.
+     contents
+     ;; 2. Footnote definitions.
+     (let ((definitions (org-export-collect-footnote-definitions
+			 (plist-get info :parse-tree) info))
+	   ;; Insert full links right inside the footnote definition
+	   ;; as they have no chance to be inserted later.
+	   (org-ascii-links-to-notes nil))
+       (when definitions
+	 (concat
+	  "\n\n\n"
+	  (let ((title (org-ascii--translate "Footnotes" info)))
+	    (concat
+	     title "\n"
+	     (make-string
+	      (length title)
+	      (if (eq (plist-get info :ascii-charset) 'utf-8) ?─ ?_))))
+	  "\n\n"
+	  (let ((text-width (- org-ascii-text-width org-ascii-global-margin)))
 	    (mapconcat
 	     (lambda (ref)
 	       (let ((id (format "[%s] " (car ref))))
@@ -933,20 +926,42 @@ holding export options."
 			      (concat id "\n" (org-export-data def info))
 			    (push id (nthcdr 2 first))
 			    (org-export-data def info)))
-		      ;; Fill paragraph once footnote ID is inserted in
-		      ;; order to have a correct length for first line.
+		      ;; Fill paragraph once footnote ID is inserted
+		      ;; in order to have a correct length for first
+		      ;; line.
 		      (org-ascii--fill-string
 		       (concat id (org-export-data def info))
 		       text-width info))))))
-	     definitions "\n\n"))))
-       ;; 5. Creator.  Ignore `comment' value as there are no comments in
-       ;;    ASCII.  Justify it to the bottom right.
-       (let ((creator-info (plist-get info :with-creator)))
-	 (unless (or (not creator-info) (eq creator-info 'comment))
-	   (concat
-	    "\n\n\n"
-	    (org-ascii--fill-string
-	     (plist-get info :creator) text-width info 'right))))))
+	     definitions "\n\n"))))))
+    org-ascii-global-margin)))
+
+(defun org-ascii-template (contents info)
+  "Return complete document string after ASCII conversion.
+CONTENTS is the transcoded contents string.  INFO is a plist
+holding export options."
+  (concat
+   ;; 1. Build title block.
+   (org-ascii--indent-string
+    (concat (org-ascii-template--document-title info)
+	    ;; 2. Table of contents.
+	    (let ((depth (plist-get info :with-toc)))
+	      (when depth
+		(concat
+		 (org-ascii--build-toc info (and (wholenump depth) depth))
+		 "\n\n\n"))))
+    org-ascii-global-margin)
+   ;; 3. Document's body.
+   contents
+   ;; 4. Creator.  Ignore `comment' value as there are no comments in
+   ;;    ASCII.  Justify it to the bottom right.
+   (org-ascii--indent-string
+    (let ((creator-info (plist-get info :with-creator))
+	  (text-width (- org-ascii-text-width org-ascii-global-margin)))
+      (unless (or (not creator-info) (eq creator-info 'comment))
+	(concat
+	 "\n\n\n"
+	 (org-ascii--fill-string
+	  (plist-get info :creator) text-width info 'right))))
     org-ascii-global-margin)))
 
 (defun org-ascii--translate (s info)
@@ -1805,8 +1820,8 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-When optional argument BODY-ONLY is non-nil, strip title, table
-of contents and footnote definitions from output.
+When optional argument BODY-ONLY is non-nil, strip title and
+table of contents from output.
 
 EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
@@ -1855,8 +1870,8 @@ first.
 When optional argument VISIBLE-ONLY is non-nil, don't export
 contents of hidden elements.
 
-When optional argument BODY-ONLY is non-nil, strip title, table
-of contents and footnote definitions from output.
+When optional argument BODY-ONLY is non-nil, strip title and
+table of contents from output.
 
 EXT-PLIST, when provided, is a property list with external
 parameters overriding Org default settings, but still inferior to
