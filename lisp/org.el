@@ -11536,7 +11536,8 @@ keywords relative to each registered export back-end."
     "DESCRIPTION:" "DRAWERS:" "EMAIL:" "EXCLUDE_TAGS:" "FILETAGS:" "INCLUDE:"
     "INDEX:" "KEYWORDS:" "LANGUAGE:" "MACRO:" "OPTIONS:" "PROPERTY"
     "PRIORITIES:" "SELECT_TAGS:" "SEQ_TODO:" "SETUPFILE:" "STARTUP:" "TAGS:"
-    "TITLE:" "TODO:" "TYP_TODO:"))
+    "TITLE:" "TODO:" "TYP_TODO:" "EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS"
+    "INFOJS_OPT"))
 
 (defcustom org-structure-template-alist
   '(("s" "#+BEGIN_SRC ?\n\n#+END_SRC"
