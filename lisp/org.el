@@ -7399,6 +7399,8 @@ When NO-TODO is non-nil, don't include TODO keywords."
      (t (looking-at org-heading-regexp)
 	(match-string 2)))))
 
+(defvar orgstruct-mode)   ; defined below
+
 (defun org-heading-components ()
   "Return the components of the current heading.
 This is a list with the following elements:
