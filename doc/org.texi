@@ -5839,6 +5839,7 @@ Meaning: the task (most likely a TODO item, though not necessarily) is supposed
 to be finished on that date.
 
 @vindex org-deadline-warning-days
+@vindex org-agenda-skip-deadline-prewarning-if-scheduled
 On the deadline date, the task will be listed in the agenda.  In
 addition, the agenda for @emph{today} will carry a warning about the
 approaching or missed deadline, starting
@@ -5853,7 +5854,9 @@ until the entry is marked DONE@.  An example:
 
 You can specify a different lead time for warnings for a specific
 deadlines using the following syntax.  Here is an example with a warning
-period of 5 days @code{DEADLINE: <2004-02-29 Sun -5d>}.
+period of 5 days @code{DEADLINE: <2004-02-29 Sun -5d>}.  This warning is
+deactivated if the task get scheduled and you set
+@code{org-agenda-skip-deadline-prewarning-if-scheduled} to @code{t}.
 
 @item SCHEDULED
 @cindex SCHEDULED keyword
@@ -5873,6 +5876,17 @@ the task will automatically be forwarded until completed.
 *** TODO Call Trillian for a date on New Years Eve.
     SCHEDULED: <2004-12-25 Sat>
 @end example
+
+@vindex org-scheduled-delay-days
+@vindex org-agenda-skip-scheduled-delay-if-deadline
+If you want to @emph{delay} the display of this task in the agenda, use
+@code{SCHEDULED: <2004-12-25 Sat -2d>}: the task is still scheduled on the
+25th but will appear two days later.  In case the task contains a repeater,
+the delay is considered to affect all occurrences; if you want it to affect
+only the first scheduled occurrence of the task, use @code{--2d} instead.
+See @code{org-scheduled-delay-days} and
+@code{org-agenda-skip-scheduled-delay-if-deadline} for details on how to
+control this globally or per agenda.
 
 @noindent
 @b{Important:} Scheduling an item in Org mode should @i{not} be
