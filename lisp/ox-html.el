@@ -2215,7 +2215,6 @@ INFO is a plist holding contextual information.  See
 	(case (org-element-type destination)
 	  ;; ID link points to an external file.
 	  (plain-text
-	   (assert (org-uuidgen-p path))
 	   (let ((fragment (concat "ID-" path))
 		 ;; Treat links to ".org" files as ".html", if needed.
 		 (path (funcall --link-org-files-as-html-maybe
