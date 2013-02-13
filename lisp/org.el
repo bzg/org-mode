@@ -9979,13 +9979,21 @@ application the system uses for this file type."
 	    (throw 'match t))
 
 	  (save-excursion
-	    (let ((plinkpos (org-in-regexp org-plain-link-re)))
-	      (when (or (org-in-regexp org-angle-link-re)
-			(and plinkpos (goto-char (car plinkpos))
-			     (save-match-data (not (looking-back "\\[\\[")))))
-		(setq type (match-string 1)
-		      path (org-link-unescape (match-string 2)))
-		(throw 'match t))))
+	    (when (or (org-in-regexp org-angle-link-re)
+		      (let ((match (org-in-regexp org-plain-link-re)))
+			;; Check a plain link is not within a bracket link
+			(and match
+			     (save-excursion
+			       (progn
+				 (goto-char (car match))
+				 (not (org-in-regexp org-bracket-link-regexp))))))
+		      (let ((line_ending (save-excursion (end-of-line) (point))))
+			;; We are in a line before a plain or bracket link
+			(or (re-search-forward org-plain-link-re line_ending t)
+			    (re-search-forward org-bracket-link-regexp line_ending t))))
+	      (setq type (match-string 1)
+		    path (org-link-unescape (match-string 2)))
+		(throw 'match t)))
 	  (save-excursion
 	    (when (org-in-regexp (org-re "\\(:[[:alnum:]_@#%:]+\\):[ \t]*$"))
 	      (setq type "tags"
