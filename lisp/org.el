@@ -22221,8 +22221,10 @@ the cursor is already beyond the end of the headline."
 			((fboundp 'move-end-of-line) 'move-end-of-line)
 			(t 'end-of-line))))
     (if (or (not special) arg) (call-interactively move-fun)
-      (let* ((element (save-excursion (beginning-of-line)
-				      (org-element-at-point)))
+      (let* ((element (ignore-errors
+			;; Don't throw an error outside elements
+			(save-excursion (beginning-of-line)
+					(org-element-at-point))))
 	     (type (org-element-type element)))
 	(cond
 	 ((memq type '(headline inlinetask))
