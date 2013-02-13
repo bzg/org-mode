@@ -406,8 +406,8 @@ the value in cdr."
 #+EMAIL:     %s
 #+DATE:      %s
 #+LANGUAGE:  %s
-#+EXPORT_SELECT_TAGS: %s
-#+EXPORT_EXCLUDE_TAGS: %s
+#+SELECT_TAGS: %s
+#+EXCLUDE_TAGS: %s
 #+PRIORITIES: %c %c %c
 #+TAGS:      %s
 #+FILETAGS:  %s

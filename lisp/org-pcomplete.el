@@ -196,7 +196,7 @@ When completing for #+STARTUP, for example, this function returns
 		 ,(format "Complete #+%s option." o)
 		 (pcomplete/org-mode/file-option/x ,o))))
       '("TITLE" "AUTHOR" "EMAIL" "DATE" "LANGUAGE" "TAGS" "FILETAGS"
-	"EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS" "PRIORITIES"))
+	"SELECT_TAGS" "EXCLUDE_TAGS" "PRIORITIES"))
 
 (defun pcomplete/org-mode/file-option/options ()
   "Complete arguments for the #+OPTIONS file option."
