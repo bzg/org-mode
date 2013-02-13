@@ -398,6 +398,9 @@ the value in cdr."
     (cons (list (car flat) (cadr flat))
 	  (org-make-parameter-alist (cddr flat)))))
 
+(defvar org-export-default-language) ; Defined in ox.el
+(defvar org-export-select-tags)      ; Defined in ox.el
+(defvar org-export-exclude-tags)     ; Defined in ox.el
 (defun org-default-options ()
   "Return a string with default options as keyword options."
   (format
