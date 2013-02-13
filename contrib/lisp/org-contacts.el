@@ -253,11 +253,11 @@ This function returns a list whose contains:
 	 (len2 (length s2))
 	 (start2 (or start2 0))
 	 (end2 (or end2 len2))
-	 
+
 	 (new-start (car (org-contacts-compare-strings
 			  (substring (org-reverse-string s1) (- len1 start1)) nil nil
 			  (substring (org-reverse-string s2) (- len2 start2)) nil nil)))
-	 
+
 	 (new-end (+ end1 (car (org-contacts-compare-strings
 				(substring s1 end1) nil nil
 				(substring s2 end2) nil nil)))))
