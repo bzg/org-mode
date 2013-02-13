@@ -770,7 +770,9 @@ used as a communication channel."
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
   (let* ((type (org-element-property :type plain-list))
-	 (attributes (org-export-read-attribute :attr_beamer plain-list))
+	 (attributes (org-combine-plists
+		      (org-export-read-attribute :attr_latex plain-list)
+		      (org-export-read-attribute :attr_beamer plain-list)))
 	 (latex-type (let ((env (plist-get attributes :environment)))
 		       (cond (env (format "%s" env))
 			     ((eq type 'ordered) "enumerate")
