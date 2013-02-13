@@ -7399,6 +7399,8 @@ When NO-TODO is non-nil, don't include TODO keywords."
      (t (looking-at org-heading-regexp)
 	(match-string 2)))))
 
+(defvar orgstruct-mode)   ; defined below
+
 (defun org-heading-components ()
   "Return the components of the current heading.
 This is a list with the following elements:
@@ -8810,15 +8812,14 @@ call CMD."
   (org-load-modules-maybe)
   (unless org-local-vars
     (setq org-local-vars (org-get-local-variables)))
-  (let (symbols values)
+  (let (binds)
     (dolist (var org-local-vars)
       (when (or (not (boundp (car var)))
 		(eq (symbol-value (car var))
 		    (default-value (car var))))
-        (push (car var) symbols)
-        (push (cadr var) values)))
-    (progv symbols values
-      (call-interactively cmd))))
+	(push (list (car var) `(quote ,(cadr var))) binds)))
+    (eval `(let ,binds
+	     (call-interactively (quote ,cmd))))))
 
 ;;;; Archiving
 
