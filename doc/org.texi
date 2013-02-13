@@ -1428,7 +1428,7 @@ level).
 Move subtree down (swap with next subtree of same level).
 @orgcmd{M-h,org-mark-element}
 Mark the element at point.  Hitting repeatedly will mark subsequent elements
-of the one just marked.  E.g. hitting @key{M-h} on a paragraph will mark it,
+of the one just marked.  E.g., hitting @key{M-h} on a paragraph will mark it,
 hitting @key{M-h} immediately again will mark the next one.
 @orgcmd{C-c @@,org-mark-subtree}
 Mark the subtree at point.  Hitting repeatedly will mark subsequent subtrees
@@ -12081,7 +12081,7 @@ node which is known to TaskJuggler, such as @samp{limits}, @samp{vacation},
 @samp{shift}, @samp{booking}, @samp{efficiency}, @samp{journalentry},
 @samp{rate} for resources or @samp{account}, @samp{start}, @samp{note},
 @samp{duration}, @samp{end}, @samp{journalentry}, @samp{milestone},
-@samp{reference}, @samp{responsible}, @samp{scheduling}, etc for tasks.
+@samp{reference}, @samp{responsible}, @samp{scheduling}, etc.@: for tasks.
 
 @subsection Dependencies
 

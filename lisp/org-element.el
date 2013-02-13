@@ -3994,7 +3994,7 @@ containing the secondary string.  It is used to set correctly
   (data types fun &optional info first-match no-recursion with-affiliated)
   "Map a function on selected elements or objects.
 
-DATA is an Org buffer parse tree, as returned by, i.e,
+DATA is an Org buffer parse tree, as returned by, i.e.,
 `org-element-parse-buffer'.  TYPES is a symbol or list of symbols
 of elements or objects types (see `org-element-all-elements' and
 `org-element-all-objects' for a complete list of types).  FUN is
