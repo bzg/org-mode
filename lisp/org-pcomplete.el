@@ -178,6 +178,26 @@ When completing for #+STARTUP, for example, this function returns
 		(setq opts (delete "showstars" opts)))))
 	    opts))))
 
+(defmacro pcomplete/org-mode/file-option/x (option)
+  "Complete arguments for OPTION."
+  `(while
+       (pcomplete-here
+	(pcomplete-uniqify-list
+	 (delq nil
+	       (mapcar (lambda(o)
+			 (when (string-match (concat "^[ \t]*#\\+"
+						     ,option ":[ \t]+\\(.*\\)[ \t]*$") o)
+			   (match-string 1 o)))
+		       (split-string (org-default-options) "\n")))))))
+
+(mapc (lambda (o)
+	(eval `(defun
+		 ,(intern (concat "pcomplete/org-mode/file-option/" (downcase o))) ()
+		 ,(format "Complete #+%s option." o)
+		 (pcomplete/org-mode/file-option/x ,o))))
+      '("TITLE" "AUTHOR" "EMAIL" "DATE" "LANGUAGE" "TAGS" "FILETAGS"
+	"EXPORT_SELECT_TAGS" "EXPORT_EXCLUDE_TAGS" "PRIORITIES"))
+
 (defun pcomplete/org-mode/file-option/options ()
   "Complete arguments for the #+OPTIONS file option."
   (while (pcomplete-here

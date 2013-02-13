@@ -398,6 +398,36 @@ the value in cdr."
     (cons (list (car flat) (cadr flat))
 	  (org-make-parameter-alist (cddr flat)))))
 
+(defun org-default-options ()
+  "Return a string with default options as keyword options."
+  (format
+   "#+TITLE:     %s
+#+AUTHOR:    %s
+#+EMAIL:     %s
+#+DATE:      %s
+#+LANGUAGE:  %s
+#+EXPORT_SELECT_TAGS: %s
+#+EXPORT_EXCLUDE_TAGS: %s
+#+PRIORITIES: %c %c %c
+#+TAGS:      %s
+#+FILETAGS:  %s
+"
+   (buffer-name) (user-full-name) user-mail-address
+   (format-time-string (substring (car org-time-stamp-formats) 1 -1))
+   org-export-default-language
+   (mapconcat 'identity org-export-select-tags " ")
+   (mapconcat 'identity org-export-exclude-tags " ")
+   org-highest-priority org-lowest-priority org-default-priority
+   (or (mapconcat (lambda (x)
+		    (cond
+		     ((equal :startgroup (car x)) "{")
+		     ((equal :endgroup (car x)) "}")
+		     ((equal :newline (car x)) "")
+		     ((cdr x) (format "%s(%c)" (car x) (cdr x)))
+		     (t (car x))))
+		  (or org-tag-alist (org-get-buffer-tags)) " ") "")
+   (mapconcat 'identity org-file-tags " ")))
+
 ;;;###autoload
 (defmacro org-load-noerror-mustsuffix (file)
   "Load FILE with optional arguments NOERROR and MUSTSUFFIX.  Drop the MUSTSUFFIX argument for XEmacs, which doesn't recognize it."
