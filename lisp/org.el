@@ -7445,12 +7445,14 @@ This is a list with the following elements:
   (org-move-subtree-down)
   (end-of-line 1))
 
-(defun org-insert-heading-respect-content ()
-  (interactive)
+(defun org-insert-heading-respect-content (invisible-ok)
+  "Insert heading with `org-insert-heading-respect-content' set to t."
+  (interactive "P")
   (let ((org-insert-heading-respect-content t))
-    (org-insert-heading t)))
+    (org-insert-heading t invisible-ok)))
 
 (defun org-insert-todo-heading-respect-content (&optional force-state)
+  "Insert TODO heading with `org-insert-heading-respect-content' set to t."
   (interactive "P")
   (let ((org-insert-heading-respect-content t))
     (org-insert-todo-heading force-state t)))
