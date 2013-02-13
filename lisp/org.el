@@ -8632,9 +8632,11 @@ buffer.  It will also recognize item context in multiline items."
 					 (key-description binding)))))
         (let ((key (lookup-key orgstruct-mode-map binding)))
           (when (or (not key) (numberp key))
-            (org-defkey orgstruct-mode-map
-                        binding
-                        (orgstruct-make-binding f binding)))))))
+	    (condition-case nil
+		(org-defkey orgstruct-mode-map
+			    binding
+			    (orgstruct-make-binding f binding))
+	      (error nil)))))))
   (run-hooks 'orgstruct-setup-hook))
 
 (defun orgstruct-make-binding (fun key)
@@ -8672,7 +8674,8 @@ should be checked in for a command to execute outside of tables."
                                          'item-body)))
                 (org-run-like-in-org-mode ',fun)
                 t))
-          (let ((binding (let ((orgstruct-mode)) (key-binding ,key))))
+          (let* ((orgstruct-mode)
+		 (binding (key-binding ,key)))
             (if (keymapp binding)
                 (set-temporary-overlay-map binding)
               (call-interactively
