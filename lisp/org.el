@@ -8632,9 +8632,11 @@ buffer.  It will also recognize item context in multiline items."
 					 (key-description binding)))))
         (let ((key (lookup-key orgstruct-mode-map binding)))
           (when (or (not key) (numberp key))
-            (org-defkey orgstruct-mode-map
-                        binding
-                        (orgstruct-make-binding f binding)))))))
+	    (condition-case nil
+		(org-defkey orgstruct-mode-map
+			    binding
+			    (orgstruct-make-binding f binding))
+	      (error nil)))))))
   (run-hooks 'orgstruct-setup-hook))
 
 (defun orgstruct-make-binding (fun key)
