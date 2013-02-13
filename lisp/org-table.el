@@ -765,7 +765,7 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 	 (hfmt1 (concat
 		 (make-string sp2 ?-) "%s" (make-string sp1 ?-) "+"))
 	 emptystrings links dates emph raise narrow
-	 falign falign1 fmax f1 len c e space)
+	 falign falign1 fmax f1 f2 len c e space)
     (untabify beg end)
     (remove-text-properties beg end '(org-cwidth t org-dwidth t display t))
     ;; Check if we have links or dates
@@ -851,10 +851,19 @@ When nil, simply write \"#ERROR\" in corrupted fields.")
 		  (unless (> f1 1)
 		    (user-error "Cannot narrow field starting with wide link \"%s\""
 			   (match-string 0 xx)))
-		  (add-text-properties f1 (length xx) (list 'org-cwidth t) xx)
-		  (add-text-properties (- f1 2) f1
-				       (list 'display org-narrow-column-arrow)
-				       xx)))))
+		  (setq f2 (length xx))
+		  (if (= (org-string-width xx)
+			 f2)
+		      (setq f2 f1)
+		    (setq f2 1)
+		    (while (< (org-string-width (substring xx 0 f2))
+			      f1)
+		      (setq f2 (1+ f2))))
+		  (add-text-properties f2 (length xx) (list 'org-cwidth t) xx)
+		  (add-text-properties (if (>= (string-width (substring xx (1- f2) f2)) 2)
+					   (1- f2) (- f2 2)) f2
+					   (list 'display org-narrow-column-arrow)
+					   xx)))))
       ;; Get the maximum width for each column
       (push (apply 'max (or fmax 1) 1 (mapcar 'org-string-width column))
 	    lengths)
