@@ -981,13 +981,16 @@ Optional argument NEW may specify text to replace the current field content."
 	    (progn
 	      (setq s (match-string 1)
 		    o (match-string 0)
-		    l (max 1 (- (match-end 0) (match-beginning 0) 3))
+		    l (max 1
+			   (- (org-string-width
+			       (buffer-substring-no-properties
+				(match-end 0) (match-beginning 0))) 3))
 		    e (not (= (match-beginning 2) (match-end 2))))
 	      (setq f (format (if num " %%%ds %s" " %%-%ds %s")
 			      l (if e "|" (setq org-table-may-need-update t) ""))
 		    n (format f s))
 	      (if new
-		  (if (<= (length new) l)      ;; FIXME: length -> str-width?
+		  (if (<= (org-string-width new) l)
 		      (setq n (format f new))
 		    (setq n (concat new "|") org-table-may-need-update t)))
 	      (if (equal (string-to-char n) ?-) (setq n (concat " " n)))
