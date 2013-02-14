@@ -5215,8 +5215,8 @@ In an Org Export Stack buffer, use \\<org-export-stack-mode-map>\\[org-export-st
 on current line, \\[org-export-stack-remove] to remove it from the stack and \\[org-export-stack-clear] to clear
 stack completely.
 
-Removal entries in an Org Export Stack buffer doesn't affect
-files or buffers, only view in the stack.
+Removing entries in an Org Export Stack buffer doesn't affect
+files or buffers, only the display.
 
 \\{org-export-stack-mode-map}"
   (abbrev-mode 0)
