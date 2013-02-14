@@ -9942,8 +9942,8 @@ Insert template with export options, see example below.
 @cindex #+TEXT
 @cindex #+OPTIONS
 @cindex #+BIND
-@cindex #+LINK_UP
-@cindex #+LINK_HOME
+@cindex #+HTML_LINK_UP
+@cindex #+HTML_LINK_HOME
 @cindex #+SELECT_TAGS
 @cindex #+EXCLUDE_TAGS
 @cindex #+LaTeX_HEADER
@@ -9964,8 +9964,8 @@ Insert template with export options, see example below.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
 #+BIND:        lisp-var lisp-val, e.g., @code{org-export-latex-low-levels itemize}
                @r{You need to confirm using these, or configure @code{org-export-allow-BIND}}
-#+LINK_UP:     the ``up'' link of an exported page
-#+LINK_HOME:   the ``home'' link of an exported page
+#+HTML_LINK_UP:     the ``up'' link of an exported page
+#+HTML_LINK_HOME:   the ``home'' link of an exported page
 #+LaTeX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
 #+SELECT_TAGS:   Tags that select a tree for export
 #+EXCLUDE_TAGS:  Tags that exclude a tree from export
@@ -10459,9 +10459,9 @@ settings, or add to them by using the variables @code{org-export-html-style}
 fine-grained settings, like file-local settings).  To set the latter variable
 individually for each file, you can use
 
-@cindex #+STYLE
+@cindex #+HTML_STYLE
 @example
-#+STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+#+HTML_STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
 @end example
 
 @noindent
@@ -14939,7 +14939,7 @@ This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+DATE:,
 @itemx #+OPTIONS:, #+BIND:,
 @itemx #+DESCRIPTION:, #+KEYWORDS:,
-@itemx #+LaTeX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:,
+@itemx #+LaTeX_HEADER:, #+HTML_STYLE:, #+HTML_LINK_UP:, #+HTML_LINK_HOME:,
 @itemx #+SELECT_TAGS:, #+EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
 @ref{Export options}.
