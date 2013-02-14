@@ -9944,9 +9944,8 @@ Insert template with export options, see example below.
 @cindex #+BIND
 @cindex #+LINK_UP
 @cindex #+LINK_HOME
-@cindex #+EXPORT_SELECT_TAGS
-@cindex #+EXPORT_EXCLUDE_TAGS
-@cindex #+XSLT
+@cindex #+SELECT_TAGS
+@cindex #+EXCLUDE_TAGS
 @cindex #+LaTeX_HEADER
 @vindex user-full-name
 @vindex user-mail-address
@@ -9968,8 +9967,8 @@ Insert template with export options, see example below.
 #+LINK_UP:     the ``up'' link of an exported page
 #+LINK_HOME:   the ``home'' link of an exported page
 #+LaTeX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
-#+EXPORT_SELECT_TAGS:   Tags that select a tree for export
-#+EXPORT_EXCLUDE_TAGS:  Tags that exclude a tree from export
+#+SELECT_TAGS:   Tags that select a tree for export
+#+EXCLUDE_TAGS:  Tags that exclude a tree from export
 @end example
 
 @noindent
@@ -14938,10 +14937,10 @@ keys.  The corresponding variable is @code{org-tag-alist}.
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+DATE:,
-@itemx #+OPTIONS:, #+BIND:, #+XSLT:,
+@itemx #+OPTIONS:, #+BIND:,
 @itemx #+DESCRIPTION:, #+KEYWORDS:,
 @itemx #+LaTeX_HEADER:, #+STYLE:, #+LINK_UP:, #+LINK_HOME:,
-@itemx #+EXPORT_SELECT_TAGS:, #+EXPORT_EXCLUDE_TAGS:
+@itemx #+SELECT_TAGS:, #+EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
 @ref{Export options}.
 @item #+TODO:    #+SEQ_TODO:   #+TYP_TODO:
