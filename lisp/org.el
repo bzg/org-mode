@@ -670,6 +670,17 @@ the following lines anywhere in the buffer:
   :version "24.1"
   :type 'boolean)
 
+(defcustom org-startup-with-latex-preview nil
+  "Non-nil means preview LaTeX fragments when loading a new Org file.
+
+This can also be configured on a per-file basis by adding one of
+the followinglines anywhere in the buffer:
+   #+STARTUP: latexpreview
+   #+STARTUP: nolatexpreview"
+  :group 'org-startup
+  :version "24.3"
+  :type 'boolean)
+
 (defcustom org-insert-mode-line-in-empty-file nil
   "Non-nil means insert the first line setting Org-mode in empty files.
 When the function `org-mode' is called interactively in an empty file, this
@@ -4618,6 +4629,8 @@ After a match, the following groups carry important information:
     ("noalign" org-startup-align-all-tables nil)
     ("inlineimages" org-startup-with-inline-images t)
     ("noinlineimages" org-startup-with-inline-images nil)
+    ("latexpreview" org-startup-with-latex-preview t)
+    ("nolatexpreview" org-startup-with-latex-preview nil)
     ("customtime" org-display-custom-times t)
     ("logdone" org-log-done time)
     ("lognotedone" org-log-done note)
@@ -5260,6 +5273,8 @@ The following commands are available:
 	(set-buffer-modified-p bmp)))
     (when org-startup-with-inline-images
       (org-display-inline-images))
+    (when org-startup-with-latex-preview
+      (org-preview-latex-fragment))
     (unless org-inhibit-startup-visibility-stuff
       (org-set-startup-visibility)))
   ;; Try to set org-hide correctly
