@@ -573,9 +573,9 @@ This function should be called from `gnus-article-prepare-hook'."
   (let ((org-agenda-files (org-contacts-files))
         (org-agenda-skip-function
          (lambda () (org-agenda-skip-if nil `(notregexp ,name))))
-        (org-agenda-format (propertize
-                            "%(org-contacts-icon-as-string)% p% s%(org-contacts-irc-number-of-unread-messages)%+T"
-                            'keymap org-contacts-keymap))
+        (org-agenda-prefix-format (propertize
+				   "%(org-contacts-icon-as-string)% s%(org-contacts-irc-number-of-unread-messages) "
+				   'keymap org-contacts-keymap))
         (org-agenda-overriding-header
          (or org-agenda-overriding-header
              (concat "List of contacts matching `" name "':"))))
