@@ -4025,7 +4025,6 @@ example *bold*, _underlined_ and /italic/.  This variable sets the marker
 characters, the face to be used by font-lock for highlighting in Org-mode
 Emacs buffers, and the HTML tags to be used for this.
 For LaTeX export, see the variable `org-export-latex-emphasis-alist'.
-For DocBook export, see the variable `org-export-docbook-emphasis-alist'.
 Use customize to modify this, or restart Emacs after changing it."
   :group 'org-appearance
   :set 'org-set-emph-re
@@ -4047,7 +4046,7 @@ Use customize to modify this, or restart Emacs after changing it."
     st))
 
 (defvar org-protecting-blocks
-  '("src" "example" "latex" "ascii" "html" "docbook" "ditaa" "dot" "r" "R")
+  '("src" "example" "latex" "ascii" "html" "ditaa" "dot" "r" "R")
   "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
 This is needed for font-lock setup.")
 
@@ -5637,7 +5636,7 @@ by a #."
 	      (dc3 (downcase (match-string 3)))
 	      end end1 quoting block-type ovl)
 	  (cond
-	   ((member dc1 '("+html:" "+ascii:" "+latex:" "+docbook:"))
+	   ((member dc1 '("+html:" "+ascii:" "+latex:"))
 	    ;; a single line of backend-specific content
 	    (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
 	    (remove-text-properties (match-beginning 0) (match-end 0)

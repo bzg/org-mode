@@ -85,7 +85,7 @@
   "Regular expression matching the definition of a footnote.")
 
 (defconst org-footnote-forbidden-blocks
-  '("ascii" "beamer" "comment" "docbook" "example" "html" "latex" "odt" "src")
+  '("ascii" "beamer" "comment" "example" "html" "latex" "odt" "src")
   "Names of blocks where footnotes are not allowed.")
 
 (defgroup org-footnote nil

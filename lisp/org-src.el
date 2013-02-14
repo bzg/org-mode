@@ -520,10 +520,8 @@ the language, a switch telling if the content should be in a single line."
 	    ("^[ \t]*#\\+begin_latex.*\n" "\n[ \t]*#\\+end_latex" "latex")
 	    ("^[ \t]*#\\+ascii:" "\n" "fundamental" single-line)
 	    ("^[ \t]*#\\+begin_ascii.*\n" "\n[ \t]*#\\+end_ascii" "fundamental")
-	    ("^[ \t]*#\\+docbook:" "\n" "xml" single-line)
 	    ("^[ \t]*#\\+macro:[ \t]+\\S-+\\( \\|$\\)"
 	     "\n" "fundamental" macro-definition)
-	    ("^[ \t]*#\\+begin_docbook.*\n" "\n[ \t]*#\\+end_docbook" "xml")
 	    )))
 	(pos (point))
 	re1 re2 single beg end lang lfmt match-re1 ind entry)

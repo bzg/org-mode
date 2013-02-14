@@ -570,7 +570,6 @@ Exporting
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
-* DocBook export::              Exporting to DocBook
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * TaskJuggler export::          Exporting to TaskJuggler
 * Freemind export::             Exporting to Freemind mind maps
@@ -598,15 +597,6 @@ HTML export
 * Tables in @LaTeX{} export::   Options for exporting tables to @LaTeX{}
 * Images in @LaTeX{} export::   How to insert figures into @LaTeX{} output
 * Beamer class export::         Turning the file into a presentation
-
-DocBook export
-
-* DocBook export commands::     How to invoke DocBook export
-* Quoting DocBook code::        Incorporating DocBook code in Org files
-* Recursive sections::          Recursive sections in DocBook
-* Tables in DocBook export::    Tables are exported as HTML tables
-* Images in DocBook export::    How to insert figures into DocBook output
-* Special characters::          How to handle special characters
 
 OpenDocument Text export
 
@@ -9102,9 +9092,9 @@ spent (via @code{CLOCKSUM}) and with the planned total effort for it.
 
 When exporting Org mode documents, the exporter tries to reflect the
 structure of the document as accurately as possible in the backend.  Since
-export targets like HTML, @LaTeX{}, or DocBook allow much richer formatting,
-Org mode has rules on how to prepare text for rich export.  This section
-summarizes the markup rules used in an Org mode buffer.
+export targets like HTML, @LaTeX{} allow much richer formatting, Org mode has
+rules on how to prepare text for rich export.  This section summarizes the
+markup rules used in an Org mode buffer.
 
 @menu
 * Structural markup elements::  The basic structure as seen by the exporter
@@ -9198,8 +9188,8 @@ the table of contents entirely, by configuring the variable
 
 Org mode normally exports the text before the first headline, and even uses
 the first line as the document title.  The text will be fully marked up.  If
-you need to include literal HTML, @LaTeX{}, or DocBook code, use the special
-constructs described below in the sections for the individual exporters.
+you need to include literal HTML or @LaTeX{} code, use the special constructs
+described below in the sections for the individual exporters.
 
 @vindex org-export-skip-text-before-1st-heading
 Some people like to use the space before the first headline for setup and
@@ -9351,12 +9341,12 @@ Optionally, the caption can take the form:
 @end example
 
 @cindex inlined images, markup rules
-Some backends (HTML, @LaTeX{}, and DocBook) allow you to directly include
-images into the exported document.  Org does this, if a link to an image
-files does not have a description part, for example @code{[[./img/a.jpg]]}.
-If you wish to define a caption for the image and maybe a label for internal
-cross references, make sure that the link is on a line by itself and precede
-it with @code{#+CAPTION} and @code{#+LABEL} as follows:
+Some backends (HTML and @LaTeX{}) allow you to directly include images into
+the exported document.  Org does this, if a link to an image files does not
+have a description part, for example @code{[[./img/a.jpg]]}.  If you wish to
+define a caption for the image and maybe a label for internal cross
+references, make sure that the link is on a line by itself and precede it
+with @code{#+CAPTION} and @code{#+LABEL} as follows:
 
 @example
 #+CAPTION: This is the caption for the next figure link (or table)
@@ -9702,8 +9692,7 @@ need the @file{dvipng} program or the @file{convert}, respectively available
 at @url{http://sourceforge.net/projects/dvipng/} and from the
 @file{imagemagick} suite.  The @LaTeX{} header that will be used when
 processing a fragment can be configured with the variable
-@code{org-format-latex-header}.} that can be displayed in a browser or in
-DocBook documents.
+@code{org-format-latex-header}.} that can be displayed in a browser.
 
 @LaTeX{} fragments don't need any special marking at all.  The following
 snippets will be identified as @LaTeX{} source code:
@@ -9744,9 +9733,9 @@ ones you do not wish to have interpreted by the @LaTeX{} converter.
 @vindex org-export-with-LaTeX-fragments
 @LaTeX{} processing can be configured with the variable
 @code{org-export-with-LaTeX-fragments}.  The default setting is @code{t}
-which means @file{MathJax} for HTML, and no processing for DocBook, ASCII and
-@LaTeX{} backends.  You can also set this variable on a per-file basis using one
-of these lines:
+which means @file{MathJax} for HTML, and no processing for ASCII and @LaTeX{}
+backends.  You can also set this variable on a per-file basis using one of
+these lines:
 
 @example
 #+OPTIONS: LaTeX:t          @r{Do the right thing automatically (MathJax)}
@@ -9865,15 +9854,14 @@ printing and sharing of notes, ASCII export produces a readable and simple
 version of an Org file.  HTML export allows you to publish a notes file on
 the web, while the XOXO format provides a solid base for exchange with a
 broad range of other applications.  @LaTeX{} export lets you use Org mode and
-its structured editing functions to easily create @LaTeX{} files.  DocBook
-export makes it possible to convert Org files to many other formats using
-DocBook tools.  OpenDocument Text (ODT) export allows seamless
-collaboration across organizational boundaries.  For project management you
-can create gantt and resource charts by using TaskJuggler export.  To
-incorporate entries with associated times like deadlines or appointments into
-a desktop calendar program like iCal, Org mode can also produce extracts in
-the iCalendar format.  Currently, Org mode only supports export, not import of
-these different formats.
+its structured editing functions to easily create @LaTeX{} files.
+OpenDocument Text (ODT) export allows seamless collaboration across
+organizational boundaries.  For project management you can create gantt and
+resource charts by using TaskJuggler export.  To incorporate entries with
+associated times like deadlines or appointments into a desktop calendar
+program like iCal, Org mode can also produce extracts in the iCalendar
+format.  Currently, Org mode only supports export, not import of these
+different formats.
 
 Org supports export of selected regions when @code{transient-mark-mode} is
 enabled (default in Emacs 23).
@@ -9885,7 +9873,6 @@ enabled (default in Emacs 23).
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
-* DocBook export::              Exporting to DocBook
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * TaskJuggler export::          Exporting to TaskJuggler
 * Freemind export::             Exporting to Freemind mind maps
@@ -9983,7 +9970,6 @@ Insert template with export options, see example below.
 #+LaTeX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
 #+EXPORT_SELECT_TAGS:   Tags that select a tree for export
 #+EXPORT_EXCLUDE_TAGS:  Tags that exclude a tree from export
-#+XSLT:        the XSLT stylesheet used by DocBook exporter to generate FO file
 @end example
 
 @noindent
@@ -10559,7 +10545,7 @@ You can choose default values for these options by customizing the variable
 @code{org-infojs-options}.  If you always want to apply the script to your
 pages, configure the variable @code{org-export-html-use-infojs}.
 
-@node @LaTeX{} and PDF export, DocBook export, HTML export, Exporting
+@node @LaTeX{} and PDF export, OpenDocument Text export, HTML export, Exporting
 @section @LaTeX{} and PDF export
 @cindex @LaTeX{} export
 @cindex PDF export
@@ -10921,206 +10907,9 @@ Here is a simple example Org document that is intended for beamer export.
 
 For more information, see the documentation on Worg.
 
-@node DocBook export, OpenDocument Text export, @LaTeX{} and PDF export, Exporting
-@section DocBook export
-@cindex DocBook export
-@cindex PDF export
-@cindex Cui, Baoqiu
-
-Org contains a DocBook exporter written by Baoqiu Cui.  Once an Org file is
-exported to DocBook format, it can be further processed to produce other
-formats, including PDF, HTML, man pages, etc., using many available DocBook
-tools and stylesheets.
-
-Currently DocBook exporter only supports DocBook V5.0.
-
-@menu
-* DocBook export commands::     How to invoke DocBook export
-* Quoting DocBook code::        Incorporating DocBook code in Org files
-* Recursive sections::          Recursive sections in DocBook
-* Tables in DocBook export::    Tables are exported as HTML tables
-* Images in DocBook export::    How to insert figures into DocBook output
-* Special characters::          How to handle special characters
-@end menu
-
-@node DocBook export commands, Quoting DocBook code, DocBook export, DocBook export
-@subsection DocBook export commands
-
-@cindex region, active
-@cindex active region
-@cindex transient-mark-mode
-@table @kbd
-@orgcmd{C-c C-e D,org-export-as-docbook}
-@cindex property EXPORT_FILE_NAME
-Export as a DocBook file.  For an Org file, @file{myfile.org}, the DocBook XML
-file will be @file{myfile.xml}.  The file will be overwritten without
-warning.  If there is an active region@footnote{This requires
-@code{transient-mark-mode} to be turned on}, only the region will be
-exported.  If the selected region is a single tree@footnote{To select the
-current subtree, use @kbd{C-c @@}.}, the tree head will become the document
-title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
-property, that name will be used for the export.
-@orgcmd{C-c C-e V,org-export-as-docbook-pdf-and-open}
-Export as a DocBook file, process to PDF, then open the resulting PDF file.
-
-@vindex org-export-docbook-xslt-proc-command
-@vindex org-export-docbook-xsl-fo-proc-command
-Note that, in order to produce PDF output based on an exported DocBook file,
-you need to have XSLT processor and XSL-FO processor software installed on your
-system.  Check variables @code{org-export-docbook-xslt-proc-command} and
-@code{org-export-docbook-xsl-fo-proc-command}.
-
-@vindex org-export-docbook-xslt-stylesheet
-The stylesheet argument @code{%s} in variable
-@code{org-export-docbook-xslt-proc-command} is replaced by the value of
-variable @code{org-export-docbook-xslt-stylesheet}, which needs to be set by
-the user.  You can also overrule this global setting on a per-file basis by
-adding an in-buffer setting @code{#+XSLT:} to the Org file.
-
-@orgkey{C-c C-e v D}
-Export only the visible part of the document.
-@end table
-
-@node Quoting DocBook code, Recursive sections, DocBook export commands, DocBook export
-@subsection Quoting DocBook code
-
-You can quote DocBook code in Org files and copy it verbatim into exported
-DocBook file with the following constructs:
-
-@cindex #+DOCBOOK
-@cindex #+BEGIN_DOCBOOK
-@example
-#+DOCBOOK: Literal DocBook code for export
-@end example
-
-@noindent or
-@cindex #+BEGIN_DOCBOOK
-
-@example
-#+BEGIN_DOCBOOK
-All lines between these markers are exported by DocBook exporter
-literally.
-#+END_DOCBOOK
-@end example
-
-For example, you can use the following lines to include a DocBook warning
-admonition.  As to what this warning says, you should pay attention to the
-document context when quoting DocBook code in Org files.  You may make
-exported DocBook XML files invalid by not quoting DocBook code correctly.
-
-@example
-#+BEGIN_DOCBOOK
-<warning>
-  <para>You should know what you are doing when quoting DocBook XML code
-  in your Org file.  Invalid DocBook XML may be generated by
-  DocBook exporter if you are not careful!</para>
-</warning>
-#+END_DOCBOOK
-@end example
-
-@node Recursive sections, Tables in DocBook export, Quoting DocBook code, DocBook export
-@subsection Recursive sections
-@cindex DocBook recursive sections
-
-DocBook exporter exports Org files as articles using the @code{article}
-element in DocBook.  Recursive sections, i.e., @code{section} elements, are
-used in exported articles.  Top level headlines in Org files are exported as
-top level sections, and lower level headlines are exported as nested
-sections.  The entire structure of Org files will be exported completely, no
-matter how many nested levels of headlines there are.
-
-Using recursive sections makes it easy to port and reuse exported DocBook
-code in other DocBook document types like @code{book} or @code{set}.
-
-@node Tables in DocBook export, Images in DocBook export, Recursive sections, DocBook export
-@subsection Tables in DocBook export
-@cindex tables, in DocBook export
-
-Tables in Org files are exported as HTML tables, which have been supported since
-DocBook V4.3.
-
-If a table does not have a caption, an informal table is generated using the
-@code{informaltable} element; otherwise, a formal table will be generated
-using the @code{table} element.
-
-@node Images in DocBook export, Special characters, Tables in DocBook export, DocBook export
-@subsection Images in DocBook export
-@cindex images, inline in DocBook
-@cindex inlining images in DocBook
-
-Images that are linked to without a description part in the link, like
-@samp{[[file:img.jpg]]} or @samp{[[./img.jpg]]}, will be exported to DocBook
-using @code{mediaobject} elements.  Each @code{mediaobject} element contains
-an @code{imageobject} that wraps an @code{imagedata} element.  If you have
-specified a caption for an image as described in @ref{Images and tables}, a
-@code{caption} element will be added in @code{mediaobject}.  If a label is
-also specified, it will be exported as an @code{xml:id} attribute of the
-@code{mediaobject} element.
-
-@vindex org-export-docbook-default-image-attributes
-Image attributes supported by the @code{imagedata} element, like @code{align}
-or @code{width}, can be specified in two ways: you can either customize
-variable @code{org-export-docbook-default-image-attributes} or use the
-@code{#+ATTR_DOCBOOK:} line.  Attributes specified in variable
-@code{org-export-docbook-default-image-attributes} are applied to all inline
-images in the Org file to be exported (unless they are overridden by image
-attributes specified in @code{#+ATTR_DOCBOOK:} lines).
-
-The @code{#+ATTR_DOCBOOK:} line can be used to specify additional image
-attributes or override default image attributes for individual images.  If
-the same attribute appears in both the @code{#+ATTR_DOCBOOK:} line and
-variable @code{org-export-docbook-default-image-attributes}, the former
-takes precedence.  Here is an example about how image attributes can be
-set:
-
-@cindex #+CAPTION
-@cindex #+LABEL
-@cindex #+ATTR_DOCBOOK
-@example
-#+CAPTION:    The logo of Org mode
-#+LABEL:      unicorn-svg
-#+ATTR_DOCBOOK: scalefit="1" width="100%" depth="100%"
-[[./img/org-mode-unicorn.svg]]
-@end example
-
-@vindex org-export-docbook-inline-image-extensions
-By default, DocBook exporter recognizes the following image file types:
-@file{jpeg}, @file{jpg}, @file{png}, @file{gif}, and @file{svg}.  You can
-customize variable @code{org-export-docbook-inline-image-extensions} to add
-more types to this list as long as DocBook supports them.
-
-@node Special characters,  , Images in DocBook export, DocBook export
-@subsection Special characters in DocBook export
-@cindex Special characters in DocBook export
-
-@vindex org-export-docbook-doctype
-@vindex org-entities
-Special characters that are written in @TeX{}-like syntax, such as @code{\alpha},
-@code{\Gamma}, and @code{\Zeta}, are supported by DocBook exporter.  These
-characters are rewritten to XML entities, like @code{&alpha;},
-@code{&Gamma;}, and @code{&Zeta;}, based on the list saved in variable
-@code{org-entities}.  As long as the generated DocBook file includes the
-corresponding entities, these special characters are recognized.
-
-You can customize variable @code{org-export-docbook-doctype} to include the
-entities you need.  For example, you can set variable
-@code{org-export-docbook-doctype} to the following value to recognize all
-special characters included in XHTML entities:
-
-@example
-"<!DOCTYPE article [
-<!ENTITY % xhtml1-symbol PUBLIC
-\"-//W3C//ENTITIES Symbol for HTML//EN//XML\"
-\"http://www.w3.org/2003/entities/2007/xhtml1-symbol.ent\"
->
-%xhtml1-symbol;
-]>
-"
-@end example
-
 @c begin opendocument
 
-@node OpenDocument Text export, TaskJuggler export, DocBook export, Exporting
+@node OpenDocument Text export, TaskJuggler export, @LaTeX{} and PDF export, Exporting
 @section OpenDocument Text export
 @cindex K, Jambunathan
 @cindex ODT
@@ -11305,7 +11094,7 @@ the factory settings.
 
 @node Links in ODT export, Tables in ODT export, Applying custom styles, OpenDocument Text export
 @subsection Links in ODT export
-@cindex tables, in DocBook export
+@cindex links, in ODT export
 
 ODT exporter creates native cross-references for internal links.  It creates
 Internet-style links for all other links.
@@ -11319,7 +11108,7 @@ with a cross-reference and sequence number of the labeled entity.
 
 @node Tables in ODT export, Images in ODT export, Links in ODT export, OpenDocument Text export
 @subsection Tables in ODT export
-@cindex tables, in DocBook export
+@cindex tables, in ODT export
 
 Export of native Org mode tables (@pxref{Tables}) and simple @file{table.el}
 tables is supported.  However, export of complex @file{table.el} tables---tables
@@ -16903,7 +16692,9 @@ calculations and improved XEmacs compatibility, in particular by porting
 @item
 @i{Sacha Chua} suggested copying some linking code from Planner.
 @item
-@i{Baoqiu Cui} contributed the DocBook exporter.
+@i{Baoqiu Cui} contributed the DocBook exporter.  It has been deleted from
+Org 8.0: you can now export to Texinfo and export the @code{.texi} file to
+DocBook using @code{makeinfo}.
 @item
 @i{Eddward DeVilla} proposed and tested checkbox statistics.  He also
 came up with the idea of properties, and that there should be an API for
