@@ -369,6 +369,12 @@ file name, %b by the file base name \(i.e without extension) and
   :type '(repeat :tag "Shell command sequence"
 		 (string :tag "Shell command")))
 
+;;; Constants
+(defconst org-texinfo-max-toc-depth 4
+  "Maximum depth for creation of detailed menu listings.  Beyond
+  this depth texinfo will not recognize the nodes and will cause
+  errors.  Left as a constant in case this value ever changes.")
+
 
 ;;; Internal Functions
 
@@ -501,7 +507,8 @@ MENU is the parse-tree to work with.  LEVEL is the starting level
 for the menu headlines and from which recursion occurs.  INFO is
 a plist containing contextual information."
   (when level
-    (let ((max-depth (plist-get info :headline-levels)))
+    (let ((max-depth (min org-texinfo-max-toc-depth
+		      (plist-get info :headline-levels))))
       (when (> max-depth level)
 	(loop for headline in menu append
 	      (let* ((title (org-texinfo--menu-headlines headline info))
