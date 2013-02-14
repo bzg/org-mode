@@ -586,7 +586,11 @@ the following lines anywhere in the buffer:
    #+STARTUP: fold              (or `overview', this is equivalent)
    #+STARTUP: nofold            (or `showall', this is equivalent)
    #+STARTUP: content
-   #+STARTUP: showeverything"
+   #+STARTUP: showeverything
+
+By default, this option is ignored when Org opens agenda files
+for the first time.  If you want the agenda to honor the startup
+option, set `org-agenda-inhibit-startup' to nil."
   :group 'org-startup
   :type '(choice
 	  (const :tag "nofold: show all" nil)

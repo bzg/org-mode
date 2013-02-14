@@ -1288,6 +1288,7 @@ Copy the @i{visible} text in the region into the kill ring.
 @end table
 
 @vindex org-startup-folded
+@vindex org-agenda-inhibit-startup
 @cindex @code{overview}, STARTUP keyword
 @cindex @code{content}, STARTUP keyword
 @cindex @code{showall}, STARTUP keyword
@@ -1305,6 +1306,10 @@ buffer:
 #+STARTUP: showall
 #+STARTUP: showeverything
 @end example
+
+The startup visibility options are ignored when the file is open for the
+first time during the agenda generation: if you want the agenda to honor
+the startup visibility, set @code{org-agenda-inhibit-startup} to nil.
 
 @cindex property, VISIBILITY
 @noindent
