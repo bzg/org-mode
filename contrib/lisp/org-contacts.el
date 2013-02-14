@@ -139,38 +139,64 @@ This overrides `org-email-link-description-format' if set."
     map)
   "The keymap used in `org-contacts' result list.")
 
+(defvar org-contacts-db nil
+  "Org Contacts database.")
+
+(defvar org-contacts-last-update nil
+  "Last time the Org Contacts database has been updated.")
+
 (defun org-contacts-files ()
   "Return list of Org files to use for contact management."
   (or org-contacts-files (org-agenda-files t 'ifmode)))
 
+(defun org-contacts-db ()
+  "Return the latest Org Contacts Database"
+  (let* (todo-only
+	 (contacts-matcher
+	  (cdr (org-make-tags-matcher org-contacts-matcher)))
+	 (need-update?
+	  (or (null org-contacts-last-update)
+	      (some (lambda (file)
+		      (time-less-p org-contacts-last-update
+				   (elt (file-attributes file) 5)))
+		    (org-contacts-files))))
+	 markers result)
+    (when need-update?
+      (message "Update Org Contacts Database")
+      (dolist (file (org-contacts-files))
+	(org-check-agenda-file file)
+	(with-current-buffer (org-get-agenda-file-buffer file)
+	  (unless (eq major-mode 'org-mode)
+	    (error "File %s is no in `org-mode'" file))
+	  (org-scan-tags
+	   '(add-to-list 'markers (set-marker (make-marker) (point)))
+	   contacts-matcher
+	   todo-only)))
+      (dolist (marker markers result)
+	(org-with-point-at marker
+	  (add-to-list 'result
+		       (list (org-get-heading t) marker (org-entry-properties marker 'all)))))
+      (setf org-contacts-db result
+	    org-contacts-last-update (current-time)))
+    org-contacts-db))
+
 (defun org-contacts-filter (&optional name-match tags-match)
   "Search for a contact maching NAME-MATCH and TAGS-MATCH.
 If both match values are nil, return all contacts."
-  (let* (todo-only
-	 (tags-matcher
-	  (if tags-match
-	      (cdr (org-make-tags-matcher tags-match))
-	    t))
-	 (name-matcher
-	  (if name-match
-	      '(org-string-match-p name-match (org-get-heading t))
-	    t))
-	 (contacts-matcher
-	  (cdr (org-make-tags-matcher org-contacts-matcher)))
-	 markers result)
-    (dolist (file (org-contacts-files))
-      (org-check-agenda-file file)
-      (with-current-buffer (org-get-agenda-file-buffer file)
-        (unless (eq major-mode 'org-mode)
-          (error "File %s is no in `org-mode'" file))
-        (org-scan-tags
-         '(add-to-list 'markers (set-marker (make-marker) (point)))
-         `(and ,contacts-matcher ,tags-matcher ,name-matcher)
-	 todo-only)))
-    (dolist (marker markers result)
-      (org-with-point-at marker
-        (add-to-list 'result
-                     (list (org-get-heading t) marker (org-entry-properties marker 'all)))))))
+  (if (and (null name-match)
+	   (null tags-match))
+      (org-contacts-db)
+    (loop for contact in (org-contacts-db)
+	  if (or
+	      (and name-match
+		   (org-string-match-p name-match
+				       (first contact)))
+	      (and tags-match
+		   (some (lambda (tag)
+			   (org-string-match-p tags-match tag))
+			 (org-split-string
+			  (or (cdr (assoc-string "ALLTAGS" (caddr contact))) "") ":"))))
+	  collect contact)))
 
 (when (not (fboundp 'completion-table-case-fold))
   ;; That function is new in Emacs 24...
