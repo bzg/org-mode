@@ -2693,7 +2693,9 @@ contextual information."
 		(and (string-match  "<table\\(.*\\)>" table-tag)
 		     (match-string 1 table-tag))
 		(and label (format " id=\"%s\""
-				   (org-export-solidify-link-text label)))))))
+				   (org-export-solidify-link-text label)))
+		(unless (string= attributes "")
+		  (concat " " attributes))))))
        ;; Remove last blank line.
        (setq contents (substring contents 0 -1))
        (format "<table%s>\n%s\n%s\n%s\n</table>"
