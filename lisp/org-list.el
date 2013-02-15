@@ -1081,8 +1081,9 @@ It determines the number of whitespaces to append by looking at
 			    org-list-two-spaces-after-bullet-regexp bullet))
 		      "  "
 		    " ")))
-      (string-match "\\S-+\\([ \t]*\\)" bullet)
-      (replace-match spaces nil nil bullet 1))))
+      (if (string-match "\\S-+\\([ \t]*\\)" bullet)
+	  (replace-match spaces nil nil bullet 1)
+	bullet))))
 
 (defun org-list-swap-items (beg-A beg-B struct)
   "Swap item starting at BEG-A with item starting at BEG-B in STRUCT.
