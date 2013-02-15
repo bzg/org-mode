@@ -3715,10 +3715,7 @@ significant."
 		     (when foundp (throw 'exit foundp)))))
 	       (org-export-get-genealogy link)) nil)
 	    ;; No match with a common ancestor: try full parse-tree.
-	    (funcall find-headline
-		     (if (not match-title-p) path
-		       (cons (substring (car path) 1) (cdr path)))
-		     (plist-get info :parse-tree))))))))
+	    (funcall find-headline path (plist-get info :parse-tree))))))))
 
 (defun org-export-resolve-id-link (link info)
   "Return headline referenced as LINK destination.
@@ -5512,8 +5509,14 @@ options as CDR."
 		(not expertp)
 		(memq key '(? ? ?\s ?\d)))
       (case key
-	(? (ignore-errors (scroll-up-line)))
-	(? (ignore-errors (scroll-down-line)))
+	(? (if (not (pos-visible-in-window-p (point-max)))
+		 (ignore-errors (scroll-up-line))
+	       (message "End of buffer")
+	       (sit-for 1)))
+	(? (if (not (pos-visible-in-window-p (point-min)))
+		 (ignore-errors (scroll-down-line))
+	       (message "Beginning of buffer")
+	       (sit-for 1)))
 	(?\s (if (not (pos-visible-in-window-p (point-max)))
 		 (scroll-up nil)
 	       (message "End of buffer")
