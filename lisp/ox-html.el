@@ -1268,7 +1268,9 @@ INFO is a plist used as a communication channel."
 (defun org-html--build-mathjax-config (info)
   "Insert the user setup into the mathjax template.
 INFO is a plist used as a communication channel."
-  (when (memq (plist-get info :with-latex) '(mathjax t))
+  (when (and (memq (plist-get info :with-latex) '(mathjax t))
+	     (org-element-map (plist-get info :parse-tree)
+		 '(latex-fragment) 'identity info t))
     (let ((template org-html-mathjax-template)
 	  (options org-html-mathjax-options)
 	  (in-buffer (or (plist-get info :html-mathjax) ""))
