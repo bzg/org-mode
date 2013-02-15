@@ -19652,13 +19652,8 @@ This command does many different things, depending on context:
    ((run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-hook))
    (t
     (let* ((context (org-element-context)) (type (org-element-type context)))
-      ;; Test if point is within blanks at the end of an element.
-      (if (save-excursion
-	    (or (not context)
-		(beginning-of-line)
-		(and (looking-at "[ \t]*$")
-		     (skip-chars-forward " \r\t\n")
-		     (>= (point) (org-element-property :end context)))))
+      ;; Test if point is within a blank line.
+      (if (save-excursion (beginning-of-line) (looking-at "[ \t]*$"))
 	  (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
 	      (user-error "C-c C-c can do nothing useful at this location"))
 	;; For convenience: at the first line of a paragraph on the
@@ -22241,10 +22236,8 @@ the cursor is already beyond the end of the headline."
 			((fboundp 'move-end-of-line) 'move-end-of-line)
 			(t 'end-of-line))))
     (if (or (not special) arg) (call-interactively move-fun)
-      (let* ((element (ignore-errors
-			;; Don't throw an error outside elements
-			(save-excursion (beginning-of-line)
-					(org-element-at-point))))
+      (let* ((element (save-excursion (beginning-of-line)
+				      (org-element-at-point)))
 	     (type (org-element-type element)))
 	(cond
 	 ((memq type '(headline inlinetask))
