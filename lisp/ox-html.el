@@ -1241,7 +1241,7 @@ INFO is a plist used as a communication channel."
     (concat
      (format "<title>%s</title>\n" title)
      (format
-      "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>"
+      "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>\n"
       (or (and org-html-coding-system
 	       (fboundp 'coding-system-get)
 	       (coding-system-get org-html-coding-system 'mime-charset))
