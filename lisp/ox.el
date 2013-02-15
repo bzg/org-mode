@@ -3746,7 +3746,9 @@ has type \"radio\"."
   (let ((path (org-element-property :path link)))
     (org-element-map (plist-get info :parse-tree) 'radio-target
       (lambda (radio)
-	(when (equal (org-element-property :value radio) path) radio))
+	(and (compare-strings
+	      (org-element-property :value radio) 0 nil path 0 nil t)
+	     radio))
       info 'first-match)))
 
 
