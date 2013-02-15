@@ -19651,13 +19651,8 @@ This command does many different things, depending on context:
    ((run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-hook))
    (t
     (let* ((context (org-element-context)) (type (org-element-type context)))
-      ;; Test if point is within blanks at the end of an element.
-      (if (save-excursion
-	    (or (not context)
-		(beginning-of-line)
-		(and (looking-at "[ \t]*$")
-		     (skip-chars-forward " \r\t\n")
-		     (>= (point) (org-element-property :end context)))))
+      ;; Test if point is within a blank line.
+      (if (save-excursion (beginning-of-line) (looking-at "[ \t]*$"))
 	  (or (run-hook-with-args-until-success 'org-ctrl-c-ctrl-c-final-hook)
 	      (user-error "C-c C-c can do nothing useful at this location"))
 	;; For convenience: at the first line of a paragraph on the
