@@ -5256,11 +5256,15 @@ files or buffers, only the display.
   "Export dispatcher for Org mode.
 
 It provides an access to common export related tasks in a buffer.
-Its interface comes in two flavours: standard and expert.  While
-both share the same set of bindings, only the former displays the
-valid keys associations in a dedicated buffer.  Set
-`org-export-dispatch-use-expert-ui' to switch to one flavour or
-the other.
+Its interface comes in two flavours: standard and expert.
+
+While both share the same set of bindings, only the former
+displays the valid keys associations in a dedicated buffer.
+Scrolling (resp. line-wise motion) in this buffer is done with
+SPC and DEL (resp. C-n and C-p) keys.
+
+Set variable `org-export-dispatch-use-expert-ui' to switch to one
+flavour or the other.
 
 When ARG is \\[universal-argument], repeat the last export action, with the same set
 of options used back then, on the current buffer.
