@@ -9269,10 +9269,10 @@ according to FMT (default from `org-email-link-description-format')."
 	       (and (derived-mode-p 'org-mode)
 		    (save-excursion
 		      (org-back-to-heading t)
-		      (plist-get (cadr (org-element-at-point))
-				 :raw-value)))))
+		      (org-element-property :raw-value (org-element-at-point))))))
 	(lines org-context-in-file-links))
     (or string (setq s (concat "*" s)))  ; Add * for headlines
+    (setq s (replace-regexp-in-string "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" "" s))
     (when (and string (integerp lines) (> lines 0))
       (let ((slines (org-split-string s "\n")))
 	(when (< lines (length slines))
