@@ -4042,13 +4042,6 @@ Use customize to modify this, or restart Emacs after changing it."
 	   (string :tag "HTML end tag")
 	   (option (const verbatim)))))
 
-(defvar org-syntax-table
-  (let ((st (make-syntax-table)))
-    (mapc (lambda(c) (modify-syntax-entry
-		      (string-to-char (car c)) "w p" st))
-	  org-emphasis-alist)
-    st))
-
 (defvar org-protecting-blocks
   '("src" "example" "latex" "ascii" "html" "ditaa" "dot" "r" "R")
   "Blocks that contain text that is quoted, i.e. not processed as Org syntax.
@@ -5189,6 +5182,12 @@ The following commands are available:
     (org-set-tag-faces 'org-tag-faces org-tag-faces))
   ;; Calc embedded
   (org-set-local 'calc-embedded-open-mode "# ")
+  (mapc (lambda(c) (modify-syntax-entry (string-to-char (car c)) "w p"))
+	org-emphasis-alist)
+  (modify-syntax-entry ?< "(")
+  (modify-syntax-entry ?> ")")
+  (modify-syntax-entry ?{ "(")
+  (modify-syntax-entry ?} ")")
   (modify-syntax-entry ?@ "w")
   (modify-syntax-entry ?\" "\"")
   (if org-startup-truncated (setq truncate-lines t))
@@ -19166,7 +19165,7 @@ See the individual commands for more information."
    ((org-at-item-p) (call-interactively 'org-move-item-up))
    ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
 			   (call-interactively 'org-timestamp-up)))
-   (t (org-modifier-cursor-error))))
+   (t (call-interactively 'org-drag-line-backward))))
 
 (defun org-shiftmetadown (&optional arg)
   "Move subtree down or insert table row.
@@ -19181,7 +19180,7 @@ See the individual commands for more information."
    ((org-at-item-p) (call-interactively 'org-move-item-down))
    ((org-at-clock-log-p) (let ((org-clock-adjust-closest t))
 			   (call-interactively 'org-timestamp-down)))
-   (t (org-modifier-cursor-error))))
+   (t (call-interactively 'org-drag-line-forward))))
 
 (defsubst org-hidden-tree-error ()
   (error
@@ -22865,6 +22864,25 @@ Move to the previous element at the same level, when possible."
 	(org-element-swap-A-B elem next-elem)
 	(goto-char (+ pos size-next size-blank))))))
 
+(defun org-drag-line-forward (arg)
+  "Drag the line at point ARG lines forward."
+  (interactive "p")
+  (dotimes (n (abs arg))
+    (let ((c (current-column)))
+      (if (< 0 arg)
+	  (progn
+	    (beginning-of-line 2)
+	    (transpose-lines 1)
+	    (beginning-of-line 0))
+	(transpose-lines 1)
+	(beginning-of-line -1))
+      (org-move-to-column c))))
+
+(defun org-drag-line-backward (arg)
+  "Drag the line at point ARG lines backward."
+  (interactive "p")
+  (org-drag-line-forward (- arg)))
+
 (defun org-mark-element ()
   "Put point at beginning of this element, mark at end.
 
@@ -22902,13 +22920,6 @@ ones already marked."
       (narrow-to-region
        (org-element-property :begin elem)
        (org-element-property :end elem))))))
-
-(defun org-transpose-words ()
-  "Transpose words, using `org-mode' syntax table."
-  (interactive)
-  (with-syntax-table org-syntax-table
-    (call-interactively 'transpose-words)))
-(org-remap org-mode-map 'transpose-words 'org-transpose-words)
 
 (defun org-transpose-element ()
   "Transpose current and previous elements, keeping blank lines between.
