@@ -6568,7 +6568,7 @@ Any match of REMOVE-RE will be removed from TXT."
 			     (and org-agenda-search-headline-for-time txt))))
 	     (time-of-day (and dotime (org-get-time-of-day ts)))
 	     stamp plain s0 s1 s2 rtn srp l
-	     duration thecategory)
+	     duration thecategory breadcrumbs)
 	(and (derived-mode-p 'org-mode) buffer-file-name
 	     (add-to-list 'org-agenda-contributing-files buffer-file-name))
 	(when (and dotime time-of-day)
@@ -6801,7 +6801,7 @@ and stored in the variable `org-prefix-format-compiled'."
       (if (equal var 'time) (setq org-prefix-has-time t))
       (if (equal var 'tag)  (setq org-prefix-has-tag  t))
       (if (equal var 'effort) (setq org-prefix-has-effort t))
-      (if (equal var 'breadcrumbs) (setq org-prefix-has-breadcumbs t))
+      (if (equal var 'breadcrumbs) (setq org-prefix-has-breadcrumbs t))
       (setq f (concat "%" (match-string 2 s) "s"))
       (when (equal var 'category)
 	(setq org-prefix-category-length
