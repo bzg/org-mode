@@ -4622,26 +4622,40 @@ first element of current section."
 	   (list (org-element-headline-parser (point-max) t))))
      ;; Otherwise move at the beginning of the section containing
      ;; point.
-     (let ((origin (point))
-	   (end (save-excursion
-		  (org-with-limited-levels (outline-next-heading)) (point)))
-	   element type special-flag trail struct prevs parent)
-       (org-with-limited-levels
-	(if (org-before-first-heading-p) (goto-char (point-min))
-	  (org-back-to-heading)
-	  (forward-line)))
-       (org-skip-whitespace)
-       (beginning-of-line)
-       ;; Parse successively each element, skipping those ending
-       ;; before original position.
-       (catch 'exit
-         (while t
-           (setq element
+     (catch 'exit
+       (let ((origin (point))
+	     (end (save-excursion
+		    (org-with-limited-levels (outline-next-heading)) (point)))
+	     element type special-flag trail struct prevs parent)
+	 (org-with-limited-levels
+	  (if (org-before-first-heading-p)
+	      ;; In empty lines at buffer's beginning, return nil.
+	      (progn (goto-char (point-min))
+		     (org-skip-whitespace)
+		     (when (or (eobp) (> (line-beginning-position) origin))
+		       (throw 'exit nil)))
+	    (org-back-to-heading)
+	    (forward-line)
+	    (org-skip-whitespace)
+	    (when (> (line-beginning-position) origin)
+	      ;; In blank lines just after the headline, point still
+	      ;; belongs to the headline.
+	      (throw 'exit
+		     (progn (org-back-to-heading)
+			    (if (not keep-trail)
+				(org-element-headline-parser (point-max) t)
+			      (list (org-element-headline-parser
+				     (point-max) t))))))))
+	 (beginning-of-line)
+	 ;; Parse successively each element, skipping those ending
+	 ;; before original position.
+	 (while t
+	   (setq element
 		 (org-element--current-element end 'element special-flag struct)
-                 type (car element))
+		 type (car element))
 	   (org-element-put-property element :parent parent)
 	   (when keep-trail (push element trail))
-           (cond
+	   (cond
 	    ;; 1. Skip any element ending before point.  Also skip
 	    ;;    element ending at point when we're sure that another
 	    ;;    element has started.
