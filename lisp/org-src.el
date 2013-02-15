@@ -174,6 +174,7 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 
 (defvar org-src-mode-map (make-sparse-keymap))
 (define-key org-src-mode-map "\C-c'" 'org-edit-src-exit)
+(define-key org-src-mode-map "\C-ck" 'org-edit-src-abort)
 (define-key org-src-mode-map "\C-x\C-s" 'org-edit-src-save)
 
 (defvar org-edit-src-force-single-line nil)
@@ -241,8 +242,8 @@ the display of windows containing the Org buffer and the code buffer."
 	    end (move-marker end (nth 1 info))
 	    msg (if allow-write-back-p
 		    (substitute-command-keys
-		     "Edit, then exit with C-c ' (C-c and single quote)")
-		  "Exit with C-c ' (C-c and single quote)")
+		     "Edit, then exit with C-c ' (C-c and single quote) -- C-c k to abort")
+		  "Exit with C-c ' (C-c and single quote) -- C-c k to abort")
 	    code (or code (buffer-substring-no-properties beg end))
 	    lang (or (cdr (assoc (nth 2 info) org-src-lang-modes))
 		     (nth 2 info))
@@ -712,8 +713,9 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
 	;; Block is hidden; put point at start of block
 	(beginning-of-line 0)
       ;; Block is visible, put point where it was in the code buffer
-      (org-goto-line (1- (+ (org-current-line) line)))
-      (org-move-to-column (if preserve-indentation col (+ col total-nindent delta))))
+      (when allow-write-back-p
+	(org-goto-line (1- (+ (org-current-line) line)))
+	(org-move-to-column (if preserve-indentation col (+ col total-nindent delta)))))
     (unless (eq context 'save)
       (move-marker beg nil)
       (move-marker end nil)))
@@ -721,6 +723,12 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
     (when org-edit-src-saved-temp-window-config
       (set-window-configuration org-edit-src-saved-temp-window-config)
       (setq org-edit-src-saved-temp-window-config nil))))
+
+(defun org-edit-src-abort ()
+  "Abort editing of the src code and return to the Org buffer."
+  (interactive)
+  (let (org-edit-src-allow-write-back-p)
+    (org-edit-src-exit 'exit)))
 
 (defmacro org-src-in-org-buffer (&rest body)
   `(let ((p (point)) (m (mark)) (ul buffer-undo-list) msg)
