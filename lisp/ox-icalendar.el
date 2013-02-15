@@ -53,7 +53,7 @@
 
 (defgroup org-export-icalendar nil
   "Options specific for iCalendar export back-end."
-  :tag "Org iCalendar"
+  :tag "Org Export iCalendar"
   :group 'org-export)
 
 (defcustom org-icalendar-combined-agenda-file "~/org.ics"
