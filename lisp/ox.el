@@ -5242,9 +5242,9 @@ files or buffers, only the display.
 ;;; The Dispatcher
 ;;
 ;; `org-export-dispatch' is the standard interactive way to start an
-;; export process.  It uses `org-export-dispatch-ui' as a subroutine
+;; export process.  It uses `org-export--dispatch-ui' as a subroutine
 ;; for its interface, which, in turn, delegates response to key
-;; pressed to `org-export-dispatch-action'.
+;; pressed to `org-export--dispatch-action'.
 
 ;;;###autoload
 (defun org-export-dispatch (&optional arg)
@@ -5269,7 +5269,7 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
 		     (unwind-protect
 			 ;; Store this export command.
 			 (setq org-export-dispatch-last-action
-			       (org-export-dispatch-ui
+			       (org-export--dispatch-ui
 				(list org-export-initial-scope
 				      (and org-export-in-background 'async))
 				nil
@@ -5301,7 +5301,7 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
 			  (and (memq 'visible optns) t)
 			  (and (memq 'body optns) t))))))
 
-(defun org-export-dispatch-ui (options first-key expertp)
+(defun org-export--dispatch-ui (options first-key expertp)
   "Handle interface for `org-export-dispatch'.
 
 OPTIONS is a list containing current interactive options set for
@@ -5460,55 +5460,78 @@ back to standard interface."
     ;; With expert UI, just read key with a fancy prompt.  In standard
     ;; UI, display an intrusive help buffer.
     (if expertp
-	(org-export-dispatch-action
+	(org-export--dispatch-action
 	 expert-prompt allowed-keys backends options first-key expertp)
       ;; At first call, create frame layout in order to display menu.
       (unless (get-buffer "*Org Export Dispatcher*")
 	(delete-other-windows)
 	(org-switch-to-buffer-other-window
 	 (get-buffer-create "*Org Export Dispatcher*"))
-	(setq cursor-type nil))
+	(setq cursor-type nil)
+	;; Prevent square brackets from being highlighted when point
+	;; moves onto them.
+	(modify-syntax-entry ?\[ "w"))
       ;; At this point, the buffer containing the menu exists and is
       ;; visible in the current window.  So, refresh it.
       (with-current-buffer "*Org Export Dispatcher*"
-	(erase-buffer)
-	(insert help))
+	;; Refresh help.  Maintain display continuity by re-visiting
+	;; previous window position.
+	(let ((pos (window-start)))
+	  (erase-buffer)
+	  (insert help)
+	  (set-window-start nil pos)))
       (org-fit-window-to-buffer)
-      (org-export-dispatch-action
+      (org-export--dispatch-action
        standard-prompt allowed-keys backends options first-key expertp))))
 
-(defun org-export-dispatch-action
+(defun org-export--dispatch-action
   (prompt allowed-keys backends options first-key expertp)
   "Read a character from command input and act accordingly.
 
 PROMPT is the displayed prompt, as a string.  ALLOWED-KEYS is
 a list of characters available at a given step in the process.
 BACKENDS is a list of menu entries.  OPTIONS, FIRST-KEY and
-EXPERTP are the same as defined in `org-export-dispatch-ui',
+EXPERTP are the same as defined in `org-export--dispatch-ui',
 which see.
 
 Toggle export options when required.  Otherwise, return value is
 a list with action as CAR and a list of interactive export
 options as CDR."
-  (let ((key (read-char-exclusive prompt)))
+  (let (key)
+    ;; Scrolling: when in non-expert mode, act on motion keys (C-n,
+    ;; C-p, SPC, DEL).
+    (while (and (setq key (read-char-exclusive prompt))
+		(not expertp)
+		(memq key '(? ? ?\s ?\d)))
+      (case key
+	(? (ignore-errors (scroll-up-line)))
+	(? (ignore-errors (scroll-down-line)))
+	(?\s (if (not (pos-visible-in-window-p (point-max)))
+		 (scroll-up nil)
+	       (message "End of buffer")
+	       (sit-for 1)))
+	(?\d (if (not (pos-visible-in-window-p (point-min)))
+		 (scroll-down nil)
+	       (message "Beginning of buffer")
+	       (sit-for 1)))))
     (cond
      ;; Ignore undefined associations.
      ((not (memq key allowed-keys))
       (ding)
       (unless expertp (message "Invalid key") (sit-for 1))
-      (org-export-dispatch-ui options first-key expertp))
+      (org-export--dispatch-ui options first-key expertp))
      ;; q key at first level aborts export.  At second
      ;; level, cancel first key instead.
      ((eq key ?q) (if (not first-key) (error "Export aborted")
-		    (org-export-dispatch-ui options nil expertp)))
+		    (org-export--dispatch-ui options nil expertp)))
      ;; Help key: Switch back to standard interface if
      ;; expert UI was active.
-     ((eq key ??) (org-export-dispatch-ui options first-key nil))
+     ((eq key ??) (org-export--dispatch-ui options first-key nil))
      ;; Switch to asynchronous export stack.
      ((eq key ?&) '(stack))
      ;; Toggle export options.
      ((memq key '(? ? ? ? ?))
-      (org-export-dispatch-ui
+      (org-export--dispatch-ui
        (let ((option (case key (? 'body) (? 'visible) (? 'subtree)
 			   (? 'force) (? 'async))))
 	 (if (memq option options) (remq option options)
@@ -5537,7 +5560,7 @@ options as CDR."
 			(member (assq first-key backends) backends)))))
 	    options))
      ;; Otherwise, enter sub-menu.
-     (t (org-export-dispatch-ui options key expertp)))))
+     (t (org-export--dispatch-ui options key expertp)))))
 
 
 
