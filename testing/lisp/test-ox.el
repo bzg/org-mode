@@ -1432,18 +1432,27 @@ Another text. (ref:text)
 (ert-deftest test-org-export/resolve-radio-link ()
   "Test `org-export-resolve-radio-link' specifications."
   ;; Standard test.
-  (org-test-with-temp-text "<<<radio>>> radio"
-    (org-update-radio-target-regexp)
-    (should
+  (should
+   (org-test-with-temp-text "<<<radio>>> radio"
+     (org-update-radio-target-regexp)
+     (let* ((tree (org-element-parse-buffer))
+	    (info `(:parse-tree ,tree)))
+       (org-export-resolve-radio-link
+	(org-element-map tree 'link 'identity info t)
+	info))))
+  ;; Radio targets are case-insensitive.
+  (should
+   (org-test-with-temp-text "<<<RADIO>>> radio"
+     (org-update-radio-target-regexp)
      (let* ((tree (org-element-parse-buffer))
 	    (info `(:parse-tree ,tree)))
        (org-export-resolve-radio-link
 	(org-element-map tree 'link 'identity info t)
 	info))))
   ;; Radio target with objects.
-  (org-test-with-temp-text "<<<radio \\alpha>>> radio \\alpha"
-    (org-update-radio-target-regexp)
-    (should
+  (should
+   (org-test-with-temp-text "<<<radio \\alpha>>> radio \\alpha"
+     (org-update-radio-target-regexp)
      (let* ((tree (org-element-parse-buffer))
 	    (info `(:parse-tree ,tree)))
        (org-export-resolve-radio-link
