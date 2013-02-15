@@ -1270,7 +1270,7 @@ INFO is a plist used as a communication channel."
 INFO is a plist used as a communication channel."
   (when (and (memq (plist-get info :with-latex) '(mathjax t))
 	     (org-element-map (plist-get info :parse-tree)
-		 '(latex-fragment) 'identity info t))
+		 '(latex-fragment latex-environment) 'identity info t))
     (let ((template org-html-mathjax-template)
 	  (options org-html-mathjax-options)
 	  (in-buffer (or (plist-get info :html-mathjax) ""))
