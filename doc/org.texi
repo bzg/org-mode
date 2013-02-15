@@ -10208,11 +10208,11 @@ creates two levels of headings and does the rest as items.
 
 @node HTML preamble and postamble, Quoting HTML tags, HTML Export commands, HTML export
 @subsection HTML preamble and postamble
-@vindex org-export-html-preamble
-@vindex org-export-html-postamble
-@vindex org-export-html-preamble-format
-@vindex org-export-html-postamble-format
-@vindex org-export-html-validation-link
+@vindex org-html-preamble
+@vindex org-html-postamble
+@vindex org-html-preamble-format
+@vindex org-html-postamble-format
+@vindex org-html-validation-link
 @vindex org-export-author-info
 @vindex org-export-email-info
 @vindex org-export-creator-info
@@ -10220,25 +10220,25 @@ creates two levels of headings and does the rest as items.
 
 The HTML exporter lets you define a preamble and a postamble.
 
-The default value for @code{org-export-html-preamble} is @code{t}, which
-means that the preamble is inserted depending on the relevant format string
-in @code{org-export-html-preamble-format}.
+The default value for @code{org-html-preamble} is @code{t}, which means
+that the preamble is inserted depending on the relevant format string in
+@code{org-html-preamble-format}.
 
-Setting @code{org-export-html-preamble} to a string will override the default
+Setting @code{org-html-preamble} to a string will override the default
 format string.  Setting it to a function, will insert the output of the
 function, which must be a string; such a function takes no argument but you
 can check against the value of @code{opt-plist}, which contains the list of
 publishing properties for the current file.  Setting to @code{nil} will not
 insert any preamble.
 
-The default value for @code{org-export-html-postamble} is @code{'auto}, which
+The default value for @code{org-html-postamble} is @code{'auto}, which
 means that the HTML exporter will look for the value of
 @code{org-export-author-info}, @code{org-export-email-info},
 @code{org-export-creator-info} and @code{org-export-time-stamp-file},
-@code{org-export-html-validation-link} and build the postamble from these
-values.  Setting @code{org-export-html-postamble} to @code{t} will insert the
+@code{org-html-validation-link} and build the postamble from these
+values.  Setting @code{org-html-postamble} to @code{t} will insert the
 postamble from the relevant format string found in
-@code{org-export-html-postamble-format}.  Setting it to @code{nil} will not
+@code{org-html-postamble-format}.  Setting it to @code{nil} will not
 insert any postamble.
 
 @node Quoting HTML tags, Links in HTML export, HTML preamble and postamble, HTML export
@@ -10297,10 +10297,10 @@ and @code{style} attributes for a link:
 @node Tables in HTML export, Images in HTML export, Links in HTML export, HTML export
 @subsection Tables
 @cindex tables, in HTML
-@vindex org-export-html-table-tag
+@vindex org-html-table-tag
 
 Org mode tables are exported to HTML using the table tag defined in
-@code{org-export-html-table-tag}.  The default setting makes tables without
+@code{org-html-table-tag}.  The default setting makes tables without
 cell borders and frame.  If you would like to change this for individual
 tables, place something like the following before the table:
 
@@ -10316,11 +10316,11 @@ tables, place something like the following before the table:
 
 @cindex images, inline in HTML
 @cindex inlining images in HTML
-@vindex org-export-html-inline-images
+@vindex org-html-inline-images
 HTML export can inline images given as links in the Org file, and
 it can make an image the clickable part of a link.  By
 default@footnote{But see the variable
-@code{org-export-html-inline-images}.}, images are inlined if a link does
+@code{org-html-inline-images}.}, images are inlined if a link does
 not have a description.  So @samp{[[file:myimg.jpg]]} will be inlined,
 while @samp{[[file:myimg.jpg][the image]]} will just produce a link
 @samp{the image} that points to the image.  If the description part
@@ -10363,15 +10363,15 @@ page views, you should install@footnote{Installation instructions can be
 found on the MathJax website, see
 @uref{http://www.mathjax.org/resources/docs/?installation.html}.} MathJax on
 your own server in order to limit the load of our server.}  To configure
-@file{MathJax}, use the variable @code{org-export-html-mathjax-options} or
+@file{MathJax}, use the variable @code{org-html-mathjax-options} or
 insert something like the following into the buffer:
 
 @example
-#+MATHJAX: align:"left" mathml:t path:"/MathJax/MathJax.js"
+#+HTML_MATHJAX: align:"left" mathml:t path:"/MathJax/MathJax.js"
 @end example
 
 @noindent See the docstring of the variable
-@code{org-export-html-mathjax-options} for the meaning of the parameters in
+@code{org-html-mathjax-options} for the meaning of the parameters in
 this line.
 
 If you prefer, you can also request that @LaTeX{} fragments are processed
@@ -10411,13 +10411,13 @@ respectively.  For example
 @cindex CSS, for HTML export
 @cindex HTML export, CSS
 
-@vindex org-export-html-todo-kwd-class-prefix
-@vindex org-export-html-tag-class-prefix
+@vindex org-html-todo-kwd-class-prefix
+@vindex org-html-tag-class-prefix
 You can also give style information for the exported file.  The HTML exporter
 assigns the following special CSS classes@footnote{If the classes on TODO
 keywords and tags lead to conflicts, use the variables
-@code{org-export-html-todo-kwd-class-prefix} and
-@code{org-export-html-tag-class-prefix} to make them unique.} to appropriate
+@code{org-html-todo-kwd-class-prefix} and
+@code{org-html-tag-class-prefix} to make them unique.} to appropriate
 parts of the document---your style specifications may change these, in
 addition to any of the standard classes like for headlines, tables, etc.
 @example
@@ -10449,18 +10449,17 @@ p.footnote          @r{footnote definition paragraph, containing a footnote}
 .footnum            @r{footnote number in footnote definition (always <sup>)}
 @end example
 
-@vindex org-export-html-style-default
-@vindex org-export-html-style-include-default
-@vindex org-export-html-style
-@vindex org-export-html-extra
-@vindex org-export-html-style-default
+@vindex org-html-style-default
+@vindex org-html-style-include-default
+@vindex org-html-style
+@vindex org-html-style-default
 Each exported file contains a compact default style that defines these
 classes in a basic way@footnote{This style is defined in the constant
-@code{org-export-html-style-default}, which you should not modify.  To turn
+@code{org-html-style-default}, which you should not modify.  To turn
 inclusion of these defaults off, customize
-@code{org-export-html-style-include-default}}.  You may overwrite these
-settings, or add to them by using the variables @code{org-export-html-style}
-(for Org-wide settings) and @code{org-export-html-style-extra} (for more
+@code{org-html-style-include-default}}.  You may overwrite these
+settings, or add to them by using the variables @code{org-html-style}
+(for Org-wide settings) and @code{org-html-style-extra} (for more
 fine-grained settings, like file-local settings).  To set the latter variable
 individually for each file, you can use
 
@@ -10555,17 +10554,16 @@ pages, configure the variable @code{org-export-html-use-infojs}.
 @cindex PDF export
 @cindex Guerry, Bastien
 
-Org mode contains a @LaTeX{} exporter written by Bastien Guerry.  With
-further processing@footnote{The default @LaTeX{} output is designed for
-processing with @code{pdftex} or @LaTeX{}.  It includes packages that are not
-compatible with @code{xetex} and possibly @code{luatex}.  See the variables
+Org mode contains a @LaTeX{} exporter.  With further processing@footnote{The
+default @LaTeX{} output is designed for processing with @code{pdftex} or
+@LaTeX{}.  It includes packages that are not compatible with @code{xetex} and
+possibly @code{luatex}.  See the variables
 @code{org-latex-default-packages-alist} and
-@code{org-latex-packages-alist}.}, this backend is also used to
-produce PDF output.  Since the @LaTeX{} output uses @file{hyperref} to
-implement links and cross references, the PDF output file will be fully
-linked.  Beware of the fact that your @code{org} file has to be properly
-structured in order to be correctly exported: respect the hierarchy of
-sections.
+@code{org-latex-packages-alist}.}, this backend is also used to produce PDF
+output.  Since the @LaTeX{} output uses @file{hyperref} to implement links
+and cross references, the PDF output file will be fully linked.  Beware of
+the fact that your @code{org} file has to be properly structured in order to
+be correctly exported: respect the hierarchy of sections.
 
 @menu
 * @LaTeX{}/PDF export commands::
@@ -12237,8 +12235,8 @@ variables in Org.  The table below lists these properties along
 with the variable they belong to.  See the documentation string for the
 respective variable for details.
 
-@vindex org-export-html-link-up
-@vindex org-export-html-link-home
+@vindex org-html-link-up
+@vindex org-html-link-home
 @vindex org-export-default-language
 @vindex org-display-custom-times
 @vindex org-export-headline-levels
@@ -12268,27 +12266,25 @@ respective variable for details.
 @vindex org-export-time-stamp-file
 @vindex org-export-with-tables
 @vindex org-export-highlight-first-table-line
-@vindex org-export-html-style-include-default
-@vindex org-export-html-style-include-scripts
-@vindex org-export-html-style
-@vindex org-export-html-style-extra
-@vindex org-export-html-link-org-files-as-html
-@vindex org-export-html-inline-images
-@vindex org-export-html-extension
-@vindex org-export-html-table-tag
-@vindex org-export-html-expand
-@vindex org-export-html-with-timestamp
+@vindex org-html-style-include-default
+@vindex org-html-style-include-scripts
+@vindex org-html-style
+@vindex org-html-style-extra
+@vindex org-html-link-org-files-as-html
+@vindex org-html-inline-images
+@vindex org-html-extension
+@vindex org-html-table-tag
 @vindex org-export-publishing-directory
-@vindex org-export-html-preamble
-@vindex org-export-html-postamble
+@vindex org-html-preamble
+@vindex org-html-postamble
 @vindex user-full-name
 @vindex user-mail-address
 @vindex org-export-select-tags
 @vindex org-export-exclude-tags
 
 @multitable @columnfractions 0.32 0.68
-@item @code{:link-up}               @tab @code{org-export-html-link-up}
-@item @code{:link-home}             @tab @code{org-export-html-link-home}
+@item @code{:link-up}               @tab @code{org-html-link-up}
+@item @code{:link-home}             @tab @code{org-html-link-home}
 @item @code{:language}              @tab @code{org-export-default-language}
 @item @code{:customtime}            @tab @code{org-display-custom-times}
 @item @code{:headline-levels}       @tab @code{org-export-headline-levels}
@@ -12319,19 +12315,17 @@ respective variable for details.
 @item @code{:creator-info}          @tab @code{org-export-creator-info}
 @item @code{:tables}                @tab @code{org-export-with-tables}
 @item @code{:table-auto-headline}   @tab @code{org-export-highlight-first-table-line}
-@item @code{:style-include-default} @tab @code{org-export-html-style-include-default}
-@item @code{:style-include-scripts} @tab @code{org-export-html-style-include-scripts}
-@item @code{:style}                 @tab @code{org-export-html-style}
-@item @code{:style-extra}           @tab @code{org-export-html-style-extra}
-@item @code{:convert-org-links}     @tab @code{org-export-html-link-org-files-as-html}
-@item @code{:inline-images}         @tab @code{org-export-html-inline-images}
-@item @code{:html-extension}        @tab @code{org-export-html-extension}
-@item @code{:html-preamble}         @tab @code{org-export-html-preamble}
-@item @code{:html-postamble}        @tab @code{org-export-html-postamble}
-@item @code{:xml-declaration}       @tab @code{org-export-html-xml-declaration}
-@item @code{:html-table-tag}        @tab @code{org-export-html-table-tag}
-@item @code{:expand-quoted-html}    @tab @code{org-export-html-expand}
-@item @code{:timestamp}             @tab @code{org-export-html-with-timestamp}
+@item @code{:style-include-default} @tab @code{org-html-style-include-default}
+@item @code{:style-include-scripts} @tab @code{org-html-style-include-scripts}
+@item @code{:style}                 @tab @code{org-html-style}
+@item @code{:style-extra}           @tab @code{org-html-style-extra}
+@item @code{:convert-org-links}     @tab @code{org-html-link-org-files-as-html}
+@item @code{:inline-images}         @tab @code{org-html-inline-images}
+@item @code{:html-extension}        @tab @code{org-html-extension}
+@item @code{:html-preamble}         @tab @code{org-html-preamble}
+@item @code{:html-postamble}        @tab @code{org-html-postamble}
+@item @code{:xml-declaration}       @tab @code{org-html-xml-declaration}
+@item @code{:html-table-tag}        @tab @code{org-html-table-tag}
 @item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
 @item @code{:select-tags}           @tab @code{org-export-select-tags}
 @item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
