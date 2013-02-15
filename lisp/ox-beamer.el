@@ -844,7 +844,7 @@ holding export options."
 			"^[ \t]*\\\\documentclass\\(\\(\\[.*\\]\\)?\\)"
 			class-options header t nil 1)))))
 	  (if (not document-class-string)
-	      (user-error "Unknown LaTeX class `%s'")
+	      (user-error "Unknown LaTeX class `%s'" class)
 	    (org-latex-guess-babel-language
 	     (org-latex-guess-inputenc
 	      (org-splice-latex-header
