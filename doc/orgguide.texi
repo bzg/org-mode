@@ -13,9 +13,9 @@
 @c Version and Contact Info
 @set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
 @set AUTHOR Carsten Dominik
-@set MAINTAINER Carsten Dominik
-@set MAINTAINEREMAIL @email{carsten at orgmode dot org}
-@set MAINTAINERCONTACT @uref{mailto:carsten at orgmode dot org,contact the maintainer}
+@set MAINTAINER Bastien Guerry
+@set MAINTAINEREMAIL @email{bzg at gnu dot org}
+@set MAINTAINERCONTACT @uref{mailto:bzg at gnu dot org,contact the maintainer}
 @c %**end of header
 @finalout
 
@@ -2389,7 +2389,7 @@ Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 
 By default, the @LaTeX{} output uses the class @code{article}.  You can
 change this by adding an option like @code{#+LaTeX_CLASS: myclass} in your
-file.  The class must be listed in @code{org-export-latex-classes}.
+file.  The class must be listed in @code{org-latex-classes}.
 
 Embedded @LaTeX{} as described in @ref{Embedded @LaTeX{}}, will be correctly
 inserted into the @LaTeX{} file.  Similarly to the HTML exporter, you can use
