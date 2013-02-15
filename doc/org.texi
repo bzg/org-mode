@@ -9400,7 +9400,7 @@ the HTML backend (it requires version 1.34 of the @file{htmlize.el} package,
 which is distributed with Org).  Fontified code chunks in @LaTeX{} can be
 achieved using either the listings or the
 @url{http://code.google.com/p/minted, minted,} package.  Refer to
-@code{org-export-latex-listings} documentation for details.}.  This is done
+@code{org-latex-listings} documentation for details.}.  This is done
 with the @samp{src} block, where you also need to specify the name of the
 major mode that should be used to fontify the example@footnote{Code in
 @samp{src} blocks may also be evaluated either interactively or on export.
@@ -9967,7 +9967,7 @@ Insert template with export options, see example below.
 #+TEXT:        Some descriptive text to be inserted at the beginning.
 #+TEXT:        Several lines may be given.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
-#+BIND:        lisp-var lisp-val, e.g., @code{org-export-latex-low-levels itemize}
+#+BIND:        lisp-var lisp-val, e.g., @code{org-latex-image-default-option width=.7\\linewidth}
                @r{You need to confirm using these, or configure @code{org-export-allow-BIND}}
 #+HTML_LINK_UP:     the ``up'' link of an exported page
 #+HTML_LINK_HOME:   the ``home'' link of an exported page
@@ -10559,8 +10559,8 @@ Org mode contains a @LaTeX{} exporter written by Bastien Guerry.  With
 further processing@footnote{The default @LaTeX{} output is designed for
 processing with @code{pdftex} or @LaTeX{}.  It includes packages that are not
 compatible with @code{xetex} and possibly @code{luatex}.  See the variables
-@code{org-export-latex-default-packages-alist} and
-@code{org-export-latex-packages-alist}.}, this backend is also used to
+@code{org-latex-default-packages-alist} and
+@code{org-latex-packages-alist}.}, this backend is also used to
 produce PDF output.  Since the @LaTeX{} output uses @file{hyperref} to
 implement links and cross references, the PDF output file will be fully
 linked.  Beware of the fact that your @code{org} file has to be properly
@@ -10638,30 +10638,30 @@ creates two levels of headings and does the rest as items.
 
 By default, the @LaTeX{} output uses the class @code{article}.
 
-@vindex org-export-latex-default-class
-@vindex org-export-latex-classes
-@vindex org-export-latex-default-packages-alist
-@vindex org-export-latex-packages-alist
+@vindex org-latex-default-class
+@vindex org-latex-classes
+@vindex org-latex-default-packages-alist
+@vindex org-latex-packages-alist
 @cindex #+LaTeX_HEADER
 @cindex #+LaTeX_CLASS
 @cindex #+LaTeX_CLASS_OPTIONS
 @cindex property, LaTeX_CLASS
 @cindex property, LaTeX_CLASS_OPTIONS
 You can change this globally by setting a different value for
-@code{org-export-latex-default-class} or locally by adding an option like
+@code{org-latex-default-class} or locally by adding an option like
 @code{#+LaTeX_CLASS: myclass} in your file, or with a @code{:LaTeX_CLASS:}
 property that applies when exporting a region containing only this (sub)tree.
-The class must be listed in @code{org-export-latex-classes}.  This variable
+The class must be listed in @code{org-latex-classes}.  This variable
 defines a header template for each class@footnote{Into which the values of
-@code{org-export-latex-default-packages-alist} and
-@code{org-export-latex-packages-alist} are spliced.}, and allows you to
+@code{org-latex-default-packages-alist} and
+@code{org-latex-packages-alist} are spliced.}, and allows you to
 define the sectioning structure for each class.  You can also define your own
 classes there.  @code{#+LaTeX_CLASS_OPTIONS} or a @code{:LaTeX_CLASS_OPTIONS:}
 property can specify the options for the @code{\documentclass} macro.  The
 options to documentclass have to be provided, as expected by @LaTeX{}, within
 square brackets.  You can also use @code{#+LaTeX_HEADER: \usepackage@{xyz@}}
 to add lines to the header.  See the docstring of
-@code{org-export-latex-classes} for more information.  An example is shown
+@code{org-latex-classes} for more information.  An example is shown
 below.
 
 @example
@@ -12308,7 +12308,7 @@ respective variable for details.
 @item @code{:priority}              @tab @code{org-export-with-priority}
 @item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
 @item @code{:LaTeX-fragments}       @tab @code{org-export-with-LaTeX-fragments}
-@item @code{:latex-listings}        @tab @code{org-export-latex-listings}
+@item @code{:latex-listings}        @tab @code{org-latex-listings}
 @item @code{:skip-before-1st-heading} @tab @code{org-export-skip-text-before-1st-heading}
 @item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
 @item @code{:timestamps}            @tab @code{org-export-with-timestamps}
@@ -12335,7 +12335,7 @@ respective variable for details.
 @item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
 @item @code{:select-tags}           @tab @code{org-export-select-tags}
 @item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
-@item @code{:latex-image-options}   @tab @code{org-export-latex-image-default-option}
+@item @code{:latex-image-options}   @tab @code{org-latex-image-default-option}
 @end multitable
 
 Most of the @code{org-export-with-*} variables have the same effect in
