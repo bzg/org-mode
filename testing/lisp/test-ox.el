@@ -421,6 +421,43 @@ text
       (should (equal (org-export-as 'test nil nil 'body-only) "Text\n"))
       (should (equal (org-export-as 'test) "BEGIN\nText\nEND")))))
 
+(ert-deftest test-org-export/output-file-name ()
+  "Test `org-export-output-file-name' specifications."
+  ;; Export from a file: name is built from original file name.
+  (should
+   (org-test-with-temp-text-in-file "Test"
+     (equal (concat (file-name-as-directory ".")
+		    (file-name-nondirectory
+		     (file-name-sans-extension (buffer-file-name))))
+	    (file-name-sans-extension (org-export-output-file-name ".ext")))))
+  ;; When exporting to subtree, check EXPORT_FILE_NAME property first.
+  (should
+   (org-test-with-temp-text-in-file
+       "* Test\n  :PROPERTIES:\n  :EXPORT_FILE_NAME: test\n  :END:"
+     (equal (org-export-output-file-name ".ext" t) "./test.ext")))
+  ;; From a buffer not associated to a file, too.
+  (should
+   (org-test-with-temp-text
+       "* Test\n  :PROPERTIES:\n  :EXPORT_FILE_NAME: test\n  :END:"
+     (equal (org-export-output-file-name ".ext" t) "./test.ext")))
+  ;; When provided name is absolute, preserve it.
+  (should
+   (org-test-with-temp-text
+       (format "* Test\n  :PROPERTIES:\n  :EXPORT_FILE_NAME: %s\n  :END:"
+	       (expand-file-name "test"))
+     (file-name-absolute-p (org-export-output-file-name ".ext" t))))
+  ;; When PUB-DIR argument is provided, use it.
+  (should
+   (org-test-with-temp-text-in-file "Test"
+     (equal (file-name-directory
+	     (org-export-output-file-name ".ext" nil "dir/"))
+	    "dir/")))
+  ;; When returned name would overwrite original file, add EXTENSION
+  ;; another time.
+  (should
+   (org-test-at-id "75282ba2-f77a-4309-a970-e87c149fe125"
+     (equal (org-export-output-file-name ".org") "./normal.org.org"))))
+
 (ert-deftest test-org-export/expand-include ()
   "Test file inclusion in an Org buffer."
   ;; Error when file isn't specified.
