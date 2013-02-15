@@ -1205,10 +1205,10 @@ Paragraph[fn:1]"
       "Paragraph.\n#+TARGET: Test\n[[Test]]"
     (should-not
      (org-element-map
-      tree 'link
-      (lambda (link)
-	(org-export-get-ordinal
-	 (org-export-resolve-fuzzy-link link info) info)) info)))
+	 tree 'link
+       (lambda (link)
+	 (org-export-get-ordinal
+	  (org-export-resolve-fuzzy-link link info) info)) info)))
   ;; 2. Link to an headline should return headline's number.
   (org-test-with-parsed-data
       "Paragraph.\n* Head1\n* Head2\n* Head3\n[[Head2]]"
@@ -1216,10 +1216,10 @@ Paragraph[fn:1]"
      ;; Note: Headline's number is in fact a list of numbers.
      (equal '(2)
 	    (org-element-map
-	     tree 'link
-	     (lambda (link)
-	       (org-export-get-ordinal
-		(org-export-resolve-fuzzy-link link info) info)) info t))))
+		tree 'link
+	      (lambda (link)
+		(org-export-get-ordinal
+		 (org-export-resolve-fuzzy-link link info) info)) info t))))
   ;; 3. Link to a target in an item should return item's number.
   (org-test-with-parsed-data
       "- Item1\n  - Item11\n  - <<test>>Item12\n- Item2\n\n\n[[test]]"
@@ -1227,10 +1227,10 @@ Paragraph[fn:1]"
      ;; Note: Item's number is in fact a list of numbers.
      (equal '(1 2)
 	    (org-element-map
-	     tree 'link
-	     (lambda (link)
-	       (org-export-get-ordinal
-		(org-export-resolve-fuzzy-link link info) info)) info t))))
+		tree 'link
+	      (lambda (link)
+		(org-export-get-ordinal
+		 (org-export-resolve-fuzzy-link link info) info)) info t))))
   ;; 4. Link to a target in a footnote should return footnote's
   ;;    number.
   (org-test-with-parsed-data "
@@ -1238,10 +1238,10 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
     (should
      (equal '(2 3)
 	    (org-element-map
-	     tree 'link
-	     (lambda (link)
-	       (org-export-get-ordinal
-		(org-export-resolve-fuzzy-link link info) info)) info))))
+		tree 'link
+	      (lambda (link)
+		(org-export-get-ordinal
+		 (org-export-resolve-fuzzy-link link info) info)) info))))
   ;; 5. Link to a named element should return sequence number of that
   ;;    element.
   (org-test-with-parsed-data
@@ -1249,10 +1249,10 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
     (should
      (= 2
 	(org-element-map
-	 tree 'link
-	 (lambda (link)
-	   (org-export-get-ordinal
-	    (org-export-resolve-fuzzy-link link info) info)) info t))))
+	    tree 'link
+	  (lambda (link)
+	    (org-export-get-ordinal
+	     (org-export-resolve-fuzzy-link link info) info)) info t))))
   ;; 6. Link to a target not within an item, a table, a footnote
   ;;    reference or definition should return section number.
   (org-test-with-parsed-data
@@ -1260,10 +1260,16 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
     (should
      (equal '(2)
 	    (org-element-map
-	     tree 'link
-	     (lambda (link)
-	       (org-export-get-ordinal
-		(org-export-resolve-fuzzy-link link info) info)) info t)))))
+		tree 'link
+	      (lambda (link)
+		(org-export-get-ordinal
+		 (org-export-resolve-fuzzy-link link info) info)) info t))))
+  ;; 7. Space are not significant when matching a fuzzy link.
+  (should
+   (org-test-with-parsed-data "* Head 1\n[[Head\n  1]]"
+     (org-element-map tree 'link
+       (lambda (link) (org-export-resolve-fuzzy-link link info))
+       info t))))
 
 (ert-deftest test-org-export/resolve-coderef ()
   "Test `org-export-resolve-coderef' specifications."

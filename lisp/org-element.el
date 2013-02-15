@@ -3007,11 +3007,7 @@ Assume point is at the beginning of the link."
 	      raw-link (org-translate-link
 			(org-link-expand-abbrev
 			 (org-match-string-no-properties 1)))
-	      ;; Remove newline characters due to filling.  Headlines,
-	      ;; targets, radio targets and name affiliated keywords
-	      ;; cannot contain any.
-	      link (org-link-unescape
-		    (replace-regexp-in-string "\n[ \t]*" " " raw-link)))
+	      link (org-link-unescape raw-link))
 	;; Determine TYPE of link and set PATH accordingly.
 	(cond
 	 ;; File type.

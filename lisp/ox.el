@@ -3658,9 +3658,14 @@ Return value can be an object, an element, or nil:
 
 - Otherwise, return nil.
 
-Assume LINK type is \"fuzzy\"."
-  (let* ((path (org-element-property :path link))
-	 (match-title-p (eq (aref path 0) ?*)))
+Assume LINK type is \"fuzzy\".  White spaces are not
+significant."
+  (let* ((raw-path (org-element-property :path link))
+	 (match-title-p (eq (aref raw-path 0) ?*))
+	 ;; Split PATH at white spaces so matches are space
+	 ;; insensitive.
+	 (path (org-split-string
+		(if match-title-p (substring raw-path 1) raw-path))))
     (cond
      ;; First try to find a matching "<<path>>" unless user specified
      ;; he was looking for an headline (path starts with a *
@@ -3670,7 +3675,8 @@ Assume LINK type is \"fuzzy\"."
 	     (lambda (blob)
 	       (and (or (eq (org-element-type blob) 'target)
 			(equal (org-element-property :key blob) "TARGET"))
-		    (equal (org-element-property :value blob) path)
+		    (equal (org-split-string (org-element-property :value blob))
+			   path)
 		    blob))
 	     info t)))
      ;; Then try to find an element with a matching "#+NAME: path"
@@ -3679,7 +3685,8 @@ Assume LINK type is \"fuzzy\"."
 	   (org-element-map (plist-get info :parse-tree)
 	       org-element-all-elements
 	     (lambda (el)
-	       (when (string= (org-element-property :name el) path) el))
+	       (let ((name (org-element-property :name el)))
+		 (when (and name (equal (org-split-string name) path)) el)))
 	     info 'first-match)))
      ;; Last case: link either points to an headline or to
      ;; nothingness.  Try to find the source, with priority given to
@@ -3693,9 +3700,9 @@ Assume LINK type is \"fuzzy\"."
 	      (lambda (name data)
 		(org-element-map data 'headline
 		  (lambda (headline)
-		    (when (string=
-			   (org-element-property :raw-value headline)
-			   name)
+		    (when (equal (org-split-string
+				  (org-element-property :raw-value headline))
+				 name)
 		      headline))
 		  info 'first-match)))))
 	;; Search among headlines sharing an ancestor with link, from
@@ -3709,7 +3716,8 @@ Assume LINK type is \"fuzzy\"."
 	       (org-export-get-genealogy link)) nil)
 	    ;; No match with a common ancestor: try full parse-tree.
 	    (funcall find-headline
-		     (if match-title-p (substring path 1) path)
+		     (if (not match-title-p) path
+		       (cons (substring (car path) 1) (cdr path)))
 		     (plist-get info :parse-tree))))))))
 
 (defun org-export-resolve-id-link (link info)

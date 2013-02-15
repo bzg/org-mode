@@ -1288,13 +1288,7 @@ e^{i\\pi}+1=0
 		   (org-element-map
 		    (org-element-parse-buffer) 'link
 		    (lambda (link) (org-element-property :type link))
-		    nil t nil t)))))
-  ;; Corner case: links with filled path.
-  (should
-   (equal "a b"
-	  (org-test-with-temp-text "* a b\n[[a\nb]]"
-	    (progn (forward-line 1)
-		   (org-element-property :path (org-element-context)))))))
+		    nil t nil t))))))
 
 
 ;;;; Macro
