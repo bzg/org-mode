@@ -1269,6 +1269,17 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
    (org-test-with-parsed-data "* Head 1\n[[Head\n  1]]"
      (org-element-map tree 'link
        (lambda (link) (org-export-resolve-fuzzy-link link info))
+       info t)))
+  ;; 8. Statistics cookies are ignored for headline match.
+  (should
+   (org-test-with-parsed-data "* Head [0/0]\n[[Head]]"
+     (org-element-map tree 'link
+       (lambda (link) (org-export-resolve-fuzzy-link link info))
+       info t)))
+  (should
+   (org-test-with-parsed-data "* Head [100%]\n[[Head]]"
+     (org-element-map tree 'link
+       (lambda (link) (org-export-resolve-fuzzy-link link info))
        info t))))
 
 (ert-deftest test-org-export/resolve-coderef ()

@@ -3696,12 +3696,15 @@ significant."
       (let ((find-headline
 	     (function
 	      ;; Return first headline whose `:raw-value' property is
-	      ;; NAME in parse tree DATA, or nil.
+	      ;; NAME in parse tree DATA, or nil.  Statistics cookies
+	      ;; are ignored.
 	      (lambda (name data)
 		(org-element-map data 'headline
 		  (lambda (headline)
 		    (when (equal (org-split-string
-				  (org-element-property :raw-value headline))
+				  (replace-regexp-in-string
+				   "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+				   (org-element-property :raw-value headline)))
 				 name)
 		      headline))
 		  info 'first-match)))))
