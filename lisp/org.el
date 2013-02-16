@@ -12106,7 +12106,7 @@ See variable `org-track-ordered-property-with-tag'."
       (org-back-to-heading)
       (if (org-entry-get nil "ORDERED")
 	  (progn
-	    (org-delete-property "ORDERED")
+	    (org-delete-property "ORDERED" "PROPERTIES")
 	    (and tag (org-toggle-tag tag 'off))
 	    (message "Subtasks can be completed in arbitrary order"))
 	(org-entry-put nil "ORDERED" "t")
@@ -14908,8 +14908,10 @@ If yes, return this value.  If not, return the current value of the variable."
 	(read prop)
       (symbol-value var))))
 
-(defun org-entry-delete (pom property)
-  "Delete the property PROPERTY from entry at point-or-marker POM."
+(defun org-entry-delete (pom property &optional delete-empty-drawer)
+  "Delete the property PROPERTY from entry at point-or-marker POM.
+When optional argument DELETE-EMPTY-DRAWER is a string, it defines
+an empty drawer to delete."
   (org-with-point-at pom
     (if (member property org-special-properties)
 	nil ; cannot delete these properties.
@@ -14921,6 +14923,9 @@ If yes, return this value.  If not, return the current value of the variable."
 		  (cdr range) t))
 	    (progn
 	      (delete-region (match-beginning 0) (1+ (point-at-eol)))
+	      (and delete-empty-drawer
+		   (org-remove-empty-drawer-at
+		    delete-empty-drawer (car range)))
 	      t)
 	  nil)))))
 
@@ -15350,15 +15355,17 @@ in the current file."
     (unless (equal (org-entry-get nil property) value)
       (org-entry-put nil property value))))
 
-(defun org-delete-property (property)
-  "In the current entry, delete PROPERTY."
+(defun org-delete-property (property &optional delete-empty-drawer)
+  "In the current entry, delete PROPERTY.
+When optional argument DELETE-EMPTY-DRAWER is a string, it defines
+an empty drawer to delete."
   (interactive
    (let* ((completion-ignore-case t)
 	  (prop (org-icompleting-read "Property: "
 				      (org-entry-properties nil 'standard))))
      (list prop)))
   (message "Property %s %s" property
-	   (if (org-entry-delete nil property)
+	   (if (org-entry-delete nil property delete-empty-drawer)
 	       "deleted"
 	     "was not present in the entry")))
 
