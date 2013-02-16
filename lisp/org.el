@@ -4713,16 +4713,15 @@ but the stars and the body are.")
     (org-set-local 'org-file-properties nil)
     (org-set-local 'org-file-tags nil)
     (let ((re (org-make-options-regexp
-	       '("CATEGORY" "TODO" "COLUMNS"
-		 "STARTUP" "ARCHIVE" "FILETAGS" "TAGS" "LINK" "PRIORITIES"
-		 "CONSTANTS" "PROPERTY" "DRAWERS" "SETUPFILE" "LATEX_CLASS"
-		 "OPTIONS")
+	       '("CATEGORY" "TODO" "COLUMNS" "STARTUP" "ARCHIVE" "FILETAGS"
+		 "TAGS" "LINK" "PRIORITIES" "CONSTANTS" "PROPERTY" "DRAWERS"
+		 "SETUPFILE" "OPTIONS")
 	       "\\(?:[a-zA-Z][0-9a-zA-Z_]*_TODO\\)"))
 	  (splitre "[ \t]+")
 	  (scripts org-use-sub-superscripts)
 	  kwds kws0 kwsa key log value cat arch tags const links hw dws
-	  tail sep kws1 prio props ftags drawers beamer-p
-	  ext-setup-or-nil setup-contents (start 0))
+	  tail sep kws1 prio props ftags drawers ext-setup-or-nil setup-contents
+	  (start 0))
       (save-excursion
 	(save-restriction
 	  (widen)
@@ -4791,8 +4790,6 @@ but the stars and the body are.")
 	      (setq arch value)
 	      (remove-text-properties 0 (length arch)
 				      '(face t fontified t) arch))
-	     ((equal key "LATEX_CLASS")
-	      (setq beamer-p (equal value "beamer")))
 	     ((equal key "OPTIONS")
 	      (if (string-match "\\([ \t]\\|\\`\\)\\^:\\(t\\|nil\\|{}\\)" value)
 		  (setq scripts (read (match-string 2 value)))))
