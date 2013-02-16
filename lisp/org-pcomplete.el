@@ -145,6 +145,7 @@ When completing for #+STARTUP, for example, this function returns
 (declare-function org-get-export-keywords "org" ())
 (defun pcomplete/org-mode/file-option ()
   "Complete against all valid file options."
+  (require 'org-element)
   (pcomplete-here
    (org-pcomplete-case-double
     (append (mapcar (lambda (keyword) (concat keyword " "))
