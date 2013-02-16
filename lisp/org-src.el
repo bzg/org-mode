@@ -182,7 +182,7 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 
 (defvar org-src-mode-map (make-sparse-keymap))
 (define-key org-src-mode-map "\C-c'" 'org-edit-src-exit)
-(define-key org-src-mode-map "\C-ck" 'org-edit-src-abort)
+(define-key org-src-mode-map "\C-c\C-k" 'org-edit-src-abort)
 (define-key org-src-mode-map "\C-x\C-s" 'org-edit-src-save)
 
 (defvar org-edit-src-force-single-line nil)
@@ -254,8 +254,8 @@ the display of windows containing the Org buffer and the code buffer."
 	    end (move-marker end (nth 1 info))
 	    msg (if allow-write-back-p
 		    (substitute-command-keys
-		     "Edit, then exit with C-c ' (C-c and single quote) -- C-c k to abort")
-		  "Exit with C-c ' (C-c and single quote) -- C-c k to abort")
+		     "Edit, then exit with C-c ' (C-c and single quote) -- C-c C-k to abort")
+		  "Exit with C-c ' (C-c and single quote) -- C-c C-k to abort")
 	    code (or code (buffer-substring-no-properties beg end))
 	    lang (or (cdr (assoc (nth 2 info) org-src-lang-modes))
 		     (nth 2 info))
@@ -450,7 +450,7 @@ the fragment in the Org-mode buffer."
 	(col (current-column))
 	(case-fold-search t)
 	(msg (substitute-command-keys
-	      "Edit, then exit with C-c ' (C-c and single quote) -- C-c k to abort"))
+	      "Edit, then exit with C-c ' (C-c and single quote) -- C-c C-k to abort"))
 	(org-mode-p (derived-mode-p 'org-mode))
 	(beg (make-marker))
 	(end (make-marker))
@@ -784,7 +784,7 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
   "Save parent buffer with current state source-code buffer."
   (interactive)
   (if (string-match "Fixed Width" (buffer-name))
-      (user-error "Use C-c ' to save and exit, C-c k to abort editing")
+      (user-error "Use C-c ' to save and exit, C-c C-k to abort editing")
     (org-src-in-org-buffer (save-buffer))))
 
 (declare-function org-babel-tangle "ob-tangle" (&optional only-this-block target-file lang))
