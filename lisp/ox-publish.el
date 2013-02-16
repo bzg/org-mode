@@ -568,9 +568,7 @@ Return output file name."
 		;; filters.  It isn't dependent on `:makeindex', since
 		;; we want to keep it up-to-date in cache anyway.
 		(org-combine-plists
-		 plist `(:filter-parse-tree
-			 ,(cons 'org-publish-collect-index
-				(plist-get plist :filter-parse-tree)))))))
+		 plist '(:filter-parse-tree (org-publish-collect-index))))))
       ;; Remove opened buffer in the process.
       (unless visitingp (kill-buffer work-buffer)))))
 
