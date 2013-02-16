@@ -10361,8 +10361,6 @@ visibility around point, thus ignoring
       (cond
        ((derived-mode-p 'org-mode)
 	(org-occur (match-string 1 s)))
-       ;;((eq major-mode 'dired-mode)
-       ;; (grep (concat "grep -n -e '" (match-string 1 s) "' *")))
        (t (org-do-occur (match-string 1 s)))))
      ((and (derived-mode-p 'org-mode) org-link-search-must-match-exact-headline)
       (and (equal (string-to-char s) ?*) (setq s (substring s 1)))
