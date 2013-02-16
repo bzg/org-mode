@@ -698,6 +698,8 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
       (set-buffer-modified-p nil))
     (org-src-switch-to-buffer (marker-buffer beg) (or context 'exit))
     (if (eq context 'save) (save-buffer)
+      (with-current-buffer buffer
+	(set-buffer-modified-p nil))
       (kill-buffer buffer))
     (goto-char beg)
     (when allow-write-back-p
@@ -749,7 +751,9 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
 (defun org-edit-src-save ()
   "Save parent buffer with current state source-code buffer."
   (interactive)
-  (org-src-in-org-buffer (save-buffer)))
+  (if (string-match "Fixed Width" (buffer-name))
+      (user-error "Use C-c ' to save and exit, C-c k to abort editing")
+    (org-src-in-org-buffer (save-buffer))))
 
 (declare-function org-babel-tangle "ob-tangle" (&optional only-this-block target-file lang))
 
