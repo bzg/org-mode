@@ -19846,7 +19846,7 @@ See the individual commands for more information."
     ("Refresh/Reload"
      ["Refresh setup current buffer" org-mode-restart t]
      ["Reload Org (after update)" org-reload t]
-     ["Reload Org uncompiled" (org-reload t) :active t :keys "C-u C-c C-x r"])
+     ["Reload Org uncompiled" (org-reload t) :active t :keys "C-u C-c C-x !"])
     ))
 
 (defun org-info (&optional node)
