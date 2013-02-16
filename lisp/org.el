@@ -13982,7 +13982,9 @@ If ONOFF is `on' or `off', don't toggle but set to this state."
   (if (or (org-at-heading-p) (and arg (org-before-first-heading-p)))
       (org-set-tags arg just-align)
     (save-excursion
-      (org-back-to-heading t)
+      (unless (and (org-region-active-p)
+		   org-loop-over-headlines-in-active-region)
+	(org-back-to-heading t))
       (org-set-tags arg just-align))))
 
 (defun org-set-tags-to (data)
