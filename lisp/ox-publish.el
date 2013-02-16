@@ -569,8 +569,8 @@ Return output file name."
 		;; we want to keep it up-to-date in cache anyway.
 		(org-combine-plists
 		 plist `(:filter-parse-tree
-			 (org-publish-collect-index
-			  ,@(plist-get plist :filter-parse-tree)))))))
+			 ,(cons 'org-publish-collect-index
+				(plist-get plist :filter-parse-tree)))))))
       ;; Remove opened buffer in the process.
       (unless visitingp (kill-buffer work-buffer)))))
 
