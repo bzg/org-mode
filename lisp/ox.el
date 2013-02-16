@@ -2622,13 +2622,23 @@ specified filters, if any, are called first."
 INFO is a plist containing the current communication channel.
 Return the updated communication channel."
   (let (plist)
-    ;; Install user defined filters with `org-export-filters-alist'.
+    ;; Install user-defined filters with `org-export-filters-alist'
+    ;; and filters already in INFO (through ext-plist mechanism).
     (mapc (lambda (p)
-	    (setq plist (plist-put plist (car p) (eval (cdr p)))))
+	    (let* ((prop (car p))
+		   (info-value (plist-get info prop))
+		   (default-value (symbol-value (cdr p))))
+	      (setq plist
+		    (plist-put plist prop
+			       ;; Filters in INFO will be called
+			       ;; before those user provided.
+			       (append (if (listp info-value) info-value
+					 (list info-value))
+				       default-value)))))
 	  org-export-filters-alist)
     ;; Prepend back-end specific filters to that list.
     (mapc (lambda (p)
-	    ;; Single values get consed, lists are prepended.
+	    ;; Single values get consed, lists are appended.
 	    (let ((key (car p)) (value (cdr p)))
 	      (when value
 		(setq plist

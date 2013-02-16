@@ -1986,7 +1986,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(value (org-element-property :value keyword)))
     (cond
      ((string= key "HTML") value)
-     ((string= key "INDEX") (format "\\index{%s}" value))
      ;; Invisible targets.
      ((string= key "TARGET") nil)
      ((string= key "TOC")
@@ -2908,15 +2907,6 @@ Return output file name."
 ;;;; org-html-with-timestamp
 ;;;; org-html-html-helper-timestamp
 
-;;;; org-export-as-html-and-open
-;;;; org-export-as-html-batch
-;;;; org-export-as-html-to-buffer
-;;;; org-replace-region-by-html
-;;;; org-export-region-as-html
-;;;; org-export-as-html
-
-;;;; (org-export-directory :html opt-plist)
-;;;; (plist-get opt-plist :html-extension)
 ;;;; org-html-toplevel-hlevel
 ;;;; org-html-special-string-regexps
 ;;;; org-html-inline-images
