@@ -64,6 +64,14 @@ there are kept outside the narrowed region."
 		   (const :tag "from `lang' element")
 		   (const :tag "from `style' element")))))
 
+(defcustom org-edit-src-auto-save-idle-delay 5
+  "Delay of idle time before auto-saving src code buffers.
+When a positive integer N, save after N seconds of idle time.
+When 0 (the default), don't auto-save."
+  :group 'org-edit-structure
+  :version "24.3"
+  :type 'integer)
+
 (defcustom org-coderef-label-format "(ref:%s)"
   "The default coderef format.
 This format string will be used to search for coderef labels in literal
@@ -187,11 +195,14 @@ For example, there is no ocaml-mode in Emacs, but the mode to use is
 (defvar org-edit-src-block-indentation nil)
 (defvar org-edit-src-saved-temp-window-config nil)
 
-(defvar org-src-ask-before-returning-to-edit-buffer t
+(defcustom org-src-ask-before-returning-to-edit-buffer t
   "If nil, when org-edit-src code is used on a block that already
 has an active edit buffer, it will switch to that edit buffer
 immediately; otherwise it will ask whether you want to return to
-the existing edit buffer.")
+the existing edit buffer."
+  :group 'org-edit-structure
+  :version "24.3"
+  :type 'boolean)
 
 (defvar org-src-babel-info nil)
 
@@ -203,6 +214,7 @@ This minor mode is turned on in two situations:
 There is a mode hook, and keybindings for `org-edit-src-exit' and
 `org-edit-src-save'")
 
+(defvar org-edit-src-code-timer nil)
 (defun org-edit-src-code (&optional context code edit-buffer-name)
   "Edit the source CODE block at point.
 The code is copied to a separate buffer and the appropriate mode
@@ -341,7 +353,24 @@ the display of windows containing the Org buffer and the code buffer."
 	     (org-set-local 'header-line-format msg))
 	(let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
 	  (when (fboundp edit-prep-func)
-	    (funcall edit-prep-func full-info))))
+	    (funcall edit-prep-func full-info)))
+	(or org-edit-src-code-timer
+	    (setq org-edit-src-code-timer
+		  (unless (zerop org-edit-src-auto-save-idle-delay)
+		    (run-with-idle-timer
+		     org-edit-src-auto-save-idle-delay t
+		     (lambda ()
+		       (cond
+			((and (string-match "\*Org Src" (buffer-name))
+			      (buffer-modified-p))
+			 (org-edit-src-save))
+			((not
+			  (delq nil (mapcar
+				     (lambda (b)
+				       (string-match "\*Org Src" (buffer-name b)))
+				     (buffer-list))))
+			 (cancel-timer org-edit-src-code-timer)
+			 (setq org-edit-src-code-timer)))))))))
       t)))
 
 (defun org-edit-src-continue (e)
@@ -421,7 +450,7 @@ the fragment in the Org-mode buffer."
 	(col (current-column))
 	(case-fold-search t)
 	(msg (substitute-command-keys
-	      "Edit, then exit with C-c ' (C-c and single quote)"))
+	      "Edit, then exit with C-c ' (C-c and single quote) -- C-c k to abort"))
 	(org-mode-p (derived-mode-p 'org-mode))
 	(beg (make-marker))
 	(end (make-marker))
@@ -721,6 +750,9 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
     (unless (eq context 'save)
       (move-marker beg nil)
       (move-marker end nil)))
+  (when org-edit-src-code-timer
+    (cancel-timer org-edit-src-code-timer)
+    (setq org-edit-src-code-timer nil))
   (unless (eq context 'save)
     (when org-edit-src-saved-temp-window-config
       (set-window-configuration org-edit-src-saved-temp-window-config)
