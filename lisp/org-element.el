@@ -3990,9 +3990,9 @@ containing the secondary string.  It is used to set correctly
   (data types fun &optional info first-match no-recursion with-affiliated)
   "Map a function on selected elements or objects.
 
-DATA is an Org buffer parse tree, as returned by, i.e.,
-`org-element-parse-buffer'.  TYPES is a symbol or list of symbols
-of elements or objects types (see `org-element-all-elements' and
+DATA is a parse tree, an element, an object, a string, or a list
+of such constructs.  TYPES is a symbol or list of symbols of
+elements or objects types (see `org-element-all-elements' and
 `org-element-all-objects' for a complete list of types).  FUN is
 the function called on the matching element or object.  It has to
 accept one argument: the element or object itself.
@@ -4087,9 +4087,8 @@ looking into captions:
 		((not --data))
 		;; Ignored element in an export context.
 		((and info (memq --data (plist-get info :ignore-list))))
-		;; Secondary string: only objects can be found there.
-		((not --type)
-		 (when (eq --category 'objects) (mapc --walk-tree --data)))
+		;; List of elements or objects.
+		((not --type) (mapc --walk-tree --data))
 		;; Unconditionally enter parse trees.
 		((eq --type 'org-data)
 		 (mapc --walk-tree (org-element-contents --data)))
