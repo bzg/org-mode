@@ -5269,17 +5269,16 @@ The following commands are available:
 	   (= (point-min) (point-max)))
       (insert "#    -*- mode: org -*-\n\n"))
   (unless org-inhibit-startup
-    (and org-startup-with-beamer-mode (org-beamer-mode))
-    (when org-startup-align-all-tables
-      (let ((bmp (buffer-modified-p)))
-	(org-table-map-tables 'org-table-align 'quietly)
-	(set-buffer-modified-p bmp)))
-    (when org-startup-with-inline-images
-      (org-display-inline-images))
-    (when org-startup-with-latex-preview
-      (org-preview-latex-fragment))
-    (unless org-inhibit-startup-visibility-stuff
-      (org-set-startup-visibility)))
+    (org-unmodified
+     (and org-startup-with-beamer-mode (org-beamer-mode))
+     (when org-startup-align-all-tables
+       (org-table-map-tables 'org-table-align 'quietly))
+     (when org-startup-with-inline-images
+       (org-display-inline-images))
+     (when org-startup-with-latex-preview
+       (org-preview-latex-fragment))
+     (unless org-inhibit-startup-visibility-stuff
+       (org-set-startup-visibility))))
   ;; Try to set org-hide correctly
   (set-face-foreground 'org-hide (org-find-invisible-foreground)))
 
