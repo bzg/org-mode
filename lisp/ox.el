@@ -78,6 +78,7 @@
 
 (eval-when-compile (require 'cl))
 (require 'org-element)
+(require 'org-macro)
 (require 'ob-exp)
 
 (declare-function org-publish "ox-publish" (project &optional force async))

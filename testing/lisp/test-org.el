@@ -398,52 +398,6 @@ http://article.gmane.org/gmane.emacs.orgmode/21459/"
 
 
 
-;;; Macros
-
-(ert-deftest test-org/macro-replace-all ()
-  "Test `org-macro-replace-all' specifications."
-  ;; Standard test.
-  (should
-   (equal
-    "#+MACRO: A B\n1 B 3"
-    (org-test-with-temp-text "#+MACRO: A B\n1 {{{A}}} 3"
-      (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all org-macro-templates)
-	     (buffer-string)))))
-  ;; Macro with arguments.
-  (should
-   (equal
-    "#+MACRO: macro $1 $2\nsome text"
-    (org-test-with-temp-text "#+MACRO: macro $1 $2\n{{{macro(some,text)}}}"
-      (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all org-macro-templates)
-	     (buffer-string)))))
-  ;; Macro with "eval".
-  (should
-   (equal
-    "#+MACRO: add (eval (+ $1 $2))\n3"
-    (org-test-with-temp-text "#+MACRO: add (eval (+ $1 $2))\n{{{add(1,2)}}}"
-      (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all org-macro-templates)
-	     (buffer-string)))))
-  ;; Nested macros.
-  (should
-   (equal
-    "#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\ninner outer"
-    (org-test-with-temp-text
-	"#+MACRO: in inner\n#+MACRO: out {{{in}}} outer\n{{{out}}}"
-      (progn (org-macro-initialize-templates)
-	     (org-macro-replace-all org-macro-templates)
-	     (buffer-string)))))
-  ;; Error out when macro expansion is circular.
-  (should-error
-   (org-test-with-temp-text
-       "#+MACRO: mac1 {{{mac2}}}\n#+MACRO: mac2 {{{mac1}}}\n{{{mac1}}}"
-     (org-macro-initialize-templates)
-     (org-macro-replace-all org-macro-templates))))
-
-
-
 ;;; Node Properties
 
 (ert-deftest test-org/accumulated-properties-in-drawers ()
