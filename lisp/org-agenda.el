@@ -7164,7 +7164,8 @@ in the file.  Otherwise, restriction will be to the current subtree."
 	(put 'org-agenda-files 'org-restrict
 	     (list (buffer-file-name (buffer-base-buffer))))
 	(org-back-to-heading t)
-	(move-overlay org-agenda-restriction-lock-overlay (point) (point-at-eol))
+	(move-overlay org-agenda-restriction-lock-overlay
+		      (point) (save-excursion (outline-next-heading) (point)))
 	(move-marker org-agenda-restrict-begin (point))
 	(move-marker org-agenda-restrict-end
 		     (save-excursion (org-end-of-subtree t)))
