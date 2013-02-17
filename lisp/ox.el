@@ -3498,7 +3498,7 @@ inherited from parent headlines and FILETAGS keywords."
 (defun org-export-get-node-property (property blob &optional inherited)
   "Return node PROPERTY value for BLOB.
 
-PROPERTY is normalized symbol (i.e. `:cookie-data').  BLOB is an
+PROPERTY is an upcase symbol (i.e. `:COOKIE_DATA').  BLOB is an
 element or object.
 
 If optional argument INHERITED is non-nil, the value can be
@@ -3526,13 +3526,13 @@ fail, the fall-back value is \"???\"."
   (or (let ((headline (if (eq (org-element-type blob) 'headline) blob
 			(org-export-get-parent-headline blob))))
 	;; Almost like `org-export-node-property', but we cannot trust
-	;; `plist-member' as every headline has a `:category'
+	;; `plist-member' as every headline has a `:CATEGORY'
 	;; property, would it be nil or equal to "???" (which has the
 	;; same meaning).
 	(let ((parent headline) value)
 	  (catch 'found
 	    (while parent
-	      (let ((category (org-element-property :category parent)))
+	      (let ((category (org-element-property :CATEGORY parent)))
 		(and category (not (equal "???" category))
 		     (throw 'found category)))
 	      (setq parent (org-element-property :parent parent))))))
@@ -3743,8 +3743,8 @@ tree, a file name or nil.  Assume LINK type is either \"id\" or
     ;; First check if id is within the current parse tree.
     (or (org-element-map (plist-get info :parse-tree) 'headline
 	  (lambda (headline)
-	    (when (or (string= (org-element-property :id headline) id)
-		      (string= (org-element-property :custom-id headline) id))
+	    (when (or (string= (org-element-property :ID headline) id)
+		      (string= (org-element-property :CUSTOM_ID headline) id))
 	      headline))
 	  info 'first-match)
 	;; Otherwise, look for external files.

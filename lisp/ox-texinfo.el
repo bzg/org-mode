@@ -538,7 +538,7 @@ contextual information."
     (lambda (head)
       (and (= (org-export-get-relative-level head info) level)
 	   ;; Do not take note of footnotes or copying headlines.
-	   (not (org-element-property :copying head))
+	   (not (org-element-property :COPYING head))
 	   (not (org-element-property :footnote-section-p head))
 	   ;; Collect headline.
 	   head))
@@ -556,13 +556,13 @@ menu using `org-texinfo--format-menu'."
   (loop for headline in items collect
 	(let* ((menu-title (org-texinfo--sanitize-menu
 			    (org-export-data
-			     (org-element-property :texinfo-menu-title headline)
+			     (org-element-property :TEXINFO_MENU_TITLE headline)
 			     info)))
 	       (title (org-texinfo--sanitize-menu
 		       (org-texinfo--sanitize-headline
 			(org-element-property :title headline) info)))
 	       (descr (org-export-data
-		       (org-element-property :description headline)
+		       (org-element-property :DESCRIPTION headline)
 		       info))
 	       (menu-entry (if (string= "" menu-title) title menu-title))
 	       (len (length menu-entry))
@@ -636,7 +636,7 @@ holding export options."
 	 (header (nth 1 (assoc class org-texinfo-classes)))
 	 (copying
 	  (org-element-map (plist-get info :parse-tree) 'headline
-	    (lambda (hl) (and (org-element-property :copying hl) hl)) info t))
+	    (lambda (hl) (and (org-element-property :COPYING hl) hl)) info t))
 	 (dircat (plist-get info :texinfo-dircat))
 	 (dirtitle (plist-get info :texinfo-dirtitle))
 	 (dirdesc (plist-get info :texinfo-dirdesc))
@@ -899,7 +899,7 @@ holding contextual information."
 	 ;; Retrieve custom menu title (if any)
 	 (menu-title (org-texinfo--sanitize-menu
 		      (org-export-data
-		       (org-element-property :texinfo-menu-title headline)
+		       (org-element-property :TEXINFO_MENU_TITLE headline)
 		       info)))
 	 ;; Retrieve headline text
 	 (text (org-texinfo--sanitize-headline
@@ -998,7 +998,7 @@ holding contextual information."
      ((org-element-property :footnote-section-p headline) nil)
      ;; Case 2: This is the `copying' section: ignore it
      ;;         This is used elsewhere.
-     ((org-element-property :copying headline) nil)
+     ((org-element-property :COPYING headline) nil)
      ;; Case 3: An index.  If it matches one of the known indexes,
      ;;         print it as such following the contents, otherwise
      ;;         print the contents and leave the index up to the user.
@@ -1180,7 +1180,7 @@ INFO is a plist holding contextual information.  See
 	  ;; LINK points to an headline.  Use the headline as the NODE target
 	  (headline
 	   (format "@ref{%s,%s}"
-		   (or (org-element-property :texinfo-menu-title destination)
+		   (or (org-element-property :TEXINFO_MENU_TITLE destination)
 		       (org-element-property :title destination))
 		   (or desc "")))
 	  (otherwise
@@ -1203,7 +1203,7 @@ INFO is a plist holding contextual information.  See
 	  ;; LINK points to an headline.  Use the headline as the NODE target
 	  (headline
 	   (format "@ref{%s,%s}"
-		   (or (org-element-property :texinfo-menu-title destination)
+		   (or (org-element-property :TEXINFO_MENU_TITLE destination)
 		       (org-element-property :title destination))
 		   (or desc "")))
 	  (otherwise

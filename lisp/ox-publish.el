@@ -930,9 +930,9 @@ its CDR is a string."
 		    file
 		    (cond
 		     ((not parent) nil)
-		     ((let ((id (org-element-property :id parent)))
+		     ((let ((id (org-element-property :ID parent)))
 			(and id (cons 'id id))))
-		     ((let ((id (org-element-property :custom-id parent)))
+		     ((let ((id (org-element-property :CUSTOM-ID parent)))
 			(and id (cons 'custom-id id))))
 		     (t (cons 'name
 			      (org-element-property :raw-value parent))))))))

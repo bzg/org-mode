@@ -1839,9 +1839,9 @@ holding contextual information."
 					(org-export-get-headline-number
 					 headline info) "-"))
 	     (ids (remove 'nil
-			  (list (org-element-property :custom-id headline)
+			  (list (org-element-property :CUSTOM_ID headline)
 				(concat "sec-" section-number)
-				(org-element-property :id headline))))
+				(org-element-property :ID headline))))
 	     (preferred-id (car ids))
 	     (extra-ids (cdr ids))
 	     (extra-class (org-element-property :html-container-class headline))
@@ -2238,7 +2238,7 @@ INFO is a plist holding contextual information.  See
 		   ;; Case 1: Headline is linked via it's CUSTOM_ID
 		   ;; property.  Use CUSTOM_ID.
 		   ((string= type "custom-id")
-		    (org-element-property :custom-id destination))
+		    (org-element-property :CUSTOM_ID destination))
 		   ;; Case 2: Headline is linked via it's ID property
 		   ;; or through other means.  Use the default href.
 		   ((member type '("id" "fuzzy"))
@@ -2479,7 +2479,7 @@ holding contextual information."
         ;; Build return value.
         (format "<div class=\"outline-text-%d\" id=\"text-%s\">\n%s</div>"
                 class-num
-		(or (org-element-property :custom-id parent) section-number)
+		(or (org-element-property :CUSTOM_ID parent) section-number)
 		contents)))))
 
 ;;;; Radio Target

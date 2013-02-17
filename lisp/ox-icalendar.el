@@ -293,7 +293,7 @@ a message if the file was modified."
     (org-map-entries
      (lambda ()
        (let ((entry (org-element-at-point)))
-	 (unless (org-element-property :id entry)
+	 (unless (org-element-property :ID entry)
 	   (org-id-get-create)
 	   (setq modified-flag t)
 	   (forward-line))
@@ -330,7 +330,7 @@ An headline is blocked when either:
 	       (cond
 		((not (org-element-property :todo-keyword parent))
 		 (throw 'blockedp nil))
-		((org-not-nil (org-element-property :ordered parent))
+		((org-not-nil (org-element-property :ORDERED parent))
 		 (let ((sibling current))
 		   (while (setq sibling (org-export-get-previous-element
 					 sibling info))
@@ -527,20 +527,20 @@ inlinetask within the section."
 			   (cons nil (org-element-contents first))))))))
       (concat
        (unless (and (plist-get info :icalendar-agenda-view)
-		    (not (org-element-property :icalendar-mark entry)))
+		    (not (org-element-property :ICALENDAR-MARK entry)))
 	 (let ((todo-type (org-element-property :todo-type entry))
-	       (uid (or (org-element-property :id entry) (org-id-new)))
+	       (uid (or (org-element-property :ID entry) (org-id-new)))
 	       (summary (org-icalendar-cleanup-string
-			 (or (org-element-property :summary entry)
+			 (or (org-element-property :SUMMARY entry)
 			     (org-export-data
 			      (org-element-property :title entry) info))))
 	       (loc (org-icalendar-cleanup-string
-		     (org-element-property :location entry)))
+		     (org-element-property :LOCATION entry)))
 	       ;; Build description of the entry from associated
 	       ;; section (headline) or contents (inlinetask).
 	       (desc
 		(org-icalendar-cleanup-string
-		 (or (org-element-property :description entry)
+		 (or (org-element-property :DESCRIPTION entry)
 		     (let ((contents (org-export-data inside info)))
 		       (cond
 			((not (org-string-nw-p contents)) nil)
@@ -729,7 +729,7 @@ Return VALARM component as a string, or nil if it isn't allowed."
   ;; (c) only a DISPLAY action is defined.                       [ESF]
   (let ((alarm-time
 	 (let ((warntime
-		(org-element-property :appt-warntime entry)))
+		(org-element-property :APPT_WARNTIME entry)))
 	   (if warntime (string-to-number warntime) 0))))
     (and (or (> alarm-time 0) (> org-icalendar-alarm-time 0))
 	 (org-element-property :hour-start timestamp)

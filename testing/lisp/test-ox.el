@@ -1064,7 +1064,7 @@ Paragraph[fn:1]"
   :prop:     value
   :END:"
 	    (org-export-get-node-property
-	     :prop (org-element-map tree 'headline 'identity nil t)))))
+	     :PROP (org-element-map tree 'headline 'identity nil t)))))
   ;; Test inheritance.
   (should
    (equal "value"
@@ -1075,7 +1075,7 @@ Paragraph[fn:1]"
 ** Headline
    Paragraph"
 	    (org-export-get-node-property
-	     :prop (org-element-map tree 'paragraph 'identity nil t) t))))
+	     :PROP (org-element-map tree 'paragraph 'identity nil t) t))))
   ;; Cannot return a value before the first headline.
   (should-not
    (org-test-with-parsed-data "Paragraph
@@ -1084,7 +1084,7 @@ Paragraph[fn:1]"
   :prop:     value
   :END:"
      (org-export-get-node-property
-      :prop (org-element-map tree 'paragraph 'identity nil t)))))
+      :PROP (org-element-map tree 'paragraph 'identity nil t)))))
 
 (ert-deftest test-org-export/get-category ()
   "Test `org-export-get-category' specifications."
@@ -1406,7 +1406,7 @@ Another text. (ref:text)
   ;; 1. Regular test for custom-id link.
   (org-test-with-parsed-data "* Headline1
 :PROPERTIES:
-:CUSTOM-ID: test
+:CUSTOM_ID: test
 :END:
 * Headline 2
 \[[#test]]"
@@ -1416,7 +1416,7 @@ Another text. (ref:text)
   ;; 2. Failing test for custom-id link.
   (org-test-with-parsed-data "* Headline1
 :PROPERTIES:
-:CUSTOM-ID: test
+:CUSTOM_ID: test
 :END:
 * Headline 2
 \[[#no-match]]"

@@ -378,7 +378,7 @@ INFO is a plist used as a communication channel.
 The value is either the label specified in \"BEAMER_opt\"
 property, or a fallback value built from headline's number.  This
 function assumes HEADLINE will be treated as a frame."
-  (let ((opt (org-element-property :beamer-opt headline)))
+  (let ((opt (org-element-property :BEAMER_OPT headline)))
     (if (and (org-string-nw-p opt)
 	     (string-match "\\(?:^\\|,\\)label=\\(.*?\\)\\(?:$\\|,\\)" opt))
 	(match-string 1 opt)
@@ -395,19 +395,19 @@ INFO is a plist used as a communication channel."
    ;;    farthest.
    (catch 'exit
      (mapc (lambda (parent)
-	     (let ((env (org-element-property :beamer-env parent)))
+	     (let ((env (org-element-property :BEAMER_ENV parent)))
 	       (when (and env (member (downcase env) '("frame" "fullframe")))
 		 (throw 'exit (org-export-get-relative-level parent info)))))
 	   (nreverse (org-export-get-genealogy headline)))
      nil)
    ;; 2. Look for "frame" environment in HEADLINE.
-   (let ((env (org-element-property :beamer-env headline)))
+   (let ((env (org-element-property :BEAMER_ENV headline)))
      (and env (member (downcase env) '("frame" "fullframe"))
 	  (org-export-get-relative-level headline info)))
    ;; 3. Look for "frame" environment in sub-tree.
    (org-element-map headline 'headline
      (lambda (hl)
-       (let ((env (org-element-property :beamer-env hl)))
+       (let ((env (org-element-property :BEAMER_ENV hl)))
 	 (when (and env (member (downcase env) '("frame" "fullframe")))
 	   (org-export-get-relative-level hl info))))
      info 'first-match)
@@ -421,7 +421,7 @@ used as a communication channel."
   ;; Use `latex' back-end output, inserting overlay specifications
   ;; if possible.
   (let ((latex-headline (org-export-with-backend 'latex headline contents info))
-	(mode-specs (org-element-property :beamer-act headline)))
+	(mode-specs (org-element-property :BEAMER_ACT headline)))
     (if (and mode-specs
 	     (string-match "\\`\\\\\\(.*?\\)\\(?:\\*\\|\\[.*\\]\\)?{"
 			   latex-headline))
@@ -443,14 +443,14 @@ used as a communication channel."
 	    ;; Overlay specification, if any. When surrounded by
 	    ;; square brackets, consider it as a default
 	    ;; specification.
-	    (let ((action (org-element-property :beamer-act headline)))
+	    (let ((action (org-element-property :BEAMER_ACT headline)))
 	      (cond
 	       ((not action) "")
 	       ((string-match "\\`\\[.*\\]\\'" action )
 		(org-beamer--normalize-argument action 'defaction))
 	       (t (org-beamer--normalize-argument action 'action))))
 	    ;; Options, if any.
-	    (let* ((beamer-opt (org-element-property :beamer-opt headline))
+	    (let* ((beamer-opt (org-element-property :BEAMER_OPT headline))
 		   (options
 		    ;; Collect options from default value and headline's
 		    ;; properties.  Also add a label for links.
@@ -479,7 +479,7 @@ used as a communication channel."
 		",")
 	       'option))
 	    ;; Title.
-	    (let ((env (org-element-property :beamer-env headline)))
+	    (let ((env (org-element-property :BEAMER_ENV headline)))
 	      (format "{%s}"
 		      (if (and env (equal (downcase env) "fullframe")) ""
 			(org-export-data
@@ -500,12 +500,12 @@ used as a communication channel."
   "Format HEADLINE as a block.
 CONTENTS holds the contents of the headline.  INFO is a plist
 used as a communication channel."
-  (let* ((column-width (org-element-property :beamer-col headline))
+  (let* ((column-width (org-element-property :BEAMER_COL headline))
 	 ;; ENVIRONMENT defaults to "block" if none is specified and
 	 ;; there is no column specification.  If there is a column
 	 ;; specified but still no explicit environment, ENVIRONMENT
 	 ;; is "column".
-	 (environment (let ((env (org-element-property :beamer-env headline)))
+	 (environment (let ((env (org-element-property :BEAMER_ENV headline)))
 			(cond
 			 ;; "block" is the fallback environment.
 			 ((and (not env) (not column-width)) "block")
@@ -519,14 +519,14 @@ used as a communication channel."
 				      org-beamer-environments-extra
 				      org-beamer-environments-default))))
 	 (title (org-export-data (org-element-property :title headline) info))
-	 (options (let ((options (org-element-property :beamer-opt headline)))
+	 (options (let ((options (org-element-property :BEAMER_OPT headline)))
 		    (if (not options) ""
 		      (org-beamer--normalize-argument options 'option))))
 	 ;; Start a "columns" environment when explicitly requested or
 	 ;; when there is no previous headline or the previous
 	 ;; headline do not have a BEAMER_column property.
 	 (parent-env (org-element-property
-		      :beamer-env (org-export-get-parent-headline headline)))
+		      :BEAMER_ENV (org-export-get-parent-headline headline)))
 	 (start-columns-p
 	  (or (equal environment "columns")
 	      (and column-width
@@ -534,7 +534,7 @@ used as a communication channel."
 			     (equal (downcase parent-env) "columns")))
 		   (or (org-export-first-sibling-p headline info)
 		       (not (org-element-property
-			     :beamer-col
+			     :BEAMER_COL
 			     (org-export-get-previous-element
 			      headline info)))))))
 	 ;; End the "columns" environment when explicitly requested or
@@ -547,7 +547,7 @@ used as a communication channel."
 			     (equal (downcase parent-env) "columns")))
 		   (or (org-export-last-sibling-p headline info)
 		       (not (org-element-property
-			     :beamer-col
+			     :BEAMER_COL
 			     (org-export-get-next-element headline info))))))))
     (concat
      (when start-columns-p
@@ -571,7 +571,7 @@ used as a communication channel."
 	  ;; brackets, it is a default overlay specification and
 	  ;; overlay specification is empty.  Otherwise, it is an
 	  ;; overlay specification and the default one is nil.
-	  (let ((action (org-element-property :beamer-act headline)))
+	  (let ((action (org-element-property :BEAMER_ACT headline)))
 	    (cond
 	     ((not action) (list (cons "a" "") (cons "A" "")))
 	     ((string-match "\\`\\[.*\\]\\'" action)
@@ -599,25 +599,25 @@ as a communication channel."
   (unless (org-element-property :footnote-section-p headline)
     (let ((level (org-export-get-relative-level headline info))
 	  (frame-level (org-beamer--frame-level headline info))
-	  (environment (let ((env (org-element-property :beamer-env headline)))
+	  (environment (let ((env (org-element-property :BEAMER_ENV headline)))
 			 (if (stringp env) (downcase env) "block"))))
       (cond
        ;; Case 1: Resume frame specified by "BEAMER_ref" property.
        ((equal environment "againframe")
-	(let ((ref (org-element-property :beamer-ref headline)))
+	(let ((ref (org-element-property :BEAMER_REF headline)))
 	  ;; Reference to frame being resumed is mandatory.  Ignore
 	  ;; the whole headline if it isn't provided.
 	  (when (org-string-nw-p ref)
 	    (concat "\\againframe"
 		    ;; Overlay specification.
-		    (let ((overlay (org-element-property :beamer-act headline)))
+		    (let ((overlay (org-element-property :BEAMER_ACT headline)))
 		      (when overlay
 			(org-beamer--normalize-argument
 			 overlay
 			 (if (string-match "^\\[.*\\]$" overlay) 'defaction
 			   'action))))
 		    ;; Options.
-		    (let ((options (org-element-property :beamer-opt headline)))
+		    (let ((options (org-element-property :BEAMER_OPT headline)))
 		      (when options
 			(org-beamer--normalize-argument options 'option)))
 		    ;; Resolve reference provided by "BEAMER_ref"
@@ -642,7 +642,7 @@ as a communication channel."
        ;; Case 2: Creation of an appendix is requested.
        ((equal environment "appendix")
 	(concat "\\appendix"
-		(org-element-property :beamer-act headline)
+		(org-element-property :BEAMER_ACT headline)
 		"\n"
 		(make-string (org-element-property :pre-blank headline) ?\n)
 		contents))

@@ -1834,8 +1834,8 @@ holding contextual information."
 					 (org-export-get-headline-number
 					  headline info) "-")))
 	   ;; Get user-specified labels for the headline.
-	   (extra-ids (list (org-element-property :custom-id headline)
-			    (org-element-property :id headline)))
+	   (extra-ids (list (org-element-property :CUSTOM_ID headline)
+			    (org-element-property :ID headline)))
 	   ;; Extra targets.
 	   (extra-targets
 	    (mapconcat (lambda (x)
