@@ -947,17 +947,15 @@ publishing directory."
   (let ((all-files (org-publish-get-base-files
 		    project (plist-get (cdr project) :exclude)))
 	full-index)
-    ;; Compile full index.
-    (mapc
-     (lambda (file)
-       (let ((index (org-publish-cache-get-file-property file :index)))
-	 (dolist (term index)
-	   (unless (member term full-index) (push term full-index)))))
-     all-files)
-    ;; Sort it alphabetically.
-    (setq full-index
-	  (sort full-index (lambda (a b) (string< (downcase (car a))
-					     (downcase (car b))))))
+    ;; Compile full index and sort it alphabetically.
+    (dolist (file all-files
+		  (setq full-index
+			(sort (nreverse full-index)
+			      (lambda (a b) (string< (downcase (car a))
+						(downcase (car b)))))))
+      (let ((index (org-publish-cache-get-file-property file :index)))
+	(dolist (term index)
+	  (unless (member term full-index) (push term full-index)))))
     ;; Write "theindex.inc" in DIRECTORY.
     (with-temp-file (expand-file-name "theindex.inc" directory)
       (insert "* Index\n")
