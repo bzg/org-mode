@@ -958,9 +958,9 @@ publishing directory."
     (setq full-index
 	  (sort full-index (lambda (a b) (string< (downcase (car a))
 					     (downcase (car b))))))
-    ;; Fill "theindex.org".
-    (with-temp-buffer
-      (insert "#+TITLE: Index\n#+OPTIONS: num:nil author:nil\n")
+    ;; Write "theindex.inc" in DIRECTORY.
+    (with-temp-file (expand-file-name "theindex.inc" directory)
+      (insert "* Index\n")
       (let ((current-letter nil) (last-entry nil))
 	(dolist (idx full-index)
 	  (let* ((entry (org-split-string (car idx) "!"))
@@ -972,7 +972,7 @@ publishing directory."
 			(plist-get (cdr project) :base-directory))))
 	    ;; Check if another letter has to be inserted.
 	    (unless (string= letter current-letter)
-	      (insert (format "* %s\n" letter)))
+	      (insert (format "** %s\n" letter)))
 	    ;; Compute the first difference between last entry and
 	    ;; current one: it tells the level at which new items
 	    ;; should be added.
@@ -1002,8 +1002,15 @@ publishing directory."
 		       (car (last entry)))))
 		  "\n"))))
 	    (setq current-letter letter last-entry entry))))
-      ;; Write index.
-      (write-file (expand-file-name "theindex.org" directory)))))
+      ;; Write "theindex.org" if it doesn't exist.  The combination
+      ;; "theindex.inc" and conditional "theindex.org" allows for
+      ;; a greater flexibility for the user, since he can provide its
+      ;; own "theindex.org", inserting "theindex.inc" wherever he
+      ;; wants.
+      (let ((index.org (expand-file-name "theindex.org" directory)))
+	(unless (file-exists-p index.org)
+	  (with-temp-file index.org
+	    (insert "\n\n#+INCLUDE: \"theindex.inc\"\n\n")))))))
 
 
 
