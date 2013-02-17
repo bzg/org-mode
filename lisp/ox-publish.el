@@ -976,9 +976,10 @@ publishing directory."
 	    ;; Compute the first difference between last entry and
 	    ;; current one: it tells the level at which new items
 	    ;; should be added.
-	    (let* ((rank (loop for n from 0 to (length entry)
-			       unless (equal (nth n entry) (nth n last-entry))
-			       return n))
+	    (let* ((rank (if (equal entry last-entry) (1- (length entry))
+			   (loop for n from 0 to (length entry)
+				 unless (equal (nth n entry) (nth n last-entry))
+				 return n)))
 		   (len (length (nthcdr rank entry))))
 	      ;; For each term after the first difference, create
 	      ;; a new sub-list with the term as body.  Moreover,
