@@ -763,17 +763,16 @@ Assume point is at beginning of the headline."
 	   (archivedp (member org-archive-tag tags))
 	   (footnote-section-p (and org-footnote-section
 				    (string= org-footnote-section raw-value)))
-	   ;; Normalize property names: ":SOME_PROP:" becomes
-	   ;; ":some-prop".
+	   ;; Upcase property names.  It avoids confusion between
+	   ;; properties obtained through property drawer and default
+	   ;; properties from the parser (e.g. `:end' and :END:)
 	   (standard-props
 	    (let (plist)
 	      (mapc
 	       (lambda (p)
 		 (setq plist
 		       (plist-put plist
-				  (intern (concat ":"
-						  (replace-regexp-in-string
-						   "_" "-" (downcase (car p)))))
+				  (intern (concat ":" (upcase (car p))))
 				  (cdr p))))
 	       (org-entry-properties nil 'standard))
 	      plist))
@@ -930,17 +929,16 @@ Assume point is at beginning of the inline task."
 	   (tags (let ((raw-tags (nth 5 components)))
 		   (and raw-tags (org-split-string raw-tags ":"))))
 	   (raw-value (or (nth 4 components) ""))
-	   ;; Normalize property names: ":SOME_PROP:" becomes
-	   ;; ":some-prop".
+	   ;; Upcase property names.  It avoids confusion between
+	   ;; properties obtained through property drawer and default
+	   ;; properties from the parser (e.g. `:end' and :END:)
 	   (standard-props
 	    (let (plist)
 	      (mapc
 	       (lambda (p)
 		 (setq plist
 		       (plist-put plist
-				  (intern (concat ":"
-						  (replace-regexp-in-string
-						   "_" "-" (downcase (car p)))))
+				  (intern (concat ":" (upcase (car p))))
 				  (cdr p))))
 	       (org-entry-properties nil 'standard))
 	      plist))
