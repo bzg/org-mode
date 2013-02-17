@@ -5388,7 +5388,7 @@ back to standard interface."
 	 ;; pressed, if any.  Some keys (?^B, ?^V, ?^S, ?^F, ?^A
 	 ;; and ?q) are always available.
 	 (allowed-keys
-	  (nconc (list ? ? ? ? ?)
+	  (nconc (list 2 22 19 6 1)
 		 (if (not first-key) (org-uniquify (mapcar 'car backends))
 		   (let (sub-menu)
 		     (dolist (backend backends (sort (mapcar 'car sub-menu) '<))
@@ -5525,13 +5525,13 @@ options as CDR."
     ;; C-p, SPC, DEL).
     (while (and (setq key (read-char-exclusive prompt))
 		(not expertp)
-		(memq key '(? ? ?\s ?\d)))
+		(memq key '(14 16 ?\s ?\d)))
       (case key
-	(? (if (not (pos-visible-in-window-p (point-max)))
+	(14 (if (not (pos-visible-in-window-p (point-max)))
 		 (ignore-errors (scroll-up-line))
 	       (message "End of buffer")
 	       (sit-for 1)))
-	(? (if (not (pos-visible-in-window-p (point-min)))
+	(16 (if (not (pos-visible-in-window-p (point-min)))
 		 (ignore-errors (scroll-down-line))
 	       (message "Beginning of buffer")
 	       (sit-for 1)))
@@ -5558,11 +5558,12 @@ options as CDR."
      ((eq key ??) (org-export--dispatch-ui options first-key nil))
      ;; Switch to asynchronous export stack.
      ((eq key ?&) '(stack))
-     ;; Toggle export options.
-     ((memq key '(? ? ? ? ?))
+     ;; Toggle export options
+     ;; C-b (2) C-v (22) C-s (19) C-f (6) C-a (1)
+     ((memq key '(2 22 19 6 1))
       (org-export--dispatch-ui
-       (let ((option (case key (? 'body) (? 'visible) (? 'subtree)
-			   (? 'force) (? 'async))))
+       (let ((option (case key (2 'body) (22 'visible) (19 'subtree)
+			   (6 'force) (1 'async))))
 	 (if (memq option options) (remq option options)
 	   (cons option options)))
        first-key expertp))
