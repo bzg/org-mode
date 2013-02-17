@@ -493,7 +493,8 @@ depends on, if any."
 	      (const :tag "   infojs:     Set up Sebastian Rose's JavaScript org-info.js" jsinfo)
 	      (const :tag "C  confluence  Export buffer to Confluence Wiki format" confluence)
 	      (const :tag "C  groff       Export buffer to Groff format" groff)
-	      (const :tag "C  koma-letter Export buffer to KOMA Scrlttrl2 format" koma-letter)))
+	      (const :tag "C  koma-letter Export buffer to KOMA Scrlttrl2 format" koma-letter)
+	      (const :tag "C  taskjuggler Export buffer to TaskJuggler format" taskjuggler)))
 
 (eval-after-load 'ox
   '(mapc
