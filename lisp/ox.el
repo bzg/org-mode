@@ -5493,10 +5493,7 @@ back to standard interface."
 	(org-switch-to-buffer-other-window
 	 (get-buffer-create "*Org Export Dispatcher*"))
 	(setq cursor-type nil
-	      header-line-format "Use SPC, DEL, C-n or C-p to navigate.")
-	;; Prevent square brackets from being highlighted when point
-	;; moves onto them.
-	(modify-syntax-entry ?\[ "w"))
+	      header-line-format "Use SPC, DEL, C-n or C-p to navigate."))
       ;; At this point, the buffer containing the menu exists and is
       ;; visible in the current window.  So, refresh it.
       (with-current-buffer "*Org Export Dispatcher*"
