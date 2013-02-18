@@ -675,17 +675,24 @@ If `:auto-sitemap' is set, publish the sitemap too.  If
 	    (preparation-function
 	     (plist-get project-plist :preparation-function))
 	    (completion-function (plist-get project-plist :completion-function))
-	    (files (org-publish-get-base-files project exclude-regexp)) file)
+	    (files (org-publish-get-base-files project exclude-regexp))
+	    (theindex
+	     (expand-file-name "theindex.org"
+			       (plist-get project-plist :base-directory))))
        (when preparation-function (run-hooks 'preparation-function))
        (if sitemap-p (funcall sitemap-function project sitemap-filename))
-       (dolist (file files) (org-publish-file file project t))
+       ;; Publish all files from PROJECT excepted "theindex.org".  Its
+       ;; publishing will be deferred until "theindex.inc" is
+       ;; populated.
+       (dolist (file files)
+	 (unless (equal file theindex)
+	   (org-publish-file file project t)))
+       ;; Populate "theindex.inc", if needed, and publish
+       ;; "theindex.org".
        (when (plist-get project-plist :makeindex)
 	 (org-publish-index-generate-theindex
 	  project (plist-get project-plist :base-directory))
-	 (org-publish-file
-	  (expand-file-name
-	   "theindex.org" (plist-get project-plist :base-directory))
-	  project t))
+	 (org-publish-file theindex project t))
        (when completion-function (run-hooks 'completion-function))
        (org-publish-write-cache-file)))
    (org-publish-expand-projects projects)))
