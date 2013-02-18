@@ -5198,8 +5198,7 @@ The following commands are available:
     (org-set-tag-faces 'org-tag-faces org-tag-faces))
   ;; Calc embedded
   (org-set-local 'calc-embedded-open-mode "# ")
-  (mapc (lambda(c) (modify-syntax-entry (string-to-char (car c)) "w p"))
-	org-emphasis-alist)
+  ;; Modify a few syntax entries
   (modify-syntax-entry ?< "(")
   (modify-syntax-entry ?> ")")
   (modify-syntax-entry ?{ "(")
@@ -5296,6 +5295,13 @@ The following commands are available:
        (org-set-startup-visibility))))
   ;; Try to set org-hide correctly
   (set-face-foreground 'org-hide (org-find-invisible-foreground)))
+
+(defvar org-mode-transpose-word-syntax-table
+  (let ((st (make-syntax-table)))
+    (mapc (lambda(c) (modify-syntax-entry
+		      (string-to-char (car c)) "w p" st))
+	  org-emphasis-alist)
+    st))
 
 (when (fboundp 'abbrev-table-put)
   (abbrev-table-put org-mode-abbrev-table
@@ -19042,6 +19048,16 @@ COMMANDS is a list of alternating OLDDEF NEWDEF command names."
       (if (fboundp 'command-remapping)
 	  (org-defkey map (vector 'remap old) new)
 	(substitute-key-definition old new map global-map)))))
+
+(defun org-transpose-words ()
+  "Transpose words for Org.
+This uses the `org-mode-transpose-word-syntax-table' syntax
+table, which interprets characters in `org-emphasis-alist' as
+word constituants."
+  (interactive)
+  (with-syntax-table org-mode-transpose-word-syntax-table
+    (call-interactively 'transpose-words)))
+(org-remap org-mode-map 'transpose-words 'org-transpose-words)
 
 (when (eq org-enable-table-editor 'optimized)
   ;; If the user wants maximum table support, we need to hijack
