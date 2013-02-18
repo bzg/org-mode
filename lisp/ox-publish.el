@@ -967,7 +967,6 @@ publishing directory."
 	  (unless (member term full-index) (push term full-index)))))
     ;; Write "theindex.inc" in DIRECTORY.
     (with-temp-file (expand-file-name "theindex.inc" directory)
-      (insert "* Index\n")
       (let ((current-letter nil) (last-entry nil))
 	(dolist (idx full-index)
 	  (let* ((entry (org-split-string (car idx) "!"))
@@ -979,7 +978,7 @@ publishing directory."
 			(plist-get (cdr project) :base-directory))))
 	    ;; Check if another letter has to be inserted.
 	    (unless (string= letter current-letter)
-	      (insert (format "** %s\n" letter)))
+	      (insert (format "* %s\n" letter)))
 	    ;; Compute the first difference between last entry and
 	    ;; current one: it tells the level at which new items
 	    ;; should be added.
@@ -1010,15 +1009,12 @@ publishing directory."
 		       (car (last entry)))))
 		  "\n"))))
 	    (setq current-letter letter last-entry entry))))
-      ;; Write "theindex.org" if it doesn't exist.  The combination
-      ;; "theindex.inc" and conditional "theindex.org" allows for
-      ;; a greater flexibility for the user, since he can provide its
-      ;; own "theindex.org", inserting "theindex.inc" wherever he
-      ;; wants.
+      ;; Create "theindex.org", if it doesn't exist yet, and provide
+      ;; a default index file.
       (let ((index.org (expand-file-name "theindex.org" directory)))
 	(unless (file-exists-p index.org)
 	  (with-temp-file index.org
-	    (insert "\n\n#+INCLUDE: \"theindex.inc\"\n\n")))))))
+	    (insert "#+TITLE: Index\n\n#+INCLUDE: \"theindex.inc\"\n\n")))))))
 
 
 
