@@ -2821,7 +2821,7 @@ Return code as a string."
 	 ;; added some new ones.
 	 (org-macro-initialize-templates)
 	 (org-macro-replace-all org-macro-templates)
-	 (when org-export-babel-evaluate (org-export-execute-babel-code))
+	 (org-export-execute-babel-code)
 	 ;; Update radio targets since keyword inclusion might have
 	 ;; added some more.
 	 (org-update-radio-target-regexp)
