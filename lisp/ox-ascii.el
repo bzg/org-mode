@@ -1462,11 +1462,7 @@ channel."
   "Transcode a QUOTE-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (let ((width (org-ascii--current-text-width quote-block info)))
-    (org-ascii--indent-string
-     (org-remove-indentation
-      (org-ascii--fill-string contents width info))
-     org-ascii-quote-margin)))
+  (org-ascii--indent-string contents org-ascii-quote-margin))
 
 
 ;;;; Quote Section
