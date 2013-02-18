@@ -485,12 +485,24 @@ body\n")))
     (should (equal (buffer-string)
 		   "Small Org file with an include keyword.\n")))
   ;; Insertion with constraints on headlines level.
-  (org-test-with-temp-text
-      (format
-       "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-\""
-       org-test-dir)
-    (org-export-expand-include-keyword)
-    (should (equal (buffer-string) "* Top heading\n** Heading\nbody\n")))
+  (should
+   (equal
+    "* Top heading\n** Heading\nbody\n"
+    (org-test-with-temp-text
+	(format
+	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-\""
+	 org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
+  (should
+   (equal
+    "* Top heading\n* Heading\nbody\n"
+    (org-test-with-temp-text
+	(format
+	 "* Top heading\n#+INCLUDE: \"%s/examples/include.org\" :lines \"9-\" :minlevel 1"
+	 org-test-dir)
+      (org-export-expand-include-keyword)
+      (buffer-string))))
   ;; Inclusion within an example block.
   (org-test-with-temp-text
       (format "#+INCLUDE: \"%s/examples/include.org\" :lines \"1-2\" example"
