@@ -7331,7 +7331,12 @@ This is important for non-interactive uses of the command."
 	    (cond
 	     (org-insert-heading-respect-content
 	      (if (not (equal force-heading '(16)))
-		  (org-end-of-subtree nil t)
+		  (progn
+		    (org-end-of-subtree nil t)
+		    (and (looking-at "^\\*") (backward-char 1))
+		    (while (and (not (bobp))
+				(member (char-before) '(?\ ?\t ?\n)))
+		      (backward-delete-char 1)))
 		(org-up-heading-safe)
 		(org-end-of-subtree nil t))
 	      (when (featurep 'org-inlinetask)
