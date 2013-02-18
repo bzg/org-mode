@@ -74,19 +74,18 @@ CDR of each element is in one of the following forms:
 2. A meta-project definition, specifying of a list of
    sub-projects:
 
-     \(:components \(\"project-1\" \"project-2\" ...))
+     \(:components (\"project-1\" \"project-2\" ...))
 
 When the CDR of an element of org-publish-project-alist is in
 this second form, the elements of the list after `:components'
 are taken to be components of the project, which group together
 files requiring different publishing options.  When you publish
-such a project with \\[org-publish], the components all
-publish.
+such a project with \\[org-publish], the components all publish.
 
-When a property is given a value in
-`org-publish-project-alist', its setting overrides the value of
-the corresponding user variable \(if any) during publishing.
-However, options set within a file override everything.
+When a property is given a value in `org-publish-project-alist',
+its setting overrides the value of the corresponding user
+variable (if any) during publishing.  However, options set within
+a file override everything.
 
 Most properties are optional, but some should always be set:
 
@@ -96,13 +95,13 @@ Most properties are optional, but some should always be set:
 
   `:base-extension'
 
-    Extension \(without the dot!) of source files.  This can be
+    Extension (without the dot!) of source files.  This can be
     a regular expression.  If not given, \"org\" will be used as
     default extension.
 
   `:publishing-directory'
 
-    Directory \(possibly remote) where output files will be
+    Directory (possibly remote) where output files will be
     published.
 
 The `:exclude' property may be used to prevent certain files from
@@ -110,7 +109,7 @@ being published.  Its value may be a string or regexp matching
 file names you don't want to be published.
 
 The `:include' property may be used to include extra files.  Its
-value may be a list of filenames to include. The filenames are
+value may be a list of filenames to include.  The filenames are
 considered relative to the base directory.
 
 When both `:include' and `:exclude' properties are given values,
@@ -125,8 +124,8 @@ set of output formats.
 
     Function to publish file.  Each back-end may define its
     own (i.e. `org-latex-publish-to-pdf',
-    `org-html-publish-to-html').  May be a list of functions,
-    in which case each function in the list is invoked in turn.
+    `org-html-publish-to-html').  May be a list of functions, in
+    which case each function in the list is invoked in turn.
 
 Another property allows you to insert code that prepares
 a project for publishing.  For example, you could call GNU Make
@@ -200,21 +199,21 @@ a site-map of files or summary page for a given project.
 
   `:sitemap-function'
 
-    Plugin function to use for generation of site-map.  Defaults to
-    `org-publish-org-sitemap', which generates a plain list of
+    Plugin function to use for generation of site-map.  Defaults
+    to `org-publish-org-sitemap', which generates a plain list of
     links to all files in the project.
 
   `:sitemap-style'
 
-    Can be `list' \(site-map is just an itemized list of the
-    titles of the files involved) or `tree' \(the directory
+    Can be `list' (site-map is just an itemized list of the
+    titles of the files involved) or `tree' (the directory
     structure of the source files is reflected in the site-map).
     Defaults to `tree'.
 
   `:sitemap-sans-extension'
 
     Remove extension from site-map's file-names.  Useful to have
-    cool URIs \(see http://www.w3.org/Provider/Style/URI).
+    cool URIs (see http://www.w3.org/Provider/Style/URI).
     Defaults to nil.
 
 If you create a site-map file, adjust the sorting like this:
@@ -222,9 +221,8 @@ If you create a site-map file, adjust the sorting like this:
   `:sitemap-sort-folders'
 
     Where folders should appear in the site-map.  Set this to
-    `first' \(default) or `last' to display folders first or
-    last, respectively.  Any other value will mix files and
-    folders.
+    `first' (default) or `last' to display folders first or last,
+    respectively.  Any other value will mix files and folders.
 
   `:sitemap-sort-files'
 
@@ -236,11 +234,15 @@ If you create a site-map file, adjust the sorting like this:
 
     Should sorting be case-sensitive?  Default nil.
 
-The following properties control the creation of a concept index.
+The following property control the creation of a concept index.
 
   `:makeindex'
 
-    Create a concept index.
+    Create a concept index.  The file containing the index has to
+    be called \"theindex.org\".  If it doesn't exist in the
+    project, it will be generated.  Contents of the index are
+    stored in the file \"theindex.inc\", which can be included in
+    \"theindex.org\".
 
 Other properties affecting publication.
 
