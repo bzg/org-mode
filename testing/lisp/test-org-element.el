@@ -874,6 +874,17 @@ Some other text
 	;; Test tag removal.
 	(should (equal (org-element-property :tags headline) '("test")))))))
 
+(ert-deftest test-org-element/headline-properties ()
+  "Test properties from property drawer."
+  ;; All properties from property drawer have their symbol upper
+  ;; cased.
+  (should
+   (org-test-with-temp-text "* Headline\n:PROPERTIES:\n:foo: bar\n:END:"
+     (org-element-property :FOO (org-element-at-point))))
+  (should-not
+   (org-test-with-temp-text "* Headline\n:PROPERTIES:\n:foo: bar\n:END:"
+     (org-element-property :foo (org-element-at-point)))))
+
 
 ;;;; Horizontal Rule
 
@@ -943,8 +954,8 @@ Some other text
 	  (org-test-with-temp-text "*************** TODO Task"
 	    (org-element-property
 	     :todo-keyword
-	     (org-element-map
-	      (org-element-parse-buffer) 'inlinetask 'identity nil t))))))
+	     (org-element-map (org-element-parse-buffer) 'inlinetask
+	       'identity nil t))))))
       ;; Planning info.
       (should
        (equal
@@ -954,8 +965,7 @@ Some other text
 DEADLINE: <2012-03-29 thu.>"
 	  (org-element-property
 	   :deadline
-	   (org-element-map
-	    (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
+	   (org-element-map (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
       ;; Priority.
       (should
        (equal
@@ -965,7 +975,7 @@ DEADLINE: <2012-03-29 thu.>"
 	  (org-element-property
 	   :priority
 	   (org-element-map
-	    (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
+	       (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
       ;; Tags.
       (should
        (equal
@@ -975,7 +985,26 @@ DEADLINE: <2012-03-29 thu.>"
 	  (org-element-property
 	   :tags
 	   (org-element-map
-	    (org-element-parse-buffer) 'inlinetask 'identity nil t))))))))
+	       (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
+      ;; Regular properties are accessed through upper case keywords.
+      (should
+       (org-test-with-temp-text "
+*************** Task
+:PROPERTIES:
+:foo: bar
+:END:
+*************** END"
+	 (forward-line)
+	 (org-element-property :FOO (org-element-at-point))))
+      (should-not
+       (org-test-with-temp-text "
+*************** Task
+:PROPERTIES:
+:foo: bar
+:END:
+*************** END"
+	 (forward-line)
+	 (org-element-property :foo (org-element-at-point)))))))
 
 
 ;;;; Italic

@@ -736,8 +736,8 @@ containing `:raw-value', `:title', `:begin', `:end',
 `:commentedp' and `:footnote-section-p' keywords.
 
 The plist also contains any property set in the property drawer,
-with its name in lowercase, the underscores replaced with hyphens
-and colons at the beginning (i.e. `:custom-id').
+with its name in upper cases and colons added at the
+beginning (i.e. `:CUSTOM_ID').
 
 When RAW-SECONDARY-P is non-nil, headline's title will not be
 parsed as a secondary string, but as a plain string instead.
@@ -912,8 +912,8 @@ containing `:title', `:begin', `:end', `:hiddenp',
 `:scheduled', `:deadline', `:closed' and `:post-blank' keywords.
 
 The plist also contains any property set in the property drawer,
-with its name in lowercase, the underscores replaced with hyphens
-and colons at the beginning (i.e. `:custom-id').
+with its name in upper cases and colons added at the
+beginning (i.e. `:CUSTOM_ID').
 
 When optional argument RAW-SECONDARY-P is non-nil, inline-task's
 title will not be parsed as a secondary string, but as a plain
