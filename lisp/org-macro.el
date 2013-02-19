@@ -42,7 +42,9 @@
 (declare-function org-element-context "org-element" (&optional element))
 (declare-function org-element-property "org-element" (property element))
 (declare-function org-element-type "org-element" (element))
-
+(declare-function org-remove-double-quotes "org" (s))
+(declare-function org-file-contents "org" (file &optional noerror))
+(declare-function org-with-wide-buffer "org-macs" (&rest body))
 
 ;;; Variables
 
