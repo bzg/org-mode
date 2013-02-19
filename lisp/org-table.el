@@ -43,7 +43,6 @@
 (declare-function aa2u "ext:ascii-art-to-unicode" ())
 (defvar orgtbl-mode) ; defined below
 (defvar orgtbl-mode-menu) ; defined when orgtbl mode get initialized
-(defvar org-export-html-table-tag) ; defined in org-exp.el
 (defvar constants-unit-system)
 (defvar org-table-follow-field-mode)
 
