@@ -18744,7 +18744,7 @@ BEG and END default to the buffer boundaries."
     ("^" . org-sort)
     ("w" . org-refile)
     ("a" . org-archive-subtree-default-with-confirmation)
-    ("." . org-mark-subtree) ;; FIXME Better use @ (see C-c @) here?
+    ("@" . org-mark-subtree)
     ("#" . org-toggle-comment)
     ("Clock Commands")
     ("I" . org-clock-in)
