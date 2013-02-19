@@ -1093,16 +1093,7 @@ so long."
 			 60.0))))
 	   org-clock-user-idle-start)))))
 
-(defvar org-clock-current-task nil
-  "Task currently clocked in.")
-(defun org-clock-set-current ()
-  "Set `org-clock-current-task' to the task currently clocked in."
-  (setq org-clock-current-task (nth 4 (org-heading-components))))
-
-(defun org-clock-delete-current ()
-  "Reset `org-clock-current-task' to nil."
-  (setq org-clock-current-task nil))
-
+(defvar org-clock-current-task nil "Task currently clocked in.")
 (defvar org-clock-out-time nil) ; store the time of the last clock-out
 
 ;;;###autoload
@@ -1200,7 +1191,7 @@ make this the default behavior.)"
 	      ;; manually
 	      (run-hooks 'org-clock-in-prepare-hook)
 	      (org-clock-history-push))
-	    (org-clock-set-current)
+	    (setq org-clock-current-task (nth 4 (org-heading-components)))
 	    (cond ((functionp org-clock-in-switch-to-state)
 		   (looking-at org-complex-heading-regexp)
 		   (let ((newstate (funcall org-clock-in-switch-to-state
@@ -1220,14 +1211,11 @@ make this the default behavior.)"
 		  (cond ((and org-clock-heading-function
 			      (functionp org-clock-heading-function))
 			 (funcall org-clock-heading-function))
-			((and (looking-at org-complex-heading-regexp)
-			      (match-string 4))
+			((nth 4 (org-heading-components))
 			 (replace-regexp-in-string
 			  "\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]" "\\1"
-			  (match-string 4)))
+			  (match-string-no-properties 4)))
 			(t "???")))
-	    (setq org-clock-heading (org-propertize org-clock-heading
-						    'face nil))
 	    (org-clock-find-position org-clock-in-resume)
 	    (cond
 	     ((and org-clock-in-resume
@@ -1566,7 +1554,7 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 		   te (if remove " => LINE REMOVED" ""))
           (run-hooks 'org-clock-out-hook)
 	  (unless (org-clocking-p)
-	    (org-clock-delete-current)))))))
+	    (setq org-clock-current-task nil)))))))
 
 (add-hook 'org-clock-out-hook 'org-clock-remove-empty-clock-drawer)
 
@@ -2799,9 +2787,7 @@ The details of what will be saved are regulated by the variable
 		   (buffer-file-name b)
 		   (or (not org-clock-persist-query-save)
 		       (y-or-n-p (concat "Save current clock ("
-					 (substring-no-properties
-					  org-clock-heading)
-					 ") "))))
+					 org-clock-heading ") "))))
 	      (insert "(setq resume-clock '(\""
 		      (buffer-file-name (org-clocking-buffer))
 		      "\" . " (int-to-string (marker-position org-clock-marker))
