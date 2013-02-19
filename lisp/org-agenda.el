@@ -3765,10 +3765,7 @@ generating a new one."
 
 (defun org-agenda-mark-clocking-task ()
   "Mark the current clock entry in the agenda if it is present."
-  (mapc (lambda (o)
-	  (if (eq (overlay-get o 'type) 'org-agenda-clocking)
-	      (delete-overlay o)))
-	(overlays-in (point-min) (point-max)))
+  (org-agenda-unmark-clocking-task)
   (when (marker-buffer org-clock-hd-marker)
     (save-excursion
       (goto-char (point-min))
@@ -3782,6 +3779,13 @@ generating a new one."
 	    (overlay-put ov 'face 'org-agenda-clocking)
 	    (overlay-put ov 'help-echo
 			 "The clock is running in this item")))))))
+
+(defun org-agenda-unmark-clocking-task ()
+  "Unmark the current clocking task."
+  (mapc (lambda (o)
+	  (if (eq (overlay-get o 'type) 'org-agenda-clocking)
+	      (delete-overlay o)))
+	(overlays-in (point-min) (point-max))))
 
 (defun org-agenda-fontify-priorities ()
   "Make highest priority lines bold, and lowest italic."
@@ -9141,9 +9145,9 @@ ARG is passed through to `org-deadline'."
       (org-clock-in arg)
     (let* ((marker (or (org-get-at-bol 'org-marker)
 		       (org-agenda-error)))
-	   (hdmarker (or (org-get-at-bol 'org-hd-marker)
-			 marker))
+	   (hdmarker (or (org-get-at-bol 'org-hd-marker) marker))
 	   (pos (marker-position marker))
+	   (col (current-column))
 	   newhead)
       (org-with-remote-undo (marker-buffer marker)
         (with-current-buffer (marker-buffer marker)
@@ -9154,14 +9158,15 @@ ARG is passed through to `org-deadline'."
 	  (org-cycle-hide-drawers 'children)
 	  (org-clock-in arg)
 	  (setq newhead (org-get-heading)))
-	(org-agenda-change-all-lines newhead hdmarker)))))
+	(org-agenda-change-all-lines newhead hdmarker))
+      (org-move-to-column col))))
 
 (defun org-agenda-clock-out ()
   "Stop the currently running clock."
   (interactive)
   (unless (marker-buffer org-clock-marker)
     (error "No running clock"))
-  (let ((marker (make-marker)) newhead)
+  (let ((marker (make-marker)) (col (current-column)) newhead)
     (org-with-remote-undo (marker-buffer org-clock-marker)
       (with-current-buffer (marker-buffer org-clock-marker)
 	(save-excursion
@@ -9173,7 +9178,9 @@ ARG is passed through to `org-deadline'."
 	    (org-clock-out)
 	    (setq newhead (org-get-heading))))))
     (org-agenda-change-all-lines newhead marker)
-    (move-marker marker nil)))
+    (move-marker marker nil)
+    (org-move-to-column col)
+    (org-agenda-unmark-clocking-task)))
 
 (defun org-agenda-clock-cancel (&optional arg)
   "Cancel the currently running clock."
