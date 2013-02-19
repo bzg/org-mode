@@ -3008,7 +3008,7 @@ Return file name as a string."
 	   (t (concat (file-name-as-directory ".") base-name extension)))))
     ;; If writing to OUTPUT-FILE would overwrite original file, append
     ;; EXTENSION another time to final name.
-    (if (and visited-file (file-equal-p visited-file output-file))
+    (if (and visited-file (org-file-equal-p visited-file output-file))
 	(concat output-file extension)
       output-file)))
 

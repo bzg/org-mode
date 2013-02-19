@@ -489,6 +489,16 @@ With two arguments, return floor and remainder of their quotient."
 	   (defun org-release () "N/A")
 	   (defun org-git-version () "N/A !!check installation!!"))))))
 
+(defun org-file-equal-p (f1 f2)
+  "Return t if files F1 and F2 are the same.
+Implements `file-equal-p' for older emacsen and XEmacs."
+  (if (fboundp 'file-equal-p)
+      (file-equal-p f1 f2)
+    (let (f1-attr f2-attr)
+      (and (setq f1-attr (file-attributes (file-truename f1)))
+	   (setq f2-attr (file-attributes (file-truename f2)))
+	   (equal f1-attr f2-attr)))))
+
 (provide 'org-compat)
 
 ;;; org-compat.el ends here
