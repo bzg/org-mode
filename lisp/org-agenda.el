@@ -1971,7 +1971,6 @@ Toggle `org-agenda-sticky'.
     org-agenda-last-search-view-search-was-boolean
     org-agenda-filtered-by-category
     org-agenda-filter-form
-    org-agenda-show-window
     org-agenda-cycle-counter
     org-agenda-last-prefix-arg)
   "Variables that must be local in agenda buffers to allow multiple buffers.")
