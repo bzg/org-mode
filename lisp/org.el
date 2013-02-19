@@ -14679,6 +14679,7 @@ When INCREMENT is non-nil, set the property to the next allowed value."
 	 (cur (org-entry-get nil prop))
 	 (allowed (org-property-get-allowed-values nil prop 'table))
 	 (existing (mapcar 'list (org-property-values prop)))
+	 (heading (nth 4 (org-heading-components)))
 	 rpl
 	 (val (cond
 	       ((stringp value) value)
@@ -14712,6 +14713,9 @@ When INCREMENT is non-nil, set the property to the next allowed value."
     (save-excursion
       (org-back-to-heading t)
       (put-text-property (point-at-bol) (point-at-eol) 'org-effort val))
+    (when (string= heading org-clock-current-task)
+      (setq org-clock-effort (get-text-property (point-at-bol) 'org-effort))
+      (org-clock-update-mode-line))
     (message "%s is now %s" prop val)))
 
 (defun org-at-property-p ()
@@ -15473,6 +15477,7 @@ completion."
 	 (allowed (or (org-property-get-allowed-values (point) key)
 		      (and (member value  '("[ ]" "[-]" "[X]"))
 			   '("[ ]" "[X]"))))
+	 (heading (save-match-data (nth 4 (org-heading-components))))
 	 nval)
     (unless allowed
       (error "Allowed values for this property have not been defined"))
@@ -15490,7 +15495,10 @@ completion."
     (when (equal prop org-effort-property)
       (save-excursion
 	(org-back-to-heading t)
-	(put-text-property (point-at-bol) (point-at-eol) 'org-effort nval)))
+	(put-text-property (point-at-bol) (point-at-eol) 'org-effort nval))
+      (when (string= org-clock-current-task heading)
+	(setq org-clock-effort nval)
+	(org-clock-update-mode-line)))
     (run-hook-with-args 'org-property-changed-functions key nval)))
 
 (defun org-find-olp (path &optional this-buffer)
