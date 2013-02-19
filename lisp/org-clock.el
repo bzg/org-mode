@@ -1271,11 +1271,11 @@ make this the default behavior.)"
 			      (format
 			       "You stopped another clock %d mins ago; start this one from then? "
 			       (/ (- (org-float-time
-				      (org-current-time org-clock-rounding-minutes))
+				      (org-current-time org-clock-rounding-minutes t))
 				     (org-float-time leftover)) 60)))
 			     leftover)
 			start-time
-			(org-current-time org-clock-rounding-minutes)))
+			(org-current-time org-clock-rounding-minutes t)))
 	      (setq ts (org-insert-time-stamp org-clock-start-time
 					      'with-hm 'inactive))))
 	    (move-marker org-clock-marker (point) (buffer-base-buffer))
@@ -1327,8 +1327,8 @@ for a todo state to switch to, overriding the existing value
       (org-clock-in (org-clock-select-task))
     (let ((start-time (if (or org-clock-continuously (equal arg '(16)))
 			  (or org-clock-out-time
-			      (org-current-time org-clock-rounding-minutes))
-			(org-current-time org-clock-rounding-minutes))))
+			      (org-current-time org-clock-rounding-minutes t))
+			(org-current-time org-clock-rounding-minutes t))))
       (if (null org-clock-history)
 	  (message "No last clock")
 	(let ((org-clock-in-switch-to-state
