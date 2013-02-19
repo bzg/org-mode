@@ -14661,6 +14661,7 @@ value for the property."
   (interactive)
   (org-set-effort nil t))
 
+(defvar org-clock-effort "") ;; Defined in org-clock.el
 (defun org-set-effort (&optional value increment)
   "Set the effort property of the current entry.
 With numerical prefix arg, use the nth allowed value, 0 stands for the
