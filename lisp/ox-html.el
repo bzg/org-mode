@@ -256,11 +256,6 @@ have the default style included, customize the variable
   :tag "Org Export HTML"
   :group 'org-export)
 
-(defgroup org-export-htmlize nil
-  "Options for processing examples with htmlize.el."
-  :tag "Org Export Htmlize"
-  :group 'org-export-html)
-
 
 ;;;; Bold etc
 
@@ -522,7 +517,7 @@ default we use here encompasses both."
 
 ;;;; Src Block
 
-(defcustom org-export-htmlize-output-type 'inline-css
+(defcustom org-html-htmlize-output-type 'inline-css
   "Output type to be used by htmlize when formatting code snippets.
 Choices are `css', to export the CSS selectors only, or `inline-css', to
 export the CSS attribute values inline in the HTML.  We use as default
@@ -537,16 +532,16 @@ a style file to define the look of these classes.
 To get a start for your css file, start Emacs session and make sure that
 all the faces you are interested in are defined, for example by loading files
 in all modes you want.  Then, use the command
-\\[org-export-htmlize-generate-css] to extract class definitions."
-  :group 'org-export-htmlize
+\\[org-html-htmlize-generate-css] to extract class definitions."
+  :group 'org-export-html
   :type '(choice (const css) (const inline-css)))
 
-(defcustom org-export-htmlize-font-prefix "org-"
+(defcustom org-html-htmlize-font-prefix "org-"
   "The prefix for CSS class names for htmlize font specifications."
-  :group 'org-export-htmlize
+  :group 'org-export-html
   :type 'string)
 
-(defcustom org-export-htmlized-org-css-url nil
+(defcustom org-html-htmlized-org-css-url nil
   "URL pointing to a CSS file defining text colors for htmlized Emacs buffers.
 Normally when creating an htmlized version of an Org buffer, htmlize will
 create CSS to define the font colors.  However, this does not work when
@@ -555,7 +550,7 @@ with different fontification setup work on the same website.
 When this variable is non-nil, creating an htmlized version of an Org buffer
 using `org-export-as-org' will remove the internal CSS section and replace it
 with a link to this URL."
-  :group 'org-export-htmlize
+  :group 'org-export-html
   :type '(choice
 	  (const :tag "Keep internal css" nil)
 	  (string :tag "URL or local href")))
@@ -1069,12 +1064,12 @@ ELEMENT is either a src block or an example block."
 	      (substring style (match-beginning 0)))
     style))
 
-(defun org-export-htmlize-region-for-paste (beg end)
+(defun org-html-htmlize-region-for-paste (beg end)
   "Convert the region to HTML, using htmlize.el.
 This is much like `htmlize-region-for-paste', only that it uses
 the settings define in the org-... variables."
-  (let* ((htmlize-output-type org-export-htmlize-output-type)
-	 (htmlize-css-name-prefix org-export-htmlize-font-prefix)
+  (let* ((htmlize-output-type org-html-htmlize-output-type)
+	 (htmlize-css-name-prefix org-html-htmlize-font-prefix)
 	 (htmlbuf (htmlize-region beg end)))
     (unwind-protect
 	(with-current-buffer htmlbuf
@@ -1083,7 +1078,7 @@ the settings define in the org-... variables."
       (kill-buffer htmlbuf))))
 
 ;;;###autoload
-(defun org-export-htmlize-generate-css ()
+(defun org-html-htmlize-generate-css ()
   "Create the CSS for all font definitions in the current Emacs session.
 Use this to create face definitions in your CSS style file that can then
 be used by code snippets transformed by htmlize.
@@ -1091,8 +1086,8 @@ This command just produces a buffer that contains class definitions for all
 faces used in the current Emacs session.  You can copy and paste the ones you
 need into your CSS file.
 
-If you then set `org-export-htmlize-output-type' to `css', calls
-to the function `org-export-htmlize-region-for-paste' will
+If you then set `org-html-htmlize-output-type' to `css', calls
+to the function `org-html-htmlize-region-for-paste' will
 produce code that uses these same face definitions."
   (interactive)
   (require 'htmlize)
@@ -1540,7 +1535,7 @@ is the language used for CODE, as a string, or nil."
 		       (org-src-mode)
 		       (set-buffer-modified-p nil)
 		       ;; Htmlize region.
-		       (org-export-htmlize-region-for-paste
+		       (org-html-htmlize-region-for-paste
 			(point-min) (point-max))))
 	  ;; Strip any encolosing <pre></pre> tags.
 	  (if (string-match "<pre[^>]*>\n*\\([^\000]*\\)</pre>" code)
