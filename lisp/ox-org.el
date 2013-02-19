@@ -104,6 +104,15 @@ Ignore keywords targeted at other export back-ends."
 		   org-element-block-name-alist))
     (org-element-keyword-interpreter keyword nil)))
 
+(defun org-org-publish-to-org (plist filename pub-dir)
+  "Publish an org file to org.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-publish-org-to 'org filename ".org" plist pub-dir))
 
 (provide 'ox-org)
 
