@@ -9870,45 +9870,35 @@ If it decides that it is not responsible for this link, it must return
 nil to indicate that that Org-mode can continue with other options
 like exact and fuzzy text search.")
 
-(defun org-next-link ()
+(defun org-next-link (&optional search-backward)
   "Move forward to the next link.
 If the link is in hidden text, expose it."
-  (interactive)
+  (interactive "P")
   (when (and org-link-search-failed (eq this-command last-command))
     (goto-char (point-min))
     (message "Link search wrapped back to beginning of buffer"))
   (setq org-link-search-failed nil)
   (let* ((pos (point))
 	 (ct (org-context))
-	 (a (assoc :link ct)))
-    (if a (goto-char (nth 2 a)))
-    (if (re-search-forward org-any-link-re nil t)
+	 (a (assoc :link ct))
+	 (srch-fun (if search-backward 're-search-backward 're-search-forward)))
+    (cond (a (goto-char (nth (if search-backward 1 2) a)))
+	  ((looking-at org-any-link-re)
+	   ;; Don't stay stuck at link without an org-link face
+	   (forward-char (if search-backward -1 1))))
+    (if (funcall srch-fun org-any-link-re nil t)
 	(progn
 	  (goto-char (match-beginning 0))
 	  (if (outline-invisible-p) (org-show-context)))
       (goto-char pos)
       (setq org-link-search-failed t)
-      (error "No further link found"))))
+      (message "No further link found"))))
 
 (defun org-previous-link ()
   "Move backward to the previous link.
 If the link is in hidden text, expose it."
   (interactive)
-  (when (and org-link-search-failed (eq this-command last-command))
-    (goto-char (point-max))
-    (message "Link search wrapped back to end of buffer"))
-  (setq org-link-search-failed nil)
-  (let* ((pos (point))
-	 (ct (org-context))
-	 (a (assoc :link ct)))
-    (if a (goto-char (nth 1 a)))
-    (if (re-search-backward org-any-link-re nil t)
-	(progn
-	  (goto-char (match-beginning 0))
-	  (if (outline-invisible-p) (org-show-context)))
-      (goto-char pos)
-      (setq org-link-search-failed t)
-      (error "No further link found"))))
+  (funcall 'org-next-link t))
 
 (defun org-translate-link (s)
   "Translate a link string if a translation function has been defined."
