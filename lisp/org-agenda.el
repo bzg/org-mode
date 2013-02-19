@@ -6636,6 +6636,10 @@ Any match of REMOVE-RE will be removed from TXT."
 	(add-text-properties 0 (length txt) '(org-heading t) txt)
 
 	;; Prepare the variables needed in the eval of the compiled format
+	(if org-prefix-has-breadcrumbs
+	    (setq breadcrumbs (org-with-point-at (org-get-at-bol 'org-marker)
+				(let ((s (org-display-outline-path nil nil "->" t)))
+				  (if (eq "" s) "" (concat s "->"))))))
 	(setq time (cond (s2 (concat
 			      (org-agenda-time-of-day-to-ampm-maybe s1)
 			      "-" (org-agenda-time-of-day-to-ampm-maybe s2)
@@ -6647,9 +6651,6 @@ Any match of REMOVE-RE will be removed from TXT."
 				"......")))
 			 (t ""))
 	      extra (or (and (not habitp) extra) "")
-	      breadcrumbs (org-with-point-at (org-get-at-bol 'org-marker)
-			    (let ((s (org-display-outline-path nil nil "->" t)))
-				 (if (eq "" s) "" (concat s "->"))))
 	      category (if (symbolp category) (symbol-name category) category)
 	      thecategory (copy-sequence category)
 	      level (or level ""))
