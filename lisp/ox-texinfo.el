@@ -430,6 +430,17 @@ See `org-texinfo-text-markup-alist' for details."
      ;; Else use format string.
      (t (format fmt text)))))
 
+(defun org-texinfo--get-node (headline info)
+  "Return node entry associated to HEADLINE.
+INFO is a plist used as a communication channel."
+  (let ((menu-title (org-element-property :texinfo-menu-title headline)))
+    (org-texinfo--sanitize-menu
+     (replace-regexp-in-string
+      "%" "%%"
+      (if menu-title (org-export-data menu-title info)
+	(org-texinfo--sanitize-headline
+	 (org-element-property :title headline) info))))))
+
 ;;; Headline sanitizing
 
 (defun org-texinfo--sanitize-headline (headline info)
@@ -896,22 +907,12 @@ holding contextual information."
 	 (class-sectionning (assoc class org-texinfo-classes))
 	 ;; Find the index type, if any
 	 (index (org-element-property :index headline))
-	 ;; Retrieve custom menu title (if any)
-	 (menu-title (org-texinfo--sanitize-menu
-		      (org-export-data
-		       (org-element-property :TEXINFO_MENU_TITLE headline)
-		       info)))
 	 ;; Retrieve headline text
 	 (text (org-texinfo--sanitize-headline
 		(org-element-property :title headline) info))
 	 ;; Create node info, to insert it before section formatting.
 	 ;; Use custom menu title if present
-	 (node (format "@node %s\n"
-		       (org-texinfo--sanitize-menu
-			(replace-regexp-in-string "%" "%%"
-						  (if (not (string= "" menu-title))
-						      menu-title
-						    text)))))
+	 (node (format "@node %s\n" (org-texinfo--get-node headline info)))
 	 ;; Menus must be generated with first child, otherwise they
 	 ;; will not nest properly
 	 (menu (let* ((first (org-export-first-sibling-p headline info))
@@ -1180,8 +1181,7 @@ INFO is a plist holding contextual information.  See
 	  ;; LINK points to an headline.  Use the headline as the NODE target
 	  (headline
 	   (format "@ref{%s,%s}"
-		   (or (org-element-property :TEXINFO_MENU_TITLE destination)
-		       (org-element-property :title destination))
+		   (org-texinfo--get-node destination info)
 		   (or desc "")))
 	  (otherwise
 	   (let ((path (org-export-solidify-link-text path)))
@@ -1203,8 +1203,7 @@ INFO is a plist holding contextual information.  See
 	  ;; LINK points to an headline.  Use the headline as the NODE target
 	  (headline
 	   (format "@ref{%s,%s}"
-		   (or (org-element-property :TEXINFO_MENU_TITLE destination)
-		       (org-element-property :title destination))
+		   (org-texinfo--get-node destination info)
 		   (or desc "")))
 	  (otherwise
 	   (let ((path (org-export-solidify-link-text path)))
