@@ -433,7 +433,7 @@ See `org-texinfo-text-markup-alist' for details."
 (defun org-texinfo--get-node (headline info)
   "Return node entry associated to HEADLINE.
 INFO is a plist used as a communication channel."
-  (let ((menu-title (org-element-property :texinfo-menu-title headline)))
+  (let ((menu-title (org-element-property :TEXINFO_MENU_TITLE headline)))
     (org-texinfo--sanitize-menu
      (replace-regexp-in-string
       "%" "%%"
