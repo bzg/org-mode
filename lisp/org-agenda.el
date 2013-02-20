@@ -1562,11 +1562,11 @@ present, but zero width when absent.  For example, \"%?-12t\" will
 result in a 12 character time field if a time of the day is specified,
 but will completely disappear in entries which do not contain a time.
 
-If there is punctuation or whitespace character just before the final
-format letter, this character will be appended to the field value if
-the value is not empty.  For example, the format \"%-12:c\" leads to
-\"Diary: \" if the category is \"Diary\".  If the category were be
-empty, no additional colon would be inserted.
+If there is punctuation or whitespace character just before the
+final format letter, this character will be appended to the field
+value if the value is not empty.  For example, the format
+\"%-12:c\" leads to \"Diary: \" if the category is \"Diary\".  If
+the category is empty, no additional colon is inserted.
 
 The default value for the agenda sublist is \"  %-12:c%?-12t% s\",
 which means:
