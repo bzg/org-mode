@@ -122,6 +122,7 @@
    (:html-style-include-default nil nil org-html-style-include-default)
    (:html-style-include-scripts nil nil org-html-style-include-scripts)
    (:html-table-tag nil nil org-html-table-tag)
+   (:html-htmlized-css-url "HTML_HTMLIZED_CSS_URL" nil org-html-htmlized-org-css-url)
    ;; Redefine regular options.
    (:creator "CREATOR" nil org-html-creator-string)
    (:with-latex nil "tex" org-html-with-latex)
@@ -536,11 +537,11 @@ create CSS to define the font colors.  However, this does not work when
 converting in batch mode, and it also can look bad if different people
 with different fontification setup work on the same website.
 When this variable is non-nil, creating an htmlized version of an Org buffer
-using `org-export-as-org' will remove the internal CSS section and replace it
-with a link to this URL."
+using `org-export-as-org' will include a link to this URL if the
+setting of `org-html-htmlize-output-type' is 'css."
   :group 'org-export-html
   :type '(choice
-	  (const :tag "Keep internal css" nil)
+	  (const :tag "Don't include external stylesheet link" nil)
 	  (string :tag "URL or local href")))
 
 
@@ -1190,8 +1191,13 @@ INFO is a plist used as a communication channel."
 INFO is a plist used as a communication channel."
   (org-element-normalize-string
    (concat
-    (when (plist-get info :html-style-include-default) org-html-style-default)
+    (when (plist-get info :html-style-include-default)
+      (org-element-normalize-string org-html-style-default))
     (org-element-normalize-string (plist-get info :html-style))
+    (when (and (plist-get info :html-htmlized-css-url)
+	       (eq org-html-htmlize-output-type 'css))
+      (format "<link rel=\"stylesheet\" href=\"%s\" type=\"text/css\" />\n"
+	      (plist-get info :html-htmlized-css-url)))
     (org-element-normalize-string (plist-get info :html-style-extra))
     (when (plist-get info :html-style-include-scripts) org-html-scripts))))
 
