@@ -183,11 +183,10 @@ holding export options."
       (let* ((header (nth 1 (assoc class org-latex-classes)))
              (document-class-string
               (and (stringp header)
-                   (if class-options
-                       (replace-regexp-in-string
-                        "^[ \t]*\\\\documentclass\\(\\[.*?\\]\\)"
-                        class-options header t nil 1)
-                     header))))
+                   (if (not class-options) header
+		     (replace-regexp-in-string
+		      "^[ \t]*\\\\documentclass\\(\\(\\[[^]]*\\]\\)?\\)"
+		      class-options header t nil 1)))))
         (if (not document-class-string)
 	    (user-error "Unknown LaTeX class `%s'")
           (org-latex-guess-babel-language

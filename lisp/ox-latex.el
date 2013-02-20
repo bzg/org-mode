@@ -1109,7 +1109,7 @@ holding export options."
 		(and (stringp header)
 		     (if (not class-options) header
 		       (replace-regexp-in-string
-			"^[ \t]*\\\\documentclass\\(\\(\\[.*\\]\\)?\\)"
+			"^[ \t]*\\\\documentclass\\(\\(\\[[^]]*\\]\\)?\\)"
 			class-options header t nil 1)))))
 	  (if (not document-class-string)
 	      (user-error "Unknown LaTeX class `%s'" class)
