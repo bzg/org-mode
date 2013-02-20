@@ -1780,7 +1780,7 @@ TREE is the parse tree.  BACK-END is the symbol specifying
 back-end used for export.  INFO is a plist used as
 a communication channel.
 
-This function only applies to `e-ascii' back-end.  See
+This function only applies to `ascii' back-end.  See
 `org-ascii-paragraph-spacing' for information."
   (when (wholenump org-ascii-paragraph-spacing)
     (org-element-map tree 'paragraph
