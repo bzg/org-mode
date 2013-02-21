@@ -5338,8 +5338,8 @@ the rounding returns a past time."
 	    (apply 'encode-time
 		   (append (list 0 (* r (floor (+ .5 (/ (float (nth 1 time)) r)))))
 			   (nthcdr 2 time))))
-      (if (and past (< (time-to-seconds (time-subtract (current-time) res)) 0))
-	  (seconds-to-time (- (time-to-seconds res) (* r 60)))
+      (if (and past (< (float-time (time-subtract (current-time) res)) 0))
+	  (float-time (- (time-to-seconds res) (* r 60)))
 	res))))
 
 (defun org-today ()
