@@ -693,7 +693,7 @@ Assume point is at the beginning of the footnote definition."
 			   (re-search-forward
 			    (concat org-outline-regexp-bol "\\|"
 				    org-footnote-definition-re "\\|"
-				    "^[ \t]*$") limit 'move))
+				    "^\\([ \t]*\n\\)\\{2,\\}") limit 'move))
 			 (match-beginning 0)
 		       (point))))
 	   (contents-begin (progn (search-forward "]")

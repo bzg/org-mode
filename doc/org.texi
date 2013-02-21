@@ -1845,13 +1845,13 @@ or on a per-file basis by using
 @cindex footnotes
 
 Org mode supports the creation of footnotes.  In contrast to the
-@file{footnote.el} package, Org mode's footnotes are designed for work on a
-larger document, not only for one-off documents like emails.  The basic
-syntax is similar to the one used by @file{footnote.el}, i.e., a footnote is
-defined in a paragraph that is started by a footnote marker in square
-brackets in column 0, no indentation allowed.  If you need a paragraph break
-inside a footnote, use the @LaTeX{} idiom @samp{\par}.  The footnote reference
-is simply the marker in square brackets, inside text.  For example:
+@file{footnote.el} package, Org mode's footnotes are designed for work on
+a larger document, not only for one-off documents like emails.
+
+A footnote is started by a footnote marker in square brackets in column 0, no
+indentation allowed.  It ends at the next footnote definition, headline, or
+after two consecutive empty lines.  The footnote reference is simply the
+marker in square brackets, inside text.  For example:
 
 @example
 The Org homepage[fn:1] now looks a lot better than it used to.

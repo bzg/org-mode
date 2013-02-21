@@ -724,10 +724,10 @@ Some other text
       (org-element-parse-buffer) 'footnote-definition 'identity nil t)))
   ;; Footnote with more contents
   (should
-   (= 28
+   (= 29
       (org-element-property
        :end
-       (org-test-with-temp-text "[fn:1] Definition\n| a | b |"
+       (org-test-with-temp-text "[fn:1] Definition\n\n| a | b |"
 	 (org-element-map
 	  (org-element-parse-buffer)
 	  'footnote-definition 'identity nil t)))))

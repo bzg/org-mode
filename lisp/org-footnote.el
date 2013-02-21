@@ -251,11 +251,12 @@ otherwise."
   (when (save-excursion (beginning-of-line) (org-footnote-in-valid-context-p))
     (save-excursion
       (end-of-line)
-      ;; Footnotes definitions are separated by new headlines or blank
-      ;; lines.
-      (let ((lim (save-excursion (re-search-backward
-				  (concat org-outline-regexp-bol
-					  "\\|^[ \t]*$") nil t))))
+      ;; Footnotes definitions are separated by new headlines, another
+      ;; footnote definition or 2 blank lines.
+      (let ((lim (save-excursion
+		   (re-search-backward
+		    (concat org-outline-regexp-bol
+			    "\\|^\\([ \t]*\n\\)\\{2,\\}") nil t))))
 	(when (re-search-backward org-footnote-definition-re lim t)
 	  (let ((label (org-match-string-no-properties 1))
 		(beg (match-beginning 0))
@@ -271,7 +272,7 @@ otherwise."
 			     (re-search-forward
 			      (concat org-outline-regexp-bol "\\|"
 				      org-footnote-definition-re "\\|"
-				      "^[ \t]*$") bound 'move))
+				      "^\\([ \t]*\n\\)\\{2,\\}") bound 'move))
 			   (match-beginning 0)
 			 (point)))))
 	    (list label beg end
