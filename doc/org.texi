@@ -571,7 +571,6 @@ Exporting
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * OpenDocument Text export::    Exporting to OpenDocument Text
-* Freemind export::             Exporting to Freemind mind maps
 * iCalendar export::            Exporting in iCalendar format
 
 HTML export
@@ -9871,7 +9870,6 @@ enabled (default in Emacs 23).
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * OpenDocument Text export::    Exporting to OpenDocument Text
-* Freemind export::             Exporting to Freemind mind maps
 * iCalendar export::            Exporting in iCalendar format
 @end menu
 
@@ -10901,7 +10899,7 @@ For more information, see the documentation on Worg.
 
 @c begin opendocument
 
-@node OpenDocument Text export, Freemind export, @LaTeX{} and PDF export, Exporting
+@node OpenDocument Text export, iCalendar export, @LaTeX{} and PDF export, Exporting
 @section OpenDocument Text export
 @cindex K, Jambunathan
 @cindex ODT
@@ -11816,20 +11814,7 @@ ODT exporter will take care of updating the
 
 @c end opendocument
 
-@node Freemind export, iCalendar export, OpenDocument Text export, Exporting
-@section Freemind export
-@cindex Freemind export
-@cindex mind map
-
-The Freemind exporter was written by Lennart Borgman.
-
-@table @kbd
-@orgcmd{C-c C-e m,org-export-as-freemind}
-Export as a Freemind mind map.  For an Org file @file{myfile.org}, the Freemind
-file will be @file{myfile.mm}.
-@end table
-
-@node iCalendar export,  , Freemind export, Exporting
+@node iCalendar export,  , OpenDocument Text export, Exporting
 @section iCalendar export
 @cindex iCalendar export
 
