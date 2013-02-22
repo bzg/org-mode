@@ -8721,9 +8721,9 @@ buffer.  It will also recognize item context in multiline items."
                               (where-is-internal f outline-mode-map)))
         ;; TODO use local-function-key-map
         (dolist (rep '(("<tab>" . "TAB")
-                       ("<ret>" . "RET")
-                       ("<esc>" . "ESC")
-                       ("<del>" . "DEL")))
+                       ("<return>" . "RET")
+                       ("<escape>" . "ESC")
+                       ("<delete>" . "DEL")))
           (setq binding (read-kbd-macro (replace-regexp-in-string
 					 (regexp-quote (car rep))
 					 (cdr rep)
