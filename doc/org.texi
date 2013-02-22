@@ -6562,7 +6562,7 @@ used a special setup for @file{remember.el}, then replaced it with
 @file{org-remember.el}.  As of version 8.0, @file{org-remember.el} has
 been completely replaced by @file{org-capture.el}.
 
-If your configuration depends on @fite{org-remember.el}, you need to update
+If your configuration depends on @file{org-remember.el}, you need to update
 it and use the setup described below.  To convert your
 @code{org-remember-templates}, run the command
 @example
