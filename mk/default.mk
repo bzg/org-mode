@@ -24,7 +24,7 @@ infodir = $(prefix)/info
 
 # Define if you want to include some (or all) files from contrib/lisp
 # just the filename please (no path prefix, no .el suffix), maybe with globbing
-#ORG_ADD_CONTRIB = org-e-* org-md org-export # e.g. the new exporter
+#ORG_ADD_CONTRIB = ox-* # e.g. the contributed exporter
 
 # Where to create temporary files for the testsuite
 # respect TMPDIR if it is already defined in the environment
