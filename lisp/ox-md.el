@@ -68,6 +68,8 @@ This variable can be set to either `atx' or `setext'."
 	       (org-open-file (org-md-export-to-markdown nil s v)))))))
   :translate-alist ((bold . org-md-bold)
 		    (code . org-md-verbatim)
+		    (comment . (lambda (&rest args) ""))
+		    (comment-block . (lambda (&rest args) ""))
 		    (example-block . org-md-example-block)
 		    (fixed-width . org-md-example-block)
 		    (footnote-definition . ignore)
