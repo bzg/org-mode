@@ -566,13 +566,17 @@ Return output file name."
 		   (body-p (plist-get plist :body-only)))
 	       (org-export-to-file
 		backend output-file nil nil body-p
-		;; Install `org-publish-collect-index' in parse tree
-		;; filters.  It isn't dependent on `:makeindex', since
-		;; we want to keep it up-to-date in cache anyway.
+		;; Add `org-publish-collect-numbering' and
+		;; `org-publish-collect-index' to final output
+		;; filters.  The latter isn't dependent on
+		;; `:makeindex', since we want to keep it up-to-date
+		;; in cache anyway.
 		(org-combine-plists
-		 plist `(:filter-parse-tree
-			 ,(cons 'org-publish-collect-index
-				(plist-get plist :filter-parse-tree)))))))
+		 plist
+		 `(:filter-final-output
+		   ,(cons 'org-publish-collect-numbering
+			  (cons 'org-publish-collect-index
+				(plist-get plist :filter-final-output))))))))
       ;; Remove opened buffer in the process.
       (unless visitingp (kill-buffer work-buffer)))))
 
@@ -913,11 +917,12 @@ the project."
 
 ;;; Index generation
 
-(defun org-publish-collect-index (tree backend info)
-  "Update index for a file with TREE in cache.
+(defun org-publish-collect-index (output backend info)
+  "Update index for a file in cache.
 
-BACKEND is the back-end being used for transcoding.  INFO is
-a plist containing publishing options.
+OUTPUT is the output from transcoding current file.  BACKEND is
+the back-end that was used for transcoding.  INFO is a plist
+containing publishing and export options.
 
 The index relative to current file is stored as an alist.  An
 association has the following shape: (TERM FILE-NAME PARENT),
@@ -931,9 +936,9 @@ its CDR is a string."
     (org-publish-cache-set-file-property
      file :index
      (delete-dups
-      (org-element-map tree 'keyword
+      (org-element-map (plist-get info :parse-tree) 'keyword
 	(lambda (k)
-	  (when (equal (upcase (org-element-property :key k)) "INDEX")
+	  (when (equal (org-element-property :key k) "INDEX")
 	    (let ((parent (org-export-get-parent-headline k)))
 	      (list (org-element-property :value k)
 		    file
@@ -944,10 +949,13 @@ its CDR is a string."
 		     ((let ((id (org-element-property :CUSTOM_ID parent)))
 			(and id (cons 'custom-id id))))
 		     (t (cons 'name
-			      (org-element-property :raw-value parent))))))))
+			      ;; Remove statistics cookie.
+			      (replace-regexp-in-string
+			       "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+			       (org-element-property :raw-value parent)))))))))
 	info))))
-  ;; Return parse-tree to avoid altering output.
-  tree)
+  ;; Return output unchanged.
+  output)
 
 (defun org-publish-index-generate-theindex (project directory)
   "Retrieve full index from cache and build \"theindex.org\".
@@ -1015,6 +1023,38 @@ publishing directory."
 	(unless (file-exists-p index.org)
 	  (with-temp-file index.org
 	    (insert "#+TITLE: Index\n\n#+INCLUDE: \"theindex.inc\"\n\n")))))))
+
+
+
+;;; External Fuzzy Links Resolution
+;;
+;; This part implements tools to resolve [[file.org::*Some headline]]
+;; links, where "file.org" belongs to the current project.
+
+(defun org-publish-collect-numbering (output backend info)
+  (org-publish-cache-set-file-property
+   (plist-get info :input-file) :numbering
+   (mapcar (lambda (entry)
+	     (cons (org-split-string
+		    (replace-regexp-in-string
+		     "\\[[0-9]+%\\]\\|\\[[0-9]+/[0-9]+\\]" ""
+		     (org-element-property :raw-value (car entry))))
+		   (cdr entry)))
+	   (plist-get info :headline-numbering)))
+  ;; Return output unchanged.
+  output)
+
+(defun org-publish-resolve-external-fuzzy-link (file fuzzy)
+  "Return numbering for headline matching FUZZY search in FILE.
+
+Return value is a list of numbers, or nil.  This function allows
+to resolve external fuzzy links like:
+
+  [[file.org::*fuzzy][description]"
+  (cdr (assoc (org-split-string
+	       (if (eq (aref fuzzy 0) ?*) (substring fuzzy 1) fuzzy))
+	      (org-publish-cache-get-file-property
+	       (expand-file-name file) :numbering nil t))))
 
 
 
