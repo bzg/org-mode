@@ -4122,7 +4122,8 @@ When EMPTY is non-nil, also include days without any entries."
 
 (defvar org-agenda-start-day nil  ; dynamically scoped parameter
   "Start day for the agenda view.
-Custom commands can set this variable in the options section.")
+Custom commands can set this variable in the options section.
+See the docstring of `org-read-date' on allowed values.")
 (defvar org-starting-day nil) ; local variable in the agenda buffer
 (defvar org-arg-loc nil) ; local variable
 
