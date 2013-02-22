@@ -2133,7 +2133,7 @@ the item, so this really moves item trees."
 	 (prevs (org-list-prevs-alist struct))
 	 (next-item (org-list-get-next-item (point-at-bol) struct prevs)))
     (unless (or next-item org-list-use-circular-motion)
-      (error "Cannot move this item further down"))
+      (user-error "Cannot move this item further down"))
     (if (not next-item)
 	(setq struct (org-list-send-item item 'begin struct))
       (setq struct (org-list-swap-items item next-item struct))
@@ -2154,7 +2154,7 @@ the item, so this really moves item trees."
 	 (prevs (org-list-prevs-alist struct))
 	 (prev-item (org-list-get-prev-item (point-at-bol) struct prevs)))
     (unless (or prev-item org-list-use-circular-motion)
-      (error "Cannot move this item further up"))
+      (user-error "Cannot move this item further up"))
     (if (not prev-item)
 	(setq struct (org-list-send-item item 'end struct))
       (setq struct (org-list-swap-items prev-item item struct)))
@@ -2756,7 +2756,7 @@ Return t at each successful move."
 	  (cond
 	   ((ignore-errors (org-list-indent-item-generic 1 t struct)))
 	   ((ignore-errors (org-list-indent-item-generic -1 t struct)))
-	   (t (error "Cannot move item"))))
+	   (t (user-error "Cannot move item"))))
 	t))))
 
 (defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)

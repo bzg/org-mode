@@ -7929,7 +7929,7 @@ case."
     (while (> cnt 0)
       (or (and (funcall movfunc) (looking-at org-outline-regexp))
 	  (progn (goto-char beg0)
-		 (error "Cannot move past superior level or buffer limit")))
+		 (user-error "Cannot move past superior level or buffer limit")))
       (setq cnt (1- cnt)))
     (if (> arg 0)
 	;; Moving forward - still need to move over subtree
@@ -22702,13 +22702,13 @@ When BLOCK-REGEXP is non-nil, use this regexp to find blocks."
   "Move forward by one element.
 Move to the next element at the same level, when possible."
   (interactive)
-  (cond ((eobp) (error "Cannot move further down"))
+  (cond ((eobp) (user-error "Cannot move further down"))
 	((org-with-limited-levels (org-at-heading-p))
 	 (let ((origin (point)))
 	   (goto-char (org-end-of-subtree nil t))
 	   (unless (org-with-limited-levels (org-at-heading-p))
 	     (goto-char origin)
-	     (error "Cannot move further down"))))
+	     (user-error "Cannot move further down"))))
 	(t
 	 (let* ((elem (org-element-at-point))
 		(end (org-element-property :end elem))
@@ -22721,7 +22721,7 @@ Move to the next element at the same level, when possible."
   "Move backward by one element.
 Move to the previous element at the same level, when possible."
   (interactive)
-  (cond ((bobp) (error "Cannot move further up"))
+  (cond ((bobp) (user-error "Cannot move further up"))
 	((org-with-limited-levels (org-at-heading-p))
 	 ;; At an headline, move to the previous one, if any, or stay
 	 ;; here.
@@ -22732,7 +22732,7 @@ Move to the previous element at the same level, when possible."
 	   (when (= (point) origin)
 	     (or (org-with-limited-levels (org-up-heading-safe))
 		 (progn (goto-char origin)
-			(error "Cannot move further up"))))))
+			(user-error "Cannot move further up"))))))
 	(t
 	 (let* ((trail (org-element-at-point 'keep-trail))
 		(elem (car trail))
