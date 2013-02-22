@@ -2729,10 +2729,13 @@ another buffer, effectively cloning the original buffer there."
 			(val (cdr entry)))
 		    (and (not (eq var 'org-font-lock-keywords))
 			 (or (memq var
-				   '(major-mode default-directory
-						buffer-file-name outline-level
-						outline-regexp
-						buffer-invisibility-spec))
+				   '(major-mode
+				     default-directory
+				     buffer-file-name
+				     buffer-file-coding-system
+				     outline-level
+				     outline-regexp
+				     buffer-invisibility-spec))
 			     (string-match "^\\(org-\\|orgtbl-\\)"
 					   (symbol-name var)))
 			 ;; Skip unreadable values, as they cannot be
