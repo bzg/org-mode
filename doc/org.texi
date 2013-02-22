@@ -8642,12 +8642,13 @@ This is a globally available command, and also available in the agenda menu.
 @cindex agenda views, exporting
 @vindex org-agenda-exporter-settings
 Write the agenda view to a file.  Depending on the extension of the selected
-file name, the view will be exported as HTML (extension @file{.html} or
-@file{.htm}), Postscript (extension @file{.ps}), PDF (extension @file{.pdf}),
-and plain text (any other extension).  When called with a @kbd{C-u} prefix
-argument, immediately open the newly created file.  Use the variable
-@code{org-agenda-exporter-settings} to set options for @file{ps-print} and
-for @file{htmlize} to be used during export.
+file name, the view will be exported as HTML (@file{.html} or @file{.htm}),
+Postscript (@file{.ps}), PDF (@file{.pdf}), Org (@file{.org}) and plain text
+(any other extension).  When exporting to Org, only the body of original
+headlines are exported, not subtrees or inherited tags.  When called with a
+@kbd{C-u} prefix argument, immediately open the newly created file.  Use the
+variable @code{org-agenda-exporter-settings} to set options for
+@file{ps-print} and for @file{htmlize} to be used during export.
 
 @tsubheading{Quit and Exit}
 @orgcmd{q,org-agenda-quit}
