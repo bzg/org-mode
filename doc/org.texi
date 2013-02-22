@@ -572,7 +572,6 @@ Exporting
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * Freemind export::             Exporting to Freemind mind maps
-* XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 
 HTML export
@@ -9853,14 +9852,13 @@ is normal.
 Org mode documents can be exported into a variety of other formats.  For
 printing and sharing of notes, ASCII export produces a readable and simple
 version of an Org file.  HTML export allows you to publish a notes file on
-the web, while the XOXO format provides a solid base for exchange with a
-broad range of other applications.  @LaTeX{} export lets you use Org mode and
-its structured editing functions to easily create @LaTeX{} files.
-OpenDocument Text (ODT) export allows seamless collaboration across
-organizational boundaries.  To incorporate entries with associated times like
-deadlines or appointments into a desktop calendar program like iCal, Org mode
-can also produce extracts in the iCalendar format.  Currently, Org mode only
-supports export, not import of these different formats.
+the web.  @LaTeX{} export lets you use Org mode and its structured editing
+functions to easily create @LaTeX{} files.  OpenDocument Text (ODT) export
+allows seamless collaboration across organizational boundaries.  To
+incorporate entries with associated times like deadlines or appointments into
+a desktop calendar program like iCal, Org mode can also produce extracts in
+the iCalendar format.  Currently, Org mode only supports export, not import
+of these different formats.
 
 Org supports export of selected regions when @code{transient-mark-mode} is
 enabled (default in Emacs 23).
@@ -9874,7 +9872,6 @@ enabled (default in Emacs 23).
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * Freemind export::             Exporting to Freemind mind maps
-* XOXO export::                 Exporting to XOXO
 * iCalendar export::            Exporting in iCalendar format
 @end menu
 
@@ -11819,7 +11816,7 @@ ODT exporter will take care of updating the
 
 @c end opendocument
 
-@node Freemind export, XOXO export, OpenDocument Text export, Exporting
+@node Freemind export, iCalendar export, OpenDocument Text export, Exporting
 @section Freemind export
 @cindex Freemind export
 @cindex mind map
@@ -11832,23 +11829,7 @@ Export as a Freemind mind map.  For an Org file @file{myfile.org}, the Freemind
 file will be @file{myfile.mm}.
 @end table
 
-@node XOXO export, iCalendar export, Freemind export, Exporting
-@section XOXO export
-@cindex XOXO export
-
-Org mode contains an exporter that produces XOXO-style output.
-Currently, this exporter only handles the general outline structure and
-does not interpret any additional Org mode features.
-
-@table @kbd
-@orgcmd{C-c C-e x,org-export-as-xoxo}
-Export as an XOXO file.  For an Org file @file{myfile.org}, the XOXO file will be
-@file{myfile.html}.
-@orgkey{C-c C-e v x}
-Export only the visible part of the document.
-@end table
-
-@node iCalendar export,  , XOXO export, Exporting
+@node iCalendar export,  , Freemind export, Exporting
 @section iCalendar export
 @cindex iCalendar export
 
