@@ -6557,25 +6557,22 @@ trees to an archive file keeps the system compact and fast.
 @section Capture
 @cindex capture
 
-Org's method for capturing new items is heavily inspired by John Wiegley
-excellent remember package.  Up to version 6.36 Org used a special setup
-for @file{remember.el}.  @file{org-remember.el} is still part of Org mode for
-backward compatibility with existing setups.  You can find the documentation
-for org-remember at @url{http://orgmode.org/org-remember.pdf}.
+Capture lets you quickly store notes with little interruption of your work
+flow.  Org's method for capturing new items is heavily inspired by John
+Wiegley excellent @code{remember.el} package.  Up to version 6.36, Org
+used a special setup for @file{remember.el}, then replaced it with
+@file{org-remember.el}.  As of version 8.0, @file{org-remember.el} has
+been completely replaced by @file{org-capture.el}.
 
-The new capturing setup described here is preferred and should be used by new
-users.  To convert your @code{org-remember-templates}, run the command
+If your configuration depends on @fite{org-remember.el}, you need to update
+it and use the setup described below.  To convert your
+@code{org-remember-templates}, run the command
 @example
 @kbd{M-x org-capture-import-remember-templates @key{RET}}
 @end example
 @noindent and then customize the new variable with @kbd{M-x
 customize-variable org-capture-templates}, check the result, and save the
-customization.  You can then use both remember and capture until
-you are familiar with the new mechanism.
-
-Capture lets you quickly store notes with little interruption of your work
-flow.  The basic process of capturing is very similar to remember, but Org
-does enhance it with templates and more.
+customization.
 
 @menu
 * Setting up capture::          Where notes will be stored
