@@ -434,7 +434,6 @@ to add an effort property.")
 (defvar org-clock-mode-line-timer nil)
 (defvar org-clock-idle-timer nil)
 (defvar org-clock-heading) ; defined in org.el
-(defvar org-clock-heading-for-remember "")
 (defvar org-clock-start-time "")
 
 (defvar org-clock-leftover-time nil
@@ -1202,11 +1201,6 @@ make this the default behavior.)"
 						 org-clock-in-switch-to-state
 						 "\\>"))))
 		   (org-todo org-clock-in-switch-to-state)))
-	    (setq org-clock-heading-for-remember
-		  (and (looking-at org-complex-heading-regexp)
-		       (match-end 4)
-		       (org-trim (buffer-substring (match-end 1)
-						   (match-end 4)))))
 	    (setq org-clock-heading
 		  (cond ((and org-clock-heading-function
 			      (functionp org-clock-heading-function))

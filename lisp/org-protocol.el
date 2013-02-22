@@ -91,11 +91,6 @@
 ;;     Org-link of which the page title will be the description part.  If text
 ;;     was select in the browser, that text will be the body of the entry.
 ;;
-;;   * Call `org-protocol-remember' by using the sub-protocol \"remember\".
-;;     This is provided for backward compatibility.
-;;     You may read `org-capture' as `org-remember' throughout this file if
-;;     you still use `org-remember'.
-;;
 ;; You may use the same bookmark URL for all those standard handlers and just
 ;; adjust the sub-protocol used:
 ;;
@@ -155,8 +150,7 @@ for `org-protocol-the-protocol' and sub-protocols defined in
 ;;; Variables:
 
 (defconst org-protocol-protocol-alist-default
-  '(("org-remember"    :protocol "remember"    :function org-protocol-remember :kill-client t)
-    ("org-capture"     :protocol "capture"     :function org-protocol-capture  :kill-client t)
+  '(("org-capture"     :protocol "capture"     :function org-protocol-capture  :kill-client t)
     ("org-store-link"  :protocol "store-link"  :function org-protocol-store-link)
     ("org-open-source" :protocol "open-source" :function org-protocol-open-source))
   "Default protocols to use.
@@ -391,24 +385,6 @@ The sub-protocol used to reach this function is set in
              uri))
   nil)
 
-(defun org-protocol-remember (info)
-  "Process an org-protocol://remember:// style url.
-
-The location for a browser's bookmark has to look like this:
-
-  javascript:location.href='org-protocol://remember://'+ \\
-        encodeURIComponent(location.href)+'/' \\
-        encodeURIComponent(document.title)+'/'+ \\
-        encodeURIComponent(window.getSelection())
-
-See the docs for `org-protocol-capture' for more information."
-
-  (if (and (boundp 'org-stored-links)
-           (fboundp 'org-capture)
-	   (org-protocol-do-capture info 'org-remember))
-      (message "Item remembered."))
-  nil)
-
 (defun org-protocol-capture (info)
   "Process an org-protocol://capture:// style url.
 
@@ -431,14 +407,12 @@ But you may prepend the encoded URL with a character and a slash like so:
 
 Now template ?b will be used."
   (if (and (boundp 'org-stored-links)
-           (fboundp 'org-capture)
-	   (org-protocol-do-capture info 'org-capture))
+	   (org-protocol-do-capture info))
       (message "Item captured."))
   nil)
 
-(defun org-protocol-do-capture (info capture-func)
-  "Support `org-capture' and `org-remember' alike.
-CAPTURE-FUNC is either the symbol `org-remember' or `org-capture'."
+(defun org-protocol-do-capture (info)
+  "Support `org-capture'."
   (let* ((parts (org-protocol-split-data info t org-protocol-data-separator))
 	 (template (or (and (>= 2 (length (car parts))) (pop parts))
 		       org-protocol-default-template-key))
@@ -449,8 +423,7 @@ CAPTURE-FUNC is either the symbol `org-remember' or `org-capture'."
 	 (region (or (caddr parts) ""))
 	 (orglink (org-make-link-string
 		   url (if (string-match "[^[:space:]]" title) title url)))
-	 (org-capture-link-is-already-stored t) ;; avoid call to org-store-link
-	 remember-annotation-functions)
+	 (org-capture-link-is-already-stored t)) ;; avoid call to org-store-link
     (setq org-stored-links
 	  (cons (list url title) org-stored-links))
     (kill-new orglink)
@@ -460,7 +433,7 @@ CAPTURE-FUNC is either the symbol `org-remember' or `org-capture'."
 			  :annotation orglink
 			  :initial region)
     (raise-frame)
-    (funcall capture-func nil template)))
+    (funcall 'org-capture nil template)))
 
 (defun org-protocol-open-source (fname)
   "Process an org-protocol://open-source:// style url.
