@@ -1771,7 +1771,7 @@ holding contextual information."
 	 (text (org-export-data (org-element-property :title headline) info))
 	 (tags (and (plist-get info :with-tags)
 		    (org-export-get-tags headline info)))
-	 (headline-label (or (org-element-property :custom-id headline)
+	 (headline-label (or (org-element-property :CUSTOM_ID headline)
 			     (concat "sec-" (mapconcat 'number-to-string
 						       headline-number "-"))))
 	 (format-function (cond
@@ -1843,7 +1843,7 @@ holding contextual information."
 	     (level1 (+ level (1- org-html-toplevel-hlevel))))
 	(format "<div id=\"%s\" class=\"%s\">%s%s</div>\n"
 		(format "outline-container-%s"
-			(or (org-element-property :custom-id headline)
+			(or (org-element-property :CUSTOM_ID headline)
 			    section-number))
 		(concat (format "outline-%d" level1) (and extra-class " ")
 			extra-class)

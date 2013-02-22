@@ -273,7 +273,7 @@ Note that the wrapper div must include the class \"slide\"."
 	   (if (and class (string-match-p "\\<slide\\>" class))
 	       (format
 		"<a href='#outline-container-%s'>%s</a>"
-		(or (org-element-property :custom-id headline)
+		(or (org-element-property :CUSTOM_ID headline)
 		    (mapconcat
 		     'number-to-string
 		     (org-export-get-headline-number headline info) "-"))
