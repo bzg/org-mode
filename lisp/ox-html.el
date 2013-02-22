@@ -573,7 +573,7 @@ The first %s will be filled with the scope of the field, either row or col.
 The second %s will be replaced by a style entry to align the field.
 See also the variable `org-html-table-use-header-tags-for-first-column'.
 See also the variable `org-html-table-align-individual-fields'."
-  :group 'org-export-tables		; FIXME: change group?
+  :group 'org-export-html
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
 (defcustom org-html-table-data-tags '("<td%s>" . "</td>")
@@ -582,7 +582,7 @@ This is customizable so that alignment options can be specified.
 The first %s will be filled with the scope of the field, either row or col.
 The second %s will be replaced by a style entry to align the field.
 See also the variable `org-html-table-align-individual-fields'."
-  :group 'org-export-tables
+  :group 'org-export-html
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
 (defcustom org-html-table-row-tags '("<tr>" . "</tr>")
@@ -603,7 +603,7 @@ starting from 1 in the first header line.  For example
               \"</tr>\"))
 
 will give even lines the class \"tr-even\" and odd lines the class \"tr-odd\"."
-  :group 'org-export-tables
+  :group 'org-export-html
   :type '(cons
 	  (choice :tag "Opening tag"
 		  (string :tag "Specify")
@@ -617,13 +617,13 @@ will give even lines the class \"tr-even\" and odd lines the class \"tr-odd\"."
 When nil, alignment will only be specified in the column tags, but this
 is ignored by some browsers (like Firefox, Safari).  Opera does it right
 though."
-  :group 'org-export-tables
+  :group 'org-export-html
   :type 'boolean)
 
 (defcustom org-html-table-use-header-tags-for-first-column nil
   "Non-nil means format column one in tables with header tags.
 When nil, also column one will use data tags."
-  :group 'org-export-tables
+  :group 'org-export-html
   :type 'boolean)
 
 (defcustom org-html-table-caption-above t
@@ -1878,7 +1878,7 @@ CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((org-lang (org-element-property :language inline-src-block))
 	 (code (org-element-property :value inline-src-block)))
-    (error "FIXME")))
+    (error "Cannot export inline src block")))
 
 
 ;;;; Inlinetask
@@ -2275,7 +2275,7 @@ INFO is a plist holding contextual information.  See
 			    (if (atom number) (number-to-string number)
 			      (mapconcat 'number-to-string number ".")))))
 	     (format "<a href=\"#%s\"%s>%s</a>"
-		     path attributes (or desc "FIXME")))))))
+		     path attributes (or desc "No description for this link")))))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.
      ((string= type "coderef")
@@ -2325,16 +2325,21 @@ the plist used as a communication channel."
 
 ;;;; Plain List
 
+;; FIXME Maybe arg1 is not needed because <li value="20"> already sets
+;; the correct value for the item counter
 (defun org-html-begin-plain-list (type &optional arg1)
+  "Insert the beginning of the HTML list depending on TYPE.
+When ARG1 is a string, use it as the start parameter for ordered
+lists."
   (case type
     (ordered
-     (format "<ol class=\"org-ol\"%s>" (if arg1		; FIXME
-			  (format " start=\"%d\"" arg1)
-			"")))
+     (format "<ol class=\"org-ol\"%s>"
+	     (if arg1 (format " start=\"%d\"" arg1) "")))
     (unordered "<ul class=\"org-ul\">")
     (descriptive "<dl class=\"org-dl\">")))
 
 (defun org-html-end-plain-list (type)
+  "Insert the end of the HTML list depending on TYPE."
   (case type
     (ordered "</ol>")
     (unordered "</ul>")
@@ -2344,7 +2349,7 @@ the plist used as a communication channel."
   "Transcode a PLAIN-LIST element from Org to HTML.
 CONTENTS is the contents of the list.  INFO is a plist holding
 contextual information."
-  (let* (arg1 ;; FIXME
+  (let* (arg1 ;; (assoc :counter (org-element-map plain-list 'item
 	 (type (org-element-property :type plain-list)))
     (format "%s\n%s%s"
 	    (org-html-begin-plain-list type)
