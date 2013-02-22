@@ -1527,8 +1527,8 @@ archive file keeps the system compact and fast.
 @section Capture
 
 Org's method for capturing new items is heavily inspired by John Wiegley
-excellent remember package.  It lets you store quick notes with little
-interruption of your work flow.  Org lets you define templates for new
+excellent @file{remember.el} package.  It lets you store quick notes with
+little interruption of your work flow.  Org lets you define templates for new
 entries and associate them with different targets for storing notes.
 
 @menu
@@ -1605,7 +1605,7 @@ allow dynamic insertion of content.  Here is a small selection of the
 possibilities, consult the manual for more.
 @smallexample
 %a          @r{annotation, normally the link created with @code{org-store-link}}
-%i          @r{initial content, the region when remember is called with C-u.}
+%i          @r{initial content, the region when capture is called with C-u.}
 %t          @r{timestamp, date only}
 %T          @r{timestamp with date and time}
 %u, %U      @r{like the above, but inactive timestamps}
@@ -1669,8 +1669,6 @@ setting this variable, for example
 @seealso{
 @uref{http://orgmode.org/manual/Capture-_002d-Refile-_002d-Archive.html#Capture-_002d-Refile-_002d-Archive,
 Chapter 9 of the manual}@*
-@uref{http://members.optusnet.com.au/~charles57/GTD/remember.html, Charles
-Cave's remember tutorial}@*
 @uref{http://orgmode.org/worg/org-tutorials/org-protocol-custom-handler.php,
 Sebastian Rose's tutorial for capturing from a web browser}}@uref{}@*
 
