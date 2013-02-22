@@ -2898,31 +2898,16 @@ Return output file name."
 ;;;; org-table-number-fraction
 ;;;; org-table-number-regexp
 ;;;; org-html-table-caption-above
-
 ;;;; org-html-with-timestamp
 ;;;; org-html-html-helper-timestamp
-
-;;;; org-html-toplevel-hlevel
-;;;; org-html-special-string-regexps
-;;;; org-html-inline-images
 ;;;; org-html-inline-image-extensions
-;;;; org-html-protect-char-alist
-;;;; org-html-table-use-header-tags-for-first-column
-;;;; org-html-todo-kwd-class-prefix
-;;;; org-html-tag-class-prefix
-;;;; org-html-footnote-separator
-
 ;;;; org-export-preferred-target-alist
-;;;; org-export-solidify-link-text
 ;;;; class for anchors
 ;;;; org-export-with-section-numbers, body-only
 ;;;; org-export-mark-todo-in-toc
-
 ;;;; org-html-format-org-link
 ;;;; (caption (and caption (org-xml-encode-org-text caption)))
 ;;;; alt = (file-name-nondirectory path)
-
-;;;;  org-export-time-stamp-file'
 
 (provide 'ox-html)
 
