@@ -49,6 +49,8 @@
    (center-block . org-groff-center-block)
    (clock . org-groff-clock)
    (code . org-groff-code)
+   (comment . (lambda (&rest args) ""))
+   (comment-block . (lambda (&rest args) ""))
    (drawer . org-groff-drawer)
    (dynamic-block . org-groff-dynamic-block)
    (entity . org-groff-entity)
@@ -71,7 +73,7 @@
    (plain-list . org-groff-plain-list)
    (plain-text . org-groff-plain-text)
    (planning . org-groff-planning)
-   (property-drawer . org-groff-property-drawer)
+   (property-drawer . (lambda (&rest args) ""))
    (quote-block . org-groff-quote-block)
    (quote-section . org-groff-quote-section)
    (radio-target . org-groff-radio-target)
@@ -1425,16 +1427,6 @@ information."
 			 (org-element-property :raw-value scheduled))))))))
     "")
    ""))
-
-;;; Property Drawer
-
-(defun org-groff-property-drawer (property-drawer contents info)
-  "Transcode a PROPERTY-DRAWER element from Org to Groff.
-CONTENTS is nil.  INFO is a plist holding contextual
-information."
-  ;; The property drawer isn't exported but we want separating blank
-  ;; lines nonetheless.
-  "")
 
 ;;; Quote Block
 
