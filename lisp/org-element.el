@@ -1945,7 +1945,6 @@ Assume point is at the beginning of the latex environment."
 	  (org-element-paragraph-parser limit affiliated)
 	(let* ((code-end (progn (forward-line) (point)))
 	       (begin (car affiliated))
-	       (post-affiliated (point))
 	       (value (buffer-substring-no-properties code-begin code-end))
 	       (end (progn (skip-chars-forward " \r\t\n" limit)
 			   (skip-chars-backward " \t")
@@ -1956,7 +1955,7 @@ Assume point is at the beginning of the latex environment."
 		       :end end
 		       :value value
 		       :post-blank (count-lines code-end end)
-		       :post-affiliated post-affiliated)
+		       :post-affiliated code-begin)
 		 (cdr affiliated))))))))
 
 (defun org-element-latex-environment-interpreter (latex-environment contents)
