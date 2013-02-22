@@ -106,6 +106,7 @@ Ignore keywords targeted at other export back-ends."
 		   org-element-block-name-alist))
     (org-element-keyword-interpreter keyword nil)))
 
+;;;###autoload
 (defun org-org-publish-to-org (plist filename pub-dir)
   "Publish an org file to org.
 
