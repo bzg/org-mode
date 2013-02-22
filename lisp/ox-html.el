@@ -2164,18 +2164,37 @@ INFO is a plist holding contextual information.  See
 	 (raw-path (org-element-property :path link))
 	 ;; Ensure DESC really exists, or set it to nil.
 	 (desc (and (not (string= desc "")) desc))
-	 (path (cond
-		((member type '("http" "https" "ftp" "mailto"))
-		 (concat type ":" raw-path))
-		((string= type "file")
-		 ;; Treat links to ".org" files as ".html", if needed.
-		 (setq raw-path (funcall --link-org-files-as-html-maybe
-					 raw-path info))
-		 ;; If file path is absolute, prepend it with protocol
-		 ;; component - "file://".
-		 (if (not (file-name-absolute-p raw-path)) raw-path
-		   (concat "file://" (expand-file-name raw-path))))
-		(t raw-path)))
+	 (path
+	  (cond
+	   ((member type '("http" "https" "ftp" "mailto"))
+	    (concat type ":" raw-path))
+	   ((string= type "file")
+	    ;; Treat links to ".org" files as ".html", if needed.
+	    (setq raw-path
+		  (funcall --link-org-files-as-html-maybe raw-path info))
+	    ;; If file path is absolute, prepend it with protocol
+	    ;; component - "file://".
+	    (when (file-name-absolute-p raw-path)
+	      (setq raw-path
+		    (concat "file://" (expand-file-name raw-path))))
+	    ;; Add search option, if any.  A search option can be
+	    ;; relative to a custom-id or a headline title.  Any other
+	    ;; option is ignored.
+	    (let ((option (org-element-property :search-option link)))
+	      (cond ((not option) raw-path)
+		    ((eq (aref option 0) ?#) (concat raw-path option))
+		    ;; External fuzzy link: try to resolve it if path
+		    ;; belongs to current project, if any.
+		    ((eq (aref option 0) ?*)
+		     (concat
+		      raw-path
+		      (let ((numbers
+			     (org-publish-resolve-external-fuzzy-link
+			      (org-element-property :path link) option)))
+			(and numbers (concat "#sec-"
+					     (mapconcat 'number-to-string
+							numbers "-")))))))))
+	   (t raw-path)))
 	 attributes protocol)
     ;; Extract attributes from parent's paragraph.
     (and (setq attributes
