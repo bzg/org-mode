@@ -952,7 +952,7 @@ when specified inputenc option is \"AUTO\".
 Return the new header, as a string."
   (let* ((cs (or (ignore-errors
 		   (latexenc-coding-system-to-inputenc
-		    buffer-file-coding-system))
+		    (or org-export-coding-system buffer-file-coding-system)))
 		 "utf8")))
     (if (not cs) header
       ;; First translate if that is requested.
