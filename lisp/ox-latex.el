@@ -442,21 +442,6 @@ which format headlines like for Org version prior to 8.0."
   :version "24.3"
   :type 'function)
 
-(defcustom org-latex-format-headline-default-function
-  (lambda (todo todo-type priority text tags)
-    (concat (when todo
-	      (format "\\\\textbf{\\\\textsc{\\\\textsf{%s}}} " todo))
-	    (when priority
-	      (format "\\\\framebox{\\\\#%c} " priority))
-	    text
-	    (when tags
-	      (format "\\\\hfill{}\\\\textsc{%s}"
-		      (mapconcat 'identity tags ":")))))
-  "Default format function for a headline.
-See `org-latex-format-headline-function' for details."
-  :group 'org-export-latex
-  :version "24.3"
-  :type 'function)
 
 ;;;; Footnotes
 
@@ -1541,6 +1526,17 @@ holding contextual information."
 	;; regular sectioning format string.
 	(format section-fmt full-text
 		(concat headline-label pre-blanks contents))))))))
+
+(defun org-latex-format-headline-default-function
+  (todo todo-type priority text tags)
+  "Default format function for a headline.
+See `org-latex-format-headline-function' for details."
+  (concat
+   (and todo (format "\\textbf{\\textsc{\\textsf{%s}}} " todo))
+   (and priority (format "\\framebox{\\#%c} " priority))
+   text
+   (and tags
+	(format "\\hfill{}\\textsc{%s}" (mapconcat 'identity tags ":")))))
 
 
 ;;;; Horizontal Rule
