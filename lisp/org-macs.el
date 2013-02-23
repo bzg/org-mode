@@ -117,6 +117,8 @@ Otherwise return nil."
 (def-edebug-spec org-preserve-lc (body))
 
 ;; Copied from bookmark.el
+;; Use `org-unmodified' to ignore real modifications, otherwise
+;; `with-silent-modifications' is enough to ignore cosmetic ones
 (defmacro org-unmodified (&rest body)
   "Run BODY while preserving the buffer's `buffer-modified-p' state."
   (org-with-gensyms (was-modified)
