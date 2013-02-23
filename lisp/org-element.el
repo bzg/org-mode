@@ -729,11 +729,12 @@ CONTENTS is the contents of the footnote-definition."
   "Parse a headline.
 
 Return a list whose CAR is `headline' and CDR is a plist
-containing `:raw-value', `:title', `:begin', `:end',
-`:pre-blank', `:hiddenp', `:contents-begin' and `:contents-end',
-`:level', `:priority', `:tags', `:todo-keyword',`:todo-type',
-`:scheduled', `:deadline', `:closed', `:quotedp', `:archivedp',
-`:commentedp' and `:footnote-section-p' keywords.
+containing `:raw-value', `:title', `:optional-title', `:begin',
+`:end', `:pre-blank', `:hiddenp', `:contents-begin' and
+`:contents-end', `:level', `:priority', `:tags',
+`:todo-keyword',`:todo-type', `:scheduled', `:deadline',
+`:closed', `:quotedp', `:archivedp', `:commentedp' and
+`:footnote-section-p' keywords.
 
 The plist also contains any property set in the property drawer,
 with its name in upper cases and colons added at the
@@ -847,6 +848,13 @@ Assume point is at beginning of the headline."
 			  :quotedp quotedp)
 		    time-props
 		    standard-props))))
+	(let ((opt-title (org-element-property :OPTIONAL_TITLE headline)))
+	  (when opt-title
+	    (org-element-put-property
+	     headline :optional-title
+	     (if raw-secondary-p opt-title
+	       (org-element-parse-secondary-string
+		opt-title (org-element-restriction 'headline) headline)))))
 	(org-element-put-property
 	 headline :title
 	 (if raw-secondary-p raw-value

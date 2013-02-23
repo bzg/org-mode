@@ -3548,6 +3548,12 @@ fail, the fall-back value is \"???\"."
 	(and file (file-name-sans-extension (file-name-nondirectory file))))
       "???"))
 
+(defun org-export-get-optional-title (headline info)
+  "Return optional title for HEADLINE, as a secondary string.
+INFO is a plist used as a communication channel.  If no such
+title is defined, return nil."
+  (org-element-property :optional-title headline))
+
 (defun org-export-first-sibling-p (headline info)
   "Non-nil when HEADLINE is the first sibling in its sub-tree.
 INFO is a plist used as a communication channel."
