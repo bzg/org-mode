@@ -546,7 +546,6 @@ Structural markup elements
 * Document title::              Where the title is taken from
 * Headings and sections::       The document structure as seen by the exporter
 * Table of contents::           The if and where of the table of contents
-* Initial text::                Text before the first heading?
 * Lists::                       Lists
 * Paragraphs::                  Paragraphs
 * Footnote markup::             Footnotes
@@ -9113,7 +9112,6 @@ markup rules used in an Org mode buffer.
 * Document title::              Where the title is taken from
 * Headings and sections::       The document structure as seen by the exporter
 * Table of contents::           The if and where of the table of contents
-* Initial text::                Text before the first heading?
 * Lists::                       Lists
 * Paragraphs::                  Paragraphs
 * Footnote markup::             Footnotes
@@ -9135,10 +9133,8 @@ The title of the exported document is taken from the special line
 @end example
 
 @noindent
-If this line does not exist, the title is derived from the first non-empty,
-non-comment line in the buffer.  If no such line exists, or if you have
-turned off exporting of the text before the first headline (see below), the
-title will be the file name without extension.
+If this line does not exist, the title will be the name of the file
+associated to buffer, without extension, or the buffer name.
 
 @cindex property, EXPORT_TITLE
 If you are exporting only a subtree by marking is as the region, the heading
@@ -9163,7 +9159,7 @@ per-file basis with a line
 #+OPTIONS: H:4
 @end example
 
-@node Table of contents, Initial text, Headings and sections, Structural markup elements
+@node Table of contents, Lists, Headings and sections, Structural markup elements
 @subheading Table of contents
 @cindex table of contents, markup rules
 
@@ -9189,35 +9185,7 @@ contents.  However, it is possible to specifify an alternative title by
 setting @code{:OPTIONAL_TITLE:} property accordingly.  It will then be used
 when building the table.
 
-@node Initial text, Lists, Table of contents, Structural markup elements
-@subheading Text before the first headline
-@cindex text before first headline, markup rules
-@cindex #+TEXT
-
-Org mode normally exports the text before the first headline, and even uses
-the first line as the document title.  The text will be fully marked up.  If
-you need to include literal HTML or @LaTeX{} code, use the special constructs
-described below in the sections for the individual exporters.
-
-@vindex org-export-skip-text-before-1st-heading
-Some people like to use the space before the first headline for setup and
-internal links and therefore would like to control the exported text before
-the first headline in a different way.  You can do so by setting the variable
-@code{org-export-skip-text-before-1st-heading} to @code{t}.  On a per-file
-basis, you can get the same effect with @samp{#+OPTIONS: skip:t}.
-
-@noindent
-If you still want to have some text before the first headline, use the
-@code{#+TEXT} construct:
-
-@example
-#+OPTIONS: skip:t
-#+TEXT: This text will go before the *first* headline.
-#+TEXT: [TABLE-OF-CONTENTS]
-#+TEXT: This goes between the table of contents and the *first* headline
-@end example
-
-@node Lists, Paragraphs, Initial text, Structural markup elements
+@node Lists, Paragraphs, Table of contents, Structural markup elements
 @subheading Lists
 @cindex lists, markup rules
 

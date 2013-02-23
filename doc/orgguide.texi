@@ -2312,8 +2312,6 @@ Insert template with export options, see example below.
 #+DESCRIPTION: the page description, e.g.@: for the XHTML meta tag
 #+KEYWORDS:    the page keywords, e.g.@: for the XHTML meta tag
 #+LANGUAGE:    language for HTML, e.g.@: @samp{en} (@code{org-export-default-language})
-#+TEXT:        Some descriptive text to be inserted at the beginning.
-#+TEXT:        Several lines may be given.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
 #+LINK_UP:     the ``up'' link of an exported page
 #+LINK_HOME:   the ``home'' link of an exported page
