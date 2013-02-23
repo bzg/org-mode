@@ -402,7 +402,7 @@ Return new string.  If S is the empty string, return it."
 
 (defun org-taskjuggler--build-attributes (item attributes)
   "Return attributes string for task, resource or report ITEM.
-ITEM is an headline.  ATTRIBUTES is a list of symbols
+ITEM is a headline.  ATTRIBUTES is a list of symbols
 representing valid attributes for ITEM."
   (mapconcat
    (lambda (attribute)
@@ -445,7 +445,7 @@ ID is a string."
 
 (defun org-taskjuggler-resolve-dependencies (task info)
   "Return a list of all tasks TASK depends on.
-TASK is an headline.  INFO is a plist used as a communication
+TASK is a headline.  INFO is a plist used as a communication
 channel."
   (let ((deps-ids
          ;; Get all dependencies specified in BLOCKER and DEPENDS task
@@ -486,7 +486,7 @@ channel."
 (defun org-taskjuggler-format-dependencies (dependencies task info)
   "Format DEPENDENCIES to match TaskJuggler syntax.
 DEPENDENCIES is list of dependencies for TASK, as returned by
-`org-taskjuggler-resolve-depedencies'.  TASK is an headline.
+`org-taskjuggler-resolve-depedencies'.  TASK is a headline.
 INFO is a plist used as a communication channel.  Return value
 doesn't include leading \"depends\"."
   (let ((dep-str (concat (org-element-property :BLOCKER task)
@@ -614,7 +614,7 @@ Return complete project plan as a string in TaskJuggler syntax."
 
 (defun org-taskjuggler--build-project (project info)
   "Return a project declaration.
-PROJECT is an headline.  INFO is a plist used as a communication
+PROJECT is a headline.  INFO is a plist used as a communication
 channel.  If no start date is specified, start today.  If no end
 date is specified, end `org-taskjuggler-default-project-duration'
 days from now."
@@ -634,7 +634,7 @@ days from now."
 (defun org-taskjuggler--build-resource (resource info)
   "Return a resource declaration.
 
-RESOURCE is an headline.  INFO is a plist used as a communication
+RESOURCE is a headline.  INFO is a plist used as a communication
 channel.
 
 All valid attributes from RESOURCE are inserted.  If RESOURCE
@@ -666,7 +666,7 @@ neither is defined a unique id will be associated to it."
 
 (defun org-taskjuggler--build-report (report)
   "Return a report declaration.
-REPORT is an headline.  INFO is a plist used as a communication
+REPORT is a headline.  INFO is a plist used as a communication
 channel."
   (concat
    ;; Opening report.
@@ -691,7 +691,7 @@ channel."
 (defun org-taskjuggler--build-task (task info)
   "Return a task declaration.
 
-TASK is an headline.  INFO is a plist used as a communication
+TASK is a headline.  INFO is a plist used as a communication
 channel.
 
 All valid attributes from TASK are inserted.  If TASK defines

@@ -99,7 +99,7 @@ This is similar to `org-outline-regexp' but additionally makes
 sure that we are at the beginning of the line.")
 
 (defvar org-heading-regexp "^\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
-  "Matches an headline, putting stars and text into groups.
+  "Matches a headline, putting stars and text into groups.
 Stars are put in group 1 and the trimmed body in group 2.")
 
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
@@ -4704,13 +4704,13 @@ means to push this value onto the list in the variable.")
   "Regular expression for hiding blocks.")
 (defconst org-heading-keyword-regexp-format
   "^\\(\\*+\\)\\(?: +%s\\)\\(?: +\\(.*?\\)\\)?[ \t]*$"
-  "Printf format for a regexp matching an headline with some keyword.
+  "Printf format for a regexp matching a headline with some keyword.
 This regexp will match the headline of any node which has the
 exact keyword that is put into the format.  The keyword isn't in
 any group by default, but the stars and the body are.")
 (defconst org-heading-keyword-maybe-regexp-format
   "^\\(\\*+\\)\\(?: +%s\\)?\\(?: +\\(.*?\\)\\)?[ \t]*$"
-  "Printf format for a regexp matching an headline, possibly with some keyword.
+  "Printf format for a regexp matching a headline, possibly with some keyword.
 This regexp can match any headline with the specified keyword, or
 without a keyword.  The keyword isn't in any group by default,
 but the stars and the body are.")
@@ -13442,7 +13442,7 @@ a file becomes an N^2 operation - but with this variable set, it scales
 as N.")
 
 (defun org-scan-tags (action matcher todo-only &optional start-level)
-  "Scan headline tags with inheritance and produce output ACTION.
+  "Sca headline tags with inheritance and produce output ACTION.
 
 ACTION can be `sparse-tree' to produce a sparse tree in the current buffer,
 or `agenda' to produce an entry list for an agenda view.  It can also be
@@ -19978,7 +19978,7 @@ Calls `org-table-insert-hline', `org-toggle-item', or
   "Convert headings or normal lines to items, items to normal lines.
 If there is no active region, only the current line is considered.
 
-If the first non blank line in the region is an headline, convert
+If the first non blank line in the region is a headline, convert
 all headlines to items, shifting text accordingly.
 
 If it is an item, convert all items to normal lines.
@@ -20113,7 +20113,7 @@ point into heading.
 
 In a region:
 
-- If the first non blank line is an headline, remove the stars
+- If the first non blank line is a headline, remove the stars
   from all headlines in the region.
 
 - If it is a normal line turn each and every normal line (i.e. not an
@@ -22723,7 +22723,7 @@ Move to the previous element at the same level, when possible."
   (interactive)
   (cond ((bobp) (user-error "Cannot move further up"))
 	((org-with-limited-levels (org-at-heading-p))
-	 ;; At an headline, move to the previous one, if any, or stay
+	 ;; At a headline, move to the previous one, if any, or stay
 	 ;; here.
 	 (let ((origin (point)))
 	   (org-with-limited-levels (org-backward-heading-same-level 1))

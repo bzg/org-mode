@@ -47,7 +47,7 @@
 ;;
 ;; - Headlines become frames when their level is equal to
 ;;   `org-beamer-frame-level' (or "H" value in the OPTIONS line).
-;;   Though, if an headline in the current tree has a "BEAMER_env"
+;;   Though, if a headline in the current tree has a "BEAMER_env"
 ;;   (see below) property set to either "frame" or "fullframe", its
 ;;   level overrides the variable.  A "fullframe" is a frame with an
 ;;   empty (ignored) title.
@@ -66,7 +66,7 @@
 ;;   a "BEAMER_ref" property is mandatory in order to refer to the
 ;;   frame being resumed, and contents are ignored.
 ;;
-;;   Also, an headline with an "ignoreheading" environment will have
+;;   Also, a headline with an "ignoreheading" environment will have
 ;;   its contents only inserted in the output.  This special value is
 ;;   useful to have data between frames, or to properly close
 ;;   a "column" environment.
@@ -128,7 +128,7 @@ Headlines at a lower level will be translated into a sectioning
 structure.  At a higher level, they will be translated into
 blocks.
 
-If an headline with a \"BEAMER_env\" property set to \"frame\" is
+If a headline with a \"BEAMER_env\" property set to \"frame\" is
 found within a tree, its level locally overrides this number.
 
 This variable has no effect on headlines with the \"BEAMER_env\"
@@ -136,7 +136,7 @@ property set to either \"ignoreheading\", \"appendix\", or
 \"note\", which will respectively, be invisible, become an
 appendix or a note.
 
-This integer is relative to the minimal level of an headline
+This integer is relative to the minimal level of a headline
 within the parse tree, defined as 1."
   :group 'org-export-beamer
   :type 'integer)
@@ -357,10 +357,10 @@ channel."
 
 ;;;; Headline
 ;;
-;; The main function to translate an headline is
+;; The main function to translate a headline is
 ;; `org-beamer-headline'.
 ;;
-;; Depending on the level at which an headline is considered as
+;; Depending on the level at which a headline is considered as
 ;; a frame (given by `org-beamer--frame-level'), the headline is
 ;; either a section (`org-beamer--format-section'), a frame
 ;; (`org-beamer--format-frame') or a block

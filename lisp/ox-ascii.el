@@ -734,7 +734,7 @@ generation.  INFO is a plist used as a communication channel."
 (defun org-ascii--unique-links (element info)
   "Return a list of unique link references in ELEMENT.
 
-ELEMENT is either an headline element or a section element.  INFO
+ELEMENT is either a headline element or a section element.  INFO
 is a plist used as a communication channel."
   (let* (seen
 	 (unique-link-p
@@ -1111,7 +1111,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;;; Headline
 
 (defun org-ascii-headline (headline contents info)
-  "Transcode an HEADLINE element from Org to ASCII.
+  "Transcode a HEADLINE element from Org to ASCII.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   ;; Don't export footnote section, which will be handled at the end
@@ -1763,7 +1763,7 @@ contextual information."
 ;;; Filters
 
 (defun org-ascii-filter-headline-blank-lines (headline back-end info)
-  "Filter controlling number of blank lines after an headline.
+  "Filter controlling number of blank lines after a headline.
 
 HEADLINE is a string representing a transcoded headline.
 BACK-END is symbol specifying back-end used for export.  INFO is

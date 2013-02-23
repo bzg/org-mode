@@ -1782,7 +1782,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-odt-format-headline--wrap (headline translations info
 						 &optional format-function
 						 &rest extra-keys)
-  "Transcode an HEADLINE element from Org to ODT.
+  "Transcode a HEADLINE element from Org to ODT.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (setq translations (or translations (plist-get info :translate-alist)))
@@ -1819,7 +1819,7 @@ holding contextual information."
 	   :section-number section-number extra-keys)))
 
 (defun org-odt-headline (headline contents info)
-  "Transcode an HEADLINE element from Org to ODT.
+  "Transcode a HEADLINE element from Org to ODT.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   ;; Case 1: This is a footnote section: ignore it.
@@ -2757,7 +2757,7 @@ INFO is a plist holding contextual information.  See
 	    (format
 	     "<text:bookmark-ref text:reference-format=\"text\" text:ref-name=\"OrgXref.%s\">%s</text:bookmark-ref>"
 	     href desc)))))
-     ;; Links pointing to an headline: Find destination and build
+     ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
       (let* ((destination (if (string= type "fuzzy")
@@ -2772,7 +2772,7 @@ INFO is a plist holding contextual information.  See
 					 :raw-link link) info))))
 	 ;; Case 2: Fuzzy link points to an invisible target.  Strip it.
 	 (when (eq (org-element-type destination) 'keyword) "")
-	 ;; Case 3: LINK points to an headline.
+	 ;; Case 3: LINK points to a headline.
 	 (when (eq (org-element-type destination) 'headline)
 	   ;; Case 3.1: LINK has a custom description that is
 	   ;; different from headline's title.  Create a hyperlink.

@@ -451,7 +451,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;; Headline
 
 (defun org-man-headline (headline contents info)
-  "Transcode an HEADLINE element from Org to Man.
+  "Transcode a HEADLINE element from Org to Man.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((level (org-export-get-relative-level headline info))

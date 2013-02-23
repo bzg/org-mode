@@ -88,7 +88,7 @@ This is used locally in each buffer being initialized.")
 (defvar org-hide-leading-stars-before-indent-mode nil
   "Used locally.")
 (defvar org-indent-modified-headline-flag nil
-  "Non-nil means the last deletion operated on an headline.
+  "Non-nil means the last deletion operated on a headline.
 It is modified by `org-indent-notify-modified-headline'.")
 
 
@@ -412,7 +412,7 @@ range of inserted text.  DUMMY is an unused argument.
 This function is meant to be called by `after-change-functions'."
   (when org-indent-mode
     (save-match-data
-      ;; If an headline was modified or inserted, set properties until
+      ;; If a headline was modified or inserted, set properties until
       ;; next headline.
       (if (or org-indent-modified-headline-flag
 	      (save-excursion

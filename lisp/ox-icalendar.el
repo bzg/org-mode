@@ -309,7 +309,7 @@ a message if the file was modified."
 
 INFO is a plist used as a communication channel.
 
-An headline is blocked when either:
+a headline is blocked when either:
 
   - It has children which are not all in a completed state.
 
@@ -406,7 +406,7 @@ This is mandatory for \"DTSTAMP\" property."
 
 (defun org-icalendar-get-categories (entry info)
   "Return categories according to `org-icalendar-categories'.
-ENTRY is an headline or an inlinetask element.  INFO is a plist
+ENTRY is a headline or an inlinetask element.  INFO is a plist
 used as a communication channel."
   (mapconcat
    'identity
@@ -494,7 +494,7 @@ BACK-END and INFO are ignored."
 ;;;; Headline and Inlinetasks
 
 ;; The main function is `org-icalendar-entry', which extracts
-;; information from an headline or an inlinetask (summary,
+;; information from a headline or an inlinetask (summary,
 ;; description...) and then delegates code generation to
 ;; `org-icalendar--vtodo' and `org-icalendar--vevent', depending
 ;; on the component needed.
@@ -505,7 +505,7 @@ BACK-END and INFO are ignored."
 (defun org-icalendar-entry (entry contents info)
   "Transcode ENTRY element into iCalendar format.
 
-ENTRY is either an headline or an inlinetask.  CONTENTS is
+ENTRY is either a headline or an inlinetask.  CONTENTS is
 ignored.  INFO is a plist used as a communication channel.
 
 This function is called on every headline, the section below
@@ -516,7 +516,7 @@ inlinetask within the section."
   (unless (org-element-property :footnote-section-p entry)
     (let* ((type (org-element-type entry))
 	   ;; Determine contents really associated to the entry.  For
-	   ;; an headline, limit them to section, if any.  For an
+	   ;; a headline, limit them to section, if any.  For an
 	   ;; inlinetask, this is every element within the task.
 	   (inside
 	    (if (eq type 'inlinetask)
@@ -569,7 +569,7 @@ inlinetask within the section."
 		   (org-icalendar--vevent
 		    entry scheduled (concat "SC-" uid)
 		    (concat "S: " summary) loc desc cat)))
-	    ;; When collecting plain timestamps from an headline and
+	    ;; When collecting plain timestamps from a headline and
 	    ;; its title, skip inlinetasks since collection will
 	    ;; happen once ENTRY is one of them.
 	    (let ((counter 0))
@@ -597,7 +597,7 @@ inlinetask within the section."
 	      (org-icalendar--vtodo entry uid summary loc desc cat))
 	    ;; Diary-sexp: Collect every diary-sexp element within
 	    ;; ENTRY and its title, and transcode them.  If ENTRY is
-	    ;; an headline, skip inlinetasks: they will be handled
+	    ;; a headline, skip inlinetasks: they will be handled
 	    ;; separately.
 	    (when org-icalendar-include-sexps
 	      (let ((counter 0))
@@ -613,7 +613,7 @@ inlinetask within the section."
 				summary))
 			     info nil (and (eq type 'headline) 'inlinetask))
 			   ""))))))
-       ;; If ENTRY is an headline, call current function on every
+       ;; If ENTRY is a headline, call current function on every
        ;; inlinetask within it.  In agenda export, this is independent
        ;; from the mark (or lack thereof) on the entry.
        (when (eq type 'headline)
@@ -628,7 +628,7 @@ inlinetask within the section."
   (entry timestamp uid summary location description categories)
   "Create a VEVENT component.
 
-ENTRY is either an headline or an inlinetask element.  TIMESTAMP
+ENTRY is either a headline or an inlinetask element.  TIMESTAMP
 is a timestamp object defining the date-time of the event.  UID
 is the unique identifier for the event.  SUMMARY defines a short
 summary or subject for the event.  LOCATION defines the intended
@@ -666,7 +666,7 @@ Return VEVENT component as a string."
   (entry uid summary location description categories)
   "Create a VTODO component.
 
-ENTRY is either an headline or an inlinetask element.  UID is the
+ENTRY is either a headline or an inlinetask element.  UID is the
 unique identifier for the task.  SUMMARY defines a short summary
 or subject for the task.  LOCATION defines the intended venue for
 the task.  DESCRIPTION provides the complete description of the

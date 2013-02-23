@@ -177,7 +177,7 @@ a communication channel."
 	   ;; Headline text without tags.
 	   (heading (concat todo priority title)))
       (cond
-       ;; Cannot create an headline.  Fall-back to a list.
+       ;; Cannot create a headline.  Fall-back to a list.
        ((or (org-export-low-level-p headline info)
 	    (not (memq org-md-headline-style '(atx setext)))
 	    (and (eq org-md-headline-style 'atx) (> level 6))

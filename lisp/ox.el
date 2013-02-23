@@ -150,7 +150,7 @@ like (KEYWORD OPTION DEFAULT BEHAVIOUR) where:
 
 KEYWORD is a string representing a buffer keyword, or nil.  Each
   property defined this way can also be set, during subtree
-  export, through an headline property named after the keyword
+  export, through a headline property named after the keyword
   with the \"EXPORT_\" prefix (i.e. DATE keyword and EXPORT_DATE
   property).
 OPTION is a string that could be found in an #+OPTIONS: line.
@@ -1476,7 +1476,7 @@ specific items to read, if any."
   "Get export options in subtree at point.
 Optional argument BACKEND is a symbol specifying back-end used
 for export.  Return options as a plist."
-  ;; For each buffer keyword, create an headline property setting the
+  ;; For each buffer keyword, create a headline property setting the
   ;; same property in communication channel. The name for the property
   ;; is the keyword with "EXPORT_" appended to it.
   (org-with-wide-buffer
@@ -1724,7 +1724,7 @@ Following tree properties are set or updated:
                    original buffer and current parse tree.
 
 `:headline-offset' Offset between true level of headlines and
-		   local level.  An offset of -1 means an headline
+		   local level.  An offset of -1 means a headline
 		   of level 2 should be considered as a level
 		   1 headline in the context.
 
@@ -1795,7 +1795,7 @@ OPTIONS is a plist holding export options."
 DATA is the parse tree.  OPTIONS is the plist holding export
 options.
 
-Return an alist whose key is an headline and value is its
+Return an alist whose key is a headline and value is its
 associated numbering \(in the shape of a list of numbers\) or nil
 for a footnotes section."
   (let ((numbering (make-vector org-export-max-depth 0)))
@@ -2674,7 +2674,7 @@ Return the updated communication channel."
 ;; `org-export-expand-include-keyword' and
 ;; `org-export--prepare-file-contents'.  Structure wise, including
 ;; a whole Org file in a buffer often makes little sense.  For
-;; example, if the file contains an headline and the include keyword
+;; example, if the file contains a headline and the include keyword
 ;; was within an item, the item should contain the headline.  That's
 ;; why file inclusion should be done before any structure can be
 ;; associated to the file, that is before parsing.
@@ -3265,7 +3265,7 @@ applied."
 ;;
 ;; `org-export-collect-footnote-definitions' is a tool to list
 ;; actually used footnotes definitions in the whole parse tree, or in
-;; an headline, in order to add footnote listings throughout the
+;; a headline, in order to add footnote listings throughout the
 ;; transcoded data.
 ;;
 ;; `org-export-footnote-first-reference-p' is a predicate used by some
@@ -3682,7 +3682,7 @@ significant."
 		(if match-title-p (substring raw-path 1) raw-path))))
     (cond
      ;; First try to find a matching "<<path>>" unless user specified
-     ;; he was looking for an headline (path starts with a *
+     ;; he was looking for a headline (path starts with a *
      ;; character).
      ((and (not match-title-p)
 	   (org-element-map (plist-get info :parse-tree) '(keyword target)
@@ -3702,7 +3702,7 @@ significant."
 	       (let ((name (org-element-property :name el)))
 		 (when (and name (equal (org-split-string name) path)) el)))
 	     info 'first-match)))
-     ;; Last case: link either points to an headline or to
+     ;; Last case: link either points to a headline or to
      ;; nothingness.  Try to find the source, with priority given to
      ;; headlines with the closest common ancestor.  If such candidate
      ;; is found, return it, otherwise return nil.
@@ -3790,7 +3790,7 @@ accepts two arguments: the element or object being considered and
 the plist used as a communication channel.  This allows to count
 only a certain type of objects (i.e. inline images).
 
-Return value is a list of numbers if ELEMENT is an headline or an
+Return value is a list of numbers if ELEMENT is a headline or an
 item.  It is nil for keywords.  It represents the footnote number
 for footnote definitions and footnote references.  If ELEMENT is
 a target, return the same value as if ELEMENT was the closest
@@ -3812,7 +3812,7 @@ objects of the same type."
                                          table))
 		  return parent)))
     (case (org-element-type element)
-      ;; Special case 1: An headline returns its number as a list.
+      ;; Special case 1: A headline returns its number as a list.
       (headline (org-export-get-headline-number element info))
       ;; Special case 2: An item returns its number as a list.
       (item (let ((struct (org-element-property :structure element)))

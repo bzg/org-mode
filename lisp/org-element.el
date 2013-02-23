@@ -62,7 +62,7 @@
 ;; `table-cell', `target', `timestamp', `underline' and `verbatim'.
 ;;
 ;; Some elements also have special properties whose value can hold
-;; objects themselves (i.e. an item tag or an headline name).  Such
+;; objects themselves (i.e. an item tag or a headline name).  Such
 ;; values are called "secondary strings".  Any object belongs to
 ;; either an element or a secondary string.
 ;;
@@ -726,7 +726,7 @@ CONTENTS is the contents of the footnote-definition."
 ;;;; Headline
 
 (defun org-element-headline-parser (limit &optional raw-secondary-p)
-  "Parse an headline.
+  "Parse a headline.
 
 Return a list whose CAR is `headline' and CDR is a plist
 containing `:raw-value', `:title', `:begin', `:end',
@@ -4212,7 +4212,7 @@ Elements are accumulated into ACC."
 	      (not cbeg)))
 	 ;; Greater element: parse it between `contents-begin' and
 	 ;; `contents-end'.  Make sure GRANULARITY allows the
-	 ;; recursion, or ELEMENT is an headline, in which case going
+	 ;; recursion, or ELEMENT is a headline, in which case going
 	 ;; inside is mandatory, in order to get sub-level headings.
 	 ((and (memq type org-element-greater-elements)
 	       (or (memq granularity '(element object nil))
@@ -4604,7 +4604,7 @@ is always the element at point.  The following positions contain
 element's siblings, then parents, siblings of parents, until the
 first element of current section."
   (org-with-wide-buffer
-   ;; If at an headline, parse it.  It is the sole element that
+   ;; If at a headline, parse it.  It is the sole element that
    ;; doesn't require to know about context.  Be sure to disallow
    ;; secondary string parsing, though.
    (if (org-with-limited-levels (org-at-heading-p))

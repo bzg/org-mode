@@ -192,7 +192,7 @@ As an example, one could set the variable to the following, in
 order to reproduce the default set-up:
 
 \(defun org-groff-format-headline (todo todo-type priority text tags)
-  \"Default format function for an headline.\"
+  \"Default format function for a headline.\"
   \(concat (when todo
             \(format \"\\fB%s\\fP \" todo))
 	  \(when priority
@@ -935,7 +935,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;; Headline
 
 (defun org-groff-headline (headline contents info)
-  "Transcode an HEADLINE element from Org to Groff.
+  "Transcode a HEADLINE element from Org to Groff.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((class (plist-get info :groff-class))
@@ -1275,7 +1275,7 @@ INFO is a plist holding contextual information.  See
           (format "\\fI [%s] \\fP"
                   (org-export-solidify-link-text path)))))
 
-     ;; Links pointing to an headline: find destination and build
+     ;; Links pointing to a headline: find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
       (let ((destination (if (string= type "fuzzy")
@@ -1294,7 +1294,7 @@ INFO is a plist holding contextual information.  See
                         (org-element-property :raw-link link) info))))
           ;; Fuzzy link points to an invisible target.
           (keyword nil)
-          ;; LINK points to an headline.  If headlines are numbered
+          ;; LINK points to a headline.  If headlines are numbered
           ;; and the link has no description, display headline's
           ;; number.  Otherwise, display description or headline's
           ;; title.

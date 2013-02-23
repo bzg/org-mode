@@ -210,7 +210,7 @@ As an example, one could set the variable to the following, in
 order to reproduce the default set-up:
 
 \(defun org-texinfo-format-headline (todo todo-type priority text tags)
-  \"Default format function for an headline.\"
+  \"Default format function for a headline.\"
   \(concat (when todo
             \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo))
 	  \(when priority
@@ -898,7 +898,7 @@ plist holding contextual information."
 ;;; Headline
 
 (defun org-texinfo-headline (headline contents info)
-  "Transcode an HEADLINE element from Org to Texinfo.
+  "Transcode a HEADLINE element from Org to Texinfo.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((class (plist-get info :texinfo-class))
@@ -1169,7 +1169,7 @@ INFO is a plist holding contextual information.  See
 		      (concat text (if desc (concat "," desc))))))
 	 protocol)
     (cond
-     ;; Links pointing to an headline: Find destination and build
+     ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "id"))
       (let ((destination (org-export-resolve-id-link link info)))
@@ -1178,7 +1178,7 @@ INFO is a plist holding contextual information.  See
 	  (plain-text
 	   (if desc (format "@uref{file://%s,%s}" destination desc)
 	     (format "@uref{file://%s}" destination)))
-	  ;; LINK points to an headline.  Use the headline as the NODE target
+	  ;; LINK points to a headline.  Use the headline as the NODE target
 	  (headline
 	   (format "@ref{%s,%s}"
 		   (org-texinfo--get-node destination info)
@@ -1200,7 +1200,7 @@ INFO is a plist holding contextual information.  See
 	  (plain-text
 	   (if desc (format "@uref{file://%s,%s}" destination desc)
 	     (format "@uref{file://%s}" destination)))
-	  ;; LINK points to an headline.  Use the headline as the NODE target
+	  ;; LINK points to a headline.  Use the headline as the NODE target
 	  (headline
 	   (format "@ref{%s,%s}"
 		   (org-texinfo--get-node destination info)

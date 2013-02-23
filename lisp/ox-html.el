@@ -365,7 +365,7 @@ As an example, one could set the variable to the following, in
 order to reproduce the default set-up:
 
 \(defun org-html-format-headline \(todo todo-type priority text tags)
-  \"Default format function for an headline.\"
+  \"Default format function for a headline.\"
   \(concat \(when todo
             \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo))
 	  \(when priority
@@ -1752,7 +1752,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-html-format-headline--wrap (headline info
 						  &optional format-function
 						  &rest extra-keys)
-  "Transcode an HEADLINE element from Org to HTML.
+  "Transcode a HEADLINE element from Org to HTML.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((level (+ (org-export-get-relative-level headline info)
@@ -1789,7 +1789,7 @@ holding contextual information."
     	   :section-number section-number extra-keys)))
 
 (defun org-html-headline (headline contents info)
-  "Transcode an HEADLINE element from Org to HTML.
+  "Transcode a HEADLINE element from Org to HTML.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   ;; Empty contents?
@@ -2221,7 +2221,7 @@ INFO is a plist holding contextual information.  See
 		  (org-export-solidify-link-text path)
 		  attributes
 		  (org-export-data (org-element-contents destination) info)))))
-     ;; Links pointing to an headline: Find destination and build
+     ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
       (let ((destination (if (string= type "fuzzy")
@@ -2244,7 +2244,7 @@ INFO is a plist holding contextual information.  See
 			(org-element-property :raw-link link) info))))
 	  ;; Fuzzy link points to an invisible target.
 	  (keyword nil)
-	  ;; Link points to an headline.
+	  ;; Link points to a headline.
 	  (headline
 	   (let ((href
 		  ;; What href to use?
