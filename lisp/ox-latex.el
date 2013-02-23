@@ -408,7 +408,7 @@ argument."
   :group 'org-export-latex
   :type 'string)
 
-(defcustom org-latex-toc-command "\\tableofcontents\n\\vspace*{1cm}\n\n"
+(defcustom org-latex-toc-command "\\tableofcontents\n\n"
   "LaTeX command to set the table of contents, list of figures...
 This command only applies to the table of contents generated with
 toc:nil option, not to those generated with #+TOC keyword."
