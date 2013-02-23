@@ -423,8 +423,9 @@ toc:nil option, not to those generated with #+TOC keyword."
 
 ;;;; Headline
 
-(defcustom org-latex-format-headline-function nil
-  "Function to format headline text.
+(defcustom org-latex-format-headline-function
+  'org-latex-format-headline-default-function
+  "Function for formatting the headline's text.
 
 This function will be called with 5 arguments:
 TODO      the todo keyword (string or nil).
@@ -435,22 +436,27 @@ TAGS      the tags as a list of strings (list of strings or nil).
 
 The function result will be used in the section format string.
 
-As an example, one could set the variable to the following, in
-order to reproduce the default set-up:
-
-\(defun org-latex-format-headline (todo todo-type priority text tags)
-  \"Default format function for an headline.\"
-  \(concat (when todo
-            \(format \"\\\\textbf{\\\\textsc{\\\\textsf{%s}}} \" todo))
-	  \(when priority
-            \(format \"\\\\framebox{\\\\#%c} \" priority))
-	  text
-	  \(when tags
-            \(format \"\\\\hfill{}\\\\textsc{%s}\"
-              \(mapconcat 'identity tags \":\")))))"
+Use `org-latex-format-headline-default-function' by default,
+which format headlines like for Org version prior to 8.0."
   :group 'org-export-latex
+  :version "24.3"
   :type 'function)
 
+(defcustom org-latex-format-headline-default-function
+  (lambda (todo todo-type priority text tags)
+    (concat (when todo
+	      (format "\\\\textbf{\\\\textsc{\\\\textsf{%s}}} " todo))
+	    (when priority
+	      (format "\\\\framebox{\\\\#%c} " priority))
+	    text
+	    (when tags
+	      (format "\\\\hfill{}\\\\textsc{%s}"
+		      (mapconcat 'identity tags ":")))))
+  "Default format function for a headline.
+See `org-latex-format-headline-function' for details."
+  :group 'org-export-latex
+  :version "24.3"
+  :type 'function)
 
 ;;;; Footnotes
 
@@ -1412,7 +1418,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;;; Headline
 
 (defun org-latex-headline (headline contents info)
-  "Transcode an HEADLINE element from Org to LaTeX.
+  "Transcode a HEADLINE element from Org to LaTeX.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
   (let* ((class (plist-get info :latex-class))
@@ -1843,7 +1849,7 @@ INFO is a plist holding contextual information.  See
 	  (format "\\hyperref[%s]{%s}"
 		  (org-export-solidify-link-text path)
 		  (org-export-data (org-element-contents destination) info)))))
-     ;; Links pointing to an headline: Find destination and build
+     ;; Links pointing to a headline: Find destination and build
      ;; appropriate referencing command.
      ((member type '("custom-id" "fuzzy" "id"))
       (let ((destination (if (string= type "fuzzy")
@@ -1862,7 +1868,7 @@ INFO is a plist holding contextual information.  See
 			(org-element-property :raw-link link) info))))
 	  ;; Fuzzy link points to an invisible target.
 	  (keyword nil)
-	  ;; LINK points to an headline.  If headlines are numbered
+	  ;; LINK points to a headline.  If headlines are numbered
 	  ;; and the link has no description, display headline's
 	  ;; number.  Otherwise, display description or headline's
 	  ;; title.
