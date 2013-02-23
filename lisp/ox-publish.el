@@ -305,8 +305,8 @@ You can overwrite this default per project in your
   :type 'boolean)
 
 (defcustom org-publish-sitemap-date-format "%Y-%m-%d"
-  "Format for `format-time-string' which is used to print a date
-in the sitemap."
+  "Format for printing a date in the sitemap.
+See `format-time-string' for allowed formatters."
   :group 'org-export-publish
   :type 'string)
 
