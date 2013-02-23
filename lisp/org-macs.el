@@ -87,16 +87,6 @@
 Otherwise return nil."
   (and v (not (equal v "nil")) v))
 
-(defmacro org-unmodified (&rest body)
-  "Execute body without changing `buffer-modified-p'.
-Also, do not record undo information."
-  `(set-buffer-modified-p
-    (prog1 (buffer-modified-p)
-      (let ((buffer-undo-list t)
-	    (inhibit-modification-hooks t))
-	,@body))))
-(def-edebug-spec org-unmodified (body))
-
 (defun org-substitute-posix-classes (re)
   "Substitute posix classes in regular expression RE."
   (let ((ss re))
@@ -127,13 +117,16 @@ Also, do not record undo information."
 (def-edebug-spec org-preserve-lc (body))
 
 ;; Copied from bookmark.el
-(defmacro org-with-buffer-modified-unmodified (&rest body)
+(defmacro org-unmodified (&rest body)
   "Run BODY while preserving the buffer's `buffer-modified-p' state."
   (org-with-gensyms (was-modified)
     `(let ((,was-modified (buffer-modified-p)))
        (unwind-protect
-           (progn ,@body)
-         (set-buffer-modified-p ,was-modified)))))
+           (let ((buffer-undo-list t)
+		 (inhibit-modification-hooks t))
+	     ,@body)
+	 (set-buffer-modified-p ,was-modified)))))
+(def-edebug-spec org-unmodified (body))
 
 (defmacro org-without-partial-completion (&rest body)
   `(if (and (boundp 'partial-completion-mode)

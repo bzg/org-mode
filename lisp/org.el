@@ -12157,7 +12157,7 @@ changes because there are unchecked boxes in this entry."
 
 (defun org-entry-blocked-p ()
   "Is the current entry blocked?"
-  (org-with-buffer-modified-unmodified
+  (org-unmodified
    (if (org-entry-get nil "NOBLOCKING")
        nil ;; Never block this entry
      (not
@@ -17600,33 +17600,33 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
 	    (org-unmodified
-	    (org-refresh-category-properties)
-	    (org-refresh-properties org-effort-property 'org-effort)
-	    (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
-	    (setq org-todo-keywords-for-agenda
-		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
-	    (setq org-done-keywords-for-agenda
-		  (append org-done-keywords-for-agenda org-done-keywords))
-	    (setq org-todo-keyword-alist-for-agenda
-		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
-	    (setq org-drawers-for-agenda
-		  (append org-drawers-for-agenda org-drawers))
-	    (setq org-tag-alist-for-agenda
-		  (append org-tag-alist-for-agenda org-tag-alist))
+	     (org-refresh-category-properties)
+	     (org-refresh-properties org-effort-property 'org-effort)
+	     (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
+	     (setq org-todo-keywords-for-agenda
+		   (append org-todo-keywords-for-agenda org-todo-keywords-1))
+	     (setq org-done-keywords-for-agenda
+		   (append org-done-keywords-for-agenda org-done-keywords))
+	     (setq org-todo-keyword-alist-for-agenda
+		   (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
+	     (setq org-drawers-for-agenda
+		   (append org-drawers-for-agenda org-drawers))
+	     (setq org-tag-alist-for-agenda
+		   (append org-tag-alist-for-agenda org-tag-alist))
 
-	    (save-excursion
-	      (remove-text-properties (point-min) (point-max) pall)
-	      (when org-agenda-skip-archived-trees
-		(goto-char (point-min))
-		(while (re-search-forward rea nil t)
-		  (if (org-at-heading-p t)
-		      (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
-	      (goto-char (point-min))
-	      (setq re (format org-heading-keyword-regexp-format
-			       org-comment-string))
-	      (while (re-search-forward re nil t)
-		(add-text-properties
-		 (match-beginning 0) (org-end-of-subtree t) pc))))))))
+	     (save-excursion
+	       (remove-text-properties (point-min) (point-max) pall)
+	       (when org-agenda-skip-archived-trees
+		 (goto-char (point-min))
+		 (while (re-search-forward rea nil t)
+		   (if (org-at-heading-p t)
+		       (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
+	       (goto-char (point-min))
+	       (setq re (format org-heading-keyword-regexp-format
+				org-comment-string))
+	       (while (re-search-forward re nil t)
+		 (add-text-properties
+		  (match-beginning 0) (org-end-of-subtree t) pc))))))))
     (setq org-todo-keywords-for-agenda
           (org-uniquify org-todo-keywords-for-agenda))
     (setq org-todo-keyword-alist-for-agenda
