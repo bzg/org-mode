@@ -9167,19 +9167,27 @@ per-file basis with a line
 @subheading Table of contents
 @cindex table of contents, markup rules
 
+@cindex #+TOC
 @vindex org-export-with-toc
 The table of contents is normally inserted directly before the first headline
-of the file.  If you would like to get it to a different location, insert the
-string @code{[TABLE-OF-CONTENTS]} on a line by itself at the desired
-location.  The depth of the table of contents is by default the same as the
-number of headline levels, but you can choose a smaller number, or turn off
-the table of contents entirely, by configuring the variable
-@code{org-export-with-toc}, or on a per-file basis with a line like
+of the file.  If you would like to get it to a different location, insert
+@code{#+TOC: headlines} at the desired location.  The depth of the table of
+contents is by default the same as the number of headline levels, but you can
+choose a smaller number, or turn off the table of contents entirely, by
+configuring the variable @code{org-export-with-toc}, or on a per-file basis
+with a line like
 
 @example
 #+OPTIONS: toc:2          (only to two levels in TOC)
+#+TOC: headlines 2        (the same, at a specific location)
 #+OPTIONS: toc:nil        (no TOC at all)
 @end example
+
+@cindex property, OPTIONAL_TITLE
+The headline's title usually determines its corresponding entry in a table of
+contents.  However, it is possible to specifify an alternative title by
+setting @code{:OPTIONAL_TITLE:} property accordingly.  It will then be used
+when building the table.
 
 @node Initial text, Lists, Table of contents, Structural markup elements
 @subheading Text before the first headline
