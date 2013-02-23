@@ -16485,7 +16485,16 @@ complete if the ones above were not mentioned in this manual.
 @item
 @i{Russel Adams} came up with the idea for drawers.
 @item
+@i{Suvayu Ali} has steadily helped on the mailing list, providing useful
+feedback on many features and several patches.
+@item
+@i{Luis Anaya} wrote @file{ox-man.el}.
+@item
 @i{Thomas Baumann} wrote @file{org-bbdb.el} and @file{org-mhe.el}.
+@item
+@i{Michael Brand} helped by reporting many bugs and testing many features.
+He also implemented the distinction between empty fields and 0-value fields
+in Org's spreadsheets.
 @item
 @i{Christophe Bataillon} created the great unicorn logo that we use on the
 Org mode website.
@@ -16509,6 +16518,8 @@ calculations and improved XEmacs compatibility, in particular by porting
 @file{nouline.el} to XEmacs.
 @item
 @i{Sacha Chua} suggested copying some linking code from Planner.
+@item
+@i{Toby S. Cubitt} contributed to the code for clock formats.
 @item
 @i{Baoqiu Cui} contributed the DocBook exporter.  It has been deleted from
 Org 8.0: you can now export to Texinfo and export the @code{.texi} file to
@@ -16556,7 +16567,9 @@ publication through Network Theory Ltd.
 @item
 @i{Niels Giesen} had the idea to automatically archive DONE trees.
 @item
-@i{Nicolas Goaziou} rewrote much of the plain list code.
+@i{Nicolas Goaziou} rewrote much of the plain list code.  He also wrote
+@file{org-element.el} and @file{org-export.el}, which was a huge step forward
+in implementing a clean framework for Org exporters.
 @item
 @i{Kai Grossjohann} pointed out key-binding conflicts with other packages.
 @item
@@ -16579,6 +16592,8 @@ folded entries, and column view for properties.
 @item
 @i{Tokuya Kameshima} wrote @file{org-wl.el} and @file{org-mew.el}.
 @item
+@i{Jonathan Leech-Pepin} wrote @file{ox-texinfo.el}.
+@item
 @i{Shidai Liu} ("Leo") asked for embedded @LaTeX{} and tested it.  He also
 provided frequent feedback and some patches.
 @item
@@ -16591,7 +16606,7 @@ small fixes and patches.
 @item
 @i{Jason F. McBrayer} suggested agenda export to CSV format.
 @item
-@i{Max Mikhanosha} came up with the idea of refiling.
+@i{Max Mikhanosha} came up with the idea of refiling and sticky agendas.
 @item
 @i{Dmitri Minaev} sent a patch to set priority limits on a per-file
 basis.
@@ -16625,6 +16640,9 @@ links, among other things.
 @i{Pete Phillips} helped during the development of the TAGS feature, and
 provided frequent feedback.
 @item
+@i{Francesco Pizzolante} provided patches that helped speeding up the agenda
+generation.
+@item
 @i{Martin Pohlack} provided the code snippet to bundle character insertion
 into bundles of 20 for undo.
 @item
@@ -16649,6 +16667,9 @@ of feedback, developed and applied standards to the Org documentation.
 @item
 @i{Christian Schlauer} proposed angular brackets around links, among
 other things.
+@item
+@i{Christopher Schmidt} reworked @code{orgstruct-mode} so that users can
+enjoy folding in non-org buffers by using Org headlines in comments.
 @item
 @i{Paul Sexton} wrote @file{org-ctags.el}.
 @item
