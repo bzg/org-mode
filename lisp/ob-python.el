@@ -40,12 +40,19 @@
 
 (defvar org-babel-default-header-args:python '())
 
-(defvar org-babel-python-command "python"
-  "Name of the command for executing Python code.")
+(defcustom org-babel-python-command "python"
+  "Name of the command for executing Python code."
+  :group 'org-babel
+  :version "24.3"
+  :type 'string)
 
-(defvar org-babel-python-mode (if (featurep 'xemacs) 'python-mode 'python)
+(defcustom org-babel-python-mode
+  (if (or (featurep 'xemacs) (featurep 'python-mode)) 'python-mode 'python)
   "Preferred python mode for use in running python interactively.
-This will typically be either 'python or 'python-mode.")
+This will typically be either 'python or 'python-mode."
+  :group 'org-babel
+  :version "24.3"
+  :type 'function)
 
 (defvar org-src-preserve-indentation)
 
