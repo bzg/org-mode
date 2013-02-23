@@ -536,7 +536,7 @@ INFO is a plist used as a communication channel."
 			   (org-list-get-bullet beg-item struct)))))))))))))
 
 (defun org-ascii--build-title
-  (element info text-width &optional underline notags)
+  (element info text-width &optional underline notags toc)
   "Format ELEMENT title and return it.
 
 ELEMENT is either an `headline' or `inlinetask' element.  INFO is
@@ -547,8 +547,11 @@ When optional argument UNDERLINE is non-nil, underline title,
 without the tags, according to `org-ascii-underline'
 specifications.
 
-if optional argument NOTAGS is nil, no tags will be added to the
-title."
+If optional argument NOTAGS is non-nil, no tags will be added to
+the title.
+
+When optional argument TOC is non-nil, use optional title if
+possible."
   (let* ((headlinep (eq (org-element-type element) 'headline))
 	 (numbers
 	  ;; Numbering is specific to headlines.
@@ -559,8 +562,11 @@ title."
 		 'number-to-string
 		 (org-export-get-headline-number element info) ".")
 		" ")))
-	 (text (org-trim
-		(org-export-data (org-element-property :title element) info)))
+	 (text
+	  (org-trim
+	   (org-export-data
+	    (or (and toc headlinep (org-export-get-optional-title element info))
+		(org-element-property :title element)) info)))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword element)))
@@ -652,7 +658,9 @@ which the table of contents generation has been initiated."
 	     (unless (zerop indent) (concat (make-string (1- indent) ?.) " "))
 	     (org-ascii--build-title
 	      headline info (- text-width indent) nil
-	      (eq (plist-get info :with-tags) 'not-in-toc)))))
+	      (or (not (plist-get info :with-tags))
+		  (eq (plist-get info :with-tags) 'not-in-toc))
+	      'toc))))
 	(org-export-collect-headlines info n) "\n")))))
 
 (defun org-ascii--list-listings (keyword info)

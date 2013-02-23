@@ -1116,7 +1116,10 @@ produce code that uses these same face definitions."
   "Build a string by concatenating N times STRING."
   (let (out) (dotimes (i n out) (setq out (concat string out)))))
 
-(defun org-html-toc-text (toc-entries)
+(defun org-html--toc-text (toc-entries)
+  "Return innards of a table of contents, as a string.
+TOC-ENTRIES is an alist where key is a headline title, as
+a string, and value is its relative level, as an integer."
   (let* ((prev-level (1- (nth 1 (car toc-entries))))
 	 (start-level prev-level))
     (concat
@@ -1138,36 +1141,50 @@ produce code that uses these same face definitions."
       toc-entries "")
      (org-html--make-string (- prev-level start-level) "</li>\n</ul>\n"))))
 
-(defun* org-html-format-toc-headline
-    (todo todo-type priority text tags
-	  &key level section-number headline-label &allow-other-keys)
-  (let ((headline (concat
-		   section-number (and section-number ". ")
-		   text
-		   (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags))))
+(defun org-html--format-toc-headline (headline info)
+  "Return an appropriate table of contents entry for HEADLINE.
+INFO is a plist used as a communication channel."
+  (let* ((headline-number (org-export-get-headline-number headline info))
+	 (section-number
+	  (and (not (org-export-low-level-p headline info))
+	       (org-export-numbered-headline-p headline info)
+	       (concat (mapconcat 'number-to-string headline-number ".") ". ")))
+	 (tags (and (eq (plist-get info :with-tags) t)
+		    (org-export-get-tags headline info))))
     (format "<a href=\"#%s\">%s</a>"
-	    (org-export-solidify-link-text headline-label)
-	    (if (not nil) headline
-	      (format "<span class=\"%s\">%s</span>" todo-type headline)))))
+	    ;; Label.
+	    (org-export-solidify-link-text
+	     (or (org-element-property :CUSTOM_ID headline)
+		 (concat "sec-" (mapconcat 'number-to-string
+					   headline-number "-"))))
+	    ;; Body.
+	    (concat section-number
+		    (org-export-data
+		     (or (org-export-get-optional-title headline info)
+			 (org-element-property :title headline))
+		     info)
+		    (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags)))))
 
 (defun org-html-toc (depth info)
-  (let* ((headlines (org-export-collect-headlines info depth))
-	 (toc-entries
-	  (loop for headline in headlines collect
-		(list (org-html-format-headline--wrap
-		       headline info 'org-html-format-toc-headline)
-		      (org-export-get-relative-level headline info)))))
+  "Build table of contents.
+DEPTH is an integer specifying the depth of the table. INFO is
+a plist used as a communication channel.  Return nil if table of
+contents is empty."
+  (let ((toc-entries
+	 (mapcar (lambda (headline)
+		   (list (org-html--format-toc-headline headline info)
+			 (org-export-get-relative-level headline info)))
+		 (org-export-collect-headlines info depth))))
     (when toc-entries
-      (concat
-       "<div id=\"table-of-contents\">\n"
-       (format "<h%d>%s</h%d>\n"
-	       org-html-toplevel-hlevel
-	       (org-html--translate "Table of Contents" info)
-	       org-html-toplevel-hlevel)
-       "<div id=\"text-table-of-contents\">"
-       (org-html-toc-text toc-entries)
-       "</div>\n"
-       "</div>\n"))))
+      (concat "<div id=\"table-of-contents\">\n"
+	      (format "<h%d>%s</h%d>\n"
+		      org-html-toplevel-hlevel
+		      (org-html--translate "Table of Contents" info)
+		      org-html-toplevel-hlevel)
+	      "<div id=\"text-table-of-contents\">"
+	      (org-html--toc-text toc-entries)
+	      "</div>\n"
+	      "</div>\n"))))
 
 (defun org-html-fix-class-name (kwd) 	; audit callers of this function
   "Turn todo keyword into a valid class name.
