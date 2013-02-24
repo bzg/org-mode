@@ -703,9 +703,9 @@ generation.  INFO is a plist used as a communication channel."
 	(org-export-collect-listings info) "\n")))))
 
 (defun org-ascii--list-tables (keyword info)
-  "Return a list of listings.
+  "Return a list of tables.
 
-KEYWORD is the keyword that initiated the list of listings
+KEYWORD is the keyword that initiated the list of tables
 generation.  INFO is a plist used as a communication channel."
   (let ((title (org-ascii--translate "List of Tables" info)))
     (concat
