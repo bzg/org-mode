@@ -1679,7 +1679,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	       (format "\\setcounter{tocdepth}{%s}\n" depth))
 	     "\\tableofcontents")))
 	 ((string= "tables" value) "\\listoftables")
-	 ((string= "figures" value) "\\listoffigures")
 	 ((string= "listings" value)
 	  (cond
 	   ((eq org-latex-listings 'minted) "\\listoflistings")
