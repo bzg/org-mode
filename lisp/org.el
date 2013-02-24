@@ -17600,21 +17600,20 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (org-check-agenda-file file)
 	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
+	    (org-refresh-category-properties)
+	    (org-refresh-properties org-effort-property 'org-effort)
+	    (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
+	    (setq org-todo-keywords-for-agenda
+		  (append org-todo-keywords-for-agenda org-todo-keywords-1))
+	    (setq org-done-keywords-for-agenda
+		  (append org-done-keywords-for-agenda org-done-keywords))
+	    (setq org-todo-keyword-alist-for-agenda
+		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
+	    (setq org-drawers-for-agenda
+		  (append org-drawers-for-agenda org-drawers))
+	    (setq org-tag-alist-for-agenda
+		  (append org-tag-alist-for-agenda org-tag-alist))
 	    (with-silent-modifications
-	      (org-refresh-category-properties)
-	      (org-refresh-properties org-effort-property 'org-effort)
-	      (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
-	      (setq org-todo-keywords-for-agenda
-		    (append org-todo-keywords-for-agenda org-todo-keywords-1))
-	      (setq org-done-keywords-for-agenda
-		    (append org-done-keywords-for-agenda org-done-keywords))
-	      (setq org-todo-keyword-alist-for-agenda
-		    (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
-	      (setq org-drawers-for-agenda
-		    (append org-drawers-for-agenda org-drawers))
-	      (setq org-tag-alist-for-agenda
-		    (append org-tag-alist-for-agenda org-tag-alist))
-
 	      (save-excursion
 		(remove-text-properties (point-min) (point-max) pall)
 		(when org-agenda-skip-archived-trees
@@ -17633,7 +17632,6 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
     (setq org-todo-keyword-alist-for-agenda
 	  (org-uniquify org-todo-keyword-alist-for-agenda)
 	  org-tag-alist-for-agenda (org-uniquify org-tag-alist-for-agenda))))
-
 
 
 ;;;; CDLaTeX minor mode
