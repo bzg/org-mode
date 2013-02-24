@@ -69,13 +69,16 @@ This function is called by `org-babel-execute-src-block'."
 
 ;; helper functions
 
+(defvar org-babel-perl-var-wrap "q(%s)"
+  "Wrapper for variables inserted into Perl code.")
+
 (defun org-babel-perl-var-to-perl (var)
   "Convert an elisp value to a perl variable.
 The elisp value, VAR, is converted to a string of perl source code
 specifying a var of the same value."
   (if (listp var)
       (concat "[" (mapconcat #'org-babel-perl-var-to-perl var ", ") "]")
-    (format "%S" var)))
+    (format org-babel-perl-var-wrap var)))
 
 (defvar org-babel-perl-buffers '(:default . nil))
 
