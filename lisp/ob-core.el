@@ -630,8 +630,11 @@ arguments and pop open the results in a preview buffer."
 	    (org-babel-expand-body:generic
 	     body params (and (fboundp assignments-cmd)
 			      (funcall assignments-cmd params))))))
-    (org-edit-src-code
-     nil expanded (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))))
+    (if (called-interactively-p 'any)
+	(org-edit-src-code
+	 nil expanded
+	 (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))
+      expanded)))
 
 (defun org-babel-edit-distance (s1 s2)
   "Return the edit (levenshtein) distance between strings S1 S2."
