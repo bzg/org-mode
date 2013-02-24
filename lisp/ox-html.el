@@ -1913,7 +1913,7 @@ holding contextual information."
 				(org-element-property :ID headline))))
 	     (preferred-id (car ids))
 	     (extra-ids (cdr ids))
-	     (extra-class (org-element-property :html-container-class headline))
+	     (extra-class (org-element-property :HTML_CONTAINER_CLASS headline))
 	     (level1 (+ level (1- org-html-toplevel-hlevel))))
 	(format "<div id=\"%s\" class=\"%s\">%s%s</div>\n"
 		(format "outline-container-%s"
