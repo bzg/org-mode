@@ -117,7 +117,6 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-inlinetask-toggle-visibility "org-inlinetask" ())
 (declare-function org-pop-to-buffer-same-window "org-compat" (&optional buffer-or-name norecord label))
-(declare-function org-at-clock-log-p "org-clock" ())
 (declare-function org-clock-get-last-clock-out-time "org-clock" ())
 (declare-function org-clock-timestamps-up "org-clock" (&optional n))
 (declare-function org-clock-timestamps-down "org-clock" (&optional n))
@@ -4201,6 +4200,7 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
        (save-excursion
 	 (goto-char (org-table-begin 'any))
 	 (looking-at org-table1-hline-regexp))))
+
 (defun org-table-recognize-table.el ()
   "If there is a table.el table nearby, recognize it and move into it."
   (if org-table-tab-recognizes-table.el
@@ -4236,7 +4236,6 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
     nil))
 
 (defvar org-table-clean-did-remove-column nil)
-
 (defun org-table-map-tables (function &optional quietly)
   "Apply FUNCTION to the start of all tables in the buffer."
   (save-excursion
@@ -16866,6 +16865,12 @@ With prefix ARG, change that many days."
 			 t t)))
       (message "Timestamp is now %sactive"
 	       (if (equal (char-after beg) ?<) "" "in")))))
+
+(defun org-at-clock-log-p nil
+  "Is the cursor on the clock log line?"
+  (save-excursion
+    (move-beginning-of-line 1)
+    (looking-at "^[ \t]*CLOCK:")))
 
 (defvar org-clock-history)                     ; defined in org-clock.el
 (defvar org-clock-adjust-closest nil)          ; defined in org-clock.el

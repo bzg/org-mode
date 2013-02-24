@@ -1567,12 +1567,6 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (org-remove-empty-drawer-at clock-drawer (point))
 	  (forward-line 1))))))
 
-(defun org-at-clock-log-p nil
-  "Is the cursor on the clock log line?"
-  (save-excursion
-    (move-beginning-of-line 1)
-    (looking-at "^[ \t]*CLOCK:")))
-
 (defun org-clock-timestamps-up (&optional n)
   "Increase CLOCK timestamps at cursor.
 Optional argument N tells to change by that many units."
