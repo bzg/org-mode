@@ -9179,10 +9179,18 @@ with a line like
 #+OPTIONS: toc:nil        (no TOC at all)
 @end example
 
+The same @code{TOC} keyword can also generate a list of all tables
+(resp. a listings) with a caption in the buffer.
+
+@example
+#+TOC: listings           (build a list of listings)
+#+TOC: tables             (build a list of tables)
+@end example
+
 @cindex property, OPTIONAL_TITLE
 The headline's title usually determines its corresponding entry in a table of
 contents.  However, it is possible to specifify an alternative title by
-setting @code{:OPTIONAL_TITLE:} property accordingly.  It will then be used
+setting @code{OPTIONAL_TITLE} property accordingly.  It will then be used
 when building the table.
 
 @node Lists, Paragraphs, Table of contents, Structural markup elements
