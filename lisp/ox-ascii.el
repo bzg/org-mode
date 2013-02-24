@@ -551,7 +551,7 @@ If optional argument NOTAGS is non-nil, no tags will be added to
 the title.
 
 When optional argument TOC is non-nil, use optional title if
-possible."
+possible.  It doesn't apply to `inlinetask' elements."
   (let* ((headlinep (eq (org-element-type element) 'headline))
 	 (numbers
 	  ;; Numbering is specific to headlines.
@@ -565,8 +565,9 @@ possible."
 	 (text
 	  (org-trim
 	   (org-export-data
-	    (or (and toc headlinep (org-export-get-optional-title element info))
-		(org-element-property :title element)) info)))
+	    (if (and toc headlinep) (org-export-get-optional-title element info)
+	      (org-element-property :title element))
+	    info)))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword element)))
