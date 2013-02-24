@@ -3550,9 +3550,10 @@ fail, the fall-back value is \"???\"."
 
 (defun org-export-get-optional-title (headline info)
   "Return optional title for HEADLINE, as a secondary string.
-INFO is a plist used as a communication channel.  If no such
-title is defined, return nil."
-  (org-element-property :optional-title headline))
+INFO is a plist used as a communication channel.  If no optional
+title is defined, fall-back to the regular title."
+  (or (org-element-property :optional-title headline)
+      (org-element-property :title headline)))
 
 (defun org-export-first-sibling-p (headline info)
   "Non-nil when HEADLINE is the first sibling in its sub-tree.

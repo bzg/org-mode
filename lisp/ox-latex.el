@@ -1480,9 +1480,7 @@ holding contextual information."
 	       (funcall org-latex-format-headline-function
 			todo todo-type priority
 			(org-export-data
-			 (or (org-export-get-optional-title headline info)
-			     (org-element-property :title headline))
-			 info)
+			 (org-export-get-optional-title headline info) info)
 			(and (eq (plist-get info :with-tags) t) tags))))
 	  (if (and opt-title (string-match "\\`\\\\\\(.*?\\){" section-fmt))
 	      (format (replace-match "\\1[%s]" nil nil section-fmt 1)

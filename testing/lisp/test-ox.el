@@ -1018,6 +1018,24 @@ Paragraph[fn:1]"
   ;; Otherwise, return it as a roman number.
   (should (equal (org-export-number-to-roman 1449) "MCDXLIX")))
 
+(ert-deftest test-org-export/get-optional-title ()
+  "Test `org-export-get-optional-title' specifications."
+  ;; If OPTIONAL_TITLE property is defined, use it.
+  (should
+   (equal '("opt")
+	  (org-test-with-parsed-data
+	      "* Headline\n:PROPERTIES:\n:OPTIONAL_TITLE: opt\n:END:"
+	    (org-export-get-optional-title
+	     (org-element-map tree 'headline 'identity info t)
+	     info))))
+  ;; Otherwise, fall-back to regular title.
+  (should
+   (equal '("Headline")
+	  (org-test-with-parsed-data "* Headline"
+	    (org-export-get-optional-title
+	     (org-element-map tree 'headline 'identity info t)
+	     info)))))
+
 (ert-deftest test-org-export/get-tags ()
   "Test `org-export-get-tags' specifications."
   (let ((org-export-exclude-tags '("noexport"))

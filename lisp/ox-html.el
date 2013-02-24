@@ -1148,9 +1148,7 @@ INFO is a plist used as a communication channel."
 	    ;; Body.
 	    (concat section-number
 		    (org-export-data
-		     (or (org-export-get-optional-title headline info)
-			 (org-element-property :title headline))
-		     info)
+		     (org-export-get-optional-title headline info) info)
 		    (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags)))))
 
 (defun org-html-toc (depth info)
