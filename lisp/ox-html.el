@@ -1104,74 +1104,6 @@ produce code that uses these same face definitions."
   "Build a string by concatenating N times STRING."
   (let (out) (dotimes (i n out) (setq out (concat string out)))))
 
-(defun org-html--toc-text (toc-entries)
-  "Return innards of a table of contents, as a string.
-TOC-ENTRIES is an alist where key is a headline title, as
-a string, and value is its relative level, as an integer."
-  (let* ((prev-level (1- (nth 1 (car toc-entries))))
-	 (start-level prev-level))
-    (concat
-     (mapconcat
-      (lambda (entry)
-	(let ((headline (nth 0 entry))
-	      (level (nth 1 entry)))
-	  (concat
-	   (let* ((cnt (- level prev-level))
-		  (times (if (> cnt 0) (1- cnt) (- cnt)))
-		  rtn)
-	     (setq prev-level level)
-	     (concat
-	      (org-html--make-string
-	       times (cond ((> cnt 0) "\n<ul>\n<li>")
-			   ((< cnt 0) "</li>\n</ul>\n")))
-	      (if (> cnt 0) "\n<ul>\n<li>" "</li>\n<li>")))
-	   headline)))
-      toc-entries "")
-     (org-html--make-string (- prev-level start-level) "</li>\n</ul>\n"))))
-
-(defun org-html--format-toc-headline (headline info)
-  "Return an appropriate table of contents entry for HEADLINE.
-INFO is a plist used as a communication channel."
-  (let* ((headline-number (org-export-get-headline-number headline info))
-	 (section-number
-	  (and (not (org-export-low-level-p headline info))
-	       (org-export-numbered-headline-p headline info)
-	       (concat (mapconcat 'number-to-string headline-number ".") ". ")))
-	 (tags (and (eq (plist-get info :with-tags) t)
-		    (org-export-get-tags headline info))))
-    (format "<a href=\"#%s\">%s</a>"
-	    ;; Label.
-	    (org-export-solidify-link-text
-	     (or (org-element-property :CUSTOM_ID headline)
-		 (concat "sec-" (mapconcat 'number-to-string
-					   headline-number "-"))))
-	    ;; Body.
-	    (concat section-number
-		    (org-export-data
-		     (org-export-get-optional-title headline info) info)
-		    (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags)))))
-
-(defun org-html-toc (depth info)
-  "Build table of contents.
-DEPTH is an integer specifying the depth of the table. INFO is
-a plist used as a communication channel.  Return nil if table of
-contents is empty."
-  (let ((toc-entries
-	 (mapcar (lambda (headline)
-		   (list (org-html--format-toc-headline headline info)
-			 (org-export-get-relative-level headline info)))
-		 (org-export-collect-headlines info depth))))
-    (when toc-entries
-      (concat "<div id=\"table-of-contents\">\n"
-	      (format "<h%d>%s</h%d>\n"
-		      org-html-toplevel-hlevel
-		      (org-html--translate "Table of Contents" info)
-		      org-html-toplevel-hlevel)
-	      "<div id=\"text-table-of-contents\">"
-	      (org-html--toc-text toc-entries)
-	      "</div>\n"
-	      "</div>\n"))))
-
 (defun org-html-fix-class-name (kwd) 	; audit callers of this function
   "Turn todo keyword into a valid class name.
 Replaces invalid characters with \"_\"."
@@ -1599,6 +1531,146 @@ a plist used as a communication channel."
 
 
 
+;;; Tables of Contents
+
+(defun org-html-toc (depth info)
+  "Build a table of contents.
+DEPTH is an integer specifying the depth of the table. INFO is
+a plist used as a communication channel.  Return the table of
+contents as a string, or nil if it is empty."
+  (let ((toc-entries
+	 (mapcar (lambda (headline)
+		   (cons (org-html--format-toc-headline headline info)
+			 (org-export-get-relative-level headline info)))
+		 (org-export-collect-headlines info depth))))
+    (when toc-entries
+      (concat "<div id=\"table-of-contents\">\n"
+	      (format "<h%d>%s</h%d>\n"
+		      org-html-toplevel-hlevel
+		      (org-html--translate "Table of Contents" info)
+		      org-html-toplevel-hlevel)
+	      "<div id=\"text-table-of-contents\">"
+	      (org-html--toc-text toc-entries)
+	      "</div>\n"
+	      "</div>\n"))))
+
+(defun org-html--toc-text (toc-entries)
+  "Return innards of a table of contents, as a string.
+TOC-ENTRIES is an alist where key is an entry title, as a string,
+and value is its relative level, as an integer."
+  (let* ((prev-level (1- (cdar toc-entries)))
+	 (start-level prev-level))
+    (concat
+     (mapconcat
+      (lambda (entry)
+	(let ((headline (car entry))
+	      (level (cdr entry)))
+	  (concat
+	   (let* ((cnt (- level prev-level))
+		  (times (if (> cnt 0) (1- cnt) (- cnt)))
+		  rtn)
+	     (setq prev-level level)
+	     (concat
+	      (org-html--make-string
+	       times (cond ((> cnt 0) "\n<ul>\n<li>")
+			   ((< cnt 0) "</li>\n</ul>\n")))
+	      (if (> cnt 0) "\n<ul>\n<li>" "</li>\n<li>")))
+	   headline)))
+      toc-entries "")
+     (org-html--make-string (- prev-level start-level) "</li>\n</ul>\n"))))
+
+(defun org-html--format-toc-entry (headline info)
+  "Return an appropriate table of contents entry for HEADLINE.
+INFO is a plist used as a communication channel."
+  (let* ((headline-number (org-export-get-headline-number headline info))
+	 (section-number
+	  (and (not (org-export-low-level-p headline info))
+	       (org-export-numbered-headline-p headline info)
+	       (concat (mapconcat 'number-to-string headline-number ".") ". ")))
+	 (tags (and (eq (plist-get info :with-tags) t)
+		    (org-export-get-tags headline info))))
+    (format "<a href=\"#%s\">%s</a>"
+	    ;; Label.
+	    (org-export-solidify-link-text
+	     (or (org-element-property :CUSTOM_ID headline)
+		 (concat "sec-" (mapconcat 'number-to-string
+					   headline-number "-"))))
+	    ;; Body.
+	    (concat section-number
+		    (org-export-data
+		     (org-export-get-optional-title headline info) info)
+		    (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags)))))
+
+(defun org-html-list-of-listings (info)
+  "Build a list of listings.
+INFO is a plist used as a communication channel.  Return the list
+of listings as a string, or nil if it is empty."
+  (let ((lol-entries (org-export-collect-listings info)))
+    (when lol-entries
+      (concat "<div id=\"list-of-listings\">\n"
+	      (format "<h%d>%s</h%d>\n"
+		      org-html-toplevel-hlevel
+		      (org-html--translate "List of Listings" info)
+		      org-html-toplevel-hlevel)
+	      "<div id=\"text-list-of-listings\">\n<ul>\n"
+	      (let ((count 0)
+		    (initial-fmt (org-html--translate "Listing %d:" info)))
+		(mapconcat
+		 (lambda (entry)
+		   (let ((label (org-element-property :name entry))
+			 (title (org-trim
+				 (org-export-data
+				  (or (org-export-get-caption entry t)
+				      (org-export-get-caption entry))
+				  info))))
+		     (concat
+		      "<li>"
+		      (if (not label)
+			  (concat (format initial-fmt (incf count)) " " title)
+			(format "<a href=\"#%s\">%s %s</a>"
+				(org-export-solidify-link-text label)
+				(format initial-fmt (incf count))
+				title))
+		      "</li>")))
+		 lol-entries "\n"))
+	      "\n</ul>\n</div>\n</div>"))))
+
+(defun org-html-list-of-tables (info)
+  "Build a list of tables.
+INFO is a plist used as a communication channel.  Return the list
+of tables as a string, or nil if it is empty."
+  (let ((lol-entries (org-export-collect-tables info)))
+    (when lol-entries
+      (concat "<div id=\"list-of-tables\">\n"
+	      (format "<h%d>%s</h%d>\n"
+		      org-html-toplevel-hlevel
+		      (org-html--translate "List of Tables" info)
+		      org-html-toplevel-hlevel)
+	      "<div id=\"text-list-of-tables\">\n<ul>\n"
+	      (let ((count 0)
+		    (initial-fmt (org-html--translate "Table %d:" info)))
+		(mapconcat
+		 (lambda (entry)
+		   (let ((label (org-element-property :name entry))
+			 (title (org-trim
+				 (org-export-data
+				  (or (org-export-get-caption entry t)
+				      (org-export-get-caption entry))
+				  info))))
+		     (concat
+		      "<li>"
+		      (if (not label)
+			  (concat (format initial-fmt (incf count)) " " title)
+			(format "<a href=\"#%s\">%s %s</a>"
+				(org-export-solidify-link-text label)
+				(format initial-fmt (incf count))
+				title))
+		      "</li>")))
+		 lol-entries "\n"))
+	      "\n</ul>\n</div>\n</div>"))))
+
+
+
 ;;; Transcode Functions
 
 ;;;; Bold
@@ -1994,13 +2066,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 				(string-to-number (match-string 0 value)))
 			   (plist-get info :with-toc))))
 	    (org-html-toc depth info)))
-	 ((string= "tables" value) "\\listoftables")
-	 ((string= "figures" value) "\\listoffigures")
-	 ((string= "listings" value)
-	  (cond
-	   ;; At the moment, src blocks with a caption are wrapped
-	   ;; into a figure environment.
-	   (t "\\listoffigures")))))))))
+	 ((string= "listings" value) (org-html-list-of-listings info))
+	 ((string= "tables" value) (org-html-list-of-tables info))))))))
 
 
 ;;;; Latex Environment
@@ -2536,13 +2603,18 @@ contextual information."
       (org-html--textarea-block src-block)
     (let ((lang (org-element-property :language src-block))
 	  (caption (org-export-get-caption src-block))
-	  (code (org-html-format-code src-block info)))
-      (if (not lang) (format "<pre class=\"example\">\n%s</pre>" code)
-	(format "<div class=\"org-src-container\">\n%s%s\n</div>"
-		(if (not caption) ""
-		  (format "<label class=\"org-src-name\">%s</label>"
-			  (org-export-data caption info)))
-		(format "\n<pre class=\"src src-%s\">%s</pre>" lang code))))))
+	  (code (org-html-format-code src-block info))
+	  (label (let ((lbl (org-element-property :name src-block)))
+		   (if (not lbl) ""
+		     (format " id=\"%s\""
+			     (org-export-solidify-link-text lbl))))))
+      (if (not lang) (format "<pre class=\"example\"%s>\n%s</pre>" label code)
+	(format
+	 "<div class=\"org-src-container\">\n%s%s\n</div>"
+	 (if (not caption) ""
+	   (format "<label class=\"org-src-name\">%s</label>"
+		   (org-export-data caption info)))
+	 (format "\n<pre class=\"src src-%s\"%s>%s</pre>" lang label code))))))
 
 
 ;;;; Statistics Cookie
