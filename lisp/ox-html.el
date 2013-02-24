@@ -1824,9 +1824,8 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 ;;;; Headline
 
-(defun org-html-format-headline--wrap (headline info
-						  &optional format-function
-						  &rest extra-keys)
+(defun org-html-format-headline--wrap
+  (headline info &optional format-function &rest extra-keys)
   "Transcode a HEADLINE element from Org to HTML.
 CONTENTS holds the contents of the headline.  INFO is a plist
 holding contextual information."
