@@ -1579,7 +1579,7 @@ and value is its relative level, as an integer."
       toc-entries "")
      (org-html--make-string (- prev-level start-level) "</li>\n</ul>\n"))))
 
-(defun org-html--format-toc-entry (headline info)
+(defun org-html--format-toc-headline (headline info)
   "Return an appropriate table of contents entry for HEADLINE.
 INFO is a plist used as a communication channel."
   (let* ((headline-number (org-export-get-headline-number headline info))
