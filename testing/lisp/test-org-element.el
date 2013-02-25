@@ -1684,12 +1684,6 @@ Outside list"
   (should
    (org-test-with-temp-text "a_{b}"
      (org-element-map (org-element-parse-buffer) 'subscript 'identity)))
-  ;; At the beginning of an item.
-  (should
-   (eq 'subscript
-       (org-test-with-temp-text "- _b"
-	 (progn (search-forward "_")
-		(org-element-type (org-element-context))))))
   ;; Multiple subscripts in a paragraph.
   (should
    (= 2
@@ -1710,12 +1704,6 @@ Outside list"
   (should
    (org-test-with-temp-text "a^{b}"
      (org-element-map (org-element-parse-buffer) 'superscript 'identity)))
-  ;; At the beginning of an item.
-  (should
-   (eq 'superscript
-       (org-test-with-temp-text "- ^b"
-	 (progn (search-forward "^")
-		(org-element-type (org-element-context))))))
   ;; Multiple superscript in a paragraph.
   (should
    (= 2
