@@ -44,9 +44,9 @@
       ((?H "To temporary buffer" org-deck-export-as-html)
        (?h "To file" org-deck-export-to-html)
        (?o "To file and open"
-	   (lambda (a s v b)
-	     (if a (org-deck-export-to-html t s v b)
-	       (org-open-file (org-deck-export-to-html nil s v b)))))))
+           (lambda (a s v b)
+             (if a (org-deck-export-to-html t s v b)
+               (org-open-file (org-deck-export-to-html nil s v b)))))))
   :options-alist
   ((:html-link-home "HTML_LINK_HOME" nil nil)
    (:html-link-up "HTML_LINK_UP" nil nil)
@@ -60,11 +60,11 @@
    (:deck-theme "DECK_THEME" nil org-deck-theme)
    (:deck-transition "DECK_TRANSITION" nil org-deck-transition)
    (:deck-include-extensions "DECK_INCLUDE_EXTENSIONS" nil
-		     org-deck-include-extensions split)
+                             org-deck-include-extensions split)
    (:deck-exclude-extensions "DECK_EXCLUDE_EXTENSIONS" nil
-			     org-deck-exclude-extensions split)
+                             org-deck-exclude-extensions split)
    (:deck-directories "DECK_DIRECTORIES" nil
-			   org-deck-directories split))
+                      org-deck-directories split))
   :translate-alist
   ((headline . org-deck-headline)
    (inner-template . org-deck-inner-template)
@@ -86,19 +86,19 @@ modernizr; core, extensions and themes directories.)"
   (remove-duplicates
    (car (remove 'nil components))
    :test (lambda (x y)
-	   (string= (file-name-nondirectory x)
-		    (file-name-nondirectory y)))))
+           (string= (file-name-nondirectory x)
+                    (file-name-nondirectory y)))))
 
 (defun org-deck--find-extensions ()
   "Returns a unique list of all extensions found in
 in the extensions directories under `org-deck-directories'"
   (org-deck--cleanup-components
-     (mapcar				; extensions under existing dirs
-      (lambda (dir)
-	(when (file-directory-p dir) (directory-files dir t "^[^.]")))
-      (mapcar 	 			; possible extension directories
-       (lambda (x) (expand-file-name "extensions" x))
-       org-deck-directories))))
+   (mapcar				; extensions under existing dirs
+    (lambda (dir)
+      (when (file-directory-p dir) (directory-files dir t "^[^.]")))
+    (mapcar                           ; possible extension directories
+     (lambda (x) (expand-file-name "extensions" x))
+     org-deck-directories))))
 
 (defun org-deck--find-css (type)
   "Return a unique list of all the css stylesheets in the themes/TYPE
@@ -107,10 +107,10 @@ directories under `org-deck-directories'."
    (mapcar
     (lambda (dir)
       (let ((css-dir (expand-file-name
-		      (concat (file-name-as-directory "themes") type) dir)))
-	(when (file-directory-p css-dir)
-	  (directory-files css-dir t  "\\.css$"))))
-      org-deck-directories)))
+                      (concat (file-name-as-directory "themes") type) dir)))
+        (when (file-directory-p css-dir)
+          (directory-files css-dir t  "\\.css$"))))
+    org-deck-directories)))
 
 (defun org-deck-list-components ()
   "List all available deck extensions, styles and
@@ -168,7 +168,7 @@ Can be overriden with the DECK_BASE_URL property."
   :type 'string)
 
 (defcustom org-deck-footer-template
-"<h1>%author - %title</h1>"
+  "<h1>%author - %title</h1>"
   "Format template to specify footer div.
 Completed using `org-fill-template'.
 Optional keys include %author, %email, %file, %title and %date.
@@ -190,11 +190,11 @@ This is included in a <header> section."
     #title-slide h1 {
         position: static; padding: 0;
         margin-top: 10%;
-	-webkit-transform: none;
-	-moz-transform: none;
-	-ms-transform: none;
-	-o-transform: none;
-	transform: none;
+        -webkit-transform: none;
+        -moz-transform: none;
+        -ms-transform: none;
+        -o-transform: none;
+        transform: none;
     }
     #title-slide h2 {
         text-align: center;
@@ -228,11 +228,11 @@ Note that the wrapper div must include the class \"slide\"."
     #table-of-contents h1 {
         position: static; padding: 0;
         margin-top: 10%;
-	-webkit-transform: none;
-	-moz-transform: none;
-	-ms-transform: none;
-	-o-transform: none;
-	Transform: none;
+        -webkit-transform: none;
+        -moz-transform: none;
+        -ms-transform: none;
+        -o-transform: none;
+        Transform: none;
     }
     #title-slide h2 {
         text-align: center;
@@ -247,77 +247,77 @@ Note that the wrapper div must include the class \"slide\"."
 
 (defun org-deck-toc (depth info)
   (concat
-    "<div id=\"table-of-contents\" class=\"slide\">\n"
-    (format "<h2>%s</h2>\n"
-	    (org-html--translate "Table of Contents" info))
-    (org-html-toc-text
-     (mapcar
-      (lambda (headline)
-	(let* ((class (org-element-property :HTML_CONTAINER_CLASS headline))
-	       (section-number
-		(when
-		    (and (not (org-export-low-level-p headline info))
-			 (org-export-numbered-headline-p headline info))
-		  (concat
-		   (mapconcat
-		    'number-to-string
-		    (org-export-get-headline-number headline info) ".") ". ")))
-	      (title
-	       (concat
-		section-number
-		(replace-regexp-in-string ; remove any links in headline...
-		 "</?a[^>]*>" ""
-		 (org-export-data
-		  (org-element-property :title headline) info)))))
-	  (list
-	   (if (and class (string-match-p "\\<slide\\>" class))
-	       (format
-		"<a href='#outline-container-%s'>%s</a>"
-		(or (org-element-property :CUSTOM_ID headline)
-		    (mapconcat
-		     'number-to-string
-		     (org-export-get-headline-number headline info) "-"))
-		title)
-	     title)
-	   (org-export-get-relative-level headline info))))
-      (org-export-collect-headlines info depth)))
-    "</div>\n" ))
+   "<div id=\"table-of-contents\" class=\"slide\">\n"
+   (format "<h2>%s</h2>\n"
+           (org-html--translate "Table of Contents" info))
+   (org-html-toc-text
+    (mapcar
+     (lambda (headline)
+       (let* ((class (org-element-property :HTML_CONTAINER_CLASS headline))
+              (section-number
+               (when
+                   (and (not (org-export-low-level-p headline info))
+                        (org-export-numbered-headline-p headline info))
+                 (concat
+                  (mapconcat
+                   'number-to-string
+                   (org-export-get-headline-number headline info) ".") ". ")))
+              (title
+               (concat
+                section-number
+                (replace-regexp-in-string ; remove any links in headline...
+                 "</?a[^>]*>" ""
+                 (org-export-data
+                  (org-element-property :title headline) info)))))
+         (list
+          (if (and class (string-match-p "\\<slide\\>" class))
+              (format
+               "<a href='#outline-container-%s'>%s</a>"
+               (or (org-element-property :CUSTOM_ID headline)
+                   (mapconcat
+                    'number-to-string
+                    (org-export-get-headline-number headline info) "-"))
+               title)
+            title)
+          (org-export-get-relative-level headline info))))
+     (org-export-collect-headlines info depth)))
+   "</div>\n"))
 
 (defun org-deck--get-packages (info)
   (let ((prefix (concat (plist-get info :deck-base-url) "/"))
-	(theme (plist-get info :deck-theme))
-	(transition (plist-get info :deck-transition))
-	(include (plist-get info :deck-include-extensions))
-	(exclude (plist-get info :deck-exclude-extensions))
-	(scripts '()) (sheets '()) (snippets '()))
+        (theme (plist-get info :deck-theme))
+        (transition (plist-get info :deck-transition))
+        (include (plist-get info :deck-include-extensions))
+        (exclude (plist-get info :deck-exclude-extensions))
+        (scripts '()) (sheets '()) (snippets '()))
     (add-to-list 'scripts (concat prefix "jquery-1.7.2.min.js"))
     (add-to-list 'scripts (concat prefix "core/deck.core.js"))
     (add-to-list 'scripts (concat prefix "modernizr.custom.js"))
     (add-to-list 'sheets  (concat prefix "core/deck.core.css"))
-     (mapc
-      (lambda (extdir)
-	(let* ((name (file-name-nondirectory extdir))
-	       (dir (file-name-as-directory extdir))
-	       (path (concat prefix "extensions/" name "/"))
-	       (base (format "deck.%s." name)))
-	  (when (and (or (eq nil include) (member name include))
-		     (not (member name exclude)))
-	    (when (file-exists-p (concat dir base "js"))
-	      (add-to-list 'scripts (concat path base "js")))
-	    (when (file-exists-p (concat dir base "css"))
-	      (add-to-list 'sheets (concat path base "css")))
-	    (when (file-exists-p (concat dir base "html"))
-	      (add-to-list 'snippets (concat dir base "html"))))))
-      (org-deck--find-extensions))
-     (add-to-list 'sheets
-		  (if (file-name-directory theme) theme
-		    (format "%sthemes/style/%s" prefix theme)))
-     (add-to-list
-      'sheets
-      (if (file-name-directory transition) transition
-	(format "%sthemes/transition/%s" prefix transition)))
-     (list :scripts (nreverse scripts) :sheets (nreverse sheets)
-	   :snippets snippets)))
+    (mapc
+     (lambda (extdir)
+       (let* ((name (file-name-nondirectory extdir))
+              (dir (file-name-as-directory extdir))
+              (path (concat prefix "extensions/" name "/"))
+              (base (format "deck.%s." name)))
+         (when (and (or (eq nil include) (member name include))
+                    (not (member name exclude)))
+           (when (file-exists-p (concat dir base "js"))
+             (add-to-list 'scripts (concat path base "js")))
+           (when (file-exists-p (concat dir base "css"))
+             (add-to-list 'sheets (concat path base "css")))
+           (when (file-exists-p (concat dir base "html"))
+             (add-to-list 'snippets (concat dir base "html"))))))
+     (org-deck--find-extensions))
+    (add-to-list 'sheets
+                 (if (file-name-directory theme) theme
+                   (format "%sthemes/style/%s" prefix theme)))
+    (add-to-list
+     'sheets
+     (if (file-name-directory transition) transition
+       (format "%sthemes/transition/%s" prefix transition)))
+    (list :scripts (nreverse scripts) :sheets (nreverse sheets)
+          :snippets snippets)))
 
 (defun org-html-inner-template (contents info)
   "Return body of document string after HTML conversion.
@@ -337,7 +337,7 @@ holding export options."
         (level (org-export-get-relative-level headline info)))
     (when (and (= 1 level) (not (string-match-p "\\<slide\\>" class)))
       (org-element-put-property headline :HTML_CONTAINER_CLASS (concat class " slide")))
-  (org-html-headline headline contents info)))
+    (org-html-headline headline contents info)))
 
 (defun org-deck-item (item contents info)
   "Transcode an ITEM element from Org to HTML.
@@ -364,104 +364,104 @@ the \"slide\" class will be added to the to the list element,
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (let ((pkg-info (org-deck--get-packages info)))
-  (mapconcat
-   'identity
-   (list
-    "<!DOCTYPE html>"
-    (let ((lang (plist-get info :language)))
+    (mapconcat
+     'identity
+     (list
+      "<!DOCTYPE html>"
+      (let ((lang (plist-get info :language)))
+        (mapconcat
+         (lambda (x)
+           (apply
+            'format
+            "<!--%s <html class='no-js %s' lang='%s'> %s<![endif]-->"
+            x))
+         (list `("[if lt IE 7]>" "ie6" ,lang "")
+               `("[if IE 7]>" "ie7" ,lang "")
+               `("[if IE 8]>" "ie8" ,lang "")
+               `("[if gt IE 8]><!-->" "" ,lang "<!--")) "\n"))
+      "<head>"
+      (org-deck--build-meta-info info)
       (mapconcat
-       (lambda (x)
-	 (apply
-	  'format
-	  "<!--%s <html class='no-js %s' lang='%s'> %s<![endif]-->"
-	  x))
-       (list `("[if lt IE 7]>" "ie6" ,lang "")
-	     `("[if IE 7]>" "ie7" ,lang "")
-	     `("[if IE 8]>" "ie8" ,lang "")
-	     `("[if gt IE 8]><!-->" "" ,lang "<!--")) "\n"))
-    "<head>"
-    (org-deck--build-meta-info info)
-    (mapconcat
-     (lambda (sheet)
-       (format
-	"<link rel='stylesheet' href='%s' type='text/css' />" sheet))
-     (plist-get pkg-info :sheets) "\n")
-    "<style type='text/css'>"
-    "#table-of-contents a {color: inherit;}"
-    "#table-of-contents ul {margin-bottom: 0;}"
-    (when (plist-get info :section-numbers)
-      "#table-of-contents ul li {list-style-type: none;}")
-    "</style>"
-    ""
-    (mapconcat
-     (lambda (script)
-       (format
-	"<script src='%s' type='text/javascript'></script>" script))
-     (plist-get pkg-info :scripts) "\n")
-    (org-html--build-mathjax-config info)
-    "<script type='text/javascript'>"
-    "  $(document).ready(function () { $.deck('.slide'); });"
-    "</script>"
-    (org-html--build-style info)
-    org-deck-title-page-style
-    "</head>"
-    "<body>"
-    "<header class='deck-status'>"
-    (org-fill-template
-     org-deck-header-template (org-deck-template-alist info))
-    "</header>"
-    "<div class='deck-container'>"
-    ;; title page
-    (org-fill-template
-     org-deck-title-page-template (org-deck-template-alist info))
-    ;; toc page
-    (let ((depth (plist-get info :with-toc)))
-      (when depth (org-deck-toc depth info)))
-    contents
-    (mapconcat
-     (lambda (snippet)
-       (with-temp-buffer (insert-file-contents snippet)
-			 (buffer-string)))
-     (plist-get pkg-info :snippets) "\n")
-    "<footer class='deck-status'>"
-    (org-fill-template
-     org-deck-footer-template (org-deck-template-alist info))
-    "</footer>"
-    "</div>"
-    "</body>"
-    "</html>\n") "\n")))
+       (lambda (sheet)
+         (format
+          "<link rel='stylesheet' href='%s' type='text/css' />" sheet))
+       (plist-get pkg-info :sheets) "\n")
+      "<style type='text/css'>"
+      "#table-of-contents a {color: inherit;}"
+      "#table-of-contents ul {margin-bottom: 0;}"
+      (when (plist-get info :section-numbers)
+        "#table-of-contents ul li {list-style-type: none;}")
+      "</style>"
+      ""
+      (mapconcat
+       (lambda (script)
+         (format
+          "<script src='%s' type='text/javascript'></script>" script))
+       (plist-get pkg-info :scripts) "\n")
+      (org-html--build-mathjax-config info)
+      "<script type='text/javascript'>"
+      "  $(document).ready(function () { $.deck('.slide'); });"
+      "</script>"
+      (org-html--build-style info)
+      org-deck-title-page-style
+      "</head>"
+      "<body>"
+      "<header class='deck-status'>"
+      (org-fill-template
+       org-deck-header-template (org-deck-template-alist info))
+      "</header>"
+      "<div class='deck-container'>"
+      ;; title page
+      (org-fill-template
+       org-deck-title-page-template (org-deck-template-alist info))
+      ;; toc page
+      (let ((depth (plist-get info :with-toc)))
+        (when depth (org-deck-toc depth info)))
+      contents
+      (mapconcat
+       (lambda (snippet)
+         (with-temp-buffer (insert-file-contents snippet)
+                           (buffer-string)))
+       (plist-get pkg-info :snippets) "\n")
+      "<footer class='deck-status'>"
+      (org-fill-template
+       org-deck-footer-template (org-deck-template-alist info))
+      "</footer>"
+      "</div>"
+      "</body>"
+      "</html>\n") "\n")))
 
 (defun org-deck--build-meta-info (info)
   "Return meta tags for exported document.
 INFO is a plist used as a communication channel."
   (let* ((title (org-export-data (plist-get info :title) info))
-	 (author (and (plist-get info :with-author)
-		      (let ((auth (plist-get info :author)))
-			(and auth (org-export-data auth info)))))
-	 (date (and (plist-get info :with-date)
-		    (let ((date (plist-get info :date)))
-		      (and date (org-export-data date info)))))
-	 (description (plist-get info :description))
-	 (keywords (plist-get info :keywords)))
+         (author (and (plist-get info :with-author)
+                      (let ((auth (plist-get info :author)))
+                        (and auth (org-export-data auth info)))))
+         (date (and (plist-get info :with-date)
+                    (let ((date (plist-get info :date)))
+                      (and date (org-export-data date info)))))
+         (description (plist-get info :description))
+         (keywords (plist-get info :keywords)))
     (mapconcat
      'identity
      (list
       (format "<title>%s</title>" title)
       (format "<meta charset='%s' />"
-	      (or (and org-html-coding-system
-		       (fboundp 'coding-system-get)
-		       (coding-system-get
-			org-html-coding-system 'mime-charset))
-		  "iso-8859-1"))
+              (or (and org-html-coding-system
+                       (fboundp 'coding-system-get)
+                       (coding-system-get
+                        org-html-coding-system 'mime-charset))
+                  "iso-8859-1"))
       (mapconcat
        (lambda (attr)
-	 (when (< 0 (length (car attr)))
-	   (format "<meta name='%s' content='%s'/>\n"
-		   (nth 1 attr) (car attr))))
+         (when (< 0 (length (car attr)))
+           (format "<meta name='%s' content='%s'/>\n"
+                   (nth 1 attr) (car attr))))
        (list '("Org-mode" "generator")
-	     `(,author "author")
-	     `(,description "description")
-	     `(,keywords "keywords")) "")) "\n")))
+             `(,author "author")
+             `(,description "description")
+             `(,keywords "keywords")) "")) "\n")))
 (defun org-deck-export-as-html
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to an HTML buffer.
@@ -495,21 +495,21 @@ is non-nil."
   (interactive)
   (if async
       (org-export-async-start
-	  (lambda (output)
-	    (with-current-buffer (get-buffer-create "*Org deck.js Export*")
-	      (erase-buffer)
-	      (insert output)
-	      (goto-char (point-min))
-	      (nxml-mode)
-	      (org-export-add-to-stack (current-buffer) 'deck)))
-	`(org-export-as 'deck ,subtreep ,visible-only ,body-only ',ext-plist))
+          (lambda (output)
+            (with-current-buffer (get-buffer-create "*Org deck.js Export*")
+              (erase-buffer)
+              (insert output)
+              (goto-char (point-min))
+              (nxml-mode)
+              (org-export-add-to-stack (current-buffer) 'deck)))
+        `(org-export-as 'deck ,subtreep ,visible-only ,body-only ',ext-plist))
     (let ((outbuf (org-export-to-buffer
-		   'deck "*Org deck.js Export*"
-		   subtreep visible-only body-only ext-plist)))
+                   'deck "*Org deck.js Export*"
+                   subtreep visible-only body-only ext-plist)))
       ;; Set major mode.
       (with-current-buffer outbuf (nxml-mode))
       (when org-export-show-temporary-export-buffer
-	(switch-to-buffer-other-window outbuf)))))
+        (switch-to-buffer-other-window outbuf)))))
 
 (defun org-deck-export-to-html
   (&optional async subtreep visible-only body-only ext-plist)
@@ -541,18 +541,18 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let* ((extension (concat "." org-html-extension))
-	 (file (org-export-output-file-name extension subtreep))
-	 (org-export-coding-system org-html-coding-system))
+         (file (org-export-output-file-name extension subtreep))
+         (org-export-coding-system org-html-coding-system))
     (if async
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'deck))
-	  (let ((org-export-coding-system org-html-coding-system))
-	    `(expand-file-name
-	      (org-export-to-file
-	       'deck ,file ,subtreep ,visible-only ,body-only ',ext-plist))))
+        (org-export-async-start
+            (lambda (f) (org-export-add-to-stack f 'deck))
+          (let ((org-export-coding-system org-html-coding-system))
+            `(expand-file-name
+              (org-export-to-file
+               'deck ,file ,subtreep ,visible-only ,body-only ',ext-plist))))
       (let ((org-export-coding-system org-html-coding-system))
-	(org-export-to-file
-	 'deck file subtreep visible-only body-only ext-plist)))))
+        (org-export-to-file
+         'deck file subtreep visible-only body-only ext-plist)))))
 
 (defun org-deck-publish-to-html (plist filename pub-dir)
   "Publish an org file to deck.js HTML Presentation.
