@@ -1197,7 +1197,7 @@ INFO is a plist holding contextual information.  See
 	     (if (not desc) (format "@ref{%s}" path)
 	       (format "@ref{%s,,%s}" path desc)))))))
      ((member type '("info"))
-      (let* ((info-path (split-string path ":"))
+      (let* ((info-path (split-string path "[:#]"))
 	     (info-manual (car info-path))
 	     (info-node (or (cadr info-path) "top"))
 	     (title (or desc "")))
