@@ -18085,9 +18085,27 @@ share a good deal of logic."
          "invalid value of `org-latex-create-formula-image-program'")))
    string tofile options buffer))
 
+(declare-function org-export--get-global-options "org-export" (&optional backend))
+(declare-function org-export--get-inbuffer-options "org-export" (&optional backend files))
+(defun org-create-formula--latex-header ()
+  "Return LaTeX header appropriate for previewing a LaTeX snippet."
+  (org-latex-guess-inputenc
+   (org-splice-latex-header
+    org-format-latex-header
+    org-latex-default-packages-alist
+    org-latex-packages-alist t
+    (plist-get
+     (org-combine-plists
+      (org-export--get-global-options 'latex)
+      (org-export--get-inbuffer-options
+       'latex
+       (and buffer-file-name (org-remove-double-quotes buffer-file-name))))
+     :latex-header-extra))))
+
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image-with-dvipng (string tofile options buffer)
   "This calls dvipng."
+  (require 'ox-latex)
   (let* ((tmpdir (if (featurep 'xemacs)
 		     (temp-directory)
 		   temporary-file-directory))
@@ -18109,14 +18127,10 @@ share a good deal of logic."
       (unless (string= fg "Transparent") (setq fg (org-dvipng-color-format fg))))
     (if (eq bg 'default) (setq bg (org-dvipng-color :background))
       (unless (string= bg "Transparent") (setq bg (org-dvipng-color-format bg))))
-    (with-temp-file texfile
-      (require 'ox-latex)
-      (insert (org-latex-guess-inputenc
-	       (org-splice-latex-header
-		org-format-latex-header
-		org-latex-default-packages-alist
-		org-latex-packages-alist t)))
-      (insert "\n\\begin{document}\n" string "\n\\end{document}\n"))
+    (let ((latex-header (org-create-formula--latex-header)))
+      (with-temp-file texfile
+	(insert latex-header)
+	(insert "\n\\begin{document}\n" string "\n\\end{document}\n")))
     (let ((dir default-directory))
       (condition-case nil
 	  (progn
@@ -18156,6 +18170,7 @@ share a good deal of logic."
 (defvar org-latex-pdf-process)		; From ox-latex.el
 (defun org-create-formula-image-with-imagemagick (string tofile options buffer)
   "This calls convert, which is included into imagemagick."
+  (require 'ox-latex)
   (let* ((tmpdir (if (featurep 'xemacs)
 		     (temp-directory)
 		   temporary-file-directory))
@@ -18178,21 +18193,17 @@ share a good deal of logic."
     (if (eq bg 'default) (setq bg (org-latex-color :background))
       (setq bg (org-latex-color-format
 		(if (string= bg "Transparent") "white" bg))))
-    (with-temp-file texfile
-      (require 'ox-latex)
-      (insert (org-latex-guess-inputenc
-	       (org-splice-latex-header
-		org-format-latex-header
-		org-latex-default-packages-alist
-		org-latex-packages-alist t)))
-      (insert "\n\\begin{document}\n"
-	      "\\definecolor{fg}{rgb}{" fg "}\n"
-	      "\\definecolor{bg}{rgb}{" bg "}\n"
-	      "\n\\pagecolor{bg}\n"
-	      "\n{\\color{fg}\n"
-	      string
-	      "\n}\n"
-	      "\n\\end{document}\n"))
+    (let ((latex-header (org-create-formula--latex-header)))
+      (with-temp-file texfile
+	(insert latex-header)
+	(insert "\n\\begin{document}\n"
+		"\\definecolor{fg}{rgb}{" fg "}\n"
+		"\\definecolor{bg}{rgb}{" bg "}\n"
+		"\n\\pagecolor{bg}\n"
+		"\n{\\color{fg}\n"
+		string
+		"\n}\n"
+		"\n\\end{document}\n")))
     (let ((dir default-directory) cmd cmds latex-frags-cmds)
       (condition-case nil
 	  (progn
