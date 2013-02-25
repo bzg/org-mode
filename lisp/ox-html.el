@@ -1478,10 +1478,10 @@ is the language used for CODE, as a string, or nil."
 		       ;; Htmlize region.
 		       (org-html-htmlize-region-for-paste
 			(point-min) (point-max))))
-	  ;; Strip any encolosing <pre></pre> tags.
-	  (if (string-match "<pre[^>]*>\n*\\([^\000]*\\)</pre>" code)
-	      (match-string 1 code)
-	    code))))))))
+	  ;; Strip any enclosing <pre></pre> tags.
+	  (let* ((beg (and (string-match "\\`<pre[^>]*>\n*" code) (match-end 0)))
+		 (end (and beg (string-match "</pre>\\'" code))))
+	    (if (and beg end) (substring code beg end) code)))))))))
 
 (defun org-html-do-format-code
   (code &optional lang refs retain-labels num-start)
