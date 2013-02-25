@@ -2340,7 +2340,7 @@ Another text. (ref:text)
 	 (org-element-type
 	  (org-export-get-previous-element
 	   (org-element-map
-	    (plist-get info :title) 'plain-text 'identity info t) info)))))
+	       (plist-get info :title) 'plain-text 'identity info t) info)))))
   ;; Find previous element in parsed affiliated keywords.
   (should
    (eq 'verbatim
@@ -2351,7 +2351,7 @@ Another text. (ref:text)
   ;; With optional argument N, return a list containing up to
   ;; N previous elements.
   (should
-   (equal '(bold italic underline)
+   (equal '(underline italic bold)
 	  (org-test-with-parsed-data "_a_ /b/ *c* ~d~"
 	    (mapcar 'car
 		    (org-export-get-previous-element
@@ -2359,7 +2359,7 @@ Another text. (ref:text)
   ;; When N is a positive integer, return a list containing up to
   ;; N previous elements.
   (should
-   (equal '(bold italic)
+   (equal '(italic bold)
 	  (org-test-with-parsed-data "_a_ /b/ *c* ~d~"
 	    (mapcar 'car
 		    (org-export-get-previous-element

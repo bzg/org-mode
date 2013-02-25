@@ -4800,8 +4800,8 @@ a communication channel.  Return previous exportable element or
 object, a string, or nil.
 
 When optional argument N is a positive integer, return a list
-containing up to N siblings before BLOB, from closest to
-farthest.  With any other non-nil value, return a list containing
+containing up to N siblings before BLOB, from farthest to
+closest.  With any other non-nil value, return a list containing
 all of them."
   (let ((siblings
 	 ;; An object can belong to the contents of its parent or
@@ -4823,10 +4823,10 @@ all of them."
 	      (cond ((memq obj (plist-get info :ignore-list)))
 		    ((null n) (throw 'exit obj))
 		    ((not (wholenump n)) (push obj prev))
-		    ((zerop n) (throw 'exit (nreverse prev)))
+		    ((zerop n) (throw 'exit prev))
 		    (t (decf n) (push obj prev))))
 	    (cdr (memq blob (reverse siblings))))
-      (nreverse prev))))
+      prev)))
 
 (defun org-export-get-next-element (blob info &optional n)
   "Return next element or object.
