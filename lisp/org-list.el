@@ -2786,7 +2786,10 @@ If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies
 a function to be called with point at the beginning of the
 record.  It must return either a string or a number that should
 serve as the sorting key for that record.  It will then use
-COMPARE-FUNC to compare entries."
+COMPARE-FUNC to compare entries.
+
+Sorting is done against the visible part of the headlines, it
+ignores hidden links."
   (interactive "P")
   (let* ((case-func (if with-case 'identity 'downcase))
          (struct (org-list-struct))
@@ -2826,11 +2829,14 @@ COMPARE-FUNC to compare entries."
 		(when (looking-at "[ \t]*[-+*0-9.)]+\\([ \t]+\\[[- X]\\]\\)?[ \t]+")
 		  (cond
 		   ((= dcst ?n)
-		    (string-to-number (buffer-substring (match-end 0)
-							(point-at-eol))))
+		    (string-to-number
+		     (org-sort-remove-invisible
+		      (buffer-substring (match-end 0) (point-at-eol)))))
 		   ((= dcst ?a)
 		    (funcall case-func
-			     (buffer-substring (match-end 0) (point-at-eol))))
+			     (org-sort-remove-invisible
+			      (buffer-substring
+			       (match-end 0) (point-at-eol)))))
 		   ((= dcst ?t)
 		    (cond
 		     ;; If it is a timer list, convert timer to seconds

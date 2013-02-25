@@ -8320,6 +8320,7 @@ Optional argument WITH-CASE means sort case-sensitively."
     (org-call-with-arg 'org-sort-entries with-case))))
 
 (defun org-sort-remove-invisible (s)
+  "Remove invisible links from string S."
   (remove-text-properties 0 (length s) org-rm-props s)
   (while (string-match org-bracket-link-regexp s)
     (setq s (replace-match (if (match-end 2)
@@ -8343,7 +8344,7 @@ Else, if the cursor is before the first entry, sort the top-level items.
 Else, the children of the entry at point are sorted.
 
 Sorting can be alphabetically, numerically, by date/time as given by
-a time stamp, by a property or by priority.
+a time stamp, by a property, by priority order, or by a custom function.
 
 The command prompts for the sorting type unless it has been given to the
 function through the SORTING-TYPE argument, which needs to be a character,
@@ -8369,7 +8370,10 @@ called with point at the beginning of the record.  It must return either
 a string or a number that should serve as the sorting key for that record.
 
 Comparing entries ignores case by default.  However, with an optional argument
-WITH-CASE, the sorting considers case as well."
+WITH-CASE, the sorting considers case as well.
+
+Sorting is done against the visible part of the headlines, it ignores hidden
+links."
   (interactive "P")
   (let ((case-func (if with-case 'identity 'downcase))
 	(cmstr
@@ -8481,11 +8485,11 @@ WITH-CASE, the sorting considers case as well."
 	   (cond
 	    ((= dcst ?n)
 	     (if (looking-at org-complex-heading-regexp)
-		 (string-to-number (match-string 4))
+		 (string-to-number (org-sort-remove-invisible (match-string 4)))
 	       nil))
 	    ((= dcst ?a)
 	     (if (looking-at org-complex-heading-regexp)
-		 (funcall case-func (match-string 4))
+		 (funcall case-func (org-sort-remove-invisible (match-string 4)))
 	       nil))
 	    ((= dcst ?t)
 	     (let ((end (save-excursion (outline-next-heading) (point))))
