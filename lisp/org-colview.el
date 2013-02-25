@@ -223,17 +223,17 @@ This is the compiled version of the format.")
       (setq s2 (org-columns-add-ellipses (or modval val) width))
       (setq string (format f s2))
       ;; Create the overlay
-      (with-silent-modifications
-	(setq ov (org-columns-new-overlay
-		  beg (setq beg (1+ beg)) string (if dateline face1 face)))
-	(overlay-put ov 'keymap org-columns-map)
-	(overlay-put ov 'org-columns-key property)
-	(overlay-put ov 'org-columns-value (cdr ass))
-	(overlay-put ov 'org-columns-value-modified modval)
-	(overlay-put ov 'org-columns-pom pom)
-	(overlay-put ov 'org-columns-format f)
-	(overlay-put ov 'line-prefix "")
-	(overlay-put ov 'wrap-prefix ""))
+      (org-with-silent-modifications
+       (setq ov (org-columns-new-overlay
+		 beg (setq beg (1+ beg)) string (if dateline face1 face)))
+       (overlay-put ov 'keymap org-columns-map)
+       (overlay-put ov 'org-columns-key property)
+       (overlay-put ov 'org-columns-value (cdr ass))
+       (overlay-put ov 'org-columns-value-modified modval)
+       (overlay-put ov 'org-columns-pom pom)
+       (overlay-put ov 'org-columns-format f)
+       (overlay-put ov 'line-prefix "")
+       (overlay-put ov 'wrap-prefix ""))
       (if (or (not (char-after beg))
 	      (equal (char-after beg) ?\n))
 	  (let ((inhibit-read-only t))
@@ -332,11 +332,11 @@ for the duration of the command.")
 	(remove-hook 'post-command-hook 'org-columns-hscoll-title 'local))
       (move-marker org-columns-begin-marker nil)
       (move-marker org-columns-top-level-marker nil)
-      (with-silent-modifications
-	(mapc 'delete-overlay org-columns-overlays)
-	(setq org-columns-overlays nil)
-	(let ((inhibit-read-only t))
-	  (remove-text-properties (point-min) (point-max) '(read-only t))))
+      (org-with-silent-modifications
+       (mapc 'delete-overlay org-columns-overlays)
+       (setq org-columns-overlays nil)
+       (let ((inhibit-read-only t))
+	 (remove-text-properties (point-min) (point-max) '(read-only t))))
       (when org-columns-flyspell-was-active
 	(flyspell-mode 1))
       (when (local-variable-p 'org-colview-initial-truncate-line-value)
@@ -384,10 +384,10 @@ CPHR is the complex heading regexp to use for parsing ITEM."
 (defun org-columns-quit ()
   "Remove the column overlays and in this way exit column editing."
   (interactive)
-  (with-silent-modifications
-    (org-columns-remove-overlays)
-    (let ((inhibit-read-only t))
-      (remove-text-properties (point-min) (point-max) '(read-only t))))
+  (org-with-silent-modifications
+   (org-columns-remove-overlays)
+   (let ((inhibit-read-only t))
+     (remove-text-properties (point-min) (point-max) '(read-only t))))
   (when (eq major-mode 'org-agenda-mode)
     (setq org-agenda-columns-active nil)
     (message
@@ -488,9 +488,9 @@ Where possible, use the standard interface for changing this line."
 	  (org-agenda-columns)))
        (t
 	(let ((inhibit-read-only t))
-	  (with-silent-modifications
-	    (remove-text-properties
-	     (max (point-min) (1- bol)) eol '(read-only t)))
+	  (org-with-silent-modifications
+	   (remove-text-properties
+	    (max (point-min) (1- bol)) eol '(read-only t)))
 	  (unwind-protect
 	      (progn
 		(setq org-columns-overlays
@@ -920,8 +920,8 @@ Don't set this, this is meant for dynamic scoping.")
 
 (defun org-columns-compute-all ()
   "Compute all columns that have operators defined."
-  (with-silent-modifications
-    (remove-text-properties (point-min) (point-max) '(org-summaries t)))
+  (org-with-silent-modifications
+   (remove-text-properties (point-min) (point-max) '(org-summaries t)))
   (let ((columns org-columns-current-fmt-compiled)
 	(org-columns-time (time-to-number-of-days (current-time)))
 	col)
@@ -996,9 +996,9 @@ Don't set this, this is meant for dynamic scoping.")
 	  (if (assoc property sum-alist)
 	      (setcdr (assoc property sum-alist) useval)
 	    (push (cons property useval) sum-alist)
-	    (with-silent-modifications
-	      (add-text-properties sumpos (1+ sumpos)
-				   (list 'org-summaries sum-alist))))
+	    (org-with-silent-modifications
+	     (add-text-properties sumpos (1+ sumpos)
+				  (list 'org-summaries sum-alist))))
 	  (when (and val (not (equal val (if flag str val))))
 	    (org-entry-put nil property (if flag str val)))
 	  ;; add current to current level accumulator
@@ -1509,8 +1509,8 @@ This will add overlays to the date lines, to show the summary for each day."
 	(save-excursion
 	  (save-restriction
 	    (widen)
-	    (with-silent-modifications
-	      (remove-text-properties (point-min) (point-max) '(org-summaries t)))
+	    (org-with-silent-modifications
+	     (remove-text-properties (point-min) (point-max) '(org-summaries t)))
 	    (goto-char (point-min))
 	    (org-columns-get-format-and-top-level)
 	    (while (setq fm (pop fmt))

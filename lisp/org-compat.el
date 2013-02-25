@@ -499,6 +499,12 @@ Implements `file-equal-p' for older emacsen and XEmacs."
 	   (setq f2-attr (file-attributes (file-truename f2)))
 	   (equal f1-attr f2-attr)))))
 
+(defmacro org-with-silent-modifications (&rest body)
+  (if (fboundp 'with-silent-modifications)
+      `(with-silent-modifications ,@body)
+    `(org-unmodified ,@body)))
+(def-edebug-spec org-with-silent-modifications (body))
+
 (provide 'org-compat)
 
 ;;; org-compat.el ends here

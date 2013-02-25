@@ -8955,24 +8955,24 @@ call CMD."
 		  ((symbolp org-category) (symbol-name org-category))
 		  (t org-category)))
 	beg end cat pos optionp)
-    (with-silent-modifications
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char (point-min))
-	  (put-text-property (point) (point-max) 'org-category def-cat)
-	  (while (re-search-forward
-		  "^\\(#\\+CATEGORY:\\|[ \t]*:CATEGORY:\\)\\(.*\\)" nil t)
-	    (setq pos (match-end 0)
-		  optionp (equal (char-after (match-beginning 0)) ?#)
-		  cat (org-trim (match-string 2)))
-	    (if optionp
-		(setq beg (point-at-bol) end (point-max))
-	      (org-back-to-heading t)
-	      (setq beg (point) end (org-end-of-subtree t t)))
-	    (put-text-property beg end 'org-category cat)
-	    (put-text-property beg end 'org-category-position beg)
-	    (goto-char pos)))))))
+    (org-with-silent-modifications
+     (save-excursion
+       (save-restriction
+	 (widen)
+	 (goto-char (point-min))
+	 (put-text-property (point) (point-max) 'org-category def-cat)
+	 (while (re-search-forward
+		 "^\\(#\\+CATEGORY:\\|[ \t]*:CATEGORY:\\)\\(.*\\)" nil t)
+	   (setq pos (match-end 0)
+		 optionp (equal (char-after (match-beginning 0)) ?#)
+		 cat (org-trim (match-string 2)))
+	   (if optionp
+	       (setq beg (point-at-bol) end (point-max))
+	     (org-back-to-heading t)
+	     (setq beg (point) end (org-end-of-subtree t t)))
+	   (put-text-property beg end 'org-category cat)
+	   (put-text-property beg end 'org-category-position beg)
+	   (goto-char pos)))))))
 
 (defun org-refresh-properties (dprop tprop)
   "Refresh buffer text properties.
@@ -8980,17 +8980,17 @@ DPROP is the drawer property and TPROP is the corresponding text
 property to set."
   (let ((case-fold-search t)
 	(inhibit-read-only t) p)
-    (with-silent-modifications
-      (save-excursion
-	(save-restriction
-	  (widen)
-	  (goto-char (point-min))
-	  (while (re-search-forward (concat "^[ \t]*:" dprop ": +\\(.*\\)[ \t]*$") nil t)
-	    (setq p (org-match-string-no-properties 1))
-	    (save-excursion
-	      (org-back-to-heading t)
-	      (put-text-property
-	       (point-at-bol) (point-at-eol) tprop p))))))))
+    (org-with-silent-modifications
+     (save-excursion
+       (save-restriction
+	 (widen)
+	 (goto-char (point-min))
+	 (while (re-search-forward (concat "^[ \t]*:" dprop ": +\\(.*\\)[ \t]*$") nil t)
+	   (setq p (org-match-string-no-properties 1))
+	   (save-excursion
+	     (org-back-to-heading t)
+	     (put-text-property
+	      (point-at-bol) (point-at-eol) tprop p))))))))
 
 
 ;;;; Link Stuff
@@ -12166,15 +12166,15 @@ changes because there are unchecked boxes in this entry."
 
 (defun org-entry-blocked-p ()
   "Is the current entry blocked?"
-  (with-silent-modifications
-    (if (org-entry-get nil "NOBLOCKING")
-	nil ;; Never block this entry
-      (not (run-hook-with-args-until-failure
-	    'org-blocker-hook
-	    (list :type 'todo-state-change
-		  :position (point)
-		  :from 'todo
-		  :to 'done))))))
+  (org-with-silent-modifications
+   (if (org-entry-get nil "NOBLOCKING")
+       nil ;; Never block this entry
+     (not (run-hook-with-args-until-failure
+	   'org-blocker-hook
+	   (list :type 'todo-state-change
+		 :position (point)
+		 :from 'todo
+		 :to 'done))))))
 
 (defun org-update-statistics-cookies (all)
   "Update the statistics cookie, either from TODO or from checkboxes.
@@ -17626,20 +17626,20 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (append org-drawers-for-agenda org-drawers))
 	    (setq org-tag-alist-for-agenda
 		  (append org-tag-alist-for-agenda org-tag-alist))
-	    (with-silent-modifications
-	      (save-excursion
-		(remove-text-properties (point-min) (point-max) pall)
-		(when org-agenda-skip-archived-trees
-		  (goto-char (point-min))
-		  (while (re-search-forward rea nil t)
-		    (if (org-at-heading-p t)
-			(add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
-		(goto-char (point-min))
-		(setq re (format org-heading-keyword-regexp-format
-				 org-comment-string))
-		(while (re-search-forward re nil t)
-		  (add-text-properties
-		   (match-beginning 0) (org-end-of-subtree t) pc))))))))
+	    (org-with-silent-modifications
+	     (save-excursion
+	       (remove-text-properties (point-min) (point-max) pall)
+	       (when org-agenda-skip-archived-trees
+		 (goto-char (point-min))
+		 (while (re-search-forward rea nil t)
+		   (if (org-at-heading-p t)
+		       (add-text-properties (point-at-bol) (org-end-of-subtree t) pa))))
+	       (goto-char (point-min))
+	       (setq re (format org-heading-keyword-regexp-format
+				org-comment-string))
+	       (while (re-search-forward re nil t)
+		 (add-text-properties
+		  (match-beginning 0) (org-end-of-subtree t) pc))))))))
     (setq org-todo-keywords-for-agenda
           (org-uniquify org-todo-keywords-for-agenda))
     (setq org-todo-keyword-alist-for-agenda

@@ -147,8 +147,8 @@ useful to make it ever so slightly different."
 
 (defsubst org-indent-remove-properties (beg end)
   "Remove indentations between BEG and END."
-  (with-silent-modifications
-    (remove-text-properties beg end '(line-prefix nil wrap-prefix nil))))
+  (org-with-silent-modifications
+   (remove-text-properties beg end '(line-prefix nil wrap-prefix nil))))
 
 ;;;###autoload
 (define-minor-mode org-indent-mode
@@ -342,50 +342,50 @@ stopped."
        ;; 2. For each line, set `line-prefix' and `wrap-prefix'
        ;;    properties depending on the type of line (headline,
        ;;    inline task, item or other).
-       (with-silent-modifications
-	 (while (and (<= (point) end) (not (eobp)))
-	   (cond
-	    ;; When in asynchronous mode, check if interrupt is
-	    ;; required.
-	    ((and delay (input-pending-p)) (throw 'interrupt (point)))
-	    ;; In asynchronous mode, take a break of
-	    ;; `org-indent-agent-resume-delay' every DELAY to avoid
-	    ;; blocking any other idle timer or process output.
-	    ((and delay (time-less-p time-limit (current-time)))
-	     (setq org-indent-agent-resume-timer
-		   (run-with-idle-timer
-		    (time-add (current-idle-time)
-			      org-indent-agent-resume-delay)
-		    nil #'org-indent-initialize-agent))
-	     (throw 'interrupt (point)))
-	    ;; Headline or inline task.
-	    ((looking-at org-outline-regexp)
-	     (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
-		    (line (* added-ind-per-lvl (1- nstars)))
-		    (wrap (+ line (1+ nstars))))
-	       (cond
-		;; Headline: new value for PF.
-		((looking-at limited-re)
-		 (org-indent-set-line-properties line wrap t)
-		 (setq pf wrap))
-		;; End of inline task: PF-INLINE is now nil.
-		((looking-at "\\*+ end[ \t]*$")
-		 (org-indent-set-line-properties line wrap 'inline)
-		 (setq pf-inline nil))
-		;; Start of inline task.  Determine if it contains
-		;; text, or if it is only one line long.  Set
-		;; PF-INLINE accordingly.
-		(t (org-indent-set-line-properties line wrap 'inline)
-		   (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
-	    ;; List item: `wrap-prefix' is set where body starts.
-	    ((org-at-item-p)
-	     (let* ((line (or pf-inline pf 0))
-		    (wrap (+ (org-list-item-body-column (point)) line)))
-	       (org-indent-set-line-properties line wrap nil)))
-	    ;; Normal line: use PF-INLINE, PF or nil as prefixes.
-	    (t (let* ((line (or pf-inline pf 0))
-		      (wrap (+ line (org-get-indentation))))
-		 (org-indent-set-line-properties line wrap nil))))))))))
+       (org-with-silent-modifications
+	(while (and (<= (point) end) (not (eobp)))
+	  (cond
+	   ;; When in asynchronous mode, check if interrupt is
+	   ;; required.
+	   ((and delay (input-pending-p)) (throw 'interrupt (point)))
+	   ;; In asynchronous mode, take a break of
+	   ;; `org-indent-agent-resume-delay' every DELAY to avoid
+	   ;; blocking any other idle timer or process output.
+	   ((and delay (time-less-p time-limit (current-time)))
+	    (setq org-indent-agent-resume-timer
+		  (run-with-idle-timer
+		   (time-add (current-idle-time)
+			     org-indent-agent-resume-delay)
+		   nil #'org-indent-initialize-agent))
+	    (throw 'interrupt (point)))
+	   ;; Headline or inline task.
+	   ((looking-at org-outline-regexp)
+	    (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
+		   (line (* added-ind-per-lvl (1- nstars)))
+		   (wrap (+ line (1+ nstars))))
+	      (cond
+	       ;; Headline: new value for PF.
+	       ((looking-at limited-re)
+		(org-indent-set-line-properties line wrap t)
+		(setq pf wrap))
+	       ;; End of inline task: PF-INLINE is now nil.
+	       ((looking-at "\\*+ end[ \t]*$")
+		(org-indent-set-line-properties line wrap 'inline)
+		(setq pf-inline nil))
+	       ;; Start of inline task.  Determine if it contains
+	       ;; text, or if it is only one line long.  Set
+	       ;; PF-INLINE accordingly.
+	       (t (org-indent-set-line-properties line wrap 'inline)
+		  (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
+	   ;; List item: `wrap-prefix' is set where body starts.
+	   ((org-at-item-p)
+	    (let* ((line (or pf-inline pf 0))
+		   (wrap (+ (org-list-item-body-column (point)) line)))
+	      (org-indent-set-line-properties line wrap nil)))
+	   ;; Normal line: use PF-INLINE, PF or nil as prefixes.
+	   (t (let* ((line (or pf-inline pf 0))
+		     (wrap (+ line (org-get-indentation))))
+		(org-indent-set-line-properties line wrap nil))))))))))
 
 (defun org-indent-notify-modified-headline (beg end)
   "Set `org-indent-modified-headline-flag' depending on context.

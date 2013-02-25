@@ -63,14 +63,6 @@
       `(interactive-p))))
 (def-edebug-spec org-called-interactively-p (&optional ("quote" symbolp)))
 
-(when (and (not (fboundp 'with-silent-modifications))
-	   (or (< emacs-major-version 23)
-	       (and (= emacs-major-version 23)
-		    (< emacs-minor-version 2))))
-  (defmacro with-silent-modifications (&rest body)
-    `(org-unmodified ,@body))
-  (def-edebug-spec with-silent-modifications (body)))
-
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
   `(and (boundp (quote ,var)) ,var))
