@@ -625,12 +625,15 @@ of the longest menu entry."
                            (desc    (nth 2 name))
                            (length  (nth 0 name))
 			   (column  (max
+				     ;;6 is "* " ":: " for inserted text
 				     length
-				     org-texinfo-node-description-column))
+				     (-
+				      org-texinfo-node-description-column
+				      6)))
 			   (spacing (- column length)
 				    ))
                       (if (> length -1)
-                          (concat "* " title ":: "
+                          (concat "* " title "::  "
                                   (make-string spacing ?\s)
                                   (if desc
                                       (concat desc)))
