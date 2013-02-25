@@ -149,19 +149,21 @@ This overrides `org-email-link-description-format' if set."
   "Return list of Org files to use for contact management."
   (or org-contacts-files (org-agenda-files t 'ifmode)))
 
+(defun org-contacts-db-need-update? ()
+  "Determine whether `org-contacts-db' needs to be refreshed."
+  (or (null org-contacts-last-update)
+      (some (lambda (file)
+	      (or (time-less-p org-contacts-last-update
+			       (elt (file-attributes file) 5))))
+	    (org-contacts-files))))
+
 (defun org-contacts-db ()
   "Return the latest Org Contacts Database"
   (let* (todo-only
 	 (contacts-matcher
 	  (cdr (org-make-tags-matcher org-contacts-matcher)))
-	 (need-update?
-	  (or (null org-contacts-last-update)
-	      (some (lambda (file)
-		      (time-less-p org-contacts-last-update
-				   (elt (file-attributes file) 5)))
-		    (org-contacts-files))))
 	 markers result)
-    (when need-update?
+    (when (org-contacts-db-need-update?)
       (message "Update Org Contacts Database")
       (dolist (file (org-contacts-files))
 	(org-check-agenda-file file)
