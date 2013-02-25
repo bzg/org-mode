@@ -196,7 +196,13 @@
   (org-test-with-temp-text "#+NAME: para\nSome\ntext."
     (let ((fill-column 20))
       (org-fill-paragraph)
-      (should (equal (buffer-string) "#+NAME: para\nSome\ntext.")))))
+      (should (equal (buffer-string) "#+NAME: para\nSome\ntext."))))
+  ;; Do not move point after table when filling a table.
+  (should-not
+   (org-test-with-temp-text "| a | b |\n| c | d |\n"
+     (forward-char)
+     (org-fill-paragraph)
+     (eobp))))
 
 (ert-deftest test-org/auto-fill-function ()
   "Test auto-filling features."

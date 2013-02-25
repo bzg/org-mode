@@ -127,7 +127,8 @@
 	   (lambda (a s v b)
 	     (org-ascii-export-to-ascii a s v b '(:ascii-charset utf-8))))))
   :filters-alist ((:filter-headline . org-ascii-filter-headline-blank-lines)
-		  (:filter-parse-tree . org-ascii-filter-paragraph-spacing)
+		  (:filter-parse-tree org-ascii-filter-paragraph-spacing
+				      org-ascii-filter-comment-spacing)
 		  (:filter-section . org-ascii-filter-headline-blank-lines))
   :options-alist ((:ascii-charset nil nil org-ascii-charset)))
 
@@ -1791,8 +1792,7 @@ TREE is the parse tree.  BACK-END is the symbol specifying
 back-end used for export.  INFO is a plist used as
 a communication channel.
 
-This function only applies to `ascii' back-end.  See
-`org-ascii-paragraph-spacing' for information."
+See `org-ascii-paragraph-spacing' for information."
   (when (wholenump org-ascii-paragraph-spacing)
     (org-element-map tree 'paragraph
       (lambda (p)
@@ -1800,6 +1800,18 @@ This function only applies to `ascii' back-end.  See
 		  'paragraph)
 	  (org-element-put-property
 	   p :post-blank org-ascii-paragraph-spacing)))))
+  tree)
+
+(defun org-ascii-filter-comment-spacing (tree backend info)
+  "Filter removing blank lines between comments.
+TREE is the parse tree.  BACK-END is the symbol specifying
+back-end used for export.  INFO is a plist used as
+a communication channel."
+  (org-element-map tree '(comment comment-block)
+    (lambda (c)
+      (when (memq (org-element-type (org-export-get-next-element c info))
+		  '(comment comment-block))
+	(org-element-put-property c :post-blank 0))))
   tree)
 
 
