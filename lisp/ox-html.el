@@ -2160,12 +2160,15 @@ used as a communication channel."
 	 (parent (org-export-get-parent-element link))
 	 (caption (org-export-data (org-export-get-caption parent) info))
 	 (label (org-element-property :name parent))
-	 ;; Retrieve latex attributes from the element around.
-	 (attr (let ((raw-attr
-		      (mapconcat #'identity
-				 (org-element-property :attr_html parent)
-				 " ")))
-		 (unless (string= raw-attr "") raw-attr))))
+	 ;; Retrieve latex attributes from the PARENT element. HACK:
+	 ;; Only do this for the first link in PARENT.  This is needed
+	 ;; as long as attributes cannot be set on a per link basis.
+	 (attr (when (eq link (org-element-map parent 'link 'identity info t))
+		 (let ((raw-attr
+			(mapconcat #'identity
+				   (org-element-property :attr_html parent)
+				   " ")))
+		   (unless (string= raw-attr "") raw-attr)))))
     ;; Now clear ATTR from any special keyword and set a default
     ;; value if nothing is left.
     (setq attr (if (not attr) "" (org-trim attr)))
@@ -2271,16 +2274,22 @@ INFO is a plist holding contextual information.  See
 							numbers "-")))))))))
 	   (t raw-path)))
 	 attributes protocol)
-    ;; Extract attributes from parent's paragraph.
+    ;; Extract attributes from parent's paragraph. HACK: Only do this
+    ;; for the first link in parent.  This is needed as long as
+    ;; attributes cannot be set on a per link basis.
     (and (setq attributes
-	       (mapconcat
-		'identity
-		(let ((att (org-element-property
-			    :attr_html (org-export-get-parent-element link))))
-		  (unless (and desc att (string-match (regexp-quote (car att)) desc)) att))
-		" "))
+	       (let ((parent (org-export-get-parent-element link)))
+		 (if (not (eq (org-element-map parent 'link 'identity info t)
+			      link))
+		     ""
+		   (mapconcat
+		    'identity
+		    (let ((att (org-element-property :attr_html parent)))
+		      (unless (and desc att
+				   (string-match (regexp-quote (car att)) desc))
+			att))
+		    " "))))
 	 (setq attributes (concat " " attributes)))
-
     (cond
      ;; Image file.
      ((and (or (eq t org-html-inline-images)
