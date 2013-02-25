@@ -907,6 +907,8 @@ holding contextual information."
 	 (class-sectionning (assoc class org-texinfo-classes))
 	 ;; Find the index type, if any
 	 (index (org-element-property :INDEX headline))
+	 ;; Check if it is an appendix
+	 (appendix (org-element-property :APPENDIX headline))
 	 ;; Retrieve headline text
 	 (text (org-texinfo--sanitize-headline
 		(org-element-property :title headline) info))
@@ -949,13 +951,20 @@ holding contextual information."
 	     ((stringp sec) sec)
 	     ;; (numbered-section . unnumbered-section)
 	     ((not (consp (cdr sec)))
-	      ;; If an index, always unnumbered
-	      (if index
-		  (concat menu node (cdr sec) "\n%s")
+	      (cond
+	       ;;If an index, always unnumbered
+	       (index
+		(concat menu node (cdr sec) "\n%s"))
+	       (appendix
+		(concat menu node (replace-regexp-in-string
+				   "unnumbered"
+				   "appendix"
+				   (cdr sec)) "\n%s"))
 		;; Otherwise number as needed.
+	       (t
 		(concat menu node
 			(funcall
-			 (if numberedp #'car #'cdr) sec) "\n%s"))))))
+			 (if numberedp #'car #'cdr) sec) "\n%s")))))))
 	 (todo
 	  (and (plist-get info :with-todo-keywords)
 	       (let ((todo (org-element-property :todo-keyword headline)))
