@@ -8326,6 +8326,10 @@ Optional argument WITH-CASE means sort case-sensitively."
     (setq s (replace-match (if (match-end 2)
 			       (match-string 3 s)
 			     (match-string 1 s)) t t s)))
+  (let ((st (format " %s " s)))
+    (while (string-match org-emph-re st)
+      (setq st (replace-match (format " %s " (match-string 4 st)) t t st)))
+    (setq s (substring st 1 -1)))
   s)
 
 (defvar org-priority-regexp) ; defined later in the file
