@@ -20733,7 +20733,10 @@ With prefix arg UNCOMPILED, load the uncompiled versions."
 
 (defun org-in-verbatim-emphasis ()
   (save-match-data
-    (and (org-in-regexp org-emph-re 2) (member (match-string 3) '("=" "~")))))
+    (and (org-in-regexp org-emph-re 2)
+	 (>= (point) (match-beginning 3))
+	 (<= (point) (match-end 4))
+	 (member (match-string 3) '("=" "~")))))
 
 (defun org-goto-marker-or-bmk (marker &optional bookmark)
   "Go to MARKER, widen if necessary.  When marker is not live, try BOOKMARK."
