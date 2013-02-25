@@ -43,6 +43,7 @@
   (require 'org))
 (require 'gnus-util)
 (require 'org-agenda)
+(require 'org-capture)
 
 (defgroup org-contacts nil
   "Options about contacts management."
@@ -131,6 +132,11 @@ This overrides `org-email-link-description-format' if set."
   "Default file for vcard export."
   :group 'org-contacts
   :type 'file)
+
+;; Decalre external functions and variables
+(declare-function wl-summary-message-number "ext:wl-summary" ())
+(declare-function wl-address-header-extract-address "ext:wl-address")
+(declare-function wl-address-header-extract-realname "ext:wl-address")
 
 (defvar org-contacts-keymap
   (let ((map (make-sparse-keymap)))
@@ -501,7 +507,8 @@ Format is a string matching the following format specification:
   (let ((calendar-date-style 'american)
         (entry ""))
     (unless format (setq format org-contacts-birthday-format))
-    (loop for contact in (org-contacts-filter)
+    (loop with date = nil 		; FIXME: prevent a warning
+	  for contact in (org-contacts-filter)
           for anniv = (let ((anniv (cdr (assoc-string
                                          (or field org-contacts-birthday-property)
                                          (caddr contact)))))
@@ -647,7 +654,8 @@ Works from wl-summary-mode and mime-view-mode - that is while viewing email.
 Depends on Wanderlust been loaded."
   (with-current-buffer (org-capture-get :original-buffer)
     (cond
-     ((eq major-mode 'wl-summary-mode) (when wl-summary-buffer-elmo-folder
+     ((eq major-mode 'wl-summary-mode) (when (and (boundp 'wl-summary-buffer-elmo-folder)
+						  wl-summary-buffer-elmo-folder)
                                          (elmo-message-field
                                           wl-summary-buffer-elmo-folder
                                           (wl-summary-message-number)
