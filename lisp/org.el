@@ -8694,6 +8694,7 @@ buffer.  It will also recognize item context in multiline items."
   "Setup orgstruct keymap."
   (dolist (f
            '("org-meta"
+             "org-shift"
              "org-shiftmeta"
              org-shifttab
              org-backward-element
