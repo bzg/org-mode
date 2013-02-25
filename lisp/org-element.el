@@ -4255,9 +4255,9 @@ Elements are accumulated into ACC."
 
 Objects are accumulated in ACC.
 
-RESTRICTION is a list of object types which are allowed in the
-current object."
-  (let (candidates)
+RESTRICTION is a list of object successors which are allowed in
+the current object."
+  (let ((candidates 'initial))
     (save-excursion
       (goto-char beg)
       (while (and (< (point) end)
@@ -4309,44 +4309,35 @@ current object."
   "Return an alist of candidates for the next object.
 
 LIMIT bounds the search, and RESTRICTION narrows candidates to
-some object types.
+some object successors.
 
-Return value is an alist whose CAR is position and CDR the object
-type, as a symbol.
+OBJECTS is the previous candidates alist.  If it is set to
+`initial', no search has been done before, and all symbols in
+RESTRICTION should be looked after.
 
-OBJECTS is the previous candidates alist."
-  ;; Filter out any object found but not belonging to RESTRICTION.
-  (setq objects
-	(org-remove-if-not
-	 (lambda (obj)
-	   (let ((type (car obj)))
-	     (memq (or (cdr (assq type org-element-object-successor-alist))
-		       type)
-		   restriction)))
-	 objects))
-  (let (next-candidates types-to-search)
-    ;; If no previous result, search every object type in RESTRICTION.
-    ;; Otherwise, keep potential candidates (old objects located after
-    ;; point) and ask to search again those which had matched before.
-    (if (not objects) (setq types-to-search restriction)
-      (mapc (lambda (obj)
-	      (if (< (cdr obj) (point)) (push (car obj) types-to-search)
-		(push obj next-candidates)))
-	    objects))
-    ;; Call the appropriate successor function for each type to search
-    ;; and accumulate matches.
-    (mapc
-     (lambda (type)
-       (let* ((successor-fun
-	       (intern
-		(format "org-element-%s-successor"
-			(or (cdr (assq type org-element-object-successor-alist))
-			    type))))
-	      (obj (funcall successor-fun limit)))
-	 (and obj (push obj next-candidates))))
-     types-to-search)
-    ;; Return alist.
-    next-candidates))
+Return value is an alist whose CAR is the object type and CDR its
+beginning position."
+  (delq
+   nil
+   (if (eq objects 'initial)
+       ;; When searching for the first time, look for every successor
+       ;; allowed in RESTRICTION.
+       (mapcar
+	(lambda (res)
+	  (funcall (intern (format "org-element-%s-successor" res)) limit))
+	restriction)
+     ;; Focus on objects returned during last search.  Keep those
+     ;; still after point.  Search again objects before it.
+     (mapcar
+      (lambda (obj)
+	(if (>= (cdr obj) (point)) obj
+	  (let* ((type (car obj))
+		 (succ (or (cdr (assq type org-element-object-successor-alist))
+			   type)))
+	    (and succ
+		 (funcall (intern (format "org-element-%s-successor" succ))
+			  limit)))))
+      objects))))
 
 
 
@@ -4776,7 +4767,7 @@ Providing it allows for quicker computation."
 	 element
        (let ((restriction (org-element-restriction type))
 	     (parent element)
-	     candidates)
+	     (candidates 'initial))
 	 (catch 'exit
 	   (while (setq candidates (org-element--get-next-object-candidates
 				    end restriction candidates))
@@ -4810,6 +4801,7 @@ Providing it allows for quicker computation."
 		       (org-element-put-property object :parent parent)
 		       (setq parent object
 			     restriction (org-element-restriction object)
+			     candidates 'initial
 			     end cend)))))))
 	   parent))))))
 

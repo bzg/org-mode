@@ -21741,7 +21741,7 @@ meant to be filled."
 
 (declare-function message-goto-body "message" ())
 (defvar message-cite-prefix-regexp)	; From message.el
-(defvar org-element-all-objects)	; From org-element.el
+(defvar org-element-all-successors)	; From org-element.el
 (defun org-fill-paragraph (&optional justify)
   "Fill element at point, when applicable.
 
@@ -21819,7 +21819,7 @@ a footnote definition, try to fill the first paragraph within."
 		   (cons beg
 			 (org-element-map
 			     (org-element--parse-objects
-			      beg end nil org-element-all-objects)
+			      beg end nil org-element-all-successors)
 			     'line-break
 			   (lambda (lb) (org-element-property :end lb)))))))
 	       t)))
