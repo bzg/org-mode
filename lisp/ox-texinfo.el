@@ -222,6 +222,16 @@ order to reproduce the default set-up:
   :group 'org-export-texinfo
   :type 'function)
 
+;;; Node listing (menu)
+
+(defcustom org-texinfo-node-description-column 32
+  "Column at which to start the description in the node
+  listings.
+
+If a node title is greater than this length, the description will
+be placed after the end of the title."
+  :group 'org-export-texinfo
+  :type 'integer)
 
 ;;; Footnotes
 ;;
@@ -609,19 +619,20 @@ Other menu items are output as:
 With the spacing between :: and description based on the length
 of the longest menu entry."
 
-  (let* ((lengths (mapcar 'car text-menu))
-         (max-length (apply 'max lengths))
-	 output)
+  (let (output)
     (setq output
           (mapcar (lambda (name)
-                    (let* ((title (nth 1 name))
-                           (desc (nth 2 name))
-                           (length (nth 0 name)))
+                    (let* ((title   (nth 1 name))
+                           (desc    (nth 2 name))
+                           (length  (nth 0 name))
+			   (column  (max
+				     length
+				     org-texinfo-node-description-column))
+			   (spacing (- column length)
+				    ))
                       (if (> length -1)
                           (concat "* " title ":: "
-                                  (make-string
-				   (- (+ 3 max-length) length)
-				   ?\s)
+                                  (make-string spacing ?\s)
                                   (if desc
                                       (concat desc)))
                         (concat "\n" title "\n"))))
