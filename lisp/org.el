@@ -8319,14 +8319,13 @@ Optional argument WITH-CASE means sort case-sensitively."
    (t
     (org-call-with-arg 'org-sort-entries with-case))))
 
-(defun org-sort-remove-invisible (s)
-  "Remove invisible links from string S."
-  (remove-text-properties 0 (length s) org-rm-props s)
-  (while (string-match org-bracket-link-regexp s)
-    (setq s (replace-match (if (match-end 2)
-			       (match-string 3 s)
-			     (match-string 1 s)) t t s)))
-  s)
+(defsubst org-sort-remove-invisible (s)
+  "Return the visible string from string S."
+  (let (result)
+    (dotimes (c (length s))
+      (let ((st (substring s c (1+ c))))
+	(unless (get-text-property 0 'invisible st) (push st result))))
+    (mapconcat 'identity (reverse result) "")))
 
 (defvar org-priority-regexp) ; defined later in the file
 
