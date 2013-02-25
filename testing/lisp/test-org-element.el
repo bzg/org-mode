@@ -1193,7 +1193,7 @@ e^{i\\pi}+1=0
 
 (ert-deftest test-org-element/link-parser ()
   "Test `link' parser."
-  ;; 1. Radio target.
+  ;; Radio target.
   (should
    (equal
     "radio"
@@ -1201,18 +1201,18 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map
-	(let ((org-target-link-regexp "radio")) (org-element-parse-buffer))
-	'link 'identity nil t)))))
-  ;; 2. Standard link.
+	   (let ((org-target-link-regexp "radio")) (org-element-parse-buffer))
+	   'link 'identity nil t)))))
+  ;; Standard link.
   ;;
-  ;; 2.1. With description.
+  ;; ... with description.
   (should
    (equal
     '("Orgmode.org")
     (org-test-with-temp-text "[[http://orgmode.org][Orgmode.org]]"
       (org-element-contents
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.2. Without description.
+  ;; ... without description.
   (should
    (equal
     "http"
@@ -1220,7 +1220,7 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.3. With expansion.
+  ;; ... with expansion.
   (should
    (equal
     "//orgmode.org/worg"
@@ -1229,7 +1229,7 @@ e^{i\\pi}+1=0
 	(org-element-property
 	 :path
 	 (org-element-map (org-element-parse-buffer) 'link 'identity nil t))))))
-  ;; 2.4. With translation.
+  ;; ... with translation.
   (should
    (equal
     "127.0.0.1"
@@ -1238,9 +1238,9 @@ e^{i\\pi}+1=0
 	(let ((org-link-translation-function 'link-translate))
 	  (org-element-property
 	   :path
-	   (org-element-map
-	    (org-element-parse-buffer) 'link 'identity nil t)))))))
-  ;; 2.5. Id link.
+	   (org-element-map (org-element-parse-buffer) 'link
+	     'identity nil t)))))))
+  ;; ... id link.
   (should
    (equal
     "id"
@@ -1248,7 +1248,7 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.6. Custom-id link.
+  ;; ... custom-id link.
   (should
    (equal
     "custom-id"
@@ -1256,7 +1256,7 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.7 Coderef link.
+  ;; ... coderef link.
   (should
    (equal
     "coderef"
@@ -1264,7 +1264,7 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.8 Fuzzy link.
+  ;; ... fuzzy link.
   (should
    (equal
     "fuzzy"
@@ -1272,31 +1272,29 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.9 File-type link with search option.
+  ;; ... file-type link with search option.
   (should
    (equal
     '(("file" "projects.org" "*task title"))
     (org-test-with-temp-text "[[file:projects.org::*task title]]"
-      (org-element-map
-       (org-element-parse-buffer) 'link
-       (lambda (l) (list (org-element-property :type l)
-		    (org-element-property :path l)
-		    (org-element-property :search-option l)))))))
-  ;; 2.10 File-type link with application.
+      (org-element-map (org-element-parse-buffer) 'link
+	(lambda (l) (list (org-element-property :type l)
+		     (org-element-property :path l)
+		     (org-element-property :search-option l)))))))
+  ;; ... file-type link with application.
   (should
    (equal
     '(("file" "projects.org" "docview"))
     (org-test-with-temp-text "[[docview:projects.org]]"
-      (org-element-map
-       (org-element-parse-buffer) 'link
-       (lambda (l) (list (org-element-property :type l)
-		    (org-element-property :path l)
-		    (org-element-property :application l)))))))
-  ;; 3. Plain link.
+      (org-element-map (org-element-parse-buffer) 'link
+	(lambda (l) (list (org-element-property :type l)
+		     (org-element-property :path l)
+		     (org-element-property :application l)))))))
+  ;; Plain link.
   (should
    (org-test-with-temp-text "A link: http://orgmode.org"
      (org-element-map (org-element-parse-buffer) 'link 'identity)))
-  ;; 4. Angular link.
+  ;; Angular link.
   (should
    (org-test-with-temp-text "A link: <http://orgmode.org>"
      (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))
@@ -1314,10 +1312,15 @@ e^{i\\pi}+1=0
 	  (org-test-with-temp-text
 	      "#+LINK: orgmode http://www.orgmode.org/\n* H [[orgmode:#docs]]"
 	    (progn (org-mode-restart)
-		   (org-element-map
-		    (org-element-parse-buffer) 'link
-		    (lambda (link) (org-element-property :type link))
-		    nil t nil t))))))
+		   (org-element-map (org-element-parse-buffer) 'link
+		     (lambda (link) (org-element-property :type link))
+		     nil t nil t)))))
+  ;; Plain links are allowed as description of regular links.
+  (should
+   (equal "file"
+	  (org-test-with-temp-text "[[http://orgmode.org][file:unicorn.jpg]]"
+	    (search-forward "file:")
+	    (org-element-property :type (org-element-context))))))
 
 
 ;;;; Macro

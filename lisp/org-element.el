@@ -186,7 +186,7 @@ is not sufficient to know if point is at a paragraph ending.  See
 
 (defconst org-element-all-successors
   '(export-snippet footnote-reference inline-babel-call inline-src-block
-		   latex-or-entity line-break link macro radio-target
+		   latex-or-entity line-break link macro plain-link radio-target
 		   statistics-cookie sub/superscript table-cell target
 		   text-markup timestamp)
   "Complete list of successors.")
@@ -198,7 +198,6 @@ is not sufficient to know if point is at a paragraph ending.  See
     (verbatim . text-markup) (entity . latex-or-entity)
     (latex-fragment . latex-or-entity))
   "Alist of translations between object type and successor name.
-
 Sharing the same successor comes handy when, for example, the
 regexp matching one object can also match the other object.")
 
@@ -315,8 +314,8 @@ a secondary string.")
 	  link macro radio-target sub/superscript target text-markup)
     (keyword inline-babel-call inline-src-block latex-or-entity link macro
 	     sub/superscript text-markup timestamp)
-    (link export-snippet inline-babel-call inline-src-block latex-or-entity link
-	  sub/superscript text-markup)
+    (link export-snippet inline-babel-call inline-src-block latex-or-entity
+	  plain-link sub/superscript text-markup)
     (paragraph export-snippet footnote-reference inline-babel-call
 	       inline-src-block latex-or-entity line-break link macro
 	       radio-target statistics-cookie sub/superscript target text-markup
@@ -3100,6 +3099,16 @@ beginning position."
 	     (concat org-any-link-re "\\|" org-target-link-regexp))))
       (when (re-search-forward link-regexp limit t)
 	(cons 'link (match-beginning 0))))))
+
+(defun org-element-plain-link-successor (limit)
+  "Search for the next plain link object.
+
+LIMIT bounds the search.
+
+Return value is a cons cell whose CAR is `link' and CDR is
+beginning position."
+  (and (save-excursion (re-search-forward org-plain-link-re limit t))
+       (cons 'link (match-beginning 0))))
 
 
 ;;;; Macro
