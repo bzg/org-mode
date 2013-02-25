@@ -906,7 +906,7 @@ holding contextual information."
 	 (numberedp (org-export-numbered-headline-p headline info))
 	 (class-sectionning (assoc class org-texinfo-classes))
 	 ;; Find the index type, if any
-	 (index (org-element-property :index headline))
+	 (index (org-element-property :INDEX headline))
 	 ;; Retrieve headline text
 	 (text (org-texinfo--sanitize-headline
 		(org-element-property :title headline) info))
