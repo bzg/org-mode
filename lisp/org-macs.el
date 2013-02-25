@@ -108,9 +108,8 @@ Otherwise return nil."
 	 (org-move-to-column ,col)))))
 (def-edebug-spec org-preserve-lc (body))
 
-;; Copied from bookmark.el
-;; Use `org-unmodified' to ignore real modifications, otherwise
-;; `with-silent-modifications' is enough to ignore cosmetic ones
+;; Use `org-with-silent-modifications' to ignore cosmetic changes and
+;; `org-unmodified' to ignore real text modifications
 (defmacro org-unmodified (&rest body)
   "Run BODY while preserving the buffer's `buffer-modified-p' state."
   (org-with-gensyms (was-modified)
