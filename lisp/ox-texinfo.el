@@ -128,8 +128,7 @@
    (:subauthor "SUBAUTHOR" nil nil newline)
    (:texinfo-dircat "TEXINFO_DIR_CATEGORY" nil nil t)
    (:texinfo-dirtitle "TEXINFO_DIR_TITLE" nil nil t)
-   (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)
-   (:texinfo-menu-title "TEXINFO_MENU_TITLE" nil nil newline)))
+   (:texinfo-dirdesc "TEXINFO_DIR_DESC" nil nil t)))
 
 
 
@@ -443,7 +442,7 @@ See `org-texinfo-text-markup-alist' for details."
 (defun org-texinfo--get-node (headline info)
   "Return node entry associated to HEADLINE.
 INFO is a plist used as a communication channel."
-  (let ((menu-title (org-element-property :TEXINFO_MENU_TITLE headline)))
+  (let ((menu-title (org-export-get-optional-title headline info)))
     (org-texinfo--sanitize-menu
      (replace-regexp-in-string
       "%" "%%"
@@ -577,7 +576,7 @@ menu using `org-texinfo--format-menu'."
   (loop for headline in items collect
 	(let* ((menu-title (org-texinfo--sanitize-menu
 			    (org-export-data
-			     (org-element-property :TEXINFO_MENU_TITLE headline)
+			     (org-export-get-optional-title headline info)
 			     info)))
 	       (title (org-texinfo--sanitize-menu
 		       (org-texinfo--sanitize-headline
