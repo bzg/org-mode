@@ -31,7 +31,7 @@ SERVERMK ?= true # or just any value at all, really
 
 #----------------------------------------------------------------------
 
-ORGFULL   = README COPYING lisp/ \
+ORGFULL   = README COPYING AUTHORS lisp/ \
 		Makefile request-assign-future.txt \
 		mk/default.mk mk/targets.mk mk/version.mk \
 		mk/org-fixup.el \
