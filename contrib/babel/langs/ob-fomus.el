@@ -1,13 +1,12 @@
-;;; ob-fomus.el --- org-babel functions for fomus evaluation
+;;; ob-fomus.el --- Org-babel functions for fomus evaluation
 
 ;; Copyright (C) 2011-2013 Torsten Anders
 
 ;; Author: Torsten Anders
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
-;; Version: 
 
-;;; License:
+;; This file is not part of GNU Emacs.
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

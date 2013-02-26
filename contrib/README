@@ -10,22 +10,21 @@ Please put your contribution in one of these directories:
 LISP (emacs-lisp code)
 ======================
 htmlize.el               --- Convert buffer text and decorations to HTML
-org2rem.el               --- Convert org appointments into reminders
 org-annotate-file.el     --- Annotate a file with org syntax
 org-bibtex-extras.el     --- Extras for working with org-bibtex entries
 org-bookmark.el          --- Links to bookmarks
+org-bullets.el           --- Show bullets in org-mode as UTF-8 characters
 org-checklist.el         --- org functions for checklist handling
 org-choose.el            --- Use TODO keywords to mark decision states
 org-collector.el         --- Collect properties into tables
-org-contacts             --- Contacts management
+org-contacts.el          --- Contacts management
 org-contribdir.el        --- Dummy file to mark the org contrib Lisp directory
 org-depend.el            --- TODO dependencies for Org-mode
 org-drill.el             --- Self-testing with org-learn
 org-element.el           --- Parser and applications for Org syntax
 org-elisp-symbol.el      --- Org links to emacs-lisp symbols
-org-eval.el              --- The <lisp> tag, adapted from Muse
 org-eval-light.el        --- Evaluate in-buffer code on demand
-org-exp-bibtex.el        --- Export citations to LaTeX and HTML
+org-eval.el              --- The <lisp> tag, adapted from Muse
 org-expiry.el 	         --- Expiry mechanism for Org entries
 org-export-generic.el    --- Export framework for configurable backends
 org-git-link.el          --- Provide org links to specific file version
@@ -47,11 +46,18 @@ org-screen.el            --- Visit screen sessions through Org-mode links
 org-secretary.el         --- Team management with org-mode
 org-static-mathjax.el    --- Muse-like tags in Org-mode
 org-sudoku.el            --- Create and solve SUDOKU puzzles in Org tables
-orgtbl-sqlinsert.el      --- Convert Org-mode tables to SQL insertions
 org-toc.el 	         --- Table of contents for Org-mode buffer
 org-track.el             --- Keep up with Org development
 org-velocity.el          --- something like Notational Velocity for Org
 org-wikinodes.el         --- CamelCase wiki-like links for Org
+org2rem.el               --- Convert org appointments into reminders
+orgtbl-sqlinsert.el      --- Convert Org-mode tables to SQL insertions
+ox-confluence.el         --- Confluence Wiki Back-End for Org Export Engine
+ox-deck.el               --- deck.js Presentation Back-End for Org Export Engine
+ox-groff.el              --- Groff Back-End for Org Export Engine
+ox-koma-letter.el        --- KOMA Scrlttr2 Back-End for Org Export Engine
+ox-s5.el                 --- S5 Presentation Back-End for Org Export Engine
+ox-taskjuggler.el        --- TaskJuggler Back-End for Org Export Engine
 
 
 BABEL
@@ -59,11 +65,9 @@ BABEL
 library-of-babel.org     --- Documentation for the library of babel
 langs/ob-fomus.el        --- Org-babel functions for fomus evaluation
 langs/ob-oz.el           --- Org-babel functions for Oz evaluation
-
-
-ODT (OpenDocumentText)
-======================
-README.org               --- Legacy documentation for Org ODT exporter
+langs/ob-mathomatic.el   --- Org-babel functions for mathomatic evaluation
+langs/ob-tcl.el          --- Org-babel functions for tcl evaluation
+langs/ob-eukleides.el    --- Org-babel functions for eukleides evaluation
 
 
 SCRIPTS (shell, bash, etc.)

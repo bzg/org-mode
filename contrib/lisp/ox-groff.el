@@ -1,11 +1,10 @@
-;; ox-groff.el --- Groff Back-End for Org Export Engine
+;;; ox-groff.el --- Groff Back-End for Org Export Engine
 
 ;; Copyright (C) 2011-2013  Free Software Foundation, Inc.
 
 ;; Author: Nicolas Goaziou <n.goaziou at gmail dot com>
 ;; Author: Luis R Anaya <papoanaya aroba hot mail punto com>
 ;; Keywords: outlines, hypermedia, calendar, wp
-;;
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

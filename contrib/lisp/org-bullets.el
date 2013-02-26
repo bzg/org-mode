@@ -1,7 +1,8 @@
 ;;; org-bullets.el --- Show bullets in org-mode as UTF-8 characters
-;;; Version: 0.1
-;;; Author: sabof
-;;; URL: https://github.com/sabof/org-bullets
+;;
+;; Version: 0.1
+;; Author: sabof
+;; URL: https://github.com/sabof/org-bullets
 
 ;; This file is NOT part of GNU Emacs.
 ;;

@@ -1,4 +1,4 @@
-;;; ob-mathomatic.el --- org-babel functions for mathomatic evaluation
+;;; ob-mathomatic.el --- Org-babel functions for mathomatic evaluation
 
 ;; Copyright (C) 2009-2012  Free Software Foundation, Inc.
 
@@ -9,7 +9,7 @@
 ;; Keywords: literate programming, reproducible research, mathomatic
 ;; Homepage: http://orgmode.org
 
-;; This file is part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by

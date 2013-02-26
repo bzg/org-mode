@@ -1,4 +1,4 @@
-;;; ob-eukleides.el --- org-babel functions for eukleides evaluation
+;;; ob-eukleides.el --- Org-babel functions for eukleides evaluation
 
 ;; Copyright (C) 2010-2012  Free Software Foundation, Inc.
 
@@ -6,7 +6,7 @@
 ;; Keywords: literate programming, reproducible research
 ;; Homepage: http://orgmode.org
 
-;; This file is part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
