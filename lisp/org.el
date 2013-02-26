@@ -5209,9 +5209,9 @@ on a string that terminates immediately after the date.")
 				 org-ts-regexp "\\)?")
   "Regular expression matching a time stamp or time stamp range.")
 (defconst org-tsr-regexp-both
-  (concat "[^][]" ;; Don't activate dates in links
+  (concat "[^][]\\(" ;; Don't activate dates in links
 	  org-ts-regexp-both "\\(--?-?"
-	  org-ts-regexp-both "\\)?")
+	  org-ts-regexp-both "\\)?\\)")
   "Regular expression matching a time stamp or time stamp range.
 The time stamps may be either active or inactive.")
 
@@ -5517,15 +5517,15 @@ by a #."
   "Run through the buffer and add overlays to dates."
   (if (re-search-forward org-tsr-regexp-both limit t)
       (progn
-	(org-remove-flyspell-overlays-in (1+ (match-beginning 0)) (match-end 0))
-	(add-text-properties (1+ (match-beginning 0)) (match-end 0)
+	(org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
+	(add-text-properties (match-beginning 1) (match-end 1)
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map))
-	(org-rear-nonsticky-at (match-end 0))
+	(org-rear-nonsticky-at (match-end 1))
 	(when org-display-custom-times
-	  (if (match-end 3)
-	      (org-display-custom-time (match-beginning 3) (match-end 3)))
-	  (org-display-custom-time (match-beginning 1) (match-end 1)))
+	  (if (match-end 4)
+	      (org-display-custom-time (match-beginning 4) (match-end 4)))
+	  (org-display-custom-time (match-beginning 2) (match-end 2)))
 	t)))
 
 (defvar org-target-link-regexp nil
@@ -5771,7 +5771,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   (if (memq 'plain lk) '(org-activate-plain-links))
 	   (if (memq 'bracket lk) '(org-activate-bracket-links (0 'org-link t)))
 	   (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
-	   (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
+	   (if (memq 'date lk) '(org-activate-dates (1 'org-date t)))
 	   (if (memq 'footnote lk) '(org-activate-footnote-links))
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
