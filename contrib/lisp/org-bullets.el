@@ -1,8 +1,7 @@
 ;;; org-bullets.el --- Show bullets in org-mode as UTF-8 characters
-;;
-;; Version: 0.1
-;; Author: sabof
-;; URL: https://github.com/sabof/org-bullets
+;;; Version: 0.2.2
+;;; Author: sabof
+;;; URL: https://github.com/sabof/org-bullets
 
 ;; This file is NOT part of GNU Emacs.
 ;;
@@ -31,7 +30,7 @@
 (eval-when-compile (require 'cl))
 
 (defgroup org-bullets nil
-  "Use different background for even and odd lines."
+  "Display bullets as UTF-8 characters"
   :group 'org-appearance)
 
 ;; A nice collection of unicode bullets:
@@ -58,16 +57,24 @@ It can contain any number of symbols, which will be repeated."
   :group 'org-bullets
   :type 'symbol)
 
-(defun org-bullets-level-char (level)
-  (nth (mod (1- level)
-            (length org-bullets-bullet-list))
-       org-bullets-bullet-list))
+(defvar org-bullets-bullet-map
+  '(keymap
+    (mouse-1 . org-cycle)
+    (mouse-2
+     . (lambda (e)
+         (interactive "e")
+         (mouse-set-point e)
+         (org-cycle))))
+  "Mouse events for bullets.
+Should this be undesirable, one can remove them with
 
-(defun org-bullets-ptp (iter &rest args)
-  (apply 'put-text-property
-         (+ iter (match-beginning 0))
-         (+ iter (match-beginning 0) 1)
-         args))
+\(setcdr org-bullets-bullet-map nil\)")
+
+(defun org-bullets-level-char (level)
+  (string-to-char
+   (nth (mod (1- level)
+             (length org-bullets-bullet-list))
+        org-bullets-bullet-list)))
 
 ;;;###autoload
 (define-minor-mode org-bullets-mode
@@ -75,35 +82,24 @@ It can contain any number of symbols, which will be repeated."
   nil nil nil
   (let* (( keyword
            `(("^\\*+ "
-              (0 (let (( offset 0)
-                       ( level
-                         (- (match-end 0)
-                            (match-beginning 0) 1)))
-                   (dotimes (iter level)
-                     (if (= (1- level) iter)
-                         (progn
-                           (compose-region
-                            (+ iter (match-beginning 0))
-                            (+ iter (match-beginning 0) 1)
-                            (org-bullets-level-char level))
-                           (when (facep org-bullets-face-name)
-                             (org-bullets-ptp
-                              iter 'face org-bullets-face-name)))
-                         (org-bullets-ptp
-                          iter 'face (list :foreground
-                                           (face-attribute
-                                            'default :background))))
-                     (put-text-property
-                      (match-beginning 0)
-                      (match-end 0)
-                      'keymap
-                      '(keymap
-                        (mouse-1 . org-cycle)
-                        (mouse-2
-                         . (lambda (e)
-                             (interactive "e")
-                             (mouse-set-point e)
-                             (org-cycle))))))
+              (0 (let (( level (- (match-end 0) (match-beginning 0) 1)))
+                   (compose-region (- (match-end 0) 2)
+                                   (- (match-end 0) 1)
+                                   (org-bullets-level-char level))
+                   (when (facep org-bullets-face-name)
+                     (put-text-property (- (match-end 0) 2)
+                                        (- (match-end 0) 1)
+                                        'face
+                                        org-bullets-face-name))
+                   (put-text-property (match-beginning 0)
+                                      (- (match-end 0) 2)
+                                      'face (list :foreground
+                                                  (face-attribute
+                                                   'default :background)))
+                   (put-text-property (match-beginning 0)
+                                      (match-end 0)
+                                      'keymap
+                                      org-bullets-bullet-map)
                    nil))))))
     (if org-bullets-mode
         (progn (font-lock-add-keywords nil keyword)
