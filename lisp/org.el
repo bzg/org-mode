@@ -8623,6 +8623,8 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
   "Regexp that matches the custom prefix of Org headlines in
 orgstruct(++)-mode."
   :group 'org
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 ;;;###autoload(put 'orgstruct-heading-prefix-regexp 'safe-local-variable 'stringp)
 
