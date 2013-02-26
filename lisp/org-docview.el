@@ -49,7 +49,7 @@
 (declare-function image-mode-window-get "ext:image-mode"
 		  (prop &optional winprops))
 
-(org-autoload 'doc-view-goto-page "doc-view")
+(org-autoload "doc-view" '(doc-view-goto-page))
 
 (org-add-link-type "docview" 'org-docview-open 'org-docview-export)
 (add-hook 'org-store-link-functions 'org-docview-store-link)
