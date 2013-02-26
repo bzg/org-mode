@@ -8761,36 +8761,41 @@ should be checked in for a command to execute outside of tables."
         (setq nname (format "%s-%d" name (setq i (1+ i)))))
       (setq name (intern nname)))
     (eval
-     `(defun ,name (arg)
-        ,(concat "In Structure, run `" (symbol-name fun) "'.\n"
-                 "Outside of structure, run the binding of `"
-                 (key-description key) "'.")
-        (interactive "p")
-        (unless
-            (let* ((org-heading-regexp
-		    (concat "^"
-			    orgstruct-heading-prefix-regexp
-			    "\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[ 	]*$"))
-		   (org-outline-regexp
-		    (concat orgstruct-heading-prefix-regexp "\\*+ "))
-		   (org-outline-regexp-bol
-		    (concat "^" org-outline-regexp))
-		   (outline-regexp org-outline-regexp)
-		   (outline-heading-end-regexp "\n")
-		   (outline-level 'outline-level)
-		   (outline-heading-alist))
-              (when (org-context-p 'headline 'item
-                                   ,(when (memq fun '(org-insert-heading))
-                                      '(when orgstruct-is-++
-                                         'item-body)))
-                (org-run-like-in-org-mode ',fun)
-                t))
-          (let* ((orgstruct-mode)
-		 (binding (key-binding ,key)))
-            (if (keymapp binding)
-                (set-temporary-overlay-map binding)
-              (call-interactively
-               (or binding 'orgstruct-error)))))))
+     (let ((bindings '((org-heading-regexp
+			(concat "^"
+				orgstruct-heading-prefix-regexp
+				"\\(\\*+\\)\\(?: +\\(.*?\\)\\)?[		]*$"))
+		       (org-outline-regexp
+			(concat orgstruct-heading-prefix-regexp "\\*+ "))
+		       (org-outline-regexp-bol
+			(concat "^" org-outline-regexp))
+		       (outline-regexp org-outline-regexp)
+		       (outline-heading-end-regexp "\n")
+		       (outline-level 'outline-level)
+		       (outline-heading-alist))))
+       `(defun ,name (arg)
+	  ,(concat "In Structure, run `" (symbol-name fun) "'.\n"
+		   "Outside of structure, run the binding of `"
+		   (key-description key) "'.")
+	  (interactive "p")
+	  (unless
+	      (let* ,bindings
+		(when (org-context-p 'headline 'item
+				     ,(when (memq fun '(org-insert-heading))
+					'(when orgstruct-is-++
+					   'item-body)))
+		  (org-run-like-in-org-mode
+		   (lambda ()
+		     (interactive)
+		     (let* ,bindings
+		       (call-interactively ',fun))))
+		  t))
+	    (let* ((orgstruct-mode)
+		   (binding (key-binding ,key)))
+	      (if (keymapp binding)
+		  (set-temporary-overlay-map binding)
+		(call-interactively
+		 (or binding 'orgstruct-error))))))))
     name))
 
 (defun org-contextualize-keys (alist contexts)
