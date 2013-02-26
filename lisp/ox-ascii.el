@@ -566,7 +566,7 @@ possible.  It doesn't apply to `inlinetask' elements."
 	 (text
 	  (org-trim
 	   (org-export-data
-	    (if (and toc headlinep) (org-export-get-optional-title element info)
+	    (if (and toc headlinep) (org-export-get-alt-title element info)
 	      (org-element-property :title element))
 	    info)))
 	 (todo

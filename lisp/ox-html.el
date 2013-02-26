@@ -1605,7 +1605,7 @@ INFO is a plist used as a communication channel."
 	    ;; Body.
 	    (concat section-number
 		    (org-export-data
-		     (org-export-get-optional-title headline info) info)
+		     (org-export-get-alt-title headline info) info)
 		    (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags)))))
 
 (defun org-html-list-of-listings (info)

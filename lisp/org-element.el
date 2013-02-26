@@ -728,7 +728,7 @@ CONTENTS is the contents of the footnote-definition."
   "Parse a headline.
 
 Return a list whose CAR is `headline' and CDR is a plist
-containing `:raw-value', `:title', `:optional-title', `:begin',
+containing `:raw-value', `:title', `:alt-title', `:begin',
 `:end', `:pre-blank', `:hiddenp', `:contents-begin' and
 `:contents-end', `:level', `:priority', `:tags',
 `:todo-keyword',`:todo-type', `:scheduled', `:deadline',
@@ -847,13 +847,13 @@ Assume point is at beginning of the headline."
 			  :quotedp quotedp)
 		    time-props
 		    standard-props))))
-	(let ((opt-title (org-element-property :OPTIONAL_TITLE headline)))
-	  (when opt-title
+	(let ((alt-title (org-element-property :ALT_TITLE headline)))
+	  (when alt-title
 	    (org-element-put-property
-	     headline :optional-title
-	     (if raw-secondary-p opt-title
+	     headline :alt-title
+	     (if raw-secondary-p alt-title
 	       (org-element-parse-secondary-string
-		opt-title (org-element-restriction 'headline) headline)))))
+		alt-title (org-element-restriction 'headline) headline)))))
 	(org-element-put-property
 	 headline :title
 	 (if raw-secondary-p raw-value

@@ -9187,11 +9187,11 @@ The same @code{TOC} keyword can also generate a list of all tables
 #+TOC: tables             (build a list of tables)
 @end example
 
-@cindex property, OPTIONAL_TITLE
+@cindex property, ALT_TITLE
 The headline's title usually determines its corresponding entry in a table of
 contents.  However, it is possible to specifify an alternative title by
-setting @code{OPTIONAL_TITLE} property accordingly.  It will then be used
-when building the table.
+setting @code{ALT_TITLE} property accordingly.  It will then be used when
+building the table.
 
 @node Lists, Paragraphs, Table of contents, Structural markup elements
 @subheading Lists

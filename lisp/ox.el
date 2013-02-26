@@ -3419,6 +3419,10 @@ INFO is the plist used as a communication channel."
 ;; `org-export-get-tags', `org-export-get-category' and
 ;; `org-export-get-node-property' extract useful information from an
 ;; headline or a parent headline.  They all handle inheritance.
+;;
+;; `org-export-get-alt-title' tries to retrieve an alternative title,
+;; as a secondary string, suitable for table of contents.  It falls
+;; back onto default title.
 
 (defun org-export-get-relative-level (headline info)
   "Return HEADLINE relative level within current parsed tree.
@@ -3552,11 +3556,11 @@ fail, the fall-back value is \"???\"."
 	(and file (file-name-sans-extension (file-name-nondirectory file))))
       "???"))
 
-(defun org-export-get-optional-title (headline info)
-  "Return optional title for HEADLINE, as a secondary string.
+(defun org-export-get-alt-title (headline info)
+  "Return alternative title for HEADLINE, as a secondary string.
 INFO is a plist used as a communication channel.  If no optional
 title is defined, fall-back to the regular title."
-  (or (org-element-property :optional-title headline)
+  (or (org-element-property :alt-title headline)
       (org-element-property :title headline)))
 
 (defun org-export-first-sibling-p (headline info)
