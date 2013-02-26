@@ -2774,11 +2774,15 @@ Return PDF file's name."
      (org-latex-export-to-latex
       nil subtreep visible-only body-only ext-plist))))
 
-(defun org-latex-compile (texfile)
+(defun org-latex-compile (texfile &optional snippet)
   "Compile a TeX file.
 
 TEXFILE is the name of the file being compiled.  Processing is
 done through the command specified in `org-latex-pdf-process'.
+
+When optional argument SNIPPET is non-nil, TEXFILE is a temporary
+file used to preview a LaTeX snippet.  In this case, do not
+create a log buffer and do not bother removing log files.
 
 Return PDF file name or an error if it couldn't be produced."
   (let* ((base-name (file-name-sans-extension (file-name-nondirectory texfile)))
@@ -2788,7 +2792,7 @@ Return PDF file name or an error if it couldn't be produced."
 	 ;; not to whatever value the current buffer may have.
 	 (default-directory (file-name-directory full-name))
 	 errors)
-    (message (format "Processing LaTeX file %s ..." texfile))
+    (unless snippet (message (format "Processing LaTeX file %s ..." texfile)))
     (save-window-excursion
       (cond
        ;; A function is provided: Apply it.
@@ -2798,7 +2802,8 @@ Return PDF file name or an error if it couldn't be produced."
        ;; values in each command before applying it.  Output is
        ;; redirected to "*Org PDF LaTeX Output*" buffer.
        ((consp org-latex-pdf-process)
-	(let ((outbuf (get-buffer-create "*Org PDF LaTeX Output*")))
+	(let ((outbuf (and (not snippet)
+			   (get-buffer-create "*Org PDF LaTeX Output*"))))
 	  (mapc
 	   (lambda (command)
 	     (shell-command
@@ -2811,7 +2816,7 @@ Return PDF file name or an error if it couldn't be produced."
 	      outbuf))
 	   org-latex-pdf-process)
 	  ;; Collect standard errors from output buffer.
-	  (setq errors (org-latex--collect-errors outbuf))))
+	  (setq errors (and (not snippet) (org-latex--collect-errors outbuf)))))
        (t (error "No valid command to process to PDF")))
       (let ((pdffile (concat out-dir base-name ".pdf")))
 	;; Check for process failure.  Provide collected errors if
@@ -2821,7 +2826,7 @@ Return PDF file name or an error if it couldn't be produced."
 			   (when errors (concat ": " errors))))
 	  ;; Else remove log files, when specified, and signal end of
 	  ;; process to user, along with any error encountered.
-	  (when org-latex-remove-logfiles
+	  (when (and (not snippet) org-latex-remove-logfiles)
 	    (dolist (ext org-latex-logfiles-extensions)
 	      (let ((file (concat out-dir base-name "." ext)))
 		(when (file-exists-p file) (delete-file file)))))

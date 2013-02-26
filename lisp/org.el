@@ -18167,7 +18167,7 @@ share a good deal of logic."
 		  (delete-file (concat texfilebase e))))
 	pngfile))))
 
-(defvar org-latex-pdf-process)		; From ox-latex.el
+(declare-function org-latex-compile "org-latex" (texfile &optional snippet))
 (defun org-create-formula-image-with-imagemagick (string tofile options buffer)
   "This calls convert, which is included into imagemagick."
   (require 'ox-latex)
@@ -18204,39 +18204,7 @@ share a good deal of logic."
 		string
 		"\n}\n"
 		"\n\\end{document}\n")))
-    (let ((dir default-directory) cmd cmds latex-frags-cmds)
-      (condition-case nil
-	  (progn
-	    (cd tmpdir)
-	    (setq cmds org-latex-pdf-process)
-	    (while cmds
-	      (setq latex-frags-cmds (pop cmds))
-	      (if (listp latex-frags-cmds)
-		  (setq cmds nil)
-		(setq latex-frags-cmds (list (car org-latex-pdf-process)))))
-	    (while latex-frags-cmds
-	      (setq cmd (pop latex-frags-cmds))
-	      (while (string-match "%b" cmd)
-		(setq cmd (replace-match
-			   (save-match-data
-			     (shell-quote-argument texfile))
-			   t t cmd)))
-	      (while (string-match "%f" cmd)
-		(setq cmd (replace-match
-			   (save-match-data
-			     (shell-quote-argument
-			      (file-name-nondirectory texfile)))
-			   t t cmd)))
-	      (while (string-match "%o" cmd)
-		(setq cmd (replace-match
-			   (save-match-data
-			     (shell-quote-argument
-			      (file-name-directory texfile)))
-			   t t cmd)))
-	      (setq cmd (split-string cmd))
-	      (eval (append (list 'call-process (pop cmd) nil nil nil) cmd))))
-	(error nil))
-      (cd dir))
+    (org-latex-compile texfile t)
     (if (not (file-exists-p pdffile))
 	(progn (message "Failed to create pdf file from %s" texfile) nil)
       (condition-case nil
