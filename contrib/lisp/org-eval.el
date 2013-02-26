@@ -88,8 +88,7 @@
        (:foreground "yellow"))))
   "Face for command output that is included into an Org-mode buffer."
   :group 'org-eval
-  :group 'org-faces
-  :version "22.1")
+  :group 'org-faces)
 
 (defvar org-eval-regexp nil)
 

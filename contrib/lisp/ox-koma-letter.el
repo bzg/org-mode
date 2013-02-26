@@ -73,8 +73,7 @@
 (defgroup org-export-koma-letter nil
   "Options for exporting to KOMA scrlttr2 class in LaTeX export."
   :tag "Org Koma-Letter"
-  :group 'org-export
-  :version "24.2")
+  :group 'org-export)
 
 (defcustom org-koma-letter-class-option-file "NF"
   "Letter Class Option File."

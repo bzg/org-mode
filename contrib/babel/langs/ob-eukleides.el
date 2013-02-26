@@ -44,9 +44,7 @@
 (defcustom org-eukleides-path nil
   "Path to the eukleides executable file."
   :group 'org-babel
-  :version "24.1"
   :type 'string)
-
 
 (defcustom org-eukleides-eps-to-raster nil
   "Command used to convert EPS to raster. Nil for no conversion."
@@ -56,7 +54,6 @@
          (const :tag "sam2p" "a=%s;b=%s;sam2p ${a} ${b}" )
          (const :tag "NetPNM"  "a=%s;b=%s;pstopnm -stdout ${a} | pnmtopng  > ${b}" )
          (const :tag "None" nil)))
-
 
 (defun org-babel-execute:eukleides (body params)
   "Execute a block of eukleides code with org-babel.
@@ -71,17 +68,17 @@ This function is called by `org-babel-execute-src-block'."
 		  (error "`org-eukleides-path' is not set")
 		(concat (expand-file-name org-eukleides-path)
                 " -b --output="
-                (org-babel-process-file-name 
-                 (concat 
+                (org-babel-process-file-name
+                 (concat
                   (file-name-sans-extension out-file) ".eps"))
                 " "
                 (org-babel-process-file-name in-file)))))
     (unless (file-exists-p org-eukleides-path)
       (error "Could not find eukleides at %s" org-eukleides-path))
-    
+
     (if (string= (file-name-extension out-file) "png")
         (if org-eukleides-eps-to-raster
-            (shell-command (format org-eukleides-eps-to-raster  
+            (shell-command (format org-eukleides-eps-to-raster
                                     (concat (file-name-sans-extension out-file) ".eps")
                                     (concat (file-name-sans-extension out-file) ".png")))
           (error "Conversion to PNG not supported. use a file with an EPS name")))

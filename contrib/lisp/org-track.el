@@ -69,7 +69,6 @@ unpack it into that directory (i.e. a subdirectory
 sources.
 All you'll have to do is call `M-x org-track-update' from
 time to time."
-  :version "22.1"
   :group 'org)
 
 (defcustom org-track-directory (concat user-emacs-directory "org/lisp")

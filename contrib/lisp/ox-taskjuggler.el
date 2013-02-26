@@ -159,7 +159,6 @@
 (defcustom org-taskjuggler-extension ".tjp"
   "Extension of TaskJuggler files."
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type 'string)
 
 (defcustom org-taskjuggler-project-tag "taskjuggler_project"
@@ -167,7 +166,6 @@
 This tag is used to find the tree containing all the tasks for
 the project."
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type 'string)
 
 (defcustom org-taskjuggler-resource-tag "taskjuggler_resource"
@@ -175,7 +173,6 @@ the project."
 This tag is used to find the tree containing all the resources
 for the project."
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type 'string)
 
 (defcustom org-taskjuggler-report-tag "taskjuggler_report"
@@ -183,13 +180,11 @@ for the project."
 This tag is used to find the tree containing all the reports for
 the project."
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type 'string)
 
 (defcustom org-taskjuggler-target-version 2.4
   "Which version of TaskJuggler the exporter is targeting."
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type 'number)
 
 (defcustom org-taskjuggler-default-project-version "1.0"
@@ -197,7 +192,6 @@ the project."
 This value can also be set with the \":VERSION:\" property
 associated to the headline defining the project."
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type 'string)
 
 (defcustom org-taskjuggler-default-project-duration 280
@@ -206,7 +200,6 @@ The value will be used if no start and end date have been defined
 in the root node of the task tree, i.e. the tree that has been
 marked with `org-taskjuggler-project-tag'"
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type 'integer)
 
 (defcustom org-taskjuggler-default-reports
@@ -226,7 +219,6 @@ marked with `org-taskjuggler-project-tag'"
 }")
   "Default reports for the project."
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type '(repeat (string :tag "Report")))
 
 (defcustom org-taskjuggler-default-global-header ""
@@ -234,7 +226,6 @@ marked with `org-taskjuggler-project-tag'"
 This goes before project declaration, and might be useful for
 early macros."
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type '(string :tag "Preamble"))
 
 (defcustom org-taskjuggler-default-global-properties
@@ -252,7 +243,6 @@ could for example include another TaskJuggler file.
 The global properties are inserted after the project declaration
 but before any resource and task declarations."
   :group 'org-export-taskjuggler
-  :version "24.2"
   :type '(string :tag "Preamble"))
 
 (defcustom org-taskjuggler-valid-task-attributes
