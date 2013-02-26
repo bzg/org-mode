@@ -74,6 +74,7 @@
   :translate-alist
   ((headline . org-s5-headline)
    (plain-list . org-s5-plain-list)
+   (inner-template . org-s5-inner-template)
    (template . org-s5-template)))
 
 (defgroup org-export-s5 nil
@@ -150,20 +151,37 @@ Note that the wrapper div must include the class \"slide\"."
   :type 'string)
 
 
+(defun org-s5--format-toc-headline (headline info)
+  "Return an appropriate table of contents entry for HEADLINE.
+Note that (currently) the S5 exporter does not support deep links,
+so the table of contents is not \"active\".
+INFO is a plist used as a communication channel."
+  (let* ((headline-number (org-export-get-headline-number headline info))
+	 (section-number
+	  (and (not (org-export-low-level-p headline info))
+	       (org-export-numbered-headline-p headline info)
+	       (concat (mapconcat 'number-to-string headline-number ".") ". ")))
+	 (tags (and (eq (plist-get info :with-tags) t)
+		    (org-export-get-tags headline info))))
+    (concat section-number
+	    (org-export-data
+	     (org-export-get-alt-title headline info) info)
+	    (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags))))
+
 (defun org-s5-toc (depth info)
   (let* ((headlines (org-export-collect-headlines info depth))
 	 (toc-entries
-	  (loop for headline in headlines collect
-		(list (org-html-format-headline--wrap
-		       headline info 'org-html-format-toc-headline)
-		      (org-export-get-relative-level headline info)))))
+	  (mapcar (lambda (headline)
+		    (cons (org-s5--format-toc-headline headline info)
+			  (org-export-get-relative-level headline info)))
+		  (org-export-collect-headlines info depth))))
     (when toc-entries
       (concat
        "<div id=\"table-of-contents\" class=\"slide\">\n"
        (format "<h1>%s</h1>\n"
 	       (org-html--translate "Table of Contents" info))
        "<div id=\"text-table-of-contents\">"
-       (org-html-toc-text toc-entries)
+       (org-html--toc-text toc-entries)
        "</div>\n"
        "</div>\n"))))
 
@@ -240,6 +258,12 @@ which will make the list into a \"build\"."
    ("date"   . ,(nth 0 (plist-get info :date)))
    ("file"   . ,(plist-get info :input-file))))
 
+(defun org-s5-inner-template (contents info)
+  "Return body of document string after HTML conversion.
+CONTENTS is the transcoded contents string.  INFO is a plist
+holding export options."
+  (concat contents "\n"))
+
 (defun org-s5-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
@@ -270,6 +294,7 @@ holding export options."
     ;; title page
     (org-fill-template
      org-s5-title-page-template (org-s5-template-alist info))
+    ;; table of contents.
     (let ((depth (plist-get info :with-toc)))
       (when depth (org-s5-toc depth info)))
     contents

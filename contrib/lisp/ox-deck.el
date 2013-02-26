@@ -37,6 +37,7 @@
 ;; works (it is derived from ox-html.)
 
 (require 'ox-html)
+(eval-when-compile (require 'cl))
 
 (org-export-define-derived-backend deck html
   :menu-entry
@@ -62,9 +63,7 @@
    (:deck-include-extensions "DECK_INCLUDE_EXTENSIONS" nil
                              org-deck-include-extensions split)
    (:deck-exclude-extensions "DECK_EXCLUDE_EXTENSIONS" nil
-                             org-deck-exclude-extensions split)
-   (:deck-directories "DECK_DIRECTORIES" nil
-                      org-deck-directories split))
+                             org-deck-exclude-extensions split))
   :translate-alist
   ((headline . org-deck-headline)
    (inner-template . org-deck-inner-template)
@@ -76,7 +75,7 @@
   :tag "Org Export DECK"
   :group 'org-export-html)
 
-(defcustom org-deck-directories nil
+(defcustom org-deck-directories '("./deck.js")
   "Directories to search for deck.js components (jquery,
 modernizr; core, extensions and themes directories.)"
   :group 'org-export-deck
@@ -250,7 +249,7 @@ Note that the wrapper div must include the class \"slide\"."
    "<div id=\"table-of-contents\" class=\"slide\">\n"
    (format "<h2>%s</h2>\n"
            (org-html--translate "Table of Contents" info))
-   (org-html-toc-text
+   (org-html--toc-text
     (mapcar
      (lambda (headline)
        (let* ((class (org-element-property :HTML_CONTAINER_CLASS headline))
@@ -269,7 +268,7 @@ Note that the wrapper div must include the class \"slide\"."
                  "</?a[^>]*>" ""
                  (org-export-data
                   (org-element-property :title headline) info)))))
-         (list
+         (cons
           (if (and class (string-match-p "\\<slide\\>" class))
               (format
                "<a href='#outline-container-%s'>%s</a>"
@@ -319,17 +318,11 @@ Note that the wrapper div must include the class \"slide\"."
     (list :scripts (nreverse scripts) :sheets (nreverse sheets)
           :snippets snippets)))
 
-(defun org-html-inner-template (contents info)
+(defun org-deck-inner-template (contents info)
   "Return body of document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (concat
-   ;; Table of contents.
-   (let ((depth (plist-get info :with-toc)))
-     (when depth (org-deck-toc depth info)))
-   ;; Document contents.
-   contents
-   "\n"))
+  (concat contents "\n"))
 
 (defun org-deck-headline (headline contents info)
   (let ((org-html-toplevel-hlevel 2)
