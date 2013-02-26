@@ -14110,13 +14110,13 @@ agenda-with-archives
 The remaining args are treated as settings for the skipping facilities of
 the scanner.  The following items can be given here:
 
-  archive    skip trees with the archive tag.
+  archive    skip trees with the archive tag
   comment    skip trees with the COMMENT keyword
   function or Emacs Lisp form:
-             will be used as value for `org-agenda-skip-function', so whenever
-             the function returns t, FUNC will not be called for that
-             entry and search will continue from the point where the
-             function leaves it.
+             will be used as value for `org-agenda-skip-function', so
+             whenever the function returns a position, FUNC will not be
+             called for that entry and search will continue from the
+             position returned
 
 If your function needs to retrieve the tags including inherited tags
 at the *current* entry, you can use the value of the variable
