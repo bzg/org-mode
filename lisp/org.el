@@ -18100,8 +18100,8 @@ share a good deal of logic."
          "invalid value of `org-latex-create-formula-image-program'")))
    string tofile options buffer))
 
-(declare-function org-export--get-global-options "org-export" (&optional backend))
-(declare-function org-export--get-inbuffer-options "org-export" (&optional backend))
+(declare-function org-export--get-global-options "ox" (&optional backend))
+(declare-function org-export--get-inbuffer-options "ox" (&optional backend))
 (defun org-create-formula--latex-header ()
   "Return LaTeX header appropriate for previewing a LaTeX snippet."
   (org-latex-guess-inputenc
