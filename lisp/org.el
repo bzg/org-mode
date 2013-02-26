@@ -682,7 +682,8 @@ the followinglines anywhere in the buffer:
    #+STARTUP: latexpreview
    #+STARTUP: nolatexpreview"
   :group 'org-startup
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-insert-mode-line-in-empty-file nil
@@ -2881,7 +2882,8 @@ minutes, and durations less than a day will be expressed entirely
 in minutes (even for durations longer than an hour)."
   :group 'org-time
   :group 'org-clock
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice (string :tag "Format string")
 		 (set :tag "Plist"
 		      (group :inline t (const :tag "Years" :years)
@@ -2933,7 +2935,8 @@ See `org-effort-durations' on how to set effort durations
 and `org-time-clocksum-format' for more on time clock formats."
   :group 'org-time
   :group 'org-clock
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-time-clocksum-fractional-format "%.2f"
@@ -2988,7 +2991,8 @@ specified.
 Custom commands can set this variable in the options section."
   :group 'org-time
   :group 'org-agenda-daily/weekly
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'integer)
 
 (defcustom org-read-date-prefer-future t
@@ -3084,7 +3088,7 @@ When nil, only the minibuffer will be available."
 
 (make-obsolete-variable
  'org-read-date-minibuffer-setup-hook
- "Set `org-read-date-minibuffer-local-map' instead." "24.3")
+ "Set `org-read-date-minibuffer-local-map' instead." "24.4")
 (defcustom org-read-date-minibuffer-setup-hook nil
   "Hook to be used to set up keys for the date/time interface.
 Add key definitions to `minibuffer-local-map', which will be a
@@ -3124,7 +3128,8 @@ For example, if `org-extend-today-until' is 8, and it's 4am, then the
 Note that this option has precedence over the combined use of
 `org-use-effective-time' and `org-extend-today-until'."
   :group 'org-time
-  ;; :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-edit-timestamp-down-means-later nil
@@ -16362,7 +16367,7 @@ Don't touch the rest."
   (let ((n 0))
     (mapcar (lambda (x) (if (< (setq n (1+ n)) 7) (or x 0) x)) time)))
 
-(define-obsolete-function-alias 'org-days-to-time 'org-time-stamp-to-now "24.3")
+(define-obsolete-function-alias 'org-days-to-time 'org-time-stamp-to-now "24.4")
 
 (defun org-time-stamp-to-now (timestamp-string &optional seconds)
   "Difference between TIMESTAMP-STRING and now in days.
@@ -17250,7 +17255,8 @@ and fall back on the original width if none is found.
 
 This requires Emacs >= 24.1, build with imagemagick support."
   :group 'org-appearance
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Use the image width" t)
 	  (integer :tag "Use a number of pixels")

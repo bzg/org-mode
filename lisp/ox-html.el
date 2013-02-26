@@ -963,7 +963,8 @@ CSS classes, then this prefix can be very useful."
 (defcustom org-html-display-buffer-mode 'html-mode
   "Default mode when visiting the HTML output."
   :group 'org-export-html
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice (function 'html-mode)
 		 (function 'nxml-mode)
 		 (function :tag "Other mode")))

@@ -69,7 +69,8 @@ there are kept outside the narrowed region."
 When a positive integer N, save after N seconds of idle time.
 When 0 (the default), don't auto-save."
   :group 'org-edit-structure
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'integer)
 
 (defcustom org-coderef-label-format "(ref:%s)"
@@ -201,7 +202,8 @@ has an active edit buffer, it will switch to that edit buffer
 immediately; otherwise it will ask whether you want to return to
 the existing edit buffer."
   :group 'org-edit-structure
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defvar org-src-babel-info nil)

@@ -851,7 +851,8 @@ scheduled date when the delay should expire.  The symbol `post-deadline'
 eliminates the schedule delay when the date is posterior to the deadline."
   :group 'org-agenda-skip
   :group 'org-agenda-daily/weekly
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Always honor delay" nil)
 	  (const :tag "Ignore delay if posterior to the deadline" post-deadline)
@@ -1341,7 +1342,8 @@ When nil, they may also match part of a word."
 E.g. when this is set to 1, the search view will only
 show headlines of level 1."
   :group 'org-agenda-search-view
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'integer)
 
 (defgroup org-agenda-time-grid nil
@@ -2482,7 +2484,8 @@ duplicates.)"
 This can be nil (no limit) or an integer or an alist of agenda
 types with an associated number of entries to display in this
 type."
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
   :type '(choice (symbol :tag "No limit" nil)
 		 (integer :tag "Max number of entries")
@@ -2500,7 +2503,8 @@ type."
 This can be nil (no limit) or an integer or an alist of agenda
 types with an associated number of entries to display in this
 type."
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
   :type '(choice (symbol :tag "No limit" nil)
 		 (integer :tag "Max number of entries")
@@ -2518,7 +2522,8 @@ type."
 This can be nil (no limit) or an integer or an alist of agenda
 types with an associated number of entries to display in this
 type."
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
   :type '(choice (symbol :tag "No limit" nil)
 		 (integer :tag "Max number of entries")
@@ -2536,7 +2541,8 @@ type."
 This can be nil (no limit) or a number of minutes (as an integer)
 or an alist of agenda types with an associated number of minutes
 to limit entries to in this type."
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :group 'org-agenda-custom-commands
   :type '(choice (symbol :tag "No limit" nil)
 		 (integer :tag "Max number of entries")

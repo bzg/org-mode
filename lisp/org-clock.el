@@ -107,7 +107,8 @@ out within the next 5 minutes, the clock line will be removed;
 if you clock out 8 minutes after your clocked in, the clock
 out time will be 14:50."
   :group 'org-clock
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (integer :tag "Minutes (0 for no rounding)")
 	  (symbol  :tag "Use `org-time-stamp-rounding-minutes'" 'same-as-time-stamp)))
@@ -406,7 +407,8 @@ Org git distribution. Or, you can do:
 
 if you are using Debian."
   :group 'org-clock
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defvar org-clock-in-prepare-hook nil

@@ -78,9 +78,10 @@ org-agenda-text-search-extra-files
 
 (defcustom org-mobile-allpriorities "A B C"
   "Default set of priority cookies for the index file."
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string
-  :group 'org-mobile
-  :version "24.3")
+  :group 'org-mobile)
 
 (defcustom org-mobile-use-encryption nil
   "Non-nil means keep only encrypted files on the WebDAV server.

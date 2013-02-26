@@ -42,8 +42,9 @@
 
 (defcustom org-babel-python-command "python"
   "Name of the command for executing Python code."
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :group 'org-babel
-  :version "24.3"
   :type 'string)
 
 (defcustom org-babel-python-mode
@@ -51,7 +52,8 @@
   "Preferred python mode for use in running python interactively.
 This will typically be either 'python or 'python-mode."
   :group 'org-babel
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'function)
 
 (defvar org-src-preserve-indentation)

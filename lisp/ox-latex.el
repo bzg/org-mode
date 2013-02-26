@@ -439,7 +439,8 @@ The function result will be used in the section format string.
 Use `org-latex-format-headline-default-function' by default,
 which format headlines like for Org version prior to 8.0."
   :group 'org-export-latex
-  :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'function)
 
 
