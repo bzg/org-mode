@@ -5610,23 +5610,22 @@ will be prompted for."
 
 (defun org-activate-plain-links (limit)
   "Run through the buffer and add overlays to links."
-  (catch 'exit
-    (let (f hl)
-      (when (and (re-search-forward (concat org-plain-link-re) limit t)
-		 (not (org-in-src-block-p)))
-	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
-	(setq f (get-text-property (match-beginning 0) 'face))
-	(setq hl (org-match-string-no-properties 0))
-	(if (or (eq f 'org-tag)
-		(and (listp f) (memq 'org-tag f)))
-	    nil
-	  (add-text-properties (match-beginning 0) (match-end 0)
-			       (list 'mouse-face 'highlight
-				     'face 'org-link
-				     'htmlize-link `(:uri ,hl)
-				     'keymap org-mouse-map))
-	  (org-rear-nonsticky-at (match-end 0)))
-	t))))
+  (let (f hl)
+    (when (and (re-search-forward (concat org-plain-link-re) limit t)
+	       (not (org-in-src-block-p)))
+      (org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+      (setq f (get-text-property (match-beginning 0) 'face))
+      (setq hl (org-match-string-no-properties 0))
+      (if (or (eq f 'org-tag)
+	      (and (listp f) (memq 'org-tag f)))
+	  nil
+	(add-text-properties (match-beginning 0) (match-end 0)
+			     (list 'mouse-face 'highlight
+				   'face 'org-link
+				   'htmlize-link `(:uri ,hl)
+				   'keymap org-mouse-map))
+	(org-rear-nonsticky-at (match-end 0)))
+      t)))
 
 (defun org-activate-code (limit)
   (if (re-search-forward "^[ \t]*\\(:\\(?: .*\\|$\\)\n?\\)" limit t)
@@ -13251,27 +13250,27 @@ How much context is shown depends upon the variables
 	(following-p (org-get-alist-option org-show-following-heading key))
 	(entry-p     (org-get-alist-option org-show-entry-below key))
 	(siblings-p  (org-get-alist-option org-show-siblings key)))
-    (catch 'exit
-      ;; Show heading or entry text
-      (if (and heading-p (not entry-p))
-	  (org-flag-heading nil)    ; only show the heading
-	(and (or entry-p (outline-invisible-p) (org-invisible-p2))
-	     (org-show-hidden-entry)))    ; show entire entry
-      (when following-p
-	;; Show next sibling, or heading below text
-	(save-excursion
-	  (and (if heading-p (org-goto-sibling) (outline-next-heading))
-	       (org-flag-heading nil))))
-      (when siblings-p (org-show-siblings))
-      (when hierarchy-p
-	;; show all higher headings, possibly with siblings
-	(save-excursion
-	  (while (and (condition-case nil
-			  (progn (org-up-heading-all 1) t)
-			(error nil))
-		      (not (bobp)))
-	    (org-flag-heading nil)
-	    (when siblings-p (org-show-siblings))))))))
+    ;; Show heading or entry text
+    (if (and heading-p (not entry-p))
+	(org-flag-heading nil)    ; only show the heading
+      (and (or entry-p (outline-invisible-p) (org-invisible-p2))
+	   (org-show-hidden-entry)))    ; show entire entry
+    (when following-p
+      ;; Show next sibling, or heading below text
+      (save-excursion
+	(and (if heading-p (org-goto-sibling) (outline-next-heading))
+	     (org-flag-heading nil))))
+    (when siblings-p (org-show-siblings))
+    (when hierarchy-p
+      ;; show all higher headings, possibly with siblings
+      (save-excursion
+	(while (and (condition-case nil
+			(progn (org-up-heading-all 1) t)
+		      (error nil))
+		    (not (bobp)))
+	  (org-flag-heading nil)
+	  (when siblings-p (org-show-siblings)))))
+    (save-excursion (goto-char (window-start)) (recenter 0))))
 
 (defvar org-reveal-start-hook nil
   "Hook run before revealing a location.")
