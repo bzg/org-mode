@@ -4216,7 +4216,7 @@ Otherwise, these types are allowed:
 	      '(org-columns-number-to-string
 		org-columns-get-format-and-top-level
 		org-columns-compute
-		org-columns-remove-overlays)))
+		org-columns-remove-overlays))
 
 ;; Autoload ID code
 
