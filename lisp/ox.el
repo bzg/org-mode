@@ -1404,9 +1404,7 @@ inferior to file-local settings."
    ;; ... from an external property list...
    ext-plist
    ;; ... from in-buffer settings...
-   (org-export--get-inbuffer-options
-    backend
-    (and buffer-file-name (org-remove-double-quotes buffer-file-name)))
+   (org-export--get-inbuffer-options backend)
    ;; ... and from subtree, when appropriate.
    (and subtreep (org-export--get-subtree-options backend))
    ;; Eventually add misc. properties.
@@ -1531,106 +1529,112 @@ for export.  Return options as a plist."
      ;; Return value.
      plist)))
 
-(defun org-export--get-inbuffer-options (&optional backend files)
+(defun org-export--get-inbuffer-options (&optional backend)
   "Return current buffer export options, as a plist.
 
 Optional argument BACKEND, when non-nil, is a symbol specifying
 which back-end specific options should also be read in the
 process.
 
-Optional argument FILES is a list of setup files names read so
-far, used to avoid circular dependencies.
-
 Assume buffer is in Org mode.  Narrowing, if any, is ignored."
-  (org-with-wide-buffer
-   (goto-char (point-min))
-   (let ((case-fold-search t) plist)
-     ;; 1. Special keywords, as in `org-export-special-keywords'.
-     (let ((special-re
-	    (format "^[ \t]*#\\+%s:" (regexp-opt org-export-special-keywords))))
-       (while (re-search-forward special-re nil t)
-	 (let ((element (org-element-at-point)))
-	   (when (eq (org-element-type element) 'keyword)
-	     (let* ((key (org-element-property :key element))
-		    (val (org-element-property :value element))
-		    (prop
+  (let* (plist
+	 get-options			; For byte-compiler.
+	 (case-fold-search t)
+	 (options (append
+		   ;; Priority is given to back-end specific options.
+		   (and backend (org-export-backend-options backend))
+		   org-export-options-alist))
+	 (regexp (format "^[ \t]*#\\+%s:"
+			 (regexp-opt (nconc (delq nil (mapcar 'cadr options))
+					    org-export-special-keywords))))
+	 (find-opt
+	  (lambda (keyword)
+	    ;; Return property name associated to KEYWORD.
+	    (catch 'exit
+	      (mapc (lambda (option)
+		      (when (equal (nth 1 option) keyword)
+			(throw 'exit (car option))))
+		    options))))
+	 (get-options
+	  (lambda (&optional files plist)
+	    ;; Recursively read keywords in buffer.  FILES is a list
+	    ;; of files read so far.  PLIST is the current property
+	    ;; list obtained.
+	    (org-with-wide-buffer
+	     (goto-char (point-min))
+	     (while (re-search-forward regexp nil t)
+	       (let ((element (org-element-at-point)))
+		 (when (eq (org-element-type element) 'keyword)
+		   (let ((key (org-element-property :key element))
+			 (val (org-element-property :value element)))
 		     (cond
+		      ;; Options in `org-export-special-keywords'.
 		      ((equal key "SETUPFILE")
-		       (let ((file
-			      (expand-file-name
-			       (org-remove-double-quotes (org-trim val)))))
+		       (let ((file (expand-file-name
+				    (org-remove-double-quotes (org-trim val)))))
 			 ;; Avoid circular dependencies.
 			 (unless (member file files)
 			   (with-temp-buffer
 			     (insert (org-file-contents file 'noerror))
 			     (org-mode)
-			     (org-export--get-inbuffer-options
-			      backend (cons file files))))))
+			     (setq plist (funcall get-options
+						  (cons file files) plist))))))
 		      ((equal key "OPTIONS")
-		       (org-export--parse-option-keyword val backend))
-		      ((equal key "FILETAGS")
-		       (list :filetags
-			     (org-uniquify
-			      (append (org-split-string val ":")
-				      (plist-get plist :filetags))))))))
-	       (setq plist (org-combine-plists plist prop)))))))
-     ;; 2. Standard options, as in `org-export-options-alist'.
-     (let* ((all (append
-		  ;; Priority is given to back-end specific options.
-		  (and backend (org-export-backend-options backend))
-		  org-export-options-alist)))
-       (dolist (option all)
-	 (let ((prop (car option)))
-	   (when (and (nth 1 option) (not (plist-member plist prop)))
-	     (goto-char (point-min))
-	     (let ((opt-re (format "^[ \t]*#\\+%s:" (nth 1 option)))
-		   (behaviour (nth 4 option)))
-	       (while (re-search-forward opt-re nil t)
-		 (let ((element (org-element-at-point)))
-		   (when (eq (org-element-type element) 'keyword)
-		     (let((key (org-element-property :key element))
-			  (val (org-element-property :value element)))
 		       (setq plist
-			     (plist-put
-			      plist (car option)
-			      ;; Handle value depending on specified
-			      ;; BEHAVIOUR.
-			      (case behaviour
-				(space
-				 (if (not (plist-get plist prop)) (org-trim val)
-				   (concat (plist-get plist prop)
-					   " "
-					   (org-trim val))))
-				(newline
-				 (org-trim (concat (plist-get plist prop)
-						   "\n"
-						   (org-trim val))))
-				(split `(,@(plist-get plist prop)
-					 ,@(org-split-string val)))
-				('t val)
-				(otherwise
-				 (if (not (plist-member plist prop)) val
-				   (plist-get plist prop))))))))))))))
-       ;; Parse keywords specified in
-       ;; `org-element-document-properties'.
-       (mapc
-	(lambda (key)
-	  ;; Find the property associated to the keyword.
-	  (let* ((prop (catch 'found
-			 (mapc (lambda (option)
-				 (when (equal (nth 1 option) key)
-				   (throw 'found (car option))))
-			       all)))
-		 (value (and prop (plist-get plist prop))))
-	    (when (stringp value)
-	      (setq plist
-		    (plist-put
-		     plist prop
-		     (org-element-parse-secondary-string
-		      value (org-element-restriction 'keyword)))))))
-	org-element-document-properties))
-     ;; 3. Return final value.
-     plist)))
+			     (org-combine-plists
+			      plist
+			      (org-export--parse-option-keyword val backend))))
+		      ((equal key "FILETAGS")
+		       (setq plist
+			     (org-combine-plists
+			      plist
+			      (list :filetags
+				    (org-uniquify
+				     (append (org-split-string val ":")
+					     (plist-get plist :filetags)))))))
+		      (t
+		       ;; Options in `org-export-options-alist'.
+		       (let* ((prop (funcall find-opt key))
+			      (behaviour (nth 4 (assq prop options))))
+			 (setq plist
+			       (plist-put
+				plist prop
+				;; Handle value depending on specified
+				;; BEHAVIOUR.
+				(case behaviour
+				  (space
+				   (if (not (plist-get plist prop))
+				       (org-trim val)
+				     (concat (plist-get plist prop)
+					     " "
+					     (org-trim val))))
+				  (newline
+				   (org-trim (concat (plist-get plist prop)
+						     "\n"
+						     (org-trim val))))
+				  (split `(,@(plist-get plist prop)
+					   ,@(org-split-string val)))
+				  ('t val)
+				  (otherwise
+				   (if (not (plist-member plist prop)) val
+				     (plist-get plist prop)))))))))))))
+	     ;; Return final value.
+	     plist))))
+    ;; Read options in the current buffer.
+    (setq plist (funcall get-options buffer-file-name nil))
+    ;; Parse keywords specified in `org-element-document-properties'.
+    (mapc (lambda (keyword)
+	    ;; Find the property associated to the keyword.
+	    (let* ((prop (funcall find-opt keyword))
+		   (value (and prop (plist-get plist prop))))
+	      (when (stringp value)
+		(setq plist
+		      (plist-put plist prop
+				 (org-element-parse-secondary-string
+				  value (org-element-restriction 'keyword)))))))
+	  org-element-document-properties)
+    ;; Return value.
+    plist))
 
 (defun org-export--get-buffer-attributes ()
   "Return properties related to buffer attributes, as a plist."

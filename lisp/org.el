@@ -18101,7 +18101,7 @@ share a good deal of logic."
    string tofile options buffer))
 
 (declare-function org-export--get-global-options "org-export" (&optional backend))
-(declare-function org-export--get-inbuffer-options "org-export" (&optional backend files))
+(declare-function org-export--get-inbuffer-options "org-export" (&optional backend))
 (defun org-create-formula--latex-header ()
   "Return LaTeX header appropriate for previewing a LaTeX snippet."
   (org-latex-guess-inputenc
@@ -18112,9 +18112,7 @@ share a good deal of logic."
     (plist-get
      (org-combine-plists
       (org-export--get-global-options 'latex)
-      (org-export--get-inbuffer-options
-       'latex
-       (and buffer-file-name (org-remove-double-quotes buffer-file-name))))
+      (org-export--get-inbuffer-options 'latex))
      :latex-header-extra))))
 
 ;; This function borrows from Ganesh Swami's latex2png.el

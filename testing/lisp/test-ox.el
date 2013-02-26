@@ -122,26 +122,53 @@ already filled in `info'."
 
 (ert-deftest test-org-export/get-inbuffer-options ()
   "Test reading all standard export keywords."
+  ;; Properties should follow buffer order.
   (should
    (equal
-    (org-test-with-temp-text "#+AUTHOR: Me, Myself and I
-#+CREATOR: Idem
-#+DATE: Today
-#+DESCRIPTION: Testing
-#+DESCRIPTION: with two lines
-#+EMAIL: some@email.org
-#+EXCLUDE_TAGS: noexport invisible
-#+KEYWORDS: test
-#+LANGUAGE: en
-#+SELECT_TAGS: export
-#+TITLE: Some title
-#+TITLE: with spaces"
+    (org-test-with-temp-text "#+LANGUAGE: fr\n#+CREATOR: Me\n#+EMAIL: email"
       (org-export--get-inbuffer-options))
-    '(:author
-      ("Me, Myself and I") :creator "Idem" :date ("Today")
-      :description "Testing\nwith two lines" :email "some@email.org"
-      :exclude-tags ("noexport" "invisible") :keywords "test" :language "en"
-      :select-tags ("export") :title ("Some title with spaces")))))
+    '(:language "fr" :creator "Me" :email "email")))
+  ;; Parse document keywords.
+  (should
+   (equal
+    (org-test-with-temp-text "#+AUTHOR: Me"
+      (org-export--get-inbuffer-options))
+    '(:author ("Me"))))
+  ;; Test `space' behaviour.
+  (should
+   (equal
+    (org-test-with-temp-text "#+TITLE: Some title\n#+TITLE: with spaces"
+      (org-export--get-inbuffer-options))
+    '(:title ("Some title with spaces"))))
+  ;; Test `newline' behaviour.
+  (should
+   (equal
+    (org-test-with-temp-text "#+DESCRIPTION: With\n#+DESCRIPTION: two lines"
+      (org-export--get-inbuffer-options))
+    '(:description "With\ntwo lines")))
+  ;; Test `split' behaviour.
+  (should
+   (equal
+    (org-test-with-temp-text "#+SELECT_TAGS: a\n#+SELECT_TAGS: b"
+      (org-export--get-inbuffer-options))
+    '(:select-tags ("a" "b"))))
+  ;; Options set through SETUPFILE.
+  (should
+   (equal
+    (org-test-with-temp-text
+	(format "#+DESCRIPTION: l1
+#+LANGUAGE: es
+#+SELECT_TAGS: a
+#+TITLE: a
+#+SETUPFILE: \"%s/examples/setupfile.org\"
+#+DESCRIPTION: l3
+#+LANGUAGE: fr
+#+SELECT_TAGS: c
+#+TITLE: c"
+		org-test-dir)
+      (org-export--get-inbuffer-options))
+    '(:description "l1\nl2\nl3":language "fr" :select-tags ("a" "b" "c")
+		   :title ("a b c")))))
 
 (ert-deftest test-org-export/get-subtree-options ()
   "Test setting options from headline's properties."
