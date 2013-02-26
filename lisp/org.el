@@ -18752,8 +18752,7 @@ this function returns t, nil otherwise."
 		(throw 'exit t))))
 	nil))))
 
-(org-autoload 'org-element-at-point "org-element")
-(org-autoload 'org-element-type "org-element")
+(org-autoload "org-element" '(org-element-at-point org-element-type))
 
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
 (declare-function org-element-type "org-element" (element))
