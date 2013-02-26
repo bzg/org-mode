@@ -50,12 +50,12 @@
 		  (&optional buffer-or-name norecord label))
 (declare-function org-unescape-code-in-region "org-src" (beg end))
 
-(autoload 'org-export-generic "org-export-generic" "Export using the generic exporter" t)
-
-(autoload 'org-export-as-odt "org-odt"
-  "Export the outline to a OpenDocument Text file." t)
-(autoload 'org-export-as-odt-and-open "org-odt"
-  "Export the outline to a OpenDocument Text file and open it." t)
+(org-autoload 'org-export-generic
+	      "org-export-generic" "Export using the generic exporter" t)
+(org-autoload 'org-export-as-odt "org-odt"
+	      "Export the outline to a OpenDocument Text file." t)
+(org-autoload 'org-export-as-odt-and-open "org-odt"
+	      "Export the outline to a OpenDocument Text file and open it." t)
 
 (defgroup org-export nil
   "Options for exporting org-listings."

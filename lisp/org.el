@@ -4216,7 +4216,7 @@ Otherwise, these types are allowed:
 	      '(org-columns-number-to-string
 		org-columns-get-format-and-top-level
 		org-columns-compute
-		org-columns-remove-overlays))
+		org-columns-remove-overlays)))
 
 ;; Autoload ID code
 
@@ -18752,8 +18752,8 @@ this function returns t, nil otherwise."
 		(throw 'exit t))))
 	nil))))
 
-(autoload 'org-element-at-point "org-element")
-(autoload 'org-element-type "org-element")
+(org-autoload 'org-element-at-point "org-element")
+(org-autoload 'org-element-type "org-element")
 
 (declare-function org-element-at-point "org-element" (&optional keep-trail))
 (declare-function org-element-type "org-element" (element))
