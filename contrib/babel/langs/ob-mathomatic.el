@@ -55,23 +55,23 @@
 		 ;; graphic output
 		 (let ((graphic-file (org-babel-mathomatic-graphical-output-file params)))
 		   (if graphic-file
-		       (cond 
+		       (cond
 			((string-match ".\.eps$" graphic-file)
-			 (format ;; Need to add command to send to file. 
+			 (format ;; Need to add command to send to file.
 			  "set plot set terminal postscript eps\\;set output %S "
 			  graphic-file))
 			((string-match ".\.ps$" graphic-file)
-			 (format ;; Need to add command to send to file. 
-			  "set plot set terminal postscript\\;set output %S " 
+			 (format ;; Need to add command to send to file.
+			  "set plot set terminal postscript\\;set output %S "
 			  graphic-file))
 
 			((string-match ".\.pic$" graphic-file)
-			 (format ;; Need to add command to send to file. 
-			  "set plot set terminal gpic\\;set output %S " 
+			 (format ;; Need to add command to send to file.
+			  "set plot set terminal gpic\\;set output %S "
 			  graphic-file))
-			(t 
-			 (format ;; Need to add command to send to file. 
-			  "set plot set terminal png\\;set output %S " 
+			(t
+			 (format ;; Need to add command to send to file.
+			  "set plot set terminal png\\;set output %S "
 			  graphic-file)))
 		     ""))
 		 ;; variables
@@ -114,7 +114,6 @@ called by `org-babel-execute-src-block'."
 	  (with-temp-file tmp-file (insert result))
 	  (org-babel-import-elisp-from-file tmp-file))))))
 
-
 (defun org-babel-prep-session:mathomatic (session params)
   (error "Mathomatic does not support sessions"))
 
@@ -138,12 +137,9 @@ of the same value."
 (defun org-babel-mathomatic-elisp-to-mathomatic (val)
   "Return a string of mathomatic code which evaluates to VAL."
   (if (listp val)
-      (mapconcat #'org-babel-mathomatic-elisp-to-mathomatic val " ") 
+      (mapconcat #'org-babel-mathomatic-elisp-to-mathomatic val " ")
     (format "%s" val)))
 
-
 (provide 'ob-mathomatic)
-
-
 
 ;;; ob-mathomatic.el ends here
