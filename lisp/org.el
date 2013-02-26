@@ -23002,7 +23002,7 @@ Show the heading too, if it is currently invisible."
 	 (re (concat "^" (org-get-limited-outline-regexp)))
 	 (subs (make-vector (1+ n) nil))
 	 (last-level 0)
-	 m level head)
+	 m level head0 head)
     (save-excursion
       (save-restriction
 	(widen)
@@ -23010,9 +23010,9 @@ Show the heading too, if it is currently invisible."
 	(while (re-search-backward re nil t)
 	  (setq level (org-reduced-level (funcall outline-level)))
 	  (when (and (<= level n)
-		     (looking-at org-complex-heading-regexp))
-	    (setq head (org-link-display-format
-			(org-match-string-no-properties 4))
+		     (looking-at org-complex-heading-regexp)
+		     (setq head0 (org-match-string-no-properties 4)))
+	    (setq head (org-link-display-format head0)
 		  m (org-imenu-new-marker))
 	    (org-add-props head nil 'org-imenu-marker m 'org-imenu t)
 	    (if (>= level last-level)
