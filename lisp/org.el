@@ -18180,7 +18180,7 @@ share a good deal of logic."
 		  (delete-file (concat texfilebase e))))
 	pngfile))))
 
-(declare-function org-latex-compile "org-latex" (texfile &optional snippet))
+(declare-function org-latex-compile "ox-latex" (texfile &optional snippet))
 (defun org-create-formula-image-with-imagemagick (string tofile options buffer)
   "This calls convert, which is included into imagemagick."
   (require 'ox-latex)
