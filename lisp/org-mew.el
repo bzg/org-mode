@@ -146,6 +146,12 @@ with \"t\" key."
 (declare-function mew-summary-visit-folder "ext:mew-summary4"
 		  (folder &optional goend no-ls))
 (declare-function mew-window-push "ext:mew" ())
+(declare-function mew-expand-folder "ext:mew-func" (folder))
+(declare-function mew-case:folder-folder "ext:mew-func" (case:folder))
+(declare-function mew "ext:mew" (&optional arg))
+(declare-function mew-message-goto-summary "ext:mew-message" ())
+(declare-function mew-summary-mode "ext:mew-summary" ())
+
 (defvar mew-init-p)
 (defvar mew-mark-afterstep-spec)
 (defvar mew-summary-goto-line-then-display)
