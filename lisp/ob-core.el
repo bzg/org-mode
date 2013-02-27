@@ -33,7 +33,7 @@
   (if (memq system-type '(windows-nt cygwin))
       ".exe"
     nil))
-(defvar org-babel-call-process-region-original)
+(defvar org-babel-call-process-region-original nil) ;; dynamically scoped for tramp
 (defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
 (declare-function show-all "outline" ())
@@ -2527,7 +2527,6 @@ of the string."
                     (org-babel-chomp (org-reverse-string string) regexp))
                    regexp))
 
-(defvar org-babel-org-babel-call-process-region-original nil)
 (defun org-babel-tramp-handle-call-process-region
   (start end program &optional delete buffer display &rest args)
   "Use Tramp to handle `call-process-region'.
