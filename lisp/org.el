@@ -5913,7 +5913,7 @@ Result depends on variable `org-highlight-latex-and-related'."
 LIMIT bounds the search for syntax to highlight.  Stop at first
 highlighted object, if any.  Return t if some highlighting was
 done, nil otherwise."
-  (when org-highlight-latex-and-related
+  (when (org-string-nw-p org-latex-and-related-regexp)
     (catch 'found
       (while (re-search-forward org-latex-and-related-regexp limit t)
 	(unless (memq (car-safe (get-text-property (1+ (match-beginning 0))
@@ -18180,7 +18180,7 @@ share a good deal of logic."
 		  (delete-file (concat texfilebase e))))
 	pngfile))))
 
-(declare-function org-latex-compile "org-latex" (texfile &optional snippet))
+(declare-function org-latex-compile "ox-latex" (texfile &optional snippet))
 (defun org-create-formula-image-with-imagemagick (string tofile options buffer)
   "This calls convert, which is included into imagemagick."
   (require 'ox-latex)

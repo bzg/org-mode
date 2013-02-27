@@ -43,6 +43,7 @@
   (require 'org))
 (require 'gnus-util)
 (require 'org-agenda)
+(require 'org-capture)
 
 (defgroup org-contacts nil
   "Options about contacts management."
@@ -132,6 +133,16 @@ This overrides `org-email-link-description-format' if set."
   :group 'org-contacts
   :type 'file)
 
+(defcustom org-contacts-enable-completion t
+  "Enable or not the completion in `message-mode' with `org-contacts'."
+  :group 'org-contacts
+  :type 'boolean)
+
+;; Decalre external functions and variables
+(declare-function wl-summary-message-number "ext:wl-summary" ())
+(declare-function wl-address-header-extract-address "ext:wl-address")
+(declare-function wl-address-header-extract-realname "ext:wl-address")
+
 (defvar org-contacts-keymap
   (let ((map (make-sparse-keymap)))
     (define-key map "M" 'org-contacts-view-send-email)
@@ -149,19 +160,21 @@ This overrides `org-email-link-description-format' if set."
   "Return list of Org files to use for contact management."
   (or org-contacts-files (org-agenda-files t 'ifmode)))
 
+(defun org-contacts-db-need-update? ()
+  "Determine whether `org-contacts-db' needs to be refreshed."
+  (or (null org-contacts-last-update)
+      (some (lambda (file)
+	      (or (time-less-p org-contacts-last-update
+			       (elt (file-attributes file) 5))))
+	    (org-contacts-files))))
+
 (defun org-contacts-db ()
   "Return the latest Org Contacts Database"
   (let* (todo-only
 	 (contacts-matcher
 	  (cdr (org-make-tags-matcher org-contacts-matcher)))
-	 (need-update?
-	  (or (null org-contacts-last-update)
-	      (some (lambda (file)
-		      (time-less-p org-contacts-last-update
-				   (elt (file-attributes file) 5)))
-		    (org-contacts-files))))
 	 markers result)
-    (when need-update?
+    (when (org-contacts-db-need-update?)
       (message "Update Org Contacts Database")
       (dolist (file (org-contacts-files))
 	(org-check-agenda-file file)
@@ -499,7 +512,8 @@ Format is a string matching the following format specification:
   (let ((calendar-date-style 'american)
         (entry ""))
     (unless format (setq format org-contacts-birthday-format))
-    (loop for contact in (org-contacts-filter)
+    (loop with date = nil 		; FIXME: prevent a warning
+	  for contact in (org-contacts-filter)
           for anniv = (let ((anniv (cdr (assoc-string
                                          (or field org-contacts-birthday-property)
                                          (caddr contact)))))
@@ -633,7 +647,8 @@ This adds `org-contacts-gnus-check-mail-address' and
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-check-mail-address)
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-store-last-mail))
 
-(when (boundp 'completion-at-point-functions)
+(when (and org-contacts-enable-completion
+	   (boundp 'completion-at-point-functions))
   (add-hook 'message-mode-hook
 	    (lambda ()
 	      (add-to-list 'completion-at-point-functions
@@ -645,7 +660,8 @@ Works from wl-summary-mode and mime-view-mode - that is while viewing email.
 Depends on Wanderlust been loaded."
   (with-current-buffer (org-capture-get :original-buffer)
     (cond
-     ((eq major-mode 'wl-summary-mode) (when wl-summary-buffer-elmo-folder
+     ((eq major-mode 'wl-summary-mode) (when (and (boundp 'wl-summary-buffer-elmo-folder)
+						  wl-summary-buffer-elmo-folder)
                                          (elmo-message-field
                                           wl-summary-buffer-elmo-folder
                                           (wl-summary-message-number)
