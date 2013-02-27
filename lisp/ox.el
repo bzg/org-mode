@@ -1784,9 +1784,9 @@ OPTIONS is a plist holding export options."
       (mapc
        (lambda (blob)
 	 (when (and (eq (org-element-type blob) 'headline)
+		    (not (org-element-property :footnote-section-p blob))
 		    (not (memq blob (plist-get options :ignore-list))))
-	   (setq min-level
-		 (min (org-element-property :level blob) min-level)))
+	   (setq min-level (min (org-element-property :level blob) min-level)))
 	 (when (= min-level 1) (throw 'exit 1)))
        (org-element-contents data))
       ;; If no headline was found, for the sake of consistency, set
