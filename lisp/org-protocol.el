@@ -561,9 +561,9 @@ as filename."
 
 (defun org-protocol-create-for-org ()
   "Create a org-protocol project for the current file's Org-mode project.
-This works, if the file visited is part of a publishing project in
-`org-publish-project-alist'.  This function calls `org-protocol-create' to do
-most of the work."
+The visited file needs to be part of a publishing project in
+`org-publish-project-alist' for this to work.  The function
+delegates most of the work to `org-protocol-create'."
   (interactive)
   (require 'org-publish)
   (let ((all (or (org-publish-get-project-from-filename buffer-file-name))))
@@ -573,10 +573,11 @@ most of the work."
 
 (defun org-protocol-create (&optional project-plist)
   "Create a new org-protocol project interactively.
-An org-protocol project is an entry in `org-protocol-project-alist'
-which is used by `org-protocol-open-source'.
-Optionally use project-plist to initialize the defaults for this project.  If
-project-plist is the CDR of an element in `org-publish-project-alist', reuse
+An org-protocol project is an entry in
+`org-protocol-project-alist' which is used by
+`org-protocol-open-source'.  Optionally use PROJECT-PLIST to
+initialize the defaults for this project.  If PROJECT-PLIST is
+the cdr of an element in `org-publish-project-alist', reuse
 :base-directory, :html-extension and :base-extension."
   (interactive)
   (let ((working-dir (expand-file-name
