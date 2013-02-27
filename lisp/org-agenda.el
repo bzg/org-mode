@@ -1632,7 +1632,7 @@ range, respectively."
 		  (string :tag "Format string")
 		  (function))))
 
-(defcustom org-agenda-scheduled-leaders '("Scheduled: " "Sched.%2dx: ")
+(defcustom org-agenda-scheduled-leaders '(" Scheduled: " "Sched.%3dx: ")
   "Text preceding scheduled items in the agenda view.
 This is a list with two strings.  The first applies when the item is
 scheduled on the current day.  The second applies when it has been scheduled
@@ -1641,6 +1641,8 @@ this item is scheduled, due to automatic rescheduling of unfinished items
 for the following day.  So this number is one larger than the number of days
 that passed since this item was scheduled first."
   :group 'org-agenda-line-format
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(list
 	  (string :tag "Scheduled today     ")
 	  (string :tag "Scheduled previously")))
@@ -1654,13 +1656,15 @@ These entries are added to the agenda when pressing \"[\"."
 	  (string :tag "Scheduled today     ")
 	  (string :tag "Scheduled previously")))
 
-(defcustom org-agenda-deadline-leaders '("Deadline:  " "In %3d d.: ")
+(defcustom org-agenda-deadline-leaders '("  Deadline: " " In %3d d.: " "%3d d. ago: ")
   "Text preceding deadline items in the agenda view.
-This is a list with two strings.  The first applies when the item has its
-deadline on the current day.  The second applies when it is in the past or
-in the future, it may contain %d to capture how many days away the deadline
-is (was)."
+This is a list with three strings.  The first applies when the item has its
+deadline on the current day.  The second applies when the deadline is in the
+future, the third one when it is in the past.  The strings may contain %d
+to capture the number of days."
   :group 'org-agenda-line-format
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(list
 	  (string :tag "Deadline today   ")
 	  (choice :tag "Deadline relative"
@@ -5899,6 +5903,9 @@ See also the user option `org-agenda-clock-consistency-checks'."
 	 (regexp org-deadline-time-regexp)
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date)) ; DATE bound by calendar
+	 (dl0 (car org-agenda-deadline-leaders))
+	 (dl1 (nth 1 org-agenda-deadline-leaders))
+	 (dl2 (or (nth 2 org-agenda-deadline-leaders) dl1))
 	 d2 diff dfrac wdays pos pos1 category category-pos level
 	 tags suppress-prewarning ee txt head face s todo-state
 	 show-all upcomingp donep timestr warntime inherited-tags ts-date)
@@ -5983,15 +5990,16 @@ See also the user option `org-agenda-clock-consistency-checks'."
 			    (concat (substring s (match-beginning 1)) " "))
 		    (setq timestr 'time))
 		  (setq txt (org-agenda-format-item
-			     (if (= diff 0)
-				 (car org-agenda-deadline-leaders)
-			       (if (functionp
-				    (nth 1 org-agenda-deadline-leaders))
-				   (funcall
-				    (nth 1 org-agenda-deadline-leaders)
-				    diff date)
-				 (format (nth 1 org-agenda-deadline-leaders)
-					 diff)))
+			     (cond ((= diff 0) dl0)
+				   ((> diff 0)
+				    (if (functionp dl1)
+					(funcall dl1 diff date)
+				      (format dl1 diff)))
+				   (t
+				    (if (functionp dl2)
+					(funcall dl2 diff date)
+				      (format dl2 (if (string= dl2 dl1)
+						      diff (abs diff))))))
 			     head level category tags
 			     (if (not (= diff 0)) nil timestr)))))
 	      (when txt
