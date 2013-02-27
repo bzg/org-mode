@@ -5913,7 +5913,7 @@ Result depends on variable `org-highlight-latex-and-related'."
 LIMIT bounds the search for syntax to highlight.  Stop at first
 highlighted object, if any.  Return t if some highlighting was
 done, nil otherwise."
-  (when org-highlight-latex-and-related
+  (when (org-string-nw-p org-latex-and-related-regexp)
     (catch 'found
       (while (re-search-forward org-latex-and-related-regexp limit t)
 	(unless (memq (car-safe (get-text-property (1+ (match-beginning 0))
