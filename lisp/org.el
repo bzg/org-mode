@@ -5830,15 +5830,15 @@ by a #."
   (if (and (re-search-forward org-tsr-regexp-both limit t)
 	   (not (equal (char-before (match-beginning 0)) 91)))
       (progn
-	(org-remove-flyspell-overlays-in (match-beginning 1) (match-end 1))
-	(add-text-properties (match-beginning 1) (match-end 1)
+	(org-remove-flyspell-overlays-in (match-beginning 0) (match-end 0))
+	(add-text-properties (match-beginning 0) (match-end 0)
 			     (list 'mouse-face 'highlight
 				   'keymap org-mouse-map))
-	(org-rear-nonsticky-at (match-end 1))
+	(org-rear-nonsticky-at (match-end 0))
 	(when org-display-custom-times
-	  (if (match-end 4)
-	      (org-display-custom-time (match-beginning 4) (match-end 4)))
-	  (org-display-custom-time (match-beginning 2) (match-end 2)))
+	  (if (match-end 3)
+	      (org-display-custom-time (match-beginning 3) (match-end 3)))
+	  (org-display-custom-time (match-beginning 1) (match-end 1)))
 	t)))
 
 (defvar org-target-link-regexp nil
