@@ -309,12 +309,12 @@ references."
 (defvar org-bracket-link-regexp)
 (defun org-babel-spec-to-string (spec)
   "Insert SPEC into the current file.
-Insert the source-code specified by SPEC into the current
-source code file.  This function uses `comment-region' which
-assumes that the appropriate major-mode is set.  SPEC has the
-form
 
-  (start-line file link source-name params body comment)"
+Insert the source-code specified by SPEC into the current source
+code file.  This function uses `comment-region' which assumes
+that the appropriate major-mode is set.  SPEC has the form:
+
+  \(start-line file link source-name params body comment)"
   (let* ((start-line (nth 0 spec))
 	 (file (nth 1 spec))
 	 (link (nth 2 spec))
@@ -346,8 +346,7 @@ form
     (insert
      (format
       "%s\n"
-      (replace-regexp-in-string
-       "^," ""
+      (org-unescape-code-in-string
        (org-babel-trim body (if org-src-preserve-indentation "[\f\n\r\v]")))))
     (when link-p
       (funcall
