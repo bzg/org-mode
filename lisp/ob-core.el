@@ -530,7 +530,7 @@ block."
 		       (string= "yes" (cdr (assoc :cache params)))))
 	 (new-hash (when cache-p (org-babel-sha1-hash info)))
 	 (old-hash (when cache-p (org-babel-current-result-hash)))
-	 (cache-current (and (not arg) new-hash (equal new-hash old-hash))))
+	 (cache-current-p (and (not arg) new-hash (equal new-hash old-hash))))
     (when (or cache-current-p
 	      (org-babel-confirm-evaluate
 	       (let ((i info))
