@@ -133,6 +133,11 @@ This overrides `org-email-link-description-format' if set."
   :group 'org-contacts
   :type 'file)
 
+(defcustom org-contacts-enable-completion t
+  "Enable or not the completion in `message-mode' with `org-contacts'."
+  :group 'org-contacts
+  :type 'boolean)
+
 ;; Decalre external functions and variables
 (declare-function wl-summary-message-number "ext:wl-summary" ())
 (declare-function wl-address-header-extract-address "ext:wl-address")
@@ -642,7 +647,8 @@ This adds `org-contacts-gnus-check-mail-address' and
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-check-mail-address)
   (add-hook 'gnus-article-prepare-hook 'org-contacts-gnus-store-last-mail))
 
-(when (boundp 'completion-at-point-functions)
+(when (and org-contacts-enable-completion
+	   (boundp 'completion-at-point-functions))
   (add-hook 'message-mode-hook
 	    (lambda ()
 	      (add-to-list 'completion-at-point-functions
