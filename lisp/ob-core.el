@@ -531,11 +531,12 @@ block."
 			 (org-babel-process-params
 			  (org-babel-merge-params (nth 2 info) params))
 		       (nth 2 info)))
-	     (cache? (and (not arg) (cdr (assoc :cache params))
+	     (cache-p (and (not arg) (cdr (assoc :cache params))
 			  (string= "yes" (cdr (assoc :cache params)))))
 	     (result-params (cdr (assoc :result-params params)))
-	     (new-hash (when cache? (org-babel-sha1-hash info)))
-	     (old-hash (when cache? (org-babel-current-result-hash)))
+	     (new-hash (when cache-p (org-babel-sha1-hash info)))
+	     (old-hash (when cache-p (org-babel-current-result-hash)))
+	     (cache-current-p (and (not arg) new-hash (equal new-hash old-hash)))
 	     (body (setf (nth 1 info)
 			 (if (org-babel-noweb-p params :eval)
 			     (org-babel-expand-noweb-references info)
@@ -562,7 +563,7 @@ block."
 			  (funcall lang-check (symbol-name
 					       (cdr (assoc lang org-src-lang-modes))))
 			  (error "No org-babel-execute function for %s!" lang))))
-	      (if (and (not arg) new-hash (equal new-hash old-hash))
+	      (if cache-current-p
 		  (save-excursion ;; return cached result
 		    (goto-char (org-babel-where-is-src-block-result nil info))
 		    (end-of-line 1) (forward-char 1)
