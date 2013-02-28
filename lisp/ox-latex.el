@@ -875,13 +875,17 @@ file name as its single argument."
 
 (defcustom org-latex-logfiles-extensions
   '("aux" "idx" "log" "out" "toc" "nav" "snm" "vrb")
-  "The list of file extensions to consider as LaTeX logfiles."
+  "The list of file extensions to consider as LaTeX logfiles.
+The logfiles will be remove if `org-latex-remove-logfiles' is
+non-nil."
   :group 'org-export-latex
   :type '(repeat (string :tag "Extension")))
 
 (defcustom org-latex-remove-logfiles t
   "Non-nil means remove the logfiles produced by PDF production.
-These are the .aux, .log, .out, and .toc files."
+By default, logfiles are files with these extensions: .aux, .idx,
+.log, .out, .toc, .nav, .snm and .vrb.  To define the set of
+logfiles to remove, set `org-latex-logfiles-extensions'."
   :group 'org-export-latex
   :type 'boolean)
 

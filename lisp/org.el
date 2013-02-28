@@ -18832,8 +18832,7 @@ If not, return to the original position and throw an error."
   "Hook for activating single-letter speed commands.
 `org-speed-commands-default' specifies a minimal command set.
 Use `org-speed-commands-user' for further customization."
-  (when (or (and (bolp) (looking-at org-outline-regexp)
-		 (not (org-in-block-p '("src"))))
+  (when (or (and (bolp) (looking-at org-outline-regexp))
 	    (and (functionp org-use-speed-commands)
 		 (funcall org-use-speed-commands)))
     (cdr (assoc keys (append org-speed-commands-user
