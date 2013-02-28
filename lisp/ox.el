@@ -297,6 +297,10 @@ This variable is set with `org-export-define-backend' and
 The value should be a list.  Its CAR is the action, as a symbol,
 and its CDR is a list of export options.")
 
+(defvar org-export-dispatch-last-position (make-marker)
+  "The position where the last export command was created using the dispatcher.
+This marker will be used with `C-u C-c C-e' to make sure export repetition
+uses the same subtree if the previous command was restricted to a subtree.")
 
 
 ;;; User-configurable Variables
@@ -5310,17 +5314,23 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
 		((and arg org-export-dispatch-last-action))
 		(t (save-window-excursion
 		     (unwind-protect
-			 ;; Store this export command.
-			 (setq org-export-dispatch-last-action
-			       (org-export--dispatch-ui
-				(list org-export-initial-scope
-				      (and org-export-in-background 'async))
-				nil
-				org-export-dispatch-use-expert-ui))
+			 (progn
+			   ;; Remember where we are
+			   (move-marker org-export-dispatch-last-position
+					(point))
+			   ;; Get and store an export command
+			   (setq org-export-dispatch-last-action
+				 (org-export--dispatch-ui
+				  (list org-export-initial-scope
+					(and org-export-in-background 'async))
+				  nil
+				  org-export-dispatch-use-expert-ui)))
 		       (and (get-buffer "*Org Export Dispatcher*")
 			    (kill-buffer "*Org Export Dispatcher*")))))))
 	 (action (car input))
 	 (optns (cdr input)))
+    (unless (memq 'subtree optns)
+      (move-marker org-export-dispatch-last-position nil))
     (case action
       ;; First handle special hard-coded actions.
       (stack (org-export-stack))
@@ -5336,13 +5346,23 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
 		    (memq 'force optns)
 		    (memq 'async optns)))
       (publish-all (org-publish-all (memq 'force optns) (memq 'async optns)))
-      (otherwise (funcall action
-			  ;; Return a symbol instead of a list to ease
-			  ;; asynchronous export macro use.
-			  (and (memq 'async optns) t)
-			  (and (memq 'subtree optns) t)
-			  (and (memq 'visible optns) t)
-			  (and (memq 'body optns) t))))))
+      (otherwise
+       (save-excursion
+	 (when arg
+	   ;; Repeating command, maybe move cursor
+	   ;; to restore subtree context
+	   (if (eq (marker-buffer org-export-dispatch-last-position)
+		   (current-buffer))
+	       (goto-char org-export-dispatch-last-position)
+	     ;; We are in a differnet buffer, forget position
+	     (move-marker org-export-dispatch-last-position nil)))
+	 (funcall action
+		  ;; Return a symbol instead of a list to ease
+		  ;; asynchronous export macro use.
+		  (and (memq 'async optns) t)
+		  (and (memq 'subtree optns) t)
+		  (and (memq 'visible optns) t)
+		  (and (memq 'body optns) t)))))))
 
 (defun org-export--dispatch-ui (options first-key expertp)
   "Handle interface for `org-export-dispatch'.
