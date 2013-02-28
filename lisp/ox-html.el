@@ -1323,9 +1323,6 @@ CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (concat
    (format "<div id=\"%s\">\n" (nth 1 org-html-divs))
-   ;; Document title.
-   (format "<h1 class=\"title\">%s</h1>\n"
-	   (org-export-data (plist-get info :title) info))
    ;; Table of contents.
    (let ((depth (plist-get info :with-toc)))
      (when depth (org-html-toc depth info)))
@@ -1373,6 +1370,10 @@ holding export options."
 	       (or link-home link-up))))
    ;; Preamble.
    (org-html--build-preamble info)
+   ;; Document title.
+   (let ((title (plist-get info :title)))
+     (when title
+       (format "<h1 class=\"title\">%s</h1>\n" (org-export-data title info))))
    ;; Document contents.
    contents
    ;; Postamble.
