@@ -18833,7 +18833,10 @@ If not, return to the original position and throw an error."
 `org-speed-commands-default' specifies a minimal command set.
 Use `org-speed-commands-user' for further customization."
   (when (or (and (bolp) (looking-at org-outline-regexp)
-		 (not (org-in-block-p '("src"))))
+		 ;; FIXME org-speed-commands-forbidden-blocks?
+		 (not (org-in-block-p
+		       '("src" "example" "verse" "html"
+			 "latex" "ascii" "beamer" "odt"))))
 	    (and (functionp org-use-speed-commands)
 		 (funcall org-use-speed-commands)))
     (cdr (assoc keys (append org-speed-commands-user
