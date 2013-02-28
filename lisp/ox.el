@@ -5317,7 +5317,8 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
 			 (progn
 			   ;; Remember where we are
 			   (move-marker org-export-dispatch-last-position
-					(point))
+					(point)
+					(org-base-buffer (current-buffer)))
 			   ;; Get and store an export command
 			   (setq org-export-dispatch-last-action
 				 (org-export--dispatch-ui
@@ -5352,7 +5353,7 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
 	   ;; Repeating command, maybe move cursor
 	   ;; to restore subtree context
 	   (if (eq (marker-buffer org-export-dispatch-last-position)
-		   (current-buffer))
+		   (org-base-buffer (current-buffer)))
 	       (goto-char org-export-dispatch-last-position)
 	     ;; We are in a differnet buffer, forget position
 	     (move-marker org-export-dispatch-last-position nil)))
