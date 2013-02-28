@@ -439,13 +439,13 @@ A group FOO is composed of contacts with the tag FOO."
 		if email-list
 		;; … append a list of USER <EMAIL>.
 		nconc (loop for email in email-list
-			    collect (org-contacts-format-email contact-name email)))))
+			    collect (org-contacts-format-email contact-name email))))
+	 (completion-list (org-contacts-all-completions-prefix
+			   string
+			   (remove-duplicates completion-list :test #'equalp))))
     (when completion-list
       (list start end
-	    (org-contacts-make-collection-prefix
-	     (org-contacts-all-completions-prefix
-	      string
-	      (remove-duplicates completion-list :test #'equalp)))))))
+	    (org-contacts-make-collection-prefix completion-list)))))
 
 (defun org-contacts-message-complete-function (&optional start)
   "Function used in `completion-at-point-functions' in `message-mode'."
