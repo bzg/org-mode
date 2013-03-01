@@ -3210,7 +3210,9 @@ the settings have already been scoped and we do not wish to overrule other,
 higher priority settings.
 If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
   (interactive "FWrite agenda to file: \nP")
-  (if (not (file-writable-p file))
+  (if (or (not (file-writable-p file))
+	  (and (file-exists-p file)
+	       (not (y-or-n-p (format "Overwrite existing file %s? " file)))))
       (error "Cannot write agenda to file %s" file))
   (org-let (if nosettings nil org-agenda-exporter-settings)
     '(save-excursion
