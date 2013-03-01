@@ -354,6 +354,7 @@ form
        insert-comment
        (org-fill-template org-babel-tangle-comment-format-end link-data)))))
 
+(defvar org-comment-string) ;; Defined in org.el
 (defun org-babel-tangle-collect-blocks (&optional language)
   "Collect source blocks in the current Org-mode file.
 Return an association list of source-code block specifications of

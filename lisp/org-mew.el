@@ -126,6 +126,7 @@ with \"t\" key."
 (declare-function mew-case-folder "ext:mew-func" (case folder))
 (declare-function mew-folder-path-to-folder
 		  "ext:mew-func" (path &optional has-proto))
+(declare-function mew-idstr-to-id-list "ext:mew-header" (idstr &optional rev))
 (declare-function mew-folder-remotep "ext:mew-func" (folder))
 (declare-function mew-folder-virtualp "ext:mew-func" (folder))
 (declare-function mew-header-get-value "ext:mew-header"
