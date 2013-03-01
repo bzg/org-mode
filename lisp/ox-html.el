@@ -1791,8 +1791,17 @@ INFO is a plist used as a communication channel."
 					   headline-number "-"))))
 	    ;; Body.
 	    (concat section-number
-		    (org-export-data
-		     (org-export-get-alt-title headline info) info)
+		    (org-export-data-with-translations
+		     (org-export-get-alt-title headline info)
+		     ;; Ignore any footnote-reference, link,
+		     ;; radio-target and target in table of contents.
+		     (nconc
+		      '((footnote-reference . ignore)
+			(link . (lambda (link contents i) contents))
+			(radio-target . (lambda (radio contents i) contents))
+			(target . ignore))
+		      (org-export-backend-translate-table 'html))
+		     info)
 		    (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags)))))
 
 (defun org-html-list-of-listings (info)
@@ -2128,6 +2137,9 @@ holding contextual information."
 			 extra-ids "")
 			full-text
 			level1)
+		;; When there is no section, pretend there is an empty
+		;; one to get the correct <div class="outline- ...>
+		;; which is needed by `org-info.js'.
 		(if (not (eq (org-element-type first-content) 'section))
 		    (concat (org-html-section first-content "" info)
 			    contents)
