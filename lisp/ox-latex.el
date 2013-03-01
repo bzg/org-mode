@@ -1506,7 +1506,7 @@ holding contextual information."
   "Default format function for a headline.
 See `org-latex-format-headline-function' for details."
   (concat
-   (and todo (format "\\textbf{\\textsc{\\textsf{%s}}} " todo))
+   (and todo (format "{\\bfseries\\sffamily %s} " todo))
    (and priority (format "\\framebox{\\#%c} " priority))
    text
    (and tags
