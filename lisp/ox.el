@@ -5091,6 +5091,10 @@ and
 	     "%S"
 	     `(with-temp-buffer
 		,(when org-export-async-debug '(setq debug-on-error t))
+		;; Ignore `org-mode-hook' as it has been run already
+		;; in the original buffer.  Ignore `kill-emacs-hook'
+		;; as we need a truly non-interactive process.
+		(setq org-mode-hook nil kill-emacs-hook nil)
 		;; Initialize `org-mode' and export framework in the
 		;; external process.
 		(org-mode)
