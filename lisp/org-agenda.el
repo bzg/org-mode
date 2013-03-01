@@ -3432,43 +3432,6 @@ removed from the entry content.  Currently only `planning' is allowed here."
 		(setq txt (buffer-substring (point-min) (point)))))))))
     txt))
 
-(defun org-agenda-collect-markers ()
-  "Collect the markers pointing to entries in the agenda buffer."
-  (let (m markers)
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-	(when (setq m (or (org-get-at-bol 'org-hd-marker)
-			  (org-get-at-bol 'org-marker)))
-	  (push m markers))
-	(beginning-of-line 2)))
-    (nreverse markers)))
-
-(defun org-create-marker-find-array (marker-list)
-  "Create a alist of files names with all marker positions in that file."
-  (let (f tbl m a p)
-    (while (setq m (pop marker-list))
-      (setq p (marker-position m)
-	    f (buffer-file-name (or (buffer-base-buffer
-				     (marker-buffer m))
-				    (marker-buffer m))))
-      (if (setq a (assoc f tbl))
-	  (push (marker-position m) (cdr a))
-	(push (list f p) tbl)))
-    (mapcar (lambda (x) (setcdr x (sort (copy-sequence (cdr x)) '<)) x)
-	    tbl)))
-
-(defvar org-agenda-marker-table nil) ; dynamically scoped parameter
-(defun org-check-agenda-marker-table ()
-  "Check of the current entry is on the marker list."
-  (let ((file (buffer-file-name (or (buffer-base-buffer) (current-buffer))))
-	a)
-    (and (setq a (assoc file org-agenda-marker-table))
-	 (save-match-data
-	   (save-excursion
-	     (org-back-to-heading t)
-	     (member (point) (cdr a)))))))
-
 (defun org-check-for-org-mode ()
   "Make sure current buffer is in org-mode.  Error if not."
   (or (derived-mode-p 'org-mode)

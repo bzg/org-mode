@@ -285,20 +285,23 @@ re-read the iCalendar file.")
 
 ;;; Internal Functions
 
-(defun org-icalendar-create-uid (file &optional bell)
+(defun org-icalendar-create-uid (file &optional bell h-markers)
   "Set ID property on headlines missing it in FILE.
 When optional argument BELL is non-nil, inform the user with
-a message if the file was modified."
-  (let (modified-flag)
+a message if the file was modified.  With optional argument
+H-MARKERS non-nil, it is a list of markers for the headlines
+which will be updated."
+  (let (modified-flag pt)
+    (when h-markers (setq pt (goto-char (car h-markers))))
     (org-map-entries
      (lambda ()
        (let ((entry (org-element-at-point)))
-	 (unless (org-element-property :ID entry)
+	 (unless (or (< (point) pt) (org-element-property :ID entry))
 	   (org-id-get-create)
 	   (setq modified-flag t)
 	   (forward-line))
-	 (when (eq (org-element-type entry) 'inlinetask)
-	   (setq org-map-continue-from (org-element-property :end entry)))))
+	 (setq org-map-continue-from
+	       (if h-markers (pop h-markers) (point-max)))))
      nil nil 'comment)
     (when (and bell modified-flag)
       (message "ID properties created in file \"%s\"" file)
@@ -888,8 +891,32 @@ The file is stored under the name chosen in
 	  `(apply 'org-icalendar--combine-files nil ',files)))
     (apply 'org-icalendar--combine-files nil (org-agenda-files t))))
 
-(declare-function org-agenda-collect-markers "org-agenda" ())
-(declare-function org-create-marker-find-array "org-agenda" (marker-list))
+(defun org-agenda-collect-markers ()
+  "Collect the markers pointing to entries in the agenda buffer."
+  (let (m markers)
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+	(when (setq m (or (org-get-at-bol 'org-hd-marker)
+			  (org-get-at-bol 'org-marker)))
+	  (push m markers))
+	(beginning-of-line 2)))
+    (nreverse markers)))
+
+(defun org-create-marker-find-array (marker-list)
+  "Create an alist of files names with all marker positions in that file."
+  (let (f tbl m a p)
+    (while (setq m (pop marker-list))
+      (setq p (marker-position m)
+	    f (buffer-file-name
+	       (or (buffer-base-buffer (marker-buffer m))
+		   (marker-buffer m))))
+      (if (setq a (assoc f tbl))
+	  (push (marker-position m) (cdr a))
+	(push (list f p) tbl)))
+    (mapcar (lambda (x) (setcdr x (sort (copy-sequence (cdr x)) '<)) x)
+	    tbl)))
+
 (defun org-icalendar-export-current-agenda (file)
   "Export current agenda view to an iCalendar FILE.
 This function assumes major mode for current buffer is
@@ -930,11 +957,10 @@ files to build the calendar from."
 		(catch 'nextfile
 		  (org-check-agenda-file file)
 		  (with-current-buffer (org-get-agenda-file-buffer file)
-		    ;; Create ID if necessary.
-		    (when org-icalendar-store-UID
-		      (org-icalendar-create-uid file))
-		    (let ((marks (cdr (assoc (expand-file-name file)
-					     restriction))))
+		    (let ((marks (cdr (assoc (expand-file-name file) restriction))))
+		      ;; Create ID if necessary.
+		      (when org-icalendar-store-UID
+			(org-icalendar-create-uid file t marks))
 		      (unless (and restriction (not marks))
 			;; Add a hook adding :ICALENDAR_MARK: property
 			;; to each entry appearing in agenda view.
