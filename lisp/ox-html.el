@@ -2108,7 +2108,8 @@ holding contextual information."
 	     (preferred-id (car ids))
 	     (extra-ids (cdr ids))
 	     (extra-class (org-element-property :HTML_CONTAINER_CLASS headline))
-	     (level1 (+ level (1- org-html-toplevel-hlevel))))
+	     (level1 (+ level (1- org-html-toplevel-hlevel)))
+	     (first-content (car (org-element-contents headline))))
 	(format "<div id=\"%s\" class=\"%s\">%s%s</div>\n"
 		(format "outline-container-%s"
 			(or (org-element-property :CUSTOM_ID headline)
@@ -2127,7 +2128,10 @@ holding contextual information."
 			 extra-ids "")
 			full-text
 			level1)
-		contents))))))
+		(if (not (eq (org-element-type first-content) 'section))
+		    (concat (org-html-section first-content "" info)
+			    contents)
+		  contents)))))))
 
 
 ;;;; Horizontal Rule
