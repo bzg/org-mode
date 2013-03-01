@@ -388,29 +388,7 @@ The function must accept six parameters:
   TAGS      the inlinetask tags, as a list of strings.
   CONTENTS  the contents of the inlinetask, as a string.
 
-The function should return the string to be exported.
-
-For example, the variable could be set to the following function
-in order to mimic default behaviour:
-
-\(defun org-html-format-inlinetask \(todo type priority name tags contents\)
-\"Format an inline task element for HTML export.\"
-  \(let \(\(full-title
-	 \(concat
-	  \(when todo
-            \(format \"\\\\textbf{\\\\textsf{\\\\textsc{%s}}} \" todo))
-	  \(when priority (format \"\\\\framebox{\\\\#%c} \" priority))
-	  title
-	  \(when tags (format \"\\\\hfill{}\\\\textsc{%s}\" tags)))))
-    \(format (concat \"\\\\begin{center}\\n\"
-		    \"\\\\fbox{\\n\"
-		    \"\\\\begin{minipage}[c]{.6\\\\textwidth}\\n\"
-		    \"%s\\n\\n\"
-		    \"\\\\rule[.8em]{\\\\textwidth}{2pt}\\n\\n\"
-		    \"%s\"
-		    \"\\\\end{minipage}}\"
-		    \"\\\\end{center}\")
-	    full-title contents))"
+The function should return the string to be exported."
   :group 'org-export-html
   :type 'function)
 
@@ -1323,6 +1301,10 @@ CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (concat
    (format "<div id=\"%s\">\n" (nth 1 org-html-divs))
+   ;; Document title.
+   (let ((title (plist-get info :title)))
+     (when title
+       (format "<h1 class=\"title\">%s</h1>\n" (org-export-data title info))))
    ;; Table of contents.
    (let ((depth (plist-get info :with-toc)))
      (when depth (org-html-toc depth info)))
@@ -1370,10 +1352,6 @@ holding export options."
 	       (or link-home link-up))))
    ;; Preamble.
    (org-html--build-preamble info)
-   ;; Document title.
-   (let ((title (plist-get info :title)))
-     (when title
-       (format "<h1 class=\"title\">%s</h1>\n" (org-export-data title info))))
    ;; Document contents.
    contents
    ;; Postamble.
