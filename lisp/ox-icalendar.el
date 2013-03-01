@@ -891,39 +891,37 @@ The file is stored under the name chosen in
 	  `(apply 'org-icalendar--combine-files nil ',files)))
     (apply 'org-icalendar--combine-files nil (org-agenda-files t))))
 
-(defun org-agenda-collect-markers ()
-  "Collect the markers pointing to entries in the agenda buffer."
-  (let (m markers)
-    (save-excursion
-      (goto-char (point-min))
-      (while (not (eobp))
-	(when (setq m (or (org-get-at-bol 'org-hd-marker)
-			  (org-get-at-bol 'org-marker)))
-	  (push m markers))
-	(beginning-of-line 2)))
-    (nreverse markers)))
-
-(defun org-create-marker-find-array (marker-list)
-  "Create an alist of files names with all marker positions in that file."
-  (let (f tbl m a p)
-    (while (setq m (pop marker-list))
-      (setq p (marker-position m)
-	    f (buffer-file-name
-	       (or (buffer-base-buffer (marker-buffer m))
-		   (marker-buffer m))))
-      (if (setq a (assoc f tbl))
-	  (push (marker-position m) (cdr a))
-	(push (list f p) tbl)))
-    (mapcar (lambda (x) (setcdr x (sort (copy-sequence (cdr x)) '<)) x)
-	    tbl)))
-
 (defun org-icalendar-export-current-agenda (file)
   "Export current agenda view to an iCalendar FILE.
 This function assumes major mode for current buffer is
 `org-agenda-mode'."
-  (let ((org-icalendar-combined-agenda-file file))
+  (let ((org-icalendar-combined-agenda-file file)
+	(marker-list
+	 ;; Collect the markers pointing to entries in the current
+	 ;; agenda buffer.
+	 (let (markers)
+	   (save-excursion
+	     (goto-char (point-min))
+	     (while (not (eobp))
+	       (let ((m (or (org-get-at-bol 'org-hd-marker)
+			    (org-get-at-bol 'org-marker))))
+		 (and m (push m markers)))
+	       (beginning-of-line 2)))
+	   (nreverse markers))))
     (apply 'org-icalendar--combine-files
-	   (org-create-marker-find-array (org-agenda-collect-markers))
+	   ;; Build restriction alist.
+	   (let (restriction)
+	     ;; Sort markers in each association within RESTRICTION.
+	     (mapcar (lambda (x) (setcdr x (sort (copy-sequence (cdr x)) '<)) x)
+		     (dolist (m marker-list restriction)
+		       (let* ((pos (marker-position m))
+			      (file (buffer-file-name
+				     (org-base-buffer (marker-buffer m))))
+			      (file-markers (assoc file restriction)))
+			 ;; Add POS in FILE association if one exists
+			 ;; or create a new association for FILE.
+			 (if file-markers (push pos (cdr file-markers))
+			   (push (list file pos) restriction))))))
 	   (org-agenda-files nil 'ifmode))))
 
 (defun org-icalendar--combine-files (restriction &rest files)
