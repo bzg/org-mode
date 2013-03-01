@@ -988,6 +988,13 @@ removed from entry text before it is shown in the agenda."
   :group 'org-agenda
   :type '(repeat (regexp)))
 
+(defcustom org-agenda-entry-text-leaders "    > "
+  "Text prepended to the entry text in agenda buffers."
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :group 'org-agenda
+  :type 'string)
+
 (defvar org-agenda-entry-text-cleanup-hook nil
   "Hook that is run after basic cleanup of entry text to be shown in agenda.
 This cleanup is done in a temporary buffer, so the function may inspect and
@@ -3816,7 +3823,8 @@ This check for agenda markers in all agenda buffers currently active."
       (error "No marker points to an entry here"))
     (setq txt (concat "\n" (org-no-properties
 			    (org-agenda-get-some-entry-text
-			     m org-agenda-entry-text-maxlines "    > "))))
+			     m org-agenda-entry-text-maxlines
+			     org-agenda-entry-text-leaders))))
     (when (string-match "\\S-" txt)
       (setq o (make-overlay (point-at-bol) (point-at-eol)))
       (overlay-put o 'evaporate t)
