@@ -101,7 +101,8 @@
    (verbatim . org-html-verbatim)
    (verse-block . org-html-verse-block))
   :export-block "HTML"
-  :filters-alist ((:filter-final-output . org-html-final-function))
+  :filters-alist ((:filter-options . org-html-infojs-install-script)
+		  (:filter-final-output . org-html-final-function))
   :menu-entry
   (?h "Export to HTML"
       ((?H "As HTML buffer" org-html-export-as-html)
@@ -386,8 +387,7 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
   "Install script in export options when appropriate.
 EXP-PLIST is a plist containing export options.  BACKEND is the
 export back-end currently used."
-  (unless (or (not (org-export-derived-backend-p backend 'html))
-	      (not org-html-use-infojs)
+  (unless (or (not org-html-use-infojs)
 	      (and (eq org-html-use-infojs 'when-configured)
 		   (or (not (plist-get exp-plist :infojs-opt))
 		       (string-match "\\<view:nil\\>"
@@ -463,8 +463,6 @@ export back-end currently used."
       ;; Return the modified property list.
       exp-plist)))
 
-(when org-html-use-infojs
-  (add-to-list 'org-export-filter-options-functions 'org-html-infojs-install-script))
 
 ;;;; Bold etc
 
