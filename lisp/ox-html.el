@@ -2352,18 +2352,7 @@ used as a communication channel."
 	 (parent (org-export-get-parent-element link))
 	 (caption (org-export-data (org-export-get-caption parent) info))
 	 (label (org-element-property :name parent))
-	 ;; Retrieve latex attributes from the PARENT element. HACK:
-	 ;; Only do this for the first link in PARENT.  This is needed
-	 ;; as long as attributes cannot be set on a per link basis.
-	 (attr (when (eq link (org-element-map parent 'link 'identity info t))
-		 (let ((raw-attr
-			(mapconcat #'identity
-				   (org-element-property :attr_html parent)
-				   " ")))
-		   (unless (string= raw-attr "") raw-attr)))))
-    ;; Now clear ATTR from any special keyword and set a default
-    ;; value if nothing is left.
-    (setq attr (if (not attr) "" (org-trim attr)))
+	 (attr (mapconcat #'identity (org-element-property :attr_html parent) " ")))
     ;; Return proper string, depending on DISPOSITION.
     (org-html-format-inline-image
      path caption label attr (org-html-standalone-image-p link info))))
@@ -2481,7 +2470,7 @@ INFO is a plist holding contextual information.  See
 				   (string-match (regexp-quote (car att)) desc))
 			att))
 		    " "))))
-	 (setq attributes (concat " " attributes)))
+	 (unless (string= attributes "") (concat " " attributes)))
     (cond
      ;; Image file.
      ((and (or (eq t org-html-inline-images)
@@ -2575,12 +2564,13 @@ INFO is a plist holding contextual information.  See
      ;; equivalent line number.
      ((string= type "coderef")
       (let ((fragment (concat "coderef-" path)))
-	(format "<a href=\"#%s\" %s%s>%s</a>"
+	(format "<a href=\"#%s\"%s%s>%s</a>"
 		fragment
-		(format (concat "class=\"coderef\""
-				" onmouseover=\"CodeHighlightOn(this, '%s');\""
-				" onmouseout=\"CodeHighlightOff(this, '%s');\"")
-			fragment fragment)
+		(org-trim
+		 (format (concat "class=\"coderef\""
+				 " onmouseover=\"CodeHighlightOn(this, '%s');\""
+				 " onmouseout=\"CodeHighlightOff(this, '%s');\"")
+			 fragment fragment))
 		attributes
 		(format (org-export-get-coderef-format path desc)
 			(org-export-resolve-coderef path info)))))
