@@ -10516,11 +10516,11 @@ buttons: @r{Should view-toggle buttons be everywhere?  When @code{nil} (the}
          @r{default), only one such button will be present.}
 @end example
 @noindent
-@vindex org-infojs-options
-@vindex org-export-html-use-infojs
+@vindex org-html-infojs-options
+@vindex org-html-use-infojs
 You can choose default values for these options by customizing the variable
-@code{org-infojs-options}.  If you always want to apply the script to your
-pages, configure the variable @code{org-export-html-use-infojs}.
+@code{org-html-infojs-options}.  If you always want to apply the script to your
+pages, configure the variable @code{org-html-use-infojs}.
 
 @node @LaTeX{} and PDF export, OpenDocument Text export, HTML export, Exporting
 @section @LaTeX{} and PDF export
