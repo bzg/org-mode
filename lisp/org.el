@@ -12605,7 +12605,7 @@ of `org-todo-keywords-1'."
     (message "%d TODO entries found"
 	     (org-occur (concat "^" org-outline-regexp " *" kwd-re )))))
 
-(defun org-deadline (&optional arg time)
+(defun org-deadline (arg &optional time)
   "Insert the \"DEADLINE:\" string with a timestamp to make a deadline.
 With one universal prefix argument, remove any deadline from the item.
 With two universal prefix arguments, prompt for a warning delay.
@@ -12621,6 +12621,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 	 org-loop-over-headlines-in-active-region
 	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (let* ((old-date (org-entry-get nil "DEADLINE"))
+	   (old-date-time (org-time-string-to-time old-date))
 	   (repeater (and old-date
 			  (string-match
 			   "\\([.+-]+[0-9]+[hdwmy]\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
@@ -12643,11 +12644,12 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		(replace-match
 		 (concat org-deadline-string
 			 " <" rpl
-			 (format " -%dd" (abs
-					  (- (time-to-days
-					      (save-match-data
-						(org-read-date nil t nil "Warn starting from")))
-					     (time-to-days nil))))
+			 (format " -%dd"
+				 (abs
+				  (- (time-to-days
+				      (save-match-data
+					(org-read-date nil t nil "Warn starting from" old-date-time)))
+				     (time-to-days old-date-time))))
 			 ">") t t))
 	    (user-error "No deadline information to update"))))
        (t
@@ -12672,7 +12674,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 			    (substring org-last-inserted-timestamp -1))))))
 	(message "Deadline on %s" org-last-inserted-timestamp))))))
 
-(defun org-schedule (&optional arg time)
+(defun org-schedule (arg &optional time)
   "Insert the SCHEDULED: string with a timestamp to schedule a TODO item.
 With one universal prefix argument, remove any scheduling date from the item.
 With two universal prefix arguments, prompt for a delay cookie.
@@ -12688,6 +12690,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 	 org-loop-over-headlines-in-active-region
 	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (let* ((old-date (org-entry-get nil "SCHEDULED"))
+	   (old-date-time (org-time-string-to-time old-date))
 	   (repeater (and old-date
 			  (string-match
 			   "\\([.+-]+[0-9]+[hdwmy]\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
@@ -12711,11 +12714,12 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 		(replace-match
 		 (concat org-scheduled-string
 			 " <" rpl
-			 (format " -%dd" (abs
-					  (- (time-to-days
-					      (save-match-data
-						(org-read-date nil t nil "Delay until")))
-					     (time-to-days nil))))
+			 (format " -%dd"
+				 (abs
+				  (- (time-to-days
+				      (save-match-data
+					(org-read-date nil t nil "Delay until" old-date-time)))
+				     (time-to-days old-date-time))))
 			 ">") t t))
 	    (user-error "No scheduled information to update"))))
        (t

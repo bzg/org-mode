@@ -4376,6 +4376,7 @@ using `org-open-file'."
  org-odt-file-extensions)
 
 (provide 'ox-odt)
+(provide 'org-odt) ; Stay compatible with <8.0 configurations
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"

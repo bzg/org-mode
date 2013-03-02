@@ -1207,6 +1207,7 @@ Returns value on success, else nil."
 
 
 (provide 'ox-publish)
+(provide 'org-publish) ; Stay compatible with <8.0 configurations
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"
