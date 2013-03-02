@@ -42,6 +42,7 @@
     (setq load-path (cons org-lisp-dir load-path))
     (require 'org)
     (require 'org-id)
+    (require 'ox)
     (org-babel-do-load-languages
      'org-babel-load-languages '((sh . t) (org . t))))
 
