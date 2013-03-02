@@ -27,6 +27,30 @@
 ;;; Code:
 (require 'ox)
 
+(defgroup org-export-org nil
+  "Options for exporting Org mode files to Org."
+  :tag "Org Export Org"
+  :group 'org-export)
+
+(define-obsolete-variable-alias
+  'org-export-htmlized-org-css-url org-org-htmlized-css-url "24.4")
+(defcustom org-org-htmlized-css-url nil
+  "URL pointing to the CSS defining colors for htmlized Emacs buffers.
+Normally when creating an htmlized version of an Org buffer,
+htmlize will create the CSS to define the font colors.  However,
+this does not work when converting in batch mode, and it also can
+look bad if different people with different fontification setup
+work on the same website.  When this variable is non-nil,
+creating an htmlized version of an Org buffer using
+`org-org-export-as-org' will include a link to this URL if the
+setting of `org-html-htmlize-output-type' is 'css."
+  :group 'org-export-org
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type '(choice
+	  (const :tag "Don't include external stylesheet link" nil)
+	  (string :tag "URL or local href")))
+
 (org-export-define-backend org
   ((babel-call . org-org-identity)
    (bold . org-org-identity)
@@ -115,7 +139,27 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
-  (org-publish-org-to 'org filename ".org" plist pub-dir))
+  (org-publish-org-to 'org filename ".org" plist pub-dir)
+  (when (plist-get plist :htmlized-source)
+    (require 'htmlize)
+    (require 'ox-html)
+    (or (find-buffer-visiting filename)
+	(find-file filename))
+    (font-lock-fontify-buffer)
+    (let* ((htmlize-output-type 'css)
+	   (newbuf (htmlize-buffer)))
+      (with-current-buffer newbuf
+	(when org-org-htmlized-css-url
+	  (goto-char (point-min))
+	  (and (re-search-forward
+		"<style type=\"text/css\">[^\000]*?\n[ \t]*</style>.*" nil t)
+	       (replace-match
+		(format
+		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
+		 org-org-htmlized-css-url) t t)))
+	(write-file (concat pub-dir (file-name-nondirectory filename) ".html")))
+      (kill-buffer newbuf))
+    (set-buffer-modified-p nil)))
 
 (provide 'ox-org)
 

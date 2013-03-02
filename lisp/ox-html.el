@@ -712,21 +712,6 @@ in all modes you want.  Then, use the command
   :group 'org-export-html
   :type 'string)
 
-(defcustom org-html-htmlized-org-css-url nil
-  "URL pointing to a CSS file defining text colors for htmlized Emacs buffers.
-Normally when creating an htmlized version of an Org buffer, htmlize will
-create CSS to define the font colors.  However, this does not work when
-converting in batch mode, and it also can look bad if different people
-with different fontification setup work on the same website.
-When this variable is non-nil, creating an htmlized version of an Org buffer
-using `org-export-as-org' will include a link to this URL if the
-setting of `org-html-htmlize-output-type' is 'css."
-  :group 'org-export-html
-  :type '(choice
-	  (const :tag "Don't include external stylesheet link" nil)
-	  (string :tag "URL or local href")))
-
-
 ;;;; Table
 
 (defcustom org-html-table-tag
