@@ -6987,6 +6987,8 @@ If the line does not have an effort defined, return nil."
 
 (defun org-agenda-filter-apply (filter type)
   "Set FILTER as the new agenda filter and apply it."
+  ;; Deactivate `org-agenda-entry-text-mode' when filtering
+  (if org-agenda-entry-text-mode (org-agenda-entry-text-mode))
   (let (tags cat)
     (if (eq type 'tag)
 	(setq org-agenda-tag-filter filter)
@@ -7418,17 +7420,23 @@ so that the date SD will be in that range."
 (defun org-agenda-entry-text-mode (&optional arg)
   "Toggle entry text mode in an agenda buffer."
   (interactive "P")
-  (setq org-agenda-entry-text-mode (or (integerp arg)
-                                       (not org-agenda-entry-text-mode)))
-  (org-agenda-entry-text-hide)
-  (and org-agenda-entry-text-mode
-       (let ((org-agenda-entry-text-maxlines
-	      (if (integerp arg) arg org-agenda-entry-text-maxlines)))
-	 (org-agenda-entry-text-show)))
-  (org-agenda-set-mode-name)
-  (message "Entry text mode is %s.  Maximum number of lines is %d"
-	   (if org-agenda-entry-text-mode "on" "off")
-	   (if (integerp arg) arg org-agenda-entry-text-maxlines)))
+  (if (or org-agenda-tag-filter
+	  org-agenda-category-filter
+	  org-agenda-top-category-filter)
+      (user-error "Can't show entry text in filtered views")
+    (setq org-agenda-entry-text-mode (or (integerp arg)
+					 (not org-agenda-entry-text-mode)))
+    (org-agenda-entry-text-hide)
+    (and org-agenda-entry-text-mode
+	 (let ((org-agenda-entry-text-maxlines
+		(if (integerp arg) arg org-agenda-entry-text-maxlines)))
+	   (org-agenda-entry-text-show)))
+    (org-agenda-set-mode-name)
+    (message "Entry text mode is %s%s"
+	     (if org-agenda-entry-text-mode "on" "off")
+	     (if (not org-agenda-entry-text-mode) ""
+	       (format " (maximum number of lines is %d)"
+		       (if (integerp arg) arg org-agenda-entry-text-maxlines))))))
 
 (defun org-agenda-clockreport-mode (&optional with-filter)
   "Toggle clocktable mode in an agenda buffer.
