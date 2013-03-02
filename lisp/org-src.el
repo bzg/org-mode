@@ -64,7 +64,7 @@ there are kept outside the narrowed region."
 		   (const :tag "from `lang' element")
 		   (const :tag "from `style' element")))))
 
-(defcustom org-edit-src-auto-save-idle-delay 5
+(defcustom org-edit-src-auto-save-idle-delay 0
   "Delay of idle time before auto-saving src code buffers.
 When a positive integer N, save after N seconds of idle time.
 When 0 (the default), don't auto-save."
@@ -350,7 +350,10 @@ the display of windows containing the Org buffer and the code buffer."
 	 (if org-src-preserve-indentation col (max 0 (- col total-nindent))))
 	(org-src-mode)
 	(set-buffer-modified-p nil)
-	(setq buffer-file-name nil)
+	(setq buffer-file-name nil
+	      buffer-auto-save-file-name
+	      (concat (make-temp-name "org-src-")
+		      (format-time-string "-%Y-%d-%m") ".txt"))
 	(and org-edit-src-persistent-message
 	     (org-set-local 'header-line-format msg))
 	(let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
@@ -373,7 +376,7 @@ the display of windows containing the Org buffer and the code buffer."
 				     (buffer-list))))
 			 (cancel-timer org-edit-src-code-timer)
 			 (setq org-edit-src-code-timer)))))))))
-      t)))
+	t)))
 
 (defun org-edit-src-continue (e)
   "Continue editing source blocks." ;; Fixme: be more accurate
