@@ -137,10 +137,10 @@
 (defvar htmlize-buffer-places)  ; from htmlize.el
 
 (defconst org-html-special-string-regexps
-  '(("\\\\-" . "&shy;")
-    ("---\\([^-]\\)" . "&mdash;\\1")
-    ("--\\([^-]\\)" . "&ndash;\\1")
-    ("\\.\\.\\." . "&hellip;"))
+  '(("\\\\-" . "&#x00ad;")		; shy
+    ("---\\([^-]\\)" . "&#x2014;\\1")	; mdash
+    ("--\\([^-]\\)" . "&#x2013;\\1")	; ndash
+    ("\\.\\.\\." . "&#x2026;"))		; hellip
   "Regular expressions for special string conversion.")
 
 (defconst org-html-scripts
@@ -1580,7 +1580,7 @@ INFO is a plist used as a communication channel."
 		       (concat org-html-tag-class-prefix
 			       (org-html-fix-class-name tag))
 		       tag))
-	     tags "&nbsp;"))))
+	     tags "&#xa0;"))))
 
 ;;;; Headline
 
@@ -1594,7 +1594,7 @@ INFO is a plist used as a communication channel."
 	(todo (org-html--todo todo))
 	(tags (org-html--tags tags)))
     (concat section-number todo (and todo " ") text
-	    (and tags "&nbsp;&nbsp;&nbsp;") tags)))
+	    (and tags "&#xa0;&#xa0;&#xa0;") tags)))
 
 ;;;; Src Code
 
@@ -1781,7 +1781,7 @@ INFO is a plist used as a communication channel."
 			(target . ignore))
 		      (org-export-backend-translate-table 'html))
 		     info)
-		    (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags)))))
+		    (and tags "&#xa0;&#xa0;&#xa0;") (org-html--tags tags)))))
 
 (defun org-html-list-of-listings (info)
   "Build a list of listings.
@@ -2185,7 +2185,7 @@ contextual information."
 
 (defun org-html-checkbox (checkbox)
   (case checkbox (on "<code>[X]</code>")
-	(off "<code>[&nbsp;]</code>")
+	(off "<code>[&#xa0;]</code>")
 	(trans "<code>[-]</code>")
 	(t "")))
 
@@ -2857,7 +2857,7 @@ channel."
 			" align=\"%s\"" " class=\"%s\"")
 		    (org-export-table-cell-alignment table-cell info)))))
     (when (or (not contents) (string= "" (org-trim contents)))
-      (setq contents "&nbsp;"))
+      (setq contents "&#xa0;"))
     (cond
      ((and (org-export-table-has-header-p table info)
 	   (= 1 (org-export-table-row-group table-row info)))
@@ -3010,7 +3010,7 @@ information."
   (let ((value (org-html-plain-text
 		(org-timestamp-translate timestamp) info)))
     (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
-	    (replace-regexp-in-string "--" "&ndash;" value))))
+	    (replace-regexp-in-string "--" "&#x2013;" value))))
 
 
 ;;;; Underline
@@ -3050,7 +3050,7 @@ contextual information."
   (while (string-match "^[ \t]+" contents)
     (let* ((num-ws (length (match-string 0 contents)))
 	   (ws (let (out) (dotimes (i num-ws out)
-			    (setq out (concat out "&nbsp;"))))))
+			    (setq out (concat out "&#xa0;"))))))
       (setq contents (replace-match ws nil t contents))))
   (format "<p class=\"verse\">\n%s</p>" contents))
 
