@@ -183,18 +183,21 @@ used to limit the exported source code blocks by language."
   (mapc (lambda (el) (copy-file el pub-dir t)) (org-babel-tangle-file filename)))
 
 ;;;###autoload
-(defun org-babel-tangle (&optional only-this-block target-file lang)
+(defun org-babel-tangle (arg &optional target-file lang)
   "Write code blocks to source-specific files.
 Extract the bodies of all source code blocks from the current
-file into their own source-specific files.  Optional argument
-TARGET-FILE can be used to specify a default export file for all
-source blocks.  Optional argument LANG can be used to limit the
-exported source code blocks by language."
+file into their own source-specific files.
+With one universal prefix argument, only tangle the block at point.
+When two universal prefix arguments, only tangle blocks for the
+tangle file of the block at point.
+Optional argument TARGET-FILE can be used to specify a default
+export file for all source blocks.  Optional argument LANG can be
+used to limit the exported source code blocks by language."
   (interactive "P")
   (run-hooks 'org-babel-pre-tangle-hook)
-  ;; possibly restrict the buffer to the current code block
+  ;; Possibly Restrict the buffer to the current code block
   (save-restriction
-    (when only-this-block
+    (when (equal arg '(4))
       (unless (org-babel-where-is-src-block-head)
 	(error "Point is not currently inside of a code block"))
       (save-match-data
@@ -217,6 +220,10 @@ exported source code blocks by language."
 		 (org-babel-merge-params org-babel-default-header-args
 					 (list (cons :tangle target-file)))
 	       org-babel-default-header-args))
+	    (tangle-file
+	     (when (equal arg '(16))
+	       (or (cdr (assoc :tangle (nth 2 (org-babel-get-src-block-info))))
+		   (read-from-minibuffer "Tangle to: " (buffer-file-name)))))
 	    path-collector)
 	(mapc ;; map over all languages
 	 (lambda (by-lang)
@@ -277,7 +284,7 @@ exported source code blocks by language."
 		      (setq block-counter (+ 1 block-counter))
 		      (add-to-list 'path-collector file-name)))))
 	      specs)))
-	 (org-babel-tangle-collect-blocks lang))
+	 (org-babel-tangle-collect-blocks lang tangle-file))
 	(message "Tangled %d code block%s from %s" block-counter
 		 (if (= block-counter 1) "" "s")
 		 (file-name-nondirectory
@@ -354,33 +361,36 @@ that the appropriate major-mode is set.  SPEC has the form:
        (org-fill-template org-babel-tangle-comment-format-end link-data)))))
 
 (defvar org-comment-string) ;; Defined in org.el
-(defun org-babel-tangle-collect-blocks (&optional language)
+(defun org-babel-tangle-collect-blocks (&optional lang tangle-file)
   "Collect source blocks in the current Org-mode file.
 Return an association list of source-code block specifications of
 the form used by `org-babel-spec-to-string' grouped by language.
 Optional argument LANG can be used to limit the collected source
-code blocks by language."
+code blocks by language.  Optional argument TANGLE-FILE can be
+used to limit the collected code blocks by target file."
   (let ((block-counter 1) (current-heading "") blocks)
     (org-babel-map-src-blocks (buffer-file-name)
-      ((lambda (new-heading)
-	 (if (not (string= new-heading current-heading))
-	     (progn
-	       (setq block-counter 1)
-	       (setq current-heading new-heading))
-	   (setq block-counter (+ 1 block-counter))))
-       (replace-regexp-in-string "[ \t]" "-"
-				 (condition-case nil
-				     (or (nth 4 (org-heading-components))
-					 "(dummy for heading without text)")
-				   (error (buffer-file-name)))))
+      (lambda (new-heading)
+	(if (not (string= new-heading current-heading))
+	    (progn
+	      (setq block-counter 1)
+	      (setq current-heading new-heading))
+	  (setq block-counter (+ 1 block-counter))))
+      (replace-regexp-in-string "[ \t]" "-"
+				(condition-case nil
+				    (or (nth 4 (org-heading-components))
+					"(dummy for heading without text)")
+				  (error (buffer-file-name))))
       (let* ((start-line
 	      (save-restriction (widen) (+ 1 (line-number-at-pos (point)))))
 	     (file (buffer-file-name))
 	     (info (org-babel-get-src-block-info 'light))
-	     (src-lang (nth 0 info)))
+	     (src-lang (nth 0 info))
+	     (src-tfile (cdr (assoc :tangle (nth 2 info)))))
         (unless (or (string-match (concat "^" org-comment-string) current-heading)
-		    (string= (cdr (assoc :tangle (nth 2 info))) "no"))
-          (unless (and language (not (string= language src-lang)))
+		    (string= (cdr (assoc :tangle (nth 2 info))) "no")
+		    (and tangle-file (not (equal tangle-file src-tfile))))
+          (unless (and lang (not (string= lang src-lang)))
 	    (let* ((info (org-babel-get-src-block-info))
 		   (params (nth 2 info))
 		   (extra (nth 3 info))
@@ -401,7 +411,7 @@ code blocks by language."
 		   (assignments-cmd
 		    (intern (concat "org-babel-variable-assignments:" src-lang)))
 		   (body
-		    ((lambda (body) ;; run the tangle-body-hook
+		    ((lambda (body) ;; Run the tangle-body-hook
 		       (with-temp-buffer
 			 (insert body)
 			 (when (string-match "-r" extra)
@@ -411,7 +421,7 @@ code blocks by language."
 			     (replace-match "")))
 			 (run-hooks 'org-babel-tangle-body-hook)
 			 (buffer-string)))
-		     ((lambda (body) ;; expand the body in language specific manner
+		     ((lambda (body) ;; Expand the body in language specific manner
 			(if (assoc :no-expand params)
 			    body
 			  (if (fboundp expand-cmd)
@@ -426,13 +436,13 @@ code blocks by language."
 		   (comment
 		    (when (or (string= "both" (cdr (assoc :comments params)))
 			      (string= "org" (cdr (assoc :comments params))))
-		      ;; from the previous heading or code-block end
+		      ;; From the previous heading or code-block end
 		      (funcall
 		       org-babel-process-comment-text
 		       (buffer-substring
 			(max (condition-case nil
 				 (save-excursion
-				   (org-back-to-heading t)  ; sets match data
+				   (org-back-to-heading t)  ; Sets match data
 				   (match-end 0))
 			       (error (point-min)))
 			     (save-excursion
@@ -442,7 +452,7 @@ code blocks by language."
 				 (point-min))))
 			(point)))))
 		   by-lang)
-	      ;; add the spec for this block to blocks under it's language
+	      ;; Add the spec for this block to blocks under it's language
 	      (setq by-lang (cdr (assoc src-lang blocks)))
 	      (setq blocks (delq (assoc src-lang blocks) blocks))
 	      (setq blocks (cons
@@ -450,7 +460,7 @@ code blocks by language."
 				  (cons (list start-line file link
 					      source-name params body comment)
 					by-lang)) blocks)))))))
-    ;; ensure blocks in the correct order
+    ;; Ensure blocks are in the correct order
     (setq blocks
           (mapcar
 	   (lambda (by-lang) (cons (car by-lang) (reverse (cdr by-lang))))
