@@ -1,9 +1,0 @@
-This directory contains the obsolete libraries for exporting .org
-files to various formats.
-
-It is kept here for archiving purpose and to ease the reading of the
-source code, in case it helps with users migrating to the new export
-engine.
-
-If you want to use the old exporters, you should checkout the maint
-branch of Org's repository and reload Org.
