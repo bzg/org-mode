@@ -1548,7 +1548,15 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	  (message (concat "Clock stopped at %s after "
 			   (org-minutes-to-clocksum-string (+ (* 60 h) m)) "%s")
 		   te (if remove " => LINE REMOVED" ""))
-          (run-hooks 'org-clock-out-hook)
+	  (let ((h org-clock-out-hook))
+	    ;; If a closing note needs to be stored in the drawer
+	    ;; where clocks are stored, let's temporarily disable
+	    ;; `org-clock-remove-empty-clock-drawer'
+	    (if (and (equal org-clock-into-drawer org-log-into-drawer)
+		     (eq org-log-done 'note)
+		     org-clock-out-when-done)
+		(setq h (delq 'org-clock-remove-empty-clock-drawer h)))
+	    (mapc (lambda (f) (funcall f)) h))
 	  (unless (org-clocking-p)
 	    (setq org-clock-current-task nil)))))))
 
