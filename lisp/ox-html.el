@@ -1793,10 +1793,10 @@ INFO is a plist used as a communication channel."
 		     (org-export-get-alt-title headline info)
 		     ;; Ignore any footnote-reference, link,
 		     ;; radio-target and target in table of contents.
-		     (nconc
+		     (append
 		      '((footnote-reference . ignore)
-			(link . (lambda (link contents i) contents))
-			(radio-target . (lambda (radio contents i) contents))
+			(link . (lambda (link desc i) desc))
+			(radio-target . (lambda (radio desc i) desc))
 			(target . ignore))
 		      (org-export-backend-translate-table 'html))
 		     info)
