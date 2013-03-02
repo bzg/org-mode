@@ -2480,7 +2480,8 @@ INFO is a plist holding contextual information.  See
 				   (string-match (regexp-quote (car att)) desc))
 			att))
 		    " "))))
-	 (unless (string= attributes "") (concat " " attributes)))
+	 (unless (string= attributes "")
+	   (setq attributes (concat " " attributes))))
     (cond
      ;; Image file.
      ((and (or (eq t org-html-inline-images)
