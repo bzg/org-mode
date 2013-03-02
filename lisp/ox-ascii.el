@@ -1946,7 +1946,6 @@ Return output file name."
 
 
 (provide 'ox-ascii)
-(provide 'org-ascii) ; Stay compatible with <8.0 configurations
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"

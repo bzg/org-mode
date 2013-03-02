@@ -3216,7 +3216,6 @@ Return output file name."
 ;;;; alt = (file-name-nondirectory path)
 
 (provide 'ox-html)
-(provide 'org-html) ; Stay compatible with <8.0 configurations
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"

@@ -990,7 +990,6 @@ files to build the calendar from."
 
 
 (provide 'ox-icalendar)
-(provide 'org-icalendar) ; Stay compatible with <8.0 configurations
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"

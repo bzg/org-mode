@@ -1244,7 +1244,6 @@ Return output file name."
 
 
 (provide 'ox-beamer)
-(provide 'org-beamer) ; Stay compatible with <8.0 configurations
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"
