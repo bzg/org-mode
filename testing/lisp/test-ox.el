@@ -247,25 +247,19 @@ Paragraph"
 
 (ert-deftest test-org-export/handle-options ()
   "Test if export options have an impact on output."
-  ;; Test exclude tags.
-  (org-test-with-temp-text "* Head1 :noexport:"
-    (org-test-with-backend test
-      (should
-       (equal (org-export-as 'test nil nil nil '(:exclude-tags ("noexport")))
-	      ""))))
-  ;; Test include tags.
-  (org-test-with-temp-text "
-* Head1
-* Head2
-** Sub-Head2.1 :export:
-*** Sub-Head2.1.1
-* Head2"
-    (org-test-with-backend test
-      (should
-       (equal
-	"* Head2\n** Sub-Head2.1 :export:\n*** Sub-Head2.1.1\n"
-	(let ((org-tags-column 0))
-	  (org-export-as 'test nil nil nil '(:select-tags ("export"))))))))
+  ;; Test exclude tags for headlines and inlinetasks.
+  (should
+   (equal ""
+	  (org-test-with-temp-text "* Head1 :noexp:"
+	    (org-test-with-backend test
+	      (org-export-as 'test nil nil nil '(:exclude-tags ("noexp")))))))
+  ;; Test include tags for headlines and inlinetasks.
+  (should
+   (equal "* H2\n** Sub :exp:\n*** Sub Sub\n"
+	  (org-test-with-temp-text "* H1\n* H2\n** Sub :exp:\n*** Sub Sub\n* H3"
+	    (let ((org-tags-column 0))
+	      (org-test-with-backend test
+		(org-export-as 'test nil nil nil '(:select-tags ("exp"))))))))
   ;; Test mixing include tags and exclude tags.
   (org-test-with-temp-text "
 * Head1 :export:
@@ -281,16 +275,18 @@ Paragraph"
 	 'test nil nil nil
 	 '(:select-tags ("export") :exclude-tags ("noexport")))))))
   ;; Ignore tasks.
-  (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-    (org-test-with-temp-text "* TODO Head1"
-      (org-test-with-backend test
-	(should (equal (org-export-as 'test nil nil nil '(:with-tasks nil))
-		       "")))))
-  (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
-    (org-test-with-temp-text "* TODO Head1"
-      (org-test-with-backend test
-	(should (equal (org-export-as 'test nil nil nil '(:with-tasks t))
-		       "* TODO Head1\n")))))
+  (should
+   (equal ""
+	  (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+	    (org-test-with-temp-text "* TODO Head1"
+	      (org-test-with-backend test
+		(org-export-as 'test nil nil nil '(:with-tasks nil)))))))
+  (should
+   (equal "* TODO Head1\n"
+	  (let ((org-todo-keywords '((sequence "TODO" "DONE"))))
+	    (org-test-with-temp-text "* TODO Head1"
+	      (org-test-with-backend test
+		(org-export-as 'test nil nil nil '(:with-tasks t)))))))
   ;; Archived tree.
   (org-test-with-temp-text "* Head1 :archive:"
     (let ((org-archive-tag "archive"))
@@ -1229,6 +1225,35 @@ Paragraph[fn:1]"
 	 tree 'headline
 	 (lambda (h) (if (org-export-last-sibling-p h info) 'yes 'no))
 	 info))))))
+
+(ert-deftest test-org-export/handle-inlinetasks ()
+  "Test inlinetask export."
+  ;; Inlinetask with an exclude tag.
+  (when (featurep 'org-inlinetask)
+    (should
+     (equal
+      ""
+      (let ((org-inlinetask-min-level 3))
+	(org-test-with-temp-text "*** Inlinetask :noexp:\nContents\n*** end"
+	  (org-test-with-backend test
+	    (org-export-as 'test nil nil nil '(:exclude-tags ("noexp"))))))))
+    ;; Inlinetask with an include tag.
+    (should
+     (equal
+      "* H2\n*** Inline :exp:\n"
+      (let ((org-inlinetask-min-level 3)
+	    (org-tags-column 0))
+	(org-test-with-temp-text "* H1\n* H2\n*** Inline :exp:"
+	  (org-test-with-backend test
+	    (org-export-as 'test nil nil nil '(:select-tags ("exp"))))))))
+    ;; Ignore inlinetask with a TODO keyword and tasks excluded.
+    (should
+     (equal ""
+	    (let ((org-todo-keywords '((sequence "TODO" "DONE")))
+		  (org-inlinetask-min-level 3))
+	      (org-test-with-temp-text "*** TODO Inline"
+		(org-test-with-backend test
+		  (org-export-as 'test nil nil nil '(:with-tasks nil)))))))))
 
 
 
