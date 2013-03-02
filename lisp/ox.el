@@ -1854,40 +1854,47 @@ export options."
     ignore))
 
 (defun org-export--selected-trees (data info)
-  "Return list of headlines containing a select tag in their tree.
+  "Return list of headlines and inlinetasks with a select tag in their tree.
 DATA is parsed data as returned by `org-element-parse-buffer'.
 INFO is a plist holding export options."
   (let* (selected-trees
-	 walk-data			; for byte-compiler.
+	 walk-data			; For byte-compiler.
 	 (walk-data
 	  (function
 	   (lambda (data genealogy)
-	     (case (org-element-type data)
-	       (org-data (mapc (lambda (el) (funcall walk-data el genealogy))
-			       (org-element-contents data)))
-	       (headline
-		(let ((tags (org-element-property :tags data)))
-		  (if (loop for tag in (plist-get info :select-tags)
-			    thereis (member tag tags))
-		      ;; When a select tag is found, mark full
-		      ;; genealogy and every headline within the tree
-		      ;; as acceptable.
-		      (setq selected-trees
-			    (append
-			     genealogy
-			     (org-element-map data 'headline 'identity)
-			     selected-trees))
-		    ;; Else, continue searching in tree, recursively.
-		    (mapc
-		     (lambda (el) (funcall walk-data el (cons data genealogy)))
-		     (org-element-contents data))))))))))
-    (funcall walk-data data nil) selected-trees))
+	     (let ((type (org-element-type data)))
+	       (cond
+		((memq type '(headline inlinetask))
+		 (let ((tags (org-element-property :tags data)))
+		   (if (loop for tag in (plist-get info :select-tags)
+			     thereis (member tag tags))
+		       ;; When a select tag is found, mark full
+		       ;; genealogy and every headline within the tree
+		       ;; as acceptable.
+		       (setq selected-trees
+			     (append
+			      genealogy
+			      (org-element-map data '(headline inlinetask)
+				'identity)
+			      selected-trees))
+		     ;; If at a headline, continue searching in tree,
+		     ;; recursively.
+		     (when (eq type 'headline)
+		       (mapc (lambda (el)
+			       (funcall walk-data el (cons data genealogy)))
+			     (org-element-contents data))))))
+		((or (eq type 'org-data)
+		     (memq type org-element-greater-elements))
+		 (mapc (lambda (el) (funcall walk-data el genealogy))
+		       (org-element-contents data)))))))))
+    (funcall walk-data data nil)
+    selected-trees))
 
 (defun org-export--skip-p (blob options selected)
   "Non-nil when element or object BLOB should be skipped during export.
 OPTIONS is the plist holding export options.  SELECTED, when
-non-nil, is a list of headlines belonging to a tree with a select
-tag."
+non-nil, is a list of headlines or inlinetasks belonging to
+a tree with a select tag."
   (case (org-element-type blob)
     (clock (not (plist-get options :with-clocks)))
     (drawer
@@ -1902,13 +1909,15 @@ tag."
 		  (if (eq (car with-drawers-p) 'not)
 		      (member-ignore-case name (cdr with-drawers-p))
 		    (not (member-ignore-case name with-drawers-p))))))))
-    (headline
+    ((headline inlinetask)
      (let ((with-tasks (plist-get options :with-tasks))
 	   (todo (org-element-property :todo-keyword blob))
 	   (todo-type (org-element-property :todo-type blob))
 	   (archived (plist-get options :with-archived-trees))
 	   (tags (org-element-property :tags blob)))
        (or
+	(and (eq (org-element-type blob) 'inlinetask)
+	     (not (plist-get options :with-inlinetasks)))
 	;; Ignore subtrees with an exclude tag.
 	(loop for k in (plist-get options :exclude-tags)
 	      thereis (member k tags))
@@ -1925,7 +1934,6 @@ tag."
 		 (and (memq with-tasks '(todo done))
 		      (not (eq todo-type with-tasks)))
 		 (and (consp with-tasks) (not (member todo with-tasks))))))))
-    (inlinetask (not (plist-get options :with-inlinetasks)))
     ((latex-environment latex-fragment) (not (plist-get options :with-latex)))
     (planning (not (plist-get options :with-plannings)))
     (statistics-cookie (not (plist-get options :with-statistics-cookies)))
