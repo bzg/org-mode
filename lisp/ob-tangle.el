@@ -183,7 +183,7 @@ used to limit the exported source code blocks by language."
   (mapc (lambda (el) (copy-file el pub-dir t)) (org-babel-tangle-file filename)))
 
 ;;;###autoload
-(defun org-babel-tangle (arg &optional target-file lang)
+(defun org-babel-tangle (&optional arg target-file lang)
   "Write code blocks to source-specific files.
 Extract the bodies of all source code blocks from the current
 file into their own source-specific files.

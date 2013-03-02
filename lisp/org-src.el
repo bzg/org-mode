@@ -792,7 +792,7 @@ with \",*\", \",#+\", \",,*\" and \",,#+\"."
       (user-error "Use C-c ' to save and exit, C-c C-k to abort editing")
     (org-src-in-org-buffer (save-buffer))))
 
-(declare-function org-babel-tangle "ob-tangle" (&optional only-this-block target-file lang))
+(declare-function org-babel-tangle "ob-tangle" (&optional arg target-file lang))
 
 (defun org-src-tangle (arg)
   "Tangle the parent buffer."
