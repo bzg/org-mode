@@ -26,14 +26,15 @@
 
 ;;; Code:
 (require 'ox)
+(declare-function htmlize-buffer "htmlize" (&optional buffer))
 
 (defgroup org-export-org nil
   "Options for exporting Org mode files to Org."
   :tag "Org Export Org"
-  :group 'org-export)
+  :group 'org-export
+  :version "24.4"
+  :package-version '(Org . "8.0"))
 
-(define-obsolete-variable-alias
-  'org-export-htmlized-org-css-url org-org-htmlized-css-url "24.4")
 (defcustom org-org-htmlized-css-url nil
   "URL pointing to the CSS defining colors for htmlized Emacs buffers.
 Normally when creating an htmlized version of an Org buffer,
@@ -45,11 +46,11 @@ creating an htmlized version of an Org buffer using
 `org-org-export-as-org' will include a link to this URL if the
 setting of `org-html-htmlize-output-type' is 'css."
   :group 'org-export-org
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Don't include external stylesheet link" nil)
 	  (string :tag "URL or local href")))
+(define-obsolete-variable-alias
+  'org-export-htmlized-org-css-url org-org-htmlized-css-url "24.4")
 
 (org-export-define-backend org
   ((babel-call . org-org-identity)
