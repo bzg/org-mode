@@ -118,10 +118,9 @@
    (:html-mathjax "HTML_MATHJAX" nil "" space)
    (:html-postamble nil "html-postamble" org-html-postamble)
    (:html-preamble nil "html-preamble" org-html-preamble)
-   (:html-style nil nil org-html-style)
-   (:html-style-extra "HTML_STYLE" nil org-html-style-extra newline)
-   (:html-style-include-default nil nil org-html-style-include-default)
-   (:html-style-include-scripts nil nil org-html-style-include-scripts)
+   (:html-head "HTML_HEAD" nil org-html-head newline)
+   (:html-style-include-default nil nil org-html-head-include-default-style)
+   (:html-head-include-scripts nil nil org-html-head-include-scripts)
    (:html-table-tag nil nil org-html-table-tag)
    (:html-htmlized-css-url "HTML_HTMLIZED_CSS_URL" nil org-html-htmlized-org-css-url)
    ;; Redefine regular options.
@@ -244,10 +243,9 @@ for the JavaScript code in this tag.
   /*]]>*/-->
 </style>"
   "The default style specification for exported HTML files.
-Please use the variables `org-html-style' and
-`org-html-style-extra' to add to this style.  If you wish to not
-have the default style included, customize the variable
-`org-html-style-include-default'.")
+You can use `org-html-head' and `org-html-head-extra' to add to
+this style.  If you don't want to include this default style,
+customize `org-html-head-include-default-style'.")
 
 
 
@@ -452,8 +450,8 @@ export back-end currently used."
 	     (setq style (replace-match style t t template))
 	     (setq exp-plist
 		   (plist-put
-		    exp-plist :html-style-extra
-		    (concat (or (plist-get exp-plist :html-style-extra) "")
+		    exp-plist :html-head-extra
+		    (concat (or (plist-get exp-plist :html-head-extra) "")
 			    "\n"
 			    style)))))
       ;; This script absolutely needs the table of contents, so we
@@ -1069,33 +1067,42 @@ ignored."
 
 ;;;; Template :: Scripts
 
-(defcustom org-html-style-include-scripts t
+(define-obsolete-variable-alias
+  'org-html-style-include-scripts 'org-html-head-include-scripts "24.4")
+(defcustom org-html-head-include-scripts t
   "Non-nil means include the JavaScript snippets in exported HTML files.
 The actual script is defined in `org-html-scripts' and should
 not be modified."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 
 ;;;; Template :: Styles
 
-(defcustom org-html-style-include-default t
+(define-obsolete-variable-alias
+  'org-html-style-include-default 'org-html-head-include-default-style "24.4")
+(defcustom org-html-head-include-default-style t
   "Non-nil means include the default style in exported HTML files.
-The actual style is defined in `org-html-style-default' and should
-not be modified.  Use the variables `org-html-style' to add
-your own style information."
+The actual style is defined in `org-html-style-default' and
+should not be modified.  Use `org-html-head' to add your own
+style information."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 ;;;###autoload
-(put 'org-html-style-include-default 'safe-local-variable 'booleanp)
+(put 'org-html-head-include-default-style 'safe-local-variable 'booleanp)
 
-(defcustom org-html-style ""
-  "Org-wide style definitions for exported HTML files.
+(define-obsolete-variable-alias 'org-html-style 'org-html-head "24.4")
+(defcustom org-html-head ""
+  "Org-wide head definitions for exported HTML files.
 
-This variable needs to contain the full HTML structure to provide a style,
-including the surrounding HTML tags.  If you set the value of this variable,
-you should consider to include definitions for the following classes:
- title, todo, done, timestamp, timestamp-kwd, tag, target.
+This variable can contain the full HTML structure to provide a
+style, including the surrounding HTML tags.  You can consider
+including definitions for the following classes: title, todo,
+done, timestamp, timestamp-kwd, tag, target.
 
 For example, a valid value would be:
 
@@ -1109,29 +1116,19 @@ For example, a valid value would be:
     ]]>
    </style>
 
-If you'd like to refer to an external style file, use something like
+If you want to refer to an external style, use something like
 
-   <link rel=\"stylesheet\" type=\"text/css\" href=\"mystyles.css\">
+   <link rel=\"stylesheet\" type=\"text/css\" href=\"mystyles.css\" />
 
-As the value of this option simply gets inserted into the HTML <head> header,
-you can \"misuse\" it to add arbitrary text to the header.
-See also the variable `org-html-style-extra'."
+As the value of this option simply gets inserted into the HTML
+<head> header, you can use it to add any arbitrary text to the
+header."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 ;;;###autoload
-(put 'org-html-style 'safe-local-variable 'stringp)
-
-(defcustom org-html-style-extra ""
-  "Additional style information for HTML export.
-The value of this variable is inserted into the HTML buffer right after
-the value of `org-html-style'.  Use this variable for per-file
-settings of style information, and do not forget to surround the style
-settings with <style>...</style> tags."
-  :group 'org-export-html
-  :type 'string)
-;;;###autoload
-(put 'org-html-style-extra 'safe-local-variable 'stringp)
-
+(put 'org-html-head 'safe-local-variable 'stringp)
 
 ;;;; Todos
 
@@ -1383,8 +1380,7 @@ INFO is a plist used as a communication channel."
 	       (eq org-html-htmlize-output-type 'css))
       (format "<link rel=\"stylesheet\" href=\"%s\" type=\"text/css\" />\n"
 	      (plist-get info :html-htmlized-css-url)))
-    (org-element-normalize-string (plist-get info :html-style-extra))
-    (when (plist-get info :html-style-include-scripts) org-html-scripts))))
+    (when (plist-get info :html-head-include-scripts) org-html-scripts))))
 
 (defun org-html--build-mathjax-config (info)
   "Insert the user setup into the mathjax template.
