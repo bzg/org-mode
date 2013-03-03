@@ -499,6 +499,7 @@ A group FOO is composed of contacts with the tag FOO."
                ;; show the next heading
                (org-flag-heading nil)))))))
 
+(org-no-warnings (defvar date)) ;; unprefixed, from calendar.el
 (defun org-contacts-anniversaries (&optional field format)
   "Compute FIELD anniversary for each contact, returning FORMAT.
 Default FIELD value is \"BIRTHDAY\".
@@ -512,8 +513,7 @@ Format is a string matching the following format specification:
   (let ((calendar-date-style 'american)
         (entry ""))
     (unless format (setq format org-contacts-birthday-format))
-    (loop with date = nil 		; FIXME: prevent a warning
-	  for contact in (org-contacts-filter)
+    (loop for contact in (org-contacts-filter)
           for anniv = (let ((anniv (cdr (assoc-string
                                          (or field org-contacts-birthday-property)
                                          (caddr contact)))))
