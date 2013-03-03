@@ -3219,7 +3219,8 @@ If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
   (interactive "FWrite agenda to file: \nP")
   (if (or (not (file-writable-p file))
 	  (and (file-exists-p file)
-	       (not (y-or-n-p (format "Overwrite existing file %s? " file)))))
+	       (if (called-interactively-p 'any)
+		   (not (y-or-n-p (format "Overwrite existing file %s? " file))))))
       (error "Cannot write agenda to file %s" file))
   (org-let (if nosettings nil org-agenda-exporter-settings)
     '(save-excursion
