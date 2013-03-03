@@ -1907,7 +1907,7 @@ channel."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format (or (cdr (assq 'code org-html-text-markup-alist)) "%s")
-	  (org-element-property :value code)))
+	  (org-html-plain-text (org-element-property :value code) info)))
 
 
 ;;;; Drawer
@@ -3037,7 +3037,7 @@ holding contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format (or (cdr (assq 'verbatim org-html-text-markup-alist)) "%s")
-	  (org-element-property :value verbatim)))
+	  (org-html-plain-text (org-element-property :value verbatim) info)))
 
 
 ;;;; Verse Block
