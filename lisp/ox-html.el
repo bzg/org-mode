@@ -119,7 +119,7 @@
    (:html-postamble nil "html-postamble" org-html-postamble)
    (:html-preamble nil "html-preamble" org-html-preamble)
    (:html-head "HTML_HEAD" nil org-html-head newline)
-   (:html-style-include-default nil nil org-html-head-include-default-style)
+   (:html-head-include-default-style nil nil org-html-head-include-default-style)
    (:html-head-include-scripts nil nil org-html-head-include-scripts)
    (:html-table-tag nil nil org-html-table-tag)
    ;; Redefine regular options.
@@ -1357,7 +1357,7 @@ INFO is a plist used as a communication channel."
 INFO is a plist used as a communication channel."
   (org-element-normalize-string
    (concat
-    (when (plist-get info :html-style-include-default)
+    (when (plist-get info :html-head-include-default-style)
       (org-element-normalize-string org-html-style-default))
     (org-element-normalize-string (plist-get info :html-style))
     (when (and (plist-get info :html-htmlized-css-url)
