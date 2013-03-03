@@ -5205,8 +5205,6 @@ The following commands are available:
   ;; Calc embedded
   (org-set-local 'calc-embedded-open-mode "# ")
   ;; Modify a few syntax entries
-  (modify-syntax-entry ?{ "(")
-  (modify-syntax-entry ?} ")")
   (modify-syntax-entry ?@ "w")
   (modify-syntax-entry ?\" "\"")
   (if org-startup-truncated (setq truncate-lines t))
