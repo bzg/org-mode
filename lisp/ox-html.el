@@ -122,7 +122,6 @@
    (:html-style-include-default nil nil org-html-head-include-default-style)
    (:html-head-include-scripts nil nil org-html-head-include-scripts)
    (:html-table-tag nil nil org-html-table-tag)
-   (:html-htmlized-css-url "HTML_HTMLIZED_CSS_URL" nil org-html-htmlized-org-css-url)
    ;; Redefine regular options.
    (:creator "CREATOR" nil org-html-creator-string)
    (:with-latex nil "tex" org-html-with-latex)
