@@ -1063,6 +1063,9 @@ be returned that indicates what went wrong."
      ((eq what 'addheading)
       (if (org-on-heading-p) ; if false we are in top-level of file
 	  (progn
+	    ;; Workaround a `org-insert-heading-respect-content' bug
+	    ;; which prevents correct insertion when point is invisible
+	    (org-show-subtree)
 	    (end-of-line 1)
 	    (org-insert-heading-respect-content t)
 	    (org-demote))
