@@ -7345,23 +7345,26 @@ frame is not changed."
 
 ;;; Inserting headlines
 
-(defun org-previous-line-empty-p ()
+(defun org-previous-line-empty-p (&optional next)
+  "Is the previous line a blank line?
+When NEXT is non-nil, check the next line instead."
   (save-excursion
     (and (not (bobp))
-	 (or (beginning-of-line 0) t)
+	 (or (beginning-of-line (if next 2 0)) t)
 	 (save-match-data
 	   (looking-at "[ \t]*$")))))
 
-(defun org-insert-heading (&optional force-heading invisible-ok)
+(defun org-insert-heading (&optional arg invisible-ok)
   "Insert a new heading or item with same depth at point.
-If point is in a plain list and FORCE-HEADING is nil, create a new list item.
-If point is at the beginning of a headline, insert a sibling before the
-current headline.  If point is not at the beginning, split the line,
-create the new headline with the text in the current line after point
-\(but see also the variable `org-M-RET-may-split-line').
+If point is in a plain list and ARG is nil, create a new list item.
+With one universal prefix argument, insert a heading even in lists.
+With two universal prefix arguments, insert the heading at the end
+of the parent subtree.
 
-With a double prefix arg, force the heading to be inserted at the
-end of the parent subtree.
+If point is at the beginning of a headline, insert a sibling before
+the current headline.  If point is not at the beginning, split the line
+and create a new headline with the text in the current line after point
+\(see `org-M-RET-may-split-line' on how to modify this behavior).
 
 When INVISIBLE-OK is set, stop at invisible headlines when going back.
 This is important for non-interactive uses of the command."
@@ -7370,12 +7373,17 @@ This is important for non-interactive uses of the command."
 	  (and (not (save-excursion
 		      (and (ignore-errors (org-back-to-heading invisible-ok))
 			   (org-at-heading-p))))
-	       (or force-heading (not (org-in-item-p)))))
+	       (or arg (not (org-in-item-p)))))
       (progn
-	(insert "\n* ")
+	(insert
+	 (if (org-previous-line-empty-p) "" "\n")
+	 (if (org-in-src-block-p) ",* " "* "))
 	(run-hooks 'org-insert-heading-hook))
-    (when (or force-heading (not (org-insert-item)))
+    (when (or arg (not (org-insert-item)))
       (let* ((empty-line-p nil)
+	     (eops (equal arg '(16))) ; insert at end of parent subtree
+	     (org-insert-heading-respect-content
+	      (or (not (null arg)) org-insert-heading-respect-content))
 	     (level nil)
 	     (on-heading (org-at-heading-p))
 	     (head (save-excursion
@@ -7393,32 +7401,34 @@ This is important for non-interactive uses of the command."
 			     (if (org-at-heading-p)
 				 (org-back-to-heading invisible-ok)
 			       (error "This should not happen")))
-			   (setq empty-line-p (org-previous-line-empty-p))
+			   (unless (and (save-excursion
+					  (save-match-data
+					    (org-backward-heading-same-level 1 invisible-ok))
+					  (= (point) (match-beginning 0)))
+					(not (org-previous-line-empty-p t)))
+			     (setq empty-line-p (org-previous-line-empty-p)))
 			   (match-string 0))
-		       (error "*"))))
+		       (error "* "))))
 	     (blank-a (cdr (assq 'heading org-blank-before-new-entry)))
 	     (blank (if (eq blank-a 'auto) empty-line-p blank-a))
 	     pos hide-previous previous-pos)
 	(cond
-	 ((and (org-at-heading-p) (bolp)
+	 ;; At the beginning of a heading, open a new line for insertiong
+	 ((and (bolp) (org-at-heading-p)
+	       (not eops)
 	       (or (bobp)
 		   (save-excursion (backward-char 1) (not (outline-invisible-p)))))
-	  ;; insert before the current line
 	  (open-line (if blank 2 1)))
-	 ((and (bolp)
-	       (not org-insert-heading-respect-content)
-	       (or (bobp)
-		   (save-excursion
-		     (backward-char 1) (not (outline-invisible-p)))))
-	  ;; insert right here
-	  nil)
 	 (t
-	  ;; somewhere in the line
           (save-excursion
 	    (setq previous-pos (point-at-bol))
             (end-of-line)
             (setq hide-previous (outline-invisible-p)))
-	  (and org-insert-heading-respect-content (org-show-subtree))
+	  (and org-insert-heading-respect-content
+	       (save-excursion
+		 (while (outline-invisible-p)
+		   (org-show-subtree)
+		   (org-up-heading-safe))))
 	  (let ((split
 		 (and (org-get-alist-option org-M-RET-may-split-line 'headline)
 		      (save-excursion
@@ -7429,16 +7439,20 @@ This is important for non-interactive uses of the command."
 			       (> p (match-beginning 4)))))))
 		tags pos)
 	    (cond
+	     ;; Insert a new line, possibly at end of parent subtree
 	     (org-insert-heading-respect-content
-	      (if (not (equal force-heading '(16)))
+	      (if (not eops)
 		  (progn
 		    (org-end-of-subtree nil t)
 		    (and (looking-at "^\\*") (backward-char 1))
 		    (while (and (not (bobp))
 				(member (char-before) '(?\ ?\t ?\n)))
 		      (backward-delete-char 1)))
-		(org-up-heading-safe)
-		(org-end-of-subtree nil t))
+		(let ((p (point)))
+		  (org-up-heading-safe)
+		  (if (= p (point))
+		      (goto-char (point-max))
+		    (org-end-of-subtree nil t))))
 	      (when (featurep 'org-inlinetask)
 		(while (and (not (eobp))
 			    (looking-at "\\(\\*+\\)[ \t]+")
@@ -7448,7 +7462,8 @@ This is important for non-interactive uses of the command."
 	      (or (bolp) (newline))
 	      (or (org-previous-line-empty-p)
 		  (and blank (newline)))
-	      (open-line 1))
+	      (if (or empty-line-p eops) (open-line 1)))
+	     ;; Insert a headling containing text after point
 	     ((org-at-heading-p)
 	      (when hide-previous
 		(show-children)
@@ -7550,11 +7565,11 @@ This is a list with the following elements:
   (org-move-subtree-down)
   (end-of-line 1))
 
-(defun org-insert-heading-respect-content (invisible-ok)
+(defun org-insert-heading-respect-content (&optional arg invisible-ok)
   "Insert heading with `org-insert-heading-respect-content' set to t."
   (interactive "P")
   (let ((org-insert-heading-respect-content t))
-    (org-insert-heading t invisible-ok)))
+    (org-insert-heading arg invisible-ok)))
 
 (defun org-insert-todo-heading-respect-content (&optional force-state)
   "Insert TODO heading with `org-insert-heading-respect-content' set to t."
