@@ -119,7 +119,7 @@
    (:html-postamble nil "html-postamble" org-html-postamble)
    (:html-preamble nil "html-preamble" org-html-preamble)
    (:html-head "HTML_HEAD" nil "html-head" org-html-head)
-   (:html-head "HTML_HEAD_EXTRA" nil "html-head-extra" org-html-head-extra)
+   (:html-head-extra "HTML_HEAD_EXTRA" nil "html-head-extra" org-html-head-extra)
    (:html-head-include-default-style nil nil org-html-head-include-default-style)
    (:html-head-include-scripts nil nil org-html-head-include-scripts)
    (:html-table-tag nil nil org-html-table-tag)
