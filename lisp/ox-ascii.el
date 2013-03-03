@@ -1542,13 +1542,14 @@ holding contextual information."
   "Transcode a SRC-BLOCK element from Org to ASCII.
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
-  (let ((caption (org-ascii--build-caption src-block info)))
-    (concat
-     (when (and caption org-ascii-caption-above) (concat caption "\n"))
-     (org-ascii--box-string
-      (org-export-format-code-default src-block info) info)
-     (when (and caption (not org-ascii-caption-above))
-       (concat "\n" caption)))))
+  (let ((caption (org-ascii--build-caption src-block info))
+	(code (org-export-format-code-default src-block info)))
+    (if (equal code "") ""
+      (concat
+       (when (and caption org-ascii-caption-above) (concat caption "\n"))
+       (org-ascii--box-string code info)
+       (when (and caption (not org-ascii-caption-above))
+	 (concat "\n" caption))))))
 
 
 ;;;; Statistics Cookie

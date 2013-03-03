@@ -4003,37 +4003,38 @@ code."
   ;; Extract code and references.
   (let* ((code-info (org-export-unravel-code element))
          (code (car code-info))
-         (code-lines (org-split-string code "\n"))
-	 (refs (and (org-element-property :retain-labels element)
-		    (cdr code-info)))
-         ;; Handle line numbering.
-         (num-start (case (org-element-property :number-lines element)
-                      (continued (org-export-get-loc element info))
-                      (new 0)))
-         (num-fmt
-          (and num-start
-               (format "%%%ds  "
-                       (length (number-to-string
-                                (+ (length code-lines) num-start))))))
-         ;; Prepare references display, if required.  Any reference
-         ;; should start six columns after the widest line of code,
-         ;; wrapped with parenthesis.
-	 (max-width
-	  (+ (apply 'max (mapcar 'length code-lines))
-	     (if (not num-start) 0 (length (format num-fmt num-start))))))
-    (org-export-format-code
-     code
-     (lambda (loc line-num ref)
-       (let ((number-str (and num-fmt (format num-fmt line-num))))
-         (concat
-          number-str
-          loc
-          (and ref
-               (concat (make-string
-                        (- (+ 6 max-width)
-                           (+ (length loc) (length number-str))) ? )
-                       (format "(%s)" ref))))))
-     num-start refs)))
+	 (code-lines (org-split-string code "\n")))
+    (if (null code-lines) ""
+      (let* ((refs (and (org-element-property :retain-labels element)
+			(cdr code-info)))
+	     ;; Handle line numbering.
+	     (num-start (case (org-element-property :number-lines element)
+			  (continued (org-export-get-loc element info))
+			  (new 0)))
+	     (num-fmt
+	      (and num-start
+		   (format "%%%ds  "
+			   (length (number-to-string
+				    (+ (length code-lines) num-start))))))
+	     ;; Prepare references display, if required.  Any reference
+	     ;; should start six columns after the widest line of code,
+	     ;; wrapped with parenthesis.
+	     (max-width
+	      (+ (apply 'max (mapcar 'length code-lines))
+		 (if (not num-start) 0 (length (format num-fmt num-start))))))
+	(org-export-format-code
+	 code
+	 (lambda (loc line-num ref)
+	   (let ((number-str (and num-fmt (format num-fmt line-num))))
+	     (concat
+	      number-str
+	      loc
+	      (and ref
+		   (concat (make-string
+			    (- (+ 6 max-width)
+			       (+ (length loc) (length number-str))) ? )
+			   (format "(%s)" ref))))))
+	 num-start refs)))))
 
 
 ;;;; For Tables

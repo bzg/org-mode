@@ -1586,6 +1586,31 @@ Another text. (ref:text)
       (should (equal (org-export-unravel-code (org-element-at-point))
 		     '("(+ 2 2)\n(+ 3 3)\n" (2 . "one")))))))
 
+(ert-deftest test-org-export/format-code-default ()
+  "Test `org-export-format-code-default' specifications."
+  ;; Return the empty string when code is empty.
+  (should
+   (equal ""
+	  (org-test-with-parsed-data "#+BEGIN_SRC emacs-lisp\n\n\n#+END_SRC"
+	    (org-export-format-code-default
+	     (org-element-map tree 'src-block 'identity info t) info))))
+  ;; Number lines, two whitespace characters before the actual loc.
+  (should
+   (equal "1  a\n2  b\n"
+	  (org-test-with-parsed-data
+	      "#+BEGIN_SRC emacs-lisp +n\na\nb\n#+END_SRC"
+	    (org-export-format-code-default
+	     (org-element-map tree 'src-block 'identity info t) info))))
+  ;; Put references 6 whitespace characters after the widest line,
+  ;; wrapped within parenthesis.
+  (should
+   (equal "123      (a)\n1        (b)\n"
+	  (let ((org-coderef-label-format "(ref:%s)"))
+	    (org-test-with-parsed-data
+		"#+BEGIN_SRC emacs-lisp\n123 (ref:a)\n1 (ref:b)\n#+END_SRC"
+	      (org-export-format-code-default
+	       (org-element-map tree 'src-block 'identity info t) info))))))
+
 
 
 ;;; Smart Quotes
