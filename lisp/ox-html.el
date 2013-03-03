@@ -118,7 +118,8 @@
    (:html-mathjax "HTML_MATHJAX" nil "" space)
    (:html-postamble nil "html-postamble" org-html-postamble)
    (:html-preamble nil "html-preamble" org-html-preamble)
-   (:html-head "HTML_HEAD" nil org-html-head newline)
+   (:html-head "HTML_HEAD" nil "html-head" org-html-head)
+   (:html-head "HTML_HEAD_EXTRA" nil "html-head-extra" org-html-head-extra)
    (:html-head-include-default-style nil nil org-html-head-include-default-style)
    (:html-head-include-scripts nil nil org-html-head-include-scripts)
    (:html-table-tag nil nil org-html-table-tag)
@@ -1106,13 +1107,29 @@ If you want to refer to an external style, use something like
 
 As the value of this option simply gets inserted into the HTML
 <head> header, you can use it to add any arbitrary text to the
-header."
+header.
+
+You can set this on a per-file basis using #+HTML_HEAD:,
+or for publication projects using the :html-head property."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'string)
 ;;;###autoload
 (put 'org-html-head 'safe-local-variable 'stringp)
+
+
+(defcustom org-html-head-extra ""
+  "More head information to add in the HTML output.
+
+You can set this on a per-file basis using #+HTML_HEAD_EXTRA:,
+or for publication projects using the :html-head-extra property."
+  :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
+;;;###autoload
+(put 'org-html-head-extra 'safe-local-variable 'stringp)
 
 ;;;; Todos
 
@@ -1342,14 +1359,15 @@ INFO is a plist used as a communication channel."
      (and keywords
 	  (format "<meta name=\"keywords\" content=\"%s\"/>\n" keywords)))))
 
-(defun org-html--build-style (info)
-  "Return style information for exported document.
+(defun org-html--build-head (info)
+  "Return information for the <head>..</head> of the HTML output.
 INFO is a plist used as a communication channel."
   (org-element-normalize-string
    (concat
     (when (plist-get info :html-head-include-default-style)
       (org-element-normalize-string org-html-style-default))
-    (org-element-normalize-string (plist-get info :html-style))
+    (org-element-normalize-string (plist-get info :html-head))
+    (org-element-normalize-string (plist-get info :html-head-extra))
     (when (and (plist-get info :html-htmlized-css-url)
 	       (eq org-html-htmlize-output-type 'css))
       (format "<link rel=\"stylesheet\" href=\"%s\" type=\"text/css\" />\n"
@@ -1516,7 +1534,7 @@ holding export options."
 	   (plist-get info :language) (plist-get info :language))
    "<head>\n"
    (org-html--build-meta-info info)
-   (org-html--build-style info)
+   (org-html--build-head info)
    (org-html--build-mathjax-config info)
    "</head>\n"
    "<body>\n"
