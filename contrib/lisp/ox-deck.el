@@ -395,7 +395,7 @@ holding export options."
       "<script type='text/javascript'>"
       "  $(document).ready(function () { $.deck('.slide'); });"
       "</script>"
-      (org-html--build-style info)
+      (org-html--build-head info)
       org-deck-title-page-style
       "</head>"
       "<body>"

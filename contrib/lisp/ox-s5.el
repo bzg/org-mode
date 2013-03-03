@@ -278,7 +278,7 @@ holding export options."
     "<head>"
     (org-s5--build-meta-info info)
     (org-s5--build-style info)
-    (org-html--build-style info)
+    (org-html--build-head info)
     (org-html--build-mathjax-config info)
     "</head>"
     "<body>"
