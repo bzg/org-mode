@@ -2705,7 +2705,7 @@ not overwrite the stored one."
 	(if lispp
 	    (setq ev (condition-case nil
 			 (eval (eval (read form)))
-		       (user-error "#ERROR"))
+		       (error "#ERROR"))
 		  ev (if (numberp ev) (number-to-string ev) ev)
 		  ev (if duration (org-table-time-seconds-to-string
 				   (string-to-number ev)
