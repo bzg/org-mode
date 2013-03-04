@@ -74,6 +74,7 @@ langs/ob-oz.el           --- Org-babel functions for Oz evaluation
 langs/ob-mathomatic.el   --- Org-babel functions for mathomatic evaluation
 langs/ob-tcl.el          --- Org-babel functions for tcl evaluation
 langs/ob-eukleides.el    --- Org-babel functions for eukleides evaluation
+langs/ob-julia.el    	 --- Org-babel functions for julia evaluation
 
 
 SCRIPTS (shell, bash, etc.)
