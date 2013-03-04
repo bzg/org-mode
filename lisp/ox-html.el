@@ -2654,7 +2654,7 @@ contextual information."
 
 (defun org-html-encode-plain-text (text)
   "Convert plain text characters to HTML equivalent.
-Possible conversions are set in `org-export-html-protect-char-alist'."
+Possible conversions are set in `org-html-protect-char-alist'."
   (mapc
    (lambda (pair)
      (setq text (replace-regexp-in-string (car pair) (cdr pair) text t t)))
