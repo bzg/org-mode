@@ -94,6 +94,11 @@
 (defvar org-ts-regexp)
 (defvar org-ts-regexp-both)
 
+(declare-function outline-invisible-p "outline" (&optional pos))
+(declare-function outline-flag-region "outline" (from to flag))
+(declare-function outline-next-heading "outline" ())
+(declare-function outline-previous-heading "outline" ())
+
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
@@ -107,10 +112,6 @@
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-in-block-p "org" (names))
 (declare-function org-in-regexp "org" (re &optional nlines visually))
-(declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
-(declare-function org-inlinetask-goto-end "org-inlinetask" ())
-(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
-(declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-level-increment "org" ())
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-at-heading-p "org" (&optional invisible-ok))
@@ -118,15 +119,21 @@
 (declare-function org-remove-if "org" (predicate seq))
 (declare-function org-reduced-level "org" (L))
 (declare-function org-show-subtree "org" ())
+(declare-function org-sort-remove-invisible "org" (S))
 (declare-function org-time-string-to-seconds "org" (s))
 (declare-function org-timer-hms-to-secs "org-timer" (hms))
 (declare-function org-timer-item "org-timer" (&optional arg))
 (declare-function org-trim "org" (s))
 (declare-function org-uniquify "org" (list))
-(declare-function outline-invisible-p "outline" (&optional pos))
-(declare-function outline-flag-region "outline" (from to flag))
-(declare-function outline-next-heading "outline" ())
-(declare-function outline-previous-heading "outline" ())
+
+(declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
+(declare-function org-inlinetask-goto-end "org-inlinetask" ())
+(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
+(declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
+
+(declare-function org-export-string-as "ox"
+		  (string backend &optional body-only ext-plist))
+
 
 
 
@@ -3015,9 +3022,8 @@ for this list."
     (unless (org-at-item-p) (error "Not at a list item"))
     (save-excursion
       (re-search-backward "#\\+ORGLST" nil t)
-      (unless (looking-at "[ \t]*#\\+ORGLST[: \t][ \t]*SEND[ \t]+\\([^ \t\r\n]+\\)[ \t]+\\([^ \t\r\n]+\\)\\([ \t]+.*\\)?")
-	(if maybe
-	    (throw 'exit nil)
+      (unless (looking-at "#\\+ORGLST:[ \t]+SEND[ \t]+\\(\\S-+\\)[ \t]+\\(\\S-+\\)")
+	(if maybe (throw 'exit nil)
 	  (error "Don't know how to transform this list"))))
     (let* ((name (match-string 1))
 	   (transform (intern (match-string 2)))
@@ -3031,13 +3037,11 @@ for this list."
 	      (re-search-backward "#\\+ORGLST" nil t)
 	      (re-search-forward (org-item-beginning-re) bottom-point t)
 	      (match-beginning 0)))
-	   (list (save-restriction
-		   (narrow-to-region top-point bottom-point)
-		   (org-list-parse-list)))
+	   (plain-list (buffer-substring-no-properties top-point bottom-point))
 	   beg txt)
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))
-      (let ((txt (funcall transform list)))
+      (let ((txt (funcall transform plain-list)))
 	;; Find the insertion place
 	(save-excursion
 	  (goto-char (point-min))
@@ -3194,65 +3198,24 @@ items."
 
 (defun org-list-to-latex (list &optional params)
   "Convert LIST into a LaTeX list.
-LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
-with overruling parameters for `org-list-to-generic'."
-  (org-list-to-generic
-   list
-   (org-combine-plists
-    '(:splice nil :ostart "\\begin{enumerate}\n" :oend "\\end{enumerate}"
-	      :ustart "\\begin{itemize}\n" :uend "\\end{itemize}"
-	      :dstart "\\begin{description}\n" :dend "\\end{description}"
-	      :dtstart "[" :dtend "] "
-	      :istart "\\item " :iend "\n"
-	      :icount (let ((enum (nth depth '("i" "ii" "iii" "iv"))))
-			(if enum
-			    ;; LaTeX increments counter just before
-			    ;; using it, so set it to the desired
-			    ;; value, minus one.
-			    (format "\\setcounter{enum%s}{%s}\n\\item "
-				    enum (1- counter))
-			  "\\item "))
-	      :csep "\n"
-	      :cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}"
-	      :cbtrans "\\texttt{[-]}")
-    params)))
+LIST is as string representing the list to transform, as Org
+syntax.  Return converted list as a string."
+  (require 'ox-latex)
+  (org-export-string-as list 'latex t))
 
-(defun org-list-to-html (list &optional params)
+(defun org-list-to-html (list)
   "Convert LIST into a HTML list.
-LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
-with overruling parameters for `org-list-to-generic'."
-  (org-list-to-generic
-   list
-   (org-combine-plists
-    '(:splice nil :ostart "<ol>\n" :oend "\n</ol>"
-	      :ustart "<ul>\n" :uend "\n</ul>"
-	      :dstart "<dl>\n" :dend "\n</dl>"
-	      :dtstart "<dt>" :dtend "</dt>\n"
-	      :ddstart "<dd>" :ddend "</dd>"
-	      :istart "<li>" :iend "</li>"
-	      :icount (format "<li value=\"%s\">" counter)
-	      :isep "\n" :lsep "\n" :csep "\n"
-	      :cbon "<code>[X]</code>" :cboff "<code>[ ]</code>"
-	      :cbtrans "<code>[-]</code>")
-    params)))
+LIST is as string representing the list to transform, as Org
+syntax.  Return converted list as a string."
+  (require 'ox-html)
+  (org-export-string-as list 'html t))
 
 (defun org-list-to-texinfo (list &optional params)
   "Convert LIST into a Texinfo list.
-LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
-with overruling parameters for `org-list-to-generic'."
-  (org-list-to-generic
-   list
-   (org-combine-plists
-    '(:splice nil :ostart "@itemize @minus\n" :oend "@end itemize"
-	      :ustart "@enumerate\n" :uend "@end enumerate"
-	      :dstart "@table @asis\n" :dend "@end table"
-	      :dtstart " " :dtend "\n"
-	      :istart "@item\n" :iend "\n"
-	      :icount "@item\n"
-	      :csep "\n"
-	      :cbon "@code{[X]}" :cboff "@code{[ ]}"
-	      :cbtrans "@code{[-]}")
-    params)))
+LIST is as string representing the list to transform, as Org
+syntax.  Return converted list as a string."
+  (require 'ox-texinfo)
+  (org-export-string-as list 'texinfo t))
 
 (defun org-list-to-subtree (list &optional params)
   "Convert LIST into an Org subtree.
