@@ -2006,7 +2006,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
       ;; FIXME
       (ignore))
      ((string= key "TARGET") nil)
-     ((string= key "toc")
+     ((string= key "TOC")
       (let ((value (downcase value)))
 	(cond
 	 ((string-match "\\<headlines\\>" value)
