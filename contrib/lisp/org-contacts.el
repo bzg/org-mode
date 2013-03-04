@@ -42,6 +42,8 @@
 (eval-and-compile
   (require 'org))
 (require 'gnus-util)
+(require 'gnus-art)
+(require 'mai-utils)
 (require 'org-agenda)
 (require 'org-capture)
 
