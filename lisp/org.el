@@ -156,6 +156,7 @@ Stars are put in group 1 and the trimmed body in group 2.")
 		  (beg end acc restriction))
 (declare-function org-element-parse-buffer "org-element"
 		  (&optional granularity visible-only))
+(declare-function org-element-restriction "org-element" (element))
 (declare-function org-element-type "org-element" (element))
 
 ;; load languages based on value of `org-babel-load-languages'
@@ -21753,7 +21754,6 @@ meant to be filled."
 
 (declare-function message-goto-body "message" ())
 (defvar message-cite-prefix-regexp)	; From message.el
-(defvar org-element-all-successors)	; From org-element.el
 (defun org-fill-paragraph (&optional justify)
   "Fill element at point, when applicable.
 
@@ -21831,8 +21831,7 @@ a footnote definition, try to fill the first paragraph within."
 		   (cons beg
 			 (org-element-map
 			     (org-element--parse-objects
-			      beg end nil
-			      (remq 'table-cell org-element-all-successors))
+			      beg end nil (org-element-restriction 'paragraph))
 			     'line-break
 			   (lambda (lb) (org-element-property :end lb)))))))
 	       t)))
