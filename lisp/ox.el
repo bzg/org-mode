@@ -1139,6 +1139,12 @@ The back-end could then be called with, for example:
 ;;   - category :: option
 ;;   - type :: list of strings
 ;;
+;; + `:export-options' :: List of export options available for current
+;;      process.
+;;   - category :: none
+;;   - type :: list of symbols, among `subtree', `body-only' and
+;;      `visible-only'.
+;;
 ;; + `:exported-data' :: Hash table used for memoizing
 ;;     `org-export-data'.
 ;;   - category :: tree
@@ -1150,14 +1156,14 @@ The back-end could then be called with, for example:
 ;;   - type :: list of strings
 ;;
 ;; + `:footnote-definition-alist' :: Alist between footnote labels and
-;;     their definition, as parsed data.  Only non-inlined footnotes
-;;     are represented in this alist.  Also, every definition isn't
-;;     guaranteed to be referenced in the parse tree.  The purpose of
-;;     this property is to preserve definitions from oblivion
-;;     (i.e. when the parse tree comes from a part of the original
-;;     buffer), it isn't meant for direct use in a back-end.  To
-;;     retrieve a definition relative to a reference, use
-;;     `org-export-get-footnote-definition' instead.
+;;      their definition, as parsed data.  Only non-inlined footnotes
+;;      are represented in this alist.  Also, every definition isn't
+;;      guaranteed to be referenced in the parse tree.  The purpose of
+;;      this property is to preserve definitions from oblivion
+;;      (i.e. when the parse tree comes from a part of the original
+;;      buffer), it isn't meant for direct use in a back-end.  To
+;;      retrieve a definition relative to a reference, use
+;;      `org-export-get-footnote-definition' instead.
 ;;   - category :: option
 ;;   - type :: alist (STRING . LIST)
 ;;
@@ -2827,7 +2833,14 @@ Return code as a string."
 	     (narrow-to-region (point) (point-max))))
       ;; Initialize communication channel with original buffer
       ;; attributes, unavailable in its copy.
-      (let ((info (org-export--get-buffer-attributes)) tree)
+      (let ((info (org-combine-plists
+		   (list :export-options
+			 (delq nil
+			       (list (and subtreep 'subtree)
+				     (and visible-only 'visible-only)
+				     (and body-only 'body-only))))
+		   (org-export--get-buffer-attributes)))
+	    tree)
 	;; Update communication channel and get parse tree.  Buffer
 	;; isn't parsed directly.  Instead, a temporary copy is
 	;; created, where include keywords, macros are expanded and
