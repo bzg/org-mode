@@ -308,13 +308,15 @@ Note that the wrapper div must include the class \"slide\"."
            (when (file-exists-p (concat dir base "html"))
              (add-to-list 'snippets (concat dir base "html"))))))
      (org-deck--find-extensions))
-    (add-to-list 'sheets
-                 (if (file-name-directory theme) theme
-                   (format "%sthemes/style/%s" prefix theme)))
-    (add-to-list
-     'sheets
-     (if (file-name-directory transition) transition
-       (format "%sthemes/transition/%s" prefix transition)))
+    (if (not (string-match-p "^[[:space:]]*$" theme))
+	(add-to-list 'sheets
+		     (if (file-name-directory theme) theme
+		       (format "%sthemes/style/%s" prefix theme))))
+    (if (not (string-match-p "^[[:space:]]*$" transition))
+	(add-to-list
+	 'sheets
+	 (if (file-name-directory transition) transition
+	   (format "%sthemes/transition/%s" prefix transition))))
     (list :scripts (nreverse scripts) :sheets (nreverse sheets)
           :snippets snippets)))
 
