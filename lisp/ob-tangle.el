@@ -352,7 +352,7 @@ that the appropriate major-mode is set.  SPEC has the form:
        (org-fill-template org-babel-tangle-comment-format-end link-data)))))
 
 (defvar org-comment-string) ;; Defined in org.el
-(defun org-babel-tangle-collect-blocks (&optional lang tangle-file)
+(defun org-babel-tangle-collect-blocks (&optional language tangle-file)
   "Collect source blocks in the current Org-mode file.
 Return an association list of source-code block specifications of
 the form used by `org-babel-spec-to-string' grouped by language.
@@ -378,7 +378,7 @@ used to limit the collected code blocks by target file."
         (unless (or (string-match (concat "^" org-comment-string) current-heading)
 		    (string= (cdr (assoc :tangle (nth 2 info))) "no")
 		    (and tangle-file (not (equal tangle-file src-tfile))))
-          (unless (and lang (not (string= lang src-lang)))
+          (unless (and language (not (string= language src-lang)))
 	    ;; Add the spec for this block to blocks under it's language
 	    (setq by-lang (cdr (assoc src-lang blocks)))
 	    (setq blocks (delq (assoc src-lang blocks) blocks))
