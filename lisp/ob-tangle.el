@@ -356,9 +356,9 @@ that the appropriate major-mode is set.  SPEC has the form:
   "Collect source blocks in the current Org-mode file.
 Return an association list of source-code block specifications of
 the form used by `org-babel-spec-to-string' grouped by language.
-Optional argument LANG can be used to limit the collected source
-code blocks by language.  Optional argument TANGLE-FILE can be
-used to limit the collected code blocks by target file."
+Optional argument LANGUAGE can be used to limit the collected
+source code blocks by language.  Optional argument TANGLE-FILE
+can be used to limit the collected code blocks by target file."
   (let ((block-counter 1) (current-heading "") blocks by-lang)
     (org-babel-map-src-blocks (buffer-file-name)
       (lambda (new-heading)
