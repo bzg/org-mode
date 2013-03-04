@@ -202,7 +202,7 @@ set the properties in the `org-column' face.  For example, set
 
 Under XEmacs, the rules are simpler, because the XEmacs version of
 column view defines special faces for each outline level.  See the file
-`org-colview-xemacs.el' for details."
+`org-colview-xemacs.el' in Org's contrib/ directory for details."
   :group 'org-faces)
 
 (defface org-column-title

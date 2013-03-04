@@ -52,6 +52,12 @@ org-velocity.el          --- something like Notational Velocity for Org
 org-wikinodes.el         --- CamelCase wiki-like links for Org
 org2rem.el               --- Convert org appointments into reminders
 orgtbl-sqlinsert.el      --- Convert Org-mode tables to SQL insertions
+org-favtable.el          --- Lookup table of favorite references and links
+org-mew.el		 --- Support for links to Mew messages
+org-vm.el		 --- Support for links to VM messages
+org-wl.el		 --- Support for links to Wanderlust messages
+org-w3m.el		 --- Support link/copy/paste from w3m to Org-mode
+org-colview-xemacs.el	 --- Column View in Org-mode, XEmacs-specific version
 ox-confluence.el         --- Confluence Wiki Back-End for Org Export Engine
 ox-deck.el               --- deck.js Presentation Back-End for Org Export Engine
 ox-groff.el              --- Groff Back-End for Org Export Engine
