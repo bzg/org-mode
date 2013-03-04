@@ -13290,7 +13290,7 @@ How much context is shown depends upon the variables
 		    (not (bobp)))
 	  (org-flag-heading nil)
 	  (when siblings-p (org-show-siblings)))))
-    (org-fix-ellipsis-at-bol)))
+    (unless (eq key 'agenda) (org-fix-ellipsis-at-bol))))
 
 (defvar org-reveal-start-hook nil
   "Hook run before revealing a location.")
