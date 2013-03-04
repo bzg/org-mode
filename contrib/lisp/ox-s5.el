@@ -60,12 +60,10 @@
   :options-alist
   ((:html-link-home "HTML_LINK_HOME" nil nil)
    (:html-link-up "HTML_LINK_UP" nil nil)
-   (:html-mathjax "HTML_MATHJAX" nil "" space)
    (:html-postamble nil "html-postamble" nil t)
    (:html-preamble nil "html-preamble" nil t)
-   (:html-head "HTML_HEAD" nil org-html-head newline)
-   (:html-head-include-default-style "HTML_INCLUDE_STYLE" nil org-html-head-include-default-style newline)
-   (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil org-html-head-include-scripts newline)
+   (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" nil nil)
+   (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil nil)
    (:s5-version "S5_VERSION" nil org-s5-version)
    (:s5-theme-file "S5_THEME_FILE" nil org-s5-theme-file)
    (:s5-ui-url "S5_UI_URL" nil org-s5-ui-url)
@@ -185,7 +183,7 @@ INFO is a plist used as a communication channel."
        "</div>\n"
        "</div>\n"))))
 
-(defun org-s5--build-style (info)
+(defun org-s5--build-head (info)
   (let* ((dir (plist-get info :s5-ui-url))
 	 (theme (or (plist-get info :s5-theme-file) "default/slides.css")))
     (mapconcat
@@ -277,7 +275,7 @@ holding export options."
 	    (plist-get info :language) (plist-get info :language))
     "<head>"
     (org-s5--build-meta-info info)
-    (org-s5--build-style info)
+    (org-s5--build-head info)
     (org-html--build-head info)
     (org-html--build-mathjax-config info)
     "</head>"

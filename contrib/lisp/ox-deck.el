@@ -51,11 +51,9 @@
   :options-alist
   ((:html-link-home "HTML_LINK_HOME" nil nil)
    (:html-link-up "HTML_LINK_UP" nil nil)
-   (:html-mathjax "HTML_MATHJAX" nil "" space)
    (:html-postamble nil "html-postamble" nil t)
    (:html-preamble nil "html-preamble" nil t)
-   (:html-head-extra "HTML_HEAD" nil org-html-head-extra newline)
-   (:html-head-include-default-style "HTML_INCLUDE_STYLE" nil nil)
+   (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" nil nil)
    (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil nil)
    (:deck-base-url "DECK_BASE_URL" nil org-deck-base-url)
    (:deck-theme "DECK_THEME" nil org-deck-theme)
