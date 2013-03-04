@@ -12632,7 +12632,7 @@ can either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 	 org-loop-over-headlines-in-active-region
 	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (let* ((old-date (org-entry-get nil "DEADLINE"))
-	   (old-date-time (org-time-string-to-time old-date))
+	   (old-date-time (if old-date (org-time-string-to-time old-date)))
 	   (repeater (and old-date
 			  (string-match
 			   "\\([.+-]+[0-9]+[hdwmy]\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
@@ -12701,7 +12701,7 @@ either be an Org date like \"2011-07-24\" or a delta like \"+2d\"."
 	 org-loop-over-headlines-in-active-region
 	 cl (if (outline-invisible-p) (org-end-of-subtree nil t))))
     (let* ((old-date (org-entry-get nil "SCHEDULED"))
-	   (old-date-time (org-time-string-to-time old-date))
+	   (old-date-time (if old-date (org-time-string-to-time old-date)))
 	   (repeater (and old-date
 			  (string-match
 			   "\\([.+-]+[0-9]+[hdwmy]\\(?:[/ ][-+]?[0-9]+[hdwmy]\\)?\\) ?"
