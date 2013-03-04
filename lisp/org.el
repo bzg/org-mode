@@ -84,7 +84,7 @@
 (require 'org-compat)
 
 ;; `org-outline-regexp' ought to be a defconst but is let-binding in
-;; some places -- e.g. see the macro org-with-limited-levels.
+;; some places -- e.g. see the macro `org-with-limited-levels'.
 ;;
 ;; In Org buffers, the value of `outline-regexp' is that of
 ;; `org-outline-regexp'.  The only function still directly relying on
