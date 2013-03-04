@@ -267,10 +267,12 @@ string with two characters."
   :group 'org-protocol
   :type 'string)
 
-(defcustom org-protocol-data-separator "/+"
+(defcustom org-protocol-data-separator "/+\\|\\?"
   "The default data separator to use.
    This should be a single regexp string."
   :group 'org-protocol
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 ;;; Helper functions:
@@ -291,7 +293,7 @@ nil, assume \"/+\".  The results of that splitting are returned
 as a list.  If UNHEXIFY is non-nil, hex-decode each split part.
 If UNHEXIFY is a function, use that function to decode each split
 part."
-  (let* ((sep (or separator "/+"))
+  (let* ((sep (or separator "/+\\|\\?"))
          (split-parts (split-string data sep)))
     (if unhexify
 	(if (fboundp unhexify)
@@ -411,6 +413,14 @@ Now template ?b will be used."
       (message "Item captured."))
   nil)
 
+(defun org-protocol-convert-query-to-plist (query)
+  "Convert query string that is part of url to property list."
+  (if query
+      (apply 'append (mapcar (lambda (x)
+			       (let ((c (split-string x "=")))
+				 (list (intern (concat ":" (car c))) (cadr c))))
+			     (split-string query "&")))))
+
 (defun org-protocol-do-capture (info)
   "Support `org-capture'."
   (let* ((parts (org-protocol-split-data info t org-protocol-data-separator))
@@ -423,6 +433,7 @@ Now template ?b will be used."
 	 (region (or (caddr parts) ""))
 	 (orglink (org-make-link-string
 		   url (if (string-match "[^[:space:]]" title) title url)))
+	 (query (or (org-protocol-convert-query-to-plist (cadddr parts)) ""))
 	 (org-capture-link-is-already-stored t)) ;; avoid call to org-store-link
     (setq org-stored-links
 	  (cons (list url title) org-stored-links))
@@ -431,7 +442,8 @@ Now template ?b will be used."
 			  :link url
 			  :description title
 			  :annotation orglink
-			  :initial region)
+			  :initial region
+			  :query query)
     (raise-frame)
     (funcall 'org-capture nil template)))
 
