@@ -1487,7 +1487,8 @@ holding contextual information."
 			(org-export-data
 			 (org-export-get-alt-title headline info) info)
 			(and (eq (plist-get info :with-tags) t) tags))))
-	  (if (and opt-title (string-match "\\`\\\\\\(.*?[^*]\\){" section-fmt))
+	  (if (and numberedp opt-title
+		   (string-match "\\`\\\\\\(.*?[^*]\\){" section-fmt))
 	      (format (replace-match "\\1[%s]" nil nil section-fmt 1)
 		      ;; Replace square brackets with parenthesis
 		      ;; since square brackets are not supported in
