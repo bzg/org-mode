@@ -120,8 +120,8 @@
    (:html-preamble nil "html-preamble" org-html-preamble)
    (:html-head "HTML_HEAD" nil org-html-head newline)
    (:html-head-extra "HTML_HEAD_EXTRA" nil org-html-head-extra newline)
-   (:html-head-include-default-style nil nil org-html-head-include-default-style)
-   (:html-head-include-scripts nil nil org-html-head-include-scripts)
+   (:html-head-include-default-style "HTML_INCLUDE_STYLE" nil org-html-head-include-default-style newline)
+   (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil org-html-head-include-scripts newline)
    (:html-table-tag nil nil org-html-table-tag)
    ;; Redefine regular options.
    (:creator "CREATOR" nil org-html-creator-string)

@@ -10427,22 +10427,25 @@ p.footnote          @r{footnote definition paragraph, containing a footnote}
 @end example
 
 @vindex org-html-style-default
-@vindex org-html-style-include-default
-@vindex org-html-style
-@vindex org-html-style-default
+@vindex org-html-head-include-default-style
+@vindex org-html-head
+@vindex org-html-head-extra
+@cindex #+HTML_INCLUDE_STYLE
 Each exported file contains a compact default style that defines these
 classes in a basic way@footnote{This style is defined in the constant
 @code{org-html-style-default}, which you should not modify.  To turn
 inclusion of these defaults off, customize
-@code{org-html-style-include-default}}.  You may overwrite these
-settings, or add to them by using the variables @code{org-html-style}
-(for Org-wide settings) and @code{org-html-style-extra} (for more
-fine-grained settings, like file-local settings).  To set the latter variable
-individually for each file, you can use
+@code{org-html-head-include-default-style} or set @code{#+HTML_INCLUDE_STYLE}
+to nil on a per-file basis.}.  You may overwrite these settings, or add to
+them by using the variables @code{org-html-head} and
+@code{org-html-head-extra}.  You can override the global values of these
+variables for each file by using these keywords:
 
-@cindex #+HTML_STYLE
+@cindex #+HTML_HEAD
+@cindex #+HTML_HEAD_EXTRA
 @example
-#+HTML_STYLE: <link rel="stylesheet" type="text/css" href="stylesheet.css" />
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="style1.css" />
+#+HTML_HEAD_EXTRA: <link rel="alternate stylesheet" type="text/css" href="style2.css" />
 @end example
 
 @noindent
@@ -14745,7 +14748,7 @@ This line contains the formulas for the table directly above the line.
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+DATE:,
 @itemx #+OPTIONS:, #+BIND:,
 @itemx #+DESCRIPTION:, #+KEYWORDS:,
-@itemx #+LaTeX_HEADER:, #+HTML_STYLE:, #+HTML_LINK_UP:, #+HTML_LINK_HOME:,
+@itemx #+LaTeX_HEADER:, #+HTML_HEAD:, #+HTML_LINK_UP:, #+HTML_LINK_HOME:,
 @itemx #+SELECT_TAGS:, #+EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
 @ref{Export options}.
