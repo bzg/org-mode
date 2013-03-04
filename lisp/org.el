@@ -21831,7 +21831,8 @@ a footnote definition, try to fill the first paragraph within."
 		   (cons beg
 			 (org-element-map
 			     (org-element--parse-objects
-			      beg end nil org-element-all-successors)
+			      beg end nil
+			      (remq 'table-cell org-element-all-successors))
 			     'line-break
 			   (lambda (lb) (org-element-property :end lb)))))))
 	       t)))
