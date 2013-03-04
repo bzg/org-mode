@@ -385,7 +385,8 @@ Option settings will replace the %MANAGER-OPTIONS cookie."
   "Install script in export options when appropriate.
 EXP-PLIST is a plist containing export options.  BACKEND is the
 export back-end currently used."
-  (unless (or (not org-html-use-infojs)
+  (unless (or (memq 'body-only (plist-get exp-plist :export-options))
+	      (not org-html-use-infojs)
 	      (and (eq org-html-use-infojs 'when-configured)
 		   (or (not (plist-get exp-plist :infojs-opt))
 		       (string-match "\\<view:nil\\>"
