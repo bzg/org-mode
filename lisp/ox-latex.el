@@ -1632,9 +1632,17 @@ contextual information."
   (let* ((counter
 	  (let ((count (org-element-property :counter item))
 		(level
-		 (loop for parent in (org-export-get-genealogy item)
-		       count (eq (org-element-type parent) 'plain-list)
-		       until (eq (org-element-type parent) 'headline))))
+		 ;; Determine level of current item to determine the
+		 ;; correct LaTeX counter to use (enumi, enumii...).
+		 (let ((parent item) (level 0))
+		   (while (memq (org-element-type
+				 (setq parent (org-export-get-parent parent)))
+				'(plain-list item))
+		     (when (and (eq (org-element-type parent) 'plain-list)
+				(eq (org-element-property :type parent)
+				    'ordered))
+		       (incf level)))
+		   level)))
 	    (and count
 		 (< level 5)
 		 (format "\\setcounter{enum%s}{%s}\n"
