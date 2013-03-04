@@ -3193,8 +3193,6 @@ Return output file name."
 ;;;; org-table-number-fraction
 ;;;; org-table-number-regexp
 ;;;; org-html-table-caption-above
-;;;; org-html-with-timestamp
-;;;; org-html-html-helper-timestamp
 ;;;; org-html-inline-image-extensions
 ;;;; org-export-preferred-target-alist
 ;;;; class for anchors
