@@ -1495,11 +1495,6 @@ INFO is a plist used as a communication channel."
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
   (concat
-   (format "<div id=\"%s\">\n" (nth 1 org-html-divs))
-   ;; Document title.
-   (let ((title (plist-get info :title)))
-     (when title
-       (format "<h1 class=\"title\">%s</h1>\n" (org-export-data title info))))
    ;; Table of contents.
    (let ((depth (plist-get info :with-toc)))
      (when depth (org-html-toc depth info)))
@@ -1508,8 +1503,7 @@ holding export options."
    ;; Footnotes section.
    (org-html-footnote-section info)
    ;; Bibliography.
-   (org-html-bibliography)
-   "\n</div>"))
+   (org-html-bibliography)))
 
 (defun org-html-template (contents info)
   "Return complete document string after HTML conversion.
@@ -1548,7 +1542,13 @@ holding export options."
    ;; Preamble.
    (org-html--build-preamble info)
    ;; Document contents.
+   (format "<div id=\"%s\">\n" (nth 1 org-html-divs))
+   ;; Document title.
+   (let ((title (plist-get info :title)))
+     (when title
+       (format "<h1 class=\"title\">%s</h1>\n" (org-export-data title info))))
    contents
+   "</div>\n"
    ;; Postamble.
    (org-html--build-postamble info)
    ;; Closing document.
