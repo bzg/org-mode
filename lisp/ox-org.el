@@ -35,6 +35,8 @@
   :version "24.4"
   :package-version '(Org . "8.0"))
 
+(define-obsolete-variable-alias
+  'org-export-htmlized-org-css-url 'org-org-htmlized-css-url "24.4")
 (defcustom org-org-htmlized-css-url nil
   "URL pointing to the CSS defining colors for htmlized Emacs buffers.
 Normally when creating an htmlized version of an Org buffer,
@@ -49,8 +51,6 @@ setting of `org-html-htmlize-output-type' is 'css."
   :type '(choice
 	  (const :tag "Don't include external stylesheet link" nil)
 	  (string :tag "URL or local href")))
-(define-obsolete-variable-alias
-  'org-export-htmlized-org-css-url org-org-htmlized-css-url "24.4")
 
 (org-export-define-backend org
   ((babel-call . org-org-identity)
