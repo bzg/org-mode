@@ -297,45 +297,34 @@ Any keyword in this list will have its value parsed and stored as
 a secondary string.")
 
 (defconst org-element-object-restrictions
-  '((bold export-snippet inline-babel-call inline-src-block latex-or-entity link
-	  radio-target sub/superscript target text-markup timestamp)
-    (footnote-reference export-snippet footnote-reference inline-babel-call
-			inline-src-block latex-or-entity line-break link macro
-			radio-target sub/superscript target text-markup
-			timestamp)
-    (headline inline-babel-call inline-src-block latex-or-entity link macro
-	      radio-target statistics-cookie sub/superscript target text-markup
-	      timestamp)
-    (inlinetask inline-babel-call inline-src-block latex-or-entity link macro
-		radio-target sub/superscript target text-markup timestamp)
-    (italic export-snippet inline-babel-call inline-src-block latex-or-entity
-	    link radio-target sub/superscript target text-markup timestamp)
-    (item export-snippet footnote-reference inline-babel-call latex-or-entity
-	  link macro radio-target sub/superscript target text-markup)
-    (keyword inline-babel-call inline-src-block latex-or-entity link macro
-	     sub/superscript text-markup timestamp)
-    (link export-snippet inline-babel-call inline-src-block latex-or-entity
-	  plain-link sub/superscript text-markup)
-    (paragraph export-snippet footnote-reference inline-babel-call
-	       inline-src-block latex-or-entity line-break link macro
-	       radio-target statistics-cookie sub/superscript target text-markup
-	       timestamp)
-    (radio-target export-snippet latex-or-entity sub/superscript)
-    (strike-through export-snippet inline-babel-call inline-src-block
-		    latex-or-entity link radio-target sub/superscript target
-		    text-markup timestamp)
-    (subscript export-snippet inline-babel-call inline-src-block latex-or-entity
-	       sub/superscript target text-markup)
-    (superscript export-snippet inline-babel-call inline-src-block
-		 latex-or-entity sub/superscript target text-markup)
-    (table-cell export-snippet footnote-reference latex-or-entity link macro
-		radio-target sub/superscript target text-markup timestamp)
-    (table-row table-cell)
-    (underline export-snippet inline-babel-call inline-src-block latex-or-entity
-	       link radio-target sub/superscript target text-markup timestamp)
-    (verse-block footnote-reference inline-babel-call inline-src-block
-		 latex-or-entity line-break link macro radio-target
-		 sub/superscript target text-markup timestamp))
+  (let* ((standard-set
+	  (remq 'plain-link (remq 'table-cell org-element-all-successors)))
+	 (standard-set-no-line-break (remq 'line-break standard-set)))
+    `((bold ,@standard-set)
+      (footnote-reference ,@standard-set)
+      (headline ,@standard-set-no-line-break)
+      (inlinetask ,@standard-set-no-line-break)
+      (italic ,@standard-set)
+      (item ,@standard-set-no-line-break)
+      (keyword ,@standard-set)
+      ;; Ignore all links excepted plain links in a link description.
+      ;; Also ignore radio-targets and line breaks.
+      (link export-snippet inline-babel-call inline-src-block latex-or-entity
+	    macro plain-link statistics-cookie sub/superscript text-markup)
+      (paragraph ,@standard-set)
+      ;; Remove any variable object from radio target as it would
+      ;; prevent it from being properly recognized.
+      (radio-target latex-or-entity sub/superscript)
+      (strike-through ,@standard-set)
+      (subscript ,@standard-set)
+      (superscript ,@standard-set)
+      ;; Ignore inline babel call and inline src block as formulas are
+      ;; possible.  Also ignore line breaks and statistics cookies.
+      (table-cell export-snippet footnote-reference latex-or-entity link macro
+		  radio-target sub/superscript target text-markup timestamp)
+      (table-row table-cell)
+      (underline ,@standard-set)
+      (verse-block ,@standard-set)))
   "Alist of objects restrictions.
 
 CAR is an element or object type containing objects and CDR is
@@ -343,8 +332,7 @@ a list of successors that will be called within an element or
 object of such type.
 
 For example, in a `radio-target' object, one can only find
-entities, export snippets, latex-fragments, subscript and
-superscript.
+entities, latex-fragments, subscript and superscript.
 
 This alist also applies to secondary string.  For example, an
 `headline' type element doesn't directly contain objects, but
