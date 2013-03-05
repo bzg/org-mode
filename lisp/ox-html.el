@@ -195,29 +195,50 @@ for the JavaScript code in this tag.
 (defconst org-html-style-default
   "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/
-  html { font-size: 12pt; }
-  .title  { text-align:center; }
-  .todo   { font-family:monospace; color:red; }
-  .done   { color:green; }
-  .tag    { background-color: #eee; font-family:monospace;
-            padding:2px; font-size:80%; font-weight:normal; }
-  .timestamp { color:#bebebe; }
-  .timestamp-kwd { color:#5f9ea0; }
-  .right  { margin-left:auto; margin-right:0px;  text-align:right; }
-  .left   { margin-left:0px;  margin-right:auto; text-align:left; }
-  .center { margin-left:auto; margin-right:auto; text-align:center; }
-  #content { margin: 0 0 0 0; }
-  #postamble p, a { font-size: 90%; margin:.2em; }
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  #content { margin: 3em; }
+  #postamble p, a { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-       border: 1px solid #AEBDCC;
-       background-color: #F3F5F7;
-       box-shadow: 1px 1px 1px #ccc;
-       padding: 8pt;
-       font-family: monospace;
-       font-size: 90%;
-       overflow:auto;
-      }
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
   table { border-collapse:collapse; }
   td, th { vertical-align:top;  }
   th.right  { text-align:center;  }
@@ -1085,7 +1106,7 @@ not be modified."
 (defcustom org-html-head-include-default-style t
   "Non-nil means include the default style in exported HTML files.
 The actual style is defined in `org-html-style-default' and
-should not be modified.  Use `org-html-head' to add your own
+should not be modified.  Use `org-html-head' to use your own
 style information."
   :group 'org-export-html
   :version "24.4"
