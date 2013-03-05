@@ -83,7 +83,7 @@
 ;; for the table (if unspecified, an image with a caption will be set
 ;; in a "figure" environment).  `:comment-include' is a boolean that
 ;; toggles whether to comment out the \includegraphics
-;; call. `:placement' is a string that will be used as argument for
+;; call.  `:placement' is a string that will be used as argument for
 ;; the environment chosen.  `:options' is a string that will be used
 ;; as the optional argument for "includegraphics" macro.
 ;;
@@ -563,7 +563,7 @@ Otherwise, place it near the end."
 (defcustom org-latex-table-scientific-notation "%s\\,(%s)"
   "Format string to display numbers in scientific notation.
 The format should have \"%s\" twice, for mantissa and exponent
-\(i.e. \"%s\\\\times10^{%s}\").
+\(i.e., \"%s\\\\times10^{%s}\").
 
 When nil, no transformation is made."
   :group 'org-export-latex
@@ -2636,7 +2636,7 @@ channel."
 
 (defun org-latex-verse-block (verse-block contents info)
   "Transcode a VERSE-BLOCK element from Org to LaTeX.
-CONTENTS is verse block contents. INFO is a plist holding
+CONTENTS is verse block contents.  INFO is a plist holding
 contextual information."
   (org-latex--wrap-label
    verse-block
