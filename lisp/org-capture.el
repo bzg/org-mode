@@ -238,7 +238,7 @@ be replaced with content and expanded in this order:
   %x          Content of the X clipboard.
   %k          Title of currently clocked task.
   %K          Link to currently clocked task.
-  %n          User name (taken from `user-full-name').
+  %n          User name (taken from the variable `user-full-name').
   %f          File visited by current buffer when org-capture was called.
   %F          Full path of the file or directory visited by current buffer.
   %:keyword   Specific information for certain link types, see below.
@@ -440,6 +440,7 @@ Turning on this mode runs the normal hook `org-capture-mode-hook'."
 
 ;;;###autoload
 (defun org-capture-string (string &optional keys)
+  "Capture STRING with the template selected by KEYS."
   (interactive "sInitial text: \n")
   (let ((org-capture-initial string)
 	(org-capture-entry (org-capture-select-template keys)))
@@ -971,7 +972,7 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
 	     (find-file-noselect (expand-file-name file org-directory)))))
 
 (defun org-capture-steal-local-variables (buffer)
-  "Install Org-mode local variables."
+  "Install Org-mode local variables of BUFFER."
   (mapc (lambda (v)
 	  (ignore-errors (org-set-local (car v) (cdr v))))
 	(buffer-local-variables buffer)))
@@ -1268,7 +1269,7 @@ Of course, if exact position has been required, just put it there."
     (goto-char beg)))
 
 (defun org-capture-empty-lines-before (&optional n)
-  "Arrange for the correct number of empty lines before the insertion point.
+  "Set the correct number of empty lines before the insertion point.
 Point will be after the empty lines, so insertion can directly be done."
   (setq n (or n (org-capture-get :empty-lines-before)
 	      (org-capture-get :empty-lines) 0))
@@ -1278,7 +1279,7 @@ Point will be after the empty lines, so insertion can directly be done."
     (if (> n 0) (newline n))))
 
 (defun org-capture-empty-lines-after (&optional n)
-  "Arrange for the correct number of empty lines after the inserted string.
+  "Set the correct number of empty lines after the inserted string.
 Point will remain at the first line after the inserted text."
   (setq n (or n (org-capture-get :empty-lines-after)
 	      (org-capture-get :empty-lines) 0))
@@ -1291,6 +1292,7 @@ Point will remain at the first line after the inserted text."
 (defvar org-clock-marker) ; Defined in org.el
 
 (defun org-capture-insert-template-here ()
+  "Insert the capture template at point."
   (let* ((template (org-capture-get :template))
 	 (type  (org-capture-get :type))
 	 beg end pp)
@@ -1759,7 +1761,7 @@ Such keywords are prefixed with \"%:\".  See
 
 ;;;###autoload
 (defun org-capture-import-remember-templates ()
-  "Set org-capture-templates to be similar to `org-remember-templates'."
+  "Set `org-capture-templates' to be similar to `org-remember-templates'."
   (interactive)
   (when (and (yes-or-no-p
 	      "Import old remember templates into org-capture-templates? ")
