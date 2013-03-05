@@ -7380,7 +7380,12 @@ This is important for non-interactive uses of the command."
 	 (if (org-previous-line-empty-p) "" "\n")
 	 (if (org-in-src-block-p) ",* " "* "))
 	(run-hooks 'org-insert-heading-hook))
-    (when (or arg (not (org-insert-item)))
+    (when (or arg
+	      (not (org-insert-item
+		    (save-excursion
+		      (beginning-of-line)
+		      (looking-at org-list-full-item-re)
+		      (match-string 3)))))
       (let* ((empty-line-p nil)
 	     (eops (equal arg '(16))) ; insert at end of parent subtree
 	     (org-insert-heading-respect-content
