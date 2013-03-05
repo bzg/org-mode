@@ -171,7 +171,7 @@ This overrides `org-email-link-description-format' if set."
 	    (org-contacts-files))))
 
 (defun org-contacts-db ()
-  "Return the latest Org Contacts Database"
+  "Return the latest Org Contacts Database."
   (let* (todo-only
 	 (contacts-matcher
 	  (cdr (org-make-tags-matcher org-contacts-matcher)))
@@ -221,9 +221,9 @@ If both match values are nil, return all contacts."
 	(complete-with-action action table string pred)))))
 
 (defun org-contacts-try-completion-prefix (to-match collection &optional predicate)
-  "Like `try-completion' but:
-- works only with list and alist;
-- looks at all prefixes rather than just the beginning of the string;"
+  "Custom implementation of `try-completion'.
+This version works only with list and alist and it looks at all
+prefixes rather than just the beginning of the string."
   (loop with regexp = (concat "\\b" (regexp-quote to-match))
 	with ret = nil
 	with ret-start = nil
@@ -307,9 +307,9 @@ This function returns a list whose contains:
 	  (+ new-start (- end1 start1)))))
 
 (defun org-contacts-all-completions-prefix (to-match collection &optional predicate)
-  "Like `all-completions' but:
-- works only with list and alist;
-- looks at all prefixes rather than just the beginning of the string;"
+  "Custom version of `all-completions'.
+This version works only with list and alist and it looks at all
+prefixes rather than just the beginning of the string."
   (loop with regexp = (concat "\\b" (regexp-quote to-match))
 	for el in collection
 	for string = (if (listp el) (car el) el)
@@ -328,8 +328,7 @@ This function returns a list whose contains:
 		  string)))
 
 (defun org-contacts-make-collection-prefix (collection)
-  "Makes a collection function from COLLECTION which will match
-on prefixes."
+  "Make a collection function from COLLECTION which will match on prefixes."
   (lexical-let ((collection collection))
     (lambda (string predicate flag)
       (cond ((eq flag nil)
@@ -350,6 +349,7 @@ on prefixes."
 	       )))))
 
 (defun org-contacts-display-sort-function (completions)
+  "Sort function for contacts display."
   (mapcar (lambda (string)
 	    (loop with len = (1- (length string))
 		  for i upfrom 0 to len
@@ -572,6 +572,7 @@ This function should be called from `gnus-article-prepare-hook'."
             (org-set-property org-contacts-last-read-mail-property link)))))))
 
 (defun org-contacts-icon-as-string ()
+  "Return the contact icon as a string."
   (let ((image (org-contacts-get-icon)))
     (concat
      (propertize "-" 'display
@@ -609,12 +610,12 @@ This function should be called from `gnus-article-prepare-hook'."
    prompt (org-contacts-filter) predicate t initial-input hist def inherit-input-method))
 
 (defun org-contacts-format-name (name)
-  "Trim any local formatting to get a bare name."
+  "Trim any local formatting to get a bare NAME."
   ;; Remove radio targets characters
   (replace-regexp-in-string org-radio-target-regexp "\\1" name))
 
 (defun org-contacts-format-email (name email)
-  "Format a mail address."
+  "Format an EMAIL address corresponding to NAME."
   (unless email
     (error "`email' cannot be nul"))
   (if name
@@ -641,7 +642,7 @@ This function should be called from `gnus-article-prepare-hook'."
   "Add some hooks for Gnus user.
 This adds `org-contacts-gnus-check-mail-address' and
 `org-contacts-gnus-store-last-mail' to
-`gnus-article-prepare-hook'. It also adds a binding on `;' in
+`gnus-article-prepare-hook'.  It also adds a binding on `;' in
 `gnus-summary-mode-map' to `org-contacts-gnus-article-from-goto'"
   (require 'gnus)
   (require 'gnus-art)
@@ -869,3 +870,7 @@ Requires google-maps-el."
     collect (cons (list addr) (list :label (string-to-char (car contact)))))))
 
 (provide 'org-contacts)
+
+(provide 'org-contacts)
+
+;;; org-contacts.el ends here
