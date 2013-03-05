@@ -456,6 +456,7 @@ depends on, if any."
   :group 'org-export
   :version "24.4"
   :package-version '(Org . "8.0")
+  :initialize 'custom-initialize-set
   :set (lambda (var val)
 	 (if (not (featurep 'ox)) (set-default var val)
 	   ;; Any back-end not required anymore (not present in VAL and not
