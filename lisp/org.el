@@ -7447,6 +7447,8 @@ This is important for non-interactive uses of the command."
 		    (org-end-of-subtree nil t)
 		    (and (looking-at "^\\*") (backward-char 1))
 		    (while (and (not (bobp))
+				;; Don't delete spaces in empty headlines
+				(not (looking-back org-outline-regexp))
 				(member (char-before) '(?\ ?\t ?\n)))
 		      (backward-delete-char 1)))
 		(let ((p (point)))
