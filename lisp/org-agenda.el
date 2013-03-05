@@ -1094,7 +1094,7 @@ a calendar-style date list like (month day year)."
 	  (function :tag "Function")))
 
 (defun org-agenda-format-date-aligned (date)
-  "Format a date string for display in the daily/weekly agenda, or timeline.
+  "Format a DATE string for display in the daily/weekly agenda, or timeline.
 This function makes sure that dates are aligned for easy reading."
   (require 'cal-iso)
   (let* ((dayname (calendar-day-name date))
@@ -1147,8 +1147,7 @@ For example, 9:30am would become 09:30 rather than  9:30."
      ":" minute ampm)))
 
 (defun org-agenda-time-of-day-to-ampm-maybe (time)
-  "Conditionally convert TIME to AM/PM format
-based on `org-agenda-timegrid-use-ampm'"
+  "Conditionally convert TIME to AM/PM format based on `org-agenda-timegrid-use-ampm'."
   (if org-agenda-timegrid-use-ampm
       (org-agenda-time-of-day-to-ampm time)
     time))
@@ -1203,7 +1202,7 @@ shown, either today or the nearest into the future."
 	  (const :tag "Don't show repeating stamps" nil)))
 
 (defcustom org-scheduled-past-days 10000
-  "No. of days to continue listing scheduled items that are not marked DONE.
+  "Number of days to continue listing scheduled items not marked DONE.
 When an item is scheduled on a date, it shows up in the agenda on this
 day and will be listed until it is marked done for the number of days
 given here."
@@ -2767,6 +2766,7 @@ Agenda views are separated by `org-agenda-block-separator'."
     (org-agenda-fit-window-to-buffer)))
 
 (defun org-agenda-normalize-custom-commands (cmds)
+  "Normalize custom commands CMDS."
   (delq nil
 	(mapcar
 	 (lambda (x)
@@ -2980,6 +2980,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 (defvar org-agenda-overriding-arguments nil)
 (defvar org-agenda-overriding-cmd-arguments nil)
 (defun org-agenda-run-series (name series)
+  "Run agenda NAME as a SERIES of agenda commands."
   (org-let (nth 1 series) '(org-agenda-prepare name))
   ;; We need to reset agenda markers here, because when constructing a
   ;; block agenda, the individual blocks do not do that.
@@ -3149,6 +3150,7 @@ This ensures the export commands can easily use it."
 
 ;;;###autoload
 (defun org-store-agenda-views (&rest parameters)
+  "Store agenda views."
   (interactive)
   (eval (list 'org-batch-store-agenda-views)))
 
