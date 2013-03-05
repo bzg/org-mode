@@ -195,28 +195,31 @@ for the JavaScript code in this tag.
 (defconst org-html-style-default
   "<style type=\"text/css\">
  <!--/*--><![CDATA[/*><!--*/
-  html { font-family: Times, serif; font-size: 12pt; }
-  .title  { text-align: center; }
-  .todo   { color: red; }
-  .done   { color: green; }
-  .tag    { background-color: #add8e6; font-weight:normal }
-  .target { }
-  .timestamp { color: #bebebe; }
-  .timestamp-kwd { color: #5f9ea0; }
-  .right  {margin-left:auto; margin-right:0px;  text-align:right;}
-  .left   {margin-left:0px;  margin-right:auto; text-align:left;}
-  .center {margin-left:auto; margin-right:auto; text-align:center;}
-  p.verse { margin-left: 3% }
+  html { font-size: 12pt; }
+  .title  { text-align:center; }
+  .todo   { font-family:monospace; color:red; }
+  .done   { color:green; }
+  .tag    { background-color: #eee; font-family:monospace;
+            padding:2px; font-size:80%; font-weight:normal; }
+  .timestamp { color:#bebebe; }
+  .timestamp-kwd { color:#5f9ea0; }
+  .right  { margin-left:auto; margin-right:0px;  text-align:right; }
+  .left   { margin-left:0px;  margin-right:auto; text-align:left; }
+  .center { margin-left:auto; margin-right:auto; text-align:center; }
+  #content { margin: 0 0 0 0; }
+  #postamble p, a { font-size: 90%; margin:.2em; }
+  p.verse { margin-left: 3%; }
   pre {
-	border: 1pt solid #AEBDCC;
-	background-color: #F3F5F7;
-	padding: 5pt;
-	font-family: courier, monospace;
-        font-size: 90%;
-        overflow:auto;
-  }
-  table { border-collapse: collapse; }
-  td, th { vertical-align: top;  }
+       border: 1px solid #AEBDCC;
+       background-color: #F3F5F7;
+       box-shadow: 1px 1px 1px #ccc;
+       padding: 8pt;
+       font-family: monospace;
+       font-size: 90%;
+       overflow:auto;
+      }
+  table { border-collapse:collapse; }
+  td, th { vertical-align:top;  }
   th.right  { text-align:center;  }
   th.left   { text-align:center;   }
   th.center { text-align:center; }
@@ -224,22 +227,22 @@ for the JavaScript code in this tag.
   td.left   { text-align:left;   }
   td.center { text-align:center; }
   dt { font-weight: bold; }
-  div.figure { padding: 0.5em; }
-  div.figure p { text-align: center; }
+  div.figure { padding:1em; }
+  div.figure p { text-align:center; }
   div.inlinetask {
     padding:10px;
     border:2px solid gray;
     margin:10px;
     background: #ffffcc;
   }
-  textarea { overflow-x: auto; }
+  textarea { overflow-x:auto; }
   .linenr { font-size:smaller }
-  .code-highlighted {background-color:#ffff00;}
+  .code-highlighted { background-color:#ffff00; }
   .org-info-js_info-navigation { border-style:none; }
-  #org-info-js_console-label { font-size:10px; font-weight:bold;
-                               white-space:nowrap; }
-  .org-info-js_search-highlight {background-color:#ffff00; color:#000000;
-                                 font-weight:bold; }
+  #org-info-js_console-label
+    { font-size:10px; font-weight:bold; white-space:nowrap; }
+  .org-info-js_search-highlight
+    { background-color:#ffff00; color:#000000; font-weight:bold; }
   /*]]>*/-->
 </style>"
   "The default style specification for exported HTML files.
@@ -926,20 +929,21 @@ You can also customize this for each buffer, using something like
 (defcustom org-html-postamble 'auto
   "Non-nil means insert a postamble in HTML export.
 
-When t, insert a string as defined by the formatting string in
-`org-html-postamble-format'.  When set to a string, this
-string overrides `org-html-postamble-format'.  When set to
-'auto, discard `org-html-postamble-format' and honor
-`org-export-author/email/creator-info' variables.  When set to a
-function, apply this function and insert the returned string.
-The function takes the property list of export options as its
-only argument.
+When set to 'auto, check against the
+`org-export-with-author/email/creator/date' variables to set the
+content of the postamble.  When set to a string, use this string
+as the postamble.  When t, insert a string as defined by the
+formatting string in `org-html-postamble-format'.
+
+When set to a function, apply this function and insert the
+returned string.  The function takes the property list of export
+options as its only argument.
 
 Setting :html-postamble in publishing projects will take
 precedence over this variable."
   :group 'org-export-html
   :type '(choice (const :tag "No postamble" nil)
-		 (const :tag "Auto preamble" 'auto)
+		 (const :tag "Auto postamble" 'auto)
 		 (const :tag "Default formatting string" t)
 		 (string :tag "Custom formatting string")
 		 (function :tag "Function (must return a string)")))
@@ -989,9 +993,11 @@ like that: \"%%\"."
 (defcustom org-html-preamble t
   "Non-nil means insert a preamble in HTML export.
 
-When t, insert a string as defined by one of the formatting
-strings in `org-html-preamble-format'.  When set to a
-string, this string overrides `org-html-preamble-format'.
+When t, insert a string as defined by the formatting string in
+`org-html-preamble-format'.  When set to a string, use this
+formatting string instead (see `org-html-postamble-format' for an
+example of such a formatting string).
+
 When set to a function, apply this function and insert the
 returned string.  The function takes the property list of export
 options as its only argument.
@@ -1019,7 +1025,10 @@ preamble itself.  This format string can contain these elements:
   %d stands for the date.
 
 If you need to use a \"%\" character, you need to escape it
-like that: \"%%\"."
+like that: \"%%\".
+
+See the default value of `org-html-postamble-format' for an
+example."
   :group 'org-export-html
   :type '(alist :key-type (string :tag "Language")
 		:value-type (string :tag "Format string")))
