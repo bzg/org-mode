@@ -71,15 +71,11 @@
 If `org-mew-inbox-folder' is non-nil, `org-mew-open' locates the message
 in this inbox folder as well as the folder specified by the link."
   :group 'org-mew
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-mew-use-id-db t
   "Use ID database to locate the message if id.db is created."
   :group 'org-mew
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-mew-subject-alist
@@ -90,8 +86,6 @@ in this inbox folder as well as the folder specified by the link."
 	      1))
   "Alist of subject regular expression and matched group number for search."
   :group 'org-mew
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(repeat (cons (regexp) (integer))))
 
 (defcustom org-mew-capture-inbox-folders nil
@@ -101,8 +95,6 @@ message if the message's folder is any of these folders and the
 message is not marked.  Nil means `org-mew-capture' never ask you
 destination folders before capture."
   :group 'org-mew
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(repeat string))
 
 (defcustom org-mew-capture-guess-alist nil
@@ -117,8 +109,6 @@ the capture template associated with \"o\" key, and any other
 messages will be captured with the capture template associated
 with \"t\" key."
   :group 'org-mew
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(repeat (cons regexp string)))
 
 ;; Declare external functions and variables

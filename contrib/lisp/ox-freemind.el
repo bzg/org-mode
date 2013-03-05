@@ -64,8 +64,7 @@
 (defgroup org-export-freemind nil
   "Options for exporting Org mode files to Freemind Mindmap."
   :tag "Org Export Freemind Mindmap"
-  :group 'org-export
-  :version "24.4")
+  :group 'org-export)
 
 (defcustom org-freemind-styles
   '((default . "<node>\n</node>")
@@ -85,8 +84,7 @@ node style."
 				  (const :tag "Default value" default)
 				  (string :tag "Node style"))
                 :value-type (string :tag "Style spec"))
-  :group 'org-export-freemind
-  :version "24.4")
+  :group 'org-export-freemind)
 
 (defcustom org-freemind-style-map-function 'org-freemind-style-map--automatic
   "Function to map an Org element to it's node style.
@@ -102,8 +100,7 @@ function.  See `org-freemind-styles' for a list of named styles."
 	  (function-item org-freemind-style-map--automatic)
 	  (function-item org-freemind-style-map--default)
 	  function)
-  :group 'org-export-freemind
-  :version "24.4")
+  :group 'org-export-freemind)
 
 (defcustom org-freemind-section-format 'note
   "Specify how outline sections are to be formatted.
@@ -118,16 +115,14 @@ stand apart.  Otherwise, use `inline'."
 	  (const :tag "Append to outline title" inline)
 	  (const :tag "Attach as a note" note)
 	  (const :tag "Create a separate node" node))
-  :group 'org-export-freemind
-  :version "24.4")
+  :group 'org-export-freemind)
 
 ;;;; Debugging
 
 (defcustom org-freemind-pretty-output nil
   "Enable this to generate pretty Freemind Mindmap."
   :type 'boolean
-  :group 'org-export-freemind
-  :version "24.4")
+  :group 'org-export-freemind)
 
 
 ;;; Internal Functions
