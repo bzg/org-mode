@@ -347,6 +347,8 @@ to add the symbol `xyz', and the package must have a call to:
 For export specific modules, see also `org-export-backends'."
   :group 'org
   :set 'org-set-modules
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type
   '(set :greedy t
 	(const :tag "   bbdb:              Links to BBDB entries" org-bbdb)
@@ -452,6 +454,8 @@ Adding a back-end to this list will also pull the back-end it
 depends on, if any."
   :group 'org
   :group 'org-export
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :set (lambda (var val)
 	 (if (not (featurep 'ox)) (set-default var val)
 	   ;; Any back-end not required anymore (not present in VAL and not
@@ -3915,6 +3919,8 @@ following symbols:
   `script'   Highlight subscript and superscript.
   `entities' Highlight entities."
   :group 'org-appearance
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "No highlighting" nil)
 	  (set :greedy t :tag "Highlight"
@@ -8654,6 +8660,8 @@ orgstruct(++)-mode."
 (defcustom orgstruct-setup-hook nil
   "Hook run after orgstruct-mode-map is filled."
   :group 'org
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'hook)
 
 (defvar orgstruct-initialized nil)

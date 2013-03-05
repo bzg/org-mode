@@ -61,11 +61,15 @@ This will typically be either 'python or 'python-mode."
 (defcustom org-babel-python-hline-to "None"
   "Replace hlines in incoming tables with this when translating to python."
   :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-babel-python-None-to 'hline
   "Replace 'None' in python tables with this before returning."
   :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defun org-babel-execute:python (body params)

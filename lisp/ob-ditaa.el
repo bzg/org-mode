@@ -62,6 +62,8 @@
   (expand-file-name "DitaaEps.jar" (file-name-directory org-ditaa-jar-path))
   "Path to the DitaaEps.jar executable."
   :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-ditaa-jar-option "-jar"

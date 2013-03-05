@@ -578,6 +578,8 @@ The function result will be used in the section format string."
 By default, anchors are formatted with both \"id\" and \"name\"
 attributes, when appropriate."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 
@@ -828,6 +830,8 @@ and corresponding declarations."
   "Coding system for HTML export.
 Use utf-8 as the default value."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'coding-system)
 
 (defcustom org-html-divs '("preamble" "content" "postamble")
@@ -836,6 +840,8 @@ This is a list of three strings, the first one for the preamble
 DIV, the second one for the content DIV and the third one for the
 postamble DIV."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(list
 	  (string :tag " Div for the preamble:")
 	  (string :tag "  Div for the content:")

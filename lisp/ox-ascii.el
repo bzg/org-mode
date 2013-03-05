@@ -146,29 +146,39 @@
 This number includes margin size, as set in
 `org-ascii-global-margin'."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'integer)
 
 (defcustom org-ascii-global-margin 0
   "Width of the left margin, in number of characters."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'integer)
 
 (defcustom org-ascii-inner-margin 2
   "Width of the inner margin, in number of characters.
 Inner margin is applied between each headline."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'integer)
 
 (defcustom org-ascii-quote-margin 6
   "Width of margin used for quoting text, in characters.
 This margin is applied on both sides of the text."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'integer)
 
 (defcustom org-ascii-inlinetask-width 30
   "Width of inline tasks, in number of characters.
 This number ignores any margin."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'integer)
 
 (defcustom org-ascii-headline-spacing '(1 . 2)
@@ -182,6 +192,8 @@ contents.
 A nil value replicates the number of blank lines found in the
 original Org buffer at the same place."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Replicate original spacing" nil)
 	  (cons :tag "Set an uniform spacing"
@@ -194,6 +206,8 @@ If the value is an integer, indent the first line of each
 paragraph by this number.  If it is the symbol `auto' preserve
 indentation from original document."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (integer :tag "Number of white spaces characters")
 	  (const :tag "Preserve original width" auto)))
@@ -204,6 +218,8 @@ If the value is an integer, add this number of blank lines
 between contiguous paragraphs.  If is it the symbol `auto', keep
 the same number of blank lines as in the original document."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (integer :tag "Number of blank lines")
 	  (const :tag "Preserve original spacing" auto)))
@@ -215,6 +231,8 @@ Possible values are:
 `latin1'   Include Latin-1 characters
 `utf-8'    Use all UTF-8 characters"
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "ASCII" ascii)
 	  (const :tag "Latin-1" latin1)
@@ -233,6 +251,8 @@ of underline characters.  In a sequence, the characters will be
 used in order for headlines level 1, 2, ...  If no character is
 available for a given level, the headline won't be underlined."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(list
 	  (cons :tag "Underline characters sequence"
 		(const :tag "ASCII charset" ascii)
@@ -259,6 +279,8 @@ here, the list will be repeated.
 Note that this variable doesn't affect plain lists
 representation."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(list
 	  (cons :tag "Bullet characters for low level headlines"
 		(const :tag "ASCII charset" ascii)
@@ -275,6 +297,8 @@ representation."
 When nil, the link will be exported in place.  If the line
 becomes long in this way, it will be wrapped."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-ascii-table-keep-all-vertical-lines nil
@@ -282,6 +306,8 @@ becomes long in this way, it will be wrapped."
 When nil, vertical lines will be removed except for those needed
 for column grouping."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-ascii-table-widen-columns t
@@ -289,6 +315,8 @@ for column grouping."
 When nil, narrowed columns will look in ASCII export just like in
 Org mode, i.e. with \"=>\" as ellipsis."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-ascii-table-use-ascii-art nil
@@ -298,17 +326,25 @@ It only makes sense when export charset is `utf-8'.  It is nil by
 default since it requires ascii-art-to-unicode.el package.  You
 can download it here:
 
-  http://gnuvola.org/software/j/aa2u/ascii-art-to-unicode.el.")
+  http://gnuvola.org/software/j/aa2u/ascii-art-to-unicode.el."
+  :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'boolean)
 
 (defcustom org-ascii-caption-above nil
   "When non-nil, place caption string before the element.
 Otherwise, place it right after it."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-ascii-verbatim-format "`%s'"
   "Format string used for verbatim text and inline code."
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-ascii-format-drawer-function nil
@@ -329,6 +365,8 @@ in order to mimic default behaviour:
   \"Format a drawer element for ASCII export.\"
   contents)"
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'function)
 
 (defcustom org-ascii-format-inlinetask-function nil
@@ -375,6 +413,8 @@ in order to mimic default behaviour:
         \(plist-get info :ascii-inner-margin\)
         \(org-ascii--current-text-width inlinetask info\)\)"
   :group 'org-export-ascii
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'function)
 
 
@@ -1950,6 +1990,7 @@ Return output file name."
 
 ;; Local variables:
 ;; generated-autoload-file: "org-loaddefs.el"
+;; coding: utf-8-emacs
 ;; End:
 
 ;;; ox-ascii.el ends here

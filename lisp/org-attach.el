@@ -57,6 +57,8 @@ where the Org file lives."
 (defcustom org-attach-git-annex-cutoff (* 32 1024)
   "If non-nil, files larger than this will be annexed instead of stored."
   :group 'org-attach
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "None" nil)
 	  (integer :tag "Bytes")))

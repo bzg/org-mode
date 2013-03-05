@@ -135,6 +135,8 @@ remove code block execution from the C-c C-c keybinding."
 Should be either RESULTS or NAME however any capitalization may
 be used."
   :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-babel-noweb-wrap-start "<<"

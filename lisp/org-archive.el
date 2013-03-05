@@ -76,6 +76,8 @@ This variable is obsolete and has no effect anymore, instead add or remove
 When nil, no header will be inserted.
 When a string, a %s formatter will be replaced by the file name."
   :group 'org-archive
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-archive-subtree-add-inherited-tags 'infile

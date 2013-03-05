@@ -721,6 +721,8 @@ For example, with a value of '\(\(\"h\" . \"html\"\)\), the
 HTML back-end will recognize the contents of \"@@h:<b>@@\" as
 HTML code while every other back-end will ignore it."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(repeat
 	  (cons (string :tag "Shortcut")
 		(string :tag "Back-end"))))
@@ -728,6 +730,8 @@ HTML code while every other back-end will ignore it."
 (defcustom org-export-coding-system nil
   "Coding system for the exported file."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'coding-system)
 
 (defcustom org-export-copy-to-kill-ring t
@@ -758,6 +762,8 @@ these cases."
 Results from an asynchronous export are never displayed
 automatically.  But you can retrieve them with \\[org-export-stack]."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-export-async-init-file user-init-file
@@ -766,6 +772,8 @@ Value must be an absolute file name.  It defaults to user's
 initialization file.  Though, a specific configuration makes the
 process faster and the export more portable."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(file :must-match t))
 
 (defcustom org-export-invisible-backends nil
@@ -778,6 +786,8 @@ Indeed, Org may require some export back-ends without notice.  If
 these modules are never to be used interactively, adding them
 here will avoid cluttering the dispatcher menu."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(repeat (symbol :tag "Back-End")))
 
 (defcustom org-export-dispatch-use-expert-ui nil
@@ -791,6 +801,8 @@ passed the FORCE argument and \"a\" when the export should be
 asynchronous).  Also, \[?] allows to switch back to standard
 mode."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 

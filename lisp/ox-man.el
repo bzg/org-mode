@@ -128,11 +128,15 @@
 (defcustom org-man-tables-centered t
   "When non-nil, tables are exported in a center environment."
   :group 'org-export-man
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-man-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
   :group 'org-export-man
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 
@@ -143,6 +147,8 @@ The format should have \"%s\" twice, for mantissa and exponent
 
 When nil, no transformation is made."
   :group 'org-export-man
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
           (string :tag "Format string")
           (const :tag "No formatting")))
@@ -154,6 +160,8 @@ When nil, no transformation is made."
 (defcustom org-man-source-highlight nil
   "Use GNU source highlight to embellish source blocks "
   :group 'org-export-man
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 
@@ -183,6 +191,8 @@ parameter for the listings package.  If the mode name and the
 listings name are the same, the language does not need an entry
 in this list - but it does not hurt if it is present."
   :group 'org-export-man
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(repeat
           (list
            (symbol :tag "Major mode       ")
@@ -224,6 +234,9 @@ Alternatively, this may be a Lisp function that does the
 processing.  This function should accept the file name as
 its single argument."
   :group 'org-export-pdf
+  :group 'org-export-man
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
           (repeat :tag "Shell command sequence"
                   (string :tag "Shell command"))
@@ -240,12 +253,16 @@ its single argument."
   '("log" "out" "toc")
   "The list of file extensions to consider as Man logfiles."
   :group 'org-export-man
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(repeat (string :tag "Extension")))
 
 (defcustom org-man-remove-logfiles t
   "Non-nil means remove the logfiles produced by PDF production.
 These are the .aux, .log, .out, and .toc files."
   :group 'org-export-man
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 

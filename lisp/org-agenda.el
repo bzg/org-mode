@@ -750,12 +750,14 @@ Non-nil means to compare time stamps using seconds.  An item is then
 considered future if it has a time value later than current time."
   :group 'org-agenda-skip
   :group 'org-agenda-todo-list
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Compare time with days" nil)
 	  (const :tag "Compare time with seconds" t)))
 
 (defcustom org-agenda-tags-todo-honor-ignore-options nil
-  "Non-nil means honor todo-list ...ignore options also in tags-todo search.
+  "Non-nil means honor todo-list ignores options also in tags-todo search.
 The variables
    `org-agenda-todo-ignore-with-date',
    `org-agenda-todo-ignore-timestamp',
