@@ -43,7 +43,7 @@
   (require 'org))
 (require 'gnus-util)
 (require 'gnus-art)
-(require 'mai-utils)
+(require 'mail-utils)
 (require 'org-agenda)
 (require 'org-capture)
 
