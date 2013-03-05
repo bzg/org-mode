@@ -2102,7 +2102,9 @@ contextual information."
 		"\\begin{minted}[%s]{%s}\n%s\\end{minted}"
 		;; Options.
 		(org-latex--make-option-string
-		 (if (not num-start) org-latex-minted-options
+		 (if (or (not num-start)
+			 (assoc "linenos" org-latex-minted-options))
+		     org-latex-minted-options
 		   (append `(("linenos")
 			     ("firstnumber" ,(number-to-string (1+ num-start))))
 			   org-latex-minted-options)))
@@ -2147,15 +2149,17 @@ contextual information."
 	   ;; Options.
 	   (format "\\lstset{%s}\n"
 		   (org-latex--make-option-string
-		    (append org-latex-listings-options
-			    `(("language" ,lst-lang))
-			    (when label `(("label" ,label)))
-			    (when caption-str `(("caption" ,caption-str)))
-			    (cond ((not num-start) '(("numbers" "none")))
-				  ((zerop num-start) '(("numbers" "left")))
-				  (t `(("numbers" "left")
-				       ("firstnumber"
-					,(number-to-string (1+ num-start)))))))))
+		    (append
+		     org-latex-listings-options
+		     `(("language" ,lst-lang))
+		     (when label `(("label" ,label)))
+		     (when caption-str `(("caption" ,caption-str)))
+		     (cond ((assoc "numbers" org-latex-listings-options) nil)
+			   ((not num-start) '(("numbers" "none")))
+			   ((zerop num-start) '(("numbers" "left")))
+			   (t `(("numbers" "left")
+				("firstnumber"
+				 ,(number-to-string (1+ num-start)))))))))
 	   ;; Source code.
 	   (format
 	    "\\begin{lstlisting}\n%s\\end{lstlisting}"
