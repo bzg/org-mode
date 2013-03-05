@@ -463,7 +463,7 @@ export back-end currently used."
       exp-plist)))
 
 
-;;;; Bold etc
+;;;; Bold, etc.
 
 (defcustom org-html-text-markup-alist
   '((bold . "<b>%s</b>")
@@ -472,7 +472,7 @@ export back-end currently used."
     (strike-through . "<del>%s</del>")
     (underline . "<span style=\"text-decoration:underline;\">%s</span>")
     (verbatim . "<code>%s</code>"))
-  "Alist of HTML expressions to convert text markup
+  "Alist of HTML expressions to convert text markup.
 
 The key must be a symbol among `bold', `code', `italic',
 `strike-through', `underline' and `verbatim'.  The value is
@@ -485,14 +485,12 @@ returned as-is."
 		:value-type (string :tag "Format string"))
   :options '(bold code italic strike-through underline verbatim))
 
-
-;;;; Debugging
-
 (defcustom org-html-pretty-output nil
   "Enable this to generate pretty HTML."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
-
 
 ;;;; Drawers
 
@@ -631,11 +629,11 @@ t              Synonym for `mathjax'."
 
 (defcustom org-html-link-org-files-as-html t
   "Non-nil means make file links to `file.org' point to `file.html'.
-When org-mode is exporting an org-mode file to HTML, links to
+When `org-mode' is exporting an `org-mode' file to HTML, links to
 non-html files are directly put into a href tag in HTML.
 However, links to other Org-mode files (recognized by the
 extension `.org.) should become links to the corresponding html
-file, assuming that the linked org-mode file will also be
+file, assuming that the linked `org-mode' file will also be
 converted to HTML.
 When nil, the links still point to the plain `.org' file."
   :group 'org-export-html
@@ -928,7 +926,7 @@ You can also customize this for each buffer, using something like
 (defcustom org-html-postamble 'auto
   "Non-nil means insert a postamble in HTML export.
 
-When `t', insert a string as defined by the formatting string in
+When t, insert a string as defined by the formatting string in
 `org-html-postamble-format'.  When set to a string, this
 string overrides `org-html-postamble-format'.  When set to
 'auto, discard `org-html-postamble-format' and honor
@@ -991,7 +989,7 @@ like that: \"%%\"."
 (defcustom org-html-preamble t
   "Non-nil means insert a preamble in HTML export.
 
-When `t', insert a string as defined by one of the formatting
+When t, insert a string as defined by one of the formatting
 strings in `org-html-preamble-format'.  When set to a
 string, this string overrides `org-html-preamble-format'.
 When set to a function, apply this function and insert the
@@ -1147,7 +1145,11 @@ CSS classes, then this prefix can be very useful."
 ;;; Internal Functions
 
 (defun org-html-format-inline-image (src &optional
-					   caption label attr standalone-p)
+					 caption label attr standalone-p)
+  "Format an inline image from SRC.
+CAPTION, LABEL and ATTR are optional arguments providing the
+caption, the label and the attribute of the image.
+When STANDALONE-P is t, wrap the <img.../> into a <div>...</div>."
   (let* ((id (if (not label) ""
 	       (format " id=\"%s\"" (org-export-solidify-link-text label))))
 	 (attr (concat attr
@@ -1202,7 +1204,7 @@ ELEMENT is either a src block or an example block."
 ;;;; Table
 
 (defun org-html-splice-attributes (tag attributes)
-  "Read attributes in string ATTRIBUTES, add and replace in HTML tag TAG."
+  "Return a HTML TAG edited wrt ATTRIBUTES."
   (if (not attributes)
       tag
     (let (oldatt newatt)
@@ -1218,7 +1220,7 @@ ELEMENT is either a src block or an example block."
       tag)))
 
 (defun org-export-splice-style (style extra)
-  "Splice EXTRA into STYLE, just before \"</style>\"."
+  "Return STYLE updated wrt EXTRA."
   (if (and (stringp extra)
 	   (string-match "\\S-" extra)
 	   (string-match "</style>" style))
@@ -1228,7 +1230,7 @@ ELEMENT is either a src block or an example block."
     style))
 
 (defun org-html-htmlize-region-for-paste (beg end)
-  "Convert the region to HTML, using htmlize.el.
+  "Convert the region between BEG and END to HTML, using htmlize.el.
 This is much like `htmlize-region-for-paste', only that it uses
 the settings define in the org-... variables."
   (let* ((htmlize-output-type org-html-htmlize-output-type)
@@ -1280,7 +1282,7 @@ produce code that uses these same face definitions."
   (let (out) (dotimes (i n out) (setq out (concat string out)))))
 
 (defun org-html-fix-class-name (kwd) 	; audit callers of this function
-  "Turn todo keyword into a valid class name.
+  "Turn todo keyword KWD into a valid class name.
 Replaces invalid characters with \"_\"."
   (save-match-data
     (while (string-match "[^a-zA-Z0-9_]" kwd)
@@ -1288,6 +1290,7 @@ Replaces invalid characters with \"_\"."
   kwd)
 
 (defun org-html-format-footnote-reference (n def refcnt)
+  "Format footnote reference N with definition DEF into HTML."
   (let ((extra (if (= refcnt 1) "" (format ".%d"  refcnt))))
     (format org-html-footnote-format
 	    (let* ((id (format "fnr.%s%s" n extra))
@@ -1296,10 +1299,12 @@ Replaces invalid characters with \"_\"."
 	      (org-html--anchor id n attributes)))))
 
 (defun org-html-format-footnotes-section (section-name definitions)
+  "Format footnotes section SECTION-NAME."
   (if (not definitions) ""
     (format org-html-footnotes-section section-name definitions)))
 
 (defun org-html-format-footnote-definition (fn)
+  "Format the footnote definition FN."
   (let ((n (car fn)) (def (cdr fn)))
     (format
      "<tr>\n<td>%s</td>\n<td>%s</td>\n</tr>\n"
@@ -1311,6 +1316,8 @@ Replaces invalid characters with \"_\"."
      def)))
 
 (defun org-html-footnote-section (info)
+  "Format the footnote section.
+INFO is a plist used as a communication channel."
   (let* ((fn-alist (org-export-collect-footnote-definitions
 		    (plist-get info :parse-tree) info))
 
@@ -1562,6 +1569,7 @@ INFO is a plist used as a communication channel."
 ;;;; Anchor
 
 (defun org-html--anchor (&optional id desc attributes)
+  "Format a HTML anchor."
   (let* ((name (and org-html-allow-name-attribute-in-anchors id))
 	 (attributes (concat (and id (format " id=\"%s\"" id))
 			     (and name (format " name=\"%s\"" name))
@@ -1571,6 +1579,7 @@ INFO is a plist used as a communication channel."
 ;;;; Todo
 
 (defun org-html--todo (todo)
+  "Format TODO keywords into HTML."
   (when todo
     (format "<span class=\"%s %s%s\">%s</span>"
 	    (if (member todo org-done-keywords) "done" "todo")
@@ -1580,6 +1589,7 @@ INFO is a plist used as a communication channel."
 ;;;; Tags
 
 (defun org-html--tags (tags)
+  "Format TAGS into HTML."
   (when tags
     (format "<span class=\"tag\">%s</span>"
 	    (mapconcat
@@ -1595,6 +1605,7 @@ INFO is a plist used as a communication channel."
 (defun* org-html-format-headline
   (todo todo-type priority text tags
 	&key level section-number headline-label &allow-other-keys)
+  "Format a headline in HTML."
   (let ((section-number
 	 (when section-number
 	   (format "<span class=\"section-number-%d\">%s</span> "
@@ -1716,8 +1727,8 @@ a plist used as a communication channel."
 
 (defun org-html-toc (depth info)
   "Build a table of contents.
-DEPTH is an integer specifying the depth of the table. INFO is
-a plist used as a communication channel.  Return the table of
+DEPTH is an integer specifying the depth of the table.  INFO is a
+plist used as a communication channel.  Return the table of
 contents as a string, or nil if it is empty."
   (let ((toc-entries
 	 (mapcar (lambda (headline)
@@ -2155,6 +2166,7 @@ contextual information."
 ;;;; Inlinetask
 
 (defun org-html-format-section (text class &optional id)
+  "Format a section with TEXT into a HTML div with CLASS and ID."
   (let ((extra (concat (when id (format " id=\"%s\"" id)))))
     (concat (format "<div class=\"%s\"%s>\n" class extra) text "</div>\n")))
 
@@ -2192,6 +2204,7 @@ contextual information."
 ;;;; Item
 
 (defun org-html-checkbox (checkbox)
+  "Format CHECKBOX into HTML."
   (case checkbox (on "<code>[X]</code>")
 	(off "<code>[&#xa0;]</code>")
 	(trans "<code>[-]</code>")
@@ -2200,6 +2213,7 @@ contextual information."
 (defun org-html-format-list-item (contents type checkbox
 					     &optional term-counter-id
 					     headline)
+  "Format a list item into HTML."
   (let ((checkbox (concat (org-html-checkbox checkbox) (and checkbox " "))))
     (concat
      (case type
@@ -2269,7 +2283,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 ;;;; Latex Environment
 
 (defun org-html-format-latex (latex-frag processing-type)
-  "Format LaTeX fragments into HTML."
+  "Format the LaTeX fragment LATEX-FRAG into HTML."
   (let ((cache-relpath "") (cache-dir "") bfn)
     (unless (eq processing-type 'mathjax)
       (setq bfn (buffer-file-name)
@@ -2653,7 +2667,7 @@ contextual information."
     string))
 
 (defun org-html-encode-plain-text (text)
-  "Convert plain text characters to HTML equivalent.
+  "Convert plain text characters from TEXT to HTML equivalent.
 Possible conversions are set in `org-html-protect-char-alist'."
   (mapc
    (lambda (pair)
@@ -2917,6 +2931,8 @@ communication channel."
 ;;;; Table
 
 (defun org-html-table-first-row-data-cells (table info)
+  "Transcode the first row of TABLE.
+INFO is a plist used as a communication channel."
   (let ((table-row
 	 (org-element-map table 'table-row
 	   (lambda (row)
@@ -2927,6 +2943,8 @@ communication channel."
       (cdr (org-element-contents table-row)))))
 
 (defun org-html-table--table.el-table (table info)
+  "Format table.el tables into HTML.
+INFO is a plist used as a communication channel."
   (when (eq (org-element-property :type table) 'table.el)
     (require 'table)
     (let ((outbuf (with-current-buffer
@@ -3067,6 +3085,8 @@ contextual information."
 ;;; Filter Functions
 
 (defun org-html-final-function (contents backend info)
+  "Filter to prettify the HTML output.
+Prettifying happens if `org-html-pretty-output' is t."
   (if (not org-html-pretty-output) contents
     (with-temp-buffer
       (html-mode)
