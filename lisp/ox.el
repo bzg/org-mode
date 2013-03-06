@@ -788,8 +788,6 @@ process faster and the export more portable."
   :group 'org-export-general
   :version "24.4"
   :package-version '(Org . "8.0")
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(file :must-match t))
 
 (defcustom org-export-invisible-backends nil

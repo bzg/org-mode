@@ -137,6 +137,8 @@
 (defgroup org-export-texinfo nil
   "Options for exporting Org mode files to Texinfo."
   :tag "Org Export Texinfo"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :group 'org-export)
 
 ;;; Preamble
@@ -144,15 +146,11 @@
 (defcustom org-texinfo-filename nil
   "Default filename for texinfo output."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(string :tag "Export Filename"))
 
 (defcustom org-texinfo-default-class "info"
   "The default Texinfo class."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(string :tag "Texinfo class"))
 
 (defcustom org-texinfo-classes
@@ -185,8 +183,6 @@ parameters, the \(reduced) level of the headline, and a predicate
 non-nil when the headline should be numbered.  It must return
 a format string in which the section title will be added."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(repeat
 	  (list (string :tag "Texinfo class")
 		(string :tag "Texinfo header")
@@ -225,8 +221,6 @@ order to reproduce the default set-up:
             \(format \"\\\\hfill{}\\\\textsc{%s}\"
               \(mapconcat 'identity tags \":\"))))"
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'function)
 
 ;;; Node listing (menu)
@@ -238,8 +232,6 @@ order to reproduce the default set-up:
 If a node title is greater than this length, the description will
 be placed after the end of the title."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'integer)
 
 ;;; Footnotes
@@ -251,22 +243,16 @@ be placed after the end of the title."
 (defcustom org-texinfo-active-timestamp-format "@emph{%s}"
   "A printf format string to be applied to active timestamps."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-texinfo-inactive-timestamp-format "@emph{%s}"
   "A printf format string to be applied to inactive timestamps."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-texinfo-diary-timestamp-format "@emph{%s}"
   "A printf format string to be applied to diary timestamps."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'string)
 
 ;;; Links
@@ -274,8 +260,6 @@ be placed after the end of the title."
 (defcustom org-texinfo-link-with-unknown-path-format "@indicateurl{%s}"
   "Format string for links with unknown path type."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'string)
 
 ;;; Tables
@@ -283,8 +267,6 @@ be placed after the end of the title."
 (defcustom org-texinfo-tables-verbatim nil
   "When non-nil, tables are exported verbatim."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-texinfo-table-scientific-notation "%s\\,(%s)"
@@ -294,8 +276,6 @@ The format should have \"%s\" twice, for mantissa and exponent
 
 When nil, no transformation is made."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(choice
 	  (string :tag "Format string")
 	  (const :tag "No formatting")))
@@ -324,8 +304,6 @@ to typeset and try to protect special characters.
 If no association can be found for a given markup, text will be
 returned as-is."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'alist
   :options '(bold code italic verbatim comment))
 
@@ -347,8 +325,6 @@ in order to mimic default behaviour:
   \"Format a drawer element for Texinfo export.\"
   contents\)"
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'function)
 
 ;;; Inlinetasks
@@ -385,8 +361,6 @@ in order to mimic default behaviour:
                     \"\n\"))
 	    full-title contents))"
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type 'function)
 
 ;;; Src blocks
@@ -403,8 +377,6 @@ as a command.  %f in the command will be replaced by the full
 file name, %b by the file base name \(i.e without extension) and
 %o by the base directory of the file."
   :group 'org-export-texinfo
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(repeat :tag "Shell command sequence"
 		 (string :tag "Shell command")))
 

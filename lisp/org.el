@@ -5307,6 +5307,12 @@ The following commands are available:
   ;; Try to set org-hide correctly
   (set-face-foreground 'org-hide (org-find-invisible-foreground)))
 
+;; Update `customize-package-emacs-version-alist'
+(add-to-list 'customize-package-emacs-version-alist
+	     '(Org ("6.21b" . "23.1")  ("6.33x" . "23.2")
+		   ("7.8.11" . "24.1") ("7.9.4" . "24.3")
+		   ("8.0" . "24.4")))
+
 (defvar org-mode-transpose-word-syntax-table
   (let ((st (make-syntax-table)))
     (mapc (lambda(c) (modify-syntax-entry

@@ -40,14 +40,13 @@
   "Options specific to Markdown export back-end."
   :tag "Org Markdown"
   :group 'org-export
-  :version "24.2")
+  :version "24.4"
+  :package-version '(Org . "8.0"))
 
 (defcustom org-md-headline-style 'atx
   "Style used to format headlines.
 This variable can be set to either `atx' or `setext'."
   :group 'org-export-md
-  :version "24.4"
-  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Use \"atx\" style" atx)
 	  (const :tag "Use \"Setext\" style" setext)))

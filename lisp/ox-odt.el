@@ -668,6 +668,8 @@ in order to mimic default behaviour:
   \"Format a drawer element for ODT export.\"
   contents\)"
   :group 'org-export-odt
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'function)
 
 
@@ -685,6 +687,8 @@ TAGS      the tags string, separated with colons \(string or nil\).
 
 The function result will be used as headline text."
   :group 'org-export-odt
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'function)
 
 
@@ -703,6 +707,8 @@ The function must accept six parameters:
 
 The function should return the string to be exported."
   :group 'org-export-odt
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'function)
 
 
