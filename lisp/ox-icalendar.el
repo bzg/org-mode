@@ -818,8 +818,8 @@ Return ICS file name."
   (let ((file (buffer-file-name (buffer-base-buffer))))
     (when (and file org-icalendar-store-UID)
       (org-icalendar-create-uid file 'warn-user)))
-  ;; Export part.  Since this back-end is backed up by `e-ascii',
-  ;; ensure links will not be collected at the end of sections.
+  ;; Export part.  Since this back-end is backed up by `ascii', ensure
+  ;; links will not be collected at the end of sections.
   (let ((outfile (org-export-output-file-name ".ics" subtreep)))
     (if async
 	(org-export-async-start
