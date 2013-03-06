@@ -17309,7 +17309,7 @@ This requires Emacs >= 24.1, build with imagemagick support."
 	  (list :tag "Use #+ATTR* or a number of pixels" (integer))
 	  (const :tag "Use #+ATTR* or don't resize" nil)))
 
-(defcustom org-agenda-inhibit-startup t
+(defcustom org-agenda-inhibit-startup nil
   "Inhibit startup when preparing agenda buffers.
 When this variable is `t' (the default), the initialization of
 the Org agenda buffers is inhibited: e.g. the visibility state
