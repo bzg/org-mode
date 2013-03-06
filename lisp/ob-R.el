@@ -237,7 +237,7 @@ current code buffer."
 	 '((:bmp . "bmp")
 	   (:jpg . "jpeg")
 	   (:jpeg . "jpeg")
-	   (:tex . "tikz")
+	   (:tikz . "tikz")
 	   (:tiff . "tiff")
 	   (:png . "png")
 	   (:svg . "svg")

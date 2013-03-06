@@ -77,15 +77,19 @@
 ;; (i.e. "inparaenum").  The second one allows to specify optional
 ;; arguments for that environment (square brackets are not mandatory).
 ;;
-;; Images accept `:float', `:placement', `:comment-include', and
-;; `:options' as attributes.  `:float' accepts a symbol among `wrap',
-;; `multicolumn', and `figure', which defines the float environment
-;; for the table (if unspecified, an image with a caption will be set
-;; in a "figure" environment).  `:comment-include' is a boolean that
-;; toggles whether to comment out the \includegraphics
-;; call.  `:placement' is a string that will be used as argument for
-;; the environment chosen.  `:options' is a string that will be used
-;; as the optional argument for "includegraphics" macro.
+;; Images accept `:float', `:placement', `:comment-include', `:width',
+;; and `:height', and `:options' as attributes.  `:float' accepts
+;; a symbol among `wrap', `multicolumn', and `figure', which defines
+;; the float environment for the image (if unspecified, an image with
+;; a caption will be set in a "figure" environment).
+;; `:comment-include' is a boolean that toggles whether to comment out
+;; the code which actually includes the image. `:placement' is
+;; a string that will be used as argument for the environment chosen.
+;; `:width' and `:height' control the width and height of the image.
+;; `:options' is a string that will be used as the optional argument
+;; for "includegraphics" macro or, in the case of tikz images, used as
+;; the optional argument for a `tikzpicture' environment which will
+;; surround the "\input" picture code.
 ;;
 ;; Special blocks accept `:options' as attribute.  Its value will be
 ;; appended as-is to the opening string of the environment created.
@@ -472,9 +476,25 @@ which format headlines like for Org version prior to 8.0."
 
 ;;;; Links
 
-(defcustom org-latex-image-default-option "width=.9\\linewidth"
+(defcustom org-latex-image-default-option ""
   "Default option for images."
   :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
+
+(defcustom org-latex-image-default-width ".9\\linewidth"
+  "Default width for images."
+  :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
+
+(defcustom org-latex-image-default-height ""
+  "Default height for images."
+  :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-latex-default-figure-position "htb"
@@ -483,7 +503,7 @@ which format headlines like for Org version prior to 8.0."
   :type 'string)
 
 (defcustom org-latex-inline-image-rules
-  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\)\\'"))
+  '(("file" . "\\.\\(pdf\\|jpeg\\|jpg\\|png\\|ps\\|eps\\|tikz\\)\\'"))
   "Rules characterizing image files that can be inlined into LaTeX.
 
 A rule consists in an association whose key is the type of link
@@ -1751,6 +1771,7 @@ used as a communication channel."
 	 (path (let ((raw-path (org-element-property :path link)))
 		 (if (not (file-name-absolute-p raw-path)) raw-path
 		   (expand-file-name raw-path))))
+	 (filetype (file-name-extension path))
 	 (caption (org-latex--caption/label-string parent info))
 	 ;; Retrieve latex attributes from the element around.
 	 (attr (org-export-read-attribute :attr_latex parent))
@@ -1768,32 +1789,62 @@ used as a communication channel."
 		   (format "[%s]" org-latex-default-figure-position))
 		  (t ""))))
 	 (comment-include (if (plist-get attr :comment-include) "%" ""))
-	 ;; Options for "includegraphics" macro. Make sure it is
-	 ;; a string with square brackets when non empty.  Default to
-	 ;; `org-latex-image-default-option' when possible.
-	 (options (let ((opt (format "%s"
-				     (or (plist-get attr :options)
-					 org-latex-image-default-option))))
-		    (cond ((string-match "\\`\\[.*\\]" opt) opt)
-			  ((org-string-nw-p opt) (format "[%s]" opt))
-			  ((eq float 'float) "[width=0.7\\textwidth]")
-			  ((eq float 'wrap) "[width=0.48\\textwidth]")
-			  (t "")))))
+	 ;; It is possible to specify width and height in the
+	 ;; ATTR_LATEX line, and also via default variables.
+	 (width (format "%s" (cond ((plist-get attr :width))
+				   ((eq float 'float) "0.7\\textwidth")
+				   ((eq float 'wrap) "0.48\\textwidth")
+				   (t org-latex-image-default-width))))
+	 (height (format "%s" (or (plist-get attr :height)
+				  org-latex-image-default-height)))
+	 (options (let ((opt (format "%s" (or (plist-get attr :options)
+					      org-latex-image-default-option))))
+		    (if (not (string-match "\\`\\[\\(.*\\)\\]\\'" opt)) opt
+		      (match-string 1 opt))))
+	 image-code)
+    (if (equal filetype "tikz")
+	;; For tikz images:
+	;; - use \input to read in image file.
+	;; - if options are present, wrap in a tikzpicture environment.
+	;; - if width or height are present, use \resizebox to change
+	;;   the image size.
+	(progn
+	  (setq image-code (format "\\input{%s}" path))
+	  (when (org-string-nw-p options)
+	    (setq image-code
+		  (format "\\begin{tikzpicture}[%s]\n%s\n\\end{tikzpicture}"
+			  options
+			  image-code)))
+	  (when (or (org-string-nw-p width) (org-string-nw-p height))
+	    (setq image-code (format "\\resizebox{%s}{%s}{%s}"
+				     (if (org-string-nw-p width) width "!")
+				     (if (org-string-nw-p height) height "!")
+				     image-code))))
+      ;; For other images:
+      ;; - add width and height to options.
+      ;; - include the image with \includegraphics.
+      (when (org-string-nw-p width)
+	(setq options (concat options ",width=" width)))
+      (when (org-string-nw-p height)
+	(setq options (concat options ",height=" height)))
+      (when (= (aref options 0) ?,)
+	(setq options (substring options 1)))
+      (setq image-code (format "\\includegraphics[%s]{%s}" options path)))
     ;; Return proper string, depending on FLOAT.
     (case float
       (wrap (format "\\begin{wrapfigure}%s
 \\centering
-%s\\includegraphics%s{%s}
-%s\\end{wrapfigure}" placement comment-include options path caption))
+%s%s
+%s\\end{wrapfigure}" placement comment-include image-code caption))
       (multicolumn (format "\\begin{figure*}%s
 \\centering
-%s\\includegraphics%s{%s}
-%s\\end{figure*}" placement comment-include options path caption))
+%s%s
+%s\\end{figure*}" placement comment-include image-code caption))
       (figure (format "\\begin{figure}%s
 \\centering
-%s\\includegraphics%s{%s}
-%s\\end{figure}" placement comment-include options path caption))
-      (t (format "\\includegraphics%s{%s}" options path)))))
+%s%s
+%s\\end{figure}" placement comment-include image-code caption))
+      (otherwise image-code))))
 
 (defun org-latex-link (link desc info)
   "Transcode a LINK object from Org to LaTeX.
