@@ -10893,7 +10893,6 @@ For more information, see the documentation on Worg.
 
 @node OpenDocument Text export, iCalendar export, @LaTeX{} and PDF export, Exporting
 @section OpenDocument Text export
-@cindex K, Jambunathan
 @cindex ODT
 @cindex OpenDocument
 @cindex export, OpenDocument
@@ -16446,12 +16445,6 @@ from worrying about possible bugs here and let me focus on other parts.
 Nicolas is maintaining the consistency of the deepest parts of Org.  His work
 on @file{org-element.el} and @file{org-export.el} has been outstanding, and
 opened the doors for many new ideas and features.
-
-@item Jambunathan K
-Jambunathan contributed the ODT exporter, definitely a killer feature of
-Org mode.  He also contributed the new HTML exporter, which is another core
-feature of Org.  Here too, I knew I could rely on him to fix bugs in these
-areas and to patiently explain the users what was the problems and solutions.
 
 @item Achim Gratz
 Achim rewrote the building process of Org, turning some @emph{ad hoc} tools
