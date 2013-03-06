@@ -2931,7 +2931,7 @@ See `org-time-clocksum-format' for more on time clock formats."
   :version "24.3"
   :type 'boolean)
 
-(defcustom org-time-clocksum-use-effort-durations t
+(defcustom org-time-clocksum-use-effort-durations nil
   "When non-nil, \\[org-clock-display] uses effort durations.
 E.g. by default, one day is considered to be a 8 hours effort,
 so a task that has been clocked for 16 hours will be displayed
