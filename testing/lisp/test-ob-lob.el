@@ -24,15 +24,13 @@
  (expand-file-name
   "library-of-babel.org"
   (expand-file-name
-   "babel"
-   (expand-file-name
-    "contrib"
+   "doc"
     (expand-file-name
      ".."
      (expand-file-name
       ".."
       (file-name-directory
-       (or load-file-name buffer-file-name))))))))
+       (or load-file-name buffer-file-name)))))))
 
 (ert-deftest test-ob-lob/ingest ()
   "Test the ingestion of an org-mode file."
