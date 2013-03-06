@@ -6056,6 +6056,9 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   (if (memq 'radio lk) '(org-activate-target-links (0 'org-link t)))
 	   (if (memq 'date lk) '(org-activate-dates (0 'org-date t)))
 	   (if (memq 'footnote lk) '(org-activate-footnote-links))
+           ;; Targets.
+           (list org-any-target-regexp '(0 'org-target t))
+	   ;; Diary sexps.
 	   '("^&?%%(.*\\|<%%([^>\n]*?>" (0 'org-sexp-date t))
 	   '(org-hide-wide-columns (0 nil append))
 	   ;; TODO keyword
