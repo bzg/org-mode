@@ -389,6 +389,8 @@ This variable doesn't apply to properties drawers.
 This option can also be set with the #+OPTIONS line,
 e.g. \"d:nil\"."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "All drawers" t)
 	  (const :tag "None" nil)
@@ -461,6 +463,8 @@ nil         Ignore math snippets.
 `verbatim'  Keep everything in verbatim.
 t           Allow export of math snippets."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Do not process math in any way" nil)
 	  (const :tag "Interpret math snippets" t)
@@ -509,6 +513,8 @@ e.g. \"e:nil\"."
 This option can also be set with the #+OPTIONS line,
 e.g. \"inline:nil\"."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-export-with-planning nil
@@ -516,6 +522,8 @@ e.g. \"inline:nil\"."
 This option can also be set with the #+OPTIONS: line,
 e.g. \"p:t\"."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-export-with-priority nil
@@ -553,6 +561,8 @@ This option can also be set with the #+SELECT_TAGS: keyword."
 This option can also be set with the #+OPTIONS: line,
 e.g. \"':t\"."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-export-with-special-strings t
@@ -577,6 +587,8 @@ e.g. \"-:nil\"."
 This option can also be set with the #+OPTIONS: line,
 e.g. \"stat:nil\""
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-export-with-sub-superscripts t
@@ -710,6 +722,8 @@ When nil, remove all these keywords from the export."
 This is a potential security risk, which is why the default value
 is nil.  You can also allow them through local buffer variables."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-export-snippet-translation-alist nil
@@ -772,6 +786,8 @@ Value must be an absolute file name.  It defaults to user's
 initialization file.  Though, a specific configuration makes the
 process faster and the export more portable."
   :group 'org-export-general
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :version "24.4"
   :package-version '(Org . "8.0")
   :type '(file :must-match t))

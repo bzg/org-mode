@@ -516,6 +516,8 @@ pdflatex, pdf, jpg and png images are OK.  When processing
 through dvi to Postscript, only ps and eps are allowed.  The
 default we use here encompasses both."
   :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(alist :key-type (string :tag "Type")
 		:value-type (regexp :tag "Path")))
 
@@ -530,6 +532,8 @@ default we use here encompasses both."
 (defcustom org-latex-default-table-environment "tabular"
   "Default environment used to build tables."
   :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-latex-default-table-mode 'table
@@ -555,6 +559,8 @@ LaTeX attributes.
 When modifying this variable, it may be useful to change
 `org-latex-default-table-environment' accordingly."
   :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice (const :tag "Table" table)
 		 (const :tag "Matrix" math)
 		 (const :tag "Inline matrix" inline-math)
@@ -572,6 +578,8 @@ loaded in the header of the document.  This value can be ignored
 locally with \":booktabs t\" and \":booktabs nil\" LaTeX
 attributes."
   :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
 
 (defcustom org-latex-table-caption-above t
@@ -587,6 +595,8 @@ The format should have \"%s\" twice, for mantissa and exponent
 
 When nil, no transformation is made."
   :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (string :tag "Format string")
 	  (const :tag "No formatting")))
@@ -920,6 +930,8 @@ logfiles to remove, set `org-latex-logfiles-extensions'."
 The regular expressions are used to find possible errors in the
 log of a latex-run."
   :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(repeat
 	  (cons
 	   (string :tag "Regexp")

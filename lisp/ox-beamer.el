@@ -156,6 +156,8 @@ For example, it could be set to \"allowframebreaks\"."
   "%45ITEM %10BEAMER_env(Env) %10BEAMER_act(Act) %4BEAMER_col(Col) %8BEAMER_opt(Opt)"
   "Column view format that should be used to fill the template."
   :group 'org-export-beamer
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const  :tag "Do not insert Beamer column view format" nil)
 	  (string :tag "Beamer column view format")))
@@ -163,6 +165,8 @@ For example, it could be set to \"allowframebreaks\"."
 (defcustom org-beamer-theme "default"
   "Default theme used in Beamer presentations."
   :group 'org-export-beamer
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Do not insert a Beamer theme" nil)
 	  (string :tag "Beamer theme")))
@@ -182,6 +186,8 @@ open    The opening template for the environment, with the following escapes
         %U   if there is headline text, that text in [] brackets
 close   The closing string of the environment."
   :group 'org-export-beamer
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(repeat
 	  (list
 	   (string :tag "Environment")

@@ -643,6 +643,8 @@ nil            Ignore math snippets.
                be loaded.
 t              Synonym for `mathjax'."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Do not process math in any way" nil)
 	  (const :tag "Use dvipng to make images" dvipng)
@@ -695,6 +697,8 @@ pdflatex, pdf, jpg and png images are OK.  When processing
 through dvi to Postscript, only ps and eps are allowed.  The
 default we use here encompasses both."
   :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(alist :key-type (string :tag "Type")
 		:value-type (regexp :tag "Path")))
 

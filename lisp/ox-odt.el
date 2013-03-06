@@ -727,6 +727,8 @@ nil            Ignore math snippets.
                be loaded.
 t              Synonym for `mathjax'."
   :group 'org-export-odt
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(choice
 	  (const :tag "Do not process math in any way" nil)
 	  (const :tag "Use dvipng to make images" dvipng)
