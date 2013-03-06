@@ -1,15 +1,17 @@
 This directory contains add-ons to Org-mode.
 
-These contributions are not part of GNU Emacs or of the official Org-mode
-package.  But the git repository for Org-mode is glad to provide useful way
-to distribute and develop them as long as they are distributed under a free
-software license.
+These contributions are not part of GNU Emacs or of the official
+Org-mode package.  But the git repository for Org-mode is glad to
+provide useful way to distribute and develop them as long as they
+are distributed under a free software license.
 
 Please put your contribution in one of these directories:
 
-LISP (emacs-lisp code)
-======================
-htmlize.el               --- Convert buffer text and decorations to HTML
+LISP (Emacs Lisp)
+=================
+
+Org utils
+~~~~~~~~~
 org-annotate-file.el     --- Annotate a file with org syntax
 org-bibtex-extras.el     --- Extras for working with org-bibtex entries
 org-bookmark.el          --- Links to bookmarks
@@ -25,7 +27,7 @@ org-element.el           --- Parser and applications for Org syntax
 org-elisp-symbol.el      --- Org links to emacs-lisp symbols
 org-eval-light.el        --- Evaluate in-buffer code on demand
 org-eval.el              --- The <lisp> tag, adapted from Muse
-org-expiry.el 	         --- Expiry mechanism for Org entries
+org-expiry.el            --- Expiry mechanism for Org entries
 org-export-generic.el    --- Export framework for configurable backends
 org-git-link.el          --- Provide org links to specific file version
 org-interactive-query.el --- Interactive modification of tags query
@@ -58,6 +60,9 @@ org-vm.el		 --- Support for links to VM messages
 org-wl.el		 --- Support for links to Wanderlust messages
 org-w3m.el		 --- Support link/copy/paste from w3m to Org-mode
 org-colview-xemacs.el	 --- Column View in Org-mode, XEmacs-specific version
+
+Org exporters
+~~~~~~~~~~~~~
 ox-confluence.el         --- Confluence Wiki Back-End for Org Export Engine
 ox-deck.el               --- deck.js Presentation Back-End for Org Export Engine
 ox-groff.el              --- Groff Back-End for Org Export Engine
@@ -65,28 +70,29 @@ ox-koma-letter.el        --- KOMA Scrlttr2 Back-End for Org Export Engine
 ox-s5.el                 --- S5 Presentation Back-End for Org Export Engine
 ox-taskjuggler.el        --- TaskJuggler Back-End for Org Export Engine
 
+Org Babel languages
+~~~~~~~~~~~~~~~~~~~
+ob-fomus.el        	 --- Org-babel functions for fomus evaluation
+ob-oz.el           	 --- Org-babel functions for Oz evaluation
+ob-mathomatic.el   	 --- Org-babel functions for mathomatic evaluation
+ob-tcl.el 		 --- Org-babel functions for tcl evaluation
+ob-eukleides.el    	 --- Org-babel functions for eukleides evaluation
+ob-julia.el  	 	 --- Org-babel functions for julia evaluation
 
-BABEL
-=====
-library-of-babel.org     --- Documentation for the library of babel
-langs/ob-fomus.el        --- Org-babel functions for fomus evaluation
-langs/ob-oz.el           --- Org-babel functions for Oz evaluation
-langs/ob-mathomatic.el   --- Org-babel functions for mathomatic evaluation
-langs/ob-tcl.el          --- Org-babel functions for tcl evaluation
-langs/ob-eukleides.el    --- Org-babel functions for eukleides evaluation
-langs/ob-julia.el    	 --- Org-babel functions for julia evaluation
-
+External libraries
+~~~~~~~~~~~~~~~~~~
+htmlize.el               --- Convert buffer text and decorations to HTML
+  
 
 SCRIPTS (shell, bash, etc.)
 ===========================
-
-dir2org.zsh          --- Org compatible fs structure output
-ditaa.jar            --- ASCII to PNG converter by Stathis Sideris, GPL
-org2hpda             --- Generate hipster pda style printouts from Org-mode
-org-docco.org        --- docco side-by-side annotated code export to HTML
-StartOzServer.oz     --- implements the Oz-side of the Org-babel Oz interface
-staticmathjax        --- XULRunner application to process MathJax statically
-x11idle.c            --- get the idle time of your X session
+dir2org.zsh              --- Org compatible fs structure output
+ditaa.jar            	 --- ASCII to PNG converter by Stathis Sideris, GPL
+org2hpda             	 --- Generate hipster pda style printouts from Org-mode
+org-docco.org        	 --- docco side-by-side annotated code export to HTML
+StartOzServer.oz     	 --- implements the Oz-side of the Org-babel Oz interface
+staticmathjax        	 --- XULRunner application to process MathJax statically
+x11idle.c            	 --- get the idle time of your X session
 
 This directory also contains supporting files for the following
 packages: ob-oz.el, org-docco.org, and org-static-mathjax.el.
