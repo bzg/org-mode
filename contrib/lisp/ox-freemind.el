@@ -531,8 +531,4 @@ Return output file's name."
 
 (provide 'ox-freemind)
 
-;; Local variables:
-;; generated-autoload-file: "org-loaddefs.el"
-;; End:
-
 ;;; ox-freemind.el ends here

@@ -838,7 +838,6 @@ Open file with the TaskJuggler GUI."
 (provide 'ox-taskjuggler)
 
 ;; Local variables:
-;; generated-autoload-file: "org-loaddefs.el"
 ;; sentence-end-double-space: t
 ;; End:
 
