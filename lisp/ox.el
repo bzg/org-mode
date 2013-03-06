@@ -2749,11 +2749,16 @@ The copy will preserve local variables, visibility, contents and
 narrowing of the original buffer.  If a region was active in
 BUFFER, contents will be narrowed to that region instead.
 
-The resulting function can be eval'ed at a later time, from
-another buffer, effectively cloning the original buffer there."
+The resulting function can be evaled at a later time, from
+another buffer, effectively cloning the original buffer there.
+
+The function assumes BUFFER's major mode is `org-mode'."
   (with-current-buffer buffer
     `(lambda ()
        (let ((inhibit-modification-hooks t))
+	 ;; Set major mode. Ignore `org-mode-hook' as it has been run
+	 ;; already in BUFFER.
+	 (let ((org-mode-hook nil)) (org-mode))
 	 ;; Buffer local variables.
 	 ,@(let (local-vars)
 	     (mapc
@@ -2763,13 +2768,9 @@ another buffer, effectively cloning the original buffer there."
 			(val (cdr entry)))
 		    (and (not (eq var 'org-font-lock-keywords))
 			 (or (memq var
-				   '(major-mode
-				     default-directory
+				   '(default-directory
 				     buffer-file-name
-				     buffer-file-coding-system
-				     outline-level
-				     outline-regexp
-				     buffer-invisibility-spec))
+				     buffer-file-coding-system))
 			     (string-match "^\\(org-\\|orgtbl-\\)"
 					   (symbol-name var)))
 			 ;; Skip unreadable values, as they cannot be
@@ -5125,13 +5126,10 @@ and
 	     "%S"
 	     `(with-temp-buffer
 		,(when org-export-async-debug '(setq debug-on-error t))
-		;; Ignore `org-mode-hook' as it has been run already
-		;; in the original buffer.  Ignore `kill-emacs-hook'
-		;; as we need a truly non-interactive process.
-		(setq org-mode-hook nil kill-emacs-hook nil)
-		;; Initialize `org-mode' and export framework in the
-		;; external process.
-		(org-mode)
+		;; Ignore `kill-emacs-hook' as we need a truly
+		;; non-interactive process.
+		(setq kill-emacs-hook nil)
+		;; Initialize export framework in external process.
 		(require 'ox)
 		;; Re-create current buffer there.
 		(funcall ,,copy-fun)
