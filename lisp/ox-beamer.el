@@ -97,6 +97,11 @@
 ;; sets overlay specifications and the last one inserts optional
 ;; arguments in current list environment.
 ;;
+;; Table of contents generated from "toc:t" option item are wrapped
+;; within a "frame" environment.  Those generated from a TOC keyword
+;; aren't.  TOC keywords accept options enclosed within square
+;; brackets (e.g. #+TOC: headlines [currentsection]).
+;;
 ;; Eventually, an export snippet with a value enclosed within angular
 ;; brackets put at the beginning of an element or object whose type is
 ;; among `bold', `item', `link', `radio-target' and `target' will
@@ -706,10 +711,8 @@ channel."
 	    (options (and (string-match "\\[.*?\\]" value)
 			  (match-string 0 value))))
 	(concat
-	 "\\begin{frame}"
 	 (when (wholenump depth) (format "\\setcounter{tocdepth}{%s}\n" depth))
-	 "\\tableofcontents" options "\n"
-	 "\\end{frame}")))
+	 "\\tableofcontents" options)))
      (t (org-export-with-backend 'latex keyword contents info)))))
 
 
