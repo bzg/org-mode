@@ -20036,8 +20036,8 @@ all headlines to items, shifting text accordingly.
 
 If it is an item, convert all items to normal lines.
 
-If it is normal text, change region into an item.  With a prefix
-argument ARG, change each line in region into an item."
+If it is normal text, change region into a list of items.
+With a prefix argument ARG, change the region in a single item."
   (interactive "P")
   (let ((shift-text
 	 (function
@@ -20130,19 +20130,10 @@ argument ARG, change each line in region into an item."
 		 (funcall shift-text
 			  (+ start-ind (* (1+ delta) bul-len))
 			  (min end section-end)))))))
-	;; Case 3. Normal line with ARG: turn each non-item line into
-	;;         an item.
-	(arg
-	 (while (< (point) end)
-	   (unless (or (org-at-heading-p) (org-at-item-p))
-	     (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
-		 (replace-match
-		  (concat "\\1" (org-list-bullet-string "-") "\\2"))))
-	   (forward-line)))
-	;; Case 4. Normal line without ARG: make the first line of
-	;;         region an item, and shift indentation of others
-	;;         lines to set them as item's body.
-	(t (let* ((bul (org-list-bullet-string "-"))
+	;; Case 3. Normal line with ARG: make the first line of region
+	;;         an item, and shift indentation of others lines to
+	;;         set them as item's body.
+	(arg (let* ((bul (org-list-bullet-string "-"))
 		  (bul-len (length bul))
 		  (ref-ind (org-get-indentation)))
 	     (skip-chars-forward " \t")
@@ -20155,11 +20146,20 @@ argument ARG, change each line in region into an item."
 			(+ ref-ind bul-len)
 			(min end (save-excursion (or (outline-next-heading)
 						     (point)))))
-	       (forward-line)))))))))
+	       (forward-line))))
+	;; Case 4. Normal line without ARG: turn each non-item line
+	;;         into an item.
+	(t
+	 (while (< (point) end)
+	   (unless (or (org-at-heading-p) (org-at-item-p))
+	     (if (looking-at "\\([ \t]*\\)\\(\\S-\\)")
+		 (replace-match
+		  (concat "\\1" (org-list-bullet-string "-") "\\2"))))
+	   (forward-line))))))))
 
 (defun org-toggle-heading (&optional nstars)
   "Convert headings to normal text, or items or text to headings.
-If there is no active region, only the current line is considered.
+If there is no active region, only convert the current line.
 
 With a \\[universal-argument] prefix, convert the whole list at
 point into heading.
@@ -20169,15 +20169,17 @@ In a region:
 - If the first non blank line is a headline, remove the stars
   from all headlines in the region.
 
-- If it is a normal line turn each and every normal line (i.e. not an
-  heading or an item) in the region into a heading.
+- If it is a normal line, turn each and every normal line (i.e.,
+  not an heading or an item) in the region into headings.  If you
+  want to convert only the first line of this region, use one
+  universal prefix argument.
 
 - If it is a plain list item, turn all plain list items into headings.
 
 When converting a line into a heading, the number of stars is chosen
 such that the lines become children of the current entry.  However,
-when a prefix argument is given, its value determines the number of
-stars to add."
+when a numeric prefix argument is given, its value determines the
+number of stars to add."
   (interactive "P")
   (let ((skip-blanks
 	 (function
@@ -20195,7 +20197,7 @@ stars to add."
     ;; do not consider the last line to be in the region.
 
     (when (and current-prefix-arg (org-at-item-p))
-      (if (equal current-prefix-arg '(4)) (setq current-prefix-arg 1))
+      (if (listp current-prefix-arg) (setq current-prefix-arg 1))
       (org-mark-element))
 
     (if (org-region-active-p)
@@ -20221,10 +20223,9 @@ stars to add."
 	;;         One star will be added by `org-list-to-subtree'.
 	((org-at-item-p)
 	 (let* ((stars (make-string
-			(if nstars
-			    ;; subtract the star that will be added again by
-			    ;; `org-list-to-subtree'
-			    (1- (prefix-numeric-value current-prefix-arg))
+			;; subtract the star that will be added again by
+			;; `org-list-to-subtree'
+			(if (numberp nstars) (1- nstars)
 			  (or (org-current-level) 0))
 			?*))
 		(add-stars
@@ -20248,18 +20249,17 @@ stars to add."
 	     (forward-line))))
 	;; Case 3. Started at normal text: make every line an heading,
 	;;         skipping headlines and items.
-	(t (let* ((stars (make-string
-			  (if nstars
-			      (prefix-numeric-value current-prefix-arg)
-			    (or (org-current-level) 0))
-			  ?*))
+	(t (let* ((stars
+		   (make-string
+		    (if (numberp nstars) nstars (or (org-current-level) 0)) ?*))
 		  (add-stars
 		   (cond (nstars "")                ; stars from prefix only
 			 ((equal stars "") "*")     ; before first heading
 			 (org-odd-levels-only "**") ; inside heading, odd
 			 (t "*")))                  ; inside heading, oddeven
-		  (rpl (concat stars add-stars " ")))
-	     (while (< (point) end)
+		  (rpl (concat stars add-stars " "))
+		  (lend (if (listp nstars) (save-excursion (end-of-line) (point)))))
+	     (while (< (point) (if (equal nstars '(4)) lend end))
 	       (when (and (not (or (org-at-heading-p) (org-at-item-p) (org-at-comment-p)))
 			  (looking-at "\\([ \t]*\\)\\(\\S-\\)"))
 		 (replace-match (concat rpl (match-string 2))) (setq toggled t))
