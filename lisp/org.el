@@ -8751,6 +8751,8 @@ buffer.  It will also recognize item context in multiline items."
              org-backward-element
              org-backward-heading-same-level
              org-ctrl-c-ret
+	     org-ctrl-c-minus
+	     org-ctrl-c-star
              org-cycle
              org-forward-heading-same-level
              org-insert-heading
