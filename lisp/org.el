@@ -18159,7 +18159,7 @@ share a good deal of logic."
      (org-combine-plists
       (org-export--get-global-options 'latex)
       (org-export--get-inbuffer-options 'latex))
-     :latex-header-extra))))
+     :latex-header))))
 
 ;; This function borrows from Ganesh Swami's latex2png.el
 (defun org-create-formula-image-with-dvipng (string tofile options buffer)

@@ -194,7 +194,8 @@ holding export options."
              document-class-string
              org-latex-default-packages-alist ; defined in org.el
              org-latex-packages-alist nil     ; defined in org.el
-             (plist-get info :latex-header-extra)))
+	     (concat (plist-get info :latex-header)
+		     (plist-get info :latex-header-extra))))
            info)))))
    ;; Define "From" data.
    (format "\\setkomavar{fromname}{%s}\n"

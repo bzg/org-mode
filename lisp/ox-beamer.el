@@ -860,7 +860,8 @@ holding export options."
 	       document-class-string
 	       org-latex-default-packages-alist
 	       org-latex-packages-alist nil
-	       (concat (plist-get info :latex-header-extra)
+	       (concat (plist-get info :latex-header)
+		       (plist-get info :latex-header-extra)
 		       (plist-get info :beamer-header-extra))))
 	     info)))))
      ;; 3. Insert themes.

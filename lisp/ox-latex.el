@@ -29,9 +29,10 @@
 ;; functions are available: `org-latex-publish-to-latex' and
 ;; `org-latex-publish-to-pdf'.
 ;;
-;; The library introduces three new buffer keywords: "LATEX_CLASS",
-;; "LATEX_CLASS_OPTIONS" and "LATEX_HEADER", and a new OPTIONS item:
-;; "textht".
+;; The library introduces four new buffer keywords: "LATEX_CLASS",
+;; "LATEX_CLASS_OPTIONS", "LATEX_HEADER" and "LATEX_HEADER_EXTRA" (the
+;; latter will not be used to build LaTeX snippets).  It also
+;; introduces a new OPTIONS item: "textht".
 ;;
 ;; Table export can be controlled with a number of attributes (through
 ;; ATTR_LATEX keyword).
@@ -177,7 +178,8 @@
 		  (:date-format nil nil org-latex-date-timestamp-format)
 		  (:latex-class "LATEX_CLASS" nil org-latex-default-class t)
 		  (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
-		  (:latex-header-extra "LATEX_HEADER" nil nil newline)
+		  (:latex-header "LATEX_HEADER" nil nil newline)
+		  (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
 		  (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)))
 
 
@@ -1149,7 +1151,8 @@ holding export options."
 	       document-class-string
 	       org-latex-default-packages-alist
 	       org-latex-packages-alist nil
-	       (plist-get info :latex-header-extra)))
+	       (concat (plist-get info :latex-header)
+		       (plist-get info :latex-header-extra))))
 	     info)))))
      ;; Possibly limit depth for headline numbering.
      (let ((sec-num (plist-get info :section-numbers)))
