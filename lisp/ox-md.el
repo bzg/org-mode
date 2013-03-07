@@ -418,7 +418,7 @@ as a communication channel."
 
 ;;;###autoload
 (defun org-md-export-as-markdown (&optional async subtreep visible-only)
-  "Export current buffer to a text buffer.
+  "Export current buffer to a Markdown buffer.
 
 If narrowing is active in the current buffer, only export its
 narrowed part.
