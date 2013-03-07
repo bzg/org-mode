@@ -291,8 +291,8 @@ When optional argument BELL is non-nil, inform the user with
 a message if the file was modified.  With optional argument
 H-MARKERS non-nil, it is a list of markers for the headlines
 which will be updated."
-  (let (modified-flag pt)
-    (when h-markers (setq pt (goto-char (car h-markers))))
+  (let ((pt (if h-markers (goto-char (car h-markers)) (point-min)))
+	modified-flag)
     (org-map-entries
      (lambda ()
        (let ((entry (org-element-at-point)))
@@ -300,8 +300,7 @@ which will be updated."
 	   (org-id-get-create)
 	   (setq modified-flag t)
 	   (forward-line))
-	 (setq org-map-continue-from
-	       (if h-markers (pop h-markers) (point-max)))))
+	 (when h-markers (setq org-map-continue-from (pop h-markers)))))
      nil nil 'comment)
     (when (and bell modified-flag)
       (message "ID properties created in file \"%s\"" file)
