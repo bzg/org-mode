@@ -275,12 +275,6 @@ will also unescape &#nn;."
 			 )))
 		   org-str))))
 
-;; (let* ((str1 "a quote: \", an amp: &, lt: <; over 256: öåäÖÅÄ")
-;;        (str2 (org-freemind-escape-str-from-org str1))
-;;        (str3 (org-freemind-unescape-str-to-org str2)))
-;;     (unless (string= str1 str3)
-;;       (error "Error str3=%s" str3)))
-
 (defun org-freemind-convert-links-helper (matched)
   "Helper for `org-freemind-convert-links-from-org'.
 MATCHED is the link just matched."
