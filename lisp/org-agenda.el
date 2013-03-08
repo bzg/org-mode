@@ -7623,11 +7623,11 @@ With prefix ARG, go backward that many times the current span."
   "Switch to default view for agenda."
   (interactive)
   (org-agenda-change-time-span (or org-agenda-ndays org-agenda-span)))
-(defun org-agenda-day-view (&optional day-of-year)
+(defun org-agenda-day-view (&optional day-of-month)
   "Switch to daily view for agenda.
-With argument DAY-OF-YEAR, switch to that day of the year."
+With argument DAY-OF-MONTH, switch to that day of the month."
   (interactive "P")
-  (org-agenda-change-time-span 'day day-of-year))
+  (org-agenda-change-time-span 'day day-of-month))
 (defun org-agenda-week-view (&optional iso-week)
   "Switch to daily view for agenda.
 With argument ISO-WEEK, switch to the corresponding ISO week.
