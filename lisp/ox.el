@@ -3257,11 +3257,24 @@ that property within attributes.
 
 This function assumes attributes are defined as \":keyword
 value\" pairs.  It is appropriate for `:attr_html' like
-properties."
+properties.  All values will become strings except the empty
+string and \"nil\", which will become nil."
   (let ((attributes
 	 (let ((value (org-element-property attribute element)))
-	   (and value
-		(read (format "(%s)" (mapconcat 'identity value " ")))))))
+	   (when value
+	     (let ((s (mapconcat 'identity value " ")) result)
+	       (while (string-match
+		       "\\(?:^\\|[ \t]+\\)\\(:[-a-zA-Z0-9_]+\\)\\([ \t]+\\|$\\)"
+		       s)
+		 (let ((value (substring s 0 (match-beginning 0))))
+		   (push (and (not (member value '("nil" ""))) value) result))
+		 (push (intern (match-string 1 s)) result)
+		 (setq s (substring s (match-end 0))))
+	       ;; Ignore any string before the first property with `cdr'.
+	       (cdr (nreverse (cons (and (org-string-nw-p s)
+					 (not (equal s "nil"))
+					 s)
+				    result))))))))
     (if property (plist-get attributes property) attributes)))
 
 (defun org-export-get-caption (element &optional shortp)

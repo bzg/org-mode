@@ -945,28 +945,14 @@ This function assumes TABLE has `org' as its `:type' attribute."
          (lines (org-split-string contents "\n"))
 
          (attr-list
-          (let ((result-list '()))
-            (dolist (attr-item
-                     (list
-                      (if (plist-get attr :expand)
-                          "expand" nil)
-
-                      (case (plist-get attr :placement)
-                        ('center "center")
-                        ('left nil)
-                        (t (if org-man-tables-centered "center" "")))
-
-                      (case (plist-get attr :boxtype)
-                        ('box "box")
-                        ('doublebox "doublebox")
-                        ('allbox "allbox")
-                        ('none nil)
-                        (t "box"))))
-
-              (if attr-item
-                  (add-to-list 'result-list attr-item)))
-            result-list ))
-
+	  (delq nil
+		(list
+		 (and (plist-get attr :expand) "expand")
+		 (let ((placement (plist-get attr :placement)))
+		   (cond ((string= placement 'center) "center")
+			 ((string= placement 'left) nil)
+			 (t (if org-man-tables-centered "center" ""))))
+		 (or (plist-get attr :boxtype) "box"))))
 
          (title-line  (plist-get attr :title-line))
          (long-cells (plist-get attr :long-cells))

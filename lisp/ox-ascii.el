@@ -1218,7 +1218,9 @@ information."
 	(spec-width
 	 (org-export-read-attribute :attr_ascii horizontal-rule :width)))
     (org-ascii--justify-string
-     (make-string (if (wholenump spec-width) spec-width text-width)
+     (make-string (if (and spec-width (string-match "^[0-9]+$" spec-width))
+		      (string-to-number spec-width)
+		    text-width)
 		  (if (eq (plist-get info :ascii-charset) 'utf-8) ?― ?-))
      text-width 'center)))
 

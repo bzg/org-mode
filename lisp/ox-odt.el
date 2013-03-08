@@ -2341,12 +2341,19 @@ used as a communication channel."
 	  (list user-frame-style user-frame-attrs user-frame-anchor))
 	 ;; (embed-as (or embed-as user-frame-anchor "paragraph"))
 	 ;; extrac
-	 ;; handle `:width', `:height' and `:scale' properties.
+	 ;;
+	 ;; Handle `:width', `:height' and `:scale' properties.  Read
+	 ;; them as numbers since we need them for computations.
 	 (size (org-odt--image-size
-		src-expanded (plist-get attr-plist :width)
-		(plist-get attr-plist :height)
-		(plist-get attr-plist :scale) nil ;; embed-as
-		"paragraph"			  ; FIXME
+		src-expanded
+		(let ((width (plist-get attr-plist :width)))
+		  (and width (read width)))
+		(let ((length (plist-get attr-plist :length)))
+		  (and length (read length)))
+		(let ((scale (plist-get attr-plist :scale)))
+		  (and scale (read scale)))
+		nil			; embed-as
+		"paragraph"		; FIXME
 		))
 	 (width (car size)) (height (cdr size))
 	 (standalone-link-p (org-odt--standalone-link-p element info))
@@ -3351,8 +3358,9 @@ channel."
 	      "OrgTableHeading")
 	     ((let* ((table (org-export-get-parent-table table-cell))
 		     (table-attrs (org-export-read-attribute :attr_odt table))
-		     (table-header-columns (plist-get table-attrs
-						      :header-columns)))
+		     (table-header-columns
+		      (let ((cols (plist-get table-attrs :header-columns)))
+			(and cols (read cols)))))
 		(<= c (cond ((wholenump table-header-columns)
 			     (- table-header-columns 1))
 			    (table-header-columns 0)

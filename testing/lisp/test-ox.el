@@ -645,12 +645,33 @@ body\n")))
      :attr_html
      (org-test-with-temp-text "#+ATTR_HTML: :a 1 :b 2\nParagraph"
        (org-element-at-point)))
-    '(:a 1 :b 2)))
+    '(:a "1" :b "2")))
   ;; Return nil on empty attribute.
   (should-not
    (org-export-read-attribute
     :attr_html
-    (org-test-with-temp-text "Paragraph" (org-element-at-point)))))
+    (org-test-with-temp-text "Paragraph" (org-element-at-point))))
+  ;; Return nil on "nil" string.
+  (should
+   (equal '(:a nil :b nil)
+	  (org-export-read-attribute
+	   :attr_html
+	   (org-test-with-temp-text "#+ATTR_HTML: :a nil :b nil\nParagraph"
+	     (org-element-at-point)))))
+  ;; Return nil on empty string.
+  (should
+   (equal '(:a nil :b nil)
+	  (org-export-read-attribute
+	   :attr_html
+	   (org-test-with-temp-text "#+ATTR_HTML: :a :b\nParagraph"
+	     (org-element-at-point)))))
+  ;; Ignore text before first property.
+  (should-not
+   (member "ignore"
+	   (org-export-read-attribute
+	    :attr_html
+	    (org-test-with-temp-text "#+ATTR_HTML: ignore :a 1\nParagraph"
+	      (org-element-at-point))))))
 
 (ert-deftest test-org-export/get-caption ()
   "Test `org-export-get-caption' specifications."

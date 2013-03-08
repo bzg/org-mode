@@ -1211,11 +1211,11 @@ used as a communication channel."
                    (expand-file-name raw-path))))
          (attr (org-export-read-attribute :attr_groff link))
          (placement
-          (case (plist-get attr :position)
-            ('center "")
-            ('left "-L")
-            ('right "-R")
-            (t "")))
+          (let ((pos (plist-get attr :position)))
+	    (cond ((string= pos 'center) "")
+		  ((string= pos 'left) "-L")
+		  ((string= pos 'right) "-R")
+		  (t ""))))
 	 (width  (or (plist-get attr :width) ""))
 	 (height (or (plist-get attr :height) ""))
 	 (caption (and (not (plist-get attr :disable-caption))
@@ -1225,7 +1225,7 @@ used as a communication channel."
     (concat
      (cond
       ((and org-groff-raster-to-ps
-            (or  (string-match ".\.png$" path) 
+            (or  (string-match ".\.png$" path)
                  (string-match ".\.jpg$" path)))
        (let ((eps-path (concat path ".eps")))
          (shell-command (format org-groff-raster-to-ps path eps-path))
@@ -1660,37 +1660,20 @@ This function assumes TABLE has `org' as its `:type' attribute."
          (lines (org-split-string contents "\n"))
 
          (attr-list
-          (let (result-list)
-            (dolist (attr-item
-                     (list
-                      (if (plist-get attr :expand)
-                          "expand" nil)
-
-                      (case (plist-get attr :placement)
-                        ('center "center")
-                        ('left nil)
-                        (t
-                         (if org-groff-tables-centered
-                             "center" "")))
-
-                      (case (plist-get attr :boxtype)
-                        ('box "box")
-                        ('doublebox "doublebox")
-                        ('allbox "allbox")
-                        ('none nil)
-                        (t "box"))))
-
-              (if (not (null attr-item))
-                  (add-to-list 'result-list attr-item)))
-            result-list))
+	  (delq nil
+		(list (and (plist-get attr :expand) "expand")
+		      (let ((placement (plist-get attr :placement)))
+			(cond ((string= placement 'center) "center")
+			      ((string= placement 'left) nil)
+			      (t (if org-groff-tables-centered "center" ""))))
+		      (or (plist-get attr :boxtype) "box"))))
 
          (title-line  (plist-get attr :title-line))
          (long-cells (plist-get attr :long-cells))
 
          (table-format
           (concat
-           (format "%s"
-                   (or (car attr-list) ""))
+           (or (car attr-list) "")
            (or
             (let (output-list)
 	      (when (cdr attr-list)

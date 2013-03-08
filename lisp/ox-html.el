@@ -1214,9 +1214,9 @@ When STANDALONE-P is t, wrap the <img.../> into a <div>...</div>."
 (defun org-html--textarea-block (element)
   "Transcode ELEMENT into a textarea block.
 ELEMENT is either a src block or an example block."
-  (let ((code (car (org-export-unravel-code element)))
-	(attr (org-export-read-attribute :attr_html element)))
-    (format "<p>\n<textarea cols=\"%d\" rows=\"%d\">\n%s</textarea>\n</p>"
+  (let* ((code (car (org-export-unravel-code element)))
+	 (attr (org-export-read-attribute :attr_html element)))
+    (format "<p>\n<textarea cols=\"%s\" rows=\"%s\">\n%s</textarea>\n</p>"
 	    (or (plist-get attr :width) 80)
 	    (or (plist-get attr :height) (org-count-lines code))
 	    code)))

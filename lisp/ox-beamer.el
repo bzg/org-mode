@@ -783,7 +783,7 @@ contextual information."
 		      (org-export-read-attribute :attr_latex plain-list)
 		      (org-export-read-attribute :attr_beamer plain-list)))
 	 (latex-type (let ((env (plist-get attributes :environment)))
-		       (cond (env (format "%s" env))
+		       (cond (env)
 			     ((eq type 'ordered) "enumerate")
 			     ((eq type 'descriptive) "description")
 			     (t "itemize")))))
@@ -793,11 +793,11 @@ contextual information."
 	     latex-type
 	     ;; Default overlay specification, if any.
 	     (org-beamer--normalize-argument
-	      (format "%s" (or (plist-get attributes :overlay) ""))
+	      (or (plist-get attributes :overlay) "")
 	      'defaction)
 	     ;; Second optional argument depends on the list type.
 	     (org-beamer--normalize-argument
-	      (format "%s" (or (plist-get attributes :options) ""))
+	      (or (plist-get attributes :options) "")
 	      'option)
 	     ;; Eventually insert contents and close environment.
 	     contents

@@ -1814,17 +1814,17 @@ used as a communication channel."
 	 (comment-include (if (plist-get attr :comment-include) "%" ""))
 	 ;; It is possible to specify width and height in the
 	 ;; ATTR_LATEX line, and also via default variables.
-	 (width (format "%s" (cond ((plist-get attr :width))
-				   ((plist-get attr :height) "")
-				   ((eq float 'figure) "0.7\\textwidth")
-				   ((eq float 'wrap) "0.48\\textwidth")
-				   (t org-latex-image-default-width))))
-	 (height (format "%s" (cond ((plist-get attr :height))
-				    ((or (plist-get attr :width)
-					 (memq float '(figure wrap))) "")
-				    (t org-latex-image-default-height))))
-	 (options (let ((opt (format "%s" (or (plist-get attr :options)
-					      org-latex-image-default-option))))
+	 (width (cond ((plist-get attr :width))
+		      ((plist-get attr :height) "")
+		      ((eq float 'figure) "0.7\\textwidth")
+		      ((eq float 'wrap) "0.48\\textwidth")
+		      (t org-latex-image-default-width)))
+	 (height (cond ((plist-get attr :height))
+		       ((or (plist-get attr :width)
+			    (memq float '(figure wrap))) "")
+		       (t org-latex-image-default-height)))
+	 (options (let ((opt (or (plist-get attr :options)
+				 org-latex-image-default-option)))
 		    (if (not (string-match "\\`\\[\\(.*\\)\\]\\'" opt)) opt
 		      (match-string 1 opt))))
 	 image-code)
@@ -2421,9 +2421,8 @@ This function assumes TABLE has `org' as its `:type' property and
 	 ;; Determine alignment string.
 	 (alignment (org-latex--align-string table info))
 	 ;; Determine environment for the table: longtable, tabular...
-	 (table-env (let ((env (plist-get attr :environment)))
-		      (if env (format "%s" env)
-			org-latex-default-table-environment)))
+	 (table-env (or (plist-get attr :environment)
+			org-latex-default-table-environment))
 	 ;; If table is a float, determine environment: table, table*
 	 ;; or sidewaystable.
 	 (float-env (unless (equal "longtable" table-env)
@@ -2436,7 +2435,7 @@ This function assumes TABLE has `org' as its `:type' property and
 			  "table")))))
 	 ;; Extract others display options.
 	 (fontsize (let ((font (plist-get attr :font)))
-		     (and font (concat (org-trim (format "%s" font)) "\n"))))
+		     (and font (concat font "\n"))))
 	 (width (plist-get attr :width))
 	 (placement (or (plist-get attr :placement)
 			(format "[%s]" org-latex-default-figure-position)))
@@ -2527,9 +2526,8 @@ This function assumes TABLE has `org' as its `:type' property and
   (let* ((caption (org-latex--caption/label-string table info))
 	 (attr (org-export-read-attribute :attr_latex table))
 	 (inlinep (eq (plist-get attr :mode) 'inline-math))
-	 (env (let ((env (plist-get attr :environment)))
-		(if env (format "%s" env)
-		  org-latex-default-table-environment)))
+	 (env (or (plist-get attr :environment)
+		  org-latex-default-table-environment))
 	 (contents
 	  (mapconcat
 	   (lambda (row)
@@ -2566,19 +2564,20 @@ This function assumes TABLE has `org' as its `:type' property and
 	   (inlinep "\\(")
 	   ((org-string-nw-p caption) (concat "\\begin{equation}\n" caption))
 	   (t "\\["))
-     ;; Prefix (make sure it is a string).
-     (format "%s" (or (plist-get attr :math-prefix) ""))
+     ;; Prefix.
+     (or (plist-get attr :math-prefix) "")
      ;; Environment.  Also treat special cases.
      (cond ((equal env "array")
 	    (let ((align (org-latex--align-string table info)))
 	      (format "\\begin{array}{%s}\n%s\\end{array}" align contents)))
 	   ((assoc env org-latex-table-matrix-macros)
-	    (format "\\%s%s{\n%s}" env
-		    (format "%s" (or (plist-get attr :math-arguments) ""))
+	    (format "\\%s%s{\n%s}"
+		    env
+		    (or (plist-get attr :math-arguments) "")
 		    contents))
 	   (t (format "\\begin{%s}\n%s\\end{%s}" env contents env)))
-     ;; Suffix (make sure it is a string).
-     (format "%s" (or (plist-get attr :math-suffix) ""))
+     ;; Suffix.
+     (or (plist-get attr :math-suffix) "")
      ;; Closing string.  If TABLE is in the middle of a table cluster,
      ;; do not insert any.  If it closes such a cluster, be sure to
      ;; close the cluster with a string matching the opening string.
