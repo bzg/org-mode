@@ -321,7 +321,7 @@ with contributions by David O'Toole, Bastien Guerry, Philip Rooke, Dan Davison, 
 * Capture - Refile - Archive::  The ins and outs for projects
 * Agenda Views::                Collecting information into views
 * Markup::                      Prepare text for rich export
-* Exporting::                   Sharing and publishing of notes
+* Exporting::                   Sharing and publishing notes
 * Publishing::                  Create a web site of linked Org files
 * Working With Source Code::    Export, evaluate, and tangle code blocks
 * Miscellaneous::               All the rest which did not fit elsewhere
@@ -782,7 +782,7 @@ timestamps, and scheduling.  It dynamically compiles entries into an
 agenda that utilizes and smoothly integrates much of the Emacs calendar
 and diary.  Plain text URL-like links connect to websites, emails,
 Usenet messages, BBDB entries, and any files related to the projects.
-For printing and sharing of notes, an Org file can be exported as a
+For printing and sharing notes, an Org file can be exported as a
 structured ASCII file, as HTML, or (TODO and agenda items only) as an
 iCalendar file.  It can also serve as a publishing tool for a set of
 linked web pages.
@@ -9839,7 +9839,7 @@ is normal.
 @cindex exporting
 
 Org mode documents can be exported into a variety of other formats.  For
-printing and sharing of notes, ASCII export produces a readable and simple
+printing and sharing notes, ASCII export produces a readable and simple
 version of an Org file.  HTML export allows you to publish a notes file on
 the web.  @LaTeX{} export lets you use Org mode and its structured editing
 functions to easily create @LaTeX{} files.  OpenDocument Text (ODT) export
