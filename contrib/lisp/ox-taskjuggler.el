@@ -182,7 +182,7 @@ the project."
   :group 'org-export-taskjuggler
   :type 'string)
 
-(defcustom org-taskjuggler-target-version 2.4
+(defcustom org-taskjuggler-target-version 3.0
   "Which version of TaskJuggler the exporter is targeting."
   :group 'org-export-taskjuggler
   :type 'number)
