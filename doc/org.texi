@@ -16685,7 +16685,7 @@ with links transformation to Org syntax.
 @i{David O'Toole} wrote @file{org-publish.el} and drafted the manual
 chapter about publishing.
 @item
-@i{Jambunathan K} contributed the ODT exporter.
+@i{Jambunathan K} contributed the ODT exporter and rewrote the HTML exporter.
 @item
 @i{Sebastien Vauban} reported many issues with @LaTeX{} and BEAMER export and
 enabled source code highlighting in Gnus.
