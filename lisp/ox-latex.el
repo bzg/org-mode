@@ -98,6 +98,8 @@
 ;; This back-end also offers enhanced support for footnotes.  Thus, it
 ;; handles nested footnotes, footnotes in tables and footnotes in item
 ;; descriptions.
+;;
+;; Smart quotes are activated by default.
 
 ;;; Code:
 
@@ -174,13 +176,15 @@
 	   (lambda (a s v b)
 	     (if a (org-latex-export-to-pdf t s v b)
 	       (org-open-file (org-latex-export-to-pdf nil s v b)))))))
-  :options-alist ((:date "DATE" nil "\\today" t)
-		  (:date-format nil nil org-latex-date-timestamp-format)
+  :options-alist ((:date-format nil nil org-latex-date-timestamp-format)
 		  (:latex-class "LATEX_CLASS" nil org-latex-default-class t)
 		  (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
 		  (:latex-header "LATEX_HEADER" nil nil newline)
 		  (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
-		  (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)))
+		  (:latex-hyperref-p nil "texht" org-latex-with-hyperref t)
+		  ;; Redefine regular options.
+		  (:date "DATE" nil "\\today" t)
+		  (:with-smart-quotes nil "'" t)))
 
 
 
