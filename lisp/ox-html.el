@@ -1593,8 +1593,7 @@ holding export options."
    (format "<div id=\"%s\">\n" (nth 1 org-html-divs))
    ;; Document title.
    (let ((title (plist-get info :title)))
-     (when title
-       (format "<h1 class=\"title\">%s</h1>\n" (org-export-data title info))))
+     (format "<h1 class=\"title\">%s</h1>\n" (org-export-data (or title "") info)))
    contents
    "</div>\n"
    ;; Postamble.
