@@ -1811,9 +1811,9 @@ used as a communication channel."
 	 ;; It is possible to specify width and height in the
 	 ;; ATTR_LATEX line, and also via default variables.
 	 (width (format "%s" (cond ((plist-get attr :width))
+				   ((plist-get attr :height) "")
 				   ((eq float 'figure) "0.7\\textwidth")
 				   ((eq float 'wrap) "0.48\\textwidth")
-				   ((plist-get attr :height) "")
 				   (t org-latex-image-default-width))))
 	 (height (format "%s" (cond ((plist-get attr :height))
 				    ((or (plist-get attr :width)
