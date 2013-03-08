@@ -696,14 +696,14 @@ a unique id will be associated to it."
          (effort (org-element-property :EFFORT task))
          (milestone
           (or (org-element-property :MILESTONE task)
-              (and (org-element-map (org-element-contents task) 'headline
-                     'identity info t)  ; Has task any child?
-                   (not (or effort
-                            (org-element-property :LENGTH task)
-                            (org-element-property :DURATION task)
-                            (and (org-taskjuggler-get-start task)
-                                 (org-taskjuggler-get-end task))
-                            (org-element-property :PERIOD task))))))
+              (not (or (org-element-map (org-element-contents task) 'headline
+			 'identity info t)  ; Has task any child?
+		       effort
+		       (org-element-property :LENGTH task)
+		       (org-element-property :DURATION task)
+		       (and (org-taskjuggler-get-start task)
+			    (org-taskjuggler-get-end task))
+		       (org-element-property :PERIOD task)))))
          (priority
           (let ((pri (org-element-property :priority task)))
             (and pri
