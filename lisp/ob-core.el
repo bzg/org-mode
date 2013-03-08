@@ -294,32 +294,32 @@ confirmation from the user.
 
 Note disabling confirmation may result in accidental evaluation
 of potentially harmful code."
-  (let* ((eval (or (cdr (assoc :eval (nth 2 info)))
-		   (when (assoc :noeval (nth 2 info)) "no")))
-         (query (cond ((equal eval "query") t)
-		      ((and (boundp 'org-current-export-file)
-			    org-current-export-file
-			    (equal eval "query-export")) t)
-                      ((functionp org-confirm-babel-evaluate)
-                       (funcall org-confirm-babel-evaluate
-                                (nth 0 info) (nth 1 info)))
-                      (t org-confirm-babel-evaluate))))
-    (if (or (equal eval "never") (equal eval "no")
-	    (and (boundp 'org-current-export-file)
-		 org-current-export-file
-		 (or (equal eval "no-export")
-		     (equal eval "never-export")))
+  (let* ((info0th        (nth 0 info))
+	 (info1st        (nth 1 info))
+	 (info2nd        (nth 2 info))
+	 (info4th        (nth 4 info))
+	 (eval           (or (cdr  (assoc :eval   info2nd))
+			     (when (assoc :noeval info2nd) "no")))
+	 (eval-no        (or (equal eval "no")
+			     (equal eval "never")))
+	 (export         (org-bound-and-true-p org-current-export-file))
+	 (eval-no-export (and export (or (equal eval "no-export")
+					 (equal eval "never-export"))))
+	 (noeval         (or eval-no eval-no-export))
+	 (query          (or (equal eval "query")
+			     (and export (equal eval "query-export"))
+			     (when (functionp org-confirm-babel-evaluate)
+			       (funcall org-confirm-babel-evaluate info0th info1st))
+			     org-confirm-babel-evaluate))
+	 (code-block     (if info    (format  " %s "  info0th) " "))
+	 (block-name     (if info4th (format " (%s) " info4th) " ")))
+    (if (or noeval
 	    (and query
-		 (not (yes-or-no-p
-		       (format "Evaluate this%scode block%son your system? "
-			       (if info (format " %s " (nth 0 info)) " ")
-			       (if (nth 4 info)
-				   (format " (%s) " (nth 4 info)) " "))))))
-	(prog1 nil (message "Evaluation %s"
-			    (if (or (equal eval "never") (equal eval "no")
-				    (equal eval "no-export")
-				    (equal eval "never-export"))
-				"Disabled" "Aborted")))
+		 (not (yes-or-no-p (format "Evaluate this%scode block%son your system? "
+					   code-block block-name)))))
+	(prog1 nil
+	  (message (format "Evaluation of this%scode-block%sis %s."
+			   code-block block-name (if noeval "disabled" "aborted"))))
       t)))
 
 ;;;###autoload
