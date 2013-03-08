@@ -1207,7 +1207,8 @@ When STANDALONE-P is t, wrap the <img.../> into a <div>...</div>."
       (let ((img (format "<img src=\"%s\" %s/>" src attr)))
 	(format "\n<div%s class=\"figure\">%s%s\n</div>"
 		id (format "\n<p>%s</p>" img)
-		(when caption (format "\n<p>%s</p>" caption)))))
+		(when (and caption (not (string= caption "")))
+		  (format "\n<p>%s</p>" caption)))))
      (t (format "<img src=\"%s\" %s/>" src (concat attr id))))))
 
 (defun org-html--textarea-block (element)
