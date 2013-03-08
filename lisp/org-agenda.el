@@ -8133,10 +8133,19 @@ If this information is not given, the function uses the tree at point."
 	  (beginning-of-line 0))))))
 
 (defun org-agenda-refile (&optional goto rfloc no-update)
-  "Refile the item at point."
+  "Refile the item at point.
+
+When GOTO is 0 or '(64), clear the refile cache.
+When GOTO is '(16), go to the location of the last refiled item.
+RFLOC can be a refile location obtained in a different way.
+When NO-UPDATE is non-nil, don't redo the agenda buffer."
   (interactive "P")
-  (if (equal goto '(16))
-      (org-refile-goto-last-stored)
+  (cond
+   ((member goto '(0 (64)))
+    (org-refile-cache-clear))
+   ((equal goto '(16))
+    (org-refile-goto-last-stored))
+   (t
     (let* ((buffer-orig (buffer-name))
 	   (marker (or (org-get-at-bol 'org-hd-marker)
 		       (org-agenda-error)))
@@ -8154,7 +8163,7 @@ If this information is not given, the function uses the tree at point."
 	    (let ((org-agenda-buffer-name buffer-orig))
 	      (org-remove-subtree-entries-from-agenda))
 	    (org-refile goto buffer rfloc)))))
-    (unless no-update (org-agenda-redo))))
+    (unless no-update (org-agenda-redo)))))
 
 (defun org-agenda-open-link (&optional arg)
   "Open the link(s) in the current entry, if any.
