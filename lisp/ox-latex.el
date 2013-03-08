@@ -486,14 +486,18 @@ which format headlines like for Org version prior to 8.0."
   :type 'string)
 
 (defcustom org-latex-image-default-width ".9\\linewidth"
-  "Default width for images."
+  "Default width for images.
+This value will not be used if a height is provided."
   :group 'org-export-latex
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-latex-image-default-height ""
-  "Default height for images."
+  "Default height for images.
+This value will not be used if a width is provided, or if the
+image is wrapped within a \"figure\" or \"wrapfigure\"
+environment."
   :group 'org-export-latex
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -1807,11 +1811,14 @@ used as a communication channel."
 	 ;; It is possible to specify width and height in the
 	 ;; ATTR_LATEX line, and also via default variables.
 	 (width (format "%s" (cond ((plist-get attr :width))
-				   ((eq float 'float) "0.7\\textwidth")
+				   ((eq float 'figure) "0.7\\textwidth")
 				   ((eq float 'wrap) "0.48\\textwidth")
+				   ((plist-get attr :height) "")
 				   (t org-latex-image-default-width))))
-	 (height (format "%s" (or (plist-get attr :height)
-				  org-latex-image-default-height)))
+	 (height (format "%s" (cond ((plist-get attr :height))
+				    ((or (plist-get attr :width)
+					 (memq float '(figure wrap))) "")
+				    (t org-latex-image-default-height))))
 	 (options (let ((opt (format "%s" (or (plist-get attr :options)
 					      org-latex-image-default-option))))
 		    (if (not (string-match "\\`\\[\\(.*\\)\\]\\'" opt)) opt
