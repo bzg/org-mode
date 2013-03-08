@@ -721,7 +721,7 @@ a unique id will be associated to it."
      (and allocate
           (format "  purge %s\n  allocate %s\n"
                   ;; Compatibility for previous TaskJuggler versions.
-                  (if (>= org-export-taskjuggler-target-version 3.0) "allocate"
+                  (if (>= org-taskjuggler-target-version 3.0) "allocate"
                     "allocations")
                   allocate))
      (and complete (format "  complete %s\n" comptete))
