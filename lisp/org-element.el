@@ -4019,7 +4019,7 @@ Nil values returned from FUN do not appear in the results.
 
 
 Examples:
---------
+---------
 
 Assuming TREE is a variable containing an Org buffer parse tree,
 the following example will return a flat list of all `src-block'
