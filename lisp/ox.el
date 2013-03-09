@@ -5140,9 +5140,11 @@ and
 	     "%S"
 	     `(with-temp-buffer
 		,(when org-export-async-debug '(setq debug-on-error t))
-		;; Ignore `kill-emacs-hook' as we need a truly
+		;; Ignore `kill-emacs-hook' and code evaluation
+		;; queries from Babel as we need a truly
 		;; non-interactive process.
-		(setq kill-emacs-hook nil)
+		(setq kill-emacs-hook nil
+		      org-babel-confirm-evaluate-answer-no t)
 		;; Initialize export framework in external process.
 		(require 'ox)
 		;; Re-create current buffer there.
