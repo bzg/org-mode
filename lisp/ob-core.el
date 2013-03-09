@@ -325,9 +325,16 @@ Do not query the user."
 	   (message (format "Evaluation of this%scode-block%sis disabled."
 			    code-block block-name))))))
 
+ ;; dynamically scoped for asynchroneous export
+(defvar org-babel-confirm-evaluate-answer-no)
+
 (defsubst org-babel-confirm-evaluate (info)
   "Confirm evaluation of the code block INFO.
-This behavior can be suppressed by setting the value of
+
+If the variable `org-babel-confirm-evaluate-answer-no´ is bound
+to a non-nil value, auto-answer with \"no\".
+
+This query can also be suppressed by setting the value of
 `org-confirm-babel-evaluate' to nil, in which case all future
 interactive code block evaluations will proceed without any
 confirmation from the user.
@@ -336,9 +343,12 @@ Note disabling confirmation may result in accidental evaluation
 of potentially harmful code."
   (org-babel-check-confirm-evaluate info
     (not (when query
-	   (unless (yes-or-no-p (format
-				 "Evaluate this%scode block%son your system? "
-				 code-block block-name))
+	   (unless
+	       (and (not (org-bound-and-true-p
+			  org-babel-confirm-evaluate-answer-no))
+		    (yes-or-no-p
+		     (format "Evaluate this%scode block%son your system? "
+			     code-block block-name)))
 	     (message (format "Evaluation of this%scode-block%sis aborted."
 			      code-block block-name)))))))
 
