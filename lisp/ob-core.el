@@ -540,14 +540,22 @@ block."
       (let* ((params (if params
 			 (org-babel-process-params merged-params)
 		       (nth 2 info)))
-	     (cache-p (and (not arg) (cdr (assoc :cache params))
+	     (cachep (and (not arg) (cdr (assoc :cache params))
 			   (string= "yes" (cdr (assoc :cache params)))))
-	     (new-hash (when cache-p (org-babel-sha1-hash info)))
-	     (old-hash (when cache-p (org-babel-current-result-hash)))
-	     (cache-current-p (and (not arg) new-hash (equal new-hash old-hash))))
-	(when (or cache-current-p
-		  (org-babel-confirm-evaluate
-		   (let ((i info)) (setf (nth 2 i) merged-params) i)))
+	     (new-hash (when cachep (org-babel-sha1-hash info)))
+	     (old-hash (when cachep (org-babel-current-result-hash)))
+	     (cache-current-p (and (not arg) new-hash
+				   (equal new-hash old-hash))))
+	(cond
+	 (cache-current-p
+	  (save-excursion ;; return cached result
+	    (goto-char (org-babel-where-is-src-block-result nil info))
+	    (end-of-line 1) (forward-char 1)
+	    (let ((result (org-babel-read-result)))
+	      (message (replace-regexp-in-string
+			"%" "%%" (format "%S" result))) result)))
+	 ((org-babel-confirm-evaluate
+	   (let ((i info)) (setf (nth 2 i) merged-params) i))
 	  (let* ((lang (nth 0 info))
 		 (result-params (cdr (assoc :result-params params)))
 		 (body (setf (nth 1 info)
@@ -559,57 +567,57 @@ block."
 		   (or (and dir (file-name-as-directory (expand-file-name dir)))
 		       default-directory))
 		 (org-babel-call-process-region-original ;; for tramp handler
-		  (or (org-bound-and-true-p org-babel-call-process-region-original)
+		  (or (org-bound-and-true-p
+		       org-babel-call-process-region-original)
 		      (symbol-function 'call-process-region)))
 		 (indent (car (last info)))
 		 result cmd)
 	    (unwind-protect
 		(let ((call-process-region
 		       (lambda (&rest args)
-			 (apply 'org-babel-tramp-handle-call-process-region args))))
-		  (let ((lang-check (lambda (f)
-				      (let ((f (intern (concat "org-babel-execute:" f))))
-					(when (fboundp f) f)))))
+			 (apply 'org-babel-tramp-handle-call-process-region
+				args))))
+		  (let ((lang-check
+			 (lambda (f)
+			   (let ((f (intern (concat "org-babel-execute:" f))))
+			     (when (fboundp f) f)))))
 		    (setq cmd
 			  (or (funcall lang-check lang)
-			      (funcall lang-check (symbol-name
-						   (cdr (assoc lang org-src-lang-modes))))
-			      (error "No org-babel-execute function for %s!" lang))))
-		  (if cache-current-p
-		      (save-excursion ;; return cached result
-			(goto-char (org-babel-where-is-src-block-result nil info))
-			(end-of-line 1) (forward-char 1)
-			(setq result (org-babel-read-result))
-			(message (replace-regexp-in-string
-				  "%" "%%" (format "%S" result))) result)
-		    (message "executing %s code block%s..."
-			     (capitalize lang)
-			     (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
-		    (if (member "none" result-params)
-			(progn
-			  (funcall cmd body params)
-			  (message "result silenced"))
-		      (setq result
-			    ((lambda (result)
-			       (if (and (eq (cdr (assoc :result-type params)) 'value)
-					(or (member "vector" result-params)
-					    (member "table" result-params))
-					(not (listp result)))
-				   (list (list result)) result))
-			     (funcall cmd body params)))
-		      ;; if non-empty result and :file then write to :file
-		      (when (cdr (assoc :file params))
-			(when result
-			  (with-temp-file (cdr (assoc :file params))
-			    (insert
-			     (org-babel-format-result
-			      result (cdr (assoc :sep (nth 2 info)))))))
-			(setq result (cdr (assoc :file params))))
-		      (org-babel-insert-result
-		       result result-params info new-hash indent lang)
-		      (run-hooks 'org-babel-after-execute-hook)
-		      result)))
-	      (setq call-process-region 'org-babel-call-process-region-original))))))))
+			      (funcall lang-check
+				       (symbol-name
+					(cdr (assoc lang org-src-lang-modes))))
+			      (error "No org-babel-execute function for %s!"
+				     lang))))
+		  (message "executing %s code block%s..."
+			   (capitalize lang)
+			   (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
+		  (if (member "none" result-params)
+		      (progn
+			(funcall cmd body params)
+			(message "result silenced"))
+		    (setq result
+			  ((lambda (result)
+			     (if (and (eq (cdr (assoc :result-type params))
+					  'value)
+				      (or (member "vector" result-params)
+					  (member "table" result-params))
+				      (not (listp result)))
+				 (list (list result)) result))
+			   (funcall cmd body params)))
+		    ;; if non-empty result and :file then write to :file
+		    (when (cdr (assoc :file params))
+		      (when result
+			(with-temp-file (cdr (assoc :file params))
+			  (insert
+			   (org-babel-format-result
+			    result (cdr (assoc :sep (nth 2 info)))))))
+		      (setq result (cdr (assoc :file params))))
+		    (org-babel-insert-result
+		     result result-params info new-hash indent lang)
+		    (run-hooks 'org-babel-after-execute-hook)
+		    result))
+	      (setq call-process-region
+		    'org-babel-call-process-region-original)))))))))
 
 (defun org-babel-expand-body:generic (body params &optional var-lines)
   "Expand BODY with PARAMS.
@@ -1748,7 +1756,8 @@ following the source block."
 	   (inlinep (when (org-babel-get-inline-src-block-matches)
 		      (match-end 0)))
 	   (name (if on-lob-line
-		     (mapconcat #'identity (butlast (org-babel-lob-get-info)) "")
+		     (mapconcat #'identity (butlast (org-babel-lob-get-info))
+				"")
 		   (nth 4 (or info (org-babel-get-src-block-info 'light)))))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head)))
 	   found beg end)
