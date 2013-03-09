@@ -303,11 +303,13 @@ Returns a list
 	  (query          (or (equal eval "query")
 			      (and export (equal eval "query-export"))
 			      (when (functionp org-confirm-babel-evaluate)
-				(funcall org-confirm-babel-evaluate info0th info1st))
+				(funcall org-confirm-babel-evaluate
+					 info0th info1st))
 			      org-confirm-babel-evaluate))
 	  (code-block     (if info    (format  " %s "  info0th) " "))
 	  (block-name     (if info4th (format " (%s) " info4th) " ")))
      ,@body))
+
 (defsubst org-babel-check-evaluate (info)
   "Check if code block INFO should be evaluated.
 Do not query the user."
@@ -315,6 +317,7 @@ Do not query the user."
     (not (when noeval
 	   (message (format "Evaluation of this%scode-block%sis disabled."
 			    code-block block-name))))))
+
 (defsubst org-babel-confirm-evaluate (info)
   "Confirm evaluation of the code block INFO.
 This behavior can be suppressed by setting the value of
@@ -326,8 +329,9 @@ Note disabling confirmation may result in accidental evaluation
 of potentially harmful code."
   (org-babel-check-confirm-evaluate info
     (not (when query
-	   (unless (yes-or-no-p (format "Evaluate this%scode block%son your system? "
-					code-block block-name))
+	   (unless (yes-or-no-p (format
+				 "Evaluate this%scode block%son your system? "
+				 code-block block-name))
 	     (message (format "Evaluation of this%scode-block%sis aborted."
 			      code-block block-name)))))))
 
