@@ -286,29 +286,36 @@ Returns a list
 
 (defvar org-current-export-file) ; dynamically bound
 (defmacro org-babel-check-confirm-evaluate (info &rest body)
-  "Pull some information from code block INFO and evaluate BODY."
+  "Evaluate BODY with special execution confirmation variables set.
+
+Specifically; NOEVAL will indicate if evaluation is allowed,
+QUERY will indicate if a user query is required, CODE-BLOCK will
+hold the language of the code block, and BLOCK-NAME will hold the
+name of the code block."
   (declare (indent defun))
-  `(let* ((info0th        (nth 0 ,info))
-	  (info1st        (nth 1 ,info))
-	  (info2nd        (nth 2 ,info))
-	  (info4th        (nth 4 ,info))
-	  (eval           (or (cdr  (assoc :eval   info2nd))
-			      (when (assoc :noeval info2nd) "no")))
-	  (eval-no        (or (equal eval "no")
-			      (equal eval "never")))
-	  (export         (org-bound-and-true-p org-current-export-file))
-	  (eval-no-export (and export (or (equal eval "no-export")
-					  (equal eval "never-export"))))
-	  (noeval         (or eval-no eval-no-export))
-	  (query          (or (equal eval "query")
-			      (and export (equal eval "query-export"))
-			      (when (functionp org-confirm-babel-evaluate)
-				(funcall org-confirm-babel-evaluate
-					 info0th info1st))
-			      org-confirm-babel-evaluate))
-	  (code-block     (if info    (format  " %s "  info0th) " "))
-	  (block-name     (if info4th (format " (%s) " info4th) " ")))
-     ,@body))
+  (org-with-gensyms
+      (lang block-body headers name eval eval-no export eval-no-export)
+    `(let* ((,lang           (nth 0 ,info))
+	    (,block-body     (nth 1 ,info))
+	    (,headers        (nth 2 ,info))
+	    (,name           (nth 4 ,info))
+	    (,eval           (or (cdr  (assoc :eval   ,headers))
+				 (when (assoc :noeval ,headers) "no")))
+	    (,eval-no        (or (equal ,eval "no")
+				 (equal ,eval "never")))
+	    (,export         (org-bound-and-true-p org-current-export-file))
+	    (,eval-no-export (and ,export (or (equal ,eval "no-export")
+					      (equal ,eval "never-export"))))
+	    (noeval          (or ,eval-no ,eval-no-export))
+	    (query           (or (equal ,eval "query")
+				 (and ,export (equal ,eval "query-export"))
+				 (when (functionp org-confirm-babel-evaluate)
+				   (funcall org-confirm-babel-evaluate
+					    ,lang ,block-body))
+				 org-confirm-babel-evaluate))
+	    (code-block      (if ,info (format  " %s "  ,lang) " "))
+	    (block-name      (if ,name (format " (%s) " ,name) " ")))
+       ,@body)))
 
 (defsubst org-babel-check-evaluate (info)
   "Check if code block INFO should be evaluated.
