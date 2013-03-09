@@ -33,7 +33,8 @@
   (if (memq system-type '(windows-nt cygwin))
       ".exe"
     nil))
-(defvar org-babel-call-process-region-original nil) ;; dynamically scoped for tramp
+;; dynamically scoped for tramp
+(defvar org-babel-call-process-region-original nil)
 (defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
 (declare-function show-all "outline" ())
