@@ -1282,11 +1282,9 @@ contextual information."
 	 (indic (or (plist-get attr :indic)
 		    org-texinfo-def-table-markup))
 	 (type (org-element-property :type plain-list))
-	 (table-type (or (plist-get attr :table-type)
-			 "table"))
+	 (table-type (plist-get attr :table-type))
 	 ;; Ensure valid texinfo table type.
-	 (table-type (if (memq table-type '("table" "ftable" "vtable"))
-			 table-type
+	 (table-type (if (member table-type '("ftable" "vtable")) table-type
 		       "table"))
 	 (list-type (cond
 		     ((eq type 'ordered) "enumerate")
