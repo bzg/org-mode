@@ -1348,7 +1348,7 @@ Replaces invalid characters with \"_\"."
   "Format the footnote definition FN."
   (let ((n (car fn)) (def (cdr fn)))
     (format
-     "<tr>\n<td>%s</td>\n<td>%s</td>\n</tr>\n"
+     "%s %s\n"
      (format org-html-footnote-format
 	     (let* ((id (format "fn.%s" n))
 		    (href (format " href=\"#fnr.%s\"" n))
@@ -1372,7 +1372,7 @@ INFO is a plist used as a communication channel."
       (org-html-format-footnotes-section
        (org-html--translate "Footnotes" info)
        (format
-	"<table>\n%s\n</table>\n"
+	"\n%s\n"
 	(mapconcat 'org-html-format-footnote-definition fn-alist "\n"))))))
 
 
@@ -2645,11 +2645,13 @@ INFO is a plist holding contextual information.  See
   "Transcode a PARAGRAPH element from Org to HTML.
 CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
-  (let* ((style nil)			; FIXME
-	 (class (cdr (assoc style '((footnote . "footnote")
-				    (verse . nil)))))
-	 (extra (if class (format " class=\"%s\"" class) ""))
-	 (parent (org-export-get-parent paragraph)))
+  (let* ((parent (org-export-get-parent paragraph))
+	 (parent-type (org-element-type parent))
+	 (style '((footnote-definition
+		   " style=\"display:inline;\" class=\"footnote\""
+		   "<br/>")))
+	 (extra (or (cadr (assoc parent-type style)) ""))
+	 (after (or (nth 1 (cdr (assoc parent-type style))) "")))
     (cond
      ((and (eq (org-element-type parent) 'item)
 	   (= (org-element-property :begin paragraph)
@@ -2659,7 +2661,7 @@ the plist used as a communication channel."
      ((org-html-standalone-image-p paragraph info)
       ;; standalone image
       contents)
-     (t (format "<p%s>\n%s</p>" extra contents)))))
+     (t (format "<p%s>\n%s</p>%s" extra contents after)))))
 
 
 ;;;; Plain List
