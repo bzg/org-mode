@@ -143,7 +143,7 @@ This function is called by `org-babel-execute-src-block'."
     (mapcar (lambda (row)
 	      (if (equal 'hline row)
 		  'hline
-		(mapcar #'org-babel-read row))) result)))
+		(mapcar #'org-babel-string-read row))) result)))
 
 (defun org-babel-sqlite-offset-colnames (table headers-p)
   "If HEADERS-P is non-nil then offset the first row as column names."
