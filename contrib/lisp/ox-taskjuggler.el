@@ -10,6 +10,8 @@
 ;; Keywords: org, taskjuggler, project planning
 ;; Description: Converts an Org mode buffer into a TaskJuggler project plan
 
+;; This file is not part of GNU Emacs.
+
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation, either version 3 of the License, or
@@ -23,7 +25,7 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;; Commentary:
+;;; Commentary:
 ;;
 ;; This library implements a TaskJuggler exporter for Org mode.
 ;; TaskJuggler uses a text format to define projects, tasks and

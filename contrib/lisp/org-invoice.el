@@ -23,7 +23,7 @@
 ;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 ;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ;;
-;; Commentary:
+;;; Commentary:
 ;;
 ;; Building on top of the terrific OrgMode, org-invoice tries to
 ;; provide functionality for managing invoices.  Currently, it does
