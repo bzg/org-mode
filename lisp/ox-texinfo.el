@@ -1431,16 +1431,18 @@ as a communication channel."
 CONTENTS holds the contents of the item.  INFO is a plist holding
 contextual information."
   (let* ((lang (org-element-property :language src-block))
-	 (lisp-p (string-match-p "lisp" lang)))
+	 (lisp-p (string-match-p "lisp" lang))
+	 (src-contents (org-texinfo--sanitize-content
+		   (org-export-format-code-default src-block info))))
     (cond
      ;; Case 1.  Lisp Block
      (lisp-p
       (format "@lisp\n%s@end lisp"
-	      (org-export-format-code-default src-block info)))
+	      src-contents))
      ;; Case 2.  Other blocks
      (t
       (format "@example\n%s@end example"
-	      (org-export-format-code-default src-block info))))))
+	      src-contents)))))
 
 ;;; Statistics Cookie
 
