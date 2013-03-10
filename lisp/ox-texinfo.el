@@ -1142,7 +1142,7 @@ contextual information."
   (let* ((tag (org-element-property :tag item))
 	 (desc (org-export-data tag info)))
     (concat "\n@item " (if tag desc) "\n"
-	    (org-trim contents) "\n")))
+	    (and contents (org-trim contents)) "\n")))
 
 ;;; Keyword
 
