@@ -8658,7 +8658,7 @@ If WITH-CASE is non-nil, the sorting will be case-sensitive."
 ;; command.  There might be problems if any of the keys is otherwise
 ;; used as a prefix key.
 
-(defcustom orgstruct-heading-prefix-regexp ""
+(defcustom orgstruct-heading-prefix-regexp nil
   "Regexp that matches the custom prefix of Org headlines in
 orgstruct(++)-mode."
   :group 'org
@@ -8739,76 +8739,87 @@ buffer.  It will also recognize item context in multiline items."
 (defun orgstruct-error ()
   "Error when there is no default binding for a structure key."
   (interactive)
-  (error "This key has no function outside structure elements"))
+  (funcall (if (fboundp 'user-error)
+	       'user-error
+	     'error)
+	   "This key has no function outside structure elements"))
 
 (defun orgstruct-setup ()
   "Setup orgstruct keymap."
-  (dolist (f
-           '("org-meta"
-             "org-shift"
-             "org-shiftmeta"
-             org-shifttab
-             org-backward-element
-             org-backward-heading-same-level
-             org-ctrl-c-ret
-	     org-ctrl-c-minus
-	     org-ctrl-c-star
-             org-cycle
-             org-forward-heading-same-level
-             org-insert-heading
-             org-insert-heading-respect-content
-             org-kill-note-or-show-branches
-             org-mark-subtree
-             org-narrow-to-subtree
-             org-promote-subtree
-             org-reveal
-             org-show-subtree
-             org-sort
-             org-up-element
-             outline-demote
-             outline-next-visible-heading
-             outline-previous-visible-heading
-             outline-promote
-             outline-up-heading
-             show-children))
-    (dolist (f (if (stringp f)
-                   (let ((flist))
-                     (dolist (postfix
-                              '("-return" "tab" "left" "right" "up" "down")
-                              flist)
-                       (let ((f (intern (concat f postfix))))
-                         (when (fboundp f)
-                           (push f flist)))))
-                 (list f)))
-      (dolist (binding (nconc (where-is-internal f org-mode-map)
-                              (where-is-internal f outline-mode-map)))
-        ;; TODO use local-function-key-map
-        (dolist (rep '(("<tab>" . "TAB")
-                       ("<return>" . "RET")
-                       ("<escape>" . "ESC")
-                       ("<delete>" . "DEL")))
-          (setq binding (read-kbd-macro (replace-regexp-in-string
-					 (regexp-quote (car rep))
-					 (cdr rep)
-					 (key-description binding)))))
-        (let ((key (lookup-key orgstruct-mode-map binding)))
-          (when (or (not key) (numberp key))
-	    (condition-case nil
-		(org-defkey orgstruct-mode-map
-			    binding
-			    (orgstruct-make-binding f binding))
-	      (error nil)))))))
+  (dolist (cell '((org-demote . t)
+		  (org-metaleft . t)
+		  (org-metaright . t)
+		  (org-promote . t)
+		  (org-shiftmetaleft . t)
+		  (org-shiftmetaright . t)
+		  org-backward-element
+		  org-backward-heading-same-level
+		  org-ctrl-c-ret
+		  org-ctrl-c-minus
+		  org-ctrl-c-star
+		  org-cycle
+		  org-forward-heading-same-level
+		  org-insert-heading
+		  org-insert-heading-respect-content
+		  org-kill-note-or-show-branches
+		  org-mark-subtree
+		  org-meta-return
+		  org-metadown
+		  org-metaup
+		  org-narrow-to-subtree
+		  org-promote-subtree
+		  org-reveal
+		  org-shiftdown
+		  org-shiftleft
+		  org-shiftmetadown
+		  org-shiftmetaup
+		  org-shiftright
+		  org-shifttab
+		  org-shifttab
+		  org-shiftup
+		  org-show-subtree
+		  org-sort
+		  org-up-element
+		  outline-demote
+		  outline-next-visible-heading
+		  outline-previous-visible-heading
+		  outline-promote
+		  outline-up-heading
+		  show-children))
+    (let ((f (or (car-safe cell) cell))
+	  (disable-when-heading-prefix (cdr-safe cell)))
+      (when (fboundp f)
+	(dolist (binding (nconc (where-is-internal f org-mode-map)
+				(where-is-internal f outline-mode-map)))
+	  ;; TODO use local-function-key-map
+	  (dolist (rep '(("<tab>" . "TAB")
+			 ("<return>" . "RET")
+			 ("<escape>" . "ESC")
+			 ("<delete>" . "DEL")))
+	    (setq binding (read-kbd-macro (replace-regexp-in-string
+					   (regexp-quote (car rep))
+					   (cdr rep)
+					   (key-description binding)))))
+	  (let ((key (lookup-key orgstruct-mode-map binding)))
+	    (when (or (not key) (numberp key))
+	      (condition-case nil
+		  (org-defkey orgstruct-mode-map
+			      binding
+			      (orgstruct-make-binding f binding disable-when-heading-prefix))
+		(error nil))))))))
   (run-hooks 'orgstruct-setup-hook))
 
-(defun orgstruct-make-binding (fun key)
+(defun orgstruct-make-binding (fun key disable-when-heading-prefix)
   "Create a function for binding in the structure minor mode.
 FUN is the command to call inside a table.  KEY is the key that
-should be checked in for a command to execute outside of tables."
+should be checked in for a command to execute outside of tables.
+Non-nil DISABLE-WHEN-HEADING-PREFIX means to disable the command
+if `orgstruct-heading-prefix-regexp' is non-nil."
   (let ((name (concat "orgstruct-hijacker-" (symbol-name fun))))
     (let ((nname name)
-          (i 0))
+	  (i 0))
       (while (fboundp (intern nname))
-        (setq nname (format "%s-%d" name (setq i (1+ i)))))
+	(setq nname (format "%s-%d" name (setq i (1+ i)))))
       (setq name (intern nname)))
     (eval
      (let ((bindings '((org-heading-regexp
@@ -8821,31 +8832,45 @@ should be checked in for a command to execute outside of tables."
 			(concat "^" org-outline-regexp))
 		       (outline-regexp org-outline-regexp)
 		       (outline-heading-end-regexp "\n")
-		       (outline-level 'outline-level)
+		       (outline-level 'org-outline-level)
 		       (outline-heading-alist))))
        `(defun ,name (arg)
 	  ,(concat "In Structure, run `" (symbol-name fun) "'.\n"
 		   "Outside of structure, run the binding of `"
-		   (key-description key) "'.")
+		   (key-description key) "'."
+		   (when disable-when-heading-prefix
+		     (concat
+		      "\nIf `orgstruct-heading-prefix-regexp' is non-nil, this command will always fall\n"
+		      "back to the default binding due to limitations of Org's implementation of\n"
+		      "`" (symbol-name fun) "'.")))
 	  (interactive "p")
-	  (unless
-	      (let* ,bindings
-		(when (org-context-p 'headline 'item
-				     ,(when (memq fun '(org-insert-heading))
-					'(when orgstruct-is-++
-					   'item-body)))
-		  (org-run-like-in-org-mode
-		   (lambda ()
-		     (interactive)
-		     (let* ,bindings
-		       (call-interactively ',fun))))
-		  t))
-	    (let* ((orgstruct-mode)
-		   (binding (key-binding ,key)))
-	      (if (keymapp binding)
-		  (set-temporary-overlay-map binding)
-		(call-interactively
-		 (or binding 'orgstruct-error))))))))
+	  (let* ((disable
+		  ,(when disable-when-heading-prefix
+		     '(and orgstruct-heading-prefix-regexp
+			   (not (string= orgstruct-heading-prefix-regexp "")))))
+		 (fallback
+		  (or disable
+		      (not
+		       (let* ,bindings
+			 (org-context-p 'headline 'item
+					,(when (memq fun '(org-insert-heading))
+					   '(when orgstruct-is-++
+					      'item-body))))))))
+	    (if fallback
+		(let* ((orgstruct-mode)
+		       (binding (key-binding ,key)))
+		  (if (keymapp binding)
+		      (set-temporary-overlay-map binding)
+		    (let ((func (or binding
+				    (unless disable
+				      'orgstruct-error))))
+		      (when func
+			(call-interactively func)))))
+	      (org-run-like-in-org-mode
+	       (lambda ()
+		 (interactive)
+		 (let* ,bindings
+		   (call-interactively ',fun)))))))))
     name))
 
 (defun org-contextualize-keys (alist contexts)
