@@ -166,89 +166,92 @@ Can be overriden with the DECK_BASE_URL property."
   :group 'org-export-deck
   :type 'string)
 
-(defcustom org-deck-footer-template
+(defcustom org-deck-postamble-template
   "<h1>%author - %title</h1>"
-  "Format template to specify footer div.
-Completed using `org-fill-template'.
-Optional keys include %author, %email, %file, %title and %date.
-This is included in a <footer> section."
+  "Format template to specify the postamble section of document.
+Completed using `org-fill-template', optional keys include
+%author, %email, %file, %title and %date.
+
+This is included in the document at the bottom of the content
+section, and uses the postamble element and id from
+`org-html-divs'. The default places the author and presentation
+title at the bottom of each slide. See also
+`org-deck-preamble-postamble-styles'."
   :group 'org-export-deck
   :type 'string)
 
-(defcustom org-deck-header-template ""
-  "Format template to specify page. Completed using `org-fill-template'.
-Optional keys include %author, %email, %file, %title and %date.
-This is included in a <header> section."
+(defcustom org-deck-preamble-template ""
+  "Format template to specify the preamble section of the document.
+Completed using `org-fill-template', optional keys include
+%author, %email, %file, %title and %date.
+
+This is included before the content section of the document and
+would normally be a header for the presentation. See also
+`org-deck-preamble-postamble-styles'."
   :group 'org-export-deck
   :type 'string)
 
-(defcustom org-deck-title-page-style
-  "<style type='text/css'>
-    header, footer { left: 5px; width: 100% }
-    header { position: absolute; top: 10px; }
-    #title-slide h1 {
-        position: static; padding: 0;
-        margin-top: 10%;
-        -webkit-transform: none;
-        -moz-transform: none;
-        -ms-transform: none;
-        -o-transform: none;
-        transform: none;
-    }
-    #title-slide h2 {
-        text-align: center;
-        border:none;
-        padding: 0;
-        margin: 0;
-    }
-</style>"
-  "CSS styles to use for title page"
+(defvar org-deck-preamble-postamble-styles
+  `((both "left: 5px; width: 100%;")
+    (preamble "position: absolute; top: 10px;")
+    (postamble ""))
+  "Alist of css styles for the preamble, postamble and both respectively.
+Can be overriden in `org-deck-styles'. See also `org-html-divs'.")
+
+(defvar org-deck-toc-styles
+  (mapconcat
+   'identity
+   (list
+    "#table-of-contents a {color: inherit;}"
+    "#table-of-contents ul {margin-bottom: 0;}"
+    "#table-of-contents li {padding: 0;}") "\n")
+  "Default css styles used for formatting a table of contents slide.
+Can be overriden in `org-deck-styles'.
+Note that when the headline numbering option is true, a \"list-style: none\" 
+is automatically added to avoid both numbers and bullets on the toc entries.")
+
+(defcustom org-deck-styles
+  "
+#title-slide h1 {
+    position: static; padding: 0;
+    margin-top: 10%;
+    -webkit-transform: none;
+    -moz-transform: none;
+    -ms-transform: none;
+    -o-transform: none;
+    transform: none;
+}
+#title-slide h2 {
+    text-align: center;
+    border:none;
+    padding: 0;
+    margin: 0;
+}"
+  "Deck specific CSS styles to include in exported html.
+Defaults to styles for the title page."
   :group 'org-export-deck
   :type 'string)
 
-(defcustom org-deck-title-page-template
-  "<div class='slide' id='title-slide'>
-<h1>%title</h1>
+(defcustom org-deck-title-slide-template
+  "<h1>%title</h1>
 <h2>%author</h2>
 <h2>%email</h2>
-<h2>%date</h2>
-</div>"
-  "Format template to specify title page div.
-Completed using `org-fill-template'.
-Optional keys include %author, %email, %file, %title and %date.
-Note that the wrapper div must include the class \"slide\"."
-  :group 'org-export-deck
-  :type 'string)
+<h2>%date</h2>"
+  "Format template to specify title page section.
+Completed using `org-fill-template', optional keys include
+%author, %email, %file, %title and %date.
 
-(defcustom org-deck-toc-style
-  "<style type='text/css'>
-    header, footer { left: 5px; width: 100% }
-    header { position: absolute; top: 10px; }
-    #table-of-contents h1 {
-        position: static; padding: 0;
-        margin-top: 10%;
-        -webkit-transform: none;
-        -moz-transform: none;
-        -ms-transform: none;
-        -o-transform: none;
-        Transform: none;
-    }
-    #title-slide h2 {
-        text-align: center;
-        border:none;
-        padding: 0;
-        margin: 0;
-    }
-</style>"
-  "CSS styles to use for title page"
+It will be wrapped in the element defined in the :html-container
+property, and defaults to the value of `org-html-container-element',
+and have the id \"title-slide\"."
   :group 'org-export-deck
   :type 'string)
 
 (defun org-deck-toc (depth info)
   (concat
-   "<div id=\"table-of-contents\" class=\"slide\">\n"
-   (format "<h2>%s</h2>\n"
-           (org-html--translate "Table of Contents" info))
+   (format "<%s id='table-of-contents' class='slide'>\n"
+	   (plist-get info :html-container))
+   (format "<h2>%s</h2>\n" (org-html--translate "Table of Contents" info))
    (org-html--toc-text
     (mapcar
      (lambda (headline)
@@ -280,7 +283,7 @@ Note that the wrapper div must include the class \"slide\"."
             title)
           (org-export-get-relative-level headline info))))
      (org-export-collect-headlines info depth)))
-   "</div>\n"))
+   (format "</%s>\n" (plist-get info :html-container))))
 
 (defun org-deck--get-packages (info)
   (let ((prefix (concat (plist-get info :deck-base-url) "/"))
@@ -362,17 +365,17 @@ holding export options."
     (mapconcat
      'identity
      (list
-      "<!DOCTYPE html>"
+      (plist-get info :html-doctype)
       (let ((lang (plist-get info :language)))
         (mapconcat
          (lambda (x)
            (apply
             'format
-            "<!--%s <html class='no-js %s' lang='%s'> %s<![endif]-->"
+            "<!--%s <html %s lang='%s' xmlns='http://www.w3.org/1999/xhtml'> %s<![endif]-->"
             x))
-         (list `("[if lt IE 7]>" "ie6" ,lang "")
-               `("[if IE 7]>" "ie7" ,lang "")
-               `("[if IE 8]>" "ie8" ,lang "")
+         (list `("[if lt IE 7]>" "class='no-js ie6'" ,lang "")
+               `("[if IE 7]>" "class='no-js ie7'" ,lang "")
+               `("[if IE 8]>" "class='no-js ie8'" ,lang "")
                `("[if gt IE 8]><!-->" "" ,lang "<!--")) "\n"))
       "<head>"
       (org-deck--build-meta-info info)
@@ -381,13 +384,6 @@ holding export options."
          (format
           "<link rel='stylesheet' href='%s' type='text/css' />" sheet))
        (plist-get pkg-info :sheets) "\n")
-      "<style type='text/css'>"
-      "#table-of-contents a {color: inherit;}"
-      "#table-of-contents ul {margin-bottom: 0;}"
-      (when (plist-get info :section-numbers)
-        "#table-of-contents ul li {list-style-type: none;}")
-      "</style>"
-      ""
       (mapconcat
        (lambda (script)
          (format
@@ -398,17 +394,39 @@ holding export options."
       "  $(document).ready(function () { $.deck('.slide'); });"
       "</script>"
       (org-html--build-head info)
-      org-deck-title-page-style
+      "<style type='text/css'>"
+      org-deck-toc-styles
+      (when (plist-get info :section-numbers)
+        "#table-of-contents ul li {list-style-type: none;}")
+      (format "#%s, #%s {%s}"
+	      (nth 2 (assq 'preamble org-html-divs))
+	      (nth 2 (assq 'postamble org-html-divs))
+	      (nth 1 (assq 'both org-deck-preamble-postamble-styles)))
+      (format "#%s {%s}"
+	      (nth 2 (assq 'preamble org-html-divs))
+	      (nth 1 (assq 'preamble org-deck-preamble-postamble-styles)))
+      (format "#%s {%s}"
+	      (nth 2 (assq 'postamble org-html-divs))
+	      (nth 1 (assq 'postamble org-deck-preamble-postamble-styles)))
+      org-deck-styles
+      "</style>"
       "</head>"
       "<body>"
-      "<header class='deck-status'>"
+      (format "<%s id='%s' class='deck-status'>"
+	      (nth 1 (assq 'preamble org-html-divs))
+	      (nth 2 (assq 'preamble org-html-divs)))
       (org-fill-template
-       org-deck-header-template (org-deck-template-alist info))
-      "</header>"
-      "<div class='deck-container'>"
+       org-deck-preamble-template (org-deck-template-alist info))
+      (format "</%s>" (nth 1 (assq 'preamble org-html-divs)))
+      (format "<%s id='%s' class='deck-container'>"
+	      (nth 1 (assq 'content org-html-divs))
+	      (nth 2 (assq 'content org-html-divs)))
       ;; title page
+      (format "<%s id='title-slide' class='slide'>"
+	      (plist-get info :html-container))
       (org-fill-template
-       org-deck-title-page-template (org-deck-template-alist info))
+       org-deck-title-slide-template (org-deck-template-alist info))
+      (format "</%s>" (plist-get info :html-container))
       ;; toc page
       (let ((depth (plist-get info :with-toc)))
         (when depth (org-deck-toc depth info)))
@@ -418,11 +436,13 @@ holding export options."
          (with-temp-buffer (insert-file-contents snippet)
                            (buffer-string)))
        (plist-get pkg-info :snippets) "\n")
-      "<footer class='deck-status'>"
+      (format "<%s id='%s' class='deck-status'>"
+	      (nth 1 (assq 'postamble org-html-divs))
+	      (nth 2 (assq 'postamble org-html-divs)))
       (org-fill-template
-       org-deck-footer-template (org-deck-template-alist info))
-      "</footer>"
-      "</div>"
+       org-deck-postamble-template (org-deck-template-alist info))
+      (format "</%s>" (nth 1 (assq 'postamble org-html-divs)))
+      (format "</%s>" (nth 1 (assq 'content org-html-divs)))
       "</body>"
       "</html>\n") "\n")))
 
@@ -442,7 +462,7 @@ INFO is a plist used as a communication channel."
      'identity
      (list
       (format "<title>%s</title>" title)
-      (format "<meta charset='%s' />"
+      (format "<meta http-equiv='Content-Type' content='text/html; charset=%s'/>"
               (or (and org-html-coding-system
                        (fboundp 'coding-system-get)
                        (coding-system-get

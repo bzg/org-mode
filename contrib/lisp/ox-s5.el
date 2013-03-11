@@ -56,9 +56,9 @@
       ((?H "To temporary buffer" org-s5-export-as-html)
        (?h "To file" org-s5-export-to-html)
        (?o "To file and open"
-	   (lambda (a s v b)
-	     (if a (org-s5-export-to-html t s v b)
-	       (org-open-file (org-s5-export-to-html nil s v b)))))))
+           (lambda (a s v b)
+             (if a (org-s5-export-to-html t s v b)
+               (org-open-file (org-s5-export-to-html nil s v b)))))))
   :options-alist
   ((:html-link-home "HTML_LINK_HOME" nil nil)
    (:html-link-up "HTML_LINK_UP" nil nil)
@@ -118,38 +118,38 @@ Can be overriden with the S5_UI_URL property."
   :type '(choice (const hidden) (const visibile)))
 
 (defcustom org-s5-footer-template
-  "<div id=\"footer\">
-<h1>%author - %title</h1>
-</div>"
-  "Format template to specify footer div. Completed using
-`org-fill-template'.
-Optional keys include %author, %email, %file, %title and %date.
-Note that the div id must be \"footer\"."
+  "<h1>%author - %title</h1>"
+  "Format template to specify footer div.
+Completed using `org-fill-template', optional keys include
+%author, %email, %file, %title and %date.
+
+It will be wrapped in a <div> with the id \"footer\""
   :group 'org-export-s5
   :type 'string)
 
-(defcustom org-s5-header-template "<div id=\"header\"></div>"
-  "Format template to specify footer div. Completed using
-`org-fill-template'.
-Optional keys include %author, %email, %file, %title and %date.
-Note that the div id must be \"header\"."
+(defcustom org-s5-header-template ""
+  "Format template to specify header div.
+Completed using `org-fill-template', optional keys include
+%author, %email, %file, %title and %date.
+
+It will be wrapped in a <div> with the id \"header\""
   :group 'org-export-s5
   :type 'string)
 
-(defcustom org-s5-title-page-template
-  "<div class=\"slide title-page\">
-<h1>%title</h1>
-<h1>%author</h1>
-<h1>%email</h1>
-<h1>%date</h1>
-</div>"
-  "Format template to specify title page div. Completed using
-`org-fill-template'.
-Optional keys include %author, %email, %file, %title and %date.
-Note that the wrapper div must include the class \"slide\"."
+(defcustom org-s5-title-slide-template
+  "<h1>%title</h1>
+<h2>%author</h2>
+<h2>%email</h2>
+<h2>%date</h2>"
+  "Format template to specify title page section.
+Completed using `org-fill-template', optional keys include
+%author, %email, %file, %title and %date.
+
+It will be wrapped in the element defined in the :html-container
+property, and defaults to the value of `org-html-container-element',
+and have the id \"title-slide\"."
   :group 'org-export-s5
   :type 'string)
-
 
 (defun org-s5--format-toc-headline (headline info)
   "Return an appropriate table of contents entry for HEADLINE.
@@ -157,57 +157,58 @@ Note that (currently) the S5 exporter does not support deep links,
 so the table of contents is not \"active\".
 INFO is a plist used as a communication channel."
   (let* ((headline-number (org-export-get-headline-number headline info))
-	 (section-number
-	  (and (not (org-export-low-level-p headline info))
-	       (org-export-numbered-headline-p headline info)
-	       (concat (mapconcat 'number-to-string headline-number ".") ". ")))
-	 (tags (and (eq (plist-get info :with-tags) t)
-		    (org-export-get-tags headline info))))
+         (section-number
+          (and (not (org-export-low-level-p headline info))
+               (org-export-numbered-headline-p headline info)
+               (concat (mapconcat 'number-to-string headline-number ".") ". ")))
+         (tags (and (eq (plist-get info :with-tags) t)
+                    (org-export-get-tags headline info))))
     (concat section-number
-	    (org-export-data
-	     (org-export-get-alt-title headline info) info)
-	    (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags))))
+            (org-export-data
+             (org-export-get-alt-title headline info) info)
+            (and tags "&nbsp;&nbsp;&nbsp;") (org-html--tags tags))))
 
 (defun org-s5-toc (depth info)
   (let* ((headlines (org-export-collect-headlines info depth))
-	 (toc-entries
-	  (mapcar (lambda (headline)
-		    (cons (org-s5--format-toc-headline headline info)
-			  (org-export-get-relative-level headline info)))
-		  (org-export-collect-headlines info depth))))
+         (toc-entries
+          (mapcar (lambda (headline)
+                    (cons (org-s5--format-toc-headline headline info)
+                          (org-export-get-relative-level headline info)))
+                  (org-export-collect-headlines info depth))))
     (when toc-entries
       (concat
-       "<div id=\"table-of-contents\" class=\"slide\">\n"
+       (format "<%s id='table-of-contents' class='slide'>\n"
+               (plist-get info :html-container))
        (format "<h1>%s</h1>\n"
-	       (org-html--translate "Table of Contents" info))
+               (org-html--translate "Table of Contents" info))
        "<div id=\"text-table-of-contents\">"
        (org-html--toc-text toc-entries)
        "</div>\n"
-       "</div>\n"))))
+       (format "</%s>\n" (plist-get info :html-container))))))
 
 (defun org-s5--build-head (info)
   (let* ((dir (plist-get info :s5-ui-url))
-	 (theme (or (plist-get info :s5-theme-file) "default/slides.css")))
+         (theme (or (plist-get info :s5-theme-file) "default/slides.css")))
     (mapconcat
      'identity
      (list
       "<!-- style sheet links -->"
       (mapconcat
        (lambda (list)
-	 (format
-	  (concat
-	   "<link rel='stylesheet' href='%s/default/%s' type='text/css'"
-	   " media='%s' id='%s' />")
-	  dir (nth 0 list) (nth 1 list) (nth 2 list)))
+         (format
+          (concat
+           "<link rel='stylesheet' href='%s/default/%s' type='text/css'"
+           " media='%s' id='%s' />")
+          dir (nth 0 list) (nth 1 list) (nth 2 list)))
        (list
-	'("outline.css" "screen" "outlineStyle")
-	'("print.css" "print" "slidePrint")
-	'("opera.css" "projection" "operaFix")) "\n")
+        '("outline.css" "screen" "outlineStyle")
+        '("print.css" "print" "slidePrint")
+        '("opera.css" "projection" "operaFix")) "\n")
       (format (concat
-	       "<link rel='stylesheet' href='%s' type='text/css'"
-	       " media='screen' id='slideProj' />")
-	      (if (string-match-p "^\\(http\\|/\\)" theme) theme
-		(concat dir "/" theme)))
+               "<link rel='stylesheet' href='%s' type='text/css'"
+               " media='screen' id='slideProj' />")
+              (if (string-match-p "^\\(http\\|/\\)" theme) theme
+                (concat dir "/" theme)))
       "<!-- S5 JS -->"
       (concat
        "<script src='" dir
@@ -217,7 +218,7 @@ INFO is a plist used as a communication channel."
   (concat
    (org-html--build-meta-info info)
    (format "<meta name=\"version\" content=\"S5 %s\" />\n"
-	   (plist-get info :s5-version))
+           (plist-get info :s5-version))
    (format "<meta name='defaultView' content='%s' />\n"
            (plist-get info :s5-default-view))
    (format "<meta name='controlVis' content='%s' />"
@@ -239,16 +240,16 @@ If a containing headline has the property :INCREMENTAL,
 then the \"incremental\" class will be added to the to the list,
 which will make the list into a \"build\"."
   (let* ((type (org-element-property :type plain-list))
-	(tag (case type
-	       (ordered "ol")
-	       (unordered "ul")
-	       (descriptive "dl"))))
+        (tag (case type
+               (ordered "ol")
+               (unordered "ul")
+               (descriptive "dl"))))
     (format "%s\n%s%s"
-	    (format
-	     "<%s class='org-%s%s'>" tag tag
-	     (if (org-export-get-node-property :INCREMENTAL plain-list t)
-		 " incremental" ""))
-	    contents (org-html-end-plain-list type))))
+            (format
+             "<%s class='org-%s%s'>" tag tag
+             (if (org-export-get-node-property :INCREMENTAL plain-list t)
+                 " incremental" ""))
+            contents (org-html-end-plain-list type))))
 
 (defun org-s5-template-alist (info)
   `(
@@ -271,10 +272,9 @@ holding export options."
   (mapconcat
    'identity
    (list
-    "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
-	\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+    (plist-get info :html-doctype)
     (format "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\">"
-	    (plist-get info :language) (plist-get info :language))
+            (plist-get info :language) (plist-get info :language))
     "<head>"
     (org-s5--build-meta-info info)
     (org-s5--build-head info)
@@ -285,20 +285,29 @@ holding export options."
     "<div class=\"layout\">"
     "<div id=\"controls\"><!-- no edit --></div>"
     "<div id=\"currentSlide\"><!-- no edit --></div>"
+     "<div id='header'>"
     (org-fill-template
      org-s5-header-template (org-s5-template-alist info))
+    "</div>"
+    "<div id='footer'>"
     (org-fill-template
      org-s5-footer-template (org-s5-template-alist info))
     "</div>"
-    (format "<div id=\"%s\" class=\"presentation\">" (nth 1 org-html-divs))
+    "</div>"
+    (format "<%s id=\"%s\" class=\"presentation\">"
+            (nth 1 (assq 'content org-html-divs))
+            (nth 2 (assq 'content org-html-divs)))
     ;; title page
+    (format "<%s id='title-slide' class='slide'>"
+            (plist-get info :html-container))
     (org-fill-template
-     org-s5-title-page-template (org-s5-template-alist info))
+     org-s5-title-slide-template (org-s5-template-alist info))
+    (format "</%s>" (plist-get info :html-container))
     ;; table of contents.
     (let ((depth (plist-get info :with-toc)))
       (when depth (org-s5-toc depth info)))
     contents
-    "</div>"
+    (format "</%s>" (nth 1 (assq 'content org-html-divs)))
     "</body>"
     "</html>\n") "\n"))
 
@@ -335,21 +344,21 @@ is non-nil."
   (interactive)
   (if async
       (org-export-async-start
-	  (lambda (output)
-	    (with-current-buffer (get-buffer-create "*Org S5 Export*")
-	      (erase-buffer)
-	      (insert output)
-	      (goto-char (point-min))
-	      (nxml-mode)
-	      (org-export-add-to-stack (current-buffer) 's5)))
-	`(org-export-as 's5 ,subtreep ,visible-only ,body-only ',ext-plist))
+          (lambda (output)
+            (with-current-buffer (get-buffer-create "*Org S5 Export*")
+              (erase-buffer)
+              (insert output)
+              (goto-char (point-min))
+              (nxml-mode)
+              (org-export-add-to-stack (current-buffer) 's5)))
+        `(org-export-as 's5 ,subtreep ,visible-only ,body-only ',ext-plist))
     (let ((outbuf (org-export-to-buffer
-		   's5 "*Org S5 Export*"
-		   subtreep visible-only body-only ext-plist)))
+                   's5 "*Org S5 Export*"
+                   subtreep visible-only body-only ext-plist)))
       ;; Set major mode.
       (with-current-buffer outbuf (nxml-mode))
       (when org-export-show-temporary-export-buffer
-	(switch-to-buffer-other-window outbuf)))))
+        (switch-to-buffer-other-window outbuf)))))
 
 (defun org-s5-export-to-html
   (&optional async subtreep visible-only body-only ext-plist)
@@ -381,18 +390,18 @@ file-local settings.
 Return output file's name."
   (interactive)
   (let* ((extension (concat "." org-html-extension))
-	 (file (org-export-output-file-name extension subtreep))
-	 (org-export-coding-system org-html-coding-system))
+         (file (org-export-output-file-name extension subtreep))
+         (org-export-coding-system org-html-coding-system))
     (if async
-	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 's5))
-	  (let ((org-export-coding-system org-html-coding-system))
-	    `(expand-file-name
-	      (org-export-to-file
-	       's5 ,file ,subtreep ,visible-only ,body-only ',ext-plist))))
+        (org-export-async-start
+            (lambda (f) (org-export-add-to-stack f 's5))
+          (let ((org-export-coding-system org-html-coding-system))
+            `(expand-file-name
+              (org-export-to-file
+               's5 ,file ,subtreep ,visible-only ,body-only ',ext-plist))))
       (let ((org-export-coding-system org-html-coding-system))
-	(org-export-to-file
-	 's5 file subtreep visible-only body-only ext-plist)))))
+        (org-export-to-file
+         's5 file subtreep visible-only body-only ext-plist)))))
 
 (defun org-s5-publish-to-html (plist filename pub-dir)
   "Publish an org file to S5 HTML Presentation.
