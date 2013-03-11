@@ -242,6 +242,11 @@ you can \"misuse\" it to also add other text to the header."
 (defconst org-sorting-choice
   '(choice
     (const time-up) (const time-down)
+    (const timestamp-up) (const timestamp-down)
+    (const scheduled-up) (const scheduled-down)
+    (const deadline-up)  (const deadline-down)
+    (const ts-up) (const ts-down)
+    (const tsia-up) (const tsia-down)
     (const category-keep) (const category-up) (const category-down)
     (const tag-down) (const tag-up)
     (const priority-up) (const priority-down)
