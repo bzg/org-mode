@@ -195,7 +195,8 @@ with \"t\" key."
 	   (mark-info (mew-summary-get-mark)))
       (if (and org-mew-link-to-refile-destination
 	       (eq mark-info ?o))	; marked as refile
-	  (nth 1 (mew-refile-get msgnum))
+	  (mew-case-folder (mew-sinfo-get-case)
+			   (nth 1 (mew-refile-get msgnum)))
 	(let ((folder-or-path (mew-summary-folder-name)))
 	  (mew-folder-path-to-folder folder-or-path t))))))
 
