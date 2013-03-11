@@ -329,6 +329,8 @@ you can \"misuse\" it to also add other text to the header."
 			  (set :greedy t :value (:deadline :scheduled :timestamp :sexp)
 			       (const :deadline)
 			       (const :scheduled)
+			       (const :deadline*)
+			       (const :scheduled*)
 			       (const :timestamp)
 			       (const :sexp))))
 		   (list :tag "Standard skipping condition"
@@ -2709,6 +2711,8 @@ Pressing `<' twice means to restrict to the current subtree or region
 	      (cond
 	       ((eq type 'agenda)
 		(org-let lprops '(org-agenda-list current-prefix-arg)))
+	       ((eq type 'agenda*)
+		(org-let lprops '(org-agenda-list current-prefix-arg nil nil t)))
 	       ((eq type 'alltodo)
 		(org-let lprops '(org-todo-list current-prefix-arg)))
 	       ((eq type 'search)
@@ -2866,6 +2870,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 		     (cond
 		      ((string-match "\\S-" desc) desc)
 		      ((eq type 'agenda) "Agenda for current week or day")
+		      ((eq type 'agenda*) "Appointments for current week or day")
 		      ((eq type 'alltodo) "List of all TODO entries")
 		      ((eq type 'search) "Word search")
 		      ((eq type 'stuck) "List of stuck projects")
@@ -3028,6 +3033,9 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
 	 ((eq type 'agenda)
 	  (org-let2 gprops lprops
 	    '(call-interactively 'org-agenda-list)))
+	 ((eq type 'agenda*)
+	  (org-let2 gprops lprops
+	    '(funcall 'org-agenda-list nil nil t)))
 	 ((eq type 'alltodo)
 	  (org-let2 gprops lprops
 	    '(call-interactively 'org-todo-list)))
@@ -4058,24 +4066,33 @@ This variable is a list of symbols that controls the types of
 items that appear in the daily/weekly agenda.  Allowed symbols in this
 list are are
 
-   :timestamp    List items containing a date stamp or date range matching
-                 the selected date.  This includes sexp entries in
-                 angular brackets.
+  :timestamp   List items containing a date stamp or date range matching
+               the selected date.  This includes sexp entries in angular
+               brackets.
 
-   :sexp         List entries resulting from plain diary-like sexps.
+  :sexp        List entries resulting from plain diary-like sexps.
 
-   :deadline     List deadline due on that date.  When the date is today,
-                 also list any deadlines past due, or due within
-		 `org-deadline-warning-days'.  `:deadline' must appear before
-                 `:scheduled' if the setting of
-                 `org-agenda-skip-scheduled-if-deadline-is-shown' is to have
-                 any effect.
+  :deadline    List deadline due on that date.  When the date is today,
+               also list any deadlines past due, or due within
+	       `org-deadline-warning-days'.  `:deadline' must appear before
+               `:scheduled' if the setting of
+               `org-agenda-skip-scheduled-if-deadline-is-shown' is to have
+               any effect.
 
-   :scheduled    List all items which are scheduled for the given date.
-		 The diary for *today* also contains items which were
-		 scheduled earlier and are not yet marked DONE.
+  :deadline*   Same as above, but only include the deadline if it has an
+               hour specification as [h]h:mm.
 
-By default, all four types are turned on.
+  :scheduled   List all items which are scheduled for the given date.
+	       The diary for *today* also contains items which were
+	       scheduled earlier and are not yet marked DONE.
+
+  :scheduled*  Same as above, but only include the scheduled item if it
+               has an hour specification as [h]h:mm.
+
+By default, all four non-starred types are turned on.
+
+When :scheduled* or :deadline* are included, :schedule or :deadline
+will be ignored.
 
 Never set this variable globally using `setq', because then it
 will apply to all future agenda commands.  Instead, bind it with
@@ -4087,7 +4104,7 @@ the daily/weekly agenda, see `org-agenda-skip-function'.")
 
 (defvar org-agenda-buffer-tmp-name nil)
 ;;;###autoload
-(defun org-agenda-list (&optional arg start-day span)
+(defun org-agenda-list (&optional arg start-day span with-hour)
   "Produce a daily/weekly view from all files in variable `org-agenda-files'.
 The view will be for the current day or week, but from the overview buffer
 you will be able to go to other days/weeks.
@@ -4097,7 +4114,10 @@ span ARG days.  Lisp programs should instead specify SPAN to change
 the number of days.  SPAN defaults to `org-agenda-span'.
 
 START-DAY defaults to TODAY, or to the most recent match for the weekday
-given in `org-agenda-start-on-weekday'."
+given in `org-agenda-start-on-weekday'.
+
+When WITH-HOUR is non-nil, only include scheduled and deadline
+items if they have an hour specification like [h]h:mm."
   (interactive "P")
   (if org-agenda-overriding-arguments
       (setq arg (car org-agenda-overriding-arguments)
@@ -4147,7 +4167,7 @@ given in `org-agenda-start-on-weekday'."
 	   s e rtn rtnall file date d start-pos end-pos todayp
 	   clocktable-start clocktable-end filter)
       (setq org-agenda-redo-command
-	    (list 'org-agenda-list (list 'quote arg) start-day (list 'quote span)))
+	    (list 'org-agenda-list (list 'quote arg) start-day (list 'quote span) with-hour))
       (dotimes (n (1- ndays))
 	(push (1+ (car day-numbers)) day-numbers))
       (setq day-numbers (nreverse day-numbers))
@@ -4190,9 +4210,26 @@ given in `org-agenda-start-on-weekday'."
 	  (catch 'nextfile
 	    (org-check-agenda-file file)
 	    (let ((org-agenda-entry-types org-agenda-entry-types))
-	      (unless org-agenda-include-deadlines
+	      ;; Starred types override non-starred equivalents
+	      (when (member :deadline* org-agenda-entry-types)
 		(setq org-agenda-entry-types
 		      (delq :deadline org-agenda-entry-types)))
+	      (when (member :scheduled* org-agenda-entry-types)
+		(setq org-agenda-entry-types
+		      (delq :scheduled org-agenda-entry-types)))
+	      ;; Honor with-hour
+	      (when with-hour
+		(when (member :deadline org-agenda-entry-types)
+		  (setq org-agenda-entry-types
+			(delq :deadline org-agenda-entry-types))
+		  (push :deadline* org-agenda-entry-types))
+		(when (member :scheduled org-agenda-entry-types)
+		  (setq org-agenda-entry-types
+			(delq :scheduled org-agenda-entry-types))
+		  (push :scheduled* org-agenda-entry-types)))
+	      (unless org-agenda-include-deadlines
+		(setq org-agenda-entry-types
+		      (delq :deadline* (delq :deadline org-agenda-entry-types))))
 	      (cond
 	       ((memq org-agenda-show-log-scoped '(only clockcheck))
 		(setq rtn (org-agenda-get-day-entries
@@ -5242,11 +5279,18 @@ the documentation of `org-diary'."
 		 ((eq arg :scheduled)
 		  (setq rtn (org-agenda-get-scheduled deadline-results))
 		  (setq results (append results rtn)))
+		 ((eq arg :scheduled*)
+		  (setq rtn (org-agenda-get-scheduled deadline-results t))
+		  (setq results (append results rtn)))
 		 ((eq arg :closed)
 		  (setq rtn (org-agenda-get-progress))
 		  (setq results (append results rtn)))
 		 ((eq arg :deadline)
 		  (setq rtn (org-agenda-get-deadlines))
+		  (setq deadline-results (copy-sequence rtn))
+		  (setq results (append results rtn)))
+		 ((eq arg :deadline*)
+		  (setq rtn (org-agenda-get-deadlines t))
 		  (setq deadline-results (copy-sequence rtn))
 		  (setq results (append results rtn))))))))
 	results))))
@@ -5908,8 +5952,10 @@ See also the user option `org-agenda-clock-consistency-checks'."
       ;; Nope, this gap is not OK
       nil)))
 
-(defun org-agenda-get-deadlines ()
-  "Return the deadline information for agenda display."
+(defun org-agenda-get-deadlines (&optional with-hour)
+  "Return the deadline information for agenda display.
+When WITH-HOUR is non-nil, only return deadlines with an hour
+specification like [h]h:mm."
   (let* ((props (list 'mouse-face 'highlight
 		      'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
@@ -5917,7 +5963,9 @@ See also the user option `org-agenda-clock-consistency-checks'."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
-	 (regexp org-deadline-time-regexp)
+	 (regexp (if with-hour
+		     org-deadline-time-hour-regexp
+		   org-deadline-time-regexp))
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date)) ; DATE bound by calendar
 	 (dl0 (car org-agenda-deadline-leaders))
@@ -6047,8 +6095,10 @@ FRACTION is what fraction of the head-warning time has passed."
       (while (setq f (pop faces))
 	(if (>= fraction (car f)) (throw 'exit (cdr f)))))))
 
-(defun org-agenda-get-scheduled (&optional deadline-results)
-  "Return the scheduled information for agenda display."
+(defun org-agenda-get-scheduled (&optional deadline-results with-hour)
+  "Return the scheduled information for agenda display.
+When WITH-HOUR is non-nil, only return scheduled items with
+an hour specification like [h]h:mm."
   (let* ((props (list 'org-not-done-regexp org-not-done-regexp
 		      'org-todo-regexp org-todo-regexp
 		      'org-complex-heading-regexp org-complex-heading-regexp
@@ -6057,7 +6107,9 @@ FRACTION is what fraction of the head-warning time has passed."
 		      'help-echo
 		      (format "mouse-2 or RET jump to org file %s"
 			      (abbreviate-file-name buffer-file-name))))
-	 (regexp org-scheduled-time-regexp)
+	 (regexp (if with-hour
+		     org-scheduled-time-hour-regexp
+		   org-scheduled-time-regexp))
 	 (todayp (org-agenda-todayp date)) ; DATE bound by calendar
 	 (d1 (calendar-absolute-from-gregorian date))  ; DATE bound by calendar
 	 mm
@@ -9763,7 +9815,8 @@ will only add headlines containing IMPORTANT or headlines
 belonging to the \"Work\" category.
 
 ARGS are symbols indicating what kind of entries to consider.
-By default `org-agenda-to-appt' will use :deadline, :scheduled
+By default `org-agenda-to-appt' will use :deadline*, :scheduled*
+\(i.e., deadlines and scheduled items with a hh:mm specification)
 and :timestamp entries.  See the docstring of `org-diary' for
 details and examples.
 
@@ -9774,7 +9827,7 @@ to override `appt-message-warning-time'."
   (if (eq filter t)
       (setq filter (read-from-minibuffer "Regexp filter: ")))
   (let* ((cnt 0) ; count added events
-	 (scope (or args '(:deadline :scheduled :timestamp)))
+	 (scope (or args '(:deadline* :scheduled* :timestamp)))
 	 (org-agenda-new-buffers nil)
 	 (org-deadline-warning-days 0)
 	 ;; Do not use `org-today' here because appt only takes
@@ -9796,7 +9849,10 @@ to override `appt-message-warning-time'."
     ;; Map thru entries and find if we should filter them out
     (mapc
      (lambda(x)
-       (let* ((evt (org-trim (or (get-text-property 1 'txt x) "")))
+       (let* ((evt (org-trim
+		    (replace-regexp-in-string
+		     org-bracket-link-regexp "\\3"
+		     (or (get-text-property 1 'txt x) ""))))
 	      (cat (get-text-property 1 'org-category x))
 	      (tod (get-text-property 1 'time-of-day x))
 	      (ok (or (null filter)
