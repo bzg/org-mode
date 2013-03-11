@@ -8402,12 +8402,22 @@ point.  Pressing @code{<} another time will remove this filter.  You can add
 a filter preset through the option @code{org-agenda-category-filter-preset}
 (see below.)
 
+@orgcmd{|,org-agenda-filter-by-regexp}
+@vindex org-agenda-regexp-filter-preset
+
+Filter the agenda view by a regular expression: only show agenda entries
+matching the regular expression the user entered.  When called with a prefix
+argument, it will filter @emph{out} entries matching the regexp.  With two
+universal prefix arguments, it will remove all the regexp filters, which can
+be cumulated.  You can add a filter preset through the option
+@code{org-agenda-category-filter-preset} (see below.)
+
 @orgcmd{/,org-agenda-filter-by-tag}
 @vindex org-agenda-tag-filter-preset
-Filter the current agenda view with respect to a tag and/or effort estimates.
-The difference between this and a custom agenda command is that filtering is
-very fast, so that you can switch quickly between different filters without
-having to recreate the agenda.@footnote{Custom commands can preset a filter by
+Filter the agenda view with respect to a tag and/or effort estimates.  The
+difference between this and a custom agenda command is that filtering is very
+fast, so that you can switch quickly between different filters without having
+to recreate the agenda.@footnote{Custom commands can preset a filter by
 binding the variable @code{org-agenda-tag-filter-preset} as an option.  This
 filter will then be applied to the view and persist as a basic filter through
 refreshes and more secondary filtering.  The filter is a global property of

@@ -703,15 +703,18 @@ month and 365.24 days for a year)."
   :group 'org-faces)
 
 (defface org-agenda-filter-tags
-  (org-compatible-face 'mode-line
-    nil)
+  (org-compatible-face 'mode-line nil)
   "Face for tag(s) in the mode-line when filtering the agenda."
   :group 'org-faces)
 
+(defface org-agenda-filter-regexp
+  (org-compatible-face 'mode-line nil)
+  "Face for regexp(s) in the mode-line when filtering the agenda."
+  :group 'org-faces)
+
 (defface org-agenda-filter-category
-  (org-compatible-face 'mode-line
-    nil)
-  "Face for tag(s) in the mode-line when filtering the agenda."
+  (org-compatible-face 'mode-line nil)
+  "Face for categories(s) in the mode-line when filtering the agenda."
   :group 'org-faces)
 
 (defface org-time-grid ;; originally copied from font-lock-variable-name-face
@@ -726,20 +729,17 @@ month and 365.24 days for a year)."
   "Face used to show the current time in the time grid.")
 
 (defface org-agenda-diary
-  (org-compatible-face 'default
-    nil)
+  (org-compatible-face 'default nil)
   "Face used for agenda entries that come from the Emacs diary."
   :group 'org-faces)
 
 (defface org-agenda-calendar-event
-  (org-compatible-face 'default
-    nil)
+  (org-compatible-face 'default nil)
   "Face used to show events and appointments in the agenda."
   :group 'org-faces)
 
 (defface org-agenda-calendar-sexp
-  (org-compatible-face 'default
-    nil)
+  (org-compatible-face 'default nil)
   "Face used to show events computed from a S-expression."
   :group 'org-faces)
 
