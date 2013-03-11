@@ -39,8 +39,7 @@
 (eval-when-compile
   (require 'cl))
 
-(eval-and-compile
-  (require 'org))
+(require 'org)
 (require 'gnus-util)
 (require 'gnus-art)
 (require 'mail-utils)
@@ -141,9 +140,18 @@ This overrides `org-email-link-description-format' if set."
   :type 'boolean)
 
 ;; Decalre external functions and variables
-(declare-function wl-summary-message-number "ext:wl-summary" ())
+(declare-function org-reverse-string "org")
+(declare-function org-install-letbind "org-exp")
+(declare-function diary-ordinal-suffix "ext:diary-lib")
+(declare-function wl-summary-message-number "ext:wl-summary")
 (declare-function wl-address-header-extract-address "ext:wl-address")
 (declare-function wl-address-header-extract-realname "ext:wl-address")
+(declare-function erc-buffer-list "ext:erc")
+(declare-function erc-get-channel-user-list "ext:erc")
+(declare-function google-maps-static-show "ext:google-maps-static")
+(declare-function elmo-message-field "ext:elmo-pipe")
+(declare-function std11-narrow-to-header "ext:std11")
+(declare-function std11-fetch-field "ext:std11")
 
 (defvar org-contacts-keymap
   (let ((map (make-sparse-keymap)))
@@ -779,11 +787,10 @@ address."
 
 (defun erc-nicknames-list ()
   "Return all nicknames of all ERC buffers."
-  (if (fboundp 'erc-buffer-list)
-      (loop for buffer in (erc-buffer-list)
-            nconc (with-current-buffer buffer
-                    (loop for user-entry in (mapcar 'car (erc-get-channel-user-list))
-                          collect (elt user-entry 1))))))
+  (loop for buffer in (erc-buffer-list)
+	nconc (with-current-buffer buffer
+		(loop for user-entry in (mapcar 'car (erc-get-channel-user-list))
+		      collect (elt user-entry 1)))))
 
 (add-to-list 'org-property-set-functions-alist
              `(,org-contacts-nickname-property . org-contacts-completing-read-nickname))
