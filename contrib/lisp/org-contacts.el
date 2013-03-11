@@ -165,10 +165,10 @@ This overrides `org-email-link-description-format' if set."
 (defun org-contacts-db-need-update-p ()
   "Determine whether `org-contacts-db' needs to be refreshed."
   (or (null org-contacts-last-update)
-      (some (lambda (file)
-	      (or (time-less-p org-contacts-last-update
-			       (elt (file-attributes file) 5))))
-	    (org-contacts-files))))
+      (org-find-if (lambda (file)
+		     (or (time-less-p org-contacts-last-update
+				      (elt (file-attributes file) 5))))
+		   (org-contacts-files))))
 
 (defun org-contacts-db ()
   "Return the latest Org Contacts Database."
@@ -207,10 +207,10 @@ If both match values are nil, return all contacts."
 		   (org-string-match-p name-match
 				       (first contact)))
 	      (and tags-match
-		   (some (lambda (tag)
-			   (org-string-match-p tags-match tag))
-			 (org-split-string
-			  (or (cdr (assoc-string "ALLTAGS" (caddr contact))) "") ":"))))
+		   (org-find-if (lambda (tag)
+				  (org-string-match-p tags-match tag))
+				(org-split-string
+				 (or (cdr (assoc-string "ALLTAGS" (caddr contact))) "") ":"))))
 	  collect contact)))
 
 (when (not (fboundp 'completion-table-case-fold))
@@ -369,10 +369,13 @@ prefixes rather than just the beginning of the string."
 	  completions))
 
 (defun org-contacts-test-completion-prefix (string collection predicate)
-  (find-if (lambda (el)
-	     (and (or (null predicate) (funcall predicate el))
-		  (string= string el)))
-	   collection))
+  ;; Prevents `org-find-if' from redefining `predicate' and going into
+  ;; an infinite loop.
+  (lexical-let ((predicate predicate))
+    (org-find-if (lambda (el)
+		   (and (or (null predicate) (funcall predicate el))
+			(string= string el)))
+		 collection)))
 
 (defun org-contacts-boundaries-prefix (string collection predicate suffix)
   (list* 'boundaries (completion-boundaries string collection predicate suffix)))
@@ -444,7 +447,7 @@ A group FOO is composed of contacts with the tag FOO."
 			    collect (org-contacts-format-email contact-name email))))
 	 (completion-list (org-contacts-all-completions-prefix
 			   string
-			   (remove-duplicates completion-list :test #'equalp))))
+			   (org-uniquify completion-list))))
     (when completion-list
       (list start end
 	    (org-contacts-make-collection-prefix completion-list)))))
