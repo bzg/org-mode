@@ -8793,6 +8793,8 @@ buffer).
 @kindex C-c a C
 @vindex org-agenda-custom-commands
 @cindex agenda views, main example
+@cindex agenda, as an agenda views
+@cindex agenda*, as an agenda views
 @cindex tags, as an agenda view
 @cindex todo, as an agenda view
 @cindex tags-todo
@@ -8803,13 +8805,15 @@ buffer).
 Custom commands are configured in the variable
 @code{org-agenda-custom-commands}.  You can customize this variable, for
 example by pressing @kbd{C-c a C}.  You can also directly set it with Emacs
-Lisp in @file{.emacs}.  The following example contains all valid search
-types:
+Lisp in @file{.emacs}.  The following example contains all valid agenda
+views:
 
 @lisp
 @group
 (setq org-agenda-custom-commands
-      '(("w" todo "WAITING")
+      '(("x" agenda)
+        ("y" agenda*)
+        ("w" todo "WAITING")
         ("W" todo-tree "WAITING")
         ("u" tags "+boss-urgent")
         ("v" tags-todo "+boss-urgent")
@@ -8835,6 +8839,15 @@ expression to be used for the matching.  The example above will
 therefore define:
 
 @table @kbd
+@item C-c a x
+as a global search for agenda entries planned@footnote{@emph{Planned} means
+here that these entries have some planning information attached to them, like
+a time-stamp, a scheduled or a deadline string.  See
+@var{org-agenda-entry-types} on how to set what planning information will be
+taken into account.} this week/day.
+@item C-c a y
+as a global search for agenda entries planned this week/day, but only those
+with an hour specification like @code{[h]h:mm}---think of them as appointments.
 @item C-c a w
 as a global search for TODO entries with @samp{WAITING} as the TODO
 keyword
@@ -15931,14 +15944,18 @@ other block) with @code{org-narrow-to-block}.
 @vindex org-agenda-skip-function
 @vindex org-agenda-skip-function-global
 Org provides a special hook that can be used to narrow down the selection
-made by these agenda views: @code{agenda}, @code{todo}, @code{alltodo},
-@code{tags}, @code{tags-todo}, @code{tags-tree}.  You may specify a function
-that is used at each match to verify if the match should indeed be part of
-the agenda view, and if not, how much should be skipped.  You can specify a
-global condition that will be applied to all agenda views, this condition
-would be stored in the variable @code{org-agenda-skip-function-global}.  More
-commonly, such a definition is applied only to specific custom searches,
-using @code{org-agenda-skip-function}.
+made by these agenda views: @code{agenda}, @code{agenda*}@footnote{The
+@code{agenda*} view is the same than @code{agenda} except that it only
+considers @emph{appointments}, i.e., scheduled and deadline items that have a
+time specification @code{[h]h:mm} in their time-stamps.}, @code{todo},
+@code{alltodo}, @code{tags}, @code{tags-todo}, @code{tags-tree}.  You may
+specify a function that is used at each match to verify if the match should
+indeed be part of the agenda view, and if not, how much should be skipped.
+You can specify a global condition that will be applied to all agenda views,
+this condition would be stored in the variable
+@code{org-agenda-skip-function-global}.  More commonly, such a definition is
+applied only to specific custom searches, using
+@code{org-agenda-skip-function}.
 
 Let's say you want to produce a list of projects that contain a WAITING
 tag anywhere in the project tree.  Let's further assume that you have
