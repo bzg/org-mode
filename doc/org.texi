@@ -733,6 +733,7 @@ Hacking
 * Tables in arbitrary syntax::  Orgtbl for @LaTeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
+* Speeding up your agendas::    Tips on how to speed up your agendas
 * Extracting agenda information::  Postprocessing of agenda information
 * Using the property API::      Writing programs that use entry properties
 * Using the mapping API::       Mapping over all or selected entries
@@ -15250,6 +15251,7 @@ Org.
 * Tables in arbitrary syntax::  Orgtbl for @LaTeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
+* Speeding up your agendas::    Tips on how to speed up your agendas
 * Extracting agenda information::  Postprocessing of agenda information
 * Using the property API::      Writing programs that use entry properties
 * Using the mapping API::       Mapping over all or selected entries
@@ -15818,7 +15820,7 @@ written in a way such that it does nothing in buffers that are not in
 You can narrow the current buffer to the current dynamic block (like any
 other block) with @code{org-narrow-to-block}.
 
-@node Special agenda views, Extracting agenda information, Dynamic blocks, Hacking
+@node Special agenda views, Speeding up your agendas, Dynamic blocks, Hacking
 @section Special agenda views
 @cindex agenda views, user-defined
 
@@ -15919,7 +15921,48 @@ like this, even without defining a special function:
     (org-agenda-overriding-header "Projects waiting for something: "))))
 @end lisp
 
-@node Extracting agenda information, Using the property API, Special agenda views, Hacking
+@node Speeding up your agendas, Extracting agenda information, Special agenda views, Hacking
+@section Speeding up your agendas
+@cindex agenda views, optimization
+
+When your Org files grow in both number and size, agenda commands may start
+to become slow.  Below are some tips on how to speed up the agenda commands.
+
+@enumerate
+@item
+Reduce the number of Org agenda files: this will reduce the slowliness caused
+by accessing to a harddrive.
+@item
+Reduce the number of DONE and archived headlines: this way the agenda does
+not need to skip them.
+@item
+@vindex org-agenda-dim-blocked-tasks
+Inhibit the dimming of blocked tasks: 
+@lisp
+(setq org-agenda-dim-blocked-tasks nil)
+@end lisp
+@item
+@vindex org-startup-folded
+@vindex org-agenda-inhibit-startup
+Inhibit agenda files startup options:
+@lisp
+(setq org-agenda-inhibit-startup nil)
+@end lisp
+@item
+@vindex org-agenda-show-inherited-tags
+@vindex org-agenda-use-tag-inheritance
+Disable tag inheritance in agenda:
+@lisp
+(setq org-agenda-use-tag-inheritance nil)
+@end lisp
+@end enumerate
+
+You can set these options for specific agenda views only.  See the docstrings
+of these variables for details on why they affect the agenda generation, and
+this @uref{http://orgmode.org/worg/agenda-optimization.html, dedicated Worg
+page} for further explanations.
+
+@node Extracting agenda information, Using the property API, Speeding up your agendas, Hacking
 @section Extracting agenda information
 @cindex agenda, pipe
 @cindex Scripts, for agenda processing
