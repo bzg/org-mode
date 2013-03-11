@@ -69,6 +69,8 @@ This variable can be set to either `atx' or `setext'."
 	       (org-open-file (org-md-export-to-markdown nil s v)))))))
   :translate-alist ((bold . org-md-bold)
 		    (code . org-md-verbatim)
+		    (verbatim . org-md-verbatim)
+		    (underline . org-md-underline)
 		    (comment . (lambda (&rest args) ""))
 		    (comment-block . (lambda (&rest args) ""))
 		    (example-block . org-md-example-block)
@@ -89,8 +91,7 @@ This variable can be set to either `atx' or `setext'."
 		    (quote-section . org-md-example-block)
 		    (section . org-md-section)
 		    (src-block . org-md-example-block)
-		    (template . org-md-template)
-		    (verbatim . org-md-verbatim)))
+		    (template . org-md-template)))
 
 
 
@@ -125,6 +126,14 @@ CONTENTS is the text within bold markup.  INFO is a plist used as
 a communication channel."
   (format "**%s**" contents))
 
+;;;; Underline
+
+(defun org-md-underline (underline contents info)
+  "Transcode UNDERLINE object into Markdown format.
+CONTENTS is the text within underline markup.  INFO is a plist
+used as a communication channel."
+  ;; Return the bare text as MarkDown does not support underlining
+  contents)
 
 ;;;; Code and Verbatim
 
