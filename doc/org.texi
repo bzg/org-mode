@@ -1319,6 +1319,7 @@ Furthermore, any entries with a @samp{VISIBILITY} property (@pxref{Properties
 and Columns}) will get their visibility adapted accordingly.  Allowed values
 for this property are @code{folded}, @code{children}, @code{content}, and
 @code{all}.
+
 @table @asis
 @orgcmd{C-u C-u @key{TAB},org-set-startup-visibility}
 Switch back to the startup visibility of the buffer, i.e., whatever is
@@ -2909,6 +2910,7 @@ active formula, the cursor in the formula editor will mark it.
 While inside the special buffer, Org will automatically highlight
 any field or range reference at the cursor position.  You may edit,
 remove and add formulas, and use the following commands:
+
 @table @kbd
 @orgcmdkkc{C-c C-c,C-x C-s,org-table-fedit-finish}
 Exit the formula editor and store the modified formulas.  With @kbd{C-u}
@@ -3054,6 +3056,7 @@ empty first field.
 
 @cindex marking characters, tables
 The marking characters have the following meaning:
+
 @table @samp
 @item !
 The fields in this line define names for the columns, so that you may
@@ -5124,6 +5127,7 @@ FILE         @r{The filename the entry is located in.}
 
 To create sparse trees and special lists with selection based on properties,
 the same commands are used as for tag searches (@pxref{Tag searches}).
+
 @table @kbd
 @orgcmdkkc{C-c / m,C-c \\,org-match-sparse-tree}
 Create a sparse tree with all matching entries.  With a
@@ -6771,6 +6775,7 @@ selection.
 
 @item type
 The type of entry, a symbol.  Valid values are:
+
 @table @code
 @item entry
 An Org mode node, with a headline.  Will be filed as the child of the target
@@ -6799,6 +6804,7 @@ the empty string, it defaults to @code{org-default-notes-file}.  A file can
 also be given as a variable, function, or Emacs Lisp form.
 
 Valid values are:
+
 @table @code
 @item (file "path/to/file")
 Text will be placed at the beginning or end of that file.
@@ -6843,6 +6849,7 @@ more details.
 @item properties
 The rest of the entry is a property list of additional options.
 Recognized properties are:
+
 @table @code
 @item :prepend
 Normally new captured information will be appended at
@@ -7017,7 +7024,6 @@ directory.
 @noindent The following commands deal with attachments:
 
 @table @kbd
-
 @orgcmd{C-c C-a,org-attach}
 The dispatcher for commands related to the attachment system.  After these
 keys, a list of commands is displayed and you must press an additional key
@@ -7459,6 +7465,7 @@ Remove the permanent restriction created by @kbd{C-c C-x <}.
 @noindent
 When working with @file{speedbar.el}, you can use the following commands in
 the Speedbar frame:
+
 @table @kbd
 @orgcmdtkc{< @r{in the speedbar frame},<,org-speedbar-set-agenda-restriction}
 Permanently restrict the agenda to the item---either an Org file or a subtree
@@ -7479,6 +7486,7 @@ following we will assume that @kbd{C-c a} is indeed how the dispatcher
 is accessed and list keyboard access to commands accordingly.  After
 pressing @kbd{C-c a}, an additional letter is required to execute a
 command.  The dispatcher offers the following default commands:
+
 @table @kbd
 @item a
 Create the calendar-like agenda (@pxref{Weekly/daily agenda}).
@@ -7821,6 +7829,7 @@ searches@footnote{But @pxref{x-agenda-skip-entry-regexp,
 ,skipping entries based on regexp}.}.
 
 Here are more examples:
+
 @table @samp
 @item work+TODO="WAITING"
 Select @samp{:work:}-tagged TODO lines with the specific TODO
@@ -11325,7 +11334,6 @@ You can use the following commands to quickly verify the reliability of
 the @LaTeX{}-to-MathML converter.
 
 @table @kbd
-
 @item M-x org-export-as-odf
 Convert a @LaTeX{} math snippet to an OpenDocument formula (@file{.odf}) file.
 
@@ -12611,6 +12619,7 @@ The @code{:exports} header argument can be used to specify export
 behavior:
 
 @subsubheading Header arguments:
+
 @table @code
 @item :exports code
 The default in most languages.  The body of the code block is exported, as
@@ -12649,6 +12658,7 @@ using @code{org-babel-expand-src-block} which can expand both variable and
 ``noweb'' style references  (see @ref{Noweb reference syntax}).
 
 @subsubheading Header arguments
+
 @table @code
 @item :tangle no
 The default.  The code block is not included in the tangled output.
@@ -12662,6 +12672,7 @@ Include the code block in the tangled output to file @samp{filename}.
 
 @kindex  C-c C-v t
 @subsubheading Functions
+
 @table @code
 @item org-babel-tangle
 Tangle the current file.  Bound to @kbd{C-c C-v t}.
@@ -12672,6 +12683,7 @@ Choose a file to tangle.  Bound to @kbd{C-c C-v f}.
 @end table
 
 @subsubheading Hooks
+
 @table @code
 @item org-babel-post-tangle-hook
 This hook is run from within code files tangled by @code{org-babel-tangle}.
@@ -16413,6 +16425,7 @@ should then go through these entries and do whatever actions are necessary.
 If a note has been stored while flagging an entry in @i{MobileOrg}, that note
 will be displayed in the echo area when the cursor is on the corresponding
 agenda line.
+
 @table @kbd
 @kindex ?
 @item ?
