@@ -360,6 +360,17 @@ Document structure
 * Orgstruct mode::              Structure editing outside Org
 * Org syntax::                  Formal description of Org's syntax
 
+Visibility cycling
+
+* Global and local cycling::    Cycling through various visibility states
+* Initial visibility::          Setting the initial visibility state
+* Catching invisible edits::    Preventing mistakes when editing invisible parts
+
+Global and local cycling
+
+* Initial visibility::          Setting the initial visibility state
+* Catching invisible edits::    Preventing mistakes when editing invisible parts
+
 Tables
 
 * Built-in table editor::       Simple tables
@@ -1205,6 +1216,15 @@ variable @code{org-cycle-separator-lines} to modify this behavior.
 @cindex show hidden text
 @cindex hide text
 
+@menu
+* Global and local cycling::    Cycling through various visibility states
+* Initial visibility::          Setting the initial visibility state
+* Catching invisible edits::    Preventing mistakes when editing invisible parts
+@end menu
+
+@node Global and local cycling, Initial visibility, Visibility cycling, Visibility cycling
+@subsection Global and local cycling
+
 Outlines make it possible to hide parts of the text in the buffer.
 Org uses just two commands, bound to @key{TAB} and
 @kbd{S-@key{TAB}} to change the visibility in the buffer.
@@ -1287,6 +1307,15 @@ the previously used indirect buffer.
 Copy the @i{visible} text in the region into the kill ring.
 @end table
 
+@menu
+* Initial visibility::          Setting the initial visibility state
+* Catching invisible edits::    Preventing mistakes when editing invisible parts
+@end menu
+
+@node Initial visibility, Catching invisible edits, Global and local cycling, Visibility cycling
+@subsection Initial visibility
+
+@cindex visibility, initialize
 @vindex org-startup-folded
 @vindex org-agenda-inhibit-startup
 @cindex @code{overview}, STARTUP keyword
@@ -1326,6 +1355,17 @@ Switch back to the startup visibility of the buffer, i.e., whatever is
 requested by startup options and @samp{VISIBILITY} properties in individual
 entries.
 @end table
+
+@node Catching invisible edits,  , Initial visibility, Visibility cycling
+@subsection Catching invisible edits
+
+@vindex org-catch-invisible-edits
+@cindex edits, catching invisible
+Sometimes you may inadvertantly edit an invisible part of the buffer and be
+confused on what as been edited and how to undo the mistake.  Setting
+@code{org-catch-invisible-edits} to non-nil will help prevent this.  See the
+docstring of this option on how Org should catch invisible edits and process
+them.
 
 @node Motion, Structure editing, Visibility cycling, Document Structure
 @section Motion
