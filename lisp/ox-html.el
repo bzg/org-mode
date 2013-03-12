@@ -111,6 +111,8 @@
 	       (org-open-file (org-html-export-to-html nil s v b)))))))
   :options-alist
   ((:html-extension nil nil org-html-extension)
+   (:html-doctype "HTML_DOCTYPE" nil org-html-doctype)
+   (:html-container "HTML_CONTAINER" nil org-html-container-element)
    (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
    (:html-link-up "HTML_LINK_UP" nil org-html-link-up)
    (:html-mathjax "HTML_MATHJAX" nil "" space)
@@ -845,18 +847,46 @@ Use utf-8 as the default value."
   :package-version '(Org . "8.0")
   :type 'coding-system)
 
-(defcustom org-html-divs '("preamble" "content" "postamble")
-  "The name of the main divs for HTML export.
-This is a list of three strings, the first one for the preamble
-DIV, the second one for the content DIV and the third one for the
-postamble DIV."
+(defcustom org-html-doctype
+  "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
+    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+  "Document type definition to use for exported HTML files.
+Can be set with the in-buffer HTML_DOCTYPE property or for
+publishing, with :html-doctype."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
-  :type '(list
-	  (string :tag " Div for the preamble:")
-	  (string :tag "  Div for the content:")
-	  (string :tag "Div for the postamble:")))
+  :type 'string)
+
+(defcustom org-html-container-element "div"
+  "Container class to use for wrapping top level sections.
+Can be set with the in-buffer HTML_CONTAINER property or for
+publishing, with :html-container."
+  :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
+
+(defcustom org-html-divs
+  '((preamble  "div" "preamble")
+    (content   "div" "content")
+    (postamble "div" "postamble"))
+  "Alist of the threed section elements for HTML export.
+The car of each entry is one of 'preamble, 'content or 'postamble.
+The cdrs of each entry are the ELEMENT_TYPE and ID for each
+section of the exported document."
+  :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type '(list :greedy t
+	       (list :tag "Preamble"
+		     (const :format "" preamble)
+		     (string :tag "element") (string :tag "     id"))
+	       (list :tag "Content"
+		     (const :format "" content)
+		     (string :tag "element") (string :tag "     id"))
+	       (list :tag "Postamble" (const :format "" postamble)
+		     (string :tag "     id") (string :tag "element"))))
 
 ;;;; Template :: Mathjax
 
@@ -1460,9 +1490,11 @@ INFO is a plist used as a communication channel."
 		    `((?t . ,title) (?a . ,author)
 		      (?d . ,date) (?e . ,email))))))))
 	(when (org-string-nw-p preamble-contents)
-	  (concat (format "<div id=\"%s\">\n" (nth 0 org-html-divs))
+	  (concat (format "<%s id=\"%s\">\n"
+			  (nth 1 (assq 'preamble org-html-divs))
+			  (nth 2 (assq 'preamble org-html-divs)))
 		  (org-element-normalize-string preamble-contents)
-		  "</div>\n"))))))
+		  (format "</%s>\n" (nth 1 (assq 'preamble  org-html-divs)))))))))
 
 (defun org-html--build-postamble (info)
   "Return document postamble as a string, or nil.
@@ -1512,9 +1544,11 @@ INFO is a plist used as a communication channel."
 			     (?v . ,html-validation-link)))))))))
 	(when (org-string-nw-p postamble-contents)
 	  (concat
-	   (format "<div id=\"%s\">\n" (nth 2 org-html-divs))
+	   (format "<%s id=\"%s\">\n"
+		   (nth 1 (assq 'postamble org-html-divs))
+		   (nth 2 (assq 'postamble org-html-divs)))
 	   (org-element-normalize-string postamble-contents)
-	   "</div>\n"))))))
+	   (format "</%s>\n" (nth 1 (assq 'postamble org-html-divs)))))))))
 
 (defun org-html-inner-template (contents info)
   "Return body of document string after HTML conversion.
@@ -1549,8 +1583,8 @@ holding export options."
 	     (coding-system-get org-html-coding-system 'mime-charset))
 	"iso-8859-1"))
    "\n"
-   "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
-	       \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\n"
+   (plist-get info :html-doctype)
+   "\n"
    (format "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\">\n"
 	   (plist-get info :language) (plist-get info :language))
    "<head>\n"
@@ -1568,12 +1602,15 @@ holding export options."
    ;; Preamble.
    (org-html--build-preamble info)
    ;; Document contents.
-   (format "<div id=\"%s\">\n" (nth 1 org-html-divs))
+   (format "<%s id=\"%s\">\n"
+	   (nth 1 (assq 'content org-html-divs))
+	   (nth 2 (assq 'content org-html-divs)))
    ;; Document title.
    (let ((title (plist-get info :title)))
      (format "<h1 class=\"title\">%s</h1>\n" (org-export-data (or title "") info)))
    contents
-   "</div>\n"
+   (format "</%s>\n"
+	   (nth 1 (assq 'content org-html-divs)))
    ;; Postamble.
    (org-html--build-postamble info)
    ;; Closing document.
@@ -2121,7 +2158,10 @@ holding contextual information."
 	     (extra-class (org-element-property :HTML_CONTAINER_CLASS headline))
 	     (level1 (+ level (1- org-html-toplevel-hlevel)))
 	     (first-content (car (org-element-contents headline))))
-	(format "<div id=\"%s\" class=\"%s\">%s%s</div>\n"
+	(format "<%s id=\"%s\" class=\"%s\">%s%s</%s>\n"
+		(if (= 1 (org-export-get-relative-level headline info))
+		    (plist-get info :html-container)
+		  "div")
 		(format "outline-container-%s"
 			(or (org-element-property :CUSTOM_ID headline)
 			    section-number))
@@ -2145,7 +2185,10 @@ holding contextual information."
 		(if (not (eq (org-element-type first-content) 'section))
 		    (concat (org-html-section first-content "" info)
 			    contents)
-		  contents)))))))
+		  contents)
+		(if (= 1 (org-export-get-relative-level headline info))
+		    (plist-get info :html-container)
+		  "div")))))))
 
 ;;;; Horizontal Rule
 
