@@ -861,7 +861,10 @@ publishing, with :html-doctype."
 (defcustom org-html-container-element "div"
   "Container class to use for wrapping top level sections.
 Can be set with the in-buffer HTML_CONTAINER property or for
-publishing, with :html-container."
+publishing, with :html-container.
+
+Note that changing the default will prevent you from using
+org-info.js for your website."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -874,7 +877,10 @@ publishing, with :html-container."
   "Alist of the threed section elements for HTML export.
 The car of each entry is one of 'preamble, 'content or 'postamble.
 The cdrs of each entry are the ELEMENT_TYPE and ID for each
-section of the exported document."
+section of the exported document.
+
+Note that changing the default will prevent you from using
+org-info.js for your website."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
