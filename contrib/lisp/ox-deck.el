@@ -92,7 +92,7 @@ modernizr; core, extensions and themes directories.)"
   "Returns a unique list of all extensions found in
 in the extensions directories under `org-deck-directories'"
   (org-deck--cleanup-components
-   (mapcar				; extensions under existing dirs
+   (mapcar                              ; extensions under existing dirs
     (lambda (dir)
       (when (file-directory-p dir) (directory-files dir t "^[^.]")))
     (mapcar                           ; possible extension directories
@@ -250,7 +250,7 @@ and have the id \"title-slide\"."
 (defun org-deck-toc (depth info)
   (concat
    (format "<%s id='table-of-contents' class='slide'>\n"
-	   (plist-get info :html-container))
+           (plist-get info :html-container))
    (format "<h2>%s</h2>\n" (org-html--translate "Table of Contents" info))
    (org-html--toc-text
     (mapcar
@@ -312,14 +312,14 @@ and have the id \"title-slide\"."
              (add-to-list 'snippets (concat dir base "html"))))))
      (org-deck--find-extensions))
     (if (not (string-match-p "^[[:space:]]*$" theme))
-	(add-to-list 'sheets
-		     (if (file-name-directory theme) theme
-		       (format "%sthemes/style/%s" prefix theme))))
+        (add-to-list 'sheets
+                     (if (file-name-directory theme) theme
+                       (format "%sthemes/style/%s" prefix theme))))
     (if (not (string-match-p "^[[:space:]]*$" transition))
-	(add-to-list
-	 'sheets
-	 (if (file-name-directory transition) transition
-	   (format "%sthemes/transition/%s" prefix transition))))
+        (add-to-list
+         'sheets
+         (if (file-name-directory transition) transition
+           (format "%sthemes/transition/%s" prefix transition))))
     (list :scripts (nreverse scripts) :sheets (nreverse sheets)
           :snippets snippets)))
 
@@ -399,31 +399,31 @@ holding export options."
       (when (plist-get info :section-numbers)
         "#table-of-contents ul li {list-style-type: none;}")
       (format "#%s, #%s {%s}"
-	      (nth 2 (assq 'preamble org-html-divs))
-	      (nth 2 (assq 'postamble org-html-divs))
-	      (nth 1 (assq 'both org-deck-preamble-postamble-styles)))
+              (nth 2 (assq 'preamble org-html-divs))
+              (nth 2 (assq 'postamble org-html-divs))
+              (nth 1 (assq 'both org-deck-preamble-postamble-styles)))
       (format "#%s {%s}"
-	      (nth 2 (assq 'preamble org-html-divs))
-	      (nth 1 (assq 'preamble org-deck-preamble-postamble-styles)))
+              (nth 2 (assq 'preamble org-html-divs))
+              (nth 1 (assq 'preamble org-deck-preamble-postamble-styles)))
       (format "#%s {%s}"
-	      (nth 2 (assq 'postamble org-html-divs))
-	      (nth 1 (assq 'postamble org-deck-preamble-postamble-styles)))
+              (nth 2 (assq 'postamble org-html-divs))
+              (nth 1 (assq 'postamble org-deck-preamble-postamble-styles)))
       org-deck-styles
       "</style>"
       "</head>"
       "<body>"
       (format "<%s id='%s' class='deck-status'>"
-	      (nth 1 (assq 'preamble org-html-divs))
-	      (nth 2 (assq 'preamble org-html-divs)))
+              (nth 1 (assq 'preamble org-html-divs))
+              (nth 2 (assq 'preamble org-html-divs)))
       (org-fill-template
        org-deck-preamble-template (org-deck-template-alist info))
       (format "</%s>" (nth 1 (assq 'preamble org-html-divs)))
       (format "<%s id='%s' class='deck-container'>"
-	      (nth 1 (assq 'content org-html-divs))
-	      (nth 2 (assq 'content org-html-divs)))
+              (nth 1 (assq 'content org-html-divs))
+              (nth 2 (assq 'content org-html-divs)))
       ;; title page
       (format "<%s id='title-slide' class='slide'>"
-	      (plist-get info :html-container))
+              (plist-get info :html-container))
       (org-fill-template
        org-deck-title-slide-template (org-deck-template-alist info))
       (format "</%s>" (plist-get info :html-container))
@@ -437,8 +437,8 @@ holding export options."
                            (buffer-string)))
        (plist-get pkg-info :snippets) "\n")
       (format "<%s id='%s' class='deck-status'>"
-	      (nth 1 (assq 'postamble org-html-divs))
-	      (nth 2 (assq 'postamble org-html-divs)))
+              (nth 1 (assq 'postamble org-html-divs))
+              (nth 2 (assq 'postamble org-html-divs)))
       (org-fill-template
        org-deck-postamble-template (org-deck-template-alist info))
       (format "</%s>" (nth 1 (assq 'postamble org-html-divs)))
