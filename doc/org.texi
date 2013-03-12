@@ -358,6 +358,7 @@ Document structure
 * Blocks::                      Folding blocks
 * Footnotes::                   How footnotes are defined in Org's syntax
 * Orgstruct mode::              Structure editing outside Org
+* Org syntax::                  Formal description of Org's syntax
 
 Tables
 
@@ -1142,6 +1143,7 @@ edit the structure of the document.
 * Blocks::                      Folding blocks
 * Footnotes::                   How footnotes are defined in Org's syntax
 * Orgstruct mode::              Structure editing outside Org
+* Org syntax::                  Formal description of Org's syntax
 @end menu
 
 @node Outlines, Headlines, Document Structure, Document Structure
@@ -1953,7 +1955,7 @@ Footnote labels are also links to the corresponding definition/reference, and
 you can use the usual commands to follow these links.
 @end table
 
-@node Orgstruct mode,  , Footnotes, Document Structure
+@node Orgstruct mode, Org syntax, Footnotes, Document Structure
 @section The Orgstruct minor mode
 @cindex Orgstruct mode
 @cindex minor mode for structure editing
@@ -1987,6 +1989,28 @@ headlines.  For example, if you set this variable to @code{"^;; "} in Emacs
 Lisp files, you will be able to fold and unfold headlines in Emacs Lisp
 commented lines.  Some commands like @code{org-demote} are disabled when the
 prefix is set, but folding/unfolding will work correctly.
+
+@node Org syntax,  , Orgstruct mode, Document Structure
+@section Org syntax
+@cindex Org syntax
+
+A reference document providing a formal description of Org's syntax is
+available as @uref{http://orgmode.org/worg/dev/org-syntax.html, a draft on
+Worg}, written and maintained by Nicolas Goaziou.  It defines Org's core
+internal concepts such as @code{headlines}, @code{sections}, @code{affiliated
+keywords}, @code{(greater) elements} and @code{objects}.  Each part of an Org
+file falls into one of the categories above.
+
+To explore the abstract structure of an Org buffer, run this in a buffer:
+
+@lisp
+M-: (org-element-parse-buffer) RET
+@end lisp
+
+It will output a list containing the buffer's content represented as an
+abstract structure.  The export engine relies on the information stored in
+this list.  Most interactive commands (e.g., for structure editing) also
+rely on the syntactic meaning of the surrounding context.
 
 @node Tables, Hyperlinks, Document Structure, Top
 @chapter Tables
