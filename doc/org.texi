@@ -1294,11 +1294,13 @@ Copy the @i{visible} text in the region into the kill ring.
 @cindex @code{showall}, STARTUP keyword
 @cindex @code{showeverything}, STARTUP keyword
 
-When Emacs first visits an Org file, the global state is set to
-OVERVIEW, i.e., only the top level headlines are visible.  This can be
-configured through the variable @code{org-startup-folded}, or on a
-per-file basis by adding one of the following lines anywhere in the
-buffer:
+When Emacs first visits an Org file, the global state is set to OVERVIEW,
+i.e., only the top level headlines are visible@footnote{When
+@code{org-agenda-inhibit-startup} is non-nil, Org will not honor the default
+visibility state when first opening a file for the agenda (@pxref{Speeding up
+your agendas}).}  This can be configured through the variable
+@code{org-startup-folded}, or on a per-file basis by adding one of the
+following lines anywhere in the buffer:
 
 @example
 #+STARTUP: overview
@@ -3814,7 +3816,7 @@ Rotate the TODO state of the current item among
 If TODO keywords have fast access keys (see @ref{Fast access to TODO
 states}), you will be prompted for a TODO keyword through the fast selection
 interface; this is the default behavior when
-@var{org-use-fast-todo-selection} is @code{non-nil}.
+@var{org-use-fast-todo-selection} is non-nil.
 
 The same rotation can also be done ``remotely'' from the timeline and agenda
 buffers with the @kbd{t} command key (@pxref{Agenda commands}).
