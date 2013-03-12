@@ -6127,8 +6127,14 @@ special repeaters  @samp{++} and @samp{.+}.  For example:
    today.
 @end example
 
-You may have both scheduling and deadline information for a specific
-task---just make sure that the repeater intervals on both are the same.
+@vindex org-agenda-skip-scheduled-if-deadline-is-shown
+You may have both scheduling and deadline information for a specific task.
+If the repeater is set for the scheduling information only, you probably want
+the repeater to be ignored after the deadline.  If so, set the variable
+@code{org-agenda-skip-scheduled-if-deadline-is-shown} to
+@code{repeated-after-deadline}.  If you want both scheduling and deadline
+information to repeat after the same interval, set the same repeater for both
+timestamps.
 
 An alternative to using a repeater is to create a number of copies of a task
 subtree, with dates shifted in each copy.  The command @kbd{C-c C-x c} was
