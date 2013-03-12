@@ -38,7 +38,6 @@
 (require 'format-spec)
 (eval-when-compile (require 'cl) (require 'table))
 
-
 
 ;;; Function Declarations
 
@@ -46,7 +45,6 @@
 (declare-function htmlize-region "ext:htmlize" (beg end))
 (declare-function org-pop-to-buffer-same-window
 		  "org-compat" (&optional buffer-or-name norecord label))
-
 
 ;;; Define Back-End
 
@@ -129,7 +127,6 @@
    ;; Leave room for "ox-infojs.el" extension.
    (:infojs-opt "INFOJS_OPT" nil nil)))
 
-
 
 ;;; Internal Variables
 
@@ -205,6 +202,7 @@ for the JavaScript code in this tag.
   .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
   .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
   .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
   #content { margin: 3em; }
   #postamble p, a { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
@@ -241,21 +239,23 @@ for the JavaScript code in this tag.
 
   table { border-collapse:collapse; }
   td, th { vertical-align:top;  }
-  th.right  { text-align:center;  }
-  th.left   { text-align:center;   }
-  th.center { text-align:center; }
-  td.right  { text-align:right;  }
-  td.left   { text-align:left;   }
-  td.center { text-align:center; }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
   dt { font-weight: bold; }
-  div.figure { padding:1em; }
-  div.figure p { text-align:center; }
-  div.inlinetask {
-    padding:10px;
-    border:2px solid gray;
-    margin:10px;
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
     background: #ffffcc;
   }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
   textarea { overflow-x:auto; }
   .linenr { font-size:smaller }
   .code-highlighted { background-color:#ffff00; }
@@ -271,7 +271,6 @@ You can use `org-html-head' and `org-html-head-extra' to add to
 this style.  If you don't want to include this default style,
 customize `org-html-head-include-default-style'.")
 
-
 
 ;;; User Configuration Variables
 
@@ -279,7 +278,6 @@ customize `org-html-head-include-default-style'.")
   "Options for exporting Org mode files to HTML."
   :tag "Org Export HTML"
   :group 'org-export)
-
 
 ;;;; Handle infojs
 
@@ -486,7 +484,6 @@ export back-end currently used."
       ;; Return the modified property list.
       exp-plist)))
 
-
 ;;;; Bold, etc.
 
 (defcustom org-html-text-markup-alist
@@ -494,7 +491,7 @@ export back-end currently used."
     (code . "<code>%s</code>")
     (italic . "<i>%s</i>")
     (strike-through . "<del>%s</del>")
-    (underline . "<span style=\"text-decoration:underline;\">%s</span>")
+    (underline . "<span class=\"underline\">%s</span>")
     (verbatim . "<code>%s</code>"))
   "Alist of HTML expressions to convert text markup.
 
@@ -536,7 +533,6 @@ in order to mimic default behaviour:
   :group 'org-export-html
   :type 'function)
 
-
 ;;;; Footnotes
 
 (defcustom org-html-footnotes-section "<div id=\"footnotes\">
@@ -562,7 +558,6 @@ by the footnotes themselves."
   "Text used to separate footnotes."
   :group 'org-export-html
   :type 'string)
-
 
 ;;;; Headline
 
@@ -591,7 +586,6 @@ The function result will be used in the section format string."
   :group 'org-export-html
   :type 'function)
 
-
 ;;;; HTML-specific
 
 (defcustom org-html-allow-name-attribute-in-anchors t
@@ -602,7 +596,6 @@ attributes, when appropriate."
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'boolean)
-
 
 ;;;; Inlinetasks
 
@@ -620,7 +613,6 @@ The function must accept six parameters:
 The function should return the string to be exported."
   :group 'org-export-html
   :type 'function)
-
 
 ;;;; LaTeX
 
@@ -652,7 +644,6 @@ t              Synonym for `mathjax'."
 	  (const :tag "Use MathJax to display math" mathjax)
 	  (const :tag "Leave math verbatim" verbatim)))
 
-
 ;;;; Links :: Generic
 
 (defcustom org-html-link-org-files-as-html t
@@ -666,7 +657,6 @@ converted to HTML.
 When nil, the links still point to the plain `.org' file."
   :group 'org-export-html
   :type 'boolean)
-
 
 ;;;; Links :: Inline images
 
@@ -702,7 +692,6 @@ default we use here encompasses both."
   :type '(alist :key-type (string :tag "Type")
 		:value-type (regexp :tag "Path")))
 
-
 ;;;; Plain Text
 
 (defcustom org-html-protect-char-alist
@@ -713,7 +702,6 @@ default we use here encompasses both."
   :group 'org-export-html
   :type '(repeat (cons (string :tag "Character")
 		       (string :tag "HTML equivalent"))))
-
 
 ;;;; Src Block
 
@@ -817,7 +805,6 @@ Otherwise, place it near the end."
   :group 'org-export-html
   :type 'boolean)
 
-
 ;;;; Tags
 
 (defcustom org-html-tag-class-prefix ""
@@ -828,7 +815,6 @@ as a class name.  But if you get into conflicts with other, existing
 CSS classes, then this prefix can be very useful."
   :group 'org-export-html
   :type 'string)
-
 
 ;;;; Template :: Generic
 
@@ -871,7 +857,6 @@ postamble DIV."
 	  (string :tag " Div for the preamble:")
 	  (string :tag "  Div for the content:")
 	  (string :tag "Div for the postamble:")))
-
 
 ;;;; Template :: Mathjax
 
@@ -954,7 +939,6 @@ You can also customize this for each buffer, using something like
   :group 'org-export-html
   :type 'string)
 
-
 ;;;; Template :: Postamble
 
 (defcustom org-html-postamble 'auto
@@ -1018,7 +1002,6 @@ like that: \"%%\"."
   :group 'org-export-html
   :type '(string :tag "Creator string"))
 
-
 ;;;; Template :: Preamble
 
 (defcustom org-html-preamble t
@@ -1075,7 +1058,7 @@ example."
   :type '(string :tag "File or URL"))
 
 (defcustom org-html-home/up-format
-  "<div id=\"org-div-home-and-up\" style=\"text-align:right;font-size:70%%;white-space:nowrap;\">
+  "<div id=\"org-div-home-and-up\">
  <a accesskey=\"h\" href=\"%s\"> UP </a>
  |
  <a accesskey=\"H\" href=\"%s\"> HOME </a>
@@ -1087,7 +1070,6 @@ the second the HOME link.  If both `org-html-link-up' and
 ignored."
   :group 'org-export-html
   :type 'string)
-
 
 ;;;; Template :: Scripts
 
@@ -1101,7 +1083,6 @@ not be modified."
   :version "24.4"
   :package-version '(Org . "8.0")
   :type 'boolean)
-
 
 ;;;; Template :: Styles
 
@@ -1156,7 +1137,6 @@ or for publication projects using the :html-head property."
   :type 'string)
 ;;;###autoload
 (put 'org-html-head 'safe-local-variable 'stringp)
-
 
 (defcustom org-html-head-extra ""
   "More head information to add in the HTML output.
@@ -1220,7 +1200,6 @@ ELEMENT is either a src block or an example block."
 	    (or (plist-get attr :width) 80)
 	    (or (plist-get attr :height) (org-count-lines code))
 	    code)))
-
 
 ;;;; Bibliography
 
@@ -1374,7 +1353,6 @@ INFO is a plist used as a communication channel."
        (format
 	"\n%s\n"
 	(mapconcat 'org-html-format-footnote-definition fn-alist "\n"))))))
-
 
 
 ;;; Template
@@ -1761,7 +1739,6 @@ a plist used as a communication channel."
 		      (new 0))))
     (org-html-do-format-code code lang refs retain-labels num-start)))
 
-
 
 ;;; Tables of Contents
 
@@ -1910,7 +1887,6 @@ of tables as a string, or nil if it is empty."
 		 lol-entries "\n"))
 	      "\n</ul>\n</div>\n</div>"))))
 
-
 
 ;;; Transcode Functions
 
@@ -1923,15 +1899,13 @@ contextual information."
   (format (or (cdr (assq 'bold org-html-text-markup-alist)) "%s")
 	  contents))
 
-
 ;;;; Center Block
 
 (defun org-html-center-block (center-block contents info)
   "Transcode a CENTER-BLOCK element from Org to HTML.
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
-  (format "<div style=\"text-align: center\">\n%s</div>" contents))
-
+  (format "<div class=\"center\">\n%s</div>" contents))
 
 ;;;; Clock
 
@@ -1951,7 +1925,6 @@ channel."
 	  (let ((time (org-element-property :duration clock)))
 	    (and time (format " <span class=\"timestamp\">(%s)</span>" time)))))
 
-
 ;;;; Code
 
 (defun org-html-code (code contents info)
@@ -1960,7 +1933,6 @@ CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format (or (cdr (assq 'code org-html-text-markup-alist)) "%s")
 	  (org-html-plain-text (org-element-property :value code) info)))
-
 
 ;;;; Drawer
 
@@ -1976,7 +1948,6 @@ holding contextual information."
     ;; display contents of the drawer.
     contents))
 
-
 ;;;; Dynamic Block
 
 (defun org-html-dynamic-block (dynamic-block contents info)
@@ -1985,7 +1956,6 @@ CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information.  See `org-export-data'."
   contents)
 
-
 ;;;; Entity
 
 (defun org-html-entity (entity contents info)
@@ -1993,7 +1963,6 @@ holding contextual information.  See `org-export-data'."
 CONTENTS are the definition itself.  INFO is a plist holding
 contextual information."
   (org-element-property :html entity))
-
 
 ;;;; Example Block
 
@@ -2006,7 +1975,6 @@ information."
     (format "<pre class=\"example\">\n%s</pre>"
 	    (org-html-format-code example-block info))))
 
-
 ;;;; Export Snippet
 
 (defun org-html-export-snippet (export-snippet contents info)
@@ -2016,7 +1984,6 @@ information."
   (when (eq (org-export-snippet-backend export-snippet) 'html)
     (org-element-property :value export-snippet)))
 
-
 ;;;; Export Block
 
 (defun org-html-export-block (export-block contents info)
@@ -2024,7 +1991,6 @@ information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (when (string= (org-element-property :type export-block) "HTML")
     (org-remove-indentation (org-element-property :value export-block))))
-
 
 ;;;; Fixed Width
 
@@ -2035,7 +2001,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	  (org-html-do-format-code
 	   (org-remove-indentation
 	    (org-element-property :value fixed-width)))))
-
 
 ;;;; Footnote Reference
 
@@ -2061,7 +2026,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (t (org-html-format-footnote-reference
 	(org-export-get-footnote-number footnote-reference info)
 	"IGNORED" 1)))))
-
 
 ;;;; Headline
 
@@ -2183,14 +2147,12 @@ holding contextual information."
 			    contents)
 		  contents)))))))
 
-
 ;;;; Horizontal Rule
 
 (defun org-html-horizontal-rule (horizontal-rule contents info)
   "Transcode an HORIZONTAL-RULE  object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   "<hr/>")
-
 
 ;;;; Inline Src Block
 
@@ -2201,7 +2163,6 @@ contextual information."
   (let* ((org-lang (org-element-property :language inline-src-block))
 	 (code (org-element-property :value inline-src-block)))
     (error "Cannot export inline src block")))
-
 
 ;;;; Inlinetask
 
@@ -2231,7 +2192,6 @@ holding contextual information."
 	      (org-html-format-headline--wrap inlinetask info)
 	      contents))))
 
-
 ;;;; Italic
 
 (defun org-html-italic (italic contents info)
@@ -2239,7 +2199,6 @@ holding contextual information."
 CONTENTS is the text with italic markup.  INFO is a plist holding
 contextual information."
   (format (or (cdr (assq 'italic org-html-text-markup-alist)) "%s") contents))
-
 
 ;;;; Item
 
@@ -2296,7 +2255,6 @@ contextual information."
     (org-html-format-list-item
      contents type checkbox (or tag counter))))
 
-
 ;;;; Keyword
 
 (defun org-html-keyword (keyword contents info)
@@ -2318,7 +2276,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    (org-html-toc depth info)))
 	 ((string= "listings" value) (org-html-list-of-listings info))
 	 ((string= "tables" value) (org-html-list-of-tables info))))))))
-
 
 ;;;; Latex Environment
 
@@ -2360,7 +2317,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	   (match-string 1 formula-link) caption label attr t))))
      (t latex-frag))))
 
-
 ;;;; Latex Fragment
 
 (defun org-html-latex-fragment (latex-fragment contents info)
@@ -2380,14 +2336,12 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	    (match-string 1 formula-link)))))
       (t latex-frag))))
 
-
 ;;;; Line Break
 
 (defun org-html-line-break (line-break contents info)
   "Transcode a LINE-BREAK object from Org to HTML.
 CONTENTS is nil.  INFO is a plist holding contextual information."
   "<br/>\n")
-
 
 ;;;; Link
 
@@ -2638,7 +2592,6 @@ INFO is a plist holding contextual information.  See
      ;; No path, only description.  Try to do something useful.
      (t (format "<i>%s</i>" desc)))))
 
-
 ;;;; Paragraph
 
 (defun org-html-paragraph (paragraph contents info)
@@ -2662,7 +2615,6 @@ the plist used as a communication channel."
       ;; standalone image
       contents)
      (t (format "<p%s>\n%s</p>%s" extra contents after)))))
-
 
 ;;;; Plain List
 
@@ -2770,7 +2722,6 @@ channel."
 			  (org-element-property :raw-value scheduled)))))))
       " "))))
 
-
 ;;;; Property Drawer
 
 (defun org-html-property-drawer (property-drawer contents info)
@@ -2781,7 +2732,6 @@ information."
   ;; lines nonetheless.
   "")
 
-
 ;;;; Quote Block
 
 (defun org-html-quote-block (quote-block contents info)
@@ -2789,7 +2739,6 @@ information."
 CONTENTS holds the contents of the block.  INFO is a plist
 holding contextual information."
   (format "<blockquote>\n%s</blockquote>" contents))
-
 
 ;;;; Quote Section
 
@@ -2799,7 +2748,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((value (org-remove-indentation
 		(org-element-property :value quote-section))))
     (when value (format "<pre>\n%s</pre>" value))))
-
 
 ;;;; Section
 
@@ -2833,7 +2781,6 @@ contextual information."
 	     (org-element-property :value radio-target))))
     (org-html--anchor id text)))
 
-
 ;;;; Special Block
 
 (defun org-html-special-block (special-block contents info)
@@ -2843,7 +2790,6 @@ holding contextual information."
   (format "<div class=\"%s\">\n%s\n</div>"
 	  (downcase (org-element-property :type special-block))
 	  contents))
-
 
 ;;;; Src Block
 
@@ -2868,7 +2814,6 @@ contextual information."
 		   (org-export-data caption info)))
 	 (format "\n<pre class=\"src src-%s\"%s>%s</pre>" lang label code))))))
 
-
 ;;;; Statistics Cookie
 
 (defun org-html-statistics-cookie (statistics-cookie contents info)
@@ -2876,7 +2821,6 @@ contextual information."
 CONTENTS is nil.  INFO is a plist holding contextual information."
   (let ((cookie-value (org-element-property :value statistics-cookie)))
     (format "<code>%s</code>" cookie-value)))
-
 
 ;;;; Strike-Through
 
@@ -2887,7 +2831,6 @@ holding contextual information."
   (format (or (cdr (assq 'strike-through org-html-text-markup-alist)) "%s")
 	  contents))
 
-
 ;;;; Subscript
 
 (defun org-html-subscript (subscript contents info)
@@ -2896,7 +2839,6 @@ CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
   (format "<sub>%s</sub>" contents))
 
-
 ;;;; Superscript
 
 (defun org-html-superscript (superscript contents info)
@@ -2904,7 +2846,6 @@ contextual information."
 CONTENTS is the contents of the object.  INFO is a plist holding
 contextual information."
   (format "<sup>%s</sup>" contents))
-
 
 ;;;; Tabel Cell
 
@@ -2933,7 +2874,6 @@ channel."
 	      contents (cdr org-html-table-header-tags)))
      (t (concat "\n" (format (car org-html-table-data-tags) cell-attrs)
 		contents (cdr org-html-table-data-tags))))))
-
 
 ;;;; Table Row
 
@@ -2968,7 +2908,6 @@ communication channel."
        ;; End a rowgroup?
        (when (org-export-table-row-ends-rowgroup-p table-row info)
 	 (cdr rowgroup-tags))))))
-
 
 ;;;; Table
 
@@ -3057,7 +2996,6 @@ contextual information."
 	       (funcall table-column-specs table info)
 	       contents)))))
 
-
 ;;;; Target
 
 (defun org-html-target (target contents info)
@@ -3067,7 +3005,6 @@ information."
   (let ((id (org-export-solidify-link-text
 	     (org-element-property :value target))))
     (org-html--anchor id)))
-
 
 ;;;; Timestamp
 
@@ -3080,7 +3017,6 @@ information."
     (format "<span class=\"timestamp-wrapper\"><span class=\"timestamp\">%s</span></span>"
 	    (replace-regexp-in-string "--" "&#x2013;" value))))
 
-
 ;;;; Underline
 
 (defun org-html-underline (underline contents info)
@@ -3090,7 +3026,6 @@ holding contextual information."
   (format (or (cdr (assq 'underline org-html-text-markup-alist)) "%s")
 	  contents))
 
-
 ;;;; Verbatim
 
 (defun org-html-verbatim (verbatim contents info)
@@ -3099,7 +3034,6 @@ CONTENTS is nil.  INFO is a plist holding contextual
 information."
   (format (or (cdr (assq 'verbatim org-html-text-markup-alist)) "%s")
 	  (org-html-plain-text (org-element-property :value verbatim) info)))
-
 
 ;;;; Verse Block
 
@@ -3122,7 +3056,6 @@ contextual information."
       (setq contents (replace-match ws nil t contents))))
   (format "<p class=\"verse\">\n%s</p>" contents))
 
-
 
 ;;; Filter Functions
 
@@ -3135,7 +3068,6 @@ Prettifying happens if `org-html-pretty-output' is t."
       (insert contents)
       (indent-region (point-min) (point-max))
       (buffer-substring-no-properties (point-min) (point-max)))))
-
 
 
 ;;; End-user functions
@@ -3244,7 +3176,6 @@ publishing directory.
 
 Return output file name."
   (org-publish-org-to 'html filename ".html" plist pub-dir))
-
 
 
 ;;; FIXME
