@@ -248,6 +248,9 @@ for the JavaScript code in this tag.
   td.left   { text-align: left;   }
   td.center { text-align: center; }
   dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
   .figure { padding: 1em; }
   .figure p { text-align: center; }
   .inlinetask {
@@ -258,14 +261,14 @@ for the JavaScript code in this tag.
   }
   #org-div-home-and-up
    { text-align: right; font-size: 70%; white-space: nowrap; }
-  textarea { overflow-x:auto; }
-  .linenr { font-size:smaller }
-  .code-highlighted { background-color:#ffff00; }
-  .org-info-js_info-navigation { border-style:none; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
   #org-info-js_console-label
-    { font-size:10px; font-weight:bold; white-space:nowrap; }
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
-    { background-color:#ffff00; color:#000000; font-weight:bold; }
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
   /*]]>*/-->
 </style>"
   "The default style specification for exported HTML files.
@@ -1363,7 +1366,7 @@ Replaces invalid characters with \"_\"."
   "Format the footnote definition FN."
   (let ((n (car fn)) (def (cdr fn)))
     (format
-     "%s %s\n"
+     "<div class=\"footdef\">%s %s</div>\n"
      (format org-html-footnote-format
 	     (let* ((id (format "fn.%s" n))
 		    (href (format " href=\"#fnr.%s\"" n))
@@ -1376,7 +1379,6 @@ Replaces invalid characters with \"_\"."
 INFO is a plist used as a communication channel."
   (let* ((fn-alist (org-export-collect-footnote-definitions
 		    (plist-get info :parse-tree) info))
-
 	 (fn-alist
 	  (loop for (n type raw) in fn-alist collect
 		(cons n (if (eq (org-element-type raw) 'org-data)
@@ -2649,11 +2651,8 @@ CONTENTS is the contents of the paragraph, as a string.  INFO is
 the plist used as a communication channel."
   (let* ((parent (org-export-get-parent paragraph))
 	 (parent-type (org-element-type parent))
-	 (style '((footnote-definition
-		   " style=\"display:inline;\" class=\"footnote\""
-		   "<br/>")))
-	 (extra (or (cadr (assoc parent-type style)) ""))
-	 (after (or (nth 1 (cdr (assoc parent-type style))) "")))
+	 (style '((footnote-definition " class=\"footpara\"")))
+	 (extra (or (cadr (assoc parent-type style)) "")))
     (cond
      ((and (eq (org-element-type parent) 'item)
 	   (= (org-element-property :begin paragraph)
@@ -2663,7 +2662,7 @@ the plist used as a communication channel."
      ((org-html-standalone-image-p paragraph info)
       ;; standalone image
       contents)
-     (t (format "<p%s>\n%s</p>%s" extra contents after)))))
+     (t (format "<p%s>\n%s</p>" extra contents)))))
 
 ;;;; Plain List
 
