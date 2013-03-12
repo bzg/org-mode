@@ -789,20 +789,29 @@ is DONE."
 
 (defcustom org-agenda-skip-scheduled-if-deadline-is-shown nil
   "Non-nil means skip scheduling line if same entry shows because of deadline.
-In the agenda of today, an entry can show up multiple times because
-it is both scheduled and has a nearby deadline, and maybe a plain time
-stamp as well.
-When this variable is t, then only the deadline is shown and the fact that
-the entry is scheduled today or was scheduled previously is not shown.
-When this variable is nil, the entry will be shown several times.  When
-the variable is the symbol `not-today', then skip scheduled previously,
-but not scheduled today."
+
+In the agenda of today, an entry can show up multiple times
+because it is both scheduled and has a nearby deadline, and maybe
+a plain time stamp as well.
+
+When this variable is nil, the entry will be shown several times.
+
+When set to t, then only the deadline is shown and the fact that
+the entry is scheduled today or was scheduled previously is not
+shown.
+
+When set to the symbol `not-today', skip scheduled previously,
+but not scheduled today.
+
+When set to the symbol `repeated-after-deadline', skip scheduled
+items if they are repeated beyond the current dealine."
   :group 'org-agenda-skip
   :group 'org-agenda-daily/weekly
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "Always" t)
-	  (const :tag "Not when scheduled today" not-today)))
+	  (const :tag "Not when scheduled today" not-today)
+	  (const :tag "When repeated past deadline" repeated-after-deadline)))
 
 (defcustom org-agenda-skip-timestamp-if-deadline-is-shown nil
   "Non-nil means skip timestamp line if same entry shows because of deadline.
@@ -6113,6 +6122,10 @@ FRACTION is what fraction of the head-warning time has passed."
 				  (org-is-habit-p))))
 	      (setq category (org-get-category)
 		    category-pos (get-text-property (point) 'org-category-position))
+	      (if (and (eq org-agenda-skip-scheduled-if-deadline-is-shown
+			   'repeated-after-deadline)
+		       (<= 0 (- d2 (time-to-days (org-get-deadline-time (point))))))
+		  (throw :skip nil))
 	      (if (not (re-search-backward "^\\*+[ \t]+" nil t))
 		  (throw :skip nil)
 		(goto-char (match-end 0))
@@ -6125,7 +6138,7 @@ FRACTION is what fraction of the head-warning time has passed."
 			(throw :skip nil))
 		  (if (and
 		       (or (eq t org-agenda-skip-scheduled-if-deadline-is-shown)
-			   (and org-agenda-skip-scheduled-if-deadline-is-shown
+			   (and (eq org-agenda-skip-scheduled-if-deadline-is-shown 'not-today)
 				pastschedp))
 		       (setq mm (assoc pos1 deadline-position-alist)))
 		      (throw :skip nil)))
