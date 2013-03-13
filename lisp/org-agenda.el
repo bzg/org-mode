@@ -7196,6 +7196,7 @@ in the agenda."
 	 (top-cat-filter org-agenda-top-category-filter)
 	 (cat-filter org-agenda-category-filter)
 	 (cat-preset (get 'org-agenda-category-filter :preset-filter))
+	 (re-filter org-agenda-regexp-filter)
 	 (re-preset (get 'org-agenda-category-filter :preset-filter))
 	 (org-agenda-tag-filter-while-redo (or tag-filter tag-preset))
 	 (cols org-agenda-columns-active)
