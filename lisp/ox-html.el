@@ -2465,7 +2465,7 @@ standalone images, do the following.
 DESC is the description part of the link, or the empty string.
 INFO is a plist holding contextual information.  See
 `org-export-data'."
-  (let* ((--link-org-files-as-html-maybe
+  (let* ((link-org-files-as-html-maybe
 	  (function
 	   (lambda (raw-path info)
 	     "Treat links to `file.org' as links to `file.html', if needed.
@@ -2488,7 +2488,7 @@ INFO is a plist holding contextual information.  See
 	   ((string= type "file")
 	    ;; Treat links to ".org" files as ".html", if needed.
 	    (setq raw-path
-		  (funcall --link-org-files-as-html-maybe raw-path info))
+		  (funcall link-org-files-as-html-maybe raw-path info))
 	    ;; If file path is absolute, prepend it with protocol
 	    ;; component - "file://".
 	    (when (file-name-absolute-p raw-path)
@@ -2556,7 +2556,7 @@ INFO is a plist holding contextual information.  See
 	  (plain-text
 	   (let ((fragment (concat "ID-" path))
 		 ;; Treat links to ".org" files as ".html", if needed.
-		 (path (funcall --link-org-files-as-html-maybe
+		 (path (funcall link-org-files-as-html-maybe
 				destination info)))
 	     (format "<a href=\"%s#%s\"%s>%s</a>"
 		     path fragment attributes (or desc destination))))
