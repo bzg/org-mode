@@ -499,6 +499,13 @@ Implements `file-equal-p' for older emacsen and XEmacs."
 	   (setq f2-attr (file-attributes (file-truename f2)))
 	   (equal f1-attr f2-attr)))))
 
+;; `buffer-narrowed-p' is available for Emacs >=24.3
+(defun org-buffer-narrowed-p ()
+  "Compatibility function for `buffer-narrowed-p'."
+  (if (fboundp 'buffer-narrowed-p)
+      (buffer-narrowed-p)
+    (/= (- (point-max) (point-min)) (buffer-size))))
+
 (defmacro org-with-silent-modifications (&rest body)
   (if (fboundp 'with-silent-modifications)
       `(with-silent-modifications ,@body)

@@ -7386,22 +7386,25 @@ and create a new headline with the text in the current line after point
 When INVISIBLE-OK is set, stop at invisible headlines when going back.
 This is important for non-interactive uses of the command."
   (interactive "P")
-  (if (or (= (buffer-size) 0)
-	  (and (not (save-excursion
-		      (and (ignore-errors (org-back-to-heading invisible-ok))
-			   (org-at-heading-p))))
-	       (or arg (not (org-in-item-p)))))
-      (progn
-	(insert
-	 (if (org-previous-line-empty-p) "" "\n")
-	 (if (org-in-src-block-p) ",* " "* "))
-	(run-hooks 'org-insert-heading-hook))
-    (when (or arg
-	      (not (org-insert-item
-		    (save-excursion
-		      (beginning-of-line)
-		      (looking-at org-list-full-item-re)
-		      (match-string 3)))))
+  (cond
+   ((or (= (buffer-size) 0)
+	(and (not (save-excursion
+		    (and (ignore-errors (org-back-to-heading invisible-ok))
+			 (org-at-heading-p))))
+	     (or arg (not (org-in-item-p)))))
+    (insert
+     (if (org-previous-line-empty-p) "" "\n")
+     (if (org-in-src-block-p) ",* " "* "))
+    (run-hooks 'org-insert-heading-hook))
+   ((or arg (not (org-insert-item
+		  (save-excursion
+		    (beginning-of-line)
+		    (looking-at org-list-full-item-re)
+		    (match-string 3)))))
+    (let (begn endn)
+      (when (org-buffer-narrowed-p)
+	(setq begn (point-min) endn (point-max))
+	(widen))
       (let* ((empty-line-p nil)
 	     (eops (equal arg '(16))) ; insert at end of parent subtree
 	     (org-insert-heading-respect-content
@@ -7434,18 +7437,16 @@ This is important for non-interactive uses of the command."
 	     (blank-a (cdr (assq 'heading org-blank-before-new-entry)))
 	     (blank (if (eq blank-a 'auto) empty-line-p blank-a))
 	     pos hide-previous previous-pos)
-	(cond
-	 ;; At the beginning of a heading, open a new line for insertiong
-	 ((and (bolp) (org-at-heading-p)
-	       (not eops)
-	       (or (bobp)
-		   (save-excursion (backward-char 1) (not (outline-invisible-p)))))
-	  (open-line (if blank 2 1)))
-	 (t
-          (save-excursion
+	(if ;; At the beginning of a heading, open a new line for insertiong
+	    (and (bolp) (org-at-heading-p)
+		 (not eops)
+		 (or (bobp)
+		     (save-excursion (backward-char 1) (not (outline-invisible-p)))))
+	    (open-line (if blank 2 1))
+	  (save-excursion
 	    (setq previous-pos (point-at-bol))
-            (end-of-line)
-            (setq hide-previous (outline-invisible-p)))
+	    (end-of-line)
+	    (setq hide-previous (outline-invisible-p)))
 	  (and org-insert-heading-respect-content
 	       (save-excursion
 		 (while (outline-invisible-p)
@@ -7511,16 +7512,18 @@ This is important for non-interactive uses of the command."
 		  (org-set-tags nil 'align))))
 	     (t
 	      (or split (end-of-line 1))
-	      (newline (if blank 2 1)))))))
+	      (newline (if blank 2 1))))))
 	(insert head) (just-one-space)
 	(setq pos (point))
 	(end-of-line 1)
 	(unless (= (point) pos) (just-one-space) (backward-delete-char 1))
-        (when (and org-insert-heading-respect-content hide-previous)
+	(when (and org-insert-heading-respect-content hide-previous)
 	  (save-excursion
 	    (goto-char previous-pos)
 	    (hide-subtree)))
-	(run-hooks 'org-insert-heading-hook)))))
+	(when (and begn endn)
+	  (narrow-to-region (min (point) begn) (max (point) endn)))
+	(run-hooks 'org-insert-heading-hook))))))
 
 (defun org-get-heading (&optional no-tags no-todo)
   "Return the heading of the current entry, without the stars.
