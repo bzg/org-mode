@@ -4571,6 +4571,9 @@ Also put tags into group 4 if tags are present.")
 (defvar org-deadline-time-regexp nil
   "Matches the DEADLINE keyword together with a time stamp.")
 (make-variable-buffer-local 'org-deadline-time-regexp)
+(defvar org-deadline-time-hour-regexp nil
+  "Matches the DEADLINE keyword together with a time-and-hour stamp.")
+(make-variable-buffer-local 'org-deadline-time-hour-regexp)
 (defvar org-deadline-line-regexp nil
   "Matches the DEADLINE keyword and the rest of the line.")
 (make-variable-buffer-local 'org-deadline-line-regexp)
@@ -4580,6 +4583,9 @@ Also put tags into group 4 if tags are present.")
 (defvar org-scheduled-time-regexp nil
   "Matches the SCHEDULED keyword together with a time stamp.")
 (make-variable-buffer-local 'org-scheduled-time-regexp)
+(defvar org-scheduled-time-hour-regexp nil
+  "Matches the SCHEDULED keyword together with a time-and-hour stamp.")
+(make-variable-buffer-local 'org-scheduled-time-hour-regexp)
 (defvar org-closed-time-regexp nil
   "Matches the CLOSED keyword together with a time stamp.")
 (make-variable-buffer-local 'org-closed-time-regexp)
@@ -4988,12 +4994,18 @@ but the stars and the body are.")
 	    org-deadline-regexp (concat "\\<" org-deadline-string)
 	    org-deadline-time-regexp
 	    (concat "\\<" org-deadline-string " *<\\([^>]+\\)>")
+	    org-deadline-time-hour-regexp
+	    (concat "\\<" org-deadline-string
+		    " *<\\(.+[0-9]\\{1,2\\}:[0-9]\\{2\\}[^>]*\\)>")
 	    org-deadline-line-regexp
 	    (concat "\\<\\(" org-deadline-string "\\).*")
 	    org-scheduled-regexp
 	    (concat "\\<" org-scheduled-string)
 	    org-scheduled-time-regexp
 	    (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>")
+	    org-scheduled-time-hour-regexp
+	    (concat "\\<" org-scheduled-string
+		    " *<\\(.+[0-9]\\{1,2\\}:[0-9]\\{2\\}[^>]*\\)>")
 	    org-closed-time-regexp
 	    (concat "\\<" org-closed-string " *\\[\\([^]]+\\)\\]")
 	    org-keyword-time-regexp
