@@ -739,69 +739,69 @@ body\n")))
 	      :export-block ("test"))
 	    org-element-block-name-alist))))
 
-(ert-deftest test-org-export/define-derived-backend ()
-  "Test `org-export-define-derived-backend' specifications."
-  ;; Error when parent back-end is not defined.
-  (should-error
-   (let (org-export-registered-backends)
-     (org-export-define-derived-backend test parent)))
-  ;; Append translation table to parent's.
-  (should
-   (equal '((:headline . test) (:headline . parent))
-	  (let (org-export-registered-backends)
-	    (org-export-define-backend parent ((:headline . parent)))
-	    (org-export-define-derived-backend test parent
-	      :translate-alist ((:headline . test)))
-	    (org-export-backend-translate-table 'test))))
-  ;; Options defined in the new back have priority over those defined
-  ;; in parent.
-  (should
-   (eq 'test
-       (let (org-export-registered-backends)
-	 (org-export-define-backend parent
-	   ((:headline . parent))
-	   :options-alist ((:a nil nil 'parent)))
-	 (org-export-define-derived-backend test parent
-	   :options-alist ((:a nil nil 'test)))
-	 (plist-get (org-export--get-global-options 'test) :a)))))
+;; (ert-deftest test-org-export/define-derived-backend ()
+;;   "Test `org-export-define-derived-backend' specifications."
+;;   ;; Error when parent back-end is not defined.
+;;   (should-error
+;;    (let (org-export-registered-backends)
+;;      (org-export-define-derived-backend test parent)))
+;;   ;; Append translation table to parent's.
+;;   (should
+;;    (equal '((:headline . test) (:headline . parent))
+;; 	  (let (org-export-registered-backends)
+;; 	    (org-export-define-backend parent ((:headline . parent)))
+;; 	    (org-export-define-derived-backend test parent
+;; 	      :translate-alist ((:headline . test)))
+;; 	    (org-export-backend-translate-table 'test))))
+;;   ;; Options defined in the new back have priority over those defined
+;;   ;; in parent.
+;;   (should
+;;    (eq 'test
+;;        (let (org-export-registered-backends)
+;; 	 (org-export-define-backend parent
+;; 	   ((:headline . parent))
+;; 	   :options-alist ((:a nil nil 'parent)))
+;; 	 (org-export-define-derived-backend test parent
+;; 	   :options-alist ((:a nil nil 'test)))
+;; 	 (plist-get (org-export--get-global-options 'test) :a)))))
 
-(ert-deftest test-org-export/derived-backend-p ()
-  "Test `org-export-derived-backend-p' specifications."
-  ;; Non-nil with direct match.
-  (should
-   (let (org-export-registered-backends)
-     (org-export-define-backend test ((headline . test)))
-     (org-export-derived-backend-p 'test 'test)))
-  (should
-   (let (org-export-registered-backends)
-     (org-export-define-backend test ((headline . test)))
-     (org-export-define-derived-backend test2 test)
-     (org-export-derived-backend-p 'test2 'test2)))
-  ;; Non-nil with a direct parent.
-  (should
-   (let (org-export-registered-backends)
-     (org-export-define-backend test ((headline . test)))
-     (org-export-define-derived-backend test2 test)
-     (org-export-derived-backend-p 'test2 'test)))
-  ;; Non-nil with an indirect parent.
-  (should
-   (let (org-export-registered-backends)
-     (org-export-define-backend test ((headline . test)))
-     (org-export-define-derived-backend test2 test)
-     (org-export-define-derived-backend test3 test2)
-     (org-export-derived-backend-p 'test3 'test)))
-  ;; Nil otherwise.
-  (should-not
-   (let (org-export-registered-backends)
-     (org-export-define-backend test ((headline . test)))
-     (org-export-define-backend test2 ((headline . test2)))
-     (org-export-derived-backend-p 'test2 'test)))
-  (should-not
-   (let (org-export-registered-backends)
-     (org-export-define-backend test ((headline . test)))
-     (org-export-define-backend test2 ((headline . test2)))
-     (org-export-define-derived-backend test3 test2)
-     (org-export-derived-backend-p 'test3 'test))))
+;; (ert-deftest test-org-export/derived-backend-p ()
+;;   "Test `org-export-derived-backend-p' specifications."
+;;   ;; Non-nil with direct match.
+;;   (should
+;;    (let (org-export-registered-backends)
+;;      (org-export-define-backend test ((headline . test)))
+;;      (org-export-derived-backend-p 'test 'test)))
+;;   (should
+;;    (let (org-export-registered-backends)
+;;      (org-export-define-backend test ((headline . test)))
+;;      (org-export-define-derived-backend test2 test)
+;;      (org-export-derived-backend-p 'test2 'test2)))
+;;   ;; Non-nil with a direct parent.
+;;   (should
+;;    (let (org-export-registered-backends)
+;;      (org-export-define-backend test ((headline . test)))
+;;      (org-export-define-derived-backend test2 test)
+;;      (org-export-derived-backend-p 'test2 'test)))
+;;   ;; Non-nil with an indirect parent.
+;;   (should
+;;    (let (org-export-registered-backends)
+;;      (org-export-define-backend test ((headline . test)))
+;;      (org-export-define-derived-backend test2 test)
+;;      (org-export-define-derived-backend test3 test2)
+;;      (org-export-derived-backend-p 'test3 'test)))
+;;   ;; Nil otherwise.
+;;   (should-not
+;;    (let (org-export-registered-backends)
+;;      (org-export-define-backend test ((headline . test)))
+;;      (org-export-define-backend test2 ((headline . test2)))
+;;      (org-export-derived-backend-p 'test2 'test)))
+;;   (should-not
+;;    (let (org-export-registered-backends)
+;;      (org-export-define-backend test ((headline . test)))
+;;      (org-export-define-backend test2 ((headline . test2)))
+;;      (org-export-define-derived-backend test3 test2)
+;;      (org-export-derived-backend-p 'test3 'test))))
 
 (ert-deftest test-org-export/with-backend ()
   "Test `org-export-with-backend' definition."
