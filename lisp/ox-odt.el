@@ -1619,7 +1619,8 @@ channel."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (format "<text:span text:style-name=\"%s\">%s</text:span>"
-	  "OrgCode" (org-element-property :value code)))
+	  "OrgCode" (org-odt--encode-plain-text
+		     (org-element-property :value code))))
 
 
 ;;;; Comment
@@ -3725,7 +3726,8 @@ holding contextual information."
 CONTENTS is nil.  INFO is a plist used as a communication
 channel."
   (format "<text:span text:style-name=\"%s\">%s</text:span>"
-	  "OrgCode" (org-element-property :value verbatim)))
+	  "OrgCode" (org-odt--encode-plain-text
+		     (org-element-property :value verbatim))))
 
 
 ;;;; Verse Block
