@@ -82,7 +82,7 @@
   :group 'org)
 
 (defcustom org-expiry-inactive-timestamps nil
-  "Insert inactive timestamps for the created and expired time properties"
+  "Insert inactive timestamps for created/expired properties."
   :type 'boolean
   :group 'org-expiry)
 
