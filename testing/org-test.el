@@ -30,7 +30,14 @@
 
 
 ;;;; Code:
-(require 'org-test-ob-consts)
+
+;;; Ob constants
+
+(defconst org-test-file-ob-anchor
+  "94839181-184f-4ff4-a72f-94214df6f5ba")
+
+(defconst org-test-link-in-heading-file-ob-anchor
+  "a8b1d111-eca8-49f0-8930-56d4f0875155")
 
 (let* ((org-test-dir (expand-file-name
 		      (file-name-directory
@@ -304,8 +311,7 @@ Consider setting `pp-escape-newlines' to nil manually."
 	 "			\"..\" (file-name-directory\n"
 	 "			      (or load-file-name buffer-file-name)))\n"
 	 "		       load-path)))\n"
-	 "  (require 'org-test)\n"
-	 "  (require 'org-test-ob-consts))\n\n"
+	 "  (require 'org-test)\n\n"
 	 "\n"
 	 ";;; Tests\n"
 	 "(ert-deftest " name "/example-test ()\n"
