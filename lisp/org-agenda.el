@@ -3483,6 +3483,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defvar org-agenda-name nil)
 (defvar org-agenda-tag-filter nil)
 (defvar org-agenda-category-filter nil)
+(defvar org-agenda-regexp-filter nil)
 (defvar org-agenda-top-category-filter nil)
 (defvar org-agenda-tag-filter-while-redo nil)
 (defvar org-agenda-tag-filter-preset nil
