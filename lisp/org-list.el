@@ -217,8 +217,7 @@ Valid values are ?. and ?\).  To get both terminators, use t."
 		 (const :tag "paren like in \"2)\"" ?\))
 		 (const :tag "both" t)))
 
-(defvaralias 'org-alphabetical-lists
-  'org-list-allow-alphabetical) ;; Since 8.0
+(org-defvaralias 'org-alphabetical-lists 'org-list-allow-alphabetical) ;; Since 8.0
 (defcustom org-list-allow-alphabetical nil
   "Non-nil means single character alphabetical bullets are allowed.
 Both uppercase and lowercase are handled.  Lists with more than
@@ -240,7 +239,7 @@ spaces instead of one after the bullet in each item of the list."
 	  (const :tag "never" nil)
 	  (regexp)))
 
-(defvaralias 'org-empty-line-terminates-plain-lists
+(org-defvaralias 'org-empty-line-terminates-plain-lists
   'org-list-empty-line-terminates-plain-lists) ;; Since 8.0
 (defcustom org-list-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
@@ -294,7 +293,7 @@ This hook runs even if checkbox rule in
 implement alternative ways of collecting statistics
 information.")
 
-(defvaralias 'org-hierarchical-checkbox-statistics
+(org-defvaralias 'org-hierarchical-checkbox-statistics
   'org-checkbox-hierarchical-statistics) ;; Since 8.0
 (defcustom org-checkbox-hierarchical-statistics t
   "Non-nil means checkbox statistics counts only the state of direct children.
@@ -304,7 +303,7 @@ with the word \"recursive\" in the value."
   :group 'org-plain-lists
   :type 'boolean)
 
-(defvaralias 'org-description-max-indent
+(org-defvaralias 'org-description-max-indent
   'org-list-description-max-indent) ;; Since 8.0
 (defcustom org-list-description-max-indent 20
   "Maximum indentation for the second line of a description list.

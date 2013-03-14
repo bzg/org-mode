@@ -103,15 +103,14 @@ sure that we are at the beginning of the line.")
 Stars are put in group 1 and the trimmed body in group 2.")
 
 ;; Emacs 22 calendar compatibility:  Make sure the new variables are available
-(when (fboundp 'defvaralias)
-  (unless (boundp 'calendar-view-holidays-initially-flag)
-    (defvaralias 'calendar-view-holidays-initially-flag
-      'view-calendar-holidays-initially))
-  (unless (boundp 'calendar-view-diary-initially-flag)
-    (defvaralias 'calendar-view-diary-initially-flag
-      'view-diary-entries-initially))
-  (unless (boundp 'diary-fancy-buffer)
-    (defvaralias 'diary-fancy-buffer 'fancy-diary-buffer)))
+(unless (boundp 'calendar-view-holidays-initially-flag)
+  (org-defvaralias 'calendar-view-holidays-initially-flag
+    'view-calendar-holidays-initially))
+(unless (boundp 'calendar-view-diary-initially-flag)
+  (org-defvaralias 'calendar-view-diary-initially-flag
+    'view-diary-entries-initially))
+(unless (boundp 'diary-fancy-buffer)
+  (org-defvaralias 'diary-fancy-buffer 'fancy-diary-buffer))
 
 (declare-function org-inlinetask-at-task-p "org-inlinetask" ())
 (declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
@@ -731,8 +730,7 @@ it work for ESC."
   :group 'org-startup
   :type 'boolean)
 
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-CUA-compatible 'org-replace-disputed-keys))
+(org-defvaralias 'org-CUA-compatible 'org-replace-disputed-keys)
 
 (defcustom org-disputed-keys
   '(([(shift up)]		. [(meta p)])
@@ -1213,8 +1211,7 @@ This may also be a cons cell where the behavior for `C-a' and
 			(const :tag "off" nil)
 			(const :tag "on: before tags first" t)
 			(const :tag "reversed: after tags first" reversed)))))
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-special-ctrl-a 'org-special-ctrl-a/e))
+(org-defvaralias 'org-special-ctrl-a 'org-special-ctrl-a/e)
 
 (defcustom org-special-ctrl-k nil
   "Non-nil means `C-k' will behave specially in headlines.
@@ -2639,8 +2636,7 @@ a subtree."
 	  (const :tag "LOGBOOK" t)
 	  (string :tag "Other")))
 
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-log-state-notes-into-drawer 'org-log-into-drawer))
+(org-defvaralias 'org-log-state-notes-into-drawer 'org-log-into-drawer)
 
 (defun org-log-into-drawer ()
   "Return the value of `org-log-into-drawer', but let properties overrule.
@@ -3088,9 +3084,8 @@ minibuffer will also be active, and you can simply enter the date as well.
 When nil, only the minibuffer will be available."
   :group 'org-time
   :type 'boolean)
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-popup-calendar-for-date-prompt
-      'org-read-date-popup-calendar))
+(org-defvaralias 'org-popup-calendar-for-date-prompt
+  'org-read-date-popup-calendar)
 
 (make-obsolete-variable
  'org-read-date-minibuffer-setup-hook
@@ -3559,9 +3554,8 @@ scope."
 	      (const :tag "Agenda Archives" agenda-archives)
 	      (repeat :inline t (file))))
 
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-agenda-multi-occur-extra-files
-      'org-agenda-text-search-extra-files))
+(org-defvaralias 'org-agenda-multi-occur-extra-files
+  'org-agenda-text-search-extra-files)
 
 (defcustom org-agenda-skip-unavailable-files nil
   "Non-nil means to just skip non-reachable files in `org-agenda-files'.

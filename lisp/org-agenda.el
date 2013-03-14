@@ -259,9 +259,8 @@ you can \"misuse\" it to also add other text to the header."
 
 ;; Keep custom values for `org-agenda-filter-preset' compatible with
 ;; the new variable `org-agenda-tag-filter-preset'.
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-agenda-filter-preset 'org-agenda-tag-filter-preset)
-  (defvaralias 'org-agenda-filter 'org-agenda-tag-filter))
+(org-defvaralias 'org-agenda-filter-preset 'org-agenda-tag-filter-preset)
+(org-defvaralias 'org-agenda-filter 'org-agenda-tag-filter)
 
 (defconst org-agenda-custom-commands-local-options
   `(repeat :tag "Local settings for this command.  Remember to quote values"
@@ -1356,9 +1355,8 @@ boolean search."
   :version "24.1"
   :type 'boolean)
 
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-agenda-search-view-search-words-only
-      'org-agenda-search-view-always-boolean))
+(org-defvaralias 'org-agenda-search-view-search-words-only
+  'org-agenda-search-view-always-boolean)
 
 (defcustom org-agenda-search-view-force-full-words nil
   "Non-nil means, search words must be matches as complete words.
@@ -1803,9 +1801,8 @@ When this is the symbol `prefix', only remove tags when
 	  (const :tag "Never" nil)
 	  (const :tag "When prefix format contains %T" prefix)))
 
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-agenda-remove-tags-when-in-prefix
-      'org-agenda-remove-tags))
+(org-defvaralias 'org-agenda-remove-tags-when-in-prefix
+  'org-agenda-remove-tags)
 
 (defcustom org-agenda-tags-column (if (featurep 'xemacs) -79 -80)
   "Shift tags in agenda items to this column.
@@ -1815,8 +1812,7 @@ it means that the tags should be flushright to that column.  For example,
   :group 'org-agenda-line-format
   :type 'integer)
 
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-agenda-align-tags-to-column 'org-agenda-tags-column))
+(org-defvaralias 'org-agenda-align-tags-to-column 'org-agenda-tags-column)
 
 (defcustom org-agenda-fontify-priorities 'cookies
   "Non-nil means highlight low and high priorities in agenda.
@@ -1974,8 +1970,7 @@ works you probably want to add it to `org-agenda-custom-commands' for good."
 
 (defvar org-agenda-mode-map (make-sparse-keymap)
   "Keymap for `org-agenda-mode'.")
-(if (fboundp 'defvaralias)
-    (defvaralias 'org-agenda-keymap 'org-agenda-mode-map))
+(org-defvaralias 'org-agenda-keymap 'org-agenda-mode-map)
 
 (defvar org-agenda-menu) ; defined later in this file.
 (defvar org-agenda-restrict nil) ; defined later in this file.

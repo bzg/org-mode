@@ -244,7 +244,7 @@ auto     Automatically, either `all', or `repeat' for repeating tasks"
 	  (const :tag "All task time" all)
 	  (const :tag "Automatically, `all' or since `repeat'" auto)))
 
-(defvaralias 'org-task-overrun-text 'org-clock-task-overrun-text)
+(org-defvaralias 'org-task-overrun-text 'org-clock-task-overrun-text)
 (defcustom org-clock-task-overrun-text nil
   "Extra mode line text to indicate that the clock is overrun.
 The can be nil to indicate that instead of adding text, the clock time

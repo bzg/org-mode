@@ -113,10 +113,18 @@ any other entries, and any resulting duplicates will be removed entirely."
 
 ;;;; Emacs/XEmacs compatibility
 
+(defun org-defvaralias (new-alias base-variable &optional docstring)
+  "Compatibility function for defvaralias.
+Don't do the aliasing when `defvaralias' is not bound."
+  (declare ((indent 1)))
+  (when (fboundp 'defvaralias)
+    (defvaralias new-alias base-variable docstring)))
+(put 'org-defvaralias 'lisp-indent-function 1)
+
 (eval-and-compile
   (when (and (not (boundp 'user-emacs-directory))
 	     (boundp 'user-init-directory))
-    (defvaralias 'user-emacs-directory 'user-init-directory)))
+    (org-defvaralias 'user-emacs-directory 'user-init-directory)))
 
 ;; Keys
 (defconst org-xemacs-key-equivalents

@@ -43,8 +43,7 @@
 (declare-function gnus-summary-last-subject "gnus-sum" nil)
 ;; Customization variables
 
-(when (fboundp 'defvaralias)
-  (defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links))
+(org-defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links)
 
 (defcustom org-gnus-prefer-web-links nil
   "If non-nil, `org-store-link' creates web links to Google groups or Gmane.
