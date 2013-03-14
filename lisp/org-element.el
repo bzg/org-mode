@@ -4751,7 +4751,8 @@ Providing it allows for quicker computation."
 				    :contents-begin element))
 			     (cend (org-element-property
 				    :contents-end element)))
-			 (and (>= origin cbeg)
+			 (and cbeg cend ; cbeg is nil for table rules
+			      (>= origin cbeg)
 			      (<= origin cend)
 			      (progn (goto-char cbeg) (setq end cend)))))
 		  (and (eq type 'keyword)
