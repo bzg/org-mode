@@ -161,6 +161,7 @@ plain list item with an implied large level number, all true
 children and grand children of the outline heading will be
 exposed in a children' view."
   :group 'org-plain-lists
+  :group 'org-cycle
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "With cursor in plain list (recommended)" t)
@@ -216,7 +217,9 @@ Valid values are ?. and ?\).  To get both terminators, use t."
 		 (const :tag "paren like in \"2)\"" ?\))
 		 (const :tag "both" t)))
 
-(defcustom org-alphabetical-lists nil
+(defvaralias 'org-alphabetical-lists
+  'org-list-allow-alphabetical) ;; Since 8.0
+(defcustom org-list-allow-alphabetical nil
   "Non-nil means single character alphabetical bullets are allowed.
 Both uppercase and lowercase are handled.  Lists with more than
 26 items will fallback to standard numbering.  Alphabetical
@@ -237,7 +240,9 @@ spaces instead of one after the bullet in each item of the list."
 	  (const :tag "never" nil)
 	  (regexp)))
 
-(defcustom org-empty-line-terminates-plain-lists nil
+(defvaralias 'org-empty-line-terminates-plain-lists
+  'org-list-empty-line-terminates-plain-lists) ;; Since 8.0
+(defcustom org-list-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
 Otherwise, two of them will be necessary."
   :group 'org-plain-lists
@@ -289,7 +294,9 @@ This hook runs even if checkbox rule in
 implement alternative ways of collecting statistics
 information.")
 
-(defcustom org-hierarchical-checkbox-statistics t
+(defvaralias 'org-hierarchical-checkbox-statistics
+  'org-checkbox-hierarchical-statistics) ;; Since 8.0
+(defcustom org-checkbox-hierarchical-statistics t
   "Non-nil means checkbox statistics counts only the state of direct children.
 When nil, all boxes below the cookie are counted.
 This can be set to nil on a per-node basis using a COOKIE_DATA property
@@ -297,7 +304,9 @@ with the word \"recursive\" in the value."
   :group 'org-plain-lists
   :type 'boolean)
 
-(defcustom org-description-max-indent 20
+(defvaralias 'org-description-max-indent
+  'org-list-description-max-indent) ;; Since 8.0
+(defcustom org-list-description-max-indent 20
   "Maximum indentation for the second line of a description list.
 When the indentation would be larger than this, it will become
 5 characters instead."
