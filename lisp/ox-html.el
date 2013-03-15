@@ -2518,7 +2518,8 @@ INFO is a plist holding contextual information.  See
 			      (org-element-property :path link) option)))
 			(and numbers (concat "#sec-"
 					     (mapconcat 'number-to-string
-							numbers "-")))))))))
+							numbers "-"))))))
+		    (t raw-path))))
 	   (t raw-path)))
 	 attributes protocol)
     ;; Extract attributes from parent's paragraph. HACK: Only do this
