@@ -8716,6 +8716,10 @@ modes.  The following keys behave as if Org-mode were active, if
 the cursor is on a headline, or on a plain list item (both as
 defined by Org-mode)."
   nil " OrgStruct" (make-sparse-keymap)
+  (funcall (if orgstruct-mode
+	       'add-to-invisibility-spec
+	     'remove-from-invisibility-spec)
+	   '(outline . t))
   (when orgstruct-mode
     (org-load-modules-maybe)
     (unless orgstruct-initialized
