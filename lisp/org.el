@@ -10441,9 +10441,9 @@ does handle the search, it must return a non-nil value to keep
 other functions from trying.
 
 Each function can access the current prefix argument through the
-variable `current-prefix-argument'.  Note that a single prefix is
-used to force opening a link in Emacs, so it may be good to only
-use a numeric or double prefix to guide the search function.
+variable `current-prefix-arg'.  Note that a single prefix is used
+to force opening a link in Emacs, so it may be good to only use a
+numeric or double prefix to guide the search function.
 
 In case this is needed, a function in this hook can also restore
 the window configuration before `org-open-at-point' was called using:
