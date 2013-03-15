@@ -73,7 +73,7 @@
   :version "24.4"
   :package-version '(Org . "8.0"))
 
-(defcustom org-rss-image-url ""
+(defcustom org-rss-image-url "http://orgmode.org/img/org-mode-unicorn-logo.png"
   "The URL of the an image for the RSS feed."
   :group 'org-export-rss
   :type 'string)
@@ -213,7 +213,8 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
-  (org-publish-org-to 'rss filename ".xml" plist pub-dir))
+  (org-publish-org-to
+   'rss filename (concat "." org-rss-extension) plist pub-dir))
 
 ;;; Main transcoding functions
 
