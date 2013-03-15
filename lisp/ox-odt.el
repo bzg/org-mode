@@ -4146,8 +4146,8 @@ Use `org-create-math-formula' to convert LATEX-FRAG first to
 MathML.  When invoked as an interactive command, use
 `org-latex-regexps' to infer LATEX-FRAG from currently active
 region.  If no LaTeX fragments are found, prompt for it.  Push
-MathML source to kill ring, if `org-export-copy-to-kill-ring' is
-non-nil."
+MathML source to kill ring depending on the value of
+`org-export-copy-to-kill-ring'."
   (interactive
    `(,(let (frag)
 	(setq frag (and (setq frag (and (region-active-p)
@@ -4187,7 +4187,7 @@ non-nil."
 	 (unless mathml (error "No Math formula created"))
 	 (insert mathml)
 	 ;; Add MathML to kill ring, if needed.
-	 (when org-export-copy-to-kill-ring
+	 (when (org-export--copy-to-kill-ring-p)
 	   (org-kill-new (buffer-string))))))))
 
 ;;;###autoload

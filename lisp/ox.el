@@ -748,10 +748,14 @@ HTML code while every other back-end will ignore it."
   :package-version '(Org . "8.0")
   :type 'coding-system)
 
-(defcustom org-export-copy-to-kill-ring t
-  "Non-nil means exported stuff will also be pushed onto the kill ring."
+(defcustom org-export-copy-to-kill-ring 'if-interactive
+  "Should we push exported content to the kill ring?"
   :group 'org-export-general
-  :type 'boolean)
+  :version "24.3"
+  :type '(choice
+	  (const :tag "Always" t)
+	  (const :tag "When export is done interactively" if-interactive)
+	  (const :tag "Never" nil)))
 
 (defcustom org-export-initial-scope 'buffer
   "The initial scope when exporting with `org-export-dispatch'.
@@ -1989,7 +1993,6 @@ a tree with a select tag."
 	(not (memq (org-element-property :type blob)
 		   '(inactive inactive-range))))))))
 
-
 
 ;;; The Transcoder
 ;;
@@ -2956,7 +2959,7 @@ Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
 EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
-If `org-export-copy-to-kill-ring' is non-nil, add buffer contents
+Depending on `org-export-copy-to-kill-ring', add buffer contents
 to kill ring.  Return buffer."
   (let ((out (org-export-as backend subtreep visible-only body-only ext-plist))
 	(buffer (get-buffer-create buffer)))
@@ -2965,7 +2968,7 @@ to kill ring.  Return buffer."
       (insert out)
       (goto-char (point-min)))
     ;; Maybe add buffer contents to kill ring.
-    (when (and org-export-copy-to-kill-ring (org-string-nw-p out))
+    (when (and (org-export--copy-to-kill-ring-p) (org-string-nw-p out))
       (org-kill-new out))
     ;; Return buffer.
     buffer))
@@ -2982,7 +2985,7 @@ Optional arguments SUBTREEP, VISIBLE-ONLY, BODY-ONLY and
 EXT-PLIST are similar to those used in `org-export-as', which
 see.
 
-If `org-export-copy-to-kill-ring' is non-nil, add file contents
+Depending on `org-export-copy-to-kill-ring', add file contents
 to kill ring.  Return output file's name."
   ;; Checks for FILE permissions.  `write-file' would do the same, but
   ;; we'd rather avoid needless transcoding of parse tree.
@@ -2994,7 +2997,7 @@ to kill ring.  Return output file's name."
       (let ((coding-system-for-write org-export-coding-system))
 	(write-file file)))
     ;; Maybe add file contents to kill ring.
-    (when (and org-export-copy-to-kill-ring (org-string-nw-p out))
+    (when (and (org-export--copy-to-kill-ring-p) (org-string-nw-p out))
       (org-kill-new out)))
   ;; Return full path.
   file)
@@ -5700,7 +5703,14 @@ options as CDR."
      ;; Otherwise, enter sub-menu.
      (t (org-export--dispatch-ui options key expertp)))))
 
+;;; Miscellaneous
 
+(defun org-export--copy-to-kill-ring-p ()
+  "Should we copy the export buffer to the kill ring?
+See also `org-export-copy-to-kill-ring'."
+  (if (eq org-export-copy-to-kill-ring 'if-interactive)
+      (not (or executing-kbd-macro noninteractive))
+    (eq org-export-copy-to-kill-ring t)))
 
 (provide 'ox)
 
