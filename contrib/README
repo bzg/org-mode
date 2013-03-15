@@ -69,6 +69,7 @@ ox-groff.el              --- Groff Back-End for Org Export Engine
 ox-koma-letter.el        --- KOMA Scrlttr2 Back-End for Org Export Engine
 ox-s5.el                 --- S5 Presentation Back-End for Org Export Engine
 ox-taskjuggler.el        --- TaskJuggler Back-End for Org Export Engine
+ox-rss.el		 --- RSS 2.0 Back-End for Org Export Engine
 
 Org Babel languages
 ~~~~~~~~~~~~~~~~~~~
