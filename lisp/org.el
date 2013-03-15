@@ -8892,7 +8892,22 @@ if `orgstruct-heading-prefix-regexp' is non-nil."
 					      'item-body))))))))
 	    (if fallback
 		(let* ((orgstruct-mode)
-		       (binding (key-binding ,key)))
+		       (binding
+			(loop with key = ,key
+			      for rep in '(nil
+					   ("<tab>" . "TAB")
+					   ("<return>" . "RET")
+					   ("<escape>" . "ESC")
+					   ("<delete>" . "DEL"))
+			      do
+			      (when rep
+				(setq key (read-kbd-macro
+					   (let ((case-fold-search))
+					     (replace-regexp-in-string
+					      (regexp-quote (car rep))
+					      (cdr rep)
+					      (key-description key))))))
+			      thereis (key-binding key))))
 		  (if (keymapp binding)
 		      (set-temporary-overlay-map binding)
 		    (let ((func (or binding
