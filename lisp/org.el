@@ -495,14 +495,13 @@ depends on, if any."
 	      (const :tag "   odt         Export buffer to ODT format" odt)
 	      (const :tag "   texinfo     Export buffer to Texinfo format" texinfo)
 	      (const :tag "C  confluence  Export buffer to Confluence Wiki format" confluence)
+	      (const :tag "C  deck        Export buffer to deck.js presentations" deck)
 	      (const :tag "C  freemind    Export buffer to Freemind mindmap format" freemind)
 	      (const :tag "C  groff       Export buffer to Groff format" groff)
 	      (const :tag "C  koma-letter Export buffer to KOMA Scrlttrl2 format" koma-letter)
-	      (const :tag "C  taskjuggler Export buffer to TaskJuggler format" taskjuggler)
-	      (const :tag "C  taskjuggler Export buffer to TaskJuggler format" taskjuggler)
-	      (const :tag "C  deck        Export buffer to deck.js presentations" deck)
+	      (const :tag "C  RSS 2.0     Export buffer to RSS 2.0 format" rss)
 	      (const :tag "C  s5          Export buffer to s5 presentations" s5)
-	      (const :tag "C  RSS 2.0     Export buffer to RSS 2.0 format" rss)))
+	      (const :tag "C  taskjuggler Export buffer to TaskJuggler format" taskjuggler)))
 
 (eval-after-load 'ox
   '(mapc
