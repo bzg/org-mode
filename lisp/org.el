@@ -8829,10 +8829,12 @@ buffer.  It will also recognize item context in multiline items."
 			 ("<return>" . "RET")
 			 ("<escape>" . "ESC")
 			 ("<delete>" . "DEL")))
-	    (setq binding (read-kbd-macro (replace-regexp-in-string
-					   (regexp-quote (car rep))
-					   (cdr rep)
-					   (key-description binding)))))
+	    (setq binding (read-kbd-macro
+			   (let ((case-fold-search))
+			     (replace-regexp-in-string
+			      (regexp-quote (cdr rep))
+			      (car rep)
+			      (key-description binding))))))
 	  (let ((key (lookup-key orgstruct-mode-map binding)))
 	    (when (or (not key) (numberp key))
 	      (condition-case nil
