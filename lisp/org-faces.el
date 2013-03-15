@@ -779,7 +779,16 @@ level org-n-level-faces"
        (:foreground "burlywood"))
       (t (,@font))))
   "Face used to highlight LaTeX data, entities and sub/superscript."
-  :group 'org-faces)
+  :group 'org-faces
+  :version "24.4"
+  :package-version '(Org . "8.0"))
+
+(defface org-macro
+  (org-compatible-face 'org-latex-and-related nil)
+  "Face for macros."
+  :group 'org-faces
+  :version "24.4"
+  :package-version '(Org . "8.0"))
 
 (org-copy-face 'mode-line 'org-mode-line-clock
   "Face used for clock display in mode line.")
