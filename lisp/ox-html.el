@@ -511,8 +511,15 @@ returned as-is."
 		:value-type (string :tag "Format string"))
   :options '(bold code italic strike-through underline verbatim))
 
-(defcustom org-html-pretty-output nil
-  "Enable this to generate pretty HTML."
+(defcustom org-html-indent t
+  "Non-nil means to indent the generated HTML."
+  :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'boolean)
+
+(defcustom org-html-use-unicode-chars nil
+  "Non-nil means to use unicode characters instead of HTML entities."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -3117,14 +3124,16 @@ contextual information."
 ;;; Filter Functions
 
 (defun org-html-final-function (contents backend info)
-  "Filter to prettify the HTML output.
-Prettifying happens if `org-html-pretty-output' is t."
-  (if (not org-html-pretty-output) contents
-    (with-temp-buffer
-      (html-mode)
-      (insert contents)
-      (indent-region (point-min) (point-max))
-      (buffer-substring-no-properties (point-min) (point-max)))))
+  "Filter to indent the HTML and convert HTML entities."
+  (with-temp-buffer
+    (insert contents)
+    (set-auto-mode t)
+    (if org-html-indent
+	(indent-region (point-min) (point-max)))
+    (when org-html-use-unicode-chars
+      (require 'mm-url)
+      (mm-url-decode-entities))
+    (buffer-substring-no-properties (point-min) (point-max))))
 
 
 ;;; End-user functions
