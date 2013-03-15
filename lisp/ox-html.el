@@ -1404,7 +1404,12 @@ INFO is a plist used as a communication channel."
 			(and auth (org-export-data auth info)))))
 	 (date (and (plist-get info :with-date)
 		    (let ((date (plist-get info :date)))
-		      (and date (org-export-data date info)))))
+		      (if (eq (org-element-type (car date)) 'timestamp)
+			  (format-time-string
+			   "%a, %d %h %Y %H:%M:%S %Z" ;; RFC 822
+			   (org-time-string-to-time
+			    (org-element-property :raw-value (car date))))
+			(car date)))))
 	 (description (plist-get info :description))
 	 (keywords (plist-get info :keywords)))
     (concat
@@ -1511,8 +1516,11 @@ INFO is a plist used as a communication channel."
     (when postamble
       (let ((postamble-contents
 	     (if (functionp postamble) (funcall postamble info)
-	       (let ((date (if (not (plist-get info :with-date)) ""
-			     (org-export-data (plist-get info :date) info)))
+	       (let ((date (org-export-data
+			    (or (plist-get info :date)
+				(substring (format-time-string
+					    (car org-time-stamp-formats)) 1 -1))
+			    info))
 		     (author (let ((author (plist-get info :author)))
 			       (and author (org-export-data author info))))
 		     (email (mapconcat
