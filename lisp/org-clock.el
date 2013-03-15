@@ -2576,7 +2576,7 @@ from the dynamic block definition."
 		(apply 'encode-time (org-parse-time-string te))))))
     (setq tsb
 	  (if (eq step0 'week)
-	      (- ts (* 86400 (- (nth (abs (- 7 ws)) (decode-time (seconds-to-time ts))) 1)))
+	      (- ts (* 86400 (- (nth 6 (decode-time (seconds-to-time ts))) ws)))
 	    ts))
     (setq p1 (plist-put p1 :header ""))
     (setq p1 (plist-put p1 :step nil))
