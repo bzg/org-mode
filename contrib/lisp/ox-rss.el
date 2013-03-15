@@ -392,4 +392,6 @@ information."
 	       (buffer-file-name))
       (sit-for 2))))
 
+(provide 'ox-rss)
+
 ;;; ox-rss.el ends here
