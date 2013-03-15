@@ -557,3 +557,5 @@ publishing directory. Returns output file name."
   (org-publish-org-to 'deck filename ".html" plist pub-dir))
 
 (provide 'ox-deck)
+
+;;; ox-deck.el ends here

@@ -405,3 +405,5 @@ Return output file name."
   (org-publish-org-to 's5 filename ".html" plist pub-dir))
 
 (provide 'ox-s5)
+
+;;; ox-s5.el ends here
