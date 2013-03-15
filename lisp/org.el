@@ -8281,8 +8281,10 @@ If yes, remember the marker and the distance to BEG."
 The clones will be inserted as siblings.
 
 In interactive use, the user will be prompted for the number of
-clones to be produced, and for a time SHIFT, which may be a
-repeater as used in time stamps, for example `+3d'.
+clones to be produced.  When called with a universal prefix argument
+and if the entry has a timestamp, the user will also be prompted for
+a time shift, which may be a repeater as used in time stamps, for
+example `+3d'.
 
 When a valid repeater is given and the entry contains any time
 stamps, the clones will become a sequence in time, with time
@@ -8301,10 +8303,22 @@ the following will happen:
   to past the last clone.
 In this way you can spell out a number of instances of a repeating task,
 and still retain the repeater to cover future instances of the task."
-  (interactive "nNumber of clones to produce: \nsDate shift per clone (e.g. +1w, empty to copy unchanged): ")
-  (let (beg end template task idprop
-	    shift-n shift-what doshift nmin nmax (n-no-remove -1)
-	    (drawer-re org-drawer-regexp))
+  (interactive "nNumber of clones to produce: ")
+  (let ((shift
+	 (or shift
+	     (if (and (equal current-prefix-arg '(4))
+		      (save-excursion
+			(re-search-forward org-ts-regexp-both
+					   (save-excursion
+					     (org-end-of-subtree t)
+					     (point)) t)))
+		 (read-from-minibuffer
+		  "Date shift per clone (e.g. +1w, empty to copy unchanged): ")
+	       ""))) ;; No time shift
+	(n-no-remove -1)
+	(drawer-re org-drawer-regexp)
+	beg end template task idprop
+	shift-n shift-what doshift nmin nmax)
     (if (not (and (integerp n) (> n 0)))
 	(error "Invalid number of replications %s" n))
     (if (and (setq doshift (and (stringp shift) (string-match "\\S-" shift)))
