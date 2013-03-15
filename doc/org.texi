@@ -6352,6 +6352,8 @@ be selected:
              @r{Relative times like @code{"<now>"} can also be used.  See}
              @r{@ref{Matching tags and properties} for relative time syntax.}
 :wstart      @r{The starting day of the week.  The default is 1 for monday.}
+:mstart      @r{The starting day of the month.  The default 1 is for the first}
+             @r{day of the month.}
 :step        @r{@code{week} or @code{day}, to split the table into chunks.}
              @r{To use this, @code{:block} or @code{:tstart}, @code{:tend} are needed.}
 :stepskip0   @r{Do not show steps that have zero time.}
