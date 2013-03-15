@@ -136,6 +136,10 @@
 (defvar org-html-format-table-no-css)
 (defvar htmlize-buffer-places)  ; from htmlize.el
 
+(defvar org-html--timestamp-format "%Y-%m-%d %a %H:%M"
+  "FORMAT used by `format-time-string' for timestamps in
+preamble, postamble and metadata.")
+
 (defconst org-html-special-string-regexps
   '(("\\\\-" . "&#x00ad;")		; shy
     ("---\\([^-]\\)" . "&#x2014;\\1")	; mdash
@@ -206,8 +210,7 @@ for the JavaScript code in this tag.
   .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
   .center { margin-left: auto; margin-right: auto; text-align: center; }
   .underline { text-decoration: underline; }
-  #content { margin: 3em; }
-  #postamble p, a { font-size: 90%; margin: .2em; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
     border: 1px solid #ccc;
@@ -870,7 +873,7 @@ publishing, with :html-doctype."
   :type 'string)
 
 (defcustom org-html-container-element "div"
-  "Container class to use for wrapping top level sections.
+  "HTML element to use for wrapping top level sections.
 Can be set with the in-buffer HTML_CONTAINER property or for
 publishing, with :html-container.
 
@@ -1023,11 +1026,13 @@ the #+LANGUAGE keyword.
 The second element of each list is a format string to format the
 postamble itself.  This format string can contain these elements:
 
+  %t stands for the title.
   %a stands for the author's name.
   %e stands for the author's email.
   %d stands for the date.
   %c will be replaced by information about Org/Emacs versions.
   %v will be replaced by `org-html-validation-link'.
+  %T will be replace by the creation time of the file.
 
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
@@ -1084,6 +1089,9 @@ preamble itself.  This format string can contain these elements:
   %a stands for the author's name.
   %e stands for the author's email.
   %d stands for the date.
+  %c will be replaced by information about Org/Emacs versions.
+  %v will be replaced by `org-html-validation-link'.
+  %T will be replace by the creation time of the file.
 
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\".
@@ -1348,7 +1356,7 @@ produce code that uses these same face definitions."
   "Build a string by concatenating N times STRING."
   (let (out) (dotimes (i n out) (setq out (concat string out)))))
 
-(defun org-html-fix-class-name (kwd) 	; audit callers of this function
+(defun org-html-fix-class-name (kwd)	; audit callers of this function
   "Turn todo keyword KWD into a valid class name.
 Replaces invalid characters with \"_\"."
   (save-match-data
@@ -1410,27 +1418,20 @@ INFO is a plist used as a communication channel."
 	 (author (and (plist-get info :with-author)
 		      (let ((auth (plist-get info :author)))
 			(and auth (org-export-data auth info)))))
-	 (date (and (plist-get info :with-date)
-		    (let ((date (plist-get info :date)))
-		      (if (eq (org-element-type (car date)) 'timestamp)
-			  (format-time-string
-			   "%a, %d %h %Y %H:%M:%S %Z" ;; RFC 822
-			   (org-time-string-to-time
-			    (org-element-property :raw-value (car date))))
-			(car date)))))
 	 (description (plist-get info :description))
 	 (keywords (plist-get info :keywords)))
     (concat
      (format "<title>%s</title>\n" title)
      (format
+      (when :time-stamp-file
+	(format-time-string
+	 (concat "<!-- " org-html--timestamp-format " -->\n")))
       "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>\n"
       (or (and org-html-coding-system
 	       (fboundp 'coding-system-get)
 	       (coding-system-get org-html-coding-system 'mime-charset))
 	  "iso-8859-1"))
-     (format "<meta name=\"title\" content=\"%s\"/>\n" title)
      (format "<meta name=\"generator\" content=\"Org-mode\"/>\n")
-     (and date (format "<meta name=\"generated\" content=\"%s\"/>\n" date))
      (and author (format "<meta name=\"author\" content=\"%s\"/>\n" author))
      (and description
 	  (format "<meta name=\"description\" content=\"%s\"/>\n" description))
@@ -1486,93 +1487,78 @@ INFO is a plist used as a communication channel."
       ;; Return the modified template.
       (org-element-normalize-string template))))
 
-(defun org-html--build-preamble (info)
-  "Return document preamble as a string, or nil.
-INFO is a plist used as a communication channel."
-  (let ((preamble (plist-get info :html-preamble)))
-    (when preamble
-      (let ((preamble-contents
-	     (if (functionp preamble) (funcall preamble info)
-	       (let ((title (org-export-data (plist-get info :title) info))
-		     (date (if (not (plist-get info :with-date)) ""
-			     (org-export-data (plist-get info :date) info)))
-		     (author (if (not (plist-get info :with-author)) ""
-			       (org-export-data (plist-get info :author) info)))
-		     (email (if (not (plist-get info :with-email)) ""
-			      (plist-get info :email))))
-		 (if (stringp preamble)
-		     (format-spec preamble
-				  `((?t . ,title) (?a . ,author)
-				    (?d . ,date) (?e . ,email)))
-		   (format-spec
-		    (or (cadr (assoc (plist-get info :language)
-				     org-html-preamble-format))
-			(cadr (assoc "en" org-html-preamble-format)))
-		    `((?t . ,title) (?a . ,author)
-		      (?d . ,date) (?e . ,email))))))))
-	(when (org-string-nw-p preamble-contents)
-	  (concat (format "<%s id=\"%s\">\n"
-			  (nth 1 (assq 'preamble org-html-divs))
-			  (nth 2 (assq 'preamble org-html-divs)))
-		  (org-element-normalize-string preamble-contents)
-		  (format "</%s>\n" (nth 1 (assq 'preamble  org-html-divs)))))))))
-
-(defun org-html--build-postamble (info)
-  "Return document postamble as a string, or nil.
-INFO is a plist used as a communication channel."
-  (let ((postamble (plist-get info :html-postamble)))
-    (when postamble
-      (let ((postamble-contents
-	     (if (functionp postamble) (funcall postamble info)
-	       (let ((date (org-export-data
-			    (or (plist-get info :date)
-				(substring (format-time-string
-					    (car org-time-stamp-formats)) 1 -1))
-			    info))
-		     (author (let ((author (plist-get info :author)))
-			       (and author (org-export-data author info))))
-		     (email (mapconcat
-			     (lambda (e)
-			       (format "<a href=\"mailto:%s\">%s</a>" e e))
-			     (split-string (plist-get info :email)  ",+ *")
-			     ", "))
-		     (html-validation-link (or org-html-validation-link ""))
-		     (creator-info (plist-get info :creator)))
-		 (cond ((stringp postamble)
-			(format-spec postamble
-				     `((?a . ,author) (?e . ,email)
-				       (?d . ,date)   (?c . ,creator-info)
-				       (?v . ,html-validation-link))))
-		       ((eq postamble 'auto)
-			(concat
-			 (when (plist-get info :time-stamp-file)
-			   (format "<p class=\"date\">%s: %s</p>\n"
-				   (org-html--translate "Date" info)
-				   date))
-			 (when (and (plist-get info :with-author) author)
-			   (format "<p class=\"author\">%s : %s</p>\n"
-				   (org-html--translate "Author" info)
-				   author))
-			 (when (and (plist-get info :with-email) email)
-			   (format "<p class=\"email\">%s </p>\n" email))
-			 (when (plist-get info :with-creator)
-			   (format "<p class=\"creator\">%s</p>\n"
-				   creator-info))
-			 html-validation-link "\n"))
-		       (t (format-spec
-			   (or (cadr (assoc (plist-get info :language)
-					    org-html-postamble-format))
-			       (cadr (assoc "en" org-html-postamble-format)))
-			   `((?a . ,author) (?e . ,email)
-			     (?d . ,date)   (?c . ,creator-info)
-			     (?v . ,html-validation-link)))))))))
-	(when (org-string-nw-p postamble-contents)
+(defun org-html--build-pre/postamble (type info)
+  "Return document preamble or postamble as a string, or nil.
+TYPE is either 'preamble or 'postamble, INFO is a plist used as a
+communication channel."
+  (let ((section (plist-get info (intern (format ":html-%s" type))))
+	(spec `((?t . ,(org-export-data (plist-get info :title) info))
+		(?d . ,(org-export-data (plist-get info :date) info))
+		(?T . ,(format-time-string org-html--timestamp-format))
+		(?a . ,(org-export-data (plist-get info :author) info))
+		(?e . ,(mapconcat
+			(lambda (e)
+			  (format "<a href=\"mailto:%s\">%s</a>" e e))
+			(split-string (plist-get info :email)  ",+ *")
+			", "))
+		(?c . ,(plist-get info :creator))
+		(?v . ,(or org-html-validation-link "")))))
+    (when section
+      (let ((section-contents
+	     (if (functionp section) (funcall section info)
+	       (cond
+		((stringp section) (format-spec section spec))
+		((eq section 'auto)
+		 (let ((date (cdr (assq ?d spec)))
+		       (author (cdr (assq ?a spec)))
+		       (email (cdr (assq ?e spec)))
+		       (creator (cdr (assq ?c spec)))
+		       (timestamp (cdr (assq ?T spec)))
+		       (validation-link (cdr (assq ?v spec))))
+		   (concat
+		    (when (and (plist-get info :with-date)
+			       (org-string-nw-p date))
+		      (format "<p class=\"date\">%s: %s</p>\n"
+			      (org-html--translate "Date" info)
+			      date))
+		    (when (and (plist-get info :with-author)
+			       (org-string-nw-p author))
+		      (format "<p class=\"author\">%s: %s</p>\n"
+			      (org-html--translate "Author" info)
+			      author))
+		    (when (and (plist-get info :with-email)
+			       (org-string-nw-p email))
+		      (format "<p class=\"email\">%s: %s</p>\n"
+			      (org-html--translate "Email" info)
+			      email))
+		    (when (plist-get info :time-stamp-file)
+		      (format
+		       "<p class=\"date\">%s: %s</p>\n"
+		       (org-html--translate "Created" info)
+		       (format-time-string org-html--timestamp-format)))
+		    (when (plist-get info :with-creator)
+		      (format "<p class=\"creator\">%s</p>\n"
+			      creator))
+		    (format "<p class=\"xhtml-validation\">%s</p>\n"
+			    validation-link))))
+		(t (format-spec
+		    (or (cadr (assoc
+			       (plist-get info :language)
+			       (eval (intern
+				      (format "org-html-%s-format" type)))))
+			(cadr
+			 (assoc
+			  "en"
+			  (eval
+			   (intern (format "org-html-%s-format" type))))))
+		    spec))))))
+	(when (org-string-nw-p section-contents)
 	  (concat
 	   (format "<%s id=\"%s\">\n"
-		   (nth 1 (assq 'postamble org-html-divs))
-		   (nth 2 (assq 'postamble org-html-divs)))
-	   (org-element-normalize-string postamble-contents)
-	   (format "</%s>\n" (nth 1 (assq 'postamble org-html-divs)))))))))
+		   (nth 1 (assq type org-html-divs))
+		   (nth 2 (assq type org-html-divs)))
+	   (org-element-normalize-string section-contents)
+	   (format "</%s>\n" (nth 1 (assq type org-html-divs)))))))))
 
 (defun org-html-inner-template (contents info)
   "Return body of document string after HTML conversion.
@@ -1624,7 +1610,7 @@ holding export options."
 	       (or link-up link-home)
 	       (or link-home link-up))))
    ;; Preamble.
-   (org-html--build-preamble info)
+   (org-html--build-pre/postamble 'preamble info)
    ;; Document contents.
    (format "<%s id=\"%s\">\n"
 	   (nth 1 (assq 'content org-html-divs))
@@ -1636,7 +1622,7 @@ holding export options."
    (format "</%s>\n"
 	   (nth 1 (assq 'content org-html-divs)))
    ;; Postamble.
-   (org-html--build-postamble info)
+   (org-html--build-pre/postamble 'postamble info)
    ;; Closing document.
    "</body>\n</html>"))
 
@@ -2124,9 +2110,9 @@ holding contextual information."
 					todo todo-type priority text tags))))
 			   (t 'org-html-format-headline))))
     (apply format-function
-    	   todo todo-type  priority text tags
-    	   :headline-label headline-label :level level
-    	   :section-number section-number extra-keys)))
+	   todo todo-type  priority text tags
+	   :headline-label headline-label :level level
+	   :section-number section-number extra-keys)))
 
 (defun org-html-headline (headline contents info)
   "Transcode a HEADLINE element from Org to HTML.
@@ -2934,7 +2920,7 @@ channel."
       (concat "\n" (format (car org-html-table-header-tags) "col" cell-attrs)
 	      contents (cdr org-html-table-header-tags)))
      ((and org-html-table-use-header-tags-for-first-column
-  	   (zerop (cdr (org-export-table-cell-address table-cell info))))
+	   (zerop (cdr (org-export-table-cell-address table-cell info))))
       (concat "\n" (format (car org-html-table-header-tags) "row" cell-attrs)
 	      contents (cdr org-html-table-header-tags)))
      (t (concat "\n" (format (car org-html-table-data-tags) cell-attrs)
