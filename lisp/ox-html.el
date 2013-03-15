@@ -45,6 +45,7 @@
 (declare-function htmlize-region "ext:htmlize" (beg end))
 (declare-function org-pop-to-buffer-same-window
 		  "org-compat" (&optional buffer-or-name norecord label))
+(declare-function mm-url-decode-entities "mm-url" ())
 
 ;;; Define Back-End
 
