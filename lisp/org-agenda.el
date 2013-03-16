@@ -2290,7 +2290,8 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "{" 'org-agenda-manipulate-query-add-re)
 (org-defkey org-agenda-mode-map "}" 'org-agenda-manipulate-query-subtract-re)
 (org-defkey org-agenda-mode-map "/" 'org-agenda-filter-by-tag)
-(org-defkey org-agenda-mode-map "|" 'org-agenda-filter-by-regexp)
+(org-defkey org-agenda-mode-map "=" 'org-agenda-filter-by-regexp)
+(org-defkey org-agenda-mode-map "|" 'org-agenda-filter-remove-all)
 (org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag-refine)
 (org-defkey org-agenda-mode-map "<" 'org-agenda-filter-by-category)
 (org-defkey org-agenda-mode-map "^" 'org-agenda-filter-by-top-category)
@@ -7288,8 +7289,18 @@ With two prefix arguments, remove the regexp filters."
 			      "Narrow to entries matching regexp: ")))))
 	(push flt org-agenda-regexp-filter)
 	(org-agenda-filter-apply org-agenda-regexp-filter 'regexp))
-    (org-agenda-filter-show-all-regexp)
+    (org-agenda-filter-show-all-re)
     (message "Regexp filter removed")))
+
+(defun org-agenda-filter-remove-all ()
+  "Remove all filters from the current agenda buffer."
+  (interactive)
+  (when org-agenda-tag-filter
+    (org-agenda-filter-show-all-tag))
+  (when org-agenda-category-filter
+    (org-agenda-filter-show-all-cat))
+  (when org-agenda-regexp-filter
+    (org-agenda-filter-show-all-re)))
 
 (defun org-agenda-filter-by-tag (strip &optional char narrow)
   "Keep only those lines in the agenda buffer that have a specific tag.
@@ -7541,7 +7552,7 @@ If the line does not have an effort defined, return nil."
 	org-agenda-filter-form nil)
   (org-agenda-set-mode-name))
 
-(defun org-agenda-filter-show-all-regexp nil
+(defun org-agenda-filter-show-all-re nil
   "Remove regexp filter overlays from the agenda buffer."
   (mapc 'delete-overlay org-agenda-re-filter-overlays)
   (setq org-agenda-re-filter-overlays nil
