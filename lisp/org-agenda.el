@@ -262,6 +262,48 @@ you can \"misuse\" it to also add other text to the header."
 (org-defvaralias 'org-agenda-filter-preset 'org-agenda-tag-filter-preset)
 (org-defvaralias 'org-agenda-filter 'org-agenda-tag-filter)
 
+(defvar org-agenda-entry-types '(:deadline :scheduled :timestamp :sexp)
+  "List of types searched for when creating the daily/weekly agenda.
+This variable is a list of symbols that controls the types of
+items that appear in the daily/weekly agenda.  Allowed symbols in this
+list are are
+
+  :timestamp   List items containing a date stamp or date range matching
+               the selected date.  This includes sexp entries in angular
+               brackets.
+
+  :sexp        List entries resulting from plain diary-like sexps.
+
+  :deadline    List deadline due on that date.  When the date is today,
+               also list any deadlines past due, or due within
+	       `org-deadline-warning-days'.  `:deadline' must appear before
+               `:scheduled' if the setting of
+               `org-agenda-skip-scheduled-if-deadline-is-shown' is to have
+               any effect.
+
+  :deadline*   Same as above, but only include the deadline if it has an
+               hour specification as [h]h:mm.
+
+  :scheduled   List all items which are scheduled for the given date.
+	       The diary for *today* also contains items which were
+	       scheduled earlier and are not yet marked DONE.
+
+  :scheduled*  Same as above, but only include the scheduled item if it
+               has an hour specification as [h]h:mm.
+
+By default, all four non-starred types are turned on.
+
+When :scheduled* or :deadline* are included, :schedule or :deadline
+will be ignored.
+
+Never set this variable globally using `setq', because then it
+will apply to all future agenda commands.  Instead, bind it with
+`let' to scope it dynamically into the agenda-constructing
+command.  A good way to set it is through options in
+`org-agenda-custom-commands'.  For a more flexible (though
+somewhat less efficient) way of determining what is included in
+the daily/weekly agenda, see `org-agenda-skip-function'.")
+
 (defconst org-agenda-custom-commands-local-options
   `(repeat :tag "Local settings for this command.  Remember to quote values"
 	   (choice :tag "Setting"
@@ -325,7 +367,7 @@ you can \"misuse\" it to also add other text to the header."
 			 (const org-agenda-entry-types)
 			 (list
 			  (const :format "" quote)
-			  (set :greedy t :value (:deadline :scheduled :timestamp :sexp)
+			  (set :greedy t :value ,org-agenda-entry-types
 			       (const :deadline)
 			       (const :scheduled)
 			       (const :deadline*)
@@ -4056,48 +4098,6 @@ See the docstring of `org-read-date' on allowed values.")
 (defvar org-starting-day nil) ; local variable in the agenda buffer
 (defvar org-arg-loc nil) ; local variable
 
-(defvar org-agenda-entry-types '(:deadline :scheduled :timestamp :sexp)
-  "List of types searched for when creating the daily/weekly agenda.
-This variable is a list of symbols that controls the types of
-items that appear in the daily/weekly agenda.  Allowed symbols in this
-list are are
-
-  :timestamp   List items containing a date stamp or date range matching
-               the selected date.  This includes sexp entries in angular
-               brackets.
-
-  :sexp        List entries resulting from plain diary-like sexps.
-
-  :deadline    List deadline due on that date.  When the date is today,
-               also list any deadlines past due, or due within
-	       `org-deadline-warning-days'.  `:deadline' must appear before
-               `:scheduled' if the setting of
-               `org-agenda-skip-scheduled-if-deadline-is-shown' is to have
-               any effect.
-
-  :deadline*   Same as above, but only include the deadline if it has an
-               hour specification as [h]h:mm.
-
-  :scheduled   List all items which are scheduled for the given date.
-	       The diary for *today* also contains items which were
-	       scheduled earlier and are not yet marked DONE.
-
-  :scheduled*  Same as above, but only include the scheduled item if it
-               has an hour specification as [h]h:mm.
-
-By default, all four non-starred types are turned on.
-
-When :scheduled* or :deadline* are included, :schedule or :deadline
-will be ignored.
-
-Never set this variable globally using `setq', because then it
-will apply to all future agenda commands.  Instead, bind it with
-`let' to scope it dynamically into the agenda-constructing
-command.  A good way to set it is through options in
-`org-agenda-custom-commands'.  For a more flexible (though
-somewhat less efficient) way of determining what is included in
-the daily/weekly agenda, see `org-agenda-skip-function'.")
-
 (defvar org-agenda-buffer-tmp-name nil)
 ;;;###autoload
 (defun org-agenda-list (&optional arg start-day span with-hour)
@@ -5186,8 +5186,8 @@ all files listed in `org-agenda-files' will be checked automatically:
 
    &%%(org-diary)
 
-If you don't give any arguments (as in the example above), the default
-arguments (:deadline :scheduled :timestamp :sexp) are used.
+If you don't give any arguments (as in the example above), the default value
+of `org-agenda-entry-types' is used: (:deadline :scheduled :timestamp :sexp).
 So the example above may also be written as
 
    &%%(org-diary :deadline :timestamp :sexp :scheduled)
@@ -5203,7 +5203,7 @@ function from a program - use `org-agenda-get-day-entries' instead."
     (org-agenda-reset-markers))
   (org-compile-prefix-format 'agenda)
   (org-set-sorting-strategy 'agenda)
-  (setq args (or args '(:deadline :scheduled :timestamp :sexp)))
+  (setq args (or args org-agenda-entry-types))
   (let* ((files (if (and entry (stringp entry) (string-match "\\S-" entry))
 		    (list entry)
 		  (org-agenda-files t)))
@@ -5235,7 +5235,7 @@ FILE is the path to a file to be checked for entries.  DATE is date like
 the one returned by `calendar-current-date'.  ARGS are symbols indicating
 which kind of entries should be extracted.  For details about these, see
 the documentation of `org-diary'."
-  (setq args (or args '(:deadline :scheduled :timestamp :sexp)))
+  (setq args (or args org-agenda-entry-types))
   (let* ((org-startup-folded nil)
 	 (org-startup-align-all-tables nil)
 	 (buffer (if (file-exists-p file)
