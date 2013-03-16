@@ -53,8 +53,8 @@
   :options-alist
   ((:html-link-home "HTML_LINK_HOME" nil nil)
    (:html-link-up "HTML_LINK_UP" nil nil)
-   (:html-postamble nil "html-postamble" nil t)
-   (:html-preamble nil "html-preamble" nil t)
+   (:deck-postamble "DECK_POSTAMBLE" nil org-deck-postamble newline)
+   (:deck-preamble "DECK_PREAMBLE" nil org-deck-preamble newline)
    (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" nil nil)
    (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil nil)
    (:deck-base-url "DECK_BASE_URL" nil org-deck-base-url)
@@ -166,37 +166,61 @@ Can be overriden with the DECK_BASE_URL property."
   :group 'org-export-deck
   :type 'string)
 
-(defcustom org-deck-postamble-template
-  "<h1>%author - %title</h1>"
-  "Format template to specify the postamble section of document.
-Completed using `org-fill-template', optional keys include
-%author, %email, %file, %title and %date.
-
-This is included in the document at the bottom of the content
-section, and uses the postamble element and id from
-`org-html-divs'. The default places the author and presentation
-title at the bottom of each slide. See also
-`org-deck-preamble-postamble-styles'."
-  :group 'org-export-deck
-  :type 'string)
-
-(defcustom org-deck-preamble-template ""
-  "Format template to specify the preamble section of the document.
-Completed using `org-fill-template', optional keys include
-%author, %email, %file, %title and %date.
-
-This is included before the content section of the document and
-would normally be a header for the presentation. See also
-`org-deck-preamble-postamble-styles'."
-  :group 'org-export-deck
-  :type 'string)
-
-(defvar org-deck-preamble-postamble-styles
+(defvar org-deck-pre/postamble-styles
   `((both "left: 5px; width: 100%;")
     (preamble "position: absolute; top: 10px;")
     (postamble ""))
   "Alist of css styles for the preamble, postamble and both respectively.
 Can be overriden in `org-deck-styles'. See also `org-html-divs'.")
+
+(defcustom org-deck-postamble "<h1>%a - %t</h1>"
+  "Non-nil means insert a postamble in HTML export.
+
+When set to a string, use this string
+as the postamble.  When t, insert a string as defined by the
+formatting string in `org-html-postamble-format'.
+
+When set to a function, apply this function and insert the
+returned string.  The function takes the property list of export
+options as its only argument.
+
+This is included in the document at the bottom of the content
+section, and uses the postamble element and id from
+`org-html-divs'. The default places the author and presentation
+title at the bottom of each slide.
+
+The css styling is controlled by `org-deck-pre/postamble-styles'.
+
+Setting :deck-postamble in publishing projects will take
+precedence over this variable."
+  :group 'org-export-deck
+  :type '(choice (const :tag "No postamble" nil)
+                 (const :tag "Default formatting string" t)
+                 (string :tag "Custom formatting string")
+                 (function :tag "Function (must return a string)")))
+
+(defcustom org-deck-preamble nil
+  "Non-nil means insert a preamble in HTML export.
+
+When set to a string, use this string
+as the preamble.  When t, insert a string as defined by the
+formatting string in `org-html-preamble-format'.
+
+When set to a function, apply this function and insert the
+returned string.  The function takes the property list of export
+options as its only argument.
+
+This is included in the document at the top of  content section, and
+uses the preamble element and id from `org-html-divs'. The css
+styling is controlled by `org-deck-pre/postamble-styles'.
+
+Setting :deck-preamble in publishing projects will take
+precedence over this variable."
+  :group 'org-export-deck
+  :type '(choice (const :tag "No preamble" nil)
+                 (const :tag "Default formatting string" t)
+                 (string :tag "Custom formatting string")
+                 (function :tag "Function (must return a string)")))
 
 (defvar org-deck-toc-styles
   (mapconcat
@@ -207,7 +231,7 @@ Can be overriden in `org-deck-styles'. See also `org-html-divs'.")
     "#table-of-contents li {padding: 0;}") "\n")
   "Default css styles used for formatting a table of contents slide.
 Can be overriden in `org-deck-styles'.
-Note that when the headline numbering option is true, a \"list-style: none\" 
+Note that when the headline numbering option is true, a \"list-style: none\"
 is automatically added to avoid both numbers and bullets on the toc entries.")
 
 (defcustom org-deck-styles
@@ -233,13 +257,13 @@ Defaults to styles for the title page."
   :type 'string)
 
 (defcustom org-deck-title-slide-template
-  "<h1>%title</h1>
-<h2>%author</h2>
-<h2>%email</h2>
-<h2>%date</h2>"
+  "<h1>%t</h1>
+<h2>%a</h2>
+<h2>%e</h2>
+<h2>%d</h2>"
   "Format template to specify title page section.
-Completed using `org-fill-template', optional keys include
-%author, %email, %file, %title and %date.
+See `org-html-postamble-format' for the valid elements which
+can be included.
 
 It will be wrapped in the element defined in the :html-container
 property, and defaults to the value of `org-html-container-element',
@@ -349,19 +373,15 @@ the \"slide\" class will be added to the to the list element,
         (replace-regexp-in-string "^<li>" "<li class='slide'>" text)
       text)))
 
-(defun org-deck-template-alist (info)
-  (list
-   `("title"  . ,(car (plist-get info :title)))
-   `("author" . ,(car (plist-get info :author)))
-   `("email"  . ,(plist-get info :email))
-   `("date"   . ,(nth 0 (plist-get info :date)))
-   `("file"   . ,(plist-get info :input-file))))
-
 (defun org-deck-template (contents info)
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let ((pkg-info (org-deck--get-packages info)))
+  (let ((pkg-info (org-deck--get-packages info))
+         (org-html--pre/postamble-class "deck-status")
+         (info (plist-put
+                (plist-put info :html-preamble (plist-get info :deck-preamble))
+                :html-postamble (plist-get info :deck-postamble))))
     (mapconcat
      'identity
      (list
@@ -401,31 +421,25 @@ holding export options."
       (format "#%s, #%s {%s}"
               (nth 2 (assq 'preamble org-html-divs))
               (nth 2 (assq 'postamble org-html-divs))
-              (nth 1 (assq 'both org-deck-preamble-postamble-styles)))
+              (nth 1 (assq 'both org-deck-pre/postamble-styles)))
       (format "#%s {%s}"
               (nth 2 (assq 'preamble org-html-divs))
-              (nth 1 (assq 'preamble org-deck-preamble-postamble-styles)))
+              (nth 1 (assq 'preamble org-deck-pre/postamble-styles)))
       (format "#%s {%s}"
               (nth 2 (assq 'postamble org-html-divs))
-              (nth 1 (assq 'postamble org-deck-preamble-postamble-styles)))
+              (nth 1 (assq 'postamble org-deck-pre/postamble-styles)))
       org-deck-styles
       "</style>"
       "</head>"
       "<body>"
-      (format "<%s id='%s' class='deck-status'>"
-              (nth 1 (assq 'preamble org-html-divs))
-              (nth 2 (assq 'preamble org-html-divs)))
-      (org-fill-template
-       org-deck-preamble-template (org-deck-template-alist info))
-      (format "</%s>" (nth 1 (assq 'preamble org-html-divs)))
       (format "<%s id='%s' class='deck-container'>"
               (nth 1 (assq 'content org-html-divs))
               (nth 2 (assq 'content org-html-divs)))
+      (org-html--build-pre/postamble 'preamble info)
       ;; title page
       (format "<%s id='title-slide' class='slide'>"
               (plist-get info :html-container))
-      (org-fill-template
-       org-deck-title-slide-template (org-deck-template-alist info))
+      (format-spec org-deck-title-slide-template (org-html-format-spec info))
       (format "</%s>" (plist-get info :html-container))
       ;; toc page
       (let ((depth (plist-get info :with-toc)))
@@ -436,12 +450,7 @@ holding export options."
          (with-temp-buffer (insert-file-contents snippet)
                            (buffer-string)))
        (plist-get pkg-info :snippets) "\n")
-      (format "<%s id='%s' class='deck-status'>"
-              (nth 1 (assq 'postamble org-html-divs))
-              (nth 2 (assq 'postamble org-html-divs)))
-      (org-fill-template
-       org-deck-postamble-template (org-deck-template-alist info))
-      (format "</%s>" (nth 1 (assq 'postamble org-html-divs)))
+      (org-html--build-pre/postamble 'postamble info)
       (format "</%s>" (nth 1 (assq 'content org-html-divs)))
       "</body>"
       "</html>\n") "\n")))

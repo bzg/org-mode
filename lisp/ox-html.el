@@ -140,6 +140,9 @@
   "FORMAT used by `format-time-string' for timestamps in
 preamble, postamble and metadata.")
 
+(defvar org-html--pre/postamble-class "status"
+  "CSS class used for pre/postamble")
+
 (defconst org-html-special-string-regexps
   '(("\\\\-" . "&#x00ad;")		; shy
     ("---\\([^-]\\)" . "&#x2014;\\1")	; mdash
@@ -1487,22 +1490,27 @@ INFO is a plist used as a communication channel."
       ;; Return the modified template.
       (org-element-normalize-string template))))
 
+(defun org-html-format-spec (info)
+  "Return format specification for elements that can be
+used in the preamble or postamble."
+  `((?t . ,(org-export-data (plist-get info :title) info))
+    (?d . ,(org-export-data (plist-get info :date) info))
+    (?T . ,(format-time-string org-html--timestamp-format))
+    (?a . ,(org-export-data (plist-get info :author) info))
+    (?e . ,(mapconcat
+	    (lambda (e)
+	      (format "<a href=\"mailto:%s\">%s</a>" e e))
+	    (split-string (plist-get info :email)  ",+ *")
+	    ", "))
+    (?c . ,(plist-get info :creator))
+    (?v . ,(or org-html-validation-link ""))))
+
 (defun org-html--build-pre/postamble (type info)
   "Return document preamble or postamble as a string, or nil.
 TYPE is either 'preamble or 'postamble, INFO is a plist used as a
 communication channel."
   (let ((section (plist-get info (intern (format ":html-%s" type))))
-	(spec `((?t . ,(org-export-data (plist-get info :title) info))
-		(?d . ,(org-export-data (plist-get info :date) info))
-		(?T . ,(format-time-string org-html--timestamp-format))
-		(?a . ,(org-export-data (plist-get info :author) info))
-		(?e . ,(mapconcat
-			(lambda (e)
-			  (format "<a href=\"mailto:%s\">%s</a>" e e))
-			(split-string (plist-get info :email)  ",+ *")
-			", "))
-		(?c . ,(plist-get info :creator))
-		(?v . ,(or org-html-validation-link "")))))
+	(spec (org-html-format-spec info)))
     (when section
       (let ((section-contents
 	     (if (functionp section) (funcall section info)
@@ -1554,9 +1562,10 @@ communication channel."
 		    spec))))))
 	(when (org-string-nw-p section-contents)
 	  (concat
-	   (format "<%s id=\"%s\">\n"
+	   (format "<%s id=\"%s\" class=\"%s\">\n"
 		   (nth 1 (assq type org-html-divs))
-		   (nth 2 (assq type org-html-divs)))
+		   (nth 2 (assq type org-html-divs))
+		   org-html--pre/postamble-class)
 	   (org-element-normalize-string section-contents)
 	   (format "</%s>\n" (nth 1 (assq type org-html-divs)))))))))
 

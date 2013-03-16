@@ -62,15 +62,16 @@
   :options-alist
   ((:html-link-home "HTML_LINK_HOME" nil nil)
    (:html-link-up "HTML_LINK_UP" nil nil)
-   (:html-postamble nil "html-postamble" nil t)
-   (:html-preamble nil "html-preamble" nil t)
+   (:s5-postamble "S5_POSTAMBLE" nil org-s5-postamble newline)
+   (:s5-preamble "S5_PREAMBLE" nil org-s5-preamble newline)
    (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" nil nil)
    (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil nil)
    (:s5-version "S5_VERSION" nil org-s5-version)
    (:s5-theme-file "S5_THEME_FILE" nil org-s5-theme-file)
    (:s5-ui-url "S5_UI_URL" nil org-s5-ui-url)
    (:s5-default-view "S5_DEFAULT_VIEW" nil org-s5-default-view)
-   (:s5-control-visibility "S5_CONTROL_VISIBILITY" nil org-s5-control-visibility))
+   (:s5-control-visibility "S5_CONTROL_VISIBILITY" nil
+			   org-s5-control-visibility))
   :translate-alist
   ((headline . org-s5-headline)
    (plain-list . org-s5-plain-list)
@@ -117,33 +118,77 @@ Can be overriden with the S5_UI_URL property."
   :group 'org-export-s5
   :type '(choice (const hidden) (const visibile)))
 
-(defcustom org-s5-footer-template
-  "<h1>%author - %title</h1>"
-  "Format template to specify footer div.
-Completed using `org-fill-template', optional keys include
-%author, %email, %file, %title and %date.
+(defcustom org-s5-divs
+  '((preamble  "div" "header")
+    (content   "div" "content")
+    (postamble "div" "footer"))
+  "Alist of the threed section elements for HTML export.
+The car of each entry is one of 'preamble, 'content or 'postamble.
+The cdrs of each entry are the ELEMENT_TYPE and ID for each
+section of the exported document.
 
-It will be wrapped in a <div> with the id \"footer\""
+Note that changing the defaults for the preamble and postamble
+will break the standard S5 stylesheets. To generate XOXO compatible
+slideshows, change the content ELEMENT_TYPE to \"ul\" or \"ol\"
+and the `org-html-container-element' to \"li\"."
+  :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type '(list :greedy t
+	       (list :tag "Preamble"
+		     (const :format "" preamble)
+		     (string :tag "element") (string :tag "     id"))
+	       (list :tag "Content"
+		     (const :format "" content)
+		     (string :tag "element") (string :tag "     id"))
+	       (list :tag "Postamble" (const :format "" postamble)
+		     (string :tag "     id") (string :tag "element"))))
+
+(defcustom org-s5-postamble "<h1>%a - %t</h1>"
+  "Preamble inserted into the S5 layout section.
+When set to a string, use this string as the postamble.
+
+When set to a function, apply this function and insert the
+returned string.  The function takes the property list of export
+options as its only argument.
+
+Setting the S5_POSTAMBLE option -- or the :s5-postamble in publishing
+projects -- will take precedence over this variable.
+
+Note that the default css styling will break if this is set to nil
+or an empty string."
   :group 'org-export-s5
-  :type 'string)
+  :type '(choice (const :tag "No postamble" "&#x20;")
+		 (string :tag "Custom formatting string")
+		 (function :tag "Function (must return a string)")))
 
-(defcustom org-s5-header-template ""
-  "Format template to specify header div.
-Completed using `org-fill-template', optional keys include
-%author, %email, %file, %title and %date.
+(defcustom org-s5-preamble "&#x20;"
+  "Peamble inserted into the S5 layout section.
 
-It will be wrapped in a <div> with the id \"header\""
+When set to a string, use this string as the preamble.
+
+When set to a function, apply this function and insert the
+returned string.  The function takes the property list of export
+options as its only argument.
+
+Setting S5_PREAMBLE option -- or the :s5-preamble in publishing
+projects -- will take precedence over this variable.
+
+Note that the default css styling will break if this is set to nil
+or an empty string."
   :group 'org-export-s5
-  :type 'string)
+  :type '(choice (const :tag "No preamble" "&#x20;")
+		 (string :tag "Custom formatting string")
+		 (function :tag "Function (must return a string)")))
 
 (defcustom org-s5-title-slide-template
-  "<h1>%title</h1>
-<h2>%author</h2>
-<h2>%email</h2>
-<h2>%date</h2>"
+  "<h1>%t</h1>
+<h2>%a</h2>
+<h2>%e</h2>
+<h2>%d</h2>"
   "Format template to specify title page section.
-Completed using `org-fill-template', optional keys include
-%author, %email, %file, %title and %date.
+See `org-html-postamble-format' for the valid elements which
+can be included.
 
 It will be wrapped in the element defined in the :html-container
 property, and defaults to the value of `org-html-container-element',
@@ -251,14 +296,6 @@ which will make the list into a \"build\"."
                  " incremental" ""))
             contents (org-html-end-plain-list type))))
 
-(defun org-s5-template-alist (info)
-  `(
-   ("title"  . ,(car (plist-get info :title)))
-   ("author" . ,(car (plist-get info :author)))
-   ("email"  . ,(plist-get info :email))
-   ("date"   . ,(nth 0 (plist-get info :date)))
-   ("file"   . ,(plist-get info :input-file))))
-
 (defun org-s5-inner-template (contents info)
   "Return body of document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
@@ -269,47 +306,44 @@ holding export options."
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (mapconcat
-   'identity
-   (list
-    (plist-get info :html-doctype)
-    (format "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\">"
-            (plist-get info :language) (plist-get info :language))
-    "<head>"
-    (org-s5--build-meta-info info)
-    (org-s5--build-head info)
-    (org-html--build-head info)
-    (org-html--build-mathjax-config info)
-    "</head>"
-    "<body>"
-    "<div class=\"layout\">"
-    "<div id=\"controls\"><!-- no edit --></div>"
-    "<div id=\"currentSlide\"><!-- no edit --></div>"
-     "<div id='header'>"
-    (org-fill-template
-     org-s5-header-template (org-s5-template-alist info))
-    "</div>"
-    "<div id='footer'>"
-    (org-fill-template
-     org-s5-footer-template (org-s5-template-alist info))
-    "</div>"
-    "</div>"
-    (format "<%s id=\"%s\" class=\"presentation\">"
-            (nth 1 (assq 'content org-html-divs))
-            (nth 2 (assq 'content org-html-divs)))
-    ;; title page
-    (format "<%s id='title-slide' class='slide'>"
-            (plist-get info :html-container))
-    (org-fill-template
-     org-s5-title-slide-template (org-s5-template-alist info))
-    (format "</%s>" (plist-get info :html-container))
-    ;; table of contents.
-    (let ((depth (plist-get info :with-toc)))
-      (when depth (org-s5-toc depth info)))
-    contents
-    (format "</%s>" (nth 1 (assq 'content org-html-divs)))
-    "</body>"
-    "</html>\n") "\n"))
+  (let ((org-html-divs org-s5-divs)
+	 (info (plist-put
+		(plist-put info :html-preamble (plist-get info :s5-preamble))
+		:html-postamble (plist-get info :s5-postamble))))
+    (mapconcat
+     'identity
+     (list
+      (plist-get info :html-doctype)
+      (format "<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"%s\" xml:lang=\"%s\">"
+	      (plist-get info :language) (plist-get info :language))
+      "<head>"
+      (org-s5--build-meta-info info)
+      (org-s5--build-head info)
+      (org-html--build-head info)
+      (org-html--build-mathjax-config info)
+      "</head>"
+      "<body>"
+      "<div class=\"layout\">"
+      "<div id=\"controls\"><!-- no edit --></div>"
+      "<div id=\"currentSlide\"><!-- no edit --></div>"
+      (org-html--build-pre/postamble 'preamble info)
+      (org-html--build-pre/postamble 'postamble info)
+      "</div>"
+      (format "<%s id=\"%s\" class=\"presentation\">"
+	      (nth 1 (assq 'content org-s5-divs))
+	      (nth 2 (assq 'content org-s5-divs)))
+      ;; title page
+      (format "<%s id='title-slide' class='slide'>"
+	      (plist-get info :html-container))
+      (format-spec org-s5-title-slide-template (org-html-format-spec info))
+      (format "</%s>" (plist-get info :html-container))
+      ;; table of contents.
+      (let ((depth (plist-get info :with-toc)))
+	(when depth (org-s5-toc depth info)))
+      contents
+      (format "</%s>" (nth 1 (assq 'content org-s5-divs)))
+      "</body>"
+      "</html>\n") "\n")))
 
 (defun org-s5-export-as-html
   (&optional async subtreep visible-only body-only ext-plist)
