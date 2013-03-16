@@ -7111,6 +7111,7 @@ Also restore the window configuration."
 	(kill-buffer buf)
 	(org-columns-remove-overlays)
 	(setq org-agenda-archives-mode nil)))
+    (setq org-agenda-buffer nil)
     ;; Maybe restore the pre-agenda window configuration.
     (and org-agenda-restore-windows-after-quit
 	 (not (eq org-agenda-window-setup 'other-frame))
