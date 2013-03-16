@@ -2203,9 +2203,8 @@ item is invisible."
 	       ;; If we're in a description list, ask for the new term.
 	       (desc (when (eq (org-list-get-list-type itemp struct prevs)
 			       'descriptive)
-		       (concat (read-string "Term: ") " :: "))))
-	  (setq struct
-		(org-list-insert-item pos struct prevs checkbox desc))
+		       " :: ")))
+	  (setq struct (org-list-insert-item pos struct prevs checkbox desc))
 	  (org-list-write-struct struct (org-list-parents-alist struct))
 	  (when checkbox (org-update-checkbox-count-maybe))
 	  (looking-at org-list-full-item-re)
@@ -2214,6 +2213,7 @@ item is invisible."
 				(string-match "[.)]" (match-string 1))))
 			 (match-beginning 4)
 		       (match-end 0)))
+	  (if desc (backward-char 1))
 	  t)))))
 
 (defun org-list-repair ()
