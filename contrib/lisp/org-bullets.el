@@ -82,9 +82,8 @@ If this is undesirable, one can remove them with
 (define-minor-mode org-bullets-mode
   "UTF-8 bullets for `org-mode'."
   nil nil nil
-  (require 'org-mode)
   (let* ((keyword
-	  `((org-outline-regexp-bol
+	  `((,org-outline-regexp-bol
 	     (0 (let (( level (- (match-end 0) (match-beginning 0) 1)))
 		  (compose-region (- (match-end 0) 2)
 				  (- (match-end 0) 1)
