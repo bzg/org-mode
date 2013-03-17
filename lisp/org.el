@@ -22071,7 +22071,10 @@ contains commented lines.  Otherwise, comment them."
 	    (goto-char (point-min))
 	    (while (not (eobp))
 	      (unless (and (not comment-empty-lines) (looking-at "[ \t]*$"))
-		(org-move-to-column min-indent t)
+		;; Don't get fooled by invisible text (e.g. link path)
+		;; when moving to column MIN-INDENT.
+		(let ((buffer-invisibility-spec nil))
+		  (org-move-to-column min-indent t))
 		(insert comment-start))
 	      (forward-line))))))))
 
