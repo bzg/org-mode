@@ -1853,9 +1853,12 @@ used as a communication channel."
 	(setq options (concat options ",width=" width)))
       (when (org-string-nw-p height)
 	(setq options (concat options ",height=" height)))
-      (when (= (aref options 0) ?,)
-	(setq options (substring options 1)))
-      (setq image-code (format "\\includegraphics[%s]{%s}" options path)))
+      (setq image-code
+	    (format "\\includegraphics%s{%s}"
+		    (cond ((not (org-string-nw-p options)) "")
+			  ((= (aref options 0) ?,) (substring options 1))
+			  (t options))
+		    path)))
     ;; Return proper string, depending on FLOAT.
     (case float
       (wrap (format "\\begin{wrapfigure}%s
