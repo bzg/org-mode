@@ -19140,9 +19140,8 @@ because, in this case the deletion might narrow the column."
 	    (let ((pos (point))
 		  (noalign (looking-at "[^|\n\r]*  |"))
 		  (c org-table-may-need-update))
-	      (replace-match (concat
-			      (substring (match-string 0) 1 -1)
-			      " |"))
+	      (replace-match
+	       (concat (substring (match-string 0) 1 -1) " |") nil t)
 	      (goto-char pos)
 	      ;; noalign: if there were two spaces at the end, this field
 	      ;; does not determine the width of the column.
