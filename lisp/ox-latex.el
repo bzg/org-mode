@@ -1856,8 +1856,9 @@ used as a communication channel."
       (setq image-code
 	    (format "\\includegraphics%s{%s}"
 		    (cond ((not (org-string-nw-p options)) "")
-			  ((= (aref options 0) ?,) (substring options 1))
-			  (t options))
+			  ((= (aref options 0) ?,)
+			   (format "[%s]"(substring options 1)))
+			  (t (format "[%s]" options)))
 		    path)))
     ;; Return proper string, depending on FLOAT.
     (case float
