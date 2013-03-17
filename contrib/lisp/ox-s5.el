@@ -118,31 +118,21 @@ Can be overriden with the S5_UI_URL property."
   :group 'org-export-s5
   :type '(choice (const hidden) (const visibile)))
 
-(defcustom org-s5-divs
+(defvar org-s5--divs
   '((preamble  "div" "header")
     (content   "div" "content")
     (postamble "div" "footer"))
-  "Alist of the threed section elements for HTML export.
+  "Alist of the three section elements for HTML export.
 The car of each entry is one of 'preamble, 'content or 'postamble.
 The cdrs of each entry are the ELEMENT_TYPE and ID for each
 section of the exported document.
 
-Note that changing the defaults for the preamble and postamble
-will break the standard S5 stylesheets. To generate XOXO compatible
-slideshows, change the content ELEMENT_TYPE to \"ul\" or \"ol\"
-and the `org-html-container-element' to \"li\"."
-  :group 'org-export-html
-  :version "24.4"
-  :package-version '(Org . "8.0")
-  :type '(list :greedy t
-	       (list :tag "Preamble"
-		     (const :format "" preamble)
-		     (string :tag "element") (string :tag "     id"))
-	       (list :tag "Content"
-		     (const :format "" content)
-		     (string :tag "element") (string :tag "     id"))
-	       (list :tag "Postamble" (const :format "" postamble)
-		     (string :tag "     id") (string :tag "element"))))
+If you set `org-html-container-element' to \"li\", \"ol\" will be
+uses as the content ELEMENT_TYPE, generating an XOXO format
+slideshow.
+
+Note that changing the preamble or postamble will break the
+core S5 stylesheets.")
 
 (defcustom org-s5-postamble "<h1>%a - %t</h1>"
   "Preamble inserted into the S5 layout section.
@@ -306,7 +296,10 @@ holding export options."
   "Return complete document string after HTML conversion.
 CONTENTS is the transcoded contents string.  INFO is a plist
 holding export options."
-  (let ((org-html-divs org-s5-divs)
+  (let ((org-html-divs
+	 (if (equal (plist-get info :html-container) "li")
+	     (append '((content "ol" "content")) org-s5--divs)
+	   org-s5--divs))
 	 (info (plist-put
 		(plist-put info :html-preamble (plist-get info :s5-preamble))
 		:html-postamble (plist-get info :s5-postamble))))
@@ -330,8 +323,8 @@ holding export options."
       (org-html--build-pre/postamble 'postamble info)
       "</div>"
       (format "<%s id=\"%s\" class=\"presentation\">"
-	      (nth 1 (assq 'content org-s5-divs))
-	      (nth 2 (assq 'content org-s5-divs)))
+	      (nth 1 (assq 'content org-html-divs))
+	      (nth 2 (assq 'content org-html-divs)))
       ;; title page
       (format "<%s id='title-slide' class='slide'>"
 	      (plist-get info :html-container))
@@ -341,7 +334,7 @@ holding export options."
       (let ((depth (plist-get info :with-toc)))
 	(when depth (org-s5-toc depth info)))
       contents
-      (format "</%s>" (nth 1 (assq 'content org-s5-divs)))
+      (format "</%s>" (nth 1 (assq 'content org-html-divs)))
       "</body>"
       "</html>\n") "\n")))
 
