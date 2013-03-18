@@ -757,24 +757,25 @@
   "Test `org-list-to-html' specifications."
   (should
    (equal "<ul class=\"org-ul\">\n<li>a\n</li>\n</ul>"
-	  (with-temp-buffer
-	    (insert "<!-- BEGIN RECEIVE ORGLST name -->
+	  (let (org-html-indent)
+	    (with-temp-buffer
+	      (insert "<!-- BEGIN RECEIVE ORGLST name -->
 <!-- END RECEIVE ORGLST name -->
 <!--
 #+ORGLST: SEND name org-list-to-html
 - a
 -->")
-	    (goto-char (point-min))
-	    (re-search-forward "^- a" nil t)
-	    (beginning-of-line)
-	    (org-list-send-list)
-	    (goto-line 2)
-	    (buffer-substring-no-properties
-	     (point)
-	     (progn (re-search-forward "^<!-- END" nil t)
-		    (beginning-of-line)
-		    (skip-chars-backward " \r\t\n")
-		    (point)))))))
+	      (goto-char (point-min))
+	      (re-search-forward "^- a" nil t)
+	      (beginning-of-line)
+	      (org-list-send-list)
+	      (goto-line 2)
+	      (buffer-substring-no-properties
+	       (point)
+	       (progn (re-search-forward "^<!-- END" nil t)
+		      (beginning-of-line)
+		      (skip-chars-backward " \r\t\n")
+		      (point))))))))
 
 (ert-deftest test-org-list/to-latex ()
   "Test `org-list-to-latex' specifications."
