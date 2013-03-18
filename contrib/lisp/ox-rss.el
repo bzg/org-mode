@@ -104,10 +104,10 @@ When nil, Org will create ids using `org-icalendar-create-uid'."
 (org-export-define-derived-backend rss html
   :menu-entry
   (?r "Export to RSS"
-      ((?R "To temporary buffer"
+      ((?R "As RSS buffer"
 	   (lambda (a s v b) (org-rss-export-as-rss a s v)))
-       (?r "To file" (lambda (a s v b) (org-rss-export-to-rss a s v)))
-       (?o "To file and open"
+       (?r "As RSS file" (lambda (a s v b) (org-rss-export-to-rss a s v)))
+       (?o "As RSS file and open"
 	   (lambda (a s v b)
 	     (if a (org-rss-export-to-rss t s v)
 	       (org-open-file (org-rss-export-to-rss nil s v)))))))
