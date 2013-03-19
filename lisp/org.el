@@ -23150,8 +23150,8 @@ Show the heading too, if it is currently invisible."
 		     (org-show-context 'org-goto))))))
 
 (defun org-link-display-format (link)
-  "Replace a link with either the description, or the link target
-if no description is present"
+  "Replace a link with its the description.
+If there is no description, use the link target."
   (save-match-data
     (if (string-match org-bracket-link-analytic-regexp link)
 	(replace-match (if (match-end 5)
