@@ -4804,7 +4804,7 @@ but the stars and the body are.")
 	     ((equal key "DRAWERS")
 	      (setq drawers (delete-dups (append org-drawers (org-split-string value splitre)))))
 	     ((equal key "CONSTANTS")
-	      (setq const (append const (org-split-string value splitre))))
+	      (org-table-set-constants))
 	     ((equal key "STARTUP")
 	      (let ((opts (org-split-string value splitre))
 		    l var val)
@@ -4908,13 +4908,6 @@ but the stars and the body are.")
 	      org-todo-kwd-alist (nreverse org-todo-kwd-alist)
 	      org-todo-key-trigger (delq nil (mapcar 'cdr org-todo-key-alist))
 	      org-todo-key-alist (org-assign-fast-keys org-todo-key-alist)))
-      ;; Process the constants
-      (when const
-	(let (e cst)
-	  (while (setq e (pop const))
-	    (if (string-match "^\\([a-zA-Z0][_a-zA-Z0-9]*\\)=\\(.*\\)" e)
-		(push (cons (match-string 1 e) (match-string 2 e)) cst)))
-	  (setq org-table-formula-constants-local cst)))
 
       ;; Process the tags.
       (when tags
