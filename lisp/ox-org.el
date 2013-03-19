@@ -144,11 +144,13 @@ Return output file name."
   (when (plist-get plist :htmlized-source)
     (require 'htmlize)
     (require 'ox-html)
-    (or (find-buffer-visiting filename)
-	(find-file filename))
-    (font-lock-fontify-buffer)
-    (let* ((htmlize-output-type 'css)
-	   (newbuf (htmlize-buffer)))
+    (let* ((org-inhibit-startup t)
+	   (htmlize-output-type 'css)
+	   (visitingp (find-buffer-visiting filename))
+	   (work-buffer (or visitingp (find-file filename)))
+	   newbuf)
+      (font-lock-fontify-buffer)
+      (setq newbuf (htmlize-buffer))
       (with-current-buffer newbuf
 	(when org-org-htmlized-css-url
 	  (goto-char (point-min))
@@ -159,7 +161,8 @@ Return output file name."
 		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
 		 org-org-htmlized-css-url) t t)))
 	(write-file (concat pub-dir (file-name-nondirectory filename) ".html")))
-      (kill-buffer newbuf))
+      (kill-buffer newbuf)
+      (unless visitingp (kill-buffer work-buffer)))
     (set-buffer-modified-p nil)))
 
 (provide 'ox-org)
