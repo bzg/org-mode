@@ -144,7 +144,7 @@
 ;;; Preamble
 
 (defcustom org-texinfo-filename nil
-  "Default filename for texinfo output."
+  "Default filename for Texinfo output."
   :group 'org-export-texinfo
   :type '(string :tag "Export Filename"))
 
@@ -371,7 +371,7 @@ in order to mimic default behaviour:
 
 (defcustom org-texinfo-info-process
   '("makeinfo %f")
-  "Commands to process a texinfo file to an INFO file.
+  "Commands to process a Texinfo file to an INFO file.
 This is list of strings, each of them will be given to the shell
 as a command.  %f in the command will be replaced by the full
 file name, %b by the file base name \(i.e without extension) and
@@ -383,7 +383,7 @@ file name, %b by the file base name \(i.e without extension) and
 ;;; Constants
 (defconst org-texinfo-max-toc-depth 4
   "Maximum depth for creation of detailed menu listings.  Beyond
-  this depth texinfo will not recognize the nodes and will cause
+  this depth Texinfo will not recognize the nodes and will cause
   errors.  Left as a constant in case this value ever changes.")
 
 
@@ -485,7 +485,7 @@ retrieved."
   "Remove invalid characters from TITLE for use in menus and
 nodes.
 
-Based on TEXINFO specifications, the following must be removed:
+Based on Texinfo specifications, the following must be removed:
 @ { } ( ) : . ,"
   (replace-regexp-in-string "[@{}():,.]" "" title))
 
