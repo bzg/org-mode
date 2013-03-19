@@ -2411,7 +2411,11 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 (defun org-html-link--inline-image (link desc info)
   "Return HTML code for an inline image.
 LINK is the link pointing to the inline image.  INFO is a plist
-used as a communication channel."
+used as a communication channel.
+
+Inline images can have these attributes:
+
+#+ATTR_HTML: :width 100px :height 100px :alt \"Alt description\"."
   (let* ((type (org-element-property :type link))
 	 (raw-path (org-element-property :path link))
 	 (path (cond ((member type '("http" "https"))
@@ -2422,10 +2426,19 @@ used as a communication channel."
 	 (parent (org-export-get-parent-element link))
 	 (caption (org-export-data (org-export-get-caption parent) info))
 	 (label (org-element-property :name parent))
-	 (attr (mapconcat #'identity (org-element-property :attr_html parent) " ")))
+	 (alt (org-export-read-attribute :attr_html parent :alt))
+	 (width (org-export-read-attribute :attr_html parent :width))
+	 (height (org-export-read-attribute :attr_html parent :height))
+	 (options (org-export-read-attribute :attr_html parent :options)))
     ;; Return proper string, depending on DISPOSITION.
     (org-html-format-inline-image
-     path caption label attr (org-html-standalone-image-p link info))))
+     path caption label
+     (mapconcat 'identity
+		(delq nil (list (if width (format "width=\"%s\"" width))
+				(if alt (format "alt=\"%s\"" alt))
+				(if height (format "height=\"%s\"" height))
+				options)) " ")
+     (org-html-standalone-image-p link info))))
 
 (defvar org-html-standalone-image-predicate)
 (defun org-html-standalone-image-p (element info &optional predicate)
@@ -2534,13 +2547,9 @@ INFO is a plist holding contextual information.  See
 		 (if (not (eq (org-element-map parent 'link 'identity info t)
 			      link))
 		     ""
-		   (mapconcat
-		    'identity
-		    (let ((att (org-element-property :attr_html parent)))
-		      (unless (and desc att
-				   (string-match (regexp-quote (car att)) desc))
-			att))
-		    " "))))
+		    (let ((att (org-export-read-attribute :attr_html parent :options)))
+		      (unless (and desc att (string-match (regexp-quote att) desc))
+			att)))))
 	 (unless (string= attributes "")
 	   (setq attributes (concat " " attributes))))
     (cond
@@ -3012,9 +3021,8 @@ contextual information."
     (t
      (let* ((label (org-element-property :name table))
 	    (caption (org-export-get-caption table))
-	    (attributes (mapconcat #'identity
-				   (org-element-property :attr_html table)
-				   " "))
+	    (attributes
+	     (org-export-read-attribute :attr_html table :options))
 	    (alignspec
 	     (if (and (boundp 'org-html-format-table-no-css)
 		      org-html-format-table-no-css)
