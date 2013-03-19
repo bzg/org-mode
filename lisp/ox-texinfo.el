@@ -385,6 +385,23 @@ file name, %b by the file base name \(i.e without extension) and
   :type '(repeat :tag "Shell command sequence"
 		 (string :tag "Shell command")))
 
+(defcustom org-texinfo-logfiles-extensions
+  '("aux" "toc" "cp" "fn" "ky" "pg" "tp" "vr")
+  "The list of file extensions to consider as Texinfo logfiles.
+The logfiles will be remove if `org-texinfo-remove-logfiles' is
+non-nil."
+  :group 'org-export-texinfo
+  :type '(repeat (string :tag "Extension")))
+
+(defcustom org-texinfo-remove-logfiles t
+  "Non-nil means remove the logfiles produced by compiling a Texinfo file.
+By default, logfiles are files with these extensions: .aux, .toc,
+.cp, .fn, .ky, .pg and .tp.  To define the set of logfiles to remove,
+set `org-texinfo-logfiles-extensions'."
+  :group 'org-export-latex
+  :type 'boolean)
+
+
 ;;; Constants
 (defconst org-texinfo-max-toc-depth 4
   "Maximum depth for creation of detailed menu listings.  Beyond
@@ -1809,6 +1826,10 @@ Return INFO file name or an error if it couldn't be produced."
 			   (when errors (concat ": " errors))))
 	  ;; Else remove log files, when specified, and signal end of
 	  ;; process to user, along with any error encountered.
+	  (when org-texinfo-remove-logfiles
+	    (dolist (ext org-texinfo-logfiles-extensions)
+	      (let ((file (concat out-dir base-name "." ext)))
+		(when (file-exists-p file) (delete-file file)))))
 	  (message (concat "Process completed"
 			   (if (not errors) "."
 			     (concat " with errors: " errors)))))
