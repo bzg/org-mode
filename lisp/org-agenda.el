@@ -3792,9 +3792,10 @@ generating a new one."
 	(overlay-put ov 'org-type 'org-priority)))))
 
 (defun org-agenda-dim-blocked-tasks (&optional invisible)
-  (interactive "P")
   "Dim currently blocked TODO's in the agenda display."
-  (message "Dim or hide blocked tasks...")
+  (interactive "P")
+  (when (org-called-interactively-p 'any)
+    (message "Dim or hide blocked tasks..."))
   (mapc (lambda (o) (if (eq (overlay-get o 'org-type) 'org-blocked-todo)
 			(delete-overlay o)))
 	(overlays-in (point-min) (point-max)))
