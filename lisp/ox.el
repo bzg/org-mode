@@ -4259,7 +4259,8 @@ Possible values are `left', `right' and `center'."
 	 (table (org-export-get-parent-table table-cell))
 	 (number-cells 0)
 	 (total-cells 0)
-	 cookie-align)
+	 cookie-align
+	 previous-cell-number-p)
     (mapc
      (lambda (row)
        (cond
@@ -4289,7 +4290,11 @@ Possible values are `left', `right' and `center'."
 			(elt (org-element-contents row) column))
 		       info)))
 	   (incf total-cells)
-	   (when (string-match org-table-number-regexp value)
+	   ;; Treat an empty cell as a number if it follows a number
+	   (if (not (or (string-match org-table-number-regexp value)
+			(and (string= value "") previous-cell-number-p)))
+	       (setq previous-cell-number-p nil)
+	     (setq previous-cell-number-p t)
 	     (incf number-cells))))))
      (org-element-contents table))
     ;; Return value.  Alignment specified by cookies has precedence
