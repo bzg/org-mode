@@ -15098,7 +15098,7 @@ an empty drawer to delete."
 	 (values (and old (org-split-string old "[ \t]"))))
     (setq value (org-entry-protect-space value))
     (unless (member value values)
-      (setq values (cons value values))
+      (setq values (append values (list value)))
       (org-entry-put pom property
 		     (mapconcat 'identity values " ")))))
 
