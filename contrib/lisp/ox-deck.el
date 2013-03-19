@@ -41,34 +41,34 @@
 (require 'ox-html)
 (eval-when-compile (require 'cl))
 
-(org-export-define-derived-backend deck html
+(org-export-define-derived-backend 'deck 'html
   :menu-entry
-  (?d "Export to deck.js HTML Presentation"
-      ((?H "To temporary buffer" org-deck-export-as-html)
-       (?h "To file" org-deck-export-to-html)
-       (?o "To file and open"
-           (lambda (a s v b)
-             (if a (org-deck-export-to-html t s v b)
-               (org-open-file (org-deck-export-to-html nil s v b)))))))
+  '(?d "Export to deck.js HTML Presentation"
+       ((?H "To temporary buffer" org-deck-export-as-html)
+	(?h "To file" org-deck-export-to-html)
+	(?o "To file and open"
+	    (lambda (a s v b)
+	      (if a (org-deck-export-to-html t s v b)
+		(org-open-file (org-deck-export-to-html nil s v b)))))))
   :options-alist
-  ((:html-link-home "HTML_LINK_HOME" nil nil)
-   (:html-link-up "HTML_LINK_UP" nil nil)
-   (:deck-postamble "DECK_POSTAMBLE" nil org-deck-postamble newline)
-   (:deck-preamble "DECK_PREAMBLE" nil org-deck-preamble newline)
-   (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" nil nil)
-   (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil nil)
-   (:deck-base-url "DECK_BASE_URL" nil org-deck-base-url)
-   (:deck-theme "DECK_THEME" nil org-deck-theme)
-   (:deck-transition "DECK_TRANSITION" nil org-deck-transition)
-   (:deck-include-extensions "DECK_INCLUDE_EXTENSIONS" nil
-                             org-deck-include-extensions split)
-   (:deck-exclude-extensions "DECK_EXCLUDE_EXTENSIONS" nil
-                             org-deck-exclude-extensions split))
+  '((:html-link-home "HTML_LINK_HOME" nil nil)
+    (:html-link-up "HTML_LINK_UP" nil nil)
+    (:deck-postamble "DECK_POSTAMBLE" nil org-deck-postamble newline)
+    (:deck-preamble "DECK_PREAMBLE" nil org-deck-preamble newline)
+    (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" nil nil)
+    (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil nil)
+    (:deck-base-url "DECK_BASE_URL" nil org-deck-base-url)
+    (:deck-theme "DECK_THEME" nil org-deck-theme)
+    (:deck-transition "DECK_TRANSITION" nil org-deck-transition)
+    (:deck-include-extensions "DECK_INCLUDE_EXTENSIONS" nil
+			      org-deck-include-extensions split)
+    (:deck-exclude-extensions "DECK_EXCLUDE_EXTENSIONS" nil
+			      org-deck-exclude-extensions split))
   :translate-alist
-  ((headline . org-deck-headline)
-   (inner-template . org-deck-inner-template)
-   (item . org-deck-item)
-   (template . org-deck-template)))
+  '((headline . org-deck-headline)
+    (inner-template . org-deck-inner-template)
+    (item . org-deck-item)
+    (template . org-deck-template)))
 
 (defgroup org-export-deck nil
   "Options for exporting Org mode files to deck.js HTML Presentations."

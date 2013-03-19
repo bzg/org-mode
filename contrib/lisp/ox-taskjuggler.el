@@ -292,18 +292,18 @@ This hook is run with the name of the file as argument.")
 
 ;;; Back-End Definition
 
-(org-export-define-backend taskjuggler
-  ((template . org-taskjuggler-project-plan))
+(org-export-define-backend 'taskjuggler
+  '((template . org-taskjuggler-project-plan))
   :menu-entry
-  (?J "Export to TaskJuggler"
-      ((?j "As TJP file" (lambda (a s v b) (org-taskjuggler-export a s v)))
-       (?o "As TJP file and open"
-           (lambda (a s v b)
-             (if a (org-taskjuggler-export a s v)
-               (org-taskjuggler-export-and-open s v))))))
+  '(?J "Export to TaskJuggler"
+       ((?j "As TJP file" (lambda (a s v b) (org-taskjuggler-export a s v)))
+	(?o "As TJP file and open"
+	    (lambda (a s v b)
+	      (if a (org-taskjuggler-export a s v)
+		(org-taskjuggler-export-and-open s v))))))
   ;; This property will be used to store unique ids in communication
   ;; channel.  Ids will be retrieved with `org-taskjuggler-get-id'.
-  :options-alist ((:taskjuggler-unique-ids nil nil nil)))
+  :options-alist '((:taskjuggler-unique-ids nil nil nil)))
 
 
 

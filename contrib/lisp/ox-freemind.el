@@ -42,22 +42,22 @@
 
 ;;; Define Back-End
 
-(org-export-define-derived-backend freemind html
+(org-export-define-derived-backend 'freemind 'html
   :export-block "FREEMIND"
   :menu-entry
-  (?f "Export to Freemind Mindmap"
-      ((?f "As Freemind Mindmap file" org-freemind-export-to-freemind)
-       (?o "As Freemind Mindmap file and open"
-	   (lambda (a s v b)
-	     (if a (org-freemind-export-to-freemind t s v b)
-	       (org-open-file (org-freemind-export-to-freemind nil s v b)))))))
-  :translate-alist ((headline . org-freemind-headline)
-		    (template . org-freemind-template)
-		    (inner-template . org-freemind-inner-template)
-		    (section . org-freemind-section)
-		    (entity . org-freemind-entity))
-  :filters-alist ((:filter-options . org-freemind-options-function)
-		  (:filter-final-output . org-freemind-final-function)))
+  '(?f "Export to Freemind Mindmap"
+       ((?f "As Freemind Mindmap file" org-freemind-export-to-freemind)
+	(?o "As Freemind Mindmap file and open"
+	    (lambda (a s v b)
+	      (if a (org-freemind-export-to-freemind t s v b)
+		(org-open-file (org-freemind-export-to-freemind nil s v b)))))))
+  :translate-alist '((headline . org-freemind-headline)
+		     (template . org-freemind-template)
+		     (inner-template . org-freemind-inner-template)
+		     (section . org-freemind-section)
+		     (entity . org-freemind-entity))
+  :filters-alist '((:filter-options . org-freemind-options-function)
+		   (:filter-final-output . org-freemind-final-function)))
 
 
 

@@ -50,33 +50,33 @@
 
 (require 'ox-html)
 
-(org-export-define-derived-backend s5 html
+(org-export-define-derived-backend 's5 'html
   :menu-entry
-  (?s "Export to S5 HTML Presentation"
-      ((?H "To temporary buffer" org-s5-export-as-html)
-       (?h "To file" org-s5-export-to-html)
-       (?o "To file and open"
-           (lambda (a s v b)
-             (if a (org-s5-export-to-html t s v b)
-               (org-open-file (org-s5-export-to-html nil s v b)))))))
+  '(?s "Export to S5 HTML Presentation"
+       ((?H "To temporary buffer" org-s5-export-as-html)
+	(?h "To file" org-s5-export-to-html)
+	(?o "To file and open"
+	    (lambda (a s v b)
+	      (if a (org-s5-export-to-html t s v b)
+		(org-open-file (org-s5-export-to-html nil s v b)))))))
   :options-alist
-  ((:html-link-home "HTML_LINK_HOME" nil nil)
-   (:html-link-up "HTML_LINK_UP" nil nil)
-   (:s5-postamble "S5_POSTAMBLE" nil org-s5-postamble newline)
-   (:s5-preamble "S5_PREAMBLE" nil org-s5-preamble newline)
-   (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" nil nil)
-   (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil nil)
-   (:s5-version "S5_VERSION" nil org-s5-version)
-   (:s5-theme-file "S5_THEME_FILE" nil org-s5-theme-file)
-   (:s5-ui-url "S5_UI_URL" nil org-s5-ui-url)
-   (:s5-default-view "S5_DEFAULT_VIEW" nil org-s5-default-view)
-   (:s5-control-visibility "S5_CONTROL_VISIBILITY" nil
-			   org-s5-control-visibility))
+  '((:html-link-home "HTML_LINK_HOME" nil nil)
+    (:html-link-up "HTML_LINK_UP" nil nil)
+    (:s5-postamble "S5_POSTAMBLE" nil org-s5-postamble newline)
+    (:s5-preamble "S5_PREAMBLE" nil org-s5-preamble newline)
+    (:html-head-include-default-style "HTML_INCLUDE_DEFAULT_STYLE" nil nil)
+    (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil nil)
+    (:s5-version "S5_VERSION" nil org-s5-version)
+    (:s5-theme-file "S5_THEME_FILE" nil org-s5-theme-file)
+    (:s5-ui-url "S5_UI_URL" nil org-s5-ui-url)
+    (:s5-default-view "S5_DEFAULT_VIEW" nil org-s5-default-view)
+    (:s5-control-visibility "S5_CONTROL_VISIBILITY" nil
+			    org-s5-control-visibility))
   :translate-alist
-  ((headline . org-s5-headline)
-   (plain-list . org-s5-plain-list)
-   (inner-template . org-s5-inner-template)
-   (template . org-s5-template)))
+  '((headline . org-s5-headline)
+    (plain-list . org-s5-plain-list)
+    (inner-template . org-s5-inner-template)
+    (template . org-s5-template)))
 
 (defgroup org-export-s5 nil
   "Options for exporting Org mode files to S5 HTML Presentations."

@@ -108,28 +108,28 @@
 
 ;;; Define Back-End
 
-(org-export-define-derived-backend koma-letter latex
+(org-export-define-derived-backend 'koma-letter 'latex
   :options-alist
-  ((:closing "CLOSING" nil org-koma-letter-closing)
-   (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
-   (:lco "LCO" nil org-koma-letter-class-option-file)
-   (:opening "OPENING" nil org-koma-letter-opening)
-   (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
-   (:signature "SIGNATURE" nil nil newline)
-   (:to-address "TO_ADDRESS" nil nil newline))
-  :translate-alist ((export-block . org-koma-letter-export-block)
-                    (export-snippet . org-koma-letter-export-snippet)
-                    (keyword . org-koma-letter-keyword)
-                    (template . org-koma-letter-template))
+  '((:closing "CLOSING" nil org-koma-letter-closing)
+    (:from-address "FROM_ADDRESS" nil org-koma-letter-from-address newline)
+    (:lco "LCO" nil org-koma-letter-class-option-file)
+    (:opening "OPENING" nil org-koma-letter-opening)
+    (:phone-number "PHONE_NUMBER" nil org-koma-letter-phone-number)
+    (:signature "SIGNATURE" nil nil newline)
+    (:to-address "TO_ADDRESS" nil nil newline))
+  :translate-alist '((export-block . org-koma-letter-export-block)
+		     (export-snippet . org-koma-letter-export-snippet)
+		     (keyword . org-koma-letter-keyword)
+		     (template . org-koma-letter-template))
   :menu-entry
-  (?k "Export with KOMA Scrlttr2"
-      ((?K "As LaTeX buffer" org-koma-letter-export-as-latex)
-       (?k "As LaTeX file" org-koma-letter-export-to-latex)
-       (?p "As PDF file" org-koma-letter-export-to-pdf)
-       (?O "As PDF file and open"
-           (lambda (a s v b)
-             (if a (org-koma-letter-export-to-pdf t s v b)
-	       (org-open-file (org-koma-letter-export-to-pdf nil s v b))))))))
+  '(?k "Export with KOMA Scrlttr2"
+       ((?K "As LaTeX buffer" org-koma-letter-export-as-latex)
+	(?k "As LaTeX file" org-koma-letter-export-to-latex)
+	(?p "As PDF file" org-koma-letter-export-to-pdf)
+	(?O "As PDF file and open"
+	    (lambda (a s v b)
+	      (if a (org-koma-letter-export-to-pdf t s v b)
+		(org-open-file (org-koma-letter-export-to-pdf nil s v b))))))))
 
 
 ;;; Transcode Functions
