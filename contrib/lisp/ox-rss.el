@@ -233,7 +233,13 @@ communication channel."
 		 (concat "sec-" (mapconcat 'number-to-string hl-number "-")))))
 	   (category (org-rss-plain-text
 		      (or (org-element-property :CATEGORY headline) "") info))
-	   (pubdate (org-element-property :PUBDATE headline))
+	   (pubdate
+	    (let ((system-time-locale "C"))
+	      (format-time-string
+	       "%a, %d %h %Y %H:%M:%S %Z"
+	       (org-time-string-to-time
+		(or (org-element-property :PUBDATE headline)
+		    (error "Missing PUBDATE property"))))))
 	   (title (org-rss-plain-text
 		   (org-element-property :raw-value headline) info))
 	   (publink
@@ -383,9 +389,8 @@ information."
 	   (unless (org-entry-get (point) "PUBDATE")
 	     (setq msg t)
 	     (org-set-property
-	      "PUBDATE"
-	      (let ((system-time-locale "C"))
-		(format-time-string "%a, %d %h %Y %H:%M:%S %Z")))))))
+	      "PUBDATE" (format-time-string
+			 (cdr org-time-stamp-formats)))))))
      nil nil 'comment 'archive)
     (when msg
       (message "Property PUBDATE added to top-level entries in %s"
