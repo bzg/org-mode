@@ -4622,12 +4622,15 @@ First element has index 0, or I0 if given."
 		     (orgtbl-format-line prevline))))))
 
 ;;;###autoload
-(defun orgtbl-to-generic (table params)
+(defun orgtbl-to-generic (table params &optional backend)
   "Convert the orgtbl-mode TABLE to some other format.
 This generic routine can be used for many standard cases.
 TABLE is a list, each entry either the symbol `hline' for a horizontal
 separator line, or a list of fields for that line.
 PARAMS is a property list of parameters that can influence the conversion.
+A third optional argument BACKEND can be used to convert the content of
+the cells using a specific export back-end.
+
 For the generic converter, some parameters are obligatory: you need to
 specify either :lfmt, or all of (:lstart :lend :sep).
 
@@ -4698,22 +4701,29 @@ directly by `orgtbl-send-table'.  See manual."
 	 (*orgtbl-llfmt* (or (plist-get params :llfmt) *orgtbl-lfmt*))
 	 (*orgtbl-fmt* (plist-get params :fmt))
 	 *orgtbl-rtn*)
-
+    ;; Convert cells content to backend BACKEND
+    (when backend
+      (setq *orgtbl-table*
+	    (mapcar
+	     (lambda(r)
+	       (mapcar
+		(lambda (c)
+		  (org-trim (org-export-string-as c backend t '(:with-tables t))))
+		r))
+	     *orgtbl-table*)))
     ;; Put header
     (unless splicep
       (when (plist-member params :tstart)
 	(let ((tstart (orgtbl-eval-str (plist-get params :tstart))))
 	  (if tstart (push tstart *orgtbl-rtn*)))))
-
-    ;; Do we have a heading section?  If so, format it and handle the
-    ;; trailing hline.
+    ;; If we have a heading, format it and handle the trailing hline.
     (if (and (not splicep)
 	     (or (consp (car *orgtbl-table*))
 		 (consp (nth 1 *orgtbl-table*)))
 	     (memq 'hline (cdr *orgtbl-table*)))
 	(progn
 	  (when (eq 'hline (car *orgtbl-table*))
-	    ;; there is a hline before the first data line
+	    ;; There is a hline before the first data line
 	    (and hline (push hline *orgtbl-rtn*))
 	    (pop *orgtbl-table*))
 	  (let* ((*orgtbl-lstart* (or (plist-get params :hlstart)
@@ -4731,15 +4741,12 @@ directly by `orgtbl-send-table'.  See manual."
 	    (orgtbl-format-section 'hline))
 	  (if (and hline (not skipheadrule)) (push hline *orgtbl-rtn*))
 	  (pop *orgtbl-table*)))
-
     ;; Now format the main section.
     (orgtbl-format-section nil)
-
     (unless splicep
       (when (plist-member params :tend)
 	(let ((tend (orgtbl-eval-str (plist-get params :tend))))
 	  (if tend (push tend *orgtbl-rtn*)))))
-
     (mapconcat (if remove-newlines
 		   (lambda (tend)
 		     (replace-regexp-in-string "[\n\r\t\f]" "\\\\n" tend))
@@ -4797,7 +4804,8 @@ this function is called."
 	   :tend "\\end{tabular}"
 	   :lstart "" :lend " \\\\" :sep " & "
 	   :efmt "%s\\,(%s)" :hline "\\hline")))
-    (orgtbl-to-generic table (org-combine-plists params2 params))))
+    (require 'ox-latex)
+    (orgtbl-to-generic table (org-combine-plists params2 params) 'latex)))
 
 ;;;###autoload
 (defun orgtbl-to-html (table params)
@@ -4859,7 +4867,8 @@ this function is called."
 	   :tend "@end multitable"
 	   :lstart "@item " :lend "" :sep " @tab "
 	   :hlstart "@headitem ")))
-    (orgtbl-to-generic table (org-combine-plists params2 params))))
+    (require 'ox-texinfo)
+    (orgtbl-to-generic table (org-combine-plists params2 params) 'texinfo)))
 
 ;;;###autoload
 (defun orgtbl-to-orgtbl (table params)
