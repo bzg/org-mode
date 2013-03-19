@@ -148,6 +148,11 @@
   :group 'org-export-texinfo
   :type '(string :tag "Export Filename"))
 
+(defcustom org-texinfo-coding-system nil
+  "Default document encoding for Texinfo output."
+  :group 'org-export-texinfo
+  :type 'coding-system)
+
 (defcustom org-texinfo-default-class "info"
   "The default Texinfo class."
   :group 'org-export-texinfo
@@ -654,6 +659,7 @@ holding export options."
 			    (file-name-nondirectory
 			     (org-export-output-file-name ".info"))))
 	 (author (org-export-data (plist-get info :author) info))
+	 (lang (org-export-data (plist-get info :language) info))
 	 (texinfo-header (plist-get info :texinfo-header))
 	 (texinfo-post-header (plist-get info :texinfo-post-header))
 	 (subtitle (plist-get info :subtitle))
@@ -678,6 +684,10 @@ holding export options."
      ;; Filename and Title
      "@setfilename " info-filename "\n"
      "@settitle " title "\n"
+     (if org-texinfo-coding-system
+       (format "@documentencoding %s\n"
+	       (upcase (symbol-name org-texinfo-coding-system))) "\n")
+     (format "@documentlanguage %s\n" lang)
      "\n\n"
      "@c Version and Contact Info\n"
      "@set AUTHOR " author "\n"
@@ -1003,7 +1013,7 @@ holding contextual information."
 			(when priority (format "@emph{#%s} " priority))
 			text
 			(when tags
-			  (format ":%s:"
+			  (format " :%s:"
 				  (mapconcat 'identity tags ":")))))))
 	 (full-text-no-tag
 	  (org-texinfo--sanitize-content
@@ -1679,16 +1689,19 @@ file-local settings.
 
 Return output file's name."
   (interactive)
-  (let ((outfile (org-export-output-file-name ".texi" subtreep)))
+  (let ((outfile (org-export-output-file-name ".texi" subtreep))
+	(org-export-coding-system org-texinfo-coding-system))
     (if async
 	(org-export-async-start
 	    (lambda (f) (org-export-add-to-stack f 'texinfo))
-	  `(expand-file-name
-	    (org-export-to-file
-	     'texinfo ,outfile ,subtreep ,visible-only ,body-only
-	     ',ext-plist)))
-      (org-export-to-file
-       'texinfo outfile subtreep visible-only body-only ext-plist))))
+	  (let ((org-export-coding-system org-texinfo-coding-system))
+	    `(expand-file-name
+	      (org-export-to-file
+	       'texinfo ,outfile ,subtreep ,visible-only ,body-only
+	       ',ext-plist))))
+      (let ((org-export-coding-system org-texinfo-coding-system))
+	(org-export-to-file
+	 'texinfo outfile subtreep visible-only body-only ext-plist)))))
 
 (defun org-texinfo-export-to-info
   (&optional async subtreep visible-only body-only ext-plist)
@@ -1723,17 +1736,31 @@ directory.
 Return INFO file's name."
   (interactive)
   (if async
-      (let ((outfile (org-export-output-file-name ".texi" subtreep)))
+      (let ((outfile (org-export-output-file-name ".texi" subtreep))
+	    (org-export-coding-system org-texinfo-coding-system))
 	(org-export-async-start
 	    (lambda (f) (org-export-add-to-stack f 'texinfo))
-	  `(expand-file-name
-	    (org-texinfo-compile
-	     (org-export-to-file
-	      'texinfo ,outfile ,subtreep ,visible-only ,body-only
-	      ',ext-plist)))))
+	  (let ((org-export-coding-system org-texinfo-coding-system))
+	    `(expand-file-name
+	      (org-texinfo-compile
+	       (org-export-to-file
+		'texinfo ,outfile ,subtreep ,visible-only ,body-only
+		',ext-plist))))))
     (org-texinfo-compile
-     (org-texinfo-export-to-texinfo
-      nil subtreep visible-only body-only ext-plist))))
+     (let ((org-export-coding-system org-texinfo-coding-system))
+       (org-texinfo-export-to-texinfo
+	nil subtreep visible-only body-only ext-plist)))))
+
+;;;###autoload
+(defun org-texinfo-publish-to-texinfo (plist filename pub-dir)
+  "Publish an org file to Texinfo.
+
+FILENAME is the filename of the Org file to be published.  PLIST
+is the property list for the given project.  PUB-DIR is the
+publishing directory.
+
+Return output file name."
+  (org-publish-org-to 'texinfo filename ".texi" plist pub-dir))
 
 (defun org-texinfo-compile (file)
   "Compile a texinfo file.
