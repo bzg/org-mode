@@ -2881,7 +2881,8 @@ Return code as a string."
 	 (org-update-radio-target-regexp)
 	 ;; Run last hook with current back-end as argument.
 	 (goto-char (point-min))
-	 (run-hook-with-args 'org-export-before-parsing-hook backend)
+	 (save-excursion
+	   (run-hook-with-args 'org-export-before-parsing-hook backend))
 	 ;; Update communication channel with environment.  Also
 	 ;; install user's and developer's filters.
 	 (setq info
