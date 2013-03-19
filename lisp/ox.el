@@ -1071,7 +1071,7 @@ The back-end could then be called with, for example:
     (when export-block
       (mapc
        (lambda (name)
-	 (add-to-list org-element-block-name-alist
+	 (add-to-list 'org-element-block-name-alist
 		      `(,name . org-element-export-block-parser)))
        export-block))))
 
