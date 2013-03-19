@@ -255,31 +255,31 @@ re-read the iCalendar file.")
 
 ;;; Define Back-End
 
-(org-export-define-derived-backend icalendar ascii
-  :translate-alist ((clock . ignore)
-		    (headline . org-icalendar-entry)
-		    (inlinetask . ignore)
-		    (planning . ignore)
-		    (section . ignore)
-		    (template . org-icalendar-template))
+(org-export-define-derived-backend 'icalendar 'ascii
+  :translate-alist '((clock . ignore)
+		     (headline . org-icalendar-entry)
+		     (inlinetask . ignore)
+		     (planning . ignore)
+		     (section . ignore)
+		     (template . org-icalendar-template))
   :options-alist
-  ((:exclude-tags
-    "ICALENDAR_EXCLUDE_TAGS" nil org-icalendar-exclude-tags split)
-   (:with-timestamps nil "<" org-icalendar-with-timestamps)
-   (:with-vtodo nil nil org-icalendar-include-todo)
-   ;; The following property will be non-nil when export has been
-   ;; started from org-agenda-mode.  In this case, any entry without
-   ;; a non-nil "ICALENDAR_MARK" property will be ignored.
-   (:icalendar-agenda-view nil nil nil))
+  '((:exclude-tags
+     "ICALENDAR_EXCLUDE_TAGS" nil org-icalendar-exclude-tags split)
+    (:with-timestamps nil "<" org-icalendar-with-timestamps)
+    (:with-vtodo nil nil org-icalendar-include-todo)
+    ;; The following property will be non-nil when export has been
+    ;; started from org-agenda-mode.  In this case, any entry without
+    ;; a non-nil "ICALENDAR_MARK" property will be ignored.
+    (:icalendar-agenda-view nil nil nil))
   :filters-alist
-  ((:filter-headline . org-icalendar-clear-blank-lines))
+  '((:filter-headline . org-icalendar-clear-blank-lines))
   :menu-entry
-  (?c "Export to iCalendar"
-      ((?f "Current file" org-icalendar-export-to-ics)
-       (?a "All agenda files"
-	   (lambda (a s v b) (org-icalendar-export-agenda-files a)))
-       (?c "Combine all agenda files"
-	   (lambda (a s v b) (org-icalendar-combine-agenda-files a))))))
+  '(?c "Export to iCalendar"
+       ((?f "Current file" org-icalendar-export-to-ics)
+	(?a "All agenda files"
+	    (lambda (a s v b) (org-icalendar-export-agenda-files a)))
+	(?c "Combine all agenda files"
+	    (lambda (a s v b) (org-icalendar-combine-agenda-files a))))))
 
 
 

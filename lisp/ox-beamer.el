@@ -293,36 +293,36 @@ Return overlay specification, as a string, or nil."
 
 ;;; Define Back-End
 
-(org-export-define-derived-backend beamer latex
+(org-export-define-derived-backend 'beamer 'latex
   :export-block "BEAMER"
   :menu-entry
-  (?l 1
-      ((?B "As LaTeX buffer (Beamer)" org-beamer-export-as-latex)
-       (?b "As LaTeX file (Beamer)" org-beamer-export-to-latex)
-       (?P "As PDF file (Beamer)" org-beamer-export-to-pdf)
-       (?O "As PDF file and open (Beamer)"
-	   (lambda (a s v b)
-	     (if a (org-beamer-export-to-pdf t s v b)
-	       (org-open-file (org-beamer-export-to-pdf nil s v b)))))))
+  '(?l 1
+       ((?B "As LaTeX buffer (Beamer)" org-beamer-export-as-latex)
+	(?b "As LaTeX file (Beamer)" org-beamer-export-to-latex)
+	(?P "As PDF file (Beamer)" org-beamer-export-to-pdf)
+	(?O "As PDF file and open (Beamer)"
+	    (lambda (a s v b)
+	      (if a (org-beamer-export-to-pdf t s v b)
+		(org-open-file (org-beamer-export-to-pdf nil s v b)))))))
   :options-alist
-  ((:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
-   (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
-   (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
-   (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
-   (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
-   (:beamer-header-extra "BEAMER_HEADER" nil nil newline)
-   (:headline-levels nil "H" org-beamer-frame-level))
-  :translate-alist ((bold . org-beamer-bold)
-		    (export-block . org-beamer-export-block)
-		    (export-snippet . org-beamer-export-snippet)
-		    (headline . org-beamer-headline)
-		    (item . org-beamer-item)
-		    (keyword . org-beamer-keyword)
-		    (link . org-beamer-link)
-		    (plain-list . org-beamer-plain-list)
-		    (radio-target . org-beamer-radio-target)
-		    (target . org-beamer-target)
-		    (template . org-beamer-template)))
+  '((:beamer-theme "BEAMER_THEME" nil org-beamer-theme)
+    (:beamer-color-theme "BEAMER_COLOR_THEME" nil nil t)
+    (:beamer-font-theme "BEAMER_FONT_THEME" nil nil t)
+    (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
+    (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
+    (:beamer-header-extra "BEAMER_HEADER" nil nil newline)
+    (:headline-levels nil "H" org-beamer-frame-level))
+  :translate-alist '((bold . org-beamer-bold)
+		     (export-block . org-beamer-export-block)
+		     (export-snippet . org-beamer-export-snippet)
+		     (headline . org-beamer-headline)
+		     (item . org-beamer-item)
+		     (keyword . org-beamer-keyword)
+		     (link . org-beamer-link)
+		     (plain-list . org-beamer-plain-list)
+		     (radio-target . org-beamer-radio-target)
+		     (target . org-beamer-target)
+		     (template . org-beamer-template)))
 
 
 

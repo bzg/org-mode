@@ -842,7 +842,7 @@ mode."
 ;; Eventually `org-export-barf-if-invalid-backend' returns an error
 ;; when a given back-end hasn't been registered yet.
 
-(defmacro org-export-define-backend (backend translators &rest body)
+(defun org-export-define-backend (backend translators &rest body)
   "Define a new back-end BACKEND.
 
 TRANSLATORS is an alist between object or element types and
@@ -905,7 +905,7 @@ keywords are understood:
     Menu entry for the export dispatcher.  It should be a list
     like:
 
-      \(KEY DESCRIPTION-OR-ORDINAL ACTION-OR-MENU)
+      '(KEY DESCRIPTION-OR-ORDINAL ACTION-OR-MENU)
 
     where :
 
@@ -929,17 +929,17 @@ keywords are understood:
       If it is an alist, associations should follow the
       pattern:
 
-        \(KEY DESCRIPTION ACTION)
+        '(KEY DESCRIPTION ACTION)
 
       where KEY, DESCRIPTION and ACTION are described above.
 
     Valid values include:
 
-      \(?m \"My Special Back-end\" my-special-export-function)
+      '(?m \"My Special Back-end\" my-special-export-function)
 
       or
 
-      \(?l \"Export to LaTeX\"
+      '(?l \"Export to LaTeX\"
            \(?p \"As PDF file\" org-latex-export-to-pdf)
            \(?o \"As PDF file and open\"
                \(lambda (a s v b)
@@ -950,7 +950,7 @@ keywords are understood:
       or the following, which will be added to the previous
       sub-menu,
 
-      \(?l 1
+      '(?l 1
           \((?B \"As TEX buffer (Beamer)\" org-beamer-export-as-latex)
            \(?P \"As PDF file (Beamer)\" org-beamer-export-to-pdf)))
 
@@ -960,8 +960,7 @@ keywords are understood:
     communication channel and how their value are acquired.  See
     `org-export-options-alist' for more information about
     structure of the values."
-  (declare (debug (&define name sexp [&rest [keywordp sexp]] defbody))
-	   (indent 1))
+  (declare (indent 1))
   (let (export-block filters menu-entry options contents)
     (while (keywordp (car body))
       (case (pop body)
@@ -977,22 +976,19 @@ keywords are understood:
 			   (and filters (list :filters-alist filters))
 			   (and options (list :options-alist options))
 			   (and menu-entry (list :menu-entry menu-entry))))
-    `(progn
-       ;; Register back-end.
-       (let ((registeredp (assq ',backend org-export-registered-backends)))
-	 (if registeredp (setcdr registeredp ',contents)
-	   (push (cons ',backend ',contents) org-export-registered-backends)))
-       ;; Tell parser to not parse EXPORT-BLOCK blocks.
-       ,(when export-block
-	  `(mapc
-	    (lambda (name)
-	      (add-to-list 'org-element-block-name-alist
-			   `(,name . org-element-export-block-parser)))
-	    ',export-block))
-       ;; Splice in the body, if any.
-       ,@body)))
+    ;; Register back-end.
+    (let ((registeredp (assq backend org-export-registered-backends)))
+      (if registeredp (setcdr registeredp contents)
+	(push (cons backend contents) org-export-registered-backends)))
+    ;; Tell parser to not parse EXPORT-BLOCK blocks.
+    (when export-block
+      (mapc
+       (lambda (name)
+	 (add-to-list 'org-element-block-name-alist
+		      `(,name . org-element-export-block-parser)))
+       export-block))))
 
-(defmacro org-export-define-derived-backend (child parent &rest body)
+(defun org-export-define-derived-backend (child parent &rest body)
   "Create a new back-end as a variant of an existing one.
 
 CHILD is the name of the derived back-end.  PARENT is the name of
@@ -1038,14 +1034,13 @@ keywords are understood:
 As an example, here is how one could define \"my-latex\" back-end
 as a variant of `latex' back-end with a custom template function:
 
-  \(org-export-define-derived-backend my-latex latex
-     :translate-alist ((template . my-latex-template-fun)))
+  \(org-export-define-derived-backend 'my-latex 'latex
+     :translate-alist '((template . my-latex-template-fun)))
 
 The back-end could then be called with, for example:
 
   \(org-export-to-buffer 'my-latex \"*Test my-latex*\")"
-  (declare (debug (&define name sexp [&rest [keywordp sexp]] def-body))
-	   (indent 2))
+  (declare (indent 2))
   (let (export-block filters menu-entry options translators contents)
     (while (keywordp (car body))
       (case (pop body)
@@ -1067,21 +1062,18 @@ The back-end could then be called with, for example:
 		    (let ((p-options (org-export-backend-options parent)))
 		      (list :options-alist (append options p-options)))
 		    (and menu-entry (list :menu-entry menu-entry))))
-    `(progn
-       (org-export-barf-if-invalid-backend ',parent)
-       ;; Register back-end.
-       (let ((registeredp (assq ',child org-export-registered-backends)))
-	 (if registeredp (setcdr registeredp ',contents)
-	   (push (cons ',child ',contents) org-export-registered-backends)))
-       ;; Tell parser to not parse EXPORT-BLOCK blocks.
-       ,(when export-block
-	  `(mapc
-	    (lambda (name)
-	      (add-to-list 'org-element-block-name-alist
-			   `(,name . org-element-export-block-parser)))
-	    ',export-block))
-       ;; Splice in the body, if any.
-       ,@body)))
+    (org-export-barf-if-invalid-backend parent)
+    ;; Register back-end.
+    (let ((registeredp (assq child org-export-registered-backends)))
+      (if registeredp (setcdr registeredp contents)
+	(push (cons child contents) org-export-registered-backends)))
+    ;; Tell parser to not parse EXPORT-BLOCK blocks.
+    (when export-block
+      (mapc
+       (lambda (name)
+	 (add-to-list org-element-block-name-alist
+		      `(,name . org-element-export-block-parser)))
+       export-block))))
 
 (defun org-export-backend-parent (backend)
   "Return back-end from which BACKEND is derived, or nil."

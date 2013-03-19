@@ -54,83 +54,83 @@
 ;; We also install a filter for headlines and sections, in order to
 ;; control blank lines separating them in output string.
 
-(org-export-define-backend ascii
-  ((bold . org-ascii-bold)
-   (center-block . org-ascii-center-block)
-   (clock . org-ascii-clock)
-   (code . org-ascii-code)
-   (comment . (lambda (&rest args) ""))
-   (comment-block . (lambda (&rest args) ""))
-   (drawer . org-ascii-drawer)
-   (dynamic-block . org-ascii-dynamic-block)
-   (entity . org-ascii-entity)
-   (example-block . org-ascii-example-block)
-   (export-block . org-ascii-export-block)
-   (export-snippet . org-ascii-export-snippet)
-   (fixed-width . org-ascii-fixed-width)
-   (footnote-definition . org-ascii-footnote-definition)
-   (footnote-reference . org-ascii-footnote-reference)
-   (headline . org-ascii-headline)
-   (horizontal-rule . org-ascii-horizontal-rule)
-   (inline-src-block . org-ascii-inline-src-block)
-   (inlinetask . org-ascii-inlinetask)
-   (inner-template . org-ascii-inner-template)
-   (italic . org-ascii-italic)
-   (item . org-ascii-item)
-   (keyword . org-ascii-keyword)
-   (latex-environment . org-ascii-latex-environment)
-   (latex-fragment . org-ascii-latex-fragment)
-   (line-break . org-ascii-line-break)
-   (link . org-ascii-link)
-   (paragraph . org-ascii-paragraph)
-   (plain-list . org-ascii-plain-list)
-   (plain-text . org-ascii-plain-text)
-   (planning . org-ascii-planning)
-   (quote-block . org-ascii-quote-block)
-   (quote-section . org-ascii-quote-section)
-   (radio-target . org-ascii-radio-target)
-   (section . org-ascii-section)
-   (special-block . org-ascii-special-block)
-   (src-block . org-ascii-src-block)
-   (statistics-cookie . org-ascii-statistics-cookie)
-   (strike-through . org-ascii-strike-through)
-   (subscript . org-ascii-subscript)
-   (superscript . org-ascii-superscript)
-   (table . org-ascii-table)
-   (table-cell . org-ascii-table-cell)
-   (table-row . org-ascii-table-row)
-   (target . org-ascii-target)
-   (template . org-ascii-template)
-   (timestamp . org-ascii-timestamp)
-   (underline . org-ascii-underline)
-   (verbatim . org-ascii-verbatim)
-   (verse-block . org-ascii-verse-block))
+(org-export-define-backend 'ascii
+  '((bold . org-ascii-bold)
+    (center-block . org-ascii-center-block)
+    (clock . org-ascii-clock)
+    (code . org-ascii-code)
+    (comment . (lambda (&rest args) ""))
+    (comment-block . (lambda (&rest args) ""))
+    (drawer . org-ascii-drawer)
+    (dynamic-block . org-ascii-dynamic-block)
+    (entity . org-ascii-entity)
+    (example-block . org-ascii-example-block)
+    (export-block . org-ascii-export-block)
+    (export-snippet . org-ascii-export-snippet)
+    (fixed-width . org-ascii-fixed-width)
+    (footnote-definition . org-ascii-footnote-definition)
+    (footnote-reference . org-ascii-footnote-reference)
+    (headline . org-ascii-headline)
+    (horizontal-rule . org-ascii-horizontal-rule)
+    (inline-src-block . org-ascii-inline-src-block)
+    (inlinetask . org-ascii-inlinetask)
+    (inner-template . org-ascii-inner-template)
+    (italic . org-ascii-italic)
+    (item . org-ascii-item)
+    (keyword . org-ascii-keyword)
+    (latex-environment . org-ascii-latex-environment)
+    (latex-fragment . org-ascii-latex-fragment)
+    (line-break . org-ascii-line-break)
+    (link . org-ascii-link)
+    (paragraph . org-ascii-paragraph)
+    (plain-list . org-ascii-plain-list)
+    (plain-text . org-ascii-plain-text)
+    (planning . org-ascii-planning)
+    (quote-block . org-ascii-quote-block)
+    (quote-section . org-ascii-quote-section)
+    (radio-target . org-ascii-radio-target)
+    (section . org-ascii-section)
+    (special-block . org-ascii-special-block)
+    (src-block . org-ascii-src-block)
+    (statistics-cookie . org-ascii-statistics-cookie)
+    (strike-through . org-ascii-strike-through)
+    (subscript . org-ascii-subscript)
+    (superscript . org-ascii-superscript)
+    (table . org-ascii-table)
+    (table-cell . org-ascii-table-cell)
+    (table-row . org-ascii-table-row)
+    (target . org-ascii-target)
+    (template . org-ascii-template)
+    (timestamp . org-ascii-timestamp)
+    (underline . org-ascii-underline)
+    (verbatim . org-ascii-verbatim)
+    (verse-block . org-ascii-verse-block))
   :export-block "ASCII"
   :menu-entry
-  (?t "Export to Plain Text"
-      ((?A "As ASCII buffer"
-	   (lambda (a s v b)
-	     (org-ascii-export-as-ascii a s v b '(:ascii-charset ascii))))
-       (?a "As ASCII file"
-	   (lambda (a s v b)
-	     (org-ascii-export-to-ascii a s v b '(:ascii-charset ascii))))
-       (?L "As Latin1 buffer"
-	   (lambda (a s v b)
-	     (org-ascii-export-as-ascii a s v b '(:ascii-charset latin1))))
-       (?l "As Latin1 file"
-	   (lambda (a s v b)
-	     (org-ascii-export-to-ascii a s v b '(:ascii-charset latin1))))
-       (?U "As UTF-8 buffer"
-	   (lambda (a s v b)
-	     (org-ascii-export-as-ascii a s v b '(:ascii-charset utf-8))))
-       (?u "As UTF-8 file"
-	   (lambda (a s v b)
-	     (org-ascii-export-to-ascii a s v b '(:ascii-charset utf-8))))))
-  :filters-alist ((:filter-headline . org-ascii-filter-headline-blank-lines)
-		  (:filter-parse-tree org-ascii-filter-paragraph-spacing
-				      org-ascii-filter-comment-spacing)
-		  (:filter-section . org-ascii-filter-headline-blank-lines))
-  :options-alist ((:ascii-charset nil nil org-ascii-charset)))
+  '(?t "Export to Plain Text"
+       ((?A "As ASCII buffer"
+	    (lambda (a s v b)
+	      (org-ascii-export-as-ascii a s v b '(:ascii-charset ascii))))
+	(?a "As ASCII file"
+	    (lambda (a s v b)
+	      (org-ascii-export-to-ascii a s v b '(:ascii-charset ascii))))
+	(?L "As Latin1 buffer"
+	    (lambda (a s v b)
+	      (org-ascii-export-as-ascii a s v b '(:ascii-charset latin1))))
+	(?l "As Latin1 file"
+	    (lambda (a s v b)
+	      (org-ascii-export-to-ascii a s v b '(:ascii-charset latin1))))
+	(?U "As UTF-8 buffer"
+	    (lambda (a s v b)
+	      (org-ascii-export-as-ascii a s v b '(:ascii-charset utf-8))))
+	(?u "As UTF-8 file"
+	    (lambda (a s v b)
+	      (org-ascii-export-to-ascii a s v b '(:ascii-charset utf-8))))))
+  :filters-alist '((:filter-headline . org-ascii-filter-headline-blank-lines)
+		   (:filter-parse-tree org-ascii-filter-paragraph-spacing
+				       org-ascii-filter-comment-spacing)
+		   (:filter-section . org-ascii-filter-headline-blank-lines))
+  :options-alist '((:ascii-charset nil nil org-ascii-charset)))
 
 
 
@@ -239,8 +239,8 @@ Possible values are:
 	  (const :tag "UTF-8" utf-8)))
 
 (defcustom org-ascii-underline '((ascii ?= ?~ ?-)
-				   (latin1 ?= ?~ ?-)
-				   (utf-8 ?═ ?─ ?╌ ?┄ ?┈))
+				 (latin1 ?= ?~ ?-)
+				 (utf-8 ?═ ?─ ?╌ ?┄ ?┈))
   "Characters for underlining headings in ASCII export.
 
 Alist whose key is a symbol among `ascii', `latin1' and `utf-8'
@@ -1895,15 +1895,15 @@ is non-nil."
   (interactive)
   (if async
       (org-export-async-start
-	  (lambda (output)
-	    (with-current-buffer (get-buffer-create "*Org ASCII Export*")
-	      (erase-buffer)
-	      (insert output)
-	      (goto-char (point-min))
-	      (text-mode)
-	      (org-export-add-to-stack (current-buffer) 'ascii)))
-	`(org-export-as 'ascii ,subtreep ,visible-only ,body-only
-			',ext-plist))
+       (lambda (output)
+	 (with-current-buffer (get-buffer-create "*Org ASCII Export*")
+	   (erase-buffer)
+	   (insert output)
+	   (goto-char (point-min))
+	   (text-mode)
+	   (org-export-add-to-stack (current-buffer) 'ascii)))
+       `(org-export-as 'ascii ,subtreep ,visible-only ,body-only
+		       ',ext-plist))
     (let ((outbuf (org-export-to-buffer
 		   'ascii "*Org ASCII Export*"
 		   subtreep visible-only body-only ext-plist)))
@@ -1944,10 +1944,10 @@ Return output file's name."
   (let ((outfile (org-export-output-file-name ".txt" subtreep)))
     (if async
 	(org-export-async-start
-	    (lambda (f) (org-export-add-to-stack f 'ascii))
-	  `(expand-file-name
-	    (org-export-to-file
-	     'ascii ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))
+	 (lambda (f) (org-export-add-to-stack f 'ascii))
+	 `(expand-file-name
+	   (org-export-to-file
+	    'ascii ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))
       (org-export-to-file
        'ascii outfile subtreep visible-only body-only ext-plist))))
 
