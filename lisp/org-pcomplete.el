@@ -394,12 +394,12 @@ Complete a language in the first field, the header arguments and switches."
 
 (defun pcomplete/org-mode/block-option/clocktable ()
   "Complete keywords in a clocktable line."
-  (while (pcomplete-here '(":maxlevel" ":scope"
+  (while (pcomplete-here '(":maxlevel" ":scope" ":lang"
 			   ":tstart" ":tend" ":block" ":step"
 			   ":stepskip0" ":fileskip0"
 			   ":emphasize" ":link" ":narrow" ":indent"
 			   ":tcolumns" ":level" ":compact" ":timestamp"
-			   ":formula" ":formatter"))))
+			   ":formula" ":formatter" ":wstart" ":mstart"))))
 
 (defun org-pcomplete-case-double (list)
   "Return list with both upcase and downcase version of all strings in LIST."
