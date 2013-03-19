@@ -558,7 +558,8 @@ directory.
 Return output file name."
   (unless (or (not pub-dir) (file-exists-p pub-dir)) (make-directory pub-dir t))
   ;; Check if a buffer visiting FILENAME is already open.
-  (let* ((visitingp (find-buffer-visiting filename))
+  (let* ((org-inhibit-startup t)
+	 (visitingp (find-buffer-visiting filename))
 	 (work-buffer (or visitingp (find-file-noselect filename))))
     (prog1 (with-current-buffer work-buffer
 	     (let ((output-file
@@ -723,8 +724,10 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 	 (visiting (find-buffer-visiting sitemap-filename))
 	 (ifn (file-name-nondirectory sitemap-filename))
 	 file sitemap-buffer)
-    (with-current-buffer (setq sitemap-buffer
-			       (or visiting (find-file sitemap-filename)))
+    (with-current-buffer
+	(let ((org-inhibit-startup t))
+	  (setq sitemap-buffer
+		(or visiting (find-file sitemap-filename))))
       (erase-buffer)
       (insert (concat "#+TITLE: " sitemap-title "\n\n"))
       (while (setq file (pop files))
@@ -791,7 +794,8 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
   "Find the title of FILE in project."
   (or
    (and (not reset) (org-publish-cache-get-file-property file :title nil t))
-   (let* ((visiting (find-buffer-visiting file))
+   (let* ((org-inhibit-startup t)
+	  (visiting (find-buffer-visiting file))
 	  (buffer (or visiting (find-file-noselect file)))
 	  title)
      (with-current-buffer buffer
@@ -810,7 +814,8 @@ If FILE provides a #+date keyword use it else use the file
 system's modification time.
 
 It returns time in `current-time' format."
-  (let* ((visiting (find-buffer-visiting file))
+  (let* ((org-inhibit-startup t)
+	 (visiting (find-buffer-visiting file))
 	 (file-buf (or visiting (find-file-noselect file nil)))
 	 (date (plist-get
 		(with-current-buffer file-buf
@@ -1122,8 +1127,8 @@ If FREE-CACHE, empty the cache."
 (defun org-publish-cache-file-needs-publishing
   (filename &optional pub-dir pub-func base-dir)
   "Check the timestamp of the last publishing of FILENAME.
-Non-nil if the file needs publishing.  The function also checks
-if any included files have been more recently published, so that
+Return non-nil if the file needs publishing.  Also check if
+any included files have been more recently published, so that
 the file including them will be republished as well."
   (unless org-publish-cache
     (error
@@ -1131,6 +1136,7 @@ the file including them will be republished as well."
   (let* ((case-fold-search t)
 	 (key (org-publish-timestamp-filename filename pub-dir pub-func))
 	 (pstamp (org-publish-cache-get key))
+	 (org-inhibit-startup t)
 	 (visiting (find-buffer-visiting filename))
 	 included-files-ctime buf)
 
