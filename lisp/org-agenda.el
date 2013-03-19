@@ -7214,13 +7214,18 @@ in the agenda."
 	 (series-redo-cmd (get-text-property p 'org-series-redo-cmd)))
     (put 'org-agenda-tag-filter :preset-filter nil)
     (put 'org-agenda-category-filter :preset-filter nil)
+    (put 'org-agenda-regexp-filter :preset-filter nil)
     (and cols (org-columns-quit))
     (message "Rebuilding agenda buffer...")
     (if series-redo-cmd
 	(eval series-redo-cmd)
       (org-let lprops '(eval redo-cmd)))
     (setq org-agenda-undo-list nil
-	  org-agenda-pending-undo-list nil)
+	  org-agenda-pending-undo-list nil
+	  org-agenda-tag-filter tag-filter
+	  org-agenda-category-filter cat-filter
+	  org-agenda-regexp-filter re-filter
+	  org-agenda-top-category-filter top-cat-filter)
     (message "Rebuilding agenda buffer...done")
     (put 'org-agenda-tag-filter :preset-filter tag-preset)
     (put 'org-agenda-category-filter :preset-filter cat-preset)
