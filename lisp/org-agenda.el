@@ -3794,7 +3794,7 @@ generating a new one."
 (defun org-agenda-dim-blocked-tasks (&optional invisible)
   "Dim currently blocked TODO's in the agenda display."
   (interactive "P")
-  (when (org-called-interactively-p 'any)
+  (when (org-called-interactively-p 'interactive)
     (message "Dim or hide blocked tasks..."))
   (mapc (lambda (o) (if (eq (overlay-get o 'org-type) 'org-blocked-todo)
 			(delete-overlay o)))
@@ -3825,7 +3825,8 @@ generating a new one."
 		(overlay-put ov 'invisible t)
 	      (overlay-put ov 'face 'org-agenda-dimmed-todo-face))
 	    (overlay-put ov 'org-type 'org-blocked-todo))))))
-    (message "Dim or hide blocked tasks...done"))
+    (when (org-called-interactively-p 'interactive)
+      (message "Dim or hide blocked tasks...done")))
 
 (defvar org-agenda-skip-function nil
   "Function to be called at each match during agenda construction.
@@ -7195,7 +7196,7 @@ in the agenda."
 	 (cat-filter org-agenda-category-filter)
 	 (cat-preset (get 'org-agenda-category-filter :preset-filter))
 	 (re-filter org-agenda-regexp-filter)
-	 (re-preset (get 'org-agenda-category-filter :preset-filter))
+	 (re-preset (get 'org-agenda-regexp-filter :preset-filter))
 	 (org-agenda-tag-filter-while-redo (or tag-filter tag-preset))
 	 (cols org-agenda-columns-active)
 	 (line (org-current-line))
