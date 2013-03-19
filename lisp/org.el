@@ -7125,7 +7125,6 @@ RET=jump to location             C-g=quit and return to previous location
 
 (defvar org-goto-start-pos) ; dynamically scoped parameter
 
-;; FIXME: Docstring does not mention both interfaces
 (defun org-goto (&optional alternative-interface)
   "Look up a different location in the current file, keeping current visibility.
 
