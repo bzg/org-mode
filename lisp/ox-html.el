@@ -1428,7 +1428,8 @@ INFO is a plist used as a communication channel."
      (format
       (when :time-stamp-file
 	(format-time-string
-	 (concat "<!-- " org-html--timestamp-format " -->\n")))
+	 (concat "<!-- " org-html--timestamp-format " -->\n"))))
+     (format
       "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>\n"
       (or (and org-html-coding-system
 	       (fboundp 'coding-system-get)
