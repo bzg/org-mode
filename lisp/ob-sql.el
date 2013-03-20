@@ -103,10 +103,10 @@ This function is called by `org-babel-execute-src-block'."
                        (org-babel-temp-file "sql-out-")))
 	 (header-delim "")
          (command (case (intern engine)
-                    ('dbi (format "dbish --batch '%s' < %s | sed '%s' > %s"
+                    ('dbi (format "dbish --batch %s < %s | sed '%s' > %s"
 				  (or cmdline "")
 				  (org-babel-process-file-name in-file)
-				  "/^+/d;s/^\|//;$d"
+				  "/^+/d;s/^\|//;s/(NULL)/ /g;$d"
 				  (org-babel-process-file-name out-file)))
                     ('monetdb (format "mclient -f tab %s < %s > %s"
                                       (or cmdline "")
@@ -142,6 +142,7 @@ This function is called by `org-babel-execute-src-block'."
       (with-temp-buffer
 	(cond
 	  ((or (eq (intern engine) 'mysql)
+	       (eq (intern engine) 'dbi))
 	       (eq (intern engine) 'postgresql))
 	   ;; Add header row delimiter after column-names header in first line
 	   (cond
