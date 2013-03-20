@@ -142,7 +142,7 @@ This function is called by `org-babel-execute-src-block'."
       (with-temp-buffer
 	(cond
 	  ((or (eq (intern engine) 'mysql)
-	       (eq (intern engine) 'dbi))
+	       (eq (intern engine) 'dbi)
 	       (eq (intern engine) 'postgresql))
 	   ;; Add header row delimiter after column-names header in first line
 	   (cond
