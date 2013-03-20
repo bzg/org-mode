@@ -2426,10 +2426,11 @@ Inline images can have these attributes:
 	 (parent (org-export-get-parent-element link))
 	 (caption (org-export-data (org-export-get-caption parent) info))
 	 (label (org-element-property :name parent))
-	 (alt (org-export-read-attribute :attr_html parent :alt))
-	 (width (org-export-read-attribute :attr_html parent :width))
-	 (height (org-export-read-attribute :attr_html parent :height))
-	 (options (org-export-read-attribute :attr_html parent :options)))
+	 (attrs (org-export-read-attribute :attr_html parent))
+	 (alt (plist-get attrs :alt))
+	 (width (plist-get attrs :width))
+	 (height (plist-get attrs :height))
+	 (options (plist-get attrs :options)))
     ;; Return proper string, depending on DISPOSITION.
     (org-html-format-inline-image
      path caption label
@@ -2549,7 +2550,7 @@ INFO is a plist holding contextual information.  See
 		     ""
 		    (let ((att (org-export-read-attribute :attr_html parent :options)))
 		      (unless (and desc att (string-match (regexp-quote att) desc))
-			att)))))
+			(or att ""))))))
 	 (unless (string= attributes "")
 	   (setq attributes (concat " " attributes))))
     (cond
