@@ -2701,7 +2701,8 @@ Return the updated communication channel."
 ;; its derivatives, `org-export-to-buffer', `org-export-to-file' and
 ;; `org-export-string-as'.  They differ either by the way they output
 ;; the resulting code (for the first two) or by the input type (for
-;; the latter).
+;; the latter).  `org-export--copy-to-kill-ring-p' determines if
+;; output of these function should be added to kill ring.
 ;;
 ;; `org-export-output-file-name' is an auxiliary function meant to be
 ;; used with `org-export-to-file'.  With a given extension, it tries
@@ -3225,6 +3226,13 @@ file should have."
     (unwind-protect (let ((org-current-export-file reference))
 		      (org-babel-exp-process-buffer))
       (kill-buffer reference))))
+
+(defun org-export--copy-to-kill-ring-p ()
+  "Return a non-nil value when output should be added to the kill ring.
+See also `org-export-copy-to-kill-ring'."
+  (if (eq org-export-copy-to-kill-ring 'if-interactive)
+      (not (or executing-kbd-macro noninteractive))
+    (eq org-export-copy-to-kill-ring t)))
 
 
 
@@ -5701,14 +5709,7 @@ options as CDR."
      ;; Otherwise, enter sub-menu.
      (t (org-export--dispatch-ui options key expertp)))))
 
-;;; Miscellaneous
 
-(defun org-export--copy-to-kill-ring-p ()
-  "Should we copy the export buffer to the kill ring?
-See also `org-export-copy-to-kill-ring'."
-  (if (eq org-export-copy-to-kill-ring 'if-interactive)
-      (not (or executing-kbd-macro noninteractive))
-    (eq org-export-copy-to-kill-ring t)))
 
 (provide 'ox)
 
