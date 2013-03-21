@@ -518,8 +518,9 @@ returned as-is."
 		:value-type (string :tag "Format string"))
   :options '(bold code italic strike-through underline verbatim))
 
-(defcustom org-html-indent t
-  "Non-nil means to indent the generated HTML."
+(defcustom org-html-indent nil
+  "Non-nil means to indent the generated HTML.
+Warning: non-nil may break indentation of source code blocks."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
