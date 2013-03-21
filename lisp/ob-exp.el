@@ -241,7 +241,7 @@ this template."
 		       (insert rep)))))))))))))
 
 (defvar org-src-preserve-indentation)	; From org-src.el
-(defun org-export-blocks-preprocess ()
+(defun org-babel-exp-process-buffer ()
   "Execute all blocks in visible part of buffer."
   (interactive)
   (save-window-excursion
@@ -295,7 +295,7 @@ this template."
 					   (goto-char match-start)
 					   (indent-line-to ind))
 			 ;; Indent everything.
-			 (indent-code-rigidly match-start (point) ind)))))
+			 (indent-rigidly match-start (point) ind)))))
 	      (setq pos (line-beginning-position))
               ;; Cleanup markers.
 	      (set-marker match-start nil)

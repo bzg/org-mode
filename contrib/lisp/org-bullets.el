@@ -1,7 +1,7 @@
 ;;; org-bullets.el --- Show bullets in org-mode as UTF-8 characters
-;;; Version: 0.1
-;;; Author: sabof
-;;; URL: https://github.com/sabof/org-bullets
+;; Version: 0.2.2
+;; Author: sabof
+;; URL: https://github.com/sabof/org-bullets
 
 ;; This file is NOT part of GNU Emacs.
 ;;
@@ -30,7 +30,7 @@
 (eval-when-compile (require 'cl))
 
 (defgroup org-bullets nil
-  "Use different background for even and odd lines."
+  "Display bullets as UTF-8 characters."
   :group 'org-appearance)
 
 ;; A nice collection of unicode bullets:
@@ -46,105 +46,77 @@
     ;; ► • ★ ▸
     )
   "This variable contains the list of bullets.
-It can contain any number of symbols, which will be repeated."
+It can contain any number of one-character strings.
+For levels beyond the size of the list, the stars will be
+displayed using the first items again."
   :group 'org-bullets
   :type '(repeat (string :tag "Bullet character")))
 
-(defvar org-bullet-overlays nil)
-(make-variable-buffer-local 'org-bullet-overlays)
+(defcustom org-bullets-face-name nil
+  "Allows to override `org-mode' bullets face.
+If set to a name of a face, that face will be used.
+Otherwise the face of the heading level will be used."
+  :group 'org-bullets
+  :type 'symbol)
 
-(defvar org-bullets-changes nil)
-(make-variable-buffer-local 'org-bullets-changes)
+(defvar org-bullets-bullet-map
+  '(keymap
+    (mouse-1 . org-cycle)
+    (mouse-2 . (lambda (e)
+		 (interactive "e")
+		 (mouse-set-point e)
+		 (org-cycle))))
+  "Mouse events for bullets.
+If this is undesirable, one can remove them with
 
-(defun org-bullets-match-length ()
-  (- (match-end 0) (match-beginning 0)))
+\(setcdr org-bullets-bullet-map nil\)")
 
-(defun org-bullets-make-star (bullet-string counter)
-  (let* ((map '(keymap
-                (mouse-1 . org-cycle)
-                (mouse-2 . (lambda (e)
-                             (interactive "e")
-                             (mouse-set-point e)
-                             (org-cycle)))))
-         (face (save-excursion
-                 (save-match-data
-                   (beginning-of-line)
-                   (looking-at "\\*+")
-                   (intern (concat "org-level-"
-                                   (int-to-string
-                                    (1+ (mod (1- (org-bullets-match-length))
-                                             8))))))))
-         (overlay (make-overlay (point)
-                                (1+ (point)))))
-    (overlay-put overlay 'display
-                 (if (zerop counter)
-                     (propertize bullet-string
-                                 'face face
-                                 'local-map map)
-                     (propertize " "
-                                 'local-map map)))
-    (overlay-put overlay 'is-bullet t)
-    (push overlay org-bullet-overlays)))
-
-(defun org-bullets-clear ()
-  (mapc 'delete-overlay org-bullet-overlays)
-  (setq org-bullet-overlays nil))
-
-(defun* org-bullets-redraw (&optional (beginning (point-min)) (end (point-max)))
-  (save-excursion
-    (save-match-data
-      (mapc 'delete-overlay
-            (remove-if-not
-             (lambda (overlay) (overlay-get overlay 'is-bullet))
-             (overlays-in beginning end)))
-      (goto-char beginning)
-      (while (and (re-search-forward "^\\*+" nil t)
-                  (<= (point) end))
-        (let* ((bullet-string (nth (mod (1- (org-bullets-match-length))
-                                        (list-length org-bullets-bullet-list))
-                                   org-bullets-bullet-list)))
-          (goto-char (match-beginning 0))
-          (if (save-match-data (looking-at "^\\*+ "))
-              (let ((counter (1- (org-bullets-match-length))))
-                (while (looking-at "[* ]")
-                  (org-bullets-make-star bullet-string counter)
-                  (forward-char)
-                  (decf counter)))
-              (goto-char (match-end 0)))
-          )))))
-
-(defun org-bullets-notify-change (&rest args)
-  (push args org-bullets-changes))
-
-(defun* org-bullets-post-command-hook (&rest ignore)
-  (unless org-bullets-changes
-    (return-from org-bullets-post-command-hook))
-  (let ((min (reduce 'min org-bullets-changes :key 'first))
-        (max (reduce 'max org-bullets-changes :key 'second)))
-    (org-bullets-redraw (save-excursion
-                          (goto-char min)
-                          (line-beginning-position))
-                        (save-excursion
-                          (goto-char max)
-                          (forward-line)
-                          (line-end-position))))
-  (setq org-bullets-changes nil))
-
-;;; Interface
+(defun org-bullets-level-char (level)
+  "Return a character corresponding to LEVEL."
+  (string-to-char
+   (nth (mod (1- level)
+             (length org-bullets-bullet-list))
+        org-bullets-bullet-list)))
 
 ;;;###autoload
 (define-minor-mode org-bullets-mode
-    "UTF8 Bullets for org-mode"
+  "UTF-8 bullets for `org-mode'."
   nil nil nil
-  (if org-bullets-mode
-      (progn
-        (add-hook 'after-change-functions 'org-bullets-notify-change nil t)
-        (add-hook 'post-command-hook 'org-bullets-post-command-hook nil t)
-        (org-bullets-redraw))
-      (remove-hook 'after-change-functions 'org-bullets-notify-change t)
-      (remove-hook 'post-command-hook 'org-bullets-post-command-hook t)
-      (mapc 'delete-overlay org-bullet-overlays)))
+  (let* ((keyword
+	  `((,org-outline-regexp-bol
+	     (0 (let (( level (- (match-end 0) (match-beginning 0) 1)))
+		  (compose-region (- (match-end 0) 2)
+				  (- (match-end 0) 1)
+				  (org-bullets-level-char level))
+		  (when (facep org-bullets-face-name)
+		    (put-text-property (- (match-end 0) 2)
+				       (- (match-end 0) 1)
+				       'face
+				       org-bullets-face-name))
+		  (put-text-property (match-beginning 0)
+				     (- (match-end 0) 2)
+				     'face (list :foreground
+						 (face-attribute
+						  'default :background)))
+		  (put-text-property (match-beginning 0)
+				     (match-end 0)
+				     'keymap
+				     org-bullets-bullet-map)
+		  nil))))))
+    (if org-bullets-mode
+        (progn (font-lock-add-keywords nil keyword)
+               (font-lock-fontify-buffer))
+      (save-excursion
+	(goto-char (point-min))
+	(font-lock-remove-keywords nil keyword)
+	(while (re-search-forward org-outline-regexp-bol nil t)
+	  (decompose-region (match-beginning 0) (match-end 0)))
+	(font-lock-fontify-buffer)))))
 
 (provide 'org-bullets)
+
+;; Local Variables:
+;; coding: utf-8-emacs
+;; End:
 
 ;;; org-bullets.el ends here

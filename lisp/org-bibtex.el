@@ -5,7 +5,7 @@
 ;; Authors: Bastien Guerry <bzg at altern dot org>
 ;;       Carsten Dominik <carsten dot dominik at gmail dot com>
 ;;       Eric Schulte <schulte dot eric at gmail dot com>
-;; Keywords: org, wp, remember
+;; Keywords: org, wp, capture
 ;;
 ;; This file is part of GNU Emacs.
 ;;
@@ -31,7 +31,7 @@
 ;; the link that contains the author name, the year and a short title.
 ;;
 ;; It also stores detailed information about the entry so that
-;; remember templates can access and enter this information easily.
+;; capture templates can access and enter this information easily.
 ;;
 ;; The available properties for each entry are listed here:
 ;;
@@ -41,14 +41,14 @@
 ;; :booktitle     :month          :annote      :abstract
 ;; :key           :btype
 ;;
-;; Here is an example of a remember template that use some of this
+;; Here is an example of a capture template that use some of this
 ;; information (:author :year :title :journal :pages):
 ;;
-;; (setq org-remember-templates
+;; (setq org-capure-templates
 ;;   '((?b "* READ %?\n\n%a\n\n%:author (%:year): %:title\n   \
 ;;          In %:journal, %:pages.")))
 ;;
-;; Let's say you want to remember this BibTeX entry:
+;; Let's say you want to capture this BibTeX entry:
 ;;
 ;; @Article{dolev83,
 ;;   author = 	 {Danny Dolev and Andrew C. Yao},
@@ -61,7 +61,7 @@
 ;;   month =	 {Mars}
 ;; }
 ;;
-;; M-x `org-remember' on this entry will produce this buffer:
+;; M-x `org-capture' on this entry will produce this buffer:
 ;;
 ;; =====================================================================
 ;; * READ <== [point here]
@@ -94,7 +94,7 @@
 ;;
 ;; The link creation part has been part of Org-mode for a long time.
 ;;
-;; Creating better remember template information was inspired by a request
+;; Creating better capture template information was inspired by a request
 ;; of Austin Frank: http://article.gmane.org/gmane.emacs.orgmode/4112
 ;; and then implemented by Bastien Guerry.
 ;;
@@ -120,7 +120,6 @@
 (declare-function bibtex-generate-autokey "bibtex" ())
 (declare-function bibtex-parse-entry "bibtex" (&optional content))
 (declare-function bibtex-url "bibtex" (&optional pos no-browse))
-(declare-function longlines-mode "longlines" (&optional arg))
 (declare-function org-babel-trim "ob" (string &optional regexp))
 
 
@@ -381,7 +380,7 @@ This variable is relevant only if `org-bibtex-export-tags-as-keywords' is t."
 	   (buf-name (format "*Bibtex Help %s*" name)))
       (with-output-to-temp-buffer buf-name
 	(princ (cdr (assoc field org-bibtex-fields))))
-      (with-current-buffer buf-name (longlines-mode t))
+      (with-current-buffer buf-name (visual-line-mode 1))
       (org-fit-window-to-buffer (get-buffer-window buf-name))
       ((lambda (result) (when (> (length result) 0) result))
        (read-from-minibuffer (format "%s: " name))))))
@@ -708,7 +707,7 @@ This function relies `org-search-view' to locate results."
         (org-agenda-search-view-always-boolean t))
     (org-search-view nil
 		     (format "%s +{:%s%s:}"
-			     string org-bibtex-prefix
+			     string (or org-bibtex-prefix "")
 			     org-bibtex-type-property-name))))
 
 (provide 'org-bibtex)

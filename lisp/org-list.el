@@ -94,6 +94,11 @@
 (defvar org-ts-regexp)
 (defvar org-ts-regexp-both)
 
+(declare-function outline-invisible-p "outline" (&optional pos))
+(declare-function outline-flag-region "outline" (from to flag))
+(declare-function outline-next-heading "outline" ())
+(declare-function outline-previous-heading "outline" ())
+
 (declare-function org-at-heading-p "org" (&optional ignored))
 (declare-function org-before-first-heading-p "org" ())
 (declare-function org-back-to-heading "org" (&optional invisible-ok))
@@ -107,10 +112,6 @@
 (declare-function org-icompleting-read "org" (&rest args))
 (declare-function org-in-block-p "org" (names))
 (declare-function org-in-regexp "org" (re &optional nlines visually))
-(declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
-(declare-function org-inlinetask-goto-end "org-inlinetask" ())
-(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
-(declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
 (declare-function org-level-increment "org" ())
 (declare-function org-narrow-to-subtree "org" ())
 (declare-function org-at-heading-p "org" (&optional invisible-ok))
@@ -118,15 +119,21 @@
 (declare-function org-remove-if "org" (predicate seq))
 (declare-function org-reduced-level "org" (L))
 (declare-function org-show-subtree "org" ())
+(declare-function org-sort-remove-invisible "org" (S))
 (declare-function org-time-string-to-seconds "org" (s))
 (declare-function org-timer-hms-to-secs "org-timer" (hms))
 (declare-function org-timer-item "org-timer" (&optional arg))
 (declare-function org-trim "org" (s))
 (declare-function org-uniquify "org" (list))
-(declare-function outline-invisible-p "outline" (&optional pos))
-(declare-function outline-flag-region "outline" (from to flag))
-(declare-function outline-next-heading "outline" ())
-(declare-function outline-previous-heading "outline" ())
+
+(declare-function org-inlinetask-goto-beginning "org-inlinetask" ())
+(declare-function org-inlinetask-goto-end "org-inlinetask" ())
+(declare-function org-inlinetask-in-task-p "org-inlinetask" ())
+(declare-function org-inlinetask-outline-regexp "org-inlinetask" ())
+
+(declare-function org-export-string-as "ox"
+		  (string backend &optional body-only ext-plist))
+
 
 
 
@@ -154,6 +161,7 @@ plain list item with an implied large level number, all true
 children and grand children of the outline heading will be
 exposed in a children' view."
   :group 'org-plain-lists
+  :group 'org-cycle
   :type '(choice
 	  (const :tag "Never" nil)
 	  (const :tag "With cursor in plain list (recommended)" t)
@@ -209,7 +217,8 @@ Valid values are ?. and ?\).  To get both terminators, use t."
 		 (const :tag "paren like in \"2)\"" ?\))
 		 (const :tag "both" t)))
 
-(defcustom org-alphabetical-lists nil
+(org-defvaralias 'org-alphabetical-lists 'org-list-allow-alphabetical) ;; Since 8.0
+(defcustom org-list-allow-alphabetical nil
   "Non-nil means single character alphabetical bullets are allowed.
 Both uppercase and lowercase are handled.  Lists with more than
 26 items will fallback to standard numbering.  Alphabetical
@@ -230,7 +239,9 @@ spaces instead of one after the bullet in each item of the list."
 	  (const :tag "never" nil)
 	  (regexp)))
 
-(defcustom org-empty-line-terminates-plain-lists nil
+(org-defvaralias 'org-empty-line-terminates-plain-lists
+  'org-list-empty-line-terminates-plain-lists) ;; Since 8.0
+(defcustom org-list-empty-line-terminates-plain-lists nil
   "Non-nil means an empty line ends all plain list levels.
 Otherwise, two of them will be necessary."
   :group 'org-plain-lists
@@ -282,7 +293,9 @@ This hook runs even if checkbox rule in
 implement alternative ways of collecting statistics
 information.")
 
-(defcustom org-hierarchical-checkbox-statistics t
+(org-defvaralias 'org-hierarchical-checkbox-statistics
+  'org-checkbox-hierarchical-statistics) ;; Since 8.0
+(defcustom org-checkbox-hierarchical-statistics t
   "Non-nil means checkbox statistics counts only the state of direct children.
 When nil, all boxes below the cookie are counted.
 This can be set to nil on a per-node basis using a COOKIE_DATA property
@@ -290,7 +303,9 @@ with the word \"recursive\" in the value."
   :group 'org-plain-lists
   :type 'boolean)
 
-(defcustom org-description-max-indent 20
+(org-defvaralias 'org-description-max-indent
+  'org-list-description-max-indent) ;; Since 8.0
+(defcustom org-list-description-max-indent 20
   "Maximum indentation for the second line of a description list.
 When the indentation would be larger than this, it will become
 5 characters instead."
@@ -333,7 +348,7 @@ list, obtained by prompting the user."
 		(string :tag "Format"))))
 
 (defvar org-list-forbidden-blocks '("example" "verse" "src" "ascii" "beamer"
-				    "docbook" "html" "latex" "odt")
+				    "html" "latex" "odt")
   "Names of blocks where lists are not allowed.
 Names must be in lower case.")
 
@@ -642,8 +657,7 @@ Assume point is at an item."
       (save-excursion
 	(catch 'exit
 	  (while t
-	    (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
-			  (org-get-indentation))))
+	    (let ((ind (org-get-indentation)))
 	      (cond
 	       ((<= (point) lim-up)
 		;; At upward limit: if we ended at an item, store it,
@@ -651,18 +665,10 @@ Assume point is at an item."
 		;; Jump to part 2.
 		(throw 'exit
 		       (setq itm-lst
-			     (if (or (not (looking-at item-re))
-				     (get-text-property (point) 'org-example))
+			     (if (not (looking-at item-re))
 				 (memq (assq (car beg-cell) itm-lst) itm-lst)
 			       (setq beg-cell (cons (point) ind))
 			       (cons (funcall assoc-at-point ind) itm-lst)))))
-	       ;; At a verbatim block, go before its beginning.  Move
-	       ;; from eol to ensure `previous-single-property-change'
-	       ;; will return a value.
-	       ((get-text-property (point) 'org-example)
-		(goto-char (previous-single-property-change
-			    (point-at-eol) 'org-example nil lim-up))
-		(forward-line -1))
 	       ;; Looking at a list ending regexp.  Dismiss useless
 	       ;; data recorded above BEG-CELL.  Jump to part 2.
 	       ((looking-at org-list-end-re)
@@ -711,8 +717,7 @@ Assume point is at an item."
       ;;    position of items in END-LST-2.
       (catch 'exit
 	(while t
-	  (let ((ind (+ (or (get-text-property (point) 'original-indentation) 0)
-			(org-get-indentation))))
+	  (let ((ind (org-get-indentation)))
 	    (cond
 	     ((>= (point) lim-down)
 	      ;; At downward limit: this is de facto the end of the
@@ -720,12 +725,6 @@ Assume point is at an item."
 	      ;; part 3.
 	      (throw 'exit
 		     (push (cons 0 (funcall end-before-blank)) end-lst-2)))
-	     ;; At a verbatim block, move to its end.  Point is at bol
-	     ;; and 'org-example property is set by whole lines:
-	     ;; `next-single-property-change' always return a value.
-	     ((get-text-property (point) 'org-example)
-	      (goto-char
-	       (next-single-property-change (point) 'org-example nil lim-down)))
 	     ;; Looking at a list ending regexp.  Save point as an
 	     ;; ending position and jump to part 3.
 	     ((looking-at org-list-end-re)
@@ -1097,8 +1096,9 @@ It determines the number of whitespaces to append by looking at
 			    org-list-two-spaces-after-bullet-regexp bullet))
 		      "  "
 		    " ")))
-      (string-match "\\S-+\\([ \t]*\\)" bullet)
-      (replace-match spaces nil nil bullet 1))))
+      (if (string-match "\\S-+\\([ \t]*\\)" bullet)
+	  (replace-match spaces nil nil bullet 1)
+	bullet))))
 
 (defun org-list-swap-items (beg-A beg-B struct)
   "Swap item starting at BEG-A with item starting at BEG-B in STRUCT.
@@ -2148,7 +2148,7 @@ the item, so this really moves item trees."
 	 (prevs (org-list-prevs-alist struct))
 	 (next-item (org-list-get-next-item (point-at-bol) struct prevs)))
     (unless (or next-item org-list-use-circular-motion)
-      (error "Cannot move this item further down"))
+      (user-error "Cannot move this item further down"))
     (if (not next-item)
 	(setq struct (org-list-send-item item 'begin struct))
       (setq struct (org-list-swap-items item next-item struct))
@@ -2169,7 +2169,7 @@ the item, so this really moves item trees."
 	 (prevs (org-list-prevs-alist struct))
 	 (prev-item (org-list-get-prev-item (point-at-bol) struct prevs)))
     (unless (or prev-item org-list-use-circular-motion)
-      (error "Cannot move this item further up"))
+      (user-error "Cannot move this item further up"))
     (if (not prev-item)
 	(setq struct (org-list-send-item item 'end struct))
       (setq struct (org-list-swap-items prev-item item struct)))
@@ -2203,9 +2203,8 @@ item is invisible."
 	       ;; If we're in a description list, ask for the new term.
 	       (desc (when (eq (org-list-get-list-type itemp struct prevs)
 			       'descriptive)
-		       (concat (read-string "Term: ") " :: "))))
-	  (setq struct
-		(org-list-insert-item pos struct prevs checkbox desc))
+		       " :: ")))
+	  (setq struct (org-list-insert-item pos struct prevs checkbox desc))
 	  (org-list-write-struct struct (org-list-parents-alist struct))
 	  (when checkbox (org-update-checkbox-count-maybe))
 	  (looking-at org-list-full-item-re)
@@ -2214,6 +2213,7 @@ item is invisible."
 				(string-match "[.)]" (match-string 1))))
 			 (match-beginning 4)
 		       (match-end 0)))
+	  (if desc (backward-char 1))
 	  t)))))
 
 (defun org-list-repair ()
@@ -2771,7 +2771,7 @@ Return t at each successful move."
 	  (cond
 	   ((ignore-errors (org-list-indent-item-generic 1 t struct)))
 	   ((ignore-errors (org-list-indent-item-generic -1 t struct)))
-	   (t (error "Cannot move item"))))
+	   (t (user-error "Cannot move item"))))
 	t))))
 
 (defun org-sort-list (&optional with-case sorting-type getkey-func compare-func)
@@ -2801,7 +2801,10 @@ If the SORTING-TYPE is ?f or ?F, then GETKEY-FUNC specifies
 a function to be called with point at the beginning of the
 record.  It must return either a string or a number that should
 serve as the sorting key for that record.  It will then use
-COMPARE-FUNC to compare entries."
+COMPARE-FUNC to compare entries.
+
+Sorting is done against the visible part of the headlines, it
+ignores hidden links."
   (interactive "P")
   (let* ((case-func (if with-case 'identity 'downcase))
          (struct (org-list-struct))
@@ -2841,11 +2844,14 @@ COMPARE-FUNC to compare entries."
 		(when (looking-at "[ \t]*[-+*0-9.)]+\\([ \t]+\\[[- X]\\]\\)?[ \t]+")
 		  (cond
 		   ((= dcst ?n)
-		    (string-to-number (buffer-substring (match-end 0)
-							(point-at-eol))))
+		    (string-to-number
+		     (org-sort-remove-invisible
+		      (buffer-substring (match-end 0) (point-at-eol)))))
 		   ((= dcst ?a)
 		    (funcall case-func
-			     (buffer-substring (match-end 0) (point-at-eol))))
+			     (org-sort-remove-invisible
+			      (buffer-substring
+			       (match-end 0) (point-at-eol)))))
 		   ((= dcst ?t)
 		    (cond
 		     ;; If it is a timer list, convert timer to seconds
@@ -3024,9 +3030,8 @@ for this list."
     (unless (org-at-item-p) (error "Not at a list item"))
     (save-excursion
       (re-search-backward "#\\+ORGLST" nil t)
-      (unless (looking-at "[ \t]*#\\+ORGLST[: \t][ \t]*SEND[ \t]+\\([^ \t\r\n]+\\)[ \t]+\\([^ \t\r\n]+\\)\\([ \t]+.*\\)?")
-	(if maybe
-	    (throw 'exit nil)
+      (unless (looking-at "#\\+ORGLST:[ \t]+SEND[ \t]+\\(\\S-+\\)[ \t]+\\(\\S-+\\)")
+	(if maybe (throw 'exit nil)
 	  (error "Don't know how to transform this list"))))
     (let* ((name (match-string 1))
 	   (transform (intern (match-string 2)))
@@ -3040,13 +3045,11 @@ for this list."
 	      (re-search-backward "#\\+ORGLST" nil t)
 	      (re-search-forward (org-item-beginning-re) bottom-point t)
 	      (match-beginning 0)))
-	   (list (save-restriction
-		   (narrow-to-region top-point bottom-point)
-		   (org-list-parse-list)))
+	   (plain-list (buffer-substring-no-properties top-point bottom-point))
 	   beg txt)
       (unless (fboundp transform)
 	(error "No such transformation function %s" transform))
-      (let ((txt (funcall transform list)))
+      (let ((txt (funcall transform plain-list)))
 	;; Find the insertion place
 	(save-excursion
 	  (goto-char (point-min))
@@ -3203,65 +3206,24 @@ items."
 
 (defun org-list-to-latex (list &optional params)
   "Convert LIST into a LaTeX list.
-LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
-with overruling parameters for `org-list-to-generic'."
-  (org-list-to-generic
-   list
-   (org-combine-plists
-    '(:splice nil :ostart "\\begin{enumerate}\n" :oend "\\end{enumerate}"
-	      :ustart "\\begin{itemize}\n" :uend "\\end{itemize}"
-	      :dstart "\\begin{description}\n" :dend "\\end{description}"
-	      :dtstart "[" :dtend "] "
-	      :istart "\\item " :iend "\n"
-	      :icount (let ((enum (nth depth '("i" "ii" "iii" "iv"))))
-			(if enum
-			    ;; LaTeX increments counter just before
-			    ;; using it, so set it to the desired
-			    ;; value, minus one.
-			    (format "\\setcounter{enum%s}{%s}\n\\item "
-				    enum (1- counter))
-			  "\\item "))
-	      :csep "\n"
-	      :cbon "\\texttt{[X]}" :cboff "\\texttt{[ ]}"
-	      :cbtrans "\\texttt{[-]}")
-    params)))
+LIST is as string representing the list to transform, as Org
+syntax.  Return converted list as a string."
+  (require 'ox-latex)
+  (org-export-string-as list 'latex t))
 
-(defun org-list-to-html (list &optional params)
+(defun org-list-to-html (list)
   "Convert LIST into a HTML list.
-LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
-with overruling parameters for `org-list-to-generic'."
-  (org-list-to-generic
-   list
-   (org-combine-plists
-    '(:splice nil :ostart "<ol>\n" :oend "\n</ol>"
-	      :ustart "<ul>\n" :uend "\n</ul>"
-	      :dstart "<dl>\n" :dend "\n</dl>"
-	      :dtstart "<dt>" :dtend "</dt>\n"
-	      :ddstart "<dd>" :ddend "</dd>"
-	      :istart "<li>" :iend "</li>"
-	      :icount (format "<li value=\"%s\">" counter)
-	      :isep "\n" :lsep "\n" :csep "\n"
-	      :cbon "<code>[X]</code>" :cboff "<code>[ ]</code>"
-	      :cbtrans "<code>[-]</code>")
-    params)))
+LIST is as string representing the list to transform, as Org
+syntax.  Return converted list as a string."
+  (require 'ox-html)
+  (org-export-string-as list 'html t))
 
 (defun org-list-to-texinfo (list &optional params)
   "Convert LIST into a Texinfo list.
-LIST is as returned by `org-list-parse-list'.  PARAMS is a property list
-with overruling parameters for `org-list-to-generic'."
-  (org-list-to-generic
-   list
-   (org-combine-plists
-    '(:splice nil :ostart "@itemize @minus\n" :oend "@end itemize"
-	      :ustart "@enumerate\n" :uend "@end enumerate"
-	      :dstart "@table @asis\n" :dend "@end table"
-	      :dtstart " " :dtend "\n"
-	      :istart "@item\n" :iend "\n"
-	      :icount "@item\n"
-	      :csep "\n"
-	      :cbon "@code{[X]}" :cboff "@code{[ ]}"
-	      :cbtrans "@code{[-]}")
-    params)))
+LIST is as string representing the list to transform, as Org
+syntax.  Return converted list as a string."
+  (require 'ox-texinfo)
+  (org-export-string-as list 'texinfo t))
 
 (defun org-list-to-subtree (list &optional params)
   "Convert LIST into an Org subtree.

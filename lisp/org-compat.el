@@ -113,10 +113,17 @@ any other entries, and any resulting duplicates will be removed entirely."
 
 ;;;; Emacs/XEmacs compatibility
 
+(defun org-defvaralias (new-alias base-variable &optional docstring)
+  "Compatibility function for defvaralias.
+Don't do the aliasing when `defvaralias' is not bound."
+  (declare (indent 1))
+  (when (fboundp 'defvaralias)
+    (defvaralias new-alias base-variable docstring)))
+
 (eval-and-compile
   (when (and (not (boundp 'user-emacs-directory))
 	     (boundp 'user-init-directory))
-    (defvaralias 'user-emacs-directory 'user-init-directory)))
+    (org-defvaralias 'user-emacs-directory 'user-init-directory)))
 
 ;; Keys
 (defconst org-xemacs-key-equivalents
@@ -488,6 +495,29 @@ With two arguments, return floor and remainder of their quotient."
 	'(progn
 	   (defun org-release () "N/A")
 	   (defun org-git-version () "N/A !!check installation!!"))))))
+
+(defun org-file-equal-p (f1 f2)
+  "Return t if files F1 and F2 are the same.
+Implements `file-equal-p' for older emacsen and XEmacs."
+  (if (fboundp 'file-equal-p)
+      (file-equal-p f1 f2)
+    (let (f1-attr f2-attr)
+      (and (setq f1-attr (file-attributes (file-truename f1)))
+	   (setq f2-attr (file-attributes (file-truename f2)))
+	   (equal f1-attr f2-attr)))))
+
+;; `buffer-narrowed-p' is available for Emacs >=24.3
+(defun org-buffer-narrowed-p ()
+  "Compatibility function for `buffer-narrowed-p'."
+  (if (fboundp 'buffer-narrowed-p)
+      (buffer-narrowed-p)
+    (/= (- (point-max) (point-min)) (buffer-size))))
+
+(defmacro org-with-silent-modifications (&rest body)
+  (if (fboundp 'with-silent-modifications)
+      `(with-silent-modifications ,@body)
+    `(org-unmodified ,@body)))
+(def-edebug-spec org-with-silent-modifications (body))
 
 (provide 'org-compat)
 

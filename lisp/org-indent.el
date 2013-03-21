@@ -88,7 +88,7 @@ This is used locally in each buffer being initialized.")
 (defvar org-hide-leading-stars-before-indent-mode nil
   "Used locally.")
 (defvar org-indent-modified-headline-flag nil
-  "Non-nil means the last deletion operated on an headline.
+  "Non-nil means the last deletion operated on a headline.
 It is modified by `org-indent-notify-modified-headline'.")
 
 
@@ -147,8 +147,8 @@ useful to make it ever so slightly different."
 
 (defsubst org-indent-remove-properties (beg end)
   "Remove indentations between BEG and END."
-  (with-silent-modifications
-    (remove-text-properties beg end '(line-prefix nil wrap-prefix nil))))
+  (org-with-silent-modifications
+   (remove-text-properties beg end '(line-prefix nil wrap-prefix nil))))
 
 ;;;###autoload
 (define-minor-mode org-indent-mode
@@ -159,69 +159,68 @@ properties, after each buffer modification, on the modified zone.
 
 The process is synchronous.  Though, initial indentation of
 buffer, which can take a few seconds on large buffers, is done
-during idle time." nil " Ind" nil
-(cond
- ((org-bound-and-true-p org-inhibit-startup)
-  (setq org-indent-mode nil))
- ((and org-indent-mode (featurep 'xemacs))
-  (message "org-indent-mode does not work in XEmacs - refusing to turn it on")
-  (setq org-indent-mode nil))
- ((and org-indent-mode
-       (not (org-version-check "23.1.50" "Org Indent mode" :predicate)))
-  (message "org-indent-mode can crash Emacs 23.1 - refusing to turn it on!")
-  (ding)
-  (sit-for 1)
-  (setq org-indent-mode nil))
- (org-indent-mode
-  ;; mode was turned on.
-  (org-set-local 'indent-tabs-mode nil)
-  (or org-indent-strings (org-indent-initialize))
-  (org-set-local 'org-indent-initial-marker (copy-marker 1))
-  (when org-indent-mode-turns-off-org-adapt-indentation
-    (org-set-local 'org-adapt-indentation nil))
-  (when org-indent-mode-turns-on-hiding-stars
-    (org-set-local 'org-hide-leading-stars-before-indent-mode
-		   org-hide-leading-stars)
-    (org-set-local 'org-hide-leading-stars t))
-  (make-local-variable 'filter-buffer-substring-functions)
-  (add-hook 'filter-buffer-substring-functions
-	    (lambda (fun start end delete)
-	      (org-indent-remove-properties-from-string
-	       (funcall fun start end delete))))
-  (org-add-hook 'after-change-functions 'org-indent-refresh-maybe nil 'local)
-  (org-add-hook 'before-change-functions
-		'org-indent-notify-modified-headline nil 'local)
-  (and font-lock-mode (org-restart-font-lock))
-  (org-indent-remove-properties (point-min) (point-max))
-  ;; Submit current buffer to initialize agent.  If it's the first
-  ;; buffer submitted, also start the agent.  Current buffer is
-  ;; pushed in both cases to avoid a race condition.
-  (if org-indent-agentized-buffers
+during idle time."
+  nil " Ind" nil
+  (cond
+   ((and org-indent-mode (featurep 'xemacs))
+    (message "org-indent-mode does not work in XEmacs - refusing to turn it on")
+    (setq org-indent-mode nil))
+   ((and org-indent-mode
+	 (not (org-version-check "23.1.50" "Org Indent mode" :predicate)))
+    (message "org-indent-mode can crash Emacs 23.1 - refusing to turn it on!")
+    (ding)
+    (sit-for 1)
+    (setq org-indent-mode nil))
+   (org-indent-mode
+    ;; mode was turned on.
+    (org-set-local 'indent-tabs-mode nil)
+    (or org-indent-strings (org-indent-initialize))
+    (org-set-local 'org-indent-initial-marker (copy-marker 1))
+    (when org-indent-mode-turns-off-org-adapt-indentation
+      (org-set-local 'org-adapt-indentation nil))
+    (when org-indent-mode-turns-on-hiding-stars
+      (org-set-local 'org-hide-leading-stars-before-indent-mode
+		     org-hide-leading-stars)
+      (org-set-local 'org-hide-leading-stars t))
+    (make-local-variable 'filter-buffer-substring-functions)
+    (add-hook 'filter-buffer-substring-functions
+	      (lambda (fun start end delete)
+		(org-indent-remove-properties-from-string
+		 (funcall fun start end delete))))
+    (org-add-hook 'after-change-functions 'org-indent-refresh-maybe nil 'local)
+    (org-add-hook 'before-change-functions
+		  'org-indent-notify-modified-headline nil 'local)
+    (and font-lock-mode (org-restart-font-lock))
+    (org-indent-remove-properties (point-min) (point-max))
+    ;; Submit current buffer to initialize agent.  If it's the first
+    ;; buffer submitted, also start the agent.  Current buffer is
+    ;; pushed in both cases to avoid a race condition.
+    (if org-indent-agentized-buffers
+	(push (current-buffer) org-indent-agentized-buffers)
       (push (current-buffer) org-indent-agentized-buffers)
-    (push (current-buffer) org-indent-agentized-buffers)
-    (setq org-indent-agent-timer
-	  (run-with-idle-timer 0.2 t #'org-indent-initialize-agent))))
- (t
-  ;; mode was turned off (or we refused to turn it on)
-  (kill-local-variable 'org-adapt-indentation)
-  (setq org-indent-agentized-buffers
-	(delq (current-buffer) org-indent-agentized-buffers))
-  (when (markerp org-indent-initial-marker)
-    (set-marker org-indent-initial-marker nil))
-  (when (boundp 'org-hide-leading-stars-before-indent-mode)
-    (org-set-local 'org-hide-leading-stars
-		   org-hide-leading-stars-before-indent-mode))
-  (remove-hook 'filter-buffer-substring-functions
-	       (lambda (fun start end delete)
-		 (org-indent-remove-properties-from-string
-		  (funcall fun start end delete))))
-  (remove-hook 'after-change-functions 'org-indent-refresh-maybe 'local)
-  (remove-hook 'before-change-functions
-	       'org-indent-notify-modified-headline 'local)
-  (org-with-wide-buffer
-   (org-indent-remove-properties (point-min) (point-max)))
-  (and font-lock-mode (org-restart-font-lock))
-  (redraw-display))))
+      (setq org-indent-agent-timer
+	    (run-with-idle-timer 0.2 t #'org-indent-initialize-agent))))
+   (t
+    ;; mode was turned off (or we refused to turn it on)
+    (kill-local-variable 'org-adapt-indentation)
+    (setq org-indent-agentized-buffers
+	  (delq (current-buffer) org-indent-agentized-buffers))
+    (when (markerp org-indent-initial-marker)
+      (set-marker org-indent-initial-marker nil))
+    (when (boundp 'org-hide-leading-stars-before-indent-mode)
+      (org-set-local 'org-hide-leading-stars
+		     org-hide-leading-stars-before-indent-mode))
+    (remove-hook 'filter-buffer-substring-functions
+		 (lambda (fun start end delete)
+		   (org-indent-remove-properties-from-string
+		    (funcall fun start end delete))))
+    (remove-hook 'after-change-functions 'org-indent-refresh-maybe 'local)
+    (remove-hook 'before-change-functions
+		 'org-indent-notify-modified-headline 'local)
+    (org-with-wide-buffer
+     (org-indent-remove-properties (point-min) (point-max)))
+    (and font-lock-mode (org-restart-font-lock))
+    (redraw-display))))
 
 (defun org-indent-indent-buffer ()
   "Add indentation properties to the accessible part of the buffer."
@@ -329,7 +328,7 @@ stopped."
      ;;    inline task or not.
      (let* ((case-fold-search t)
 	    (limited-re (org-get-limited-outline-regexp))
-	    (added-ind-per-lvl (1- org-indent-indentation-per-level))
+	    (added-ind-per-lvl (abs (1- org-indent-indentation-per-level)))
 	    (pf (save-excursion
 		  (and (ignore-errors (let ((outline-regexp limited-re))
 					(org-back-to-heading t)))
@@ -343,50 +342,50 @@ stopped."
        ;; 2. For each line, set `line-prefix' and `wrap-prefix'
        ;;    properties depending on the type of line (headline,
        ;;    inline task, item or other).
-       (with-silent-modifications
-	 (while (and (<= (point) end) (not (eobp)))
-	   (cond
-	    ;; When in asynchronous mode, check if interrupt is
-	    ;; required.
-	    ((and delay (input-pending-p)) (throw 'interrupt (point)))
-	    ;; In asynchronous mode, take a break of
-	    ;; `org-indent-agent-resume-delay' every DELAY to avoid
-	    ;; blocking any other idle timer or process output.
-	    ((and delay (time-less-p time-limit (current-time)))
-	     (setq org-indent-agent-resume-timer
-		   (run-with-idle-timer
-		    (time-add (current-idle-time)
-			      org-indent-agent-resume-delay)
-		    nil #'org-indent-initialize-agent))
-	     (throw 'interrupt (point)))
-	    ;; Headline or inline task.
-	    ((looking-at org-outline-regexp)
-	     (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
-		    (line (* added-ind-per-lvl (1- nstars)))
-		    (wrap (+ line (1+ nstars))))
-	       (cond
-		;; Headline: new value for PF.
-		((looking-at limited-re)
-		 (org-indent-set-line-properties line wrap t)
-		 (setq pf wrap))
-		;; End of inline task: PF-INLINE is now nil.
-		((looking-at "\\*+ end[ \t]*$")
-		 (org-indent-set-line-properties line wrap 'inline)
-		 (setq pf-inline nil))
-		;; Start of inline task.  Determine if it contains
-		;; text, or if it is only one line long.  Set
-		;; PF-INLINE accordingly.
-		(t (org-indent-set-line-properties line wrap 'inline)
-		   (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
-	    ;; List item: `wrap-prefix' is set where body starts.
-	    ((org-at-item-p)
-	     (let* ((line (or pf-inline pf 0))
-		    (wrap (+ (org-list-item-body-column (point)) line)))
-	       (org-indent-set-line-properties line wrap nil)))
-	    ;; Normal line: use PF-INLINE, PF or nil as prefixes.
-	    (t (let* ((line (or pf-inline pf 0))
-		      (wrap (+ line (org-get-indentation))))
-		 (org-indent-set-line-properties line wrap nil))))))))))
+       (org-with-silent-modifications
+	(while (and (<= (point) end) (not (eobp)))
+	  (cond
+	   ;; When in asynchronous mode, check if interrupt is
+	   ;; required.
+	   ((and delay (input-pending-p)) (throw 'interrupt (point)))
+	   ;; In asynchronous mode, take a break of
+	   ;; `org-indent-agent-resume-delay' every DELAY to avoid
+	   ;; blocking any other idle timer or process output.
+	   ((and delay (time-less-p time-limit (current-time)))
+	    (setq org-indent-agent-resume-timer
+		  (run-with-idle-timer
+		   (time-add (current-idle-time)
+			     org-indent-agent-resume-delay)
+		   nil #'org-indent-initialize-agent))
+	    (throw 'interrupt (point)))
+	   ;; Headline or inline task.
+	   ((looking-at org-outline-regexp)
+	    (let* ((nstars (- (match-end 0) (match-beginning 0) 1))
+		   (line (* added-ind-per-lvl (1- nstars)))
+		   (wrap (+ line (1+ nstars))))
+	      (cond
+	       ;; Headline: new value for PF.
+	       ((looking-at limited-re)
+		(org-indent-set-line-properties line wrap t)
+		(setq pf wrap))
+	       ;; End of inline task: PF-INLINE is now nil.
+	       ((looking-at "\\*+ end[ \t]*$")
+		(org-indent-set-line-properties line wrap 'inline)
+		(setq pf-inline nil))
+	       ;; Start of inline task.  Determine if it contains
+	       ;; text, or if it is only one line long.  Set
+	       ;; PF-INLINE accordingly.
+	       (t (org-indent-set-line-properties line wrap 'inline)
+		  (setq pf-inline (and (org-inlinetask-in-task-p) wrap))))))
+	   ;; List item: `wrap-prefix' is set where body starts.
+	   ((org-at-item-p)
+	    (let* ((line (or pf-inline pf 0))
+		   (wrap (+ (org-list-item-body-column (point)) line)))
+	      (org-indent-set-line-properties line wrap nil)))
+	   ;; Normal line: use PF-INLINE, PF or nil as prefixes.
+	   (t (let* ((line (or pf-inline pf 0))
+		     (wrap (+ line (org-get-indentation))))
+		(org-indent-set-line-properties line wrap nil))))))))))
 
 (defun org-indent-notify-modified-headline (beg end)
   "Set `org-indent-modified-headline-flag' depending on context.
@@ -413,7 +412,7 @@ range of inserted text.  DUMMY is an unused argument.
 This function is meant to be called by `after-change-functions'."
   (when org-indent-mode
     (save-match-data
-      ;; If an headline was modified or inserted, set properties until
+      ;; If a headline was modified or inserted, set properties until
       ;; next headline.
       (if (or org-indent-modified-headline-flag
 	      (save-excursion

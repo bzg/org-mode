@@ -40,23 +40,36 @@
 
 (defvar org-babel-default-header-args:python '())
 
-(defvar org-babel-python-command "python"
-  "Name of command for executing Python code.")
+(defcustom org-babel-python-command "python"
+  "Name of the command for executing Python code."
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :group 'org-babel
+  :type 'string)
 
-(defvar org-babel-python-mode (if (featurep 'xemacs) 'python-mode 'python)
+(defcustom org-babel-python-mode
+  (if (or (featurep 'xemacs) (featurep 'python-mode)) 'python-mode 'python)
   "Preferred python mode for use in running python interactively.
-This will typically be either 'python or 'python-mode.")
+This will typically be either 'python or 'python-mode."
+  :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'function)
 
 (defvar org-src-preserve-indentation)
 
 (defcustom org-babel-python-hline-to "None"
   "Replace hlines in incoming tables with this when translating to python."
   :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-babel-python-None-to 'hline
   "Replace 'None' in python tables with this before returning."
   :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defun org-babel-execute:python (body params)
@@ -156,7 +169,9 @@ then create.  Return the initialized session."
       (cond
        ((and (eq 'python org-babel-python-mode)
 	     (fboundp 'run-python)) ; python.el
-	(run-python))
+	(if (version< "24.1" emacs-version)
+	    (run-python org-babel-python-command)
+	  (run-python)))
        ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
 	;; Make sure that py-which-bufname is initialized, as otherwise

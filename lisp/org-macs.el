@@ -63,14 +63,6 @@
       `(interactive-p))))
 (def-edebug-spec org-called-interactively-p (&optional ("quote" symbolp)))
 
-(when (and (not (fboundp 'with-silent-modifications))
-	   (or (< emacs-major-version 23)
-	       (and (= emacs-major-version 23)
-		    (< emacs-minor-version 2))))
-  (defmacro with-silent-modifications (&rest body)
-    `(org-unmodified ,@body))
-  (def-edebug-spec with-silent-modifications (body)))
-
 (defmacro org-bound-and-true-p (var)
   "Return the value of symbol VAR if it is bound, else nil."
   `(and (boundp (quote ,var)) ,var))
@@ -86,16 +78,6 @@
   "If V not nil, and also not the string \"nil\", then return V.
 Otherwise return nil."
   (and v (not (equal v "nil")) v))
-
-(defmacro org-unmodified (&rest body)
-  "Execute body without changing `buffer-modified-p'.
-Also, do not record undo information."
-  `(set-buffer-modified-p
-    (prog1 (buffer-modified-p)
-      (let ((buffer-undo-list t)
-	    before-change-functions after-change-functions)
-	,@body))))
-(def-edebug-spec org-unmodified (body))
 
 (defun org-substitute-posix-classes (re)
   "Substitute posix classes in regular expression RE."
@@ -126,14 +108,18 @@ Also, do not record undo information."
 	 (org-move-to-column ,col)))))
 (def-edebug-spec org-preserve-lc (body))
 
-;; Copied from bookmark.el
-(defmacro org-with-buffer-modified-unmodified (&rest body)
+;; Use `org-with-silent-modifications' to ignore cosmetic changes and
+;; `org-unmodified' to ignore real text modifications
+(defmacro org-unmodified (&rest body)
   "Run BODY while preserving the buffer's `buffer-modified-p' state."
   (org-with-gensyms (was-modified)
     `(let ((,was-modified (buffer-modified-p)))
        (unwind-protect
-           (progn ,@body)
-         (set-buffer-modified-p ,was-modified)))))
+           (let ((buffer-undo-list t)
+		 (inhibit-modification-hooks t))
+	     ,@body)
+	 (set-buffer-modified-p ,was-modified)))))
+(def-edebug-spec org-unmodified (body))
 
 (defmacro org-without-partial-completion (&rest body)
   `(if (and (boundp 'partial-completion-mode)
@@ -175,34 +161,6 @@ We use a macro so that the test can happen at compilation time."
 (defmacro org-no-warnings (&rest body)
   (cons (if (fboundp 'with-no-warnings) 'with-no-warnings 'progn) body))
 (def-edebug-spec org-no-warnings (body))
-
-(defmacro org-if-unprotected (&rest body)
-  "Execute BODY if there is no `org-protected' text property at point."
-  `(unless (get-text-property (point) 'org-protected)
-     ,@body))
-(def-edebug-spec org-if-unprotected (body))
-
-(defmacro org-if-unprotected-1 (&rest body)
-  "Execute BODY if there is no `org-protected' text property at point-1."
-  `(unless (get-text-property (1- (point)) 'org-protected)
-     ,@body))
-(def-edebug-spec org-if-unprotected-1 (body))
-
-(defmacro org-if-unprotected-at (pos &rest body)
-  "Execute BODY if there is no `org-protected' text property at POS."
-  `(unless (get-text-property ,pos 'org-protected)
-     ,@body))
-(def-edebug-spec org-if-unprotected-at (form body))
-(put 'org-if-unprotected-at 'lisp-indent-function 1)
-
-(defun org-re-search-forward-unprotected (&rest args)
-  "Like re-search-forward, but stop only in unprotected places."
-  (catch 'exit
-    (while t
-      (unless (apply 're-search-forward args)
-	(throw 'exit nil))
-      (unless (get-text-property (match-beginning 0) 'org-protected)
-	(throw 'exit (point))))))
 
 ;; FIXME: Normalize argument names
 (defmacro org-with-remote-undo (_buffer &rest _body)
@@ -263,7 +221,8 @@ in `org-rm-props'."
   (cond ((eq key t) t)
 	((eq option t) t)
 	((assoc key option) (cdr (assoc key option)))
-	(t (cdr (assq 'default option)))))
+	(t (let ((r (cdr (assq 'default option))))
+	     (if (listp r) (delq nil r) r)))))
 
 (defsubst org-check-external-command (cmd &optional use no-error)
   "Check if external program CMD for USE exists, error if not.

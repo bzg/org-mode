@@ -215,7 +215,17 @@ Some other text
    (equal
     '((("l1")) (nil "s1"))
     (org-test-with-temp-text "#+CAPTION[s1]:\n#+CAPTION: l1\nParagraph"
-      (org-element-property :caption (org-element-at-point))))))
+      (org-element-property :caption (org-element-at-point)))))
+  ;; Corner case: orphaned keyword at the end of an element.
+  (should
+   (eq 'keyword
+       (org-test-with-temp-text "- item\n  #+name: name\nSome paragraph"
+	 (progn (search-forward "name")
+		(org-element-type (org-element-at-point))))))
+  (should-not
+   (org-test-with-temp-text "- item\n  #+name: name\nSome paragraph"
+     (progn (search-forward "Some")
+	    (org-element-property :name (org-element-at-point))))))
 
 
 ;;;; Babel Call
@@ -714,10 +724,10 @@ Some other text
       (org-element-parse-buffer) 'footnote-definition 'identity nil t)))
   ;; Footnote with more contents
   (should
-   (= 28
+   (= 29
       (org-element-property
        :end
-       (org-test-with-temp-text "[fn:1] Definition\n| a | b |"
+       (org-test-with-temp-text "[fn:1] Definition\n\n| a | b |"
 	 (org-element-map
 	  (org-element-parse-buffer)
 	  'footnote-definition 'identity nil t)))))
@@ -864,6 +874,17 @@ Some other text
 	;; Test tag removal.
 	(should (equal (org-element-property :tags headline) '("test")))))))
 
+(ert-deftest test-org-element/headline-properties ()
+  "Test properties from property drawer."
+  ;; All properties from property drawer have their symbol upper
+  ;; cased.
+  (should
+   (org-test-with-temp-text "* Headline\n:PROPERTIES:\n:foo: bar\n:END:"
+     (org-element-property :FOO (org-element-at-point))))
+  (should-not
+   (org-test-with-temp-text "* Headline\n:PROPERTIES:\n:foo: bar\n:END:"
+     (org-element-property :foo (org-element-at-point)))))
+
 
 ;;;; Horizontal Rule
 
@@ -933,8 +954,8 @@ Some other text
 	  (org-test-with-temp-text "*************** TODO Task"
 	    (org-element-property
 	     :todo-keyword
-	     (org-element-map
-	      (org-element-parse-buffer) 'inlinetask 'identity nil t))))))
+	     (org-element-map (org-element-parse-buffer) 'inlinetask
+	       'identity nil t))))))
       ;; Planning info.
       (should
        (equal
@@ -944,8 +965,7 @@ Some other text
 DEADLINE: <2012-03-29 thu.>"
 	  (org-element-property
 	   :deadline
-	   (org-element-map
-	    (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
+	   (org-element-map (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
       ;; Priority.
       (should
        (equal
@@ -955,7 +975,7 @@ DEADLINE: <2012-03-29 thu.>"
 	  (org-element-property
 	   :priority
 	   (org-element-map
-	    (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
+	       (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
       ;; Tags.
       (should
        (equal
@@ -965,7 +985,26 @@ DEADLINE: <2012-03-29 thu.>"
 	  (org-element-property
 	   :tags
 	   (org-element-map
-	    (org-element-parse-buffer) 'inlinetask 'identity nil t))))))))
+	       (org-element-parse-buffer) 'inlinetask 'identity nil t)))))
+      ;; Regular properties are accessed through upper case keywords.
+      (should
+       (org-test-with-temp-text "
+*************** Task
+:PROPERTIES:
+:foo: bar
+:END:
+*************** END"
+	 (forward-line)
+	 (org-element-property :FOO (org-element-at-point))))
+      (should-not
+       (org-test-with-temp-text "
+*************** Task
+:PROPERTIES:
+:foo: bar
+:END:
+*************** END"
+	 (forward-line)
+	 (org-element-property :foo (org-element-at-point)))))))
 
 
 ;;;; Italic
@@ -1154,7 +1193,7 @@ e^{i\\pi}+1=0
 
 (ert-deftest test-org-element/link-parser ()
   "Test `link' parser."
-  ;; 1. Radio target.
+  ;; Radio target.
   (should
    (equal
     "radio"
@@ -1162,18 +1201,18 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map
-	(let ((org-target-link-regexp "radio")) (org-element-parse-buffer))
-	'link 'identity nil t)))))
-  ;; 2. Standard link.
+	   (let ((org-target-link-regexp "radio")) (org-element-parse-buffer))
+	   'link 'identity nil t)))))
+  ;; Standard link.
   ;;
-  ;; 2.1. With description.
+  ;; ... with description.
   (should
    (equal
     '("Orgmode.org")
     (org-test-with-temp-text "[[http://orgmode.org][Orgmode.org]]"
       (org-element-contents
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.2. Without description.
+  ;; ... without description.
   (should
    (equal
     "http"
@@ -1181,7 +1220,7 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.3. With expansion.
+  ;; ... with expansion.
   (should
    (equal
     "//orgmode.org/worg"
@@ -1190,7 +1229,7 @@ e^{i\\pi}+1=0
 	(org-element-property
 	 :path
 	 (org-element-map (org-element-parse-buffer) 'link 'identity nil t))))))
-  ;; 2.4. With translation.
+  ;; ... with translation.
   (should
    (equal
     "127.0.0.1"
@@ -1199,9 +1238,9 @@ e^{i\\pi}+1=0
 	(let ((org-link-translation-function 'link-translate))
 	  (org-element-property
 	   :path
-	   (org-element-map
-	    (org-element-parse-buffer) 'link 'identity nil t)))))))
-  ;; 2.5. Id link.
+	   (org-element-map (org-element-parse-buffer) 'link
+	     'identity nil t)))))))
+  ;; ... id link.
   (should
    (equal
     "id"
@@ -1209,7 +1248,7 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.6. Custom-id link.
+  ;; ... custom-id link.
   (should
    (equal
     "custom-id"
@@ -1217,7 +1256,7 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.7 Coderef link.
+  ;; ... coderef link.
   (should
    (equal
     "coderef"
@@ -1225,7 +1264,7 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.8 Fuzzy link.
+  ;; ... fuzzy link.
   (should
    (equal
     "fuzzy"
@@ -1233,31 +1272,29 @@ e^{i\\pi}+1=0
       (org-element-property
        :type
        (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))))
-  ;; 2.9 File-type link with search option.
+  ;; ... file-type link with search option.
   (should
    (equal
     '(("file" "projects.org" "*task title"))
     (org-test-with-temp-text "[[file:projects.org::*task title]]"
-      (org-element-map
-       (org-element-parse-buffer) 'link
-       (lambda (l) (list (org-element-property :type l)
-		    (org-element-property :path l)
-		    (org-element-property :search-option l)))))))
-  ;; 2.10 File-type link with application.
+      (org-element-map (org-element-parse-buffer) 'link
+	(lambda (l) (list (org-element-property :type l)
+		     (org-element-property :path l)
+		     (org-element-property :search-option l)))))))
+  ;; ... file-type link with application.
   (should
    (equal
     '(("file" "projects.org" "docview"))
     (org-test-with-temp-text "[[docview:projects.org]]"
-      (org-element-map
-       (org-element-parse-buffer) 'link
-       (lambda (l) (list (org-element-property :type l)
-		    (org-element-property :path l)
-		    (org-element-property :application l)))))))
-  ;; 3. Plain link.
+      (org-element-map (org-element-parse-buffer) 'link
+	(lambda (l) (list (org-element-property :type l)
+		     (org-element-property :path l)
+		     (org-element-property :application l)))))))
+  ;; Plain link.
   (should
    (org-test-with-temp-text "A link: http://orgmode.org"
      (org-element-map (org-element-parse-buffer) 'link 'identity)))
-  ;; 4. Angular link.
+  ;; Angular link.
   (should
    (org-test-with-temp-text "A link: <http://orgmode.org>"
      (org-element-map (org-element-parse-buffer) 'link 'identity nil t)))
@@ -1275,10 +1312,15 @@ e^{i\\pi}+1=0
 	  (org-test-with-temp-text
 	      "#+LINK: orgmode http://www.orgmode.org/\n* H [[orgmode:#docs]]"
 	    (progn (org-mode-restart)
-		   (org-element-map
-		    (org-element-parse-buffer) 'link
-		    (lambda (link) (org-element-property :type link))
-		    nil t nil t))))))
+		   (org-element-map (org-element-parse-buffer) 'link
+		     (lambda (link) (org-element-property :type link))
+		     nil t nil t)))))
+  ;; Plain links are allowed as description of regular links.
+  (should
+   (equal "file"
+	  (org-test-with-temp-text "[[http://orgmode.org][file:unicorn.jpg]]"
+	    (search-forward "file:")
+	    (org-element-property :type (org-element-context))))))
 
 
 ;;;; Macro
@@ -1292,7 +1334,18 @@ e^{i\\pi}+1=0
   ;; With arguments.
   (should
    (org-test-with-temp-text "{{{macro(arg1,arg2)}}}"
-     (org-element-map (org-element-parse-buffer) 'macro 'identity))))
+     (org-element-map (org-element-parse-buffer) 'macro 'identity)))
+  ;; Properly handle protected commas in arguments...
+  (should
+   (= 2
+      (length
+       (org-test-with-temp-text "{{{macro(arg1\\,arg1,arg2)}}}"
+	 (org-element-property :args (org-element-context))))))
+  ;; ... even when last argument ends with a protected comma.
+  (should
+   (equal '("C-,")
+	  (org-test-with-temp-text "{{{macro(C-\\,)}}}"
+	    (org-element-property :args (org-element-context))))))
 
 
 ;;;; Node Property
@@ -1634,12 +1687,6 @@ Outside list"
   (should
    (org-test-with-temp-text "a_{b}"
      (org-element-map (org-element-parse-buffer) 'subscript 'identity)))
-  ;; At the beginning of an item.
-  (should
-   (eq 'subscript
-       (org-test-with-temp-text "- _b"
-	 (progn (search-forward "_")
-		(org-element-type (org-element-context))))))
   ;; Multiple subscripts in a paragraph.
   (should
    (= 2
@@ -1660,12 +1707,6 @@ Outside list"
   (should
    (org-test-with-temp-text "a^{b}"
      (org-element-map (org-element-parse-buffer) 'superscript 'identity)))
-  ;; At the beginning of an item.
-  (should
-   (eq 'superscript
-       (org-test-with-temp-text "- ^b"
-	 (progn (search-forward "^")
-		(org-element-type (org-element-context))))))
   ;; Multiple superscript in a paragraph.
   (should
    (= 2
@@ -2661,15 +2702,6 @@ Paragraph \\alpha."
        (org-test-with-temp-text "- Para1\n- Para2\n\nPara3"
 	 (progn (forward-line 2)
 		(org-element-type (org-element-at-point))))))
-  ;; Special case: within the first blank lines in buffer, return nil.
-  (should-not (org-test-with-temp-text "\nParagraph" (org-element-at-point)))
-  ;; Special case: within the blank lines after a headline, return
-  ;; that headline.
-  (should
-   (eq 'headline
-       (org-test-with-temp-text "* Headline\n\nParagraph"
-	 (progn (forward-line)
-		(org-element-type (org-element-at-point))))))
   ;; With an optional argument, return trail.
   (should
    (equal '(paragraph center-block)
@@ -2716,6 +2748,12 @@ Paragraph \\alpha."
        (org-test-with-temp-text "#+DATE: {{{macro}}}"
 	 (progn (search-forward "{")
 		(org-element-type (org-element-context))))))
+  ;; Do not find objects in table rules.
+  (should
+   (eq 'table-row
+       (org-test-with-temp-text "| a | b |\n+---+---+\n| c | d |"
+	 (forward-line)
+	 (org-element-type (org-element-context)))))
   ;; Find objects in parsed affiliated keywords.
   (should
    (eq 'macro
@@ -2742,9 +2780,7 @@ Paragraph \\alpha."
        (org-test-with-temp-text "Some *text with _underline_ text*"
 	 (progn
 	   (search-forward "under")
-	   (org-element-type (org-element-context (org-element-at-point)))))))
-  ;; Return nil when point is within the first blank lines.
-  (should-not (org-test-with-temp-text "\n* Headline" (org-element-context))))
+	   (org-element-type (org-element-context (org-element-at-point))))))))
 
 
 (provide 'test-org-element)

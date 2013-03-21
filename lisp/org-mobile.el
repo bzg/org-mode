@@ -78,9 +78,10 @@ org-agenda-text-search-extra-files
 
 (defcustom org-mobile-allpriorities "A B C"
   "Default set of priority cookies for the index file."
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string
-  :group 'org-mobile
-  :version "24.3")
+  :group 'org-mobile)
 
 (defcustom org-mobile-use-encryption nil
   "Non-nil means keep only encrypted files on the WebDAV server.
@@ -1069,8 +1070,11 @@ be returned that indicates what went wrong."
      ((eq what 'addheading)
       (if (org-on-heading-p) ; if false we are in top-level of file
 	  (progn
+	    ;; Workaround a `org-insert-heading-respect-content' bug
+	    ;; which prevents correct insertion when point is invisible
+	    (org-show-subtree)
 	    (end-of-line 1)
-	    (org-insert-heading-respect-content)
+	    (org-insert-heading-respect-content '(4) t)
 	    (org-demote))
 	(beginning-of-line)
 	(insert "* "))

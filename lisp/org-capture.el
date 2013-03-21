@@ -50,7 +50,6 @@
 (eval-when-compile
   (require 'cl))
 (require 'org)
-(require 'org-mks)
 
 (declare-function org-datetree-find-date-create "org-datetree"
 		  (date &optional keep-restriction))
@@ -239,7 +238,7 @@ be replaced with content and expanded in this order:
   %x          Content of the X clipboard.
   %k          Title of currently clocked task.
   %K          Link to currently clocked task.
-  %n          User name (taken from `user-full-name').
+  %n          User name (taken from the variable `user-full-name').
   %f          File visited by current buffer when org-capture was called.
   %F          Full path of the file or directory visited by current buffer.
   %:keyword   Specific information for certain link types, see below.
@@ -441,6 +440,7 @@ Turning on this mode runs the normal hook `org-capture-mode-hook'."
 
 ;;;###autoload
 (defun org-capture-string (string &optional keys)
+  "Capture STRING with the template selected by KEYS."
   (interactive "sInitial text: \n")
   (let ((org-capture-initial string)
 	(org-capture-entry (org-capture-select-template keys)))
@@ -461,6 +461,8 @@ Here are the available contexts definitions:
       in-mode: command displayed only in matching modes
   not-in-file: command not displayed in matching files
   not-in-mode: command not displayed in matching modes
+    in-buffer: command displayed only in matching buffers
+not-in-buffer: command not displayed in matching buffers
    [function]: a custom function taking no argument
 
 If you define several checks, the agenda command will be
@@ -486,6 +488,8 @@ to avoid duplicates.)"
 				     (choice
 				      (const :tag "In file" in-file)
 				      (const :tag "Not in file" not-in-file)
+				      (const :tag "In buffer" in-buffer)
+				      (const :tag "Not in buffer" not-in-buffer)
 				      (const :tag "In mode" in-mode)
 				      (const :tag "Not in mode" not-in-mode))
 				     (regexp))
@@ -604,7 +608,7 @@ of the day at point (if any) or the current HH:MM time."
 		(error
 		 "Could not start the clock in this capture buffer")))
 	  (if (org-capture-get :immediate-finish)
-	      (org-capture-finalize nil)))))))))
+	      (org-capture-finalize)))))))))
 
 (defun org-capture-get-template ()
   "Get the template from a file or a function if necessary."
@@ -968,7 +972,7 @@ it.  When it is a variable, retrieve the value.  Return whatever we get."
 	     (find-file-noselect (expand-file-name file org-directory)))))
 
 (defun org-capture-steal-local-variables (buffer)
-  "Install Org-mode local variables."
+  "Install Org-mode local variables of BUFFER."
   (mapc (lambda (v)
 	  (ignore-errors (org-set-local (car v) (cdr v))))
 	(buffer-local-variables buffer)))
@@ -1265,7 +1269,7 @@ Of course, if exact position has been required, just put it there."
     (goto-char beg)))
 
 (defun org-capture-empty-lines-before (&optional n)
-  "Arrange for the correct number of empty lines before the insertion point.
+  "Set the correct number of empty lines before the insertion point.
 Point will be after the empty lines, so insertion can directly be done."
   (setq n (or n (org-capture-get :empty-lines-before)
 	      (org-capture-get :empty-lines) 0))
@@ -1275,7 +1279,7 @@ Point will be after the empty lines, so insertion can directly be done."
     (if (> n 0) (newline n))))
 
 (defun org-capture-empty-lines-after (&optional n)
-  "Arrange for the correct number of empty lines after the inserted string.
+  "Set the correct number of empty lines after the inserted string.
 Point will remain at the first line after the inserted text."
   (setq n (or n (org-capture-get :empty-lines-after)
 	      (org-capture-get :empty-lines) 0))
@@ -1288,6 +1292,7 @@ Point will remain at the first line after the inserted text."
 (defvar org-clock-marker) ; Defined in org.el
 
 (defun org-capture-insert-template-here ()
+  "Insert the capture template at point."
   (let* ((template (org-capture-get :template))
 	 (type  (org-capture-get :type))
 	 beg end pp)
@@ -1370,8 +1375,104 @@ Use PREFIX as a prefix for the name of the indirect buffer."
   (unless (org-kill-is-subtree-p tree)
     (error "Template is not a valid Org entry or tree")))
 
-;;; The template code
+(defun org-mks (table title &optional prompt specials)
+  "Select a member of an alist with multiple keys.
+TABLE is the alist which should contain entries where the car is a string.
+There should be two types of entries.
 
+1. prefix descriptions like (\"a\" \"Description\")
+   This indicates that `a' is a prefix key for multi-letter selection, and
+   that there are entries following with keys like \"ab\", \"ax\"...
+
+2. Selectable members must have more than two elements, with the first
+   being the string of keys that lead to selecting it, and the second a
+   short description string of the item.
+
+The command will then make a temporary buffer listing all entries
+that can be selected with a single key, and all the single key
+prefixes.  When you press the key for a single-letter entry, it is selected.
+When you press a prefix key, the commands (and maybe further prefixes)
+under this key will be shown and offered for selection.
+
+TITLE will be placed over the selection in the temporary buffer,
+PROMPT will be used when prompting for a key.  SPECIAL is an alist with
+also (\"key\" \"description\") entries.  When one of these is selection,
+only the bare key is returned."
+  (setq prompt (or prompt "Select: "))
+  (let (tbl orig-table dkey ddesc des-keys allowed-keys
+	    current prefix rtn re pressed buffer (inhibit-quit t))
+    (save-window-excursion
+      (setq buffer (org-switch-to-buffer-other-window "*Org Select*"))
+      (setq orig-table table)
+      (catch 'exit
+	(while t
+	  (erase-buffer)
+	  (insert title "\n\n")
+	  (setq tbl table
+		des-keys nil
+		allowed-keys nil)
+	  (setq prefix (if current (concat current " ") ""))
+	  (while tbl
+	    (cond
+	     ((and (= 2 (length (car tbl))) (= (length (caar tbl)) 1))
+	      ;; This is a description on this level
+	      (setq dkey (caar tbl) ddesc (cadar tbl))
+	      (pop tbl)
+	      (push dkey des-keys)
+	      (push dkey allowed-keys)
+	      (insert prefix "[" dkey "]" "..." "  " ddesc "..." "\n")
+	      ;; Skip keys which are below this prefix
+	      (setq re (concat "\\`" (regexp-quote dkey)))
+	      (while (and tbl (string-match re (caar tbl))) (pop tbl)))
+	     ((= 2 (length (car tbl)))
+	      ;; Not yet a usable description, skip it
+	      )
+	     (t
+	      ;; usable entry on this level
+	      (insert prefix "[" (caar tbl) "]" "     " (nth 1 (car tbl)) "\n")
+	      (push (caar tbl) allowed-keys)
+	      (pop tbl))))
+	  (when specials
+	    (insert "-------------------------------------------------------------------------------\n")
+	    (let ((sp specials))
+	      (while sp
+		(insert (format "[%s]     %s\n"
+				(caar sp) (nth 1 (car sp))))
+		(push (caar sp) allowed-keys)
+		(pop sp))))
+	  (push "\C-g" allowed-keys)
+	  (goto-char (point-min))
+	  (if (not (pos-visible-in-window-p (point-max)))
+	      (org-fit-window-to-buffer))
+	  (message prompt)
+	  (setq pressed (char-to-string (read-char-exclusive)))
+	  (while (not (member pressed allowed-keys))
+	    (message "Invalid key `%s'" pressed) (sit-for 1)
+	    (message prompt)
+	    (setq pressed (char-to-string (read-char-exclusive))))
+	  (when (equal pressed "\C-g")
+	    (kill-buffer buffer)
+	    (error "Abort"))
+	  (when (and (not (assoc pressed table))
+		     (not (member pressed des-keys))
+		     (assoc pressed specials))
+	    (throw 'exit (setq rtn pressed)))
+	  (unless (member pressed des-keys)
+	    (throw 'exit (setq rtn (rassoc (cdr (assoc pressed table))
+					   orig-table))))
+	  (setq current (concat current pressed))
+	  (setq table (mapcar
+		       (lambda (x)
+			 (if (and (> (length (car x)) 1)
+				  (equal (substring (car x) 0 1) pressed))
+			     (cons (substring (car x) 1) (cdr x))
+			   nil))
+		       table))
+	  (setq table (remove nil table)))))
+    (when buffer (kill-buffer buffer))
+    rtn))
+
+;;; The template code
 (defun org-capture-select-template (&optional keys)
   "Select a capture template.
 Lisp programs can force the template by setting KEYS to a string."
@@ -1500,10 +1601,8 @@ The template may still contain \"%?\" for cursor positioning."
 		(setq v-i (mapconcat 'identity
 				     (org-split-string initial "\n")
 				     (concat "\n" lead))))))
-	  (replace-match
-	   (or (org-add-props (eval (intern (concat "v-" (match-string 1))))
-		   '(org-protected t)) "")
-	   t t)))
+	  (replace-match (or (eval (intern (concat "v-" (match-string 1)))) "")
+			 t t)))
 
       ;; From the property list
       (when plist-p
@@ -1519,8 +1618,7 @@ The template may still contain \"%?\" for cursor positioning."
       (let ((org-inhibit-startup t)) (org-mode))
       ;; Interactive template entries
       (goto-char (point-min))
-      (while (and (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCLp]\\)?" nil t)
-		  (not (get-text-property (1- (point)) 'org-protected)))
+      (while (re-search-forward "%^\\({\\([^}]*\\)}\\)?\\([gGtTuUCLp]\\)?" nil t)
 	(unless (org-capture-escaped-%)
 	  (setq char (if (match-end 3) (match-string-no-properties 3))
 		prompt (if (match-end 2) (match-string-no-properties 2)))
@@ -1663,7 +1761,7 @@ Such keywords are prefixed with \"%:\".  See
 
 ;;;###autoload
 (defun org-capture-import-remember-templates ()
-  "Set org-capture-templates to be similar to `org-remember-templates'."
+  "Set `org-capture-templates' to be similar to `org-remember-templates'."
   (interactive)
   (when (and (yes-or-no-p
 	      "Import old remember templates into org-capture-templates? ")

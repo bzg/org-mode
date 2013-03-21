@@ -33,7 +33,8 @@
   (if (memq system-type '(windows-nt cygwin))
       ".exe"
     nil))
-(defvar org-babel-call-process-region-original)
+;; dynamically scoped for tramp
+(defvar org-babel-call-process-region-original nil)
 (defvar org-src-lang-modes)
 (defvar org-babel-library-of-babel)
 (declare-function show-all "outline" ())
@@ -59,6 +60,8 @@
 		  (pom property &optional inherit literal-nil))
 (declare-function org-make-options-regexp "org" (kwds &optional extra))
 (declare-function org-do-remove-indentation "org" (&optional n))
+(declare-function org-next-block "org" (arg &optional backward block-regexp))
+(declare-function org-previous-block "org" (arg &optional block-regexp))
 (declare-function org-show-context "org" (&optional key))
 (declare-function org-at-table-p "org" (&optional table-type))
 (declare-function org-cycle "org" (&optional arg))
@@ -91,6 +94,7 @@
 (declare-function org-escape-code-in-region "org-src" (beg end))
 (declare-function org-unescape-code-in-string "org-src" (s))
 (declare-function org-table-to-lisp "org-table" (&optional txt))
+(declare-function org-reverse-string "org" (string))
 
 (defgroup org-babel nil
   "Code block evaluation and management in `org-mode' documents."
@@ -132,6 +136,8 @@ remove code block execution from the C-c C-c keybinding."
 Should be either RESULTS or NAME however any capitalization may
 be used."
   :group 'org-babel
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'string)
 
 (defcustom org-babel-noweb-wrap-start "<<"
@@ -279,42 +285,72 @@ Returns a list
     (when info (append info (list name indent)))))
 
 (defvar org-current-export-file) ; dynamically bound
-(defun org-babel-confirm-evaluate (info)
+(defmacro org-babel-check-confirm-evaluate (info &rest body)
+  "Evaluate BODY with special execution confirmation variables set.
+
+Specifically; NOEVAL will indicate if evaluation is allowed,
+QUERY will indicate if a user query is required, CODE-BLOCK will
+hold the language of the code block, and BLOCK-NAME will hold the
+name of the code block."
+  (declare (indent defun))
+  (org-with-gensyms
+      (lang block-body headers name eval eval-no export eval-no-export)
+    `(let* ((,lang           (nth 0 ,info))
+	    (,block-body     (nth 1 ,info))
+	    (,headers        (nth 2 ,info))
+	    (,name           (nth 4 ,info))
+	    (,eval           (or (cdr  (assoc :eval   ,headers))
+				 (when (assoc :noeval ,headers) "no")))
+	    (,eval-no        (or (equal ,eval "no")
+				 (equal ,eval "never")))
+	    (,export         (org-bound-and-true-p org-current-export-file))
+	    (,eval-no-export (and ,export (or (equal ,eval "no-export")
+					      (equal ,eval "never-export"))))
+	    (noeval          (or ,eval-no ,eval-no-export))
+	    (query           (or (equal ,eval "query")
+				 (and ,export (equal ,eval "query-export"))
+				 (when (functionp org-confirm-babel-evaluate)
+				   (funcall org-confirm-babel-evaluate
+					    ,lang ,block-body))
+				 org-confirm-babel-evaluate))
+	    (code-block      (if ,info (format  " %s "  ,lang) " "))
+	    (block-name      (if ,name (format " (%s) " ,name) " ")))
+       ,@body)))
+
+(defsubst org-babel-check-evaluate (info)
+  "Check if code block INFO should be evaluated.
+Do not query the user."
+  (org-babel-check-confirm-evaluate info
+    (not (when noeval
+	   (message (format "Evaluation of this%scode-block%sis disabled."
+			    code-block block-name))))))
+
+ ;; dynamically scoped for asynchroneous export
+(defvar org-babel-confirm-evaluate-answer-no)
+
+(defsubst org-babel-confirm-evaluate (info)
   "Confirm evaluation of the code block INFO.
-This behavior can be suppressed by setting the value of
+
+If the variable `org-babel-confirm-evaluate-answer-no´ is bound
+to a non-nil value, auto-answer with \"no\".
+
+This query can also be suppressed by setting the value of
 `org-confirm-babel-evaluate' to nil, in which case all future
 interactive code block evaluations will proceed without any
 confirmation from the user.
 
 Note disabling confirmation may result in accidental evaluation
 of potentially harmful code."
-  (let* ((eval (or (cdr (assoc :eval (nth 2 info)))
-		   (when (assoc :noeval (nth 2 info)) "no")))
-         (query (cond ((equal eval "query") t)
-		      ((and (boundp 'org-current-export-file)
-			    org-current-export-file
-			    (equal eval "query-export")) t)
-                      ((functionp org-confirm-babel-evaluate)
-                       (funcall org-confirm-babel-evaluate
-                                (nth 0 info) (nth 1 info)))
-                      (t org-confirm-babel-evaluate))))
-    (if (or (equal eval "never") (equal eval "no")
-	    (and (boundp 'org-current-export-file)
-		 org-current-export-file
-		 (or (equal eval "no-export")
-		     (equal eval "never-export")))
-	    (and query
-		 (not (yes-or-no-p
-		       (format "Evaluate this%scode block%son your system? "
-			       (if info (format " %s " (nth 0 info)) " ")
-			       (if (nth 4 info)
-				   (format " (%s) " (nth 4 info)) " "))))))
-	(prog1 nil (message "Evaluation %s"
-			    (if (or (equal eval "never") (equal eval "no")
-				    (equal eval "no-export")
-				    (equal eval "never-export"))
-				"Disabled" "Aborted")))
-      t)))
+  (org-babel-check-confirm-evaluate info
+    (not (when query
+	   (unless
+	       (and (not (org-bound-and-true-p
+			  org-babel-confirm-evaluate-answer-no))
+		    (yes-or-no-p
+		     (format "Evaluate this%scode block%son your system? "
+			     code-block block-name)))
+	     (message (format "Evaluation of this%scode-block%sis aborted."
+			      code-block block-name)))))))
 
 ;;;###autoload
 (defun org-babel-execute-safely-maybe ()
@@ -453,7 +489,10 @@ specific header arguments as well.")
 (defvar org-babel-result-regexp
   (concat "^[ \t]*#\\+"
 	  (regexp-opt org-babel-data-names t)
-	  "\\(\\[\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*")
+	  "\\(\\[\\("
+	  ;; FIXME The string below is `org-ts-regexp'
+	  "<\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\r\n>]*?\\)>"
+	  " \\)?\\([[:alnum:]]+\\)\\]\\)?\\:[ \t]*")
   "Regular expression used to match result lines.
 If the results are associated with a hash key then the hash will
 be saved in the second match data.")
@@ -478,6 +517,9 @@ can not be resolved.")
 
 (defvar org-babel-hash-show 4
   "Number of initial characters to show of a hidden results hash.")
+
+(defvar org-babel-hash-show-time nil
+  "When not nil show the time the code block was evaluated in the result hash.")
 
 (defvar org-babel-after-execute-hook nil
   "Hook for functions to be called after `org-babel-execute-src-block'")
@@ -512,83 +554,91 @@ Optionally supply a value for PARAMS which will be merged with
 the header arguments specified at the front of the source code
 block."
   (interactive)
-  (let ((info (or info (org-babel-get-src-block-info))))
-    (when (org-babel-confirm-evaluate
-	   (let ((i info))
-	     (setf (nth 2 i) (org-babel-merge-params (nth 2 info) params))
-	     i))
-      (let* ((lang (nth 0 info))
-	     (params (if params
-			 (org-babel-process-params
-			  (org-babel-merge-params (nth 2 info) params))
+  (let* ((info (or info (org-babel-get-src-block-info)))
+	 (merged-params (org-babel-merge-params (nth 2 info) params)))
+    (when (org-babel-check-evaluate
+	   (let ((i info)) (setf (nth 2 i) merged-params) i))
+      (let* ((params (if params
+			 (org-babel-process-params merged-params)
 		       (nth 2 info)))
-	     (cache? (and (not arg) (cdr (assoc :cache params))
-			  (string= "yes" (cdr (assoc :cache params)))))
-	     (result-params (cdr (assoc :result-params params)))
-	     (new-hash (when cache? (org-babel-sha1-hash info)))
-	     (old-hash (when cache? (org-babel-current-result-hash)))
-	     (body (setf (nth 1 info)
-			 (if (org-babel-noweb-p params :eval)
-			     (org-babel-expand-noweb-references info)
-			   (nth 1 info))))
-	     (dir (cdr (assoc :dir params)))
-	     (default-directory
-	       (or (and dir (file-name-as-directory (expand-file-name dir)))
-		   default-directory))
-	     (org-babel-call-process-region-original
-	      (if (boundp 'org-babel-call-process-region-original)
-		  org-babel-call-process-region-original
-		(symbol-function 'call-process-region)))
-	     (indent (car (last info)))
-	     result cmd)
-	(unwind-protect
-	    (let ((call-process-region
-		   (lambda (&rest args)
-		     (apply 'org-babel-tramp-handle-call-process-region args))))
-	      (let ((lang-check (lambda (f)
-				  (let ((f (intern (concat "org-babel-execute:" f))))
-				    (when (fboundp f) f)))))
-		(setq cmd
-		      (or (funcall lang-check lang)
-			  (funcall lang-check (symbol-name
-					       (cdr (assoc lang org-src-lang-modes))))
-			  (error "No org-babel-execute function for %s!" lang))))
-	      (if (and (not arg) new-hash (equal new-hash old-hash))
-		  (save-excursion ;; return cached result
-		    (goto-char (org-babel-where-is-src-block-result nil info))
-		    (end-of-line 1) (forward-char 1)
-		    (setq result (org-babel-read-result))
-		    (message (replace-regexp-in-string
-			      "%" "%%" (format "%S" result))) result)
-		(message "executing %s code block%s..."
-			 (capitalize lang)
-			 (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
-		(if (member "none" result-params)
-		    (progn
-		      (funcall cmd body params)
-		      (message "result silenced"))
-		(setq result
-		      ((lambda (result)
-			 (if (and (eq (cdr (assoc :result-type params)) 'value)
-				  (or (member "vector" result-params)
-				      (member "table" result-params))
-				  (not (listp result)))
-			     (list (list result)) result))
-		       (funcall cmd body params)))
-		;; if non-empty result and :file then write to :file
-		(when (cdr (assoc :file params))
-		  (when result
-		    (with-temp-file (cdr (assoc :file params))
-		      (insert
-		       (org-babel-format-result
-			result (cdr (assoc :sep (nth 2 info)))))))
-		  (setq result (cdr (assoc :file params))))
-		(org-babel-insert-result
-		 result result-params info new-hash indent lang)
-		(run-hooks 'org-babel-after-execute-hook)
-		result
-		)))
-	  (setq call-process-region 'org-babel-call-process-region-original))))))
+	     (cachep (and (not arg) (cdr (assoc :cache params))
+			   (string= "yes" (cdr (assoc :cache params)))))
+	     (new-hash (when cachep (org-babel-sha1-hash info)))
+	     (old-hash (when cachep (org-babel-current-result-hash)))
+	     (cache-current-p (and (not arg) new-hash
+				   (equal new-hash old-hash))))
+	(cond
+	 (cache-current-p
+	  (save-excursion ;; return cached result
+	    (goto-char (org-babel-where-is-src-block-result nil info))
+	    (end-of-line 1) (forward-char 1)
+	    (let ((result (org-babel-read-result)))
+	      (message (replace-regexp-in-string
+			"%" "%%" (format "%S" result))) result)))
+	 ((org-babel-confirm-evaluate
+	   (let ((i info)) (setf (nth 2 i) merged-params) i))
+	  (let* ((lang (nth 0 info))
+		 (result-params (cdr (assoc :result-params params)))
+		 (body (setf (nth 1 info)
+			     (if (org-babel-noweb-p params :eval)
+				 (org-babel-expand-noweb-references info)
+			       (nth 1 info))))
+		 (dir (cdr (assoc :dir params)))
+		 (default-directory
+		   (or (and dir (file-name-as-directory (expand-file-name dir)))
+		       default-directory))
+		 (org-babel-call-process-region-original ;; for tramp handler
+		  (or (org-bound-and-true-p
+		       org-babel-call-process-region-original)
+		      (symbol-function 'call-process-region)))
+		 (indent (car (last info)))
+		 result cmd)
+	    (unwind-protect
+		(let ((call-process-region
+		       (lambda (&rest args)
+			 (apply 'org-babel-tramp-handle-call-process-region
+				args))))
+		  (let ((lang-check
+			 (lambda (f)
+			   (let ((f (intern (concat "org-babel-execute:" f))))
+			     (when (fboundp f) f)))))
+		    (setq cmd
+			  (or (funcall lang-check lang)
+			      (funcall lang-check
+				       (symbol-name
+					(cdr (assoc lang org-src-lang-modes))))
+			      (error "No org-babel-execute function for %s!"
+				     lang))))
+		  (message "executing %s code block%s..."
+			   (capitalize lang)
+			   (if (nth 4 info) (format " (%s)" (nth 4 info)) ""))
+		  (if (member "none" result-params)
+		      (progn
+			(funcall cmd body params)
+			(message "result silenced"))
+		    (setq result
+			  ((lambda (result)
+			     (if (and (eq (cdr (assoc :result-type params))
+					  'value)
+				      (or (member "vector" result-params)
+					  (member "table" result-params))
+				      (not (listp result)))
+				 (list (list result)) result))
+			   (funcall cmd body params)))
+		    ;; if non-empty result and :file then write to :file
+		    (when (cdr (assoc :file params))
+		      (when result
+			(with-temp-file (cdr (assoc :file params))
+			  (insert
+			   (org-babel-format-result
+			    result (cdr (assoc :sep (nth 2 info)))))))
+		      (setq result (cdr (assoc :file params))))
+		    (org-babel-insert-result
+		     result result-params info new-hash indent lang)
+		    (run-hooks 'org-babel-after-execute-hook)
+		    result))
+	      (setq call-process-region
+		    'org-babel-call-process-region-original)))))))))
 
 (defun org-babel-expand-body:generic (body params &optional var-lines)
   "Expand BODY with PARAMS.
@@ -621,8 +671,11 @@ arguments and pop open the results in a preview buffer."
 	    (org-babel-expand-body:generic
 	     body params (and (fboundp assignments-cmd)
 			      (funcall assignments-cmd params))))))
-    (org-edit-src-code
-     nil expanded (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))))
+    (if (called-interactively-p 'any)
+	(org-edit-src-code
+	 nil expanded
+	 (concat "*Org-Babel Preview " (buffer-name) "[ " lang " ]*"))
+      expanded)))
 
 (defun org-babel-edit-distance (s1 s2)
   "Return the edit (levenshtein) distance between strings S1 S2."
@@ -747,10 +800,12 @@ session."
   (let* ((info (or info (org-babel-get-src-block-info)))
          (lang (nth 0 info))
          (params (nth 2 info))
-         (body (setf (nth 1 info)
-		     (if (org-babel-noweb-p params :eval)
-                         (org-babel-expand-noweb-references info)
-		       (nth 1 info))))
+         (body (if (not info)
+		   (user-error "No src code block at point")
+		 (setf (nth 1 info)
+		       (if (org-babel-noweb-p params :eval)
+			   (org-babel-expand-noweb-references info)
+			 (nth 1 info)))))
          (session (cdr (assoc :session params)))
 	 (dir (cdr (assoc :dir params)))
 	 (default-directory
@@ -1073,7 +1128,7 @@ the current subtree."
 (defun org-babel-current-result-hash ()
   "Return the current in-buffer hash."
   (org-babel-where-is-src-block-result)
-  (org-no-properties (match-string 3)))
+  (org-no-properties (match-string 5)))
 
 (defun org-babel-set-current-result-hash (hash)
   "Set the current in-buffer hash to HASH."
@@ -1090,11 +1145,11 @@ will remain visible."
   (add-to-invisibility-spec '(org-babel-hide-hash . t))
   (save-excursion
     (when (and (re-search-forward org-babel-result-regexp nil t)
-               (match-string 3))
-      (let* ((start (match-beginning 3))
+               (match-string 5))
+      (let* ((start (match-beginning 5))
              (hide-start (+ org-babel-hash-show start))
-             (end (match-end 3))
-             (hash (match-string 3))
+             (end (match-end 5))
+             (hash (match-string 5))
              ov1 ov2)
         (setq ov1 (make-overlay start hide-start))
         (setq ov2 (make-overlay hide-start end))
@@ -1107,7 +1162,8 @@ Only the initial `org-babel-hash-show' characters of each hash
 will remain visible.  This function should be called as part of
 the `org-mode-hook'."
   (save-excursion
-    (while (re-search-forward org-babel-result-regexp nil t)
+    (while (and (not org-babel-hash-show-time)
+		(re-search-forward org-babel-result-regexp nil t))
       (goto-char (match-beginning 0))
       (org-babel-hide-hash)
       (goto-char (match-end 0)))))
@@ -1632,22 +1688,15 @@ buffer or nil if no such result exists."
 (defun org-babel-next-src-block (&optional arg)
   "Jump to the next source block.
 With optional prefix argument ARG, jump forward ARG many source blocks."
-  (interactive "P")
-  (when (looking-at org-babel-src-block-regexp) (forward-char 1))
-  (condition-case nil
-      (re-search-forward org-babel-src-block-regexp nil nil (or arg 1))
-    (error (error "No further code blocks")))
-  (goto-char (match-beginning 0)) (org-show-context))
+  (interactive "p")
+  (org-next-block arg nil org-babel-src-block-regexp))
 
 ;;;###autoload
 (defun org-babel-previous-src-block (&optional arg)
   "Jump to the previous source block.
 With optional prefix argument ARG, jump backward ARG many source blocks."
-  (interactive "P")
-  (condition-case nil
-      (re-search-backward org-babel-src-block-regexp nil nil (or arg 1))
-    (error (error "No previous code blocks")))
-  (goto-char (match-beginning 0)) (org-show-context))
+  (interactive "p")
+  (org-previous-block arg org-babel-src-block-regexp))
 
 (defvar org-babel-load-languages)
 
@@ -1728,7 +1777,8 @@ following the source block."
 	   (inlinep (when (org-babel-get-inline-src-block-matches)
 		      (match-end 0)))
 	   (name (if on-lob-line
-		     (mapconcat #'identity (butlast (org-babel-lob-get-info)) "")
+		     (mapconcat #'identity (butlast (org-babel-lob-get-info))
+				"")
 		   (nth 4 (or info (org-babel-get-src-block-info 'light)))))
 	   (head (unless on-lob-line (org-babel-where-is-src-block-head)))
 	   found beg end)
@@ -1745,7 +1795,7 @@ following the source block."
 	  ;; - if it does need to be rebuilt then do set end
 	  name (setq beg (org-babel-find-named-result name))
 	  (prog1 beg
-	    (when (and hash (not (string= hash (match-string 3))))
+	    (when (and hash (not (string= hash (match-string 5))))
 	      (goto-char beg) (setq end beg) ;; beginning of result
 	      (forward-line 1)
 	      (delete-region end (org-babel-result-end)) nil)))
@@ -1757,20 +1807,26 @@ following the source block."
 	  (progn (end-of-line 1)
 		 (if (eobp) (insert "\n") (forward-char 1))
 		 (setq end (point))
-		 (or (and (not name)
-			  (progn ;; unnamed results line already exists
-			    (re-search-forward "[^ \f\t\n\r\v]" nil t)
+		 (or (and
+		      (not name)
+		      (progn ;; unnamed results line already exists
+			(catch 'non-comment
+			  (while (re-search-forward "[^ \f\t\n\r\v]" nil t)
 			    (beginning-of-line 1)
-			    (looking-at
-			     (concat org-babel-result-regexp "\n")))
-			  (prog1 (point)
-			    ;; must remove and rebuild if hash!=old-hash
-			    (if (and hash (not (string= hash (match-string 3))))
-				(prog1 nil
-				  (forward-line 1)
-				  (delete-region
-				   end (org-babel-result-end)))
-			      (setq end nil))))))))))
+			    (cond
+			     ((looking-at (concat org-babel-result-regexp "\n"))
+			      (throw 'non-comment t))
+			     ((looking-at "^[ \t]*#") (end-of-line 1))
+			     (t (throw 'non-comment nil))))))
+		      (let ((this-hash (match-string 5)))
+			(prog1 (point)
+			  ;; must remove and rebuild if hash!=old-hash
+			  (if (and hash (not (string= hash this-hash)))
+			      (prog1 nil
+				(forward-line 1)
+				(delete-region
+				 end (org-babel-result-end)))
+			    (setq end nil)))))))))))
       (if (not (and insert end)) found
 	(goto-char end)
 	(unless beg
@@ -1778,7 +1834,11 @@ following the source block."
 	(insert (concat
 		 (when (wholenump indent) (make-string indent ? ))
 		 "#+" org-babel-results-keyword
-		 (when hash (concat "["hash"]"))
+		 (when hash
+		   (if org-babel-hash-show-time
+		       (concat
+			"["(format-time-string "<%Y-%m-%d %H:%M:%S>")" "hash"]")
+		     (concat "["hash"]")))
 		 ":"
 		 (when name (concat " " name)) "\n"))
 	(unless beg (insert "\n") (backward-char))
@@ -1960,7 +2020,7 @@ code ---- the results are extracted in the syntax of the source
 			    (goto-char end) (insert (concat finish "\n"))
 			    (goto-char beg) (insert (concat start "\n"))
 			    (unless no-escape
-			      (org-escape-code-in-region (point) end))
+			      (org-escape-code-in-region (min (point) end) end))
 			    (goto-char end) (goto-char (point-at-eol))
 			    (setq end (point-marker))))
 		    (proper-list-p (lambda (it) (and (listp it) (null (cdr (last it)))))))
@@ -2495,10 +2555,6 @@ If the table is trivial, then return it as a scalar."
                            (match-string 1 cell))
                       cell) t))
 
-(defun org-babel-reverse-string (string)
-  "Return the reverse of STRING."
-  (apply 'string (reverse (string-to-list string))))
-
 (defun org-babel-chomp (string &optional regexp)
   "Strip trailing spaces and carriage returns from STRING.
 Default regexp used is \"[ \f\t\n\r\v]\" but can be
@@ -2513,11 +2569,10 @@ overwritten by specifying a regexp as a second argument."
   "Strip leading and trailing spaces and carriage returns from STRING.
 Like `org-babel-chomp' only it runs on both the front and back
 of the string."
-  (org-babel-chomp (org-babel-reverse-string
-                    (org-babel-chomp (org-babel-reverse-string string) regexp))
+  (org-babel-chomp (org-reverse-string
+                    (org-babel-chomp (org-reverse-string string) regexp))
                    regexp))
 
-(defvar org-babel-org-babel-call-process-region-original nil)
 (defun org-babel-tramp-handle-call-process-region
   (start end program &optional delete buffer display &rest args)
   "Use Tramp to handle `call-process-region'.
@@ -2568,7 +2623,8 @@ Emacs shutdown."))
 
 (defmacro org-babel-result-cond (result-params scalar-form &rest table-forms)
   "Call the code to parse raw string results according to RESULT-PARAMS."
-  (declare (indent 1))
+  (declare (indent 1)
+	   (debug (form form &rest form)))
   `(unless (member "none" ,result-params)
      (if (or (member "scalar" ,result-params)
 	     (member "verbatim" ,result-params)

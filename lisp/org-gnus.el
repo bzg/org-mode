@@ -43,8 +43,7 @@
 (declare-function gnus-summary-last-subject "gnus-sum" nil)
 ;; Customization variables
 
-(when (fboundp 'defvaralias)
-  (defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links))
+(org-defvaralias 'org-usenet-links-prefer-google 'org-gnus-prefer-web-links)
 
 (defcustom org-gnus-prefer-web-links nil
   "If non-nil, `org-store-link' creates web links to Google groups or Gmane.
@@ -69,9 +68,9 @@ this variable to `t'."
 (defcustom org-gnus-no-server nil
   "Should Gnus be started using `gnus-no-server'?"
   :group 'org-gnus
-  ;; :version "24.3"
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type 'boolean)
-
 
 ;; Install the link type
 (org-add-link-type "gnus" 'org-gnus-open)
