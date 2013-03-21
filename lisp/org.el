@@ -5909,10 +5909,7 @@ by a #."
   (if (and (re-search-forward org-bracket-link-regexp limit t)
 	   (not (org-in-src-block-p)))
       (let* ((hl (org-match-string-no-properties 1))
-	     (help (concat "LINK: " hl))
-	     ;; FIXME: Above we should remove the escapes.  But that
-	     ;; requires another match, protecting match data, a lot
-	     ;; of overhead for font-lock.
+	     (help (concat "LINK: " (save-match-data (org-link-unescape hl))))
 	     (ip (org-maybe-intangible
 		  (list 'invisible 'org-link
 			'keymap org-mouse-map 'mouse-face 'highlight
