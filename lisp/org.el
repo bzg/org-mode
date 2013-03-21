@@ -17377,9 +17377,12 @@ When set to `t', always use the image width.
 When set to a number, use imagemagick (when available) to set
 the image's width to this value.
 
-When set to a number in a list, try to get the width from the
+When set to a number in a list, try to get the width from any
 #+ATTR.* keyword if it matches a width specification like
-width=\"[0-9]+\", and fall back on that number if none is found.
+
+  #+ATTR_HTML: :width 300px
+
+and fall back on that number if none is found.
 
 When set to nil, try to get the width from an #+ATTR.* keyword
 and fall back on the original width if none is found.
@@ -18525,6 +18528,7 @@ BEG and END default to the buffer boundaries."
       (let ((re (concat "\\[\\[\\(\\(file:\\)\\|\\([./~]\\)\\)\\([^]\n]+?"
 			(substring (org-image-file-name-regexp) 0 -2)
 			"\\)\\]" (if include-linked "" "\\]")))
+	    (case-fold-search t)
 	    old file ov img type attrwidth width)
 	(while (re-search-forward re end t)
 	  (setq old (get-char-property-and-overlay (match-beginning 1)
@@ -18537,7 +18541,7 @@ BEG and END default to the buffer boundaries."
 				(save-excursion
 				  (save-match-data
 				    (when (re-search-backward
-					   "#\\+ATTR.*width=\"\\([^\"]+\\)\""
+					   "#\\+attr.*:width[ \t]+\\([^ ]+\\)"
 					   (save-excursion
 					     (re-search-backward "^[ \t]*$\\|\\`" nil t)) t)
 				      (string-to-number (match-string 1))))))
