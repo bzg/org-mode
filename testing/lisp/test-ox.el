@@ -871,7 +871,16 @@ body\n")))
       (let ((org-export-snippet-translation-alist nil))
 	(should (equal (org-export-as 'test) "A\n")))
       (let ((org-export-snippet-translation-alist '(("t" . "test"))))
-	(should (equal (org-export-as 'test) "AB\n"))))))
+	(should (equal (org-export-as 'test) "AB\n")))))
+  ;; Ignored export snippets do not remove any blank.
+  (should
+   (equal "begin  end\n"
+	  (org-test-with-parsed-data "begin @@test:A@@ end"
+	    (org-export-data-with-translations
+	     tree
+	     '((paragraph . (lambda (paragraph contents info) contents))
+	       (section . (lambda (section contents info) contents)))
+	     info)))))
 
 
 

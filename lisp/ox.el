@@ -2062,8 +2062,12 @@ Return transcoded string."
 			 (eq (plist-get info :with-archived-trees) 'headline)
 			 (org-element-property :archivedp data)))
 		(let ((transcoder (org-export-transcoder data info)))
-		  (and (functionp transcoder)
-		       (funcall transcoder data nil info))))
+		  (or (and (functionp transcoder)
+			   (funcall transcoder data nil info))
+		      ;; Export snippets never return a nil value so
+		      ;; that white spaces following them are never
+		      ;; ignored.
+		      (and (eq type 'export-snippet) ""))))
 	       ;; Element/Object with contents.
 	       (t
 		(let ((transcoder (org-export-transcoder data info)))
