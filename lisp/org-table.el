@@ -4643,7 +4643,7 @@ When FMT is nil, return the first argument from ARGS."
 				   f)))
 	     line)))
       (push (if *orgtbl-lfmt*
-		(orgtbl-apply-fmt *orgtbl-lfmt* line)
+		(apply #'orgtbl-apply-fmt *orgtbl-lfmt* line)
 	      (concat (orgtbl-eval-str *orgtbl-lstart*)
 		      (mapconcat 'identity line *orgtbl-sep*)
 		      (orgtbl-eval-str *orgtbl-lend*)))
