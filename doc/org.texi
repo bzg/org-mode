@@ -9655,18 +9655,21 @@ You can define text snippets with
 #+MACRO: name   replacement text $1, $2 are arguments
 @end example
 
-@noindent which can be referenced anywhere in the document (even in
-code examples) with @code{@{@{@{name(arg1,arg2)@}@}@}}.  In addition to
-defined macros, @code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc.,
-will reference information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and
-similar lines.  Also, @code{@{@{@{date(@var{FORMAT})@}@}@}} and
+@noindent which can be referenced in
+paragraphs, verse blocks, table cells and some keywords with
+@code{@{@{@{name(arg1,arg2)@}@}@}}@footnote{Since commas separate arguments,
+commas within arguments have to be escaped with a backslash character.
+Conversely, backslash characters before a comma, and only them, need to be
+escaped with another backslash character.}.  In addition to defined macros,
+@code{@{@{@{title@}@}@}}, @code{@{@{@{author@}@}@}}, etc., will reference
+information set by the @code{#+TITLE:}, @code{#+AUTHOR:}, and similar lines.
+Also, @code{@{@{@{date(@var{FORMAT})@}@}@}} and
 @code{@{@{@{modification-time(@var{FORMAT})@}@}@}} refer to current date time
 and to the modification time of the file being exported, respectively.
 @var{FORMAT} should be a format string understood by
 @code{format-time-string}.
 
-Macro expansion takes place during export, and some people use it to
-construct complex HTML code.
+Macro expansion takes place during export.
 
 
 @node Embedded @LaTeX{},  , Macro replacement, Markup

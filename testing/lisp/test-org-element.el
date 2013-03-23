@@ -1345,6 +1345,16 @@ e^{i\\pi}+1=0
   (should
    (equal '("C-,")
 	  (org-test-with-temp-text "{{{macro(C-\\,)}}}"
+	    (org-element-property :args (org-element-context)))))
+  ;; Allow to escape escaping character.
+  (should
+   (equal '("C-\\" "")
+	  (org-test-with-temp-text "{{{macro(C-\\\\,)}}}"
+	    (org-element-property :args (org-element-context)))))
+  ;; No need to escape backslashes elsewhere.
+  (should
+   (equal '("\\")
+	  (org-test-with-temp-text "{{{macro(\\)}}}"
 	    (org-element-property :args (org-element-context))))))
 
 
