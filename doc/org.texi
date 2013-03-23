@@ -1642,12 +1642,12 @@ is supported, it may be better to not use it for plain list items.}  as
 bullets.
 @item
 @vindex org-plain-list-ordered-item-terminator
-@vindex org-alphabetical-lists
+@vindex org-list-allow-alphabetical
 @emph{Ordered} list items start with a numeral followed by either a period or
 a right parenthesis@footnote{You can filter out any of them by configuring
 @code{org-plain-list-ordered-item-terminator}.}, such as @samp{1.} or
 @samp{1)}@footnote{You can also get @samp{a.}, @samp{A.}, @samp{a)} and
-@samp{A)} by configuring @code{org-alphabetical-lists}.  To minimize
+@samp{A)} by configuring @code{org-list-allow-alphabetical}.  To minimize
 confusion with normal text, those are limited to one character only.  Beyond
 that limit, bullets will automatically fallback to numbers.}.  If you want a
 list to start with a different value (e.g., 20), start the text of the item
@@ -1667,11 +1667,11 @@ line.  In particular, if an ordered list reaches number @samp{10.}, then the
 list.  An item ends before the next line that is less or equally indented
 than its bullet/number.
 
-@vindex org-empty-line-terminates-plain-lists
+@vindex org-list-empty-line-terminates-plain-lists
 A list ends whenever every item has ended, which means before any line less
 or equally indented than items at top level.  It also ends before two blank
-lines@footnote{See also @code{org-empty-line-terminates-plain-lists}.}.  In
-that case, all items are closed.  Here is an example:
+lines@footnote{See also @code{org-list-empty-line-terminates-plain-lists}.}.
+In that case, all items are closed.  Here is an example:
 
 @example
 @group
@@ -4593,7 +4593,7 @@ checked.
 @cindex statistics, for checkboxes
 @cindex checkbox statistics
 @cindex property, COOKIE_DATA
-@vindex org-hierarchical-checkbox-statistics
+@vindex org-checkbox-hierarchical-statistics
 The @samp{[2/4]} and @samp{[1/3]} in the first and second line are cookies
 indicating how many checkboxes present in this entry have been checked off,
 and the total number of checkboxes present.  This can give you an idea on how
@@ -4601,7 +4601,7 @@ many checkboxes remain, even without opening a folded entry.  The cookies can
 be placed into a headline or into (the first line of) a plain list item.
 Each cookie covers checkboxes of direct children structurally below the
 headline/item on which the cookie appears@footnote{Set the variable
-@code{org-hierarchical-checkbox-statistics} if you want such cookies to
+@code{org-checkbox-hierarchical-statistics} if you want such cookies to
 count all checkboxes below the cookie, not just those belonging to direct
 children.}.  You have to insert the cookie yourself by typing either
 @samp{[/]} or @samp{[%]}.  With @samp{[/]} you get an @samp{n out of m}
