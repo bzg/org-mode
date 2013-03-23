@@ -126,10 +126,12 @@ Stars are put in group 1 and the trimmed body in group 2.")
 (declare-function org-beamer-mode "ox-beamer" ())
 (declare-function org-table-edit-field "org-table" (arg))
 (declare-function org-table-justify-field-maybe "org-table" (&optional new))
+(declare-function org-table-set-constants "org-table" ())
 (declare-function org-id-get-create "org-id" (&optional force))
 (declare-function org-id-find-id-file "org-id" (id))
 (declare-function org-tags-view "org-agenda" (&optional todo-only match))
 (declare-function org-agenda-list "org-agenda" (&optional arg start-day span))
+(declare-function org-agenda-redo "org-agenda" (&optional all))
 (declare-function org-table-align "org-table" ())
 (declare-function org-table-paste-rectangle "org-table" ())
 (declare-function org-table-maybe-eval-formula "org-table" ())
@@ -1324,9 +1326,9 @@ and a boolean flag as CDR.  The cdr may also be the symbol `auto', in
 which case Org will look at the surrounding headings/items and try to
 make an intelligent decision whether to insert a blank line or not.
 
-For plain lists, if the variable `org-empty-line-terminates-plain-lists' is
-set, the setting here is ignored and no empty line is inserted, to avoid
-breaking the list structure."
+For plain lists, if `org-list-empty-line-terminates-plain-lists' is set,
+the setting here is ignored and no empty line is inserted to avoid breaking
+the list structure."
   :group 'org-edit-structure
   :type '(list
 	  (cons (const heading)
@@ -2288,7 +2290,12 @@ taken from the (otherwise obsolete) variable `org-todo-interpretation'."
 (defvar org-done-keywords-for-agenda nil)
 (defvar org-drawers-for-agenda nil)
 (defvar org-todo-keyword-alist-for-agenda nil)
-(defvar org-tag-alist-for-agenda nil)
+(defvar org-tag-alist-for-agenda nil
+  "Alist of all tags from all agenda files.")
+(defvar org-tag-groups-alist-for-agenda nil
+  "Alist of all groups tags from all current agenda files.")
+(defvar org-tag-groups-alist nil)
+(make-variable-buffer-local 'org-tag-groups-alist)
 (defvar org-agenda-contributing-files nil)
 (defvar org-not-done-keywords nil)
 (make-variable-buffer-local 'org-not-done-keywords)
@@ -3170,6 +3177,8 @@ See the manual for details."
 	   (list :tag "Start radio group"
 		 (const :startgroup)
 		 (option (string :tag "Group description")))
+	   (list :tag "Group tags delimiter"
+		 (const :grouptags))
 	   (list :tag "End radio group"
 		 (const :endgroup)
 		 (option (string :tag "Group description")))
@@ -3192,6 +3201,7 @@ To disable these tags on a per-file basis, insert anywhere in the file:
 	   (cons   (string    :tag "Tag name")
 		   (character :tag "Access char"))
 	   (const :tag "Start radio group" (:startgroup))
+	   (const :tag "Group tags delimiter" (:grouptags))
 	   (const :tag "End radio group" (:endgroup))
 	   (const :tag "New line" (:newline)))))
 
@@ -4730,8 +4740,97 @@ This regexp can match any headline with the specified keyword, or
 without a keyword.  The keyword isn't in any group by default,
 but the stars and the body are.")
 
+(defcustom org-group-tags t
+  "When non-nil (the default), use group tags.
+This can be turned on/off through `org-toggle-tags-groups'."
+  :group 'org-tags
+  :group 'org-startup
+  :type 'boolean)
+
+(defun org-toggle-tags-groups ()
+  "Toggle support for group tags.
+Support for group tags is controlled by the option
+`org-group-tags', which is non-nil by default."
+  (interactive)
+  (setq org-group-tags (not org-group-tags))
+  (if (and (derived-mode-p 'org-agenda-mode)
+	   org-group-tags)
+      (org-agenda-redo))
+  (when (derived-mode-p 'org-mode)
+    (org-set-regexps-and-options-for-tags)
+    (org-set-regexps-and-options))
+  (message "Groups tags support has been turned %s"
+	   (if org-group-tags "on" "off")))
+
+(defun org-set-regexps-and-options-for-tags ()
+  "Precompute regular expressions used for tags in the current buffer."
+  (when (derived-mode-p 'org-mode)
+    (org-set-local 'org-file-tags nil)
+    (let ((re (org-make-options-regexp '("FILETAGS" "TAGS")))
+	  (splitre "[ \t]+")
+	  tags ftags key value
+	  (start 0))
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char (point-min))
+	  (while (re-search-forward re nil t)
+	    (setq key (upcase (org-match-string-no-properties 1))
+		  value (org-match-string-no-properties 2))
+	    (if (stringp value) (setq value (org-trim value)))
+	    (cond
+	     ((equal key "TAGS")
+	      (setq tags (append tags (if tags '("\\n") nil)
+				 (org-split-string value splitre))))
+	     ((equal key "FILETAGS")
+	      (when (string-match "\\S-" value)
+		(setq ftags
+		      (append
+		       ftags
+		       (apply 'append
+			      (mapcar (lambda (x) (org-split-string x ":"))
+				      (org-split-string value)))))))))))
+      ;; Process the file tags.
+      (and ftags (org-set-local 'org-file-tags
+				(mapcar 'org-add-prop-inherited ftags)))
+      (org-set-local 'org-tag-groups-alist nil)
+      ;; Process the tags.
+      ;; FIXME
+      (when tags
+	(let (e tgs g)
+	  (while (setq e (pop tags))
+	    (cond
+	     ((equal e "{")
+	      (progn (push '(:startgroup) tgs)
+		     (when (equal (nth 1 tags) ":")
+		       (push (list (replace-regexp-in-string
+				    "(.+)$" "" (nth 0 tags)))
+			     org-tag-groups-alist)
+		       (setq g 0))))
+	     ((equal e ":") (push '(:grouptags) tgs))
+	     ((equal e "}") (push '(:endgroup) tgs) (if g (setq g nil)))
+	     ((equal e "\\n") (push '(:newline) tgs))
+	     ((string-match (org-re "^\\([[:alnum:]_@#%]+\\)(\\(.\\))$") e)
+	      (push (cons (match-string 1 e)
+			  (string-to-char (match-string 2 e))) tgs)
+	      (if (and g (> g 0))
+		  (setcar org-tag-groups-alist
+			  (append (car org-tag-groups-alist)
+				  (list (match-string 1 e)))))
+	      (if g (setq g (1+ g))))
+	     (t (push (list e) tgs)
+		(if (and g (> g 0))
+		    (setcar org-tag-groups-alist
+			    (append (car org-tag-groups-alist) (list e))))
+		(if g (setq g (1+ g))))))
+	  (org-set-local 'org-tag-alist nil)
+	  (while (setq e (pop tgs))
+	    (or (and (stringp (car e))
+		     (assoc (car e) org-tag-alist))
+		(push e org-tag-alist))))))))
+
 (defun org-set-regexps-and-options ()
-  "Precompute regular expressions for current buffer."
+  "Precompute regular expressions used in the current buffer."
   (when (derived-mode-p 'org-mode)
     (org-set-local 'org-todo-kwd-alist nil)
     (org-set-local 'org-todo-key-alist nil)
@@ -4742,16 +4841,15 @@ but the stars and the body are.")
     (org-set-local 'org-todo-sets nil)
     (org-set-local 'org-todo-log-states nil)
     (org-set-local 'org-file-properties nil)
-    (org-set-local 'org-file-tags nil)
     (let ((re (org-make-options-regexp
-	       '("CATEGORY" "TODO" "COLUMNS" "STARTUP" "ARCHIVE" "FILETAGS"
-		 "TAGS" "LINK" "PRIORITIES" "CONSTANTS" "PROPERTY" "DRAWERS"
+	       '("CATEGORY" "TODO" "COLUMNS" "STARTUP" "ARCHIVE"
+		 "LINK" "PRIORITIES" "CONSTANTS" "PROPERTY" "DRAWERS"
 		 "SETUPFILE" "OPTIONS")
 	       "\\(?:[a-zA-Z][0-9a-zA-Z_]*_TODO\\)"))
 	  (splitre "[ \t]+")
 	  (scripts org-use-sub-superscripts)
-	  kwds kws0 kwsa key log value cat arch tags const links hw dws
-	  tail sep kws1 prio props ftags drawers ext-setup-or-nil setup-contents
+	  kwds kws0 kwsa key log value cat arch const links hw dws
+	  tail sep kws1 prio props drawers ext-setup-or-nil setup-contents
 	  (start 0))
       (save-excursion
 	(save-restriction
@@ -4776,9 +4874,6 @@ but the stars and the body are.")
 	      ;; general TODO-like setup
  	      (push (cons (intern (downcase (match-string 1 key)))
 			  (org-split-string value splitre)) kwds))
-	     ((equal key "TAGS")
-	      (setq tags (append tags (if tags '("\\n") nil)
-				 (org-split-string value splitre))))
 	     ((equal key "COLUMNS")
 	      (org-set-local 'org-columns-default-format value))
 	     ((equal key "LINK")
@@ -4793,14 +4888,6 @@ but the stars and the body are.")
 		(setq props (org-update-property-plist (match-string 1 value)
 						       (match-string 2 value)
 						       props))))
-	     ((equal key "FILETAGS")
-	      (when (string-match "\\S-" value)
-		(setq ftags
-		      (append
-		       ftags
-		       (apply 'append
-			      (mapcar (lambda (x) (org-split-string x ":"))
-				      (org-split-string value)))))))
 	     ((equal key "DRAWERS")
 	      (setq drawers (delete-dups (append org-drawers (org-split-string value splitre)))))
 	     ((equal key "CONSTANTS")
@@ -4856,8 +4943,6 @@ but the stars and the body are.")
 	(org-set-local 'org-lowest-priority  (nth 1 prio))
 	(org-set-local 'org-default-priority (nth 2 prio)))
       (and props (org-set-local 'org-file-properties (nreverse props)))
-      (and ftags (org-set-local 'org-file-tags
-				(mapcar 'org-add-prop-inherited ftags)))
       (and drawers (org-set-local 'org-drawers drawers))
       (and arch (org-set-local 'org-archive-location arch))
       (and links (setq org-link-abbrev-alist-local (nreverse links)))
@@ -4908,26 +4993,6 @@ but the stars and the body are.")
 	      org-todo-kwd-alist (nreverse org-todo-kwd-alist)
 	      org-todo-key-trigger (delq nil (mapcar 'cdr org-todo-key-alist))
 	      org-todo-key-alist (org-assign-fast-keys org-todo-key-alist)))
-
-      ;; Process the tags.
-      (when tags
-	(let (e tgs)
-	  (while (setq e (pop tags))
-	    (cond
-	     ((equal e "{") (push '(:startgroup) tgs))
-	     ((equal e "}") (push '(:endgroup) tgs))
-	     ((equal e "\\n") (push '(:newline) tgs))
-	     ((string-match (org-re "^\\([[:alnum:]_@#%]+\\)(\\(.\\))$") e)
-	      (push (cons (match-string 1 e)
-			  (string-to-char (match-string 2 e)))
-		    tgs))
-	     (t (push (list e) tgs))))
-	  (org-set-local 'org-tag-alist nil)
-	  (while (setq e (pop tgs))
-	    (or (and (stringp (car e))
-		     (assoc (car e) org-tag-alist))
-		(push e org-tag-alist)))))
-
       ;; Compute the regular expressions and other local variables.
       ;; Using `org-outline-regexp-bol' would complicate them much,
       ;; because of the fixed white space at the end of that string.
@@ -5064,7 +5129,7 @@ This will extract info from a string like \"WAIT(w@/!)\"."
 Respect keys that are already there."
   (let (new e (alt ?0))
     (while (setq e (pop alist))
-      (if (or (memq (car e) '(:newline :endgroup :startgroup))
+      (if (or (memq (car e) '(:newline :grouptags :endgroup :startgroup))
 	      (cdr e)) ;; Key already assigned.
 	  (push e new)
 	(let ((clist (string-to-list (downcase (car e))))
@@ -5208,6 +5273,7 @@ The following commands are available:
 					      org-ellipsis)))
 	       (if (stringp org-ellipsis) org-ellipsis "..."))))
     (setq buffer-display-table org-display-table))
+  (org-set-regexps-and-options-for-tags)
   (org-set-regexps-and-options)
   (when (and org-tag-faces (not org-tags-special-faces-re))
     ;; tag faces set outside customize.... force initialization.
@@ -5672,7 +5738,7 @@ by a #."
     (error (message "org-mode fontification error"))))
 
 (defun org-fontify-meta-lines-and-blocks-1 (limit)
-  "Fontify #+ lines and blocks, in the correct ways."
+  "Fontify #+ lines and blocks."
   (let ((case-fold-search t))
     (if (re-search-forward
 	 "^\\([ \t]*#\\(\\(\\+[a-zA-Z]+:?\\| \\|$\\)\\(_\\([a-zA-Z]+\\)\\)?\\)[ \t]*\\(\\([^ \t\n]*\\)[ \t]*\\(.*\\)\\)\\)"
@@ -6088,6 +6154,12 @@ needs to be inserted at a specific position in the font-lock sequence.")
 	   '(org-font-lock-add-priority-faces)
 	   ;; Tags
 	   '(org-font-lock-add-tag-faces)
+	   ;; Tags groups
+	   (if (and org-group-tags org-tag-groups-alist)
+	       (list (concat org-outline-regexp-bol ".+\\(:"
+			     (regexp-opt (mapcar 'car org-tag-groups-alist))
+			     ":\\).*$")
+		     '(1 'org-tag-group prepend)))
 	   ;; Special keywords
 	   (list (concat "\\<" org-deadline-string) '(0 'org-special-keyword t))
 	   (list (concat "\\<" org-scheduled-string) '(0 'org-special-keyword t))
@@ -12017,8 +12089,7 @@ For calling through lisp, arg is also interpreted in the following way:
 				       (not org-todo-key-trigger)))
 			      ;; Read a state with completion
 			      (org-icompleting-read
-			       "State: " (mapcar (lambda(x) (list x))
-						 org-todo-keywords-1)
+			       "State: " (mapcar 'list org-todo-keywords-1)
 			       nil t))
 			     ((eq arg 'right)
 			      (if this
@@ -13828,7 +13899,7 @@ See also `org-scan-tags'.
 "
   (declare (special todo-only))
   (unless (boundp 'todo-only)
-    (error "org-make-tags-matcher expects todo-only to be scoped in"))
+    (error "`org-make-tags-matcher' expects todo-only to be scoped in"))
   (unless match
     ;; Get a new match request, with completion
     (let ((org-last-tags-completion-table
@@ -13844,6 +13915,8 @@ See also `org-scan-tags'.
 	tagsmatch todomatch tagsmatcher todomatcher kwd matcher
 	orterms term orlist re-p str-p level-p level-op time-p
 	prop-p pn pv po gv rest)
+    ;; Expand group tags
+    (setq match (org-tags-expand match))
     (if (string-match "/+" match)
 	;; match contains also a todo-matching request
 	(progn
@@ -13949,6 +14022,54 @@ See also `org-scan-tags'.
       (setq matcher (list 'and '(member todo org-not-done-keywords)
 			  matcher)))
     (cons match0 matcher)))
+
+(defun org-tags-expand (match &optional single-as-list downcased)
+  "Expand group tags in MATCH.
+
+This replaces every group tag in MATCH with a regexp tag search.
+For example, a group tag \"Work\" defined as { Work : Lab Conf }
+will be replaced like this:
+
+   Work =>  {\(?:Work\|Lab\|Conf\}
+  +Work => +{\(?:Work\|Lab\|Conf\}
+  -Work => -{\(?:Work\|Lab\|Conf\}
+
+Replacing by a regexp preserves the structure of the match.
+E.g., this expansion
+
+  Work|Home => {\(?:Work\|Lab\|Conf\}|Home
+
+will match anything tagged with \"Lab\" and \"Home\", or tagged
+with \"Conf\" and \"Home\" or tagged with \"Work\" and \"home\".
+
+When the optional argument SINGLE-AS-LIST is non-nil, MATCH is
+assumed to be a single group tag, and the function will return
+the list of tags in this group.
+
+When DOWNCASE is non-nil, expand downcased TAGS."
+  (if org-group-tags
+      (let* ((case-fold-search t)
+	     (tal (or org-tag-groups-alist-for-agenda
+		      org-tag-groups-alist))
+	     (tal (if downcased (mapcar (lambda(tg) (mapcar 'downcase tg)) tal) tal))
+	     (tml (mapcar 'car tal))
+	     (rtnmatch match) rpl)
+	(while (and tml (string-match
+			 (concat "\\(?1:[+-]?\\)\\(?2:" (regexp-opt tml) "\\)")
+			 rtnmatch))
+	  (let* ((dir (match-string 1 rtnmatch))
+		 (tag (match-string 2 rtnmatch))
+		 (tag (if downcased (downcase tag) tag)))
+	    (setq tml (delete tag tml))
+	    (setq rpl (append (org-uniquify rpl) (assoc tag tal)))
+	    (setq rtnmatch
+		  (replace-match
+		   (concat dir "{" (regexp-opt rpl) "}") t t rtnmatch))))
+	(if single-as-list
+	    (or (reverse rpl) (list rtnmatch))
+	  rtnmatch))
+    (if single-as-list (list (if downcased (downcase match) match))
+      match)))
 
 (defun org-op-to-function (op &optional stringp)
   "Turn an operator into the appropriate function."
@@ -14346,15 +14467,14 @@ This works in the agenda, and also in an org-mode buffer."
       rtn)
      ((eq flag t)
       ;; all-completions
-      (all-completions s2 ctable confirm)
-      )
+      (all-completions s2 ctable confirm))
      ((eq flag 'lambda)
       ;; exact match?
-      (assoc s2 ctable)))
-    ))
+      (assoc s2 ctable)))))
 
 (defun org-fast-tag-insert (kwd tags face &optional end)
-  "Insert KDW, and the TAGS, the latter with face FACE.  Also insert END."
+  "Insert KDW, and the TAGS, the latter with face FACE.
+Also insert END."
   (insert (format "%-12s" (concat kwd ":"))
 	  (org-add-props (mapconcat 'identity tags " ") nil 'face face)
 	  (or end "")))
@@ -14370,6 +14490,7 @@ This works in the agenda, and also in an org-mode buffer."
       (insert (org-add-props " Next change exits" nil 'face 'org-warning)))))
 
 (defun org-set-current-tags-overlay (current prefix)
+  "Add an overlay to CURRENT tag with PREFIX."
   (let ((s (concat ":" (mapconcat 'identity current ":") ":")))
     (if (featurep 'xemacs)
 	(org-overlay-display org-tags-overlay (concat prefix s)
@@ -14452,6 +14573,7 @@ Returns the new tags string, or nil to not change the current settings."
 	    (while (equal (car tbl) '(:newline))
 	      (insert "\n")
 	      (setq tbl (cdr tbl)))))
+	 ((equal e '(:grouptags)) nil)
 	 (t
 	  (setq tg (copy-sequence (car e)) c2 nil)
 	  (if (cdr e)
@@ -14467,11 +14589,13 @@ Returns the new tags string, or nil to not change the current settings."
 	    (setq c (or c2 char)))
 	  (if ingroup (push tg (car groups)))
 	  (setq tg (org-add-props tg nil 'face
-				  (cond
-				   ((not (assoc tg table))
-				    (org-get-todo-face tg))
-				   ((member tg current) c-face)
-				   ((member tg inherited) i-face))))
+	  			  (cond
+	  			   ((not (assoc tg table))
+	  			    (org-get-todo-face tg))
+	  			   ((member tg current) c-face)
+	  			   ((member tg inherited) i-face))))
+	  (if (equal (caar tbl) :grouptags)
+	      (org-add-props tg nil 'face 'org-tag-group))
 	  (if (and (= cnt 0) (not ingroup)) (insert "  "))
 	  (insert "[" c "] " tg (make-string
 				 (- fwidth 4 (length tg)) ?\ ))
@@ -17120,7 +17244,7 @@ When SUPPRESS-TMP-DELAY is non-nil, suppress delays like \"--2d\"."
       ;; Maybe adjust the closest clock in `org-clock-history'
       (when org-clock-adjust-closest
 	(if (not (and (org-at-clock-log-p)
-		      (< 1 (length (delq nil (mapcar (lambda(m) (marker-position m))
+		      (< 1 (length (delq nil (mapcar 'marker-position
 						     org-clock-history))))))
 	    (message "No clock to adjust")
 	  (cond ((save-excursion ; fix previous clock?
@@ -17747,7 +17871,9 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	(inhibit-read-only t)
 	(org-inhibit-startup org-agenda-inhibit-startup)
 	(rea (concat ":" org-archive-tag ":"))
-	file re)
+	file re org-tag-alist)
+    (setq org-tag-alist-for-agenda nil
+	  org-tag-groups-alist-for-agenda nil)
     (save-excursion
       (save-restriction
 	(while (setq file (pop files))
@@ -17757,6 +17883,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	      (org-check-agenda-file file)
 	      (set-buffer (org-get-agenda-file-buffer file)))
 	    (widen)
+	    (org-set-regexps-and-options-for-tags)
 	    (org-refresh-category-properties)
 	    (org-refresh-properties org-effort-property 'org-effort)
 	    (org-refresh-properties "APPT_WARNTIME" 'org-appt-warntime)
@@ -17770,6 +17897,10 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (append org-drawers-for-agenda org-drawers))
 	    (setq org-tag-alist-for-agenda
 		  (append org-tag-alist-for-agenda org-tag-alist))
+	    (if org-group-tags
+		(setq org-tag-groups-alist-for-agenda
+		      (org-uniquify-alist
+		       (append org-tag-groups-alist-for-agenda org-tag-groups-alist))))
 	    (org-with-silent-modifications
 	     (save-excursion
 	       (remove-text-properties (point-min) (point-max) pall)
@@ -17787,8 +17918,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
     (setq org-todo-keywords-for-agenda
           (org-uniquify org-todo-keywords-for-agenda))
     (setq org-todo-keyword-alist-for-agenda
-	  (org-uniquify org-todo-keyword-alist-for-agenda)
-	  org-tag-alist-for-agenda (org-uniquify org-tag-alist-for-agenda))))
+	  (org-uniquify org-todo-keyword-alist-for-agenda))))
 
 
 ;;;; CDLaTeX minor mode
@@ -18735,6 +18865,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-xa" 'org-toggle-archive-tag)
 (org-defkey org-mode-map "\C-c\C-xA" 'org-archive-to-archive-sibling)
 (org-defkey org-mode-map "\C-c\C-xb" 'org-tree-to-indirect-buffer)
+(org-defkey org-mode-map "\C-c\C-xq" 'org-toggle-tags-groups)
 (org-defkey org-mode-map "\C-c\C-j" 'org-goto)
 (org-defkey org-mode-map "\C-c\C-t" 'org-todo)
 (org-defkey org-mode-map "\C-c\C-q" 'org-set-tags-command)
@@ -21381,6 +21512,27 @@ for the search purpose."
   (let (res)
     (mapc (lambda (x) (add-to-list 'res x 'append)) list)
     res))
+
+(defun org-uniquify-alist (alist)
+  "Merge duplicate elements of an alist.
+
+For example, in this alist:
+
+\(org-uniquify-alist '((a 1) (b 2) (a 3)))
+  => '((a 1 3) (b 2))
+
+merge (a 1) and (a 3) into (a 1 3) and return the new alist."
+  (let (rtn)
+    (mapc
+     (lambda (e)
+       (let (n)
+	 (if (not (assoc (car e) rtn))
+	     (push e rtn)
+	   (setq n (cons (car e) (append (cdr (assoc (car e) rtn)) (cdr e))))
+	   (setq rtn (assq-delete-all (car e) rtn))
+	   (push n rtn))))
+	  alist)
+    rtn))
 
 (defun org-delete-all (elts list)
   "Remove all elements in ELTS from LIST."

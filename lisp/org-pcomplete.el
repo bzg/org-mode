@@ -239,6 +239,7 @@ When completing for #+STARTUP, for example, this function returns
 		 (cond
 		  ((eq :startgroup (car x)) "{")
 		  ((eq :endgroup (car x)) "}")
+		  ((eq :grouptags (car x)) ":")
 		  ((eq :newline (car x)) "\\n")
 		  ((cdr x) (format "%s(%c)" (car x) (cdr x)))
 		  (t (car x))))
