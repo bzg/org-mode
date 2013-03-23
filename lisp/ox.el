@@ -5149,31 +5149,37 @@ and
       \(org-export-to-file
        'backend ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))"
   (declare (indent 1) (debug t))
-  (org-with-gensyms (process temp-file copy-fun proc-buffer handler)
+  (org-with-gensyms (process temp-file copy-fun proc-buffer handler coding)
     ;; Write the full sexp evaluating BODY in a copy of the current
     ;; buffer to a temporary file, as it may be too long for program
     ;; args in `start-process'.
     `(with-temp-message "Initializing asynchronous export process"
        (let ((,copy-fun (org-export--generate-copy-script (current-buffer)))
-	     (,temp-file (make-temp-file "org-export-process")))
+	     (,temp-file (make-temp-file "org-export-process"))
+	     (,coding buffer-file-coding-system))
 	 (with-temp-file ,temp-file
 	   (insert
-	    (format
-	     "%S"
-	     `(with-temp-buffer
-		,(when org-export-async-debug '(setq debug-on-error t))
-		;; Ignore `kill-emacs-hook' and code evaluation
-		;; queries from Babel as we need a truly
-		;; non-interactive process.
-		(setq kill-emacs-hook nil
-		      org-babel-confirm-evaluate-answer-no t)
-		;; Initialize export framework in external process.
-		(require 'ox)
-		;; Re-create current buffer there.
-		(funcall ,,copy-fun)
-		(restore-buffer-modified-p nil)
-		;; Sexp to evaluate in the buffer.
-		(print (progn ,,@body))))))
+	    ;; Null characters (from variable values) are inserted
+	    ;; within the file.  As a consequence, coding system for
+	    ;; buffer contents will not be recognized properly.  So,
+	    ;; we make sure it is the same as the one used to display
+	    ;; the original buffer.
+	    (format ";; -*- coding: %s; -*-\n%S"
+		    ,coding
+		    `(with-temp-buffer
+		       ,(when org-export-async-debug '(setq debug-on-error t))
+		       ;; Ignore `kill-emacs-hook' and code evaluation
+		       ;; queries from Babel as we need a truly
+		       ;; non-interactive process.
+		       (setq kill-emacs-hook nil
+			     org-babel-confirm-evaluate-answer-no t)
+		       ;; Initialize export framework.
+		       (require 'ox)
+		       ;; Re-create current buffer there.
+		       (funcall ,,copy-fun)
+		       (restore-buffer-modified-p nil)
+		       ;; Sexp to evaluate in the buffer.
+		       (print (progn ,,@body))))))
 	 ;; Start external process.
 	 (let* ((process-connection-type nil)
 		(,proc-buffer (generate-new-buffer-name "*Org Export Process*"))
