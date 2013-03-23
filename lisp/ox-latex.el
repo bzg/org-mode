@@ -95,6 +95,9 @@
 ;; Special blocks accept `:options' as attribute.  Its value will be
 ;; appended as-is to the opening string of the environment created.
 ;;
+;; Source blocks accept `:long-listing' attribute, which prevents the
+;; block to be wrapped within a float when non-nil.
+;;
 ;; This back-end also offers enhanced support for footnotes.  Thus, it
 ;; handles nested footnotes, footnotes in tables and footnotes in item
 ;; descriptions.
@@ -830,6 +833,20 @@ options will be applied to blocks of all languages."
 	  (list
 	   (string :tag "Minted option name ")
 	   (string :tag "Minted option value"))))
+
+(defcustom org-latex-long-listings nil
+  "When non-nil no listing will be wrapped within a float.
+
+Removing floats may break some functionalities.  For example, it
+will be impossible to use cross-references to listings when using
+`minted' set-up when this variable is non-nil.
+
+This value can be locally ignored with \":long-listing t\" and
+\":long-listing nil\" LaTeX attributes."
+  :group 'org-export-latex
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'boolean)
 
 (defvar org-latex-custom-lang-environments nil
   "Alist mapping languages to language-specific LaTeX environments.
@@ -2156,16 +2173,23 @@ contextual information."
 	   (num-start (case (org-element-property :number-lines src-block)
 			(continued (org-export-get-loc src-block info))
 			(new 0)))
-	   (retain-labels (org-element-property :retain-labels src-block)))
+	   (retain-labels (org-element-property :retain-labels src-block))
+	   (long-listing
+	    (let ((attr (org-export-read-attribute :attr_latex src-block)))
+	      (if (plist-member attr :long-listing)
+		  (plist-get attr :long-listing)
+		org-latex-long-listings))))
       (cond
        ;; Case 1.  No source fontification.
        ((not org-latex-listings)
-	(let ((caption-str (org-latex--caption/label-string src-block info))
-	      (float-env (and caption "\\begin{figure}[H]\n%s\n\\end{figure}")))
+	(let* ((caption-str (org-latex--caption/label-string src-block info))
+	       (float-env (and (not long-listing)
+			       (or label caption)
+			       (format "\\begin{figure}[H]\n%s%%s\n\\end{figure}"
+				       caption-str))))
 	  (format
 	   (or float-env "%s")
-	   (concat caption-str
-		   (format "\\begin{verbatim}\n%s\\end{verbatim}"
+	   (concat (format "\\begin{verbatim}\n%s\\end{verbatim}"
 			   (org-export-format-code-default src-block info))))))
        ;; Case 2.  Custom environment.
        (custom-env (format "\\begin{%s}\n%s\\end{%s}\n"
@@ -2175,9 +2199,10 @@ contextual information."
        ;; Case 3.  Use minted package.
        ((eq org-latex-listings 'minted)
 	(let ((float-env
-	       (when (or label caption)
-		 (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
-			 (org-latex--caption/label-string src-block info))))
+	       (and (not long-listing)
+		    (or label caption)
+		    (format "\\begin{listing}[H]\n%%s\n%s\\end{listing}"
+			    (org-latex--caption/label-string src-block info))))
 	      (body
 	       (format
 		"\\begin{minted}[%s]{%s}\n%s\\end{minted}"
