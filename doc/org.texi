@@ -437,6 +437,7 @@ Tags
 
 * Tag inheritance::             Tags use the tree structure of the outline
 * Setting tags::                How to assign tags to a headline
+* Tag groups::                  Use one tag to search for several tags
 * Tag searches::                Searching for combinations of tags
 
 Properties and columns
@@ -4688,6 +4689,7 @@ You may specify special faces for specific tags using the variable
 @menu
 * Tag inheritance::             Tags use the tree structure of the outline
 * Setting tags::                How to assign tags to a headline
+* Tag groups::                  Use one tag to search for several tags
 * Tag searches::                Searching for combinations of tags
 @end menu
 
@@ -4745,7 +4747,7 @@ with inherited tags.  Set @code{org-agenda-use-tag-inheritance} to control
 this: the default value includes all agenda types, but setting this to nil
 can really speed up agenda generation.
 
-@node Setting tags, Tag searches, Tag inheritance, Tags
+@node Setting tags, Tag groups, Tag inheritance, Tags
 @section Setting tags
 @cindex setting tags
 @cindex tags, setting
@@ -4926,7 +4928,46 @@ instead of @kbd{C-c C-c}).  If you set the variable to the value
 @code{expert}, the special window is not even shown for single-key tag
 selection, it comes up only when you press an extra @kbd{C-c}.
 
-@node Tag searches,  , Setting tags, Tags
+@node Tag groups, Tag searches, Setting tags, Tags
+@section Tag groups
+
+@cindex group tags
+@cindex tags, groups
+In a set of mutually exclusive tags, the first tag can be defined as a
+@emph{group tag}.  When you search for a group tag, it will return matches
+for all members in the group.  In an agenda view, filtering by a group tag
+will display headlines tagged with at least one of the members of the
+group.  This makes tag searches and filters even more flexible.
+
+You can set group tags by inserting a colon between the group tag and other
+tags, like this:
+
+@example
+#+TAGS: @{ @@read : @@read_book  @@read_ebook }
+@end example
+
+In this example, @samp{@@read} is a @emph{group tag} for a set of three
+tags: @samp{@@read}, @samp{@@read_book} and @samp{@@read_ebook}.
+
+You can also use the @code{:grouptags} keyword directly when setting
+@var{org-tag-alist}:
+
+@lisp
+(setq org-tag-alist '((:startgroup . nil) 
+                      ("@@read" . nil)
+                      (:grouptags . nil)
+                      ("@@read_book" . nil)
+                      ("@@read_ebook" . nil)
+                      (:endgroup . nil)))
+@end lisp
+
+@kindex C-c C-x q
+@vindex org-group-tags
+If you want to ignore group tags temporarily, toggle group tags support
+with @command{org-toggle-tags-groups}, bound to @kbd{C-c C-x q}.  If you
+want to disable tag groups completely, set @var{org-group-tags} to nil.
+
+@node Tag searches,  , Tag groups, Tags
 @section Tag searches
 @cindex tag searches
 @cindex searching for tags
