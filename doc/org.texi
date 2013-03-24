@@ -4766,6 +4766,7 @@ to @code{org-tags-column}.  When called with a @kbd{C-u} prefix, all
 tags in the current buffer will be aligned to that column, just to make
 things look nice.  TAGS are automatically realigned after promotion,
 demotion, and TODO state changes (@pxref{TODO basics}).
+
 @orgcmd{C-c C-c,org-set-tags-command}
 When the cursor is in a headline, this does the same as @kbd{C-c C-q}.
 @end table
@@ -4916,15 +4917,14 @@ alternatively with @kbd{C-c C-c C-c w}.  Adding the non-predefined tag
 
 @vindex org-fast-tag-selection-single-key
 If you find that most of the time you need only a single key press to
-modify your list of tags, set the variable
-@code{org-fast-tag-selection-single-key}.  Then you no longer have to
-press @key{RET} to exit fast tag selection---it will immediately exit
-after the first change.  If you then occasionally need more keys, press
-@kbd{C-c} to turn off auto-exit for the current tag selection process
-(in effect: start selection with @kbd{C-c C-c C-c} instead of @kbd{C-c
-C-c}).  If you set the variable to the value @code{expert}, the special
-window is not even shown for single-key tag selection, it comes up only
-when you press an extra @kbd{C-c}.
+modify your list of tags, set @code{org-fast-tag-selection-single-key}.
+Then you no longer have to press @key{RET} to exit fast tag selection---it
+will immediately exit after the first change.  If you then occasionally
+need more keys, press @kbd{C-c} to turn off auto-exit for the current tag
+selection process (in effect: start selection with @kbd{C-c C-c C-c}
+instead of @kbd{C-c C-c}).  If you set the variable to the value
+@code{expert}, the special window is not even shown for single-key tag
+selection, it comes up only when you press an extra @kbd{C-c}.
 
 @node Tag searches,  , Setting tags, Tags
 @section Tag searches
