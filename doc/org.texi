@@ -7874,16 +7874,21 @@ commands}.
 @subsubheading Match syntax
 
 @cindex Boolean logic, for tag/property searches
-A search string can use Boolean operators @samp{&} for AND and @samp{|} for
-OR@.  @samp{&} binds more strongly than @samp{|}.  Parentheses are currently
-not implemented.  Each element in the search is either a tag, a regular
-expression matching tags, or an expression like @code{PROPERTY OPERATOR
-VALUE} with a comparison operator, accessing a property value.  Each element
-may be preceded by @samp{-}, to select against it, and @samp{+} is syntactic
-sugar for positive selection.  The AND operator @samp{&} is optional when
-@samp{+} or @samp{-} is present.  Here are some examples, using only tags.
+A search string can use Boolean operators @samp{&} for @code{AND} and
+@samp{|} for @code{OR}@.  @samp{&} binds more strongly than @samp{|}.
+Parentheses are not implemented.  Each element in the search is either a
+tag, a regular expression matching tags, or an expression like
+@code{PROPERTY OPERATOR VALUE} with a comparison operator, accessing a
+property value.  Each element may be preceded by @samp{-}, to select
+against it, and @samp{+} is syntactic sugar for positive selection.  The
+@code{AND} operator @samp{&} is optional when @samp{+} or @samp{-} is
+present.  Here are some examples, using only tags.
 
 @table @samp
+@item work
+Select headlines tagged @samp{:work:}.
+@item work&boss
+Select headlines tagged @samp{:work:} and @samp{:boss:}.
 @item +work-boss
 Select headlines tagged @samp{:work:}, but discard those also tagged
 @samp{:boss:}.
@@ -7899,6 +7904,13 @@ Instead of a tag, you may also specify a regular expression enclosed in curly
 braces.  For example,
 @samp{work+@{^boss.*@}} matches headlines that contain the tag
 @samp{:work:} and any tag @i{starting} with @samp{boss}.
+
+@cindex group tags, as regular expressions
+Group tags (@pxref{Tag groups}) are expanded as regular expressions.  E.g.,
+if @samp{:work:} is a group tag for the group @samp{:work:lab:conf:}, then
+searching for @samp{work} will search for @samp{@{\(?:work\|lab\|conf\)@}}
+and searching for @samp{-work} will search for all headlines but those with
+one of the tag in the group (i.e., @samp{-@{\(?:work\|lab\|conf\)@}}).
 
 @cindex TODO keyword matching, with tags search
 @cindex level, require for tags/property match
