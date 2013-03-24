@@ -519,7 +519,7 @@ can not be resolved.")
   "Number of initial characters to show of a hidden results hash.")
 
 (defvar org-babel-hash-show-time nil
-  "When not nil show the time the code block was evaluated in the result hash.")
+  "Non-nil means show the time the code block was evaluated in the result hash.")
 
 (defvar org-babel-after-execute-hook nil
   "Hook for functions to be called after `org-babel-execute-src-block'")
