@@ -4943,7 +4943,7 @@ You can set group tags by inserting a colon between the group tag and other
 tags, like this:
 
 @example
-#+TAGS: @{ @@read : @@read_book  @@read_ebook }
+#+TAGS: @{ @@read : @@read_book  @@read_ebook @}
 @end example
 
 In this example, @samp{@@read} is a @emph{group tag} for a set of three
