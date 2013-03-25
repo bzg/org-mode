@@ -2701,7 +2701,6 @@ not overwrite the stored one."
 			(org-table-make-reference
 			 x keep-empty numbers lispp))
 		      t t form)))
-
 	(if lispp
 	    (setq ev (condition-case nil
 			 (eval (eval (read form)))
@@ -2712,6 +2711,10 @@ not overwrite the stored one."
 				   duration-output-format) ev))
 	  (or (fboundp 'calc-eval)
 	      (user-error "Calc does not seem to be installed, and is needed to evaluate the formula"))
+	  (or (get-buffer "*Calculator*")
+	      (progn
+		(require 'calc)
+		(save-window-excursion (calc))))
 	  ;; Use <...> time-stamps so that Calc can handle them
 	  (setq form (replace-regexp-in-string org-ts-regexp3 "<\\1>" form))
 	  ;; I18n-ize local time-stamps by setting (system-time-locale "C")
