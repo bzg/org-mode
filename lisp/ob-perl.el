@@ -87,7 +87,7 @@ specifying a var of the same value."
 		    (concat "[\n"
 			    (mapconcat #'org-babel-perl--var-to-perl var "")
 			    prefix "]"))
-		(concat "q(" (princ var) ")"))
+		(format "q(%s)" var))
 	      (unless (zerop org-babel-perl--lvl) ",\n")))))
 
 (defvar org-babel-perl-buffers '(:default . nil))
