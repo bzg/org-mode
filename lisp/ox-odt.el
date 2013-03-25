@@ -3093,10 +3093,9 @@ holding contextual information."
     (while (search-forward "<office:annotation>" nil t)
       (and (re-search-backward "</text:p>" nil t)
 	   (replace-match "" t t))
-      (search-forward "</office:annotation>" nil t)
-      (if (re-search-forward "<text:p[^>]*>" nil t)
-	  (replace-match "" t t)
-	(insert "\n</text:p>")))))
+      (and (search-forward "</office:annotation>" nil t)
+	   (re-search-forward "<text:p[^>]*>" nil t)
+	   (replace-match "" t t)))))
 
 
 ;;;; Src Block
@@ -4086,7 +4085,7 @@ contextual information."
 		       (with-current-buffer buf
 			 ;; Prettify output if needed.
 			 (if (equal (file-name-nondirectory (buffer-file-name buf))
-				    "content.xml")
+				      "content.xml")
 			     (org-odt--fix-annotations))
 			 (when org-odt-prettify-xml
 			   (indent-region (point-min) (point-max)))
