@@ -3066,9 +3066,7 @@ holding contextual information."
 	     (date (or (plist-get attributes :date)
 		       ;; FIXME: Is `car' right thing to do below?
 		       (car (plist-get info :date)))))
-
-	(format "\n<text:p text:style-name=\"%s\">%s</text:p>"
-		"Text_20_body"
+	(format "\n<text:p>%s</text:p>"
 		(format "<office:annotation>\n%s\n</office:annotation>"
 			(concat
 			 (and author
