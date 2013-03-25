@@ -160,7 +160,7 @@
           ;; Lists.
           (let ((term (case org-plain-list-ordered-item-terminator
                         (?\) ")") (?. "\\.") (otherwise "[.)]")))
-                (alpha (and org-alphabetical-lists "\\|[A-Za-z]")))
+                (alpha (and org-list-allow-alphabetical "\\|[A-Za-z]")))
             (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
                     "\\(?:[ \t]\\|$\\)"))
           "\\)\\)")
@@ -3117,20 +3117,19 @@ Assume point is at the macro."
 	  (post-blank (progn (goto-char (match-end 0))
 			     (skip-chars-forward " \t")))
 	  (end (point))
-	  (args (let ((args (org-match-string-no-properties 3)) args2)
+	  (args (let ((args (org-match-string-no-properties 3)))
 		  (when args
 		    ;; Do not use `org-split-string' since empty
 		    ;; strings are meaningful here.
-		    (setq args (split-string args ","))
-		    (while args
-		      (while (string-match "\\\\\\'" (car args))
-			;; Repair bad splits, when comma is protected,
-                        ;; and thus not a real separator.
-			(setcar (cdr args) (concat (substring (car args) 0 -1)
-						   "," (nth 1 args)))
-			(pop args))
-		      (push (pop args) args2))
-		    (mapcar 'org-trim (nreverse args2))))))
+		    (split-string
+		     (replace-regexp-in-string
+		      "\\(\\\\*\\)\\(,\\)"
+		      (lambda (str)
+			(let ((len (length (match-string 1 str))))
+			  (concat (make-string (/ len 2) ?\\)
+				  (if (zerop (mod len 2)) "\000" ","))))
+		      args nil t)
+		     "\000")))))
       (list 'macro
 	    (list :key key
 		  :value value

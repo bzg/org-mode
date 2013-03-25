@@ -2701,7 +2701,8 @@ Return the updated communication channel."
 ;; its derivatives, `org-export-to-buffer', `org-export-to-file' and
 ;; `org-export-string-as'.  They differ either by the way they output
 ;; the resulting code (for the first two) or by the input type (for
-;; the latter).
+;; the latter).  `org-export--copy-to-kill-ring-p' determines if
+;; output of these function should be added to kill ring.
 ;;
 ;; `org-export-output-file-name' is an auxiliary function meant to be
 ;; used with `org-export-to-file'.  With a given extension, it tries
@@ -3225,6 +3226,13 @@ file should have."
     (unwind-protect (let ((org-current-export-file reference))
 		      (org-babel-exp-process-buffer))
       (kill-buffer reference))))
+
+(defun org-export--copy-to-kill-ring-p ()
+  "Return a non-nil value when output should be added to the kill ring.
+See also `org-export-copy-to-kill-ring'."
+  (if (eq org-export-copy-to-kill-ring 'if-interactive)
+      (not (or executing-kbd-macro noninteractive))
+    (eq org-export-copy-to-kill-ring t)))
 
 
 
@@ -5141,31 +5149,37 @@ and
       \(org-export-to-file
        'backend ,outfile ,subtreep ,visible-only ,body-only ',ext-plist)))"
   (declare (indent 1) (debug t))
-  (org-with-gensyms (process temp-file copy-fun proc-buffer handler)
+  (org-with-gensyms (process temp-file copy-fun proc-buffer handler coding)
     ;; Write the full sexp evaluating BODY in a copy of the current
     ;; buffer to a temporary file, as it may be too long for program
     ;; args in `start-process'.
     `(with-temp-message "Initializing asynchronous export process"
        (let ((,copy-fun (org-export--generate-copy-script (current-buffer)))
-	     (,temp-file (make-temp-file "org-export-process")))
+	     (,temp-file (make-temp-file "org-export-process"))
+	     (,coding buffer-file-coding-system))
 	 (with-temp-file ,temp-file
 	   (insert
-	    (format
-	     "%S"
-	     `(with-temp-buffer
-		,(when org-export-async-debug '(setq debug-on-error t))
-		;; Ignore `kill-emacs-hook' and code evaluation
-		;; queries from Babel as we need a truly
-		;; non-interactive process.
-		(setq kill-emacs-hook nil
-		      org-babel-confirm-evaluate-answer-no t)
-		;; Initialize export framework in external process.
-		(require 'ox)
-		;; Re-create current buffer there.
-		(funcall ,,copy-fun)
-		(restore-buffer-modified-p nil)
-		;; Sexp to evaluate in the buffer.
-		(print (progn ,,@body))))))
+	    ;; Null characters (from variable values) are inserted
+	    ;; within the file.  As a consequence, coding system for
+	    ;; buffer contents will not be recognized properly.  So,
+	    ;; we make sure it is the same as the one used to display
+	    ;; the original buffer.
+	    (format ";; -*- coding: %s; -*-\n%S"
+		    ,coding
+		    `(with-temp-buffer
+		       ,(when org-export-async-debug '(setq debug-on-error t))
+		       ;; Ignore `kill-emacs-hook' and code evaluation
+		       ;; queries from Babel as we need a truly
+		       ;; non-interactive process.
+		       (setq kill-emacs-hook nil
+			     org-babel-confirm-evaluate-answer-no t)
+		       ;; Initialize export framework.
+		       (require 'ox)
+		       ;; Re-create current buffer there.
+		       (funcall ,,copy-fun)
+		       (restore-buffer-modified-p nil)
+		       ;; Sexp to evaluate in the buffer.
+		       (print (progn ,,@body))))))
 	 ;; Start external process.
 	 (let* ((process-connection-type nil)
 		(,proc-buffer (generate-new-buffer-name "*Org Export Process*"))
@@ -5701,14 +5715,7 @@ options as CDR."
      ;; Otherwise, enter sub-menu.
      (t (org-export--dispatch-ui options key expertp)))))
 
-;;; Miscellaneous
 
-(defun org-export--copy-to-kill-ring-p ()
-  "Should we copy the export buffer to the kill ring?
-See also `org-export-copy-to-kill-ring'."
-  (if (eq org-export-copy-to-kill-ring 'if-interactive)
-      (not (or executing-kbd-macro noninteractive))
-    (eq org-export-copy-to-kill-ring t)))
 
 (provide 'ox)
 

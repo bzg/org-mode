@@ -98,7 +98,7 @@ modify this GNU manual.''
 * Working With Source Code::	Source code snippets embedded in Org
 * Miscellaneous::		All the rest which did not fit elsewhere
 
-* GNU Free Documentation License:: This manual license.
+* GNU Free Documentation License::  This manual license.
 
 @detailmenu
  --- The Detailed Node Listing ---
@@ -148,6 +148,7 @@ Tags
 * Tag inheritance::		Tags use the tree structure of the outline
 * Setting tags::		How to assign tags to a headline
 * Tag searches::		Searching for combinations of tags
+* Tag searches::		Searching for combinations of tags
 
 Dates and Times
 
@@ -158,7 +159,7 @@ Dates and Times
 
 Capture - Refile - Archive
 
-* Capture::			
+* Capture::			Capturing new stuff
 * Refile and copy::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 
@@ -1110,6 +1111,7 @@ Tags will by default be in bold face with the same color as the headline.
 * Tag inheritance::		Tags use the tree structure of the outline
 * Setting tags::		How to assign tags to a headline
 * Tag searches::		Searching for combinations of tags
+* Tag searches::		Searching for combinations of tags
 @end menu
 
 @node Tag inheritance, Setting tags, Tags, Tags
@@ -1189,7 +1191,46 @@ can instead set the TAGS option line as:
 #+TAGS: @@work(w)  @@home(h)  @@tennisclub(t)  laptop(l)  pc(p)
 @end smallexample
 
-@node Tag searches,  , Setting tags, Tags
+@node Tag searches, Tag searches, Setting tags, Tags
+@section Tag groups
+
+@cindex group tags
+@cindex tags, groups
+In a set of mutually exclusive tags, the first tag can be defined as a
+@emph{group tag}.  When you search for a group tag, it will return matches
+for all members in the group.  In an agenda view, filtering by a group tag
+will display headlines tagged with at least one of the members of the
+group.  This makes tag searches and filters even more flexible.
+
+You can set group tags by inserting a colon between the group tag and other
+tags, like this:
+
+@example
+#+TAGS: @{ @@read : @@read_book  @@read_ebook @}
+@end example
+
+In this example, @samp{@@read} is a @emph{group tag} for a set of three
+tags: @samp{@@read}, @samp{@@read_book} and @samp{@@read_ebook}.
+
+You can also use the @code{:grouptags} keyword directly when setting
+@var{org-tag-alist}:
+
+@lisp
+(setq org-tag-alist '((:startgroup . nil) 
+                      ("@@read" . nil)
+                      (:grouptags . nil)
+                      ("@@read_book" . nil)
+                      ("@@read_ebook" . nil)
+                      (:endgroup . nil)))
+@end lisp
+
+@kindex C-c C-x q
+@vindex org-group-tags
+If you want to ignore group tags temporarily, toggle group tags support
+with @command{org-toggle-tags-groups}, bound to @kbd{C-c C-x q}.  If you
+want to disable tag groups completely, set @var{org-group-tags} to nil.
+
+@node Tag searches,  , Tag searches, Tags
 @section Tag searches
 
 Once a system of tags has been set up, it can be used to collect related
@@ -1518,8 +1559,8 @@ projects need to be moved around.  Moving completed project trees to an
 archive file keeps the system compact and fast.
 
 @menu
-* Capture::
-* Refiling notes::		Moving a tree from one place to another
+* Capture::			Capturing new stuff
+* Refile and copy::		Moving a tree from one place to another
 * Archiving::			What to do with finished projects
 @end menu
 

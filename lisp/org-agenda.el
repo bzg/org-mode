@@ -1702,7 +1702,7 @@ range, respectively."
 		  (string :tag "Format string")
 		  (function))))
 
-(defcustom org-agenda-scheduled-leaders '(" Scheduled: " "Sched.%3dx: ")
+(defcustom org-agenda-scheduled-leaders '("Scheduled: " "Sched.%3dx:")
   "Text preceding scheduled items in the agenda view.
 This is a list with two strings.  The first applies when the item is
 scheduled on the current day.  The second applies when it has been scheduled
@@ -1726,7 +1726,7 @@ These entries are added to the agenda when pressing \"[\"."
 	  (string :tag "Scheduled today     ")
 	  (string :tag "Scheduled previously")))
 
-(defcustom org-agenda-deadline-leaders '("  Deadline: " " In %3d d.: " "%3d d. ago: ")
+(defcustom org-agenda-deadline-leaders '("Deadline:  " "In %3d d.: " "%3d d. ago:")
   "Text preceding deadline items in the agenda view.
 This is a list with three strings.  The first applies when the item has its
 deadline on the current day.  The second applies when the deadline is in the
@@ -4753,8 +4753,6 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 	 buffer)
     (when (and (stringp match) (not (string-match "\\S-" match)))
       (setq match nil))
-    (setq matcher (org-make-tags-matcher match)
-	  match (car matcher) matcher (cdr matcher))
     (catch 'exit
       (if org-agenda-sticky
 	  (setq org-agenda-buffer-name
@@ -4762,7 +4760,11 @@ The prefix arg TODO-ONLY limits the search to TODO entries."
 		    (format "*Org Agenda(%s:%s)*"
 			    (or org-keys (or (and todo-only "M") "m")) match)
 		  (format "*Org Agenda(%s)*" (or (and todo-only "M") "m")))))
+      ;; Prepare agendas (and `org-tag-alist-for-agenda') before
+      ;; expanding tags within `org-make-tags-matcher'
       (org-agenda-prepare (concat "TAGS " match))
+      (setq matcher (org-make-tags-matcher match)
+	    match (car matcher) matcher (cdr matcher))
       (org-compile-prefix-format 'tags)
       (org-set-sorting-strategy 'tags)
       (setq org-agenda-query-string match)
@@ -7373,7 +7375,7 @@ to switch to narrowing."
      ((equal char ?\r)
       (org-agenda-filter-show-all-tag)
       (when org-agenda-auto-exclude-function
-	(setq org-agenda-tag-filter '())
+	(setq org-agenda-tag-filter nil)
 	(dolist (tag (org-agenda-get-represented-tags))
 	  (let ((modifier (funcall org-agenda-auto-exclude-function tag)))
 	    (if modifier
@@ -7430,37 +7432,59 @@ to switch to narrowing."
   (interactive "P")
   (org-agenda-filter-by-tag strip char 'refine))
 
-(defun org-agenda-filter-make-matcher ()
+(defun org-agenda-filter-make-matcher (filter type)
   "Create the form that tests a line for agenda filter."
   (let (f f1)
-    ;; first compute the tag-filter matcher
-    (dolist (x (delete-dups
-		(append (get 'org-agenda-tag-filter
-			     :preset-filter) org-agenda-tag-filter)))
-      (if (member x '("-" "+"))
-	  (setq f1 (if (equal x "-") 'tags '(not tags)))
-	(if (string-match "[<=>?]" x)
-	    (setq f1 (org-agenda-filter-effort-form x))
-	  (setq f1 (list 'member (downcase (substring x 1)) 'tags)))
-	(if (equal (string-to-char x) ?-)
-	    (setq f1 (list 'not f1))))
-      (push f1 f))
-    ;; then compute the category-filter matcher
-    (dolist (x (delete-dups
-		(append (get 'org-agenda-category-filter
-			     :preset-filter) org-agenda-category-filter)))
-      (if (equal "-" (substring x 0 1))
-	  (setq f1 (list 'not (list 'equal (substring x 1) 'cat)))
-	(setq f1 (list 'equal (substring x 1) 'cat)))
-      (push f1 f))
-    ;; Finally compute the regexp filter
-    (dolist (x (delete-dups
-		(append (get 'org-agenda-regexp-filter
-			     :preset-filter) org-agenda-regexp-filter)))
-      (if (equal "-" (substring x 0 1))
-	  (setq f1 (list 'not (list 'string-match (substring x 1) 'txt)))
-	(setq f1 (list 'string-match (substring x 1) 'txt)))
-      (push f1 f))
+    (cond
+     ;; Tag filter
+     ((eq type 'tag)
+      (setq filter
+	    (delete-dups
+	     (append (get 'org-agenda-tag-filter :preset-filter)
+		     filter)))
+      (dolist (x filter)
+	(let ((nfilter (org-agenda-filter-expand-tags filter)) nf nf1
+	      (ffunc
+	       (lambda (nf0 nf01 fltr notgroup op)
+		 (dolist (x fltr)
+		   (if (member x '("-" "+"))
+		       (setq nf01 (if (equal x "-") 'tags '(not tags)))
+		     (if (string-match "[<=>?]" x)
+			 (setq nf01 (org-agenda-filter-effort-form x))
+		       (setq nf01 (list 'member (downcase (substring x 1))
+					'tags)))
+		     (when (equal (string-to-char x) ?-)
+		       (setq nf01 (list 'not nf01))
+		       (when (not notgroup) (setq op 'and))))
+		   (push nf01 nf0))
+		 (if notgroup
+		     (push (cons 'and nf0) f)
+		   (push (cons (or op 'or) nf0) f)))))
+	  (if (equal nfilter filter)
+	      (funcall ffunc f1 f filter t nil)
+	    (funcall ffunc nf1 nf nfilter nil nil)))))
+     ;; Category filter
+     ((eq type 'category)
+      (setq filter
+	    (delete-dups
+	     (append (get 'org-agenda-category-filter :preset-filter)
+		     filter)))
+      (dolist (x filter)
+	(if (equal "-" (substring x 0 1))
+	    (setq f1 (list 'not (list 'equal (substring x 1) 'cat)))
+	  (setq f1 (list 'equal (substring x 1) 'cat)))
+	(push f1 f)))
+     ;; Regexp filter
+     ((eq type 'regexp)
+      (setq filter
+	    (delete-dups
+	     (append (get 'org-agenda-regexp-filter :preset-filter)
+		     filter)))
+      (dolist (x filter)
+	(if (equal "-" (substring x 0 1))
+	    (setq f1 (list 'not (list 'string-match (substring x 1) 'txt)))
+	  (setq f1 (list 'string-match (substring x 1) 'txt)))
+	(push f1 f))))
     (cons 'and (nreverse f))))
 
 (defun org-agenda-filter-effort-form (e)
@@ -7485,12 +7509,31 @@ If the line does not have an effort defined, return nil."
       (funcall op (or eff (if org-sort-agenda-noeffort-is-high 32767 0))
 	       value))))
 
+(defun org-agenda-filter-expand-tags (filter &optional no-operator)
+  "Expand group tags in FILTER for the agenda.
+When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
+  (if org-group-tags
+      (let ((case-fold-search t) rtn)
+	(mapc
+	 (lambda (f)
+	   (let (f0 dir)
+	     (if (string-match "^\\([+-]\\)\\(.+\\)" f)
+		 (setq dir (match-string 1 f) f0 (match-string 2 f))
+	       (setq dir (if no-operator "" "+") f0 f))
+	     (setq rtn (append (mapcar (lambda(f1) (concat dir f1))
+				       (org-tags-expand f0 t t))
+			       rtn))))
+	 filter)
+	(reverse rtn))
+    filter))
+
 (defun org-agenda-filter-apply (filter type)
   "Set FILTER as the new agenda filter and apply it."
   ;; Deactivate `org-agenda-entry-text-mode' when filtering
   (if org-agenda-entry-text-mode (org-agenda-entry-text-mode))
   (let (tags cat txt)
-    (setq org-agenda-filter-form (org-agenda-filter-make-matcher))
+    (setq org-agenda-filter-form
+	  (org-agenda-filter-make-matcher filter type))
     (if (and (eq type 'category)
 	     (not (equal (substring (car filter) 0 1) "-")))
 	;; Only set `org-agenda-filtered-by-category' to t
@@ -7502,7 +7545,11 @@ If the line does not have an effort defined, return nil."
       (while (not (eobp))
 	(if (org-get-at-bol 'org-marker)
 	    (progn
-	      (setq tags (org-get-at-bol 'tags) ; used in eval
+	      (setq tags ; used in eval
+		    (apply 'append
+			   (mapcar (lambda (f)
+				     (org-agenda-filter-expand-tags (list f) t))
+				   (org-get-at-bol 'tags)))
 		    cat (get-text-property (point) 'org-category)
 		    txt (get-text-property (point) 'txt))
 	      (if (not (eval org-agenda-filter-form))
