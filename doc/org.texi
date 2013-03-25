@@ -10085,7 +10085,6 @@ specifically related to export, see @ref{In-buffer settings}.
 In particular, note that you can place commonly-used (export) options in
 a separate file which can be included using @code{#+SETUPFILE}.
 
-@table @kbd
 @cindex #+TITLE
 @cindex #+AUTHOR
 @cindex #+DATE
@@ -10106,7 +10105,6 @@ a separate file which can be included using @code{#+SETUPFILE}.
 @vindex user-full-name
 @vindex user-mail-address
 @vindex org-export-default-language
-@c FIXME New name? @vindex org-export-date-timestamp-format
 @example
 #+TITLE:       the title to be shown (default is the buffer name)
 #+AUTHOR:      the author (default taken from @code{user-full-name})
@@ -10122,7 +10120,6 @@ a separate file which can be included using @code{#+SETUPFILE}.
 #+HTML_LINK_UP:     the ``up'' link of an exported page
 #+HTML_LINK_HOME:   the ``home'' link of an exported page
 #+LaTeX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
-@c FIXME
 #+LaTeX_HEADER_EXTRA: extra line(s) for the @LaTeX{} header, used in special contexts
 #+SELECT_TAGS:   Tags that select a tree for export
 #+EXCLUDE_TAGS:  Tags that exclude a tree from export
