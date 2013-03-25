@@ -542,7 +542,7 @@ of the day at point (if any) or the current HH:MM time."
 	   (annotation (if (and (boundp 'org-capture-link-is-already-stored)
 				org-capture-link-is-already-stored)
 			   (plist-get org-store-link-plist :annotation)
-			 (ignore-errors (org-store-link nil))))
+			 (ignore-errors (org-store-link nil t))))
 	   (entry (or org-capture-entry (org-capture-select-template keys)))
 	   initial)
       (setq initial (or org-capture-initial
