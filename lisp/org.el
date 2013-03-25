@@ -23397,6 +23397,7 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 (defun org-mode-flyspell-verify ()
   "Don't let flyspell put overlays at active buttons, or on
    {todo,all-time,additional-option-like}-keywords."
+  (require 'org-element) ; For `org-element-affiliated-keywords'
   (let ((pos (max (1- (point)) (point-min)))
 	(word (thing-at-point 'word)))
     (and (not (get-text-property pos 'keymap))
