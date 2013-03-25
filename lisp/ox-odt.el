@@ -3066,14 +3066,15 @@ holding contextual information."
 	     (date (or (plist-get attributes :date)
 		       ;; FIXME: Is `car' right thing to do below?
 		       (car (plist-get info :date)))))
-	(format "<office:annotation>\n%s\n</office:annotation>"
-		(concat
-		 (and author
-		      (format "<dc:creator>%s</dc:creator>" author))
-		 (and date
-		      (format "<dc:date>%s</dc:date>"
-			      (org-odt--format-timestamp date nil 'iso-date)))
-		 contents))))
+	(format "\n<text:p>%s</text:p>"
+		(format "<office:annotation>\n%s\n</office:annotation>"
+			(concat
+			 (and author
+			      (format "<dc:creator>%s</dc:creator>" author))
+			 (and date
+			      (format "<dc:date>%s</dc:date>"
+				      (org-odt--format-timestamp date nil 'iso-date)))
+			 contents)))))
      ;; Textbox.
      ((string= type "textbox")
       (let ((width (plist-get attributes :width))
@@ -3085,17 +3086,6 @@ holding contextual information."
 		"Text_20_body" (org-odt--textbox contents width height
 						   style extra anchor))))
      (t contents))))
-
-(defun org-odt--fix-annotations ()
-  "Fix annotations in the XML buffer."
-  (save-excursion
-    (goto-char (point-min))
-    (while (search-forward "<office:annotation>" nil t)
-      (and (re-search-backward "</text:p>" nil t)
-	   (replace-match "" t t))
-      (and (search-forward "</office:annotation>" nil t)
-	   (re-search-forward "<text:p[^>]*>" nil t)
-	   (replace-match "" t t)))))
 
 
 ;;;; Src Block
@@ -4035,7 +4025,7 @@ contextual information."
   `(let* ((--out-file ,out-file)
 	  (out-file-type (file-name-extension --out-file))
 	  (org-odt-xml-files '("META-INF/manifest.xml" "content.xml"
-			       "meta.xml" "styles.xml"))
+				 "meta.xml" "styles.xml"))
 	  ;; Initialize temporary workarea.  All files that end up in
 	  ;; the exported document get parked/created here.
 	  (org-odt-zip-dir (file-name-as-directory
@@ -4084,9 +4074,6 @@ contextual information."
 		     (when buf
 		       (with-current-buffer buf
 			 ;; Prettify output if needed.
-			 (if (equal (file-name-nondirectory (buffer-file-name buf))
-				      "content.xml")
-			     (org-odt--fix-annotations))
 			 (when org-odt-prettify-xml
 			   (indent-region (point-min) (point-max)))
 			 (save-buffer 0)))))
