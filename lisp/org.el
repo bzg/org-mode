@@ -11116,9 +11116,10 @@ on the system \"/user@host:\"."
   (let (marker)
     (catch 'exit
       (while (and set (setq marker (nth 3 (pop set))))
-	;; if org-refile-use-outline-path is 'file, marker may be nil
+	;; If `org-refile-use-outline-path' is 'file, marker may be nil
 	(when (and marker (null (marker-buffer marker)))
-	  (message "not found") (sit-for 3)
+	  (message "Please regenerate the refile cache with `C-0 C-c C-w'")
+	  (sit-for 3)
 	  (throw 'exit nil)))
       t)))
 
