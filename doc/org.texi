@@ -437,6 +437,7 @@ Tags
 
 * Tag inheritance::             Tags use the tree structure of the outline
 * Setting tags::                How to assign tags to a headline
+* Tag groups::                  Use one tag to search for several tags
 * Tag searches::                Searching for combinations of tags
 
 Properties and columns
@@ -1608,15 +1609,15 @@ a sparse tree matching the string @samp{FIXME}.
 The other sparse tree commands select headings based on TODO keywords,
 tags, or properties and will be discussed later in this manual.
 
-@kindex C-c C-e v
+@kindex C-c C-e C-v
 @cindex printing sparse trees
 @cindex visible text, printing
 To print a sparse tree, you can use the Emacs command
 @code{ps-print-buffer-with-faces} which does not print invisible parts
 of the document @footnote{This does not work under XEmacs, because
 XEmacs uses selective display for outlining, not text properties.}.
-Or you can use the command @kbd{C-c C-e v} to export only the visible
-part of the document and print the resulting file.
+Or you can use @kbd{C-c C-e C-v} to export only the visible part of
+the document and print the resulting file.
 
 @node Plain lists, Drawers, Sparse trees, Document Structure
 @section Plain lists
@@ -1642,12 +1643,12 @@ is supported, it may be better to not use it for plain list items.}  as
 bullets.
 @item
 @vindex org-plain-list-ordered-item-terminator
-@vindex org-alphabetical-lists
+@vindex org-list-allow-alphabetical
 @emph{Ordered} list items start with a numeral followed by either a period or
 a right parenthesis@footnote{You can filter out any of them by configuring
 @code{org-plain-list-ordered-item-terminator}.}, such as @samp{1.} or
 @samp{1)}@footnote{You can also get @samp{a.}, @samp{A.}, @samp{a)} and
-@samp{A)} by configuring @code{org-alphabetical-lists}.  To minimize
+@samp{A)} by configuring @code{org-list-allow-alphabetical}.  To minimize
 confusion with normal text, those are limited to one character only.  Beyond
 that limit, bullets will automatically fallback to numbers.}.  If you want a
 list to start with a different value (e.g., 20), start the text of the item
@@ -1667,11 +1668,11 @@ line.  In particular, if an ordered list reaches number @samp{10.}, then the
 list.  An item ends before the next line that is less or equally indented
 than its bullet/number.
 
-@vindex org-empty-line-terminates-plain-lists
+@vindex org-list-empty-line-terminates-plain-lists
 A list ends whenever every item has ended, which means before any line less
 or equally indented than items at top level.  It also ends before two blank
-lines@footnote{See also @code{org-empty-line-terminates-plain-lists}.}.  In
-that case, all items are closed.  Here is an example:
+lines@footnote{See also @code{org-list-empty-line-terminates-plain-lists}.}.
+In that case, all items are closed.  Here is an example:
 
 @example
 @group
@@ -4593,7 +4594,7 @@ checked.
 @cindex statistics, for checkboxes
 @cindex checkbox statistics
 @cindex property, COOKIE_DATA
-@vindex org-hierarchical-checkbox-statistics
+@vindex org-checkbox-hierarchical-statistics
 The @samp{[2/4]} and @samp{[1/3]} in the first and second line are cookies
 indicating how many checkboxes present in this entry have been checked off,
 and the total number of checkboxes present.  This can give you an idea on how
@@ -4601,7 +4602,7 @@ many checkboxes remain, even without opening a folded entry.  The cookies can
 be placed into a headline or into (the first line of) a plain list item.
 Each cookie covers checkboxes of direct children structurally below the
 headline/item on which the cookie appears@footnote{Set the variable
-@code{org-hierarchical-checkbox-statistics} if you want such cookies to
+@code{org-checkbox-hierarchical-statistics} if you want such cookies to
 count all checkboxes below the cookie, not just those belonging to direct
 children.}.  You have to insert the cookie yourself by typing either
 @samp{[/]} or @samp{[%]}.  With @samp{[/]} you get an @samp{n out of m}
@@ -4688,6 +4689,7 @@ You may specify special faces for specific tags using the variable
 @menu
 * Tag inheritance::             Tags use the tree structure of the outline
 * Setting tags::                How to assign tags to a headline
+* Tag groups::                  Use one tag to search for several tags
 * Tag searches::                Searching for combinations of tags
 @end menu
 
@@ -4745,7 +4747,7 @@ with inherited tags.  Set @code{org-agenda-use-tag-inheritance} to control
 this: the default value includes all agenda types, but setting this to nil
 can really speed up agenda generation.
 
-@node Setting tags, Tag searches, Tag inheritance, Tags
+@node Setting tags, Tag groups, Tag inheritance, Tags
 @section Setting tags
 @cindex setting tags
 @cindex tags, setting
@@ -4766,6 +4768,7 @@ to @code{org-tags-column}.  When called with a @kbd{C-u} prefix, all
 tags in the current buffer will be aligned to that column, just to make
 things look nice.  TAGS are automatically realigned after promotion,
 demotion, and TODO state changes (@pxref{TODO basics}).
+
 @orgcmd{C-c C-c,org-set-tags-command}
 When the cursor is in a headline, this does the same as @kbd{C-c C-q}.
 @end table
@@ -4916,17 +4919,55 @@ alternatively with @kbd{C-c C-c C-c w}.  Adding the non-predefined tag
 
 @vindex org-fast-tag-selection-single-key
 If you find that most of the time you need only a single key press to
-modify your list of tags, set the variable
-@code{org-fast-tag-selection-single-key}.  Then you no longer have to
-press @key{RET} to exit fast tag selection---it will immediately exit
-after the first change.  If you then occasionally need more keys, press
-@kbd{C-c} to turn off auto-exit for the current tag selection process
-(in effect: start selection with @kbd{C-c C-c C-c} instead of @kbd{C-c
-C-c}).  If you set the variable to the value @code{expert}, the special
-window is not even shown for single-key tag selection, it comes up only
-when you press an extra @kbd{C-c}.
+modify your list of tags, set @code{org-fast-tag-selection-single-key}.
+Then you no longer have to press @key{RET} to exit fast tag selection---it
+will immediately exit after the first change.  If you then occasionally
+need more keys, press @kbd{C-c} to turn off auto-exit for the current tag
+selection process (in effect: start selection with @kbd{C-c C-c C-c}
+instead of @kbd{C-c C-c}).  If you set the variable to the value
+@code{expert}, the special window is not even shown for single-key tag
+selection, it comes up only when you press an extra @kbd{C-c}.
 
-@node Tag searches,  , Setting tags, Tags
+@node Tag groups, Tag searches, Setting tags, Tags
+@section Tag groups
+
+@cindex group tags
+@cindex tags, groups
+In a set of mutually exclusive tags, the first tag can be defined as a
+@emph{group tag}.  When you search for a group tag, it will return matches
+for all members in the group.  In an agenda view, filtering by a group tag
+will display headlines tagged with at least one of the members of the
+group.  This makes tag searches and filters even more flexible.
+
+You can set group tags by inserting a colon between the group tag and other
+tags, like this:
+
+@example
+#+TAGS: @{ @@read : @@read_book  @@read_ebook @}
+@end example
+
+In this example, @samp{@@read} is a @emph{group tag} for a set of three
+tags: @samp{@@read}, @samp{@@read_book} and @samp{@@read_ebook}.
+
+You can also use the @code{:grouptags} keyword directly when setting
+@var{org-tag-alist}:
+
+@lisp
+(setq org-tag-alist '((:startgroup . nil) 
+                      ("@@read" . nil)
+                      (:grouptags . nil)
+                      ("@@read_book" . nil)
+                      ("@@read_ebook" . nil)
+                      (:endgroup . nil)))
+@end lisp
+
+@kindex C-c C-x q
+@vindex org-group-tags
+If you want to ignore group tags temporarily, toggle group tags support
+with @command{org-toggle-tags-groups}, bound to @kbd{C-c C-x q}.  If you
+want to disable tag groups completely, set @var{org-group-tags} to nil.
+
+@node Tag searches,  , Tag groups, Tags
 @section Tag searches
 @cindex tag searches
 @cindex searching for tags
@@ -7833,16 +7874,21 @@ commands}.
 @subsubheading Match syntax
 
 @cindex Boolean logic, for tag/property searches
-A search string can use Boolean operators @samp{&} for AND and @samp{|} for
-OR@.  @samp{&} binds more strongly than @samp{|}.  Parentheses are currently
-not implemented.  Each element in the search is either a tag, a regular
-expression matching tags, or an expression like @code{PROPERTY OPERATOR
-VALUE} with a comparison operator, accessing a property value.  Each element
-may be preceded by @samp{-}, to select against it, and @samp{+} is syntactic
-sugar for positive selection.  The AND operator @samp{&} is optional when
-@samp{+} or @samp{-} is present.  Here are some examples, using only tags.
+A search string can use Boolean operators @samp{&} for @code{AND} and
+@samp{|} for @code{OR}@.  @samp{&} binds more strongly than @samp{|}.
+Parentheses are not implemented.  Each element in the search is either a
+tag, a regular expression matching tags, or an expression like
+@code{PROPERTY OPERATOR VALUE} with a comparison operator, accessing a
+property value.  Each element may be preceded by @samp{-}, to select
+against it, and @samp{+} is syntactic sugar for positive selection.  The
+@code{AND} operator @samp{&} is optional when @samp{+} or @samp{-} is
+present.  Here are some examples, using only tags.
 
 @table @samp
+@item work
+Select headlines tagged @samp{:work:}.
+@item work&boss
+Select headlines tagged @samp{:work:} and @samp{:boss:}.
 @item +work-boss
 Select headlines tagged @samp{:work:}, but discard those also tagged
 @samp{:boss:}.
@@ -7858,6 +7904,13 @@ Instead of a tag, you may also specify a regular expression enclosed in curly
 braces.  For example,
 @samp{work+@{^boss.*@}} matches headlines that contain the tag
 @samp{:work:} and any tag @i{starting} with @samp{boss}.
+
+@cindex group tags, as regular expressions
+Group tags (@pxref{Tag groups}) are expanded as regular expressions.  E.g.,
+if @samp{:work:} is a group tag for the group @samp{:work:lab:conf:}, then
+searching for @samp{work} will search for @samp{@{\(?:work\|lab\|conf\)@}}
+and searching for @samp{-work} will search for all headlines but those with
+one of the tag in the group (i.e., @samp{-@{\(?:work\|lab\|conf\)@}}).
 
 @cindex TODO keyword matching, with tags search
 @cindex level, require for tags/property match
@@ -8739,7 +8792,7 @@ calendars.
 @orgcmd{H,org-agenda-holidays}
 Show holidays for three months around the cursor date.
 
-@item M-x org-export-icalendar-combine-agenda-files
+@item M-x org-icalendar-combine-agenda-files
 Export a single iCalendar file containing entries from all agenda files.
 This is a globally available command, and also available in the agenda menu.
 
@@ -9833,18 +9886,19 @@ If $a^2=b$ and \( b=2 \), then the solution must be
 either $$ a=+\sqrt@{2@} $$ or \[ a=-\sqrt@{2@} \].
 @end example
 
-@noindent
-@vindex org-format-latex-options
-If you need any of the delimiter ASCII sequences for other purposes, you
-can configure the option @code{org-format-latex-options} to deselect the
-ones you do not wish to have interpreted by the @LaTeX{} converter.
+@c FIXME
+@c @noindent
+@c @vindex org-format-latex-options
+@c If you need any of the delimiter ASCII sequences for other purposes, you
+@c can configure the option @code{org-format-latex-options} to deselect the
+@c ones you do not wish to have interpreted by the @LaTeX{} converter.
 
-@vindex org-export-with-LaTeX-fragments
+@vindex org-export-with-latex
 @LaTeX{} processing can be configured with the variable
-@code{org-export-with-LaTeX-fragments}.  The default setting is @code{t}
-which means @file{MathJax} for HTML, and no processing for ASCII and @LaTeX{}
-backends.  You can also set this variable on a per-file basis using one of
-these lines:
+@code{org-export-with-latex}.  The default setting is @code{t} which means
+@file{MathJax} for HTML, and no processing for ASCII and @LaTeX{} backends.
+You can also set this variable on a per-file basis using one of these
+lines:
 
 @example
 #+OPTIONS: LaTeX:t          @r{Do the right thing automatically (MathJax)}
@@ -10011,7 +10065,7 @@ Finally, all subtrees that are marked by any of the @emph{exclude} tags will
 be removed from the export buffer.
 @end enumerate
 
-The variable @code{org-export-with-tasks} can be configured to select which
+The variable @var{org-export-with-tasks} can be configured to select which
 kind of tasks should be included for export.  See the docstring of the
 variable for more information.
 
@@ -10027,14 +10081,11 @@ C-e t}.  For individual lines, a good way to make sure the keyword is
 correct is to type @samp{#+} and then use @kbd{M-@key{TAB}} completion
 (@pxref{Completion}).   For a summary of other in-buffer settings not
 specifically related to export, see @ref{In-buffer settings}.
+
 In particular, note that you can place commonly-used (export) options in
 a separate file which can be included using @code{#+SETUPFILE}.
 
 @table @kbd
-@orgcmd{C-c C-e t,org-insert-export-options-template}
-Insert template with export options, see example below.
-@end table
-
 @cindex #+TITLE
 @cindex #+AUTHOR
 @cindex #+DATE
@@ -10045,15 +10096,17 @@ Insert template with export options, see example below.
 @cindex #+TEXT
 @cindex #+OPTIONS
 @cindex #+BIND
+@cindex #HTML_HEAD
 @cindex #+HTML_LINK_UP
 @cindex #+HTML_LINK_HOME
 @cindex #+SELECT_TAGS
 @cindex #+EXCLUDE_TAGS
 @cindex #+LaTeX_HEADER
+@cindex #+LaTeX_HEADER_EXTRA
 @vindex user-full-name
 @vindex user-mail-address
 @vindex org-export-default-language
-@vindex org-export-date-timestamp-format
+@c FIXME New name? @vindex org-export-date-timestamp-format
 @example
 #+TITLE:       the title to be shown (default is the buffer name)
 #+AUTHOR:      the author (default taken from @code{user-full-name})
@@ -10062,14 +10115,15 @@ Insert template with export options, see example below.
 #+DESCRIPTION: the page description, e.g., for the XHTML meta tag
 #+KEYWORDS:    the page keywords, e.g., for the XHTML meta tag
 #+LANGUAGE:    language for HTML, e.g., @samp{en} (@code{org-export-default-language})
-#+TEXT:        Some descriptive text to be inserted at the beginning.
-#+TEXT:        Several lines may be given.
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
 #+BIND:        lisp-var lisp-val, e.g., @code{org-latex-image-default-option width=.7\\linewidth}
                @r{You need to confirm using these, or configure @code{org-export-allow-BIND}}
+#+HTML_HEAD:   Additional line to the @samp{<head>...</head>} of the HTML output
 #+HTML_LINK_UP:     the ``up'' link of an exported page
 #+HTML_LINK_HOME:   the ``home'' link of an exported page
 #+LaTeX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
+@c FIXME
+#+LaTeX_HEADER_EXTRA: extra line(s) for the @LaTeX{} header, used in special contexts
 #+SELECT_TAGS:   Tags that select a tree for export
 #+EXCLUDE_TAGS:  Tags that exclude a tree from export
 @end example
@@ -10155,14 +10209,13 @@ the subtrees are exported.
 
 @table @kbd
 @orgcmd{C-c C-e,org-export}
-@vindex org-export-run-in-background
 Dispatcher for export and publishing commands.  Displays a help-window
 listing the additional key(s) needed to launch an export or publishing
 command.  The prefix arg is passed through to the exporter.  A double prefix
 @kbd{C-u C-u} causes most commands to be executed in the background, in a
 separate Emacs process@footnote{To make this behavior the default, customize
 the variable @code{org-export-run-in-background}.}.
-@orgcmd{C-c C-e v,org-export-visible}
+@orgcmd{C-c C-e C-v,org-export-visible}
 Like @kbd{C-c C-e}, but only export the text that is currently visible
 (i.e., not hidden by outline visibility).
 @orgcmd{C-u C-u C-c C-e,org-export}
@@ -10186,7 +10239,7 @@ with special characters and symbols available in these encodings.
 @cindex active region
 @cindex transient-mark-mode
 @table @kbd
-@orgcmd{C-c C-e a,org-export-as-ascii}
+@orgcmd{C-c C-e t a,org-ascii-export-to-ascii}
 @cindex property, EXPORT_FILE_NAME
 Export as an ASCII file.  For an Org file, @file{myfile.org}, the ASCII file
 will be @file{myfile.txt}.  The file will be overwritten without
@@ -10197,41 +10250,36 @@ current subtree, use @kbd{C-c @@}.}, the tree head will
 become the document title.  If the tree head entry has or inherits an
 @code{EXPORT_FILE_NAME} property, that name will be used for the
 export.
-@orgcmd{C-c C-e A,org-export-as-ascii-to-buffer}
+@orgcmd{C-c C-e t A,org-ascii-export-as-ascii}
 Export to a temporary buffer.  Do not create a file.
-@orgcmd{C-c C-e n,org-export-as-latin1}
-@xorgcmd{C-c C-e N,org-export-as-latin1-to-buffer}
-Like the above commands, but use Latin-1 encoding.
-@orgcmd{C-c C-e u,org-export-as-utf8}
-@xorgcmd{C-c C-e U,org-export-as-utf8-to-buffer}
-Like the above commands, but use UTF-8 encoding.
-@item C-c C-e v a/n/u
+@item C-c C-e C-v t a/t A
 Export only the visible part of the document.
 @end table
 
-@cindex headline levels, for exporting
-In the exported version, the first 3 outline levels will become
-headlines, defining a general document structure.  Additional levels
-will be exported as itemized lists.  If you want that transition to occur
-at a different level, specify it with a prefix argument.  For example,
+@c FIXME Exporting sublevels
+@c @cindex headline levels, for exporting
+@c In the exported version, the first 3 outline levels will become
+@c headlines, defining a general document structure.  Additional levels
+@c will be exported as itemized lists.  If you want that transition to occur
+@c at a different level, specify it with a prefix argument.  For example,
 
-@example
-@kbd{C-1 C-c C-e a}
-@end example
+@c @example
+@c @kbd{C-1 C-c C-e a}
+@c @end example
 
-@noindent
-creates only top level headlines and exports the rest as items.  When
-headlines are converted to items, the indentation of the text following
-the headline is changed to fit nicely under the item.  This is done with
-the assumption that the first body line indicates the base indentation of
-the body text.  Any indentation larger than this is adjusted to preserve
-the layout relative to the first line.  Should there be lines with less
-indentation than the first one, these are left alone.
+@c @noindent
+@c creates only top level headlines and exports the rest as items.  When
+@c headlines are converted to items, the indentation of the text following
+@c the headline is changed to fit nicely under the item.  This is done with
+@c the assumption that the first body line indicates the base indentation of
+@c the body text.  Any indentation larger than this is adjusted to preserve
+@c the layout relative to the first line.  Should there be lines with less
+@c indentation than the first one, these are left alone.
 
-@vindex org-export-ascii-links-to-notes
+@vindex org-ascii-links-to-notes
 Links will be exported in a footnote-like style, with the descriptive part in
 the text and the link in a note before the next heading.  See the variable
-@code{org-export-ascii-links-to-notes} for details and other options.
+@code{org-ascii-links-to-notes} for details and other options.
 
 @node HTML export, @LaTeX{} and PDF export, ASCII/Latin-1/UTF-8 export, Exporting
 @section HTML export
@@ -10261,7 +10309,7 @@ language, but with additional support for tables.
 @cindex active region
 @cindex transient-mark-mode
 @table @kbd
-@orgcmd{C-c C-e h,org-export-as-html}
+@orgcmd{C-c C-e h h,org-html-export-to-html}
 @cindex property, EXPORT_FILE_NAME
 Export as a HTML file.  For an Org file @file{myfile.org},
 the HTML file will be @file{myfile.html}.  The file will be overwritten
@@ -10271,38 +10319,27 @@ exported.  If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has, or inherits, an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
-@orgcmd{C-c C-e b,org-export-as-html-and-open}
+@kbd{C-c C-e h o}
 Export as a HTML file and immediately open it with a browser.
-@orgcmd{C-c C-e H,org-export-as-html-to-buffer}
+@orgcmd{C-c C-e h H,org-html-export-as-html}
 Export to a temporary buffer.  Do not create a file.
-@orgcmd{C-c C-e R,org-export-region-as-html}
-Export the active region to a temporary buffer.  With a prefix argument, do
-not produce the file header and footer, but just the plain HTML section for
-the region.  This is good for cut-and-paste operations.
-@item C-c C-e v h/b/H/R
+@item C-c C-e C-v h H/h h/h o
 Export only the visible part of the document.
-@item M-x org-export-region-as-html
-Convert the region to HTML under the assumption that it was in Org mode
-syntax before.  This is a global command that can be invoked in any
-buffer.
-@item M-x org-replace-region-by-HTML
-Replace the active region (assumed to be in Org mode syntax) by HTML
-code.
 @end table
 
-@cindex headline levels, for exporting
-In the exported version, the first 3 outline levels will become headlines,
-defining a general document structure.  Additional levels will be exported as
-itemized lists.  If you want that transition to occur at a different level,
-specify it with a numeric prefix argument.  For example,
+@c FIXME Exporting sublevels
+@c @cindex headline levels, for exporting
+@c In the exported version, the first 3 outline levels will become headlines,
+@c defining a general document structure.  Additional levels will be exported as
+@c itemized lists.  If you want that transition to occur at a different level,
+@c specify it with a numeric prefix argument.  For example,
 
-@example
-@kbd{C-2 C-c C-e b}
-@end example
+@c @example
+@c @kbd{C-2 C-c C-e b}
+@c @end example
 
-@noindent
-creates two levels of headings and does the rest as items.
-
+@c @noindent
+@c creates two levels of headings and does the rest as items.
 
 @node HTML preamble and postamble, Quoting HTML tags, HTML Export commands, HTML export
 @subsection HTML preamble and postamble
@@ -10682,7 +10719,7 @@ be correctly exported: respect the hierarchy of sections.
 @cindex active region
 @cindex transient-mark-mode
 @table @kbd
-@orgcmd{C-c C-e l,org-export-as-latex}
+@orgcmd{C-c C-e l l,org-latex-export-to-latex}
 @cindex property EXPORT_FILE_NAME
 Export as a @LaTeX{} file.  For an Org file
 @file{myfile.org}, the @LaTeX{} file will be @file{myfile.tex}.  The file will
@@ -10692,40 +10729,34 @@ exported.  If the selected region is a single tree@footnote{To select the
 current subtree, use @kbd{C-c @@}.}, the tree head will become the document
 title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
 property, that name will be used for the export.
-@orgcmd{C-c C-e L,org-export-as-latex-to-buffer}
+@orgcmd{C-c C-e l L,org-latex-export-as-latex}
 Export to a temporary buffer.  Do not create a file.
-@item C-c C-e v l/L
+@item C-c C-e C-v l/L
 Export only the visible part of the document.
-@item M-x org-export-region-as-latex
-Convert the region to @LaTeX{} under the assumption that it was in Org mode
-syntax before.  This is a global command that can be invoked in any
-buffer.
-@item M-x org-replace-region-by-latex
-Replace the active region (assumed to be in Org mode syntax) by @LaTeX{}
-code.
-@orgcmd{C-c C-e p,org-export-as-pdf}
+@orgcmd{C-c C-e l p,org-latex-export-to-pdf}
 Export as @LaTeX{} and then process to PDF.
-@orgcmd{C-c C-e d,org-export-as-pdf-and-open}
+@kbd{C-c C-e l o}
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-@cindex headline levels, for exporting
-@vindex org-latex-low-levels
-In the exported version, the first 3 outline levels will become
-headlines, defining a general document structure.  Additional levels
-will be exported as description lists.  The exporter can ignore them or
-convert them to a custom string depending on
-@code{org-latex-low-levels}.
+@c FIXME Exporting sublevels
+@c @cindex headline levels, for exporting
+@c @vindex org-latex-low-levels
+@c In the exported version, the first 3 outline levels will become
+@c headlines, defining a general document structure.  Additional levels
+@c will be exported as description lists.  The exporter can ignore them or
+@c convert them to a custom string depending on
+@c @code{org-latex-low-levels}.
 
-If you want that transition to occur at a different level, specify it
-with a numeric prefix argument.  For example,
+@c If you want that transition to occur at a different level, specify it
+@c with a numeric prefix argument.  For example,
 
-@example
-@kbd{C-2 C-c C-e l}
-@end example
+@c @example
+@c @kbd{C-2 C-c C-e l}
+@c @end example
 
-@noindent
-creates two levels of headings and does the rest as items.
+@c @noindent
+@c creates two levels of headings and does the rest as items.
 
 @node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{}/PDF export commands, @LaTeX{} and PDF export
 @subsection Header and sectioning structure
@@ -11058,14 +11089,14 @@ output.  Check the availability of this program before proceeding further.
 @cindex active region
 @cindex transient-mark-mode
 @table @kbd
-@orgcmd{C-c C-e o,org-export-as-odt}
+@orgcmd{C-c C-e o o,org-odt-export-to-odt}
 @cindex property EXPORT_FILE_NAME
 
 Export as OpenDocument Text file.
 
 @vindex org-export-odt-preferred-output-format
-If @code{org-export-odt-preferred-output-format} is specified, automatically
-convert the exported file to that format.  @xref{x-export-to-other-formats, ,
+If @code{org-preferred-output-format} is specified, automatically convert
+the exported file to that format.  @xref{x-export-to-other-formats, ,
 Automatically exporting to other formats}.
 
 For an Org file @file{myfile.org}, the ODT file will be
@@ -11077,13 +11108,13 @@ tree head will become the document title.  If the tree head entry has, or
 inherits, an @code{EXPORT_FILE_NAME} property, that name will be used for the
 export.
 
-@orgcmd{C-c C-e O,org-export-as-odt-and-open}
+@kbd{C-c C-e o O}
 Export as an OpenDocument Text file and open the resulting file.
 
-@vindex org-export-odt-preferred-output-format
-If @code{org-export-odt-preferred-output-format} is specified, open the
-converted file instead.  @xref{x-export-to-other-formats, , Automatically
-exporting to other formats}.
+@vindex org-odt-preferred-output-format
+If @code{org-preferred-output-format} is specified, open the converted file
+instead.  @xref{x-export-to-other-formats, , Automatically exporting to
+other formats}.
 @end table
 
 @node Extending ODT export, Applying custom styles, ODT export commands, OpenDocument Text export
@@ -11964,19 +11995,19 @@ In this way the UID remains unique, but a synchronization program can still
 figure out from which entry all the different instances originate.
 
 @table @kbd
-@orgcmd{C-c C-e i,org-export-icalendar-this-file}
-Create iCalendar entries for the current file and store them in the same
+@orgcmd{C-c C-e c f,org-icalendar-export-to-ics}
+Create iCalendar entries for the current buffer and store them in the same
 directory, using a file extension @file{.ics}.
-@orgcmd{C-c C-e I, org-export-icalendar-all-agenda-files}
+@orgcmd{C-c C-e c a, org-icalendar-export-agenda-files}
 @vindex org-agenda-files
-Like @kbd{C-c C-e i}, but do this for all files in
+Like @kbd{C-c C-e c f}, but do this for all files in
 @code{org-agenda-files}.  For each of these files, a separate iCalendar
 file will be written.
-@orgcmd{C-c C-e c,org-export-icalendar-combine-agenda-files}
-@vindex org-combined-agenda-icalendar-file
+@orgcmd{C-c C-e c c,org-icalendar-combine-agenda-files}
+@vindex org-icalendar-combined-agenda-file
 Create a single large iCalendar file from all files in
 @code{org-agenda-files} and write it to the file given by
-@code{org-combined-agenda-icalendar-file}.
+@code{org-icalendar-combined-agenda-file}.
 @end table
 
 @vindex org-use-property-inheritance
@@ -12186,7 +12217,7 @@ respective variable for details.
 @vindex org-export-with-done-tasks
 @vindex org-export-with-priority
 @vindex org-export-with-TeX-macros
-@vindex org-export-with-LaTeX-fragments
+@vindex org-export-with-latex
 @vindex org-export-skip-text-before-1st-heading
 @vindex org-export-with-fixed-width
 @vindex org-export-with-timestamps
@@ -12233,7 +12264,7 @@ respective variable for details.
 @item @code{:tasks}                 @tab @code{org-export-with-tasks}
 @item @code{:priority}              @tab @code{org-export-with-priority}
 @item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
-@item @code{:LaTeX-fragments}       @tab @code{org-export-with-LaTeX-fragments}
+@item @code{:LaTeX-fragments}       @tab @code{org-export-with-latex}
 @item @code{:latex-listings}        @tab @code{org-latex-listings}
 @item @code{:skip-before-1st-heading} @tab @code{org-export-skip-text-before-1st-heading}
 @item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
@@ -12509,13 +12540,13 @@ right place on the web server, and publishing images to it.
 Once properly configured, Org can publish with the following commands:
 
 @table @kbd
-@orgcmd{C-c C-e X,org-publish}
+@orgcmd{C-c C-e P x,org-publish}
 Prompt for a specific project and publish all files that belong to it.
-@orgcmd{C-c C-e P,org-publish-current-project}
+@orgcmd{C-c C-e P p,org-publish-current-project}
 Publish the project containing the current file.
-@orgcmd{C-c C-e F,org-publish-current-file}
+@orgcmd{C-c C-e P f,org-publish-current-file}
 Publish only the current file.
-@orgcmd{C-c C-e E,org-publish-all}
+@orgcmd{C-c C-e P a,org-publish-all}
 Publish every project.
 @end table
 
@@ -14868,10 +14899,11 @@ this file, and (potentially) the corresponding @emph{fast tag selection}
 keys.  The corresponding variable is @code{org-tag-alist}.
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
-@item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+TEXT:, #+DATE:,
+@item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+DATE:,
 @itemx #+OPTIONS:, #+BIND:,
 @itemx #+DESCRIPTION:, #+KEYWORDS:,
-@itemx #+LaTeX_HEADER:, #+HTML_HEAD:, #+HTML_LINK_UP:, #+HTML_LINK_HOME:,
+@itemx #+LaTeX_HEADER:, #+LaTeX_HEADER_EXTRA:,
+@itemx #+HTML_HEAD:, #+HTML_LINK_UP:, #+HTML_LINK_HOME:,
 @itemx #+SELECT_TAGS:, #+EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
 @ref{Export options}.

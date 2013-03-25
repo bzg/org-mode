@@ -117,9 +117,11 @@ cleanrel:
 
 doc-up:	info pdf card html
 	$(MAKE) -C doc manual guide
-	$(CP) doc/org.html $(SERVROOT)
-	$(CP) doc/manual/* $(SERVROOT)/manual
-	$(CP) doc/guide/*  $(SERVROOT)/guide
+	$(CP) doc/org.html     $(SERVROOT)
+	$(CP) doc/org.pdf      $(SERVROOT)
+	$(CP) doc/orgguide.pdf $(SERVROOT)
+	$(CP) doc/manual/*     $(SERVROOT)/manual
+	$(CP) doc/guide/*      $(SERVROOT)/guide
 
 upload:			cleanall rel-up doc-up elpa-up elpaplus-up
 upload-elpa:		cleanall elpa-up

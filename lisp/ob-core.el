@@ -519,7 +519,7 @@ can not be resolved.")
   "Number of initial characters to show of a hidden results hash.")
 
 (defvar org-babel-hash-show-time nil
-  "When not nil show the time the code block was evaluated in the result hash.")
+  "Non-nil means show the time the code block was evaluated in the result hash.")
 
 (defvar org-babel-after-execute-hook nil
   "Hook for functions to be called after `org-babel-execute-src-block'")
@@ -2641,14 +2641,17 @@ Emacs shutdown."))
 Passes PREFIX and SUFFIX directly to `make-temp-file' with the
 value of `temporary-file-directory' temporarily set to the value
 of `org-babel-temporary-directory'."
-  (let ((temporary-file-directory
-	 (if (file-remote-p default-directory)
-	     (concat (file-remote-p default-directory) "/tmp")
+  (if (file-remote-p default-directory)
+      (let ((prefix
+             (concat (file-remote-p default-directory)
+                     (expand-file-name prefix temporary-file-directory))))
+        (make-temp-file prefix nil suffix))
+    (let ((temporary-file-directory
 	   (or (and (boundp 'org-babel-temporary-directory)
 		    (file-exists-p org-babel-temporary-directory)
 		    org-babel-temporary-directory)
-	       temporary-file-directory))))
-      (make-temp-file prefix nil suffix)))
+	       temporary-file-directory)))
+      (make-temp-file prefix nil suffix))))
 
 (defun org-babel-remove-temporary-directory ()
   "Remove `org-babel-temporary-directory' on Emacs shutdown."

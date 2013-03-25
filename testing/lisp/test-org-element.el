@@ -2703,7 +2703,7 @@ Paragraph \\alpha."
        (org-test-with-temp-text "- Para1\n\n- Para2"
 	 (progn (forward-line)
 		(org-element-type
-		 (let ((org-empty-line-terminates-plain-lists nil))
+		 (let ((org-list-empty-line-terminates-plain-lists nil))
 		   (org-element-at-point)))))))
   ;; Special case: at the last blank line in a plain list, return it
   ;; instead of the last item.

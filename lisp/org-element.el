@@ -160,7 +160,7 @@
           ;; Lists.
           (let ((term (case org-plain-list-ordered-item-terminator
                         (?\) ")") (?. "\\.") (otherwise "[.)]")))
-                (alpha (and org-alphabetical-lists "\\|[A-Za-z]")))
+                (alpha (and org-list-allow-alphabetical "\\|[A-Za-z]")))
             (concat "\\(?:[-+*]\\|\\(?:[0-9]+" alpha "\\)" term "\\)"
                     "\\(?:[ \t]\\|$\\)"))
           "\\)\\)")

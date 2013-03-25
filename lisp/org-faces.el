@@ -790,6 +790,13 @@ level org-n-level-faces"
   :version "24.4"
   :package-version '(Org . "8.0"))
 
+(defface org-tag-group
+  (org-compatible-face 'org-tag nil)
+  "Face for group tags."
+  :group 'org-faces
+  :version "24.4"
+  :package-version '(Org . "8.0"))
+
 (org-copy-face 'mode-line 'org-mode-line-clock
   "Face used for clock display in mode line.")
 (org-copy-face 'mode-line 'org-mode-line-clock-overrun
