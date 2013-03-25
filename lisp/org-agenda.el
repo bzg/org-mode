@@ -1702,7 +1702,7 @@ range, respectively."
 		  (string :tag "Format string")
 		  (function))))
 
-(defcustom org-agenda-scheduled-leaders '("Scheduled: " "Sched.%3dx:")
+(defcustom org-agenda-scheduled-leaders '("Scheduled: " "Sched.%2dx: ")
   "Text preceding scheduled items in the agenda view.
 This is a list with two strings.  The first applies when the item is
 scheduled on the current day.  The second applies when it has been scheduled
@@ -1726,7 +1726,7 @@ These entries are added to the agenda when pressing \"[\"."
 	  (string :tag "Scheduled today     ")
 	  (string :tag "Scheduled previously")))
 
-(defcustom org-agenda-deadline-leaders '("Deadline:  " "In %3d d.: " "%3d d. ago:")
+(defcustom org-agenda-deadline-leaders '("Deadline:  " "In %3d d.: " "%2d d. ago: ")
   "Text preceding deadline items in the agenda view.
 This is a list with three strings.  The first applies when the item has its
 deadline on the current day.  The second applies when the deadline is in the
