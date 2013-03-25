@@ -4753,12 +4753,11 @@ Support for group tags is controlled by the option
 `org-group-tags', which is non-nil by default."
   (interactive)
   (setq org-group-tags (not org-group-tags))
-  (if (and (derived-mode-p 'org-agenda-mode)
-	   org-group-tags)
-      (org-agenda-redo))
-  (when (derived-mode-p 'org-mode)
-    (org-set-regexps-and-options-for-tags)
-    (org-set-regexps-and-options))
+  (cond ((and (derived-mode-p 'org-agenda-mode)
+	      org-group-tags)
+	 (org-agenda-redo))
+	((derived-mode-p 'org-mode)
+	 (let ((org-inhibit-startup t)) (org-mode))))
   (message "Groups tags support has been turned %s"
 	   (if org-group-tags "on" "off")))
 
@@ -14049,13 +14048,17 @@ the list of tags in this group.
 When DOWNCASE is non-nil, expand downcased TAGS."
   (if org-group-tags
       (let* ((case-fold-search t)
+	     (stable org-mode-syntax-table)
 	     (tal (or org-tag-groups-alist-for-agenda
 		      org-tag-groups-alist))
 	     (tal (if downcased (mapcar (lambda(tg) (mapcar 'downcase tg)) tal) tal))
 	     (tml (mapcar 'car tal))
 	     (rtnmatch match) rpl)
+	;; @ and _ are allowed as word-components in tags
+	(modify-syntax-entry ?@ "w" stable)
+	(modify-syntax-entry ?_ "w" stable)
 	(while (and tml (string-match
-			 (concat "\\(?1:[+-]?\\)\\(?2:" (regexp-opt tml) "\\)")
+			 (concat "\\(?1:[+-]?\\)\\(?2:\\<" (regexp-opt tml) "\\>\\)")
 			 rtnmatch))
 	  (let* ((dir (match-string 1 rtnmatch))
 		 (tag (match-string 2 rtnmatch))
