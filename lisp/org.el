@@ -4911,7 +4911,9 @@ Support for group tags is controlled by the option
 	     ((equal key "OPTIONS")
 	      (if (string-match "\\([ \t]\\|\\`\\)\\^:\\(t\\|nil\\|{}\\)" value)
 		  (setq scripts (read (match-string 2 value)))))
-	     ((equal key "SETUPFILE")
+	     ((and (equal key "SETUPFILE")
+		   ;; Prevent checking in Gnus messages
+		   (not buffer-read-only))
 	      (setq setup-contents (org-file-contents
 				    (expand-file-name
 				     (org-remove-double-quotes value))
@@ -5093,10 +5095,7 @@ Support for group tags is controlled by the option
   (if (or (not file)
 	  (not (file-readable-p file)))
       (if noerror
-	  (progn
-	    (message "Cannot read file \"%s\"" file)
-	    (ding) (sit-for 2)
-	    "")
+	  (message "Cannot read file \"%s\"" file)
 	(error "Cannot read file \"%s\"" file))
     (with-temp-buffer
       (insert-file-contents file)
