@@ -6493,12 +6493,15 @@ Any match of REMOVE-RE will be removed from TXT."
 			       (match-string 2 txt))
 		       t t txt))))
 	(when (derived-mode-p 'org-mode)
-	  (setq effort (ignore-errors (get-text-property 0 'org-effort txt)))
-	  (if effort
-	      (setq neffort (org-duration-string-to-minutes effort)
-		    effort (setq effort (concat "[" effort "]")))
-	    ;; prevent erroring out with %e format when there is no effort
-	    (setq effort "")))
+	  (setq effort (ignore-errors (get-text-property 0 'org-effort txt))))
+
+	;; org-agenda-add-time-grid-maybe calls us with *Agenda* as
+	;; current buffer, so move this check outside of above
+	(if effort
+	    (setq neffort (org-duration-string-to-minutes effort)
+		  effort (setq effort (concat "[" effort "]")))
+	  ;; prevent erroring out with %e format when there is no effort
+	  (setq effort ""))
 
 	(when remove-re
 	  (while (string-match remove-re txt)
