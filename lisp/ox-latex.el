@@ -48,7 +48,7 @@
 ;; - The second most important attribute is `:environment'.  It is the
 ;;   environment used for the table and defaults to
 ;;   `org-latex-default-table-environment' value.  It can be set to
-;;   anything, including "tabularx", "longtable", "array",
+;;   anything, including "tabularx", "longtable", "array", "tabu",
 ;;   "bmatrix"...
 ;;
 ;; - `:float' attribute defines a float environment for the table.
@@ -60,6 +60,12 @@
 ;; - `:align', `:font' and `:width' attributes set, respectively, the
 ;;   alignment string of the table, its font size and its width.  They
 ;;   only apply on regular tables.
+;;
+;; - `:spread' is a boolean attribute specific to the "tabu" and
+;;   "longtabu" environments, and only takes effect when used in
+;;   conjunction with the `:width' attribute.  When `:spread' is
+;;   non-nil, the table will be spread or shrunk by the value of
+;;   `:width'.
 ;;
 ;; - `:booktabs', `:center' and `:rmlines' values are booleans.  They
 ;;   toggle, respectively "booktabs" usage (assuming the package is
@@ -2454,7 +2460,7 @@ This function assumes TABLE has `org' as its `:type' property and
 			org-latex-default-table-environment))
 	 ;; If table is a float, determine environment: table, table*
 	 ;; or sidewaystable.
-	 (float-env (unless (equal "longtable" table-env)
+	 (float-env (unless (member table-env '("longtable" "longtabu"))
 		      (let ((float (plist-get attr :float)))
 			(cond
 			 ((string= float "sidewaystable") "sidewaystable")
@@ -2466,6 +2472,7 @@ This function assumes TABLE has `org' as its `:type' property and
 	 (fontsize (let ((font (plist-get attr :font)))
 		     (and font (concat font "\n"))))
 	 (width (plist-get attr :width))
+	 (spreadp (plist-get attr :spread))
 	 (placement (or (plist-get attr :placement)
 			(format "[%s]" org-latex-default-figure-position)))
 	 (centerp (if (plist-member attr :center) (plist-get attr :center)
@@ -2485,6 +2492,23 @@ This function assumes TABLE has `org' as its `:type' property and
 		   (concat caption "\\\\\n"))
 	      "\\end{longtable}\n"
 	      (and fontsize "}")))
+     ;; Longtabu
+     ((equal "longtabu" table-env)
+      (concat (and fontsize (concat "{" fontsize))
+	      (format "\\begin{longtabu}%s{%s}\n"
+		      (if width
+			  (format " %s %s "
+				  (if spreadp "spread" "to") width) "")
+		      alignment)
+	      (and org-latex-table-caption-above
+		   (org-string-nw-p caption)
+		   (concat caption "\\\\\n"))
+	      contents
+	      (and (not org-latex-table-caption-above)
+		   (org-string-nw-p caption)
+		   (concat caption "\\\\\n"))
+	      "\\end{longtabu}\n"
+	      (and fontsize "}")))
      ;; Others.
      (t (concat (cond
 		 (float-env
@@ -2494,12 +2518,19 @@ This function assumes TABLE has `org' as its `:type' property and
 			  fontsize))
 		 (centerp (concat "\\begin{center}\n" fontsize))
 		 (fontsize (concat "{" fontsize)))
-		(format "\\begin{%s}%s{%s}\n%s\\end{%s}"
-			table-env
-			(if width (format "{%s}" width) "")
-			alignment
-			contents
-			table-env)
+		(cond ((equal "tabu" table-env)
+		       (format "\\begin{tabu}%s{%s}\n%s\\end{tabu}"
+			       (if width (format
+					  (if spreadp " spread %s " " to %s ")
+					  width) "")
+			       alignment
+			       contents))
+		      (t (format "\\begin{%s}%s{%s}\n%s\\end{%s}"
+				 table-env
+				 (if width (format "{%s}" width) "")
+				 alignment
+				 contents
+				 table-env)))
 		(cond
 		 (float-env
 		  (concat (if org-latex-table-caption-above "" caption)
@@ -2659,9 +2690,9 @@ a communication channel."
   (when (eq (org-element-property :type table-row) 'standard)
     (let* ((attr (org-export-read-attribute :attr_latex
 					    (org-export-get-parent table-row)))
-	   (longtablep (string= (or (plist-get attr :environment)
+	   (longtablep (member (or (plist-get attr :environment)
 				    org-latex-default-table-environment)
-				"longtable"))
+				'("longtable" "longtabu")))
 	   (booktabsp (if (plist-member attr :booktabs)
 			  (plist-get attr :booktabs)
 			org-latex-tables-booktabs))
