@@ -238,7 +238,7 @@ ignored in this case."
 ;; Region compatibility
 
 (defvar org-ignore-region nil
-  "To temporarily disable the active region.")
+  "Non-nil means temporarily disable the active region.")
 
 (defun org-region-active-p ()
   "Is `transient-mark-mode' on and the region active?
