@@ -9283,7 +9283,7 @@ type.  For a simple example of an export function, see `org-bbdb.el'."
 (defvar org-id-link-to-org-use-id) ; Defined in org-id.el
 
 ;;;###autoload
-(defun org-store-link (arg &optional ignore-region)
+(defun org-store-link (arg)
   "\\<org-mode-map>Store an org-link to the current location.
 This link is added to `org-stored-links' and can later be inserted
 into an org-buffer with \\[org-insert-link].
@@ -9295,34 +9295,46 @@ For file links, arg negates `org-context-in-file-links'.
 A double prefix arg force skipping storing functions that are not
 part of Org's core.
 
-When the region is active and IGNORE-REGION is nil, store each line
-in the region as a separate link."
+A triple prefix arg force storing a link for each line in the
+active region."
   (interactive "P")
   (org-load-modules-maybe)
-  (setq org-store-link-plist nil)  ; reset
-  (if (and (org-region-active-p) (not ignore-region))
+  (if (and (equal arg '(64)) (org-region-active-p))
       (save-excursion
-	(let ((beg (region-beginning)) (end (region-end)))
-	  (goto-char beg)
+	(let ((end (region-end)))
+	  (goto-char (region-beginning))
+	  (set-mark (point))
 	  (while (< (point-at-eol) end)
-	    (funcall 'org-store-link arg t)
-	    (move-beginning-of-line 2))))
+	    (move-end-of-line 1) (activate-mark)
+	    (let (current-prefix-arg)
+	      (call-interactively 'org-store-link))
+	    (move-beginning-of-line 2)
+	    (set-mark (point)))))
     (org-with-limited-levels
-     (let (link cpltxt desc description search txt custom-id agenda-link sfuns sfunsn)
+     (setq org-store-link-plist nil)
+     (let (link cpltxt desc description search
+		txt custom-id agenda-link sfuns sfunsn)
        (cond
+
+	;; Store a link using an external link type
 	((and (not (equal arg '(16)))
 	      (setq sfuns
 		    (delq
-		     nil (mapcar (lambda (f) (let (fs) (if (funcall f) (push f fs))))
+		     nil (mapcar (lambda (f)
+				   (let (fs) (if (funcall f) (push f fs))))
 				 org-store-link-functions))
 		    sfunsn (mapcar (lambda (fu) (symbol-name (car fu))) sfuns))
 	      (or (and (cdr sfuns)
 		       (funcall (intern
-				 (completing-read "Which function for creating the link? "
-						  sfunsn t (car sfunsn)))))
+				 (completing-read
+				  "Which function for creating the link? "
+				  sfunsn t (car sfunsn)))))
 		  (funcall (caar sfuns)))
 	      (setq link (plist-get org-store-link-plist :link)
-		    desc (or (plist-get org-store-link-plist :description) link))))
+		    desc (or (plist-get org-store-link-plist
+					:description) link))))
+
+	;; Store a link from a source code buffer
 	((org-src-edit-buffer-p)
 	 (let (label gc)
 	   (while (or (not label)
@@ -9342,8 +9354,8 @@ in the region as a separate link."
 	   (insert link)
 	   (setq link (concat "(" label ")") desc nil)))
 
+	;; We are in the agenda, link to referenced location
 	((equal (org-bound-and-true-p org-agenda-buffer-name) (buffer-name))
-	 ;; We are in the agenda, link to referenced location
 	 (let ((m (or (get-text-property (point) 'org-hd-marker)
 		      (get-text-property (point) 'org-marker))))
 	   (when m
@@ -9378,20 +9390,14 @@ in the region as a separate link."
 	       link (url-view-url t))
 	 (org-store-link-props :type "w3" :url (url-view-url t)))
 
-	((setq search (run-hook-with-args-until-success
-		       'org-create-file-search-functions))
-	 (setq link (concat "file:" (abbreviate-file-name buffer-file-name)
-			    "::" search))
-	 (setq cpltxt (or description link)))
-
 	((eq major-mode 'image-mode)
 	 (setq cpltxt (concat "file:"
 			      (abbreviate-file-name buffer-file-name))
 	       link cpltxt)
 	 (org-store-link-props :type "image" :file buffer-file-name))
 
+	;; In dired, store a link to the file of the current line
 	((eq major-mode 'dired-mode)
-	 ;; link to the file in the current line
 	 (let ((file (dired-get-filename nil t)))
 	   (setq file (if file
 			  (abbreviate-file-name
@@ -9401,9 +9407,16 @@ in the region as a separate link."
 	   (setq cpltxt (concat "file:" file)
 		 link cpltxt)))
 
+	((setq search (run-hook-with-args-until-success
+		       'org-create-file-search-functions))
+	 (setq link (concat "file:" (abbreviate-file-name buffer-file-name)
+			    "::" search))
+	 (setq cpltxt (or description link)))
+
 	((and (buffer-file-name (buffer-base-buffer)) (derived-mode-p 'org-mode))
 	 (setq custom-id (org-entry-get nil "CUSTOM_ID"))
 	 (cond
+	  ;; Store a link using the radio target at point
 	  ((org-in-regexp "<<\\(.*?\\)>>")
 	   (setq cpltxt
 		 (concat "file:"
@@ -9419,12 +9432,13 @@ in the region as a separate link."
 				      'create-if-interactive-and-no-custom-id)
 				  (not custom-id))))
 		    (and org-id-link-to-org-use-id (org-entry-get nil "ID"))))
-	   ;; We can make a link using the ID.
+	   ;; Store a link using the ID at point
 	   (setq link (condition-case nil
 			  (prog1 (org-id-store-link)
-			    (setq desc (plist-get org-store-link-plist :description)))
+			    (setq desc (plist-get org-store-link-plist
+						  :description)))
 			(error
-			 ;; probably before first headline, link to file only
+			 ;; Probably before first headline, link only to file
 			 (concat "file:"
 				 (abbreviate-file-name
 				  (buffer-file-name (buffer-base-buffer))))))))
@@ -9463,7 +9477,7 @@ in the region as a separate link."
 	 (setq cpltxt (concat "file:"
 			      (abbreviate-file-name
 			       (buffer-file-name (buffer-base-buffer)))))
-	 ;; Add a context string
+	 ;; Add a context string.
 	 (when (org-xor org-context-in-file-links arg)
 	   (setq txt (if (org-region-active-p)
 			 (buffer-substring (region-beginning) (region-end))
@@ -9480,28 +9494,28 @@ in the region as a separate link."
 
 	(t (setq link nil)))
 
+       ;; We're done setting link and desc, clean up
        (if (consp link) (setq cpltxt (car link) link (cdr link)))
        (setq link (or link cpltxt)
 	     desc (or desc cpltxt))
        (cond ((equal desc "NONE") (setq desc nil))
 	     ((string-match org-bracket-link-regexp desc)
-	      (setq desc (replace-regexp-in-string
-			  org-bracket-link-regexp
-			  (concat "\\3" (if (equal (length (match-string 0 desc))
-						   (length desc)) "*" "")) desc))))
+	      (setq desc
+		    (replace-regexp-in-string
+		     org-bracket-link-regexp
+		     (concat "\\3" (if (equal (length (match-string 0 desc))
+					      (length desc)) "*" "")) desc))))
 
-       (if (and (or (org-called-interactively-p 'any)
-		    executing-kbd-macro ignore-region) link)
-	   (progn
-	     (setq org-stored-links
-		   (cons (list link desc) org-stored-links))
-	     (message "Stored: %s" (or desc link))
-	     (when custom-id
-	       (setq link (concat "file:" (abbreviate-file-name (buffer-file-name))
-				  "::#" custom-id))
-	       (setq org-stored-links
-		     (cons (list link desc) org-stored-links))))
-	 (or agenda-link (and link (org-make-link-string link desc))))))))
+       ;; Return the link
+       (if (not (and (or (org-called-interactively-p 'any)
+			 executing-kbd-macro) link))
+	   (or agenda-link (and link (org-make-link-string link desc)))
+	 (push (list link desc) org-stored-links)
+	 (message "Stored: %s" (or desc link))
+	 (when custom-id
+	   (setq link (concat "file:" (abbreviate-file-name
+				       (buffer-file-name)) "::#" custom-id))
+	   (push (list link desc) org-stored-links)))))))
 
 (defun org-store-link-props (&rest plist)
   "Store link properties, extract names and addresses."
