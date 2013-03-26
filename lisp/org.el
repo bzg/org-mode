@@ -9437,10 +9437,12 @@ in the region as a separate link."
 	   (when (org-xor org-context-in-file-links arg)
 	     (let* ((ee (org-element-at-point))
 		    (et (org-element-type ee))
-		    (ev (plist-get (cadr ee) :value)))
+		    (ev (plist-get (cadr ee) :value))
+		    (ek (plist-get (cadr ee) :key))
+		    (eok (and (stringp ek) (string-match "name\\|target" ek))))
 	       (setq txt (cond
 			  ((org-at-heading-p) nil)
-			  ((eq et 'keyword) ev)
+			  ((and (eq et 'keyword) eok) ev)
 			  ((org-region-active-p)
 			   (buffer-substring (region-beginning) (region-end)))))
 	       (when (or (null txt) (string-match "\\S-" txt))
@@ -9449,7 +9451,7 @@ in the region as a separate link."
 			       (condition-case nil
 				   (org-make-org-heading-search-string txt)
 				 (error "")))
-		       desc (or (and (eq et 'keyword) ev)
+		       desc (or (and (eq et 'keyword) eok ev)
 				(nth 4 (ignore-errors (org-heading-components)))
 				"NONE")))))
 	   (if (string-match "::\\'" cpltxt)
@@ -10595,7 +10597,8 @@ visibility around point, thus ignoring
 	     (goto-char (point-min))
 	     (and
 	      (re-search-forward
-	       (concat "^[ \t]*:CUSTOM_ID:[ \t]+" (regexp-quote (substring s0 1)) "[ \t]*$") nil t)
+	       (concat "^[ \t]*:CUSTOM_ID:[ \t]+"
+		       (regexp-quote (substring s0 1)) "[ \t]*$") nil t)
 	      (setq type 'dedicated
 		    pos (match-beginning 0))))
 	   ;; There is an exact target for this
@@ -10614,17 +10617,10 @@ visibility around point, thus ignoring
 	(goto-char (point-min))
 	(and
 	 (re-search-forward
-	  (format "^[ \t]*#\\+TARGET: %s" (regexp-quote s0)) nil t)
+	  (format "^[ \t]*#\\+\\(?:TARGET\\|NAME\\): %s"
+		  (regexp-quote s0)) nil t)
 	 (setq type 'dedicated pos (match-beginning 0))))
       ;; Found an invisible target.
-      (goto-char pos))
-     ((save-excursion
-	(goto-char (point-min))
-	(and
-	 (re-search-forward
-	  (format "^[ \t]*#\\+NAME: %s" (regexp-quote s0)) nil t)
-	 (setq type 'dedicated pos (match-beginning 0))))
-      ;; Found an element with a matching #+name affiliated keyword.
       (goto-char pos))
      ((and (string-match "^(\\(.*\\))$" s0)
 	   (save-excursion
@@ -10682,9 +10678,11 @@ visibility around point, thus ignoring
 	    re0 (concat "\\(<<" (regexp-quote s0) ">>\\)")
 	    re2 (concat markers "\\(" (mapconcat 'downcase words "[ \t]+")
 			"\\)" markers)
-	    re2a_ (concat "\\(" (mapconcat 'downcase words "[ \t\r\n]+") "\\)[ \t\r\n]")
+	    re2a_ (concat "\\(" (mapconcat 'downcase words
+					   "[ \t\r\n]+") "\\)[ \t\r\n]")
 	    re2a (concat "[ \t\r\n]" re2a_)
-	    re4_ (concat "\\(" (mapconcat 'downcase words "[^a-zA-Z_\r\n]+") "\\)[^a-zA-Z_]")
+	    re4_ (concat "\\(" (mapconcat 'downcase words
+					  "[^a-zA-Z_\r\n]+") "\\)[^a-zA-Z_]")
 	    re4 (concat "[^a-zA-Z_]" re4_)
 
 	    re1 (concat pre re2 post)
@@ -10702,14 +10700,14 @@ visibility around point, thus ignoring
        ((eq type 'occur) (org-do-occur (downcase reall) 'cleanup))
        (t (goto-char (point-min))
 	  (setq type 'fuzzy)
-	  (if (or (and (org-search-not-self 1 re0 nil t) (setq type 'dedicated))
+	  (if (or (and (org-search-not-self 1 re0 nil t)
+		       (setq type 'dedicated))
 		  (org-search-not-self 1 re1 nil t)
 		  (org-search-not-self 1 re2 nil t)
 		  (org-search-not-self 1 re2a nil t)
 		  (org-search-not-self 1 re3 nil t)
 		  (org-search-not-self 1 re4 nil t)
-		  (org-search-not-self 1 re5 nil t)
-		  )
+		  (org-search-not-self 1 re5 nil t))
 	      (goto-char (match-beginning 1))
 	    (goto-char pos)
 	    (error "No match"))))))
