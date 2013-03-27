@@ -1915,9 +1915,8 @@ INFO is a plist holding contextual information.  See
 		((member type '("http" "https" "ftp" "mailto"))
 		 (concat type ":" raw-path))
 		((string= type "file")
-		 (if (file-name-absolute-p raw-path)
-		     (concat "file://" (expand-file-name raw-path))
-		   (concat "file://" raw-path)))
+		 (if (not (file-name-absolute-p raw-path)) raw-path
+		   (concat "file://" (expand-file-name raw-path))))
 		(t raw-path)))
 	 protocol)
     (cond
@@ -1940,8 +1939,8 @@ INFO is a plist holding contextual information.  See
 	(case (org-element-type destination)
 	  ;; Id link points to an external file.
 	  (plain-text
-	   (if desc (format "\\href{file://%s}{%s}" destination desc)
-	     (format "\\url{file://%s}" destination)))
+	   (if desc (format "\\href{%s}{%s}" destination desc)
+	     (format "\\url{%s}" destination)))
 	  ;; Fuzzy link points nowhere.
 	  ('nil
 	   (format org-latex-link-with-unknown-path-format
