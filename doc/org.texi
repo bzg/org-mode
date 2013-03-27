@@ -9353,8 +9353,8 @@ with a line like
 #+OPTIONS: toc:nil        (no TOC at all)
 @end example
 
-The same @code{TOC} keyword can also generate a list of all tables
-(resp. a listings) with a caption in the buffer.
+The same @code{TOC} keyword can also generate a list of all tables (resp. all
+listings) with a caption in the buffer.
 
 @example
 #+TOC: listings           (build a list of listings)
