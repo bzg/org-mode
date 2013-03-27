@@ -10100,11 +10100,12 @@ a separate file which can be included using @code{#+SETUPFILE}.
 @cindex #+HTML_LINK_HOME
 @cindex #+SELECT_TAGS
 @cindex #+EXCLUDE_TAGS
-@cindex #+LaTeX_HEADER
-@cindex #+LaTeX_HEADER_EXTRA
+@cindex #+LATEX_HEADER
+@cindex #+LATEX_HEADER_EXTRA
 @vindex user-full-name
 @vindex user-mail-address
 @vindex org-export-default-language
+@vindex org-export-allow-bind-keywords
 @example
 #+TITLE:       the title to be shown (default is the buffer name)
 #+AUTHOR:      the author (default taken from @code{user-full-name})
@@ -10114,13 +10115,13 @@ a separate file which can be included using @code{#+SETUPFILE}.
 #+KEYWORDS:    the page keywords, e.g., for the XHTML meta tag
 #+LANGUAGE:    language for HTML, e.g., @samp{en} (@code{org-export-default-language})
 #+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
-#+BIND:        lisp-var lisp-val, e.g., @code{org-latex-image-default-option width=.7\\linewidth}
-               @r{You need to confirm using these, or configure @code{org-export-allow-BIND}}
+#+BIND:        lisp-var lisp-val, e.g., @code{org-latex-image-default-width ".7\\linewidth"}
+               @r{Configure @code{org-export-allow-bind-keywords} to use this}
 #+HTML_HEAD:   Additional line to the @samp{<head>...</head>} of the HTML output
 #+HTML_LINK_UP:     the ``up'' link of an exported page
 #+HTML_LINK_HOME:   the ``home'' link of an exported page
-#+LaTeX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
-#+LaTeX_HEADER_EXTRA: extra line(s) for the @LaTeX{} header, used in special contexts
+#+LATEX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
+#+LATEX_HEADER_EXTRA: similar to #+LATEX_HEADER, but ignored when previewing math snippets
 #+SELECT_TAGS:   Tags that select a tree for export
 #+EXCLUDE_TAGS:  Tags that exclude a tree from export
 @end example
@@ -10144,7 +10145,6 @@ settings.  Here you can:
 @cindex @LaTeX{} fragments
 @cindex author info, in export
 @cindex time info, in export
-@vindex org-export-plist-vars
 @vindex org-export-author-info
 @vindex org-export-creator-info
 @vindex org-export-email-info
@@ -10182,11 +10182,6 @@ d:         @r{turn on/off inclusion of drawers, or list drawers to include}
 These options take effect in both the HTML and @LaTeX{} export, except for
 @code{TeX} and @code{LaTeX} options, which are respectively @code{t} and
 @code{nil} for the @LaTeX{} export.
-
-The default values for these and many other options are given by a set of
-variables.  For a list of such variables, the corresponding OPTIONS keys and
-also the publishing keys (@pxref{Project alist}), see the constant
-@code{org-export-plist-vars}.
 
 When exporting only a single subtree by selecting it with @kbd{C-c @@} before
 calling an export command, the subtree can overrule some of the file's export
