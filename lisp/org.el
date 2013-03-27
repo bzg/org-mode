@@ -10631,10 +10631,17 @@ visibility around point, thus ignoring
 	(goto-char (point-min))
 	(and
 	 (re-search-forward
-	  (format "^[ \t]*#\\+\\(?:TARGET\\|NAME\\): %s"
-		  (regexp-quote s0)) nil t)
+	  (format "^[ \t]*#\\+TARGET: %s" (regexp-quote s0)) nil t)
 	 (setq type 'dedicated pos (match-beginning 0))))
       ;; Found an invisible target.
+      (goto-char pos))
+     ((save-excursion
+	(goto-char (point-min))
+	(and
+	 (re-search-forward
+	  (format "^[ \t]*#\\+NAME: %s" (regexp-quote s0)) nil t)
+	 (setq type 'dedicated pos (match-beginning 0))))
+      ;; Found an element with a matching #+name affiliated keyword.
       (goto-char pos))
      ((and (string-match "^(\\(.*\\))$" s0)
 	   (save-excursion
