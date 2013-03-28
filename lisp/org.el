@@ -17893,7 +17893,7 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 	(inhibit-read-only t)
 	(org-inhibit-startup org-agenda-inhibit-startup)
 	(rea (concat ":" org-archive-tag ":"))
-	file re org-tag-alist)
+	file re)
     (setq org-tag-alist-for-agenda nil
 	  org-tag-groups-alist-for-agenda nil)
     (save-excursion
@@ -17917,8 +17917,9 @@ When a buffer is unmodified, it is just killed.  When modified, it is saved
 		  (append org-todo-keyword-alist-for-agenda org-todo-key-alist))
 	    (setq org-drawers-for-agenda
 		  (append org-drawers-for-agenda org-drawers))
-	    (setq org-tag-alist-for-agenda
-		  (append org-tag-alist-for-agenda org-tag-alist))
+	    (unless (equal org-tag-alist-for-agenda org-tag-alist)
+	      (setq org-tag-alist-for-agenda
+		    (append org-tag-alist-for-agenda org-tag-alist)))
 	    (if org-group-tags
 		(setq org-tag-groups-alist-for-agenda
 		      (org-uniquify-alist
