@@ -8956,17 +8956,18 @@ if `orgstruct-heading-prefix-regexp' is non-nil."
 		(let* ((orgstruct-mode)
 		       (binding
 			(loop with key = ,key
-			      for rep in '(nil
-					   ("<tab>" . "TAB")
-					   ("<return>" . "RET")
-					   ("<escape>" . "ESC")
-					   ("<delete>" . "DEL"))
+			      for rep in
+			      '(nil
+				("<\\([^>]*\\)tab>" . "\\1TAB")
+				("<\\([^>]*\\)return>" . "\\1RET")
+				("<\\([^>]*\\)escape>" . "\\1ESC")
+				("<\\([^>]*\\)delete>" . "\\1DEL"))
 			      do
 			      (when rep
 				(setq key (read-kbd-macro
 					   (let ((case-fold-search))
 					     (replace-regexp-in-string
-					      (regexp-quote (car rep))
+					      (car rep)
 					      (cdr rep)
 					      (key-description key))))))
 			      thereis (key-binding key))))
