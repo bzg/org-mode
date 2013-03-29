@@ -1750,9 +1750,17 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	;; Inline definitions are secondary strings.
 	;; Non-inline footnotes definitions are full Org data.
 	(t
-	 (let* ((raw (org-export-get-footnote-definition footnote-reference
-							 info))
-		(def (let ((def (org-trim (org-export-data raw info))))
+	 (let* ((raw (org-export-get-footnote-definition
+		      footnote-reference info))
+		(translations
+		 (cons (cons 'paragraph
+			     (lambda (p c i)
+			       (org-odt--format-paragraph
+				p c "Footnote" "OrgFootnoteCenter"
+				"OrgFootnoteQuotations")))
+		       (org-export-backend-translate-table 'odt)))
+		(def (let ((def (org-trim (org-export-data-with-translations
+					   raw translations info))))
 		       (if (eq (org-element-type raw) 'org-data) def
 			 (format "\n<text:p text:style-name=\"%s\">%s</text:p>"
 				 "Footnote" def)))))
@@ -2872,26 +2880,36 @@ INFO is a plist holding contextual information.  See
 
 ;;;; Paragraph
 
-(defun org-odt-paragraph (paragraph contents info)
-  "Transcode a PARAGRAPH element from Org to ODT.
-CONTENTS is the contents of the paragraph, as a string.  INFO is
-the plist used as a communication channel."
+(defun org-odt--format-paragraph (paragraph contents default center quote)
+  "Format paragraph according to given styles.
+PARAGRAPH is a paragraph type element.  CONTENTS is the
+transcoded contents of that paragraph, as a string.  DEFAULT,
+CENTER and QUOTE are, respectively, style to use when paragraph
+belongs to no special environment, a center block, or a quote
+block."
   (let* ((parent (org-export-get-parent paragraph))
 	 (parent-type (org-element-type parent))
 	 (style (case parent-type
-		  (quote-block "Quotations")
-		  (center-block "OrgCenter")
-		  (footnote-definition "Footnote")
-		  (t (or (org-element-property :style paragraph)
-			 "Text_20_body")))))
+		  (quote-block quote)
+		  (center-block center)
+		  (t default))))
     ;; If this paragraph is a leading paragraph in an item and the
     ;; item has a checkbox, splice the checkbox and paragraph contents
     ;; together.
     (when (and (eq (org-element-type parent) 'item)
-    	       (eq paragraph (car (org-element-contents parent))))
+	       (eq paragraph (car (org-element-contents parent))))
       (setq contents (concat (org-odt--checkbox parent) contents)))
-    (assert style)
     (format "\n<text:p text:style-name=\"%s\">%s</text:p>" style contents)))
+
+(defun org-odt-paragraph (paragraph contents info)
+  "Transcode a PARAGRAPH element from Org to ODT.
+CONTENTS is the contents of the paragraph, as a string.  INFO is
+the plist used as a communication channel."
+  (org-odt--format-paragraph
+   paragraph contents
+   (or (org-element-property :style paragraph) "Text_20_body")
+   "OrgCenter"
+   "Quotations"))
 
 
 ;;;; Plain List
