@@ -189,7 +189,10 @@ then create.  Return the initialized session."
 		(setq python-buffer (org-babel-python-with-earmufs session)))
 	      (let ((python-shell-buffer-name
 		     (org-babel-python-without-earmufs python-buffer)))
-		(run-python org-babel-python-command)))
+		(run-python
+		 (if (member system-type '(cygwin windows-nt ms-dos))
+		     (concat org-babel-python-command " -i")
+		   org-babel-python-command))))
 	  (run-python)))
        ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
