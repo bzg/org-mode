@@ -90,6 +90,19 @@ already filled in `info'."
    (org-test-with-temp-text "#+bind: variable value"
      (let ((org-export-allow-bind-keywords t))
        (org-export--install-letbind-maybe)
+       (eq variable 'value))))
+  ;; Preserve order of BIND keywords.
+  (should
+   (org-test-with-temp-text "#+BIND: variable 1\n#+BIND: variable 2"
+     (let ((org-export-allow-bind-keywords t))
+       (org-export--install-letbind-maybe)
+       (eq variable 2))))
+  ;; Read BIND keywords in setup files.
+  (should
+   (org-test-with-temp-text
+       (format "#+SETUPFILE: \"%s/examples/setupfile.org\"" org-test-dir)
+     (let ((org-export-allow-bind-keywords t))
+       (org-export--install-letbind-maybe)
        (eq variable 'value)))))
 
 (ert-deftest test-org-export/parse-option-keyword ()

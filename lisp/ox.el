@@ -1427,7 +1427,8 @@ done against the current sub-tree.
 Third optional argument EXT-PLIST is a property list with
 external parameters overriding Org default settings, but still
 inferior to file-local settings."
-  ;; First install #+BIND variables.
+  ;; First install #+BIND variables since these must be set before
+  ;; global options are read.
   (org-export--install-letbind-maybe)
   ;; Get and prioritize export options...
   (org-combine-plists
@@ -1713,20 +1714,39 @@ process."
     plist))
 
 (defun org-export--install-letbind-maybe ()
-  "Install the values from #+BIND lines as local variables.
-Variables must be installed before in-buffer options are
-retrieved."
+  "Install the values from #+BIND lines as local variables."
   (when org-export-allow-bind-keywords
-    (let ((case-fold-search t) letbind)
-      (org-with-wide-buffer
-       (goto-char (point-min))
-       (while (re-search-forward "^[ \t]*#\\+BIND:" nil t)
-	 (let* ((element (org-element-at-point))
-		(value (org-element-property :value element)))
-	   (when (and (eq (org-element-type element) 'keyword)
-		      (not (equal value  "")))
-	     (push (read (format "(%s)" value)) letbind)))))
-      (dolist (pair (nreverse letbind))
+    (let* (collect-bind			; For byte-compiler.
+	   (collect-bind
+	    (lambda (files alist)
+	      ;; Return an alist between variable names and their
+	      ;; value.  FILES is a list of setup files names read so
+	      ;; far, used to avoid circular dependencies.  ALIST is
+	      ;; the alist collected so far.
+	      (let ((case-fold-search t))
+		(org-with-wide-buffer
+		 (goto-char (point-min))
+		 (while (re-search-forward
+			 "^[ \t]*#\\+\\(BIND\\|SETUPFILE\\):" nil t)
+		   (let ((element (org-element-at-point)))
+		     (when (eq (org-element-type element) 'keyword)
+		       (let ((val (org-element-property :value element)))
+			 (if (equal (org-element-property :key element) "BIND")
+			     (push (read (format "(%s)" val)) alist)
+			   ;; Enter setup file.
+			   (let ((file (expand-file-name
+					(org-remove-double-quotes val))))
+			     (unless (member file files)
+			       (with-temp-buffer
+				 (org-mode)
+				 (insert (org-file-contents file 'noerror))
+				 (setq alist
+				       (funcall collect-bind
+						(cons file files)
+						alist))))))))))
+		 alist)))))
+      ;; Install each variable in current buffer.
+      (dolist (pair (nreverse (funcall collect-bind nil nil)))
 	(org-set-local (car pair) (nth 1 pair))))))
 
 
