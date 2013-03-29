@@ -151,7 +151,7 @@ Emacs-lisp table, otherwise return the results as a string."
        res))
    (org-babel-script-escape results)))
 
-(defvar org-babel-python-buffers '((:default . nil)))
+(defvar org-babel-python-buffers '((:default . "*Python*")))
 
 (defun org-babel-python-session-buffer (session)
   "Return the buffer associated with SESSION."
@@ -170,7 +170,8 @@ then create.  Return the initialized session."
        ((and (eq 'python org-babel-python-mode)
 	     (fboundp 'run-python)) ; python.el
 	(if (version< "24.1" emacs-version)
-	    (run-python org-babel-python-command)
+	    (let ((python-shell-buffer-name python-buffer))
+	      (run-python org-babel-python-command))
 	  (run-python)))
        ((and (eq 'python-mode org-babel-python-mode)
 	     (fboundp 'py-shell)) ; python-mode.el
