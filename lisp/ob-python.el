@@ -185,7 +185,8 @@ then create.  Return the initialized session."
 	     (fboundp 'run-python)) ; python.el
 	(if (version< "24.1" emacs-version)
 	    (progn
-	      (unless python-buffer (org-babel-python-with-earmufs session))
+	      (unless python-buffer
+		(setq python-buffer (org-babel-python-with-earmufs session)))
 	      (let ((python-shell-buffer-name
 		     (org-babel-python-without-earmufs python-buffer)))
 		(run-python org-babel-python-command)))
