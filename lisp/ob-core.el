@@ -2068,6 +2068,7 @@ code ---- the results are extracted in the syntax of the source
 		 ((member "latex" result-params)
 		  (funcall wrap "#+BEGIN_LaTeX" "#+END_LaTeX"))
 		 ((member "org" result-params)
+		  (goto-char beg) (if (org-at-table-p) (org-cycle))
 		  (funcall wrap "#+BEGIN_SRC org" "#+END_SRC"))
 		 ((member "code" result-params)
 		  (funcall wrap (format "#+BEGIN_SRC %s%s" (or lang "none") results-switches)
@@ -2077,6 +2078,7 @@ code ---- the results are extracted in the syntax of the source
 		 ((or (member "drawer" result-params)
 		      ;; Stay backward compatible with <7.9.2
 		      (member "wrap" result-params))
+		  (goto-char beg) (if (org-at-table-p) (org-cycle))
 		  (funcall wrap ":RESULTS:" ":END:" 'no-escape))
 		 ((and (not (funcall proper-list-p result))
 		       (not (member "file" result-params)))
