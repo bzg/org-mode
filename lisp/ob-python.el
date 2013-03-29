@@ -208,7 +208,7 @@ then create.  Return the initialized session."
 			  (concat "Python-" (symbol-name session))))
 	       (py-which-bufname bufname))
 	  (py-shell)
-	  (setq python-buffer (org-babel-python-earmufs bufname))))
+	  (setq python-buffer (org-babel-python-with-earmufs bufname))))
        (t
 	(error "No function available for running an inferior Python")))
       (setq org-babel-python-buffers
