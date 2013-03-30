@@ -1786,7 +1786,7 @@ Such keywords are prefixed with \"%:\".  See
 		   (position (or (nth 4 entry) org-remember-default-headline))
 		   (type 'entry)
 		   (prepend org-reverse-note-order)
-		   immediate target)
+		   immediate target jump-to-captured)
 	       (cond
 		((member position '(top bottom))
 		 (setq target (list 'file file)
@@ -1800,9 +1800,13 @@ Such keywords are prefixed with \"%:\".  See
 		 (setq template (replace-match "" t t template)
 		       immediate t))
 
+	       (when (string-match "%&" template)
+		 (setq jump-to-captured t))
+
 	       (append (list key desc type target template)
 		       (if prepend '(:prepend t))
-		       (if immediate '(:immediate-finish t)))))
+		       (if immediate '(:immediate-finish t))
+		       (if jump-to-captured '(:jump-to-captured t)))))
 
 	   org-remember-templates))))
 
