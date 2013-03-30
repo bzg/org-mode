@@ -4459,7 +4459,8 @@ Otherwise, these types are allowed:
 		 (const :tag "Only active timestamps" active)
 		 (const :tag "Only inactive timestamps" inactive)
 		 (const :tag "Only scheduled timestamps" scheduled)
-		 (const :tag "Only deadline timestamps" deadline))
+		 (const :tag "Only deadline timestamps" deadline)
+		 (const :tag "Only closed timestamps" closed))
   :version "24.3"
   :group 'org-sparse-trees)
 
@@ -13343,11 +13344,14 @@ D      Show deadlines and scheduled items between a date range."
 		   ((eq type 'active) "only active timestamps")
 		   ((eq type 'inactive) "only inactive timestamps")
 		   ((eq type 'scheduled-or-deadline) "scheduled/deadline")
+		   ((eq type 'closed) "with a closed time-stamp")
 		   (t "scheduled/deadline")))
     (setq ans (read-char-exclusive))
     (cond
      ((equal ans ?c)
-      (org-sparse-tree arg (cadr (member type '(scheduled-or-deadline all scheduled deadline active inactive)))))
+      (org-sparse-tree
+       arg (cadr (member type '(scheduled-or-deadline
+				all scheduled deadline active inactive closed)))))
      ((equal ans ?d)
       (call-interactively 'org-check-deadlines))
      ((equal ans ?b)
@@ -16725,6 +16729,7 @@ Allowed values for TYPE are:
    inactive: only inactive timestamps ([...])
   scheduled: only scheduled timestamps
    deadline: only deadline timestamps
+     closed: only closed time-stamps
 
 When TYPE is nil, fall back on returning a regexp that matches
 both scheduled and deadline timestamps."
@@ -16733,6 +16738,7 @@ both scheduled and deadline timestamps."
 	((eq type 'inactive) "\\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\n>]*?\\)\\]")
 	((eq type 'scheduled) (concat "\\<" org-scheduled-string " *<\\([^>]+\\)>"))
 	((eq type 'deadline) (concat "\\<" org-deadline-string " *<\\([^>]+\\)>"))
+	((eq type 'closed) (concat org-closed-string " \\[\\([0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\} ?[^\n>]*?\\)\\]"))
 	((eq type 'scheduled-or-deadline)
 	 (concat "\\<\\(?:" org-deadline-string "\\|" org-scheduled-string "\\) *<\\([^>]+\\)>"))))
 
@@ -23474,29 +23480,6 @@ To get rid of the restriction, use \\[org-agenda-remove-restriction-lock]."
 ;; Make session.el ignore our circular variable
 (eval-after-load "session"
   '(add-to-list 'session-globals-exclude 'org-mark-ring))
-
-;;;; Experimental code
-
-(defun org-closed-in-range ()
-  "Sparse tree of items closed in a certain time range.
-Still experimental, may disappear in the future."
-  (interactive)
-  ;; Get the time interval from the user.
-  (let* ((time1 (org-float-time
-                 (org-read-date nil 'to-time nil "Starting date: ")))
-         (time2 (org-float-time
-                 (org-read-date nil 'to-time nil "End date:")))
-         ;; callback function
-         (callback (lambda ()
-                     (let ((time
-                            (org-float-time
-                             (apply 'encode-time
-                                    (org-parse-time-string
-                                     (match-string 1))))))
-                       ;; check if time in interval
-                       (and (>= time time1) (<= time time2))))))
-    ;; make tree, check each match with the callback
-    (org-occur "CLOSED: +\\[\\(.*?\\)\\]" nil callback)))
 
 ;;;; Finish up
 
