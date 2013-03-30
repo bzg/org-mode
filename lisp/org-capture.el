@@ -181,6 +181,8 @@ properties are:
                      template only needs information that can be added
                      automatically.
 
+ :jump-to-captured   When set, jump to the captured entry when finished.
+
  :empty-lines        Set this to the number of lines the should be inserted
                      before and after the new item.  Default 0, only common
                      other value is 1.
@@ -339,11 +341,15 @@ calendar                |  %:type %:date"
 			 ;; Give the most common options as checkboxes
 			 :options (((const :format "%v " :prepend) (const t))
 				   ((const :format "%v " :immediate-finish) (const t))
+				   ((const :format "%v " :jump-to-captured) (const t))
 				   ((const :format "%v " :empty-lines) (const 1))
+				   ((const :format "%v " :empty-lines-before) (const 1))
+				   ((const :format "%v " :empty-lines-after) (const 1))
 				   ((const :format "%v " :clock-in) (const t))
 				   ((const :format "%v " :clock-keep) (const t))
 				   ((const :format "%v " :clock-resume) (const t))
 				   ((const :format "%v " :unnarrowed) (const t))
+				   ((const :format "%v " :table-line-pos) (const t))
 				   ((const :format "%v " :kill-buffer) (const t))))))))
 
 (defcustom org-capture-before-finalize-hook nil
@@ -633,6 +639,8 @@ of the day at point (if any) or the current HH:MM time."
 With prefix argument STAY-WITH-CAPTURE, jump to the location of the
 captured item after finalizing."
   (interactive "P")
+  (when (org-capture-get :jump-to-captured)
+    (setq stay-with-capture t))
   (unless (and org-capture-mode
 	       (buffer-base-buffer (current-buffer)))
     (error "This does not seem to be a capture buffer for Org-mode"))
