@@ -6211,11 +6211,11 @@ needs to be inserted at a specific position in the font-lock sequence.")
   (org-set-local 'org-pretty-entities (not org-pretty-entities))
   (org-restart-font-lock)
   (if org-pretty-entities
-      (message "Entities are displayed as UTF8 characters")
+      (message "Entities are now displayed as UTF8 characters")
     (save-restriction
       (widen)
       (org-decompose-region (point-min) (point-max))
-      (message "Entities are displayed plain"))))
+      (message "Entities are now displayed as plain text"))))
 
 (defvar org-custom-properties-overlays nil
   "List of overlays used for custom properties.")
@@ -6385,10 +6385,10 @@ and subscripts."
 	       (keyw-p (eq 'org-special-keyword (get-text-property mpos 'face))))
 	  (goto-char (point-at-bol))
 	  (setq table-p (org-looking-at-p org-table-dataline-regexp)
-		comment-p (org-looking-at-p "[ \t]*#"))
+		comment-p (org-looking-at-p "^[ \t]*#[ +]"))
 	  (goto-char pos)
-	  ;; FIXME: Should we go back one character here, for a_b^c
-	  ;; (goto-char (1- pos)) ;????????????????????
+	  ;; Handle a_b^c
+	  (if (member (char-after) '(?_ ?^)) (goto-char (1- pos)))
 	  (if (or comment-p emph-p link-p keyw-p)
 	      t
 	    (put-text-property (match-beginning 3) (match-end 0)
