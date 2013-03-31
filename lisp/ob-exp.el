@@ -52,10 +52,13 @@
 (defcustom org-export-babel-evaluate t
   "Switch controlling code evaluation during export.
 When set to nil no code will be evaluated as part of the export
-process."
+process.  When set to 'inline-only, only inline code blocks will
+be executed."
   :group 'org-babel
   :version "24.1"
-  :type 'boolean)
+  :type '(choice (const :tag "Never" nil)
+		 (const :tag "Only inline code" inline-only)
+		 (const :tag "Always" t)))
 (put 'org-export-babel-evaluate 'safe-local-variable (lambda (x) (eq x nil)))
 
 (defun org-babel-exp-get-export-buffer ()
@@ -378,7 +381,9 @@ Results are prepared in a manner suitable for export by org-mode.
 This function is called by `org-babel-exp-do-export'.  The code
 block will be evaluated.  Optional argument SILENT can be used to
 inhibit insertion of results into the buffer."
-  (when (and org-export-babel-evaluate
+  (when (and (or (eq org-export-babel-evaluate t)
+		 (and (eq type 'inline)
+		      (eq org-export-babel-evaluate 'inline-only)))
 	     (not (and hash (equal hash (org-babel-current-result-hash)))))
     (let ((lang (nth 0 info))
 	  (body (if (org-babel-noweb-p (nth 2 info) :eval)
