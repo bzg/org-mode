@@ -19944,7 +19944,7 @@ When in a fixed-width region, call `org-edit-fixed-width-region'.
 When at an #+INCLUDE keyword, visit the included file.
 On a link, call `ffap' to visit the link at point.
 Otherwise, return a user error."
-  (interactive)
+  (interactive "P")
   (let ((element (org-element-at-point)))
     (assert (not buffer-read-only) nil
 	    "Buffer is read-only: %s" (buffer-name))
@@ -19959,8 +19959,9 @@ Otherwise, return a user error."
              ;; At a src-block with a session and function called with
              ;; an ARG: switch to the buffer related to the inferior
              ;; process.
-             (funcall (intern (concat "org-babel-prep-session:" lang))
-                      session params)))))
+             (switch-to-buffer
+	      (funcall (intern (concat "org-babel-prep-session:" lang))
+		       session params))))))
       (keyword
        (if (member (org-element-property :key element) '("INCLUDE" "SETUPFILE"))
            (find-file
