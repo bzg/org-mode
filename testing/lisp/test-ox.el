@@ -75,35 +75,45 @@ already filled in `info'."
   "Test reading #+BIND: keywords."
   ;; Test with `org-export-allow-bind-keywords' set to t.
   (should
-   (org-test-with-temp-text "#+BIND: variable value"
+   (org-test-with-temp-text "#+BIND: test-ox-var value"
      (let ((org-export-allow-bind-keywords t))
-       (org-export--install-letbind-maybe)
-       (eq variable 'value))))
+       (org-export-get-environment)
+       (eq test-ox-var 'value))))
   ;; Test with `org-export-allow-bind-keywords' set to nil.
   (should-not
-   (org-test-with-temp-text "#+BIND: variable value"
+   (org-test-with-temp-text "#+BIND: test-ox-var value"
      (let ((org-export-allow-bind-keywords nil))
-       (org-export--install-letbind-maybe)
-       (boundp 'variable))))
+       (org-export-get-environment)
+       (boundp 'test-ox-var))))
   ;; BIND keywords are case-insensitive.
   (should
-   (org-test-with-temp-text "#+bind: variable value"
+   (org-test-with-temp-text "#+bind: test-ox-var value"
      (let ((org-export-allow-bind-keywords t))
-       (org-export--install-letbind-maybe)
-       (eq variable 'value))))
+       (org-export-get-environment)
+       (eq test-ox-var 'value))))
   ;; Preserve order of BIND keywords.
   (should
-   (org-test-with-temp-text "#+BIND: variable 1\n#+BIND: variable 2"
+   (org-test-with-temp-text "#+BIND: test-ox-var 1\n#+BIND: test-ox-var 2"
      (let ((org-export-allow-bind-keywords t))
-       (org-export--install-letbind-maybe)
-       (eq variable 2))))
+       (org-export-get-environment)
+       (eq test-ox-var 2))))
   ;; Read BIND keywords in setup files.
   (should
    (org-test-with-temp-text
        (format "#+SETUPFILE: \"%s/examples/setupfile.org\"" org-test-dir)
      (let ((org-export-allow-bind-keywords t))
-       (org-export--install-letbind-maybe)
-       (eq variable 'value)))))
+       (org-export-get-environment)
+       (eq variable 'value))))
+  ;; Verify that bound variables are seen during export.
+  (should
+   (equal "Yes\n"
+	  (org-test-with-temp-text "#+BIND: test-ox-var value"
+	    (let ((org-export-allow-bind-keywords t)
+		  org-export-registered-backends)
+	      (org-export-define-backend 'check
+		'((section . (lambda (s c i)
+			       (if (eq test-ox-var 'value) "Yes" "No")))))
+	      (org-export-as 'check))))))
 
 (ert-deftest test-org-export/parse-option-keyword ()
   "Test reading all standard #+OPTIONS: items."

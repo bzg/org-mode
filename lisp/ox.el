@@ -1429,7 +1429,8 @@ external parameters overriding Org default settings, but still
 inferior to file-local settings."
   ;; First install #+BIND variables since these must be set before
   ;; global options are read.
-  (org-export--install-letbind-maybe)
+  (dolist (pair (org-export--list-bound-variables))
+    (org-set-local (car pair) (nth 1 pair)))
   ;; Get and prioritize export options...
   (org-combine-plists
    ;; ... from global variables...
@@ -1713,8 +1714,10 @@ process."
     ;; Return value.
     plist))
 
-(defun org-export--install-letbind-maybe ()
-  "Install the values from #+BIND lines as local variables."
+(defun org-export--list-bound-variables ()
+  "Return variables bound from BIND keywords in current buffer.
+Also look for BIND keywords in setup files.  The return value is
+an alist where associations are (VARIABLE-NAME VALUE)."
   (when org-export-allow-bind-keywords
     (let* (collect-bind			; For byte-compiler.
 	   (collect-bind
@@ -1745,9 +1748,8 @@ process."
 						(cons file files)
 						alist))))))))))
 		 alist)))))
-      ;; Install each variable in current buffer.
-      (dolist (pair (nreverse (funcall collect-bind nil nil)))
-	(org-set-local (car pair) (nth 1 pair))))))
+      ;; Return value in appropriate order of appearance.
+      (nreverse (funcall collect-bind nil nil)))))
 
 
 ;;;; Tree Properties
@@ -2793,28 +2795,28 @@ The function assumes BUFFER's major mode is `org-mode'."
 	 ;; Set major mode. Ignore `org-mode-hook' as it has been run
 	 ;; already in BUFFER.
 	 (let ((org-mode-hook nil)) (org-mode))
-	 ;; Buffer local variables.
-	 ,@(let (local-vars)
-	     (mapc
-	      (lambda (entry)
-		(when (consp entry)
-		  (let ((var (car entry))
-			(val (cdr entry)))
-		    (and (not (eq var 'org-font-lock-keywords))
-			 (or (memq var
-				   '(default-directory
+	 ;; Copy specific buffer local variables and variables set
+	 ;; through BIND keywords.
+	 ,@(let ((bound-variables (org-export--list-bound-variables))
+		 vars)
+	     (dolist (entry (buffer-local-variables (buffer-base-buffer)) vars)
+	       (when (consp entry)
+		 (let ((var (car entry))
+		       (val (cdr entry)))
+		   (and (not (eq var 'org-font-lock-keywords))
+			(or (memq var
+				  '(default-directory
 				     buffer-file-name
 				     buffer-file-coding-system))
-			     (string-match "^\\(org-\\|orgtbl-\\)"
-					   (symbol-name var)))
-			 ;; Skip unreadable values, as they cannot be
-			 ;; sent to external process.
-			 (or (not val) (ignore-errors (read (format "%S" val))))
-			 (push `(set (make-local-variable (quote ,var))
-				     (quote ,val))
-			       local-vars)))))
-	      (buffer-local-variables (buffer-base-buffer)))
-	     local-vars)
+			    (assq var bound-variables)
+			    (string-match "^\\(org-\\|orgtbl-\\)"
+					  (symbol-name var)))
+			;; Skip unreadable values, as they cannot be
+			;; sent to external process.
+			(or (not val) (ignore-errors (read (format "%S" val))))
+			(push `(set (make-local-variable (quote ,var))
+				    (quote ,val))
+			      vars))))))
 	 ;; Whole buffer contents.
 	 (insert
 	  ,(org-with-wide-buffer
