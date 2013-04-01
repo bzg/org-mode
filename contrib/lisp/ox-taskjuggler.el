@@ -498,9 +498,10 @@ doesn't include leading \"depends\"."
                          (string-match (concat id " +\\({.*?}\\)") dep-str)
                          (org-match-string-no-properties 1))))
                  path)
-             ;; Compute number of exclamation marks.
+             ;; Compute number of exclamation marks by looking for the
+	     ;; common ancestor between TASK and DEP.
              (while (not (org-element-map parent 'headline
-                           (lambda (task) (eq task dep))))
+                           (lambda (hl) (eq hl task))))
                (incf exclamations)
                (setq parent (org-export-get-parent parent)))
              ;; Build path from DEP to PARENT.
