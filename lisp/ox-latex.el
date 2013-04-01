@@ -2031,18 +2031,22 @@ TEXT is the string to transcode.  INFO is a plist holding
 contextual information."
   (let ((specialp (plist-get info :with-special-strings))
 	(output text))
-    ;; Protect %, #, &, $, ~, ^, _,  { and }.
-    (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}~^_]\\)" output)
+    ;; Protect %, #, &, $, ^, _,  { and }.
+    (while (string-match "\\([^\\]\\|^\\)\\([%$#&{}^_]\\)" output)
       (setq output
 	    (replace-match
 	     (format "\\%s" (match-string 2 output)) nil t output 2)))
     ;; Protect \.  If special strings are used, be careful not to
     ;; protect "\" in "\-" constructs.
-    (let ((symbols (if specialp "-%$#&{}~^_\\" "%$#&{}~^_\\")))
+    (let ((symbols (if specialp "-%$#&{}^_\\" "%$#&{}^_\\")))
       (setq output
 	    (replace-regexp-in-string
 	     (format "\\(?:[^\\]\\|^\\)\\(\\\\\\)\\(?:[^%s]\\|$\\)" symbols)
 	     "$\\backslash$" output nil t 1)))
+    ;; Protect ~.
+    (setq output
+	  (replace-regexp-in-string
+	   "\\([^\\]\\|^\\)\\(~\\)" "\\textasciitilde{}" output nil t 2))
     ;; Activate smart quotes.  Be sure to provide original TEXT string
     ;; since OUTPUT may have been modified.
     (when (plist-get info :with-smart-quotes)
