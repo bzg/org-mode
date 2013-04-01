@@ -442,6 +442,7 @@ then run `org-babel-pop-to-session'."
     (noweb-ref	. :any)
     (noweb-sep  . :any)
     (padline	. ((yes no)))
+    (post       . :any)
     (results	. ((file list vector table scalar verbatim)
 		   (raw html latex org code pp drawer)
 		   (replace silent none append prepend)
@@ -611,6 +612,11 @@ block."
 				      (not (listp result)))
 				 (list (list result)) result))
 			   (funcall cmd body params)))
+		    ;; possibly perform post process provided its appropriate
+		    (when (cdr (assoc :post params))
+		      (let ((*this* result))
+			(setq result (org-babel-ref-resolve
+				      (cdr (assoc :post params))))))
 		    ;; if non-empty result and :file then write to :file
 		    (when (cdr (assoc :file params))
 		      (when result
