@@ -209,14 +209,18 @@ This function is called by `org-babel-execute-src-block'."
       (if (org-babel-comint-buffer-livep session)
 	  session
 	(save-window-excursion
-	  (require 'ess) (R)
-	  (rename-buffer
-	   (if (bufferp session)
-	       (buffer-name session)
-	     (if (stringp session)
-		 session
-	       (buffer-name))))
-	  (current-buffer))))))
+	  (save-excursion
+	    (when (get-buffer session)
+	      ;; Session buffer exists, but with dead process
+	      (set-buffer session))
+	    (require 'ess) (R)
+	    (rename-buffer
+	     (if (bufferp session)
+		 (buffer-name session)
+	       (if (stringp session)
+		   session
+		 (buffer-name))))
+	    (current-buffer)))))))
 
 (defun org-babel-R-associate-session (session)
   "Associate R code buffer with an R session.
