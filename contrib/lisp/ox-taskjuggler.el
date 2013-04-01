@@ -411,16 +411,19 @@ resource.  Its id is derived from its name and made unique
 against UNIQUE-IDS.  If the (downcased) first token of the
 headline is not unique try to add more (downcased) tokens of the
 headline or finally add more underscore characters (\"_\")."
-  (let* ((parts (org-split-string (org-element-property :raw-value item)))
-	 (id (org-taskjuggler--clean-id (downcase (pop parts)))))
-    ;; Try to add more parts of the headline to make it unique.
-    (while (and (car parts) (member id unique-ids))
-      (setq id (concat id "_"
-                       (org-taskjuggler--clean-id (downcase (pop parts))))))
-    ;; If it's still not unique, add "_".
-    (while (member id unique-ids)
-      (setq id (concat id "_")))
-    id))
+  (let ((id (org-string-nw-p (org-element-property :TASK_ID item))))
+    ;; If an id is specified, use it, as long as it's unique.
+    (if (and id (not (member id unique-ids))) id
+      (let* ((parts (org-split-string (org-element-property :raw-value item)))
+	     (id (org-taskjuggler--clean-id (downcase (pop parts)))))
+	;; Try to add more parts of the headline to make it unique.
+	(while (and (car parts) (member id unique-ids))
+	  (setq id (concat id "_"
+			   (org-taskjuggler--clean-id (downcase (pop parts))))))
+	;; If it's still not unique, add "_".
+	(while (member id unique-ids)
+	  (setq id (concat id "_")))
+	id))))
 
 (defun org-taskjuggler--clean-id (id)
   "Clean and return ID to make it acceptable for TaskJuggler.
