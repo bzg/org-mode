@@ -185,8 +185,7 @@
 	    (lambda (a s v b)
 	      (if a (org-latex-export-to-pdf t s v b)
 		(org-open-file (org-latex-export-to-pdf nil s v b)))))))
-  :options-alist '((:date-format nil nil org-latex-date-timestamp-format)
-		   (:latex-class "LATEX_CLASS" nil org-latex-default-class t)
+  :options-alist '((:latex-class "LATEX_CLASS" nil org-latex-default-class t)
 		   (:latex-class-options "LATEX_CLASS_OPTIONS" nil nil t)
 		   (:latex-header "LATEX_HEADER" nil nil newline)
 		   (:latex-header-extra "LATEX_HEADER_EXTRA" nil nil newline)
@@ -405,19 +404,6 @@ are written as utf8 files."
 	  (cons
 	   (string :tag "Derived from buffer")
 	   (string :tag "Use this instead"))))
-
-(defcustom org-latex-date-timestamp-format nil
-  "Time-stamp format string to use for DATE keyword.
-
-The format string, when specified, only applies if date consists
-in a single time-stamp.  Otherwise its value will be ignored.
-
-See `format-time-string' for details on how to build this
-string."
-  :group 'org-export-latex
-  :type '(choice
-	  (string :tag "Time-stamp format string")
-	  (const :tag "No format string" nil)))
 
 (defcustom org-latex-title-command "\\maketitle"
   "The command used to insert the title just after \\begin{document}.
@@ -1199,17 +1185,8 @@ holding export options."
 	      (format "\\author{%s\\thanks{%s}}\n" author email))
 	     ((or author email) (format "\\author{%s}\n" (or author email)))))
      ;; Date.
-     (let ((date (and (plist-get info :with-date) (plist-get info :date))))
-       (format "\\date{%s}\n"
-	       (cond ((not date) "")
-		     ;; If `:date' consists in a single timestamp and
-		     ;; `:date-format' is provided, apply it.
-		     ((and (plist-get info :date-format)
-			   (not (cdr date))
-			   (eq (org-element-type (car date)) 'timestamp))
-		      (org-timestamp-format
-		       (car date) (plist-get info :date-format)))
-		     (t (org-export-data date info)))))
+     (let ((date (and (plist-get info :with-date) (org-export-get-date info))))
+       (format "\\date{%s}\n" (org-export-data date info)))
      ;; Title
      (format "\\title{%s}\n" title)
      ;; Hyperref options.

@@ -880,7 +880,7 @@ INFO is a plist used as a communication channel."
 	 (email (and (plist-get info :with-email)
 		     (org-export-data (plist-get info :email) info)))
 	 (date (and (plist-get info :with-date)
-		    (org-export-data (plist-get info :date) info))))
+		    (org-export-data (org-export-get-date info) info))))
     ;; There are two types of title blocks depending on the presence
     ;; of a title to display.
     (if (string= title "")

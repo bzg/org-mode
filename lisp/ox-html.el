@@ -1496,7 +1496,7 @@ INFO is a plist used as a communication channel."
   "Return format specification for elements that can be
 used in the preamble or postamble."
   `((?t . ,(org-export-data (plist-get info :title) info))
-    (?d . ,(org-export-data (plist-get info :date) info))
+    (?d . ,(org-export-data (org-export-get-date info) info))
     (?T . ,(format-time-string org-html--timestamp-format))
     (?a . ,(org-export-data (plist-get info :author) info))
     (?e . ,(mapconcat

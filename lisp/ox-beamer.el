@@ -899,17 +899,8 @@ holding export options."
 	     (author (format "\\author{%s}\n" author))
 	     (t "\\author{}\n")))
      ;; 6. Date.
-     (let ((date (and (plist-get info :with-date) (plist-get info :date))))
-       (format "\\date{%s}\n"
-	       (cond ((not date) "")
-		     ;; If `:date' consists in a single timestamp and
-		     ;; `:date-format' is provided, apply it.
-		     ((and (plist-get info :date-format)
-			   (not (cdr date))
-			   (eq (org-element-type (car date)) 'timestamp))
-		      (org-timestamp-format
-		       (car date) (plist-get info :date-format)))
-		     (t (org-export-data date info)))))
+     (let ((date (and (plist-get info :with-date) (org-export-get-date info))))
+       (format "\\date{%s}\n" (org-export-data date info)))
      ;; 7. Title
      (format "\\title{%s}\n" title)
      ;; 8. Hyperref options.
