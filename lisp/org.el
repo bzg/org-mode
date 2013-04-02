@@ -4222,6 +4222,9 @@ This works for both table types.")
   (org-autoload "org-table"
 		'(org-table-begin org-table-blank-field org-table-end)))
 
+(defconst org-TBLFM-regexp "^[ \t]*#\\+TBLFM: "
+  "Detect a #+TBLFM line.")
+
 ;;;###autoload
 (defun turn-on-orgtbl ()
   "Unconditionally turn on `orgtbl-mode'."
@@ -4316,6 +4319,15 @@ If TABLE-TYPE is non-nil, also check for table.el-type tables."
 (declare-function org-clock-update-mode-line "org-clock" ())
 (declare-function org-resolve-clocks "org-clock"
 		  (&optional also-non-dangling-p prompt last-valid))
+
+(defun org-at-TBLFM-p (&optional pos)
+  "Return t when point (or POS) is in #+TBLFM line."
+  (save-excursion
+    (let ((pos pos)))
+    (goto-char (or pos (point)))
+    (beginning-of-line 1)
+    (looking-at org-TBLFM-regexp)))
+
 (defvar org-clock-start-time)
 (defvar org-clock-marker (make-marker)
   "Marker recording the last clock-in.")

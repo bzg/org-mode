@@ -749,6 +749,25 @@ reference (with row).  Format specifier N."
 ;;   "Remote reference."
 ;;   (should
 ;;    (string= "$3 = remote(FOO, @@#$2)" (org-table-convert-refs-to-rc "C& = remote(FOO, @@#B&)"))))
+(ert-deftest test-org-table/org-at-TBLFM-p ()
+  (org-test-with-temp-text-in-file
+      "
+| 1 |
+| 2 |
+#+TBLFM: $2=$1*2
+
+"
+    (goto-char (point-min))
+    (forward-line 2)
+    (should (equal (org-at-TBLFM-p) nil))
+
+    (goto-char (point-min))
+    (forward-line 3)
+    (should (equal (org-at-TBLFM-p) t))
+
+    (goto-char (point-min))
+    (forward-line 4)
+    (should (equal (org-at-TBLFM-p) nil))))
 
 (provide 'test-org-table)
 
