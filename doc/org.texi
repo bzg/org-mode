@@ -3004,6 +3004,52 @@ You may edit the @samp{#+TBLFM} directly and re-apply the changed
 equations with @kbd{C-c C-c} in that line or with the normal
 recalculation commands in the table.
 
+@anchor{Using multiple #+TBLFM lines}
+@subsubheading Using multiple #+TBLFM lines
+@cindex #+TBLFM line, multiple
+@cindex #+TBLFM
+@cindex #+TBLFM, switching
+@kindex C-c C-c
+
+You may apply the formula temporarily.  This is useful when you
+switch the formula.  Place multiple @samp{#+TBLFM} lines right
+after the table, and then press @kbd{C-c C-c} on the formula to
+apply.  Here is an example:
+
+@example
+| x | y |
+|---+---|
+| 1 |   |
+| 2 |   |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+@end example
+
+@noindent
+Pressing @kbd{C-c C-c} in the line of @samp{#+TBLFM: $2=$1*2} yields:
+
+@example
+| x | y |
+|---+---|
+| 1 | 2 |
+| 2 | 4 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+@end example
+
+@noindent
+Note: If you recalculate this table (with @kbd{C-u C-c *}, for example), you
+will get the following result of applying only the first @samp{#+TBLFM} line.
+
+@example
+| x | y |
+|---+---|
+| 1 | 1 |
+| 2 | 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+@end example
+
 @subsubheading Debugging formulas
 @cindex formula debugging
 @cindex debugging, of table formulas
@@ -14921,8 +14967,15 @@ entitiesplain   @r{Leave entities plain}
 These lines (several such lines are allowed) specify the valid tags in
 this file, and (potentially) the corresponding @emph{fast tag selection}
 keys.  The corresponding variable is @code{org-tag-alist}.
+@cindex #+TBLFM
 @item #+TBLFM:
 This line contains the formulas for the table directly above the line.
+
+Table can have multiple lines containing @samp{#+TBLFM:}.  Note
+that only the first line of @samp{#+TBLFM:} will be applied when
+you reculculate the table.  For more details see @ref{Using
+multiple #+TBLFM lines} in @ref{Editing and debugging formulas}.
+
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+DATE:,
 @itemx #+OPTIONS:, #+BIND:,
 @itemx #+DESCRIPTION:, #+KEYWORDS:,
