@@ -1292,6 +1292,38 @@ Paragraph[fn:1]"
 
 
 
+;;; Keywords
+
+(ert-deftest test-org-export/get-date ()
+  "Test `org-export-get-date' specifications."
+  ;; Return a properly formatted string when
+  ;; `org-export-date-timestamp-format' is non-nil and DATE keyword
+  ;; consists in a single timestamp.
+  (should
+   (equal "29 03 2012"
+	  (let ((org-export-date-timestamp-format "%d %m %Y"))
+	    (org-test-with-parsed-data "#+DATE: <2012-03-29 Thu>"
+	      (org-export-get-date info)))))
+  ;; Return a secondary string otherwise.
+  (should-not
+   (stringp
+    (let ((org-export-date-timestamp-format nil))
+      (org-test-with-parsed-data "#+DATE: <2012-03-29 Thu>"
+	(org-export-get-date info)))))
+  (should
+   (equal '("Date")
+	  (org-test-with-parsed-data "#+DATE: Date"
+	    (org-export-get-date info))))
+  ;; Optional argument has precedence over
+  ;; `org-export-date-timestamp-format'.
+  (should
+   (equal "29 03"
+	  (let ((org-export-date-timestamp-format "%d %m %Y"))
+	    (org-test-with-parsed-data "#+DATE: <2012-03-29 Thu>"
+	      (org-export-get-date info "%d %m"))))))
+
+
+
 ;;; Links
 
 (ert-deftest test-org-export/get-coderef-format ()
