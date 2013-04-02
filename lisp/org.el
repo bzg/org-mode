@@ -20201,9 +20201,10 @@ This command does many different things, depending on context:
 		       (and (eq type 'table-row)
 			    (= (point) (org-element-property :end context))))
 		   (save-excursion
-		     (goto-char (org-element-property :contents-begin context))
-		     (org-call-with-arg 'org-table-recalculate (or arg t))
-		     (orgtbl-send-table 'maybe))
+		     (if (org-at-TBLFM-p) (org-calc-current-TBLFM)
+		       (goto-char (org-element-property :contents-begin context))
+		       (org-call-with-arg 'org-table-recalculate (or arg t))
+		       (orgtbl-send-table 'maybe)))
 		 (org-table-maybe-eval-formula)
 		 (cond (arg (call-interactively 'org-table-recalculate))
 		       ((org-table-maybe-recalculate-line))

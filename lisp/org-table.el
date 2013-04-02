@@ -3171,6 +3171,30 @@ with the prefix ARG."
 	      (setq checksum c1)))
 	  (user-error "No convergence after %d iterations" imax))))))
 
+(defun org-calc-current-TBLFM (&optional arg)
+  "Apply the #+TBLFM in the line to the table."
+  (interactive "P")
+  (unless (org-at-TBLFM-p) (user-error "Not at a #+TBLFM line"))
+  (let ((formula (buffer-substring
+		  (point-at-bol)
+		  (point-at-eol)))
+	s e)
+    (save-excursion
+      ;; Insert a temporary formula at right after the table
+      (goto-char (org-TBLFM-begin))
+      (setq s (set-marker (make-marker) (point)))
+      (insert (concat formula "\n"))
+      (setq e (set-marker (make-marker) (point)))
+
+      ;; Recalculate the table
+      (beginning-of-line 0)		; move to the inserted line
+      (skip-chars-backward " \r\n\t")
+      (if (org-at-table-p)
+	  (org-call-with-arg 'org-table-recalculate (or arg t)))
+
+      ;; Delete the formula inserted temporarily
+      (delete-region s e))))
+
 (defun org-TBLFM-begin ()
   "Find the beginning of the TBLFM lines and return its position.
 Return nil when the beginning of TBLFM line was not found."

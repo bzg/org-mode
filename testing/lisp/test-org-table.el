@@ -892,6 +892,43 @@ reference (with row).  Format specifier N."
     (should (= (org-TBLFM-begin)
 		   61))))
 
+(ert-deftest test-org-table/org-calc-current-TBLFM ()
+    (org-test-with-temp-text-in-file
+      "
+| 1 |   |
+| 2 |   |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+#+TBLFM: $2=$1*3
+"
+    (let ((got (progn (goto-char (point-min))
+		      (forward-line 3)
+		      (org-calc-current-TBLFM)
+		      (buffer-string)))
+	  (expect "
+| 1 | 1 |
+| 2 | 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+#+TBLFM: $2=$1*3
+"))
+      (should (string= got
+		       expect)))
+
+    (let ((got (progn (goto-char (point-min))
+		      (forward-line 4)
+		      (org-calc-current-TBLFM)
+		      (buffer-string)))
+	  (expect "
+| 1 | 2 |
+| 2 | 4 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+#+TBLFM: $2=$1*3
+"))
+      (should (string= got
+		       expect)))))
+
 (provide 'test-org-table)
 
 ;;; test-org-table.el ends here
