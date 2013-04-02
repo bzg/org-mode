@@ -769,6 +769,129 @@ reference (with row).  Format specifier N."
     (forward-line 4)
     (should (equal (org-at-TBLFM-p) nil))))
 
+(ert-deftest test-org-table/org-TBLFM-begin ()
+  (org-test-with-temp-text-in-file
+      "
+| 1 |
+| 2 |
+#+TBLFM: $2=$1*2
+
+"
+    (goto-char (point-min))
+    (should (equal (org-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (equal (org-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 3)
+    (should (= (org-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 4)
+    (should (= (org-TBLFM-begin)
+		   14))
+
+    ))
+
+(ert-deftest test-org-table/org-TBLFM-begin-for-multiple-TBLFM-lines ()
+  "For multiple #+TBLFM lines."
+  (org-test-with-temp-text-in-file
+      "
+| 1 |
+| 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+
+"
+    (goto-char (point-min))
+    (should (equal (org-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (equal (org-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 3)
+    (should (= (org-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 4)
+    (should (= (org-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 5)
+    (should (= (org-TBLFM-begin)
+		   14))
+
+    ))
+
+(ert-deftest test-org-table/org-TBLFM-begin-for-pultiple-TBLFM-lines-blocks ()
+  (org-test-with-temp-text-in-file
+      "
+| 1 |
+| 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+
+| 6 |
+| 7 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2
+
+"
+    (goto-char (point-min))
+    (should (equal (org-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (equal (org-TBLFM-begin)
+		   nil))
+
+    (goto-char (point-min))
+    (forward-line 3)
+    (should (= (org-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 4)
+    (should (= (org-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 5)
+    (should (= (org-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 6)
+    (should (= (org-TBLFM-begin)
+		   14))
+
+    (goto-char (point-min))
+    (forward-line 8)
+    (should (= (org-TBLFM-begin)
+		   61))
+
+    (goto-char (point-min))
+    (forward-line 9)
+    (should (= (org-TBLFM-begin)
+		   61))
+
+    (goto-char (point-min))
+    (forward-line 10)
+    (should (= (org-TBLFM-begin)
+		   61))))
+
 (provide 'test-org-table)
 
 ;;; test-org-table.el ends here

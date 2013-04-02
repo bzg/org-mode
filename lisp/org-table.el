@@ -52,6 +52,8 @@ This can be used to add additional functionality after the table is sent
 to the receiver position, otherwise, if table is not sent, the functions
 are not run.")
 
+(defvar org-TBLFM-begin-regexp "|\n[ \t]*#\\+TBLFM: ")
+
 (defcustom orgtbl-optimized (eq org-enable-table-editor 'optimized)
   "Non-nil means use the optimized table editor version for `orgtbl-mode'.
 In the optimized version, the table editor takes over all simple keys that
@@ -3168,6 +3170,18 @@ with the prefix ARG."
 		  (throw 'exit t))
 	      (setq checksum c1)))
 	  (user-error "No convergence after %d iterations" imax))))))
+
+(defun org-TBLFM-begin ()
+  "Find the beginning of the TBLFM lines and return its position.
+Return nil when the beginning of TBLFM line was not found."
+  (save-excursion
+    (when (progn (forward-line 1)
+	      (re-search-backward
+	       org-TBLFM-begin-regexp
+	       nil t))
+	  (point-at-bol 2))))
+
+
 
 (defun org-table-expand-lhs-ranges (equations)
   "Expand list of formulas.
