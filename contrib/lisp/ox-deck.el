@@ -463,7 +463,7 @@ INFO is a plist used as a communication channel."
                       (let ((auth (plist-get info :author)))
                         (and auth (org-export-data auth info)))))
          (date (and (plist-get info :with-date)
-                    (let ((date (plist-get info :date)))
+                    (let ((date (org-export-get-date info)))
                       (and date (org-export-data date info)))))
          (description (plist-get info :description))
          (keywords (plist-get info :keywords)))

@@ -206,7 +206,7 @@ holding export options."
            (org-export-data (plist-get info :email) info))
    (format "\\setkomavar{fromphone}{%s}\n" (plist-get info :phone-number))
    ;; Date.
-   (format "\\date{%s}\n" (org-export-data (plist-get info :date) info))
+   (format "\\date{%s}\n" (org-export-data (org-export-get-date info) info))
    ;; Letter Class Option File
    (format "\\LoadLetterOption{%s}\n" (plist-get info :lco))
    ;; Letter start.

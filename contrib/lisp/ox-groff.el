@@ -622,8 +622,8 @@ See `org-groff-text-markup-alist' for details."
 
    ;; 5. Date.
    (when (plist-get info :with-date)
-     (let ((date (org-export-data (plist-get info :date) info)))
-       (and date (format ".ND \"%s\"\n" date))))
+     (let ((date (org-export-data (org-export-get-date info) info)))
+       (and (org-string-nw-p date) (format ".ND \"%s\"\n" date))))
 
    ;;
    ;; If Abstract, then Populate Abstract
