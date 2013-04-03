@@ -6702,7 +6702,7 @@ in special contexts.
 		     (end (org-list-get-bottom-point struct)))
 		(mapc (lambda (e) (org-list-set-item-visibility e struct 'folded))
 		      (org-list-get-all-items (point) struct prevs))
-		(goto-char end))))))
+		(goto-char (if (< end eos) end eos)))))))
       (message "CHILDREN")
       (save-excursion
 	(goto-char eos)
