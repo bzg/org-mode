@@ -19027,6 +19027,7 @@ BEG and END default to the buffer boundaries."
     ("c" . org-cycle)
     ("C" . org-shifttab)
     (" " . org-display-outline-path)
+    ("s" . org-narrow-to-subtree)
     ("=" . org-columns)
     ("Outline Structure Editing")
     ("U" . org-shiftmetaup)
