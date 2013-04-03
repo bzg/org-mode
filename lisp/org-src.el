@@ -877,9 +877,9 @@ issued in the language major mode buffer."
 
 (defun org-src-native-tab-command-maybe ()
   "Perform language-specific TAB action.
-Alter code block according to effect of TAB in the language major
-mode."
+Alter code block according to what TAB does in the language major mode."
   (and org-src-tab-acts-natively
+       (org-in-src-block-p)
        (not (equal this-command 'org-shifttab))
        (let ((org-src-strip-leading-and-trailing-blank-lines nil))
 	 (org-babel-do-key-sequence-in-edit-buffer (kbd "TAB")))))
