@@ -78,7 +78,7 @@ For example, to point to your `obe-bibtex-file' use the following.
 	(find-file obe-bibtex-file)
 	(goto-char (point-min))
 	(while (re-search-forward "  :CUSTOM_ID: \\(.+\\)$" nil t)
-	  (push (org-babel-clean-text-properties (match-string 1))
+	  (push (org-no-properties (match-string 1))
 		obe-citations))
 	obe-citations)))
 
@@ -111,7 +111,7 @@ For example, to point to your `obe-bibtex-file' use the following.
     (when (obe-goto-citation citation)
       (let ((pt (point)))
 	`((:authors . ,(split-string (org-entry-get pt "AUTHOR") " and " t))
-	  (:title   . ,(org-babel-clean-text-properties (org-get-heading 1 1)))
+	  (:title   . ,(org-no-properties (org-get-heading 1 1)))
 	  (:journal . ,(org-entry-get pt "JOURNAL")))))))
 
 (defun obe-meta-to-json (meta &optional fields)
