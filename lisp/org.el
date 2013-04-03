@@ -21843,15 +21843,19 @@ hierarchy of headlines by UP levels before marking the subtree."
 			     (re-search-backward "[ \t]*#\\+begin_"nil t))
 			(looking-at "[ \t]*[\n:#|]")
 			(looking-at org-footnote-definition-re)
-			(and (ignore-errors (goto-char (org-in-item-p)))
-			     (goto-char
-			      (org-list-get-top-point (org-list-struct))))
 			(and (not inline-task-p)
 			     (featurep 'org-inlinetask)
 			     (org-inlinetask-in-task-p)
 			     (or (org-inlinetask-goto-beginning) t))))
 	  (beginning-of-line 0))
 	(cond
+	 ;; There was a list item above.
+	 ((save-excursion
+	    (and (ignore-errors (goto-char (org-in-item-p)))
+		 (goto-char
+		  (org-list-get-top-point (org-list-struct)))))
+	  (looking-at org-list-full-item-re)
+	  (setq column (length (match-string 0))))
 	 ;; There was an heading above.
 	 ((looking-at "\\*+[ \t]+")
 	  (if (not org-adapt-indentation)
