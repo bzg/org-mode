@@ -13211,14 +13211,8 @@ include anything in the Org mode file that takes a @code{#+NAME:},
 @code{#+BEGIN_EXAMPLE} blocks, other code blocks, and the results of other
 code blocks.
 
-When a reference is made to another code block, the referenced block will be
-evaluated whenever needed, in order to supply its value to the referencing
-block.  If the referenced block is cached (see @ref{cache}), its value will
-be reused if possible, instead of being re-calculated.  If the referring code
-block is cached, its hash value will depend on the value of all the code
-blocks it references.  This system can thus be used to create a system of
-as-needed re-evaluation among code blocks similar to that provided by
-@uref{http://yihui.name/knitr/, knitr} or Sweave.
+Note: When a reference is made to another code block, the referenced block
+will be evaluated unless it has current cached results (see @ref{cache}).
 
 Argument values can be indexed in a manner similar to arrays (see @ref{var,
 Indexable variable values}).
