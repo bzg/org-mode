@@ -7664,11 +7664,16 @@ C-c a a}) you may set the number of days to be displayed.
 
 @vindex org-agenda-span
 @vindex org-agenda-ndays
+@vindex org-agenda-start-day
+@vindex org-agenda-start-on-weekday
 The default number of days displayed in the agenda is set by the variable
-@code{org-agenda-span} (or the obsolete @code{org-agenda-ndays}).  This
+@var{org-agenda-span} (or the obsolete @var{org-agenda-ndays}).  This
 variable can be set to any number of days you want to see by default in the
-agenda, or to a span name, such a @code{day}, @code{week}, @code{month} or
-@code{year}.
+agenda, or to a span name, such as @code{day}, @code{week}, @code{month} or
+@code{year}.  For weekly agendas, the default is to start on the previous
+monday (see @var{org-agenda-start-on-weekday}).  You can also set the start
+date using a date shift: @code{(setq org-agenda-start-day "+10d")} will
+start the agenda ten days from today in the future.
 
 Remote editing from the agenda buffer means, for example, that you can
 change the dates of deadlines and appointments from the agenda buffer.
