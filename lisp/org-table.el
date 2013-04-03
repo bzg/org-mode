@@ -4706,10 +4706,12 @@ directly by `orgtbl-send-table'.  See manual."
       (setq *orgtbl-table*
 	    (mapcar
 	     (lambda(r)
-	       (mapcar
-		(lambda (c)
-		  (org-trim (org-export-string-as c backend t '(:with-tables t))))
-		r))
+	       (if (listp r)
+		   (mapcar
+		    (lambda (c)
+		      (org-trim (org-export-string-as c backend t '(:with-tables t))))
+		    r)
+		 r))
 	     *orgtbl-table*)))
     ;; Put header
     (unless splicep
