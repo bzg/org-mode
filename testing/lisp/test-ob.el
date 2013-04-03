@@ -486,7 +486,7 @@ echo \"[[file:./cv.cls]]\"
       (should
        (equal
 	'(error
-	  "variable \"x\" in block \"carre\" must be assigned a default value")
+	  "Variable \"x\" must be assigned a default value")
 	err)))))
 
 (ert-deftest test-org-babel/just-one-results-block ()
