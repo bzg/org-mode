@@ -13327,19 +13327,6 @@ on two lines
 
 @end table
 
-@subsubheading Alternate argument syntax
-It is also possible to specify arguments in a potentially more natural way
-using the @code{#+NAME:} line of a code block.  As in the following
-example, arguments can be packed inside of parentheses, separated by commas,
-following the source name.
-
-@example
-#+NAME: double(input=0, x=2)
-#+BEGIN_SRC emacs-lisp
-(* 2 (+ input x))
-#+END_SRC
-@end example
-
 @subsubheading Indexable variable values
 It is possible to reference portions of variable values by ``indexing'' into
 the variables.  Indexes are 0 based with negative values counting back from

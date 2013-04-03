@@ -170,7 +170,7 @@ See also `org-babel-noweb-wrap-start'."
 	  "\\("
 	  org-babel-multi-line-header-regexp
 	  "\\)*"
-	  "\\([^ ()\f\t\n\r\v]+\\)\\(\(\\(.*\\)\)\\|\\)")
+	  "\\([^ ()\f\t\n\r\v]+\\)")
   "Regular expression matching source name lines with a name.")
 
 (defvar org-babel-src-block-regexp
@@ -261,21 +261,7 @@ Returns a list
 		   (nth 2 info)
 		   (org-babel-parse-header-arguments (match-string 1)))))
 	  (when (looking-at org-babel-src-name-w-name-regexp)
-	    (setq name (org-no-properties (match-string 3)))
-	    (when (and (match-string 5) (> (length (match-string 5)) 0))
-	      (setf (nth 2 info) ;; merge functional-syntax vars and header-args
-		    (org-babel-merge-params
-		     (mapcar
-		      (lambda (ref) (cons :var ref))
-		      (mapcar
-		       (lambda (var) ;; check that each variable is initialized
-			 (if (string-match ".+=.+" var)
-			     var
-			   (error
-			    "variable \"%s\"%s must be assigned a default value"
-			    var (if name (format " in block \"%s\"" name) ""))))
-		       (org-babel-ref-split-args (match-string 5))))
-		     (nth 2 info))))))
+	    (setq name (org-no-properties (match-string 3)))))
       ;; inline source block
       (when (org-babel-get-inline-src-block-matches)
 	(setq info (org-babel-parse-inline-src-block-match))))
