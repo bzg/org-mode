@@ -3248,7 +3248,10 @@ is the property list for the given project.  PUB-DIR is the
 publishing directory.
 
 Return output file name."
-  (org-publish-org-to 'html filename ".html" plist pub-dir))
+  (org-publish-org-to 'html filename
+		      (concat "." (or (plist-get plist :html-extension)
+				      org-html-extension "html"))
+		      plist pub-dir))
 
 
 ;;; FIXME

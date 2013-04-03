@@ -146,6 +146,8 @@ Return output file name."
     (require 'ox-html)
     (let* ((org-inhibit-startup t)
 	   (htmlize-output-type 'css)
+	   (html-ext (concat "." (or (plist-get plist :html-extension)
+				     org-html-extension "html")))
 	   (visitingp (find-buffer-visiting filename))
 	   (work-buffer (or visitingp (find-file filename)))
 	   newbuf)
@@ -160,7 +162,7 @@ Return output file name."
 		(format
 		 "<link rel=\"stylesheet\" type=\"text/css\" href=\"%s\">"
 		 org-org-htmlized-css-url) t t)))
-	(write-file (concat pub-dir (file-name-nondirectory filename) ".html")))
+	(write-file (concat pub-dir (file-name-nondirectory filename) html-ext)))
       (kill-buffer newbuf)
       (unless visitingp (kill-buffer work-buffer)))
     (set-buffer-modified-p nil)))
