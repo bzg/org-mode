@@ -116,7 +116,7 @@
 (declare-function bbdb-search-name "ext:bbdb-com" (regexp &optional layout))
 (declare-function bbdb-search-organization "ext:bbdb-com" (regexp &optional layout))
 
-;; `bbdb-record-xfield' was part of BBDB v3.x
+;; `bbdb-record-note' was part of BBDB v3.x
 (declare-function bbdb-record-note "ext:bbdb" (record label))
 ;; `bbdb-record-xfield' replaces it in recent BBDB v3.x+
 (declare-function bbdb-record-xfield "ext:bbdb" (record label))
