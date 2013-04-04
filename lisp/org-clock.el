@@ -1076,7 +1076,7 @@ This is performed after `org-clock-idle-time' minutes, to check
 if the user really wants to stay clocked in after being idle for
 so long."
   (when (and org-clock-idle-time (not org-clock-resolving-clocks)
-	     org-clock-marker)
+	     org-clock-marker (marker-buffer org-clock-marker))
     (let* ((org-clock-user-idle-seconds (org-user-idle-seconds))
 	   (org-clock-user-idle-start
 	    (time-subtract (current-time)
