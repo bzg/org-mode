@@ -717,6 +717,7 @@ Specific header arguments
 * shebang::                     Make tangled files executable
 * eval::                        Limit evaluation of specific code blocks
 * wrap::                        Mark source block evaluation results
+* post::                        Post processing of code block results
 
 Miscellaneous
 
@@ -13196,6 +13197,7 @@ argument in lowercase letters.  The following header arguments are defined:
 * shebang::                     Make tangled files executable
 * eval::                        Limit evaluation of specific code blocks
 * wrap::                        Mark source block evaluation results
+* post::                        Post processing of code block results
 @end menu
 
 Additional header arguments are defined on a language-specific basis, see
@@ -14111,13 +14113,48 @@ If this header argument is not set then evaluation is determined by the value
 of the @code{org-confirm-babel-evaluate} variable see @ref{Code evaluation
 security}.
 
-@node wrap,  , eval, Specific header arguments
+@node wrap, post, eval, Specific header arguments
 @subsubsection @code{:wrap}
 The @code{:wrap} header argument is used to mark the results of source block
 evaluation.  The header argument can be passed a string that will be appended
 to @code{#+BEGIN_} and @code{#+END_}, which will then be used to wrap the
 results.  If not string is specified then the results will be wrapped in a
 @code{#+BEGIN/END_RESULTS} block.
+
+@node post,  , wrap, Specific header arguments
+@subsubsection @code{:post}
+The @code{:post} header argument is used to post-process the results of a
+code block execution.  When a post argument is given, the results of the code
+block will temporarily be bound to the @code{*this*} variable.  This variable
+may then be included in header argument forms such as those used in @ref{var}
+header argument specifications allowing passing of results to other code
+blocks, or direct execution via Emacs Lisp.
+
+The following example illustrates the usage of the @code{:post} header
+argument.
+
+@example
+#+name: attr_wrap
+#+begin_src sh :var data="" :var width="\\textwidth" :results output
+  echo "#+ATTR_LATEX width=$width"
+  echo "$data"
+#+end_src
+
+#+header: :file /tmp/it.png
+#+begin_src dot :post attr_wrap(width="5cm", data=*this*) :results drawer
+  digraph{
+          a -> b;
+          b -> c;
+          c -> a;
+  }
+#+end_src
+
+#+RESULTS:
+:RESULTS:
+#+ATTR_LATEX width=5cm
+[[file:/tmp/it.png]]
+:END:
+@end example
 
 @node Results of evaluation, Noweb reference syntax, Header arguments, Working With Source Code
 @section Results of evaluation
