@@ -1076,7 +1076,7 @@ This is performed after `org-clock-idle-time' minutes, to check
 if the user really wants to stay clocked in after being idle for
 so long."
   (when (and org-clock-idle-time (not org-clock-resolving-clocks)
-	     (marker-buffer org-clock-marker))
+	     org-clock-marker)
     (let* ((org-clock-user-idle-seconds (org-user-idle-seconds))
 	   (org-clock-user-idle-start
 	    (time-subtract (current-time)
@@ -1515,8 +1515,8 @@ to, overriding the existing value of `org-clock-out-switch-to-state'."
 	    (delete-region (point) (point-at-eol))
 	    (and (looking-at "\n") (> (point-max) (1+ (point)))
 		 (delete-char 1)))
-	  (setq org-clock-marker nil)
-	  (setq org-clock-hd-marker nil)
+	  (move-marker org-clock-marker nil)
+	  (move-marker org-clock-hd-marker nil)
 	  (when org-log-note-clock-out
 	    (org-add-log-setup 'clock-out nil nil nil nil
 			       (concat "# Task: " (org-get-heading t) "\n\n")))
@@ -1647,8 +1647,8 @@ Optional argument N tells to change by that many units."
 	       (org-remove-empty-drawer-at "LOGBOOK" (point)))
       (message "Clock gone, cancel the timer anyway")
       (sit-for 2)))
-  (setq org-clock-marker nil)
-  (setq org-clock-hd-marker nil)
+  (move-marker org-clock-marker nil)
+  (move-marker org-clock-hd-marker nil)
   (setq global-mode-string
 	(delq 'org-mode-line-string global-mode-string))
   (setq frame-title-format org-frame-title-format-backup)
