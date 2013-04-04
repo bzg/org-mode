@@ -2328,8 +2328,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	(value (org-element-property :value keyword)))
     (cond
      ((string= key "HTML") value)
-     ;; Invisible targets.
-     ((string= key "TARGET") nil)
      ((string= key "TOC")
       (let ((value (downcase value)))
 	(cond

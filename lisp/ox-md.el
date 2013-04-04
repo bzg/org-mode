@@ -310,14 +310,12 @@ a communication channel."
 	     (org-export-data (org-element-contents destination) info)))
 	  ((equal type "fuzzy")
 	   (let ((destination (org-export-resolve-fuzzy-link link info)))
-	     ;; Ignore invisible "#+TARGET: path".
-	     (unless (eq (org-element-type destination) 'keyword)
-	       (if (org-string-nw-p contents) contents
-		 (when destination
-		   (let ((number (org-export-get-ordinal destination info)))
-		     (when number
-		       (if (atom number) (number-to-string number)
-			 (mapconcat 'number-to-string number ".")))))))))
+	     (if (org-string-nw-p contents) contents
+	       (when destination
+		 (let ((number (org-export-get-ordinal destination info)))
+		   (when number
+		     (if (atom number) (number-to-string number)
+		       (mapconcat 'number-to-string number "."))))))))
 	  (t (let* ((raw-path (org-element-property :path link))
 		    (path (cond
 			   ((member type '("http" "https" "ftp"))

@@ -1722,8 +1722,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (cond
      ((string= key "LATEX") value)
      ((string= key "INDEX") (format "\\index{%s}" value))
-     ;; Invisible targets.
-     ((string= key "TARGET") nil)
      ((string= key "TOC")
       (let ((value (downcase value)))
 	(cond
@@ -1924,8 +1922,6 @@ INFO is a plist holding contextual information.  See
 		   (or desc
 		       (org-export-data
 			(org-element-property :raw-link link) info))))
-	  ;; Fuzzy link points to an invisible target.
-	  (keyword nil)
 	  ;; LINK points to a headline.  If headlines are numbered
 	  ;; and the link has no description, display headline's
 	  ;; number.  Otherwise, display description or headline's
