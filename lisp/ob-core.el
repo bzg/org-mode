@@ -612,11 +612,6 @@ block."
 				      (not (listp result)))
 				 (list (list result)) result))
 			   (funcall cmd body params)))
-		    ;; possibly perform post process provided its appropriate
-		    (when (cdr (assoc :post params))
-		      (let ((*this* result))
-			(setq result (org-babel-ref-resolve
-				      (cdr (assoc :post params))))))
 		    ;; if non-empty result and :file then write to :file
 		    (when (cdr (assoc :file params))
 		      (when result
@@ -625,6 +620,20 @@ block."
 			   (org-babel-format-result
 			    result (cdr (assoc :sep (nth 2 info)))))))
 		      (setq result (cdr (assoc :file params))))
+		    ;; possibly perform post process provided its appropriate
+		    (when (cdr (assoc :post params))
+		      (let ((*this* (if (cdr (assoc :file params))
+					(org-babel-result-to-file
+					 (cdr (assoc :file params))
+					 (when (assoc :file-desc params)
+					   (or (cdr (assoc :file-desc params))
+					       result)))
+				      result)))
+			(setq result (org-babel-ref-resolve
+				      (cdr (assoc :post params))))
+			(when (cdr (assoc :file params))
+			  (setq result-params
+				(remove "file" result-params)))))
 		    (org-babel-insert-result
 		     result result-params info new-hash indent lang)
 		    (run-hooks 'org-babel-after-execute-hook)
