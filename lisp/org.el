@@ -20158,6 +20158,7 @@ This command does many different things, depending on context:
 	   ;; first item in the list.  Without an argument, repair the
 	   ;; list.
 	   (let* ((begin (org-element-property :contents-begin context))
+		  (beginm (move-marker (make-marker) begin))
 		  (struct (org-element-property :structure context))
 		  (old-struct (copy-tree struct))
 		  (first-box (save-excursion
@@ -20181,7 +20182,7 @@ This command does many different things, depending on context:
 	     (org-list-write-struct
 	      struct (org-list-parents-alist struct) old-struct)
 	     (org-update-checkbox-count-maybe)
-	     (save-excursion (goto-char begin) (org-list-send-list 'maybe))))
+	     (save-excursion (goto-char beginm) (org-list-send-list 'maybe))))
 	  ((property-drawer node-property)
 	   (call-interactively 'org-property-action))
 	  ((radio-target target)
