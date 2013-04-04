@@ -1348,15 +1348,7 @@ Paragraph[fn:1]"
 
 (ert-deftest test-org-export/fuzzy-link ()
   "Test fuzzy links specifications."
-  ;; 1. Links to invisible (keyword) targets should be ignored.
-  (org-test-with-parsed-data
-      "Paragraph.\n#+TARGET: Test\n[[Test]]"
-    (should-not
-     (org-element-map tree 'link
-       (lambda (link)
-	 (org-export-get-ordinal
-	  (org-export-resolve-fuzzy-link link info) info)) info)))
-  ;; 2. Link to an headline should return headline's number.
+  ;; Link to an headline should return headline's number.
   (org-test-with-parsed-data
       "Paragraph.\n* Head1\n* Head2\n* Head3\n[[Head2]]"
     (should
@@ -1366,7 +1358,7 @@ Paragraph[fn:1]"
 	      (lambda (link)
 		(org-export-get-ordinal
 		 (org-export-resolve-fuzzy-link link info) info)) info t))))
-  ;; 3. Link to a target in an item should return item's number.
+  ;; Link to a target in an item should return item's number.
   (org-test-with-parsed-data
       "- Item1\n  - Item11\n  - <<test>>Item12\n- Item2\n\n\n[[test]]"
     (should
@@ -1376,8 +1368,7 @@ Paragraph[fn:1]"
 	      (lambda (link)
 		(org-export-get-ordinal
 		 (org-export-resolve-fuzzy-link link info) info)) info t))))
-  ;; 4. Link to a target in a footnote should return footnote's
-  ;;    number.
+  ;; Link to a target in a footnote should return footnote's number.
   (org-test-with-parsed-data "
 Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
     (should
@@ -1386,8 +1377,8 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
 	      (lambda (link)
 		(org-export-get-ordinal
 		 (org-export-resolve-fuzzy-link link info) info)) info))))
-  ;; 5. Link to a named element should return sequence number of that
-  ;;    element.
+  ;; Link to a named element should return sequence number of that
+  ;; element.
   (org-test-with-parsed-data
       "#+NAME: tbl1\n|1|2|\n#+NAME: tbl2\n|3|4|\n#+NAME: tbl3\n|5|6|\n[[tbl2]]"
     (should
@@ -1396,8 +1387,8 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
 	  (lambda (link)
 	    (org-export-get-ordinal
 	     (org-export-resolve-fuzzy-link link info) info)) info t))))
-  ;; 6. Link to a target not within an item, a table, a footnote
-  ;;    reference or definition should return section number.
+  ;; Link to a target not within an item, a table, a footnote
+  ;; reference or definition should return section number.
   (org-test-with-parsed-data
       "* Head1\n* Head2\nParagraph<<target>>\n* Head3\n[[target]]"
     (should
@@ -1406,13 +1397,13 @@ Paragraph[1][2][fn:lbl3:C<<target>>][[test]][[target]]\n[1] A\n\n[2] <<test>>B"
 	      (lambda (link)
 		(org-export-get-ordinal
 		 (org-export-resolve-fuzzy-link link info) info)) info t))))
-  ;; 7. Space are not significant when matching a fuzzy link.
+  ;; Space are not significant when matching a fuzzy link.
   (should
    (org-test-with-parsed-data "* Head 1\n[[Head\n  1]]"
      (org-element-map tree 'link
        (lambda (link) (org-export-resolve-fuzzy-link link info))
        info t)))
-  ;; 8. Statistics cookies are ignored for headline match.
+  ;; Statistics cookies are ignored for headline match.
   (should
    (org-test-with-parsed-data "* Head [0/0]\n[[Head]]"
      (org-element-map tree 'link
@@ -1491,55 +1482,50 @@ Another text. (ref:text)
 
 (ert-deftest test-org-export/resolve-fuzzy-link ()
   "Test `org-export-resolve-fuzzy-link' specifications."
-  ;; 1. Match target objects.
-  (org-test-with-parsed-data "<<target>> [[target]]"
-    (should
+  ;; Match target objects.
+  (should
+   (org-test-with-parsed-data "<<target>> [[target]]"
      (org-export-resolve-fuzzy-link
       (org-element-map tree 'link 'identity info t) info)))
-  ;; 2. Match target elements.
-  (org-test-with-parsed-data "#+TARGET: target\n[[target]]"
-    (should
+  ;; Match named elements.
+  (should
+   (org-test-with-parsed-data "#+NAME: target\nParagraph\n\n[[target]]"
      (org-export-resolve-fuzzy-link
       (org-element-map tree 'link 'identity info t) info)))
-  ;; 3. Match named elements.
-  (org-test-with-parsed-data "#+NAME: target\nParagraph\n\n[[target]]"
-    (should
+  ;; Match exact headline's name.
+  (should
+   (org-test-with-parsed-data "* My headline\n[[My headline]]"
      (org-export-resolve-fuzzy-link
       (org-element-map tree 'link 'identity info t) info)))
-  ;; 4. Match exact headline's name.
-  (org-test-with-parsed-data "* My headline\n[[My headline]]"
-    (should
-     (org-export-resolve-fuzzy-link
-      (org-element-map tree 'link 'identity info t) info)))
-  ;; 5. Targets objects have priority over named elements and headline
-  ;;    titles.
-  (org-test-with-parsed-data
-      "* target\n#+NAME: target\n<<target>>\n\n[[target]]"
-    (should
-     (eq 'target
+  ;; Targets objects have priority over named elements and headline
+  ;; titles.
+  (should
+   (eq 'target
+       (org-test-with-parsed-data
+	   "* target\n#+NAME: target\n<<target>>\n\n[[target]]"
 	 (org-element-type
 	  (org-export-resolve-fuzzy-link
 	   (org-element-map tree 'link 'identity info t) info)))))
-  ;; 6. Named elements have priority over headline titles.
-  (org-test-with-parsed-data
-      "* target\n#+NAME: target\nParagraph\n\n[[target]]"
-    (should
-     (eq 'paragraph
+  ;; Named elements have priority over headline titles.
+  (should
+   (eq 'paragraph
+       (org-test-with-parsed-data
+	   "* target\n#+NAME: target\nParagraph\n\n[[target]]"
 	 (org-element-type
 	  (org-export-resolve-fuzzy-link
 	   (org-element-map tree 'link 'identity info t) info)))))
-  ;; 7. If link's path starts with a "*", only match headline titles,
-  ;;    though.
-  (org-test-with-parsed-data
-      "* target\n#+NAME: target\n<<target>>\n\n[[*target]]"
-    (should
-     (eq 'headline
+  ;; If link's path starts with a "*", only match headline titles,
+  ;; though.
+  (should
+   (eq 'headline
+       (org-test-with-parsed-data
+	   "* target\n#+NAME: target\n<<target>>\n\n[[*target]]"
 	 (org-element-type
 	  (org-export-resolve-fuzzy-link
 	   (org-element-map tree 'link 'identity info t) info)))))
-  ;; 8. Return nil if no match.
-  (org-test-with-parsed-data "[[target]]"
-    (should-not
+  ;; Return nil if no match.
+  (should-not
+   (org-test-with-parsed-data "[[target]]"
      (org-export-resolve-fuzzy-link
       (org-element-map tree 'link 'identity info t) info))))
 
