@@ -495,6 +495,7 @@ depends on, if any."
 	      (const :tag "   man         Export buffer to MAN format" man)
 	      (const :tag "   md          Export buffer to Markdown format" md)
 	      (const :tag "   odt         Export buffer to ODT format" odt)
+	      (const :tag "   org         Export buffer to Org format" org)
 	      (const :tag "   texinfo     Export buffer to Texinfo format" texinfo)
 	      (const :tag "C  confluence  Export buffer to Confluence Wiki format" confluence)
 	      (const :tag "C  deck        Export buffer to deck.js presentations" deck)
