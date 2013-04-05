@@ -65,7 +65,7 @@
 ;; customizable should belong to the `org-export-BACKEND' group.
 ;;
 ;; Tools for common tasks across back-ends are implemented in the
-;; following part of then file.
+;; following part of the file.
 ;;
 ;; Then, a wrapper macro for asynchronous export,
 ;; `org-export-async-start', along with tools to display results. are
@@ -2761,6 +2761,10 @@ Return the updated communication channel."
 ;; was within an item, the item should contain the headline.  That's
 ;; why file inclusion should be done before any structure can be
 ;; associated to the file, that is before parsing.
+;;
+;; `org-export-insert-default-template' is a command to insert
+;; a default template (or a back-end specific template) at point or in
+;; current subtree.
 
 (defun org-export-copy-buffer ()
   "Return a copy of the current buffer.
@@ -3051,6 +3055,104 @@ Return code as a string."
     (insert string)
     (org-mode)
     (org-export-as backend nil nil body-only ext-plist)))
+
+;;;###autoload
+(defun org-export-insert-default-template (&optional backend subtreep)
+  "Insert all export keywords with default values at beginning of line.
+
+BACKEND is a symbol representing the export back-end for which
+specific export options should be added to the template, or
+`default' for default template.  When it is nil, the user will be
+prompted for a category.
+
+If SUBTREEP is non-nil, export configuration will be set up
+locally for the subtree through node properties."
+  (interactive)
+  (unless (derived-mode-p 'org-mode) (user-error "Not in an Org mode buffer"))
+  (when (and subtreep (org-before-first-heading-p))
+    (user-error "No subtree to set export options for"))
+  (let ((node (and subtreep (save-excursion (org-back-to-heading t) (point))))
+	(backend (or backend
+                     (intern
+                      (org-completing-read
+                       "Options category: "
+                       (cons "default"
+                             (mapcar (lambda (b) (symbol-name (car b)))
+                                     org-export-registered-backends))))))
+	options keywords)
+    ;; Populate OPTIONS and KEYWORDS.
+    (dolist (entry (if (eq backend 'default) org-export-options-alist
+		     (org-export-backend-options backend)))
+      (let ((keyword (nth 1 entry))
+            (option (nth 2 entry)))
+        (cond
+         (keyword (unless (assoc keyword keywords)
+                    (let ((value
+                           (if (eq (nth 4 entry) 'split)
+                               (mapconcat 'identity (eval (nth 3 entry)) " ")
+                             (eval (nth 3 entry)))))
+                      (push (cons keyword value) keywords))))
+         (option (unless (assoc option options)
+                   (push (cons option (eval (nth 3 entry))) options))))))
+    ;; Move to an appropriate location in order to insert options.
+    (unless subtreep (beginning-of-line))
+    ;; First get TITLE, DATE, AUTHOR and EMAIL if they belong to the
+    ;; list of available keywords.
+    (when (assoc "TITLE" keywords)
+      (let ((title
+	     (or (let ((visited-file (buffer-file-name (buffer-base-buffer))))
+		   (and visited-file
+			(file-name-sans-extension
+			 (file-name-nondirectory visited-file))))
+		 (buffer-name (buffer-base-buffer)))))
+	(if (not subtreep) (insert (format "#+TITLE: %s\n" title))
+	  (org-entry-put node "EXPORT_TITLE" title))))
+    (when (assoc "DATE" keywords)
+      (let ((date (with-temp-buffer (org-insert-time-stamp (current-time)))))
+	(if (not subtreep) (insert "#+DATE: " date "\n")
+	  (org-entry-put node "EXPORT_DATE" date))))
+    (when (assoc "AUTHOR" keywords)
+      (let ((author (cdr (assoc "AUTHOR" keywords))))
+	(if subtreep (org-entry-put node "EXPORT_AUTHOR" author)
+	  (insert
+	   (format "#+AUTHOR:%s\n"
+		   (if (not (org-string-nw-p author)) ""
+		     (concat " " author)))))))
+    (when (assoc "EMAIL" keywords)
+      (let ((email (cdr (assoc "EMAIL" keywords))))
+	(if subtreep (org-entry-put node "EXPORT_EMAIL" email)
+	  (insert
+	   (format "#+EMAIL:%s\n"
+		   (if (not (org-string-nw-p email)) ""
+		     (concat " " email)))))))
+    ;; Then (multiple) OPTIONS lines.  Never go past fill-column.
+    (when options
+      (let ((items
+	     (mapcar
+	      (lambda (opt)
+		(format "%s:%s" (car opt) (format "%s" (cdr opt))))
+	      (sort options (lambda (k1 k2) (string< (car k1) (car k2)))))))
+	(if subtreep
+	    (org-entry-put
+	     node "EXPORT_OPTIONS" (mapconcat 'identity items " "))
+	  (while items
+	    (insert "#+OPTIONS:")
+	    (let ((width 10))
+	      (while (and items
+			  (< (+ width (length (car items)) 1) fill-column))
+		(let ((item (pop items)))
+		  (insert " " item)
+		  (incf width (1+ (length item))))))
+	    (insert "\n")))))
+    ;; And the rest of keywords.
+    (dolist (key (sort keywords (lambda (k1 k2) (string< (car k1) (car k2)))))
+      (unless (member (car key) '("TITLE" "DATE" "AUTHOR" "EMAIL"))
+        (let ((val (cdr key)))
+          (if subtreep (org-entry-put node (concat "EXPORT_" (car key)) val)
+            (insert
+             (format "#+%s:%s\n"
+                     (car key)
+                     (if (org-string-nw-p val) (format " %s" val) "")))))))))
 
 (defun org-export-output-file-name (extension &optional subtreep pub-dir)
   "Return output file's name according to buffer specifications.
@@ -5473,6 +5575,7 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
       (move-marker org-export-dispatch-last-position nil))
     (case action
       ;; First handle special hard-coded actions.
+      (template (org-export-insert-default-template nil optns))
       (stack (org-export-stack))
       (publish-current-file
        (org-publish-current-file (memq 'force optns) (memq 'async optns)))
@@ -5489,12 +5592,12 @@ When ARG is \\[universal-argument] \\[universal-argument], display the asynchron
       (otherwise
        (save-excursion
 	 (when arg
-	   ;; Repeating command, maybe move cursor
-	   ;; to restore subtree context
+	   ;; Repeating command, maybe move cursor to restore subtree
+	   ;; context.
 	   (if (eq (marker-buffer org-export-dispatch-last-position)
 		   (org-base-buffer (current-buffer)))
 	       (goto-char org-export-dispatch-last-position)
-	     ;; We are in a differnet buffer, forget position
+	     ;; We are in a different buffer, forget position.
 	     (move-marker org-export-dispatch-last-position nil)))
 	 (funcall action
 		  ;; Return a symbol instead of a list to ease
@@ -5563,8 +5666,9 @@ back to standard interface."
 		      ((numberp key-b) t)))))
 	   (lambda (a b) (< (car a) (car b)))))
 	 ;; Compute a list of allowed keys based on the first key
-	 ;; pressed, if any.  Some keys (?^B, ?^V, ?^S, ?^F, ?^A
-	 ;; and ?q) are always available.
+	 ;; pressed, if any.  Some keys
+	 ;; (?^B, ?^V, ?^S, ?^F, ?^A, ?&, ?# and ?q) are always
+	 ;; available.
 	 (allowed-keys
 	  (nconc (list 2 22 19 6 1)
 		 (if (not first-key) (org-uniquify (mapcar 'car backends))
@@ -5574,7 +5678,7 @@ back to standard interface."
 			 (setq sub-menu (append (nth 2 backend) sub-menu))))))
 		 (cond ((eq first-key ?P) (list ?f ?p ?x ?a))
 		       ((not first-key) (list ?P)))
-		 (list ?&)
+		 (list ?& ?#)
 		 (when expertp (list ??))
 		 (list ?q)))
 	 ;; Build the help menu for standard UI.
@@ -5582,10 +5686,9 @@ back to standard interface."
 	  (unless expertp
 	    (concat
 	     ;; Options are hard-coded.
-	     (format "Options
-    [%s] Body only:    %s       [%s] Visible only:     %s
-    [%s] Export scope: %s   [%s] Force publishing: %s
-    [%s] Async export: %s\n"
+	     (format "[%s] Body only:    %s           [%s] Visible only:     %s
+\[%s] Export scope: %s       [%s] Force publishing: %s
+\[%s] Async export: %s\n\n"
 		     (funcall fontify-key "C-b" t)
 		     (funcall fontify-value
 			      (if (memq 'body options) "On " "Off"))
@@ -5635,14 +5738,16 @@ back to standard interface."
 	     ;; Publishing menu is hard-coded.
 	     (format "\n[%s] Publish
     [%s] Current file              [%s] Current project
-    [%s] Choose project            [%s] All projects\n\n"
+    [%s] Choose project            [%s] All projects\n\n\n"
 		     (funcall fontify-key "P")
 		     (funcall fontify-key "f" ?P)
 		     (funcall fontify-key "p" ?P)
 		     (funcall fontify-key "x" ?P)
 		     (funcall fontify-key "a" ?P))
-	     (format "\[%s] Export stack\n" (funcall fontify-key "&" t))
-	     (format "\[%s] %s"
+	     (format "[%s] Export stack                  [%s] Insert template\n"
+		     (funcall fontify-key "&" t)
+		     (funcall fontify-key "#" t))
+	     (format "[%s] %s"
 		     (funcall fontify-key "q" t)
 		     (if first-key "Main menu" "Exit")))))
 	 ;; Build prompts for both standard and expert UI.
@@ -5710,13 +5815,13 @@ options as CDR."
 		(memq key '(14 16 ?\s ?\d)))
       (case key
 	(14 (if (not (pos-visible-in-window-p (point-max)))
-		 (ignore-errors (scroll-up-line))
-	       (message "End of buffer")
-	       (sit-for 1)))
+		(ignore-errors (scroll-up-line))
+	      (message "End of buffer")
+	      (sit-for 1)))
 	(16 (if (not (pos-visible-in-window-p (point-min)))
-		 (ignore-errors (scroll-down-line))
-	       (message "Beginning of buffer")
-	       (sit-for 1)))
+		(ignore-errors (scroll-down-line))
+	      (message "Beginning of buffer")
+	      (sit-for 1)))
 	(?\s (if (not (pos-visible-in-window-p (point-max)))
 		 (scroll-up nil)
 	       (message "End of buffer")
@@ -5731,17 +5836,18 @@ options as CDR."
       (ding)
       (unless expertp (message "Invalid key") (sit-for 1))
       (org-export--dispatch-ui options first-key expertp))
-     ;; q key at first level aborts export.  At second
-     ;; level, cancel first key instead.
+     ;; q key at first level aborts export.  At second level, cancel
+     ;; first key instead.
      ((eq key ?q) (if (not first-key) (error "Export aborted")
 		    (org-export--dispatch-ui options nil expertp)))
-     ;; Help key: Switch back to standard interface if
-     ;; expert UI was active.
+     ;; Help key: Switch back to standard interface if expert UI was
+     ;; active.
      ((eq key ??) (org-export--dispatch-ui options first-key nil))
+     ;; Send request for template insertion along with export scope.
+     ((eq key ?#) (cons 'template (memq 'subtree options)))
      ;; Switch to asynchronous export stack.
      ((eq key ?&) '(stack))
-     ;; Toggle export options
-     ;; C-b (2) C-v (22) C-s (19) C-f (6) C-a (1)
+     ;; Toggle options: C-b (2) C-v (22) C-s (19) C-f (6) C-a (1).
      ((memq key '(2 22 19 6 1))
       (org-export--dispatch-ui
        (let ((option (case key (2 'body) (22 'visible) (19 'subtree)
