@@ -2295,7 +2295,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag-refine)
 (org-defkey org-agenda-mode-map "~" 'org-agenda-limit-interactively)
 (org-defkey org-agenda-mode-map "<" 'org-agenda-filter-by-category)
-(org-defkey org-agenda-mode-map "^" 'org-agenda-filter-by-top-category)
+(org-defkey org-agenda-mode-map "^" 'org-agenda-filter-by-top-headline)
 (org-defkey org-agenda-mode-map ";" 'org-timer-set-timer)
 (define-key org-agenda-mode-map "?" 'org-agenda-show-the-flagging-note)
 (org-defkey org-agenda-mode-map "\C-c\C-x\C-mg"    'org-mobile-pull)
@@ -3531,7 +3531,7 @@ removed from the entry content.  Currently only `planning' is allowed here."
 (defvar org-agenda-tag-filter nil)
 (defvar org-agenda-category-filter nil)
 (defvar org-agenda-regexp-filter nil)
-(defvar org-agenda-top-category-filter nil)
+(defvar org-agenda-top-headline-filter nil)
 (defvar org-agenda-tag-filter-while-redo nil)
 (defvar org-agenda-tag-filter-preset nil
   "A preset of the tags filter used for secondary agenda filtering.
@@ -7227,7 +7227,7 @@ in the agenda."
 	 (org-agenda-keep-modes t)
 	 (tag-filter org-agenda-tag-filter)
 	 (tag-preset (get 'org-agenda-tag-filter :preset-filter))
-	 (top-cat-filter org-agenda-top-category-filter)
+	 (top-hl-filter org-agenda-top-headline-filter)
 	 (cat-filter org-agenda-category-filter)
 	 (cat-preset (get 'org-agenda-category-filter :preset-filter))
 	 (re-filter org-agenda-regexp-filter)
@@ -7260,7 +7260,7 @@ in the agenda."
 	  org-agenda-tag-filter tag-filter
 	  org-agenda-category-filter cat-filter
 	  org-agenda-regexp-filter re-filter
-	  org-agenda-top-category-filter top-cat-filter)
+	  org-agenda-top-headline-filter top-hl-filter)
     (message "Rebuilding agenda buffer...done")
     (put 'org-agenda-tag-filter :preset-filter tag-preset)
     (put 'org-agenda-category-filter :preset-filter cat-preset)
@@ -7268,7 +7268,7 @@ in the agenda."
     (and (or tag-filter tag-preset) (org-agenda-filter-apply tag-filter 'tag))
     (and (or cat-filter cat-preset) (org-agenda-filter-apply cat-filter 'category))
     (and (or re-filter re-preset) (org-agenda-filter-apply re-filter 'regexp))
-    (and top-cat-filter (org-agenda-filter-top-category-apply top-cat-filter))
+    (and top-hl-filter (org-agenda-filter-top-headline-apply top-hl-filter))
     (and cols (org-called-interactively-p 'any) (org-agenda-columns))
     (org-goto-line line)
     (recenter window-line)))
@@ -7292,7 +7292,8 @@ The category is that of the current line."
 	   'category)
 	(error "No category at point")))))
 
-(defun org-find-top-category (&optional pos)
+(defun org-find-top-headline (&optional pos)
+  "Find the topmost parent headline and return it."
   (save-excursion
     (with-current-buffer (if pos (marker-buffer pos) (current-buffer))
       (if pos (goto-char pos))
@@ -7301,18 +7302,18 @@ The category is that of the current line."
       (ignore-errors
 	(nth 4 (org-heading-components))))))
 
-(defvar org-agenda-filtered-by-top-category nil)
-(defun org-agenda-filter-by-top-category (strip)
-  "Keep only those lines in the agenda buffer that have a specific category.
-The category is that of the current line."
+(defvar org-agenda-filtered-by-top-headline nil)
+(defun org-agenda-filter-by-top-headline (strip)
+  "Keep only those lines that are descendants from the same top headline.
+The top headline is that of the current line."
   (interactive "P")
-  (if org-agenda-filtered-by-top-category
+  (if org-agenda-filtered-by-top-headline
       (progn
-        (setq org-agenda-filtered-by-top-category nil
-	      org-agenda-top-category-filter nil)
+        (setq org-agenda-filtered-by-top-headline nil
+	      org-agenda-top-headline-filter nil)
         (org-agenda-filter-show-all-cat))
-    (let ((cat (org-find-top-category (org-get-at-bol 'org-hd-marker))))
-      (if cat (org-agenda-filter-top-category-apply cat strip)
+    (let ((cat (org-find-top-headline (org-get-at-bol 'org-hd-marker))))
+      (if cat (org-agenda-filter-top-headline-apply cat strip)
         (error "No top-level category at point")))))
 
 (defvar org-agenda-regexp-filter nil)
@@ -7592,22 +7593,22 @@ When NO-OPERATOR is non-nil, do not add the + operator to returned tags."
     (if (get-char-property (point) 'invisible)
 	(ignore-errors (org-agenda-previous-line)))))
 
-(defun org-agenda-filter-top-category-apply (category &optional negative)
-  "Set FILTER as the new agenda filter and apply it."
+(defun org-agenda-filter-top-headline-apply (hl &optional negative)
+  "Filter by top headline HL."
   (org-agenda-set-mode-name)
   (save-excursion
     (goto-char (point-min))
     (while (not (eobp))
       (let* ((pos (org-get-at-bol 'org-hd-marker))
-             (topcat (and pos (org-find-top-category pos))))
-        (if (and topcat (funcall (if negative 'identity 'not)
-                                 (string= category topcat)))
+             (tophl (and pos (org-find-top-headline pos))))
+        (if (and tophl (funcall (if negative 'identity 'not)
+                                 (string= hl tophl)))
             (org-agenda-filter-hide-line 'category)))
       (beginning-of-line 2)))
   (if (get-char-property (point) 'invisible)
       (org-agenda-previous-line))
-  (setq org-agenda-top-category-filter category
-	org-agenda-filtered-by-top-category t))
+  (setq org-agenda-top-headline-filter hl
+	org-agenda-filtered-by-top-headline t))
 
 (defun org-agenda-filter-hide-line (type)
   "Hide lines with TYPE in the agenda buffer."
@@ -8011,7 +8012,7 @@ so that the date SD will be in that range."
   (interactive "P")
   (if (or org-agenda-tag-filter
 	  org-agenda-category-filter
-	  org-agenda-top-category-filter)
+	  org-agenda-top-headline-filter)
       (user-error "Can't show entry text in filtered views")
     (setq org-agenda-entry-text-mode (or (integerp arg)
 					 (not org-agenda-entry-text-mode)))
