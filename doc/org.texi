@@ -13037,7 +13037,7 @@ specific (and having higher priority) than the last.
 @node System-wide header arguments, Language-specific header arguments, Using header arguments, Using header arguments
 @subsubheading System-wide header arguments
 @vindex org-babel-default-header-args
-System-wide values of header arguments can be specified by customizing the
+System-wide values of header arguments can be specified by adapting the
 @code{org-babel-default-header-args} variable:
 
 @example
@@ -13047,20 +13047,6 @@ System-wide values of header arguments can be specified by customizing the
 :cache      => "no"
 :noweb      => "no"
 @end example
-
-@c @example
-@c   org-babel-default-header-args is a variable defined in `org-babel.el'.
-@c   Its value is
-@c   ((:session . "none")
-@c    (:results . "replace")
-@c    (:exports . "code")
-@c    (:cache . "no")
-@c    (:noweb . "no"))
-
-
-@c   Documentation:
-@c   Default arguments to use when evaluating a code block.
-@c @end example
 
 For example, the following example could be used to set the default value of
 @code{:noweb} header arguments to @code{yes}.  This would have the effect of
