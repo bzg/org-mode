@@ -4806,8 +4806,8 @@ Support for group tags is controlled by the option
     (org-set-local 'org-file-tags nil)
     (let ((re (org-make-options-regexp '("FILETAGS" "TAGS")))
 	  (splitre "[ \t]+")
-	  tags ftags key value
-	  (start 0))
+	  (start 0)
+	  tags ftags key value)
       (save-excursion
 	(save-restriction
 	  (widen)
@@ -4894,6 +4894,17 @@ Support for group tags is controlled by the option
 	  (widen)
 	  (goto-char (point-min))
 	  (while (or (and ext-setup-or-nil
+		     	  (let (ret)
+		     	    (with-temp-buffer
+		     	      (insert ext-setup-or-nil)
+		     	      (let ((major-mode 'org-mode))
+				(org-set-regexps-and-options-for-tags)
+				(setq ret (list org-file-tags org-tag-alist
+						org-tag-groups-alist))))
+		     	    (setq org-file-tags (nth 0 ret)
+		     		  org-tag-alist (nth 1 ret)
+		     		  org-tag-groups-alist (nth 2 ret))))
+		     (and ext-setup-or-nil
 			  (string-match re ext-setup-or-nil start)
 			  (setq start (match-end 0)))
 		     (and (setq ext-setup-or-nil nil start 0)
