@@ -819,13 +819,19 @@ to do our best."
   (let* ((properties (caddr contact))
 	 (name (org-contacts-vcard-escape (car contact)))
 	 (n (org-contacts-vcard-encode-name name))
-	 (email (org-contacts-vcard-escape (cdr (assoc-string org-contacts-email-property properties))))
+	 (email (cdr (assoc-string org-contacts-email-property properties)))
 	 (bday (org-contacts-vcard-escape (cdr (assoc-string org-contacts-birthday-property properties))))
 	 (addr (cdr (assoc-string org-contacts-address-property properties)))
 	 (nick (org-contacts-vcard-escape (cdr (assoc-string org-contacts-nickname-property properties))))
 	 (head (format "BEGIN:VCARD\nVERSION:3.0\nN:%s\nFN:%s\n" n name)))
     (concat head
-	    (when email (format "EMAIL:%s\n" email))
+	    (when email (progn
+			  (setq emails-list (split-string email "[,;: ]+"))
+			  (setq result "")
+			  (while emails-list
+			    (setq result (concat result  "EMAIL:" (car emails-list) "\n"))
+			    (setq emails-list (cdr emails-list)))
+			  result))
 	    (when addr
 	      (format "ADR:;;%s\n" (replace-regexp-in-string "\\, ?" ";" addr)))
 	    (when bday
