@@ -61,6 +61,11 @@ When set to nil, all your Org files will be used."
   :type 'string
   :group 'org-contacts)
 
+(defcustom org-contacts-tel-property "PHONE"
+  "Name of the property for contact phone number."
+  :type 'string
+  :group 'org-contacts)
+
 (defcustom org-contacts-address-property "ADDRESS"
   "Name of the property for contact address."
   :type 'string
@@ -839,6 +844,13 @@ to do our best."
 			  result))
 	    (when addr
 	      (format "ADR:;;%s\n" (replace-regexp-in-string "\\, ?" ";" addr)))
+	    (when tel (progn
+			(setq phones-list (split-string tel "[,;: ]+"))
+			(setq result "")
+			(while phones-list
+			  (setq result (concat result  "TEL:" (car phones-list) "\n"))
+			  (setq phones-list (cdr phones-list)))
+			result))
 	    (when bday
 	      (let ((cal-bday (calendar-gregorian-from-absolute (org-time-string-to-absolute bday))))
 		(format "BDAY:%04d-%02d-%02d\n"
