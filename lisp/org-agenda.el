@@ -2293,6 +2293,7 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "=" 'org-agenda-filter-by-regexp)
 (org-defkey org-agenda-mode-map "|" 'org-agenda-filter-remove-all)
 (org-defkey org-agenda-mode-map "\\" 'org-agenda-filter-by-tag-refine)
+(org-defkey org-agenda-mode-map "~" 'org-agenda-limit-interactively)
 (org-defkey org-agenda-mode-map "<" 'org-agenda-filter-by-category)
 (org-defkey org-agenda-mode-map "^" 'org-agenda-filter-by-top-category)
 (org-defkey org-agenda-mode-map ";" 'org-timer-set-timer)
@@ -3792,7 +3793,9 @@ generating a new one."
 	(overlay-put ov 'org-type 'org-priority)))))
 
 (defun org-agenda-dim-blocked-tasks (&optional invisible)
-  "Dim currently blocked TODO's in the agenda display."
+  "Dim currently blocked TODO's in the agenda display.
+When INVISIBLE is non-nil, hide currently blocked TODO instead of
+dimming them."
   (interactive "P")
   (when (org-called-interactively-p 'interactive)
     (message "Dim or hide blocked tasks..."))
@@ -6789,26 +6792,48 @@ The optional argument TYPE tells the agenda type."
 		  (mapcar
 		   org-agenda-before-sorting-filter-function list))))
     (setq list (mapcar 'org-agenda-highlight-todo list)
-	  list (mapcar 'identity (sort list 'org-entries-lessp))
-	  list (org-agenda-limit-entries
-		list 'effort-minutes max-effort 'identity)
-	  list (org-agenda-limit-entries list 'todo-state max-todo)
-	  list (org-agenda-limit-entries list 'tags max-tags)
-	  list (org-agenda-limit-entries list 'org-hd-marker max-entries)
-	  list (mapconcat 'identity list "\n"))))
+	  list (mapcar 'identity (sort list 'org-entries-lessp)))
+    (when max-effort
+      (setq list (org-agenda-limit-entries
+		  list 'effort-minutes max-effort 'identity)))
+    (when max-todo
+      (setq list (org-agenda-limit-entries list 'todo-state max-todo)))
+    (when max-tags
+      (setq list (org-agenda-limit-entries list 'tags max-tags)))
+    (when max-entries
+      (setq list (org-agenda-limit-entries list 'org-hd-marker max-entries)))
+    (mapconcat 'identity list "\n")))
 
 (defun org-agenda-limit-entries (list prop limit &optional fn)
   "Limit the number of agenda entries."
-  (if limit
-      (let ((f (or fn (lambda (p) (and p 1)))) (lim 0))
-	(delq nil
-	      (mapcar
-	       (lambda (e)
-		 (let ((pval (funcall f (get-text-property 1 prop e))))
-		   (if pval (setq lim (+ lim pval)))
-		   (if (or (not pval) (<= lim limit)) e)))
-	       list)))
-    list))
+  (let ((include (and limit (< limit 0))))
+    (if limit
+	(let ((fun (or fn (lambda (p) (if p 1))))
+	      (lim 0))
+	  (delq nil
+		(mapcar
+		 (lambda (e)
+		   (let ((pval (funcall fun (get-text-property 1 prop e))))
+		     (if pval (setq lim (+ lim pval)))
+		     (cond ((and pval (<= lim (abs limit))) e)
+			   ((and include (not pval)) e))))
+		 list)))
+      list)))
+
+(defun org-agenda-limit-interactively ()
+  "In agenda, interactively limit entries to various maximums."
+  (interactive)
+  (let* ((max (read-char "Number of [e]ntries [t]odos [T]ags [E]ffort? "))
+	 (num (string-to-number (read-from-minibuffer "How many? "))))
+    (cond ((equal max ?e)
+	   (let ((org-agenda-max-entries num)) (org-agenda-redo)))
+	  ((equal max ?t)
+	   (let ((org-agenda-max-todos num)) (org-agenda-redo)))
+	  ((equal max ?T)
+	   (let ((org-agenda-max-tags num)) (org-agenda-redo)))
+	  ((equal max ?E)
+	   (let ((org-agenda-max-effort num)) (org-agenda-redo)))))
+  (org-agenda-fit-window-to-buffer))
 
 (defun org-agenda-highlight-todo (x)
   (let ((org-done-keywords org-done-keywords-for-agenda)
@@ -7226,7 +7251,7 @@ in the agenda."
     (message "Rebuilding agenda buffer...")
     (if series-redo-cmd
 	(eval series-redo-cmd)
-      (org-let lprops '(eval redo-cmd)))
+      (org-let lprops redo-cmd))
     (setq org-agenda-undo-list nil
 	  org-agenda-pending-undo-list nil
 	  org-agenda-tag-filter tag-filter
