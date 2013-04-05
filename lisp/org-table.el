@@ -3190,10 +3190,11 @@ with the prefix ARG."
       (beginning-of-line 0)		; move to the inserted line
       (skip-chars-backward " \r\n\t")
       (if (org-at-table-p)
-	  (org-call-with-arg 'org-table-recalculate (or arg t)))
+	  (unwind-protect
+	      (org-call-with-arg 'org-table-recalculate (or arg t))
 
-      ;; Delete the formula inserted temporarily
-      (delete-region s e))))
+	    ;; delete the formula inserted temporarily
+	    (delete-region s e))))))
 
 (defun org-TBLFM-begin ()
   "Find the beginning of the TBLFM lines and return its position.

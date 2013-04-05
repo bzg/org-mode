@@ -929,6 +929,31 @@ reference (with row).  Format specifier N."
       (should (string= got
 		       expect)))))
 
+(ert-deftest test-org-table/org-calc-current-TBLFM-when-stop-because-of-error ()
+  "org-calc-current-TBLFM should preserve the input as it was."
+  (org-test-with-temp-text-in-file
+      "
+| 1 | 1 |
+| 2 | 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2::$2=$1*2
+#+TBLFM: $2=$1*3
+"
+    (let ((expect "
+| 1 | 1 |
+| 2 | 2 |
+#+TBLFM: $2=$1*1
+#+TBLFM: $2=$1*2::$2=$1*2
+#+TBLFM: $2=$1*3
+"))
+      (goto-char (point-min))
+      (forward-line 4)
+      (should-error (org-calc-current-TBLFM))
+      (setq got (buffer-string))
+      (message "%s" got)
+      (should (string= got
+		       expect)))))
+
 (provide 'test-org-table)
 
 ;;; test-org-table.el ends here
