@@ -14188,11 +14188,11 @@ argument.
 
 #+header: :file /tmp/it.png
 #+begin_src dot :post attr_wrap(width="5cm", data=*this*) :results drawer
-  digraph{
+  digraph@{
           a -> b;
           b -> c;
           c -> a;
-  }
+  @}
 #+end_src
 
 #+RESULTS:
