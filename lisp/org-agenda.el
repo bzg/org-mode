@@ -5333,7 +5333,7 @@ the documentation of `org-diary'."
 					      "\\|") "\\)"))
 			  (t org-not-done-regexp))))
 	 marker priority category category-pos level tags todo-state ts-date ts-date-type
-	 ee txt beg end inherited-tags)
+	 ee txt beg end inherited-tags todo-state-end-pos)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
       (catch :skip
@@ -5341,6 +5341,10 @@ the documentation of `org-diary'."
 	  (beginning-of-line)
 	  (org-agenda-skip)
 	  (setq beg (point) end (save-excursion (outline-next-heading) (point)))
+	  (unless (and (setq todo-state (org-get-todo-state))
+		       (setq todo-state-end-pos (match-end 2)))
+	    (goto-char end)
+	    (throw :skip nil))
 	  (when (org-agenda-check-for-timestamp-as-reason-to-ignore-todo-item end)
 	    (goto-char (1+ beg))
 	    (or org-agenda-todo-list-sublevels (org-end-of-subtree 'invisible))
@@ -5388,8 +5392,7 @@ the documentation of `org-diary'."
 	      tags (org-get-tags-at nil (not inherited-tags))
 	      level (make-string (org-reduced-level (org-outline-level)) ? )
 	      txt (org-agenda-format-item "" txt level category tags t)
-	      priority (1+ (org-get-priority txt))
-	      todo-state (org-get-todo-state))
+	      priority (1+ (org-get-priority txt)))
 	(org-add-props txt props
 	  'org-marker marker 'org-hd-marker marker
 	  'priority priority 'org-category category
@@ -5399,7 +5402,7 @@ the documentation of `org-diary'."
 	  'type (concat "todo" ts-date-type) 'todo-state todo-state)
 	(push txt ee)
 	(if org-agenda-todo-list-sublevels
-	    (goto-char (match-end 2))
+	    (goto-char todo-state-end-pos)
 	  (org-end-of-subtree 'invisible))))
     (nreverse ee)))
 
