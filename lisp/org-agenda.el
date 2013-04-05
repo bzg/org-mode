@@ -7069,7 +7069,7 @@ in the file.  Otherwise, restriction will be to the current subtree."
 	     (list (buffer-file-name (buffer-base-buffer))))
 	(org-back-to-heading t)
 	(move-overlay org-agenda-restriction-lock-overlay
-		      (point) (save-excursion (org-end-of-subtree t t) (point)))
+		      (point) (point-at-eol))
 	(move-marker org-agenda-restrict-begin (point))
 	(move-marker org-agenda-restrict-end
 		     (save-excursion (org-end-of-subtree t t)))
