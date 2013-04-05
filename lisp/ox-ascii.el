@@ -1424,16 +1424,14 @@ INFO is a plist holding contextual information."
      ;; targets.
      ((string= type "fuzzy")
       (let ((destination (org-export-resolve-fuzzy-link link info)))
-	;; Ignore invisible "#+TARGET: path".
-	(unless (eq (org-element-type destination) 'keyword)
-	  (if (org-string-nw-p desc) desc
-	    (when destination
-	      (let ((number
-		     (org-export-get-ordinal
-		      destination info nil 'org-ascii--has-caption-p)))
-		(when number
-		  (if (atom number) (number-to-string number)
-		    (mapconcat 'number-to-string number ".")))))))))
+	(if (org-string-nw-p desc) desc
+	  (when destination
+	    (let ((number
+		   (org-export-get-ordinal
+		    destination info nil 'org-ascii--has-caption-p)))
+	      (when number
+		(if (atom number) (number-to-string number)
+		  (mapconcat 'number-to-string number "."))))))))
      (t
       (if (not (org-string-nw-p desc)) (format "[%s]" raw-link)
 	(concat

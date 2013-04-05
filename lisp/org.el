@@ -520,6 +520,7 @@ depends on, if any."
 	      (const :tag "   man         Export buffer to MAN format" man)
 	      (const :tag "   md          Export buffer to Markdown format" md)
 	      (const :tag "   odt         Export buffer to ODT format" odt)
+	      (const :tag "   org         Export buffer to Org format" org)
 	      (const :tag "   texinfo     Export buffer to Texinfo format" texinfo)
 	      (const :tag "C  confluence  Export buffer to Confluence Wiki format" confluence)
 	      (const :tag "C  deck        Export buffer to deck.js presentations" deck)
@@ -9492,7 +9493,7 @@ active region."
 		    (et (org-element-type ee))
 		    (ev (plist-get (cadr ee) :value))
 		    (ek (plist-get (cadr ee) :key))
-		    (eok (and (stringp ek) (string-match "name\\|target" ek))))
+		    (eok (and (stringp ek) (string-match "name" ek))))
 	       (setq txt (cond
 			  ((org-at-heading-p) nil)
 			  ((and (eq et 'keyword) eok) ev)
@@ -10665,14 +10666,6 @@ visibility around point, thus ignoring
 	 (setq type 'dedicated
 	       pos (match-beginning 0))))
       ;; There is an exact target for this
-      (goto-char pos))
-     ((save-excursion
-	(goto-char (point-min))
-	(and
-	 (re-search-forward
-	  (format "^[ \t]*#\\+TARGET: %s" (regexp-quote s0)) nil t)
-	 (setq type 'dedicated pos (match-beginning 0))))
-      ;; Found an invisible target.
       (goto-char pos))
      ((save-excursion
 	(goto-char (point-min))
@@ -11907,7 +11900,7 @@ keywords relative to each registered export back-end."
     "DESCRIPTION:" "DRAWERS:" "EMAIL:" "EXCLUDE_TAGS:" "FILETAGS:" "INCLUDE:"
     "INDEX:" "KEYWORDS:" "LANGUAGE:" "MACRO:" "OPTIONS:" "PROPERTY:"
     "PRIORITIES:" "SELECT_TAGS:" "SEQ_TODO:" "SETUPFILE:" "STARTUP:" "TAGS:"
-    "TITLE:" "TODO:" "TYP_TODO:" "SELECT_TAGS:" "EXCLUDE_TAGS:" "TARGET:"))
+    "TITLE:" "TODO:" "TYP_TODO:" "SELECT_TAGS:" "EXCLUDE_TAGS:"))
 
 (defcustom org-structure-template-alist
   '(("s" "#+BEGIN_SRC ?\n\n#+END_SRC"

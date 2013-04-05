@@ -618,8 +618,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
     (cond
      ((string= key "MAN") value)
      ((string= key "INDEX") nil)
-     ;; Invisible targets.
-     ((string= key "TARGET") nil)
      ((string= key "TOC"   ) nil))))
 
 

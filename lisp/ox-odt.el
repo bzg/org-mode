@@ -2022,7 +2022,6 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
      ((string= key "INDEX")
       ;; FIXME
       (ignore))
-     ((string= key "TARGET") nil)
      ((string= key "TOC")
       (let ((value (downcase value)))
 	(cond
@@ -2836,10 +2835,10 @@ INFO is a plist holding contextual information.  See
 	     (let ((label (org-element-property :value destination)))
 	       (format "<text:a xlink:type=\"simple\" xlink:href=\"#%s\">%s</text:a>"
 		       (org-export-solidify-link-text label) desc))))
-	 ;; LINK has no description. It points to either a HEADLINE, a
-	 ;; TARGET or an ELEMENT with a #+NAME: LABEL attached to it.
-	 ;; LINK to DESTINATION, but make a best effort to provide a
-	 ;; *meaningful* description.
+	 ;; LINK has no description. It points to either a HEADLINE or
+	 ;; an ELEMENT with a #+NAME: LABEL attached to it.  LINK to
+	 ;; DESTINATION, but make a best effort to provide
+	 ;; a *meaningful* description.
 	 (org-odt-link--infer-description destination info))))
      ;; Coderef: replace link with the reference name or the
      ;; equivalent line number.

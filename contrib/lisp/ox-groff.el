@@ -1293,12 +1293,9 @@ INFO is a plist holding contextual information.  See
                    (or desc
                        (org-export-data
                         (org-element-property :raw-link link) info))))
-          ;; Fuzzy link points to an invisible target.
-          (keyword nil)
-          ;; LINK points to a headline.  If headlines are numbered
-          ;; and the link has no description, display headline's
-          ;; number.  Otherwise, display description or headline's
-          ;; title.
+          ;; LINK points to a headline.  If headlines are numbered and
+          ;; the link has no description, display headline's number.
+          ;; Otherwise, display description or headline's title.
           (headline
            (let ((label ""))
              (if (and (plist-get info :section-numbers) (not desc))
