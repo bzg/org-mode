@@ -71,6 +71,11 @@ When set to nil, all your Org files will be used."
   :type 'string
   :group 'org-contacts)
 
+(defcustom org-contacts-note-property "NOTE"
+  "Name of the property for contact note."
+  :type 'string
+  :group 'org-contacts)
+
 (defcustom org-contacts-birthday-format "Birthday: %l (%Y)"
   "Format of the anniversary agenda entry.
 The following replacements are available:
@@ -841,6 +846,7 @@ to do our best."
 			(calendar-extract-month cal-bday)
 			(calendar-extract-day cal-bday))))
 	    (when nick (format "NICKNAME:%s\n" nick))
+	    (when note (format "NOTE:%s\n" note))
 	    "END:VCARD\n\n")))
 
 (defun org-contacts-export-as-vcard (&optional name file to-buffer)
