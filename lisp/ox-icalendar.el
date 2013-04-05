@@ -360,8 +360,7 @@ or the day by one (if it does not contain a time) when no
 explicit ending time is specified.
 
 When optional argument UTC is non-nil, time will be expressed in
-Universal Time, ignoring `org-icalendar-date-time-format'.
-This is mandatory for \"DTSTAMP\" property."
+Universal Time, ignoring `org-icalendar-date-time-format'."
   (let* ((year-start (org-element-property :year-start timestamp))
 	 (year-end (org-element-property :year-end timestamp))
 	 (month-start (org-element-property :month-start timestamp))
@@ -405,6 +404,10 @@ This is mandatory for \"DTSTAMP\" property."
       ;; `format-time-string' and fix any mistake (i.e. MI >= 60).
       (encode-time 0 mi h d m y)
       (or utc (and with-time-p (org-icalendar-use-UTC-date-time-p)))))))
+
+(defun org-icalendar-dtstamp ()
+  "Return DTSTAMP property, as a string."
+  (format-time-string "DTSTAMP:%Y%m%dT%H%M%SZ" nil t))
 
 (defun org-icalendar-get-categories (entry info)
   "Return categories according to `org-icalendar-categories'.
@@ -644,7 +647,7 @@ Return VEVENT component as a string."
        (org-icalendar-transcode-diary-sexp
 	(org-element-property :raw-value timestamp) uid summary)
      (concat "BEGIN:VEVENT\n"
-	     (org-icalendar-convert-timestamp timestamp "DTSTAMP" nil t) "\n"
+	     (org-icalendar-dtstamp) "\n"
 	     "UID:" uid "\n"
 	     (org-icalendar-convert-timestamp timestamp "DTSTART") "\n"
 	     (org-icalendar-convert-timestamp timestamp "DTEND" t) "\n"
@@ -690,7 +693,7 @@ Return VTODO component as a string."
     (org-icalendar-fold-string
      (concat "BEGIN:VTODO\n"
 	     "UID:TODO-" uid "\n"
-	     (org-icalendar-convert-timestamp start "DTSTAMP" nil t) "\n"
+	     (org-icalendar-dtstamp) "\n"
 	     (org-icalendar-convert-timestamp start "DTSTART") "\n"
 	     (and (memq 'todo-due org-icalendar-use-deadline)
 		  (org-element-property :deadline entry)
