@@ -12705,6 +12705,7 @@ Returns the new TODO keyword, or nil if no state change should occur."
   (member (org-get-todo-state) org-done-keywords))
 
 (defun org-get-todo-state ()
+  "Return the TODO keyword of the current subtree."
   (save-excursion
     (org-back-to-heading t)
     (and (looking-at org-todo-line-regexp)
