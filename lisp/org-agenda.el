@@ -657,6 +657,13 @@ that are marked with the ARCHIVE tag will be included anyway.  When this is
 t, also all archive files associated with the current selection of agenda
 files will be included.")
 
+(defcustom org-agenda-restriction-lock-highlight-subtree t
+  "Non-nil means highlight the whole subtree when restriction is active.
+Otherwise only highlight the headline.  Highlighting the whole subtree is
+useful to ensure no edits happen beyond the restricted region."
+  :group 'org-agenda
+  :type 'boolean)
+
 (defcustom org-agenda-skip-comment-trees t
   "Non-nil means skip trees that start with the COMMENT keyword.
 When nil, these trees are also scanned by agenda commands."
@@ -7072,7 +7079,10 @@ in the file.  Otherwise, restriction will be to the current subtree."
 	     (list (buffer-file-name (buffer-base-buffer))))
 	(org-back-to-heading t)
 	(move-overlay org-agenda-restriction-lock-overlay
-		      (point) (point-at-eol))
+		      (point)
+		      (if org-agenda-restriction-lock-highlight-subtree
+			  (save-excursion (org-end-of-subtree t t) (point))
+			(point-at-eol)))
 	(move-marker org-agenda-restrict-begin (point))
 	(move-marker org-agenda-restrict-end
 		     (save-excursion (org-end-of-subtree t t)))
