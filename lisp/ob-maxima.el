@@ -83,6 +83,7 @@ called by `org-babel-execute-src-block'."
 		     (mapcar (lambda (line)
 			       (unless (or (string-match "batch" line)
 					   (string-match "^rat: replaced .*$" line)
+					   (string-match "^;;; Loading #P" line)
 					   (= 0 (length line)))
 				 line))
 			     (split-string raw "[\r\n]"))) "\n"))
