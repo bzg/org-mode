@@ -455,6 +455,15 @@ non-nil."
       (when org-export-show-temporary-export-buffer
 	(switch-to-buffer-other-window outbuf)))))
 
+;;;###autoload
+(defun org-md-convert-region-to-md ()
+  "Assume the current region has org-mode syntax, and convert it to Markdown.
+This can be used in any buffer.  For example, you can write an
+itemized list in org-mode syntax in a Markdown buffer and use
+this command to convert it."
+  (interactive)
+  (org-export-replace-region-by 'md))
+
 
 ;;;###autoload
 (defun org-md-export-to-markdown (&optional async subtreep visible-only)

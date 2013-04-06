@@ -3057,6 +3057,18 @@ Return code as a string."
     (org-export-as backend nil nil body-only ext-plist)))
 
 ;;;###autoload
+(defun org-export-replace-region-by (backend)
+  "Replace the active region by its export to BACKEND."
+  (if (not (org-region-active-p))
+      (user-error "No active region to replace")
+    (let* ((beg (region-beginning))
+	   (end (region-end))
+	   (str (buffer-substring beg end)) rpl)
+      (setq rpl (org-export-string-as str backend t))
+      (delete-region beg end)
+      (insert rpl))))
+
+;;;###autoload
 (defun org-export-insert-default-template (&optional backend subtreep)
   "Insert all export keywords with default values at beginning of line.
 

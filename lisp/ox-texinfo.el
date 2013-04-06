@@ -1779,6 +1779,15 @@ publishing directory.
 Return output file name."
   (org-publish-org-to 'texinfo filename ".texi" plist pub-dir))
 
+;;;###autoload
+(defun org-texinfo-convert-region-to-texinfo ()
+  "Assume the current region has org-mode syntax, and convert it to Texinfo.
+This can be used in any buffer.  For example, you can write an
+itemized list in org-mode syntax in an Texinfo buffer and use
+this command to convert it."
+  (interactive)
+  (org-export-replace-region-by 'texinfo))
+
 (defun org-texinfo-compile (file)
   "Compile a texinfo file.
 

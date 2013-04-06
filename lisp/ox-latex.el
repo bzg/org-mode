@@ -2822,6 +2822,15 @@ is non-nil."
 	(switch-to-buffer-other-window outbuf)))))
 
 ;;;###autoload
+(defun org-latex-convert-region-to-latex ()
+  "Assume the current region has org-mode syntax, and convert it to LaTeX.
+This can be used in any buffer.  For example, you can write an
+itemized list in org-mode syntax in an LaTeX buffer and use this
+command to convert it."
+  (interactive)
+  (org-export-replace-region-by 'latex))
+
+;;;###autoload
 (defun org-latex-export-to-latex
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a LaTeX file.

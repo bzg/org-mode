@@ -3194,6 +3194,15 @@ is non-nil."
 	(switch-to-buffer-other-window outbuf)))))
 
 ;;;###autoload
+(defun org-html-convert-region-to-html ()
+  "Assume the current region has org-mode syntax, and convert it to HTML.
+This can be used in any buffer.  For example, you can write an
+itemized list in org-mode syntax in an HTML buffer and use this
+command to convert it."
+  (interactive)
+  (org-export-replace-region-by 'html))
+
+;;;###autoload
 (defun org-html-export-to-html
   (&optional async subtreep visible-only body-only ext-plist)
   "Export current buffer to a HTML file.
