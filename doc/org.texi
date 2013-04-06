@@ -3346,10 +3346,8 @@ internal structure of all links, use the menu entry
 If the link does not look like a URL, it is considered to be internal in the
 current file.  The most important case is a link like
 @samp{[[#my-custom-id]]} which will link to the entry with the
-@code{CUSTOM_ID} property @samp{my-custom-id}.  Such custom IDs are very good
-for HTML export (@pxref{HTML export}) where they produce pretty section
-links.  You are responsible yourself to make sure these custom IDs are unique
-in a file.
+@code{CUSTOM_ID} property @samp{my-custom-id}.  You are responsible yourself
+to make sure these custom IDs are unique in a file.
 
 Links such as @samp{[[My Target]]} or @samp{[[My Target][Find my target]]}
 lead to a text search in the current file.
@@ -3357,27 +3355,48 @@ lead to a text search in the current file.
 The link can be followed with @kbd{C-c C-o} when the cursor is on the link,
 or with a mouse click (@pxref{Handling links}).  Links to custom IDs will
 point to the corresponding headline.  The preferred match for a text link is
-a @i{dedicated target}: the same string in double angular brackets.  Targets
-may be located anywhere; sometimes it is convenient to put them into a
-comment line.  For example
+a @i{dedicated target}: the same string in double angular brackets, like
+@samp{<<My Target>>}.
+
+@cindex #+NAME
+If no dedicated target exists, the link will then try to match the exact name
+of an element within the buffer.  Naming is done with the @code{#+NAME}
+keyword, which has to be put the line before the element it refers to, as in
+the following example
 
 @example
-# <<My Target>>
+#+NAME: My Target
+| a  | table      |
+|----+------------|
+| of | four cells |
 @end example
 
-@noindent In HTML export (@pxref{HTML export}), such targets will become
-named anchors for direct access through @samp{http} links@footnote{Note that
-text before the first headline is usually not exported, so the first such
-target should be after the first headline, or in the line directly before the
-first headline.}.
-
-If no dedicated target exists, Org will search for a headline that is exactly
+If none of the above succeeds, Org will search for a headline that is exactly
 the link text but may also include a TODO keyword and tags@footnote{To insert
-a link targeting a headline, in-buffer completion can be used.  Just type a
-star followed by a few optional letters into the buffer and press
+a link targeting a headline, in-buffer completion can be used.  Just type
+a star followed by a few optional letters into the buffer and press
 @kbd{M-@key{TAB}}.  All headlines in the current buffer will be offered as
-completions.}.  In non-Org files, the search will look for the words in the
-link text.  In the above example the search would be for @samp{my target}.
+completions.}.
+
+During export, internal links will be used to mark objects and assign them
+a number.  Marked objects will then be referenced by links pointing to them.
+In particular, links without a description will appear as the number assigned
+to the marked object@footnote{When targetting a @code{#+NAME} keyword,
+@code{#+CAPTION} keyword is mandatory in order to get proper numbering.}.  In
+the following excerpt from an Org buffer
+
+@example
+- one item
+- <<target>>another item
+Here we refer to item [[target]].
+@end example
+
+@noindent
+The last sentence will appear as @samp{Here we refer to item 2} when
+exported.
+
+In non-Org files, the search will look for the words in the link text.  In
+the above example the search would be for @samp{my target}.
 
 Following a link pushes a mark onto Org's own mark ring.  You can
 return to the previous position with @kbd{C-c &}.  Using this command

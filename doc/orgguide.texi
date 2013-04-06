@@ -730,6 +730,9 @@ Links such as @samp{[[My Target]]} or @samp{[[My Target][Find my target]]}
 lead to a text search in the current file for the corresponding target which
 looks like @samp{<<My Target>>}.
 
+Internal links will be used to reference their destination, through links or
+numbers, when possible.
+
 @node External links, Handling links, Internal links, Hyperlinks
 @section External links
 
