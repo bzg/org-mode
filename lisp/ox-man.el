@@ -1208,7 +1208,7 @@ Return PDF file name or an error if it couldn't be produced."
 	 ;; not to whatever value the current buffer may have.
 	 (default-directory (file-name-directory full-name))
          errors)
-    (message (format "Processing Groff file %s ..." file))
+    (message (format "Processing Groff file %s..." file))
     (save-window-excursion
       (cond
        ;; A function is provided: Apply it.

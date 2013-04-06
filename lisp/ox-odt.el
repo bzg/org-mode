@@ -2239,7 +2239,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 	 (target-file
 	  (format "%s%04d.%s" target-dir
 		  (incf org-odt-embedded-images-count) image-type)))
-    (message "Embedding %s as %s ..."
+    (message "Embedding %s as %s..."
 	     (substring-no-properties path) target-file)
 
     (when (= 1 org-odt-embedded-images-count)
@@ -2447,7 +2447,7 @@ used as a communication channel."
      "application/vnd.oasis.opendocument.formula" target-dir "1.2")
     ;; Copy over the formula file from user directory to zip
     ;; directory.
-    (message "Embedding %s as %s ..." src-file target-file)
+    (message "Embedding %s as %s..." src-file target-file)
     (let ((case-fold-search nil))
       (cond
        ;; Case 1: Mathml.
