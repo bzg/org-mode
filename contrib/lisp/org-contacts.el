@@ -151,7 +151,6 @@ This overrides `org-email-link-description-format' if set."
 
 ;; Decalre external functions and variables
 (declare-function org-reverse-string "org")
-(declare-function org-install-letbind "org-exp")
 (declare-function diary-ordinal-suffix "ext:diary-lib")
 (declare-function wl-summary-message-number "ext:wl-summary")
 (declare-function wl-address-header-extract-address "ext:wl-address")
@@ -871,20 +870,14 @@ is created and the VCard is written into that buffer."
 	 (buffer (if to-buffer
 		     (get-buffer-create to-buffer)
 		   (find-file-noselect filename))))
-
     (message "Exporting...")
-
     (set-buffer buffer)
     (let ((inhibit-read-only t)) (erase-buffer))
     (fundamental-mode)
-    (org-install-letbind)
-
     (when (fboundp 'set-buffer-file-coding-system)
       (set-buffer-file-coding-system coding-system-for-write))
-
     (loop for contact in (org-contacts-filter name)
 	  do (insert (org-contacts-vcard-format contact)))
-
     (if to-buffer
 	(current-buffer)
       (progn (save-buffer) (kill-buffer)))))
