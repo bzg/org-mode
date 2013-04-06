@@ -944,7 +944,7 @@ contexts.  See `org-show-hierarchy-above' for valid contexts."
   :group 'org-reveal-location
   :type org-context-choice)
 
-(defcustom org-show-siblings '((default . nil) (isearch t))
+(defcustom org-show-siblings '((default . nil) (isearch t) (bookmark-jump t))
   "Non-nil means show all sibling heading when revealing a location.
 Org-mode often shows locations in an org-mode file which might have
 been invisible before.  When this is set, the sibling of the current entry
@@ -958,7 +958,9 @@ use the command \\[org-reveal] to show more context.
 Instead of t, this can also be an alist specifying this option for different
 contexts.  See `org-show-hierarchy-above' for valid contexts."
   :group 'org-reveal-location
-  :type org-context-choice)
+  :type org-context-choice
+  :version "24.4"
+  :package-version '(Org . "8.0"))
 
 (defcustom org-show-entry-below '((default . nil))
   "Non-nil means show the entry below a headline when revealing a location.
