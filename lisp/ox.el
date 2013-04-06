@@ -1623,7 +1623,7 @@ Assume buffer is in Org mode.  Narrowing, if any, is ignored."
 			 (unless (member file files)
 			   (with-temp-buffer
 			     (insert (org-file-contents file 'noerror))
-			     (org-mode)
+			     (let ((org-inhibit-startup t)) (org-mode))
 			     (setq plist (funcall get-options
 						  (cons file files) plist))))))
 		      ((equal key "OPTIONS")
@@ -1754,7 +1754,7 @@ an alist where associations are (VARIABLE-NAME VALUE)."
 					(org-remove-double-quotes val))))
 			     (unless (member file files)
 			       (with-temp-buffer
-				 (org-mode)
+				 (let ((org-inhibit-startup t)) (org-mode))
 				 (insert (org-file-contents file 'noerror))
 				 (setq alist
 				       (funcall collect-bind
@@ -2811,7 +2811,7 @@ The function assumes BUFFER's major mode is `org-mode'."
        (let ((inhibit-modification-hooks t))
 	 ;; Set major mode. Ignore `org-mode-hook' as it has been run
 	 ;; already in BUFFER.
-	 (let ((org-mode-hook nil)) (org-mode))
+	 (let ((org-mode-hook nil) (org-inhibit-startup t)) (org-mode))
 	 ;; Copy specific buffer local variables and variables set
 	 ;; through BIND keywords.
 	 ,@(let ((bound-variables (org-export--list-bound-variables))
@@ -3053,7 +3053,7 @@ still inferior to file-local settings.
 Return code as a string."
   (with-temp-buffer
     (insert string)
-    (org-mode)
+    (let ((org-inhibit-startup t)) (org-mode))
     (org-export-as backend nil nil body-only ext-plist)))
 
 ;;;###autoload
@@ -3290,7 +3290,7 @@ paths."
 	     (t
 	      (insert
 	       (with-temp-buffer
-		 (org-mode)
+		 (let ((org-inhibit-startup t)) (org-mode))
 		 (insert
 		  (org-export--prepare-file-contents file lines ind minlevel))
 		 (org-export-expand-include-keyword
@@ -3342,7 +3342,8 @@ file should have."
     ;; If IND is set, preserve indentation of include keyword until
     ;; the first headline encountered.
     (when ind
-      (unless (eq major-mode 'org-mode) (org-mode))
+      (unless (eq major-mode 'org-mode)
+	(let ((org-inhibit-startup t)) (org-mode)))
       (goto-char (point-min))
       (let ((ind-str (make-string ind ? )))
 	(while (not (or (eobp) (looking-at org-outline-regexp-bol)))
@@ -3356,7 +3357,8 @@ file should have."
     ;; in the file (CUR-MIN), and remove stars to each headline so
     ;; that headlines with minimal level have a level of MINLEVEL.
     (when minlevel
-      (unless (eq major-mode 'org-mode) (org-mode))
+      (unless (eq major-mode 'org-mode)
+	(let ((org-inhibit-startup t)) (org-mode)))
       (org-with-limited-levels
        (let ((levels (org-map-entries
 		      (lambda () (org-reduced-level (org-current-level))))))
