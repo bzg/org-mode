@@ -127,7 +127,12 @@ The following replacements are available:
   :type 'string
   :group 'org-contacts)
 
-(defcustom org-contacts-matcher (concat org-contacts-email-property "<>\"\"")
+(defcustom org-contacts-matcher
+  (mapconcat 'identity (list org-contacts-email-property
+			     org-contacts-tel-property
+			     org-contacts-address-property
+			     org-contacts-birthday-property)
+			     "<>\"\"|")
   "Matching rule for finding heading that are contacts.
 This can be a tag name, or a property check."
   :type 'string
