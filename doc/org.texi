@@ -547,7 +547,7 @@ Custom agenda views
 Markup for rich export
 
 * Structural markup elements::  The basic structure as seen by the exporter
-* Images and tables::           Tables and Images will be included
+* Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
 * Index entries::               Making an index
@@ -3381,9 +3381,9 @@ completions.}.
 During export, internal links will be used to mark objects and assign them
 a number.  Marked objects will then be referenced by links pointing to them.
 In particular, links without a description will appear as the number assigned
-to the marked object@footnote{When targetting a @code{#+NAME} keyword,
-@code{#+CAPTION} keyword is mandatory in order to get proper numbering.}.  In
-the following excerpt from an Org buffer
+to the marked object@footnote{When targeting a @code{#+NAME} keyword,
+@code{#+CAPTION} keyword is mandatory in order to get proper numbering
+(@pxref{Images and Tables}).}.  In the following excerpt from an Org buffer
 
 @example
 - one item
@@ -9549,45 +9549,48 @@ Toggle the COMMENT keyword at the beginning of an entry.
 
 @cindex tables, markup rules
 @cindex #+CAPTION
-@cindex #+LABEL
+@cindex #+NAME
 Both the native Org mode tables (@pxref{Tables}) and tables formatted with
 the @file{table.el} package will be exported properly.  For Org mode tables,
 the lines before the first horizontal separator line will become table header
 lines.  You can use the following lines somewhere before the table to assign
 a caption and a label for cross references, and in the text you can refer to
-the object with @code{\ref@{tab:basic-data@}}:
+the object with @code{[[tab:basic-data]]} (@pxref{Internal links}):
 
 @example
 #+CAPTION: This is the caption for the next table (or link)
-#+LABEL:   tab:basic-data
+#+NAME:   tab:basic-data
    | ... | ...|
    |-----|----|
 @end example
 
 Optionally, the caption can take the form:
 @example
-#+CAPTION: [Caption for list of figures]@{Caption for table (or link).@}
+#+CAPTION[Caption for list of tables]: Caption for table.
 @end example
 
 @cindex inlined images, markup rules
-Some backends (HTML and @LaTeX{}) allow you to directly include images into
-the exported document.  Org does this, if a link to an image files does not
-have a description part, for example @code{[[./img/a.jpg]]}.  If you wish to
+Some backends allow you to directly include images into the exported
+document.  Org does this, if a link to an image files does not have
+a description part, for example @code{[[./img/a.jpg]]}.  If you wish to
 define a caption for the image and maybe a label for internal cross
 references, make sure that the link is on a line by itself and precede it
-with @code{#+CAPTION} and @code{#+LABEL} as follows:
+with @code{#+CAPTION} and @code{#+NAME} as follows:
 
 @example
 #+CAPTION: This is the caption for the next figure link (or table)
-#+LABEL:   fig:SED-HR4049
+#+NAME:   fig:SED-HR4049
 [[./img/a.jpg]]
 @end example
 
-You may also define additional attributes for the figure.  As this is
-backend-specific, see the sections about the individual backends for more
-information.
+@noindent
+Such images can be displayed within the buffer.  @xref{Handling links,the
+discussion of image links}.
 
-@xref{Handling links,the discussion of image links}.
+Even though images and tables are prominent examples of captioned structures,
+the same caption mechanism can apply to many others (e.g., @LaTeX{}
+equations, source code blocks).  Depending on the export back-end, those may
+or may not be handled.
 
 @node Literal examples, Include files, Images and tables, Markup
 @section Literal examples
