@@ -810,22 +810,27 @@ Default for SITEMAP-FILENAME is 'sitemap.org'."
 
 (defun org-publish-find-date (file)
   "Find the date of FILE in project.
-If FILE provides a #+date keyword use it else use the file
-system's modification time.
-
-It returns time in `current-time' format."
+If FILE provides a DATE keyword use it else use the file system's
+modification time.  Return time in `current-time' format."
   (let* ((org-inhibit-startup t)
 	 (visiting (find-buffer-visiting file))
 	 (file-buf (or visiting (find-file-noselect file nil)))
 	 (date (plist-get
 		(with-current-buffer file-buf
 		  (org-mode)
-		  (org-export--get-inbuffer-options))
+		  (org-export-get-environment))
 		:date)))
     (unless visiting (kill-buffer file-buf))
-    (if date (org-time-string-to-time date)
-      (when (file-exists-p file)
-	(nth 5 (file-attributes file))))))
+    ;; DATE is either a timestamp object or a secondary string.  If it
+    ;; is a timestamp or if the secondary string contains a timestamp,
+    ;; convert it to internal format.  Otherwise, use FILE
+    ;; modification time.
+    (cond ((eq (org-element-type date) 'timestamp)
+	   (org-time-string-to-time (org-element-interpret-data date)))
+	  ((let ((ts (and (consp date) (assq 'timestamp date))))
+	     (and ts (org-string-nw-p (org-element-interpret-data ts)))))
+	  ((file-exists-p file) (nth 5 (file-attributes file)))
+	  (t (error "No such file: \"%s\"" file)))))
 
 
 
