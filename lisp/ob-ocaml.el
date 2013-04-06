@@ -74,7 +74,11 @@
 					 (progn (setq out t) nil))))
 				   (mapcar #'org-babel-trim (reverse raw))))))))
     (org-babel-reassemble-table
-     (org-babel-ocaml-parse-output (org-babel-trim clean))
+     (let ((raw (org-babel-trim clean)))
+       (org-babel-result-cond (cdr (assoc :result-params params))
+	 ;; strip type information from output
+	 (if (string-match "= \\(.+\\)$" raw) (match-string 1 raw) raw)
+	 (org-babel-ocaml-parse-output raw)))
      (org-babel-pick-name
       (cdr (assoc :colname-names params)) (cdr (assoc :colnames params)))
      (org-babel-pick-name
