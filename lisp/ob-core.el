@@ -2637,10 +2637,14 @@ Emacs shutdown."))
 	     (member "html" ,result-params)
 	     (member "code" ,result-params)
 	     (member "pp" ,result-params)
-	     (and (member "output" ,result-params)
+	     (and (or (member "output" ,result-params)
+		      (member "raw"    ,result-params)
+		      (member "org"    ,result-params)
+		      (member "drawer" ,result-params))
 		  (not (member "table" ,result-params))))
 	 ,scalar-form
        ,@table-forms)))
+(def-edebug-spec org-babel-result-cond (form form body))
 
 (defun org-babel-temp-file (prefix &optional suffix)
   "Create a temporary file in the `org-babel-temporary-directory'.
