@@ -124,11 +124,10 @@
     (:html-head-include-default-style "HTML_INCLUDE_STYLE" nil org-html-head-include-default-style newline)
     (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil org-html-head-include-scripts newline)
     (:html-table-tag nil nil org-html-table-tag)
+    (:infojs-opt "INFOJS_OPT" nil nil)
     ;; Redefine regular options.
     (:creator "CREATOR" nil org-html-creator-string)
-    (:with-latex nil "tex" org-html-with-latex)
-    ;; Leave room for "ox-infojs.el" extension.
-    (:infojs-opt "INFOJS_OPT" nil nil)))
+    (:with-latex nil "tex" org-html-with-latex)))
 
 
 ;;; Internal Variables
@@ -870,8 +869,7 @@ Use utf-8 as the default value."
   :type 'coding-system)
 
 (defcustom org-html-doctype
-  "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"
-    \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
+  "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">"
   "Document type definition to use for exported HTML files.
 Can be set with the in-buffer HTML_DOCTYPE property or for
 publishing, with :html-doctype."
@@ -3292,7 +3290,6 @@ Return output file name."
 ;;;; org-html-inline-image-extensions
 ;;;; org-export-preferred-target-alist
 ;;;; class for anchors
-;;;; org-export-with-section-numbers, body-only
 ;;;; org-export-mark-todo-in-toc
 ;;;; org-html-format-org-link
 ;;;; (caption (and caption (org-xml-encode-org-text caption)))
