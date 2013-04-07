@@ -135,10 +135,6 @@
 (defvar org-html-format-table-no-css)
 (defvar htmlize-buffer-places)  ; from htmlize.el
 
-(defvar org-html--timestamp-format "%Y-%m-%d %a %H:%M"
-  "FORMAT used by `format-time-string' for timestamps in
-preamble, postamble and metadata.")
-
 (defvar org-html--pre/postamble-class "status"
   "CSS class used for pre/postamble")
 
@@ -921,6 +917,14 @@ org-info.js for your website."
 	       (list :tag "Postamble" (const :format "" postamble)
 		     (string :tag "     id") (string :tag "element"))))
 
+(defcustom org-html-metadata-timestamp-format "%Y-%m-%d %a %H:%M"
+  "Format used for timestamps in preamble, postamble and metadata.
+See `format-time-string' for more information on its components."
+  :group 'org-export-html
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'string)
+
 ;;;; Template :: Mathjax
 
 (defcustom org-html-mathjax-options
@@ -1441,7 +1445,7 @@ INFO is a plist used as a communication channel."
      (format
       (when :time-stamp-file
 	(format-time-string
-	 (concat "<!-- " org-html--timestamp-format " -->\n"))))
+	 (concat "<!-- " org-html-metadata-timestamp-format " -->\n"))))
      (format
       "<meta http-equiv=\"Content-Type\" content=\"text/html;charset=%s\"/>\n"
       (or (and org-html-coding-system
@@ -1509,7 +1513,7 @@ INFO is a plist used as a communication channel."
 used in the preamble or postamble."
   `((?t . ,(org-export-data (plist-get info :title) info))
     (?d . ,(org-export-data (org-export-get-date info) info))
-    (?T . ,(format-time-string org-html--timestamp-format))
+    (?T . ,(format-time-string org-html-metadata-timestamp-format))
     (?a . ,(org-export-data (plist-get info :author) info))
     (?e . ,(mapconcat
 	    (lambda (e)
@@ -1518,7 +1522,7 @@ used in the preamble or postamble."
 	    ", "))
     (?c . ,(plist-get info :creator))
     (?C . ,(let ((file (plist-get info :input-file)))
-	     (format-time-string org-html--timestamp-format
+	     (format-time-string org-html-metadata-timestamp-format
 				 (if file (nth 5 (file-attributes file))
 				   (current-time)))))
     (?v . ,(or org-html-validation-link ""))))
@@ -1561,10 +1565,9 @@ communication channel."
 		      (format
 		       "<p class=\"date\">%s: %s</p>\n"
 		       (org-html--translate "Created" info)
-		       (format-time-string org-html--timestamp-format)))
+		       (format-time-string org-html-metadata-timestamp-format)))
 		    (when (plist-get info :with-creator)
-		      (format "<p class=\"creator\">%s</p>\n"
-			      creator))
+		      (format "<p class=\"creator\">%s</p>\n" creator))
 		    (format "<p class=\"xhtml-validation\">%s</p>\n"
 			    validation-link))))
 		(t (format-spec
