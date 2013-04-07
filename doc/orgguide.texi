@@ -2090,7 +2090,7 @@ summarizes the markup rules used in an Org-mode buffer.
 
 @menu
 * Structural markup elements::	The basic structure as seen by the exporter
-* Images and tables::		Tables and Images will be included
+* Images and tables::		Images, tables and caption mechanism
 * Literal examples::		Source code examples with special formatting
 * Include files::		Include additional files into a document
 * Embedded @LaTeX{}::		@LaTeX{} can be freely used inside Org documents
@@ -2211,32 +2211,30 @@ Toggle the COMMENT keyword at the beginning of an entry.
 For Org mode tables, the lines before the first horizontal separator line
 will become table header lines.  You can use the following lines somewhere
 before the table to assign a caption and a label for cross references, and in
-the text you can refer to the object with @code{\ref@{tab:basic-data@}}:
+the text you can refer to the object with @code{[[tab:basic-data]]}:
 
 @smallexample
 #+CAPTION: This is the caption for the next table (or link)
-#+LABEL:   tbl:basic-data
+#+NAME:   tbl:basic-data
    | ... | ...|
    |-----|----|
 @end smallexample
 
-Some backends (HTML, @LaTeX{}, and DocBook) allow you to directly include
-images into the exported document.  Org does this, if a link to an image
-files does not have a description part, for example @code{[[./img/a.jpg]]}.
-If you wish to define a caption for the image and maybe a label for internal
-cross references, you sure that the link is on a line by itself precede it
-with:
+Some backends allow you to directly include images into the exported
+document.  Org does this, if a link to an image files does not have
+a description part, for example @code{[[./img/a.jpg]]}.  If you wish to
+define a caption for the image and maybe a label for internal cross
+references, you sure that the link is on a line by itself precede it with:
 
 @smallexample
 #+CAPTION: This is the caption for the next figure link (or table)
-#+LABEL:   fig:SED-HR4049
+#+NAME:   fig:SED-HR4049
 [[./img/a.jpg]]
 @end smallexample
 
-You may also define additional attributes for the figure.  As this is
-backend-specific, see the sections about the individual backends for more
-information.
-
+The same caption mechanism applies to other structures than images and tables
+(e.g., @LaTeX{} equations, source code blocks), provided the chosen export
+back-end supports them.
 
 @node Literal examples, Include files, Images and tables, Markup
 @section Literal examples
