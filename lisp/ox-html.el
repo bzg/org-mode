@@ -1025,7 +1025,7 @@ precedence over this variable."
   "Alist of languages and format strings for the HTML postamble.
 
 The first element of each list is the language code, as used for
-the LANGUAGE keyword.  See `org-export-default-language'
+the LANGUAGE keyword.  See `org-export-default-language'.
 
 The second element of each list is a format string to format the
 postamble itself.  This format string can contain these elements:
@@ -1034,10 +1034,10 @@ postamble itself.  This format string can contain these elements:
   %a stands for the author's name.
   %e stands for the author's email.
   %d stands for the date.
-  %c will be replaced by creator information.  See
-   `org-html-creator-string'.
+  %c will be replaced by `org-html-creator-string'.
   %v will be replaced by `org-html-validation-link'.
-  %T will be replaced by the creation time of the HTML file.
+  %T will be replaced by the export time.
+  %C will be replaced by the last modification time.
 
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
@@ -1086,7 +1086,7 @@ precedence over this variable."
   "Alist of languages and format strings for the HTML preamble.
 
 The first element of each list is the language code, as used for
-the #+LANGUAGE keyword.
+the LANGUAGE keyword.  See `org-export-default-language'.
 
 The second element of each list is a format string to format the
 preamble itself.  This format string can contain these elements:
@@ -1095,9 +1095,10 @@ preamble itself.  This format string can contain these elements:
   %a stands for the author's name.
   %e stands for the author's email.
   %d stands for the date.
-  %c will be replaced by information about Org/Emacs versions.
+  %c will be replaced by `org-html-creator-string'.
   %v will be replaced by `org-html-validation-link'.
-  %T will be replace by the creation time of the file.
+  %T will be replaced by the export time.
+  %C will be replaced by the last modification time.
 
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\".
@@ -1507,6 +1508,10 @@ used in the preamble or postamble."
 	    (split-string (plist-get info :email)  ",+ *")
 	    ", "))
     (?c . ,(plist-get info :creator))
+    (?C . ,(let ((file (plist-get info :input-file)))
+	     (format-time-string org-html--timestamp-format
+				 (if file (nth 5 (file-attributes file))
+				   (current-time)))))
     (?v . ,(or org-html-validation-link ""))))
 
 (defun org-html--build-pre/postamble (type info)
