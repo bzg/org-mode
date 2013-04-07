@@ -2525,8 +2525,8 @@ appropriate."
 
 (defun org-babel-number-p (string)
   "If STRING represents a number return its value."
-  (if (and (string-match "^-?[0-9]*\\.?[0-9]*$" string)
-	   (string-match "[0-9]+" string)
+  (if (and (string-match "[0-9]+" string)
+	   (string-match "^-?[0-9]*\\.?[0-9]*$" string)
            (= (length (substring string (match-beginning 0)
 				 (match-end 0)))
 	      (length string)))
