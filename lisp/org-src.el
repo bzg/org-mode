@@ -350,10 +350,11 @@ the display of windows containing the Org buffer and the code buffer."
 	 (if org-src-preserve-indentation col (max 0 (- col total-nindent))))
 	(org-src-mode)
 	(set-buffer-modified-p nil)
-	(setq buffer-file-name nil
-	      buffer-auto-save-file-name
-	      (concat (make-temp-name "org-src-")
-		      (format-time-string "-%Y-%d-%m") ".txt"))
+	(setq buffer-file-name nil)
+	(when auto-save-default
+	  (setq buffer-auto-save-file-name
+		(concat (make-temp-name "org-src-")
+			(format-time-string "-%Y-%d-%m") ".txt")))
 	(and org-edit-src-persistent-message
 	     (org-set-local 'header-line-format msg))
 	(let ((edit-prep-func (intern (concat "org-babel-edit-prep:" lang))))
