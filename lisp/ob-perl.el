@@ -106,10 +106,11 @@ specifying a var of the same value."
     my $rt = ref $rv;
     if (qq(ARRAY) eq $rt) {
         local $\\=$/;
+        local $,=qq(\t);
 	foreach my $rv ( @$rv ) {
 	    my $rt = ref $rv;
 	    if (qq(ARRAY) eq $rt) {
-		print join q(|), @$rv;
+		print @$rv;
 	    } else {
 		print $rv;
 	    }
