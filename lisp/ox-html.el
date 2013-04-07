@@ -779,23 +779,27 @@ See also the variable `org-html-table-align-individual-fields'."
   :type '(cons (string :tag "Opening tag") (string :tag "Closing tag")))
 
 (defcustom org-html-table-row-tags '("<tr>" . "</tr>")
-  "The opening tag for table data fields.
+  "The opening and ending tags for table rows.
 This is customizable so that alignment options can be specified.
-Instead of strings, these can be Lisp forms that will be evaluated
-for each row in order to construct the table row tags.  During evaluation,
-the variable `head' will be true when this is a header line, nil when this
-is a body line.  And the variable `nline' will contain the line number,
-starting from 1 in the first header line.  For example
+Instead of strings, these can be Lisp forms that will be
+evaluated for each row in order to construct the table row tags.
+
+During evaluation, these variables will be dynamically bound so that
+you can reuse them:
+
+  `rowgroup-number': group number of current row
+ `start-rowgroup-p': non-nil means the row starts a group
+   `end-rowgroup-p': non-nil means the row ends a group
+        `top-row-p': non-nil means this is the top row
+     `bottom-row-p': non-nil means this is the bottom row
+
+For example:
 
   (setq org-html-table-row-tags
-        (cons '(if head
-                   \"<tr>\"
-                 (if (= (mod nline 2) 1)
-                     \"<tr class=\\\"tr-odd\\\">\"
-                   \"<tr class=\\\"tr-even\\\">\"))
-              \"</tr>\"))
+        (cons '(cond (top-row-p \"<tr class=\\\"tr-top\\\">\")
+                     (bottom-row-p \"<tr class=\\\"tr-bottom\\\">\"))))
 
-will give even lines the class \"tr-even\" and odd lines the class \"tr-odd\"."
+will use the \"tr-top\" and \"tr-bottom\" classes for top and bottom row."
   :group 'org-export-html
   :type '(cons
 	  (choice :tag "Opening tag"
@@ -2961,11 +2965,22 @@ communication channel."
   ;; Rules are ignored since table separators are deduced from
   ;; borders of the current row.
   (when (eq (org-element-property :type table-row) 'standard)
-    (let* ((first-rowgroup-p (= 1 (org-export-table-row-group table-row info)))
+    (let* ((rowgroup-number (org-export-table-row-group table-row info))
+	   (start-rowgroup-p
+	    (org-export-table-row-starts-rowgroup-p table-row info))
+	   (end-rowgroup-p
+	    (org-export-table-row-ends-rowgroup-p table-row info))
+	   ;; `top-row-p' and `end-rowgroup-p' are not used directly
+	   ;; but should be set so that `org-html-table-row-tags' can
+	   ;; use them (see the docstring of this variable.)
+	   (top-row-p (and (equal start-rowgroup-p '(top))
+			   (equal end-rowgroup-p '(below top))))
+	   (bottom-row-p (and (equal start-rowgroup-p '(above))
+			      (equal end-rowgroup-p '(bottom above))))
 	   (rowgroup-tags
 	    (cond
 	     ;; Case 1: Row belongs to second or subsequent rowgroups.
-	     ((not (= 1 (org-export-table-row-group table-row info)))
+	     ((not (= 1 rowgroup-number))
 	      '("<tbody>" . "\n</tbody>"))
 	     ;; Case 2: Row is from first rowgroup.  Table has >=1 rowgroups.
 	     ((org-export-table-has-header-p
@@ -2975,16 +2990,14 @@ communication channel."
 	     (t '("<tbody>" . "\n</tbody>")))))
       (concat
        ;; Begin a rowgroup?
-       (when (org-export-table-row-starts-rowgroup-p table-row info)
-	 (car rowgroup-tags))
+       (when start-rowgroup-p (car rowgroup-tags))
        ;; Actual table row
        (concat "\n" (eval (car org-html-table-row-tags))
 	       contents
 	       "\n"
 	       (eval (cdr org-html-table-row-tags)))
        ;; End a rowgroup?
-       (when (org-export-table-row-ends-rowgroup-p table-row info)
-	 (cdr rowgroup-tags))))))
+       (when end-rowgroup-p (cdr rowgroup-tags))))))
 
 ;;;; Table
 
