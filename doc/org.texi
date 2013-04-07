@@ -13516,7 +13516,7 @@ Emacs Lisp, as shown in the following example.
 @node results, file, var, Specific header arguments
 @subsubsection @code{:results}
 
-There are three classes of @code{:results} header argument.  Only one option
+There are four classes of @code{:results} header argument.  Only one option
 per class may be supplied per code block.
 
 @itemize @bullet
@@ -13525,6 +13525,10 @@ per class may be supplied per code block.
 from the code block
 @item
 @b{type} header arguments specify what type of result the code block will
+return---which has implications for how they will be processed before
+insertion into the Org mode buffer
+@item
+@b{format} header arguments specify what type of result the code block will
 return---which has implications for how they will be inserted into the
 Org mode buffer
 @item
@@ -13570,6 +13574,15 @@ buffer as quoted text.  E.g., @code{:results value verbatim}.
 @item @code{file}
 The results will be interpreted as the path to a file, and will be inserted
 into the Org mode buffer as a file link.  E.g., @code{:results value file}.
+@end itemize
+
+@subsubheading Format
+
+The following options are mutually exclusive and specify what type of results
+the code block will return.  By default, results are inserted accoring to the
+type as specified above.
+
+@itemize @bullet
 @item @code{raw}
 The results are interpreted as raw Org mode code and are inserted directly
 into the buffer.  If the results look like a table they will be aligned as
@@ -14004,8 +14017,7 @@ values @code{yes} or @code{no}, with a default value of @code{no}.
 Strips horizontal lines from the input table.  In most languages this is the
 desired effect because an @code{hline} symbol is interpreted as an unbound
 variable and raises an error.  Setting @code{:hlines no} or relying on the
-default value yields the following results.  Note that the @code{:hline}
-header argument has no effect for Emacs Lisp code blocks.
+default value yields the following results.
 
 @example
 #+TBLNAME: many-cols
@@ -14057,9 +14069,7 @@ Leaves hlines in the table.  Setting @code{:hlines yes} has this effect.
 The @code{:colnames} header argument accepts the values @code{yes},
 @code{no}, or @code{nil} for unassigned.  The default value is @code{nil}.
 Note that the behavior of the @code{:colnames} header argument may differ
-across languages.  For example Emacs Lisp code blocks ignore the
-@code{:colnames} header argument entirely given the ease with which tables
-with column names may be handled directly in Emacs Lisp.
+across languages.
 
 @itemize @bullet
 @item @code{nil}
