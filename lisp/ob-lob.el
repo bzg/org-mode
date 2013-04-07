@@ -121,6 +121,7 @@ if so then run the appropriate source block from the Library."
   (let* ((mkinfo (lambda (p) (list "emacs-lisp" "results" p nil nil (nth 2 info))))
 	 (pre-params (org-babel-merge-params
 		      org-babel-default-header-args
+		      org-babel-default-header-args:emacs-lisp
 		      (org-babel-params-from-properties)
 		      (org-babel-parse-header-arguments
 		       (org-no-properties
