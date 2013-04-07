@@ -1526,7 +1526,7 @@ for export.  Return options as a plist."
   ;; is the keyword with "EXPORT_" appended to it.
   (org-with-wide-buffer
    (let (prop plist)
-     ;; Make sure point is at an heading.
+     ;; Make sure point is at a heading.
      (if (org-at-heading-p) (org-up-heading-safe) (org-back-to-heading t))
      ;; Take care of EXPORT_TITLE. If it isn't defined, use headline's
      ;; title as its fallback value.
@@ -4318,11 +4318,11 @@ All special columns will be ignored during export."
       (eq special-column-p 'special))))
 
 (defun org-export-table-has-header-p (table info)
-  "Non-nil when TABLE has an header.
+  "Non-nil when TABLE has a header.
 
 INFO is a plist used as a communication channel.
 
-A table has an header when it contains at least two row groups."
+A table has a header when it contains at least two row groups."
   (let ((rowgroup 1) row-flag)
     (org-element-map table 'table-row
       (lambda (row)
