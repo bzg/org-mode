@@ -4612,7 +4612,8 @@ First element has index 0, or I0 if given."
     fmt))
 
 (defsubst orgtbl-apply-fmt (fmt &rest args)
-  "Apply format FMT to the arguments.  NIL FMTs return the first argument."
+  "Apply format FMT to arguments ARGS.
+When FMT is nil, return the first argument from ARGS."
   (cond ((functionp fmt) (apply fmt args))
 	(fmt (apply 'format fmt args))
 	(args (car args))
