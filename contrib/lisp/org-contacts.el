@@ -834,6 +834,8 @@ to do our best."
 	 (name (org-contacts-vcard-escape (car contact)))
 	 (n (org-contacts-vcard-encode-name name))
 	 (email (cdr (assoc-string org-contacts-email-property properties)))
+	 (tel  (cdr (assoc-string org-contacts-tel-property properties)))
+	 (note (cdr (assoc-string org-contacts-note-property properties)))
 	 (bday (org-contacts-vcard-escape (cdr (assoc-string org-contacts-birthday-property properties))))
 	 (addr (cdr (assoc-string org-contacts-address-property properties)))
 	 (nick (org-contacts-vcard-escape (cdr (assoc-string org-contacts-nickname-property properties))))
