@@ -3383,7 +3383,7 @@ a number.  Marked objects will then be referenced by links pointing to them.
 In particular, links without a description will appear as the number assigned
 to the marked object@footnote{When targeting a @code{#+NAME} keyword,
 @code{#+CAPTION} keyword is mandatory in order to get proper numbering
-(@pxref{Images and Tables}).}.  In the following excerpt from an Org buffer
+(@pxref{Images and tables}).}.  In the following excerpt from an Org buffer
 
 @example
 - one item
