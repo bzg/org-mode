@@ -2294,7 +2294,7 @@ processed normally. @kbd{C-c '} will visit the included file.
 
 For scientific notes which need to be able to contain mathematical symbols
 and the occasional formula, Org-mode supports embedding @LaTeX{} code into
-its files.  You can directly use TeX-like macros for special symbols, enter
+its files.  You can directly use TeX-like syntax for special symbols, enter
 formulas and entire @LaTeX{} environments.
 
 @smallexample

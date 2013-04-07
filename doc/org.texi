@@ -9834,11 +9834,11 @@ readily processed to produce pretty output for a number of export backends.
 @cindex HTML entities
 @cindex @LaTeX{} entities
 
-You can use @LaTeX{} macros to insert special symbols like @samp{\alpha} to
-indicate the Greek letter, or @samp{\to} to indicate an arrow.  Completion
-for these macros is available, just type @samp{\} and maybe a few letters,
+You can use @LaTeX{}-like syntax to insert special symbols like @samp{\alpha}
+to indicate the Greek letter, or @samp{\to} to indicate an arrow.  Completion
+for these symbols is available, just type @samp{\} and maybe a few letters,
 and press @kbd{M-@key{TAB}} to see possible completions.  Unlike @LaTeX{}
-code, Org mode allows these macros to be present without surrounding math
+code, Org mode allows these symbols to be present without surrounding math
 delimiters, for example:
 
 @example
@@ -9847,7 +9847,7 @@ Angles are written as Greek letters \alpha, \beta and \gamma.
 
 @vindex org-entities
 During export, these symbols will be transformed into the native format of
-the exporter backend.  Strings like @code{\alpha} will be exported as
+the exporter back-end.  Strings like @code{\alpha} will be exported as
 @code{&alpha;} in the HTML output, and as @code{$\alpha$} in the @LaTeX{}
 output.  Similarly, @code{\nbsp} will become @code{&nbsp;} in HTML and
 @code{~} in @LaTeX{}.  If you need such a symbol inside a word, terminate it
@@ -9859,7 +9859,7 @@ A large number of entities is provided, with names taken from both HTML and
 @samp{...} are all converted into special commands creating hyphens of
 different lengths or a compact set of dots.
 
-If you would like to see entities displayed as UTF8 characters, use the
+If you would like to see entities displayed as UTF-8 characters, use the
 following command@footnote{You can turn this on by default by setting the
 variable @code{org-pretty-entities}, or on a per-file base with the
 @code{#+STARTUP} option @code{entitiespretty}.}:
@@ -9877,31 +9877,25 @@ for display purposes only.
 @cindex subscript
 @cindex superscript
 
-Just like in @LaTeX{}, @samp{^} and @samp{_} are used to indicate super-
-and subscripts.  Again, these can be used without embedding them in
-math-mode delimiters.  To increase the readability of ASCII text, it is
-not necessary (but OK) to surround multi-character sub- and superscripts
-with curly braces.  For example
+Just like in @LaTeX{}, @samp{^} and @samp{_} are used to indicate super- and
+subscripts.  Again, these can be used without embedding them in math-mode
+delimiters.  To increase the readability of ASCII text, it is not necessary
+(but OK) to surround multi-character sub- and superscripts with curly braces.
+For example
 
 @example
 The mass of the sun is M_sun = 1.989 x 10^30 kg.  The radius of
 the sun is R_@{sun@} = 6.96 x 10^8 m.
 @end example
 
-@vindex org-export-with-sub-superscripts
+@vindex org-use-sub-superscripts
 To avoid interpretation as raised or lowered text, you can quote @samp{^} and
 @samp{_} with a backslash: @samp{\^} and @samp{\_}.  If you write a text
 where the underscore is often used in a different context, Org's convention
 to always interpret these as subscripts can get in your way.  Configure the
-variable @code{org-export-with-sub-superscripts} to globally change this
-convention, or use, on a per-file basis:
-
-@example
-#+OPTIONS: ^:@{@}
-@end example
-
-@noindent With this setting, @samp{a_b} will not be interpreted as a
-subscript, but @samp{a_@{b@}} will.
+variable @code{org-use-sub-superscripts} to change this convention.  For
+example, when setting this variable to @code{@{@}}, @samp{a_b} will not be
+interpreted as a subscript, but @samp{a_@{b@}} will.
 
 @table @kbd
 @kindex C-c C-x \
@@ -9917,28 +9911,28 @@ format sub- and superscripts in a WYSIWYM way.
 @vindex org-format-latex-header
 Going beyond symbols and sub- and superscripts, a full formula language is
 needed.  Org mode can contain @LaTeX{} math fragments, and it supports ways
-to process these for several export backends.  When exporting to @LaTeX{},
+to process these for several export back-ends.  When exporting to @LaTeX{},
 the code is obviously left as it is.  When exporting to HTML, Org invokes the
 @uref{http://www.mathjax.org, MathJax library} (@pxref{Math formatting in
 HTML export}) to process and display the math@footnote{If you plan to use
 this regularly or on pages with significant page views, you should install
-@file{MathJax} on your own
-server in order to limit the load of our server.}.  Finally, it can also
-process the mathematical expressions into images@footnote{For this to work
-you need to be on a system with a working @LaTeX{} installation.  You also
-need the @file{dvipng} program or the @file{convert}, respectively available
-at @url{http://sourceforge.net/projects/dvipng/} and from the
-@file{imagemagick} suite.  The @LaTeX{} header that will be used when
-processing a fragment can be configured with the variable
-@code{org-format-latex-header}.} that can be displayed in a browser.
+@file{MathJax} on your own server in order to limit the load of our server.}.
+Finally, it can also process the mathematical expressions into
+images@footnote{For this to work you need to be on a system with a working
+@LaTeX{} installation.  You also need the @file{dvipng} program or the
+@file{convert}, respectively available at
+@url{http://sourceforge.net/projects/dvipng/} and from the @file{imagemagick}
+suite.  The @LaTeX{} header that will be used when processing a fragment can
+be configured with the variable @code{org-format-latex-header}.} that can be
+displayed in a browser.
 
 @LaTeX{} fragments don't need any special marking at all.  The following
 snippets will be identified as @LaTeX{} source code:
 @itemize @bullet
 @item
 Environments of any kind@footnote{When @file{MathJax} is used, only the
-environment recognized by @file{MathJax} will be processed.  When
-@file{dvipng} is used to create images, any @LaTeX{} environments will be
+environments recognized by @file{MathJax} will be processed.  When
+@file{dvipng} is used to create images, any @LaTeX{} environment will be
 handled.}.  The only requirement is that the @code{\begin} and @code{\end}
 statements appear on a new line, at the beginning of the line or after
 whitespaces only.
@@ -9955,9 +9949,9 @@ For the other delimiters, there is no such restriction, so when in doubt, use
 @noindent For example:
 
 @example
-\begin@{equation@}                          % arbitrary environments,
-x=\sqrt@{b@}                                % even tables, figures
-\end@{equation@}                            % etc
+\begin@{equation@}
+x=\sqrt@{b@}
+\end@{equation@}
 
 If $a^2=b$ and \( b=2 \), then the solution must be
 either $$ a=+\sqrt@{2@} $$ or \[ a=-\sqrt@{2@} \].
@@ -9978,18 +9972,22 @@ You can also set this variable on a per-file basis using one of these
 lines:
 
 @example
-#+OPTIONS: LaTeX:t          @r{Do the right thing automatically (MathJax)}
-#+OPTIONS: LaTeX:dvipng     @r{Force using dvipng images}
-#+OPTIONS: LaTeX:nil        @r{Do not process @LaTeX{} fragments at all}
-#+OPTIONS: LaTeX:verbatim   @r{Verbatim export, for jsMath or so}
+#+OPTIONS: tex:t          @r{Do the right thing automatically (MathJax)}
+#+OPTIONS: tex:dvipng     @r{Force using dvipng images}
+#+OPTIONS: tex:nil        @r{Do not process @LaTeX{} fragments at all}
+#+OPTIONS: tex:verbatim   @r{Verbatim export, for jsMath or so}
 @end example
 
 @node Previewing @LaTeX{} fragments, CDLaTeX mode, @LaTeX{} fragments, Embedded @LaTeX{}
 @subsection Previewing @LaTeX{} fragments
 @cindex @LaTeX{} fragments, preview
 
-If you have @file{dvipng} installed, @LaTeX{} fragments can be processed to
-produce preview images of the typeset expressions:
+@vindex org-latex-create-formula-image-program
+If you have @file{dvipng} or @file{imagemagick} installed@footnote{Choose the
+converter by setting the variable
+@code{org-latex-create-formula-image-program} accordingly.}, @LaTeX{}
+fragments can be processed to produce preview images of the typeset
+expressions:
 
 @table @kbd
 @kindex C-c C-x C-l
