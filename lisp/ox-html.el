@@ -892,7 +892,7 @@ org-info.js for your website."
   '((preamble  "div" "preamble")
     (content   "div" "content")
     (postamble "div" "postamble"))
-  "Alist of the threed section elements for HTML export.
+  "Alist of the three section elements for HTML export.
 The car of each entry is one of 'preamble, 'content or 'postamble.
 The cdrs of each entry are the ELEMENT_TYPE and ID for each
 section of the exported document.
