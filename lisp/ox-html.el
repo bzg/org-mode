@@ -1037,6 +1037,7 @@ postamble itself.  This format string can contain these elements:
   %c will be replaced by `org-html-creator-string'.
   %v will be replaced by `org-html-validation-link'.
   %T will be replaced by the export time.
+  %C will be replaced by the last modification time.
 
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\"."
@@ -1097,6 +1098,7 @@ preamble itself.  This format string can contain these elements:
   %c will be replaced by `org-html-creator-string'.
   %v will be replaced by `org-html-validation-link'.
   %T will be replaced by the export time.
+  %C will be replaced by the last modification time.
 
 If you need to use a \"%\" character, you need to escape it
 like that: \"%%\".
@@ -1506,6 +1508,10 @@ used in the preamble or postamble."
 	    (split-string (plist-get info :email)  ",+ *")
 	    ", "))
     (?c . ,(plist-get info :creator))
+    (?C . ,(let ((file (plist-get info :input-file)))
+	     (format-time-string org-html--timestamp-format
+				 (if file (nth 5 (file-attributes file))
+				   (current-time)))))
     (?v . ,(or org-html-validation-link ""))))
 
 (defun org-html--build-pre/postamble (type info)
