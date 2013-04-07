@@ -44,7 +44,7 @@
     (org-babel-next-src-block)
     (should (= 15 (org-babel-execute-src-block)))))
 
-(ert-deftest ob-fortran/preprosessor-var ()
+(ert-deftest ob-fortran/preprocessor-var ()
   "Test preprocessed fortran"
   (org-test-at-id "d8d1dfd3-5f0c-48fe-b55d-777997e02242"
     (org-babel-next-src-block 2)
