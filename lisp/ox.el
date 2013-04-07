@@ -4375,8 +4375,8 @@ All special rows will be ignored during export."
 
 INFO is a plist used as the communication channel.
 
-Return value is the group number, as an integer, or nil special
-rows and table rules.  Group 1 is also table's header."
+Return value is the group number, as an integer, or nil for
+special rows and table rules.  Group 1 is also table's header."
   (unless (or (eq (org-element-property :type table-row) 'rule)
 	      (org-export-table-row-is-special-p table-row info))
     (let ((group 0) row-flag)
