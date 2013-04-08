@@ -926,19 +926,23 @@ was started."
 		(with-output-to-temp-buffer "*Org Clock*"
 		  (princ "Select a Clock Resolution Command:
 
-i/q/C-g  Ignore this question; the same as keeping all the idle time.
+i/q      Ignore this question; the same as keeping all the idle time.
 
 k/K      Keep X minutes of the idle time (default is all).  If this
          amount is less than the default, you will be clocked out
          that many minutes after the time that idling began, and then
          clocked back in at the present time.
+
 g/G      Indicate that you \"got back\" X minutes ago.  This is quite
          different from 'k': it clocks you out from the beginning of
          the idle period and clock you back in X minutes ago.
+
 s/S      Subtract the idle time from the current clock.  This is the
          same as keeping 0 minutes.
+
 C        Cancel the open timer altogether.  It will be as though you
          never clocked in.
+
 j/J      Jump to the current clock, to make manual adjustments.
 
 For all these options, using uppercase makes your final state
