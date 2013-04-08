@@ -138,13 +138,13 @@ will be used to define the footnote at the reference position."
   "Non-nil means define automatically new labels for footnotes.
 Possible values are:
 
-nil        prompt the user for each label
-t          create unique labels of the form [fn:1], [fn:2], ...
-confirm    like t, but let the user edit the created value.  In particular,
-           the label can be removed from the minibuffer, to create
+nil        Prompt the user for each label.
+t          Create unique labels of the form [fn:1], [fn:2], etc.
+confirm    Like t, but let the user edit the created value.
+           The label can be removed from the minibuffer to create
            an anonymous footnote.
 random	   Automatically generate a unique, random label.
-plain      Automatically create plain number labels like [1]"
+plain      Automatically create plain number labels like [1]."
   :group 'org-footnote
   :type '(choice
 	  (const :tag "Prompt for label" nil)
