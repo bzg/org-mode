@@ -4331,7 +4331,8 @@ items if they have an hour specification like [h]h:mm."
 	(t n)))
 
 (defun org-agenda-span-to-ndays (span &optional start-day)
-  "Return ndays from SPAN, possibly starting at START-DAY."
+  "Return ndays from SPAN, possibly starting at START-DAY.
+START-DAY is an absolute time value."
   (cond ((numberp span) span)
 	((eq span 'day) 1)
 	((eq span 'week) 7)
@@ -7731,7 +7732,9 @@ Negative selection means regexp must not match for selection of an entry."
 	 (2-arg (nth 2 args))
 	 (with-hour-p (nth 4 org-agenda-redo-command))
 	 (newcmd (list 'org-agenda-list 0-arg date
-		       (org-agenda-span-to-ndays 2-arg)	with-hour-p))
+		       (org-agenda-span-to-ndays
+			2-arg (org-time-string-to-absolute date))
+		       with-hour-p))
 	 (newargs (cdr newcmd))
 	 (inhibit-read-only t)
 	 org-agenda-sticky)
