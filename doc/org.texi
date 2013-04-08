@@ -14810,7 +14810,7 @@ as if they had been included in the buffer.  In particular, the file can be
 any other Org mode file with internal setup.  You can visit the file the
 cursor is in the line with @kbd{C-c '}.
 @item #+STARTUP:
-@cindex #+STARTUP:
+@cindex #+STARTUP
 This line sets options to be used at startup of Org mode, when an
 Org file is being visited.
 
