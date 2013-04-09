@@ -6068,9 +6068,9 @@ the task will automatically be forwarded until completed.
 If you want to @emph{delay} the display of this task in the agenda, use
 @code{SCHEDULED: <2004-12-25 Sat -2d>}: the task is still scheduled on the
 25th but will appear two days later.  In case the task contains a repeater,
-the delay is considered to affect all occurrences; if you want it to affect
-only the first scheduled occurrence of the task, use @code{--2d} instead.
-See @code{org-scheduled-delay-days} and
+the delay is considered to affect all occurrences; if you want the delay to
+only affect the first scheduled occurrence of the task, use @code{--2d}
+instead.  See @code{org-scheduled-delay-days} and
 @code{org-agenda-skip-scheduled-delay-if-deadline} for details on how to
 control this globally or per agenda.
 
