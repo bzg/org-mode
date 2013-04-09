@@ -16865,9 +16865,13 @@ Eric is maintaining the Babel parts of Org.  His reactivity here kept me away
 from worrying about possible bugs here and let me focus on other parts.
 
 @item Nicolas Goaziou
-Nicolas is maintaining the consistency of the deepest parts of Org.  His work
-on @file{org-element.el} and @file{org-export.el} has been outstanding, and
-opened the doors for many new ideas and features.
+Nicolas is maintaining the consistency of the deepest parts of Org.  His
+work on @file{org-element.el} and @file{ox.el} has been outstanding, and
+opened the doors for many new ideas and features.  He rewrote many of the
+old exporters to use the new export engine, and helped with documenting
+this major change.  More importantly (if that's possible), he has been more
+than reliable during all the work done for Org 8.0, and always very
+reactive on the mailing list.
 
 @item Achim Gratz
 Achim rewrote the building process of Org, turning some @emph{ad hoc} tools
