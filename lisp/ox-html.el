@@ -796,7 +796,9 @@ For example:
 
   (setq org-html-table-row-tags
         (cons '(cond (top-row-p \"<tr class=\\\"tr-top\\\">\")
-                     (bottom-row-p \"<tr class=\\\"tr-bottom\\\">\"))))
+                     (bottom-row-p \"<tr class=\\\"tr-bottom\\\">\")
+                     (t \"<tr>\"))
+              \"</tr>\"))
 
 will use the \"tr-top\" and \"tr-bottom\" classes for top and bottom row."
   :group 'org-export-html
