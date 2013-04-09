@@ -576,9 +576,9 @@ Embedded @LaTeX{}
 
 Exporting
 
-* Selective export::            Using tags to select and exclude trees
-* Export options::              Per-file export settings
-* The export dispatcher::       How to access exporter commands
+* The Export Dispatcher::       The main exporter interface
+* Export formats::              Available export formats
+* Export settings::             Generic export settings
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
@@ -9342,7 +9342,7 @@ markup rules used in an Org mode buffer.
 
 @menu
 * Structural markup elements::  The basic structure as seen by the exporter
-* Images and tables::           Tables and Images will be included
+* Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
 * Index entries::               Making an index
@@ -10087,24 +10087,21 @@ is normal.
 @chapter Exporting
 @cindex exporting
 
-Org mode documents can be exported into a variety of other formats.  For
-printing and sharing notes, ASCII export produces a readable and simple
+Org mode documents can be exported into a variety of other formats.
+
+For printing and sharing notes, ASCII export produces a readable and simple
 version of an Org file.  HTML export allows you to publish a notes file on
 the web.  @LaTeX{} export lets you use Org mode and its structured editing
 functions to easily create @LaTeX{} files.  OpenDocument Text (ODT) export
 allows seamless collaboration across organizational boundaries.  To
 incorporate entries with associated times like deadlines or appointments into
 a desktop calendar program like iCal, Org mode can also produce extracts in
-the iCalendar format.  Currently, Org mode only supports export, not import
-of these different formats.
-
-Org supports export of selected regions when @code{transient-mark-mode} is
-enabled (default in Emacs 23).
+the iCalendar format.
 
 @menu
-* Selective export::            Using tags to select and exclude trees
-* Export options::              Per-file export settings
-* The export dispatcher::       How to access exporter commands
+* The Export Dispatcher::       The main exporter interface
+* Export formats::              Available export formats
+* Export settings::             Generic export settings
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
@@ -10112,187 +10109,315 @@ enabled (default in Emacs 23).
 * iCalendar export::            Exporting in iCalendar format
 @end menu
 
-@node Selective export, Export options, Exporting, Exporting
-@section Selective export
-@cindex export, selective by tags or TODO keyword
+@node The Export Dispatcher, Export formats, Exporting, Exporting
+@section The Export Dispatcher
+@vindex org-export-dispatch-use-expert-ui
+@cindex Export, dispatcher
 
-@vindex org-export-select-tags
-@vindex org-export-exclude-tags
-@cindex org-export-with-tasks
-You may use tags to select the parts of a document that should be exported,
-or to exclude parts from export.  This behavior is governed by two variables:
-@code{org-export-select-tags} and @code{org-export-exclude-tags},
-respectively defaulting to @code{'(:export:)} and @code{'(:noexport:)}.
+The main entry point for any export related task is the dispatcher, a
+hierarchical menu@footnote{It is also possible to use a less intrusive
+interface by setting @var{org-export-dispatch-use-expert-ui} to a non-nil
+value.  In that case, only a prompt is visible from the minibuffer.  From
+there one can still switch back to regular menu with @kbd{?} key.} from
+which it is possible to select an export format and to toggle export
+options.
 
-@enumerate
-@item
-Org first checks if any of the @emph{select} tags is present in the
-buffer.  If yes, all trees that do not carry one of these tags will be
-excluded.  If a selected tree is a subtree, the heading hierarchy above it
-will also be selected for export, but not the text below those headings.
+@c @quotation
+@table @asis
+@orgcmd{C-c C-e,org-export-dispatch}
 
-@item
-If none of the select tags is found, the whole buffer will be selected for
-export.
+Dispatch for export and publishing commands.  When called with @kbd{C-u}
+prefix argument, repeat last command, preserving toggled options, on
+current buffer.  If the active buffer hasn't changed and subtree export was
+activated, the command will affect that same subtree.
+@end table
+@c @end quotation
 
-@item
-Finally, all subtrees that are marked by any of the @emph{exclude} tags will
-be removed from the export buffer.
-@end enumerate
+Normally the entire buffer is exported, but if there is an active region
+only that part of the buffer will be exported.
 
-The variable @var{org-export-with-tasks} can be configured to select which
-kind of tasks should be included for export.  See the docstring of the
-variable for more information.
-
-@node Export options, The export dispatcher, Selective export, Exporting
-@section Export options
-@cindex options, for export
-
-@cindex completion, of option keywords
-The exporter recognizes special lines in the buffer which provide
-additional information.  These lines may be put anywhere in the file.
-The whole set of lines can be inserted into the buffer with @kbd{C-c
-C-e t}.  For individual lines, a good way to make sure the keyword is
-correct is to type @samp{#+} and then use @kbd{M-@key{TAB}} completion
-(@pxref{Completion}).   For a summary of other in-buffer settings not
-specifically related to export, see @ref{In-buffer settings}.
-
-In particular, note that you can place commonly-used (export) options in
-a separate file which can be included using @code{#+SETUPFILE}.
-
-@cindex #+TITLE
-@cindex #+AUTHOR
-@cindex #+DATE
-@cindex #+EMAIL
-@cindex #+DESCRIPTION
-@cindex #+KEYWORDS
-@cindex #+LANGUAGE
-@cindex #+TEXT
-@cindex #+OPTIONS
-@cindex #+BIND
-@cindex #HTML_HEAD
-@cindex #+HTML_LINK_UP
-@cindex #+HTML_LINK_HOME
-@cindex #+SELECT_TAGS
-@cindex #+EXCLUDE_TAGS
-@cindex #+LATEX_HEADER
-@cindex #+LATEX_HEADER_EXTRA
-@vindex user-full-name
-@vindex user-mail-address
-@vindex org-export-default-language
-@vindex org-export-allow-bind-keywords
-@example
-#+TITLE:       the title to be shown (default is the buffer name)
-#+AUTHOR:      the author (default taken from @code{user-full-name})
-#+DATE:        a date, an Org timestamp@footnote{@code{org-export-date-timestamp-format} defines how this timestamp will be exported.}, or a format string for @code{format-time-string}
-#+EMAIL:       his/her email address (default from @code{user-mail-address})
-#+DESCRIPTION: the page description, e.g., for the XHTML meta tag
-#+KEYWORDS:    the page keywords, e.g., for the XHTML meta tag
-#+LANGUAGE:    language for HTML, e.g., @samp{en} (@code{org-export-default-language})
-#+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
-#+BIND:        lisp-var lisp-val, e.g., @code{org-latex-image-default-width ".7\\linewidth"}
-               @r{Configure @code{org-export-allow-bind-keywords} to use this}
-#+HTML_HEAD:   Additional line to the @samp{<head>...</head>} of the HTML output
-#+HTML_LINK_UP:     the ``up'' link of an exported page
-#+HTML_LINK_HOME:   the ``home'' link of an exported page
-#+LATEX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
-#+LATEX_HEADER_EXTRA: similar to #+LATEX_HEADER, but ignored when previewing math snippets
-#+SELECT_TAGS:   Tags that select a tree for export
-#+EXCLUDE_TAGS:  Tags that exclude a tree from export
-@end example
-
-@noindent
-The @code{#+OPTIONS} line is a compact@footnote{If you want to configure many options
-this way, you can use several @code{#+OPTIONS} lines.} form to specify export
-settings.  Here you can:
-@cindex headline levels
-@cindex section-numbers
-@cindex table of contents
-@cindex line-break preservation
-@cindex quoted HTML tags
-@cindex fixed-width sections
-@cindex tables
-@cindex @TeX{}-like syntax for sub- and superscripts
-@cindex footnotes
-@cindex special strings
-@cindex emphasized text
-@cindex @TeX{} macros
-@cindex @LaTeX{} fragments
-@cindex author info, in export
-@cindex time info, in export
-@vindex org-export-author-info
-@vindex org-export-creator-info
-@vindex org-export-email-info
-@vindex org-export-time-stamp-file
-@example
-H:         @r{set the number of headline levels for export}
-num:       @r{turn on/off section-numbers}
-toc:       @r{turn on/off table of contents, or set level limit (integer)}
-\n:        @r{turn on/off line-break-preservation (DOES NOT WORK)}
-@@:         @r{turn on/off quoted HTML tags}
-::         @r{turn on/off fixed-width sections}
-|:         @r{turn on/off tables}
-^:         @r{turn on/off @TeX{}-like syntax for sub- and superscripts.  If}
-           @r{you write "^:@{@}", @code{a_@{b@}} will be interpreted, but}
-           @r{the simple @code{a_b} will be left as it is.}
--:         @r{turn on/off conversion of special strings.}
-f:         @r{turn on/off footnotes like this[1].}
-todo:      @r{turn on/off inclusion of TODO keywords into exported text}
-tasks:     @r{turn on/off inclusion of tasks (TODO items), can be nil to remove}
-           @r{all tasks, @code{todo} to remove DONE tasks, or list of kwds to keep}
-pri:       @r{turn on/off priority cookies}
-tags:      @r{turn on/off inclusion of tags, may also be @code{not-in-toc}}
-<:         @r{turn on/off inclusion of any time/date stamps like DEADLINES}
-*:         @r{turn on/off emphasized text (bold, italic, underlined)}
-TeX:       @r{turn on/off simple @TeX{} macros in plain text}
-LaTeX:     @r{configure export of @LaTeX{} fragments.  Default @code{auto}}
-skip:      @r{turn on/off skipping the text before the first heading}
-author:    @r{turn on/off inclusion of author name/email into exported file}
-email:     @r{turn on/off inclusion of author email into exported file}
-creator:   @r{turn on/off inclusion of creator info into exported file}
-timestamp: @r{turn on/off inclusion creation time into exported file}
-d:         @r{turn on/off inclusion of drawers, or list drawers to include}
-@end example
-@noindent
-These options take effect in both the HTML and @LaTeX{} export, except for
-@code{TeX} and @code{LaTeX} options, which are respectively @code{t} and
-@code{nil} for the @LaTeX{} export.
-
-When exporting only a single subtree by selecting it with @kbd{C-c @@} before
-calling an export command, the subtree can overrule some of the file's export
-settings with properties @code{EXPORT_FILE_NAME}, @code{EXPORT_TITLE},
-@code{EXPORT_TEXT}, @code{EXPORT_AUTHOR}, @code{EXPORT_DATE}, and
-@code{EXPORT_OPTIONS}.
-
-@node The export dispatcher, ASCII/Latin-1/UTF-8 export, Export options, Exporting
-@section The export dispatcher
-@cindex dispatcher, for export commands
-
-All export commands can be reached using the export dispatcher, which is a
-prefix key that prompts for an additional key specifying the command.
-Normally the entire file is exported, but if there is an active region that
-contains one outline tree, the first heading is used as document title and
-the subtrees are exported.
+Export options can also, among other things, affect the scope of export
+process.  They are toggled from the dispatcher with appropriate key
+combinations:
 
 @table @kbd
-@orgcmd{C-c C-e,org-export}
-Dispatcher for export and publishing commands.  Displays a help-window
-listing the additional key(s) needed to launch an export or publishing
-command.  The prefix arg is passed through to the exporter.  A double prefix
-@kbd{C-u C-u} causes most commands to be executed in the background, in a
-separate Emacs process@footnote{To make this behavior the default, customize
-the variable @code{org-export-run-in-background}.}.
-@orgcmd{C-c C-e C-v,org-export-visible}
-Like @kbd{C-c C-e}, but only export the text that is currently visible
-(i.e., not hidden by outline visibility).
-@orgcmd{C-u C-u C-c C-e,org-export}
+@item C-a
+@vindex org-export-async-init-file
 @vindex org-export-run-in-background
-Call the exporter, but reverse the setting of
-@code{org-export-run-in-background}, i.e., request background processing if
-not set, or force processing in the current Emacs process if set.
+Toggles asynchronous export.  The export happens in an external Emacs
+process@footnote{Configure @var{org-export-async-init-file} to properly set
+it up.}.
+
+In this case, no output is displayed automatically.  It is stored in a list
+called the export stack, and can be viewed from there.  The stack can be
+reached by calling the dispatcher with a double @kbd{C-u} prefix argument,
+or with @kbd{&} key from the dispatcher.
+
+To make this behaviour the default, customize the variable successfully
+@var{org-export-run-in-background}.
+
+@item C-b
+Toggles body-only export.  Its effect, if any, depends on the back-end
+used.  Its purpose is to remove all meta-data from output and focus on the
+real contents.
+
+@item C-s
+@vindex org-export-initial-scope
+Toggles subtree export.  The top heading becomes the document title and is
+removed from the contents.
+
+You can change the default state of this option by setting
+@var{org-export-initial-scope}.
+
+@item C-v
+Toggles visible-only export.  Only export the text that is currently
+visible, i.e. not hidden by outline visibility in the buffer.
+
 @end table
 
-@node ASCII/Latin-1/UTF-8 export, HTML export, The export dispatcher, Exporting
+@vindex org-export-copy-to-kill-ring
+Unless it happened asynchronously, a successful export process usually
+stores its output into the kill-ring.  You can configure
+@var{org-export-copy-to-kill-ring} in order to change this behaviour.
+
+@node Export formats, Export settings, The Export Dispatcher, Exporting
+@section Export formats
+@cindex Export, formats
+
+Libraries translating an Org buffer into a foreign format are called export
+back-ends.  An export format is not available until the proper back-end has
+been loaded.
+
+@vindex org-export-backends
+By default, the following four back-ends are ready to use: @code{ascii},
+@code{html}, @code{icalendar} and @code{latex}.  It is possible to add more
+(or remove some) by customizing @var{org-export-backends}.
+
+Core back-ends include:
+
+@itemize
+@item ascii (ASCII format)
+@item beamer (@LaTeX{} Beamer format)
+@item html (HTML format)
+@item icalendar (iCalendar format)
+@item latex (@LaTeX{} format)
+@item man (Man page format)
+@item md (Markdown format)
+@item odt (OpenDocument Text format)
+@item texinfo (Texinfo format)
+@end itemize
+
+More are available from the @code{contrib/} directory available from the
+distribution archives or from GNU/Org ELPA.
+
+@node Export settings, ASCII/Latin-1/UTF-8 export, Export formats, Exporting
+@section Export settings
+@cindex Export, settings
+
+Export output can be controlled through a number of export options.  These
+can be set globally with variables, and overridden on a per-buffer basis
+with keywords.  Such keywords may be put anywhere in the file.  For
+individual lines, a good way to make sure the keyword is correct is to type
+@code{#+} and then use @kbd{M-<TAB>} completion.
+
+Here is an exhaustive list of such keywords along with the equivalent
+global variable.  Only options available for every back-end are discussed
+in this section.
+
+@table @samp
+@item AUTHOR
+@vindex user-full-name
+the author (@var{user-full-name}).
+
+@item CREATOR
+@vindex org-export-creator-string
+entity responsible for output generation (@var{org-export-creator-string}).
+
+@item DATE
+@vindex org-export-date-timestamp-format
+A date or a time-stamp@footnote{The variable
+@var{org-export-date-timestamp-format} defines how this time-stamp will be
+exported.}.
+
+@item DESCRIPTION
+the page description, e.g., for the XHTML meta tag.
+
+@item EMAIL
+@vindex user-mail-address
+email address (@var{user-mail-address}.)
+
+@item EXCLUDE_TAGS
+Tags that exclude a tree from export
+
+@item KEYWORDS
+keywords defining the contents, e.g., for the XHTML meta tag.
+
+@item LANGUAGE
+@vindex org-export-default-language
+language used for translation of some strings
+(@var{org-export-default-language}).
+
+@item SELECT_TAGS
+@vindex org-export-select-tags
+Tags that select a tree for export (@var{org-export-select-tags}).
+
+@item TITLE
+the title to be shown (otherwise derived from buffer's name).
+@end table
+
+Additionally, the @code{OPTIONS} keyword is a compact@footnote{If you want
+to configure many options this way, you can use several @code{#+OPTIONS}
+lines.} form to specify export settings.  Here you can:
+
+@table @code
+@item ':
+@vindex org-export-with-smart-quotes
+toggle smart quotes (@var{org-export-with-smart-quotes}).
+
+@item *:
+toggle emphasized text (@var{org-export-with-emphasize}).
+
+@item -:
+@vindex org-export-with-special-strings
+toggle conversion of special strings
+(@var{org-export-with-special-strings}).
+
+@item ::
+@vindex org-export-with-fixed-width
+toggle fixed-width sections
+(@var{org-export-with-fixed-width}).
+
+@item <:
+@vindex org-export-with-timestamps
+toggle inclusion of any time/date stamps like DEADLINES
+(@var{org-export-with-timestamps}).
+
+@item :
+@vindex org-export-preserve-breaks
+toggle line-break-preservation (@var{org-export-preserve-breaks}).
+
+@item ^: FIXME
+@vindex org-export-with-sub-superscripts
+toggle @TeX{}-like syntax for sub- and superscripts.  If you write
+"^:@{@}", 'a@math{_b}' will be interpreted, but the simple 'a_b' will be
+left as it is (@var{org-export-with-sub-superscripts}).
+
+@item arch:
+@vindex org-export-with-archived-trees
+configure export of archived trees.  Can be set to @code{headline} to only
+process the headline, skipping its contents
+(@var{org-export-with-archived-trees}).
+
+@item author:
+@vindex org-export-with-author
+toggle inclusion of author name into exported file
+(@var{org-export-with-author}).
+
+@item c:
+@vindex org-export-with-clocks
+toggle inclusion of CLOCK keywords (@var{org-export-with-clocks}).
+
+@item creator:
+@vindex org-export-with-creator
+configure inclusion of creator info into exported file.  It may be set to
+@code{comment} (@var{org-export-with-creator}).
+
+@item d:
+@vindex org-export-with-drawers
+toggle inclusion of drawers, or list drawers to include
+(@var{org-export-with-drawers}).
+
+@item e:
+@vindex org-export-with-entities
+toggle inclusion of entities (@var{org-export-with-entities}).
+
+@item email:
+@vindex org-export-with-email
+toggle inclusion of author email into exported file
+(@var{org-export-with-email}).
+
+@item f:
+@vindex org-export-with-footnotes
+toggle footnotes (@var{org-export-with-footnotes}).
+
+@item H:
+@vindex org-export-headline-levels
+set the number of headline levels for export
+(@var{org-export-headline-levels}).
+
+@item inline:
+@vindex org-export-with-inlinetasks
+toggle inclusion of inlinetasks (@var{org-export-with-inlinetasks}).
+
+@item num:
+@vindex org-export-with-section-numbers
+toggle section-numbers (@var{org-export-with-section-numbers})
+
+@item pri:
+@vindex org-export-with-priority
+toggle priority cookies (@var{org-export-with-priority}).
+
+@item stat:
+@vindex org-export-with-statistics-cookies
+toggle inclusion of statistics cookies
+(@var{org-export-with-statistics-cookies}).
+
+@item tags:
+@vindex org-export-with-tags
+toggle inclusion of tags, may also be @code{not-in-toc}
+(@var{org-export-with-tags}).
+
+@item tasks:
+@vindex org-export-with-tasks
+toggle inclusion of tasks (TODO items), can be @code{nil} to remove all
+tasks, @code{todo} to remove DONE tasks, or a list of keywords to keep
+(@var{org-export-with-tasks}).
+
+@item tex:
+@vindex org-export-with-latex
+configure export of @LaTeX{} fragments and environments.  It may be set to
+@code{verbatim} (@var{org-export-with-latex}).
+
+@item timestamp:
+@vindex org-export-time-stamp-file
+toggle inclusion creation time into exported file
+(@var{org-export-time-stamp-file}).
+
+@item toc:
+@vindex org-export-with-toc
+toggle table of contents, or set level limit (@var{org-export-with-toc}).
+
+@item todo:
+@vindex org-export-with-todo-keywords
+toggle inclusion of TODO keywords into exported text
+(@var{org-export-with-todo-keywords}).
+
+@item |:
+@vindex org-export-with-tables
+toggle tables (@var{org-export-with-tables}).
+
+@end table
+
+A more general mechanism is also provided.  Indeed, Emacs variables can
+become buffer-local during export by using the BIND keyword.  Its syntax is
+@samp{#+BIND: variable value}.  This is particularly useful for in-buffer
+settings that cannot be changed using specific keywords.
+
+You can place commonly-used export settings in a separate file which can be
+included using @samp{#+SETUPFILE: "filename"} syntax.
+
+These settings affect all buffer's export processes.  Though, it is
+possible to override them locally when exporting only a subtree.  This is
+done by adding a headline property named after the keyword with the
+@samp{EXPORT_} prefix.  For example, @samp{DATE} and @samp{OPTIONS}
+keywords become, respectively @samp{EXPORT_DATE} and @samp{EXPORT_OPTIONS}
+properties.  Subtree export also supports the self-explicit
+@samp{EXPORT_FILE_NAME} property@footnote{There is no buffer-wide
+equivalent for this property.  The file name in this case is derived from
+the file associated to the buffer, if possible, or asked to the user
+otherwise.}.
+
+@node ASCII/Latin-1/UTF-8 export, HTML export, Export settings, Exporting
 @section ASCII/Latin-1/UTF-8 export
 @cindex ASCII export
 @cindex Latin-1 export
@@ -12366,13 +12491,11 @@ both HTML and @LaTeX{} exporters, except for @code{:TeX-macros} and
 @LaTeX{} export.  See @code{org-export-plist-vars} to check this list of
 options.
 
-
-
 @vindex org-publish-project-alist
-When a property is given a value in @code{org-publish-project-alist},
-its setting overrides the value of the corresponding user variable (if
-any) during publishing.  Options set within a file (@pxref{Export
-options}), however, override everything.
+When a property is given a value in @code{org-publish-project-alist}, its
+setting overrides the value of the corresponding user variable (if any)
+during publishing.  Options set within a file (@pxref{Export settings}),
+however, override everything.
 
 @node Publishing links, Sitemap, Publishing options, Configuration
 @subsection Links between published files
@@ -15002,7 +15125,7 @@ multiple #+TBLFM lines} in @ref{Editing and debugging formulas}.
 @itemx #+HTML_HEAD:, #+HTML_LINK_UP:, #+HTML_LINK_HOME:,
 @itemx #+SELECT_TAGS:, #+EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
-@ref{Export options}.
+@ref{Export settings}.
 @item #+TODO:    #+SEQ_TODO:   #+TYP_TODO:
 @vindex org-todo-keywords
 These lines set the TODO keywords and their interpretation in the
