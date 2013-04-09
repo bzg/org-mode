@@ -4966,11 +4966,11 @@ it here: http://gnuvola.org/software/j/aa2u/ascii-art-to-unicode.el."
 (defun org-table-get-remote-range (name-or-id form)
   "Get a field value or a list of values in a range from table at ID.
 
-NAME-OR-ID may be the name of a table in the current file as set by
-a \"#+TBLNAME:\" directive.  The first table following this line
+NAME-OR-ID may be the name of a table in the current file as set
+by a \"#+NAME:\" directive.  The first table following this line
 will then be used.  Alternatively, it may be an ID referring to
-any entry, also in a different file.  In this case, the first table
-in that entry will be referenced.
+any entry, also in a different file.  In this case, the first
+table in that entry will be referenced.
 FORM is a field or range descriptor like \"@2$3\" or \"B3\" or
 \"@I$2..@II$2\".  All the references must be absolute, not relative.
 
