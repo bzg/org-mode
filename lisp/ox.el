@@ -4640,6 +4640,21 @@ INFO is a plist used as a communication channel."
        (org-export-table-row-ends-rowgroup-p table-row info)
        (= (org-export-table-row-group table-row info) 1)))
 
+(defun org-export-table-row-number (table-row info)
+  "Return TABLE-ROW number.
+INFO is a plist used as a communication channel.  Return value is
+zero-based and ignores separators.  The function returns nil for
+special colums and separators."
+  (when (and (eq (org-element-property :type table-row) 'standard)
+	     (not (org-export-table-row-is-special-p table-row info)))
+    (let ((number 0))
+      (org-element-map (org-export-get-parent-table table-row) 'table-row
+	(lambda (row)
+	  (cond ((eq row table-row) number)
+		((eq (org-element-property :type row) 'standard)
+		 (incf number) nil)))
+	info 'first-match))))
+
 (defun org-export-table-dimensions (table info)
   "Return TABLE dimensions.
 
@@ -4677,13 +4692,7 @@ function returns nil for other cells."
 		     (eq (car (org-element-contents table-row)) table-cell)))
       (cons
        ;; Row number.
-       (let ((row-count 0))
-	 (org-element-map table 'table-row
-	   (lambda (row)
-	     (cond ((eq (org-element-property :type row) 'rule) nil)
-		   ((eq row table-row) row-count)
-		   (t (incf row-count) nil)))
-	   info 'first-match))
+       (org-export-table-row-number (org-export-get-parent table-cell) info)
        ;; Column number.
        (let ((col-count 0))
 	 (org-element-map table-row 'table-cell
