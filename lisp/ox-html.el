@@ -795,13 +795,17 @@ you can reuse them:
 
 For example:
 
-  (setq org-html-table-row-tags
-        (cons '(cond (top-row-p \"<tr class=\\\"tr-top\\\">\")
-                     (bottom-row-p \"<tr class=\\\"tr-bottom\\\">\")
-                     (t \"<tr>\"))
-              \"</tr>\"))
+\(setq org-html-table-row-tags
+      (cons '(cond (top-row-p \"<tr class=\\\"tr-top\\\">\")
+                   (bottom-row-p \"<tr class=\\\"tr-bottom\\\">\")
+                   (t (if (= (mod row-number 2) 1)
+			  \"<tr class=\\\"tr-odd\\\">\"
+			\"<tr class=\\\"tr-even\\\">\")))
+	    \"</tr>\"))
 
-will use the \"tr-top\" and \"tr-bottom\" classes for top and bottom row."
+will use the \"tr-top\" and \"tr-bottom\" classes for the top row
+and the bottom row, and otherwise alternate between \"tr-odd\" and
+\"tr-even\" for odd and even rows."
   :group 'org-export-html
   :type '(cons
 	  (choice :tag "Opening tag"
