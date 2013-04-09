@@ -2561,7 +2561,7 @@ This function assumes TABLE has `org' as its `:type' property and
 `inline-math' or `math' as its `:mode' attribute.."
   (let* ((caption (org-latex--caption/label-string table info))
 	 (attr (org-export-read-attribute :attr_latex table))
-	 (inlinep (eq (plist-get attr :mode) 'inline-math))
+	 (inlinep (equal (plist-get attr :mode) "inline-math"))
 	 (env (or (plist-get attr :environment)
 		  org-latex-default-table-environment))
 	 (contents
