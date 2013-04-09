@@ -546,9 +546,10 @@ of a different task.")
 	   (push s sel-list)))
        org-clock-history)
       (run-hooks 'org-clock-before-select-task-hook)
-      (org-fit-window-to-buffer)
+      (goto-char (point-min))
+      (org-fit-window-to-buffer nil nil (+ 6 (length org-clock-history)))
       (message (or prompt "Select task for clocking:"))
-      (setq rpl (read-char-exclusive))
+      (setq cursor-type nil rpl (read-char-exclusive))
       (cond
        ((eq rpl ?q) nil)
        ((eq rpl ?x) nil)
@@ -560,7 +561,7 @@ of a different task.")
 And return a cons cell with the selection character integer and the marker
 pointing to it."
   (when (marker-buffer marker)
-    (let (file cat task heading prefix)
+    (let (file cat clockout task heading prefix)
       (with-current-buffer (org-base-buffer (marker-buffer marker))
 	(save-excursion
 	  (save-restriction
@@ -569,6 +570,11 @@ pointing to it."
 	      (goto-char marker)
 	      (setq file (buffer-file-name (marker-buffer marker))
 		    cat (org-get-category)
+		    clockout (replace-regexp-in-string
+			      "^<\\(.+\\)>$" "\\1"
+			      (format-time-string
+			       (cdr org-time-stamp-formats)
+			       (org-clock-get-last-clock-out-time)))
 		    heading (org-get-heading 'notags)
 		    prefix (save-excursion
 			     (org-back-to-heading t)
@@ -579,8 +585,8 @@ pointing to it."
 			   (concat prefix heading)
 			   org-odd-levels-only)
 			  (length prefix)))))))
-      (when (and cat task)
-	(insert (format "[%c] %-15s %s\n" i cat task))
+      (when (and cat task clockout)
+	(insert (format "[%c] %-12s   %-12s   %s\n" i cat clockout task))
 	(cons i marker)))))
 
 (defvar org-clock-task-overrun nil
