@@ -786,6 +786,7 @@ evaluated for each row in order to construct the table row tags.
 During evaluation, these variables will be dynamically bound so that
 you can reuse them:
 
+       `row-number': row number (0 is the first row)
   `rowgroup-number': group number of current row
  `start-rowgroup-p': non-nil means the row starts a group
    `end-rowgroup-p': non-nil means the row ends a group
@@ -2966,6 +2967,7 @@ communication channel."
   ;; borders of the current row.
   (when (eq (org-element-property :type table-row) 'standard)
     (let* ((rowgroup-number (org-export-table-row-group table-row info))
+	   (row-number (org-export-table-row-number table-row info))
 	   (start-rowgroup-p
 	    (org-export-table-row-starts-rowgroup-p table-row info))
 	   (end-rowgroup-p
