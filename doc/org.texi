@@ -744,6 +744,7 @@ Hacking
 * Hooks::                       How to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
+* Adding export back-ends::     How to write new export back-ends
 * Context-sensitive commands::  How to add functionality to such commands
 * Tables in arbitrary syntax::  Orgtbl for @LaTeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
@@ -15619,6 +15620,7 @@ Org.
 * Hooks::                       How to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
+* Adding export back-ends::     How to write new export back-ends
 * Context-sensitive commands::  How to add functionality to such commands
 * Tables in arbitrary syntax::  Orgtbl for @LaTeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
@@ -15652,7 +15654,7 @@ documentation about each package, is maintained by the Worg project at
 
 
 
-@node Adding hyperlink types, Context-sensitive commands, Add-on packages, Hacking
+@node Adding hyperlink types, Adding export back-ends, Add-on packages, Hacking
 @section Adding hyperlink types
 @cindex hyperlinks, adding new types
 
@@ -15755,7 +15757,37 @@ When it makes sense for your new link type, you may also define a function
 support for inserting such a link with @kbd{C-c C-l}.  Such a function should
 not accept any arguments, and return the full link with prefix.
 
-@node Context-sensitive commands, Tables in arbitrary syntax, Adding hyperlink types, Hacking
+@node Adding export back-ends, Context-sensitive commands, Adding hyperlink types, Hacking
+@section Adding export back-ends
+@cindex Export, writing back-ends
+
+Org 8.0 comes with a completely rewritten export engine which makes it easy
+to write new export back-ends, either from scratch, or from deriving them
+from existing ones.
+
+Your two entry points are respectively @code{org-export-define-backend} and
+@code{org-export-define-derived-backend}.  To grok these functions, you
+should first have a look at @file{ox-latex.el} (for how to define a new
+back-end from scratch) and @file{ox-beamer.el} (for how to derive a new
+back-end from an existing one.
+
+When creating a new back-end from scratch, the basic idea is to set the name
+of the back-end (as a symbol) and an an alist of elements and export
+functions.  On top of this, you will need to set additional keywords like
+@code{:menu-entry} (to display the back-end in the export dispatcher),
+@code{:export-block} (to specify what blocks should not be exported by this
+back-end), and @code{:options-alist} (to let the user set export options that
+are specific to this back-end.)
+
+Deriving a new back-end is similar, except that you need to set
+@code{:translate-alist} to an alist of export functions that should be used
+instead of the parent back-end functions.
+
+For a complete reference documentation, see
+@url{http://orgmode.org/worg/dev/org-export-reference.html, the Org Export
+Reference on Worg}.
+
+@node Context-sensitive commands, Tables in arbitrary syntax, Adding export back-ends, Hacking
 @section Context-sensitive commands
 @cindex context-sensitive commands, hooks
 @cindex add-ons, context-sensitive commands
