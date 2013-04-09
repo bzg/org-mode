@@ -17463,7 +17463,9 @@ The format is determined by `org-time-clocksum-format',
 `org-time-clocksum-use-fractional' and
 `org-time-clocksum-fractional-format' and
 `org-time-clocksum-use-effort-durations'."
-  (let ((clocksum "") h d w mo y fmt n)
+  (let ((clocksum "")
+	(m (round m)) ; Don't allow fractions of minutes
+	h d w mo y fmt n)
     (setq h (if org-time-clocksum-use-effort-durations
 		(cdr (assoc "h" org-effort-durations)) 60)
 	  d (if org-time-clocksum-use-effort-durations
