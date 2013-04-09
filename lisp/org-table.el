@@ -2929,7 +2929,10 @@ list, 'literal is for the format specifier L."
       (if lispp
 	  (if (eq lispp 'literal)
 	      elements
-	    (prin1-to-string (if numbers (string-to-number elements) elements)))
+	    (if (and (eq elements "") (not keep-empty))
+		""
+	      (prin1-to-string
+	       (if numbers (string-to-number elements) elements))))
 	(if (string-match "\\S-" elements)
 	    (progn
 	      (when numbers (setq elements (number-to-string
@@ -2942,7 +2945,7 @@ list, 'literal is for the format specifier L."
 	    (delq nil
 		  (mapcar (lambda (x) (if (string-match "\\S-" x) x nil))
 			  elements))))
-    (setq elements (or elements '("")))
+    (setq elements (or elements '()))  ; if delq returns nil then we need '()
     (if lispp
 	(mapconcat
 	 (lambda (x)

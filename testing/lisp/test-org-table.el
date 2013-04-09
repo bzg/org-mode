@@ -339,7 +339,7 @@ reference (with row).  No format specifier."
 | 0 | 1 | 0 | #ERROR | #ERROR | #ERROR | 2 | 2 |
 | z | 1 | z | #ERROR | #ERROR | #ERROR | 2 | 2 |
 |   | 1 |   | #ERROR | #ERROR | #ERROR | 1 | 1 |
-|   |   |   | #ERROR | #ERROR | #ERROR | 1 | 1 |
+|   |   |   | #ERROR | 0      | 0      | 0 | 0 |
 "
      1 lisp)
     (org-test-table-target-expect
@@ -348,7 +348,7 @@ reference (with row).  No format specifier."
 | 0 | 1 | 0 |     1 |     1 |     1 | 2 | 2 |
 | z | 1 | z | z + 1 | z + 1 | z + 1 | 2 | 2 |
 |   | 1 | 0 |     1 |     1 |     1 | 1 | 1 |
-|   |   | 0 |     0 |     0 |     0 | 1 | 1 |
+|   |   | 0 |     0 |     0 |     0 | 0 | 0 |
 "
      1 calc)
     (org-test-table-target-expect
@@ -381,7 +381,7 @@ reference (with row).  Format specifier N."
 | 0 | 1 | 0 | 1 | 1 | 1 | 2 | 2 |
 | z | 1 | 0 | 1 | 1 | 1 | 2 | 2 |
 |   | 1 | 0 | 1 | 1 | 1 | 1 | 1 |
-|   |   | 0 | 0 | 0 | 0 | 1 | 1 |
+|   |   | 0 | 0 | 0 | 0 | 0 | 0 |
 "
      1 lisp calc)
     (org-test-table-target-expect
@@ -455,20 +455,34 @@ reference (with row).  Format specifier N."
   ;; Empty fields in simple and complex range reference: Suppress them
   ;; ($5 and $6) or keep them and use 0 ($7 and $8)
 
-  (org-test-table-target-expect
-   "\n|   |   | 5 | 7 | replace | replace | replace | replace |\n"
-   "\n|   |   | 5 | 7 | 6 | 6 | 3 | 3 |\n"
-   1
-   ;; Calc formula
-   (concat "#+TBLFM: "
-	   "$5 = vmean($1..$4)     :: $6 = vmean(@0$1..@0$4) :: "
-	   "$7 = vmean($1..$4); EN :: $8 = vmean(@0$1..@0$4); EN")
-   ;; Lisp formula
-   (concat "#+TBLFM: "
-	   "$5 = '(/ (+   $1..$4  ) (length '(  $1..$4  )));  N :: "
-	   "$6 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4)));  N :: "
-	   "$7 = '(/ (+   $1..$4  ) (length '(  $1..$4  ))); EN :: "
-	   "$8 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4))); EN"))
+  (let ((calc (concat
+	       "#+TBLFM: "
+	       "$5 = vmean($1..$4)     :: "
+	       "$6 = vmean(@0$1..@0$4) :: "
+	       "$7 = vmean($1..$4); EN :: "
+	       "$8 = vmean(@0$1..@0$4); EN"))
+	(lisp (concat
+	       "#+TBLFM: "
+	       "$5 = '(/ (+   $1..$4  ) (length '(  $1..$4  )));  N :: "
+	       "$6 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4)));  N :: "
+	       "$7 = '(/ (+   $1..$4  ) (length '(  $1..$4  ))); EN :: "
+	       "$8 = '(/ (+ @0$1..@0$4) (length '(@0$1..@0$4))); EN")))
+    (org-test-table-target-expect
+     "\n|   |   | 5 | 7 | replace | replace | replace | replace |\n"
+     "\n|   |   | 5 | 7 | 6 | 6 | 3 | 3 |\n"
+     1 calc lisp)
+
+    ;; The mean value of a range with only empty fields is not defined
+    (let ((target
+	   "\n|   |   |   |   | replace | replace | replace | replace |\n"))
+      (org-test-table-target-expect
+       target
+       "\n|   |   |   |   | vmean([]) | vmean([]) | 0 | 0 |\n"
+       1 calc)
+      (org-test-table-target-expect
+       target
+       "\n|   |   |   |   | #ERROR | #ERROR | 0 | 0 |\n"
+       1 lisp)))
 
   ;; Test if one field is empty, else do a calculation
   (org-test-table-target-expect
@@ -667,11 +681,11 @@ reference (with row).  Format specifier N."
   ;; For Lisp formula
   (should (equal "\"0\""       (f   "0"         nil nil t)))
   (should (equal "\"z\""       (f   "z"         nil nil t)))
-  (should (equal  "\"\""       (f   ""          nil nil t)))
+  (should (equal   ""          (f   ""          nil nil t)))
   (should (equal "\"0\" \"1\"" (f '("0"    "1") nil nil t)))
   (should (equal "\"z\" \"1\"" (f '("z"    "1") nil nil t)))
   (should (equal       "\"1\"" (f '(""     "1") nil nil t)))
-  (should (equal    "\"\""     (f '(""     "" ) nil nil t)))
+  (should (equal      ""       (f '(""     "" ) nil nil t)))
   ;; For Calc formula
   (should (equal  "(0)"        (f   "0"         nil nil nil)))
   (should (equal  "(z)"        (f   "z"         nil nil nil)))
@@ -679,7 +693,7 @@ reference (with row).  Format specifier N."
   (should (equal  "[0,1]"      (f '("0"    "1") nil nil nil)))
   (should (equal  "[z,1]"      (f '("z"    "1") nil nil nil)))
   (should (equal    "[1]"      (f '(""     "1") nil nil nil)))
-  (should (equal   "[0]"       (f '(""     "" ) nil nil nil)))
+  (should (equal   "[]"        (f '(""     "" ) nil nil nil)))
   ;; For Calc formula, special numbers
   (should (equal  "(nan)"      (f    "nan"      nil nil nil)))
   (should (equal "(uinf)"      (f   "uinf"      nil nil nil)))
@@ -695,11 +709,11 @@ reference (with row).  Format specifier N."
   ;; For Lisp formula
   (should (equal  "0"    (f   "0"         nil t t)))
   (should (equal  "0"    (f   "z"         nil t t)))
-  (should (equal  "0"    (f   ""          nil t t)))
+  (should (equal  ""     (f   ""          nil t t)))
   (should (equal  "0 1"  (f '("0"    "1") nil t t)))
   (should (equal  "0 1"  (f '("z"    "1") nil t t)))
   (should (equal    "1"  (f '(""     "1") nil t t)))
-  (should (equal   "0"   (f '(""     "" ) nil t t)))
+  (should (equal   ""    (f '(""     "" ) nil t t)))
   ;; For Calc formula
   (should (equal "(0)"   (f   "0"         nil t nil)))
   (should (equal "(0)"   (f   "z"         nil t nil)))
@@ -707,7 +721,7 @@ reference (with row).  Format specifier N."
   (should (equal "[0,1]" (f '("0"    "1") nil t nil)))
   (should (equal "[0,1]" (f '("z"    "1") nil t nil)))
   (should (equal   "[1]" (f '(""     "1") nil t nil)))
-  (should (equal  "[0]"  (f '(""     "" ) nil t nil)))
+  (should (equal  "[]"   (f '(""     "" ) nil t nil)))
   ;; For Calc formula, special numbers
   (should (equal "(0)"   (f    "nan"      nil t nil)))
   (should (equal "(0)"   (f   "uinf"      nil t nil)))
