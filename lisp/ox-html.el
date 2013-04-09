@@ -2197,7 +2197,7 @@ holding contextual information."
 		  "div")
 		(format "outline-container-%s"
 			(or (org-element-property :CUSTOM_ID headline)
-			    section-number))
+			    (concat "sec-" section-number)))
 		(concat (format "outline-%d" level1) (and extra-class " ")
 			extra-class)
 		(format "\n<h%d id=\"%s\">%s%s</h%d>\n"
