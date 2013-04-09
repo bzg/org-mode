@@ -1911,6 +1911,35 @@ Another text. (ref:text)
       (mapcar (lambda (row) (org-export-table-row-group row info))
 	      (org-element-map tree 'table-row 'identity))))))
 
+(ert-deftest test-org-export/table-row-number ()
+  "Test `org-export-table-row-number' specifications."
+  ;; Standard test.  Number is 0-indexed.
+  (should
+   (equal '(0 1)
+	  (org-test-with-parsed-data "| a | b | c |\n| d | e | f |"
+	    (org-element-map tree 'table-row
+	      (lambda (row) (org-export-table-row-number row info)) info))))
+  ;; Number ignores separators.
+  (should
+   (equal '(0 1)
+	  (org-test-with-parsed-data "
+| a | b | c |
+|---+---+---|
+| d | e | f |"
+	    (org-element-map tree 'table-row
+	      (lambda (row) (org-export-table-row-number row info)) info))))
+  ;; Number ignores special rows.
+  (should
+   (equal '(0 1)
+	  (org-test-with-parsed-data "
+| / | <   | >   |
+|   | b   | c   |
+|---+-----+-----|
+|   | <c> | <c> |
+|   | e   | f   |"
+	    (org-element-map tree 'table-row
+	      (lambda (row) (org-export-table-row-number row info)) info)))))
+
 (ert-deftest test-org-export/table-cell-width ()
   "Test `org-export-table-cell-width' specifications."
   ;; 1. Width is primarily determined by width cookies.  If no cookie
