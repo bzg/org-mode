@@ -11,7 +11,7 @@
 @set txicodequotebacktick
 
 @c Version and Contact Info
-@set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
+@set MAINTAINERSITE @uref{http://orgmode.org,maintainers web page}
 @set AUTHOR Carsten Dominik
 @set MAINTAINER Bastien Guerry
 @set MAINTAINEREMAIL @email{bzg at gnu dot org}
@@ -750,7 +750,7 @@ Hacking
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
 * Speeding up your agendas::    Tips on how to speed up your agendas
-* Extracting agenda information::  Postprocessing of agenda information
+* Extracting agenda information::  Post-processing of agenda information
 * Using the property API::      Writing programs that use entry properties
 * Using the mapping API::       Mapping over all or selected entries
 
@@ -833,7 +833,7 @@ ends, for example:
 @pindex GTD, Getting Things Done
 @r{@bullet{} an environment in which to implement David Allen's GTD system}
 @r{@bullet{} a simple hypertext system, with HTML and @LaTeX{} export}
-@r{@bullet{} a publishing tool to create a set of interlinked webpages}
+@r{@bullet{} a publishing tool to create a set of interlinked web pages}
 @r{@bullet{} an environment for literate programming}
 @end example
 
@@ -1365,7 +1365,7 @@ entries.
 
 @vindex org-catch-invisible-edits
 @cindex edits, catching invisible
-Sometimes you may inadvertantly edit an invisible part of the buffer and be
+Sometimes you may inadvertently edit an invisible part of the buffer and be
 confused on what as been edited and how to undo the mistake.  Setting
 @code{org-catch-invisible-edits} to non-nil will help prevent this.  See the
 docstring of this option on how Org should catch invisible edits and process
@@ -1439,7 +1439,7 @@ headline is created before the current line.  If the command is used
 at the @emph{end} of a folded subtree (i.e., behind the ellipses at
 the end of a headline), then a headline like the current one will be
 inserted after the end of the subtree.  Calling this command with
-@kbd{C-u C-u} will inconditionnally respect the headline's content and
+@kbd{C-u C-u} will unconditionally respect the headline's content and
 create a new item at the end of the parent subtree.
 @orgcmd{C-@key{RET},org-insert-heading-respect-content}
 Just like @kbd{M-@key{RET}}, except when adding a new heading below the
@@ -1766,7 +1766,7 @@ similar effect.
 @item M-up
 @itemx M-down
 Move the item including subitems up/down@footnote{See
-@code{org-liste-use-circular-motion} for a cyclic behavior.} (swap with
+@code{org-list-use-circular-motion} for a cyclic behavior.} (swap with
 previous/next item of same indentation).  If the list is ordered, renumbering
 is automatic.
 @kindex M-@key{left}
@@ -2601,7 +2601,7 @@ numbers.
 @cindex references, to a different table
 @cindex name, of column or field
 @cindex constants, in calculations
-@cindex #+TBLNAME
+@cindex #+NAME, for table
 
 You may also reference constants, fields and ranges from a different table,
 either in the current file or even in a different file.  The syntax is
@@ -2612,7 +2612,7 @@ remote(NAME-OR-ID,REF)
 
 @noindent
 where NAME can be the name of a table in the current file as set by a
-@code{#+TBLNAME: NAME} line before the table.  It can also be the ID of an
+@code{#+NAME: Name} line before the table.  It can also be the ID of an
 entry, even in a different file, and the reference then refers to the first
 table in that entry.  REF is an absolute field or range reference as
 described above for example @code{@@3$3} or @code{$somename}, valid in the
@@ -2882,7 +2882,7 @@ Searches for the first element @code{S} in list @code{S-LIST} for which
 is @code{t}; returns the value from the corresponding position in list
 @code{R-LIST}.  The default @code{PREDICATE} is @code{equal}.  Note that the
 parameters @code{VAL} and @code{S} are passed to @code{PREDICATE} in the same
-order as the correspoding parameters are in the call to
+order as the corresponding parameters are in the call to
 @code{org-lookup-first}, where @code{VAL} precedes @code{S-LIST}.  If
 @code{R-LIST} is @code{nil}, the matching element @code{S} of @code{S-LIST}
 is returned.
@@ -5884,13 +5884,12 @@ w4            @result{} ISO week for of the current year @b{2006}
 2012-w04-5    @result{} Same as above
 @end example
 
-Furthermore you can specify a relative date by giving, as the
-@emph{first} thing in the input: a plus/minus sign, a number and a
-letter ([dwmy]) to indicate change in days, weeks, months, or years.  With a
-single plus or minus, the date is always relative to today.  With a
-double plus or minus, it is relative to the default date.  If instead of
-a single letter, you use the abbreviation of day name, the date will be
-the Nth such day, e.g.:
+Furthermore you can specify a relative date by giving, as the @emph{first}
+thing in the input: a plus/minus sign, a number and a letter ([hdwmy]) to
+indicate change in hours, days, weeks, months, or years.  With a single plus
+or minus, the date is always relative to today.  With a double plus or minus,
+it is relative to the default date.  If instead of a single letter, you use
+the abbreviation of day name, the date will be the Nth such day, e.g.:
 
 @example
 +0            @result{} today
@@ -6787,10 +6786,12 @@ a global key@footnote{Please select your own key, @kbd{C-c c} is only a
 suggestion.}  for capturing new material.
 
 @vindex org-default-notes-file
-@example
+@smalllisp
+@group
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (define-key global-map "\C-cc" 'org-capture)
-@end example
+@end group
+@end smalllisp
 
 @node Using capture, Capture templates, Setting up capture, Capture
 @subsection Using capture
@@ -6869,13 +6870,15 @@ your file @file{~/org/gtd.org}.  Also, a date tree in the file
 @file{journal.org} should capture journal entries.  A possible configuration
 would look like:
 
-@example
+@smalllisp
+@group
 (setq org-capture-templates
  '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
         "* TODO %?\n  %i\n  %a")
    ("j" "Journal" entry (file+datetree "~/org/journal.org")
         "* %?\nEntered on %U\n  %i\n  %a")))
-@end example
+@end group
+@end smalllisp
 
 @noindent If you then press @kbd{C-c c t}, Org will prepare the template
 for you like this:
@@ -6920,9 +6923,9 @@ single key, or @code{"bt"} for selection with two keys.  When using
 several keys, keys using the same prefix key must be sequential
 in the list and preceded by a 2-element entry explaining the
 prefix key, for example
-@example
+@smalllisp
          ("b" "Templates for marking stuff to buy")
-@end example
+@end smalllisp
 @noindent If you do not define a template for the @kbd{C} key, this key will
 be used to open the customize buffer for this complex variable.
 
@@ -7139,18 +7142,18 @@ context, you can customize @var{org-capture-templates-contexts}.  Let's say
 for example that you have a capture template @code{"p"} for storing Gnus
 emails containing patches.  Then you would configure this option like this:
 
-@example
+@smalllisp
 (setq org-capture-templates-contexts
       '(("p" (in-mode . "message-mode"))))
-@end example
+@end smalllisp
 
 You can also tell that the command key @code{"p"} should refer to another
 template.  In that case, add this command key like this:
 
-@example
+@smalllisp
 (setq org-capture-templates-contexts
       '(("p" "q" (in-mode . "message-mode"))))
-@end example
+@end smalllisp
 
 See the docstring of the variable for more information.
 
@@ -7254,12 +7257,14 @@ web to import tasks into Org.  To access feeds, configure the variable
 @code{org-feed-alist}.  The docstring of this variable has detailed
 information.  Here is just an example:
 
-@example
+@smalllisp
+@group
 (setq org-feed-alist
      '(("Slashdot"
          "http://rss.slashdot.org/Slashdot/slashdot"
          "~/txt/org/feeds.org" "Slashdot Entries")))
-@end example
+@end group
+@end smalllisp
 
 @noindent
 will configure that new items from the feed provided by
@@ -8438,7 +8443,7 @@ entries that have been clocked on that day.  You can configure the entry
 types that should be included in log mode using the variable
 @code{org-agenda-log-mode-items}.  When called with a @kbd{C-u} prefix, show
 all possible logbook entries, including state changes.  When called with two
-prefix args @kbd{C-u C-u}, show only logging information, nothing else.
+prefix arguments @kbd{C-u C-u}, show only logging information, nothing else.
 @kbd{v L} is equivalent to @kbd{C-u v l}.
 @c
 @orgcmdkskc{v [,[,org-agenda-manipulate-query-add}
@@ -8456,7 +8461,7 @@ press @kbd{v a} again.
 @vindex org-agenda-start-with-clockreport-mode
 @vindex org-clock-report-include-clocking-task
 Toggle Clockreport mode.  In Clockreport mode, the daily/weekly agenda will
-always show a table with the clocked times for the timespan and file scope
+always show a table with the clocked times for the time span and file scope
 covered by the current agenda view.  The initial setting for this mode in new
 agenda buffers can be set with the variable
 @code{org-agenda-start-with-clockreport-mode}.  By using a prefix argument
@@ -8537,7 +8542,7 @@ Filter the agenda view by a regular expression: only show agenda entries
 matching the regular expression the user entered.  When called with a prefix
 argument, it will filter @emph{out} entries matching the regexp.  With two
 universal prefix arguments, it will remove all the regexp filters, which can
-be cumulated.  You can add a filter preset through the option
+be accumulated.  You can add a filter preset through the option
 @code{org-agenda-category-filter-preset} (see below.)
 
 @orgcmd{/,org-agenda-filter-by-tag}
@@ -8591,7 +8596,7 @@ say you use a @code{Net} tag to identify tasks which need network access, an
 calls.  You could auto-exclude these tags based on the availability of the
 Internet, and outside of business hours, with something like this:
 
-@lisp
+@smalllisp
 @group
 (defun org-my-auto-exclude-function (tag)
   (and (cond
@@ -8605,7 +8610,7 @@ Internet, and outside of business hours, with something like this:
 
 (setq org-agenda-auto-exclude-function 'org-my-auto-exclude-function)
 @end group
-@end lisp
+@end smalllisp
 
 @orgcmd{\\,org-agenda-filter-by-tag-refine}
 Narrow the current agenda filter by an additional condition.  When called with
@@ -9352,7 +9357,7 @@ spent (via @code{CLOCKSUM}) and with the planned total effort for it.
 @chapter Markup for rich export
 
 When exporting Org mode documents, the exporter tries to reflect the
-structure of the document as accurately as possible in the backend.  Since
+structure of the document as accurately as possible in the back-end.  Since
 export targets like HTML, @LaTeX{} allow much richer formatting, Org mode has
 rules on how to prepare text for rich export.  This section summarizes the
 markup rules used in an Org mode buffer.
@@ -9451,7 +9456,7 @@ listings) with a caption in the buffer.
 
 @cindex property, ALT_TITLE
 The headline's title usually determines its corresponding entry in a table of
-contents.  However, it is possible to specifify an alternative title by
+contents.  However, it is possible to specify an alternative title by
 setting @code{ALT_TITLE} property accordingly.  It will then be used when
 building the table.
 
@@ -9459,8 +9464,8 @@ building the table.
 @subheading Lists
 @cindex lists, markup rules
 
-Plain lists as described in @ref{Plain lists}, are translated to the backend's
-syntax for such lists.  Most backends support unordered, ordered, and
+Plain lists as described in @ref{Plain lists}, are translated to the back-end's
+syntax for such lists.  Most back-ends support unordered, ordered, and
 description lists.
 
 @node Paragraphs, Footnote markup, Lists, Structural markup elements
@@ -9512,7 +9517,7 @@ but not any simpler
 @cindex @file{footnote.el}
 
 Footnotes defined in the way described in @ref{Footnotes}, will be exported
-by all backends.  Org allows multiple references to the same note, and
+by all back-ends.  Org allows multiple references to the same note, and
 multiple footnotes side by side.
 
 @node Emphasis and monospace, Horizontal rules, Footnote markup, Structural markup elements
@@ -9587,7 +9592,7 @@ Optionally, the caption can take the form:
 @end example
 
 @cindex inlined images, markup rules
-Some backends allow you to directly include images into the exported
+Some back-ends allow you to directly include images into the exported
 document.  Org does this, if a link to an image files does not have
 a description part, for example @code{[[./img/a.jpg]]}.  If you wish to
 define a caption for the image and maybe a label for internal cross
@@ -9640,7 +9645,7 @@ Here is an example
 If the example is source code from a programming language, or any other text
 that can be marked up by font-lock in Emacs, you can ask for the example to
 look like the fontified Emacs buffer@footnote{This works automatically for
-the HTML backend (it requires version 1.34 of the @file{htmlize.el} package,
+the HTML back-end (it requires version 1.34 of the @file{htmlize.el} package,
 which is distributed with Org).  Fontified code chunks in @LaTeX{} can be
 achieved using either the listings or the
 @url{http://code.google.com/p/minted, minted,} package.  Refer to
@@ -9832,7 +9837,7 @@ Donald E. Knuth's @TeX{} system.  Many of the features described here as
 distinction.}  is widely used to typeset scientific documents.  Org mode
 supports embedding @LaTeX{} code into its files, because many academics are
 used to writing and reading @LaTeX{} source code, and because it can be
-readily processed to produce pretty output for a number of export backends.
+readily processed to produce pretty output for a number of export back-ends.
 
 @menu
 * Special symbols::             Greek letters and other symbols
@@ -9882,6 +9887,7 @@ variable @code{org-pretty-entities}, or on a per-file base with the
 @code{#+STARTUP} option @code{entitiespretty}.}:
 
 @table @kbd
+@cindex @code{entitiespretty}, STARTUP keyword
 @kindex C-c C-x \
 @item C-c C-x \
 Toggle display of entities as UTF-8 characters.  This does not change the
@@ -9984,7 +9990,7 @@ either $$ a=+\sqrt@{2@} $$ or \[ a=-\sqrt@{2@} \].
 @vindex org-export-with-latex
 @LaTeX{} processing can be configured with the variable
 @code{org-export-with-latex}.  The default setting is @code{t} which means
-@file{MathJax} for HTML, and no processing for ASCII and @LaTeX{} backends.
+@file{MathJax} for HTML, and no processing for ASCII and @LaTeX{} back-ends.
 You can also set this variable on a per-file basis using one of these
 lines:
 
@@ -10568,22 +10574,17 @@ The default value for @code{org-html-preamble} is @code{t}, which means
 that the preamble is inserted depending on the relevant format string in
 @code{org-html-preamble-format}.
 
-Setting @code{org-html-preamble} to a string will override the default
-format string.  Setting it to a function, will insert the output of the
-function, which must be a string; such a function takes no argument but you
-can check against the value of @code{opt-plist}, which contains the list of
-publishing properties for the current file.  Setting to @code{nil} will not
-insert any preamble.
+Setting @code{org-html-preamble} to a string will override the default format
+string.  If you set it to a function, it will insert the output of the
+function, which must be a string.  Setting to @code{nil} will not insert any
+preamble.
 
-The default value for @code{org-html-postamble} is @code{'auto}, which
-means that the HTML exporter will look for the value of
-@code{org-export-author-info}, @code{org-export-email-info},
-@code{org-export-creator-info} and @code{org-export-time-stamp-file},
-@code{org-html-validation-link} and build the postamble from these
-values.  Setting @code{org-html-postamble} to @code{t} will insert the
-postamble from the relevant format string found in
-@code{org-html-postamble-format}.  Setting it to @code{nil} will not
-insert any postamble.
+The default value for @code{org-html-postamble} is @code{'auto}, which means
+that the HTML exporter will look for information about the author, the email,
+the creator and the date, and build the postamble from these values.  Setting
+@code{org-html-postamble} to @code{t} will insert the postamble from the
+relevant format string found in @code{org-html-postamble-format}.  Setting it
+to @code{nil} will not insert any postamble.
 
 @node Quoting HTML tags, Links in HTML export, HTML preamble and postamble, HTML export
 @subsection Quoting HTML tags
@@ -10841,15 +10842,12 @@ as well, press @kbd{?} for an overview of the available keys).  The second
 view type is a @emph{folding} view much like Org provides inside Emacs.  The
 script is available at @url{http://orgmode.org/org-info.js} and you can find
 the documentation for it at @url{http://orgmode.org/worg/code/org-info-js/}.
-We host the script at our site, but if you use it a lot, you might
-not want to be dependent on @url{orgmode.org} and prefer to install a local
+We host the script at our site, but if you use it a lot, you might not want
+to be dependent on @url{http://orgmode.org} and prefer to install a local
 copy on your own web server.
 
-To use the script, you need to make sure that the @file{org-jsinfo.el} module
-gets loaded.  It should be loaded by default, but you can try @kbd{M-x
-customize-variable @key{RET} org-modules @key{RET}} to convince yourself that
-this is indeed the case.  All it then takes to make use of the program is
-adding a single line to the Org file:
+All it then takes to use this program is adding a single line to the Org
+file:
 
 @cindex #+INFOJS_OPT
 @example
@@ -10899,14 +10897,13 @@ pages, configure the variable @code{org-html-use-infojs}.
 @section @LaTeX{} and PDF export
 @cindex @LaTeX{} export
 @cindex PDF export
-@cindex Guerry, Bastien
 
 Org mode contains a @LaTeX{} exporter.  With further processing@footnote{The
 default @LaTeX{} output is designed for processing with @code{pdftex} or
 @LaTeX{}.  It includes packages that are not compatible with @code{xetex} and
 possibly @code{luatex}.  See the variables
 @code{org-latex-default-packages-alist} and
-@code{org-latex-packages-alist}.}, this backend is also used to produce PDF
+@code{org-latex-packages-alist}.}, this back-end is also used to produce PDF
 output.  Since the @LaTeX{} output uses @file{hyperref} to implement links
 and cross references, the PDF output file will be fully linked.  Beware of
 the fact that your @code{org} file has to be properly structured in order to
@@ -11648,10 +11645,10 @@ You can use the following commands to quickly verify the reliability of
 the @LaTeX{}-to-MathML converter.
 
 @table @kbd
-@item M-x org-export-as-odf
+@item M-x org-odt-export-as-odf
 Convert a @LaTeX{} math snippet to an OpenDocument formula (@file{.odf}) file.
 
-@item M-x org-export-as-odf-and-open
+@item M-x org-odt-export-as-odf-and-open
 Convert a @LaTeX{} math snippet to an OpenDocument formula (@file{.odf}) file
 and open the formula file with the system-registered application.
 @end table
@@ -12311,7 +12308,7 @@ and where to put published files.
 @tab Directory containing publishing source files
 @item @code{:publishing-directory}
 @tab Directory where output files will be published.  You can directly
-publish to a webserver using a file name syntax appropriate for
+publish to a web server using a file name syntax appropriate for
 the Emacs @file{tramp} package.  Or you can publish to a local directory and
 use external tools to upload your website (@pxref{Uploading files}).
 @item @code{:preparation-function}
@@ -12848,7 +12845,7 @@ src_<language>[<header arguments>]@{<body>@}
 @table @code
 @item <#+NAME: name>
 This line associates a name with the code block.  This is similar to the
-@code{#+TBLNAME: NAME} lines that can be used to name tables in Org mode
+@code{#+NAME: Name} lines that can be used to name tables in Org mode
 files.  Referencing the name of a code block makes it possible to evaluate
 the block from other places in the file, from other files, or from Org mode
 table formulas (see @ref{The spreadsheet}).  Names are assumed to be unique
@@ -13405,11 +13402,10 @@ syntax used to specify arguments is the same across all languages.  In every
 case, variables require a default value when they are declared.
 
 The values passed to arguments can either be literal values, references, or
-Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}).  References
-include anything in the Org mode file that takes a @code{#+NAME:},
-@code{#+TBLNAME:}, or @code{#+RESULTS:} line.  This includes tables, lists,
-@code{#+BEGIN_EXAMPLE} blocks, other code blocks, and the results of other
-code blocks.
+Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}).
+References include anything in the Org mode file that takes a @code{#+NAME:}
+or @code{#+RESULTS:} line: tables, lists, @code{#+BEGIN_EXAMPLE} blocks,
+other code blocks and the results of other code blocks.
 
 Note: When a reference is made to another code block, the referenced block
 will be evaluated unless it has current cached results (see @ref{cache}).
@@ -13434,10 +13430,10 @@ Here are examples of passing values by reference:
 @table @dfn
 
 @item table
-an Org mode table named with either a @code{#+NAME:} or @code{#+TBLNAME:} line
+an Org mode table named with either a @code{#+NAME:} line
 
 @example
-#+TBLNAME: example-table
+#+NAME: example-table
 | 1 |
 | 2 |
 | 3 |
@@ -13717,7 +13713,7 @@ into the Org mode buffer as a file link.  E.g., @code{:results value file}.
 @subsubheading Format
 
 The following options are mutually exclusive and specify what type of results
-the code block will return.  By default, results are inserted accoring to the
+the code block will return.  By default, results are inserted according to the
 type as specified above.
 
 @itemize @bullet
@@ -14158,7 +14154,7 @@ variable and raises an error.  Setting @code{:hlines no} or relying on the
 default value yields the following results.
 
 @example
-#+TBLNAME: many-cols
+#+NAME: many-cols
 | a | b | c |
 |---+---+---|
 | d | e | f |
@@ -14180,7 +14176,7 @@ default value yields the following results.
 Leaves hlines in the table.  Setting @code{:hlines yes} has this effect.
 
 @example
-#+TBLNAME: many-cols
+#+NAME: many-cols
 | a | b | c |
 |---+---+---|
 | d | e | f |
@@ -14217,7 +14213,7 @@ names will be removed from the table before
 processing, then reapplied to the results.
 
 @example
-#+TBLNAME: less-cols
+#+NAME: less-cols
 | a |
 |---|
 | b |
@@ -14264,7 +14260,7 @@ The first column of the table is removed from the table before processing,
 and is then reapplied to the results.
 
 @example
-#+TBLNAME: with-rownames
+#+NAME: with-rownames
 | one | 1 | 2 | 3 | 4 |  5 |
 | two | 6 | 7 | 8 | 9 | 10 |
 
@@ -15130,7 +15126,7 @@ This line contains the formulas for the table directly above the line.
 
 Table can have multiple lines containing @samp{#+TBLFM:}.  Note
 that only the first line of @samp{#+TBLFM:} will be applied when
-you reculculate the table.  For more details see @ref{Using
+you recalculate the table.  For more details see @ref{Using
 multiple #+TBLFM lines} in @ref{Editing and debugging formulas}.
 
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+DATE:,
@@ -15185,7 +15181,7 @@ If the cursor is in a property line or at the start or end of a property
 drawer, offer property commands.
 @item
 If the cursor is at a footnote reference, go to the corresponding
-definition, and vice versa.
+definition, and @emph{vice versa}.
 @item
 If the cursor is on a statistics cookie, update it.
 @item
@@ -15641,7 +15637,7 @@ Org.
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
 * Speeding up your agendas::    Tips on how to speed up your agendas
-* Extracting agenda information::  Postprocessing of agenda information
+* Extracting agenda information::  Post-processing of agenda information
 * Using the property API::      Writing programs that use entry properties
 * Using the mapping API::       Mapping over all or selected entries
 @end menu
@@ -16354,7 +16350,7 @@ to become slow.  Below are some tips on how to speed up the agenda commands.
 @enumerate
 @item
 Reduce the number of Org agenda files: this will reduce the slowliness caused
-by accessing to a harddrive.
+by accessing to a hard drive.
 @item
 Reduce the number of DONE and archived headlines: this way the agenda does
 not need to skip them.
@@ -16881,7 +16877,7 @@ of his great @file{remember.el}.
 Without Sebastian, the HTML/XHTML publishing of Org would be the pitiful work
 of an ignorant amateur.  Sebastian has pushed this part of Org onto a much
 higher level.  He also wrote @file{org-info.js}, a Java script for displaying
-webpages derived from Org using an Info-like or a folding interface with
+web pages derived from Org using an Info-like or a folding interface with
 single-key navigation.
 @end table
 
