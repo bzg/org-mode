@@ -11287,7 +11287,7 @@ output.  Check the availability of this program before proceeding further.
 
 Export as OpenDocument Text file.
 
-@vindex org-export-odt-preferred-output-format
+@vindex org-odt-preferred-output-format
 If @code{org-preferred-output-format} is specified, automatically convert
 the exported file to that format.  @xref{x-export-to-other-formats, ,
 Automatically exporting to other formats}.
@@ -11323,7 +11323,7 @@ one format (say @samp{csv}) to another format (say @samp{ods} or @samp{xls}).
 If you have a working installation of LibreOffice, a document converter is
 pre-configured for you and you can use it right away.  If you would like to
 use @file{unoconv} as your preferred converter, customize the variable
-@code{org-export-odt-convert-process} to point to @code{unoconv}.  You can
+@code{org-odt-convert-process} to point to @code{unoconv}.  You can
 also use your own favorite converter or tweak the default settings of the
 @file{LibreOffice} and @samp{unoconv} converters.  @xref{Configuring a
 document converter}.
@@ -11331,12 +11331,12 @@ document converter}.
 @subsubsection Automatically exporting to other formats
 @anchor{x-export-to-other-formats}
 
-@vindex org-export-odt-preferred-output-format
+@vindex org-odt-preferred-output-format
 Very often, you will find yourself exporting to ODT format, only to
 immediately save the exported document to other formats like @samp{doc},
 @samp{docx}, @samp{rtf}, @samp{pdf} etc.  In such cases, you can specify your
 preferred output format by customizing the variable
-@code{org-export-odt-preferred-output-format}.  This way, the export commands
+@code{org-odt-preferred-output-format}.  This way, the export commands
 (@pxref{x-export-to-odt,,Exporting to ODT}) can be extended to export to a
 format that is of immediate interest to you.
 
@@ -11349,10 +11349,10 @@ ODT format.  LibreOffice converter, mentioned above, is one such
 converter.  Once a converter is configured, you can interact with it using
 the following command.
 
-@vindex org-export-odt-convert
+@vindex org-odt-convert
 @table @kbd
 
-@item M-x org-export-odt-convert
+@item M-x org-odt-convert
 Convert an existing document from one format to another.  With a prefix
 argument, also open the newly produced file.
 @end table
@@ -11389,8 +11389,8 @@ OpenDocument Text (@file{.odt}) or OpenDocument Template (@file{.ott}) file.
 
 @item
 @cindex #+ODT_STYLES_FILE
-@vindex org-export-odt-styles-file
-Customize the variable @code{org-export-odt-styles-file} and point it to the
+@vindex org-odt-styles-file
+Customize the variable @code{org-odt-styles-file} and point it to the
 newly created file.  For additional configuration options
 @pxref{x-overriding-factory-styles,,Overriding factory styles}.
 
@@ -11513,7 +11513,7 @@ You can control the size and scale of the embedded images using the
 @code{#+ATTR_ODT} attribute.
 
 @cindex identify, ImageMagick
-@vindex org-export-odt-pixels-per-inch
+@vindex org-odt-pixels-per-inch
 The exporter specifies the desired size of the image in the final document in
 units of centimeters.  In order to scale the embedded images, the exporter
 queries for pixel dimensions of the images using one of a) ImageMagick's
@@ -11523,7 +11523,7 @@ routinely produce documents that have large images or you export your Org
 files that has images using a Emacs batch script, then the use of
 @file{ImageMagick} is mandatory.} The pixel dimensions are subsequently
 converted in to units of centimeters using
-@code{org-export-odt-pixels-per-inch}.  The default value of this variable is
+@code{org-odt-pixels-per-inch}.  The default value of this variable is
 set to @code{display-pixels-per-inch}.  You can tweak this variable to
 achieve the best results.
 
@@ -11698,15 +11698,15 @@ It could be rendered as shown below in the exported document.
 Figure 2: Bell curve
 @end example
 
-@vindex org-export-odt-category-strings
+@vindex org-odt-category-map-alist
 You can modify the category component of the caption by customizing the
-variable @code{org-export-odt-category-strings}.  For example, to tag all
-embedded images with the string @samp{Illustration} (instead of the default
-@samp{Figure}) use the following setting.
+option @code{org-odt-category-map-alist}.  For example, to tag all embedded
+images with the string @samp{Illustration} (instead of the default
+@samp{Figure}) use the following setting:
 
 @lisp
-(setq org-export-odt-category-strings
-      '(("en" "Table" "Illustration" "Equation" "Equation")))
+(setq org-odt-category-map-alist
+      (("__Figure__" "Illustration" "value" "Figure" org-odt--enumerable-image-p)))
 @end lisp
 
 With this, previous image will be captioned as below in the exported
@@ -11727,14 +11727,14 @@ fontification to be turned on.}  The auto-generated styles have @samp{OrgSrc}
 as prefix and inherit their color from the faces used by Emacs
 @code{font-lock} library for the source language.
 
-@vindex org-export-odt-fontify-srcblocks
-If you prefer to use your own custom styles for fontification, you can do so
-by customizing the variable
-@code{org-export-odt-create-custom-styles-for-srcblocks}.
+@vindex org-odt-fontify-srcblocks
+If you prefer to use your own custom styles for fontification, you can do
+so by customizing the variable
+@code{org-odt-create-custom-styles-for-srcblocks}.
 
-@vindex org-export-odt-create-custom-styles-for-srcblocks
+@vindex org-odt-create-custom-styles-for-srcblocks
 You can turn off fontification of literal examples by customizing the
-variable @code{org-export-odt-fontify-srcblocks}.
+option @code{org-odt-fontify-srcblocks}.
 
 @node Advanced topics in ODT export,  , Literal examples in ODT export, OpenDocument Text export
 @subsection Advanced topics in ODT export
@@ -11765,27 +11765,27 @@ like to tweak the default converter settings, proceed as below.
 @enumerate
 @item Register the converter
 
-@vindex org-export-odt-convert-processes
-Name your converter and add it to the list of known converters by customizing
-the variable @code{org-export-odt-convert-processes}.  Also specify how the
-converter can be invoked via command-line to effect the conversion.
+@vindex org-odt-convert-processes
+Name your converter and add it to the list of known converters by
+customizing the option @code{org-odt-convert-processes}.  Also specify how
+the converter can be invoked via command-line to effect the conversion.
 
 @item Configure its capabilities
 
-@vindex org-export-odt-convert-capabilities
-@anchor{x-odt-converter-capabilities}
-Specify the set of formats the converter can handle by customizing the
-variable @code{org-export-odt-convert-capabilities}.  Use the default value
-for this variable as a guide for configuring your converter.  As suggested by
-the default setting, you can specify the full set of formats supported by the
+@vindex org-odt-convert-capabilities
+@anchor{x-odt-converter-capabilities} Specify the set of formats the
+converter can handle by customizing the variable
+@code{org-odt-convert-capabilities}.  Use the default value for this
+variable as a guide for configuring your converter.  As suggested by the
+default setting, you can specify the full set of formats supported by the
 converter and not limit yourself to specifying formats that are related to
 just the OpenDocument Text format.
 
 @item Choose the converter
 
-@vindex org-export-odt-convert-process
+@vindex org-odt-convert-process
 Select the newly added converter as the preferred one by customizing the
-variable @code{org-export-odt-convert-process}.
+option @code{org-odt-convert-process}.
 @end enumerate
 
 @node Working with OpenDocument style files, Creating one-off styles, Configuring a document converter, Advanced topics in ODT export
@@ -11853,9 +11853,9 @@ customize these variables to override the factory styles used by the
 exporter.
 
 @itemize
-@anchor{x-org-export-odt-styles-file}
+@anchor{x-org-odt-styles-file}
 @item
-@code{org-export-odt-styles-file}
+@code{org-odt-styles-file}
 
 Use this variable to specify the @file{styles.xml} that will be used in the
 final output.  You can specify one of the following values:
@@ -11884,9 +11884,9 @@ like header and footer images.
 Use the default @file{styles.xml}
 @end enumerate
 
-@anchor{x-org-export-odt-content-template-file}
+@anchor{x-org-odt-content-template-file}
 @item
-@code{org-export-odt-content-template-file}
+@code{org-odt-content-template-file}
 
 Use this variable to specify the blank @file{content.xml} that will be used
 in the final output.
@@ -11973,16 +11973,15 @@ OpenDocument-v1.2
 specification.@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
 OpenDocument-v1.2 Specification}}
 
-
-
 @subsubheading Custom table styles: an illustration
 
-To have a quick preview of this feature, install the below setting and export
-the table that follows.
+@vindex org-odt-table-styles
+To have a quick preview of this feature, install the below setting and
+export the table that follows:
 
 @lisp
-(setq org-export-odt-table-styles
-      (append org-export-odt-table-styles
+(setq org-odt-table-styles
+      (append org-odt-table-styles
 	      '(("TableWithHeaderRowAndColumn" "Custom"
 		 ((use-first-row-styles . t)
 		  (use-first-column-styles . t)))
@@ -12001,9 +12000,9 @@ the table that follows.
 In the above example, you used a template named @samp{Custom} and installed
 two table styles with the names @samp{TableWithHeaderRowAndColumn} and
 @samp{TableWithFirstRowandLastRow}.  (@strong{Important:} The OpenDocument
-styles needed for producing the above template have been pre-defined for you.
-These styles are available under the section marked @samp{Custom Table
-Template} in @file{OrgOdtContentTemplate.xml}
+styles needed for producing the above template have been pre-defined for
+you.  These styles are available under the section marked @samp{Custom
+Table Template} in @file{OrgOdtContentTemplate.xml}
 (@pxref{x-orgodtcontenttemplate-xml,,Factory styles}).  If you need
 additional templates you have to define these styles yourselves.
 
@@ -12087,9 +12086,9 @@ Define a table style@footnote{See the attributes @code{table:template-name},
 @code{table:use-banding-column-styles} of the @code{<table:table>} element in
 the OpenDocument-v1.2 specification}
 
-@vindex org-export-odt-table-styles
+@vindex org-odt-table-styles
 To define a table style, create an entry for the style in the variable
-@code{org-export-odt-table-styles} and specify the following:
+@code{org-odt-table-styles} and specify the following:
 
 @itemize @minus
 @item the name of the table template created in step (1)
@@ -12102,8 +12101,8 @@ based on the same template @samp{Custom}.  The styles achieve their intended
 effect by selectively activating the individual cell styles in that template.
 
 @lisp
-(setq org-export-odt-table-styles
-      (append org-export-odt-table-styles
+(setq org-odt-table-styles
+      (append org-odt-table-styles
 	      '(("TableWithHeaderRowAndColumn" "Custom"
 		 ((use-first-row-styles . t)
 		  (use-first-column-styles . t)))
@@ -12140,12 +12139,11 @@ nothing but @samp{zip} archives}: @inforef{File Archives,,emacs}.  For
 general help with validation (and schema-sensitive editing) of XML files:
 @inforef{Introduction,,nxml-mode}.
 
-@vindex org-export-odt-schema-dir
+@vindex org-odt-schema-dir
 If you have ready access to OpenDocument @file{.rnc} files and the needed
 schema-locating rules in a single folder, you can customize the variable
-@code{org-export-odt-schema-dir} to point to that directory.  The
-ODT exporter will take care of updating the
-@code{rng-schema-locating-files} for you.
+@code{org-odt-schema-dir} to point to that directory.  The ODT exporter
+will take care of updating the @code{rng-schema-locating-files} for you.
 
 @c end opendocument
 
