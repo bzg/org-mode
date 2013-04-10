@@ -7520,11 +7520,13 @@ This is important for non-interactive uses of the command."
      (if (org-previous-line-empty-p) "" "\n")
      (if (org-in-src-block-p) ",* " "* "))
     (run-hooks 'org-insert-heading-hook))
-   ((or arg (not (org-insert-item
-		  (save-excursion
-		    (beginning-of-line)
-		    (looking-at org-list-full-item-re)
-		    (match-string 3)))))
+   ((or arg
+	org-insert-heading-respect-content
+	(not (org-insert-item
+	      (save-excursion
+		(beginning-of-line)
+		(looking-at org-list-full-item-re)
+		(match-string 3)))))
     (let (begn endn)
       (when (org-buffer-narrowed-p)
 	(setq begn (point-min) endn (point-max))
@@ -7589,7 +7591,10 @@ This is important for non-interactive uses of the command."
 		tags pos)
 	    (cond
 	     ;; Insert a new line, possibly at end of parent subtree
-	     ((and (not arg) (not on-heading) (not on-empty-line))
+	     ((and (not arg) (not on-heading) (not on-empty-line)
+		   (not (save-excursion
+			  (beginning-of-line 1)
+			  (looking-at org-list-full-item-re))))
 	      (beginning-of-line 1))
 	     (org-insert-heading-respect-content
 	      (if (not eops)
