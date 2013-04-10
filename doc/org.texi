@@ -12364,27 +12364,32 @@ possibly transformed in the process.  The default transformation is to export
 Org files as HTML files, and this is done by the function
 @code{org-html-publish-to-html} which calls the HTML exporter (@pxref{HTML
 export}).  But you also can publish your content as PDF files using
-@code{org-latex-publish-to-pdf}, or as @code{ascii}, @code{latin1} or
-@code{utf8} encoded files using the corresponding functions.  If you want to
-publish the Org file itself, but with @i{archived}, @i{commented}, and
-@i{tag-excluded} trees removed, use @code{org-org-publish-to-org} and set the
-parameters @code{:plain-source} and/or @code{:htmlized-source}.  This will
-produce @file{file.org} and @file{file.org.html} in the publishing
-directory@footnote{@file{file-source.org} and @file{file-source.org.html} if
-source and publishing directories are equal.  Note that with this kind of
-setup, you need to add @code{:exclude "-source\\.org"} to the project
-definition in @code{org-publish-project-alist} to prevent the published
-source files from being considered as new org files the next time the project
-is published.}.  Other files like images only need to be copied to the
-publishing destination; for this you may use @code{org-publish-attachment}.
-For non-Org files, you always need to specify the publishing function:
+@code{org-latex-publish-to-pdf} or as @code{ascii}, @code{Texinfo}, etc.,
+using the corresponding functions.
+
+If you want to publish the Org file itself but with the @i{archived},
+@i{commented} and @i{tag-excluded} trees removed, use the function
+@code{org-org-publish-to-org}.  This will produce @file{file.org}.  If you
+want a htmlized version of this file, set the parameter
+@code{:htmlized-source} to @code{t}, it will produce @file{file.org.html} in
+the publishing directory.
+
+@c @footnote{@file{file-source.org} and @file{file-source.org.html} if source
+@c and publishing directories are equal.  Note that with this kind of setup, you
+@c need to add @code{:exclude "-source\\.org"} to the project definition in
+@c @code{org-publish-project-alist} to prevent the published source files from
+@c being considered as new org files the next time the project is published.}.
+
+Other files like images only need to be copied to the publishing destination;
+for this you may use @code{org-publish-attachment}.  For non-Org files, you
+always need to specify the publishing function:
 
 @multitable @columnfractions 0.3 0.7
 @item @code{:publishing-function}
 @tab Function executing the publication of a file.  This may also be a
 list of functions, which will all be called in turn.
-@item @code{:plain-source}
-@tab Non-nil means, publish plain source.
+@c @item @code{:plain-source}
+@c @tab Non-nil means, publish plain source.
 @item @code{:htmlized-source}
 @tab Non-nil means, publish htmlized source.
 @end multitable
@@ -12396,117 +12401,106 @@ should take the specified file, make the necessary transformation (if any)
 and place the result into the destination folder.
 
 @node Publishing options, Publishing links, Publishing action, Configuration
-@subsection Options for the HTML/@LaTeX{} exporters
+@subsection Options for the exporters
 @cindex options, for publishing
 
-The property list can be used to set many export options for the HTML
-and @LaTeX{} exporters.  In most cases, these properties correspond to user
-variables in Org.  The table below lists these properties along
-with the variable they belong to.  See the documentation string for the
-respective variable for details.
+The property list can be used to set many export options for the exporters.
+In most cases, these properties correspond to user variables in Org.  The
+first table below lists these properties along with the variable they belong
+to.  The second table list HTML specific properties.  See the documentation
+string for the respective variable for details.
 
-@vindex org-html-link-up
-@vindex org-html-link-home
-@vindex org-export-default-language
-@vindex org-display-custom-times
-@vindex org-export-headline-levels
-@vindex org-export-with-section-numbers
-@vindex org-export-section-number-format
-@vindex org-export-with-toc
-@vindex org-export-preserve-breaks
 @vindex org-export-with-archived-trees
-@vindex org-export-with-emphasize
-@vindex org-export-with-sub-superscripts
-@vindex org-export-with-special-strings
-@vindex org-export-with-footnotes
+@vindex org-export-with-author
+@vindex org-export-with-creator
+@vindex org-display-custom-times
 @vindex org-export-with-drawers
-@vindex org-export-with-tags
-@vindex org-export-with-todo-keywords
-@vindex org-export-with-tasks
-@vindex org-export-with-done-tasks
-@vindex org-export-with-priority
-@vindex org-export-with-TeX-macros
-@vindex org-export-with-latex
-@vindex org-export-skip-text-before-1st-heading
-@vindex org-export-with-fixed-width
-@vindex org-export-with-timestamps
-@vindex org-export-author-info
-@vindex org-export-email-info
-@vindex org-export-creator-info
-@vindex org-export-time-stamp-file
-@vindex org-export-with-tables
-@vindex org-export-highlight-first-table-line
-@vindex org-html-style-include-default
-@vindex org-html-style-include-scripts
-@vindex org-html-style
-@vindex org-html-style-extra
-@vindex org-html-link-org-files-as-html
-@vindex org-html-inline-images
-@vindex org-html-extension
-@vindex org-html-table-tag
-@vindex org-export-publishing-directory
-@vindex org-html-preamble
-@vindex org-html-postamble
-@vindex user-full-name
+@vindex org-export-with-email
 @vindex user-mail-address
-@vindex org-export-select-tags
+@vindex org-export-with-emphasize
 @vindex org-export-exclude-tags
+@vindex org-export-with-fixed-width
+@vindex org-export-with-footnotes
+@vindex org-export-headline-levels
+@vindex org-export-default-language
+@vindex org-export-with-latex
+@vindex org-export-preserve-breaks
+@vindex org-export-with-priority
+@vindex org-export-publishing-directory
+@vindex org-export-with-section-numbers
+@vindex org-export-select-tags
+@vindex org-export-with-special-strings
+@vindex org-export-with-sub-superscripts
+@vindex org-export-with-toc
+@vindex org-export-with-tables
+@vindex org-export-with-tags
+@vindex org-export-with-tasks
+@vindex org-export-with-timestamps
+@vindex org-export-with-todo-keywords
 
 @multitable @columnfractions 0.32 0.68
-@item @code{:link-up}               @tab @code{org-html-link-up}
-@item @code{:link-home}             @tab @code{org-html-link-home}
-@item @code{:language}              @tab @code{org-export-default-language}
-@item @code{:customtime}            @tab @code{org-display-custom-times}
-@item @code{:headline-levels}       @tab @code{org-export-headline-levels}
-@item @code{:section-numbers}       @tab @code{org-export-with-section-numbers}
-@item @code{:section-number-format} @tab @code{org-export-section-number-format}
-@item @code{:table-of-contents}     @tab @code{org-export-with-toc}
-@item @code{:preserve-breaks}       @tab @code{org-export-preserve-breaks}
 @item @code{:archived-trees}        @tab @code{org-export-with-archived-trees}
-@item @code{:emphasize}             @tab @code{org-export-with-emphasize}
-@item @code{:sub-superscript}       @tab @code{org-export-with-sub-superscripts}
-@item @code{:special-strings}       @tab @code{org-export-with-special-strings}
-@item @code{:footnotes}             @tab @code{org-export-with-footnotes}
+@item @code{:author}                @tab @code{org-export-with-author}
+@item @code{:creator}               @tab @code{org-export-with-creator}
+@item @code{:customtime}            @tab @code{org-display-custom-times}
 @item @code{:drawers}               @tab @code{org-export-with-drawers}
-@item @code{:tags}                  @tab @code{org-export-with-tags}
-@item @code{:todo-keywords}         @tab @code{org-export-with-todo-keywords}
-@item @code{:tasks}                 @tab @code{org-export-with-tasks}
-@item @code{:priority}              @tab @code{org-export-with-priority}
-@item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
-@item @code{:LaTeX-fragments}       @tab @code{org-export-with-latex}
-@item @code{:latex-listings}        @tab @code{org-latex-listings}
-@item @code{:skip-before-1st-heading} @tab @code{org-export-skip-text-before-1st-heading}
-@item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
-@item @code{:timestamps}            @tab @code{org-export-with-timestamps}
-@item @code{:author}                @tab @code{user-full-name}
+@item @code{:email}                 @tab @code{org-export-with-email}
 @item @code{:email}                 @tab @code{user-mail-address} : @code{addr;addr;..}
-@item @code{:author-info}           @tab @code{org-export-author-info}
-@item @code{:email-info}            @tab @code{org-export-email-info}
-@item @code{:creator-info}          @tab @code{org-export-creator-info}
+@item @code{:emphasize}             @tab @code{org-export-with-emphasize}
+@item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
+@item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
+@item @code{:footnotes}             @tab @code{org-export-with-footnotes}
+@item @code{:headline-levels}       @tab @code{org-export-headline-levels}
+@item @code{:language}              @tab @code{org-export-default-language}
+@item @code{:latex-fragments}       @tab @code{org-export-with-latex}
+@item @code{:preserve-breaks}       @tab @code{org-export-preserve-breaks}
+@item @code{:priority}              @tab @code{org-export-with-priority}
+@item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
+@item @code{:section-numbers}       @tab @code{org-export-with-section-numbers}
+@item @code{:select-tags}           @tab @code{org-export-select-tags}
+@item @code{:special-strings}       @tab @code{org-export-with-special-strings}
+@item @code{:sub-superscript}       @tab @code{org-export-with-sub-superscripts}
+@item @code{:table-of-contents}     @tab @code{org-export-with-toc}
 @item @code{:tables}                @tab @code{org-export-with-tables}
-@item @code{:table-auto-headline}   @tab @code{org-export-highlight-first-table-line}
-@item @code{:style-include-default} @tab @code{org-html-style-include-default}
-@item @code{:style-include-scripts} @tab @code{org-html-style-include-scripts}
-@item @code{:style}                 @tab @code{org-html-style}
-@item @code{:style-extra}           @tab @code{org-html-style-extra}
-@item @code{:convert-org-links}     @tab @code{org-html-link-org-files-as-html}
-@item @code{:inline-images}         @tab @code{org-html-inline-images}
+@item @code{:tags}                  @tab @code{org-export-with-tags}
+@item @code{:tasks}                 @tab @code{org-export-with-tasks}
+@item @code{:timestamps}            @tab @code{org-export-with-timestamps}
+@item @code{:todo-keywords}         @tab @code{org-export-with-todo-keywords}
+@end multitable
+
+@vindex org-html-doctype
+@vindex org-html-xml-declaration
+@vindex org-html-link-up
+@vindex org-html-link-home
+@vindex org-html-link-org-files-as-html
+@vindex org-html-head
+@vindex org-html-head-extra
+@vindex org-html-inline-images
+@vindex org-html-extension
+@vindex org-html-preamble
+@vindex org-html-postamble
+@vindex org-html-table-tag
+@vindex org-html-style-include-default
+@vindex org-html-style-include-scripts
+@multitable @columnfractions 0.32 0.68
+@item @code{:html-doctype}          @tab @code{org-html-doctype}
+@item @code{:html-xml-declaration}  @tab @code{org-html-xml-declaration}
+@item @code{:html-link-up}          @tab @code{org-html-link-up}
+@item @code{:html-link-home}        @tab @code{org-html-link-home}
+@item @code{:html-link-org-as-html} @tab @code{org-html-link-org-files-as-html}
+@item @code{:html-head}             @tab @code{org-html-head}
+@item @code{:html-head-extra}       @tab @code{org-html-head-extra}
+@item @code{:html-inline-images}    @tab @code{org-html-inline-images}
 @item @code{:html-extension}        @tab @code{org-html-extension}
 @item @code{:html-preamble}         @tab @code{org-html-preamble}
 @item @code{:html-postamble}        @tab @code{org-html-postamble}
-@item @code{:xml-declaration}       @tab @code{org-html-xml-declaration}
 @item @code{:html-table-tag}        @tab @code{org-html-table-tag}
-@item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
-@item @code{:select-tags}           @tab @code{org-export-select-tags}
-@item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
-@item @code{:latex-image-options}   @tab @code{org-latex-image-default-option}
+@item @code{:html-head-include-default-style} @tab @code{org-html-style-include-default}
+@item @code{:html-head-include-scripts} @tab @code{org-html-style-include-scripts}
 @end multitable
 
-Most of the @code{org-export-with-*} variables have the same effect in
-both HTML and @LaTeX{} exporters, except for @code{:TeX-macros} and
-@code{:LaTeX-fragments} options, respectively @code{nil} and @code{t} in the
-@LaTeX{} export.  See @code{org-export-plist-vars} to check this list of
-options.
+Most of the @code{org-export-with-*} variables have the same effect in each
+exporter.
 
 @vindex org-publish-project-alist
 When a property is given a value in @code{org-publish-project-alist}, its
@@ -12518,38 +12512,19 @@ however, override everything.
 @subsection Links between published files
 @cindex links, publishing
 
-To create a link from one Org file to another, you would use
-something like @samp{[[file:foo.org][The foo]]} or simply
-@samp{file:foo.org.} (@pxref{Hyperlinks}).  When published, this link
-becomes a link to @file{foo.html}.  In this way, you can interlink the
-pages of your "org web" project and the links will work as expected when
-you publish them to HTML@.  If you also publish the Org source file and want
-to link to that, use an @code{http:} link instead of a @code{file:} link,
-because @code{file:} links are converted to link to the corresponding
-@file{html} file.
+To create a link from one Org file to another, you would use something like
+@samp{[[file:foo.org][The foo]]} or simply @samp{file:foo.org.}
+(@pxref{Hyperlinks}).  When published, this link becomes a link to
+@file{foo.html}.  You can thus interlink the pages of your "org web" project
+and the links will work as expected when you publish them to HTML@.  If you
+also publish the Org source file and want to link to it, use an @code{http:}
+link instead of a @code{file:} link, because @code{file:} links are converted
+to link to the corresponding @file{html} file.
 
 You may also link to related files, such as images.  Provided you are careful
 with relative file names, and provided you have also configured Org to upload
 the related files, these links will work too.  See @ref{Complex example}, for
 an example of this usage.
-
-Sometimes an Org file to be published may contain links that are
-only valid in your production environment, but not in the publishing
-location.  In this case, use the property
-
-@multitable @columnfractions 0.4 0.6
-@item @code{:link-validation-function}
-@tab Function to validate links
-@end multitable
-
-@noindent
-to define a function for checking link validity.  This function must
-accept two arguments, the file name and a directory relative to which
-the file name is interpreted in the production environment.  If this
-function returns @code{nil}, then the HTML generator will only insert a
-description into the HTML file, but no link.  One option for this
-function is @code{org-publish-validate-link} which checks if the given
-file is part of any project in @code{org-publish-project-alist}.
 
 @node Sitemap, Generating an index, Publishing links, Configuration
 @subsection Generating a sitemap
