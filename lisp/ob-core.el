@@ -317,7 +317,7 @@ Do not query the user."
 (defsubst org-babel-confirm-evaluate (info)
   "Confirm evaluation of the code block INFO.
 
-If the variable `org-babel-confirm-evaluate-answer-no´ is bound
+If the variable `org-babel-confirm-evaluate-answer-no' is bound
 to a non-nil value, auto-answer with \"no\".
 
 This query can also be suppressed by setting the value of
