@@ -131,7 +131,7 @@
     (:with-footnotes nil "f" org-export-with-footnotes)
     (:with-inlinetasks nil "inline" org-export-with-inlinetasks)
     (:with-latex nil "tex" org-export-with-latex)
-    (:with-plannings nil "p" org-export-with-planning)
+    (:with-planning nil "p" org-export-with-planning)
     (:with-priority nil "pri" org-export-with-priority)
     (:with-smart-quotes nil "'" org-export-with-smart-quotes)
     (:with-special-strings nil "-" org-export-with-special-strings)
@@ -1345,7 +1345,7 @@ The back-end could then be called with, for example:
 ;;   - category :: option
 ;;   - type :: symbol (`verbatim', nil, t)
 ;;
-;; + `:with-plannings' :: Non-nil means transcoding should include
+;; + `:with-planning' :: Non-nil means transcoding should include
 ;;      planning info.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
@@ -2005,7 +2005,7 @@ a tree with a select tag."
 		      (not (eq todo-type with-tasks)))
 		 (and (consp with-tasks) (not (member todo with-tasks))))))))
     ((latex-environment latex-fragment) (not (plist-get options :with-latex)))
-    (planning (not (plist-get options :with-plannings)))
+    (planning (not (plist-get options :with-planning)))
     (statistics-cookie (not (plist-get options :with-statistics-cookies)))
     (table-cell
      (and (org-export-table-has-special-column-p
