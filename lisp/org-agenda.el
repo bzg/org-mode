@@ -2472,12 +2472,12 @@ This undoes changes both in the agenda buffer and in the remote buffer
 that have been changed along."
   (interactive)
   (or org-agenda-allow-remote-undo
-      (error "Check the variable `org-agenda-allow-remote-undo' to activate remote undo"))
+      (user-error "Check the variable `org-agenda-allow-remote-undo' to activate remote undo"))
   (if (not (eq this-command last-command))
       (setq org-agenda-undo-has-started-in nil
 	    org-agenda-pending-undo-list org-agenda-undo-list))
   (if (not org-agenda-pending-undo-list)
-      (error "No further undo information"))
+      (user-error "No further undo information"))
   (let* ((entry (pop org-agenda-pending-undo-list))
 	 buf line cmd rembuf)
     (setq cmd (pop entry) line (pop entry))
@@ -2787,7 +2787,7 @@ Pressing `<' twice means to restrict to the current subtree or region
 		(org-let lprops '(funcall type org-match)))
 	       ((fboundp type)
 		(org-let lprops '(funcall type org-match)))
-	       (t (error "Invalid custom agenda command type %s" type))))
+	       (t (user-error "Invalid custom agenda command type %s" type))))
 	  (org-agenda-run-series (nth 1 entry) (cddr entry))))
        ((equal org-keys "C")
 	(setq org-agenda-custom-commands org-agenda-custom-commands-orig)
@@ -2818,14 +2818,14 @@ Pressing `<' twice means to restrict to the current subtree or region
 	 t t))
        ((equal org-keys "L")
 	(unless (derived-mode-p 'org-mode)
-	  (error "This is not an Org-mode file"))
+	  (user-error "This is not an Org-mode file"))
 	(unless restriction
 	  (put 'org-agenda-files 'org-restrict (list bfn))
 	  (org-call-with-arg 'org-timeline arg)))
        ((equal org-keys "#") (call-interactively 'org-agenda-list-stuck-projects))
        ((equal org-keys "/") (call-interactively 'org-occur-in-agenda-files))
        ((equal org-keys "!") (customize-variable 'org-stuck-projects))
-       (t (error "Invalid agenda key"))))))
+       (t (user-error "Invalid agenda key"))))))
 
 (defun org-agenda-append-agenda ()
   "Append another agenda view to the current one.
@@ -2833,7 +2833,7 @@ This function allows interactive building of block agendas.
 Agenda views are separated by `org-agenda-block-separator'."
   (interactive)
   (unless (derived-mode-p 'org-agenda-mode)
-    (error "Can only append from within agenda buffer"))
+    (user-error "Can only append from within agenda buffer"))
   (let ((org-agenda-multi t))
     (org-agenda)
     (widen)
@@ -3041,7 +3041,7 @@ L   Timeline for current buffer         #   List stuck projects (!=configure)
             (org-agenda-get-restriction-and-command prefix-descriptions))
 
 	   ((equal c ?q) (error "Abort"))
-	   (t (error "Invalid key %c" c))))))))
+	   (t (user-error "Invalid key %c" c))))))))
 
 (defun org-agenda-fit-window-to-buffer ()
   "Fit the window to the buffer size."
@@ -3303,7 +3303,7 @@ If AGENDA-BUFFER-NAME, use this as the buffer name for the agenda to write."
 	  (and (file-exists-p file)
 	       (if (called-interactively-p 'any)
 		   (not (y-or-n-p (format "Overwrite existing file %s? " file))))))
-      (error "Cannot write agenda to file %s" file))
+      (user-error "Cannot write agenda to file %s" file))
   (org-let (if nosettings nil org-agenda-exporter-settings)
     '(save-excursion
        (save-window-excursion
@@ -9240,7 +9240,7 @@ ARG is passed through to `org-deadline'."
   "Cancel the currently running clock."
   (interactive "P")
   (unless (marker-buffer org-clock-marker)
-    (error "No running clock"))
+    (user-error "No running clock"))
   (org-with-remote-undo (marker-buffer org-clock-marker)
     (org-clock-cancel)))
 
@@ -9268,7 +9268,7 @@ buffer, display it in another window."
 	(setq d1 (calendar-cursor-to-date t)
 	      d2 (car calendar-mark-ring))
       (setq dp1 (get-text-property (point-at-bol) 'day))
-      (unless dp1 (error "No date defined in current line"))
+      (unless dp1 (user-error "No date defined in current line"))
       (setq d1 (calendar-gregorian-from-absolute dp1)
 	    d2 (and (ignore-errors (mark))
 		    (save-excursion
@@ -9292,7 +9292,7 @@ buffer, display it in another window."
      ((equal char ?b)
       (setq text (read-string "Block entry: "))
       (unless (and d1 d2 (not (equal d1 d2)))
-	(error "No block of days selected"))
+	(user-error "No block of days selected"))
       (org-agenda-add-entry-to-org-agenda-diary-file 'block text d1 d2)
       (and (equal (buffer-name) org-agenda-buffer-name) (org-agenda-redo)))
      ((equal char ?j)
@@ -9301,7 +9301,7 @@ buffer, display it in another window."
       (require 'org-datetree)
       (org-datetree-find-date-create d1)
       (org-reveal t))
-     (t (error "Invalid selection character `%c'" char)))))
+     (t (user-error "Invalid selection character `%c'" char)))))
 
 (defcustom org-agenda-insert-diary-strategy 'date-tree
   "Where in `org-agenda-diary-file' should new entries be added?
@@ -9461,11 +9461,11 @@ entries in that Org-mode file."
 	   (point (point))
 	   (mark (or (mark t) (point))))
       (unless cmd
-	(error "No command associated with <%c>" char))
+	(user-error "No command associated with <%c>" char))
       (unless (and (get-text-property point 'day)
 		   (or (not (equal ?b char))
 		       (get-text-property mark 'day)))
-	(error "Don't know which date to use for diary entry"))
+	(user-error "Don't know which date to use for diary entry"))
       ;; We implement this by hacking the `calendar-cursor-to-date' function
       ;; and the `calendar-mark-ring' variable.  Saves a lot of code.
       (let ((calendar-mark-ring
@@ -9486,7 +9486,7 @@ entries in that Org-mode file."
   (org-agenda-check-type t 'agenda 'timeline)
   (require 'diary-lib)
   (unless (get-text-property (min (1- (point-max)) (point)) 'day)
-    (error "Don't know which date to use for the calendar command"))
+    (user-error "Don't know which date to use for the calendar command"))
   (let* ((oldf (symbol-function 'calendar-cursor-to-date))
 	 (point (point))
 	 (date (calendar-gregorian-from-absolute
@@ -9535,7 +9535,7 @@ argument, latitude and longitude will be prompted for."
   (interactive)
   (org-agenda-check-type t 'agenda 'timeline)
   (let* ((day (or (get-text-property (min (1- (point-max)) (point)) 'day)
-		  (error "Don't know which date to open in calendar")))
+		  (user-error "Don't know which date to open in calendar")))
 	 (date (calendar-gregorian-from-absolute day))
 	 (calendar-move-hook nil)
 	 (calendar-view-holidays-initially-flag nil)
@@ -9558,7 +9558,7 @@ This is a command that has to be installed in `calendar-mode-map'."
   (let ((day (get-text-property (min (1- (point-max)) (point)) 'day))
 	date s)
     (unless day
-      (error "Don't know which date to convert"))
+      (user-error "Don't know which date to convert"))
     (setq date (calendar-gregorian-from-absolute day))
     (setq s (concat
 	     "Gregorian:  " (calendar-date-string date) "\n"
@@ -9594,7 +9594,7 @@ This is a command that has to be installed in `calendar-mode-map'."
       (let* ((m (org-get-at-bol 'org-hd-marker))
 	     ov)
 	(unless (org-agenda-bulk-marked-p)
-	  (unless m (error "Nothing to mark at point"))
+	  (unless m (user-error "Nothing to mark at point"))
 	  (push m org-agenda-bulk-marked-entries)
 	  (setq ov (make-overlay (point-at-bol) (+ 2 (point-at-bol))))
 	  (org-overlay-display ov (concat org-agenda-bulk-mark-char " ")
@@ -9686,14 +9686,14 @@ bulk action."
 The prefix arg is passed through to the command if possible."
   (interactive "P")
   ;; Make sure we have markers, and only valid ones
-  (unless org-agenda-bulk-marked-entries (error "No entries are marked"))
+  (unless org-agenda-bulk-marked-entries (user-error "No entries are marked"))
   (mapc
    (lambda (m)
      (unless (and (markerp m)
 		  (marker-buffer m)
 		  (buffer-live-p (marker-buffer m))
 		  (marker-position m))
-       (error "Marker %s for bulk command is invalid" m)))
+       (user-error "Marker %s for bulk command is invalid" m)))
    org-agenda-bulk-marked-entries)
 
   ;; Prompt for the bulk command
@@ -9772,7 +9772,7 @@ The prefix arg is passed through to the command if possible."
 
 	 ((equal action ?S)
 	  (if (not (org-agenda-check-type nil 'agenda 'timeline 'todo))
-	      (error "Can't scatter tasks in \"%s\" agenda view" org-agenda-type)
+	      (user-error "Can't scatter tasks in \"%s\" agenda view" org-agenda-type)
 	    (let ((days (read-number
 			 (format "Scatter tasks across how many %sdays: "
 				 (if arg "week" "")) 7)))
@@ -9810,7 +9810,7 @@ The prefix arg is passed through to the command if possible."
 			   (org-icompleting-read "Function: "
 						 obarray 'fboundp t nil nil)))))
 
-	 (t (error "Invalid bulk action")))
+	 (t (user-error "Invalid bulk action")))
 
 	;; Sort the markers, to make sure that parents are handled before children
 	(setq entries (sort entries
@@ -9866,7 +9866,7 @@ tag and (if present) the flagging note."
 	(win (selected-window))
 	note heading newhead)
     (unless hdmarker
-      (error "No linked entry at point"))
+      (user-error "No linked entry at point"))
     (if (and (eq this-command last-command)
 	     (y-or-n-p "Unflag and remove any flagging note? "))
 	(progn
@@ -9876,7 +9876,7 @@ tag and (if present) the flagging note."
 	  (message "Entry unflagged"))
       (setq note (org-entry-get hdmarker "THEFLAGGINGNOTE"))
       (unless note
-	(error "No flagging note"))
+	(user-error "No flagging note"))
       (org-kill-new note)
       (org-switch-to-buffer-other-window "*Flagging Note*")
       (erase-buffer)
