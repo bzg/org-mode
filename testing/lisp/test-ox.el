@@ -383,10 +383,10 @@ Paragraph"
     (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
       (org-test-with-backend test
 	(should
-	 (equal (org-export-as 'test nil nil nil '(:with-plannings t))
+	 (equal (org-export-as 'test nil nil nil '(:with-planning t))
 		"CLOSED: [2012-04-29 sun. 10:45]\n"))
 	(should
-	 (equal (org-export-as 'test nil nil nil '(:with-plannings nil))
+	 (equal (org-export-as 'test nil nil nil '(:with-planning nil))
 		"")))))
   ;; Statistics cookies.
   (should
@@ -686,6 +686,20 @@ body\n")))
 	  (org-export-read-attribute
 	   :attr_html
 	   (org-test-with-temp-text "#+ATTR_HTML: :a :b\nParagraph"
+	     (org-element-at-point)))))
+  ;; Return empty string when value is "".
+  (should
+   (equal '(:a "")
+	  (org-export-read-attribute
+	   :attr_html
+	   (org-test-with-temp-text "#+ATTR_HTML: :a \"\"\nParagraph"
+	     (org-element-at-point)))))
+  ;; Return \"\" when value is """".
+  (should
+   (equal '(:a "\"\"")
+	  (org-export-read-attribute
+	   :attr_html
+	   (org-test-with-temp-text "#+ATTR_HTML: :a \"\"\"\"\nParagraph"
 	     (org-element-at-point)))))
   ;; Ignore text before first property.
   (should-not

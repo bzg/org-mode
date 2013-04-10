@@ -3423,24 +3423,31 @@ that property within attributes.
 
 This function assumes attributes are defined as \":keyword
 value\" pairs.  It is appropriate for `:attr_html' like
-properties.  All values will become strings except the empty
-string and \"nil\", which will become nil."
-  (let ((attributes
-	 (let ((value (org-element-property attribute element)))
-	   (when value
-	     (let ((s (mapconcat 'identity value " ")) result)
-	       (while (string-match
-		       "\\(?:^\\|[ \t]+\\)\\(:[-a-zA-Z0-9_]+\\)\\([ \t]+\\|$\\)"
-		       s)
-		 (let ((value (substring s 0 (match-beginning 0))))
-		   (push (and (not (member value '("nil" ""))) value) result))
-		 (push (intern (match-string 1 s)) result)
-		 (setq s (substring s (match-end 0))))
-	       ;; Ignore any string before the first property with `cdr'.
-	       (cdr (nreverse (cons (and (org-string-nw-p s)
-					 (not (equal s "nil"))
-					 s)
-				    result))))))))
+properties.
+
+All values will become strings except the empty string and
+\"nil\", which will become nil.  Also, values containing only
+double quotes will be read as-is, which means that \"\" value
+will become the empty string."
+  (let* ((prepare-value
+	  (lambda (str)
+	    (cond ((member str '(nil "" "nil")) nil)
+		  ((string-match "^\"\\(\"+\\)?\"$" str)
+		   (or (match-string 1 str) ""))
+		  (t str))))
+	 (attributes
+	  (let ((value (org-element-property attribute element)))
+	    (when value
+	      (let ((s (mapconcat 'identity value " ")) result)
+		(while (string-match
+			"\\(?:^\\|[ \t]+\\)\\(:[-a-zA-Z0-9_]+\\)\\([ \t]+\\|$\\)"
+			s)
+		  (let ((value (substring s 0 (match-beginning 0))))
+		    (push (funcall prepare-value value) result))
+		  (push (intern (match-string 1 s)) result)
+		  (setq s (substring s (match-end 0))))
+		;; Ignore any string before first property with `cdr'.
+		(cdr (nreverse (cons (funcall prepare-value s) result))))))))
     (if property (plist-get attributes property) attributes)))
 
 (defun org-export-get-caption (element &optional shortp)
