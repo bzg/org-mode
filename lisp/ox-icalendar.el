@@ -971,7 +971,7 @@ files to build the calendar from."
 				      (lambda (m-list dummy)
 					(mapc (lambda (m)
 						(org-entry-put
-						 m "ICALENDAR_MARK" "t"))
+						 m "ICALENDAR-MARK" "t"))
 					      m-list))
 				      (sort marks '>))
 				     org-export-before-processing-hook)))
