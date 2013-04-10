@@ -1295,32 +1295,6 @@ ELEMENT is either a src block or an example block."
 
 ;;;; Table
 
-(defun org-html-splice-attributes (tag attributes)
-  "Return a HTML TAG edited wrt ATTRIBUTES."
-  (if (not attributes)
-      tag
-    (let (oldatt newatt)
-      (setq oldatt (org-extract-attributes-from-string tag)
-	    tag (pop oldatt)
-	    newatt (cdr (org-extract-attributes-from-string attributes)))
-      (while newatt
-	(setq oldatt (plist-put oldatt (pop newatt) (pop newatt))))
-      (if (string-match ">" tag)
-	  (setq tag
-		(replace-match (concat (org-attributes-to-string oldatt) ">")
-			       t t tag)))
-      tag)))
-
-(defun org-export-splice-style (style extra)
-  "Return STYLE updated wrt EXTRA."
-  (if (and (stringp extra)
-	   (string-match "\\S-" extra)
-	   (string-match "</style>" style))
-      (concat (substring style 0 (match-beginning 0))
-	      "\n" extra "\n"
-	      (substring style (match-beginning 0)))
-    style))
-
 (defun org-html-htmlize-region-for-paste (beg end)
   "Convert the region between BEG and END to HTML, using htmlize.el.
 This is much like `htmlize-region-for-paste', only that it uses
