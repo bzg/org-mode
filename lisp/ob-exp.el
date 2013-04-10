@@ -92,8 +92,8 @@ process."
 
 (defun org-babel-exp-src-block (&rest headers)
   "Process source block for export.
-Depending on the 'export' headers argument in replace the source
-code block with...
+Depending on the 'export' headers argument, replace the source
+code block like this:
 
 both ---- display the code and the results
 
@@ -103,7 +103,7 @@ code ---- the default, display the code inside the block but do
 results - just like none only the block is run on export ensuring
           that it's results are present in the org-mode buffer
 
-none ----- do not display either code or results upon export
+none ---- do not display either code or results upon export
 
 Assume point is at the beginning of block's starting line."
   (interactive)
