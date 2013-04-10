@@ -411,7 +411,8 @@ inhibit insertion of results into the buffer."
 	   ((equal type 'lob)
 	    (save-excursion
 	      (re-search-backward org-babel-lob-one-liner-regexp nil t)
-	      (org-babel-execute-src-block nil info)))))))))
+	      (let (org-confirm-babel-evaluate)
+		(org-babel-execute-src-block nil info))))))))))
 
 
 (provide 'ob-exp)

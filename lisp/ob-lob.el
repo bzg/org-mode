@@ -137,8 +137,9 @@ if so then run the appropriate source block from the Library."
 	(save-excursion (goto-char (org-babel-where-is-src-block-result))
 			(forward-line 1)
 			(message "%S" (org-babel-read-result)))
-      (prog1 (org-babel-execute-src-block
-	      nil (funcall mkinfo (org-babel-process-params pre-params)))
+      (prog1 (let* ((proc-params (org-babel-process-params pre-params))
+		     org-confirm-babel-evaluate)
+	       (org-babel-execute-src-block nil (funcall mkinfo proc-params)))
 	;; update the hash
 	(when new-hash (org-babel-set-current-result-hash new-hash))))))
 
