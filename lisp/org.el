@@ -1340,9 +1340,8 @@ default   the value to be used for all contexts not explicitly
 (defcustom org-insert-heading-respect-content nil
   "Non-nil means insert new headings after the current subtree.
 When nil, the new heading is created directly after the current line.
-The commands \\[org-insert-heading-respect-content] and
-\\[org-insert-todo-heading-respect-content] turn this variable on
-for the duration of the command."
+The commands \\[org-insert-heading-respect-content] and \\[org-insert-todo-heading-respect-content] turn
+this variable on for the duration of the command."
   :group 'org-structure
   :type 'boolean)
 
@@ -7536,6 +7535,8 @@ This is important for non-interactive uses of the command."
 	      (or (not (null arg)) org-insert-heading-respect-content))
 	     (level nil)
 	     (on-heading (org-at-heading-p))
+	     (on-empty-line
+	      (save-excursion (beginning-of-line 1) (looking-at "^\\s-*$")))
 	     (head (save-excursion
 		     (condition-case nil
 			 (progn
@@ -7588,6 +7589,8 @@ This is important for non-interactive uses of the command."
 		tags pos)
 	    (cond
 	     ;; Insert a new line, possibly at end of parent subtree
+	     ((and (not arg) (not on-heading) (not on-empty-line))
+	      (beginning-of-line 1))
 	     (org-insert-heading-respect-content
 	      (if (not eops)
 		  (progn
@@ -7637,7 +7640,9 @@ This is important for non-interactive uses of the command."
 		  (org-set-tags nil 'align))))
 	     (t
 	      (or split (end-of-line 1))
-	      (newline (if blank 2 1))))))
+	      (newline (cond ((and blank (not on-empty-line)) 2)
+			     (blank 1)
+			     (on-empty-line 0) (t 1)))))))
 	(insert head) (just-one-space)
 	(setq pos (point))
 	(end-of-line 1)
