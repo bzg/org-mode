@@ -2838,6 +2838,7 @@ Agenda views are separated by `org-agenda-block-separator'."
     (org-agenda)
     (widen)
     (org-agenda-finalize)
+    (setq buffer-read-only t)
     (org-agenda-fit-window-to-buffer)))
 
 (defun org-agenda-normalize-custom-commands (cmds)
