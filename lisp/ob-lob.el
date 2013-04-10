@@ -116,6 +116,7 @@ if so then run the appropriate source block from the Library."
 	 (list (length (if (= (length (match-string 12)) 0)
 			   (match-string 2) (match-string 11)))))))))
 
+(defvar org-babel-default-header-args:emacs-lisp) ; Defined in ob-emacs-lisp.el
 (defun org-babel-lob-execute (info)
   "Execute the lob call specified by INFO."
   (let* ((mkinfo (lambda (p) (list "emacs-lisp" "results" p nil nil (nth 2 info))))
