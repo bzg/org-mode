@@ -10374,7 +10374,12 @@ toggle inclusion of inlinetasks (@var{org-export-with-inlinetasks}).
 
 @item num:
 @vindex org-export-with-section-numbers
-toggle section-numbers (@var{org-export-with-section-numbers})
+toggle section-numbers (@var{org-export-with-section-numbers}).
+
+@item p:
+@vindex org-export-with-planning
+toggle export of planning information (e.g. deadlines)
+(@var{org-export-with-planning}).
 
 @item pri:
 @vindex org-export-with-priority
