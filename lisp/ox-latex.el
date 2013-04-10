@@ -1814,7 +1814,6 @@ used as a communication channel."
 	 ;; ATTR_LATEX line, and also via default variables.
 	 (width (cond ((plist-get attr :width))
 		      ((plist-get attr :height) "")
-		      ((eq float 'figure) "0.7\\textwidth")
 		      ((eq float 'wrap) "0.48\\textwidth")
 		      (t org-latex-image-default-width)))
 	 (height (cond ((plist-get attr :height))

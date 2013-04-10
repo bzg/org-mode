@@ -124,7 +124,7 @@
     (:html-head-extra "HTML_HEAD_EXTRA" nil org-html-head-extra newline)
     (:html-head-include-default-style "HTML_INCLUDE_STYLE" nil org-html-head-include-default-style newline)
     (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil org-html-head-include-scripts newline)
-    (:html-table-tag nil nil org-html-table-tag)
+    (:html-table-attributes nil nil org-html-table-default-attributes)
     (:html-table-row-tags nil nil org-html-table-row-tags)
     (:html-xml-declaration nil nil org-html-xml-declaration)
     (:html-inline-images nil nil org-html-inline-images)
@@ -695,16 +695,9 @@ be linked only."
     ("http" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\|svg\\)\\'")
     ("https" . "\\.\\(jpeg\\|jpg\\|png\\|gif\\|svg\\)\\'"))
   "Rules characterizing image files that can be inlined into HTML.
-
 A rule consists in an association whose key is the type of link
 to consider, and value is a regexp that will be matched against
-link's path.
-
-Note that, by default, the image extension *actually* allowed
-depend on the way the HTML file is processed.  When used with
-pdflatex, pdf, jpg and png images are OK.  When processing
-through dvi to Postscript, only ps and eps are allowed.  The
-default we use here encompasses both."
+link's path."
   :group 'org-export-html
   :version "24.4"
   :package-version '(Org . "8.0")
@@ -750,13 +743,16 @@ in all modes you want.  Then, use the command
 
 ;;;; Table
 
-(defcustom org-html-table-tag
-  "<table border=\"2\" cellspacing=\"0\" cellpadding=\"6\" rules=\"groups\" frame=\"hsides\">"
-  "The HTML tag that is used to start a table.
-This must be a <table> tag, but you may change the options like
-borders and spacing."
+(defcustom org-html-table-default-attributes
+  '(:border "2" :cellspacing "0" :cellpadding "6" :rules "groups" :frame "hsides")
+  "Default attributes and values which will be used in table tags.
+This is a plist where attributes are symbols, starting with
+colons, and values are strings."
   :group 'org-export-html
-  :type 'string)
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type '(plist :key-type (symbol :tag "Property")
+		:value-type (string :tag "Value")))
 
 (defcustom org-html-table-header-tags '("<th scope=\"%s\"%s>" . "</th>")
   "The opening tag for table header fields.
@@ -1243,6 +1239,19 @@ CSS classes, then this prefix can be very useful."
 
 ;;; Internal Functions
 
+(defun org-html--make-attribute-string (attributes)
+  "Return a list of attributes, as a string.
+ATTRIBUTES is a plist where values are either strings or nil. An
+attributes with a nil value will be omitted from the result."
+  (let (output)
+    (dolist (item attributes (mapconcat 'identity (nreverse output) " "))
+      (cond ((null item) (pop output))
+            ((symbolp item) (push (substring (symbol-name item) 1) output))
+            (t (let ((key (car output))
+                     (value (replace-regexp-in-string
+                             "\"" "&quot;" (org-html-encode-plain-text item))))
+                 (setcar output (format "%s=\"%s\"" key value))))))))
+
 (defun org-html-format-inline-image (src &optional
 					 caption label attr standalone-p)
   "Format an inline image from SRC.
@@ -1301,32 +1310,6 @@ ELEMENT is either a src block or an example block."
 	nil))))
 
 ;;;; Table
-
-(defun org-html-splice-attributes (tag attributes)
-  "Return a HTML TAG edited wrt ATTRIBUTES."
-  (if (not attributes)
-      tag
-    (let (oldatt newatt)
-      (setq oldatt (org-extract-attributes-from-string tag)
-	    tag (pop oldatt)
-	    newatt (cdr (org-extract-attributes-from-string attributes)))
-      (while newatt
-	(setq oldatt (plist-put oldatt (pop newatt) (pop newatt))))
-      (if (string-match ">" tag)
-	  (setq tag
-		(replace-match (concat (org-attributes-to-string oldatt) ">")
-			       t t tag)))
-      tag)))
-
-(defun org-export-splice-style (style extra)
-  "Return STYLE updated wrt EXTRA."
-  (if (and (stringp extra)
-	   (string-match "\\S-" extra)
-	   (string-match "</style>" style))
-      (concat (substring style 0 (match-beginning 0))
-	      "\n" extra "\n"
-	      (substring style (match-beginning 0)))
-    style))
 
 (defun org-html-htmlize-region-for-paste (beg end)
   "Convert the region between BEG and END to HTML, using htmlize.el.
@@ -2432,6 +2415,7 @@ CONTENTS is nil.  INFO is a plist holding contextual information."
 
 (defun org-html-link--inline-image (link desc info)
   "Return HTML code for an inline image.
+
 LINK is the link pointing to the inline image.  INFO is a plist
 used as a communication channel.
 
@@ -2447,20 +2431,12 @@ Inline images can have these attributes:
 		     (t raw-path)))
 	 (parent (org-export-get-parent-element link))
 	 (caption (org-export-data (org-export-get-caption parent) info))
-	 (label (org-element-property :name parent))
-	 (attrs (org-export-read-attribute :attr_html parent))
-	 (alt (plist-get attrs :alt))
-	 (width (plist-get attrs :width))
-	 (height (plist-get attrs :height))
-	 (options (plist-get attrs :options)))
+	 (label (org-element-property :name parent)))
     ;; Return proper string, depending on DISPOSITION.
     (org-html-format-inline-image
      path caption label
-     (mapconcat 'identity
-		(delq nil (list (if width (format "width=\"%s\"" width))
-				(if alt (format "alt=\"%s\"" alt))
-				(if height (format "height=\"%s\"" height))
-				options)) " ")
+     (org-html--make-attribute-string
+      (org-export-read-attribute :attr_html parent))
      (org-html-standalone-image-p link info))))
 
 (defvar org-html-standalone-image-predicate)
@@ -2561,20 +2537,19 @@ INFO is a plist holding contextual information.  See
 							numbers "-"))))))
 		    (t raw-path))))
 	   (t raw-path)))
-	 attributes protocol)
-    ;; Extract attributes from parent's paragraph. HACK: Only do this
-    ;; for the first link in parent.  This is needed as long as
-    ;; attributes cannot be set on a per link basis.
-    (and (setq attributes
-	       (let ((parent (org-export-get-parent-element link)))
-		 (if (not (eq (org-element-map parent 'link 'identity info t)
-			      link))
-		     ""
-		    (let ((att (org-export-read-attribute :attr_html parent :options)))
-		      (unless (and desc att (string-match (regexp-quote att) desc))
-			(or att ""))))))
-	 (unless (string= attributes "")
-	   (setq attributes (concat " " attributes))))
+	 ;; Extract attributes from parent's paragraph. HACK: Only do
+	 ;; this for the first link in parent.  This is needed as long
+	 ;; as attributes cannot be set on a per link basis.
+	 (attributes
+	  (let ((parent (org-export-get-parent-element link)))
+	    (if (not (eq (org-element-map parent 'link 'identity info t) link))
+		""
+	      (let ((att (org-html--make-attribute-string
+			  (org-export-read-attribute :attr_html parent))))
+		(cond ((not (org-string-nw-p att)) "")
+		      ((and desc (string-match (regexp-quote att) desc)) "")
+		      (t (concat " " att)))))))
+	 protocol)
     (cond
      ;; Image file.
      ((and (or (eq t org-html-inline-images)
@@ -3055,7 +3030,11 @@ contextual information."
      (let* ((label (org-element-property :name table))
 	    (caption (org-export-get-caption table))
 	    (attributes
-	     (org-export-read-attribute :attr_html table :options))
+	     (org-html--make-attribute-string
+	      (org-combine-plists
+	       (and label (list :id (org-export-solidify-link-text label)))
+	       (plist-get info :html-table-attributes)
+	       (org-export-read-attribute :attr_html table))))
 	    (alignspec
 	     (if (and (boundp 'org-html-format-table-no-css)
 		      org-html-format-table-no-css)
@@ -3078,20 +3057,9 @@ contextual information."
 		      (when (org-export-table-cell-ends-colgroup-p
 			     table-cell info)
 			"\n</colgroup>"))))
-		 (org-html-table-first-row-data-cells table info) "\n"))))
-	    (table-attributes
-	     (let ((table-tag (plist-get info :html-table-tag)))
-	       (concat
-		(and (string-match  "<table\\(.*\\)>" table-tag)
-		     (match-string 1 table-tag))
-		(and label (format " id=\"%s\""
-				   (org-export-solidify-link-text label)))
-		(unless (string= attributes "")
-		  (concat " " attributes))))))
-       ;; Remove last blank line.
-       (setq contents (substring contents 0 -1))
-       (format "<table%s>\n%s\n%s\n%s\n</table>"
-	       table-attributes
+		 (org-html-table-first-row-data-cells table info) "\n")))))
+       (format "<table%s>\n%s\n%s\n%s</table>"
+	       (if (equal attributes "") "" (concat " " attributes))
 	       (if (not caption) ""
 		 (format "<caption>%s</caption>"
 			 (org-export-data caption info)))

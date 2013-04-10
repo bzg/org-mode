@@ -10126,23 +10126,6 @@ from."
       (org-add-props s nil 'org-attr attr))
     s))
 
-(defun org-extract-attributes-from-string (tag)
-  (let (key value attr)
-    (while (string-match "\\([a-zA-Z]+\\)=\"\\([^\"]*\\)\"\\s-?" tag)
-      (setq key (match-string 1 tag) value (match-string 2 tag)
-	    tag (replace-match "" t t tag)
-	    attr (plist-put attr (intern key) value)))
-    (cons tag attr)))
-
-(defun org-attributes-to-string (plist)
-  "Format a property list into an HTML attribute list."
-  (let ((s "") key value)
-    (while plist
-      (setq key (pop plist) value (pop plist))
-      (and value
-	   (setq s (concat s " " (symbol-name key) "=\"" value "\""))))
-    s))
-
 ;;; Opening/following a link
 
 (defvar org-link-search-failed nil)
