@@ -112,6 +112,7 @@
 		(org-open-file (org-html-export-to-html nil s v b)))))))
   :options-alist
   '((:html-extension nil nil org-html-extension)
+    (:html-link-org-as-html nil nil org-html-link-org-files-as-html)
     (:html-doctype "HTML_DOCTYPE" nil org-html-doctype)
     (:html-container "HTML_CONTAINER" nil org-html-container-element)
     (:html-link-home "HTML_LINK_HOME" nil org-html-link-home)
@@ -124,6 +125,9 @@
     (:html-head-include-default-style "HTML_INCLUDE_STYLE" nil org-html-head-include-default-style newline)
     (:html-head-include-scripts "HTML_INCLUDE_SCRIPTS" nil org-html-head-include-scripts newline)
     (:html-table-tag nil nil org-html-table-tag)
+    (:html-table-row-tags nil nil org-html-table-row-tags)
+    (:html-xml-declaration nil nil org-html-xml-declaration)
+    (:html-inline-images nil nil org-html-inline-images)
     (:infojs-opt "INFOJS_OPT" nil nil)
     ;; Redefine regular options.
     (:creator "CREATOR" nil org-html-creator-string)
