@@ -13342,12 +13342,19 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	      (insert (pop lines))))
 	  (message "Note stored")
 	  (org-back-to-heading t)
-	  (org-cycle-hide-drawers 'children))))))
-  (set-window-configuration org-log-note-window-configuration)
-  (with-current-buffer (marker-buffer org-log-note-return-to)
-    (goto-char org-log-note-return-to))
-  (move-marker org-log-note-return-to nil)
-  (and org-log-post-message (message "%s" org-log-post-message)))
+	  (org-cycle-hide-drawers 'children))
+	;; Fix `buffer-undo-list' when `org-store-log-note' is called
+	;; from within `org-add-log-note' because `buffer-undo-list'
+	;; is then modified outside of `org-with-remote-undo'.
+	(when (eq this-command 'org-agenda-todo)
+	  (setcdr buffer-undo-list (cddr buffer-undo-list)))))))
+  ;; Don't add undo information when called from `org-agenda-todo'
+  (let ((buffer-undo-list (eq this-command 'org-agenda-todo)))
+    (set-window-configuration org-log-note-window-configuration)
+    (with-current-buffer (marker-buffer org-log-note-return-to)
+      (goto-char org-log-note-return-to))
+    (move-marker org-log-note-return-to nil)
+    (and org-log-post-message (message "%s" org-log-post-message))))
 
 (defun org-remove-empty-drawer-at (drawer pos)
   "Remove an empty drawer DRAWER at position POS.
