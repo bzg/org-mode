@@ -12494,7 +12494,7 @@ string for the respective variable for details.
 @item @code{:html-extension}        @tab @code{org-html-extension}
 @item @code{:html-preamble}         @tab @code{org-html-preamble}
 @item @code{:html-postamble}        @tab @code{org-html-postamble}
-@item @code{:html-table-tag}        @tab @code{org-html-table-tag}
+@item @code{:html-table-attributes}        @tab @code{org-html-table-default-attributes}
 @item @code{:html-head-include-default-style} @tab @code{org-html-style-include-default}
 @item @code{:html-head-include-scripts} @tab @code{org-html-style-include-scripts}
 @end multitable
