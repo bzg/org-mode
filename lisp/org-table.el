@@ -1118,7 +1118,7 @@ copying.  In the case of a timestamp, increment by one day."
   (interactive "p")
   (let* ((colpos (org-table-current-column))
 	 (col (current-column))
-	 (field (org-table-get-field))
+	 (field (save-excursion (org-table-get-field)))
 	 (non-empty (string-match "[^ \t]" field))
 	 (beg (org-table-begin))
 	 (orig-n n)
