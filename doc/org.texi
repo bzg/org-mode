@@ -10935,43 +10935,23 @@ be correctly exported: respect the hierarchy of sections.
 @cindex transient-mark-mode
 @table @kbd
 @orgcmd{C-c C-e l l,org-latex-export-to-latex}
-@cindex property EXPORT_FILE_NAME
-Export as a @LaTeX{} file.  For an Org file
-@file{myfile.org}, the @LaTeX{} file will be @file{myfile.tex}.  The file will
-be overwritten without warning.  If there is an active region@footnote{This
-requires @code{transient-mark-mode} be turned on.}, only the region will be
-exported.  If the selected region is a single tree@footnote{To select the
-current subtree, use @kbd{C-c @@}.}, the tree head will become the document
-title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
-property, that name will be used for the export.
+Export as a @LaTeX{} file.  For an Org file @file{myfile.org}, the @LaTeX{}
+file will be @file{myfile.tex}.  The file will be overwritten without
+warning.
 @orgcmd{C-c C-e l L,org-latex-export-as-latex}
 Export to a temporary buffer.  Do not create a file.
 @item C-c C-e C-v l/L
 Export only the visible part of the document.
 @orgcmd{C-c C-e l p,org-latex-export-to-pdf}
 Export as @LaTeX{} and then process to PDF.
-@kbd{C-c C-e l o}
+@item C-c C-e l o
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-@c FIXME Exporting sublevels
-@c @cindex headline levels, for exporting
-@c @vindex org-latex-low-levels
-@c In the exported version, the first 3 outline levels will become
-@c headlines, defining a general document structure.  Additional levels
-@c will be exported as description lists.  The exporter can ignore them or
-@c convert them to a custom string depending on
-@c @code{org-latex-low-levels}.
-
-@c If you want that transition to occur at a different level, specify it
-@c with a numeric prefix argument.  For example,
-
-@c @example
-@c @kbd{C-2 C-c C-e l}
-@c @end example
-
-@c @noindent
-@c creates two levels of headings and does the rest as items.
+In the exported version, the first three outline levels will become
+headlines, defining a general document structure.  Additional levels will be
+exported as description lists.  The transition can also occur at a different
+level (@pxref{Export settings}).
 
 @node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{}/PDF export commands, @LaTeX{} and PDF export
 @subsection Header and sectioning structure
@@ -10987,32 +10967,37 @@ By default, the @LaTeX{} output uses the class @code{article}.
 @vindex org-latex-classes
 @vindex org-latex-default-packages-alist
 @vindex org-latex-packages-alist
-@cindex #+LaTeX_HEADER
-@cindex #+LaTeX_CLASS
-@cindex #+LaTeX_CLASS_OPTIONS
-@cindex property, LaTeX_CLASS
-@cindex property, LaTeX_CLASS_OPTIONS
 You can change this globally by setting a different value for
 @code{org-latex-default-class} or locally by adding an option like
-@code{#+LaTeX_CLASS: myclass} in your file, or with a @code{:LaTeX_CLASS:}
-property that applies when exporting a region containing only this (sub)tree.
-The class must be listed in @code{org-latex-classes}.  This variable
-defines a header template for each class@footnote{Into which the values of
-@code{org-latex-default-packages-alist} and
-@code{org-latex-packages-alist} are spliced.}, and allows you to
-define the sectioning structure for each class.  You can also define your own
-classes there.  @code{#+LaTeX_CLASS_OPTIONS} or a @code{:LaTeX_CLASS_OPTIONS:}
-property can specify the options for the @code{\documentclass} macro.  The
-options to documentclass have to be provided, as expected by @LaTeX{}, within
-square brackets.  You can also use @code{#+LaTeX_HEADER: \usepackage@{xyz@}}
-to add lines to the header.  See the docstring of
-@code{org-latex-classes} for more information.  An example is shown
-below.
+@code{#+LATEX_CLASS: myclass} in your file, or with
+a @code{EXPORT_LATEX_CLASS} property that applies when exporting a region
+containing only this (sub)tree.  The class must be listed in
+@code{org-latex-classes}.  This variable defines a header template for each
+class@footnote{Into which the values of
+@code{org-latex-default-packages-alist} and @code{org-latex-packages-alist}
+are spliced.}, and allows you to define the sectioning structure for each
+class.  You can also define your own classes there.
+
+@cindex #+LATEX_CLASS
+@cindex #+LATEX_CLASS_OPTIONS
+@cindex property, EXPORT_LATEX_CLASS
+@cindex property, EXPORT_LATEX_CLASS_OPTIONS
+@code{LATEX_CLASS_OPTIONS} keyword or @code{EXPORT_LATEX_CLASS_OPTIONS}
+property can specify the options for the @code{\documentclass} macro.  These
+options have to be provided, as expected by @LaTeX{}, within square brackets.
+
+@cindex #+LATEX_HEADER
+@cindex #+LATEX_HEADER_EXTRA
+You can also use LATEX_HEADER and LATEX_HEADER_EXTRA keywords in order to add
+lines to the header.  See the docstring of @code{org-latex-classes} for more
+information.
+
+An example is shown below.
 
 @example
-#+LaTeX_CLASS: article
-#+LaTeX_CLASS_OPTIONS: [a4paper]
-#+LaTeX_HEADER: \usepackage@{xyz@}
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper]
+#+LATEX_HEADER: \usepackage@{xyz@}
 
 * Headline 1
   some text
@@ -11022,24 +11007,27 @@ below.
 @subsection Quoting @LaTeX{} code
 
 Embedded @LaTeX{} as described in @ref{Embedded @LaTeX{}}, will be correctly
-inserted into the @LaTeX{} file.  This includes simple macros like
-@samp{\ref@{LABEL@}} to create a cross reference to a figure.  Furthermore,
-you can add special code that should only be present in @LaTeX{} export with
-the following constructs:
+inserted into the @LaTeX{} file.  Furthermore, you can add special code that
+should only be present in @LaTeX{} export with the following constructs:
 
-@cindex #+LaTeX
-@cindex #+BEGIN_LaTeX
+@cindex #+LATEX
+@cindex #+BEGIN_LATEX
 @example
-#+LaTeX: Literal @LaTeX{} code for export
+Code within @@@@latex:some code@@@@ a paragraph.
 @end example
 
 @noindent or
-@cindex #+BEGIN_LaTeX
 
 @example
-#+BEGIN_LaTeX
+#+LATEX: Literal @LaTeX{} code for export
+@end example
+
+@noindent or, eventually,
+
+@example
+#+BEGIN_LATEX
 All lines between these markers are exported literally
-#+END_LaTeX
+#+END_LATEX
 @end example
 
 
@@ -11047,37 +11035,72 @@ All lines between these markers are exported literally
 @subsection Tables in @LaTeX{} export
 @cindex tables, in @LaTeX{} export
 
-For @LaTeX{} export of a table, you can specify a label, a caption and
-placement options (@pxref{Images and tables}).  You can also use the
-@code{ATTR_LaTeX} line to request a @code{longtable} environment for the
-table, so that it may span several pages, or to change the default table
-environment from @code{table} to @code{table*} or to change the default inner
-tabular environment to @code{tabularx} or @code{tabulary}.  Finally, you can
-set the alignment string, and (with @code{tabularx} or @code{tabulary}) the
-width:
+For @LaTeX{} export of a table, you can specify a label and a caption
+(@pxref{Images and tables}).
 
-@cindex #+CAPTION
-@cindex #+LABEL
-@cindex #+ATTR_LaTeX
+You can also use the @code{ATTR_LATEX} line to control table layout and
+contents.  Valid attributes are:
+
+@table @code
+@item :mode
+@vindex org-latex-default-table-mode
+Nature of table's contents.  It can be set to @code{table}, @code{math},
+@code{inline-math} or @code{verbatim}.  In particular, when in @code{math} or
+@code{inline-math} mode, every cell is exported as-is, horizontal rules are
+ignored and the table will be wrapped in a math environment.  Also,
+contiguous tables sharing the same math mode will be wrapped within the same
+environment.  Default mode is determined in
+@var{org-latex-default-table-mode}.
+@item :environment
+@vindex org-latex-default-table-environment
+Environment used for the table.  It can be to any @LaTeX{} table
+environment, like @code{tabularx}, @code{longtable}, @code{array},
+@code{tabu}, @code{bmatrix}@enddots{}  It defaults to
+@var{org-latex-default-table-environment} value.
+@item :float
+Float environment for the table.  Possible values are @code{sidewaystable},
+@code{multicolumn} and @code{table}.  If unspecified, a table with a caption
+will have a @code{table} environment.  Moreover, @code{:placement} attribute
+can specify the positioning of the float.
+@item :align, :font, :width
+set, respectively, the alignment string of the table, its font size and its
+width.  They only apply on regular tables.
+@item :spread
+Boolean specific to the @code{tabu} and @code{longtabu} environments, and
+only takes effect when used in conjunction with the @code{:width} attribute.
+When @code{:spread} is non-nil, the table will be spread or shrunk by the
+value of @code{:width}.
+@item :booktabs, :center, :rmlines
+@vindex org-latex-tables-booktabs
+@vindex org-latex-tables-centered
+They toggle, respectively, @code{booktabs} usage (assuming the package is
+properly loaded), table centering and removal of every horizontal rule but
+the first one (in a "table.el" table only).  In particular,
+@var{org-latex-tables-booktabs} (resp. @var{org-latex-tables-centered})
+activates the first (resp. second) attribute globally.
+@item :math-prefix, :math-suffix, :math-arguments
+string which will be inserted, respectively, before the table within the math
+environment, after the table within the math environment, and between the
+macro name and the contents of the table.  The latter attribute is necessary
+to matrix macros that require more than one argument (e.g.,
+@code{qbordermatrix}).
+@end table
+
+Thus, attributes can be used in a wide array of situations, like writing
+a table that will span over multiple pages, or a matrix product:
+
+@cindex #+ATTR_LATEX
 @example
-#+CAPTION: A long table
-#+LABEL: tbl:long
-#+ATTR_LaTeX: longtable align=l|lp@{3cm@}r|l
+#+ATTR_LATEX: :environment longtable :align l|lp@{3cm@}r|l
 | ..... | ..... |
 | ..... | ..... |
-@end example
 
-or to specify a multicolumn table with @code{tabulary}
-
-@cindex #+CAPTION
-@cindex #+LABEL
-@cindex #+ATTR_LaTeX
-@example
-#+CAPTION: A wide table with tabulary
-#+LABEL: tbl:wide
-#+ATTR_LaTeX: table* tabulary width=\textwidth
-| ..... | ..... |
-| ..... | ..... |
+#+ATTR_LATEX: :mode math :environment bmatrix :math-suffix \times
+| a | b |
+| c | d |
+#+ATTR_LATEX: :mode math :environment bmatrix
+| 1 | 2 |
+| 3 | 4 |
 @end example
 
 @node Images in @LaTeX{} export, Beamer class export, Tables in @LaTeX{} export, @LaTeX{} and PDF export
@@ -11088,46 +11111,44 @@ or to specify a multicolumn table with @code{tabulary}
 Images that are linked to without a description part in the link, like
 @samp{[[file:img.jpg]]} or @samp{[[./img.jpg]]} will be inserted into the PDF
 output file resulting from @LaTeX{} processing.  Org will use an
-@code{\includegraphics} macro to insert the image.  If you have specified a
-caption and/or a label as described in @ref{Images and tables}, the figure
-will be wrapped into a @code{figure} environment and thus become a floating
-element.  You can use an @code{#+ATTR_LaTeX:} line to specify various other
-options.  You can ask org to export an image as a float without specifying
-a label or a caption by using the keyword @code{float} in this line.  Various
-optional arguments to the @code{\includegraphics} macro can also be specified
-in this fashion.  To modify the placement option of the floating environment,
-add something like @samp{placement=[h!]} to the attributes.  It is to be noted
-this option can be used with tables as well@footnote{One can also take
-advantage of this option to pass other, unrelated options into the figure or
-table environment.  For an example see the section ``Exporting org files'' in
-@url{http://orgmode.org/worg/org-hacks.html}}.
+@code{\includegraphics} macro to insert the image@footnote{In the case of
+TikZ (@url{http://sourceforge.net/projects/pgf/}) images, it will become an
+@code{\input} macro wrapped within a @code{tikzñpicture} environment.}.  You
+can use an @code{#+ATTR_LATEX:} line to specify its width or height, with,
+respectively, @code{:width} and @code{:height} attributes.  It is also
+possible to specify any other option with the @code{:options} attribute, as
+shown in the following example:
 
-If you would like to let text flow around the image, add the word @samp{wrap}
-to the @code{#+ATTR_LaTeX:} line, which will make the figure occupy the left
-half of the page.  To fine-tune, the @code{placement} field will be the set
-of additional arguments needed by the @code{wrapfigure} environment.  Note
-that if you change the size of the image, you need to use compatible settings
-for @code{\includegraphics} and @code{wrapfigure}.
-
-@cindex #+CAPTION
-@cindex #+LABEL
-@cindex #+ATTR_LaTeX
+@cindex #+ATTR_LATEX
 @example
-#+CAPTION:    The black-body emission of the disk around HR 4049
-#+LABEL:      fig:SED-HR4049
-#+ATTR_LaTeX: width=5cm,angle=90
+#+ATTR_LATEX: :width 5cm :options angle=90
 [[./img/sed-hr4049.pdf]]
+@end example
 
-#+ATTR_LaTeX: width=0.38\textwidth wrap placement=@{r@}@{0.4\textwidth@}
+If you have specified a caption as described in @ref{Images and tables}, the
+picture will be wrapped into a @code{figure} environment and thus become
+a floating element.  You can also ask Org to export an image as a float
+without specifying caption by setting the @code{:float} attribute to
+@code{figure} value in @code{#+ATTR_LATEX:} line.  You may also set it to:
+@table @code
+@item wrap
+if you would like to let text flow around the image.  It will make the figure
+occupy the left half of the page.
+@item multicolumn
+if you wish to include an image which spans multiple columns in a page.  This
+will export the image wrapped in a @code{figure*} environment.
+@end table
+To modify the placement option of any floating environment, set the
+@code{placement} attribute.
+
+@cindex #+ATTR_LATEX
+@example
+#+ATTR_LATEX: :float wrap :width 0.38\textwidth :placement @{r@}@{0.4\textwidth@}
 [[./img/hst.png]]
 @end example
 
-If you wish to include an image which spans multiple columns in a page, you
-can use the keyword @code{multicolumn} in the @code{#+ATTR_LaTeX} line.  This
-will export the image wrapped in a @code{figure*} environment.
-
-If you need references to a label created in this way, write
-@samp{\ref@{fig:SED-HR4049@}} just like in @LaTeX{}.
+Eventually, in the @code{:comment-include} attributes has a non-nil value,
+the code actually including the image will be commented out.
 
 @node Beamer class export,  , Images in @LaTeX{} export, @LaTeX{} and PDF export
 @subsection Beamer class export
@@ -11148,7 +11169,7 @@ different level---then the hierarchy above frames will produce the sectioning
 structure of the presentation.
 
 A template for useful in-buffer settings or properties can be inserted into
-the buffer with @kbd{M-x org-insert-beamer-options-template}.  Among other
+the buffer with @kbd{M-x org-beamer-insert-options-template}.  Among other
 things, this will install a column view format which is very handy for
 editing special properties used by beamer.
 
