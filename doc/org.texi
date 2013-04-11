@@ -10640,26 +10640,31 @@ and @code{style} attributes for a link:
 
 @cindex #+ATTR_HTML
 @example
-#+ATTR_HTML: title="The Org mode homepage" style="color:red;"
+#+ATTR_HTML: :title "The Org mode homepage" :style "color:red;"
 [[http://orgmode.org]]
 @end example
 
 @node Tables in HTML export, Images in HTML export, Links in HTML export, HTML export
 @subsection Tables
 @cindex tables, in HTML
-@vindex org-html-table-tag
+@vindex org-html-table-default-attributes
 
-Org mode tables are exported to HTML using the table tag defined in
-@code{org-html-table-tag}.  The default setting makes tables without
-cell borders and frame.  If you would like to change this for individual
-tables, place something like the following before the table:
+Org mode tables are exported to HTML using the table attributes defined in
+@code{org-html-table-default-attributes}.  The default setting makes tables
+without cell borders and frame.  If you would like to change this for
+individual tables, place something like the following before the table:
 
 @cindex #+CAPTION
 @cindex #+ATTR_HTML
 @example
 #+CAPTION: This is a table with lines around and between cells
-#+ATTR_HTML: border="2" rules="all" frame="border"
+#+ATTR_HTML: :border "2" :rules "all" :frame "border"
 @end example
+
+@vindex org-html-table-row-tags
+You can also modify the default tags used for each row by setting
+@var{org-html-table-row-tags}.  See the docstring for an example on
+how to use this option.
 
 @node Images in HTML export, Math formatting in HTML export, Tables in HTML export, HTML export
 @subsection Images in HTML export
@@ -10691,7 +10696,7 @@ support text viewers and accessibility, and align it to the right.
 @cindex #+ATTR_HTML
 @example
 #+CAPTION: A black cat stalking a spider
-#+ATTR_HTML: alt="cat/spider image" title="Action!" align="right"
+#+ATTR_HTML: :alt "cat/spider image" :title "Action!" :align "right"
 [[./img/a.jpg]]
 @end example
 
@@ -12479,7 +12484,7 @@ string for the respective variable for details.
 @vindex org-html-extension
 @vindex org-html-preamble
 @vindex org-html-postamble
-@vindex org-html-table-tag
+@vindex org-html-table-default-attributes
 @vindex org-html-style-include-default
 @vindex org-html-style-include-scripts
 @multitable @columnfractions 0.32 0.68
@@ -14315,7 +14320,7 @@ argument.
 @example
 #+name: attr_wrap
 #+begin_src sh :var data="" :var width="\\textwidth" :results output
-  echo "#+ATTR_LATEX width=$width"
+  echo "#+ATTR_LATEX :width $width"
   echo "$data"
 #+end_src
 
@@ -14330,7 +14335,7 @@ argument.
 
 #+RESULTS:
 :RESULTS:
-#+ATTR_LATEX width=5cm
+#+ATTR_LATEX :width 5cm
 [[file:/tmp/it.png]]
 :END:
 @end example
