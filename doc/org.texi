@@ -10319,11 +10319,11 @@ toggle inclusion of any time/date stamps like DEADLINES
 @vindex org-export-preserve-breaks
 toggle line-break-preservation (@var{org-export-preserve-breaks}).
 
-@item ^: FIXME
+@item ^:
 @vindex org-export-with-sub-superscripts
-toggle @TeX{}-like syntax for sub- and superscripts.  If you write
-"^:@{@}", 'a@math{_b}' will be interpreted, but the simple 'a_b' will be
-left as it is (@var{org-export-with-sub-superscripts}).
+toggle @TeX{}-like syntax for sub- and superscripts.  If you write "^:@{@}",
+@samp{a_@{b@}} will be interpreted, but the simple @samp{a_b} will be left as
+it is (@var{org-export-with-sub-superscripts}).
 
 @item arch:
 @vindex org-export-with-archived-trees
@@ -10432,7 +10432,7 @@ become buffer-local during export by using the BIND keyword.  Its syntax is
 settings that cannot be changed using specific keywords.
 
 You can place commonly-used export settings in a separate file which can be
-included using @samp{#+SETUPFILE: "filename"} syntax.
+included using @samp{#+SETUPFILE: filename} syntax.
 
 These settings affect all buffer's export processes.  Though, it is
 possible to override them locally when exporting only a subtree.  This is
