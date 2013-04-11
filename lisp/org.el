@@ -4010,7 +4010,7 @@ After a match, the match groups contain these elements:
 	   (body1 (concat body "*?"))
 	   (markers (mapconcat 'car org-emphasis-alist ""))
 	   (vmarkers (mapconcat
-		      (lambda (x) (if (eq (nth 4 x) 'verbatim) (car x) ""))
+		      (lambda (x) (if (eq (nth 2 x) 'verbatim) (car x) ""))
 		      org-emphasis-alist "")))
       ;; make sure special characters appear at the right position in the class
       (if (string-match "\\^" markers)
@@ -4078,31 +4078,29 @@ Use customize to modify this, or restart Emacs after changing it."
 	  (option (boolean :tag "Please ignore this button"))))
 
 (defcustom org-emphasis-alist
-  `(("*" bold "<b>" "</b>")
-    ("/" italic "<i>" "</i>")
-    ("_" underline "<span style=\"text-decoration:underline;\">" "</span>")
-    ("=" org-code "<code>" "</code>" verbatim)
-    ("~" org-verbatim "<code>" "</code>" verbatim)
-    ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))
-     "<del>" "</del>")
-    )
-  "Special syntax for emphasized text.
-Text starting and ending with a special character will be emphasized, for
-example *bold*, _underlined_ and /italic/.  This variable sets the marker
-characters, the face to be used by font-lock for highlighting in Org-mode
-Emacs buffers, and the HTML tags to be used for this.
-For LaTeX export, see the variable `org-export-latex-emphasis-alist'.
-Use customize to modify this, or restart Emacs after changing it."
+  `(("*" bold)
+    ("/" italic)
+    ("_" underline)
+    ("=" org-code verbatim)
+    ("~" org-verbatim verbatim)
+    ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))))
+  "Alist of characters and faces to emphasize text.
+Text starting and ending with a special character will be emphasized,
+for example *bold*, _underlined_ and /italic/.  This variable sets the
+marker characters and the face to be used by font-lock for highlighting
+in Org-mode Emacs buffers.
+
+You need to reload Org or to restart Emacs after customizing this."
   :group 'org-appearance
   :set 'org-set-emph-re
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(repeat
 	  (list
 	   (string :tag "Marker character")
 	   (choice
 	    (face :tag "Font-lock-face")
 	    (plist :tag "Face property list"))
-	   (string :tag "HTML start tag")
-	   (string :tag "HTML end tag")
 	   (option (const verbatim)))))
 
 (defvar org-protecting-blocks
@@ -5685,36 +5683,27 @@ The time stamps may be either active or inactive.")
 If there is an active region, change that region to a new emphasis.
 If there is no region, just insert the marker characters and position
 the cursor between them.
-CHAR should be either the marker character, or the first character of the
-HTML tag associated with that emphasis.  If CHAR is a space, the means
-to remove the emphasis of the selected region.
-If char is not given (for example in an interactive call) it
-will be prompted for."
+CHAR should be the marker character.  If it is a space, it means to
+remove the emphasis of the selected region.
+If CHAR is not given (for example in an interactive call) it will be
+prompted for."
   (interactive)
-  (let ((eal org-emphasis-alist) e det
-	(erc org-emphasis-regexp-components)
+  (let ((erc org-emphasis-regexp-components)
 	(prompt "")
-	(string "") beg end move tag c s)
+	(string "") beg end move c s)
     (if (org-region-active-p)
 	(setq beg (region-beginning) end (region-end)
 	      string (buffer-substring beg end))
       (setq move t))
 
-    (while (setq e (pop eal))
-      (setq tag (car (org-split-string (nth 2 e) "[ <>/]+"))
-	    c (aref tag 0))
-      (push (cons c (string-to-char (car e))) det)
-      (setq prompt (concat prompt (format " [%s%c]%s" (car e) c
-					  (substring tag 1)))))
-    (setq det (nreverse det))
     (unless char
-      (message "%s" (concat "Emphasis marker or tag:" prompt))
+      (message "Emphasis marker or tag: [%s]"
+	       (mapconcat (lambda(e) (car e)) org-emphasis-alist ""))
       (setq char (read-char-exclusive)))
-    (setq char (or (cdr (assoc char det)) char))
     (if (equal char ?\ )
 	(setq s "" move nil)
       (unless (assoc (char-to-string char) org-emphasis-alist)
-	(error "No such emphasis marker: \"%c\"" char))
+	(user-error "No such emphasis marker: \"%c\"" char))
       (setq s (char-to-string char)))
     (while (and (> (length string) 1)
 		(equal (substring string 0 1) (substring string -1))
