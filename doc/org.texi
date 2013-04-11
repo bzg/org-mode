@@ -11113,7 +11113,7 @@ Images that are linked to without a description part in the link, like
 output file resulting from @LaTeX{} processing.  Org will use an
 @code{\includegraphics} macro to insert the image@footnote{In the case of
 TikZ (@url{http://sourceforge.net/projects/pgf/}) images, it will become an
-@code{\input} macro wrapped within a @code{tikzñpicture} environment.}.  You
+@code{\input} macro wrapped within a @code{tikzpicture} environment.}.  You
 can use an @code{#+ATTR_LATEX:} line to specify its width or height, with,
 respectively, @code{:width} and @code{:height} attributes.  It is also
 possible to specify any other option with the @code{:options} attribute, as
@@ -11130,14 +11130,16 @@ picture will be wrapped into a @code{figure} environment and thus become
 a floating element.  You can also ask Org to export an image as a float
 without specifying caption by setting the @code{:float} attribute to
 @code{figure} value in @code{#+ATTR_LATEX:} line.  You may also set it to:
-@table @code
-@item wrap
-if you would like to let text flow around the image.  It will make the figure
-occupy the left half of the page.
-@item multicolumn
-if you wish to include an image which spans multiple columns in a page.  This
-will export the image wrapped in a @code{figure*} environment.
-@end table
+@itemize @minus
+@item
+@code{wrap}: if you would like to let text flow around the image.  It will
+make the figure occupy the left half of the page.
+@item
+@code{multicolumn}: if you wish to include an image which spans multiple
+columns in a page.  This will export the image wrapped in a @code{figure*}
+environment.
+@end itemize
+@noindent
 To modify the placement option of any floating environment, set the
 @code{placement} attribute.
 
