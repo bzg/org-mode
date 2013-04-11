@@ -1979,8 +1979,7 @@ n   @r{Normalize the footnotes by collecting all definitions (including}
     @r{inline definitions) into a special section, and then numbering them}
     @r{in sequence.  The references will then also be numbers.  This is}
     @r{meant to be the final step before finishing a document (e.g., sending}
-    @r{off an email).  The exporters do this automatically, and so could}
-    @r{something like @code{message-send-hook}.}
+    @r{off an email).}
 d   @r{Delete the footnote at point, and all definitions of and references}
     @r{to it.}
 @end example
@@ -10267,7 +10266,7 @@ the page description, e.g., for the XHTML meta tag.
 
 @item EMAIL
 @vindex user-mail-address
-email address (@var{user-mail-address}.)
+email address (@var{user-mail-address}).
 
 @item EXCLUDE_TAGS
 Tags that exclude a tree from export
@@ -10319,11 +10318,11 @@ toggle inclusion of any time/date stamps like DEADLINES
 @vindex org-export-preserve-breaks
 toggle line-break-preservation (@var{org-export-preserve-breaks}).
 
-@item ^: FIXME
+@item ^:
 @vindex org-export-with-sub-superscripts
-toggle @TeX{}-like syntax for sub- and superscripts.  If you write
-"^:@{@}", 'a@math{_b}' will be interpreted, but the simple 'a_b' will be
-left as it is (@var{org-export-with-sub-superscripts}).
+toggle @TeX{}-like syntax for sub- and superscripts.  If you write "^:@{@}",
+@samp{a_@{b@}} will be interpreted, but the simple @samp{a_b} will be left as
+it is (@var{org-export-with-sub-superscripts}).
 
 @item arch:
 @vindex org-export-with-archived-trees
@@ -10432,7 +10431,7 @@ become buffer-local during export by using the BIND keyword.  Its syntax is
 settings that cannot be changed using specific keywords.
 
 You can place commonly-used export settings in a separate file which can be
-included using @samp{#+SETUPFILE: "filename"} syntax.
+included using @samp{#+SETUPFILE: filename} syntax.
 
 These settings affect all buffer's export processes.  Though, it is
 possible to override them locally when exporting only a subtree.  This is
@@ -10640,7 +10639,7 @@ and @code{style} attributes for a link:
 
 @cindex #+ATTR_HTML
 @example
-#+ATTR_HTML: :title "The Org mode homepage" :style "color:red;"
+#+ATTR_HTML: :title The Org mode homepage :style color:red;
 [[http://orgmode.org]]
 @end example
 
@@ -10658,7 +10657,7 @@ individual tables, place something like the following before the table:
 @cindex #+ATTR_HTML
 @example
 #+CAPTION: This is a table with lines around and between cells
-#+ATTR_HTML: :border "2" :rules "all" :frame "border"
+#+ATTR_HTML: :border 2 :rules all :frame border
 @end example
 
 @vindex org-html-table-row-tags
@@ -10696,7 +10695,7 @@ support text viewers and accessibility, and align it to the right.
 @cindex #+ATTR_HTML
 @example
 #+CAPTION: A black cat stalking a spider
-#+ATTR_HTML: :alt "cat/spider image" :title "Action!" :align "right"
+#+ATTR_HTML: :alt cat/spider image :title Action! :align right
 [[./img/a.jpg]]
 @end example
 
