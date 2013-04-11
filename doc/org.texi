@@ -1979,8 +1979,7 @@ n   @r{Normalize the footnotes by collecting all definitions (including}
     @r{inline definitions) into a special section, and then numbering them}
     @r{in sequence.  The references will then also be numbers.  This is}
     @r{meant to be the final step before finishing a document (e.g., sending}
-    @r{off an email).  The exporters do this automatically, and so could}
-    @r{something like @code{message-send-hook}.}
+    @r{off an email).
 d   @r{Delete the footnote at point, and all definitions of and references}
     @r{to it.}
 @end example
