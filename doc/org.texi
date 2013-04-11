@@ -10640,7 +10640,7 @@ and @code{style} attributes for a link:
 
 @cindex #+ATTR_HTML
 @example
-#+ATTR_HTML: :title "The Org mode homepage" :style "color:red;"
+#+ATTR_HTML: :title The Org mode homepage :style color:red;
 [[http://orgmode.org]]
 @end example
 
@@ -10658,7 +10658,7 @@ individual tables, place something like the following before the table:
 @cindex #+ATTR_HTML
 @example
 #+CAPTION: This is a table with lines around and between cells
-#+ATTR_HTML: :border "2" :rules "all" :frame "border"
+#+ATTR_HTML: :border 2 :rules all :frame border
 @end example
 
 @vindex org-html-table-row-tags
@@ -10696,7 +10696,7 @@ support text viewers and accessibility, and align it to the right.
 @cindex #+ATTR_HTML
 @example
 #+CAPTION: A black cat stalking a spider
-#+ATTR_HTML: :alt "cat/spider image" :title "Action!" :align "right"
+#+ATTR_HTML: :alt cat/spider image :title Action! :align right
 [[./img/a.jpg]]
 @end example
 
