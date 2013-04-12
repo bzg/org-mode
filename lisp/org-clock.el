@@ -565,7 +565,7 @@ of a different task.")
 And return a cons cell with the selection character integer and the marker
 pointing to it."
   (when (marker-buffer marker)
-    (let (file cat clockout task heading prefix)
+    (let (file cat task heading prefix)
       (with-current-buffer (org-base-buffer (marker-buffer marker))
 	(save-excursion
 	  (save-restriction
@@ -574,11 +574,6 @@ pointing to it."
 	      (goto-char marker)
 	      (setq file (buffer-file-name (marker-buffer marker))
 		    cat (org-get-category)
-		    clockout (replace-regexp-in-string
-			      "^<\\(.+\\)>$" "\\1"
-			      (format-time-string
-			       (cdr org-time-stamp-formats)
-			       (org-clock-get-last-clock-out-time)))
 		    heading (org-get-heading 'notags)
 		    prefix (save-excursion
 			     (org-back-to-heading t)
@@ -589,8 +584,8 @@ pointing to it."
 			   (concat prefix heading)
 			   org-odd-levels-only)
 			  (length prefix)))))))
-      (when (and cat task clockout)
-	(insert (format "[%c] %-12s   %-12s   %s\n" i cat clockout task))
+      (when (and cat task)
+	(insert (format "[%c] %-12s  %s\n" i cat task))
 	(cons i marker)))))
 
 (defvar org-clock-task-overrun nil
