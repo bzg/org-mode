@@ -12225,9 +12225,10 @@ For calling through lisp, arg is also interpreted in the following way:
 			      (nth 2 (assoc this org-todo-log-states))))
 	      (if (and (eq dolog 'note) (eq org-inhibit-logging 'note))
 		  (setq dolog 'time))
-	      (when (and org-state
-			 (member org-state org-not-done-keywords)
-			 (not (member this org-not-done-keywords)))
+	      (when (or (not org-state)
+			(and org-state
+			     (member org-state org-not-done-keywords)
+			     (not (member this org-not-done-keywords))))
 		;; This is now a todo state and was not one before
 		;; If there was a CLOSED time stamp, get rid of it.
 		(org-add-planning-info nil nil 'closed))
