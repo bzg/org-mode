@@ -4050,7 +4050,10 @@ After a match, the match groups contain these elements:
 		    "\\3\\)"
 		    "\\([" post  "]\\|$\\)")))))
 
-(defcustom org-emphasis-regexp-components
+;; This used to be a defcustom (Org <8.0) but allowing the users to
+;; set this option proved cumbersome.  See this message/thread:
+;; http://article.gmane.org/gmane.emacs.orgmode/68681
+(defvar org-emphasis-regexp-components
   '(" \t('\"{" "- \t.,:!?;'\")}\\" " \t\r\n,\"'" "." 1)
   "Components used to build the regular expression for emphasis.
 This is a list with five entries.  Terminology:  In an emphasis string
@@ -4066,16 +4069,7 @@ body-regexp  A regexp like \".\" to match a body character.  Don't use
              non-shy groups here, and don't allow newline here.
 newline      The maximum number of newlines allowed in an emphasis exp.
 
-Use customize to modify this, or restart Emacs after changing it."
-  :group 'org-appearance
-  :set 'org-set-emph-re
-  :type '(list
-	  (sexp    :tag "Allowed chars in pre      ")
-	  (sexp    :tag "Allowed chars in post     ")
-	  (sexp    :tag "Forbidden chars in border ")
-	  (sexp    :tag "Regexp for body           ")
-	  (integer :tag "number of newlines allowed")
-	  (option (boolean :tag "Please ignore this button"))))
+You need to reload Org or to restart Emacs after customizing this.")
 
 (defcustom org-emphasis-alist
   `(("*" bold)
