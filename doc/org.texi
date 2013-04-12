@@ -5029,6 +5029,8 @@ You can also use the @code{:grouptags} keyword directly when setting
                       (:endgroup . nil)))
 @end lisp
 
+You cannot nest group tags or use a group tag as a tag in another group.
+
 @kindex C-c C-x q
 @vindex org-group-tags
 If you want to ignore group tags temporarily, toggle group tags support
