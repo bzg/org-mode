@@ -605,8 +605,7 @@ HTML export
 * @LaTeX{}/PDF export commands::
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
-* Tables in @LaTeX{} export::   Options for exporting tables to @LaTeX{}
-* Images in @LaTeX{} export::   How to insert figures into @LaTeX{} output
+* @LaTeX{} specific attributes::  Controlling @LaTeX{} output
 * Beamer class export::         Turning the file into a presentation
 
 OpenDocument Text export
@@ -9550,8 +9549,8 @@ with a line like
 #+OPTIONS: toc:nil        (no TOC at all)
 @end example
 
-The same @code{TOC} keyword can also generate a list of all tables (resp. all
-listings) with a caption in the buffer.
+The same @code{TOC} keyword can also generate a list of all tables (resp.@:
+all listings) with a caption in the buffer.
 
 @example
 #+TOC: listings           (build a list of listings)
@@ -11023,16 +11022,20 @@ possibly @code{luatex}.  See the variables
 @code{org-latex-default-packages-alist} and
 @code{org-latex-packages-alist}.}, this back-end is also used to produce PDF
 output.  Since the @LaTeX{} output uses @file{hyperref} to implement links
-and cross references, the PDF output file will be fully linked.  Beware of
-the fact that your @code{org} file has to be properly structured in order to
-be correctly exported: respect the hierarchy of sections.
+and cross references, the PDF output file will be fully linked.
+
+As is @LaTeX{}, blank lines are meaningful for this back-end: a paragraph
+will not be started if two contiguous syntactical elements are not separated
+by an empty line.
+
+This back-end also offers enhanced support for footnotes.  Thus, it handles
+nested footnotes, footnotes in tables and footnotes in items' description.
 
 @menu
 * @LaTeX{}/PDF export commands::
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
-* Tables in @LaTeX{} export::   Options for exporting tables to @LaTeX{}
-* Images in @LaTeX{} export::   How to insert figures into @LaTeX{} output
+* @LaTeX{} specific attributes::   Controlling @LaTeX{} output
 * Beamer class export::         Turning the file into a presentation
 @end menu
 
@@ -11112,7 +11115,7 @@ An example is shown below.
   some text
 @end example
 
-@node Quoting @LaTeX{} code, Tables in @LaTeX{} export, Header and sectioning, @LaTeX{} and PDF export
+@node Quoting @LaTeX{} code, @LaTeX{} specific attributes, Header and sectioning, @LaTeX{} and PDF export
 @subsection Quoting @LaTeX{} code
 
 Embedded @LaTeX{} as described in @ref{Embedded @LaTeX{}}, will be correctly
@@ -11140,15 +11143,19 @@ All lines between these markers are exported literally
 @end example
 
 
-@node Tables in @LaTeX{} export, Images in @LaTeX{} export, Quoting @LaTeX{} code, @LaTeX{} and PDF export
-@subsection Tables in @LaTeX{} export
+@node @LaTeX{} specific attributes, Beamer class export, Quoting @LaTeX{} code, @LaTeX{} and PDF export
+@subsection @LaTeX{} specific attributes
+@cindex #+ATTR_LATEX
+
+@LaTeX{} understands attributes specified in an @code{ATTR_LATEX} line.  They
+affect tables, images, plain lists, special blocks and source blocks.
+
+@subsubheading Tables in @LaTeX{} export
 @cindex tables, in @LaTeX{} export
 
 For @LaTeX{} export of a table, you can specify a label and a caption
-(@pxref{Images and tables}).
-
-You can also use the @code{ATTR_LATEX} line to control table layout and
-contents.  Valid attributes are:
+(@pxref{Images and tables}).  You can also use attributes to control table
+layout and contents.  Valid properties are:
 
 @table @code
 @item :mode
@@ -11171,7 +11178,9 @@ Float environment for the table.  Possible values are @code{sidewaystable},
 @code{multicolumn} and @code{table}.  If unspecified, a table with a caption
 will have a @code{table} environment.  Moreover, @code{:placement} attribute
 can specify the positioning of the float.
-@item :align, :font, :width
+@item :align
+@itemx :font
+@itemx :width
 set, respectively, the alignment string of the table, its font size and its
 width.  They only apply on regular tables.
 @item :spread
@@ -11179,15 +11188,19 @@ Boolean specific to the @code{tabu} and @code{longtabu} environments, and
 only takes effect when used in conjunction with the @code{:width} attribute.
 When @code{:spread} is non-nil, the table will be spread or shrunk by the
 value of @code{:width}.
-@item :booktabs, :center, :rmlines
+@item :booktabs
+@itemx :center
+@itemx :rmlines
 @vindex org-latex-tables-booktabs
 @vindex org-latex-tables-centered
 They toggle, respectively, @code{booktabs} usage (assuming the package is
 properly loaded), table centering and removal of every horizontal rule but
 the first one (in a "table.el" table only).  In particular,
-@var{org-latex-tables-booktabs} (resp. @var{org-latex-tables-centered})
-activates the first (resp. second) attribute globally.
-@item :math-prefix, :math-suffix, :math-arguments
+@var{org-latex-tables-booktabs} (resp.@: @var{org-latex-tables-centered})
+activates the first (resp.@: second) attribute globally.
+@item :math-prefix
+@itemx :math-suffix
+@itemx :math-arguments
 string which will be inserted, respectively, before the table within the math
 environment, after the table within the math environment, and between the
 macro name and the contents of the table.  The latter attribute is necessary
@@ -11198,7 +11211,6 @@ to matrix macros that require more than one argument (e.g.,
 Thus, attributes can be used in a wide array of situations, like writing
 a table that will span over multiple pages, or a matrix product:
 
-@cindex #+ATTR_LATEX
 @example
 #+ATTR_LATEX: :environment longtable :align l|lp@{3cm@}r|l
 | ..... | ..... |
@@ -11212,8 +11224,7 @@ a table that will span over multiple pages, or a matrix product:
 | 3 | 4 |
 @end example
 
-@node Images in @LaTeX{} export, Beamer class export, Tables in @LaTeX{} export, @LaTeX{} and PDF export
-@subsection Images in @LaTeX{} export
+@subsubheading Images in @LaTeX{} export
 @cindex images, inline in @LaTeX{}
 @cindex inlining images in @LaTeX{}
 
@@ -11222,13 +11233,13 @@ Images that are linked to without a description part in the link, like
 output file resulting from @LaTeX{} processing.  Org will use an
 @code{\includegraphics} macro to insert the image@footnote{In the case of
 TikZ (@url{http://sourceforge.net/projects/pgf/}) images, it will become an
-@code{\input} macro wrapped within a @code{tikzpicture} environment.}.  You
-can use an @code{#+ATTR_LATEX:} line to specify its width or height, with,
-respectively, @code{:width} and @code{:height} attributes.  It is also
-possible to specify any other option with the @code{:options} attribute, as
-shown in the following example:
+@code{\input} macro wrapped within a @code{tikzpicture} environment.}.
 
-@cindex #+ATTR_LATEX
+You can specify specify image width or height with, respectively,
+@code{:width} and @code{:height} attributes.  It is also possible to add any
+other option with the @code{:options} attribute, as shown in the following
+example:
+
 @example
 #+ATTR_LATEX: :width 5cm :options angle=90
 [[./img/sed-hr4049.pdf]]
@@ -11237,8 +11248,8 @@ shown in the following example:
 If you have specified a caption as described in @ref{Images and tables}, the
 picture will be wrapped into a @code{figure} environment and thus become
 a floating element.  You can also ask Org to export an image as a float
-without specifying caption by setting the @code{:float} attribute to
-@code{figure} value in @code{#+ATTR_LATEX:} line.  You may also set it to:
+without specifying caption by setting the @code{:float} attribute.  You may
+also set it to:
 @itemize @minus
 @item
 @code{wrap}: if you would like to let text flow around the image.  It will
@@ -11252,7 +11263,6 @@ environment.
 To modify the placement option of any floating environment, set the
 @code{placement} attribute.
 
-@cindex #+ATTR_LATEX
 @example
 #+ATTR_LATEX: :float wrap :width 0.38\textwidth :placement @{r@}@{0.4\textwidth@}
 [[./img/hst.png]]
@@ -11261,12 +11271,65 @@ To modify the placement option of any floating environment, set the
 Eventually, in the @code{:comment-include} attributes has a non-nil value,
 the code actually including the image will be commented out.
 
-@node Beamer class export,  , Images in @LaTeX{} export, @LaTeX{} and PDF export
+@subsubheading Plain lists in @LaTeX{} export
+@cindex plain lists, in @LaTeX{} export
+
+Plain lists accept two optional attributes: @code{:environment} and
+@code{:options}.  The first one allows to use a non-standard environment
+(e.g., @samp{inparaenum}).  The second one allows to specify optional
+arguments for that environment (square brackets may be omitted).
+
+@example
+#+ATTR_LATEX: :environment compactitem :options $\circ$
+- you need ``paralist'' package to reproduce this example.
+@end example
+
+@subsubheading Source blocks in @LaTeX{} export
+@cindex source blocks, in @LaTeX{} export
+
+In addition to syntax defined in @ref{Literal examples}, names and captions
+(@pxref{Images and tables}), source blocks also accept @code{:long-listing}
+attribute, which prevents the block to become a float when non nil.
+
+@example
+#+ATTR_LATEX: :long-listing t
+#+BEGIN_SRC emacs-lisp
+Code that may not fit in a single page.
+#+END_SRC
+@end example
+
+@subsubheading Special blocks in @LaTeX{} export
+@cindex special blocks, in @LaTeX{} export
+
+In @LaTeX{} back-end, special blocks become environments of the same name.
+Value of @code{:options} attribute will be appended as-is to that
+environment's opening string.  For example:
+
+@example
+#+ATTR_LATEX: :options [Proof of important theorem]
+#+BEGIN_PROOF
+...
+Therefore, any natural number above 4 is the sum of two primes.
+#+END_PROOF
+@end example
+
+@noindent
+becomes
+
+@example
+\begin@{proof@}[Proof of important theorem]
+...
+Therefore, any natural number above 4 is the sum of two primes.
+\end@{proof@}
+@end example
+
+@node Beamer class export,  , @LaTeX{} specific attributes, @LaTeX{} and PDF export
 @subsection Beamer class export
 
-The @LaTeX{} class @file{beamer} allows production of high quality presentations
-using @LaTeX{} and pdf processing.  Org mode has special support for turning an
-Org mode file or tree into a @file{beamer} presentation.
+The @LaTeX{} class @file{beamer} allows production of high quality
+presentations using @LaTeX{} and pdf processing.  Org mode has special
+support for turning an Org mode file or tree into a @file{beamer}
+presentation.
 
 When the @LaTeX{} class for the current buffer (as set with @code{#+LaTeX_CLASS:
 beamer}) or subtree (set with a @code{LaTeX_CLASS} property) is
@@ -11459,8 +11522,8 @@ export.
 Export as an OpenDocument Text file and open the resulting file.
 
 @vindex org-odt-preferred-output-format
-If @code{org-preferred-output-format} is specified, open the converted file
-instead.  @xref{x-export-to-other-formats, , Automatically exporting to
+If @code{org-odt-preferred-output-format} is specified, open the converted
+file instead.  @xref{x-export-to-other-formats, , Automatically exporting to
 other formats}.
 @end table
 
