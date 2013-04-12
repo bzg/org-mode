@@ -5875,7 +5875,7 @@ in @b{bold}.
 14            @result{} @b{2006}-@b{06}-14
 12            @result{} @b{2006}-@b{07}-12
 2/5           @result{} @b{2007}-02-05
-Fri           @result{} nearest Friday (default date or later)
+Fri           @result{} nearest Friday after the default date
 sep 15        @result{} @b{2006}-09-15
 feb 15        @result{} @b{2007}-02-15
 sep 12 9      @result{} 2009-09-12
@@ -5900,7 +5900,8 @@ the abbreviation of day name, the date will be the Nth such day, e.g.:
 +4            @result{} same as above
 +2w           @result{} two weeks from today
 ++5           @result{} five days from default date
-+2tue         @result{} second Tuesday from now.
++2tue         @result{} second Tuesday from now
+-wed          @result{} last Wednesday
 @end example
 
 @vindex parse-time-months

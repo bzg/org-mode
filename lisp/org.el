@@ -16141,7 +16141,8 @@ mean next year.  For details, see the manual.  A few examples:
   12:45         --> today 12:45
   22 sept 0:34  --> currentyear-09-22 0:34
   12            --> currentyear-currentmonth-12
-  Fri           --> nearest Friday (today or later)
+  Fri           --> nearest Friday after today
+  -Tue          --> last Tuesday
   etc.
 
 Furthermore you can specify a relative date by giving, as the *first* thing
@@ -16529,7 +16530,12 @@ DEF-FLAG   is t when a double ++ or -- indicates shift relative to
       (if wday1
 	  (progn
 	    (setq delta (mod (+ 7 (- wday1 wday)) 7))
-	    (if (= dir ?-) (setq delta (- delta 7)))
+	    (if (= delta 0) (setq delta 7))
+	    (if (= dir ?-)
+		(progn
+		  (setq delta (- delta 7))
+		  (if (= delta 0) (setq delta -7))
+		  ))
 	    (if (> n 1) (setq delta (+ delta (* (1- n) (if (= dir ?-) -7 7)))))
 	    (list delta "d" rel))
 	(list (* n (if (= dir ?-) -1 1)) what rel)))))
