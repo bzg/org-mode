@@ -14118,7 +14118,7 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 	    (setq rpl (append (org-uniquify rpl) (assoc tag tal)))
 	    (setq rtnmatch
 		  (replace-match
-		   (concat dir "{" (regexp-opt rpl) "}") t t rtnmatch))))
+		   (concat dir "{\\<" (regexp-opt rpl) "\\>}") t t rtnmatch))))
 	(if single-as-list
 	    (or (reverse rpl) (list rtnmatch))
 	  rtnmatch))
