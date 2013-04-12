@@ -553,7 +553,7 @@ Markup for rich export
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
 * Index entries::               Making an index
-* Macro replacement::           Use macros to create complex output
+* Macro replacement::           Use macros to create templates
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 
 Structural markup elements
@@ -1874,6 +1874,12 @@ want to store a quick note in the LOGBOOK drawer, in a similar way to state chan
 @item C-c C-z
 Add a time-stamped note to the LOGBOOK drawer.
 @end table
+
+@vindex org-export-with-drawers
+You can select the name of the drawers which should be exported with
+@var{org-export-with-drawers}.  In that case, drawer contents will appear in
+export output.  Property drawers are not affected by this variable and are
+never exported.
 
 @node Blocks, Footnotes, Drawers, Document Structure
 @section Blocks
@@ -9474,8 +9480,9 @@ markup rules used in an Org mode buffer.
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
 * Index entries::               Making an index
-* Macro replacement::           Use macros to create complex output
+* Macro replacement::           Use macros to create templates
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
+* Special blocks::              Containers targeted at export back-ends
 @end menu
 
 @node Structural markup elements, Images and tables, Markup, Markup
@@ -9934,7 +9941,7 @@ and to the modification time of the file being exported, respectively.
 Macro expansion takes place during export.
 
 
-@node Embedded @LaTeX{},  , Macro replacement, Markup
+@node Embedded @LaTeX{}, Special blocks , Macro replacement, Markup
 @section Embedded @LaTeX{}
 @cindex @TeX{} interpretation
 @cindex @LaTeX{} interpretation
@@ -10215,6 +10222,21 @@ the symbol before point with an accent or a font.  If you wait more than
 modification will work only inside @LaTeX{} fragments; outside the quote
 is normal.
 @end itemize
+
+@node Special blocks, , Embedded @LaTeX{}, Markup
+@section Special blocks
+@cindex Special blocks
+
+Org syntax includes pre-defined blocks (@pxref{Paragraphs} and @ref{Literal
+examples}).  It is also possible to create blocks containing raw code
+targeted at a specific back-ends (e.g., @samp{#+BEGIN_LATEX}).
+
+Any other block is a @emph{special block}.  Each export back-end decides if
+they should be exported, and how.  When the block is ignored, its contents
+are still exported, as if the block were not there.  For example, when
+exporting a @samp{#+BEGIN_TEST} block, HTML back-end wraps its contents
+within @samp{<div name="test">} tag.  Refer to back-end specific
+documentation for more information.
 
 @node Exporting, Publishing, Markup, Top
 @chapter Exporting
