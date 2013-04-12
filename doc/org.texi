@@ -9530,15 +9530,19 @@ multiple footnotes side by side.
 @cindex strike-through text, markup rules
 @vindex org-fontify-emphasized-text
 @vindex org-emphasis-regexp-components
+@vindex org-emphasis-alist
 You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=code=}
 and @code{~verbatim~}, and, if you must, @samp{+strike-through+}.  Text
 in the code and verbatim string is not processed for Org mode specific
-syntax; it is exported verbatim.
+syntax, it is exported verbatim.
 
 To turn off fontification for marked up text, you can set
-@code{org-fontify-emphasized-text} to @code{nil}.  To fine tune what
-characters are allowed before and after the special characters, see
-@code{org-emphasis-regexp-components}.
+@code{org-fontify-emphasized-text} to @code{nil}.  To narrow down the list of
+available markup syntax, you can customize @var{org-emphasis-alist}.  To fine
+tune what characters are allowed before and after the markup characters, you
+can tweak @code{org-emphasis-regexp-components}.  Beware that changing one of
+the above variables will no take effect until you reload Org, for which you
+may need to restart Emacs.
 
 @node Horizontal rules, Comment lines, Emphasis and monospace, Structural markup elements
 @subheading  Horizontal rules
