@@ -5007,7 +5007,8 @@ will display headlines tagged with at least one of the members of the
 group.  This makes tag searches and filters even more flexible.
 
 You can set group tags by inserting a colon between the group tag and other
-tags, like this:
+tags---beware that all whitespaces are mandatory so that Org can parse this
+line correctly:
 
 @example
 #+TAGS: @{ @@read : @@read_book  @@read_ebook @}
