@@ -1340,9 +1340,8 @@ default   the value to be used for all contexts not explicitly
 (defcustom org-insert-heading-respect-content nil
   "Non-nil means insert new headings after the current subtree.
 When nil, the new heading is created directly after the current line.
-The commands \\[org-insert-heading-respect-content] and
-\\[org-insert-todo-heading-respect-content] turn this variable on
-for the duration of the command."
+The commands \\[org-insert-heading-respect-content] and \\[org-insert-todo-heading-respect-content] turn
+this variable on for the duration of the command."
   :group 'org-structure
   :type 'boolean)
 
@@ -4011,7 +4010,7 @@ After a match, the match groups contain these elements:
 	   (body1 (concat body "*?"))
 	   (markers (mapconcat 'car org-emphasis-alist ""))
 	   (vmarkers (mapconcat
-		      (lambda (x) (if (eq (nth 4 x) 'verbatim) (car x) ""))
+		      (lambda (x) (if (eq (nth 2 x) 'verbatim) (car x) ""))
 		      org-emphasis-alist "")))
       ;; make sure special characters appear at the right position in the class
       (if (string-match "\\^" markers)
@@ -4051,7 +4050,10 @@ After a match, the match groups contain these elements:
 		    "\\3\\)"
 		    "\\([" post  "]\\|$\\)")))))
 
-(defcustom org-emphasis-regexp-components
+;; This used to be a defcustom (Org <8.0) but allowing the users to
+;; set this option proved cumbersome.  See this message/thread:
+;; http://article.gmane.org/gmane.emacs.orgmode/68681
+(defvar org-emphasis-regexp-components
   '(" \t('\"{" "- \t.,:!?;'\")}\\" " \t\r\n,\"'" "." 1)
   "Components used to build the regular expression for emphasis.
 This is a list with five entries.  Terminology:  In an emphasis string
@@ -4067,43 +4069,32 @@ body-regexp  A regexp like \".\" to match a body character.  Don't use
              non-shy groups here, and don't allow newline here.
 newline      The maximum number of newlines allowed in an emphasis exp.
 
-Use customize to modify this, or restart Emacs after changing it."
-  :group 'org-appearance
-  :set 'org-set-emph-re
-  :type '(list
-	  (sexp    :tag "Allowed chars in pre      ")
-	  (sexp    :tag "Allowed chars in post     ")
-	  (sexp    :tag "Forbidden chars in border ")
-	  (sexp    :tag "Regexp for body           ")
-	  (integer :tag "number of newlines allowed")
-	  (option (boolean :tag "Please ignore this button"))))
+You need to reload Org or to restart Emacs after customizing this.")
 
 (defcustom org-emphasis-alist
-  `(("*" bold "<b>" "</b>")
-    ("/" italic "<i>" "</i>")
-    ("_" underline "<span style=\"text-decoration:underline;\">" "</span>")
-    ("=" org-code "<code>" "</code>" verbatim)
-    ("~" org-verbatim "<code>" "</code>" verbatim)
-    ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))
-     "<del>" "</del>")
-    )
-  "Special syntax for emphasized text.
-Text starting and ending with a special character will be emphasized, for
-example *bold*, _underlined_ and /italic/.  This variable sets the marker
-characters, the face to be used by font-lock for highlighting in Org-mode
-Emacs buffers, and the HTML tags to be used for this.
-For LaTeX export, see the variable `org-export-latex-emphasis-alist'.
-Use customize to modify this, or restart Emacs after changing it."
+  `(("*" bold)
+    ("/" italic)
+    ("_" underline)
+    ("=" org-code verbatim)
+    ("~" org-verbatim verbatim)
+    ("+" ,(if (featurep 'xemacs) 'org-table '(:strike-through t))))
+  "Alist of characters and faces to emphasize text.
+Text starting and ending with a special character will be emphasized,
+for example *bold*, _underlined_ and /italic/.  This variable sets the
+marker characters and the face to be used by font-lock for highlighting
+in Org-mode Emacs buffers.
+
+You need to reload Org or to restart Emacs after customizing this."
   :group 'org-appearance
   :set 'org-set-emph-re
+  :version "24.4"
+  :package-version '(Org . "8.0")
   :type '(repeat
 	  (list
 	   (string :tag "Marker character")
 	   (choice
 	    (face :tag "Font-lock-face")
 	    (plist :tag "Face property list"))
-	   (string :tag "HTML start tag")
-	   (string :tag "HTML end tag")
 	   (option (const verbatim)))))
 
 (defvar org-protecting-blocks
@@ -5145,10 +5136,9 @@ Support for group tags is controlled by the option
   "Return the contents of FILE, as a string."
   (if (or (not file)
 	  (not (file-readable-p file)))
-      (if (not noerror)
-	  (error "Cannot read file \"%s\"" file)
-	(message "Cannot read file \"%s\"" file)
-	(sit-for 3))
+      (if noerror
+	  (message "Cannot read file \"%s\"" file)
+	(error "Cannot read file \"%s\"" file))
     (with-temp-buffer
       (insert-file-contents file)
       (buffer-string))))
@@ -5687,36 +5677,27 @@ The time stamps may be either active or inactive.")
 If there is an active region, change that region to a new emphasis.
 If there is no region, just insert the marker characters and position
 the cursor between them.
-CHAR should be either the marker character, or the first character of the
-HTML tag associated with that emphasis.  If CHAR is a space, the means
-to remove the emphasis of the selected region.
-If char is not given (for example in an interactive call) it
-will be prompted for."
+CHAR should be the marker character.  If it is a space, it means to
+remove the emphasis of the selected region.
+If CHAR is not given (for example in an interactive call) it will be
+prompted for."
   (interactive)
-  (let ((eal org-emphasis-alist) e det
-	(erc org-emphasis-regexp-components)
+  (let ((erc org-emphasis-regexp-components)
 	(prompt "")
-	(string "") beg end move tag c s)
+	(string "") beg end move c s)
     (if (org-region-active-p)
 	(setq beg (region-beginning) end (region-end)
 	      string (buffer-substring beg end))
       (setq move t))
 
-    (while (setq e (pop eal))
-      (setq tag (car (org-split-string (nth 2 e) "[ <>/]+"))
-	    c (aref tag 0))
-      (push (cons c (string-to-char (car e))) det)
-      (setq prompt (concat prompt (format " [%s%c]%s" (car e) c
-					  (substring tag 1)))))
-    (setq det (nreverse det))
     (unless char
-      (message "%s" (concat "Emphasis marker or tag:" prompt))
+      (message "Emphasis marker or tag: [%s]"
+	       (mapconcat (lambda(e) (car e)) org-emphasis-alist ""))
       (setq char (read-char-exclusive)))
-    (setq char (or (cdr (assoc char det)) char))
     (if (equal char ?\ )
 	(setq s "" move nil)
       (unless (assoc (char-to-string char) org-emphasis-alist)
-	(error "No such emphasis marker: \"%c\"" char))
+	(user-error "No such emphasis marker: \"%c\"" char))
       (setq s (char-to-string char)))
     (while (and (> (length string) 1)
 		(equal (substring string 0 1) (substring string -1))
@@ -7522,11 +7503,13 @@ This is important for non-interactive uses of the command."
      (if (org-previous-line-empty-p) "" "\n")
      (if (org-in-src-block-p) ",* " "* "))
     (run-hooks 'org-insert-heading-hook))
-   ((or arg (not (org-insert-item
-		  (save-excursion
-		    (beginning-of-line)
-		    (looking-at org-list-full-item-re)
-		    (match-string 3)))))
+   ((or arg
+	org-insert-heading-respect-content
+	(not (org-insert-item
+	      (save-excursion
+		(beginning-of-line)
+		(looking-at org-list-full-item-re)
+		(match-string 3)))))
     (let (begn endn)
       (when (org-buffer-narrowed-p)
 	(setq begn (point-min) endn (point-max))
@@ -7537,6 +7520,8 @@ This is important for non-interactive uses of the command."
 	      (or (not (null arg)) org-insert-heading-respect-content))
 	     (level nil)
 	     (on-heading (org-at-heading-p))
+	     (on-empty-line
+	      (save-excursion (beginning-of-line 1) (looking-at "^\\s-*$")))
 	     (head (save-excursion
 		     (condition-case nil
 			 (progn
@@ -7589,6 +7574,11 @@ This is important for non-interactive uses of the command."
 		tags pos)
 	    (cond
 	     ;; Insert a new line, possibly at end of parent subtree
+	     ((and (not arg) (not on-heading) (not on-empty-line)
+		   (not (save-excursion
+			  (beginning-of-line 1)
+			  (looking-at org-list-full-item-re))))
+	      (beginning-of-line 1))
 	     (org-insert-heading-respect-content
 	      (if (not eops)
 		  (progn
@@ -7638,7 +7628,9 @@ This is important for non-interactive uses of the command."
 		  (org-set-tags nil 'align))))
 	     (t
 	      (or split (end-of-line 1))
-	      (newline (if blank 2 1))))))
+	      (newline (cond ((and blank (not on-empty-line)) 2)
+			     (blank 1)
+			     (on-empty-line 0) (t 1)))))))
 	(insert head) (just-one-space)
 	(setq pos (point))
 	(end-of-line 1)
@@ -10122,23 +10114,6 @@ from."
       (org-add-props s nil 'org-attr attr))
     s))
 
-(defun org-extract-attributes-from-string (tag)
-  (let (key value attr)
-    (while (string-match "\\([a-zA-Z]+\\)=\"\\([^\"]*\\)\"\\s-?" tag)
-      (setq key (match-string 1 tag) value (match-string 2 tag)
-	    tag (replace-match "" t t tag)
-	    attr (plist-put attr (intern key) value)))
-    (cons tag attr)))
-
-(defun org-attributes-to-string (plist)
-  "Format a property list into an HTML attribute list."
-  (let ((s "") key value)
-    (while plist
-      (setq key (pop plist) value (pop plist))
-      (and value
-	   (setq s (concat s " " (symbol-name key) "=\"" value "\""))))
-    s))
-
 ;;; Opening/following a link
 
 (defvar org-link-search-failed nil)
@@ -12250,9 +12225,10 @@ For calling through lisp, arg is also interpreted in the following way:
 			      (nth 2 (assoc this org-todo-log-states))))
 	      (if (and (eq dolog 'note) (eq org-inhibit-logging 'note))
 		  (setq dolog 'time))
-	      (when (and org-state
-			 (member org-state org-not-done-keywords)
-			 (not (member this org-not-done-keywords)))
+	      (when (or (not org-state)
+			(and org-state
+			     (member org-state org-not-done-keywords)
+			     (not (member this org-not-done-keywords))))
 		;; This is now a todo state and was not one before
 		;; If there was a CLOSED time stamp, get rid of it.
 		(org-add-planning-info nil nil 'closed))
@@ -13242,7 +13218,7 @@ EXTRA is additional text that will be inserted into the notes buffer."
   (org-switch-to-buffer-other-window "*Org Note*")
   (erase-buffer)
   (if (memq org-log-note-how '(time state))
-      (let (current-prefix-arg)	(org-store-log-note))
+      (let (current-prefix-arg) (org-store-log-note))
     (let ((org-inhibit-startup t)) (org-mode))
     (insert (format "# Insert note for %s.
 # Finish with C-c C-c, or cancel with C-c C-k.\n\n"
@@ -13343,12 +13319,19 @@ EXTRA is additional text that will be inserted into the notes buffer."
 	      (insert (pop lines))))
 	  (message "Note stored")
 	  (org-back-to-heading t)
-	  (org-cycle-hide-drawers 'children))))))
-  (set-window-configuration org-log-note-window-configuration)
-  (with-current-buffer (marker-buffer org-log-note-return-to)
-    (goto-char org-log-note-return-to))
-  (move-marker org-log-note-return-to nil)
-  (and org-log-post-message (message "%s" org-log-post-message)))
+	  (org-cycle-hide-drawers 'children))
+	;; Fix `buffer-undo-list' when `org-store-log-note' is called
+	;; from within `org-add-log-note' because `buffer-undo-list'
+	;; is then modified outside of `org-with-remote-undo'.
+	(when (eq this-command 'org-agenda-todo)
+	  (setcdr buffer-undo-list (cddr buffer-undo-list)))))))
+  ;; Don't add undo information when called from `org-agenda-todo'
+  (let ((buffer-undo-list (eq this-command 'org-agenda-todo)))
+    (set-window-configuration org-log-note-window-configuration)
+    (with-current-buffer (marker-buffer org-log-note-return-to)
+      (goto-char org-log-note-return-to))
+    (move-marker org-log-note-return-to nil)
+    (and org-log-post-message (message "%s" org-log-post-message))))
 
 (defun org-remove-empty-drawer-at (drawer pos)
   "Remove an empty drawer DRAWER at position POS.
@@ -13969,9 +13952,12 @@ See also `org-scan-tags'.
   (unless (boundp 'todo-only)
     (error "`org-make-tags-matcher' expects todo-only to be scoped in"))
   (unless match
-    ;; Get a new match request, with completion
+    ;; Get a new match request, with completion against the global
+    ;; tags table and the local tags in current buffer
     (let ((org-last-tags-completion-table
-	   (org-global-tags-completion-table)))
+	   (org-uniquify
+	    (delq nil (append (org-get-buffer-tags)
+			      (org-global-tags-completion-table))))))
       (setq match (org-completing-read-no-i
 		   "Match: " 'org-tags-completion-function nil nil nil
 		   'org-tags-history))))
@@ -14098,14 +14084,14 @@ This replaces every group tag in MATCH with a regexp tag search.
 For example, a group tag \"Work\" defined as { Work : Lab Conf }
 will be replaced like this:
 
-   Work =>  {\(?:Work\|Lab\|Conf\}
-  +Work => +{\(?:Work\|Lab\|Conf\}
-  -Work => -{\(?:Work\|Lab\|Conf\}
+   Work =>  {\\(?:Work\\|Lab\\|Conf\\)}
+  +Work => +{\\(?:Work\\|Lab\\|Conf\\)}
+  -Work => -{\\(?:Work\\|Lab\\|Conf\\)}
 
 Replacing by a regexp preserves the structure of the match.
 E.g., this expansion
 
-  Work|Home => {\(?:Work\|Lab\|Conf\}|Home
+  Work|Home => {\\(?:Work\\|Lab\\|Conf\\}|Home
 
 will match anything tagged with \"Lab\" and \"Home\", or tagged
 with \"Conf\" and \"Home\" or tagged with \"Work\" and \"home\".
@@ -14120,23 +14106,26 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 	     (stable org-mode-syntax-table)
 	     (tal (or org-tag-groups-alist-for-agenda
 		      org-tag-groups-alist))
-	     (tal (if downcased (mapcar (lambda(tg) (mapcar 'downcase tg)) tal) tal))
+	     (tal (if downcased
+		      (mapcar (lambda(tg) (mapcar 'downcase tg)) tal) tal))
 	     (tml (mapcar 'car tal))
 	     (rtnmatch match) rpl)
 	;; @ and _ are allowed as word-components in tags
 	(modify-syntax-entry ?@ "w" stable)
 	(modify-syntax-entry ?_ "w" stable)
-	(while (and tml (string-match
-			 (concat "\\(?1:[+-]?\\)\\(?2:\\<" (regexp-opt tml) "\\>\\)")
-			 rtnmatch))
+	(while (and tml
+		    (string-match
+		     (concat "\\(?1:[+-]?\\)\\(?2:\\<"
+			     (regexp-opt tml) "\\>\\)") rtnmatch))
 	  (let* ((dir (match-string 1 rtnmatch))
 		 (tag (match-string 2 rtnmatch))
 		 (tag (if downcased (downcase tag) tag)))
 	    (setq tml (delete tag tml))
-	    (setq rpl (append (org-uniquify rpl) (assoc tag tal)))
-	    (setq rtnmatch
-		  (replace-match
-		   (concat dir "{" (regexp-opt rpl) "}") t t rtnmatch))))
+	    (when (not (get-text-property 0 'grouptag (match-string 2 rtnmatch)))
+	      (setq rpl (append (org-uniquify rpl) (assoc tag tal)))
+	      (setq rpl (concat dir "{\\<" (regexp-opt rpl) "\\>}"))
+	      (if (stringp rpl) (org-add-props rpl '(grouptag t)))
+	      (setq rtnmatch (replace-match rpl t t rtnmatch)))))
 	(if single-as-list
 	    (or (reverse rpl) (list rtnmatch))
 	  rtnmatch))
@@ -14487,7 +14476,9 @@ This works in the agenda, and also in an org-mode buffer."
    (list (region-beginning) (region-end)
 	 (let ((org-last-tags-completion-table
 		(if (derived-mode-p 'org-mode)
-		    (org-get-buffer-tags)
+		    (org-uniquify
+		     (delq nil (append (org-get-buffer-tags)
+				       (org-global-tags-completion-table))))
 		  (org-global-tags-completion-table))))
 	   (org-icompleting-read
 	    "Tag: " 'org-tags-completion-function nil nil nil
@@ -17464,7 +17455,9 @@ The format is determined by `org-time-clocksum-format',
 `org-time-clocksum-use-fractional' and
 `org-time-clocksum-fractional-format' and
 `org-time-clocksum-use-effort-durations'."
-  (let ((clocksum "") h d w mo y fmt n)
+  (let ((clocksum "")
+	(m (round m)) ; Don't allow fractions of minutes
+	h d w mo y fmt n)
     (setq h (if org-time-clocksum-use-effort-durations
 		(cdr (assoc "h" org-effort-durations)) 60)
 	  d (if org-time-clocksum-use-effort-durations
@@ -21594,14 +21587,12 @@ for the search purpose."
   "Return the reverse of STRING."
   (apply 'string (reverse (string-to-list string))))
 
-(defun org-uniquify (list)
-  "Remove duplicate elements from LIST."
-  (let (res)
-    (mapc (lambda (x) (add-to-list 'res x 'append)) list)
-    res))
+(defsubst org-uniquify (list)
+  "Non-destructively remove duplicate elements from LIST."
+  (let ((res (copy-seq list))) (delete-dups res)))
 
 (defun org-uniquify-alist (alist)
-  "Merge duplicate elements of an alist.
+  "Merge duplicate elements of ALIST.
 
 For example, in this alist:
 
@@ -23029,8 +23020,8 @@ non-nil it will also look at invisible ones."
                're-search-forward))
           (count (if arg (abs arg) 1))
           (result (point)))
-      (forward-char (if (and arg (< arg 0)) -1 1))
-      (while (and (> count 0)
+      (while (and (prog1 (> count 0)
+		    (forward-char (if (and arg (< arg 0)) -1 1)))
                   (funcall f org-outline-regexp-bol nil 'move))
         (let ((l (- (match-end 0) (match-beginning 0) 1)))
           (cond ((< l level) (setq count 0))

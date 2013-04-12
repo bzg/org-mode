@@ -179,6 +179,7 @@ included.  See the back-end documentation for more information.
   :with-tags                `org-export-with-tags'
   :with-tasks               `org-export-with-tasks'
   :with-timestamps          `org-export-with-timestamps'
+  :with-planning            `org-export-with-planning'
   :with-todo-keywords       `org-export-with-todo-keywords'
 
 The following properties may be used to control publishing of

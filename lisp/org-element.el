@@ -3393,7 +3393,7 @@ LIMIT bounds the search.
 
 Return value is a cons cell whose CAR is `table-cell' and CDR is
 beginning position."
-  (when (looking-at "[ \t]*.*?[ \t]+|") (cons 'table-cell (point))))
+  (when (looking-at "[ \t]*.*?[ \t]*|") (cons 'table-cell (point))))
 
 
 ;;;; Target

@@ -131,7 +131,7 @@
     (:with-footnotes nil "f" org-export-with-footnotes)
     (:with-inlinetasks nil "inline" org-export-with-inlinetasks)
     (:with-latex nil "tex" org-export-with-latex)
-    (:with-plannings nil "p" org-export-with-planning)
+    (:with-planning nil "p" org-export-with-planning)
     (:with-priority nil "pri" org-export-with-priority)
     (:with-smart-quotes nil "'" org-export-with-smart-quotes)
     (:with-special-strings nil "-" org-export-with-special-strings)
@@ -1345,7 +1345,7 @@ The back-end could then be called with, for example:
 ;;   - category :: option
 ;;   - type :: symbol (`verbatim', nil, t)
 ;;
-;; + `:with-plannings' :: Non-nil means transcoding should include
+;; + `:with-planning' :: Non-nil means transcoding should include
 ;;      planning info.
 ;;   - category :: option
 ;;   - type :: symbol (nil, t)
@@ -2005,7 +2005,7 @@ a tree with a select tag."
 		      (not (eq todo-type with-tasks)))
 		 (and (consp with-tasks) (not (member todo with-tasks))))))))
     ((latex-environment latex-fragment) (not (plist-get options :with-latex)))
-    (planning (not (plist-get options :with-plannings)))
+    (planning (not (plist-get options :with-planning)))
     (statistics-cookie (not (plist-get options :with-statistics-cookies)))
     (table-cell
      (and (org-export-table-has-special-column-p
@@ -3423,24 +3423,31 @@ that property within attributes.
 
 This function assumes attributes are defined as \":keyword
 value\" pairs.  It is appropriate for `:attr_html' like
-properties.  All values will become strings except the empty
-string and \"nil\", which will become nil."
-  (let ((attributes
-	 (let ((value (org-element-property attribute element)))
-	   (when value
-	     (let ((s (mapconcat 'identity value " ")) result)
-	       (while (string-match
-		       "\\(?:^\\|[ \t]+\\)\\(:[-a-zA-Z0-9_]+\\)\\([ \t]+\\|$\\)"
-		       s)
-		 (let ((value (substring s 0 (match-beginning 0))))
-		   (push (and (not (member value '("nil" ""))) value) result))
-		 (push (intern (match-string 1 s)) result)
-		 (setq s (substring s (match-end 0))))
-	       ;; Ignore any string before the first property with `cdr'.
-	       (cdr (nreverse (cons (and (org-string-nw-p s)
-					 (not (equal s "nil"))
-					 s)
-				    result))))))))
+properties.
+
+All values will become strings except the empty string and
+\"nil\", which will become nil.  Also, values containing only
+double quotes will be read as-is, which means that \"\" value
+will become the empty string."
+  (let* ((prepare-value
+	  (lambda (str)
+	    (cond ((member str '(nil "" "nil")) nil)
+		  ((string-match "^\"\\(\"+\\)?\"$" str)
+		   (or (match-string 1 str) ""))
+		  (t str))))
+	 (attributes
+	  (let ((value (org-element-property attribute element)))
+	    (when value
+	      (let ((s (mapconcat 'identity value " ")) result)
+		(while (string-match
+			"\\(?:^\\|[ \t]+\\)\\(:[-a-zA-Z0-9_]+\\)\\([ \t]+\\|$\\)"
+			s)
+		  (let ((value (substring s 0 (match-beginning 0))))
+		    (push (funcall prepare-value value) result))
+		  (push (intern (match-string 1 s)) result)
+		  (setq s (substring s (match-end 0))))
+		;; Ignore any string before first property with `cdr'.
+		(cdr (nreverse (cons (funcall prepare-value s) result))))))))
     (if property (plist-get attributes property) attributes)))
 
 (defun org-export-get-caption (element &optional shortp)
@@ -4640,6 +4647,21 @@ INFO is a plist used as a communication channel."
        (org-export-table-row-ends-rowgroup-p table-row info)
        (= (org-export-table-row-group table-row info) 1)))
 
+(defun org-export-table-row-number (table-row info)
+  "Return TABLE-ROW number.
+INFO is a plist used as a communication channel.  Return value is
+zero-based and ignores separators.  The function returns nil for
+special colums and separators."
+  (when (and (eq (org-element-property :type table-row) 'standard)
+	     (not (org-export-table-row-is-special-p table-row info)))
+    (let ((number 0))
+      (org-element-map (org-export-get-parent-table table-row) 'table-row
+	(lambda (row)
+	  (cond ((eq row table-row) number)
+		((eq (org-element-property :type row) 'standard)
+		 (incf number) nil)))
+	info 'first-match))))
+
 (defun org-export-table-dimensions (table info)
   "Return TABLE dimensions.
 
@@ -4677,13 +4699,7 @@ function returns nil for other cells."
 		     (eq (car (org-element-contents table-row)) table-cell)))
       (cons
        ;; Row number.
-       (let ((row-count 0))
-	 (org-element-map table 'table-row
-	   (lambda (row)
-	     (cond ((eq (org-element-property :type row) 'rule) nil)
-		   ((eq row table-row) row-count)
-		   (t (incf row-count) nil)))
-	   info 'first-match))
+       (org-export-table-row-number (org-export-get-parent table-cell) info)
        ;; Column number.
        (let ((col-count 0))
 	 (org-element-map table-row 'table-cell

@@ -317,7 +317,7 @@ Do not query the user."
 (defsubst org-babel-confirm-evaluate (info)
   "Confirm evaluation of the code block INFO.
 
-If the variable `org-babel-confirm-evaluate-answer-no´ is bound
+If the variable `org-babel-confirm-evaluate-answer-no' is bound
 to a non-nil value, auto-answer with \"no\".
 
 This query can also be suppressed by setting the value of
@@ -2514,9 +2514,8 @@ appropriate."
   (if (and (stringp cell) (not (equal cell "")))
       (or (org-babel-number-p cell)
           (if (and (not inhibit-lisp-eval)
-		   (member (substring cell 0 1) '("(" "'" "`" "[" "*"))
-		   (or (not (equal (substring cell 0 1) "*"))
-		       (equal (substring cell (- (length cell) 1)) "*")))
+		   (or (member (substring cell 0 1) '("(" "'" "`" "["))
+		       (string= cell "*this*")))
               (eval (read cell))
             (if (string= (substring cell 0 1) "\"")
 		(read cell)

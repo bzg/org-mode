@@ -2760,6 +2760,8 @@ INFO is a plist holding contextual information.  See
 		     (concat "file://" (expand-file-name raw-path))
 		   (concat "file://" raw-path)))
 		(t raw-path)))
+	 ;; Convert & to &amp; for correct XML representation
+	 (path (replace-regexp-in-string "&" "&amp;" path))
 	 protocol)
     (cond
      ;; Image file.

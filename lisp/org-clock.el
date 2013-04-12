@@ -514,46 +514,51 @@ of a different task.")
   "Hook called in task selection just before prompting the user.")
 
 (defun org-clock-select-task (&optional prompt)
-  "Select a task that recently was associated with clocking."
+  "Select a task that was recently associated with clocking."
   (interactive)
-  (let (sel-list rpl (i 0) s)
-    (save-window-excursion
-      (org-switch-to-buffer-other-window
-       (get-buffer-create "*Clock Task Select*"))
-      (erase-buffer)
-      (when (marker-buffer org-clock-default-task)
-	(insert (org-add-props "Default Task\n" nil 'face 'bold))
-	(setq s (org-clock-insert-selection-line ?d org-clock-default-task))
-	(push s sel-list))
-      (when (marker-buffer org-clock-interrupted-task)
-	(insert (org-add-props "The task interrupted by starting the last one\n" nil 'face 'bold))
-	(setq s (org-clock-insert-selection-line ?i org-clock-interrupted-task))
-	(push s sel-list))
-      (when (org-clocking-p)
-	(insert (org-add-props "Current Clocking Task\n" nil 'face 'bold))
-	(setq s (org-clock-insert-selection-line ?c org-clock-marker))
-	(push s sel-list))
-      (insert (org-add-props "Recent Tasks\n" nil 'face 'bold))
-      (mapc
-       (lambda (m)
-	 (when (marker-buffer m)
-	   (setq i (1+ i)
-		 s (org-clock-insert-selection-line
-		    (if (< i 10)
-			(+ i ?0)
-		      (+ i (- ?A 10))) m))
-	   (if (fboundp 'int-to-char) (setf (car s) (int-to-char (car s))))
-	   (push s sel-list)))
-       org-clock-history)
-      (run-hooks 'org-clock-before-select-task-hook)
-      (org-fit-window-to-buffer)
-      (message (or prompt "Select task for clocking:"))
-      (setq rpl (read-char-exclusive))
-      (cond
-       ((eq rpl ?q) nil)
-       ((eq rpl ?x) nil)
-       ((assoc rpl sel-list) (cdr (assoc rpl sel-list)))
-       (t (error "Invalid task choice %c" rpl))))))
+  (let ((chl (length org-clock-history)) sel-list rpl (i 0) s)
+    (if (zerop chl)
+	(user-error "No recent clock")
+      (save-window-excursion
+	(org-switch-to-buffer-other-window
+	 (get-buffer-create "*Clock Task Select*"))
+	(erase-buffer)
+	(when (marker-buffer org-clock-default-task)
+	  (insert (org-add-props "Default Task\n" nil 'face 'bold))
+	  (setq s (org-clock-insert-selection-line ?d org-clock-default-task))
+	  (push s sel-list))
+	(when (marker-buffer org-clock-interrupted-task)
+	  (insert (org-add-props "The task interrupted by starting the last one\n" nil 'face 'bold))
+	  (setq s (org-clock-insert-selection-line ?i org-clock-interrupted-task))
+	  (push s sel-list))
+	(when (org-clocking-p)
+	  (insert (org-add-props "Current Clocking Task\n" nil 'face 'bold))
+	  (setq s (org-clock-insert-selection-line ?c org-clock-marker))
+	  (push s sel-list))
+	(insert (org-add-props "Recent Tasks\n" nil 'face 'bold))
+	(mapc
+	 (lambda (m)
+	   (when (marker-buffer m)
+	     (setq i (1+ i)
+		   s (org-clock-insert-selection-line
+		      (if (< i 10)
+			  (+ i ?0)
+			(+ i (- ?A 10))) m))
+	     (if (fboundp 'int-to-char) (setf (car s) (int-to-char (car s))))
+	     (push s sel-list)))
+	 org-clock-history)
+	(run-hooks 'org-clock-before-select-task-hook)
+	(goto-char (point-min))
+	;; Set min-height relatively to circumvent a possible but in
+	;; `fit-window-to-buffer'
+	(fit-window-to-buffer nil nil (if (< chl 10) chl (+ 5 chl)))
+	(message (or prompt "Select task for clocking:"))
+	(setq cursor-type nil rpl (read-char-exclusive))
+	(cond
+	 ((eq rpl ?q) nil)
+	 ((eq rpl ?x) nil)
+	 ((assoc rpl sel-list) (cdr (assoc rpl sel-list)))
+	 (t (user-error "Invalid task choice %c" rpl)))))))
 
 (defun org-clock-insert-selection-line (i marker)
   "Insert a line for the clock selection menu.
@@ -580,7 +585,7 @@ pointing to it."
 			   org-odd-levels-only)
 			  (length prefix)))))))
       (when (and cat task)
-	(insert (format "[%c] %-15s %s\n" i cat task))
+	(insert (format "[%c] %-12s  %s\n" i cat task))
 	(cons i marker)))))
 
 (defvar org-clock-task-overrun nil
@@ -926,19 +931,23 @@ was started."
 		(with-output-to-temp-buffer "*Org Clock*"
 		  (princ "Select a Clock Resolution Command:
 
-i/q/C-g  Ignore this question; the same as keeping all the idle time.
+i/q      Ignore this question; the same as keeping all the idle time.
 
 k/K      Keep X minutes of the idle time (default is all).  If this
          amount is less than the default, you will be clocked out
          that many minutes after the time that idling began, and then
          clocked back in at the present time.
+
 g/G      Indicate that you \"got back\" X minutes ago.  This is quite
          different from 'k': it clocks you out from the beginning of
          the idle period and clock you back in X minutes ago.
+
 s/S      Subtract the idle time from the current clock.  This is the
          same as keeping 0 minutes.
+
 C        Cancel the open timer altogether.  It will be as though you
          never clocked in.
+
 j/J      Jump to the current clock, to make manual adjustments.
 
 For all these options, using uppercase makes your final state

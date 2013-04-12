@@ -294,13 +294,13 @@
      ("\\subsection{%s}" . "\\subsection*{%s}")
      ("\\subsubsection{%s}" . "\\subsubsection*{%s}")))
   "Alist of LaTeX classes and associated header and structure.
-If #+LaTeX_CLASS is set in the buffer, use its value and the
+If #+LATEX_CLASS is set in the buffer, use its value and the
 associated information.  Here is the structure of each cell:
 
   \(class-name
     header-string
-    \(numbered-section . unnumbered-section\)
-    ...\)
+    \(numbered-section . unnumbered-section)
+    ...)
 
 The header string
 -----------------
@@ -315,7 +315,8 @@ following commands will be added:
   `org-latex-packages-alist'.  Thus, your header definitions
   should avoid to also request these packages.
 
-- Lines specified via \"#+LaTeX_HEADER:\"
+- Lines specified via \"#+LATEX_HEADER:\" and
+  \"#+LATEX_HEADER_EXTRA:\" keywords.
 
 If you need more control about the sequence in which the header
 is built up, or if you want to exclude one of these building
@@ -326,8 +327,8 @@ macro-like placeholders.
  [NO-DEFAULT-PACKAGES]   do not include any of the default packages
  [PACKAGES]              \\usepackage statements for packages
  [NO-PACKAGES]           do not include the packages
- [EXTRA]                 the stuff from #+LaTeX_HEADER
- [NO-EXTRA]              do not include #+LaTeX_HEADER stuff
+ [EXTRA]                 the stuff from #+LATEX_HEADER
+ [NO-EXTRA]              do not include #+LATEX_HEADER stuff
 
 So a header like
 
@@ -338,9 +339,9 @@ So a header like
   [PACKAGES]
 
 will omit the default packages, and will include the
-#+LaTeX_HEADER lines, then have a call to \\providecommand, and
-then place \\usepackage commands based on the content of
-`org-latex-packages-alist'.
+#+LATEX_HEADER and #+LATEX_HEADER_EXTRA lines, then have a call
+to \\providecommand, and then place \\usepackage commands based
+on the content of `org-latex-packages-alist'.
 
 If your header, `org-latex-default-packages-alist' or
 `org-latex-packages-alist' inserts
@@ -357,14 +358,14 @@ following the header string.  For each sectioning level, a number
 of strings is specified.  A %s formatter is mandatory in each
 section string and will be replaced by the title of the section.
 
-Instead of a cons cell \(numbered . unnumbered\), you can also
+Instead of a cons cell (numbered . unnumbered), you can also
 provide a list of 2 or 4 elements,
 
-  \(numbered-open numbered-close\)
+  \(numbered-open numbered-close)
 
 or
 
-  \(numbered-open numbered-close unnumbered-open unnumbered-close\)
+  \(numbered-open numbered-close unnumbered-open unnumbered-close)
 
 providing opening and closing strings for a LaTeX environment
 that should represent the document section.  The opening clause
@@ -372,7 +373,7 @@ should have a %s to represent the section title.
 
 Instead of a list of sectioning commands, you can also specify
 a function name.  That function will be called with two
-parameters, the \(reduced) level of the headline, and a predicate
+parameters, the (reduced) level of the headline, and a predicate
 non-nil when the headline should be numbered.  It must return
 a format string in which the section title will be added."
   :group 'org-export-latex
@@ -1814,7 +1815,6 @@ used as a communication channel."
 	 ;; ATTR_LATEX line, and also via default variables.
 	 (width (cond ((plist-get attr :width))
 		      ((plist-get attr :height) "")
-		      ((eq float 'figure) "0.7\\textwidth")
 		      ((eq float 'wrap) "0.48\\textwidth")
 		      (t org-latex-image-default-width)))
 	 (height (cond ((plist-get attr :height))
@@ -2561,7 +2561,7 @@ This function assumes TABLE has `org' as its `:type' property and
 `inline-math' or `math' as its `:mode' attribute.."
   (let* ((caption (org-latex--caption/label-string table info))
 	 (attr (org-export-read-attribute :attr_latex table))
-	 (inlinep (eq (plist-get attr :mode) 'inline-math))
+	 (inlinep (equal (plist-get attr :mode) "inline-math"))
 	 (env (or (plist-get attr :environment)
 		  org-latex-default-table-environment))
 	 (contents

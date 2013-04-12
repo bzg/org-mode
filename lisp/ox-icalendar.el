@@ -897,7 +897,8 @@ The file is stored under the name chosen in
   "Export current agenda view to an iCalendar FILE.
 This function assumes major mode for current buffer is
 `org-agenda-mode'."
-  (let ((org-icalendar-combined-agenda-file file)
+  (let (org-export-babel-evaluate ; Don't evaluate Babel block
+	(org-icalendar-combined-agenda-file file)
 	(marker-list
 	 ;; Collect the markers pointing to entries in the current
 	 ;; agenda buffer.
@@ -971,7 +972,7 @@ files to build the calendar from."
 				      (lambda (m-list dummy)
 					(mapc (lambda (m)
 						(org-entry-put
-						 m "ICALENDAR_MARK" "t"))
+						 m "ICALENDAR-MARK" "t"))
 					      m-list))
 				      (sort marks '>))
 				     org-export-before-processing-hook)))

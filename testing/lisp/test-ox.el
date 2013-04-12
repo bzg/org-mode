@@ -383,10 +383,10 @@ Paragraph"
     (org-test-with-temp-text "CLOSED: [2012-04-29 sun. 10:45]"
       (org-test-with-backend test
 	(should
-	 (equal (org-export-as 'test nil nil nil '(:with-plannings t))
+	 (equal (org-export-as 'test nil nil nil '(:with-planning t))
 		"CLOSED: [2012-04-29 sun. 10:45]\n"))
 	(should
-	 (equal (org-export-as 'test nil nil nil '(:with-plannings nil))
+	 (equal (org-export-as 'test nil nil nil '(:with-planning nil))
 		"")))))
   ;; Statistics cookies.
   (should
@@ -686,6 +686,20 @@ body\n")))
 	  (org-export-read-attribute
 	   :attr_html
 	   (org-test-with-temp-text "#+ATTR_HTML: :a :b\nParagraph"
+	     (org-element-at-point)))))
+  ;; Return empty string when value is "".
+  (should
+   (equal '(:a "")
+	  (org-export-read-attribute
+	   :attr_html
+	   (org-test-with-temp-text "#+ATTR_HTML: :a \"\"\nParagraph"
+	     (org-element-at-point)))))
+  ;; Return \"\" when value is """".
+  (should
+   (equal '(:a "\"\"")
+	  (org-export-read-attribute
+	   :attr_html
+	   (org-test-with-temp-text "#+ATTR_HTML: :a \"\"\"\"\nParagraph"
 	     (org-element-at-point)))))
   ;; Ignore text before first property.
   (should-not
@@ -1910,6 +1924,35 @@ Another text. (ref:text)
       '(1 nil nil 2)
       (mapcar (lambda (row) (org-export-table-row-group row info))
 	      (org-element-map tree 'table-row 'identity))))))
+
+(ert-deftest test-org-export/table-row-number ()
+  "Test `org-export-table-row-number' specifications."
+  ;; Standard test.  Number is 0-indexed.
+  (should
+   (equal '(0 1)
+	  (org-test-with-parsed-data "| a | b | c |\n| d | e | f |"
+	    (org-element-map tree 'table-row
+	      (lambda (row) (org-export-table-row-number row info)) info))))
+  ;; Number ignores separators.
+  (should
+   (equal '(0 1)
+	  (org-test-with-parsed-data "
+| a | b | c |
+|---+---+---|
+| d | e | f |"
+	    (org-element-map tree 'table-row
+	      (lambda (row) (org-export-table-row-number row info)) info))))
+  ;; Number ignores special rows.
+  (should
+   (equal '(0 1)
+	  (org-test-with-parsed-data "
+| / | <   | >   |
+|   | b   | c   |
+|---+-----+-----|
+|   | <c> | <c> |
+|   | e   | f   |"
+	    (org-element-map tree 'table-row
+	      (lambda (row) (org-export-table-row-number row info)) info)))))
 
 (ert-deftest test-org-export/table-cell-width ()
   "Test `org-export-table-cell-width' specifications."

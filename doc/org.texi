@@ -11,7 +11,7 @@
 @set txicodequotebacktick
 
 @c Version and Contact Info
-@set MAINTAINERSITE @uref{http://orgmode.org,maintainers webpage}
+@set MAINTAINERSITE @uref{http://orgmode.org,maintainers web page}
 @set AUTHOR Carsten Dominik
 @set MAINTAINER Bastien Guerry
 @set MAINTAINEREMAIL @email{bzg at gnu dot org}
@@ -288,7 +288,8 @@ modify this GNU manual.''
 
 @subtitle Release @value{VERSION}
 @author by Carsten Dominik
-with contributions by David O'Toole, Bastien Guerry, Philip Rooke, Dan Davison, Eric Schulte, Thomas Dye and Jambunathan K.
+with contributions by David O'Toole, Bastien Guerry, Philip Rooke, Dan
+Davison, Eric Schulte, Thomas Dye, Jambunathan K and Nicolas Goaziou.
 
 @c The following two commands start the copyright page.
 @page
@@ -536,7 +537,8 @@ Presentation and sorting
 
 * Categories::                  Not all tasks are equal
 * Time-of-day specifications::  How the agenda knows the time
-* Sorting of agenda items::     The order of things
+* Sorting agenda items::        The order of things
+* Filtering/limiting agenda items:: Dynamically narrow the agenda
 
 Custom agenda views
 
@@ -551,7 +553,7 @@ Markup for rich export
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
 * Index entries::               Making an index
-* Macro replacement::           Use macros to create complex output
+* Macro replacement::           Use macros to create templates
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
 
 Structural markup elements
@@ -576,9 +578,9 @@ Embedded @LaTeX{}
 
 Exporting
 
-* Selective export::            Using tags to select and exclude trees
-* Export options::              Per-file export settings
-* The export dispatcher::       How to access exporter commands
+* The Export Dispatcher::       The main exporter interface
+* Export formats::              Available export formats
+* Export settings::             Generic export settings
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
@@ -603,8 +605,7 @@ HTML export
 * @LaTeX{}/PDF export commands::
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
-* Tables in @LaTeX{} export::   Options for exporting tables to @LaTeX{}
-* Images in @LaTeX{} export::   How to insert figures into @LaTeX{} output
+* @LaTeX{} specific attributes::  Controlling @LaTeX{} output
 * Beamer class export::         Turning the file into a presentation
 
 OpenDocument Text export
@@ -743,12 +744,13 @@ Hacking
 * Hooks::                       How to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
+* Adding export back-ends::     How to write new export back-ends
 * Context-sensitive commands::  How to add functionality to such commands
 * Tables in arbitrary syntax::  Orgtbl for @LaTeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
 * Speeding up your agendas::    Tips on how to speed up your agendas
-* Extracting agenda information::  Postprocessing of agenda information
+* Extracting agenda information::  Post-processing of agenda information
 * Using the property API::      Writing programs that use entry properties
 * Using the mapping API::       Mapping over all or selected entries
 
@@ -831,7 +833,7 @@ ends, for example:
 @pindex GTD, Getting Things Done
 @r{@bullet{} an environment in which to implement David Allen's GTD system}
 @r{@bullet{} a simple hypertext system, with HTML and @LaTeX{} export}
-@r{@bullet{} a publishing tool to create a set of interlinked webpages}
+@r{@bullet{} a publishing tool to create a set of interlinked web pages}
 @r{@bullet{} an environment for literate programming}
 @end example
 
@@ -882,17 +884,17 @@ You can download Org latest release from @uref{http://orgmode.org/, Org's
 website}.  In this case, make sure you set the load-path correctly in your
 @file{.emacs}:
 
-@example
+@lisp
 (add-to-list 'load-path "~/path/to/orgdir/lisp")
-@end example
+@end lisp
 
 The downloaded archive contains contributed libraries that are not included
 in Emacs.  If you want to use them, add the @file{contrib} directory to your
 load-path:
 
-@example
+@lisp
 (add-to-list 'load-path "~/path/to/orgdir/contrib/lisp" t)
-@end example
+@end lisp
 
 Optionally, you can compile the files and/or install them in your system.
 Run @code{make help} to list compilation and installation options.
@@ -1029,7 +1031,7 @@ is not necessary.  In that case it is sufficient to start Emacs as
 @code{emacs -Q}.  The @code{minimal-org.el} setup file can have contents as
 shown below.
 
-@example
+@lisp
 ;;; Minimal setup to load latest `org-mode'
 
 ;; activate debugging
@@ -1040,7 +1042,7 @@ shown below.
 ;; add latest org-mode to load path
 (add-to-list 'load-path (expand-file-name "/path/to/org-mode/lisp"))
 (add-to-list 'load-path (expand-file-name "/path/to/org-mode/contrib/lisp" t))
-@end example
+@end lisp
 
 If an error occurs, a backtrace can be very useful (see below on how to
 create one).  Often a small example file helps, along with clear information
@@ -1363,7 +1365,7 @@ entries.
 
 @vindex org-catch-invisible-edits
 @cindex edits, catching invisible
-Sometimes you may inadvertantly edit an invisible part of the buffer and be
+Sometimes you may inadvertently edit an invisible part of the buffer and be
 confused on what as been edited and how to undo the mistake.  Setting
 @code{org-catch-invisible-edits} to non-nil will help prevent this.  See the
 docstring of this option on how Org should catch invisible edits and process
@@ -1437,7 +1439,7 @@ headline is created before the current line.  If the command is used
 at the @emph{end} of a folded subtree (i.e., behind the ellipses at
 the end of a headline), then a headline like the current one will be
 inserted after the end of the subtree.  Calling this command with
-@kbd{C-u C-u} will inconditionnally respect the headline's content and
+@kbd{C-u C-u} will unconditionally respect the headline's content and
 create a new item at the end of the parent subtree.
 @orgcmd{C-@key{RET},org-insert-heading-respect-content}
 Just like @kbd{M-@key{RET}}, except when adding a new heading below the
@@ -1764,7 +1766,7 @@ similar effect.
 @item M-up
 @itemx M-down
 Move the item including subitems up/down@footnote{See
-@code{org-liste-use-circular-motion} for a cyclic behavior.} (swap with
+@code{org-list-use-circular-motion} for a cyclic behavior.} (swap with
 previous/next item of same indentation).  If the list is ordered, renumbering
 is automatic.
 @kindex M-@key{left}
@@ -1873,6 +1875,12 @@ want to store a quick note in the LOGBOOK drawer, in a similar way to state chan
 Add a time-stamped note to the LOGBOOK drawer.
 @end table
 
+@vindex org-export-with-drawers
+You can select the name of the drawers which should be exported with
+@var{org-export-with-drawers}.  In that case, drawer contents will appear in
+export output.  Property drawers are not affected by this variable and are
+never exported.
+
 @node Blocks, Footnotes, Drawers, Document Structure
 @section Blocks
 
@@ -1977,8 +1985,7 @@ n   @r{Normalize the footnotes by collecting all definitions (including}
     @r{inline definitions) into a special section, and then numbering them}
     @r{in sequence.  The references will then also be numbers.  This is}
     @r{meant to be the final step before finishing a document (e.g., sending}
-    @r{off an email).  The exporters do this automatically, and so could}
-    @r{something like @code{message-send-hook}.}
+    @r{off an email).}
 d   @r{Delete the footnote at point, and all definitions of and references}
     @r{to it.}
 @end example
@@ -2599,7 +2606,7 @@ numbers.
 @cindex references, to a different table
 @cindex name, of column or field
 @cindex constants, in calculations
-@cindex #+TBLNAME
+@cindex #+NAME, for table
 
 You may also reference constants, fields and ranges from a different table,
 either in the current file or even in a different file.  The syntax is
@@ -2610,7 +2617,7 @@ remote(NAME-OR-ID,REF)
 
 @noindent
 where NAME can be the name of a table in the current file as set by a
-@code{#+TBLNAME: NAME} line before the table.  It can also be the ID of an
+@code{#+NAME: Name} line before the table.  It can also be the ID of an
 entry, even in a different file, and the reference then refers to the first
 table in that entry.  REF is an absolute field or range reference as
 described above for example @code{@@3$3} or @code{$somename}, valid in the
@@ -2880,7 +2887,7 @@ Searches for the first element @code{S} in list @code{S-LIST} for which
 is @code{t}; returns the value from the corresponding position in list
 @code{R-LIST}.  The default @code{PREDICATE} is @code{equal}.  Note that the
 parameters @code{VAL} and @code{S} are passed to @code{PREDICATE} in the same
-order as the correspoding parameters are in the call to
+order as the corresponding parameters are in the call to
 @code{org-lookup-first}, where @code{VAL} precedes @code{S-LIST}.  If
 @code{R-LIST} is @code{nil}, the matching element @code{S} of @code{S-LIST}
 is returned.
@@ -5006,7 +5013,8 @@ will display headlines tagged with at least one of the members of the
 group.  This makes tag searches and filters even more flexible.
 
 You can set group tags by inserting a colon between the group tag and other
-tags, like this:
+tags---beware that all whitespaces are mandatory so that Org can parse this
+line correctly:
 
 @example
 #+TAGS: @{ @@read : @@read_book  @@read_ebook @}
@@ -5026,6 +5034,8 @@ You can also use the @code{:grouptags} keyword directly when setting
                       ("@@read_ebook" . nil)
                       (:endgroup . nil)))
 @end lisp
+
+You cannot nest group tags or use a group tag as a tag in another group.
 
 @kindex C-c C-x q
 @vindex org-group-tags
@@ -5882,13 +5892,12 @@ w4            @result{} ISO week for of the current year @b{2006}
 2012-w04-5    @result{} Same as above
 @end example
 
-Furthermore you can specify a relative date by giving, as the
-@emph{first} thing in the input: a plus/minus sign, a number and a
-letter ([dwmy]) to indicate change in days, weeks, months, or years.  With a
-single plus or minus, the date is always relative to today.  With a
-double plus or minus, it is relative to the default date.  If instead of
-a single letter, you use the abbreviation of day name, the date will be
-the Nth such day, e.g.:
+Furthermore you can specify a relative date by giving, as the @emph{first}
+thing in the input: a plus/minus sign, a number and a letter ([hdwmy]) to
+indicate change in hours, days, weeks, months, or years.  With a single plus
+or minus, the date is always relative to today.  With a double plus or minus,
+it is relative to the default date.  If instead of a single letter, you use
+the abbreviation of day name, the date will be the Nth such day, e.g.:
 
 @example
 +0            @result{} today
@@ -6068,9 +6077,9 @@ the task will automatically be forwarded until completed.
 If you want to @emph{delay} the display of this task in the agenda, use
 @code{SCHEDULED: <2004-12-25 Sat -2d>}: the task is still scheduled on the
 25th but will appear two days later.  In case the task contains a repeater,
-the delay is considered to affect all occurrences; if you want it to affect
-only the first scheduled occurrence of the task, use @code{--2d} instead.
-See @code{org-scheduled-delay-days} and
+the delay is considered to affect all occurrences; if you want the delay to
+only affect the first scheduled occurrence of the task, use @code{--2d}
+instead.  See @code{org-scheduled-delay-days} and
 @code{org-agenda-skip-scheduled-delay-if-deadline} for details on how to
 control this globally or per agenda.
 
@@ -6785,10 +6794,12 @@ a global key@footnote{Please select your own key, @kbd{C-c c} is only a
 suggestion.}  for capturing new material.
 
 @vindex org-default-notes-file
-@example
+@smalllisp
+@group
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (define-key global-map "\C-cc" 'org-capture)
-@end example
+@end group
+@end smalllisp
 
 @node Using capture, Capture templates, Setting up capture, Capture
 @subsection Using capture
@@ -6867,13 +6878,15 @@ your file @file{~/org/gtd.org}.  Also, a date tree in the file
 @file{journal.org} should capture journal entries.  A possible configuration
 would look like:
 
-@example
+@smalllisp
+@group
 (setq org-capture-templates
  '(("t" "Todo" entry (file+headline "~/org/gtd.org" "Tasks")
         "* TODO %?\n  %i\n  %a")
    ("j" "Journal" entry (file+datetree "~/org/journal.org")
         "* %?\nEntered on %U\n  %i\n  %a")))
-@end example
+@end group
+@end smalllisp
 
 @noindent If you then press @kbd{C-c c t}, Org will prepare the template
 for you like this:
@@ -6918,9 +6931,9 @@ single key, or @code{"bt"} for selection with two keys.  When using
 several keys, keys using the same prefix key must be sequential
 in the list and preceded by a 2-element entry explaining the
 prefix key, for example
-@example
+@smalllisp
          ("b" "Templates for marking stuff to buy")
-@end example
+@end smalllisp
 @noindent If you do not define a template for the @kbd{C} key, this key will
 be used to open the customize buffer for this complex variable.
 
@@ -7137,18 +7150,18 @@ context, you can customize @var{org-capture-templates-contexts}.  Let's say
 for example that you have a capture template @code{"p"} for storing Gnus
 emails containing patches.  Then you would configure this option like this:
 
-@example
+@smalllisp
 (setq org-capture-templates-contexts
       '(("p" (in-mode . "message-mode"))))
-@end example
+@end smalllisp
 
 You can also tell that the command key @code{"p"} should refer to another
 template.  In that case, add this command key like this:
 
-@example
+@smalllisp
 (setq org-capture-templates-contexts
       '(("p" "q" (in-mode . "message-mode"))))
-@end example
+@end smalllisp
 
 See the docstring of the variable for more information.
 
@@ -7252,12 +7265,14 @@ web to import tasks into Org.  To access feeds, configure the variable
 @code{org-feed-alist}.  The docstring of this variable has detailed
 information.  Here is just an example:
 
-@example
+@smalllisp
+@group
 (setq org-feed-alist
      '(("Slashdot"
          "http://rss.slashdot.org/Slashdot/slashdot"
          "~/txt/org/feeds.org" "Slashdot Entries")))
-@end example
+@end group
+@end smalllisp
 
 @noindent
 will configure that new items from the feed provided by
@@ -8201,7 +8216,8 @@ associated with the item.
 @menu
 * Categories::                  Not all tasks are equal
 * Time-of-day specifications::  How the agenda knows the time
-* Sorting of agenda items::     The order of things
+* Sorting agenda items::        The order of things
+* Filtering/limiting agenda items:: Dynamically narrow the agenda
 @end menu
 
 @node Categories, Time-of-day specifications, Presentation and sorting, Presentation and sorting
@@ -8238,7 +8254,7 @@ longer than 10 characters.
 You can set up icons for category by customizing the
 @code{org-agenda-category-icon-alist} variable.
 
-@node Time-of-day specifications, Sorting of agenda items, Categories, Presentation and sorting
+@node Time-of-day specifications, Sorting agenda items, Categories, Presentation and sorting
 @subsection Time-of-day specifications
 @cindex time-of-day specification
 
@@ -8289,8 +8305,8 @@ The time grid can be turned on and off with the variable
 @code{org-agenda-use-time-grid}, and can be configured with
 @code{org-agenda-time-grid}.
 
-@node Sorting of agenda items,  , Time-of-day specifications, Presentation and sorting
-@subsection Sorting of agenda items
+@node Sorting agenda items, Filtering/limiting agenda items, Time-of-day specifications, Presentation and sorting
+@subsection Sorting agenda items
 @cindex sorting, of agenda items
 @cindex priorities, of agenda items
 Before being inserted into a view, the items are sorted.  How this is
@@ -8322,6 +8338,189 @@ sequence in which they are found in the agenda files.
 Sorting can be customized using the variable
 @code{org-agenda-sorting-strategy}, and may also include criteria based on
 the estimated effort of an entry (@pxref{Effort estimates}).
+
+@node Filtering/limiting agenda items,  , Sorting agenda items, Presentation and sorting
+@subsection Filtering/limiting agenda items
+
+Agenda built-in or customized commands are statically defined.  Agenda
+filters and limits provide two ways of dynamically narrowing down the list of
+agenda entries: @emph{fitlers} and @emph{limits}.  Filters only act on the
+display of the items, while limits take effect before the list of agenda
+entries is built.  Filter are more often used interactively, while limits are
+mostly useful when defined as local variables within custom agenda commands.
+
+@subsubheading Filtering in the agenda
+@cindex filtering, by tag, category, top headline and effort, in agenda
+@cindex tag filtering, in agenda
+@cindex category filtering, in agenda
+@cindex top headline filtering, in agenda
+@cindex effort filtering, in agenda
+@cindex query editing, in agenda
+
+@table @kbd
+@orgcmd{/,org-agenda-filter-by-tag}
+@vindex org-agenda-tag-filter-preset
+Filter the agenda view with respect to a tag and/or effort estimates.  The
+difference between this and a custom agenda command is that filtering is very
+fast, so that you can switch quickly between different filters without having
+to recreate the agenda.@footnote{Custom commands can preset a filter by
+binding the variable @code{org-agenda-tag-filter-preset} as an option.  This
+filter will then be applied to the view and persist as a basic filter through
+refreshes and more secondary filtering.  The filter is a global property of
+the entire agenda view---in a block agenda, you should only set this in the
+global options section, not in the section of an individual block.}
+
+You will be prompted for a tag selection letter; @key{SPC} will mean any tag at
+all.  Pressing @key{TAB} at that prompt will offer use completion to select a
+tag (including any tags that do not have a selection character).  The command
+then hides all entries that do not contain or inherit this tag.  When called
+with prefix arg, remove the entries that @emph{do} have the tag.  A second
+@kbd{/} at the prompt will turn off the filter and unhide any hidden entries.
+If the first key you press is either @kbd{+} or @kbd{-}, the previous filter
+will be narrowed by requiring or forbidding the selected additional tag.
+Instead of pressing @kbd{+} or @kbd{-} after @kbd{/}, you can also
+immediately use the @kbd{\} command.
+
+@vindex org-sort-agenda-noeffort-is-high
+In order to filter for effort estimates, you should set up allowed
+efforts globally, for example
+@lisp
+(setq org-global-properties
+    '(("Effort_ALL". "0 0:10 0:30 1:00 2:00 3:00 4:00")))
+@end lisp
+You can then filter for an effort by first typing an operator, one of
+@kbd{<}, @kbd{>}, and @kbd{=}, and then the one-digit index of an effort
+estimate in your array of allowed values, where @kbd{0} means the 10th value.
+The filter will then restrict to entries with effort smaller-or-equal, equal,
+or larger-or-equal than the selected value.  If the digits 0--9 are not used
+as fast access keys to tags, you can also simply press the index digit
+directly without an operator.  In this case, @kbd{<} will be assumed.  For
+application of the operator, entries without a defined effort will be treated
+according to the value of @code{org-sort-agenda-noeffort-is-high}.  To filter
+for tasks without effort definition, press @kbd{?} as the operator.
+
+Org also supports automatic, context-aware tag filtering.  If the variable
+@code{org-agenda-auto-exclude-function} is set to a user-defined function,
+that function can decide which tags should be excluded from the agenda
+automatically.  Once this is set, the @kbd{/} command then accepts @kbd{RET}
+as a sub-option key and runs the auto exclusion logic.  For example, let's
+say you use a @code{Net} tag to identify tasks which need network access, an
+@code{Errand} tag for errands in town, and a @code{Call} tag for making phone
+calls.  You could auto-exclude these tags based on the availability of the
+Internet, and outside of business hours, with something like this:
+
+@smalllisp
+@group
+(defun org-my-auto-exclude-function (tag)
+  (and (cond
+        ((string= tag "Net")
+         (/= 0 (call-process "/sbin/ping" nil nil nil
+                             "-c1" "-q" "-t1" "mail.gnu.org")))
+        ((or (string= tag "Errand") (string= tag "Call"))
+         (let ((hour (nth 2 (decode-time))))
+           (or (< hour 8) (> hour 21)))))
+       (concat "-" tag)))
+
+(setq org-agenda-auto-exclude-function 'org-my-auto-exclude-function)
+@end group
+@end smalllisp
+
+@orgcmd{\\,org-agenda-filter-by-tag-refine}
+Narrow the current agenda filter by an additional condition.  When called with
+prefix arg, remove the entries that @emph{do} have the tag, or that do match
+the effort criterion.  You can achieve the same effect by pressing @kbd{+} or
+@kbd{-} as the first key after the @kbd{/} command.
+
+@c
+@kindex [
+@kindex ]
+@kindex @{
+@kindex @}
+@item [ ] @{ @}
+@table @i
+@item @r{in} search view
+add new search words (@kbd{[} and @kbd{]}) or new regular expressions
+(@kbd{@{} and @kbd{@}}) to the query string.  The opening bracket/brace will
+add a positive search term prefixed by @samp{+}, indicating that this search
+term @i{must} occur/match in the entry.  The closing bracket/brace will add a
+negative search term which @i{must not} occur/match in the entry for it to be
+selected.
+@end table
+
+@orgcmd{<,org-agenda-filter-by-category}
+@vindex org-agenda-category-filter-preset
+
+Filter the current agenda view with respect to the category of the item at
+point.  Pressing @code{<} another time will remove this filter.  You can add
+a filter preset through the option @code{org-agenda-category-filter-preset}
+(see below.)
+
+@orgcmd{^,org-agenda-filter-by-top-headline}
+Filter the current agenda view and only display the siblings and the parent
+headline of the one at point.
+
+@orgcmd{=,org-agenda-filter-by-regexp}
+@vindex org-agenda-regexp-filter-preset
+
+Filter the agenda view by a regular expression: only show agenda entries
+matching the regular expression the user entered.  When called with a prefix
+argument, it will filter @emph{out} entries matching the regexp.  With two
+universal prefix arguments, it will remove all the regexp filters, which can
+be accumulated.  You can add a filter preset through the option
+@code{org-agenda-category-filter-preset} (see below.)
+
+@orgcmd{|,org-agenda-filter-remove-all}
+Remove all filters in the current agenda view.
+@end table
+
+@subsubheading Setting limits for the agenda
+@cindex limits, in agenda
+@vindex org-agenda-max-entries
+@vindex org-agenda-max-effort
+@vindex org-agenda-max-todos
+@vindex org-agenda-max-tags
+
+Here is a list of options that you can set, either globally, or locally in
+your custom agenda views@pxref{Custom agenda views}.
+
+@table @var
+@item org-agenda-max-entries
+Limit the number of entries.
+@item org-agenda-max-effort
+Limit the duration of accumulated efforts (as minutes).
+@item org-agenda-max-todos
+Limit the number of entries with TODO keywords.
+@item org-agenda-max-tags
+Limit the number of tagged entries.
+@end table
+
+When set to a positive integer, each option will exclude entries from other
+catogories: for example, @code{(setq org-agenda-max-effort 100)} will limit
+the agenda to 100 minutes of effort and exclude any entry that as no effort
+property.  If you want to include entries with no effort property, use a
+negative value for @var{org-agenda-max-effort}.
+
+One useful setup is to use @var{org-agenda-max-entries} locally in a custom
+command.  For example, this custom command will display the next five entries
+with a @code{NEXT} TODO keyword.
+
+@smalllisp
+(setq org-agenda-custom-commands
+      '(("n" todo "NEXT"
+         ((org-agenda-max-entries 5)))))
+@end smalllisp
+
+Once you mark one of these five entry as @code{DONE}, rebuilding the agenda
+will again the next five entries again, including the first entry that was
+excluded so far.
+
+You can also dynamically set temporary limits@footnote{Those temporary limits
+are lost when rebuilding the agenda.}:
+
+@table @kbd
+@orgcmd{~,org-agenda-limit-interactively}
+This prompts for the type of limit to apply and its value.
+@end table
 
 @node Agenda commands, Custom agenda views, Presentation and sorting, Agenda Views
 @section Commands in the agenda buffer
@@ -8436,7 +8635,7 @@ entries that have been clocked on that day.  You can configure the entry
 types that should be included in log mode using the variable
 @code{org-agenda-log-mode-items}.  When called with a @kbd{C-u} prefix, show
 all possible logbook entries, including state changes.  When called with two
-prefix args @kbd{C-u C-u}, show only logging information, nothing else.
+prefix arguments @kbd{C-u C-u}, show only logging information, nothing else.
 @kbd{v L} is equivalent to @kbd{C-u v l}.
 @c
 @orgcmdkskc{v [,[,org-agenda-manipulate-query-add}
@@ -8454,7 +8653,7 @@ press @kbd{v a} again.
 @vindex org-agenda-start-with-clockreport-mode
 @vindex org-clock-report-include-clocking-task
 Toggle Clockreport mode.  In Clockreport mode, the daily/weekly agenda will
-always show a table with the clocked times for the timespan and file scope
+always show a table with the clocked times for the time span and file scope
 covered by the current agenda view.  The initial setting for this mode in new
 agenda buffers can be set with the variable
 @code{org-agenda-start-with-clockreport-mode}.  By using a prefix argument
@@ -8513,119 +8712,39 @@ that entry would be in the original buffer (taken from a property, from a
 Remove the restriction lock on the agenda, if it is currently restricted to a
 file or subtree (@pxref{Agenda files}).
 
-@tsubheading{Secondary filtering and query editing}
-@cindex filtering, by tag category and effort, in agenda
-@cindex tag filtering, in agenda
-@cindex category filtering, in agenda
-@cindex effort filtering, in agenda
-@cindex query editing, in agenda
+@tsubheading{Secondary filtering and query editing@footnote{See
+@pxref{Filtering/limiting agenda items} for a detailed description of these
+commands.}}
+
+@orgcmd{/,org-agenda-filter-by-tag}
+@vindex org-agenda-tag-filter-preset
+Filter the agenda view with respect to a tag and/or effort estimates.
+
+@orgcmd{\\,org-agenda-filter-by-tag-refine}
+Narrow the current agenda filter by an additional condition.
 
 @orgcmd{<,org-agenda-filter-by-category}
 @vindex org-agenda-category-filter-preset
 
 Filter the current agenda view with respect to the category of the item at
-point.  Pressing @code{<} another time will remove this filter.  You can add
-a filter preset through the option @code{org-agenda-category-filter-preset}
-(see below.)
+point.  Pressing @code{<} another time will remove this filter.
 
-@orgcmd{|,org-agenda-filter-by-regexp}
+@orgcmd{^,org-agenda-filter-by-top-headline}
+Filter the current agenda view and only display the siblings and the parent
+headline of the one at point.
+
+@orgcmd{=,org-agenda-filter-by-regexp}
 @vindex org-agenda-regexp-filter-preset
 
 Filter the agenda view by a regular expression: only show agenda entries
 matching the regular expression the user entered.  When called with a prefix
 argument, it will filter @emph{out} entries matching the regexp.  With two
 universal prefix arguments, it will remove all the regexp filters, which can
-be cumulated.  You can add a filter preset through the option
+be accumulated.  You can add a filter preset through the option
 @code{org-agenda-category-filter-preset} (see below.)
 
-@orgcmd{/,org-agenda-filter-by-tag}
-@vindex org-agenda-tag-filter-preset
-Filter the agenda view with respect to a tag and/or effort estimates.  The
-difference between this and a custom agenda command is that filtering is very
-fast, so that you can switch quickly between different filters without having
-to recreate the agenda.@footnote{Custom commands can preset a filter by
-binding the variable @code{org-agenda-tag-filter-preset} as an option.  This
-filter will then be applied to the view and persist as a basic filter through
-refreshes and more secondary filtering.  The filter is a global property of
-the entire agenda view---in a block agenda, you should only set this in the
-global options section, not in the section of an individual block.}
-
-You will be prompted for a tag selection letter; @key{SPC} will mean any tag at
-all.  Pressing @key{TAB} at that prompt will offer use completion to select a
-tag (including any tags that do not have a selection character).  The command
-then hides all entries that do not contain or inherit this tag.  When called
-with prefix arg, remove the entries that @emph{do} have the tag.  A second
-@kbd{/} at the prompt will turn off the filter and unhide any hidden entries.
-If the first key you press is either @kbd{+} or @kbd{-}, the previous filter
-will be narrowed by requiring or forbidding the selected additional tag.
-Instead of pressing @kbd{+} or @kbd{-} after @kbd{/}, you can also
-immediately use the @kbd{\} command.
-
-@vindex org-sort-agenda-noeffort-is-high
-In order to filter for effort estimates, you should set up allowed
-efforts globally, for example
-@lisp
-(setq org-global-properties
-    '(("Effort_ALL". "0 0:10 0:30 1:00 2:00 3:00 4:00")))
-@end lisp
-You can then filter for an effort by first typing an operator, one of
-@kbd{<}, @kbd{>}, and @kbd{=}, and then the one-digit index of an effort
-estimate in your array of allowed values, where @kbd{0} means the 10th value.
-The filter will then restrict to entries with effort smaller-or-equal, equal,
-or larger-or-equal than the selected value.  If the digits 0--9 are not used
-as fast access keys to tags, you can also simply press the index digit
-directly without an operator.  In this case, @kbd{<} will be assumed.  For
-application of the operator, entries without a defined effort will be treated
-according to the value of @code{org-sort-agenda-noeffort-is-high}.  To filter
-for tasks without effort definition, press @kbd{?} as the operator.
-
-Org also supports automatic, context-aware tag filtering.  If the variable
-@code{org-agenda-auto-exclude-function} is set to a user-defined function,
-that function can decide which tags should be excluded from the agenda
-automatically.  Once this is set, the @kbd{/} command then accepts @kbd{RET}
-as a sub-option key and runs the auto exclusion logic.  For example, let's
-say you use a @code{Net} tag to identify tasks which need network access, an
-@code{Errand} tag for errands in town, and a @code{Call} tag for making phone
-calls.  You could auto-exclude these tags based on the availability of the
-Internet, and outside of business hours, with something like this:
-
-@lisp
-@group
-(defun org-my-auto-exclude-function (tag)
-  (and (cond
-        ((string= tag "Net")
-         (/= 0 (call-process "/sbin/ping" nil nil nil
-                             "-c1" "-q" "-t1" "mail.gnu.org")))
-        ((or (string= tag "Errand") (string= tag "Call"))
-         (let ((hour (nth 2 (decode-time))))
-           (or (< hour 8) (> hour 21)))))
-       (concat "-" tag)))
-
-(setq org-agenda-auto-exclude-function 'org-my-auto-exclude-function)
-@end group
-@end lisp
-
-@orgcmd{\\,org-agenda-filter-by-tag-refine}
-Narrow the current agenda filter by an additional condition.  When called with
-prefix arg, remove the entries that @emph{do} have the tag, or that do match
-the effort criterion.  You can achieve the same effect by pressing @kbd{+} or
-@kbd{-} as the first key after the @kbd{/} command.
-
-@c
-@kindex [
-@kindex ]
-@kindex @{
-@kindex @}
-@item [ ] @{ @}
-@table @i
-@item @r{in} search view
-add new search words (@kbd{[} and @kbd{]}) or new regular expressions
-(@kbd{@{} and @kbd{@}}) to the query string.  The opening bracket/brace will
-add a positive search term prefixed by @samp{+}, indicating that this search
-term @i{must} occur/match in the entry.  The closing bracket/brace will add a
-negative search term which @i{must not} occur/match in the entry for it to be
-selected.
-@end table
+@orgcmd{|,org-agenda-filter-remove-all}
+Remove all filters in the current agenda view.
 
 @tsubheading{Remote editing}
 @cindex remote editing, from agenda
@@ -8783,40 +8902,55 @@ these special timestamps.  By default, marks are removed after the bulk.  If
 you want them to persist, set @code{org-agenda-bulk-persistent-marks} to
 @code{t} or hit @kbd{p} at the prompt.
 
-@example
-*  @r{Toggle persistent marks.}
-$  @r{Archive all selected entries.}
-A  @r{Archive entries by moving them to their respective archive siblings.}
-t  @r{Change TODO state.  This prompts for a single TODO keyword and}
-   @r{changes the state of all selected entries, bypassing blocking and}
-   @r{suppressing logging notes (but not timestamps).}
-+  @r{Add a tag to all selected entries.}
--  @r{Remove a tag from all selected entries.}
-s  @r{Schedule all items to a new date.  To shift existing schedule dates}
-   @r{by a fixed number of days, use something starting with double plus}
-   @r{at the prompt, for example @samp{++8d} or @samp{++2w}.}
-d  @r{Set deadline to a specific date.}
-r  @r{Prompt for a single refile target and move all entries.  The entries}
-   @r{will no longer be in the agenda; refresh (@kbd{g}) to bring them back.}
-S  @r{Reschedule randomly into the coming N days.  N will be prompted for.}
-   @r{With prefix arg (@kbd{C-u B S}), scatter only across weekdays.}
-f  @r{Apply a function@footnote{You can also create persistent custom functions through@code{org-agenda-bulk-custom-functions}.} to marked entries.}
-   @r{For example, the function below sets the CATEGORY property of the}
-   @r{entries to web.}
-   @r{(defun set-category ()}
-   @r{  (interactive "P")}
-   @r{  (let* ((marker (or (org-get-at-bol 'org-hd-marker)}
-   @r{                     (org-agenda-error)))}
-   @r{            (buffer (marker-buffer marker)))}
-   @r{       (with-current-buffer buffer}
-   @r{         (save-excursion}
-   @r{           (save-restriction}
-   @r{             (widen)}
-   @r{             (goto-char marker)}
-   @r{             (org-back-to-heading t)}
-   @r{             (org-set-property "CATEGORY" "web"))))))}
-@end example
+@table @kbd
+@item *
+Toggle persistent marks.
+@item $
+Archive all selected entries.
+@item A
+Archive entries by moving them to their respective archive siblings.
+@item t
+Change TODO state.  This prompts for a single TODO keyword and changes the
+state of all selected entries, bypassing blocking and suppressing logging
+notes (but not timestamps).
+@item +
+Add a tag to all selected entries.
+@item -
+Remove a tag from all selected entries.
+@item s
+Schedule all items to a new date.  To shift existing schedule dates by a
+fixed number of days, use something starting with double plus at the prompt,
+for example @samp{++8d} or @samp{++2w}.
+@item d
+Set deadline to a specific date.
+@item r
+Prompt for a single refile target and move all entries.  The entries will no
+longer be in the agenda; refresh (@kbd{g}) to bring them back.
+@item S
+Reschedule randomly into the coming N days.  N will be prompted for.  With
+prefix arg (@kbd{C-u B S}), scatter only across weekdays.
+@item f
+Apply a function@footnote{You can also create persistent custom functions
+through@code{org-agenda-bulk-custom-functions}.} to marked entries.  For
+example, the function below sets the CATEGORY property of the entries to web.
 
+@lisp
+@group
+(defun set-category ()
+  (interactive "P")
+  (let* ((marker (or (org-get-at-bol 'org-hd-marker)
+                     (org-agenda-error)))
+         (buffer (marker-buffer marker)))
+    (with-current-buffer buffer
+      (save-excursion
+        (save-restriction
+          (widen)
+          (goto-char marker)
+          (org-back-to-heading t)
+          (org-set-property "CATEGORY" "web"))))))
+@end group
+@end lisp
+@end table
 
 @tsubheading{Calendar commands}
 @cindex calendar commands, from agenda
@@ -9113,18 +9247,18 @@ say for example that you have an agenda commands @code{"o"} displaying a view
 that you only need when reading emails.  Then you would configure this option
 like this:
 
-@example
+@lisp
 (setq org-agenda-custom-commands-contexts
       '(("o" (in-mode . "message-mode"))))
-@end example
+@end lisp
 
 You can also tell that the command key @code{"o"} should refer to another
 command key @code{"r"}.  In that case, add this command key like this:
 
-@example
+@lisp
 (setq org-agenda-custom-commands-contexts
       '(("o" "r" (in-mode . "message-mode"))))
-@end example
+@end lisp
 
 See the docstring of the variable for more information.
 
@@ -9335,19 +9469,20 @@ spent (via @code{CLOCKSUM}) and with the planned total effort for it.
 @chapter Markup for rich export
 
 When exporting Org mode documents, the exporter tries to reflect the
-structure of the document as accurately as possible in the backend.  Since
+structure of the document as accurately as possible in the back-end.  Since
 export targets like HTML, @LaTeX{} allow much richer formatting, Org mode has
 rules on how to prepare text for rich export.  This section summarizes the
 markup rules used in an Org mode buffer.
 
 @menu
 * Structural markup elements::  The basic structure as seen by the exporter
-* Images and tables::           Tables and Images will be included
+* Images and tables::           Images, tables and caption mechanism
 * Literal examples::            Source code examples with special formatting
 * Include files::               Include additional files into a document
 * Index entries::               Making an index
-* Macro replacement::           Use macros to create complex output
+* Macro replacement::           Use macros to create templates
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
+* Special blocks::              Containers targeted at export back-ends
 @end menu
 
 @node Structural markup elements, Images and tables, Markup, Markup
@@ -9424,8 +9559,8 @@ with a line like
 #+OPTIONS: toc:nil        (no TOC at all)
 @end example
 
-The same @code{TOC} keyword can also generate a list of all tables (resp. all
-listings) with a caption in the buffer.
+The same @code{TOC} keyword can also generate a list of all tables (resp.@:
+all listings) with a caption in the buffer.
 
 @example
 #+TOC: listings           (build a list of listings)
@@ -9434,7 +9569,7 @@ listings) with a caption in the buffer.
 
 @cindex property, ALT_TITLE
 The headline's title usually determines its corresponding entry in a table of
-contents.  However, it is possible to specifify an alternative title by
+contents.  However, it is possible to specify an alternative title by
 setting @code{ALT_TITLE} property accordingly.  It will then be used when
 building the table.
 
@@ -9442,8 +9577,8 @@ building the table.
 @subheading Lists
 @cindex lists, markup rules
 
-Plain lists as described in @ref{Plain lists}, are translated to the backend's
-syntax for such lists.  Most backends support unordered, ordered, and
+Plain lists as described in @ref{Plain lists}, are translated to the back-end's
+syntax for such lists.  Most back-ends support unordered, ordered, and
 description lists.
 
 @node Paragraphs, Footnote markup, Lists, Structural markup elements
@@ -9495,7 +9630,7 @@ but not any simpler
 @cindex @file{footnote.el}
 
 Footnotes defined in the way described in @ref{Footnotes}, will be exported
-by all backends.  Org allows multiple references to the same note, and
+by all back-ends.  Org allows multiple references to the same note, and
 multiple footnotes side by side.
 
 @node Emphasis and monospace, Horizontal rules, Footnote markup, Structural markup elements
@@ -9509,15 +9644,19 @@ multiple footnotes side by side.
 @cindex strike-through text, markup rules
 @vindex org-fontify-emphasized-text
 @vindex org-emphasis-regexp-components
+@vindex org-emphasis-alist
 You can make words @b{*bold*}, @i{/italic/}, _underlined_, @code{=code=}
 and @code{~verbatim~}, and, if you must, @samp{+strike-through+}.  Text
 in the code and verbatim string is not processed for Org mode specific
-syntax; it is exported verbatim.
+syntax, it is exported verbatim.
 
 To turn off fontification for marked up text, you can set
-@code{org-fontify-emphasized-text} to @code{nil}.  To fine tune what
-characters are allowed before and after the special characters, see
-@code{org-emphasis-regexp-components}.
+@code{org-fontify-emphasized-text} to @code{nil}.  To narrow down the list of
+available markup syntax, you can customize @var{org-emphasis-alist}.  To fine
+tune what characters are allowed before and after the markup characters, you
+can tweak @code{org-emphasis-regexp-components}.  Beware that changing one of
+the above variables will no take effect until you reload Org, for which you
+may need to restart Emacs.
 
 @node Horizontal rules, Comment lines, Emphasis and monospace, Structural markup elements
 @subheading  Horizontal rules
@@ -9570,7 +9709,7 @@ Optionally, the caption can take the form:
 @end example
 
 @cindex inlined images, markup rules
-Some backends allow you to directly include images into the exported
+Some back-ends allow you to directly include images into the exported
 document.  Org does this, if a link to an image files does not have
 a description part, for example @code{[[./img/a.jpg]]}.  If you wish to
 define a caption for the image and maybe a label for internal cross
@@ -9623,7 +9762,7 @@ Here is an example
 If the example is source code from a programming language, or any other text
 that can be marked up by font-lock in Emacs, you can ask for the example to
 look like the fontified Emacs buffer@footnote{This works automatically for
-the HTML backend (it requires version 1.34 of the @file{htmlize.el} package,
+the HTML back-end (it requires version 1.34 of the @file{htmlize.el} package,
 which is distributed with Org).  Fontified code chunks in @LaTeX{} can be
 achieved using either the listings or the
 @url{http://code.google.com/p/minted, minted,} package.  Refer to
@@ -9802,7 +9941,7 @@ and to the modification time of the file being exported, respectively.
 Macro expansion takes place during export.
 
 
-@node Embedded @LaTeX{},  , Macro replacement, Markup
+@node Embedded @LaTeX{}, Special blocks , Macro replacement, Markup
 @section Embedded @LaTeX{}
 @cindex @TeX{} interpretation
 @cindex @LaTeX{} interpretation
@@ -9815,7 +9954,7 @@ Donald E. Knuth's @TeX{} system.  Many of the features described here as
 distinction.}  is widely used to typeset scientific documents.  Org mode
 supports embedding @LaTeX{} code into its files, because many academics are
 used to writing and reading @LaTeX{} source code, and because it can be
-readily processed to produce pretty output for a number of export backends.
+readily processed to produce pretty output for a number of export back-ends.
 
 @menu
 * Special symbols::             Greek letters and other symbols
@@ -9865,6 +10004,7 @@ variable @code{org-pretty-entities}, or on a per-file base with the
 @code{#+STARTUP} option @code{entitiespretty}.}:
 
 @table @kbd
+@cindex @code{entitiespretty}, STARTUP keyword
 @kindex C-c C-x \
 @item C-c C-x \
 Toggle display of entities as UTF-8 characters.  This does not change the
@@ -9967,7 +10107,7 @@ either $$ a=+\sqrt@{2@} $$ or \[ a=-\sqrt@{2@} \].
 @vindex org-export-with-latex
 @LaTeX{} processing can be configured with the variable
 @code{org-export-with-latex}.  The default setting is @code{t} which means
-@file{MathJax} for HTML, and no processing for ASCII and @LaTeX{} backends.
+@file{MathJax} for HTML, and no processing for ASCII and @LaTeX{} back-ends.
 You can also set this variable on a per-file basis using one of these
 lines:
 
@@ -10083,28 +10223,40 @@ modification will work only inside @LaTeX{} fragments; outside the quote
 is normal.
 @end itemize
 
+@node Special blocks, , Embedded @LaTeX{}, Markup
+@section Special blocks
+@cindex Special blocks
+
+Org syntax includes pre-defined blocks (@pxref{Paragraphs} and @ref{Literal
+examples}).  It is also possible to create blocks containing raw code
+targeted at a specific back-ends (e.g., @samp{#+BEGIN_LATEX}).
+
+Any other block is a @emph{special block}.  Each export back-end decides if
+they should be exported, and how.  When the block is ignored, its contents
+are still exported, as if the block were not there.  For example, when
+exporting a @samp{#+BEGIN_TEST} block, HTML back-end wraps its contents
+within @samp{<div name="test">} tag.  Refer to back-end specific
+documentation for more information.
+
 @node Exporting, Publishing, Markup, Top
 @chapter Exporting
 @cindex exporting
 
-Org mode documents can be exported into a variety of other formats.  For
-printing and sharing notes, ASCII export produces a readable and simple
+Org mode documents can be exported into a variety of other formats.
+
+For printing and sharing notes, ASCII export produces a readable and simple
 version of an Org file.  HTML export allows you to publish a notes file on
 the web.  @LaTeX{} export lets you use Org mode and its structured editing
 functions to easily create @LaTeX{} files.  OpenDocument Text (ODT) export
 allows seamless collaboration across organizational boundaries.  To
 incorporate entries with associated times like deadlines or appointments into
 a desktop calendar program like iCal, Org mode can also produce extracts in
-the iCalendar format.  Currently, Org mode only supports export, not import
-of these different formats.
-
-Org supports export of selected regions when @code{transient-mark-mode} is
-enabled (default in Emacs 23).
+the iCalendar format.
 
 @menu
-* Selective export::            Using tags to select and exclude trees
-* Export options::              Per-file export settings
-* The export dispatcher::       How to access exporter commands
+* The Export Dispatcher::       The main exporter interface
+* Export formats::              Available export formats
+* Export settings::             Generic export settings
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
@@ -10112,187 +10264,320 @@ enabled (default in Emacs 23).
 * iCalendar export::            Exporting in iCalendar format
 @end menu
 
-@node Selective export, Export options, Exporting, Exporting
-@section Selective export
-@cindex export, selective by tags or TODO keyword
+@node The Export Dispatcher, Export formats, Exporting, Exporting
+@section The Export Dispatcher
+@vindex org-export-dispatch-use-expert-ui
+@cindex Export, dispatcher
 
-@vindex org-export-select-tags
-@vindex org-export-exclude-tags
-@cindex org-export-with-tasks
-You may use tags to select the parts of a document that should be exported,
-or to exclude parts from export.  This behavior is governed by two variables:
-@code{org-export-select-tags} and @code{org-export-exclude-tags},
-respectively defaulting to @code{'(:export:)} and @code{'(:noexport:)}.
+The main entry point for any export related task is the dispatcher, a
+hierarchical menu@footnote{It is also possible to use a less intrusive
+interface by setting @var{org-export-dispatch-use-expert-ui} to a non-nil
+value.  In that case, only a prompt is visible from the minibuffer.  From
+there one can still switch back to regular menu with @kbd{?} key.} from
+which it is possible to select an export format and to toggle export
+options.
 
-@enumerate
-@item
-Org first checks if any of the @emph{select} tags is present in the
-buffer.  If yes, all trees that do not carry one of these tags will be
-excluded.  If a selected tree is a subtree, the heading hierarchy above it
-will also be selected for export, but not the text below those headings.
+@c @quotation
+@table @asis
+@orgcmd{C-c C-e,org-export-dispatch}
 
-@item
-If none of the select tags is found, the whole buffer will be selected for
-export.
+Dispatch for export and publishing commands.  When called with @kbd{C-u}
+prefix argument, repeat last command, preserving toggled options, on
+current buffer.  If the active buffer hasn't changed and subtree export was
+activated, the command will affect that same subtree.
+@end table
+@c @end quotation
 
-@item
-Finally, all subtrees that are marked by any of the @emph{exclude} tags will
-be removed from the export buffer.
-@end enumerate
+Normally the entire buffer is exported, but if there is an active region
+only that part of the buffer will be exported.
 
-The variable @var{org-export-with-tasks} can be configured to select which
-kind of tasks should be included for export.  See the docstring of the
-variable for more information.
-
-@node Export options, The export dispatcher, Selective export, Exporting
-@section Export options
-@cindex options, for export
-
-@cindex completion, of option keywords
-The exporter recognizes special lines in the buffer which provide
-additional information.  These lines may be put anywhere in the file.
-The whole set of lines can be inserted into the buffer with @kbd{C-c
-C-e t}.  For individual lines, a good way to make sure the keyword is
-correct is to type @samp{#+} and then use @kbd{M-@key{TAB}} completion
-(@pxref{Completion}).   For a summary of other in-buffer settings not
-specifically related to export, see @ref{In-buffer settings}.
-
-In particular, note that you can place commonly-used (export) options in
-a separate file which can be included using @code{#+SETUPFILE}.
-
-@cindex #+TITLE
-@cindex #+AUTHOR
-@cindex #+DATE
-@cindex #+EMAIL
-@cindex #+DESCRIPTION
-@cindex #+KEYWORDS
-@cindex #+LANGUAGE
-@cindex #+TEXT
-@cindex #+OPTIONS
-@cindex #+BIND
-@cindex #HTML_HEAD
-@cindex #+HTML_LINK_UP
-@cindex #+HTML_LINK_HOME
-@cindex #+SELECT_TAGS
-@cindex #+EXCLUDE_TAGS
-@cindex #+LATEX_HEADER
-@cindex #+LATEX_HEADER_EXTRA
-@vindex user-full-name
-@vindex user-mail-address
-@vindex org-export-default-language
-@vindex org-export-allow-bind-keywords
-@example
-#+TITLE:       the title to be shown (default is the buffer name)
-#+AUTHOR:      the author (default taken from @code{user-full-name})
-#+DATE:        a date, an Org timestamp@footnote{@code{org-export-date-timestamp-format} defines how this timestamp will be exported.}, or a format string for @code{format-time-string}
-#+EMAIL:       his/her email address (default from @code{user-mail-address})
-#+DESCRIPTION: the page description, e.g., for the XHTML meta tag
-#+KEYWORDS:    the page keywords, e.g., for the XHTML meta tag
-#+LANGUAGE:    language for HTML, e.g., @samp{en} (@code{org-export-default-language})
-#+OPTIONS:     H:2 num:t toc:t \n:nil @@:t ::t |:t ^:t f:t TeX:t ...
-#+BIND:        lisp-var lisp-val, e.g., @code{org-latex-image-default-width ".7\\linewidth"}
-               @r{Configure @code{org-export-allow-bind-keywords} to use this}
-#+HTML_HEAD:   Additional line to the @samp{<head>...</head>} of the HTML output
-#+HTML_LINK_UP:     the ``up'' link of an exported page
-#+HTML_LINK_HOME:   the ``home'' link of an exported page
-#+LATEX_HEADER: extra line(s) for the @LaTeX{} header, like \usepackage@{xyz@}
-#+LATEX_HEADER_EXTRA: similar to #+LATEX_HEADER, but ignored when previewing math snippets
-#+SELECT_TAGS:   Tags that select a tree for export
-#+EXCLUDE_TAGS:  Tags that exclude a tree from export
-@end example
-
-@noindent
-The @code{#+OPTIONS} line is a compact@footnote{If you want to configure many options
-this way, you can use several @code{#+OPTIONS} lines.} form to specify export
-settings.  Here you can:
-@cindex headline levels
-@cindex section-numbers
-@cindex table of contents
-@cindex line-break preservation
-@cindex quoted HTML tags
-@cindex fixed-width sections
-@cindex tables
-@cindex @TeX{}-like syntax for sub- and superscripts
-@cindex footnotes
-@cindex special strings
-@cindex emphasized text
-@cindex @TeX{} macros
-@cindex @LaTeX{} fragments
-@cindex author info, in export
-@cindex time info, in export
-@vindex org-export-author-info
-@vindex org-export-creator-info
-@vindex org-export-email-info
-@vindex org-export-time-stamp-file
-@example
-H:         @r{set the number of headline levels for export}
-num:       @r{turn on/off section-numbers}
-toc:       @r{turn on/off table of contents, or set level limit (integer)}
-\n:        @r{turn on/off line-break-preservation (DOES NOT WORK)}
-@@:         @r{turn on/off quoted HTML tags}
-::         @r{turn on/off fixed-width sections}
-|:         @r{turn on/off tables}
-^:         @r{turn on/off @TeX{}-like syntax for sub- and superscripts.  If}
-           @r{you write "^:@{@}", @code{a_@{b@}} will be interpreted, but}
-           @r{the simple @code{a_b} will be left as it is.}
--:         @r{turn on/off conversion of special strings.}
-f:         @r{turn on/off footnotes like this[1].}
-todo:      @r{turn on/off inclusion of TODO keywords into exported text}
-tasks:     @r{turn on/off inclusion of tasks (TODO items), can be nil to remove}
-           @r{all tasks, @code{todo} to remove DONE tasks, or list of kwds to keep}
-pri:       @r{turn on/off priority cookies}
-tags:      @r{turn on/off inclusion of tags, may also be @code{not-in-toc}}
-<:         @r{turn on/off inclusion of any time/date stamps like DEADLINES}
-*:         @r{turn on/off emphasized text (bold, italic, underlined)}
-TeX:       @r{turn on/off simple @TeX{} macros in plain text}
-LaTeX:     @r{configure export of @LaTeX{} fragments.  Default @code{auto}}
-skip:      @r{turn on/off skipping the text before the first heading}
-author:    @r{turn on/off inclusion of author name/email into exported file}
-email:     @r{turn on/off inclusion of author email into exported file}
-creator:   @r{turn on/off inclusion of creator info into exported file}
-timestamp: @r{turn on/off inclusion creation time into exported file}
-d:         @r{turn on/off inclusion of drawers, or list drawers to include}
-@end example
-@noindent
-These options take effect in both the HTML and @LaTeX{} export, except for
-@code{TeX} and @code{LaTeX} options, which are respectively @code{t} and
-@code{nil} for the @LaTeX{} export.
-
-When exporting only a single subtree by selecting it with @kbd{C-c @@} before
-calling an export command, the subtree can overrule some of the file's export
-settings with properties @code{EXPORT_FILE_NAME}, @code{EXPORT_TITLE},
-@code{EXPORT_TEXT}, @code{EXPORT_AUTHOR}, @code{EXPORT_DATE}, and
-@code{EXPORT_OPTIONS}.
-
-@node The export dispatcher, ASCII/Latin-1/UTF-8 export, Export options, Exporting
-@section The export dispatcher
-@cindex dispatcher, for export commands
-
-All export commands can be reached using the export dispatcher, which is a
-prefix key that prompts for an additional key specifying the command.
-Normally the entire file is exported, but if there is an active region that
-contains one outline tree, the first heading is used as document title and
-the subtrees are exported.
+Export options can also, among other things, affect the scope of export
+process.  They are toggled from the dispatcher with appropriate key
+combinations:
 
 @table @kbd
-@orgcmd{C-c C-e,org-export}
-Dispatcher for export and publishing commands.  Displays a help-window
-listing the additional key(s) needed to launch an export or publishing
-command.  The prefix arg is passed through to the exporter.  A double prefix
-@kbd{C-u C-u} causes most commands to be executed in the background, in a
-separate Emacs process@footnote{To make this behavior the default, customize
-the variable @code{org-export-run-in-background}.}.
-@orgcmd{C-c C-e C-v,org-export-visible}
-Like @kbd{C-c C-e}, but only export the text that is currently visible
-(i.e., not hidden by outline visibility).
-@orgcmd{C-u C-u C-c C-e,org-export}
+@item C-a
+@vindex org-export-async-init-file
 @vindex org-export-run-in-background
-Call the exporter, but reverse the setting of
-@code{org-export-run-in-background}, i.e., request background processing if
-not set, or force processing in the current Emacs process if set.
+Toggles asynchronous export.  The export happens in an external Emacs
+process@footnote{Configure @var{org-export-async-init-file} to properly set
+it up.}.
+
+In this case, no output is displayed automatically.  It is stored in a list
+called the export stack, and can be viewed from there.  The stack can be
+reached by calling the dispatcher with a double @kbd{C-u} prefix argument,
+or with @kbd{&} key from the dispatcher.
+
+To make this behaviour the default, customize the variable successfully
+@var{org-export-run-in-background}.
+
+@item C-b
+Toggles body-only export.  Its effect, if any, depends on the back-end
+used.  Its purpose is to remove all meta-data from output and focus on the
+real contents.
+
+@item C-s
+@vindex org-export-initial-scope
+Toggles subtree export.  The top heading becomes the document title and is
+removed from the contents.
+
+You can change the default state of this option by setting
+@var{org-export-initial-scope}.
+
+@item C-v
+Toggles visible-only export.  Only export the text that is currently
+visible, i.e. not hidden by outline visibility in the buffer.
+
 @end table
 
-@node ASCII/Latin-1/UTF-8 export, HTML export, The export dispatcher, Exporting
+@vindex org-export-copy-to-kill-ring
+Unless it happened asynchronously, a successful export process usually
+stores its output into the kill-ring.  You can configure
+@var{org-export-copy-to-kill-ring} in order to change this behaviour.
+
+@node Export formats, Export settings, The Export Dispatcher, Exporting
+@section Export formats
+@cindex Export, formats
+
+Libraries translating an Org buffer into a foreign format are called export
+back-ends.  An export format is not available until the proper back-end has
+been loaded.
+
+@vindex org-export-backends
+By default, the following four back-ends are ready to use: @code{ascii},
+@code{html}, @code{icalendar} and @code{latex}.  It is possible to add more
+(or remove some) by customizing @var{org-export-backends}.
+
+Core back-ends include:
+
+@itemize
+@item ascii (ASCII format)
+@item beamer (@LaTeX{} Beamer format)
+@item html (HTML format)
+@item icalendar (iCalendar format)
+@item latex (@LaTeX{} format)
+@item man (Man page format)
+@item md (Markdown format)
+@item odt (OpenDocument Text format)
+@item texinfo (Texinfo format)
+@end itemize
+
+More are available from the @code{contrib/} directory available from the
+distribution archives or from GNU/Org ELPA.
+
+@node Export settings, ASCII/Latin-1/UTF-8 export, Export formats, Exporting
+@section Export settings
+@cindex Export, settings
+
+Export output can be controlled through a number of export options.  These
+can be set globally with variables, and overridden on a per-buffer basis
+with keywords.  Such keywords may be put anywhere in the file.  For
+individual lines, a good way to make sure the keyword is correct is to type
+@code{#+} and then use @kbd{M-<TAB>} completion.
+
+Here is an exhaustive list of such keywords along with the equivalent
+global variable.  Only options available for every back-end are discussed
+in this section.
+
+@table @samp
+@item AUTHOR
+@vindex user-full-name
+the author (@var{user-full-name}).
+
+@item CREATOR
+@vindex org-export-creator-string
+entity responsible for output generation (@var{org-export-creator-string}).
+
+@item DATE
+@vindex org-export-date-timestamp-format
+A date or a time-stamp@footnote{The variable
+@var{org-export-date-timestamp-format} defines how this time-stamp will be
+exported.}.
+
+@item DESCRIPTION
+the page description, e.g., for the XHTML meta tag.
+
+@item EMAIL
+@vindex user-mail-address
+email address (@var{user-mail-address}).
+
+@item EXCLUDE_TAGS
+Tags that exclude a tree from export
+
+@item KEYWORDS
+keywords defining the contents, e.g., for the XHTML meta tag.
+
+@item LANGUAGE
+@vindex org-export-default-language
+language used for translation of some strings
+(@var{org-export-default-language}).
+
+@item SELECT_TAGS
+@vindex org-export-select-tags
+Tags that select a tree for export (@var{org-export-select-tags}).
+
+@item TITLE
+the title to be shown (otherwise derived from buffer's name).
+@end table
+
+Additionally, the @code{OPTIONS} keyword is a compact@footnote{If you want
+to configure many options this way, you can use several @code{#+OPTIONS}
+lines.} form to specify export settings.  Here you can:
+
+@table @code
+@item ':
+@vindex org-export-with-smart-quotes
+toggle smart quotes (@var{org-export-with-smart-quotes}).
+
+@item *:
+toggle emphasized text (@var{org-export-with-emphasize}).
+
+@item -:
+@vindex org-export-with-special-strings
+toggle conversion of special strings
+(@var{org-export-with-special-strings}).
+
+@item ::
+@vindex org-export-with-fixed-width
+toggle fixed-width sections
+(@var{org-export-with-fixed-width}).
+
+@item <:
+@vindex org-export-with-timestamps
+toggle inclusion of any time/date stamps like DEADLINES
+(@var{org-export-with-timestamps}).
+
+@item :
+@vindex org-export-preserve-breaks
+toggle line-break-preservation (@var{org-export-preserve-breaks}).
+
+@item ^:
+@vindex org-export-with-sub-superscripts
+toggle @TeX{}-like syntax for sub- and superscripts.  If you write "^:@{@}",
+@samp{a_@{b@}} will be interpreted, but the simple @samp{a_b} will be left as
+it is (@var{org-export-with-sub-superscripts}).
+
+@item arch:
+@vindex org-export-with-archived-trees
+configure export of archived trees.  Can be set to @code{headline} to only
+process the headline, skipping its contents
+(@var{org-export-with-archived-trees}).
+
+@item author:
+@vindex org-export-with-author
+toggle inclusion of author name into exported file
+(@var{org-export-with-author}).
+
+@item c:
+@vindex org-export-with-clocks
+toggle inclusion of CLOCK keywords (@var{org-export-with-clocks}).
+
+@item creator:
+@vindex org-export-with-creator
+configure inclusion of creator info into exported file.  It may be set to
+@code{comment} (@var{org-export-with-creator}).
+
+@item d:
+@vindex org-export-with-drawers
+toggle inclusion of drawers, or list drawers to include
+(@var{org-export-with-drawers}).
+
+@item e:
+@vindex org-export-with-entities
+toggle inclusion of entities (@var{org-export-with-entities}).
+
+@item email:
+@vindex org-export-with-email
+toggle inclusion of author email into exported file
+(@var{org-export-with-email}).
+
+@item f:
+@vindex org-export-with-footnotes
+toggle footnotes (@var{org-export-with-footnotes}).
+
+@item H:
+@vindex org-export-headline-levels
+set the number of headline levels for export
+(@var{org-export-headline-levels}).
+
+@item inline:
+@vindex org-export-with-inlinetasks
+toggle inclusion of inlinetasks (@var{org-export-with-inlinetasks}).
+
+@item num:
+@vindex org-export-with-section-numbers
+toggle section-numbers (@var{org-export-with-section-numbers}).
+
+@item p:
+@vindex org-export-with-planning
+toggle export of planning information (e.g. deadlines)
+(@var{org-export-with-planning}).
+
+@item pri:
+@vindex org-export-with-priority
+toggle priority cookies (@var{org-export-with-priority}).
+
+@item stat:
+@vindex org-export-with-statistics-cookies
+toggle inclusion of statistics cookies
+(@var{org-export-with-statistics-cookies}).
+
+@item tags:
+@vindex org-export-with-tags
+toggle inclusion of tags, may also be @code{not-in-toc}
+(@var{org-export-with-tags}).
+
+@item tasks:
+@vindex org-export-with-tasks
+toggle inclusion of tasks (TODO items), can be @code{nil} to remove all
+tasks, @code{todo} to remove DONE tasks, or a list of keywords to keep
+(@var{org-export-with-tasks}).
+
+@item tex:
+@vindex org-export-with-latex
+configure export of @LaTeX{} fragments and environments.  It may be set to
+@code{verbatim} (@var{org-export-with-latex}).
+
+@item timestamp:
+@vindex org-export-time-stamp-file
+toggle inclusion creation time into exported file
+(@var{org-export-time-stamp-file}).
+
+@item toc:
+@vindex org-export-with-toc
+toggle table of contents, or set level limit (@var{org-export-with-toc}).
+
+@item todo:
+@vindex org-export-with-todo-keywords
+toggle inclusion of TODO keywords into exported text
+(@var{org-export-with-todo-keywords}).
+
+@item |:
+@vindex org-export-with-tables
+toggle tables (@var{org-export-with-tables}).
+
+@end table
+
+A more general mechanism is also provided.  Indeed, Emacs variables can
+become buffer-local during export by using the BIND keyword.  Its syntax is
+@samp{#+BIND: variable value}.  This is particularly useful for in-buffer
+settings that cannot be changed using specific keywords.
+
+You can place commonly-used export settings in a separate file which can be
+included using @samp{#+SETUPFILE: filename} syntax.
+
+These settings affect all buffer's export processes.  Though, it is
+possible to override them locally when exporting only a subtree.  This is
+done by adding a headline property named after the keyword with the
+@samp{EXPORT_} prefix.  For example, @samp{DATE} and @samp{OPTIONS}
+keywords become, respectively @samp{EXPORT_DATE} and @samp{EXPORT_OPTIONS}
+properties.  Subtree export also supports the self-explicit
+@samp{EXPORT_FILE_NAME} property@footnote{There is no buffer-wide
+equivalent for this property.  The file name in this case is derived from
+the file associated to the buffer, if possible, or asked to the user
+otherwise.}.
+
+@node ASCII/Latin-1/UTF-8 export, HTML export, Export settings, Exporting
 @section ASCII/Latin-1/UTF-8 export
 @cindex ASCII export
 @cindex Latin-1 export
@@ -10302,51 +10587,59 @@ ASCII export produces a simple and very readable version of an Org mode
 file, containing only plain ASCII@.  Latin-1 and UTF-8 export augment the file
 with special characters and symbols available in these encodings.
 
-@cindex region, active
-@cindex active region
-@cindex transient-mark-mode
+@vindex org-ascii-links-to-notes
+Links are exported in a footnote-like style, with the descriptive part in the
+text and the link in a note before the next heading.  See the variable
+@code{org-ascii-links-to-notes} for details and other options.
+
+@subheading ASCII export commands
+
 @table @kbd
-@orgcmd{C-c C-e t a,org-ascii-export-to-ascii}
-@cindex property, EXPORT_FILE_NAME
+@orgcmd{C-c C-e t a/l/u,org-ascii-export-to-ascii}
 Export as an ASCII file.  For an Org file, @file{myfile.org}, the ASCII file
-will be @file{myfile.txt}.  The file will be overwritten without
-warning.  If there is an active region@footnote{This requires
-@code{transient-mark-mode} be turned on.}, only the region will be
-exported.  If the selected region is a single tree@footnote{To select the
-current subtree, use @kbd{C-c @@}.}, the tree head will
-become the document title.  If the tree head entry has or inherits an
-@code{EXPORT_FILE_NAME} property, that name will be used for the
-export.
-@orgcmd{C-c C-e t A,org-ascii-export-as-ascii}
+will be @file{myfile.txt}.  The file will be overwritten without warning.
+When the original file is @file{myfile.txt}, the resulting file becomes
+@file{myfile.txt.txt} in order to prevent data loss.
+@orgcmd{C-c C-e t A/L/U,org-ascii-export-as-ascii}
 Export to a temporary buffer.  Do not create a file.
-@item C-c C-e C-v t a/t A
-Export only the visible part of the document.
 @end table
 
-@c FIXME Exporting sublevels
-@c @cindex headline levels, for exporting
-@c In the exported version, the first 3 outline levels will become
-@c headlines, defining a general document structure.  Additional levels
-@c will be exported as itemized lists.  If you want that transition to occur
-@c at a different level, specify it with a prefix argument.  For example,
+@subheading Header and sectioning structure
 
-@c @example
-@c @kbd{C-1 C-c C-e a}
-@c @end example
+In the exported version, the first three outline levels become headlines,
+defining a general document structure.  Additional levels are exported as
+lists.  The transition can also occur at a different level (@pxref{Export
+settings}).
 
-@c @noindent
-@c creates only top level headlines and exports the rest as items.  When
-@c headlines are converted to items, the indentation of the text following
-@c the headline is changed to fit nicely under the item.  This is done with
-@c the assumption that the first body line indicates the base indentation of
-@c the body text.  Any indentation larger than this is adjusted to preserve
-@c the layout relative to the first line.  Should there be lines with less
-@c indentation than the first one, these are left alone.
+@subheading Quoting ASCII text
 
-@vindex org-ascii-links-to-notes
-Links will be exported in a footnote-like style, with the descriptive part in
-the text and the link in a note before the next heading.  See the variable
-@code{org-ascii-links-to-notes} for details and other options.
+You can insert text that will only appear when using @code{ASCII} back-end
+with the following constructs:
+
+@cindex #+ASCII
+@cindex #+BEGIN_ASCII
+@example
+Text @@@@ascii:and additional text@@@@ within a paragraph.
+
+#+ASCII: Some text
+
+#+BEGIN_ASCII
+All lines in this block will appear only when using this back-end.
+#+END_ASCII
+@end example
+
+@subheading ASCII specific attributes
+@cindex #+ATTR_ASCII
+@cindex horizontal rules, in ASCII export
+
+@code{ASCII} back-end only understands one attribute, @code{:width}, which
+specifies the length, in characters, of a given horizontal rule.  It must be
+specified using an @code{ATTR_ASCII} line, directly preceding the rule.
+
+@example
+#+ATTR_ASCII: :width 10
+-----
+@end example
 
 @node HTML export, @LaTeX{} and PDF export, ASCII/Latin-1/UTF-8 export, Exporting
 @section HTML export
@@ -10426,22 +10719,17 @@ The default value for @code{org-html-preamble} is @code{t}, which means
 that the preamble is inserted depending on the relevant format string in
 @code{org-html-preamble-format}.
 
-Setting @code{org-html-preamble} to a string will override the default
-format string.  Setting it to a function, will insert the output of the
-function, which must be a string; such a function takes no argument but you
-can check against the value of @code{opt-plist}, which contains the list of
-publishing properties for the current file.  Setting to @code{nil} will not
-insert any preamble.
+Setting @code{org-html-preamble} to a string will override the default format
+string.  If you set it to a function, it will insert the output of the
+function, which must be a string.  Setting to @code{nil} will not insert any
+preamble.
 
-The default value for @code{org-html-postamble} is @code{'auto}, which
-means that the HTML exporter will look for the value of
-@code{org-export-author-info}, @code{org-export-email-info},
-@code{org-export-creator-info} and @code{org-export-time-stamp-file},
-@code{org-html-validation-link} and build the postamble from these
-values.  Setting @code{org-html-postamble} to @code{t} will insert the
-postamble from the relevant format string found in
-@code{org-html-postamble-format}.  Setting it to @code{nil} will not
-insert any postamble.
+The default value for @code{org-html-postamble} is @code{'auto}, which means
+that the HTML exporter will look for information about the author, the email,
+the creator and the date, and build the postamble from these values.  Setting
+@code{org-html-postamble} to @code{t} will insert the postamble from the
+relevant format string found in @code{org-html-postamble-format}.  Setting it
+to @code{nil} will not insert any postamble.
 
 @node Quoting HTML tags, Links in HTML export, HTML preamble and postamble, HTML export
 @subsection Quoting HTML tags
@@ -10492,26 +10780,31 @@ and @code{style} attributes for a link:
 
 @cindex #+ATTR_HTML
 @example
-#+ATTR_HTML: title="The Org mode homepage" style="color:red;"
+#+ATTR_HTML: :title The Org mode homepage :style color:red;
 [[http://orgmode.org]]
 @end example
 
 @node Tables in HTML export, Images in HTML export, Links in HTML export, HTML export
 @subsection Tables
 @cindex tables, in HTML
-@vindex org-html-table-tag
+@vindex org-html-table-default-attributes
 
-Org mode tables are exported to HTML using the table tag defined in
-@code{org-html-table-tag}.  The default setting makes tables without
-cell borders and frame.  If you would like to change this for individual
-tables, place something like the following before the table:
+Org mode tables are exported to HTML using the table attributes defined in
+@code{org-html-table-default-attributes}.  The default setting makes tables
+without cell borders and frame.  If you would like to change this for
+individual tables, place something like the following before the table:
 
 @cindex #+CAPTION
 @cindex #+ATTR_HTML
 @example
 #+CAPTION: This is a table with lines around and between cells
-#+ATTR_HTML: border="2" rules="all" frame="border"
+#+ATTR_HTML: :border 2 :rules all :frame border
 @end example
+
+@vindex org-html-table-row-tags
+You can also modify the default tags used for each row by setting
+@var{org-html-table-row-tags}.  See the docstring for an example on
+how to use this option.
 
 @node Images in HTML export, Math formatting in HTML export, Tables in HTML export, HTML export
 @subsection Images in HTML export
@@ -10543,7 +10836,7 @@ support text viewers and accessibility, and align it to the right.
 @cindex #+ATTR_HTML
 @example
 #+CAPTION: A black cat stalking a spider
-#+ATTR_HTML: alt="cat/spider image" title="Action!" align="right"
+#+ATTR_HTML: :alt cat/spider image :title Action! :align right
 [[./img/a.jpg]]
 @end example
 
@@ -10699,15 +10992,12 @@ as well, press @kbd{?} for an overview of the available keys).  The second
 view type is a @emph{folding} view much like Org provides inside Emacs.  The
 script is available at @url{http://orgmode.org/org-info.js} and you can find
 the documentation for it at @url{http://orgmode.org/worg/code/org-info-js/}.
-We host the script at our site, but if you use it a lot, you might
-not want to be dependent on @url{orgmode.org} and prefer to install a local
+We host the script at our site, but if you use it a lot, you might not want
+to be dependent on @url{http://orgmode.org} and prefer to install a local
 copy on your own web server.
 
-To use the script, you need to make sure that the @file{org-jsinfo.el} module
-gets loaded.  It should be loaded by default, but you can try @kbd{M-x
-customize-variable @key{RET} org-modules @key{RET}} to convince yourself that
-this is indeed the case.  All it then takes to make use of the program is
-adding a single line to the Org file:
+All it then takes to use this program is adding a single line to the Org
+file:
 
 @cindex #+INFOJS_OPT
 @example
@@ -10757,73 +11047,51 @@ pages, configure the variable @code{org-html-use-infojs}.
 @section @LaTeX{} and PDF export
 @cindex @LaTeX{} export
 @cindex PDF export
-@cindex Guerry, Bastien
 
 Org mode contains a @LaTeX{} exporter.  With further processing@footnote{The
 default @LaTeX{} output is designed for processing with @code{pdftex} or
 @LaTeX{}.  It includes packages that are not compatible with @code{xetex} and
 possibly @code{luatex}.  See the variables
 @code{org-latex-default-packages-alist} and
-@code{org-latex-packages-alist}.}, this backend is also used to produce PDF
+@code{org-latex-packages-alist}.}, this back-end is also used to produce PDF
 output.  Since the @LaTeX{} output uses @file{hyperref} to implement links
-and cross references, the PDF output file will be fully linked.  Beware of
-the fact that your @code{org} file has to be properly structured in order to
-be correctly exported: respect the hierarchy of sections.
+and cross references, the PDF output file will be fully linked.
+
+As is @LaTeX{}, blank lines are meaningful for this back-end: a paragraph
+will not be started if two contiguous syntactical elements are not separated
+by an empty line.
+
+This back-end also offers enhanced support for footnotes.  Thus, it handles
+nested footnotes, footnotes in tables and footnotes in items' description.
 
 @menu
 * @LaTeX{}/PDF export commands::
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
-* Tables in @LaTeX{} export::   Options for exporting tables to @LaTeX{}
-* Images in @LaTeX{} export::   How to insert figures into @LaTeX{} output
+* @LaTeX{} specific attributes::   Controlling @LaTeX{} output
 * Beamer class export::         Turning the file into a presentation
 @end menu
 
 @node @LaTeX{}/PDF export commands, Header and sectioning, @LaTeX{} and PDF export, @LaTeX{} and PDF export
 @subsection @LaTeX{} export commands
 
-@cindex region, active
-@cindex active region
-@cindex transient-mark-mode
 @table @kbd
 @orgcmd{C-c C-e l l,org-latex-export-to-latex}
-@cindex property EXPORT_FILE_NAME
-Export as a @LaTeX{} file.  For an Org file
-@file{myfile.org}, the @LaTeX{} file will be @file{myfile.tex}.  The file will
-be overwritten without warning.  If there is an active region@footnote{This
-requires @code{transient-mark-mode} be turned on.}, only the region will be
-exported.  If the selected region is a single tree@footnote{To select the
-current subtree, use @kbd{C-c @@}.}, the tree head will become the document
-title.  If the tree head entry has or inherits an @code{EXPORT_FILE_NAME}
-property, that name will be used for the export.
+Export as a @LaTeX{} file.  For an Org file @file{myfile.org}, the @LaTeX{}
+file will be @file{myfile.tex}.  The file will be overwritten without
+warning.
 @orgcmd{C-c C-e l L,org-latex-export-as-latex}
 Export to a temporary buffer.  Do not create a file.
-@item C-c C-e C-v l/L
-Export only the visible part of the document.
 @orgcmd{C-c C-e l p,org-latex-export-to-pdf}
 Export as @LaTeX{} and then process to PDF.
-@kbd{C-c C-e l o}
+@item C-c C-e l o
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-@c FIXME Exporting sublevels
-@c @cindex headline levels, for exporting
-@c @vindex org-latex-low-levels
-@c In the exported version, the first 3 outline levels will become
-@c headlines, defining a general document structure.  Additional levels
-@c will be exported as description lists.  The exporter can ignore them or
-@c convert them to a custom string depending on
-@c @code{org-latex-low-levels}.
-
-@c If you want that transition to occur at a different level, specify it
-@c with a numeric prefix argument.  For example,
-
-@c @example
-@c @kbd{C-2 C-c C-e l}
-@c @end example
-
-@c @noindent
-@c creates two levels of headings and does the rest as items.
+In the exported version, the first three outline levels become headlines,
+defining a general document structure.  Additional levels are exported as
+@code{itemize} or @code{enumerate} lists.  The transition can also occur at
+a different level (@pxref{Export settings}).
 
 @node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{}/PDF export commands, @LaTeX{} and PDF export
 @subsection Header and sectioning structure
@@ -10839,154 +11107,260 @@ By default, the @LaTeX{} output uses the class @code{article}.
 @vindex org-latex-classes
 @vindex org-latex-default-packages-alist
 @vindex org-latex-packages-alist
-@cindex #+LaTeX_HEADER
-@cindex #+LaTeX_CLASS
-@cindex #+LaTeX_CLASS_OPTIONS
-@cindex property, LaTeX_CLASS
-@cindex property, LaTeX_CLASS_OPTIONS
 You can change this globally by setting a different value for
 @code{org-latex-default-class} or locally by adding an option like
-@code{#+LaTeX_CLASS: myclass} in your file, or with a @code{:LaTeX_CLASS:}
-property that applies when exporting a region containing only this (sub)tree.
-The class must be listed in @code{org-latex-classes}.  This variable
-defines a header template for each class@footnote{Into which the values of
-@code{org-latex-default-packages-alist} and
-@code{org-latex-packages-alist} are spliced.}, and allows you to
-define the sectioning structure for each class.  You can also define your own
-classes there.  @code{#+LaTeX_CLASS_OPTIONS} or a @code{:LaTeX_CLASS_OPTIONS:}
-property can specify the options for the @code{\documentclass} macro.  The
-options to documentclass have to be provided, as expected by @LaTeX{}, within
-square brackets.  You can also use @code{#+LaTeX_HEADER: \usepackage@{xyz@}}
-to add lines to the header.  See the docstring of
-@code{org-latex-classes} for more information.  An example is shown
-below.
+@code{#+LATEX_CLASS: myclass} in your file, or with
+a @code{EXPORT_LATEX_CLASS} property that applies when exporting a region
+containing only this (sub)tree.  The class must be listed in
+@code{org-latex-classes}.  This variable defines a header template for each
+class@footnote{Into which the values of
+@code{org-latex-default-packages-alist} and @code{org-latex-packages-alist}
+are spliced.}, and allows you to define the sectioning structure for each
+class.  You can also define your own classes there.
+
+@cindex #+LATEX_CLASS
+@cindex #+LATEX_CLASS_OPTIONS
+@cindex property, EXPORT_LATEX_CLASS
+@cindex property, EXPORT_LATEX_CLASS_OPTIONS
+@code{LATEX_CLASS_OPTIONS} keyword or @code{EXPORT_LATEX_CLASS_OPTIONS}
+property can specify the options for the @code{\documentclass} macro.  These
+options have to be provided, as expected by @LaTeX{}, within square brackets.
+
+@cindex #+LATEX_HEADER
+@cindex #+LATEX_HEADER_EXTRA
+You can also use LATEX_HEADER and LATEX_HEADER_EXTRA keywords in order to add
+lines to the header.  See the docstring of @code{org-latex-classes} for more
+information.
+
+An example is shown below.
 
 @example
-#+LaTeX_CLASS: article
-#+LaTeX_CLASS_OPTIONS: [a4paper]
-#+LaTeX_HEADER: \usepackage@{xyz@}
+#+LATEX_CLASS: article
+#+LATEX_CLASS_OPTIONS: [a4paper]
+#+LATEX_HEADER: \usepackage@{xyz@}
 
 * Headline 1
   some text
 @end example
 
-@node Quoting @LaTeX{} code, Tables in @LaTeX{} export, Header and sectioning, @LaTeX{} and PDF export
+@node Quoting @LaTeX{} code, @LaTeX{} specific attributes, Header and sectioning, @LaTeX{} and PDF export
 @subsection Quoting @LaTeX{} code
 
 Embedded @LaTeX{} as described in @ref{Embedded @LaTeX{}}, will be correctly
-inserted into the @LaTeX{} file.  This includes simple macros like
-@samp{\ref@{LABEL@}} to create a cross reference to a figure.  Furthermore,
-you can add special code that should only be present in @LaTeX{} export with
-the following constructs:
+inserted into the @LaTeX{} file.  Furthermore, you can add special code that
+should only be present in @LaTeX{} export with the following constructs:
 
-@cindex #+LaTeX
-@cindex #+BEGIN_LaTeX
+@cindex #+LATEX
+@cindex #+BEGIN_LATEX
 @example
-#+LaTeX: Literal @LaTeX{} code for export
-@end example
+Code within @@@@latex:some code@@@@ a paragraph.
 
-@noindent or
-@cindex #+BEGIN_LaTeX
+#+LATEX: Literal @LaTeX{} code for export
 
-@example
-#+BEGIN_LaTeX
+#+BEGIN_LATEX
 All lines between these markers are exported literally
-#+END_LaTeX
+#+END_LATEX
 @end example
 
 
-@node Tables in @LaTeX{} export, Images in @LaTeX{} export, Quoting @LaTeX{} code, @LaTeX{} and PDF export
-@subsection Tables in @LaTeX{} export
+@node @LaTeX{} specific attributes, Beamer class export, Quoting @LaTeX{} code, @LaTeX{} and PDF export
+@subsection @LaTeX{} specific attributes
+@cindex #+ATTR_LATEX
+
+@LaTeX{} understands attributes specified in an @code{ATTR_LATEX} line.  They
+affect tables, images, plain lists, special blocks and source blocks.
+
+@subsubheading Tables in @LaTeX{} export
 @cindex tables, in @LaTeX{} export
 
-For @LaTeX{} export of a table, you can specify a label, a caption and
-placement options (@pxref{Images and tables}).  You can also use the
-@code{ATTR_LaTeX} line to request a @code{longtable} environment for the
-table, so that it may span several pages, or to change the default table
-environment from @code{table} to @code{table*} or to change the default inner
-tabular environment to @code{tabularx} or @code{tabulary}.  Finally, you can
-set the alignment string, and (with @code{tabularx} or @code{tabulary}) the
-width:
+For @LaTeX{} export of a table, you can specify a label and a caption
+(@pxref{Images and tables}).  You can also use attributes to control table
+layout and contents.  Valid properties are:
 
-@cindex #+CAPTION
-@cindex #+LABEL
-@cindex #+ATTR_LaTeX
+@table @code
+@item :mode
+@vindex org-latex-default-table-mode
+Nature of table's contents.  It can be set to @code{table}, @code{math},
+@code{inline-math} or @code{verbatim}.  In particular, when in @code{math} or
+@code{inline-math} mode, every cell is exported as-is, horizontal rules are
+ignored and the table will be wrapped in a math environment.  Also,
+contiguous tables sharing the same math mode will be wrapped within the same
+environment.  Default mode is determined in
+@var{org-latex-default-table-mode}.
+@item :environment
+@vindex org-latex-default-table-environment
+Environment used for the table.  It can be to any @LaTeX{} table
+environment, like @code{tabularx}, @code{longtable}, @code{array},
+@code{tabu}, @code{bmatrix}@enddots{}  It defaults to
+@var{org-latex-default-table-environment} value.
+@item :float
+Float environment for the table.  Possible values are @code{sidewaystable},
+@code{multicolumn} and @code{table}.  If unspecified, a table with a caption
+will have a @code{table} environment.  Moreover, @code{:placement} attribute
+can specify the positioning of the float.
+@item :align
+@itemx :font
+@itemx :width
+set, respectively, the alignment string of the table, its font size and its
+width.  They only apply on regular tables.
+@item :spread
+Boolean specific to the @code{tabu} and @code{longtabu} environments, and
+only takes effect when used in conjunction with the @code{:width} attribute.
+When @code{:spread} is non-nil, the table will be spread or shrunk by the
+value of @code{:width}.
+@item :booktabs
+@itemx :center
+@itemx :rmlines
+@vindex org-latex-tables-booktabs
+@vindex org-latex-tables-centered
+They toggle, respectively, @code{booktabs} usage (assuming the package is
+properly loaded), table centering and removal of every horizontal rule but
+the first one (in a "table.el" table only).  In particular,
+@var{org-latex-tables-booktabs} (resp.@: @var{org-latex-tables-centered})
+activates the first (resp.@: second) attribute globally.
+@item :math-prefix
+@itemx :math-suffix
+@itemx :math-arguments
+string which will be inserted, respectively, before the table within the math
+environment, after the table within the math environment, and between the
+macro name and the contents of the table.  The latter attribute is necessary
+to matrix macros that require more than one argument (e.g.,
+@code{qbordermatrix}).
+@end table
+
+Thus, attributes can be used in a wide array of situations, like writing
+a table that will span over multiple pages, or a matrix product:
+
 @example
-#+CAPTION: A long table
-#+LABEL: tbl:long
-#+ATTR_LaTeX: longtable align=l|lp@{3cm@}r|l
+#+ATTR_LATEX: :environment longtable :align l|lp@{3cm@}r|l
 | ..... | ..... |
 | ..... | ..... |
+
+#+ATTR_LATEX: :mode math :environment bmatrix :math-suffix \times
+| a | b |
+| c | d |
+#+ATTR_LATEX: :mode math :environment bmatrix
+| 1 | 2 |
+| 3 | 4 |
 @end example
 
-or to specify a multicolumn table with @code{tabulary}
-
-@cindex #+CAPTION
-@cindex #+LABEL
-@cindex #+ATTR_LaTeX
-@example
-#+CAPTION: A wide table with tabulary
-#+LABEL: tbl:wide
-#+ATTR_LaTeX: table* tabulary width=\textwidth
-| ..... | ..... |
-| ..... | ..... |
-@end example
-
-@node Images in @LaTeX{} export, Beamer class export, Tables in @LaTeX{} export, @LaTeX{} and PDF export
-@subsection Images in @LaTeX{} export
+@subsubheading Images in @LaTeX{} export
 @cindex images, inline in @LaTeX{}
 @cindex inlining images in @LaTeX{}
 
 Images that are linked to without a description part in the link, like
 @samp{[[file:img.jpg]]} or @samp{[[./img.jpg]]} will be inserted into the PDF
 output file resulting from @LaTeX{} processing.  Org will use an
-@code{\includegraphics} macro to insert the image.  If you have specified a
-caption and/or a label as described in @ref{Images and tables}, the figure
-will be wrapped into a @code{figure} environment and thus become a floating
-element.  You can use an @code{#+ATTR_LaTeX:} line to specify various other
-options.  You can ask org to export an image as a float without specifying
-a label or a caption by using the keyword @code{float} in this line.  Various
-optional arguments to the @code{\includegraphics} macro can also be specified
-in this fashion.  To modify the placement option of the floating environment,
-add something like @samp{placement=[h!]} to the attributes.  It is to be noted
-this option can be used with tables as well@footnote{One can also take
-advantage of this option to pass other, unrelated options into the figure or
-table environment.  For an example see the section ``Exporting org files'' in
-@url{http://orgmode.org/worg/org-hacks.html}}.
+@code{\includegraphics} macro to insert the image@footnote{In the case of
+TikZ (@url{http://sourceforge.net/projects/pgf/}) images, it will become an
+@code{\input} macro wrapped within a @code{tikzpicture} environment.}.
 
-If you would like to let text flow around the image, add the word @samp{wrap}
-to the @code{#+ATTR_LaTeX:} line, which will make the figure occupy the left
-half of the page.  To fine-tune, the @code{placement} field will be the set
-of additional arguments needed by the @code{wrapfigure} environment.  Note
-that if you change the size of the image, you need to use compatible settings
-for @code{\includegraphics} and @code{wrapfigure}.
+You can specify specify image width or height with, respectively,
+@code{:width} and @code{:height} attributes.  It is also possible to add any
+other option with the @code{:options} attribute, as shown in the following
+example:
 
-@cindex #+CAPTION
-@cindex #+LABEL
-@cindex #+ATTR_LaTeX
 @example
-#+CAPTION:    The black-body emission of the disk around HR 4049
-#+LABEL:      fig:SED-HR4049
-#+ATTR_LaTeX: width=5cm,angle=90
+#+ATTR_LATEX: :width 5cm :options angle=90
 [[./img/sed-hr4049.pdf]]
+@end example
 
-#+ATTR_LaTeX: width=0.38\textwidth wrap placement=@{r@}@{0.4\textwidth@}
+If you have specified a caption as described in @ref{Images and tables}, the
+picture will be wrapped into a @code{figure} environment and thus become
+a floating element.  You can also ask Org to export an image as a float
+without specifying caption by setting the @code{:float} attribute.  You may
+also set it to:
+@itemize @minus
+@item
+@code{wrap}: if you would like to let text flow around the image.  It will
+make the figure occupy the left half of the page.
+@item
+@code{multicolumn}: if you wish to include an image which spans multiple
+columns in a page.  This will export the image wrapped in a @code{figure*}
+environment.
+@end itemize
+@noindent
+To modify the placement option of any floating environment, set the
+@code{placement} attribute.
+
+@example
+#+ATTR_LATEX: :float wrap :width 0.38\textwidth :placement @{r@}@{0.4\textwidth@}
 [[./img/hst.png]]
 @end example
 
-If you wish to include an image which spans multiple columns in a page, you
-can use the keyword @code{multicolumn} in the @code{#+ATTR_LaTeX} line.  This
-will export the image wrapped in a @code{figure*} environment.
+Eventually, in the @code{:comment-include} attributes has a non-nil value,
+the code actually including the image will be commented out.
 
-If you need references to a label created in this way, write
-@samp{\ref@{fig:SED-HR4049@}} just like in @LaTeX{}.
+@subsubheading Plain lists in @LaTeX{} export
+@cindex plain lists, in @LaTeX{} export
 
-@node Beamer class export,  , Images in @LaTeX{} export, @LaTeX{} and PDF export
+Plain lists accept two optional attributes: @code{:environment} and
+@code{:options}.  The first one allows to use a non-standard environment
+(e.g., @samp{inparaenum}).  The second one allows to specify optional
+arguments for that environment (square brackets may be omitted).
+
+@example
+#+ATTR_LATEX: :environment compactitem :options $\circ$
+- you need ``paralist'' package to reproduce this example.
+@end example
+
+@subsubheading Source blocks in @LaTeX{} export
+@cindex source blocks, in @LaTeX{} export
+
+In addition to syntax defined in @ref{Literal examples}, names and captions
+(@pxref{Images and tables}), source blocks also accept @code{:long-listing}
+attribute, which prevents the block to become a float when non nil.
+
+@example
+#+ATTR_LATEX: :long-listing t
+#+BEGIN_SRC emacs-lisp
+Code that may not fit in a single page.
+#+END_SRC
+@end example
+
+@subsubheading Special blocks in @LaTeX{} export
+@cindex special blocks, in @LaTeX{} export
+
+In @LaTeX{} back-end, special blocks become environments of the same name.
+Value of @code{:options} attribute will be appended as-is to that
+environment's opening string.  For example:
+
+@example
+#+ATTR_LATEX: :options [Proof of important theorem]
+#+BEGIN_PROOF
+...
+Therefore, any natural number above 4 is the sum of two primes.
+#+END_PROOF
+@end example
+
+@noindent
+becomes
+
+@example
+\begin@{proof@}[Proof of important theorem]
+...
+Therefore, any natural number above 4 is the sum of two primes.
+\end@{proof@}
+@end example
+
+@subsubheading Horizontal rules
+@cindex horizontal rules, in @LaTeX{} export
+
+Width and thickness of a given horizontal rule can be controlled with,
+respectively, @code{:width} and @code{:thickness} attributes:
+
+@example
+#+ATTR_LATEX: :width .6\textwidth :thickness 0.8pt
+-----
+@end example
+
+@node Beamer class export,  , @LaTeX{} specific attributes, @LaTeX{} and PDF export
 @subsection Beamer class export
 
-The @LaTeX{} class @file{beamer} allows production of high quality presentations
-using @LaTeX{} and pdf processing.  Org mode has special support for turning an
-Org mode file or tree into a @file{beamer} presentation.
+The @LaTeX{} class @file{beamer} allows production of high quality
+presentations using @LaTeX{} and pdf processing.  Org mode has special
+support for turning an Org mode file or tree into a @file{beamer}
+presentation.
 
 When the @LaTeX{} class for the current buffer (as set with @code{#+LaTeX_CLASS:
 beamer}) or subtree (set with a @code{LaTeX_CLASS} property) is
@@ -11000,7 +11374,7 @@ different level---then the hierarchy above frames will produce the sectioning
 structure of the presentation.
 
 A template for useful in-buffer settings or properties can be inserted into
-the buffer with @kbd{M-x org-insert-beamer-options-template}.  Among other
+the buffer with @kbd{M-x org-beamer-insert-options-template}.  Among other
 things, this will install a column view format which is very handy for
 editing special properties used by beamer.
 
@@ -11161,7 +11535,7 @@ output.  Check the availability of this program before proceeding further.
 
 Export as OpenDocument Text file.
 
-@vindex org-export-odt-preferred-output-format
+@vindex org-odt-preferred-output-format
 If @code{org-preferred-output-format} is specified, automatically convert
 the exported file to that format.  @xref{x-export-to-other-formats, ,
 Automatically exporting to other formats}.
@@ -11179,8 +11553,8 @@ export.
 Export as an OpenDocument Text file and open the resulting file.
 
 @vindex org-odt-preferred-output-format
-If @code{org-preferred-output-format} is specified, open the converted file
-instead.  @xref{x-export-to-other-formats, , Automatically exporting to
+If @code{org-odt-preferred-output-format} is specified, open the converted
+file instead.  @xref{x-export-to-other-formats, , Automatically exporting to
 other formats}.
 @end table
 
@@ -11197,7 +11571,7 @@ one format (say @samp{csv}) to another format (say @samp{ods} or @samp{xls}).
 If you have a working installation of LibreOffice, a document converter is
 pre-configured for you and you can use it right away.  If you would like to
 use @file{unoconv} as your preferred converter, customize the variable
-@code{org-export-odt-convert-process} to point to @code{unoconv}.  You can
+@code{org-odt-convert-process} to point to @code{unoconv}.  You can
 also use your own favorite converter or tweak the default settings of the
 @file{LibreOffice} and @samp{unoconv} converters.  @xref{Configuring a
 document converter}.
@@ -11205,12 +11579,12 @@ document converter}.
 @subsubsection Automatically exporting to other formats
 @anchor{x-export-to-other-formats}
 
-@vindex org-export-odt-preferred-output-format
+@vindex org-odt-preferred-output-format
 Very often, you will find yourself exporting to ODT format, only to
 immediately save the exported document to other formats like @samp{doc},
 @samp{docx}, @samp{rtf}, @samp{pdf} etc.  In such cases, you can specify your
 preferred output format by customizing the variable
-@code{org-export-odt-preferred-output-format}.  This way, the export commands
+@code{org-odt-preferred-output-format}.  This way, the export commands
 (@pxref{x-export-to-odt,,Exporting to ODT}) can be extended to export to a
 format that is of immediate interest to you.
 
@@ -11223,10 +11597,10 @@ ODT format.  LibreOffice converter, mentioned above, is one such
 converter.  Once a converter is configured, you can interact with it using
 the following command.
 
-@vindex org-export-odt-convert
+@vindex org-odt-convert
 @table @kbd
 
-@item M-x org-export-odt-convert
+@item M-x org-odt-convert
 Convert an existing document from one format to another.  With a prefix
 argument, also open the newly produced file.
 @end table
@@ -11263,8 +11637,8 @@ OpenDocument Text (@file{.odt}) or OpenDocument Template (@file{.ott}) file.
 
 @item
 @cindex #+ODT_STYLES_FILE
-@vindex org-export-odt-styles-file
-Customize the variable @code{org-export-odt-styles-file} and point it to the
+@vindex org-odt-styles-file
+Customize the variable @code{org-odt-styles-file} and point it to the
 newly created file.  For additional configuration options
 @pxref{x-overriding-factory-styles,,Overriding factory styles}.
 
@@ -11387,7 +11761,7 @@ You can control the size and scale of the embedded images using the
 @code{#+ATTR_ODT} attribute.
 
 @cindex identify, ImageMagick
-@vindex org-export-odt-pixels-per-inch
+@vindex org-odt-pixels-per-inch
 The exporter specifies the desired size of the image in the final document in
 units of centimeters.  In order to scale the embedded images, the exporter
 queries for pixel dimensions of the images using one of a) ImageMagick's
@@ -11397,7 +11771,7 @@ routinely produce documents that have large images or you export your Org
 files that has images using a Emacs batch script, then the use of
 @file{ImageMagick} is mandatory.} The pixel dimensions are subsequently
 converted in to units of centimeters using
-@code{org-export-odt-pixels-per-inch}.  The default value of this variable is
+@code{org-odt-pixels-per-inch}.  The default value of this variable is
 set to @code{display-pixels-per-inch}.  You can tweak this variable to
 achieve the best results.
 
@@ -11506,10 +11880,10 @@ You can use the following commands to quickly verify the reliability of
 the @LaTeX{}-to-MathML converter.
 
 @table @kbd
-@item M-x org-export-as-odf
+@item M-x org-odt-export-as-odf
 Convert a @LaTeX{} math snippet to an OpenDocument formula (@file{.odf}) file.
 
-@item M-x org-export-as-odf-and-open
+@item M-x org-odt-export-as-odf-and-open
 Convert a @LaTeX{} math snippet to an OpenDocument formula (@file{.odf}) file
 and open the formula file with the system-registered application.
 @end table
@@ -11572,15 +11946,15 @@ It could be rendered as shown below in the exported document.
 Figure 2: Bell curve
 @end example
 
-@vindex org-export-odt-category-strings
+@vindex org-odt-category-map-alist
 You can modify the category component of the caption by customizing the
-variable @code{org-export-odt-category-strings}.  For example, to tag all
-embedded images with the string @samp{Illustration} (instead of the default
-@samp{Figure}) use the following setting.
+option @code{org-odt-category-map-alist}.  For example, to tag all embedded
+images with the string @samp{Illustration} (instead of the default
+@samp{Figure}) use the following setting:
 
 @lisp
-(setq org-export-odt-category-strings
-      '(("en" "Table" "Illustration" "Equation" "Equation")))
+(setq org-odt-category-map-alist
+      (("__Figure__" "Illustration" "value" "Figure" org-odt--enumerable-image-p)))
 @end lisp
 
 With this, previous image will be captioned as below in the exported
@@ -11601,14 +11975,14 @@ fontification to be turned on.}  The auto-generated styles have @samp{OrgSrc}
 as prefix and inherit their color from the faces used by Emacs
 @code{font-lock} library for the source language.
 
-@vindex org-export-odt-fontify-srcblocks
-If you prefer to use your own custom styles for fontification, you can do so
-by customizing the variable
-@code{org-export-odt-create-custom-styles-for-srcblocks}.
+@vindex org-odt-fontify-srcblocks
+If you prefer to use your own custom styles for fontification, you can do
+so by customizing the variable
+@code{org-odt-create-custom-styles-for-srcblocks}.
 
-@vindex org-export-odt-create-custom-styles-for-srcblocks
+@vindex org-odt-create-custom-styles-for-srcblocks
 You can turn off fontification of literal examples by customizing the
-variable @code{org-export-odt-fontify-srcblocks}.
+option @code{org-odt-fontify-srcblocks}.
 
 @node Advanced topics in ODT export,  , Literal examples in ODT export, OpenDocument Text export
 @subsection Advanced topics in ODT export
@@ -11639,27 +12013,27 @@ like to tweak the default converter settings, proceed as below.
 @enumerate
 @item Register the converter
 
-@vindex org-export-odt-convert-processes
-Name your converter and add it to the list of known converters by customizing
-the variable @code{org-export-odt-convert-processes}.  Also specify how the
-converter can be invoked via command-line to effect the conversion.
+@vindex org-odt-convert-processes
+Name your converter and add it to the list of known converters by
+customizing the option @code{org-odt-convert-processes}.  Also specify how
+the converter can be invoked via command-line to effect the conversion.
 
 @item Configure its capabilities
 
-@vindex org-export-odt-convert-capabilities
-@anchor{x-odt-converter-capabilities}
-Specify the set of formats the converter can handle by customizing the
-variable @code{org-export-odt-convert-capabilities}.  Use the default value
-for this variable as a guide for configuring your converter.  As suggested by
-the default setting, you can specify the full set of formats supported by the
+@vindex org-odt-convert-capabilities
+@anchor{x-odt-converter-capabilities} Specify the set of formats the
+converter can handle by customizing the variable
+@code{org-odt-convert-capabilities}.  Use the default value for this
+variable as a guide for configuring your converter.  As suggested by the
+default setting, you can specify the full set of formats supported by the
 converter and not limit yourself to specifying formats that are related to
 just the OpenDocument Text format.
 
 @item Choose the converter
 
-@vindex org-export-odt-convert-process
+@vindex org-odt-convert-process
 Select the newly added converter as the preferred one by customizing the
-variable @code{org-export-odt-convert-process}.
+option @code{org-odt-convert-process}.
 @end enumerate
 
 @node Working with OpenDocument style files, Creating one-off styles, Configuring a document converter, Advanced topics in ODT export
@@ -11727,9 +12101,9 @@ customize these variables to override the factory styles used by the
 exporter.
 
 @itemize
-@anchor{x-org-export-odt-styles-file}
+@anchor{x-org-odt-styles-file}
 @item
-@code{org-export-odt-styles-file}
+@code{org-odt-styles-file}
 
 Use this variable to specify the @file{styles.xml} that will be used in the
 final output.  You can specify one of the following values:
@@ -11758,9 +12132,9 @@ like header and footer images.
 Use the default @file{styles.xml}
 @end enumerate
 
-@anchor{x-org-export-odt-content-template-file}
+@anchor{x-org-odt-content-template-file}
 @item
-@code{org-export-odt-content-template-file}
+@code{org-odt-content-template-file}
 
 Use this variable to specify the blank @file{content.xml} that will be used
 in the final output.
@@ -11810,7 +12184,7 @@ custom @samp{PageBreak} style as shown below.
 
 @example
 <style:style style:name="PageBreak" style:family="paragraph"
-	     style:parent-style-name="Text_20_body">
+             style:parent-style-name="Text_20_body">
   <style:paragraph-properties fo:break-before="page"/>
 </style:style>
 @end example
@@ -11847,22 +12221,21 @@ OpenDocument-v1.2
 specification.@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
 OpenDocument-v1.2 Specification}}
 
-
-
 @subsubheading Custom table styles: an illustration
 
-To have a quick preview of this feature, install the below setting and export
-the table that follows.
+@vindex org-odt-table-styles
+To have a quick preview of this feature, install the below setting and
+export the table that follows:
 
 @lisp
-(setq org-export-odt-table-styles
-      (append org-export-odt-table-styles
-	      '(("TableWithHeaderRowAndColumn" "Custom"
-		 ((use-first-row-styles . t)
-		  (use-first-column-styles . t)))
-		("TableWithFirstRowandLastRow" "Custom"
-		 ((use-first-row-styles . t)
-		  (use-last-row-styles . t))))))
+(setq org-odt-table-styles
+      (append org-odt-table-styles
+            '(("TableWithHeaderRowAndColumn" "Custom"
+                ((use-first-row-styles . t)
+                 (use-first-column-styles . t)))
+                ("TableWithFirstRowandLastRow" "Custom"
+                 ((use-first-row-styles . t)
+                 (use-last-row-styles . t))))))
 @end lisp
 
 @example
@@ -11875,9 +12248,9 @@ the table that follows.
 In the above example, you used a template named @samp{Custom} and installed
 two table styles with the names @samp{TableWithHeaderRowAndColumn} and
 @samp{TableWithFirstRowandLastRow}.  (@strong{Important:} The OpenDocument
-styles needed for producing the above template have been pre-defined for you.
-These styles are available under the section marked @samp{Custom Table
-Template} in @file{OrgOdtContentTemplate.xml}
+styles needed for producing the above template have been pre-defined for
+you.  These styles are available under the section marked @samp{Custom
+Table Template} in @file{OrgOdtContentTemplate.xml}
 (@pxref{x-orgodtcontenttemplate-xml,,Factory styles}).  If you need
 additional templates you have to define these styles yourselves.
 
@@ -11961,9 +12334,9 @@ Define a table style@footnote{See the attributes @code{table:template-name},
 @code{table:use-banding-column-styles} of the @code{<table:table>} element in
 the OpenDocument-v1.2 specification}
 
-@vindex org-export-odt-table-styles
+@vindex org-odt-table-styles
 To define a table style, create an entry for the style in the variable
-@code{org-export-odt-table-styles} and specify the following:
+@code{org-odt-table-styles} and specify the following:
 
 @itemize @minus
 @item the name of the table template created in step (1)
@@ -11976,14 +12349,14 @@ based on the same template @samp{Custom}.  The styles achieve their intended
 effect by selectively activating the individual cell styles in that template.
 
 @lisp
-(setq org-export-odt-table-styles
-      (append org-export-odt-table-styles
-	      '(("TableWithHeaderRowAndColumn" "Custom"
-		 ((use-first-row-styles . t)
-		  (use-first-column-styles . t)))
-		("TableWithFirstRowandLastRow" "Custom"
-		 ((use-first-row-styles . t)
-		  (use-last-row-styles . t))))))
+(setq org-odt-table-styles
+      (append org-odt-table-styles
+              '(("TableWithHeaderRowAndColumn" "Custom"
+                 ((use-first-row-styles . t)
+                  (use-first-column-styles . t)))
+                ("TableWithFirstRowandLastRow" "Custom"
+                 ((use-first-row-styles . t)
+                  (use-last-row-styles . t))))))
 @end lisp
 
 @item
@@ -12014,12 +12387,11 @@ nothing but @samp{zip} archives}: @inforef{File Archives,,emacs}.  For
 general help with validation (and schema-sensitive editing) of XML files:
 @inforef{Introduction,,nxml-mode}.
 
-@vindex org-export-odt-schema-dir
+@vindex org-odt-schema-dir
 If you have ready access to OpenDocument @file{.rnc} files and the needed
 schema-locating rules in a single folder, you can customize the variable
-@code{org-export-odt-schema-dir} to point to that directory.  The
-ODT exporter will take care of updating the
-@code{rng-schema-locating-files} for you.
+@code{org-odt-schema-dir} to point to that directory.  The ODT exporter
+will take care of updating the @code{rng-schema-locating-files} for you.
 
 @c end opendocument
 
@@ -12171,7 +12543,7 @@ and where to put published files.
 @tab Directory containing publishing source files
 @item @code{:publishing-directory}
 @tab Directory where output files will be published.  You can directly
-publish to a webserver using a file name syntax appropriate for
+publish to a web server using a file name syntax appropriate for
 the Emacs @file{tramp} package.  Or you can publish to a local directory and
 use external tools to upload your website (@pxref{Uploading files}).
 @item @code{:preparation-function}
@@ -12222,27 +12594,32 @@ possibly transformed in the process.  The default transformation is to export
 Org files as HTML files, and this is done by the function
 @code{org-html-publish-to-html} which calls the HTML exporter (@pxref{HTML
 export}).  But you also can publish your content as PDF files using
-@code{org-latex-publish-to-pdf}, or as @code{ascii}, @code{latin1} or
-@code{utf8} encoded files using the corresponding functions.  If you want to
-publish the Org file itself, but with @i{archived}, @i{commented}, and
-@i{tag-excluded} trees removed, use @code{org-org-publish-to-org} and set the
-parameters @code{:plain-source} and/or @code{:htmlized-source}.  This will
-produce @file{file.org} and @file{file.org.html} in the publishing
-directory@footnote{@file{file-source.org} and @file{file-source.org.html} if
-source and publishing directories are equal.  Note that with this kind of
-setup, you need to add @code{:exclude "-source\\.org"} to the project
-definition in @code{org-publish-project-alist} to prevent the published
-source files from being considered as new org files the next time the project
-is published.}.  Other files like images only need to be copied to the
-publishing destination; for this you may use @code{org-publish-attachment}.
-For non-Org files, you always need to specify the publishing function:
+@code{org-latex-publish-to-pdf} or as @code{ascii}, @code{Texinfo}, etc.,
+using the corresponding functions.
+
+If you want to publish the Org file itself but with the @i{archived},
+@i{commented} and @i{tag-excluded} trees removed, use the function
+@code{org-org-publish-to-org}.  This will produce @file{file.org}.  If you
+want a htmlized version of this file, set the parameter
+@code{:htmlized-source} to @code{t}, it will produce @file{file.org.html} in
+the publishing directory.
+
+@c @footnote{@file{file-source.org} and @file{file-source.org.html} if source
+@c and publishing directories are equal.  Note that with this kind of setup, you
+@c need to add @code{:exclude "-source\\.org"} to the project definition in
+@c @code{org-publish-project-alist} to prevent the published source files from
+@c being considered as new org files the next time the project is published.}.
+
+Other files like images only need to be copied to the publishing destination;
+for this you may use @code{org-publish-attachment}.  For non-Org files, you
+always need to specify the publishing function:
 
 @multitable @columnfractions 0.3 0.7
 @item @code{:publishing-function}
 @tab Function executing the publication of a file.  This may also be a
 list of functions, which will all be called in turn.
-@item @code{:plain-source}
-@tab Non-nil means, publish plain source.
+@c @item @code{:plain-source}
+@c @tab Non-nil means, publish plain source.
 @item @code{:htmlized-source}
 @tab Non-nil means, publish htmlized source.
 @end multitable
@@ -12254,162 +12631,130 @@ should take the specified file, make the necessary transformation (if any)
 and place the result into the destination folder.
 
 @node Publishing options, Publishing links, Publishing action, Configuration
-@subsection Options for the HTML/@LaTeX{} exporters
+@subsection Options for the exporters
 @cindex options, for publishing
 
-The property list can be used to set many export options for the HTML
-and @LaTeX{} exporters.  In most cases, these properties correspond to user
-variables in Org.  The table below lists these properties along
-with the variable they belong to.  See the documentation string for the
-respective variable for details.
+The property list can be used to set many export options for the exporters.
+In most cases, these properties correspond to user variables in Org.  The
+first table below lists these properties along with the variable they belong
+to.  The second table list HTML specific properties.  See the documentation
+string for the respective variable for details.
 
-@vindex org-html-link-up
-@vindex org-html-link-home
-@vindex org-export-default-language
-@vindex org-display-custom-times
-@vindex org-export-headline-levels
-@vindex org-export-with-section-numbers
-@vindex org-export-section-number-format
-@vindex org-export-with-toc
-@vindex org-export-preserve-breaks
 @vindex org-export-with-archived-trees
-@vindex org-export-with-emphasize
-@vindex org-export-with-sub-superscripts
-@vindex org-export-with-special-strings
-@vindex org-export-with-footnotes
+@vindex org-export-with-author
+@vindex org-export-with-creator
+@vindex org-display-custom-times
 @vindex org-export-with-drawers
-@vindex org-export-with-tags
-@vindex org-export-with-todo-keywords
-@vindex org-export-with-tasks
-@vindex org-export-with-done-tasks
-@vindex org-export-with-priority
-@vindex org-export-with-TeX-macros
-@vindex org-export-with-latex
-@vindex org-export-skip-text-before-1st-heading
-@vindex org-export-with-fixed-width
-@vindex org-export-with-timestamps
-@vindex org-export-author-info
-@vindex org-export-email-info
-@vindex org-export-creator-info
-@vindex org-export-time-stamp-file
-@vindex org-export-with-tables
-@vindex org-export-highlight-first-table-line
-@vindex org-html-style-include-default
-@vindex org-html-style-include-scripts
-@vindex org-html-style
-@vindex org-html-style-extra
-@vindex org-html-link-org-files-as-html
-@vindex org-html-inline-images
-@vindex org-html-extension
-@vindex org-html-table-tag
-@vindex org-export-publishing-directory
-@vindex org-html-preamble
-@vindex org-html-postamble
-@vindex user-full-name
+@vindex org-export-with-email
 @vindex user-mail-address
-@vindex org-export-select-tags
+@vindex org-export-with-emphasize
 @vindex org-export-exclude-tags
+@vindex org-export-with-fixed-width
+@vindex org-export-with-footnotes
+@vindex org-export-headline-levels
+@vindex org-export-default-language
+@vindex org-export-with-latex
+@vindex org-export-preserve-breaks
+@vindex org-export-with-priority
+@vindex org-export-publishing-directory
+@vindex org-export-with-section-numbers
+@vindex org-export-select-tags
+@vindex org-export-with-special-strings
+@vindex org-export-with-sub-superscripts
+@vindex org-export-with-toc
+@vindex org-export-with-tables
+@vindex org-export-with-tags
+@vindex org-export-with-tasks
+@vindex org-export-with-timestamps
+@vindex org-export-with-todo-keywords
 
 @multitable @columnfractions 0.32 0.68
-@item @code{:link-up}               @tab @code{org-html-link-up}
-@item @code{:link-home}             @tab @code{org-html-link-home}
-@item @code{:language}              @tab @code{org-export-default-language}
-@item @code{:customtime}            @tab @code{org-display-custom-times}
-@item @code{:headline-levels}       @tab @code{org-export-headline-levels}
-@item @code{:section-numbers}       @tab @code{org-export-with-section-numbers}
-@item @code{:section-number-format} @tab @code{org-export-section-number-format}
-@item @code{:table-of-contents}     @tab @code{org-export-with-toc}
-@item @code{:preserve-breaks}       @tab @code{org-export-preserve-breaks}
 @item @code{:archived-trees}        @tab @code{org-export-with-archived-trees}
-@item @code{:emphasize}             @tab @code{org-export-with-emphasize}
-@item @code{:sub-superscript}       @tab @code{org-export-with-sub-superscripts}
-@item @code{:special-strings}       @tab @code{org-export-with-special-strings}
-@item @code{:footnotes}             @tab @code{org-export-with-footnotes}
+@item @code{:author}                @tab @code{org-export-with-author}
+@item @code{:creator}               @tab @code{org-export-with-creator}
+@item @code{:customtime}            @tab @code{org-display-custom-times}
 @item @code{:drawers}               @tab @code{org-export-with-drawers}
-@item @code{:tags}                  @tab @code{org-export-with-tags}
-@item @code{:todo-keywords}         @tab @code{org-export-with-todo-keywords}
-@item @code{:tasks}                 @tab @code{org-export-with-tasks}
-@item @code{:priority}              @tab @code{org-export-with-priority}
-@item @code{:TeX-macros}            @tab @code{org-export-with-TeX-macros}
-@item @code{:LaTeX-fragments}       @tab @code{org-export-with-latex}
-@item @code{:latex-listings}        @tab @code{org-latex-listings}
-@item @code{:skip-before-1st-heading} @tab @code{org-export-skip-text-before-1st-heading}
-@item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
-@item @code{:timestamps}            @tab @code{org-export-with-timestamps}
-@item @code{:author}                @tab @code{user-full-name}
+@item @code{:email}                 @tab @code{org-export-with-email}
 @item @code{:email}                 @tab @code{user-mail-address} : @code{addr;addr;..}
-@item @code{:author-info}           @tab @code{org-export-author-info}
-@item @code{:email-info}            @tab @code{org-export-email-info}
-@item @code{:creator-info}          @tab @code{org-export-creator-info}
+@item @code{:emphasize}             @tab @code{org-export-with-emphasize}
+@item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
+@item @code{:fixed-width}           @tab @code{org-export-with-fixed-width}
+@item @code{:footnotes}             @tab @code{org-export-with-footnotes}
+@item @code{:headline-levels}       @tab @code{org-export-headline-levels}
+@item @code{:language}              @tab @code{org-export-default-language}
+@item @code{:latex-fragments}       @tab @code{org-export-with-latex}
+@item @code{:preserve-breaks}       @tab @code{org-export-preserve-breaks}
+@item @code{:priority}              @tab @code{org-export-with-priority}
+@item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
+@item @code{:section-numbers}       @tab @code{org-export-with-section-numbers}
+@item @code{:select-tags}           @tab @code{org-export-select-tags}
+@item @code{:special-strings}       @tab @code{org-export-with-special-strings}
+@item @code{:sub-superscript}       @tab @code{org-export-with-sub-superscripts}
+@item @code{:table-of-contents}     @tab @code{org-export-with-toc}
 @item @code{:tables}                @tab @code{org-export-with-tables}
-@item @code{:table-auto-headline}   @tab @code{org-export-highlight-first-table-line}
-@item @code{:style-include-default} @tab @code{org-html-style-include-default}
-@item @code{:style-include-scripts} @tab @code{org-html-style-include-scripts}
-@item @code{:style}                 @tab @code{org-html-style}
-@item @code{:style-extra}           @tab @code{org-html-style-extra}
-@item @code{:convert-org-links}     @tab @code{org-html-link-org-files-as-html}
-@item @code{:inline-images}         @tab @code{org-html-inline-images}
+@item @code{:tags}                  @tab @code{org-export-with-tags}
+@item @code{:tasks}                 @tab @code{org-export-with-tasks}
+@item @code{:timestamps}            @tab @code{org-export-with-timestamps}
+@item @code{:todo-keywords}         @tab @code{org-export-with-todo-keywords}
+@end multitable
+
+@vindex org-html-doctype
+@vindex org-html-xml-declaration
+@vindex org-html-link-up
+@vindex org-html-link-home
+@vindex org-html-link-org-files-as-html
+@vindex org-html-head
+@vindex org-html-head-extra
+@vindex org-html-inline-images
+@vindex org-html-extension
+@vindex org-html-preamble
+@vindex org-html-postamble
+@vindex org-html-table-default-attributes
+@vindex org-html-style-include-default
+@vindex org-html-style-include-scripts
+@multitable @columnfractions 0.32 0.68
+@item @code{:html-doctype}          @tab @code{org-html-doctype}
+@item @code{:html-xml-declaration}  @tab @code{org-html-xml-declaration}
+@item @code{:html-link-up}          @tab @code{org-html-link-up}
+@item @code{:html-link-home}        @tab @code{org-html-link-home}
+@item @code{:html-link-org-as-html} @tab @code{org-html-link-org-files-as-html}
+@item @code{:html-head}             @tab @code{org-html-head}
+@item @code{:html-head-extra}       @tab @code{org-html-head-extra}
+@item @code{:html-inline-images}    @tab @code{org-html-inline-images}
 @item @code{:html-extension}        @tab @code{org-html-extension}
 @item @code{:html-preamble}         @tab @code{org-html-preamble}
 @item @code{:html-postamble}        @tab @code{org-html-postamble}
-@item @code{:xml-declaration}       @tab @code{org-html-xml-declaration}
-@item @code{:html-table-tag}        @tab @code{org-html-table-tag}
-@item @code{:publishing-directory}  @tab @code{org-export-publishing-directory}
-@item @code{:select-tags}           @tab @code{org-export-select-tags}
-@item @code{:exclude-tags}          @tab @code{org-export-exclude-tags}
-@item @code{:latex-image-options}   @tab @code{org-latex-image-default-option}
+@item @code{:html-table-attributes}        @tab @code{org-html-table-default-attributes}
+@item @code{:html-head-include-default-style} @tab @code{org-html-style-include-default}
+@item @code{:html-head-include-scripts} @tab @code{org-html-style-include-scripts}
 @end multitable
 
-Most of the @code{org-export-with-*} variables have the same effect in
-both HTML and @LaTeX{} exporters, except for @code{:TeX-macros} and
-@code{:LaTeX-fragments} options, respectively @code{nil} and @code{t} in the
-@LaTeX{} export.  See @code{org-export-plist-vars} to check this list of
-options.
-
-
+Most of the @code{org-export-with-*} variables have the same effect in each
+exporter.
 
 @vindex org-publish-project-alist
-When a property is given a value in @code{org-publish-project-alist},
-its setting overrides the value of the corresponding user variable (if
-any) during publishing.  Options set within a file (@pxref{Export
-options}), however, override everything.
+When a property is given a value in @code{org-publish-project-alist}, its
+setting overrides the value of the corresponding user variable (if any)
+during publishing.  Options set within a file (@pxref{Export settings}),
+however, override everything.
 
 @node Publishing links, Sitemap, Publishing options, Configuration
 @subsection Links between published files
 @cindex links, publishing
 
-To create a link from one Org file to another, you would use
-something like @samp{[[file:foo.org][The foo]]} or simply
-@samp{file:foo.org.} (@pxref{Hyperlinks}).  When published, this link
-becomes a link to @file{foo.html}.  In this way, you can interlink the
-pages of your "org web" project and the links will work as expected when
-you publish them to HTML@.  If you also publish the Org source file and want
-to link to that, use an @code{http:} link instead of a @code{file:} link,
-because @code{file:} links are converted to link to the corresponding
-@file{html} file.
+To create a link from one Org file to another, you would use something like
+@samp{[[file:foo.org][The foo]]} or simply @samp{file:foo.org.}
+(@pxref{Hyperlinks}).  When published, this link becomes a link to
+@file{foo.html}.  You can thus interlink the pages of your "org web" project
+and the links will work as expected when you publish them to HTML@.  If you
+also publish the Org source file and want to link to it, use an @code{http:}
+link instead of a @code{file:} link, because @code{file:} links are converted
+to link to the corresponding @file{html} file.
 
 You may also link to related files, such as images.  Provided you are careful
 with relative file names, and provided you have also configured Org to upload
 the related files, these links will work too.  See @ref{Complex example}, for
 an example of this usage.
-
-Sometimes an Org file to be published may contain links that are
-only valid in your production environment, but not in the publishing
-location.  In this case, use the property
-
-@multitable @columnfractions 0.4 0.6
-@item @code{:link-validation-function}
-@tab Function to validate links
-@end multitable
-
-@noindent
-to define a function for checking link validity.  This function must
-accept two arguments, the file name and a directory relative to which
-the file name is interpreted in the production environment.  If this
-function returns @code{nil}, then the HTML generator will only insert a
-description into the HTML file, but no link.  One option for this
-function is @code{org-publish-validate-link} which checks if the given
-file is part of any project in @code{org-publish-project-alist}.
 
 @node Sitemap, Generating an index, Publishing links, Configuration
 @subsection Generating a sitemap
@@ -12710,7 +13055,7 @@ src_<language>[<header arguments>]@{<body>@}
 @table @code
 @item <#+NAME: name>
 This line associates a name with the code block.  This is similar to the
-@code{#+TBLNAME: NAME} lines that can be used to name tables in Org mode
+@code{#+NAME: Name} lines that can be used to name tables in Org mode
 files.  Referencing the name of a code block makes it possible to evaluate
 the block from other places in the file, from other files, or from Org mode
 table formulas (see @ref{The spreadsheet}).  Names are assumed to be unique
@@ -13079,7 +13424,7 @@ blocks.
 @lisp
 (setq org-babel-default-header-args
       (cons '(:noweb . "yes")
-	    (assq-delete-all :noweb org-babel-default-header-args)))
+            (assq-delete-all :noweb org-babel-default-header-args)))
 @end lisp
 
 @node Language-specific header arguments, Buffer-wide header arguments, System-wide header arguments, Using header arguments
@@ -13267,11 +13612,10 @@ syntax used to specify arguments is the same across all languages.  In every
 case, variables require a default value when they are declared.
 
 The values passed to arguments can either be literal values, references, or
-Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}).  References
-include anything in the Org mode file that takes a @code{#+NAME:},
-@code{#+TBLNAME:}, or @code{#+RESULTS:} line.  This includes tables, lists,
-@code{#+BEGIN_EXAMPLE} blocks, other code blocks, and the results of other
-code blocks.
+Emacs Lisp code (see @ref{var, Emacs Lisp evaluation of variables}).
+References include anything in the Org mode file that takes a @code{#+NAME:}
+or @code{#+RESULTS:} line: tables, lists, @code{#+BEGIN_EXAMPLE} blocks,
+other code blocks and the results of other code blocks.
 
 Note: When a reference is made to another code block, the referenced block
 will be evaluated unless it has current cached results (see @ref{cache}).
@@ -13296,10 +13640,10 @@ Here are examples of passing values by reference:
 @table @dfn
 
 @item table
-an Org mode table named with either a @code{#+NAME:} or @code{#+TBLNAME:} line
+an Org mode table named with either a @code{#+NAME:} line
 
 @example
-#+TBLNAME: example-table
+#+NAME: example-table
 | 1 |
 | 2 |
 | 3 |
@@ -13579,7 +13923,7 @@ into the Org mode buffer as a file link.  E.g., @code{:results value file}.
 @subsubheading Format
 
 The following options are mutually exclusive and specify what type of results
-the code block will return.  By default, results are inserted accoring to the
+the code block will return.  By default, results are inserted according to the
 type as specified above.
 
 @itemize @bullet
@@ -14020,7 +14364,7 @@ variable and raises an error.  Setting @code{:hlines no} or relying on the
 default value yields the following results.
 
 @example
-#+TBLNAME: many-cols
+#+NAME: many-cols
 | a | b | c |
 |---+---+---|
 | d | e | f |
@@ -14042,7 +14386,7 @@ default value yields the following results.
 Leaves hlines in the table.  Setting @code{:hlines yes} has this effect.
 
 @example
-#+TBLNAME: many-cols
+#+NAME: many-cols
 | a | b | c |
 |---+---+---|
 | d | e | f |
@@ -14079,7 +14423,7 @@ names will be removed from the table before
 processing, then reapplied to the results.
 
 @example
-#+TBLNAME: less-cols
+#+NAME: less-cols
 | a |
 |---|
 | b |
@@ -14126,7 +14470,7 @@ The first column of the table is removed from the table before processing,
 and is then reapplied to the results.
 
 @example
-#+TBLNAME: with-rownames
+#+NAME: with-rownames
 | one | 1 | 2 | 3 | 4 |  5 |
 | two | 6 | 7 | 8 | 9 | 10 |
 
@@ -14201,7 +14545,7 @@ argument.
 @example
 #+name: attr_wrap
 #+begin_src sh :var data="" :var width="\\textwidth" :results output
-  echo "#+ATTR_LATEX width=$width"
+  echo "#+ATTR_LATEX :width $width"
   echo "$data"
 #+end_src
 
@@ -14216,7 +14560,7 @@ argument.
 
 #+RESULTS:
 :RESULTS:
-#+ATTR_LATEX width=5cm
+#+ATTR_LATEX :width 5cm
 [[file:/tmp/it.png]]
 :END:
 @end example
@@ -14672,11 +15016,11 @@ ask and nil not to ask.
 For example, here is how to execute "ditaa" code (which is considered safe)
 without asking:
 
-@example
+@lisp
 (defun my-org-confirm-babel-evaluate (lang body)
   (not (string= lang "ditaa")))  ; don't ask for ditaa
 (setq org-confirm-babel-evaluate 'my-org-confirm-babel-evaluate)
-@end example
+@end lisp
 
 @item Following @code{shell} and @code{elisp} links
 Org has two link types that can directly evaluate code (@pxref{External
@@ -14992,7 +15336,7 @@ This line contains the formulas for the table directly above the line.
 
 Table can have multiple lines containing @samp{#+TBLFM:}.  Note
 that only the first line of @samp{#+TBLFM:} will be applied when
-you reculculate the table.  For more details see @ref{Using
+you recalculate the table.  For more details see @ref{Using
 multiple #+TBLFM lines} in @ref{Editing and debugging formulas}.
 
 @item #+TITLE:, #+AUTHOR:, #+EMAIL:, #+LANGUAGE:, #+DATE:,
@@ -15002,7 +15346,7 @@ multiple #+TBLFM lines} in @ref{Editing and debugging formulas}.
 @itemx #+HTML_HEAD:, #+HTML_LINK_UP:, #+HTML_LINK_HOME:,
 @itemx #+SELECT_TAGS:, #+EXCLUDE_TAGS:
 These lines provide settings for exporting files.  For more details see
-@ref{Export options}.
+@ref{Export settings}.
 @item #+TODO:    #+SEQ_TODO:   #+TYP_TODO:
 @vindex org-todo-keywords
 These lines set the TODO keywords and their interpretation in the
@@ -15047,7 +15391,7 @@ If the cursor is in a property line or at the start or end of a property
 drawer, offer property commands.
 @item
 If the cursor is at a footnote reference, go to the corresponding
-definition, and vice versa.
+definition, and @emph{vice versa}.
 @item
 If the cursor is on a statistics cookie, update it.
 @item
@@ -15411,10 +15755,10 @@ Then, tell Org mode what to do with the new function:
 @lisp
 (add-hook 'org-mode-hook
           (lambda ()
-	    (make-variable-buffer-local 'yas/trigger-key)
-	    (setq yas/trigger-key [tab])
-	    (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
-	    (define-key yas/keymap [tab] 'yas/next-field)))
+            (make-variable-buffer-local 'yas/trigger-key)
+            (setq yas/trigger-key [tab])
+            (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
+            (define-key yas/keymap [tab] 'yas/next-field)))
 @end lisp
 
 @item @file{windmove.el} by Hovav Shacham
@@ -15463,7 +15807,7 @@ customize the @code{org-crypt-tag-matcher} setting.
 To use org-crypt it is suggested that you have the following in your
 @file{.emacs}:
 
-@example
+@lisp
 (require 'org-crypt)
 (org-crypt-use-before-save-magic)
 (setq org-tags-exclude-from-inheritance (quote ("crypt")))
@@ -15481,7 +15825,7 @@ To use org-crypt it is suggested that you have the following in your
   ;; To turn it off only locally, you can insert this:
   ;;
   ;; # -*- buffer-auto-save-file-name: nil; -*-
-@end example
+@end lisp
 
 Excluding the crypt tag from inheritance prevents already encrypted text
 being encrypted again.
@@ -15497,12 +15841,13 @@ Org.
 * Hooks::                       How to reach into Org's internals
 * Add-on packages::             Available extensions
 * Adding hyperlink types::      New custom link types
+* Adding export back-ends::     How to write new export back-ends
 * Context-sensitive commands::  How to add functionality to such commands
 * Tables in arbitrary syntax::  Orgtbl for @LaTeX{} and other programs
 * Dynamic blocks::              Automatically filled blocks
 * Special agenda views::        Customized views
 * Speeding up your agendas::    Tips on how to speed up your agendas
-* Extracting agenda information::  Postprocessing of agenda information
+* Extracting agenda information::  Post-processing of agenda information
 * Using the property API::      Writing programs that use entry properties
 * Using the mapping API::       Mapping over all or selected entries
 @end menu
@@ -15530,7 +15875,7 @@ documentation about each package, is maintained by the Worg project at
 
 
 
-@node Adding hyperlink types, Context-sensitive commands, Add-on packages, Hacking
+@node Adding hyperlink types, Adding export back-ends, Add-on packages, Hacking
 @section Adding hyperlink types
 @cindex hyperlinks, adding new types
 
@@ -15633,7 +15978,37 @@ When it makes sense for your new link type, you may also define a function
 support for inserting such a link with @kbd{C-c C-l}.  Such a function should
 not accept any arguments, and return the full link with prefix.
 
-@node Context-sensitive commands, Tables in arbitrary syntax, Adding hyperlink types, Hacking
+@node Adding export back-ends, Context-sensitive commands, Adding hyperlink types, Hacking
+@section Adding export back-ends
+@cindex Export, writing back-ends
+
+Org 8.0 comes with a completely rewritten export engine which makes it easy
+to write new export back-ends, either from scratch, or from deriving them
+from existing ones.
+
+Your two entry points are respectively @code{org-export-define-backend} and
+@code{org-export-define-derived-backend}.  To grok these functions, you
+should first have a look at @file{ox-latex.el} (for how to define a new
+back-end from scratch) and @file{ox-beamer.el} (for how to derive a new
+back-end from an existing one.
+
+When creating a new back-end from scratch, the basic idea is to set the name
+of the back-end (as a symbol) and an an alist of elements and export
+functions.  On top of this, you will need to set additional keywords like
+@code{:menu-entry} (to display the back-end in the export dispatcher),
+@code{:export-block} (to specify what blocks should not be exported by this
+back-end), and @code{:options-alist} (to let the user set export options that
+are specific to this back-end.)
+
+Deriving a new back-end is similar, except that you need to set
+@code{:translate-alist} to an alist of export functions that should be used
+instead of the parent back-end functions.
+
+For a complete reference documentation, see
+@url{http://orgmode.org/worg/dev/org-export-reference.html, the Org Export
+Reference on Worg}.
+
+@node Context-sensitive commands, Tables in arbitrary syntax, Adding export back-ends, Hacking
 @section Context-sensitive commands
 @cindex context-sensitive commands, hooks
 @cindex add-ons, context-sensitive commands
@@ -16058,7 +16433,7 @@ The corresponding block writer function could look like this:
 (defun org-dblock-write:block-update-time (params)
   (let ((fmt (or (plist-get params :format) "%d. %m. %Y")))
     (insert "Last block update at: "
-	    (format-time-string fmt (current-time)))))
+            (format-time-string fmt (current-time)))))
 @end lisp
 
 If you want to make sure that all dynamic blocks are always up-to-date,
@@ -16185,7 +16560,7 @@ to become slow.  Below are some tips on how to speed up the agenda commands.
 @enumerate
 @item
 Reduce the number of Org agenda files: this will reduce the slowliness caused
-by accessing to a harddrive.
+by accessing to a hard drive.
 @item
 Reduce the number of DONE and archived headlines: this way the agenda does
 not need to skip them.
@@ -16712,7 +17087,7 @@ of his great @file{remember.el}.
 Without Sebastian, the HTML/XHTML publishing of Org would be the pitiful work
 of an ignorant amateur.  Sebastian has pushed this part of Org onto a much
 higher level.  He also wrote @file{org-info.js}, a Java script for displaying
-webpages derived from Org using an Info-like or a folding interface with
+web pages derived from Org using an Info-like or a folding interface with
 single-key navigation.
 @end table
 
@@ -16741,9 +17116,13 @@ Eric is maintaining the Babel parts of Org.  His reactivity here kept me away
 from worrying about possible bugs here and let me focus on other parts.
 
 @item Nicolas Goaziou
-Nicolas is maintaining the consistency of the deepest parts of Org.  His work
-on @file{org-element.el} and @file{org-export.el} has been outstanding, and
-opened the doors for many new ideas and features.
+Nicolas is maintaining the consistency of the deepest parts of Org.  His
+work on @file{org-element.el} and @file{ox.el} has been outstanding, and
+opened the doors for many new ideas and features.  He rewrote many of the
+old exporters to use the new export engine, and helped with documenting
+this major change.  More importantly (if that's possible), he has been more
+than reliable during all the work done for Org 8.0, and always very
+reactive on the mailing list.
 
 @item Achim Gratz
 Achim rewrote the building process of Org, turning some @emph{ad hoc} tools

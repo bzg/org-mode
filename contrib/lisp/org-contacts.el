@@ -81,6 +81,12 @@ When set to nil, all your Org files will be used."
   :type 'string
   :group 'org-contacts)
 
+(defcustom org-contacts-alias-property "ALIAS"
+  "Name of the property for contact name alias."
+  :type 'string
+  :group 'org-contacts)
+
+
 (defcustom org-contacts-birthday-format "Birthday: %l (%Y)"
   "Format of the anniversary agenda entry.
 The following replacements are available:
@@ -129,6 +135,7 @@ The following replacements are available:
 
 (defcustom org-contacts-matcher
   (mapconcat 'identity (list org-contacts-email-property
+			     org-contacts-alias-property
 			     org-contacts-tel-property
 			     org-contacts-address-property
 			     org-contacts-birthday-property)

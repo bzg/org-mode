@@ -40,7 +40,7 @@
 ;; So an example of a simple src block referencing table data in the
 ;; same file would be
 
-;;  #+TBLNAME: sandbox
+;;  #+NAME: sandbox
 ;;  | 1 |         2 | 3 |
 ;;  | 4 | org-babel | 6 |
 ;;
