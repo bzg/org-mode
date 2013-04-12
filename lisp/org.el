@@ -13952,9 +13952,12 @@ See also `org-scan-tags'.
   (unless (boundp 'todo-only)
     (error "`org-make-tags-matcher' expects todo-only to be scoped in"))
   (unless match
-    ;; Get a new match request, with completion
+    ;; Get a new match request, with completion against the global
+    ;; tags table and the local tags in current buffer
     (let ((org-last-tags-completion-table
-	   (org-global-tags-completion-table)))
+	   (org-uniquify
+	    (delq nil (append (org-get-buffer-tags)
+			      (org-global-tags-completion-table))))))
       (setq match (org-completing-read-no-i
 		   "Match: " 'org-tags-completion-function nil nil nil
 		   'org-tags-history))))
@@ -14081,14 +14084,14 @@ This replaces every group tag in MATCH with a regexp tag search.
 For example, a group tag \"Work\" defined as { Work : Lab Conf }
 will be replaced like this:
 
-   Work =>  {\(?:Work\|Lab\|Conf\}
-  +Work => +{\(?:Work\|Lab\|Conf\}
-  -Work => -{\(?:Work\|Lab\|Conf\}
+   Work =>  {\\(?:Work\\|Lab\\|Conf\\)}
+  +Work => +{\\(?:Work\\|Lab\\|Conf\\)}
+  -Work => -{\\(?:Work\\|Lab\\|Conf\\)}
 
 Replacing by a regexp preserves the structure of the match.
 E.g., this expansion
 
-  Work|Home => {\(?:Work\|Lab\|Conf\}|Home
+  Work|Home => {\\(?:Work\\|Lab\\|Conf\\}|Home
 
 will match anything tagged with \"Lab\" and \"Home\", or tagged
 with \"Conf\" and \"Home\" or tagged with \"Work\" and \"home\".
@@ -14103,23 +14106,26 @@ When DOWNCASE is non-nil, expand downcased TAGS."
 	     (stable org-mode-syntax-table)
 	     (tal (or org-tag-groups-alist-for-agenda
 		      org-tag-groups-alist))
-	     (tal (if downcased (mapcar (lambda(tg) (mapcar 'downcase tg)) tal) tal))
+	     (tal (if downcased
+		      (mapcar (lambda(tg) (mapcar 'downcase tg)) tal) tal))
 	     (tml (mapcar 'car tal))
 	     (rtnmatch match) rpl)
 	;; @ and _ are allowed as word-components in tags
 	(modify-syntax-entry ?@ "w" stable)
 	(modify-syntax-entry ?_ "w" stable)
-	(while (and tml (string-match
-			 (concat "\\(?1:[+-]?\\)\\(?2:\\<" (regexp-opt tml) "\\>\\)")
-			 rtnmatch))
+	(while (and tml
+		    (string-match
+		     (concat "\\(?1:[+-]?\\)\\(?2:\\<"
+			     (regexp-opt tml) "\\>\\)") rtnmatch))
 	  (let* ((dir (match-string 1 rtnmatch))
 		 (tag (match-string 2 rtnmatch))
 		 (tag (if downcased (downcase tag) tag)))
 	    (setq tml (delete tag tml))
-	    (setq rpl (append (org-uniquify rpl) (assoc tag tal)))
-	    (setq rtnmatch
-		  (replace-match
-		   (concat dir "{\\<" (regexp-opt rpl) "\\>}") t t rtnmatch))))
+	    (when (not (get-text-property 0 'grouptag (match-string 2 rtnmatch)))
+	      (setq rpl (append (org-uniquify rpl) (assoc tag tal)))
+	      (setq rpl (concat dir "{\\<" (regexp-opt rpl) "\\>}"))
+	      (if (stringp rpl) (org-add-props rpl '(grouptag t)))
+	      (setq rtnmatch (replace-match rpl t t rtnmatch)))))
 	(if single-as-list
 	    (or (reverse rpl) (list rtnmatch))
 	  rtnmatch))
@@ -14470,7 +14476,9 @@ This works in the agenda, and also in an org-mode buffer."
    (list (region-beginning) (region-end)
 	 (let ((org-last-tags-completion-table
 		(if (derived-mode-p 'org-mode)
-		    (org-get-buffer-tags)
+		    (org-uniquify
+		     (delq nil (append (org-get-buffer-tags)
+				       (org-global-tags-completion-table))))
 		  (org-global-tags-completion-table))))
 	   (org-icompleting-read
 	    "Tag: " 'org-tags-completion-function nil nil nil
@@ -21579,14 +21587,12 @@ for the search purpose."
   "Return the reverse of STRING."
   (apply 'string (reverse (string-to-list string))))
 
-(defun org-uniquify (list)
-  "Remove duplicate elements from LIST."
-  (let (res)
-    (mapc (lambda (x) (add-to-list 'res x 'append)) list)
-    res))
+(defsubst org-uniquify (list)
+  "Non-destructively remove duplicate elements from LIST."
+  (let ((res (copy-seq list))) (delete-dups res)))
 
 (defun org-uniquify-alist (alist)
-  "Merge duplicate elements of an alist.
+  "Merge duplicate elements of ALIST.
 
 For example, in this alist:
 
