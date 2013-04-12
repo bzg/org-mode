@@ -10587,51 +10587,59 @@ ASCII export produces a simple and very readable version of an Org mode
 file, containing only plain ASCII@.  Latin-1 and UTF-8 export augment the file
 with special characters and symbols available in these encodings.
 
-@cindex region, active
-@cindex active region
-@cindex transient-mark-mode
+@vindex org-ascii-links-to-notes
+Links are exported in a footnote-like style, with the descriptive part in the
+text and the link in a note before the next heading.  See the variable
+@code{org-ascii-links-to-notes} for details and other options.
+
+@subheading ASCII export commands
+
 @table @kbd
-@orgcmd{C-c C-e t a,org-ascii-export-to-ascii}
-@cindex property, EXPORT_FILE_NAME
+@orgcmd{C-c C-e t a/l/u,org-ascii-export-to-ascii}
 Export as an ASCII file.  For an Org file, @file{myfile.org}, the ASCII file
-will be @file{myfile.txt}.  The file will be overwritten without
-warning.  If there is an active region@footnote{This requires
-@code{transient-mark-mode} be turned on.}, only the region will be
-exported.  If the selected region is a single tree@footnote{To select the
-current subtree, use @kbd{C-c @@}.}, the tree head will
-become the document title.  If the tree head entry has or inherits an
-@code{EXPORT_FILE_NAME} property, that name will be used for the
-export.
-@orgcmd{C-c C-e t A,org-ascii-export-as-ascii}
+will be @file{myfile.txt}.  The file will be overwritten without warning.
+When the original file is @file{myfile.txt}, the resulting file becomes
+@file{myfile.txt.txt} in order to prevent data loss.
+@orgcmd{C-c C-e t A/L/U,org-ascii-export-as-ascii}
 Export to a temporary buffer.  Do not create a file.
-@item C-c C-e C-v t a/t A
-Export only the visible part of the document.
 @end table
 
-@c FIXME Exporting sublevels
-@c @cindex headline levels, for exporting
-@c In the exported version, the first 3 outline levels will become
-@c headlines, defining a general document structure.  Additional levels
-@c will be exported as itemized lists.  If you want that transition to occur
-@c at a different level, specify it with a prefix argument.  For example,
+@subheading Header and sectioning structure
 
-@c @example
-@c @kbd{C-1 C-c C-e a}
-@c @end example
+In the exported version, the first three outline levels become headlines,
+defining a general document structure.  Additional levels are exported as
+lists.  The transition can also occur at a different level (@pxref{Export
+settings}).
 
-@c @noindent
-@c creates only top level headlines and exports the rest as items.  When
-@c headlines are converted to items, the indentation of the text following
-@c the headline is changed to fit nicely under the item.  This is done with
-@c the assumption that the first body line indicates the base indentation of
-@c the body text.  Any indentation larger than this is adjusted to preserve
-@c the layout relative to the first line.  Should there be lines with less
-@c indentation than the first one, these are left alone.
+@subheading Quoting ASCII text
 
-@vindex org-ascii-links-to-notes
-Links will be exported in a footnote-like style, with the descriptive part in
-the text and the link in a note before the next heading.  See the variable
-@code{org-ascii-links-to-notes} for details and other options.
+You can insert text that will only appear when using @code{ASCII} back-end
+with the following constructs:
+
+@cindex #+ASCII
+@cindex #+BEGIN_ASCII
+@example
+Text @@@@ascii:and additional text@@@@ within a paragraph.
+
+#+ASCII: Some text
+
+#+BEGIN_ASCII
+All lines in this block will appear only when using this back-end.
+#+END_ASCII
+@end example
+
+@subheading ASCII specific attributes
+@cindex #+ATTR_ASCII
+@cindex horizontal rules, in ASCII export
+
+@code{ASCII} back-end only understands one attribute, @code{:width}, which
+specifies the length, in characters, of a given horizontal rule.  It must be
+specified using an @code{ATTR_ASCII} line, directly preceding the rule.
+
+@example
+#+ATTR_ASCII: :width 10
+-----
+@end example
 
 @node HTML export, @LaTeX{} and PDF export, ASCII/Latin-1/UTF-8 export, Exporting
 @section HTML export
@@ -11067,9 +11075,6 @@ nested footnotes, footnotes in tables and footnotes in items' description.
 @node @LaTeX{}/PDF export commands, Header and sectioning, @LaTeX{} and PDF export, @LaTeX{} and PDF export
 @subsection @LaTeX{} export commands
 
-@cindex region, active
-@cindex active region
-@cindex transient-mark-mode
 @table @kbd
 @orgcmd{C-c C-e l l,org-latex-export-to-latex}
 Export as a @LaTeX{} file.  For an Org file @file{myfile.org}, the @LaTeX{}
@@ -11077,18 +11082,16 @@ file will be @file{myfile.tex}.  The file will be overwritten without
 warning.
 @orgcmd{C-c C-e l L,org-latex-export-as-latex}
 Export to a temporary buffer.  Do not create a file.
-@item C-c C-e C-v l/L
-Export only the visible part of the document.
 @orgcmd{C-c C-e l p,org-latex-export-to-pdf}
 Export as @LaTeX{} and then process to PDF.
 @item C-c C-e l o
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-In the exported version, the first three outline levels will become
-headlines, defining a general document structure.  Additional levels will be
-exported as description lists.  The transition can also occur at a different
-level (@pxref{Export settings}).
+In the exported version, the first three outline levels become headlines,
+defining a general document structure.  Additional levels are exported as
+@code{itemize} or @code{enumerate} lists.  The transition can also occur at
+a different level (@pxref{Export settings}).
 
 @node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{}/PDF export commands, @LaTeX{} and PDF export
 @subsection Header and sectioning structure
@@ -11151,17 +11154,9 @@ should only be present in @LaTeX{} export with the following constructs:
 @cindex #+BEGIN_LATEX
 @example
 Code within @@@@latex:some code@@@@ a paragraph.
-@end example
 
-@noindent or
-
-@example
 #+LATEX: Literal @LaTeX{} code for export
-@end example
 
-@noindent or, eventually,
-
-@example
 #+BEGIN_LATEX
 All lines between these markers are exported literally
 #+END_LATEX
@@ -11346,6 +11341,17 @@ becomes
 ...
 Therefore, any natural number above 4 is the sum of two primes.
 \end@{proof@}
+@end example
+
+@subsubheading Horizontal rules
+@cindex horizontal rules, in @LaTeX{} export
+
+Width and thickness of a given horizontal rule can be controlled with,
+respectively, @code{:width} and @code{:thickness} attributes:
+
+@example
+#+ATTR_LATEX: :width .6\textwidth :thickness 0.8pt
+-----
 @end example
 
 @node Beamer class export,  , @LaTeX{} specific attributes, @LaTeX{} and PDF export
