@@ -1008,10 +1008,10 @@ version of Org available---if you are running an outdated version, it is
 quite possible that the bug has been fixed already.  If the bug persists,
 prepare a report and provide as much information as possible, including the
 version information of Emacs (@kbd{M-x emacs-version @key{RET}}) and Org
-(@kbd{M-x org-version @key{RET}}), as well as the Org related setup in
+(@kbd{M-x org-version RET}), as well as the Org related setup in
 @file{.emacs}.  The easiest way to do this is to use the command
 @example
-@kbd{M-x org-submit-bug-report}
+@kbd{M-x org-submit-bug-report RET}
 @end example
 @noindent which will put all this information into an Emacs mail buffer so
 that you only need to add your description.  If you re not sending the Email
@@ -1071,7 +1071,7 @@ Reload uncompiled versions of all Org mode Lisp files.  The backtrace
 contains much more information if it is produced with uncompiled code.
 To do this, use
 @example
-C-u M-x org-reload RET
+@kbd{C-u M-x org-reload RET}
 @end example
 @noindent
 or select @code{Org -> Refresh/Reload -> Reload Org uncompiled} from the
@@ -2016,7 +2016,7 @@ you can use the usual commands to follow these links.
 If you like the intuitive way the Org mode structure editing and list
 formatting works, you might want to use these commands in other modes like
 Text mode or Mail mode as well.  The minor mode @code{orgstruct-mode} makes
-this possible.   Toggle the mode with @kbd{M-x orgstruct-mode}, or
+this possible.   Toggle the mode with @kbd{M-x orgstruct-mode RET}, or
 turn it on by default, for example in Message mode, with one of:
 
 @lisp
@@ -2261,7 +2261,7 @@ window follow the cursor through the table and always show the current
 field.  The follow mode exits automatically when the cursor leaves the table,
 or when you repeat this command with @kbd{C-u C-u C-c `}.
 @c
-@item M-x org-table-import
+@item M-x org-table-import RET
 Import a file as a table.  The table should be TAB or whitespace
 separated.  Use, for example, to import a spreadsheet table or data
 from a database, because these programs generally can write
@@ -2274,7 +2274,7 @@ Tables can also be imported by pasting tabular text into the Org
 buffer, selecting the pasted text with @kbd{C-x C-x} and then using the
 @kbd{C-c |} command (see above under @i{Creation and conversion}).
 @c
-@item M-x org-table-export
+@item M-x org-table-export RET
 @findex org-table-export
 @vindex org-table-export-default-format
 Export the table, by default as a TAB-separated file.  Use for data
@@ -2403,7 +2403,7 @@ every vertical line you would like to have:
 If you like the intuitive way the Org table editor works, you
 might also want to use it in other modes like Text mode or Mail mode.
 The minor mode Orgtbl mode makes this possible.  You can always toggle
-the mode with @kbd{M-x orgtbl-mode}.  To turn it on by default, for
+the mode with @kbd{M-x orgtbl-mode RET}.  To turn it on by default, for
 example in Message mode, use
 
 @lisp
@@ -3096,10 +3096,10 @@ hline are left alone, assuming that these are part of the table header.
 Iterate the table by recomputing it until no further changes occur.
 This may be necessary if some computed fields use the value of other
 fields that are computed @i{later} in the calculation sequence.
-@item M-x org-table-recalculate-buffer-tables
+@item M-x org-table-recalculate-buffer-tables RET
 @findex org-table-recalculate-buffer-tables
 Recompute all tables in the current buffer.
-@item M-x org-table-iterate-buffer-tables
+@item M-x org-table-iterate-buffer-tables RET
 @findex org-table-iterate-buffer-tables
 Iterate all tables in the current buffer, in order to converge table-to-table
 dependencies.
@@ -5206,7 +5206,7 @@ in the current file will be offered as possible completions.
 @orgcmd{C-c C-x p,org-set-property}
 Set a property.  This prompts for a property name and a value.  If
 necessary, the property drawer is created as well.
-@item C-u M-x org-insert-drawer
+@item C-u M-x org-insert-drawer RET
 @cindex org-insert-drawer
 Insert a property drawer into the current entry.  The drawer will be
 inserted early in the entry, but after the lines with planning
@@ -5604,7 +5604,7 @@ global    @r{make a global view, including all headings in the file}
           @r{run column view at the top of this file}
 "@var{ID}"      @r{call column view in the tree that has an @code{:ID:}}
           @r{property with the value @i{label}.  You can use}
-          @r{@kbd{M-x org-id-copy} to create a globally unique ID for}
+          @r{@kbd{M-x org-id-copy RET} to create a globally unique ID for}
           @r{the current entry and copy it to the kill-ring.}
 @end example
 @item :hlines
@@ -6776,7 +6776,7 @@ If your configuration depends on @file{org-remember.el}, you need to update
 it and use the setup described below.  To convert your
 @code{org-remember-templates}, run the command
 @example
-@kbd{M-x org-capture-import-remember-templates @key{RET}}
+@kbd{M-x org-capture-import-remember-templates RET}
 @end example
 @noindent and then customize the new variable with @kbd{M-x
 customize-variable org-capture-templates}, check the result, and save the
@@ -7606,7 +7606,7 @@ Remove current file from the list of agenda files.
 @itemx C-,
 Cycle through agenda file list, visiting one file after the other.
 @kindex M-x org-iswitchb
-@item M-x org-iswitchb
+@item M-x org-iswitchb RET
 Command to use an @code{iswitchb}-like interface to switch to and between Org
 buffers.
 @end table
@@ -9000,7 +9000,7 @@ calendars.
 @orgcmd{H,org-agenda-holidays}
 Show holidays for three months around the cursor date.
 
-@item M-x org-icalendar-combine-agenda-files
+@item M-x org-icalendar-combine-agenda-files RET
 Export a single iCalendar file containing entries from all agenda files.
 This is a globally available command, and also available in the agenda menu.
 
@@ -10177,7 +10177,7 @@ some of the features of CD@LaTeX{} mode.  You need to install
 AUC@TeX{}) from @url{http://www.astro.uva.nl/~dominik/Tools/cdlatex}.
 Don't use CD@LaTeX{} mode itself under Org mode, but use the light
 version @code{org-cdlatex-mode} that comes as part of Org mode.  Turn it
-on for the current buffer with @code{M-x org-cdlatex-mode}, or for all
+on for the current buffer with @kbd{M-x org-cdlatex-mode RET}, or for all
 Org files with
 
 @lisp
@@ -10202,7 +10202,7 @@ the second brace.  Even outside fragments, @key{TAB} will expand
 environment abbreviations at the beginning of a line.  For example, if
 you write @samp{equ} at the beginning of a line and press @key{TAB},
 this abbreviation will be expanded to an @code{equation} environment.
-To get a list of all abbreviations, type @kbd{M-x cdlatex-command-help}.
+To get a list of all abbreviations, type @kbd{M-x cdlatex-command-help RET}.
 @item
 @kindex _
 @kindex ^
@@ -10248,13 +10248,22 @@ documentation for more information.
 Org mode documents can be exported into a variety of other formats.
 
 For printing and sharing notes, ASCII export produces a readable and simple
-version of an Org file.  HTML export allows you to publish a notes file on
-the web.  @LaTeX{} export lets you use Org mode and its structured editing
+version of an Org file.  HTML export allows you to publish notes on the web
+easily.  @LaTeX{} export lets you use Org mode and its structured editing
 functions to easily create @LaTeX{} files.  OpenDocument Text (ODT) export
-allows seamless collaboration across organizational boundaries.  To
+allows seamless collaboration across organizational boundaries.  Markdown
+export lets you seamlessly collaborate with other developers.  Finally, to
 incorporate entries with associated times like deadlines or appointments into
 a desktop calendar program like iCal, Org mode can also produce extracts in
 the iCalendar format.
+
+Note that the built-in back-ends come with commands to convert the selected
+region: e.g., in a HTML buffer, @kbd{M-x org-html-convert-region-to-html
+RET} will replace the selected region with its HTML export.  Used in
+combination with @code{orgtbl-mode} and/or @code{orgstruc-mode}, this is a
+powerful way of quickly editing tables and lists in HTML, @LaTeX{},
+@code{Texinfo}, etc.
+
 
 @menu
 * The Export Dispatcher::       The main exporter interface
@@ -11636,7 +11645,7 @@ the following command.
 @vindex org-odt-convert
 @table @kbd
 
-@item M-x org-odt-convert
+@item M-x org-odt-convert RET
 Convert an existing document from one format to another.  With a prefix
 argument, also open the newly produced file.
 @end table
@@ -11916,10 +11925,10 @@ You can use the following commands to quickly verify the reliability of
 the @LaTeX{}-to-MathML converter.
 
 @table @kbd
-@item M-x org-odt-export-as-odf
+@item M-x org-odt-export-as-odf RET
 Convert a @LaTeX{} math snippet to an OpenDocument formula (@file{.odf}) file.
 
-@item M-x org-odt-export-as-odf-and-open
+@item M-x org-odt-export-as-odf-and-open RET
 Convert a @LaTeX{} math snippet to an OpenDocument formula (@file{.odf}) file
 and open the formula file with the system-registered application.
 @end table
@@ -14038,7 +14047,7 @@ While the @code{:file} header argument can be used to specify the path to the
 output file, @code{:dir} specifies the default directory during code block
 execution.  If it is absent, then the directory associated with the current
 buffer is used.  In other words, supplying @code{:dir path} temporarily has
-the same effect as changing the current directory with @kbd{M-x cd path}, and
+the same effect as changing the current directory with @kbd{M-x cd path RET}, and
 then not supplying @code{:dir}.  Under the surface, @code{:dir} simply sets
 the value of the Emacs variable @code{default-directory}.
 
@@ -15078,7 +15087,7 @@ either by the @i{calc} interpreter, or by the @i{Emacs Lisp} interpreter.
 There are more than 500 variables that can be used to customize
 Org.  For the sake of compactness of the manual, I am not
 describing the variables here.  A structured overview of customization
-variables is available with @kbd{M-x org-customize}.  Or select
+variables is available with @kbd{M-x org-customize RET}.  Or select
 @code{Browse Org Group} from the @code{Org->Customization} menu.  Many
 settings can also be activated on a per-file basis, by putting special
 lines into the buffer (@pxref{In-buffer settings}).
@@ -16177,7 +16186,7 @@ in @LaTeX{}.
 @item
 You can just comment the table line-by-line whenever you want to process
 the file, and uncomment it whenever you need to edit the table.  This
-only sounds tedious---the command @kbd{M-x orgtbl-toggle-comment}
+only sounds tedious---the command @kbd{M-x orgtbl-toggle-comment RET}
 makes this comment-toggling very easy, in particular if you bind it to a
 key.
 @end itemize
@@ -16192,7 +16201,7 @@ activated by placing @code{\usepackage@{comment@}} into the document
 header.  Orgtbl mode can insert a radio table skeleton@footnote{By
 default this works only for @LaTeX{}, HTML, and Texinfo.  Configure the
 variable @code{orgtbl-radio-tables} to install templates for other
-modes.}  with the command @kbd{M-x orgtbl-insert-radio-table}.  You will
+modes.}  with the command @kbd{M-x orgtbl-insert-radio-table RET}.  You will
 be prompted for a table name, let's say we use @samp{salesfigures}.  You
 will then get the following template:
 
@@ -17053,11 +17062,11 @@ this flagged entry is finished.
 @kindex C-c a ?
 If you are not able to process all flagged entries directly, you can always
 return to this agenda view@footnote{Note, however, that there is a subtle
-difference.  The view created automatically by @kbd{M-x org-mobile-pull
-@key{RET}} is guaranteed to search all files that have been addressed by the
-last pull.  This might include a file that is not currently in your list of
-agenda files.  If you later use @kbd{C-c a ?} to regenerate the view, only
-the current agenda files will be searched.} using @kbd{C-c a ?}.
+difference.  The view created automatically by @kbd{M-x org-mobile-pull RET}
+is guaranteed to search all files that have been addressed by the last pull.
+This might include a file that is not currently in your list of agenda files.
+If you later use @kbd{C-c a ?} to regenerate the view, only the current
+agenda files will be searched.} using @kbd{C-c a ?}.
 
 @node History and Acknowledgments, GNU Free Documentation License, MobileOrg, Top
 @appendix History and acknowledgments
