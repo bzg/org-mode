@@ -582,6 +582,7 @@ Exporting
 * Export formats::              Available export formats
 * Export settings::             Generic export settings
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
+* Beamer export::               Turning the file into a presentation
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * Markdown export::             Exporting to Markdown
@@ -607,7 +608,6 @@ HTML export
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
 * @LaTeX{} specific attributes::  Controlling @LaTeX{} output
-* Beamer class export::         Turning the file into a presentation
 
 OpenDocument Text export
 
@@ -10270,6 +10270,7 @@ powerful way of quickly editing tables and lists in HTML, @LaTeX{},
 * Export formats::              Available export formats
 * Export settings::             Generic export settings
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
+* Beamer export::               Exporting as a Beamer presentation
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
 * Markdown export::             Exporting to Markdown
@@ -10586,7 +10587,7 @@ equivalent for this property.  The file name in this case is derived from
 the file associated to the buffer, if possible, or asked to the user
 otherwise.}.
 
-@node ASCII/Latin-1/UTF-8 export, HTML export, Export settings, Exporting
+@node ASCII/Latin-1/UTF-8 export, Beamer export, Export settings, Exporting
 @section ASCII/Latin-1/UTF-8 export
 @cindex ASCII export
 @cindex Latin-1 export
@@ -10650,7 +10651,223 @@ specified using an @code{ATTR_ASCII} line, directly preceding the rule.
 -----
 @end example
 
-@node HTML export, @LaTeX{} and PDF export, ASCII/Latin-1/UTF-8 export, Exporting
+@node Beamer export, HTML export, ASCII/Latin-1/UTF-8 export, Exporting
+@section Beamer export
+@cindex Beamer export
+
+The @LaTeX{} class @code{Beamer} allows production of high quality
+presentations using @LaTeX{} and pdf processing.  Org mode has special
+support for turning an Org mode file or tree into a @code{Beamer}
+presentation.
+
+@subheading Beamer export commands
+
+@table @kbd
+@orgcmd{C-c C-e l b,org-beamer-export-to-latex}
+Export as a @LaTeX{} file.  For an Org file @file{myfile.org}, the @LaTeX{}
+file will be @file{myfile.tex}.  The file will be overwritten without
+warning.
+@orgcmd{C-c C-e l B,org-beamer-export-as-latex}
+Export to a temporary buffer.  Do not create a file.
+@orgcmd{C-c C-e l P,org-beamer-export-to-pdf}
+Export as @LaTeX{} and then process to PDF.
+@item C-c C-e l O
+Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
+@end table
+
+@subheading Sectioning, Frames and Blocks
+
+Any tree with not-too-deep level nesting should in principle be exportable as
+a Beamer presentation.  Headlines fall into three categories: sectioning
+elements, frames and blocks.
+
+@itemize @minus
+@item
+@vindex org-beamer-frame-level
+Headlines become frames when their level is equal to
+@var{org-beamer-frame-level} or @code{H} value in an @code{OPTIONS} line
+(@pxref{Export settings}).
+
+@cindex property, BEAMER_ENV
+Though, if a headline in the current tree has a @code{BEAMER_ENV} property
+set to either to @code{frame} or @code{fullframe}, its level overrides the
+variable.  A @code{fullframe} is a frame with an empty (ignored) title.
+
+@item
+@vindex org-beamer-environments-default
+@vindex org-beamer-environments-extra
+All frame's children become @code{block} environments.  Special block types
+can be enforced by setting headline's @code{BEAMER_ENV} property@footnote{If
+this property is set, the entry will also get a @code{:B_environment:} tag to
+make this visible.  This tag has no semantic meaning, it is only a visual
+aid.} to an appropriate value (see @var{org-beamer-environments-default} for
+supported values and @var{org-beamer-environments-extra} for adding more).
+
+@item
+@cindex property, BEAMER_REF
+As a special case, if the @code{BEAMER_ENV} property is set to either
+@code{appendix}, @code{note}, @code{noteNH} or @code{againframe}, the
+headline will become, respectively, an appendix, a note (within frame or
+between frame, depending on its level), a note with its title ignored or an
+@code{\againframe} command.  In the latter case, a @code{BEAMER_REF} property
+is mandatory in order to refer to the frame being resumed, and contents are
+ignored.
+
+Also, a headline with an @code{ignoreheading} environment will have its
+contents only inserted in the output.  This special value is useful to have
+data between frames, or to properly close a @code{column} environment.
+@end itemize
+
+@cindex property, BEAMER_ACT
+@cindex property, BEAMER_OPT
+Headlines also support @code{BEAMER_ACT} and @code{BEAMER_OPT} properties.
+The former is translated as an overlay/action specification, or a default
+overlay specification when enclosed within square brackets.  The latter
+specifies options for the current frame.  Though, @code{fragile} option is
+added automatically if it contains source code that uses any verbatim
+environment.
+
+@cindex property, BEAMER_COL
+Moreover, headlines handle the @code{BEAMER_COL} property.  Its value should
+be a decimal number representing the width of the column as a fraction of the
+total text width.  If the headline has no specific environment, its title
+will be ignored and its contents will fill the column created.  Otherwise,
+the block will fill the whole column and the title will be preserved.  Two
+contiguous headlines with a non-nil @code{BEAMER_COL} value share the same
+@code{columns} @LaTeX{} environment.  It will end before the next headline
+without such a property.  This environment is generated automatically.
+Although, it can also be explicitly created, with a special @code{columns}
+value for @code{BEAMER_ENV} property (if it needs to be set up with some
+specific options, for example).
+
+@subheading Beamer specific syntax
+
+Beamer back-end is an extension of @LaTeX{} back-end.  As such, all @LaTeX{}
+specific syntax (e.g., @samp{#+LATEX:} or @samp{#+ATTR_LATEX:}) is
+recognized.  See @ref{@LaTeX{} and PDF export} for more information.
+
+@cindex #+BEAMER_THEME
+@cindex #+BEAMER_COLOR_THEME
+@cindex #+BEAMER_FONT_THEME
+@cindex #+BEAMER_INNER_THEME
+@cindex #+BEAMER_OUTER_THEME
+Beamer export introduces a number of keywords to insert code in the
+document's header.  Four control appearance of the presentantion:
+@code{#+BEAMER_THEME}, @code{#+BEAMER_COLOR_THEME},
+@code{#+BEAMER_FONT_THEME}, @code{#+BEAMER_INNER_THEME} and
+@code{#+BEAMER_OUTER_THEME}.  All of them accept optional arguments within
+square brackets.  The last one, @code{#+BEAMER_HEADER}, is more generic and
+allows to append any line of code in the header.
+
+@example
+#+BEAMER_THEME: Rochester [height=20pt]
+#+BEAMER_COLOR_THEME: spruce
+@end example
+
+Table of contents generated from @code{toc:t} @code{OPTION} keyword are
+wrapped within a @code{frame} environment.  Those generated from a @code{TOC}
+keyword (@pxref{Table of contents}) are not.  In that case, it is also
+possible to specify options, enclosed within square brackets.
+
+@example
+#+TOC: headlines [currentsection]
+@end example
+
+Beamer specific code can be inserted with the following constructs:
+
+@cindex #+BEAMER
+@cindex #+BEGIN_BEAMER
+@example
+#+BEAMER: \pause
+
+#+BEGIN_BEAMER
+All lines in this block will appear only when using this back-end.
+#+END_BEAMER
+
+Text @@@@beamer:some code@@@@ within a paragraph.
+@end example
+
+In particular, this last example can be used to add overlay specifications to
+objects whose type is among @code{bold}, @code{item}, @code{link},
+@code{radio-target} and @code{target}, when the value is enclosed within
+angular brackets and put at the beginning the object.
+
+@example
+A *@@@@beamer:<2->@@@@useful* feature
+@end example
+
+@cindex #+ATTR_BEAMER
+Eventually, every plain list has support for @code{:environment},
+@code{:overlay} and @code{:options} attributes through @code{ATTR_BEAMER}
+affiliated keyword.  The first one allows to use a different environment, the
+second sets overlay specifications and the last one inserts optional
+arguments in current list environment.
+
+@example
+#+ATTR_BEAMER: :overlay +-
+- item 1
+- item 2
+@end example
+
+@subheading Editing support
+
+You can turn on a special minor mode @code{org-beamer-mode} for faster
+editing with:
+
+@example
+#+STARTUP: beamer
+@end example
+
+@table @kbd
+@orgcmd{C-c C-b,org-beamer-select-environment}
+In @code{org-beamer-mode}, this key offers fast selection of a Beamer
+environment or the @code{BEAMER_COL} property.
+@end table
+
+Also, a template for useful in-buffer settings or properties can be inserted
+into the buffer with @kbd{M-x org-beamer-insert-options-template}.  Among
+other things, this will install a column view format which is very handy for
+editing special properties used by Beamer.
+
+@subheading An example
+
+Here is a simple example Org document that is intended for Beamer export.
+
+@smallexample
+#+TITLE: Example Presentation
+#+AUTHOR: Carsten Dominik
+#+OPTIONS: H:2
+#+LATEX_CLASS: beamer
+#+LATEX_CLASS_OPTIONS: [presentation]
+#+BEAMER_THEME: Madrid
+#+COLUMNS: %45ITEM %10BEAMER_ENV(Env) %10BEAMER_ACT(Act) %4BEAMER_COL(Col) %8BEAMER_OPT(Opt)
+
+* This is the first structural section
+
+** Frame 1
+*** Thanks to Eric Fraga                                           :B_block:BMCOL:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ENV: block
+    :END:
+    for the first viable Beamer setup in Org
+*** Thanks to everyone else                                        :B_block:BMCOL:
+    :PROPERTIES:
+    :BEAMER_COL: 0.48
+    :BEAMER_ACT: <2->
+    :BEAMER_ENV: block
+    :END:
+    for contributing to the discussion
+**** This will be formatted as a beamer note                              :B_note:
+     :PROPERTIES:
+     :BEAMER_env: note
+     :END:
+** Frame 2 (where we will not use columns)
+*** Request
+    Please test this stuff!
+@end smallexample
+
+@node HTML export, @LaTeX{} and PDF export, Beamer export, Exporting
 @section HTML export
 @cindex HTML export
 
@@ -11078,7 +11295,6 @@ nested footnotes, footnotes in tables and footnotes in items' description.
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
 * @LaTeX{} specific attributes::   Controlling @LaTeX{} output
-* Beamer class export::         Turning the file into a presentation
 @end menu
 
 @node @LaTeX{}/PDF export commands, Header and sectioning, @LaTeX{} and PDF export, @LaTeX{} and PDF export
@@ -11171,8 +11387,7 @@ All lines between these markers are exported literally
 #+END_LATEX
 @end example
 
-
-@node @LaTeX{} specific attributes, Beamer class export, Quoting @LaTeX{} code, @LaTeX{} and PDF export
+@node @LaTeX{} specific attributes, , Quoting @LaTeX{} code, @LaTeX{} and PDF export
 @subsection @LaTeX{} specific attributes
 @cindex #+ATTR_LATEX
 
@@ -11362,134 +11577,6 @@ respectively, @code{:width} and @code{:thickness} attributes:
 #+ATTR_LATEX: :width .6\textwidth :thickness 0.8pt
 -----
 @end example
-
-@node Beamer class export,  , @LaTeX{} specific attributes, @LaTeX{} and PDF export
-@subsection Beamer class export
-
-The @LaTeX{} class @file{beamer} allows production of high quality
-presentations using @LaTeX{} and pdf processing.  Org mode has special
-support for turning an Org mode file or tree into a @file{beamer}
-presentation.
-
-When the @LaTeX{} class for the current buffer (as set with @code{#+LaTeX_CLASS:
-beamer}) or subtree (set with a @code{LaTeX_CLASS} property) is
-@code{beamer}, a special export mode will turn the file or tree into a beamer
-presentation.  Any tree with not-too-deep level nesting should in principle be
-exportable as a beamer presentation.  By default, the top-level entries (or
-the first level below the selected subtree heading) will be turned into
-frames, and the outline structure below this level will become itemize lists.
-You can also configure the variable @code{org-beamer-frame-level} to a
-different level---then the hierarchy above frames will produce the sectioning
-structure of the presentation.
-
-A template for useful in-buffer settings or properties can be inserted into
-the buffer with @kbd{M-x org-beamer-insert-options-template}.  Among other
-things, this will install a column view format which is very handy for
-editing special properties used by beamer.
-
-You can influence the structure of the presentation using the following
-properties:
-
-@table @code
-@item BEAMER_env
-The environment that should be used to format this entry.  Valid environments
-are defined in the constant @code{org-beamer-environments-default}, and you
-can define more in @code{org-beamer-environments-extra}.  If this property is
-set, the entry will also get a @code{:B_environment:} tag to make this
-visible.  This tag has no semantic meaning, it is only a visual aid.
-@item BEAMER_envargs
-The beamer-special arguments that should be used for the environment, like
-@code{[t]} or @code{[<+->]} of @code{<2-3>}.  If the @code{BEAMER_col}
-property is also set, something like @code{C[t]} can be added here as well to
-set an options argument for the implied @code{columns} environment.
-@code{c[t]} or @code{c<2->} will set an options for the implied @code{column}
-environment.
-@item BEAMER_col
-The width of a column that should start with this entry.  If this property is
-set, the entry will also get a @code{:BMCOL:} property to make this visible.
-Also this tag is only a visual aid.  When this is a plain number, it will be
-interpreted as a fraction of @code{\textwidth}.  Otherwise it will be assumed
-that you have specified the units, like @samp{3cm}.  The first such property
-in a frame will start a @code{columns} environment to surround the columns.
-This environment is closed when an entry has a @code{BEAMER_col} property
-with value 0 or 1, or automatically at the end of the frame.
-@item BEAMER_extra
-Additional commands that should be inserted after the environment has been
-opened.  For example, when creating a frame, this can be used to specify
-transitions.
-@end table
-
-Frames will automatically receive a @code{fragile} option if they contain
-source code that uses the verbatim environment.  Special @file{beamer}
-specific code can be inserted using @code{#+BEAMER:} and
-@code{#+BEGIN_BEAMER...#+END_BEAMER} constructs, similar to other export
-backends, but with the difference that @code{#+LaTeX:} stuff will be included
-in the presentation as well.
-
-Outline nodes with @code{BEAMER_env} property value @samp{note} or
-@samp{noteNH} will be formatted as beamer notes, i,e, they will be wrapped
-into @code{\note@{...@}}.  The former will include the heading as part of the
-note text, the latter will ignore the heading of that node.  To simplify note
-generation, it is actually enough to mark the note with a @emph{tag} (either
-@code{:B_note:} or @code{:B_noteNH:}) instead of creating the
-@code{BEAMER_env} property.
-
-You can turn on a special minor mode @code{org-beamer-mode} for editing
-support with
-
-@example
-#+STARTUP: beamer
-@end example
-
-@table @kbd
-@orgcmd{C-c C-b,org-beamer-select-environment}
-In @code{org-beamer-mode}, this key offers fast selection of a beamer
-environment or the @code{BEAMER_col} property.
-@end table
-
-Column view provides a great way to set the environment of a node and other
-important parameters.  Make sure you are using a COLUMN format that is geared
-toward this special purpose.  The command @kbd{M-x
-org-insert-beamer-options-template} defines such a format.
-
-Here is a simple example Org document that is intended for beamer export.
-
-@smallexample
-#+LaTeX_CLASS: beamer
-#+TITLE: Example Presentation
-#+AUTHOR: Carsten Dominik
-#+LaTeX_CLASS_OPTIONS: [presentation]
-#+BEAMER_FRAME_LEVEL: 2
-#+BEAMER_HEADER_EXTRA: \usetheme@{Madrid@}\usecolortheme@{default@}
-#+COLUMNS: %35ITEM %10BEAMER_env(Env) %10BEAMER_envargs(Args) %4BEAMER_col(Col) %8BEAMER_extra(Ex)
-
-* This is the first structural section
-
-** Frame 1 \\ with a subtitle
-*** Thanks to Eric Fraga                                      :BMCOL:B_block:
-    :PROPERTIES:
-    :BEAMER_env: block
-    :BEAMER_envargs: C[t]
-    :BEAMER_col: 0.5
-    :END:
-    for the first viable beamer setup in Org
-*** Thanks to everyone else                                   :BMCOL:B_block:
-    :PROPERTIES:
-    :BEAMER_col: 0.5
-    :BEAMER_env: block
-    :BEAMER_envargs: <2->
-    :END:
-    for contributing to the discussion
-**** This will be formatted as a beamer note                  :B_note:
-** Frame 2 \\ where we will not use columns
-*** Request                                                   :B_block:
-    Please test this stuff!
-    :PROPERTIES:
-    :BEAMER_env: block
-    :END:
-@end smallexample
-
-For more information, see the documentation on Worg.
 
 @node Markdown export, OpenDocument Text export, @LaTeX{} and PDF export, Exporting
 @section Markdown export
