@@ -516,7 +516,11 @@ of a different task.")
 (defun org-clock-select-task (&optional prompt)
   "Select a task that was recently associated with clocking."
   (interactive)
-  (let ((chl (length org-clock-history)) sel-list rpl (i 0) s)
+  (let (och chl sel-list rpl (i 0) s)
+    ;; Remove successive dups from the clock history to consider
+    (mapc (lambda (c) (if (not (equal c (car och))) (push c och)))
+	  org-clock-history)
+    (setq och (reverse och) chl (length och))
     (if (zerop chl)
 	(user-error "No recent clock")
       (save-window-excursion
@@ -546,7 +550,7 @@ of a different task.")
 			(+ i (- ?A 10))) m))
 	     (if (fboundp 'int-to-char) (setf (car s) (int-to-char (car s))))
 	     (push s sel-list)))
-	 org-clock-history)
+	 och)
 	(run-hooks 'org-clock-before-select-task-hook)
 	(goto-char (point-min))
 	;; Set min-height relatively to circumvent a possible but in
