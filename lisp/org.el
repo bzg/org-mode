@@ -1117,8 +1117,7 @@ visibility is cycled."
 		 (const :tag "Only in completely white lines" white)
 		 (const :tag "Before first char in a line" whitestart)
 		 (const :tag "Everywhere except in headlines" t)
-		 (const :tag "Everywhere except at bol in headlines" exc-hl-bol)
-		 ))
+		 (const :tag "Everywhere except at bol in headlines" exc-hl-bol)))
 
 (defcustom org-cycle-separator-lines 2
   "Number of empty lines needed to keep an empty line between collapsed trees.
@@ -1906,12 +1905,10 @@ The system \"open\" is used for most files.
 See `org-file-apps'.")
 
 (defcustom org-file-apps
-  '(
-    (auto-mode . emacs)
+  '((auto-mode . emacs)
     ("\\.mm\\'" . default)
     ("\\.x?html?\\'" . default)
-    ("\\.pdf\\'" . default)
-    )
+    ("\\.pdf\\'" . default))
   "External applications for opening `file:path' items in a document.
 Org-mode uses system defaults for different file types, but
 you can use this variable to set the application for a given file
@@ -6229,8 +6226,7 @@ needs to be inserted at a specific position in the font-lock sequence.")
 				 "\\)"))
 		 '(2 'org-special-keyword t))
 	   ;; Blocks and meta lines
-	   '(org-fontify-meta-lines-and-blocks)
-	   )))
+	   '(org-fontify-meta-lines-and-blocks))))
     (setq org-font-lock-extra-keywords (delq nil org-font-lock-extra-keywords))
     (run-hooks 'org-font-lock-set-keywords-hook)
     ;; Now set the full font-lock-keywords
@@ -10194,8 +10190,7 @@ This is still an experimental function, your mileage may vary."
     ;; A typical message link.  Planner has the id after the final slash,
     ;; we separate it with a hash mark
     (setq path (concat (match-string 1 path) "#"
-		       (org-remove-angle-brackets (match-string 2 path)))))
-   )
+		       (org-remove-angle-brackets (match-string 2 path))))))
   (cons type path))
 
 (defun org-find-file-at-mouse (ev)
@@ -10735,8 +10730,7 @@ visibility around point, thus ignoring
 	    re4 (concat pre (if pre re4_ re4))
 	    reall (concat "\\(" re0 "\\)\\|\\(" re1 "\\)\\|\\(" re2
 			  "\\)\\|\\(" re3 "\\)\\|\\(" re4 "\\)\\|\\("
-			  re5 "\\)"
-			  ))
+			  re5 "\\)"))
       (cond
        ((eq type 'org-occur) (org-occur reall))
        ((eq type 'occur) (org-do-occur (downcase reall) 'cleanup))
@@ -11275,8 +11269,7 @@ on the system \"/user@host:\"."
 		       (goto-char (point-at-eol))))))))
 	    (when org-refile-use-cache
 	      (org-refile-cache-put tgs (buffer-file-name) descre))
-	    (setq targets (append tgs targets))
-	    ))))
+	    (setq targets (append tgs targets))))))
     (message "Getting targets...done")
     (nreverse targets)))
 
@@ -16534,8 +16527,7 @@ DEF-FLAG   is t when a double ++ or -- indicates shift relative to
 	    (if (= dir ?-)
 		(progn
 		  (setq delta (- delta 7))
-		  (if (= delta 0) (setq delta -7))
-		  ))
+		  (if (= delta 0) (setq delta -7))))
 	    (if (> n 1) (setq delta (+ delta (* (1- n) (if (= dir ?-) -7 7)))))
 	    (list delta "d" rel))
 	(list (* n (if (= dir ?-) -1 1)) what rel)))))
