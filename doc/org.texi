@@ -584,6 +584,7 @@ Exporting
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
+* Markdown export::             Exporting to Markdown format
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * iCalendar export::            Exporting in iCalendar format
 
@@ -10262,6 +10263,7 @@ the iCalendar format.
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
+* Markdown export::             Exporting to Markdown format
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * iCalendar export::            Exporting in iCalendar format
 @end menu
@@ -11090,11 +11092,6 @@ Export as @LaTeX{} and then process to PDF.
 Export as @LaTeX{} and then process to PDF, then open the resulting PDF file.
 @end table
 
-In the exported version, the first three outline levels become headlines,
-defining a general document structure.  Additional levels are exported as
-@code{itemize} or @code{enumerate} lists.  The transition can also occur at
-a different level (@pxref{Export settings}).
-
 @node Header and sectioning, Quoting @LaTeX{} code, @LaTeX{}/PDF export commands, @LaTeX{} and PDF export
 @subsection Header and sectioning structure
 @cindex @LaTeX{} class
@@ -11102,6 +11099,11 @@ a different level (@pxref{Export settings}).
 @cindex @LaTeX{} header
 @cindex header, for @LaTeX{} files
 @cindex sectioning structure, for @LaTeX{} export
+
+The first three outline levels become headlines, defining a general document
+structure.  Additional levels are exported as @code{itemize} or
+@code{enumerate} lists.  The transition can also occur at a different level
+(@pxref{Export settings}).
 
 By default, the @LaTeX{} output uses the class @code{article}.
 
@@ -11484,20 +11486,52 @@ Here is a simple example Org document that is intended for beamer export.
 
 For more information, see the documentation on Worg.
 
+@node Markdown export, OpenDocument Text export, @LaTeX{} and PDF export, Exporting
+@section Markdown export
+@cindex Markdown export
+
+@code{md} export back-end generates Markdown syntax@footnote{Vanilla flavour,
+as defined at @url{http://daringfireball.net/projects/markdown/}.} for an Org
+mode buffer.
+
+It is built over HTML back-end: any construct not supported by Markdown
+syntax (e.g., tables) will be controlled and translated by @code{html}
+back-end (@pxref{HTML export}).
+
+@subheading Markdown export commands
+
+@table @kbd
+@orgcmd{C-c C-e m m,org-md-export-to-markdown}
+Export as a text file written in Markdown syntax.  For an Org file,
+@file{myfile.org}, the resulting file will be @file{myfile.md}.  The file
+will be overwritten without warning.
+@orgcmd{C-c C-e m M,org-md-export-as-markdown}
+Export to a temporary buffer.  Do not create a file.
+@item C-c C-e m o
+Export as a text file with Markdown syntax, then open it.
+@end table
+
+@subheading Header and sectioning structure
+
+@vindex org-md-headline-style
+Markdown export can generate both @code{atx} and @code{setext} types for
+headlines, according to @var{org-md-headline-style}.  The former introduces
+a hard limit of two levels, whereas the latter pushes it to six.  Headlines
+below that limit are exported as lists.  You can also set a soft limit before
+that one (@pxref{Export settings}).
+
 @c begin opendocument
 
-@node OpenDocument Text export, iCalendar export, @LaTeX{} and PDF export, Exporting
+@node OpenDocument Text export, iCalendar export, Markdown export, Exporting
 @section OpenDocument Text export
 @cindex ODT
 @cindex OpenDocument
 @cindex export, OpenDocument
 @cindex LibreOffice
-@cindex org-odt.el
-@cindex org-modules
 
-Org Mode@footnote{Versions 7.8 or later} supports export to OpenDocument Text
-(ODT) format using the @file{org-odt.el} module.  Documents created
-by this exporter use the @cite{OpenDocument-v1.2
+Org mode@footnote{Versions 7.8 or later} supports export to OpenDocument Text
+(ODT) format.  Documents created by this exporter use the
+@cite{OpenDocument-v1.2
 specification}@footnote{@url{http://docs.oasis-open.org/office/v1.2/OpenDocument-v1.2.html,
 Open Document Format for Office Applications (OpenDocument) Version 1.2}} and
 are compatible with LibreOffice 3.4.
