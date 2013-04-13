@@ -12628,43 +12628,37 @@ and @code{:exclude}.
 Publishing means that a file is copied to the destination directory and
 possibly transformed in the process.  The default transformation is to export
 Org files as HTML files, and this is done by the function
-@code{org-html-publish-to-html} which calls the HTML exporter (@pxref{HTML
+@code{org-html-publish-to-html}, which calls the HTML exporter (@pxref{HTML
 export}).  But you also can publish your content as PDF files using
 @code{org-latex-publish-to-pdf} or as @code{ascii}, @code{Texinfo}, etc.,
 using the corresponding functions.
 
-If you want to publish the Org file itself but with the @i{archived},
-@i{commented} and @i{tag-excluded} trees removed, use the function
-@code{org-org-publish-to-org}.  This will produce @file{file.org}.  If you
-want a htmlized version of this file, set the parameter
-@code{:htmlized-source} to @code{t}, it will produce @file{file.org.html} in
-the publishing directory.
+If you want to publish the Org file as an @code{.org} file but with the
+@i{archived}, @i{commented} and @i{tag-excluded} trees removed, use the
+function @code{org-org-publish-to-org}.  This will produce @file{file.org}
+and put it in the publishing directory.  If you want a htmlized version of
+this file, set the parameter @code{:htmlized-source} to @code{t}, it will
+produce @file{file.org.html} in the publishing directory@footnote{If the
+publishing directory is the same than the source directory, @file{file.org}
+will be exported as @file{file.org.org}, so probably don't want to do this.}.
 
-@c @footnote{@file{file-source.org} and @file{file-source.org.html} if source
-@c and publishing directories are equal.  Note that with this kind of setup, you
-@c need to add @code{:exclude "-source\\.org"} to the project definition in
-@c @code{org-publish-project-alist} to prevent the published source files from
-@c being considered as new org files the next time the project is published.}.
-
-Other files like images only need to be copied to the publishing destination;
-for this you may use @code{org-publish-attachment}.  For non-Org files, you
+Other files like images only need to be copied to the publishing destination.
+For this you can use @code{org-publish-attachment}.  For non-org files, you
 always need to specify the publishing function:
 
 @multitable @columnfractions 0.3 0.7
 @item @code{:publishing-function}
 @tab Function executing the publication of a file.  This may also be a
 list of functions, which will all be called in turn.
-@c @item @code{:plain-source}
-@c @tab Non-nil means, publish plain source.
 @item @code{:htmlized-source}
 @tab Non-nil means, publish htmlized source.
 @end multitable
 
 The function must accept three arguments: a property list containing at least
-a @code{:publishing-directory} property, the name of the file to be
-published, and the path to the publishing directory of the output file.  It
-should take the specified file, make the necessary transformation (if any)
-and place the result into the destination folder.
+a @code{:publishing-directory} property, the name of the file to be published
+and the path to the publishing directory of the output file.  It should take
+the specified file, make the necessary transformation (if any) and place the
+result into the destination folder.
 
 @node Publishing options, Publishing links, Publishing action, Configuration
 @subsection Options for the exporters
