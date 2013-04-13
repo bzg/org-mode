@@ -8036,6 +8036,7 @@ so that the date SD will be in that range."
   (interactive "P")
   (if (or org-agenda-tag-filter
 	  org-agenda-category-filter
+	  org-agenda-regexp-filter
 	  org-agenda-top-headline-filter)
       (user-error "Can't show entry text in filtered views")
     (setq org-agenda-entry-text-mode (or (integerp arg)
