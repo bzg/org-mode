@@ -10311,7 +10311,6 @@ combinations:
 @table @kbd
 @item C-a
 @vindex org-export-async-init-file
-@vindex org-export-run-in-background
 Toggles asynchronous export.  The export happens in an external Emacs
 process@footnote{Configure @var{org-export-async-init-file} to properly set
 it up.}.
@@ -10320,9 +10319,6 @@ In this case, no output is displayed automatically.  It is stored in a list
 called the export stack, and can be viewed from there.  The stack can be
 reached by calling the dispatcher with a double @kbd{C-u} prefix argument,
 or with @kbd{&} key from the dispatcher.
-
-To make this behaviour the default, customize the variable successfully
-@var{org-export-run-in-background}.
 
 @item C-b
 Toggles body-only export.  Its effect, if any, depends on the back-end
