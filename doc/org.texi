@@ -11273,7 +11273,7 @@ You can choose default values for these options by customizing the variable
 @code{org-html-infojs-options}.  If you always want to apply the script to your
 pages, configure the variable @code{org-html-use-infojs}.
 
-@node @LaTeX{} and PDF export, OpenDocument Text export, HTML export, Exporting
+@node @LaTeX{} and PDF export, Markdown export, HTML export, Exporting
 @section @LaTeX{} and PDF export
 @cindex @LaTeX{} export
 @cindex PDF export
