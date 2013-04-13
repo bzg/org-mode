@@ -21598,14 +21598,16 @@ for the search purpose."
   (let ((res (copy-seq list))) (delete-dups res)))
 
 (defun org-uniquify-alist (alist)
-  "Merge duplicate elements of ALIST.
+  "Merge elements of ALIST with the same key.
 
 For example, in this alist:
 
 \(org-uniquify-alist '((a 1) (b 2) (a 3)))
   => '((a 1 3) (b 2))
 
-merge (a 1) and (a 3) into (a 1 3) and return the new alist."
+merge (a 1) and (a 3) into (a 1 3).
+
+The function returns the new ALIST."
   (let (rtn)
     (mapc
      (lambda (e)
