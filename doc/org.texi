@@ -584,9 +584,9 @@ Exporting
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
-* Markdown export::             Exporting to Markdown format
+* Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
-* iCalendar export::            Exporting in iCalendar format
+* iCalendar export::            Exporting to iCalendar
 
 HTML export
 
@@ -760,7 +760,7 @@ Tables and lists in arbitrary syntax
 * Radio tables::                Sending and receiving radio tables
 * A @LaTeX{} example::          Step by step, almost a tutorial
 * Translator functions::        Copy and modify
-* Radio lists::                 Doing the same for lists
+* Radio lists::                 Sending and receiving lists
 
 MobileOrg
 
@@ -10263,9 +10263,9 @@ the iCalendar format.
 * ASCII/Latin-1/UTF-8 export::  Exporting to flat files with encoding
 * HTML export::                 Exporting to HTML
 * @LaTeX{} and PDF export::     Exporting to @LaTeX{}, and processing to PDF
-* Markdown export::             Exporting to Markdown format
+* Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
-* iCalendar export::            Exporting in iCalendar format
+* iCalendar export::            Exporting to iCalendar
 @end menu
 
 @node The Export Dispatcher, Export formats, Exporting, Exporting
@@ -16107,7 +16107,7 @@ can use Org's facilities to edit and structure lists by turning
 * Radio tables::                Sending and receiving radio tables
 * A @LaTeX{} example::          Step by step, almost a tutorial
 * Translator functions::        Copy and modify
-* Radio lists::                 Doing the same for lists
+* Radio lists::                 Sending and receiving lists
 @end menu
 
 @node Radio tables, A @LaTeX{} example, Tables in arbitrary syntax, Tables in arbitrary syntax
