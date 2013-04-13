@@ -28,12 +28,11 @@
 ;;; Commentary:
 ;;
 ;; This library implements a TaskJuggler exporter for Org mode.
-;; TaskJuggler uses a text format to define projects, tasks and
-;; resources, so it is a natural fit for Org mode.  It can produce all
-;; sorts of reports for tasks or resources in either HTML, CSV or PDF.
-;; The current version of TaskJuggler requires KDE but the next
-;; version is implemented in Ruby and should therefore run on any
-;; platform.
+;; TaskJuggler is a project planing tool that uses a text format to
+;; define projects, tasks and resources, so it is a natural fit for
+;; Org mode.  It can produce all sorts of reports for tasks or
+;; resources in either HTML, CSV or PDF.  TaskJuggler is implemented
+;; in Ruby and should therefore run on any platform.
 ;;
 ;; The exporter does not export all the nodes of a document or
 ;; strictly follow the order of the nodes in the document.
@@ -185,7 +184,14 @@ the project."
   :type 'string)
 
 (defcustom org-taskjuggler-target-version 3.0
-  "Which version of TaskJuggler the exporter is targeting."
+  "Which version of TaskJuggler the exporter is targeting.
+By default a project plan is exported which conforms to version
+3.x of TaskJuggler.  For a project plan that is compatible with
+versions of TaskJuggler older than 3.0 set this to 2.4.
+
+If you change this variable be sure to also change
+`org-taskjuggler-default-reports' as the format of reports has
+changed considerably between version 2.x and 3.x of TaskJuggler"
   :group 'org-export-taskjuggler
   :type 'number)
 
