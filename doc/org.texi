@@ -10321,6 +10321,10 @@ called the export stack, and can be viewed from there.  The stack can be
 reached by calling the dispatcher with a double @kbd{C-u} prefix argument,
 or with @kbd{&} key from the dispatcher.
 
+@vindex org-export-in-background
+To make this behaviour the default, customize the variable
+@var{org-export-in-background}.
+
 @item C-b
 Toggles body-only export.  Its effect, if any, depends on the back-end
 used.  Its purpose is to remove all meta-data from output and focus on the
