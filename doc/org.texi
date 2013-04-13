@@ -5028,7 +5028,7 @@ You can also use the @code{:grouptags} keyword directly when setting
 @var{org-tag-alist}:
 
 @lisp
-(setq org-tag-alist '((:startgroup . nil) 
+(setq org-tag-alist '((:startgroup . nil)
                       ("@@read" . nil)
                       (:grouptags . nil)
                       ("@@read_book" . nil)
@@ -15906,7 +15906,7 @@ A large number of add-on packages have been written by various authors.
 These packages are not part of Emacs, but they are distributed as contributed
 packages with the separate release available at @uref{http://orgmode.org}.
 See the @file{contrib/README} file in the source code directory for a list of
-contributed files.  You may also find some more information on the Worg page: 
+contributed files.  You may also find some more information on the Worg page:
 @uref{http://orgmode.org/worg/org-contrib/}.
 
 @node Adding hyperlink types, Adding export back-ends, Add-on packages, Hacking
@@ -16600,7 +16600,7 @@ Reduce the number of DONE and archived headlines: this way the agenda does
 not need to skip them.
 @item
 @vindex org-agenda-dim-blocked-tasks
-Inhibit the dimming of blocked tasks: 
+Inhibit the dimming of blocked tasks:
 @lisp
 (setq org-agenda-dim-blocked-tasks nil)
 @end lisp
