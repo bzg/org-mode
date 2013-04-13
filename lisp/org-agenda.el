@@ -3979,6 +3979,7 @@ dates."
   (interactive "P")
   (let* ((dopast t)
 	 (org-agenda-show-log-scoped org-agenda-show-log)
+	 (org-agenda-show-log org-agenda-show-log-scoped)
 	 (entry (buffer-file-name (or (buffer-base-buffer (current-buffer))
 				      (current-buffer))))
 	 (date (calendar-current-date))
@@ -3995,9 +3996,11 @@ dates."
 	 args
 	 s e rtn d emptyp)
     (setq org-agenda-redo-command
-	  (list 'progn
-		(list 'org-switch-to-buffer-other-window (current-buffer))
-		(list 'org-timeline (list 'quote dotodo))))
+    	  (list 'let
+		(list (list 'org-agenda-show-log 'org-agenda-show-log))
+    		(list 'org-switch-to-buffer-other-window (current-buffer))
+    		(list 'org-timeline (list 'quote dotodo))))
+    (put 'org-agenda-redo-command 'org-lprops nil)
     (if (not dopast)
 	;; Remove past dates from the list of dates.
 	(setq day-numbers (delq nil (mapcar (lambda(x)
@@ -4050,10 +4053,11 @@ dates."
 		  (put-text-property s (1- (point)) 'org-today t))
 	      (and rtn (insert (org-agenda-finalize-entries rtn 'timeline) "\n"))
 	      (put-text-property s (1- (point)) 'day d)))))
-    (goto-char (point-min))
     (goto-char (or (text-property-any (point-min) (point-max) 'org-today t)
 		   (point-min)))
-    (add-text-properties (point-min) (point-max) '(org-agenda-type timeline))
+    (add-text-properties
+     (point-min) (point-max)
+     `(org-agenda-type timeline org-redo-cmd ,org-agenda-redo-command))
     (org-agenda-finalize)
     (setq buffer-read-only t)))
 
