@@ -15906,13 +15906,12 @@ maintained by the Worg project and can be found at
 @cindex add-on packages
 
 A large number of add-on packages have been written by various authors.
+
 These packages are not part of Emacs, but they are distributed as contributed
-packages with the separate release available at the Org mode home page at
-@uref{http://orgmode.org}.  The list of contributed packages, along with
-documentation about each package, is maintained by the Worg project at
+packages with the separate release available at @uref{http://orgmode.org}.
+See the @file{contrib/README} file in the source code directory for a list of
+contributed files.  You may also find some more information on the Worg page: 
 @uref{http://orgmode.org/worg/org-contrib/}.
-
-
 
 @node Adding hyperlink types, Adding export back-ends, Add-on packages, Hacking
 @section Adding hyperlink types
