@@ -2285,7 +2285,7 @@ Any element in `:ignore-list' will be skipped when using
 ;;   configure it.
 ;;
 ;; - `:filter-TYPE' applies on the string returned after an element or
-;;   object of type TYPE has been transcoded.  An user can modify
+;;   object of type TYPE has been transcoded.  A user can modify
 ;;   `org-export-filter-TYPE-functions'
 ;;
 ;; All filters sets are applied with
