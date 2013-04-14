@@ -394,21 +394,46 @@ Paragraph"
 	  (org-test-with-temp-text "[0/0]"
 	    (org-test-with-backend test
 	      (org-export-as
-	       'test nil nil nil '(:with-statistics-cookies nil))))))
-  ;; Timestamps.
-  (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
-    (org-test-with-backend test
-      (should
-       (equal (org-export-as 'test nil nil nil '(:with-timestamps t))
-	      "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>\n"))
-      (should
-       (equal (org-export-as 'test nil nil nil '(:with-timestamps nil)) ""))
-      (should
-       (equal (org-export-as 'test nil nil nil '(:with-timestamps active))
-	      "<2012-04-29 sun. 10:45>\n"))
-      (should
-       (equal (org-export-as 'test nil nil nil '(:with-timestamps inactive))
-	      "[2012-04-29 sun. 10:45]\n")))))
+	       'test nil nil nil '(:with-statistics-cookies nil)))))))
+
+(ert-deftest test-org-export/with-timestamps ()
+  "Test `org-export-with-timestamps' specifications."
+  ;; t value.
+  (should
+   (equal
+    "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>\n"
+    (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
+      (org-test-with-backend test
+	(org-export-as 'test nil nil nil '(:with-timestamps t))))))
+  ;; nil value.
+  (should
+   (equal
+    ""
+    (org-test-with-temp-text "[2012-04-29 sun. 10:45]<2012-04-29 sun. 10:45>"
+      (org-test-with-backend test
+	(org-export-as 'test nil nil nil '(:with-timestamps nil))))))
+  ;; `active' value.
+  (should
+   (equal
+    "<2012-03-29 Thu>\n\nParagraph <2012-03-29 Thu>[2012-03-29 Thu]"
+    (org-test-with-temp-text
+	"<2012-03-29 Thu>[2012-03-29 Thu]
+
+Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
+      (org-test-with-backend test
+	(org-trim
+	 (org-export-as 'test nil nil nil '(:with-timestamps active)))))))
+  ;; `inactive' value.
+  (should
+   (equal
+    "[2012-03-29 Thu]\n\nParagraph <2012-03-29 Thu>[2012-03-29 Thu]"
+    (org-test-with-temp-text
+	"<2012-03-29 Thu>[2012-03-29 Thu]
+
+Paragraph <2012-03-29 Thu>[2012-03-29 Thu]"
+      (org-test-with-backend test
+	(org-trim
+	 (org-export-as 'test nil nil nil '(:with-timestamps inactive))))))))
 
 (ert-deftest test-org-export/comment-tree ()
   "Test if export process ignores commented trees."

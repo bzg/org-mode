@@ -726,9 +726,15 @@ also be set with the OPTIONS keyword, e.g. \"timestamp:nil\"."
 (defcustom org-export-with-timestamps t
   "Non nil means allow timestamps in export.
 
-It can be set to `active', `inactive', t or nil, in order to
-export, respectively, only active timestamps, only inactive ones,
-all of them or none.
+It can be set to any of the following values:
+  t          export all timestamps.
+  `active'   export active timestamps only.
+  `inactive' export inactive timestamps only.
+  nil        do not export timestamps
+
+This only applies to timestamps isolated in a paragraph
+containing only timestamps.  Other timestamps are always
+exported.
 
 This option can also be set with the OPTIONS keyword, e.g.
 \"<:nil\"."
@@ -2022,19 +2028,24 @@ a tree with a select tag."
 	  (not (org-export-get-previous-element blob options))))
     (table-row (org-export-table-row-is-special-p blob options))
     (timestamp
-     (case (plist-get options :with-timestamps)
-       ;; No timestamp allowed.
-       ('nil t)
-       ;; Only active timestamps allowed and the current one isn't
-       ;; active.
-       (active
-	(not (memq (org-element-property :type blob)
-		   '(active active-range))))
-       ;; Only inactive timestamps allowed and the current one isn't
-       ;; inactive.
-       (inactive
-	(not (memq (org-element-property :type blob)
-		   '(inactive inactive-range))))))))
+     ;; `:with-timestamps' only applies to isolated timestamps
+     ;; objects, i.e. timestamp objects in a paragraph containing only
+     ;; timestamps and whitespaces.
+     (when (let ((parent (org-export-get-parent-element blob)))
+	     (and (memq (org-element-type parent) '(paragraph verse-block))
+		  (not (org-element-map parent
+			   (cons 'plain-text
+				 (remq 'timestamp org-element-all-objects))
+			 (lambda (obj)
+			   (or (not (stringp obj)) (org-string-nw-p obj)))
+			 options t))))
+       (case (plist-get options :with-timestamps)
+	 ('nil t)
+	 (active
+	  (not (memq (org-element-property :type blob) '(active active-range))))
+	 (inactive
+	  (not (memq (org-element-property :type blob)
+		     '(inactive inactive-range)))))))))
 
 
 ;;; The Transcoder
