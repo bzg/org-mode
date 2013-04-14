@@ -116,6 +116,18 @@
 (eval-when-compile (require 'cl))
 (require 'ox-latex)
 
+;; Install a default set-up for Beamer export.
+(unless (assoc "beamer" org-latex-classes)
+  (add-to-list 'org-latex-classes
+	       '("beamer"
+		 "\\documentclass[presentation]{beamer}
+     \[DEFAULT-PACKAGES]
+     \[PACKAGES]
+     \[EXTRA]"
+		 ("\\section{%s}" . "\\section*{%s}")
+		 ("\\subsection{%s}" . "\\subsection*{%s}")
+		 ("\\subsubsection{%s}" . "\\subsubsection*{%s}"))))
+
 
 
 ;;; User-Configurable Variables
@@ -311,7 +323,9 @@ Return overlay specification, as a string, or nil."
     (:beamer-inner-theme "BEAMER_INNER_THEME" nil nil t)
     (:beamer-outer-theme "BEAMER_OUTER_THEME" nil nil t)
     (:beamer-header-extra "BEAMER_HEADER" nil nil newline)
-    (:headline-levels nil "H" org-beamer-frame-level))
+    ;; Modify existing properties.
+    (:headline-levels nil "H" org-beamer-frame-level)
+    (:latex-class "LATEX_CLASS" nil "beamer" t))
   :translate-alist '((bold . org-beamer-bold)
 		     (export-block . org-beamer-export-block)
 		     (export-snippet . org-beamer-export-snippet)
