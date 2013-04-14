@@ -2653,23 +2653,28 @@ format, however, has been changed to @code{(float 8)} to keep tables
 compact.  The default settings can be configured using the variable
 @code{org-calc-default-modes}.
 
-@example
-p20           @r{set the internal Calc calculation precision to 20 digits}
-n3 s3 e2 f4   @r{Normal, scientific, engineering, or fixed}
-              @r{format of the result of Calc passed back to Org.}
-              @r{Calc formatting is unlimited in precision as}
-              @r{long as the Calc calculation precision is greater.}
-D R           @r{angle modes: degrees, radians}
-F S           @r{fraction and symbolic modes}
-E             @r{keep empty fields in ranges and use nan (not a number)}
-              @r{in Calc formulas for empty fields in range references and}
-              @r{for empty field references; else suppress empty fields in}
-              @r{range references and use 0 for empty field references, see}
-              @r{also the notes for `Range references' in @pxref{References}}
-N             @r{interpret all fields as numbers, use 0 for non-numbers;}
-              @r{N has higher precedence than E (for the value of the field)}
-L             @r{literal, for Lisp formulas only}
-@end example
+@table @asis
+@item @code{p20}
+Set the internal Calc calculation precision to 20 digits.
+@item @code{n3}, @code{s3}, @code{e2}, @code{f4}
+Normal, scientific, engineering or fixed format of the result of Calc passed
+back to Org.  Calc formatting is unlimited in precision as long as the Calc
+calculation precision is greater.
+@item @code{D}, @code{R}
+Angle modes: Degree, radian.
+@item @code{F}, @code{S}
+Fraction and symbolic modes.
+@item @code{E}
+Keep empty fields in ranges and use nan (not a number) in Calc formulas for
+empty fields in range references and for empty field references.  Else
+suppress empty fields in range references and use 0 for empty field
+references, see also the notes for `Range references' in @pxref{References}.
+@item @code{N}
+Interpret all fields as numbers, use 0 for non-numbers.  @code{N} has higher
+precedence than @code{E} (for the value of the field).
+@item @code{L}
+Literal, for Lisp formulas only.
+@end table
 
 @noindent
 Unless you use large integer numbers or high-precision-calculation
@@ -2699,12 +2704,12 @@ taylor($3,x=7,2)     @r{Taylor series of $3, at x=7, second degree}
 
 Calc also contains a complete set of logical operations.  For example
 
-@example
-if($1 < 20, teen, string(""))
-                     @r{"teen" if age $1 is less than 20, else empty}
-if("$1" = "nan" || "$2" = "nan", string(""), $1 + $2); E
-                     @r{sum of first two columns unless one or both empty}
-@end example
+@table @code
+@item if($1 < 20, teen, string(""))
+"teen" if age $1 is less than 20, else empty.
+@item if("$1" = "nan" || "$2" = "nan", string(""), $1 + $2); E
+Sum of first two columns unless one or both empty.
+@end table
 
 Note that you can also use two org-specific flags @code{T} and @code{t} for
 durations computations @ref{Durations and time values}.
@@ -2739,14 +2744,14 @@ fields, so you can embed them in list or vector syntax.
 Here are a few examples---note how the @samp{N} mode is used when we do
 computations in Lisp:
 
-@example
-@r{Swap the first two characters of the content of column 1}
-  '(concat (substring $1 1 2) (substring $1 0 1) (substring $1 2))
-@r{Add columns 1 and 2, equivalent to Calc's @code{$1+$2}}
-  '(+ $1 $2);N
-@r{Compute the sum of columns 1--4, like Calc's @code{vsum($1..$4)}}
-  '(apply '+ '($1..$4));N
-@end example
+@table @code
+@item '(concat (substring $1 1 2) (substring $1 0 1) (substring $1 2))
+Swap the first two characters of the content of column 1.
+@item '(+ $1 $2);N
+Add columns 1 and 2, equivalent to Calc's @code{$1+$2}.
+@item '(apply '+ '($1..$4));N
+Compute the sum of columns 1 to 4, like Calc's @code{vsum($1..$4)}.
+@end table
 
 @node Durations and time values, Field and range formulas, Formula syntax for Lisp, The spreadsheet
 @subsection Durations and time values
