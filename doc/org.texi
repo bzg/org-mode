@@ -555,6 +555,7 @@ Markup for rich export
 * Index entries::               Making an index
 * Macro replacement::           Use macros to create templates
 * Embedded @LaTeX{}::           LaTeX can be freely used inside Org documents
+* Special blocks::              Containers targeted at export back-ends
 
 Structural markup elements
 
@@ -607,7 +608,7 @@ HTML export
 * @LaTeX{}/PDF export commands::
 * Header and sectioning::       Setting up the export file structure
 * Quoting @LaTeX{} code::       Incorporating literal @LaTeX{} code
-* @LaTeX{} specific attributes::  Controlling @LaTeX{} output
+* @LaTeX{} specific attributes::   Controlling @LaTeX{} output
 
 OpenDocument Text export
 
@@ -10659,10 +10660,9 @@ specified using an @code{ATTR_ASCII} line, directly preceding the rule.
 @section Beamer export
 @cindex Beamer export
 
-The @LaTeX{} class @code{Beamer} allows production of high quality
+The @LaTeX{} class @emph{Beamer} allows production of high quality
 presentations using @LaTeX{} and pdf processing.  Org mode has special
-support for turning an Org mode file or tree into a @code{Beamer}
-presentation.
+support for turning an Org mode file or tree into a Beamer presentation.
 
 @subheading Beamer export commands
 
