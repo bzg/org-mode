@@ -539,6 +539,10 @@ e.g. \"inline:nil\"."
 
 (defcustom org-export-with-planning nil
   "Non-nil means include planning info in export.
+
+Planning info is the line containing either SCHEDULED:,
+DEADLINE:, CLOSED: time-stamps, or a combination of them.
+
 This option can also be set with the OPTIONS keyword,
 e.g. \"p:t\"."
   :group 'org-export-general
