@@ -22063,8 +22063,11 @@ meant to be filled."
 		 (throw 'exit (make-string (length (match-string 0)) ? ))))))
       (org-with-wide-buffer
        (let* ((p (line-beginning-position))
-	      (element (save-excursion (beginning-of-line)
-				       (org-element-at-point)))
+	      (element (save-excursion
+			 (beginning-of-line)
+			 (or (ignore-errors (org-element-at-point))
+			     (user-error "An element cannot be parsed line %d"
+					 (line-number-at-pos (point))))))
 	      (type (org-element-type element))
 	      (post-affiliated (org-element-property :post-affiliated element)))
 	 (unless (and post-affiliated (< p post-affiliated))
@@ -22134,7 +22137,11 @@ a footnote definition, try to fill the first paragraph within."
     (with-syntax-table org-mode-transpose-word-syntax-table
       ;; Move to end of line in order to get the first paragraph
       ;; within a plain list or a footnote definition.
-      (let ((element (save-excursion (end-of-line) (org-element-at-point))))
+      (let ((element (save-excursion
+		       (end-of-line)
+		       (or (ignore-errors (org-element-at-point))
+			   (user-error "An element cannot be parsed line %d"
+				       (line-number-at-pos (point)))))))
 	;; First check if point is in a blank line at the beginning of
 	;; the buffer.  In that case, ignore filling.
 	(case (org-element-type element)
