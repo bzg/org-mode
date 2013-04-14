@@ -518,7 +518,7 @@ used as a communication channel."
 	    ;; remove the first word from the contents in the PDF
 	    ;; output.
 	    (if (not fragilep) contents
-	      (replace-regexp-in-string "\\`\n*" "\\& " contents))
+	      (replace-regexp-in-string "\\`\n*" "\\& " (or contents "")))
 	    "\\end{frame}")))
 
 (defun org-beamer--format-block (headline contents info)
