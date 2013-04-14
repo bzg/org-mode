@@ -1332,7 +1332,7 @@ Copy the @i{visible} text in the region into the kill ring.
 
 When Emacs first visits an Org file, the global state is set to OVERVIEW,
 i.e., only the top level headlines are visible@footnote{When
-@var{org-agenda-inhibit-startup} is non-nil, Org will not honor the default
+@var{org-agenda-inhibit-startup} is non-@code{nil}, Org will not honor the default
 visibility state when first opening a file for the agenda (@pxref{Speeding up
 your agendas}).}  This can be configured through the variable
 @var{org-startup-folded}, or on a per-file basis by adding one of the
@@ -1347,7 +1347,7 @@ following lines anywhere in the buffer:
 
 The startup visibility options are ignored when the file is open for the
 first time during the agenda generation: if you want the agenda to honor
-the startup visibility, set @var{org-agenda-inhibit-startup} to nil.
+the startup visibility, set @var{org-agenda-inhibit-startup} to @code{nil}.
 
 @cindex property, VISIBILITY
 @noindent
@@ -1370,7 +1370,7 @@ entries.
 @cindex edits, catching invisible
 Sometimes you may inadvertently edit an invisible part of the buffer and be
 confused on what as been edited and how to undo the mistake.  Setting
-@var{org-catch-invisible-edits} to non-nil will help prevent this.  See the
+@var{org-catch-invisible-edits} to non-@code{nil} will help prevent this.  See the
 docstring of this option on how Org should catch invisible edits and process
 them.
 
@@ -3497,7 +3497,7 @@ file:projects.org                         @r{another Org file}
 file:projects.org::some words             @r{text search in Org file}@footnote{
 The actual behavior of the search will depend on the value of
 the option @var{org-link-search-must-match-exact-headline}.  If its value
-is nil, then a fuzzy text search will be done.  If it is t, then only the
+is @code{nil}, then a fuzzy text search will be done.  If it is t, then only the
 exact headline will be matched.  If the value is @code{'query-to-create},
 then an exact headline will be searched; if it is not found, then the user
 will be queried to create it.}
@@ -3960,7 +3960,7 @@ Rotate the TODO state of the current item among
 If TODO keywords have fast access keys (see @ref{Fast access to TODO
 states}), you will be prompted for a TODO keyword through the fast selection
 interface; this is the default behavior when
-@var{org-use-fast-todo-selection} is non-nil.
+@var{org-use-fast-todo-selection} is non-@code{nil}.
 
 The same rotation can also be done ``remotely'' from the timeline and agenda
 buffers with the @kbd{t} command key (@pxref{Agenda commands}).
@@ -4417,7 +4417,7 @@ to a buffer:
 @cindex property, LOGGING
 In order to define logging settings that are local to a subtree or a
 single item, define a LOGGING property in this entry.  Any non-empty
-LOGGING property resets all logging settings to nil.  You may then turn
+LOGGING property resets all logging settings to @code{nil}.  You may then turn
 on logging for this specific tree using STARTUP keywords like
 @code{lognotedone} or @code{logrepeat}, as well as adding state specific
 settings like @code{TODO(!)}.  For example
@@ -4528,7 +4528,7 @@ The amount of history, in days before today, to appear in consistency graphs.
 @item org-habit-following-days
 The number of days after today that will appear in consistency graphs.
 @item org-habit-show-habits-only-for-today
-If non-nil, only show habits in today's agenda view.  This is set to true by
+If non-@code{nil}, only show habits in today's agenda view.  This is set to true by
 default.
 @end table
 
@@ -4841,7 +4841,7 @@ either in the @code{tags} or @code{tags-todo} agenda types.  In other agenda
 types, @var{org-use-tag-inheritance} has no effect.  Still, you may want to
 have your tags correctly set in the agenda, so that tag filtering works fine,
 with inherited tags.  Set @var{org-agenda-use-tag-inheritance} to control
-this: the default value includes all agenda types, but setting this to nil
+this: the default value includes all agenda types, but setting this to @code{nil}
 can really speed up agenda generation.
 
 @node Setting tags, Tag groups, Tag inheritance, Tags
@@ -5065,7 +5065,7 @@ You cannot nest group tags or use a group tag as a tag in another group.
 @vindex org-group-tags
 If you want to ignore group tags temporarily, toggle group tags support
 with @command{org-toggle-tags-groups}, bound to @kbd{C-c C-x q}.  If you
-want to disable tag groups completely, set @var{org-group-tags} to nil.
+want to disable tag groups completely, set @var{org-group-tags} to @code{nil}.
 
 @node Tag searches,  , Tag groups, Tags
 @section Tag searches
@@ -10311,7 +10311,7 @@ of quickly editing tables and lists in HTML, @LaTeX{}, @code{Texinfo}, etc.
 
 The main entry point for any export related task is the dispatcher, a
 hierarchical menu@footnote{It is also possible to use a less intrusive
-interface by setting @var{org-export-dispatch-use-expert-ui} to a non-nil
+interface by setting @var{org-export-dispatch-use-expert-ui} to a non-@code{nil}
 value.  In that case, only a prompt is visible from the minibuffer.  From
 there one can still switch back to regular menu with @kbd{?} key.} from
 which it is possible to select an export format and to toggle export
@@ -10769,7 +10769,7 @@ be a decimal number representing the width of the column as a fraction of the
 total text width.  If the headline has no specific environment, its title
 will be ignored and its contents will fill the column created.  Otherwise,
 the block will fill the whole column and the title will be preserved.  Two
-contiguous headlines with a non-nil @code{BEAMER_COL} value share the same
+contiguous headlines with a non-@code{nil} @code{BEAMER_COL} value share the same
 @code{columns} @LaTeX{} environment.  It will end before the next headline
 without such a property.  This environment is generated automatically.
 Although, it can also be explicitly created, with a special @code{columns}
@@ -11216,7 +11216,7 @@ classes in a basic way@footnote{This style is defined in the constant
 @var{org-html-style-default}, which you should not modify.  To turn
 inclusion of these defaults off, customize
 @var{org-html-head-include-default-style} or set @code{#+HTML_INCLUDE_STYLE}
-to nil on a per-file basis.}.  You may overwrite these settings, or add to
+to @code{nil} on a per-file basis.}.  You may overwrite these settings, or add to
 them by using the variables @var{org-html-head} and
 @var{org-html-head-extra}.  You can override the global values of these
 variables for each file by using these keywords:
@@ -11466,7 +11466,7 @@ width.  They only apply on regular tables.
 @item :spread
 Boolean specific to the @code{tabu} and @code{longtabu} environments, and
 only takes effect when used in conjunction with the @code{:width} attribute.
-When @code{:spread} is non-nil, the table will be spread or shrunk by the
+When @code{:spread} is non-@code{nil}, the table will be spread or shrunk by the
 value of @code{:width}.
 @item :booktabs
 @itemx :center
@@ -11548,7 +11548,7 @@ To modify the placement option of any floating environment, set the
 [[./img/hst.png]]
 @end example
 
-Eventually, in the @code{:comment-include} attributes has a non-nil value,
+Eventually, in the @code{:comment-include} attributes has a non-@code{nil} value,
 the code actually including the image will be commented out.
 
 @subsubheading Plain lists in @LaTeX{} export
@@ -11569,7 +11569,7 @@ arguments for that environment (square brackets may be omitted).
 
 In addition to syntax defined in @ref{Literal examples}, names and captions
 (@pxref{Images and tables}), source blocks also accept @code{:long-listing}
-attribute, which prevents the block to become a float when non nil.
+attribute, which prevents the block to become a float when non-@code{nil}.
 
 @example
 #+ATTR_LATEX: :long-listing t
@@ -11930,10 +11930,10 @@ The exporter specifies the desired size of the image in the final document in
 units of centimeters.  In order to scale the embedded images, the exporter
 queries for pixel dimensions of the images using one of a) ImageMagick's
 @file{identify} program or b) Emacs `create-image' and `image-size'
-APIs.@footnote{Use of @file{ImageMagick} is only desirable.  However, if you
+APIs@footnote{Use of @file{ImageMagick} is only desirable.  However, if you
 routinely produce documents that have large images or you export your Org
 files that has images using a Emacs batch script, then the use of
-@file{ImageMagick} is mandatory.} The pixel dimensions are subsequently
+@file{ImageMagick} is mandatory.}. The pixel dimensions are subsequently
 converted in to units of centimeters using
 @var{org-odt-pixels-per-inch}.  The default value of this variable is
 set to @code{display-pixels-per-inch}.  You can tweak this variable to
@@ -12763,7 +12763,7 @@ specific parts of a back-end without too much work.
 
 As an example, imagine we want the @code{ascii} back-end to display the
 language used in a source block, when it is available, but only when some
-attribute is non-nil, like the following:
+attribute is non-@code{nil}, like the following:
 
 @example
 #+ATTR_ASCII: :language t
@@ -12923,7 +12923,7 @@ extension.
 and @code{:exclude}.
 
 @item @code{:recursive}
-@tab Non-nil means, check base-directory recursively for files to publish.
+@tab non-@code{nil} means, check base-directory recursively for files to publish.
 @end multitable
 
 @node Publishing action, Publishing options, Selecting files, Configuration
@@ -12956,7 +12956,7 @@ always need to specify the publishing function:
 @tab Function executing the publication of a file.  This may also be a
 list of functions, which will all be called in turn.
 @item @code{:htmlized-source}
-@tab Non-nil means, publish htmlized source.
+@tab non-@code{nil} means, publish htmlized source.
 @end multitable
 
 The function must accept three arguments: a property list containing at least
@@ -13100,7 +13100,7 @@ a map of files for a given project.
 
 @multitable @columnfractions 0.35 0.65
 @item @code{:auto-sitemap}
-@tab When non-nil, publish a sitemap during @code{org-publish-current-project}
+@tab When non-@code{nil}, publish a sitemap during @code{org-publish-current-project}
 or @code{org-publish-all}.
 
 @item @code{:sitemap-filename}
@@ -13145,7 +13145,7 @@ a sitemap entry's date is to be formatted.  This property bypasses
 @var{org-publish-sitemap-date-format} which defaults to @code{%Y-%m-%d}.
 
 @item @code{:sitemap-sans-extension}
-@tab When non-nil, remove filenames' extensions from the generated sitemap.
+@tab When non-@code{nil}, remove filenames' extensions from the generated sitemap.
 Useful to have cool URIs (see @uref{http://www.w3.org/Provider/Style/URI}).
 Defaults to @code{nil}.
 
@@ -13159,7 +13159,7 @@ Org mode can generate an index across the files of a publishing project.
 
 @multitable @columnfractions 0.25 0.75
 @item @code{:makeindex}
-@tab When non-nil, generate in index in the file @file{theindex.org} and
+@tab When non-@code{nil}, generate in index in the file @file{theindex.org} and
 publish it as @file{theindex.html}.
 @end multitable
 
@@ -13446,7 +13446,7 @@ This variable is especially useful for tangling languages such as
 Python, in which whitespace indentation in the output is critical.
 @item org-src-ask-before-returning-to-edit-buffer
 By default, Org will ask before returning to an open edit buffer.  Set this
-variable to nil to switch without asking.
+variable to @code{nil} to switch without asking.
 @end table
 
 To turn on native code fontification in the @emph{Org} buffer, configure the
@@ -15343,9 +15343,9 @@ which take off the default security brakes.
 
 @defopt org-confirm-babel-evaluate
 When t (the default), the user is asked before every code block evaluation.
-When nil, the user is not asked.  When set to a function, it is called with
+When @code{nil}, the user is not asked.  When set to a function, it is called with
 two arguments (language and body of the code block) and should return t to
-ask and nil not to ask.
+ask and @code{nil} not to ask.
 @end defopt
 
 For example, here is how to execute "ditaa" code (which is considered safe)
@@ -16459,8 +16459,8 @@ removal of these columns, the function never knows that there have been
 additional columns.
 
 @item :no-escape t
-When non-nil, do not escape special characters @code{&%#_^} when exporting
-the table.  The default value is nil.
+When non-@code{nil}, do not escape special characters @code{&%#_^} when exporting
+the table.  The default value is @code{nil}.
 @end table
 
 @noindent
@@ -16575,7 +16575,7 @@ interprets the following parameters (see also @pxref{Translator functions}):
 @table @code
 @item :splice nil/t
 When set to t, return only table body lines, don't wrap them into a
-tabular environment.  Default is nil.
+tabular environment.  Default is @code{nil}.
 
 @item :fmt fmt
 A format to be used to wrap each field, it should contain @code{%s} for the
@@ -17042,27 +17042,27 @@ This includes the TODO keyword, the tags, time strings for deadline,
 scheduled, and clocking, and any additional properties defined in the
 entry.  The return value is an alist.  Keys may occur multiple times
 if the property key was used several times.@*
-POM may also be nil, in which case the current entry is used.
-If WHICH is nil or `all', get all properties.  If WHICH is
+POM may also be @code{nil}, in which case the current entry is used.
+If WHICH is @code{nil} or `all', get all properties.  If WHICH is
 `special' or `standard', only get that subclass.
 @end defun
 @vindex org-use-property-inheritance
 @findex org-insert-property-drawer
 @defun org-entry-get pom property &optional inherit
-Get value of PROPERTY for entry at point-or-marker POM@.  By default,
-this only looks at properties defined locally in the entry.  If INHERIT
-is non-nil and the entry does not have the property, then also check
-higher levels of the hierarchy.  If INHERIT is the symbol
+Get value of @code{PROPERTY} for entry at point-or-marker @code{POM}@.  By default,
+this only looks at properties defined locally in the entry.  If @code{INHERIT}
+is non-@code{nil} and the entry does not have the property, then also check
+higher levels of the hierarchy.  If @code{INHERIT} is the symbol
 @code{selective}, use inheritance if and only if the setting of
-@var{org-use-property-inheritance} selects PROPERTY for inheritance.
+@var{org-use-property-inheritance} selects @code{PROPERTY} for inheritance.
 @end defun
 
 @defun org-entry-delete pom property
-Delete the property PROPERTY from entry at point-or-marker POM.
+Delete the property @code{PROPERTY} from entry at point-or-marker POM.
 @end defun
 
 @defun org-entry-put pom property value
-Set PROPERTY to VALUE for entry at point-or-marker POM.
+Set @code{PROPERTY} to @code{VALUE} for entry at point-or-marker POM.
 @end defun
 
 @defun org-buffer-property-keys &optional include-specials
@@ -17074,28 +17074,29 @@ Insert a property drawer for the current entry.  Also
 @end defun
 
 @defun org-entry-put-multivalued-property pom property &rest values
-Set PROPERTY at point-or-marker POM to VALUES@.  VALUES should be a list of
-strings.  They will be concatenated, with spaces as separators.
+Set @code{PROPERTY} at point-or-marker @code{POM} to @code{VALUES}@.
+@code{VALUES} should be a list of strings.  They will be concatenated, with
+spaces as separators.
 @end defun
 
 @defun org-entry-get-multivalued-property pom property
-Treat the value of the property PROPERTY as a whitespace-separated list of
-values and return the values as a list of strings.
+Treat the value of the property @code{PROPERTY} as a whitespace-separated
+list of values and return the values as a list of strings.
 @end defun
 
 @defun org-entry-add-to-multivalued-property pom property value
-Treat the value of the property PROPERTY as a whitespace-separated list of
-values and make sure that VALUE is in this list.
+Treat the value of the property @code{PROPERTY} as a whitespace-separated
+list of values and make sure that @code{VALUE} is in this list.
 @end defun
 
 @defun org-entry-remove-from-multivalued-property pom property value
-Treat the value of the property PROPERTY as a whitespace-separated list of
-values and make sure that VALUE is @emph{not} in this list.
+Treat the value of the property @code{PROPERTY} as a whitespace-separated
+list of values and make sure that @code{VALUE} is @emph{not} in this list.
 @end defun
 
 @defun org-entry-member-in-multivalued-property pom property value
-Treat the value of the property PROPERTY as a whitespace-separated list of
-values and check if VALUE is in this list.
+Treat the value of the property @code{PROPERTY} as a whitespace-separated
+list of values and check if @code{VALUE} is in this list.
 @end defun
 
 @defopt org-property-allowed-value-functions
@@ -17119,30 +17120,29 @@ functions for each or selected entries.  The main entry point for this API
 is:
 
 @defun org-map-entries func &optional match scope &rest skip
-Call FUNC at each headline selected by MATCH in SCOPE.
+Call @code{FUNC} at each headline selected by @code{MATCH} in @code{SCOPE}.
 
-FUNC is a function or a Lisp form.  The function will be called without
-arguments, with the cursor positioned at the beginning of the headline.
-The return values of all calls to the function will be collected and
-returned as a list.
+@code{FUNC} is a function or a Lisp form.  The function will be called
+without arguments, with the cursor positioned at the beginning of the
+headline.  The return values of all calls to the function will be collected
+and returned as a list.
 
-The call to FUNC will be wrapped into a save-excursion form, so FUNC
-does not need to preserve point.  After evaluation, the cursor will be
-moved to the end of the line (presumably of the headline of the
-processed entry) and search continues from there.  Under some
-circumstances, this may not produce the wanted results.  For example,
-if you have removed (e.g., archived) the current (sub)tree it could
-mean that the next entry will be skipped entirely.  In such cases, you
-can specify the position from where search should continue by making
-FUNC set the variable `org-map-continue-from' to the desired buffer
-position.
+The call to @code{FUNC} will be wrapped into a save-excursion form, so
+@code{FUNC} does not need to preserve point.  After evaluation, the cursor
+will be moved to the end of the line (presumably of the headline of the
+processed entry) and search continues from there.  Under some circumstances,
+this may not produce the wanted results.  For example, if you have removed
+(e.g., archived) the current (sub)tree it could mean that the next entry will
+be skipped entirely.  In such cases, you can specify the position from where
+search should continue by making @code{FUNC} set the variable
+@var{org-map-continue-from} to the desired buffer position.
 
-MATCH is a tags/property/todo match as it is used in the agenda match view.
-Only headlines that are matched by this query will be considered during
-the iteration.  When MATCH is nil or t, all headlines will be
-visited by the iteration.
+@code{MATCH} is a tags/property/todo match as it is used in the agenda match
+view.  Only headlines that are matched by this query will be considered
+during the iteration.  When @code{MATCH} is @code{nil} or @code{t}, all
+headlines will be visited by the iteration.
 
-SCOPE determines the scope of this command.  It can be any of:
+@code{SCOPE} determines the scope of this command.  It can be any of:
 
 @example
 nil     @r{the current buffer, respecting the restriction if any}
@@ -17180,17 +17180,18 @@ Here are a couple of functions that might be handy:
 
 @defun org-todo &optional arg
 Change the TODO state of the entry.  See the docstring of the functions for
-the many possible values for the argument ARG.
+the many possible values for the argument @code{ARG}.
 @end defun
 
 @defun org-priority &optional action
 Change the priority of the entry.  See the docstring of this function for the
-possible values for ACTION.
+possible values for @code{ACTION}.
 @end defun
 
 @defun org-toggle-tag tag &optional onoff
-Toggle the tag TAG in the current entry.  Setting ONOFF to either @code{on}
-or @code{off} will not toggle tag, but ensure that it is either on or off.
+Toggle the tag @code{TAG} in the current entry.  Setting @code{ONOFF} to
+either @code{on} or @code{off} will not toggle tag, but ensure that it is
+either on or off.
 @end defun
 
 @defun org-promote
