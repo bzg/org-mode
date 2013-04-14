@@ -853,6 +853,14 @@ Changes become only effective after restarting Emacs."
   :group 'org-keywords
   :type 'string)
 
+(defcustom org-closed-keep-when-no-todo nil
+  "Remove CLOSED: time-stamp when switching back to a non-todo state?"
+  :group 'org-todo
+  :group 'org-keywords
+  :version "24.4"
+  :package-version '(Org . "8.0")
+  :type 'boolean)
+
 (defconst org-planning-or-clock-line-re (concat "^[ \t]*\\("
 						org-scheduled-string "\\|"
 						org-deadline-string "\\|"
@@ -12218,7 +12226,7 @@ For calling through lisp, arg is also interpreted in the following way:
 			      (nth 2 (assoc this org-todo-log-states))))
 	      (if (and (eq dolog 'note) (eq org-inhibit-logging 'note))
 		  (setq dolog 'time))
-	      (when (or (not org-state)
+	      (when (or (and (not org-state) (not org-closed-keep-when-no-todo))
 			(and org-state
 			     (member org-state org-not-done-keywords)
 			     (not (member this org-not-done-keywords))))
