@@ -18974,7 +18974,7 @@ BEG and END default to the buffer boundaries."
 (org-defkey org-mode-map "\C-c\C-c" 'org-ctrl-c-ctrl-c)
 (org-defkey org-mode-map "\C-c\C-k" 'org-kill-note-or-show-branches)
 (org-defkey org-mode-map "\C-c#"    'org-update-statistics-cookies)
-(org-defkey org-mode-map "\C-o"     'org-ctrl-o)
+(org-defkey org-mode-map [remap open-line] 'org-open-line)
 (org-defkey org-mode-map "\C-m"     'org-return)
 (org-defkey org-mode-map "\C-j"     'org-return-indent)
 (org-defkey org-mode-map "\C-c?"    'org-table-field-info)
@@ -20233,7 +20233,7 @@ Also updates the keyword regular expressions."
     (let ((org-note-abort t))
       (funcall org-finish-function))))
 
-(defun org-ctrl-o (n)
+(defun org-open-line (n)
   "Insert a new row in tables, call `open-line' elsewhere."
   (interactive "*p")
   (if (org-at-table-p)
