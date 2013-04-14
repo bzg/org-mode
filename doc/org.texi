@@ -2539,10 +2539,10 @@ $<<<..$>>     @r{start in third column, continue to the one but last}
 @end example
 
 @noindent Range references return a vector of values that can be fed
-into Calc vector functions.  Empty fields in ranges are normally
-suppressed, so that the vector contains only the non-empty fields (but
-see the @samp{E} mode switch below).  If there are no non-empty fields,
-@samp{[0]} is returned to avoid syntax errors in formulas.
+into Calc vector functions.  Empty fields in ranges are normally suppressed,
+so that the vector contains only the non-empty fields.  For other options
+with the mode switches @samp{E}, @samp{N} and examples @pxref{Formula syntax
+for Calc}.
 
 @subsubheading Field coordinates in formulas
 @cindex field coordinates
@@ -2653,6 +2653,8 @@ format, however, has been changed to @code{(float 8)} to keep tables
 compact.  The default settings can be configured using the variable
 @code{org-calc-default-modes}.
 
+@noindent List of modes:
+
 @table @asis
 @item @code{p20}
 Set the internal Calc calculation precision to 20 digits.
@@ -2661,32 +2663,39 @@ Normal, scientific, engineering or fixed format of the result of Calc passed
 back to Org.  Calc formatting is unlimited in precision as long as the Calc
 calculation precision is greater.
 @item @code{D}, @code{R}
-Angle modes: Degree, radian.
+Degree and radian angle modes of Calc.
 @item @code{F}, @code{S}
-Fraction and symbolic modes.
+Fraction and symbolic modes of Calc.
+@item @code{T}, @code{t}
+Duration computations in Calc or Lisp, @pxref{Durations and time values}.
 @item @code{E}
-Keep empty fields in ranges and use nan (not a number) in Calc formulas for
-empty fields in range references and for empty field references.  Else
-suppress empty fields in range references and use 0 for empty field
-references, see also the notes for `Range references' in @pxref{References}.
+If and how to consider empty fields.  Without @samp{E} empty fields in range
+references are suppressed so that the Calc vector or Lisp list contains only
+the non-empty fields.  With @samp{E} the empty fields are kept.  For empty
+fields in ranges or empty field references the value @samp{nan} (not a
+number) is used in Calc formulas and the empty string is used for Lisp
+formulas.  Add @samp{N} to use 0 instead for both formula types.  For the
+value of a field the mode @samp{N} has higher precedence than @samp{E}.
 @item @code{N}
-Interpret all fields as numbers, use 0 for non-numbers.  @code{N} has higher
-precedence than @code{E} (for the value of the field).
+Interpret all fields as numbers, use 0 for non-numbers.  See the next section
+to see how this is essential for computations with Lisp formulas.  In Calc
+formulas it is used only occasionally because there number strings are
+already interpreted as numbers without @samp{N}.
 @item @code{L}
-Literal, for Lisp formulas only.
+Literal, for Lisp formulas only.  See the next section.
 @end table
 
 @noindent
-Unless you use large integer numbers or high-precision-calculation
-and -display for floating point numbers you may alternatively provide a
-@code{printf} format specifier to reformat the Calc result after it has been
+Unless you use large integer numbers or high-precision-calculation and
+-display for floating point numbers you may alternatively provide a
+@samp{printf} format specifier to reformat the Calc result after it has been
 passed back to Org instead of letting Calc already do the
-formatting@footnote{The @code{printf} reformatting is limited in precision
-because the value passed to it is converted into an @code{integer} or
-@code{double}.  The @code{integer} is limited in size by truncating the
-signed value to 32 bits.  The @code{double} is limited in precision to 64
-bits overall which leaves approximately 16 significant decimal digits.}.
-A few examples:
+formatting@footnote{The @samp{printf} reformatting is limited in precision
+because the value passed to it is converted into an @samp{integer} or
+@samp{double}.  The @samp{integer} is limited in size by truncating the
+signed value to 32 bits.  The @samp{double} is limited in precision to 64
+bits overall which leaves approximately 16 significant decimal digits.}.  A
+few examples:
 
 @example
 $1+$2                @r{Sum of first and second field}
@@ -2697,22 +2706,35 @@ $0;%.1f              @r{Reformat current cell to 1 decimal}
 $c/$1/$cm            @r{Hz -> cm conversion, using @file{constants.el}}
 tan($1);Dp3s1        @r{Compute in degrees, precision 3, display SCI 1}
 sin($1);Dp3%.1e      @r{Same, but use printf specifier for display}
-vmean($2..$7)        @r{Compute column range mean, suppress empty fields}
-vmean($2..$7);EN     @r{Same, but treat empty fields as 0}
 taylor($3,x=7,2)     @r{Taylor series of $3, at x=7, second degree}
 @end example
 
-Calc also contains a complete set of logical operations.  For example
+Calc also contains a complete set of logical operations, (@pxref{Logical
+Operations, , Logical Operations, calc, GNU Emacs Calc Manual}).  For example
 
 @table @code
 @item if($1 < 20, teen, string(""))
-"teen" if age $1 is less than 20, else empty.
-@item if("$1" = "nan" || "$2" = "nan", string(""), $1 + $2); E
-Sum of first two columns unless one or both empty.
+"teen" if age $1 is less than 20, else the Org table result field is set to
+empty with the empty string.
+@item if("$1" == "nan" || "$2" == "nan", string(""), $1 + $2); E
+Sum of the first two columns.  When at least one of the input fields is empty
+the Org table result field is set to empty.
+@item if(typeof(vmean($1..$7)) == 12, string(""), vmean($1..$7); E
+Mean value of a range unless there is any empty field.  Every field in the
+range that is empty is replaced by @samp{nan} which lets @samp{vmean} result
+in @samp{nan}.  Then @samp{typeof == 12} detects the @samp{nan} from
+@samp{vmean} and the Org table result field is set to empty.  Use this when
+the sample set is expected to never have missing values.
+@item if("$1..$7" == "[]", string(""), vmean($1..$7))
+Mean value of a range with empty fields skipped.  Every field in the range
+that is empty is skipped.  When all fields in the range are empty the mean
+value is not defined and the Org table result field is set to empty.  Use
+this when the sample set can have a variable size.
+@item vmean($1..$7); EN
+To complete the example before: Mean value of a range with empty fields
+counting as samples with value 0.  Use this only when incomplete sample sets
+should be padded with 0 to the full size.
 @end table
-
-Note that you can also use two org-specific flags @code{T} and @code{t} for
-durations computations @ref{Durations and time values}.
 
 You can add your own Calc functions defined in Emacs Lisp with @code{defmath}
 and use them in formula syntax for Calc.
