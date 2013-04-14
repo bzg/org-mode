@@ -1,4 +1,4 @@
-\input texinfo
+ \input texinfo
 @c %**start of header
 @setfilename ../../info/org
 @settitle The Org Manual
@@ -10246,17 +10246,17 @@ documentation for more information.
 @chapter Exporting
 @cindex exporting
 
-Org mode documents can be exported into a variety of other formats.
+Org mode documents can be exported to a variety of other formats.
 
-For printing and sharing notes, ASCII export produces a readable and simple
-version of an Org file.  HTML export allows you to publish notes on the web
-easily.  @LaTeX{} export lets you use Org mode and its structured editing
-functions to easily create @LaTeX{} files.  OpenDocument Text (ODT) export
+ASCII export produces a readable and simple version of an Org file for
+printing and sharing notes.  HTML export allows you to easily publish notes
+on the web, or to build full-fledged websites.  @LaTeX{} export lets you use
+Org mode and its structured editing functions to create arbitrarily complex
+@LaTeX{} files for any kind of document.  OpenDocument Text (ODT) export
 allows seamless collaboration across organizational boundaries.  Markdown
-export lets you seamlessly collaborate with other developers.  Finally, to
-incorporate entries with associated times like deadlines or appointments into
-a desktop calendar program like iCal, Org mode can also produce extracts in
-the iCalendar format.
+export lets you seamlessly collaborate with other developers.  Finally, iCal
+export can extract entries with deadlines or appointments to produce a file
+in the iCalendar format.
 
 Note that the built-in back-ends come with commands to convert the selected
 region: e.g., in a HTML buffer, @kbd{M-x org-html-convert-region-to-html
@@ -10385,14 +10385,14 @@ distribution archives or from GNU/Org ELPA.
 @cindex Export, settings
 
 Export output can be controlled through a number of export options.  These
-can be set globally with variables, and overridden on a per-buffer basis
-with keywords.  Such keywords may be put anywhere in the file.  For
-individual lines, a good way to make sure the keyword is correct is to type
-@code{#+} and then use @kbd{M-<TAB>} completion.
+can be set globally with variables, and overridden on a per-buffer basis with
+keywords.  Such keywords may be put anywhere in the file.  For individual
+lines, a good way to make sure the keyword is correct is to type @code{#+}
+and then use @kbd{M-<TAB>} completion.
 
-Here is an exhaustive list of such keywords along with the equivalent
-global variable.  Only options available for every back-end are discussed
-in this section.
+Here is an exhaustive list of such keywords along with the equivalent global
+variable.  Only options available for every back-end are discussed in this
+section.
 
 @table @samp
 @item AUTHOR
@@ -10416,9 +10416,6 @@ the page description, e.g., for the XHTML meta tag.
 @vindex user-mail-address
 email address (@var{user-mail-address}).
 
-@item EXCLUDE_TAGS
-Tags that exclude a tree from export
-
 @item KEYWORDS
 keywords defining the contents, e.g., for the XHTML meta tag.
 
@@ -10429,7 +10426,16 @@ language used for translation of some strings
 
 @item SELECT_TAGS
 @vindex org-export-select-tags
-Tags that select a tree for export (@var{org-export-select-tags}).
+Tags that select a tree for export (@var{org-export-select-tags}).  The
+default value is @code{:export:}.  Within a subtree tagged with
+@code{:export:}, you can still exclude entries with @code{:noexport:} (see
+below).
+
+@item EXCLUDE_TAGS
+Tags that exclude a tree from export (@var{org-export-exclude-tags}).  The
+default value is @code{:noexport:}.  Entries with the @code{:noexport:} tag
+will be unconditionally excluded from the export, even if they have an
+@code{:export:} tag.
 
 @item TITLE
 the title to be shown (otherwise derived from buffer's name).
@@ -10459,7 +10465,7 @@ toggle fixed-width sections
 
 @item <:
 @vindex org-export-with-timestamps
-toggle inclusion of any time/date stamps like DEADLINES
+toggle inclusion of any time/date active/inactive stamps
 (@var{org-export-with-timestamps}).
 
 @item :
@@ -10525,8 +10531,9 @@ toggle section-numbers (@var{org-export-with-section-numbers}).
 
 @item p:
 @vindex org-export-with-planning
-toggle export of planning information (e.g. deadlines)
-(@var{org-export-with-planning}).
+toggle export of planning information (@var{org-export-with-planning}).
+``Planning information'' is the line containing the @code{SCHEDULED:}, the
+@code{DEADLINE:} or the @code{CLOSED:} cookies or a combination of them.
 
 @item pri:
 @vindex org-export-with-priority
