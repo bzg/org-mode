@@ -21592,7 +21592,7 @@ for the search purpose."
 
 (defsubst org-uniquify (list)
   "Non-destructively remove duplicate elements from LIST."
-  (let ((res (copy-seq list))) (delete-dups res)))
+  (let ((res (copy-sequence list))) (delete-dups res)))
 
 (defun org-uniquify-alist (alist)
   "Merge elements of ALIST with the same key.
