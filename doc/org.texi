@@ -10425,7 +10425,7 @@ variables, include:
 @table @samp
 @item AUTHOR
 @vindex user-full-name
-The author (@var{user-full-name}).
+The document author (@var{user-full-name}).
 
 @item CREATOR
 @vindex org-export-creator-string
