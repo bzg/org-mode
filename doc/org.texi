@@ -12670,7 +12670,8 @@ duties involving structural modifications of the document.  For example, one
 may want to remove every headline in the buffer during export.  The following
 code can achieve this:
 
-@example
+@lisp
+@group
 (defun my-headline-removal (backend)
   "Remove all headlines in the current buffer.
 BACKEND is the export back-end being used, as a symbol."
@@ -12678,7 +12679,8 @@ BACKEND is the export back-end being used, as a symbol."
    (lambda () (delete-region (point) (progn (forward-line) (point))))))
 
 (add-hook 'org-export-before-parsing-hook 'my-headline-removal)
-@end example
+@end group
+@end lisp
 
 Note that functions used in these hooks require a mandatory argument,
 a symbol representing the back-end used.
@@ -12761,7 +12763,8 @@ For example, the following snippet allows me to use non-breaking spaces in
 the Org buffer and get them translated into @LaTeX{} without using the
 @code{\nbsp} macro (where @code{_} stands for the non-breaking space):
 
-@example
+@lisp
+@group
 (defun my-latex-filter-nobreaks (text backend info)
   "Ensure \" \" are properly handled in LaTeX export."
   (when (org-export-derived-backend-p backend 'latex)
@@ -12769,7 +12772,8 @@ the Org buffer and get them translated into @LaTeX{} without using the
 
 (add-to-list 'org-export-filter-plain-text-functions
              'my-latex-filter-nobreaks)
-@end example
+@end group
+@end lisp
 
 Three arguments must be provided to a fiter: the code being changed, the
 back-end used, and some information about the export process.  You can safely
@@ -12799,7 +12803,8 @@ attribute is non-@code{nil}, like the following:
 Because that back-end is lacking in that area, we are going to create a new
 back-end, @code{my-ascii} that will do the job.
 
-@example
+@lisp
+@group
 (defun my-ascii-src-block (src-block contents info)
   "Transcode a SRC-BLOCK element from Org to ASCII.
 CONTENTS is nil.  INFO is a plist used as a communication
@@ -12816,7 +12821,8 @@ channel."
 
 (org-export-define-derived-backend 'my-ascii 'ascii
   :translate-alist '((src-block . my-ascii-src-block)))
-@end example
+@end group
+@end lisp
 
 The @code{my-ascii-src-block} function looks at the attribute above the
 element.  If it isn’t true, it gives hand to the @code{ascii} back-end.
@@ -12825,9 +12831,9 @@ A new back-end is then created.  It only changes its behaviour when
 translating @code{src-block} type element.  Now, all it takes to use the new
 back-end is calling the following from an Org buffer:
 
-@example
+@smalllisp
 (org-export-to-buffer 'my-ascii "*Org MY-ASCII Export*")
-@end example
+@end smalllisp
 
 It is obviously possible to write an interactive function for this, install
 it in the export dispatcher menu, and so on.
