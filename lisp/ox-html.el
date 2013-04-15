@@ -1421,12 +1421,22 @@ INFO is a plist used as a communication channel."
 (defun org-html--build-meta-info (info)
   "Return meta tags for exported document.
 INFO is a plist used as a communication channel."
-  (let* ((title (org-export-data (plist-get info :title) info))
-	 (author (and (plist-get info :with-author)
-		      (let ((auth (plist-get info :author)))
-			(and auth (org-export-data auth info)))))
-	 (description (plist-get info :description))
-	 (keywords (plist-get info :keywords)))
+  (let ((protect-string
+	 (lambda (str)
+	   (replace-regexp-in-string
+	    "\"" "&quot;" (org-html-encode-plain-text str))))
+	(title (org-export-data (plist-get info :title) info))
+	(author (and (plist-get info :with-author)
+		     (let ((auth (plist-get info :author)))
+		       (and auth
+			    ;; Return raw Org syntax, skipping non
+			    ;; exportable objects.
+			    (org-element-interpret-data
+			     (org-element-map auth
+				 (cons 'plain-text org-element-all-objects)
+			       'identity info))))))
+	(description (plist-get info :description))
+	(keywords (plist-get info :keywords)))
     (concat
      (format "<title>%s</title>\n" title)
      (format
@@ -1440,11 +1450,15 @@ INFO is a plist used as a communication channel."
 	       (coding-system-get org-html-coding-system 'mime-charset))
 	  "iso-8859-1"))
      (format "<meta name=\"generator\" content=\"Org-mode\"/>\n")
-     (and author (format "<meta name=\"author\" content=\"%s\"/>\n" author))
-     (and description
-	  (format "<meta name=\"description\" content=\"%s\"/>\n" description))
-     (and keywords
-	  (format "<meta name=\"keywords\" content=\"%s\"/>\n" keywords)))))
+     (and (org-string-nw-p author)
+	  (format "<meta name=\"author\" content=\"%s\"/>\n"
+		  (funcall protect-string author)))
+     (and (org-string-nw-p description)
+	  (format "<meta name=\"description\" content=\"%s\"/>\n"
+		  (funcall protect-string description)))
+     (and (org-string-nw-p keywords)
+	  (format "<meta name=\"keywords\" content=\"%s\"/>\n"
+		  (funcall protect-string keywords))))))
 
 (defun org-html--build-head (info)
   "Return information for the <head>..</head> of the HTML output.
