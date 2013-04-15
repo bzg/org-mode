@@ -10335,8 +10335,7 @@ export dispatcher with the following key combinations:
 @item C-a
 @vindex org-export-async-init-file
 Toggle asynchronous export.  Asynchronous export uses an external Emacs
-process that is configured with a specified initialization file
-(@pxref{Configuring asynchronous export}).   
+process that is configured with a specified initialization file.
 
 While exporting asynchronously, the output is not displayed.  It is stored in
 a list called ``the export stack'', and can be viewed from there.  The stack
@@ -10414,7 +10413,7 @@ override options set at a more general level.
 In-buffer settings may appear anywhere in the file, either directly or
 indirectly through a file included using @code{#+SETUPFILE}.  Option keyword
 sets tailored to a particular back-end can be inserted from the export
-dispatcher (@pxref{The export dispatcher}) using the @code{Insert template}
+dispatcher (@pxref{The Export Dispatcher}) using the @code{Insert template}
 command by pressing @key{#}.  To insert keywords individually, a good way to
 make sure the keyword is correct is to type @code{#+} and then to use
 @kbd{M-<TAB>} for completion.
@@ -12642,7 +12641,7 @@ is a list of such conversion commands:
 @table @code
 @item org-html-convert-region-to-html
 Convert the selected region into HTML.
-@item @item org-latex-convert-region-to-latex
+@item org-latex-convert-region-to-latex
 Convert the selected region into @LaTeX{}.
 @item org-texinfo-convert-region-to-texinfo
 Convert the selected region into @code{Texinfo}.
@@ -12755,7 +12754,7 @@ where @code{TYPE} is the type targeted by the filter.  Valid types are:
 @tab underline
 @item verbatim
 @tab verse-block
-@tab 
+@tab
 @end multitable
 
 For example, the following snippet allows me to use non-breaking spaces in
