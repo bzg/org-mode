@@ -2,7 +2,7 @@
 ;;
 ;; Copyright (C) 2007-2013 Free Software Foundation, Inc.
 ;;
-;; Authors: Bastien Guerry <bzg at altern dot org>
+;; Authors: Bastien Guerry <bzg at gnu dot org>
 ;;       Carsten Dominik <carsten dot dominik at gmail dot com>
 ;;       Eric Schulte <schulte dot eric at gmail dot com>
 ;; Keywords: org, wp, capture
