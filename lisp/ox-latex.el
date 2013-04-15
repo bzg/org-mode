@@ -327,8 +327,8 @@ macro-like placeholders.
  [NO-DEFAULT-PACKAGES]   do not include any of the default packages
  [PACKAGES]              \\usepackage statements for packages
  [NO-PACKAGES]           do not include the packages
- [EXTRA]                 the stuff from #+LATEX_HEADER
- [NO-EXTRA]              do not include #+LATEX_HEADER stuff
+ [EXTRA]                 the stuff from #+LATEX_HEADER(_EXTRA)
+ [NO-EXTRA]              do not include #+LATEX_HEADER(_EXTRA) stuff
 
 So a header like
 
