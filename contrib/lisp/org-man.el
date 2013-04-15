@@ -63,7 +63,8 @@ PATH should be a topic that can be thrown at the man command."
 	(desc (or description link)))
     (cond
      ((eq format 'html) (format "<a target=\"_blank\" href=\"%s\">%s</a>" path desc))
-     ((eq format 'latex) (format "\href{%s}{%s}" path desc))
+     ((eq format 'latex) (format "\\href{%s}{%s}" path desc))
+     ((eq format 'texinfo (format "@uref{%s,%s}" path desc)))
      ((eq format 'ascii) (format "%s (%s)" desc path))
      (t path))))
 
