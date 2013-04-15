@@ -2200,9 +2200,7 @@ holding contextual information."
 	     (level1 (+ level (1- org-html-toplevel-hlevel)))
 	     (first-content (car (org-element-contents headline))))
 	(format "<%s id=\"%s\" class=\"%s\">%s%s</%s>\n"
-		(if (= 1 (org-export-get-relative-level headline info))
-		    (plist-get info :html-container)
-		  "div")
+		(org-html--container headline info)
 		(format "outline-container-%s"
 			(or (org-element-property :CUSTOM_ID headline)
 			    (concat "sec-" section-number)))
@@ -2227,9 +2225,13 @@ holding contextual information."
 		    (concat (org-html-section first-content "" info)
 			    contents)
 		  contents)
-		(if (= 1 (org-export-get-relative-level headline info))
-		    (plist-get info :html-container)
-		  "div")))))))
+		(org-html--container headline info)))))))
+
+(defun org-html--container (headline info)
+  (or (org-element-property :HTML_CONTAINER headline)
+      (if (= 1 (org-export-get-relative-level headline info))
+	  (plist-get info :html-container)
+	"div")))
 
 ;;;; Horizontal Rule
 
