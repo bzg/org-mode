@@ -209,7 +209,6 @@ way they are handled must be hard-coded into
     (:filter-latex-fragment . org-export-filter-latex-fragment-functions)
     (:filter-line-break . org-export-filter-line-break-functions)
     (:filter-link . org-export-filter-link-functions)
-    (:filter-macro . org-export-filter-macro-functions)
     (:filter-node-property . org-export-filter-node-property-functions)
     (:filter-options . org-export-filter-options-functions)
     (:filter-paragraph . org-export-filter-paragraph-functions)
@@ -2617,12 +2616,6 @@ channel, as a plist.  It must return a string or nil.")
 
 (defvar org-export-filter-link-functions nil
   "List of functions applied to a transcoded link.
-Each filter is called with three arguments: the transcoded data,
-as a string, the back-end, as a symbol, and the communication
-channel, as a plist.  It must return a string or nil.")
-
-(defvar org-export-filter-macro-functions nil
-  "List of functions applied to a transcoded macro.
 Each filter is called with three arguments: the transcoded data,
 as a string, the back-end, as a symbol, and the communication
 channel, as a plist.  It must return a string or nil.")
