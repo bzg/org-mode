@@ -12669,66 +12669,67 @@ last function will be the one used in the final output.
 There are filters sets for each type of element or object, for plain text,
 for the parse tree, for the export options and for the final output.  They
 are all named after the same scheme: @code{org-export-filter-TYPE-functions},
-where @code{TYPE} is the type targeted by the filter. Valid types are:
+where @code{TYPE} is the type targeted by the filter.  Valid types are:
 
-@itemize @minus
+@multitable @columnfractions .33 .33 .33
 @item bold
-@item babel-call
-@item center-block
+@tab babel-call
+@tab center-block
 @item clock
-@item code
-@item comment
+@tab code
+@tab comment
 @item comment-block
-@item diary-sexp
-@item drawer
+@tab diary-sexp
+@tab drawer
 @item dynamic-block
-@item entity
-@item example-block
+@tab entity
+@tab example-block
 @item export-block
-@item export-snippet
-@item final-output
+@tab export-snippet
+@tab final-output
 @item fixed-width
-@item footnote-definition
-@item footnote-reference
+@tab footnote-definition
+@tab footnote-reference
 @item headline
-@item horizontal-rule
-@item inline-babel-call
+@tab horizontal-rule
+@tab inline-babel-call
 @item inline-src-block
-@item inlinetask
-@item italic
+@tab inlinetask
+@tab italic
 @item item
-@item keyword
-@item latex-environment
+@tab keyword
+@tab latex-environment
 @item latex-fragment
-@item line-break
-@item link
+@tab line-break
+@tab link
 @item node-property
-@item options
-@item paragraph
+@tab options
+@tab paragraph
 @item parse-tree
-@item plain-list
-@item plain-text
+@tab plain-list
+@tab plain-text
 @item planning
-@item property-drawer
-@item quote-block
+@tab property-drawer
+@tab quote-block
 @item quote-section
-@item radio-target
-@item section
+@tab radio-target
+@tab section
 @item special-block
-@item src-block
-@item statistics-cookie
+@tab src-block
+@tab statistics-cookie
 @item strike-through
-@item subscript
-@item superscript
+@tab subscript
+@tab superscript
 @item table
-@item table-cell
-@item table-row
+@tab table-cell
+@tab table-row
 @item target
-@item timestamp
-@item underline
+@tab timestamp
+@tab underline
 @item verbatim
-@item verse-block
-@end itemize
+@tab verse-block
+@tab 
+@end multitable
 
 For example, the following snippet allows me to use non-breaking spaces in
 the Org buffer and get them translated into @LaTeX{} without using the
