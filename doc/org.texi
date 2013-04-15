@@ -11389,9 +11389,12 @@ options have to be provided, as expected by @LaTeX{}, within square brackets.
 
 @cindex #+LATEX_HEADER
 @cindex #+LATEX_HEADER_EXTRA
-You can also use LATEX_HEADER and LATEX_HEADER_EXTRA keywords in order to add
-lines to the header.  See the docstring of @var{org-latex-classes} for more
-information.
+You can also use @code{LATEX_HEADER} and
+@code{LATEX_HEADER_EXTRA}@footnote{Unlike to @code{LATEX_HEADER}, contents
+from @code{LATEX_HEADER_EXTRA} keywords will not be loaded when previewing
+@LaTeX{} snippets (@pxref{Previewing @LaTeX{} fragments}).} keywords in order
+to add lines to the header.  See the docstring of @var{org-latex-classes} for
+more information.
 
 An example is shown below.
 
