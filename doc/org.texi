@@ -589,6 +589,7 @@ Exporting
 * Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * iCalendar export::            Exporting to iCalendar
+* Export in foreign buffers::   Author tables in lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 
 HTML export
@@ -9967,7 +9968,7 @@ and to the modification time of the file being exported, respectively.
 Macro expansion takes place during export.
 
 
-@node Embedded @LaTeX{}, Special blocks , Macro replacement, Markup
+@node Embedded @LaTeX{}, Special blocks, Macro replacement, Markup
 @section Embedded @LaTeX{}
 @cindex @TeX{} interpretation
 @cindex @LaTeX{} interpretation
@@ -10249,7 +10250,7 @@ modification will work only inside @LaTeX{} fragments; outside the quote
 is normal.
 @end itemize
 
-@node Special blocks, , Embedded @LaTeX{}, Markup
+@node Special blocks,  , Embedded @LaTeX{}, Markup
 @section Special blocks
 @cindex Special blocks
 
@@ -10284,12 +10285,6 @@ export lets you seamlessly collaborate with other developers.  Finally, iCal
 export can extract entries with deadlines or appointments to produce a file
 in the iCalendar format.
 
-Note that the built-in back-ends come with commands to convert the selected
-region: e.g., in a HTML buffer, @kbd{M-x org-html-convert-region-to-html RET}
-will replace the selected region with its HTML export.  Used in combination
-with @code{orgtbl-mode} and/or @code{orgstruc-mode}, this is a powerful way
-of quickly editing tables and lists in HTML, @LaTeX{}, @code{Texinfo}, etc.
-
 @menu
 * The Export Dispatcher::       The main exporter interface
 * Export formats::              Available export formats
@@ -10301,6 +10296,7 @@ of quickly editing tables and lists in HTML, @LaTeX{}, @code{Texinfo}, etc.
 * Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * iCalendar export::            Exporting to iCalendar
+* Export in foreign buffers::   Author tables in lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 @end menu
 
@@ -11423,7 +11419,7 @@ All lines between these markers are exported literally
 #+END_LATEX
 @end example
 
-@node @LaTeX{} specific attributes, , Quoting @LaTeX{} code, @LaTeX{} and PDF export
+@node @LaTeX{} specific attributes,  , Quoting @LaTeX{} code, @LaTeX{} and PDF export
 @subsection @LaTeX{} specific attributes
 @cindex #+ATTR_LATEX
 
@@ -12559,7 +12555,7 @@ will take care of updating the @code{rng-schema-locating-files} for you.
 
 @c end opendocument
 
-@node iCalendar export, Advanced configuration, OpenDocument Text export, Exporting
+@node iCalendar export, Export in foreign buffers, OpenDocument Text export, Exporting
 @section iCalendar export
 @cindex iCalendar export
 
@@ -12628,7 +12624,30 @@ and the description from the body (limited to
 How this calendar is best read and updated, depends on the application
 you are using.  The FAQ covers this issue.
 
-@node Advanced configuration,  , iCalendar export, Exporting
+@node Export in foreign buffers, Advanced configuration, iCalendar export, Exporting
+@section Export in foreign buffers
+
+Most built-in back-ends come with a command to convert the selected region
+into a selected format and replace this region by the exported output.  Here
+is a list of such conversion commands:
+
+@table @code
+@item org-html-convert-region-to-html
+Convert the selected region into HTML.
+@item @item org-latex-convert-region-to-latex
+Convert the selected region into @LaTeX{}.
+@item org-texinfo-convert-region-to-texinfo
+Convert the selected region into @code{Texinfo}.
+@item org-md-convert-region-to-md
+Convert the selected region into @code{MarkDown}.
+@end table
+
+This is particularily useful for converting tables and lists in foreign
+buffers.  E.g., in a HTML buffer, you can turn on @code{orgstruct-mode}, then
+use Org commands for editing a list, and finally select and convert the list
+with @code{M-x org-html-convert-region-to-html RET}.
+
+@node Advanced configuration,  , Export in foreign buffers, Exporting
 @section Advanced configuration
 
 @subheading Hooks
