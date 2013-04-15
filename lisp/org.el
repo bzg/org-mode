@@ -19539,9 +19539,9 @@ See `org-ctrl-c-ctrl-c-hook' for more information.")
 
 (defun org-shifttab (&optional arg)
   "Global visibility cycling or move to previous table field.
-Calls `org-cycle' with argument t, or `org-table-previous-field', depending
-on context.
-See the individual commands for more information."
+Call `org-table-previous-field' within a table.
+When ARG is nil, cycle globally through visibility states.
+When ARG is a numeric prefix, show contents of this level."
   (interactive "P")
   (cond
    ((org-at-table-p) (call-interactively 'org-table-previous-field))
@@ -19549,6 +19549,7 @@ See the individual commands for more information."
     (let ((arg2 (if org-odd-levels-only (1- (* 2 arg)) arg)))
       (message "Content view to level: %d" arg)
       (org-content (prefix-numeric-value arg2))
+      (org-cycle-show-empty-lines t)
       (setq org-cycle-global-status 'overview)))
    (t (call-interactively 'org-global-cycle))))
 
