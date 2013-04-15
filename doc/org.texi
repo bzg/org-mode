@@ -10410,13 +10410,14 @@ compact form with the @code{#+OPTIONS} keyword; or for a tree by setting
 properties (@pxref{Properties and Columns}).  Options set at a specific level
 override options set at a more general level.
 
+@cindex #+SETUPFILE
 In-buffer settings may appear anywhere in the file, either directly or
-indirectly through a file included using @code{#+SETUPFILE}.  Option keyword
-sets tailored to a particular back-end can be inserted from the export
-dispatcher (@pxref{The Export Dispatcher}) using the @code{Insert template}
-command by pressing @key{#}.  To insert keywords individually, a good way to
-make sure the keyword is correct is to type @code{#+} and then to use
-@kbd{M-<TAB>} for completion.
+indirectly through a file included using @samp{#+SETUPFILE: filename} syntax.
+Option keyword sets tailored to a particular back-end can be inserted from
+the export dispatcher (@pxref{The Export Dispatcher}) using the @code{Insert
+template} command by pressing @key{#}.  To insert keywords individually,
+a good way to make sure the keyword is correct is to type @code{#+} and then
+to use @kbd{M-<TAB>} for completion.
 
 The export keywords available for every back-end, and their equivalent global
 variables, include:
@@ -10609,13 +10610,11 @@ Toggle inclusion of TODO keywords into exported text
 Toggle inclusion of tables (@var{org-export-with-tables}).
 @end table
 
+@cindex #+BIND
 A more general mechanism is also provided.  Indeed, Emacs variables can
 become buffer-local during export by using the BIND keyword.  Its syntax is
 @samp{#+BIND: variable value}.  This is particularly useful for in-buffer
 settings that cannot be changed using specific keywords.
-
-You can place commonly-used export settings in a separate file which can be
-included using @samp{#+SETUPFILE: filename} syntax.
 
 These settings affect all buffer's export processes.  Though, it is possible
 to override them locally when exporting only a subtree.  This is done by
@@ -10973,8 +10972,6 @@ Export only the visible part of the document.
 @vindex org-html-preamble-format
 @vindex org-html-postamble-format
 @vindex org-html-validation-link
-@vindex org-export-author-info
-@vindex org-export-email-info
 @vindex org-export-creator-string
 @vindex org-export-time-stamp-file
 
