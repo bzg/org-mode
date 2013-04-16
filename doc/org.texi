@@ -2632,14 +2632,13 @@ referenced table.
 @cindex formula syntax, Calc
 @cindex syntax, of formulas
 
-A formula can be any algebraic expression understood by the Emacs
-@file{Calc} package.  @b{Note that @file{calc} has the
-non-standard convention that @samp{/} has lower precedence than
-@samp{*}, so that @samp{a/b*c} is interpreted as @samp{a/(b*c)}.}  Before
-evaluation by @code{calc-eval} (@pxref{Calling Calc from
-Your Programs, calc-eval, Calling Calc from Your Lisp Programs, calc, GNU
-Emacs Calc Manual}),
-variable substitution takes place according to the rules described above.
+A formula can be any algebraic expression understood by the Emacs @file{Calc}
+package.  Note that @file{calc} has the non-standard convention that @samp{/}
+has lower precedence than @samp{*}, so that @samp{a/b*c} is interpreted as
+@samp{a/(b*c)}.  Before evaluation by @code{calc-eval} (@pxref{Calling Calc
+from Your Programs, calc-eval, Calling Calc from Your Lisp Programs, calc,
+GNU Emacs Calc Manual}), variable substitution takes place according to the
+rules described above.
 @cindex vectors, in table calculations
 The range vectors can be directly fed into the Calc vector functions
 like @samp{vmean} and @samp{vsum}.
