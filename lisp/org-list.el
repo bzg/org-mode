@@ -2858,9 +2858,10 @@ ignores hidden links."
 		     ;; If it is a timer list, convert timer to seconds
 		     ((org-at-item-timer-p)
 		      (org-timer-hms-to-secs (match-string 1)))
-		     ((or (re-search-forward org-ts-regexp (point-at-eol) t)
-			  (re-search-forward org-ts-regexp-both
-					     (point-at-eol) t))
+		     ((or (save-excursion
+			    (re-search-forward org-ts-regexp (point-at-eol) t))
+			  (save-excursion (re-search-forward org-ts-regexp-both
+							     (point-at-eol) t)))
 		      (org-time-string-to-seconds (match-string 0)))
 		     (t (org-float-time now))))
 		   ((= dcst ?f)
