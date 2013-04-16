@@ -13465,11 +13465,16 @@ Source code in the specified language.
 @cindex code block, editing
 @cindex source code, editing
 
+@vindex org-edit-src-auto-save-idle-delay
+@vindex org-edit-src-turn-on-auto-save
 @kindex C-c '
-Use @kbd{C-c '} to edit the current code block.  This brings up
-a language major-mode edit buffer containing the body of the code
-block.  Saving this buffer will write the new contents back to the Org
-buffer.  Use @kbd{C-c '} again to exit.
+Use @kbd{C-c '} to edit the current code block.  This brings up a language
+major-mode edit buffer containing the body of the code block.  Manually
+saving this buffer with @key{C-x C-s} will write the contents back to the Org
+buffer.  You can also set @var{org-edit-src-auto-save-idle-delay} to save the
+base buffer after some idle delay, or @code{org-edit-src-turn-on-auto-save}
+to auto-save this buffer into a separate file using @code{auto-save-mode}.
+Use @kbd{C-c '} again to exit.
 
 The @code{org-src-mode} minor mode will be active in the edit buffer.  The
 following variables can be used to configure the behavior of the edit
