@@ -1418,7 +1418,8 @@ only the bare key is returned."
 	  (insert title "\n\n")
 	  (setq tbl table
 		des-keys nil
-		allowed-keys nil)
+		allowed-keys nil
+		cursor-type nil)
 	  (setq prefix (if current (concat current " ") ""))
 	  (while tbl
 	    (cond
