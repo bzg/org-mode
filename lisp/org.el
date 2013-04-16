@@ -9547,12 +9547,15 @@ active region."
        (setq link (or link cpltxt)
 	     desc (or desc cpltxt))
        (cond ((equal desc "NONE") (setq desc nil))
-	     ((string-match org-bracket-link-regexp desc)
-	      (setq desc
-		    (replace-regexp-in-string
-		     org-bracket-link-regexp
-		     (concat "\\3" (if (equal (length (match-string 0 desc))
-					      (length desc)) "*" "")) desc))))
+	     ((string-match org-bracket-link-analytic-regexp desc)
+	      (let ((d0 (match-string 3 desc))
+		    (p0 (match-string 5 desc)))
+		(setq desc
+		      (replace-regexp-in-string
+		       org-bracket-link-regexp
+		       (concat (or p0 d0)
+			       (if (equal (length (match-string 0 desc))
+					  (length desc)) "*" "")) desc)))))
 
        ;; Return the link
        (if (not (and (or (org-called-interactively-p 'any)
