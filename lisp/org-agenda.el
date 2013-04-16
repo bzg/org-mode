@@ -2183,7 +2183,9 @@ The following commands are available:
 (org-defkey org-agenda-mode-map "\C-k"     'org-agenda-kill)
 (org-defkey org-agenda-mode-map "\C-c\C-w" 'org-agenda-refile)
 (org-defkey org-agenda-mode-map "m"        'org-agenda-bulk-mark)
+(org-defkey org-agenda-mode-map "\M-m"     'org-agenda-bulk-toggle)
 (org-defkey org-agenda-mode-map "*"        'org-agenda-bulk-mark-all)
+(org-defkey org-agenda-mode-map "\M-*"     'org-agenda-bulk-toggle-all)
 (org-defkey org-agenda-mode-map "#"        'org-agenda-dim-blocked-tasks)
 (org-defkey org-agenda-mode-map "%"        'org-agenda-bulk-mark-regexp)
 (org-defkey org-agenda-mode-map "u"        'org-agenda-bulk-unmark)
@@ -2399,9 +2401,11 @@ The following commands are available:
     ("Bulk action"
      ["Mark entry" org-agenda-bulk-mark t]
      ["Mark all" org-agenda-bulk-mark-all t]
-     ["Mark matching regexp" org-agenda-bulk-mark-regexp t]
      ["Unmark entry" org-agenda-bulk-unmark t]
-     ["Unmark all entries" org-agenda-bulk-unmark-all :active t :keys "U"])
+     ["Unmark all" org-agenda-bulk-unmark-all :active t :keys "U"]
+     ["Toggle mark" org-agenda-bulk-toggle t]
+     ["Toggle all" org-agenda-bulk-toggle-all t]
+     ["Mark regexp" org-agenda-bulk-mark-regexp t])
     ["Act on all marked" org-agenda-bulk-action t]
     "--"
     ("Tags and Properties"
@@ -9606,7 +9610,10 @@ This is a command that has to be installed in `calendar-mode-map'."
 			       (org-get-todo-face "TODO")
 			       'evaporate)
 	  (overlay-put ov 'type 'org-marked-entry-overlay))
-	(beginning-of-line 2)
+	(end-of-line 1)
+	(or (ignore-errors
+	      (goto-char (next-single-property-change (point) 'txt)))
+	    (beginning-of-line 2))
 	(while (and (get-char-property (point) 'invisible) (not (eobp)))
 	  (beginning-of-line 2))
 	(message "%d entries marked for bulk action"
@@ -9620,12 +9627,13 @@ This is a command that has to be installed in `calendar-mode-map'."
 (defun org-agenda-bulk-mark-regexp (regexp)
   "Mark entries matching REGEXP for future agenda bulk action."
   (interactive "sMark entries matching regexp: ")
-  (let ((entries-marked 0))
+  (let ((entries-marked 0) txt-at-point)
     (save-excursion
       (goto-char (point-min))
       (goto-char (next-single-property-change (point) 'txt))
-      (while (re-search-forward regexp nil t)
-	(when (string-match regexp (get-text-property (point) 'txt))
+      (while (and (re-search-forward regexp nil t)
+		  (setq txt-at-point (get-text-property (point) 'txt)))
+	(when (string-match regexp txt-at-point)
 	  (setq entries-marked (1+ entries-marked))
 	  (call-interactively 'org-agenda-bulk-mark))))
     (if (not entries-marked)
@@ -9642,15 +9650,27 @@ This is a command that has to be installed in `calendar-mode-map'."
 	   (setq org-agenda-bulk-marked-entries
 		 (delete (org-get-at-bol 'org-hd-marker)
 			 org-agenda-bulk-marked-entries))
-	   (beginning-of-line 2)
+	   (end-of-line 1)
+	   (or (ignore-errors
+		 (goto-char (next-single-property-change (point) 'txt)))
+	       (beginning-of-line 2))
 	   (while (and (get-char-property (point) 'invisible) (not (eobp)))
 	     (beginning-of-line 2))
 	   (message "%d entries left marked for bulk action"
 		    (length org-agenda-bulk-marked-entries)))
 	  (t (message "No entry to unmark here")))))
 
+(defun org-agenda-bulk-toggle-all ()
+  "Toggle all marks for bulk action."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (while (ignore-errors
+	     (goto-char (next-single-property-change (point) 'txt)))
+      (org-agenda-bulk-toggle))))
+
 (defun org-agenda-bulk-toggle ()
-  "Toggle marking the entry at point for bulk action."
+  "Toggle the mark at point for bulk action."
   (interactive)
   (if (org-agenda-bulk-marked-p)
       (org-agenda-bulk-unmark)
