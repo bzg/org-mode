@@ -589,6 +589,7 @@ Exporting
 * Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * iCalendar export::            Exporting to iCalendar
+* Other built-in back-ends::    Exporting to @code{Texinfo}, a man page, or Org
 * Export in foreign buffers::   Author tables in lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 
@@ -10306,6 +10307,7 @@ in the iCalendar format.
 * Markdown export::             Exporting to Markdown
 * OpenDocument Text export::    Exporting to OpenDocument Text
 * iCalendar export::            Exporting to iCalendar
+* Other built-in back-ends::    Exporting to @code{Texinfo}, a man page, or Org
 * Export in foreign buffers::   Author tables in lists in Org syntax
 * Advanced configuration::      Fine-tuning the export output
 @end menu
@@ -12572,7 +12574,7 @@ will take care of updating the @code{rng-schema-locating-files} for you.
 
 @c end opendocument
 
-@node iCalendar export, Export in foreign buffers, OpenDocument Text export, Exporting
+@node iCalendar export, Other built-in back-ends, OpenDocument Text export, Exporting
 @section iCalendar export
 @cindex iCalendar export
 
@@ -12641,7 +12643,27 @@ and the description from the body (limited to
 How this calendar is best read and updated, depends on the application
 you are using.  The FAQ covers this issue.
 
-@node Export in foreign buffers, Advanced configuration, iCalendar export, Exporting
+@node Other built-in back-ends, Export in foreign buffers, iCalendar export, Exporting
+@section Other built-in back-ends
+@cindex export back-ends, built-in
+@vindex org-export-backends
+
+On top of the aforemetioned back-ends, Org comes with other built-in ones: 
+
+@itemize
+@item @file{ox-man.el}: export to a man page.
+@item @file{ox-texinfo.el}: export to @code{Texinfo} format.
+@item @file{ox-org.el}: export to an Org document.
+@end itemize
+
+To activate these export back-end, customize @var{org-export-backends} or
+load them directly with e.g., @code{(require 'ox-texinfo)}.  This will add
+new keys in the export dispatcher (@pxref{The Export Dispatcher}).
+
+See the comment section of these files for more information on how to use
+them.
+
+@node Export in foreign buffers, Advanced configuration, Other built-in back-ends, Exporting
 @section Export in foreign buffers
 
 Most built-in back-ends come with a command to convert the selected region
