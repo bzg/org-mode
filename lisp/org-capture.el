@@ -1432,7 +1432,8 @@ only the bare key is returned."
 	      (insert prefix "[" dkey "]" "..." "  " ddesc "..." "\n")
 	      ;; Skip keys which are below this prefix
 	      (setq re (concat "\\`" (regexp-quote dkey)))
-	      (while (and tbl (string-match re (caar tbl))) (pop tbl)))
+	      (let (case-fold-search)
+		(while (and tbl (string-match re (caar tbl))) (pop tbl))))
 	     ((= 2 (length (car tbl)))
 	      ;; Not yet a usable description, skip it
 	      )
