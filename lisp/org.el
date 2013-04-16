@@ -16946,7 +16946,7 @@ The variable `date' is bound by the calendar when this is called."
 
 (defun org-small-year-to-year (year)
   "Convert 2-digit years into 4-digit years.
-38-99 are mapped into 1938-1999.  1-37 are mapped into 2001-2007.
+38-99 are mapped into 1938-1999.  1-37 are mapped into 2001-2037.
 The year 2000 cannot be abbreviated.  Any year larger than 99
 is returned unchanged."
   (if (< year 38)
