@@ -13037,64 +13037,64 @@ The property list can be used to set many export options for the exporters.
 In most cases, these properties correspond to user variables in Org.  The
 first table below lists these properties along with the variable they belong
 to.  The second table list HTML specific properties.  See the documentation
-string for the respective variable for details.
+string of these options for details.
 
+@vindex org-display-custom-times
+@vindex org-export-default-language
+@vindex org-export-exclude-tags
+@vindex org-export-headline-levels
+@vindex org-export-preserve-breaks
+@vindex org-export-publishing-directory
+@vindex org-export-select-tags
 @vindex org-export-with-archived-trees
 @vindex org-export-with-author
 @vindex org-export-with-creator
-@vindex org-display-custom-times
 @vindex org-export-with-drawers
 @vindex org-export-with-email
-@vindex user-mail-address
 @vindex org-export-with-emphasize
-@vindex org-export-exclude-tags
 @vindex org-export-with-fixed-width
 @vindex org-export-with-footnotes
-@vindex org-export-headline-levels
-@vindex org-export-default-language
 @vindex org-export-with-latex
-@vindex org-export-preserve-breaks
+@vindex org-export-with-planning
 @vindex org-export-with-priority
-@vindex org-export-publishing-directory
 @vindex org-export-with-section-numbers
-@vindex org-export-select-tags
 @vindex org-export-with-special-strings
 @vindex org-export-with-sub-superscripts
-@vindex org-export-with-toc
 @vindex org-export-with-tables
 @vindex org-export-with-tags
 @vindex org-export-with-tasks
 @vindex org-export-with-timestamps
+@vindex org-export-with-toc
 @vindex org-export-with-todo-keywords
+@vindex user-mail-address
 
 @multitable @columnfractions 0.32 0.68
 @item @code{:archived-trees}        @tab @var{org-export-with-archived-trees}
-@item @code{:author}                @tab @var{org-export-with-author}
-@item @code{:creator}               @tab @var{org-export-with-creator}
-@item @code{:customtime}            @tab @var{org-display-custom-times}
-@item @code{:drawers}               @tab @var{org-export-with-drawers}
-@item @code{:email}                 @tab @var{org-export-with-email}
-@item @code{:email}                 @tab @var{user-mail-address} : @code{addr;addr;..}
-@item @code{:emphasize}             @tab @var{org-export-with-emphasize}
 @item @code{:exclude-tags}          @tab @var{org-export-exclude-tags}
-@item @code{:fixed-width}           @tab @var{org-export-with-fixed-width}
-@item @code{:footnotes}             @tab @var{org-export-with-footnotes}
 @item @code{:headline-levels}       @tab @var{org-export-headline-levels}
 @item @code{:language}              @tab @var{org-export-default-language}
-@item @code{:latex-fragments}       @tab @var{org-export-with-latex}
 @item @code{:preserve-breaks}       @tab @var{org-export-preserve-breaks}
-@item @code{:priority}              @tab @var{org-export-with-priority}
 @item @code{:publishing-directory}  @tab @var{org-export-publishing-directory}
 @item @code{:section-numbers}       @tab @var{org-export-with-section-numbers}
 @item @code{:select-tags}           @tab @var{org-export-select-tags}
-@item @code{:special-strings}       @tab @var{org-export-with-special-strings}
-@item @code{:sub-superscript}       @tab @var{org-export-with-sub-superscripts}
-@item @code{:table-of-contents}     @tab @var{org-export-with-toc}
-@item @code{:tables}                @tab @var{org-export-with-tables}
-@item @code{:tags}                  @tab @var{org-export-with-tags}
-@item @code{:tasks}                 @tab @var{org-export-with-tasks}
-@item @code{:timestamps}            @tab @var{org-export-with-timestamps}
-@item @code{:todo-keywords}         @tab @var{org-export-with-todo-keywords}
+@item @code{:with-author}           @tab @var{org-export-with-author}
+@item @code{:with-creator}          @tab @var{org-export-with-creator}
+@item @code{:with-drawers}          @tab @var{org-export-with-drawers}
+@item @code{:with-email}            @tab @var{org-export-with-email}
+@item @code{:with-emphasize}        @tab @var{org-export-with-emphasize}
+@item @code{:with-fixed-width}      @tab @var{org-export-with-fixed-width}
+@item @code{:with-footnotes}        @tab @var{org-export-with-footnotes}
+@item @code{:with-latex}            @tab @var{org-export-with-latex}
+@item @code{:with-planning}         @tab @var{org-export-with-planning}
+@item @code{:with-priority}         @tab @var{org-export-with-priority}
+@item @code{:with-special-strings}  @tab @var{org-export-with-special-strings}
+@item @code{:with-sub-superscript}  @tab @var{org-export-with-sub-superscripts}
+@item @code{:with-tables}           @tab @var{org-export-with-tables}
+@item @code{:with-tags}             @tab @var{org-export-with-tags}
+@item @code{:with-tasks}            @tab @var{org-export-with-tasks}
+@item @code{:with-timestamps}       @tab @var{org-export-with-timestamps}
+@item @code{:with-toc}              @tab @var{org-export-with-toc}
+@item @code{:with-todo-keywords}    @tab @var{org-export-with-todo-keywords}
 @end multitable
 
 @vindex org-html-doctype
@@ -13289,10 +13289,10 @@ directory on the local machine.
          :base-directory "~/org/"
          :publishing-directory "~/public_html"
          :section-numbers nil
-         :table-of-contents nil
-         :style "<link rel=\"stylesheet\"
-                href=\"../other/mystyle.css\"
-                type=\"text/css\"/>")))
+         :with-toc nil
+         :html-head "<link rel=\"stylesheet\"
+                    href=\"../other/mystyle.css\"
+                    type=\"text/css\"/>")))
 @end lisp
 
 @node Complex example,  , Simple example, Sample configuration
@@ -13326,8 +13326,8 @@ right place on the web server, and publishing images to it.
           :exclude "PrivatePage.org"   ;; regexp
           :headline-levels 3
           :section-numbers nil
-          :table-of-contents nil
-          :style "<link rel=\"stylesheet\"
+          :with-toc nil
+          :html-head "<link rel=\"stylesheet\"
                   href=\"../other/mystyle.css\" type=\"text/css\"/>"
           :html-preamble t)
 
