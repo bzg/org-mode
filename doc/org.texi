@@ -3463,26 +3463,23 @@ cursor on or at a target.
 @section External links
 @cindex links, external
 @cindex external links
-@cindex links, external
 @cindex Gnus links
 @cindex BBDB links
 @cindex IRC links
 @cindex URL links
 @cindex file links
-@cindex VM links
 @cindex RMAIL links
-@cindex WANDERLUST links
 @cindex MH-E links
 @cindex USENET links
 @cindex SHELL links
 @cindex Info links
 @cindex Elisp links
 
-Org supports links to files, websites, Usenet and email messages,
-BBDB database entries and links to both IRC conversations and their
-logs.  External links are URL-like locators.  They start with a short
-identifying string followed by a colon.  There can be no space after
-the colon.  The following list shows examples for each link type.
+Org supports links to files, websites, Usenet and email messages, BBDB
+database entries and links to both IRC conversations and their logs.
+External links are URL-like locators.  They start with a short identifying
+string followed by a colon.  There can be no space after the colon.  The
+following list shows examples for each link type.
 
 @example
 http://www.astro.uva.nl/~dominik          @r{on the web}
@@ -3509,13 +3506,6 @@ docview:papers/last.pdf::NNN              @r{open in doc-view mode at page}
 id:B7423F4D-2E8A-471B-8810-C40F074717E9   @r{Link to heading by ID}
 news:comp.emacs                           @r{Usenet link}
 mailto:adent@@galaxy.net                   @r{Mail link}
-vm:folder                                 @r{VM folder link}
-vm:folder#id                              @r{VM message link}
-vm://myself@@some.where.org/folder#id      @r{VM on remote machine}
-vm-imap:account:folder                    @r{VM IMAP folder link}
-vm-imap:account:folder#id                 @r{VM IMAP message link}
-wl:folder                                 @r{WANDERLUST folder link}
-wl:folder#id                              @r{WANDERLUST message link}
 mhe:folder                                @r{MH-E folder link}
 mhe:folder#id                             @r{MH-E message link}
 rmail:folder                              @r{RMAIL folder link}
@@ -3530,11 +3520,27 @@ elisp:org-agenda                          @r{Interactive Elisp command}
 elisp:(find-file-other-frame "Elisp.org") @r{Elisp form to evaluate}
 @end example
 
+@cindex VM links
+@cindex WANDERLUST links
+On top of these built-in link types, some are available through the
+@code{contrib/} directory (@pxref{Installation}).  For example, these links
+to VM or Wanderlust messages are available when you load the corresponding
+libraries from the @code{contrib/} directory:
+
+@example
+vm:folder                                 @r{VM folder link}
+vm:folder#id                              @r{VM message link}
+vm://myself@@some.where.org/folder#id      @r{VM on remote machine}
+vm-imap:account:folder                    @r{VM IMAP folder link}
+vm-imap:account:folder#id                 @r{VM IMAP message link}
+wl:folder                                 @r{WANDERLUST folder link}
+wl:folder#id                              @r{WANDERLUST message link}
+@end example
+
 For customizing Org to add new link types @ref{Adding hyperlink types}.
 
-A link should be enclosed in double brackets and may contain a
-descriptive text to be displayed instead of the URL (@pxref{Link
-format}), for example:
+A link should be enclosed in double brackets and may contain a descriptive
+text to be displayed instead of the URL (@pxref{Link format}), for example:
 
 @example
 [[http://www.gnu.org/software/emacs/][GNU Emacs]]
