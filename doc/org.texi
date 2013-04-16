@@ -4334,13 +4334,17 @@ in-buffer setting is: @code{#+STARTUP: logdone}}
 (setq org-log-done 'time)
 @end lisp
 
+@vindex org-closed-keep-when-no-todo
 @noindent
-Then each time you turn an entry from a TODO (not-done) state into any
-of the DONE states, a line @samp{CLOSED: [timestamp]} will be inserted
-just after the headline.  If you turn the entry back into a TODO item
-through further state cycling, that line will be removed again.  If you
-want to record a note along with the timestamp, use@footnote{The
-corresponding in-buffer setting is: @code{#+STARTUP: lognotedone}}
+Then each time you turn an entry from a TODO (not-done) state into any of the
+DONE states, a line @samp{CLOSED: [timestamp]} will be inserted just after
+the headline.  If you turn the entry back into a TODO item through further
+state cycling, that line will be removed again.  If you turn the entry back
+to a non-TODO state (by pressing @key{C-c C-t SPC} for example), that line
+will also be removed, unless you set @var{org-closed-keep-when-no-todo} to
+non-@code{nil}.  If you want to record a note along with the timestamp,
+use@footnote{The corresponding in-buffer setting is: @code{#+STARTUP:
+lognotedone}.}
 
 @lisp
 (setq org-log-done 'note)
